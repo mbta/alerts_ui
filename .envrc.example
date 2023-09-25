@@ -1,0 +1,7 @@
+export ALERT_API_URL=http://s3.amazonaws.com/mbta-realtime-test/alerts_enhanced.json
+export DATABASE_URL_DEV=postgresql://__username__:password@localhost:5432/alert_concierge_dev
+export DATABASE_URL_PROD=
+export DATABASE_URL_TEST=postgresql://__username__:password@localhost:5432/alert_concierge_test
+export SENTRY_DSN=
+export SENTRY_ENV=local
+export SECRET_KEY_BASE=
