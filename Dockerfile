@@ -44,7 +44,7 @@ WORKDIR /home/alertsui
 COPY --from=app-builder --chown=alertsui:alertsui  /root/_build/prod/rel/alerts_ui .
 
 # HTTP
-EXPOSE 4010
+EXPOSE 4000
 
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 

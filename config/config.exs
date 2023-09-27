@@ -16,6 +16,7 @@ config :alerts_ui, AlertsUI.Repo, migration_timestamps: [type: :utc_datetime]
 
 # Configures the endpoint
 config :alerts_ui, AlertsUIWeb.Endpoint,
+  http: [:inet6, port: 4000],
   url: [host: "localhost"],
   render_errors: [
     formats: [html: AlertsUIWeb.ErrorHTML, json: AlertsUIWeb.ErrorJSON],

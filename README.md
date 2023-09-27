@@ -39,4 +39,3 @@ To start your Phoenix server:
 - Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
 
 Now you can visit [`localhost:4010`](http://localhost:4010) from your browser.
->>>>>>> 2ceaaee (new phoenix project)
