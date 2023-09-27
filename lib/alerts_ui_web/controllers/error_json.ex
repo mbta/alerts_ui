@@ -1,4 +1,8 @@
 defmodule AlertsUIWeb.ErrorJSON do
+  @moduledoc """
+  Render errors formatted as JSON.
+  """
+
   # If you want to customize a particular status code,
   # you may add your own clauses, such as:
   #
