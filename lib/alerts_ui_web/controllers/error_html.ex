@@ -1,4 +1,8 @@
 defmodule AlertsUIWeb.ErrorHTML do
+  @moduledoc """
+  Render errors formatted as HTML.
+  """
+
   use AlertsUIWeb, :html
 
   # If you want to customize your error pages,
