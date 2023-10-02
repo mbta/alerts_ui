@@ -36,7 +36,7 @@ defmodule AlertsUI.MixProject do
       {:phoenix_ecto, "~> 4.4"},
       {:ecto_sql, "~> 3.10"},
       {:credo, "~> 1.6.0", only: [:dev, :test]},
-      {:dialyxir, "~> 1.1.0", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.4.1", only: [:dev, :test], runtime: false},
       {:ehmon, github: "mbta/ehmon", only: :prod},
       {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 3.3"},

@@ -20,6 +20,10 @@ defmodule AlertsUIWeb.Router do
     get "/", PageController, :home
   end
 
+  scope "/", AlertsUIWeb do
+    get("/_health", HealthController, :index)
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", AlertsUIWeb do
   #   pipe_through :api
