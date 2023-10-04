@@ -20,8 +20,11 @@ if System.get_env("PHX_SERVER") do
   config :alerts_ui, AlertsUIWeb.Endpoint, server: true
 end
 
-config :alerts_ui, AlertsUI.Repo,
-  url: System.fetch_env!("DATABASE_URL_#{config_env() |> to_string() |> String.upcase()}")
+if config_env() == :test do
+  config :alerts_ui, AlertsUI.Repo, url: System.fetch_env!("DATABASE_URL_TEST")
+else
+  config :alerts_ui, AlertsUI.Repo, url: System.fetch_env!("DATABASE_URL")
+end
 
 if config_env() == :prod do
   # The secret key base is used to sign/encrypt cookies and other secrets.
