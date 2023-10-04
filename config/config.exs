@@ -12,7 +12,13 @@ config :alerts_ui,
   ecto_repos: [AlertsUI.Repo]
 
 # Configure your database
-config :alerts_ui, AlertsUI.Repo, migration_timestamps: [type: :utc_datetime]
+config :alerts_ui, AlertsUI.Repo,
+  migration_timestamps: [
+    type: :utc_datetime,
+    inserted_at: :created_at
+  ],
+  migration_primary_key: [name: :id, type: :binary_id],
+  migration_foreign_key: [column: :id, type: :binary_id]
 
 # Configures the endpoint
 config :alerts_ui, AlertsUIWeb.Endpoint,
