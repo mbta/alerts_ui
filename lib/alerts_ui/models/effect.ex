@@ -4,6 +4,10 @@ defmodule AlertsUI.Models.Effect do
   """
   use AlertsUI.Schema
 
+  @type t :: %__MODULE__{
+          name: String.t()
+        }
+
   schema "effects" do
     field :name, :string
     timestamps()

@@ -4,6 +4,10 @@ defmodule AlertsUI.Models.Cause do
   """
   use AlertsUI.Schema
 
+  @type t :: %__MODULE__{
+          name: String.t()
+        }
+
   schema "causes" do
     field :name, :string
     timestamps()
