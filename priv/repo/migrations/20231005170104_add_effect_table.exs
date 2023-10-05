@@ -3,7 +3,7 @@ defmodule AlertsUI.Repo.Migrations.AddEffectTable do
 
   def change do
     create table("effects") do
-      add :name, :string
+      add :name, :string, unique: true
       timestamps()
     end
   end

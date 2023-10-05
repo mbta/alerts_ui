@@ -5,7 +5,10 @@ defmodule AlertsUI.Models.Cause do
   use AlertsUI.Schema
 
   @type t :: %__MODULE__{
-          name: String.t()
+          id: Ecto.UUID.t(),
+          name: String.t(),
+          created_at: DateTime.t(),
+          updated_at: DateTime.t()
         }
 
   schema "causes" do

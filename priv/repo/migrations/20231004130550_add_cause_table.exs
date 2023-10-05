@@ -3,7 +3,7 @@ defmodule AlertsUI.Repo.Migrations.AddCauseTable do
 
   def change do
     create table("causes") do
-      add :name, :string
+      add :name, :string, unique: true
       timestamps()
     end
   end
