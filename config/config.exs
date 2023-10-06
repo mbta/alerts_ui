@@ -11,6 +11,8 @@ config :alerts_ui,
   namespace: AlertsUI,
   ecto_repos: [AlertsUI.Repo]
 
+config :alerts_ui, aws_rds_mod: ExAws.RDS
+
 # Configure your database
 config :alerts_ui, AlertsUI.Repo,
   migration_timestamps: [

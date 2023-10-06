@@ -51,7 +51,9 @@ defmodule AlertsUI.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
-      {:plug_cowboy, "~> 2.5"}
+      {:plug_cowboy, "~> 2.5"},
+      {:hackney, "1.19.1"},
+      {:ex_aws_rds, "~> 2.0"}
     ]
   end
 
