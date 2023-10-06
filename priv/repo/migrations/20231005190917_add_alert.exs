@@ -2,11 +2,28 @@ defmodule AlertsUI.Repo.Migrations.AddAlertTable do
   use Ecto.Migration
 
   def change do
+    drop table("causes")
+    drop table("effects")
+
+    cause_list =
+      AlertsUI.Models.Cause.causes()
+      |> Enum.map(&"'#{&1}'")
+      |> Enum.join(", ")
+
+    effect_list =
+      AlertsUI.Models.Effect.effects()
+      |> Enum.map(&"'#{&1}'")
+      |> Enum.join(", ")
+
+    execute("CREATE TYPE effects AS ENUM (#{effect_list});")
+
+    execute("CREATE TYPE causes AS ENUM (#{cause_list});")
+
     create table("alerts") do
       add :alert_id, :string
-      add :effect, :string
+      add :effect, :effects
       add :effect_detail, :string
-      add :cause, :string
+      add :cause, :causes
       add :cause_detail, :string
       add :header_text, :string
       add :description_text, :string

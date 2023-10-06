@@ -1,18 +1,17 @@
 defmodule AlertsUI.Models.Effect do
   @moduledoc """
-    Effects to be used in the effect field of Alerts
+    Effects to be used in the effect field of Alerts.
   """
-  use AlertsUI.Schema
-
-  @type t :: %__MODULE__{
-          id: Ecto.UUID.t(),
-          name: String.t(),
-          created_at: DateTime.t(),
-          updated_at: DateTime.t()
-        }
-
-  schema "effects" do
-    field :name, :string
-    timestamps()
-  end
+  def effects,
+    do: [
+      "NO_SERVICE",
+      "REDUCED_SERVICE",
+      "SIGNIFICANT_DELAYS",
+      "DETOUR",
+      "ADDITIONAL_SERVICE",
+      "MODIFIED_SERVICE",
+      "OTHER_EFFECT",
+      "UNKNOWN_EFFECT",
+      "STOP_MOVED"
+    ]
 end

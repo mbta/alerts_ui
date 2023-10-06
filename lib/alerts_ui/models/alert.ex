@@ -3,16 +3,17 @@ defmodule AlertsUI.Models.Alert do
     Models an alert
   """
   use AlertsUI.Schema
-  alias AlertsUI.Repo
   alias AlertsUI.Models.Cause, as: Cause
   alias AlertsUI.Models.Effect, as: Effect
 
+  @cause Cause.causes() |> Enum.map(&String.to_atom(&1))
+  @effect Effect.effects() |> Enum.map(&String.to_atom(&1))
 
   schema "alerts" do
     field :alert_id, :string
-    field :effect, Ecto.Enum, values: Repo.all(Effect) |> Enum.map(& &1.name)
+    field :effect, Ecto.Enum, values: @effect
     field :effect_detail, :string
-    field :cause, Ecto.Enum, values: Repo.all(Cause) |> Enum.map(& &1.name)
+    field :cause, Ecto.Enum, values: @cause
     field :cause_detail, :string
     field :header_text, :string
     field :description_text, :string
