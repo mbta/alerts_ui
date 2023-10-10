@@ -32,7 +32,7 @@ RUN mix phx.digest
 RUN mix release
 
 # --- Set up runtime container ---
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 
 ENV LANG=C.UTF-8 MIX_ENV=prod REPLACE_OS_VARS=true
 
