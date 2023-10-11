@@ -14,8 +14,6 @@ defmodule AlertsUI.Application do
       AlertsUI.Repo,
       # Start the PubSub system
       {Phoenix.PubSub, name: AlertsUI.PubSub},
-      # Start Finch
-      {Finch, name: AlertsUI.Finch},
       # Start the Endpoint (http/https)
       AlertsUIWeb.Endpoint
       # Start a worker by calling: AlertsUI.Worker.start_link(arg)
