@@ -52,8 +52,9 @@ defmodule AlertsUI.MixProject do
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      {:hackney, "1.19.1"},
-      {:ex_aws_rds, "~> 2.0"}
+      {:ex_aws, "~> 2.0"},
+      {:ex_aws_rds, "~> 2.0"},
+      {:hackney, "1.19.1"}
     ]
   end
 
