@@ -3,13 +3,48 @@ defmodule AlertsUI.Models.Alert do
     Models an alert
   """
   use AlertsUI.Schema
-  alias AlertsUI.Models.{AlertLifecycle, Cause, DurationCertainty, Effect, SeverityLevel}
+
+  alias AlertsUI.Models.{
+    ActivePeriod,
+    AlertLifecycle,
+    Cause,
+    DurationCertainty,
+    Effect,
+    SeverityLevel
+  }
 
   @cause Cause.causes() |> Enum.map(&String.to_atom(&1))
   @effect Effect.effects() |> Enum.map(&String.to_atom(&1))
   @severity_level SeverityLevel.severity_levels() |> Enum.map(&String.to_atom(&1))
   @alert_lifecycle AlertLifecycle.alert_lifecycles() |> Enum.map(&String.to_atom(&1))
   @duration_certainty DurationCertainty.duration_certainties() |> Enum.map(&String.to_atom(&1))
+
+  @type t :: %__MODULE__{
+          id: Ecto.UUID,
+          created_at: DateTime.t(),
+          updated_at: DateTime.t(),
+          alert_id: String.t(),
+          effect: atom() | nil,
+          effect_detail: String.t() | nil,
+          cause: atom() | nil,
+          cause_detail: String.t() | nil,
+          header_text: String.t(),
+          description_text: String.t(),
+          severity_level: atom() | nil,
+          url: String.t() | nil,
+          service_effect_text: String.t() | nil,
+          short_header_text: String.t() | nil,
+          severity: integer() | nil,
+          created_timestamp: DateTime.t() | nil,
+          last_modified_timestamp: DateTime.t() | nil,
+          last_push_notification_timestamp: DateTime.t() | nil,
+          timeframe_text: String.t() | nil,
+          alert_lifecycle: atom() | nil,
+          duration_certainty: atom() | nil,
+          active_period: [String.t()] | nil,
+          image_url: String.t() | nil,
+          image_alternative_text: String.t() | nil
+        }
 
   schema "alerts" do
     field :alert_id, :string
@@ -30,7 +65,7 @@ defmodule AlertsUI.Models.Alert do
     field :timeframe_text, :string
     field :alert_lifecycle, Ecto.Enum, values: @alert_lifecycle
     field :duration_certainty, Ecto.Enum, values: @duration_certainty
-    embeds_one :active_period, :string
+    embeds_many :active_period, ActivePeriod
     field :image_url, :string
     field :image_alternative_text, :string
     timestamps()

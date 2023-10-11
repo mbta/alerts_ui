@@ -39,7 +39,7 @@ defmodule AlertsUI.Repo.Migrations.AddAlertTable do
 
     execute("CREATE TYPE alert_lifecycles AS ENUM (#{alert_lifecycle_list});")
 
-    execute("CREATE TYPE duration_certainty AS ENUM (#{duration_certanty_list});")
+    execute("CREATE TYPE duration_certainty AS ENUM (#{duration_certainty_list});")
 
     create table("alerts") do
       add :alert_id, :string
@@ -60,7 +60,7 @@ defmodule AlertsUI.Repo.Migrations.AddAlertTable do
       add :timeframe_text, :string
       add :alert_lifecycle, :alert_lifecycles
       add :duration_certainty, :duration_certainty
-      add(:active_period, {:array, :string}, default: [])
+      add(:active_period, {:array, :map}, default: [])
       add :image_url, :string
       add :image_alternative_text, :string
       timestamps()
