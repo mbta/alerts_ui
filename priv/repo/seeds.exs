@@ -9,6 +9,26 @@
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
+informed_entity_1 =
+  AlertsUI.Repo.insert!(%AlertsUI.Models.InformedEntity{
+    agency_id: "111",
+    route_id: "222",
+    route_type: 1,
+    direction_id: 3,
+    stop_id: "333",
+    activities: [:BOARD, :EXIT]
+  })
+
+informed_entity_2 =
+  AlertsUI.Repo.insert!(%AlertsUI.Models.InformedEntity{
+    agency_id: "555",
+    route_id: "666",
+    route_type: 2,
+    direction_id: 4,
+    stop_id: "777",
+    activities: [:PARK_CAR, :STORE_BIKE]
+  })
+
 AlertsUI.Repo.insert!(%AlertsUI.Models.Alert{
   alert_id: "12345",
   effect: :NO_SERVICE,
@@ -33,5 +53,6 @@ AlertsUI.Repo.insert!(%AlertsUI.Models.Alert{
     %{start_time: ~U[2023-10-12 00:03:00Z], end_time: ~U[2023-10-12 00:04:00Z]}
   ],
   image_url: "https://example.com/image1.png",
-  image_alternative_text: "an alert image"
+  image_alternative_text: "an alert image",
+  informed_entity: [informed_entity_1, informed_entity_2]
 })
