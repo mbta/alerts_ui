@@ -30,4 +30,8 @@ defmodule AlertsUI.Models.TripDescriptor do
     field :schedule_relationship, Ecto.Enum, values: @schedule_relationship
     timestamps()
   end
+
+  def new(fields) do
+    struct!(__MODULE__, fields)
+  end
 end

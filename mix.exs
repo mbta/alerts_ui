@@ -54,7 +54,11 @@ defmodule AlertsUI.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:ex_aws, "~> 2.0"},
       {:ex_aws_rds, "~> 2.0"},
-      {:hackney, "1.20.1"}
+      {:hackney, "1.20.1"},
+      {:gen_stage, "~> 1.2.1"},
+      {:httpoison, "~> 2.1"},
+      {:bypass, "~> 2.1", only: :test},
+      {:stream_data, "~> 0.6.0", only: :test}
     ]
   end
 

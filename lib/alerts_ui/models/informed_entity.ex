@@ -32,4 +32,8 @@ defmodule AlertsUI.Models.InformedEntity do
     has_one :trip, TripDescriptor
     timestamps()
   end
+
+  def new(fields) do
+    struct!(__MODULE__, fields)
+  end
 end

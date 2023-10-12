@@ -73,4 +73,8 @@ defmodule AlertsUI.Models.Alert do
     has_many :informed_entity, InformedEntity
     timestamps()
   end
+
+  def new(fields) do
+    struct!(__MODULE__, fields)
+  end
 end

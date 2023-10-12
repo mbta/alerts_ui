@@ -9,9 +9,10 @@ import Config
 
 config :alerts_ui,
   namespace: AlertsUI,
-  ecto_repos: [AlertsUI.Repo]
-
-config :alerts_ui, aws_rds_mod: ExAws.RDS
+  ecto_repos: [AlertsUI.Repo],
+  aws_rds_mod: ExAws.RDS,
+  alert_api_url: {:system, "ALERT_API_URL"},
+  start_data_processes: true
 
 # Configure your database
 config :alerts_ui, AlertsUI.Repo,
