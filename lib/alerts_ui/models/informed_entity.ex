@@ -3,9 +3,9 @@ defmodule AlertsUI.Models.InformedEntity do
     Models an Informed Entity
   """
   use AlertsUI.Schema
-  alias AlertsUI.Models.{Activity, Alert}
+  alias AlertsUI.Models.{Activity, Alert, TripDescriptor}
 
-  @activity Activity.activities() |> Enum.map(&String.to_atom(&1))
+  @activity Activity.activities()
 
   @type t :: %__MODULE__{
           id: Ecto.UUID,
@@ -17,7 +17,8 @@ defmodule AlertsUI.Models.InformedEntity do
           route_type: integer() | nil,
           direction_id: integer() | nil,
           stop_id: String.t() | nil,
-          activities: [atom()] | nil
+          activities: [atom()] | nil,
+          trip: TripDescriptor | nil
         }
 
   schema "informed_entities" do
@@ -28,6 +29,7 @@ defmodule AlertsUI.Models.InformedEntity do
     field :direction_id, :integer
     field :stop_id, :string
     field :activities, {:array, Ecto.Enum}, values: @activity
+    has_one :trip, TripDescriptor
     timestamps()
   end
 end
