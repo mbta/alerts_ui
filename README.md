@@ -7,9 +7,9 @@ A UI for creating and modifying alerts
 ### Requirements
 
 - [`asdf`](https://asdf-vm.com/) with plugins: `elixir`, `erlang`
-- PostgreSQL 13 (using Homebrew: `brew install postgresql@13`)
+- PostgreSQL 15 (using Homebrew: `brew install postgresql@15`)
 - You will need Postgres client tools in your PATH; if using Homebrew and you
-  get an error about missing tools, use `brew link postgresql@13`
+  get an error about missing tools, use `brew link postgresql@15`
 - [`direnv`](https://direnv.net/) _(optional, for auto-loading env vars)_
 
 ### Instructions
