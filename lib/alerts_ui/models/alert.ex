@@ -13,11 +13,11 @@ defmodule AlertsUI.Models.Alert do
     SeverityLevel
   }
 
-  @cause Cause.causes() |> Enum.map(&String.to_atom(&1))
-  @effect Effect.effects() |> Enum.map(&String.to_atom(&1))
-  @severity_level SeverityLevel.severity_levels() |> Enum.map(&String.to_atom(&1))
-  @alert_lifecycle AlertLifecycle.alert_lifecycles() |> Enum.map(&String.to_atom(&1))
-  @duration_certainty DurationCertainty.duration_certainties() |> Enum.map(&String.to_atom(&1))
+  @cause Cause.causes()
+  @effect Effect.effects()
+  @severity_level SeverityLevel.severity_levels()
+  @alert_lifecycle AlertLifecycle.alert_lifecycles()
+  @duration_certainty DurationCertainty.duration_certainties()
 
   @type t :: %__MODULE__{
           id: Ecto.UUID,

@@ -4,8 +4,8 @@ defmodule AlertsUI.Models.DurationCertainty do
   """
   def duration_certainties,
     do: [
-      "KNOWN",
-      "UNKNOWN",
-      "ESTIMATED"
+      :KNOWN,
+      :UNKNOWN,
+      :ESTIMATED
     ]
 end

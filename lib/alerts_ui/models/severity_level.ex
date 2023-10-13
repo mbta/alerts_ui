@@ -4,9 +4,9 @@ defmodule AlertsUI.Models.SeverityLevel do
   """
   def severity_levels,
     do: [
-      "UNKNOWN_SEVERITY",
-      "INFO",
-      "WARNING",
-      "SEVERE"
+      :UNKNOWN_SEVERITY,
+      :INFO,
+      :WARNING,
+      :SEVERE
     ]
 end

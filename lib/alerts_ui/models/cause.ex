@@ -4,17 +4,17 @@ defmodule AlertsUI.Models.Cause do
   """
   def causes,
     do: [
-      "UNKNOWN_CAUSE",
-      "OTHER_CAUSE",
-      "TECHNICAL_PROBLEM",
-      "STRIKE",
-      "DEMONSTRATION",
-      "ACCIDENT",
-      "HOLIDAY",
-      "WEATHER",
-      "MAINTENANCE",
-      "CONSTRUCTION",
-      "POLICE_ACTIVITY",
-      "MEDICAL_EMERGENCY"
+      :UNKNOWN_CAUSE,
+      :OTHER_CAUSE,
+      :TECHNICAL_PROBLEM,
+      :STRIKE,
+      :DEMONSTRATION,
+      :ACCIDENT,
+      :HOLIDAY,
+      :WEATHER,
+      :MAINTENANCE,
+      :CONSTRUCTION,
+      :POLICE_ACTIVITY,
+      :MEDICAL_EMERGENCY
     ]
 end

@@ -4,9 +4,9 @@ defmodule AlertsUI.Models.AlertLifecycle do
   """
   def alert_lifecycles,
     do: [
-      "NEW",
-      "UPCOMING",
-      "ONGOING",
-      "ONGOING_UPCOMING"
+      :NEW,
+      :UPCOMING,
+      :ONGOING,
+      :ONGOING_UPCOMING
     ]
 end
