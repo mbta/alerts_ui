@@ -9,7 +9,42 @@
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
-AlertsUI.Repo.insert!(%AlertsUI.Models.Alert{
+
+alias AlertsUI.Repo
+alias AlertsUI.Models.{Alert, InformedEntity, TripDescriptor}
+
+trip =
+  Repo.insert!(%TripDescriptor{
+    trip_id: "001",
+    route_id: "222",
+    direction_id: 3,
+    start_time: ~T[23:00:07],
+    start_date: ~D[2023-10-01],
+    schedule_relationship: :SCHEDULED
+  })
+
+informed_entity_1 =
+  Repo.insert!(%InformedEntity{
+    agency_id: "111",
+    route_id: "222",
+    route_type: 1,
+    direction_id: 3,
+    stop_id: "333",
+    activities: [:BOARD, :EXIT],
+    trip: trip
+  })
+
+informed_entity_2 =
+  Repo.insert!(%InformedEntity{
+    agency_id: "555",
+    route_id: "666",
+    route_type: 2,
+    direction_id: 4,
+    stop_id: "777",
+    activities: [:PARK_CAR, :STORE_BIKE]
+  })
+
+Repo.insert!(%Alert{
   alert_id: "12345",
   effect: :NO_SERVICE,
   effect_detail: "No Service",
@@ -33,5 +68,6 @@ AlertsUI.Repo.insert!(%AlertsUI.Models.Alert{
     %{start_time: ~U[2023-10-12 00:03:00Z], end_time: ~U[2023-10-12 00:04:00Z]}
   ],
   image_url: "https://example.com/image1.png",
-  image_alternative_text: "an alert image"
+  image_alternative_text: "an alert image",
+  informed_entity: [informed_entity_1, informed_entity_2]
 })

@@ -10,6 +10,7 @@ defmodule AlertsUI.Models.Alert do
     Cause,
     DurationCertainty,
     Effect,
+    InformedEntity,
     SeverityLevel
   }
 
@@ -43,7 +44,8 @@ defmodule AlertsUI.Models.Alert do
           duration_certainty: atom() | nil,
           active_period: [String.t()] | nil,
           image_url: String.t() | nil,
-          image_alternative_text: String.t() | nil
+          image_alternative_text: String.t() | nil,
+          informed_entity: [InformedEntity.t()]
         }
 
   schema "alerts" do
@@ -68,6 +70,7 @@ defmodule AlertsUI.Models.Alert do
     embeds_many :active_period, ActivePeriod
     field :image_url, :string
     field :image_alternative_text, :string
+    has_many :informed_entity, InformedEntity
     timestamps()
   end
 end
