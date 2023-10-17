@@ -3,7 +3,7 @@ defmodule AlertsUI.Models.TripDescriptor do
     Models a Trip Descriptor
   """
   use AlertsUI.Schema
-  alias AlertsUI.Models.{InformedEntity, ScheduleRelationship}
+  alias AlertsUI.Models.{ExtendedTime, InformedEntity, ScheduleRelationship}
 
   @schedule_relationship ScheduleRelationship.schedule_relationships()
 
@@ -15,7 +15,7 @@ defmodule AlertsUI.Models.TripDescriptor do
           trip_id: String.t() | nil,
           route_id: String.t() | nil,
           direction_id: integer() | nil,
-          start_time: Time.t() | nil,
+          start_time: ExtendedTime.t() | nil,
           start_date: Date.t() | nil,
           schedule_relationship: atom() | nil
         }
@@ -25,7 +25,7 @@ defmodule AlertsUI.Models.TripDescriptor do
     field :trip_id, :string
     field :route_id, :string
     field :direction_id, :integer
-    field :start_time, :time
+    embeds_one :start_time, ExtendedTime
     field :start_date, :date
     field :schedule_relationship, Ecto.Enum, values: @schedule_relationship
     timestamps()

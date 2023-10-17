@@ -2,7 +2,7 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParser do
   @moduledoc """
   Supervisor for realtime alert information from realtime GTFS.
   """
-  alias AlertsUI.Models.{Alert, InformedEntity, TripDescriptor}
+  alias AlertsUI.Models.{Alert, ExtendedTime, InformedEntity, TripDescriptor}
 
   @spec parse(binary | []) :: [AlertsUI.Models.Alert.t()] | []
   def parse(binary) do
@@ -73,7 +73,7 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParser do
       route_id: Map.get(trip, "route_id"),
       direction_id: Map.get(trip, "direction_id"),
       start_date: Map.get(trip, "start_date") |> date,
-      start_time: Map.get(trip, "start_time") |> time,
+      start_time: Map.get(trip, "start_time") |> ExtendedTime.new(),
       schedule_relationship: Map.get(trip, "schedule_relationship") |> parse_string_to_atom
     )
   end
@@ -107,11 +107,6 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParser do
   @spec parse_unix_time(integer() | nil) :: DateTime.t() | nil
   defp parse_unix_time(nil), do: nil
   defp parse_unix_time(timestamp), do: DateTime.from_unix!(timestamp)
-
-  @spec time(String.t() | nil) :: Time.t() | nil
-  def time(nil), do: nil
-
-  def time(time), do: Time.from_iso8601!(time)
 
   @spec date(String.t() | nil) :: Date.t() | nil
   def date(nil), do: nil

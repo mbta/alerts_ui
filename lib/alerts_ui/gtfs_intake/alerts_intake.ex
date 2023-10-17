@@ -22,7 +22,12 @@ defmodule AlertsUI.GTFSIntake.AlertsIntake do
 
   @impl GenStage
   def handle_events(events, _from, state) do
-    events |> List.flatten() |> Enum.map(&"#{&1.alert_id}, ") |> Logger.info()
+    events
+    |> List.flatten()
+    |> Enum.map(&"#{&1.alert_id}, ")
+    |> Kernel.++(["alerts parsed"])
+    |> Logger.info()
+
     {:noreply, [], state}
   end
 end

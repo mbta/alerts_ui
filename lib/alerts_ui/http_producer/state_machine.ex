@@ -159,10 +159,9 @@ defmodule AlertsUI.HttpProducer.StateMachine do
 
   defp handle_message(machine, {:http_response, %{status_code: 304}}) do
     # not modified
-    _ =
-      Logger.info(fn ->
-        "#{__MODULE__}: not modified url=#{inspect(machine.url)}"
-      end)
+    Logger.info(fn ->
+      "#{__MODULE__}: not modified url=#{inspect(machine.url)}"
+    end)
 
     {machine, messages} = check_last_success(machine)
     message = {:fetch, machine.url}
@@ -177,10 +176,9 @@ defmodule AlertsUI.HttpProducer.StateMachine do
   defp handle_message(machine, {:http_error, reason}) do
     log_level = error_log_level(reason)
 
-    _ =
-      Logger.log(log_level, fn ->
-        "#{__MODULE__}: url=#{inspect(machine.url)} error=#{inspect(reason)}"
-      end)
+    Logger.log(log_level, fn ->
+      "#{__MODULE__}: url=#{inspect(machine.url)} error=#{inspect(reason)}"
+    end)
 
     {machine, messages} = check_last_success(machine)
     message = {:fetch, machine.url}
@@ -204,19 +202,17 @@ defmodule AlertsUI.HttpProducer.StateMachine do
     # log, but otherwise ignore
     log_level = error_log_level(reason)
 
-    _ =
-      Logger.log(log_level, fn ->
-        "#{__MODULE__}: url=#{inspect(machine.url)} error=#{inspect(reason)}"
-      end)
+    Logger.log(log_level, fn ->
+      "#{__MODULE__}: url=#{inspect(machine.url)} error=#{inspect(reason)}"
+    end)
 
     {machine, [], []}
   end
 
   defp handle_message(machine, unknown) do
-    _ =
-      Logger.error(fn ->
-        "#{__MODULE__}: got unexpected message url=#{inspect(machine.url)} message=#{inspect(unknown)}"
-      end)
+    Logger.error(fn ->
+      "#{__MODULE__}: got unexpected message url=#{inspect(machine.url)} message=#{inspect(unknown)}"
+    end)
 
     {machine, [], []}
   end
