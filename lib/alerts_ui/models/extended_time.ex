@@ -6,17 +6,21 @@ defmodule AlertsUI.Models.ExtendedTime do
   a valid time type.
   """
   use AlertsUI.Schema
+  import Ecto.Changeset
   alias AlertsUI.Models.ExtendedTime
 
-  @type id :: String.t()
   @type t :: %__MODULE__{
           relative_day: 1 | 2,
           time: Time.t()
         }
 
-  schema "extended_time" do
+  embedded_schema do
     field :relative_day, :integer
     field :time, :time
+  end
+
+  def changeset(%__MODULE__{} = ex_time, params \\ %{}) do
+    cast(ex_time, params, [:relative_day, :time])
   end
 
   @doc """

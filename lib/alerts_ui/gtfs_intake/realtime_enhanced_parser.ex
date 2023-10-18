@@ -2,7 +2,7 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParser do
   @moduledoc """
   Supervisor for realtime alert information from realtime GTFS.
   """
-  alias AlertsUI.Models.{Alert, ExtendedTime, InformedEntity, TripDescriptor}
+  alias AlertsUI.Models.ExtendedTime
 
   @spec parse(binary | []) :: [AlertsUI.Models.Alert.t()] | []
   def parse(binary) do
@@ -11,7 +11,7 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParser do
     |> decode_entities()
   end
 
-  @spec decode_entities(map()) :: [Alert.t()]
+  @spec decode_entities(map()) :: [map()]
   defp decode_entities(%{"entity" => entities}),
     do: Enum.map(entities, &decode_feed_entity(&1))
 
@@ -20,9 +20,9 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParser do
 
   defp decode_feed_entity(_), do: []
 
-  @spec decode_alert(map, any) :: Alert.t()
+  @spec decode_alert(map, any) :: map()
   def decode_alert(alert, id) do
-    Alert.new(
+    %{
       alert_id: id,
       effect: Map.get(alert, "effect") |> parse_string_to_atom,
       effect_detail: Map.get(alert, "effect_detail"),
@@ -46,13 +46,13 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParser do
       image_url: Map.get(alert, "image_url") |> parse_translated_string,
       image_alternative_text: Map.get(alert, "image_alternative_text") |> parse_translated_string,
       informed_entity: Map.get(alert, "informed_entity") |> decode_informed_entities
-    )
+    }
   end
 
-  @spec decode_trip(nil | [map()]) :: nil | [InformedEntity.t()]
+  @spec decode_trip(nil | [map()]) :: nil | [map()]
   defp decode_informed_entities(informed_entities) do
     Enum.map(informed_entities, fn informed_entity ->
-      InformedEntity.new(
+      %{
         agency_id: Map.get(informed_entity, "agency_id"),
         route_id: Map.get(informed_entity, "route_id"),
         route_type: Map.get(informed_entity, "route_type"),
@@ -60,26 +60,30 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParser do
         stop_id: Map.get(informed_entity, "stop_id"),
         activities: Map.get(informed_entity, "activities") |> Enum.map(&parse_string_to_atom(&1)),
         trip: Map.get(informed_entity, "trip") |> decode_trip
-      )
+      }
     end)
   end
 
-  @spec decode_trip(nil | map()) :: nil | TripDescriptor.t()
+  @spec decode_trip(nil | map()) :: nil | map()
   defp decode_trip(nil), do: nil
 
   defp decode_trip(trip) do
-    TripDescriptor.new(
+    %{
       trip_id: Map.get(trip, "trip_id"),
       route_id: Map.get(trip, "route_id"),
       direction_id: Map.get(trip, "direction_id"),
       start_date: Map.get(trip, "start_date") |> date,
-      start_time: Map.get(trip, "start_time") |> ExtendedTime.new(),
+      start_time: Map.get(trip, "start_time") |> ExtendedTime.new() |> safe_to_map,
       schedule_relationship: Map.get(trip, "schedule_relationship") |> parse_string_to_atom
-    )
+    }
   end
 
+  @spec safe_to_map(nil | [map()]) :: nil | [map()]
+  defp safe_to_map(nil), do: nil
+  defp safe_to_map(struct), do: Map.from_struct(struct)
+
   @spec parse_active_periods(nil | [map()]) :: nil | [map()]
-  defp parse_active_periods(nil), do: nil
+  defp parse_active_periods(nil), do: []
 
   defp parse_active_periods(periods_list) do
     Enum.map(periods_list, fn active_period ->

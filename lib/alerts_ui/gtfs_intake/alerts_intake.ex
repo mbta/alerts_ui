@@ -4,6 +4,7 @@ defmodule AlertsUI.GTFSIntake.AlertsIntake do
   """
   use GenStage
   require Logger
+  alias AlertsUI.Alerts
 
   @spec start_link(any) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
@@ -24,9 +25,7 @@ defmodule AlertsUI.GTFSIntake.AlertsIntake do
   def handle_events(events, _from, state) do
     events
     |> List.flatten()
-    |> Enum.map(&"#{&1.alert_id}, ")
-    |> Kernel.++(["alerts parsed"])
-    |> Logger.info()
+    |> Enum.each(&Alerts.create_alert(&1))
 
     {:noreply, [], state}
   end

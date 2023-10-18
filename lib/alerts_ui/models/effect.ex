@@ -4,6 +4,7 @@ defmodule AlertsUI.Models.Effect do
   """
   def effects,
     do: [
+      :ACCESSIBILITY_ISSUE,
       :NO_SERVICE,
       :REDUCED_SERVICE,
       :SIGNIFICANT_DELAYS,
