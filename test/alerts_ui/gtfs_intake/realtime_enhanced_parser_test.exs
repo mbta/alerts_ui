@@ -11,8 +11,6 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParserTest do
       binary = File.read!(fixture_path("alerts_enhanced.json"))
       [actual_alert, _alert2] = parsed = RealtimeEnhancedParser.parse(binary)
       assert Enum.all?(parsed, &(&1.__struct__ in [Alert]))
-
-      assert actual_alert.__struct__ in [Alert]
       assert actual_alert.effect == :OTHER_EFFECT
       assert actual_alert.effect_detail == "DELAY"
 
