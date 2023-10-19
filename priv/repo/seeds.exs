@@ -11,14 +11,14 @@
 # and so on) as they will fail if something goes wrong.
 
 alias AlertsUI.Repo
-alias AlertsUI.Models.{Alert, InformedEntity, TripDescriptor}
+alias AlertsUI.Models.{Alert, ExtendedTime, InformedEntity, TripDescriptor}
 
 trip =
   Repo.insert!(%TripDescriptor{
     trip_id: "001",
     route_id: "222",
     direction_id: 3,
-    start_time: ~T[23:00:07],
+    start_time: %ExtendedTime{relative_day: 2, time: ~T[01:30:30]},
     start_date: ~D[2023-10-01],
     schedule_relationship: :SCHEDULED
   })
@@ -64,8 +64,8 @@ Repo.insert!(%Alert{
   alert_lifecycle: :NEW,
   duration_certainty: :UNKNOWN,
   active_period: [
-    %{start_time: ~U[2023-10-12 00:01:00Z], end_time: ~U[2023-10-12 00:02:00Z]},
-    %{start_time: ~U[2023-10-12 00:03:00Z], end_time: ~U[2023-10-12 00:04:00Z]}
+    %{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-12 00:02:00Z]},
+    %{start: ~U[2023-10-12 00:03:00Z], end: ~U[2023-10-12 00:04:00Z]}
   ],
   image_url: "https://example.com/image1.png",
   image_alternative_text: "an alert image",

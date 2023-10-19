@@ -5,12 +5,12 @@ defmodule AlertsUI.Models.ActivePeriod do
   use AlertsUI.Schema
 
   @type t :: %__MODULE__{
-          start_time: DateTime.t(),
-          end_time: DateTime.t()
+          start: DateTime.t(),
+          end: DateTime.t()
         }
 
   embedded_schema do
-    field :start_time, :utc_datetime
-    field :end_time, :utc_datetime
+    field :start, :utc_datetime
+    field :end, :utc_datetime
   end
 end

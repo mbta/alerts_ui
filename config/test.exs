@@ -16,6 +16,9 @@ config :alerts_ui, AlertsUIWeb.Endpoint,
   secret_key_base: "7+lgNetlQrrPYf5ffzj/5XmtGR1YOBlWqEamnZ7Mdzo/pHixA1hIQsd2DtnXW0XQ",
   server: false
 
+# Don't run data processes (e.g. the API stream) during test
+config :alerts_ui, start_data_processes: false
+
 # Print only warnings and errors during test
 config :logger, level: :warning
 
