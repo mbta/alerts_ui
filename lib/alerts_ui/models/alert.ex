@@ -100,10 +100,6 @@ defmodule AlertsUI.Models.Alert do
     timestamps()
   end
 
-  def new(fields) do
-    struct!(__MODULE__, fields)
-  end
-
   @spec create_changeset(any(), map()) :: Ecto.Changeset.t()
   def create_changeset(%__MODULE__{} = alert, params) do
     alert

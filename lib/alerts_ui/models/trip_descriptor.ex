@@ -34,11 +34,6 @@ defmodule AlertsUI.Models.TripDescriptor do
     timestamps()
   end
 
-  @spec new(any) :: struct
-  def new(fields) do
-    struct!(__MODULE__, fields)
-  end
-
   @spec create_changeset(__MODULE__.t(), map()) :: Ecto.Changeset.t()
   def create_changeset(%__MODULE__{} = trip, params) do
     trip
@@ -50,7 +45,7 @@ defmodule AlertsUI.Models.TripDescriptor do
   end
 
   @spec validate_trip_rules(Ecto.Changeset.t(), map) :: Ecto.Changeset.t()
-  def validate_trip_rules(changeset, params) do
+  defp validate_trip_rules(changeset, params) do
     # Per the GTFS spec, trip descriptors must have either a trip_id or all of:
     # route_id, direction_id, start_time, and a schedule_relationship equal to :SCHEDULED
 

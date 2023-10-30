@@ -17,5 +17,6 @@ defmodule AlertsUI.Models.ActivePeriod do
 
   def changeset(%__MODULE__{} = active_period, params \\ %{}) do
     cast(active_period, params, [:start, :end])
+    |> validate_required([:start, :end])
   end
 end

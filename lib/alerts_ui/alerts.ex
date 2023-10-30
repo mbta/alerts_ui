@@ -11,7 +11,6 @@ defmodule AlertsUI.Alerts do
   @spec create_alert(map()) :: {:ok, Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
   def create_alert(alert) do
     # this is temporarily filtering out duplicate alerts
-    # To do-  only insert duplicate alerts if last modified timestamp is unique?
     result =
       Alert.create_changeset(%Alert{}, alert)
       |> unsafe_validate_unique(:alert_id, Repo)
@@ -35,22 +34,23 @@ defmodule AlertsUI.Alerts do
     result
   end
 
-  def list_all_versions_of_alert(alert) when is_struct(alert) do
-    list_all_versions_of_alert(alert.alert_id)
+  @spec list_all_versions(Alert.t() | String.t()) :: [Alert.t()]
+  def list_all_versions(alert) when is_struct(alert) do
+    list_all_versions(alert.alert_id)
   end
 
-  def list_all_versions_of_alert(alert_id) do
+  def list_all_versions(alert_id) do
     Repo.all(
       from(
         a in Alert,
         where: a.alert_id == ^alert_id,
-        order_by: [desc: a.created_timestamp],
+        order_by: [desc: a.last_modified_timestamp],
         preload: [informed_entity: [:trip]]
       )
     )
   end
 
-  def list_all_alerts do
+  def list_all do
     Repo.all(
       from(
         a in Alert,

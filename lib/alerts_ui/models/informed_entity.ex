@@ -36,10 +36,6 @@ defmodule AlertsUI.Models.InformedEntity do
     timestamps()
   end
 
-  def new(fields) do
-    struct!(__MODULE__, fields)
-  end
-
   @spec create_changeset(__MODULE__.t(), map()) :: Ecto.Changeset.t()
   def create_changeset(%__MODULE__{} = informed_entity, params) do
     # informed entity must have at least one field
