@@ -1,9 +1,8 @@
 defmodule AlertsUI.AlertsTest do
   @moduledoc false
   use AlertsUI.DataCase, async: true
+  import AlertsUI.Support.Factory
   alias AlertsUI.Alerts
-  alias AlertsUI.Models.Alert
-  alias AlertsUI.Repo
 
   describe "create_alert/1" do
     test "stores valid alert" do
@@ -53,22 +52,8 @@ defmodule AlertsUI.AlertsTest do
 
   describe "list_all_versions/1" do
     test "list versions of alerts given alert id" do
-      alert1 = %{
-        alert_id: "123",
-        header_text: "a",
-        description_text: "b",
-        informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}]
-      }
-
-      alert2 = %{
-        alert_id: "123",
-        header_text: "c",
-        description_text: "d",
-        informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}]
-      }
-
-      Alert.create_changeset(%Alert{}, alert1) |> Repo.insert()
-      Alert.create_changeset(%Alert{}, alert2) |> Repo.insert()
+      insert(:alert, %{alert_id: "123"})
+      insert(:alert, %{alert_id: "123"})
 
       [result1, result2] = Alerts.list_all_versions("123")
       assert result1.alert_id == "123"
@@ -76,47 +61,21 @@ defmodule AlertsUI.AlertsTest do
     end
 
     test "list alerts given alert id" do
-      alert1 = %{
-        alert_id: "123",
-        header_text: "a",
-        description_text: "b",
-        informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}]
-      }
-
-      alert2 = %{
-        alert_id: "123",
-        header_text: "c",
-        description_text: "d",
-        informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}]
-      }
-
-      {:ok, created_alert} = Alert.create_changeset(%Alert{}, alert1) |> Repo.insert()
-      Alert.create_changeset(%Alert{}, alert2) |> Repo.insert()
+      created_alert = insert(:alert, %{alert_id: "123", header_text: "a"})
+      insert(:alert, %{alert_id: "123", header_text: "b"})
 
       [result1, result2] = Alerts.list_all_versions(created_alert)
       assert result1.alert_id == "123"
       assert result2.alert_id == "123"
+      assert result1.header_text == "a"
+      assert result2.header_text == "b"
     end
   end
 
   describe "list_all/0" do
     test "lists all alerts" do
-      alert1 = %{
-        alert_id: "123",
-        header_text: "a",
-        description_text: "b",
-        informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}]
-      }
-
-      alert2 = %{
-        alert_id: "234",
-        header_text: "c",
-        description_text: "d",
-        informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}]
-      }
-
-      Alert.create_changeset(%Alert{}, alert1) |> Repo.insert()
-      Alert.create_changeset(%Alert{}, alert2) |> Repo.insert()
+      insert(:alert, %{alert_id: "123"})
+      insert(:alert, %{alert_id: "234"})
 
       [result1, result2] = Alerts.list_all()
       assert result1.alert_id == "123"
