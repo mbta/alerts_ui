@@ -11,13 +11,18 @@ defmodule AlertsUI.Models.ActivePeriodTest do
       assert changeset.valid?
     end
 
-    test "not valid if start time is missing" do
-      changeset = ActivePeriod.changeset(%ActivePeriod{}, %{end_time: ~U[2023-10-13 00:01:00Z]})
-      assert changeset.valid? == false
+    test "create with just end time is valid" do
+      changeset = ActivePeriod.changeset(%ActivePeriod{}, %{end: ~U[2023-10-13 00:01:00Z]})
+      assert changeset.valid?
     end
 
-    test "not valid if end time is missing" do
-      changeset = ActivePeriod.changeset(%ActivePeriod{}, %{start_time: ~U[2023-10-12 00:01:00Z]})
+    test "create with just start time is valid" do
+      changeset = ActivePeriod.changeset(%ActivePeriod{}, %{start: ~U[2023-10-12 00:01:00Z]})
+      assert changeset.valid?
+    end
+
+    test "create with not start or end time is not valid" do
+      changeset = ActivePeriod.changeset(%ActivePeriod{}, %{})
       assert changeset.valid? == false
     end
   end
