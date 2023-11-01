@@ -36,10 +36,11 @@ defmodule AlertsUI.GTFSIntake.AlertsIntakeTest do
       assert response == {:noreply, [], %{}}
     end
 
-    test "persists alerts to database", %{events: events} do
+    test "persists alerts to database if they're the newest version", %{events: events} do
+      insert(:alert, alert_id: "123", last_modified_timestamp: ~U[2023-10-19 18:45:38Z])
       AlertsIntake.handle_events(events, nil, %{})
 
-      assert length(Alerts.list_all()) == 2
+      assert length(Alerts.list_all()) == 3
     end
 
     test "filters out alerts that are not more recent than the most recent version", %{
@@ -47,7 +48,7 @@ defmodule AlertsUI.GTFSIntake.AlertsIntakeTest do
     } do
       insert(:alert, alert_id: "123", last_modified_timestamp: ~U[2023-10-21 18:45:38Z])
       AlertsIntake.handle_events(events, nil, %{})
-      [result_1, result_2] = Alerts.list_all()
+      [result_1, result_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id)
       assert result_1.alert_id == "123"
       assert result_1.last_modified_timestamp == ~U[2023-10-21 18:45:38Z]
       assert result_2.alert_id == "234"

@@ -15,6 +15,8 @@ defmodule AlertsUI.Models.ScheduleRelationship do
       :SCHEDULED,
       :ADDED,
       :UNSCHEDULED,
-      :CANCELED
+      :CANCELED,
+      :DUPLICATED,
+      :DELETED
     ]
 end

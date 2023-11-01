@@ -21,7 +21,7 @@ defmodule AlertsUI.Models.InformedEntity do
           direction_id: integer() | nil,
           stop_id: String.t() | nil,
           activities: [atom()] | nil,
-          trip: TripDescriptor | nil
+          trip: TripDescriptor.t() | nil
         }
 
   schema "informed_entities" do

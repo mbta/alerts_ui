@@ -37,6 +37,8 @@ defmodule AlertsUI.Models.Alert do
   timeframe_text
   alert_lifecycle
   duration_certainty
+  tts_header_text
+  tts_description_text
   image_url
   image_alternative_text)a
 
@@ -71,6 +73,9 @@ defmodule AlertsUI.Models.Alert do
           active_period: [ActivePeriod.t()] | nil,
           image_url: String.t() | nil,
           image_alternative_text: String.t() | nil,
+          image_url: String.t() | nil,
+          tts_header_text: String.t() | nil,
+          tts_description_text: String.t() | nil,
           informed_entity: [InformedEntity.t()]
         }
 
@@ -96,6 +101,8 @@ defmodule AlertsUI.Models.Alert do
     embeds_many :active_period, ActivePeriod
     field :image_url, :string
     field :image_alternative_text, :string
+    field :tts_header_text, :string
+    field :tts_description_text, :string
     has_many :informed_entity, InformedEntity
     timestamps()
   end
