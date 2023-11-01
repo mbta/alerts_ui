@@ -10,19 +10,11 @@ defmodule AlertsUI.Alerts do
 
   @spec create_alert(map()) :: {:ok, Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
   def create_alert(alert) do
-    # this is temporarily filtering out duplicate alerts
     result =
       Alert.create_changeset(%Alert{}, alert)
-      |> unsafe_validate_unique(:alert_id, Repo)
       |> Repo.insert()
 
     case result do
-      {:error,
-       %Ecto.Changeset{
-         errors: [alert_id: {"has already been taken", _}]
-       } = _changeset} ->
-        nil
-
       {:error, changeset} ->
         Logger.warning("Error persisting alert with ID #{get_field(changeset, :alert_id)}")
         traverse_errors(changeset, fn {msg, _} -> msg end) |> Logger.warning()
@@ -48,6 +40,35 @@ defmodule AlertsUI.Alerts do
         preload: [informed_entity: [:trip]]
       )
     )
+  end
+
+  @spec get_most_recent_version(Alert.t() | String.t()) :: Alert.t() | nil
+  def get_most_recent_version(alert) when is_struct(alert) do
+    get_most_recent_version(alert.alert_id)
+  end
+
+  def get_most_recent_version(alert_id) do
+    from(
+      a in Alert,
+      where: a.alert_id == ^alert_id,
+      order_by: [desc: a.last_modified_timestamp],
+      preload: [informed_entity: [:trip]]
+    )
+    |> first()
+    |> Repo.one()
+  end
+
+  @spec is_most_recent_version?(Alert.t()) :: boolean()
+  def is_most_recent_version?(incoming_alert) do
+    case get_most_recent_version(incoming_alert.alert_id) do
+      nil -> true
+      stored_alert -> is_last_modified_time_more_recent?(incoming_alert, stored_alert)
+    end
+  end
+
+  defp is_last_modified_time_more_recent?(incoming_alert, stored_alert) do
+    DateTime.compare(incoming_alert.last_modified_timestamp, stored_alert.last_modified_timestamp) ==
+      :gt
   end
 
   def list_all do

@@ -31,27 +31,6 @@ defmodule AlertsUI.AlertsTest do
       Alerts.create_alert(alert)
       assert length(Alerts.list_all()) - before_alerts_length == 0
     end
-
-    test "only stores alerts with unique ids" do
-      before_alerts_length = Alerts.list_all() |> length
-
-      alert = %{
-        alert_id: "123",
-        header_text: "a",
-        description_text: "b",
-        informed_entity: [
-          %{
-            route_id: "1",
-            trip: %{trip_id: "2", start_time: %{relative_day: 1, time: ~T[01:01:01]}}
-          }
-        ]
-      }
-
-      Alerts.create_alert(alert)
-      assert length(Alerts.list_all()) - before_alerts_length == 1
-      Alerts.create_alert(alert)
-      assert length(Alerts.list_all()) - before_alerts_length == 1
-    end
   end
 
   describe "list_all_versions/1" do
@@ -73,6 +52,42 @@ defmodule AlertsUI.AlertsTest do
       assert result2.alert_id == "123"
       assert result1.header_text == "a"
       assert result2.header_text == "b"
+    end
+  end
+
+  describe "get_most_recent_version/1" do
+    test "gives back most recent version given alert id" do
+      insert(:alert, %{alert_id: "123", last_modified_timestamp: ~U[2023-10-12 00:01:00Z]})
+      insert(:alert, %{alert_id: "123", last_modified_timestamp: ~U[2023-10-13 00:01:00Z]})
+      result = Alerts.get_most_recent_version("123")
+      assert result.last_modified_timestamp == ~U[2023-10-13 00:01:00Z]
+    end
+  end
+
+  describe "is_most_recent_version?/1" do
+    test "returns true if no other alert with same alert_id is stored" do
+      new_alert = build(:alert, %{alert_id: "123"})
+      assert Alerts.is_most_recent_version?(new_alert) == true
+    end
+
+    test "returns true if new alert is more recent than stored versions with same alert_id" do
+      insert(:alert, %{alert_id: "123", last_modified_timestamp: ~U[2023-10-12 00:01:00Z]})
+      insert(:alert, %{alert_id: "123", last_modified_timestamp: ~U[2023-10-13 00:01:00Z]})
+
+      new_alert =
+        build(:alert, %{alert_id: "123", last_modified_timestamp: ~U[2023-10-14 00:01:00Z]})
+
+      assert Alerts.is_most_recent_version?(new_alert) == true
+    end
+
+    test "returns false if new alert is not than stored versions with same alert_id" do
+      insert(:alert, %{alert_id: "123", last_modified_timestamp: ~U[2023-10-12 00:01:00Z]})
+      insert(:alert, %{alert_id: "123", last_modified_timestamp: ~U[2023-10-14 00:01:00Z]})
+
+      new_alert =
+        build(:alert, %{alert_id: "123", last_modified_timestamp: ~U[2023-10-13 00:01:00Z]})
+
+      assert Alerts.is_most_recent_version?(new_alert) == false
     end
   end
 

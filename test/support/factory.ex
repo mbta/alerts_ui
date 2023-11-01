@@ -20,6 +20,7 @@ defmodule AlertsUI.Support.Factory do
     %InformedEntity{route_id: "1", trip: build(:trip_descriptor)}
   end
 
+  @spec active_period_factory() :: AlertsUI.Models.ActivePeriod.t()
   def active_period_factory do
     %ActivePeriod{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:01:00Z]}
   end
@@ -33,6 +34,21 @@ defmodule AlertsUI.Support.Factory do
         build(:active_period)
       ],
       informed_entity: [build(:informed_entity_with_trip)]
+    }
+  end
+
+  def alert_map_factory do
+    %{
+      alert_id: "123",
+      header_text: "a",
+      description_text: "b",
+      active_period: [
+        %{
+          start: ~U[2023-10-20 16:15:00Z],
+          end: ~U[2023-10-20 18:45:38Z]
+        }
+      ],
+      informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}]
     }
   end
 end

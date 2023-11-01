@@ -12,6 +12,7 @@ defmodule AlertsUI.GTFSIntake.AlertsIntake do
   end
 
   @impl GenStage
+  @spec init(any()) :: {:consumer, :the_state_does_not_matter, any()}
   def init(opts) do
     {:consumer, :the_state_does_not_matter, opts}
   end
@@ -25,6 +26,7 @@ defmodule AlertsUI.GTFSIntake.AlertsIntake do
   def handle_events(events, _from, state) do
     events
     |> List.flatten()
+    |> Enum.filter(&Alerts.is_most_recent_version?(&1))
     |> Enum.each(&Alerts.create_alert(&1))
 
     {:noreply, [], state}
