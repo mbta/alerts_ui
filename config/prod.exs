@@ -14,3 +14,6 @@ config :ehmon, :report_mf, {:ehmon, :info_report}
 
 # Runtime production configuration, including reading
 # of environment variables, is done on config/runtime.exs.
+
+# Config for db migration function
+config :alerts_ui, :migration_task, AlertsUI.ReleaseTasks

@@ -7,6 +7,13 @@ defmodule AlertsUI.Application do
 
   @impl true
   def start(_type, _args) do
+    with {:ok, pid} <- supervise() do
+      Application.get_env(:alerts_ui, :migration_task).migrate()
+      {:ok, pid}
+    end
+  end
+
+  def supervise do
     load_runtime_config()
 
     children =

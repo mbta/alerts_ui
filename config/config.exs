@@ -12,7 +12,8 @@ config :alerts_ui,
   ecto_repos: [AlertsUI.Repo],
   aws_rds_mod: ExAws.RDS,
   alert_api_url: {:system, "ALERT_API_URL"},
-  start_data_processes: true
+  start_data_processes: true,
+  migration_task: AlertsUI.ReleaseTasks.Dev
 
 # Configure your database
 config :alerts_ui, AlertsUI.Repo,
