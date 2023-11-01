@@ -58,7 +58,8 @@ defmodule AlertsUI.MixProject do
       {:gen_stage, "~> 1.2.1"},
       {:httpoison, "~> 2.1"},
       {:bypass, "~> 2.1", only: :test},
-      {:stream_data, "~> 0.6.0", only: :test}
+      {:stream_data, "~> 0.6.0", only: :test},
+      {:ex_machina, "~> 2.7.0", only: :test}
     ]
   end
 

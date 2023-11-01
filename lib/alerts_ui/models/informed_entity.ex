@@ -3,9 +3,12 @@ defmodule AlertsUI.Models.InformedEntity do
     Models an Informed Entity
   """
   use AlertsUI.Schema
+  import Ecto.Changeset
   alias AlertsUI.Models.{Activity, Alert, TripDescriptor}
 
   @activity Activity.activities()
+
+  @permitted_fields ~w(alert_id route_id direction_id agency_id route_type stop_id activities)a
 
   @type t :: %__MODULE__{
           id: Ecto.UUID,
@@ -33,7 +36,20 @@ defmodule AlertsUI.Models.InformedEntity do
     timestamps()
   end
 
-  def new(fields) do
-    struct!(__MODULE__, fields)
+  @spec create_changeset(__MODULE__.t(), map()) :: Ecto.Changeset.t()
+  def create_changeset(%__MODULE__{} = informed_entity, params) do
+    # informed entity must have at least one field
+    # per GTFS spec
+    informed_entity
+    |> cast(params, @permitted_fields)
+    |> cast_assoc(:trip, required: false, with: &TripDescriptor.create_changeset/2)
+    |> validate_subset(:activities, @activity)
+    |> case do
+      %{changes: changes} = changeset when changes == %{} ->
+        add_error(changeset, :agency_id, "at least one field must be present")
+
+      changeset ->
+        changeset
+    end
   end
 end

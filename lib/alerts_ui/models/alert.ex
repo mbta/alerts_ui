@@ -3,6 +3,7 @@ defmodule AlertsUI.Models.Alert do
     Models an alert
   """
   use AlertsUI.Schema
+  import Ecto.Changeset
 
   alias AlertsUI.Models.{
     ActivePeriod,
@@ -13,6 +14,31 @@ defmodule AlertsUI.Models.Alert do
     InformedEntity,
     SeverityLevel
   }
+
+  @permitted_fields ~w(
+  id
+  created_at
+  updated_at
+  alert_id
+  effect
+  effect_detail
+  cause
+  cause_detail
+  header_text
+  description_text
+  severity_level
+  url
+  service_effect_text
+  short_header_text
+  severity
+  created_timestamp
+  last_modified_timestamp
+  last_push_notification_timestamp
+  timeframe_text
+  alert_lifecycle
+  duration_certainty
+  image_url
+  image_alternative_text)a
 
   @cause Cause.causes()
   @effect Effect.effects()
@@ -42,7 +68,7 @@ defmodule AlertsUI.Models.Alert do
           timeframe_text: String.t() | nil,
           alert_lifecycle: atom() | nil,
           duration_certainty: atom() | nil,
-          active_period: [String.t()] | nil,
+          active_period: [ActivePeriod.t()] | nil,
           image_url: String.t() | nil,
           image_alternative_text: String.t() | nil,
           informed_entity: [InformedEntity.t()]
@@ -74,7 +100,18 @@ defmodule AlertsUI.Models.Alert do
     timestamps()
   end
 
-  def new(fields) do
-    struct!(__MODULE__, fields)
+  @spec create_changeset(any(), map()) :: Ecto.Changeset.t()
+  def create_changeset(%__MODULE__{} = alert, params) do
+    alert
+    |> cast(params, @permitted_fields)
+    |> cast_embed(:active_period, required: false, with: &ActivePeriod.changeset/2)
+    |> cast_assoc(:informed_entity, required: true, with: &InformedEntity.create_changeset/2)
+    |> validate_inclusion(:effect, @effect)
+    |> validate_inclusion(:cause, @cause)
+    |> validate_inclusion(:severity_level, @severity_level)
+    |> validate_inclusion(:alert_lifecycle, @alert_lifecycle)
+    |> validate_inclusion(:duration_certainty, @duration_certainty)
+    |> validate_required([:header_text, :alert_id])
+    |> validate_length(:informed_entity, min: 1)
   end
 end

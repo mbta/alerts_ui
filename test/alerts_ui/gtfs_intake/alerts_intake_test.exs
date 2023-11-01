@@ -1,5 +1,5 @@
 defmodule AlertsUI.GTFSIntake.AlertsIntakeTest do
-  use ExUnit.Case
+  use AlertsUI.DataCase, async: true
   alias AlertsUI.GTFSIntake.AlertsIntake
 
   describe "start_link/1" do
@@ -8,15 +8,17 @@ defmodule AlertsUI.GTFSIntake.AlertsIntakeTest do
     end
   end
 
-  describe "handle_events/3" do
-    setup do
-      events = []
+  describe "handle_info/2" do
+    test "returns noreply" do
+      response = AlertsIntake.handle_info({make_ref(), :hello}, %{})
 
-      {:ok, events: events}
+      assert response == {:noreply, [], %{}}
     end
+  end
 
-    test "returns noreply", %{events: events} do
-      response = AlertsIntake.handle_events(events, nil, %{})
+  describe "handle_events/3" do
+    test "returns noreply" do
+      response = AlertsIntake.handle_events([], nil, %{})
 
       assert response == {:noreply, [], %{}}
     end

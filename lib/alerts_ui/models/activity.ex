@@ -1,6 +1,14 @@
 defmodule AlertsUI.Models.Activity do
   @moduledoc """
-    Causes to be used in the activity field of Informed Entity
+    Activities to be used in the activity field of Informed Entity
+  """
+
+  @doc """
+  Returns list of atoms allowed in activities field of Informed Entity
+
+  ## Examples
+      iex> is_list(AlertsUI.Models.Activity.activities)
+      true
   """
   def activities,
     do: [

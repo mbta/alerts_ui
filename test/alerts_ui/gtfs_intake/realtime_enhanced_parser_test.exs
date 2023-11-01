@@ -1,16 +1,15 @@
 defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParserTest do
   @moduledoc false
-  use ExUnit.Case, async: true
+  use AlertsUI.DataCase, async: true
 
   import Test.Support.Helpers
   alias AlertsUI.GTFSIntake.RealtimeEnhancedParser
-  alias AlertsUI.Models.{Alert, ExtendedTime, InformedEntity, TripDescriptor}
 
   describe "parse/1" do
     test "parsing alert JSON results in alert atructs with expected fields" do
       binary = File.read!(fixture_path("alerts_enhanced.json"))
       [actual_alert, _alert2] = parsed = RealtimeEnhancedParser.parse(binary)
-      assert Enum.all?(parsed, &(&1.__struct__ in [Alert]))
+      assert Enum.all?(parsed, &is_map(&1))
       assert actual_alert.effect == :OTHER_EFFECT
       assert actual_alert.effect_detail == "DELAY"
 
@@ -42,16 +41,17 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParserTest do
 
       assert actual_alert.duration_certainty == :KNOWN
       [ie_1, _ie_2] = informed_entities = actual_alert.informed_entity
-      Enum.all?(informed_entities, &(&1.__struct__ in [InformedEntity]))
+      Enum.all?(informed_entities, &is_map(&1))
       assert ie_1.agency_id == "1"
       assert ie_1.route_type == 2
       assert ie_1.route_id == "CR-Lowell"
-      assert ie_1.trip.__struct__ in [TripDescriptor]
+      assert is_map(ie_1.trip)
       assert ie_1.trip.trip_id == "CR-627689-308"
       assert ie_1.trip.route_id == "CR-Lowell"
       assert ie_1.trip.direction_id == 1
       assert ie_1.trip.start_date == ~D[2023-09-21]
-      assert ie_1.trip.start_time == %ExtendedTime{relative_day: 2, time: ~T[01:40:30]}
+      assert ie_1.trip.start_time.time == ~T[01:40:30]
+      assert ie_1.trip.start_time.relative_day == 2
       assert ie_1.activities == [:BOARD, :EXIT, :RIDE]
     end
   end
