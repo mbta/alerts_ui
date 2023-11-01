@@ -1,5 +1,5 @@
 defmodule AlertsUI.GTFSIntake.AlertsIntakeTest do
-  use ExUnit.Case
+  use AlertsUI.DataCase, async: true
   alias AlertsUI.GTFSIntake.AlertsIntake
 
   describe "start_link/1" do

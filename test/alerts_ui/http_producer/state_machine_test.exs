@@ -1,6 +1,6 @@
 defmodule AlertsUI.HttpProducer.StateMachineTest do
   @moduledoc false
-  use ExUnit.Case
+  use AlertsUI.DataCase, async: true
   import AlertsUI.HttpProducer.StateMachine
   import ExUnit.CaptureLog
 

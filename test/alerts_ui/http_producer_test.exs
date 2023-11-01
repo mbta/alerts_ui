@@ -1,6 +1,6 @@
 defmodule HttpProducerTest do
   @moduledoc false
-  use ExUnit.Case
+  use AlertsUI.DataCase, async: true
   require Logger
   import AlertsUI.HttpProducer
   import Plug.Conn, only: [get_req_header: 2, put_resp_header: 3, send_resp: 3]

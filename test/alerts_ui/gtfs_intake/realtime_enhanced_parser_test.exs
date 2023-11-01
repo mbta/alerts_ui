@@ -1,6 +1,6 @@
 defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParserTest do
   @moduledoc false
-  use ExUnit.Case, async: true
+  use AlertsUI.DataCase, async: true
 
   import Test.Support.Helpers
   alias AlertsUI.GTFSIntake.RealtimeEnhancedParser

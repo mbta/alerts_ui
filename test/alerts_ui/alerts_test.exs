@@ -6,6 +6,8 @@ defmodule AlertsUI.AlertsTest do
 
   describe "create_alert/1" do
     test "stores valid alert" do
+      before_alerts_length = Alerts.list_all() |> length
+
       alert = %{
         alert_id: "123",
         header_text: "a",
@@ -14,23 +16,25 @@ defmodule AlertsUI.AlertsTest do
       }
 
       Alerts.create_alert(alert)
-      actual_alerts = Alerts.list_all()
-      assert length(actual_alerts) == 1
+      assert length(Alerts.list_all()) - before_alerts_length == 1
     end
 
     @tag :capture_log
     test "does not store invalid alert" do
+      before_alerts_length = Alerts.list_all() |> length
+
       alert = %{
         description_text: "b",
         informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}]
       }
 
       Alerts.create_alert(alert)
-      actual_alerts = Alerts.list_all()
-      assert actual_alerts == []
+      assert length(Alerts.list_all()) - before_alerts_length == 0
     end
 
     test "only stores alerts with unique ids" do
+      before_alerts_length = Alerts.list_all() |> length
+
       alert = %{
         alert_id: "123",
         header_text: "a",
@@ -44,9 +48,9 @@ defmodule AlertsUI.AlertsTest do
       }
 
       Alerts.create_alert(alert)
-      assert length(Alerts.list_all()) == 1
+      assert length(Alerts.list_all()) - before_alerts_length == 1
       Alerts.create_alert(alert)
-      assert length(Alerts.list_all()) == 1
+      assert length(Alerts.list_all()) - before_alerts_length == 1
     end
   end
 
@@ -74,10 +78,10 @@ defmodule AlertsUI.AlertsTest do
 
   describe "list_all/0" do
     test "lists all alerts" do
-      insert(:alert, %{alert_id: "123"})
       insert(:alert, %{alert_id: "234"})
+      insert(:alert, %{alert_id: "123"})
 
-      [result1, result2] = Alerts.list_all()
+      [result1, result2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id)
       assert result1.alert_id == "123"
       assert result2.alert_id == "234"
     end

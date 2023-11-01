@@ -1,6 +1,6 @@
 defmodule AlertsUI.Alerts do
   @moduledoc """
-    Functions for working with alerts in the database
+    Context for working with alerts in the database
   """
   import Ecto.Changeset
   import Ecto.Query
@@ -35,8 +35,8 @@ defmodule AlertsUI.Alerts do
   end
 
   @spec list_all_versions(Alert.t() | String.t()) :: [Alert.t()]
-  def list_all_versions(alert) when is_struct(alert) do
-    list_all_versions(alert.alert_id)
+  def list_all_versions(%Alert{alert_id: alert_id}) do
+    list_all_versions(alert_id)
   end
 
   def list_all_versions(alert_id) do

@@ -68,7 +68,7 @@ defmodule AlertsUI.Models.Alert do
           timeframe_text: String.t() | nil,
           alert_lifecycle: atom() | nil,
           duration_certainty: atom() | nil,
-          active_period: [map()] | nil,
+          active_period: [ActivePeriod.t()] | nil,
           image_url: String.t() | nil,
           image_alternative_text: String.t() | nil,
           informed_entity: [InformedEntity.t()]

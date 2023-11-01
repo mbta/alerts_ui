@@ -19,7 +19,8 @@ defmodule AlertsUI.Models.ActivePeriod do
   def changeset(%__MODULE__{} = active_period, params \\ %{}) do
     case {Map.get(params, :start), Map.get(params, :end)} do
       {nil, nil} ->
-        cast(active_period, params, [:start, :end])
+        active_period
+        |> cast(params, [:start, :end])
         |> add_error(:start, "requires at least one of start or end time")
 
       {_, _} ->

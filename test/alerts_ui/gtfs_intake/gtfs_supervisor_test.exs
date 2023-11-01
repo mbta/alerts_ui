@@ -1,5 +1,5 @@
 defmodule AlertsUI.GTFSIntake.GTFSSupervisorTest do
-  use ExUnit.Case, async: true
+  use AlertsUI.DataCase, async: true
 
   alias AlertsUI.GTFSIntake.GTFSSupervisor
 

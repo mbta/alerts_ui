@@ -1,6 +1,5 @@
 defmodule AlertsUI.Repo.Migrations.ModifyTypes do
   use Ecto.Migration
-  alias AlertsUI.Models.{AlertLifecycle, Effect}
 
   def change do
     execute("ALTER TYPE effects ADD VALUE IF NOT EXISTS 'ACCESSIBILITY_ISSUE';")
