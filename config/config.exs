@@ -56,6 +56,20 @@ config :tailwind,
     cd: Path.expand("../assets", __DIR__)
   ]
 
+# Configure Oban
+config :alerts_ui, Oban,
+  repo: AlertsUI.Repo,
+  plugins: [
+    Oban.Plugins.Pruner,
+    {Oban.Plugins.Cron,
+     crontab: [
+       # Import and write GTFS feeds every minute
+       {"* * * * *", AlertsUi.FeedImporterExporter,
+        unique: [period: 60, states: [:available, :scheduled, :executing]]}
+     ]}
+  ],
+  queues: [default: 10]
+
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
