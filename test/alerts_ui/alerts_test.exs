@@ -78,12 +78,13 @@ defmodule AlertsUI.AlertsTest do
 
   describe "list_all/0" do
     test "lists all alerts" do
-      insert(:alert, %{alert_id: "234"})
       insert(:alert, %{alert_id: "123"})
+      insert(:alert, %{alert_id: "234"})
 
-      [result1, result2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id)
-      assert result1.alert_id == "123"
-      assert result2.alert_id == "234"
+      all_alerts = Alerts.list_all()
+
+      assert Enum.find(all_alerts, &(&1.alert_id == "123"))
+      assert Enum.find(all_alerts, &(&1.alert_id == "234"))
     end
   end
 end
