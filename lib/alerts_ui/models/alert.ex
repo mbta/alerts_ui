@@ -98,21 +98,21 @@ defmodule AlertsUI.Models.Alert do
     field :timeframe_text, :string
     field :alert_lifecycle, Ecto.Enum, values: @alert_lifecycle
     field :duration_certainty, Ecto.Enum, values: @duration_certainty
-    embeds_many :active_period, ActivePeriod
+    embeds_many :active_period, ActivePeriod, on_replace: :delete
     field :image_url, :string
     field :image_alternative_text, :string
     field :tts_header_text, :string
     field :tts_description_text, :string
-    has_many :informed_entity, InformedEntity
+    has_many :informed_entity, InformedEntity, on_replace: :nilify
     timestamps()
   end
 
-  @spec create_changeset(any(), map()) :: Ecto.Changeset.t()
-  def create_changeset(%__MODULE__{} = alert, params) do
+  @spec changeset(any(), map()) :: Ecto.Changeset.t()
+  def changeset(%__MODULE__{} = alert, params) do
     alert
     |> cast(params, @permitted_fields)
     |> cast_embed(:active_period, required: false, with: &ActivePeriod.changeset/2)
-    |> cast_assoc(:informed_entity, required: true, with: &InformedEntity.create_changeset/2)
+    |> cast_assoc(:informed_entity, required: true, with: &InformedEntity.changeset/2)
     |> validate_inclusion(:effect, @effect)
     |> validate_inclusion(:cause, @cause)
     |> validate_inclusion(:severity_level, @severity_level)
@@ -120,5 +120,6 @@ defmodule AlertsUI.Models.Alert do
     |> validate_inclusion(:duration_certainty, @duration_certainty)
     |> validate_required([:header_text, :alert_id])
     |> validate_length(:informed_entity, min: 1)
+    |> unique_constraint(:alert_id)
   end
 end

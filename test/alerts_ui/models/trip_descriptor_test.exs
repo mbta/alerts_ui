@@ -3,9 +3,9 @@ defmodule AlertsUI.Models.TripDescriptorTest do
   use AlertsUI.DataCase, async: true
   alias AlertsUI.Models.TripDescriptor
 
-  describe "create_changeset/2" do
+  describe "changeset/2" do
     test "create with trip id is valid" do
-      changeset = TripDescriptor.create_changeset(%TripDescriptor{}, %{trip_id: "1"})
+      changeset = TripDescriptor.changeset(%TripDescriptor{}, %{trip_id: "1"})
       assert changeset.valid?
     end
 
@@ -18,7 +18,7 @@ defmodule AlertsUI.Models.TripDescriptorTest do
         schedule_relationship: :SCHEDULED
       }
 
-      changeset = TripDescriptor.create_changeset(%TripDescriptor{}, params)
+      changeset = TripDescriptor.changeset(%TripDescriptor{}, params)
       assert changeset.valid?
     end
 
@@ -31,7 +31,7 @@ defmodule AlertsUI.Models.TripDescriptorTest do
         schedule_relationship: :ADDED
       }
 
-      changeset = TripDescriptor.create_changeset(%TripDescriptor{}, params)
+      changeset = TripDescriptor.changeset(%TripDescriptor{}, params)
       assert changeset.valid? == false
     end
   end

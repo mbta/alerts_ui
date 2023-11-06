@@ -28,14 +28,14 @@ defmodule AlertsUI.Models.TripDescriptor do
     field :trip_id, :string
     field :route_id, :string
     field :direction_id, :integer
-    embeds_one :start_time, ExtendedTime
+    embeds_one :start_time, ExtendedTime, on_replace: :update
     field :start_date, :date
     field :schedule_relationship, Ecto.Enum, values: @schedule_relationship
     timestamps()
   end
 
-  @spec create_changeset(__MODULE__.t(), map()) :: Ecto.Changeset.t()
-  def create_changeset(%__MODULE__{} = trip, params) do
+  @spec changeset(__MODULE__.t(), map()) :: Ecto.Changeset.t()
+  def changeset(%__MODULE__{} = trip, params) do
     trip
     |> cast(params, @permitted_fields)
     |> validate_inclusion(:schedule_relationship, @schedule_relationship)

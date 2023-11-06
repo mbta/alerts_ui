@@ -22,7 +22,7 @@ defmodule AlertsUI.GTFSIntake.AlertsIntakeTest do
     setup do
       events = [
         [
-          build(:alert_map, alert_id: "123", last_modified_timestamp: ~U[2023-10-20 18:45:38Z]),
+          build(:alert_map, alert_id: "123", last_modified_timestamp: ~U[2023-10-19 18:45:38Z]),
           build(:alert_map, alert_id: "234", last_modified_timestamp: ~U[2023-10-20 18:45:38Z])
         ]
       ]
@@ -36,22 +36,71 @@ defmodule AlertsUI.GTFSIntake.AlertsIntakeTest do
       assert response == {:noreply, [], %{}}
     end
 
-    test "persists alerts to database if they're the newest version", %{events: events} do
-      insert(:alert, alert_id: "123", last_modified_timestamp: ~U[2023-10-19 18:45:38Z])
+    test "creates alerts if there's no previous versions" do
+      events =
+        [
+          build(:alert_map, alert_id: "123", last_modified_timestamp: ~U[2023-10-19 18:45:38Z]),
+          build(:alert_map, alert_id: "234", last_modified_timestamp: ~U[2023-10-20 18:45:38Z])
+        ]
+
+      before_alerts_length = Alerts.list_all() |> length
       AlertsIntake.handle_events(events, nil, %{})
 
-      assert length(Alerts.list_all()) == 3
+      assert length(Alerts.list_all()) - before_alerts_length == 2
     end
 
-    test "filters out alerts that are not more recent than the most recent version", %{
-      events: events
-    } do
-      insert(:alert, alert_id: "123", last_modified_timestamp: ~U[2023-10-21 18:45:38Z])
+    test "updates alert if incoming version is most recent" do
+      events = [
+        build(:alert_map,
+          alert_id: "123",
+          last_modified_timestamp: ~U[2023-10-21 18:45:38Z],
+          header_text: "new"
+        ),
+        build(:alert_map, alert_id: "234", last_modified_timestamp: ~U[2023-10-20 18:45:38Z])
+      ]
+
+      insert(:alert,
+        alert_id: "123",
+        last_modified_timestamp: ~U[2023-10-19 18:45:38Z],
+        header_text: "old"
+      )
+
+      before_alerts_length = Alerts.list_all() |> length
+
       AlertsIntake.handle_events(events, nil, %{})
       [result_1, result_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id)
       assert result_1.alert_id == "123"
       assert result_1.last_modified_timestamp == ~U[2023-10-21 18:45:38Z]
+      assert result_1.header_text == "new"
       assert result_2.alert_id == "234"
+      assert length(Alerts.list_all()) - before_alerts_length == 1
+    end
+
+    test "does nothing if incoming version is not more recent" do
+      events = [
+        build(:alert_map,
+          alert_id: "123",
+          last_modified_timestamp: ~U[2023-10-19 18:45:38Z],
+          header_text: "incoming"
+        ),
+        build(:alert_map, alert_id: "234", last_modified_timestamp: ~U[2023-10-20 18:45:38Z])
+      ]
+
+      insert(:alert,
+        alert_id: "123",
+        last_modified_timestamp: ~U[2023-10-21 18:45:38Z],
+        header_text: "original"
+      )
+
+      before_alerts_length = Alerts.list_all() |> length
+
+      AlertsIntake.handle_events(events, nil, %{})
+      [result_1, result_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id)
+      assert result_1.alert_id == "123"
+      assert result_1.last_modified_timestamp == ~U[2023-10-21 18:45:38Z]
+      assert result_1.header_text == "original"
+      assert result_2.alert_id == "234"
+      assert length(Alerts.list_all()) - before_alerts_length == 1
     end
   end
 end
