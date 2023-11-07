@@ -55,13 +55,10 @@ defmodule AlertsUI.Alerts do
         Map.get(stored_alert, :last_modified_timestamp)
       )
 
-    case incoming_alert_is_more_recent do
-      true ->
-        {:ok, stored_alert |> Alert.changeset(incoming_alert)}
-
-      false ->
-        {:error,
-         change(%Alert{}, %{}) |> add_error(:alert_id, "alert is not most recent version")}
+    if incoming_alert_is_more_recent do
+      {:ok, stored_alert |> Alert.changeset(incoming_alert)}
+    else
+      {:error, change(%Alert{}, %{}) |> add_error(:alert_id, "alert is not most recent version")}
     end
   end
 
