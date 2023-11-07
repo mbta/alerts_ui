@@ -3,7 +3,7 @@ defmodule AlertsUI.Models.AlertTest do
   use AlertsUI.DataCase, async: true
   alias AlertsUI.Models.Alert
 
-  describe "create_changeset/2" do
+  describe "changeset/2" do
     test "create with header, description, and informed_entity is valid" do
       params = %{
         alert_id: "123",
@@ -18,7 +18,7 @@ defmodule AlertsUI.Models.AlertTest do
         informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}]
       }
 
-      changeset = Alert.create_changeset(%Alert{}, params)
+      changeset = Alert.changeset(%Alert{}, params)
       assert changeset.valid?
     end
 
@@ -36,12 +36,12 @@ defmodule AlertsUI.Models.AlertTest do
         informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}]
       }
 
-      changeset = Alert.create_changeset(%Alert{}, params)
+      changeset = Alert.changeset(%Alert{}, params)
       assert changeset.valid? == false
     end
 
     test "alert without header and description is not valid" do
-      changeset = Alert.create_changeset(%Alert{}, %{header_text: "a", url: "example.com"})
+      changeset = Alert.changeset(%Alert{}, %{header_text: "a", url: "example.com"})
       assert changeset.valid? == false
     end
   end

@@ -45,6 +45,8 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParser do
       active_period: Map.get(alert, "active_period") |> parse_active_periods,
       image_url: Map.get(alert, "image_url") |> parse_translated_string,
       image_alternative_text: Map.get(alert, "image_alternative_text") |> parse_translated_string,
+      tts_header_text: Map.get(alert, "tts_header_text") |> parse_translated_string,
+      tts_description_text: Map.get(alert, "tts_description_text") |> parse_translated_string,
       informed_entity: Map.get(alert, "informed_entity") |> decode_informed_entities
     }
   end

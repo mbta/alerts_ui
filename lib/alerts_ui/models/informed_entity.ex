@@ -21,7 +21,7 @@ defmodule AlertsUI.Models.InformedEntity do
           direction_id: integer() | nil,
           stop_id: String.t() | nil,
           activities: [atom()] | nil,
-          trip: TripDescriptor | nil
+          trip: TripDescriptor.t() | nil
         }
 
   schema "informed_entities" do
@@ -36,13 +36,13 @@ defmodule AlertsUI.Models.InformedEntity do
     timestamps()
   end
 
-  @spec create_changeset(__MODULE__.t(), map()) :: Ecto.Changeset.t()
-  def create_changeset(%__MODULE__{} = informed_entity, params) do
+  @spec changeset(__MODULE__.t(), map()) :: Ecto.Changeset.t()
+  def changeset(%__MODULE__{} = informed_entity, params) do
     # informed entity must have at least one field
     # per GTFS spec
     informed_entity
     |> cast(params, @permitted_fields)
-    |> cast_assoc(:trip, required: false, with: &TripDescriptor.create_changeset/2)
+    |> cast_assoc(:trip, required: false, with: &TripDescriptor.changeset/2)
     |> validate_subset(:activities, @activity)
     |> case do
       %{changes: changes} = changeset when changes == %{} ->

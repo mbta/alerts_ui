@@ -3,76 +3,131 @@ defmodule AlertsUI.AlertsTest do
   use AlertsUI.DataCase, async: true
   import AlertsUI.Support.Factory
   alias AlertsUI.Alerts
+  alias AlertsUI.Models.Alert
 
-  describe "create_alert/1" do
-    test "stores valid alert" do
-      before_alerts_length = Alerts.list_all() |> length
+  describe "create_or_modify_alert/1" do
+    test "updates alert if ids match" do
+      existing_alert =
+        insert(
+          :alert,
+          %{
+            alert_id: "123",
+            header_text: "old header text"
+          }
+        )
 
-      alert = %{
-        alert_id: "123",
-        header_text: "a",
-        description_text: "b",
-        informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}]
-      }
+      new_params =
+        build(:alert_map, %{
+          alert_id: "123",
+          header_text: "new header text",
+          last_modified_timestamp: ~U[2023-10-12 00:01:00Z]
+        })
 
-      Alerts.create_alert(alert)
-      assert length(Alerts.list_all()) - before_alerts_length == 1
+      Alerts.create_or_modify_alert(new_params)
+      updated_alert = Repo.get_by(Alert, id: existing_alert.id)
+      assert updated_alert.alert_id == "123"
+      assert updated_alert.header_text == "new header text"
     end
 
     @tag :capture_log
-    test "does not store invalid alert" do
-      before_alerts_length = Alerts.list_all() |> length
+    test "does not update alert if ids dont match" do
+      existing_alert =
+        insert(
+          :alert,
+          %{
+            alert_id: "123",
+            header_text: "old header text"
+          }
+        )
 
-      alert = %{
-        description_text: "b",
-        informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}]
-      }
+      new_params =
+        build(:alert_map, %{
+          alert_id: "234",
+          header_text: "new header text",
+          last_modified_timestamp: ~U[2023-10-12 00:01:00Z]
+        })
 
-      Alerts.create_alert(alert)
-      assert length(Alerts.list_all()) - before_alerts_length == 0
+      Alerts.create_or_modify_alert(new_params)
+      unmodified_alert = Repo.get_by!(Alert, id: existing_alert.id)
+      assert unmodified_alert.alert_id == "123"
+      assert unmodified_alert.header_text == "old header text"
     end
 
-    test "only stores alerts with unique ids" do
+    test "does not update alert if incoming is not newer" do
+      insert(
+        :alert,
+        %{
+          alert_id: "123",
+          header_text: "old header text",
+          last_modified_timestamp: ~U[2023-10-14 00:01:00Z]
+        }
+      )
+
+      new_params =
+        build(:alert_map, %{
+          alert_id: "123",
+          header_text: "new header text",
+          last_modified_timestamp: ~U[2023-10-12 00:01:00Z]
+        })
+
+      Alerts.create_or_modify_alert(new_params)
+      unmodified_alert = Repo.get_by!(Alert, alert_id: "123")
+      assert unmodified_alert.header_text == "old header text"
+    end
+
+    @tag :capture_log
+    test "does not create invalid alert" do
       before_alerts_length = Alerts.list_all() |> length
 
       alert = %{
         alert_id: "123",
-        header_text: "a",
         description_text: "b",
-        informed_entity: [
-          %{
-            route_id: "1",
-            trip: %{trip_id: "2", start_time: %{relative_day: 1, time: ~T[01:01:01]}}
-          }
-        ]
+        informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}]
       }
 
-      Alerts.create_alert(alert)
-      assert length(Alerts.list_all()) - before_alerts_length == 1
-      Alerts.create_alert(alert)
-      assert length(Alerts.list_all()) - before_alerts_length == 1
+      Alerts.create_or_modify_alert(alert)
+      assert length(Alerts.list_all()) - before_alerts_length == 0
     end
   end
 
-  describe "list_all_versions/1" do
-    test "list versions of alerts given alert id" do
-      insert(:alert, %{alert_id: "123"})
-      insert(:alert, %{alert_id: "123"})
+  describe "is_last_modified_time_more_recent?/1" do
+    test "returns true if incoming alert is more recent than stored alert" do
+      existing_alert =
+        insert(:alert, %{alert_id: "123", last_modified_timestamp: ~U[2023-10-13 00:01:00Z]})
 
-      [result1, result2] = Alerts.list_all_versions("123")
-      assert result1.alert_id == "123"
-      assert result2.alert_id == "123"
+      incoming_alert =
+        build(:alert, %{alert_id: "123", last_modified_timestamp: ~U[2023-10-14 00:01:00Z]})
+
+      assert Alerts.is_last_modified_time_more_recent?(
+               Map.get(incoming_alert, :last_modified_timestamp),
+               Map.get(existing_alert, :last_modified_timestamp)
+             ) == true
     end
 
-    test "list alerts given alert id" do
-      created_alert = insert(:alert, %{alert_id: "123", header_text: "a"})
-      insert(:alert, %{alert_id: "123", header_text: "b"})
+    test "returns false if incoming alert is not more recent than stored alert" do
+      existing_alert =
+        insert(:alert, %{alert_id: "123", last_modified_timestamp: ~U[2023-10-14 00:01:00Z]})
 
-      [result1, result2] = Alerts.list_all_versions(created_alert)
-      assert result1.alert_id == "123"
-      assert result2.alert_id == "123"
-      assert result1.header_text == "a"
-      assert result2.header_text == "b"
+      incoming_alert =
+        build(:alert_map, %{alert_id: "123", last_modified_timestamp: ~U[2023-10-13 00:01:00Z]})
+
+      assert Alerts.is_last_modified_time_more_recent?(
+               Map.get(incoming_alert, :last_modified_timestamp),
+               Map.get(existing_alert, :last_modified_timestamp)
+             ) == false
+    end
+
+    test "returns false if incoming alert has no timestamp" do
+      existing_alert =
+        insert(:alert, %{alert_id: "123", last_modified_timestamp: ~U[2023-10-14 00:01:00Z]})
+
+      incoming_alert =
+        build(:alert_map, %{alert_id: "123"})
+
+      assert Alerts.is_last_modified_time_more_recent?(
+               Map.get(incoming_alert, :last_modified_timestamp),
+               Map.get(existing_alert, :last_modified_timestamp)
+             ) == false
     end
   end
 
@@ -81,7 +136,7 @@ defmodule AlertsUI.AlertsTest do
       insert(:alert, %{alert_id: "123"})
       insert(:alert, %{alert_id: "234"})
 
-      all_alerts = Alerts.list_all()
+      all_alerts = Alerts.list_all() |> Enum.sort_by(& &1.alert_id)
 
       assert Enum.find(all_alerts, &(&1.alert_id == "123"))
       assert Enum.find(all_alerts, &(&1.alert_id == "234"))
