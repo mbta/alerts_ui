@@ -19,6 +19,9 @@ config :alerts_ui, AlertsUIWeb.Endpoint,
 # Don't run data processes (e.g. the API stream) during test
 config :alerts_ui, start_data_processes: false
 
+# Don't run Oban jobs and plugins during test runs
+config :alerts_ui, Oban, testing: :inline
+
 # Print only warnings and errors during test
 config :logger, level: :warning
 

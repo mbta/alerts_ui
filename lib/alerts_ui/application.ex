@@ -25,9 +25,8 @@ defmodule AlertsUI.Application do
           # Start the PubSub system
           {Phoenix.PubSub, name: AlertsUI.PubSub},
           # Start the Endpoint (http/https)
-          AlertsUIWeb.Endpoint
-          # Start a worker by calling: AlertsUI.Worker.start_link(arg)
-          # {AlertsUI.Worker, arg}
+          AlertsUIWeb.Endpoint,
+          {Oban, Application.fetch_env!(:alerts_ui, Oban)}
         ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
