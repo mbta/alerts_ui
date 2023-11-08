@@ -34,6 +34,7 @@ defmodule AlertsUI.Models.Alert do
   created_timestamp
   last_modified_timestamp
   last_push_notification_timestamp
+  closed_timestamp
   timeframe_text
   alert_lifecycle
   duration_certainty
@@ -67,6 +68,7 @@ defmodule AlertsUI.Models.Alert do
           created_timestamp: DateTime.t() | nil,
           last_modified_timestamp: DateTime.t() | nil,
           last_push_notification_timestamp: DateTime.t() | nil,
+          closed_timestamp: DateTime.t() | nil,
           timeframe_text: String.t() | nil,
           alert_lifecycle: atom() | nil,
           duration_certainty: atom() | nil,
@@ -95,6 +97,7 @@ defmodule AlertsUI.Models.Alert do
     field :created_timestamp, :utc_datetime
     field :last_modified_timestamp, :utc_datetime
     field :last_push_notification_timestamp, :utc_datetime
+    field :closed_timestamp, :utc_datetime
     field :timeframe_text, :string
     field :alert_lifecycle, Ecto.Enum, values: @alert_lifecycle
     field :duration_certainty, Ecto.Enum, values: @duration_certainty

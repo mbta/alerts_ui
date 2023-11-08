@@ -131,6 +131,52 @@ defmodule AlertsUI.AlertsTest do
     end
   end
 
+  describe "close_if_not_in_feed/2" do
+    test "closes existing alerts that aren't in the feed" do
+      insert(:alert, %{alert_id: "123"})
+      insert(:alert, %{alert_id: "234"})
+      insert(:alert, %{alert_id: "456"})
+
+      alert_feed = [build(:alert_map, %{alert_id: "456"})]
+      Alerts.close_if_not_in_feed(alert_feed, ~U[2023-10-14 00:01:00Z])
+      result1 = Repo.get_by(Alert, alert_id: "123")
+      result2 = Repo.get_by(Alert, alert_id: "234")
+      result3 = Repo.get_by(Alert, alert_id: "456")
+
+      assert result1.closed_timestamp == ~U[2023-10-14 00:01:00Z]
+      assert result2.closed_timestamp == ~U[2023-10-14 00:01:00Z]
+      assert result3.closed_timestamp == nil
+    end
+
+    test "do not update closed timestamp if exists" do
+      insert(:alert, %{alert_id: "123", closed_timestamp: ~U[2023-10-01 00:01:00Z]})
+      insert(:alert, %{alert_id: "234"})
+      insert(:alert, %{alert_id: "456"})
+
+      alert_feed = [build(:alert_map, %{alert_id: "456"}), build(:alert_map, %{alert_id: "234"})]
+      Alerts.close_if_not_in_feed(alert_feed, ~U[2023-10-14 00:01:00Z])
+      result1 = Repo.get_by(Alert, alert_id: "123")
+      result2 = Repo.get_by(Alert, alert_id: "234")
+      result3 = Repo.get_by(Alert, alert_id: "456")
+
+      assert result1.closed_timestamp == ~U[2023-10-01 00:01:00Z]
+      assert result2.closed_timestamp == nil
+      assert result3.closed_timestamp == nil
+    end
+  end
+
+  describe "list_all_open/0" do
+    test "lists all alerts" do
+      insert(:alert, %{alert_id: "234", closed_timestamp: ~U[2023-10-14 00:01:00Z]})
+      insert(:alert, %{alert_id: "456"})
+      insert(:alert, %{alert_id: "123"})
+
+      [result1, result2] = Alerts.list_all_open()
+      assert result1.alert_id == "123"
+      assert result2.alert_id == "456"
+    end
+  end
+
   describe "list_all/0" do
     test "lists all alerts" do
       insert(:alert, %{alert_id: "123"})

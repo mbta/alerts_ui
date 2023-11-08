@@ -27,4 +27,25 @@ defmodule AlertsUI.Models.ActivePeriod do
         cast(active_period, params, [:start, :end])
     end
   end
+
+  @spec is_time_inside_active_period?(
+          %{
+            :end => DateTime.t() | nil,
+            :start => DateTime.t() | nil
+          },
+          DateTime.t()
+        ) :: boolean()
+  def is_time_inside_active_period?(active_period, time \\ DateTime.utc_now())
+
+  def is_time_inside_active_period?(%{start: start, end: nil}, time) do
+    DateTime.compare(time, start) == :gt
+  end
+
+  def is_time_inside_active_period?(%{start: nil, end: the_end}, time) do
+    DateTime.compare(time, the_end) == :lt
+  end
+
+  def is_time_inside_active_period?(%{start: start, end: the_end}, time) do
+    DateTime.compare(time, start) == :gt and DateTime.compare(time, the_end) == :lt
+  end
 end

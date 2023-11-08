@@ -9,6 +9,7 @@ defmodule AlertsUI.Models.AlertTest do
         alert_id: "123",
         header_text: "a",
         description_text: "b",
+        open: false,
         active_period: [
           %{
             start: ~U[2023-10-20 16:15:00Z],
@@ -27,6 +28,7 @@ defmodule AlertsUI.Models.AlertTest do
         alert_id: "123",
         header_text: "a",
         description_text: "b",
+        open: true,
         active_period: [
           %{
             start: "not valid",

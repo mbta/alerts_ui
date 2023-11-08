@@ -26,6 +26,7 @@ defmodule AlertsUI.GTFSIntake.AlertsIntake do
   def handle_events(events, _from, state) do
     events
     |> List.flatten()
+    |> Alerts.close_if_not_in_feed()
     |> Enum.each(&Alerts.create_or_modify_alert(&1))
 
     {:noreply, [], state}

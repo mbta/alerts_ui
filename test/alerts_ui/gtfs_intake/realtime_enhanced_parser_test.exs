@@ -1,7 +1,6 @@
 defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParserTest do
   @moduledoc false
   use AlertsUI.DataCase, async: true
-
   import Test.Support.Helpers
   alias AlertsUI.GTFSIntake.RealtimeEnhancedParser
 
@@ -32,6 +31,7 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParserTest do
       assert actual_alert.created_timestamp == ~U[2023-09-21 14:18:54Z]
       assert actual_alert.last_modified_timestamp == ~U[2023-10-12 13:45:43Z]
       assert actual_alert.last_push_notification_timestamp == ~U[2023-09-21 14:18:54Z]
+      assert actual_alert.closed_timestamp == ~U[2023-09-22 14:18:54Z]
       assert actual_alert.timeframe_text == "through October 20"
       assert actual_alert.alert_lifecycle == :ONGOING
 

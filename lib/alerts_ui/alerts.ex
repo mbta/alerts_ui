@@ -78,6 +78,32 @@ defmodule AlertsUI.Alerts do
     DateTime.compare(incoming_time, stored_time) == :gt
   end
 
+  @spec close_if_not_in_feed([map()], DateTime.t()) :: [map()]
+  def close_if_not_in_feed(incoming_alert_list, closed_time \\ DateTime.utc_now()) do
+    alert_ids = Enum.map(incoming_alert_list, & &1.alert_id)
+
+    from(
+      a in Alert,
+      where: a.alert_id not in ^alert_ids,
+      where: is_nil(a.closed_timestamp)
+    )
+    |> Repo.update_all(set: [closed_timestamp: closed_time])
+
+    incoming_alert_list
+  end
+
+  @spec list_all_open() :: [Alert.t()]
+  def list_all_open do
+    Repo.all(
+      from(
+        a in Alert,
+        where: is_nil(a.closed_timestamp),
+        preload: [informed_entity: [:trip]],
+        order_by: [asc: a.alert_id]
+      )
+    )
+  end
+
   @spec list_all() :: [Alert.t()]
   def list_all do
     Repo.all(

@@ -3,6 +3,7 @@ defmodule AlertsUI.GTFSIntake.AlertsIntakeTest do
   import AlertsUI.Support.Factory
   alias AlertsUI.Alerts
   alias AlertsUI.GTFSIntake.AlertsIntake
+  alias AlertsUI.Models.Alert
 
   describe "start_link/1" do
     test "can start" do
@@ -101,6 +102,18 @@ defmodule AlertsUI.GTFSIntake.AlertsIntakeTest do
       assert result_1.header_text == "original"
       assert result_2.alert_id == "234"
       assert length(Alerts.list_all()) - before_alerts_length == 1
+    end
+
+    test "closes alerts that aren't in the feed" do
+      events = [
+        build(:alert_map, alert_id: "123"),
+        build(:alert_map, alert_id: "234")
+      ]
+
+      insert(:alert, alert_id: "456")
+      AlertsIntake.handle_events(events, nil, %{})
+      updated_alert = Repo.get_by(Alert, alert_id: "456")
+      assert !is_nil(updated_alert.closed_timestamp)
     end
   end
 end

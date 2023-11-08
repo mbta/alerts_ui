@@ -26,4 +26,60 @@ defmodule AlertsUI.Models.ActivePeriodTest do
       assert changeset.valid? == false
     end
   end
+
+  describe "is_time_inside_active_period?/2" do
+    test "if no end time, returns true if time is after start" do
+      active_period = %ActivePeriod{start: ~U[2023-10-12 00:01:00Z]}
+      result = ActivePeriod.is_time_inside_active_period?(active_period, ~U[2023-10-13 00:01:00Z])
+      assert result == true
+    end
+
+    test "if no end time, returns false if time is before start" do
+      active_period = %ActivePeriod{start: ~U[2023-10-12 00:01:00Z]}
+      result = ActivePeriod.is_time_inside_active_period?(active_period, ~U[2023-10-11 00:01:00Z])
+      assert result == false
+    end
+
+    test "if no start time, returns true if time is before end" do
+      active_period = %ActivePeriod{end: ~U[2023-10-12 00:01:00Z]}
+      result = ActivePeriod.is_time_inside_active_period?(active_period, ~U[2023-10-11 00:01:00Z])
+      assert result == true
+    end
+
+    test "if no start time, returns false if time is after end" do
+      active_period = %ActivePeriod{end: ~U[2023-10-12 00:01:00Z]}
+      result = ActivePeriod.is_time_inside_active_period?(active_period, ~U[2023-10-13 00:01:00Z])
+      assert result == false
+    end
+
+    test "if start and end, return true if time is between them" do
+      active_period = %ActivePeriod{
+        start: ~U[2023-10-10 00:01:00Z],
+        end: ~U[2023-10-12 00:01:00Z]
+      }
+
+      result = ActivePeriod.is_time_inside_active_period?(active_period, ~U[2023-10-11 00:01:00Z])
+      assert result == true
+    end
+
+    test "if start and end, returns false if time is before start" do
+      active_period = %ActivePeriod{
+        start: ~U[2023-10-10 00:01:00Z],
+        end: ~U[2023-10-12 00:01:00Z]
+      }
+
+      result = ActivePeriod.is_time_inside_active_period?(active_period, ~U[2023-10-09 00:01:00Z])
+      assert result == false
+    end
+
+    test "if start and end, returns false if time is after end" do
+      active_period = %ActivePeriod{
+        start: ~U[2023-10-10 00:01:00Z],
+        end: ~U[2023-10-12 00:01:00Z]
+      }
+
+      result = ActivePeriod.is_time_inside_active_period?(active_period, ~U[2023-10-13 00:01:00Z])
+      assert result == false
+    end
+  end
 end
