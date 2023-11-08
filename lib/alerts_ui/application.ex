@@ -12,8 +12,7 @@ defmodule AlertsUI.Application do
     children =
       if Application.get_env(:alerts_ui, :start_data_processes) do
         [
-          AlertsUI.GTFSIntake.GTFSSupervisor,
-          AlertsUI.FeedOutput.AlertsOutput
+          AlertsUI.GTFSIntake.GTFSSupervisor
         ]
       else
         []
