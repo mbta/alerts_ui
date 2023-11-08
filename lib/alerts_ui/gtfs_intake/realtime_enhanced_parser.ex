@@ -39,6 +39,7 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParser do
       last_modified_timestamp: Map.get(alert, "last_modified_timestamp") |> parse_unix_time,
       last_push_notification_timestamp:
         Map.get(alert, "last_push_notification_timestamp") |> parse_unix_time,
+      closed_timestamp: Map.get(alert, "closed_timestamp") |> parse_unix_time,
       timeframe_text: Map.get(alert, "timeframe_text") |> parse_translated_string,
       alert_lifecycle: Map.get(alert, "alert_lifecycle") |> parse_string_to_atom,
       duration_certainty: Map.get(alert, "duration_certainty") |> parse_string_to_atom,

@@ -28,6 +28,10 @@ may need to adjust the username in `.envrc`.
 If not using `direnv`, you can instead `source .envrc` to perform a one-time
 export of the environment variables into your current shell session.
 
+### Notes for deployment
+
+Postgres 15 needs special permissions to allow migrations to be run, and they'll need set up for each new environment. cf this [asana ticket](https://app.asana.com/0/1113179098808463/1205855651255216/f)
+
 ### Running tests
 
 - `mix test`
