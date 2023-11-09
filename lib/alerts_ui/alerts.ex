@@ -113,4 +113,15 @@ defmodule AlertsUI.Alerts do
       )
     )
   end
+
+  @spec get_by_alert_id(String.t()) :: Alert.t()
+  def get_by_alert_id(alert_id) do
+    Repo.get_by(
+      from(
+        a in Alert,
+        preload: [informed_entity: [:trip]]
+      ),
+      alert_id: alert_id
+    )
+  end
 end
