@@ -6,7 +6,7 @@ defmodule AlertsUi.FeedImporterExporter do
   use Oban.Worker
   require Logger
   alias AlertsUI.Alerts
-  alias AlertsUI.FeedOutput.CreateOutputAlert
+  alias AlertsUI.FeedOutput.{CreateGtfsJson, CreateOutputAlert}
 
   @impl Oban.Worker
   def perform(_job) do
@@ -15,11 +15,10 @@ defmodule AlertsUi.FeedImporterExporter do
     Logger.info("FeedImporterExporter: Writing the service alerts feed")
 
     Alerts.list_all_open()
-    |> Enum.map(&CreateOutputAlert.build_alert(&1))
-    |> length
-    |> Integer.to_string()
-    |> Logger.info()
+    |> Enum.map(&CreateOutputAlert.build_alert/1)
+    |> CreateGtfsJson.output_json()
 
+    Logger.info("Exporter Successful!")
     :ok
   end
 end

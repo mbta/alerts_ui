@@ -2,7 +2,9 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
   @moduledoc """
   Turns an alert database entry into a map ready for output to JSON
   """
+  alias AlertsUI.Models.Alert
 
+  @spec build_alert(Alert.t()) :: map()
   def build_alert(alert) do
     %{
       "id" => Map.get(alert, :alert_id),
