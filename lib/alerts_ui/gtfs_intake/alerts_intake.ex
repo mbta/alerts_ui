@@ -81,7 +81,7 @@ defmodule AlertsUI.GTFSIntake.AlertsIntake do
     {time, parsed} = :timer.tc(RealtimeEnhancedParser, :parse, [body])
 
     Logger.info(fn ->
-      "#{__MODULE__} Parsed alerts feed: records=#{length(parsed)} time=#{time / 1000}"
+      "#{__MODULE__} Parsed alerts feed: records=#{length(parsed)} time=#{time / 1_000}"
     end)
 
     parsed
