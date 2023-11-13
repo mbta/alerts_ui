@@ -69,12 +69,14 @@ defmodule AlertsUI.GTFSIntake.AlertsIntakeTest do
       before_alerts_length = Alerts.list_all() |> length
 
       AlertsIntake.handle_events(events, nil, %{})
-      [result_1, result_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id)
-      assert result_1.alert_id == "123"
+
+      all_alerts = Alerts.list_all()
+      assert length(all_alerts) - before_alerts_length == 1
+
+      assert result_1 = Enum.find(all_alerts, &(&1.alert_id == "123"))
       assert result_1.last_modified_timestamp == ~U[2023-10-21 18:45:38Z]
       assert result_1.header_text == "new"
-      assert result_2.alert_id == "234"
-      assert length(Alerts.list_all()) - before_alerts_length == 1
+      assert Enum.find(all_alerts, &(&1.alert_id == "234"))
     end
 
     test "does nothing if incoming version is not more recent" do
@@ -96,12 +98,14 @@ defmodule AlertsUI.GTFSIntake.AlertsIntakeTest do
       before_alerts_length = Alerts.list_all() |> length
 
       AlertsIntake.handle_events(events, nil, %{})
-      [result_1, result_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id)
-      assert result_1.alert_id == "123"
+
+      all_alerts = Alerts.list_all()
+
+      assert length(all_alerts) - before_alerts_length == 1
+      assert result_1 = Enum.find(all_alerts, &(&1.alert_id == "123"))
       assert result_1.last_modified_timestamp == ~U[2023-10-21 18:45:38Z]
       assert result_1.header_text == "original"
-      assert result_2.alert_id == "234"
-      assert length(Alerts.list_all()) - before_alerts_length == 1
+      assert Enum.find(all_alerts, &(&1.alert_id == "234"))
     end
 
     test "closes alerts that aren't in the feed" do
