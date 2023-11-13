@@ -188,4 +188,12 @@ defmodule AlertsUI.AlertsTest do
       assert Enum.find(all_alerts, &(&1.alert_id == "234"))
     end
   end
+
+  describe "get_by_alert_id/1" do
+    test "returns alert with matching alert_id" do
+      expected_alert = insert(:alert, %{alert_id: "123", header_text: "this is the right alert"})
+      insert(:alert, %{alert_id: "234", header_text: "wrong alert here"})
+      assert Alerts.get_by_alert_id("123").header_text == expected_alert.header_text
+    end
+  end
 end
