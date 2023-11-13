@@ -11,8 +11,7 @@ config :alerts_ui,
   namespace: AlertsUI,
   ecto_repos: [AlertsUI.Repo],
   aws_rds_mod: ExAws.RDS,
-  alert_api_url: {:system, "ALERT_API_URL"},
-  start_data_processes: true
+  alert_api_url: {:system, "ALERT_API_URL"}
 
 # Configure your database
 config :alerts_ui, AlertsUI.Repo,

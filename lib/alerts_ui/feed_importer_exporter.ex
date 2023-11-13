@@ -7,10 +7,13 @@ defmodule AlertsUi.FeedImporterExporter do
   require Logger
   alias AlertsUI.Alerts
   alias AlertsUI.FeedOutput.{CreateGtfsJson, CreateOutputAlert}
+  alias AlertsUI.GTFSIntake.AlertsIntake
 
   @impl Oban.Worker
   def perform(_job) do
     Logger.info("FeedImporterExporter: Importing the source feed")
+
+    AlertsIntake.run()
 
     Logger.info("FeedImporterExporter: Writing the service alerts feed")
 
