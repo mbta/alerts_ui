@@ -6,8 +6,13 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParserTest do
 
   describe "parse/1" do
     test "parsing alert JSON results in alert atructs with expected fields" do
-      binary = File.read!(fixture_path("alerts_enhanced.json"))
-      [actual_alert, _alert2] = parsed = RealtimeEnhancedParser.parse(binary)
+      alert_data =
+        "alerts_enhanced.json"
+        |> fixture_path()
+        |> File.read!()
+        |> Jason.decode!()
+
+      [actual_alert, _alert2] = parsed = RealtimeEnhancedParser.parse(alert_data)
       assert Enum.all?(parsed, &is_map(&1))
       assert actual_alert.effect == :OTHER_EFFECT
       assert actual_alert.effect_detail == "DELAY"

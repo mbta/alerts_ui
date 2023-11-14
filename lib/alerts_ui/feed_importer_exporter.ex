@@ -10,10 +10,10 @@ defmodule AlertsUi.FeedImporterExporter do
   alias AlertsUI.GTFSIntake.AlertsIntake
 
   @impl Oban.Worker
-  def perform(_job) do
+  def perform(_job, opts \\ []) do
     Logger.info("#{__MODULE__}: Importing alerts feed")
 
-    {import_time, :ok} = :timer.tc(AlertsIntake, :run, [])
+    {import_time, :ok} = :timer.tc(AlertsIntake, :run, [opts])
 
     Logger.info("#{__MODULE__}: Imported alerts feed: time_ms=#{import_time / 1_000}")
 

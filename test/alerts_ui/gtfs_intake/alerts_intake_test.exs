@@ -5,13 +5,14 @@ defmodule AlertsUI.GTFSIntake.AlertsIntakeTest do
   alias AlertsUI.Alerts
   alias AlertsUI.GTFSIntake.AlertsIntake
   alias AlertsUI.Models.Alert
+  alias Req.Response
 
   describe "run" do
     test "returns :ok" do
       opts = [
-        get_fn: fn _, _, _ ->
-          body = Jason.encode!(%{entity: []})
-          {:ok, %HTTPoison.Response{status_code: 200, body: body, headers: []}}
+        get_fn: fn _ ->
+          body = %{"entity" => []}
+          Response.new(status: 200, body: body)
         end
       ]
 
@@ -30,16 +31,16 @@ defmodule AlertsUI.GTFSIntake.AlertsIntakeTest do
         |> last_modified(1_697_827_538)
 
       opts = [
-        get_fn: fn _, _, _ ->
+        get_fn: fn _ ->
           body =
-            Jason.encode!(%{
-              entity: [
+            %{
+              "entity" => [
                 alert_entity_data_1,
                 alert_entity_data_2
               ]
-            })
+            }
 
-          {:ok, %HTTPoison.Response{status_code: 200, body: body, headers: []}}
+          Response.new(status: 200, body: body)
         end
       ]
 
@@ -63,16 +64,16 @@ defmodule AlertsUI.GTFSIntake.AlertsIntakeTest do
         |> last_modified(1_697_827_538)
 
       opts = [
-        get_fn: fn _, _, _ ->
+        get_fn: fn _ ->
           body =
-            Jason.encode!(%{
-              entity: [
+            %{
+              "entity" => [
                 alert_entity_data_1,
                 alert_entity_data_2
               ]
-            })
+            }
 
-          {:ok, %HTTPoison.Response{status_code: 200, body: body, headers: []}}
+          Response.new(status: 200, body: body)
         end
       ]
 
@@ -108,16 +109,16 @@ defmodule AlertsUI.GTFSIntake.AlertsIntakeTest do
         |> last_modified(1_697_827_538)
 
       opts = [
-        get_fn: fn _, _, _ ->
+        get_fn: fn _ ->
           body =
-            Jason.encode!(%{
-              entity: [
+            %{
+              "entity" => [
                 alert_entity_data_1,
                 alert_entity_data_2
               ]
-            })
+            }
 
-          {:ok, %HTTPoison.Response{status_code: 200, body: body, headers: []}}
+          Response.new(status: 200, body: body)
         end
       ]
 
@@ -146,16 +147,16 @@ defmodule AlertsUI.GTFSIntake.AlertsIntakeTest do
       alert_entity_data_2 = build(:alert_entity_data, %{"id" => "234"})
 
       opts = [
-        get_fn: fn _, _, _ ->
+        get_fn: fn _ ->
           body =
-            Jason.encode!(%{
-              entity: [
+            %{
+              "entity" => [
                 alert_entity_data_1,
                 alert_entity_data_2
               ]
-            })
+            }
 
-          {:ok, %HTTPoison.Response{status_code: 200, body: body, headers: []}}
+          Response.new(status: 200, body: body)
         end
       ]
 

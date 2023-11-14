@@ -5,7 +5,7 @@ defmodule AlertsUI.GTFSIntake.AlertsIntake do
   require Logger
   alias AlertsUI.Alerts
   alias AlertsUI.GTFSIntake.RealtimeEnhancedParser
-  alias AlertsUI.Models.Alert
+  alias Req.Response
 
   @spec run :: :ok
   def run(opts \\ []) do
@@ -18,65 +18,25 @@ defmodule AlertsUI.GTFSIntake.AlertsIntake do
     :ok
   end
 
-  @spec fetch_feed(keyword()) :: {:http_response, HTTPoison.Response.t()} | {:http_error, any()}
+  @spec fetch_feed(keyword()) :: Response.t()
   defp fetch_feed(opts) do
-    get_fn = Keyword.get(opts, :get_fn, &HTTPoison.get/3)
+    get_fn = Keyword.get(opts, :get_fn, &Req.get!/1)
 
-    headers = %{"accept-encoding" => "gzip"}
-
-    get_opts = [
-      timeout: 15_000,
-      recv_timeout: 15_000,
-      hackney: [pool: :alerts_import_pool]
-    ]
-
-    case get_fn.(alert_api_url(), headers, get_opts) do
-      {:ok, %HTTPoison.Response{} = response} ->
-        {:http_response, response}
-
-      {:error, %HTTPoison.Error{reason: reason}} ->
-        Logger.warning("Error fetching alerts feed, reason=#{reason}")
-        {:http_error, reason}
-    end
+    get_fn.(
+      url: alert_api_url(),
+      headers: %{"accept-encoding" => "gzip"}
+    )
   end
 
   @spec alert_api_url :: String.t()
   defp alert_api_url, do: Application.get_env(:alerts_ui, :alert_api_url)
 
-  @spec parse_response({:http_response, HTTPoison.Response.t()} | {:http_error, any()}) :: [
-          AlertsUI.Models.Alert.t()
-        ]
-  defp parse_response(
-         {:http_response, %HTTPoison.Response{status_code: 200, headers: headers, body: body}}
-       ) do
-    headers
-    |> decode_body(body)
-    |> parse_body()
-  end
+  @spec parse_response(Response.t()) :: [map()]
+  defp parse_response(%Response{status: 200, body: body}), do: parse_body(body)
 
-  defp parse_response({:http_error, _reason}), do: []
+  defp parse_response(_), do: []
 
-  defp decode_body(headers, body) do
-    case find_header(headers, "content-encoding") do
-      :error ->
-        body
-
-      {:ok, "gzip"} ->
-        :zlib.gunzip(body)
-    end
-  end
-
-  defp find_header(headers, match_header) do
-    case Enum.find(headers, &(String.downcase(elem(&1, 0)) == match_header)) do
-      {_, value} ->
-        {:ok, value}
-
-      _ ->
-        :error
-    end
-  end
-
-  @spec parse_body(binary()) :: [Alert.t()]
+  @spec parse_body(binary()) :: [map()]
   defp parse_body(body) do
     {time, parsed} = :timer.tc(RealtimeEnhancedParser, :parse, [body])
 
@@ -97,7 +57,7 @@ defmodule AlertsUI.GTFSIntake.AlertsIntake do
 
   defp log_parse_error(error, trace, body) do
     Logger.error(fn ->
-      "#{__MODULE__}: Alerts feed parse error error=#{inspect(error)}\n#{Exception.format_stacktrace(trace)}\n body=#{body}"
+      "#{__MODULE__}: Alerts feed parse error error=#{inspect(error)}\n#{Exception.format_stacktrace(trace)}\n body=#{inspect(body)}"
     end)
   end
 end

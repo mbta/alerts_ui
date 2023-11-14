@@ -56,7 +56,7 @@ defmodule AlertsUI.MixProject do
       {:ex_aws_rds, "~> 2.0"},
       {:hackney, "1.20.1"},
       {:gen_stage, "~> 1.2.1"},
-      {:httpoison, "~> 2.1"},
+      {:req, "~> 0.4.0"},
       {:bypass, "~> 2.1", only: :test},
       {:stream_data, "~> 0.6.0", only: :test},
       {:ex_machina, "~> 2.7.0", only: :test},
