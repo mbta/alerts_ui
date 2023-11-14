@@ -4,11 +4,9 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParser do
   """
   alias AlertsUI.Models.ExtendedTime
 
-  @spec parse(binary | []) :: [AlertsUI.Models.Alert.t()] | []
-  def parse(binary) do
-    binary
-    |> Jason.decode!(strings: :copy)
-    |> decode_entities()
+  @spec parse(map()) :: [map()]
+  def parse(alert_data) do
+    decode_entities(alert_data)
   end
 
   @spec decode_entities(map()) :: [map()]
@@ -24,31 +22,32 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParser do
   def decode_alert(alert, id) do
     %{
       alert_id: id,
-      effect: Map.get(alert, "effect") |> parse_string_to_atom,
+      effect: alert |> Map.get("effect") |> parse_string_to_atom(),
       effect_detail: Map.get(alert, "effect_detail"),
-      cause: Map.get(alert, "cause") |> parse_string_to_atom,
+      cause: alert |> Map.get("cause") |> parse_string_to_atom(),
       cause_detail: Map.get(alert, "cause_detail"),
-      header_text: Map.get(alert, "header_text") |> parse_translated_string,
-      description_text: Map.get(alert, "description_text") |> parse_translated_string,
-      severity_level: Map.get(alert, "severity_level") |> parse_string_to_atom,
-      url: Map.get(alert, "url") |> parse_translated_string,
-      service_effect_text: Map.get(alert, "service_effect_text") |> parse_translated_string,
-      short_header_text: Map.get(alert, "short_header_text") |> parse_translated_string,
+      header_text: alert |> Map.get("header_text") |> parse_translated_string(),
+      description_text: alert |> Map.get("description_text") |> parse_translated_string(),
+      severity_level: alert |> Map.get("severity_level") |> parse_string_to_atom(),
+      url: alert |> Map.get("url") |> parse_translated_string(),
+      service_effect_text: alert |> Map.get("service_effect_text") |> parse_translated_string(),
+      short_header_text: alert |> Map.get("short_header_text") |> parse_translated_string(),
       severity: Map.get(alert, "severity"),
-      created_timestamp: Map.get(alert, "created_timestamp") |> parse_unix_time,
-      last_modified_timestamp: Map.get(alert, "last_modified_timestamp") |> parse_unix_time,
+      created_timestamp: alert |> Map.get("created_timestamp") |> parse_unix_time(),
+      last_modified_timestamp: alert |> Map.get("last_modified_timestamp") |> parse_unix_time(),
       last_push_notification_timestamp:
-        Map.get(alert, "last_push_notification_timestamp") |> parse_unix_time,
-      closed_timestamp: Map.get(alert, "closed_timestamp") |> parse_unix_time,
-      timeframe_text: Map.get(alert, "timeframe_text") |> parse_translated_string,
-      alert_lifecycle: Map.get(alert, "alert_lifecycle") |> parse_string_to_atom,
-      duration_certainty: Map.get(alert, "duration_certainty") |> parse_string_to_atom,
-      active_period: Map.get(alert, "active_period") |> parse_active_periods,
-      image_url: Map.get(alert, "image_url") |> parse_translated_string,
-      image_alternative_text: Map.get(alert, "image_alternative_text") |> parse_translated_string,
-      tts_header_text: Map.get(alert, "tts_header_text") |> parse_translated_string,
-      tts_description_text: Map.get(alert, "tts_description_text") |> parse_translated_string,
-      informed_entity: Map.get(alert, "informed_entity") |> decode_informed_entities
+        alert |> Map.get("last_push_notification_timestamp") |> parse_unix_time(),
+      closed_timestamp: alert |> Map.get("closed_timestamp") |> parse_unix_time(),
+      timeframe_text: alert |> Map.get("timeframe_text") |> parse_translated_string(),
+      alert_lifecycle: alert |> Map.get("alert_lifecycle") |> parse_string_to_atom(),
+      duration_certainty: alert |> Map.get("duration_certainty") |> parse_string_to_atom(),
+      active_period: alert |> Map.get("active_period") |> parse_active_periods,
+      image_url: alert |> Map.get("image_url") |> parse_translated_string(),
+      image_alternative_text:
+        alert |> Map.get("image_alternative_text") |> parse_translated_string(),
+      tts_header_text: alert |> Map.get("tts_header_text") |> parse_translated_string(),
+      tts_description_text: alert |> Map.get("tts_description_text") |> parse_translated_string(),
+      informed_entity: alert |> Map.get("informed_entity") |> decode_informed_entities()
     }
   end
 
@@ -61,8 +60,9 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParser do
         route_type: Map.get(informed_entity, "route_type"),
         direction_id: Map.get(informed_entity, "direction_id"),
         stop_id: Map.get(informed_entity, "stop_id"),
-        activities: Map.get(informed_entity, "activities") |> Enum.map(&parse_string_to_atom(&1)),
-        trip: Map.get(informed_entity, "trip") |> decode_trip
+        activities:
+          informed_entity |> Map.get("activities") |> Enum.map(&parse_string_to_atom(&1)),
+        trip: informed_entity |> Map.get("trip") |> decode_trip()
       }
     end)
   end
@@ -75,9 +75,9 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParser do
       trip_id: Map.get(trip, "trip_id"),
       route_id: Map.get(trip, "route_id"),
       direction_id: Map.get(trip, "direction_id"),
-      start_date: Map.get(trip, "start_date") |> date,
-      start_time: Map.get(trip, "start_time") |> ExtendedTime.new() |> safe_to_map,
-      schedule_relationship: Map.get(trip, "schedule_relationship") |> parse_string_to_atom
+      start_date: trip |> Map.get("start_date") |> date(),
+      start_time: trip |> Map.get("start_time") |> ExtendedTime.new() |> safe_to_map(),
+      schedule_relationship: trip |> Map.get("schedule_relationship") |> parse_string_to_atom()
     }
   end
 
@@ -91,8 +91,8 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParser do
   defp parse_active_periods(periods_list) do
     Enum.map(periods_list, fn active_period ->
       %{
-        start: Map.get(active_period, "start") |> parse_unix_time,
-        end: Map.get(active_period, "end") |> parse_unix_time
+        start: active_period |> Map.get("start") |> parse_unix_time(),
+        end: active_period |> Map.get("end") |> parse_unix_time()
       }
     end)
   end

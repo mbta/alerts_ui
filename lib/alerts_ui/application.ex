@@ -10,24 +10,17 @@ defmodule AlertsUI.Application do
     load_runtime_config()
 
     children =
-      if Application.get_env(:alerts_ui, :start_data_processes) do
-        [
-          AlertsUI.GTFSIntake.GTFSSupervisor
-        ]
-      else
-        []
-      end ++
-        [
-          # Start the Telemetry supervisor
-          AlertsUIWeb.Telemetry,
-          # Start the Ecto repository
-          AlertsUI.Repo,
-          # Start the PubSub system
-          {Phoenix.PubSub, name: AlertsUI.PubSub},
-          # Start the Endpoint (http/https)
-          AlertsUIWeb.Endpoint,
-          {Oban, Application.fetch_env!(:alerts_ui, Oban)}
-        ]
+      [
+        # Start the Telemetry supervisor
+        AlertsUIWeb.Telemetry,
+        # Start the Ecto repository
+        AlertsUI.Repo,
+        # Start the PubSub system
+        {Phoenix.PubSub, name: AlertsUI.PubSub},
+        # Start the Endpoint (http/https)
+        AlertsUIWeb.Endpoint,
+        {Oban, Application.fetch_env!(:alerts_ui, Oban)}
+      ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

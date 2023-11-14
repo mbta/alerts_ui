@@ -7,18 +7,28 @@ defmodule AlertsUi.FeedImporterExporter do
   require Logger
   alias AlertsUI.Alerts
   alias AlertsUI.FeedOutput.{CreateGtfsJson, CreateOutputAlert}
+  alias AlertsUI.GTFSIntake.AlertsIntake
 
   @impl Oban.Worker
-  def perform(_job) do
-    Logger.info("FeedImporterExporter: Importing the source feed")
+  def perform(_job, opts \\ []) do
+    Logger.info("#{__MODULE__}: Importing alerts feed")
 
-    Logger.info("FeedImporterExporter: Writing the service alerts feed")
+    {import_time, :ok} = :timer.tc(AlertsIntake, :run, [opts])
 
+    Logger.info("#{__MODULE__}: Imported alerts feed: time_ms=#{import_time / 1_000}")
+
+    Logger.info("#{__MODULE__}: Exporting alerts feed")
+
+    {export_time, _} = :timer.tc(__MODULE__, :write_feed, [])
+
+    Logger.info("#{__MODULE__}: Exported alerts feed: time_ms=#{export_time / 1_000}")
+
+    :ok
+  end
+
+  def write_feed do
     Alerts.list_all_open()
     |> Enum.map(&CreateOutputAlert.build_alert/1)
     |> CreateGtfsJson.output_json()
-
-    Logger.info("Exporter Successful!")
-    :ok
   end
 end

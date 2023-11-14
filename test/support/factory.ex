@@ -51,4 +51,90 @@ defmodule AlertsUI.Support.Factory do
       informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}]
     }
   end
+
+  def alert_entity_data_factory do
+    %{
+      "alert" => %{
+        "active_period" => [%{"start" => 1_681_419_933}],
+        "alert_lifecycle" => "ONGOING",
+        "cause" => "UNKNOWN_CAUSE",
+        "cause_detail" => "UNKNOWN_CAUSE",
+        "created_timestamp" => 1_681_419_934,
+        "description_text" => %{
+          "translation" => [
+            %{"language" => "en", "text" => "Affected routes:\r\n62\r\n76"}
+          ]
+        },
+        "duration_certainty" => "UNKNOWN",
+        "effect" => "STOP_MOVED",
+        "effect_detail" => "STOP_MOVE",
+        "header_text" => %{
+          "translation" => [
+            %{
+              "language" => "en",
+              "text" => "Massachusetts Ave @ Percy Rd (outbound) stop moving until 3:30 PM"
+            }
+          ]
+        },
+        "informed_entity" => [
+          %{
+            "activities" => ["BOARD"],
+            "agency_id" => "1",
+            "route_id" => "627",
+            "route_type" => 3,
+            "stop_id" => "8597"
+          },
+          %{
+            "activities" => ["BOARD"],
+            "agency_id" => "1",
+            "route_id" => "62",
+            "route_type" => 3,
+            "stop_id" => "8597"
+          },
+          %{
+            "activities" => ["BOARD"],
+            "agency_id" => "1",
+            "route_id" => "76",
+            "route_type" => 3,
+            "stop_id" => "8597"
+          }
+        ],
+        "last_modified_timestamp" => 1_682_024_761,
+        "service_effect_text" => %{
+          "translation" => [
+            %{
+              "language" => "en",
+              "text" => "Massachusetts Ave @ Percy Rd stop moved"
+            }
+          ]
+        },
+        "severity" => 1,
+        "severity_level" => "INFO",
+        "short_header_text" => %{
+          "translation" => [
+            %{
+              "language" => "en",
+              "text" => "Massachusetts Ave @ Percy Rd (outbound) stop moving until 3:30 PM"
+            }
+          ]
+        },
+        "timeframe_text" => %{
+          "translation" => [%{"language" => "en", "text" => "ongoing"}]
+        }
+      },
+      "id" => "123456"
+    }
+  end
+
+  def last_modified(alert_entity_data, unix_time),
+    do: put_in(alert_entity_data, ["alert", "last_modified_timestamp"], unix_time)
+
+  def with_header_text(alert_entity_data, text),
+    do:
+      put_in(alert_entity_data, ["alert", "header_text", "translation"], [
+        %{
+          "language" => "en",
+          "text" => text
+        }
+      ])
 end
