@@ -16,7 +16,7 @@ config :alerts_ui,
 =======
   alert_api_url: {:system, "ALERT_API_URL"},
   start_data_processes: true,
-  json_output_filename: "./assets/outputs/alerts_feed.json",
+  json_output_filename: "./assets/alerts_feed.json",
   file_write_function: &File.write/2
 >>>>>>> 73fbe8a (save to json file, add test coverage)
 
