@@ -19,7 +19,8 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
         build(:trip_descriptor, %{
           route_id: "CR-Lowell",
           trip_id: "CR-627691-310",
-          direction_id: 1
+          direction_id: 1,
+          start_time: build(:extended_time, %{relative_day: 1, time: ~T[01:40:30]})
         })
 
       informed_entity_1 =
@@ -170,7 +171,8 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
               "trip" => %{
                 "route_id" => "CR-Lowell",
                 "trip_id" => "CR-627691-310",
-                "direction_id" => 1
+                "direction_id" => 1,
+                "start_time" => "01:40:30"
               },
               "activities" => [
                 "BOARD",

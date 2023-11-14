@@ -19,6 +19,13 @@ defmodule AlertsUI.Models.ExtendedTime do
     field :time, :time
   end
 
+  @doc """
+  Builds an ExtendedTime changeset
+
+  ## Examples
+      iex> AlertsUI.Models.ExtendedTime.changeset(%AlertsUI.Models.ExtendedTime{relative_day: 1, time: ~T[01:01:01]}).valid?
+      true
+  """
   def changeset(%__MODULE__{} = ex_time, params \\ %{}) do
     cast(ex_time, params, [:relative_day, :time])
   end

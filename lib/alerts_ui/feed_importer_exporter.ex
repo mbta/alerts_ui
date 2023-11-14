@@ -9,6 +9,9 @@ defmodule AlertsUi.FeedImporterExporter do
   alias AlertsUI.FeedOutput.{CreateGtfsJson, CreateOutputAlert}
   alias AlertsUI.GTFSIntake.AlertsIntake
 
+  @json_output_filename AlertsUI.config(:json_output_filename)
+  @write_fn AlertsUI.config(:file_write_function)
+
   @impl Oban.Worker
   def perform(_job, opts \\ []) do
     Logger.info("#{__MODULE__}: Importing alerts feed")
@@ -27,8 +30,10 @@ defmodule AlertsUi.FeedImporterExporter do
   end
 
   def write_feed do
-    Alerts.list_all_open()
+    alerts = Alerts.list_all_open()
     |> Enum.map(&CreateOutputAlert.build_alert/1)
     |> CreateGtfsJson.output_json()
+
+    @write_fn.(@json_output_filename, alerts)
   end
 end

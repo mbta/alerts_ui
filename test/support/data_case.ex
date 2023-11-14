@@ -35,6 +35,11 @@ defmodule AlertsUI.DataCase do
   end
 
   @doc """
+  Fake file write function for use in test env
+  """
+  def fake_file_write(_, _), do: nil
+
+  @doc """
   Sets up the sandbox based on the test tags.
   """
   def setup_sandbox(tags) do

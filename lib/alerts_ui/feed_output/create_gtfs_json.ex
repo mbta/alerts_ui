@@ -10,10 +10,12 @@ defmodule AlertsUI.FeedOutput.CreateGtfsJson do
               binary() | []
             )
   def output_json(map) do
-    map |> build_json |> Jason.encode_to_iodata!()
+    map
+    |> build_json
+    |> Jason.encode!()
+    |> Jason.Formatter.pretty_print_to_iodata()
   end
 
-  @spec build_json([map()]) :: map()
   def build_json(alerts) do
     %{
       "header" => %{

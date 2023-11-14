@@ -11,7 +11,14 @@ config :alerts_ui,
   namespace: AlertsUI,
   ecto_repos: [AlertsUI.Repo],
   aws_rds_mod: ExAws.RDS,
+<<<<<<< HEAD
   alert_api_url: {:system, "ALERT_API_URL"}
+=======
+  alert_api_url: {:system, "ALERT_API_URL"},
+  start_data_processes: true,
+  json_output_filename: "./assets/outputs/alerts_feed.json",
+  file_write_function: &File.write/2
+>>>>>>> 73fbe8a (save to json file, add test coverage)
 
 # Configure your database
 config :alerts_ui, AlertsUI.Repo,

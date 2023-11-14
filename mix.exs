@@ -9,7 +9,20 @@ defmodule AlertsUI.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      test_coverage: [
+        ignore_modules: [
+          AlertsUI.DataCase,
+          AlertsUIWeb.PageHTML,
+          AlertsUIWeb.ErrorHTML,
+          AlertsUIWeb.CoreComponents,
+          AlertsUIWeb.Layouts,
+          AlertsUIWeb.Router,
+          AlertsUIWeb.Telemetry,
+          AlertsUI.Application,
+          AlertsUI.Support.Factory
+        ]
+      ]
     ]
   end
 

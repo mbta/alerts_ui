@@ -80,10 +80,10 @@ jobs:
       - name: Credo
         run: mix credo --strict
       - name: Run tests
-        run: mix test #--cover
-    #   - name: Upload coverage artifact
-    #     uses: actions/upload-artifact@v2
-    #     with:
-    #       name: elixir-lcov
-    #       path: cover/
-    #   - uses: mbta/actions/dialyzer@v1
+        run: mix test --cover
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: elixir-lcov
+          path: cover/
+      - uses: mbta/actions/dialyzer@v1

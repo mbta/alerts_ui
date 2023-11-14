@@ -28,6 +28,12 @@ defmodule AlertsUI.Models.ActivePeriodTest do
   end
 
   describe "is_time_inside_active_period?/2" do
+    test "uses current time as default time" do
+      active_period = %ActivePeriod{start: ~U[2008-10-12 00:01:00Z]}
+      result = ActivePeriod.is_time_inside_active_period?(active_period)
+      assert result == true
+    end
+
     test "if no end time, returns true if time is after start" do
       active_period = %ActivePeriod{start: ~U[2023-10-12 00:01:00Z]}
       result = ActivePeriod.is_time_inside_active_period?(active_period, ~U[2023-10-13 00:01:00Z])

@@ -39,3 +39,6 @@ npm-debug.log
 
 .env
 .envrc
+
+# Ignore generated json files
+/assets/outputs/*.json

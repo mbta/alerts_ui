@@ -1,5 +1,9 @@
 import Config
 
+config :alerts_ui,
+  json_output_filename: "",
+  file_write_function: &AlertsUI.DataCase.fake_file_write/2
+
 # Configure your database
 #
 # The MIX_TEST_PARTITION environment variable can be used
