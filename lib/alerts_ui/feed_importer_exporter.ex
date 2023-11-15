@@ -30,9 +30,10 @@ defmodule AlertsUi.FeedImporterExporter do
   end
 
   def write_feed do
-    alerts = Alerts.list_all_open()
-    |> Enum.map(&CreateOutputAlert.build_alert/1)
-    |> CreateGtfsJson.output_json()
+    alerts =
+      Alerts.list_all_open()
+      |> Enum.map(&CreateOutputAlert.build_alert/1)
+      |> CreateGtfsJson.output_json()
 
     @write_fn.(@json_output_filename, alerts)
   end
