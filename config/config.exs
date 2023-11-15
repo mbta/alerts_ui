@@ -12,7 +12,9 @@ config :alerts_ui,
   ecto_repos: [AlertsUI.Repo],
   aws_rds_mod: ExAws.RDS,
   alert_api_url: {:system, "ALERT_API_URL"},
-  json_output_filename: "./assets/alerts_feed.json",
+  gtfs_proto_filename: "./assets/outputs/gtfs-realtime.proto",
+  json_output_filename: "./assets/outputs/alerts_feed.json",
+  protobuf_output_filename: "./assets/outputs/alerts_feed.pb",
   file_write_function: &File.write/2
 
 # Configure your database

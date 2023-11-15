@@ -32,7 +32,7 @@ defmodule AlertsUI.MixProject do
   def application do
     [
       mod: {AlertsUI.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :exprotobuf]
     ]
   end
 
@@ -73,7 +73,8 @@ defmodule AlertsUI.MixProject do
       {:bypass, "~> 2.1", only: :test},
       {:stream_data, "~> 0.6.0", only: :test},
       {:ex_machina, "~> 2.7.0", only: :test},
-      {:oban, "~> 2.16"}
+      {:oban, "~> 2.16"},
+      {:exprotobuf, "~> 1.2.17"}
     ]
   end
 

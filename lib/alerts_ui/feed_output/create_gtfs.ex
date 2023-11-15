@@ -1,4 +1,4 @@
-defmodule AlertsUI.FeedOutput.CreateGtfsJson do
+defmodule AlertsUI.FeedOutput.CreateGtfs do
   @moduledoc """
     Given a list of alerts, outputs a JSON ready to write to file
   """
@@ -9,21 +9,20 @@ defmodule AlertsUI.FeedOutput.CreateGtfsJson do
               binary() | maybe_improper_list(any(), binary() | []) | byte(),
               binary() | []
             )
-  def output_json(map) do
-    map
-    |> build_json
+  def output_json(alerts) do
+    %{
+      header: build_gtfs_header(),
+      entity: alerts
+    }
     |> Jason.encode!()
     |> Jason.Formatter.pretty_print_to_iodata()
   end
 
-  def build_json(alerts) do
+  def build_gtfs_header do
     %{
-      "header" => %{
-        "gtfs_realtime_version" => "2.0",
-        "incrementality" => "FULL_DATASET",
-        "timestamp" => DateTime.utc_now() |> DateTime.to_unix()
-      },
-      "entity" => alerts
+      gtfs_realtime_version: "2.0",
+      incrementality: :FULL_DATASET,
+      timestamp: DateTime.utc_now() |> DateTime.to_unix()
     }
   end
 end

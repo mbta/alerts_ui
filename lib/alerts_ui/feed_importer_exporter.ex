@@ -6,7 +6,7 @@ defmodule AlertsUi.FeedImporterExporter do
   use Oban.Worker
   require Logger
   alias AlertsUI.Alerts
-  alias AlertsUI.FeedOutput.{CreateGtfsJson, CreateOutputAlert}
+  alias AlertsUI.FeedOutput.{CreateGtfs, CreateOutputAlert}
   alias AlertsUI.GTFSIntake.AlertsIntake
 
   @json_output_filename AlertsUI.config(:json_output_filename)
@@ -33,8 +33,8 @@ defmodule AlertsUi.FeedImporterExporter do
     alerts =
       Alerts.list_all_open()
       |> Enum.map(&CreateOutputAlert.build_alert/1)
-      |> CreateGtfsJson.output_json()
 
-    @write_fn.(@json_output_filename, alerts)
+    alerts_json = CreateGtfs.output_json(alerts)
+    @write_fn.(@json_output_filename, alerts_json)
   end
 end
