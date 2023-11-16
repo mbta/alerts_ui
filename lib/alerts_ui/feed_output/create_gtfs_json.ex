@@ -1,4 +1,4 @@
-defmodule AlertsUI.FeedOutput.CreateGtfs do
+defmodule AlertsUI.FeedOutput.CreateGtfsJson do
   @moduledoc """
     Given a list of alerts, outputs a JSON ready to write to file
   """

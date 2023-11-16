@@ -42,7 +42,7 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParser do
       alert_lifecycle: alert |> Map.get("alert_lifecycle") |> parse_string_to_atom(),
       duration_certainty: alert |> Map.get("duration_certainty") |> parse_string_to_atom(),
       active_period: alert |> Map.get("active_period") |> parse_active_periods,
-      image_url: alert |> Map.get("image_url") |> parse_translated_string(),
+      image_url: alert |> Map.get("image") |> parse_translated_string(),
       image_alternative_text:
         alert |> Map.get("image_alternative_text") |> parse_translated_string(),
       tts_header_text: alert |> Map.get("tts_header_text") |> parse_translated_string(),

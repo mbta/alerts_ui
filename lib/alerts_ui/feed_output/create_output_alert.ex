@@ -11,9 +11,9 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
       alert:
         %{
           effect: Map.get(alert, :effect),
-          effect_detail: Map.get(alert, :effect_detail),
+          effect_detail: Map.get(alert, :effect_detail) |> build_translated_string,
           cause: Map.get(alert, :cause),
-          cause_detail: Map.get(alert, :cause_detail),
+          cause_detail: Map.get(alert, :cause_detail) |> build_translated_string,
           header_text: Map.get(alert, :header_text) |> build_translated_string,
           description_text: Map.get(alert, :description_text) |> build_translated_string,
           severity_level: Map.get(alert, :severity_level),
@@ -31,7 +31,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
           alert_lifecycle: Map.get(alert, :alert_lifecycle),
           duration_certainty: Map.get(alert, :duration_certainty),
           active_period: Map.get(alert, :active_period) |> build_active_periods,
-          image_url: Map.get(alert, :image_url) |> build_translated_string,
+          image: Map.get(alert, :image_url) |> build_translated_image,
           image_alternative_text:
             Map.get(alert, :image_alternative_text) |> build_translated_string,
           tts_header_text: Map.get(alert, :tts_header_text) |> build_translated_string,
@@ -97,6 +97,20 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
         %{
           text: input_string,
           language: "en"
+        }
+      ]
+    }
+  end
+
+  defp build_translated_image(nil), do: nil
+
+  defp build_translated_image(input_string) do
+    %{
+      localized_image: [
+        %{
+          url: input_string,
+          language: "en",
+          media_type: "image/png"
         }
       ]
     }

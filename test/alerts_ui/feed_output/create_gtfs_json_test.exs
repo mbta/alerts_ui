@@ -1,7 +1,7 @@
 defmodule AlertsUI.FeedOutput.CreateGtfsTest do
   use AlertsUI.DataCase, async: true
   import AlertsUI.Support.Factory
-  alias AlertsUI.FeedOutput.CreateGtfs
+  alias AlertsUI.FeedOutput.CreateGtfsJson
   alias AlertsUI.FeedOutput.CreateOutputAlert
 
   setup do
@@ -19,13 +19,13 @@ defmodule AlertsUI.FeedOutput.CreateGtfsTest do
   describe "build_gtfs_header/1" do
     test "outputs correctly formatted header" do
       assert %{gtfs_realtime_version: "2.0", incrementality: :FULL_DATASET, timestamp: _} =
-               CreateGtfs.build_gtfs_header()
+               CreateGtfsJson.build_gtfs_header()
     end
   end
 
   describe "output_json/1" do
     test "returns json from map", %{test_alerts: test_alerts} do
-      assert test_alerts |> CreateGtfs.output_json() |> is_list
+      assert test_alerts |> CreateGtfsJson.output_json() |> is_list
     end
   end
 end
