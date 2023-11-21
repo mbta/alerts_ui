@@ -9,6 +9,8 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobuf do
   @moduledoc """
     Given a list of alerts, outputs a protobuf ready to write to file
   """
+  alias AlertsUI.FeedOutput.CreateOutputAlert
+
   alias AlertsUI.FeedOutput.GTFSProtobufDefinition.{
     Alert,
     EntitySelector,
@@ -26,7 +28,7 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobuf do
   @valid_alert_fields ~w(active_period informed_entity cause effect url header_text description_text tts_header_text tts_description_text severity_level image image_alternative_text cause_detail effect_detail)a
 
   def output_protobuf(alerts) do
-    header = FeedHeader.new(build_gtfs_header())
+    header = FeedHeader.new(CreateOutputAlert.build_gtfs_header())
 
     entity =
       alerts
@@ -40,14 +42,6 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobuf do
 
     FeedMessage.new(header: header, entity: entity)
     |> FeedMessage.encode()
-  end
-
-  def build_gtfs_header do
-    %{
-      gtfs_realtime_version: "2.0",
-      incrementality: :FULL_DATASET,
-      timestamp: DateTime.utc_now() |> DateTime.to_unix()
-    }
   end
 
   def build_alert(alert) do

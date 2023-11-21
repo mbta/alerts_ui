@@ -188,4 +188,11 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
       assert expected["alert"] == actual["alert"]
     end
   end
+
+  describe "build_gtfs_header/1" do
+    test "outputs correctly formatted header" do
+      assert %{gtfs_realtime_version: "2.0", incrementality: :FULL_DATASET, timestamp: _} =
+               CreateOutputAlert.build_gtfs_header()
+    end
+  end
 end

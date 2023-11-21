@@ -42,6 +42,14 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
     }
   end
 
+  def build_gtfs_header do
+    %{
+      gtfs_realtime_version: "2.0",
+      incrementality: :FULL_DATASET,
+      timestamp: DateTime.utc_now() |> DateTime.to_unix()
+    }
+  end
+
   def build_active_periods(nil), do: nil
 
   def build_active_periods(active_periods) do

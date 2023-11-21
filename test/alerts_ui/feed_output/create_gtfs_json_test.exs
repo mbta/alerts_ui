@@ -16,13 +16,6 @@ defmodule AlertsUI.FeedOutput.CreateGtfsTest do
     {:ok, test_alerts: [test_alert_1, test_alert_2]}
   end
 
-  describe "build_gtfs_header/1" do
-    test "outputs correctly formatted header" do
-      assert %{gtfs_realtime_version: "2.0", incrementality: :FULL_DATASET, timestamp: _} =
-               CreateGtfsJson.build_gtfs_header()
-    end
-  end
-
   describe "output_json/1" do
     test "returns json from map", %{test_alerts: test_alerts} do
       assert test_alerts |> CreateGtfsJson.output_json() |> is_list

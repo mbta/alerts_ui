@@ -80,13 +80,6 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobufTest do
     end
   end
 
-  describe "build_gtfs_header/1" do
-    test "outputs correctly formatted header" do
-      assert %{gtfs_realtime_version: "2.0", incrementality: :FULL_DATASET, timestamp: _} =
-               CreateGtfsProtobuf.build_gtfs_header()
-    end
-  end
-
   describe "build_alert/1" do
     test "builds alert" do
       actual_alert = CreateGtfsProtobuf.build_alert(@alert) |> Map.from_struct()
