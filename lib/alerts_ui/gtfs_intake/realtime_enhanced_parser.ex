@@ -39,8 +39,10 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParser do
         alert |> Map.get("last_push_notification_timestamp") |> parse_unix_time(),
       closed_timestamp: alert |> Map.get("closed_timestamp") |> parse_unix_time(),
       timeframe_text: alert |> Map.get("timeframe_text") |> parse_translated_string(),
+      recurrence_text: alert |> Map.get("recurrence_text") |> parse_translated_string(),
       alert_lifecycle: alert |> Map.get("alert_lifecycle") |> parse_string_to_atom(),
       duration_certainty: alert |> Map.get("duration_certainty") |> parse_string_to_atom(),
+      reminder_times: alert |> Map.get("reminder_times"),
       active_period: alert |> Map.get("active_period") |> parse_active_periods,
       image_url: alert |> Map.get("image") |> parse_translated_string(),
       image_alternative_text:
@@ -58,6 +60,7 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParser do
         agency_id: Map.get(informed_entity, "agency_id"),
         route_id: Map.get(informed_entity, "route_id"),
         route_type: Map.get(informed_entity, "route_type"),
+        facility_id: Map.get(informed_entity, "facility_id"),
         direction_id: Map.get(informed_entity, "direction_id"),
         stop_id: Map.get(informed_entity, "stop_id"),
         activities:

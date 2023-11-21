@@ -13,7 +13,7 @@ config :alerts_ui,
   aws_rds_mod: ExAws.RDS,
   alert_api_url: {:system, "ALERT_API_URL"},
   gtfs_proto_filename: "./assets/outputs/gtfs-realtime.proto",
-  json_output_filename: "./assets/outputs/alerts_feed.json",
+  enhanced_json_output_filename: "./assets/outputs/alerts_feed_enhanced.json",
   protobuf_output_filename: "./assets/outputs/alerts_feed.pb"
 
 # Configure your database

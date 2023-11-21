@@ -6,13 +6,33 @@ defmodule AlertsUI.AlertsTest do
   alias AlertsUI.Models.Alert
 
   describe "create_or_modify_alert/1" do
+    test "creates alert if new" do
+      new_params =
+        build(:alert_map, %{
+          alert_id: "123",
+          header_text: "new header text",
+          description_text: "",
+          last_modified_timestamp: ~U[2023-10-12 00:01:00Z]
+        })
+
+      Alerts.create_or_modify_alert(new_params)
+      new_alert = Repo.get_by(Alert, alert_id: "123")
+      assert new_alert.alert_id == "123"
+      assert new_alert.header_text == "new header text"
+      assert new_alert.description_text == ""
+    end
+
     test "updates alert if ids match" do
       existing_alert =
         insert(
           :alert,
           %{
             alert_id: "123",
-            header_text: "old header text"
+            header_text: "old header text",
+            active_period: [
+              build(:active_period),
+              %{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:01:00Z]}
+            ]
           }
         )
 
@@ -20,13 +40,15 @@ defmodule AlertsUI.AlertsTest do
         build(:alert_map, %{
           alert_id: "123",
           header_text: "new header text",
-          last_modified_timestamp: ~U[2023-10-12 00:01:00Z]
+          last_modified_timestamp: ~U[2023-10-12 00:01:00Z],
+          active_period: [%{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:03:00Z]}]
         })
 
       Alerts.create_or_modify_alert(new_params)
       updated_alert = Repo.get_by(Alert, id: existing_alert.id)
       assert updated_alert.alert_id == "123"
       assert updated_alert.header_text == "new header text"
+      assert (updated_alert.active_period |> hd).end == ~U[2023-10-13 00:03:00Z]
     end
 
     @tag :capture_log
@@ -97,6 +119,19 @@ defmodule AlertsUI.AlertsTest do
 
       incoming_alert =
         build(:alert, %{alert_id: "123", last_modified_timestamp: ~U[2023-10-14 00:01:00Z]})
+
+      assert Alerts.is_last_modified_time_more_recent?(
+               Map.get(incoming_alert, :last_modified_timestamp),
+               Map.get(existing_alert, :last_modified_timestamp)
+             ) == true
+    end
+
+    test "returns true if incoming alert has same time as stored alert" do
+      existing_alert =
+        insert(:alert, %{alert_id: "123", last_modified_timestamp: ~U[2023-10-13 00:01:00Z]})
+
+      incoming_alert =
+        build(:alert, %{alert_id: "123", last_modified_timestamp: ~U[2023-10-13 00:01:00Z]})
 
       assert Alerts.is_last_modified_time_more_recent?(
                Map.get(incoming_alert, :last_modified_timestamp),

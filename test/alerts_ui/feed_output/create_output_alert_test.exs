@@ -28,6 +28,8 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
           agency_id: "1",
           route_type: 2,
           route_id: "CR-Lowell",
+          stop_id: "1003",
+          facility_id: "park-qamnl-garage",
           trip: trip1,
           activities: [
             :BOARD,
@@ -87,8 +89,8 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
         alert: %{
           effect: :OTHER_EFFECT,
           effect_detail: "DELAY",
-          cause: "UNKNOWN_CAUSE",
-          cause_detail: :UNKNOWN_CAUSE,
+          cause: :UNKNOWN_CAUSE,
+          cause_detail: "UNKNOWN_CAUSE",
           header_text: %{
             translation: [
               %{
@@ -151,6 +153,8 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
               agency_id: "1",
               route_type: 2,
               route_id: "CR-Lowell",
+              stop_id: "1003",
+              facility_id: "park-qamnl-garage",
               trip: %{
                 route_id: "CR-Lowell",
                 trip_id: "CR-627689-308",
@@ -185,7 +189,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
       }
 
       actual = CreateOutputAlert.build_alert(existing_alert)
-      assert expected["alert"] == actual["alert"]
+      assert expected == actual
     end
   end
 

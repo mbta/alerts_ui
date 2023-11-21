@@ -5,49 +5,49 @@ defmodule AlertsUi.FeedImporterExporter do
   """
   use Oban.Worker
   require Logger
-  alias AlertsUI.Alerts
-  alias AlertsUI.FeedOutput.{CreateGtfsJson, CreateGtfsProtobuf, CreateOutputAlert}
+  alias AlertsUI.FeedOutput.{CompareFeed, WriteFeed}
   alias AlertsUI.GTFSIntake.AlertsIntake
-
-  @json_output_filename AlertsUI.config(:json_output_filename)
-  @protobuf_output_filename AlertsUI.config(:protobuf_output_filename)
 
   @impl Oban.Worker
   def perform(_job, opts \\ []) do
-    Logger.info("#{__MODULE__}: Importing alerts feed")
+    import_json = import_feed(opts)
 
-    {import_time, :ok} = :timer.tc(AlertsIntake, :run, [opts])
+    export_json = export_feed(opts)
 
-    Logger.info("#{__MODULE__}: Imported alerts feed: time_ms=#{import_time / 1_000}")
-
-    Logger.info("#{__MODULE__}: Exporting alerts feed")
-
-    {export_time, _} = :timer.tc(__MODULE__, :write_feed, [opts])
-
-    Logger.info("#{__MODULE__}: Exported alerts feed: time_ms=#{export_time / 1_000}")
-
+    compare_feeds(import_json, export_json)
     :ok
   end
 
-  @spec write_feed() :: any()
-  def write_feed(opts \\ []) do
-    alerts =
-      Alerts.list_all_open()
-      |> Enum.map(&CreateOutputAlert.build_alert/1)
+  def import_feed(opts) do
+    Logger.info("#{__MODULE__}: Importing alerts feed")
 
-    write_json_file(alerts, opts)
-    write_protobuf_file(alerts, opts)
+    {import_time, {:ok, import_json}} = :timer.tc(&AlertsIntake.run/1, [opts])
+
+    Logger.info("#{__MODULE__}: Imported alerts feed: time_ms=#{import_time / 1_000}")
+    import_json
   end
 
-  defp write_json_file(alerts, opts) do
-    write_fn = Keyword.get(opts, :write_fn, &File.write/2)
-    alerts_json = CreateGtfsJson.output_json(alerts)
-    write_fn.(@json_output_filename, alerts_json)
+  def export_feed(opts) do
+    Logger.info("#{__MODULE__}: Exporting alerts feed")
+
+    {export_time, {:ok, export_json}} = :timer.tc(&WriteFeed.write_feed/1, [opts])
+
+    Logger.info("#{__MODULE__}: Exported alerts feed: time_ms=#{export_time / 1_000}")
+    export_json
   end
 
-  defp write_protobuf_file(alerts, opts) do
-    write_fn = Keyword.get(opts, :write_fn, &File.write/2)
-    alerts_protobuf = CreateGtfsProtobuf.output_protobuf(alerts)
-    write_fn.(@protobuf_output_filename, alerts_protobuf)
+  def compare_feeds(import_json, export_json) do
+    filtered_import =
+      Enum.filter(import_json["entity"], &is_nil(Map.get(&1["alert"], "closed_timestamp")))
+
+    with :ok <- CompareFeed.compare_headers(import_json["header"], export_json["header"]),
+         :ok <- CompareFeed.compare_entity_lists(filtered_import, export_json["entity"]) do
+      Logger.info("Export ok!")
+    else
+      {error_message, data} ->
+        Logger.warning(
+          "Export mismatch problem: #{error_message}. Error data: #{data |> inspect}"
+        )
+    end
   end
 end

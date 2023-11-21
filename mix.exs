@@ -84,7 +84,8 @@ defmodule AlertsUI.MixProject do
       {:stream_data, "~> 0.6.0", only: :test},
       {:ex_machina, "~> 2.7.0", only: :test},
       {:oban, "~> 2.16"},
-      {:exprotobuf, "~> 1.2.17"}
+      {:exprotobuf, "~> 1.2.17"},
+      {:map_diff, "~> 1.3.4"}
     ]
   end
 

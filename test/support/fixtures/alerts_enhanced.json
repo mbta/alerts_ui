@@ -58,8 +58,23 @@
                         }
                     ]
                 },
+                "recurrence_text": {
+                    "translation": [
+                        {
+                            "text": "weekdays",
+                            "language": "en"
+                        }
+                    ]
+                },
                 "alert_lifecycle": "ONGOING",
                 "duration_certainty": "KNOWN",
+                "reminder_times": [
+                    1692910800,
+                    1692982800,
+                    1693038600,
+                    1693125000,
+                    1693211400
+                ],
                 "active_period": [
                     {
                         "start": 1696272120,
@@ -71,6 +86,8 @@
                         "agency_id": "1",
                         "route_type": 2,
                         "route_id": "CR-Lowell",
+                        "facility_id": "park-qamnl-garage",
+                        "stop_id": "1002",
                         "trip": {
                             "route_id": "CR-Lowell",
                             "trip_id": "CR-627689-308",

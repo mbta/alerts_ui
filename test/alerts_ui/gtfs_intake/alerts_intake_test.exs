@@ -10,7 +10,7 @@ defmodule AlertsUI.GTFSIntake.AlertsIntakeTest do
   alias Req.Response
 
   describe "run" do
-    test "returns :ok" do
+    test "returns :ok and map" do
       opts = [
         get_fn: fn _ ->
           body = %{"entity" => []}
@@ -18,7 +18,7 @@ defmodule AlertsUI.GTFSIntake.AlertsIntakeTest do
         end
       ]
 
-      assert AlertsIntake.run(opts) == :ok
+      assert {:ok, %{"entity" => []}} = AlertsIntake.run(opts)
     end
 
     test "creates alerts if there's no previous versions" do
@@ -177,7 +177,7 @@ defmodule AlertsUI.GTFSIntake.AlertsIntakeTest do
         end
       ]
 
-      assert AlertsIntake.run(opts) == :ok
+      assert AlertsIntake.run(opts) == {:ok, "error"}
     end
 
     @tag :capture_log
@@ -188,7 +188,7 @@ defmodule AlertsUI.GTFSIntake.AlertsIntakeTest do
         end
       ]
 
-      assert AlertsIntake.run(opts) == :ok
+      assert AlertsIntake.run(opts) == {:ok, "INVALID RESPONSE"}
     end
 
     test "logs how long the parsing took" do

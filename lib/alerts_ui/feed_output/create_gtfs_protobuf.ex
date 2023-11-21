@@ -56,7 +56,9 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobuf do
     |> Map.replace_lazy(:tts_description_text, &build_translated_string/1)
     |> Map.replace_lazy(:image, &build_translated_image/1)
     |> Map.replace_lazy(:image_alternative_text, &build_translated_string/1)
+    |> Map.replace_lazy(:cause_detail, &string_to_translated_string/1)
     |> Map.replace_lazy(:cause_detail, &build_translated_string/1)
+    |> Map.replace_lazy(:effect_detail, &string_to_translated_string/1)
     |> Map.replace_lazy(:effect_detail, &build_translated_string/1)
     |> Alert.new()
   end
@@ -77,6 +79,17 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobuf do
   def build_time_range(time_range) do
     time_range
     |> TimeRange.new()
+  end
+
+  defp string_to_translated_string(input_string) do
+    %{
+      translation: [
+        %{
+          text: input_string,
+          language: "en"
+        }
+      ]
+    }
   end
 
   def build_translated_string(translated_string) do

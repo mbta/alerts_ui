@@ -7,15 +7,19 @@ defmodule AlertsUI.GTFSIntake.AlertsIntake do
   alias AlertsUI.GTFSIntake.RealtimeEnhancedParser
   alias Req.Response
 
-  @spec run :: :ok
+  @spec run :: {:ok, any()}
   def run(opts \\ []) do
-    opts
-    |> fetch_feed()
+    %Response{status: _, body: json_body} =
+      response =
+      opts
+      |> fetch_feed()
+
+    response
     |> parse_response()
     |> Alerts.close_if_not_in_feed()
     |> Enum.each(&Alerts.create_or_modify_alert(&1))
 
-    :ok
+    {:ok, json_body}
   end
 
   @spec fetch_feed(keyword()) :: Response.t()
