@@ -6,8 +6,11 @@ defmodule AlertsUi.FeedImporterExporter do
   use Oban.Worker
   require Logger
   alias AlertsUI.Alerts
-  alias AlertsUI.FeedOutput.{CreateGtfsJson, CreateOutputAlert}
+  alias AlertsUI.FeedOutput.{CreateGtfsJson, CreateGtfsProtobuf, CreateOutputAlert}
   alias AlertsUI.GTFSIntake.AlertsIntake
+
+  @json_output_filename AlertsUI.config(:json_output_filename)
+  @protobuf_output_filename AlertsUI.config(:protobuf_output_filename)
 
   @impl Oban.Worker
   def perform(_job, opts \\ []) do
@@ -19,16 +22,32 @@ defmodule AlertsUi.FeedImporterExporter do
 
     Logger.info("#{__MODULE__}: Exporting alerts feed")
 
-    {export_time, _} = :timer.tc(__MODULE__, :write_feed, [])
+    {export_time, _} = :timer.tc(__MODULE__, :write_feed, [opts])
 
     Logger.info("#{__MODULE__}: Exported alerts feed: time_ms=#{export_time / 1_000}")
 
     :ok
   end
 
-  def write_feed do
-    Alerts.list_all_open()
-    |> Enum.map(&CreateOutputAlert.build_alert/1)
-    |> CreateGtfsJson.output_json()
+  @spec write_feed() :: any()
+  def write_feed(opts \\ []) do
+    alerts =
+      Alerts.list_all_open()
+      |> Enum.map(&CreateOutputAlert.build_alert/1)
+
+    write_json_file(alerts, opts)
+    write_protobuf_file(alerts, opts)
+  end
+
+  defp write_json_file(alerts, opts) do
+    write_fn = Keyword.get(opts, :write_fn, &File.write/2)
+    alerts_json = CreateGtfsJson.output_json(alerts)
+    write_fn.(@json_output_filename, alerts_json)
+  end
+
+  defp write_protobuf_file(alerts, opts) do
+    write_fn = Keyword.get(opts, :write_fn, &File.write/2)
+    alerts_protobuf = CreateGtfsProtobuf.output_protobuf(alerts)
+    write_fn.(@protobuf_output_filename, alerts_protobuf)
   end
 end

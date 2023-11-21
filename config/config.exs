@@ -11,7 +11,10 @@ config :alerts_ui,
   namespace: AlertsUI,
   ecto_repos: [AlertsUI.Repo],
   aws_rds_mod: ExAws.RDS,
-  alert_api_url: {:system, "ALERT_API_URL"}
+  alert_api_url: {:system, "ALERT_API_URL"},
+  gtfs_proto_filename: "./assets/outputs/gtfs-realtime.proto",
+  json_output_filename: "./assets/outputs/alerts_feed.json",
+  protobuf_output_filename: "./assets/outputs/alerts_feed.pb"
 
 # Configure your database
 config :alerts_ui, AlertsUI.Repo,
@@ -64,7 +67,7 @@ config :alerts_ui, Oban,
      crontab: [
        # Import and write GTFS feeds every minute
        {"* * * * *", AlertsUi.FeedImporterExporter,
-        unique: [period: 60, states: [:available, :scheduled, :executing]]}
+        unique: [period: 30, states: [:available, :scheduled, :executing]]}
      ]}
   ],
   queues: [default: 10]
