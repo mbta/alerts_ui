@@ -13,7 +13,8 @@ defmodule AlertsUi.FeedImporterExporterTest do
          fn _ ->
            body = %{"entity" => []}
            Response.new(status: 200, body: body)
-         end}
+         end},
+        {:write_fn, fn _, _ -> nil end}
       ]
 
       insert(:alert)
