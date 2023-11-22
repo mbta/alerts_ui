@@ -49,10 +49,6 @@ defmodule AlertsUI.GTFSIntake.AlertsIntake do
     error ->
       log_parse_error(error, __STACKTRACE__, body)
       []
-  catch
-    error ->
-      log_parse_error(error, __STACKTRACE__, body)
-      []
   end
 
   defp log_parse_error(error, trace, body) do

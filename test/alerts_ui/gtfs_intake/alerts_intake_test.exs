@@ -2,6 +2,8 @@ defmodule AlertsUI.GTFSIntake.AlertsIntakeTest do
   @moduledoc false
   use AlertsUI.DataCase, async: true
   import AlertsUI.Support.Factory
+  import ExUnit.CaptureLog
+  import Test.Support.Helpers
   alias AlertsUI.Alerts
   alias AlertsUI.GTFSIntake.AlertsIntake
   alias AlertsUI.Models.Alert
@@ -166,6 +168,45 @@ defmodule AlertsUI.GTFSIntake.AlertsIntakeTest do
 
       updated_alert = Repo.get_by(Alert, alert_id: "456")
       assert !is_nil(updated_alert.closed_timestamp)
+    end
+
+    test "runs even if unable to fetch the feed" do
+      opts = [
+        get_fn: fn _ ->
+          Response.new(status: 500, body: "error")
+        end
+      ]
+
+      assert AlertsIntake.run(opts) == :ok
+    end
+
+    @tag :capture_log
+    test "runs even if unable to parse the response" do
+      opts = [
+        get_fn: fn _ ->
+          Response.new(status: 200, body: "INVALID RESPONSE")
+        end
+      ]
+
+      assert AlertsIntake.run(opts) == :ok
+    end
+
+    test "logs how long the parsing took" do
+      set_log_level(:info)
+
+      logs =
+        capture_log(fn ->
+          opts = [
+            get_fn: fn _ ->
+              body = %{"entity" => []}
+              Response.new(status: 200, body: body)
+            end
+          ]
+
+          AlertsIntake.run(opts)
+        end)
+
+      assert logs =~ ~r/records=\d+ time=\d+/
     end
   end
 end

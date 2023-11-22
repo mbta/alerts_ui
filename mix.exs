@@ -20,7 +20,17 @@ defmodule AlertsUI.MixProject do
           AlertsUIWeb.Router,
           AlertsUIWeb.Telemetry,
           AlertsUI.Application,
-          AlertsUI.Support.Factory
+          AlertsUI.Support.Factory,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.Position,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.Shape,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.TripUpdate,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.TripUpdate.StopTimeEvent,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.TripUpdate.StopTimeUpdate,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.TripUpdate.StopTimeUpdate.StopTimeProperties,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.TripUpdate.TripProperties,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.VehicleDescriptor,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.VehiclePosition,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.VehiclePosition.CarriageDetails
         ]
       ]
     ]
