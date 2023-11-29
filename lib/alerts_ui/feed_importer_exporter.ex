@@ -15,7 +15,6 @@ defmodule AlertsUi.FeedImporterExporter do
     export_json = export_feed(opts)
 
     compare_feeds(import_json, export_json)
-    :ok
   end
 
   def import_feed(opts) do
@@ -43,11 +42,14 @@ defmodule AlertsUi.FeedImporterExporter do
     with :ok <- CompareFeed.compare_headers(import_json["header"], export_json["header"]),
          :ok <- CompareFeed.compare_entity_lists(filtered_import, export_json["entity"]) do
       Logger.info("Export ok!")
+      :ok
     else
       {error_message, data} ->
         Logger.warning(
           "Export mismatch problem: #{error_message}. Error data: #{data |> inspect}"
         )
+
+        {:error, error_message}
     end
   end
 end

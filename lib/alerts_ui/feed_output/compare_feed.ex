@@ -3,6 +3,7 @@ defmodule AlertsUI.FeedOutput.CompareFeed do
     Functions to check outgoing feed against incoming
   """
 
+  @spec compare_headers(map(), map()) :: :ok | {:header_mismatch, list()}
   def compare_headers(incoming_header, outgoing_header) do
     version_ok =
       incoming_header["gtfs_realtime_version"] == outgoing_header["gtfs_realtime_version"]
@@ -18,6 +19,7 @@ defmodule AlertsUI.FeedOutput.CompareFeed do
     end
   end
 
+  @spec compare_entity_lists(any(), any()) :: :ok | {atom(), list()}
   def compare_entity_lists(incoming, outgoing) do
     # this relies on consistent ordering of alert_ids inside the entity lists
     incoming_ids = Enum.map(incoming, & &1["id"])
@@ -29,7 +31,7 @@ defmodule AlertsUI.FeedOutput.CompareFeed do
     end
   end
 
-  @spec compare_alert_lists(list(), list()) :: :ok
+  @spec compare_alert_lists(list(), list()) :: :ok | {atom(), list()}
   def compare_alert_lists(incoming, outgoing) do
     zipped_list = List.zip([incoming, outgoing])
 
@@ -41,9 +43,9 @@ defmodule AlertsUI.FeedOutput.CompareFeed do
         end
       end)
 
-    case Enum.filter(alerts_match, fn result -> result != :ok end) do
-      [] -> :ok
-      error_list -> {:error_in_alert_match, error_list}
+    case Enum.all?(alerts_match, &(&1 == :ok)) do
+      true -> :ok
+      false -> {:error_in_alert_match, Enum.filter(alerts_match, &(&1 != :ok))}
     end
   end
 

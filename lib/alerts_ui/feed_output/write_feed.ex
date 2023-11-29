@@ -10,8 +10,6 @@ defmodule AlertsUI.FeedOutput.WriteFeed do
 
   @spec write_feed() :: any()
   def write_feed(opts \\ []) do
-    Alerts.list_all_open()
-
     alerts =
       Alerts.list_all_open()
       |> Enum.map(&CreateOutputAlert.build_alert/1)
