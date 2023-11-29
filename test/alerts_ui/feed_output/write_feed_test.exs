@@ -19,7 +19,7 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
         "id" => "123abc"
       }
 
-      {:ok, actual} = WriteFeed.write_feed([{:write_fn, fn _, _ -> nil end}])
+      {:ok, actual} = WriteFeed.write_feed()
 
       assert %{
                "gtfs_realtime_version" => "2.0",

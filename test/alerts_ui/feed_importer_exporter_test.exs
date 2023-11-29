@@ -25,8 +25,7 @@ defmodule AlertsUi.FeedImporterExporterTest do
            }
 
            Response.new(status: 200, body: body)
-         end},
-        {:write_fn, fn _, _ -> nil end}
+         end}
       ]
 
       {result, _log} =
@@ -56,8 +55,7 @@ defmodule AlertsUi.FeedImporterExporterTest do
            }
 
            Response.new(status: 200, body: body)
-         end},
-        {:write_fn, fn _, _ -> nil end}
+         end}
       ]
 
       insert(:alert, %{alert_id: "123456"})
@@ -87,8 +85,7 @@ defmodule AlertsUi.FeedImporterExporterTest do
            }
 
            Response.new(status: 200, body: body)
-         end},
-        {:write_fn, fn _, _ -> nil end}
+         end}
       ]
 
       insert(:alert, %{alert_id: "654321"})
