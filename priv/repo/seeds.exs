@@ -27,6 +27,7 @@ informed_entity_1 =
   Repo.insert!(%InformedEntity{
     agency_id: "111",
     route_id: "222",
+    facility_id: "park-qamnl-garage",
     route_type: 1,
     direction_id: 3,
     stop_id: "333",
@@ -61,9 +62,17 @@ Repo.insert!(%Alert{
   last_modified_timestamp: ~U[2023-10-12 00:02:00Z],
   last_push_notification_timestamp: ~U[2023-10-12 00:03:00Z],
   closed_timestamp: ~U[2023-10-13 00:03:00Z],
-  timeframe_text: "recently?",
+  timeframe_text: "ongoing",
+  recurrence_text: "weekdays",
   alert_lifecycle: :NEW,
   duration_certainty: :UNKNOWN,
+  reminder_times: [
+    1_692_910_800,
+    1_692_982_800,
+    1_693_038_600,
+    1_693_125_000,
+    1_693_211_400
+  ],
   active_period: [
     %{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-12 00:02:00Z]},
     %{start: ~U[2023-10-12 00:03:00Z], end: ~U[2023-10-12 00:04:00Z]}

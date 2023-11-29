@@ -50,6 +50,8 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParserTest do
       assert ie_1.agency_id == "1"
       assert ie_1.route_type == 2
       assert ie_1.route_id == "CR-Lowell"
+      assert ie_1.stop_id == "1002"
+      assert ie_1.facility_id == "park-qamnl-garage"
       assert is_map(ie_1.trip)
       assert ie_1.trip.trip_id == "CR-627689-308"
       assert ie_1.trip.route_id == "CR-Lowell"

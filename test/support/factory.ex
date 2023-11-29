@@ -66,6 +66,13 @@ defmodule AlertsUI.Support.Factory do
           ]
         },
         "duration_certainty" => "UNKNOWN",
+        "reminder_times" => [
+          1_692_910_800,
+          1_692_982_800,
+          1_693_038_600,
+          1_693_125_000,
+          1_693_211_400
+        ],
         "effect" => "STOP_MOVED",
         "effect_detail" => "STOP_MOVE",
         "header_text" => %{
@@ -81,6 +88,7 @@ defmodule AlertsUI.Support.Factory do
             "activities" => ["BOARD"],
             "agency_id" => "1",
             "route_id" => "627",
+            "facility_id" => "park-qamnl-garage",
             "route_type" => 3,
             "stop_id" => "8597"
           },
@@ -120,6 +128,9 @@ defmodule AlertsUI.Support.Factory do
         },
         "timeframe_text" => %{
           "translation" => [%{"language" => "en", "text" => "ongoing"}]
+        },
+        "recurrence_text" => %{
+          "translation" => [%{"language" => "en", "text" => "weekdays"}]
         }
       },
       "id" => "123456"

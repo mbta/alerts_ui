@@ -36,8 +36,10 @@ defmodule AlertsUI.Models.Alert do
   last_push_notification_timestamp
   closed_timestamp
   timeframe_text
+  recurrence_text
   alert_lifecycle
   duration_certainty
+  reminder_times
   tts_header_text
   tts_description_text
   image_url
@@ -70,8 +72,10 @@ defmodule AlertsUI.Models.Alert do
           last_push_notification_timestamp: DateTime.t() | nil,
           closed_timestamp: DateTime.t() | nil,
           timeframe_text: String.t() | nil,
+          recurrence_text: String.t() | nil,
           alert_lifecycle: atom() | nil,
           duration_certainty: atom() | nil,
+          reminder_times: [integer()] | nil,
           active_period: [ActivePeriod.t()] | nil,
           image_url: String.t() | nil,
           image_alternative_text: String.t() | nil,
@@ -88,7 +92,7 @@ defmodule AlertsUI.Models.Alert do
     field :cause, Ecto.Enum, values: @cause
     field :cause_detail, :string
     field :header_text, :string
-    field :description_text, :string
+    field :description_text, :string, default: ""
     field :severity_level, Ecto.Enum, values: @severity_level
     field :url, :string
     field :service_effect_text, :string
@@ -99,8 +103,10 @@ defmodule AlertsUI.Models.Alert do
     field :last_push_notification_timestamp, :utc_datetime
     field :closed_timestamp, :utc_datetime
     field :timeframe_text, :string
+    field :recurrence_text, :string
     field :alert_lifecycle, Ecto.Enum, values: @alert_lifecycle
     field :duration_certainty, Ecto.Enum, values: @duration_certainty
+    field :reminder_times, {:array, :integer}
     embeds_many :active_period, ActivePeriod, on_replace: :delete
     field :image_url, :string
     field :image_alternative_text, :string

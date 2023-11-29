@@ -6,14 +6,17 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
 
   @spec build_alert(Alert.t()) :: map()
   def build_alert(alert) do
+    # cause_detail and effect_detail should be translated_string types according to GTFS spec
+    # but in the current feed they are simple strings
+
     %{
       id: Map.get(alert, :alert_id),
       alert:
         %{
           effect: Map.get(alert, :effect),
-          effect_detail: Map.get(alert, :effect_detail) |> build_translated_string,
+          effect_detail: Map.get(alert, :effect_detail),
           cause: Map.get(alert, :cause),
-          cause_detail: Map.get(alert, :cause_detail) |> build_translated_string,
+          cause_detail: Map.get(alert, :cause_detail),
           header_text: Map.get(alert, :header_text) |> build_translated_string,
           description_text: Map.get(alert, :description_text) |> build_translated_string,
           severity_level: Map.get(alert, :severity_level),
@@ -28,8 +31,10 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
             Map.get(alert, :last_push_notification_timestamp) |> date_time_to_unix(),
           closed_timestamp: Map.get(alert, :closed_timestamp) |> date_time_to_unix(),
           timeframe_text: Map.get(alert, :timeframe_text) |> build_translated_string,
+          recurrence_text: Map.get(alert, :recurrence_text) |> build_translated_string,
           alert_lifecycle: Map.get(alert, :alert_lifecycle),
           duration_certainty: Map.get(alert, :duration_certainty),
+          reminder_times: Map.get(alert, :reminder_times),
           active_period: Map.get(alert, :active_period) |> build_active_periods,
           image: Map.get(alert, :image_url) |> build_translated_image,
           image_alternative_text:
@@ -74,6 +79,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
     %{
       agency_id: Map.get(informed_entity, :agency_id),
       route_type: Map.get(informed_entity, :route_type),
+      facility_id: Map.get(informed_entity, :facility_id),
       route_id: Map.get(informed_entity, :route_id),
       trip: Map.get(informed_entity, :trip) |> build_trip,
       direction_id: Map.get(informed_entity, :direction_id),

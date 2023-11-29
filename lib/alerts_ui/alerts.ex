@@ -75,7 +75,7 @@ defmodule AlertsUI.Alerts do
   def is_last_modified_time_more_recent?(_, nil), do: true
 
   def is_last_modified_time_more_recent?(incoming_time, stored_time) do
-    DateTime.compare(incoming_time, stored_time) == :gt
+    DateTime.compare(incoming_time, stored_time) != :lt
   end
 
   @spec close_if_not_in_feed([map()], DateTime.t()) :: [map()]

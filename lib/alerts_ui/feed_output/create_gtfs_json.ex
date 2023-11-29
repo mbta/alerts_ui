@@ -4,13 +4,13 @@ defmodule AlertsUI.FeedOutput.CreateGtfsJson do
   """
   alias AlertsUI.FeedOutput.CreateOutputAlert
 
-  @spec output_json(any()) ::
+  @spec output_enhanced_json(any()) ::
           binary()
           | maybe_improper_list(
               binary() | maybe_improper_list(any(), binary() | []) | byte(),
               binary() | []
             )
-  def output_json(alerts) do
+  def output_enhanced_json(alerts) do
     %{
       header: CreateOutputAlert.build_gtfs_header(),
       entity: alerts

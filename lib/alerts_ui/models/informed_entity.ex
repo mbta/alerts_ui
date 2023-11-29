@@ -8,7 +8,7 @@ defmodule AlertsUI.Models.InformedEntity do
 
   @activity Activity.activities()
 
-  @permitted_fields ~w(alert_id route_id direction_id agency_id route_type stop_id activities)a
+  @permitted_fields ~w(alert_id route_id facility_id direction_id agency_id route_type stop_id activities)a
 
   @type t :: %__MODULE__{
           id: Ecto.UUID,
@@ -17,6 +17,7 @@ defmodule AlertsUI.Models.InformedEntity do
           updated_at: DateTime.t(),
           agency_id: String.t() | nil,
           route_id: String.t() | nil,
+          facility_id: String.t() | nil,
           route_type: integer() | nil,
           direction_id: integer() | nil,
           stop_id: String.t() | nil,
@@ -28,6 +29,7 @@ defmodule AlertsUI.Models.InformedEntity do
     belongs_to :alert, Alert
     field :agency_id, :string
     field :route_id, :string
+    field :facility_id, :string
     field :route_type, :integer
     field :direction_id, :integer
     field :stop_id, :string
