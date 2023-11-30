@@ -3,7 +3,7 @@ defmodule AlertsUI.FeedOutput.WriteFile do
     defines behavior for writing a file
   """
   @callback write(filename :: String.t(), content :: binary()) ::
-              :ok | :ok | {:error, term()}
+              :ok | {:error, term()}
 end
 
 defmodule AlertsUI.FeedOutput.WriteToS3 do
@@ -13,16 +13,21 @@ defmodule AlertsUI.FeedOutput.WriteToS3 do
     go to different file paths
   """
   @behaviour AlertsUI.FeedOutput.WriteFile
-  @bucket_name System.get_env("S3_BUCKET_NAME", "")
-  @bucket_prefix System.get_env("S3_BUCKET_PREFIX", "")
 
   def write(filename, content) do
-    filepath = "#{@bucket_prefix}/#{filename}"
-
-    case ExAws.S3.put_object(@bucket_name, filepath, content) |> ExAws.request!() do
+    case ExAws.S3.put_object(get_bucket_name(), get_file_path(filename), content)
+         |> ExAws.request!() do
       {:ok, _term} -> :ok
       {:error, reason} -> {:error, reason}
     end
+  end
+
+  defp get_bucket_name do
+    System.get_env("S3_BUCKET_NAME", "")
+  end
+
+  defp get_file_path(filename) do
+    "#{System.get_env("S3_BUCKET_PREFIX", "")}/#{filename}"
   end
 end
 

@@ -15,7 +15,7 @@ config :alerts_ui,
   gtfs_proto_filename: "./assets/outputs/gtfs-realtime.proto",
   enhanced_json_output_filename: "alerts_feed_enhanced.json",
   protobuf_output_filename: "alerts_feed.pb",
-  migration_task: AlertsUI.ReleaseTasks.Dev
+  skip_migrations: true
 
 # Configure your database
 config :alerts_ui, AlertsUI.Repo,

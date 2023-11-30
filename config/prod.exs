@@ -16,7 +16,6 @@ config :ehmon, :report_mf, {:ehmon, :info_report}
 # of environment variables, is done on config/runtime.exs.
 
 # function for writing feed output files
-config :alerts_ui, file_write_module: AlertsUI.FeedOutput.WriteToS3
-
-# Config for db migration function
-config :alerts_ui, :migration_task, AlertsUI.ReleaseTasks
+config :alerts_ui,
+  file_write_module: AlertsUI.FeedOutput.WriteToS3,
+  skip_migrations: false
