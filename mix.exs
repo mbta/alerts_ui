@@ -30,7 +30,9 @@ defmodule AlertsUI.MixProject do
           AlertsUI.FeedOutput.GTFSProtobufDefinition.TripUpdate.TripProperties,
           AlertsUI.FeedOutput.GTFSProtobufDefinition.VehicleDescriptor,
           AlertsUI.FeedOutput.GTFSProtobufDefinition.VehiclePosition,
-          AlertsUI.FeedOutput.GTFSProtobufDefinition.VehiclePosition.CarriageDetails
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.VehiclePosition.CarriageDetails,
+          AlertsUI.FeedOutput.WriteToS3,
+          AlertsUI.FeedOutput.WriteLocal
         ]
       ]
     ]
@@ -77,6 +79,7 @@ defmodule AlertsUI.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:ex_aws, "~> 2.0"},
       {:ex_aws_rds, "~> 2.0"},
+      {:ex_aws_s3, "~> 2.0"},
       {:hackney, "1.20.1"},
       {:gen_stage, "~> 1.2.1"},
       {:req, "~> 0.4.0"},

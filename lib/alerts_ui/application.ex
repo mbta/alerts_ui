@@ -11,6 +11,9 @@ defmodule AlertsUI.Application do
 
     children =
       [
+        {Ecto.Migrator,
+         repos: Application.fetch_env!(:alerts_ui, :ecto_repos),
+         skip: AlertsUI.config(:skip_migrations) == true},
         # Start the Telemetry supervisor
         AlertsUIWeb.Telemetry,
         # Start the Ecto repository

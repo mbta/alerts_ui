@@ -13,8 +13,9 @@ config :alerts_ui,
   aws_rds_mod: ExAws.RDS,
   alert_api_url: {:system, "ALERT_API_URL"},
   gtfs_proto_filename: "./assets/outputs/gtfs-realtime.proto",
-  enhanced_json_output_filename: "./assets/outputs/alerts_feed_enhanced.json",
-  protobuf_output_filename: "./assets/outputs/alerts_feed.pb"
+  enhanced_json_output_filename: "alerts_feed_enhanced.json",
+  protobuf_output_filename: "alerts_feed.pb",
+  skip_migrations: true
 
 # Configure your database
 config :alerts_ui, AlertsUI.Repo,

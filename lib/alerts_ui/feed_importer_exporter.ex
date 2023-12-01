@@ -29,10 +29,14 @@ defmodule AlertsUi.FeedImporterExporter do
   def export_feed(opts) do
     Logger.info("#{__MODULE__}: Exporting alerts feed")
 
-    {export_time, {:ok, export_json}} = :timer.tc(&WriteFeed.write_feed/1, [opts])
+    case :timer.tc(&WriteFeed.write_feed/1, [opts]) do
+      {export_time, {:ok, export_json}} ->
+        Logger.info("#{__MODULE__}: Exported alerts feed: time_ms=#{export_time / 1_000}")
+        export_json
 
-    Logger.info("#{__MODULE__}: Exported alerts feed: time_ms=#{export_time / 1_000}")
-    export_json
+      {_, {:error, reason}} ->
+        Logger.warning("Error writing to file! #{reason}")
+    end
   end
 
   def compare_feeds(import_json, export_json) do
