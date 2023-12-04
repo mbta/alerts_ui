@@ -16,7 +16,7 @@ defmodule AlertsUI.FeedOutput.WriteToS3 do
 
   def write(filename, content) do
     case ExAws.S3.put_object(get_bucket_name(), get_file_path(filename), content)
-         |> ExAws.request!() do
+         |> ExAws.request() do
       {:ok, _term} -> :ok
       {:error, reason} -> {:error, reason}
     end
