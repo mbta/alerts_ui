@@ -122,6 +122,10 @@ defmodule AlertsUI.Alerts do
     )
   end
 
+  def list_all_paginated(params) do
+    Flop.validate_and_run(Alert, params, for: Alert)
+  end
+
   @spec get_by_alert_id(String.t()) :: Alert.t()
   def get_by_alert_id(alert_id) do
     Repo.get_by(

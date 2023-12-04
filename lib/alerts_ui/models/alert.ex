@@ -85,6 +85,16 @@ defmodule AlertsUI.Models.Alert do
           informed_entity: [InformedEntity.t()]
         }
 
+  @derive {
+    Flop.Schema,
+    filterable: [:closed_timestamp],
+    sortable: [:alert_id, :created_timestamp, :active_period],
+    default_order: %{
+      order_by: [:created_timestamp, :alert_id],
+      order_directions: [:desc, :desc]
+    }
+  }
+
   schema "alerts" do
     field :alert_id, :string
     field :effect, Ecto.Enum, values: @effect

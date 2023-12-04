@@ -92,7 +92,9 @@ defmodule AlertsUI.MixProject do
       # Specifying the specific verison 0.10.5 until the bug with version 0.10.6 is resolved.
       # See https://github.com/ueberauth/ueberauth/issues/194
       {:ueberauth, "0.10.6"},
-      {:ueberauth_oidcc, "~> 0.3.0"}
+      {:ueberauth_oidcc, "~> 0.3.0"},
+      {:flop_phoenix, "~> 0.22.4"},
+      {:tzdata, "~> 1.1"}
     ]
   end
 
