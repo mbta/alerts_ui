@@ -16,6 +16,6 @@ defmodule AlertsUI.FeedOutput.CreateGtfsJson do
       entity: alerts
     }
     |> Jason.encode!()
-    |> Jason.Formatter.pretty_print_to_iodata()
+    |> Jason.Formatter.pretty_print()
   end
 end

@@ -68,7 +68,7 @@ config :alerts_ui, Oban,
      crontab: [
        # Import and write GTFS feeds every minute
        {"* * * * *", AlertsUi.FeedImporterExporter,
-        unique: [period: 30, states: [:available, :scheduled, :executing]]}
+        max_attempts: 3, unique: [period: 30, states: [:available, :scheduled, :executing]]}
      ]}
   ],
   queues: [default: 10]
