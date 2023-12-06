@@ -63,6 +63,7 @@ defmodule AlertsUI.FeedOutput.CompareFeed do
       :ok
     else
       changed_map = %{value: _, changed: _} -> {:alert_map_mismatch, changed_map}
+      {:informed_entity_length_mismatch, no_match} -> {:informed_entity_mismatch, no_match}
       {:informed_entity_mismatch, no_match} -> {:informed_entity_mismatch, no_match}
       {:active_period_mismatch, no_match} -> {:active_period_mismatch, no_match}
     end
@@ -83,7 +84,13 @@ defmodule AlertsUI.FeedOutput.CompareFeed do
          [] <- incoming -- outgoing do
       :ok
     else
-      _ -> {:informed_entity_mismatch, ["Alert_id: #{alert_id}", incoming, outgoing]}
+      false ->
+        {:informed_entity_length_mismatch,
+         ["Alert_id: #{alert_id}", length(incoming), length(outgoing)]}
+
+      _ ->
+        {:informed_entity_content_mismatch,
+         ["Alert_id: #{alert_id}", "difference:", incoming -- outgoing]}
     end
   end
 end
