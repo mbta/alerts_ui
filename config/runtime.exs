@@ -55,7 +55,7 @@ cond do
 
     pool_size =
       case System.get_env("DATABASE_POOL_SIZE") do
-        nil -> 10
+        nil -> 20
         val -> String.to_integer(val)
       end
 
@@ -68,8 +68,10 @@ cond do
       hostname: hostname,
       port: port,
       pool_size: pool_size,
+      queue_target: 5000,
       # password set by `configure` callback below
       configure: {AlertsUI.Repo, :before_connect, []},
+      timeout: 15_000,
       ssl: true,
       ssl_opts: [
         cacertfile: "priv/aws-cert-bundle.pem",

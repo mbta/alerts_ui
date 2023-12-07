@@ -111,7 +111,7 @@ defmodule AlertsUI.FeedOutput.CompareFeedTest do
         }
       ]
 
-      expected = {:informed_entity_mismatch, ["Alert_id: 123", list_1, list_2]}
+      expected = {:informed_entity_length_mismatch, ["Alert_id: 123", 3, 2]}
       assert expected == CompareFeed.compare_informed_entities(list_1, list_2, "123")
     end
 
@@ -152,7 +152,20 @@ defmodule AlertsUI.FeedOutput.CompareFeedTest do
         }
       ]
 
-      expected = {:informed_entity_mismatch, ["Alert_id: 123", list_1, list_2]}
+      expected =
+        {:informed_entity_content_mismatch,
+         [
+           "Alert_id: 123",
+           "difference:",
+           [
+             %{
+               "activities" => ["PARK_CAR"],
+               "facility_id" => "park-qamnl-garage",
+               "stop_id" => "door-qamnl-indep"
+             }
+           ]
+         ]}
+
       assert expected == CompareFeed.compare_informed_entities(list_1, list_2, "123")
     end
   end
@@ -322,7 +335,7 @@ defmodule AlertsUI.FeedOutput.CompareFeedTest do
         build(:alert_entity_data, %{"id" => "567"})
       ]
 
-      expected = {:alert_list_length_difference, [eq: ["123", "234", "456"], ins: ["567"]]}
+      expected = {:alert_list_length_difference, [ins: ["567"]]}
 
       assert expected == CompareFeed.compare_entity_lists(list_1, list_2)
     end
@@ -405,7 +418,17 @@ defmodule AlertsUI.FeedOutput.CompareFeedTest do
       expected = {
         :error_in_alert_match,
         [
-          informed_entity_mismatch: ["Alert_id: 234", informed_entity_1, informed_entity_2]
+          informed_entity_content_mismatch: [
+            "Alert_id: 234",
+            "difference:",
+            [
+              %{
+                "activities" => ["RIDE"],
+                "facility_id" => "park-qamnl-garage",
+                "stop_id" => "door-qamnl-indep"
+              }
+            ]
+          ]
         ]
       }
 
