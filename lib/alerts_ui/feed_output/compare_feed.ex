@@ -26,8 +26,17 @@ defmodule AlertsUI.FeedOutput.CompareFeed do
     outgoing_ids = Enum.map(outgoing, & &1["id"])
 
     case length(incoming_ids) == length(outgoing_ids) do
-      true -> compare_alert_lists(incoming, outgoing)
-      false -> {:alert_list_length_difference, List.myers_difference(incoming_ids, outgoing_ids)}
+      true ->
+        compare_alert_lists(incoming, outgoing)
+
+      false ->
+        {:alert_list_length_difference,
+         [
+           "incoming_length: #{length(incoming_ids)}",
+           "outgoing_length: #{length(outgoing_ids)}",
+           List.myers_difference(incoming_ids, outgoing_ids)
+           |> Enum.filter(fn {k, _v} -> k !== :eq end)
+         ]}
     end
   end
 
@@ -62,9 +71,11 @@ defmodule AlertsUI.FeedOutput.CompareFeed do
          :ok <- compare_informed_entities(incoming_ie, outgoing_ie, incoming["id"]) do
       :ok
     else
-      changed_map = %{value: _, changed: _} -> {:alert_map_mismatch, changed_map}
-      {:informed_entity_mismatch, no_match} -> {:informed_entity_mismatch, no_match}
-      {:active_period_mismatch, no_match} -> {:active_period_mismatch, no_match}
+      changed_map = %{value: _, changed: _} ->
+        {:alert_map_mismatch, changed_map}
+
+      other_result ->
+        other_result
     end
   end
 
@@ -83,7 +94,13 @@ defmodule AlertsUI.FeedOutput.CompareFeed do
          [] <- incoming -- outgoing do
       :ok
     else
-      _ -> {:informed_entity_mismatch, ["Alert_id: #{alert_id}", incoming, outgoing]}
+      false ->
+        {:informed_entity_length_mismatch,
+         ["Alert_id: #{alert_id}", length(incoming), length(outgoing)]}
+
+      _ ->
+        {:informed_entity_content_mismatch,
+         ["Alert_id: #{alert_id}", "difference:", incoming -- outgoing]}
     end
   end
 end

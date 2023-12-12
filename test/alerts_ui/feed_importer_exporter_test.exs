@@ -99,4 +99,30 @@ defmodule AlertsUi.FeedImporterExporterTest do
       assert log =~ "Export mismatch problem: alert_list_length_difference"
     end
   end
+
+  describe "end to end" do
+    test "match" do
+      set_log_level(:info)
+
+      alert =
+        "alerts_enhanced.json"
+        |> fixture_path()
+        |> File.read!()
+        |> Jason.decode!()
+
+      opts = [
+        {:get_fn,
+         fn _ ->
+           Response.new(status: 200, body: alert)
+         end}
+      ]
+
+      {_result, log} =
+        with_log(fn ->
+          FeedImporterExporter.perform(%Job{args: %{}}, opts)
+        end)
+
+      assert log =~ "Export ok!"
+    end
+  end
 end
