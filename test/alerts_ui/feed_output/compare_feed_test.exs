@@ -335,7 +335,9 @@ defmodule AlertsUI.FeedOutput.CompareFeedTest do
         build(:alert_entity_data, %{"id" => "567"})
       ]
 
-      expected = {:alert_list_length_difference, [ins: ["567"]]}
+      expected =
+        {:alert_list_length_difference,
+         ["incoming_length: 3", "outgoing_length: 4", [ins: ["567"]]]}
 
       assert expected == CompareFeed.compare_entity_lists(list_1, list_2)
     end

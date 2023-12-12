@@ -31,8 +31,12 @@ defmodule AlertsUI.FeedOutput.CompareFeed do
 
       false ->
         {:alert_list_length_difference,
-         List.myers_difference(incoming_ids, outgoing_ids)
-         |> Enum.filter(fn {k, _v} -> k !== :eq end)}
+         [
+           "incoming_length: #{length(incoming_ids)}",
+           "outgoing_length: #{length(outgoing_ids)}",
+           List.myers_difference(incoming_ids, outgoing_ids)
+           |> Enum.filter(fn {k, _v} -> k !== :eq end)
+         ]}
     end
   end
 
@@ -70,14 +74,8 @@ defmodule AlertsUI.FeedOutput.CompareFeed do
       changed_map = %{value: _, changed: _} ->
         {:alert_map_mismatch, changed_map}
 
-      {:informed_entity_length_mismatch, no_match} ->
-        {:informed_entity_length_mismatch, no_match}
-
-      {:informed_entity_content_mismatch, no_match} ->
-        {:informed_entity_content_mismatch, no_match}
-
-      {:active_period_mismatch, no_match} ->
-        {:active_period_mismatch, no_match}
+      other_result ->
+        other_result
     end
   end
 
