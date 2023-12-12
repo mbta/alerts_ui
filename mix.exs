@@ -57,7 +57,6 @@ defmodule AlertsUI.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:bypass, "~> 2.1", only: :test},
       {:credo, "~> 1.7.1", only: [:dev, :test]},
       {:dialyxir, "~> 1.4.1", only: [:dev, :test], runtime: false},
       {:ecto_sql, "~> 3.10"},
