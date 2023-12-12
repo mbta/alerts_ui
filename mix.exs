@@ -87,7 +87,11 @@ defmodule AlertsUI.MixProject do
       {:stream_data, "~> 0.6.0", only: :test},
       {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 0.6"},
-      {:telemetry_poller, "~> 1.0"}
+      {:telemetry_poller, "~> 1.0"},
+      # Specifying the specific verison 0.10.5 until the bug with version 0.10.6 is resolved.
+      # See https://github.com/ueberauth/ueberauth/issues/194
+      {:ueberauth, "0.10.5"},
+      {:ueberauth_oidcc, "~> 0.3.0"}
     ]
   end
 

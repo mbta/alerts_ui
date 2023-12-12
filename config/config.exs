@@ -81,6 +81,31 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+keycloak_base_opts = [
+  issuer: :keycloak_issuer,
+  userinfo: true,
+  uid_field: "preferred_username",
+  scopes: ~w(openid email profile roles web-origins),
+  preferred_auth_methods: ~w(client_secret_post)a
+]
+
+config :ueberauth, Ueberauth,
+  providers: [
+    keycloak: {Ueberauth.Strategy.Oidcc, keycloak_base_opts},
+    edit_password:
+      {Ueberauth.Strategy.Oidcc,
+       Keyword.merge(keycloak_base_opts,
+         callback_path: "/auth/keycloak_edit/callback",
+         authorization_params: %{kc_action: "UPDATE_PASSWORD"}
+       )},
+    update_profile:
+      {Ueberauth.Strategy.Oidcc,
+       Keyword.merge(keycloak_base_opts,
+         callback_path: "/auth/keycloak_edit/callback",
+         authorization_params: %{kc_action: "MBTA_UPDATE_PROFILE"}
+       )}
+  ]
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
