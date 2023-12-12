@@ -7,6 +7,8 @@ import Config
 # before starting your production server.
 config :alerts_ui, AlertsUIWeb.Endpoint, cache_static_manifest: "priv/static/cache_manifest.json"
 
+config :alerts_ui, :redirect_http?, true
+
 # Do not print debug messages in production
 config :logger, level: :info
 

@@ -37,6 +37,8 @@ config :alerts_ui, AlertsUIWeb.Endpoint,
   pubsub_server: AlertsUI.PubSub,
   live_view: [signing_salt: "zLRBcKO6"]
 
+config :alerts_ui, :redirect_http?, false
+
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.17.11",
