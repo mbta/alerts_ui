@@ -72,7 +72,7 @@ defmodule AlertsUI.FeedOutput.CompareFeed do
       :ok
     else
       changed_map = %{value: _, changed: _} ->
-        {:alert_map_mismatch, changed_map}
+        {:alert_map_mismatch, ["Alert id: #{incoming["id"]}", changed_map]}
 
       other_result ->
         other_result

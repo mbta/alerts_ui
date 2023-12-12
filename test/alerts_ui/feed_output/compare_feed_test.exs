@@ -294,10 +294,16 @@ defmodule AlertsUI.FeedOutput.CompareFeedTest do
         ]
       }
 
-      alert_1 = build(:alert_entity_data, %{"alert" => %{"header_text" => translation_1}})
+      alert_1 =
+        build(:alert_entity_data, %{
+          "alert" => %{"header_text" => translation_1},
+          "id" => "123456"
+        })
+
       alert_2 = build(:alert_entity_data, %{"alert" => %{"header_text" => translation_2}})
 
-      assert {:alert_map_mismatch, %{value: _, removed: _, added: _, changed: :map_change}} =
+      assert {:alert_map_mismatch,
+              ["Alert id: 123456", %{value: _, removed: _, added: _, changed: :map_change}]} =
                CompareFeed.compare_alerts(alert_1, alert_2)
     end
   end
@@ -358,14 +364,17 @@ defmodule AlertsUI.FeedOutput.CompareFeedTest do
       expected = {
         :error_in_alert_match,
         [
-          alert_map_mismatch: %{
-            value: %{
-              "cause_detail" => %{removed: "cool", added: "bean", changed: :primitive_change}
-            },
-            removed: %{"cause_detail" => "cool"},
-            added: %{"cause_detail" => "bean"},
-            changed: :map_change
-          }
+          alert_map_mismatch: [
+            "Alert id: 234",
+            %{
+              value: %{
+                "cause_detail" => %{removed: "cool", added: "bean", changed: :primitive_change}
+              },
+              removed: %{"cause_detail" => "cool"},
+              added: %{"cause_detail" => "bean"},
+              changed: :map_change
+            }
+          ]
         ]
       }
 

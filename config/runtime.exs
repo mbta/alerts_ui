@@ -68,10 +68,9 @@ cond do
       hostname: hostname,
       port: port,
       pool_size: pool_size,
-      queue_target: 5000,
       # password set by `configure` callback below
       configure: {AlertsUI.Repo, :before_connect, []},
-      timeout: 15_000,
+      timeout: 30_000,
       ssl: true,
       ssl_opts: [
         cacertfile: "priv/aws-cert-bundle.pem",
