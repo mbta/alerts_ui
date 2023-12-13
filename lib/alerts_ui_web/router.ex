@@ -52,11 +52,6 @@ defmodule AlertsUIWeb.Router do
     pipe_through [:redirect_prod_http, :browser]
 
     get "/:provider/callback", AuthController, :callback
-  end
-
-  scope "/auth", AlertsUIWeb do
-    pipe_through [:redirect_prod_http, :browser]
-
     delete "/keycloak/logout", AuthController, :logout
   end
 
