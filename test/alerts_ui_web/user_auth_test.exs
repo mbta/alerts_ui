@@ -50,6 +50,7 @@ defmodule AlertsUIWeb.UserAuthTest do
         |> UserAuth.log_in_user(user, logout_uri())
 
       assert redirected_to(conn) == "/hello"
+      refute get_session(conn, :user_return_to)
     end
   end
 
