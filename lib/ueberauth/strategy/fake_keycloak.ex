@@ -36,19 +36,7 @@ defmodule Ueberauth.Strategy.FakeKeycloak do
       expires: true,
       expires_at: expires_at(conn),
       other: %{
-        id_token: @token,
-        provider: :keycloak,
-        user_info: %{
-          "email" => @email,
-          "email_verified" => true,
-          "family_name" => "Name",
-          "given_name" => "Fake",
-          "mbta_uuid" => @mbta_uuid,
-          "name" => "Fake Name",
-          "phone_number" => "+15555555555",
-          "preferred_username" => @email,
-          "sub" => "7eaf0809-88da-4895-97e0-c83444ab310f"
-        }
+        id_token: @token
       },
       refresh_token: nil,
       scopes: [],
