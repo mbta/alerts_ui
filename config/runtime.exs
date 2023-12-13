@@ -81,17 +81,7 @@ cond do
           {&:ssl_verify_hostname.verify_fun/3, [check_hostname: String.to_charlist(hostname)]}
       ]
 
-    if base_uri = System.get_env("KEYCLOAK_BASE_URI") do
-      config :alerts_ui,
-        keycloak_base_uri: base_uri
-
-      keycloak_issuer =
-        String.replace_trailing(
-          System.fetch_env!("KEYCLOAK_WELL_KNOWN_OIDC"),
-          "/.well-known/openid-configuration",
-          ""
-        )
-
+    if keycloak_issuer = System.get_env("KEYCLOAK_ISSUER") do
       keycloak_base_opts = [
         client_id: System.fetch_env!("KEYCLOAK_CLIENT_ID"),
         client_secret: System.fetch_env!("KEYCLOAK_CLIENT_SECRET")
