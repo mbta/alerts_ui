@@ -35,4 +35,25 @@ defmodule AlertsUIWeb.ConnCase do
     AlertsUI.DataCase.setup_sandbox(tags)
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
+
+  @doc """
+  Logs the given `user` into the `conn`.
+
+  If no user is provided, use the fixture data.
+
+  It returns an updated `conn`.
+  """
+  def log_in_user(conn) do
+    user = AlertsUI.AccountsFixtures.user_fixture()
+    log_in_user(conn, user)
+  end
+
+  def log_in_user(conn, user) do
+    conn
+    |> Phoenix.ConnTest.init_test_session(%{})
+    |> Plug.Conn.put_session(:user, user)
+    |> Plug.Conn.put_session(:logout_uri, logout_uri())
+  end
+
+  def logout_uri, do: "http://oidc.example/end_session_uri"
 end

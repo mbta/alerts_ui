@@ -37,6 +37,8 @@ config :alerts_ui, AlertsUIWeb.Endpoint,
   pubsub_server: AlertsUI.PubSub,
   live_view: [signing_salt: "zLRBcKO6"]
 
+config :alerts_ui, :redirect_http?, false
+
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.17.11",
@@ -80,6 +82,20 @@ config :logger, :console,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
+
+config :ueberauth, Ueberauth,
+  providers: [
+    keycloak: {
+      Ueberauth.Strategy.Oidcc,
+      [
+        issuer: :keycloak_issuer,
+        userinfo: true,
+        uid_field: "preferred_username",
+        scopes: ~w(openid email roles),
+        preferred_auth_methods: ~w(client_secret_post)a
+      ]
+    }
+  ]
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
