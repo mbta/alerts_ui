@@ -21,7 +21,3 @@ config :ehmon, :report_mf, {:ehmon, :info_report}
 config :alerts_ui,
   file_write_module: AlertsUI.FeedOutput.WriteToS3,
   skip_migrations: false
-
-# Enable dev routes for dashboard and mailbox
-# TODO do not merge this, just for testing
-config :alerts_ui, dev_routes: true

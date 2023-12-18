@@ -69,7 +69,7 @@ config :alerts_ui, Oban,
     {Oban.Plugins.Cron,
      crontab: [
        # Import and write GTFS feeds every minute
-       {"*/2 * * * *", AlertsUi.FeedImporterExporter,
+       {"* * * * *", AlertsUi.FeedImporterExporter,
         max_attempts: 1, unique: [period: 30, states: [:available, :scheduled, :executing]]}
      ]}
   ],
