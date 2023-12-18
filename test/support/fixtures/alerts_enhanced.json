@@ -45,6 +45,15 @@
                         }
                     ]
                 },
+                "image": {
+                    "localized_image": [
+                        {
+                            "url": "https://dev-mbta.pantheonsite.io/sites/default/files/styles/max_2600x2600/public/media/2023-12/GovCenter-NorthStation_diagram3.png?itok=OZTrNJcN",
+                            "media_type": "application/octet-stream",
+                            "language": "en"
+                        }
+                    ]
+                },
                 "severity": 3,
                 "created_timestamp": 1695305934,
                 "last_modified_timestamp": 1697118343,

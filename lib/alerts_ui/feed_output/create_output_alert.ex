@@ -124,7 +124,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
         %{
           url: input_string,
           language: "en",
-          media_type: "image/png"
+          media_type: "application/octet-stream"
         }
       ]
     }
