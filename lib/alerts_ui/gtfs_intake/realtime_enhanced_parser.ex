@@ -44,7 +44,7 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParser do
       duration_certainty: alert |> Map.get("duration_certainty") |> parse_string_to_atom(),
       reminder_times: alert |> Map.get("reminder_times"),
       active_period: alert |> Map.get("active_period") |> parse_active_periods,
-      image_url: alert |> Map.get("image") |> parse_translated_string(),
+      image_url: alert |> Map.get("image") |> parse_translated_image(),
       image_alternative_text:
         alert |> Map.get("image_alternative_text") |> parse_translated_string(),
       tts_header_text: alert |> Map.get("tts_header_text") |> parse_translated_string(),
@@ -98,6 +98,16 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParser do
         end: active_period |> Map.get("end") |> parse_unix_time()
       }
     end)
+  end
+
+  @spec parse_translated_image(nil | [map()]) :: String.t() | nil
+  defp parse_translated_image(nil), do: nil
+
+  defp parse_translated_image(%{"localized_image" => localized_images}) do
+    case Enum.find(localized_images, &(&1["language"] == "en")) do
+      %{"url" => url} -> url
+      _ -> nil
+    end
   end
 
   @spec parse_translated_string(nil | [map()]) :: String.t() | nil
