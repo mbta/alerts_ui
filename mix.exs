@@ -94,7 +94,8 @@ defmodule AlertsUI.MixProject do
       {:ueberauth, "0.10.6"},
       {:ueberauth_oidcc, "~> 0.3.0"},
       {:flop_phoenix, "~> 0.22.4"},
-      {:tzdata, "~> 1.1"}
+      {:tzdata, "~> 1.1"},
+      {:ecto_psql_extras, "~> 0.6", only: :dev}
     ]
   end
 
