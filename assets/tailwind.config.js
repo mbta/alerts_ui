@@ -18,14 +18,8 @@ module.exports = {
       }
     },
   },
-  daisyui: {
-    logs: false,
-    themes: ["light", "dark", "cupcake", "corporate", "winter"],
-  },
   plugins: [
-    require("@tailwindcss/typography"),
     require("@tailwindcss/forms"),
-    require("daisyui"),
     // Allows prefixing tailwind classes with LiveView classes to add rules
     // only when LiveView classes are applied, for example:
     //
