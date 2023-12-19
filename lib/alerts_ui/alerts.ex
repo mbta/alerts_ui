@@ -56,7 +56,11 @@ defmodule AlertsUI.Alerts do
       )
 
     if incoming_alert_is_more_recent do
-      {:ok, stored_alert |> Alert.changeset(incoming_alert)}
+      stored_alert_with_preloads =
+        stored_alert
+        |> Repo.preload(informed_entity: [:trip])
+
+      {:ok, stored_alert_with_preloads |> Alert.changeset(incoming_alert)}
     else
       {:error, change(%Alert{}, %{}) |> add_error(:alert_id, "alert is not most recent version")}
     end
@@ -65,8 +69,7 @@ defmodule AlertsUI.Alerts do
   defp get_alert_by_alert_id_query(alert_id) do
     from(
       a in Alert,
-      where: a.alert_id == ^alert_id,
-      preload: [informed_entity: [:trip]]
+      where: a.alert_id == ^alert_id
     )
   end
 
@@ -94,11 +97,16 @@ defmodule AlertsUI.Alerts do
 
   @spec list_all_open() :: [Alert.t()]
   def list_all_open do
+    # Using an inner join here reduces the
+    # number of overall queries
+    # ref. https://hexdocs.pm/ecto/Ecto.Query.html#preload/3
     Repo.all(
       from(
         a in Alert,
         where: is_nil(a.closed_timestamp),
-        preload: [informed_entity: [:trip]],
+        inner_join: ie in AlertsUI.Models.InformedEntity,
+        on: ie.alert_id == a.id,
+        preload: [informed_entity: {ie, :trip}],
         order_by: [asc: a.alert_id]
       )
     )

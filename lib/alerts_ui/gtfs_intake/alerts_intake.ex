@@ -57,7 +57,7 @@ defmodule AlertsUI.GTFSIntake.AlertsIntake do
 
   defp log_parse_error(error, trace, body) do
     Logger.error(fn ->
-      "#{__MODULE__}: Alerts feed parse error error=#{inspect(error)}\n#{Exception.format_stacktrace(trace)}\n body=#{inspect(body)}"
+      "#{__MODULE__}: Alerts feed parse error error=#{inspect(error)} stacktrace=#{Exception.format_stacktrace(trace)} body=#{inspect(body)}"
     end)
   end
 end

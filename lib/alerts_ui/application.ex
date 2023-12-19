@@ -28,6 +28,15 @@ defmodule AlertsUI.Application do
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     Oban.Telemetry.attach_default_logger()
+
+    :ok =
+      :telemetry.attach(
+        "ecto-handler",
+        [:alerts_ui, :repo, :query],
+        &AlertsUI.Telemetry.handle_event/4,
+        %{}
+      )
+
     opts = [strategy: :one_for_one, name: AlertsUI.Supervisor]
     Supervisor.start_link(children, opts)
   end

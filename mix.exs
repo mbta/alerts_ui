@@ -19,6 +19,7 @@ defmodule AlertsUI.MixProject do
           AlertsUIWeb.Layouts,
           AlertsUIWeb.Router,
           AlertsUIWeb.Telemetry,
+          AlertsUI.Telemetry,
           AlertsUI.Application,
           AlertsUI.Support.Factory,
           AlertsUI.FeedOutput.GTFSProtobufDefinition.Position,
