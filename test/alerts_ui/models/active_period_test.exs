@@ -88,4 +88,96 @@ defmodule AlertsUI.Models.ActivePeriodTest do
       assert result == false
     end
   end
+
+  describe "start_time_of_first_active_period/1" do
+    test "gives earliest start out of active periods" do
+      active_periods = [
+        %ActivePeriod{
+          start: ~U[2023-10-10 00:01:00Z],
+          end: ~U[2023-10-18 00:01:00Z]
+        },
+        %ActivePeriod{
+          start: ~U[2023-10-09 00:01:00Z],
+          end: ~U[2023-10-19 00:01:00Z]
+        },
+        %ActivePeriod{
+          start: ~U[2023-10-11 00:01:00Z],
+          end: ~U[2023-10-20 00:01:00Z]
+        },
+        %ActivePeriod{
+          start: nil,
+          end: ~U[2023-10-20 00:01:00Z]
+        }
+      ]
+
+      result = ActivePeriod.start_time_of_first_active_period(active_periods)
+      assert result == ~U[2023-10-09 00:01:00Z]
+    end
+
+    test "returns nil if no start times" do
+      active_periods = [
+        %ActivePeriod{
+          end: ~U[2023-10-11 00:01:00Z],
+          start: nil
+        },
+        %ActivePeriod{
+          end: ~U[2023-10-10 00:01:00Z],
+          start: nil
+        },
+        %ActivePeriod{
+          end: ~U[2023-10-09 00:01:00Z],
+          start: nil
+        }
+      ]
+
+      result = ActivePeriod.start_time_of_first_active_period(active_periods)
+      assert result == nil
+    end
+  end
+
+  describe "end_time_of_last_active_period/1" do
+    test "gives last end out of active periods" do
+      active_periods = [
+        %ActivePeriod{
+          start: ~U[2023-10-11 00:01:00Z],
+          end: ~U[2023-10-20 00:01:00Z]
+        },
+        %ActivePeriod{
+          start: ~U[2023-10-10 00:01:00Z],
+          end: ~U[2023-10-18 00:01:00Z]
+        },
+        %ActivePeriod{
+          start: ~U[2023-10-09 00:01:00Z],
+          end: ~U[2023-10-19 00:01:00Z]
+        },
+        %ActivePeriod{
+          start: ~U[2023-10-09 00:01:00Z],
+          end: nil
+        }
+      ]
+
+      result = ActivePeriod.end_time_of_last_active_period(active_periods)
+      assert result == ~U[2023-10-20 00:01:00Z]
+    end
+
+    test "returns nil if no end times" do
+      active_periods = [
+        %ActivePeriod{
+          start: ~U[2023-10-11 00:01:00Z],
+          end: nil
+        },
+        %ActivePeriod{
+          start: ~U[2023-10-10 00:01:00Z],
+          end: nil
+        },
+        %ActivePeriod{
+          start: ~U[2023-10-09 00:01:00Z],
+          end: nil
+        }
+      ]
+
+      result = ActivePeriod.end_time_of_last_active_period(active_periods)
+      assert result == nil
+    end
+  end
 end

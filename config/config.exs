@@ -17,6 +17,8 @@ config :alerts_ui,
   protobuf_output_filename: "alerts_feed.pb",
   skip_migrations: true
 
+config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
+
 # Configure your database
 config :alerts_ui, AlertsUI.Repo,
   migration_timestamps: [
@@ -69,11 +71,15 @@ config :alerts_ui, Oban,
     {Oban.Plugins.Cron,
      crontab: [
        # Import and write GTFS feeds every minute
-       {"* * * * *", AlertsUi.FeedImporterExporter,
+       {"*/2 * * * *", AlertsUi.FeedImporterExporter,
         max_attempts: 1, unique: [period: 30, states: [:available, :scheduled, :executing]]}
      ]}
   ],
   queues: [default: 10]
+
+# Configures Flop Pagination
+config :flop,
+  repo: AlertsUI.Repo
 
 # Configures Elixir's Logger
 config :logger, :console,

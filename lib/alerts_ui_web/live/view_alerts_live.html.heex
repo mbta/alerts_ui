@@ -1,0 +1,57 @@
+<div class="w-100 flex flex-row justify-center">
+  <article class="prose prose-stone min-w-fit">
+    <h1>Alerts</h1>
+    <div data-theme="winter" class="flex flex-col justify-center min-w-fit">
+      <Flop.Phoenix.table
+        items={@alerts}
+        meta={@meta}
+        on_sort={JS.push("sort-alerts")}
+        opts={[
+          table_attrs: [class: "table"],
+          thead_th_attrs: [class: "min-w-[10rem]"],
+          tbody_tr_attrs: [class: "hover"],
+          no_results_content: "No alerts found"
+        ]}
+      >
+        <:col :let={alert} label="Alert ID" field={:alert_id}><%= alert.alert_id %></:col>
+        <:col :let={alert} label="Description" field={:header_text} col_style="min-width: 20rem;">
+          <%= alert.header_text %>
+        </:col>
+        <:col :let={alert} label="Created At" field={:created_timestamp}>
+          <%= DateTimeHelpers.friendly_date_time(alert.created_timestamp) %>
+        </:col>
+        <:col :let={alert} label="Start" field={:active_period}>
+          <%= DateTimeHelpers.friendly_date_time(
+            ActivePeriod.start_time_of_first_active_period(alert.active_period)
+          ) %>
+        </:col>
+        <:col :let={alert} label="End" field={:active_period}>
+          <%= DateTimeHelpers.friendly_date_time(
+            ActivePeriod.end_time_of_last_active_period(alert.active_period)
+          ) %>
+        </:col>
+        <:col :let={alert} label="Closed At" field={:closed_timestamp}>
+          <%= DateTimeHelpers.friendly_date_time(alert.closed_timestamp) %>
+        </:col>
+      </Flop.Phoenix.table>
+
+      <Flop.Phoenix.pagination
+        meta={@meta}
+        on_paginate={JS.push("paginate-alerts")}
+        opts={[
+          page_links: {:ellipsis, 3},
+          wrapper_attrs: [class: "my-6 flex flex-row justify-center not-prose"],
+          disabled_class: "join-item btn btn-disabled",
+          pagination_link_attrs: [class: "join-item btn"],
+          current_link_attrs: [class: "join-item btn btn-active"],
+          next_link_content: "»",
+          next_link_attrs: [class: "join-item btn btn-outline order-last ml-4"],
+          previous_link_content: "«",
+          previous_link_attrs: [class: "join-item btn btn-outline mr-4"],
+          pagination_list_attrs: [class: "join"],
+          ellipsis_attrs: [class: "join-item btn btn-disabled"]
+        ]}
+      />
+    </div>
+  </article>
+</div>

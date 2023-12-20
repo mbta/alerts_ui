@@ -200,6 +200,17 @@ defmodule AlertsUI.AlertsTest do
     end
   end
 
+  describe "list_all_paginated/1" do
+    test "list all alerts with flop" do
+      insert(:alert, %{alert_id: "234"})
+      insert(:alert, %{alert_id: "456"})
+      insert(:alert, %{alert_id: "123"})
+      {:ok, {results, %Flop.Meta{}}} = Alerts.list_all_paginated()
+      assert length(results) == 3
+      assert Enum.map(results, & &1.alert_id) |> Enum.sort() == ["123", "234", "456"]
+    end
+  end
+
   describe "list_all_open/0" do
     test "lists all alerts" do
       insert(:alert, %{alert_id: "234", closed_timestamp: ~U[2023-10-14 00:01:00Z]})

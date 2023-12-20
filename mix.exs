@@ -92,7 +92,10 @@ defmodule AlertsUI.MixProject do
       # Specifying the specific verison 0.10.5 until the bug with version 0.10.6 is resolved.
       # See https://github.com/ueberauth/ueberauth/issues/194
       {:ueberauth, "0.10.6"},
-      {:ueberauth_oidcc, "~> 0.3.0"}
+      {:ueberauth_oidcc, "~> 0.3.0"},
+      {:flop_phoenix, "~> 0.22.4"},
+      {:tzdata, "~> 1.1"},
+      {:ecto_psql_extras, "~> 0.6", only: :dev}
     ]
   end
 
@@ -107,6 +110,8 @@ defmodule AlertsUI.MixProject do
       setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
+      "ecto.test_setup": ["ecto.create", "ecto.migrate"],
+      "ecto.test_reset": ["ecto.drop", "ecto.test_setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind default", "esbuild default"],

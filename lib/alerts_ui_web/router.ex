@@ -61,6 +61,13 @@ defmodule AlertsUIWeb.Router do
     get("/_health", HealthController, :index)
   end
 
+  live_session :default do
+    scope "/", AlertsUIWeb do
+      pipe_through(:browser)
+      live("/alerts", ViewAlertsLive)
+    end
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", AlertsUIWeb do
   #   pipe_through :api

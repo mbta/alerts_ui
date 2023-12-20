@@ -19,7 +19,7 @@ A UI for creating and modifying alerts
 4. `cat .envrc.example | sed -e "s/__username__/$(logname)/g" > .envrc`
 6. `direnv allow`
 7. `mix ecto.setup`
-8. `MIX_ENV=test mix ecto.setup`
+8. `MIX_ENV=test mix ecto.test_setup`
 
 The above assumes you have a PostgreSQL user with the same name as your OS user
 (`logname`), which should be the default with a Homebrew install. Otherwise, you
