@@ -42,9 +42,10 @@ RUN echo "51b107da46717aed974d97464b63f7357b220fe8737969db1492d1cae74b3947  aws-
 
 # Add frontend assets compiled in node container, required by phx.digest
 COPY --from=assets-builder /root/priv/static ./priv/static
+COPY --from=assets-builder /root/assets/node_modules ./assets/node_modules
 
 RUN mix compile
-RUN mix phx.digest
+RUN mix assets.deploy
 RUN mix release
 
 # --- Set up runtime container ---
