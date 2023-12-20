@@ -10,10 +10,16 @@ defmodule AlertsUIWeb.AlertsLiveTest do
       :ok
     end
 
-    test "connected mount", %{conn: conn} do
+    test "connected mount displays a list of alerts when logged in", %{conn: conn} do
+      conn = log_in_user(conn)
+
       {:ok, _view, html} = live(conn, "/alerts")
       assert html =~ ~r/Alerts/
       assert html =~ ~r/123/
+    end
+
+    test "redirects the user when not logged in", %{conn: conn} do
+      assert live(conn, "/alerts") == {:error, {:redirect, %{to: "/auth/keycloak", flash: %{}}}}
     end
   end
 end
