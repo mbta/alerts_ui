@@ -13,6 +13,9 @@
           no_results_content: "No alerts found"
         ]}
       >
+        <:col :let={alert} label="Route" field={:alert_id}>
+          <.informed_entity_icon entities={AlertsUI.Models.Alert.entities_with_icons(alert)} />
+        </:col>
         <:col :let={alert} label="Alert ID" field={:alert_id}><%= alert.alert_id %></:col>
         <:col :let={alert} label="Description" field={:header_text} col_style="min-width: 20rem;">
           <%= alert.header_text %>

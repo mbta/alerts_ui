@@ -16,7 +16,7 @@ defmodule AlertsUIWeb.CoreComponents do
   """
   use Phoenix.Component
 
-  import AlertsUIWeb.Gettext
+  import AlertsUIWeb.{Gettext, IconComponents}
 
   alias Phoenix.HTML.{Form, FormField}
   alias Phoenix.LiveView.JS
@@ -589,6 +589,21 @@ defmodule AlertsUIWeb.CoreComponents do
     <span class={[@name, @class]} />
     """
   end
+
+  @doc """
+  Renders a list of icons representing an alert's informed entities.
+  """
+  attr(:entities, :list, required: true)
+
+  def informed_entity_icon(assigns) do
+    ~H"""
+    <.mode_icon type={mode_icon_type(@entities)} />
+    """
+  end
+
+  defp mode_icon_type([_, _ | _]), do: "Multiple"
+  defp mode_icon_type([entity]), do: entity
+  defp mode_icon_type(_), do: "Other"
 
   ## JS Commands
 

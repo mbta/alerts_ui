@@ -141,4 +141,28 @@ defmodule AlertsUI.Models.Alert do
     |> validate_length(:informed_entity, min: 1)
     |> unique_constraint(:alert_id)
   end
+
+  @spec entities_with_icons(t()) :: [String.t()]
+  def entities_with_icons(%__MODULE__{informed_entity: entities}) do
+    entities
+    |> Enum.flat_map(&routes_or_facilities/1)
+    |> Enum.uniq()
+  end
+
+  @spec routes_or_facilities(InformedEntity.t()) :: [String.t()]
+  defp routes_or_facilities(%InformedEntity{route_id: route_id}) when not is_nil(route_id),
+    do: [route_id]
+
+  defp routes_or_facilities(%InformedEntity{activities: activities}) do
+    activities
+    |> Enum.filter(&InformedEntity.facility_activity?/1)
+    |> Enum.map(&combine_bike_activities/1)
+    |> Enum.map(&Atom.to_string/1)
+  end
+
+  defp routes_or_facilities(_), do: []
+
+  defp combine_bike_activities(:bringing_bike), do: :bike
+  defp combine_bike_activities(:store_bike), do: :bike
+  defp combine_bike_activities(other), do: other
 end

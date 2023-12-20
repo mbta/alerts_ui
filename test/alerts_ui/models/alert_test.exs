@@ -1,7 +1,8 @@
 defmodule AlertsUI.Models.AlertTest do
   @moduledoc false
   use AlertsUI.DataCase, async: true
-  alias AlertsUI.Models.Alert
+
+  alias AlertsUI.Models.{Alert, InformedEntity}
 
   describe "changeset/2" do
     test "create with header, description, and informed_entity is valid" do
@@ -43,6 +44,51 @@ defmodule AlertsUI.Models.AlertTest do
     test "alert without header and description is not valid" do
       changeset = Alert.changeset(%Alert{}, %{header_text: "a", url: "example.com"})
       assert changeset.valid? == false
+    end
+  end
+
+  describe "entities_with_icons" do
+    test "returns a list of route IDs or facility activities representing the alert's informed entities" do
+      alert = %Alert{
+        id: "1",
+        informed_entity: [
+          %InformedEntity{activities: [:board, :exit, :ride], route_id: "28", route_type: 3},
+          %InformedEntity{
+            activities: [:using_wheelchair, :park_car, :board],
+            facility_id: "772",
+            stop_id: "70511"
+          }
+        ]
+      }
+
+      assert Alert.entities_with_icons(alert) == ["28", "using_wheelchair", "park_car"]
+    end
+
+    test "returns only unique results" do
+      alert = %Alert{
+        id: "1",
+        informed_entity: [
+          %InformedEntity{activities: [:board], route_id: "28", route_type: 3},
+          %InformedEntity{activities: [:exit], route_id: "28", route_type: 3}
+        ]
+      }
+
+      assert Alert.entities_with_icons(alert) == ["28"]
+    end
+
+    test "combines bike activities" do
+      alert = %Alert{
+        id: "1",
+        informed_entity: [
+          %InformedEntity{
+            activities: [:bringing_bike, :store_bike],
+            facility_id: "772",
+            stop_id: "70511"
+          }
+        ]
+      }
+
+      assert Alert.entities_with_icons(alert) == ["bike"]
     end
   end
 end
