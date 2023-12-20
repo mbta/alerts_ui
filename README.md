@@ -16,6 +16,7 @@ A UI for creating and modifying alerts
 
 1. `asdf install`
 2. `mix deps.get`
+1. `npm --prefix assets i`
 4. `cat .envrc.example | sed -e "s/__username__/$(logname)/g" > .envrc`
 6. `direnv allow`
 7. `mix ecto.setup`
