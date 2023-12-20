@@ -11,7 +11,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
     end
 
     test "connected mount", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/view-alerts")
+      {:ok, _view, html} = live(conn, "/alerts")
       assert html =~ ~r/Alerts/
       assert html =~ ~r/123/
     end

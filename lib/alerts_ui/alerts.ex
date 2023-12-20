@@ -122,7 +122,7 @@ defmodule AlertsUI.Alerts do
     )
   end
 
-  def list_all_paginated(params) do
+  def list_all_paginated(params \\ %{}) do
     Flop.validate_and_run(Alert, params, for: Alert)
   end
 

@@ -64,7 +64,7 @@ defmodule AlertsUIWeb.Router do
   live_session :default do
     scope "/", AlertsUIWeb do
       pipe_through(:browser)
-      live("/view-alerts", ViewAlertsLive)
+      live("/alerts", ViewAlertsLive)
     end
   end
 

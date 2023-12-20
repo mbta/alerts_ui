@@ -28,32 +28,34 @@ defmodule AlertsUI.Models.ActivePeriod do
     end
   end
 
-  @spec start_time_of_first_active_period([__MODULE__.t()]) :: DateTime.t() | nil
+  @spec start_time_of_first_active_period([t()]) :: DateTime.t() | nil
   def start_time_of_first_active_period(active_periods) do
     case active_periods
-         |> Enum.filter(&(!is_nil(&1.start))) do
+         |> Enum.map(& &1.start)
+         |> Enum.reject(&is_nil(&1)) do
       [] ->
         nil
 
       active_periods ->
-        active_periods |> Enum.sort_by(& &1.start, {:asc, Date}) |> hd() |> Map.get(:start)
+        active_periods |> Enum.sort_by(& &1, {:asc, Date}) |> hd()
     end
   end
 
-  @spec end_time_of_last_active_period([__MODULE__.t()]) :: DateTime.t() | nil
+  @spec end_time_of_last_active_period([t()]) :: DateTime.t() | nil
   def end_time_of_last_active_period(active_periods) do
     case active_periods
-         |> Enum.filter(&(!is_nil(&1.end))) do
+         |> Enum.map(& &1.end)
+         |> Enum.reject(&is_nil(&1)) do
       [] ->
         nil
 
       active_periods ->
-        active_periods |> Enum.sort_by(& &1.end, {:desc, Date}) |> hd() |> Map.get(:end)
+        active_periods |> Enum.sort_by(& &1, {:desc, Date}) |> hd()
     end
   end
 
   @spec is_time_inside_active_period?(
-          __MODULE__.t(),
+          t(),
           DateTime.t()
         ) :: boolean()
   def is_time_inside_active_period?(active_period, time \\ DateTime.utc_now())
