@@ -13,6 +13,20 @@ WORKDIR /root
 ADD . .
 RUN mix deps.get --only prod
 
+# --- Build NPM assets ---
+FROM node:20.7.0-alpine3.17 as assets-builder
+
+WORKDIR /root
+ADD . .
+
+# Copy in elixir deps required to build node modules for phoenix
+COPY --from=elixir-builder /root/deps ./deps
+
+# Build dependencies in case certain packages don't have prebuild binaries
+RUN apk add --no-cache --update python3 build-base
+
+RUN npm --prefix assets ci
+
 # --- Build Elixir release ---
 FROM elixir-builder as app-builder
 
@@ -26,8 +40,10 @@ RUN curl https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem \
     -o aws-cert-bundle.pem
 RUN echo "51b107da46717aed974d97464b63f7357b220fe8737969db1492d1cae74b3947  aws-cert-bundle.pem" | sha256sum -c -
 
+# Add frontend assets compiled in node container, required by phx.digest
+COPY --from=assets-builder /root/priv/static ./priv/static
+
 RUN mix compile
-RUN mix assets.deploy
 RUN mix phx.digest
 RUN mix release
 
