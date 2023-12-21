@@ -123,7 +123,9 @@ defmodule AlertsUI.Alerts do
   end
 
   def list_all_paginated(params \\ %{}) do
-    Flop.validate_and_run(Alert, params, for: Alert)
+    Alert
+    |> preload([:informed_entity])
+    |> Flop.validate_and_run(params, for: Alert)
   end
 
   @spec get_by_alert_id(String.t()) :: Alert.t()

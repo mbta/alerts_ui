@@ -6,6 +6,14 @@ defmodule AlertsUI.Models.InformedEntity do
   import Ecto.Changeset
   alias AlertsUI.Models.{Activity, Alert, TripDescriptor}
 
+  @facility_activies [
+    :bringing_bike,
+    :park_car,
+    :store_bike,
+    :using_escalator,
+    :using_wheelchair
+  ]
+
   @activity Activity.activities()
 
   @permitted_fields ~w(alert_id route_id facility_id direction_id agency_id route_type stop_id activities)a
@@ -54,4 +62,11 @@ defmodule AlertsUI.Models.InformedEntity do
         changeset
     end
   end
+
+  @spec facility_activies :: [atom()]
+  def facility_activies, do: @facility_activies
+
+  @spec facility_activity?(atom()) :: boolean()
+  def facility_activity?(activity) when activity in @facility_activies, do: true
+  def facility_activity?(_), do: false
 end
