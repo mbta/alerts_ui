@@ -3,6 +3,7 @@ defmodule AlertsUI.AlertsTest do
   use AlertsUI.DataCase, async: true
   import AlertsUI.Support.Factory
   alias AlertsUI.Alerts
+  alias AlertsUI.Models.ActivePeriod
   alias AlertsUI.Models.Alert
 
   describe "create_or_modify_alert/1" do
@@ -211,16 +212,112 @@ defmodule AlertsUI.AlertsTest do
     end
   end
 
+  describe "order_by_active_period_query/0" do
+    test "order by starts" do
+      active_periods1 = [
+        %ActivePeriod{
+          start: ~U[2023-10-11 00:01:00Z],
+          end: ~U[2023-10-18 00:01:00Z]
+        },
+        %ActivePeriod{
+          start: ~U[2023-10-10 00:01:00Z],
+          end: ~U[2023-10-19 00:01:00Z]
+        },
+        %ActivePeriod{
+          start: nil,
+          end: ~U[2023-10-20 00:01:00Z]
+        }
+      ]
+
+      active_periods2 = [
+        %ActivePeriod{
+          start: ~U[2023-10-10 00:01:00Z],
+          end: nil
+        },
+        %ActivePeriod{
+          start: ~U[2023-10-08 00:01:00Z],
+          end: ~U[2023-10-19 00:01:00Z]
+        }
+      ]
+
+      active_periods3 = [
+        %ActivePeriod{
+          start: ~U[2023-10-10 00:01:00Z],
+          end: ~U[2023-10-18 00:01:00Z]
+        },
+        %ActivePeriod{
+          start: ~U[2023-10-09 00:01:00Z],
+          end: ~U[2023-10-19 00:01:00Z]
+        }
+      ]
+
+      insert(:alert, %{alert_id: "123", active_period: active_periods2})
+      insert(:alert, %{alert_id: "234", active_period: active_periods1})
+      insert(:alert, %{alert_id: "345", active_period: active_periods3})
+
+      {:ok, {result, _meta}} = Alerts.list_all_paginated(%{"order" => "start"})
+      assert result |> Enum.map(& &1.alert_id) == ["123", "345", "234"]
+    end
+
+    test "order by ends" do
+      active_periods1 = [
+        %ActivePeriod{
+          start: ~U[2023-10-11 00:01:00Z],
+          end: ~U[2023-10-18 00:01:00Z]
+        },
+        %ActivePeriod{
+          start: ~U[2023-10-10 00:01:00Z],
+          end: ~U[2023-10-19 00:01:00Z]
+        },
+        %ActivePeriod{
+          start: nil,
+          end: ~U[2023-10-20 00:01:00Z]
+        }
+      ]
+
+      active_periods2 = [
+        %ActivePeriod{
+          start: ~U[2023-10-10 00:01:00Z],
+          end: ~U[2023-10-18 00:01:00Z]
+        },
+        %ActivePeriod{
+          start: ~U[2023-10-08 00:01:00Z],
+          end: ~U[2023-10-19 00:01:00Z]
+        }
+      ]
+
+      active_periods3 = [
+        %ActivePeriod{
+          start: ~U[2023-10-10 00:01:00Z],
+          end: ~U[2023-10-18 00:01:00Z]
+        },
+        %ActivePeriod{
+          start: ~U[2023-10-09 00:01:00Z],
+          end: ~U[2023-10-17 00:01:00Z]
+        }
+      ]
+
+      insert(:alert, %{alert_id: "123", active_period: active_periods2})
+      insert(:alert, %{alert_id: "234", active_period: active_periods1})
+      insert(:alert, %{alert_id: "345", active_period: active_periods3})
+
+      {:ok, {result, _meta}} = Alerts.list_all_paginated(%{"order" => "end"})
+
+      assert result |> Enum.map(& &1.alert_id) == ["234", "123", "345"]
+    end
+  end
+
   describe "list_all_open/0" do
     test "lists all alerts" do
       insert(:alert, %{alert_id: "234", closed_timestamp: ~U[2023-10-14 00:01:00Z]})
       insert(:alert, %{alert_id: "456"})
       insert(:alert, %{alert_id: "123"})
 
-      all_alerts = Alerts.list_all()
+      all_alerts = Alerts.list_all_open()
 
       assert Enum.find(all_alerts, &(&1.alert_id == "123"))
       assert Enum.find(all_alerts, &(&1.alert_id == "456"))
+      refute Enum.find(all_alerts, &(&1.alert_id == "234"))
     end
   end
 

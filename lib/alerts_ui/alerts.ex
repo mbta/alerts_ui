@@ -9,6 +9,18 @@ defmodule AlertsUI.Alerts do
   alias Ecto.Multi
   require Logger
 
+  @end_sql "SELECT *,
+  (SELECT max(obj->>'end')
+  FROM unnest(alerts.active_period) obj) AS subq
+  FROM \"alerts\"
+  ORDER BY subq desc"
+
+  @start_sql "SELECT *,
+  (SELECT min(obj->>'start')
+  FROM unnest(alerts.active_period) obj) AS subq
+  FROM \"alerts\"
+  ORDER BY subq asc"
+
   @spec create_or_modify_alert(map()) ::
           {:ok, Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
   def create_or_modify_alert(incoming_alert) do
@@ -123,9 +135,33 @@ defmodule AlertsUI.Alerts do
   end
 
   def list_all_paginated(params \\ %{}) do
-    Alert
-    |> preload([:informed_entity])
-    |> Flop.validate_and_run(params, for: Alert)
+    case Map.has_key?(params, "order") do
+      true ->
+        aggregate_subquery = order_by_active_period_query(params["order"])
+        active_period_subquery = from(q in subquery(aggregate_subquery))
+        Flop.validate_and_run( active_period_subquery, params)
+
+      _ ->
+        Alert
+        |> preload([:informed_entity])
+        |> Flop.validate_and_run(params, for: Alert)
+    end
+  end
+
+  def order_by_active_period_query("start") do
+    dummy_query = from(a in Alert, as: :dummy, select: a.id, limit: 1)
+
+    from(d in subquery(dummy_query))
+    |> join(:inner, [], raw in fragment(@start_sql), on: true, as: :raw)
+    |> select_alert()
+  end
+
+  def order_by_active_period_query("end") do
+    dummy_query = from(a in Alert, as: :dummy, select: a.id, limit: 1)
+
+    from(d in subquery(dummy_query))
+    |> join(:inner, [], raw in fragment(@end_sql), on: true, as: :raw)
+    |> select_alert()
   end
 
   @spec get_by_alert_id(String.t()) :: Alert.t()
@@ -137,5 +173,34 @@ defmodule AlertsUI.Alerts do
       ),
       alert_id: alert_id
     )
+  end
+
+  defp select_alert(query) do
+    query
+    |> select([raw: a], %{
+      id: a.id,
+      alert_id: a.alert_id,
+      effect: a.effect,
+      effect_detail: a.effect_detail,
+      cause: a.cause,
+      cause_detail: a.cause_detail,
+      header_text: a.header_text,
+      description_text: a.description_text,
+      severity_level: a.severity_level,
+      url: a.url,
+      service_effect_text: a.service_effect_text,
+      short_header_text: a.short_header_text,
+      severity: a.severity,
+      created_timestamp: a.created_timestamp,
+      last_modified_timestamp: a.last_modified_timestamp,
+      last_push_notification_timestamp: a.last_push_notification_timestamp,
+      closed_timestamp: a.closed_timestamp,
+      timeframe_text: a.timeframe_text,
+      recurrence_text: a.recurrence_text,
+      alert_lifecycle: a.alert_lifecycle,
+      duration_certainty: a.duration_certainty,
+      reminder_times: a.reminder_times,
+      active_period: a.active_period
+    })
   end
 end

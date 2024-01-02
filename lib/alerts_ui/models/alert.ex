@@ -89,6 +89,22 @@ defmodule AlertsUI.Models.Alert do
     Flop.Schema,
     filterable: [:closed_timestamp],
     sortable: [:alert_id, :created_timestamp, :active_period],
+    adapter_opts: [
+      join_fields: [
+        start: [
+          binding: :active_period_start,
+          field: :start,
+          ecto_type: :utc_datetime,
+          path: [:active_period, :start]
+        ],
+        end: [
+          binding: :active_period_end,
+          field: :end,
+          ecto_type: :utc_datetime,
+          path: [:active_period, :end]
+        ]
+      ]
+    ],
     default_order: %{
       order_by: [:created_timestamp, :alert_id],
       order_directions: [:desc, :desc]
