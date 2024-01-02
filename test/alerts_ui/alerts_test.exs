@@ -112,7 +112,7 @@ defmodule AlertsUI.AlertsTest do
     end
   end
 
-  describe "is_last_modified_time_more_recent?/1" do
+  describe "last_modified_time_more_recent?/1" do
     test "returns true if incoming alert is more recent than stored alert" do
       existing_alert =
         insert(:alert, %{alert_id: "123", last_modified_timestamp: ~U[2023-10-13 00:01:00Z]})
@@ -120,7 +120,7 @@ defmodule AlertsUI.AlertsTest do
       incoming_alert =
         build(:alert, %{alert_id: "123", last_modified_timestamp: ~U[2023-10-14 00:01:00Z]})
 
-      assert Alerts.is_last_modified_time_more_recent?(
+      assert Alerts.last_modified_time_more_recent?(
                Map.get(incoming_alert, :last_modified_timestamp),
                Map.get(existing_alert, :last_modified_timestamp)
              ) == true
@@ -133,7 +133,7 @@ defmodule AlertsUI.AlertsTest do
       incoming_alert =
         build(:alert, %{alert_id: "123", last_modified_timestamp: ~U[2023-10-13 00:01:00Z]})
 
-      assert Alerts.is_last_modified_time_more_recent?(
+      assert Alerts.last_modified_time_more_recent?(
                Map.get(incoming_alert, :last_modified_timestamp),
                Map.get(existing_alert, :last_modified_timestamp)
              ) == true
@@ -146,7 +146,7 @@ defmodule AlertsUI.AlertsTest do
       incoming_alert =
         build(:alert_map, %{alert_id: "123", last_modified_timestamp: ~U[2023-10-13 00:01:00Z]})
 
-      assert Alerts.is_last_modified_time_more_recent?(
+      assert Alerts.last_modified_time_more_recent?(
                Map.get(incoming_alert, :last_modified_timestamp),
                Map.get(existing_alert, :last_modified_timestamp)
              ) == false
@@ -159,7 +159,7 @@ defmodule AlertsUI.AlertsTest do
       incoming_alert =
         build(:alert_map, %{alert_id: "123"})
 
-      assert Alerts.is_last_modified_time_more_recent?(
+      assert Alerts.last_modified_time_more_recent?(
                Map.get(incoming_alert, :last_modified_timestamp),
                Map.get(existing_alert, :last_modified_timestamp)
              ) == false

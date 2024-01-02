@@ -50,7 +50,7 @@ defmodule AlertsUI.Alerts do
     # for it if the incoming alert is more recent. Otherwise create an error changeset so
     # nothing gets created
     incoming_alert_is_more_recent =
-      is_last_modified_time_more_recent?(
+      last_modified_time_more_recent?(
         Map.get(incoming_alert, :last_modified_timestamp),
         Map.get(stored_alert, :last_modified_timestamp)
       )
@@ -73,11 +73,11 @@ defmodule AlertsUI.Alerts do
     )
   end
 
-  @spec is_last_modified_time_more_recent?(map() | nil, Alert.t() | nil) :: boolean()
-  def is_last_modified_time_more_recent?(nil, _), do: false
-  def is_last_modified_time_more_recent?(_, nil), do: true
+  @spec last_modified_time_more_recent?(map() | nil, Alert.t() | nil) :: boolean()
+  def last_modified_time_more_recent?(nil, _), do: false
+  def last_modified_time_more_recent?(_, nil), do: true
 
-  def is_last_modified_time_more_recent?(incoming_time, stored_time) do
+  def last_modified_time_more_recent?(incoming_time, stored_time) do
     DateTime.compare(incoming_time, stored_time) != :lt
   end
 

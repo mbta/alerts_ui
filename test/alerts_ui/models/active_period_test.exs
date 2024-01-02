@@ -27,34 +27,34 @@ defmodule AlertsUI.Models.ActivePeriodTest do
     end
   end
 
-  describe "is_time_inside_active_period?/2" do
+  describe "time_inside_active_period?/2" do
     test "uses current time as default time" do
       active_period = %ActivePeriod{start: ~U[2008-10-12 00:01:00Z]}
-      result = ActivePeriod.is_time_inside_active_period?(active_period)
+      result = ActivePeriod.time_inside_active_period?(active_period)
       assert result == true
     end
 
     test "if no end time, returns true if time is after start" do
       active_period = %ActivePeriod{start: ~U[2023-10-12 00:01:00Z]}
-      result = ActivePeriod.is_time_inside_active_period?(active_period, ~U[2023-10-13 00:01:00Z])
+      result = ActivePeriod.time_inside_active_period?(active_period, ~U[2023-10-13 00:01:00Z])
       assert result == true
     end
 
     test "if no end time, returns false if time is before start" do
       active_period = %ActivePeriod{start: ~U[2023-10-12 00:01:00Z]}
-      result = ActivePeriod.is_time_inside_active_period?(active_period, ~U[2023-10-11 00:01:00Z])
+      result = ActivePeriod.time_inside_active_period?(active_period, ~U[2023-10-11 00:01:00Z])
       assert result == false
     end
 
     test "if no start time, returns true if time is before end" do
       active_period = %ActivePeriod{end: ~U[2023-10-12 00:01:00Z]}
-      result = ActivePeriod.is_time_inside_active_period?(active_period, ~U[2023-10-11 00:01:00Z])
+      result = ActivePeriod.time_inside_active_period?(active_period, ~U[2023-10-11 00:01:00Z])
       assert result == true
     end
 
     test "if no start time, returns false if time is after end" do
       active_period = %ActivePeriod{end: ~U[2023-10-12 00:01:00Z]}
-      result = ActivePeriod.is_time_inside_active_period?(active_period, ~U[2023-10-13 00:01:00Z])
+      result = ActivePeriod.time_inside_active_period?(active_period, ~U[2023-10-13 00:01:00Z])
       assert result == false
     end
 
@@ -64,7 +64,7 @@ defmodule AlertsUI.Models.ActivePeriodTest do
         end: ~U[2023-10-12 00:01:00Z]
       }
 
-      result = ActivePeriod.is_time_inside_active_period?(active_period, ~U[2023-10-11 00:01:00Z])
+      result = ActivePeriod.time_inside_active_period?(active_period, ~U[2023-10-11 00:01:00Z])
       assert result == true
     end
 
@@ -74,7 +74,7 @@ defmodule AlertsUI.Models.ActivePeriodTest do
         end: ~U[2023-10-12 00:01:00Z]
       }
 
-      result = ActivePeriod.is_time_inside_active_period?(active_period, ~U[2023-10-09 00:01:00Z])
+      result = ActivePeriod.time_inside_active_period?(active_period, ~U[2023-10-09 00:01:00Z])
       assert result == false
     end
 
@@ -84,7 +84,7 @@ defmodule AlertsUI.Models.ActivePeriodTest do
         end: ~U[2023-10-12 00:01:00Z]
       }
 
-      result = ActivePeriod.is_time_inside_active_period?(active_period, ~U[2023-10-13 00:01:00Z])
+      result = ActivePeriod.time_inside_active_period?(active_period, ~U[2023-10-13 00:01:00Z])
       assert result == false
     end
   end
