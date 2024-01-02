@@ -138,8 +138,11 @@ defmodule AlertsUI.Alerts do
     case Map.has_key?(params, "order") do
       true ->
         aggregate_subquery = order_by_active_period_query(params["order"])
-        active_period_subquery = from(q in subquery(aggregate_subquery))
-        Flop.validate_and_run( active_period_subquery, params)
+
+        active_period_subquery =
+          from(q in subquery(aggregate_subquery), preload: [informed_entity: [:trip]])
+
+        Flop.validate_and_run(active_period_subquery, params)
 
       _ ->
         Alert
@@ -177,8 +180,8 @@ defmodule AlertsUI.Alerts do
 
   defp select_alert(query) do
     query
-    |> select([raw: a], %{
-      id: a.id,
+    |> select([raw: a], %Alert{
+      id: type(a.id, :binary_id),
       alert_id: a.alert_id,
       effect: a.effect,
       effect_detail: a.effect_detail,
