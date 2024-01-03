@@ -114,7 +114,7 @@ defmodule AlertsUIWeb.AuthControllerTest do
             "phone_number" => "5551234567",
             "preferred_username" => email,
             "resource_access" => %{
-              "t-alerts" => %{
+              "alerts-ui" => %{
                 "roles" => roles
               }
             }
