@@ -255,7 +255,12 @@ defmodule AlertsUI.AlertsTest do
       insert(:alert, %{alert_id: "234", active_period: active_periods1})
       insert(:alert, %{alert_id: "345", active_period: active_periods3})
 
-      {:ok, {result, _meta}} = Alerts.list_all_paginated(%{"order" => "start"})
+      {:ok, {result, _meta}} =
+        Alerts.list_all_paginated(%Flop{
+          order_by: [:active_period_start, :created_timestamp, :alert_id],
+          order_directions: [:asc, :desc, :desc]
+        })
+
       assert result |> Enum.map(& &1.alert_id) == ["123", "345", "234"]
     end
 
@@ -301,7 +306,11 @@ defmodule AlertsUI.AlertsTest do
       insert(:alert, %{alert_id: "234", active_period: active_periods1})
       insert(:alert, %{alert_id: "345", active_period: active_periods3})
 
-      {:ok, {result, _meta}} = Alerts.list_all_paginated(%{"order" => "end"})
+      {:ok, {result, _meta}} =
+        Alerts.list_all_paginated(%{
+          order_by: [:active_period_end, :created_timestamp, :alert_id],
+          order_directions: [:asc, :desc, :desc]
+        })
 
       assert result |> Enum.map(& &1.alert_id) == ["234", "123", "345"]
     end

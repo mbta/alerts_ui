@@ -9,17 +9,29 @@ defmodule AlertsUI.Alerts do
   alias Ecto.Multi
   require Logger
 
-  @end_sql "SELECT *,
+  @end_sql_asc "SELECT *,
+  (SELECT max(obj->>'end')
+  FROM unnest(alerts.active_period) obj) AS subq
+  FROM \"alerts\"
+  ORDER BY subq asc"
+
+  @end_sql_desc "SELECT *,
   (SELECT max(obj->>'end')
   FROM unnest(alerts.active_period) obj) AS subq
   FROM \"alerts\"
   ORDER BY subq desc"
 
-  @start_sql "SELECT *,
+  @start_sql_asc "SELECT *,
   (SELECT min(obj->>'start')
   FROM unnest(alerts.active_period) obj) AS subq
   FROM \"alerts\"
   ORDER BY subq asc"
+
+  @start_sql_desc "SELECT *,
+  (SELECT min(obj->>'start')
+  FROM unnest(alerts.active_period) obj) AS subq
+  FROM \"alerts\"
+  ORDER BY subq desc"
 
   @spec create_or_modify_alert(map()) ::
           {:ok, Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
@@ -134,37 +146,53 @@ defmodule AlertsUI.Alerts do
     )
   end
 
-  def list_all_paginated(params \\ %{}) do
-    case Map.has_key?(params, "order") do
+  def list_all_paginated(params) do
+    cond do
+      Enum.member?(params.order_by, :active_period_start) ->
+        active_period_subquery = order_by_active_period_query(:active_period_start, params)
+        Flop.validate_and_run(active_period_subquery, Flop.reset_order(params))
+
+      Enum.member?(params.order_by, :active_period_end) ->
+        active_period_subquery = order_by_active_period_query(:active_period_end, params)
+        Flop.validate_and_run(active_period_subquery, Flop.reset_order(params))
+
       true ->
-        aggregate_subquery = order_by_active_period_query(params["order"])
-
-        active_period_subquery =
-          from(q in subquery(aggregate_subquery), preload: [informed_entity: [:trip]])
-
-        Flop.validate_and_run(active_period_subquery, params)
-
-      _ ->
         Alert
         |> preload([:informed_entity])
         |> Flop.validate_and_run(params, for: Alert)
     end
   end
 
-  def order_by_active_period_query("start") do
+  def order_by_active_period_query(field, params) do
+    direction = Flop.current_order(params, field)
     dummy_query = from(a in Alert, as: :dummy, select: a.id, limit: 1)
 
-    from(d in subquery(dummy_query))
-    |> join(:inner, [], raw in fragment(@start_sql), on: true, as: :raw)
-    |> select_alert()
+    aggregate_subquery =
+      from(d in subquery(dummy_query))
+      |> active_period_subquery(field, direction)
+      |> select_alert()
+
+    from(q in subquery(aggregate_subquery), preload: [informed_entity: [:trip]])
   end
 
-  def order_by_active_period_query("end") do
-    dummy_query = from(a in Alert, as: :dummy, select: a.id, limit: 1)
+  defp active_period_subquery(query, :active_period_start, :asc) do
+    query
+    |> join(:inner, [], raw in fragment(@start_sql_asc), on: true, as: :raw)
+  end
 
-    from(d in subquery(dummy_query))
-    |> join(:inner, [], raw in fragment(@end_sql), on: true, as: :raw)
-    |> select_alert()
+  defp active_period_subquery(query, :active_period_start, :desc) do
+    query
+    |> join(:inner, [], raw in fragment(@start_sql_desc), on: true, as: :raw)
+  end
+
+  defp active_period_subquery(query, :active_period_end, :asc) do
+    query
+    |> join(:inner, [], raw in fragment(@end_sql_asc), on: true, as: :raw)
+  end
+
+  defp active_period_subquery(query, :active_period_end, :desc) do
+    query
+    |> join(:inner, [], raw in fragment(@end_sql_desc), on: true, as: :raw)
   end
 
   @spec get_by_alert_id(String.t()) :: Alert.t()
