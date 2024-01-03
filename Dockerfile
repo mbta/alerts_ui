@@ -1,5 +1,5 @@
 # --- Set up Elixir build ---
-FROM hexpm/elixir:1.15.6-erlang-26.1-debian-bullseye-20230612-slim as elixir-builder
+FROM hexpm/elixir:1.16.0-erlang-26.2.1-debian-bullseye-20231009-slim as elixir-builder
 
 ENV LANG=C.UTF-8 MIX_ENV=prod
 
@@ -14,7 +14,7 @@ ADD . .
 RUN mix deps.get --only prod
 
 # --- Build NPM assets ---
-FROM node:20.7.0-alpine3.17 as assets-builder
+FROM node:20.10.0-alpine3.19 as assets-builder
 
 WORKDIR /root
 ADD . .
