@@ -10,25 +10,25 @@ defmodule AlertsUI.Alerts do
   require Logger
 
   @end_sql_asc "SELECT *,
-  (SELECT max(obj->>'end')
+  (SELECT CAST(max(obj->>'end') as timestamp)
   FROM unnest(alerts.active_period) obj) AS subq
   FROM \"alerts\"
   ORDER BY subq asc"
 
   @end_sql_desc "SELECT *,
-  (SELECT max(obj->>'end')
+  (SELECT CAST(max(obj->>'end') as timestamp)
   FROM unnest(alerts.active_period) obj) AS subq
   FROM \"alerts\"
   ORDER BY subq desc"
 
   @start_sql_asc "SELECT *,
-  (SELECT min(obj->>'start')
+  (SELECT CAST(min(obj->>'start') as timestamp)
   FROM unnest(alerts.active_period) obj) AS subq
   FROM \"alerts\"
   ORDER BY subq asc"
 
   @start_sql_desc "SELECT *,
-  (SELECT min(obj->>'start')
+  (SELECT CAST(min(obj->>'start') as timestamp)
   FROM unnest(alerts.active_period) obj) AS subq
   FROM \"alerts\"
   ORDER BY subq desc"
@@ -222,10 +222,10 @@ defmodule AlertsUI.Alerts do
       service_effect_text: a.service_effect_text,
       short_header_text: a.short_header_text,
       severity: a.severity,
-      created_timestamp: a.created_timestamp,
-      last_modified_timestamp: a.last_modified_timestamp,
-      last_push_notification_timestamp: a.last_push_notification_timestamp,
-      closed_timestamp: a.closed_timestamp,
+      created_timestamp: type(a.created_timestamp, :utc_datetime),
+      last_modified_timestamp: type(a.last_modified_timestamp, :utc_datetime),
+      last_push_notification_timestamp: type(a.last_push_notification_timestamp, :utc_datetime),
+      closed_timestamp: type(a.closed_timestamp, :utc_datetime),
       timeframe_text: a.timeframe_text,
       recurrence_text: a.recurrence_text,
       alert_lifecycle: a.alert_lifecycle,
