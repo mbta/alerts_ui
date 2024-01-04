@@ -10,25 +10,25 @@ defmodule AlertsUI.Alerts do
   require Logger
 
   @end_sql_asc "SELECT *,
-  (SELECT CAST(max(obj->>'end') as timestamp)
+  (SELECT max(obj->>'end')
   FROM unnest(alerts.active_period) obj) AS subq
   FROM \"alerts\"
   ORDER BY subq asc"
 
   @end_sql_desc "SELECT *,
-  (SELECT CAST(max(obj->>'end') as timestamp)
+  (SELECT max(obj->>'end')
   FROM unnest(alerts.active_period) obj) AS subq
   FROM \"alerts\"
   ORDER BY subq desc"
 
   @start_sql_asc "SELECT *,
-  (SELECT CAST(min(obj->>'start') as timestamp)
+  (SELECT min(obj->>'start')
   FROM unnest(alerts.active_period) obj) AS subq
   FROM \"alerts\"
   ORDER BY subq asc"
 
   @start_sql_desc "SELECT *,
-  (SELECT CAST(min(obj->>'start') as timestamp)
+  (SELECT min(obj->>'start')
   FROM unnest(alerts.active_period) obj) AS subq
   FROM \"alerts\"
   ORDER BY subq desc"
@@ -148,13 +148,23 @@ defmodule AlertsUI.Alerts do
 
   def list_all_paginated(params) do
     cond do
-      Enum.member?(params.order_by, :active_period_start) ->
+      List.first(params.order_by) == :active_period_start ->
         active_period_subquery = order_by_active_period_query(:active_period_start, params)
-        Flop.validate_and_run(active_period_subquery, Flop.reset_order(params))
 
-      Enum.member?(params.order_by, :active_period_end) ->
+        {:ok, {result, meta}} =
+          Flop.validate_and_run(active_period_subquery, Flop.reset_order(params))
+
+        new_meta = Map.put(meta, :flop, params)
+        {:ok, {result, new_meta}}
+
+      List.first(params.order_by) == :active_period_end ->
         active_period_subquery = order_by_active_period_query(:active_period_end, params)
-        Flop.validate_and_run(active_period_subquery, Flop.reset_order(params))
+
+        {:ok, {result, meta}} =
+          Flop.validate_and_run(active_period_subquery, Flop.reset_order(params))
+
+        new_meta = Map.put(meta, :flop, params)
+        {:ok, {result, new_meta}}
 
       true ->
         Alert
