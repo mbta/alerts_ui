@@ -88,7 +88,13 @@ defmodule AlertsUI.Models.Alert do
   @derive {
     Flop.Schema,
     filterable: [:closed_timestamp],
-    sortable: [:alert_id, :created_timestamp, :active_period_start, :active_period_end],
+    sortable: [
+      :alert_id,
+      :created_timestamp,
+      :active_period_start,
+      :active_period_end,
+      :closed_timestamp
+    ],
     adapter_opts: [
       alias_fields: [:active_period_start, :active_period_end]
     ],

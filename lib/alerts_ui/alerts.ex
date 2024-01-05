@@ -146,31 +146,82 @@ defmodule AlertsUI.Alerts do
     )
   end
 
+  @spec get_by_alert_id(String.t()) :: Alert.t()
+  def get_by_alert_id(alert_id) do
+    Repo.get_by(
+      from(
+        a in Alert,
+        preload: [informed_entity: [:trip]]
+      ),
+      alert_id: alert_id
+    )
+  end
+
+  @spec list_all_paginated(atom() | %{:order_by => list(), optional(any()) => any()}) ::
+          {:ok, {list(), Flop.Meta.t()}}
   def list_all_paginated(params) do
+    # We want Flop to track the "direction" of active_period_start and active_period_end (eg ascending or descending)
+    # but we cannot put those params into validate and run directly because they don't exist in our Alert schema
+    # so we're removing them from both the order_by and order_directions params as necessary before doing the flop run
+    # and then putting them back in our return.
     cond do
       List.first(params.order_by) == :active_period_start ->
-        active_period_subquery = order_by_active_period_query(:active_period_start, params)
-
-        {:ok, {result, meta}} =
-          Flop.validate_and_run(active_period_subquery, Flop.reset_order(params))
-
-        new_meta = Map.put(meta, :flop, params)
-        {:ok, {result, new_meta}}
+        order_by_active_period_query(:active_period_start, params)
+        |> flop_run_and_reset_params(Flop.reset_order(params), params)
 
       List.first(params.order_by) == :active_period_end ->
-        active_period_subquery = order_by_active_period_query(:active_period_end, params)
-
-        {:ok, {result, meta}} =
-          Flop.validate_and_run(active_period_subquery, Flop.reset_order(params))
-
-        new_meta = Map.put(meta, :flop, params)
-        {:ok, {result, new_meta}}
+        order_by_active_period_query(:active_period_end, params)
+        |> flop_run_and_reset_params(Flop.reset_order(params), params)
 
       true ->
+        new_params = remove_unwanted_params(params)
+
         Alert
         |> preload([:informed_entity])
-        |> Flop.validate_and_run(params, for: Alert)
+        |> flop_run_and_reset_params(new_params, params)
     end
+  end
+
+  defp flop_run_and_reset_params(query, new_params, old_params) do
+    {:ok, {result, meta}} =
+      Flop.validate_and_run(query, new_params)
+
+    new_meta = Map.put(meta, :flop, old_params)
+    {:ok, {result, new_meta}}
+  end
+
+  defp remove_unwanted_params(params) do
+    active_period_positions = Enum.with_index(params.order_by)
+    new_params = params
+
+    new_params =
+      case :active_period_start in params.order_by do
+        true ->
+          delete_from_params(new_params, active_period_positions, :active_period_start)
+
+        false ->
+          new_params
+      end
+
+    case :active_period_end in params.order_by do
+      true ->
+        delete_from_params(new_params, active_period_positions, :active_period_end)
+
+      false ->
+        new_params
+    end
+  end
+
+  defp delete_from_params(new_params, positions, field) do
+    new_params
+    |> Map.put(
+      :order_by,
+      List.delete_at(new_params.order_by, positions[field])
+    )
+    |> Map.put(
+      :order_directions,
+      List.delete_at(new_params.order_directions, positions[field])
+    )
   end
 
   def order_by_active_period_query(field, params) do
@@ -203,17 +254,6 @@ defmodule AlertsUI.Alerts do
   defp active_period_subquery(query, :active_period_end, :desc) do
     query
     |> join(:inner, [], raw in fragment(@end_sql_desc), on: true, as: :raw)
-  end
-
-  @spec get_by_alert_id(String.t()) :: Alert.t()
-  def get_by_alert_id(alert_id) do
-    Repo.get_by(
-      from(
-        a in Alert,
-        preload: [informed_entity: [:trip]]
-      ),
-      alert_id: alert_id
-    )
   end
 
   defp select_alert(query) do
