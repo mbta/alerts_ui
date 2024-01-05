@@ -33,7 +33,8 @@ defmodule AlertsUI.MixProject do
           AlertsUI.FeedOutput.GTFSProtobufDefinition.VehiclePosition,
           AlertsUI.FeedOutput.GTFSProtobufDefinition.VehiclePosition.CarriageDetails,
           AlertsUI.FeedOutput.WriteToS3,
-          AlertsUI.FeedOutput.WriteLocal
+          AlertsUI.FeedOutput.WriteLocal,
+          Ueberauth.Strategy.FakeKeycloak
         ]
       ]
     ]
