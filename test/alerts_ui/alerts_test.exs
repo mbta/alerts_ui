@@ -334,10 +334,10 @@ defmodule AlertsUI.AlertsTest do
           order_directions: [:desc, :desc, :desc]
         })
 
-      assert result |> Enum.map(& &1.alert_id) == ["345", "234", "123", "012"]
+      assert result |> Enum.map(& &1.alert_id) == ["012", "345", "234", "123"]
     end
 
-    test "order by end ascending" do
+    test "order by end descending" do
       last = [
         %ActivePeriod{
           start: ~U[2023-10-11 00:01:00Z],
@@ -397,10 +397,10 @@ defmodule AlertsUI.AlertsTest do
           order_directions: [:desc, :desc, :desc]
         })
 
-      assert result |> Enum.map(& &1.alert_id) == ["234", "123", "345", "012"]
+      assert result |> Enum.map(& &1.alert_id) == ["012", "234", "123", "345"]
     end
 
-    test "order by end descending" do
+    test "order by end ascending" do
       latest = [
         %ActivePeriod{
           start: ~U[2023-10-11 00:01:00Z],

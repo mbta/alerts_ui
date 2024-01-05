@@ -19,7 +19,7 @@ defmodule AlertsUI.Alerts do
   (SELECT max(obj->>'end')
   FROM unnest(alerts.active_period) obj) AS subq
   FROM \"alerts\"
-  ORDER BY subq desc NULLS LAST"
+  ORDER BY subq desc NULLS FIRST"
 
   @start_sql_asc "SELECT *,
   (SELECT min(obj->>'start')
@@ -31,7 +31,7 @@ defmodule AlertsUI.Alerts do
   (SELECT min(obj->>'start')
   FROM unnest(alerts.active_period) obj) AS subq
   FROM \"alerts\"
-  ORDER BY subq desc NULLS LAST"
+  ORDER BY subq desc NULLS FIRST"
 
   @spec create_or_modify_alert(map()) ::
           {:ok, Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
