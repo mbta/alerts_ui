@@ -9,13 +9,6 @@ defmodule AlertsUI.Alerts do
   alias Ecto.Multi
   require Logger
 
-  @active_period "SELECT *,
-  (SELECT max(obj->>'end')
- FROM unnest(alerts.active_period) obj) AS active_period_end,
- (SELECT min(obj->>'start')
- FROM unnest(alerts.active_period) obj) AS active_period_start
- FROM alerts"
-
   @spec create_or_modify_alert(map()) ::
           {:ok, Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
   def create_or_modify_alert(incoming_alert) do
@@ -152,7 +145,12 @@ defmodule AlertsUI.Alerts do
 
     aggregate_subquery =
       from(d in subquery(dummy_query))
-      |> join(:inner, [subq], raw in fragment(@active_period), on: true, as: :raw)
+      |> join(:inner, [subq], raw in fragment("SELECT *,
+      (SELECT max(obj->>'end')
+      FROM unnest(alerts.active_period) obj) AS active_period_end,
+      (SELECT min(obj->>'start')
+      FROM unnest(alerts.active_period) obj) AS active_period_start
+      FROM alerts"), on: true, as: :raw)
       |> select_alert()
 
     from(q in subquery(aggregate_subquery), preload: [informed_entity: [:trip]])

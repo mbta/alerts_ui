@@ -54,7 +54,9 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     flop = Flop.push_order(socket.assigns.meta.flop, order)
 
     new_order_directions =
-      flop.order_directions |> Enum.map(&if &1 == :desc, do: :desc_nulls_last, else: &1)
+      flop.order_directions
+      |> Enum.map(&if &1 == :desc, do: :desc_nulls_last, else: &1)
+      |> Enum.map(&if &1 == :asc, do: :asc_nulls_first, else: &1)
 
     flop = Map.put(flop, :order_directions, new_order_directions)
 
