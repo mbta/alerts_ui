@@ -86,6 +86,7 @@ defmodule AlertsUIWeb do
       import Phoenix.HTML.Form
       # Core UI components and translation
       import AlertsUIWeb.CoreComponents
+      import AlertsUIWeb.IconComponents
       import AlertsUIWeb.Gettext
 
       # Shortcut for generating JS commands

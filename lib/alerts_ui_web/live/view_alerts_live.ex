@@ -22,8 +22,10 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   end
 
   @impl true
-  def handle_params(_params, _url, socket) do
-    {:noreply, socket}
+  def handle_params(params, _url, socket) do
+    with {:ok, {alerts, meta}} <- Alerts.list_all_paginated(params) do
+      {:noreply, assign(socket, meta: meta, alerts: alerts)}
+    end
   end
 
   @impl true
@@ -64,4 +66,21 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       {:noreply, assign(socket, meta: meta, alerts: alerts)}
     end
   end
+
+  @impl true
+  def handle_event("update-filter", %{"reset" => ""} = params, socket) do
+    params =
+      params
+      |> clean_filter_params()
+      |> Map.replace("filters", %{})
+
+    {:noreply, push_patch(socket, to: ~p"/alerts?#{params}")}
+  end
+
+  def handle_event("update-filter", params, socket) do
+    params = clean_filter_params(params)
+    {:noreply, push_patch(socket, to: ~p"/alerts?#{params}")}
+  end
+
+  defp clean_filter_params(params), do: Map.drop(params, ["_target", "reset"])
 end
