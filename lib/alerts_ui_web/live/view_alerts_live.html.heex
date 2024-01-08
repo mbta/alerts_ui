@@ -1,6 +1,15 @@
 <div class="w-100 flex flex-row justify-center">
   <article class="prose prose-stone min-w-fit">
     <h1>Alerts</h1>
+
+    <.filter_form
+      fields={[
+        alert_id: [label: "ID", op: :ilike_and]
+      ]}
+      meta={@meta}
+      id="alert-filter-form"
+    />
+
     <div data-theme="winter" class="flex flex-col justify-center min-w-fit">
       <Flop.Phoenix.table
         items={@alerts}

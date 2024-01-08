@@ -33,7 +33,8 @@ defmodule AlertsUI.MixProject do
           AlertsUI.FeedOutput.GTFSProtobufDefinition.VehiclePosition,
           AlertsUI.FeedOutput.GTFSProtobufDefinition.VehiclePosition.CarriageDetails,
           AlertsUI.FeedOutput.WriteToS3,
-          AlertsUI.FeedOutput.WriteLocal
+          AlertsUI.FeedOutput.WriteLocal,
+          Ueberauth.Strategy.FakeKeycloak
         ]
       ]
     ]
@@ -60,6 +61,7 @@ defmodule AlertsUI.MixProject do
     [
       {:credo, "~> 1.7.1", only: [:dev, :test]},
       {:dialyxir, "~> 1.4.1", only: [:dev, :test], runtime: false},
+      {:ecto_psql_extras, "~> 0.6", only: :dev},
       {:ecto_sql, "~> 3.10"},
       {:ehmon, github: "mbta/ehmon", only: :prod},
       {:esbuild, "~> 0.7", runtime: Mix.env() == :dev},
@@ -72,13 +74,15 @@ defmodule AlertsUI.MixProject do
       {:gettext, "~> 0.20"},
       {:finch, "~> 0.13"},
       {:floki, ">= 0.30.0", only: :test},
+      {:flop_phoenix, "~> 0.22"},
       {:hackney, "1.20.1"},
       {:jason, "~> 1.2"},
       {:map_diff, "~> 1.3.4"},
       {:oban, "~> 2.16"},
       {:phoenix, "~> 1.7.7"},
       {:phoenix_ecto, "~> 4.4"},
-      {:phoenix_html, "~> 3.3"},
+      {:phoenix_html, "~> 4.0"},
+      {:phoenix_html_helpers, "~> 1.0"},
       {:phoenix_live_dashboard, "~> 0.8.0"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_view, "~> 0.20.0"},
@@ -89,11 +93,9 @@ defmodule AlertsUI.MixProject do
       {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
-      {:ueberauth, "~> 0.10"},
-      {:ueberauth_oidcc, "~> 0.3.0"},
-      {:flop_phoenix, "~> 0.22.4"},
       {:tzdata, "~> 1.1"},
-      {:ecto_psql_extras, "~> 0.6", only: :dev}
+      {:ueberauth, "~> 0.10"},
+      {:ueberauth_oidcc, "~> 0.3.0"}
     ]
   end
 
