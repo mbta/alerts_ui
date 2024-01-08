@@ -23,15 +23,21 @@
         <:col :let={alert} label="Created At" field={:created_timestamp}>
           <%= DateTimeHelpers.friendly_date_time(alert.created_timestamp) %>
         </:col>
-        <:col :let={alert} label="Start" field={:active_period}>
-          <%= DateTimeHelpers.friendly_date_time(
-            ActivePeriod.start_time_of_first_active_period(alert.active_period)
-          ) %>
+        <:col
+          :let={alert}
+          label="Start"
+          field={:active_period_start}
+          directions={{:asc_nulls_first, :desc_nulls_last}}
+        >
+          <%= DateTimeHelpers.friendly_date_time(alert.active_period_start) %>
         </:col>
-        <:col :let={alert} label="End" field={:active_period}>
-          <%= DateTimeHelpers.friendly_date_time(
-            ActivePeriod.end_time_of_last_active_period(alert.active_period)
-          ) %>
+        <:col
+          :let={alert}
+          label="End"
+          field={:active_period_end}
+          directions={{:asc_nulls_first, :desc_nulls_last}}
+        >
+          <%= DateTimeHelpers.friendly_date_time(alert.active_period_end) %>
         </:col>
         <:col :let={alert} label="Closed At" field={:closed_timestamp}>
           <%= DateTimeHelpers.friendly_date_time(alert.closed_timestamp) %>

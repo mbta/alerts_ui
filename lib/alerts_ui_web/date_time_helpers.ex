@@ -17,16 +17,23 @@ defmodule AlertsViewerWeb.DateTimeHelpers do
   "Jan 7"
   iex> friendly_date_time(~U[2021-12-07 14:01:00.00Z], ~U[2022-01-12 15:02:00.00Z])
   "Dec 2021"
+  iex> friendly_date_time("2020-01-13T17:32:00Z", ~U[2022-01-12 15:02:00.00Z])
+  "Jan 2020"
   iex> friendly_date_time(nil, ~U[2022-01-12 15:02:00.00Z])
   ""
   """
-  @spec friendly_date_time(DateTime.t() | nil) :: String.t()
-  @spec friendly_date_time(DateTime.t() | nil, DateTime.t()) :: String.t()
+  @spec friendly_date_time(DateTime.t() | String.t() | nil) :: String.t()
+  @spec friendly_date_time(DateTime.t() | String.t() | nil, DateTime.t()) :: String.t()
   def friendly_date_time(dt, now \\ DateTime.now!("America/New_York"))
 
   def friendly_date_time(nil, _now), do: ""
 
-  def friendly_date_time(dt, now) do
+  def friendly_date_time(dt, now) when is_binary(dt) do
+    {:ok, dt, 0} = DateTime.from_iso8601(dt)
+    friendly_date_time(dt, now)
+  end
+
+  def friendly_date_time(%DateTime{} = dt, now) do
     format = date_time_format(dt, now)
     Calendar.strftime(DateTime.shift_zone!(dt, "America/New_York"), format)
   end

@@ -122,12 +122,6 @@ defmodule AlertsUI.Alerts do
     )
   end
 
-  def list_all_paginated(params \\ %{}) do
-    Alert
-    |> preload([:informed_entity])
-    |> Flop.validate_and_run(params, for: Alert)
-  end
-
   @spec get_by_alert_id(String.t()) :: Alert.t()
   def get_by_alert_id(alert_id) do
     Repo.get_by(
@@ -137,5 +131,61 @@ defmodule AlertsUI.Alerts do
       ),
       alert_id: alert_id
     )
+  end
+
+  @spec list_all_paginated(%{:order_by => list(), optional(any()) => any()}) ::
+          {:ok, {list(), Flop.Meta.t()}}
+  def list_all_paginated(params) do
+    order_by_active_period_query()
+    |> Flop.validate_and_run(params)
+  end
+
+  def order_by_active_period_query do
+    dummy_query = from(a in Alert, as: :dummy, select: a.id, limit: 1)
+
+    aggregate_subquery =
+      from(d in subquery(dummy_query))
+      |> join(:inner, [subq], raw in fragment("SELECT *,
+      (SELECT max(obj->>'end')
+      FROM unnest(alerts.active_period) obj) AS active_period_end,
+      (SELECT min(obj->>'start')
+      FROM unnest(alerts.active_period) obj) AS active_period_start
+      FROM alerts"), on: true, as: :raw)
+      |> select_alert()
+
+    from(q in subquery(aggregate_subquery), preload: [informed_entity: [:trip]])
+  end
+
+  defp select_alert(query) do
+    query
+    |> select([raw: a], %Alert{
+      id: type(a.id, :binary_id),
+      alert_id: a.alert_id,
+      effect: a.effect,
+      effect_detail: a.effect_detail,
+      cause: a.cause,
+      cause_detail: a.cause_detail,
+      header_text: a.header_text,
+      description_text: a.description_text,
+      severity_level: a.severity_level,
+      url: a.url,
+      service_effect_text: a.service_effect_text,
+      short_header_text: a.short_header_text,
+      severity: a.severity,
+      created_timestamp: type(a.created_timestamp, :utc_datetime),
+      last_modified_timestamp: type(a.last_modified_timestamp, :utc_datetime),
+      last_push_notification_timestamp: type(a.last_push_notification_timestamp, :utc_datetime),
+      closed_timestamp: type(a.closed_timestamp, :utc_datetime),
+      timeframe_text: a.timeframe_text,
+      recurrence_text: a.recurrence_text,
+      alert_lifecycle: a.alert_lifecycle,
+      duration_certainty: a.duration_certainty,
+      reminder_times: a.reminder_times,
+      active_period: a.active_period,
+      active_period_start:
+        type(a.active_period_start, :utc_datetime) |> selected_as(:active_period_start),
+      active_period_end:
+        type(a.active_period_end, :utc_datetime) |> selected_as(:active_period_end)
+    })
   end
 end
