@@ -22,8 +22,8 @@ defmodule AlertsViewerWeb.DateTimeHelpers do
   iex> friendly_date_time(nil, ~U[2022-01-12 15:02:00.00Z])
   ""
   """
-  @spec friendly_date_time(DateTime.t() | nil) :: String.t()
-  @spec friendly_date_time(DateTime.t() | nil, DateTime.t()) :: String.t()
+  @spec friendly_date_time(DateTime.t() | String.t() | nil) :: String.t()
+  @spec friendly_date_time(DateTime.t() | String.t() | nil, DateTime.t()) :: String.t()
   def friendly_date_time(dt, now \\ DateTime.now!("America/New_York"))
 
   def friendly_date_time(nil, _now), do: ""

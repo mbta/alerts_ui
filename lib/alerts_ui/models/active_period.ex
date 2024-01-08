@@ -31,9 +31,8 @@ defmodule AlertsUI.Models.ActivePeriod do
   @spec start_time_of_first_active_period([t()]) :: DateTime.t() | nil
   def start_time_of_first_active_period(active_periods) do
     case active_periods
-         |> Enum.map(&(Map.get(&1, :start) || Map.get(&1, "start")))
-         |> Enum.reject(&is_nil(&1))
-         |> Enum.map(&format_time(&1)) do
+         |> Enum.map(& &1.start)
+         |> Enum.reject(&is_nil(&1)) do
       [] ->
         nil
 
@@ -45,25 +44,13 @@ defmodule AlertsUI.Models.ActivePeriod do
   @spec end_time_of_last_active_period([t()]) :: DateTime.t() | nil
   def end_time_of_last_active_period(active_periods) do
     case active_periods
-         |> Enum.map(&(Map.get(&1, :end) || Map.get(&1, "end")))
-         |> Enum.reject(&is_nil(&1))
-         |> Enum.map(&format_time(&1)) do
+         |> Enum.map(& &1.end)
+         |> Enum.reject(&is_nil(&1)) do
       [] ->
         nil
 
       active_periods ->
         active_periods |> Enum.sort_by(& &1, {:desc, Date}) |> hd()
-    end
-  end
-
-  defp format_time(time) do
-    case is_binary(time) do
-      true ->
-        {:ok, dt, 0} = DateTime.from_iso8601(time)
-        dt
-
-      false ->
-        time
     end
   end
 

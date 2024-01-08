@@ -9,29 +9,12 @@ defmodule AlertsUI.Alerts do
   alias Ecto.Multi
   require Logger
 
-  @end_sql_asc "SELECT *,
+  @active_period "SELECT *,
   (SELECT max(obj->>'end')
-  FROM unnest(alerts.active_period) obj) AS subq
-  FROM \"alerts\"
-  ORDER BY subq asc NULLS LAST"
-
-  @end_sql_desc "SELECT *,
-  (SELECT max(obj->>'end')
-  FROM unnest(alerts.active_period) obj) AS subq
-  FROM \"alerts\"
-  ORDER BY subq desc NULLS FIRST"
-
-  @start_sql_asc "SELECT *,
-  (SELECT min(obj->>'start')
-  FROM unnest(alerts.active_period) obj) AS subq
-  FROM \"alerts\"
-  ORDER BY subq asc NULLS LAST"
-
-  @start_sql_desc "SELECT *,
-  (SELECT min(obj->>'start')
-  FROM unnest(alerts.active_period) obj) AS subq
-  FROM \"alerts\"
-  ORDER BY subq desc NULLS FIRST"
+ FROM unnest(alerts.active_period) obj) AS active_period_end,
+ (SELECT min(obj->>'start')
+ FROM unnest(alerts.active_period) obj) AS active_period_start
+ FROM alerts"
 
   @spec create_or_modify_alert(map()) ::
           {:ok, Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
@@ -157,103 +140,22 @@ defmodule AlertsUI.Alerts do
     )
   end
 
-  @spec list_all_paginated(atom() | %{:order_by => list(), optional(any()) => any()}) ::
+  @spec list_all_paginated(%{:order_by => list(), optional(any()) => any()}) ::
           {:ok, {list(), Flop.Meta.t()}}
   def list_all_paginated(params) do
-    # We want Flop to track the "direction" of active_period_start and active_period_end (eg ascending or descending)
-    # but we cannot put those params into validate and run directly because they don't exist in our Alert schema
-    # so we're removing them from both the order_by and order_directions params as necessary before doing the flop run
-    # and then putting them back in our return.
-    cond do
-      List.first(params.order_by) == :active_period_start ->
-        order_by_active_period_query(:active_period_start, params)
-        |> flop_run_and_reset_params(Flop.reset_order(params), params)
-
-      List.first(params.order_by) == :active_period_end ->
-        order_by_active_period_query(:active_period_end, params)
-        |> flop_run_and_reset_params(Flop.reset_order(params), params)
-
-      true ->
-        new_params = remove_unwanted_params(params)
-
-        Alert
-        |> preload([:informed_entity])
-        |> flop_run_and_reset_params(new_params, params)
-    end
+    order_by_active_period_query()
+    |> Flop.validate_and_run(params)
   end
 
-  defp flop_run_and_reset_params(query, new_params, old_params) do
-    {:ok, {result, meta}} =
-      Flop.validate_and_run(query, new_params)
-
-    new_meta = Map.put(meta, :flop, old_params)
-    {:ok, {result, new_meta}}
-  end
-
-  defp remove_unwanted_params(params) do
-    active_period_positions = Enum.with_index(params.order_by)
-    new_params = params
-
-    new_params =
-      case :active_period_start in params.order_by do
-        true ->
-          delete_from_params(new_params, active_period_positions, :active_period_start)
-
-        false ->
-          new_params
-      end
-
-    case :active_period_end in params.order_by do
-      true ->
-        delete_from_params(new_params, active_period_positions, :active_period_end)
-
-      false ->
-        new_params
-    end
-  end
-
-  defp delete_from_params(new_params, positions, field) do
-    new_params
-    |> Map.put(
-      :order_by,
-      List.delete_at(new_params.order_by, positions[field])
-    )
-    |> Map.put(
-      :order_directions,
-      List.delete_at(new_params.order_directions, positions[field])
-    )
-  end
-
-  def order_by_active_period_query(field, params) do
-    direction = Flop.current_order(params, field)
+  def order_by_active_period_query do
     dummy_query = from(a in Alert, as: :dummy, select: a.id, limit: 1)
 
     aggregate_subquery =
       from(d in subquery(dummy_query))
-      |> active_period_subquery(field, direction)
+      |> join(:inner, [subq], raw in fragment(@active_period), on: true, as: :raw)
       |> select_alert()
 
     from(q in subquery(aggregate_subquery), preload: [informed_entity: [:trip]])
-  end
-
-  defp active_period_subquery(query, :active_period_start, :asc) do
-    query
-    |> join(:inner, [], raw in fragment(@start_sql_asc), on: true, as: :raw)
-  end
-
-  defp active_period_subquery(query, :active_period_start, :desc) do
-    query
-    |> join(:inner, [], raw in fragment(@start_sql_desc), on: true, as: :raw)
-  end
-
-  defp active_period_subquery(query, :active_period_end, :asc) do
-    query
-    |> join(:inner, [], raw in fragment(@end_sql_asc), on: true, as: :raw)
-  end
-
-  defp active_period_subquery(query, :active_period_end, :desc) do
-    query
-    |> join(:inner, [], raw in fragment(@end_sql_desc), on: true, as: :raw)
   end
 
   defp select_alert(query) do
@@ -281,7 +183,11 @@ defmodule AlertsUI.Alerts do
       alert_lifecycle: a.alert_lifecycle,
       duration_certainty: a.duration_certainty,
       reminder_times: a.reminder_times,
-      active_period: a.active_period
+      active_period: a.active_period,
+      active_period_start:
+        type(a.active_period_start, :utc_datetime) |> selected_as(:active_period_start),
+      active_period_end:
+        type(a.active_period_end, :utc_datetime) |> selected_as(:active_period_end)
     })
   end
 end

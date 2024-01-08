@@ -127,6 +127,8 @@ defmodule AlertsUI.Models.Alert do
     field :duration_certainty, Ecto.Enum, values: @duration_certainty
     field :reminder_times, {:array, :integer}
     embeds_many :active_period, ActivePeriod, on_replace: :delete
+    field :active_period_start, :utc_datetime, virtual: true
+    field :active_period_end, :utc_datetime, virtual: true
     field :image_url, :string
     field :image_alternative_text, :string
     field :tts_header_text, :string
