@@ -2,6 +2,7 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParser do
   @moduledoc """
   Supervisor for realtime alert information from realtime GTFS.
   """
+  alias AlertsUI.Models.ActivePeriod
   alias AlertsUI.Models.ExtendedTime
 
   @spec parse(map()) :: [map()]
@@ -20,6 +21,8 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParser do
 
   @spec decode_alert(map, any) :: map()
   def decode_alert(alert, id) do
+    active_periods = alert |> Map.get("active_period") |> parse_active_periods
+
     %{
       alert_id: id,
       effect: alert |> Map.get("effect") |> parse_string_to_atom(),
@@ -43,7 +46,9 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParser do
       alert_lifecycle: alert |> Map.get("alert_lifecycle") |> parse_string_to_atom(),
       duration_certainty: alert |> Map.get("duration_certainty") |> parse_string_to_atom(),
       reminder_times: alert |> Map.get("reminder_times"),
-      active_period: alert |> Map.get("active_period") |> parse_active_periods,
+      active_period: active_periods,
+      active_period_start: ActivePeriod.start_time_of_first_active_period(active_periods),
+      active_period_end: ActivePeriod.end_time_of_last_active_period(active_periods),
       image_url: alert |> Map.get("image") |> parse_translated_image(),
       image_alternative_text:
         alert |> Map.get("image_alternative_text") |> parse_translated_string(),

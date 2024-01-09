@@ -43,7 +43,9 @@ defmodule AlertsUI.Models.Alert do
   tts_header_text
   tts_description_text
   image_url
-  image_alternative_text)a
+  image_alternative_text
+  active_period_start
+  active_period_end)a
 
   @cause Cause.causes()
   @effect Effect.effects()
@@ -77,6 +79,8 @@ defmodule AlertsUI.Models.Alert do
           duration_certainty: atom() | nil,
           reminder_times: [integer()] | nil,
           active_period: [ActivePeriod.t()] | nil,
+          active_period_start: DateTime.t() | nil,
+          active_period_end: DateTime.t() | nil,
           image_url: String.t() | nil,
           image_alternative_text: String.t() | nil,
           image_url: String.t() | nil,
@@ -95,12 +99,10 @@ defmodule AlertsUI.Models.Alert do
       :active_period_end,
       :closed_timestamp
     ],
-    adapter_opts: [
-      alias_fields: [:active_period_start, :active_period_end]
-    ],
+    adapter_opts: [],
     default_order: %{
-      order_by: [:created_timestamp, :alert_id],
-      order_directions: [:desc, :desc]
+      order_by: [:created_timestamp, :alert_id, :active_period_start, :active_period_end],
+      order_directions: [:desc_nulls_last, :desc_nulls_last, :desc_nulls_last, :desc_nulls_last]
     }
   }
 
@@ -127,8 +129,8 @@ defmodule AlertsUI.Models.Alert do
     field :duration_certainty, Ecto.Enum, values: @duration_certainty
     field :reminder_times, {:array, :integer}
     embeds_many :active_period, ActivePeriod, on_replace: :delete
-    field :active_period_start, :utc_datetime, virtual: true
-    field :active_period_end, :utc_datetime, virtual: true
+    field :active_period_start, :utc_datetime
+    field :active_period_end, :utc_datetime
     field :image_url, :string
     field :image_alternative_text, :string
     field :tts_header_text, :string
