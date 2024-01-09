@@ -11,11 +11,12 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   @spec mount(map(), any(), any()) :: {:ok, any()}
   def mount(params, _session, socket) do
     params =
-      Map.merge(params, %Flop{
-        page_size: 50,
-        order_by: [:created_timestamp, :alert_id],
-        order_directions: [:desc, :desc]
-      })
+      Map.merge(
+        %Flop{
+          page_size: 50
+        },
+        params
+      )
 
     with {:ok, {alerts, meta}} <- Alerts.list_all_paginated(params) do
       {:ok, assign(socket, meta: meta, alerts: alerts)}
