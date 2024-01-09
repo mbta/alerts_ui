@@ -91,7 +91,7 @@ defmodule AlertsUI.Models.Alert do
 
   @derive {
     Flop.Schema,
-    filterable: [:alert_id, :closed_timestamp],
+    filterable: [:alert_id, :closed_timestamp, :effect_detail],
     sortable: [
       :alert_id,
       :created_timestamp,

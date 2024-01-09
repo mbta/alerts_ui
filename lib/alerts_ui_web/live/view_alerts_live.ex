@@ -4,6 +4,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   """
   use AlertsUIWeb, :live_view
   alias AlertsUI.Alerts
+  alias AlertsUI.Models.Effect
   alias AlertsViewerWeb.DateTimeHelpers
 
   @impl true
@@ -83,4 +84,17 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   end
 
   defp clean_filter_params(params), do: Map.drop(params, ["_target", "reset"])
+
+  defp format_options(options) do
+    [{"All", ""}]
+    |> Enum.concat(
+      options
+      |> Enum.map(
+        &{&1
+         |> String.replace("_", " ")
+         |> String.split()
+         |> Enum.map_join(" ", fn s -> String.capitalize(s) end), &1}
+      )
+    )
+  end
 end
