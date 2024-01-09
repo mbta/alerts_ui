@@ -44,6 +44,8 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParserTest do
                %{start: ~U[2023-10-02 18:42:00Z], end: ~U[2023-10-20 20:00:00Z]}
              ]
 
+      assert actual_alert.active_period_start == ~U[2023-10-02 18:42:00Z]
+      assert actual_alert.active_period_end == ~U[2023-10-20 20:00:00Z]
       assert actual_alert.duration_certainty == :KNOWN
       [ie_1, _ie_2] = informed_entities = actual_alert.informed_entity
       Enum.all?(informed_entities, &is_map(&1))
