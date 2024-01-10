@@ -1,6 +1,7 @@
 <div class="w-100 flex flex-row justify-center">
   <article class="prose prose-stone min-w-fit">
     <h1>Alerts</h1>
+
     <div data-theme="winter" class="flex flex-col justify-center min-w-fit">
       <.filter_form
         fields={[
@@ -10,7 +11,8 @@
             type: "select",
             options: format_options(Effect.effect_details()),
             value: ""
-          ]
+          ],
+          text_content: [label: "Keyword", op: :ilike_and]
         ]}
         meta={@meta}
         id="alert-filter-form"
