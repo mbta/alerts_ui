@@ -91,7 +91,7 @@ defmodule AlertsUI.Models.Alert do
 
   @derive {
     Flop.Schema,
-    filterable: [:alert_id, :effect_detail],
+    filterable: [:alert_id, :effect_detail, :text_content],
     sortable: [
       :alert_id,
       :created_timestamp,
@@ -99,7 +99,9 @@ defmodule AlertsUI.Models.Alert do
       :active_period_end,
       :closed_timestamp
     ],
-    adapter_opts: [],
+    adapter_opts: [
+      compound_fields: [text_content: [:header_text, :description_text]]
+    ],
     default_order: %{
       order_by: [:created_timestamp, :alert_id, :active_period_start, :active_period_end],
       order_directions: [:desc_nulls_last, :desc_nulls_last, :desc_nulls_last, :desc_nulls_last]
