@@ -4,17 +4,19 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   """
   use AlertsUIWeb, :live_view
   alias AlertsUI.Alerts
+  alias AlertsUI.Models.Effect
   alias AlertsViewerWeb.DateTimeHelpers
 
   @impl true
   @spec mount(map(), any(), any()) :: {:ok, any()}
   def mount(params, _session, socket) do
     params =
-      Map.merge(params, %Flop{
-        page_size: 50,
-        order_by: [:created_timestamp, :alert_id],
-        order_directions: [:desc, :desc]
-      })
+      Map.merge(
+        %Flop{
+          page_size: 50
+        },
+        params
+      )
 
     with {:ok, {alerts, meta}} <- Alerts.list_all_paginated(params) do
       {:ok, assign(socket, meta: meta, alerts: alerts)}
@@ -83,4 +85,17 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   end
 
   defp clean_filter_params(params), do: Map.drop(params, ["_target", "reset"])
+
+  defp format_options(options) do
+    [{"All", ""}]
+    |> Enum.concat(
+      options
+      |> Enum.map(
+        &{&1
+         |> String.replace("_", " ")
+         |> String.split()
+         |> Enum.map_join(" ", fn s -> String.capitalize(s) end), &1}
+      )
+    )
+  end
 end

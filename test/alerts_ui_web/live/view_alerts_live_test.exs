@@ -12,7 +12,8 @@ defmodule AlertsUIWeb.AlertsLiveTest do
           build(:active_period, %{start: ~U[2023-10-12 00:01:00Z]}),
           build(:active_period, %{start: ~U[2023-10-13 00:01:00Z]})
         ],
-        header_text: "this is the first alert"
+        header_text: "this is the first alert",
+        effect_detail: "DETOUR"
       })
 
       insert(:alert, %{
@@ -21,7 +22,8 @@ defmodule AlertsUIWeb.AlertsLiveTest do
           build(:active_period, %{start: ~U[2023-11-12 00:01:00Z]}),
           build(:active_period, %{start: ~U[2023-11-13 00:01:00Z]})
         ],
-        header_text: "this is the second alert"
+        header_text: "this is the second alert",
+        effect_detail: "SUMMARY"
       })
 
       :ok
@@ -45,7 +47,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
       assert view |> render_click("sort-alerts", %{"order" => "active_period_start"}) =~ "123"
     end
 
-    test "filter change", %{conn: conn} do
+    test "alert_id filter change", %{conn: conn} do
       conn = log_in_user(conn)
 
       {:ok, view, html} = live(conn, "/alerts")
@@ -54,6 +56,20 @@ defmodule AlertsUIWeb.AlertsLiveTest do
       assert render_change(view, "update-filter", alert_id_filter_params("")) =~ "123"
       assert render_change(view, "update-filter", alert_id_filter_params("123")) =~ "123"
       refute render_change(view, "update-filter", alert_id_filter_params("124")) =~ "123"
+    end
+
+    test "effect filter change", %{conn: conn} do
+      conn = log_in_user(conn)
+
+      {:ok, view, html} = live(conn, "/alerts")
+
+      assert html =~ "123"
+      assert render_change(view, "update-filter", effect_filter_params("")) =~ "123"
+      assert render_change(view, "update-filter", effect_filter_params("")) =~ "234"
+      refute render_change(view, "update-filter", effect_filter_params("SUMMARY")) =~ "123"
+      assert render_change(view, "update-filter", effect_filter_params("SUMMARY")) =~ "234"
+      refute render_change(view, "update-filter", effect_filter_params("DETOUR")) =~ "234"
+      assert render_change(view, "update-filter", effect_filter_params("DETOUR")) =~ "123"
     end
 
     test "filter reset", %{conn: conn} do
@@ -66,7 +82,8 @@ defmodule AlertsUIWeb.AlertsLiveTest do
 
       assert render_change(view, "update-filter", %{
                "filters" => %{
-                 "0" => %{"field" => "alert_id", "op" => "ilike_and", "value" => "124"}
+                 "0" => %{"field" => "alert_id", "op" => "ilike_and", "value" => "124"},
+                 "1" => %{"field" => "effect_detail", "value" => ""}
                },
                "reset" => ""
              }) =~ "123"
@@ -78,6 +95,16 @@ defmodule AlertsUIWeb.AlertsLiveTest do
       "_target" => ["filters", "0", "value"],
       "filters" => %{
         "0" => %{"field" => "alert_id", "op" => "ilike_and", "value" => search_string}
+      }
+    }
+  end
+
+  defp effect_filter_params(search_string) do
+    %{
+      "_target" => ["filters", "0", "value"],
+      "filters" => %{
+        "0" => %{"field" => "alert_id", "op" => "ilike_and", "value" => ""},
+        "1" => %{"field" => "effect_detail", "value" => search_string}
       }
     }
   end
