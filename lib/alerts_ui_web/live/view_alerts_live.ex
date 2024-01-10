@@ -5,6 +5,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   use AlertsUIWeb, :live_view
   alias AlertsUI.Alerts
   alias AlertsUI.Models.Effect
+  alias AlertsUI.Models.InformedEntity
   alias AlertsViewerWeb.DateTimeHelpers
 
   @impl true
@@ -18,37 +19,23 @@ defmodule AlertsUIWeb.ViewAlertsLive do
         params
       )
 
-    with {:ok, {alerts, meta}} <- Alerts.list_all_paginated(params) do
+    with {alerts, meta} <- Alerts.list_all_paginated(params) do
       {:ok, assign(socket, meta: meta, alerts: alerts)}
     end
   end
 
   @impl true
   def handle_params(params, _url, socket) do
-    with {:ok, {alerts, meta}} <- Alerts.list_all_paginated(params) do
+    with {alerts, meta} <- Alerts.list_all_paginated(params) do
       {:noreply, assign(socket, meta: meta, alerts: alerts)}
     end
   end
 
   @impl true
-  @spec handle_event(
-          <<_::88, _::_*32>>,
-          map(),
-          atom()
-          | %{
-              :assigns =>
-                atom()
-                | %{
-                    :meta => atom() | %{:flop => map(), optional(any()) => any()},
-                    optional(any()) => any()
-                  },
-              optional(any()) => any()
-            }
-        ) :: {:noreply, any()}
   def handle_event("paginate-alerts", %{"page" => page}, socket) do
     flop = Flop.set_page(socket.assigns.meta.flop, page)
 
-    with {:ok, {alerts, meta}} <- Alerts.list_all_paginated(flop) do
+    with {alerts, meta} <- Alerts.list_all_paginated(flop) do
       {:noreply, assign(socket, meta: meta, alerts: alerts)}
     end
   end
@@ -64,7 +51,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
     flop = Map.put(flop, :order_directions, new_order_directions)
 
-    with {:ok, {alerts, meta}} <- Alerts.list_all_paginated(flop) do
+    with {alerts, meta} <- Alerts.list_all_paginated(flop) do
       {:noreply, assign(socket, meta: meta, alerts: alerts)}
     end
   end
@@ -86,10 +73,10 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   defp clean_filter_params(params), do: Map.drop(params, ["_target", "reset"])
 
-  defp format_options(options) do
+  defp format_effect_options do
     [{"All", ""}]
     |> Enum.concat(
-      options
+      Effect.effect_details()
       |> Enum.map(
         &{&1
          |> String.replace("_", " ")
@@ -97,5 +84,12 @@ defmodule AlertsUIWeb.ViewAlertsLive do
          |> Enum.map_join(" ", fn s -> String.capitalize(s) end), &1}
       )
     )
+  end
+
+  defp format_service_type_options do
+    [{"All", ""}]
+    |> Enum.concat(InformedEntity.route_type_mapping())
+    |> Enum.map(fn {k, v} -> {k, v} end)
+    |> Enum.concat([{"Access", :access}])
   end
 end

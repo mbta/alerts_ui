@@ -6,7 +6,7 @@ defmodule AlertsUI.Models.InformedEntity do
   import Ecto.Changeset
   alias AlertsUI.Models.{Activity, Alert, TripDescriptor}
 
-  @facility_activies [
+  @facility_activities [
     :bringing_bike,
     :park_car,
     :store_bike,
@@ -63,10 +63,20 @@ defmodule AlertsUI.Models.InformedEntity do
     end
   end
 
-  @spec facility_activies :: [atom()]
-  def facility_activies, do: @facility_activies
+  @spec facility_activities :: [atom()]
+  def facility_activities, do: @facility_activities
 
   @spec facility_activity?(atom()) :: boolean()
-  def facility_activity?(activity) when activity in @facility_activies, do: true
+  def facility_activity?(activity) when activity in @facility_activities, do: true
   def facility_activity?(_), do: false
+
+  def route_type_mapping do
+    %{
+      "Light Rail" => 0,
+      "Subway" => 1,
+      "Commuter Rail" => 2,
+      "Bus" => 3,
+      "Ferry" => 4
+    }
+  end
 end

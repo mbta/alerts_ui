@@ -9,10 +9,15 @@
           effect_detail: [
             label: "Effect",
             type: "select",
-            options: format_options(Effect.effect_details()),
+            options: format_effect_options(),
             value: ""
           ],
-          text_content: [label: "Keyword", op: :ilike_and]
+          text_content: [label: "Keyword", op: :ilike_and],
+          service_type: [
+            label: "Service Type",
+            type: "select",
+            options: format_service_type_options()
+          ]
         ]}
         meta={@meta}
         id="alert-filter-form"

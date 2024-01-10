@@ -133,15 +133,20 @@ defmodule AlertsUI.Alerts do
     )
   end
 
-  @spec list_all_paginated(%{:order_by => list(), optional(any()) => any()}) ::
-          {:ok, {list(), Flop.Meta.t()}}
+  @spec list_all_paginated(map()) :: {[any()], Flop.Meta.t()}
   def list_all_paginated(params) do
-    from(
-      a in Alert,
-      inner_join: ie in AlertsUI.Models.InformedEntity,
-      on: ie.alert_id == a.id,
-      preload: [informed_entity: {ie, :trip}]
-    )
-    |> Flop.validate_and_run(params, for: Alert)
+    opts = [for: Alert]
+
+    with {:ok, flop} <- Flop.validate(params, opts) do
+      Alert
+      |> Flop.with_named_bindings(flop, &join_informed_entity/2, opts)
+      |> preload(informed_entity: [:trip])
+      |> Flop.run(flop, opts)
+    end
+  end
+
+  defp join_informed_entity(query, _opts) do
+    query
+    |> join(:inner, [a], ie in assoc(a, :informed_entity), as: :informed_entity)
   end
 end

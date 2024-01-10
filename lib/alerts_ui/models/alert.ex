@@ -9,6 +9,7 @@ defmodule AlertsUI.Models.Alert do
     ActivePeriod,
     AlertLifecycle,
     Cause,
+    CustomFilters,
     DurationCertainty,
     Effect,
     InformedEntity,
@@ -91,7 +92,7 @@ defmodule AlertsUI.Models.Alert do
 
   @derive {
     Flop.Schema,
-    filterable: [:alert_id, :effect_detail, :text_content],
+    filterable: [:alert_id, :effect_detail, :text_content, :service_type],
     sortable: [
       :alert_id,
       :created_timestamp,
@@ -100,7 +101,15 @@ defmodule AlertsUI.Models.Alert do
       :closed_timestamp
     ],
     adapter_opts: [
-      compound_fields: [text_content: [:header_text, :description_text]]
+      compound_fields: [text_content: [:header_text, :description_text]],
+      custom_fields: [
+        service_type: [
+          filter: {CustomFilters, :service_type_filter, [source: :inserted_at]},
+          ecto_type: :string,
+          operators: [:==],
+          bindings: [:informed_entity]
+        ]
+      ]
     ],
     default_order: %{
       order_by: [:created_timestamp, :alert_id, :active_period_start, :active_period_end],

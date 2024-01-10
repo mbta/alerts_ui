@@ -16,12 +16,12 @@ defmodule AlertsUI.Models.InformedEntityTest do
     end
   end
 
-  describe "facility_activies/0" do
+  describe "facility_activities/0" do
     test "provides a list of activity atoms that are considered facilities" do
-      facility_activies = InformedEntity.facility_activies()
+      facility_activities = InformedEntity.facility_activities()
 
-      assert is_list(facility_activies)
-      assert Enum.all?(facility_activies, &is_atom/1)
+      assert is_list(facility_activities)
+      assert Enum.all?(facility_activities, &is_atom/1)
     end
   end
 
