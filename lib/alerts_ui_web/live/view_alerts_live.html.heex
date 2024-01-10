@@ -16,7 +16,16 @@
         ]}
         meta={@meta}
         id="alert-filter-form"
-      />
+      >
+        <div>
+          <.label for="timeline">Timeline</.label>
+          <.radio_switch
+            name="timeline"
+            values={["current", "future", "past"]}
+            selected={@timeline}
+          />
+        </div>
+      </.filter_form>
     </div>
 
     <div data-theme="winter" class="flex flex-col justify-center min-w-fit">

@@ -19,14 +19,24 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       )
 
     with {:ok, {alerts, meta}} <- Alerts.list_all_paginated(params) do
-      {:ok, assign(socket, meta: meta, alerts: alerts)}
+      {:ok,
+       assign(socket,
+         meta: meta,
+         alerts: alerts,
+         timeline: Map.get(params, "timeline", "current")
+       )}
     end
   end
 
   @impl true
   def handle_params(params, _url, socket) do
     with {:ok, {alerts, meta}} <- Alerts.list_all_paginated(params) do
-      {:noreply, assign(socket, meta: meta, alerts: alerts)}
+      {:noreply,
+       assign(socket,
+         meta: meta,
+         alerts: alerts,
+         timeline: Map.get(params, "timeline", "current")
+       )}
     end
   end
 
@@ -84,8 +94,6 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     {:noreply, push_patch(socket, to: ~p"/alerts?#{params}")}
   end
 
-  defp clean_filter_params(params), do: Map.drop(params, ["_target", "reset"])
-
   defp format_options(options) do
     [{"All", ""}]
     |> Enum.concat(
@@ -98,4 +106,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       )
     )
   end
+
+  @spec clean_filter_params(map()) :: map()
+  defp clean_filter_params(params), do: Map.drop(params, ["_target", "reset"])
 end

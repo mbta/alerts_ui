@@ -136,12 +136,37 @@ defmodule AlertsUI.Alerts do
   @spec list_all_paginated(%{:order_by => list(), optional(any()) => any()}) ::
           {:ok, {list(), Flop.Meta.t()}}
   def list_all_paginated(params) do
+    timeline = Map.get(params, "timeline", "current")
+
     from(
       a in Alert,
       inner_join: ie in AlertsUI.Models.InformedEntity,
       on: ie.alert_id == a.id,
       preload: [informed_entity: {ie, :trip}]
     )
+    |> where_in_timeline(timeline)
     |> Flop.validate_and_run(params, for: Alert)
+  end
+
+  @spec where_in_timeline(Ecto.Query.t(), String.t()) :: Ecto.Query.t()
+  @spec where_in_timeline(Ecto.Query.t(), String.t(), DateTime.t()) :: Ecto.Query.t()
+  defp where_in_timeline(query, timeline, now \\ DateTime.utc_now())
+
+  defp where_in_timeline(query, "future", now) do
+    from(a in query, where: not is_nil(a.active_period_start) and a.active_period_start > ^now)
+  end
+
+  defp where_in_timeline(query, "past", now) do
+    from(a in query, where: not is_nil(a.active_period_end) and a.active_period_end <= ^now)
+  end
+
+  # Not future and not past
+  defp where_in_timeline(query, _current, now) do
+    from(
+      a in query,
+      where:
+        not (not is_nil(a.active_period_start) and a.active_period_start > ^now) and
+          not (not is_nil(a.active_period_end) and a.active_period_end <= ^now)
+    )
   end
 end

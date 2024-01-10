@@ -225,6 +225,8 @@ defmodule AlertsUIWeb.CoreComponents do
   attr :on_change, :string, default: "update-filter"
   attr :target, :string, default: nil
 
+  slot :inner_block
+
   def filter_form(%{meta: meta} = assigns) do
     assigns = assign(assigns, :form, Phoenix.Component.to_form(meta))
 
@@ -241,6 +243,7 @@ defmodule AlertsUIWeb.CoreComponents do
         <Flop.Phoenix.filter_fields :let={i} form={@form} fields={@fields}>
           <.input field={i.field} label={i.label} type={i.type} phx-debounce={120} {i.rest} />
         </Flop.Phoenix.filter_fields>
+        <%= render_slot(@inner_block) %>
       </div>
       <button class="btn btn-outline basis-8 self-center px-8" name="reset">reset</button>
     </.form>
@@ -412,6 +415,58 @@ defmodule AlertsUIWeb.CoreComponents do
       />
       <.error :for={msg <- @errors}><%= msg %></.error>
     </div>
+    """
+  end
+
+  @doc """
+  Renders a radio switch input field.
+
+  ## Examples
+
+      <.radio_switch name="group-name" values=["one", "two", "three"] selected={"two"} />
+  """
+  attr :name, :string, required: true
+  attr :values, :list, required: true
+  attr :selected, :any
+
+  def radio_switch(assigns) do
+    assigns = assign_new(assigns, :selected, fn -> List.first(assigns.values) end)
+
+    ~H"""
+    <div class="join">
+      <.radio_switch_input
+        :for={value <- @values}
+        name={@name}
+        value={value}
+        label={String.capitalize(value)}
+        checked={value == @selected}
+      />
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a radio switch input field.
+
+  ## Examples
+
+      <.radio_switch_input name="group-name" value="one" label="One" checked={true} />
+  """
+  attr :name, :string, required: true
+  attr :value, :any, required: true
+  attr :label, :string, default: nil
+  attr :checked, :boolean
+
+  def radio_switch_input(assigns) do
+    ~H"""
+    <input
+      type="radio"
+      name={@name}
+      value={@value}
+      aria-label={@label}
+      checked={@checked}
+      class="join-item btn checked:bg-none w-20"
+    />
     """
   end
 
