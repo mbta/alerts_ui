@@ -59,7 +59,8 @@ defmodule AlertsUI.Application do
   @spec load_runtime_config :: :ok
   def load_runtime_config do
     application_keys = [
-      :alert_api_url
+      :alert_api_url,
+      :compare_feed
     ]
 
     for application_key <- application_keys do

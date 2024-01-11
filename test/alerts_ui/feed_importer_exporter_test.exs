@@ -8,6 +8,11 @@ defmodule AlertsUi.FeedImporterExporterTest do
   alias Oban.Job
   alias Req.Response
 
+  setup_all do
+    reassign_env(:alerts_ui, :compare_feed, "true")
+    :ok
+  end
+
   describe "perform" do
     test "runs successfully" do
       set_log_level(:info)
