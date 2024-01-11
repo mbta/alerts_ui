@@ -135,7 +135,7 @@ defmodule AlertsUI.Alerts do
 
   @spec list_all_paginated(map()) :: {[any()], Flop.Meta.t()}
   def list_all_paginated(params) do
-    opts = [for: Alert]
+    opts = [for: Alert, page_size: 50]
 
     with {:ok, flop} <- Flop.validate(params, opts) do
       Alert
