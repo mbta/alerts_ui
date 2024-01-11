@@ -205,24 +205,56 @@ defmodule AlertsUI.AlertsTest do
       insert(:alert, %{alert_id: "234"})
       insert(:alert, %{alert_id: "456"})
       insert(:alert, %{alert_id: "123"})
-      {:ok, {results, %Flop.Meta{}}} = Alerts.list_all_paginated(%Flop{order_by: []})
+      {results, %Flop.Meta{}} = Alerts.list_all_paginated(%Flop{order_by: []})
       assert length(results) == 3
       assert Enum.map(results, & &1.alert_id) |> Enum.sort() == ["123", "234", "456"]
     end
 
-    test "order by active_period" do
+    test "filter by active_period" do
       insert(:alert, %{alert_id: "012", active_period_start: nil})
       insert(:alert, %{alert_id: "123", active_period_start: ~U[2023-10-14 00:01:00Z]})
       insert(:alert, %{alert_id: "234", active_period_start: ~U[2023-10-16 00:01:00Z]})
       insert(:alert, %{alert_id: "345", active_period_start: ~U[2023-10-15 00:01:00Z]})
 
-      {:ok, {result, _meta}} =
+      {result, _meta} =
         Alerts.list_all_paginated(%Flop{
           order_by: [:active_period_start, :created_timestamp, :alert_id],
           order_directions: [:asc, :desc, :desc]
         })
 
       assert result |> Enum.map(& &1.alert_id) == ["123", "345", "234", "012"]
+    end
+
+    test "filter by service type" do
+      ie_1 = build(:informed_entity, %{route_type: 1, activities: [:BOARD]})
+      ie_2 = build(:informed_entity, %{route_type: nil, activities: [:STORE_BIKE]})
+      insert(:alert, %{alert_id: "123", informed_entity: [ie_1]})
+      insert(:alert, %{alert_id: "234", informed_entity: [ie_2]})
+      insert(:alert, %{alert_id: "345", informed_entity: [ie_1, ie_2]})
+
+      {result_1, _meta} =
+        Alerts.list_all_paginated(%{
+          order_by: [:alert_id],
+          filters: [%{"field" => "service_type", "value" => "1"}]
+        })
+
+      assert result_1 |> Enum.map(& &1.alert_id) == ["123", "345"]
+
+      {result_2, _meta} =
+        Alerts.list_all_paginated(%{
+          order_by: [:alert_id],
+          filters: [%{"field" => "service_type", "value" => "access"}]
+        })
+
+      assert result_2 |> Enum.map(& &1.alert_id) == ["234", "345"]
+
+      {result_3, _meta} =
+        Alerts.list_all_paginated(%{
+          order_by: [:alert_id],
+          filters: [%{"field" => "service_type", "value" => ""}]
+        })
+
+      assert result_3 |> Enum.map(& &1.alert_id) == ["123", "234", "345"]
     end
   end
 
