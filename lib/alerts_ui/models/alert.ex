@@ -92,7 +92,7 @@ defmodule AlertsUI.Models.Alert do
 
   @derive {
     Flop.Schema,
-    filterable: [:alert_id, :effect_detail, :text_content, :service_type],
+    filterable: [:alert_id, :effect_detail, :text_content, :service_type, :timeline],
     sortable: [
       :alert_id,
       :created_timestamp,
@@ -108,6 +108,11 @@ defmodule AlertsUI.Models.Alert do
           ecto_type: :string,
           operators: [:==],
           bindings: [:informed_entity]
+        ],
+        timeline: [
+          filter: {CustomFilters, :timeline_filter, []},
+          ecto_type: :string,
+          operators: [:==]
         ]
       ]
     ],
