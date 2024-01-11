@@ -239,7 +239,11 @@ defmodule AlertsUIWeb.CoreComponents do
     >
       <div class="flex flex-row gap-2">
         <Flop.Phoenix.filter_fields :let={i} form={@form} fields={@fields}>
-          <.input field={i.field} label={i.label} type={i.type} phx-debounce={120} {i.rest} />
+          <%= if i.type == "radio_switch" do %>
+            <.radio_switch name={i.field.name} label={i.label} selected={i.field.value} {i.rest} />
+          <% else %>
+            <.input field={i.field} label={i.label} type={i.type} phx-debounce={120} {i.rest} />
+          <% end %>
         </Flop.Phoenix.filter_fields>
       </div>
       <button class="btn btn-outline basis-8 self-center px-8" name="reset">reset</button>
@@ -412,6 +416,60 @@ defmodule AlertsUIWeb.CoreComponents do
       />
       <.error :for={msg <- @errors}><%= msg %></.error>
     </div>
+    """
+  end
+
+  @doc """
+  Renders a radio switch input field.
+
+  ## Examples
+
+      <.radio_switch name="group-name" values=["one", "two", "three"] selected={"two"} />
+  """
+  attr :name, :string, required: true
+  attr :label, :string, default: nil
+  attr :values, :list, required: true
+  attr :selected, :any
+
+  def radio_switch(assigns) do
+    ~H"""
+    <fieldset>
+      <.label for={@name}><%= @label %></.label>
+      <div class="join">
+        <.radio_switch_input
+          :for={value <- @values}
+          name={@name}
+          value={value}
+          label={String.capitalize(value)}
+          checked={value == @selected}
+        />
+      </div>
+    </fieldset>
+    """
+  end
+
+  @doc """
+  Renders a radio switch input field.
+
+  ## Examples
+
+      <.radio_switch_input name="group-name" value="one" label="One" checked={true} />
+  """
+  attr :name, :string, required: true
+  attr :value, :any, required: true
+  attr :label, :string, default: nil
+  attr :checked, :boolean
+
+  def radio_switch_input(assigns) do
+    ~H"""
+    <input
+      type="radio"
+      name={@name}
+      value={@value}
+      aria-label={@label}
+      checked={@checked}
+      class="join-item btn checked:bg-none w-20"
+    />
     """
   end
 

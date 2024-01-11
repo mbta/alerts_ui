@@ -63,8 +63,6 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     {:noreply, push_patch(socket, to: ~p"/alerts?#{params}")}
   end
 
-  defp clean_filter_params(params), do: Map.drop(params, ["_target", "reset"])
-
   defp format_effect_options do
     [{"All", ""}]
     |> Enum.concat(
@@ -83,4 +81,9 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     |> Enum.concat(InformedEntity.route_type_mapping())
     |> Enum.concat([{"Access", :access}])
   end
+
+  defp timeline_options, do: ["current", "future", "past"]
+
+  @spec clean_filter_params(map()) :: map()
+  defp clean_filter_params(params), do: Map.drop(params, ["_target", "reset"])
 end

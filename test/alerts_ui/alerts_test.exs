@@ -256,6 +256,95 @@ defmodule AlertsUI.AlertsTest do
 
       assert result_3 |> Enum.map(& &1.alert_id) == ["123", "234", "345"]
     end
+
+    test "filter by timeline" do
+      now = DateTime.utc_now()
+      one_hour_from_now = DateTime.add(now, 1, :hour)
+      one_hour_ago = DateTime.add(now, -1, :hour)
+
+      insert(:alert, %{
+        alert_id: "start_nil_end_nil",
+        active_period_start: nil,
+        active_period_end: nil
+      })
+
+      insert(:alert, %{
+        alert_id: "start_nil_end_future",
+        active_period_start: nil,
+        active_period_end: one_hour_from_now
+      })
+
+      insert(:alert, %{
+        alert_id: "start_nil_end_past",
+        active_period_start: nil,
+        active_period_end: one_hour_ago
+      })
+
+      insert(:alert, %{
+        alert_id: "start_future_end_nil",
+        active_period_start: one_hour_from_now,
+        active_period_end: nil
+      })
+
+      insert(:alert, %{
+        alert_id: "start_past_end_nil",
+        active_period_start: one_hour_ago,
+        active_period_end: nil
+      })
+
+      insert(:alert, %{
+        alert_id: "start_past_end_past",
+        active_period_start: one_hour_ago,
+        active_period_end: one_hour_ago
+      })
+
+      insert(:alert, %{
+        alert_id: "start_past_end_future",
+        active_period_start: one_hour_ago,
+        active_period_end: one_hour_from_now
+      })
+
+      insert(:alert, %{
+        alert_id: "start_future_end_future",
+        active_period_start: one_hour_from_now,
+        active_period_end: one_hour_from_now
+      })
+
+      {current_results, _meta} =
+        Alerts.list_all_paginated(%{
+          order_by: [:alert_id],
+          filters: [%{"field" => "timeline", "value" => "current"}]
+        })
+
+      assert current_results |> Enum.map(& &1.alert_id) == [
+               "start_nil_end_future",
+               "start_nil_end_nil",
+               "start_past_end_future",
+               "start_past_end_nil"
+             ]
+
+      {future_results, _meta} =
+        Alerts.list_all_paginated(%{
+          order_by: [:alert_id],
+          filters: [%{"field" => "timeline", "value" => "future"}]
+        })
+
+      assert future_results |> Enum.map(& &1.alert_id) == [
+               "start_future_end_future",
+               "start_future_end_nil"
+             ]
+
+      {past_results, _meta} =
+        Alerts.list_all_paginated(%{
+          order_by: [:alert_id],
+          filters: [%{"field" => "timeline", "value" => "past"}]
+        })
+
+      assert past_results |> Enum.map(& &1.alert_id) == [
+               "start_nil_end_past",
+               "start_past_end_past"
+             ]
+    end
   end
 
   describe "list_all_open/0" do
