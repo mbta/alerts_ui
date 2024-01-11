@@ -5,23 +5,26 @@ permissions:
   contents: read
 
 on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+
   workflow_dispatch:
     inputs:
       environment:
         type: environment
         required: true
-        default: dev-green
-  push:
-    branches: ["main"]
 
 jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.env || 'dev-green' }}
-    concurrency: ${{ github.event.inputs.env || 'dev-green' }}
+    environment: ${{ github.event.inputs.env || inputs.environment }}
+    concurrency: ${{ github.event.inputs.env || inputs.environment  }}
     env:
-      TARGET: ${{ github.event.inputs.env || 'dev-green' }}
+      TARGET: ${{ github.event.inputs.env || inputs.environment }}
     steps:
       - uses: actions/checkout@v2
       - uses: mbta/actions/build-push-ecr@v2
