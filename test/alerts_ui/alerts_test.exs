@@ -225,7 +225,7 @@ defmodule AlertsUI.AlertsTest do
       assert result |> Enum.map(& &1.alert_id) == ["123", "345", "234", "012"]
     end
 
-    test "order by service type" do
+    test "filter by service type" do
       ie_1 = build(:informed_entity, %{route_type: 1, activities: [:BOARD]})
       ie_2 = build(:informed_entity, %{route_type: nil, activities: [:STORE_BIKE]})
       insert(:alert, %{alert_id: "123", informed_entity: [ie_1]})
@@ -247,6 +247,14 @@ defmodule AlertsUI.AlertsTest do
         })
 
       assert result_2 |> Enum.map(& &1.alert_id) == ["234", "345"]
+
+      {result_3, _meta} =
+        Alerts.list_all_paginated(%{
+          order_by: [:alert_id],
+          filters: [%{"field" => "service_type", "value" => ""}]
+        })
+
+      assert result_3 |> Enum.map(& &1.alert_id) == ["123", "234", "345"]
     end
   end
 

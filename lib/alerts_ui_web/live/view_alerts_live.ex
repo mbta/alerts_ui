@@ -81,7 +81,6 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   defp format_service_type_options do
     [{"All", ""}]
     |> Enum.concat(InformedEntity.route_type_mapping())
-    |> Enum.map(fn {k, v} -> {k, v} end)
     |> Enum.concat([{"Access", :access}])
   end
 end

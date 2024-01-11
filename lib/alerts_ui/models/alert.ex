@@ -104,7 +104,7 @@ defmodule AlertsUI.Models.Alert do
       compound_fields: [text_content: [:header_text, :description_text]],
       custom_fields: [
         service_type: [
-          filter: {CustomFilters, :service_type_filter, [source: :inserted_at]},
+          filter: {CustomFilters, :service_type_filter, []},
           ecto_type: :string,
           operators: [:==],
           bindings: [:informed_entity]
