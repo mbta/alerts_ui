@@ -9,7 +9,8 @@ defmodule AlertsUi.FeedImporterExporter do
   alias AlertsUI.GTFSIntake.AlertsIntake
 
   @spec compare_feed :: boolean()
-  defp compare_feed, do: Application.get_env(:alerts_ui, :compare_feed) == "true"
+  defp compare_feed,
+    do: Application.get_env(:alerts_ui, :compare_feed) == "true"
 
   @impl Oban.Worker
   def perform(_job, opts \\ []) do
