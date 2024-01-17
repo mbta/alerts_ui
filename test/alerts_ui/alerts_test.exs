@@ -51,6 +51,34 @@ defmodule AlertsUI.AlertsTest do
       assert (updated_alert.active_period |> hd).end == ~U[2023-10-13 00:03:00Z]
     end
 
+    test "does not update active period if empty and closed" do
+      existing_alert =
+        insert(
+          :alert,
+          %{
+            alert_id: "123",
+            header_text: "old header text",
+            active_period: [
+              build(:active_period),
+              %{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:01:00Z]}
+            ]
+          }
+        )
+
+      new_params =
+        build(:alert_map, %{
+          alert_id: "123",
+          header_text: "new header text",
+          last_modified_timestamp: ~U[2023-10-12 00:01:00Z],
+          closed_timestamp: ~U[2023-10-13 00:01:00Z],
+          active_period: []
+        })
+
+      Alerts.create_or_modify_alert(new_params)
+      updated_alert = Repo.get_by(Alert, id: existing_alert.id)
+      assert (updated_alert.active_period |> hd).end == ~U[2023-10-13 00:01:00Z]
+    end
+
     @tag :capture_log
     test "does not update alert if ids dont match" do
       existing_alert =
@@ -109,6 +137,85 @@ defmodule AlertsUI.AlertsTest do
 
       Alerts.create_or_modify_alert(alert)
       assert length(Alerts.list_all()) - before_alerts_length == 0
+    end
+  end
+
+  describe "create_changeset/3" do
+    test "create new changeset if no stored alert" do
+      params =
+        build(:alert_map, %{
+          alert_id: "123",
+          header_text: "new header text",
+          description_text: "",
+          last_modified_timestamp: ~U[2023-10-12 00:01:00Z]
+        })
+
+      {:ok, changeset} = Alerts.create_changeset(:repo, %{most_recent_alert: nil}, params)
+      assert changeset.changes.alert_id == "123"
+    end
+
+    test "create modification changeset if stored alert is older" do
+      stored_alert =
+        insert(:alert, %{
+          alert_id: "123",
+          header_text: "old header text",
+          description_text: "",
+          last_modified_timestamp: ~U[2023-10-12 00:01:00Z],
+          active_period: [
+            build(:active_period),
+            %{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:01:00Z]}
+          ]
+        })
+
+      params =
+        build(:alert_map, %{
+          alert_id: "123",
+          header_text: "new header text",
+          description_text: "",
+          last_modified_timestamp: ~U[2023-10-13 00:01:00Z],
+          active_period: [
+            %{
+              start: ~U[2023-10-20 16:15:00Z],
+              end: ~U[2023-10-21 18:45:38Z]
+            }
+          ]
+        })
+
+      {:ok, changeset} =
+        Alerts.create_changeset(:repo, %{most_recent_alert: stored_alert}, params)
+
+      assert changeset.changes.header_text == "new header text"
+      assert changeset.changes.active_period |> length == 3
+    end
+
+    test "do not overwrite active period if incoming has closed timestamp and empty active period" do
+      stored_alert =
+        insert(:alert, %{
+          alert_id: "123",
+          header_text: "old header text",
+          description_text: "",
+          last_modified_timestamp: ~U[2023-10-12 00:01:00Z],
+          active_period: [
+            build(:active_period),
+            %{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:01:00Z]}
+          ]
+        })
+
+      params =
+        build(:alert_map, %{
+          alert_id: "123",
+          header_text: "new header text",
+          description_text: "",
+          last_modified_timestamp: ~U[2023-10-13 00:01:00Z],
+          closed_timestamp: ~U[2023-10-14 00:01:00Z],
+          active_period: []
+        })
+
+      {:ok, changeset} =
+        Alerts.create_changeset(:repo, %{most_recent_alert: stored_alert}, params)
+
+      assert changeset.changes.header_text == "new header text"
+      assert Map.has_key?(changeset.changes, :active_period) == false
     end
   end
 
