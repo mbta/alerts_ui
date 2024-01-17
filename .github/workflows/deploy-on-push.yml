@@ -1,0 +1,19 @@
+name: Deploy on Push
+
+permissions:
+  id-token: write
+  contents: read
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+    call-deploy-dev-green:
+        uses: deploy-dev.yml
+        with:
+          environment: dev-green
+    call-deploy-dev-orange:
+        uses: deploy-dev.yml
+        with:
+          environment: dev-orange
