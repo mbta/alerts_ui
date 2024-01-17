@@ -45,11 +45,15 @@ defmodule AlertsUI.Alerts do
     {:ok, %Alert{} |> Alert.changeset(incoming_alert)}
   end
 
-  def create_changeset(_repo, %{most_recent_alert: stored_alert}, incoming_alert) do
+  # don't overwrite active period if it's empty and alert is closed
+  def create_changeset(
+        _repo,
+        %{most_recent_alert: stored_alert},
+        %{active_period: [], closed_timestamp: _} = incoming_alert
+      ) do
     # if there is a stored alert with the same alert_id, create a modification changeset
     # for it if the incoming alert is more recent. Otherwise create an error changeset so
     # nothing gets created
-
     incoming_alert_is_more_recent =
       last_modified_time_more_recent?(
         Map.get(incoming_alert, :last_modified_timestamp),
@@ -61,21 +65,28 @@ defmodule AlertsUI.Alerts do
         stored_alert
         |> Repo.preload(informed_entity: [:trip])
 
-      incoming_alert = delete_active_period_if_empty(incoming_alert)
-
-      {:ok, stored_alert_with_preloads |> Alert.changeset(incoming_alert)}
+      {:ok,
+       stored_alert_with_preloads |> Alert.changeset(Map.delete(incoming_alert, :active_period))}
     else
       {:error, change(%Alert{}, %{}) |> add_error(:alert_id, "alert is not most recent version")}
     end
   end
 
-  defp delete_active_period_if_empty(incoming_alert) do
-    # do not overwrite active period if new one is empty
-    # and alert has been closed
-    if incoming_alert.active_period == [] and Map.has_key?(incoming_alert, :closed_timestamp) do
-      Map.delete(incoming_alert, :active_period)
+  def create_changeset(_repo, %{most_recent_alert: stored_alert}, incoming_alert) do
+    incoming_alert_is_more_recent =
+      last_modified_time_more_recent?(
+        Map.get(incoming_alert, :last_modified_timestamp),
+        Map.get(stored_alert, :last_modified_timestamp)
+      )
+
+    if incoming_alert_is_more_recent do
+      stored_alert_with_preloads =
+        stored_alert
+        |> Repo.preload(informed_entity: [:trip])
+
+      {:ok, stored_alert_with_preloads |> Alert.changeset(incoming_alert)}
     else
-      incoming_alert
+      {:error, change(%Alert{}, %{}) |> add_error(:alert_id, "alert is not most recent version")}
     end
   end
 
