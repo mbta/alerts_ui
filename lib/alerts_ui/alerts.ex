@@ -9,13 +9,27 @@ defmodule AlertsUI.Alerts do
   alias Ecto.Multi
   require Logger
 
-  @spec create_or_modify_alert(map()) ::
+  def create_alert(params) do
+    %Alert{}
+    |> Alert.changeset(params)
+    |> Repo.insert()
+  end
+
+  def parse_changeset_errors(changeset) do
+    traverse_errors(changeset, fn {msg, opts} ->
+      Regex.replace(~r"%{(\w+)}", msg, fn _, key ->
+        opts |> Keyword.get(String.to_existing_atom(key), key) |> to_string()
+      end)
+    end)
+  end
+
+  @spec create_or_modify_alert_from_feed(map()) ::
           {:ok, Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
-  def create_or_modify_alert(incoming_alert) do
+  def create_or_modify_alert_from_feed(incoming_alert) do
     result =
       Multi.new()
       |> Multi.one(:most_recent_alert, get_alert_by_alert_id_query(incoming_alert.alert_id))
-      |> Multi.run(:changeset, AlertsUI.Alerts, :create_changeset, [incoming_alert])
+      |> Multi.run(:changeset, AlertsUI.Alerts, :create_changeset_from_feed, [incoming_alert])
       |> Multi.insert_or_update(:insert_or_update, fn %{changeset: changeset} -> changeset end)
       |> Repo.transaction()
 
@@ -34,19 +48,19 @@ defmodule AlertsUI.Alerts do
     result
   end
 
-  @spec create_changeset(
+  @spec create_changeset_from_feed(
           any(),
           %{:most_recent_alert => Alert.t() | nil, optional(any()) => any()},
           map()
         ) ::
           {:error, Ecto.Changeset.t()} | {:ok, Ecto.Changeset.t()}
-  def create_changeset(_repo, %{most_recent_alert: nil}, incoming_alert) do
+  def create_changeset_from_feed(_repo, %{most_recent_alert: nil}, incoming_alert) do
     # if there is no stored alert with the same alert_id, create new changeset for incoming alert
     {:ok, %Alert{} |> Alert.changeset(incoming_alert)}
   end
 
   # don't overwrite active period if it's empty and alert is closed
-  def create_changeset(
+  def create_changeset_from_feed(
         _repo,
         %{most_recent_alert: stored_alert},
         %{active_period: [], closed_timestamp: closed_timestamp} = incoming_alert
@@ -78,7 +92,7 @@ defmodule AlertsUI.Alerts do
     end
   end
 
-  def create_changeset(_repo, %{most_recent_alert: stored_alert}, incoming_alert) do
+  def create_changeset_from_feed(_repo, %{most_recent_alert: stored_alert}, incoming_alert) do
     incoming_alert_is_more_recent =
       last_modified_time_more_recent?(
         Map.get(incoming_alert, :last_modified_timestamp),

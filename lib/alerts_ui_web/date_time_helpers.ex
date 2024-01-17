@@ -1,4 +1,4 @@
-defmodule AlertsViewerWeb.DateTimeHelpers do
+defmodule AlertsUIWeb.DateTimeHelpers do
   @moduledoc """
   Utility functions for formatting dates and times.
   """

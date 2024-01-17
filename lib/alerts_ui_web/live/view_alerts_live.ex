@@ -6,7 +6,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   alias AlertsUI.Alerts
   alias AlertsUI.Models.Effect
   alias AlertsUI.Models.InformedEntity
-  alias AlertsViewerWeb.DateTimeHelpers
+  alias AlertsUIWeb.DateTimeHelpers
 
   @impl true
   @spec mount(map(), any(), any()) :: {:ok, any()}
