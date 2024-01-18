@@ -8,18 +8,30 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   alias AlertsUI.Models.InformedEntity
   alias AlertsViewerWeb.DateTimeHelpers
 
+  @one_minute_in_ms 60_000
+
   @impl true
-  @spec mount(map(), any(), any()) :: {:ok, any()}
   def mount(params, _session, socket) do
+    Process.send_after(self(), :update, @one_minute_in_ms)
+
     with {alerts, meta} <- Alerts.list_all_paginated(params) do
-      {:ok, assign(socket, meta: meta, alerts: alerts)}
+      {:ok, assign(socket, meta: meta, alerts: alerts, params: params)}
+    end
+  end
+
+  @impl true
+  def handle_info(:update, socket) do
+    Process.send_after(self(), :update, @one_minute_in_ms)
+
+    with {alerts, meta} <- Alerts.list_all_paginated(socket.assigns.params) do
+      {:noreply, assign(socket, meta: meta, alerts: alerts)}
     end
   end
 
   @impl true
   def handle_params(params, _url, socket) do
     with {alerts, meta} <- Alerts.list_all_paginated(params) do
-      {:noreply, assign(socket, meta: meta, alerts: alerts)}
+      {:noreply, assign(socket, meta: meta, alerts: alerts, params: params)}
     end
   end
 
