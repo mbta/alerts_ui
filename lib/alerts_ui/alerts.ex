@@ -49,8 +49,9 @@ defmodule AlertsUI.Alerts do
   def create_changeset(
         _repo,
         %{most_recent_alert: stored_alert},
-        %{active_period: [], closed_timestamp: _} = incoming_alert
-      ) do
+        %{active_period: [], closed_timestamp: closed_timestamp} = incoming_alert
+      )
+      when closed_timestamp !== nil do
     # if there is a stored alert with the same alert_id, create a modification changeset
     # for it if the incoming alert is more recent. Otherwise create an error changeset so
     # nothing gets created
@@ -65,8 +66,13 @@ defmodule AlertsUI.Alerts do
         stored_alert
         |> Repo.preload(informed_entity: [:trip])
 
-      {:ok,
-       stored_alert_with_preloads |> Alert.changeset(Map.delete(incoming_alert, :active_period))}
+      incoming_alert =
+        incoming_alert
+        |> Map.delete(:active_period)
+        |> Map.delete(:active_period_start)
+        |> Map.delete(:active_period_end)
+
+      {:ok, stored_alert_with_preloads |> Alert.changeset(incoming_alert)}
     else
       {:error, change(%Alert{}, %{}) |> add_error(:alert_id, "alert is not most recent version")}
     end

@@ -198,7 +198,9 @@ defmodule AlertsUI.AlertsTest do
           active_period: [
             build(:active_period),
             %{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:01:00Z]}
-          ]
+          ],
+          active_period_start: ~U[2023-10-12 00:01:00Z],
+          active_period_end: ~U[2023-10-13 00:01:00Z]
         })
 
       params =
@@ -208,7 +210,9 @@ defmodule AlertsUI.AlertsTest do
           description_text: "",
           last_modified_timestamp: ~U[2023-10-13 00:01:00Z],
           closed_timestamp: ~U[2023-10-14 00:01:00Z],
-          active_period: []
+          active_period: [],
+          active_period_start: nil,
+          active_period_end: nil
         })
 
       {:ok, changeset} =
@@ -216,6 +220,7 @@ defmodule AlertsUI.AlertsTest do
 
       assert changeset.changes.header_text == "new header text"
       assert Map.has_key?(changeset.changes, :active_period) == false
+      assert Map.has_key?(changeset.changes, :active_period_end) == false
     end
   end
 
