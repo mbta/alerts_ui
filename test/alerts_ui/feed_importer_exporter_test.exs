@@ -63,6 +63,7 @@ defmodule AlertsUi.FeedImporterExporterTest do
       {_result, log} =
         with_log(fn ->
           FeedImporterExporter.perform(%Job{args: %{}}, opts)
+          :timer.sleep(500)
         end)
 
       assert log =~ "Export ok!"
