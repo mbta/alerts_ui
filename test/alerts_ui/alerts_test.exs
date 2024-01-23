@@ -5,7 +5,43 @@ defmodule AlertsUI.AlertsTest do
   alias AlertsUI.Alerts
   alias AlertsUI.Models.Alert
 
-  describe "create_or_modify_alert/1" do
+  describe "create_alert/1" do
+    test "creates alert from params" do
+      new_params =
+        build(:alert_map, %{
+          alert_id: "123",
+          header_text: "new header text",
+          description_text: ""
+        })
+
+      {:ok, new_alert} = Alerts.create_alert(new_params)
+      assert new_alert.alert_id == "123"
+      assert new_alert.header_text == "new header text"
+      assert new_alert.description_text == ""
+    end
+
+    test "error if alert is incomplete" do
+      new_params =
+        build(:alert_map, %{
+          alert_id: "123",
+          header_text: nil,
+          description_text: nil
+        })
+
+      {:error, changeset} = Alerts.create_alert(new_params)
+      assert changeset.errors == [header_text: {"can't be blank", [validation: :required]}]
+    end
+  end
+
+  describe "parse_changeset_errors/1" do
+    test "puts changeset errors in readable format" do
+      changeset = Alert.changeset(%Alert{}, %{header_text: "hello"})
+      result = Alerts.parse_changeset_errors(changeset)
+      assert result == %{alert_id: ["can't be blank"], informed_entity: ["can't be blank"]}
+    end
+  end
+
+  describe "create_or_modify_alert_from_feed/1" do
     test "creates alert if new" do
       new_params =
         build(:alert_map, %{
@@ -15,7 +51,7 @@ defmodule AlertsUI.AlertsTest do
           last_modified_timestamp: ~U[2023-10-12 00:01:00Z]
         })
 
-      Alerts.create_or_modify_alert(new_params)
+      Alerts.create_or_modify_alert_from_feed(new_params)
       new_alert = Repo.get_by(Alert, alert_id: "123")
       assert new_alert.alert_id == "123"
       assert new_alert.header_text == "new header text"
@@ -44,7 +80,7 @@ defmodule AlertsUI.AlertsTest do
           active_period: [%{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:03:00Z]}]
         })
 
-      Alerts.create_or_modify_alert(new_params)
+      Alerts.create_or_modify_alert_from_feed(new_params)
       updated_alert = Repo.get_by(Alert, id: existing_alert.id)
       assert updated_alert.alert_id == "123"
       assert updated_alert.header_text == "new header text"
@@ -74,7 +110,7 @@ defmodule AlertsUI.AlertsTest do
           active_period: []
         })
 
-      Alerts.create_or_modify_alert(new_params)
+      Alerts.create_or_modify_alert_from_feed(new_params)
       updated_alert = Repo.get_by(Alert, id: existing_alert.id)
       assert (updated_alert.active_period |> hd).end == ~U[2023-10-13 00:01:00Z]
     end
@@ -97,7 +133,7 @@ defmodule AlertsUI.AlertsTest do
           last_modified_timestamp: ~U[2023-10-12 00:01:00Z]
         })
 
-      Alerts.create_or_modify_alert(new_params)
+      Alerts.create_or_modify_alert_from_feed(new_params)
       unmodified_alert = Repo.get_by!(Alert, id: existing_alert.id)
       assert unmodified_alert.alert_id == "123"
       assert unmodified_alert.header_text == "old header text"
@@ -120,7 +156,7 @@ defmodule AlertsUI.AlertsTest do
           last_modified_timestamp: ~U[2023-10-12 00:01:00Z]
         })
 
-      Alerts.create_or_modify_alert(new_params)
+      Alerts.create_or_modify_alert_from_feed(new_params)
       unmodified_alert = Repo.get_by!(Alert, alert_id: "123")
       assert unmodified_alert.header_text == "old header text"
     end
@@ -135,12 +171,12 @@ defmodule AlertsUI.AlertsTest do
         informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}]
       }
 
-      Alerts.create_or_modify_alert(alert)
+      Alerts.create_or_modify_alert_from_feed(alert)
       assert length(Alerts.list_all()) - before_alerts_length == 0
     end
   end
 
-  describe "create_changeset/3" do
+  describe "create_changeset_from_feed/3" do
     test "create new changeset if no stored alert" do
       params =
         build(:alert_map, %{
@@ -150,7 +186,9 @@ defmodule AlertsUI.AlertsTest do
           last_modified_timestamp: ~U[2023-10-12 00:01:00Z]
         })
 
-      {:ok, changeset} = Alerts.create_changeset(:repo, %{most_recent_alert: nil}, params)
+      {:ok, changeset} =
+        Alerts.create_changeset_from_feed(:repo, %{most_recent_alert: nil}, params)
+
       assert changeset.changes.alert_id == "123"
     end
 
@@ -182,7 +220,7 @@ defmodule AlertsUI.AlertsTest do
         })
 
       {:ok, changeset} =
-        Alerts.create_changeset(:repo, %{most_recent_alert: stored_alert}, params)
+        Alerts.create_changeset_from_feed(:repo, %{most_recent_alert: stored_alert}, params)
 
       assert changeset.changes.header_text == "new header text"
       assert changeset.changes.active_period |> length == 3
@@ -216,7 +254,7 @@ defmodule AlertsUI.AlertsTest do
         })
 
       {:ok, changeset} =
-        Alerts.create_changeset(:repo, %{most_recent_alert: stored_alert}, params)
+        Alerts.create_changeset_from_feed(:repo, %{most_recent_alert: stored_alert}, params)
 
       assert changeset.changes.header_text == "new header text"
       assert Map.has_key?(changeset.changes, :active_period) == false

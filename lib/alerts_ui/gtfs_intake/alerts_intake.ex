@@ -17,7 +17,7 @@ defmodule AlertsUI.GTFSIntake.AlertsIntake do
     response
     |> parse_response()
     |> Alerts.close_if_not_in_feed()
-    |> Enum.each(&Alerts.create_or_modify_alert(&1))
+    |> Enum.each(&Alerts.create_or_modify_alert_from_feed(&1))
 
     {:ok, json_body}
   end

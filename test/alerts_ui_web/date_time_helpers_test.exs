@@ -1,7 +1,7 @@
-defmodule AlertsViewerWeb.DateTimeHelpersTest do
+defmodule AlertsUIWeb.DateTimeHelpersTest do
   use ExUnit.Case, async: true
 
-  import AlertsViewerWeb.DateTimeHelpers
+  import AlertsUIWeb.DateTimeHelpers
 
-  doctest AlertsViewerWeb.DateTimeHelpers
+  doctest AlertsUIWeb.DateTimeHelpers
 end

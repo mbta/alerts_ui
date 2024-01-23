@@ -1,0 +1,8 @@
+<div class="w-100 flex flex-row justify-center">
+  <article class="prose prose-stone min-w-fit">
+    <h1>Create an Alert</h1>
+    <.live_component module={AlertDetails} id="details" hidden={@details_hidden} />
+    <.live_component module={SuccessfulSubmission} id="success" hidden={@success_hidden} />
+  </article>
+  <.flash kind={:error} title="Error creating Alert!" flash={@flash} />
+</div>
