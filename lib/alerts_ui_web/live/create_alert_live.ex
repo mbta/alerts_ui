@@ -1,6 +1,6 @@
 defmodule AlertsUIWeb.CreateAlertLive do
   use AlertsUIWeb, :live_view
-  alias AlertsUI.Alerts
+
   alias AlertsUIWeb.FormComponents.{AlertDetails, SuccessfulSubmission}
 
   @impl true
@@ -15,20 +15,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   @impl true
-  def handle_info({:details_created, details}, socket) do
-    Alerts.create_alert(details |> Map.from_struct())
-    |> case do
-      {:ok, _result} ->
-        {:noreply, assign(socket, [{:details_hidden, true}, {:success_hidden, false}])}
-
-      {:error, result} ->
-        errors =
-          result
-          |> Alerts.parse_changeset_errors()
-          |> Enum.map_join(", ", fn {field, reason} -> "#{field}: #{reason}" end)
-
-        socket = put_flash(socket, :error, errors)
-        {:noreply, socket}
-    end
+  def handle_info({:details_created, _details}, socket) do
+    {:noreply, assign(socket, [{:details_hidden, true}, {:success_hidden, false}])}
   end
 end

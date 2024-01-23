@@ -39,7 +39,7 @@ defmodule AlertsUIWeb.Router do
     live_session :require_authenticated_user,
       on_mount: [{AlertsUIWeb.UserAuth, :ensure_authenticated}] do
       live("/alerts", ViewAlertsLive)
-      live("/create_alert", CreateAlertLive)
+      live("/alerts/new", CreateAlertLive)
     end
   end
 

@@ -15,6 +15,7 @@ defmodule AlertsUI.Alerts do
     |> Repo.insert()
   end
 
+  @spec parse_changeset_errors(Ecto.Changeset.t()) :: %{optional(atom()) => list()}
   def parse_changeset_errors(changeset) do
     traverse_errors(changeset, fn {msg, opts} ->
       Regex.replace(~r"%{(\w+)}", msg, fn _, key ->

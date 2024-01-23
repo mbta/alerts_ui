@@ -33,6 +33,14 @@ defmodule AlertsUI.AlertsTest do
     end
   end
 
+  describe "parse_changeset_errors/1" do
+    test "puts changeset errors in readable format" do
+      changeset = Alert.changeset(%Alert{}, %{header_text: "hello"})
+      result = Alerts.parse_changeset_errors(changeset)
+      assert result == %{alert_id: ["can't be blank"], informed_entity: ["can't be blank"]}
+    end
+  end
+
   describe "create_or_modify_alert_from_feed/1" do
     test "creates alert if new" do
       new_params =

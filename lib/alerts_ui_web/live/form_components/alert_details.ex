@@ -16,14 +16,9 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
 
   @impl true
   def mount(socket) do
-    changeset = change(%__MODULE__{}) |> to_form()
+    changeset = %__MODULE__{} |> change() |> to_form()
     socket = socket |> assign(:details_changeset, changeset)
     {:ok, socket}
-  end
-
-  @impl true
-  def handle_event("change", _params, socket) do
-    {:noreply, socket}
   end
 
   @impl true

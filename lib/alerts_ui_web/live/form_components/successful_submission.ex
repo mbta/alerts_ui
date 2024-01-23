@@ -6,7 +6,7 @@ defmodule AlertsUIWeb.FormComponents.SuccessfulSubmission do
 
   @impl true
   def handle_event("ok", _params, socket) do
-    {:noreply, redirect(socket, to: "/create_alert")}
+    {:noreply, redirect(socket, to: "/alerts/new")}
   end
 
   @impl true
