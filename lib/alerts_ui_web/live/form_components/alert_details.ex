@@ -27,7 +27,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     |> apply_action(:insert)
     |> case do
       {:ok, changeset} ->
-        send(self(), {:step_completed, changeset})
+        send(self(), {:create_alert, changeset})
         {:noreply, socket}
 
       {:error, changeset} ->

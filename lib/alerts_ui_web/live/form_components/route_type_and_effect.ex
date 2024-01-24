@@ -18,10 +18,10 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   @primary_key false
   embedded_schema do
     field :route_type, :integer
-    field :effect_detail, :string
+    field :effect_name, :string
   end
 
-  @fields ~w[route_type effect_detail]a
+  @fields ~w[route_type effect_name]a
 
   @impl true
   def mount(socket) do
@@ -61,7 +61,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   @impl true
   def handle_event("save", _params, socket) do
     changeset_params = %{
-      effect_detail: socket.assigns.selected_effect,
+      effect_name: socket.assigns.selected_effect,
       route_type: InformedEntity.route_type_mapping()[socket.assigns.selected_route_type]
     }
 
@@ -98,7 +98,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
           <div :for={effect <- @effects} class={if is_nil(@selected_route_type), do: "hidden"}>
             <%= effect_buttons(assigns, effect) %>
           </div>
-          <input type="hidden" id="effect_detail" name="effect_detail" value={@selected_effect} />
+          <input type="hidden" id="effect_name" name="effect_name" value={@selected_effect} />
         </div>
       </.form>
     </div>

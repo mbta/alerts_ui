@@ -1,7 +1,13 @@
+defmodule AlertsUI.Models.EffectMapping do
+  @moduledoc "Describe a map of all aspects of an effect"
+  defstruct [:effect_name, :effect, :effect_detail]
+end
+
 defmodule AlertsUI.Models.Effect do
   @moduledoc """
     Effects to be used in the effect field of Alerts.
   """
+  alias AlertsUI.Models.EffectMapping
 
   @doc """
   Returns list of atoms allowed in effect field of alert
@@ -25,34 +31,84 @@ defmodule AlertsUI.Models.Effect do
       :UNKNOWN_EFFECT
     ]
 
-  def effect_details,
-    do: [
-      "ACCESS_ISSUE",
-      "AMBER_ALERT",
-      "BIKE_ISSUE",
-      "CANCELLATION",
-      "DELAY",
-      "DETOUR",
-      "DOCK_CLOSURE",
-      "DOCK_ISSUE",
-      "ELEVATOR_CLOSURE",
-      "ESCALATOR_CLOSURE",
-      "EXTRA_SERVICE",
-      "FACILITY_ISSUE",
-      "PARKING_CLOSURE",
-      "PARKING_ISSUE",
-      "POLICY_CHANGE",
-      "SCHEDULE_CHANGE",
-      "SERVICE_CHANGE",
-      "SHUTTLE",
-      "SNOW_ROUTE",
-      "STATION_CLOSURE",
-      "STATION_ISSUE",
-      "STOP_CLOSURE",
-      "STOP_MOVE",
-      "STOP_SHOVELING",
-      "SUMMARY",
-      "SUSPENSION",
-      "TRACK_CHANGE"
+  @doc """
+  Returns list of effect details
+
+  ## Examples
+      iex> is_list(AlertsUI.Models.Effect.effect_details)
+      true
+  """
+  def effect_details do
+    effects_tuples()
+    |> Enum.map(fn {_n, _e, detail} -> detail end)
+  end
+
+  @doc """
+  Returns list of effect names
+
+  ## Examples
+      iex> is_list(AlertsUI.Models.Effect.effect_names)
+      true
+  """
+  @spec effect_names() :: [String.t()]
+  def effect_names do
+    effects_tuples()
+    |> Enum.map(fn {name, _e, _d} -> name end)
+  end
+
+  @spec effect_map_by_name(String.t()) :: struct()
+  @doc """
+  Returns effect mapping given a name
+
+  ## Examples
+      iex> AlertsUI.Models.Effect.effect_map_by_name("Multi-Route Detour")
+      %AlertsUI.Models.EffectMapping{effect_name: "Multi-Route Detour", effect: :DETOUR, effect_detail: "DETOUR"}
+  """
+  def effect_map_by_name(search_name) do
+    {effect_name, effect, effect_detail} =
+      effects_tuples()
+      |> Enum.filter(fn {name, _e, _d} -> name == search_name end)
+      |> hd
+
+    struct(EffectMapping, %{
+      effect_name: effect_name,
+      effect: effect,
+      effect_detail: effect_detail
+    })
+  end
+
+  @spec effects_tuples() :: [tuple()]
+  def effects_tuples do
+    # {effect_name, effect, effect_detail}
+    [
+      {"Access Issue", :ACCESSIBILITY_ISSUE, "ACCESS_ISSUE"},
+      {"Amber Alert", :UNKNOWN_EFFECT, "AMBER_ALERT"},
+      {"Bike Issue", :OTHER_EFFECT, "BIKE_ISSUE"},
+      {"Cancellation", :NO_SERVICE, "CANCELLATION"},
+      {"Delay", :SIGNIFICANT_DELAYS, "DELAY"},
+      {"Detour", :DETOUR, "DETOUR"},
+      {"Dock Closure", :NO_SERVICE, "DOCK_CLOSURE"},
+      {"Dock Issue", :UNKNOWN_EFFECT, "DOCK_ISSUE"},
+      {"Elevator Closure", :ACCESSIBILITY_ISSUE, "ELEVATOR_CLOSURE"},
+      {"Escalator Closure", :ACCESSIBILITY_ISSUE, "ESCALATOR_CLOSURE"},
+      {"Extra Service", :ADDITIONAL_SERVICE, "EXTRA_SERVICE"},
+      {"Facility Issue", :OTHER_EFFECT, "FACILITY_ISSUE"},
+      {"Multi-Route Detour", :DETOUR, "DETOUR"},
+      {"Parking Closure", :OTHER_EFFECT, "PARKING_CLOSURE"},
+      {"Parking Issue", :OTHER_EFFECT, "PARKING_ISSUE"},
+      {"Policy Change", :OTHER_EFFECT, "POLICY_CHANGE"},
+      {"Schedule Change", :MODIFIED_SERVICE, "SCHEDULE_CHANGE"},
+      {"Service Change", :UNKNOWN_EFFECT, "SERVICE_CHANGE"},
+      {"Shuttle", :DETOUR, "SHUTTLE"},
+      {"Snow Route", :DETOUR, "SNOW_ROUTE"},
+      {"Station Closure", :NO_SERVICE, "STATION_CLOSURE"},
+      {"Station Issue", :UNKNOWN_EFFECT, "STATION_ISSUE"},
+      {"Stop Closure", :NO_SERVICE, "STOP_CLOSURE"},
+      {"Stop Move", :STOP_MOVED, "STOP_MOVE"},
+      {"Stop Shoveling", :OTHER_EFFECT, "STOP_SHOVELING"},
+      {"Summary", :OTHER_EFFECT, "SUMMARY"},
+      {"Suspension", :DETOUR, "SUSPENSION"},
+      {"Track Change", :OTHER_EFFECT, "TRACK_CHANGE"}
     ]
+  end
 end

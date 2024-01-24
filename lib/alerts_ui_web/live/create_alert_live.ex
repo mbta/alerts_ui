@@ -5,6 +5,8 @@ end
 
 defmodule AlertsUIWeb.CreateAlertLive do
   use AlertsUIWeb, :live_view
+  alias AlertsUI.AlertBuilder
+  alias AlertsUI.Alerts
   alias AlertsUIWeb.Step
   alias AlertsUIWeb.FormComponents.{AlertDetails, RouteTypeAndEffect, SuccessfulSubmission}
 
@@ -34,6 +36,31 @@ defmodule AlertsUIWeb.CreateAlertLive do
     }
 
     {:noreply, assign(socket, assigns)}
+  end
+
+  def handle_info({:create_alert, details}, socket) do
+    socket.assigns.alert_data
+    |> Map.merge(details |> Map.from_struct())
+    |> AlertBuilder.build_alert()
+    |> Alerts.create_alert()
+    |> case do
+      {:ok, _result} ->
+        assigns = %{
+          progress: next_step(socket.assigns.progress),
+          alert_data: nil
+        }
+
+        {:noreply, assign(socket, assigns)}
+
+      {:error, result} ->
+        errors =
+          result
+          |> Alerts.parse_changeset_errors()
+          |> Enum.map_join(", ", fn {field, reason} -> "#{field}: #{reason}" end)
+
+        socket = put_flash(socket, :error, errors)
+        {:noreply, socket}
+    end
   end
 
   defp next_step(current_step) do

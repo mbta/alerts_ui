@@ -24,6 +24,14 @@ defmodule AlertsUI.Alerts do
     end)
   end
 
+  @spec get_max_alert_id() :: integer()
+  def get_max_alert_id do
+    from(a in Alert,
+      select: fragment("max(cast((?) as integer))", a.alert_id)
+    )
+    |> Repo.one!()
+  end
+
   @spec create_or_modify_alert_from_feed(map()) ::
           {:ok, Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
   def create_or_modify_alert_from_feed(incoming_alert) do

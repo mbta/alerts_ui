@@ -2,69 +2,70 @@ defmodule AlertsUIWeb.FormComponents.EffectsForRouteTypes do
   @moduledoc """
   associates route types with their subset of effects
   """
+  alias AlertsUI.Models.Effect
 
-  def list_effects(nil), do: AlertsUI.Models.Effect.effect_details()
+  def list_effects(nil), do: Effect.effect_names()
 
   def list_effects("Subway"),
     do:
       [
-        "DELAY",
-        "STATION_CLOSURE",
-        "EXTRA_SERVICE",
-        "SHUTTLE",
-        "STATION_ISSUE",
-        "SERVICE_CHANGE",
-        "SUSPENSION",
-        "SCHEDULE_CHANGE"
+        "Delay",
+        "Station Closure",
+        "Extra Service",
+        "Shuttle",
+        "Station Issue",
+        "Service Change",
+        "Suspension",
+        "Schedule Change"
       ]
       |> Enum.sort()
 
   def list_effects("Commuter Rail"),
     do:
       [
-        "DELAY",
-        "SUSPENSION",
-        "TRACK_CHANGE",
-        "SERVICE_CHANGE",
-        "CANCELLATION",
-        "STATION_CLOSURE",
-        "SCHEDULE_CHANGE",
-        "SHUTTLE",
-        "STATION_ISSUE",
-        "EXTRA_SERVICE"
+        "Delay",
+        "Suspension",
+        "Track Change",
+        "Service Change",
+        "Cancellation",
+        "Station Closure",
+        "Schedule Change",
+        "Shuttle",
+        "Station Issue",
+        "Extra Service"
       ]
       |> Enum.sort()
 
   def list_effects("Bus"),
     do:
       [
-        "DELAY",
-        "MULTI-ROUTE_DETOUR",
-        "STOP_CLOSURE",
-        "EXTRA_SERVICE",
-        "STOP_MOVE",
-        "SNOW_ROUTE",
-        "SCHEDULE_CHANGE",
-        "SERVICE_CHANGE",
-        "DETOUR",
-        "SUSPENSION",
-        "STOP_SHOVELING",
-        "CANCELLATION"
+        "Delay",
+        "Multi-Route Detour",
+        "Stop Closure",
+        "Extra Service",
+        "Stop Move",
+        "Snow Route",
+        "Schedule Change",
+        "Service Change",
+        "Detour",
+        "Suspension",
+        "Stop Shoveling",
+        "Cancellation"
       ]
       |> Enum.sort()
 
   def list_effects("Ferry"),
     do:
       [
-        "DELAY",
-        "SUSPENSION",
-        "SCHEDULE_CHANGE",
-        "CANCELLATION",
-        "DOCK_CLOSURE",
-        "EXTRA_SERVICE",
-        "SHUTTLE",
-        "DOCK_ISSUE",
-        "SERVICE_CHANGE"
+        "Delay",
+        "Suspension",
+        "Schedule Change",
+        "Cancellation",
+        "Dock Closure",
+        "Extra Service",
+        "Shuttle",
+        "Dock Issue",
+        "Service Change"
       ]
       |> Enum.sort()
 end

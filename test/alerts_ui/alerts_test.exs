@@ -41,6 +41,17 @@ defmodule AlertsUI.AlertsTest do
     end
   end
 
+  describe "get_max_alert_id/0" do
+    test "returns highest alert_id" do
+      insert(:alert, alert_id: "1")
+      insert(:alert, alert_id: "2")
+      insert(:alert, alert_id: "5")
+      insert(:alert, alert_id: "104")
+
+      assert Alerts.get_max_alert_id() == 104
+    end
+  end
+
   describe "create_or_modify_alert_from_feed/1" do
     test "creates alert if new" do
       new_params =
