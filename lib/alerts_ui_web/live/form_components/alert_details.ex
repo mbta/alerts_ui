@@ -17,7 +17,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   @impl true
   def mount(socket) do
     changeset = %__MODULE__{} |> change() |> to_form()
-    socket = socket |> assign(:details_changeset, changeset)
+    socket = socket |> assign(:changeset, changeset)
     {:ok, socket}
   end
 
@@ -27,34 +27,33 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     |> apply_action(:insert)
     |> case do
       {:ok, changeset} ->
-        send(self(), {:details_created, changeset})
+        send(self(), {:step_completed, changeset})
         {:noreply, socket}
 
       {:error, changeset} ->
-        {:noreply, assign(socket, :details_changeset, changeset |> to_form())}
+        {:noreply, assign(socket, :changeset, changeset |> to_form())}
     end
   end
 
-  def changeset(details_changeset, params) do
-    details_changeset
+  def changeset(changeset, params) do
+    changeset
     |> cast(params, @fields)
-    |> validate_required([:header_text, :description_text])
+    |> validate_required(@fields)
   end
 
   @impl true
   def render(assigns) do
     ~H"""
-    <div class={unless @hidden == false, do: "hidden"}>
+    <div class={unless @progress.name == "details", do: "hidden"}>
       <.form
-        for={@details_changeset}
+        for={@changeset}
         phx-target={@myself}
         phx-submit="save"
-        phx-change="change"
         class="form-control gap-4"
         id="details_form"
       >
         <.input
-          field={@details_changeset[:header_text]}
+          field={@changeset[:header_text]}
           name="header_text"
           value=""
           label="Header"
@@ -63,7 +62,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           id="header_input"
         />
         <.input
-          field={@details_changeset[:description_text]}
+          field={@changeset[:description_text]}
           name="description_text"
           value=""
           label="Description"
