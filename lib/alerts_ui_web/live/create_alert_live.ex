@@ -1,6 +1,6 @@
 defmodule AlertsUIWeb.Step do
   @moduledoc "Describe a step in the multi-step form and where it can go."
-  defstruct [:name, :prev, :next]
+  defstruct [:name, :prev, :next, :label]
 end
 
 defmodule AlertsUIWeb.CreateAlertLive do
@@ -8,24 +8,35 @@ defmodule AlertsUIWeb.CreateAlertLive do
   alias AlertsUI.AlertBuilder
   alias AlertsUI.Alerts
   alias AlertsUIWeb.Step
-  alias AlertsUIWeb.FormComponents.{AlertDetails, RouteTypeAndEffect, SuccessfulSubmission}
+
+  alias AlertsUIWeb.FormComponents.{
+    AlertDetails,
+    RouteTypeAndEffect,
+    SuccessfulSubmission,
+    Timeline
+  }
 
   @steps [
-    %Step{name: "route_type_and_effect", prev: nil, next: "details"},
-    %Step{name: "details", prev: "effect", next: "success"},
-    %Step{name: "success", prev: "details", next: nil}
+    %Step{name: "route_type_and_effect", prev: nil, next: "details", label: "Select Alert Type"},
+    %Step{name: "details", prev: "effect", next: "success", label: "Alert Details"},
+    %Step{name: "success", prev: "details", next: nil, label: "Success"}
   ]
 
   @impl true
   def mount(_params, _session, socket) do
     first_step = List.first(@steps)
-    socket = socket |> assign([{:progress, first_step}, {:alert_data, %{}}])
+    socket = socket |> assign(%{progress: first_step, alert_data: %{}, steps: @steps})
     {:ok, socket}
   end
 
   @impl true
   def handle_params(_params, _url, socket) do
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("move_progress", %{"value" => name}, socket) do
+    {:noreply, assign(socket, :progress, get_step_by_name(name))}
   end
 
   @impl true
@@ -64,8 +75,10 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   defp next_step(current_step) do
-    Enum.find(@steps, fn step ->
-      step.name == current_step.next
-    end)
+    Enum.find(@steps, &(&1.name == current_step.next))
+  end
+
+  defp get_step_by_name(name) do
+    Enum.find(@steps, &(&1.name == name))
   end
 end
