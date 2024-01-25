@@ -72,10 +72,27 @@ defmodule AlertsUIWeb.CreateAlertLive do
         errors =
           result
           |> Alerts.parse_changeset_errors()
-          |> Enum.map_join(", ", fn {field, reason} -> "#{field}: #{reason}" end)
+          |> format_errors
 
         socket = put_flash(socket, :error, errors)
         {:noreply, socket}
+    end
+  end
+
+  defp format_errors(errors) do
+    Enum.map_join(errors, "; ", fn {title, values} ->
+      values =
+        values
+        |> Enum.map_join(", ", &parse_inner_value(&1))
+
+      "#{title}: #{values}"
+    end)
+  end
+
+  defp parse_inner_value(value) do
+    case is_map(value) do
+      true -> format_errors(value)
+      false -> value
     end
   end
 

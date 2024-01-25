@@ -64,6 +64,8 @@ defmodule AlertsUI.Models.Effect do
       iex> AlertsUI.Models.Effect.effect_map_by_name("Multi-Route Detour")
       %AlertsUI.Models.EffectMapping{effect_name: "Multi-Route Detour", effect: :DETOUR, effect_detail: "DETOUR"}
   """
+  def effect_map_by_name(nil), do: %{}
+
   def effect_map_by_name(search_name) do
     {effect_name, effect, effect_detail} =
       effects_tuples()

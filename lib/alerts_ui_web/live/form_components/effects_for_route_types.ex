@@ -4,6 +4,20 @@ defmodule AlertsUIWeb.FormComponents.EffectsForRouteTypes do
   """
   alias AlertsUI.Models.Effect
 
+  @doc """
+  Returns lists of effect names
+  ## Examples
+      iex> is_list(AlertsUIWeb.FormComponents.EffectsForRouteTypes.list_effects(nil))
+      true
+      iex> is_list(AlertsUIWeb.FormComponents.EffectsForRouteTypes.list_effects("Subway"))
+      true
+      iex> is_list(AlertsUIWeb.FormComponents.EffectsForRouteTypes.list_effects("Commuter Rail"))
+      true
+      iex> is_list(AlertsUIWeb.FormComponents.EffectsForRouteTypes.list_effects("Bus"))
+      true
+      iex> is_list(AlertsUIWeb.FormComponents.EffectsForRouteTypes.list_effects("Ferry"))
+      true
+  """
   def list_effects(nil), do: Effect.effect_names()
 
   def list_effects("Subway"),
