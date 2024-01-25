@@ -18,8 +18,13 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   @steps [
     %Step{name: "route_type_and_effect", prev: nil, next: "details", label: "Select Alert Type"},
-    %Step{name: "details", prev: "effect", next: "success", label: "Alert Details"},
-    %Step{name: "success", prev: "details", next: nil, label: "Success"}
+    %Step{
+      name: "details",
+      prev: "route_type_and_effect",
+      next: "success",
+      label: "Alert Details"
+    },
+    %Step{name: "success", prev: nil, next: nil, label: "Success"}
   ]
 
   @impl true

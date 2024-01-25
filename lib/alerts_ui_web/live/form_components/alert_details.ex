@@ -44,7 +44,10 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class={unless @progress.name == "details", do: "hidden"}>
+    <div
+      class={unless @progress.name == "details", do: "hidden", else: "min-w-full"}
+      id="details_view"
+    >
       <.form
         for={@changeset}
         phx-target={@myself}

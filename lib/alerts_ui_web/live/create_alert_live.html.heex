@@ -1,10 +1,11 @@
-<div class="w-100 flex flex-row justify-center">
+<div class="flex flex-col items-center justify-center min-w-full">
   <.live_component module={Timeline} id="timeline" progress={@progress} steps={@steps} />
-  <article class="prose prose-stone min-w-full">
-    <h1>Create an Alert</h1>
-    <.live_component module={RouteTypeAndEffect} id="details" progress={@progress} />
-    <.live_component module={AlertDetails} id="details" progress={@progress} />
-    <.live_component module={SuccessfulSubmission} id="success" progress={@progress} />
-  </article>
-  <.flash kind={:error} title="Error creating Alert!" flash={@flash} />
+  <div class="min-w-[75%] flex flex-col items-center justify-center">
+    <article class="prose prose-stone min-w-full flex flex-col items-center justify-center">
+      <.live_component module={RouteTypeAndEffect} id="route_type" progress={@progress} />
+      <.live_component module={AlertDetails} id="details" progress={@progress} />
+      <.live_component module={SuccessfulSubmission} id="success" progress={@progress} />
+    </article>
+    <.flash kind={:error} title="Error creating Alert!" flash={@flash} />
+  </div>
 </div>

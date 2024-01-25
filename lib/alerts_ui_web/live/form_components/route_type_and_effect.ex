@@ -80,25 +80,40 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class={unless @progress.name == "route_type_and_effect", do: "hidden"}>
+    <div
+      class={unless @progress.name == "route_type_and_effect", do: "hidden", else: "min-w-full"}
+      id="route_view"
+    >
       <.form
         for={@changeset}
         phx-target={@myself}
         phx-submit="save"
-        class="form-control gap-4 w-full"
+        class="form-control gap-4 min-w-full"
         id="route_types_form"
       >
-        <div class="grid grid-cols-2 gap-4 mb-10">
-          <div :for={route_type <- @route_types}>
-            <%= route_type_buttons(assigns, route_type) %>
+        <div class="flex flex-row">
+          <h2 class="mr-28 min-w-fit text-slate-400">Select Service Type</h2>
+          <div class="grid grid-cols-2 gap-4 mb-4 min-w-[50%]">
+            <div :for={route_type <- @route_types}>
+              <%= route_type_buttons(assigns, route_type) %>
+            </div>
+            <input type="hidden" id="route_type" name="route_type" value={@selected_route_type} />
           </div>
-          <input type="hidden" id="route_type" name="route_type" value={@selected_route_type} />
         </div>
-        <div class="grid grid-cols-4 gap-4">
-          <div :for={effect <- @effects} class={if is_nil(@selected_route_type), do: "hidden"}>
-            <%= effect_buttons(assigns, effect) %>
+
+        <hr class={if is_nil(@selected_route_type), do: "hidden"} />
+        <div class="flex flex-row">
+          <h2 class={
+            if is_nil(@selected_route_type), do: "hidden", else: "mr-28 min-w-fit text-slate-400"
+          }>
+            Select Effect
+          </h2>
+          <div class="grid grid-cols-4 gap-4 min-w-[50%]">
+            <div :for={effect <- @effects} class={if is_nil(@selected_route_type), do: "hidden"}>
+              <%= effect_buttons(assigns, effect) %>
+            </div>
+            <input type="hidden" id="effect_name" name="effect_name" value={@selected_effect} />
           </div>
-          <input type="hidden" id="effect_name" name="effect_name" value={@selected_effect} />
         </div>
       </.form>
     </div>
@@ -119,7 +134,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
       type="button"
       phx-target={@myself}
       phx-click="route_type"
-      class={"btn rounded #{@button_class} basis-8 self-center px-8 w-full"}
+      class={"btn rounded-lg #{@button_class} basis-8 self-center px-8 w-full font-extrabold"}
       value={@route_type}
     >
       <%= @route_type %>
@@ -148,7 +163,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
     <button
       phx-target={@myself}
       phx-click="effect"
-      class={"btn rounded #{@button_class} basis-8 self-center px-8 w-full"}
+      class={"btn rounded-lg #{@button_class} basis-8 self-center px-8 w-full font-extrabold"}
       value={@effect}
     >
       <%= @formatted_name %>
