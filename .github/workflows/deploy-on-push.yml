@@ -9,17 +9,14 @@ on:
     branches: ["main"]
 
 jobs:
-  call-deploy-dev-green:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ./.github/workflows/deploy-dev.yml
+    call-deploy-dev-green:
+        uses: ./.github/workflows/deploy-dev.yml
         with:
           environment: dev-green
-  call-deploy-dev-orange:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ./.github/workflows/deploy-dev.yml
+        secrets: inherit
+    call-deploy-dev-orange:
+        uses: ./.github/workflows/deploy-dev.yml
         with:
           environment: dev-orange
+        secrets: inherit
+
