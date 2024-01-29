@@ -38,7 +38,7 @@ defmodule AlertsUIWeb.FormComponents.Timeline do
 
   defp previous_steps(current_step, steps, acc \\ [])
 
-  defp previous_steps(%Step{prev: nil} = current_step, _steps, acc),
+  defp previous_steps(%Step{previous: nil} = current_step, _steps, acc),
     do: acc ++ [current_step.name]
 
   defp previous_steps(current_step, steps, acc) do
@@ -46,6 +46,6 @@ defmodule AlertsUIWeb.FormComponents.Timeline do
   end
 
   defp find_previous_step(current_step, steps) do
-    Enum.find(steps, &(&1.name == current_step.prev))
+    Enum.find(steps, &(&1.name == current_step.previous))
   end
 end

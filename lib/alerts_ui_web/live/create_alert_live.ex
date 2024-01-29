@@ -1,6 +1,6 @@
 defmodule AlertsUIWeb.Step do
   @moduledoc "Describe a step in the multi-step form and where it can go."
-  defstruct [:name, :prev, :next, :label]
+  defstruct [:name, :previous, :next, :label]
 end
 
 defmodule AlertsUIWeb.CreateAlertLive do
@@ -17,14 +17,19 @@ defmodule AlertsUIWeb.CreateAlertLive do
   }
 
   @steps [
-    %Step{name: "route_type_and_effect", prev: nil, next: "details", label: "Select Alert Type"},
+    %Step{
+      name: "route_type_and_effect",
+      previous: nil,
+      next: "details",
+      label: "Select Alert Type"
+    },
     %Step{
       name: "details",
-      prev: "route_type_and_effect",
+      previous: "route_type_and_effect",
       next: "success",
       label: "Alert Details"
     },
-    %Step{name: "success", prev: nil, next: nil, label: "Success"}
+    %Step{name: "success", previous: nil, next: nil, label: "Success"}
   ]
 
   @impl true
@@ -45,24 +50,24 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   @impl true
-  def handle_info({:step_completed, details}, socket) do
+  def handle_info({:step_completed, changeset}, socket) do
     assigns = %{
-      progress: next_step(socket.assigns.progress),
-      alert_data: Map.merge(socket.assigns.alert_data, details |> Map.from_struct())
+      progress: get_step_by_name(socket.assigns.progress.next),
+      alert_data: Map.merge(socket.assigns.alert_data, changeset |> Map.from_struct())
     }
 
     {:noreply, assign(socket, assigns)}
   end
 
-  def handle_info({:create_alert, details}, socket) do
+  def handle_info({:create_alert, changeset}, socket) do
     socket.assigns.alert_data
-    |> Map.merge(details |> Map.from_struct())
+    |> Map.merge(changeset |> Map.from_struct())
     |> AlertBuilder.build_alert()
     |> Alerts.create_alert()
     |> case do
       {:ok, _result} ->
         assigns = %{
-          progress: next_step(socket.assigns.progress),
+          progress: get_step_by_name(socket.assigns.progress.next),
           alert_data: nil
         }
 
@@ -94,10 +99,6 @@ defmodule AlertsUIWeb.CreateAlertLive do
       true -> format_errors(value)
       false -> value
     end
-  end
-
-  defp next_step(current_step) do
-    Enum.find(@steps, &(&1.name == current_step.next))
   end
 
   defp get_step_by_name(name) do

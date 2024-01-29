@@ -122,9 +122,10 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
 
   def route_type_buttons(assigns, route_type) do
     button_class =
-      case is_nil(assigns.selected_route_type) or route_type == assigns.selected_route_type do
-        true -> "btn-primary"
-        false -> "btn-default"
+      if is_nil(assigns.selected_route_type) or route_type == assigns.selected_route_type do
+        "btn-primary"
+      else
+        "btn-default"
       end
 
     assigns = assign(assigns, %{route_type: route_type, button_class: button_class})
@@ -144,19 +145,16 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
 
   def effect_buttons(assigns, effect) do
     button_class =
-      case is_nil(assigns.selected_effect) or effect == assigns.selected_effect do
-        true -> "btn-primary"
-        false -> "btn-default"
+      if is_nil(assigns.selected_effect) or effect == assigns.selected_effect do
+        "btn-primary"
+      else
+        "btn-default"
       end
-
-    formatted_name =
-      effect |> String.split("_") |> Enum.map_join(" ", &String.capitalize(&1))
 
     assigns =
       assign(assigns, %{
         effect: effect,
-        button_class: button_class,
-        formatted_name: formatted_name
+        button_class: button_class
       })
 
     ~H"""
@@ -166,7 +164,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
       class={"btn rounded-lg #{@button_class} basis-8 self-center px-8 w-full font-extrabold"}
       value={@effect}
     >
-      <%= @formatted_name %>
+      <%= @effect %>
     </button>
     """
   end

@@ -3,10 +3,12 @@ defmodule AlertsUI.AlertBuilderTest do
   use AlertsUI.DataCase, async: true
   import AlertsUI.Support.Factory
   alias AlertsUI.AlertBuilder
+  alias AlertsUI.Alerts
 
   describe "build_alert/1" do
     test "builds alert from map" do
-      insert(:alert, alert_id: "1")
+      next_higher_id = Alerts.get_max_alert_id() + 1
+      insert(:alert, alert_id: next_higher_id |> Integer.to_string())
 
       alert_data = %{
         route_type: 1,
@@ -21,7 +23,7 @@ defmodule AlertsUI.AlertBuilderTest do
                effect: :SIGNIFICANT_DELAYS,
                description_text: "ok",
                header_text: "hello",
-               alert_id: "2",
+               alert_id: (next_higher_id + 1) |> Integer.to_string(),
                informed_entity: [%{route_type: 1}],
                effect_detail: "DELAY"
              }

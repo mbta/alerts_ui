@@ -79,9 +79,14 @@ defmodule AlertsUI.Models.Effect do
     })
   end
 
-  @spec effects_tuples() :: [tuple()]
+  @type effect_name :: String.t()
+  @type effect :: atom()
+  @type effect_detail :: String.t()
+  @type effects_tuple ::
+          {effect_name :: effect_name(), effect :: effect(), effect_detail :: effect_detail()}
+
+  @spec effects_tuples() :: [effects_tuple()]
   def effects_tuples do
-    # {effect_name, effect, effect_detail}
     [
       {"Access Issue", :ACCESSIBILITY_ISSUE, "ACCESS_ISSUE"},
       {"Amber Alert", :UNKNOWN_EFFECT, "AMBER_ALERT"},

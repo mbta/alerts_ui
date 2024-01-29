@@ -29,7 +29,7 @@ defmodule AlertsUI.Alerts do
     from(a in Alert,
       select: fragment("max(cast((?) as integer))", a.alert_id)
     )
-    |> Repo.one!()
+    |> Repo.one!() || 0
   end
 
   @spec create_or_modify_alert_from_feed(map()) ::
