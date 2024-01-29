@@ -23,10 +23,14 @@ defmodule AlertsUI.AlertBuilderTest do
                effect: :SIGNIFICANT_DELAYS,
                description_text: "ok",
                header_text: "hello",
-               alert_id: (next_higher_id + 1) |> Integer.to_string(),
                informed_entity: [%{route_type: 1}],
                effect_detail: "DELAY"
              }
+
+      result |> Alerts.create_alert()
+      [alert_1, alert_2] = Alerts.list_all()
+      assert alert_1.alert_id == "1"
+      assert alert_2.alert_id |> String.to_integer() > 1
     end
   end
 end

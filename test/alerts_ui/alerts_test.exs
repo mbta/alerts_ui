@@ -41,7 +41,6 @@ defmodule AlertsUI.AlertsTest do
       result = Alerts.parse_changeset_errors(changeset)
 
       assert result == %{
-               alert_id: ["can't be blank"],
                informed_entity: [%{agency_id: ["at least one field must be present"]}]
              }
     end
