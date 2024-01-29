@@ -12,7 +12,10 @@ defmodule AlertsUIWeb.FormComponents.SuccessfulSubmission do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class={unless @hidden == false, do: "hidden"}>
+    <div
+      class={unless @progress.name == "success", do: "hidden", else: "min-w-full"}
+      id="success_view"
+    >
       Alert created successfully
       <.button phx-click="ok" phx-target={@myself} class="btn btn-outline basis-8 self-center px-8">
         ok!

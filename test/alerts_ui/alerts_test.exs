@@ -35,9 +35,26 @@ defmodule AlertsUI.AlertsTest do
 
   describe "parse_changeset_errors/1" do
     test "puts changeset errors in readable format" do
-      changeset = Alert.changeset(%Alert{}, %{header_text: "hello"})
+      changeset =
+        Alert.changeset(%Alert{}, %{header_text: "hello", informed_entity: [%{route_id: nil}]})
+
       result = Alerts.parse_changeset_errors(changeset)
-      assert result == %{alert_id: ["can't be blank"], informed_entity: ["can't be blank"]}
+
+      assert result == %{
+               alert_id: ["can't be blank"],
+               informed_entity: [%{agency_id: ["at least one field must be present"]}]
+             }
+    end
+  end
+
+  describe "get_max_alert_id/0" do
+    test "returns highest alert_id" do
+      insert(:alert, alert_id: "1")
+      insert(:alert, alert_id: "2")
+      insert(:alert, alert_id: "5")
+      insert(:alert, alert_id: "104")
+
+      assert Alerts.get_max_alert_id() == 104
     end
   end
 
