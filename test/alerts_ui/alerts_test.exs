@@ -20,6 +20,19 @@ defmodule AlertsUI.AlertsTest do
       assert new_alert.description_text == ""
     end
 
+    test "creates alert with no id uses next in sequence" do
+      new_params =
+        build(:alert_map, %{
+          header_text: "new header text",
+          description_text: ""
+        })
+
+      {:ok, new_alert} = Alerts.create_alert(new_params)
+      assert new_alert.alert_id |> String.to_integer() |> is_integer()
+      assert new_alert.header_text == "new header text"
+      assert new_alert.description_text == ""
+    end
+
     test "error if alert is incomplete" do
       new_params =
         build(:alert_map, %{

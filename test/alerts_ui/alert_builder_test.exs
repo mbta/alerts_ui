@@ -7,8 +7,7 @@ defmodule AlertsUI.AlertBuilderTest do
 
   describe "build_alert/1" do
     test "builds alert from map" do
-      next_higher_id = Alerts.get_max_alert_id() + 1
-      insert(:alert, alert_id: next_higher_id |> Integer.to_string())
+      existing_alert = insert(:alert, alert_id: "0")
 
       alert_data = %{
         route_type: 1,
@@ -29,8 +28,8 @@ defmodule AlertsUI.AlertBuilderTest do
 
       result |> Alerts.create_alert()
       [alert_1, alert_2] = Alerts.list_all()
-      assert alert_1.alert_id == "1"
-      assert alert_2.alert_id |> String.to_integer() > 1
+      assert alert_1.alert_id == existing_alert.alert_id
+      assert alert_2.alert_id |> String.to_integer() > alert_1.alert_id |> String.to_integer()
     end
   end
 end
