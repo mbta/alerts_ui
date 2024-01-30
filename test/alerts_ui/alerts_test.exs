@@ -577,4 +577,38 @@ defmodule AlertsUI.AlertsTest do
       assert Alerts.get_by_alert_id("123").header_text == expected_alert.header_text
     end
   end
+
+  describe "draft?/1" do
+    test "returns false if alert draft is false" do
+      insert(:alert, %{alert_id: "123", draft: false})
+      refute Alerts.draft?("123")
+    end
+
+    test "returns false if alert draft is nil" do
+      alert = insert(:alert, %{alert_id: "123", draft: nil})
+      refute Alerts.draft?(alert)
+    end
+
+    test "returns true if alert draft is true" do
+      insert(:alert, %{alert_id: "123", draft: true})
+      assert Alerts.draft?("123")
+    end
+  end
+
+  describe "publishable?/1" do
+    test "returns true if alert draft is false" do
+      insert(:alert, %{alert_id: "123", draft: false})
+      assert Alerts.publishable?("123")
+    end
+
+    test "returns true if alert draft is nil" do
+      alert = insert(:alert, %{alert_id: "123", draft: nil})
+      assert Alerts.publishable?(alert)
+    end
+
+    test "returns fale if alert draft is true" do
+      insert(:alert, %{alert_id: "123", draft: true})
+      refute Alerts.publishable?("123")
+    end
+  end
 end
