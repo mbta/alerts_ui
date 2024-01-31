@@ -78,6 +78,7 @@ defmodule AlertsUI.MixProject do
       {:hackney, "1.20.1"},
       {:jason, "~> 1.2"},
       {:map_diff, "~> 1.3.4"},
+      {:mbta_v3_api, git: "https://github.com/mbta/mbta_v3_api.git", branch: "mss-more-files"},
       {:oban, "~> 2.16"},
       {:phoenix, "~> 1.7.7"},
       {:phoenix_ecto, "~> 4.4"},

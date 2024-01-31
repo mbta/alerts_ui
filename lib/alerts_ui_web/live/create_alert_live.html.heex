@@ -3,7 +3,12 @@
   <div class="min-w-[75%] flex flex-col items-center justify-center">
     <article class="prose prose-stone min-w-full flex flex-col items-center justify-center">
       <.live_component module={RouteTypeAndEffect} id="route_type" progress={@progress} />
-      <.live_component module={AlertDetails} id="details" progress={@progress} />
+      <.live_component
+        module={AlertDetails}
+        id="details"
+        progress={@progress}
+        alert_data={@alert_data}
+      />
       <.live_component module={SuccessfulSubmission} id="success" progress={@progress} />
     </article>
     <.flash kind={:error} title="Error creating Alert!" flash={@flash} />

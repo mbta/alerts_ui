@@ -1,4 +1,6 @@
 export ALERT_API_URL=http://s3.amazonaws.com/mbta-realtime-test/alerts_enhanced.json
+export API_KEY=<Enter your dev API Key here>
+export API_URL=https://api-dev.mbtace.com/
 export DATABASE_URL=postgresql://__username__:password@localhost:5432/alerts_ui_dev
 export DATABASE_URL_TEST=postgresql://__username__:password@localhost:5432/alerts_ui_test
 export COMPARE_FEED=false

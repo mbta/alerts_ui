@@ -28,6 +28,10 @@ cond do
       alert_api_url: System.get_env("ALERT_API_URL"),
       compare_feed: "true"
 
+    config :mbta_v3_api,
+      base_url: "https://api-dev.mbtace.com/",
+      api_key: ""
+
   config_env() == :prod ->
     config :alerts_ui,
       alert_api_url: System.get_env("ALERT_API_URL"),
@@ -88,6 +92,10 @@ cond do
           {&:ssl_verify_hostname.verify_fun/3, [check_hostname: String.to_charlist(hostname)]}
       ]
 
+    config :mbta_v3_api,
+      base_url: System.fetch_env!("API_URL"),
+      api_key: System.fetch_env!("API_KEY")
+
     if keycloak_issuer = System.get_env("KEYCLOAK_ISSUER") do
       keycloak_base_opts = [
         client_id: System.fetch_env!("KEYCLOAK_CLIENT_ID"),
@@ -111,4 +119,8 @@ cond do
     config :alerts_ui,
       alert_api_url: System.get_env("ALERT_API_URL"),
       compare_feed: System.get_env("COMPARE_FEED", "false")
+
+    config :mbta_v3_api,
+      base_url: System.fetch_env!("API_URL"),
+      api_key: System.fetch_env!("API_KEY")
 end

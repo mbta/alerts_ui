@@ -6,8 +6,12 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   use AlertsUI.Schema
   import Ecto.Changeset
 
+  alias MBTAV3API.Routes.Repo, as: RoutesRepo
+  alias MBTAV3API.Routes.Route
+
   @primary_key false
   embedded_schema do
+    field :route_ids, :string
     field :header_text, :string
     field :description_text, :string
   end
@@ -17,8 +21,22 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   @impl true
   def mount(socket) do
     changeset = %__MODULE__{} |> change() |> to_form()
-    socket = socket |> assign(:changeset, changeset)
+    socket = socket |> assign(changeset: changeset, available_routes: [])
     {:ok, socket}
+  end
+
+  @impl true
+  def update(assigns, socket) do
+    available_routes =
+      assigns.alert_data
+      |> Map.get(:route_type)
+      |> all_route_types()
+      |> RoutesRepo.by_type()
+
+    {:ok,
+     socket
+     |> assign(assigns)
+     |> assign(:available_routes, available_routes)}
   end
 
   @impl true
@@ -55,6 +73,16 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         class="form-control gap-4"
         id="details_form"
       >
+        <fieldset>
+          <.input
+            type="select"
+            field={@changeset[:route_ids]}
+            options={formatted_select_options(@available_routes)}
+            multiple={true}
+            label="Route(s)"
+          />
+        </fieldset>
+
         <.input
           field={@changeset[:header_text]}
           name="header_text"
@@ -77,5 +105,20 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       </.form>
     </div>
     """
+  end
+
+  # We lump subway together in the interface, so when asked for either light or
+  # heavy rail include both.
+  @spec all_route_types(0..4 | nil) :: [Route.type_int()]
+  defp all_route_types(0), do: [0, 1]
+  defp all_route_types(1), do: [0, 1]
+  defp all_route_types(2), do: [2]
+  defp all_route_types(3), do: [3]
+  defp all_route_types(4), do: [4]
+  defp all_route_types(_), do: []
+
+  @spec formatted_select_options([Route.t()]) :: keyword(String.t())
+  defp formatted_select_options(routes) do
+    Enum.map(routes, fn %Route{id: id, name: name} -> {name, id} end)
   end
 end
