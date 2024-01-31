@@ -1,7 +1,8 @@
 defmodule AlertsUI.AlertsTest do
   @moduledoc false
-  use AlertsUI.DataCase, async: true
+  use AlertsUI.DataCase, async: false
   import AlertsUI.Support.Factory
+  import Test.Support.Helpers
   alias AlertsUI.Alerts
   alias AlertsUI.Models.Alert
 
@@ -20,6 +21,19 @@ defmodule AlertsUI.AlertsTest do
       assert new_alert.description_text == ""
     end
 
+    test "creates alert with no id uses next in sequence" do
+      new_params =
+        build(:alert_map, %{
+          header_text: "new header text",
+          description_text: ""
+        })
+
+      {:ok, new_alert} = Alerts.create_alert(new_params)
+      assert new_alert.alert_id |> String.to_integer() |> is_integer()
+      assert new_alert.header_text == "new header text"
+      assert new_alert.description_text == ""
+    end
+
     test "error if alert is incomplete" do
       new_params =
         build(:alert_map, %{
@@ -31,6 +45,23 @@ defmodule AlertsUI.AlertsTest do
       {:error, changeset} = Alerts.create_alert(new_params)
       assert changeset.errors == [header_text: {"can't be blank", [validation: :required]}]
     end
+
+    test "error if feed compare is true" do
+      reassign_env(:alerts_ui, :compare_feed, "true")
+
+      new_params =
+        build(:alert_map, %{
+          alert_id: "123",
+          header_text: nil,
+          description_text: nil
+        })
+
+      {:error, changeset} = Alerts.create_alert(new_params)
+
+      assert changeset.errors == [
+               alert_id: {"cannot create alert while feed is being compared", []}
+             ]
+    end
   end
 
   describe "parse_changeset_errors/1" do
@@ -41,7 +72,6 @@ defmodule AlertsUI.AlertsTest do
       result = Alerts.parse_changeset_errors(changeset)
 
       assert result == %{
-               alert_id: ["can't be blank"],
                informed_entity: [%{agency_id: ["at least one field must be present"]}]
              }
     end

@@ -1,5 +1,5 @@
 defmodule AlertsUi.FeedImporterExporterTest do
-  use AlertsUI.DataCase, async: true
+  use AlertsUI.DataCase, async: false
   use Oban.Testing, repo: AlertsUI.Repo
   import AlertsUI.Support.Factory
   import Test.Support.Helpers
@@ -9,6 +9,10 @@ defmodule AlertsUi.FeedImporterExporterTest do
   alias Req.Response
 
   describe "perform" do
+    setup do
+      reassign_env(:alerts_ui, :compare_feed, "true")
+    end
+
     test "runs successfully" do
       set_log_level(:info)
 
@@ -63,7 +67,6 @@ defmodule AlertsUi.FeedImporterExporterTest do
       {_result, log} =
         with_log(fn ->
           FeedImporterExporter.perform(%Job{args: %{}}, opts)
-          :timer.sleep(500)
         end)
 
       assert log =~ "Export ok!"
@@ -102,6 +105,10 @@ defmodule AlertsUi.FeedImporterExporterTest do
   end
 
   describe "end to end" do
+    setup do
+      reassign_env(:alerts_ui, :compare_feed, "true")
+    end
+
     test "match" do
       set_log_level(:info)
 

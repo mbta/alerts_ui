@@ -26,7 +26,7 @@ cond do
 
     config :alerts_ui,
       alert_api_url: System.get_env("ALERT_API_URL"),
-      compare_feed: "true"
+      compare_feed: "false"
 
     config :mbta_v3_api,
       base_url: "https://api-dev.mbtace.com/",

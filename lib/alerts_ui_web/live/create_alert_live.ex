@@ -104,4 +104,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
   defp get_step_by_name(name) do
     Enum.find(@steps, &(&1.name == name))
   end
+
+  defp compare_feed,
+    do: Application.get_env(:alerts_ui, :compare_feed) == "true"
 end

@@ -1,8 +1,9 @@
 defmodule AlertsUIWeb.CreateAlertLiveTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: false
   use AlertsUIWeb.ConnCase
   import Phoenix.LiveViewTest
   import AlertsUI.Support.Factory
+  import Test.Support.Helpers
   alias AlertsUIWeb.FormComponents.{AlertDetails, RouteTypeAndEffect}
 
   describe "create alerts page" do
@@ -43,6 +44,15 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
       failure_rendered_view = render(view)
       assert failure_rendered_view =~ "at least one field must be present"
+    end
+
+    test "displays warning if compare_feed is true", %{conn: conn} do
+      reassign_env(:alerts_ui, :compare_feed, "true")
+      conn = log_in_user(conn)
+      {:ok, _view, html} = live(conn, "/alerts/new")
+
+      assert html =~ ~s(! Please do not create Alerts on this server !)
+      assert html =~ ~s(<div class=\"hidden\" id=\"article-view\">)
     end
   end
 end
