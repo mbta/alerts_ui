@@ -9,10 +9,21 @@ defmodule AlertsUI.Alerts do
   alias Ecto.Multi
   require Logger
 
+  defp compare_feed,
+    do: Application.get_env(:alerts_ui, :compare_feed) == "true"
+
   def create_alert(params) do
-    %Alert{}
-    |> Alert.changeset(params)
-    |> Repo.insert()
+    if compare_feed() do
+      changeset =
+        change(%Alert{}, %{})
+        |> add_error(:alert_id, "cannot create alert while feed is being compared")
+
+      {:error, changeset}
+    else
+      %Alert{}
+      |> Alert.changeset(params)
+      |> Repo.insert()
+    end
   end
 
   @spec parse_changeset_errors(Ecto.Changeset.t()) :: %{optional(atom()) => list()}

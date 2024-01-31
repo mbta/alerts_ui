@@ -26,7 +26,7 @@ cond do
 
     config :alerts_ui,
       alert_api_url: System.get_env("ALERT_API_URL"),
-      compare_feed: "true"
+      compare_feed: "false"
 
   config_env() == :prod ->
     config :alerts_ui,

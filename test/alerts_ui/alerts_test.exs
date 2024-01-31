@@ -1,7 +1,8 @@
 defmodule AlertsUI.AlertsTest do
   @moduledoc false
-  use AlertsUI.DataCase, async: true
+  use AlertsUI.DataCase, async: false
   import AlertsUI.Support.Factory
+  import Test.Support.Helpers
   alias AlertsUI.Alerts
   alias AlertsUI.Models.Alert
 
@@ -43,6 +44,23 @@ defmodule AlertsUI.AlertsTest do
 
       {:error, changeset} = Alerts.create_alert(new_params)
       assert changeset.errors == [header_text: {"can't be blank", [validation: :required]}]
+    end
+
+    test "error if feed compare is true" do
+      reassign_env(:alerts_ui, :compare_feed, "true")
+
+      new_params =
+        build(:alert_map, %{
+          alert_id: "123",
+          header_text: nil,
+          description_text: nil
+        })
+
+      {:error, changeset} = Alerts.create_alert(new_params)
+
+      assert changeset.errors == [
+               alert_id: {"cannot create alert while feed is being compared", []}
+             ]
     end
   end
 
