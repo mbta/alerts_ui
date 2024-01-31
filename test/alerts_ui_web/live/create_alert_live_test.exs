@@ -24,8 +24,8 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
       {:ok, view, _html} = live(conn, "/alerts/new")
 
       first_rendered_view = render(view)
-      assert first_rendered_view =~ ~s(class="min-w-full" id="route_view")
-      refute first_rendered_view =~ ~s(class="min-w-full" id="details_view")
+      assert first_rendered_view =~ ~s(class="min-w-full flex flex-col" id="route_view")
+      refute first_rendered_view =~ ~s(class="min-w-full flex flex-col" id="details_view")
 
       changeset =
         Ecto.Changeset.change(%RouteTypeAndEffect{route_type: "3", effect_name: "Detour"})
@@ -33,8 +33,8 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
       send(view.pid, {:step_completed, changeset})
 
       second_rendered_view = render(view)
-      refute second_rendered_view =~ ~s(class="min-w-full" id="route_view")
-      assert second_rendered_view =~ ~s(class="min-w-full" id="details_view")
+      refute second_rendered_view =~ ~s(class="min-w-full flex flex-col" id="route_view")
+      assert second_rendered_view =~ ~s(class="min-w-full flex flex-col" id="details_view")
 
       changeset =
         Ecto.Changeset.change(%AlertDetails{header_text: "cool", description_text: "bean"})

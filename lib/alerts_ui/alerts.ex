@@ -26,6 +26,12 @@ defmodule AlertsUI.Alerts do
     end
   end
 
+  def create_draft_alert(params) do
+    %Alert{}
+    |> Alert.draft_changeset(params)
+    |> Repo.insert()
+  end
+
   @spec parse_changeset_errors(Ecto.Changeset.t()) :: %{optional(atom()) => list()}
   def parse_changeset_errors(changeset) do
     traverse_errors(changeset, fn {msg, opts} ->

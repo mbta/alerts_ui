@@ -81,7 +81,11 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   def render(assigns) do
     ~H"""
     <div
-      class={unless @progress.name == "route_type_and_effect", do: "hidden", else: "min-w-full"}
+      class={
+        unless @progress.name == "route_type_and_effect",
+          do: "hidden",
+          else: "min-w-full flex flex-col"
+      }
       id="route_view"
     >
       <.form
@@ -116,6 +120,20 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
           </div>
         </div>
       </.form>
+      <button
+        type="button"
+        phx-click="save_as_draft"
+        phx-value-effect_detail={@selected_effect}
+        phx-value-route_type={InformedEntity.route_type_mapping()[@selected_route_type]}
+        name="draft"
+        class={
+          if is_nil(@selected_route_type),
+            do: "hidden",
+            else: "btn rounded-lg mt-8 basis-8 self-center px-8 min-w-[25%] font-extrabold"
+        }
+      >
+        Save as Draft
+      </button>
     </div>
     """
   end

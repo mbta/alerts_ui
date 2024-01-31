@@ -12,6 +12,7 @@ defmodule AlertsUI.AlertBuilder do
       description_text: Map.get(alert_data, :description_text),
       effect: Map.get(effect_map, :effect),
       effect_detail: Map.get(effect_map, :effect_detail),
+      draft: Map.get(alert_data, :draft, false),
       informed_entity: build_informed_entities(alert_data)
     }
   end

@@ -23,7 +23,8 @@ defmodule AlertsUI.AlertBuilderTest do
                description_text: "ok",
                header_text: "hello",
                informed_entity: [%{route_type: 1}],
-               effect_detail: "DELAY"
+               effect_detail: "DELAY",
+               draft: false
              }
 
       result |> Alerts.create_alert()

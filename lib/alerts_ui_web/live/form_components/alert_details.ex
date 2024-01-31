@@ -22,7 +22,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   @impl true
   def mount(socket) do
     changeset = %__MODULE__{} |> change() |> to_form()
-    socket = socket |> assign(changeset: changeset, available_routes: [])
+    socket = socket |> assign(%{changeset: changeset, alert_data: %{}, available_routes: []})
     {:ok, socket}
   end
 
@@ -38,6 +38,13 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
      socket
      |> assign(assigns)
      |> assign(:available_routes, available_routes)}
+  end
+
+  def handle_event("change", params, socket) do
+    alert_data =
+      params |> Map.delete("_target") |> then(&Map.merge(socket.assigns.alert_data, &1))
+
+    {:noreply, assign(socket, :alert_data, alert_data)}
   end
 
   @impl true
@@ -68,13 +75,14 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
 
     ~H"""
     <div
-      class={unless @progress.name == "details", do: "hidden", else: "min-w-full"}
+      class={unless @progress.name == "details", do: "hidden", else: "min-w-full flex flex-col"}
       id="details_view"
     >
       <.form
         for={@changeset}
         phx-target={@myself}
         phx-submit="save"
+        phx-change="change"
         class="form-control gap-4"
         id="details_form"
       >
@@ -106,6 +114,16 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         />
         <.button class="btn btn-outline basis-8 self-center px-8" name="save">submit</.button>
       </.form>
+      <button
+        phx-click="save_as_draft"
+        phx-value-header_text={@alert_data["header_text"]}
+        phx-value-header_text={@alert_data["description_text"]}
+        type="button"
+        name="draft"
+        class="btn rounded-lg mt-8 basis-8 self-center px-8 min-w-[25%] font-extrabold"
+      >
+        Save as Draft
+      </button>
     </div>
     """
   end
