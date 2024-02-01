@@ -4,6 +4,7 @@ defmodule AlertsUI.AlertBuilder do
   """
   alias AlertsUI.Models.Effect
 
+  @spec build_alert(map()) :: map()
   def build_alert(alert_data) do
     effect_map = Effect.effect_map_by_name(Map.get(alert_data, :effect_name, nil))
 
@@ -17,7 +18,7 @@ defmodule AlertsUI.AlertBuilder do
     }
   end
 
-  def build_informed_entities(alert_data) do
+  defp build_informed_entities(alert_data) do
     %{
       route_type: Map.get(alert_data, :route_type)
     }

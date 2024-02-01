@@ -36,16 +36,17 @@ defmodule AlertsUIWeb.FormComponents.Timeline do
     """
   end
 
-  defp previous_steps(current_step, steps, acc \\ [])
+  @spec previous_steps(Step.t(), [Step.t()], [String.t()]) :: [String.t()]
+  def previous_steps(current_step, steps, acc \\ [])
 
-  defp previous_steps(%Step{previous: nil} = current_step, _steps, acc),
+  def previous_steps(%Step{previous: nil} = current_step, _steps, acc),
     do: acc ++ [current_step.name]
 
-  defp previous_steps(current_step, steps, acc) do
+  def previous_steps(current_step, steps, acc) do
     previous_steps(find_previous_step(current_step, steps), steps, acc ++ [current_step.name])
   end
 
-  defp find_previous_step(current_step, steps) do
+  def find_previous_step(current_step, steps) do
     Enum.find(steps, &(&1.name == current_step.previous))
   end
 end

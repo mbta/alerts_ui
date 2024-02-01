@@ -209,6 +209,7 @@ defmodule AlertsUI.Alerts do
 
     with {:ok, flop} <- Flop.validate(params, opts) do
       Alert
+      |> where([a], a.draft == false or is_nil(a.draft))
       |> Flop.with_named_bindings(flop, &join_informed_entity/2, opts)
       |> preload(informed_entity: [:trip])
       |> Flop.run(flop, opts)

@@ -401,7 +401,8 @@ defmodule AlertsUI.AlertsTest do
     test "list all alerts with flop" do
       insert(:alert, %{alert_id: "234"})
       insert(:alert, %{alert_id: "456"})
-      insert(:alert, %{alert_id: "123"})
+      insert(:alert, %{alert_id: "123", draft: false})
+      insert(:alert, %{alert_id: "321", draft: true})
       {results, %Flop.Meta{}} = Alerts.list_all_paginated(%Flop{order_by: []})
       assert length(results) == 3
       assert Enum.map(results, & &1.alert_id) |> Enum.sort() == ["123", "234", "456"]
@@ -606,7 +607,7 @@ defmodule AlertsUI.AlertsTest do
       assert Alerts.publishable?(alert)
     end
 
-    test "returns fale if alert draft is true" do
+    test "returns false if alert draft is true" do
       insert(:alert, %{alert_id: "123", draft: true})
       refute Alerts.publishable?("123")
     end

@@ -74,6 +74,30 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
     end
 
     @tag :logged_in_user
+    test "save as draft redirects on success", %{conn: conn} do
+      insert(:alert, alert_id: "1")
+      conn = log_in_user(conn)
+      {:ok, view, _html} = live(conn, "/alerts/new")
+
+      {_,
+       {:redirect,
+        %{
+          to: "/alerts/new",
+          flash: _
+        }}} = render_click(view, "save_as_draft", %{"route_type" => "3"})
+    end
+
+    test "save as draft shows error on error", %{conn: conn} do
+      insert(:alert, alert_id: "1")
+      conn = log_in_user(conn)
+      {:ok, view, _html} = live(conn, "/alerts/new")
+
+      rendered_view =
+        view |> render_click("save_as_draft", %{:route_type => "should not be an atom"})
+
+      rendered_view =~ "informed_entity: route_type: is invalid;"
+    end
+
     test "displays warning if compare_feed is true", %{conn: conn} do
       reassign_env(:alerts_ui, :compare_feed, "true")
       {:ok, _view, html} = live(conn, "/alerts/new")
