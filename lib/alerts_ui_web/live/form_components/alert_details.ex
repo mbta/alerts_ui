@@ -16,7 +16,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     field :description_text, :string
   end
 
-  @fields ~w[header_text description_text]a
+  @fields ~w[route_ids header_text description_text]a
+  @required_fields ~w[header_text description_text]a
 
   @impl true
   def mount(socket) do
@@ -63,7 +64,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   def changeset(changeset, params) do
     changeset
     |> cast(params, @fields)
-    |> validate_required(@fields)
+    |> validate_required(@required_fields)
   end
 
   @impl true
