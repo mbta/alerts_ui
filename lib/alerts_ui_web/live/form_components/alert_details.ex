@@ -41,15 +41,9 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   end
 
   @impl true
-  def handle_event("save", params, socket) do
-    alert_details = Map.get(params, "alert_details", %{})
-    params = Map.merge(params, alert_details)
-
-    changeset =
-      %__MODULE__{}
-      |> changeset(params)
-
-    changeset
+  def handle_event("save", %{"alert_details" => alert_details}, socket) do
+    %__MODULE__{}
+    |> changeset(alert_details)
     |> apply_action(:insert)
     |> case do
       {:ok, changeset} ->
@@ -87,16 +81,15 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         <fieldset>
           <.input
             type="select"
+            label="Route(s)"
             field={@changeset[:route_ids]}
             options={@route_id_options}
             multiple={true}
-            label="Route(s)"
           />
         </fieldset>
 
         <.input
           field={@changeset[:header_text]}
-          name="header_text"
           value=""
           label="Header"
           type="textarea"
@@ -105,7 +98,6 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         />
         <.input
           field={@changeset[:description_text]}
-          name="description_text"
           value=""
           label="Description"
           type="textarea"
