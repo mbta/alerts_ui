@@ -7,9 +7,8 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
   alias AlertsUIWeb.FormComponents.{AlertDetails, RouteTypeAndEffect}
 
   describe "create alerts page" do
+    @tag :logged_in_user
     test "connected mount displays a list of alerts when logged in", %{conn: conn} do
-      conn = log_in_user(conn)
-
       {:ok, _view, html} = live(conn, "/alerts/new")
       assert html =~ ~r/Create an Alert/
     end
@@ -19,9 +18,9 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
                {:error, {:redirect, %{to: "/auth/keycloak", flash: %{}}}}
     end
 
+    @tag :logged_in_user
     test "submitting first part of form unhides second part", %{conn: conn} do
       insert(:alert, alert_id: "1")
-      conn = log_in_user(conn)
       {:ok, view, _html} = live(conn, "/alerts/new")
 
       first_rendered_view = render(view)
@@ -46,9 +45,9 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
       assert failure_rendered_view =~ "at least one field must be present"
     end
 
+    @tag :logged_in_user
     test "displays warning if compare_feed is true", %{conn: conn} do
       reassign_env(:alerts_ui, :compare_feed, "true")
-      conn = log_in_user(conn)
       {:ok, _view, html} = live(conn, "/alerts/new")
 
       assert html =~ ~s(! Please do not create Alerts on this server !)
