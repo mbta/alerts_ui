@@ -46,6 +46,34 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
     end
 
     @tag :logged_in_user
+    test "submitting the second part of the form saves the alert", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/new")
+      first_rendered_view = render(view)
+      assert first_rendered_view =~ ~s(id="route_view")
+
+      # Submit the first part
+      changeset =
+        Ecto.Changeset.change(%RouteTypeAndEffect{route_type: "3", effect_name: "Detour"})
+
+      send(view.pid, {:step_completed, changeset})
+      second_rendered_view = render(view)
+      assert second_rendered_view =~ ~s(id="details_view")
+
+      # Submit the second part
+      changeset =
+        Ecto.Changeset.change(%AlertDetails{
+          route_ids: ["Red", "Orange"],
+          header_text: "Test header",
+          description_text: "Test description"
+        })
+
+      send(view.pid, {:create_alert, changeset})
+
+      success_rendered_view = render(view)
+      assert success_rendered_view =~ ~s(id="success_view")
+    end
+
+    @tag :logged_in_user
     test "displays warning if compare_feed is true", %{conn: conn} do
       reassign_env(:alerts_ui, :compare_feed, "true")
       {:ok, _view, html} = live(conn, "/alerts/new")
