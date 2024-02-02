@@ -67,12 +67,12 @@ defmodule AlertsUI.AlertsTest do
   describe "parse_changeset_errors/1" do
     test "puts changeset errors in readable format" do
       changeset =
-        Alert.changeset(%Alert{}, %{header_text: "hello", informed_entity: [%{route_id: nil}]})
+        Alert.changeset(%Alert{}, %{header_text: "hello", informed_entity: []})
 
       result = Alerts.parse_changeset_errors(changeset)
 
       assert result == %{
-               informed_entity: [%{agency_id: ["at least one field must be present"]}]
+               informed_entity: ["should have at least 1 item(s)", "can't be blank"]
              }
     end
   end

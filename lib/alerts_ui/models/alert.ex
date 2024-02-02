@@ -200,7 +200,8 @@ defmodule AlertsUI.Models.Alert do
   defp routes_or_facilities(%InformedEntity{route_id: route_id}) when not is_nil(route_id),
     do: [route_id]
 
-  defp routes_or_facilities(%InformedEntity{activities: activities}) do
+  defp routes_or_facilities(%InformedEntity{activities: activities})
+       when not is_nil(activities) do
     activities
     |> Enum.filter(&InformedEntity.facility_activity?/1)
     |> Enum.map(&combine_bike_activities/1)

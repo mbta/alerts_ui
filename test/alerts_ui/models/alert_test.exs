@@ -138,5 +138,20 @@ defmodule AlertsUI.Models.AlertTest do
 
       assert Alert.entities_with_icons(alert) == ["bike"]
     end
+
+    test "returns empty list if no informed entity" do
+      alert = %Alert{
+        id: "1",
+        informed_entity: [
+          %InformedEntity{
+            facility_id: "772",
+            stop_id: "70511",
+            activities: nil
+          }
+        ]
+      }
+
+      assert Alert.entities_with_icons(alert) == []
+    end
   end
 end

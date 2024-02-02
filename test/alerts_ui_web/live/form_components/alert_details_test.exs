@@ -31,7 +31,7 @@ defmodule AlertsUiWeb.FormComponents.AlertDetailsTest do
       {:ok, view, _html} = live_isolated_component(AlertDetails, assigns)
 
       view
-      |> element("#draft")
+      |> element("#details_draft")
       |> render_click(%{})
 
       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
@@ -44,22 +44,21 @@ defmodule AlertsUiWeb.FormComponents.AlertDetailsTest do
 
   describe "save event" do
     test " given a valid changset, sends a :create_alert event" do
-      {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
+      assigns =
+        Map.put(@assigns, :alert_data, %{
+          header_text: "Test header",
+          description_text: "Test description"
+        })
+
+      {:ok, view, _html} = live_isolated_component(AlertDetails, assigns)
 
       view
       |> element("form")
-      |> render_submit(%{
-        "alert_details" => %{
-          "route_ids" => ["1", "2"],
-          "header_text" => "Test header",
-          "description_text" => "Test description"
-        }
-      })
+      |> render_submit(%{})
 
       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
                       {:create_alert,
                        %AlertDetails{
-                         route_ids: ["1", "2"],
                          header_text: "Test header",
                          description_text: "Test description"
                        }}}
