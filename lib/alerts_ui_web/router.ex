@@ -34,7 +34,7 @@ defmodule AlertsUIWeb.Router do
     # Authenticated pages
     pipe_through [:redirect_prod_http, :browser, :require_authenticated_user]
 
-    get "/", PageController, :home
+    get "/", Redirector, to: "/alerts"
 
     live_session :require_authenticated_user,
       on_mount: [{AlertsUIWeb.UserAuth, :ensure_authenticated}] do
