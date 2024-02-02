@@ -65,10 +65,10 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   def handle_event("save_as_draft", partial_alert_data, socket) do
-    socket.assigns.alert_data
-    |> Map.merge(partial_alert_data |> Map.delete("value"))
+    partial_alert_data
     |> Enum.map(fn {k, v} -> {String.to_existing_atom(k), v} end)
     |> Map.new()
+    |> then(&Map.merge(socket.assigns.alert_data, &1))
     |> Map.put(:draft, true)
     |> AlertBuilder.build_alert()
     |> Alerts.create_draft_alert()
