@@ -64,12 +64,9 @@ defmodule AlertsUIWeb.CreateAlertLive do
     {:noreply, assign(socket, :progress, get_step_by_name(name))}
   end
 
-  def handle_event("save_as_draft", partial_alert_data, socket) do
-    partial_alert_data
-    |> Enum.map(fn {k, v} -> {String.to_existing_atom(k), v} end)
-    |> Map.new()
-    |> then(&Map.merge(socket.assigns.alert_data, &1))
-    |> Map.put(:draft, true)
+  def handle_info({:save_as_draft, changeset}, socket) do
+    socket.assigns.alert_data
+    |> Map.merge(changeset |> Map.from_struct())
     |> AlertBuilder.build_alert()
     |> Alerts.create_draft_alert()
     |> case do

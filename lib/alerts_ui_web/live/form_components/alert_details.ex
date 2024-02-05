@@ -14,9 +14,10 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     field :route_ids, {:array, :string}
     field :header_text, :string
     field :description_text, :string
+    field :draft, :boolean
   end
 
-  @fields ~w[route_ids header_text description_text]a
+  @fields ~w[route_ids header_text description_text draft]a
   @required_fields ~w[header_text description_text]a
 
   @impl true
@@ -42,9 +43,29 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
 
   def handle_event("change", params, socket) do
     alert_data =
-      params |> Map.delete("_target") |> then(&Map.merge(socket.assigns.alert_data, &1))
+      params["alert_details"]
+      |> Map.delete("_target")
+      |> Enum.map(fn {k, v} -> {String.to_existing_atom(k), v} end)
+      |> Map.new()
+      |> then(&Map.merge(socket.assigns.alert_data, &1))
 
     {:noreply, assign(socket, :alert_data, alert_data)}
+  end
+
+  @impl true
+  def handle_event("save_as_draft", _params, socket) do
+    socket.assigns.alert_data
+    |> Map.put(:draft, true)
+    |> then(&draft_changeset(%__MODULE__{}, &1))
+    |> apply_action(:insert)
+    |> case do
+      {:ok, changeset} ->
+        send(self(), {:save_as_draft, changeset})
+        {:noreply, socket}
+
+      {:error, changeset} ->
+        {:noreply, assign(socket, :changeset, changeset |> to_form())}
+    end
   end
 
   @impl true
@@ -60,6 +81,11 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       {:error, changeset} ->
         {:noreply, assign(socket, :changeset, changeset |> to_form())}
     end
+  end
+
+  def draft_changeset(changeset, params) do
+    changeset
+    |> cast(params, @fields)
   end
 
   def changeset(changeset, params) do
@@ -115,11 +141,14 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         <.button class="btn btn-outline basis-8 self-center px-8" name="save">submit</.button>
       </.form>
       <button
+        phx-target={@myself}
         phx-click="save_as_draft"
         phx-value-header_text={@alert_data["header_text"]}
-        phx-value-header_text={@alert_data["description_text"]}
+        phx-value-description_text={@alert_data["description_text"]}
+        phx-value-route_ids={@alert_data["route_ids"]}
         type="button"
         name="draft"
+        id="draft"
         class="btn rounded-lg mt-8 basis-8 self-center px-8 min-w-[25%] font-extrabold"
       >
         Save as Draft

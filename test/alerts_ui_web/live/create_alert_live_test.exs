@@ -3,6 +3,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
   use AlertsUIWeb.ConnCase
   import Phoenix.LiveViewTest
   import AlertsUI.Support.Factory
+  import Ecto.Changeset
   import Test.Support.Helpers
   alias AlertsUIWeb.FormComponents.{AlertDetails, RouteTypeAndEffect}
 
@@ -37,10 +38,13 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
       assert second_rendered_view =~ ~s(class="min-w-full flex flex-col" id="details_view")
 
       changeset =
-        Ecto.Changeset.change(%AlertDetails{header_text: "cool", description_text: "bean"})
+        Ecto.Changeset.change(%AlertDetails{
+          header_text: "cool",
+          description_text: "bean",
+          route_ids: ["0"]
+        })
 
       send(view.pid, {:create_alert, changeset})
-
       failure_rendered_view = render(view)
       assert failure_rendered_view =~ "at least one field must be present"
     end
@@ -75,29 +79,40 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
     @tag :logged_in_user
     test "save as draft redirects on success", %{conn: conn} do
-      insert(:alert, alert_id: "1")
       conn = log_in_user(conn)
       {:ok, view, _html} = live(conn, "/alerts/new")
 
-      {_,
-       {:redirect,
-        %{
-          to: "/alerts/new",
-          flash: _
-        }}} = render_click(view, "save_as_draft", %{"route_type" => "3"})
+      {:ok, changeset} =
+        Ecto.Changeset.change(%RouteTypeAndEffect{
+          route_type: 3,
+          draft: true
+        })
+        |> apply_action(:insert)
+
+      send(view.pid, {:save_as_draft, changeset})
+      assert_redirect(view)
     end
 
+    @tag :logged_in_user
     test "save as draft shows error on error", %{conn: conn} do
       insert(:alert, alert_id: "1")
       conn = log_in_user(conn)
       {:ok, view, _html} = live(conn, "/alerts/new")
 
-      rendered_view =
-        view |> render_click("save_as_draft", %{:route_type => "should not be an atom"})
+      {:ok, changeset} =
+        Ecto.Changeset.change(%RouteTypeAndEffect{
+          route_type: 3,
+          draft: false
+        })
+        |> apply_action(:insert)
 
-      rendered_view =~ "informed_entity: route_type: is invalid;"
+      send(view.pid, {:save_as_draft, changeset})
+      rendered_view = render(view)
+
+      rendered_view =~ "draft: draft status must be true"
     end
 
+    @tag :logged_in_user
     test "displays warning if compare_feed is true", %{conn: conn} do
       reassign_env(:alerts_ui, :compare_feed, "true")
       {:ok, _view, html} = live(conn, "/alerts/new")
