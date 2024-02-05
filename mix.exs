@@ -77,6 +77,7 @@ defmodule AlertsUI.MixProject do
       {:flop_phoenix, "~> 0.22"},
       {:hackney, "1.20.1"},
       {:jason, "~> 1.2"},
+      {:live_isolated_component, "~> 0.8", only: :test},
       {:map_diff, "~> 1.3.4"},
       {:mbta_v3_api, git: "https://github.com/mbta/mbta_v3_api.git", branch: "mss-more-files"},
       {:oban, "~> 2.16"},

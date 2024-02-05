@@ -11,12 +11,13 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
 
   @primary_key false
   embedded_schema do
-    field :route_ids, :string
+    field :route_ids, {:array, :string}
     field :header_text, :string
     field :description_text, :string
   end
 
-  @fields ~w[header_text description_text]a
+  @fields ~w[route_ids header_text description_text]a
+  @required_fields ~w[header_text description_text]a
 
   @impl true
   def mount(socket) do
@@ -28,8 +29,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   @impl true
   def update(assigns, socket) do
     available_routes =
-      assigns.alert_data
-      |> Map.get(:route_type)
+      assigns
+      |> get_in([:alert_data, :route_type])
       |> all_route_types()
       |> RoutesRepo.by_type()
 
@@ -40,8 +41,9 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   end
 
   @impl true
-  def handle_event("save", params, socket) do
-    changeset(%__MODULE__{}, params)
+  def handle_event("save", %{"alert_details" => alert_details}, socket) do
+    %__MODULE__{}
+    |> changeset(alert_details)
     |> apply_action(:insert)
     |> case do
       {:ok, changeset} ->
@@ -56,11 +58,14 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   def changeset(changeset, params) do
     changeset
     |> cast(params, @fields)
-    |> validate_required(@fields)
+    |> validate_required(@required_fields)
   end
 
   @impl true
   def render(assigns) do
+    route_id_options = formatted_select_options(assigns.available_routes)
+    assigns = assign(assigns, :route_id_options, route_id_options)
+
     ~H"""
     <div
       class={unless @progress.name == "details", do: "hidden", else: "min-w-full"}
@@ -76,16 +81,15 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         <fieldset>
           <.input
             type="select"
-            field={@changeset[:route_ids]}
-            options={formatted_select_options(@available_routes)}
-            multiple={true}
             label="Route(s)"
+            field={@changeset[:route_ids]}
+            options={@route_id_options}
+            multiple={true}
           />
         </fieldset>
 
         <.input
           field={@changeset[:header_text]}
-          name="header_text"
           value=""
           label="Header"
           type="textarea"
@@ -94,7 +98,6 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         />
         <.input
           field={@changeset[:description_text]}
-          name="description_text"
           value=""
           label="Description"
           type="textarea"
@@ -118,7 +121,22 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   defp all_route_types(_), do: []
 
   @spec formatted_select_options([Route.t()]) :: keyword(String.t())
-  defp formatted_select_options(routes) do
-    Enum.map(routes, fn %Route{id: id, name: name} -> {name, id} end)
+  defp formatted_select_options(objects) do
+    objects
+    |> Enum.sort_by(&sort_order/1)
+    |> Enum.map(fn object -> {name_for_option(object), id_for_option(object)} end)
   end
+
+  @spec sort_order(Route.t()) :: non_neg_integer()
+  defp sort_order(%Route{sort_order: sort_order}), do: sort_order
+
+  @spec name_for_option(Route.t()) :: String.t()
+  defp name_for_option(%Route{name: empty_name, long_name: long_name})
+       when is_nil(empty_name) or empty_name == "",
+       do: long_name
+
+  defp name_for_option(%Route{name: name}), do: name
+
+  @spec id_for_option(Route.t()) :: String.t()
+  defp id_for_option(%Route{id: id}), do: id
 end

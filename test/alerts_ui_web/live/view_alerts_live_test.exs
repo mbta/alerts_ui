@@ -29,9 +29,8 @@ defmodule AlertsUIWeb.AlertsLiveTest do
       :ok
     end
 
+    @tag :logged_in_user
     test "connected mount displays a list of alerts when logged in", %{conn: conn} do
-      conn = log_in_user(conn)
-
       {:ok, _view, html} = live(conn, "/alerts")
       assert html =~ ~r/Alerts/
     end
@@ -40,16 +39,14 @@ defmodule AlertsUIWeb.AlertsLiveTest do
       assert live(conn, "/alerts") == {:error, {:redirect, %{to: "/auth/keycloak", flash: %{}}}}
     end
 
+    @tag :logged_in_user
     test "sorting click event", %{conn: conn} do
-      conn = log_in_user(conn)
-
       {:ok, view, _html} = live(conn, "/alerts")
       assert view |> render_click("sort-alerts", %{"order" => "active_period_start"}) =~ "123"
     end
 
+    @tag :logged_in_user
     test "alert_id filter change", %{conn: conn} do
-      conn = log_in_user(conn)
-
       {:ok, view, html} = live(conn, "/alerts")
 
       assert html =~ "123"
@@ -58,9 +55,8 @@ defmodule AlertsUIWeb.AlertsLiveTest do
       refute render_change(view, "update-filter", alert_id_filter_params("124")) =~ "123"
     end
 
+    @tag :logged_in_user
     test "effect filter change", %{conn: conn} do
-      conn = log_in_user(conn)
-
       {:ok, view, html} = live(conn, "/alerts")
 
       assert html =~ "123"
@@ -72,9 +68,8 @@ defmodule AlertsUIWeb.AlertsLiveTest do
       assert render_change(view, "update-filter", effect_filter_params("DETOUR")) =~ "123"
     end
 
+    @tag :logged_in_user
     test "filter reset", %{conn: conn} do
-      conn = log_in_user(conn)
-
       {:ok, view, _html} = live(conn, "/alerts")
 
       assert render_change(view, "update-filter", alert_id_filter_params("")) =~ "123"

@@ -33,7 +33,17 @@ defmodule AlertsUIWeb.ConnCase do
 
   setup tags do
     AlertsUI.DataCase.setup_sandbox(tags)
-    {:ok, conn: Phoenix.ConnTest.build_conn()}
+
+    conn = Phoenix.ConnTest.build_conn()
+
+    conn =
+      if tags[:logged_in_user] do
+        log_in_user(conn)
+      else
+        conn
+      end
+
+    {:ok, conn: conn}
   end
 
   @doc """
