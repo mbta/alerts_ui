@@ -1,6 +1,21 @@
 defmodule AlertsUIWeb.Step do
   @moduledoc "Describe a step in the multi-step form and where it can go."
+
+  @doc """
+  Returns list of atoms allowed in alert lifecycle field of alert
+
+  ## Examples
+      iex> %AlertsUIWeb.Step{name: "example", previous: "cool", next: "bean", label: "hi"}
+      %AlertsUIWeb.Step{name: "example", previous: "cool", next: "bean", label: "hi"}
+  """
   defstruct [:name, :previous, :next, :label]
+
+  @type t :: %__MODULE__{
+          name: String.t(),
+          previous: String.t() | nil,
+          next: String.t() | nil,
+          label: String.t()
+        }
 end
 
 defmodule AlertsUIWeb.CreateAlertLive do
@@ -47,6 +62,27 @@ defmodule AlertsUIWeb.CreateAlertLive do
   @impl true
   def handle_event("move_progress", %{"value" => name}, socket) do
     {:noreply, assign(socket, :progress, get_step_by_name(name))}
+  end
+
+  def handle_info({:save_as_draft, changeset}, socket) do
+    socket.assigns.alert_data
+    |> Map.merge(changeset |> Map.from_struct())
+    |> AlertBuilder.build_alert()
+    |> Alerts.create_draft_alert()
+    |> case do
+      {:ok, _result} ->
+        socket = put_flash(socket, :info, "Draft Saved Successfully")
+        {:noreply, redirect(socket, to: "/alerts/new")}
+
+      {:error, result} ->
+        errors =
+          result
+          |> Alerts.parse_changeset_errors()
+          |> format_errors
+
+        socket = put_flash(socket, :error, errors)
+        {:noreply, socket}
+    end
   end
 
   @impl true

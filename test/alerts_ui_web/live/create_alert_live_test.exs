@@ -3,6 +3,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
   use AlertsUIWeb.ConnCase
   import Phoenix.LiveViewTest
   import AlertsUI.Support.Factory
+  import Ecto.Changeset
   import Test.Support.Helpers
   alias AlertsUIWeb.FormComponents.{AlertDetails, RouteTypeAndEffect}
 
@@ -24,8 +25,8 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
       {:ok, view, _html} = live(conn, "/alerts/new")
 
       first_rendered_view = render(view)
-      assert first_rendered_view =~ ~s(class="min-w-full" id="route_view")
-      refute first_rendered_view =~ ~s(class="min-w-full" id="details_view")
+      assert first_rendered_view =~ ~s(class="min-w-full flex flex-col" id="route_view")
+      refute first_rendered_view =~ ~s(class="min-w-full flex flex-col" id="details_view")
 
       changeset =
         Ecto.Changeset.change(%RouteTypeAndEffect{route_type: "3", effect_name: "Detour"})
@@ -33,14 +34,17 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
       send(view.pid, {:step_completed, changeset})
 
       second_rendered_view = render(view)
-      refute second_rendered_view =~ ~s(class="min-w-full" id="route_view")
-      assert second_rendered_view =~ ~s(class="min-w-full" id="details_view")
+      refute second_rendered_view =~ ~s(class="min-w-full flex flex-col" id="route_view")
+      assert second_rendered_view =~ ~s(class="min-w-full flex flex-col" id="details_view")
 
       changeset =
-        Ecto.Changeset.change(%AlertDetails{header_text: "cool", description_text: "bean"})
+        Ecto.Changeset.change(%AlertDetails{
+          header_text: "cool",
+          description_text: "bean",
+          route_ids: ["0"]
+        })
 
       send(view.pid, {:create_alert, changeset})
-
       failure_rendered_view = render(view)
       assert failure_rendered_view =~ "at least one field must be present"
     end
@@ -71,6 +75,41 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
       success_rendered_view = render(view)
       assert success_rendered_view =~ ~s(id="success_view")
+    end
+
+    @tag :logged_in_user
+    test "save as draft redirects on success", %{conn: conn} do
+      conn = log_in_user(conn)
+      {:ok, view, _html} = live(conn, "/alerts/new")
+
+      {:ok, changeset} =
+        Ecto.Changeset.change(%RouteTypeAndEffect{
+          route_type: 3,
+          draft: true
+        })
+        |> apply_action(:insert)
+
+      send(view.pid, {:save_as_draft, changeset})
+      assert_redirect(view)
+    end
+
+    @tag :logged_in_user
+    test "save as draft shows error on error", %{conn: conn} do
+      insert(:alert, alert_id: "1")
+      conn = log_in_user(conn)
+      {:ok, view, _html} = live(conn, "/alerts/new")
+
+      {:ok, changeset} =
+        Ecto.Changeset.change(%RouteTypeAndEffect{
+          route_type: 3,
+          draft: false
+        })
+        |> apply_action(:insert)
+
+      send(view.pid, {:save_as_draft, changeset})
+      rendered_view = render(view)
+
+      rendered_view =~ "draft: draft status must be true"
     end
 
     @tag :logged_in_user

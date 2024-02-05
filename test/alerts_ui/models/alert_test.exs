@@ -23,6 +23,25 @@ defmodule AlertsUI.Models.AlertTest do
       assert changeset.valid?
     end
 
+    test "create with invalid effect is invalid" do
+      params = %{
+        alert_id: "123",
+        header_text: "a",
+        description_text: "b",
+        effect: :COOL_BEAN,
+        active_period: [
+          %{
+            start: ~U[2023-10-20 16:15:00Z],
+            end: ~U[2023-10-20 18:45:38Z]
+          }
+        ],
+        informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}]
+      }
+
+      changeset = Alert.changeset(%Alert{}, params)
+      refute changeset.valid?
+    end
+
     test "create with invalid active period is not valid" do
       params = %{
         alert_id: "123",
@@ -38,12 +57,41 @@ defmodule AlertsUI.Models.AlertTest do
       }
 
       changeset = Alert.changeset(%Alert{}, params)
-      assert changeset.valid? == false
+      refute changeset.valid?
     end
 
     test "alert without header and description is not valid" do
       changeset = Alert.changeset(%Alert{}, %{header_text: "a", url: "example.com"})
-      assert changeset.valid? == false
+      refute changeset.valid?
+    end
+  end
+
+  describe "draft_changeset/2" do
+    test "create with draft set as true is valid" do
+      params = %{
+        draft: true
+      }
+
+      changeset = Alert.draft_changeset(%Alert{}, params)
+      assert changeset.valid?
+    end
+
+    test "create with draft set as false is invalid" do
+      params = %{
+        draft: false
+      }
+
+      changeset = Alert.draft_changeset(%Alert{}, params)
+      refute changeset.valid?
+    end
+
+    test "create with draft unset or false is invalid" do
+      params = %{
+        header_text: "a"
+      }
+
+      changeset = Alert.draft_changeset(%Alert{}, params)
+      refute changeset.valid?
     end
   end
 

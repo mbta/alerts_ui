@@ -25,6 +25,23 @@ defmodule AlertsUiWeb.FormComponents.AlertDetailsTest do
     end
   end
 
+  describe "save as draft" do
+    test "save as draft on click" do
+      assigns = @assigns |> Map.put(:alert_data, %{header_text: "cool_bean"})
+      {:ok, view, _html} = live_isolated_component(AlertDetails, assigns)
+
+      view
+      |> element("#draft")
+      |> render_click(%{})
+
+      assert_receive {:__live_isolated_component_handle_info_received__, _pid,
+                      {:save_as_draft,
+                       %AlertDetails{
+                         header_text: "cool_bean"
+                       }}}
+    end
+  end
+
   describe "save event" do
     test " given a valid changset, sends a :create_alert event" do
       {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)

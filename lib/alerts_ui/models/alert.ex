@@ -21,6 +21,7 @@ defmodule AlertsUI.Models.Alert do
   created_at
   updated_at
   alert_id
+  draft
   effect
   effect_detail
   cause
@@ -63,6 +64,7 @@ defmodule AlertsUI.Models.Alert do
           effect_detail: String.t() | nil,
           cause: atom() | nil,
           cause_detail: String.t() | nil,
+          draft: boolean(),
           header_text: String.t(),
           description_text: String.t(),
           severity_level: atom() | nil,
@@ -152,6 +154,7 @@ defmodule AlertsUI.Models.Alert do
     field :tts_header_text, :string
     field :tts_description_text, :string
     has_many :informed_entity, InformedEntity, on_replace: :nilify
+    field :draft, :boolean, default: false
     timestamps()
   end
 
@@ -168,6 +171,21 @@ defmodule AlertsUI.Models.Alert do
     |> validate_inclusion(:duration_certainty, @duration_certainty)
     |> validate_required([:header_text])
     |> validate_length(:informed_entity, min: 1)
+    |> unique_constraint(:alert_id)
+  end
+
+  @spec draft_changeset(any(), map()) :: Ecto.Changeset.t()
+  def draft_changeset(%__MODULE__{} = alert, params) do
+    alert
+    |> cast(params, @permitted_fields)
+    |> cast_embed(:active_period, required: false, with: &ActivePeriod.changeset/2)
+    |> cast_assoc(:informed_entity, required: false, with: &InformedEntity.changeset/2)
+    |> validate_acceptance(:draft, message: "draft status must be true")
+    |> validate_inclusion(:effect, @effect)
+    |> validate_inclusion(:cause, @cause)
+    |> validate_inclusion(:severity_level, @severity_level)
+    |> validate_inclusion(:alert_lifecycle, @alert_lifecycle)
+    |> validate_inclusion(:duration_certainty, @duration_certainty)
     |> unique_constraint(:alert_id)
   end
 

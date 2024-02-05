@@ -19,9 +19,11 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   embedded_schema do
     field :route_type, :integer
     field :effect_name, :string
+    field :draft, :boolean
   end
 
-  @fields ~w[route_type effect_name]a
+  @fields ~w[route_type effect_name draft]a
+  @required_fields ~w[route_type effect_name]a
 
   @impl true
   def mount(socket) do
@@ -40,10 +42,15 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
     {:ok, socket}
   end
 
+  def draft_changeset(changeset, params) do
+    changeset
+    |> cast(params, @fields)
+  end
+
   def changeset(changeset, params) do
     changeset
     |> cast(params, @fields)
-    |> validate_required(@fields)
+    |> validate_required(@required_fields)
   end
 
   @impl true
@@ -54,8 +61,28 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
      assign(socket, %{selected_route_type: route_type, effects: effects, selected_effect: nil})}
   end
 
+  @impl true
   def handle_event("effect", %{"value" => effect}, socket) do
     {:noreply, assign(socket, %{selected_effect: effect})}
+  end
+
+  @impl true
+  def handle_event("save_as_draft", params, socket) do
+    %{
+      effect_name: Map.get(params, "effect_name"),
+      route_type: InformedEntity.route_type_mapping()[Map.get(params, "route_type")],
+      draft: true
+    }
+    |> then(&draft_changeset(%__MODULE__{}, &1))
+    |> apply_action(:insert)
+    |> case do
+      {:ok, changeset} ->
+        send(self(), {:save_as_draft, changeset})
+        {:noreply, socket}
+
+      {:error, changeset} ->
+        {:noreply, assign(socket, :changeset, changeset |> to_form())}
+    end
   end
 
   @impl true
@@ -81,7 +108,11 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   def render(assigns) do
     ~H"""
     <div
-      class={unless @progress.name == "route_type_and_effect", do: "hidden", else: "min-w-full"}
+      class={
+        unless @progress.name == "route_type_and_effect",
+          do: "hidden",
+          else: "min-w-full flex flex-col"
+      }
       id="route_view"
     >
       <.form
@@ -116,6 +147,21 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
           </div>
         </div>
       </.form>
+      <button
+        phx-target={@myself}
+        phx-click="save_as_draft"
+        phx-value-effect_name={@selected_effect}
+        phx-value-route_type={@selected_route_type}
+        name="draft"
+        id="draft"
+        class={
+          if is_nil(@selected_route_type),
+            do: "hidden",
+            else: "btn rounded-lg mt-8 basis-8 self-center px-8 min-w-[25%] font-extrabold"
+        }
+      >
+        Save as Draft
+      </button>
     </div>
     """
   end

@@ -26,6 +26,12 @@ defmodule AlertsUI.Alerts do
     end
   end
 
+  def create_draft_alert(params) do
+    %Alert{}
+    |> Alert.draft_changeset(params)
+    |> Repo.insert()
+  end
+
   @spec parse_changeset_errors(Ecto.Changeset.t()) :: %{optional(atom()) => list()}
   def parse_changeset_errors(changeset) do
     traverse_errors(changeset, fn {msg, opts} ->
@@ -203,6 +209,7 @@ defmodule AlertsUI.Alerts do
 
     with {:ok, flop} <- Flop.validate(params, opts) do
       Alert
+      |> where([a], a.draft == false or is_nil(a.draft))
       |> Flop.with_named_bindings(flop, &join_informed_entity/2, opts)
       |> preload(informed_entity: [:trip])
       |> Flop.run(flop, opts)
@@ -212,5 +219,21 @@ defmodule AlertsUI.Alerts do
   defp join_informed_entity(query, _opts) do
     query
     |> join(:inner, [a], ie in assoc(a, :informed_entity), as: :informed_entity)
+  end
+
+  @spec publishable?(String.t() | Alert.t()) :: boolean()
+  def publishable?(alert_or_alert_id), do: !draft?(alert_or_alert_id)
+
+  @spec draft?(String.t() | Alert.t()) :: boolean()
+  def draft?(%Alert{} = alert), do: !!alert.draft
+
+  def draft?(alert_id) do
+    Repo.exists?(
+      from(
+        a in Alert,
+        where: a.alert_id == ^alert_id,
+        where: a.draft == true
+      )
+    )
   end
 end

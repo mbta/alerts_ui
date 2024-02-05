@@ -21,65 +21,57 @@ defmodule AlertsUIWeb.FormComponents.EffectsForRouteTypes do
   def list_effects(nil), do: Effect.effect_names()
 
   def list_effects("Subway"),
-    do:
-      [
-        "Delay",
-        "Station Closure",
-        "Extra Service",
-        "Shuttle",
-        "Station Issue",
-        "Service Change",
-        "Suspension",
-        "Schedule Change"
-      ]
-      |> Enum.sort()
+    do: [
+      "Delay",
+      "Extra Service",
+      "Schedule Change",
+      "Service Change",
+      "Shuttle",
+      "Station Closure",
+      "Station Issue",
+      "Suspension"
+    ]
 
   def list_effects("Commuter Rail"),
-    do:
-      [
-        "Delay",
-        "Suspension",
-        "Track Change",
-        "Service Change",
-        "Cancellation",
-        "Station Closure",
-        "Schedule Change",
-        "Shuttle",
-        "Station Issue",
-        "Extra Service"
-      ]
-      |> Enum.sort()
+    do: [
+      "Cancellation",
+      "Delay",
+      "Extra Service",
+      "Schedule Change",
+      "Service Change",
+      "Shuttle",
+      "Station Closure",
+      "Station Issue",
+      "Suspension",
+      "Track Change"
+    ]
 
   def list_effects("Bus"),
-    do:
-      [
-        "Delay",
-        "Multi-Route Detour",
-        "Stop Closure",
-        "Extra Service",
-        "Stop Move",
-        "Snow Route",
-        "Schedule Change",
-        "Service Change",
-        "Detour",
-        "Suspension",
-        "Stop Shoveling",
-        "Cancellation"
-      ]
-      |> Enum.sort()
+    do: [
+      "Cancellation",
+      "Delay",
+      "Detour",
+      "Extra Service",
+      "Multi-Route Detour",
+      "Schedule Change",
+      "Service Change",
+      "Snow Route",
+      "Stop Closure",
+      "Stop Move",
+      "Stop Shoveling",
+      "Suspension"
+    ]
 
   def list_effects("Ferry"),
-    do:
-      [
-        "Delay",
-        "Suspension",
-        "Schedule Change",
-        "Cancellation",
-        "Dock Closure",
-        "Extra Service",
-        "Shuttle",
-        "Dock Issue",
-        "Service Change"
-      ]
-      |> Enum.sort()
+    do: [
+      "Cancellation",
+      "Delay",
+      "Dock Closure",
+      "Dock Issue",
+      "Extra Service",
+      "Schedule Change",
+      "Service Change",
+      "Shuttle",
+      "Suspension"
+    ]
 end
