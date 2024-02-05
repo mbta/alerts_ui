@@ -221,19 +221,19 @@ defmodule AlertsUI.Alerts do
     |> join(:inner, [a], ie in assoc(a, :informed_entity), as: :informed_entity)
   end
 
-  @spec publishable?(String.t()) :: boolean()
+  @spec publishable?(String.t() | Alert.t()) :: boolean()
   def publishable?(alert_or_alert_id), do: !draft?(alert_or_alert_id)
 
-  @spec draft?(String.t()) :: boolean()
+  @spec draft?(String.t() | Alert.t()) :: boolean()
   def draft?(%Alert{} = alert), do: !!alert.draft
 
   def draft?(alert_id) do
-    !!Repo.get_by(
+    Repo.exists?(
       from(
         a in Alert,
-        select: a.draft
-      ),
-      alert_id: alert_id
+        where: a.alert_id == ^alert_id,
+        where: a.draft == true
+      )
     )
   end
 end

@@ -64,7 +64,7 @@ defmodule AlertsUI.Models.Alert do
           effect_detail: String.t() | nil,
           cause: atom() | nil,
           cause_detail: String.t() | nil,
-          draft: boolean() | nil,
+          draft: boolean(),
           header_text: String.t(),
           description_text: String.t(),
           severity_level: atom() | nil,
