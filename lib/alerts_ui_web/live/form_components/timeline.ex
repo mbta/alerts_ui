@@ -30,6 +30,7 @@ defmodule AlertsUIWeb.FormComponents.Timeline do
       phx-click="move_progress"
       class={"btn #{@button_class} rounded-full min-w-full font-extrabold"}
       value={@step.name}
+      id={@step.name}
     >
       <%= @step.label %> ►
     </button>
