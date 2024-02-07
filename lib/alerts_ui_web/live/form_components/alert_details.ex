@@ -8,22 +8,26 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
 
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
+  alias MBTAV3API.Stops.Repo, as: StopsRepo
+  alias MBTAV3API.Stops.Stop
 
   @primary_key false
   embedded_schema do
     field :route_ids, {:array, :string}
+    field :stop_ids, {:array, :string}
     field :header_text, :string
     field :description_text, :string
     field :draft, :boolean
   end
 
-  @fields ~w[route_ids header_text description_text draft]a
+  @fields ~w[route_ids header_text description_text draft stop_ids]a
   @required_fields ~w[header_text description_text]a
 
   @impl true
   def mount(socket) do
-    changeset = %__MODULE__{} |> change() |> to_form()
-    socket = socket |> assign(%{changeset: changeset, alert_data: %{}, available_routes: []})
+    form = %__MODULE__{} |> changeset() |> to_form()
+    socket = socket |> assign(%{form: form, available_routes: []})
+
     {:ok, socket}
   end
 
@@ -38,25 +42,41 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     {:ok,
      socket
      |> assign(assigns)
-     |> assign(:available_routes, available_routes)}
+     |> assign(%{
+       available_routes: available_routes,
+       available_stops: []
+     })}
   end
 
-  def handle_event("change", params, socket) do
-    alert_data =
-      params["alert_details"]
-      |> Map.delete("_target")
-      |> Enum.map(fn {k, v} -> {String.to_existing_atom(k), v} end)
-      |> Map.new()
-      |> then(&Map.merge(socket.assigns.alert_data, &1))
+  def handle_event("validate", %{"alert_details" => alert_details}, socket) do
+    available_stops =
+      Map.get(alert_details, "route_ids", [])
+      |> Enum.map(fn route -> StopsRepo.by_route(route, 0) ++ StopsRepo.by_route(route, 1) end)
+      |> List.flatten()
 
-    {:noreply, assign(socket, :alert_data, alert_data)}
+    # handle the default "all stops" case
+    alert_details =
+      with true <- Map.get(alert_details, "stop_ids", nil) in [[""], []],
+           false <- Enum.empty?(Map.get(alert_details, "route_ids", [])) do
+        Map.put(alert_details, "stop_ids", Enum.map(available_stops, &id_for_option(&1)))
+      else
+        _ -> alert_details
+      end
+
+    changeset =
+      %__MODULE__{}
+      |> changeset(alert_details)
+      |> Map.put(:action, :validate)
+
+    {:noreply, assign(socket, %{form: to_form(changeset), available_stops: available_stops})}
   end
 
   @impl true
   def handle_event("save_as_draft", _params, socket) do
-    socket.assigns.alert_data
-    |> Map.put(:draft, true)
-    |> then(&draft_changeset(%__MODULE__{}, &1))
+    changes = Map.put(socket.assigns.form.source.changes, :draft, true)
+
+    %__MODULE__{}
+    |> draft_changeset(changes)
     |> apply_action(:insert)
     |> case do
       {:ok, changeset} ->
@@ -64,14 +84,14 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         {:noreply, socket}
 
       {:error, changeset} ->
-        {:noreply, assign(socket, :changeset, changeset |> to_form())}
+        {:noreply, assign(socket, :form, changeset |> to_form())}
     end
   end
 
   @impl true
-  def handle_event("save", %{"alert_details" => alert_details}, socket) do
+  def handle_event("save", _params, socket) do
     %__MODULE__{}
-    |> changeset(alert_details)
+    |> changeset(socket.assigns.form.source.changes)
     |> apply_action(:insert)
     |> case do
       {:ok, changeset} ->
@@ -88,7 +108,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     |> cast(params, @fields)
   end
 
-  def changeset(changeset, params) do
+  def changeset(changeset, params \\ %{}) do
     changeset
     |> cast(params, @fields)
     |> validate_required(@required_fields)
@@ -97,7 +117,10 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   @impl true
   def render(assigns) do
     route_id_options = formatted_select_options(assigns.available_routes)
-    assigns = assign(assigns, :route_id_options, route_id_options)
+    stop_id_options = formatted_select_options(assigns.available_stops)
+
+    assigns =
+      assign(assigns, %{route_id_options: route_id_options, stop_id_options: stop_id_options})
 
     ~H"""
     <div
@@ -105,25 +128,36 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       id="details_view"
     >
       <.form
-        for={@changeset}
+        for={@form}
         phx-target={@myself}
         phx-submit="save"
-        phx-change="change"
+        phx-change="validate"
         class="form-control gap-4"
         id="details_form"
       >
-        <fieldset>
+        <fieldset class="flex flex-row gap-4">
           <.input
             type="select"
             label="Route(s)"
-            field={@changeset[:route_ids]}
+            field={@form[:route_ids]}
             options={@route_id_options}
             multiple={true}
           />
         </fieldset>
 
+        <fieldset>
+          <.input
+            type="select"
+            label="Stop(s)"
+            field={@form[:stop_ids]}
+            options={@stop_id_options}
+            prompt={if Map.has_key?(assigns.form.params, "route_ids"), do: "All Stops", else: nil}
+            multiple={true}
+          />
+        </fieldset>
+
         <.input
-          field={@changeset[:header_text]}
+          field={@form[:header_text]}
           value=""
           label="Header"
           type="textarea"
@@ -131,7 +165,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           id="header_input"
         />
         <.input
-          field={@changeset[:description_text]}
+          field={@form[:description_text]}
           value=""
           label="Description"
           type="textarea"
@@ -143,12 +177,9 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       <button
         phx-target={@myself}
         phx-click="save_as_draft"
-        phx-value-header_text={@alert_data["header_text"]}
-        phx-value-description_text={@alert_data["description_text"]}
-        phx-value-route_ids={@alert_data["route_ids"]}
         type="button"
         name="draft"
-        id="draft"
+        id="details_draft"
         class="btn rounded-lg mt-8 basis-8 self-center px-8 min-w-[25%] font-extrabold"
       >
         Save as Draft
@@ -167,23 +198,28 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   defp all_route_types(4), do: [4]
   defp all_route_types(_), do: []
 
-  @spec formatted_select_options([Route.t()]) :: keyword(String.t())
+  @spec formatted_select_options([Route.t() | Stop.t()]) :: keyword(String.t())
   defp formatted_select_options(objects) do
     objects
     |> Enum.sort_by(&sort_order/1)
     |> Enum.map(fn object -> {name_for_option(object), id_for_option(object)} end)
   end
 
-  @spec sort_order(Route.t()) :: non_neg_integer()
+  @spec sort_order(Stop.t() | Route.t()) :: non_neg_integer() | nil
+  # keep original order from API
+  defp sort_order(%Stop{}), do: nil
   defp sort_order(%Route{sort_order: sort_order}), do: sort_order
 
-  @spec name_for_option(Route.t()) :: String.t()
+  @spec name_for_option(Stop.t() | Route.t()) :: String.t()
+  defp name_for_option(%Stop{name: name}), do: name
+
   defp name_for_option(%Route{name: empty_name, long_name: long_name})
        when is_nil(empty_name) or empty_name == "",
        do: long_name
 
   defp name_for_option(%Route{name: name}), do: name
 
-  @spec id_for_option(Route.t()) :: String.t()
-  defp id_for_option(%Route{id: id}), do: id
+  @spec id_for_option(Stop.t() | Route.t()) :: String.t()
+  def id_for_option(%Stop{id: id}), do: id
+  def id_for_option(%Route{id: id}), do: id
 end

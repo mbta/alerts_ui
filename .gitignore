@@ -43,3 +43,5 @@ npm-debug.log
 # Ignore generated feed files
 assets/outputs/alerts_feed*.json
 assets/outputs/alerts_feed.pb
+
+.DS_Store

@@ -27,17 +27,21 @@ defmodule AlertsUiWeb.FormComponents.AlertDetailsTest do
 
   describe "save as draft" do
     test "save as draft on click" do
-      assigns = @assigns |> Map.put(:alert_data, %{header_text: "cool_bean"})
-      {:ok, view, _html} = live_isolated_component(AlertDetails, assigns)
+      {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
 
       view
-      |> element("#draft")
+      |> element("form")
+      |> render_change(%{"alert_details" => %{header_text: "cool_bean"}})
+
+      view
+      |> element("#details_draft")
       |> render_click(%{})
 
       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
                       {:save_as_draft,
                        %AlertDetails{
-                         header_text: "cool_bean"
+                         header_text: "cool_bean",
+                         draft: true
                        }}}
     end
   end
@@ -48,18 +52,18 @@ defmodule AlertsUiWeb.FormComponents.AlertDetailsTest do
 
       view
       |> element("form")
-      |> render_submit(%{
+      |> render_change(%{
         "alert_details" => %{
-          "route_ids" => ["1", "2"],
           "header_text" => "Test header",
           "description_text" => "Test description"
         }
       })
 
+      view |> element("form") |> render_submit(%{})
+
       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
                       {:create_alert,
                        %AlertDetails{
-                         route_ids: ["1", "2"],
                          header_text: "Test header",
                          description_text: "Test description"
                        }}}
