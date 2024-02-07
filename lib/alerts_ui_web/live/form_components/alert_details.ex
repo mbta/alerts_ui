@@ -61,6 +61,14 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       |> Enum.map(fn route -> StopsRepo.by_route(route, 0) ++ StopsRepo.by_route(route, 1) end)
       |> List.flatten()
 
+    # handle the default "all stops" case
+    with true <- alert_data.stop_ids in [[""], []],
+         false <- Enum.empty?(alert_data.route_ids) do
+      Map.put(alert_data, :stop_ids, Enum.map(available_stops, &id_for_option(&1)))
+    else
+      _ -> alert_data
+    end
+
     {:noreply, assign(socket, %{available_stops: available_stops, alert_data: alert_data})}
   end
 
@@ -143,6 +151,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
             label="Stop(s)"
             field={@changeset[:stop_ids]}
             options={@stop_id_options}
+            prompt={if Enum.empty?(@alert_data.route_ids), do: nil, else: "All Stops"}
             multiple={true}
           />
         </fieldset>
@@ -194,11 +203,11 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     objects
     |> Enum.sort_by(&sort_order/1)
     |> Enum.map(fn object -> {name_for_option(object), id_for_option(object)} end)
-    |> Enum.dedup()
   end
 
   @spec sort_order(Stop.t()) :: non_neg_integer()
-  defp sort_order(%Stop{name: name}), do: name
+  # keep original order from API
+  defp sort_order(%Stop{}), do: nil
 
   @spec sort_order(Route.t()) :: non_neg_integer()
   defp sort_order(%Route{sort_order: sort_order}), do: sort_order
@@ -214,8 +223,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   defp name_for_option(%Route{name: name}), do: name
 
   @spec id_for_option(Stop.t()) :: String.t()
-  defp id_for_option(%Stop{id: id}), do: id
+  def id_for_option(%Stop{id: id}), do: id
 
   @spec id_for_option(Route.t()) :: String.t()
-  defp id_for_option(%Route{id: id}), do: id
+  def id_for_option(%Route{id: id}), do: id
 end
