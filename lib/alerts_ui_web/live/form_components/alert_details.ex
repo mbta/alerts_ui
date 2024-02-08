@@ -53,10 +53,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     alert_details = populate_default_direction(alert_details)
 
     available_stops =
-      alert_details
-      |> Map.get("route_ids", [])
-      |> Enum.map(fn route -> StopsRepo.by_route(route, 0) ++ StopsRepo.by_route(route, 1) end)
-      |> List.flatten()
+      available_stops(alert_details["direction"], Map.get(alert_details, "route_ids", []))
 
     # handle the default "all stops" case
     alert_details =
@@ -200,6 +197,22 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       </button>
     </div>
     """
+  end
+
+  @spec available_stops(String.t(), [String.t()]) :: [Stop.t()]
+  defp available_stops(direction, route_ids) do
+    directions_to_list =
+      case direction do
+        "" -> [0, 1]
+        nil -> []
+        _ -> direction |> String.to_integer() |> List.wrap()
+      end
+
+    route_ids
+    |> Enum.map(fn route ->
+      Enum.map(directions_to_list, &StopsRepo.by_route(route, &1))
+    end)
+    |> List.flatten()
   end
 
   # We lump subway together in the interface, so when asked for either light or
