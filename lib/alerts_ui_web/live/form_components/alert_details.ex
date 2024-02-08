@@ -14,13 +14,14 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   @primary_key false
   embedded_schema do
     field :route_ids, {:array, :string}
+    field :direction, :string
     field :stop_ids, {:array, :string}
     field :header_text, :string
     field :description_text, :string
     field :draft, :boolean
   end
 
-  @fields ~w[route_ids header_text description_text draft stop_ids]a
+  @fields ~w[route_ids direction header_text description_text draft stop_ids]a
   @required_fields ~w[header_text description_text]a
 
   @impl true
@@ -49,8 +50,11 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   end
 
   def handle_event("validate", %{"alert_details" => alert_details}, socket) do
+    alert_details = populate_default_direction(alert_details)
+
     available_stops =
-      Map.get(alert_details, "route_ids", [])
+      alert_details
+      |> Map.get("route_ids", [])
       |> Enum.map(fn route -> StopsRepo.by_route(route, 0) ++ StopsRepo.by_route(route, 1) end)
       |> List.flatten()
 
@@ -117,10 +121,15 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   @impl true
   def render(assigns) do
     route_id_options = formatted_select_options(assigns.available_routes)
+    direction_options = formatted_direction_options(assigns.form[:route_ids].value)
     stop_id_options = formatted_select_options(assigns.available_stops)
 
     assigns =
-      assign(assigns, %{route_id_options: route_id_options, stop_id_options: stop_id_options})
+      assign(assigns,
+        route_id_options: route_id_options,
+        direction_options: direction_options,
+        stop_id_options: stop_id_options
+      )
 
     ~H"""
     <div
@@ -143,9 +152,14 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
             options={@route_id_options}
             multiple={true}
           />
-        </fieldset>
 
-        <fieldset>
+          <.input
+            type="select"
+            label="Direction"
+            field={@form[:direction]}
+            options={@direction_options}
+          />
+
           <.input
             type="select"
             label="Stop(s)"
@@ -198,6 +212,12 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   defp all_route_types(4), do: [4]
   defp all_route_types(_), do: []
 
+  @spec populate_default_direction(map()) :: map()
+  defp populate_default_direction(%{"route_ids" => [_ | _]} = alert_details),
+    do: Map.put_new(alert_details, "direction", "")
+
+  defp populate_default_direction(alert_details), do: alert_details
+
   @spec formatted_select_options([Route.t() | Stop.t()]) :: keyword(String.t())
   defp formatted_select_options(objects) do
     objects
@@ -222,4 +242,15 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   @spec id_for_option(Stop.t() | Route.t()) :: String.t()
   def id_for_option(%Stop{id: id}), do: id
   def id_for_option(%Route{id: id}), do: id
+
+  @spec formatted_direction_options([String.t()] | nil) :: keyword(String.t())
+  defp formatted_direction_options([_ | _]) do
+    [
+      "Both Directions": "",
+      Outbound: "0",
+      Inbound: "1"
+    ]
+  end
+
+  defp formatted_direction_options(_), do: []
 end
