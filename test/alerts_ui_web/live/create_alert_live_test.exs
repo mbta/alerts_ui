@@ -40,8 +40,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
       changeset =
         Ecto.Changeset.change(%AlertDetails{
           header_text: "cool",
-          description_text: "bean",
-          route_ids: ["0"]
+          description_text: "bean"
         })
 
       send(view.pid, {:create_alert, changeset})
@@ -66,7 +65,6 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
       # Submit the second part
       changeset =
         Ecto.Changeset.change(%AlertDetails{
-          route_ids: ["Red", "Orange"],
           header_text: "Test header",
           description_text: "Test description"
         })

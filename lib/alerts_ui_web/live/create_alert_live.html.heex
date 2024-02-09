@@ -12,6 +12,12 @@
       <.live_component module={RouteTypeAndEffect} id="route_type" progress={@progress} />
 
       <.live_component
+        module={AffectedService}
+        id="details"
+        progress={@progress}
+        alert_data={@alert_data}
+      />
+      <.live_component
         module={AlertDetails}
         id="details"
         progress={@progress}

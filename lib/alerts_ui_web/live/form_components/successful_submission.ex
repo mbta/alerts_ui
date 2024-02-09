@@ -17,7 +17,12 @@ defmodule AlertsUIWeb.FormComponents.SuccessfulSubmission do
       id="success_view"
     >
       Alert created successfully
-      <.button phx-click="ok" phx-target={@myself} class="btn btn-outline basis-8 self-center px-8">
+      <.button
+        phx-click="ok"
+        phx-target={@myself}
+        class="btn btn-outline basis-8 self-center px-8"
+        id="success_button"
+      >
         ok!
       </.button>
     </div>

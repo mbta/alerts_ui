@@ -18,32 +18,12 @@ defmodule AlertsUiWeb.FormComponents.AlertDetailsTest do
       next: "success",
       label: "Alert Details"
     },
-    route_type: 1,
-    available_routes: [],
-    available_stops: []
+    route_type: 1
   }
 
   describe "component" do
     test "renders" do
       assert render_component(AlertDetails, @assigns) =~ ~s(id="details_form")
-    end
-
-    test "direction options are only populated once a route is chosen" do
-      with_mock(StopsRepo, by_route: fn _route, _direction -> [] end) do
-        {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
-
-        refute view
-               |> element("select#alert_details_direction")
-               |> render() =~ "Both Directions"
-
-        view
-        |> element("form")
-        |> render_change(%{"alert_details" => %{"route_ids" => ["1"]}})
-
-        assert view
-               |> element("select#alert_details_direction")
-               |> render() =~ "Both Directions"
-      end
     end
   end
 
@@ -78,8 +58,7 @@ defmodule AlertsUiWeb.FormComponents.AlertDetailsTest do
         |> render_change(%{
           "alert_details" => %{
             "header_text" => "Test header",
-            "description_text" => "Test description",
-            "route_ids" => ["1", "2"]
+            "description_text" => "Test description"
           }
         })
 
