@@ -200,19 +200,20 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   end
 
   @spec available_stops(String.t(), [String.t()]) :: [Stop.t()]
-  defp available_stops(direction, route_ids) do
-    directions_to_list =
-      case direction do
-        "" -> [0, 1]
-        nil -> []
-        _ -> direction |> String.to_integer() |> List.wrap()
-      end
+  defp available_stops([], _route_ids), do: []
 
+  defp available_stops("", route_ids) do
     route_ids
-    |> Enum.map(fn route ->
-      Enum.map(directions_to_list, &StopsRepo.by_route(route, &1))
+    |> Enum.flat_map(fn route ->
+      Enum.flat_map([0, 1], &StopsRepo.by_route(route, &1))
     end)
-    |> List.flatten()
+  end
+
+  defp available_stops(direction, route_ids) do
+    route_ids
+    |> Enum.flat_map(fn route ->
+      StopsRepo.by_route(route, direction)
+    end)
   end
 
   # We lump subway together in the interface, so when asked for either light or
