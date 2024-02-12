@@ -16,15 +16,11 @@
         id="details"
         progress={@progress}
         alert_data={@alert_data}
-      />
-      <.live_component
-        module={AlertDetails}
-        id="details"
-        progress={@progress}
         route_type={route_type(@alert_data)}
         available_routes={@available_routes}
         available_stops={@available_stops}
       />
+      <.live_component module={AlertDetails} id="details" progress={@progress} />
 
       <.live_component module={SuccessfulSubmission} id="success" progress={@progress} />
     </article>

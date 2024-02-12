@@ -9,6 +9,7 @@ defmodule AlertsUiWeb.FormComponents.AffectedServiceTest do
   alias AlertsUIWeb.FormComponents.AffectedService
   alias AlertsUIWeb.Step
   alias MBTAV3API.Stops.Repo, as: StopsRepo
+  alias MBTAV3API.Stops.Stop
 
   @assigns %{
     id: "details",
@@ -45,31 +46,24 @@ defmodule AlertsUiWeb.FormComponents.AffectedServiceTest do
                |> render() =~ "Both Directions"
       end
     end
+
+    test "only shows stop names once route is selected" do
+      stops = [%Stop{id: "1", name: "cool stop name"}]
+
+      with_mock(StopsRepo, by_route: fn _route, _direction -> stops end) do
+        {:ok, view, _html} = live_isolated_component(AffectedService, @assigns)
+
+        refute render(view) =~ "cool stop name"
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "affected_service" => %{
+            "route_ids" => ["1", "2"],
+            "directions" => [0]
+          }
+        }) =~ "cool stop name"
+      end
+    end
   end
-
-  # describe "save event" do
-  #   test "given a valid changset, sends a :create_alert event" do
-  #     with_mock(StopsRepo, by_route: fn _route, _direction -> [] end) do
-  #       {:ok, view, _html} = live_isolated_component(AffectedService, @assigns)
-
-  #       view
-  #       |> element("form")
-  #       |> render_change(%{
-  #         "affected_service" => %{
-  #           "route_ids" => ["1", "2"]
-  #         }
-  #       })
-
-  #       view
-  #       |> element("form")
-  #       |> render_click(:save)
-
-  #       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
-  #                       {:section_completed,
-  #                        %AffectedService{
-  #                          route_ids: ["1", "2"]
-  #                        }}}
-  #     end
-  #   end
-  # end
 end
