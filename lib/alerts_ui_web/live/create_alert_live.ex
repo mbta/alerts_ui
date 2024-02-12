@@ -31,6 +31,10 @@ defmodule AlertsUIWeb.CreateAlertLive do
     Timeline
   }
 
+  alias MBTAV3API.Routes.Repo, as: RoutesRepo
+  alias MBTAV3API.Stops.Repo, as: StopsRepo
+  alias MBTAV3API.Stops.Stop
+
   @steps [
     %Step{
       name: "route_type_and_effect",
@@ -50,7 +54,16 @@ defmodule AlertsUIWeb.CreateAlertLive do
   @impl true
   def mount(_params, _session, socket) do
     first_step = List.first(@steps)
-    socket = socket |> assign(%{progress: first_step, alert_data: %{}, steps: @steps})
+
+    socket =
+      assign(socket, %{
+        progress: first_step,
+        steps: @steps,
+        alert_data: %{},
+        available_routes: [],
+        available_stops: []
+      })
+
     {:ok, socket}
   end
 
@@ -62,6 +75,16 @@ defmodule AlertsUIWeb.CreateAlertLive do
   @impl true
   def handle_event("move_progress", %{"value" => name}, socket) do
     {:noreply, assign(socket, :progress, get_step_by_name(name))}
+  end
+
+  def handle_info({:fetch_available_routes, route_types}, socket) do
+    available_routes = RoutesRepo.by_type(route_types)
+    {:noreply, assign(socket, available_routes: available_routes)}
+  end
+
+  def handle_info({:fetch_available_stops, direction, route_ids}, socket) do
+    available_stops = available_stops(direction, route_ids)
+    {:noreply, assign(socket, available_stops: available_stops)}
   end
 
   def handle_info({:save_as_draft, changeset}, socket) do
@@ -104,7 +127,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
       {:ok, _result} ->
         assigns = %{
           progress: get_step_by_name(socket.assigns.progress.next),
-          alert_data: nil
+          alert_data: %{}
         }
 
         {:noreply, assign(socket, assigns)}
@@ -139,6 +162,26 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   defp get_step_by_name(name) do
     Enum.find(@steps, &(&1.name == name))
+  end
+
+  @spec route_type(map()) :: 0..4 | nil
+  defp route_type(alert_data), do: Map.get(alert_data, :route_type)
+
+  @spec available_stops(String.t(), [String.t()]) :: [Stop.t()]
+  defp available_stops([], _route_ids), do: []
+
+  defp available_stops("", route_ids) do
+    route_ids
+    |> Enum.flat_map(fn route ->
+      Enum.flat_map([0, 1], &StopsRepo.by_route(route, &1))
+    end)
+  end
+
+  defp available_stops(direction, route_ids) do
+    route_ids
+    |> Enum.flat_map(fn route ->
+      StopsRepo.by_route(route, direction)
+    end)
   end
 
   defp compare_feed,
