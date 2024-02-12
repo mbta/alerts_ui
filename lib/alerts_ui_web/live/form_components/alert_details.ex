@@ -6,9 +6,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   use AlertsUI.Schema
   import Ecto.Changeset
 
-  alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
-  alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
 
   @primary_key false
@@ -21,45 +19,44 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     field :draft, :boolean
   end
 
-  @fields ~w[route_ids direction header_text description_text draft stop_ids]a
+  @fields ~w[route_ids direction header_text description_text stop_ids draft]a
   @required_fields ~w[header_text description_text]a
 
   @impl true
   def mount(socket) do
     form = %__MODULE__{} |> changeset() |> to_form()
-    socket = socket |> assign(%{form: form, available_routes: []})
+
+    socket = socket |> assign(%{form: form})
 
     {:ok, socket}
   end
 
   @impl true
-  def update(assigns, socket) do
-    available_routes =
-      assigns
-      |> get_in([:alert_data, :route_type])
-      |> all_route_types()
-      |> RoutesRepo.by_type()
+  def update(%{route_type: route_type} = assigns, socket) do
+    route_types = all_route_types(route_type)
+    send(self(), {:fetch_available_routes, route_types})
 
-    {:ok,
-     socket
-     |> assign(assigns)
-     |> assign(%{
-       available_routes: available_routes,
-       available_stops: []
-     })}
+    {:ok, assign(socket, assigns)}
   end
 
   def handle_event("validate", %{"alert_details" => alert_details}, socket) do
     alert_details = populate_default_direction(alert_details)
 
-    available_stops =
-      available_stops(alert_details["direction"], Map.get(alert_details, "route_ids", []))
+    send(
+      self(),
+      {:fetch_available_stops, alert_details["direction"],
+       Map.get(alert_details, "route_ids", [])}
+    )
 
     # handle the default "all stops" case
     alert_details =
       with true <- Map.get(alert_details, "stop_ids", nil) in [[""], []],
            false <- Enum.empty?(Map.get(alert_details, "route_ids", [])) do
-        Map.put(alert_details, "stop_ids", Enum.map(available_stops, &id_for_option(&1)))
+        Map.put(
+          alert_details,
+          "stop_ids",
+          Enum.map(socket.assigns.available_stops, &id_for_option(&1))
+        )
       else
         _ -> alert_details
       end
@@ -69,7 +66,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       |> changeset(alert_details)
       |> Map.put(:action, :validate)
 
-    {:noreply, assign(socket, %{form: to_form(changeset), available_stops: available_stops})}
+    {:noreply, assign(socket, %{form: to_form(changeset)})}
   end
 
   @impl true
@@ -197,23 +194,6 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       </button>
     </div>
     """
-  end
-
-  @spec available_stops(String.t(), [String.t()]) :: [Stop.t()]
-  defp available_stops([], _route_ids), do: []
-
-  defp available_stops("", route_ids) do
-    route_ids
-    |> Enum.flat_map(fn route ->
-      Enum.flat_map([0, 1], &StopsRepo.by_route(route, &1))
-    end)
-  end
-
-  defp available_stops(direction, route_ids) do
-    route_ids
-    |> Enum.flat_map(fn route ->
-      StopsRepo.by_route(route, direction)
-    end)
   end
 
   # We lump subway together in the interface, so when asked for either light or
