@@ -28,20 +28,20 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   end
 
   @impl true
-  def update(%{alert_data: %{route_type: route_type}} = assigns, socket) do
-    route_types = all_route_types(route_type)
-    send(self(), {:fetch_available_routes, route_types})
+  def update(%{alert_data: alert_data} = assigns, socket) do
+    route_type = Map.get(alert_data, :route_type)
+
+    if route_type do
+      route_types = all_route_types(route_type)
+      send(self(), {:fetch_available_routes, route_types})
+    end
 
     {:ok, assign(socket, assigns)}
   end
 
-  @impl true
-  def update(assigns, socket) do
-    {:ok, socket |> assign(assigns)}
-  end
-
   def handle_event("validate", %{"affected_service" => affected_service}, socket) do
-    affected_service = populate_default_direction(affected_service)
+    affected_service =
+      affected_service |> populate_default_direction() |> populate_default_stops(socket)
 
     send(
       self(),
@@ -49,23 +49,17 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
        Map.get(affected_service, "route_ids", [])}
     )
 
-    # handle the default "all stops" case
-    affected_service =
-      with true <- Map.get(affected_service, "stop_ids", nil) in [[""], []],
-           false <- Enum.empty?(Map.get(affected_service, "route_ids", [])) do
-        Map.put(
-          affected_service,
-          "stop_ids",
-          Enum.map(socket.assigns.available_stops, &id_for_option(&1))
-        )
-      else
-        _ -> affected_service
-      end
-
     changeset =
       %__MODULE__{}
       |> changeset(affected_service)
       |> Map.put(:action, :validate)
+
+    changeset
+    |> apply_action(:insert)
+    |> case do
+      {:ok, changeset} ->
+        send(self(), {:section_completed, changeset})
+    end
 
     {:noreply, assign(socket, %{form: to_form(changeset)})}
   end
@@ -73,21 +67,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   @impl true
   def handle_event("validate", _, socket) do
     {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event("save", _params, socket) do
-    %__MODULE__{}
-    |> changeset(socket.assigns.form.source.changes)
-    |> apply_action(:insert)
-    |> case do
-      {:ok, changeset} ->
-        send(self(), {:section_completed, changeset})
-        {:noreply, socket}
-
-      {:error, changeset} ->
-        {:noreply, assign(socket, :changeset, changeset |> to_form())}
-    end
   end
 
   def changeset(changeset, params \\ %{}) do
@@ -116,7 +95,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       <.form
         for={@form}
         phx-target={@myself}
-        phx-click-away="save"
         phx-change="validate"
         class="form-control gap-4"
         id="service_form"
@@ -203,4 +181,17 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   end
 
   defp formatted_direction_options(_), do: []
+
+  defp populate_default_stops(affected_service, socket) do
+    with true <- Map.get(affected_service, "stop_ids", nil) in [[""], []],
+         false <- Enum.empty?(Map.get(affected_service, "route_ids", [])) do
+      Map.put(
+        affected_service,
+        "stop_ids",
+        Enum.map(socket.assigns.available_stops, &id_for_option(&1))
+      )
+    else
+      _ -> affected_service
+    end
+  end
 end

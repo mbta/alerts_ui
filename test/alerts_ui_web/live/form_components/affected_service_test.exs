@@ -21,7 +21,8 @@ defmodule AlertsUiWeb.FormComponents.AffectedServiceTest do
     },
     route_type: 1,
     available_routes: [],
-    available_stops: []
+    available_stops: [],
+    alert_data: %{}
   }
 
   describe "component" do
