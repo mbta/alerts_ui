@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.FormComponents.EffectsForRouteTypes do
+defmodule AlertsUIWeb.FormComponents.DataHelpers.EffectsForRouteTypes do
   @moduledoc """
   associates route types with their subset of effects
   """
@@ -7,15 +7,15 @@ defmodule AlertsUIWeb.FormComponents.EffectsForRouteTypes do
   @doc """
   Returns lists of effect names
   ## Examples
-      iex> is_list(AlertsUIWeb.FormComponents.EffectsForRouteTypes.list_effects(nil))
+      iex> is_list(AlertsUIWeb.FormComponents.DataHelpers.EffectsForRouteTypes.list_effects(nil))
       true
-      iex> is_list(AlertsUIWeb.FormComponents.EffectsForRouteTypes.list_effects("Subway"))
+      iex> is_list(AlertsUIWeb.FormComponents.DataHelpers.EffectsForRouteTypes.list_effects("Subway"))
       true
-      iex> is_list(AlertsUIWeb.FormComponents.EffectsForRouteTypes.list_effects("Commuter Rail"))
+      iex> is_list(AlertsUIWeb.FormComponents.DataHelpers.EffectsForRouteTypes.list_effects("Commuter Rail"))
       true
-      iex> is_list(AlertsUIWeb.FormComponents.EffectsForRouteTypes.list_effects("Bus"))
+      iex> is_list(AlertsUIWeb.FormComponents.DataHelpers.EffectsForRouteTypes.list_effects("Bus"))
       true
-      iex> is_list(AlertsUIWeb.FormComponents.EffectsForRouteTypes.list_effects("Ferry"))
+      iex> is_list(AlertsUIWeb.FormComponents.DataHelpers.EffectsForRouteTypes.list_effects("Ferry"))
       true
   """
   def list_effects(nil), do: Effect.effect_names()

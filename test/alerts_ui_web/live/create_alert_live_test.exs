@@ -7,6 +7,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
   import Mock
   import Test.Support.Helpers
   alias AlertsUIWeb.FormComponents.{AffectedService, AlertDetails, RouteTypeAndEffect}
+
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
 

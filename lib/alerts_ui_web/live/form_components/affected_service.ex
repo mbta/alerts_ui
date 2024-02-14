@@ -33,7 +33,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   @impl true
   def update(%{alert_data: alert_data} = assigns, socket) do
     route_type = Map.get(alert_data, :route_type)
-
+    IO.inspect(alert_data, label: :service)
     if route_type do
       route_types = all_route_types(route_type)
       send(self(), {:fetch_available_routes, route_types})
