@@ -6,17 +6,20 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   use AlertsUI.Schema
   import Ecto.Changeset
 
+  alias AlertsUIWeb.DateTimeHelpers
   alias MBTAV3API.Routes.Route
+  alias MBTAV3API.Schedules.{Schedule, Trip}
   alias MBTAV3API.Stops.Stop
 
   @primary_key false
   embedded_schema do
     field :route_ids, {:array, :string}
     field :direction, :string
+    field :trip_ids, {:array, :string}
     field :stop_ids, {:array, :string}
   end
 
-  @fields ~w[route_ids direction stop_ids]a
+  @fields ~w[route_ids direction trip_ids stop_ids]a
 
   @impl true
   def mount(socket) do
@@ -41,7 +44,17 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   def handle_event("validate", %{"affected_service" => affected_service}, socket) do
     affected_service =
-      affected_service |> populate_default_direction() |> populate_default_stops(socket)
+      affected_service
+      |> populate_default_direction()
+      |> populate_default_stops(socket)
+
+    if show_trips_input?(socket.assigns),
+      do:
+        send(
+          self(),
+          {:fetch_available_schedules, Map.get(affected_service, "route_ids", []),
+           affected_service["direction"]}
+        )
 
     send(
       self(),
@@ -78,12 +91,19 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   def render(assigns) do
     route_id_options = formatted_select_options(assigns.available_routes)
     direction_options = formatted_direction_options(assigns.form[:route_ids].value)
+
+    trip_id_options =
+      assigns.available_schedules
+      |> Enum.group_by(&name_for_option(&1.route))
+      |> formatted_trip_options()
+
     stop_id_options = formatted_select_options(assigns.available_stops)
 
     assigns =
       assign(assigns,
         route_id_options: route_id_options,
         direction_options: direction_options,
+        trip_id_options: trip_id_options,
         stop_id_options: stop_id_options
       )
 
@@ -114,6 +134,17 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             field={@form[:direction]}
             options={@direction_options}
           />
+
+          <%= if show_trips_input?(assigns) do %>
+            <.input
+              type="select"
+              label="Trip(s)"
+              field={@form[:trip_ids]}
+              options={@trip_id_options}
+              prompt={if Map.has_key?(assigns.form.params, "route_ids"), do: "All Trips", else: nil}
+              multiple={true}
+            />
+          <% end %>
 
           <.input
             type="select"
@@ -146,6 +177,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   defp populate_default_direction(affected_service), do: affected_service
 
+  # Show trips input for Commuter Rail or Ferry
+  @spec show_trips_input?(map()) :: boolean()
+  defp show_trips_input?(%{route_type: route_type}), do: Enum.member?([2, 4], route_type)
+
   @spec formatted_select_options([Route.t() | Stop.t()]) :: keyword(String.t())
   defp formatted_select_options(objects) do
     objects
@@ -153,12 +188,13 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     |> Enum.map(fn object -> {name_for_option(object), id_for_option(object)} end)
   end
 
-  @spec sort_order(Stop.t() | Route.t()) :: non_neg_integer() | nil
+  @spec sort_order(Stop.t() | Route.t() | Schedule.t()) :: non_neg_integer() | nil
   # keep original order from API
   defp sort_order(%Stop{}), do: nil
+  defp sort_order(%Schedule{}), do: nil
   defp sort_order(%Route{sort_order: sort_order}), do: sort_order
 
-  @spec name_for_option(Stop.t() | Route.t()) :: String.t()
+  @spec name_for_option(Stop.t() | Route.t() | Schedule.t()) :: String.t()
   defp name_for_option(%Stop{name: name}), do: name
 
   defp name_for_option(%Route{name: empty_name, long_name: long_name})
@@ -167,9 +203,32 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   defp name_for_option(%Route{name: name}), do: name
 
-  @spec id_for_option(Stop.t() | Route.t()) :: String.t()
+  defp name_for_option(%Schedule{
+         trip: %Trip{name: trip_name},
+         stop: %Stop{name: stop_name},
+         departure_time: departure_time
+       }) do
+    "#{trip_name} (#{DateTimeHelpers.friendly_time(departure_time)} from #{stop_name})"
+  end
+
+  @spec id_for_option(Stop.t() | Route.t() | Schedule.t()) :: String.t()
   def id_for_option(%Stop{id: id}), do: id
   def id_for_option(%Route{id: id}), do: id
+  def id_for_option(%Schedule{trip: %Trip{id: id}}), do: id
+
+  @spec formatted_trip_options(%{String.t() => [Schedule.t()]}) :: keyword(String.t())
+  defp formatted_trip_options(schedules_by_route_name) do
+    if schedules_by_route_name |> Map.keys() |> length() <= 1 do
+      schedules_by_route_name
+      |> Map.values()
+      |> List.flatten()
+      |> formatted_select_options()
+    else
+      Enum.reduce(schedules_by_route_name, [], fn {route_name, schedules}, acc ->
+        acc ++ [{route_name, formatted_select_options(schedules)}]
+      end)
+    end
+  end
 
   @spec formatted_direction_options([String.t()] | nil) :: keyword(String.t())
   defp formatted_direction_options([_ | _]) do

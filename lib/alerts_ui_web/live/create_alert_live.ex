@@ -33,6 +33,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
   }
 
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
+  alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
+  alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
 
@@ -62,6 +64,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
         steps: @steps,
         alert_data: %{},
         available_routes: [],
+        available_schedules: [],
         available_stops: []
       })
 
@@ -81,6 +84,15 @@ defmodule AlertsUIWeb.CreateAlertLive do
   def handle_info({:fetch_available_routes, route_types}, socket) do
     available_routes = RoutesRepo.by_type(route_types)
     {:noreply, assign(socket, available_routes: available_routes)}
+  end
+
+  def handle_info({:fetch_available_schedules, route_ids, direction}, socket) do
+    directions = directions_from_selection(direction)
+    opts = direction_option([stop_sequences: :first], directions)
+
+    available_schedules = SchedulesRepo.by_route_ids(route_ids, opts)
+
+    {:noreply, assign(socket, available_schedules: available_schedules)}
   end
 
   def handle_info({:fetch_available_stops, direction, route_ids}, socket) do
@@ -152,6 +164,19 @@ defmodule AlertsUIWeb.CreateAlertLive do
         {:noreply, socket}
     end
   end
+
+  @spec directions_from_selection(String.t() | nil) :: [Trip.direction_id_t()]
+  # Both directions
+  defp directions_from_selection(""), do: [0, 1]
+  defp directions_from_selection("0"), do: [0]
+  defp directions_from_selection("1"), do: [1]
+  defp directions_from_selection(_), do: []
+
+  @spec direction_option(keyword(), [Trip.direction_id_t()]) :: keyword()
+  defp direction_option(opts, [single_direction_id | []]),
+    do: put_in(opts[:direction_id], single_direction_id)
+
+  defp direction_option(opts, _both_directions), do: opts
 
   defp format_errors(errors) do
     Enum.map_join(errors, "; ", fn {title, values} ->
