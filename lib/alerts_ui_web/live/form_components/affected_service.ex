@@ -7,6 +7,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   import Ecto.Changeset
 
   alias AlertsUIWeb.DateTimeHelpers
+  alias AlertsUIWeb.FormComponents.DataHelpers.ServiceEffectCombinations
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.{Schedule, Trip}
   alias MBTAV3API.Stops.Stop
@@ -25,7 +26,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   def mount(socket) do
     form = %__MODULE__{} |> changeset() |> to_form()
 
-    socket = socket |> assign(%{form: form})
+    socket = socket |> assign(%{form: form, combination: nil})
 
     {:ok, socket}
   end
@@ -33,12 +34,15 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   @impl true
   def update(%{alert_data: alert_data} = assigns, socket) do
     route_type = Map.get(alert_data, :route_type)
-    IO.inspect(alert_data, label: :service)
+    effect_name = Map.get(alert_data, :effect_name)
+
     if route_type do
       route_types = all_route_types(route_type)
       send(self(), {:fetch_available_routes, route_types})
     end
 
+    combination = ServiceEffectCombinations.get_combination(route_type, effect_name)
+    assigns = Map.put(assigns, :combination, combination)
     {:ok, assign(socket, assigns)}
   end
 
@@ -128,12 +132,15 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             multiple={true}
           />
 
-          <.input
-            type="select"
-            label="Direction"
-            field={@form[:direction]}
-            options={@direction_options}
-          />
+          <%= if show_directions_input?(assigns) do %>
+            <.input
+              type="select"
+              label="Direction"
+              field={@form[:direction]}
+              options={@direction_options}
+              disabled={disable_input?(@form[:route_ids].value)}
+            />
+          <% end %>
 
           <%= if show_trips_input?(assigns) do %>
             <.input
@@ -142,24 +149,45 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
               field={@form[:trip_ids]}
               options={@trip_id_options}
               prompt={if Map.has_key?(assigns.form.params, "route_ids"), do: "All Trips", else: nil}
-              multiple={true}
             />
           <% end %>
 
-          <.input
-            type="select"
-            label="Stop(s)"
-            field={@form[:stop_ids]}
-            options={@stop_id_options}
-            prompt={if Map.has_key?(assigns.form.params, "route_ids"), do: "All Stops", else: nil}
-            multiple={true}
-          />
+          <%= if show_stops_input?(assigns) do %>
+            <.input
+              type="select"
+              label="Stop(s)"
+              field={@form[:stop_ids]}
+              options={@stop_id_options}
+              prompt={if Map.has_key?(assigns.form.params, "route_ids"), do: "All Stops", else: nil}
+              multiple={true}
+              disabled={disable_input?(@form[:route_ids].value)}
+            />
+          <% end %>
         </fieldset>
       </.form>
       <hr />
     </div>
     """
   end
+
+  # Show trips input for Commuter Rail or Ferry
+  @spec show_trips_input?(map()) :: boolean()
+  defp show_trips_input?(%{combination: combination}) do
+    combination in [:RDT, :RDTS]
+  end
+
+  @spec show_stops_input?(map()) :: boolean()
+  defp show_stops_input?(%{combination: combination}) do
+    combination in [:RDS, :RDTS]
+  end
+
+  @spec show_directions_input?(map()) :: boolean()
+  defp show_directions_input?(%{combination: combination}) do
+    combination in [:RDS, :RDTS, :RDS, :RDT]
+  end
+
+  @spec disable_input?(list() | nil) :: boolean()
+  defp disable_input?(route_ids), do: !is_nil(route_ids) and length(route_ids) > 1
 
   # We lump subway together in the interface, so when asked for either light or
   # heavy rail include both.
@@ -176,10 +204,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     do: Map.put_new(affected_service, "direction", "")
 
   defp populate_default_direction(affected_service), do: affected_service
-
-  # Show trips input for Commuter Rail or Ferry
-  @spec show_trips_input?(map()) :: boolean()
-  defp show_trips_input?(%{route_type: route_type}), do: Enum.member?([2, 4], route_type)
 
   @spec formatted_select_options([Route.t() | Stop.t()]) :: keyword(String.t())
   defp formatted_select_options(objects) do
@@ -242,7 +266,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   defp formatted_direction_options(_), do: []
 
   defp populate_default_stops(affected_service, socket) do
-    with true <- Map.get(affected_service, "stop_ids", nil) in [[""], []],
+    with true <-
+           Map.get(affected_service, "stop_ids", nil) in [[""], []] or
+             disable_input?(Map.get(affected_service, "route_ids", [])),
          false <- Enum.empty?(Map.get(affected_service, "route_ids", [])) do
       Map.put(
         affected_service,

@@ -34,7 +34,11 @@ defmodule AlertsUiWeb.FormComponents.AffectedServiceTest do
 
     test "direction options are only populated once a route is chosen" do
       with_mock(StopsRepo, by_route: fn _route, _direction -> [] end) do
-        {:ok, view, _html} = live_isolated_component(AffectedService, @assigns)
+        {:ok, view, _html} =
+          live_isolated_component(AffectedService, %{
+            @assigns
+            | alert_data: %{route_type: 3, effect_name: "Delay"}
+          })
 
         refute view
                |> element("select#affected_service_direction")
@@ -52,28 +56,34 @@ defmodule AlertsUiWeb.FormComponents.AffectedServiceTest do
 
     test "trip select is only shown for commuter rail and ferry" do
       {:ok, cr_view, _html} =
-        live_isolated_component(AffectedService, %{@assigns | route_type: 2})
+        live_isolated_component(AffectedService, %{
+          @assigns
+          | alert_data: %{route_type: 2, effect_name: "Delay"}
+        })
 
       assert cr_view
              |> element("select#affected_service_trip_ids")
              |> has_element?()
 
       {:ok, ferry_view, _html} =
-        live_isolated_component(AffectedService, %{@assigns | route_type: 4})
+        live_isolated_component(AffectedService, %{
+          @assigns
+          | alert_data: %{route_type: 4, effect_name: "Delay"}
+        })
 
       assert ferry_view
              |> element("select#affected_service_trip_ids")
              |> has_element?()
 
       {:ok, subway_view, _html} =
-        live_isolated_component(AffectedService, %{@assigns | route_type: 1})
+        live_isolated_component(AffectedService, %{@assigns | alert_data: %{route_type: 1}})
 
       refute subway_view
              |> element("select#affected_service_trip_ids")
              |> has_element?()
 
       {:ok, bus_view, _html} =
-        live_isolated_component(AffectedService, %{@assigns | route_type: 3})
+        live_isolated_component(AffectedService, %{@assigns | alert_data: %{route_type: 3}})
 
       refute bus_view
              |> element("select#affected_service_trip_ids")
@@ -82,7 +92,11 @@ defmodule AlertsUiWeb.FormComponents.AffectedServiceTest do
 
     test "trip options are only populated once a route is chosen" do
       with_mock(SchedulesRepo, by_route_ids: fn _route_ids, _opts -> [] end) do
-        {:ok, view, _html} = live_isolated_component(AffectedService, %{@assigns | route_type: 2})
+        {:ok, view, _html} =
+          live_isolated_component(AffectedService, %{
+            @assigns
+            | alert_data: %{route_type: 2, effect_name: "Delay"}
+          })
 
         refute view
                |> element("select#affected_service_trip_ids")
