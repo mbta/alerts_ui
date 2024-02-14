@@ -25,6 +25,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
   alias AlertsUIWeb.Step
 
   alias AlertsUIWeb.FormComponents.{
+    AffectedService,
     AlertDetails,
     RouteTypeAndEffect,
     SuccessfulSubmission,
@@ -106,6 +107,15 @@ defmodule AlertsUIWeb.CreateAlertLive do
         socket = put_flash(socket, :error, errors)
         {:noreply, socket}
     end
+  end
+
+  @impl true
+  def handle_info({:section_completed, changeset}, socket) do
+    assigns = %{
+      alert_data: Map.merge(socket.assigns.alert_data, changeset |> Map.from_struct())
+    }
+
+    {:noreply, assign(socket, assigns)}
   end
 
   @impl true

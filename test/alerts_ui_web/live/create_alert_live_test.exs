@@ -4,8 +4,11 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
   import Phoenix.LiveViewTest
   import AlertsUI.Support.Factory
   import Ecto.Changeset
+  import Mock
   import Test.Support.Helpers
-  alias AlertsUIWeb.FormComponents.{AlertDetails, RouteTypeAndEffect}
+  alias AlertsUIWeb.FormComponents.{AffectedService, AlertDetails, RouteTypeAndEffect}
+  alias MBTAV3API.Stops.Repo, as: StopsRepo
+  alias MBTAV3API.Stops.Stop
 
   describe "create alerts page" do
     @tag :logged_in_user
@@ -40,8 +43,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
       changeset =
         Ecto.Changeset.change(%AlertDetails{
           header_text: "cool",
-          description_text: "bean",
-          route_ids: ["0"]
+          description_text: "bean"
         })
 
       send(view.pid, {:create_alert, changeset})
@@ -63,18 +65,70 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
       second_rendered_view = render(view)
       assert second_rendered_view =~ ~s(id="details_view")
 
+      # Submit service section
+      service_changeset =
+        Ecto.Changeset.change(%AffectedService{
+          route_ids: ["1", "2"]
+        })
+
+      send(view.pid, {:section_completed, service_changeset})
+
       # Submit the second part
-      changeset =
+      details_changeset =
         Ecto.Changeset.change(%AlertDetails{
-          route_ids: ["Red", "Orange"],
           header_text: "Test header",
           description_text: "Test description"
         })
 
-      send(view.pid, {:create_alert, changeset})
+      send(view.pid, {:create_alert, details_changeset})
 
       success_rendered_view = render(view)
       assert success_rendered_view =~ ~s(id="success_view")
+    end
+
+    @tag :logged_in_user
+    test "clicking on timeline moves view back", %{conn: conn} do
+      insert(:alert, alert_id: "1")
+      {:ok, view, _html} = live(conn, "/alerts/new")
+
+      changeset =
+        Ecto.Changeset.change(%RouteTypeAndEffect{route_type: "3", effect_name: "Detour"})
+
+      send(view.pid, {:step_completed, changeset})
+
+      clicked_view =
+        view
+        |> element("#route_type_and_effect")
+        |> render_click()
+
+      assert clicked_view =~ ~s(class="min-w-full flex flex-col" id="route_view")
+      refute clicked_view =~ ~s(class="min-w-full flex flex-col" id="details_view")
+    end
+
+    @tag :logged_in_user
+    test "displays stop names when route selected", %{conn: conn} do
+      stops = [%Stop{id: "1", name: "cool stop name"}]
+
+      with_mock(StopsRepo, by_route: fn _route, _direction -> stops end) do
+        conn = log_in_user(conn)
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        changeset =
+          Ecto.Changeset.change(%RouteTypeAndEffect{route_type: "3", effect_name: "Detour"})
+
+        send(view.pid, {:step_completed, changeset})
+        send(view.pid, {:fetch_available_routes, ["3"]})
+        send(view.pid, {:fetch_available_stops, 0, ["12"]})
+
+        view
+        |> element("#service_form")
+        |> render_change(%{
+          "route_ids" => ["1", "2"],
+          "directions" => [0]
+        })
+
+        assert render(view) =~ "cool stop name"
+      end
     end
 
     @tag :logged_in_user
