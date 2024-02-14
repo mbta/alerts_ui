@@ -39,6 +39,23 @@ defmodule AlertsUIWeb.DateTimeHelpers do
   end
 
   @doc """
+  Return a human-friendly time string relative to "now".
+
+  iex> friendly_time(~U[2022-01-07 14:01:00.00Z])
+  "9:01 AM"
+  iex> friendly_time(nil)
+  ""
+  """
+  @spec friendly_time(DateTime.t() | nil) :: String.t()
+  def friendly_time(nil), do: ""
+
+  def friendly_time(%DateTime{} = dt) do
+    dt
+    |> DateTime.shift_zone!("America/New_York")
+    |> Calendar.strftime("%-I:%M %p")
+  end
+
+  @doc """
   Return a human-friendly time duration string. Display in hours, rounded down,
   if greater than 1 hour, otherwise in minutes rounded down.
 
