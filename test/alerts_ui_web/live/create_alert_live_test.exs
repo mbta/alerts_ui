@@ -130,10 +130,8 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         |> element("#service_form")
         |> render_change(%{
           "route_ids" => ["1"],
-          "directions" => [0]
-        })
-
-        assert render(view) =~ "cool stop name"
+          "directions" => "0"
+        }) =~ "cool stop name"
       end
     end
 

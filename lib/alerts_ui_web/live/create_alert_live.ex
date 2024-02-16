@@ -36,7 +36,6 @@ defmodule AlertsUIWeb.CreateAlertLive do
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
   alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Repo, as: StopsRepo
-  alias MBTAV3API.Stops.Stop
 
   @steps [
     %Step{
@@ -96,8 +95,24 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   def handle_info({:fetch_available_stops, direction, route_ids}, socket) do
-    available_stops = available_stops(direction, route_ids)
+    available_stops = available_stops(directions_from_selection(direction), route_ids)
     {:noreply, assign(socket, available_stops: available_stops)}
+  end
+
+  def handle_info({:fetch_stops_by_route_type, route_type}, socket) do
+    available_stops = StopsRepo.by_route_type(route_type) |> Enum.sort_by(& &1.name)
+    {:noreply, assign(socket, available_stops: available_stops)}
+  end
+
+  def handle_info({:fetch_routes_by_stop, stop_ids, route_type}, socket) do
+    available_routes = Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1))
+
+    available_routes =
+      if route_type == 3,
+        do: Enum.filter(available_routes, &(&1.type == 3)),
+        else: available_routes
+
+    {:noreply, assign(socket, available_routes: available_routes)}
   end
 
   def handle_info({:save_as_draft, changeset}, socket) do
@@ -167,10 +182,10 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   @spec directions_from_selection(String.t() | nil) :: [Trip.direction_id_t()]
   # Both directions
-  defp directions_from_selection(""), do: [0, 1]
-  defp directions_from_selection("0"), do: [0]
-  defp directions_from_selection("1"), do: [1]
-  defp directions_from_selection(_), do: []
+  def directions_from_selection("default"), do: [0, 1]
+  def directions_from_selection("0"), do: [0]
+  def directions_from_selection("1"), do: [1]
+  def directions_from_selection(_), do: []
 
   @spec direction_option(keyword(), [Trip.direction_id_t()]) :: keyword()
   defp direction_option(opts, [single_direction_id | []]),
@@ -202,20 +217,12 @@ defmodule AlertsUIWeb.CreateAlertLive do
   @spec route_type(map()) :: 0..4 | nil
   defp route_type(alert_data), do: Map.get(alert_data, :route_type)
 
-  @spec available_stops(String.t(), [String.t()]) :: [Stop.t()]
   defp available_stops([], _route_ids), do: []
 
-  defp available_stops("", route_ids) do
+  defp available_stops(direction_array, route_ids) do
     route_ids
     |> Enum.flat_map(fn route ->
-      Enum.flat_map([0, 1], &StopsRepo.by_route(route, &1))
-    end)
-  end
-
-  defp available_stops(direction, route_ids) do
-    route_ids
-    |> Enum.flat_map(fn route ->
-      StopsRepo.by_route(route, direction)
+      Enum.flat_map(direction_array, &StopsRepo.by_route(route, &1))
     end)
   end
 

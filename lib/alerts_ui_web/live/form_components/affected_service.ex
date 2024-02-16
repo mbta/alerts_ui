@@ -35,22 +35,29 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   def update(%{alert_data: alert_data} = assigns, socket) do
     route_type = Map.get(alert_data, :route_type)
     effect_name = Map.get(alert_data, :effect_name)
+    combination = ServiceEffectCombinations.get_combination(route_type, effect_name)
 
-    if route_type do
+    # |> IO.inspect(label: :stops)
+    if combination === :SR, do: get_stops_by_route_type(route_type)
+
+    if combination !== :SR and route_type do
       route_types = all_route_types(route_type)
       send(self(), {:fetch_available_routes, route_types})
     end
 
-    combination = ServiceEffectCombinations.get_combination(route_type, effect_name)
     assigns = Map.put(assigns, :combination, combination)
     {:ok, assign(socket, assigns)}
   end
 
   def handle_event("validate", %{"affected_service" => affected_service}, socket) do
     affected_service =
-      affected_service
-      |> populate_default_direction()
-      |> populate_default_stops(socket)
+      if socket.assigns.combination !== :SR do
+        affected_service
+        |> Map.put_new("direction", "default")
+        |> populate_default_stops(socket)
+      else
+        affected_service
+      end
 
     if show_trips_input?(socket.assigns),
       do:
@@ -60,26 +67,31 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
            affected_service["direction"]}
         )
 
-    send(
-      self(),
-      {:fetch_available_stops, affected_service["direction"],
-       Map.get(affected_service, "route_ids", [])}
-    )
+    if socket.assigns.combination !== :SR, do: get_stops_by_route_ids(affected_service)
+
+    if socket.assigns.combination === :SR,
+      do:
+        get_routes_by_stop_ids(
+          Map.get(affected_service, "stop_ids", []),
+          socket.assigns.alert_data.route_type
+        )
 
     changeset =
       %__MODULE__{}
       |> changeset(affected_service, socket.assigns.combination)
-      |> apply_action(:insert)
-      |> case do
-        {:ok, changeset} ->
-          send(self(), {:section_completed, changeset})
-          changeset
 
-        {:error, changeset} ->
-          changeset
-      end
+    changeset
+    |> apply_action(:insert)
+    |> case do
+      {:ok, changeset} ->
+        send(self(), {:section_completed, changeset})
+        changeset
 
-    {:noreply, assign(socket, %{form: to_form(changeset)})}
+      {:error, changeset} ->
+        changeset
+    end
+
+    {:noreply, assign(socket, %{form: to_form(changeset |> Map.put(:action, :validate))})}
   end
 
   @impl true
@@ -126,13 +138,20 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         id="service_form"
       >
         <fieldset class="flex flex-row gap-4">
-          <.input
-            type="select"
-            label="Route(s)"
-            field={@form[:route_ids]}
-            options={@route_id_options}
-            multiple={true}
-          />
+          <%= if show_routes_input?(assigns) do %>
+            <.input
+              type="select"
+              label="Route(s)"
+              field={@form[:route_ids]}
+              options={@route_id_options}
+              multiple={true}
+              prompt={
+                if Map.has_key?(@form.params, "stop_ids") and assigns.combination == :SR,
+                  do: "All Routes",
+                  else: nil
+              }
+            />
+          <% end %>
 
           <%= if show_directions_input?(assigns) do %>
             <.input
@@ -141,6 +160,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
               field={@form[:direction]}
               options={@direction_options}
               disabled={disable_input?(@form[:route_ids].value)}
+              prompt={if Map.has_key?(@form.params, "route_ids"), do: "Both Directions", else: nil}
             />
           <% end %>
 
@@ -150,7 +170,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
               label="Trip(s)"
               field={@form[:trip_ids]}
               options={@trip_id_options}
-              prompt={if Map.has_key?(assigns.form.params, "route_ids"), do: "All Trips", else: nil}
+              prompt={if Map.has_key?(@form.params, "route_ids"), do: "All Trips", else: nil}
             />
           <% end %>
 
@@ -160,9 +180,14 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
               label="Stop(s)"
               field={@form[:stop_ids]}
               options={@stop_id_options}
-              prompt={if Map.has_key?(assigns.form.params, "route_ids"), do: "All Stops", else: nil}
+              prompt={
+                if Map.has_key?(@form.params, "route_ids") and assigns.combination !== :SR,
+                  do: "All Stops",
+                  else: nil
+              }
               multiple={true}
               disabled={disable_input?(@form[:route_ids].value)}
+              class={if assigns.combination == :SR, do: "order-first", else: ""}
             />
           <% end %>
         </fieldset>
@@ -172,15 +197,43 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     """
   end
 
-  # Show trips input for Commuter Rail or Ferry
+  def get_stops_by_route_type(route_type) do
+    send(
+      self(),
+      {:fetch_stops_by_route_type, route_type}
+    )
+  end
+
+  def get_stops_by_route_ids(affected_service) do
+    send(
+      self(),
+      {:fetch_available_stops, affected_service["direction"],
+       Map.get(affected_service, "route_ids", [])}
+    )
+  end
+
+  def get_routes_by_stop_ids(nil, _route_type), do: nil
+
+  def get_routes_by_stop_ids(stop_ids, route_type) do
+    send(
+      self(),
+      {:fetch_routes_by_stop, stop_ids, route_type}
+    )
+  end
+
+  @spec show_routes_input?(map()) :: boolean()
+  defp show_routes_input?(%{combination: combination, form: form}) do
+    !(combination in [:SR] and is_nil(form[:stop_ids].value))
+  end
+
   @spec show_trips_input?(map()) :: boolean()
   defp show_trips_input?(%{combination: combination}) do
     combination in [:RDT, :RDTS]
   end
 
   @spec show_stops_input?(map()) :: boolean()
-  defp show_stops_input?(%{combination: combination}) do
-    combination in [:RDS, :RDTS]
+  defp show_stops_input?(%{combination: combination} = _assigns) do
+    combination in [:RDS, :RDTS, :SR]
   end
 
   @spec show_directions_input?(map()) :: boolean()
@@ -200,12 +253,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   defp all_route_types(3), do: [3]
   defp all_route_types(4), do: [4]
   defp all_route_types(_), do: []
-
-  @spec populate_default_direction(map()) :: map()
-  defp populate_default_direction(%{"route_ids" => [_ | _]} = affected_service),
-    do: Map.put_new(affected_service, "direction", "")
-
-  defp populate_default_direction(affected_service), do: affected_service
 
   @spec formatted_select_options([Route.t() | Stop.t()]) :: keyword(String.t())
   defp formatted_select_options(objects) do
@@ -259,7 +306,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   @spec formatted_direction_options([String.t()] | nil) :: keyword(String.t())
   defp formatted_direction_options([_ | _]) do
     [
-      "Both Directions": "",
       Outbound: "0",
       Inbound: "1"
     ]
@@ -268,17 +314,14 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   defp formatted_direction_options(_), do: []
 
   defp populate_default_stops(affected_service, socket) do
-    with true <-
-           Map.get(affected_service, "stop_ids", nil) in [[""], []] or
-             disable_input?(Map.get(affected_service, "route_ids", [])),
-         false <- Enum.empty?(Map.get(affected_service, "route_ids", [])) do
+    if length(Map.get(affected_service, "route_ids", [])) > 0 do
       Map.put(
         affected_service,
         "stop_ids",
         Enum.map(socket.assigns.available_stops, &id_for_option(&1))
       )
     else
-      _ -> affected_service
+      affected_service
     end
   end
 end
