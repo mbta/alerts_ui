@@ -6,7 +6,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   use AlertsUI.Schema
   import Ecto.Changeset
   alias AlertsUI.Models.InformedEntity
-  alias AlertsUIWeb.FormComponents.EffectsForRouteTypes
+  alias AlertsUIWeb.FormComponents.DataHelpers.EffectsForRouteTypes
 
   @route_types [
     "Subway",

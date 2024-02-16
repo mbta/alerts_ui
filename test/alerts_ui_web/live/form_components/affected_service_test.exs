@@ -34,7 +34,11 @@ defmodule AlertsUiWeb.FormComponents.AffectedServiceTest do
 
     test "direction options are only populated once a route is chosen" do
       with_mock(StopsRepo, by_route: fn _route, _direction -> [] end) do
-        {:ok, view, _html} = live_isolated_component(AffectedService, @assigns)
+        {:ok, view, _html} =
+          live_isolated_component(AffectedService, %{
+            @assigns
+            | alert_data: %{route_type: 3, effect_name: "Delay"}
+          })
 
         refute view
                |> element("select#affected_service_direction")
@@ -52,28 +56,34 @@ defmodule AlertsUiWeb.FormComponents.AffectedServiceTest do
 
     test "trip select is only shown for commuter rail and ferry" do
       {:ok, cr_view, _html} =
-        live_isolated_component(AffectedService, %{@assigns | route_type: 2})
+        live_isolated_component(AffectedService, %{
+          @assigns
+          | alert_data: %{route_type: 2, effect_name: "Delay"}
+        })
 
       assert cr_view
              |> element("select#affected_service_trip_ids")
              |> has_element?()
 
       {:ok, ferry_view, _html} =
-        live_isolated_component(AffectedService, %{@assigns | route_type: 4})
+        live_isolated_component(AffectedService, %{
+          @assigns
+          | alert_data: %{route_type: 4, effect_name: "Delay"}
+        })
 
       assert ferry_view
              |> element("select#affected_service_trip_ids")
              |> has_element?()
 
       {:ok, subway_view, _html} =
-        live_isolated_component(AffectedService, %{@assigns | route_type: 1})
+        live_isolated_component(AffectedService, %{@assigns | alert_data: %{route_type: 1}})
 
       refute subway_view
              |> element("select#affected_service_trip_ids")
              |> has_element?()
 
       {:ok, bus_view, _html} =
-        live_isolated_component(AffectedService, %{@assigns | route_type: 3})
+        live_isolated_component(AffectedService, %{@assigns | alert_data: %{route_type: 3}})
 
       refute bus_view
              |> element("select#affected_service_trip_ids")
@@ -82,7 +92,11 @@ defmodule AlertsUiWeb.FormComponents.AffectedServiceTest do
 
     test "trip options are only populated once a route is chosen" do
       with_mock(SchedulesRepo, by_route_ids: fn _route_ids, _opts -> [] end) do
-        {:ok, view, _html} = live_isolated_component(AffectedService, %{@assigns | route_type: 2})
+        {:ok, view, _html} =
+          live_isolated_component(AffectedService, %{
+            @assigns
+            | alert_data: %{route_type: 2, effect_name: "Delay"}
+          })
 
         refute view
                |> element("select#affected_service_trip_ids")
@@ -98,13 +112,42 @@ defmodule AlertsUiWeb.FormComponents.AffectedServiceTest do
       end
     end
 
-    test "only shows stop names once route is selected" do
+    test "only shows stop element once route is selected" do
+      with_mock(StopsRepo, by_route: fn _route, _direction -> [] end) do
+        {:ok, view, _html} =
+          live_isolated_component(AffectedService, %{
+            @assigns
+            | alert_data: %{route_type: 4, effect_name: "Shuttle"}
+          })
+
+        refute render(view) =~ "All Stops"
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "affected_service" => %{
+            "route_ids" => ["1"],
+            "directions" => [0]
+          }
+        })
+
+        assert view
+               |> render() =~ "All Stops"
+      end
+    end
+
+    test "disables stop selection if multiple routes selected" do
       stops = [%Stop{id: "1", name: "cool stop name"}]
 
       with_mock(StopsRepo, by_route: fn _route, _direction -> stops end) do
-        {:ok, view, _html} = live_isolated_component(AffectedService, @assigns)
+        {:ok, view, _html} =
+          live_isolated_component(AffectedService, %{
+            @assigns
+            | alert_data: %{route_type: 4, effect_name: "Shuttle"}
+          })
 
-        refute render(view) =~ "cool stop name"
+        refute view
+               |> render() =~ ~s(disabled="disabled")
 
         view
         |> element("form")
@@ -113,7 +156,10 @@ defmodule AlertsUiWeb.FormComponents.AffectedServiceTest do
             "route_ids" => ["1", "2"],
             "directions" => [0]
           }
-        }) =~ "cool stop name"
+        })
+
+        assert view
+               |> render() =~ ~s(disabled="disabled")
       end
     end
   end

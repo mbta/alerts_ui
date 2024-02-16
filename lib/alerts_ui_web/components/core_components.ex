@@ -368,11 +368,17 @@ defmodule AlertsUIWeb.CoreComponents do
     ~H"""
     <div phx-feedback-for={@name}>
       <.label for={@id}><%= @label %></.label>
-      <select id={@id} name={@name} class="select select-bordered" multiple={@multiple} {@rest}>
+      <select
+        id={@id}
+        name={@name}
+        class={["select select-bordered", @errors != [] && "border-rose-400 focus:border-rose-400"]}
+        multiple={@multiple}
+        {@rest}
+      >
         <option :if={@prompt} value=""><%= @prompt %></option>
         <%= Form.options_for_select(@options, @value) %>
       </select>
-      <.error :for={msg <- @errors}><%= msg %></.error>
+      <.select_error :for={msg <- @errors}><%= msg %></.select_error>
     </div>
     """
   end
@@ -484,6 +490,21 @@ defmodule AlertsUIWeb.CoreComponents do
     <label for={@for} class="label">
       <%= render_slot(@inner_block) %>
     </label>
+    """
+  end
+
+  @doc """
+  Renders an error block that works with select.
+  """
+  attr :for, :string, default: nil
+  slot :inner_block, required: true
+
+  def select_error(assigns) do
+    ~H"""
+    <p for={@for} class="mt-3 flex gap-3 text-sm leading-6 text-rose-600">
+      <.icon name="hero-exclamation-circle-mini" class="mt-0.5 h-5 w-5 flex-none" />
+      <%= render_slot(@inner_block) %>
+    </p>
     """
   end
 

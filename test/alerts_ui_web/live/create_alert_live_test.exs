@@ -7,6 +7,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
   import Mock
   import Test.Support.Helpers
   alias AlertsUIWeb.FormComponents.{AffectedService, AlertDetails, RouteTypeAndEffect}
+
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
 
@@ -31,8 +32,9 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
       assert first_rendered_view =~ ~s(class="min-w-full flex flex-col" id="route_view")
       refute first_rendered_view =~ ~s(class="min-w-full flex flex-col" id="details_view")
 
-      changeset =
-        Ecto.Changeset.change(%RouteTypeAndEffect{route_type: "3", effect_name: "Detour"})
+      {:ok, changeset} =
+        Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 3, effect_name: "Detour"})
+        |> apply_action(:insert)
 
       send(view.pid, {:step_completed, changeset})
 
@@ -40,15 +42,14 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
       refute second_rendered_view =~ ~s(class="min-w-full flex flex-col" id="route_view")
       assert second_rendered_view =~ ~s(class="min-w-full flex flex-col" id="details_view")
 
-      changeset =
-        Ecto.Changeset.change(%AlertDetails{
-          header_text: "cool",
-          description_text: "bean"
-        })
+      {:error, changeset} =
+        Ecto.Changeset.change(%AlertDetails{})
+        |> AlertDetails.changeset(%{header_text: "cool", description_text: nil})
+        |> apply_action(:insert)
 
       send(view.pid, {:create_alert, changeset})
       failure_rendered_view = render(view)
-      assert failure_rendered_view =~ "at least one field must be present"
+      assert failure_rendered_view =~ "header_text: can&#39;t be blank"
     end
 
     @tag :logged_in_user
@@ -58,27 +59,30 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
       assert first_rendered_view =~ ~s(id="route_view")
 
       # Submit the first part
-      changeset =
-        Ecto.Changeset.change(%RouteTypeAndEffect{route_type: "3", effect_name: "Detour"})
+      {:ok, changeset} =
+        Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 3, effect_name: "Detour"})
+        |> apply_action(:insert)
 
       send(view.pid, {:step_completed, changeset})
       second_rendered_view = render(view)
       assert second_rendered_view =~ ~s(id="details_view")
 
       # Submit service section
-      service_changeset =
+      {:ok, service_changeset} =
         Ecto.Changeset.change(%AffectedService{
           route_ids: ["1", "2"]
         })
+        |> apply_action(:insert)
 
       send(view.pid, {:section_completed, service_changeset})
 
       # Submit the second part
-      details_changeset =
+      {:ok, details_changeset} =
         Ecto.Changeset.change(%AlertDetails{
           header_text: "Test header",
           description_text: "Test description"
         })
+        |> apply_action(:insert)
 
       send(view.pid, {:create_alert, details_changeset})
 
@@ -91,8 +95,9 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
       insert(:alert, alert_id: "1")
       {:ok, view, _html} = live(conn, "/alerts/new")
 
-      changeset =
-        Ecto.Changeset.change(%RouteTypeAndEffect{route_type: "3", effect_name: "Detour"})
+      {:ok, changeset} =
+        Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 3, effect_name: "Detour"})
+        |> apply_action(:insert)
 
       send(view.pid, {:step_completed, changeset})
 
@@ -113,8 +118,9 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         conn = log_in_user(conn)
         {:ok, view, _html} = live(conn, "/alerts/new")
 
-        changeset =
-          Ecto.Changeset.change(%RouteTypeAndEffect{route_type: "3", effect_name: "Detour"})
+        {:ok, changeset} =
+          Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 3, effect_name: "Detour"})
+          |> apply_action(:insert)
 
         send(view.pid, {:step_completed, changeset})
         send(view.pid, {:fetch_available_routes, ["3"]})
@@ -123,7 +129,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         view
         |> element("#service_form")
         |> render_change(%{
-          "route_ids" => ["1", "2"],
+          "route_ids" => ["1"],
           "directions" => [0]
         })
 
