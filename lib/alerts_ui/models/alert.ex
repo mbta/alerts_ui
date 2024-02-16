@@ -22,6 +22,7 @@ defmodule AlertsUI.Models.Alert do
   updated_at
   alert_id
   draft
+  banner_text
   effect
   effect_detail
   cause
@@ -60,6 +61,7 @@ defmodule AlertsUI.Models.Alert do
           created_at: DateTime.t(),
           updated_at: DateTime.t(),
           alert_id: String.t(),
+          banner_text: String.t() | nil,
           effect: atom() | nil,
           effect_detail: String.t() | nil,
           cause: atom() | nil,
@@ -128,6 +130,7 @@ defmodule AlertsUI.Models.Alert do
     field :alert_id, :string
     field :effect, Ecto.Enum, values: @effect
     field :effect_detail, :string
+    field :banner_text, :string
     field :cause, Ecto.Enum, values: @cause
     field :cause_detail, :string
     field :header_text, :string

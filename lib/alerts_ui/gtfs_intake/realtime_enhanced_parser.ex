@@ -29,6 +29,7 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParser do
       effect_detail: Map.get(alert, "effect_detail"),
       cause: alert |> Map.get("cause") |> parse_string_to_atom(),
       cause_detail: Map.get(alert, "cause_detail"),
+      banner_text: alert |> Map.get("banner_text") |> parse_translated_string(),
       header_text: alert |> Map.get("header_text") |> parse_translated_string(),
       description_text: alert |> Map.get("description_text") |> parse_translated_string(),
       severity_level: alert |> Map.get("severity_level") |> parse_string_to_atom(),

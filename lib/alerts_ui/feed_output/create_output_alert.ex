@@ -19,6 +19,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
           cause_detail: Map.get(alert, :cause_detail),
           header_text: Map.get(alert, :header_text) |> build_translated_string,
           description_text: Map.get(alert, :description_text) |> build_translated_string,
+          banner_text: Map.get(alert, :banner_text) |> build_translated_string,
           severity_level: Map.get(alert, :severity_level),
           url: Map.get(alert, :url) |> build_translated_string,
           service_effect_text: Map.get(alert, :service_effect_text) |> build_translated_string,
