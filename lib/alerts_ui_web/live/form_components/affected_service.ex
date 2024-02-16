@@ -24,7 +24,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   @impl true
   def mount(socket) do
-    form = %__MODULE__{} |> changeset() |> to_form()
+    form = %__MODULE__{} |> changeset(%{}) |> to_form()
 
     socket = socket |> assign(%{form: form, combination: nil})
 
@@ -68,15 +68,16 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     changeset =
       %__MODULE__{}
-      |> changeset(affected_service)
-      |> Map.put(:action, :validate)
+      |> changeset(affected_service, socket.assigns.combination)
+      |> apply_action(:insert)
+      |> case do
+        {:ok, changeset} ->
+          send(self(), {:section_completed, changeset})
+          changeset
 
-    changeset
-    |> apply_action(:insert)
-    |> case do
-      {:ok, changeset} ->
-        send(self(), {:section_completed, changeset})
-    end
+        {:error, changeset} ->
+          changeset
+      end
 
     {:noreply, assign(socket, %{form: to_form(changeset)})}
   end
@@ -86,9 +87,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     {:noreply, socket}
   end
 
-  def changeset(changeset, params \\ %{}) do
+  def changeset(changeset, params, combination \\ nil) do
     changeset
     |> cast(params, @fields)
+    |> validate_required(ServiceEffectCombinations.required_fields(combination))
   end
 
   @impl true
