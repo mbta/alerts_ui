@@ -129,8 +129,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         view
         |> element("#service_form")
         |> render_change(%{
-          "route_ids" => ["1"],
-          "directions" => "0"
+          "affected_service" => %{"route_ids" => ["1"], "directions" => "0"}
         }) =~ "cool stop name"
       end
     end
