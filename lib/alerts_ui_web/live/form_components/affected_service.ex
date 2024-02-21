@@ -33,24 +33,15 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     route_type = Map.get(alert_data, :route_type)
     route_types = all_route_types(route_type)
     send(self(), {:fetch_available_routes, route_types})
-    verify(Map.get(socket.assigns, :affected_service), assign(socket, assigns))
     {:ok, assign(socket, assigns)}
   end
 
   @impl true
   def handle_event("validate", %{"affected_service" => affected_service}, socket) do
-    verify(affected_service, socket)
-  end
-
-  def verify(nil, socket) do
-    {:noreply, socket}
-  end
-
-  def verify(affected_service, %{assigns: %{combination: _combination}} = socket) do
     affected_service =
       affected_service
       |> Map.put_new("direction", "default")
-      |> populate_default_stops(Map.get(socket.assigns, :available_stops, []))
+      |> populate_default_stops()
 
     get_stops_by_route_ids(affected_service)
 
@@ -83,16 +74,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
      })}
   end
 
-  def verify(_, socket) do
-    {:noreply, socket}
-  end
-
   def changeset(changeset, params, combination \\ nil) do
     changeset
     |> cast(params, @fields)
     |> validate_required(ServiceEffectCombinations.required_fields(combination))
-
-    # TODO
   end
 
   @impl true
@@ -240,12 +225,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   defp all_route_types(4), do: [4]
   defp all_route_types(_), do: []
 
-  defp populate_default_stops(affected_service, available_stops) do
-    if Map.get(affected_service, "stop_ids") in [nil, [], ["default"]] do
+  defp populate_default_stops(affected_service) do
+    if Map.get(affected_service, "stop_ids") in [nil, "default"] do
       Map.put(
         affected_service,
         "stop_ids",
-        Enum.map(available_stops, &SelectFormatter.id_for_option(&1))
+        []
       )
     else
       affected_service
