@@ -148,7 +148,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         |> apply_action(:insert)
 
       send(view.pid, {:save_as_draft, changeset})
-      assert_redirect(view)
+      assert_redirect(view, "/alerts/new", 500)
     end
 
     @tag :logged_in_user

@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.FormComponents.DataHelpers.EffectsForRouteTypes do
+defmodule AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes do
   @moduledoc """
   associates route types with their subset of effects
   """

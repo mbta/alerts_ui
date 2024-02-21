@@ -28,9 +28,12 @@ defmodule AlertsUIWeb.CreateAlertLive do
     AffectedService,
     AlertDetails,
     RouteTypeAndEffect,
+    StopRouteAffectedService,
     SuccessfulSubmission,
     Timeline
   }
+
+  alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
 
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
@@ -62,6 +65,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
         progress: first_step,
         steps: @steps,
         alert_data: %{},
+        combination: nil,
         available_routes: [],
         available_schedules: [],
         available_stops: []
@@ -147,9 +151,15 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   @impl true
   def handle_info({:step_completed, changeset}, socket) do
+    alert_data = Map.merge(socket.assigns.alert_data, changeset |> Map.from_struct())
+    route_type = Map.get(alert_data, :route_type)
+    effect_name = Map.get(alert_data, :effect_name)
+    combination = ServiceEffectCombinations.get_combination(route_type, effect_name)
+
     assigns = %{
       progress: get_step_by_name(socket.assigns.progress.next),
-      alert_data: Map.merge(socket.assigns.alert_data, changeset |> Map.from_struct())
+      alert_data: alert_data,
+      combination: combination
     }
 
     {:noreply, assign(socket, assigns)}
@@ -182,10 +192,10 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   @spec directions_from_selection(String.t() | nil) :: [Trip.direction_id_t()]
   # Both directions
-  def directions_from_selection("default"), do: [0, 1]
-  def directions_from_selection("0"), do: [0]
-  def directions_from_selection("1"), do: [1]
-  def directions_from_selection(_), do: []
+  defp directions_from_selection("default"), do: [0, 1]
+  defp directions_from_selection("0"), do: [0]
+  defp directions_from_selection("1"), do: [1]
+  defp directions_from_selection(_), do: []
 
   @spec direction_option(keyword(), [Trip.direction_id_t()]) :: keyword()
   defp direction_option(opts, [single_direction_id | []]),

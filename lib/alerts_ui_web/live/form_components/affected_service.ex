@@ -6,11 +6,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   use AlertsUI.Schema
   import Ecto.Changeset
 
-  alias AlertsUIWeb.DateTimeHelpers
-  alias AlertsUIWeb.FormComponents.DataHelpers.ServiceEffectCombinations
+  alias AlertsUIWeb.FormComponents.Helpers.{SelectFormatter, ServiceEffectCombinations}
   alias MBTAV3API.Routes.Route
-  alias MBTAV3API.Schedules.{Schedule, Trip}
-  alias MBTAV3API.Stops.Stop
 
   @primary_key false
   embedded_schema do
@@ -26,7 +23,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   def mount(socket) do
     form = %__MODULE__{} |> changeset(%{}) |> to_form()
 
-    socket = socket |> assign(%{form: form, combination: nil})
+    socket = socket |> assign(%{form: form})
 
     {:ok, socket}
   end
@@ -34,30 +31,16 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   @impl true
   def update(%{alert_data: alert_data} = assigns, socket) do
     route_type = Map.get(alert_data, :route_type)
-    effect_name = Map.get(alert_data, :effect_name)
-    combination = ServiceEffectCombinations.get_combination(route_type, effect_name)
-
-    # |> IO.inspect(label: :stops)
-    if combination === :SR, do: get_stops_by_route_type(route_type)
-
-    if combination !== :SR and route_type do
-      route_types = all_route_types(route_type)
-      send(self(), {:fetch_available_routes, route_types})
-    end
-
-    assigns = Map.put(assigns, :combination, combination)
+    route_types = all_route_types(route_type)
+    send(self(), {:fetch_available_routes, route_types})
     {:ok, assign(socket, assigns)}
   end
 
   def handle_event("validate", %{"affected_service" => affected_service}, socket) do
     affected_service =
-      if socket.assigns.combination !== :SR do
-        affected_service
-        |> Map.put_new("direction", "default")
-        |> populate_default_stops(socket)
-      else
-        affected_service
-      end
+      affected_service
+      |> Map.put_new("direction", "default")
+      |> populate_default_stops(socket)
 
     if show_trips_input?(socket.assigns),
       do:
@@ -67,14 +50,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
            affected_service["direction"]}
         )
 
-    if socket.assigns.combination !== :SR, do: get_stops_by_route_ids(affected_service)
-
-    if socket.assigns.combination === :SR,
-      do:
-        get_routes_by_stop_ids(
-          Map.get(affected_service, "stop_ids", []),
-          socket.assigns.alert_data.route_type
-        )
+    get_stops_by_route_ids(affected_service)
 
     changeset =
       %__MODULE__{}
@@ -107,15 +83,17 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   @impl true
   def render(assigns) do
-    route_id_options = formatted_select_options(assigns.available_routes)
-    direction_options = formatted_direction_options(assigns.form[:route_ids].value)
+    route_id_options = SelectFormatter.formatted_select_options(assigns.available_routes)
+
+    direction_options =
+      SelectFormatter.formatted_direction_options(assigns.form[:route_ids].value)
 
     trip_id_options =
       assigns.available_schedules
-      |> Enum.group_by(&name_for_option(&1.route))
-      |> formatted_trip_options()
+      |> Enum.group_by(&SelectFormatter.name_for_option(&1.route))
+      |> SelectFormatter.formatted_trip_options()
 
-    stop_id_options = formatted_select_options(assigns.available_stops)
+    stop_id_options = SelectFormatter.formatted_select_options(assigns.available_stops)
 
     assigns =
       assign(assigns,
@@ -138,20 +116,13 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         id="service_form"
       >
         <fieldset class="flex flex-row gap-4">
-          <%= if show_routes_input?(assigns) do %>
-            <.input
-              type="select"
-              label="Route(s)"
-              field={@form[:route_ids]}
-              options={@route_id_options}
-              multiple={true}
-              prompt={
-                if Map.has_key?(@form.params, "stop_ids") and assigns.combination == :SR,
-                  do: "All Routes",
-                  else: nil
-              }
-            />
-          <% end %>
+          <.input
+            type="select"
+            label="Route(s)"
+            field={@form[:route_ids]}
+            options={@route_id_options}
+            multiple={true}
+          />
 
           <%= if show_directions_input?(assigns) do %>
             <.input
@@ -181,13 +152,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
               field={@form[:stop_ids]}
               options={@stop_id_options}
               prompt={
-                if Map.has_key?(@form.params, "route_ids") and assigns.combination !== :SR,
+                if Map.has_key?(@form.params, "route_ids"),
                   do: "All Stops",
                   else: nil
               }
               multiple={true}
               disabled={disable_input?(@form[:route_ids].value)}
-              class={if assigns.combination == :SR, do: "order-first", else: ""}
             />
           <% end %>
         </fieldset>
@@ -221,11 +191,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     )
   end
 
-  @spec show_routes_input?(map()) :: boolean()
-  defp show_routes_input?(%{combination: combination, form: form}) do
-    !(combination in [:SR] and is_nil(form[:stop_ids].value))
-  end
-
   @spec show_trips_input?(map()) :: boolean()
   defp show_trips_input?(%{combination: combination}) do
     combination in [:RDT, :RDTS]
@@ -233,7 +198,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   @spec show_stops_input?(map()) :: boolean()
   defp show_stops_input?(%{combination: combination} = _assigns) do
-    combination in [:RDS, :RDTS, :SR]
+    combination in [:RDS, :RDTS]
   end
 
   @spec show_directions_input?(map()) :: boolean()
@@ -254,71 +219,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   defp all_route_types(4), do: [4]
   defp all_route_types(_), do: []
 
-  @spec formatted_select_options([Route.t() | Stop.t()]) :: keyword(String.t())
-  defp formatted_select_options(objects) do
-    objects
-    |> Enum.sort_by(&sort_order/1)
-    |> Enum.map(fn object -> {name_for_option(object), id_for_option(object)} end)
-  end
-
-  @spec sort_order(Stop.t() | Route.t() | Schedule.t()) :: non_neg_integer() | nil
-  # keep original order from API
-  defp sort_order(%Stop{}), do: nil
-  defp sort_order(%Schedule{}), do: nil
-  defp sort_order(%Route{sort_order: sort_order}), do: sort_order
-
-  @spec name_for_option(Stop.t() | Route.t() | Schedule.t()) :: String.t()
-  defp name_for_option(%Stop{name: name}), do: name
-
-  defp name_for_option(%Route{name: empty_name, long_name: long_name})
-       when is_nil(empty_name) or empty_name == "",
-       do: long_name
-
-  defp name_for_option(%Route{name: name}), do: name
-
-  defp name_for_option(%Schedule{
-         trip: %Trip{name: trip_name},
-         stop: %Stop{name: stop_name},
-         departure_time: departure_time
-       }) do
-    "#{trip_name} (#{DateTimeHelpers.friendly_time(departure_time)} from #{stop_name})"
-  end
-
-  @spec id_for_option(Stop.t() | Route.t() | Schedule.t()) :: String.t()
-  def id_for_option(%Stop{id: id}), do: id
-  def id_for_option(%Route{id: id}), do: id
-  def id_for_option(%Schedule{trip: %Trip{id: id}}), do: id
-
-  @spec formatted_trip_options(%{String.t() => [Schedule.t()]}) :: keyword(String.t())
-  defp formatted_trip_options(schedules_by_route_name) do
-    if schedules_by_route_name |> Map.keys() |> length() <= 1 do
-      schedules_by_route_name
-      |> Map.values()
-      |> List.flatten()
-      |> formatted_select_options()
-    else
-      Enum.reduce(schedules_by_route_name, [], fn {route_name, schedules}, acc ->
-        acc ++ [{route_name, formatted_select_options(schedules)}]
-      end)
-    end
-  end
-
-  @spec formatted_direction_options([String.t()] | nil) :: keyword(String.t())
-  defp formatted_direction_options([_ | _]) do
-    [
-      Outbound: "0",
-      Inbound: "1"
-    ]
-  end
-
-  defp formatted_direction_options(_), do: []
-
   defp populate_default_stops(affected_service, socket) do
     if length(Map.get(affected_service, "route_ids", [])) > 0 do
       Map.put(
         affected_service,
         "stop_ids",
-        Enum.map(socket.assigns.available_stops, &id_for_option(&1))
+        Enum.map(socket.assigns.available_stops, &SelectFormatter.id_for_option(&1))
       )
     else
       affected_service
