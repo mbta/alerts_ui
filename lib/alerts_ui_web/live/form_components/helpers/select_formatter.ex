@@ -41,7 +41,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   @spec id_for_option(Stop.t() | Route.t() | Schedule.t()) :: String.t()
   def id_for_option(%Stop{id: id}), do: id
   def id_for_option(%Route{id: id}), do: id
-  def id_for_option(%Schedule{trip: %Trip{id: id}}), do: id
+
+  def id_for_option(%Schedule{
+        route: %Route{id: route_id},
+        trip: %Trip{id: trip_id, direction_id: direction}
+      }),
+      do: "#{route_id},#{trip_id},#{direction}"
 
   @spec formatted_trip_options(%{String.t() => [Schedule.t()]}) :: keyword(String.t())
   def formatted_trip_options(schedules_by_route_name) do

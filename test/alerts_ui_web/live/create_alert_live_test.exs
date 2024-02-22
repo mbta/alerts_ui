@@ -42,6 +42,17 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
       refute second_rendered_view =~ ~s(class="min-w-full flex flex-col" id="route_view")
       assert second_rendered_view =~ ~s(class="min-w-full flex flex-col" id="details_view")
 
+      # Submit service section
+      {:ok, service_changeset} =
+        Ecto.Changeset.change(%AffectedService{
+          route_ids: ["1", "2"],
+          direction: "default",
+          stop_ids: []
+        })
+        |> apply_action(:insert)
+
+      send(view.pid, {:section_completed, service_changeset})
+
       {:error, changeset} =
         Ecto.Changeset.change(%AlertDetails{})
         |> AlertDetails.changeset(%{header_text: "cool", description_text: nil})
@@ -70,7 +81,9 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
       # Submit service section
       {:ok, service_changeset} =
         Ecto.Changeset.change(%AffectedService{
-          route_ids: ["1", "2"]
+          route_ids: ["1", "2"],
+          direction: "default",
+          stop_ids: []
         })
         |> apply_action(:insert)
 
@@ -129,7 +142,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         view
         |> element("#service_form")
         |> render_change(%{
-          "affected_service" => %{"route_ids" => ["1"], "directions" => "0"}
+          "affected_service" => %{"route_ids" => ["1"], "directions" => "0", "stop_ids" => []}
         }) =~ "cool stop name"
       end
     end

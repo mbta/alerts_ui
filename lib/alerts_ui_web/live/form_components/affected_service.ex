@@ -42,15 +42,14 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       affected_service
       |> Map.put_new("direction", "default")
       |> populate_default_stops()
+      |> populate_default_trips()
 
     get_stops_by_route_ids(affected_service)
 
-    if show_trips_input?(socket.assigns),
-      do:
-        get_schedules_by_route_ids(
-          Map.get(affected_service, "route_ids", []),
-          affected_service["direction"]
-        )
+    get_schedules_by_route_ids(
+      Map.get(affected_service, "route_ids", []),
+      affected_service["direction"]
+    )
 
     changeset =
       %__MODULE__{}
@@ -140,6 +139,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
               label="Trip(s)"
               field={@form[:trip_ids]}
               options={@trip_id_options}
+              multiple={true}
               prompt={if Map.has_key?(@form.params, "route_ids"), do: "All Trips", else: nil}
             />
           <% end %>
@@ -210,10 +210,22 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   defp all_route_types(_), do: []
 
   defp populate_default_stops(affected_service) do
-    if Map.get(affected_service, "stop_ids") in [nil, "default"] do
+    if Map.get(affected_service, "stop_ids") in [nil, "default", ["default"]] do
       Map.put(
         affected_service,
         "stop_ids",
+        []
+      )
+    else
+      affected_service
+    end
+  end
+
+  defp populate_default_trips(affected_service) do
+    if Map.get(affected_service, "trip_ids") in [nil, "default", ["default"]] do
+      Map.put(
+        affected_service,
+        "trip_ids",
         []
       )
     else

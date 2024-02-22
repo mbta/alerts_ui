@@ -45,18 +45,21 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
     test "it properly formats trips" do
       objects = [
         %Schedule{
-          trip: %Trip{id: "202", name: "joe"},
+          trip: %Trip{id: "202", name: "joe", direction_id: 0},
           stop: %Stop{id: "2022", name: "cool"},
+          route: %Route{id: "b"},
           departure_time: ~U[2024-02-20 14:01:00.00Z]
         },
         %Schedule{
-          trip: %Trip{id: "303", name: "bob"},
+          trip: %Trip{id: "303", name: "bob", direction_id: 0},
           stop: %Stop{id: "3033", name: "bobb"},
+          route: %Route{id: "c"},
           departure_time: ~U[2024-02-21 14:01:00.00Z]
         },
         %Schedule{
-          trip: %Trip{id: "101", name: "alice"},
+          trip: %Trip{id: "101", name: "alice", direction_id: 0},
           stop: %Stop{id: "1011", name: "shmalice"},
+          route: %Route{id: "a"},
           departure_time: ~U[2024-02-22 14:01:00.00Z]
         }
       ]
@@ -64,9 +67,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
       results = SelectFormatter.formatted_select_options(objects)
 
       assert results == [
-               {"joe (9:01 AM from cool)", "202"},
-               {"bob (9:01 AM from bobb)", "303"},
-               {"alice (9:01 AM from shmalice)", "101"}
+               {"joe (9:01 AM from cool)", "b,202,0"},
+               {"bob (9:01 AM from bobb)", "c,303,0"},
+               {"alice (9:01 AM from shmalice)", "a,101,0"}
              ]
     end
   end
