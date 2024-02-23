@@ -7,6 +7,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   import Ecto.Changeset
 
   alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
+  alias MBTAV3API.Routes.Route
 
   @primary_key false
   embedded_schema do
@@ -88,7 +89,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   @impl true
   def render(assigns) do
     route_id_options =
-      SelectFormatter.formatted_select_options(assigns.available_routes)
+      formatted_stop_route_select_options(assigns.available_routes)
 
     stop_id_options = SelectFormatter.formatted_select_options(assigns.available_stops)
 
@@ -145,4 +146,16 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   defp show_routes_input?(%{form: form}) do
     !is_nil(form[:stop_ids].value)
   end
+
+  @spec formatted_stop_route_select_options([Route.t()]) :: keyword(String.t())
+  def formatted_stop_route_select_options(objects) do
+    objects
+    |> Enum.sort_by(&SelectFormatter.sort_order/1)
+    |> Enum.map(fn object ->
+      {SelectFormatter.name_for_option(object), id_for_route_with_route_type(object)}
+    end)
+  end
+
+  @spec id_for_route_with_route_type(Route.t()) :: String.t()
+  def id_for_route_with_route_type(%Route{id: id, type: type}), do: "#{id},#{type}"
 end

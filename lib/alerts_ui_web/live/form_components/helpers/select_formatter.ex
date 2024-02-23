@@ -17,9 +17,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
 
   @spec sort_order(Stop.t() | Route.t() | Schedule.t()) :: non_neg_integer() | nil
   # keep original order from API
-  defp sort_order(%Stop{}), do: nil
-  defp sort_order(%Schedule{}), do: nil
-  defp sort_order(%Route{sort_order: sort_order}), do: sort_order
+  def sort_order(%Stop{}), do: nil
+  def sort_order(%Schedule{}), do: nil
+  def sort_order(%Route{sort_order: sort_order}), do: sort_order
 
   @spec name_for_option(Stop.t() | Route.t() | Schedule.t()) :: String.t()
   def name_for_option(%Stop{name: name}), do: name
