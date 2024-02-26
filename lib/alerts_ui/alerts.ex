@@ -203,6 +203,17 @@ defmodule AlertsUI.Alerts do
     )
   end
 
+  @spec get_by_id(String.t()) :: Alert.t()
+  def get_by_id(uuid) do
+    Repo.get_by(
+      from(
+        a in Alert,
+        preload: [informed_entity: [:trip]]
+      ),
+      id: uuid
+    )
+  end
+
   @spec list_all_paginated(map()) :: {[any()], Flop.Meta.t()}
   def list_all_paginated(params) do
     opts = [for: Alert, page_size: 50]

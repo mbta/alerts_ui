@@ -9,11 +9,13 @@ defmodule AlertsUiWeb.FormComponents.SuccessfulSubmissionTest do
   alias AlertsUIWeb.FormComponents.SuccessfulSubmission
   alias AlertsUIWeb.Step
 
+  @uuid Ecto.UUID.generate()
+
   @assigns %{
     id: "details",
     progress: %Step{name: "success", previous: nil, next: nil, label: "Success"},
     show_created_alert: false,
-    alert_id: "123"
+    alert_uuid: @uuid
   }
 
   describe "component" do
@@ -36,13 +38,13 @@ defmodule AlertsUiWeb.FormComponents.SuccessfulSubmissionTest do
 
   describe "laboratory flags" do
     test "Alert info not show if show_created_alert flag is not set" do
-      insert(:alert, %{alert_id: "123", header_text: "alert header text"})
+      insert(:alert, %{id: @uuid, header_text: "alert header text"})
       {:ok, _view, html} = live_isolated_component(SuccessfulSubmission, @assigns)
       refute html =~ ~s(alert header text)
     end
 
     test "Alert info shown if show_created_alert flag is set" do
-      insert(:alert, %{alert_id: "123", header_text: "alert header text"})
+      insert(:alert, %{id: @uuid, header_text: "alert header text"})
       assigns = Map.put(@assigns, :show_created_alert, true)
       {:ok, _view, html} = live_isolated_component(SuccessfulSubmission, assigns)
 

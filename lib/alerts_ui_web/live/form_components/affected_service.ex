@@ -74,6 +74,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       {:ok, changeset} ->
         send(self(), {:section_completed, changeset})
         changeset
+
       {:error, changeset} ->
         changeset
     end
