@@ -69,7 +69,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
         combination: nil,
         available_routes: [],
         available_schedules: [],
-        available_stops: []
+        available_stops: [],
+        alert_id: nil
       })
 
     {:ok, socket}
@@ -170,10 +171,11 @@ defmodule AlertsUIWeb.CreateAlertLive do
     |> AlertBuilder.build_alert(socket.assigns.combination)
     |> Alerts.create_alert()
     |> case do
-      {:ok, _result} ->
+      {:ok, result} ->
         assigns = %{
           progress: get_step_by_name(socket.assigns.progress.next),
-          alert_data: %{}
+          alert_data: %{},
+          alert_id: result.id
         }
 
         {:noreply, assign(socket, assigns)}

@@ -11,9 +11,14 @@ defmodule AlertsUIWeb.Router do
     end
   end
 
+  pipeline :get_flags do
+    plug AlertsUIrWeb.Plug.PutFlagsInSessionPlug
+  end
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
+    plug :get_flags
     plug :fetch_live_flash
     plug :put_root_layout, html: {AlertsUIWeb.Layouts, :root}
     plug :protect_from_forgery
@@ -37,10 +42,15 @@ defmodule AlertsUIWeb.Router do
     get "/", Redirector, to: "/alerts"
 
     live_session :require_authenticated_user,
-      on_mount: [{AlertsUIWeb.UserAuth, :ensure_authenticated}] do
+      on_mount: [{AlertsUIWeb.UserAuth, :ensure_authenticated}, AlertsUIWeb.PutFlagsInAssignsHook] do
       live("/alerts", ViewAlertsLive)
       live("/alerts/new", CreateAlertLive)
     end
+  end
+
+  scope "/_flags", Laboratory do
+    pipe_through(:browser)
+    forward "/", Router
   end
 
   ## Authentication routes

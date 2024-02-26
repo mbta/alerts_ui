@@ -32,3 +32,14 @@ config :ueberauth, Ueberauth,
   providers: [
     keycloak: {Ueberauth.Strategy.FakeKeycloak, []}
   ]
+
+config :laboratory,
+  features: [
+    {:test_flag, "Cool Bean", "cool bean for test"},
+    {:show_created_alert, "Show Created Alert", "Makes created alert visible on success screen"}
+  ],
+  cookie: [
+    # one month,
+    max_age: 3600 * 24 * 30,
+    http_only: true
+  ]

@@ -10,6 +10,9 @@ defmodule AlertsUI.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
+      dialyzer: [
+        plt_add_apps: [:laboratory]
+      ],
       test_coverage: [
         ignore_modules: [
           AlertsUI.DataCase,
@@ -46,6 +49,7 @@ defmodule AlertsUI.MixProject do
   def application do
     [
       mod: {AlertsUI.Application, []},
+      included_applications: [:laboratory],
       extra_applications: [:logger, :runtime_tools, :exprotobuf]
     ]
   end
@@ -77,6 +81,7 @@ defmodule AlertsUI.MixProject do
       {:flop_phoenix, "~> 0.22"},
       {:hackney, "1.20.1"},
       {:jason, "~> 1.2"},
+      {:laboratory, github: "paulswartz/laboratory", ref: "cookie_opts"},
       {:live_isolated_component, "~> 0.8", only: :test},
       {:map_diff, "~> 1.3.4"},
       {:mbta_v3_api, git: "https://github.com/mbta/mbta_v3_api.git", branch: "mss-more-files"},

@@ -10,7 +10,9 @@ defmodule AlertsUiWeb.FormComponents.SuccessfulSubmissionTest do
 
   @assigns %{
     id: "details",
-    progress: %Step{name: "success", previous: nil, next: nil, label: "Success"}
+    progress: %Step{name: "success", previous: nil, next: nil, label: "Success"},
+    show_created_alert: true,
+    alert_id: nil
   }
 
   describe "component" do
