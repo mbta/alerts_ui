@@ -4,6 +4,7 @@ defmodule AlertsUiWeb.FormComponents.SuccessfulSubmissionTest do
 
   import LiveIsolatedComponent
   import Phoenix.LiveViewTest
+  import AlertsUI.Support.Factory
 
   alias AlertsUIWeb.FormComponents.SuccessfulSubmission
   alias AlertsUIWeb.Step
@@ -11,8 +12,8 @@ defmodule AlertsUiWeb.FormComponents.SuccessfulSubmissionTest do
   @assigns %{
     id: "details",
     progress: %Step{name: "success", previous: nil, next: nil, label: "Success"},
-    show_created_alert: true,
-    alert_id: nil
+    show_created_alert: false,
+    alert_id: "123"
   }
 
   describe "component" do
@@ -30,6 +31,22 @@ defmodule AlertsUiWeb.FormComponents.SuccessfulSubmissionTest do
       |> render_click(%{})
 
       assert_redirect(view)
+    end
+  end
+
+  describe "laboratory flags" do
+    test "Alert info not show if show_created_alert flag is not set" do
+      insert(:alert, %{alert_id: "123", header_text: "alert header text"})
+      {:ok, _view, html} = live_isolated_component(SuccessfulSubmission, @assigns)
+      refute html =~ ~s(alert header text)
+    end
+
+    test "Alert info shown if show_created_alert flag is set" do
+      insert(:alert, %{alert_id: "123", header_text: "alert header text"})
+      assigns = Map.put(@assigns, :show_created_alert, true)
+      {:ok, _view, html} = live_isolated_component(SuccessfulSubmission, assigns)
+
+      assert html =~ ~s(alert header text)
     end
   end
 end

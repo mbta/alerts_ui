@@ -175,7 +175,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
         assigns = %{
           progress: get_step_by_name(socket.assigns.progress.next),
           alert_data: %{},
-          alert_id: result.id
+          alert_id: result.alert_id
         }
 
         {:noreply, assign(socket, assigns)}

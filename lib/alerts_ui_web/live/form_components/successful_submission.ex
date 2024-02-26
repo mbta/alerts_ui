@@ -4,6 +4,7 @@ defmodule AlertsUIWeb.FormComponents.SuccessfulSubmission do
   """
   use AlertsUIWeb, :live_component
   alias AlertsUI.Alerts
+  alias AlertsUI.FeedOutput.{CreateGtfsJson, CreateOutputAlert}
 
   @impl true
   def mount(socket) do
@@ -13,10 +14,21 @@ defmodule AlertsUIWeb.FormComponents.SuccessfulSubmission do
   @impl true
   def update(assigns, socket) do
     alert_id = Map.get(assigns, :alert_id, nil)
-    assigns = if alert_id do
-      Map.put(assigns, :alert, Alerts.get_by_alert_id(alert_id))
-    else Map.put(assigns, :alert, "")
-    end
+
+    assigns =
+      if !is_nil(alert_id) and assigns.show_created_alert == true do
+        alert_json =
+          alert_id
+          |> Alerts.get_by_alert_id()
+          |> CreateOutputAlert.build_alert()
+          |> List.wrap()
+          |> CreateGtfsJson.output_enhanced_json()
+
+        Map.put(assigns, :alert, alert_json)
+      else
+        Map.put(assigns, :alert, "")
+      end
+
     {:ok, assign(socket, assigns)}
   end
 
@@ -41,9 +53,11 @@ defmodule AlertsUIWeb.FormComponents.SuccessfulSubmission do
       >
         ok!
       </.button>
-    <pre :if={@show_created_alert}>
-      test
-    </pre>
+      <p :if={@show_created_alert}>
+        Alert Created: <pre>
+        <%= @alert %>
+      </pre>
+      </p>
     </div>
     """
   end
