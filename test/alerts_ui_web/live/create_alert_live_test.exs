@@ -129,11 +129,8 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         view
         |> element("#service_form")
         |> render_change(%{
-          "route_ids" => ["1"],
-          "directions" => [0]
-        })
-
-        assert render(view) =~ "cool stop name"
+          "affected_service" => %{"route_ids" => ["1"], "directions" => "0"}
+        }) =~ "cool stop name"
       end
     end
 
@@ -150,7 +147,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         |> apply_action(:insert)
 
       send(view.pid, {:save_as_draft, changeset})
-      assert_redirect(view)
+      assert_redirect(view, "/alerts/new", 500)
     end
 
     @tag :logged_in_user

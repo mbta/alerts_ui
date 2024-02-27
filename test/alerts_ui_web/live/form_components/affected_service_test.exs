@@ -24,7 +24,8 @@ defmodule AlertsUiWeb.FormComponents.AffectedServiceTest do
     available_routes: [],
     available_schedules: [],
     available_stops: [],
-    alert_data: %{}
+    alert_data: %{},
+    combination: :RDTS
   }
 
   describe "component" do
@@ -76,14 +77,20 @@ defmodule AlertsUiWeb.FormComponents.AffectedServiceTest do
              |> has_element?()
 
       {:ok, subway_view, _html} =
-        live_isolated_component(AffectedService, %{@assigns | alert_data: %{route_type: 1}})
+        live_isolated_component(
+          AffectedService,
+          @assigns |> Map.merge(%{alert_data: %{route_type: 1}, combination: :RDS})
+        )
 
       refute subway_view
              |> element("select#affected_service_trip_ids")
              |> has_element?()
 
       {:ok, bus_view, _html} =
-        live_isolated_component(AffectedService, %{@assigns | alert_data: %{route_type: 3}})
+        live_isolated_component(
+          AffectedService,
+          @assigns |> Map.merge(%{alert_data: %{route_type: 3}, combination: :RDS})
+        )
 
       refute bus_view
              |> element("select#affected_service_trip_ids")

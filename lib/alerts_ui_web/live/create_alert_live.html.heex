@@ -12,10 +12,11 @@
       <.live_component module={RouteTypeAndEffect} id="route_type" progress={@progress} />
 
       <.live_component
-        module={AffectedService}
+        module={if @combination === :SR, do: StopRouteAffectedService, else: AffectedService}
         id="details"
         progress={@progress}
         alert_data={@alert_data}
+        combination={@combination}
         route_type={route_type(@alert_data)}
         available_routes={@available_routes}
         available_schedules={@available_schedules}
