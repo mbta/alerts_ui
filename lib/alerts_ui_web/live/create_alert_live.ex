@@ -39,6 +39,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
   alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Repo, as: StopsRepo
+  alias MBTAV3API.Stops.Stop
 
   @steps [
     %Step{
@@ -109,12 +110,10 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   def handle_info({:fetch_routes_by_stop, stop_ids, route_type}, socket) do
-    available_routes = Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1))
-
     available_routes =
       if route_type == 3,
-        do: Enum.filter(available_routes, &(&1.type == 3)),
-        else: available_routes
+        do: Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1, type: 3)),
+        else: Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1))
 
     {:noreply, assign(socket, available_routes: available_routes)}
   end
@@ -227,6 +226,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
   @spec route_type(map()) :: 0..4 | nil
   defp route_type(alert_data), do: Map.get(alert_data, :route_type)
 
+  @spec available_stops([String.t()], [String.t()]) :: [Stop.t()]
   defp available_stops([], _route_ids), do: []
 
   defp available_stops(direction_array, route_ids) do

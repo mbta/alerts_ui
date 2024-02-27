@@ -166,27 +166,11 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     """
   end
 
-  def get_stops_by_route_type(route_type) do
-    send(
-      self(),
-      {:fetch_stops_by_route_type, route_type}
-    )
-  end
-
   def get_stops_by_route_ids(affected_service) do
     send(
       self(),
       {:fetch_available_stops, affected_service["direction"],
        Map.get(affected_service, "route_ids", [])}
-    )
-  end
-
-  def get_routes_by_stop_ids(nil, _route_type), do: nil
-
-  def get_routes_by_stop_ids(stop_ids, route_type) do
-    send(
-      self(),
-      {:fetch_routes_by_stop, stop_ids, route_type}
     )
   end
 
