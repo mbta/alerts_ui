@@ -212,7 +212,12 @@ defmodule AlertsUI.AlertBuilderTest do
         header_text: "hello",
         effect_name: "Delay",
         route_ids: ["57"],
-        trip_ids: ["57,123,0", "57,345,0", "57,456,0"]
+        trip_ids: ["123", "345", "456"],
+        trip_information_by_id: %{
+          "123" => %{direction_id: 0, route_id: "57"},
+          "345" => %{direction_id: 0, route_id: "57"},
+          "456" => %{direction_id: 0, route_id: "57"}
+        }
       }
 
       result = AlertBuilder.build_alert(alert_data, :RDT)
@@ -261,7 +266,12 @@ defmodule AlertsUI.AlertBuilderTest do
         header_text: "hello",
         effect_name: "Delay",
         route_ids: ["57", "58"],
-        trip_ids: ["57,123,0", "57,345,0", "58,456,0"]
+        trip_ids: ["123", "345", "456"],
+        trip_information_by_id: %{
+          "123" => %{direction_id: 0, route_id: "57"},
+          "345" => %{direction_id: 0, route_id: "57"},
+          "456" => %{direction_id: 0, route_id: "58"}
+        }
       }
 
       result = AlertBuilder.build_alert(alert_data, :RDT)
@@ -332,7 +342,12 @@ defmodule AlertsUI.AlertBuilderTest do
         header_text: "hello",
         effect_name: "Delay",
         route_ids: ["57"],
-        trip_ids: ["57,123,0", "57,345,0", "57,456,0"],
+        trip_ids: ["123", "345", "456"],
+        trip_information_by_id: %{
+          "123" => %{direction_id: 0, route_id: "57"},
+          "345" => %{direction_id: 0, route_id: "57"},
+          "456" => %{direction_id: 0, route_id: "57"}
+        },
         stop_ids: [],
         direction: "default"
       }
@@ -450,7 +465,12 @@ defmodule AlertsUI.AlertBuilderTest do
         header_text: "hello",
         effect_name: "Delay",
         route_ids: ["57"],
-        trip_ids: ["57,123,0", "57,345,0", "57,456,0"],
+        trip_ids: ["123", "345", "456"],
+        trip_information_by_id: %{
+          "123" => %{direction_id: 0, route_id: "57"},
+          "345" => %{direction_id: 0, route_id: "57"},
+          "456" => %{direction_id: 0, route_id: "57"}
+        },
         stop_ids: ["a", "b"],
         direction: "default"
       }
@@ -539,7 +559,8 @@ defmodule AlertsUI.AlertBuilderTest do
         description_text: "ok",
         header_text: "hello",
         effect_name: "Delay",
-        route_ids: ["56,1", "57,3", "58,1"],
+        route_ids: ["56", "57", "58"],
+        route_types_by_id: %{"56" => 1, "57" => 3, "58" => 1},
         stop_ids: ["a", "b"],
         direction: "default"
       }

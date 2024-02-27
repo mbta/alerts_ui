@@ -15,9 +15,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     field :direction, :string
     field :trip_ids, {:array, :string}
     field :stop_ids, {:array, :string}
+    field :trip_information_by_id, {:map, :map}
   end
 
-  @fields ~w[route_ids direction trip_ids stop_ids]a
+  @fields ~w[route_ids direction trip_ids stop_ids trip_information_by_id]a
 
   @impl true
   def mount(socket) do
@@ -51,6 +52,18 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       affected_service["direction"]
     )
 
+    trip_information_by_id =
+      socket.assigns.available_schedules
+      |> Stream.filter(fn schedule -> schedule.trip.id in affected_service["trip_ids"] end)
+      |> Enum.reduce(%{}, fn schedule, acc ->
+        Map.put(acc, schedule.trip.id, %{
+          direction_id: schedule.trip.direction_id,
+          route_id: schedule.route.id
+        })
+      end)
+
+    affected_service = Map.put(affected_service, "trip_information_by_id", trip_information_by_id)
+
     changeset =
       %__MODULE__{}
       |> changeset(affected_service, socket.assigns.combination)
@@ -71,6 +84,11 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
        form: to_form(changeset |> Map.put(:action, :validate)),
        affected_service: affected_service
      })}
+  end
+
+  @impl true
+  def handle_event("validate", _, socket) do
+    {:noreply, socket}
   end
 
   def changeset(changeset, params, combination \\ nil) do

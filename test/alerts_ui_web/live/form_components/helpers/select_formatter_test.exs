@@ -67,9 +67,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
       results = SelectFormatter.formatted_select_options(objects)
 
       assert results == [
-               {"joe (9:01 AM from cool)", "b,202,0"},
-               {"bob (9:01 AM from bobb)", "c,303,0"},
-               {"alice (9:01 AM from shmalice)", "a,101,0"}
+               {"joe (9:01 AM from cool)", "202"},
+               {"bob (9:01 AM from bobb)", "303"},
+               {"alice (9:01 AM from shmalice)", "101"}
              ]
     end
   end
