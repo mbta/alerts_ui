@@ -3,8 +3,9 @@ defmodule AlertsUI.AlertBuilder do
     Builds an alert from form data
   """
   alias AlertsUI.Models.Effect
+  alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
 
-  @spec build_alert(map(), atom()) :: map()
+  @spec build_alert(map(), ServiceEffectCombinations.service_effect_combination()) :: map()
   def build_alert(alert_data, combination) do
     effect_map = Effect.effect_map_by_name(Map.get(alert_data, :effect_name, nil))
 
@@ -116,7 +117,7 @@ defmodule AlertsUI.AlertBuilder do
            alert_data
        ) do
     stop_ids
-    |> Enum.map(fn stop_id ->
+    |> Enum.flat_map(fn stop_id ->
       trip_ids
       |> Enum.map(fn trip_id ->
         %{direction_id: direction_id, route_id: route_id} = trip_information_by_id[trip_id]
@@ -136,7 +137,6 @@ defmodule AlertsUI.AlertBuilder do
         }
       end)
     end)
-    |> List.flatten()
   end
 
   defp build_informed_entities(:SR, %{
@@ -145,7 +145,7 @@ defmodule AlertsUI.AlertBuilder do
          route_types_by_id: route_types_by_id
        }) do
     route_ids
-    |> Enum.map(fn route_id ->
+    |> Enum.flat_map(fn route_id ->
       stop_ids
       |> Enum.map(fn stop_id ->
         %{
@@ -156,7 +156,6 @@ defmodule AlertsUI.AlertBuilder do
         }
       end)
     end)
-    |> List.flatten()
   end
 
   defp build_trip(trip_id, direction_id, route_id) do
@@ -167,14 +166,10 @@ defmodule AlertsUI.AlertBuilder do
     }
   end
 
+  defp maybe_add_direction(informed_entity, "default"), do: informed_entity
+
   defp maybe_add_direction(informed_entity, direction_id) do
     informed_entity
-    |> case do
-      informed_entity when direction_id !== "default" ->
-        Map.put(informed_entity, :direction_id, direction_id |> String.to_integer())
-
-      informed_entity ->
-        informed_entity
-    end
+    |> Map.put(:direction_id, direction_id |> String.to_integer())
   end
 end

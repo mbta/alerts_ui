@@ -121,7 +121,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
   def handle_info({:save_as_draft, changeset}, socket) do
     socket.assigns.alert_data
     |> Map.merge(changeset |> Map.from_struct())
-    |> AlertBuilder.build_alert(Map.get(socket.assigns, :combination, nil))
+    |> AlertBuilder.build_alert(Map.get(socket.assigns, :combination))
     |> Alerts.create_draft_alert()
     |> case do
       {:ok, _result} ->
