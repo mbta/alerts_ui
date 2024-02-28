@@ -3,6 +3,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations do
   Gives a combination based on service type and effect
   """
 
+  @type service_effect_combination() :: :R | :RDS | :RDT | :RDTS | :SR
+
   @doc """
   Returns atom indicating service-effect combination for route type and effect
   ## Examples
@@ -29,7 +31,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations do
   """
 
   @spec get_combination(0 | 1 | 2 | 3 | 4 | nil, String.t() | nil) ::
-          :R | :RDS | :RDT | :RDTS | :SR | nil
+          service_effect_combination() | nil
   def get_combination(service_type, effect_name) when is_nil(service_type) or is_nil(effect_name),
     do: nil
 
@@ -89,7 +91,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations do
     end
   end
 
-  @spec required_fields(:R | :RDS | :RDT | :RDTS | :SR | nil) :: [atom()]
+  @spec required_fields(service_effect_combination() | nil) :: [atom()]
   def required_fields(nil), do: []
   def required_fields(:R), do: ~w[route_ids]a
   def required_fields(:SR), do: ~w[route_ids stop_ids]a
