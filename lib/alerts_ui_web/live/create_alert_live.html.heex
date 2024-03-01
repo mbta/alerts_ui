@@ -24,7 +24,13 @@
       />
       <.live_component module={AlertDetails} id="details" progress={@progress} />
 
-      <.live_component module={SuccessfulSubmission} id="success" progress={@progress} />
+      <.live_component
+        module={SuccessfulSubmission}
+        id="success"
+        progress={@progress}
+        alert_uuid={@alert_uuid}
+        show_created_alert={@show_created_alert}
+      />
     </article>
     <.flash kind={:info} title="Success!" flash={@flash} />
     <.flash kind={:error} title="Error creating Alert!" flash={@flash} />

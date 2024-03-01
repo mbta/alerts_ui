@@ -104,6 +104,16 @@ config :ueberauth, Ueberauth,
     }
   ]
 
+config :laboratory,
+  features: [
+    {:show_created_alert, "Show Created Alert", "Makes created alert visible on success screen"}
+  ],
+  cookie: [
+    # one month,
+    max_age: 3600 * 24 * 30,
+    http_only: true
+  ]
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
