@@ -1,4 +1,4 @@
-defmodule AlertsUIrWeb.Plug.PutFlagsInSessionPlug do
+defmodule AlertsUIWeb.Plug.PutFlagsInSessionPlug do
   @moduledoc """
     Reads in Laboratory flags and makes them available on live view sessions.
     Necessary because cookies are hard to access from LiveView.

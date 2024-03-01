@@ -8,7 +8,7 @@ defmodule AlertsUIWeb.PutFlagsInSessionPlugTest do
         conn
         |> Plug.Test.init_test_session(%{})
         |> fetch_session()
-        |> bypass_through(AlertsUIrWeb.Router, :get_flags)
+        |> bypass_through(AlertsUIWeb.Router, :get_flags)
         |> get("/")
 
       assert conn.assigns.test_flag == false

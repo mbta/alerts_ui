@@ -12,7 +12,7 @@ defmodule AlertsUIWeb.Router do
   end
 
   pipeline :get_flags do
-    plug AlertsUIrWeb.Plug.PutFlagsInSessionPlug
+    plug AlertsUIWeb.Plug.PutFlagsInSessionPlug
   end
 
   pipeline :browser do
