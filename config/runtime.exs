@@ -123,4 +123,21 @@ cond do
     config :mbta_v3_api,
       base_url: System.fetch_env!("API_URL"),
       api_key: System.fetch_env!("API_KEY")
+
+    if keycloak_issuer = System.get_env("KEYCLOAK_ISSUER") do
+      keycloak_base_opts = [
+        client_id: System.fetch_env!("KEYCLOAK_CLIENT_ID"),
+        client_secret: System.fetch_env!("KEYCLOAK_CLIENT_SECRET")
+      ]
+
+      config :ueberauth_oidcc,
+        issuers: [
+          %{name: :keycloak_issuer, issuer: keycloak_issuer}
+        ],
+        providers: [
+          keycloak: keycloak_base_opts,
+          edit_password: keycloak_base_opts,
+          update_profile: keycloak_base_opts
+        ]
+    end
 end
