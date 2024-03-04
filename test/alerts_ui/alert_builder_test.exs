@@ -37,6 +37,40 @@ defmodule AlertsUI.AlertBuilderTest do
       assert alert_2.alert_id |> String.to_integer() > alert_1.alert_id |> String.to_integer()
     end
 
+    test "it correctly adds combo ids" do
+      existing_alert = insert(:alert, alert_id: "0")
+
+      alert_data = %{
+        route_type: 1,
+        description_text: "ok",
+        header_text: "hello",
+        effect_name: "Delay",
+        route_ids: ["24", "27", "57"],
+        direction: "default"
+      }
+
+      result = AlertBuilder.build_alert(alert_data, :R)
+
+      assert result == %{
+               effect: :SIGNIFICANT_DELAYS,
+               description_text: "ok",
+               header_text: "hello",
+               informed_entity: [
+                 %{activities: ["BOARD", "EXIT", "RIDE"], route_id: "2427", route_type: 1},
+                 %{activities: ["BOARD", "EXIT", "RIDE"], route_id: "24", route_type: 1},
+                 %{activities: ["BOARD", "EXIT", "RIDE"], route_id: "27", route_type: 1},
+                 %{activities: ["BOARD", "EXIT", "RIDE"], route_id: "57", route_type: 1}
+               ],
+               effect_detail: "DELAY",
+               draft: false
+             }
+
+      result |> Alerts.create_alert()
+      [alert_1, alert_2] = Alerts.list_all()
+      assert alert_1.alert_id == existing_alert.alert_id
+      assert alert_2.alert_id |> String.to_integer() > alert_1.alert_id |> String.to_integer()
+    end
+
     test "properly builds RDS all-stops informed entity with 1 route" do
       alert_data = %{
         route_type: 3,
