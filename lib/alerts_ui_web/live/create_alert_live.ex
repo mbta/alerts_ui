@@ -20,9 +20,10 @@ end
 
 defmodule AlertsUIWeb.CreateAlertLive do
   use AlertsUIWeb, :live_view
+
   alias AlertsUI.AlertBuilder
   alias AlertsUI.Alerts
-  alias AlertsUIWeb.Step
+  alias AlertsUI.Routes
 
   alias AlertsUIWeb.FormComponents.{
     AffectedService,
@@ -34,8 +35,9 @@ defmodule AlertsUIWeb.CreateAlertLive do
   }
 
   alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
-
+  alias AlertsUIWeb.Step
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
+  alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
   alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Repo, as: StopsRepo
@@ -87,7 +89,22 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   def handle_info({:fetch_available_routes, route_types}, socket) do
-    available_routes = RoutesRepo.by_type(route_types)
+    available_routes =
+      route_types
+      |> RoutesRepo.by_type()
+      |> maybe_include_virtual_green_line()
+
+    {:noreply, assign(socket, available_routes: available_routes)}
+  end
+
+  def handle_info({:fetch_routes_by_stop, stop_ids, route_type}, socket) do
+    available_routes =
+      if route_type == 3,
+        do: Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1, type: 3)),
+        else: Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1))
+
+    available_routes = maybe_include_virtual_green_line(available_routes)
+
     {:noreply, assign(socket, available_routes: available_routes)}
   end
 
@@ -101,22 +118,19 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   def handle_info({:fetch_available_stops, direction, route_ids}, socket) do
-    available_stops = available_stops(directions_from_selection(direction), route_ids)
+    route_ids = Routes.expanding_green_line(route_ids)
+
+    available_stops =
+      direction
+      |> directions_from_selection()
+      |> available_stops(route_ids)
+
     {:noreply, assign(socket, available_stops: available_stops)}
   end
 
   def handle_info({:fetch_stops_by_route_type, route_type}, socket) do
     available_stops = StopsRepo.by_route_type(route_type) |> Enum.sort_by(& &1.name)
     {:noreply, assign(socket, available_stops: available_stops)}
-  end
-
-  def handle_info({:fetch_routes_by_stop, stop_ids, route_type}, socket) do
-    available_routes =
-      if route_type == 3,
-        do: Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1, type: 3)),
-        else: Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1))
-
-    {:noreply, assign(socket, available_routes: available_routes)}
   end
 
   def handle_info({:save_as_draft, changeset}, socket) do
@@ -227,6 +241,23 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   @spec route_type(map()) :: 0..4 | nil
   defp route_type(alert_data), do: Map.get(alert_data, :route_type)
+
+  @spec maybe_include_virtual_green_line([Route.t()]) :: [Route.t()]
+  defp maybe_include_virtual_green_line(routes) do
+    if Enum.any?(routes, &green_line_route?/1) do
+      [RoutesRepo.green_line() | routes]
+    else
+      routes
+    end
+  end
+
+  @spec green_line_route?(Route.t()) :: boolean()
+  def green_line_route?(%Route{id: "Green"}), do: true
+  def green_line_route?(%Route{id: "Green-B"}), do: true
+  def green_line_route?(%Route{id: "Green-C"}), do: true
+  def green_line_route?(%Route{id: "Green-D"}), do: true
+  def green_line_route?(%Route{id: "Green-E"}), do: true
+  def green_line_route?(_), do: false
 
   @spec available_stops([String.t()], [String.t()]) :: [Stop.t()]
   defp available_stops([], _route_ids), do: []
