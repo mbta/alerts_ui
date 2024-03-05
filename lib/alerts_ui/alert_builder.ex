@@ -2,14 +2,14 @@ defmodule AlertsUI.AlertBuilder do
   @moduledoc """
     Builds an alert from form data
   """
-  alias AlertsUI.Models.Effect
+  alias AlertsUI.Models.{Effect, InformedEntity}
   alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
 
   @spec build_alert(map(), ServiceEffectCombinations.service_effect_combination()) :: map()
   def build_alert(alert_data, combination) do
     effect_map = Effect.effect_map_by_name(Map.get(alert_data, :effect_name, nil))
-    route_ids = Map.get(alert_data, :route_ids, [])
 
+    route_ids = Map.get(alert_data, :route_ids, [])
     alert_data = Map.put(alert_data, :route_ids, add_combo_route_ids(route_ids))
 
     %{
@@ -179,7 +179,7 @@ defmodule AlertsUI.AlertBuilder do
   defp add_combo_route_ids(route_ids) do
     route_ids
     |> Enum.flat_map(fn route_id ->
-      combo_map = combo_map()
+      combo_map = InformedEntity.route_to_combo_route_mapping()
 
       case combo_id = Map.get(combo_map, route_id, nil) do
         nil -> []
@@ -188,34 +188,5 @@ defmodule AlertsUI.AlertBuilder do
     end)
     |> Enum.dedup()
     |> Enum.concat(route_ids)
-  end
-
-  defp combo_map do
-    %{
-      "24" => "2427",
-      "27" => "2427",
-      "32" => "3233",
-      "33" => "3233",
-      "37" => "3738",
-      "38" => "3738",
-      "40" => "4050",
-      "50" => "4050",
-      "62" => "627",
-      "76" => "627",
-      "72" => "725",
-      "75" => "725",
-      "89" => "8993",
-      "93" => "8993",
-      "116" => "116117",
-      "117" => "116117",
-      "214" => "214216",
-      "216" => "214216",
-      "441" => "441442",
-      "442" => "441442",
-      "741" => "746",
-      "742" => "746",
-      "743" => "746",
-      "Green-E" => "602"
-    }
   end
 end
