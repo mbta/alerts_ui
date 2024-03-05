@@ -30,7 +30,7 @@ config :alerts_ui, file_write_module: AlertsUI.FeedOutput.WriteNowhere
 
 config :ueberauth, Ueberauth,
   providers: [
-    keycloak: {Ueberauth.Strategy.FakeKeycloak, []}
+    keycloak: {Ueberauth.Strategy.FakeKeycloak, [issuer: :keycloak_issuer]}
   ]
 
 config :laboratory,
