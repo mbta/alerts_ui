@@ -3,7 +3,11 @@ defmodule AlertsUI.AlertBuilder do
     Builds an alert from form data
   """
   alias AlertsUI.Models.{Effect, InformedEntity}
+  alias AlertsUI.Routes
   alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
+  alias MBTAV3API.Routes.Route
+  alias MBTAV3API.Stops.Repo, as: StopsRepo
+  alias MBTAV3API.Stops.Stop
 
   @spec build_alert(map(), ServiceEffectCombinations.service_effect_combination()) :: map()
   def build_alert(alert_data, combination) do
@@ -30,6 +34,7 @@ defmodule AlertsUI.AlertBuilder do
          direction: direction
        }) do
     route_ids
+    |> Routes.expanding_green_line()
     |> Enum.map(
       &(%{
           activities: ["BOARD", "EXIT", "RIDE"],
@@ -55,8 +60,11 @@ defmodule AlertsUI.AlertBuilder do
            route_type: route_type
          }
        ) do
+    route_ids = Routes.expanding_green_line(route_ids)
+
     stop_ids
     |> stop_route_pairs(route_ids)
+    |> Enum.filter(&on_route?(&1, direction))
     |> Enum.map(fn {stop_id, route_id} ->
       %{
         activities: ["BOARD", "EXIT", "RIDE"],
@@ -148,17 +156,18 @@ defmodule AlertsUI.AlertBuilder do
          route_ids: route_ids,
          route_types_by_id: route_types_by_id
        }) do
-    route_ids
-    |> Enum.flat_map(fn route_id ->
-      stop_ids
-      |> Enum.map(fn stop_id ->
-        %{
-          activities: ["BOARD", "EXIT", "RIDE"],
-          route_id: route_id,
-          route_type: route_types_by_id[route_id],
-          stop_id: stop_id
-        }
-      end)
+    route_ids = Routes.expanding_green_line(route_ids)
+
+    stop_ids
+    |> stop_route_pairs(route_ids)
+    |> Enum.filter(&on_route?(&1, "default"))
+    |> Enum.map(fn {stop_id, route_id} ->
+      %{
+        activities: ["BOARD", "EXIT", "RIDE"],
+        route_id: route_id,
+        route_type: route_type(route_types_by_id, route_id),
+        stop_id: stop_id
+      }
     end)
   end
 
@@ -195,5 +204,43 @@ defmodule AlertsUI.AlertBuilder do
     Enum.flat_map(stop_ids, fn stop_id ->
       Enum.map(route_ids, fn route_id -> {stop_id, route_id} end)
     end)
+  end
+
+  @spec on_route?({Stop.id_t(), Route.id_t()}, String.t()) :: boolean()
+  defp on_route?({stop_id, route_id}, direction) do
+    case stops_on_route(route_id, direction) do
+      {:ok, stops_on_route} ->
+        Enum.find(stops_on_route, fn stop -> stop.id == stop_id end) != nil
+
+      _ ->
+        false
+    end
+  end
+
+  @spec stops_on_route(Route.id_t(), String.t()) :: {:ok, [Stop.t()]} | {:error, any}
+  defp stops_on_route(route_id, "default") do
+    with {:ok, stops_0} <- stops_on_route(route_id, "0"),
+         {:ok, stops_1} <- stops_on_route(route_id, "1") do
+      {:ok, stops_0 ++ stops_1}
+    end
+  end
+
+  defp stops_on_route(route_id, direction) do
+    case StopsRepo.by_route(route_id, String.to_integer(direction)) do
+      {:error, error} ->
+        {:error, error}
+
+      stops ->
+        {:ok, stops}
+    end
+  end
+
+  @spec route_type(%{String.t() => Route.type_int()}, Route.id_t()) :: Route.type_int()
+  defp route_type(route_types_by_id, route_id) do
+    if route_id in Routes.green_line_branch_ids() do
+      route_types_by_id[route_id] || route_types_by_id["Green"]
+    else
+      route_types_by_id[route_id]
+    end
   end
 end
