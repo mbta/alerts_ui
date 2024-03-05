@@ -2,12 +2,15 @@ defmodule AlertsUI.AlertBuilder do
   @moduledoc """
     Builds an alert from form data
   """
-  alias AlertsUI.Models.Effect
+  alias AlertsUI.Models.{Effect, InformedEntity}
   alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
 
   @spec build_alert(map(), ServiceEffectCombinations.service_effect_combination()) :: map()
   def build_alert(alert_data, combination) do
     effect_map = Effect.effect_map_by_name(Map.get(alert_data, :effect_name, nil))
+
+    route_ids = Map.get(alert_data, :route_ids, [])
+    alert_data = Map.put(alert_data, :route_ids, add_combo_route_ids(route_ids))
 
     %{
       header_text: Map.get(alert_data, :header_text),
@@ -171,5 +174,19 @@ defmodule AlertsUI.AlertBuilder do
   defp maybe_add_direction(informed_entity, direction_id) do
     informed_entity
     |> Map.put(:direction_id, direction_id |> String.to_integer())
+  end
+
+  defp add_combo_route_ids(route_ids) do
+    route_ids
+    |> Enum.flat_map(fn route_id ->
+      combo_map = InformedEntity.route_to_combo_route_mapping()
+
+      case combo_id = Map.get(combo_map, route_id, nil) do
+        nil -> []
+        _ -> [combo_id]
+      end
+    end)
+    |> Enum.dedup()
+    |> Enum.concat(route_ids)
   end
 end
