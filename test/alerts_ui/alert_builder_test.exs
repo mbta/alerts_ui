@@ -185,6 +185,52 @@ defmodule AlertsUI.AlertBuilderTest do
              ]
     end
 
+    test "properly builds RDS informed entity with multiple routes, multiple stops and direction" do
+      alert_data = %{
+        route_type: 3,
+        description_text: "ok",
+        header_text: "hello",
+        effect_name: "Delay",
+        stop_ids: ["a", "b"],
+        route_ids: ["57", "58"],
+        trip_ids: nil,
+        direction: "1"
+      }
+
+      result = AlertBuilder.build_alert(alert_data, :RDS)
+
+      assert result.informed_entity == [
+               %{
+                 activities: ["BOARD", "EXIT", "RIDE"],
+                 route_id: "57",
+                 route_type: 3,
+                 direction_id: 1,
+                 stop_id: "a"
+               },
+               %{
+                 activities: ["BOARD", "EXIT", "RIDE"],
+                 route_id: "58",
+                 route_type: 3,
+                 direction_id: 1,
+                 stop_id: "a"
+               },
+               %{
+                 activities: ["BOARD", "EXIT", "RIDE"],
+                 route_id: "57",
+                 route_type: 3,
+                 direction_id: 1,
+                 stop_id: "b"
+               },
+               %{
+                 activities: ["BOARD", "EXIT", "RIDE"],
+                 route_id: "58",
+                 route_type: 3,
+                 direction_id: 1,
+                 stop_id: "b"
+               }
+             ]
+    end
+
     test "properly builds R informed entity" do
       alert_data = %{
         route_type: 3,
