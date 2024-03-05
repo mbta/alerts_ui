@@ -50,21 +50,22 @@ defmodule AlertsUI.AlertBuilder do
          :RDS,
          %{
            stop_ids: [_ | _] = stop_ids,
-           route_ids: [route_id],
+           route_ids: route_ids,
            direction: direction,
            route_type: route_type
          }
        ) do
     stop_ids
-    |> Enum.map(
-      &(%{
-          activities: ["BOARD", "EXIT", "RIDE"],
-          route_id: route_id,
-          route_type: route_type,
-          stop_id: &1
-        }
-        |> maybe_add_direction(direction))
-    )
+    |> stop_route_pairs(route_ids)
+    |> Enum.map(fn {stop_id, route_id} ->
+      %{
+        activities: ["BOARD", "EXIT", "RIDE"],
+        route_id: route_id,
+        route_type: route_type,
+        stop_id: stop_id
+      }
+      |> maybe_add_direction(direction)
+    end)
   end
 
   defp build_informed_entities(
@@ -188,5 +189,11 @@ defmodule AlertsUI.AlertBuilder do
     end)
     |> Enum.dedup()
     |> Enum.concat(route_ids)
+  end
+
+  defp stop_route_pairs(stop_ids, route_ids) do
+    Enum.flat_map(stop_ids, fn stop_id ->
+      Enum.map(route_ids, fn route_id -> {stop_id, route_id} end)
+    end)
   end
 end
