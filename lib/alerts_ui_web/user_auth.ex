@@ -5,11 +5,14 @@ defmodule AlertsUIWeb.UserAuth do
 
   use AlertsUIWeb, :verified_routes
 
+  require Logger
+
   import Plug.Conn
   import Phoenix.Controller
 
   alias AlertsUIWeb.User
   alias Plug.Conn
+  alias Oidcc.{ClientContext, Token}
 
   @doc """
   Logs the user in.
@@ -160,6 +163,46 @@ defmodule AlertsUIWeb.UserAuth do
     end
   end
 
+  @doc """
+  Plug used for API routes that require the user to be authenticated.
+  """
+  def require_authenticated_api_user(conn, _opts) do
+    with {:ok, token} <- get_authorization_token(conn),
+         {:ok, client_context} <-
+           ClientContext.from_configuration_worker(
+             keycloak_issuer(),
+             keycloak_client_id(),
+             keycloak_client_secret()
+           ),
+         {:ok,
+          %{
+            "resource_access" => %{
+              "alerts-ui" => %{"roles" => roles}
+            }
+          }} <- Token.validate_jwt(token, client_context, %{signing_algs: ["RS256"]}),
+         true <- "api-writer" in roles do
+      conn
+    else
+      false ->
+        conn
+        |> put_status(403)
+        |> json(%{error: :unauthorized})
+        |> halt()
+
+      {:ok, _claims} ->
+        conn
+        |> put_status(403)
+        |> json(%{error: :unauthorized})
+        |> halt()
+
+      {:error, _error} ->
+        conn
+        |> put_status(403)
+        |> json(%{error: :unauthenticated})
+        |> halt()
+    end
+  end
+
   # This function renews the session ID and erases the whole
   # session to avoid fixation attacks. If there is any data
   # in the session you may want to preserve after log in/log out,
@@ -209,4 +252,26 @@ defmodule AlertsUIWeb.UserAuth do
   defp maybe_store_return_to(conn), do: conn
 
   defp signed_in_path(_conn), do: ~p"/"
+
+  @spec get_authorization_token(Conn.t()) :: {:ok, String.t()} | {:error, String.t()}
+  defp get_authorization_token(conn) do
+    case get_req_header(conn, "authorization") do
+      ["Bearer " <> token] -> {:ok, token}
+      _ -> {:error, "No token"}
+    end
+  end
+
+  @spec keycloak_issuer :: atom()
+  defp keycloak_issuer do
+    {_, base_opts} = Application.get_env(:ueberauth, Ueberauth)[:providers][:keycloak]
+    base_opts[:issuer]
+  end
+
+  @spec keycloak_client_id :: String.t()
+  defp keycloak_client_id,
+    do: Application.get_env(:ueberauth_oidcc, :providers)[:keycloak][:client_id]
+
+  @spec keycloak_client_secret :: String.t()
+  defp keycloak_client_secret,
+    do: Application.get_env(:ueberauth_oidcc, :providers)[:keycloak][:client_secret]
 end
