@@ -19,11 +19,11 @@ defmodule AlertsUI.Routes do
   @spec expanding_green_line([Route.t()]) :: [Route.t()]
   def expanding_green_line(route_ids) do
     route_ids
-    |> Enum.reduce([], fn route_id, acc ->
+    |> Enum.flat_map(fn route_id ->
       if route_id == "Green" do
-        acc ++ @green_line_branch_ids
+        @green_line_branch_ids
       else
-        acc ++ [route_id]
+        [route_id]
       end
     end)
     |> Enum.uniq()
