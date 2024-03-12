@@ -5,11 +5,10 @@ defmodule AlertsUI.AlertBuilder do
   alias AlertsUI.Models.{Effect, InformedEntity}
   alias AlertsUI.Routes
   alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
-  alias MBTAV3API.Routes.Route
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatterns
+  alias MBTAV3API.Routes.Route
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
-
 
   @spec build_alert(map(), ServiceEffectCombinations.service_effect_combination()) ::
           map()
