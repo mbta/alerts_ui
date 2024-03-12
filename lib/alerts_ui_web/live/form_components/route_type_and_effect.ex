@@ -107,14 +107,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   @impl true
   def render(assigns) do
     ~H"""
-    <div
-      class={
-        unless @progress.name == "route_type_and_effect",
-          do: "hidden",
-          else: "min-w-full flex flex-col"
-      }
-      id="route_view"
-    >
+    <div class="min-w-full flex flex-col" id="route_view">
       <.form
         for={@changeset}
         phx-target={@myself}

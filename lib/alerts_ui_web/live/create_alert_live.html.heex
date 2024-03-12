@@ -9,12 +9,16 @@
     id="article-view"
   >
     <article class="prose prose-stone min-w-full flex flex-col items-center justify-center">
-      <.live_component module={RouteTypeAndEffect} id="route_type" progress={@progress} />
+      <.live_component
+        :if={@progress.name == "route_type_and_effect"}
+        module={RouteTypeAndEffect}
+        id="route_type"
+      />
 
       <.live_component
+        :if={@progress.name == "details"}
         module={if @combination === :SR, do: StopRouteAffectedService, else: AffectedService}
         id="details"
-        progress={@progress}
         alert_data={@alert_data}
         combination={@combination}
         route_type={route_type(@alert_data)}
@@ -22,12 +26,12 @@
         available_schedules={@available_schedules}
         available_stops={@available_stops}
       />
-      <.live_component module={AlertDetails} id="details" progress={@progress} />
+      <.live_component :if={@progress.name == "details"} module={AlertDetails} id="details" />
 
       <.live_component
+        :if={@progress.name == "success"}
         module={SuccessfulSubmission}
         id="success"
-        progress={@progress}
         alert_uuid={@alert_uuid}
         show_created_alert={@show_created_alert}
       />

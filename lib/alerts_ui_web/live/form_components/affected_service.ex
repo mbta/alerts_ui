@@ -120,10 +120,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       )
 
     ~H"""
-    <div
-      class={unless @progress.name == "details", do: "hidden", else: "min-w-full flex flex-col"}
-      id="service_view"
-    >
+    <div class="min-w-full flex flex-col" id="service_view">
       <.form
         for={@form}
         phx-target={@myself}
