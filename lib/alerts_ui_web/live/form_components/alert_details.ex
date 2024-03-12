@@ -35,7 +35,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       |> changeset(alert_details)
       |> Map.put(:action, :validate)
 
-    {:noreply, assign(socket, %{form: to_form(changeset)})}
+    {:noreply, assign(socket, %{form: to_form(changeset), alert_details: alert_details})}
   end
 
   @impl true
@@ -98,7 +98,6 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       >
         <.input
           field={@form[:header_text]}
-          value=""
           label="Header"
           type="textarea"
           phx-debounce={120}
@@ -106,7 +105,6 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         />
         <.input
           field={@form[:description_text]}
-          value=""
           label="Description"
           type="textarea"
           phx-debounce={120}

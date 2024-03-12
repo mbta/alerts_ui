@@ -137,11 +137,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
               options={@route_id_options}
               multiple={true}
               id="stop_route_routes"
-              prompt={
-                if Map.has_key?(@form.params, "stop_ids"),
-                  do: "All Routes",
-                  else: nil
-              }
             />
           <% end %>
         </fieldset>

@@ -46,7 +46,7 @@ defmodule AlertsUiWeb.FormComponents.StopRouteAffectedServiceTest do
 
         assert view
                |> element("select#stop_route_routes")
-               |> render() =~ "All Routes"
+               |> render()
       end
     end
 
