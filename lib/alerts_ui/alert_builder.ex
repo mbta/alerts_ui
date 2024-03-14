@@ -49,10 +49,10 @@ defmodule AlertsUI.AlertBuilder do
     |> Enum.filter(&(&1 !== "default"))
   end
 
-  def add_child_stops(nil, _route_ids, _direction), do: nil
-  def add_child_stops([], _route_ids, _direction), do: []
+  defp add_child_stops(nil, _route_ids, _direction), do: nil
+  defp add_child_stops([], _route_ids, _direction), do: []
 
-  def add_child_stops(stop_ids, route_ids, direction) do
+  defp add_child_stops(stop_ids, route_ids, direction) do
     Enum.flat_map(route_ids, fn route_id ->
       get_stops(route_id, direction)
       |> Enum.filter(&(&1.parent_id in stop_ids))
