@@ -87,6 +87,18 @@ defmodule AlertsUI.ActivitiesTest do
       assert Activities.for_effect("Snow Route") == [:BOARD, :EXIT]
     end
 
+    test "Station Closure" do
+      assert Activities.for_effect("Station Closure") == [:BOARD, :EXIT]
+    end
+
+    test "Station Issue" do
+      assert Activities.for_effect("Station Issue") == [:BOARD]
+    end
+
+    test "Stop Closure" do
+      assert Activities.for_effect("Stop Closure") == [:BOARD, :EXIT]
+    end
+
     test "Stop Move" do
       assert Activities.for_effect("Stop Move") == [:BOARD]
     end
