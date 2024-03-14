@@ -29,7 +29,7 @@ defmodule AlertsUI.AlertBuilderTest do
                description_text: "ok",
                header_text: "hello",
                informed_entity: [
-                 %{route_type: 1, activities: ["BOARD", "EXIT", "RIDE"], route_id: "57"}
+                 %{route_type: 1, activities: [:BOARD, :EXIT, :RIDE], route_id: "57"}
                ],
                effect_detail: "DELAY",
                draft: false
@@ -60,10 +60,10 @@ defmodule AlertsUI.AlertBuilderTest do
                description_text: "ok",
                header_text: "hello",
                informed_entity: [
-                 %{activities: ["BOARD", "EXIT", "RIDE"], route_id: "2427", route_type: 1},
-                 %{activities: ["BOARD", "EXIT", "RIDE"], route_id: "24", route_type: 1},
-                 %{activities: ["BOARD", "EXIT", "RIDE"], route_id: "27", route_type: 1},
-                 %{activities: ["BOARD", "EXIT", "RIDE"], route_id: "57", route_type: 1}
+                 %{activities: [:BOARD, :EXIT, :RIDE], route_id: "2427", route_type: 1},
+                 %{activities: [:BOARD, :EXIT, :RIDE], route_id: "24", route_type: 1},
+                 %{activities: [:BOARD, :EXIT, :RIDE], route_id: "27", route_type: 1},
+                 %{activities: [:BOARD, :EXIT, :RIDE], route_id: "57", route_type: 1}
                ],
                effect_detail: "DELAY",
                draft: false
@@ -91,7 +91,7 @@ defmodule AlertsUI.AlertBuilderTest do
 
       assert result.informed_entity == [
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "57",
                  route_type: 3
                }
@@ -114,12 +114,12 @@ defmodule AlertsUI.AlertBuilderTest do
 
       assert result.informed_entity == [
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "57",
                  route_type: 3
                },
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "58",
                  route_type: 3
                }
@@ -142,7 +142,7 @@ defmodule AlertsUI.AlertBuilderTest do
 
       assert result.informed_entity == [
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "57",
                  route_type: 3,
                  direction_id: 1
@@ -172,21 +172,21 @@ defmodule AlertsUI.AlertBuilderTest do
 
           assert result.informed_entity == [
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
                      route_type: 3,
                      direction_id: 1,
                      stop_id: "a"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
                      route_type: 3,
                      direction_id: 1,
                      stop_id: "b"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
                      route_type: 3,
                      direction_id: 1,
@@ -219,28 +219,28 @@ defmodule AlertsUI.AlertBuilderTest do
 
           assert result.informed_entity == [
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
                      route_type: 3,
                      direction_id: 1,
                      stop_id: "a"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "58",
                      route_type: 3,
                      direction_id: 1,
                      stop_id: "a"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
                      route_type: 3,
                      direction_id: 1,
                      stop_id: "b"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "58",
                      route_type: 3,
                      direction_id: 1,
@@ -281,42 +281,42 @@ defmodule AlertsUI.AlertBuilderTest do
 
           assert result.informed_entity == [
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
                      route_type: 3,
                      direction_id: 1,
                      stop_id: "1"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
                      route_type: 3,
                      direction_id: 1,
                      stop_id: "2"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
                      route_type: 3,
                      direction_id: 1,
                      stop_id: "3"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
                      route_type: 3,
                      direction_id: 1,
                      stop_id: "a"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
                      route_type: 3,
                      direction_id: 1,
                      stop_id: "b"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
                      route_type: 3,
                      direction_id: 1,
@@ -362,49 +362,49 @@ defmodule AlertsUI.AlertBuilderTest do
 
           assert result.informed_entity == [
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "Green-B",
                      route_type: 1,
                      direction_id: 1,
                      stop_id: "place-hymnl"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "Green-C",
                      route_type: 1,
                      direction_id: 1,
                      stop_id: "place-hymnl"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "Green-D",
                      route_type: 1,
                      direction_id: 1,
                      stop_id: "place-hymnl"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "Green-B",
                      route_type: 1,
                      direction_id: 1,
                      stop_id: "place-kencl"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "Green-C",
                      route_type: 1,
                      direction_id: 1,
                      stop_id: "place-kencl"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "Green-D",
                      route_type: 1,
                      direction_id: 1,
                      stop_id: "place-kencl"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "Green-D",
                      route_type: 1,
                      direction_id: 1,
@@ -429,12 +429,12 @@ defmodule AlertsUI.AlertBuilderTest do
 
       assert result.informed_entity == [
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "57",
                  route_type: 3
                },
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "58",
                  route_type: 3
                }
@@ -455,27 +455,27 @@ defmodule AlertsUI.AlertBuilderTest do
 
       assert result.informed_entity == [
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "Red",
                  route_type: 1
                },
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "Green-B",
                  route_type: 1
                },
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "Green-C",
                  route_type: 1
                },
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "Green-D",
                  route_type: 1
                },
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "Green-E",
                  route_type: 1
                }
@@ -496,13 +496,13 @@ defmodule AlertsUI.AlertBuilderTest do
 
       assert result.informed_entity == [
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "57",
                  route_type: 3,
                  direction_id: 1
                },
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "58",
                  route_type: 3,
                  direction_id: 1
@@ -524,31 +524,31 @@ defmodule AlertsUI.AlertBuilderTest do
 
       assert result.informed_entity == [
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "Red",
                  route_type: 1,
                  direction_id: 1
                },
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "Green-B",
                  route_type: 1,
                  direction_id: 1
                },
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "Green-C",
                  route_type: 1,
                  direction_id: 1
                },
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "Green-D",
                  route_type: 1,
                  direction_id: 1
                },
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "Green-E",
                  route_type: 1,
                  direction_id: 1
@@ -575,7 +575,7 @@ defmodule AlertsUI.AlertBuilderTest do
 
       assert result.informed_entity == [
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "57",
                  route_type: 3,
                  direction_id: 0,
@@ -586,7 +586,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  }
                },
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "57",
                  route_type: 3,
                  direction_id: 0,
@@ -597,7 +597,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  }
                },
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "57",
                  route_type: 3,
                  direction_id: 0,
@@ -629,7 +629,7 @@ defmodule AlertsUI.AlertBuilderTest do
 
       assert result.informed_entity == [
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "57",
                  route_type: 3,
                  direction_id: 0,
@@ -640,7 +640,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  }
                },
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "57",
                  route_type: 3,
                  direction_id: 0,
@@ -651,7 +651,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  }
                },
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "58",
                  route_type: 3,
                  direction_id: 0,
@@ -679,7 +679,7 @@ defmodule AlertsUI.AlertBuilderTest do
 
       assert result.informed_entity == [
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "57",
                  route_type: 3
                }
@@ -707,7 +707,7 @@ defmodule AlertsUI.AlertBuilderTest do
 
       assert result.informed_entity == [
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "57",
                  route_type: 3,
                  direction_id: 0,
@@ -718,7 +718,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  }
                },
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "57",
                  route_type: 3,
                  direction_id: 0,
@@ -729,7 +729,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  }
                },
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "57",
                  route_type: 3,
                  direction_id: 0,
@@ -764,21 +764,21 @@ defmodule AlertsUI.AlertBuilderTest do
 
           assert result.informed_entity == [
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
                      route_type: 3,
                      direction_id: 0,
                      stop_id: "a"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
                      route_type: 3,
                      direction_id: 0,
                      stop_id: "b"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
                      route_type: 3,
                      direction_id: 0,
@@ -805,12 +805,12 @@ defmodule AlertsUI.AlertBuilderTest do
 
       assert result.informed_entity == [
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "57",
                  route_type: 3
                },
                %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
+                 activities: [:BOARD, :EXIT, :RIDE],
                  route_id: "58",
                  route_type: 3
                }
@@ -839,7 +839,7 @@ defmodule AlertsUI.AlertBuilderTest do
 
         assert result.informed_entity == [
                  %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
+                   activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "57",
                    route_type: 3,
                    direction_id: 0,
@@ -851,7 +851,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    }
                  },
                  %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
+                   activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "57",
                    route_type: 3,
                    direction_id: 0,
@@ -863,7 +863,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    }
                  },
                  %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
+                   activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "57",
                    route_type: 3,
                    direction_id: 0,
@@ -875,7 +875,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    }
                  },
                  %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
+                   activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "57",
                    route_type: 3,
                    direction_id: 0,
@@ -887,7 +887,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    }
                  },
                  %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
+                   activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "57",
                    route_type: 3,
                    direction_id: 0,
@@ -899,7 +899,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    }
                  },
                  %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
+                   activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "57",
                    route_type: 3,
                    direction_id: 0,
@@ -936,37 +936,37 @@ defmodule AlertsUI.AlertBuilderTest do
 
           assert result.informed_entity == [
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "56",
                      route_type: 1,
                      stop_id: "a"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
                      route_type: 3,
                      stop_id: "a"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "58",
                      route_type: 1,
                      stop_id: "a"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "56",
                      route_type: 1,
                      stop_id: "b"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
                      route_type: 3,
                      stop_id: "b"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "58",
                      route_type: 1,
                      stop_id: "b"
@@ -1011,43 +1011,43 @@ defmodule AlertsUI.AlertBuilderTest do
 
           assert result.informed_entity == [
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "Green-B",
                      route_type: 0,
                      stop_id: "place-hymnl"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "Green-C",
                      route_type: 0,
                      stop_id: "place-hymnl"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "Green-D",
                      route_type: 0,
                      stop_id: "place-hymnl"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "Green-B",
                      route_type: 0,
                      stop_id: "place-kencl"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "Green-C",
                      route_type: 0,
                      stop_id: "place-kencl"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "Green-D",
                      route_type: 0,
                      stop_id: "place-kencl"
                    },
                    %{
-                     activities: ["BOARD", "EXIT", "RIDE"],
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "Green-D",
                      route_type: 0,
                      stop_id: "place-fenwy"

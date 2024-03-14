@@ -3,6 +3,8 @@ defmodule AlertsUI.Models.Activity do
     Activities to be used in the activity field of Informed Entity
   """
 
+  @type activity :: atom()
+
   @doc """
   Returns list of atoms allowed in activities field of Informed Entity
 

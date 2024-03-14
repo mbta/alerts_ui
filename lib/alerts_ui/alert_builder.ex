@@ -2,6 +2,8 @@ defmodule AlertsUI.AlertBuilder do
   @moduledoc """
     Builds an alert from form data
   """
+
+  alias AlertsUI.Activities
   alias AlertsUI.Models.{Effect, InformedEntity}
   alias AlertsUI.Routes
   alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
@@ -13,8 +15,8 @@ defmodule AlertsUI.AlertBuilder do
   @spec build_alert(map(), ServiceEffectCombinations.service_effect_combination()) ::
           map()
   def build_alert(alert_data, combination) do
-    effect_map = Effect.effect_map_by_name(Map.get(alert_data, :effect_name, nil))
-
+    effect_name = Map.get(alert_data, :effect_name)
+    effect_map = Effect.effect_map_by_name(effect_name)
     route_ids = Map.get(alert_data, :route_ids, [])
     stop_ids = Map.get(alert_data, :stop_ids)
     direction_id = Map.get(alert_data, :direction)
@@ -30,7 +32,7 @@ defmodule AlertsUI.AlertBuilder do
       effect: Map.get(effect_map, :effect),
       effect_detail: Map.get(effect_map, :effect_detail),
       draft: Map.get(alert_data, :draft, false),
-      informed_entity: build_informed_entities(combination, alert_data)
+      informed_entity: build_informed_entities(combination, alert_data, effect_name)
     }
   end
 
@@ -67,18 +69,28 @@ defmodule AlertsUI.AlertBuilder do
   defp get_stops(route_id, direction),
     do: RoutePatterns.included_stops_by_route_id(route_id, direction_id: direction)
 
-  defp build_informed_entities(nil, _), do: []
+  @spec build_informed_entities(
+          ServiceEffectCombinations.service_effect_combination() | nil,
+          map(),
+          Effect.effect_name()
+        ) ::
+          [map()]
+  defp build_informed_entities(nil, _, _), do: []
 
-  defp build_informed_entities(:R, %{
-         route_ids: route_ids,
-         route_type: route_type,
-         direction: direction
-       }) do
+  defp build_informed_entities(
+         :R,
+         %{
+           route_ids: route_ids,
+           route_type: route_type,
+           direction: direction
+         },
+         effect
+       ) do
     route_ids
     |> Routes.expanding_green_line()
     |> Enum.map(
       &(%{
-          activities: ["BOARD", "EXIT", "RIDE"],
+          activities: Activities.for_effect(effect),
           route_id: &1,
           route_type: route_type
         }
@@ -88,9 +100,10 @@ defmodule AlertsUI.AlertBuilder do
 
   defp build_informed_entities(
          :RDS,
-         %{stop_ids: [], route_ids: [_ | _]} = alert_data
+         %{stop_ids: [], route_ids: [_ | _]} = alert_data,
+         effect
        ),
-       do: build_informed_entities(:R, alert_data)
+       do: build_informed_entities(:R, alert_data, effect)
 
   defp build_informed_entities(
          :RDS,
@@ -99,7 +112,8 @@ defmodule AlertsUI.AlertBuilder do
            route_ids: route_ids,
            direction: direction,
            route_type: route_type
-         }
+         },
+         effect
        ) do
     route_ids = Routes.expanding_green_line(route_ids)
 
@@ -108,7 +122,7 @@ defmodule AlertsUI.AlertBuilder do
     |> Enum.filter(&on_route?(&1, direction))
     |> Enum.map(fn {stop_id, route_id} ->
       %{
-        activities: ["BOARD", "EXIT", "RIDE"],
+        activities: Activities.for_effect(effect),
         route_id: route_id,
         route_type: route_type,
         stop_id: stop_id
@@ -119,9 +133,10 @@ defmodule AlertsUI.AlertBuilder do
 
   defp build_informed_entities(
          :RDT,
-         %{trip_ids: []} = alert_data
+         %{trip_ids: []} = alert_data,
+         effect
        ) do
-    build_informed_entities(:R, alert_data)
+    build_informed_entities(:R, alert_data, effect)
   end
 
   defp build_informed_entities(
@@ -130,7 +145,8 @@ defmodule AlertsUI.AlertBuilder do
            trip_ids: [_ | _] = trip_ids,
            route_type: route_type,
            trip_information_by_id: trip_information_by_id
-         }
+         },
+         effect
        ) do
     trip_ids
     |> Enum.filter(&(&1 !== "default"))
@@ -138,7 +154,7 @@ defmodule AlertsUI.AlertBuilder do
       %{direction_id: direction_id, route_id: route_id} = trip_information_by_id[trip_id]
 
       %{
-        activities: ["BOARD", "EXIT", "RIDE"],
+        activities: Activities.for_effect(effect),
         route_id: route_id,
         route_type: route_type,
         direction_id: direction_id,
@@ -152,14 +168,14 @@ defmodule AlertsUI.AlertBuilder do
     end)
   end
 
-  defp build_informed_entities(:RDTS, %{stop_ids: [], trip_ids: []} = alert_data),
-    do: build_informed_entities(:R, alert_data)
+  defp build_informed_entities(:RDTS, %{stop_ids: [], trip_ids: []} = alert_data, effect),
+    do: build_informed_entities(:R, alert_data, effect)
 
-  defp build_informed_entities(:RDTS, %{stop_ids: []} = alert_data),
-    do: build_informed_entities(:RDT, alert_data)
+  defp build_informed_entities(:RDTS, %{stop_ids: []} = alert_data, effect),
+    do: build_informed_entities(:RDT, alert_data, effect)
 
-  defp build_informed_entities(:RDTS, %{trip_ids: []} = alert_data),
-    do: build_informed_entities(:RDS, alert_data)
+  defp build_informed_entities(:RDTS, %{trip_ids: []} = alert_data, effect),
+    do: build_informed_entities(:RDS, alert_data, effect)
 
   defp build_informed_entities(
          :RDTS,
@@ -168,7 +184,8 @@ defmodule AlertsUI.AlertBuilder do
            trip_ids: [_ | _] = trip_ids,
            trip_information_by_id: trip_information_by_id
          } =
-           alert_data
+           alert_data,
+         effect
        ) do
     stop_ids
     |> Enum.flat_map(fn stop_id ->
@@ -178,7 +195,7 @@ defmodule AlertsUI.AlertBuilder do
         %{direction_id: direction_id, route_id: route_id} = trip_information_by_id[trip_id]
 
         %{
-          activities: ["BOARD", "EXIT", "RIDE"],
+          activities: Activities.for_effect(effect),
           route_id: route_id,
           route_type: alert_data.route_type,
           direction_id: direction_id,
@@ -194,11 +211,15 @@ defmodule AlertsUI.AlertBuilder do
     end)
   end
 
-  defp build_informed_entities(:SR, %{
-         stop_ids: stop_ids,
-         route_ids: route_ids,
-         route_types_by_id: route_types_by_id
-       }) do
+  defp build_informed_entities(
+         :SR,
+         %{
+           stop_ids: stop_ids,
+           route_ids: route_ids,
+           route_types_by_id: route_types_by_id
+         },
+         effect
+       ) do
     route_ids = Routes.expanding_green_line(route_ids)
 
     stop_ids
@@ -206,7 +227,7 @@ defmodule AlertsUI.AlertBuilder do
     |> Enum.filter(&on_route?(&1, "default"))
     |> Enum.map(fn {stop_id, route_id} ->
       %{
-        activities: ["BOARD", "EXIT", "RIDE"],
+        activities: Activities.for_effect(effect),
         route_id: route_id,
         route_type: route_type(route_types_by_id, route_id),
         stop_id: stop_id
