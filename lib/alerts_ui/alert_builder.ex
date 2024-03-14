@@ -4,27 +4,47 @@ defmodule AlertsUI.AlertBuilder do
   """
 
   alias AlertsUI.Activities
-  alias AlertsUI.Models.{Effect, InformedEntity}
+  alias AlertsUI.Models.{Activity, Effect, InformedEntity, RoutePattern}
   alias AlertsUI.Routes
   alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatterns
+  alias MBTAV3API.RoutePatterns.RoutePattern, as: APIRoutePattern
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
+
+  @type alert_data_t :: %{
+          route_type: Route.type_int(),
+          direction: String.t(),
+          route_ids: [Route.id_t()],
+          stop_ids: [Stop.id_t()],
+          child_stops_with_context: [stop_with_context_t()] | [],
+          trip_ids: [String.t()]
+        }
+  @type direction_t :: 0 | 1
+  @type stop_with_context_t :: {Stop.t(), Route.id_t(), direction_t(), RoutePattern.stop_type()}
 
   @spec build_alert(map(), ServiceEffectCombinations.service_effect_combination()) ::
           map()
   def build_alert(alert_data, combination) do
     effect_name = Map.get(alert_data, :effect_name)
     effect_map = Effect.effect_map_by_name(effect_name)
-    route_ids = Map.get(alert_data, :route_ids, [])
     stop_ids = Map.get(alert_data, :stop_ids)
     direction_id = Map.get(alert_data, :direction)
 
+    route_ids =
+      alert_data
+      |> Map.get(:route_ids, [])
+      |> add_combo_route_ids()
+
     alert_data =
       alert_data
-      |> Map.put(:route_ids, add_combo_route_ids(route_ids))
+      |> Map.put(:route_ids, route_ids)
       |> Map.put(:stop_ids, add_child_stops(stop_ids, route_ids, direction_id))
+      |> Map.put(
+        :child_stops_with_context,
+        child_stops_with_context(route_ids, direction_id, stop_ids)
+      )
 
     %{
       header_text: Map.get(alert_data, :header_text),
@@ -36,6 +56,7 @@ defmodule AlertsUI.AlertBuilder do
     }
   end
 
+  @spec add_combo_route_ids([Route.id_t()]) :: [Route.id_t()]
   defp add_combo_route_ids(route_ids) do
     route_ids
     |> Enum.flat_map(fn route_id ->
@@ -69,9 +90,58 @@ defmodule AlertsUI.AlertBuilder do
   defp get_stops(route_id, direction),
     do: RoutePatterns.included_stops_by_route_id(route_id, direction_id: direction)
 
+  @spec child_stops_with_context([Route.id_t()], String.t(), [Stop.id_t()]) :: [
+          stop_with_context_t()
+        ]
+  defp child_stops_with_context(route_ids, direction, parent_stop_ids) do
+    route_ids
+    |> Routes.expanding_green_line()
+    |> Enum.flat_map(fn route_id ->
+      route_id
+      |> get_route_patterns(direction)
+      |> Enum.flat_map(fn route_pattern ->
+        route_pattern_stops_with_context_for_parents(route_pattern, route_id, parent_stop_ids)
+      end)
+    end)
+  end
+
+  @spec get_route_patterns(Route.id_t(), String.t()) :: [APIRoutePattern.t()]
+  defp get_route_patterns(route_id, direction) do
+    opts =
+      [include: "representative_trip.stops"]
+      |> route_pattern_direction_opts(direction)
+
+    RoutePatterns.by_route_id(route_id, opts)
+  end
+
+  @spec route_pattern_direction_opts(keyword(), String.t()) :: keyword()
+  defp route_pattern_direction_opts(opts, "default"), do: opts
+
+  defp route_pattern_direction_opts(opts, direction),
+    do: Keyword.put(opts, :direction_id, direction)
+
+  @spec route_pattern_stops_with_context_for_parents(APIRoutePattern.t(), Route.id_t(), [
+          Stop.id_t()
+        ]) :: [
+          stop_with_context_t()
+        ]
+  defp route_pattern_stops_with_context_for_parents(route_pattern, route_id, parent_stop_ids) do
+    route_pattern
+    |> RoutePattern.stops()
+    |> Enum.filter(&(&1.parent_id in parent_stop_ids))
+    |> Enum.map(fn child_stop ->
+      {
+        child_stop,
+        route_id,
+        route_pattern.direction_id,
+        RoutePattern.stop_type(route_pattern, child_stop)
+      }
+    end)
+  end
+
   @spec build_informed_entities(
           ServiceEffectCombinations.service_effect_combination() | nil,
-          map(),
+          alert_data_t(),
           Effect.effect_name()
         ) ::
           [map()]
@@ -98,36 +168,47 @@ defmodule AlertsUI.AlertBuilder do
     )
   end
 
-  defp build_informed_entities(
-         :RDS,
-         %{stop_ids: [], route_ids: [_ | _]} = alert_data,
-         effect
-       ),
-       do: build_informed_entities(:R, alert_data, effect)
+  defp build_informed_entities(:RDS, %{child_stops_with_context: []} = alert_data, effect),
+    do: build_informed_entities(:R, alert_data, effect)
 
   defp build_informed_entities(
          :RDS,
          %{
-           stop_ids: [_ | _] = stop_ids,
-           route_ids: route_ids,
+           child_stops_with_context: [_ | _] = child_stops_with_context,
            direction: direction,
            route_type: route_type
          },
          effect
        ) do
-    route_ids = Routes.expanding_green_line(route_ids)
+    child_stops_with_context
+    |> child_stops_with_context_by_parent_id()
+    |> Enum.reduce([], fn {parent_stop_id, child_stops_with_context}, acc ->
+      child_stop_informed_entities =
+        Enum.map(child_stops_with_context, fn {%Stop{id: stop_id}, route_id, direction_id,
+                                               stop_type} ->
+          %{
+            activities: Activities.for_effect(effect, stop_type),
+            direction_id: direction_id,
+            route_id: route_id,
+            route_type: route_type,
+            stop_id: stop_id
+          }
+        end)
 
-    stop_ids
-    |> stop_route_pairs(route_ids)
-    |> Enum.filter(&on_route?(&1, direction))
-    |> Enum.map(fn {stop_id, route_id} ->
-      %{
-        activities: Activities.for_effect(effect),
-        route_id: route_id,
-        route_type: route_type,
-        stop_id: stop_id
-      }
-      |> maybe_add_direction(direction)
+      parent_stop_informed_entities =
+        child_stop_informed_entities
+        |> all_route_ids()
+        |> Enum.map(fn route_id ->
+          %{
+            activities: combined_activities(child_stop_informed_entities),
+            route_id: route_id,
+            route_type: route_type,
+            stop_id: parent_stop_id
+          }
+          |> maybe_add_direction(direction)
+        end)
+
+      acc ++ parent_stop_informed_entities ++ child_stop_informed_entities
     end)
   end
 
@@ -283,6 +364,29 @@ defmodule AlertsUI.AlertBuilder do
       stops ->
         {:ok, stops}
     end
+  end
+
+  @spec child_stops_with_context_by_parent_id([stop_with_context_t()]) :: %{
+          Stop.id_t() => [stop_with_context_t()]
+        }
+  defp child_stops_with_context_by_parent_id(child_stops_with_context) do
+    Enum.group_by(child_stops_with_context, fn {%Stop{parent_id: parent_id}, _, _, _} ->
+      parent_id
+    end)
+  end
+
+  @spec combined_activities([map()]) :: [Activity.activity()]
+  defp combined_activities(child_stop_informed_entities) do
+    child_stop_informed_entities
+    |> Enum.flat_map(& &1.activities)
+    |> Enum.uniq()
+  end
+
+  @spec all_route_ids([map()]) :: [Route.id_t()]
+  defp all_route_ids(child_stop_informed_entities) do
+    child_stop_informed_entities
+    |> Enum.map(& &1.route_id)
+    |> Enum.uniq()
   end
 
   @spec route_type(%{String.t() => Route.type_int()}, Route.id_t()) :: Route.type_int()
