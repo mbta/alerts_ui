@@ -5,6 +5,7 @@ defmodule AlertsUI.AlertBuilderTest do
   import Mock
   alias AlertsUI.AlertBuilder
   alias AlertsUI.Alerts
+  alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
 
@@ -153,42 +154,46 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mock(StopsRepo,
         by_route: fn _route_id, _direction -> [%Stop{id: "a"}, %Stop{id: "b"}, %Stop{id: "c"}] end
       ) do
-        alert_data = %{
-          route_type: 3,
-          description_text: "ok",
-          header_text: "hello",
-          effect_name: "Delay",
-          stop_ids: ["a", "b", "c"],
-          route_ids: ["57"],
-          trip_ids: nil,
-          direction: "1"
-        }
+        with_mock(RoutePatternsRepo,
+          included_stops_by_route_id: fn _route_id, _direction -> [] end
+        ) do
+          alert_data = %{
+            route_type: 3,
+            description_text: "ok",
+            header_text: "hello",
+            effect_name: "Delay",
+            stop_ids: ["a", "b", "c"],
+            route_ids: ["57"],
+            trip_ids: nil,
+            direction: "1"
+          }
 
-        result = AlertBuilder.build_alert(alert_data, :RDS)
+          result = AlertBuilder.build_alert(alert_data, :RDS)
 
-        assert result.informed_entity == [
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "57",
-                   route_type: 3,
-                   direction_id: 1,
-                   stop_id: "a"
-                 },
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "57",
-                   route_type: 3,
-                   direction_id: 1,
-                   stop_id: "b"
-                 },
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "57",
-                   route_type: 3,
-                   direction_id: 1,
-                   stop_id: "c"
-                 }
-               ]
+          assert result.informed_entity == [
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "57",
+                     route_type: 3,
+                     direction_id: 1,
+                     stop_id: "a"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "57",
+                     route_type: 3,
+                     direction_id: 1,
+                     stop_id: "b"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "57",
+                     route_type: 3,
+                     direction_id: 1,
+                     stop_id: "c"
+                   }
+                 ]
+        end
       end
     end
 
@@ -196,49 +201,129 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mock(StopsRepo,
         by_route: fn _route_id, _direction -> [%Stop{id: "a"}, %Stop{id: "b"}, %Stop{id: "c"}] end
       ) do
-        alert_data = %{
-          route_type: 3,
-          description_text: "ok",
-          header_text: "hello",
-          effect_name: "Delay",
-          stop_ids: ["a", "b"],
-          route_ids: ["57", "58"],
-          trip_ids: nil,
-          direction: "1"
-        }
+        with_mock(RoutePatternsRepo,
+          included_stops_by_route_id: fn _route_id, _direction -> [] end
+        ) do
+          alert_data = %{
+            route_type: 3,
+            description_text: "ok",
+            header_text: "hello",
+            effect_name: "Delay",
+            stop_ids: ["a", "b"],
+            route_ids: ["57", "58"],
+            trip_ids: nil,
+            direction: "1"
+          }
 
-        result = AlertBuilder.build_alert(alert_data, :RDS)
+          result = AlertBuilder.build_alert(alert_data, :RDS)
 
-        assert result.informed_entity == [
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "57",
-                   route_type: 3,
-                   direction_id: 1,
-                   stop_id: "a"
-                 },
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "58",
-                   route_type: 3,
-                   direction_id: 1,
-                   stop_id: "a"
-                 },
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "57",
-                   route_type: 3,
-                   direction_id: 1,
-                   stop_id: "b"
-                 },
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "58",
-                   route_type: 3,
-                   direction_id: 1,
-                   stop_id: "b"
-                 }
-               ]
+          assert result.informed_entity == [
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "57",
+                     route_type: 3,
+                     direction_id: 1,
+                     stop_id: "a"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "58",
+                     route_type: 3,
+                     direction_id: 1,
+                     stop_id: "a"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "57",
+                     route_type: 3,
+                     direction_id: 1,
+                     stop_id: "b"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "58",
+                     route_type: 3,
+                     direction_id: 1,
+                     stop_id: "b"
+                   }
+                 ]
+        end
+      end
+    end
+
+    test "properly builds RDS informed entity with child stops" do
+      alert_data = %{
+        route_type: 3,
+        description_text: "ok",
+        header_text: "hello",
+        effect_name: "Delay",
+        stop_ids: ["a", "b", "c"],
+        route_ids: ["57"],
+        trip_ids: nil,
+        direction: "1"
+      }
+
+      stops = [%Stop{id: "a"}, %Stop{id: "b"}, %Stop{id: "c"}]
+
+      rp_stops = [
+        %Stop{id: "1", parent_id: "a"},
+        %Stop{id: "2", parent_id: "b"},
+        %Stop{id: "3", parent_id: "c"}
+      ]
+
+      with_mock(RoutePatternsRepo,
+        included_stops_by_route_id: fn _route_id, _direction -> rp_stops end
+      ) do
+        with_mock(StopsRepo,
+          by_route: fn _route_id, _direction -> stops ++ rp_stops end
+        ) do
+          result = AlertBuilder.build_alert(alert_data, :RDS)
+
+          assert result.informed_entity == [
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "57",
+                     route_type: 3,
+                     direction_id: 1,
+                     stop_id: "1"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "57",
+                     route_type: 3,
+                     direction_id: 1,
+                     stop_id: "2"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "57",
+                     route_type: 3,
+                     direction_id: 1,
+                     stop_id: "3"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "57",
+                     route_type: 3,
+                     direction_id: 1,
+                     stop_id: "a"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "57",
+                     route_type: 3,
+                     direction_id: 1,
+                     stop_id: "b"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "57",
+                     route_type: 3,
+                     direction_id: 1,
+                     stop_id: "c"
+                   }
+                 ]
+        end
       end
     end
 
@@ -259,70 +344,74 @@ defmodule AlertsUI.AlertBuilderTest do
           "Green-E", 1 -> []
         end
       ) do
-        alert_data = %{
-          route_type: 1,
-          description_text: "ok",
-          header_text: "hello",
-          effect_name: "Delay",
-          stop_ids: ["place-hymnl", "place-kencl", "place-fenwy"],
-          route_ids: ["Green", "Green-D"],
-          trip_ids: nil,
-          direction: "1"
-        }
+        with_mock(RoutePatternsRepo,
+          included_stops_by_route_id: fn _route_id, _direction -> [] end
+        ) do
+          alert_data = %{
+            route_type: 1,
+            description_text: "ok",
+            header_text: "hello",
+            effect_name: "Delay",
+            stop_ids: ["place-hymnl", "place-kencl", "place-fenwy"],
+            route_ids: ["Green", "Green-D"],
+            trip_ids: nil,
+            direction: "1"
+          }
 
-        result = AlertBuilder.build_alert(alert_data, :RDS)
+          result = AlertBuilder.build_alert(alert_data, :RDS)
 
-        assert result.informed_entity == [
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "Green-B",
-                   route_type: 1,
-                   direction_id: 1,
-                   stop_id: "place-hymnl"
-                 },
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "Green-C",
-                   route_type: 1,
-                   direction_id: 1,
-                   stop_id: "place-hymnl"
-                 },
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "Green-D",
-                   route_type: 1,
-                   direction_id: 1,
-                   stop_id: "place-hymnl"
-                 },
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "Green-B",
-                   route_type: 1,
-                   direction_id: 1,
-                   stop_id: "place-kencl"
-                 },
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "Green-C",
-                   route_type: 1,
-                   direction_id: 1,
-                   stop_id: "place-kencl"
-                 },
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "Green-D",
-                   route_type: 1,
-                   direction_id: 1,
-                   stop_id: "place-kencl"
-                 },
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "Green-D",
-                   route_type: 1,
-                   direction_id: 1,
-                   stop_id: "place-fenwy"
-                 }
-               ]
+          assert result.informed_entity == [
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "Green-B",
+                     route_type: 1,
+                     direction_id: 1,
+                     stop_id: "place-hymnl"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "Green-C",
+                     route_type: 1,
+                     direction_id: 1,
+                     stop_id: "place-hymnl"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "Green-D",
+                     route_type: 1,
+                     direction_id: 1,
+                     stop_id: "place-hymnl"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "Green-B",
+                     route_type: 1,
+                     direction_id: 1,
+                     stop_id: "place-kencl"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "Green-C",
+                     route_type: 1,
+                     direction_id: 1,
+                     stop_id: "place-kencl"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "Green-D",
+                     route_type: 1,
+                     direction_id: 1,
+                     stop_id: "place-kencl"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "Green-D",
+                     route_type: 1,
+                     direction_id: 1,
+                     stop_id: "place-fenwy"
+                   }
+                 ]
+        end
       end
     end
 
@@ -657,42 +746,46 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mock(StopsRepo,
         by_route: fn _route_id, _direction -> [%Stop{id: "a"}, %Stop{id: "b"}, %Stop{id: "c"}] end
       ) do
-        alert_data = %{
-          route_type: 3,
-          description_text: "ok",
-          header_text: "hello",
-          effect_name: "Delay",
-          route_ids: ["57"],
-          trip_ids: [],
-          stop_ids: ["a", "b", "c"],
-          direction: "0"
-        }
+        with_mock(RoutePatternsRepo,
+          included_stops_by_route_id: fn _route_id, _direction -> [] end
+        ) do
+          alert_data = %{
+            route_type: 3,
+            description_text: "ok",
+            header_text: "hello",
+            effect_name: "Delay",
+            route_ids: ["57"],
+            trip_ids: [],
+            stop_ids: ["a", "b", "c"],
+            direction: "0"
+          }
 
-        result = AlertBuilder.build_alert(alert_data, :RDTS)
+          result = AlertBuilder.build_alert(alert_data, :RDTS)
 
-        assert result.informed_entity == [
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "57",
-                   route_type: 3,
-                   direction_id: 0,
-                   stop_id: "a"
-                 },
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "57",
-                   route_type: 3,
-                   direction_id: 0,
-                   stop_id: "b"
-                 },
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "57",
-                   route_type: 3,
-                   direction_id: 0,
-                   stop_id: "c"
-                 }
-               ]
+          assert result.informed_entity == [
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "57",
+                     route_type: 3,
+                     direction_id: 0,
+                     stop_id: "a"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "57",
+                     route_type: 3,
+                     direction_id: 0,
+                     stop_id: "b"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "57",
+                     route_type: 3,
+                     direction_id: 0,
+                     stop_id: "c"
+                   }
+                 ]
+        end
       end
     end
 
@@ -741,139 +834,145 @@ defmodule AlertsUI.AlertBuilderTest do
         direction: "default"
       }
 
-      result = AlertBuilder.build_alert(alert_data, :RDTS)
+      with_mock(RoutePatternsRepo, included_stops_by_route_id: fn _route_id, _direction -> [] end) do
+        result = AlertBuilder.build_alert(alert_data, :RDTS)
 
-      assert result.informed_entity == [
-               %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
-                 route_id: "57",
-                 route_type: 3,
-                 direction_id: 0,
-                 stop_id: "a",
-                 trip: %{
-                   trip_id: "123",
+        assert result.informed_entity == [
+                 %{
+                   activities: ["BOARD", "EXIT", "RIDE"],
                    route_id: "57",
-                   direction_id: 0
-                 }
-               },
-               %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
-                 route_id: "57",
-                 route_type: 3,
-                 direction_id: 0,
-                 stop_id: "a",
-                 trip: %{
-                   trip_id: "345",
+                   route_type: 3,
+                   direction_id: 0,
+                   stop_id: "a",
+                   trip: %{
+                     trip_id: "123",
+                     route_id: "57",
+                     direction_id: 0
+                   }
+                 },
+                 %{
+                   activities: ["BOARD", "EXIT", "RIDE"],
                    route_id: "57",
-                   direction_id: 0
-                 }
-               },
-               %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
-                 route_id: "57",
-                 route_type: 3,
-                 direction_id: 0,
-                 stop_id: "a",
-                 trip: %{
-                   trip_id: "456",
+                   route_type: 3,
+                   direction_id: 0,
+                   stop_id: "a",
+                   trip: %{
+                     trip_id: "345",
+                     route_id: "57",
+                     direction_id: 0
+                   }
+                 },
+                 %{
+                   activities: ["BOARD", "EXIT", "RIDE"],
                    route_id: "57",
-                   direction_id: 0
-                 }
-               },
-               %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
-                 route_id: "57",
-                 route_type: 3,
-                 direction_id: 0,
-                 stop_id: "b",
-                 trip: %{
-                   trip_id: "123",
+                   route_type: 3,
+                   direction_id: 0,
+                   stop_id: "a",
+                   trip: %{
+                     trip_id: "456",
+                     route_id: "57",
+                     direction_id: 0
+                   }
+                 },
+                 %{
+                   activities: ["BOARD", "EXIT", "RIDE"],
                    route_id: "57",
-                   direction_id: 0
-                 }
-               },
-               %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
-                 route_id: "57",
-                 route_type: 3,
-                 direction_id: 0,
-                 stop_id: "b",
-                 trip: %{
-                   trip_id: "345",
+                   route_type: 3,
+                   direction_id: 0,
+                   stop_id: "b",
+                   trip: %{
+                     trip_id: "123",
+                     route_id: "57",
+                     direction_id: 0
+                   }
+                 },
+                 %{
+                   activities: ["BOARD", "EXIT", "RIDE"],
                    route_id: "57",
-                   direction_id: 0
-                 }
-               },
-               %{
-                 activities: ["BOARD", "EXIT", "RIDE"],
-                 route_id: "57",
-                 route_type: 3,
-                 direction_id: 0,
-                 stop_id: "b",
-                 trip: %{
-                   trip_id: "456",
+                   route_type: 3,
+                   direction_id: 0,
+                   stop_id: "b",
+                   trip: %{
+                     trip_id: "345",
+                     route_id: "57",
+                     direction_id: 0
+                   }
+                 },
+                 %{
+                   activities: ["BOARD", "EXIT", "RIDE"],
                    route_id: "57",
-                   direction_id: 0
+                   route_type: 3,
+                   direction_id: 0,
+                   stop_id: "b",
+                   trip: %{
+                     trip_id: "456",
+                     route_id: "57",
+                     direction_id: 0
+                   }
                  }
-               }
-             ]
+               ]
+      end
     end
 
     test "SR informed entity routes and stops includes route type" do
       with_mock(StopsRepo,
         by_route: fn _route_id, _direction -> [%Stop{id: "a"}, %Stop{id: "b"}] end
       ) do
-        alert_data = %{
-          route_type: 1,
-          description_text: "ok",
-          header_text: "hello",
-          effect_name: "Delay",
-          route_ids: ["56", "57", "58"],
-          route_types_by_id: %{"56" => 1, "57" => 3, "58" => 1},
-          stop_ids: ["a", "b"],
-          direction: "default"
-        }
+        with_mock(RoutePatternsRepo,
+          included_stops_by_route_id: fn _route_id, _direction -> [] end
+        ) do
+          alert_data = %{
+            route_type: 1,
+            description_text: "ok",
+            header_text: "hello",
+            effect_name: "Delay",
+            route_ids: ["56", "57", "58"],
+            route_types_by_id: %{"56" => 1, "57" => 3, "58" => 1},
+            stop_ids: ["a", "b"],
+            direction: "default"
+          }
 
-        result = AlertBuilder.build_alert(alert_data, :SR)
+          result = AlertBuilder.build_alert(alert_data, :SR)
 
-        assert result.informed_entity == [
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "56",
-                   route_type: 1,
-                   stop_id: "a"
-                 },
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "57",
-                   route_type: 3,
-                   stop_id: "a"
-                 },
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "58",
-                   route_type: 1,
-                   stop_id: "a"
-                 },
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "56",
-                   route_type: 1,
-                   stop_id: "b"
-                 },
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "57",
-                   route_type: 3,
-                   stop_id: "b"
-                 },
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "58",
-                   route_type: 1,
-                   stop_id: "b"
-                 }
-               ]
+          assert result.informed_entity == [
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "56",
+                     route_type: 1,
+                     stop_id: "a"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "57",
+                     route_type: 3,
+                     stop_id: "a"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "58",
+                     route_type: 1,
+                     stop_id: "a"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "56",
+                     route_type: 1,
+                     stop_id: "b"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "57",
+                     route_type: 3,
+                     stop_id: "b"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "58",
+                     route_type: 1,
+                     stop_id: "b"
+                   }
+                 ]
+        end
       end
     end
 
@@ -894,63 +993,67 @@ defmodule AlertsUI.AlertBuilderTest do
           "Green-E", 1 -> []
         end
       ) do
-        alert_data = %{
-          route_type: 0,
-          description_text: "ok",
-          header_text: "hello",
-          effect_name: "Delay",
-          route_ids: ["Green", "Green-D"],
-          route_types_by_id: %{"Green" => 0, "Green-D" => 0},
-          stop_ids: ["place-hymnl", "place-kencl", "place-fenwy"],
-          direction: "default"
-        }
+        with_mock(RoutePatternsRepo,
+          included_stops_by_route_id: fn _route_id, _direction -> [] end
+        ) do
+          alert_data = %{
+            route_type: 0,
+            description_text: "ok",
+            header_text: "hello",
+            effect_name: "Delay",
+            route_ids: ["Green", "Green-D"],
+            route_types_by_id: %{"Green" => 0, "Green-D" => 0},
+            stop_ids: ["place-hymnl", "place-kencl", "place-fenwy"],
+            direction: "default"
+          }
 
-        result = AlertBuilder.build_alert(alert_data, :SR)
+          result = AlertBuilder.build_alert(alert_data, :SR)
 
-        assert result.informed_entity == [
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "Green-B",
-                   route_type: 0,
-                   stop_id: "place-hymnl"
-                 },
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "Green-C",
-                   route_type: 0,
-                   stop_id: "place-hymnl"
-                 },
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "Green-D",
-                   route_type: 0,
-                   stop_id: "place-hymnl"
-                 },
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "Green-B",
-                   route_type: 0,
-                   stop_id: "place-kencl"
-                 },
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "Green-C",
-                   route_type: 0,
-                   stop_id: "place-kencl"
-                 },
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "Green-D",
-                   route_type: 0,
-                   stop_id: "place-kencl"
-                 },
-                 %{
-                   activities: ["BOARD", "EXIT", "RIDE"],
-                   route_id: "Green-D",
-                   route_type: 0,
-                   stop_id: "place-fenwy"
-                 }
-               ]
+          assert result.informed_entity == [
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "Green-B",
+                     route_type: 0,
+                     stop_id: "place-hymnl"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "Green-C",
+                     route_type: 0,
+                     stop_id: "place-hymnl"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "Green-D",
+                     route_type: 0,
+                     stop_id: "place-hymnl"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "Green-B",
+                     route_type: 0,
+                     stop_id: "place-kencl"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "Green-C",
+                     route_type: 0,
+                     stop_id: "place-kencl"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "Green-D",
+                     route_type: 0,
+                     stop_id: "place-kencl"
+                   },
+                   %{
+                     activities: ["BOARD", "EXIT", "RIDE"],
+                     route_id: "Green-D",
+                     route_type: 0,
+                     stop_id: "place-fenwy"
+                   }
+                 ]
+        end
       end
     end
   end

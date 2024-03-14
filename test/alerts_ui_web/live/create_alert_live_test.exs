@@ -7,7 +7,8 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
   import Mock
   import Test.Support.Helpers
   alias AlertsUIWeb.FormComponents.{AffectedService, AlertDetails, RouteTypeAndEffect}
-
+  alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
+  alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
 
@@ -128,22 +129,28 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
       stops = [%Stop{id: "1", name: "cool stop name"}]
 
       with_mock(StopsRepo, by_route: fn _route, _direction -> stops end) do
-        conn = log_in_user(conn)
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        with_mock(RoutePatternsRepo,
+          included_stops_by_route_id: fn _route_id, _direction -> [] end
+        ) do
+          with_mock(SchedulesRepo, by_route_ids: fn _route_ids, _opts -> [] end) do
+            conn = log_in_user(conn)
+            {:ok, view, _html} = live(conn, "/alerts/new")
 
-        {:ok, changeset} =
-          Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 3, effect_name: "Detour"})
-          |> apply_action(:insert)
+            {:ok, changeset} =
+              Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 3, effect_name: "Detour"})
+              |> apply_action(:insert)
 
-        send(view.pid, {:step_completed, changeset})
-        send(view.pid, {:fetch_available_routes, ["3"]})
-        send(view.pid, {:fetch_available_stops, 0, ["12"]})
+            send(view.pid, {:step_completed, changeset})
+            send(view.pid, {:fetch_available_routes, ["3"]})
+            send(view.pid, {:fetch_available_stops, 0, ["12"]})
 
-        view
-        |> element("#service_form")
-        |> render_change(%{
-          "affected_service" => %{"route_ids" => ["1"], "directions" => "0", "stop_ids" => []}
-        }) =~ "cool stop name"
+            view
+            |> element("#service_form")
+            |> render_change(%{
+              "affected_service" => %{"route_ids" => ["1"], "directions" => "0", "stop_ids" => []}
+            }) =~ "cool stop name"
+          end
+        end
       end
     end
 
