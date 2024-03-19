@@ -99,7 +99,7 @@ defmodule AlertsUI.MixProject do
       {:req, "~> 0.4.0"},
       {:stream_data, "~> 0.6.0", only: :test},
       {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
-      {:telemetry_metrics, "~> 0.6"},
+      {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
       {:tzdata, "~> 1.1"},
       {:ueberauth, "~> 0.10"},
