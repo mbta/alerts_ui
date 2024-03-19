@@ -4,7 +4,7 @@ defmodule AlertsUI.ActivitiesTest do
 
   alias AlertsUI.Activities
 
-  describe "for_effect/1" do
+  describe "for_effect" do
     test "Access Issue" do
       assert Activities.for_effect("Access Issue") == [:USING_WHEELCHAIR]
     end
@@ -83,6 +83,19 @@ defmodule AlertsUI.ActivitiesTest do
       assert Activities.for_effect("Service Change") == [:BOARD, :EXIT, :RIDE]
     end
 
+    test "Shuttle for a default stop" do
+      assert Activities.for_effect("Shuttle") == [:BOARD, :EXIT, :RIDE]
+      assert Activities.for_effect("Shuttle", :default) == [:BOARD, :EXIT, :RIDE]
+    end
+
+    test "Shuttle for a first stop" do
+      assert Activities.for_effect("Shuttle", :first) == [:BOARD, :RIDE]
+    end
+
+    test "Shuttle for a last stop" do
+      assert Activities.for_effect("Shuttle", :last) == [:EXIT, :RIDE]
+    end
+
     test "Snow Route" do
       assert Activities.for_effect("Snow Route") == [:BOARD, :EXIT]
     end
@@ -109,6 +122,19 @@ defmodule AlertsUI.ActivitiesTest do
 
     test "Summary" do
       assert Activities.for_effect("Summary") == [:BOARD, :EXIT, :RIDE]
+    end
+
+    test "Suspension for a default stop" do
+      assert Activities.for_effect("Suspension") == [:BOARD, :EXIT, :RIDE]
+      assert Activities.for_effect("Suspension", :default) == [:BOARD, :EXIT, :RIDE]
+    end
+
+    test "Suspension for a first stop" do
+      assert Activities.for_effect("Suspension", :first) == [:BOARD, :RIDE]
+    end
+
+    test "Suspension for a last stop" do
+      assert Activities.for_effect("Suspension", :last) == [:EXIT, :RIDE]
     end
 
     test "Track Change" do
