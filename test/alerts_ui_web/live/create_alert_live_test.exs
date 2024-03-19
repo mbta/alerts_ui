@@ -62,7 +62,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
         send(view.pid, {:create_alert, changeset})
         failure_rendered_view = render(view)
-        assert failure_rendered_view =~ "header_text: can&#39;t be blank"
+        assert failure_rendered_view =~ "header_text: is required"
       end
     end
 

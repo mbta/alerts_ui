@@ -66,9 +66,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         {:noreply, socket}
 
       {:error, changeset} ->
-        form = to_form(changeset)
-        IO.inspect(form, label: "form")
-        {:noreply, assign(socket, :form, form)}
+        {:noreply, assign(socket, :form, to_form(changeset))}
     end
   end
 
@@ -79,7 +77,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   def changeset(changeset, params \\ %{}) do
     changeset
     |> cast(params, @fields)
-    |> validate_required(@required_fields)
+    |> validate_required(@required_fields, message: "is required")
   end
 
   @impl true
