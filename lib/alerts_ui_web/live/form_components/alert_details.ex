@@ -19,23 +19,23 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   @impl true
   def mount(socket) do
     form = %__MODULE__{} |> changeset() |> to_form()
-    socket = socket |> assign(%{form: form})
-
+    socket = assign(socket, %{form: form})
     {:ok, socket}
   end
 
   @impl true
   def update(assigns, socket) do
-    {:ok, socket |> assign(assigns)}
+    {:ok, assign(socket, assigns)}
   end
 
   def handle_event("validate", %{"alert_details" => alert_details}, socket) do
-    changeset =
+    form =
       %__MODULE__{}
       |> changeset(alert_details)
       |> Map.put(:action, :validate)
+      |> to_form()
 
-    {:noreply, assign(socket, %{form: to_form(changeset), alert_details: alert_details})}
+    {:noreply, assign(socket, %{form: form, alert_details: alert_details})}
   end
 
   @impl true
@@ -51,7 +51,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         {:noreply, socket}
 
       {:error, changeset} ->
-        {:noreply, assign(socket, :form, changeset |> to_form())}
+        {:noreply, assign(socket, :form, to_form(changeset))}
     end
   end
 
@@ -66,19 +66,18 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         {:noreply, socket}
 
       {:error, changeset} ->
-        {:noreply, assign(socket, :changeset, changeset |> to_form())}
+        {:noreply, assign(socket, :form, to_form(changeset))}
     end
   end
 
   def draft_changeset(changeset, params) do
-    changeset
-    |> cast(params, @fields)
+    cast(changeset, params, @fields)
   end
 
   def changeset(changeset, params \\ %{}) do
     changeset
     |> cast(params, @fields)
-    |> validate_required(@required_fields)
+    |> validate_required(@required_fields, message: "is required")
   end
 
   @impl true

@@ -398,7 +398,7 @@ defmodule AlertsUIWeb.CoreComponents do
         ]}
         {@rest}
       ><%= Form.normalize_value("textarea", @value) %></textarea>
-      <.error :for={msg <- @errors}><%= msg %></.error>
+      <.error :for={msg <- @errors}><%= @label %> <%= msg %></.error>
     </div>
     """
   end

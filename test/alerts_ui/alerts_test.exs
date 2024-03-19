@@ -43,7 +43,7 @@ defmodule AlertsUI.AlertsTest do
         })
 
       {:error, changeset} = Alerts.create_alert(new_params)
-      assert changeset.errors == [header_text: {"can't be blank", [validation: :required]}]
+      assert changeset.errors == [header_text: {"is required", [validation: :required]}]
     end
 
     test "error if feed compare is true" do
