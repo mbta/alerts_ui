@@ -15,7 +15,9 @@ defmodule AlertsUI.AlertsTest do
           description_text: ""
         })
 
-      {:ok, new_alert} = Alerts.create_alert(new_params)
+      {:ok, %{version: %PaperTrail.Version{item_changes: new_alert}}} =
+        Alerts.create_alert(new_params)
+
       assert new_alert.alert_id == "123"
       assert new_alert.header_text == "new header text"
       assert new_alert.description_text == ""
@@ -28,7 +30,9 @@ defmodule AlertsUI.AlertsTest do
           description_text: ""
         })
 
-      {:ok, new_alert} = Alerts.create_alert(new_params)
+      {:ok, %{version: %PaperTrail.Version{item_changes: new_alert}}} =
+        Alerts.create_alert(new_params)
+
       assert new_alert.alert_id |> String.to_integer() |> is_integer()
       assert new_alert.header_text == "new header text"
       assert new_alert.description_text == ""

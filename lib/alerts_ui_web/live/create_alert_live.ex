@@ -185,7 +185,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
     |> AlertBuilder.build_alert(socket.assigns.combination)
     |> Alerts.create_alert()
     |> case do
-      {:ok, result} ->
+      {:ok, %{version: %PaperTrail.Version{item_changes: result}}} ->
         assigns = %{
           progress: get_step_by_name(socket.assigns.progress.next),
           alert_data: %{},

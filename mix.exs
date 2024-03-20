@@ -87,6 +87,7 @@ defmodule AlertsUI.MixProject do
       {:mbta_v3_api, git: "https://github.com/mbta/mbta_v3_api.git", branch: "mss-more-files"},
       {:mock, "~> 0.3.8", only: :test},
       {:oban, "~> 2.16"},
+      {:paper_trail, "~> 1.0.0"},
       {:phoenix, "~> 1.7.7"},
       {:phoenix_ecto, "~> 4.4"},
       {:phoenix_html, "~> 4.0"},
