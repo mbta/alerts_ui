@@ -48,8 +48,10 @@ defmodule AlertsUI.Alerts do
     |> Repo.one!() || 0
   end
 
+  # @spec create_or_modify_alert_from_feed(map()) ::
+  #         {:ok, Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
   @spec create_or_modify_alert_from_feed(map()) ::
-          {:ok, Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
+          nil | :ok
   def create_or_modify_alert_from_feed(incoming_alert) do
     most_recent_alert = Repo.one(get_alert_by_alert_id_query(incoming_alert.alert_id))
 
@@ -60,28 +62,30 @@ defmodule AlertsUI.Alerts do
              incoming_alert
            ) do
         {:ok, changeset} ->
-          result =
-            PaperTrail.Multi.new()
-            |> PaperTrail.Multi.insert_or_update(changeset)
-            |> Repo.transaction()
-
-          case result do
-            {:ok, _} ->
-              nil
-
-            {:error, _, %{errors: [alert_id: {"alert is not most recent version", []}]}, _} ->
-              nil
-
-            {:error, _, changeset, _} ->
-              Logger.warning("Error persisting alert with ID #{get_field(changeset, :alert_id)}")
-              traverse_errors(changeset, fn {msg, _} -> msg end) |> Logger.warning()
-          end
+          insert_or_update(changeset)
 
         {:error, _} ->
           nil
       end
 
     result
+  end
+
+  defp insert_or_update(changeset) do
+    PaperTrail.Multi.new()
+    |> PaperTrail.Multi.insert_or_update(changeset)
+    |> Repo.transaction()
+    |> case do
+      {:ok, _} ->
+        nil
+
+      {:error, _, %{errors: [alert_id: {"alert is not most recent version", []}]}, _} ->
+        nil
+
+      {:error, _, changeset, _} ->
+        Logger.warning("Error persisting alert with ID #{get_field(changeset, :alert_id)}")
+        traverse_errors(changeset, fn {msg, _} -> msg end) |> Logger.warning()
+    end
   end
 
   @spec create_changeset_from_feed(

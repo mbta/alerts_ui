@@ -23,6 +23,25 @@ defmodule AlertsUI.AlertsTest do
       assert new_alert.description_text == ""
     end
 
+    test "papertrail saves versions" do
+      new_params =
+        build(:alert_map, %{
+          alert_id: "123",
+          header_text: "new header text",
+          description_text: ""
+        })
+
+      {:ok, %{version: %PaperTrail.Version{item_changes: new_alert}}} =
+        Alerts.create_alert(new_params)
+
+      %Alert{alert_id: stored_alert_id} = Repo.get!(Alert, new_alert.id)
+
+      %PaperTrail.Version{item_changes: %{"alert_id" => version_alert_id}} =
+        PaperTrail.Version.last()
+
+      assert stored_alert_id == version_alert_id
+    end
+
     test "creates alert with no id uses next in sequence" do
       new_params =
         build(:alert_map, %{
@@ -136,6 +155,34 @@ defmodule AlertsUI.AlertsTest do
       assert updated_alert.alert_id == "123"
       assert updated_alert.header_text == "new header text"
       assert (updated_alert.active_period |> hd).end == ~U[2023-10-13 00:03:00Z]
+    end
+
+    test "saves papertrail versions" do
+      first_params =
+        build(:alert_map, %{
+          alert_id: "123",
+          header_text: "old header text",
+          active_period: [
+            %{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:01:00Z]}
+          ]
+        })
+
+      second_params =
+        build(:alert_map, %{
+          alert_id: "123",
+          header_text: "new header text",
+          last_modified_timestamp: ~U[2023-10-12 00:01:00Z],
+          active_period: [%{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:03:00Z]}]
+        })
+
+      Alerts.create_or_modify_alert_from_feed(first_params)
+      Alerts.create_or_modify_alert_from_feed(second_params)
+
+      current_alert = Alerts.get_by_alert_id("123")
+      %PaperTrail.Version{item_changes: original_version} = PaperTrail.get_version(current_alert)
+
+      assert current_alert.header_text == "new header text"
+      assert original_version["header_text"] == "old header text"
     end
 
     test "does not update active period if empty and closed" do
