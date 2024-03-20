@@ -252,6 +252,32 @@ defmodule AlertsUIWeb.CoreComponents do
   end
 
   @doc """
+  Renders a form that with a single search field.
+
+  ## Examples
+
+      <.search_form value={@search_text} name="search" label="Text" />
+  """
+  attr :value, :any
+  attr :label, :string, default: "Search"
+  attr :name, :string, default: "search"
+  attr :on_change, :string, default: "search"
+
+  def search_form(assigns) do
+    ~H"""
+    <form phx-submit={@on_change} class="form-control gap-4 flex flex-row">
+      <.label for={@name}><%= @label %></.label>
+      <input type="search" name={@name} id={@name} value={@value} class="input input-bordered w-32" />
+      <input
+        type="submit"
+        value="Search"
+        class="phx-submit-loading:opacity-75 rounded-lg bg-zinc-900 hover:bg-zinc-700 py-2 px-3 text-sm font-semibold leading-6 text-white active:text-white/80"
+      />
+    </form>
+    """
+  end
+
+  @doc """
   Renders a button.
 
   ## Examples

@@ -45,6 +45,7 @@ defmodule AlertsUIWeb.Router do
       on_mount: [{AlertsUIWeb.UserAuth, :ensure_authenticated}, AlertsUIWeb.PutFlagsInAssignsHook] do
       live("/alerts", ViewAlertsLive)
       live("/alerts/new", CreateAlertLive)
+      live("/validate", ValidateLive)
     end
   end
 
