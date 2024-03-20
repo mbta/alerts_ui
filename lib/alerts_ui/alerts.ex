@@ -48,8 +48,6 @@ defmodule AlertsUI.Alerts do
     |> Repo.one!() || 0
   end
 
-  # @spec create_or_modify_alert_from_feed(map()) ::
-  #         {:ok, Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
   @spec create_or_modify_alert_from_feed(map()) ::
           nil | :ok
   def create_or_modify_alert_from_feed(incoming_alert) do
@@ -178,7 +176,7 @@ defmodule AlertsUI.Alerts do
     |> Repo.all()
     |> Enum.each(fn alert ->
       change(alert, closed_timestamp: closed_time)
-      |> Repo.update()
+      |> PaperTrail.update()
     end)
 
     incoming_alert_list
