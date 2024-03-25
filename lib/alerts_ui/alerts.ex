@@ -6,7 +6,6 @@ defmodule AlertsUI.Alerts do
   import Ecto.Query
   alias AlertsUI.Models.Alert
   alias AlertsUI.Repo
-  alias Ecto.Multi
   require Logger
 
   defp compare_feed,
@@ -22,14 +21,18 @@ defmodule AlertsUI.Alerts do
     else
       %Alert{}
       |> Alert.changeset(params)
-      |> Repo.insert()
+      |> PaperTrail.insert()
+      |> case do
+        {:ok, %{version: %PaperTrail.Version{item_changes: result}}} -> {:ok, result}
+        {:error, result} -> {:error, result}
+      end
     end
   end
 
   def create_draft_alert(params) do
     %Alert{}
     |> Alert.draft_changeset(params)
-    |> Repo.insert()
+    |> PaperTrail.insert()
   end
 
   @spec parse_changeset_errors(Ecto.Changeset.t()) :: %{optional(atom()) => list()}
@@ -50,28 +53,35 @@ defmodule AlertsUI.Alerts do
   end
 
   @spec create_or_modify_alert_from_feed(map()) ::
-          {:ok, Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
+          nil | :ok
   def create_or_modify_alert_from_feed(incoming_alert) do
-    result =
-      Multi.new()
-      |> Multi.one(:most_recent_alert, get_alert_by_alert_id_query(incoming_alert.alert_id))
-      |> Multi.run(:changeset, AlertsUI.Alerts, :create_changeset_from_feed, [incoming_alert])
-      |> Multi.insert_or_update(:insert_or_update, fn %{changeset: changeset} -> changeset end)
-      |> Repo.transaction()
+    most_recent_alert = Repo.one(get_alert_by_alert_id_query(incoming_alert.alert_id))
 
-    case result do
-      {:ok, _} ->
+    case create_changeset_from_feed(
+           :repo,
+           %{most_recent_alert: most_recent_alert},
+           incoming_alert
+         ) do
+      {:ok, changeset} ->
+        insert_or_update(changeset)
+
+      {:error, %{errors: [alert_id: {"alert is not most recent version", []}]}} ->
         nil
+    end
+  end
 
-      {:error, _, %{errors: [alert_id: {"alert is not most recent version", []}]}, _} ->
+  defp insert_or_update(changeset) do
+    PaperTrail.Multi.new()
+    |> PaperTrail.Multi.insert_or_update(changeset)
+    |> Repo.transaction()
+    |> case do
+      {:ok, _} ->
         nil
 
       {:error, _, changeset, _} ->
         Logger.warning("Error persisting alert with ID #{get_field(changeset, :alert_id)}")
         traverse_errors(changeset, fn {msg, _} -> msg end) |> Logger.warning()
     end
-
-    result
   end
 
   @spec create_changeset_from_feed(
@@ -154,13 +164,18 @@ defmodule AlertsUI.Alerts do
   @spec close_if_not_in_feed([map()], DateTime.t()) :: [map()]
   def close_if_not_in_feed(incoming_alert_list, closed_time \\ DateTime.utc_now()) do
     alert_ids = Enum.map(incoming_alert_list, & &1.alert_id)
+    closed_time = DateTime.truncate(closed_time, :second)
 
     from(
       a in Alert,
       where: a.alert_id not in ^alert_ids,
       where: is_nil(a.closed_timestamp)
     )
-    |> Repo.update_all(set: [closed_timestamp: closed_time])
+    |> Repo.all()
+    |> Enum.each(fn alert ->
+      change(alert, closed_timestamp: closed_time)
+      |> PaperTrail.update()
+    end)
 
     incoming_alert_list
   end
