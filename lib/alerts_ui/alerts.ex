@@ -22,6 +22,10 @@ defmodule AlertsUI.Alerts do
       %Alert{}
       |> Alert.changeset(params)
       |> PaperTrail.insert()
+      |> case do
+        {:ok, %{version: %PaperTrail.Version{item_changes: result}}} -> {:ok, result}
+        {:error, result} -> {:error, result}
+      end
     end
   end
 
@@ -53,20 +57,17 @@ defmodule AlertsUI.Alerts do
   def create_or_modify_alert_from_feed(incoming_alert) do
     most_recent_alert = Repo.one(get_alert_by_alert_id_query(incoming_alert.alert_id))
 
-    result =
-      case create_changeset_from_feed(
-             :repo,
-             %{most_recent_alert: most_recent_alert},
-             incoming_alert
-           ) do
-        {:ok, changeset} ->
-          insert_or_update(changeset)
+    case create_changeset_from_feed(
+           :repo,
+           %{most_recent_alert: most_recent_alert},
+           incoming_alert
+         ) do
+      {:ok, changeset} ->
+        insert_or_update(changeset)
 
-        {:error, _} ->
-          nil
-      end
-
-    result
+      {:error, %{errors: [alert_id: {"alert is not most recent version", []}]}} ->
+        nil
+    end
   end
 
   defp insert_or_update(changeset) do
@@ -75,9 +76,6 @@ defmodule AlertsUI.Alerts do
     |> Repo.transaction()
     |> case do
       {:ok, _} ->
-        nil
-
-      {:error, _, %{errors: [alert_id: {"alert is not most recent version", []}]}, _} ->
         nil
 
       {:error, _, changeset, _} ->
