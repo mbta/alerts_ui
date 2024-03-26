@@ -109,7 +109,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           phx-debounce={120}
           id="description_input"
         />
-        <.button class="btn btn-outline basis-8 self-center px-8" name="save">submit</.button>
+        <.button class="btn btn-outline basis-8 self-center px-8" name="save">Publish</.button>
       </.form>
       <button
         phx-target={@myself}
