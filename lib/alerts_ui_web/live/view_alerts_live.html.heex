@@ -70,6 +70,11 @@
         <:col :let={alert} label="Closed At" field={:closed_timestamp}>
           <%= DateTimeHelpers.friendly_date_time(alert.closed_timestamp) %>
         </:col>
+        <:col :let={alert}>
+          <div class="badge badge-neutral badge-outline">
+            <.link href={~p"/alerts/new?alert_id=#{alert.alert_id}"}>edit</.link>
+          </div>
+        </:col>
       </Flop.Phoenix.table>
 
       <Flop.Phoenix.pagination

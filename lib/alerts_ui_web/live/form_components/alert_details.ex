@@ -24,7 +24,19 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   end
 
   @impl true
-  def update(assigns, socket) do
+  def update(%{alert_data: alert_data} = assigns, socket) do
+    edit_alert_data =
+      %{
+        header_text: Map.get(alert_data, :header_text),
+        description_text: Map.get(alert_data, :description_text)
+      }
+
+    changeset =
+      %__MODULE__{}
+      |> changeset(edit_alert_data)
+
+    form = to_form(changeset)
+    assigns = edit_alert_data |> Map.put(:form, form) |> Map.merge(assigns)
     {:ok, assign(socket, assigns)}
   end
 
@@ -101,6 +113,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           type="textarea"
           phx-debounce={120}
           id="header_input"
+          value={@header_text}
         />
         <.input
           field={@form[:description_text]}
@@ -108,6 +121,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           type="textarea"
           phx-debounce={120}
           id="description_input"
+          value={@description_text}
         />
         <.button class="btn btn-outline basis-8 self-center px-8" name="save">Publish</.button>
       </.form>

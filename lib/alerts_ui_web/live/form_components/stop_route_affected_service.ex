@@ -32,6 +32,12 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     route_type = Map.get(alert_data, :route_type)
     get_stops_by_route_type(route_type)
 
+    assigns =
+      case Map.get(alert_data, :route_ids) do
+        nil -> assigns
+        _ -> update_for_edit(alert_data, assigns)
+      end
+
     {:ok, assign(socket, assigns)}
   end
 
@@ -76,6 +82,26 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     {:noreply, socket}
   end
 
+  def update_for_edit(alert_data, assigns) do
+    edit_alert_data =
+      %{
+        route_ids: Map.get(alert_data, :route_ids) || [],
+        stop_ids: Map.get(alert_data, :stop_ids) || []
+      }
+
+    routes_with_types = routes_with_types(assigns.available_routes, edit_alert_data.route_ids)
+
+    edit_alert_data = Map.put(edit_alert_data, :route_types_by_id, routes_with_types)
+
+    changeset =
+      %__MODULE__{}
+      |> changeset(edit_alert_data)
+
+    form = to_form(changeset |> Map.put(:action, :validate))
+
+    edit_alert_data |> Map.put(:form, form) |> Map.merge(assigns)
+  end
+
   def changeset(changeset, params) do
     changeset
     |> cast(params, @fields)
@@ -87,6 +113,16 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       self(),
       {:fetch_stops_by_route_type, route_type}
     )
+  end
+
+  #TODO
+  def routes_with_types(available_routes, route_ids) do
+    routes_with_types =
+      available_routes
+      |> Stream.filter(fn route -> route.id in route_ids end)
+      |> Enum.reduce(%{}, fn route, acc ->
+        Map.put(acc, route.id, route.type)
+      end)
   end
 
   def get_routes_by_stop_ids(nil, _route_type), do: nil
@@ -120,6 +156,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         for={@form}
         phx-target={@myself}
         phx-change="validate"
+        phx-click-alway="validate"
+        phx-blur="validate"
         class="form-control gap-4"
         id="service_form"
       >

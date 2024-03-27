@@ -80,6 +80,16 @@ defmodule AlertsUI.Models.InformedEntity do
     }
   end
 
+  def route_type_mapping_from_integer do
+    %{
+      0 => "Light Rail",
+      1 => "Subway",
+      2 => "Commuter Rail",
+      3 => "Bus",
+      4 => "Ferry"
+    }
+  end
+
   @spec route_to_combo_route_mapping() :: %{String.t() => String.t()}
   def route_to_combo_route_mapping do
     %{

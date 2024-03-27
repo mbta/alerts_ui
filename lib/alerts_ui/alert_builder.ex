@@ -78,7 +78,7 @@ defmodule AlertsUI.AlertBuilder do
   defp add_child_stops(stop_ids, route_ids, direction) do
     Enum.flat_map(route_ids, fn route_id ->
       get_stops(route_id, direction)
-      |> Enum.filter(&(&1.parent_id in stop_ids))
+      |> Enum.filter(&(Map.get(&1, :parent_id) in stop_ids))
       |> Enum.map(& &1.id)
     end)
     |> Enum.concat(stop_ids)

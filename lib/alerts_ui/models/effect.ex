@@ -79,6 +79,21 @@ defmodule AlertsUI.Models.Effect do
     })
   end
 
+  def effect_map_by_detail(nil), do: %{}
+
+  def effect_map_by_detail(search_detail) do
+    {effect_name, effect, effect_detail} =
+      effects_tuples()
+      |> Enum.filter(fn {_n, _e, detail} -> detail == search_detail end)
+      |> hd
+
+    struct(EffectMapping, %{
+      effect_name: effect_name,
+      effect: effect,
+      effect_detail: effect_detail
+    })
+  end
+
   @type effect_name :: String.t()
   @type effect :: atom()
   @type effect_detail :: String.t()

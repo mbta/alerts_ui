@@ -33,13 +33,36 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
       socket
       |> assign(%{
         changeset: changeset,
-        selected_route_type: nil,
-        selected_effect: nil,
         route_types: @route_types,
         effects: EffectsForRouteTypes.list_effects(nil)
       })
 
     {:ok, socket}
+  end
+
+  @impl true
+  def update(%{alert_data: alert_data} = assigns, socket) do
+    route_type =
+      case Map.get(alert_data, :route_type) do
+        nil -> nil
+        integer -> InformedEntity.route_type_mapping_from_integer()[integer]
+      end
+
+    edit_alert_data =
+      %{
+        route_type: route_type,
+        effect_name: Map.get(alert_data, :effect_name),
+        effects: EffectsForRouteTypes.list_effects(route_type)
+      }
+
+    changeset =
+      %__MODULE__{}
+      |> changeset(edit_alert_data)
+
+    form = to_form(changeset)
+    assigns = edit_alert_data |> Map.put(:form, form) |> Map.merge(assigns)
+
+    {:ok, assign(socket, assigns)}
   end
 
   def draft_changeset(changeset, params) do
@@ -57,13 +80,12 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   def handle_event("route_type", %{"value" => route_type}, socket) do
     effects = EffectsForRouteTypes.list_effects(route_type)
 
-    {:noreply,
-     assign(socket, %{selected_route_type: route_type, effects: effects, selected_effect: nil})}
+    {:noreply, assign(socket, %{route_type: route_type, effects: effects, effect_name: nil})}
   end
 
   @impl true
   def handle_event("effect", %{"value" => effect}, socket) do
-    {:noreply, assign(socket, %{selected_effect: effect})}
+    {:noreply, assign(socket, %{effect_name: effect})}
   end
 
   @impl true
@@ -88,8 +110,8 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   @impl true
   def handle_event("save", _params, socket) do
     changeset_params = %{
-      effect_name: socket.assigns.selected_effect,
-      route_type: InformedEntity.route_type_mapping()[socket.assigns.selected_route_type]
+      effect_name: socket.assigns.effect_name,
+      route_type: InformedEntity.route_type_mapping()[socket.assigns.route_type]
     }
 
     changeset(%__MODULE__{}, changeset_params)
@@ -128,34 +150,32 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
             <div :for={route_type <- @route_types}>
               <%= route_type_buttons(assigns, route_type) %>
             </div>
-            <input type="hidden" id="route_type" name="route_type" value={@selected_route_type} />
+            <input type="hidden" id="route_type" name="route_type" value={@route_type} />
           </div>
         </div>
 
-        <hr class={if is_nil(@selected_route_type), do: "hidden"} />
+        <hr class={if is_nil(@route_type), do: "hidden"} />
         <div class="flex flex-row">
-          <h2 class={
-            if is_nil(@selected_route_type), do: "hidden", else: "mr-28 min-w-fit text-slate-400"
-          }>
+          <h2 class={if is_nil(@route_type), do: "hidden", else: "mr-28 min-w-fit text-slate-400"}>
             Select Effect
           </h2>
           <div class="grid grid-cols-4 gap-4 min-w-[50%]">
-            <div :for={effect <- @effects} class={if is_nil(@selected_route_type), do: "hidden"}>
+            <div :for={effect <- @effects} class={if is_nil(@route_type), do: "hidden"}>
               <%= effect_buttons(assigns, effect) %>
             </div>
-            <input type="hidden" id="effect_name" name="effect_name" value={@selected_effect} />
+            <input type="hidden" id="effect_name" name="effect_name" value={@effect_name} />
           </div>
         </div>
       </.form>
       <button
         phx-target={@myself}
         phx-click="save_as_draft"
-        phx-value-effect_name={@selected_effect}
-        phx-value-route_type={@selected_route_type}
+        phx-value-effect_name={@effect_name}
+        phx-value-route_type={@route_type}
         name="draft"
         id="draft"
         class={
-          if is_nil(@selected_route_type),
+          if is_nil(@route_type),
             do: "hidden",
             else: "btn rounded-lg mt-8 basis-8 self-center px-8 min-w-[25%] font-extrabold"
         }
@@ -168,7 +188,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
 
   def route_type_buttons(assigns, route_type) do
     button_class =
-      if is_nil(assigns.selected_route_type) or route_type == assigns.selected_route_type do
+      if is_nil(assigns.route_type) or route_type == assigns.route_type do
         "btn-primary"
       else
         "btn-default"
@@ -191,7 +211,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
 
   def effect_buttons(assigns, effect) do
     button_class =
-      if is_nil(assigns.selected_effect) or effect == assigns.selected_effect do
+      if is_nil(assigns.effect_name) or effect == assigns.effect_name do
         "btn-primary"
       else
         "btn-default"

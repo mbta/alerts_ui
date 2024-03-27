@@ -21,11 +21,12 @@ defmodule AlertsUI.Alerts do
     else
       %Alert{}
       |> Alert.changeset(params)
-      |> PaperTrail.insert()
-      |> case do
-        {:ok, %{version: %PaperTrail.Version{item_changes: result}}} -> {:ok, result}
-        {:error, result} -> {:error, result}
-      end
+      |> Repo.insert_or_update()
+
+      # |> case do
+      #   {:ok, %{version: %PaperTrail.Version{item_changes: result}}} -> {:ok, result}
+      #   {:error, result} -> {:error, result}
+      # end
     end
   end
 

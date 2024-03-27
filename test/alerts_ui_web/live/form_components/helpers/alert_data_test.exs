@@ -1,0 +1,38 @@
+defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
+  @moduledoc false
+  use AlertsUIWeb.ConnCase
+  import AlertsUI.Support.Factory
+  alias AlertsUIWeb.FormComponents.Helpers.AlertData
+
+  describe "build_alert_data/1" do
+    test "it returns empty map given nil" do
+      assert AlertData.build_alert_data(nil) == %{}
+    end
+
+    test "builds alert data from alert" do
+      insert(:alert, %{
+        alert_id: "1",
+        effect: :ACCESSIBILITY_ISSUE,
+        effect_detail: "ACCESS_ISSUE",
+        header_text: "cool header text",
+        description_text: "description text",
+        informed_entity: [
+          %{route_type: 1, route_id: "1"},
+          %{route_type: 1, route_id: "2", stop_id: "a2"},
+          %{route_type: 1, route_id: "3", stop_id: "a3"},
+          %{route_type: 1, route_id: "4", trip: build(:trip_descriptor, %{trip_id: "b1"})}
+        ]
+      })
+
+      assert AlertData.build_alert_data("1") == %AlertData{
+               effect_name: "Access Issue",
+               route_type: 1,
+               route_ids: ["1", "2", "3", "4"],
+               stop_ids: ["a2", "a3"],
+               trip_ids: ["b1"],
+               header_text: "cool header text",
+               description_text: "description text"
+             }
+    end
+  end
+end

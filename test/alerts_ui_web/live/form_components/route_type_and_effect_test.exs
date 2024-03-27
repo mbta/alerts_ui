@@ -47,14 +47,14 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffectTest do
     test " given a valid changset, sends a :create_alert event" do
       assigns =
         @assigns
-        |> Map.put(:selected_effect, "Detour")
-        |> Map.put(:selected_route_type, "Bus")
+        |> Map.put(:effect_name, "Detour")
+        |> Map.put(:route_type, "Bus")
 
       {:ok, view, _html} = live_isolated_component(RouteTypeAndEffect, assigns)
 
       view
       |> element("form")
-      |> render_submit(%{})
+      |> render_submit(%{"route_type" => "Bus"})
 
       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
                       {:step_completed,

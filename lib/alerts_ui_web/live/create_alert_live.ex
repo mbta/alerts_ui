@@ -34,7 +34,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
     Timeline
   }
 
-  alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
+  alias AlertsUIWeb.FormComponents.Helpers.{AlertData, ServiceEffectCombinations}
   alias AlertsUIWeb.Step
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
@@ -60,7 +60,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
   ]
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(params, _session, socket) do
+    alert_data = AlertData.build_alert_data(Map.get(params, "alert_id"))
     first_step = List.first(@steps)
 
     socket =
@@ -68,7 +69,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
         page_title: "Create an Alert",
         progress: first_step,
         steps: @steps,
-        alert_data: %{},
+        alert_data: alert_data,
         combination: nil,
         available_routes: [],
         available_schedules: [],
