@@ -106,7 +106,7 @@ defmodule AlertsUIWeb.ValidateLive do
   defp find_alert(json, id) do
     json
     |> alerts()
-    |> Enum.find(&matches_id?(&1, id))
+    |> Enum.find(:not_found, &matches_id?(&1, id))
   end
 
   defp alerts(json), do: Map.get(json, "entity")
@@ -115,6 +115,8 @@ defmodule AlertsUIWeb.ValidateLive do
 
   defp compare_alerts(nil, _dev_orange_alert_data), do: nil
   defp compare_alerts(_ibi_alert_data, nil), do: nil
+  defp compare_alerts(:not_found, _dev_orange_alert_data), do: nil
+  defp compare_alerts(_ibi_alert_data, :not_found), do: nil
 
   defp compare_alerts(ibi_alert_data, dev_orange_alert_data),
     do: CompareFeed.compare_alerts(ibi_alert_data, dev_orange_alert_data)
