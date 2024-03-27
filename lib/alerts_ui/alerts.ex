@@ -238,6 +238,9 @@ defmodule AlertsUI.Alerts do
       |> where([a], a.draft == false or is_nil(a.draft))
       |> Flop.with_named_bindings(flop, &join_informed_entity/2, opts)
       |> preload(informed_entity: [:trip])
+      |> select_merge([a], %{
+        alert_id: a.alert_id |> type(:integer) |> selected_as(:integer_alert_id)
+      })
       |> Flop.run(flop, opts)
     end
   end

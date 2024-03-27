@@ -98,13 +98,14 @@ defmodule AlertsUI.Models.Alert do
     Flop.Schema,
     filterable: [:alert_id, :effect_detail, :text_content, :service_type, :timeline],
     sortable: [
-      :alert_id,
+      :integer_alert_id,
       :created_timestamp,
       :active_period_start,
       :active_period_end,
       :closed_timestamp
     ],
     adapter_opts: [
+      alias_fields: [:integer_alert_id],
       compound_fields: [text_content: [:header_text, :description_text]],
       custom_fields: [
         service_type: [
@@ -121,7 +122,7 @@ defmodule AlertsUI.Models.Alert do
       ]
     ],
     default_order: %{
-      order_by: [:created_timestamp, :alert_id, :active_period_start, :active_period_end],
+      order_by: [:created_timestamp, :integer_alert_id, :active_period_start, :active_period_end],
       order_directions: [:desc_nulls_last, :desc_nulls_last, :desc_nulls_last, :desc_nulls_last]
     }
   }
