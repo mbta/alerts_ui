@@ -1,8 +1,24 @@
 defmodule AlertsUIWeb.ValidateLiveTest do
+  @moduledoc false
   use AlertsUIWeb.ConnCase
   import Phoenix.LiveViewTest
+  import Test.Support.Helpers
 
   describe "ValidateLive" do
+    setup do
+      reassign_env(:alerts_ui, :get_http_fn, fn _ ->
+        %{status: 200, body: Jason.encode!(%{"entity" => []})}
+      end)
+
+      reassign_env(:alerts_ui, :get_obj_fn, fn _, _ ->
+        %{status_code: 200, body: Jason.encode!(%{"entity" => []})}
+      end)
+
+      reassign_env(:alerts_ui, :make_request_fn, fn _ ->
+        %{status_code: 200, body: Jason.encode!(%{"entity" => []})}
+      end)
+    end
+
     @tag :logged_in_user
     test "connected mount displays a list of alerts when logged in", %{conn: conn} do
       {:ok, _view, html} = live(conn, "/validate")

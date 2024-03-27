@@ -6,7 +6,6 @@ defmodule AlertsUIWeb.ValidateLive do
 
   alias AlertsUI.FeedOutput.CompareFeed
   alias ExAws.S3
-  alias Req.Response
 
   @enhanced_json_filename AlertsUI.config(:enhanced_json_output_filename)
 
@@ -65,7 +64,9 @@ defmodule AlertsUIWeb.ValidateLive do
   end
 
   defp get_ibi_feed do
-    Req.get!(
+    get_http_fn = Application.get_env(:alerts_ui, :get_http_fn, &Req.get!/1)
+
+    get_http_fn.(
       url: alert_api_url(),
       headers: %{"accept-encoding" => "gzip"},
       decode_body: false
@@ -74,7 +75,7 @@ defmodule AlertsUIWeb.ValidateLive do
 
   defp alert_api_url, do: Application.get_env(:alerts_ui, :alert_api_url)
 
-  defp parse_ibi_response(%Response{status: 200, body: json_body}),
+  defp parse_ibi_response(%{status: 200, body: json_body}),
     do: {:ok, convert_newlines(json_body)}
 
   defp parse_ibi_response(_), do: :error
@@ -82,12 +83,18 @@ defmodule AlertsUIWeb.ValidateLive do
   defp convert_newlines(text), do: String.replace(text, "\r\n", "\n")
 
   defp dev_orange_json do
+    make_request_fn = Application.get_env(:alerts_ui, :make_request_fn, &ExAws.request!/1)
+
     dev_orange_feed()
-    |> ExAws.request!()
+    |> make_request_fn.()
     |> parse_s3_response()
   end
 
-  defp dev_orange_feed, do: S3.get_object(s3_bucket_name(), s3_file_path())
+  defp dev_orange_feed do
+    get_obj_fn = Application.get_env(:alerts_ui, :get_obj_fn, &S3.get_object/2)
+
+    get_obj_fn.(s3_bucket_name(), s3_file_path())
+  end
 
   defp s3_bucket_name, do: System.get_env("S3_BUCKET_NAME", "")
 
