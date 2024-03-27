@@ -36,7 +36,9 @@ config :ueberauth, Ueberauth,
 config :laboratory,
   features: [
     {:test_flag, "Cool Bean", "cool bean for test"},
-    {:show_created_alert, "Show Created Alert", "Makes created alert visible on success screen"}
+    {:show_created_alert, "Show Created Alert", "Makes created alert visible on success screen"},
+    {:show_validate_page, "Show Validate Page",
+     "Shows the menu link to a page that helps validate alerts feeds"}
   ],
   cookie: [
     # one month,
