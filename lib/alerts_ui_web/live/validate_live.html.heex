@@ -26,11 +26,11 @@
   <div class="grid grid-cols-2 gap-x-4">
     <div>
       <%= if is_nil(@ibi_alert_data) do %>
-        <pre>
+        <pre id="ibi-json">
           <%= @ibi_json %>
         </pre>
       <% else %>
-        <pre>
+        <pre id="ibi-data">
           <%= pretty_print(@ibi_alert_data) %>
         </pre>
       <% end %>
@@ -38,11 +38,11 @@
 
     <div>
       <%= if is_nil(@dev_orange_alert_data) do %>
-        <pre>
+        <pre id="dev-orange-json">
           <%= @dev_orange_json %>
         </pre>
       <% else %>
-        <pre>
+        <pre id="dev-orange-data">
           <%= pretty_print(@dev_orange_alert_data) %>
         </pre>
       <% end %>
