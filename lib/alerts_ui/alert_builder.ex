@@ -242,7 +242,6 @@ defmodule AlertsUI.AlertBuilder do
         route_id: route_id,
         route_type: route_type,
         agency_id: Routes.agency_id(route_id),
-        direction_id: direction_id,
         trip:
           build_trip(
             trip_id,
@@ -284,7 +283,6 @@ defmodule AlertsUI.AlertBuilder do
           route_id: route_id,
           route_type: alert_data.route_type,
           agency_id: Routes.agency_id(route_id),
-          direction_id: direction_id,
           trip:
             build_trip(
               trip_id,
