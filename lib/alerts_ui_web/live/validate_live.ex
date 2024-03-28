@@ -33,7 +33,8 @@ defmodule AlertsUIWeb.ValidateLive do
   def handle_event("search", %{"ibi_alert_id" => ibi_alert_id}, socket) do
     ibi_alert_data = find_alert(socket.assigns.ibi_data, ibi_alert_id)
 
-    comparison = compare_alerts(ibi_alert_data, socket.assigns.dev_orange_alert_data)
+    comparison =
+      compare_alert_informed_entities(ibi_alert_data, socket.assigns.dev_orange_alert_data)
 
     {:noreply,
      assign(socket,
@@ -46,7 +47,8 @@ defmodule AlertsUIWeb.ValidateLive do
   def handle_event("search", %{"dev_orange_alert_id" => dev_orange_alert_id}, socket) do
     dev_orange_alert_data = find_alert(socket.assigns.dev_orange_data, dev_orange_alert_id)
 
-    comparison = compare_alerts(socket.assigns.ibi_alert_data, dev_orange_alert_data)
+    comparison =
+      compare_alert_informed_entities(socket.assigns.ibi_alert_data, dev_orange_alert_data)
 
     {:noreply,
      assign(socket,
@@ -113,11 +115,18 @@ defmodule AlertsUIWeb.ValidateLive do
 
   defp matches_id?(%{"id" => alert_id}, id), do: alert_id == id
 
-  defp compare_alerts(nil, _dev_orange_alert_data), do: nil
-  defp compare_alerts(_ibi_alert_data, nil), do: nil
-  defp compare_alerts(:not_found, _dev_orange_alert_data), do: nil
-  defp compare_alerts(_ibi_alert_data, :not_found), do: nil
+  defp compare_alert_informed_entities(nil, _dev_orange_alert_data), do: nil
+  defp compare_alert_informed_entities(_ibi_alert_data, nil), do: nil
+  defp compare_alert_informed_entities(:not_found, _dev_orange_alert_data), do: nil
+  defp compare_alert_informed_entities(_ibi_alert_data, :not_found), do: nil
 
-  defp compare_alerts(ibi_alert_data, dev_orange_alert_data),
-    do: CompareFeed.compare_alerts(ibi_alert_data, dev_orange_alert_data)
+  defp compare_alert_informed_entities(ibi_alert_data, dev_orange_alert_data) do
+    CompareFeed.compare_informed_entities(
+      informed_entities(ibi_alert_data),
+      informed_entities(dev_orange_alert_data),
+      ibi_alert_data["id"]
+    )
+  end
+
+  defp informed_entities(alert_data), do: get_in(alert_data, ["alert", "informed_entity"])
 end
