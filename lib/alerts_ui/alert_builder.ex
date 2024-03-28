@@ -162,7 +162,8 @@ defmodule AlertsUI.AlertBuilder do
       &(%{
           activities: Activities.for_effect(effect),
           route_id: &1,
-          route_type: route_type
+          route_type: route_type,
+          agency_id: Routes.agency_id(&1)
         }
         |> maybe_add_direction(direction))
     )
@@ -191,6 +192,7 @@ defmodule AlertsUI.AlertBuilder do
             direction_id: direction_id,
             route_id: route_id,
             route_type: route_type,
+            agency_id: Routes.agency_id(route_id),
             stop_id: stop_id
           }
         end)
@@ -203,6 +205,7 @@ defmodule AlertsUI.AlertBuilder do
             activities: combined_activities(child_stop_informed_entities),
             route_id: route_id,
             route_type: route_type,
+            agency_id: Routes.agency_id(route_id),
             stop_id: parent_stop_id
           }
           |> maybe_add_direction(direction)
@@ -238,6 +241,7 @@ defmodule AlertsUI.AlertBuilder do
         activities: Activities.for_effect(effect),
         route_id: route_id,
         route_type: route_type,
+        agency_id: Routes.agency_id(route_id),
         direction_id: direction_id,
         trip:
           build_trip(
@@ -279,6 +283,7 @@ defmodule AlertsUI.AlertBuilder do
           activities: Activities.for_effect(effect),
           route_id: route_id,
           route_type: alert_data.route_type,
+          agency_id: Routes.agency_id(route_id),
           direction_id: direction_id,
           trip:
             build_trip(
@@ -311,6 +316,7 @@ defmodule AlertsUI.AlertBuilder do
         activities: Activities.for_effect(effect),
         route_id: route_id,
         route_type: route_type(route_types_by_id, route_id),
+        agency_id: Routes.agency_id(route_id),
         stop_id: stop_id
       }
     end)
