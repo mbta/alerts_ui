@@ -73,7 +73,7 @@ defmodule AlertsUIWeb.ValidateLive do
     )
   end
 
-  defp alert_api_url, do: Application.get_env(:alerts_ui, :alert_api_url)
+  defp alert_api_url, do: "http://s3.amazonaws.com/mbta-realtime-test/alerts_enhanced.json"
 
   defp parse_ibi_response(%{status: 200, body: json_body}),
     do: {:ok, convert_newlines(json_body)}
