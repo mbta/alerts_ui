@@ -31,7 +31,12 @@ defmodule AlertsUI.AlertBuilderTest do
                  description_text: "ok",
                  header_text: "hello",
                  informed_entity: [
-                   %{route_type: 1, activities: [:BOARD, :EXIT, :RIDE], route_id: "57"}
+                   %{
+                     route_type: 1,
+                     activities: [:BOARD, :EXIT, :RIDE],
+                     route_id: "57",
+                     agency_id: "1"
+                   }
                  ],
                  effect_detail: "DELAY",
                  draft: false
@@ -64,10 +69,68 @@ defmodule AlertsUI.AlertBuilderTest do
                  description_text: "ok",
                  header_text: "hello",
                  informed_entity: [
-                   %{activities: [:BOARD, :EXIT, :RIDE], route_id: "2427", route_type: 1},
-                   %{activities: [:BOARD, :EXIT, :RIDE], route_id: "24", route_type: 1},
-                   %{activities: [:BOARD, :EXIT, :RIDE], route_id: "27", route_type: 1},
-                   %{activities: [:BOARD, :EXIT, :RIDE], route_id: "57", route_type: 1}
+                   %{
+                     activities: [:BOARD, :EXIT, :RIDE],
+                     route_id: "2427",
+                     route_type: 1,
+                     agency_id: "1"
+                   },
+                   %{
+                     activities: [:BOARD, :EXIT, :RIDE],
+                     route_id: "24",
+                     route_type: 1,
+                     agency_id: "1"
+                   },
+                   %{
+                     activities: [:BOARD, :EXIT, :RIDE],
+                     route_id: "27",
+                     route_type: 1,
+                     agency_id: "1"
+                   },
+                   %{
+                     activities: [:BOARD, :EXIT, :RIDE],
+                     route_id: "57",
+                     route_type: 1,
+                     agency_id: "1"
+                   }
+                 ],
+                 effect_detail: "DELAY",
+                 draft: false
+               }
+
+        result |> Alerts.create_alert()
+        [alert_1, alert_2] = Alerts.list_all()
+        assert alert_1.alert_id == existing_alert.alert_id
+        assert alert_2.alert_id |> String.to_integer() > alert_1.alert_id |> String.to_integer()
+      end
+    end
+
+    test "uses the correct agency ID for the CapeFLYER" do
+      with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
+        existing_alert = insert(:alert, alert_id: "0")
+
+        alert_data = %{
+          route_type: 2,
+          description_text: "ok",
+          header_text: "hello",
+          effect_name: "Delay",
+          route_ids: ["CapeFlyer"],
+          direction: "default"
+        }
+
+        result = AlertBuilder.build_alert(alert_data, :R)
+
+        assert result == %{
+                 effect: :SIGNIFICANT_DELAYS,
+                 description_text: "ok",
+                 header_text: "hello",
+                 informed_entity: [
+                   %{
+                     route_type: 2,
+                     activities: [:BOARD, :EXIT, :RIDE],
+                     route_id: "CapeFlyer",
+                     agency_id: "3"
+                   }
                  ],
                  effect_detail: "DELAY",
                  draft: false
@@ -99,7 +162,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "57",
-                   route_type: 3
+                   route_type: 3,
+                   agency_id: "1"
                  }
                ]
       end
@@ -124,12 +188,14 @@ defmodule AlertsUI.AlertBuilderTest do
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "57",
-                   route_type: 3
+                   route_type: 3,
+                   agency_id: "1"
                  },
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "58",
-                   route_type: 3
+                   route_type: 3,
+                   agency_id: "1"
                  }
                ]
       end
@@ -155,7 +221,8 @@ defmodule AlertsUI.AlertBuilderTest do
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "57",
                    route_type: 3,
-                   direction_id: 1
+                   direction_id: 1,
+                   agency_id: "1"
                  }
                ]
       end
@@ -198,6 +265,7 @@ defmodule AlertsUI.AlertBuilderTest do
                      direction_id: 1,
                      route_id: "57",
                      route_type: 3,
+                     agency_id: "1",
                      activities: [:BOARD, :RIDE],
                      stop_id: "a"
                    },
@@ -206,6 +274,7 @@ defmodule AlertsUI.AlertBuilderTest do
                      activities: [:BOARD, :RIDE],
                      route_id: "57",
                      route_type: 3,
+                     agency_id: "1",
                      direction_id: 1,
                      stop_id: "1"
                    },
@@ -213,6 +282,7 @@ defmodule AlertsUI.AlertBuilderTest do
                      direction_id: 1,
                      route_id: "57",
                      route_type: 3,
+                     agency_id: "1",
                      activities: [:BOARD, :EXIT, :RIDE],
                      stop_id: "b"
                    },
@@ -220,6 +290,7 @@ defmodule AlertsUI.AlertBuilderTest do
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
                      route_type: 3,
+                     agency_id: "1",
                      direction_id: 1,
                      stop_id: "2"
                    },
@@ -227,6 +298,7 @@ defmodule AlertsUI.AlertBuilderTest do
                      direction_id: 1,
                      route_id: "57",
                      route_type: 3,
+                     agency_id: "1",
                      activities: [:EXIT, :RIDE],
                      stop_id: "c"
                    },
@@ -234,6 +306,7 @@ defmodule AlertsUI.AlertBuilderTest do
                      activities: [:EXIT, :RIDE],
                      route_id: "57",
                      route_type: 3,
+                     agency_id: "1",
                      direction_id: 1,
                      stop_id: "3"
                    }
@@ -281,6 +354,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    %{
                      route_id: "57",
                      route_type: 3,
+                     agency_id: "1",
                      activities: [:BOARD, :RIDE, :EXIT],
                      stop_id: "a"
                    },
@@ -289,12 +363,14 @@ defmodule AlertsUI.AlertBuilderTest do
                      activities: [:BOARD, :RIDE],
                      route_id: "57",
                      route_type: 3,
+                     agency_id: "1",
                      direction_id: 0,
                      stop_id: "1"
                    },
                    %{
                      route_id: "57",
                      route_type: 3,
+                     agency_id: "1",
                      activities: [:EXIT, :RIDE],
                      direction_id: 1,
                      stop_id: "1"
@@ -302,6 +378,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    %{
                      route_id: "57",
                      route_type: 3,
+                     agency_id: "1",
                      activities: [:BOARD, :EXIT, :RIDE],
                      stop_id: "b"
                    },
@@ -309,6 +386,7 @@ defmodule AlertsUI.AlertBuilderTest do
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
                      route_type: 3,
+                     agency_id: "1",
                      direction_id: 0,
                      stop_id: "2"
                    },
@@ -317,11 +395,13 @@ defmodule AlertsUI.AlertBuilderTest do
                      direction_id: 1,
                      route_id: "57",
                      route_type: 3,
+                     agency_id: "1",
                      stop_id: "2"
                    },
                    %{
                      route_id: "57",
                      route_type: 3,
+                     agency_id: "1",
                      activities: [:EXIT, :RIDE, :BOARD],
                      stop_id: "c"
                    },
@@ -329,6 +409,7 @@ defmodule AlertsUI.AlertBuilderTest do
                      activities: [:EXIT, :RIDE],
                      route_id: "57",
                      route_type: 3,
+                     agency_id: "1",
                      direction_id: 0,
                      stop_id: "3"
                    },
@@ -336,6 +417,7 @@ defmodule AlertsUI.AlertBuilderTest do
                      activities: [:BOARD, :RIDE],
                      route_id: "57",
                      route_type: 3,
+                     agency_id: "1",
                      direction_id: 1,
                      stop_id: "3"
                    }
@@ -380,6 +462,7 @@ defmodule AlertsUI.AlertBuilderTest do
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
                      route_type: 3,
+                     agency_id: "1",
                      direction_id: 1,
                      stop_id: "a"
                    },
@@ -387,6 +470,7 @@ defmodule AlertsUI.AlertBuilderTest do
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "58",
                      route_type: 3,
+                     agency_id: "1",
                      direction_id: 1,
                      stop_id: "a"
                    },
@@ -395,6 +479,7 @@ defmodule AlertsUI.AlertBuilderTest do
                      direction_id: 1,
                      route_id: "57",
                      route_type: 3,
+                     agency_id: "1",
                      stop_id: "1"
                    },
                    %{
@@ -402,12 +487,14 @@ defmodule AlertsUI.AlertBuilderTest do
                      direction_id: 1,
                      route_id: "58",
                      route_type: 3,
+                     agency_id: "1",
                      stop_id: "1"
                    },
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
                      route_type: 3,
+                     agency_id: "1",
                      direction_id: 1,
                      stop_id: "b"
                    },
@@ -415,6 +502,7 @@ defmodule AlertsUI.AlertBuilderTest do
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "58",
                      route_type: 3,
+                     agency_id: "1",
                      direction_id: 1,
                      stop_id: "b"
                    },
@@ -423,6 +511,7 @@ defmodule AlertsUI.AlertBuilderTest do
                      direction_id: 1,
                      route_id: "57",
                      route_type: 3,
+                     agency_id: "1",
                      stop_id: "2"
                    },
                    %{
@@ -430,6 +519,7 @@ defmodule AlertsUI.AlertBuilderTest do
                      direction_id: 1,
                      route_id: "58",
                      route_type: 3,
+                     agency_id: "1",
                      stop_id: "2"
                    }
                  ]
@@ -491,6 +581,7 @@ defmodule AlertsUI.AlertBuilderTest do
                      direction_id: 1,
                      route_id: "Green-D",
                      route_type: 1,
+                     agency_id: "1",
                      stop_id: "place-fenwy"
                    },
                    %{
@@ -498,12 +589,14 @@ defmodule AlertsUI.AlertBuilderTest do
                      direction_id: 1,
                      route_id: "Green-D",
                      route_type: 1,
+                     agency_id: "1",
                      stop_id: "fenway-child"
                    },
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "Green-B",
                      route_type: 1,
+                     agency_id: "1",
                      direction_id: 1,
                      stop_id: "place-hymnl"
                    },
@@ -511,6 +604,7 @@ defmodule AlertsUI.AlertBuilderTest do
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "Green-C",
                      route_type: 1,
+                     agency_id: "1",
                      direction_id: 1,
                      stop_id: "place-hymnl"
                    },
@@ -518,6 +612,7 @@ defmodule AlertsUI.AlertBuilderTest do
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "Green-D",
                      route_type: 1,
+                     agency_id: "1",
                      direction_id: 1,
                      stop_id: "place-hymnl"
                    },
@@ -526,6 +621,7 @@ defmodule AlertsUI.AlertBuilderTest do
                      direction_id: 1,
                      route_id: "Green-B",
                      route_type: 1,
+                     agency_id: "1",
                      stop_id: "hynes-child"
                    },
                    %{
@@ -533,6 +629,7 @@ defmodule AlertsUI.AlertBuilderTest do
                      direction_id: 1,
                      route_id: "Green-C",
                      route_type: 1,
+                     agency_id: "1",
                      stop_id: "hynes-child"
                    },
                    %{
@@ -540,12 +637,14 @@ defmodule AlertsUI.AlertBuilderTest do
                      direction_id: 1,
                      route_id: "Green-D",
                      route_type: 1,
+                     agency_id: "1",
                      stop_id: "hynes-child"
                    },
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "Green-B",
                      route_type: 1,
+                     agency_id: "1",
                      direction_id: 1,
                      stop_id: "place-kencl"
                    },
@@ -553,6 +652,7 @@ defmodule AlertsUI.AlertBuilderTest do
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "Green-C",
                      route_type: 1,
+                     agency_id: "1",
                      direction_id: 1,
                      stop_id: "place-kencl"
                    },
@@ -560,6 +660,7 @@ defmodule AlertsUI.AlertBuilderTest do
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "Green-D",
                      route_type: 1,
+                     agency_id: "1",
                      direction_id: 1,
                      stop_id: "place-kencl"
                    },
@@ -567,6 +668,7 @@ defmodule AlertsUI.AlertBuilderTest do
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "Green-B",
                      route_type: 1,
+                     agency_id: "1",
                      direction_id: 1,
                      stop_id: "kenmore-child"
                    },
@@ -575,6 +677,7 @@ defmodule AlertsUI.AlertBuilderTest do
                      direction_id: 1,
                      route_id: "Green-C",
                      route_type: 1,
+                     agency_id: "1",
                      stop_id: "kenmore-child"
                    },
                    %{
@@ -582,6 +685,7 @@ defmodule AlertsUI.AlertBuilderTest do
                      direction_id: 1,
                      route_id: "Green-D",
                      route_type: 1,
+                     agency_id: "1",
                      stop_id: "kenmore-child"
                    }
                  ]
@@ -606,12 +710,14 @@ defmodule AlertsUI.AlertBuilderTest do
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "57",
-                   route_type: 3
+                   route_type: 3,
+                   agency_id: "1"
                  },
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "58",
-                   route_type: 3
+                   route_type: 3,
+                   agency_id: "1"
                  }
                ]
       end
@@ -634,27 +740,32 @@ defmodule AlertsUI.AlertBuilderTest do
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "Red",
-                   route_type: 1
+                   route_type: 1,
+                   agency_id: "1"
                  },
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "Green-B",
-                   route_type: 1
+                   route_type: 1,
+                   agency_id: "1"
                  },
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "Green-C",
-                   route_type: 1
+                   route_type: 1,
+                   agency_id: "1"
                  },
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "Green-D",
-                   route_type: 1
+                   route_type: 1,
+                   agency_id: "1"
                  },
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "Green-E",
-                   route_type: 1
+                   route_type: 1,
+                   agency_id: "1"
                  }
                ]
       end
@@ -678,12 +789,14 @@ defmodule AlertsUI.AlertBuilderTest do
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "57",
                    route_type: 3,
+                   agency_id: "1",
                    direction_id: 1
                  },
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "58",
                    route_type: 3,
+                   agency_id: "1",
                    direction_id: 1
                  }
                ]
@@ -708,30 +821,35 @@ defmodule AlertsUI.AlertBuilderTest do
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "Red",
                    route_type: 1,
+                   agency_id: "1",
                    direction_id: 1
                  },
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "Green-B",
                    route_type: 1,
+                   agency_id: "1",
                    direction_id: 1
                  },
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "Green-C",
                    route_type: 1,
+                   agency_id: "1",
                    direction_id: 1
                  },
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "Green-D",
                    route_type: 1,
+                   agency_id: "1",
                    direction_id: 1
                  },
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "Green-E",
                    route_type: 1,
+                   agency_id: "1",
                    direction_id: 1
                  }
                ]
@@ -761,6 +879,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "57",
                    route_type: 3,
+                   agency_id: "1",
                    direction_id: 0,
                    trip: %{
                      trip_id: "123",
@@ -772,6 +891,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "57",
                    route_type: 3,
+                   agency_id: "1",
                    direction_id: 0,
                    trip: %{
                      trip_id: "345",
@@ -783,6 +903,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "57",
                    route_type: 3,
+                   agency_id: "1",
                    direction_id: 0,
                    trip: %{
                      trip_id: "456",
@@ -817,6 +938,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "57",
                    route_type: 3,
+                   agency_id: "1",
                    direction_id: 0,
                    trip: %{
                      trip_id: "123",
@@ -828,6 +950,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "57",
                    route_type: 3,
+                   agency_id: "1",
                    direction_id: 0,
                    trip: %{
                      trip_id: "345",
@@ -839,6 +962,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "58",
                    route_type: 3,
+                   agency_id: "1",
                    direction_id: 0,
                    trip: %{
                      trip_id: "456",
@@ -868,7 +992,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "57",
-                   route_type: 3
+                   route_type: 3,
+                   agency_id: "1"
                  }
                ]
       end
@@ -899,6 +1024,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "57",
                    route_type: 3,
+                   agency_id: "1",
                    direction_id: 0,
                    trip: %{
                      trip_id: "123",
@@ -910,6 +1036,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "57",
                    route_type: 3,
+                   agency_id: "1",
                    direction_id: 0,
                    trip: %{
                      trip_id: "345",
@@ -921,6 +1048,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "57",
                    route_type: 3,
+                   agency_id: "1",
                    direction_id: 0,
                    trip: %{
                      trip_id: "456",
@@ -968,6 +1096,7 @@ defmodule AlertsUI.AlertBuilderTest do
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
                      route_type: 3,
+                     agency_id: "1",
                      direction_id: 0,
                      stop_id: "a"
                    },
@@ -976,12 +1105,14 @@ defmodule AlertsUI.AlertBuilderTest do
                      direction_id: 1,
                      route_id: "57",
                      route_type: 3,
+                     agency_id: "1",
                      stop_id: "1"
                    },
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
                      route_type: 3,
+                     agency_id: "1",
                      direction_id: 0,
                      stop_id: "b"
                    },
@@ -990,12 +1121,14 @@ defmodule AlertsUI.AlertBuilderTest do
                      direction_id: 1,
                      route_id: "57",
                      route_type: 3,
+                     agency_id: "1",
                      stop_id: "2"
                    },
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
                      route_type: 3,
+                     agency_id: "1",
                      direction_id: 0,
                      stop_id: "c"
                    },
@@ -1004,6 +1137,7 @@ defmodule AlertsUI.AlertBuilderTest do
                      direction_id: 1,
                      route_id: "57",
                      route_type: 3,
+                     agency_id: "1",
                      stop_id: "3"
                    }
                  ]
@@ -1030,12 +1164,14 @@ defmodule AlertsUI.AlertBuilderTest do
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "57",
-                   route_type: 3
+                   route_type: 3,
+                   agency_id: "1"
                  },
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "58",
-                   route_type: 3
+                   route_type: 3,
+                   agency_id: "1"
                  }
                ]
       end
@@ -1069,6 +1205,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "57",
                    route_type: 3,
+                   agency_id: "1",
                    direction_id: 0,
                    stop_id: "a",
                    trip: %{
@@ -1081,6 +1218,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "57",
                    route_type: 3,
+                   agency_id: "1",
                    direction_id: 0,
                    stop_id: "a",
                    trip: %{
@@ -1093,6 +1231,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "57",
                    route_type: 3,
+                   agency_id: "1",
                    direction_id: 0,
                    stop_id: "a",
                    trip: %{
@@ -1105,6 +1244,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "57",
                    route_type: 3,
+                   agency_id: "1",
                    direction_id: 0,
                    stop_id: "b",
                    trip: %{
@@ -1117,6 +1257,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "57",
                    route_type: 3,
+                   agency_id: "1",
                    direction_id: 0,
                    stop_id: "b",
                    trip: %{
@@ -1129,6 +1270,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "57",
                    route_type: 3,
+                   agency_id: "1",
                    direction_id: 0,
                    stop_id: "b",
                    trip: %{
@@ -1167,36 +1309,42 @@ defmodule AlertsUI.AlertBuilderTest do
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "56",
                      route_type: 1,
+                     agency_id: "1",
                      stop_id: "a"
                    },
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
                      route_type: 3,
+                     agency_id: "1",
                      stop_id: "a"
                    },
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "58",
                      route_type: 1,
+                     agency_id: "1",
                      stop_id: "a"
                    },
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "56",
                      route_type: 1,
+                     agency_id: "1",
                      stop_id: "b"
                    },
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
                      route_type: 3,
+                     agency_id: "1",
                      stop_id: "b"
                    },
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "58",
                      route_type: 1,
+                     agency_id: "1",
                      stop_id: "b"
                    }
                  ]
@@ -1243,42 +1391,49 @@ defmodule AlertsUI.AlertBuilderTest do
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "Green-B",
                      route_type: 0,
+                     agency_id: "1",
                      stop_id: "place-hymnl"
                    },
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "Green-C",
                      route_type: 0,
+                     agency_id: "1",
                      stop_id: "place-hymnl"
                    },
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "Green-D",
                      route_type: 0,
+                     agency_id: "1",
                      stop_id: "place-hymnl"
                    },
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "Green-B",
                      route_type: 0,
+                     agency_id: "1",
                      stop_id: "place-kencl"
                    },
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "Green-C",
                      route_type: 0,
+                     agency_id: "1",
                      stop_id: "place-kencl"
                    },
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "Green-D",
                      route_type: 0,
+                     agency_id: "1",
                      stop_id: "place-kencl"
                    },
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "Green-D",
                      route_type: 0,
+                     agency_id: "1",
                      stop_id: "place-fenwy"
                    }
                  ]

@@ -3,6 +3,7 @@ defmodule AlertsUI.RoutesTest do
   use AlertsUI.DataCase, async: true
 
   alias AlertsUI.Routes
+  alias MBTAV3API.Routes.Route
 
   doctest Routes
 end

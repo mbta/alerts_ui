@@ -31,4 +31,23 @@ defmodule AlertsUI.Routes do
 
   @spec green_line_branch_ids :: [Route.id_t()]
   def green_line_branch_ids, do: @green_line_branch_ids
+
+  @doc """
+  Provide the Agency ID for the given route or route ID.
+
+  ## Examples
+
+      iex> Routes.agency_id(%Route{id: "Red"})
+      "1"
+      iex> Routes.agency_id(%Route{id: "CapeFlyer"})
+      "3"
+      iex> Routes.agency_id("Red")
+      "1"
+      iex> Routes.agency_id("CapeFlyer")
+      "3"
+  """
+  @spec agency_id(Route.t() | Route.id_t()) :: String.t()
+  def agency_id(%Route{id: route_id}), do: agency_id(route_id)
+  def agency_id("CapeFlyer"), do: "3"
+  def agency_id(_), do: "1"
 end
