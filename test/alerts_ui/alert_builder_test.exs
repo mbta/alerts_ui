@@ -880,7 +880,6 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_id: "57",
                    route_type: 3,
                    agency_id: "1",
-                   direction_id: 0,
                    trip: %{
                      trip_id: "123",
                      route_id: "57",
@@ -892,7 +891,6 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_id: "57",
                    route_type: 3,
                    agency_id: "1",
-                   direction_id: 0,
                    trip: %{
                      trip_id: "345",
                      route_id: "57",
@@ -904,7 +902,6 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_id: "57",
                    route_type: 3,
                    agency_id: "1",
-                   direction_id: 0,
                    trip: %{
                      trip_id: "456",
                      route_id: "57",
@@ -939,7 +936,6 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_id: "57",
                    route_type: 3,
                    agency_id: "1",
-                   direction_id: 0,
                    trip: %{
                      trip_id: "123",
                      route_id: "57",
@@ -951,7 +947,6 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_id: "57",
                    route_type: 3,
                    agency_id: "1",
-                   direction_id: 0,
                    trip: %{
                      trip_id: "345",
                      route_id: "57",
@@ -963,7 +958,6 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_id: "58",
                    route_type: 3,
                    agency_id: "1",
-                   direction_id: 0,
                    trip: %{
                      trip_id: "456",
                      route_id: "58",
@@ -1025,7 +1019,6 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_id: "57",
                    route_type: 3,
                    agency_id: "1",
-                   direction_id: 0,
                    trip: %{
                      trip_id: "123",
                      route_id: "57",
@@ -1037,7 +1030,6 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_id: "57",
                    route_type: 3,
                    agency_id: "1",
-                   direction_id: 0,
                    trip: %{
                      trip_id: "345",
                      route_id: "57",
@@ -1049,7 +1041,6 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_id: "57",
                    route_type: 3,
                    agency_id: "1",
-                   direction_id: 0,
                    trip: %{
                      trip_id: "456",
                      route_id: "57",
@@ -1206,7 +1197,6 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_id: "57",
                    route_type: 3,
                    agency_id: "1",
-                   direction_id: 0,
                    stop_id: "a",
                    trip: %{
                      trip_id: "123",
@@ -1219,7 +1209,6 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_id: "57",
                    route_type: 3,
                    agency_id: "1",
-                   direction_id: 0,
                    stop_id: "a",
                    trip: %{
                      trip_id: "345",
@@ -1232,7 +1221,6 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_id: "57",
                    route_type: 3,
                    agency_id: "1",
-                   direction_id: 0,
                    stop_id: "a",
                    trip: %{
                      trip_id: "456",
@@ -1245,7 +1233,6 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_id: "57",
                    route_type: 3,
                    agency_id: "1",
-                   direction_id: 0,
                    stop_id: "b",
                    trip: %{
                      trip_id: "123",
@@ -1258,7 +1245,6 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_id: "57",
                    route_type: 3,
                    agency_id: "1",
-                   direction_id: 0,
                    stop_id: "b",
                    trip: %{
                      trip_id: "345",
@@ -1271,7 +1257,6 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_id: "57",
                    route_type: 3,
                    agency_id: "1",
-                   direction_id: 0,
                    stop_id: "b",
                    trip: %{
                      trip_id: "456",
