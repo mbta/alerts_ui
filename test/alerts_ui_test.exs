@@ -1,4 +1,4 @@
-defmodule AlertsUiTest do
+defmodule AlertsUITest do
   @moduledoc false
   use AlertsUI.DataCase, async: true
   import Test.Support.Helpers

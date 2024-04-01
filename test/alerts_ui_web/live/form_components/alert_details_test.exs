@@ -1,4 +1,4 @@
-defmodule AlertsUiWeb.FormComponents.AlertDetailsTest do
+defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
 
