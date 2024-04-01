@@ -1,10 +1,10 @@
-defmodule AlertsUi.FeedImporterExporterTest do
+defmodule AlertsUI.FeedImporterExporterTest do
   use AlertsUI.DataCase, async: false
   use Oban.Testing, repo: AlertsUI.Repo
   import AlertsUI.Support.Factory
   import Test.Support.Helpers
   import ExUnit.CaptureLog
-  alias AlertsUi.FeedImporterExporter
+  alias AlertsUI.FeedImporterExporter
   alias Oban.Job
   alias Req.Response
 

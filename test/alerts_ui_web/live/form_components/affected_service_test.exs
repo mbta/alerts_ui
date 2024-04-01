@@ -1,4 +1,4 @@
-defmodule AlertsUiWeb.FormComponents.AffectedServiceTest do
+defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
 

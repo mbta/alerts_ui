@@ -1,4 +1,4 @@
-defmodule AlertsUiWeb.FormComponents.RouteTypeAndEffectTest do
+defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffectTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
 

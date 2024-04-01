@@ -1,4 +1,4 @@
-defmodule AlertsUiWeb.FormComponents.SuccessfulSubmissionTest do
+defmodule AlertsUIWeb.FormComponents.SuccessfulSubmissionTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
 
