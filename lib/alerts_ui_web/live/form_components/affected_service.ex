@@ -121,11 +121,11 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       %__MODULE__{}
       |> changeset(edit_alert_data)
 
-    {:ok, foo_changeset} =
+    {:ok, completed_changeset} =
       changeset
       |> apply_action(:insert)
 
-    send(self(), {:section_completed, foo_changeset})
+    send(self(), {:section_completed, completed_changeset})
 
     form = to_form(changeset)
 

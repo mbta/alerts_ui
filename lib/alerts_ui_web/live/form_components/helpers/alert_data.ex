@@ -29,7 +29,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           combination: atom()
         }
 
-  def build_alert_data(nil), do: %{}
+  @spec build_alert_data(nil | String.t()) :: AlertsUIWeb.FormComponents.Helpers.AlertData.t()
+  def build_alert_data(nil), do: %__MODULE__{}
 
   def build_alert_data(alert_id) do
     alert = Alerts.get_by_alert_id(alert_id)
@@ -39,6 +40,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
     %__MODULE__{
       route_type: get_route_type(informed_entities),
+      direction: get_direction(informed_entities),
       effect_name: Map.get(effect_map, :effect_name),
       route_ids: gather_route_ids(informed_entities),
       stop_ids: gather_stop_ids(informed_entities),
@@ -47,6 +49,22 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       description_text: Map.get(alert, :description_text),
       combination: combination
     }
+  end
+
+  defp get_direction([]), do: nil
+
+  defp get_direction(informed_entities) do
+    directions_list =
+      informed_entities
+      |> Enum.map(& &1.direction_id)
+      |> Enum.uniq()
+      |> Enum.filter(&(!is_nil(&1)))
+
+    if length(directions_list) == 1 do
+      hd(directions_list) |> Integer.to_string()
+    else
+      nil
+    end
   end
 
   defp get_route_type([]), do: nil

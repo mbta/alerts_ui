@@ -64,12 +64,13 @@ defmodule AlertsUIWeb.CreateAlertLive do
   def mount(params, _session, socket) do
     alert_data = AlertData.build_alert_data(Map.get(params, "alert_id"))
     alert_id = Map.get(params, "alert_id")
-    first_step = List.first(@steps)
+    [first_step, second_step | _] = @steps
+    editing = if is_nil(alert_id), do: false, else: true
 
     socket =
       assign(socket, %{
         page_title: "Create an Alert",
-        progress: first_step,
+        progress: if(editing, do: second_step, else: first_step),
         steps: @steps,
         alert_data: alert_data,
         combination: Map.get(alert_data, :combination),
@@ -77,7 +78,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
         available_schedules: [],
         available_stops: [],
         alert_uuid: nil,
-        alert_id: alert_id
+        alert_id: alert_id,
+        editing: editing
       })
 
     {:ok, socket}

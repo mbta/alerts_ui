@@ -155,8 +155,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         for={@form}
         phx-target={@myself}
         phx-change="validate"
-        phx-click-alway="validate"
-        phx-blur="validate"
         class="form-control gap-4"
         id="service_form"
       >
