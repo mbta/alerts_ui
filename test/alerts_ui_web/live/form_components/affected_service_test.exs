@@ -25,7 +25,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     available_schedules: [],
     available_stops: [],
     alert_data: %{},
-    combination: :RDTS
+    combination: :RDTS,
+    editing: false
   }
 
   describe "component" do

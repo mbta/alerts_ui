@@ -30,15 +30,15 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   end
 
   @impl true
-  def update(%{alert_data: alert_data} = assigns, socket) do
+  def update(%{alert_data: alert_data, editing: editing} = assigns, socket) do
     route_type = Map.get(alert_data, :route_type)
     route_types = all_route_types(route_type)
     send(self(), {:fetch_available_routes, route_types})
 
     assigns =
-      case Map.get(alert_data, :route_ids) do
-        nil -> assigns
-        _ -> update_for_edit(alert_data, assigns)
+      case editing do
+        true -> update_for_edit(alert_data, assigns)
+        false -> assigns
       end
 
     {:ok, assign(socket, assigns)}
@@ -181,7 +181,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
               label="Direction"
               field={@form[:direction]}
               options={@direction_options}
-              disabled={disable_input?(@form[:route_ids].value)}
+              disabled={disable_input?(@form[:route_ids].value, @editing)}
               prompt={if Map.has_key?(@form.params, "route_ids"), do: "Both Directions", else: nil}
             />
           <% end %>
@@ -209,7 +209,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
                   else: nil
               }
               multiple={true}
-              disabled={disable_input?(@form[:route_ids].value)}
+              disabled={disable_input?(@form[:route_ids].value, @editing)}
             />
           <% end %>
         </fieldset>
@@ -220,15 +220,14 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   end
 
   def trip_information_by_id(available_schedules, trip_ids) do
-    trip_information_by_id =
-      available_schedules
-      |> Stream.filter(fn schedule -> schedule.trip.id in trip_ids end)
-      |> Enum.reduce(%{}, fn schedule, acc ->
-        Map.put(acc, schedule.trip.id, %{
-          direction_id: schedule.trip.direction_id,
-          route_id: schedule.route.id
-        })
-      end)
+    available_schedules
+    |> Stream.filter(fn schedule -> schedule.trip.id in trip_ids end)
+    |> Enum.reduce(%{}, fn schedule, acc ->
+      Map.put(acc, schedule.trip.id, %{
+        direction_id: schedule.trip.direction_id,
+        route_id: schedule.route.id
+      })
+    end)
   end
 
   @spec get_stops_by_route_ids(String.t(), list()) :: any()
@@ -261,8 +260,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     combination in [:RDS, :RDTS, :RDS, :RDT]
   end
 
-  @spec disable_input?(list() | nil) :: boolean()
-  defp disable_input?(route_ids), do: !is_nil(route_ids) and length(route_ids) > 1
+  @spec disable_input?(list() | nil, boolean()) :: boolean()
+  defp disable_input?(_route_ids, true), do: false
+  defp disable_input?(route_ids, _editing), do: !is_nil(route_ids) and length(route_ids) > 1
 
   # We lump subway together in the interface, so when asked for either light or
   # heavy rail include both.

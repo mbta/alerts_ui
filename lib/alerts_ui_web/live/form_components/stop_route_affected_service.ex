@@ -28,14 +28,14 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   end
 
   @impl true
-  def update(%{alert_data: alert_data} = assigns, socket) do
+  def update(%{alert_data: alert_data, editing: editing} = assigns, socket) do
     route_type = Map.get(alert_data, :route_type)
     get_stops_by_route_type(route_type)
 
     assigns =
-      case Map.get(alert_data, :route_ids) do
-        nil -> assigns
-        _ -> update_for_edit(alert_data, assigns)
+      case editing do
+        true -> update_for_edit(alert_data, assigns)
+        false -> assigns
       end
 
     {:ok, assign(socket, assigns)}
@@ -117,12 +117,11 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
   #TODO
   def routes_with_types(available_routes, route_ids) do
-    routes_with_types =
-      available_routes
-      |> Stream.filter(fn route -> route.id in route_ids end)
-      |> Enum.reduce(%{}, fn route, acc ->
-        Map.put(acc, route.id, route.type)
-      end)
+    available_routes
+    |> Stream.filter(fn route -> route.id in route_ids end)
+    |> Enum.reduce(%{}, fn route, acc ->
+      Map.put(acc, route.id, route.type)
+    end)
   end
 
   def get_routes_by_stop_ids(nil, _route_type), do: nil

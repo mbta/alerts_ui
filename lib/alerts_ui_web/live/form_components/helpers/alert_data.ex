@@ -4,6 +4,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   """
   alias AlertsUI.Alerts
   alias AlertsUI.Models.Effect
+  alias AlertsUIWeb.FormComponents.Helpers.CombinationFromInformedEntity
 
   defstruct [
     :route_type,
@@ -13,7 +14,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :stop_ids,
     :trip_ids,
     :header_text,
-    :description_text
+    :description_text,
+    :combination
   ]
 
   @type t :: %__MODULE__{
@@ -23,7 +25,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           stop_ids: [String.t()],
           trip_ids: [String.t()],
           header_text: String.t(),
-          description_text: String.t()
+          description_text: String.t(),
+          combination: atom()
         }
 
   def build_alert_data(nil), do: %{}
@@ -32,6 +35,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     alert = Alerts.get_by_alert_id(alert_id)
     effect_map = Effect.effect_map_by_detail(Map.get(alert, :effect_detail))
     informed_entities = Map.get(alert, :informed_entity, [])
+    combination = CombinationFromInformedEntity.get_combination(informed_entities)
 
     %__MODULE__{
       route_type: get_route_type(informed_entities),
@@ -40,14 +44,18 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       stop_ids: gather_stop_ids(informed_entities),
       trip_ids: gather_trip_ids(informed_entities),
       header_text: Map.get(alert, :header_text),
-      description_text: Map.get(alert, :description_text)
+      description_text: Map.get(alert, :description_text),
+      combination: combination
     }
   end
 
   defp get_route_type([]), do: nil
 
   defp get_route_type(informed_entities) do
-    hd(informed_entities).route_type
+    case Enum.any?(informed_entities, &(&1.route_type in [0, 1])) do
+      true -> 1
+      false -> hd(informed_entities).route_type
+    end
   end
 
   defp gather_route_ids(informed_entities) do

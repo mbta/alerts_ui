@@ -16,6 +16,7 @@ defmodule AlertsUI.Support.Factory do
 
   def trip_descriptor_factory, do: %TripDescriptor{trip_id: "1"}
 
+  @spec informed_entity_with_trip_factory() :: AlertsUI.Models.InformedEntity.t()
   def informed_entity_with_trip_factory do
     %InformedEntity{route_id: "1", trip: build(:trip_descriptor)}
   end

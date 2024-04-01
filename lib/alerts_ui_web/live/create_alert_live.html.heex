@@ -26,6 +26,7 @@
         available_routes={@available_routes}
         available_schedules={@available_schedules}
         available_stops={@available_stops}
+        editing={if is_nil(@alert_id), do: false, else: true}
       />
       <.live_component
         module={AlertDetails}

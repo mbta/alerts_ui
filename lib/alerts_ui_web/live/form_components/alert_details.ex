@@ -113,7 +113,6 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           type="textarea"
           phx-debounce={120}
           id="header_input"
-          value={@header_text}
         />
         <.input
           field={@form[:description_text]}
@@ -121,7 +120,6 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           type="textarea"
           phx-debounce={120}
           id="description_input"
-          value={@description_text}
         />
         <.button class="btn btn-outline basis-8 self-center px-8" name="save">Publish</.button>
       </.form>

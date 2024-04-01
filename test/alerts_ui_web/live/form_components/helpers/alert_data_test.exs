@@ -25,6 +25,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       })
 
       assert AlertData.build_alert_data("1") == %AlertData{
+               combination: :RTS,
                effect_name: "Access Issue",
                route_type: 1,
                route_ids: ["1", "2", "3", "4"],
