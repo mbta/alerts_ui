@@ -169,9 +169,38 @@ defmodule AlertsUI.AlertBuilder do
     )
   end
 
-  defp build_informed_entities(:RDS, %{child_stops_with_context: []} = alert_data, effect),
+  # No stops, treat like :R
+  defp build_informed_entities(:RDS, %{stop_ids: []} = alert_data, effect),
     do: build_informed_entities(:R, alert_data, effect)
 
+  # Only parent stops
+  defp build_informed_entities(
+         :RDS,
+         %{
+           child_stops_with_context: [],
+           route_ids: route_ids,
+           route_type: route_type,
+           direction: direction,
+           stop_ids: stop_ids
+         },
+         effect
+       ) do
+    stop_ids
+    |> stop_route_pairs(route_ids)
+    |> Enum.filter(&on_route?(&1, "default"))
+    |> Enum.map(fn {stop_id, route_id} ->
+      %{
+        activities: Activities.for_effect(effect),
+        route_id: route_id,
+        route_type: route_type,
+        agency_id: Routes.agency_id(route_id),
+        stop_id: stop_id
+      }
+      |> maybe_add_direction(direction)
+    end)
+  end
+
+  # Both parent and child stops
   defp build_informed_entities(
          :RDS,
          %{

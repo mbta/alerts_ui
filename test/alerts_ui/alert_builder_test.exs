@@ -315,6 +315,54 @@ defmodule AlertsUI.AlertBuilderTest do
       end
     end
 
+    test "RDS Bus detour with multiple stops" do
+      alert_data = %{
+        direction: "0",
+        stop_ids: ["1", "2"],
+        route_type: 3,
+        route_ids: ["1"],
+        effect_name: "Detour",
+        trip_ids: [],
+        trip_information_by_id: %{},
+        description_text: "test",
+        header_text: "test"
+      }
+
+      parent_stops = [%Stop{id: "1"}, %Stop{id: "2"}, %Stop{id: "3"}]
+
+      with_mock(RoutePatternsRepo,
+        by_route_id: fn _route_id, _opts ->
+          [%APIRoutePattern{direction_id: 0, stops: parent_stops}]
+        end,
+        included_stops_by_route_id: fn _route_id, _direction -> parent_stops end
+      ) do
+        with_mock(StopsRepo,
+          by_route: fn _route_id, _direction -> parent_stops end
+        ) do
+          result = AlertBuilder.build_alert(alert_data, :RDS)
+
+          assert result.informed_entity == [
+                   %{
+                     direction_id: 0,
+                     route_id: "1",
+                     route_type: 3,
+                     agency_id: "1",
+                     activities: [:BOARD, :EXIT],
+                     stop_id: "1"
+                   },
+                   %{
+                     direction_id: 0,
+                     route_id: "1",
+                     route_type: 3,
+                     agency_id: "1",
+                     activities: [:BOARD, :EXIT],
+                     stop_id: "2"
+                   }
+                 ]
+        end
+      end
+    end
+
     test "RDS informed entity with both directions combines child activities in parent" do
       alert_data = %{
         route_type: 3,
@@ -1059,6 +1107,7 @@ defmodule AlertsUI.AlertBuilderTest do
         effect_name: "Delay",
         route_ids: ["57"],
         trip_ids: [],
+        trip_information_by_id: %{},
         stop_ids: ["a", "b", "c"],
         direction: "0"
       }
