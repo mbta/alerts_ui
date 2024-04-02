@@ -44,14 +44,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     {:ok, assign(socket, assigns)}
   end
 
-  @impl true
-  def handle_event("validate", %{"affected_service" => affected_service}, socket) do
-    affected_service =
-      affected_service
-      |> Map.put_new("direction", "default")
-      |> populate_default_stops()
-      |> populate_default_trips()
-
+  def validate(affected_service, assigns) do
     get_stops_by_route_ids(
       Map.get(affected_service, "route_ids", []),
       affected_service["direction"]
@@ -63,13 +56,23 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     )
 
     trip_information_by_id =
-      trip_information_by_id(socket.assigns.available_schedules, affected_service["trip_ids"])
+      trip_information_by_id(assigns.available_schedules, affected_service["trip_ids"])
 
     affected_service = Map.put(affected_service, "trip_information_by_id", trip_information_by_id)
 
-    changeset =
-      %__MODULE__{}
-      |> changeset(affected_service, socket.assigns.combination)
+    %__MODULE__{}
+    |> changeset(affected_service, Map.get(assigns, :combination))
+  end
+
+  @impl true
+  def handle_event("validate", %{"affected_service" => affected_service}, socket) do
+    affected_service =
+      affected_service
+      |> Map.put_new("direction", "default")
+      |> populate_default_stops()
+      |> populate_default_trips()
+
+    changeset = validate(affected_service, socket.assigns)
 
     changeset
     |> apply_action(:insert)
@@ -109,17 +112,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         stop_ids: Map.get(alert_data, :stop_ids) || []
       }
 
-    get_stops_by_route_ids(edit_alert_data.route_ids, edit_alert_data.direction)
-    get_schedules_by_route_ids(edit_alert_data.route_ids, edit_alert_data.direction)
-
-    trip_information_by_id =
-      trip_information_by_id(assigns.available_schedules, edit_alert_data.trip_ids)
-
-    edit_alert_data = Map.put(edit_alert_data, :trip_information_by_id, trip_information_by_id)
-
     changeset =
-      %__MODULE__{}
-      |> changeset(edit_alert_data)
+      validate(edit_alert_data |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end), assigns)
 
     {:ok, completed_changeset} =
       changeset

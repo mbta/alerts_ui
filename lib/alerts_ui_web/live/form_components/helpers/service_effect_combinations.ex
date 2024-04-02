@@ -20,14 +20,28 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations do
       :RDS
       iex> ServiceEffectCombinations.get_combination(2, "Delay")
       :RDTS
+      iex> ServiceEffectCombinations.get_combination(2, "Cancellation")
+      :RDT
+      iex> ServiceEffectCombinations.get_combination(2, "Station Closure")
+      :SR
+      iex> ServiceEffectCombinations.get_combination(2, "Schedule Change")
+      :R
       iex> ServiceEffectCombinations.get_combination(3, "Cancellation")
       :RDS
       iex> ServiceEffectCombinations.get_combination(3, "Stop Move")
       :SR
+      iex> ServiceEffectCombinations.get_combination(3, "Extra Service")
+      :R
       iex> ServiceEffectCombinations.get_combination(4, "Shuttle")
       :RDS
       iex> ServiceEffectCombinations.get_combination(4, "Delay")
       :RDTS
+      iex> ServiceEffectCombinations.get_combination(4, "Cancellation")
+      :RDT
+      iex> ServiceEffectCombinations.get_combination(4, "Dock Closure")
+      :SR
+      iex> ServiceEffectCombinations.get_combination(4, "Extra Service")
+      :R
   """
 
   @spec get_combination(0 | 1 | 2 | 3 | 4 | nil, String.t() | nil) ::

@@ -9,6 +9,29 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       assert AlertData.build_alert_data(nil) == %AlertData{}
     end
 
+    test "works if informed entities empty" do
+      insert(:alert, %{
+        alert_id: "1",
+        effect: :ACCESSIBILITY_ISSUE,
+        effect_detail: "ACCESS_ISSUE",
+        header_text: "cool header text",
+        description_text: "description text",
+        informed_entity: []
+      })
+
+      assert AlertData.build_alert_data("1") == %AlertData{
+               combination: nil,
+               direction: nil,
+               effect_name: "Access Issue",
+               route_type: nil,
+               route_ids: [],
+               stop_ids: [],
+               trip_ids: [],
+               header_text: "cool header text",
+               description_text: "description text"
+             }
+    end
+
     test "handles directions correctly" do
       insert(:alert, %{
         alert_id: "1",
@@ -45,10 +68,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         header_text: "cool header text",
         description_text: "description text",
         informed_entity: [
-          %{route_type: 1, route_id: "1", direction_id: 0},
-          %{route_type: 1, route_id: "2", stop_id: "a2"},
-          %{route_type: 1, route_id: "3", stop_id: "a3", direction_id: 0},
-          %{route_type: 1, route_id: "4", trip: build(:trip_descriptor, %{trip_id: "b1"})}
+          %{route_type: 3, route_id: "1", direction_id: 0},
+          %{route_type: 3, route_id: "2", stop_id: "a2"},
+          %{route_type: 3, route_id: "3", stop_id: "a3", direction_id: 0},
+          %{route_type: 3, route_id: "4", trip: build(:trip_descriptor, %{trip_id: "b1"})}
         ]
       })
 
@@ -56,7 +79,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                combination: :RDTS,
                direction: "0",
                effect_name: "Access Issue",
-               route_type: 1,
+               route_type: 3,
                route_ids: ["1", "2", "3", "4"],
                stop_ids: ["a2", "a3"],
                trip_ids: ["b1"],

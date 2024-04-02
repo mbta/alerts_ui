@@ -5,6 +5,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.CombinationFromInformedEntity do
   """
 
   @spec get_combination(list()) :: atom()
+  def get_combination([]), do: nil
+
   def get_combination(informed_entity) do
     informed_entity
     |> Enum.reduce([R: false, D: false, T: false, S: false], fn ie, acc ->

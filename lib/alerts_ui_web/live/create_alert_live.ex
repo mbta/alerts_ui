@@ -62,7 +62,11 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   @impl true
   def mount(params, _session, socket) do
-    alert_data = AlertData.build_alert_data(Map.get(params, "alert_id"))
+    alert_data =
+      if is_nil(Map.get(params, "alert_id")),
+        do: %{},
+        else: AlertData.build_alert_data(params["alert_id"])
+
     alert_id = Map.get(params, "alert_id")
     [first_step, second_step | _] = @steps
     editing = if is_nil(alert_id), do: false, else: true

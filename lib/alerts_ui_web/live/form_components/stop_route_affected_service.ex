@@ -47,21 +47,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       Map.get(affected_service, "stop_ids", []),
       socket.assigns.alert_data.route_type
     )
-
-    route_ids = Map.get(affected_service, "route_ids", [])
-
-    routes_with_types =
-      socket.assigns.available_routes
-      |> Stream.filter(fn route -> route.id in route_ids end)
-      |> Enum.reduce(%{}, fn route, acc ->
-        Map.put(acc, route.id, route.type)
-      end)
-
-    affected_service = Map.put(affected_service, "route_types_by_id", routes_with_types)
-
-    changeset =
-      %__MODULE__{}
-      |> changeset(affected_service)
+    changeset = validate(affected_service, socket.assigns)
 
     changeset
     |> apply_action(:insert)
@@ -85,21 +71,31 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   def update_for_edit(alert_data, assigns) do
     edit_alert_data =
       %{
-        route_ids: Map.get(alert_data, :route_ids) || [],
-        stop_ids: Map.get(alert_data, :stop_ids) || []
+        "route_ids" => Map.get(alert_data, :route_ids) || [],
+        "stop_ids" => Map.get(alert_data, :stop_ids) || []
       }
 
-    routes_with_types = routes_with_types(assigns.available_routes, edit_alert_data.route_ids)
-
-    edit_alert_data = Map.put(edit_alert_data, :route_types_by_id, routes_with_types)
-
-    changeset =
-      %__MODULE__{}
-      |> changeset(edit_alert_data)
+    changeset = validate(edit_alert_data, assigns)
 
     form = to_form(changeset |> Map.put(:action, :validate))
 
     edit_alert_data |> Map.put(:form, form) |> Map.merge(assigns)
+  end
+
+  def validate(affected_service, assigns) do
+    route_ids = Map.get(affected_service, "route_ids", [])
+
+    routes_with_types =
+      socket.assigns.available_routes
+      |> Stream.filter(fn route -> route.id in route_ids end)
+      |> Enum.reduce(%{}, fn route, acc ->
+        Map.put(acc, route.id, route.type)
+      end)
+
+    affected_service = Map.put(affected_service, "route_types_by_id", routes_with_types)
+
+    %__MODULE__{}
+    |> changeset(affected_service)
   end
 
   def changeset(changeset, params) do
