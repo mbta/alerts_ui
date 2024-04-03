@@ -18,6 +18,7 @@ defmodule AlertsUIWeb.ValidateLive do
 
     {:ok,
      assign(socket,
+       page_title: "Validate Feeds",
        ibi_json: ibi_json,
        ibi_data: ibi_data,
        ibi_alert_data: nil,

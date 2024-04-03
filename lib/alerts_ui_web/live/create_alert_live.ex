@@ -65,6 +65,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
     socket =
       assign(socket, %{
+        page_title: "Create an Alert",
         progress: first_step,
         steps: @steps,
         alert_data: %{},

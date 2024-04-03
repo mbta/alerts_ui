@@ -15,7 +15,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     Process.send_after(self(), :update, @one_minute_in_ms)
 
     with {alerts, meta} <- Alerts.list_all_paginated(params) do
-      {:ok, assign(socket, meta: meta, alerts: alerts, params: params)}
+      {:ok, assign(socket, page_title: "View Alerts", meta: meta, alerts: alerts, params: params)}
     end
   end
 
