@@ -93,7 +93,7 @@ cond do
       ]
 
     config :mbta_v3_api,
-      base_url: System.fetch_env!("API_URL"),
+      base_url: String.replace_trailing(System.fetch_env!("API_URL"), "/", ""),
       api_key: System.fetch_env!("API_KEY")
 
     if keycloak_issuer = System.get_env("KEYCLOAK_ISSUER") do
@@ -121,6 +121,6 @@ cond do
       compare_feed: System.get_env("COMPARE_FEED", "false")
 
     config :mbta_v3_api,
-      base_url: System.fetch_env!("API_URL"),
+      base_url: String.replace_trailing(System.fetch_env!("API_URL"), "/", ""),
       api_key: System.fetch_env!("API_KEY")
 end
