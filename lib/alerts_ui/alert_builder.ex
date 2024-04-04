@@ -137,7 +137,7 @@ defmodule AlertsUI.AlertBuilder do
         child_stop,
         route_id,
         route_pattern.direction_id,
-        RoutePattern.stop_type(route_pattern, child_stop)
+        RoutePattern.stop_type(route_pattern, parent_stop_ids, child_stop)
       }
     end)
   end
