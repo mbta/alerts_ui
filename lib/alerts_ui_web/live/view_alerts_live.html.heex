@@ -72,7 +72,7 @@
         </:col>
         <:col :let={alert}>
           <div class="badge badge-neutral badge-outline">
-            <.link href={~p"/alerts/new?alert_id=#{alert.alert_id}"}>edit</.link>
+            <.link href={~p"/alerts/edit?alert_id=#{alert.alert_id}"}>edit</.link>
           </div>
         </:col>
       </Flop.Phoenix.table>

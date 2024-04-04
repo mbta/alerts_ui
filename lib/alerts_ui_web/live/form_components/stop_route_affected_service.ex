@@ -47,6 +47,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       Map.get(affected_service, "stop_ids", []),
       socket.assigns.alert_data.route_type
     )
+
     changeset = validate(affected_service, socket.assigns)
 
     changeset
@@ -83,14 +84,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   end
 
   def validate(affected_service, assigns) do
-    route_ids = Map.get(affected_service, "route_ids", [])
-
     routes_with_types =
-      socket.assigns.available_routes
-      |> Stream.filter(fn route -> route.id in route_ids end)
-      |> Enum.reduce(%{}, fn route, acc ->
-        Map.put(acc, route.id, route.type)
-      end)
+      routes_with_types(assigns.available_routes, Map.get(affected_service, "route_ids", []))
 
     affected_service = Map.put(affected_service, "route_types_by_id", routes_with_types)
 
@@ -111,7 +106,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     )
   end
 
-  #TODO
   def routes_with_types(available_routes, route_ids) do
     available_routes
     |> Stream.filter(fn route -> route.id in route_ids end)

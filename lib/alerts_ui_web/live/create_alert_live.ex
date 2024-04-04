@@ -69,7 +69,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
     alert_id = Map.get(params, "alert_id")
     [first_step, second_step | _] = @steps
-    editing = if is_nil(alert_id), do: false, else: true
+    editing = socket.assigns.live_action == :edit
 
     socket =
       assign(socket, %{
