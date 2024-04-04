@@ -42,18 +42,14 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       socket.assigns.alert_data.route_type
     )
 
-    routes_with_types =
-      case is_nil(affected_service["route_ids"]) do
-        true ->
-          %{}
+    route_ids = Map.get(affected_service, "route_ids", [])
 
-        false ->
-          socket.assigns.available_routes
-          |> Stream.filter(fn route -> route.id in affected_service["route_ids"] end)
-          |> Enum.reduce(%{}, fn route, acc ->
-            Map.put(acc, route.id, route.type)
-          end)
-      end
+    routes_with_types =
+      socket.assigns.available_routes
+      |> Stream.filter(fn route -> route.id in route_ids end)
+      |> Enum.reduce(%{}, fn route, acc ->
+        Map.put(acc, route.id, route.type)
+      end)
 
     affected_service = Map.put(affected_service, "route_types_by_id", routes_with_types)
 
