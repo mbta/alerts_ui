@@ -35,15 +35,18 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     {:ok, assign(socket, assigns)}
   end
 
+  @impl true
   def handle_event("validate", %{"stop_route_affected_service" => affected_service}, socket) do
     get_routes_by_stop_ids(
       Map.get(affected_service, "stop_ids", []),
       socket.assigns.alert_data.route_type
     )
 
+    route_ids = Map.get(affected_service, "route_ids", [])
+
     routes_with_types =
       socket.assigns.available_routes
-      |> Stream.filter(fn route -> route.id in affected_service["route_ids"] end)
+      |> Stream.filter(fn route -> route.id in route_ids end)
       |> Enum.reduce(%{}, fn route, acc ->
         Map.put(acc, route.id, route.type)
       end)

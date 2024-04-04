@@ -20,7 +20,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
     },
     route_type: 1,
     available_stops: [],
-    available_routes: [],
+    available_routes: [%MBTAV3API.Routes.Route{sort_order: 1, id: "1"}],
     alert_data: %{}
   }
 
