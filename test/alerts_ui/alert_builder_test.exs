@@ -260,16 +260,6 @@ defmodule AlertsUI.AlertBuilderTest do
           result = AlertBuilder.build_alert(alert_data, :RDS)
 
           assert result.informed_entity == [
-                   # Includes parent stops…
-                   %{
-                     direction_id: 1,
-                     route_id: "57",
-                     route_type: 3,
-                     agency_id: "1",
-                     activities: [:BOARD, :RIDE],
-                     stop_id: "a"
-                   },
-                   # …as well as child stops
                    %{
                      activities: [:BOARD, :RIDE],
                      route_id: "57",
@@ -279,28 +269,12 @@ defmodule AlertsUI.AlertBuilderTest do
                      stop_id: "1"
                    },
                    %{
-                     direction_id: 1,
-                     route_id: "57",
-                     route_type: 3,
-                     agency_id: "1",
-                     activities: [:BOARD, :EXIT, :RIDE],
-                     stop_id: "b"
-                   },
-                   %{
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
                      route_type: 3,
                      agency_id: "1",
                      direction_id: 1,
                      stop_id: "2"
-                   },
-                   %{
-                     direction_id: 1,
-                     route_id: "57",
-                     route_type: 3,
-                     agency_id: "1",
-                     activities: [:EXIT, :RIDE],
-                     stop_id: "c"
                    },
                    %{
                      activities: [:EXIT, :RIDE],
@@ -363,111 +337,64 @@ defmodule AlertsUI.AlertBuilderTest do
       end
     end
 
-    test "RDS informed entity with both directions combines child activities in parent" do
+    test "RDS CR track change all trips" do
       alert_data = %{
-        route_type: 3,
-        description_text: "ok",
-        header_text: "hello",
-        effect_name: "Shuttle",
-        stop_ids: ["a", "b", "c"],
-        route_ids: ["57"],
-        trip_ids: nil,
-        direction: "default"
+        route_type: 2,
+        effect_name: "Track Change",
+        route_ids: ["CR-Haverhill"],
+        direction: "0",
+        trip_ids: [],
+        trip_information_by_id: %{},
+        stop_ids: ["place-WR-0067", "place-WR-0075"],
+        header_text: "CR track change all trips",
+        description_text: "CR track change all trips"
       }
 
-      parent_stops = [%Stop{id: "a"}, %Stop{id: "b"}, %Stop{id: "c"}]
+      parent_stops = [%Stop{id: "place-WR-0067"}, %Stop{id: "place-WR-0075"}]
 
       child_stops = [
-        %Stop{id: "1", parent_id: "a"},
-        %Stop{id: "2", parent_id: "b"},
-        %Stop{id: "3", parent_id: "c"}
+        %Stop{
+          id: "WR-0067-01",
+          parent_id: "place-WR-0067"
+        },
+        %Stop{
+          id: "WR-0075-01",
+          parent_id: "place-WR-0075"
+        },
+        # Intentional duplicate
+        %Stop{
+          id: "WR-0075-01",
+          parent_id: "place-WR-0075"
+        }
       ]
 
       with_mock(RoutePatternsRepo,
         by_route_id: fn _route_id, _opts ->
-          [
-            %APIRoutePattern{direction_id: 0, stops: child_stops},
-            %APIRoutePattern{direction_id: 1, stops: Enum.reverse(child_stops)}
-          ]
+          [%APIRoutePattern{direction_id: 0, stops: child_stops}]
         end,
         included_stops_by_route_id: fn _route_id, _direction -> child_stops end
       ) do
         with_mock(StopsRepo,
           by_route: fn _route_id, _direction -> parent_stops ++ child_stops end
         ) do
-          result = AlertBuilder.build_alert(alert_data, :RDS)
+          result = AlertBuilder.build_alert(alert_data, :RDTS)
 
           assert result.informed_entity == [
-                   # Parent stop includes the combined activities of all children
                    %{
-                     route_id: "57",
-                     route_type: 3,
-                     agency_id: "1",
-                     activities: [:BOARD, :RIDE, :EXIT],
-                     stop_id: "a"
-                   },
-                   # Child stops listed per-direction
-                   %{
-                     activities: [:BOARD, :RIDE],
-                     route_id: "57",
-                     route_type: 3,
+                     activities: [:BOARD],
                      agency_id: "1",
                      direction_id: 0,
-                     stop_id: "1"
+                     route_id: "CR-Haverhill",
+                     route_type: 2,
+                     stop_id: "WR-0067-01"
                    },
                    %{
-                     route_id: "57",
-                     route_type: 3,
-                     agency_id: "1",
-                     activities: [:EXIT, :RIDE],
-                     direction_id: 1,
-                     stop_id: "1"
-                   },
-                   %{
-                     route_id: "57",
-                     route_type: 3,
-                     agency_id: "1",
-                     activities: [:BOARD, :EXIT, :RIDE],
-                     stop_id: "b"
-                   },
-                   %{
-                     activities: [:BOARD, :EXIT, :RIDE],
-                     route_id: "57",
-                     route_type: 3,
+                     activities: [:BOARD],
                      agency_id: "1",
                      direction_id: 0,
-                     stop_id: "2"
-                   },
-                   %{
-                     activities: [:BOARD, :EXIT, :RIDE],
-                     direction_id: 1,
-                     route_id: "57",
-                     route_type: 3,
-                     agency_id: "1",
-                     stop_id: "2"
-                   },
-                   %{
-                     route_id: "57",
-                     route_type: 3,
-                     agency_id: "1",
-                     activities: [:EXIT, :RIDE, :BOARD],
-                     stop_id: "c"
-                   },
-                   %{
-                     activities: [:EXIT, :RIDE],
-                     route_id: "57",
-                     route_type: 3,
-                     agency_id: "1",
-                     direction_id: 0,
-                     stop_id: "3"
-                   },
-                   %{
-                     activities: [:BOARD, :RIDE],
-                     route_id: "57",
-                     route_type: 3,
-                     agency_id: "1",
-                     direction_id: 1,
-                     stop_id: "3"
+                     route_id: "CR-Haverhill",
+                     route_type: 2,
+                     stop_id: "WR-0075-01"
                    }
                  ]
         end
@@ -508,51 +435,11 @@ defmodule AlertsUI.AlertBuilderTest do
           assert result.informed_entity == [
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
-                     route_id: "57",
-                     route_type: 3,
-                     agency_id: "1",
-                     direction_id: 1,
-                     stop_id: "a"
-                   },
-                   %{
-                     activities: [:BOARD, :EXIT, :RIDE],
-                     route_id: "58",
-                     route_type: 3,
-                     agency_id: "1",
-                     direction_id: 1,
-                     stop_id: "a"
-                   },
-                   %{
-                     activities: [:BOARD, :EXIT, :RIDE],
                      direction_id: 1,
                      route_id: "57",
                      route_type: 3,
                      agency_id: "1",
                      stop_id: "1"
-                   },
-                   %{
-                     activities: [:BOARD, :EXIT, :RIDE],
-                     direction_id: 1,
-                     route_id: "58",
-                     route_type: 3,
-                     agency_id: "1",
-                     stop_id: "1"
-                   },
-                   %{
-                     activities: [:BOARD, :EXIT, :RIDE],
-                     route_id: "57",
-                     route_type: 3,
-                     agency_id: "1",
-                     direction_id: 1,
-                     stop_id: "b"
-                   },
-                   %{
-                     activities: [:BOARD, :EXIT, :RIDE],
-                     route_id: "58",
-                     route_type: 3,
-                     agency_id: "1",
-                     direction_id: 1,
-                     stop_id: "b"
                    },
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
@@ -561,6 +448,14 @@ defmodule AlertsUI.AlertBuilderTest do
                      route_type: 3,
                      agency_id: "1",
                      stop_id: "2"
+                   },
+                   %{
+                     activities: [:BOARD, :EXIT, :RIDE],
+                     direction_id: 1,
+                     route_id: "58",
+                     route_type: 3,
+                     agency_id: "1",
+                     stop_id: "1"
                    },
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
@@ -627,10 +522,50 @@ defmodule AlertsUI.AlertBuilderTest do
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
                      direction_id: 1,
+                     route_id: "Green-B",
+                     route_type: 1,
+                     agency_id: "1",
+                     stop_id: "hynes-child"
+                   },
+                   %{
+                     activities: [:BOARD, :EXIT, :RIDE],
+                     route_id: "Green-B",
+                     route_type: 1,
+                     agency_id: "1",
+                     direction_id: 1,
+                     stop_id: "kenmore-child"
+                   },
+                   %{
+                     activities: [:BOARD, :EXIT, :RIDE],
+                     direction_id: 1,
+                     route_id: "Green-C",
+                     route_type: 1,
+                     agency_id: "1",
+                     stop_id: "hynes-child"
+                   },
+                   %{
+                     activities: [:BOARD, :EXIT, :RIDE],
+                     direction_id: 1,
+                     route_id: "Green-C",
+                     route_type: 1,
+                     agency_id: "1",
+                     stop_id: "kenmore-child"
+                   },
+                   %{
+                     activities: [:BOARD, :EXIT, :RIDE],
+                     direction_id: 1,
                      route_id: "Green-D",
                      route_type: 1,
                      agency_id: "1",
-                     stop_id: "place-fenwy"
+                     stop_id: "hynes-child"
+                   },
+                   %{
+                     activities: [:BOARD, :EXIT, :RIDE],
+                     direction_id: 1,
+                     route_id: "Green-D",
+                     route_type: 1,
+                     agency_id: "1",
+                     stop_id: "kenmore-child"
                    },
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
@@ -639,102 +574,6 @@ defmodule AlertsUI.AlertBuilderTest do
                      route_type: 1,
                      agency_id: "1",
                      stop_id: "fenway-child"
-                   },
-                   %{
-                     activities: [:BOARD, :EXIT, :RIDE],
-                     route_id: "Green-B",
-                     route_type: 1,
-                     agency_id: "1",
-                     direction_id: 1,
-                     stop_id: "place-hymnl"
-                   },
-                   %{
-                     activities: [:BOARD, :EXIT, :RIDE],
-                     route_id: "Green-C",
-                     route_type: 1,
-                     agency_id: "1",
-                     direction_id: 1,
-                     stop_id: "place-hymnl"
-                   },
-                   %{
-                     activities: [:BOARD, :EXIT, :RIDE],
-                     route_id: "Green-D",
-                     route_type: 1,
-                     agency_id: "1",
-                     direction_id: 1,
-                     stop_id: "place-hymnl"
-                   },
-                   %{
-                     activities: [:BOARD, :EXIT, :RIDE],
-                     direction_id: 1,
-                     route_id: "Green-B",
-                     route_type: 1,
-                     agency_id: "1",
-                     stop_id: "hynes-child"
-                   },
-                   %{
-                     activities: [:BOARD, :EXIT, :RIDE],
-                     direction_id: 1,
-                     route_id: "Green-C",
-                     route_type: 1,
-                     agency_id: "1",
-                     stop_id: "hynes-child"
-                   },
-                   %{
-                     activities: [:BOARD, :EXIT, :RIDE],
-                     direction_id: 1,
-                     route_id: "Green-D",
-                     route_type: 1,
-                     agency_id: "1",
-                     stop_id: "hynes-child"
-                   },
-                   %{
-                     activities: [:BOARD, :EXIT, :RIDE],
-                     route_id: "Green-B",
-                     route_type: 1,
-                     agency_id: "1",
-                     direction_id: 1,
-                     stop_id: "place-kencl"
-                   },
-                   %{
-                     activities: [:BOARD, :EXIT, :RIDE],
-                     route_id: "Green-C",
-                     route_type: 1,
-                     agency_id: "1",
-                     direction_id: 1,
-                     stop_id: "place-kencl"
-                   },
-                   %{
-                     activities: [:BOARD, :EXIT, :RIDE],
-                     route_id: "Green-D",
-                     route_type: 1,
-                     agency_id: "1",
-                     direction_id: 1,
-                     stop_id: "place-kencl"
-                   },
-                   %{
-                     activities: [:BOARD, :EXIT, :RIDE],
-                     route_id: "Green-B",
-                     route_type: 1,
-                     agency_id: "1",
-                     direction_id: 1,
-                     stop_id: "kenmore-child"
-                   },
-                   %{
-                     activities: [:BOARD, :EXIT, :RIDE],
-                     direction_id: 1,
-                     route_id: "Green-C",
-                     route_type: 1,
-                     agency_id: "1",
-                     stop_id: "kenmore-child"
-                   },
-                   %{
-                     activities: [:BOARD, :EXIT, :RIDE],
-                     direction_id: 1,
-                     route_id: "Green-D",
-                     route_type: 1,
-                     agency_id: "1",
-                     stop_id: "kenmore-child"
                    }
                  ]
         end
@@ -1134,14 +973,6 @@ defmodule AlertsUI.AlertBuilderTest do
           assert result.informed_entity == [
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
-                     route_id: "57",
-                     route_type: 3,
-                     agency_id: "1",
-                     direction_id: 0,
-                     stop_id: "a"
-                   },
-                   %{
-                     activities: [:BOARD, :EXIT, :RIDE],
                      direction_id: 1,
                      route_id: "57",
                      route_type: 3,
@@ -1150,27 +981,11 @@ defmodule AlertsUI.AlertBuilderTest do
                    },
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
-                     route_id: "57",
-                     route_type: 3,
-                     agency_id: "1",
-                     direction_id: 0,
-                     stop_id: "b"
-                   },
-                   %{
-                     activities: [:BOARD, :EXIT, :RIDE],
                      direction_id: 1,
                      route_id: "57",
                      route_type: 3,
                      agency_id: "1",
                      stop_id: "2"
-                   },
-                   %{
-                     activities: [:BOARD, :EXIT, :RIDE],
-                     route_id: "57",
-                     route_type: 3,
-                     agency_id: "1",
-                     direction_id: 0,
-                     stop_id: "c"
                    },
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
@@ -1234,86 +1049,174 @@ defmodule AlertsUI.AlertBuilderTest do
         direction: "default"
       }
 
-      with_mock(RoutePatternsRepo,
-        by_route_id: fn _route_id, _opts -> [] end,
-        included_stops_by_route_id: fn _route_id, _direction -> [] end
-      ) do
-        result = AlertBuilder.build_alert(alert_data, :RDTS)
+      parent_stops = [%Stop{id: "a"}, %Stop{id: "b"}]
 
-        assert result.informed_entity == [
-                 %{
-                   activities: [:BOARD, :EXIT, :RIDE],
-                   route_id: "57",
-                   route_type: 3,
-                   agency_id: "1",
-                   stop_id: "a",
-                   trip: %{
-                     trip_id: "123",
+      child_stops = [
+        %Stop{
+          id: "child-a",
+          parent_id: "a"
+        },
+        %Stop{
+          id: "child-b",
+          parent_id: "b"
+        }
+      ]
+
+      with_mock(RoutePatternsRepo,
+        by_route_id: fn _route_id, _opts ->
+          [%APIRoutePattern{direction_id: 0, stops: child_stops}]
+        end,
+        included_stops_by_route_id: fn _route_id, _direction -> child_stops end
+      ) do
+        with_mock(StopsRepo,
+          by_route: fn _route_id, _direction -> parent_stops ++ child_stops end
+        ) do
+          result = AlertBuilder.build_alert(alert_data, :RDTS)
+
+          assert result.informed_entity == [
+                   %{
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
-                     direction_id: 0
-                   }
-                 },
-                 %{
-                   activities: [:BOARD, :EXIT, :RIDE],
-                   route_id: "57",
-                   route_type: 3,
-                   agency_id: "1",
-                   stop_id: "a",
-                   trip: %{
-                     trip_id: "345",
+                     route_type: 3,
+                     agency_id: "1",
+                     stop_id: "child-a",
+                     trip: %{
+                       trip_id: "123",
+                       route_id: "57",
+                       direction_id: 0
+                     }
+                   },
+                   %{
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
-                     direction_id: 0
-                   }
-                 },
-                 %{
-                   activities: [:BOARD, :EXIT, :RIDE],
-                   route_id: "57",
-                   route_type: 3,
-                   agency_id: "1",
-                   stop_id: "a",
-                   trip: %{
-                     trip_id: "456",
+                     route_type: 3,
+                     agency_id: "1",
+                     stop_id: "child-a",
+                     trip: %{
+                       trip_id: "345",
+                       route_id: "57",
+                       direction_id: 0
+                     }
+                   },
+                   %{
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
-                     direction_id: 0
-                   }
-                 },
-                 %{
-                   activities: [:BOARD, :EXIT, :RIDE],
-                   route_id: "57",
-                   route_type: 3,
-                   agency_id: "1",
-                   stop_id: "b",
-                   trip: %{
-                     trip_id: "123",
+                     route_type: 3,
+                     agency_id: "1",
+                     stop_id: "child-a",
+                     trip: %{
+                       trip_id: "456",
+                       route_id: "57",
+                       direction_id: 0
+                     }
+                   },
+                   %{
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
-                     direction_id: 0
-                   }
-                 },
-                 %{
-                   activities: [:BOARD, :EXIT, :RIDE],
-                   route_id: "57",
-                   route_type: 3,
-                   agency_id: "1",
-                   stop_id: "b",
-                   trip: %{
-                     trip_id: "345",
+                     route_type: 3,
+                     agency_id: "1",
+                     stop_id: "child-b",
+                     trip: %{
+                       trip_id: "123",
+                       route_id: "57",
+                       direction_id: 0
+                     }
+                   },
+                   %{
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
-                     direction_id: 0
-                   }
-                 },
-                 %{
-                   activities: [:BOARD, :EXIT, :RIDE],
-                   route_id: "57",
-                   route_type: 3,
-                   agency_id: "1",
-                   stop_id: "b",
-                   trip: %{
-                     trip_id: "456",
+                     route_type: 3,
+                     agency_id: "1",
+                     stop_id: "child-b",
+                     trip: %{
+                       trip_id: "345",
+                       route_id: "57",
+                       direction_id: 0
+                     }
+                   },
+                   %{
+                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
-                     direction_id: 0
+                     route_type: 3,
+                     agency_id: "1",
+                     stop_id: "child-b",
+                     trip: %{
+                       trip_id: "456",
+                       route_id: "57",
+                       direction_id: 0
+                     }
                    }
-                 }
-               ]
+                 ]
+        end
+      end
+    end
+
+    test "RDTS CR track change 1 trip" do
+      alert_data = %{
+        route_type: 2,
+        effect_name: "Track Change",
+        description_text: "CR track change",
+        header_text: "CR track change",
+        route_ids: ["CR-Haverhill"],
+        direction: "0",
+        trip_ids: ["default", "CR-627678-295"],
+        trip_information_by_id: %{
+          "CR-627678-295" => %{direction_id: 0, route_id: "CR-Haverhill"}
+        },
+        stop_ids: ["place-WR-0067", "place-WR-0075"]
+      }
+
+      parent_stops = [%Stop{id: "place-WR-0067"}, %Stop{id: "place-WR-0075"}]
+
+      child_stops = [
+        %Stop{
+          id: "WR-0067-01",
+          parent_id: "place-WR-0067"
+        },
+        %Stop{
+          id: "WR-0075-01",
+          parent_id: "place-WR-0075"
+        }
+      ]
+
+      with_mock(RoutePatternsRepo,
+        by_route_id: fn _route_id, _opts ->
+          [%APIRoutePattern{direction_id: 0, stops: child_stops}]
+        end,
+        included_stops_by_route_id: fn _route_id, _direction -> child_stops end
+      ) do
+        with_mock(StopsRepo,
+          by_route: fn _route_id, _direction -> parent_stops ++ child_stops end
+        ) do
+          result = AlertBuilder.build_alert(alert_data, :RDTS)
+
+          assert result.informed_entity == [
+                   %{
+                     activities: [:BOARD],
+                     route_id: "CR-Haverhill",
+                     route_type: 2,
+                     agency_id: "1",
+                     stop_id: "WR-0067-01",
+                     trip: %{
+                       trip_id: "CR-627678-295",
+                       route_id: "CR-Haverhill",
+                       direction_id: 0
+                     }
+                   },
+                   %{
+                     activities: [:BOARD],
+                     route_id: "CR-Haverhill",
+                     route_type: 2,
+                     agency_id: "1",
+                     stop_id: "WR-0075-01",
+                     trip: %{
+                       trip_id: "CR-627678-295",
+                       route_id: "CR-Haverhill",
+                       direction_id: 0
+                     }
+                   }
+                 ]
+        end
       end
     end
 
