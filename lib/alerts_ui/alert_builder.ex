@@ -307,18 +307,16 @@ defmodule AlertsUI.AlertBuilder do
   defp build_informed_entities(
          :SR,
          %{
-           stop_ids: stop_ids,
-           route_ids: route_ids,
+           child_stops_with_context: child_stops_with_context,
            route_types_by_id: route_types_by_id
          },
          effect
        ) do
-    route_ids = Routes.expanding_green_line(route_ids)
-
-    stop_ids
-    |> stop_route_pairs(route_ids)
-    |> Enum.filter(&on_route?(&1, "default"))
-    |> Enum.map(fn {stop_id, route_id} ->
+    child_stops_with_context
+    |> Enum.filter(fn {%Stop{parent_id: parent_id}, route_id, _, _} ->
+      on_route?({parent_id, route_id}, "default")
+    end)
+    |> Enum.map(fn {%Stop{id: stop_id}, route_id, _direction_id, _stop_type} ->
       %{
         activities: Activities.for_effect(effect),
         route_id: route_id,
@@ -327,6 +325,7 @@ defmodule AlertsUI.AlertBuilder do
         stop_id: stop_id
       }
     end)
+    |> Enum.uniq()
   end
 
   defp build_trip(trip_id, direction_id, route_id) do
