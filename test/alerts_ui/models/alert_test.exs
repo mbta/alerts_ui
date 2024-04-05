@@ -2,7 +2,7 @@ defmodule AlertsUI.Models.AlertTest do
   @moduledoc false
   use AlertsUI.DataCase, async: true
 
-  alias AlertsUI.Models.{Alert, InformedEntity}
+  alias AlertsUI.Models.{Alert, InformedEntity, TripDescriptor}
 
   describe "changeset/2" do
     test "create with header, description, and informed_entity is valid" do
@@ -152,6 +152,99 @@ defmodule AlertsUI.Models.AlertTest do
       }
 
       assert Alert.entities_with_icons(alert) == []
+    end
+  end
+
+  describe "get_direction/1" do
+    test "returns nil if informed entity is empty list" do
+      assert Alert.get_direction([]) == nil
+    end
+
+    test "returns direction if only 1 direction found" do
+      informed_entity = [
+        %InformedEntity{activities: [:exit], route_id: "28", route_type: 3, direction_id: 1},
+        %InformedEntity{activities: [:exit], route_id: "29", route_type: 3, direction_id: 1},
+        %InformedEntity{activities: [:exit], route_id: "27", route_type: 3}
+      ]
+
+      assert Alert.get_direction(informed_entity) == "1"
+    end
+
+    test "returns nil if 2 directions found" do
+      informed_entity = [
+        %InformedEntity{activities: [:exit], route_id: "28", route_type: 3, direction_id: 0},
+        %InformedEntity{activities: [:exit], route_id: "29", route_type: 3, direction_id: 1}
+      ]
+
+      assert Alert.get_direction(informed_entity) == nil
+    end
+  end
+
+  describe "get_route_type/1" do
+    test "returns nil if informed entity is empty list" do
+      assert Alert.get_route_type([]) == nil
+    end
+
+    test "returns 1 if any route types are 0 or 1" do
+      informed_entity = [
+        %InformedEntity{activities: [:exit], route_id: "28", route_type: 0, direction_id: 1},
+        %InformedEntity{activities: [:exit], route_id: "29", route_type: 1, direction_id: 1},
+        %InformedEntity{activities: [:exit], route_id: "27", route_type: 2}
+      ]
+
+      assert Alert.get_route_type(informed_entity) == 1
+    end
+
+    test "returns route type of head if no 0 or 1" do
+      informed_entity = [
+        %InformedEntity{activities: [:exit], route_id: "28", route_type: 3, direction_id: 1},
+        %InformedEntity{activities: [:exit], route_id: "29", route_type: 3, direction_id: 1},
+        %InformedEntity{activities: [:exit], route_id: "27", route_type: 3}
+      ]
+
+      assert Alert.get_route_type(informed_entity) == 3
+    end
+  end
+
+  describe "gather_route_ids/1" do
+    test "lists route ids from informed entity" do
+      informed_entity = [
+        %InformedEntity{activities: [:exit], route_id: "27", route_type: 3, direction_id: 1},
+        %InformedEntity{activities: [:exit], route_id: "28", route_type: 3, direction_id: 1},
+        %InformedEntity{activities: [:exit], route_id: "29", route_type: 3, direction_id: 1},
+        %InformedEntity{activities: [:exit], route_id: "29", route_type: 3, direction_id: 1},
+        %InformedEntity{activities: [:exit], route_type: 3}
+      ]
+
+      assert Alert.gather_route_ids(informed_entity) == ["27", "28", "29"]
+    end
+  end
+
+  describe "gather_stop_ids/1" do
+    test "lists stop ids from informed entity" do
+      informed_entity = [
+        %InformedEntity{activities: [:exit], route_id: "27", route_type: 3, stop_id: "1"},
+        %InformedEntity{activities: [:exit], route_id: "28", route_type: 3, stop_id: "2"},
+        %InformedEntity{activities: [:exit], route_id: "29", route_type: 3, stop_id: "2"},
+        %InformedEntity{activities: [:exit], route_id: "29", route_type: 3, stop_id: "3"},
+        %InformedEntity{activities: [:exit], route_type: 3}
+      ]
+
+      assert Alert.gather_stop_ids(informed_entity) == ["1", "2", "3"]
+    end
+  end
+
+  describe "gather_trip_ids/1" do
+    test "lists trip ids from informed entity" do
+      informed_entity = [
+        %InformedEntity{activities: [:exit], route_type: 3, trip: %TripDescriptor{trip_id: "3"}},
+        %InformedEntity{activities: [:exit], route_type: 3, trip: %TripDescriptor{trip_id: "2"}},
+        %InformedEntity{activities: [:exit], route_type: 3},
+        %InformedEntity{activities: [:exit], route_type: 3, trip: %TripDescriptor{trip_id: "1"}},
+        %InformedEntity{activities: [:exit], route_type: 3, trip: %TripDescriptor{}}
+      ]
+
+      assert Alert.gather_trip_ids(informed_entity) == ["3", "2", "1"]
     end
   end
 end

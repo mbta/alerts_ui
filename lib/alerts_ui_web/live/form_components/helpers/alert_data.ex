@@ -3,7 +3,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   builds alert data from existing alert
   """
   alias AlertsUI.Alerts
-  alias AlertsUI.Models.Effect
+  alias AlertsUI.Models.{Alert, Effect}
   alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
 
   defstruct [
@@ -39,66 +39,15 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     combination = ServiceEffectCombinations.get_combination(informed_entities)
 
     %__MODULE__{
-      route_type: get_route_type(informed_entities),
-      direction: get_direction(informed_entities),
+      route_type: Alert.get_route_type(informed_entities),
+      direction: Alert.get_direction(informed_entities),
       effect_name: Map.get(effect_map, :effect_name),
-      route_ids: gather_route_ids(informed_entities),
-      stop_ids: gather_stop_ids(informed_entities),
-      trip_ids: gather_trip_ids(informed_entities),
+      route_ids: Alert.gather_route_ids(informed_entities),
+      stop_ids: Alert.gather_stop_ids(informed_entities),
+      trip_ids: Alert.gather_trip_ids(informed_entities),
       header_text: Map.get(alert, :header_text),
       description_text: Map.get(alert, :description_text),
       combination: combination
     }
-  end
-
-  defp get_direction([]), do: nil
-
-  defp get_direction(informed_entities) do
-    directions_list =
-      informed_entities
-      |> Enum.map(& &1.direction_id)
-      |> Enum.uniq()
-      |> Enum.filter(&(!is_nil(&1)))
-
-    if length(directions_list) == 1 do
-      hd(directions_list) |> Integer.to_string()
-    else
-      nil
-    end
-  end
-
-  defp get_route_type([]), do: nil
-
-  defp get_route_type(informed_entities) do
-    case Enum.any?(informed_entities, &(&1.route_type in [0, 1])) do
-      true -> 1
-      false -> hd(informed_entities).route_type
-    end
-  end
-
-  defp gather_route_ids(informed_entities) do
-    informed_entities
-    |> Enum.map(&Map.get(&1, :route_id))
-    |> Enum.filter(&(!is_nil(&1)))
-    |> Enum.uniq()
-  end
-
-  defp gather_stop_ids(informed_entities) do
-    informed_entities
-    |> Enum.map(&Map.get(&1, :stop_id))
-    |> Enum.filter(&(!is_nil(&1)))
-    |> Enum.uniq()
-  end
-
-  defp gather_trip_ids(informed_entities) do
-    informed_entities
-    |> Enum.map(fn ie ->
-      case Map.get(ie, :trip) do
-        nil -> nil
-        trip -> Map.get(trip, :trip_id)
-      end
-    end)
-    |> Enum.filter(&(!is_nil(&1)))
-    |> Enum.uniq()
   end
 end
