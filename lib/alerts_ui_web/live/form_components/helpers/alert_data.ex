@@ -4,7 +4,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   """
   alias AlertsUI.Alerts
   alias AlertsUI.Models.Effect
-  alias AlertsUIWeb.FormComponents.Helpers.CombinationFromInformedEntity
+  alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
 
   defstruct [
     :route_type,
@@ -29,14 +29,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           combination: atom()
         }
 
-  @spec build_alert_data(nil | String.t()) :: AlertsUIWeb.FormComponents.Helpers.AlertData.t()
+  @spec build_alert_data(nil | String.t()) :: t()
   def build_alert_data(nil), do: %__MODULE__{}
 
   def build_alert_data(alert_id) do
     alert = Alerts.get_by_alert_id(alert_id)
     effect_map = Effect.effect_map_by_detail(Map.get(alert, :effect_detail))
     informed_entities = Map.get(alert, :informed_entity, [])
-    combination = CombinationFromInformedEntity.get_combination(informed_entities)
+    combination = ServiceEffectCombinations.get_combination(informed_entities)
 
     %__MODULE__{
       route_type: get_route_type(informed_entities),
