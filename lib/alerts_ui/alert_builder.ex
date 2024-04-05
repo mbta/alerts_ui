@@ -301,6 +301,7 @@ defmodule AlertsUI.AlertBuilder do
         }
       end)
     end)
+    |> Enum.uniq()
   end
 
   defp build_informed_entities(
