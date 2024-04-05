@@ -28,9 +28,15 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   end
 
   @impl true
-  def update(%{alert_data: alert_data} = assigns, socket) do
+  def update(%{alert_data: alert_data, editing: editing} = assigns, socket) do
     route_type = Map.get(alert_data, :route_type)
     get_stops_by_route_type(route_type)
+
+    assigns =
+      case editing do
+        true -> update_for_edit(alert_data, assigns)
+        false -> assigns
+      end
 
     {:ok, assign(socket, assigns)}
   end
@@ -42,20 +48,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       socket.assigns.alert_data.route_type
     )
 
-    route_ids = Map.get(affected_service, "route_ids", [])
-
-    routes_with_types =
-      socket.assigns.available_routes
-      |> Stream.filter(fn route -> route.id in route_ids end)
-      |> Enum.reduce(%{}, fn route, acc ->
-        Map.put(acc, route.id, route.type)
-      end)
-
-    affected_service = Map.put(affected_service, "route_types_by_id", routes_with_types)
-
-    changeset =
-      %__MODULE__{}
-      |> changeset(affected_service)
+    changeset = validate(affected_service, socket.assigns)
 
     changeset
     |> apply_action(:insert)
@@ -76,6 +69,30 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     {:noreply, socket}
   end
 
+  def update_for_edit(alert_data, assigns) do
+    edit_alert_data =
+      %{
+        "route_ids" => Map.get(alert_data, :route_ids) || [],
+        "stop_ids" => Map.get(alert_data, :stop_ids) || []
+      }
+
+    changeset = validate(edit_alert_data, assigns)
+
+    form = to_form(changeset |> Map.put(:action, :validate))
+
+    edit_alert_data |> Map.put(:form, form) |> Map.merge(assigns)
+  end
+
+  def validate(affected_service, assigns) do
+    routes_with_types =
+      routes_with_types(assigns.available_routes, Map.get(affected_service, "route_ids", []))
+
+    affected_service = Map.put(affected_service, "route_types_by_id", routes_with_types)
+
+    %__MODULE__{}
+    |> changeset(affected_service)
+  end
+
   def changeset(changeset, params) do
     changeset
     |> cast(params, @fields)
@@ -87,6 +104,14 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       self(),
       {:fetch_stops_by_route_type, route_type}
     )
+  end
+
+  def routes_with_types(available_routes, route_ids) do
+    available_routes
+    |> Stream.filter(fn route -> route.id in route_ids end)
+    |> Enum.reduce(%{}, fn route, acc ->
+      Map.put(acc, route.id, route.type)
+    end)
   end
 
   def get_routes_by_stop_ids(nil, _route_type), do: nil

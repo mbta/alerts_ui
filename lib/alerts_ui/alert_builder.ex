@@ -57,6 +57,7 @@ defmodule AlertsUI.AlertBuilder do
   end
 
   @spec add_combo_route_ids([Route.id_t()]) :: [Route.id_t()]
+
   defp add_combo_route_ids(route_ids) do
     route_ids
     |> Enum.flat_map(fn route_id ->
@@ -78,7 +79,7 @@ defmodule AlertsUI.AlertBuilder do
   defp add_child_stops(stop_ids, route_ids, direction) do
     Enum.flat_map(route_ids, fn route_id ->
       get_stops(route_id, direction)
-      |> Enum.filter(&(&1.parent_id in stop_ids))
+      |> Enum.filter(&(Map.get(&1, :parent_id) in stop_ids))
       |> Enum.map(& &1.id)
     end)
     |> Enum.concat(stop_ids)
@@ -90,9 +91,11 @@ defmodule AlertsUI.AlertBuilder do
   defp get_stops(route_id, direction),
     do: RoutePatterns.included_stops_by_route_id(route_id, direction_id: direction)
 
-  @spec child_stops_with_context([Route.id_t()], String.t(), [Stop.id_t()]) :: [
-          stop_with_context_t()
-        ]
+  @spec child_stops_with_context([Route.id_t()], String.t(), [Stop.id_t()]) ::
+          [
+            stop_with_context_t()
+          ]
+
   defp child_stops_with_context(route_ids, direction, parent_stop_ids) do
     route_ids
     |> Routes.expanding_green_line()

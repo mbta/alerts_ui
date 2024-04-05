@@ -16,11 +16,40 @@ defmodule AlertsUI.AlertsTest do
         })
 
       {:ok, new_alert} =
-        Alerts.create_alert(new_params)
+        Alerts.create_or_update_alert(new_params)
 
       assert new_alert.alert_id == "123"
       assert new_alert.header_text == "new header text"
       assert new_alert.description_text == ""
+    end
+
+    test "edits alert if it exists" do
+      existing_alert =
+        insert(
+          :alert,
+          %{
+            alert_id: "123",
+            header_text: "old header text",
+            active_period: [
+              build(:active_period),
+              %{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:01:00Z]}
+            ]
+          }
+        )
+
+      new_params =
+        build(:alert_map, %{
+          alert_id: "123",
+          header_text: "new header text",
+          last_modified_timestamp: ~U[2023-10-12 00:01:00Z],
+          active_period: [%{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:03:00Z]}]
+        })
+
+      Alerts.create_or_update_alert(new_params, existing_alert)
+      updated_alert = Repo.get_by(Alert, id: existing_alert.id)
+      assert updated_alert.alert_id == "123"
+      assert updated_alert.header_text == "new header text"
+      assert (updated_alert.active_period |> hd).end == ~U[2023-10-13 00:03:00Z]
     end
 
     test "papertrail saves versions" do
@@ -32,7 +61,7 @@ defmodule AlertsUI.AlertsTest do
         })
 
       {:ok, new_alert} =
-        Alerts.create_alert(new_params)
+        Alerts.create_or_update_alert(new_params)
 
       %Alert{alert_id: stored_alert_id} = Repo.get!(Alert, new_alert.id)
 
@@ -50,7 +79,7 @@ defmodule AlertsUI.AlertsTest do
         })
 
       {:ok, new_alert} =
-        Alerts.create_alert(new_params)
+        Alerts.create_or_update_alert(new_params)
 
       assert new_alert.alert_id |> String.to_integer() |> is_integer()
       assert new_alert.header_text == "new header text"
@@ -65,7 +94,7 @@ defmodule AlertsUI.AlertsTest do
           description_text: nil
         })
 
-      {:error, changeset} = Alerts.create_alert(new_params)
+      {:error, changeset} = Alerts.create_or_update_alert(new_params)
       assert changeset.errors == [header_text: {"is required", [validation: :required]}]
     end
 
@@ -79,7 +108,7 @@ defmodule AlertsUI.AlertsTest do
           description_text: nil
         })
 
-      {:error, changeset} = Alerts.create_alert(new_params)
+      {:error, changeset} = Alerts.create_or_update_alert(new_params)
 
       assert changeset.errors == [
                alert_id: {"cannot create alert while feed is being compared", []}

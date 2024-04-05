@@ -18,7 +18,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
       next: "success",
       label: "Alert Details"
     },
-    route_type: 1
+    route_type: 1,
+    alert_data: %{}
   }
 
   describe "component" do

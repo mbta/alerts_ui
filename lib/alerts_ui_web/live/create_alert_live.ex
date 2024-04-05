@@ -23,6 +23,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   alias AlertsUI.AlertBuilder
   alias AlertsUI.Alerts
+  alias AlertsUI.Models.Alert
   alias AlertsUI.Routes
 
   alias AlertsUIWeb.FormComponents.{
@@ -34,7 +35,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
     Timeline
   }
 
-  alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
+  alias AlertsUIWeb.FormComponents.Helpers.{AlertData, ServiceEffectCombinations}
   alias AlertsUIWeb.Step
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
@@ -60,20 +61,30 @@ defmodule AlertsUIWeb.CreateAlertLive do
   ]
 
   @impl true
-  def mount(_params, _session, socket) do
-    first_step = List.first(@steps)
+  def mount(params, _session, socket) do
+    alert_id = Map.get(params, "alert_id")
+
+    alert_data =
+      if is_nil(alert_id),
+        do: %{},
+        else: AlertData.build_alert_data(alert_id)
+
+    [first_step, second_step | _] = @steps
+    editing = socket.assigns.live_action == :edit
 
     socket =
       assign(socket, %{
         page_title: "Create an Alert",
-        progress: first_step,
+        progress: if(editing, do: second_step, else: first_step),
         steps: @steps,
-        alert_data: %{},
-        combination: nil,
+        alert_data: alert_data,
+        combination: Map.get(alert_data, :combination),
         available_routes: [],
         available_schedules: [],
         available_stops: [],
-        alert_uuid: nil
+        alert_uuid: nil,
+        alert_id: alert_id,
+        editing: editing
       })
 
     {:ok, socket}
@@ -169,7 +180,10 @@ defmodule AlertsUIWeb.CreateAlertLive do
     alert_data = Map.merge(socket.assigns.alert_data, changeset |> Map.from_struct())
     route_type = Map.get(alert_data, :route_type)
     effect_name = Map.get(alert_data, :effect_name)
-    combination = ServiceEffectCombinations.get_combination(route_type, effect_name)
+
+    combination =
+      socket.assigns.combination ||
+        ServiceEffectCombinations.get_combination(route_type, effect_name)
 
     assigns = %{
       progress: get_step_by_name(socket.assigns.progress.next),
@@ -181,10 +195,20 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   def handle_info({:create_alert, changeset}, socket) do
-    socket.assigns.alert_data
-    |> Map.merge(changeset |> Map.from_struct())
-    |> AlertBuilder.build_alert(socket.assigns.combination)
-    |> Alerts.create_alert()
+    alert_map =
+      socket.assigns.alert_data
+      |> Map.merge(changeset |> Map.from_struct())
+      |> AlertBuilder.build_alert(socket.assigns.combination)
+
+    existing_alert =
+      if is_nil(socket.assigns.alert_id) do
+        %Alert{}
+      else
+        Alerts.get_by_alert_id(socket.assigns.alert_id)
+      end
+
+    alert_map
+    |> Alerts.create_or_update_alert(existing_alert)
     |> case do
       {:ok, result} ->
         assigns = %{

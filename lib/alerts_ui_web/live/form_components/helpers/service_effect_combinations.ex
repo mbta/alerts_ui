@@ -20,14 +20,28 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations do
       :RDS
       iex> ServiceEffectCombinations.get_combination(2, "Delay")
       :RDTS
+      iex> ServiceEffectCombinations.get_combination(2, "Cancellation")
+      :RDT
+      iex> ServiceEffectCombinations.get_combination(2, "Station Closure")
+      :SR
+      iex> ServiceEffectCombinations.get_combination(2, "Schedule Change")
+      :R
       iex> ServiceEffectCombinations.get_combination(3, "Cancellation")
       :RDS
       iex> ServiceEffectCombinations.get_combination(3, "Stop Move")
       :SR
+      iex> ServiceEffectCombinations.get_combination(3, "Extra Service")
+      :R
       iex> ServiceEffectCombinations.get_combination(4, "Shuttle")
       :RDS
       iex> ServiceEffectCombinations.get_combination(4, "Delay")
       :RDTS
+      iex> ServiceEffectCombinations.get_combination(4, "Cancellation")
+      :RDT
+      iex> ServiceEffectCombinations.get_combination(4, "Dock Closure")
+      :SR
+      iex> ServiceEffectCombinations.get_combination(4, "Extra Service")
+      :R
   """
 
   @spec get_combination(0 | 1 | 2 | 3 | 4 | nil, String.t() | nil) ::
@@ -98,4 +112,26 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations do
   def required_fields(:RDS), do: ~w[route_ids direction stop_ids]a
   def required_fields(:RDT), do: ~w[route_ids direction trip_ids]a
   def required_fields(:RDTS), do: ~w[route_ids direction trip_ids stop_ids]a
+
+  @spec get_combination(list()) :: atom()
+  def get_combination([]), do: nil
+
+  def get_combination(informed_entity) do
+    informed_entity
+    |> Enum.reduce([R: false, D: false, T: false, S: false], fn ie, acc ->
+      [
+        R: Map.get(ie, :route_id, false) || acc[:R],
+        D: Map.get(ie, :direction_id, false) || acc[:D],
+        T: Map.get(ie, :trip, false) || acc[:T],
+        S: Map.get(ie, :stop_id, false) || acc[:S]
+      ]
+    end)
+    |> Enum.filter(fn {_k, v} -> v end)
+    |> Enum.map_join(fn {k, _v} -> k end)
+    |> String.to_atom()
+    |> case do
+      :RS -> :SR
+      other -> other
+    end
+  end
 end

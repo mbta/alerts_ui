@@ -30,10 +30,17 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   end
 
   @impl true
-  def update(%{alert_data: alert_data} = assigns, socket) do
+  def update(%{alert_data: alert_data, editing: editing} = assigns, socket) do
     route_type = Map.get(alert_data, :route_type)
     route_types = all_route_types(route_type)
     send(self(), {:fetch_available_routes, route_types})
+
+    assigns =
+      case editing do
+        true -> update_for_edit(alert_data, assigns)
+        false -> assigns
+      end
+
     {:ok, assign(socket, assigns)}
   end
 
@@ -45,28 +52,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       |> populate_default_stops()
       |> populate_default_trips()
 
-    get_stops_by_route_ids(affected_service)
-
-    get_schedules_by_route_ids(
-      Map.get(affected_service, "route_ids", []),
-      affected_service["direction"]
-    )
-
-    trip_information_by_id =
-      socket.assigns.available_schedules
-      |> Stream.filter(fn schedule -> schedule.trip.id in affected_service["trip_ids"] end)
-      |> Enum.reduce(%{}, fn schedule, acc ->
-        Map.put(acc, schedule.trip.id, %{
-          direction_id: schedule.trip.direction_id,
-          route_id: schedule.route.id
-        })
-      end)
-
-    affected_service = Map.put(affected_service, "trip_information_by_id", trip_information_by_id)
-
-    changeset =
-      %__MODULE__{}
-      |> changeset(affected_service, socket.assigns.combination)
+    changeset = validate(affected_service, socket.assigns)
 
     changeset
     |> apply_action(:insert)
@@ -89,6 +75,49 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   @impl true
   def handle_event("validate", _, socket) do
     {:noreply, socket}
+  end
+
+  def update_for_edit(alert_data, assigns) do
+    edit_alert_data =
+      %{
+        route_ids: Map.get(alert_data, :route_ids) || [],
+        direction: Map.get(alert_data, :direction) || "default",
+        trip_ids: Map.get(alert_data, :trip_ids) || [],
+        stop_ids: Map.get(alert_data, :stop_ids) || []
+      }
+
+    changeset =
+      validate(edit_alert_data |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end), assigns)
+
+    {:ok, completed_changeset} =
+      changeset
+      |> apply_action(:insert)
+
+    send(self(), {:section_completed, completed_changeset})
+
+    form = to_form(changeset)
+
+    edit_alert_data |> Map.put(:form, form) |> Map.merge(assigns)
+  end
+
+  def validate(affected_service, assigns) do
+    get_stops_by_route_ids(
+      Map.get(affected_service, "route_ids", []),
+      affected_service["direction"]
+    )
+
+    get_schedules_by_route_ids(
+      Map.get(affected_service, "route_ids", []),
+      affected_service["direction"]
+    )
+
+    trip_information_by_id =
+      trip_information_by_id(assigns.available_schedules, affected_service["trip_ids"])
+
+    affected_service = Map.put(affected_service, "trip_information_by_id", trip_information_by_id)
+
+    %__MODULE__{}
+    |> changeset(affected_service, Map.get(assigns, :combination))
   end
 
   def changeset(changeset, params, combination \\ nil) do
@@ -146,7 +175,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
               label="Direction"
               field={@form[:direction]}
               options={@direction_options}
-              disabled={disable_input?(@form[:route_ids].value)}
+              disabled={disable_input?(@form[:route_ids].value, @editing)}
               prompt={if Map.has_key?(@form.params, "route_ids"), do: "Both Directions", else: nil}
             />
           <% end %>
@@ -174,7 +203,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
                   else: nil
               }
               multiple={true}
-              disabled={disable_input?(@form[:route_ids].value)}
+              disabled={disable_input?(@form[:route_ids].value, @editing)}
             />
           <% end %>
         </fieldset>
@@ -184,11 +213,22 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     """
   end
 
-  def get_stops_by_route_ids(affected_service) do
+  def trip_information_by_id(available_schedules, trip_ids) do
+    available_schedules
+    |> Stream.filter(fn schedule -> schedule.trip.id in trip_ids end)
+    |> Enum.reduce(%{}, fn schedule, acc ->
+      Map.put(acc, schedule.trip.id, %{
+        direction_id: schedule.trip.direction_id,
+        route_id: schedule.route.id
+      })
+    end)
+  end
+
+  @spec get_stops_by_route_ids(String.t(), list()) :: any()
+  def get_stops_by_route_ids(route_ids, direction) do
     send(
       self(),
-      {:fetch_available_stops, affected_service["direction"],
-       Map.get(affected_service, "route_ids", [])}
+      {:fetch_available_stops, direction, route_ids}
     )
   end
 
@@ -214,8 +254,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     combination in [:RDS, :RDTS, :RDS, :RDT]
   end
 
-  @spec disable_input?(list() | nil) :: boolean()
-  defp disable_input?(route_ids), do: !is_nil(route_ids) and length(route_ids) > 1
+  @spec disable_input?(list() | nil, boolean()) :: boolean()
+  defp disable_input?(_route_ids, true), do: false
+  defp disable_input?(route_ids, _editing), do: !is_nil(route_ids) and length(route_ids) > 1
 
   # We lump subway together in the interface, so when asked for either light or
   # heavy rail include both.

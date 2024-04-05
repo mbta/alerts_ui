@@ -11,17 +11,17 @@ defmodule AlertsUI.Alerts do
   defp compare_feed,
     do: Application.get_env(:alerts_ui, :compare_feed) == "true"
 
-  def create_alert(params) do
+  def create_or_update_alert(params, existing_alert \\ %Alert{}) do
     if compare_feed() do
       changeset =
-        change(%Alert{}, %{})
+        change(existing_alert, %{})
         |> add_error(:alert_id, "cannot create alert while feed is being compared")
 
       {:error, changeset}
     else
-      %Alert{}
+      existing_alert
       |> Alert.changeset(params)
-      |> PaperTrail.insert()
+      |> PaperTrail.insert_or_update()
       |> case do
         {:ok, %{version: %PaperTrail.Version{item_changes: result}}} -> {:ok, result}
         {:error, result} -> {:error, result}

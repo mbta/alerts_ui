@@ -216,4 +216,55 @@ defmodule AlertsUI.Models.Alert do
   defp combine_bike_activities(:bringing_bike), do: :bike
   defp combine_bike_activities(:store_bike), do: :bike
   defp combine_bike_activities(other), do: other
+
+  def get_direction([]), do: nil
+
+  def get_direction(informed_entities) do
+    directions_list =
+      informed_entities
+      |> Enum.map(& &1.direction_id)
+      |> Enum.uniq()
+      |> Enum.filter(&(!is_nil(&1)))
+
+    if length(directions_list) == 1 do
+      hd(directions_list) |> Integer.to_string()
+    else
+      nil
+    end
+  end
+
+  def get_route_type([]), do: nil
+
+  def get_route_type(informed_entities) do
+    case Enum.any?(informed_entities, &(&1.route_type in [0, 1])) do
+      true -> 1
+      false -> hd(informed_entities).route_type
+    end
+  end
+
+  def gather_route_ids(informed_entities) do
+    informed_entities
+    |> Enum.map(&Map.get(&1, :route_id))
+    |> Enum.filter(&(!is_nil(&1)))
+    |> Enum.uniq()
+  end
+
+  def gather_stop_ids(informed_entities) do
+    informed_entities
+    |> Enum.map(&Map.get(&1, :stop_id))
+    |> Enum.filter(&(!is_nil(&1)))
+    |> Enum.uniq()
+  end
+
+  def gather_trip_ids(informed_entities) do
+    informed_entities
+    |> Enum.map(fn ie ->
+      case Map.get(ie, :trip) do
+        nil -> nil
+        trip -> Map.get(trip, :trip_id)
+      end
+    end)
+    |> Enum.filter(&(!is_nil(&1)))
+    |> Enum.uniq()
+  end
 end
