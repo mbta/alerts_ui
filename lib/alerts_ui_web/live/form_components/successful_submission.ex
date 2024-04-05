@@ -15,19 +15,21 @@ defmodule AlertsUIWeb.FormComponents.SuccessfulSubmission do
   def update(assigns, socket) do
     alert_uuid = Map.get(assigns, :alert_uuid, nil)
 
+    alert = if is_nil(alert_uuid), do: %{}, else: alert_uuid |> Alerts.get_by_id()
+
     assigns =
       if !is_nil(alert_uuid) and assigns.show_created_alert == true do
         alert_json =
-          alert_uuid
-          |> Alerts.get_by_id()
+          alert
           |> CreateOutputAlert.build_alert()
           |> List.wrap()
           |> CreateGtfsJson.output_enhanced_json()
 
-        Map.put(assigns, :alert, alert_json)
+        Map.put(assigns, :alert_json, alert_json)
       else
-        Map.put(assigns, :alert, "")
+        Map.put(assigns, :alert_json, nil)
       end
+      |> Map.put(:alert_id, Map.get(alert, :alert_id))
 
     {:ok, assign(socket, assigns)}
   end
@@ -44,7 +46,7 @@ defmodule AlertsUIWeb.FormComponents.SuccessfulSubmission do
       class={unless @progress.name == "success", do: "hidden", else: "min-w-full"}
       id="success_view"
     >
-      Alert created successfully
+      Alert #<%= @alert_id %> created successfully
       <.button
         phx-click="ok"
         phx-target={@myself}
@@ -55,7 +57,7 @@ defmodule AlertsUIWeb.FormComponents.SuccessfulSubmission do
       </.button>
       <p :if={@show_created_alert}>
         Alert Created: <pre :if={@show_created_alert}>
-        <%= @alert %>
+        <%= @alert_json %>
       </pre>
       </p>
     </div>

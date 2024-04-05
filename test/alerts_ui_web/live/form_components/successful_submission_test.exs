@@ -20,12 +20,14 @@ defmodule AlertsUIWeb.FormComponents.SuccessfulSubmissionTest do
 
   describe "component" do
     test "renders" do
-      assert render_component(SuccessfulSubmission, @assigns) =~ ~s(id="success_view")
+      alert = insert(:alert, %{id: @uuid, header_text: "alert header text"})
+      assert render_component(SuccessfulSubmission, @assigns) =~ ~s(#{alert.alert_id})
     end
   end
 
   describe "ok event" do
     test "redirect on button click" do
+      insert(:alert, %{id: @uuid, header_text: "alert header text"})
       {:ok, view, _html} = live_isolated_component(SuccessfulSubmission, @assigns)
 
       view
