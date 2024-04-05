@@ -1136,31 +1136,38 @@ defmodule AlertsUI.AlertBuilderTest do
 
     test "RDTS informed entity with trips and stops is build properly" do
       alert_data = %{
-        route_type: 3,
-        description_text: "ok",
-        header_text: "hello",
+        route_type: 2,
         effect_name: "Delay",
-        route_ids: ["57"],
-        trip_ids: ["123", "345", "456"],
+        route_ids: ["CR-Fitchburg"],
+        direction: "default",
+        trip_ids: ["default", "CR-627754-435"],
         trip_information_by_id: %{
-          "123" => %{direction_id: 0, route_id: "57"},
-          "345" => %{direction_id: 0, route_id: "57"},
-          "456" => %{direction_id: 0, route_id: "57"}
+          "CR-627754-435" => %{direction_id: 0, route_id: "CR-Fitchburg"}
         },
-        stop_ids: ["a", "b"],
-        direction: "default"
+        stop_ids: ["place-FR-0201", "place-FR-0219"],
+        header_text: "t",
+        description_text: "t"
       }
 
-      parent_stops = [%Stop{id: "a"}, %Stop{id: "b"}]
+      parent_stops = [%Stop{id: "place-FR-0201"}, %Stop{id: "place-FR-0219"}]
 
       child_stops = [
         %Stop{
-          id: "child-a",
-          parent_id: "a"
+          id: "FR-0201-01",
+          parent_id: "place-FR-0201"
         },
         %Stop{
-          id: "child-b",
-          parent_id: "b"
+          id: "FR-0219-01",
+          parent_id: "place-FR-0219"
+        },
+        # Intentional duplicates
+        %Stop{
+          id: "FR-0201-01",
+          parent_id: "place-FR-0201"
+        },
+        %Stop{
+          id: "FR-0219-01",
+          parent_id: "place-FR-0219"
         }
       ]
 
@@ -1178,74 +1185,26 @@ defmodule AlertsUI.AlertBuilderTest do
           assert result.informed_entity == [
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
-                     route_id: "57",
-                     route_type: 3,
                      agency_id: "1",
-                     stop_id: "child-a",
+                     route_id: "CR-Fitchburg",
+                     route_type: 2,
+                     stop_id: "FR-0201-01",
                      trip: %{
-                       trip_id: "123",
-                       route_id: "57",
-                       direction_id: 0
+                       direction_id: 0,
+                       route_id: "CR-Fitchburg",
+                       trip_id: "CR-627754-435"
                      }
                    },
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
-                     route_id: "57",
-                     route_type: 3,
                      agency_id: "1",
-                     stop_id: "child-a",
+                     route_id: "CR-Fitchburg",
+                     route_type: 2,
+                     stop_id: "FR-0219-01",
                      trip: %{
-                       trip_id: "345",
-                       route_id: "57",
-                       direction_id: 0
-                     }
-                   },
-                   %{
-                     activities: [:BOARD, :EXIT, :RIDE],
-                     route_id: "57",
-                     route_type: 3,
-                     agency_id: "1",
-                     stop_id: "child-a",
-                     trip: %{
-                       trip_id: "456",
-                       route_id: "57",
-                       direction_id: 0
-                     }
-                   },
-                   %{
-                     activities: [:BOARD, :EXIT, :RIDE],
-                     route_id: "57",
-                     route_type: 3,
-                     agency_id: "1",
-                     stop_id: "child-b",
-                     trip: %{
-                       trip_id: "123",
-                       route_id: "57",
-                       direction_id: 0
-                     }
-                   },
-                   %{
-                     activities: [:BOARD, :EXIT, :RIDE],
-                     route_id: "57",
-                     route_type: 3,
-                     agency_id: "1",
-                     stop_id: "child-b",
-                     trip: %{
-                       trip_id: "345",
-                       route_id: "57",
-                       direction_id: 0
-                     }
-                   },
-                   %{
-                     activities: [:BOARD, :EXIT, :RIDE],
-                     route_id: "57",
-                     route_type: 3,
-                     agency_id: "1",
-                     stop_id: "child-b",
-                     trip: %{
-                       trip_id: "456",
-                       route_id: "57",
-                       direction_id: 0
+                       direction_id: 0,
+                       route_id: "CR-Fitchburg",
+                       trip_id: "CR-627754-435"
                      }
                    }
                  ]
@@ -1254,6 +1213,75 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "RDTS CR track change 1 trip" do
+      alert_data = %{
+        route_type: 2,
+        effect_name: "Track Change",
+        description_text: "CR track change",
+        header_text: "CR track change",
+        route_ids: ["CR-Haverhill"],
+        direction: "0",
+        trip_ids: ["default", "CR-627678-295"],
+        trip_information_by_id: %{
+          "CR-627678-295" => %{direction_id: 0, route_id: "CR-Haverhill"}
+        },
+        stop_ids: ["place-WR-0067", "place-WR-0075"]
+      }
+
+      parent_stops = [%Stop{id: "place-WR-0067"}, %Stop{id: "place-WR-0075"}]
+
+      child_stops = [
+        %Stop{
+          id: "WR-0067-01",
+          parent_id: "place-WR-0067"
+        },
+        %Stop{
+          id: "WR-0075-01",
+          parent_id: "place-WR-0075"
+        }
+      ]
+
+      with_mock(RoutePatternsRepo,
+        by_route_id: fn _route_id, _opts ->
+          [%APIRoutePattern{direction_id: 0, stops: child_stops}]
+        end,
+        included_stops_by_route_id: fn _route_id, _direction -> child_stops end
+      ) do
+        with_mock(StopsRepo,
+          by_route: fn _route_id, _direction -> parent_stops ++ child_stops end
+        ) do
+          result = AlertBuilder.build_alert(alert_data, :RDTS)
+
+          assert result.informed_entity == [
+                   %{
+                     activities: [:BOARD],
+                     route_id: "CR-Haverhill",
+                     route_type: 2,
+                     agency_id: "1",
+                     stop_id: "WR-0067-01",
+                     trip: %{
+                       trip_id: "CR-627678-295",
+                       route_id: "CR-Haverhill",
+                       direction_id: 0
+                     }
+                   },
+                   %{
+                     activities: [:BOARD],
+                     route_id: "CR-Haverhill",
+                     route_type: 2,
+                     agency_id: "1",
+                     stop_id: "WR-0075-01",
+                     trip: %{
+                       trip_id: "CR-627678-295",
+                       route_id: "CR-Haverhill",
+                       direction_id: 0
+                     }
+                   }
+                 ]
+        end
+      end
+    end
+
+    test "RDTS CR delay does not include duplicate informed entities" do
       alert_data = %{
         route_type: 2,
         effect_name: "Track Change",
