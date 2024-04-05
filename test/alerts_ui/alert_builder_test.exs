@@ -401,6 +401,108 @@ defmodule AlertsUI.AlertBuilderTest do
       end
     end
 
+    test "RDS Subway shuttle at start of line" do
+      alert_data = %{
+        route_type: 1,
+        effect_name: "Shuttle",
+        route_ids: ["Red"],
+        direction: "default",
+        stop_ids: ["place-alfcl", "place-davis", "place-portr"],
+        trip_ids: [],
+        trip_information_by_id: %{},
+        header_text: "Test 6",
+        description_text: "Test 6"
+      }
+
+      parent_stops = [
+        %Stop{id: "place-alfcl"},
+        %Stop{id: "place-davis"},
+        %Stop{id: "place-portr"},
+        %Stop{id: "place-harsq"}
+      ]
+
+      child_stops_0 = [
+        %Stop{id: "alfcl-child", parent_id: "place-alfcl"},
+        %Stop{id: "davis-child-0", parent_id: "place-davis"},
+        %Stop{id: "portr-child-0", parent_id: "place-portr"},
+        %Stop{id: "harsq-child-0", parent_id: "place-harsq"}
+      ]
+
+      child_stops_1 = [
+        %Stop{id: "harsq-child-1", parent_id: "place-harsq"},
+        %Stop{id: "portr-child-1", parent_id: "place-portr"},
+        %Stop{id: "davis-child-1", parent_id: "place-davis"},
+        %Stop{id: "alfcl-child", parent_id: "place-alfcl"}
+      ]
+
+      with_mock(RoutePatternsRepo,
+        by_route_id: fn "Red", [include: "representative_trip.stops"] ->
+          [
+            %MBTAV3API.RoutePatterns.RoutePattern{direction_id: 0, stops: child_stops_0},
+            %MBTAV3API.RoutePatterns.RoutePattern{direction_id: 1, stops: child_stops_1}
+          ]
+        end,
+        included_stops_by_route_id: fn _route_id, _direction -> child_stops_0 ++ child_stops_1 end
+      ) do
+        with_mock(StopsRepo,
+          by_route: fn _route_id, _direction -> parent_stops ++ child_stops_0 ++ child_stops_1 end
+        ) do
+          result = AlertBuilder.build_alert(alert_data, :RDS)
+
+          assert result.informed_entity == [
+                   %{
+                     activities: [:BOARD, :RIDE],
+                     agency_id: "1",
+                     direction_id: 0,
+                     route_id: "Red",
+                     route_type: 1,
+                     stop_id: "alfcl-child"
+                   },
+                   %{
+                     activities: [:BOARD, :EXIT, :RIDE],
+                     agency_id: "1",
+                     direction_id: 0,
+                     route_id: "Red",
+                     route_type: 1,
+                     stop_id: "davis-child-0"
+                   },
+                   %{
+                     activities: [:EXIT, :RIDE],
+                     agency_id: "1",
+                     direction_id: 0,
+                     route_id: "Red",
+                     route_type: 1,
+                     stop_id: "portr-child-0"
+                   },
+                   %{
+                     activities: [:BOARD, :RIDE],
+                     agency_id: "1",
+                     direction_id: 1,
+                     route_id: "Red",
+                     route_type: 1,
+                     stop_id: "portr-child-1"
+                   },
+                   %{
+                     activities: [:BOARD, :EXIT, :RIDE],
+                     agency_id: "1",
+                     direction_id: 1,
+                     route_id: "Red",
+                     route_type: 1,
+                     stop_id: "davis-child-1"
+                   },
+                   %{
+                     activities: [:EXIT, :RIDE],
+                     agency_id: "1",
+                     direction_id: 1,
+                     route_id: "Red",
+                     route_type: 1,
+                     stop_id: "alfcl-child"
+                   }
+                 ]
+        end
+      end
+    end
+
     test "properly builds RDS informed entity with multiple routes, multiple stops and direction" do
       alert_data = %{
         route_type: 3,

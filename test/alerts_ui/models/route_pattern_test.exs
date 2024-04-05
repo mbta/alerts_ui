@@ -10,9 +10,17 @@ defmodule AlertsUI.Models.RoutePatternTest do
   @stop2 %Stop{id: "s2"}
   @stop3 %Stop{id: "s3"}
   @stops [@stop1, @stop2, @stop3]
+  @child_stop1 %Stop{id: "cs1", parent_id: "s1"}
+  @child_stop2 %Stop{id: "cs2", parent_id: "s2"}
+  @child_stop3 %Stop{id: "cs3", parent_id: "s3"}
+  @child_stops [@child_stop1, @child_stop2, @child_stop3]
   @route_pattern %APIRoutePattern{
     id: "rp1",
     stops: @stops
+  }
+  @child_route_pattern %APIRoutePattern{
+    id: "rp1",
+    stops: @child_stops
   }
 
   describe "stops/1" do
@@ -44,68 +52,144 @@ defmodule AlertsUI.Models.RoutePatternTest do
   end
 
   describe "stop_type/2" do
-    test "returns first if this is the ID of the first stop in the pattern" do
-      assert RoutePattern.stop_type(@route_pattern, @stop1.id) == :first
+    test "returns first if this is the ID of the first stop in the pattern and also in the affected stops" do
+      affected_stop_ids = [@stop1.id, @stop2.id, @stop3.id]
+      assert RoutePattern.stop_type(@route_pattern, affected_stop_ids, @stop1.id) == :first
     end
 
-    test "returns first if this is the first stop in the pattern" do
-      assert RoutePattern.stop_type(@route_pattern, @stop1) == :first
+    test "returns first if this is the first stop in the pattern and also in the affected stops" do
+      affected_stop_ids = [@stop1.id, @stop2.id, @stop3.id]
+      assert RoutePattern.stop_type(@route_pattern, affected_stop_ids, @stop1) == :first
     end
 
-    test "returns last if this is the ID of the last stop in the pattern" do
-      assert RoutePattern.stop_type(@route_pattern, @stop3.id) == :last
+    test "returns first if this is the ID of the first stop in the pattern and its parent is in the affected stops" do
+      affected_stop_ids = [@stop1.id, @stop2.id, @stop3.id]
+
+      assert RoutePattern.stop_type(@child_route_pattern, affected_stop_ids, @child_stop1.id) ==
+               :first
     end
 
-    test "returns last if this is the last stop in the pattern" do
-      assert RoutePattern.stop_type(@route_pattern, @stop3) == :last
+    test "returns first if this stop ID is not first in the pattern, but is first among the affected stops" do
+      affected_stop_ids = [@stop2.id, @stop3.id]
+      assert RoutePattern.stop_type(@route_pattern, affected_stop_ids, @stop2.id) == :first
     end
 
-    test "returns default if this is the ID of neither the first or last stop in the pattern" do
-      assert RoutePattern.stop_type(@route_pattern, @stop2.id) == :default
+    test "returns first if this stop ID is not first in the pattern, but its parent is first among the affected stops" do
+      affected_stop_ids = [@stop2.id, @stop3.id]
+
+      assert RoutePattern.stop_type(@child_route_pattern, affected_stop_ids, @child_stop2.id) ==
+               :first
     end
 
-    test "returns default if this is neither the first or last stop in the pattern" do
-      assert RoutePattern.stop_type(@route_pattern, @stop2) == :default
+    test "returns last if this is the ID of the last stop in the pattern and also among the affected stops" do
+      affected_stop_ids = [@stop1.id, @stop2.id, @stop3.id]
+      assert RoutePattern.stop_type(@route_pattern, affected_stop_ids, @stop3.id) == :last
+    end
+
+    test "returns last if this is the last stop in the pattern and also among the affected stops" do
+      affected_stop_ids = [@stop1.id, @stop2.id, @stop3.id]
+      assert RoutePattern.stop_type(@route_pattern, affected_stop_ids, @stop3) == :last
+    end
+
+    test "returns last if this is the ID of the last stop in the pattern and its parent is among the affected stops" do
+      affected_stop_ids = [@stop1.id, @stop2.id, @stop3.id]
+
+      assert RoutePattern.stop_type(@child_route_pattern, affected_stop_ids, @child_stop3.id) ==
+               :last
+    end
+
+    test "returns last if this stop ID is not last in the pattern, but is last among the affected stops" do
+      affected_stop_ids = [@stop1.id, @stop2.id]
+      assert RoutePattern.stop_type(@route_pattern, affected_stop_ids, @stop2.id) == :last
+    end
+
+    test "returns last if this stop ID is not last in the pattern, but its parent is last among the affected stops" do
+      affected_stop_ids = [@stop1.id, @stop2.id]
+
+      assert RoutePattern.stop_type(@child_route_pattern, affected_stop_ids, @child_stop2.id) ==
+               :last
+    end
+
+    test "returns default if this is the ID of neither the first or last stop in the pattern among the affected stops" do
+      affected_stop_ids = [@stop1.id, @stop2.id, @stop3.id]
+      assert RoutePattern.stop_type(@route_pattern, affected_stop_ids, @stop2.id) == :default
+    end
+
+    test "returns default if this is neither the first or last stop in the pattern among the affected stops" do
+      affected_stop_ids = [@stop1.id, @stop2.id, @stop3.id]
+      assert RoutePattern.stop_type(@route_pattern, affected_stop_ids, @stop2) == :default
+    end
+
+    test "returns default if this stop ID is first in the pattern, but is not among the affected stops" do
+      affected_stop_ids = [@stop2.id, @stop3.id]
+      assert RoutePattern.stop_type(@route_pattern, affected_stop_ids, @stop1.id) == :default
+    end
+
+    test "returns default if this stop ID is last in the pattern, but is not among the affected stops" do
+      affected_stop_ids = [@stop1.id, @stop2.id]
+      assert RoutePattern.stop_type(@route_pattern, affected_stop_ids, @stop3.id) == :default
+    end
+
+    test "returns default if this stop ID is first in the pattern, but its parent is not among the affected stops" do
+      affected_stop_ids = [@stop2.id, @stop3.id]
+
+      assert RoutePattern.stop_type(@child_route_pattern, affected_stop_ids, @child_stop1.id) ==
+               :default
+    end
+
+    test "returns default if this stop ID is last in the pattern, but its parent is not among the affected stops" do
+      affected_stop_ids = [@stop1.id, @stop2.id]
+
+      assert RoutePattern.stop_type(@child_route_pattern, affected_stop_ids, @child_stop3.id) ==
+               :default
     end
   end
 
   describe "first_stop?/2" do
-    test "true if the stop ID matches the first stop in this pattern" do
-      assert RoutePattern.first_stop?(@route_pattern, @stop1.id)
+    test "true if the stop ID matches the first stop in this list of stops" do
+      assert RoutePattern.first_stop?(@stops, @stop1.id)
     end
 
-    test "true if the stop matches the first stop in this pattern" do
-      assert RoutePattern.first_stop?(@route_pattern, @stop1)
+    test "true if the stop matches the first stop in this list of stops" do
+      assert RoutePattern.first_stop?(@stops, @stop1)
     end
 
-    test "false if the stop ID does not matches the first stop in this pattern" do
-      refute RoutePattern.first_stop?(@route_pattern, @stop2.id)
-      refute RoutePattern.first_stop?(@route_pattern, @stop3.id)
+    test "false if the stop ID does not matches the first stop in this list of stops" do
+      refute RoutePattern.first_stop?(@stops, @stop2.id)
+      refute RoutePattern.first_stop?(@stops, @stop3.id)
     end
 
-    test "false if the stop does not matches the first stop in this pattern" do
-      refute RoutePattern.first_stop?(@route_pattern, @stop2)
-      refute RoutePattern.first_stop?(@route_pattern, @stop3)
+    test "false if the stop does not matches the first stop in this list of stops" do
+      refute RoutePattern.first_stop?(@stops, @stop2)
+      refute RoutePattern.first_stop?(@stops, @stop3)
+    end
+
+    test "false if given an empty list" do
+      refute RoutePattern.first_stop?([], @stop1)
     end
   end
 
   describe "last_stop?/2" do
-    test "true if the stop ID matches the first stop in this pattern" do
-      assert RoutePattern.last_stop?(@route_pattern, @stop3.id)
+    test "true if the stop ID matches the first stop in this list of stops" do
+      assert RoutePattern.last_stop?(@stops, @stop3.id)
     end
 
-    test "true if the stop matches the first stop in this pattern" do
-      assert RoutePattern.last_stop?(@route_pattern, @stop3)
+    test "true if the stop matches the first stop in this list of stops" do
+      assert RoutePattern.last_stop?(@stops, @stop3)
     end
 
-    test "false if the stop ID does not matches the first stop in this pattern" do
-      refute RoutePattern.last_stop?(@route_pattern, @stop1.id)
-      refute RoutePattern.last_stop?(@route_pattern, @stop2.id)
+    test "false if the stop ID does not matches the first stop in this list of stops" do
+      refute RoutePattern.last_stop?(@stops, @stop1.id)
+      refute RoutePattern.last_stop?(@stops, @stop2.id)
     end
 
-    test "false if the stop does not matches the first stop in this pattern" do
-      refute RoutePattern.last_stop?(@route_pattern, @stop1)
-      refute RoutePattern.last_stop?(@route_pattern, @stop2)
+    test "false if the stop does not matches the first stop in this list of stops" do
+      refute RoutePattern.last_stop?(@stops, @stop1)
+      refute RoutePattern.last_stop?(@stops, @stop2)
+    end
+
+    test "false if given an empty list" do
+      refute RoutePattern.last_stop?([], @stop3.id)
     end
   end
 end
