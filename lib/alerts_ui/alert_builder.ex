@@ -131,7 +131,7 @@ defmodule AlertsUI.AlertBuilder do
   defp route_pattern_stops_with_context_for_parents(route_pattern, route_id, parent_stop_ids) do
     route_pattern
     |> RoutePattern.stops()
-    |> Enum.filter(&(&1.parent_id in parent_stop_ids))
+    |> Enum.filter(&(&1.parent_id in parent_stop_ids and Map.get(&1, :vehicle_type) !== 3))
     |> Enum.map(fn child_stop ->
       {
         child_stop,

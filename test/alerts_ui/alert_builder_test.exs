@@ -1212,6 +1212,106 @@ defmodule AlertsUI.AlertBuilderTest do
       end
     end
 
+    test "RDTS filters out child stops with vehicle type of 3 (shuttle)" do
+      alert_data = %{
+        direction: "0",
+        route_type: 2,
+        route_ids: ["CR-Newburyport"],
+        stop_ids: ["place-north", "place-chels"],
+        trip_ids: ["default", "CR-649301-125", "CR-649300-127"],
+        effect_name: "Track Change",
+        header_text: "a",
+        description_text: "b",
+        draft: nil,
+        trip_information_by_id: %{}
+      }
+
+      parent_stops = [%Stop{id: "place-north"}, %Stop{id: "place-chels"}]
+
+      child_stops = [
+        %Stop{
+          id: "BNT-0000",
+          parent_id: "place-north",
+          vehicle_type: 2
+        },
+        # shuttle!
+        %Stop{
+          id: "BNT-0000-B2",
+          parent_id: "place-north",
+          vehicle_type: 3
+        },
+        %Stop{
+          id: "ER-0042-01",
+          parent_id: "place-chels",
+          vehicle_type: 2
+        }
+      ]
+
+      with_mock(RoutePatternsRepo,
+        by_route_id: fn _route_id, _opts ->
+          [%APIRoutePattern{direction_id: 0, stops: child_stops}]
+        end,
+        included_stops_by_route_id: fn _route_id, _direction -> child_stops end
+      ) do
+        with_mock(StopsRepo,
+          by_route: fn _route_id, _direction -> parent_stops ++ child_stops end
+        ) do
+          result = AlertBuilder.build_alert(alert_data, :RDTS)
+
+          assert result.informed_entity == [
+                   %{
+                     route_type: 2,
+                     route_id: "CR-Newburyport",
+                     activities: [:BOARD],
+                     agency_id: "1",
+                     stop_id: "BNT-0000",
+                     trip: %{
+                       direction_id: 0,
+                       route_id: "CR-Newburyport",
+                       trip_id: "CR-649301-125"
+                     }
+                   },
+                   %{
+                     route_type: 2,
+                     route_id: "CR-Newburyport",
+                     activities: [:BOARD],
+                     agency_id: "1",
+                     stop_id: "BNT-0000",
+                     trip: %{
+                       direction_id: 0,
+                       route_id: "CR-Newburyport",
+                       trip_id: "CR-649300-127"
+                     }
+                   },
+                   %{
+                     route_type: 2,
+                     route_id: "CR-Newburyport",
+                     activities: [:BOARD],
+                     agency_id: "1",
+                     stop_id: "ER-0042-01",
+                     trip: %{
+                       direction_id: 0,
+                       route_id: "CR-Newburyport",
+                       trip_id: "CR-649301-125"
+                     }
+                   },
+                   %{
+                     route_type: 2,
+                     route_id: "CR-Newburyport",
+                     activities: [:BOARD],
+                     agency_id: "1",
+                     stop_id: "ER-0042-01",
+                     trip: %{
+                       direction_id: 0,
+                       route_id: "CR-Newburyport",
+                       trip_id: "CR-649300-127"
+                     }
+                   }
+                 ]
+        end
+      end
+    end
+
     test "RDTS CR track change 1 trip" do
       alert_data = %{
         route_type: 2,
