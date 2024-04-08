@@ -43,6 +43,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
   @impl true
   def handle_event("validate", %{"stop_route_affected_service" => affected_service}, socket) do
+    affected_service = populate_default_routes(affected_service)
+
     get_routes_by_stop_ids(
       Map.get(affected_service, "stop_ids", []),
       socket.assigns.alert_data.route_type
@@ -84,9 +86,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   end
 
   def validate(affected_service, assigns) do
-    routes_with_types =
-      routes_with_types(assigns.available_routes, Map.get(affected_service, "route_ids", []))
-
+    routes_with_types = routes_with_types(assigns.available_routes, affected_service["route_ids"])
     affected_service = Map.put(affected_service, "route_types_by_id", routes_with_types)
 
     %__MODULE__{}
@@ -177,5 +177,14 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   @spec show_routes_input?(map()) :: boolean()
   defp show_routes_input?(%{form: form}) do
     !is_nil(form[:stop_ids].value)
+  end
+
+  @spec populate_default_routes(map()) :: map()
+  defp populate_default_routes(affected_service) do
+    if Map.get(affected_service, "route_ids") in [nil, "default", ["default"]] do
+      Map.put(affected_service, "route_ids", [])
+    else
+      affected_service
+    end
   end
 end
