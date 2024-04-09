@@ -243,9 +243,9 @@ defmodule AlertsUI.AlertBuilderTest do
       parent_stops = [%Stop{id: "a"}, %Stop{id: "b"}, %Stop{id: "c"}]
 
       child_stops = [
-        %Stop{id: "1", parent_id: "a"},
-        %Stop{id: "2", parent_id: "b"},
-        %Stop{id: "3", parent_id: "c"}
+        %Stop{id: "1", parent_id: "a", vehicle_type: 3},
+        %Stop{id: "2", parent_id: "b", vehicle_type: 3},
+        %Stop{id: "3", parent_id: "c", vehicle_type: 3}
       ]
 
       with_mock(RoutePatternsRepo,
@@ -355,16 +355,19 @@ defmodule AlertsUI.AlertBuilderTest do
       child_stops = [
         %Stop{
           id: "WR-0067-01",
-          parent_id: "place-WR-0067"
+          parent_id: "place-WR-0067",
+          vehicle_type: 2
         },
         %Stop{
           id: "WR-0075-01",
-          parent_id: "place-WR-0075"
+          parent_id: "place-WR-0075",
+          vehicle_type: 2
         },
         # Intentional duplicate
         %Stop{
           id: "WR-0075-01",
-          parent_id: "place-WR-0075"
+          parent_id: "place-WR-0075",
+          vehicle_type: 2
         }
       ]
 
@@ -422,17 +425,17 @@ defmodule AlertsUI.AlertBuilderTest do
       ]
 
       child_stops_0 = [
-        %Stop{id: "alfcl-child", parent_id: "place-alfcl"},
-        %Stop{id: "davis-child-0", parent_id: "place-davis"},
-        %Stop{id: "portr-child-0", parent_id: "place-portr"},
-        %Stop{id: "harsq-child-0", parent_id: "place-harsq"}
+        %Stop{id: "alfcl-child", parent_id: "place-alfcl", vehicle_type: 1},
+        %Stop{id: "davis-child-0", parent_id: "place-davis", vehicle_type: 1},
+        %Stop{id: "portr-child-0", parent_id: "place-portr", vehicle_type: 1},
+        %Stop{id: "harsq-child-0", parent_id: "place-harsq", vehicle_type: 1}
       ]
 
       child_stops_1 = [
-        %Stop{id: "harsq-child-1", parent_id: "place-harsq"},
-        %Stop{id: "portr-child-1", parent_id: "place-portr"},
-        %Stop{id: "davis-child-1", parent_id: "place-davis"},
-        %Stop{id: "alfcl-child", parent_id: "place-alfcl"}
+        %Stop{id: "harsq-child-1", parent_id: "place-harsq", vehicle_type: 1},
+        %Stop{id: "portr-child-1", parent_id: "place-portr", vehicle_type: 1},
+        %Stop{id: "davis-child-1", parent_id: "place-davis", vehicle_type: 1},
+        %Stop{id: "alfcl-child", parent_id: "place-alfcl", vehicle_type: 1}
       ]
 
       with_mock(RoutePatternsRepo,
@@ -518,9 +521,9 @@ defmodule AlertsUI.AlertBuilderTest do
       parent_stops = [%Stop{id: "a"}, %Stop{id: "b"}, %Stop{id: "c"}]
 
       child_stops = [
-        %Stop{id: "1", parent_id: "a"},
-        %Stop{id: "2", parent_id: "b"},
-        %Stop{id: "3", parent_id: "c"}
+        %Stop{id: "1", parent_id: "a", vehicle_type: 3},
+        %Stop{id: "2", parent_id: "b", vehicle_type: 3},
+        %Stop{id: "3", parent_id: "c", vehicle_type: 3}
       ]
 
       with_mock(RoutePatternsRepo,
@@ -577,9 +580,9 @@ defmodule AlertsUI.AlertBuilderTest do
       kenmore = %Stop{id: "place-kencl"}
       fenway = %Stop{id: "place-fenwy"}
 
-      hynes_child = %Stop{id: "hynes-child", parent_id: hynes.id}
-      kenmore_child = %Stop{id: "kenmore-child", parent_id: kenmore.id}
-      fenway_child = %Stop{id: "fenway-child", parent_id: fenway.id}
+      hynes_child = %Stop{id: "hynes-child", parent_id: hynes.id, vehicle_type: 1}
+      kenmore_child = %Stop{id: "kenmore-child", parent_id: kenmore.id, vehicle_type: 1}
+      fenway_child = %Stop{id: "fenway-child", parent_id: fenway.id, vehicle_type: 1}
 
       alert_data = %{
         route_type: 1,
@@ -1053,12 +1056,16 @@ defmodule AlertsUI.AlertBuilderTest do
         direction: "0"
       }
 
-      parent_stops = [%Stop{id: "a"}, %Stop{id: "b"}, %Stop{id: "c"}]
+      parent_stops = [
+        %Stop{id: "a", vehicle_type: 3},
+        %Stop{id: "b", vehicle_type: 3},
+        %Stop{id: "c", vehicle_type: 3}
+      ]
 
       child_stops = [
-        %Stop{id: "1", parent_id: "a"},
-        %Stop{id: "2", parent_id: "b"},
-        %Stop{id: "3", parent_id: "c"}
+        %Stop{id: "1", parent_id: "a", vehicle_type: 3},
+        %Stop{id: "2", parent_id: "b", vehicle_type: 3},
+        %Stop{id: "3", parent_id: "c", vehicle_type: 3}
       ]
 
       with_mock(RoutePatternsRepo,
@@ -1154,20 +1161,24 @@ defmodule AlertsUI.AlertBuilderTest do
       child_stops = [
         %Stop{
           id: "FR-0201-01",
-          parent_id: "place-FR-0201"
+          parent_id: "place-FR-0201",
+          vehicle_type: 2
         },
         %Stop{
           id: "FR-0219-01",
-          parent_id: "place-FR-0219"
+          parent_id: "place-FR-0219",
+          vehicle_type: 2
         },
         # Intentional duplicates
         %Stop{
           id: "FR-0201-01",
-          parent_id: "place-FR-0201"
+          parent_id: "place-FR-0201",
+          vehicle_type: 2
         },
         %Stop{
           id: "FR-0219-01",
-          parent_id: "place-FR-0219"
+          parent_id: "place-FR-0219",
+          vehicle_type: 2
         }
       ]
 
@@ -1212,7 +1223,7 @@ defmodule AlertsUI.AlertBuilderTest do
       end
     end
 
-    test "RDTS filters out child stops with vehicle type of 3 (shuttle)" do
+    test "RDTS filters out child stops with vehicle type that does not match the route type" do
       alert_data = %{
         direction: "0",
         route_type: 2,
@@ -1234,7 +1245,6 @@ defmodule AlertsUI.AlertBuilderTest do
           parent_id: "place-north",
           vehicle_type: 2
         },
-        # shuttle!
         %Stop{
           id: "BNT-0000-B2",
           parent_id: "place-north",
@@ -1332,11 +1342,13 @@ defmodule AlertsUI.AlertBuilderTest do
       child_stops = [
         %Stop{
           id: "WR-0067-01",
-          parent_id: "place-WR-0067"
+          parent_id: "place-WR-0067",
+          vehicle_type: 2
         },
         %Stop{
           id: "WR-0075-01",
-          parent_id: "place-WR-0075"
+          parent_id: "place-WR-0075",
+          vehicle_type: 2
         }
       ]
 
@@ -1401,11 +1413,13 @@ defmodule AlertsUI.AlertBuilderTest do
       child_stops = [
         %Stop{
           id: "WR-0067-01",
-          parent_id: "place-WR-0067"
+          parent_id: "place-WR-0067",
+          vehicle_type: 2
         },
         %Stop{
           id: "WR-0075-01",
-          parent_id: "place-WR-0075"
+          parent_id: "place-WR-0075",
+          vehicle_type: 2
         }
       ]
 
@@ -1467,11 +1481,13 @@ defmodule AlertsUI.AlertBuilderTest do
       child_stops = [
         %Stop{
           id: "child-a",
-          parent_id: "a"
+          parent_id: "a",
+          vehicle_type: 1
         },
         %Stop{
           id: "child-b",
-          parent_id: "b"
+          parent_id: "b",
+          vehicle_type: 1
         }
       ]
 
@@ -1550,9 +1566,9 @@ defmodule AlertsUI.AlertBuilderTest do
       kenmore = %Stop{id: "place-kencl"}
       fenway = %Stop{id: "place-fenwy"}
 
-      hynes_child = %Stop{id: "hynes-child", parent_id: "place-hymnl"}
-      kenmore_child = %Stop{id: "kenmore-child", parent_id: "place-kencl"}
-      fenway_child = %Stop{id: "fenway-child", parent_id: "place-fenwy"}
+      hynes_child = %Stop{id: "hynes-child", parent_id: "place-hymnl", vehicle_type: 0}
+      kenmore_child = %Stop{id: "kenmore-child", parent_id: "place-kencl", vehicle_type: 0}
+      fenway_child = %Stop{id: "fenway-child", parent_id: "place-fenwy", vehicle_type: 0}
       child_stops = [hynes_child, kenmore_child, fenway_child]
 
       with_mock(RoutePatternsRepo,
@@ -1647,12 +1663,14 @@ defmodule AlertsUI.AlertBuilderTest do
       child_stops = [
         %Stop{
           id: "PB-0194-S",
-          parent_id: "place-PB-0194"
+          parent_id: "place-PB-0194",
+          vehicle_type: 2
         },
         # Intentional duplicate
         %Stop{
           id: "PB-0194-S",
-          parent_id: "place-PB-0194"
+          parent_id: "place-PB-0194",
+          vehicle_type: 2
         }
       ]
 
