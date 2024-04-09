@@ -10,6 +10,8 @@ defmodule AlertsUI.AlertBuilder do
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatterns
   alias MBTAV3API.RoutePatterns.RoutePattern, as: APIRoutePattern
   alias MBTAV3API.Routes.Route
+  alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
+  alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
 
@@ -300,11 +302,16 @@ defmodule AlertsUI.AlertBuilder do
          },
          effect
        ) do
-    Enum.flat_map(child_stops_with_context, fn {%Stop{id: stop_id}, route_id, direction_id,
-                                                _stop_type} ->
-      trip_ids
-      |> Enum.filter(&(&1 !== "default"))
-      |> Enum.map(fn trip_id ->
+    trips = get_trips(trip_ids)
+    trip_directions = trip_directions(trips)
+
+    child_stops_with_context
+    |> Enum.filter(fn {_, _, stop_direction_id, _} ->
+      Enum.member?(trip_directions, stop_direction_id)
+    end)
+    |> Enum.flat_map(fn {%Stop{id: stop_id}, route_id, _direction_id, _stop_type} ->
+      trips
+      |> Enum.map(fn %Trip{id: trip_id, direction_id: trip_direction_id} ->
         %{
           activities: Activities.for_effect(effect),
           route_id: route_id,
@@ -313,7 +320,7 @@ defmodule AlertsUI.AlertBuilder do
           trip:
             build_trip(
               trip_id,
-              direction_id,
+              trip_direction_id,
               route_id
             ),
           stop_id: stop_id
@@ -344,6 +351,24 @@ defmodule AlertsUI.AlertBuilder do
         stop_id: stop_id
       }
     end)
+    |> Enum.uniq()
+  end
+
+  @spec get_trips([String.t()]) :: [Trip.t()]
+  defp get_trips(trip_ids) do
+    trip_ids
+    |> Enum.filter(&(&1 != "default"))
+    |> Enum.map(&get_trip/1)
+    |> Enum.reject(&is_nil/1)
+  end
+
+  @spec get_trip(String.t()) :: Trip.t() | nil
+  defp get_trip(trip_id), do: SchedulesRepo.trip(trip_id)
+
+  @spec trip_directions([Trip.t()]) :: [Trip.direction_id_t()]
+  defp trip_directions(trips) do
+    trips
+    |> Enum.map(fn %Trip{direction_id: direction_id} -> direction_id end)
     |> Enum.uniq()
   end
 
