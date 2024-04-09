@@ -31,6 +31,7 @@ defmodule AlertsUI.AlertBuilder do
     effect_map = Effect.effect_map_by_name(effect_name)
     stop_ids = Map.get(alert_data, :stop_ids)
     direction_id = Map.get(alert_data, :direction)
+    route_type = Map.get(alert_data, :route_type)
 
     route_ids =
       alert_data
@@ -43,7 +44,7 @@ defmodule AlertsUI.AlertBuilder do
       |> Map.put(:stop_ids, add_child_stops(stop_ids, route_ids, direction_id))
       |> Map.put(
         :child_stops_with_context,
-        child_stops_with_context(route_ids, direction_id, stop_ids)
+        child_stops_with_context(route_ids, direction_id, stop_ids, route_type)
       )
 
     %{
@@ -91,19 +92,24 @@ defmodule AlertsUI.AlertBuilder do
   defp get_stops(route_id, direction),
     do: RoutePatterns.included_stops_by_route_id(route_id, direction_id: direction)
 
-  @spec child_stops_with_context([Route.id_t()], String.t(), [Stop.id_t()]) ::
+  @spec child_stops_with_context([Route.id_t()], String.t(), [Stop.id_t()], Route.type_int()) ::
           [
             stop_with_context_t()
           ]
 
-  defp child_stops_with_context(route_ids, direction, parent_stop_ids) do
+  defp child_stops_with_context(route_ids, direction, parent_stop_ids, route_type) do
     route_ids
     |> Routes.expanding_green_line()
     |> Enum.flat_map(fn route_id ->
       route_id
       |> get_route_patterns(direction)
       |> Enum.flat_map(fn route_pattern ->
-        route_pattern_stops_with_context_for_parents(route_pattern, route_id, parent_stop_ids)
+        route_pattern_stops_with_context_for_parents(
+          route_pattern,
+          route_id,
+          parent_stop_ids,
+          route_type
+        )
       end)
     end)
   end
@@ -123,15 +129,28 @@ defmodule AlertsUI.AlertBuilder do
   defp route_pattern_direction_opts(opts, direction),
     do: Keyword.put(opts, :direction_id, direction)
 
-  @spec route_pattern_stops_with_context_for_parents(APIRoutePattern.t(), Route.id_t(), [
-          Stop.id_t()
-        ]) :: [
+  @spec route_pattern_stops_with_context_for_parents(
+          APIRoutePattern.t(),
+          Route.id_t(),
+          [
+            Stop.id_t()
+          ],
+          integer()
+        ) :: [
           stop_with_context_t()
         ]
-  defp route_pattern_stops_with_context_for_parents(route_pattern, route_id, parent_stop_ids) do
+  defp route_pattern_stops_with_context_for_parents(
+         route_pattern,
+         route_id,
+         parent_stop_ids,
+         route_type
+       ) do
     route_pattern
     |> RoutePattern.stops()
-    |> Enum.filter(&(&1.parent_id in parent_stop_ids))
+    |> Enum.filter(fn stop ->
+      vehicle_type = Map.get(stop, :vehicle_type)
+      stop.parent_id in parent_stop_ids and vehicle_type == route_type
+    end)
     |> Enum.map(fn child_stop ->
       {
         child_stop,
