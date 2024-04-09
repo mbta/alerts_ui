@@ -92,7 +92,7 @@ defmodule AlertsUI.AlertBuilder do
   defp get_stops(route_id, direction),
     do: RoutePatterns.included_stops_by_route_id(route_id, direction_id: direction)
 
-  @spec child_stops_with_context([Route.id_t()], String.t(), [Stop.id_t()], integer()) ::
+  @spec child_stops_with_context([Route.id_t()], String.t(), [Stop.id_t()], Route.type_int()) ::
           [
             stop_with_context_t()
           ]
