@@ -9,6 +9,7 @@ defmodule AlertsUI.AlertBuilder do
   alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatterns
   alias MBTAV3API.RoutePatterns.RoutePattern, as: APIRoutePattern
+  alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
   alias MBTAV3API.Schedules.Trip
@@ -102,13 +103,16 @@ defmodule AlertsUI.AlertBuilder do
     route_ids
     |> Routes.expanding_green_line()
     |> Enum.flat_map(fn route_id ->
+      route_type = Map.get(RoutesRepo.get(route_id) || %{}, :type)
+
       route_id
       |> get_route_patterns(direction)
       |> Enum.flat_map(fn route_pattern ->
         route_pattern_stops_with_context_for_parents(
           route_pattern,
           route_id,
-          parent_stop_ids
+          parent_stop_ids,
+          route_type
         )
       end)
     end)
@@ -134,19 +138,21 @@ defmodule AlertsUI.AlertBuilder do
           Route.id_t(),
           [
             Stop.id_t()
-          ]
+          ],
+          Route.type_int()
         ) :: [
           stop_with_context_t()
         ]
   defp route_pattern_stops_with_context_for_parents(
          route_pattern,
          route_id,
-         parent_stop_ids
+         parent_stop_ids,
+         route_type
        ) do
     route_pattern
     |> RoutePattern.stops()
     |> Enum.filter(fn stop ->
-      stop.parent_id in parent_stop_ids
+      stop.parent_id in parent_stop_ids and stop.vehicle_type == route_type
     end)
     |> Enum.map(fn child_stop ->
       {

@@ -23,7 +23,7 @@ defmodule AlertsUI.Activities do
   def for_effect("Facility Issue", _),
     do: [:BRINGING_BIKE, :PARK_CAR, :STORE_BIKE, :USING_ESCALATOR, :USING_WHEELCHAIR]
 
-  def for_effect("Multi-Route Detour", _), do: [:BOARD, :RIDE]
+  def for_effect("Multi-Route Detour", _), do: [:BOARD, :EXIT]
   def for_effect("Parking Closure", _), do: [:PARK_CAR]
   def for_effect("Parking Issue", _), do: [:PARK_CAR]
   def for_effect("Policy Change", _), do: [:BOARD, :EXIT, :RIDE]
