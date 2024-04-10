@@ -328,7 +328,7 @@ defmodule AlertsUI.AlertBuilder do
   defp build_informed_entities(
          :SR,
          %{
-           child_stops_with_context: child_stops_with_context,
+           child_stops_with_context: [_ | _] = child_stops_with_context,
            route_types_by_id: route_types_by_id
          },
          effect
@@ -347,6 +347,32 @@ defmodule AlertsUI.AlertBuilder do
       }
     end)
     |> Enum.uniq()
+  end
+
+  defp build_informed_entities(
+         :SR,
+         %{
+           stop_ids: stop_ids,
+           route_ids: route_ids,
+           route_types_by_id: route_types_by_id,
+           child_stops_with_context: []
+         },
+         effect
+       ) do
+    route_ids = Routes.expanding_green_line(route_ids)
+
+    stop_ids
+    |> stop_route_pairs(route_ids)
+    |> Enum.filter(&on_route?(&1, "default"))
+    |> Enum.map(fn {stop_id, route_id} ->
+      %{
+        activities: Activities.for_effect(effect),
+        route_id: route_id,
+        route_type: route_type(route_types_by_id, route_id),
+        agency_id: Routes.agency_id(route_id),
+        stop_id: stop_id
+      }
+    end)
   end
 
   @spec get_trips([String.t()]) :: [Trip.t()]

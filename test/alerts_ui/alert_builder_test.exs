@@ -1540,6 +1540,46 @@ defmodule AlertsUI.AlertBuilderTest do
       end
     end
 
+    test "SR informed entity when stop has no child stops" do
+      alert_data = %{
+        stop_ids: ["Boat-Charlestown"],
+        route_type: 4,
+        route_ids: ["Boat-F4"],
+        effect_name: "Dock Closure",
+        description_text: "b",
+        draft: nil,
+        header_text: "a",
+        route_types_by_id: %{"Boat-F4" => 4}
+      }
+
+      parent_stops = [%Stop{id: "Boat-Charlestown"}]
+
+      child_stops = []
+
+      with_mock(RoutePatternsRepo,
+        by_route_id: fn _route_id, _opts ->
+          [%APIRoutePattern{direction_id: 0, stops: child_stops}]
+        end,
+        included_stops_by_route_id: fn _route_id, _direction -> child_stops end
+      ) do
+        with_mock(StopsRepo,
+          by_route: fn _route_id, _direction -> parent_stops ++ child_stops end
+        ) do
+          result = AlertBuilder.build_alert(alert_data, :SR)
+
+          assert result.informed_entity == [
+                   %{
+                     activities: [:BOARD, :EXIT],
+                     agency_id: "1",
+                     route_id: "Boat-F4",
+                     route_type: 4,
+                     stop_id: "Boat-Charlestown"
+                   }
+                 ]
+        end
+      end
+    end
+
     test "SR informed entity expanding Green Line routes" do
       alert_data = %{
         route_type: 0,
