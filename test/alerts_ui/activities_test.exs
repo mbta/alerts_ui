@@ -60,7 +60,7 @@ defmodule AlertsUI.ActivitiesTest do
     end
 
     test "Multi-Route Detour" do
-      assert Activities.for_effect("Multi-Route Detour") == [:BOARD, :RIDE]
+      assert Activities.for_effect("Multi-Route Detour") == [:BOARD, :EXIT]
     end
 
     test "Parking Closure" do
