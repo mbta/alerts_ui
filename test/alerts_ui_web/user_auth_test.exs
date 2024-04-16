@@ -3,9 +3,13 @@ defmodule AlertsUIWeb.UserAuthTest do
   use AlertsUIWeb.ConnCase, async: true
 
   import AlertsUI.AccountsFixtures
+  import Mock
+  import Test.Support.Helpers
 
   alias AlertsUIWeb.UserAuth
+  alias Oidcc.{ClientContext, Token}
   alias Phoenix.LiveView
+  alias Plug.Conn
 
   setup %{conn: conn} do
     conn =
@@ -227,6 +231,67 @@ defmodule AlertsUIWeb.UserAuthTest do
       conn = conn |> assign(:current_user, user) |> UserAuth.require_authenticated_user([])
       refute conn.halted
       refute conn.status
+    end
+  end
+
+  describe "require_authenticated_api_user/2" do
+    setup do
+      reassign_env(:ueberauth_oidcc, :providers, %{
+        keycloak: %{
+          client_id: "FAKE_KEYCLOAK_CLIENT_ID",
+          client_secret: "FAKE_KEYCLOAK_CLIENT_SECRET"
+        }
+      })
+    end
+
+    test "responds with 403 unauthenticated if API user is not authenticated", %{conn: conn} do
+      conn = UserAuth.require_authenticated_api_user(conn, [])
+
+      assert %{"error" => "unauthenticated"} = json_response(conn, 403)
+      assert conn.halted
+    end
+
+    test "responds with 403 unauthorized if API user is not authorized", %{conn: conn} do
+      with_mocks([
+        {ClientContext, [],
+         from_configuration_worker: fn _provider, _client_id, _client_secret -> {:ok, %{}} end},
+        {Token, [],
+         validate_jwt: fn _token, _client_context, _opts ->
+           {:ok, %{"resource_access" => %{}}}
+         end}
+      ]) do
+        conn =
+          conn
+          |> Conn.put_req_header("authorization", "Bearer FAKE_TOKEN")
+          |> UserAuth.require_authenticated_api_user([])
+
+        assert %{"error" => "unauthorized"} = json_response(conn, 403)
+        assert conn.halted
+      end
+    end
+
+    test "does not send an 403 response if the API user is authenticated and authorized",
+         %{conn: conn} do
+      with_mocks([
+        {ClientContext, [],
+         from_configuration_worker: fn _provider, _client_id, _client_secret -> {:ok, %{}} end},
+        {Token, [],
+         validate_jwt: fn _token, _client_context, _opts ->
+           {:ok,
+            %{
+              "resource_access" => %{
+                "alerts-ui" => %{"roles" => ["api-writer"]}
+              }
+            }}
+         end}
+      ]) do
+        conn =
+          conn
+          |> Conn.put_req_header("authorization", "Bearer FAKE_TOKEN")
+          |> UserAuth.require_authenticated_api_user([])
+
+        refute conn.status
+      end
     end
   end
 end
