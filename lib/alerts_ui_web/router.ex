@@ -77,9 +77,10 @@ defmodule AlertsUIWeb.Router do
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", AlertsUIWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", AlertsUIWeb do
+    pipe_through [:api, :require_authenticated_api_user]
+    post "/alerts", ApiController, :new
+  end
 
   # Enable LiveDashboard in development
   if Application.compile_env(:alerts_ui, :dev_routes) do

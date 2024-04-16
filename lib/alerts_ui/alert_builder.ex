@@ -16,7 +16,10 @@ defmodule AlertsUI.AlertBuilder do
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
 
-  @type alert_data_t :: %{
+  @type t :: %{
+          header_text: String.t(),
+          description_text: String.t(),
+          effect_name: String.t(),
           route_type: Route.type_int(),
           direction: String.t(),
           route_ids: [Route.id_t()],
@@ -27,7 +30,7 @@ defmodule AlertsUI.AlertBuilder do
   @type direction_t :: 0 | 1
   @type stop_with_context_t :: {Stop.t(), Route.id_t(), direction_t(), RoutePattern.stop_type()}
 
-  @spec build_alert(map(), ServiceEffectCombinations.service_effect_combination()) ::
+  @spec build_alert(t(), ServiceEffectCombinations.service_effect_combination()) ::
           map()
   def build_alert(alert_data, combination) do
     effect_name = Map.get(alert_data, :effect_name)
@@ -166,7 +169,7 @@ defmodule AlertsUI.AlertBuilder do
 
   @spec build_informed_entities(
           ServiceEffectCombinations.service_effect_combination() | nil,
-          alert_data_t(),
+          t(),
           Effect.effect_name()
         ) ::
           [map()]
