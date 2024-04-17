@@ -244,10 +244,10 @@ defmodule AlertsUIWeb.UserAuthTest do
       })
     end
 
-    test "responds with 403 unauthenticated if API user is not authenticated", %{conn: conn} do
+    test "responds with 401 unauthenticated if API user is not authenticated", %{conn: conn} do
       conn = UserAuth.require_authenticated_api_user(conn, [])
 
-      assert %{"error" => "unauthenticated"} = json_response(conn, 403)
+      assert %{"error" => "unauthenticated"} = json_response(conn, 401)
       assert conn.halted
     end
 

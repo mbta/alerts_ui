@@ -16,6 +16,18 @@ config :alerts_ui,
   protobuf_output_filename: "alerts_feed.pb",
   skip_migrations: true
 
+config :alerts_ui, :phoenix_swagger,
+  swagger_files: %{
+    "priv/static/swagger.json" => [
+      # phoenix routes will be converted to swagger paths
+      router: AlertsUIWeb.Router,
+      # (optional) endpoint config used to set host, port and https schemes.
+      endpoint: AlertsUIWeb.Endpoint
+    ]
+  }
+
+config :phoenix_swagger, json_library: Jason
+
 config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
 
 # Configure your database

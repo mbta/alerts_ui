@@ -1,6 +1,5 @@
 defmodule AlertsUIWeb.Router do
   use AlertsUIWeb, :router
-
   import AlertsUIWeb.UserAuth
 
   @redirect_http Application.compile_env(:alerts_ui, :redirect_http?)
@@ -28,6 +27,7 @@ defmodule AlertsUIWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    # plug PhoenixSwagger.Plug.Validate
   end
 
   scope "/", AlertsUIWeb do
@@ -96,5 +96,14 @@ defmodule AlertsUIWeb.Router do
 
       live_dashboard "/dashboard", metrics: AlertsUIWeb.Telemetry
     end
+  end
+
+  def swagger_info do
+    %{
+      info: %{
+        version: "1.0",
+        title: "AlertsUI"
+      }
+    }
   end
 end
