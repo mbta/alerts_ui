@@ -23,7 +23,6 @@ defmodule AlertsUIWeb.ConnCase do
       @endpoint AlertsUIWeb.Endpoint
 
       use AlertsUIWeb, :verified_routes
-
       # Import conveniences for testing with connections
       import Plug.Conn
       import Phoenix.ConnTest

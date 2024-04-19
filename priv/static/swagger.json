@@ -5,99 +5,6 @@
   },
   "host": "localhost:4000",
   "definitions": {
-    "Alert": {
-      "description": "Alert information",
-      "properties": {
-        "description_text": {
-          "description": "Description for the alert.",
-          "type": "string"
-        },
-        "effect": {
-          "description": "The effect of this problem on the affected entity.",
-          "type": "string"
-        },
-        "effect_detail": {
-          "description": "Description of the effect of the alert that allows for agency-specific language",
-          "type": "string"
-        },
-        "header_text": {
-          "description": "Header for the alert.",
-          "type": "string"
-        },
-        "informed_entity": {
-          "description": {
-            "properties": {
-              "agency_id": {
-                "description": "Agency ID",
-                "type": "string"
-              },
-              "direction_id": {
-                "description": "Direction ID",
-                "enum": [
-                  0,
-                  1
-                ],
-                "type": "integer"
-              },
-              "facility_id": {
-                "description": "Facility ID",
-                "type": "string"
-              },
-              "route_id": {
-                "description": "Route ID",
-                "type": "string"
-              },
-              "route_type": {
-                "description": "Route Type",
-                "type": "integer"
-              },
-              "stop_id": {
-                "description": "Stop ID",
-                "type": "string"
-              },
-              "trip": {
-                "properties": {
-                  "direction_id": {
-                    "description": "Direction ID",
-                    "enum": [
-                      0,
-                      1
-                    ],
-                    "type": "integer"
-                  },
-                  "route_id": {
-                    "description": "Route ID",
-                    "type": "string"
-                  },
-                  "start_date": {
-                    "description": "YYYYMMDD",
-                    "type": "string"
-                  },
-                  "start_time": {
-                    "description": "11:15:35",
-                    "type": "string"
-                  },
-                  "trip_id": {
-                    "description": "Trip ID",
-                    "type": "string"
-                  }
-                },
-                "type": "object"
-              }
-            },
-            "type": "object"
-          },
-          "type": "array"
-        }
-      },
-      "required": [
-        "effect",
-        "description_text",
-        "header_text"
-      ],
-      "title": "Alert",
-      "type": "object"
-    },
     "AlertRequest": {
       "description": "POST body for creating a user",
       "properties": {
@@ -126,10 +33,145 @@
       "description": "send upon error in alert creation",
       "properties": {
         "error": {
-          "type": "map"
+          "type": "object"
         }
       },
       "title": "AlertError",
+      "type": "object"
+    },
+    "UnauthenticatedError": {
+      "description": "send upon returning a 401",
+      "properties": {
+        "error": {
+          "type": "string"
+        }
+      },
+      "title": "AlertError",
+      "type": "object"
+    },
+    "Alert": {
+      "description": "Alert information",
+      "properties": {
+        "cause": {
+          "type": "string"
+        },
+        "cause_detail": {
+          "type": "string"
+        },
+        "description_text": {
+          "type": "string"
+        },
+        "effect": {
+          "description": "The effect of this problem on the affected entity.",
+          "type": "string"
+        },
+        "effect_detail": {
+          "description": "Description of the effect of the alert that allows for agency-specific language",
+          "type": "string"
+        },
+        "header_text": {
+          "description": "Header for the alert.",
+          "type": "string"
+        },
+        "informed_entity": {
+          "description": "Array of Informed Entities",
+          "items": {
+            "$ref": "#/definitions/InformedEntity"
+          },
+          "type": "array"
+        },
+        "severity_level": {
+          "type": "string"
+        },
+        "url": {
+          "description": "The URL which provides additional information about the alert.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "informed_entity",
+        "effect_detail",
+        "description_text",
+        "header_text"
+      ],
+      "title": "Alert",
+      "type": "object"
+    },
+    "InformedEntity": {
+      "description": "Body for InformedEntity to be included with Alert",
+      "properties": {
+        "activities": {
+          "description": "string",
+          "type": "array"
+        },
+        "agency_id": {
+          "description": "Agency ID",
+          "type": "string"
+        },
+        "direction_id": {
+          "description": "Direction ID",
+          "enum": [
+            0,
+            1
+          ],
+          "type": "integer"
+        },
+        "facility_id": {
+          "description": "Facility ID",
+          "type": "string"
+        },
+        "route_id": {
+          "description": "Route ID",
+          "type": "string"
+        },
+        "route_type": {
+          "description": "Route Type",
+          "type": "integer"
+        },
+        "stop_id": {
+          "description": "Stop ID",
+          "type": "string"
+        },
+        "trip": {
+          "description": "Trip included with Informed Entity",
+          "items": {
+            "$ref": "#/definitions/Trip"
+          },
+          "type": "array"
+        }
+      },
+      "title": "InformedEntity",
+      "type": "object"
+    },
+    "Trip": {
+      "description": "TripDescriptor optionally included with Informed Entity",
+      "properties": {
+        "direction_id": {
+          "description": "Direction ID",
+          "enum": [
+            0,
+            1
+          ],
+          "type": "integer"
+        },
+        "route_id": {
+          "description": "Route ID",
+          "type": "string"
+        },
+        "start_date": {
+          "description": "Start Date in format YYYYMMDD",
+          "type": "string"
+        },
+        "start_time": {
+          "description": "Start Time in format HH:MM:SS",
+          "type": "string"
+        },
+        "trip_id": {
+          "description": "Trip ID",
+          "type": "string"
+        }
+      },
+      "title": "TripDescriptor",
       "type": "object"
     }
   },
@@ -175,13 +217,15 @@
             }
           },
           "401": {
-            "description": {
-              "error": "unauthenticated"
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/UnauthenticatedError"
             }
           },
           "403": {
-            "description": {
-              "error": "unauthorized"
+            "description": "Forbidden",
+            "schema": {
+              "error": "Forbidden"
             }
           }
         },

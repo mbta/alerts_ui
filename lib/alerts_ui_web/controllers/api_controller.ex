@@ -1,6 +1,7 @@
 defmodule AlertsUIWeb.ApiController do
   @moduledoc """
-  TODO
+  API controller- contains
+  POST /api/alerts to create a new alert
   """
   use AlertsUIWeb, :controller
   use PhoenixSwagger
@@ -20,15 +21,17 @@ defmodule AlertsUIWeb.ApiController do
 
     response(201, "Created", Schema.ref(:AlertResponse))
     response(400, "Bad Request", Schema.ref(:AlertError))
-    response(401, %{"error" => "unauthenticated"})
-    response(403, %{"error" => "unauthorized"})
+    response(401, "Unauthorized", Schema.ref(:UnauthenticatedError))
+    response(403, "Forbidden", %{"error" => "Forbidden"})
   end
 
   def new(conn, params) do
     case Alerts.create_or_update_alert(params) do
       {:ok, result} ->
         alert_uuid = Map.get(result, :id)
-        alert = if is_nil(alert_uuid), do: %{}, else: alert_uuid |> Alerts.get_by_id()
+
+        alert =
+          if is_nil(alert_uuid), do: %{}, else: alert_uuid |> Alerts.get_by_id()
 
         conn
         |> Plug.Conn.resp(201, "Created")
@@ -51,38 +54,52 @@ defmodule AlertsUIWeb.ApiController do
           properties do
             header_text(:string, "Header for the alert.", required: true)
             description_text(:string, "Description for the alert.", required: true)
-            effect(:string, "The effect of this problem on the affected entity.", required: true)
+            effect(:string, "The effect of this problem on the affected entity.")
 
             effect_detail(
               :string,
-              "Description of the effect of the alert that allows for agency-specific language"
+              "Description of the effect of the alert that allows for agency-specific language",
+              required: true
             )
 
-            informed_entity(
-              :array,
-              Schema.new do
-                properties do
-                  agency_id(:string, "Agency ID")
-                  route_id(:string, "Route ID")
-                  facility_id(:string, "Facility ID")
-                  route_type(:integer, "Route Type")
-                  direction_id(:integer, "Direction ID", enum: [0, 1])
-                  stop_id(:string, "Stop ID")
+            cause(:string)
+            cause_detail(:string)
+            description_text(:string)
+            severity_level(:string)
+            url(:string, "The URL which provides additional information about the alert.")
 
-                  trip(
-                    Schema.new do
-                      properties do
-                        trip_id(:string, "Trip ID")
-                        route_id(:string, "Route ID")
-                        direction_id(:integer, "Direction ID", enum: [0, 1])
-                        start_time(:string, "11:15:35")
-                        start_date(:string, "YYYYMMDD")
-                      end
-                    end
-                  )
-                end
-              end
+            informed_entity(Schema.array(:InformedEntity), "Array of Informed Entities",
+              required: true
             )
+          end
+        end,
+      InformedEntity:
+        swagger_schema do
+          title("InformedEntity")
+          description("Body for InformedEntity to be included with Alert")
+
+          properties do
+            agency_id(:string, "Agency ID")
+            route_id(:string, "Route ID")
+            facility_id(:string, "Facility ID")
+            route_type(:integer, "Route Type")
+            direction_id(:integer, "Direction ID", enum: [0, 1])
+            stop_id(:string, "Stop ID")
+            activities(:array, :string)
+            trip(Schema.array(:Trip), "Trip included with Informed Entity")
+          end
+        end,
+      Trip:
+        swagger_schema do
+          title("TripDescriptor")
+          description("TripDescriptor optionally included with Informed Entity")
+
+          properties do
+            trip_id(:string, "Trip ID")
+            route_id(:string, "Route ID")
+            direction_id(:integer, "Direction ID", enum: [0, 1])
+            start_time(:string, "Start Time in format HH:MM:SS")
+            start_date(:string, "Start Date in format YYYYMMDD")
           end
         end,
       AlertRequest:
@@ -107,7 +124,16 @@ defmodule AlertsUIWeb.ApiController do
           description("send upon error in alert creation")
 
           properties do
-            error(:map)
+            error(:object)
+          end
+        end,
+      UnauthenticatedError:
+        swagger_schema do
+          title("AlertError")
+          description("send upon returning a 401")
+
+          properties do
+            error(:string)
           end
         end
     }

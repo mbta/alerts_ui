@@ -27,7 +27,6 @@ defmodule AlertsUIWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
-    # plug PhoenixSwagger.Plug.Validate
   end
 
   scope "/", AlertsUIWeb do
@@ -96,6 +95,10 @@ defmodule AlertsUIWeb.Router do
 
       live_dashboard "/dashboard", metrics: AlertsUIWeb.Telemetry
     end
+  end
+
+  scope "/api/swagger" do
+    forward "/", PhoenixSwagger.Plug.SwaggerUI, otp_app: :alerts_ui, swagger_file: "swagger.json"
   end
 
   def swagger_info do
