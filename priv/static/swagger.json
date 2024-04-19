@@ -5,98 +5,6 @@
   },
   "host": "localhost:4000",
   "definitions": {
-    "AlertRequest": {
-      "description": "POST body for creating a user",
-      "properties": {
-        "alert": {
-          "$ref": "#/definitions/Alert",
-          "description": "The alert details"
-        }
-      },
-      "title": "AlertRequest",
-      "type": "object"
-    },
-    "AlertResponse": {
-      "description": "send upon successful alert",
-      "properties": {
-        "alert_id": {
-          "type": "string"
-        },
-        "result": {
-          "type": "string"
-        }
-      },
-      "title": "AlertResponse",
-      "type": "object"
-    },
-    "AlertError": {
-      "description": "send upon error in alert creation",
-      "properties": {
-        "error": {
-          "type": "object"
-        }
-      },
-      "title": "AlertError",
-      "type": "object"
-    },
-    "UnauthenticatedError": {
-      "description": "send upon returning a 401",
-      "properties": {
-        "error": {
-          "type": "string"
-        }
-      },
-      "title": "AlertError",
-      "type": "object"
-    },
-    "Alert": {
-      "description": "Alert information",
-      "properties": {
-        "cause": {
-          "type": "string"
-        },
-        "cause_detail": {
-          "type": "string"
-        },
-        "description_text": {
-          "type": "string"
-        },
-        "effect": {
-          "description": "The effect of this problem on the affected entity.",
-          "type": "string"
-        },
-        "effect_detail": {
-          "description": "Description of the effect of the alert that allows for agency-specific language",
-          "type": "string"
-        },
-        "header_text": {
-          "description": "Header for the alert.",
-          "type": "string"
-        },
-        "informed_entity": {
-          "description": "Array of Informed Entities",
-          "items": {
-            "$ref": "#/definitions/InformedEntity"
-          },
-          "type": "array"
-        },
-        "severity_level": {
-          "type": "string"
-        },
-        "url": {
-          "description": "The URL which provides additional information about the alert.",
-          "type": "string"
-        }
-      },
-      "required": [
-        "informed_entity",
-        "effect_detail",
-        "description_text",
-        "header_text"
-      ],
-      "title": "Alert",
-      "type": "object"
-    },
     "InformedEntity": {
       "description": "Body for InformedEntity to be included with Alert",
       "properties": {
@@ -172,6 +80,98 @@
         }
       },
       "title": "TripDescriptor",
+      "type": "object"
+    },
+    "Alert": {
+      "description": "Alert information",
+      "properties": {
+        "cause": {
+          "type": "string"
+        },
+        "cause_detail": {
+          "type": "string"
+        },
+        "description_text": {
+          "type": "string"
+        },
+        "effect": {
+          "description": "The effect of this problem on the affected entity.",
+          "type": "string"
+        },
+        "effect_detail": {
+          "description": "Description of the effect of the alert that allows for agency-specific language",
+          "type": "string"
+        },
+        "header_text": {
+          "description": "Header for the alert.",
+          "type": "string"
+        },
+        "informed_entity": {
+          "description": "Array of Informed Entities",
+          "items": {
+            "$ref": "#/definitions/InformedEntity"
+          },
+          "type": "array"
+        },
+        "severity_level": {
+          "type": "string"
+        },
+        "url": {
+          "description": "The URL which provides additional information about the alert.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "informed_entity",
+        "effect_detail",
+        "description_text",
+        "header_text"
+      ],
+      "title": "Alert",
+      "type": "object"
+    },
+    "AlertError": {
+      "description": "send upon error in alert creation",
+      "properties": {
+        "error": {
+          "type": "object"
+        }
+      },
+      "title": "AlertError",
+      "type": "object"
+    },
+    "AlertRequest": {
+      "description": "POST body for creating a user",
+      "properties": {
+        "alert": {
+          "$ref": "#/definitions/Alert",
+          "description": "The alert details"
+        }
+      },
+      "title": "AlertRequest",
+      "type": "object"
+    },
+    "AlertResponse": {
+      "description": "send upon successful alert",
+      "properties": {
+        "alert_id": {
+          "type": "string"
+        },
+        "result": {
+          "type": "string"
+        }
+      },
+      "title": "AlertResponse",
+      "type": "object"
+    },
+    "UnauthenticatedError": {
+      "description": "send upon returning a 401",
+      "properties": {
+        "error": {
+          "type": "string"
+        }
+      },
+      "title": "AlertError",
       "type": "object"
     }
   },

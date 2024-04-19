@@ -17,6 +17,8 @@ defmodule AlertsUI.MixProject do
       test_coverage: [
         ignore_modules: [
           AlertsUI.DataCase,
+          # Ignoring due to swagger definitions
+          AlertsUIWeb.ApiController,
           AlertsUIWeb.PageHTML,
           AlertsUIWeb.ErrorHTML,
           AlertsUIWeb.CoreComponents,
