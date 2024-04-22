@@ -6,10 +6,6 @@ defmodule AlertsUI.Models.CustomFilters do
   alias AlertsUI.Models.InformedEntity
   alias Flop.Filter
 
-  def empty_filter(query, %Filter{value: _value}, _opts) do
-    query
-  end
-
   def service_type_filter(query, %Filter{value: value}, _opts) do
     facility_activities =
       InformedEntity.facility_activities()

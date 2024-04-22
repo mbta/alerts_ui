@@ -541,49 +541,57 @@ defmodule AlertsUI.AlertsTest do
       one_hour_ago = DateTime.add(now, -1, :hour)
 
       insert(:alert, %{
-        alert_id: "start_nil_end_nil",
+        # start_nil_end_nil
+        alert_id: "100",
         active_period_start: nil,
         active_period_end: nil
       })
 
       insert(:alert, %{
-        alert_id: "start_nil_end_future",
+        # start_nil_end_future
+        alert_id: "101",
         active_period_start: nil,
         active_period_end: one_hour_from_now
       })
 
       insert(:alert, %{
-        alert_id: "start_nil_end_past",
+        # start_nil_end_past
+        alert_id: "102",
         active_period_start: nil,
         active_period_end: one_hour_ago
       })
 
       insert(:alert, %{
-        alert_id: "start_future_end_nil",
+        # start_future_end_nil
+        alert_id: "103",
         active_period_start: one_hour_from_now,
         active_period_end: nil
       })
 
       insert(:alert, %{
-        alert_id: "start_past_end_nil",
+        # start_past_end_nil
+        alert_id: "104",
         active_period_start: one_hour_ago,
         active_period_end: nil
       })
 
       insert(:alert, %{
-        alert_id: "start_past_end_past",
+        # start_past_end_past
+        alert_id: "105",
         active_period_start: one_hour_ago,
         active_period_end: one_hour_ago
       })
 
       insert(:alert, %{
-        alert_id: "start_past_end_future",
+        # start_past_end_future
+        alert_id: "106",
         active_period_start: one_hour_ago,
         active_period_end: one_hour_from_now
       })
 
       insert(:alert, %{
-        alert_id: "start_future_end_future",
+        # start_future_end_future
+        alert_id: "107",
         active_period_start: one_hour_from_now,
         active_period_end: one_hour_from_now
       })
@@ -594,12 +602,7 @@ defmodule AlertsUI.AlertsTest do
           filters: [%{"field" => "timeline", "value" => "current"}]
         })
 
-      assert current_results |> Enum.map(& &1.alert_id) == [
-               "start_nil_end_future",
-               "start_nil_end_nil",
-               "start_past_end_future",
-               "start_past_end_nil"
-             ]
+      assert current_results |> Enum.map(& &1.alert_id) == [100, 101, 104, 106]
 
       {future_results, _meta} =
         Alerts.list_all_paginated(%{
@@ -607,10 +610,7 @@ defmodule AlertsUI.AlertsTest do
           filters: [%{"field" => "timeline", "value" => "future"}]
         })
 
-      assert future_results |> Enum.map(& &1.alert_id) == [
-               "start_future_end_future",
-               "start_future_end_nil"
-             ]
+      assert future_results |> Enum.map(& &1.alert_id) == [103, 107]
 
       {past_results, _meta} =
         Alerts.list_all_paginated(%{
@@ -618,10 +618,7 @@ defmodule AlertsUI.AlertsTest do
           filters: [%{"field" => "timeline", "value" => "past"}]
         })
 
-      assert past_results |> Enum.map(& &1.alert_id) == [
-               "start_nil_end_past",
-               "start_past_end_past"
-             ]
+      assert past_results |> Enum.map(& &1.alert_id) == [102, 105]
     end
   end
 
