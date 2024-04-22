@@ -5,6 +5,7 @@ defmodule AlertsUIWeb.ApiController do
   """
   use AlertsUIWeb, :controller
   use PhoenixSwagger
+  alias AlertsUI.AlertFromApi
   alias AlertsUI.Alerts
 
   swagger_path :new do
@@ -22,16 +23,21 @@ defmodule AlertsUIWeb.ApiController do
     response(201, "Created", Schema.ref(:AlertResponse))
     response(400, "Bad Request", Schema.ref(:AlertError))
     response(401, "Unauthorized", Schema.ref(:UnauthenticatedError))
+    response(401, "Unauthenticated", Schema.ref(:UnauthenticatedError))
     response(403, "Forbidden", %{"error" => "Forbidden"})
   end
 
   def new(conn, params) do
-    case Alerts.create_or_update_alert(params) do
+    params
+    |> Jason.encode!()
+    |> Jason.decode!(keys: :atoms)
+    |> AlertFromApi.fill_in_alert()
+    |> Alerts.create_or_update_alert()
+    |> case do
       {:ok, result} ->
         alert_uuid = Map.get(result, :id)
 
-        alert =
-          if is_nil(alert_uuid), do: %{}, else: alert_uuid |> Alerts.get_by_id()
+        alert = alert_uuid |> Alerts.get_by_id()
 
         conn
         |> Plug.Conn.resp(201, "Created")

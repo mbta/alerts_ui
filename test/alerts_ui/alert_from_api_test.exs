@@ -32,6 +32,21 @@ defmodule AlertsUI.AlertFromApiTest do
       assert result.effect == :OTHER_EFFECT
     end
 
+    test "handles case if effect detail is not found" do
+      incoming = %{
+        header_text: "header",
+        description_text: "description",
+        effect: :OTHER_EFFECT,
+        effect_detail: "ACCESSIBILITY_ISSUE",
+        informed_entity: [
+          %{route_id: "1"}
+        ]
+      }
+
+      result = AlertFromApi.fill_in_alert(incoming)
+      assert result.effect == :OTHER_EFFECT
+    end
+
     test "adds activities to informed_entity if none given" do
       incoming = %{
         header_text: "header",

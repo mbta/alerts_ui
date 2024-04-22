@@ -186,7 +186,7 @@ defmodule AlertsUIWeb.UserAuth do
       false ->
         conn
         |> put_status(401)
-        |> json(%{error: :unauthenticated})
+        |> json(%{error: :unauthorized})
         |> halt()
 
       {:ok, _claims} ->

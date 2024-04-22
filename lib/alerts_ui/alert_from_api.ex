@@ -19,29 +19,43 @@ defmodule AlertsUI.AlertFromApi do
     Map.put_new(alert_data, :effect, effect_tuple.effect)
   end
 
-  defp add_activities(alert_data) do
+  defp add_activities(%{informed_entity: informed_entity} = alert_data) do
     effect_tuple = Effect.effect_map_by_detail(Map.get(alert_data, :effect_detail))
-    new_activities = Activities.for_effect(effect_tuple.effect_name)
 
-    new_informed_entity =
-      alert_data.informed_entity
-      |> Enum.map(fn informed_entity ->
-        new_activties =
-          case Map.get(informed_entity, :activities) do
-            nil -> new_activities
-            [_ | _] = activities -> Enum.map(activities, &String.to_atom(&1))
-          end
+    case is_nil(effect_tuple) do
+      false ->
+        new_activities = Activities.for_effect(effect_tuple.effect_name)
 
-        Map.put(informed_entity, :activities, new_activties)
-      end)
+        new_informed_entity =
+          informed_entity
+          |> Enum.map(fn informed_entity ->
+            new_activties = add_activities(informed_entity, new_activities)
 
+            Map.put(informed_entity, :activities, new_activties)
+          end)
+
+        Map.put(alert_data, :informed_entity, new_informed_entity)
+
+      true ->
+        alert_data
+    end
+  end
+
+  defp add_activities(alert_data), do: alert_data
+
+  defp add_activities(informed_entity, new_activities) do
+    case Map.get(informed_entity, :activities) do
+      nil -> new_activities
+      [_ | _] = activities -> Enum.map(activities, &String.to_atom(&1))
+    end
+  end
+
+  defp fill_in_informed_entities(%{informed_entity: informed_entity} = alert_data) do
+    new_informed_entity = Enum.map(informed_entity, &fill_in_informed_entity(&1))
     Map.put(alert_data, :informed_entity, new_informed_entity)
   end
 
-  defp fill_in_informed_entities(alert_data) do
-    new_informed_entity = Enum.map(alert_data.informed_entity, &fill_in_informed_entity(&1))
-    Map.put(alert_data, :informed_entity, new_informed_entity)
-  end
+  defp fill_in_informed_entities(alert_data), do: alert_data
 
   defp fill_in_informed_entity(%{trip: trip} = informed_entity) do
     route_id = Map.get(trip, :route_id)
