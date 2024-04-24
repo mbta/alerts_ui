@@ -53,40 +53,6 @@
       "title": "Alert",
       "type": "object"
     },
-    "AlertError": {
-      "description": "send upon error in alert creation",
-      "properties": {
-        "error": {
-          "type": "object"
-        }
-      },
-      "title": "AlertError",
-      "type": "object"
-    },
-    "AlertRequest": {
-      "description": "POST body for creating a user",
-      "properties": {
-        "alert": {
-          "$ref": "#/definitions/Alert",
-          "description": "The alert details"
-        }
-      },
-      "title": "AlertRequest",
-      "type": "object"
-    },
-    "AlertResponse": {
-      "description": "send upon successful alert",
-      "properties": {
-        "alert_id": {
-          "type": "string"
-        },
-        "result": {
-          "type": "string"
-        }
-      },
-      "title": "AlertResponse",
-      "type": "object"
-    },
     "InformedEntity": {
       "description": "Body for InformedEntity to be included with Alert",
       "properties": {
@@ -131,6 +97,40 @@
         }
       },
       "title": "InformedEntity",
+      "type": "object"
+    },
+    "AlertRequest": {
+      "description": "POST body for creating a user",
+      "properties": {
+        "alert": {
+          "$ref": "#/definitions/Alert",
+          "description": "The alert details"
+        }
+      },
+      "title": "AlertRequest",
+      "type": "object"
+    },
+    "AlertResponse": {
+      "description": "send upon successful alert",
+      "properties": {
+        "alert_id": {
+          "type": "string"
+        },
+        "result": {
+          "type": "string"
+        }
+      },
+      "title": "AlertResponse",
+      "type": "object"
+    },
+    "AlertError": {
+      "description": "send upon error in alert creation",
+      "properties": {
+        "error": {
+          "type": "object"
+        }
+      },
+      "title": "AlertError",
       "type": "object"
     },
     "UnauthenticatedError": {
