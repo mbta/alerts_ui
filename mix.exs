@@ -91,8 +91,6 @@ defmodule AlertsUI.MixProject do
       {:mbta_v3_api, git: "https://github.com/mbta/mbta_v3_api.git", branch: "mss-more-files"},
       {:mock, "~> 0.3.8", only: :test},
       {:oban, "~> 2.16"},
-      # needed for jwt function, remove beta once released
-      {:oidcc, "~> 3.2.0-beta", override: true},
       {:paper_trail, "~> 1.0.0"},
       {:phoenix, "~> 1.7.7"},
       {:phoenix_ecto, "~> 4.4"},
@@ -111,7 +109,7 @@ defmodule AlertsUI.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:tzdata, "~> 1.1"},
       {:ueberauth, "~> 0.10"},
-      {:ueberauth_oidcc, "~> 0.3.0"}
+      {:ueberauth_oidcc, "~> 0.4.0-pre.5"}
     ]
   end
 
