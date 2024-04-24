@@ -7,6 +7,7 @@ defmodule AlertsUI.MixProject do
       version: "0.1.0",
       elixir: "~> 1.15",
       elixirc_paths: elixirc_paths(Mix.env()),
+      compilers: Mix.compilers() ++ [:phoenix_swagger],
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
@@ -16,6 +17,8 @@ defmodule AlertsUI.MixProject do
       test_coverage: [
         ignore_modules: [
           AlertsUI.DataCase,
+          # Ignoring due to swagger definitions
+          AlertsUIWeb.ApiController,
           AlertsUIWeb.PageHTML,
           AlertsUIWeb.ErrorHTML,
           AlertsUIWeb.CoreComponents,
@@ -72,6 +75,7 @@ defmodule AlertsUI.MixProject do
       {:ex_aws, "~> 2.0"},
       {:ex_aws_rds, "~> 2.0"},
       {:ex_aws_s3, "~> 2.0"},
+      {:ex_json_schema, "~> 0.5"},
       {:ex_machina, "~> 2.7.0", only: :test},
       {:exprotobuf, "~> 1.2.17"},
       {:gen_stage, "~> 1.2.1"},
@@ -95,6 +99,7 @@ defmodule AlertsUI.MixProject do
       {:phoenix_live_dashboard, "~> 0.8.0"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_view, "~> 0.20.0"},
+      {:phoenix_swagger, "~> 0.8"},
       {:plug_cowboy, "~> 2.5"},
       {:postgrex, ">= 0.0.0"},
       {:req, "~> 0.4.0"},
@@ -104,7 +109,7 @@ defmodule AlertsUI.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:tzdata, "~> 1.1"},
       {:ueberauth, "~> 0.10"},
-      {:ueberauth_oidcc, "~> 0.3.0"}
+      {:ueberauth_oidcc, "~> 0.4.0-pre.5"}
     ]
   end
 

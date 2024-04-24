@@ -1,6 +1,5 @@
 defmodule AlertsUIWeb.Router do
   use AlertsUIWeb, :router
-
   import AlertsUIWeb.UserAuth
 
   @redirect_http Application.compile_env(:alerts_ui, :redirect_http?)
@@ -77,9 +76,10 @@ defmodule AlertsUIWeb.Router do
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", AlertsUIWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", AlertsUIWeb do
+    pipe_through [:api, :require_authenticated_api_user]
+    post "/alerts", ApiController, :new
+  end
 
   # Enable LiveDashboard in development
   if Application.compile_env(:alerts_ui, :dev_routes) do
@@ -95,5 +95,18 @@ defmodule AlertsUIWeb.Router do
 
       live_dashboard "/dashboard", metrics: AlertsUIWeb.Telemetry
     end
+  end
+
+  scope "/api/swagger" do
+    forward "/", PhoenixSwagger.Plug.SwaggerUI, otp_app: :alerts_ui, swagger_file: "swagger.json"
+  end
+
+  def swagger_info do
+    %{
+      info: %{
+        version: "1.0",
+        title: "AlertsUI"
+      }
+    }
   end
 end

@@ -79,27 +79,37 @@ defmodule AlertsUI.Models.Effect do
     })
   end
 
-  @spec effect_map_by_detail(String.t() | nil) :: struct() | map()
+  @spec effect_map_by_detail(String.t() | nil) :: struct() | map() | nil
   @doc """
-  Returns effect mapping given a detail
+  Returns effect mapping given a detail. Returns nil if detail is not listed.
 
   ## Examples
       iex> AlertsUI.Models.Effect.effect_map_by_detail("FACILITY_ISSUE")
       %AlertsUI.Models.EffectMapping{effect_name: "Facility Issue", effect: :OTHER_EFFECT, effect_detail: "FACILITY_ISSUE"}
+
+      iex> AlertsUI.Models.Effect.effect_map_by_detail("BAD_DETAIL")
+      nil
   """
   def effect_map_by_detail(nil), do: %{}
 
   def effect_map_by_detail(search_detail) do
-    {effect_name, effect, effect_detail} =
+    tuples_list =
       effects_tuples()
       |> Enum.filter(fn {_n, _e, detail} -> detail == search_detail end)
-      |> hd
 
-    struct(EffectMapping, %{
-      effect_name: effect_name,
-      effect: effect,
-      effect_detail: effect_detail
-    })
+    case tuples_list do
+      [_ | _] ->
+        {effect_name, effect, effect_detail} = hd(tuples_list)
+
+        struct(EffectMapping, %{
+          effect_name: effect_name,
+          effect: effect,
+          effect_detail: effect_detail
+        })
+
+      _ ->
+        nil
+    end
   end
 
   @type effect_name :: String.t()

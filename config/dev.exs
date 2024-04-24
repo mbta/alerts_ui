@@ -70,5 +70,5 @@ config :alerts_ui, file_write_module: AlertsUI.FeedOutput.WriteLocal
 
 config :ueberauth, Ueberauth,
   providers: [
-    keycloak: {Ueberauth.Strategy.FakeKeycloak, []}
+    keycloak: {Ueberauth.Strategy.FakeKeycloak, [issuer: :keycloak_issuer]}
   ]
