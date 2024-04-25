@@ -12,14 +12,17 @@
       <a href="/alerts/new" class="hover:text-zinc-700">
         Create an Alert
       </a>
+      <a :if={@show_components_page} href="/components" class="hover:text-zinc-700">
+        Components
+      </a>
       <a :if={@show_validate_page} href="/validate" class="hover:text-zinc-700">
         Validate Feeds
       </a>
     </div>
   </div>
 </header>
-<main class=" min-h-screen">
-  <div class="mx-auto max-w-full flex flex-row justify-center">
+<main class="min-h-screen">
+  <div class="mx-auto max-w-full">
     <.flash_group flash={@flash} />
     <%= @inner_content %>
   </div>

@@ -122,6 +122,8 @@ config :ueberauth, Ueberauth,
 config :laboratory,
   features: [
     {:show_created_alert, "Show Created Alert", "Makes created alert visible on success screen"},
+    {:show_components_page, "Show Components Style Guide page",
+     "Shows the menu link to a page showing a guide to our components"},
     {:show_validate_page, "Show Validate Page",
      "Shows the menu link to a page that helps validate alerts feeds"}
   ],
