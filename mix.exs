@@ -22,6 +22,7 @@ defmodule AlertsUI.MixProject do
           AlertsUIWeb.PageHTML,
           AlertsUIWeb.ErrorHTML,
           AlertsUIWeb.CoreComponents,
+          AlertsUIWeb.SharedComponents,
           AlertsUIWeb.Layouts,
           AlertsUIWeb.Router,
           AlertsUIWeb.Telemetry,

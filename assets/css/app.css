@@ -2,4 +2,6 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
+@import "inter_ui";
+
 /* This file is for your main application CSS */

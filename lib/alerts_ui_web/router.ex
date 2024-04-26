@@ -45,6 +45,9 @@ defmodule AlertsUIWeb.Router do
       live("/alerts", ViewAlertsLive)
       live("/alerts/new", CreateAlertLive, :new)
       live("/alerts/edit", CreateAlertLive, :edit)
+
+      # Hidden pages
+      live("/components", ComponentsLive)
       live("/validate", ValidateLive)
     end
   end

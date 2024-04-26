@@ -1,8 +1,8 @@
-<div class="flex flex-row justify-center max-w-2xl my-20">
-  <article class="prose prose-stone min-w-fit">
-    <h1>Alerts</h1>
+<div class="my-20">
+  <article>
+    <.h1>Alerts</.h1>
 
-    <div data-theme="winter" class="flex flex-col justify-center min-w-fit">
+    <div data-theme="winter">
       <.filter_form
         fields={[
           alert_id: [label: "ID", op: :ilike_and],
@@ -29,14 +29,13 @@
       />
     </div>
 
-    <div data-theme="winter" class="flex flex-col justify-center min-w-fit">
+    <div data-theme="winter">
       <Flop.Phoenix.table
         items={@alerts}
         meta={@meta}
         on_sort={JS.push("sort-alerts")}
         opts={[
           table_attrs: [class: "table"],
-          thead_th_attrs: [class: "min-w-[10rem]"],
           tbody_tr_attrs: [class: "hover"],
           no_results_content: "No alerts found"
         ]}
