@@ -5,6 +5,7 @@ defmodule AlertsUI.Models.InformedEntity do
   use AlertsUI.Schema
   import Ecto.Changeset
   alias AlertsUI.Models.{Activity, Alert, TripDescriptor}
+  alias MBTAV3API.Routes.Route
 
   @facility_activities [
     :bringing_bike,
@@ -70,15 +71,20 @@ defmodule AlertsUI.Models.InformedEntity do
   def facility_activity?(activity) when activity in @facility_activities, do: true
   def facility_activity?(_), do: false
 
-  def route_type_mapping do
-    %{
-      "Light Rail" => 0,
-      "Subway" => 1,
-      "Commuter Rail" => 2,
-      "Bus" => 3,
-      "Ferry" => 4
-    }
-  end
+  @doc """
+  Map route type names to integer codes.
+
+    ## Examples
+      iex> InformedEntity.route_type_mapping("Light Rail")
+      0
+  """
+  @spec route_type_mapping(String.t()) :: Route.type_int() | nil
+  def route_type_mapping("Light Rail"), do: 0
+  def route_type_mapping("Subway"), do: 1
+  def route_type_mapping("Commuter Rail"), do: 2
+  def route_type_mapping("Bus"), do: 3
+  def route_type_mapping("Ferry"), do: 4
+  def route_type_mapping(_), do: nil
 
   @spec route_to_combo_route_mapping() :: %{String.t() => String.t()}
   def route_to_combo_route_mapping do

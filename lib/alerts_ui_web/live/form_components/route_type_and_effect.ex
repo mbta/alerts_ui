@@ -12,7 +12,8 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
     "Subway",
     "Commuter Rail",
     "Bus",
-    "Ferry"
+    "Ferry",
+    "Systemwide"
   ]
 
   @primary_key false
@@ -23,7 +24,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   end
 
   @fields ~w[route_type effect_name draft]a
-  @required_fields ~w[route_type effect_name]a
+  @required_fields ~w[effect_name]a
 
   @impl true
   def mount(socket) do
@@ -70,7 +71,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   def handle_event("save_as_draft", params, socket) do
     %{
       effect_name: Map.get(params, "effect_name"),
-      route_type: InformedEntity.route_type_mapping()[Map.get(params, "route_type")],
+      route_type: InformedEntity.route_type_mapping(Map.get(params, "route_type")),
       draft: true
     }
     |> then(&draft_changeset(%__MODULE__{}, &1))
@@ -89,7 +90,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   def handle_event("save", _params, socket) do
     changeset_params = %{
       effect_name: socket.assigns.selected_effect,
-      route_type: InformedEntity.route_type_mapping()[socket.assigns.selected_route_type]
+      route_type: InformedEntity.route_type_mapping(socket.assigns.selected_route_type)
     }
 
     changeset(%__MODULE__{}, changeset_params)
