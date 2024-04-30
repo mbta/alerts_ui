@@ -32,7 +32,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
     RouteTypeAndEffect,
     StopRouteAffectedService,
     SuccessfulSubmission,
-    Timeline
+    Timeline,
+    TimeRange
   }
 
   alias AlertsUIWeb.FormComponents.Helpers.{AlertData, ServiceEffectCombinations}
