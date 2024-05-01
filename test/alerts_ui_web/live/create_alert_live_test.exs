@@ -93,7 +93,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
         send(view.pid, {:section_completed, service_changeset})
 
-        #Submit time range
+        # Submit time range
         {:ok, time_range_changeset} =
           Ecto.Changeset.change(%TimeRange{
             active_period_end_specifier: :later_today,
@@ -101,7 +101,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
           })
           |> apply_action(:insert)
 
-          send(view.pid, {:section_completed, time_range_changeset})
+        send(view.pid, {:section_completed, time_range_changeset})
 
         # Submit details
         {:ok, details_changeset} =

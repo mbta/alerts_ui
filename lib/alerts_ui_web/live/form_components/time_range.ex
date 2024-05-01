@@ -89,8 +89,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
               {"pick a date and time", :pick}
             ]}
           />
-          <div class={unless @form.params["end"] == "pick", do: "hidden"}>
+          <div class={unless @form.params["active_period_end_specifier"] == "pick", do: "hidden"}>
             <.input
+              id="end-selector"
               type="datetime-local"
               field={@form[:active_period_end]}
               value={DateTime.now!("America/New_York")}

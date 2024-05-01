@@ -23,9 +23,9 @@ defmodule AlertsUI.AlertBuilder do
           stop_ids: [Stop.id_t()],
           child_stops_with_context: [stop_with_context_t()] | [],
           trip_ids: [String.t()],
-          active_period_start: any(),
+          active_period_start: DateTime.t(),
           active_period_end_specifier: atom(),
-          active_period_end: any()
+          active_period_end: DateTime.t()
         }
   @type direction_t :: 0 | 1
   @type stop_with_context_t :: {Stop.t(), Route.id_t(), direction_t(), RoutePattern.stop_type()}
@@ -58,10 +58,11 @@ defmodule AlertsUI.AlertBuilder do
         child_stops_with_context(route_ids, direction_id, stop_ids)
       )
 
-    active_period_map = build_active_period(%{
-      active_period_start: Map.get(alert_data, :active_period_start),
-      active_period_end: Map.get(alert_data, :active_period_end),
-      active_period_end_specifier: Map.get(alert_data, :active_period_end_specifier)
+    active_period_map =
+      build_active_period(%{
+        active_period_start: Map.get(alert_data, :active_period_start),
+        active_period_end: Map.get(alert_data, :active_period_end),
+        active_period_end_specifier: Map.get(alert_data, :active_period_end_specifier)
       })
 
     %{
@@ -181,11 +182,12 @@ defmodule AlertsUI.AlertBuilder do
   end
 
   @spec build_active_period(map()) :: active_period_data_t() | %{}
-  def build_active_period(%{active_period_start: nil}), do: %{}
-  def build_active_period(%{
-        active_period_start: start,
-        active_period_end_specifier: :later_today
-      }) do
+  defp build_active_period(%{active_period_start: nil}), do: %{}
+
+  defp build_active_period(%{
+         active_period_start: start,
+         active_period_end_specifier: :later_today
+       }) do
     utc_start =
       start |> DateTime.from_naive!("America/New_York") |> Timex.Timezone.convert("Etc/UTC")
 
@@ -197,10 +199,10 @@ defmodule AlertsUI.AlertBuilder do
     }
   end
 
-  def build_active_period(%{
-        active_period_start: start,
-        active_period_end_specifier: :further_notice
-      }) do
+  defp build_active_period(%{
+         active_period_start: start,
+         active_period_end_specifier: :further_notice
+       }) do
     utc_start =
       start |> DateTime.from_naive!("America/New_York") |> Timex.Timezone.convert("Etc/UTC")
 
@@ -212,17 +214,14 @@ defmodule AlertsUI.AlertBuilder do
     }
   end
 
-  @doc """
-    Sets the end date of the active period to the next instance of 2:30 AM.
-  """
-  def build_active_period(%{
-        active_period_start: start,
-        active_period_end_specifier: :end_of_service_today
-      }) do
+  defp build_active_period(%{
+         active_period_start: start,
+         active_period_end_specifier: :end_of_service_today
+       }) do
     eastern_start = start |> DateTime.from_naive!("America/New_York")
     utc_start = eastern_start |> Timex.Timezone.convert("Etc/UTC")
-
-    # check if start time is after 2:30am (Eastern). If true, end date is the next day. If false, end date is same day.
+    # Sets the end date of the active period to the next instance of 2:30 AM.
+    # Checks if start time is after 2:30am (Eastern). If true, end date is the next day. If false, end date is same day.
     end_date =
       if Time.after?(DateTime.to_time(eastern_start), ~T[02:30:00]) do
         Date.add(NaiveDateTime.to_date(start), 1)
@@ -242,11 +241,11 @@ defmodule AlertsUI.AlertBuilder do
     }
   end
 
-  def build_active_period(%{
-        active_period_start: start,
-        active_period_end_specifier: :pick,
-        active_period_end: naive_end
-      }) do
+  defp build_active_period(%{
+         active_period_start: start,
+         active_period_end_specifier: :pick,
+         active_period_end: naive_end
+       }) do
     utc_start =
       start |> DateTime.from_naive!("America/New_York") |> Timex.Timezone.convert("Etc/UTC")
 
