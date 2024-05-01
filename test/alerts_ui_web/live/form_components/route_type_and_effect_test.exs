@@ -44,7 +44,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffectTest do
   end
 
   describe "save event" do
-    test " given a valid changset, sends a :create_alert event" do
+    test "given a valid changset, sends a :create_alert event" do
       assigns =
         @assigns
         |> Map.put(:selected_effect, "Detour")
@@ -64,7 +64,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffectTest do
                        }}}
     end
 
-    test " given an invalid changset, does not sends a :create_alert event" do
+    test "given an invalid changset, does not sends a :create_alert event" do
       {:ok, view, _html} = live_isolated_component(RouteTypeAndEffect, @assigns)
 
       view
