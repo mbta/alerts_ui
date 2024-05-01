@@ -72,17 +72,16 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
         existing_alert = insert(:alert, alert_id: "0")
 
-        alert_data =
-          %{
-            route_type: 1,
-            description_text: "ok",
-            header_text: "hello",
-            effect_name: "Delay",
-            route_ids: ["24", "27", "57"],
-            direction: "default",
-            active_period_start: ~N[2024-04-30 11:54:00],
-            active_period_end_specifier: :further_notice
-          }
+        alert_data = %{
+          route_type: 1,
+          description_text: "ok",
+          header_text: "hello",
+          effect_name: "Delay",
+          route_ids: ["24", "27", "57"],
+          direction: "default",
+          active_period_start: ~N[2024-04-30 11:54:00],
+          active_period_end_specifier: :further_notice
+        }
 
         result = AlertBuilder.build_alert(alert_data, :R)
 
@@ -135,17 +134,16 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
         existing_alert = insert(:alert, alert_id: "0")
 
-        alert_data =
-          %{
-            route_type: 2,
-            description_text: "ok",
-            header_text: "hello",
-            effect_name: "Delay",
-            route_ids: ["CapeFlyer"],
-            direction: "default",
-            active_period_start: ~N[2024-04-30 11:54:00],
-            active_period_end_specifier: :further_notice
-          }
+        alert_data = %{
+          route_type: 2,
+          description_text: "ok",
+          header_text: "hello",
+          effect_name: "Delay",
+          route_ids: ["CapeFlyer"],
+          direction: "default",
+          active_period_start: ~N[2024-04-30 11:54:00],
+          active_period_end_specifier: :further_notice
+        }
 
         result = AlertBuilder.build_alert(alert_data, :R)
 
@@ -282,17 +280,16 @@ defmodule AlertsUI.AlertBuilderTest do
 
     test "properly builds RDS all-stops informed entity with 1 route" do
       with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
-        alert_data =
-          %{
-            route_type: 3,
-            description_text: "ok",
-            header_text: "hello",
-            effect_name: "Delay",
-            stop_ids: [],
-            route_ids: ["57"],
-            trip_ids: nil,
-            direction: "default"
-          }
+        alert_data = %{
+          route_type: 3,
+          description_text: "ok",
+          header_text: "hello",
+          effect_name: "Delay",
+          stop_ids: [],
+          route_ids: ["57"],
+          trip_ids: nil,
+          direction: "default"
+        }
 
         result = AlertBuilder.build_alert(alert_data, :RDS)
 
@@ -309,17 +306,16 @@ defmodule AlertsUI.AlertBuilderTest do
 
     test "properly builds RDS all-stops informed entity with multiple routes" do
       with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
-        alert_data =
-          %{
-            route_type: 3,
-            description_text: "ok",
-            header_text: "hello",
-            effect_name: "Delay",
-            stop_ids: [],
-            route_ids: ["57", "58"],
-            trip_ids: nil,
-            direction: "default"
-          }
+        alert_data = %{
+          route_type: 3,
+          description_text: "ok",
+          header_text: "hello",
+          effect_name: "Delay",
+          stop_ids: [],
+          route_ids: ["57", "58"],
+          trip_ids: nil,
+          direction: "default"
+        }
 
         result = AlertBuilder.build_alert(alert_data, :RDS)
 
@@ -342,17 +338,16 @@ defmodule AlertsUI.AlertBuilderTest do
 
     test "properly builds RDS all-stops informed entity with one route and direction" do
       with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
-        alert_data =
-          %{
-            route_type: 3,
-            description_text: "ok",
-            header_text: "hello",
-            effect_name: "Delay",
-            stop_ids: [],
-            route_ids: ["57"],
-            trip_ids: nil,
-            direction: "1"
-          }
+        alert_data = %{
+          route_type: 3,
+          description_text: "ok",
+          header_text: "hello",
+          effect_name: "Delay",
+          stop_ids: [],
+          route_ids: ["57"],
+          trip_ids: nil,
+          direction: "1"
+        }
 
         result = AlertBuilder.build_alert(alert_data, :RDS)
 
@@ -369,17 +364,16 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "properly builds RDS informed entity with one route, multiple stops and direction" do
-      alert_data =
-        %{
-          route_type: 3,
-          description_text: "ok",
-          header_text: "hello",
-          effect_name: "Shuttle",
-          stop_ids: ["a", "b", "c"],
-          route_ids: ["57"],
-          trip_ids: nil,
-          direction: "1"
-        }
+      alert_data = %{
+        route_type: 3,
+        description_text: "ok",
+        header_text: "hello",
+        effect_name: "Shuttle",
+        stop_ids: ["a", "b", "c"],
+        route_ids: ["57"],
+        trip_ids: nil,
+        direction: "1"
+      }
 
       parent_stops = [%Stop{id: "a"}, %Stop{id: "b"}, %Stop{id: "c"}]
 
@@ -432,18 +426,17 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "RDS Bus detour with multiple stops" do
-      alert_data =
-        %{
-          direction: "0",
-          stop_ids: ["1", "2"],
-          route_type: 3,
-          route_ids: ["1"],
-          effect_name: "Detour",
-          trip_ids: [],
-          trip_information_by_id: %{},
-          description_text: "test",
-          header_text: "test"
-        }
+      alert_data = %{
+        direction: "0",
+        stop_ids: ["1", "2"],
+        route_type: 3,
+        route_ids: ["1"],
+        effect_name: "Detour",
+        trip_ids: [],
+        trip_information_by_id: %{},
+        description_text: "test",
+        header_text: "test"
+      }
 
       parent_stops = [%Stop{id: "1"}, %Stop{id: "2"}, %Stop{id: "3"}]
 
@@ -482,18 +475,17 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "RDS CR track change all trips" do
-      alert_data =
-        %{
-          route_type: 2,
-          effect_name: "Track Change",
-          route_ids: ["CR-Haverhill"],
-          direction: "0",
-          trip_ids: [],
-          trip_information_by_id: %{},
-          stop_ids: ["place-WR-0067", "place-WR-0075"],
-          header_text: "CR track change all trips",
-          description_text: "CR track change all trips"
-        }
+      alert_data = %{
+        route_type: 2,
+        effect_name: "Track Change",
+        route_ids: ["CR-Haverhill"],
+        direction: "0",
+        trip_ids: [],
+        trip_information_by_id: %{},
+        stop_ids: ["place-WR-0067", "place-WR-0075"],
+        header_text: "CR track change all trips",
+        description_text: "CR track change all trips"
+      }
 
       parent_stops = [%Stop{id: "place-WR-0067"}, %Stop{id: "place-WR-0075"}]
 
@@ -551,18 +543,17 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "RDS Subway shuttle at start of line" do
-      alert_data =
-        %{
-          route_type: 1,
-          effect_name: "Shuttle",
-          route_ids: ["Red"],
-          direction: "default",
-          stop_ids: ["place-alfcl", "place-davis", "place-portr"],
-          trip_ids: [],
-          trip_information_by_id: %{},
-          header_text: "Test 6",
-          description_text: "Test 6"
-        }
+      alert_data = %{
+        route_type: 1,
+        effect_name: "Shuttle",
+        route_ids: ["Red"],
+        direction: "default",
+        stop_ids: ["place-alfcl", "place-davis", "place-portr"],
+        trip_ids: [],
+        trip_information_by_id: %{},
+        header_text: "Test 6",
+        description_text: "Test 6"
+      }
 
       parent_stops = [
         %Stop{id: "place-alfcl"},
@@ -662,17 +653,16 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "properly builds RDS informed entity with multiple routes, multiple stops and direction" do
-      alert_data =
-        %{
-          route_type: 3,
-          description_text: "ok",
-          header_text: "hello",
-          effect_name: "Delay",
-          stop_ids: ["a", "b"],
-          route_ids: ["57", "58"],
-          trip_ids: nil,
-          direction: "1"
-        }
+      alert_data = %{
+        route_type: 3,
+        description_text: "ok",
+        header_text: "hello",
+        effect_name: "Delay",
+        stop_ids: ["a", "b"],
+        route_ids: ["57", "58"],
+        trip_ids: nil,
+        direction: "1"
+      }
 
       parent_stops = [%Stop{id: "a"}, %Stop{id: "b"}, %Stop{id: "c"}]
 
@@ -741,17 +731,16 @@ defmodule AlertsUI.AlertBuilderTest do
       kenmore_child = %Stop{id: "kenmore-child", parent_id: kenmore.id, vehicle_type: 1}
       fenway_child = %Stop{id: "fenway-child", parent_id: fenway.id, vehicle_type: 1}
 
-      alert_data =
-        %{
-          route_type: 1,
-          description_text: "ok",
-          header_text: "hello",
-          effect_name: "Delay",
-          stop_ids: ["place-hymnl", "place-kencl", "place-fenwy"],
-          route_ids: ["Green", "Green-D"],
-          trip_ids: nil,
-          direction: "1"
-        }
+      alert_data = %{
+        route_type: 1,
+        description_text: "ok",
+        header_text: "hello",
+        effect_name: "Delay",
+        stop_ids: ["place-hymnl", "place-kencl", "place-fenwy"],
+        route_ids: ["Green", "Green-D"],
+        trip_ids: nil,
+        direction: "1"
+      }
 
       with_mocks([
         {RoutePatternsRepo, [],
@@ -854,15 +843,14 @@ defmodule AlertsUI.AlertBuilderTest do
 
     test "properly builds R informed entity" do
       with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
-        alert_data =
-          %{
-            route_type: 3,
-            description_text: "ok",
-            header_text: "hello",
-            effect_name: "Delay",
-            route_ids: ["57", "58"],
-            direction: "default"
-          }
+        alert_data = %{
+          route_type: 3,
+          description_text: "ok",
+          header_text: "hello",
+          effect_name: "Delay",
+          route_ids: ["57", "58"],
+          direction: "default"
+        }
 
         result = AlertBuilder.build_alert(alert_data, :R)
 
@@ -885,15 +873,14 @@ defmodule AlertsUI.AlertBuilderTest do
 
     test "R informed entities expanding Green Line routes" do
       with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
-        alert_data =
-          %{
-            route_type: 1,
-            description_text: "ok",
-            header_text: "hello",
-            effect_name: "Delay",
-            route_ids: ["Red", "Green", "Green-D"],
-            direction: "default"
-          }
+        alert_data = %{
+          route_type: 1,
+          description_text: "ok",
+          header_text: "hello",
+          effect_name: "Delay",
+          route_ids: ["Red", "Green", "Green-D"],
+          direction: "default"
+        }
 
         result = AlertBuilder.build_alert(alert_data, :R)
 
@@ -934,15 +921,14 @@ defmodule AlertsUI.AlertBuilderTest do
 
     test "properly builds R informed entity with direction" do
       with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
-        alert_data =
-          %{
-            route_type: 3,
-            description_text: "ok",
-            header_text: "hello",
-            effect_name: "Delay",
-            route_ids: ["57", "58"],
-            direction: "1"
-          }
+        alert_data = %{
+          route_type: 3,
+          description_text: "ok",
+          header_text: "hello",
+          effect_name: "Delay",
+          route_ids: ["57", "58"],
+          direction: "1"
+        }
 
         result = AlertBuilder.build_alert(alert_data, :R)
 
@@ -967,15 +953,14 @@ defmodule AlertsUI.AlertBuilderTest do
 
     test "R informed entities with direction expanding Green Line routes" do
       with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
-        alert_data =
-          %{
-            route_type: 1,
-            description_text: "ok",
-            header_text: "hello",
-            effect_name: "Delay",
-            route_ids: ["Red", "Green", "Green-D"],
-            direction: "1"
-          }
+        alert_data = %{
+          route_type: 1,
+          description_text: "ok",
+          header_text: "hello",
+          effect_name: "Delay",
+          route_ids: ["Red", "Green", "Green-D"],
+          direction: "1"
+        }
 
         result = AlertBuilder.build_alert(alert_data, :R)
 
@@ -1021,20 +1006,19 @@ defmodule AlertsUI.AlertBuilderTest do
 
     test "properly builds RDT informed entity" do
       with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
-        alert_data =
-          %{
-            route_type: 3,
-            description_text: "ok",
-            header_text: "hello",
-            effect_name: "Delay",
-            route_ids: ["57"],
-            trip_ids: ["123", "345", "456"],
-            trip_information_by_id: %{
-              "123" => %{direction_id: 0, route_id: "57"},
-              "345" => %{direction_id: 0, route_id: "57"},
-              "456" => %{direction_id: 0, route_id: "57"}
-            }
+        alert_data = %{
+          route_type: 3,
+          description_text: "ok",
+          header_text: "hello",
+          effect_name: "Delay",
+          route_ids: ["57"],
+          trip_ids: ["123", "345", "456"],
+          trip_information_by_id: %{
+            "123" => %{direction_id: 0, route_id: "57"},
+            "345" => %{direction_id: 0, route_id: "57"},
+            "456" => %{direction_id: 0, route_id: "57"}
           }
+        }
 
         result = AlertBuilder.build_alert(alert_data, :RDT)
 
@@ -1078,20 +1062,19 @@ defmodule AlertsUI.AlertBuilderTest do
 
     test "properly builds RDT informed entity with multiple routes, multiple trips" do
       with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
-        alert_data =
-          %{
-            route_type: 3,
-            description_text: "ok",
-            header_text: "hello",
-            effect_name: "Delay",
-            route_ids: ["57", "58"],
-            trip_ids: ["123", "345", "456"],
-            trip_information_by_id: %{
-              "123" => %{direction_id: 0, route_id: "57"},
-              "345" => %{direction_id: 0, route_id: "57"},
-              "456" => %{direction_id: 0, route_id: "58"}
-            }
+        alert_data = %{
+          route_type: 3,
+          description_text: "ok",
+          header_text: "hello",
+          effect_name: "Delay",
+          route_ids: ["57", "58"],
+          trip_ids: ["123", "345", "456"],
+          trip_information_by_id: %{
+            "123" => %{direction_id: 0, route_id: "57"},
+            "345" => %{direction_id: 0, route_id: "57"},
+            "456" => %{direction_id: 0, route_id: "58"}
           }
+        }
 
         result = AlertBuilder.build_alert(alert_data, :RDT)
 
@@ -1135,16 +1118,15 @@ defmodule AlertsUI.AlertBuilderTest do
 
     test "properly builds RDT informed entity with 1 route, all trips" do
       with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
-        alert_data =
-          %{
-            route_type: 3,
-            description_text: "ok",
-            header_text: "hello",
-            effect_name: "Delay",
-            route_ids: ["57"],
-            trip_ids: [],
-            direction: "default"
-          }
+        alert_data = %{
+          route_type: 3,
+          description_text: "ok",
+          header_text: "hello",
+          effect_name: "Delay",
+          route_ids: ["57"],
+          trip_ids: [],
+          direction: "default"
+        }
 
         result = AlertBuilder.build_alert(alert_data, :RDT)
 
@@ -1161,22 +1143,21 @@ defmodule AlertsUI.AlertBuilderTest do
 
     test "RDTS informed entity with trips and no stops selected treated as RDT" do
       with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
-        alert_data =
-          %{
-            route_type: 3,
-            description_text: "ok",
-            header_text: "hello",
-            effect_name: "Delay",
-            route_ids: ["57"],
-            trip_ids: ["123", "345", "456"],
-            trip_information_by_id: %{
-              "123" => %{direction_id: 0, route_id: "57"},
-              "345" => %{direction_id: 0, route_id: "57"},
-              "456" => %{direction_id: 0, route_id: "57"}
-            },
-            stop_ids: [],
-            direction: "default"
-          }
+        alert_data = %{
+          route_type: 3,
+          description_text: "ok",
+          header_text: "hello",
+          effect_name: "Delay",
+          route_ids: ["57"],
+          trip_ids: ["123", "345", "456"],
+          trip_information_by_id: %{
+            "123" => %{direction_id: 0, route_id: "57"},
+            "345" => %{direction_id: 0, route_id: "57"},
+            "456" => %{direction_id: 0, route_id: "57"}
+          },
+          stop_ids: [],
+          direction: "default"
+        }
 
         result = AlertBuilder.build_alert(alert_data, :RDTS)
 
@@ -1219,18 +1200,17 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "RDTS informed entity with stops and no trips selected treated as RDS" do
-      alert_data =
-        %{
-          route_type: 3,
-          description_text: "ok",
-          header_text: "hello",
-          effect_name: "Delay",
-          route_ids: ["57"],
-          trip_ids: [],
-          trip_information_by_id: %{},
-          stop_ids: ["a", "b", "c"],
-          direction: "0"
-        }
+      alert_data = %{
+        route_type: 3,
+        description_text: "ok",
+        header_text: "hello",
+        effect_name: "Delay",
+        route_ids: ["57"],
+        trip_ids: [],
+        trip_information_by_id: %{},
+        stop_ids: ["a", "b", "c"],
+        direction: "0"
+      }
 
       parent_stops = [
         %Stop{id: "a", vehicle_type: 3},
@@ -1288,17 +1268,16 @@ defmodule AlertsUI.AlertBuilderTest do
 
     test "RDTS informed entity with no stops and no trips selected treated as R" do
       with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
-        alert_data =
-          %{
-            route_type: 3,
-            description_text: "ok",
-            header_text: "hello",
-            effect_name: "Delay",
-            route_ids: ["57", "58"],
-            trip_ids: [],
-            stop_ids: [],
-            direction: "default"
-          }
+        alert_data = %{
+          route_type: 3,
+          description_text: "ok",
+          header_text: "hello",
+          effect_name: "Delay",
+          route_ids: ["57", "58"],
+          trip_ids: [],
+          stop_ids: [],
+          direction: "default"
+        }
 
         result = AlertBuilder.build_alert(alert_data, :RDTS)
 
@@ -1320,20 +1299,19 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "RDTS informed entity with trips and stops is build properly" do
-      alert_data =
-        %{
-          route_type: 2,
-          effect_name: "Delay",
-          route_ids: ["CR-Fitchburg"],
-          direction: "default",
-          trip_ids: ["default", "CR-627754-435"],
-          trip_information_by_id: %{
-            "CR-627754-435" => %{direction_id: 0, route_id: "CR-Fitchburg"}
-          },
-          stop_ids: ["place-FR-0201", "place-FR-0219"],
-          header_text: "t",
-          description_text: "t"
-        }
+      alert_data = %{
+        route_type: 2,
+        effect_name: "Delay",
+        route_ids: ["CR-Fitchburg"],
+        direction: "default",
+        trip_ids: ["default", "CR-627754-435"],
+        trip_information_by_id: %{
+          "CR-627754-435" => %{direction_id: 0, route_id: "CR-Fitchburg"}
+        },
+        stop_ids: ["place-FR-0201", "place-FR-0219"],
+        header_text: "t",
+        description_text: "t"
+      }
 
       parent_stops = [%Stop{id: "place-FR-0201"}, %Stop{id: "place-FR-0219"}]
 
@@ -1406,20 +1384,19 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "RDTS CR track change 1 trip" do
-      alert_data =
-        %{
-          route_type: 2,
-          effect_name: "Track Change",
-          description_text: "CR track change",
-          header_text: "CR track change",
-          route_ids: ["CR-Haverhill"],
-          direction: "0",
-          trip_ids: ["default", "CR-627678-295"],
-          trip_information_by_id: %{
-            "CR-627678-295" => %{direction_id: 0, route_id: "CR-Haverhill"}
-          },
-          stop_ids: ["place-WR-0067", "place-WR-0075"]
-        }
+      alert_data = %{
+        route_type: 2,
+        effect_name: "Track Change",
+        description_text: "CR track change",
+        header_text: "CR track change",
+        route_ids: ["CR-Haverhill"],
+        direction: "0",
+        trip_ids: ["default", "CR-627678-295"],
+        trip_information_by_id: %{
+          "CR-627678-295" => %{direction_id: 0, route_id: "CR-Haverhill"}
+        },
+        stop_ids: ["place-WR-0067", "place-WR-0075"]
+      }
 
       parent_stops = [%Stop{id: "place-WR-0067"}, %Stop{id: "place-WR-0075"}]
 
@@ -1481,20 +1458,19 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "RDTS CR delay does not include duplicate informed entities" do
-      alert_data =
-        %{
-          route_type: 2,
-          effect_name: "Track Change",
-          description_text: "CR track change",
-          header_text: "CR track change",
-          route_ids: ["CR-Haverhill"],
-          direction: "0",
-          trip_ids: ["default", "CR-627678-295"],
-          trip_information_by_id: %{
-            "CR-627678-295" => %{direction_id: 0, route_id: "CR-Haverhill"}
-          },
-          stop_ids: ["place-WR-0067", "place-WR-0075"]
-        }
+      alert_data = %{
+        route_type: 2,
+        effect_name: "Track Change",
+        description_text: "CR track change",
+        header_text: "CR track change",
+        route_ids: ["CR-Haverhill"],
+        direction: "0",
+        trip_ids: ["default", "CR-627678-295"],
+        trip_information_by_id: %{
+          "CR-627678-295" => %{direction_id: 0, route_id: "CR-Haverhill"}
+        },
+        stop_ids: ["place-WR-0067", "place-WR-0075"]
+      }
 
       parent_stops = [%Stop{id: "place-WR-0067"}, %Stop{id: "place-WR-0075"}]
 
@@ -1558,20 +1534,19 @@ defmodule AlertsUI.AlertBuilderTest do
     test "RDTS CR delay does not include child stops for other direction than trip" do
       trip_id = "CR-627754-435"
 
-      alert_data =
-        %{
-          route_type: 2,
-          effect_name: "Delay",
-          description_text: "CR delay",
-          header_text: "CR delay",
-          route_ids: ["CR-Fitchburg"],
-          direction: "default",
-          trip_ids: ["default", trip_id],
-          trip_information_by_id: %{
-            trip_id => %{direction_id: 0, route_id: "CR-Fitchburg"}
-          },
-          stop_ids: ["place-FR-0201", "place-FR-0219"]
-        }
+      alert_data = %{
+        route_type: 2,
+        effect_name: "Delay",
+        description_text: "CR delay",
+        header_text: "CR delay",
+        route_ids: ["CR-Fitchburg"],
+        direction: "default",
+        trip_ids: ["default", trip_id],
+        trip_information_by_id: %{
+          trip_id => %{direction_id: 0, route_id: "CR-Fitchburg"}
+        },
+        stop_ids: ["place-FR-0201", "place-FR-0219"]
+      }
 
       parent_stops = [%Stop{id: "place-FR-0201"}, %Stop{id: "place-FR-0219"}]
 
@@ -1639,17 +1614,16 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "SR informed entity routes and stops includes route type" do
-      alert_data =
-        %{
-          route_type: 1,
-          description_text: "ok",
-          header_text: "hello",
-          effect_name: "Delay",
-          route_ids: ["56", "57", "58"],
-          route_types_by_id: %{"56" => 1, "57" => 3, "58" => 1},
-          stop_ids: ["a", "b"],
-          direction: "default"
-        }
+      alert_data = %{
+        route_type: 1,
+        description_text: "ok",
+        header_text: "hello",
+        effect_name: "Delay",
+        route_ids: ["56", "57", "58"],
+        route_types_by_id: %{"56" => 1, "57" => 3, "58" => 1},
+        stop_ids: ["a", "b"],
+        direction: "default"
+      }
 
       parent_stops = [%Stop{id: "a"}, %Stop{id: "b"}]
 
@@ -1727,17 +1701,16 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "SR informed entity when stop has no child stops" do
-      alert_data =
-        %{
-          stop_ids: ["Boat-Charlestown"],
-          route_type: 4,
-          route_ids: ["Boat-F4"],
-          effect_name: "Dock Closure",
-          description_text: "b",
-          draft: nil,
-          header_text: "a",
-          route_types_by_id: %{"Boat-F4" => 4}
-        }
+      alert_data = %{
+        stop_ids: ["Boat-Charlestown"],
+        route_type: 4,
+        route_ids: ["Boat-F4"],
+        effect_name: "Dock Closure",
+        description_text: "b",
+        draft: nil,
+        header_text: "a",
+        route_types_by_id: %{"Boat-F4" => 4}
+      }
 
       parent_stops = [%Stop{id: "Boat-Charlestown"}]
 
@@ -1768,17 +1741,16 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "SR informed entity expanding Green Line routes" do
-      alert_data =
-        %{
-          route_type: 0,
-          description_text: "ok",
-          header_text: "hello",
-          effect_name: "Delay",
-          route_ids: ["Green", "Green-D"],
-          route_types_by_id: %{"Green" => 0, "Green-D" => 0},
-          stop_ids: ["place-hymnl", "place-kencl", "place-fenwy"],
-          direction: "default"
-        }
+      alert_data = %{
+        route_type: 0,
+        description_text: "ok",
+        header_text: "hello",
+        effect_name: "Delay",
+        route_ids: ["Green", "Green-D"],
+        route_types_by_id: %{"Green" => 0, "Green-D" => 0},
+        stop_ids: ["place-hymnl", "place-kencl", "place-fenwy"],
+        direction: "default"
+      }
 
       hynes = %Stop{id: "place-hymnl"}
       kenmore = %Stop{id: "place-kencl"}
@@ -1869,17 +1841,16 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "SR CR Station Issue" do
-      alert_data =
-        %{
-          route_type: 2,
-          route_ids: ["CR-Kingston"],
-          stop_ids: ["place-PB-0194"],
-          effect_name: "Station Issue",
-          header_text: "Test 10",
-          description_text: "Test 10",
-          draft: nil,
-          route_types_by_id: %{"CR-Kingston" => 2}
-        }
+      alert_data = %{
+        route_type: 2,
+        route_ids: ["CR-Kingston"],
+        stop_ids: ["place-PB-0194"],
+        effect_name: "Station Issue",
+        header_text: "Test 10",
+        description_text: "Test 10",
+        draft: nil,
+        route_types_by_id: %{"CR-Kingston" => 2}
+      }
 
       parent_stops = [%Stop{id: "place-PB-0194"}]
 
