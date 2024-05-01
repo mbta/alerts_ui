@@ -110,7 +110,7 @@ defmodule AlertsUI.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:tzdata, "~> 1.1"},
       {:ueberauth, "~> 0.10"},
-      {:ueberauth_oidcc, "~> 0.4.0-pre.5"}
+      {:ueberauth_oidcc, "~> 0.4"}
     ]
   end
 
