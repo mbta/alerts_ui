@@ -67,6 +67,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         effect_detail: "ACCESS_ISSUE",
         header_text: "cool header text",
         description_text: "description text",
+        active_period_start: ~U[2024-05-02 16:09:34.007545Z],
+        active_period_end: ~U[2024-05-04 01:09:34.007545Z],
+        active_period: [
+          %{start: ~U[2024-05-02 16:09:34.007545Z], end: ~U[2024-05-04 01:09:34.007545Z]}
+        ],
+        duration_certainty: :KNOWN,
         informed_entity: [
           %{route_type: 3, route_id: "1", direction_id: 0},
           %{route_type: 3, route_id: "2", stop_id: "a2"},
@@ -84,8 +90,64 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                stop_ids: ["a2", "a3"],
                trip_ids: ["b1"],
                header_text: "cool header text",
-               description_text: "description text"
+               description_text: "description text",
+               active_period_end_specifier: :pick,
+               active_period_end: ~N[2024-05-03 21:09:34],
+               active_period_start: ~N[2024-05-02 12:09:34]
              }
+    end
+
+    test "handles unknown duration" do
+      insert(:alert, %{
+        alert_id: "1",
+        effect: :ACCESSIBILITY_ISSUE,
+        effect_detail: "ACCESS_ISSUE",
+        header_text: "cool header text",
+        description_text: "description text",
+        informed_entity: [],
+        active_period_start: ~U[2024-05-02 16:09:34.007545Z],
+        active_period_end: nil,
+        active_period: [%{start: ~U[2024-05-02 16:09:34.007545Z], end: nil}],
+        duration_certainty: :UNKNOWN
+      })
+
+      assert AlertData.build_alert_data("1").active_period_end_specifier == :further_notice
+    end
+
+    test "handles estimated duration" do
+      insert(:alert, %{
+        alert_id: "1",
+        effect: :ACCESSIBILITY_ISSUE,
+        effect_detail: "ACCESS_ISSUE",
+        header_text: "cool header text",
+        description_text: "description text",
+        informed_entity: [],
+        active_period_start: ~U[2024-05-02 16:09:34.007545Z],
+        active_period_end: nil,
+        active_period: [%{start: ~U[2024-05-02 16:09:34.007545Z], end: nil}],
+        duration_certainty: :ESTIMATED
+      })
+
+      assert AlertData.build_alert_data("1").active_period_end_specifier == :later_today
+    end
+
+    test "handles known end-of-service duration" do
+      insert(:alert, %{
+        alert_id: "1",
+        effect: :ACCESSIBILITY_ISSUE,
+        effect_detail: "ACCESS_ISSUE",
+        header_text: "cool header text",
+        description_text: "description text",
+        informed_entity: [],
+        active_period_start: ~U[2024-05-02 16:09:34.007545Z],
+        active_period_end: ~U[2024-05-03 06:30:00.007545Z],
+        active_period: [
+          %{start: ~U[2024-05-02 16:09:34.007545Z], end: ~U[2024-05-03 06:30:00.007545Z]}
+        ],
+        duration_certainty: :KNOWN
+      })
+
+      assert AlertData.build_alert_data("1").active_period_end_specifier == :end_of_service_today
     end
   end
 end
