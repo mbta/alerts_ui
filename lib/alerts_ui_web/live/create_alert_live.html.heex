@@ -17,6 +17,7 @@
       />
 
       <.live_component
+        :if={@combination != nil}
         module={if @combination === :SR, do: StopRouteAffectedService, else: AffectedService}
         id="affected_service"
         progress={@progress}
@@ -27,6 +28,13 @@
         available_schedules={@available_schedules}
         available_stops={@available_stops}
         editing={@editing}
+      />
+      <.live_component
+        :if={@combination == nil}
+        module={SystemwideAffectedService}
+        id="systemwide-affected-service"
+        progress={@progress}
+        alert_data={@alert_data}
       />
       <.live_component
         module={TimeRange}

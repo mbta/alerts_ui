@@ -32,6 +32,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
     RouteTypeAndEffect,
     StopRouteAffectedService,
     SuccessfulSubmission,
+    SystemwideAffectedService,
     Timeline,
     TimeRange
   }
