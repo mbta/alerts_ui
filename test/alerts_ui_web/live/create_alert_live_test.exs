@@ -6,7 +6,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
   import Ecto.Changeset
   import Mock
   import Test.Support.Helpers
-  alias AlertsUIWeb.FormComponents.{AffectedService, AlertDetails, RouteTypeAndEffect}
+  alias AlertsUIWeb.FormComponents.{AffectedService, AlertDetails, RouteTypeAndEffect, TimeRange}
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
   alias MBTAV3API.Stops.Repo, as: StopsRepo
@@ -93,7 +93,17 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
         send(view.pid, {:section_completed, service_changeset})
 
-        # Submit the second part
+        # Submit time range
+        {:ok, time_range_changeset} =
+          Ecto.Changeset.change(%TimeRange{
+            active_period_end_specifier: :later_today,
+            active_period_start: ~N[2024-04-30 11:54:00]
+          })
+          |> apply_action(:insert)
+
+        send(view.pid, {:section_completed, time_range_changeset})
+
+        # Submit details
         {:ok, details_changeset} =
           Ecto.Changeset.change(%AlertDetails{
             header_text: "Test header",

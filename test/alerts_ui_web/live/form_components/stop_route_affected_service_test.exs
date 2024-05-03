@@ -11,7 +11,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
   alias MBTAV3API.Stops.Repo, as: StopsRepo
 
   @assigns %{
-    id: "details",
+    id: "affected_service",
     progress: %Step{
       name: "details",
       previous: "route_type_and_effect",

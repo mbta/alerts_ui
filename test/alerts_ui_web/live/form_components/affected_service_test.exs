@@ -13,9 +13,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
   alias MBTAV3API.Stops.Stop
 
   @assigns %{
-    id: "details",
+    id: "affected_service",
     progress: %Step{
-      name: "details",
+      name: "affected_service",
       previous: "route_type_and_effect",
       next: "success",
       label: "Alert Details"

@@ -12,7 +12,7 @@ defmodule AlertsUIWeb.FormComponents.SuccessfulSubmissionTest do
   @uuid Ecto.UUID.generate()
 
   @assigns %{
-    id: "details",
+    id: "success",
     progress: %Step{name: "success", previous: nil, next: nil, label: "Success"},
     show_created_alert: false,
     alert_uuid: @uuid

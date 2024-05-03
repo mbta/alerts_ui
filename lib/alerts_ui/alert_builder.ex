@@ -22,10 +22,19 @@ defmodule AlertsUI.AlertBuilder do
           route_ids: [Route.id_t()],
           stop_ids: [Stop.id_t()],
           child_stops_with_context: [stop_with_context_t()] | [],
-          trip_ids: [String.t()]
+          trip_ids: [String.t()],
+          active_period_start: DateTime.t(),
+          active_period_end_specifier: atom(),
+          active_period_end: DateTime.t()
         }
   @type direction_t :: 0 | 1
   @type stop_with_context_t :: {Stop.t(), Route.id_t(), direction_t(), RoutePattern.stop_type()}
+  @type active_period_data_t :: %{
+          active_period: [any()],
+          active_period_start: DateTime.t(),
+          active_period_end: DateTime.t() | nil,
+          duration_certainty: atom()
+        }
 
   @spec build_alert(map(), ServiceEffectCombinations.service_effect_combination()) ::
           map()
@@ -49,6 +58,13 @@ defmodule AlertsUI.AlertBuilder do
         child_stops_with_context(route_ids, direction_id, stop_ids)
       )
 
+    active_period_map =
+      build_active_period(%{
+        active_period_start: Map.get(alert_data, :active_period_start),
+        active_period_end: Map.get(alert_data, :active_period_end),
+        active_period_end_specifier: Map.get(alert_data, :active_period_end_specifier)
+      })
+
     %{
       header_text: Map.get(alert_data, :header_text),
       description_text: Map.get(alert_data, :description_text),
@@ -57,6 +73,7 @@ defmodule AlertsUI.AlertBuilder do
       draft: Map.get(alert_data, :draft, false),
       informed_entity: build_informed_entities(combination, alert_data, effect_name)
     }
+    |> Map.merge(active_period_map)
   end
 
   @spec add_combo_route_ids([Route.id_t()]) :: [Route.id_t()]
@@ -163,6 +180,93 @@ defmodule AlertsUI.AlertBuilder do
       }
     end)
   end
+
+  @spec build_active_period(%{
+          active_period_start: NaiveDateTime.t() | nil,
+          active_period_end: NaiveDateTime.t() | nil,
+          active_period_end_specifier: atom() | nil
+        }) :: active_period_data_t() | %{}
+  defp build_active_period(%{active_period_start: nil}), do: %{}
+
+  defp build_active_period(%{
+         active_period_start: naive_start,
+         active_period_end_specifier: :later_today
+       }) do
+    utc_start =
+      naive_start |> eastern_naive_to_utc
+
+    %{
+      active_period_start: utc_start,
+      active_period_end: nil,
+      active_period: [%{start: utc_start, end: nil}],
+      duration_certainty: :ESTIMATED
+    }
+  end
+
+  defp build_active_period(%{
+         active_period_start: naive_start,
+         active_period_end_specifier: :further_notice
+       }) do
+    utc_start =
+      naive_start |> eastern_naive_to_utc
+
+    %{
+      active_period_start: utc_start,
+      active_period_end: nil,
+      active_period: [%{start: utc_start, end: nil}],
+      duration_certainty: :UNKNOWN
+    }
+  end
+
+  defp build_active_period(%{
+         active_period_start: naive_start,
+         active_period_end_specifier: :end_of_service_today
+       }) do
+    eastern_start = naive_start |> DateTime.from_naive!("America/New_York")
+    utc_start = eastern_start |> Timex.Timezone.convert("Etc/UTC")
+    # Sets the end date of the active period to the next instance of 2:30 AM.
+    # Checks if start time is after 2:30am (Eastern). If true, end date is the next day. If false, end date is same day.
+    end_date =
+      if Time.after?(DateTime.to_time(eastern_start), ~T[02:30:00]) do
+        Date.add(NaiveDateTime.to_date(naive_start), 1)
+      else
+        NaiveDateTime.to_date(naive_start)
+      end
+
+    utc_end =
+      DateTime.new!(end_date, ~T[02:30:00], "America/New_York")
+      |> Timex.Timezone.convert("Etc/UTC")
+
+    %{
+      active_period_start: utc_start,
+      active_period_end: utc_end,
+      active_period: [%{start: utc_start, end: utc_end}],
+      duration_certainty: :KNOWN
+    }
+  end
+
+  defp build_active_period(%{
+         active_period_start: naive_start,
+         active_period_end_specifier: :pick,
+         active_period_end: naive_end
+       }) do
+    utc_start =
+      naive_start |> eastern_naive_to_utc
+
+    utc_end =
+      naive_end |> eastern_naive_to_utc
+
+    %{
+      active_period_start: utc_start,
+      active_period_end: utc_end,
+      active_period: [%{start: utc_start, end: utc_end}],
+      duration_certainty: :KNOWN
+    }
+  end
+
+  defp eastern_naive_to_utc(naive_time),
+    do:
+      naive_time |> DateTime.from_naive!("America/New_York") |> Timex.Timezone.convert("Etc/UTC")
 
   @spec build_informed_entities(
           ServiceEffectCombinations.service_effect_combination() | nil,
