@@ -89,7 +89,10 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
               {"pick a date and time", :pick}
             ]}
           />
-          <div class={unless @form.params["active_period_end_specifier"] == "pick", do: "hidden"}>
+          <div
+            id="end-selector-div"
+            class={unless @form.params["active_period_end_specifier"] == "pick", do: "hidden"}
+          >
             <.input
               id="end-selector"
               type="datetime-local"

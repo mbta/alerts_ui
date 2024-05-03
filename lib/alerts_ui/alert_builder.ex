@@ -181,15 +181,19 @@ defmodule AlertsUI.AlertBuilder do
     end)
   end
 
-  @spec build_active_period(map()) :: active_period_data_t() | %{}
+  @spec build_active_period(%{
+          active_period_start: NaiveDateTime.t() | nil,
+          active_period_end: NaiveDateTime.t() | nil,
+          active_period_end_specifier: atom() | nil
+        }) :: active_period_data_t() | %{}
   defp build_active_period(%{active_period_start: nil}), do: %{}
 
   defp build_active_period(%{
-         active_period_start: start,
+         active_period_start: naive_start,
          active_period_end_specifier: :later_today
        }) do
     utc_start =
-      start |> DateTime.from_naive!("America/New_York") |> Timex.Timezone.convert("Etc/UTC")
+      naive_start |> eastern_naive_to_utc
 
     %{
       active_period_start: utc_start,
@@ -200,11 +204,11 @@ defmodule AlertsUI.AlertBuilder do
   end
 
   defp build_active_period(%{
-         active_period_start: start,
+         active_period_start: naive_start,
          active_period_end_specifier: :further_notice
        }) do
     utc_start =
-      start |> DateTime.from_naive!("America/New_York") |> Timex.Timezone.convert("Etc/UTC")
+      naive_start |> eastern_naive_to_utc
 
     %{
       active_period_start: utc_start,
@@ -215,18 +219,18 @@ defmodule AlertsUI.AlertBuilder do
   end
 
   defp build_active_period(%{
-         active_period_start: start,
+         active_period_start: naive_start,
          active_period_end_specifier: :end_of_service_today
        }) do
-    eastern_start = start |> DateTime.from_naive!("America/New_York")
+    eastern_start = naive_start |> DateTime.from_naive!("America/New_York")
     utc_start = eastern_start |> Timex.Timezone.convert("Etc/UTC")
     # Sets the end date of the active period to the next instance of 2:30 AM.
     # Checks if start time is after 2:30am (Eastern). If true, end date is the next day. If false, end date is same day.
     end_date =
       if Time.after?(DateTime.to_time(eastern_start), ~T[02:30:00]) do
-        Date.add(NaiveDateTime.to_date(start), 1)
+        Date.add(NaiveDateTime.to_date(naive_start), 1)
       else
-        NaiveDateTime.to_date(start)
+        NaiveDateTime.to_date(naive_start)
       end
 
     utc_end =
@@ -242,15 +246,15 @@ defmodule AlertsUI.AlertBuilder do
   end
 
   defp build_active_period(%{
-         active_period_start: start,
+         active_period_start: naive_start,
          active_period_end_specifier: :pick,
          active_period_end: naive_end
        }) do
     utc_start =
-      start |> DateTime.from_naive!("America/New_York") |> Timex.Timezone.convert("Etc/UTC")
+      naive_start |> eastern_naive_to_utc
 
     utc_end =
-      naive_end |> DateTime.from_naive!("America/New_York") |> Timex.Timezone.convert("Etc/UTC")
+      naive_end |> eastern_naive_to_utc
 
     %{
       active_period_start: utc_start,
@@ -259,6 +263,10 @@ defmodule AlertsUI.AlertBuilder do
       duration_certainty: :KNOWN
     }
   end
+
+  defp eastern_naive_to_utc(naive_time),
+    do:
+      naive_time |> DateTime.from_naive!("America/New_York") |> Timex.Timezone.convert("Etc/UTC")
 
   @spec build_informed_entities(
           ServiceEffectCombinations.service_effect_combination() | nil,

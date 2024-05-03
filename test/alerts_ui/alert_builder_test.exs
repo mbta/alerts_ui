@@ -14,7 +14,7 @@ defmodule AlertsUI.AlertBuilderTest do
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
 
-  @route_data %{
+  @alert_data %{
     route_type: 1,
     description_text: "ok",
     header_text: "hello",
@@ -182,7 +182,7 @@ defmodule AlertsUI.AlertBuilderTest do
             active_period_end: nil,
             active_period_end_specifier: :later_today
           }
-          |> Map.merge(@route_data)
+          |> Map.merge(@alert_data)
 
         result = AlertBuilder.build_alert(alert_data, :R)
 
@@ -201,7 +201,7 @@ defmodule AlertsUI.AlertBuilderTest do
             active_period_end: nil,
             active_period_end_specifier: :further_notice
           }
-          |> Map.merge(@route_data)
+          |> Map.merge(@alert_data)
 
         result = AlertBuilder.build_alert(alert_data, :R)
 
@@ -220,7 +220,7 @@ defmodule AlertsUI.AlertBuilderTest do
             active_period_end: ~N[2024-04-30 23:54:00],
             active_period_end_specifier: :pick
           }
-          |> Map.merge(@route_data)
+          |> Map.merge(@alert_data)
 
         result = AlertBuilder.build_alert(alert_data, :R)
 
@@ -242,7 +242,7 @@ defmodule AlertsUI.AlertBuilderTest do
             active_period_end: nil,
             active_period_end_specifier: :end_of_service_today
           }
-          |> Map.merge(@route_data)
+          |> Map.merge(@alert_data)
 
         result = AlertBuilder.build_alert(alert_data, :R)
 
@@ -264,7 +264,7 @@ defmodule AlertsUI.AlertBuilderTest do
             active_period_end: nil,
             active_period_end_specifier: :end_of_service_today
           }
-          |> Map.merge(@route_data)
+          |> Map.merge(@alert_data)
 
         result = AlertBuilder.build_alert(alert_data, :R)
 

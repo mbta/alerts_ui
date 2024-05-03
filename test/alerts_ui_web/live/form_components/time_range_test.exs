@@ -31,14 +31,14 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         )
 
       assert view
-             |> render() =~ "hidden"
+             |> render() =~ ~s(id=\"end-selector-div\" class=\"hidden\")
 
       view
       |> element("form")
       |> render_change(%{"time_range" => %{"active_period_end_specifier" => "pick"}})
 
       refute view
-             |> render() =~ "hidden"
+             |> render() =~ ~s(id=\"end-selector-div\" class=\"hidden\")
     end
 
     test "it sends section_completed if no error in changeset" do
