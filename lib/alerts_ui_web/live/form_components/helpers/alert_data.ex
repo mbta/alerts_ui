@@ -76,7 +76,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   def determine_specifier(ap_end, :KNOWN) when not is_nil(ap_end) do
     case NaiveDateTime.to_time(ap_end) == ~T[02:30:00] do
       true -> :end_of_service_today
-      false -> :pick
+      false -> :pick_a_date_and_time
     end
   end
 end

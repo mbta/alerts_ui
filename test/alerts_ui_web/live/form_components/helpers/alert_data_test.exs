@@ -91,7 +91,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                trip_ids: ["b1"],
                header_text: "cool header text",
                description_text: "description text",
-               active_period_end_specifier: :pick,
+               active_period_end_specifier: :pick_a_date_and_time,
                active_period_end: ~N[2024-05-03 21:09:34],
                active_period_start: ~N[2024-05-02 12:09:34]
              }

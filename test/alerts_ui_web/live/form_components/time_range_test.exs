@@ -15,7 +15,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       next: "success",
       label: "Time Range"
     },
-    alert_data: %{}
+    alert_data: %{},
+    editing: false
   }
 
   describe "component" do
@@ -23,7 +24,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       assert render_component(TimeRange, @assigns) =~ ~s(id="time_range_form")
     end
 
-    test "enddat picker only populated if pick option selected" do
+    test "enddate picker only populated if pick option selected" do
       {:ok, view, _html} =
         live_isolated_component(
           TimeRange,
@@ -35,10 +36,32 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
       view
       |> element("form")
-      |> render_change(%{"time_range" => %{"active_period_end_specifier" => "pick"}})
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end_specifier" => "pick_a_date_and_time"
+        }
+      })
 
       refute view
              |> render() =~ ~s(id=\"end-selector-div\" class=\"hidden\")
+    end
+
+    test "works if editing" do
+      {:ok, view, _html} =
+        live_isolated_component(
+          TimeRange,
+          @assigns
+          |> Map.merge(%{
+            editing: true,
+            alert_data: %{
+              active_period_start: ~N[2024-04-30 11:54:00],
+              active_period_end_specifier: :pick_a_date_and_time
+            }
+          })
+        )
+
+      assert view
+             |> render() =~ "pick a date and time"
     end
 
     test "it sends section_completed if no error in changeset" do
@@ -50,7 +73,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       |> render_change(%{
         "time_range" => %{
           "active_period_end" => "2024-05-01T09:54",
-          "active_period_end_specifier" => "pick",
+          "active_period_end_specifier" => "pick_a_date_and_time",
           "active_period_start" => "2024-05-01T08:54"
         }
       })
@@ -59,7 +82,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
                       {:section_completed,
                        %TimeRange{
                          active_period_end: ~N[2024-05-01 09:54:00],
-                         active_period_end_specifier: :pick,
+                         active_period_end_specifier: :pick_a_date_and_time,
                          active_period_start: ~N[2024-05-01 08:54:00]
                        }}}
     end

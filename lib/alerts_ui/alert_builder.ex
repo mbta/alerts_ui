@@ -247,7 +247,7 @@ defmodule AlertsUI.AlertBuilder do
 
   defp build_active_period(%{
          active_period_start: naive_start,
-         active_period_end_specifier: :pick,
+         active_period_end_specifier: :pick_a_date_and_time,
          active_period_end: naive_end
        }) do
     utc_start =

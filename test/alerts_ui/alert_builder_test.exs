@@ -218,7 +218,7 @@ defmodule AlertsUI.AlertBuilderTest do
           %{
             active_period_start: ~N[2024-04-30 11:54:00],
             active_period_end: ~N[2024-04-30 23:54:00],
-            active_period_end_specifier: :pick
+            active_period_end_specifier: :pick_a_date_and_time
           }
           |> Map.merge(@alert_data)
 
