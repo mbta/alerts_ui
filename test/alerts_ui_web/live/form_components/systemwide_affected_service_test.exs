@@ -17,7 +17,8 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedServiceTest do
       next: "success",
       label: "Alert Details"
     },
-    alert_data: %{route_type: nil, effect_name: "Suspension"}
+    alert_data: %{route_type: nil, effect_name: "Suspension"},
+    editing: false
   }
 
   describe "component" do
@@ -37,6 +38,17 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedServiceTest do
 
       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
                       {:section_completed, %SystemwideAffectedService{service_types: [3]}}}
+    end
+
+    test "renders while editing an existing alerts" do
+      alert_data = Map.put(@assigns.alert_data, :service_types, [3])
+      assigns = %{@assigns | alert_data: alert_data, editing: true}
+
+      {:ok, view, _html} = live_isolated_component(SystemwideAffectedService, assigns)
+
+      assert view
+             |> element("select#systemwide_affected_service_service_types")
+             |> render() =~ ~s(<option selected="selected" value="3">Bus</option>)
     end
   end
 

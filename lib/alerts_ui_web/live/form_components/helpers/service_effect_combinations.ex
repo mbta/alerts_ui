@@ -132,6 +132,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations do
     |> Enum.map_join(fn {k, _v} -> k end)
     |> String.to_atom()
     |> case do
+      :"" -> nil
       :RS -> :SR
       other -> other
     end

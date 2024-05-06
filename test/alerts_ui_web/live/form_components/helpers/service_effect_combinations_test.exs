@@ -65,5 +65,15 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinationsTest do
       result = ServiceEffectCombinations.get_combination(informed_entity)
       assert result == :RDTS
     end
+
+    test "systemwide" do
+      informed_entity = [
+        build(:informed_entity, %{route_id: nil, trip: nil})
+      ]
+
+      result = ServiceEffectCombinations.get_combination(informed_entity)
+
+      assert result == nil
+    end
   end
 end

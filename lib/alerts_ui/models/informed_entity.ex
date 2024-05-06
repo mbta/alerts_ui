@@ -27,7 +27,7 @@ defmodule AlertsUI.Models.InformedEntity do
           agency_id: String.t() | nil,
           route_id: String.t() | nil,
           facility_id: String.t() | nil,
-          route_type: integer() | nil,
+          route_type: Route.type_int() | nil,
           direction_id: integer() | nil,
           stop_id: String.t() | nil,
           activities: [atom()] | nil,
@@ -63,6 +63,42 @@ defmodule AlertsUI.Models.InformedEntity do
         changeset
     end
   end
+
+  @doc """
+  The Route ID for this Informed Entity
+
+    ## Examples
+      iex> InformedEntity.route_id(%InformedEntity{route_id: "1"})
+      "1"
+      iex> InformedEntity.route_id(%InformedEntity{})
+      nil
+  """
+  @spec route_id(t()) :: String.t() | nil
+  def route_id(%__MODULE__{route_id: route_id}), do: route_id
+
+  @doc """
+  Whether this Informed Entity contains a Route ID
+
+    ## Examples
+      iex> InformedEntity.route_id?(%InformedEntity{route_id: "1"})
+      true
+      iex> InformedEntity.route_id?(%InformedEntity{})
+      false
+  """
+  @spec route_id?(t()) :: boolean()
+  def route_id?(%__MODULE__{route_id: route_id}), do: !is_nil(route_id)
+
+  @doc """
+  The route type for this Informed Entity
+
+    ## Examples
+      iex> InformedEntity.route_type(%InformedEntity{route_type: 3})
+      3
+      iex> InformedEntity.route_type(%InformedEntity{})
+      nil
+  """
+  @spec route_type(t()) :: Route.type_int() | nil
+  def route_type(%__MODULE__{route_type: route_type}), do: route_type
 
   @spec facility_activities :: [atom()]
   def facility_activities, do: @facility_activities

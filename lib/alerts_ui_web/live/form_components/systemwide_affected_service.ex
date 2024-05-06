@@ -30,6 +30,18 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
   end
 
   @impl true
+  def update(%{alert_data: alert_data, editing: editing} = assigns, socket) do
+    assigns =
+      if editing do
+        update_for_edit(alert_data, assigns)
+      else
+        assigns
+      end
+
+    {:ok, assign(socket, assigns)}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <div class={
@@ -68,9 +80,7 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
       ) do
     systemwide_affected_service = integer_service_types(systemwide_affected_service)
 
-    changeset =
-      %__MODULE__{}
-      |> changeset(systemwide_affected_service)
+    changeset = changeset(%__MODULE__{}, systemwide_affected_service)
 
     case apply_action(changeset, :insert) do
       {:ok, changeset} ->
@@ -90,6 +100,22 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
     changeset
     |> cast(params, @fields)
     |> validate_required(@required_fields)
+  end
+
+  defp update_for_edit(alert_data, assigns) do
+    edit_alert_data = %{
+      service_types: Map.get(alert_data, :service_types, [])
+    }
+
+    form =
+      %__MODULE__{}
+      |> changeset(edit_alert_data)
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    edit_alert_data
+    |> Map.put(:form, form)
+    |> Map.merge(assigns)
   end
 
   defp service_type_options do
