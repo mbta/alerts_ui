@@ -157,4 +157,71 @@ defmodule AlertsUIWeb.SharedComponents do
     </h6>
     """
   end
+
+  @doc """
+  Renders a medium primary button.
+
+  ##Examples
+    <.button_primary>Button Text</.button_primary>
+  """
+  slot :inner_block, required: true
+
+  def button_primary(assigns) do
+    ~H"""
+    <button class="
+      text-text-dark
+      bg-primary
+      border-primary
+      border-1
+      px-4
+      py-3
+      rounded-md
+      hover:bg-primary-hover
+      hover:border-primary-border-hover
+      active:bg-primary-active
+      active:border-primary-active
+      focus:border-primary-active
+      focus:border-4
+      focus:px-3
+      focus:py-2
+      disabled:bg-primary-disabled
+      disabled:border-primary-disabled
+    ">
+      <%= render_slot(@inner_block) %>
+    </button>
+    """
+  end
+
+  @doc """
+  Renders a medium secondary button.
+
+  ##Examples
+    <.button_secondary>Button Text</.button_secondary>
+  """
+  slot :inner_block, required: true
+
+  def button_secondary(assigns) do
+    ~H"""
+    <button class="
+      text-text-white
+      bg-secondary-border
+      border-secondary-border
+      border-1
+      px-4
+      py-3
+      rounded-md
+      hover:bg-secondary-hover
+      active:bg-secondary-active
+      active:border-secondary-active
+      focus:border-secondary-focus-border
+      focus:border-4
+      focus:px-3
+      focus:py-2
+      disabled:bg-secondary-disabled
+      disabled:border-secondary-disabled
+    ">
+      <%= render_slot(@inner_block) %>
+    </button>
+    """
+  end
 end
