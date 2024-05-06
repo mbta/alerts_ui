@@ -3,6 +3,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations do
   Gives a combination based on service type and effect
   """
 
+  alias MBTAV3API.Routes.Route
+
   @type service_effect_combination() :: :R | :RDS | :RDT | :RDTS | :SR
 
   @doc """
@@ -44,7 +46,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations do
       :R
   """
 
-  @spec get_combination(0 | 1 | 2 | 3 | 4 | nil, String.t() | nil) ::
+  @spec get_combination(Route.type_int() | nil, String.t() | nil) ::
           service_effect_combination() | nil
   def get_combination(service_type, effect_name) when is_nil(service_type) or is_nil(effect_name),
     do: nil
@@ -130,6 +132,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations do
     |> Enum.map_join(fn {k, _v} -> k end)
     |> String.to_atom()
     |> case do
+      :"" -> nil
       :RS -> :SR
       other -> other
     end

@@ -5,6 +5,7 @@ defmodule AlertsUI.Models.InformedEntity do
   use AlertsUI.Schema
   import Ecto.Changeset
   alias AlertsUI.Models.{Activity, Alert, TripDescriptor}
+  alias MBTAV3API.Routes.Route
 
   @facility_activities [
     :bringing_bike,
@@ -26,7 +27,7 @@ defmodule AlertsUI.Models.InformedEntity do
           agency_id: String.t() | nil,
           route_id: String.t() | nil,
           facility_id: String.t() | nil,
-          route_type: integer() | nil,
+          route_type: Route.type_int() | nil,
           direction_id: integer() | nil,
           stop_id: String.t() | nil,
           activities: [atom()] | nil,
@@ -63,6 +64,42 @@ defmodule AlertsUI.Models.InformedEntity do
     end
   end
 
+  @doc """
+  The Route ID for this Informed Entity
+
+    ## Examples
+      iex> InformedEntity.route_id(%InformedEntity{route_id: "1"})
+      "1"
+      iex> InformedEntity.route_id(%InformedEntity{})
+      nil
+  """
+  @spec route_id(t()) :: String.t() | nil
+  def route_id(%__MODULE__{route_id: route_id}), do: route_id
+
+  @doc """
+  Whether this Informed Entity contains a Route ID
+
+    ## Examples
+      iex> InformedEntity.route_id?(%InformedEntity{route_id: "1"})
+      true
+      iex> InformedEntity.route_id?(%InformedEntity{})
+      false
+  """
+  @spec route_id?(t()) :: boolean()
+  def route_id?(%__MODULE__{route_id: route_id}), do: !is_nil(route_id)
+
+  @doc """
+  The route type for this Informed Entity
+
+    ## Examples
+      iex> InformedEntity.route_type(%InformedEntity{route_type: 3})
+      3
+      iex> InformedEntity.route_type(%InformedEntity{})
+      nil
+  """
+  @spec route_type(t()) :: Route.type_int() | nil
+  def route_type(%__MODULE__{route_type: route_type}), do: route_type
+
   @spec facility_activities :: [atom()]
   def facility_activities, do: @facility_activities
 
@@ -70,15 +107,20 @@ defmodule AlertsUI.Models.InformedEntity do
   def facility_activity?(activity) when activity in @facility_activities, do: true
   def facility_activity?(_), do: false
 
-  def route_type_mapping do
-    %{
-      "Light Rail" => 0,
-      "Subway" => 1,
-      "Commuter Rail" => 2,
-      "Bus" => 3,
-      "Ferry" => 4
-    }
-  end
+  @doc """
+  Map route type names to integer codes.
+
+    ## Examples
+      iex> InformedEntity.route_type_mapping("Light Rail")
+      0
+  """
+  @spec route_type_mapping(String.t()) :: Route.type_int() | nil
+  def route_type_mapping("Light Rail"), do: 0
+  def route_type_mapping("Subway"), do: 1
+  def route_type_mapping("Commuter Rail"), do: 2
+  def route_type_mapping("Bus"), do: 3
+  def route_type_mapping("Ferry"), do: 4
+  def route_type_mapping(_), do: nil
 
   @spec route_to_combo_route_mapping() :: %{String.t() => String.t()}
   def route_to_combo_route_mapping do

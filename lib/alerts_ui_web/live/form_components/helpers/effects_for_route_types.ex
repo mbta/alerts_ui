@@ -17,6 +17,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes do
       true
       iex> is_list(EffectsForRouteTypes.list_effects("Ferry"))
       true
+      iex> is_list(EffectsForRouteTypes.list_effects("Systemwide"))
+      true
   """
   def list_effects(nil), do: Effect.effect_names()
 
@@ -72,6 +74,18 @@ defmodule AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes do
       "Schedule Change",
       "Service Change",
       "Shuttle",
+      "Suspension"
+    ]
+
+  def list_effects("Systemwide"),
+    do: [
+      "Amber Alert",
+      "Delay",
+      "Extra Service",
+      "Policy Change",
+      "Schedule Change",
+      "Service Change",
+      "Summary",
       "Suspension"
     ]
 end

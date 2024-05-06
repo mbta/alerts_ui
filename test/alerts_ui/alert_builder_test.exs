@@ -62,7 +62,7 @@ defmodule AlertsUI.AlertBuilderTest do
                }
 
         result |> Alerts.create_or_update_alert()
-        [alert_1, alert_2] = Alerts.list_all()
+        [alert_1, alert_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id)
         assert alert_1.alert_id == existing_alert.alert_id
         assert alert_2.alert_id |> String.to_integer() > alert_1.alert_id |> String.to_integer()
       end
@@ -1891,6 +1891,99 @@ defmodule AlertsUI.AlertBuilderTest do
                  }
                ]
       end
+    end
+
+    test "builds systemwide bus informed entity" do
+      alert_data = %{
+        route_type: nil,
+        effect_name: "Delay",
+        service_types: [3],
+        header_text: "test header",
+        description_text: "test description"
+      }
+
+      result = AlertBuilder.build_alert(alert_data, nil)
+
+      assert result.informed_entity == [
+               %{
+                 activities: [:BOARD, :EXIT, :RIDE],
+                 route_type: 3,
+                 agency_id: "1"
+               }
+             ]
+    end
+
+    test "builds systemwide subway informed entities" do
+      alert_data = %{
+        route_type: nil,
+        effect_name: "Delay",
+        service_types: [1],
+        header_text: "test header",
+        description_text: "test description"
+      }
+
+      result = AlertBuilder.build_alert(alert_data, nil)
+
+      assert result.informed_entity == [
+               %{
+                 activities: [:BOARD, :EXIT, :RIDE],
+                 route_type: 0,
+                 agency_id: "1"
+               },
+               %{
+                 activities: [:BOARD, :EXIT, :RIDE],
+                 route_type: 1,
+                 agency_id: "1"
+               }
+             ]
+    end
+
+    test "builds systemwide informed entities for multiple service types" do
+      alert_data = %{
+        route_type: nil,
+        effect_name: "Delay",
+        service_types: [3, 1],
+        header_text: "test header",
+        description_text: "test description"
+      }
+
+      result = AlertBuilder.build_alert(alert_data, nil)
+
+      assert result.informed_entity == [
+               %{
+                 activities: [:BOARD, :EXIT, :RIDE],
+                 route_type: 3,
+                 agency_id: "1"
+               },
+               %{
+                 activities: [:BOARD, :EXIT, :RIDE],
+                 route_type: 0,
+                 agency_id: "1"
+               },
+               %{
+                 activities: [:BOARD, :EXIT, :RIDE],
+                 route_type: 1,
+                 agency_id: "1"
+               }
+             ]
+    end
+
+    test "builds systemwide informed entities for all service types" do
+      alert_data = %{
+        route_type: nil,
+        effect_name: "Delay",
+        header_text: "test header",
+        description_text: "test description"
+      }
+
+      result = AlertBuilder.build_alert(alert_data, nil)
+
+      assert result.informed_entity == [
+               %{
+                 activities: [:BOARD, :EXIT, :RIDE],
+                 agency_id: "1"
+               }
+             ]
     end
   end
 end

@@ -5,7 +5,6 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   use AlertsUIWeb, :live_view
   alias AlertsUI.Alerts
   alias AlertsUI.Models.Effect
-  alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.DateTimeHelpers
 
   @one_minute_in_ms 60_000
@@ -89,9 +88,15 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   end
 
   defp format_service_type_options do
-    [{"All", ""}]
-    |> Enum.concat(InformedEntity.route_type_mapping())
-    |> Enum.concat([{"Access", :access}])
+    [
+      {"All", ""},
+      {"Light Rail", 0},
+      {"Subway", 1},
+      {"Commuter Rail", 2},
+      {"Bus", 3},
+      {"Ferry", 4},
+      {"Access", :access}
+    ]
   end
 
   defp timeline_options, do: ["current", "future", "past"]

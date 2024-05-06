@@ -16,6 +16,8 @@ defmodule AlertsUI.Models.Alert do
     SeverityLevel
   }
 
+  alias MBTAV3API.Routes.Route
+
   @permitted_fields ~w(
   id
   created_at
@@ -234,12 +236,42 @@ defmodule AlertsUI.Models.Alert do
     end
   end
 
-  def get_route_type([]), do: nil
+  @spec systemwide?(t()) :: boolean()
+  def systemwide?(%__MODULE__{informed_entity: informed_entities}),
+    do: Enum.any?(informed_entities, &(!InformedEntity.route_id?(&1)))
 
-  def get_route_type(informed_entities) do
-    case Enum.any?(informed_entities, &(&1.route_type in [0, 1])) do
-      true -> 1
-      false -> hd(informed_entities).route_type
+  @spec get_route_type(t()) :: Route.type_int() | nil
+  def get_route_type(%__MODULE__{informed_entity: informed_entities} = alert) do
+    if systemwide?(alert) do
+      nil
+    else
+      do_get_route_type(informed_entities)
+    end
+  end
+
+  def do_get_route_type([]), do: nil
+
+  def do_get_route_type(informed_entities) do
+    case Enum.any?(informed_entities, &(InformedEntity.route_type(&1) in [0, 1])) do
+      true ->
+        1
+
+      false ->
+        informed_entities
+        |> hd()
+        |> InformedEntity.route_type()
+    end
+  end
+
+  @spec service_types(t()) :: [Route.type_int()]
+  def service_types(%__MODULE__{informed_entity: informed_entities} = alert) do
+    if systemwide?(alert) do
+      informed_entities
+      |> Enum.map(&InformedEntity.route_type(&1))
+      |> Enum.map(&simple_subway_type/1)
+      |> Enum.uniq()
+    else
+      []
     end
   end
 
@@ -268,4 +300,8 @@ defmodule AlertsUI.Models.Alert do
     |> Enum.filter(&(!is_nil(&1)))
     |> Enum.uniq()
   end
+
+  @spec simple_subway_type(Route.type_int()) :: Route.type_int()
+  defp simple_subway_type(0), do: 1
+  defp simple_subway_type(route_type), do: route_type
 end

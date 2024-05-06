@@ -5,6 +5,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   alias AlertsUI.Alerts
   alias AlertsUI.Models.{Alert, Effect}
   alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
+  alias MBTAV3API.Routes.Route
 
   defstruct [
     :route_type,
@@ -18,11 +19,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :combination,
     :active_period_start,
     :active_period_end,
-    :active_period_end_specifier
+    :active_period_end_specifier,
+    :service_types
   ]
 
   @type t :: %__MODULE__{
-          route_type: integer(),
+          route_type: Route.type_int(),
           direction: String.t(),
           route_ids: [String.t()],
           stop_ids: [String.t()],
@@ -32,7 +34,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           combination: atom(),
           active_period_start: NaiveDateTime.t(),
           active_period_end_specifier: atom(),
-          active_period_end: NaiveDateTime.t()
+          active_period_end: NaiveDateTime.t(),
+          service_types: [Route.type_int()]
         }
 
   @spec build_alert_data(nil | String.t()) :: t()
@@ -47,7 +50,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     active_period_end = Map.get(alert, :active_period_end) |> shift_to_naive()
 
     %__MODULE__{
-      route_type: Alert.get_route_type(informed_entities),
+      route_type: Alert.get_route_type(alert),
       direction: Alert.get_direction(informed_entities),
       effect_name: Map.get(effect_map, :effect_name),
       route_ids: Alert.gather_route_ids(informed_entities),
@@ -59,7 +62,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       active_period_start: Map.get(alert, :active_period_start) |> shift_to_naive(),
       active_period_end: active_period_end,
       active_period_end_specifier:
-        determine_specifier(active_period_end, Map.get(alert, :duration_certainty))
+        determine_specifier(active_period_end, Map.get(alert, :duration_certainty)),
+      service_types: Alert.service_types(alert)
     }
   end
 

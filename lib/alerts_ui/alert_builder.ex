@@ -17,12 +17,13 @@ defmodule AlertsUI.AlertBuilder do
   alias MBTAV3API.Stops.Stop
 
   @type alert_data_t :: %{
-          route_type: Route.type_int(),
+          route_type: Route.type_int() | nil,
           direction: String.t(),
           route_ids: [Route.id_t()],
           stop_ids: [Stop.id_t()],
           child_stops_with_context: [stop_with_context_t()] | [],
           trip_ids: [String.t()],
+          service_types: [Route.type_int()],
           active_period_start: DateTime.t(),
           active_period_end_specifier: atom(),
           active_period_end: DateTime.t()
@@ -43,6 +44,7 @@ defmodule AlertsUI.AlertBuilder do
     effect_map = Effect.effect_map_by_name(effect_name)
     stop_ids = Map.get(alert_data, :stop_ids)
     direction_id = Map.get(alert_data, :direction)
+    service_types = Map.get(alert_data, :service_types, [])
 
     route_ids =
       alert_data
@@ -57,6 +59,7 @@ defmodule AlertsUI.AlertBuilder do
         :child_stops_with_context,
         child_stops_with_context(route_ids, direction_id, stop_ids)
       )
+      |> Map.put(:service_types, expand_subway_service_types(service_types))
 
     active_period_map =
       build_active_period(%{
@@ -268,13 +271,47 @@ defmodule AlertsUI.AlertBuilder do
     do:
       naive_time |> DateTime.from_naive!("America/New_York") |> Timex.Timezone.convert("Etc/UTC")
 
+  defp expand_subway_service_types(service_types) do
+    service_types
+    |> Enum.flat_map(fn service_type ->
+      if service_type == 1 do
+        [0, 1]
+      else
+        [service_type]
+      end
+    end)
+    |> Enum.uniq()
+  end
+
   @spec build_informed_entities(
           ServiceEffectCombinations.service_effect_combination() | nil,
           alert_data_t(),
           Effect.effect_name()
         ) ::
           [map()]
-  defp build_informed_entities(nil, _, _), do: []
+  # Systemwide, all service types
+  defp build_informed_entities(nil, %{service_types: []}, effect) do
+    [
+      %{
+        activities: Activities.for_effect(effect),
+        agency_id: "1"
+      }
+    ]
+  end
+
+  # Systemwide, specified service types
+  defp build_informed_entities(nil, %{service_types: service_types}, effect) do
+    Enum.map(
+      service_types,
+      fn service_type ->
+        %{
+          activities: Activities.for_effect(effect),
+          route_type: service_type,
+          agency_id: "1"
+        }
+      end
+    )
+  end
 
   defp build_informed_entities(
          :R,

@@ -180,29 +180,99 @@ defmodule AlertsUI.Models.AlertTest do
     end
   end
 
+  describe "systemwide?/1" do
+    test "true if any informed entity does not specify a route ID" do
+      assert Alert.systemwide?(%Alert{
+               informed_entity: [%InformedEntity{activities: [:exit], route_type: 3}]
+             })
+
+      refute Alert.systemwide?(%Alert{
+               informed_entity: [
+                 %InformedEntity{activities: [:exit], route_type: 3, route_id: "28"}
+               ]
+             })
+    end
+  end
+
   describe "get_route_type/1" do
     test "returns nil if informed entity is empty list" do
-      assert Alert.get_route_type([]) == nil
+      assert Alert.get_route_type(%Alert{informed_entity: []}) == nil
     end
 
     test "returns 1 if any route types are 0 or 1" do
-      informed_entity = [
-        %InformedEntity{activities: [:exit], route_id: "28", route_type: 0, direction_id: 1},
-        %InformedEntity{activities: [:exit], route_id: "29", route_type: 1, direction_id: 1},
-        %InformedEntity{activities: [:exit], route_id: "27", route_type: 2}
-      ]
+      alert = %Alert{
+        informed_entity: [
+          %InformedEntity{activities: [:exit], route_id: "28", route_type: 0, direction_id: 1},
+          %InformedEntity{activities: [:exit], route_id: "29", route_type: 1, direction_id: 1},
+          %InformedEntity{activities: [:exit], route_id: "27", route_type: 2}
+        ]
+      }
 
-      assert Alert.get_route_type(informed_entity) == 1
+      assert Alert.get_route_type(alert) == 1
     end
 
     test "returns route type of head if no 0 or 1" do
-      informed_entity = [
-        %InformedEntity{activities: [:exit], route_id: "28", route_type: 3, direction_id: 1},
-        %InformedEntity{activities: [:exit], route_id: "29", route_type: 3, direction_id: 1},
-        %InformedEntity{activities: [:exit], route_id: "27", route_type: 3}
-      ]
+      alert = %Alert{
+        informed_entity: [
+          %InformedEntity{activities: [:exit], route_id: "28", route_type: 3, direction_id: 1},
+          %InformedEntity{activities: [:exit], route_id: "29", route_type: 3, direction_id: 1},
+          %InformedEntity{activities: [:exit], route_id: "27", route_type: 3}
+        ]
+      }
 
-      assert Alert.get_route_type(informed_entity) == 3
+      assert Alert.get_route_type(alert) == 3
+    end
+
+    test "accepts an Alert" do
+      alert = %Alert{
+        informed_entity: [
+          %InformedEntity{activities: [:exit], route_id: "27", route_type: 3}
+        ]
+      }
+
+      assert Alert.get_route_type(alert) == 3
+    end
+
+    test "returns nil for a systemwide alert" do
+      alert = %Alert{
+        informed_entity: [
+          %InformedEntity{activities: [:exit], route_type: 0},
+          %InformedEntity{activities: [:exit], route_type: 1},
+          %InformedEntity{activities: [:exit], route_type: 2}
+        ]
+      }
+
+      assert Alert.get_route_type(alert) == nil
+    end
+  end
+
+  describe "service_types/1" do
+    test "returns service types for a systemwide alert" do
+      assert Alert.service_types(%Alert{
+               informed_entity: [%InformedEntity{activities: [:exit], route_type: 3}]
+             }) == [3]
+    end
+
+    test "returns an empty list for non-systemwide alerts" do
+      assert Alert.service_types(%Alert{
+               informed_entity: [
+                 %InformedEntity{activities: [:exit], route_id: "27", route_type: 3}
+               ]
+             }) == []
+    end
+
+    test "maps subway route types to only 1" do
+      assert Alert.service_types(%Alert{
+               informed_entity: [
+                 %InformedEntity{activities: [:exit], route_type: 0},
+                 %InformedEntity{activities: [:exit], route_type: 1},
+                 %InformedEntity{activities: [:exit], route_type: 2}
+               ]
+             }) == [1, 2]
+    end
+
+    test "returns an empty list for an alert with no informed entities" do
+      assert Alert.service_types(%Alert{informed_entity: []}) == []
     end
   end
 
