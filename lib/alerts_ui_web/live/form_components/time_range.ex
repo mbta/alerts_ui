@@ -12,7 +12,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     :later_today,
     :end_of_service_today,
     :further_notice,
-    :pick
+    :pick_a_date_and_time
   ]
 
   @primary_key false
@@ -29,6 +29,36 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     form = %__MODULE__{} |> changeset() |> to_form()
     socket = assign(socket, %{form: form})
     {:ok, socket}
+  end
+
+  @impl true
+  def update(%{alert_data: alert_data} = assigns, socket) do
+    assigns =
+      if assigns.editing == false do
+        assigns
+      else
+        active_period_end_specifier =
+          case Map.get(alert_data, :active_period_end_specifier) do
+            nil -> nil
+            result -> Atom.to_string(result)
+          end
+
+        edit_alert_data =
+          %{
+            active_period_end: Map.get(alert_data, :active_period_end),
+            active_period_start: Map.get(alert_data, :active_period_start),
+            active_period_end_specifier: active_period_end_specifier
+          }
+
+        changeset =
+          %__MODULE__{}
+          |> changeset(edit_alert_data)
+
+        form = to_form(changeset)
+        edit_alert_data |> Map.put(:form, form) |> Map.merge(assigns)
+      end
+
+    {:ok, assign(socket, assigns)}
   end
 
   @impl true
@@ -57,6 +87,11 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   @impl true
   def render(assigns) do
+    current_time =
+      NaiveDateTime.local_now() |> NaiveDateTime.truncate(:second) |> NaiveDateTime.to_iso8601()
+
+    assigns = Map.put(assigns, :current_time, current_time)
+
     ~H"""
     <div
       class={unless @progress.name == "details", do: "hidden", else: "min-w-full flex flex-col"}
@@ -73,8 +108,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           <.input
             type="datetime-local"
             field={@form[:active_period_start]}
-            value={DateTime.now!("America/New_York")}
-            min={DateTime.to_iso8601(DateTime.now!("America/New_York"))}
+            min={@current_time}
             label="Start"
           />
 
@@ -86,19 +120,21 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
               {"later today", :later_today},
               {"end of service today", :end_of_service_today},
               {"futher notice", :further_notice},
-              {"pick a date and time", :pick}
+              {"pick a date and time", :pick_a_date_and_time}
             ]}
           />
           <div
             id="end-selector-div"
-            class={unless @form.params["active_period_end_specifier"] == "pick", do: "hidden"}
+            class={
+              unless @form.params["active_period_end_specifier"] == "pick_a_date_and_time",
+                do: "hidden"
+            }
           >
             <.input
               id="end-selector"
               type="datetime-local"
               field={@form[:active_period_end]}
-              value={DateTime.now!("America/New_York")}
-              min={DateTime.to_iso8601(DateTime.now!("America/New_York"))}
+              min={@current_time}
               label="Select Ending"
             />
           </div>

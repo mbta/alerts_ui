@@ -15,7 +15,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :trip_ids,
     :header_text,
     :description_text,
-    :combination
+    :combination,
+    :active_period_start,
+    :active_period_end,
+    :active_period_end_specifier
   ]
 
   @type t :: %__MODULE__{
@@ -26,7 +29,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           trip_ids: [String.t()],
           header_text: String.t(),
           description_text: String.t(),
-          combination: atom()
+          combination: atom(),
+          active_period_start: NaiveDateTime.t(),
+          active_period_end_specifier: atom(),
+          active_period_end: NaiveDateTime.t()
         }
 
   @spec build_alert_data(nil | String.t()) :: t()
@@ -38,6 +44,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     informed_entities = Map.get(alert, :informed_entity, [])
     combination = ServiceEffectCombinations.get_combination(informed_entities)
 
+    active_period_end = Map.get(alert, :active_period_end) |> shift_to_naive()
+
     %__MODULE__{
       route_type: Alert.get_route_type(informed_entities),
       direction: Alert.get_direction(informed_entities),
@@ -47,7 +55,28 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       trip_ids: Alert.gather_trip_ids(informed_entities),
       header_text: Map.get(alert, :header_text),
       description_text: Map.get(alert, :description_text),
-      combination: combination
+      combination: combination,
+      active_period_start: Map.get(alert, :active_period_start) |> shift_to_naive(),
+      active_period_end: active_period_end,
+      active_period_end_specifier:
+        determine_specifier(active_period_end, Map.get(alert, :duration_certainty))
     }
+  end
+
+  def shift_to_naive(nil), do: nil
+
+  def shift_to_naive(time) do
+    time |> Timex.Timezone.convert("America/New_York") |> DateTime.to_naive()
+  end
+
+  def determine_specifier(nil, nil), do: nil
+  def determine_specifier(nil, :ESTIMATED), do: :later_today
+  def determine_specifier(nil, :UNKNOWN), do: :further_notice
+
+  def determine_specifier(ap_end, :KNOWN) when not is_nil(ap_end) do
+    case NaiveDateTime.to_time(ap_end) == ~T[02:30:00] do
+      true -> :end_of_service_today
+      false -> :pick_a_date_and_time
+    end
   end
 end
