@@ -44,7 +44,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     informed_entities = Map.get(alert, :informed_entity, [])
     combination = ServiceEffectCombinations.get_combination(informed_entities)
 
-    active_period_end = Map.get(alert, :active_period_end) |> shift_to_naive
+    active_period_end = Map.get(alert, :active_period_end) |> shift_to_naive()
 
     %__MODULE__{
       route_type: Alert.get_route_type(informed_entities),
@@ -56,7 +56,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       header_text: Map.get(alert, :header_text),
       description_text: Map.get(alert, :description_text),
       combination: combination,
-      active_period_start: Map.get(alert, :active_period_start) |> shift_to_naive,
+      active_period_start: Map.get(alert, :active_period_start) |> shift_to_naive(),
       active_period_end: active_period_end,
       active_period_end_specifier:
         determine_specifier(active_period_end, Map.get(alert, :duration_certainty))

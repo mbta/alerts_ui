@@ -34,30 +34,28 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   @impl true
   def update(%{alert_data: alert_data} = assigns, socket) do
     assigns =
-      case assigns.editing do
-        false ->
-          assigns
+      if assigns.editing == false do
+        assigns
+      else
+        active_period_end_specifier =
+          case Map.get(alert_data, :active_period_end_specifier) do
+            nil -> nil
+            result -> Atom.to_string(result)
+          end
 
-        true ->
-          active_period_end_specifier =
-            case Map.get(alert_data, :active_period_end_specifier) do
-              nil -> nil
-              result -> Atom.to_string(result)
-            end
+        edit_alert_data =
+          %{
+            active_period_end: Map.get(alert_data, :active_period_end),
+            active_period_start: Map.get(alert_data, :active_period_start),
+            active_period_end_specifier: active_period_end_specifier
+          }
 
-          edit_alert_data =
-            %{
-              active_period_end: Map.get(alert_data, :active_period_end),
-              active_period_start: Map.get(alert_data, :active_period_start),
-              active_period_end_specifier: active_period_end_specifier
-            }
+        changeset =
+          %__MODULE__{}
+          |> changeset(edit_alert_data)
 
-          changeset =
-            %__MODULE__{}
-            |> changeset(edit_alert_data)
-
-          form = to_form(changeset)
-          edit_alert_data |> Map.put(:form, form) |> Map.merge(assigns)
+        form = to_form(changeset)
+        edit_alert_data |> Map.put(:form, form) |> Map.merge(assigns)
       end
 
     {:ok, assign(socket, assigns)}
