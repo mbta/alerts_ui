@@ -52,6 +52,32 @@ defmodule AlertsUI.AlertsTest do
       assert (updated_alert.active_period |> hd).end == ~U[2023-10-13 00:03:00Z]
     end
 
+    test "returns the resulting alert model" do
+      existing_alert =
+        insert(
+          :alert,
+          %{
+            alert_id: "123",
+            header_text: "old header text",
+            active_period: [
+              build(:active_period),
+              %{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:01:00Z]}
+            ]
+          }
+        )
+
+      new_params =
+        build(:alert_map, %{
+          alert_id: "123",
+          last_modified_timestamp: ~U[2023-10-12 00:01:00Z],
+          active_period: [%{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:03:00Z]}]
+        })
+
+      assert {:ok, updated_alert} = Alerts.create_or_update_alert(new_params, existing_alert)
+      assert updated_alert.alert_id == "123"
+      assert (updated_alert.active_period |> hd).end == ~U[2023-10-13 00:03:00Z]
+    end
+
     test "papertrail saves versions" do
       new_params =
         build(:alert_map, %{

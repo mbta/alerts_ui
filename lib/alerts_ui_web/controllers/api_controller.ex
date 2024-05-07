@@ -34,8 +34,8 @@ defmodule AlertsUIWeb.ApiController do
     |> AlertFromApi.fill_in_alert()
     |> Alerts.create_or_update_alert()
     |> case do
-      {:ok, result} ->
-        alert_uuid = Map.get(result, :id)
+      {:ok, alert} ->
+        alert_uuid = Map.get(alert, :id)
 
         alert = alert_uuid |> Alerts.get_by_id()
 
