@@ -54,7 +54,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       direction: Alert.get_direction(informed_entities),
       effect_name: Map.get(effect_map, :effect_name),
       route_ids: Alert.gather_route_ids(informed_entities),
-      stop_ids: Alert.gather_stop_ids(informed_entities),
+      stop_ids: Alert.gather_parent_stop_ids(informed_entities),
       trip_ids: Alert.gather_trip_ids(informed_entities),
       header_text: Map.get(alert, :header_text),
       description_text: Map.get(alert, :description_text),

@@ -121,9 +121,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations do
   def get_combination(informed_entity) do
     informed_entity
     |> Enum.reduce([R: false, D: false, T: false, S: false], fn ie, acc ->
+      trip = Map.get(ie, :trip) || %{}
+      trip_direction = Map.get(trip, :direction_id, false)
+
       [
         R: Map.get(ie, :route_id, false) || acc[:R],
-        D: Map.get(ie, :direction_id, false) || acc[:D],
+        D: Map.get(ie, :direction_id, false) || trip_direction || acc[:D],
         T: Map.get(ie, :trip, false) || acc[:T],
         S: Map.get(ie, :stop_id, false) || acc[:S]
       ]

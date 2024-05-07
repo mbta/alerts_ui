@@ -8,7 +8,9 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
 
   alias AlertsUIWeb.FormComponents.StopRouteAffectedService
   alias AlertsUIWeb.Step
+  alias MBTAV3API.Routes.Route
   alias MBTAV3API.Stops.Repo, as: StopsRepo
+  alias MBTAV3API.Stops.Stop
 
   @assigns %{
     id: "affected_service",
@@ -48,6 +50,27 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         assert view
                |> render() =~ "Route(s)"
       end
+    end
+
+    test "works correctly if editing" do
+      {:ok, view, _html} =
+        live_isolated_component(
+          StopRouteAffectedService,
+          @assigns
+          |> Map.merge(%{
+            editing: true,
+            available_stops: [%Stop{id: "place-aqucl"}, %Stop{id: "place-andrw"}],
+            available_routes: [%Route{id: "Blue", type: 1}, %Route{id: "Green", type: 1}],
+            alert_data: %{
+              stop_ids: ["place-aqucl"],
+              route_ids: ["Blue"],
+              route_type: 1
+            }
+          })
+        )
+
+      assert view |> render() =~ ~s(<option selected="selected" value="place-aqucl">)
+      assert view |> render() =~ ~s(<option selected="selected" value="Blue">)
     end
 
     test "it sends section_completed if no error in changeset" do
