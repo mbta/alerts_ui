@@ -308,31 +308,6 @@ defmodule AlertsUI.Models.AlertTest do
   end
 
   describe "gather_parent_stop_ids/1" do
-    # test "works correctly if editing" do
-    #   with_mock(StopsRepo, [
-    #     get_parent: fn _stop -> %{id: "place-aqucl"} end
-    #   ]) do
-    #     {:ok, view, _html} =
-    #       live_isolated_component(
-    #         StopRouteAffectedService,
-    #         @assigns
-    #         |> Map.merge(%{
-    #           editing: true,
-    #           available_stops: [%Stop{id: "place-aqucl"}, %Stop{id: "place-andrw"}],
-    #           available_routes: [%Route{id: "Blue", type: 1}, %Route{id: "Green", type: 1}],
-    #           alert_data: %{
-    #             stop_ids: ["70043", "70044"],
-    #             route_ids: ["Blue"],
-    #             route_type: 1
-    #           }
-    #         })
-    #       )
-    #       open_browser(view)
-    #       assert view |> render() =~ ~s(<option selected="selected" value="place-aqucl">)
-    #       assert view |> render() =~ ~s(<option selected="selected" value="Blue">)
-    #   end
-    # end
-
     test "lists parent stop ids from informed entity" do
       with_mock(StopsRepo,
         get_parent: fn _stop -> %{id: "place-aqucl"} end

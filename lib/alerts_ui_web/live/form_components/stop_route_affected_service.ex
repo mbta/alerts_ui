@@ -73,7 +73,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   end
 
   def update_for_edit(alert_data, assigns) do
-    # new_stop_ids = Map.get(alert_data, :stop_ids, []) |> Enum.map(& MBTAV3API.Stops.Repo.get_parent(&1).id) |> Enum.dedup
     edit_alert_data =
       %{
         route_ids: Map.get(alert_data, :route_ids) || [],

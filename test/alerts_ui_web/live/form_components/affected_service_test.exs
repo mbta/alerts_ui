@@ -192,43 +192,16 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
                   id: "CR-627999-541-1"
                 },
                 stop: %MBTAV3API.Stops.Stop{
-                  id: "place-sstat",
-                  parent_id: nil,
-                  child_ids: [
-                    "70079",
-                    "70080",
-                    "74611",
-                    "74617",
-                    "NEC-2287",
-                    "NEC-2287-01",
-                    "NEC-2287-02",
-                    "NEC-2287-03",
-                    "NEC-2287-04",
-                    "NEC-2287-05",
-                    "NEC-2287-06",
-                    "NEC-2287-07",
-                    "NEC-2287-08",
-                    "NEC-2287-09",
-                    "NEC-2287-10",
-                    "NEC-2287-11",
-                    "NEC-2287-12"
-                  ]
+                  id: "place-sstat"
                 },
                 platform_stop_id: "NEC-2287"
               }
             ],
             alert_data: %{
               direction: "0",
-              header_text: "a",
-              description_text: "a",
               route_type: 2,
-              stop_ids: ["CR-Worcester"],
+              stop_ids: ["place-sstat"],
               combination: :RDTS,
-              active_period_start: nil,
-              active_period_end: nil,
-              service_types: [],
-              effect_name: "Delay",
-              active_period_end_specifier: nil,
               route_ids: ["CR-Worcester"],
               trip_ids: ["CR-628038-501-1"],
               trip_information_by_id: %{
@@ -240,7 +213,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
 
       assert view |> render() =~ ~s(<option selected="selected" value="CR-Worcester">)
       assert view |> render() =~ ~s(<option selected="selected" value="0">Outbound</option>)
-      assert view |> render() =~ ~s(<option selected="selected" value="CR-Worcester">)
+      assert view |> render() =~ ~s(<option selected="selected" value="place-sstat">)
       assert view |> render() =~ ~s(<option value="CR-627999-541-1">)
     end
   end
