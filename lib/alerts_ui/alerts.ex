@@ -23,7 +23,7 @@ defmodule AlertsUI.Alerts do
       |> Alert.changeset(params)
       |> PaperTrail.insert_or_update()
       |> case do
-        {:ok, %{version: %PaperTrail.Version{item_changes: result}}} -> {:ok, result}
+        {:ok, %{model: alert}} -> {:ok, alert}
         {:error, result} -> {:error, result}
       end
     end

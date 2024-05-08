@@ -212,11 +212,11 @@ defmodule AlertsUIWeb.CreateAlertLive do
     alert_map
     |> Alerts.create_or_update_alert(existing_alert)
     |> case do
-      {:ok, result} ->
+      {:ok, alert} ->
         assigns = %{
           progress: get_step_by_name(socket.assigns.progress.next),
           alert_data: %{},
-          alert_uuid: result.id
+          alert_uuid: alert.id
         }
 
         {:noreply, assign(socket, assigns)}
