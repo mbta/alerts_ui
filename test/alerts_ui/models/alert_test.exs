@@ -1,10 +1,16 @@
 defmodule AlertsUI.Models.AlertTest do
   @moduledoc false
   use AlertsUI.DataCase, async: true
+
+  import Ecto.Changeset
   import Mock
 
   alias AlertsUI.Models.{Alert, InformedEntity, TripDescriptor}
   alias MBTAV3API.Stops.Repo, as: StopsRepo
+
+  @five_minutes_ago DateTime.utc_now()
+                    |> DateTime.add(-5, :minute)
+                    |> DateTime.truncate(:second)
 
   describe "changeset/2" do
     test "create with header, description, and informed_entity is valid" do
@@ -65,6 +71,69 @@ defmodule AlertsUI.Models.AlertTest do
     test "alert without header and description is not valid" do
       changeset = Alert.changeset(%Alert{}, %{header_text: "a", url: "example.com"})
       refute changeset.valid?
+    end
+
+    test "sets created_timestamp and last_modified_timestamp" do
+      params = %{
+        alert_id: "123"
+      }
+
+      changeset = Alert.changeset(%Alert{}, params)
+
+      assert changed?(changeset, :created_timestamp)
+      assert changed?(changeset, :last_modified_timestamp)
+    end
+
+    test "uses provided created_timestamp and last_modified_timestamp if given" do
+      params = %{
+        alert_id: "123",
+        created_timestamp: @five_minutes_ago,
+        last_modified_timestamp: @five_minutes_ago
+      }
+
+      changeset = Alert.changeset(%Alert{}, params)
+
+      assert {:ok, @five_minutes_ago} = fetch_change(changeset, :created_timestamp)
+      assert {:ok, @five_minutes_ago} = fetch_change(changeset, :last_modified_timestamp)
+    end
+
+    test "updates last_modified_timestamp on an existing alert" do
+      existing_alert = %Alert{
+        alert_id: "123",
+        header_text: "old",
+        last_modified_timestamp: @five_minutes_ago
+      }
+
+      params = %{
+        alert_id: "123",
+        header_text: "new"
+      }
+
+      changeset = Alert.changeset(existing_alert, params)
+
+      assert changed?(changeset, :last_modified_timestamp)
+
+      {:ok, new_last_modified_timestamp} =
+        fetch_change(changeset, :last_modified_timestamp)
+
+      assert new_last_modified_timestamp > @five_minutes_ago
+    end
+
+    test "does not change created_timestamp on an existing alert" do
+      existing_alert = %Alert{
+        alert_id: "123",
+        header_text: "old",
+        created_timestamp: @five_minutes_ago
+      }
+
+      params = %{
+        alert_id: "123",
+        header_text: "new"
+      }
+
+      changeset = Alert.changeset(existing_alert, params)
+
+      refute changed?(changeset, :created_timestamp)
     end
   end
 

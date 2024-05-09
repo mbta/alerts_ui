@@ -169,6 +169,8 @@ defmodule AlertsUI.Models.Alert do
   def changeset(%__MODULE__{} = alert, params) do
     alert
     |> cast(params, @permitted_fields)
+    |> created_timestamp()
+    |> last_modified_timestamp()
     |> cast_embed(:active_period, required: false, with: &ActivePeriod.changeset/2)
     |> cast_assoc(:informed_entity, required: true, with: &InformedEntity.changeset/2)
     |> validate_inclusion(:effect, @effect)
@@ -185,6 +187,8 @@ defmodule AlertsUI.Models.Alert do
   def draft_changeset(%__MODULE__{} = alert, params) do
     alert
     |> cast(params, @permitted_fields)
+    |> created_timestamp()
+    |> last_modified_timestamp()
     |> cast_embed(:active_period, required: false, with: &ActivePeriod.changeset/2)
     |> cast_assoc(:informed_entity, required: false, with: &InformedEntity.changeset/2)
     |> validate_acceptance(:draft, message: "draft status must be true")
@@ -195,6 +199,28 @@ defmodule AlertsUI.Models.Alert do
     |> validate_inclusion(:duration_certainty, @duration_certainty)
     |> unique_constraint(:alert_id)
   end
+
+  @spec created_timestamp(Ecto.Changeset.t()) :: Ecto.Changeset.t()
+  defp created_timestamp(changeset) do
+    created_timestamp = get_field(changeset, :created_timestamp)
+
+    if is_nil(created_timestamp) do
+      put_change(changeset, :created_timestamp, utc_datetime_now())
+    else
+      changeset
+    end
+  end
+
+  @spec last_modified_timestamp(Ecto.Changeset.t()) :: Ecto.Changeset.t()
+  defp last_modified_timestamp(changeset) do
+    if changed?(changeset, :last_modified_timestamp) do
+      changeset
+    else
+      put_change(changeset, :last_modified_timestamp, utc_datetime_now())
+    end
+  end
+
+  defp utc_datetime_now, do: DateTime.utc_now() |> DateTime.truncate(:second)
 
   @spec entities_with_icons(t()) :: [String.t()]
   def entities_with_icons(%__MODULE__{informed_entity: entities}) do

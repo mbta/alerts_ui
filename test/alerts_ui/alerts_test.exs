@@ -6,7 +6,11 @@ defmodule AlertsUI.AlertsTest do
   alias AlertsUI.Alerts
   alias AlertsUI.Models.Alert
 
-  describe "create_alert/1" do
+  @five_minutes_ago DateTime.utc_now()
+                    |> DateTime.add(-5, :minute)
+                    |> DateTime.truncate(:second)
+
+  describe "create_or_update_alert" do
     test "creates alert from params" do
       new_params =
         build(:alert_map, %{
@@ -21,6 +25,24 @@ defmodule AlertsUI.AlertsTest do
       assert new_alert.alert_id == "123"
       assert new_alert.header_text == "new header text"
       assert new_alert.description_text == ""
+      refute new_alert.created_timestamp == nil
+      refute new_alert.last_modified_timestamp == nil
+    end
+
+    test "uses provided created_timestamp and last_modified_timestamp if given" do
+      new_params =
+        build(:alert_map, %{
+          alert_id: "123",
+          created_timestamp: @five_minutes_ago,
+          last_modified_timestamp: @five_minutes_ago
+        })
+
+      {:ok, new_alert} =
+        Alerts.create_or_update_alert(new_params)
+
+      assert new_alert.alert_id == "123"
+      assert new_alert.created_timestamp == @five_minutes_ago
+      assert new_alert.last_modified_timestamp == @five_minutes_ago
     end
 
     test "edits alert if it exists" do
@@ -50,6 +72,52 @@ defmodule AlertsUI.AlertsTest do
       assert updated_alert.alert_id == "123"
       assert updated_alert.header_text == "new header text"
       assert (updated_alert.active_period |> hd).end == ~U[2023-10-13 00:03:00Z]
+    end
+
+    test "updates last_modified_timestamp when updating an existing alert" do
+      existing_alert =
+        insert(
+          :alert,
+          %{
+            alert_id: "123",
+            header_text: "old header text",
+            last_modified_timestamp: @five_minutes_ago
+          }
+        )
+
+      new_params =
+        build(:alert_map, %{
+          alert_id: "123",
+          header_text: "new header text"
+        })
+
+      Alerts.create_or_update_alert(new_params, existing_alert)
+      updated_alert = Repo.get_by(Alert, id: existing_alert.id)
+
+      assert updated_alert.last_modified_timestamp > @five_minutes_ago
+    end
+
+    test "does not change created_timestamp when updating an existing alert" do
+      existing_alert =
+        insert(
+          :alert,
+          %{
+            alert_id: "123",
+            header_text: "old header text",
+            created_timestamp: @five_minutes_ago
+          }
+        )
+
+      new_params =
+        build(:alert_map, %{
+          alert_id: "123",
+          header_text: "new header text"
+        })
+
+      Alerts.create_or_update_alert(new_params, existing_alert)
+      updated_alert = Repo.get_by(Alert, id: existing_alert.id)
+
+      assert updated_alert.created_timestamp == @five_minutes_ago
     end
 
     test "returns the resulting alert model" do
@@ -213,10 +281,13 @@ defmodule AlertsUI.AlertsTest do
     end
 
     test "saves papertrail versions" do
+      alert_id = Ecto.UUID.generate()
+
       first_params =
         build(:alert_map, %{
-          alert_id: "123",
+          alert_id: alert_id,
           header_text: "old header text",
+          last_modified_timestamp: ~U[2023-10-12 00:00:00Z],
           active_period: [
             %{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:01:00Z]}
           ]
@@ -224,17 +295,18 @@ defmodule AlertsUI.AlertsTest do
 
       second_params =
         build(:alert_map, %{
-          alert_id: "123",
+          alert_id: alert_id,
           header_text: "new header text",
           last_modified_timestamp: ~U[2023-10-12 00:01:00Z],
           active_period: [%{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:03:00Z]}]
         })
 
-      Alerts.create_or_modify_alert_from_feed(first_params)
-      Alerts.create_or_modify_alert_from_feed(second_params)
+      assert :ok = Alerts.create_or_modify_alert_from_feed(first_params)
+      assert :ok = Alerts.create_or_modify_alert_from_feed(second_params)
 
-      current_alert = Alerts.get_by_alert_id("123")
-      %PaperTrail.Version{item_changes: original_version} = PaperTrail.get_version(current_alert)
+      current_alert = Alerts.get_by_alert_id(alert_id)
+      version = PaperTrail.get_version(current_alert)
+      %PaperTrail.Version{item_changes: original_version} = version
 
       assert current_alert.header_text == "new header text"
       assert original_version["header_text"] == "old header text"
