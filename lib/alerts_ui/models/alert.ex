@@ -226,10 +226,13 @@ defmodule AlertsUI.Models.Alert do
   def get_direction(informed_entities) do
     directions_list =
       informed_entities
-      |> Enum.flat_map(fn ie ->
-        trip = Map.get(ie, :trip) || %{}
-        trip_direction = Map.get(trip, :direction_id)
-        [ie.direction_id, trip_direction]
+      |> Enum.map(fn ie ->
+        if is_nil(Map.get(ie, :direction_id)) do
+          trip = Map.get(ie, :trip) || %{}
+          Map.get(trip, :direction_id)
+        else
+          ie.direction_id
+        end
       end)
       |> Enum.uniq()
       |> Enum.filter(&(!is_nil(&1)))
