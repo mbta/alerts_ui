@@ -44,6 +44,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   @impl true
   def handle_event("validate", %{"stop_route_affected_service" => affected_service}, socket) do
     affected_service = populate_default_routes(affected_service)
+    Map.get(affected_service, "stop_ids", [])
 
     get_routes_by_stop_ids(
       Map.get(affected_service, "stop_ids", []),
@@ -74,11 +75,17 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   def update_for_edit(alert_data, assigns) do
     edit_alert_data =
       %{
-        "route_ids" => Map.get(alert_data, :route_ids) || [],
-        "stop_ids" => Map.get(alert_data, :stop_ids) || []
+        route_ids: Map.get(alert_data, :route_ids) || [],
+        stop_ids: Map.get(alert_data, :stop_ids) || []
       }
 
-    changeset = validate(edit_alert_data, assigns)
+    get_routes_by_stop_ids(
+      edit_alert_data.stop_ids,
+      assigns.alert_data.route_type
+    )
+
+    changeset =
+      validate(edit_alert_data |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end), assigns)
 
     form = to_form(changeset |> Map.put(:action, :validate))
 

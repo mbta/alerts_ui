@@ -66,6 +66,28 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinationsTest do
       assert result == :RDTS
     end
 
+    test "RDST with direction in trip" do
+      informed_entity = %AlertsUI.Models.InformedEntity{
+        agency_id: "1",
+        route_id: "CR-Fitchburg",
+        facility_id: nil,
+        route_type: 2,
+        direction_id: nil,
+        stop_id: "FR-0451-02",
+        activities: [:BOARD, :EXIT, :RIDE],
+        trip: %AlertsUI.Models.TripDescriptor{
+          trip_id: "CR-627728-402",
+          route_id: "CR-Fitchburg",
+          direction_id: 1,
+          created_at: ~U[2024-05-07 19:13:24Z],
+          updated_at: ~U[2024-05-07 19:13:24Z]
+        }
+      }
+
+      result = ServiceEffectCombinations.get_combination([informed_entity])
+      assert result == :RDTS
+    end
+
     test "systemwide" do
       informed_entity = [
         build(:informed_entity, %{route_id: nil, trip: nil})

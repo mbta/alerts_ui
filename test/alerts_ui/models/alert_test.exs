@@ -1,8 +1,10 @@
 defmodule AlertsUI.Models.AlertTest do
   @moduledoc false
   use AlertsUI.DataCase, async: true
+  import Mock
 
   alias AlertsUI.Models.{Alert, InformedEntity, TripDescriptor}
+  alias MBTAV3API.Stops.Repo, as: StopsRepo
 
   describe "changeset/2" do
     test "create with header, description, and informed_entity is valid" do
@@ -170,6 +172,21 @@ defmodule AlertsUI.Models.AlertTest do
       assert Alert.get_direction(informed_entity) == "1"
     end
 
+    test "returns direction if direction is in trip" do
+      informed_entity = [
+        %InformedEntity{activities: [:exit], route_id: "28", route_type: 3},
+        %InformedEntity{
+          activities: [:exit],
+          route_id: "29",
+          route_type: 3,
+          trip: %TripDescriptor{direction_id: 1}
+        },
+        %InformedEntity{activities: [:exit], route_id: "27", route_type: 3}
+      ]
+
+      assert Alert.get_direction(informed_entity) == "1"
+    end
+
     test "returns nil if 2 directions found" do
       informed_entity = [
         %InformedEntity{activities: [:exit], route_id: "28", route_type: 3, direction_id: 0},
@@ -290,17 +307,25 @@ defmodule AlertsUI.Models.AlertTest do
     end
   end
 
-  describe "gather_stop_ids/1" do
-    test "lists stop ids from informed entity" do
-      informed_entity = [
-        %InformedEntity{activities: [:exit], route_id: "27", route_type: 3, stop_id: "1"},
-        %InformedEntity{activities: [:exit], route_id: "28", route_type: 3, stop_id: "2"},
-        %InformedEntity{activities: [:exit], route_id: "29", route_type: 3, stop_id: "2"},
-        %InformedEntity{activities: [:exit], route_id: "29", route_type: 3, stop_id: "3"},
-        %InformedEntity{activities: [:exit], route_type: 3}
-      ]
+  describe "gather_parent_stop_ids/1" do
+    test "lists parent stop ids from informed entity" do
+      with_mock(StopsRepo,
+        get_parent: fn _stop -> %{id: "place-aqucl"} end
+      ) do
+        informed_entity = [
+          %InformedEntity{activities: [:exit], route_id: "27", route_type: 3, stop_id: "70043"},
+          %InformedEntity{activities: [:exit], route_id: "28", route_type: 3, stop_id: "70044"},
+          %InformedEntity{
+            activities: [:exit],
+            route_id: "28",
+            route_type: 3,
+            stop_id: "place-aqucl"
+          },
+          %InformedEntity{activities: [:exit], route_type: 3}
+        ]
 
-      assert Alert.gather_stop_ids(informed_entity) == ["1", "2", "3"]
+        assert Alert.gather_parent_stop_ids(informed_entity) == ["place-aqucl"]
+      end
     end
   end
 

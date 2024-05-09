@@ -3,6 +3,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations do
   Gives a combination based on service type and effect
   """
 
+  alias AlertsUI.Models.InformedEntity
   alias MBTAV3API.Routes.Route
 
   @type service_effect_combination() :: :R | :RDS | :RDT | :RDTS | :SR
@@ -123,7 +124,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations do
     |> Enum.reduce([R: false, D: false, T: false, S: false], fn ie, acc ->
       [
         R: Map.get(ie, :route_id, false) || acc[:R],
-        D: Map.get(ie, :direction_id, false) || acc[:D],
+        D: get_direction(ie) || acc[:D],
         T: Map.get(ie, :trip, false) || acc[:T],
         S: Map.get(ie, :stop_id, false) || acc[:S]
       ]
@@ -135,6 +136,18 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations do
       :"" -> nil
       :RS -> :SR
       other -> other
+    end
+  end
+
+  @spec get_direction(InformedEntity.t()) :: integer() | false
+  defp get_direction(ie) do
+    ie_direction = Map.get(ie, :direction_id)
+
+    if is_nil(ie_direction) do
+      trip = Map.get(ie, :trip) || %{}
+      Map.get(trip, :direction_id, false)
+    else
+      ie_direction
     end
   end
 end

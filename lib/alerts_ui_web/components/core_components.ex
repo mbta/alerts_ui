@@ -401,7 +401,7 @@ defmodule AlertsUIWeb.CoreComponents do
         multiple={@multiple}
         {@rest}
       >
-        <option :if={@prompt} value="default" selected><%= @prompt %></option>
+        <option :if={@prompt} value="default"><%= @prompt %></option>
         <%= Form.options_for_select(@options, @value) %>
       </select>
       <.select_error :for={msg <- @errors}><%= msg %></.select_error>

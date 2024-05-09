@@ -168,9 +168,9 @@ defmodule AlertsUI.AlertBuilderTest do
                }
 
         result |> Alerts.create_or_update_alert()
-        [alert_1, alert_2] = Alerts.list_all()
-        assert alert_1.alert_id == existing_alert.alert_id
-        assert alert_2.alert_id |> String.to_integer() > alert_1.alert_id |> String.to_integer()
+        [alert_1, alert_2] = Alerts.list_all() |> Enum.sort()
+        assert alert_1.alert_id |> String.to_integer() > alert_2.alert_id |> String.to_integer()
+        assert alert_2.alert_id == existing_alert.alert_id
       end
     end
 

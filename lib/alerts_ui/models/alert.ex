@@ -17,6 +17,7 @@ defmodule AlertsUI.Models.Alert do
   }
 
   alias MBTAV3API.Routes.Route
+  alias MBTAV3API.Stops.Repo, as: StopsRepo
 
   @permitted_fields ~w(
   id
@@ -225,7 +226,14 @@ defmodule AlertsUI.Models.Alert do
   def get_direction(informed_entities) do
     directions_list =
       informed_entities
-      |> Enum.map(& &1.direction_id)
+      |> Enum.map(fn ie ->
+        if is_nil(Map.get(ie, :direction_id)) do
+          trip = Map.get(ie, :trip) || %{}
+          Map.get(trip, :direction_id)
+        else
+          ie.direction_id
+        end
+      end)
       |> Enum.uniq()
       |> Enum.filter(&(!is_nil(&1)))
 
@@ -282,9 +290,13 @@ defmodule AlertsUI.Models.Alert do
     |> Enum.uniq()
   end
 
-  def gather_stop_ids(informed_entities) do
+  def gather_parent_stop_ids(informed_entities) do
     informed_entities
-    |> Enum.map(&Map.get(&1, :stop_id))
+    |> Enum.map(fn ie ->
+      ie_stop_id = Map.get(ie, :stop_id)
+      parent_stop = StopsRepo.get_parent(ie_stop_id) || %{}
+      Map.get(parent_stop, :id) || ie_stop_id
+    end)
     |> Enum.filter(&(!is_nil(&1)))
     |> Enum.uniq()
   end
