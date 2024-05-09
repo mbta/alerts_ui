@@ -76,6 +76,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
         active_period: [
           build(:active_period, %{start: ~U[2023-10-02 18:42:00Z], end: ~U[2023-10-20 20:00:00Z]})
         ],
+        active_period_start: ~U[2023-10-02 18:42:00Z],
         informed_entity: [
           informed_entity_1,
           informed_entity_2
@@ -148,6 +149,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
               end: 1_697_832_000
             }
           ],
+          active_period_start: 1_696_272_120,
           informed_entity: [
             %{
               agency_id: "1",

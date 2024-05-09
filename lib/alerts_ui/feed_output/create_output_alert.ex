@@ -37,6 +37,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
           duration_certainty: Map.get(alert, :duration_certainty),
           reminder_times: Map.get(alert, :reminder_times),
           active_period: Map.get(alert, :active_period) |> build_active_periods,
+          active_period_start: Map.get(alert, :active_period_start) |> date_time_to_unix,
           image: Map.get(alert, :image_url) |> build_translated_image,
           image_alternative_text:
             Map.get(alert, :image_alternative_text) |> build_translated_string,
