@@ -71,7 +71,6 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
         last_push_notification_timestamp: ~U[2023-09-21 14:18:54Z],
         closed_timestamp: ~U[2023-09-22 14:18:54Z],
         timeframe_text: "through October 20",
-        alert_lifecycle: :ONGOING,
         duration_certainty: :KNOWN,
         active_period: [
           build(:active_period, %{start: ~U[2023-10-02 18:42:00Z], end: ~U[2023-10-20 20:00:00Z]})
@@ -149,7 +148,6 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
               end: 1_697_832_000
             }
           ],
-          active_period_start: 1_696_272_120,
           informed_entity: [
             %{
               agency_id: "1",
