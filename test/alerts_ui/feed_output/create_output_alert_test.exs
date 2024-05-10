@@ -71,11 +71,11 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
         last_push_notification_timestamp: ~U[2023-09-21 14:18:54Z],
         closed_timestamp: ~U[2023-09-22 14:18:54Z],
         timeframe_text: "through October 20",
-        alert_lifecycle: :ONGOING,
         duration_certainty: :KNOWN,
         active_period: [
           build(:active_period, %{start: ~U[2023-10-02 18:42:00Z], end: ~U[2023-10-20 20:00:00Z]})
         ],
+        active_period_start: ~U[2023-10-02 18:42:00Z],
         informed_entity: [
           informed_entity_1,
           informed_entity_2

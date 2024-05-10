@@ -5,7 +5,7 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
 
   describe "write_json_file/2" do
     test "it writes" do
-      insert(:alert, alert_id: "123abc")
+      insert(:alert, alert_id: "123abc", active_period_start: ~U[2023-10-12 00:01:00Z])
 
       expected_alert = %{
         "alert" => %{
@@ -14,7 +14,8 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
           "header_text" => %{"translation" => [%{"language" => "en", "text" => "a"}]},
           "informed_entity" => [
             %{"activities" => [], "route_id" => "1", "trip" => %{"trip_id" => "1"}}
-          ]
+          ],
+          "alert_lifecycle" => "ONGOING"
         },
         "id" => "123abc"
       }

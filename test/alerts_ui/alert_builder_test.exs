@@ -1,6 +1,6 @@
 defmodule AlertsUI.AlertBuilderTest do
   @moduledoc false
-  use AlertsUI.DataCase, async: false
+  use AlertsUI.DataCase
   import AlertsUI.Support.Factory
   import Mock
   alias AlertsUI.AlertBuilder
