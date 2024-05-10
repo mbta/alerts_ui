@@ -116,7 +116,7 @@ defmodule AlertsUI.Models.AlertTest do
       {:ok, new_last_modified_timestamp} =
         fetch_change(changeset, :last_modified_timestamp)
 
-      assert new_last_modified_timestamp > @five_minutes_ago
+      assert DateTime.compare(new_last_modified_timestamp, @five_minutes_ago) == :gt
     end
 
     test "does not change created_timestamp on an existing alert" do

@@ -94,7 +94,7 @@ defmodule AlertsUI.AlertsTest do
       Alerts.create_or_update_alert(new_params, existing_alert)
       updated_alert = Repo.get_by(Alert, id: existing_alert.id)
 
-      assert updated_alert.last_modified_timestamp > @five_minutes_ago
+      assert DateTime.compare(updated_alert.last_modified_timestamp, @five_minutes_ago) == :gt
     end
 
     test "does not change created_timestamp when updating an existing alert" do
