@@ -55,7 +55,10 @@ defmodule AlertsUI.Alerts do
   @spec create_or_modify_alert_from_feed(map()) ::
           nil | :ok
   def create_or_modify_alert_from_feed(incoming_alert) do
-    most_recent_alert = Repo.one(get_alert_by_alert_id_query(incoming_alert.alert_id))
+    most_recent_alert =
+      incoming_alert.alert_id
+      |> get_alert_by_alert_id_query()
+      |> Repo.one()
 
     case create_changeset_from_feed(
            :repo,
@@ -76,7 +79,7 @@ defmodule AlertsUI.Alerts do
     |> Repo.transaction()
     |> case do
       {:ok, _} ->
-        nil
+        :ok
 
       {:error, _, changeset, _} ->
         Logger.warning("Error persisting alert with ID #{get_field(changeset, :alert_id)}")
