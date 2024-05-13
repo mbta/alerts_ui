@@ -66,6 +66,9 @@ defmodule AlertsUI.FeedOutput.CompareFeed do
     {incoming_ap, filtered_incoming} = Map.pop(filtered_incoming, "active_period", [])
     {outgoing_ap, filtered_outgoing} = Map.pop(filtered_outgoing, "active_period", [])
 
+    filtered_incoming = filtered_incoming |> Map.delete("alert_lifecycle")
+    filtered_outgoing = filtered_outgoing |> Map.delete("alert_lifecycle")
+
     with %{value: _, changed: :equal} <- MapDiff.diff(filtered_incoming, filtered_outgoing),
          :ok <- compare_active_periods(incoming_ap, outgoing_ap, incoming["id"]),
          :ok <- compare_informed_entities(incoming_ie, outgoing_ie, incoming["id"]) do
