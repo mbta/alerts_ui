@@ -266,7 +266,7 @@ defmodule AlertsUIWeb.SharedComponents do
         name={@name}
         class={[
           "bg-bg-primary border border-border-primary pl-3 py-1.5 rounded text-text-primary disabled:text-text-secondary focus:border-border-focus",
-          @errors != [] && "border-rose-400 focus:border-rose-400"
+          @errors != [] && "border-danger focus:border-danger"
         ]}
         multiple={@multiple}
         {@rest}
