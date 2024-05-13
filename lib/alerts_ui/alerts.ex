@@ -200,6 +200,20 @@ defmodule AlertsUI.Alerts do
     )
   end
 
+  @spec list_all_recently_closed() :: [Alert.t()]
+  def list_all_recently_closed do
+    Repo.all(
+      from(
+        a in Alert,
+        where: not is_nil(a.closed_timestamp) and a.closed_timestamp > from_now(-5, "minute"),
+        inner_join: ie in AlertsUI.Models.InformedEntity,
+        on: ie.alert_id == a.id,
+        preload: [informed_entity: {ie, :trip}],
+        order_by: [asc: a.alert_id]
+      )
+    )
+  end
+
   @spec list_all() :: [Alert.t()]
   def list_all do
     Repo.all(

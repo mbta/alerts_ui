@@ -3,12 +3,19 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
   import AlertsUI.Support.Factory
   alias AlertsUI.FeedOutput.WriteFeed
 
-  describe "write_json_file/2" do
+  describe "write_feed/0" do
     test "it writes" do
-      insert(:alert, alert_id: "123abc", active_period_start: ~U[2023-10-12 00:01:00Z])
+      four_minutes_ago = DateTime.utc_now() |> DateTime.add(-4, :minute)
+
+      insert(:alert,
+        alert_id: "123abc",
+        active_period_start: ~U[2023-10-12 00:01:00Z],
+        closed_timestamp: four_minutes_ago
+      )
 
       expected_alert = %{
         "alert" => %{
+          "closed_timestamp" => four_minutes_ago |> DateTime.to_unix(),
           "active_period" => [%{"end" => 1_697_155_260, "start" => 1_697_068_860}],
           "description_text" => %{"translation" => [%{"language" => "en", "text" => "b"}]},
           "header_text" => %{"translation" => [%{"language" => "en", "text" => "a"}]},

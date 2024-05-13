@@ -734,6 +734,26 @@ defmodule AlertsUI.AlertsTest do
     end
   end
 
+  describe "list_all_recently_closed/0" do
+    test "lists all alerts that were closed more recently than 5 minutes ago" do
+      current_time = DateTime.utc_now()
+      three_minutes_ago = DateTime.add(current_time, -3, :minute)
+      seven_minutes_ago = DateTime.add(current_time, -7, :minute)
+      one_minute_from_now = DateTime.add(current_time, 1, :minute)
+      insert(:alert, %{alert_id: "234", closed_timestamp: three_minutes_ago})
+      insert(:alert, %{alert_id: "456", closed_timestamp: seven_minutes_ago})
+      insert(:alert, %{alert_id: "789", closed_timestamp: one_minute_from_now})
+      insert(:alert, %{alert_id: "123"})
+
+      all_alerts = Alerts.list_all_recently_closed()
+
+      assert Enum.find(all_alerts, &(&1.alert_id == "234"))
+      assert Enum.find(all_alerts, &(&1.alert_id == "789"))
+      refute Enum.find(all_alerts, &(&1.alert_id == "456"))
+      refute Enum.find(all_alerts, &(&1.alert_id == "123"))
+    end
+  end
+
   describe "list_all/0" do
     test "lists all alerts" do
       insert(:alert, %{alert_id: "123"})
