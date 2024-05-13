@@ -63,17 +63,17 @@ defmodule AlertsUI.FeedOutput.CompareFeed do
     {incoming_ie, filtered_incoming} = Map.pop(incoming["alert"], "informed_entity", [])
     {outgoing_ie, filtered_outgoing} = Map.pop(outgoing["alert"], "informed_entity", [])
 
-    {incoming_ap, filtered_incoming} = Map.pop(filtered_incoming, "active_period", [])
-    {outgoing_ap, filtered_outgoing} = Map.pop(filtered_outgoing, "active_period", [])
+    # {incoming_ap, filtered_incoming} = Map.pop(filtered_incoming, "active_period", [])
+    # {outgoing_ap, filtered_outgoing} = Map.pop(filtered_outgoing, "active_period", [])
 
     filtered_incoming =
-      filtered_incoming |> Map.drop(["alert_lifecycle", "last_modified_timestamp"])
+      filtered_incoming |> Map.drop(["alert_lifecycle", "last_modified_timestamp", "active_period"])
 
     filtered_outgoing =
-      filtered_outgoing |> Map.drop(["alert_lifecycle", "last_modified_timestamp"])
+      filtered_outgoing |> Map.drop(["alert_lifecycle", "last_modified_timestamp", "active_period"])
 
     with %{value: _, changed: :equal} <- MapDiff.diff(filtered_incoming, filtered_outgoing),
-         :ok <- compare_active_periods(incoming_ap, outgoing_ap, incoming["id"]),
+        #  :ok <- compare_active_periods(incoming_ap, outgoing_ap, incoming["id"]),
          :ok <- compare_informed_entities(incoming_ie, outgoing_ie, incoming["id"]) do
       :ok
     else
