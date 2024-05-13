@@ -10,6 +10,9 @@ defmodule AlertsUIWeb.SharedComponents do
   """
   use Phoenix.Component
 
+  alias AlertsUIWeb.CoreComponents
+  alias Phoenix.HTML.{Form, FormField}
+
   @doc """
   Renders a body tag.
 
@@ -222,6 +225,86 @@ defmodule AlertsUIWeb.SharedComponents do
     ">
       <%= render_slot(@inner_block) %>
     </button>
+    """
+  end
+
+  @doc """
+  Renders a select input.
+
+  ##Examples
+    <.select />
+  """
+  attr :label, :string, default: nil
+
+  attr :field, FormField,
+    required: true,
+    doc: "a form field struct retrieved from the form, for example: @form[:email]"
+
+  attr :prompt, :string, default: nil, doc: "the prompt for select inputs"
+
+  attr :options, :list,
+    required: true,
+    doc: "the options to pass to Phoenix.HTML.Form.options_for_select/2"
+
+  attr :multiple, :boolean, default: false, doc: "whether this input allows multiple selections"
+
+  attr :rest, :global, include: ~w(disabled)
+
+  def select(%{field: %FormField{} = field} = assigns) do
+    assigns =
+      assigns
+      |> assign(field: nil, id: field.id)
+      |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
+      |> assign_new(:name, fn -> if assigns.multiple, do: field.name <> "[]", else: field.name end)
+      |> assign_new(:value, fn -> field.value end)
+
+    ~H"""
+    <div phx-feedback-for={@name} class="mb-5">
+      <.label for={@id}><%= @label %></.label>
+      <select
+        id={@id}
+        name={@name}
+        class={[
+          "bg-bg-primary border border-border-primary pl-3 py-1.5 rounded text-text-primary disabled:text-text-secondary focus:border-border-focus",
+          @errors != [] && "border-danger focus:border-danger"
+        ]}
+        multiple={@multiple}
+        {@rest}
+      >
+        <option :if={@prompt} value="default"><%= @prompt %></option>
+        <%= Form.options_for_select(@options, @value) %>
+      </select>
+      <.select_error :for={msg <- @errors}><%= msg %></.select_error>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a label.
+  """
+  attr :for, :string, default: nil
+  slot :inner_block, required: true
+
+  def label(assigns) do
+    ~H"""
+    <label for={@for} class="block font-medium leading-tight mb-2">
+      <%= render_slot(@inner_block) %>
+    </label>
+    """
+  end
+
+  @doc """
+  Renders an error block that works with select.
+  """
+  attr :for, :string, default: nil
+  slot :inner_block, required: true
+
+  def select_error(assigns) do
+    ~H"""
+    <p for={@for} class="flex gap-2 mt-1 text-sm text-text-error">
+      <CoreComponents.icon name="hero-exclamation-circle" class="flex-none h-4 mt-0.5 w-4" />
+      <%= render_slot(@inner_block) %>
+    </p>
     """
   end
 end
