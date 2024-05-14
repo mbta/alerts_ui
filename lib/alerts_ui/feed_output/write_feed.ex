@@ -18,13 +18,7 @@ defmodule AlertsUI.FeedOutput.WriteFeed do
       Alerts.list_all_open()
       |> Enum.map(&CreateOutputAlert.build_alert/1)
 
-    recently_closed_alerts =
-      Alerts.list_all_recently_closed()
-      |> Enum.map(&CreateOutputAlert.build_alert/1)
-
-    # when we diff we want to compare only closed alerts. Remove this line
-    # when diffing is turned off
-    recently_closed_alerts = if compare_feed(), do: [], else: recently_closed_alerts
+    recently_closed_alerts = get_recently_closed_alerts(compare_feed())
 
     with {:ok, alerts_json} <- write_json_file(Enum.concat(open_alerts, recently_closed_alerts)),
          :ok <- write_protobuf_file(open_alerts) do
@@ -32,6 +26,15 @@ defmodule AlertsUI.FeedOutput.WriteFeed do
     else
       {:error, reason} -> {:error, reason}
     end
+  end
+
+  # when we diff we want to compare only closed alerts. Remove this line
+  # when diffing is turned off
+  defp get_recently_closed_alerts(true), do: []
+
+  defp get_recently_closed_alerts(false) do
+    Alerts.list_all_recently_closed()
+    |> Enum.map(&CreateOutputAlert.build_alert/1)
   end
 
   defp write_json_file(alerts) do

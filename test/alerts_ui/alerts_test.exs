@@ -740,17 +740,17 @@ defmodule AlertsUI.AlertsTest do
       three_minutes_ago = DateTime.add(current_time, -3, :minute)
       seven_minutes_ago = DateTime.add(current_time, -7, :minute)
       one_minute_from_now = DateTime.add(current_time, 1, :minute)
-      insert(:alert, %{alert_id: "234", closed_timestamp: three_minutes_ago})
-      insert(:alert, %{alert_id: "456", closed_timestamp: seven_minutes_ago})
-      insert(:alert, %{alert_id: "789", closed_timestamp: one_minute_from_now})
-      insert(:alert, %{alert_id: "123"})
+      insert(:alert, %{alert_id: "3_minutes_ago", closed_timestamp: three_minutes_ago})
+      insert(:alert, %{alert_id: "7_minutes_ago", closed_timestamp: seven_minutes_ago})
+      insert(:alert, %{alert_id: "one_minute_from_now", closed_timestamp: one_minute_from_now})
+      insert(:alert, %{alert_id: "no_closed_timestamp"})
 
       all_alerts = Alerts.list_all_recently_closed()
 
-      assert Enum.find(all_alerts, &(&1.alert_id == "234"))
-      assert Enum.find(all_alerts, &(&1.alert_id == "789"))
-      refute Enum.find(all_alerts, &(&1.alert_id == "456"))
-      refute Enum.find(all_alerts, &(&1.alert_id == "123"))
+      assert Enum.find(all_alerts, &(&1.alert_id == "3_minutes_ago"))
+      assert Enum.find(all_alerts, &(&1.alert_id == "one_minute_from_now"))
+      refute Enum.find(all_alerts, &(&1.alert_id == "7_minutes_ago"))
+      refute Enum.find(all_alerts, &(&1.alert_id == "no_closed_timestamp"))
     end
   end
 
