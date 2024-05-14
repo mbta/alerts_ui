@@ -8,19 +8,33 @@ defmodule AlertsUI.FeedOutput.WriteFeed do
 
   alias AlertsUI.Alerts
   alias AlertsUI.FeedOutput.{CreateGtfsJson, CreateGtfsProtobuf, CreateOutputAlert}
+  @spec compare_feed :: boolean()
+  defp compare_feed,
+    do: Application.get_env(:alerts_ui, :compare_feed) == "true"
 
   @spec write_feed() :: {:ok, binary()} | {:error, String.t()}
   def write_feed(_opts \\ []) do
-    alerts =
+    open_alerts =
       Alerts.list_all_open()
       |> Enum.map(&CreateOutputAlert.build_alert/1)
 
-    with {:ok, alerts_json} <- write_json_file(alerts),
-         :ok <- write_protobuf_file(alerts) do
+    recently_closed_alerts = get_recently_closed_alerts(compare_feed())
+
+    with {:ok, alerts_json} <- write_json_file(Enum.concat(open_alerts, recently_closed_alerts)),
+         :ok <- write_protobuf_file(open_alerts) do
       {:ok, alerts_json |> Jason.decode!()}
     else
       {:error, reason} -> {:error, reason}
     end
+  end
+
+  # when we diff we want to compare only closed alerts. Remove this line
+  # when diffing is turned off
+  defp get_recently_closed_alerts(true), do: []
+
+  defp get_recently_closed_alerts(false) do
+    Alerts.list_all_recently_closed()
+    |> Enum.map(&CreateOutputAlert.build_alert/1)
   end
 
   defp write_json_file(alerts) do
