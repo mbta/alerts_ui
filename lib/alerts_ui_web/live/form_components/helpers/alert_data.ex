@@ -45,14 +45,16 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     alert = Alerts.get_by_alert_id(alert_id)
     effect_map = Effect.effect_map_by_detail(Map.get(alert, :effect_detail))
     informed_entities = Map.get(alert, :informed_entity, [])
-    combination = ServiceEffectCombinations.get_combination(informed_entities)
+    route_type = Alert.get_route_type(alert)
+    effect_name = Map.get(effect_map, :effect_name)
+    combination = ServiceEffectCombinations.get_combination(route_type, effect_name)
 
     active_period_end = Map.get(alert, :active_period_end) |> shift_to_naive()
 
     %__MODULE__{
-      route_type: Alert.get_route_type(alert),
+      route_type: route_type,
       direction: Alert.get_direction(informed_entities),
-      effect_name: Map.get(effect_map, :effect_name),
+      effect_name: effect_name,
       route_ids: Alert.gather_route_ids(informed_entities),
       stop_ids: Alert.gather_parent_stop_ids(informed_entities),
       trip_ids: Alert.gather_trip_ids(informed_entities),
