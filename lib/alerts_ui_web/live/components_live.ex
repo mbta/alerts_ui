@@ -10,18 +10,22 @@ defmodule AlertsUIWeb.ComponentsLive do
   @primary_key false
   embedded_schema do
     field :single_select, {:array, :integer}
+    field :single_select_error, {:array, :integer}
     field :text_input, :string
+    field :text_input_error, :string
     field :textarea, :string
+    field :textarea_error, :string
   end
 
-  @fields ~w[single_select text_input textarea]a
-  @required_fields ~w[single_select text_input textarea]a
+  @fields ~w[single_select text_input textarea single_select_error text_input_error textarea_error]a
+  @errored_fields ~w[single_select_error text_input_error textarea_error]a
 
   @impl true
   def mount(_params, _session, socket) do
     form =
       %__MODULE__{}
       |> changeset(%{})
+      |> Map.put(:action, :validate)
       |> to_form()
 
     {:ok, assign(socket, %{form: form})}
@@ -52,7 +56,13 @@ defmodule AlertsUIWeb.ComponentsLive do
   defp changeset(changeset, params) do
     changeset
     |> cast(params, @fields)
-    |> validate_required(@required_fields)
+    |> add_errors()
+  end
+
+  defp add_errors(changeset) do
+    Enum.reduce(@errored_fields, changeset, fn error_field, acc ->
+      acc |> add_error(error_field, "Error in #{error_field} field!", on_purpose: :yes)
+    end)
   end
 
   defp single_select_options do

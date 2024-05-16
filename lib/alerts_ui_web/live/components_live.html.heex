@@ -96,6 +96,12 @@
       prompt="All"
       disabled={true}
     />
+    <.select
+      label="Errored Select"
+      field={@form[:single_select_error]}
+      options={single_select_options()}
+      prompt="All"
+    />
     <.text label="Text Input" field={@form[:text_input]} placeholder="Text Input" />
     <.text
       label="Disabled Text Input"
@@ -103,12 +109,22 @@
       placeholder="Disabled Text Input"
       disabled={true}
     />
+    <.text
+      label="Errored Text Input"
+      field={@form[:text_input_error]}
+      placeholder="Errored Text Input"
+    />
     <.textarea label="TextArea" field={@form[:textarea]} placeholder="TextArea" />
     <.textarea
       label="Disabled TextArea"
       field={@form[:textarea]}
       placeholder="Disabled TextArea"
       disabled={true}
+    />
+    <.textarea
+      label="Errored TextArea"
+      field={@form[:textarea_error]}
+      placeholder="Errored TextArea"
     />
   </.form>
 </div>
