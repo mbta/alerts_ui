@@ -265,7 +265,10 @@ defmodule AlertsUIWeb.SharedComponents do
         id={@id}
         name={@name}
         class={[
-          "bg-bg-primary border border-border-primary pl-3 py-1.5 rounded text-text-primary disabled:text-text-secondary focus:border-border-focus",
+          "bg-bg-primary border border-border-primary pl-3 py-1.5
+            rounded text-text-primary disabled:text-text-secondary
+            disabled:bg-bg-elevation-3  focus:border-border-focus
+            focus:drop-shadow-input",
           @errors != [] && "border-danger focus:border-danger"
         ]}
         multiple={@multiple}
@@ -305,6 +308,93 @@ defmodule AlertsUIWeb.SharedComponents do
       <CoreComponents.icon name="hero-exclamation-circle" class="flex-none h-4 mt-0.5 w-4" />
       <%= render_slot(@inner_block) %>
     </p>
+    """
+  end
+
+  @doc """
+  Renders a text input
+    ##Examples
+    <.text />
+  """
+  attr :label, :string, default: nil
+
+  attr :field, FormField,
+    required: true,
+    doc: "a form field struct retrieved from the form, for example: @form[:email]"
+
+  attr :placeholder, :string, default: nil, doc: "placeholder text"
+  attr :rest, :global, include: ~w(disabled)
+
+  def text(%{field: %FormField{} = field} = assigns) do
+    assigns =
+      assigns
+      |> assign(field: nil, id: field.id)
+      |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
+      |> assign_new(:name, fn -> field.name end)
+      |> assign_new(:value, fn -> field.value end)
+
+    ~H"""
+    <div phx-feedback-for={@name} class="mb-5">
+      <.label for={@id}><%= @label %></.label>
+      <input
+        type="text"
+        id={@id}
+        name={@name}
+        placeholder={@placeholder}
+        class={[
+          "bg-bg-primary border border-border-primary pl-3 py-1.5
+            rounded text-text-primary disabled:text-text-secondary
+            disabled:bg-bg-elevation-3 focus:border-border-focus
+            focus:drop-shadow-input",
+          @errors != [] && "border-danger focus:border-danger"
+        ]}
+        {@rest}
+      />
+      <.select_error :for={msg <- @errors}><%= msg %></.select_error>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a textarea input
+    ##Examples
+    <.textarea />
+  """
+  attr :label, :string, default: nil
+
+  attr :field, FormField,
+    required: true,
+    doc: "a form field struct retrieved from the form, for example: @form[:email]"
+
+  attr :placeholder, :string, default: nil, doc: "placeholder text"
+  attr :rest, :global, include: ~w(disabled)
+
+  def textarea(%{field: %FormField{} = field} = assigns) do
+    assigns =
+      assigns
+      |> assign(field: nil, id: field.id)
+      |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
+      |> assign_new(:name, fn -> field.name end)
+      |> assign_new(:value, fn -> field.value end)
+
+    ~H"""
+    <div phx-feedback-for={@name} class="mb-5">
+      <.label for={@id}><%= @label %></.label>
+      <textarea
+        id={@id}
+        name={@name}
+        placeholder={@placeholder}
+        class={[
+          "bg-bg-primary border border-border-primary pl-3 py-1.5
+            rounded text-text-primary disabled:text-text-secondary
+            disabled:bg-bg-elevation-3 focus:border-border-focus
+            focus:drop-shadow-input",
+          @errors != [] && "border-danger focus:border-danger"
+        ]}
+        {@rest}
+      />
+      <.select_error :for={msg <- @errors}><%= msg %></.select_error>
+    </div>
     """
   end
 end

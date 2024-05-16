@@ -10,10 +10,12 @@ defmodule AlertsUIWeb.ComponentsLive do
   @primary_key false
   embedded_schema do
     field :single_select, {:array, :integer}
+    field :text_input, :string
+    field :textarea, :string
   end
 
-  @fields ~w[single_select]a
-  @required_fields ~w[single_select]a
+  @fields ~w[single_select text_input textarea]a
+  @required_fields ~w[single_select text_input textarea]a
 
   @impl true
   def mount(_params, _session, socket) do

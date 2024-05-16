@@ -74,7 +74,7 @@
 
   <.h2>Buttons</.h2>
 
-  <div class="inline-grid gap-4 grid-cols-1">
+  <div class="inline-grid gap-4 grid-cols-1 mb-4">
     <.button_primary>Primary Button</.button_primary>
     <br />
     <.button_secondary>Secondary Button</.button_secondary>
@@ -94,6 +94,20 @@
       field={@form[:single_select]}
       options={single_select_options()}
       prompt="All"
+      disabled={true}
+    />
+    <.text label="Text Input" field={@form[:text_input]} placeholder="Text Input" />
+    <.text
+      label="Disabled Text Input"
+      field={@form[:text_input]}
+      placeholder="Disabled Text Input"
+      disabled={true}
+    />
+    <.textarea label="TextArea" field={@form[:textarea]} placeholder="TextArea" />
+    <.textarea
+      label="Disabled TextArea"
+      field={@form[:textarea]}
+      placeholder="Disabled TextArea"
       disabled={true}
     />
   </.form>
