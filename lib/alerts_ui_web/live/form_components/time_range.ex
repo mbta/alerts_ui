@@ -94,7 +94,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
     ~H"""
     <div
-      class={unless @progress.name == "details", do: "hidden", else: "min-w-full flex flex-col"}
+      class={unless @progress.name == "details", do: "hidden", else: "min-w-full flex flex-col mt-4"}
       id="time_range_view"
     >
       <.form
@@ -104,16 +104,16 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         class="form-control gap-4"
         id="time_range_form"
       >
-        <fieldset class="flex flex-row gap-4">
+        <fieldset class="flex flex-row gap-12">
           <.input
             type="datetime-local"
             field={@form[:active_period_start]}
             min={@current_time}
             label="Start"
+            class="min-w-[16rem]"
           />
 
-          <.input
-            type="select"
+          <.select
             label="End"
             field={@form[:active_period_end_specifier]}
             options={[
@@ -122,6 +122,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
               {"futher notice", :further_notice},
               {"pick a date and time", :pick_a_date_and_time}
             ]}
+            class="min-w-[16rem]"
           />
           <div
             id="end-selector-div"
@@ -136,6 +137,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
               field={@form[:active_period_end]}
               min={@current_time}
               label="Select Ending"
+              class="min-w-[16rem]"
             />
           </div>
         </fieldset>

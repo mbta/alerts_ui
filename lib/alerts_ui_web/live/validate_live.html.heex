@@ -3,20 +3,20 @@
 
   <div class="grid grid-cols-2 gap-x-4">
     <div>
-      <h2>Feed: IBI</h2>
+      <.h2>Feed: IBI</.h2>
 
       <.search_form value={@ibi_alert_id} name="ibi_alert_id" label="Alert ID" />
     </div>
 
     <div>
-      <h2>Feed: Dev Orange</h2>
+      <.h2>Feed: Dev Orange</.h2>
 
       <.search_form value={@dev_orange_alert_id} name="dev_orange_alert_id" label="Alert ID" />
     </div>
   </div>
 
   <div :if={@comparison} class="grid grid-cols-1">
-    <h2>Comparison</h2>
+    <.h2>Comparison</.h2>
 
     <pre>
       <%= pretty_print(@comparison) %>

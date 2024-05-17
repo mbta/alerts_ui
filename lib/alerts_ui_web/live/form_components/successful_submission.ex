@@ -46,15 +46,15 @@ defmodule AlertsUIWeb.FormComponents.SuccessfulSubmission do
       class={unless @progress.name == "success", do: "hidden", else: "min-w-full"}
       id="success_view"
     >
-      Alert #<%= @alert_id %> created successfully
-      <.button
+      <.h3 class="mr-4">Alert #<%= @alert_id %> created successfully</.h3>
+      <.button_primary
         phx-click="ok"
         phx-target={@myself}
-        class="btn btn-outline basis-8 self-center px-8"
+        class="basis-8 self-center min-w-[6rem]"
         id="success_button"
       >
         ok!
-      </.button>
+      </.button_primary>
       <p :if={@show_created_alert}>
         Alert Created: <pre :if={@show_created_alert}>
         <%= @alert_json %>

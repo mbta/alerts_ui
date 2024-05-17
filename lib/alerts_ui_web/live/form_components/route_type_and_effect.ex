@@ -124,7 +124,9 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
         id="route_types_form"
       >
         <div class="flex flex-row">
-          <h2 class="mr-28 min-w-fit text-slate-400">Select Service Type</h2>
+          <div class="w-4 mr-4 min-w-[25%]">
+            <.h2>Select Service Type</.h2>
+          </div>
           <div class="grid grid-cols-2 gap-4 mb-4 min-w-[50%]">
             <div :for={route_type <- @route_types}>
               <%= route_type_buttons(assigns, route_type) %>
@@ -135,11 +137,11 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
 
         <hr class={if is_nil(@selected_route_type), do: "hidden"} />
         <div class="flex flex-row">
-          <h2 class={
-            if is_nil(@selected_route_type), do: "hidden", else: "mr-28 min-w-fit text-slate-400"
-          }>
-            Select Effect
-          </h2>
+          <div class="w-4 mr-4 min-w-[25%]">
+            <.h2 hidden={is_nil(@selected_route_type)}>
+              Select Effect
+            </.h2>
+          </div>
           <div class="grid grid-cols-4 gap-4 min-w-[50%]">
             <div :for={effect <- @effects} class={if is_nil(@selected_route_type), do: "hidden"}>
               <%= effect_buttons(assigns, effect) %>
@@ -148,54 +150,56 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
           </div>
         </div>
       </.form>
-      <button
+      <.button_secondary
         phx-target={@myself}
         phx-click="save_as_draft"
         phx-value-effect_name={@selected_effect}
         phx-value-route_type={@selected_route_type}
         name="draft"
         id="draft"
-        class={
-          if is_nil(@selected_route_type),
-            do: "hidden",
-            else: "btn rounded-lg mt-8 basis-8 self-center px-8 min-w-[25%] font-extrabold"
-        }
+        hidden={is_nil(@selected_route_type)}
+        class="mt-24 basis-8 self-center min-w-[15%] font-extrabold"
       >
         Save as Draft
-      </button>
+      </.button_secondary>
     </div>
     """
   end
 
   def route_type_buttons(assigns, route_type) do
-    button_class =
-      if is_nil(assigns.selected_route_type) or route_type == assigns.selected_route_type do
-        "btn-primary"
-      else
-        "btn-default"
-      end
+    show_primary =
+      is_nil(assigns.selected_route_type) or route_type == assigns.selected_route_type
 
-    assigns = assign(assigns, %{route_type: route_type, button_class: button_class})
+    assigns = assign(assigns, %{route_type: route_type, show_primary: show_primary})
 
     ~H"""
-    <button
-      type="button"
+    <.button_primary
+      :if={@show_primary}
       phx-target={@myself}
       phx-click="route_type"
-      class={"btn rounded-lg #{@button_class} basis-8 self-center px-8 w-full font-extrabold"}
+      class="basis-8 self-center w-full font-extrabold"
       value={@route_type}
     >
       <%= @route_type %>
-    </button>
+    </.button_primary>
+    <.button_secondary
+      :if={!@show_primary}
+      phx-target={@myself}
+      phx-click="route_type"
+      class="basis-8 self-center w-full font-extrabold"
+      value={@route_type}
+    >
+      <%= @route_type %>
+    </.button_secondary>
     """
   end
 
   def effect_buttons(assigns, effect) do
     button_class =
       if is_nil(assigns.selected_effect) or effect == assigns.selected_effect do
-        "btn-primary"
+        ""
       else
-        "btn-default"
+        ""
       end
 
     assigns =
@@ -205,14 +209,14 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
       })
 
     ~H"""
-    <button
+    <.button_primary
       phx-target={@myself}
       phx-click="effect"
-      class={"btn rounded-lg #{@button_class} basis-8 self-center px-8 w-full font-extrabold"}
+      class={"#{@button_class} basis-8 self-center w-full font-extrabold"}
       value={@effect}
     >
       <%= @effect %>
-    </button>
+    </.button_primary>
     """
   end
 end

@@ -56,14 +56,14 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
         class="form-control gap-4"
         id="systemwide-affected-service-form"
       >
-        <fieldset class="flex flex-row gap-4">
-          <.input
-            type="select"
+        <fieldset class="flex flex-row gap-12">
+          <.select
             label="Service Type(s)"
             field={@form[:service_types]}
             options={service_type_options()}
             multiple={true}
             prompt="All"
+            class="min-w-[16rem]"
           />
         </fieldset>
       </.form>
