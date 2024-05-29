@@ -76,16 +76,16 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         ],
         duration_certainty: :KNOWN,
         informed_entity: [
-          %{route_type: 3, route_id: "1", direction_id: 0},
+          %{route_type: 3, route_id: "1"},
           %{route_type: 3, route_id: "2", stop_id: "a2"},
-          %{route_type: 3, route_id: "3", stop_id: "a3", direction_id: 0},
+          %{route_type: 3, route_id: "3", stop_id: "a3"},
           %{route_type: 3, route_id: "4", trip: build(:trip_descriptor, %{trip_id: "b1"})}
         ]
       })
 
       assert AlertData.build_alert_data("1") == %AlertData{
                combination: :RDS,
-               direction: "0",
+               direction: nil,
                effect_name: "Delay",
                route_type: 3,
                route_ids: ["1", "2", "3", "4"],
