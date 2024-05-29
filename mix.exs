@@ -104,7 +104,7 @@ defmodule AlertsUI.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:postgrex, ">= 0.0.0"},
       {:req, "~> 0.4.0"},
-      {:stream_data, "~> 1.0.0", only: :test},
+      {:stream_data, "~> 1.1.0", only: :test},
       {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
