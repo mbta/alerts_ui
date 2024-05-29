@@ -277,7 +277,7 @@ defmodule AlertsUIWeb.SharedComponents do
         <option :if={@prompt} value="default"><%= @prompt %></option>
         <%= Form.options_for_select(@options, @value) %>
       </select>
-      <.select_error :for={msg <- @errors}><%= msg %></.select_error>
+      <.input_error :for={msg <- @errors}><%= msg %></.input_error>
     </div>
     """
   end
@@ -297,12 +297,12 @@ defmodule AlertsUIWeb.SharedComponents do
   end
 
   @doc """
-  Renders an error block that works with select.
+  Renders an error block that works with inputs.
   """
   attr :for, :string, default: nil
   slot :inner_block, required: true
 
-  def select_error(assigns) do
+  def input_error(assigns) do
     ~H"""
     <p for={@for} class="flex gap-2 mt-1 text-sm text-text-error">
       <CoreComponents.icon name="hero-exclamation-circle" class="flex-none h-4 mt-0.5 w-4" />
@@ -325,7 +325,7 @@ defmodule AlertsUIWeb.SharedComponents do
   attr :placeholder, :string, default: nil, doc: "placeholder text"
   attr :rest, :global, include: ~w(disabled)
 
-  def text(%{field: %FormField{} = field} = assigns) do
+  def text_input(%{field: %FormField{} = field} = assigns) do
     assigns =
       assigns
       |> assign(field: nil, id: field.id)
@@ -350,7 +350,7 @@ defmodule AlertsUIWeb.SharedComponents do
         ]}
         {@rest}
       />
-      <.select_error :for={msg <- @errors}><%= msg %></.select_error>
+      <.input_error :for={msg <- @errors}><%= msg %></.input_error>
     </div>
     """
   end
@@ -393,7 +393,7 @@ defmodule AlertsUIWeb.SharedComponents do
         ]}
         {@rest}
       />
-      <.select_error :for={msg <- @errors}><%= msg %></.select_error>
+      <.input_error :for={msg <- @errors}><%= msg %></.input_error>
     </div>
     """
   end

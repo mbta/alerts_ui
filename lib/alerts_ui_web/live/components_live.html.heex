@@ -102,14 +102,14 @@
       options={single_select_options()}
       prompt="All"
     />
-    <.text label="Text Input" field={@form[:text_input]} placeholder="Text Input" />
-    <.text
+    <.text_input label="Text Input" field={@form[:text_input]} placeholder="Text Input" />
+    <.text_input
       label="Disabled Text Input"
       field={@form[:text_input]}
       placeholder="Disabled Text Input"
       disabled={true}
     />
-    <.text
+    <.text_input
       label="Errored Text Input"
       field={@form[:text_input_error]}
       placeholder="Errored Text Input"
