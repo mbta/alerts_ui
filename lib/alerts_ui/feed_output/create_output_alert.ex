@@ -3,6 +3,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
   Turns an alert database entry into a map ready for output to JSON
   """
   alias AlertsUI.Models.{Alert, AlertLifecycle}
+  alias AlertsUI.TimeframeText
 
   @spec build_alert(Alert.t()) :: map()
   def build_alert(alert) do
@@ -31,7 +32,12 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
           last_push_notification_timestamp:
             Map.get(alert, :last_push_notification_timestamp) |> date_time_to_unix(),
           closed_timestamp: Map.get(alert, :closed_timestamp) |> date_time_to_unix(),
-          timeframe_text: Map.get(alert, :timeframe_text) |> build_translated_string,
+          timeframe_text:
+            TimeframeText.timeframe_text(
+              Map.get(alert, :active_period_start),
+              Map.get(alert, :active_period_end)
+            )
+            |> build_translated_string,
           recurrence_text: Map.get(alert, :recurrence_text) |> build_translated_string,
           alert_lifecycle:
             Map.get(alert, :active_period_start) |> AlertLifecycle.get_alert_lifecycle(),
