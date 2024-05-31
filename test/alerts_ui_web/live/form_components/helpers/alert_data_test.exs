@@ -36,8 +36,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
     test "handles directions correctly" do
       insert(:alert, %{
         alert_id: "1",
-        effect: :ACCESSIBILITY_ISSUE,
-        effect_detail: "ACCESS_ISSUE",
+        effect: :SIGNIFICANT_DELAYS,
+        effect_detail: "DELAY",
         header_text: "cool header text",
         description_text: "description text",
         informed_entity: [
@@ -49,9 +49,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       })
 
       assert AlertData.build_alert_data("1") == %AlertData{
-               combination: :RDTS,
+               combination: :RDS,
                direction: nil,
-               effect_name: "Access Issue",
+               effect_name: "Delay",
                route_type: 1,
                route_ids: ["1", "2", "3", "4"],
                stop_ids: ["a2", "a3"],
@@ -65,8 +65,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
     test "builds alert data from alert" do
       insert(:alert, %{
         alert_id: "1",
-        effect: :ACCESSIBILITY_ISSUE,
-        effect_detail: "ACCESS_ISSUE",
+        effect: :SIGNIFICANT_DELAYS,
+        effect_detail: "DELAY",
         header_text: "cool header text",
         description_text: "description text",
         active_period_start: ~U[2024-05-02 16:09:34.007545Z],
@@ -76,17 +76,17 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         ],
         duration_certainty: :KNOWN,
         informed_entity: [
-          %{route_type: 3, route_id: "1", direction_id: 0},
+          %{route_type: 3, route_id: "1"},
           %{route_type: 3, route_id: "2", stop_id: "a2"},
-          %{route_type: 3, route_id: "3", stop_id: "a3", direction_id: 0},
+          %{route_type: 3, route_id: "3", stop_id: "a3"},
           %{route_type: 3, route_id: "4", trip: build(:trip_descriptor, %{trip_id: "b1"})}
         ]
       })
 
       assert AlertData.build_alert_data("1") == %AlertData{
-               combination: :RDTS,
-               direction: "0",
-               effect_name: "Access Issue",
+               combination: :RDS,
+               direction: nil,
+               effect_name: "Delay",
                route_type: 3,
                route_ids: ["1", "2", "3", "4"],
                stop_ids: ["a2", "a3"],
