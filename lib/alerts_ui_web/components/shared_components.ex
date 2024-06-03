@@ -61,11 +61,13 @@ defmodule AlertsUIWeb.SharedComponents do
       <.h1>H1 Header Text</.h1>
 
   """
+  attr :class, :string, default: "", doc: "additional classes to add"
+  attr :hidden, :boolean, default: false, doc: "hides component if true"
   slot :inner_block, required: true
 
   def h1(assigns) do
     ~H"""
-    <h1 class="font-medium mb-4 text-4xl">
+    <h1 class={"font-medium mb-4 text-4xl #{if @hidden, do: "hidden", else: ""} #{@class}"}>
       <%= render_slot(@inner_block) %>
     </h1>
     """
@@ -79,11 +81,13 @@ defmodule AlertsUIWeb.SharedComponents do
       <.h2>H2 Header Text</.h2>
 
   """
+  attr :class, :string, default: "", doc: "additional classes to add"
+  attr :hidden, :boolean, default: false, doc: "hides component if true"
   slot :inner_block, required: true
 
   def h2(assigns) do
     ~H"""
-    <h2 class="font-medium mb-4 text-3xl">
+    <h2 class={"font-medium mb-4 text-3xl #{if @hidden, do: "hidden", else: ""} #{@class}"}>
       <%= render_slot(@inner_block) %>
     </h2>
     """
@@ -97,11 +101,13 @@ defmodule AlertsUIWeb.SharedComponents do
       <.h3>H3 Header Text</.h3>
 
   """
+  attr :class, :string, default: "", doc: "additional classes to add"
+  attr :hidden, :boolean, default: false, doc: "hides component if true"
   slot :inner_block, required: true
 
   def h3(assigns) do
     ~H"""
-    <h3 class="font-bold mb-2 text-2xl">
+    <h3 class={"font-bold mb-2 text-2xl #{if @hidden, do: "hidden", else: ""} #{@class}"}>
       <%= render_slot(@inner_block) %>
     </h3>
     """
@@ -115,11 +121,13 @@ defmodule AlertsUIWeb.SharedComponents do
       <.h4>H4 Header Text</.h4>
 
   """
+  attr :class, :string, default: "", doc: "additional classes to add"
+  attr :hidden, :boolean, default: false, doc: "hides component if true"
   slot :inner_block, required: true
 
   def h4(assigns) do
     ~H"""
-    <h4 class="font-medium mb-2 text-xl">
+    <h4 class={"font-medium mb-2 text-xl #{if @hidden, do: "hidden", else: ""} #{@class}"}>
       <%= render_slot(@inner_block) %>
     </h4>
     """
@@ -133,11 +141,13 @@ defmodule AlertsUIWeb.SharedComponents do
       <.h5>H5 Header Text</.h5>
 
   """
+  attr :class, :string, default: "", doc: "additional classes to add"
+  attr :hidden, :boolean, default: false, doc: "hides component if true"
   slot :inner_block, required: true
 
   def h5(assigns) do
     ~H"""
-    <h5 class="font-medium mb-1 text-lg">
+    <h5 class={"font-medium mb-1 text-lg #{if @hidden, do: "hidden", else: ""} #{@class}"}>
       <%= render_slot(@inner_block) %>
     </h5>
     """
@@ -151,11 +161,13 @@ defmodule AlertsUIWeb.SharedComponents do
       <.h6>H6 Header Text</.h6>
 
   """
+  attr :class, :string, default: "", doc: "additional classes to add"
+  attr :hidden, :boolean, default: false, doc: "hides component if true"
   slot :inner_block, required: true
 
   def h6(assigns) do
     ~H"""
-    <h6 class="font-medium mb-1 text-base">
+    <h6 class={"font-medium mb-1 text-base #{if @hidden, do: "hidden", else: ""} #{@class}"}>
       <%= render_slot(@inner_block) %>
     </h6>
     """
@@ -167,11 +179,18 @@ defmodule AlertsUIWeb.SharedComponents do
   ##Examples
     <.button_primary>Button Text</.button_primary>
   """
+  attr :rest, :global,
+    include:
+      ~w(phx-target phx-click phx-value-effect_name phx-value-route_type name id value disabled)
+
+  attr :class, :string, default: "", doc: "additional classes to add"
+  attr :hidden, :boolean, default: false, doc: "hides component if true"
   slot :inner_block, required: true
 
   def button_primary(assigns) do
     ~H"""
-    <button class="
+    <button
+      class={"
       text-text-dark
       bg-primary
       border-primary
@@ -189,7 +208,11 @@ defmodule AlertsUIWeb.SharedComponents do
       focus:py-2
       disabled:bg-primary-disabled
       disabled:border-primary-disabled
-    ">
+      #{if @hidden, do: "hidden", else: ""}
+      #{@class}
+    "}
+      {@rest}
+    >
       <%= render_slot(@inner_block) %>
     </button>
     """
@@ -201,11 +224,18 @@ defmodule AlertsUIWeb.SharedComponents do
   ##Examples
     <.button_secondary>Button Text</.button_secondary>
   """
+  attr :rest, :global,
+    include:
+      ~w(phx-target phx-click phx-value-effect_name phx-value-route_type name id value disabled)
+
+  attr :class, :string, default: "", doc: "additional classes to add"
+  attr :hidden, :boolean, default: false, doc: "hides component if true"
   slot :inner_block, required: true
 
   def button_secondary(assigns) do
     ~H"""
-    <button class="
+    <button
+      class={"
       text-text-white
       bg-secondary-border
       border-secondary-border
@@ -222,7 +252,11 @@ defmodule AlertsUIWeb.SharedComponents do
       focus:py-2
       disabled:bg-secondary-disabled
       disabled:border-secondary-disabled
-    ">
+      #{if @hidden, do: "hidden", else: ""}
+      #{@class}
+    "}
+      {@rest}
+    >
       <%= render_slot(@inner_block) %>
     </button>
     """
@@ -235,6 +269,8 @@ defmodule AlertsUIWeb.SharedComponents do
     <.select />
   """
   attr :label, :string, default: nil
+
+  attr :class, :string, default: "", doc: "additional classes to add"
 
   attr :field, FormField,
     required: true,
@@ -267,8 +303,8 @@ defmodule AlertsUIWeb.SharedComponents do
         class={[
           "bg-bg-primary border border-border-primary pl-3 py-1.5
             rounded text-text-primary disabled:text-text-secondary
-            disabled:bg-bg-elevation-3  focus:border-border-focus
-            focus:drop-shadow-input",
+            disabled:bg-bg-elevation-3 focus:border-border-focus
+            focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25)] #{@class}",
           @errors != [] && "border-danger focus:border-danger"
         ]}
         multiple={@multiple}
@@ -314,16 +350,17 @@ defmodule AlertsUIWeb.SharedComponents do
   @doc """
   Renders a text input
     ##Examples
-    <.text />
+    <.text_input />
   """
   attr :label, :string, default: nil
+  attr :class, :string, default: "", doc: "additional classes to add"
 
   attr :field, FormField,
     required: true,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
   attr :placeholder, :string, default: nil, doc: "placeholder text"
-  attr :rest, :global, include: ~w(disabled)
+  attr :rest, :global, include: ~w(disabled phx-debounce)
 
   def text_input(%{field: %FormField{} = field} = assigns) do
     assigns =
@@ -345,7 +382,7 @@ defmodule AlertsUIWeb.SharedComponents do
           "bg-bg-primary border border-border-primary pl-3 py-1.5
             rounded text-text-primary disabled:text-text-secondary
             disabled:bg-bg-elevation-3 focus:border-border-focus
-            focus:drop-shadow-input",
+            focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25)] #{@class}",
           @errors != [] && "border-danger focus:border-danger"
         ]}
         {@rest}
@@ -361,13 +398,14 @@ defmodule AlertsUIWeb.SharedComponents do
     <.textarea />
   """
   attr :label, :string, default: nil
+  attr :class, :string, default: "", doc: "additional classes to add"
 
   attr :field, FormField,
     required: true,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
   attr :placeholder, :string, default: nil, doc: "placeholder text"
-  attr :rest, :global, include: ~w(disabled)
+  attr :rest, :global, include: ~w(disabled phx-debounce)
 
   def textarea(%{field: %FormField{} = field} = assigns) do
     assigns =
@@ -388,11 +426,11 @@ defmodule AlertsUIWeb.SharedComponents do
           "bg-bg-primary border border-border-primary pl-3 py-1.5
             rounded text-text-primary disabled:text-text-secondary
             disabled:bg-bg-elevation-3 focus:border-border-focus
-            focus:drop-shadow-input",
+            focus:drop-shadow-input #{@class}",
           @errors != [] && "border-danger focus:border-danger"
         ]}
         {@rest}
-      />
+      ><%= Form.normalize_value("textarea", @value) %></textarea>
       <.input_error :for={msg <- @errors}><%= msg %></.input_error>
     </div>
     """

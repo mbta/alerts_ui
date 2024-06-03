@@ -160,40 +160,39 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         class="form-control gap-4"
         id="service_form"
       >
-        <fieldset class="flex flex-row gap-4">
-          <.input
-            type="select"
+        <fieldset class="flex flex-row gap-12">
+          <.select
             label="Route(s)"
             field={@form[:route_ids]}
             options={@route_id_options}
             multiple={true}
+            class="min-w-[16rem]"
           />
 
           <%= if show_directions_input?(assigns) do %>
-            <.input
-              type="select"
+            <.select
               label="Direction"
               field={@form[:direction]}
               options={@direction_options}
               disabled={disable_input?(@form[:route_ids].value, @editing)}
               prompt={if Map.has_key?(@form.params, "route_ids"), do: "Both Directions", else: nil}
+              class="min-w-[16rem]"
             />
           <% end %>
 
           <%= if show_trips_input?(assigns) do %>
-            <.input
-              type="select"
+            <.select
               label="Trip(s)"
               field={@form[:trip_ids]}
               options={@trip_id_options}
               multiple={true}
               prompt={if Map.has_key?(@form.params, "route_ids"), do: "All Trips", else: nil}
+              class="min-w-[16rem]"
             />
           <% end %>
 
           <%= if show_stops_input?(assigns) do %>
-            <.input
-              type="select"
+            <.select
               label="Stop(s)"
               field={@form[:stop_ids]}
               options={@stop_id_options}
@@ -204,6 +203,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
               }
               multiple={true}
               disabled={disable_input?(@form[:route_ids].value, @editing)}
+              class="min-w-[16rem]"
             />
           <% end %>
         </fieldset>

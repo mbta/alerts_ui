@@ -155,23 +155,23 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         class="form-control gap-4"
         id="service_form"
       >
-        <fieldset class="flex flex-row gap-4">
-          <.input
-            type="select"
+        <fieldset class="flex flex-row gap-12">
+          <.select
             label="Stop(s)"
             field={@form[:stop_ids]}
             options={@stop_id_options}
             multiple={true}
+            class="min-w-[16rem]"
           />
 
           <%= if show_routes_input?(assigns) do %>
-            <.input
-              type="select"
+            <.select
               label="Route(s)"
               field={@form[:route_ids]}
               options={@route_id_options}
               multiple={true}
               id="stop_route_routes"
+              class="min-w-[16rem]"
             />
           <% end %>
         </fieldset>

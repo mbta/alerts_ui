@@ -96,7 +96,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   def render(assigns) do
     ~H"""
     <div
-      class={unless @progress.name == "details", do: "hidden", else: "min-w-full flex flex-col"}
+      class={unless @progress.name == "details", do: "hidden", else: "min-w-full flex flex-col mt-4"}
       id="details_view"
     >
       <.form
@@ -104,35 +104,35 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         phx-target={@myself}
         phx-submit="save"
         phx-change="validate"
-        class="form-control gap-4"
+        class="form-control gap-12"
         id="details_form"
       >
-        <.input
+        <.textarea
           field={@form[:header_text]}
           label="Header"
-          type="textarea"
           phx-debounce={120}
           id="header_input"
+          class="min-w-[32rem]"
         />
-        <.input
+        <.textarea
           field={@form[:description_text]}
           label="Description"
-          type="textarea"
           phx-debounce={120}
           id="description_input"
+          class="min-w-[32rem]"
         />
-        <.button class="btn btn-outline basis-8 self-center px-8" name="save">Publish</.button>
+        <.button_primary class="basis-8 self-center min-w-[10%]" name="save">Publish</.button_primary>
       </.form>
-      <button
+      <.button_secondary
         phx-target={@myself}
         phx-click="save_as_draft"
         type="button"
         name="draft"
         id="details_draft"
-        class="btn rounded-lg mt-8 basis-8 self-center px-8 min-w-[25%] font-extrabold"
+        class="mt-8 basis-8 self-center min-w-[10%]"
       >
         Save as Draft
-      </button>
+      </.button_secondary>
     </div>
     """
   end

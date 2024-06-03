@@ -42,7 +42,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
         second_rendered_view = render(view)
         refute second_rendered_view =~ ~s(class="min-w-full flex flex-col" id="route_view")
-        assert second_rendered_view =~ ~s(class="min-w-full flex flex-col" id="details_view")
+        assert second_rendered_view =~ ~s(class="min-w-full flex flex-col mt-4" id="details_view")
 
         # Submit service section
         {:ok, service_changeset} =

@@ -58,9 +58,6 @@ module.exports = {
         current: "currentColor",
       }
     },
-    dropShadow: {
-      'input': '0 .25rem .25rem rgba(13,110,253,0.25)'
-    },
     fontFamily: {
       "body": ["Inter UI", "Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
     },
