@@ -96,6 +96,11 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
      assign(socket, %{form: form, systemwide_affected_service: systemwide_affected_service})}
   end
 
+  @impl true
+  def handle_event("validate", _, socket) do
+    {:noreply, socket}
+  end
+
   defp changeset(changeset, params) do
     changeset
     |> cast(params, @fields)

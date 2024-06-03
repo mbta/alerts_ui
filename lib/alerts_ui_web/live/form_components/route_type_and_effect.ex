@@ -195,24 +195,16 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   end
 
   def effect_buttons(assigns, effect) do
-    button_class =
-      if is_nil(assigns.selected_effect) or effect == assigns.selected_effect do
-        ""
-      else
-        ""
-      end
-
     assigns =
       assign(assigns, %{
-        effect: effect,
-        button_class: button_class
+        effect: effect
       })
 
     ~H"""
     <.button_primary
       phx-target={@myself}
       phx-click="effect"
-      class={"#{@button_class} basis-8 self-center w-full font-extrabold"}
+      class="basis-8 self-center w-full font-extrabold"
       value={@effect}
     >
       <%= @effect %>
