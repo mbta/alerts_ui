@@ -10,7 +10,7 @@ defmodule AlertsUI.TimeframeText do
     starts_later_today_ends_next_calendar_day: "Starting later today",
     starts_tomorrow: "Tomorrow",
     starts_tomorrow_ends_this_week: "Tomorrow through END_DAY_NAME",
-    starts_this_week_ends_less_than_6_days_later: "START_DAY_NAME through END_DAY_NAME",
+    starts_this_week_ends_next_week: "START_DAY_NAME through END_DAY_NAME",
     starts_this_week: "Starting START_DAY_NAME",
     distant_date_ends_same_day: "HUMAN_READABLE_START_DATE",
     distant_date: "HUMAN_READABLE_START_DATE-HUMAN_READABLE_END_DATE"
@@ -87,7 +87,7 @@ defmodule AlertsUI.TimeframeText do
     ends_2_6_days_from_start = between_two_and_six_days(start_datetime, end_datetime)
 
     if ends_2_6_days_from_start do
-      @timeframe_text_map[:starts_this_week_ends_less_than_6_days_later]
+      @timeframe_text_map[:starts_this_week_ends_next_week]
       |> String.replace("START_DAY_NAME", get_day_name(start_date))
       |> String.replace("END_DAY_NAME", get_weekday_name_for_end(end_datetime))
     else

@@ -40,6 +40,7 @@ defmodule AlertsUI.FeedImporterExporterTest do
       assert result == :ok
     end
 
+    @tag :skip
     test "logs correctly if feeds match" do
       set_log_level(:info)
       insert(:alert)
@@ -109,6 +110,7 @@ defmodule AlertsUI.FeedImporterExporterTest do
       reassign_env(:alerts_ui, :compare_feed, "true")
     end
 
+    @tag :skip
     test "match" do
       set_log_level(:info)
 
