@@ -4,7 +4,7 @@ defmodule AlertsUI.AlertBuilder do
   """
 
   alias AlertsUI.Activities
-  alias AlertsUI.Models.{Effect, InformedEntity, RoutePattern}
+  alias AlertsUI.Models.{Cause, Effect, InformedEntity, RoutePattern}
   alias AlertsUI.Routes
   alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatterns
@@ -26,7 +26,8 @@ defmodule AlertsUI.AlertBuilder do
           service_types: [Route.type_int()],
           active_period_start: DateTime.t(),
           active_period_end_specifier: atom(),
-          active_period_end: DateTime.t()
+          active_period_end: DateTime.t(),
+          cause_detail: String.t()
         }
   @type direction_t :: 0 | 1
   @type stop_with_context_t :: {Stop.t(), Route.id_t(), direction_t(), RoutePattern.stop_type()}
@@ -45,6 +46,10 @@ defmodule AlertsUI.AlertBuilder do
     stop_ids = Map.get(alert_data, :stop_ids)
     direction_id = Map.get(alert_data, :direction)
     service_types = Map.get(alert_data, :service_types, [])
+
+    route_type = Map.get(alert_data, :route_type)
+    cause_detail = Map.get(alert_data, :cause_detail, "")
+    cause = Cause.get_by_mode_and_detail(route_type, cause_detail)
 
     route_ids =
       alert_data
@@ -71,6 +76,8 @@ defmodule AlertsUI.AlertBuilder do
     %{
       header_text: Map.get(alert_data, :header_text),
       description_text: Map.get(alert_data, :description_text),
+      cause: cause,
+      cause_detail: cause_detail,
       effect: Map.get(effect_map, :effect),
       effect_detail: Map.get(effect_map, :effect_detail),
       draft: Map.get(alert_data, :draft, false),

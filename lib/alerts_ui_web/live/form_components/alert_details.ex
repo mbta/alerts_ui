@@ -5,15 +5,17 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   use AlertsUIWeb, :live_component
   use AlertsUI.Schema
   import Ecto.Changeset
+  alias AlertsUI.Models.Cause
 
   @primary_key false
   embedded_schema do
     field :header_text, :string
     field :description_text, :string
     field :draft, :boolean
+    field :cause_detail, :string, default: ""
   end
 
-  @fields ~w[header_text description_text draft]a
+  @fields ~w[header_text description_text draft cause_detail]a
   @required_fields ~w[header_text description_text]a
 
   @impl true
@@ -28,7 +30,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     edit_alert_data =
       %{
         header_text: Map.get(alert_data, :header_text),
-        description_text: Map.get(alert_data, :description_text)
+        description_text: Map.get(alert_data, :description_text),
+        cause_detail: Map.get(alert_data, :cause_detail)
       }
 
     changeset =
@@ -94,6 +97,15 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
 
   @impl true
   def render(assigns) do
+    cause_options =
+      Map.get(assigns, :route_type)
+      |> formatted_causes
+
+    assigns =
+      assign(assigns,
+        cause_options: cause_options
+      )
+
     ~H"""
     <div
       class={unless @progress.name == "details", do: "hidden", else: "min-w-full flex flex-col mt-4"}
@@ -107,6 +119,13 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         class="form-control gap-12"
         id="details_form"
       >
+        <.select
+          label="Cause"
+          field={@form[:cause_detail]}
+          options={@cause_options}
+          class="min-w-[16rem]"
+          id="cause_input"
+        />
         <.textarea
           field={@form[:header_text]}
           label="Header"
@@ -135,5 +154,15 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       </.button_secondary>
     </div>
     """
+  end
+
+  defp formatted_causes(route_type) do
+    options_list =
+      route_type
+      |> Cause.cause_map_by_mode()
+      |> Map.keys()
+      |> Enum.map(fn cause_detail -> {cause_detail, cause_detail} end)
+
+    [{"<none>", ""} | options_list]
   end
 end
