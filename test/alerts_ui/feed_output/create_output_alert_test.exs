@@ -6,6 +6,9 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
 
   describe "build_alert/2" do
     test "properly outputs alert map" do
+      active_period_start = DateTime.utc_now() |> DateTime.add(40, :day)
+      active_period_end = active_period_start |> DateTime.add(1, :hour)
+
       trip1 =
         build(:trip_descriptor, %{
           route_id: "CR-Lowell",
@@ -70,12 +73,12 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
         last_modified_timestamp: ~U[2023-10-12 13:45:43Z],
         last_push_notification_timestamp: ~U[2023-09-21 14:18:54Z],
         closed_timestamp: ~U[2023-09-22 14:18:54Z],
-        timeframe_text: "through October 20",
         duration_certainty: :KNOWN,
         active_period: [
-          build(:active_period, %{start: ~U[2023-10-02 18:42:00Z], end: ~U[2023-10-20 20:00:00Z]})
+          build(:active_period, %{start: active_period_start, end: active_period_end})
         ],
-        active_period_start: ~U[2023-10-02 18:42:00Z],
+        active_period_start: active_period_start,
+        active_period_end: active_period_end,
         informed_entity: [
           informed_entity_1,
           informed_entity_2
@@ -135,17 +138,17 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
           timeframe_text: %{
             translation: [
               %{
-                text: "through October 20",
+                text: "#{Timex.month_name(active_period_end.month)} #{active_period_end.day}",
                 language: "en"
               }
             ]
           },
-          alert_lifecycle: :ONGOING,
+          alert_lifecycle: :UPCOMING,
           duration_certainty: :KNOWN,
           active_period: [
             %{
-              start: 1_696_272_120,
-              end: 1_697_832_000
+              start: DateTime.to_unix(active_period_start),
+              end: DateTime.to_unix(active_period_end)
             }
           ],
           informed_entity: [
