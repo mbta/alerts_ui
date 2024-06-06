@@ -20,7 +20,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :active_period_start,
     :active_period_end,
     :active_period_end_specifier,
-    :service_types
+    :service_types,
+    :cause_detail
   ]
 
   @type t :: %__MODULE__{
@@ -35,7 +36,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           active_period_start: NaiveDateTime.t(),
           active_period_end_specifier: atom(),
           active_period_end: NaiveDateTime.t(),
-          service_types: [Route.type_int()]
+          service_types: [Route.type_int()],
+          cause_detail: String.t()
         }
 
   @spec build_alert_data(nil | String.t()) :: t()
@@ -65,7 +67,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       active_period_end: active_period_end,
       active_period_end_specifier:
         determine_specifier(active_period_end, Map.get(alert, :duration_certainty)),
-      service_types: Alert.service_types(alert)
+      service_types: Alert.service_types(alert),
+      cause_detail: Map.get(alert, :cause_detail)
     }
   end
 

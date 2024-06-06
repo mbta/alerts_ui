@@ -75,6 +75,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
           %{start: ~U[2024-05-02 16:09:34.007545Z], end: ~U[2024-05-04 01:09:34.007545Z]}
         ],
         duration_certainty: :KNOWN,
+        cause_detail: "hazmat condition",
         informed_entity: [
           %{route_type: 3, route_id: "1"},
           %{route_type: 3, route_id: "2", stop_id: "a2"},
@@ -96,7 +97,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                active_period_end_specifier: :pick_a_date_and_time,
                active_period_end: ~N[2024-05-03 21:09:34],
                active_period_start: ~N[2024-05-02 12:09:34],
-               service_types: []
+               service_types: [],
+               cause_detail: "hazmat condition"
              }
     end
 

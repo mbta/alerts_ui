@@ -142,6 +142,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           </div>
         </fieldset>
       </.form>
+      <hr class="mt-8" />
     </div>
     """
   end
