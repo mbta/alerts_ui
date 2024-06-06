@@ -14,11 +14,12 @@ defmodule AlertsUI.FeedOutput.WriteFeed do
 
   @spec write_feed() :: {:ok, binary()} | {:error, String.t()}
   def write_feed(_opts \\ []) do
+    recently_closed_alerts = get_recently_closed_alerts(compare_feed())
+
     open_alerts =
       Alerts.list_all_open()
+      |> Alerts.close_if_end_is_past()
       |> Enum.map(&CreateOutputAlert.build_alert/1)
-
-    recently_closed_alerts = get_recently_closed_alerts(compare_feed())
 
     with {:ok, alerts_json} <- write_json_file(Enum.concat(open_alerts, recently_closed_alerts)),
          :ok <- write_protobuf_file(open_alerts) do

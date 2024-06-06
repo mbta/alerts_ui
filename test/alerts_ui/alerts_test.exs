@@ -541,6 +541,20 @@ defmodule AlertsUI.AlertsTest do
     end
   end
 
+  describe "close_if_end_is_past/1" do
+    test "foo" do
+      current_time = ~U[2024-06-05 00:00:00Z]
+      insert(:alert, %{alert_id: "123", active_period_end: ~U[2024-06-04 00:00:00Z]})
+      insert(:alert, %{alert_id: "234", active_period_end: ~U[2024-06-06 00:00:00Z]})
+      insert(:alert, %{alert_id: "345"})
+      result = Alerts.list_all_open() |> Alerts.close_if_end_is_past(current_time)
+      [result1, result2, result3] = result |> Enum.sort_by(& &1.alert_id)
+      assert result1.closed_timestamp == current_time
+      assert result2.closed_timestamp == nil
+      assert result3.closed_timestamp == nil
+    end
+  end
+
   describe "close_if_not_in_feed/2" do
     test "closes existing alerts that aren't in the feed" do
       insert(:alert, %{alert_id: "123"})
