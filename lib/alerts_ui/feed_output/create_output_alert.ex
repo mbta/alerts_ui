@@ -11,45 +11,42 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
     # but in the current feed they are simple strings
 
     %{
-      id: Map.get(alert, :alert_id),
+      id: alert.alert_id,
       alert:
         %{
-          effect: Map.get(alert, :effect),
-          effect_detail: Map.get(alert, :effect_detail),
-          cause: Map.get(alert, :cause),
-          cause_detail: Map.get(alert, :cause_detail),
-          header_text: Map.get(alert, :header_text) |> build_translated_string,
-          description_text: Map.get(alert, :description_text) |> build_translated_string,
-          banner_text: Map.get(alert, :banner_text) |> build_translated_string,
-          severity_level: Map.get(alert, :severity_level),
-          url: Map.get(alert, :url) |> build_translated_string,
-          service_effect_text: Map.get(alert, :service_effect_text) |> build_translated_string,
-          short_header_text: Map.get(alert, :short_header_text) |> build_translated_string,
-          severity: Map.get(alert, :severity),
-          created_timestamp: Map.get(alert, :created_timestamp) |> date_time_to_unix(),
-          last_modified_timestamp:
-            Map.get(alert, :last_modified_timestamp) |> date_time_to_unix(),
+          effect: alert.effect,
+          effect_detail: alert.effect_detail,
+          cause: alert.cause,
+          cause_detail: alert.cause_detail,
+          header_text: alert.header_text |> build_translated_string,
+          description_text: alert.description_text |> build_translated_string,
+          banner_text: alert.banner_text |> build_translated_string,
+          severity_level: alert.severity_level,
+          url: alert.url |> build_translated_string,
+          service_effect_text: alert.service_effect_text |> build_translated_string,
+          short_header_text: alert.short_header_text |> build_translated_string,
+          severity: alert.severity,
+          created_timestamp: alert.created_timestamp |> date_time_to_unix(),
+          last_modified_timestamp: alert.last_modified_timestamp |> date_time_to_unix(),
           last_push_notification_timestamp:
-            Map.get(alert, :last_push_notification_timestamp) |> date_time_to_unix(),
-          closed_timestamp: Map.get(alert, :closed_timestamp) |> date_time_to_unix(),
+            alert.last_push_notification_timestamp |> date_time_to_unix(),
+          closed_timestamp: alert.closed_timestamp |> date_time_to_unix(),
           timeframe_text:
             TimeframeText.timeframe_text(
-              Map.get(alert, :active_period_start),
-              Map.get(alert, :active_period_end)
+              alert.active_period_start,
+              alert.active_period_end
             )
             |> build_translated_string,
-          recurrence_text: Map.get(alert, :recurrence_text) |> build_translated_string,
-          alert_lifecycle:
-            Map.get(alert, :active_period_start) |> AlertLifecycle.get_alert_lifecycle(),
-          duration_certainty: Map.get(alert, :duration_certainty),
-          reminder_times: Map.get(alert, :reminder_times),
-          active_period: Map.get(alert, :active_period) |> build_active_periods,
-          image: Map.get(alert, :image_url) |> build_translated_image,
-          image_alternative_text:
-            Map.get(alert, :image_alternative_text) |> build_translated_string,
-          tts_header_text: Map.get(alert, :tts_header_text) |> build_translated_string,
-          tts_description_text: Map.get(alert, :tts_description_text) |> build_translated_string,
-          informed_entity: Map.get(alert, :informed_entity) |> build_informed_entities
+          recurrence_text: alert.recurrence_text |> build_translated_string,
+          alert_lifecycle: alert.active_period_start |> AlertLifecycle.get_alert_lifecycle(),
+          duration_certainty: alert.duration_certainty,
+          reminder_times: alert.reminder_times,
+          active_period: alert.active_period |> build_active_periods,
+          image: alert.image_url |> build_translated_image,
+          image_alternative_text: alert.image_alternative_text |> build_translated_string,
+          tts_header_text: alert.tts_header_text |> build_translated_string,
+          tts_description_text: alert.tts_description_text |> build_translated_string,
+          informed_entity: alert.informed_entity |> build_informed_entities
         }
         |> Map.filter(&filter_out_nil_values/1)
     }
@@ -71,8 +68,8 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
 
   defp build_active_period(active_period) do
     %{
-      start: Map.get(active_period, :start) |> date_time_to_unix,
-      end: Map.get(active_period, :end) |> date_time_to_unix
+      start: active_period.start |> date_time_to_unix,
+      end: get_in(active_period, [Access.key!(:end)]) |> date_time_to_unix
     }
     |> Map.filter(&filter_out_nil_values/1)
   end
@@ -85,14 +82,14 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
 
   def build_informed_entity(informed_entity) do
     %{
-      agency_id: Map.get(informed_entity, :agency_id),
-      route_type: Map.get(informed_entity, :route_type),
-      facility_id: Map.get(informed_entity, :facility_id),
-      route_id: Map.get(informed_entity, :route_id),
-      trip: Map.get(informed_entity, :trip) |> build_trip,
-      direction_id: Map.get(informed_entity, :direction_id),
-      stop_id: Map.get(informed_entity, :stop_id),
-      activities: Map.get(informed_entity, :activities)
+      agency_id: informed_entity.agency_id,
+      route_type: informed_entity.route_type,
+      facility_id: informed_entity.facility_id,
+      route_id: informed_entity.route_id,
+      trip: informed_entity.trip |> build_trip,
+      direction_id: informed_entity.direction_id,
+      stop_id: informed_entity.stop_id,
+      activities: informed_entity.activities
     }
     |> Map.filter(&filter_out_nil_values/1)
   end
@@ -101,12 +98,12 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
 
   def build_trip(trip) do
     %{
-      route_id: Map.get(trip, :route_id),
-      trip_id: Map.get(trip, :trip_id),
-      direction_id: Map.get(trip, :direction_id),
-      start_time: Map.get(trip, :start_time) |> extended_time_to_string,
-      start_date: Map.get(trip, :start_date) |> date_to_string,
-      schedule_relationship: Map.get(trip, :schedule_relationship)
+      route_id: trip.route_id,
+      trip_id: trip.trip_id,
+      direction_id: trip.direction_id,
+      start_time: trip.start_time |> extended_time_to_string,
+      start_date: trip.start_date |> date_to_string,
+      schedule_relationship: trip.schedule_relationship
     }
     |> Map.filter(&filter_out_nil_values/1)
   end
