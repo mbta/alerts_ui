@@ -542,55 +542,16 @@ defmodule AlertsUI.AlertsTest do
   end
 
   describe "close_if_end_is_past/1" do
-    test "close if has end and it is past" do
+    test "closes if end time is past current time" do
       current_time = ~U[2024-06-05 00:00:00Z]
-
-      insert(:alert, %{
-        alert_id: "123",
-        active_period_end: ~U[2024-06-04 00:00:00Z],
-        duration_certainty: :KNOWN
-      })
-
-      insert(:alert, %{
-        alert_id: "234",
-        active_period_end: ~U[2024-06-06 00:00:00Z],
-        duration_certainty: :KNOWN
-      })
-
-      insert(:alert, %{alert_id: "345", duration_certainty: :UNKNOWN})
+      insert(:alert, %{alert_id: "123", active_period_end: ~U[2024-06-04 00:00:00Z]})
+      insert(:alert, %{alert_id: "234", active_period_end: ~U[2024-06-06 00:00:00Z]})
+      insert(:alert, %{alert_id: "345"})
       result = Alerts.list_all_open() |> Alerts.close_if_end_is_past(current_time)
       [result1, result2, result3] = result |> Enum.sort_by(& &1.alert_id)
       assert result1.closed_timestamp == current_time
       assert result2.closed_timestamp == nil
       assert result3.closed_timestamp == nil
-    end
-
-    test "close if selected 'later_today' and end of service is past" do
-      current_time = ~U[2024-06-05 12:00:00Z]
-
-      insert(:alert, %{
-        alert_id: "123",
-        duration_certainty: :ESTIMATED,
-        active_period_start: ~U[2024-06-05 09:00:00Z]
-      })
-
-      insert(:alert, %{
-        alert_id: "234",
-        duration_certainty: :ESTIMATED,
-        active_period_start: ~U[2024-06-05 01:00:00Z]
-      })
-
-      insert(:alert, %{
-        alert_id: "345",
-        duration_certainty: :ESTIMATED,
-        active_period_start: ~U[2024-06-04 23:00:00Z]
-      })
-
-      result = Alerts.list_all_open() |> Alerts.close_if_end_is_past(current_time)
-      [result1, result2, result3] = result |> Enum.sort_by(& &1.alert_id)
-      assert result1.closed_timestamp == nil
-      assert result2.closed_timestamp == current_time
-      assert result3.closed_timestamp == current_time
     end
   end
 

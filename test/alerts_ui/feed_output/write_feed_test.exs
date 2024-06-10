@@ -22,8 +22,7 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
       insert(:alert,
         alert_id: "345abc",
         active_period_start: ~U[2023-10-12 00:01:00Z],
-        active_period_end: nil,
-        duration_certainty: :ESTIMATED
+        active_period_end: four_minutes_ago
       )
 
       expected_alerts = [
@@ -61,8 +60,7 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
             "informed_entity" => [
               %{"activities" => [], "route_id" => "1", "trip" => %{"trip_id" => "1"}}
             ],
-            "alert_lifecycle" => "ONGOING",
-            "duration_certainty" => "ESTIMATED"
+            "alert_lifecycle" => "ONGOING"
           },
           "id" => "345abc"
         }
