@@ -378,6 +378,7 @@ defmodule AlertsUIWeb.SharedComponents do
         id={@id}
         name={@name}
         placeholder={@placeholder}
+        value={@value}
         class={[
           "bg-bg-primary border border-border-primary pl-3 py-1.5
             rounded text-text-primary disabled:text-text-secondary

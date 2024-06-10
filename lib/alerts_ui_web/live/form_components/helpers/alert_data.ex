@@ -21,7 +21,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :active_period_end,
     :active_period_end_specifier,
     :service_types,
-    :cause_detail
+    :cause_detail,
+    :url,
+    :image_url,
+    :image_alternative_text
   ]
 
   @type t :: %__MODULE__{
@@ -37,7 +40,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           active_period_end_specifier: atom(),
           active_period_end: NaiveDateTime.t(),
           service_types: [Route.type_int()],
-          cause_detail: String.t()
+          cause_detail: String.t(),
+          url: String.t(),
+          image_url: String.t(),
+          image_alternative_text: String.t()
         }
 
   @spec build_alert_data(nil | String.t()) :: t()
@@ -50,7 +56,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     route_type = Alert.get_route_type(alert)
     effect_name = Map.get(effect_map, :effect_name)
     combination = ServiceEffectCombinations.get_combination(route_type, effect_name)
-
     active_period_end = Map.get(alert, :active_period_end) |> shift_to_naive()
 
     %__MODULE__{
@@ -68,7 +73,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       active_period_end_specifier:
         determine_specifier(active_period_end, Map.get(alert, :duration_certainty)),
       service_types: Alert.service_types(alert),
-      cause_detail: Map.get(alert, :cause_detail)
+      cause_detail: Map.get(alert, :cause_detail),
+      url: Map.get(alert, :url),
+      image_url: Map.get(alert, :image_url),
+      image_alternative_text: Map.get(alert, :image_alternative_text)
     }
   end
 

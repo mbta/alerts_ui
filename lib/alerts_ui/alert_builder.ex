@@ -27,7 +27,10 @@ defmodule AlertsUI.AlertBuilder do
           active_period_start: DateTime.t(),
           active_period_end_specifier: atom(),
           active_period_end: DateTime.t(),
-          cause_detail: String.t()
+          cause_detail: String.t(),
+          url: String.t(),
+          image_url: String.t(),
+          image_alternative_text: String.t()
         }
   @type direction_t :: 0 | 1
   @type stop_with_context_t :: {Stop.t(), Route.id_t(), direction_t(), RoutePattern.stop_type()}
@@ -41,6 +44,7 @@ defmodule AlertsUI.AlertBuilder do
   @spec build_alert(map(), ServiceEffectCombinations.service_effect_combination()) ::
           map()
   def build_alert(alert_data, combination) do
+    IO.inspect(alert_data)
     effect_name = Map.get(alert_data, :effect_name)
     effect_map = Effect.effect_map_by_name(effect_name)
     stop_ids = Map.get(alert_data, :stop_ids)
@@ -76,6 +80,9 @@ defmodule AlertsUI.AlertBuilder do
     %{
       header_text: Map.get(alert_data, :header_text),
       description_text: Map.get(alert_data, :description_text),
+      url: Map.get(alert_data, :url),
+      image_url: Map.get(alert_data, :image_url),
+      image_alternative_text: Map.get(alert_data, :image_alternative_text),
       cause: cause,
       cause_detail: cause_detail,
       effect: Map.get(effect_map, :effect),

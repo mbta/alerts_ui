@@ -91,7 +91,6 @@ defmodule AlertsUI.Models.Alert do
           active_period_end: DateTime.t() | nil,
           image_url: String.t() | nil,
           image_alternative_text: String.t() | nil,
-          image_url: String.t() | nil,
           tts_header_text: String.t() | nil,
           tts_description_text: String.t() | nil,
           informed_entity: [InformedEntity.t()]
