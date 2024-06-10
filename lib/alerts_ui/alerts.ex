@@ -165,15 +165,17 @@ defmodule AlertsUI.Alerts do
   end
 
   @spec close_if_end_is_past([Alert.t()], DateTime.t()) :: [Alert.t()]
-  def close_if_end_is_past(alerts, current_time \\ DateTime.utc_now()) do
-    current_time = DateTime.truncate(current_time, :second)
+  def close_if_end_is_past(alerts, current_datetime \\ DateTime.utc_now()) do
+    current_datetime = DateTime.truncate(current_datetime, :second)
 
     alerts
     |> Enum.map(fn alert ->
-      end_is_past = end_is_past(current_time, alert.active_period_end)
+      end_is_past = end_is_past(current_datetime, alert.active_period_end)
+      ends_later_today = ends_later_today(alert.active_period_end, alert.duration_certainty)
 
-      if end_is_past do
-        change(alert, closed_timestamp: current_time)
+      if end_is_past or
+           (ends_later_today and past_service_end(alert.active_period_start, current_datetime)) do
+        change(alert, closed_timestamp: current_datetime)
         |> PaperTrail.update!()
       else
         alert
@@ -185,6 +187,26 @@ defmodule AlertsUI.Alerts do
 
   defp end_is_past(current_time, end_time),
     do: DateTime.compare(current_time, end_time) in [:eq, :gt]
+
+  # this is the case where "later today" was selected in the form
+  defp ends_later_today(nil, :ESTIMATED), do: true
+  defp ends_later_today(_ap_end, _duration_certainty), do: false
+
+  defp past_service_end(nil, _current_time), do: false
+
+  defp past_service_end(ap_start, current_datetime) do
+    start_datetime = Timex.Timezone.convert(datetime, "America/New_York")
+    start_date = DateTime.to_date(start_datetime)
+    start_time = DateTime.to_time(start_datetime)
+
+    end_of_service_day =
+      case Time.before?(start_time, ~T[02:30:00]) do
+        true -> DateTime.new!(start_date, ~T[02:30:00], "America/New_York")
+        false -> DateTime.new!(Date.add(start_date, 1), ~T[02:30:00], "America/New_York")
+      end
+
+    DateTime.compare(current_datetime, end_of_service_day) in [:gt, :eq]
+  end
 
   @spec close_if_not_in_feed([map()], DateTime.t()) :: [map()]
   def close_if_not_in_feed(incoming_alert_list, closed_time \\ DateTime.utc_now()) do
