@@ -51,12 +51,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
   def build_alert_data(alert_id) do
     alert = Alerts.get_by_alert_id(alert_id)
-    effect_map = Effect.effect_map_by_detail(Map.get(alert, :effect_detail))
-    informed_entities = Map.get(alert, :informed_entity, [])
+    effect_map = Effect.effect_map_by_detail(alert.effect_detail)
+    informed_entities = alert.informed_entity
     route_type = Alert.get_route_type(alert)
     effect_name = Map.get(effect_map, :effect_name)
     combination = ServiceEffectCombinations.get_combination(route_type, effect_name)
-    active_period_end = Map.get(alert, :active_period_end) |> shift_to_naive()
+    active_period_end = alert.active_period_end |> shift_to_naive()
 
     %__MODULE__{
       route_type: route_type,
@@ -65,18 +65,18 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       route_ids: Alert.gather_route_ids(informed_entities),
       stop_ids: Alert.gather_parent_stop_ids(informed_entities),
       trip_ids: Alert.gather_trip_ids(informed_entities),
-      header_text: Map.get(alert, :header_text),
-      description_text: Map.get(alert, :description_text),
+      header_text: alert.header_text,
+      description_text: alert.description_text,
       combination: combination,
-      active_period_start: Map.get(alert, :active_period_start) |> shift_to_naive(),
+      active_period_start: alert.active_period_start |> shift_to_naive(),
       active_period_end: active_period_end,
       active_period_end_specifier:
-        determine_specifier(active_period_end, Map.get(alert, :duration_certainty)),
+        determine_specifier(active_period_end, alert.duration_certainty),
       service_types: Alert.service_types(alert),
-      cause_detail: Map.get(alert, :cause_detail),
-      url: Map.get(alert, :url),
-      image_url: Map.get(alert, :image_url),
-      image_alternative_text: Map.get(alert, :image_alternative_text)
+      cause_detail: alert.cause_detail,
+      url: alert.url,
+      image_url: alert.image_url,
+      image_alternative_text: alert.image_alternative_text
     }
   end
 

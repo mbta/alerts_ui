@@ -44,7 +44,6 @@ defmodule AlertsUI.AlertBuilder do
   @spec build_alert(map(), ServiceEffectCombinations.service_effect_combination()) ::
           map()
   def build_alert(alert_data, combination) do
-    IO.inspect(alert_data)
     effect_name = Map.get(alert_data, :effect_name)
     effect_map = Effect.effect_map_by_name(effect_name)
     stop_ids = Map.get(alert_data, :stop_ids)
