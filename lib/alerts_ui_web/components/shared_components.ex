@@ -263,6 +263,55 @@ defmodule AlertsUIWeb.SharedComponents do
   end
 
   @doc """
+  Renders a toggle button.
+
+  ##Examples
+    <.button_toggle>Button Text</.button_toggle>
+  """
+  attr :rest, :global,
+    include:
+      ~w(phx-target phx-click phx-value-effect_name phx-value-route_type name id value disabled)
+
+  attr :class, :string, default: "", doc: "additional classes to add"
+  attr :hidden, :boolean, default: false, doc: "hides component if true"
+  attr :active, :boolean, default: true, doc: "switches to active colors if true"
+  slot :inner_block, required: true
+
+  def button_toggle(assigns) do
+    on = "
+  bg-bg-toggle-active
+  text-text-dark
+  hover:bg-primary-hover
+  active:bg-primary-active
+  "
+    off = "
+  bg-bg-elevation-5
+  text-text-primary-bg
+  hover:bg-secondary-hover
+  active:bg-secondary-active
+  "
+
+    ~H"""
+    <button
+      class={"
+      font-medium
+      mb-1
+      text-base
+      px-4
+      py-3
+      rounded-sm
+      #{if @active, do: on, else: off}
+      #{if @hidden, do: "hidden", else: ""}
+      #{@class}
+    "}
+      {@rest}
+    >
+      <%= render_slot(@inner_block) %>
+    </button>
+    """
+  end
+
+  @doc """
   Renders a select input.
 
   ##Examples
