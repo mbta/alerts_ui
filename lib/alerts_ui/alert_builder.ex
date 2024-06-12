@@ -24,13 +24,13 @@ defmodule AlertsUI.AlertBuilder do
           child_stops_with_context: [stop_with_context_t()] | [],
           trip_ids: [String.t()],
           service_types: [Route.type_int()],
-          active_period_start: DateTime.t(),
-          active_period_end_specifier: atom(),
-          active_period_end: DateTime.t(),
+          active_period_start: DateTime.t() | nil,
+          active_period_end_specifier: atom() | nil,
+          active_period_end: DateTime.t() | nil,
           cause_detail: String.t(),
-          url: String.t(),
-          image_url: String.t(),
-          image_alternative_text: String.t()
+          url: String.t() | nil,
+          image_url: String.t() | nil,
+          image_alternative_text: String.t() | nil
         }
   @type direction_t :: 0 | 1
   @type stop_with_context_t :: {Stop.t(), Route.id_t(), direction_t(), RoutePattern.stop_type()}

@@ -18,8 +18,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     field :image_alternative_text, :string
   end
 
-  @fields ~w[header_text description_text draft cause_detail url image_url image_alternative_text]a
   @required_fields ~w[header_text description_text]a
+  @fields @required_fields ++ ~w[draft cause_detail url image_url image_alternative_text]a
 
   @impl true
   def mount(socket) do

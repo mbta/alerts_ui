@@ -36,14 +36,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           header_text: String.t(),
           description_text: String.t(),
           combination: atom(),
-          active_period_start: NaiveDateTime.t(),
-          active_period_end_specifier: atom(),
-          active_period_end: NaiveDateTime.t(),
+          active_period_start: NaiveDateTime.t() | nil,
+          active_period_end_specifier: atom() | nil,
+          active_period_end: NaiveDateTime.t() | nil,
           service_types: [Route.type_int()],
           cause_detail: String.t(),
-          url: String.t(),
-          image_url: String.t(),
-          image_alternative_text: String.t()
+          url: String.t() | nil,
+          image_url: String.t() | nil,
+          image_alternative_text: String.t() | nil
         }
 
   @spec build_alert_data(nil | String.t()) :: t()
@@ -56,7 +56,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     route_type = Alert.get_route_type(alert)
     effect_name = Map.get(effect_map, :effect_name)
     combination = ServiceEffectCombinations.get_combination(route_type, effect_name)
-    active_period_end = alert.active_period_end |> shift_to_naive()
+    active_period_end = shift_to_naive(alert.active_period_end)
 
     %__MODULE__{
       route_type: route_type,
@@ -68,7 +68,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       header_text: alert.header_text,
       description_text: alert.description_text,
       combination: combination,
-      active_period_start: alert.active_period_start |> shift_to_naive(),
+      active_period_start: shift_to_naive(alert.active_period_start),
       active_period_end: active_period_end,
       active_period_end_specifier:
         determine_specifier(active_period_end, alert.duration_certainty),
