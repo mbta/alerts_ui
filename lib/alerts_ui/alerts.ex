@@ -164,6 +164,28 @@ defmodule AlertsUI.Alerts do
     DateTime.compare(incoming_time, stored_time) != :lt
   end
 
+  @spec close_if_end_is_past([Alert.t()], DateTime.t()) :: [Alert.t()]
+  def close_if_end_is_past(alerts, current_time \\ DateTime.utc_now()) do
+    current_time = DateTime.truncate(current_time, :second)
+
+    alerts
+    |> Enum.map(fn alert ->
+      end_is_past = end_is_past(current_time, alert.active_period_end)
+
+      if end_is_past do
+        change(alert, closed_timestamp: current_time)
+        |> PaperTrail.update!()
+      else
+        alert
+      end
+    end)
+  end
+
+  defp end_is_past(_current_time, nil), do: false
+
+  defp end_is_past(current_time, end_time),
+    do: DateTime.compare(current_time, end_time) in [:eq, :gt]
+
   @spec close_if_not_in_feed([map()], DateTime.t()) :: [map()]
   def close_if_not_in_feed(incoming_alert_list, closed_time \\ DateTime.utc_now()) do
     alert_ids = Enum.map(incoming_alert_list, & &1.alert_id)

@@ -195,9 +195,12 @@ defmodule AlertsUI.AlertBuilderTest do
 
         result = AlertBuilder.build_alert(alert_data, :R)
 
-        assert result.active_period == [%{start: ~U[2024-04-30 15:54:00Z], end: nil}]
+        assert result.active_period == [
+                 %{start: ~U[2024-04-30 15:54:00Z], end: ~U[2024-05-01 06:30:00Z]}
+               ]
+
         assert result.active_period_start == ~U[2024-04-30 15:54:00Z]
-        assert result.active_period_end == nil
+        assert result.active_period_end == ~U[2024-05-01 06:30:00Z]
         assert result.duration_certainty == :ESTIMATED
       end
     end
