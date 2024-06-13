@@ -112,12 +112,14 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
       class={
         unless @progress.name == "route_type_and_effect",
           do: "hidden",
-          else: "min-w-full flex flex-col"
+          else: "min-w-full flex flex-col mb-8"
       }
       id="route_view"
     >
       <.h1 class="mb-8">Create New Alert</.h1>
-      <.h5 class="text-text-secondary w-100 mb-8">Select a Service Effect</.h5>
+      <.h5 class="text-text-secondary mb-8  w-full text-center md:text-left">
+        Select a Service Effect
+      </.h5>
       <.form
         for={@changeset}
         phx-target={@myself}
@@ -125,11 +127,11 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
         class="form-control gap-4 min-w-full"
         id="route_types_form"
       >
-        <div class="w-4 mr-4 min-w-[25%]">
+        <div class="w-4 mr-4 w-full text-center md:text-left">
           <.body>Service Type</.body>
         </div>
-        <div class="flex flex-row mb-8">
-          <div class="grid grid-cols-3 lg:grid-cols-6 gap-2">
+        <div class="flex flex-row mb-8 justify-center md:justify-start">
+          <div class="grid sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-2">
             <div :for={route_type <- @route_types}>
               <%= route_type_buttons(assigns, route_type) %>
             </div>
@@ -137,16 +139,16 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
           </div>
         </div>
 
-        <div class="w-4 mr-4 min-w-[25%]">
+        <div class="w-4 mr-4 w-full text-center md:text-left">
           <.body>
             Effect
           </.body>
         </div>
-        <div class="flex flex-row">
-          <p class="text-text-disabled" hidden={!is_nil(@selected_route_type)}>
+        <div class="flex flex-row justify-center md:justify-start">
+          <p class="text-text-disabled mb-[18rem]" hidden={!is_nil(@selected_route_type)}>
             Select a service type to see possible effects.
           </p>
-          <div class="grid grid-cols-3 lg:grid-cols-6 gap-2">
+          <div class="grid sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-6  gap-2">
             <div :for={effect <- @effects} class={if is_nil(@selected_route_type), do: "hidden"}>
               <%= effect_buttons(assigns, effect) %>
             </div>

@@ -30,8 +30,8 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         {:ok, view, _html} = live(conn, "/alerts/new")
 
         first_rendered_view = render(view)
-        assert first_rendered_view =~ ~s(class="min-w-full flex flex-col" id="route_view")
-        refute first_rendered_view =~ ~s(class="min-w-full flex flex-col" id="details_view")
+        assert first_rendered_view =~ ~s(class="min-w-full flex flex-col mb-8" id="route_view")
+        refute first_rendered_view =~ ~s(class="min-w-full flex flex-col mt-4" id="details_view")
 
         {:ok, changeset} =
           Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 3, effect_name: "Detour"})
@@ -40,7 +40,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         send(view.pid, {:step_completed, changeset})
 
         second_rendered_view = render(view)
-        refute second_rendered_view =~ ~s(class="min-w-full flex flex-col" id="route_view")
+        refute second_rendered_view =~ ~s(class="min-w-full flex flex-col mb-8" id="route_view")
         assert second_rendered_view =~ ~s(class="min-w-full flex flex-col mt-4" id="details_view")
 
         # Submit service section
@@ -133,8 +133,8 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         |> element("#route_type_and_effect")
         |> render_click()
 
-      assert clicked_view =~ ~s(class="min-w-full flex flex-col" id="route_view")
-      refute clicked_view =~ ~s(class="min-w-full flex flex-col" id="details_view")
+      assert clicked_view =~ ~s(class="min-w-full flex flex-col mb-8" id="route_view")
+      refute clicked_view =~ ~s(class="min-w-full flex flex-col mt-4" id="details_view")
     end
 
     @tag :logged_in_user
