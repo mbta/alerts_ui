@@ -295,11 +295,13 @@ defmodule AlertsUIWeb.SharedComponents do
     <button
       class={"
       font-medium
+      border-bg-elevation-3
+      border-[1px]
       mb-1
       text-base
       px-4
       py-3
-      rounded-sm
+      rounded
       #{if @active, do: on, else: off}
       #{if @hidden, do: "hidden", else: ""}
       #{@class}
