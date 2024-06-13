@@ -13,10 +13,13 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     field :description_text, :string
     field :draft, :boolean
     field :cause_detail, :string, default: ""
+    field :url, :string
+    field :image_url, :string
+    field :image_alternative_text, :string
   end
 
-  @fields ~w[header_text description_text draft cause_detail]a
   @required_fields ~w[header_text description_text]a
+  @fields @required_fields ++ ~w[draft cause_detail url image_url image_alternative_text]a
 
   @impl true
   def mount(socket) do
@@ -31,7 +34,10 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       %{
         header_text: Map.get(alert_data, :header_text),
         description_text: Map.get(alert_data, :description_text),
-        cause_detail: Map.get(alert_data, :cause_detail)
+        cause_detail: Map.get(alert_data, :cause_detail),
+        url: Map.get(alert_data, :url),
+        image_url: Map.get(alert_data, :image_url),
+        image_alternative_text: Map.get(alert_data, :image_alternative_text)
       }
 
     changeset =
@@ -138,6 +144,27 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           label="Description"
           phx-debounce={120}
           id="description_input"
+          class="min-w-[32rem]"
+        />
+        <.text_input
+          field={@form[:url]}
+          label="URL"
+          phx-debounce={120}
+          id="url_input"
+          class="min-w-[32rem]"
+        />
+        <.text_input
+          field={@form[:image_url]}
+          label="Image URL"
+          phx-debounce={120}
+          id="image_url_input"
+          class="min-w-[32rem]"
+        />
+        <.text_input
+          field={@form[:image_alternative_text]}
+          label="Image Alt Text"
+          phx-debounce={120}
+          id="image_alt_text_input"
           class="min-w-[32rem]"
         />
         <.button_primary class="basis-8 self-center min-w-[10%]" name="save">Publish</.button_primary>

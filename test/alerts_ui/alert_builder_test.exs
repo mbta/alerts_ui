@@ -37,7 +37,10 @@ defmodule AlertsUI.AlertBuilderTest do
           direction: "default",
           active_period_start: ~N[2024-04-30 11:54:00],
           active_period_end_specifier: :further_notice,
-          cause_detail: "disabled train"
+          cause_detail: "disabled train",
+          url: "http://www.example.com",
+          image_url: "http://www.example.com/example.jpg",
+          image_alternative_text: "an example image"
         }
 
         result = AlertBuilder.build_alert(alert_data, :R)
@@ -61,7 +64,10 @@ defmodule AlertsUI.AlertBuilderTest do
                  active_period_start: ~U[2024-04-30 15:54:00Z],
                  active_period_end: nil,
                  cause: :TECHNICAL_PROBLEM,
-                 cause_detail: "disabled train"
+                 cause_detail: "disabled train",
+                 url: "http://www.example.com",
+                 image_url: "http://www.example.com/example.jpg",
+                 image_alternative_text: "an example image"
                }
 
         result |> Alerts.create_or_update_alert()
@@ -93,6 +99,9 @@ defmodule AlertsUI.AlertBuilderTest do
                  effect: :SIGNIFICANT_DELAYS,
                  description_text: "ok",
                  header_text: "hello",
+                 url: nil,
+                 image_url: nil,
+                 image_alternative_text: nil,
                  informed_entity: [
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
@@ -173,7 +182,10 @@ defmodule AlertsUI.AlertBuilderTest do
                  active_period_start: ~U[2024-04-30 15:54:00Z],
                  duration_certainty: :UNKNOWN,
                  cause: :OTHER_CAUSE,
-                 cause_detail: "freight train interference"
+                 cause_detail: "freight train interference",
+                 url: nil,
+                 image_url: nil,
+                 image_alternative_text: nil
                }
 
         result |> Alerts.create_or_update_alert()

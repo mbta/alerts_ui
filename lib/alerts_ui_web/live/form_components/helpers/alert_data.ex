@@ -21,7 +21,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :active_period_end,
     :active_period_end_specifier,
     :service_types,
-    :cause_detail
+    :cause_detail,
+    :url,
+    :image_url,
+    :image_alternative_text
   ]
 
   @type t :: %__MODULE__{
@@ -33,11 +36,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           header_text: String.t(),
           description_text: String.t(),
           combination: atom(),
-          active_period_start: NaiveDateTime.t(),
-          active_period_end_specifier: atom(),
-          active_period_end: NaiveDateTime.t(),
+          active_period_start: NaiveDateTime.t() | nil,
+          active_period_end_specifier: atom() | nil,
+          active_period_end: NaiveDateTime.t() | nil,
           service_types: [Route.type_int()],
-          cause_detail: String.t()
+          cause_detail: String.t(),
+          url: String.t() | nil,
+          image_url: String.t() | nil,
+          image_alternative_text: String.t() | nil
         }
 
   @spec build_alert_data(nil | String.t()) :: t()
@@ -45,13 +51,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
   def build_alert_data(alert_id) do
     alert = Alerts.get_by_alert_id(alert_id)
-    effect_map = Effect.effect_map_by_detail(Map.get(alert, :effect_detail))
-    informed_entities = Map.get(alert, :informed_entity, [])
+    effect_map = Effect.effect_map_by_detail(alert.effect_detail)
+    informed_entities = alert.informed_entity
     route_type = Alert.get_route_type(alert)
     effect_name = Map.get(effect_map, :effect_name)
     combination = ServiceEffectCombinations.get_combination(route_type, effect_name)
-
-    active_period_end = Map.get(alert, :active_period_end) |> shift_to_naive()
+    active_period_end = shift_to_naive(alert.active_period_end)
 
     %__MODULE__{
       route_type: route_type,
@@ -60,15 +65,18 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       route_ids: Alert.gather_route_ids(informed_entities),
       stop_ids: Alert.gather_parent_stop_ids(informed_entities),
       trip_ids: Alert.gather_trip_ids(informed_entities),
-      header_text: Map.get(alert, :header_text),
-      description_text: Map.get(alert, :description_text),
+      header_text: alert.header_text,
+      description_text: alert.description_text,
       combination: combination,
-      active_period_start: Map.get(alert, :active_period_start) |> shift_to_naive(),
+      active_period_start: shift_to_naive(alert.active_period_start),
       active_period_end: active_period_end,
       active_period_end_specifier:
-        determine_specifier(active_period_end, Map.get(alert, :duration_certainty)),
+        determine_specifier(active_period_end, alert.duration_certainty),
       service_types: Alert.service_types(alert),
-      cause_detail: Map.get(alert, :cause_detail)
+      cause_detail: alert.cause_detail,
+      url: alert.url,
+      image_url: alert.image_url,
+      image_alternative_text: alert.image_alternative_text
     }
   end
 
