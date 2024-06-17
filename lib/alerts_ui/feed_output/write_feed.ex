@@ -8,13 +8,10 @@ defmodule AlertsUI.FeedOutput.WriteFeed do
 
   alias AlertsUI.Alerts
   alias AlertsUI.FeedOutput.{CreateGtfsJson, CreateGtfsProtobuf, CreateOutputAlert}
-  @spec compare_feed :: boolean()
-  defp compare_feed,
-    do: Application.get_env(:alerts_ui, :compare_feed) == "true"
 
   @spec write_feed() :: {:ok, binary()} | {:error, String.t()}
   def write_feed(_opts \\ []) do
-    recently_closed_alerts = get_recently_closed_alerts(compare_feed())
+    recently_closed_alerts = get_recently_closed_alerts()
 
     open_alerts =
       Alerts.list_all_open()
@@ -29,11 +26,7 @@ defmodule AlertsUI.FeedOutput.WriteFeed do
     end
   end
 
-  # when we diff we want to compare only closed alerts. Remove this line
-  # when diffing is turned off
-  defp get_recently_closed_alerts(true), do: []
-
-  defp get_recently_closed_alerts(false) do
+  defp get_recently_closed_alerts do
     Alerts.list_all_recently_closed()
     |> Enum.map(&CreateOutputAlert.build_alert/1)
   end
