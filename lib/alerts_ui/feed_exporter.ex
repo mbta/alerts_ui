@@ -1,4 +1,4 @@
-defmodule AlertsUI.FeedImporterExporter do
+defmodule AlertsUI.FeedExporter do
   @moduledoc """
   Oban worker that periodically imports a source feed of alerts data and then
   writes the up-to-date version of our feed.

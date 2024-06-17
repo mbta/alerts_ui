@@ -1,9 +1,9 @@
-defmodule AlertsUI.FeedImporterExporterTest do
+defmodule AlertsUI.FeedExporterTest do
   use AlertsUI.DataCase, async: false
   use Oban.Testing, repo: AlertsUI.Repo
   import Test.Support.Helpers
   import ExUnit.CaptureLog
-  alias AlertsUI.FeedImporterExporter
+  alias AlertsUI.FeedExporter
   alias Oban.Job
 
   describe "perform" do
@@ -12,7 +12,7 @@ defmodule AlertsUI.FeedImporterExporterTest do
 
       {result, _log} =
         with_log(fn ->
-          FeedImporterExporter.perform(%Job{args: %{}})
+          FeedExporter.perform(%Job{args: %{}})
         end)
 
       assert result == :ok
