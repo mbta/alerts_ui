@@ -5,7 +5,6 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
   import AlertsUI.Support.Factory
   import Ecto.Changeset
   import Mock
-  import Test.Support.Helpers
   alias AlertsUIWeb.FormComponents.{AffectedService, AlertDetails, RouteTypeAndEffect, TimeRange}
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
@@ -201,15 +200,6 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
       rendered_view = render(view)
 
       rendered_view =~ "draft: draft status must be true"
-    end
-
-    @tag :logged_in_user
-    test "displays warning if compare_feed is true", %{conn: conn} do
-      reassign_env(:alerts_ui, :compare_feed, "true")
-      {:ok, _view, html} = live(conn, "/alerts/new")
-
-      assert html =~ ~s(! Please do not create Alerts on this server !)
-      assert html =~ ~s(<div class=\"hidden\" id=\"article-view\">)
     end
   end
 end

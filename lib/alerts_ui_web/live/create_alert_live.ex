@@ -295,7 +295,4 @@ defmodule AlertsUIWeb.CreateAlertLive do
       Enum.flat_map(direction_array, &StopsRepo.by_route(route, &1))
     end)
   end
-
-  defp compare_feed,
-    do: Application.get_env(:alerts_ui, :compare_feed) == "true"
 end
