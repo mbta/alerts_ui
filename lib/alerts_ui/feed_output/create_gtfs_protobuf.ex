@@ -7,9 +7,9 @@ end
 
 defmodule AlertsUI.FeedOutput.CreateGtfsProtobuf do
   @moduledoc """
-    Given a list of alerts, outputs a protobuf ready to write to file
+    Given a list of standard alerts, outputs a protobuf ready to write to file
   """
-  alias AlertsUI.FeedOutput.CreateOutputAlert
+  alias AlertsUI.FeedOutput.{CreateOutputAlert, CreateStandardAlert}
 
   alias AlertsUI.FeedOutput.GTFSProtobufDefinition.{
     Alert,
@@ -23,10 +23,6 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobuf do
     TripDescriptor
   }
 
-  @valid_trip_fields ~w(trip_id route_id direction_id start_time start_date schedule_relationship)a
-  @valid_entity_fields ~w(agency_id route_id route_type trip stop_id direction_id)a
-  @valid_alert_fields ~w(active_period informed_entity cause effect url header_text description_text tts_header_text tts_description_text severity_level image image_alternative_text cause_detail effect_detail)a
-
   def output_protobuf(alerts) do
     header = FeedHeader.new(CreateOutputAlert.build_gtfs_header())
 
@@ -35,7 +31,7 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobuf do
       |> Enum.map(fn alert ->
         %{
           id: alert.id,
-          alert: build_alert(alert.alert)
+          alert: alert.alert |> CreateStandardAlert.build_standard_alert() |> build_alert()
         }
         |> FeedEntity.new()
       end)
@@ -46,7 +42,6 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobuf do
 
   def build_alert(alert) do
     alert
-    |> Map.take(@valid_alert_fields)
     |> Map.replace_lazy(:active_period, &Enum.map(&1, fn ap -> build_time_range(ap) end))
     |> Map.replace_lazy(:informed_entity, &Enum.map(&1, fn ie -> build_entity_selector(ie) end))
     |> Map.replace_lazy(:url, &build_translated_string/1)
@@ -63,14 +58,12 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobuf do
 
   def build_entity_selector(informed_entity) do
     informed_entity
-    |> Map.take(@valid_entity_fields)
     |> Map.replace_lazy(:trip, &build_trip_descriptor/1)
     |> EntitySelector.new()
   end
 
   def build_trip_descriptor(trip) do
     trip
-    |> Map.take(@valid_trip_fields)
     |> TripDescriptor.new()
   end
 
