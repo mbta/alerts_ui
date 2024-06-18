@@ -28,10 +28,11 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobuf do
 
     entity =
       alerts
+      |> Enum.map(&CreateStandardAlert.build_standard_alert/1)
       |> Enum.map(fn alert ->
         %{
           id: alert.id,
-          alert: alert.alert |> CreateStandardAlert.build_standard_alert() |> build_alert()
+          alert: alert.alert |> build_alert()
         }
         |> FeedEntity.new()
       end)

@@ -11,9 +11,13 @@ defmodule AlertsUI.FeedOutput.CreateGtfsJson do
               binary() | []
             )
   def output_standard_json(alerts) do
+    entity =
+      alerts
+      |> Enum.map(&CreateStandardAlert.build_standard_alert/1)
+
     %{
       header: CreateOutputAlert.build_gtfs_header(),
-      entity: Enum.map(alerts, &CreateStandardAlert.build_standard_alert/1)
+      entity: entity
     }
     |> encode_json
   end

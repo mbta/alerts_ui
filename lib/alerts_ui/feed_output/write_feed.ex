@@ -21,7 +21,7 @@ defmodule AlertsUI.FeedOutput.WriteFeed do
 
     with {:ok, enhanced_alerts_json} <-
            write_enhanced_json_file(Enum.concat(open_alerts, recently_closed_alerts)),
-         {:ok, _standard_alerts_json} <- write_standard_json_file(open_alerts),
+         :ok <- write_standard_json_file(open_alerts),
          :ok <- write_protobuf_file(open_alerts) do
       {:ok, enhanced_alerts_json |> Jason.decode!()}
     else
@@ -38,7 +38,7 @@ defmodule AlertsUI.FeedOutput.WriteFeed do
     alerts_json = CreateGtfsJson.output_standard_json(alerts)
 
     case @write_module.write(@standard_json_output_filename, alerts_json) do
-      :ok -> {:ok, alerts_json}
+      :ok -> :ok
       {:error, reason} -> {:error, reason}
     end
   end

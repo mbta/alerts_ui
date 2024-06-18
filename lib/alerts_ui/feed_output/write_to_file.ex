@@ -50,10 +50,6 @@ defmodule AlertsUI.FeedOutput.WriteNowhere do
   """
   @behaviour AlertsUI.FeedOutput.WriteFile
 
-  def write("error", _content) do
-    {:error, "hello"}
-  end
-
   def write(_filename, _content) do
     :ok
   end
