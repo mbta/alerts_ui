@@ -32,7 +32,7 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobuf do
       |> Enum.map(fn alert ->
         %{
           id: alert.id,
-          alert: alert.alert |> build_alert()
+          alert: build_alert(alert.alert)
         }
         |> FeedEntity.new()
       end)

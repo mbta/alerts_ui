@@ -4,12 +4,8 @@ defmodule AlertsUI.FeedOutput.CreateGtfsJson do
   """
   alias AlertsUI.FeedOutput.{CreateOutputAlert, CreateStandardAlert}
 
-  @spec output_standard_json(any()) ::
+  @spec output_standard_json([map()]) ::
           binary()
-          | maybe_improper_list(
-              binary() | maybe_improper_list(any(), binary() | []) | byte(),
-              binary() | []
-            )
   def output_standard_json(alerts) do
     entity =
       alerts
@@ -22,12 +18,8 @@ defmodule AlertsUI.FeedOutput.CreateGtfsJson do
     |> encode_json
   end
 
-  @spec output_enhanced_json(any()) ::
+  @spec output_enhanced_json([map()]) ::
           binary()
-          | maybe_improper_list(
-              binary() | maybe_improper_list(any(), binary() | []) | byte(),
-              binary() | []
-            )
   def output_enhanced_json(alerts) do
     %{
       header: CreateOutputAlert.build_gtfs_header(),
