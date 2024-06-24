@@ -271,20 +271,23 @@ defmodule AlertsUIWeb.SharedComponents do
   def toggle_button_classes do
     [
       base_toggle_classes: "font-medium
-        border-bg-elevation-3
         border-[1px]
         mb-1
         text-base
         px-4
         py-3
-        rounded",
-      toggled_on: "bg-bg-toggle-active
-        text-text-dark
+        rounded
+        focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25)]",
+      toggled_on: "bg-menu-active
+        text-text-invert
         hover:bg-primary-hover
+        focus:bg-primary-hover
         active:bg-primary-active",
-      toggled_off: "bg-bg-elevation-5
-        text-text-primary-bg
+      toggled_off: "bg-bg-input-default
+        text-text-primary
+        border-bg-elevation-6
         hover:bg-secondary-hover
+        focus:bg-secondary-hover
         active:bg-secondary-active"
     ]
   end
@@ -416,7 +419,7 @@ defmodule AlertsUIWeb.SharedComponents do
         id={@id}
         name={@name}
         class={[
-          "bg-bg-primary border border-border-primary pl-3 py-1.5
+          "bg-bg-elevation-5 border border-border-primary pl-3 py-1.5
             rounded text-text-primary disabled:text-text-secondary
             disabled:bg-bg-elevation-3 focus:border-border-focus
             focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25)] #{@class}",
@@ -495,7 +498,7 @@ defmodule AlertsUIWeb.SharedComponents do
         placeholder={@placeholder}
         value={@value}
         class={[
-          "bg-bg-primary border border-border-primary pl-3 py-1.5
+          "bg-bg-input-default border border-border-primary pl-3 py-1.5
             rounded text-text-primary disabled:text-text-secondary
             disabled:bg-bg-elevation-3 focus:border-border-focus
             focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25)] #{@class}",
@@ -539,10 +542,10 @@ defmodule AlertsUIWeb.SharedComponents do
         name={@name}
         placeholder={@placeholder}
         class={[
-          "bg-bg-primary border border-border-primary pl-3 py-1.5
+          "bg-bg-input-default border border-border-primary pl-3 py-1.5
             rounded text-text-primary disabled:text-text-secondary
             disabled:bg-bg-elevation-3 focus:border-border-focus
-            focus:drop-shadow-input #{@class}",
+            focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25)] #{@class}",
           @errors != [] && "border-danger focus:border-danger"
         ]}
         {@rest}
