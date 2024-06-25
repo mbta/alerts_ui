@@ -37,6 +37,7 @@ defmodule AlertsUI.FeedOutput.WriteLocal do
   """
   @behaviour AlertsUI.FeedOutput.WriteFile
 
+  # sobelow_skip ["Traversal.FileModule"]
   def write(filename, content) do
     path = "./assets/outputs/" <> filename
     File.write(path, content)

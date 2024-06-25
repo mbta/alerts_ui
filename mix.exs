@@ -104,6 +104,7 @@ defmodule AlertsUI.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:postgrex, ">= 0.0.0"},
       {:req, "~> 0.5.0"},
+      {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
       {:stream_data, "~> 1.1.1", only: :test},
       {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 1.0"},
@@ -130,7 +131,15 @@ defmodule AlertsUI.MixProject do
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind default", "esbuild default"],
-      "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"]
+      "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"],
+      sobelow: "sobelow --skip --exit=low --ignore Config.HTTPS",
+      check: [
+        "compile --force --all-warnings --warnings-as-errors",
+        "format",
+        "credo",
+        "sobelow",
+        "dialyzer"
+      ]
     ]
   end
 end

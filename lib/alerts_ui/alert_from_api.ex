@@ -46,7 +46,7 @@ defmodule AlertsUI.AlertFromApi do
   defp add_activities(informed_entity, new_activities) do
     case Map.get(informed_entity, :activities) do
       nil -> new_activities
-      [_ | _] = activities -> Enum.map(activities, &String.to_atom(&1))
+      [_ | _] = activities -> Enum.map(activities, &String.to_existing_atom(&1))
     end
   end
 
