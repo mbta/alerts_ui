@@ -192,7 +192,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       assert AlertData.build_alert_data("1").active_period_end_specifier == :later_today
     end
 
-    test "handles known end-of-service duration" do
+    test "handles known end-of-service duration less than 24 hours from start time" do
       insert(:alert, %{
         alert_id: "1",
         effect: :ACCESSIBILITY_ISSUE,
@@ -209,6 +209,25 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       })
 
       assert AlertData.build_alert_data("1").active_period_end_specifier == :end_of_service_today
+    end
+
+    test "handles known end-of-service duration more than 24 hours from start time" do
+      insert(:alert, %{
+        alert_id: "1",
+        effect: :ACCESSIBILITY_ISSUE,
+        effect_detail: "ACCESS_ISSUE",
+        header_text: "cool header text",
+        description_text: "description text",
+        informed_entity: [],
+        active_period_start: ~U[2024-05-02 16:09:34.007545Z],
+        active_period_end: ~U[2024-05-04 06:30:00.007545Z],
+        active_period: [
+          %{start: ~U[2024-05-02 16:09:34.007545Z], end: ~U[2024-05-04 06:30:00.007545Z]}
+        ],
+        duration_certainty: :KNOWN
+      })
+
+      assert AlertData.build_alert_data("1").active_period_end_specifier == :pick_a_date_and_time
     end
   end
 end
