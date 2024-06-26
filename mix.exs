@@ -81,6 +81,7 @@ defmodule AlertsUI.MixProject do
       {:exprotobuf, "~> 1.2.17"},
       {:gen_stage, "~> 1.2.1"},
       {:gettext, "~> 0.20"},
+      {:fastimage, "~> 1.0.0-rc4"},
       {:finch, "~> 0.13"},
       {:floki, ">= 0.30.0", only: :test},
       {:flop_phoenix, "~> 0.22"},

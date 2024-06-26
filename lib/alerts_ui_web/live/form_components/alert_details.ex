@@ -50,6 +50,13 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   end
 
   def handle_event("validate", %{"alert_details" => alert_details}, socket) do
+          alert_details["image_url"] |> IO.inspect(label: :image_url)
+      {:ok, image_size} = case alert_details["image_url"] do
+        "" -> {:ok, nil}
+        nil -> {:ok, nil}
+        _ -> Fastimage.info(alert_details["image_url"])
+      end
+      IO.inspect(image_size, label: :IMAGE_SIZE)
     form =
       %__MODULE__{}
       |> changeset(alert_details)
@@ -152,13 +159,16 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           id="url_input"
           class="min-w-[32rem]"
         />
-        <.text_input
+        <div>
+          <.text_input
           field={@form[:image_url]}
           label="Image URL"
           phx-debounce={120}
           id="image_url_input"
           class="min-w-[32rem]"
         />
+          <img src={@form[:image_url].value}/>
+        </div>
         <.text_input
           field={@form[:image_alternative_text]}
           label="Image Alt Text"
