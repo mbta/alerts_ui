@@ -33,6 +33,7 @@ module.exports = {
         "bg-elevation-4": "#2b3741",
         "bg-elevation-5": "#2e3f4d",
         "bg-elevation-6": "#384e5c",
+        "bg-toggle-active": "#c1e4ff",
         "border-primary": "#8b9198",
         "border-focus": "#8ecdff",
         "border-disabled": "#c6c6c9",

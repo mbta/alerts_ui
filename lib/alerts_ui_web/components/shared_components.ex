@@ -262,6 +262,121 @@ defmodule AlertsUIWeb.SharedComponents do
     """
   end
 
+  @spec toggle_button_classes() :: [
+          {:base_toggle_classes, String.t()}
+          | {:toggled_off, String.t()}
+          | {:toggled_on, String.t()},
+          ...
+        ]
+  def toggle_button_classes do
+    [
+      base_toggle_classes: "font-medium
+        border-bg-elevation-3
+        border-[1px]
+        mb-1
+        text-base
+        px-4
+        py-3
+        rounded",
+      toggled_on: "bg-bg-toggle-active
+        text-text-dark
+        hover:bg-primary-hover
+        active:bg-primary-active",
+      toggled_off: "bg-bg-elevation-5
+        text-text-primary-bg
+        hover:bg-secondary-hover
+        active:bg-secondary-active"
+    ]
+  end
+
+  @doc """
+  Renders a toggle button.
+
+  ##Examples
+    <.button_toggle>Button Text</.button_toggle>
+  """
+  attr :rest, :global,
+    include:
+      ~w(type phx-target phx-click phx-value-effect_name phx-value-route_type name id value disabled)
+
+  attr :class, :string, default: "", doc: "additional classes to add"
+  attr :hidden, :boolean, default: false, doc: "hides component if true"
+  attr :active, :boolean, default: true, doc: "switches to active colors if true"
+  slot :inner_block, required: true
+
+  def button_toggle(assigns) do
+    assigns =
+      assigns
+      |> assign(toggle_button_classes())
+
+    ~H"""
+    <button
+      class={"
+      #{@base_toggle_classes}
+      #{if @active, do: @toggled_on, else: @toggled_off}
+      #{if @hidden, do: "hidden", else: ""}
+      #{@class}
+    "}
+      {@rest}
+    >
+      <%= render_slot(@inner_block) %>
+    </button>
+    """
+  end
+
+  @doc """
+  Renders a checkgroup.
+
+  ##Examples
+    <.checkgroup />
+  """
+  attr :field, FormField,
+    required: true,
+    doc: "a form field struct retrieved from the form, for example: @form[:email]"
+
+  attr :name, :string, default: ""
+  attr :options, :any
+  attr :label, :string, default: nil
+  attr :hidden, :boolean, default: false, doc: "hides component if true"
+  attr :class, :string, default: "", doc: "additional classes to add"
+  attr :rest, :global, include: ~w(disabled form readonly)
+
+  def toggle_checkgroup(%{field: %FormField{} = field} = assigns) do
+    assigns =
+      assigns
+      |> assign(id: field.id, field_value: field.value)
+      |> assign(toggle_button_classes())
+      |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
+
+    ~H"""
+    <div
+      phx-feedback-for={@name}
+      class={"grid grid-cols-1 gap-1 text-sm items-baseline #{if @hidden, do: "hidden", else: ""}"}
+    >
+      <div :for={{route_name, id} <- @options} class="">
+        <.label for={id}>
+          <div class={"
+            #{@base_toggle_classes}
+              #{if (@field_value && id in @field_value), do: @toggled_on, else: @toggled_off}
+              #{@class}"}>
+            <input
+              type="checkbox"
+              id={id}
+              name={@name}
+              value={id}
+              checked={@field_value && id in @field_value}
+              class="hidden"
+              {@rest}
+            />
+            <%= route_name %>
+          </div>
+        </.label>
+      </div>
+      <.input_error :for={msg <- @errors}><%= msg %></.input_error>
+    </div>
+    """
+  end
+
   @doc """
   Renders a select input.
 

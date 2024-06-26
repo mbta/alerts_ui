@@ -24,7 +24,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   def mount(socket) do
     form = %__MODULE__{} |> changeset(%{}) |> to_form()
 
-    socket = socket |> assign(%{form: form})
+    socket = socket |> assign(%{form: form, button_selected_routes: []})
 
     {:ok, socket}
   end
@@ -49,6 +49,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     affected_service =
       affected_service
       |> Map.put_new("direction", "default")
+      |> clean_route_ids(socket.assigns.form)
       |> populate_default_stops()
       |> populate_default_trips()
 
@@ -126,6 +127,23 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     |> validate_required(ServiceEffectCombinations.required_fields(combination))
   end
 
+  def clean_route_ids(affected_service, form) do
+    # necessary to prevent duplication when input is checkbox group
+    existing_route_ids = form.params["route_ids"] || []
+    incoming_route_ids = affected_service["route_ids"] || []
+
+    new_route_ids =
+      Enum.reduce(incoming_route_ids, existing_route_ids, fn route_id, acc ->
+        if route_id in acc do
+          acc -- [route_id]
+        else
+          [route_id | acc]
+        end
+      end)
+
+    affected_service |> Map.put("route_ids", new_route_ids)
+  end
+
   @impl true
   def render(assigns) do
     route_id_options = SelectFormatter.formatted_select_options(assigns.available_routes)
@@ -167,7 +185,16 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             options={@route_id_options}
             multiple={true}
             class="min-w-[16rem]"
+            hidden={@route_type !== 3}
           />
+          <div class="grid grid-cols-1 gap-2 mb-8">
+            <.toggle_checkgroup
+              field={@form[:route_ids]}
+              options={@route_id_options}
+              hidden={@route_type === 3}
+              name="affected_service[route_ids][]"
+            />
+          </div>
 
           <%= if show_directions_input?(assigns) do %>
             <.select

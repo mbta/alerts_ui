@@ -10,9 +10,9 @@ defmodule AlertsUIWeb.FormComponents.Timeline do
     assigns = assign(assigns, :previous_steps, previous_steps(assigns.progress, assigns.steps))
 
     ~H"""
-    <div class="flex flex-row justify-start min-w-full mb-20 bg-sky-200 py-2">
-      <h1 class="mx-6 text-xl py-3 font-extrabold">Creating New Alert</h1>
-      <div :for={step <- @steps} class="mx-6 self-center min-w-[12rem]">
+    <div class="flex flex-row justify-start mb-14 bg-sky-200 py-2 px-4 min-w-full">
+      <.h2 class="lg:mx-6 py-3 text-text-dark">Creating New Alert</.h2>
+      <div :for={step <- @steps} class="lg:mx-6 mx-2 self-center min-w-[12rem]">
         <%= step_buttons(assigns, step) %>
       </div>
     </div>

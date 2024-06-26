@@ -9,9 +9,9 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   alias AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes
 
   @route_types [
+    "Bus",
     "Subway",
     "Commuter Rail",
-    "Bus",
     "Ferry",
     "Systemwide"
   ]
@@ -112,10 +112,14 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
       class={
         unless @progress.name == "route_type_and_effect",
           do: "hidden",
-          else: "min-w-full flex flex-col"
+          else: "min-w-full flex flex-col mb-8"
       }
       id="route_view"
     >
+      <.h1 class="mb-8">Create New Alert</.h1>
+      <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
+        Select a Service Effect
+      </.h5>
       <.form
         for={@changeset}
         phx-target={@myself}
@@ -123,11 +127,11 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
         class="form-control gap-4 min-w-full"
         id="route_types_form"
       >
-        <div class="flex flex-row">
-          <div class="w-4 mr-4 min-w-[25%]">
-            <.h2>Select Service Type</.h2>
-          </div>
-          <div class="grid grid-cols-2 gap-4 mb-4 min-w-[50%]">
+        <div class="w-4 mr-4 w-full text-center md:text-left">
+          <.body>Service Type</.body>
+        </div>
+        <div class="flex flex-row mb-8 justify-center md:justify-start">
+          <div class="grid sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6 gap-2">
             <div :for={route_type <- @route_types}>
               <%= route_type_buttons(assigns, route_type) %>
             </div>
@@ -135,14 +139,16 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
           </div>
         </div>
 
-        <hr class={if is_nil(@selected_route_type), do: "hidden"} />
-        <div class="flex flex-row">
-          <div class="w-4 mr-4 min-w-[25%]">
-            <.h2 hidden={is_nil(@selected_route_type)}>
-              Select Effect
-            </.h2>
-          </div>
-          <div class="grid grid-cols-4 gap-4 min-w-[50%]">
+        <div class="w-4 mr-4 w-full text-center md:text-left">
+          <.body>
+            Effect
+          </.body>
+        </div>
+        <div class="flex flex-row justify-center md:justify-start">
+          <p class="text-text-disabled mb-[18rem]" hidden={!is_nil(@selected_route_type)}>
+            Select a service type to see possible effects.
+          </p>
+          <div class="grid sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6 gap-2">
             <div :for={effect <- @effects} class={if is_nil(@selected_route_type), do: "hidden"}>
               <%= effect_buttons(assigns, effect) %>
             </div>
@@ -167,48 +173,42 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   end
 
   def route_type_buttons(assigns, route_type) do
-    show_primary =
-      is_nil(assigns.selected_route_type) or route_type == assigns.selected_route_type
+    active_route = route_type == assigns.selected_route_type
 
-    assigns = assign(assigns, %{route_type: route_type, show_primary: show_primary})
+    assigns = assign(assigns, %{route_type: route_type, active_route: active_route})
 
     ~H"""
-    <.button_primary
-      :if={@show_primary}
+    <.button_toggle
+      active={@active_route}
       phx-target={@myself}
       phx-click="route_type"
-      class="basis-8 self-center w-full font-extrabold"
+      class="self-center min-w-[16rem]"
       value={@route_type}
     >
       <%= @route_type %>
-    </.button_primary>
-    <.button_secondary
-      :if={!@show_primary}
-      phx-target={@myself}
-      phx-click="route_type"
-      class="basis-8 self-center w-full font-extrabold"
-      value={@route_type}
-    >
-      <%= @route_type %>
-    </.button_secondary>
+    </.button_toggle>
     """
   end
 
   def effect_buttons(assigns, effect) do
+    active_effect = effect == assigns.selected_effect
+
     assigns =
       assign(assigns, %{
-        effect: effect
+        effect: effect,
+        active_effect: active_effect
       })
 
     ~H"""
-    <.button_primary
+    <.button_toggle
       phx-target={@myself}
       phx-click="effect"
-      class="basis-8 self-center w-full font-extrabold"
+      class="self-cente min-w-[16rem]"
       value={@effect}
+      active={@active_effect}
     >
       <%= @effect %>
-    </.button_primary>
+    </.button_toggle>
     """
   end
 end
