@@ -11,14 +11,17 @@ defmodule AlertsUIWeb.ComponentsLive do
   embedded_schema do
     field :single_select, {:array, :integer}
     field :single_select_error, {:array, :integer}
+    field :multiselect, {:array, :string}
+    field :multiselect_filter, :string
+    field :multiselect_error, {:array, :string}
     field :text_input, :string
     field :text_input_error, :string
     field :textarea, :string
     field :textarea_error, :string
   end
 
-  @fields ~w[single_select text_input textarea single_select_error text_input_error textarea_error]a
-  @errored_fields ~w[single_select_error text_input_error textarea_error]a
+  @fields ~w[single_select multiselect text_input textarea single_select_error multiselect_error text_input_error textarea_error multiselect_filter]a
+  @errored_fields ~w[single_select_error multiselect_error text_input_error textarea_error]a
 
   @impl true
   def mount(_params, _session, socket) do
@@ -28,7 +31,13 @@ defmodule AlertsUIWeb.ComponentsLive do
       |> Map.put(:action, :validate)
       |> to_form()
 
-    {:ok, assign(socket, %{form: form})}
+    {:ok, assign(socket, %{form: form, filter_value: ""})}
+  end
+
+  @impl true
+  def handle_event("rerender", %{"components_live" => components_live}, socket) do
+    filter_value = components_live["multiselect_filter"] |> String.downcase()
+    {:noreply, assign(socket, %{filter_value: filter_value})}
   end
 
   @doc """
@@ -76,6 +85,19 @@ defmodule AlertsUIWeb.ComponentsLive do
       Seven: 7,
       Eight: 8,
       Nine: 9
+    ]
+  end
+
+  defp multiselect_options do
+    [
+      Aardvark: "aardvark",
+      Agouti: "agouti",
+      Bilby: "bilby",
+      Binturong: "binturong",
+      Caracal: "caracal",
+      Coatimundi: "coatimundi",
+      Dhole: "dhole",
+      Duiker: "duiker"
     ]
   end
 end
