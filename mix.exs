@@ -77,7 +77,7 @@ defmodule AlertsUI.MixProject do
       {:ex_aws_rds, "~> 2.0"},
       {:ex_aws_s3, "~> 2.0"},
       {:ex_json_schema, "~> 0.5"},
-      {:ex_machina, "~> 2.7.0", only: :test},
+      {:ex_machina, "~> 2.8.0", only: :test},
       {:exprotobuf, "~> 1.2.17"},
       {:gen_stage, "~> 1.2.1"},
       {:gettext, "~> 0.20"},
