@@ -116,7 +116,7 @@
       field={@form[:multiselect]}
       filter_field={@form[:multiselect_filter]}
       filter_value={@filter_value}
-      update_function="rerender"
+      filter_update_function="rerender"
       options={multiselect_options()}
       class="max-w-[4rem]"
     />
@@ -125,20 +125,21 @@
       field={@form[:multiselect]}
       filter_field={@form[:multiselect_filter]}
       filter_value={@filter_value}
-      update_function="rerender"
+      filter_update_function="rerender"
       options={multiselect_options()}
       disabled={true}
       class="max-w-[4rem]"
     />
-    <%!-- <.multiselect
+    <.multiselect
       field={@form[:multiselect_error]}
       filter_field={@form[:multiselect_filter]}
       filter_value={@filter_value}
-      update_function="rerender"
+      filter_update_function="rerender"
       options={multiselect_options()}
       prompt="All"
+      disabled={true}
       class="max-w-[16rem]"
-    /> --%>
+    />
     <.text_input label="Text Input" field={@form[:text_input]} placeholder="Text Input" />
     <.text_input
       label="Disabled Text Input"

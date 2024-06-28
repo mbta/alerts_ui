@@ -354,7 +354,7 @@ defmodule AlertsUIWeb.SharedComponents do
     ~H"""
     <div
       phx-feedback-for={@name}
-      class={"grid grid-cols-1 gap-1 text-sm items-baseline #{if @hidden, do: "hidden", else: ""}"}
+      class={"text-sm items-baseline #{if @hidden, do: "hidden", else: ""}"}
     >
       <div :for={{route_name, id} <- @options} class="">
         <.label for={id}>
@@ -395,6 +395,8 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :class, :string, default: "", doc: "additional classes to add"
 
+  attr :div_class, :string, default: "", doc: "classes to add to the containing div"
+
   attr :field, FormField,
     required: true,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
@@ -407,6 +409,8 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :multiple, :boolean, default: false, doc: "whether this input allows multiple selections"
 
+  attr :hidden, :boolean, default: false, doc: "hides component if true"
+
   attr :rest, :global, include: ~w(disabled)
 
   def select(%{field: %FormField{} = field} = assigns) do
@@ -418,15 +422,15 @@ defmodule AlertsUIWeb.SharedComponents do
       |> assign_new(:value, fn -> field.value end)
 
     ~H"""
-    <div phx-feedback-for={@name} class="mb-5">
+    <div phx-feedback-for={@name} class={"#{@div_class} #{if @hidden, do: "hidden", else: ""}"}>
       <.label for={@id} class={if is_nil(@label), do: "hidden"}><%= @label %></.label>
       <select
         id={@id}
         name={@name}
         class={[
-          "bg-bg-elevation-5 border border-border-primary pl-3 py-1.5
+          "bg-bg-elevation-5 border border-border-primary pl-3 py-1.5 min-w-[99%] p-0
             rounded text-text-primary disabled:text-text-secondary
-            disabled:bg-bg-elevation-3 ring ring-0 ring-border-focus focus:ring-1 focus:border-border-focus
+            disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
             focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25)] #{@class}",
           @errors != [] && "border-danger focus:border-danger"
         ]}
@@ -473,11 +477,13 @@ defmodule AlertsUIWeb.SharedComponents do
     default: "",
     doc: "The value of the filter input (passed in from component to force re-render)"
 
-  attr :update_function, :string,
-    default: "validate",
-    doc: "the name of the function to call on change to update the filter_value attribute"
+  attr :filter_update_function, :string,
+    required: true,
+    doc: "the name of the function to call on change of the the filter_value attribute"
 
   attr :prompt, :string, default: nil, doc: "the prompt for multiselect inputs"
+
+  attr :hidden, :boolean, default: false, doc: "hides component if true"
 
   attr :options, :list,
     required: true,
@@ -489,30 +495,36 @@ defmodule AlertsUIWeb.SharedComponents do
     assigns =
       assigns
       |> assign(id: field.id)
+      |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
       |> assign_new(:filter_value, fn -> String.downcase(filter_value) end)
 
     ~H"""
-    <div>
+    <div {@rest} class={"#{@class} flex flex-col justify-start #{if @hidden, do: "hidden", else: ""}"}>
       <.label for={@id}><%= @label %></.label>
       <div
-        class={"min-w-fit flex flex-col -space-y-2 justify-center rounded border
-        border-border-primary ring ring-0 ring-border-focus focus-within:ring-1
-        focus-within:border-border-focus  #{@class}"}
+        class={[
+          "min-h-full min-w-fit flex flex-col -space-y-2 rounded border
+          bg-bg-elevation-5 disabled:bg-bg-elevation-3
+          border-border-primary ring-0 ring-border-focus
+          focus:ring-1 focus:border-border-focus
+          focus-within:ring-1 focus-within:border-border-focus",
+          @errors != [] && "border-danger focus:border-danger"
+        ]}
         {@rest}
       >
         <.text_input
-          class="min-w-full border-b-0 rounded-b-none pb-5 mb-0 border-0 focus:ring-0"
+          class="min-w-full pb-5 mb-0 border-0 ring-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-b-none"
           field={@filter_field}
           placeholder="⌕ Search..."
-          phx-change={@update_function}
+          phx-change={@filter_update_function}
           {@rest}
         />
-        <hr class="w-5/6 self-center border-t-1 border-bg-elevation-5" />
+        <hr class="w-5/6 self-center border-y-1 border-border-primary min-h-[1rem]" />
         <.select
           multiple={true}
           options={
             Enum.filter(@options, fn {option, _value} ->
-              option = option |> Atom.to_string() |> String.downcase()
+              option = String.downcase(option || "")
 
               case @filter_value do
                 "" -> true
@@ -522,7 +534,9 @@ defmodule AlertsUIWeb.SharedComponents do
           }
           field={@field}
           prompt={@prompt}
-          class="min-w-full border-t-0 rounded-t-none pt-5 [scrollbar-width:none] mb-0 border-0 focus:ring-0 "
+          div_class="min-h-full m-0"
+          class="min-w-full min-h-[87%] pt-0 mt-0 [scrollbar-width:none]
+            border-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-t-none"
           {@rest}
         />
       </div>
@@ -595,9 +609,9 @@ defmodule AlertsUIWeb.SharedComponents do
         class={[
           "bg-bg-input-default border border-border-primary pl-3 py-1.5
             rounded text-text-primary disabled:text-text-secondary
-            disabled:bg-bg-elevation-3 ring ring-0 ring-border-focus
-            focus:ring-1 focus:border-border-focus
-            focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25)] #{@class}",
+            disabled:bg-bg-elevation-3 ring-0  focus:ring-0 ring-border-focus
+            focus:border-border-focus
+            #{@class}",
           @errors != [] && "border-danger focus:border-danger"
         ]}
         {@rest}
@@ -640,9 +654,8 @@ defmodule AlertsUIWeb.SharedComponents do
         class={[
           "bg-bg-input-default border border-border-primary pl-3 py-1.5
             rounded text-text-primary disabled:text-text-secondary
-            disabled:bg-bg-elevation-3 ring ring-0 ring-border-focus
-            focus:ring-1 focus:border-border-focus
-            focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25)] #{@class}",
+            disabled:bg-bg-elevation-3 ring-0 ring-border-focus
+            focus:ring-1 focus:border-border-focus #{@class}",
           @errors != [] && "border-danger focus:border-danger"
         ]}
         {@rest}

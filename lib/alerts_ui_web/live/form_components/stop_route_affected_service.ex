@@ -11,18 +11,20 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   @primary_key false
   embedded_schema do
     field :route_ids, {:array, :string}
+    field :route_ids_filter, :string
     field :stop_ids, {:array, :string}
+    field :stop_ids_filter, :string
     field :route_types_by_id, {:map, :integer}
   end
 
-  @fields ~w[route_ids stop_ids route_types_by_id]a
+  @fields ~w[route_ids stop_ids route_types_by_id route_ids_filter stop_ids_filter]a
   @required_fields ~w[route_ids stop_ids route_types_by_id]a
 
   @impl true
   def mount(socket) do
     form = %__MODULE__{} |> changeset(%{}) |> to_form()
 
-    socket = socket |> assign(%{form: form})
+    socket = socket |> assign(%{form: form, route_filter_value: "", stop_filter_value: ""})
 
     {:ok, socket}
   end
@@ -39,6 +41,18 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       end
 
     {:ok, assign(socket, assigns)}
+  end
+
+  @impl true
+  def handle_event("rerender", %{"stop_route_affected_service" => affected_service}, socket) do
+    route_filter_value = affected_service |> Map.get("route_ids_filter", "") |> String.downcase()
+    stop_filter_value = affected_service |> Map.get("stop_ids_filter", "") |> String.downcase()
+
+    {:noreply,
+     assign(socket, %{
+       stop_filter_value: stop_filter_value,
+       route_filter_value: route_filter_value
+     })}
   end
 
   @impl true
@@ -145,33 +159,37 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
     ~H"""
     <div
-      class={unless @progress.name == "details", do: "hidden", else: "min-w-full flex flex-col"}
+      class={unless @progress.name == "details", do: "hidden", else: "min-w-full mb-8 min-h-[32rem]"}
       id="service_view"
     >
       <.form
         for={@form}
         phx-target={@myself}
         phx-change="validate"
-        class="form-control gap-4"
+        class="form-control gap-4 mb-16 min-h-[30rem]"
         id="service_form"
       >
-        <fieldset class="flex flex-row gap-12">
-          <.select
+        <fieldset class="flex flex-row gap-x-12 min-h-[30rem]">
+          <.multiselect
             label="Stop(s)"
             field={@form[:stop_ids]}
+            filter_field={@form[:stop_ids_filter]}
+            filter_value={@stop_filter_value}
+            filter_update_function="rerender"
             options={@stop_id_options}
-            multiple={true}
-            class="min-w-[16rem]"
+            class="min-w-[24rem]"
           />
 
           <%= if show_routes_input?(assigns) do %>
-            <.select
+            <.multiselect
               label="Route(s)"
               field={@form[:route_ids]}
-              options={@route_id_options}
-              multiple={true}
+              filter_field={@form[:route_ids_filter]}
+              filter_value={@route_filter_value}
+              filter_update_function="rerender"
               id="stop_route_routes"
-              class="min-w-[16rem]"
+              options={@route_id_options}
+              class="min-w-[18rem]"
             />
           <% end %>
         </fieldset>

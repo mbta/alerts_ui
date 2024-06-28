@@ -90,14 +90,14 @@ defmodule AlertsUIWeb.ComponentsLive do
 
   defp multiselect_options do
     [
-      Aardvark: "aardvark",
-      Agouti: "agouti",
-      Bilby: "bilby",
-      Binturong: "binturong",
-      Caracal: "caracal",
-      Coatimundi: "coatimundi",
-      Dhole: "dhole",
-      Duiker: "duiker"
+      {"Aardvark", "aardvark"},
+      {"Agouti", "agouti"},
+      {"Bilby", "bilby"},
+      {"Binturong", "binturong"},
+      {"Caracal", "caracal"},
+      {"Coatimundi", "coatimundi"},
+      {"Dhole", "dhole"},
+      {"Duiker", "duiker"}
     ]
   end
 end

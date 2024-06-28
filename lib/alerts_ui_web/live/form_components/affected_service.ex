@@ -12,19 +12,30 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   @primary_key false
   embedded_schema do
     field :route_ids, {:array, :string}
+    field :route_ids_filter, :string
     field :direction, :string
     field :trip_ids, {:array, :string}
+    field :trip_ids_filter, :string
     field :stop_ids, {:array, :string}
+    field :stop_ids_filter, :string
     field :trip_information_by_id, {:map, :map}
   end
 
-  @fields ~w[route_ids direction trip_ids stop_ids trip_information_by_id]a
+  @fields ~w[route_ids direction trip_ids stop_ids trip_information_by_id route_ids_filter trip_ids_filter stop_ids_filter]a
 
   @impl true
   def mount(socket) do
     form = %__MODULE__{} |> changeset(%{}) |> to_form()
 
-    socket = socket |> assign(%{form: form, button_selected_routes: []})
+    socket =
+      socket
+      |> assign(%{
+        form: form,
+        button_selected_routes: [],
+        route_filter_value: "",
+        stop_filter_value: "",
+        trip_filter_value: ""
+      })
 
     {:ok, socket}
   end
@@ -42,6 +53,20 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       end
 
     {:ok, assign(socket, assigns)}
+  end
+
+  @impl true
+  def handle_event("rerender", %{"stop_route_affected_service" => affected_service}, socket) do
+    route_filter_value = affected_service |> Map.get("route_ids_filter", "") |> String.downcase()
+    trip_filter_value = affected_service |> Map.get("trip_ids_filter", "") |> String.downcase()
+    stop_filter_value = affected_service |> Map.get("stop_ids_filter", "") |> String.downcase()
+
+    {:noreply,
+     assign(socket, %{
+       stop_filter_value: stop_filter_value,
+       route_filter_value: route_filter_value,
+       trip_filter_value: trip_filter_value
+     })}
   end
 
   @impl true
@@ -168,26 +193,28 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     ~H"""
     <div
-      class={unless @progress.name == "details", do: "hidden", else: "min-w-full flex flex-col"}
+      class={unless @progress.name == "details", do: "hidden", else: "min-w-full mb-8 min-h-[32rem]"}
       id="service_view"
     >
       <.form
         for={@form}
         phx-target={@myself}
         phx-change="validate"
-        class="form-control gap-4"
+        class="form-control mb-16 min-h-[30rem]"
         id="service_form"
       >
-        <fieldset class="flex flex-row gap-12">
-          <.select
+        <fieldset class="flex flex-row gap-x-12 min-h-[30rem]">
+          <.multiselect
             label="Route(s)"
             field={@form[:route_ids]}
+            filter_field={@form[:route_ids_filter]}
+            filter_value={@route_filter_value}
+            filter_update_function="rerender"
             options={@route_id_options}
-            multiple={true}
-            class="min-w-[16rem]"
+            class="min-w-[18rem]"
             hidden={@route_type !== 3}
           />
-          <div class="grid grid-cols-1 gap-2 mb-8">
+          <div class="mb-8 mt-8">
             <.toggle_checkgroup
               field={@form[:route_ids]}
               options={@route_id_options}
@@ -196,43 +223,47 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             />
           </div>
 
-          <%= if show_directions_input?(assigns) do %>
-            <.select
-              label="Direction"
-              field={@form[:direction]}
-              options={@direction_options}
-              disabled={disable_input?(@form[:route_ids].value, @editing)}
-              prompt={if Map.has_key?(@form.params, "route_ids"), do: "Both Directions", else: nil}
-              class="min-w-[16rem]"
-            />
-          <% end %>
-
           <%= if show_trips_input?(assigns) do %>
-            <.select
+            <.multiselect
               label="Trip(s)"
               field={@form[:trip_ids]}
+              filter_field={@form[:trip_ids_filter]}
+              filter_value={@trip_filter_value}
+              filter_update_function="rerender"
               options={@trip_id_options}
-              multiple={true}
+              class="min-w-[24rem]"
               prompt={if Map.has_key?(@form.params, "route_ids"), do: "All Trips", else: nil}
-              class="min-w-[16rem]"
             />
           <% end %>
+          <div class="flex flex-col justify-start">
+            <%= if show_directions_input?(assigns) do %>
+              <.select
+                label="Stop(s)"
+                field={@form[:direction]}
+                options={@direction_options}
+                disabled={disable_input?(@form[:route_ids].value, @editing)}
+                prompt={if Map.has_key?(@form.params, "route_ids"), do: "Both Directions", else: nil}
+                class="min-w-[24rem]"
+              />
+            <% end %>
 
-          <%= if show_stops_input?(assigns) do %>
-            <.select
-              label="Stop(s)"
-              field={@form[:stop_ids]}
-              options={@stop_id_options}
-              prompt={
-                if Map.has_key?(@form.params, "route_ids"),
-                  do: "All Stops",
-                  else: nil
-              }
-              multiple={true}
-              disabled={disable_input?(@form[:route_ids].value, @editing)}
-              class="min-w-[16rem]"
-            />
-          <% end %>
+            <%= if show_stops_input?(assigns) do %>
+              <.multiselect
+                field={@form[:stop_ids]}
+                filter_field={@form[:stop_ids_filter]}
+                filter_value={@stop_filter_value}
+                filter_update_function="rerender"
+                options={@stop_id_options}
+                class="min-w-[24rem] min-h-[90%]"
+                disabled={disable_input?(@form[:route_ids].value, @editing)}
+                prompt={
+                  if Map.has_key?(@form.params, "route_ids"),
+                    do: "All Stops",
+                    else: nil
+                }
+              />
+            <% end %>
+          </div>
         </fieldset>
       </.form>
       <hr />
