@@ -128,7 +128,7 @@ defmodule AlertsUI.GTFSIntake.RealtimeEnhancedParser do
 
   @spec parse_string_to_atom(nil | String.t()) :: nil | atom()
   defp parse_string_to_atom(nil), do: nil
-  defp parse_string_to_atom(enum_string), do: String.to_atom(enum_string)
+  defp parse_string_to_atom(enum_string), do: String.to_existing_atom(enum_string)
 
   @spec parse_unix_time(integer() | nil) :: DateTime.t() | nil
   defp parse_unix_time(nil), do: nil
