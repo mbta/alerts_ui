@@ -21,7 +21,12 @@ defmodule AlertsUIWeb.Router do
     plug :fetch_live_flash
     plug :put_root_layout, html: {AlertsUIWeb.Layouts, :root}
     plug :protect_from_forgery
-    plug :put_secure_browser_headers, %{"content-security-policy" => "default-src 'self'"}
+
+    plug :put_secure_browser_headers, %{
+      "content-security-policy" =>
+        "default-src 'self'; img-src 'self' https://* http://* data:; style-src 'self' 'unsafe-inline';"
+    }
+
     plug :fetch_current_user
   end
 
