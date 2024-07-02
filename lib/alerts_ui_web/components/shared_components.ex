@@ -338,7 +338,12 @@ defmodule AlertsUIWeb.SharedComponents do
   Renders a checkgroup.
 
   ##Examples
-    <.checkgroup />
+    <.togglecheckgroup
+      field={@form[:route_ids]}
+      options={[{"route_name", "route_id"}]}
+      hidden=false
+      name="affected_service[route_ids][]"
+     />
   """
   attr :field, FormField,
     required: true,
@@ -346,6 +351,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :name, :string, default: ""
   attr :options, :any
+  attr :icon_type, :string, default: nil
   attr :label, :string, default: nil
   attr :hidden, :boolean, default: false, doc: "hides component if true"
   attr :class, :string, default: "", doc: "additional classes to add"
@@ -359,8 +365,8 @@ defmodule AlertsUIWeb.SharedComponents do
       |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
 
     ~H"""
-    <div phx-feedback-for={@name} class={["text-sm items-baseline", @hidden && "hidden"]}>
-      <div :for={{route_name, id} <- @options} class="">
+    <div phx-feedback-for={@name} class={["grid grid-cols-1 gap-1 text-sm items-baseline", @hidden && "hidden"]}>
+      <div :for={{option_name, id} <- @options} class="">
         <.label for={id}>
           <div class={"
             #{@base_toggle_classes}
@@ -375,13 +381,26 @@ defmodule AlertsUIWeb.SharedComponents do
               class="hidden"
               {@rest}
             />
-            <%= route_name %>
+            <div class="flex flex-row justify-left align-center">
+              <div class={"#{unless @icon_type, do: "hidden"} mr-3 self-center"}>
+                <.mode_icon type={route_to_icon_name(@icon_type, option_name)} />
+              </div>
+              <%= option_name %>
+            </div>
           </div>
         </.label>
       </div>
       <.input_error :for={msg <- @errors}><%= msg %></.input_error>
     </div>
     """
+  end
+
+  defp route_to_icon_name(route_type, icon_name) do
+    case route_type do
+      2 -> "Commuter Rail"
+      4 -> "Ferry"
+      _ -> icon_name
+    end
   end
 
   @doc """

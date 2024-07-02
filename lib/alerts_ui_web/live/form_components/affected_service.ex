@@ -201,6 +201,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
               options={@route_id_options}
               hidden={@route_type === 3}
               name="affected_service[route_ids][]"
+              icon_type={@route_type}
             />
           </div>
 
