@@ -16,6 +16,12 @@ defmodule AlertsUI.FeedOutput.CreateGtfsTest do
     {:ok, test_alerts: [test_alert_1, test_alert_2]}
   end
 
+  describe "output_standard_json/1" do
+    test "returns json from map", %{test_alerts: test_alerts} do
+      assert test_alerts |> CreateGtfsJson.output_standard_json() |> is_binary
+    end
+  end
+
   describe "output_enhanced_json/1" do
     test "returns json from map", %{test_alerts: test_alerts} do
       assert test_alerts |> CreateGtfsJson.output_enhanced_json() |> is_binary

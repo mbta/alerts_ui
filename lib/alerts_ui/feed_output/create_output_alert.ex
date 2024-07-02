@@ -5,7 +5,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
   alias AlertsUI.Models.{Alert, AlertLifecycle}
   alias AlertsUI.TimeframeText
 
-  @spec build_alert(Alert.t()) :: map()
+  @spec build_alert(Alert.t()) :: %{id: String.t(), alert: map()}
   def build_alert(alert) do
     # cause_detail and effect_detail should be translated_string types according to GTFS spec
     # but in the current feed they are simple strings

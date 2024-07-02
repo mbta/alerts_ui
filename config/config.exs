@@ -12,6 +12,7 @@ config :alerts_ui,
   ecto_repos: [AlertsUI.Repo],
   aws_rds_mod: ExAws.RDS,
   gtfs_proto_filename: "./assets/outputs/gtfs-realtime.proto",
+  standard_json_output_filename: "alerts_feed.json",
   enhanced_json_output_filename: "alerts_feed_enhanced.json",
   protobuf_output_filename: "alerts_feed.pb",
   skip_migrations: true
