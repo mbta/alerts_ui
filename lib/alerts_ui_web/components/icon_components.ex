@@ -11,7 +11,7 @@ defmodule AlertsUIWeb.IconComponents do
 
   def mode_icon(%{type: "Bus"} = assigns) do
     ~H"""
-    <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
+    <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
       <title>
         bus
       </title>
@@ -29,7 +29,7 @@ defmodule AlertsUIWeb.IconComponents do
 
   def mode_icon(%{type: "Subway"} = assigns) do
     ~H"""
-    <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
+    <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
       <title>
         subway
       </title>
@@ -45,7 +45,7 @@ defmodule AlertsUIWeb.IconComponents do
 
   def mode_icon(%{type: "Commuter Rail"} = assigns) do
     ~H"""
-    <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
+    <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
       <title>
         commuter rail
       </title>
@@ -60,7 +60,7 @@ defmodule AlertsUIWeb.IconComponents do
 
   def mode_icon(%{type: "Ferry"} = assigns) do
     ~H"""
-    <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
+    <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
       <title>
         ferry
       </title>
@@ -75,7 +75,7 @@ defmodule AlertsUIWeb.IconComponents do
 
   def mode_icon(%{type: "Systemwide"} = assigns) do
     ~H"""
-    <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
+    <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
       <title>
         alert
       </title>
@@ -93,7 +93,7 @@ defmodule AlertsUIWeb.IconComponents do
 
   def mode_icon(%{type: "Facility"} = assigns) do
     ~H"""
-    <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
+    <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
       <title>
         accessible
       </title>

@@ -349,7 +349,6 @@ defmodule AlertsUIWeb.SharedComponents do
     required: true,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
-  attr :name, :string, default: ""
   attr :options, :any
   attr :icon_type, :string, default: nil
   attr :label, :string, default: nil
@@ -361,17 +360,17 @@ defmodule AlertsUIWeb.SharedComponents do
     assigns =
       assigns
       |> assign(id: field.id, field_value: field.value)
+      |> assign_new(:name, fn -> field.form.name <> field.name <> "[]" end)
       |> assign(toggle_button_classes())
       |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
 
     ~H"""
-    <div phx-feedback-for={@name} class={["grid grid-cols-1 gap-1 text-sm items-baseline", @hidden && "hidden"]}>
+    <div phx-feedback-for={@name} class={["grid grid-cols-1 gap-1 text-sm items-baseline", @hidden && "hidden", @class]}>
       <div :for={{option_name, id} <- @options} class="">
         <.label for={id}>
           <div class={"
             #{@base_toggle_classes}
-              #{if (@field_value && id in @field_value), do: @toggled_on, else: @toggled_off}
-              #{@class}"}>
+              #{if (@field_value && id in @field_value), do: @toggled_on, else: @toggled_off}"}>
             <input
               type="checkbox"
               id={id}

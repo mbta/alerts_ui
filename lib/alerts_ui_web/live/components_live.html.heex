@@ -163,5 +163,10 @@
       field={@form[:textarea_error]}
       placeholder="Errored TextArea"
     />
+    <.toggle_checkgroup
+      field={@form[:toggle_checkgroup]}
+      options={single_select_options()}
+      class="max-w-[16rem]"
+    />
   </.form>
 </div>
