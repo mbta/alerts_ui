@@ -97,6 +97,7 @@
       field={@form[:single_select]}
       options={single_select_options()}
       prompt="All"
+      class="max-w-[16rem]"
     />
     <.select
       label="Disabled Select"
@@ -104,12 +105,14 @@
       options={single_select_options()}
       prompt="All"
       disabled={true}
+      class="max-w-[16rem]"
     />
     <.select
       label="Errored Select"
       field={@form[:single_select_error]}
       options={single_select_options()}
       prompt="All"
+      class="max-w-[16rem]"
     />
     <.multiselect
       label="Multiselect"
@@ -118,7 +121,7 @@
       filter_value={@filter_value}
       filter_update_function="rerender"
       options={multiselect_options()}
-      class="max-w-[4rem]"
+      class="max-w-[16rem]"
     />
     <.multiselect
       label="Disabled Multiselect"
@@ -128,7 +131,7 @@
       filter_update_function="rerender"
       options={multiselect_options()}
       disabled={true}
-      class="max-w-[4rem]"
+      class="max-w-[16rem]"
     />
     <.multiselect
       field={@form[:multiselect_error]}

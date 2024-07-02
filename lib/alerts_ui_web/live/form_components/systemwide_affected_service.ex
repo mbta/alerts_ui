@@ -63,7 +63,7 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
             options={service_type_options()}
             multiple={true}
             prompt="All"
-            class="min-w-[16rem]"
+            class="max-w-[16rem]"
           />
         </fieldset>
       </.form>

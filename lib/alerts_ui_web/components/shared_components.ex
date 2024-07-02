@@ -393,9 +393,11 @@ defmodule AlertsUIWeb.SharedComponents do
   """
   attr :label, :string, default: nil
 
-  attr :class, :string, default: "", doc: "additional classes to add"
+  attr :select_class, :string,
+    default: "",
+    doc: "additional classes to add to the select component"
 
-  attr :div_class, :string, default: "", doc: "classes to add to the containing div"
+  attr :class, :string, default: "", doc: "classes to add to the containing div"
 
   attr :field, FormField,
     required: true,
@@ -422,7 +424,7 @@ defmodule AlertsUIWeb.SharedComponents do
       |> assign_new(:value, fn -> field.value end)
 
     ~H"""
-    <div phx-feedback-for={@name} class={"#{@div_class} #{if @hidden, do: "hidden", else: ""}"}>
+    <div phx-feedback-for={@name} class={"#{@class} #{if @hidden, do: "hidden", else: ""}"}>
       <.label for={@id} class={if is_nil(@label), do: "hidden"}><%= @label %></.label>
       <select
         id={@id}
@@ -431,7 +433,7 @@ defmodule AlertsUIWeb.SharedComponents do
           "bg-bg-elevation-5 border border-border-primary pl-3 py-1.5 min-w-[99%] p-0
             rounded text-text-primary disabled:text-text-secondary
             disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
-            focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25)] #{@class}",
+            focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25)] #{@select_class}",
           @errors != [] && "border-danger focus:border-danger"
         ]}
         multiple={@multiple}
@@ -534,8 +536,8 @@ defmodule AlertsUIWeb.SharedComponents do
           }
           field={@field}
           prompt={@prompt}
-          div_class="min-h-full m-0"
-          class="min-w-full min-h-[87%] pt-0 mt-0 [scrollbar-width:none]
+          class="min-h-full m-0"
+          select_class="min-w-full min-h-[87%] pt-0 mt-0 [scrollbar-width:none]
             border-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-t-none"
           {@rest}
         />
