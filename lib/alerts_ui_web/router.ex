@@ -24,7 +24,7 @@ defmodule AlertsUIWeb.Router do
 
     plug :put_secure_browser_headers, %{
       "content-security-policy" =>
-        "default-src 'self'; img-src 'self' https://* http://* data:; style-src 'self' 'unsafe-inline';"
+        "default-src 'self'; img-src 'self' https://cdn.mbta.com/* data:; style-src 'self' 'unsafe-inline';"
     }
 
     plug :fetch_current_user
