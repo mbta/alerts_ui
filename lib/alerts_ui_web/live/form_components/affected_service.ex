@@ -56,7 +56,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   end
 
   @impl true
-  def handle_event("rerender", %{"stop_route_affected_service" => affected_service}, socket) do
+  def handle_event("rerender", %{"affected_service" => affected_service}, socket) do
     route_filter_value = affected_service |> Map.get("route_ids_filter", "") |> String.downcase()
     trip_filter_value = affected_service |> Map.get("trip_ids_filter", "") |> String.downcase()
     stop_filter_value = affected_service |> Map.get("stop_ids_filter", "") |> String.downcase()

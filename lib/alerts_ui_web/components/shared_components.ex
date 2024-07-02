@@ -386,8 +386,8 @@ defmodule AlertsUIWeb.SharedComponents do
   ##Examples
     <.select
       label="Select"
-      field={@form[:single_select]}
-      options={single_select_options()}
+      field={@form[:field_name]}
+      options={[[display: :value]]}
       prompt="All"
     />
   """
@@ -456,11 +456,11 @@ defmodule AlertsUIWeb.SharedComponents do
   ##Examples
     <.multiselect
       label="Multiselect"
-      field={@form[:multiselect]}
-      filter_field={@form[:multiselect_filter]}
+      field={@form[:multiselect_field]}
+      filter_field={@form[:multiselect_filter_field]}
       filter_value={@filter_value}
-      update_function="rerender"
-      options={multiselect_options()}
+      update_function="update_function_name"
+      options={[[display: :value]]}
   """
   attr :label, :string, default: nil
 
