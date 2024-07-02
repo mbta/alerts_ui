@@ -9,6 +9,7 @@ defmodule AlertsUIWeb.SharedComponents do
   Icons are provided by [heroicons](https://heroicons.com). See `icon/1` for usage.
   """
   use Phoenix.Component
+  import AlertsUIWeb.IconComponents
 
   alias AlertsUIWeb.CoreComponents
   alias Phoenix.HTML.{Form, FormField}
@@ -303,6 +304,7 @@ defmodule AlertsUIWeb.SharedComponents do
       ~w(type phx-target phx-click phx-value-effect_name phx-value-route_type name id value disabled)
 
   attr :class, :string, default: "", doc: "additional classes to add"
+  attr :icon, :string, default: nil, doc: "optional name of icon"
   attr :hidden, :boolean, default: false, doc: "hides component if true"
   attr :active, :boolean, default: true, doc: "switches to active colors if true"
   slot :inner_block, required: true
@@ -322,7 +324,12 @@ defmodule AlertsUIWeb.SharedComponents do
     "}
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      <div class="flex flex-row justify-center align-center">
+        <div class={"#{unless @icon, do: "hidden"} mr-3 self-center"}>
+          <.mode_icon type={@icon} />
+        </div>
+        <%= render_slot(@inner_block) %>
+      </div>
     </button>
     """
   end
