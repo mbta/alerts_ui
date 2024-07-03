@@ -11,6 +11,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   @spec formatted_select_options([Route.t() | Stop.t()]) :: keyword(String.t())
   def formatted_select_options(objects) do
     objects
+    |> Enum.uniq()
     |> Enum.sort_by(&sort_order/1)
     |> Enum.map(fn object -> {name_for_option(object), id_for_option(object)} end)
   end
