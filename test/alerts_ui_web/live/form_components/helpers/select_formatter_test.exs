@@ -12,6 +12,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
       objects = [
         %Route{id: "202", name: "joe", sort_order: 2},
         %Route{id: "303", name: "", long_name: "bob", sort_order: 3},
+        %Route{id: "202", name: "joe", sort_order: 2},
         %Route{id: "101", name: "alice", sort_order: 1}
       ]
 
@@ -27,6 +28,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
     test "it keeps original order for stops" do
       objects = [
         %Stop{id: "202", name: "joe"},
+        %Stop{id: "303", name: "bob"},
         %Stop{id: "303", name: "bob"},
         %Stop{id: "101", name: "alice"}
       ]
