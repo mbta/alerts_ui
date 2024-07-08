@@ -23,7 +23,15 @@
         editing={@editing}
       />
       <.live_component
-        :if={@combination == nil}
+        :if={@combination == nil and @is_facility_alert}
+        module={FacilityAffectedService}
+        id="facility-affected-service"
+        progress={@progress}
+        alert_data={@alert_data}
+        editing={@editing}
+      />
+      <.live_component
+        :if={@combination == nil and !@is_facility_alert}
         module={SystemwideAffectedService}
         id="systemwide-affected-service"
         progress={@progress}
@@ -43,6 +51,7 @@
         progress={@progress}
         alert_data={@alert_data}
         route_type={route_type(@alert_data)}
+        is_facility_alert={@is_facility_alert}
       />
 
       <.live_component

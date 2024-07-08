@@ -29,6 +29,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
   alias AlertsUIWeb.FormComponents.{
     AffectedService,
     AlertDetails,
+    FacilityAffectedService,
     RouteTypeAndEffect,
     StopRouteAffectedService,
     SuccessfulSubmission,
@@ -81,6 +82,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
         steps: @steps,
         alert_data: alert_data,
         combination: Map.get(alert_data, :combination),
+        is_facility_alert: false,
         available_routes: [],
         available_schedules: [],
         available_stops: [],
@@ -188,7 +190,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
     assigns = %{
       progress: get_step_by_name(socket.assigns.progress.next),
       alert_data: alert_data,
-      combination: combination
+      combination: combination,
+      is_facility_alert: Map.get(alert_data, :is_facility_alert)
     }
 
     {:noreply, assign(socket, assigns)}

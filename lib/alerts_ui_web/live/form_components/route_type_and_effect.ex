@@ -13,6 +13,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
     "Subway",
     "Commuter Rail",
     "Ferry",
+    "Access",
     "Systemwide"
   ]
 
@@ -20,10 +21,11 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   embedded_schema do
     field :route_type, :integer
     field :effect_name, :string
+    field :is_facility_alert, :boolean
     field :draft, :boolean
   end
 
-  @fields ~w[route_type effect_name draft]a
+  @fields ~w[route_type effect_name is_facility_alert draft]a
   @required_fields ~w[effect_name]a
 
   @impl true
@@ -72,6 +74,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
     %{
       effect_name: Map.get(params, "effect_name"),
       route_type: InformedEntity.route_type_mapping(Map.get(params, "route_type")),
+      is_facility_alert: Map.get(params, "route_type") == "Access",
       draft: true
     }
     |> then(&draft_changeset(%__MODULE__{}, &1))
@@ -90,7 +93,8 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   def handle_event("save", _params, socket) do
     changeset_params = %{
       effect_name: socket.assigns.selected_effect,
-      route_type: InformedEntity.route_type_mapping(socket.assigns.selected_route_type)
+      route_type: InformedEntity.route_type_mapping(socket.assigns.selected_route_type),
+      is_facility_alert: socket.assigns.selected_route_type == "Access"
     }
 
     changeset(%__MODULE__{}, changeset_params)

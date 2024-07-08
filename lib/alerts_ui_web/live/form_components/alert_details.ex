@@ -104,8 +104,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   @impl true
   def render(assigns) do
     cause_options =
-      Map.get(assigns, :route_type)
-      |> formatted_causes
+      formatted_causes(Map.get(assigns, :route_type), Map.get(assigns, :is_facility_alert))
 
     assigns =
       assign(assigns,
@@ -183,7 +182,9 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     """
   end
 
-  defp formatted_causes(route_type) do
+  defp formatted_causes(route_type, is_facility_alert) do
+    route_type = if is_facility_alert, do: :ACCESS, else: route_type
+
     options_list =
       route_type
       |> Cause.cause_map_by_mode()
