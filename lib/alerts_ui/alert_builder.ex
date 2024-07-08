@@ -7,6 +7,7 @@ defmodule AlertsUI.AlertBuilder do
   alias AlertsUI.Models.{Cause, Effect, InformedEntity, RoutePattern}
   alias AlertsUI.Routes
   alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
+  alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatterns
   alias MBTAV3API.RoutePatterns.RoutePattern, as: APIRoutePattern
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
@@ -19,6 +20,8 @@ defmodule AlertsUI.AlertBuilder do
   @end_of_service ~T[02:30:00]
   @type alert_data_t :: %{
           route_type: Route.type_int() | nil,
+          is_facility: boolean(),
+          facility_id: String.t() | nil,
           direction: String.t(),
           route_ids: [Route.id_t()],
           stop_ids: [Stop.id_t()],
@@ -339,6 +342,30 @@ defmodule AlertsUI.AlertBuilder do
     )
   end
 
+  defp build_informed_entities(:ACCESS, %{facility_id: facility_id}, effect) do
+    facility = FacilitiesRepo.get(facility_id)
+    stop = StopsRepo.get!(facility.stop.id)
+
+    child_stop_ids =
+      stop.child_ids -- excluded_stops_from_facility_properties(facility.properties)
+
+    route_ids =
+      Enum.flat_map(child_stop_ids, &RoutesRepo.by_stop/1) |> Enum.map(& &1.id) |> Enum.uniq()
+
+    child_stop_ids
+    |> Enum.uniq()
+    |> Enum.flat_map(fn stop_id ->
+      Enum.map(route_ids, fn route_id ->
+        %{
+          activities: Activities.for_effect(effect),
+          facility_id: facility_id,
+          route_id: route_id,
+          stop_id: stop_id
+        }
+      end)
+    end)
+  end
+
   defp build_informed_entities(
          :R,
          %{
@@ -624,4 +651,15 @@ defmodule AlertsUI.AlertBuilder do
       route_types_by_id[route_id]
     end
   end
+
+  @spec excluded_stops_from_facility_properties([map()]) :: [String.t()]
+  defp excluded_stops_from_facility_properties(properties) do
+    Enum.reduce(properties, [], fn %{name: name, value: value}, acc ->
+      if name == "excludes-stop", do: [maybe_integer_to_string(value) | acc], else: acc
+    end)
+  end
+
+  @spec maybe_integer_to_string(integer() | String.t()) :: String.t()
+  defp maybe_integer_to_string(value) when is_integer(value), do: Integer.to_string(value)
+  defp maybe_integer_to_string(value), do: value
 end
