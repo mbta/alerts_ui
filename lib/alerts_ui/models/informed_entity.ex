@@ -122,6 +122,21 @@ defmodule AlertsUI.Models.InformedEntity do
   def route_type_mapping("Ferry"), do: 4
   def route_type_mapping(_), do: nil
 
+  @doc """
+  Map route type codes to service type names.
+
+    ## Examples
+      iex> InformedEntity.route_code_mapping(0)
+      "Light Rail"
+  """
+  @spec route_code_mapping(Route.type_int()) :: String.t() | nil
+  def route_code_mapping(0), do: "Light Rail"
+  def route_code_mapping(1), do: "Subway"
+  def route_code_mapping(2), do: "Commuter Rail"
+  def route_code_mapping(3), do: "Bus"
+  def route_code_mapping(4), do: "Ferry"
+  def route_code_mapping(_), do: nil
+
   @spec route_to_combo_route_mapping() :: %{String.t() => String.t()}
   def route_to_combo_route_mapping do
     %{

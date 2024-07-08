@@ -6,6 +6,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   use AlertsUI.Schema
   import Ecto.Changeset
 
+  alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.FormComponents.Helpers.{SelectFormatter, ServiceEffectCombinations}
   alias MBTAV3API.Routes.Route
 
@@ -171,7 +172,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         route_id_options: route_id_options,
         direction_options: direction_options,
         trip_id_options: trip_id_options,
-        stop_id_options: stop_id_options
+        stop_id_options: stop_id_options,
+        service_type_name:
+          (assigns.route_type |> InformedEntity.route_code_mapping() || "") |> String.downcase()
       )
 
     ~H"""
@@ -179,6 +182,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       class={unless @progress.name == "details", do: "hidden", else: "min-w-full mb-8 min-h-[32rem]"}
       id="service_view"
     >
+      <.h1 class="mb-8">Create new <%= @service_type_name %> alert</.h1>
+      <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
+        Affected service
+      </.h5>
       <.form
         for={@form}
         phx-target={@myself}
@@ -188,14 +195,15 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       >
         <fieldset class="flex flex-row gap-x-12 min-h-[30rem]">
           <.multiselect
-            label="Route(s)"
+            label={if @route_type in [0, 1, 2], do: "Line(s)", else: "Route(s)"}
             field={@form[:route_ids]}
             filter_field={@form[:route_ids_filter]}
             options={@route_id_options}
             class={"min-w-[18rem] #{@route_type !== 3 && "hidden"}"}
           />
-          <div class="mb-8 mt-8">
+          <div class="mb-8">
             <.toggle_checkgroup
+              label={if @route_type in [0, 1, 2], do: "Line(s)", else: "Route(s)"}
               field={@form[:route_ids]}
               options={@route_id_options}
               icon_type={icon_type(@route_type)}

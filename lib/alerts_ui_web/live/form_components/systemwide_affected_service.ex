@@ -49,14 +49,18 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
         do: "hidden",
         else: "min-w-full flex flex-col"
     }>
+      <.h1 class="mb-8">Create new systemwide alert</.h1>
+      <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
+        Affected service
+      </.h5>
       <.form
         for={@form}
         phx-target={@myself}
         phx-change="validate"
-        class="form-control gap-4"
+        class="form-control"
         id="systemwide-affected-service-form"
       >
-        <fieldset class="flex flex-row gap-12">
+        <fieldset class="mb-8 min-h-36">
           <.select
             label="Service Type(s)"
             field={@form[:service_types]}
@@ -64,6 +68,7 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
             multiple={true}
             prompt="All"
             class="max-w-[16rem]"
+            select_class="min-h-[9rem]"
           />
         </fieldset>
       </.form>
