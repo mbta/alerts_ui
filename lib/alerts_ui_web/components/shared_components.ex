@@ -524,7 +524,7 @@ defmodule AlertsUIWeb.SharedComponents do
           field={@field}
           prompt={@prompt}
           class="min-h-full m-0"
-          select_class="min-w-full min-h-[87%] pt-0 mt-0 [scrollbar-width:none]
+          select_class="min-w-full min-h-[87%] pt-0 mt-0 [scrollbar-width:thin] overflow-auto
             border-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-t-none"
           {@rest}
         />
