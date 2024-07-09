@@ -1,10 +1,10 @@
-defmodule AlertsUIWeb.FormComponents.FacilityServiceTest do
+defmodule AlertsUIWeb.FormComponents.AccessServiceTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
 
   import Phoenix.LiveViewTest
 
-  alias AlertsUIWeb.FormComponents.FacilityAffectedService
+  alias AlertsUIWeb.FormComponents.AccessAffectedService
   alias AlertsUIWeb.Step
 
   @assigns %{
@@ -21,7 +21,7 @@ defmodule AlertsUIWeb.FormComponents.FacilityServiceTest do
 
   describe "component" do
     test "renders" do
-      rendered = render_component(FacilityAffectedService, @assigns)
+      rendered = render_component(AccessAffectedService, @assigns)
 
       assert rendered =~ "facilities"
     end

@@ -1,6 +1,6 @@
-defmodule AlertsUIWeb.FormComponents.FacilityAffectedService do
+defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
   @moduledoc """
-    Live Component for facility affected service section
+    Live Component for access affected service section
   """
   use AlertsUIWeb, :live_component
   use AlertsUI.Schema
