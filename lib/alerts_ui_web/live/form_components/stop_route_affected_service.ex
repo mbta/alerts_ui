@@ -11,11 +11,13 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   @primary_key false
   embedded_schema do
     field :route_ids, {:array, :string}
+    field :route_ids_filter, :string
     field :stop_ids, {:array, :string}
+    field :stop_ids_filter, :string
     field :route_types_by_id, {:map, :integer}
   end
 
-  @fields ~w[route_ids stop_ids route_types_by_id]a
+  @fields ~w[route_ids stop_ids route_types_by_id route_ids_filter stop_ids_filter]a
   @required_fields ~w[route_ids stop_ids route_types_by_id]a
 
   @impl true
@@ -145,33 +147,33 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
     ~H"""
     <div
-      class={unless @progress.name == "details", do: "hidden", else: "min-w-full flex flex-col"}
+      class={unless @progress.name == "details", do: "hidden", else: "min-w-full mb-8 min-h-[32rem]"}
       id="service_view"
     >
       <.form
         for={@form}
         phx-target={@myself}
         phx-change="validate"
-        class="form-control gap-4"
+        class="form-control gap-4 mb-16 min-h-[30rem]"
         id="service_form"
       >
-        <fieldset class="flex flex-row gap-12">
-          <.select
+        <fieldset class="flex flex-row gap-x-12 min-h-[30rem]">
+          <.multiselect
             label="Stop(s)"
             field={@form[:stop_ids]}
+            filter_field={@form[:stop_ids_filter]}
             options={@stop_id_options}
-            multiple={true}
-            class="min-w-[16rem]"
+            class="min-w-[24rem]"
           />
 
           <%= if show_routes_input?(assigns) do %>
-            <.select
+            <.multiselect
               label="Route(s)"
               field={@form[:route_ids]}
-              options={@route_id_options}
-              multiple={true}
+              filter_field={@form[:route_ids_filter]}
               id="stop_route_routes"
-              class="min-w-[16rem]"
+              options={@route_id_options}
+              class="min-w-[18rem]"
             />
           <% end %>
         </fieldset>

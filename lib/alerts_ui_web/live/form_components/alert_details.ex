@@ -129,7 +129,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           label="Cause"
           field={@form[:cause_detail]}
           options={@cause_options}
-          class="min-w-[16rem]"
+          class="max-w-[16rem]"
           id="cause_input"
         />
         <.textarea

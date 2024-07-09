@@ -91,12 +91,13 @@
 
   <.h2>Form Fields</.h2>
 
-  <.form for={@form} class="form-control gap-4">
+  <.form for={@form} class="form-control gap-4" phx-change="rerender">
     <.select
       label="Select"
       field={@form[:single_select]}
       options={single_select_options()}
       prompt="All"
+      class="max-w-[16rem]"
     />
     <.select
       label="Disabled Select"
@@ -104,12 +105,38 @@
       options={single_select_options()}
       prompt="All"
       disabled={true}
+      class="max-w-[16rem]"
     />
     <.select
       label="Errored Select"
       field={@form[:single_select_error]}
       options={single_select_options()}
       prompt="All"
+      class="max-w-[16rem]"
+    />
+    <.multiselect
+      label="Multiselect"
+      field={@form[:multiselect]}
+      filter_field={@form[:multiselect_filter]}
+      options={multiselect_options()}
+      class="max-w-[16rem]"
+    />
+    <.multiselect
+      label="Disabled Multiselect"
+      field={@form[:multiselect]}
+      filter_field={@form[:multiselect_filter]}
+      options={multiselect_options()}
+      disabled={true}
+      class="max-w-[16rem]"
+    />
+    <.multiselect
+      label="Errored Multiselect"
+      field={@form[:multiselect_error]}
+      filter_field={@form[:multiselect_filter]}
+      options={multiselect_options()}
+      prompt="All"
+      disabled={true}
+      class="max-w-[16rem]"
     />
     <.text_input label="Text Input" field={@form[:text_input]} placeholder="Text Input" />
     <.text_input
