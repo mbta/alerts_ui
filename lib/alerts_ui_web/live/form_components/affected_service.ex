@@ -192,15 +192,14 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             field={@form[:route_ids]}
             filter_field={@form[:route_ids_filter]}
             options={@route_id_options}
-            class="min-w-[18rem]"
-            hidden={@route_type !== 3}
+            class={"min-w-[18rem] #{@route_type !== 3 && "hidden"}"}
           />
           <div class="mb-8 mt-8">
             <.toggle_checkgroup
               field={@form[:route_ids]}
               options={@route_id_options}
-              hidden={@route_type === 3}
               icon_type={@route_type}
+              class={@route_type === 3 && "hidden"}
             />
           </div>
 

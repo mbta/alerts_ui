@@ -341,7 +341,7 @@ defmodule AlertsUIWeb.SharedComponents do
     <.togglecheckgroup
       field={@form[:route_ids]}
       options={[{"route_name", "route_id"}]}
-      hidden=false
+      icon_type=3
       name="affected_service[route_ids][]"
      />
   """
@@ -352,7 +352,6 @@ defmodule AlertsUIWeb.SharedComponents do
   attr :options, :any
   attr :icon_type, :string, default: nil
   attr :label, :string, default: nil
-  attr :hidden, :boolean, default: false, doc: "hides component if true"
   attr :class, :string, default: "", doc: "additional classes to add"
   attr :rest, :global, include: ~w(disabled form readonly)
 
@@ -360,17 +359,18 @@ defmodule AlertsUIWeb.SharedComponents do
     assigns =
       assigns
       |> assign(id: field.id, field_value: field.value)
-      |> assign_new(:name, fn -> field.form.name <> field.name <> "[]" end)
+      |> assign_new(:name, fn -> field.name <> "[]" end)
       |> assign(toggle_button_classes())
       |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
 
     ~H"""
-    <div phx-feedback-for={@name} class={["grid grid-cols-1 gap-1 text-sm items-baseline", @hidden && "hidden", @class]}>
+    <div phx-feedback-for={@name} class={["grid grid-cols-1 gap-1 text-sm items-baseline", @class]}>
       <div :for={{option_name, id} <- @options} class="">
         <.label for={id}>
-          <div class={"
-            #{@base_toggle_classes}
-              #{if (@field_value && id in @field_value), do: @toggled_on, else: @toggled_off}"}>
+          <div class={[
+            @base_toggle_classes,
+            if(@field_value && id in @field_value, do: @toggled_on, else: @toggled_off)
+          ]}>
             <input
               type="checkbox"
               id={id}
@@ -381,7 +381,7 @@ defmodule AlertsUIWeb.SharedComponents do
               {@rest}
             />
             <div class="flex flex-row justify-left align-center">
-              <div class={"#{unless @icon_type, do: "hidden"} mr-3 self-center"}>
+              <div class={[unless(@icon_type, do: "hidden"), "mr-3 self-center"]}>
                 <.mode_icon type={route_to_icon_name(@icon_type, option_name)} />
               </div>
               <%= option_name %>
