@@ -24,7 +24,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   def mount(socket) do
     form = %__MODULE__{} |> changeset(%{}) |> to_form()
 
-    socket = socket |> assign(%{form: form, route_filter_value: "", stop_filter_value: ""})
+    socket = socket |> assign(%{form: form})
 
     {:ok, socket}
   end
@@ -41,18 +41,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       end
 
     {:ok, assign(socket, assigns)}
-  end
-
-  @impl true
-  def handle_event("rerender", %{"stop_route_affected_service" => affected_service}, socket) do
-    route_filter_value = affected_service |> Map.get("route_ids_filter", "") |> String.downcase()
-    stop_filter_value = affected_service |> Map.get("stop_ids_filter", "") |> String.downcase()
-
-    {:noreply,
-     assign(socket, %{
-       stop_filter_value: stop_filter_value,
-       route_filter_value: route_filter_value
-     })}
   end
 
   @impl true
@@ -174,8 +162,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
             label="Stop(s)"
             field={@form[:stop_ids]}
             filter_field={@form[:stop_ids_filter]}
-            filter_value={@stop_filter_value}
-            filter_update_function="rerender"
             options={@stop_id_options}
             class="min-w-[24rem]"
           />
@@ -185,8 +171,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
               label="Route(s)"
               field={@form[:route_ids]}
               filter_field={@form[:route_ids_filter]}
-              filter_value={@route_filter_value}
-              filter_update_function="rerender"
               id="stop_route_routes"
               options={@route_id_options}
               class="min-w-[18rem]"

@@ -31,10 +31,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       socket
       |> assign(%{
         form: form,
-        button_selected_routes: [],
-        route_filter_value: "",
-        stop_filter_value: "",
-        trip_filter_value: ""
+        button_selected_routes: []
       })
 
     {:ok, socket}
@@ -53,20 +50,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       end
 
     {:ok, assign(socket, assigns)}
-  end
-
-  @impl true
-  def handle_event("rerender", %{"affected_service" => affected_service}, socket) do
-    route_filter_value = affected_service |> Map.get("route_ids_filter", "") |> String.downcase()
-    trip_filter_value = affected_service |> Map.get("trip_ids_filter", "") |> String.downcase()
-    stop_filter_value = affected_service |> Map.get("stop_ids_filter", "") |> String.downcase()
-
-    {:noreply,
-     assign(socket, %{
-       stop_filter_value: stop_filter_value,
-       route_filter_value: route_filter_value,
-       trip_filter_value: trip_filter_value
-     })}
   end
 
   @impl true
@@ -208,8 +191,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             label="Route(s)"
             field={@form[:route_ids]}
             filter_field={@form[:route_ids_filter]}
-            filter_value={@route_filter_value}
-            filter_update_function="rerender"
             options={@route_id_options}
             class="min-w-[18rem]"
             hidden={@route_type !== 3}
@@ -228,8 +209,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
               label="Trip(s)"
               field={@form[:trip_ids]}
               filter_field={@form[:trip_ids_filter]}
-              filter_value={@trip_filter_value}
-              filter_update_function="rerender"
               options={@trip_id_options}
               class="min-w-[24rem]"
               prompt={if Map.has_key?(@form.params, "route_ids"), do: "All Trips", else: nil}
@@ -251,8 +230,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
               <.multiselect
                 field={@form[:stop_ids]}
                 filter_field={@form[:stop_ids_filter]}
-                filter_value={@stop_filter_value}
-                filter_update_function="rerender"
                 options={@stop_id_options}
                 class="min-w-[24rem] min-h-[90%]"
                 disabled={disable_input?(@form[:route_ids].value, @editing)}

@@ -91,7 +91,7 @@
 
   <.h2>Form Fields</.h2>
 
-  <.form for={@form} class="form-control gap-4">
+  <.form for={@form} class="form-control gap-4" phx-change="rerender">
     <.select
       label="Select"
       field={@form[:single_select]}
@@ -118,8 +118,6 @@
       label="Multiselect"
       field={@form[:multiselect]}
       filter_field={@form[:multiselect_filter]}
-      filter_value={@filter_value}
-      filter_update_function="rerender"
       options={multiselect_options()}
       class="max-w-[16rem]"
     />
@@ -127,17 +125,14 @@
       label="Disabled Multiselect"
       field={@form[:multiselect]}
       filter_field={@form[:multiselect_filter]}
-      filter_value={@filter_value}
-      filter_update_function="rerender"
       options={multiselect_options()}
       disabled={true}
       class="max-w-[16rem]"
     />
     <.multiselect
+      label="Errored Multiselect"
       field={@form[:multiselect_error]}
       filter_field={@form[:multiselect_filter]}
-      filter_value={@filter_value}
-      filter_update_function="rerender"
       options={multiselect_options()}
       prompt="All"
       disabled={true}

@@ -352,10 +352,7 @@ defmodule AlertsUIWeb.SharedComponents do
       |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
 
     ~H"""
-    <div
-      phx-feedback-for={@name}
-      class={"text-sm items-baseline #{if @hidden, do: "hidden", else: ""}"}
-    >
+    <div phx-feedback-for={@name} class={["text-sm items-baseline", @hidden && "hidden"]}>
       <div :for={{route_name, id} <- @options} class="">
         <.label for={id}>
           <div class={"
@@ -424,7 +421,7 @@ defmodule AlertsUIWeb.SharedComponents do
       |> assign_new(:value, fn -> field.value end)
 
     ~H"""
-    <div phx-feedback-for={@name} class={"#{@class} #{if @hidden, do: "hidden", else: ""}"}>
+    <div phx-feedback-for={@name} class={["#{@class}", @hidden && "hidden"]}>
       <.label for={@id} class={if is_nil(@label), do: "hidden"}><%= @label %></.label>
       <select
         id={@id}
@@ -433,7 +430,8 @@ defmodule AlertsUIWeb.SharedComponents do
           "bg-bg-elevation-5 border border-border-primary pl-3 py-1.5 min-w-[99%] p-0
             rounded text-text-primary disabled:text-text-secondary
             disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
-            focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25)] #{@select_class}",
+            focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25)]",
+          @select_class,
           @errors != [] && "border-danger focus:border-danger"
         ]}
         multiple={@multiple}
@@ -449,8 +447,8 @@ defmodule AlertsUIWeb.SharedComponents do
 
   @doc """
   Renders a multiselect input with an attached filter.
-  Requires: select field, filter field, and a handle_event
-  function that updates the filter_value attribute.
+  Requires: select field, filter field. The filtering will not
+  work if the form is not updated with a phx-change event
   See live/components_live.ex for a working example
 
   ##Examples
@@ -458,8 +456,6 @@ defmodule AlertsUIWeb.SharedComponents do
       label="Multiselect"
       field={@form[:multiselect_field]}
       filter_field={@form[:multiselect_filter_field]}
-      filter_value={@filter_value}
-      update_function="update_function_name"
       options={[[display: :value]]}
   """
   attr :label, :string, default: nil
@@ -475,17 +471,7 @@ defmodule AlertsUIWeb.SharedComponents do
     doc:
       "a form field struct for the filter retrieved from the form, for example: @form[:multiselect_filter]"
 
-  attr :filter_value, :string,
-    default: "",
-    doc: "The value of the filter input (passed in from component to force re-render)"
-
-  attr :filter_update_function, :string,
-    required: true,
-    doc: "the name of the function to call on change of the the filter_value attribute"
-
   attr :prompt, :string, default: nil, doc: "the prompt for multiselect inputs"
-
-  attr :hidden, :boolean, default: false, doc: "hides component if true"
 
   attr :options, :list,
     required: true,
@@ -493,15 +479,17 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :rest, :global, include: ~w(disabled)
 
-  def multiselect(%{field: %FormField{} = field, filter_value: filter_value} = assigns) do
+  def multiselect(
+        %{field: %FormField{} = field, filter_field: %FormField{} = filter_field} = assigns
+      ) do
     assigns =
       assigns
       |> assign(id: field.id)
       |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
-      |> assign_new(:filter_value, fn -> String.downcase(filter_value) end)
+      |> assign_new(:filter_value, fn -> String.downcase(filter_field.value || "") end)
 
     ~H"""
-    <div {@rest} class={"#{@class} flex flex-col justify-start #{if @hidden, do: "hidden", else: ""}"}>
+    <div {@rest} class={["flex flex-col justify-start", @class]}>
       <.label for={@id}><%= @label %></.label>
       <div
         class={[
@@ -518,7 +506,6 @@ defmodule AlertsUIWeb.SharedComponents do
           class="min-w-full pb-5 mb-0 border-0 ring-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-b-none"
           field={@filter_field}
           placeholder="⌕ Search..."
-          phx-change={@filter_update_function}
           {@rest}
         />
         <hr class="w-5/6 self-center border-y-1 border-border-primary min-h-[1rem]" />
@@ -555,7 +542,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   def label(assigns) do
     ~H"""
-    <label for={@for} class={"block font-medium leading-tight mb-2 #{@class}"}>
+    <label for={@for} class={["block font-medium leading-tight mb-2", @class]}>
       <%= render_slot(@inner_block) %>
     </label>
     """
@@ -601,7 +588,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
     ~H"""
     <div phx-feedback-for={@name}>
-      <.label for={@id} class={if is_nil(@label), do: "hidden"}><%= @label %></.label>
+      <.label :if={not is_nil(@label)} for={@id}><%= @label %></.label>
       <input
         type="text"
         id={@id}
@@ -609,11 +596,10 @@ defmodule AlertsUIWeb.SharedComponents do
         placeholder={@placeholder}
         value={@value}
         class={[
-          "bg-bg-input-default border border-border-primary pl-3 py-1.5
+          ["bg-bg-input-default border border-border-primary pl-3 py-1.5
             rounded text-text-primary disabled:text-text-secondary
             disabled:bg-bg-elevation-3 ring-0  focus:ring-0 ring-border-focus
-            focus:border-border-focus
-            #{@class}",
+            focus:border-border-focus", @class],
           @errors != [] && "border-danger focus:border-danger"
         ]}
         {@rest}
@@ -657,7 +643,8 @@ defmodule AlertsUIWeb.SharedComponents do
           "bg-bg-input-default border border-border-primary pl-3 py-1.5
             rounded text-text-primary disabled:text-text-secondary
             disabled:bg-bg-elevation-3 ring-0 ring-border-focus
-            focus:ring-1 focus:border-border-focus #{@class}",
+            focus:ring-1 focus:border-border-focus",
+          @class,
           @errors != [] && "border-danger focus:border-danger"
         ]}
         {@rest}

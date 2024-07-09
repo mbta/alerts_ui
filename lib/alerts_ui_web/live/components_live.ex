@@ -31,13 +31,17 @@ defmodule AlertsUIWeb.ComponentsLive do
       |> Map.put(:action, :validate)
       |> to_form()
 
-    {:ok, assign(socket, %{form: form, filter_value: ""})}
+    {:ok, assign(socket, %{form: form})}
   end
 
   @impl true
   def handle_event("rerender", %{"components_live" => components_live}, socket) do
-    filter_value = components_live["multiselect_filter"] |> String.downcase()
-    {:noreply, assign(socket, %{filter_value: filter_value})}
+    form =
+      %__MODULE__{}
+      |> cast(components_live, @fields)
+      |> to_form
+
+    {:noreply, assign(socket, %{form: form})}
   end
 
   @doc """
