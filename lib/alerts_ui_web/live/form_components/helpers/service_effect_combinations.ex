@@ -5,7 +5,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations do
 
   alias MBTAV3API.Routes.Route
 
-  @type service_effect_combination() :: :R | :RDS | :RDT | :RDTS | :SR
+  @type service_effect_combination() :: :R | :RDS | :RDT | :RDTS | :SR | :ACCESS
 
   @doc """
   Returns atom indicating service-effect combination for route type and effect

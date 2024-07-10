@@ -82,7 +82,6 @@ defmodule AlertsUIWeb.CreateAlertLive do
         steps: @steps,
         alert_data: alert_data,
         combination: Map.get(alert_data, :combination),
-        is_access_alert: false,
         available_routes: [],
         available_schedules: [],
         available_stops: [],
@@ -185,13 +184,17 @@ defmodule AlertsUIWeb.CreateAlertLive do
     route_type = Map.get(alert_data, :route_type)
     effect_name = Map.get(alert_data, :effect_name)
 
-    combination = ServiceEffectCombinations.get_combination(route_type, effect_name)
+    combination =
+      if route_type == "Access" do
+        :ACCESS
+      else
+        ServiceEffectCombinations.get_combination(route_type, effect_name)
+      end
 
     assigns = %{
       progress: get_step_by_name(socket.assigns.progress.next),
       alert_data: alert_data,
-      combination: combination,
-      is_access_alert: Map.get(alert_data, :is_access_alert)
+      combination: combination
     }
 
     {:noreply, assign(socket, assigns)}

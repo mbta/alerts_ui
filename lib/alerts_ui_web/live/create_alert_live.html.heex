@@ -10,8 +10,14 @@
       />
 
       <.live_component
-        :if={@combination != nil}
-        module={if @combination === :SR, do: StopRouteAffectedService, else: AffectedService}
+        module={
+          case @combination do
+            :SR -> StopRouteAffectedService
+            :ACCESS -> AccessAffectedService
+            nil -> SystemwideAffectedService
+            _ -> AffectedService
+          end
+        }
         id="affected_service"
         progress={@progress}
         alert_data={@alert_data}
@@ -20,22 +26,6 @@
         available_routes={@available_routes}
         available_schedules={@available_schedules}
         available_stops={@available_stops}
-        editing={@editing}
-      />
-      <.live_component
-        :if={@combination == nil and @is_access_alert}
-        module={AccessAffectedService}
-        id="facility-affected-service"
-        progress={@progress}
-        alert_data={@alert_data}
-        editing={@editing}
-      />
-      <.live_component
-        :if={@combination == nil and !@is_access_alert}
-        module={SystemwideAffectedService}
-        id="systemwide-affected-service"
-        progress={@progress}
-        alert_data={@alert_data}
         editing={@editing}
       />
       <.live_component
@@ -51,7 +41,7 @@
         progress={@progress}
         alert_data={@alert_data}
         route_type={route_type(@alert_data)}
-        is_access_alert={@is_access_alert}
+        combination={@combination}
       />
 
       <.live_component

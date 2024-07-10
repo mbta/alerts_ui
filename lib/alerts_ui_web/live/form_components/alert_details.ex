@@ -104,7 +104,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   @impl true
   def render(assigns) do
     cause_options =
-      formatted_causes(Map.get(assigns, :route_type), Map.get(assigns, :is_access_alert))
+      formatted_causes(Map.get(assigns, :route_type), Map.get(assigns, :combination))
 
     assigns =
       assign(assigns,
@@ -182,11 +182,11 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     """
   end
 
-  defp formatted_causes(route_type, is_access_alert) do
-    route_type = if is_access_alert, do: :ACCESS, else: route_type
+  defp formatted_causes(route_type, combination) do
+    mode = if combination == :ACCESS, do: :ACCESS, else: route_type
 
     options_list =
-      route_type
+      mode
       |> Cause.cause_map_by_mode()
       |> Map.keys()
       |> Enum.map(fn cause_detail -> {cause_detail, cause_detail} end)
