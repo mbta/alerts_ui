@@ -198,8 +198,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             <.toggle_checkgroup
               field={@form[:route_ids]}
               options={@route_id_options}
-              icon_type={@route_type}
+              icon_type={icon_type(@route_type)}
               class={@route_type === 3 && "hidden"}
+              show_icons={true}
             />
           </div>
 
@@ -245,6 +246,14 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       <hr />
     </div>
     """
+  end
+
+  defp icon_type(route_type) do
+    case route_type do
+      2 -> :COMMUTER_RAIL
+      4 -> :FERRY
+      _ -> nil
+    end
   end
 
   def trip_information_by_id(available_schedules, trip_ids) do

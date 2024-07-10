@@ -9,7 +9,7 @@ defmodule AlertsUIWeb.IconComponents do
   """
   attr :type, :string, required: true
 
-  def mode_icon(%{type: "Bus"} = assigns) do
+  def mode_icon(%{type: :BUS} = assigns) do
     ~H"""
     <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
       <title>
@@ -27,7 +27,7 @@ defmodule AlertsUIWeb.IconComponents do
     """
   end
 
-  def mode_icon(%{type: "Subway"} = assigns) do
+  def mode_icon(%{type: :SUBWAY} = assigns) do
     ~H"""
     <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
       <title>
@@ -43,7 +43,7 @@ defmodule AlertsUIWeb.IconComponents do
     """
   end
 
-  def mode_icon(%{type: "Commuter Rail"} = assigns) do
+  def mode_icon(%{type: :COMMUTER_RAIL} = assigns) do
     ~H"""
     <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
       <title>
@@ -58,7 +58,7 @@ defmodule AlertsUIWeb.IconComponents do
     """
   end
 
-  def mode_icon(%{type: "Ferry"} = assigns) do
+  def mode_icon(%{type: :FERRY} = assigns) do
     ~H"""
     <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
       <title>
@@ -73,7 +73,7 @@ defmodule AlertsUIWeb.IconComponents do
     """
   end
 
-  def mode_icon(%{type: "Systemwide"} = assigns) do
+  def mode_icon(%{type: :SYSTEMWIDE} = assigns) do
     ~H"""
     <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
       <title>
@@ -91,7 +91,7 @@ defmodule AlertsUIWeb.IconComponents do
     """
   end
 
-  def mode_icon(%{type: "Facility"} = assigns) do
+  def mode_icon(%{type: :ACCESS} = assigns) do
     ~H"""
     <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
       <title>
@@ -110,7 +110,7 @@ defmodule AlertsUIWeb.IconComponents do
   end
 
   # Multiple routes
-  def mode_icon(%{type: "Multiple"} = assigns) do
+  def mode_icon(%{type: :MULTIPLE} = assigns) do
     ~H"""
     <span class="align-middle border bg-white font-bold h-full py-1 px-2 rounded text-black text-sm">
       Multiple
@@ -242,11 +242,11 @@ defmodule AlertsUIWeb.IconComponents do
   end
 
   # Access alerts and any others without routes as affected entities
-  def mode_icon(%{type: "Other"} = assigns), do: other_icon(assigns)
-  def mode_icon(%{type: "using_escalator"} = assigns), do: other_icon(assigns)
-  def mode_icon(%{type: "using_wheelchair"} = assigns), do: other_icon(assigns)
-  def mode_icon(%{type: "park_car"} = assigns), do: other_icon(assigns)
-  def mode_icon(%{type: "bike"} = assigns), do: other_icon(assigns)
+  def mode_icon(%{type: :OTHER} = assigns), do: other_icon(assigns)
+  def mode_icon(%{type: :USING_ESCALATOR} = assigns), do: other_icon(assigns)
+  def mode_icon(%{type: :USING_WHEELCHAIR} = assigns), do: other_icon(assigns)
+  def mode_icon(%{type: :PARK_CAR} = assigns), do: other_icon(assigns)
+  def mode_icon(%{type: :BIKE} = assigns), do: other_icon(assigns)
 
   def mode_icon(%{type: "CR-" <> _} = assigns) do
     ~H"""
@@ -273,6 +273,6 @@ defmodule AlertsUIWeb.IconComponents do
     """
   end
 
-  defp route_name("CR-" <> line_name), do: line_name
+  defp route_name("CR_" <> line_name), do: line_name
   defp route_name(name), do: name
 end

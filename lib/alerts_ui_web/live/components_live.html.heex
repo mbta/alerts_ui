@@ -86,7 +86,7 @@
     <.button_secondary>Secondary Button</.button_secondary>
     <br />
     <.button_toggle>Toggle Button (active)</.button_toggle>
-    <.button_toggle icon="Red">Toggle Button with Icon</.button_toggle>
+    <.button_toggle icon={:BUS}>Toggle Button with Icon</.button_toggle>
     <.button_toggle active={false}>Toggle Button (inactive)</.button_toggle>
   </div>
 
@@ -164,9 +164,11 @@
       placeholder="Errored TextArea"
     />
     <.toggle_checkgroup
+      label="Checkgroup with icons"
       field={@form[:toggle_checkgroup]}
       options={single_select_options()}
       class="max-w-[16rem]"
+      show_icons={true}
     />
   </.form>
 </div>

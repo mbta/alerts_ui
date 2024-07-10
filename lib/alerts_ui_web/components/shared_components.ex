@@ -304,7 +304,7 @@ defmodule AlertsUIWeb.SharedComponents do
       ~w(type phx-target phx-click phx-value-effect_name phx-value-route_type name id value disabled)
 
   attr :class, :string, default: "", doc: "additional classes to add"
-  attr :icon, :string, default: nil, doc: "optional name of icon"
+  attr :icon, :atom, default: nil, doc: "optional name of icon"
   attr :hidden, :boolean, default: false, doc: "hides component if true"
   attr :active, :boolean, default: true, doc: "switches to active colors if true"
   slot :inner_block, required: true
@@ -338,10 +338,11 @@ defmodule AlertsUIWeb.SharedComponents do
   Renders a checkgroup.
 
   ##Examples
-    <.togglecheckgroup
+    <.toggle_checkgroup
       field={@form[:route_ids]}
       options={[{"route_name", "route_id"}]}
-      icon_type=3
+      show_icons={true}
+      icon_type={:FERRY}
       name="affected_service[route_ids][]"
      />
   """
@@ -349,8 +350,16 @@ defmodule AlertsUIWeb.SharedComponents do
     required: true,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
-  attr :options, :any
-  attr :icon_type, :string, default: nil
+  attr :options, :list, default: []
+
+  attr :icon_type, :string,
+    default: nil,
+    doc: "icon to to display if all options should have the same icon."
+
+  attr :show_icons, :boolean,
+    default: false,
+    doc: "whether to show icons. Icon will display option name unless icon_type is set."
+
   attr :label, :string, default: nil
   attr :class, :string, default: "", doc: "additional classes to add"
   attr :rest, :global, include: ~w(disabled form readonly)
@@ -365,6 +374,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
     ~H"""
     <div phx-feedback-for={@name} class={["grid grid-cols-1 gap-1 text-sm items-baseline", @class]}>
+      <.label for={@id} class={if is_nil(@label), do: "hidden"}><%= @label %></.label>
       <div :for={{option_name, id} <- @options} class="">
         <.label for={id}>
           <div class={[
@@ -381,8 +391,8 @@ defmodule AlertsUIWeb.SharedComponents do
               {@rest}
             />
             <div class="flex flex-row justify-left align-center">
-              <div class={[unless(@icon_type, do: "hidden"), "mr-3 self-center"]}>
-                <.mode_icon type={route_to_icon_name(@icon_type, option_name)} />
+              <div class={[unless(@show_icons, do: "hidden"), "mr-3 self-center"]}>
+                <.mode_icon type={if @icon_type, do: @icon_type, else: option_name} />
               </div>
               <%= option_name %>
             </div>
@@ -392,14 +402,6 @@ defmodule AlertsUIWeb.SharedComponents do
       <.input_error :for={msg <- @errors}><%= msg %></.input_error>
     </div>
     """
-  end
-
-  defp route_to_icon_name(route_type, icon_name) do
-    case route_type do
-      2 -> "Commuter Rail"
-      4 -> "Ferry"
-      _ -> icon_name
-    end
   end
 
   @doc """
