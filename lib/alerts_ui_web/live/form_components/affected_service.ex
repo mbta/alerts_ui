@@ -250,8 +250,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   defp icon_type(route_type) do
     case route_type do
-      2 -> :COMMUTER_RAIL
-      4 -> :FERRY
+      2 -> "Commuter Rail"
+      4 -> "Ferry"
       _ -> nil
     end
   end

@@ -184,7 +184,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
       phx-click="route_type"
       class="self-center min-w-[16rem]"
       value={@route_type}
-      icon={mode_to_icon_atom(@route_type)}
+      icon={@route_type}
     >
       <%= @route_type %>
     </.button_toggle>
@@ -211,15 +211,5 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
       <%= @effect %>
     </.button_toggle>
     """
-  end
-
-  defp mode_to_icon_atom(mode) do
-    case mode do
-      "Bus" -> :BUS
-      "Subway" -> :SUBWAY
-      "Commuter Rail" -> :COMMUTER_RAIL
-      "Ferry" -> :FERRY
-      "Systemwide" -> :SYSTEMWIDE
-    end
   end
 end

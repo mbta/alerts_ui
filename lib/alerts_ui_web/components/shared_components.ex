@@ -304,7 +304,7 @@ defmodule AlertsUIWeb.SharedComponents do
       ~w(type phx-target phx-click phx-value-effect_name phx-value-route_type name id value disabled)
 
   attr :class, :string, default: "", doc: "additional classes to add"
-  attr :icon, :atom, default: nil, doc: "optional name of icon"
+  attr :icon, :string, default: nil, doc: "optional name of icon"
   attr :hidden, :boolean, default: false, doc: "hides component if true"
   attr :active, :boolean, default: true, doc: "switches to active colors if true"
   slot :inner_block, required: true
