@@ -184,6 +184,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
       phx-click="route_type"
       class="self-center min-w-[16rem]"
       value={@route_type}
+      icon={@route_type}
     >
       <%= @route_type %>
     </.button_toggle>

@@ -18,9 +18,10 @@ defmodule AlertsUIWeb.ComponentsLive do
     field :text_input_error, :string
     field :textarea, :string
     field :textarea_error, :string
+    field :toggle_checkgroup, :string
   end
 
-  @fields ~w[single_select multiselect text_input textarea single_select_error multiselect_error text_input_error textarea_error multiselect_filter]a
+  @fields ~w[single_select multiselect text_input textarea single_select_error multiselect_error text_input_error textarea_error multiselect_filter toggle_checkgroup]a
   @errored_fields ~w[single_select_error multiselect_error text_input_error textarea_error]a
 
   @impl true
@@ -80,15 +81,15 @@ defmodule AlertsUIWeb.ComponentsLive do
 
   defp single_select_options do
     [
-      One: 1,
-      Two: 2,
-      Three: 3,
-      Four: 4,
-      Five: 5,
-      Six: 6,
-      Seven: 7,
-      Eight: 8,
-      Nine: 9
+      One: "1",
+      Two: "2",
+      Three: "3",
+      Four: "4",
+      Five: "5",
+      Six: "6",
+      Seven: "7",
+      Eight: "8",
+      Nine: "9"
     ]
   end
 

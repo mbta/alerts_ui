@@ -9,6 +9,7 @@ defmodule AlertsUIWeb.SharedComponents do
   Icons are provided by [heroicons](https://heroicons.com). See `icon/1` for usage.
   """
   use Phoenix.Component
+  import AlertsUIWeb.IconComponents
 
   alias AlertsUIWeb.CoreComponents
   alias Phoenix.HTML.{Form, FormField}
@@ -303,6 +304,7 @@ defmodule AlertsUIWeb.SharedComponents do
       ~w(type phx-target phx-click phx-value-effect_name phx-value-route_type name id value disabled)
 
   attr :class, :string, default: "", doc: "additional classes to add"
+  attr :icon, :string, default: nil, doc: "optional name of icon"
   attr :hidden, :boolean, default: false, doc: "hides component if true"
   attr :active, :boolean, default: true, doc: "switches to active colors if true"
   slot :inner_block, required: true
@@ -322,7 +324,12 @@ defmodule AlertsUIWeb.SharedComponents do
     "}
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      <div class="flex flex-row justify-center align-center">
+        <div class={"#{unless @icon, do: "hidden"} mr-3 self-center"}>
+          <.mode_icon type={@icon} />
+        </div>
+        <%= render_slot(@inner_block) %>
+      </div>
     </button>
     """
   end
@@ -331,16 +338,29 @@ defmodule AlertsUIWeb.SharedComponents do
   Renders a checkgroup.
 
   ##Examples
-    <.checkgroup />
+    <.toggle_checkgroup
+      field={@form[:route_ids]}
+      options={[{"route_name", "route_id"}]}
+      show_icons={true}
+      icon_type={:FERRY}
+      name="affected_service[route_ids][]"
+     />
   """
   attr :field, FormField,
     required: true,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
-  attr :name, :string, default: ""
-  attr :options, :any
+  attr :options, :list, default: []
+
+  attr :icon_type, :string,
+    default: nil,
+    doc: "icon to to display if all options should have the same icon."
+
+  attr :show_icons, :boolean,
+    default: false,
+    doc: "whether to show icons. Icon will display option name unless icon_type is set."
+
   attr :label, :string, default: nil
-  attr :hidden, :boolean, default: false, doc: "hides component if true"
   attr :class, :string, default: "", doc: "additional classes to add"
   attr :rest, :global, include: ~w(disabled form readonly)
 
@@ -348,17 +368,19 @@ defmodule AlertsUIWeb.SharedComponents do
     assigns =
       assigns
       |> assign(id: field.id, field_value: field.value)
+      |> assign_new(:name, fn -> field.name <> "[]" end)
       |> assign(toggle_button_classes())
       |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
 
     ~H"""
-    <div phx-feedback-for={@name} class={["text-sm items-baseline", @hidden && "hidden"]}>
-      <div :for={{route_name, id} <- @options} class="">
+    <div phx-feedback-for={@name} class={["grid grid-cols-1 gap-1 text-sm items-baseline", @class]}>
+      <.label for={@id} class={if is_nil(@label), do: "hidden"}><%= @label %></.label>
+      <div :for={{option_name, id} <- @options} class="">
         <.label for={id}>
-          <div class={"
-            #{@base_toggle_classes}
-              #{if (@field_value && id in @field_value), do: @toggled_on, else: @toggled_off}
-              #{@class}"}>
+          <div class={[
+            @base_toggle_classes,
+            if(@field_value && id in @field_value, do: @toggled_on, else: @toggled_off)
+          ]}>
             <input
               type="checkbox"
               id={id}
@@ -368,7 +390,12 @@ defmodule AlertsUIWeb.SharedComponents do
               class="hidden"
               {@rest}
             />
-            <%= route_name %>
+            <div class="flex flex-row justify-left align-center">
+              <div class={[unless(@show_icons, do: "hidden"), "mr-3 self-center"]}>
+                <.mode_icon type={if @icon_type, do: @icon_type, else: option_name} />
+              </div>
+              <%= option_name %>
+            </div>
           </div>
         </.label>
       </div>

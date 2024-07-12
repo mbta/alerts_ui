@@ -183,9 +183,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
     route_type = Map.get(alert_data, :route_type)
     effect_name = Map.get(alert_data, :effect_name)
 
-    combination =
-      socket.assigns.combination ||
-        ServiceEffectCombinations.get_combination(route_type, effect_name)
+    combination = ServiceEffectCombinations.get_combination(route_type, effect_name)
 
     assigns = %{
       progress: get_step_by_name(socket.assigns.progress.next),
