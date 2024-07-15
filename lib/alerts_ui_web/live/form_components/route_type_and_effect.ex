@@ -116,9 +116,9 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
       }
       id="route_view"
     >
-      <.h1 class="mb-8">Create New Alert</.h1>
+      <.h1 class="mb-8">Create new alert</.h1>
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
-        Select a Service Effect
+        Alert type
       </.h5>
       <.form
         for={@changeset}
@@ -145,7 +145,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
           </.body>
         </div>
         <div class="flex flex-row justify-center md:justify-start">
-          <p class="text-text-disabled mb-[18rem]" hidden={!is_nil(@selected_route_type)}>
+          <p class="text-bg-elevation-6 mb-[18rem]" hidden={!is_nil(@selected_route_type)}>
             Select a service type to see possible effects.
           </p>
           <div class="grid sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6 gap-2">
