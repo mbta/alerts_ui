@@ -15,11 +15,14 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class={
-      unless @progress.name == "details",
-        do: "hidden",
-        else: "min-w-full flex flex-col"
-    }>
+    <div
+      class={
+        unless @progress.name == "details",
+          do: "hidden",
+          else: "min-w-full flex flex-col"
+      }
+      id="access_service_view"
+    >
       facilities <hr />
     </div>
     """

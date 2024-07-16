@@ -44,11 +44,14 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class={
-      unless @progress.name == "details",
-        do: "hidden",
-        else: "min-w-full flex flex-col"
-    }>
+    <div
+      class={
+        unless @progress.name == "details",
+          do: "hidden",
+          else: "min-w-full flex flex-col"
+      }
+      id="systemwide_service_view"
+    >
       <.h1 class="mb-8">Create new systemwide alert</.h1>
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
         Affected service

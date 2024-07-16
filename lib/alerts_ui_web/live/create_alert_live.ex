@@ -38,7 +38,12 @@ defmodule AlertsUIWeb.CreateAlertLive do
     TimeRange
   }
 
-  alias AlertsUIWeb.FormComponents.Helpers.{AlertData, ServiceEffectCombinations}
+  alias AlertsUIWeb.FormComponents.Helpers.{
+    AlertData,
+    EffectsForRouteTypes,
+    ServiceEffectCombinations
+  }
+
   alias AlertsUIWeb.Step
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
@@ -185,7 +190,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
     effect_name = Map.get(alert_data, :effect_name)
 
     combination =
-      if route_type == "Access" do
+      if is_nil(route_type) and
+           effect_name in EffectsForRouteTypes.list_effects("Access") do
         :ACCESS
       else
         ServiceEffectCombinations.get_combination(route_type, effect_name)
