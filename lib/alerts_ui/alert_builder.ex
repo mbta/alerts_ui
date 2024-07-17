@@ -21,7 +21,7 @@ defmodule AlertsUI.AlertBuilder do
   @type alert_data_t :: %{
           route_type: Route.type_int() | nil,
           is_facility: boolean(),
-          facility_id: String.t() | nil,
+          facility_id: [String.t()],
           direction: String.t(),
           route_ids: [Route.id_t()],
           stop_ids: [Stop.id_t()],
@@ -342,26 +342,21 @@ defmodule AlertsUI.AlertBuilder do
     )
   end
 
-  defp build_informed_entities(:ACCESS, %{facility_id: facility_id}, effect) do
-    facility = FacilitiesRepo.get(facility_id)
-    stop = StopsRepo.get!(facility.stop.id)
+  defp build_informed_entities(:ACCESS, %{facility_ids: facility_ids}, effect) do
+    Enum.flat_map(facility_ids, fn facility_id ->
+      facility = FacilitiesRepo.get(facility_id)
+      stop = StopsRepo.get!(facility.stop.id)
 
-    child_stop_ids =
-      stop.child_ids -- excluded_stops_from_facility_properties(facility.properties)
+      child_stop_ids =
+        stop.child_ids -- excluded_stops_from_facility_properties(facility.properties)
 
-    route_ids =
-      Enum.flat_map(child_stop_ids, &RoutesRepo.by_stop/1) |> Enum.map(& &1.id) |> Enum.uniq()
+      route_ids =
+        Enum.flat_map(child_stop_ids, &RoutesRepo.by_stop/1) |> Enum.map(& &1.id) |> Enum.uniq()
 
-    child_stop_ids
-    |> Enum.uniq()
-    |> Enum.flat_map(fn stop_id ->
-      Enum.map(route_ids, fn route_id ->
-        %{
-          activities: Activities.for_effect(effect),
-          facility_id: facility_id,
-          route_id: route_id,
-          stop_id: stop_id
-        }
+      child_stop_ids
+      |> Enum.uniq()
+      |> Enum.flat_map(fn stop_id ->
+        build_facility_maps(stop_id, facility_id, route_ids, effect)
       end)
     end)
   end
@@ -611,6 +606,17 @@ defmodule AlertsUI.AlertBuilder do
   defp stop_route_pairs(stop_ids, route_ids) do
     Enum.flat_map(stop_ids, fn stop_id ->
       Enum.map(route_ids, fn route_id -> {stop_id, route_id} end)
+    end)
+  end
+
+  defp build_facility_maps(stop_id, facility_id, route_ids, effect) do
+    Enum.map(route_ids, fn route_id ->
+      %{
+        activities: Activities.for_effect(effect),
+        facility_id: facility_id,
+        route_id: route_id,
+        stop_id: stop_id
+      }
     end)
   end
 

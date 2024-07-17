@@ -89,7 +89,7 @@ defmodule AlertsUI.MixProject do
       {:laboratory, github: "paulswartz/laboratory", ref: "cookie_opts"},
       {:live_isolated_component, "~> 0.8", only: :test},
       {:map_diff, "~> 1.3.4"},
-      {:mbta_v3_api, path: "~/workspace/mbta_v3_api", branch: "add-facility-get-elm"},
+      {:mbta_v3_api, git: "https://github.com/mbta/mbta_v3_api.git", branch: "mss-more-files"},
       {:mock, "~> 0.3.8", only: :test},
       {:oban, "~> 2.16"},
       {:paper_trail, "~> 1.0.0"},
