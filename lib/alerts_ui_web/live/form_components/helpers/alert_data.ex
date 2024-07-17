@@ -4,13 +4,17 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   """
   alias AlertsUI.Alerts
   alias AlertsUI.Models.{ActivePeriod, Alert, Effect}
-  alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
+  alias AlertsUIWeb.FormComponents.Helpers.{
+    EffectsForRouteTypes,
+    ServiceEffectCombinations
+  }
   alias MBTAV3API.Routes.Route
 
   defstruct [
     :route_type,
     :effect_name,
     :direction,
+    :facility_ids,
     :route_ids,
     :stop_ids,
     :trip_ids,
@@ -30,6 +34,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   @type t :: %__MODULE__{
           route_type: Route.type_int(),
           direction: String.t(),
+          facility_ids: [String.t()],
           route_ids: [String.t()],
           stop_ids: [String.t()],
           trip_ids: [String.t()],
@@ -55,13 +60,22 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     informed_entities = alert.informed_entity
     route_type = Alert.get_route_type(alert)
     effect_name = Map.get(effect_map, :effect_name)
-    combination = ServiceEffectCombinations.get_combination(route_type, effect_name)
+
+    combination =
+      if is_nil(route_type) and
+           effect_name in EffectsForRouteTypes.list_effects("Access") do
+        :ACCESS
+      else
+        ServiceEffectCombinations.get_combination(route_type, effect_name)
+      end
+
     active_period_end = shift_to_naive(alert.active_period_end)
 
     %__MODULE__{
       route_type: route_type,
       direction: Alert.get_direction(informed_entities),
       effect_name: effect_name,
+      facility_ids: Alert.gather_facility_ids(informed_entities),
       route_ids: Alert.gather_route_ids(informed_entities),
       stop_ids: Alert.gather_parent_stop_ids(informed_entities),
       trip_ids: Alert.gather_trip_ids(informed_entities),

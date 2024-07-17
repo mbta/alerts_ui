@@ -5,83 +5,6 @@
   },
   "host": "localhost:4000",
   "definitions": {
-    "InformedEntity": {
-      "description": "Body for InformedEntity to be included with Alert",
-      "properties": {
-        "activities": {
-          "description": "string",
-          "type": "array"
-        },
-        "agency_id": {
-          "description": "Agency ID",
-          "type": "string"
-        },
-        "direction_id": {
-          "description": "Direction ID",
-          "enum": [
-            0,
-            1
-          ],
-          "type": "integer"
-        },
-        "facility_id": {
-          "description": "Facility ID",
-          "type": "string"
-        },
-        "route_id": {
-          "description": "Route ID",
-          "type": "string"
-        },
-        "route_type": {
-          "description": "Route Type",
-          "type": "integer"
-        },
-        "stop_id": {
-          "description": "Stop ID",
-          "type": "string"
-        },
-        "trip": {
-          "description": "Trip included with Informed Entity",
-          "items": {
-            "$ref": "#/definitions/Trip"
-          },
-          "type": "array"
-        }
-      },
-      "title": "InformedEntity",
-      "type": "object"
-    },
-    "Trip": {
-      "description": "TripDescriptor optionally included with Informed Entity",
-      "properties": {
-        "direction_id": {
-          "description": "Direction ID",
-          "enum": [
-            0,
-            1
-          ],
-          "type": "integer"
-        },
-        "route_id": {
-          "description": "Route ID",
-          "type": "string"
-        },
-        "start_date": {
-          "description": "Start Date in format YYYYMMDD",
-          "type": "string"
-        },
-        "start_time": {
-          "description": "Start Time in format HH:MM:SS",
-          "type": "string"
-        },
-        "trip_id": {
-          "description": "Trip ID",
-          "type": "string"
-        }
-      },
-      "title": "TripDescriptor",
-      "type": "object"
-    },
     "Alert": {
       "description": "Alert information",
       "properties": {
@@ -128,6 +51,83 @@
         "header_text"
       ],
       "title": "Alert",
+      "type": "object"
+    },
+    "Trip": {
+      "description": "TripDescriptor optionally included with Informed Entity",
+      "properties": {
+        "direction_id": {
+          "description": "Direction ID",
+          "enum": [
+            0,
+            1
+          ],
+          "type": "integer"
+        },
+        "route_id": {
+          "description": "Route ID",
+          "type": "string"
+        },
+        "start_date": {
+          "description": "Start Date in format YYYYMMDD",
+          "type": "string"
+        },
+        "start_time": {
+          "description": "Start Time in format HH:MM:SS",
+          "type": "string"
+        },
+        "trip_id": {
+          "description": "Trip ID",
+          "type": "string"
+        }
+      },
+      "title": "TripDescriptor",
+      "type": "object"
+    },
+    "InformedEntity": {
+      "description": "Body for InformedEntity to be included with Alert",
+      "properties": {
+        "activities": {
+          "description": "string",
+          "type": "array"
+        },
+        "agency_id": {
+          "description": "Agency ID",
+          "type": "string"
+        },
+        "direction_id": {
+          "description": "Direction ID",
+          "enum": [
+            0,
+            1
+          ],
+          "type": "integer"
+        },
+        "facility_id": {
+          "description": "Facility ID",
+          "type": "string"
+        },
+        "route_id": {
+          "description": "Route ID",
+          "type": "string"
+        },
+        "route_type": {
+          "description": "Route Type",
+          "type": "integer"
+        },
+        "stop_id": {
+          "description": "Stop ID",
+          "type": "string"
+        },
+        "trip": {
+          "description": "Trip included with Informed Entity",
+          "items": {
+            "$ref": "#/definitions/Trip"
+          },
+          "type": "array"
+        }
+      },
+      "title": "InformedEntity",
       "type": "object"
     },
     "AlertRequest": {

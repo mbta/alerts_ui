@@ -473,19 +473,21 @@ defmodule AlertsUIWeb.SharedComponents do
   end
 
   @doc """
-  Renders a multiselect input with an attached filter.
+  Renders a filtered_select input with an attached filter.
   Requires: select field, filter field. The filtering will not
   work if the form is not updated with a phx-change event
   See live/components_live.ex for a working example
 
   ##Examples
-    <.multiselect
-      label="Multiselect"
-      field={@form[:multiselect_field]}
-      filter_field={@form[:multiselect_filter_field]}
+    <.filtered_select
+      label="filtered_select"
+      field={@form[:filtered_select_field]}
+      filter_field={@form[:filtered_select_filter_field]}
       options={[[display: :value]]}
   """
   attr :label, :string, default: nil
+
+  attr :multiple, :boolean, default: true
 
   attr :class, :string, default: "", doc: "additional classes to add"
 
@@ -496,9 +498,9 @@ defmodule AlertsUIWeb.SharedComponents do
   attr :filter_field, FormField,
     required: true,
     doc:
-      "a form field struct for the filter retrieved from the form, for example: @form[:multiselect_filter]"
+      "a form field struct for the filter retrieved from the form, for example: @form[:filtered_select_filter]"
 
-  attr :prompt, :string, default: nil, doc: "the prompt for multiselect inputs"
+  attr :prompt, :string, default: nil, doc: "the prompt for filtered_select inputs"
 
   attr :options, :list,
     required: true,
@@ -506,7 +508,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :rest, :global, include: ~w(disabled)
 
-  def multiselect(
+  def filtered_select(
         %{field: %FormField{} = field, filter_field: %FormField{} = filter_field} = assigns
       ) do
     assigns =
@@ -537,7 +539,7 @@ defmodule AlertsUIWeb.SharedComponents do
         />
         <hr class="w-5/6 self-center border-y-1 border-border-primary min-h-[1rem]" />
         <.select
-          multiple={true}
+          multiple={@multiple}
           options={
             Enum.filter(@options, fn {option, _value} ->
               option = String.downcase(option || "")

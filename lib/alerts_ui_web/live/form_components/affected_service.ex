@@ -194,7 +194,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         id="service_form"
       >
         <fieldset class="flex flex-row gap-x-12 min-h-[30rem]">
-          <.multiselect
+          <.filtered_select
             label={if @route_type in [0, 1, 2], do: "Line(s)", else: "Route(s)"}
             field={@form[:route_ids]}
             filter_field={@form[:route_ids_filter]}
@@ -213,7 +213,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
           </div>
 
           <%= if show_trips_input?(assigns) do %>
-            <.multiselect
+            <.filtered_select
               label="Trip(s)"
               field={@form[:trip_ids]}
               filter_field={@form[:trip_ids_filter]}
@@ -235,7 +235,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             <% end %>
 
             <%= if show_stops_input?(assigns) do %>
-              <.multiselect
+              <.filtered_select
                 field={@form[:stop_ids]}
                 filter_field={@form[:stop_ids_filter]}
                 options={@stop_id_options}

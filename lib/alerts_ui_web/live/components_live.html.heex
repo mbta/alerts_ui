@@ -115,26 +115,26 @@
       prompt="All"
       class="max-w-[16rem]"
     />
-    <.multiselect
-      label="Multiselect"
-      field={@form[:multiselect]}
-      filter_field={@form[:multiselect_filter]}
-      options={multiselect_options()}
+    <.filtered_select
+      label="filtered_select"
+      field={@form[:filtered_select]}
+      filter_field={@form[:filtered_select_filter]}
+      options={filtered_select_options()}
       class="max-w-[16rem]"
     />
-    <.multiselect
-      label="Disabled Multiselect"
-      field={@form[:multiselect]}
-      filter_field={@form[:multiselect_filter]}
-      options={multiselect_options()}
+    <.filtered_select
+      label="Disabled filtered_select"
+      field={@form[:filtered_select]}
+      filter_field={@form[:filtered_select_filter]}
+      options={filtered_select_options()}
       disabled={true}
       class="max-w-[16rem]"
     />
-    <.multiselect
-      label="Errored Multiselect"
-      field={@form[:multiselect_error]}
-      filter_field={@form[:multiselect_filter]}
-      options={multiselect_options()}
+    <.filtered_select
+      label="Errored filtered_select"
+      field={@form[:filtered_select_error]}
+      filter_field={@form[:filtered_select_filter]}
+      options={filtered_select_options()}
       prompt="All"
       disabled={true}
       class="max-w-[16rem]"

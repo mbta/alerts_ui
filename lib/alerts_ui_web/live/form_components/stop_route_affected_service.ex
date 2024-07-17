@@ -158,7 +158,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         id="service_form"
       >
         <fieldset class="flex flex-row gap-x-12 min-h-[30rem]">
-          <.multiselect
+          <.filtered_select
             label="Stop(s)"
             field={@form[:stop_ids]}
             filter_field={@form[:stop_ids_filter]}
@@ -167,7 +167,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
           />
 
           <%= if show_routes_input?(assigns) do %>
-            <.multiselect
+            <.filtered_select
               label="Route(s)"
               field={@form[:route_ids]}
               filter_field={@form[:route_ids_filter]}
