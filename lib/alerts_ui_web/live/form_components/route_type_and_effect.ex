@@ -13,6 +13,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
     "Subway",
     "Commuter Rail",
     "Ferry",
+    "Access",
     "Systemwide"
   ]
 

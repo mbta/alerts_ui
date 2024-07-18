@@ -77,6 +77,17 @@ defmodule AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes do
       "Suspension"
     ]
 
+  def list_effects("Access"),
+    do: [
+      "Elevator Closure",
+      "Parking Closure",
+      "Access Issue",
+      "Bike Issue",
+      "Escalator Closure",
+      "Parking Issue",
+      "Facility Issue"
+    ]
+
   def list_effects("Systemwide"),
     do: [
       "Amber Alert",

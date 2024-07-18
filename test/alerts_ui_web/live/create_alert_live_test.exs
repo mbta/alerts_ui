@@ -66,6 +66,73 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
     end
 
     @tag :logged_in_user
+    test "shows correct affected service for access combination", %{conn: conn} do
+      with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
+        insert(:alert, alert_id: "1")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        {:ok, changeset} =
+          Ecto.Changeset.change(%RouteTypeAndEffect{
+            route_type: nil,
+            effect_name: "Parking Issue"
+          })
+          |> apply_action(:insert)
+
+        send(view.pid, {:step_completed, changeset})
+        rendered_view = render(view)
+        assert rendered_view =~ ~s(id="access_service_view")
+      end
+    end
+
+    @tag :logged_in_user
+    test "shows correct affected service for systemwide combination", %{conn: conn} do
+      with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
+        insert(:alert, alert_id: "1")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        {:ok, changeset} =
+          Ecto.Changeset.change(%RouteTypeAndEffect{route_type: nil, effect_name: "Summary"})
+          |> apply_action(:insert)
+
+        send(view.pid, {:step_completed, changeset})
+        rendered_view = render(view)
+        assert rendered_view =~ ~s(id="systemwide_service_view")
+      end
+    end
+
+    @tag :logged_in_user
+    test "shows correct affected service for stop route combination", %{conn: conn} do
+      with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
+        insert(:alert, alert_id: "1")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        {:ok, changeset} =
+          Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 3, effect_name: "Stop Move"})
+          |> apply_action(:insert)
+
+        send(view.pid, {:step_completed, changeset})
+        rendered_view = render(view)
+        assert rendered_view =~ ~s(id="stop_route_service_view")
+      end
+    end
+
+    @tag :logged_in_user
+    test "shows correct affected service for other combination", %{conn: conn} do
+      with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
+        insert(:alert, alert_id: "1")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        {:ok, changeset} =
+          Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 3, effect_name: "Detour"})
+          |> apply_action(:insert)
+
+        send(view.pid, {:step_completed, changeset})
+        rendered_view = render(view)
+        assert rendered_view =~ ~s(id="service_view")
+      end
+    end
+
+    @tag :logged_in_user
     test "submitting the second part of the form saves the alert", %{conn: conn} do
       with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
         {:ok, view, _html} = live(conn, "/alerts/new")

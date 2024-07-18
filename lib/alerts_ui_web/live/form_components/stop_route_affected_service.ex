@@ -148,7 +148,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     ~H"""
     <div
       class={unless @progress.name == "details", do: "hidden", else: "min-w-full mb-8 min-h-[32rem]"}
-      id="service_view"
+      id="stop_route_service_view"
     >
       <.form
         for={@form}
