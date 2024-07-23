@@ -130,7 +130,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                trip_ids: ["b1"],
                header_text: "cool header text",
                description_text: "description text",
-               active_period_end_specifier: :pick_a_date_and_time,
+               active_period_end_specifier: :custom,
                active_period_end: ~N[2024-05-03 21:09:34],
                active_period_start: ~N[2024-05-02 12:09:34],
                service_types: [],
@@ -204,7 +204,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         duration_certainty: :UNKNOWN
       })
 
-      assert AlertData.build_alert_data("1").active_period_end_specifier == :further_notice
+      assert AlertData.build_alert_data("1").active_period_end_specifier == :until_further_notice
     end
 
     test "handles estimated duration" do
@@ -267,7 +267,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         duration_certainty: :KNOWN
       })
 
-      assert AlertData.build_alert_data("1").active_period_end_specifier == :pick_a_date_and_time
+      assert AlertData.build_alert_data("1").active_period_end_specifier == :custom
     end
   end
 

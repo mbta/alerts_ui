@@ -108,7 +108,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
   def determine_specifier(nil, nil, _ap_start), do: nil
   def determine_specifier(nil, :ESTIMATED, _ap_start), do: :later_today
-  def determine_specifier(nil, :UNKNOWN, _ap_start), do: :further_notice
+  def determine_specifier(nil, :UNKNOWN, _ap_start), do: :until_further_notice
 
   def determine_specifier(ap_end, :KNOWN, ap_start) when not is_nil(ap_end) do
     end_is_at_end_of_service =
@@ -118,7 +118,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
     case end_is_at_end_of_service and less_than_a_day_apart do
       true -> :end_of_service_today
-      false -> :pick_a_date_and_time
+      false -> :custom
     end
   end
 end

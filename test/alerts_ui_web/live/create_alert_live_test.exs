@@ -104,7 +104,10 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
     @tag :logged_in_user
     test "shows correct affected service for stop route combination", %{conn: conn} do
-      with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
+      with_mocks([
+        {RoutePatternsRepo, [], by_route_id: fn _route_id, _opts -> [] end},
+        {StopsRepo, [], by_route_type: fn _route_type -> [] end}
+      ]) do
         insert(:alert, alert_id: "1")
         {:ok, view, _html} = live(conn, "/alerts/new")
 
@@ -213,6 +216,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
       with_mocks([
         {StopsRepo, [], by_route: fn _route, _direction -> stops end},
         {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [] end}
+        {RoutePatternsRepo, [], included_stops_by_route_id: fn _route_id, _direction -> [] end}
       ]) do
         conn = log_in_user(conn)
         {:ok, view, _html} = live(conn, "/alerts/new")
@@ -258,7 +262,6 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         send(view.pid, {:step_completed, changeset})
         send(view.pid, {:fetch_available_facilities, ["ELEVATOR"]})
 
-        # open_browser(view)
         assert view
                |> element("#service_form")
                |> render() =~ "real big elevator"

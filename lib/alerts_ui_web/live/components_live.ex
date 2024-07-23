@@ -19,9 +19,10 @@ defmodule AlertsUIWeb.ComponentsLive do
     field :textarea, :string
     field :textarea_error, :string
     field :toggle_checkgroup, :string
+    field :datetime, :string
   end
 
-  @fields ~w[single_select filtered_select text_input textarea single_select_error filtered_select_error text_input_error textarea_error filtered_select_filter toggle_checkgroup]a
+  @fields ~w[single_select filtered_select text_input textarea single_select_error filtered_select_error text_input_error textarea_error filtered_select_filter toggle_checkgroup datetime]a
   @errored_fields ~w[single_select_error filtered_select_error text_input_error textarea_error]a
 
   @impl true
@@ -32,7 +33,13 @@ defmodule AlertsUIWeb.ComponentsLive do
       |> Map.put(:action, :validate)
       |> to_form()
 
-    {:ok, assign(socket, %{form: form})}
+    current_time =
+      DateTime.now!("America/New_York")
+      |> DateTime.to_naive()
+      |> NaiveDateTime.truncate(:second)
+      |> NaiveDateTime.to_iso8601()
+
+    {:ok, assign(socket, %{form: form, current_time: current_time})}
   end
 
   @impl true

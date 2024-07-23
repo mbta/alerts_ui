@@ -41,7 +41,7 @@ defmodule AlertsUI.AlertBuilderTest do
           route_ids: ["57"],
           direction: "default",
           active_period_start: ~N[2024-04-30 11:54:00],
-          active_period_end_specifier: :further_notice,
+          active_period_end_specifier: :until_further_notice,
           cause_detail: "disabled train",
           url: "http://www.example.com",
           image_url: "http://www.example.com/example.jpg",
@@ -94,7 +94,7 @@ defmodule AlertsUI.AlertBuilderTest do
           route_ids: ["24", "27", "57"],
           direction: "default",
           active_period_start: ~N[2024-04-30 11:54:00],
-          active_period_end_specifier: :further_notice,
+          active_period_end_specifier: :until_further_notice,
           cause_detail: ""
         }
 
@@ -162,7 +162,7 @@ defmodule AlertsUI.AlertBuilderTest do
           route_ids: ["CapeFlyer"],
           direction: "default",
           active_period_start: ~N[2024-04-30 11:54:00],
-          active_period_end_specifier: :further_notice,
+          active_period_end_specifier: :until_further_notice,
           cause_detail: "freight train interference"
         }
 
@@ -231,7 +231,7 @@ defmodule AlertsUI.AlertBuilderTest do
           %{
             active_period_start: ~N[2024-04-30 11:54:00],
             active_period_end: nil,
-            active_period_end_specifier: :further_notice
+            active_period_end_specifier: :until_further_notice
           }
           |> Map.merge(@alert_data)
 
@@ -250,7 +250,7 @@ defmodule AlertsUI.AlertBuilderTest do
           %{
             active_period_start: ~N[2024-04-30 11:54:00],
             active_period_end: ~N[2024-04-30 23:54:00],
-            active_period_end_specifier: :pick_a_date_and_time
+            active_period_end_specifier: :custom
           }
           |> Map.merge(@alert_data)
 

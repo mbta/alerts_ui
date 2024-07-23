@@ -213,7 +213,8 @@ defmodule AlertsUI.AlertBuilder do
        }) do
     eastern_start = naive_start |> DateTime.from_naive!("America/New_York")
     utc_start = eastern_start |> Timex.Timezone.convert("Etc/UTC")
-
+    # Sets the end date of the active period to the next instance of 2:30 AM.
+    # Checks if start time is after 2:30am (Eastern). If true, end date is the next day. If false, end date is same day.
     end_date = ActivePeriod.end_of_service_date(eastern_start)
 
     utc_end =
@@ -230,7 +231,7 @@ defmodule AlertsUI.AlertBuilder do
 
   defp build_active_period(%{
          active_period_start: naive_start,
-         active_period_end_specifier: :further_notice
+         active_period_end_specifier: :until_further_notice
        }) do
     utc_start =
       naive_start |> eastern_naive_to_utc
@@ -268,7 +269,7 @@ defmodule AlertsUI.AlertBuilder do
 
   defp build_active_period(%{
          active_period_start: naive_start,
-         active_period_end_specifier: :pick_a_date_and_time,
+         active_period_end_specifier: :custom,
          active_period_end: naive_end
        }) do
     utc_start =
