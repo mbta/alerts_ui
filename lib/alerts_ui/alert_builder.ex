@@ -20,8 +20,7 @@ defmodule AlertsUI.AlertBuilder do
   @end_of_service ~T[02:30:00]
   @type alert_data_t :: %{
           route_type: Route.type_int() | nil,
-          is_facility: boolean(),
-          facility_id: [String.t()],
+          facility_ids: [String.t()],
           direction: String.t(),
           route_ids: [Route.id_t()],
           stop_ids: [Stop.id_t()],
@@ -345,19 +344,14 @@ defmodule AlertsUI.AlertBuilder do
   defp build_informed_entities(:ACCESS, %{facility_ids: facility_ids}, effect) do
     Enum.flat_map(facility_ids, fn facility_id ->
       facility = FacilitiesRepo.get(facility_id)
-      stop = StopsRepo.get!(facility.stop.id)
 
-      child_stop_ids =
-        stop.child_ids -- excluded_stops_from_facility_properties(facility.properties)
+      case Map.get(facility, :stop) do
+        nil ->
+          build_facility_maps(facility, effect)
 
-      route_ids =
-        Enum.flat_map(child_stop_ids, &RoutesRepo.by_stop/1) |> Enum.map(& &1.id) |> Enum.uniq()
-
-      child_stop_ids
-      |> Enum.uniq()
-      |> Enum.flat_map(fn stop_id ->
-        build_facility_maps(stop_id, facility_id, route_ids, effect)
-      end)
+        %Stop{id: stop_id} ->
+          build_facility_maps(facility, effect, stop_id)
+      end
     end)
   end
 
@@ -609,15 +603,38 @@ defmodule AlertsUI.AlertBuilder do
     end)
   end
 
-  defp build_facility_maps(stop_id, facility_id, route_ids, effect) do
-    Enum.map(route_ids, fn route_id ->
+  defp build_facility_maps(facility, effect, stop_id) do
+    stop = StopsRepo.get!(stop_id)
+
+    child_stop_ids =
+      stop.child_ids -- excluded_stops_from_facility_properties(facility.properties)
+
+    route_ids =
+      Enum.flat_map(child_stop_ids, &RoutesRepo.by_stop/1)
+      |> Enum.map(& &1.id)
+      |> Enum.uniq()
+
+    child_stop_ids
+    |> Enum.uniq()
+    |> Enum.flat_map(fn stop_id ->
+      Enum.map(route_ids, fn route_id ->
+        %{
+          activities: Activities.for_effect(effect),
+          facility_id: facility.id,
+          route_id: route_id,
+          stop_id: stop_id
+        }
+      end)
+    end)
+  end
+
+  defp build_facility_maps(facility, effect) do
+    [
       %{
         activities: Activities.for_effect(effect),
-        facility_id: facility_id,
-        route_id: route_id,
-        stop_id: stop_id
+        facility_id: facility.id
       }
-    end)
+    ]
   end
 
   @spec on_route?({Stop.id_t(), Route.id_t()}, String.t()) :: boolean()

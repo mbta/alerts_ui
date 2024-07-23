@@ -2103,4 +2103,40 @@ defmodule AlertsUI.AlertBuilderTest do
              ]
     end
   end
+
+  test "builds facility informed entities with nil stop" do
+    alert_data = %{
+      route_type: nil,
+      effect_name: "Elevator Closure",
+      header_text: "test header",
+      description_text: "test description",
+      facility_ids: ["retailsale-303012"]
+    }
+
+    facility = %Facility{
+      id: "retailsale-303012",
+      type: "FARE_VENDING_RETAILER",
+      short_name: "7-Eleven",
+      long_name: "7-Eleven",
+      stop: nil,
+      latitude: 42.395428,
+      longitude: -71.142483,
+      properties: [
+        %{name: "dispenses", value: "fare-media"}
+      ]
+    }
+
+    with_mocks([
+      {FacilitiesRepo, [], [get: fn _facility_id -> facility end]}
+    ]) do
+      result = AlertBuilder.build_alert(alert_data, :ACCESS)
+
+      assert result.informed_entity == [
+               %{
+                 facility_id: "retailsale-303012",
+                 activities: [:USING_WHEELCHAIR]
+               }
+             ]
+    end
+  end
 end
