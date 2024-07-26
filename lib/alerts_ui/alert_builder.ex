@@ -7,6 +7,7 @@ defmodule AlertsUI.AlertBuilder do
   alias AlertsUI.Models.{Cause, Effect, InformedEntity, RoutePattern}
   alias AlertsUI.Routes
   alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
+  alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatterns
   alias MBTAV3API.RoutePatterns.RoutePattern, as: APIRoutePattern
@@ -342,17 +343,9 @@ defmodule AlertsUI.AlertBuilder do
   end
 
   defp build_informed_entities(:ACCESS, %{facility_ids: facility_ids}, effect) do
-    Enum.flat_map(facility_ids, fn facility_id ->
-      facility = FacilitiesRepo.get(facility_id)
-
-      case Map.get(facility, :stop) do
-        nil ->
-          build_facility_maps(facility, effect)
-
-        %Stop{id: stop_id} ->
-          build_facility_maps(facility, effect, stop_id)
-      end
-    end)
+    facility_ids
+    |> Enum.map(&FacilitiesRepo.get/1)
+    |> Enum.flat_map(&build_facility_maps(&1, effect))
   end
 
   defp build_informed_entities(
@@ -603,11 +596,14 @@ defmodule AlertsUI.AlertBuilder do
     end)
   end
 
-  defp build_facility_maps(facility, effect, stop_id) do
+  defp build_facility_maps(
+         %Facility{stop: %Stop{id: stop_id}, id: facility_id, properties: properties},
+         effect
+       ) do
     stop = StopsRepo.get!(stop_id)
 
     child_stop_ids =
-      stop.child_ids -- excluded_stops_from_facility_properties(facility.properties)
+      stop.child_ids -- excluded_stops_from_facility_properties(properties)
 
     route_ids =
       Enum.flat_map(child_stop_ids, &RoutesRepo.by_stop/1)
@@ -620,7 +616,7 @@ defmodule AlertsUI.AlertBuilder do
       Enum.map(route_ids, fn route_id ->
         %{
           activities: Activities.for_effect(effect),
-          facility_id: facility.id,
+          facility_id: facility_id,
           route_id: route_id,
           stop_id: stop_id
         }
@@ -628,11 +624,11 @@ defmodule AlertsUI.AlertBuilder do
     end)
   end
 
-  defp build_facility_maps(facility, effect) do
+  defp build_facility_maps(%Facility{stop: nil, id: facility_id}, effect) do
     [
       %{
         activities: Activities.for_effect(effect),
-        facility_id: facility.id
+        facility_id: facility_id
       }
     ]
   end
