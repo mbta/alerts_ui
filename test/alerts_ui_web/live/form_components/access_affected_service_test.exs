@@ -2,18 +2,12 @@ defmodule AlertsUIWeb.FormComponents.AccessServiceTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
 
-<<<<<<< HEAD
-=======
   import LiveIsolatedComponent
->>>>>>> 7eef22f (add access affected service section)
   import Phoenix.LiveViewTest
 
   alias AlertsUIWeb.FormComponents.AccessAffectedService
   alias AlertsUIWeb.Step
-<<<<<<< HEAD
-=======
   alias MBTAV3API.Facilities.Facility
->>>>>>> 7eef22f (add access affected service section)
 
   @assigns %{
     id: "details",
@@ -23,12 +17,8 @@ defmodule AlertsUIWeb.FormComponents.AccessServiceTest do
       next: "success",
       label: "Alert Details"
     },
-<<<<<<< HEAD
-    alert_data: %{route_type: nil, effect_name: "Bike Issue", is_facility: true},
-=======
     alert_data: %{route_type: nil, effect_name: "Bike Issue"},
     available_facilities: [%Facility{id: "Facility-3", long_name: "Example Facility"}],
->>>>>>> 7eef22f (add access affected service section)
     editing: false
   }
 
@@ -36,9 +26,6 @@ defmodule AlertsUIWeb.FormComponents.AccessServiceTest do
     test "renders" do
       rendered = render_component(AccessAffectedService, @assigns)
 
-<<<<<<< HEAD
-      assert rendered =~ "facilities"
-=======
       assert rendered =~ ~s(id="access_service_view")
     end
 
@@ -63,7 +50,6 @@ defmodule AlertsUIWeb.FormComponents.AccessServiceTest do
              |> element("select#access_affected_service_facility_ids")
              |> render() =~
                ~s(<option selected="selected" value="Facility-3">Example Facility</option>)
->>>>>>> 7eef22f (add access affected service section)
     end
   end
 end

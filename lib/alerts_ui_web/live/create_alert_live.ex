@@ -157,18 +157,13 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   def handle_info({:fetch_available_facilities, facility_types}, socket) do
     available_facilities =
-      FacilitiesRepo.get_by_type(facility_types)
+      FacilitiesRepo.get_by_type(facility_types, include: "stop")
       # remove facilities that we don't control
       |> Enum.filter(&(!is_nil(&1.stop)))
       |> Enum.uniq()
       |> Enum.sort_by(& &1.long_name)
 
     {:noreply, assign(socket, available_facilities: available_facilities)}
-  end
-
-  def handle_info({:fetch_stops_by_stop_ids, stop_ids}, socket) do
-    available_stops = StopsRepo.by_stop_ids(stop_ids) |> Enum.sort_by(& &1.name)
-    {:noreply, assign(socket, available_stops: available_stops)}
   end
 
   def handle_info({:save_as_draft, changeset}, socket) do

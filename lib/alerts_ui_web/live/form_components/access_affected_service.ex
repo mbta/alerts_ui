@@ -37,7 +37,6 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
        form: form,
        facility_types: [],
        available_facilities: [],
-       available_stops: [],
        effect_name: nil
      })}
   end
@@ -50,17 +49,6 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
       |> InformedEntity.facility_effect_to_types()
 
     send(self(), {:fetch_available_facilities, facility_types})
-
-    stop_ids =
-      assigns.available_facilities
-      |> Enum.map(fn facility ->
-        stop = Map.get(facility, :stop)
-        if stop, do: stop.id, else: nil
-      end)
-      |> Enum.filter(&(!is_nil(&1)))
-      |> Enum.uniq()
-
-    send(self(), {:fetch_stops_by_stop_ids, stop_ids})
 
     assigns =
       if editing do
@@ -117,7 +105,6 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     changeset
     |> cast(params, @fields)
     |> validate_required(@required_fields)
-
   end
 
   @impl true
@@ -128,8 +115,17 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
       assigns.facility_types
       |> Enum.map(&{&1 |> String.capitalize() |> String.replace("_", " "), &1})
 
+    stops =
+      assigns.available_facilities
+      |> Enum.map(fn facility ->
+        stop = Map.get(facility, :stop)
+        if stop, do: stop
+      end)
+      |> Enum.filter(&(!is_nil(&1)))
+      |> Enum.uniq()
+
     stop_id_options =
-      SelectFormatter.formatted_select_options(assigns.available_stops)
+      SelectFormatter.formatted_select_options(stops)
 
     facility_id_options =
       assigns.available_facilities

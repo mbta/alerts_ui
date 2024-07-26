@@ -21,7 +21,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       })
 
       assert AlertData.build_alert_data("1") == %AlertData{
-               combination: nil,
+               combination: :ACCESS,
                direction: nil,
                effect_name: "Access Issue",
                route_type: nil,
@@ -157,6 +157,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                route_ids: [],
                stop_ids: [],
                trip_ids: [],
+               facility_ids: [],
                header_text: "cool header text",
                description_text: "description text"
              }
@@ -183,6 +184,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                route_ids: [],
                stop_ids: [],
                trip_ids: [],
+               facility_ids: [],
                header_text: "cool header text",
                description_text: "description text"
              }
