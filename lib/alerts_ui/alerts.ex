@@ -65,8 +65,7 @@ defmodule AlertsUI.Alerts do
       end_is_past = end_is_past(current_time, alert.active_period_end)
 
       if end_is_past do
-        change(alert, closed_timestamp: current_time)
-        |> PaperTrail.update!()
+        close(alert)
       else
         alert
       end
@@ -77,25 +76,6 @@ defmodule AlertsUI.Alerts do
 
   defp end_is_past(current_time, end_time),
     do: DateTime.compare(current_time, end_time) in [:eq, :gt]
-
-  @spec close_if_not_in_feed([map()], DateTime.t()) :: [map()]
-  def close_if_not_in_feed(incoming_alert_list, closed_time \\ DateTime.utc_now()) do
-    alert_ids = Enum.map(incoming_alert_list, & &1.alert_id)
-    closed_time = DateTime.truncate(closed_time, :second)
-
-    from(
-      a in Alert,
-      where: a.alert_id not in ^alert_ids,
-      where: is_nil(a.closed_timestamp)
-    )
-    |> Repo.all()
-    |> Enum.each(fn alert ->
-      change(alert, closed_timestamp: closed_time)
-      |> PaperTrail.update()
-    end)
-
-    incoming_alert_list
-  end
 
   @spec list_all_open() :: [Alert.t()]
   def list_all_open do
@@ -174,6 +154,18 @@ defmodule AlertsUI.Alerts do
       })
       |> Flop.run(flop, opts)
     end
+  end
+
+  def close(alert, closed_time \\ DateTime.utc_now()) do
+    closed_time = DateTime.truncate(closed_time, :second)
+
+    alert
+    |> change(
+      closed_timestamp: closed_time,
+      last_modified_timestamp: closed_time,
+      duration_certainty: :KNOWN
+    )
+    |> PaperTrail.update!()
   end
 
   defp join_informed_entity(query, _opts) do

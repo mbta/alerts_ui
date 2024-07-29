@@ -278,41 +278,7 @@ defmodule AlertsUI.AlertsTest do
       insert(:alert, %{alert_id: "345"})
       result = Alerts.list_all_open() |> Alerts.close_if_end_is_past(current_time)
       [result1, result2, result3] = result |> Enum.sort_by(& &1.alert_id)
-      assert result1.closed_timestamp == current_time
-      assert result2.closed_timestamp == nil
-      assert result3.closed_timestamp == nil
-    end
-  end
-
-  describe "close_if_not_in_feed/2" do
-    test "closes existing alerts that aren't in the feed" do
-      insert(:alert, %{alert_id: "123"})
-      insert(:alert, %{alert_id: "234"})
-      insert(:alert, %{alert_id: "456"})
-
-      alert_feed = [build(:alert_map, %{alert_id: "456"})]
-      Alerts.close_if_not_in_feed(alert_feed, ~U[2023-10-14 00:01:00Z])
-      result1 = Repo.get_by(Alert, alert_id: "123")
-      result2 = Repo.get_by(Alert, alert_id: "234")
-      result3 = Repo.get_by(Alert, alert_id: "456")
-
-      assert result1.closed_timestamp == ~U[2023-10-14 00:01:00Z]
-      assert result2.closed_timestamp == ~U[2023-10-14 00:01:00Z]
-      assert result3.closed_timestamp == nil
-    end
-
-    test "do not update closed timestamp if exists" do
-      insert(:alert, %{alert_id: "123", closed_timestamp: ~U[2023-10-01 00:01:00Z]})
-      insert(:alert, %{alert_id: "234"})
-      insert(:alert, %{alert_id: "456"})
-
-      alert_feed = [build(:alert_map, %{alert_id: "456"}), build(:alert_map, %{alert_id: "234"})]
-      Alerts.close_if_not_in_feed(alert_feed, ~U[2023-10-14 00:01:00Z])
-      result1 = Repo.get_by(Alert, alert_id: "123")
-      result2 = Repo.get_by(Alert, alert_id: "234")
-      result3 = Repo.get_by(Alert, alert_id: "456")
-
-      assert result1.closed_timestamp == ~U[2023-10-01 00:01:00Z]
+      assert !is_nil(result1.closed_timestamp)
       assert result2.closed_timestamp == nil
       assert result3.closed_timestamp == nil
     end
@@ -540,6 +506,23 @@ defmodule AlertsUI.AlertsTest do
     test "returns true if alert draft is true" do
       insert(:alert, %{alert_id: "123", draft: true})
       assert Alerts.draft?("123")
+    end
+  end
+
+  describe "close/2" do
+    test "closes alert" do
+      current_time = ~U[2024-06-05 00:00:00Z]
+
+      insert(:alert, %{
+        alert_id: "123",
+        last_modified_timestamp: ~U[2024-06-03 00:00:00Z],
+        duration_certainty: :ESTIMATED
+      })
+
+      result = Alerts.get_by_alert_id("123") |> Alerts.close(current_time)
+      assert result.closed_timestamp == current_time
+      assert result.last_modified_timestamp == current_time
+      assert result.duration_certainty == :KNOWN
     end
   end
 

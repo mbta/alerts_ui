@@ -60,6 +60,8 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
             "informed_entity" => [
               %{"activities" => [], "route_id" => "1", "trip" => %{"trip_id" => "1"}}
             ],
+            "duration_certainty" => "KNOWN",
+            "last_modified_timestamp" => current_time |> DateTime.to_unix(),
             "alert_lifecycle" => "ONGOING"
           },
           "id" => "345abc"
