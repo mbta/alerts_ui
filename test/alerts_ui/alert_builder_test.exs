@@ -5,6 +5,8 @@ defmodule AlertsUI.AlertBuilderTest do
   import Mock
   alias AlertsUI.AlertBuilder
   alias AlertsUI.Alerts
+  alias MBTAV3API.Facilities.Facility
+  alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
   alias MBTAV3API.RoutePatterns.RoutePattern, as: APIRoutePattern
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
@@ -2006,6 +2008,133 @@ defmodule AlertsUI.AlertBuilderTest do
                %{
                  activities: [:BOARD, :EXIT, :RIDE],
                  agency_id: "1"
+               }
+             ]
+    end
+  end
+
+  test "builds facility informed entities" do
+    alert_data = %{
+      route_type: nil,
+      effect_name: "Elevator Closure",
+      header_text: "test header",
+      description_text: "test description",
+      facility_ids: ["349"]
+    }
+
+    facility = %Facility{
+      id: "349",
+      type: "ESCALATOR",
+      short_name: "Platform to Russell Field",
+      long_name: "Alewife Escalator 349 (Platform to Russell Field)",
+      stop: %Stop{
+        id: "place-alfcl",
+        type: "stop"
+      },
+      latitude: 42.395428,
+      longitude: -71.142483,
+      properties: [
+        %{name: "direction", value: "up"},
+        %{name: "excludes-stop", value: 141},
+        %{name: "excludes-stop", value: 9_070_061},
+        %{name: "excludes-stop", value: "door-alfcl-alewife"},
+        %{name: "excludes-stop", value: "door-alfcl-busway"},
+        %{name: "excludes-stop", value: "door-alfcl-cambridgepark"},
+        %{name: "excludes-stop", value: "door-alfcl-pathbusway"},
+        %{name: "excludes-stop", value: "door-alfcl-steel"}
+      ]
+    }
+
+    stop = %Stop{
+      id: "place-alfcl",
+      type: "stop",
+      child_ids: [
+        "141",
+        "70061",
+        "9070061",
+        "Alewife-01",
+        "Alewife-02",
+        "door-alfcl-alewife",
+        "door-alfcl-busway",
+        "door-alfcl-cambridgepark",
+        "door-alfcl-pathbusway",
+        "door-alfcl-russell",
+        "door-alfcl-steel"
+      ]
+    }
+
+    route = %Route{
+      id: "Red",
+      type: 1
+    }
+
+    with_mocks([
+      {FacilitiesRepo, [], [get: fn _facility_id -> facility end]},
+      {StopsRepo, [], [get!: fn _stop_id -> stop end]},
+      {RoutesRepo, [], [by_stop: fn _stop_id -> [route] end]}
+    ]) do
+      result = AlertBuilder.build_alert(alert_data, :ACCESS)
+
+      assert result.informed_entity == [
+               %{
+                 stop_id: "70061",
+                 route_id: "Red",
+                 facility_id: "349",
+                 activities: [:USING_WHEELCHAIR]
+               },
+               %{
+                 stop_id: "Alewife-01",
+                 route_id: "Red",
+                 facility_id: "349",
+                 activities: [:USING_WHEELCHAIR]
+               },
+               %{
+                 stop_id: "Alewife-02",
+                 route_id: "Red",
+                 facility_id: "349",
+                 activities: [:USING_WHEELCHAIR]
+               },
+               %{
+                 stop_id: "door-alfcl-russell",
+                 route_id: "Red",
+                 facility_id: "349",
+                 activities: [:USING_WHEELCHAIR]
+               }
+             ]
+    end
+  end
+
+  test "builds facility informed entities with nil stop" do
+    alert_data = %{
+      route_type: nil,
+      effect_name: "Elevator Closure",
+      header_text: "test header",
+      description_text: "test description",
+      facility_ids: ["retailsale-303012"]
+    }
+
+    facility = %Facility{
+      id: "retailsale-303012",
+      type: "FARE_VENDING_RETAILER",
+      short_name: "7-Eleven",
+      long_name: "7-Eleven",
+      stop: nil,
+      latitude: 42.395428,
+      longitude: -71.142483,
+      properties: [
+        %{name: "dispenses", value: "fare-media"}
+      ]
+    }
+
+    with_mocks([
+      {FacilitiesRepo, [], [get: fn _facility_id -> facility end]}
+    ]) do
+      result = AlertBuilder.build_alert(alert_data, :ACCESS)
+
+      assert result.informed_entity == [
+               %{
+                 facility_id: "retailsale-303012",
+                 activities: [:USING_WHEELCHAIR]
                }
              ]
     end

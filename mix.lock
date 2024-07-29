@@ -43,7 +43,7 @@
   "laboratory": {:git, "https://github.com/paulswartz/laboratory.git", "24adbe2cb18d8368e140ab5e13c8f5b75adea742", [ref: "cookie_opts"]},
   "live_isolated_component": {:hex, :live_isolated_component, "0.8.0", "f1c396610abe266bf3dfc0f1c465c0ca7d9a4ffafa47714e4425f59ef8901943", [:mix], [{:phoenix, "~> 1.7.0", [hex: :phoenix, repo: "hexpm", optional: false]}, {:phoenix_live_view, "~> 0.19.0 or ~> 0.20.0", [hex: :phoenix_live_view, repo: "hexpm", optional: false]}], "hexpm", "895820621381c7d83af9c37b12268f832929e695c7d30dd937494f8a8c5f2099"},
   "map_diff": {:hex, :map_diff, "1.3.4", "4fa013ad4fff7b21694f3aa5890dad5a0679f11812fdd89a0ad06276a431faf8", [:mix], [], "hexpm", "32fc0b8fc158683a00a58298440b8cb884e7e779f9459e598df61d022b5412e9"},
-  "mbta_v3_api": {:git, "https://github.com/mbta/mbta_v3_api.git", "a56a9c70ab055f0d19d076b1449c917a64e46795", [branch: "mss-more-files"]},
+  "mbta_v3_api": {:git, "https://github.com/mbta/mbta_v3_api.git", "d017a89a5eec2dd03010e764023bfe496fb09540", [branch: "mss-more-files"]},
   "meck": {:hex, :meck, "0.9.2", "85ccbab053f1db86c7ca240e9fc718170ee5bda03810a6292b5306bf31bae5f5", [:rebar3], [], "hexpm", "81344f561357dc40a8344afa53767c32669153355b626ea9fcbc8da6b3045826"},
   "metrics": {:hex, :metrics, "1.0.1", "25f094dea2cda98213cecc3aeff09e940299d950904393b2a29d191c346a8486", [:rebar3], [], "hexpm", "69b09adddc4f74a40716ae54d140f93beb0fb8978d8636eaded0c31b6f099f16"},
   "mime": {:hex, :mime, "2.0.6", "8f18486773d9b15f95f4f4f1e39b710045fa1de891fada4516559967276e4dc2", [:mix], [], "hexpm", "c9945363a6b26d747389aac3643f8e0e09d30499a138ad64fe8fd1d13d9b153e"},
