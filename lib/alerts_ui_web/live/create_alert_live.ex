@@ -163,7 +163,32 @@ defmodule AlertsUIWeb.CreateAlertLive do
       |> Enum.uniq()
       |> Enum.sort_by(& &1.long_name)
 
-    {:noreply, assign(socket, available_facilities: available_facilities)}
+    # gather list of stops associated with facilities, along with array of facility types the stop services
+    available_stops =
+      available_facilities
+      |> Enum.reduce(%{}, fn facility, acc ->
+        stop = facility.stop
+
+        cond do
+          is_nil(stop) ->
+            acc
+
+          Map.has_key?(acc, stop.id) ->
+            Map.update!(
+              acc,
+              stop.id,
+              &Map.put(&1, :facility_types, [facility.type | &1.facility_types] |> Enum.uniq())
+            )
+
+          true ->
+            Map.put(acc, stop.id, stop |> Map.put(:facility_types, [facility.type]))
+        end
+      end)
+      |> Map.values()
+      |> Enum.sort_by(& &1.name)
+
+    {:noreply,
+     assign(socket, available_facilities: available_facilities, available_stops: available_stops)}
   end
 
   def handle_info({:save_as_draft, changeset}, socket) do

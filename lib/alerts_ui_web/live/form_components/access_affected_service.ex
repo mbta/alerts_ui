@@ -37,12 +37,13 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
        form: form,
        facility_types: [],
        available_facilities: [],
+       available_stops: [],
        effect_name: nil
      })}
   end
 
   @impl true
-  def update(%{alert_data: alert_data, editing: editing} = assigns, socket) do
+  def update(%{alert_data: alert_data} = assigns, socket) do
     facility_types =
       alert_data.effect_name
       |> string_to_formatted_atom
@@ -50,31 +51,27 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
 
     send(self(), {:fetch_available_facilities, facility_types})
 
-    assigns =
-      if editing do
-        update_for_edit(alert_data, assigns)
-      else
-        assigns
-      end
-      |> Map.merge(%{facility_types: facility_types, effect_name: alert_data.effect_name})
-
-    {:ok, assign(socket, assigns)}
-  end
-
-  defp update_for_edit(alert_data, assigns) do
-    edit_alert_data = %{
-      facility_ids: Map.get(alert_data, :facility_ids, [])
+    alert_data = %{
+      facility_ids: Map.get(alert_data, :facility_ids, []),
+      facility_ids_filter: "",
+      facility_types_filter: "",
+      stop_ids_filter: "",
+      effect_name: alert_data.effect_name
     }
 
     form =
       %__MODULE__{}
-      |> changeset(edit_alert_data)
+      |> changeset(alert_data)
       |> Map.put(:action, :validate)
       |> to_form()
 
-    edit_alert_data
-    |> Map.put(:form, form)
-    |> Map.merge(assigns)
+    assigns =
+      alert_data
+      |> Map.put(:form, form)
+      |> Map.merge(assigns)
+      |> Map.merge(%{facility_types: facility_types, effect_name: alert_data.effect_name})
+
+    {:ok, assign(socket, assigns)}
   end
 
   @impl true
@@ -111,25 +108,19 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
   def render(assigns) do
     params = assigns.form.params
 
+    stops = assigns.available_stops |> Enum.filter(&filter_stop_by_types(&1, params))
+
     facility_type_options =
       assigns.facility_types
+      |> Enum.filter(&filter_type_by_stop_ids(&1, params, stops))
       |> Enum.map(&{&1 |> String.capitalize() |> String.replace("_", " "), &1})
-
-    stops =
-      assigns.available_facilities
-      |> Enum.map(fn facility ->
-        stop = Map.get(facility, :stop)
-        if stop, do: stop
-      end)
-      |> Enum.filter(&(!is_nil(&1)))
-      |> Enum.uniq()
 
     stop_id_options =
       SelectFormatter.formatted_select_options(stops)
 
     facility_id_options =
       assigns.available_facilities
-      |> Enum.filter(&filter_by_type_and_stop_ids(&1, params))
+      |> Enum.filter(&filter_facility_by_type_and_stop_ids(&1, params))
       |> SelectFormatter.formatted_select_options()
 
     assigns =
@@ -148,9 +139,9 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
       }
       id="access_service_view"
     >
-      <.h1 class="mb-8">Create new Access alert for <%= @effect_name %></.h1>
+      <.h1 class="mb-8">Create new access alert</.h1>
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
-        Affected service
+        <%= @effect_name |> String.capitalize() %>
       </.h5>
       <.form
         for={@form}
@@ -161,10 +152,11 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
       >
         <fieldset class="flex flex-row gap-x-12 min-h-[30rem]">
           <.filtered_select
-            label="Stop(s)"
+            label="Stops"
             field={@form[:stop_ids]}
             filter_field={@form[:stop_ids_filter]}
             options={@stop_id_options}
+            loading={Enum.empty?(@stop_id_options)}
             class="min-w-[24rem] min-h-[90%]"
             prompt="All Stops"
           />
@@ -181,6 +173,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             field={@form[:facility_ids]}
             filter_field={@form[:facility_ids_filter]}
             options={@facility_id_options}
+            loading={Enum.empty?(@facility_id_options)}
             class="min-w-[48rem] min-h-[90%]"
           />
         </fieldset>
@@ -190,7 +183,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     """
   end
 
-  defp filter_by_type_and_stop_ids(facility, params) do
+  defp filter_facility_by_type_and_stop_ids(facility, params) do
     in_stop_ids =
       if params["stop_ids"] && params["stop_ids"] !== ["default"] do
         facility.stop.id in params["stop_ids"]
@@ -206,6 +199,31 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
       end
 
     in_stop_ids && in_facility_types
+  end
+
+  defp filter_stop_by_types(stop, params) do
+    if params["facility_types"] && params["facility_types"] !== ["default"] do
+      Enum.any?(stop.facility_types, fn type -> type in params["facility_types"] end)
+    else
+      true
+    end
+  end
+
+  defp filter_type_by_stop_ids(type, params, stops) do
+    if params["stop_ids"] && params["stop_ids"] !== ["default"] do
+      types_from_stops =
+        stops
+        |> Enum.filter(&(&1.id in params["stop_ids"]))
+        |> Enum.reduce([], fn stop, acc ->
+          [stop.facility_types | acc]
+        end)
+        |> List.flatten()
+        |> Enum.uniq()
+
+      type in types_from_stops
+    else
+      true
+    end
   end
 
   defp string_to_formatted_atom(string) do

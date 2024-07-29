@@ -491,6 +491,8 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :class, :string, default: "", doc: "additional classes to add"
 
+  attr :loading, :boolean, default: false, doc: "in loading state if true"
+
   attr :field, FormField,
     required: true,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
@@ -538,6 +540,7 @@ defmodule AlertsUIWeb.SharedComponents do
           {@rest}
         />
         <hr class="w-5/6 self-center border-y-1 border-border-primary min-h-[1rem]" />
+        <div :if={@loading} class="-mt-4 ml-4 z-50">Loading ...</div>
         <.select
           multiple={@multiple}
           options={
@@ -551,7 +554,7 @@ defmodule AlertsUIWeb.SharedComponents do
             end)
           }
           field={@field}
-          prompt={@prompt}
+          prompt={if @loading, do: nil, else: @prompt}
           class="min-h-full m-0"
           select_class="min-w-full min-h-[87%] pt-0 mt-0 [scrollbar-width:thin] overflow-auto
             border-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-t-none"
