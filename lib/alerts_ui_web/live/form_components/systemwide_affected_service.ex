@@ -20,23 +20,20 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
   @required_fields ~w[service_types]a
 
   @impl true
-  def mount(socket) do
+  def update(%{alert_data: alert_data} = assigns, socket) do
+    incoming_alert_data = %{
+      service_types: Map.get(alert_data, :service_types, [])
+    }
+
     form =
       %__MODULE__{}
-      |> changeset(%{})
+      |> changeset(incoming_alert_data)
       |> to_form()
 
-    {:ok, assign(socket, %{form: form})}
-  end
-
-  @impl true
-  def update(%{alert_data: alert_data, editing: editing} = assigns, socket) do
     assigns =
-      if editing do
-        update_for_edit(alert_data, assigns)
-      else
-        assigns
-      end
+      incoming_alert_data
+      |> Map.put(:form, form)
+      |> Map.merge(assigns)
 
     {:ok, assign(socket, assigns)}
   end
@@ -63,15 +60,12 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
         class="form-control"
         id="systemwide-affected-service-form"
       >
-        <fieldset class="mb-8 min-h-36">
-          <.select
-            label="Service Type(s)"
+        <fieldset class="mb-8 min-h-36 max-w-[17.5rem]">
+          <.toggle_checkgroup
+            label="Service types impacted"
             field={@form[:service_types]}
             options={service_type_options()}
-            multiple={true}
-            prompt="All"
-            class="max-w-[16rem]"
-            select_class="min-h-[9rem]"
+            show_icons={true}
           />
         </fieldset>
       </.form>
@@ -86,9 +80,7 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
         %{"systemwide_affected_service" => systemwide_affected_service},
         socket
       ) do
-    systemwide_affected_service = integer_service_types(systemwide_affected_service)
-
-    changeset = changeset(%__MODULE__{}, systemwide_affected_service)
+    changeset = changeset(%__MODULE__{}, integer_service_types(systemwide_affected_service))
 
     case apply_action(changeset, :insert) do
       {:ok, changeset} ->
@@ -118,25 +110,9 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
     |> validate_required(@required_fields)
   end
 
-  defp update_for_edit(alert_data, assigns) do
-    edit_alert_data = %{
-      service_types: Map.get(alert_data, :service_types, [])
-    }
-
-    form =
-      %__MODULE__{}
-      |> changeset(edit_alert_data)
-      |> Map.put(:action, :validate)
-      |> to_form()
-
-    edit_alert_data
-    |> Map.put(:form, form)
-    |> Map.merge(assigns)
-  end
-
   defp service_type_options do
     Enum.map(["Bus", "Commuter Rail", "Ferry", "Subway"], fn name ->
-      {name, InformedEntity.route_type_mapping(name)}
+      {name, InformedEntity.route_type_mapping(name) |> Integer.to_string()}
     end)
   end
 
