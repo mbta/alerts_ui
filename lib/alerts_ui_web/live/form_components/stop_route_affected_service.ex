@@ -24,35 +24,70 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   def mount(socket) do
     form = %__MODULE__{} |> changeset(%{}) |> to_form()
 
-    socket = socket |> assign(%{form: form})
+    socket = socket |> assign(%{form: form, available_routes: []})
 
     {:ok, socket}
   end
 
   @impl true
-  def update(%{alert_data: alert_data, editing: editing} = assigns, socket) do
+  def update(%{alert_data: alert_data, available_routes: available_routes} = assigns, socket) do
     route_type = Map.get(alert_data, :route_type)
     get_stops_by_route_type(route_type)
 
-    assigns =
-      case editing do
-        true -> update_for_edit(alert_data, assigns)
-        false -> assigns
+    stop_ids = Map.get(alert_data, :stop_ids)
+
+    if Enum.empty?(available_routes) do
+      get_routes_by_stop_ids(
+        stop_ids,
+        alert_data.route_type
+      )
+    end
+
+    route_ids = assigns.available_routes |> Enum.map(& &1.id)
+
+    new_alert_data =
+      %{
+        route_ids: route_ids,
+        stop_ids: stop_ids,
+        route_type: route_type,
+        route_types_by_id: routes_with_types(available_routes, route_ids)
+      }
+
+    changeset =
+      %__MODULE__{}
+      |> cast(new_alert_data, @fields)
+
+    if socket.assigns.available_routes == assigns.available_routes do
+      changeset
+      |> validate_required(@required_fields)
+      |> apply_action(:insert)
+      |> case do
+        {:ok, changeset} ->
+          send(self(), {:section_completed, changeset})
+
+        _ ->
+          nil
       end
+    end
+
+    form = to_form(changeset |> Map.put(:action, :validate))
+
+    assigns =
+      assigns
+      |> Map.put(:form, form)
+      |> Map.put(:alert_data, new_alert_data)
 
     {:ok, assign(socket, assigns)}
   end
 
   @impl true
   def handle_event("validate", %{"stop_route_affected_service" => affected_service}, socket) do
-    affected_service = populate_default_routes(affected_service)
-    Map.get(affected_service, "stop_ids", [])
-
     get_routes_by_stop_ids(
       Map.get(affected_service, "stop_ids", []),
       socket.assigns.alert_data.route_type
     )
 
+    affected_service = populate_default_routes(affected_service)
     changeset = validate(affected_service, socket.assigns)
 
     changeset
@@ -72,26 +107,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   @impl true
   def handle_event("validate", _, socket) do
     {:noreply, socket}
-  end
-
-  def update_for_edit(alert_data, assigns) do
-    edit_alert_data =
-      %{
-        route_ids: Map.get(alert_data, :route_ids) || [],
-        stop_ids: Map.get(alert_data, :stop_ids) || []
-      }
-
-    get_routes_by_stop_ids(
-      edit_alert_data.stop_ids,
-      assigns.alert_data.route_type
-    )
-
-    changeset =
-      validate(edit_alert_data |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end), assigns)
-
-    form = to_form(changeset |> Map.put(:action, :validate))
-
-    edit_alert_data |> Map.put(:form, form) |> Map.merge(assigns)
   end
 
   def validate(affected_service, assigns) do
@@ -159,7 +174,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       >
         <fieldset class="flex flex-row gap-x-12 min-h-[30rem]">
           <.filtered_select
-            label="Stop(s)"
+            label="Stops"
             field={@form[:stop_ids]}
             filter_field={@form[:stop_ids_filter]}
             options={@stop_id_options}
@@ -168,7 +183,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
           <%= if show_routes_input?(assigns) do %>
             <.filtered_select
-              label="Route(s)"
+              label="Routes"
               field={@form[:route_ids]}
               filter_field={@form[:route_ids_filter]}
               id="stop_route_routes"
@@ -185,12 +200,12 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
   @spec show_routes_input?(map()) :: boolean()
   defp show_routes_input?(%{form: form}) do
-    !is_nil(form[:stop_ids].value)
+    form[:stop_ids].value not in [nil, []]
   end
 
   @spec populate_default_routes(map()) :: map()
   defp populate_default_routes(affected_service) do
-    if Map.get(affected_service, "route_ids") in [nil, "default", ["default"]] do
+    if affected_service |> Map.get("route_ids") |> is_nil do
       Map.put(affected_service, "route_ids", [])
     else
       affected_service
