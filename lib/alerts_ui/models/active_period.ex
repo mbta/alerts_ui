@@ -6,6 +6,9 @@ defmodule AlertsUI.Models.ActivePeriod do
   use AlertsUI.Schema
   import Ecto.Changeset
 
+  @start_of_service ~T[03:00:00]
+  @end_of_service ~T[03:00:00]
+
   @type t :: %__MODULE__{
           start: DateTime.t() | nil,
           end: DateTime.t() | nil
@@ -70,5 +73,19 @@ defmodule AlertsUI.Models.ActivePeriod do
 
   def time_inside_active_period?(%{start: start, end: the_end}, time) do
     DateTime.compare(time, start) == :gt and DateTime.compare(time, the_end) == :lt
+  end
+
+  def start_of_service_time, do: @start_of_service
+  def end_of_service_time, do: @end_of_service
+
+  @spec end_of_service_date(DateTime.t(), Time.t()) :: Date.t()
+  def end_of_service_date(start_time, end_of_service_time \\ @end_of_service) do
+    # Sets the end date of the active period to the next instance of the "end of service" (eg 3:00 AM).
+    # Checks if start time is after 3:00am (Eastern). If true, end date is the next day. If false, end date is same day.
+    if Time.after?(DateTime.to_time(start_time), end_of_service_time) do
+      Date.add(DateTime.to_date(start_time), 1)
+    else
+      DateTime.to_date(start_time)
+    end
   end
 end

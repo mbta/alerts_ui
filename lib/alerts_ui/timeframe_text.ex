@@ -2,10 +2,8 @@ defmodule AlertsUI.TimeframeText do
   @moduledoc """
     Returns timeframe text given a start and end time
   """
-
+  alias AlertsUI.Models.ActivePeriod
   @timezone "America/New_York"
-  @end_of_service ~T[02:30:00]
-  @start_of_service ~T[04:30:00]
 
   @type datetime_tuple :: {DateTime.t(), Date.t(), Time.t()}
 
@@ -70,7 +68,7 @@ defmodule AlertsUI.TimeframeText do
        ) do
     ends_next_day_after_start_of_service =
       end_date == start_date |> Date.add(1) and
-        Time.compare(@end_of_service, end_time) in [:lt, :eq]
+        Time.compare(ActivePeriod.end_of_service_time(), end_time) in [:lt, :eq]
 
     ends_2_to_6_days_from_now = between_two_and_six_days(current_date, end_datetime)
 
@@ -113,10 +111,10 @@ defmodule AlertsUI.TimeframeText do
     # start datetime and end of service 7 days from start_datetime
 
     beginning_of_service_on_day_two =
-      Date.add(start_date, 2) |> DateTime.new!(@start_of_service, @timezone)
+      Date.add(start_date, 2) |> DateTime.new!(ActivePeriod.start_of_service_time(), @timezone)
 
     end_of_service_on_day_seven =
-      Date.add(start_date, 7) |> DateTime.new!(@end_of_service, @timezone)
+      Date.add(start_date, 7) |> DateTime.new!(ActivePeriod.end_of_service_time(), @timezone)
 
     end_is_after_beginning_of_service_on_day_two =
       DateTime.compare(end_datetime, beginning_of_service_on_day_two) in [:gt, :eq]
@@ -132,7 +130,7 @@ defmodule AlertsUI.TimeframeText do
     # returns true if end_datetime is after the start of service 7 days after start_datetime
 
     six_days_from_start =
-      Date.add(start_date, 7) |> DateTime.new!(@start_of_service, @timezone)
+      Date.add(start_date, 7) |> DateTime.new!(ActivePeriod.start_of_service_time(), @timezone)
 
     DateTime.compare(end_datetime, six_days_from_start) in [:gt, :eq]
   end
@@ -140,7 +138,7 @@ defmodule AlertsUI.TimeframeText do
   defp get_day_name_for_end({_, end_date, end_time}) do
     # moves end day up 1 day if end time is before start of service
 
-    if Time.compare(end_time, @start_of_service) in [:lt, :eq] do
+    if Time.compare(end_time, ActivePeriod.start_of_service_time()) in [:lt, :eq] do
       Date.add(end_date, -1)
     else
       end_date
@@ -161,7 +159,7 @@ defmodule AlertsUI.TimeframeText do
     # also ends month name on end date if start and end month are different
 
     end_date =
-      if Time.compare(end_time, @start_of_service) in [:lt, :eq] do
+      if Time.compare(end_time, ActivePeriod.start_of_service_time()) in [:lt, :eq] do
         Date.add(end_date, -1)
       else
         end_date

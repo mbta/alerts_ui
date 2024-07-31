@@ -4,7 +4,7 @@ defmodule AlertsUI.AlertBuilder do
   """
 
   alias AlertsUI.Activities
-  alias AlertsUI.Models.{Cause, Effect, InformedEntity, RoutePattern}
+  alias AlertsUI.Models.{ActivePeriod, Cause, Effect, InformedEntity, RoutePattern}
   alias AlertsUI.Routes
   alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
   alias MBTAV3API.Facilities.Facility
@@ -18,7 +18,6 @@ defmodule AlertsUI.AlertBuilder do
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
 
-  @end_of_service ~T[02:30:00]
   @type alert_data_t :: %{
           route_type: Route.type_int() | nil,
           facility_ids: [String.t()],
@@ -214,17 +213,11 @@ defmodule AlertsUI.AlertBuilder do
        }) do
     eastern_start = naive_start |> DateTime.from_naive!("America/New_York")
     utc_start = eastern_start |> Timex.Timezone.convert("Etc/UTC")
-    # Sets the end date of the active period to the next instance of 2:30 AM.
-    # Checks if start time is after 2:30am (Eastern). If true, end date is the next day. If false, end date is same day.
-    end_date =
-      if Time.after?(DateTime.to_time(eastern_start), @end_of_service) do
-        Date.add(NaiveDateTime.to_date(naive_start), 1)
-      else
-        NaiveDateTime.to_date(naive_start)
-      end
+
+    end_date = ActivePeriod.end_of_service_date(eastern_start)
 
     utc_end =
-      DateTime.new!(end_date, @end_of_service, "America/New_York")
+      DateTime.new!(end_date, ActivePeriod.end_of_service_time(), "America/New_York")
       |> Timex.Timezone.convert("Etc/UTC")
 
     %{
@@ -256,17 +249,13 @@ defmodule AlertsUI.AlertBuilder do
        }) do
     eastern_start = naive_start |> DateTime.from_naive!("America/New_York")
     utc_start = eastern_start |> Timex.Timezone.convert("Etc/UTC")
-    # Sets the end date of the active period to the next instance of 2:30 AM.
-    # Checks if start time is after 2:30am (Eastern). If true, end date is the next day. If false, end date is same day.
-    end_date =
-      if Time.after?(DateTime.to_time(eastern_start), @end_of_service) do
-        Date.add(NaiveDateTime.to_date(naive_start), 1)
-      else
-        NaiveDateTime.to_date(naive_start)
-      end
+    # Sets the end date of the active period to the next instance of end of service.
+    # Checks if start time is after end of service (Eastern).
+    # If true, end date is the next day. If false, end date is same day.
+    end_date = ActivePeriod.end_of_service_date(eastern_start)
 
     utc_end =
-      DateTime.new!(end_date, @end_of_service, "America/New_York")
+      DateTime.new!(end_date, ActivePeriod.end_of_service_time(), "America/New_York")
       |> Timex.Timezone.convert("Etc/UTC")
 
     %{
