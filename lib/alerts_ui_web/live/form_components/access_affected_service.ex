@@ -230,6 +230,6 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     string
     |> String.upcase()
     |> String.replace(" ", "_")
-    |> String.to_atom()
+    |> String.to_existing_atom()
   end
 end
