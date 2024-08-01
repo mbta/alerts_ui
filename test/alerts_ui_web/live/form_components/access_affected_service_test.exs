@@ -34,20 +34,20 @@ defmodule AlertsUIWeb.FormComponents.AccessServiceTest do
 
       view
       |> element("form")
-      |> render_change(%{"access_affected_service" => %{"facility_ids" => ["Facility-3"]}})
+      |> render_change(%{"access_affected_service" => %{"facility_id" => "Facility-3"}})
 
       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
-                      {:section_completed, %AccessAffectedService{facility_ids: ["Facility-3"]}}}
+                      {:section_completed, %AccessAffectedService{facility_id: "Facility-3"}}}
     end
 
     test "renders while editing an existing alerts" do
-      alert_data = Map.put(@assigns.alert_data, :facility_ids, ["Facility-3"])
+      alert_data = Map.put(@assigns.alert_data, :facility_id, "Facility-3")
       assigns = %{@assigns | alert_data: alert_data, editing: true}
 
       {:ok, view, _html} = live_isolated_component(AccessAffectedService, assigns)
 
       assert view
-             |> element("select#access_affected_service_facility_ids")
+             |> element("select#access_affected_service_facility_id")
              |> render() =~
                ~s(<option selected="selected" value="Facility-3">Example Facility</option>)
     end

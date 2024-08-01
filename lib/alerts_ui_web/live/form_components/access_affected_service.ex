@@ -18,12 +18,12 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     field :stop_ids_filter, :binary
     field :facility_types, {:array, :string}
     field :facility_types_filter, :string
-    field :facility_ids, {:array, :string}
-    field :facility_ids_filter, :string
+    field :facility_id, :string
+    field :facility_id_filter, :string
   end
 
-  @fields ~w[stop_ids stop_ids_filter facility_types facility_types_filter facility_ids facility_ids_filter]a
-  @required_fields ~w[facility_ids]a
+  @fields ~w[stop_ids stop_ids_filter facility_types facility_types_filter facility_id facility_id_filter]a
+  @required_fields ~w[facility_id]a
 
   @impl true
   def mount(socket) do
@@ -52,8 +52,8 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     send(self(), {:fetch_available_facilities, facility_types})
 
     alert_data = %{
-      facility_ids: Map.get(alert_data, :facility_ids, []),
-      facility_ids_filter: "",
+      facility_id: Map.get(alert_data, :facility_id, ""),
+      facility_id_filter: "",
       facility_types_filter: "",
       stop_ids_filter: "",
       effect_name: alert_data.effect_name
@@ -80,6 +80,14 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
         %{"access_affected_service" => access_affected_service},
         socket
       ) do
+    access_affected_service =
+      if Map.has_key?(access_affected_service, "facility_types") or
+           Map.has_key?(access_affected_service, "stop_ids") do
+        Map.drop(access_affected_service, ["facility_id"])
+      else
+        access_affected_service
+      end
+
     changeset = changeset(%__MODULE__{}, access_affected_service)
 
     case apply_action(changeset, :insert) do
@@ -170,11 +178,12 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
           />
           <.filtered_select
             label="Amenities"
-            field={@form[:facility_ids]}
-            filter_field={@form[:facility_ids_filter]}
+            field={@form[:facility_id]}
+            filter_field={@form[:facility_id_filter]}
             options={@facility_id_options}
             loading={Enum.empty?(@facility_id_options)}
             class="min-w-[48rem] min-h-[90%]"
+            multiple={false}
           />
         </fieldset>
       </.form>

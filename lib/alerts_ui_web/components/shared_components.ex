@@ -437,7 +437,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :hidden, :boolean, default: false, doc: "hides component if true"
 
-  attr :rest, :global, include: ~w(disabled)
+  attr :rest, :global, include: ~w(disabled size)
 
   def select(%{field: %FormField{} = field} = assigns) do
     assigns =
@@ -462,6 +462,7 @@ defmodule AlertsUIWeb.SharedComponents do
           @errors != [] && "border-danger focus:border-danger"
         ]}
         multiple={@multiple}
+        size="3"
         {@rest}
       >
         <option :if={@prompt} value="default"><%= @prompt %></option>
@@ -487,11 +488,11 @@ defmodule AlertsUIWeb.SharedComponents do
   """
   attr :label, :string, default: nil
 
-  attr :multiple, :boolean, default: true
-
   attr :class, :string, default: "", doc: "additional classes to add"
 
   attr :loading, :boolean, default: false, doc: "in loading state if true"
+
+  attr :multiple, :boolean, default: true
 
   attr :field, FormField,
     required: true,
@@ -543,6 +544,7 @@ defmodule AlertsUIWeb.SharedComponents do
         <div :if={@loading} class="-mt-4 ml-4 z-50">Loading ...</div>
         <.select
           multiple={@multiple}
+          size={if @multiple, do: nil, else: "3"}
           options={
             Enum.filter(@options, fn {option, _value} ->
               option = String.downcase(option || "")

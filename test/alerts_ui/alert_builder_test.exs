@@ -2031,7 +2031,7 @@ defmodule AlertsUI.AlertBuilderTest do
       effect_name: "Elevator Closure",
       header_text: "test header",
       description_text: "test description",
-      facility_ids: ["349"]
+      facility_id: "349"
     }
 
     facility = %Facility{
@@ -2122,7 +2122,7 @@ defmodule AlertsUI.AlertBuilderTest do
       effect_name: "Elevator Closure",
       header_text: "test header",
       description_text: "test description",
-      facility_ids: ["retailsale-303012"]
+      facility_id: "retailsale-303012"
     }
 
     facility = %Facility{

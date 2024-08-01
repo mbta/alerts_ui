@@ -20,7 +20,7 @@ defmodule AlertsUI.AlertBuilder do
 
   @type alert_data_t :: %{
           route_type: Route.type_int() | nil,
-          facility_ids: [String.t()],
+          facility_id: String.t(),
           direction: String.t(),
           route_ids: [Route.id_t()],
           stop_ids: [Stop.id_t()],
@@ -331,8 +331,8 @@ defmodule AlertsUI.AlertBuilder do
     )
   end
 
-  defp build_informed_entities(:ACCESS, %{facility_ids: facility_ids}, effect) do
-    facility_ids
+  defp build_informed_entities(:ACCESS, %{facility_id: facility_id}, effect) do
+    [facility_id]
     |> Enum.map(&FacilitiesRepo.get/1)
     |> Enum.flat_map(&build_facility_maps(&1, effect))
   end
