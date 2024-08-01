@@ -43,7 +43,7 @@ defmodule AlertsUI.AlertBuilderTest do
           image_alternative_text: "an example image"
         }
 
-        result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-07-23 13:43:57.227136Z])
+        result = AlertBuilder.build_alert(alert_data, :R)
 
         assert result == %{
                  effect: :SIGNIFICANT_DELAYS,
@@ -67,8 +67,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  cause_detail: "disabled train",
                  url: "http://www.example.com",
                  image_url: "http://www.example.com/example.jpg",
-                 image_alternative_text: "an example image",
-                 last_modified_timestamp: ~U[2024-07-23 13:43:57.227136Z]
+                 image_alternative_text: "an example image"
                }
 
         result |> Alerts.create_or_update_alert()
@@ -94,7 +93,7 @@ defmodule AlertsUI.AlertBuilderTest do
           cause_detail: ""
         }
 
-        result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-07-23 13:43:57.227136Z])
+        result = AlertBuilder.build_alert(alert_data, :R)
 
         assert result == %{
                  effect: :SIGNIFICANT_DELAYS,
@@ -136,8 +135,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  active_period_start: ~U[2024-04-30 15:54:00Z],
                  duration_certainty: :UNKNOWN,
                  cause_detail: "",
-                 cause: :UNKNOWN_CAUSE,
-                 last_modified_timestamp: ~U[2024-07-23 13:43:57.227136Z]
+                 cause: :UNKNOWN_CAUSE
                }
 
         result |> Alerts.create_or_update_alert()
@@ -163,7 +161,7 @@ defmodule AlertsUI.AlertBuilderTest do
           cause_detail: "freight train interference"
         }
 
-        result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-07-23 13:43:57.227136Z])
+        result = AlertBuilder.build_alert(alert_data, :R)
 
         assert result == %{
                  effect: :SIGNIFICANT_DELAYS,
@@ -187,8 +185,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  cause_detail: "freight train interference",
                  url: nil,
                  image_url: nil,
-                 image_alternative_text: nil,
-                 last_modified_timestamp: ~U[2024-07-23 13:43:57.227136Z]
+                 image_alternative_text: nil
                }
 
         result |> Alerts.create_or_update_alert()

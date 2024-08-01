@@ -108,7 +108,6 @@ defmodule AlertsUI.Support.Factory do
             "stop_id" => "8597"
           }
         ],
-        "last_modified_timestamp" => 1_682_024_761,
         "service_effect_text" => %{
           "translation" => [
             %{

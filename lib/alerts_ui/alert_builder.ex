@@ -44,7 +44,7 @@ defmodule AlertsUI.AlertBuilder do
 
   @spec build_alert(map(), ServiceEffectCombinations.service_effect_combination()) ::
           map()
-  def build_alert(alert_data, combination, current_timestamp \\ DateTime.utc_now()) do
+  def build_alert(alert_data, combination) do
     effect_name = Map.get(alert_data, :effect_name)
     effect_map = Effect.effect_map_by_name(effect_name)
     stop_ids = Map.get(alert_data, :stop_ids)
@@ -78,7 +78,6 @@ defmodule AlertsUI.AlertBuilder do
       })
 
     %{
-      last_modified_timestamp: current_timestamp,
       header_text: Map.get(alert_data, :header_text),
       description_text: Map.get(alert_data, :description_text),
       url: Map.get(alert_data, :url),

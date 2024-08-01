@@ -69,8 +69,6 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
         short_header_text:
           "On weekdays, from Sep 25th through mid-Oct, between 8am & 4pm, Lowell Ln passengers may experience delays of 5-10 minutes both ways due to t",
         severity: 3,
-        created_timestamp: ~U[2023-09-21 14:18:54Z],
-        last_modified_timestamp: ~U[2023-10-12 13:45:43Z],
         last_push_notification_timestamp: ~U[2023-09-21 14:18:54Z],
         closed_timestamp: ~U[2023-09-22 14:18:54Z],
         duration_certainty: :KNOWN,
@@ -131,8 +129,8 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
             ]
           },
           severity: 3,
-          created_timestamp: 1_695_305_934,
-          last_modified_timestamp: 1_697_118_343,
+          created_timestamp: DateTime.utc_now() |> DateTime.to_unix(),
+          last_modified_timestamp: DateTime.utc_now() |> DateTime.to_unix(),
           last_push_notification_timestamp: 1_695_305_934,
           closed_timestamp: 1_695_392_334,
           timeframe_text: %{

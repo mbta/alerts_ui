@@ -58,8 +58,6 @@ Repo.insert!(%Alert{
   service_effect_text: "The service is: none",
   short_header_text: "no Service",
   severity: 3,
-  created_timestamp: ~U[2023-10-12 00:01:00Z],
-  last_modified_timestamp: ~U[2023-10-12 00:02:00Z],
   last_push_notification_timestamp: ~U[2023-10-12 00:03:00Z],
   closed_timestamp: ~U[2023-10-13 00:03:00Z],
   timeframe_text: "ongoing",
