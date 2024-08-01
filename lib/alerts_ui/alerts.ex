@@ -138,7 +138,7 @@ defmodule AlertsUI.Alerts do
     end
   end
 
-  defp get_alert_by_alert_id_query(alert_id) do
+  def get_alert_by_alert_id_query(alert_id) do
     from(
       a in Alert,
       where: a.alert_id == ^alert_id
@@ -162,8 +162,7 @@ defmodule AlertsUI.Alerts do
       end_is_past = end_is_past(current_time, alert.active_period_end)
 
       if end_is_past do
-        change(alert, closed_timestamp: current_time)
-        |> PaperTrail.update!()
+        close(alert)
       else
         alert
       end
@@ -271,6 +270,17 @@ defmodule AlertsUI.Alerts do
       })
       |> Flop.run(flop, opts)
     end
+  end
+
+  def close(alert, closed_time \\ DateTime.utc_now()) do
+    closed_time = DateTime.truncate(closed_time, :second)
+
+    alert
+    |> change(
+      closed_timestamp: closed_time,
+      duration_certainty: :KNOWN
+    )
+    |> PaperTrail.update!()
   end
 
   defp join_informed_entity(query, _opts) do

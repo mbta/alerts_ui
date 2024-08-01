@@ -24,24 +24,8 @@ defmodule AlertsUI.AlertsTest do
       assert new_alert.alert_id == "123"
       assert new_alert.header_text == "new header text"
       assert new_alert.description_text == ""
-      refute new_alert.created_timestamp == nil
-      refute new_alert.last_modified_timestamp == nil
-    end
-
-    test "uses provided created_timestamp and last_modified_timestamp if given" do
-      new_params =
-        build(:alert_map, %{
-          alert_id: "123",
-          created_timestamp: @five_minutes_ago,
-          last_modified_timestamp: @five_minutes_ago
-        })
-
-      {:ok, new_alert} =
-        Alerts.create_or_update_alert(new_params)
-
-      assert new_alert.alert_id == "123"
-      assert new_alert.created_timestamp == @five_minutes_ago
-      assert new_alert.last_modified_timestamp == @five_minutes_ago
+      refute new_alert.created_at == nil
+      refute new_alert.updated_at == nil
     end
 
     test "edits alert if it exists" do
@@ -62,7 +46,6 @@ defmodule AlertsUI.AlertsTest do
         build(:alert_map, %{
           alert_id: "123",
           header_text: "new header text",
-          last_modified_timestamp: ~U[2023-10-12 00:01:00Z],
           active_period: [%{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:03:00Z]}]
         })
 
@@ -73,14 +56,14 @@ defmodule AlertsUI.AlertsTest do
       assert (updated_alert.active_period |> hd).end == ~U[2023-10-13 00:03:00Z]
     end
 
-    test "updates last_modified_timestamp when updating an existing alert" do
+    test "updates updated_at when updating an existing alert" do
       existing_alert =
         insert(
           :alert,
           %{
             alert_id: "123",
             header_text: "old header text",
-            last_modified_timestamp: @five_minutes_ago
+            updated_at: @five_minutes_ago
           }
         )
 
@@ -93,17 +76,17 @@ defmodule AlertsUI.AlertsTest do
       Alerts.create_or_update_alert(new_params, existing_alert)
       updated_alert = Repo.get_by(Alert, id: existing_alert.id)
 
-      assert DateTime.compare(updated_alert.last_modified_timestamp, @five_minutes_ago) == :gt
+      assert DateTime.compare(updated_alert.updated_at, @five_minutes_ago) == :gt
     end
 
-    test "does not change created_timestamp when updating an existing alert" do
+    test "does not change created_at when updating an existing alert" do
       existing_alert =
         insert(
           :alert,
           %{
             alert_id: "123",
             header_text: "old header text",
-            created_timestamp: @five_minutes_ago
+            created_at: @five_minutes_ago
           }
         )
 
@@ -116,7 +99,7 @@ defmodule AlertsUI.AlertsTest do
       Alerts.create_or_update_alert(new_params, existing_alert)
       updated_alert = Repo.get_by(Alert, id: existing_alert.id)
 
-      assert updated_alert.created_timestamp == @five_minutes_ago
+      assert updated_alert.created_at == @five_minutes_ago
     end
 
     test "returns the resulting alert model" do
@@ -136,7 +119,6 @@ defmodule AlertsUI.AlertsTest do
       new_params =
         build(:alert_map, %{
           alert_id: "123",
-          last_modified_timestamp: ~U[2023-10-12 00:01:00Z],
           active_period: [%{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:03:00Z]}]
         })
 
@@ -531,7 +513,7 @@ defmodule AlertsUI.AlertsTest do
       insert(:alert, %{alert_id: "345"})
       result = Alerts.list_all_open() |> Alerts.close_if_end_is_past(current_time)
       [result1, result2, result3] = result |> Enum.sort_by(& &1.alert_id)
-      assert result1.closed_timestamp == current_time
+      refute is_nil(result1.closed_timestamp)
       assert result2.closed_timestamp == nil
       assert result3.closed_timestamp == nil
     end
@@ -590,7 +572,7 @@ defmodule AlertsUI.AlertsTest do
 
       {result, _meta} =
         Alerts.list_all_paginated(%Flop{
-          order_by: [:active_period_start, :created_timestamp, :integer_alert_id],
+          order_by: [:active_period_start, :created_at, :integer_alert_id],
           order_directions: [:asc, :desc, :desc]
         })
 
@@ -793,6 +775,21 @@ defmodule AlertsUI.AlertsTest do
     test "returns true if alert draft is true" do
       insert(:alert, %{alert_id: "123", draft: true})
       assert Alerts.draft?("123")
+    end
+  end
+
+  describe "close/2" do
+    test "closes alert" do
+      current_time = ~U[2024-06-05 00:00:00Z]
+
+      insert(:alert, %{
+        alert_id: "123",
+        duration_certainty: :ESTIMATED
+      })
+
+      result = Alerts.get_by_alert_id("123") |> Alerts.close(current_time)
+      assert result.closed_timestamp == current_time
+      assert result.duration_certainty == :KNOWN
     end
   end
 
