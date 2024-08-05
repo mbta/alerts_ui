@@ -63,6 +63,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       |> populate_default_trips()
 
     changeset = validate(affected_service, socket.assigns)
+
     changeset
     |> apply_action(:insert)
     |> case do

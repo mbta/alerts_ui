@@ -24,7 +24,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   @impl true
   def mount(socket) do
     form = %__MODULE__{} |> changeset() |> to_form()
-    socket = assign(socket, %{form: form})
+    socket = assign(socket, %{form: form, image_size: "Image size cannot be determined"})
     {:ok, socket}
   end
 
@@ -50,20 +50,16 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   end
 
   def handle_event("validate", %{"alert_details" => alert_details}, socket) do
-          alert_details["image_url"] |> IO.inspect(label: :image_url)
-      {:ok, image_size} = case alert_details["image_url"] do
-        "" -> {:ok, nil}
-        nil -> {:ok, nil}
-        _ -> Fastimage.info(alert_details["image_url"])
-      end
-      IO.inspect(image_size, label: :IMAGE_SIZE)
+    image_size = alert_details["image_url"] |> get_image_size()
+
     form =
       %__MODULE__{}
       |> changeset(alert_details)
       |> Map.put(:action, :validate)
       |> to_form()
 
-    {:noreply, assign(socket, %{form: form, alert_details: alert_details})}
+    {:noreply,
+     assign(socket, %{form: form, alert_details: alert_details, image_size: image_size})}
   end
 
   @impl true
@@ -160,14 +156,25 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           class="min-w-[32rem]"
         />
         <div>
-          <.text_input
-          field={@form[:image_url]}
-          label="Image URL"
-          phx-debounce={120}
-          id="image_url_input"
-          class="min-w-[32rem]"
-        />
-          <img src={@form[:image_url].value}/>
+          <div class="flex flex-row">
+            <.text_input
+              field={@form[:image_url]}
+              label="Image URL"
+              phx-debounce={500}
+              id="image_url_input"
+              class="min-w-[32rem]"
+            />
+            <span class={[
+              "ml-4 self-center mt-4",
+              if(@form[:image_url].value in ["", nil], do: "hidden")
+            ]}>
+              <%= @image_size %>
+            </span>
+          </div>
+          <img
+            src={@form[:image_url].value}
+            class={["max-w-[32rem] mt-4", if(@form[:image_url].value in ["", nil], do: "hidden")]}
+          />
         </div>
         <.text_input
           field={@form[:image_alternative_text]}
@@ -202,5 +209,26 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       |> Enum.map(fn cause_detail -> {cause_detail, cause_detail} end)
 
     [{"<none>", ""} | options_list]
+  end
+
+  defp url_valid?(url) do
+    uri = URI.parse(url)
+    !is_nil(uri.scheme) && !is_nil(uri.host) && uri.host =~ "."
+  end
+
+  defp get_image_size(url) do
+    with true <- url_valid?(url),
+         {:ok, request} <- Req.get(url),
+         false <- is_nil(request.body),
+         true <-
+           Req.Response.get_header(request, "content-type")
+           |> Enum.all?(&Regex.match?(~r/image\//, &1)),
+         true <- is_binary(request.body),
+         true <- is_integer(byte_size(request.body)) do
+      size = (byte_size(request.body) / 1_000_000) |> Float.round(2)
+      "Image size: #{size} mB"
+    else
+      _ -> "Image size cannot be determined"
+    end
   end
 end
