@@ -454,7 +454,7 @@ defmodule AlertsUIWeb.SharedComponents do
         id={@id}
         name={@name}
         class={[
-          "bg-bg-elevation-5 border border-border-primary pl-3 py-1.5 min-w-[99%] p-0
+          "bg-bg-elevation-5 border border-border-primary pl-3 min-w-[99%] [color-scheme:light]
             rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto
             disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
             focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25)",
@@ -462,7 +462,6 @@ defmodule AlertsUIWeb.SharedComponents do
           @errors != [] && "border-danger focus:border-danger"
         ]}
         multiple={@multiple}
-        size="3"
         {@rest}
       >
         <option :if={@prompt} value="default"><%= @prompt %></option>
@@ -525,7 +524,7 @@ defmodule AlertsUIWeb.SharedComponents do
       <.label for={@id}><%= @label %></.label>
       <div
         class={[
-          "min-h-full min-w-fit flex flex-col -space-y-2 rounded border
+          "min-h-full min-w-fit flex flex-col rounded border
           bg-bg-elevation-5 disabled:bg-bg-elevation-3
           border-border-primary ring-0 ring-border-focus
           focus:ring-1 focus:border-border-focus
@@ -544,7 +543,7 @@ defmodule AlertsUIWeb.SharedComponents do
         <div :if={@loading} class="-mt-4 ml-4 z-50">Loading ...</div>
         <.select
           multiple={@multiple}
-          size={if @multiple, do: nil, else: "3"}
+          size="20"
           options={
             Enum.filter(@options, fn {option, _value} ->
               option = String.downcase(option || "")
@@ -559,7 +558,7 @@ defmodule AlertsUIWeb.SharedComponents do
           prompt={if @loading, do: nil, else: @prompt}
           class="min-h-full m-0"
           select_class="min-w-full min-h-[87%] pt-0 mt-0 [scrollbar-width:thin] overflow-auto
-            border-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-t-none"
+            border-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-t-none [appearance:none]"
           {@rest}
         />
       </div>

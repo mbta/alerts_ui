@@ -130,6 +130,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
       assigns.available_facilities
       |> Enum.filter(&filter_facility_by_type_and_stop_ids(&1, params))
       |> SelectFormatter.formatted_select_options()
+      |> Enum.map(fn {name, id} -> {String.slice(name, 0..80), id} end)
 
     assigns =
       assign(assigns,
@@ -165,7 +166,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             filter_field={@form[:stop_ids_filter]}
             options={@stop_id_options}
             loading={Enum.empty?(@stop_id_options)}
-            class="min-w-[24rem] min-h-[90%]"
+            class="min-w-[24rem]"
             prompt="All Stops"
           />
           <.filtered_select
@@ -173,7 +174,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             field={@form[:facility_types]}
             filter_field={@form[:facility_types_filter]}
             options={@facility_type_options}
-            class="min-w-[24rem] min-h-[90%]"
+            class="min-w-[24rem]"
             prompt="All Categories"
           />
           <.filtered_select
@@ -182,7 +183,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             filter_field={@form[:facility_id_filter]}
             options={@facility_id_options}
             loading={Enum.empty?(@facility_id_options)}
-            class="min-w-[48rem] min-h-[90%]"
+            class="min-w-[24rem] max-w-[24rem]"
             multiple={false}
           />
         </fieldset>
