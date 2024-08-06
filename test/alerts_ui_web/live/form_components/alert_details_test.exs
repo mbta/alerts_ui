@@ -49,6 +49,30 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
     end
   end
 
+  describe "image url" do
+    test "only shows preview if image has been entered" do
+      with_mock(StopsRepo, by_route: fn _route, _direction -> [] end) do
+        {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
+
+        refute view
+               |> element("div#image-preview-div")
+               |> render() =~ ~s(div id=\"image-information\")
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_details" => %{
+            "image_url" => "https://example.com/image.jpg"
+          }
+        })
+
+        assert view
+               |> element("div#image-preview-div")
+               |> render() =~ ~s(div id=\"image-information\")
+      end
+    end
+  end
+
   describe "save event" do
     test "given a valid changset, sends a :create_alert event" do
       with_mock(StopsRepo, by_route: fn _route, _direction -> [] end) do

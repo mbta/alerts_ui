@@ -24,7 +24,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   @impl true
   def mount(socket) do
     form = %__MODULE__{} |> changeset() |> to_form()
-    socket = assign(socket, %{form: form, image_size: "Image size cannot be determined"})
+    socket = assign(socket, %{form: form, image_size: nil, image_path: nil})
     {:ok, socket}
   end
 
@@ -51,6 +51,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
 
   def handle_event("validate", %{"alert_details" => alert_details}, socket) do
     image_size = alert_details["image_url"] |> get_image_size()
+    image_path = alert_details["image_url"] |> get_image_path()
 
     form =
       %__MODULE__{}
@@ -59,7 +60,12 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       |> to_form()
 
     {:noreply,
-     assign(socket, %{form: form, alert_details: alert_details, image_size: image_size})}
+     assign(socket, %{
+       form: form,
+       alert_details: alert_details,
+       image_size: image_size,
+       image_path: image_path
+     })}
   end
 
   @impl true
@@ -139,49 +145,58 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           label="Header"
           phx-debounce={120}
           id="header_input"
-          class="min-w-[32rem]"
+          class="min-w-[50%]"
         />
         <.textarea
           field={@form[:description_text]}
           label="Description"
           phx-debounce={120}
           id="description_input"
-          class="min-w-[32rem]"
+          class="min-w-[50%]"
         />
         <.text_input
           field={@form[:url]}
           label="URL"
           phx-debounce={120}
           id="url_input"
-          class="min-w-[32rem]"
+          class="min-w-[50%]"
         />
-        <div>
-          <div class="flex flex-row">
-            <.text_input
-              field={@form[:image_url]}
-              label="Image URL"
-              phx-debounce={500}
-              id="image_url_input"
-              class="min-w-[32rem]"
-            />
-            <span class={[
-              "ml-4 self-center mt-4",
-              if(@form[:image_url].value in ["", nil], do: "hidden")
-            ]}>
-              <%= @image_size %>
-            </span>
-          </div>
-          <img
-            src={@form[:image_url].value}
-            class={["max-w-[32rem] mt-4", if(@form[:image_url].value in ["", nil], do: "hidden")]}
+        <div id="image-preview-div">
+          <.text_input
+            field={@form[:image_url]}
+            label="Image URL"
+            phx-debounce={500}
+            id="image_url_input"
+            class={"min-w-[50%] #{if(@form[:image_url].value not in ["", nil], do: "border-b-0")}"}
           />
+
+          <div
+            :if={@form[:image_url].value not in ["", nil]}
+            id="image-information"
+            class="flex flex-row w-[50%] text-sm text-text-secondary bg-bg-elevation-3 p-4 rounded-b border border-bg-elevation-6 border-t-0 -mt-4"
+          >
+            <img
+              src={@form[:image_url].value}
+              class={["max-h-[8rem] mt-4", if(@form[:image_url].value in ["", nil], do: "hidden")]}
+            />
+            <div class="flex flex-col justify-center ml-4">
+              <p :if={@image_path}><%= @image_path %></p>
+              <p class={if(is_nil(@image_size) or @image_size > 2, do: "text-danger")}>
+                <%= if is_nil(@image_size) do %>
+                  Image size cannot be determined
+                <% else %>
+                  <%= "#{@image_size} mB" %>
+                <% end %>
+              </p>
+            </div>
+          </div>
         </div>
         <.text_input
           field={@form[:image_alternative_text]}
           label="Image Alt Text"
           phx-debounce={120}
           id="image_alt_text_input"
-          class="min-w-[32rem]"
+          class="min-w-[50%]"
         />
         <.button_primary class="basis-8 self-center min-w-[10%]" name="save">Publish</.button_primary>
       </.form>
@@ -225,10 +240,15 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
            |> Enum.all?(&Regex.match?(~r/image\//, &1)),
          true <- is_binary(request.body),
          true <- is_integer(byte_size(request.body)) do
-      size = (byte_size(request.body) / 1_000_000) |> Float.round(2)
-      "Image size: #{size} mB"
+      (byte_size(request.body) / 1_000_000) |> Float.round(2)
     else
-      _ -> "Image size cannot be determined"
+      _ -> nil
     end
   end
+
+  defp get_image_path(nil), do: nil
+  defp get_image_path(""), do: nil
+
+  defp get_image_path(url) when is_binary(url),
+    do: url |> Path.split() |> List.last() |> String.split("?") |> hd
 end
