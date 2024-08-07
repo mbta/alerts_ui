@@ -3,11 +3,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   builds alert data from existing alert
   """
   alias AlertsUI.Alerts
-  alias AlertsUI.Models.{Alert, Effect}
+  alias AlertsUI.Models.{ActivePeriod, Alert, Effect}
   alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
   alias MBTAV3API.Routes.Route
-
-  @end_of_service ~T[02:30:00]
 
   defstruct [
     :route_type,
@@ -97,7 +95,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   def determine_specifier(nil, :UNKNOWN, _ap_start), do: :further_notice
 
   def determine_specifier(ap_end, :KNOWN, ap_start) when not is_nil(ap_end) do
-    end_is_at_end_of_service = Time.compare(NaiveDateTime.to_time(ap_end), @end_of_service) == :eq
+    end_is_at_end_of_service =
+      Time.compare(NaiveDateTime.to_time(ap_end), ActivePeriod.end_of_service_time()) == :eq
+
     less_than_a_day_apart = NaiveDateTime.diff(ap_end, ap_start, :hour) <= 24
 
     case end_is_at_end_of_service and less_than_a_day_apart do

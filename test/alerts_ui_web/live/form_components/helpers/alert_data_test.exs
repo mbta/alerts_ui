@@ -2,6 +2,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
   import AlertsUI.Support.Factory
+  alias AlertsUI.Models.ActivePeriod
   alias AlertsUIWeb.FormComponents.Helpers.AlertData
 
   describe "build_alert_data/1" do
@@ -201,9 +202,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         description_text: "description text",
         informed_entity: [],
         active_period_start: ~U[2024-05-02 16:09:34.007545Z],
-        active_period_end: ~U[2024-05-03 06:30:00.007545Z],
+        active_period_end:
+          utc_datetime_from_local(~D[2024-05-03], ActivePeriod.end_of_service_time()),
         active_period: [
-          %{start: ~U[2024-05-02 16:09:34.007545Z], end: ~U[2024-05-03 06:30:00.007545Z]}
+          %{
+            start: ~U[2024-05-02 16:09:34.007545Z],
+            end: utc_datetime_from_local(~D[2024-05-03], ActivePeriod.end_of_service_time())
+          }
         ],
         duration_certainty: :KNOWN
       })
@@ -220,14 +225,22 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         description_text: "description text",
         informed_entity: [],
         active_period_start: ~U[2024-05-02 16:09:34.007545Z],
-        active_period_end: ~U[2024-05-04 06:30:00.007545Z],
+        active_period_end:
+          utc_datetime_from_local(~D[2024-05-04], ActivePeriod.end_of_service_time()),
         active_period: [
-          %{start: ~U[2024-05-02 16:09:34.007545Z], end: ~U[2024-05-04 06:30:00.007545Z]}
+          %{
+            start: ~U[2024-05-02 16:09:34.007545Z],
+            end: utc_datetime_from_local(~D[2024-05-04], ActivePeriod.end_of_service_time())
+          }
         ],
         duration_certainty: :KNOWN
       })
 
       assert AlertData.build_alert_data("1").active_period_end_specifier == :pick_a_date_and_time
     end
+  end
+
+  defp utc_datetime_from_local(date, time) do
+    DateTime.new!(date, time, "America/New_York") |> DateTime.shift_zone!("Etc/UTC")
   end
 end

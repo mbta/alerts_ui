@@ -5,6 +5,7 @@ defmodule AlertsUI.AlertBuilderTest do
   import Mock
   alias AlertsUI.AlertBuilder
   alias AlertsUI.Alerts
+  alias AlertsUI.Models.ActivePeriod
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
@@ -15,6 +16,8 @@ defmodule AlertsUI.AlertBuilderTest do
   alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
+
+  @end_of_service_utc ActivePeriod.end_of_service_time() |> Time.add(4, :hour)
 
   @alert_data %{
     route_type: 1,
@@ -210,11 +213,14 @@ defmodule AlertsUI.AlertBuilderTest do
         result = AlertBuilder.build_alert(alert_data, :R)
 
         assert result.active_period == [
-                 %{start: ~U[2024-04-30 15:54:00Z], end: ~U[2024-05-01 06:30:00Z]}
+                 %{
+                   start: ~U[2024-04-30 15:54:00Z],
+                   end: DateTime.new!(~D[2024-05-01], @end_of_service_utc)
+                 }
                ]
 
         assert result.active_period_start == ~U[2024-04-30 15:54:00Z]
-        assert result.active_period_end == ~U[2024-05-01 06:30:00Z]
+        assert result.active_period_end == DateTime.new!(~D[2024-05-01], @end_of_service_utc)
         assert result.duration_certainty == :ESTIMATED
       end
     end
@@ -273,11 +279,14 @@ defmodule AlertsUI.AlertBuilderTest do
         result = AlertBuilder.build_alert(alert_data, :R)
 
         assert result.active_period == [
-                 %{start: ~U[2024-04-30 15:54:00Z], end: ~U[2024-05-01 06:30:00Z]}
+                 %{
+                   start: ~U[2024-04-30 15:54:00Z],
+                   end: DateTime.new!(~D[2024-05-01], @end_of_service_utc)
+                 }
                ]
 
         assert result.active_period_start == ~U[2024-04-30 15:54:00Z]
-        assert result.active_period_end == ~U[2024-05-01 06:30:00Z]
+        assert result.active_period_end == DateTime.new!(~D[2024-05-01], @end_of_service_utc)
         assert result.duration_certainty == :KNOWN
       end
     end
@@ -295,11 +304,14 @@ defmodule AlertsUI.AlertBuilderTest do
         result = AlertBuilder.build_alert(alert_data, :R)
 
         assert result.active_period == [
-                 %{start: ~U[2024-04-30 05:54:00Z], end: ~U[2024-04-30 06:30:00Z]}
+                 %{
+                   start: ~U[2024-04-30 05:54:00Z],
+                   end: DateTime.new!(~D[2024-04-30], @end_of_service_utc)
+                 }
                ]
 
         assert result.active_period_start == ~U[2024-04-30 05:54:00Z]
-        assert result.active_period_end == ~U[2024-04-30 06:30:00Z]
+        assert result.active_period_end == DateTime.new!(~D[2024-04-30], @end_of_service_utc)
         assert result.duration_certainty == :KNOWN
       end
     end
