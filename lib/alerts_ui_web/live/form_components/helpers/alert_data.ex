@@ -4,10 +4,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   """
   alias AlertsUI.Alerts
   alias AlertsUI.Models.{ActivePeriod, Alert, Effect}
+
   alias AlertsUIWeb.FormComponents.Helpers.{
     EffectsForRouteTypes,
     ServiceEffectCombinations
   }
+
   alias MBTAV3API.Routes.Route
 
   defstruct [

@@ -38,38 +38,46 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
        facility_types: [],
        available_facilities: [],
        available_stops: [],
-       effect_name: nil
+       alert_data: %{
+         facility_id: "",
+         facility_id_filter: "",
+         facility_types_filter: "",
+         stop_ids_filter: ""
+       }
      })}
   end
 
   @impl true
   def update(%{alert_data: alert_data} = assigns, socket) do
+    effect_name = Map.get(alert_data, :effect_name) || socket.assigns.effect_name
+
     facility_types =
-      alert_data.effect_name
+      effect_name
       |> string_to_formatted_atom
       |> InformedEntity.facility_effect_to_types()
 
     send(self(), {:fetch_available_facilities, facility_types})
 
-    alert_data = %{
-      facility_id: Map.get(alert_data, :facility_id, ""),
-      facility_id_filter: "",
-      facility_types_filter: "",
-      stop_ids_filter: "",
-      effect_name: alert_data.effect_name
-    }
+    alert_data =
+      Map.put_new(alert_data, :facility_id, "")
+      |> then(fn alert_data ->
+        if is_struct(alert_data) do
+          Map.from_struct(alert_data)
+        else
+          alert_data
+        end
+      end)
 
     form =
       %__MODULE__{}
       |> changeset(alert_data)
-      |> Map.put(:action, :validate)
       |> to_form()
 
     assigns =
       alert_data
       |> Map.put(:form, form)
       |> Map.merge(assigns)
-      |> Map.merge(%{facility_types: facility_types, effect_name: alert_data.effect_name})
+      |> Map.merge(%{facility_types: facility_types, effect_name: effect_name})
 
     {:ok, assign(socket, assigns)}
   end
@@ -80,15 +88,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
         %{"access_affected_service" => access_affected_service},
         socket
       ) do
-    access_affected_service =
-      if Map.has_key?(access_affected_service, "facility_types") or
-           Map.has_key?(access_affected_service, "stop_ids") do
-        Map.drop(access_affected_service, ["facility_id"])
-      else
-        access_affected_service
-      end
-
-    changeset = changeset(%__MODULE__{}, access_affected_service)
+    changeset = changeset(%__MODULE__{}, access_affected_service) |> Map.put(:action, :validate)
 
     case apply_action(changeset, :insert) do
       {:ok, changeset} ->
@@ -166,7 +166,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             filter_field={@form[:stop_ids_filter]}
             options={@stop_id_options}
             loading={Enum.empty?(@stop_id_options)}
-            class="min-w-[24rem]"
+            class="min-w-[26rem]"
             prompt="All Stops"
           />
           <.filtered_select
@@ -174,7 +174,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             field={@form[:facility_types]}
             filter_field={@form[:facility_types_filter]}
             options={@facility_type_options}
-            class="min-w-[24rem]"
+            class="min-w-[26rem]"
             prompt="All Categories"
           />
           <.filtered_select
@@ -183,7 +183,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             filter_field={@form[:facility_id_filter]}
             options={@facility_id_options}
             loading={Enum.empty?(@facility_id_options)}
-            class="min-w-[24rem] max-w-[24rem]"
+            class="min-w-[48rem]"
             multiple={false}
           />
         </fieldset>
@@ -194,6 +194,8 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
   end
 
   defp filter_facility_by_type_and_stop_ids(facility, params) do
+    # returns true if facility in list if it belongs to a selected stop, is of a selected
+    # facility type, or has already been selected by the user.
     in_stop_ids =
       if params["stop_ids"] && params["stop_ids"] !== ["default"] do
         facility.stop.id in params["stop_ids"]
@@ -208,12 +210,14 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
         true
       end
 
-    in_stop_ids && in_facility_types
+    (in_stop_ids && in_facility_types) or facility.id == params["facility_id"]
   end
 
   defp filter_stop_by_types(stop, params) do
     if params["facility_types"] && params["facility_types"] !== ["default"] do
-      Enum.any?(stop.facility_types, fn type -> type in params["facility_types"] end)
+      Enum.any?(Map.get(stop, :facility_types, []), fn type ->
+        type in params["facility_types"]
+      end)
     else
       true
     end

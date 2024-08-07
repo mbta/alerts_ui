@@ -41,8 +41,14 @@ defmodule AlertsUIWeb.FormComponents.AccessServiceTest do
     end
 
     test "renders while editing an existing alerts" do
-      alert_data = Map.put(@assigns.alert_data, :facility_id, "Facility-3")
-      assigns = %{@assigns | alert_data: alert_data, editing: true}
+      :BIKE_ISSUE
+
+      alert_data = %AlertsUIWeb.FormComponents.Helpers.AlertData{
+        facility_id: "Facility-3",
+        effect_name: "Bike Issue"
+      }
+
+      assigns = @assigns |> Map.merge(%{alert_data: alert_data, editing: true})
 
       {:ok, view, _html} = live_isolated_component(AccessAffectedService, assigns)
 
