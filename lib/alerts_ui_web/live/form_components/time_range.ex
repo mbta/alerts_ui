@@ -28,16 +28,12 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   @primary_key false
   embedded_schema do
     field :active_period_start, :naive_datetime
-    field :start_time, :time
-    field :start_date, :date
     field :active_period_start_specifier, Ecto.Enum, values: @start_values
     field :active_period_end_specifier, Ecto.Enum, values: @end_values
-    field :end_time, :time
-    field :end_date, :date
     field :active_period_end, :naive_datetime
   end
 
-  @fields ~w[active_period_start active_period_end active_period_end_specifier active_period_start_specifier start_time start_date end_time end_date]a
+  @fields ~w[active_period_start active_period_end active_period_end_specifier active_period_start_specifier]a
 
   @impl true
   def mount(socket) do
@@ -46,7 +42,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     socket =
       assign(socket, %{
         form: form,
-        current_time: Map.get(socket.assigns, :current_time) || current_time()
+        current_time: current_time()
       })
 
     {:ok, socket}
@@ -81,7 +77,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
     active_period_start_specifier =
       case Map.get(alert_data, :active_period_start_specifier) do
-        nil -> nil
+        nil -> "now"
         result -> Atom.to_string(result)
       end
 
@@ -93,9 +89,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         active_period_start_specifier: active_period_start_specifier
       }
 
-    changeset =
-      %__MODULE__{}
-      |> changeset(default_alert_data)
+    changeset = changeset(%__MODULE__{}, default_alert_data)
 
     send(self(), {:section_completed, changeset})
     form = to_form(changeset)
@@ -127,23 +121,13 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           ""
 
         "custom" ->
-          if time_range["end_date"] && time_range["end_time"] do
-            "#{time_range["end_date"]}T#{time_range["end_time"]}:00"
-          else
-            current_time_plus_2_hours(current_time)
-          end
+          Map.get(time_range, "active_period_end", current_time_plus_2_hours(current_time))
 
         nil ->
           form.params["active_period_end"]
       end
 
-    # change start datetime based on user entry
-    start_datetime =
-      if time_range["start_date"] && time_range["start_time"] do
-        "#{time_range["start_date"]}T#{time_range["start_time"]}:00"
-      else
-        current_time
-      end
+    start_datetime = Map.get(time_range, "active_period_start", current_time)
 
     time_range =
       Map.merge(time_range, %{
@@ -152,9 +136,10 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       })
 
     changeset =
-      %__MODULE__{}
-      |> changeset(time_range)
-      |> validate_and_add_errors(time_range, current_time)
+      changeset(%__MODULE__{}, time_range)
+      |> validate_validity(time_range)
+      |> validate_relationship(time_range, current_time)
+      |> Map.put(:action, :validate)
 
     changeset
     |> apply_action(:insert)
@@ -167,72 +152,83 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         changeset
     end
 
-    {:noreply, assign(socket, %{form: to_form(changeset |> Map.put(:action, :validate))})}
+    {:noreply, assign(socket, %{form: to_form(changeset)})}
   end
 
   defp changeset(changeset, params \\ %{}) do
     cast(changeset, params, @fields)
   end
 
-  def validate_and_add_errors(changeset, time_range, current_time) do
+  @spec validate_validity(Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
+  def validate_validity(changeset, time_range) do
     changeset
-    |> validate_change(:active_period_start, fn :active_period_start, active_period_start ->
-      with {:ok, _} <- NaiveDateTime.from_iso8601(time_range["active_period_start"]),
-           true <-
-             NaiveDateTime.compare(
-               active_period_start,
-               NaiveDateTime.from_iso8601!(current_time)
-             ) in [:eq, :gt] do
-        []
-      else
-        {:error, _} ->
-          []
-
-        false ->
-          [
-            start_time: {"time must be in future", []},
-            start_date: {"date must be in future", []}
-          ]
-      end
-    end)
-    |> validate_change(:active_period_end, fn :active_period_end, active_period_end ->
-      with {:ok, _} <- NaiveDateTime.from_iso8601(time_range["active_period_end"]),
-           {:ok, _} <- NaiveDateTime.from_iso8601(time_range["active_period_start"]),
-           true <-
-             NaiveDateTime.compare(
-               active_period_end,
-               NaiveDateTime.from_iso8601!(time_range["active_period_start"])
-             ) in [:eq, :gt] do
-        []
-      else
-        {:error, _} ->
-          []
-
-        false ->
-          [
-            end_time: {"time must be after start", []},
-            end_date: {"date must be after start", []}
-          ]
+    |> then(fn changeset ->
+      case NaiveDateTime.from_iso8601(time_range["active_period_start"]) do
+        {:ok, _} -> changeset
+        {:error, _} -> add_error(changeset, :active_period_start, "Enter a valid datetime")
       end
     end)
     |> then(fn changeset ->
-      Enum.reduce(
+      cond do
+        time_range["active_period_end"] == "" ->
+          changeset
+
+        NaiveDateTime.from_iso8601(time_range["active_period_end"]) == {:error, :invalid_format} ->
+          add_error(changeset, :active_period_end, "Enter a valid datetime")
+
+        true ->
+          changeset
+      end
+    end)
+  end
+
+  @spec validate_relationship(Ecto.Changeset.t(), map(), DateTime.t()) :: Ecto.Changeset.t()
+  def validate_relationship(changeset, time_range, current_time) do
+    changeset
+    |> validate_change(:active_period_start, fn :active_period_start, active_period_start ->
+      {end_time_validity, end_time} = NaiveDateTime.from_iso8601(time_range["active_period_end"])
+
+      cond do
+        NaiveDateTime.compare(
+          active_period_start,
+          NaiveDateTime.from_iso8601!(current_time)
+        ) in [:lt] ->
+          [
+            active_period_start: {"Effect can't start in the past", []}
+          ]
+
+        end_time_validity == :ok and
+            NaiveDateTime.compare(
+              active_period_start,
+              end_time
+            ) in [:gt] ->
+          [
+            active_period_start:
+              {"Effect must start before #{formatted_datetime(end_time, "{0M}/{0D}/{YYYY}, {0h12}:{0m}:{0s} {AM}")}",
+               []}
+          ]
+
+        true ->
+          []
+      end
+    end)
+    |> validate_change(:active_period_end, fn :active_period_end, active_period_end ->
+      {start_time_validity, start_time} =
+        NaiveDateTime.from_iso8601(time_range["active_period_start"])
+
+      if start_time_validity == :ok and
+           NaiveDateTime.compare(
+             active_period_end,
+             start_time
+           ) in [:lt] do
         [
-          {:active_period_start, :start_date, :start_time},
-          {:active_period_end, :end_date, :end_time}
-        ],
-        changeset,
-        fn {datetime_field, date_field, time_field}, acc ->
-          with true <- Keyword.has_key?(changeset.errors, datetime_field),
-               {"is invalid", _} <- Keyword.get(changeset.errors, datetime_field) do
-            acc
-            |> add_error(time_field, "Please enter valid time", on_purpose: :yes)
-            |> add_error(date_field, "Please enter valid date", on_purpose: :yes)
-          else
-            _ -> acc
-          end
-        end
-      )
+          active_period_end:
+            {"Effect must end after #{formatted_datetime(start_time, "{0M}/{0D}/{YYYY}, {0h12}:{0m}:{0s} {AM}")}",
+             []}
+        ]
+      else
+        []
+      end
     end)
   end
 
@@ -285,22 +281,13 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
               phx-debounce={120}
             />
             <.datetime
-              field={@form[:start_date]}
-              min={date_from_iso(@current_time)}
-              value={date_from_iso(@start_datetime)}
-              label="Start date"
-              class="min-w-[16rem]"
-              disabled={@form.params["active_period_start_specifier"] !== "custom"}
-              type="date"
-              phx-debounce={120}
-            />
-            <.datetime
-              field={@form[:start_time]}
-              value={time_from_iso(@start_datetime)}
+              field={@form[:active_period_start]}
+              min={@current_time}
+              max={@active_period_end}
+              value={@active_period_start}
               label="Start time"
-              class="min-w-[16rem]"
+              class="min-w-[16rem] h-10"
               disabled={@form.params["active_period_start_specifier"] !== "custom"}
-              type="time"
               phx-debounce={120}
             />
           </div>
@@ -314,22 +301,12 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
               phx-debounce={120}
             />
             <.datetime
-              field={@form[:end_date]}
-              min={date_from_iso(@current_time)}
-              value={date_from_iso(@end_datetime)}
-              label="End date"
-              class="min-w-[16rem]"
-              disabled={@form.params["active_period_end_specifier"] !== "custom"}
-              type="date"
-              phx-debounce={120}
-            />
-            <.datetime
-              field={@form[:end_time]}
-              value={time_from_iso(@end_datetime)}
+              field={@form[:active_period_end]}
+              min={@active_period_start}
+              value={@active_period_end}
               label="End time"
-              class="min-w-[16rem]"
+              class="min-w-[16rem] h-10"
               disabled={@form.params["active_period_end_specifier"] !== "custom"}
-              type="time"
               phx-debounce={120}
             />
           </div>
@@ -361,11 +338,10 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     end)
   end
 
-  defp time_from_iso(iso), do: String.slice(iso, 11..-4//1)
-  defp date_from_iso(iso), do: String.slice(iso, 0..-10//1)
-
   defp current_time_plus_2_hours(current_time) do
     NaiveDateTime.add(NaiveDateTime.from_iso8601!(current_time), 2, :hour)
     |> naive_datetime_to_iso8601()
   end
+
+  defp formatted_datetime(datetime, format_string), do: Timex.format!(datetime, format_string)
 end

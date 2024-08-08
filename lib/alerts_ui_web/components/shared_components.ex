@@ -465,7 +465,7 @@ defmodule AlertsUIWeb.SharedComponents do
           "bg-bg-elevation-5 border border-bg-elevation-6 pl-3 py-1.5 min-w-[99%] p-0 [color-scheme:light]
             rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto
             disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
-            focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25)",
+            focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) h-10",
           @select_class,
           @errors != [] && "border-danger focus:border-danger"
         ]}

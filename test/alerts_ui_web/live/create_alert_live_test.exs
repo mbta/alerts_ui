@@ -69,7 +69,14 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
     @tag :logged_in_user
     test "shows correct affected service for access combination", %{conn: conn} do
-      with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
+      facilities = [
+        %Facility{id: "1", long_name: "real big elevator", stop: %Stop{id: 2, name: "stop"}}
+      ]
+
+      with_mock(
+        FacilitiesRepo,
+        get_by_type: fn _types, _opts -> facilities end
+      ) do
         insert(:alert, alert_id: "1")
         {:ok, view, _html} = live(conn, "/alerts/new")
 
@@ -215,7 +222,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
       with_mocks([
         {StopsRepo, [], by_route: fn _route, _direction -> stops end},
-        {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [] end}
+        {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [] end},
         {RoutePatternsRepo, [], included_stops_by_route_id: fn _route_id, _direction -> [] end}
       ]) do
         conn = log_in_user(conn)

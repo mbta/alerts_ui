@@ -16,7 +16,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       label: "Time Range"
     },
     alert_data: %{},
-    editing: false,
     current_time: "2024-04-30T09:33:20"
   }
 
@@ -33,7 +32,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         )
 
       assert view
-             |> render() =~ ~s(\" type=\"date\" disabled=\"disabled\")
+             |> render() =~ ~s(\" type=\"datetime-local\" disabled=\"disabled\")
 
       view
       |> element("form")
@@ -45,7 +44,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       })
 
       refute view
-             |> render() =~ ~s(\" type=\"date\" disabled=\"disabled\")
+             |> render() =~ ~s(\" type=\"datetime-local\" disabled=\"disabled\")
     end
 
     test "works if editing" do
@@ -66,6 +65,73 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
              |> render() =~ "custom"
     end
 
+    test "displays error if start before current time" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end" => "",
+          "active_period_start" => "2024-04-28T10:54:00",
+          "active_period_start_specifier" => "custom"
+        }
+      })
+
+      assert render(view) =~ ~s(Effect can&#39;t start in the past)
+    end
+
+    test "displays error if start invalid" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end" => "",
+          "active_period_start" => "foo",
+          "active_period_start_specifier" => "custom"
+        }
+      })
+
+      assert render(view) =~ ~s(Enter a valid datetime)
+    end
+
+    test "displays error if end invalid" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end" => "foo",
+          "active_period_end_specifier" => "custom"
+        }
+      })
+
+      assert render(view) =~ ~s(Enter a valid datetime)
+    end
+
+    test "displays error if end after start" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end" => "2024-05-01T09:54:00",
+          "active_period_start" => "2024-05-01T10:54:00",
+          "active_period_end_specifier" => "custom"
+        }
+      })
+
+      assert render(view) =~ ~s(Effect must end after 05/01/2024, 10:54:00 AM)
+    end
+
     test "it sends section_completed if no error in changeset" do
       {:ok, view, _html} =
         live_isolated_component(TimeRange, @assigns)
@@ -74,11 +140,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       |> element("form")
       |> render_change(%{
         "time_range" => %{
-          "end_date" => "2024-05-01",
-          "end_time" => "09:54",
-          "active_period_end_specifier" => "custom",
-          "start_date" => "2024-05-01",
-          "start_time" => "08:54"
+          "active_period_end" => "2024-05-01T09:54:00",
+          "active_period_start" => "2024-05-01T08:54:00",
+          "active_period_end_specifier" => "custom"
         }
       })
 
