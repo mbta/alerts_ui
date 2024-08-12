@@ -134,7 +134,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
     directions = directions_from_selection(direction)
     opts = direction_option([stop_sequences: :first], directions)
 
-    available_schedules = SchedulesRepo.by_route_ids(route_ids, opts)
+    schedules_from_api = SchedulesRepo.by_route_ids(route_ids, opts)
+    available_schedules = if is_list(schedules_from_api), do: schedules_from_api, else: []
 
     {:noreply, assign(socket, available_schedules: available_schedules)}
   end
@@ -156,8 +157,14 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   def handle_info({:fetch_available_facilities, facility_types}, socket) do
+    facilties_from_api = FacilitiesRepo.get_by_type(facility_types, include: "stop")
+
     available_facilities =
-      FacilitiesRepo.get_by_type(facility_types, include: "stop")
+      if is_list(facilties_from_api) do
+        facilties_from_api
+      else
+        []
+      end
       # remove facilities that we don't control
       |> Enum.filter(&(!is_nil(&1.stop)))
       |> Enum.uniq()
@@ -340,7 +347,12 @@ defmodule AlertsUIWeb.CreateAlertLive do
   defp available_stops(direction_array, route_ids) do
     route_ids
     |> Enum.flat_map(fn route ->
-      Enum.flat_map(direction_array, &StopsRepo.by_route(route, &1))
+      Enum.flat_map(direction_array, &get_stops(route, &1))
     end)
+  end
+
+  defp get_stops(route, direction) do
+    stops_from_api = StopsRepo.by_route(route, direction)
+    if is_list(stops_from_api), do: stops_from_api, else: []
   end
 end
