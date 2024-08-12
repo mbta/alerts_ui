@@ -1,6 +1,7 @@
 defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   @moduledoc """
-  builds alert data from existing alert
+  Builds alert data from existing alert
+  Used to populate form when editing an alert
   """
   alias AlertsUI.Alerts
   alias AlertsUI.Models.{ActivePeriod, Alert, Effect}
@@ -22,6 +23,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :trip_ids,
     :header_text,
     :description_text,
+    :banner_text,
     :combination,
     :active_period_start,
     :active_period_end,
@@ -42,6 +44,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           trip_ids: [String.t()],
           header_text: String.t(),
           description_text: String.t(),
+          banner_text: String.t() | nil,
           combination: atom(),
           active_period_start: NaiveDateTime.t() | nil,
           active_period_end_specifier: atom() | nil,
@@ -96,7 +99,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       cause_detail: alert.cause_detail,
       url: alert.url,
       image_url: alert.image_url,
-      image_alternative_text: alert.image_alternative_text
+      image_alternative_text: alert.image_alternative_text,
+      banner_text: alert.banner_text
     }
   end
 

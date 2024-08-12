@@ -13,13 +13,15 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     field :description_text, :string
     field :draft, :boolean
     field :cause_detail, :string, default: ""
+    field :banner_text, :string, default: ""
     field :url, :string
     field :image_url, :string
     field :image_alternative_text, :string
   end
 
   @required_fields ~w[header_text description_text]a
-  @fields @required_fields ++ ~w[draft cause_detail url image_url image_alternative_text]a
+  @fields @required_fields ++
+            ~w[draft cause_detail url image_url image_alternative_text banner_text]a
 
   @impl true
   def mount(socket) do
@@ -150,6 +152,9 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       class={unless @progress.name == "details", do: "hidden", else: "min-w-full flex flex-col mt-4"}
       id="details_view"
     >
+      <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
+        Alert details
+      </.h5>
       <.form
         for={@form}
         phx-target={@myself}
@@ -218,9 +223,39 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           phx-debounce={120}
           id="image_alt_text_input"
           class="min-w-[50%]"
+          spellcheck="true"
         />
+        <.h5 class="text-text-secondary w-full text-center md:text-left">
+          Delivery
+        </.h5>
+        <div class="flex flex-row">
+          <div>
+            <.textarea
+              field={@form[:banner_text]}
+              label="Website banner text"
+              phx-debounce={120}
+              class="min-w-[32rem] min-h-[10rem] border-b-0"
+            />
+            <div class="flex flex-row justify-end min-w-[100%] text-sm text-text-secondary bg-bg-elevation-3 p-2 pt-3 rounded-b border border-bg-elevation-6 border-t-0 -mt-8">
+              <%= String.length(@form[:banner_text].value) %>/100000
+            </div>
+          </div>
+          <div class="flex flex-col justify-center ml-4">
+            <button class="h-7 w-7 border border-border-primary bg-bg-input-default rounded-md mb-1 hover:bg-primary-hover">
+              <span class="hero-arrow-path w-5 h-5" />
+            </button>
+            <button
+              class="h-7 w-7 border border-border-primary bg-bg-input-default active:bg-menu-active rounded-md hover:bg-primary-hover"
+              phx-click={JS.dispatch("phx:copy", to: "#alert_details_banner_text")}
+              title="Copy banner text to Clipboard"
+            >
+              <span class="hero-square-2-stack-solid w-5 h-5" />
+            </button>
+          </div>
+        </div>
         <.button_primary class="basis-8 self-center min-w-[10%]" name="save">Publish</.button_primary>
       </.form>
+
       <.button_secondary
         phx-target={@myself}
         phx-click="save_as_draft"

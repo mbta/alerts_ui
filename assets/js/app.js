@@ -30,6 +30,18 @@ topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
 window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
 window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
 
+
+window.addEventListener("phx:copy", (event) => {
+  console.log(event)
+  if ("clipboard" in navigator) {
+    console.log(2)
+    const text = event.target.textContent.trim();
+    navigator.clipboard.writeText(text);
+  } else {
+    alert("Sorry, your browser does not support clipboard copy.");
+  }
+});
+
 // connect if there are any LiveViews on the page
 liveSocket.connect()
 
@@ -39,3 +51,10 @@ liveSocket.connect()
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
 
+// Copy to the clipboard
+window.addEventListener("phx:copy", (event) => {
+  if ("clipboard" in navigator) {
+    let text = event.target.value;
+    navigator.clipboard.writeText(text)
+  }
+})

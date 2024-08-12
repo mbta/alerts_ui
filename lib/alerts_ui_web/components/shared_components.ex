@@ -238,7 +238,6 @@ defmodule AlertsUIWeb.SharedComponents do
     <button
       class={"
       text-text-white
-      bg-secondary-border
       border-secondary-border
       border-1
       px-4
@@ -608,8 +607,8 @@ defmodule AlertsUIWeb.SharedComponents do
     required: true,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
-  attr :placeholder, :string, default: nil, doc: "placeholder text"
-  attr :rest, :global, include: ~w(disabled phx-debounce)
+  attr :rest, :global,
+    include: ~w(disabled phx-debounce maxlength minlength placeholder spellcheck)
 
   def text_input(%{field: %FormField{} = field} = assigns) do
     assigns =
@@ -626,7 +625,6 @@ defmodule AlertsUIWeb.SharedComponents do
         type="text"
         id={@id}
         name={@name}
-        placeholder={@placeholder}
         value={@value}
         class={[
           "bg-bg-input-default border border-bg-elevation-6 pl-2 py-1.5
@@ -655,8 +653,8 @@ defmodule AlertsUIWeb.SharedComponents do
     required: true,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
-  attr :placeholder, :string, default: nil, doc: "placeholder text"
-  attr :rest, :global, include: ~w(disabled phx-debounce)
+  attr :rest, :global,
+    include: ~w(disabled phx-debounce maxlength minlength placeholder spellcheck)
 
   def textarea(%{field: %FormField{} = field} = assigns) do
     assigns =
@@ -672,12 +670,13 @@ defmodule AlertsUIWeb.SharedComponents do
       <textarea
         id={@id}
         name={@name}
-        placeholder={@placeholder}
+        resize="none"
+        value="hello 2"
         class={[
           "bg-bg-input-default border border-bg-elevation-6 pl-3 py-1.5
             rounded text-text-primary disabled:text-text-secondary
             disabled:bg-bg-elevation-3 ring-0 ring-border-focus
-            focus:ring-1 focus:border-border-focus",
+            focus:ring-1 focus:border-border-focus invalid:border-danger",
           @class,
           @errors != [] && "border-danger focus:border-danger"
         ]}

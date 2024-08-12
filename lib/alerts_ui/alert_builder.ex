@@ -33,7 +33,10 @@ defmodule AlertsUI.AlertBuilder do
           cause_detail: String.t(),
           url: String.t() | nil,
           image_url: String.t() | nil,
-          image_alternative_text: String.t() | nil
+          image_alternative_text: String.t() | nil,
+          header_text: String.t(),
+          description_text: String.t(),
+          banner_text: String.t() | nil
         }
   @type direction_t :: 0 | 1
   @type stop_with_context_t :: {Stop.t(), Route.id_t(), direction_t(), RoutePattern.stop_type()}
@@ -44,7 +47,7 @@ defmodule AlertsUI.AlertBuilder do
           duration_certainty: atom()
         }
 
-  @spec build_alert(map(), ServiceEffectCombinations.service_effect_combination()) ::
+  @spec build_alert(alert_data_t(), ServiceEffectCombinations.service_effect_combination()) ::
           map()
   def build_alert(alert_data, combination) do
     effect_name = Map.get(alert_data, :effect_name)
@@ -82,6 +85,7 @@ defmodule AlertsUI.AlertBuilder do
     %{
       header_text: Map.get(alert_data, :header_text),
       description_text: Map.get(alert_data, :description_text),
+      banner_text: Map.get(alert_data, :banner_text),
       url: Map.get(alert_data, :url),
       image_url: Map.get(alert_data, :image_url),
       image_alternative_text: Map.get(alert_data, :image_alternative_text),
