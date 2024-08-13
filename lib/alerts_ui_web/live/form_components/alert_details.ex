@@ -53,9 +53,24 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     image_size = alert_details["image_url"] |> get_image_size()
     image_path = alert_details["image_url"] |> get_image_path()
 
-    form =
+    changeset =
       %__MODULE__{}
       |> changeset(alert_details)
+      |> validate_change(:image_url, fn :image_url, _image_url ->
+        if is_number(image_size),
+          do: [],
+          else: [image_url: "Enter a valid image URL"]
+      end)
+      |> then(fn changeset ->
+        if alert_details["image_url"] in [nil, ""] do
+          changeset
+        else
+          validate_required(changeset, :image_alternative_text, message: "Enter alt text")
+        end
+      end)
+
+    form =
+      changeset
       |> Map.put(:action, :validate)
       |> to_form()
 
@@ -181,13 +196,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
             />
             <div class="flex flex-col justify-center ml-4">
               <p :if={@image_path}><%= @image_path %></p>
-              <p class={if(is_nil(@image_size) or @image_size > 2, do: "text-danger")}>
-                <%= if is_nil(@image_size) do %>
-                  Image size cannot be determined
-                <% else %>
-                  <%= "#{@image_size} mB" %>
-                <% end %>
-              </p>
+              <p :if={@image_size}><%= "#{@image_size} mB" %></p>
             </div>
           </div>
         </div>
