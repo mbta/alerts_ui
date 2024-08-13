@@ -39,10 +39,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
        available_facilities: [],
        available_stops: [],
        alert_data: %{
-         facility_id: "",
-         facility_id_filter: "",
-         facility_types_filter: "",
-         stop_ids_filter: ""
+         facility_id: ""
        }
      })}
   end
@@ -59,14 +56,12 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     send(self(), {:fetch_available_facilities, facility_types})
 
     alert_data =
-      Map.put_new(alert_data, :facility_id, "")
-      |> then(fn alert_data ->
-        if is_struct(alert_data) do
-          Map.from_struct(alert_data)
-        else
-          alert_data
-        end
-      end)
+      if is_struct(alert_data) do
+        Map.from_struct(alert_data)
+      else
+        alert_data
+      end
+      |> Map.put_new(:facility_id, "")
 
     form =
       %__MODULE__{}

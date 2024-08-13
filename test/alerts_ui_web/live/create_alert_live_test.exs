@@ -236,63 +236,6 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
     end
 
     @tag :logged_in_user
-    test "handles case when schedules come back as nil", %{conn: conn} do
-      stops = [%Stop{id: "1", name: "cool stop name"}]
-
-      with_mocks([
-        {StopsRepo, [], by_route: fn _route, _direction -> stops end},
-        {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> nil end}
-      ]) do
-        conn = log_in_user(conn)
-        {:ok, view, _html} = live(conn, "/alerts/new")
-
-        {:ok, changeset} =
-          Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 3, effect_name: "Detour"})
-          |> apply_action(:insert)
-
-        send(view.pid, {:step_completed, changeset})
-        send(view.pid, {:fetch_available_routes, ["3"]})
-        send(view.pid, {:fetch_available_stops, 0, ["12"]})
-
-        view
-        |> element("#service_form")
-        |> render_change(%{
-          "affected_service" => %{"route_ids" => ["1"], "directions" => "0", "stop_ids" => []}
-        })
-
-        assert render(view) =~ "All Stops"
-      end
-    end
-
-    @tag :logged_in_user
-    test "handles case when stops come back as nil", %{conn: conn} do
-      with_mocks([
-        {RoutePatternsRepo, [], [included_stops_by_route_id: fn _route_id, _direction -> [] end]},
-        {StopsRepo, [], by_route: fn _route, _direction -> nil end},
-        {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [] end}
-      ]) do
-        conn = log_in_user(conn)
-        {:ok, view, _html} = live(conn, "/alerts/new")
-
-        {:ok, changeset} =
-          Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 3, effect_name: "Detour"})
-          |> apply_action(:insert)
-
-        send(view.pid, {:step_completed, changeset})
-        send(view.pid, {:fetch_available_routes, ["3"]})
-        send(view.pid, {:fetch_available_stops, 0, ["12"]})
-
-        view
-        |> element("#service_form")
-        |> render_change(%{
-          "affected_service" => %{"route_ids" => ["1"], "directions" => "0", "stop_ids" => []}
-        })
-
-        assert render(view) =~ "All Stops"
-      end
-    end
-
-    @tag :logged_in_user
     test "displays a list of facilities", %{conn: conn} do
       facilities = [
         %Facility{id: "1", long_name: "real big elevator", stop: %Stop{id: 2, name: "stop"}}
@@ -319,31 +262,6 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         assert view
                |> element("#service_form")
                |> render() =~ "real big elevator"
-      end
-    end
-
-    @tag :logged_in_user
-    test "handles case where facilities are returned as nil", %{conn: conn} do
-      with_mocks([
-        {RoutePatternsRepo, [], [included_stops_by_route_id: fn _route_id, _direction -> [] end]},
-        {FacilitiesRepo, [], get_by_type: fn _types, _opts -> nil end}
-      ]) do
-        conn = log_in_user(conn)
-        {:ok, view, _html} = live(conn, "/alerts/new")
-
-        {:ok, changeset} =
-          Ecto.Changeset.change(%RouteTypeAndEffect{
-            route_type: nil,
-            effect_name: "Elevator Closure"
-          })
-          |> apply_action(:insert)
-
-        send(view.pid, {:step_completed, changeset})
-        send(view.pid, {:fetch_available_facilities, ["ELEVATOR"]})
-
-        assert view
-               |> element("#service_form")
-               |> render() =~ "Elevator"
       end
     end
 

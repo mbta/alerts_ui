@@ -33,8 +33,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
 
   def name_for_option(%Route{name: name}), do: name
 
+  def name_for_option(%Facility{long_name: nil, short_name: short_name}), do: short_name
   def name_for_option(%Facility{long_name: long_name}), do: long_name
-  def name_for_option(%Facility{short_name: short_name}), do: short_name
 
   def name_for_option(%Schedule{
         trip: %Trip{name: trip_name},
