@@ -31,6 +31,9 @@ alerts_ui-*.tar
 # Ignore digested assets cache.
 /priv/static/cache_manifest.json
 
+# Ignore generated swagger docs file that changes constantly for no reason
+/priv/static/swagger.json
+
 # In case you use Node.js/npm, you want to ignore these.
 npm-debug.log
 /assets/node_modules/

@@ -11,9 +11,9 @@ defmodule AlertsUIWeb.ComponentsLive do
   embedded_schema do
     field :single_select, {:array, :integer}
     field :single_select_error, {:array, :integer}
-    field :multiselect, {:array, :string}
-    field :multiselect_filter, :string
-    field :multiselect_error, {:array, :string}
+    field :filtered_select, {:array, :string}
+    field :filtered_select_filter, :string
+    field :filtered_select_error, {:array, :string}
     field :text_input, :string
     field :text_input_error, :string
     field :textarea, :string
@@ -21,8 +21,8 @@ defmodule AlertsUIWeb.ComponentsLive do
     field :toggle_checkgroup, :string
   end
 
-  @fields ~w[single_select multiselect text_input textarea single_select_error multiselect_error text_input_error textarea_error multiselect_filter toggle_checkgroup]a
-  @errored_fields ~w[single_select_error multiselect_error text_input_error textarea_error]a
+  @fields ~w[single_select filtered_select text_input textarea single_select_error filtered_select_error text_input_error textarea_error filtered_select_filter toggle_checkgroup]a
+  @errored_fields ~w[single_select_error filtered_select_error text_input_error textarea_error]a
 
   @impl true
   def mount(_params, _session, socket) do
@@ -93,7 +93,7 @@ defmodule AlertsUIWeb.ComponentsLive do
     ]
   end
 
-  defp multiselect_options do
+  defp filtered_select_options do
     [
       {"Aardvark", "aardvark"},
       {"Agouti", "agouti"},

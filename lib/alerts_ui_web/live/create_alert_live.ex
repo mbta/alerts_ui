@@ -45,6 +45,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
   }
 
   alias AlertsUIWeb.Step
+  alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
@@ -90,6 +91,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
         available_routes: [],
         available_schedules: [],
         available_stops: [],
+        available_facilities: [],
         alert_uuid: nil,
         alert_id: alert_id,
         editing: editing
@@ -151,6 +153,40 @@ defmodule AlertsUIWeb.CreateAlertLive do
   def handle_info({:fetch_stops_by_route_type, route_type}, socket) do
     available_stops = StopsRepo.by_route_type(route_type) |> Enum.sort_by(& &1.name)
     {:noreply, assign(socket, available_stops: available_stops)}
+  end
+
+  def handle_info({:fetch_available_facilities, facility_types}, socket) do
+    facilties_from_api = FacilitiesRepo.get_by_type(facility_types, include: "stop")
+
+    available_facilities =
+      facilties_from_api
+      # remove facilities that we don't control
+      |> Enum.filter(&(!is_nil(&1.stop)))
+      |> Enum.uniq()
+      |> Enum.sort_by(& &1.long_name)
+
+    # gather list of stops associated with facilities, along with array of facility types the stop services
+    available_stops =
+      available_facilities
+      |> Enum.reduce(%{}, fn facility, acc ->
+        stop = facility.stop
+
+        if is_nil(stop) do
+          acc
+        else
+          Map.update(
+            acc,
+            stop.id,
+            stop |> Map.put(:facility_types, [facility.type]),
+            &Map.put(&1, :facility_types, [facility.type | &1.facility_types] |> Enum.uniq())
+          )
+        end
+      end)
+      |> Map.values()
+      |> Enum.sort_by(& &1.name)
+
+    {:noreply,
+     assign(socket, available_facilities: available_facilities, available_stops: available_stops)}
   end
 
   def handle_info({:save_as_draft, changeset}, socket) do

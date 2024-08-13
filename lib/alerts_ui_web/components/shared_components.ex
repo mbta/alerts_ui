@@ -437,7 +437,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :hidden, :boolean, default: false, doc: "hides component if true"
 
-  attr :rest, :global, include: ~w(disabled)
+  attr :rest, :global, include: ~w(disabled size)
 
   def select(%{field: %FormField{} = field} = assigns) do
     assigns =
@@ -454,7 +454,7 @@ defmodule AlertsUIWeb.SharedComponents do
         id={@id}
         name={@name}
         class={[
-          "bg-bg-elevation-5 border border-border-primary pl-3 py-1.5 min-w-[99%] p-0
+          "bg-bg-elevation-5 border border-border-primary pl-3 min-w-[99%] [color-scheme:light]
             rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto
             disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
             focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25)",
@@ -473,21 +473,25 @@ defmodule AlertsUIWeb.SharedComponents do
   end
 
   @doc """
-  Renders a multiselect input with an attached filter.
+  Renders a filtered_select input with an attached filter.
   Requires: select field, filter field. The filtering will not
   work if the form is not updated with a phx-change event
   See live/components_live.ex for a working example
 
   ##Examples
-    <.multiselect
-      label="Multiselect"
-      field={@form[:multiselect_field]}
-      filter_field={@form[:multiselect_filter_field]}
+    <.filtered_select
+      label="filtered_select"
+      field={@form[:filtered_select_field]}
+      filter_field={@form[:filtered_select_filter_field]}
       options={[[display: :value]]}
   """
   attr :label, :string, default: nil
 
   attr :class, :string, default: "", doc: "additional classes to add"
+
+  attr :loading, :boolean, default: false, doc: "in loading state if true"
+
+  attr :multiple, :boolean, default: true
 
   attr :field, FormField,
     required: true,
@@ -496,9 +500,9 @@ defmodule AlertsUIWeb.SharedComponents do
   attr :filter_field, FormField,
     required: true,
     doc:
-      "a form field struct for the filter retrieved from the form, for example: @form[:multiselect_filter]"
+      "a form field struct for the filter retrieved from the form, for example: @form[:filtered_select_filter]"
 
-  attr :prompt, :string, default: nil, doc: "the prompt for multiselect inputs"
+  attr :prompt, :string, default: nil, doc: "the prompt for filtered_select inputs"
 
   attr :options, :list,
     required: true,
@@ -506,7 +510,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :rest, :global, include: ~w(disabled)
 
-  def multiselect(
+  def filtered_select(
         %{field: %FormField{} = field, filter_field: %FormField{} = filter_field} = assigns
       ) do
     assigns =
@@ -520,7 +524,7 @@ defmodule AlertsUIWeb.SharedComponents do
       <.label for={@id}><%= @label %></.label>
       <div
         class={[
-          "min-h-full min-w-fit flex flex-col -space-y-2 rounded border
+          "min-h-full min-w-fit flex flex-col rounded border
           bg-bg-elevation-5 disabled:bg-bg-elevation-3
           border-border-primary ring-0 ring-border-focus
           focus:ring-1 focus:border-border-focus
@@ -536,8 +540,10 @@ defmodule AlertsUIWeb.SharedComponents do
           {@rest}
         />
         <hr class="w-5/6 self-center border-y-1 border-border-primary min-h-[1rem]" />
+        <div :if={@loading} class="-mt-4 ml-4 z-50">Loading ...</div>
         <.select
-          multiple={true}
+          multiple={@multiple}
+          size="20"
           options={
             Enum.filter(@options, fn {option, _value} ->
               option = String.downcase(option || "")
@@ -549,10 +555,10 @@ defmodule AlertsUIWeb.SharedComponents do
             end)
           }
           field={@field}
-          prompt={@prompt}
+          prompt={if @loading, do: nil, else: @prompt}
           class="min-h-full m-0"
           select_class="min-w-full min-h-[87%] pt-0 mt-0 [scrollbar-width:thin] overflow-auto
-            border-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-t-none"
+            border-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-t-none [appearance:none]"
           {@rest}
         />
       </div>

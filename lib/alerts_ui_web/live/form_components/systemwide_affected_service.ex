@@ -93,6 +93,9 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
     case apply_action(changeset, :insert) do
       {:ok, changeset} ->
         send(self(), {:section_completed, changeset})
+
+      {:error, changeset} ->
+        changeset
     end
 
     form =

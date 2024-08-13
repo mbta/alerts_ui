@@ -15,6 +15,24 @@ defmodule AlertsUI.Models.InformedEntity do
     :using_wheelchair
   ]
 
+  @all_facility_types [
+    "BIKE_STORAGE",
+    "ELECTRIC_CAR_CHARGERS",
+    "ELEVATED_SUBPLATFORM",
+    "ELEVATOR",
+    "ESCALATOR",
+    "FARE_MEDIA_ASSISTANCE_FACILITY",
+    "FARE_MEDIA_ASSISTANT",
+    "FARE_VENDING_MACHINE",
+    "FARE_VENDING_RETAILER",
+    "FULLY_ELEVATED_PLATFORM",
+    "PARKING_AREA",
+    "PICK_DROP",
+    "PORTABLE_BOARDING_LIFT",
+    "RAMP",
+    "TICKET_WINDOW"
+  ]
+
   @activity Activity.activities()
 
   @permitted_fields ~w(alert_id route_id facility_id direction_id agency_id route_type stop_id activities)a
@@ -108,6 +126,22 @@ defmodule AlertsUI.Models.InformedEntity do
   def facility_activity?(_), do: false
 
   @doc """
+  Map facility effects to their types
+
+  ## Examples
+    iex> InformedEntity.facility_effect_to_types(:BIKE_ISSUE)
+    ["BIKE_STORAGE"]
+  """
+  @spec facility_effect_to_types(atom()) :: [String.t()]
+  def facility_effect_to_types(:ACCESS_ISSUE), do: @all_facility_types
+  def facility_effect_to_types(:FACILITY_ISSUE), do: @all_facility_types
+  def facility_effect_to_types(:BIKE_ISSUE), do: ["BIKE_STORAGE"]
+  def facility_effect_to_types(:ELEVATOR_CLOSURE), do: ["ELEVATOR"]
+  def facility_effect_to_types(:ESCALATOR_CLOSURE), do: ["ESCALATOR"]
+  def facility_effect_to_types(:PARKING_CLOSURE), do: ["PARKING_AREA", "PICK_DROP"]
+  def facility_effect_to_types(:PARKING_ISSUE), do: ["PARKING_AREA", "PICK_DROP"]
+
+  @doc """
   Map route type names to integer codes.
 
     ## Examples
@@ -137,6 +171,9 @@ defmodule AlertsUI.Models.InformedEntity do
   def route_code_mapping(4), do: "Ferry"
   def route_code_mapping(_), do: nil
 
+  @doc """
+  Map route ids to their combo routes
+  """
   @spec route_to_combo_route_mapping() :: %{String.t() => String.t()}
   def route_to_combo_route_mapping do
     %{

@@ -289,6 +289,13 @@ defmodule AlertsUI.Models.Alert do
     |> Enum.uniq()
   end
 
+  def gather_facility_ids(informed_entities) do
+    informed_entities
+    |> Enum.map(&Map.get(&1, :facility_id))
+    |> Enum.filter(&(!is_nil(&1)))
+    |> Enum.uniq()
+  end
+
   def gather_parent_stop_ids(informed_entities) do
     informed_entities
     |> Enum.map(fn ie ->

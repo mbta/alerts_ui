@@ -21,13 +21,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       })
 
       assert AlertData.build_alert_data("1") == %AlertData{
-               combination: nil,
+               combination: :ACCESS,
                direction: nil,
                effect_name: "Access Issue",
                route_type: nil,
                route_ids: [],
                stop_ids: [],
                trip_ids: [],
+               facility_id: "",
                header_text: "cool header text",
                description_text: "description text",
                service_types: []
@@ -53,6 +54,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                combination: :RDS,
                direction: nil,
                effect_name: "Delay",
+               facility_id: "",
                route_type: 1,
                route_ids: ["1", "2", "3", "4"],
                stop_ids: ["a2", "a3"],
@@ -60,6 +62,32 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                header_text: "cool header text",
                description_text: "description text",
                service_types: []
+             }
+    end
+
+    test "gets facility id correctly" do
+      insert(:alert, %{
+        alert_id: "1",
+        effect: :OTHER_EFFECT,
+        effect_detail: "BIKE_ISSUE",
+        header_text: "cool header text",
+        description_text: "description text",
+        informed_entity: [
+          %{facility_id: "example-facility"}
+        ]
+      })
+
+      assert AlertData.build_alert_data("1") == %AlertData{
+               combination: :ACCESS,
+               direction: nil,
+               effect_name: "Bike Issue",
+               facility_id: "example-facility",
+               stop_ids: [],
+               route_ids: [],
+               trip_ids: [],
+               service_types: [nil],
+               header_text: "cool header text",
+               description_text: "description text"
              }
     end
 
@@ -96,6 +124,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                image_url: "http://www.example.com/example.jpg",
                image_alternative_text: "An example image",
                route_type: 3,
+               facility_id: "",
                route_ids: ["1", "2", "3", "4"],
                stop_ids: ["a2", "a3"],
                trip_ids: ["b1"],
@@ -128,6 +157,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                route_ids: [],
                stop_ids: [],
                trip_ids: [],
+               facility_id: "",
                header_text: "cool header text",
                description_text: "description text"
              }
@@ -154,6 +184,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                route_ids: [],
                stop_ids: [],
                trip_ids: [],
+               facility_id: "",
                header_text: "cool header text",
                description_text: "description text"
              }

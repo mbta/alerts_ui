@@ -4,6 +4,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   """
 
   alias AlertsUIWeb.DateTimeHelpers
+  alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.{Schedule, Trip}
   alias MBTAV3API.Stops.Stop
@@ -16,13 +17,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
     |> Enum.map(fn object -> {name_for_option(object), id_for_option(object)} end)
   end
 
-  @spec sort_order(Stop.t() | Route.t() | Schedule.t()) :: non_neg_integer() | nil
+  @spec sort_order(Stop.t() | Route.t() | Schedule.t() | Facility.t()) :: non_neg_integer() | nil
   # keep original order from API
   def sort_order(%Stop{}), do: nil
   def sort_order(%Schedule{}), do: nil
+  def sort_order(%Facility{}), do: nil
   def sort_order(%Route{sort_order: sort_order}), do: sort_order
 
-  @spec name_for_option(Stop.t() | Route.t() | Schedule.t()) :: String.t()
+  @spec name_for_option(Stop.t() | Route.t() | Schedule.t() | Facility.t()) :: String.t()
   def name_for_option(%Stop{name: name}), do: name
 
   def name_for_option(%Route{name: empty_name, long_name: long_name})
@@ -30,6 +32,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
       do: long_name
 
   def name_for_option(%Route{name: name}), do: name
+
+  def name_for_option(%Facility{long_name: nil, short_name: short_name}), do: short_name
+  def name_for_option(%Facility{long_name: long_name}), do: long_name
 
   def name_for_option(%Schedule{
         trip: %Trip{name: trip_name},
@@ -39,9 +44,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
     "#{trip_name} (#{DateTimeHelpers.friendly_time(departure_time)} from #{stop_name})"
   end
 
-  @spec id_for_option(Stop.t() | Route.t() | Schedule.t()) :: String.t()
+  @spec id_for_option(Stop.t() | Route.t() | Schedule.t() | Facility.t()) :: String.t()
   def id_for_option(%Stop{id: id}), do: id
   def id_for_option(%Route{id: id}), do: id
+  def id_for_option(%Facility{id: id}), do: id
   def id_for_option(%Schedule{trip: %Trip{id: id}}), do: id
 
   @spec formatted_trip_options(%{String.t() => [Schedule.t()]}) :: keyword(String.t())
