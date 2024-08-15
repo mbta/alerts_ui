@@ -367,7 +367,7 @@ defmodule AlertsUIWeb.SharedComponents do
   def toggle_checkgroup(%{field: %FormField{} = field} = assigns) do
     assigns =
       assigns
-      |> assign(id: field.id, field_value: normalize_field_value(field.value))
+      |> assign(id: field.id, field_value: normalize_strings_to_integers(field.value))
       |> assign_new(:name, fn -> field.name <> "[]" end)
       |> assign(toggle_button_classes())
       |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
@@ -404,15 +404,13 @@ defmodule AlertsUIWeb.SharedComponents do
     """
   end
 
-  defp normalize_field_value(nil), do: nil
-
-  defp normalize_field_value(values) when is_list(values),
+  defp normalize_strings_to_integers(values) when is_list(values),
     do:
       Enum.map(values, fn value ->
         if is_integer(value), do: Integer.to_string(value), else: value
       end)
 
-  defp normalize_field_value(value), do: value
+  defp normalize_strings_to_integers(value), do: value
 
   @doc """
   Renders a select input.
