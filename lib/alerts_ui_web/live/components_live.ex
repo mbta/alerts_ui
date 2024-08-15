@@ -20,9 +20,11 @@ defmodule AlertsUIWeb.ComponentsLive do
     field :textarea_error, :string
     field :toggle_checkgroup, :string
     field :datetime, :string
+    field :checkbox, :boolean
+    field :checkbox_icon, :boolean
   end
 
-  @fields ~w[single_select filtered_select text_input textarea single_select_error filtered_select_error text_input_error textarea_error filtered_select_filter toggle_checkgroup datetime]a
+  @fields ~w[single_select filtered_select text_input textarea single_select_error filtered_select_error text_input_error textarea_error filtered_select_filter toggle_checkgroup  datetime checkbox checkbox_icon]a
   @errored_fields ~w[single_select_error filtered_select_error text_input_error textarea_error]a
 
   @impl true
