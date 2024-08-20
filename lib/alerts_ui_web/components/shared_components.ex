@@ -550,7 +550,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
               case @filter_value do
                 "" -> true
-                _ -> String.starts_with?(option, @filter_value)
+                _ -> String.contains?(option, @filter_value)
               end
             end)
           }
