@@ -602,7 +602,7 @@ defmodule AlertsUIWeb.SharedComponents do
     <.text_input />
   """
   attr :label, :string, default: nil
-  attr :class, :string, default: "", doc: "additional classes to add"
+  attr :class, :any, default: "", doc: "additional classes to add"
 
   attr :field, FormField,
     required: true,
@@ -629,10 +629,11 @@ defmodule AlertsUIWeb.SharedComponents do
         placeholder={@placeholder}
         value={@value}
         class={[
-          ["bg-bg-input-default border border-bg-elevation-6 pl-2 py-1.5
+          "bg-bg-input-default border border-bg-elevation-6 pl-2 py-1.5
             rounded text-text-primary disabled:text-text-secondary
             disabled:bg-bg-elevation-3 ring-0  focus:ring-0 ring-border-focus
-            focus:border-border-focus", @class],
+            focus:border-border-focus",
+          @class,
           @errors != [] && "border-danger focus:border-danger"
         ]}
         {@rest}

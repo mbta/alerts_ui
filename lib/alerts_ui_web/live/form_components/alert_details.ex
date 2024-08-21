@@ -50,6 +50,16 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   end
 
   def handle_event("validate", %{"alert_details" => alert_details}, socket) do
+    form =
+      %__MODULE__{}
+      |> changeset(alert_details)
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    {:noreply, assign(socket, %{form: form, alert_details: alert_details})}
+  end
+
+  def handle_event("validate_image_url", %{"alert_details" => alert_details}, socket) do
     image_size = alert_details["image_url"] |> get_image_size()
     image_path = alert_details["image_url"] |> get_image_path()
 
@@ -181,8 +191,10 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
             field={@form[:image_url]}
             label="Image URL"
             phx-debounce={500}
+            phx-target={@myself}
+            phx-change="validate_image_url"
             id="image_url_input"
-            class={"min-w-[50%] #{if(@form[:image_url].value not in ["", nil], do: "border-b-0")}"}
+            class={["min-w-[50%]", if(@form[:image_url].value not in ["", nil], do: "border-b-0")]}
           />
 
           <div
@@ -242,14 +254,12 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
 
   defp get_image_size(url) do
     with true <- url_valid?(url),
-         {:ok, request} <- Req.get(url),
-         false <- is_nil(request.body),
-         true <-
-           Req.Response.get_header(request, "content-type")
-           |> Enum.all?(&Regex.match?(~r/image\//, &1)),
-         true <- is_binary(request.body),
-         true <- is_integer(byte_size(request.body)) do
-      (byte_size(request.body) / 1_000_000) |> Float.round(2)
+         {:ok,
+          %{headers: %{"content-type" => content_type, "content-length" => [content_length]}}} <-
+           Req.head(url),
+         true <- content_type |> Enum.all?(&String.starts_with?(&1, "image/")),
+         {integer, _} <- Integer.parse(content_length) do
+      (integer / 1_000_000) |> Float.round(2)
     else
       _ -> nil
     end
