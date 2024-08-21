@@ -474,8 +474,9 @@ defmodule AlertsUIWeb.SharedComponents do
 
   @doc """
   Renders a filtered_select input with an attached filter.
-  Requires: select field, filter field. The filtering will not
-  work if the form is not updated with a phx-change event
+  Requires: select field, filter field. Expects the
+  options to be pre-filtered with the filter field
+  value before being passed in.
   See live/components_live.ex for a working example
 
   ##Examples
@@ -544,16 +545,7 @@ defmodule AlertsUIWeb.SharedComponents do
         <.select
           multiple={@multiple}
           size="20"
-          options={
-            Enum.filter(@options, fn {option, _value} ->
-              option = String.downcase(option || "")
-
-              case @filter_value do
-                "" -> true
-                _ -> String.contains?(option, @filter_value)
-              end
-            end)
-          }
+          options={@options}
           field={@field}
           prompt={if @loading, do: nil, else: @prompt}
           class="min-h-full m-0"

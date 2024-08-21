@@ -17,6 +17,27 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
     |> Enum.map(fn object -> {name_for_option(object), id_for_option(object)} end)
   end
 
+  @spec formatted_select_options([Route.t() | Stop.t()], String.t()) :: keyword(String.t())
+  def formatted_select_options(objects, filter_value) do
+    objects
+    |> formatted_select_options()
+    |> filter_options(filter_value)
+  end
+
+  @spec filter_options(list(), String.t() | nil) :: list()
+  def filter_options(options, nil), do: options
+  def filter_options(options, ""), do: options
+
+  def filter_options(options, filter_value) do
+    filter_value = String.downcase(filter_value || "")
+
+    Enum.filter(options, fn {option, _value} ->
+      (option || "")
+      |> String.downcase()
+      |> String.contains?(filter_value)
+    end)
+  end
+
   @spec sort_order(Stop.t() | Route.t() | Schedule.t() | Facility.t()) :: non_neg_integer() | nil
   # keep original order from API
   def sort_order(%Stop{}), do: nil
@@ -50,16 +71,16 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   def id_for_option(%Facility{id: id}), do: id
   def id_for_option(%Schedule{trip: %Trip{id: id}}), do: id
 
-  @spec formatted_trip_options(%{String.t() => [Schedule.t()]}) :: keyword(String.t())
-  def formatted_trip_options(schedules_by_route_name) do
+  @spec formatted_trip_options(%{String.t() => [Schedule.t()]}, String.t()) :: keyword(String.t())
+  def formatted_trip_options(schedules_by_route_name, filter_value \\ "") do
     if schedules_by_route_name |> Map.keys() |> length() <= 1 do
       schedules_by_route_name
       |> Map.values()
       |> List.flatten()
-      |> formatted_select_options()
+      |> formatted_select_options(filter_value)
     else
       Enum.reduce(schedules_by_route_name, [], fn {route_name, schedules}, acc ->
-        acc ++ [{route_name, formatted_select_options(schedules)}]
+        acc ++ [{route_name, formatted_select_options(schedules, filter_value)}]
       end)
     end
   end
