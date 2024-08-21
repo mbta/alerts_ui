@@ -12,7 +12,7 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedServiceTest do
   @assigns %{
     id: "details",
     progress: %Step{
-      name: "affected-service",
+      name: "details",
       previous: "route_type_and_effect",
       next: "success",
       label: "Alert Details"
@@ -26,7 +26,7 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedServiceTest do
       rendered = render_component(SystemwideAffectedService, @assigns)
 
       assert rendered =~ ~s(id="systemwide-affected-service-form")
-      assert rendered =~ "Service Type(s)"
+      assert rendered =~ "Service types"
     end
 
     test "it sends section_completed if no error in changeset" do
@@ -46,9 +46,8 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedServiceTest do
 
       {:ok, view, _html} = live_isolated_component(SystemwideAffectedService, assigns)
 
-      assert view
-             |> element("select#systemwide_affected_service_service_types")
-             |> render() =~ ~s(<option selected="selected" value="3">Bus</option>)
+      rendered_view = render(view)
+      assert rendered_view =~ ~s( value="3" checked="checked" )
     end
   end
 
@@ -57,7 +56,7 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedServiceTest do
       assert {:noreply, socket} =
                SystemwideAffectedService.handle_event(
                  "validate",
-                 %{"systemwide_affected_service" => %{"service_types" => ["3"]}},
+                 %{"systemwide_affected_service" => %{"service_types" => [3]}},
                  %LiveView.Socket{}
                )
 

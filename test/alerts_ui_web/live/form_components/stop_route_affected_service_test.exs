@@ -41,14 +41,14 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
           })
 
         refute view
-               |> render() =~ "Route(s)"
+               |> render() =~ "Routes"
 
         view
         |> element("form")
         |> render_change(%{"stop_route_affected_service" => %{"stop_ids" => ["1"]}})
 
         assert view
-               |> render() =~ "Route(s)"
+               |> render() =~ "Routes"
       end
     end
 
