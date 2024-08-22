@@ -43,6 +43,13 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
     {:ok, socket}
   end
 
+  @impl true
+  def update(%{alert_data: alert_data} = assigns, socket) do
+    clean_alert_data = Map.merge(alert_data, %{route_ids: [], trip_ids: [], stop_ids: []})
+    assigns = Map.put(assigns, :alert_data, clean_alert_data)
+    {:ok, assign(socket, assigns)}
+  end
+
   def changeset(changeset, params) do
     changeset
     |> cast(params, @fields)
