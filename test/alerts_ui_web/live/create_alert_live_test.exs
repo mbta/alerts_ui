@@ -69,14 +69,10 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
     @tag :logged_in_user
     test "shows correct affected service for access combination", %{conn: conn} do
-      facilities = [
-        %Facility{id: "1", long_name: "real big elevator", stop: %Stop{id: 2, name: "stop"}}
-      ]
-
-      with_mock(
-        FacilitiesRepo,
-        get_by_type: fn _types, _opts -> facilities end
-      ) do
+      with_mocks([
+        {RoutePatternsRepo, [], [included_stops_by_route_id: fn _route_id, _direction -> [] end]},
+        {FacilitiesRepo, [], get_by_type: fn _types, _opts -> [] end}
+      ]) do
         insert(:alert, alert_id: "1")
         {:ok, view, _html} = live(conn, "/alerts/new")
 
@@ -112,7 +108,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
     @tag :logged_in_user
     test "shows correct affected service for stop route combination", %{conn: conn} do
       with_mocks([
-        {RoutePatternsRepo, [], by_route_id: fn _route_id, _opts -> [] end},
+        {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
         {StopsRepo, [], by_route_type: fn _route_type -> [] end}
       ]) do
         insert(:alert, alert_id: "1")
@@ -222,8 +218,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
       with_mocks([
         {StopsRepo, [], by_route: fn _route, _direction -> stops end},
-        {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [] end},
-        {RoutePatternsRepo, [], included_stops_by_route_id: fn _route_id, _direction -> [] end}
+        {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [] end}
       ]) do
         conn = log_in_user(conn)
         {:ok, view, _html} = live(conn, "/alerts/new")

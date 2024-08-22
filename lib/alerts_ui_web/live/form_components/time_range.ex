@@ -13,11 +13,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     :custom
   ]
 
-  @start_values [
-    :now,
-    :custom
-  ]
-
   @end_values [
     :later_today,
     :end_of_service_today,
@@ -81,7 +76,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         result -> Atom.to_string(result)
       end
 
-    default_alert_data =
+    alert_data =
       %{
         active_period_start: active_period_start,
         active_period_end: active_period_end,
@@ -89,13 +84,13 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         active_period_start_specifier: active_period_start_specifier
       }
 
-    changeset = changeset(%__MODULE__{}, default_alert_data)
+    changeset = changeset(%__MODULE__{}, alert_data)
 
     send(self(), {:section_completed, changeset})
     form = to_form(changeset)
 
     assigns =
-      default_alert_data
+      alert_data
       |> Map.merge(%{form: form})
       |> Map.merge(assigns)
 
@@ -161,25 +156,22 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   @spec validate_validity(Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
   def validate_validity(changeset, time_range) do
-    changeset
-    |> then(fn changeset ->
+    changeset =
       case NaiveDateTime.from_iso8601(time_range["active_period_start"]) do
         {:ok, _} -> changeset
         {:error, _} -> add_error(changeset, :active_period_start, "Enter a valid datetime")
       end
-    end)
-    |> then(fn changeset ->
-      cond do
-        time_range["active_period_end"] == "" ->
-          changeset
 
-        NaiveDateTime.from_iso8601(time_range["active_period_end"]) == {:error, :invalid_format} ->
-          add_error(changeset, :active_period_end, "Enter a valid datetime")
+    cond do
+      time_range["active_period_end"] == "" ->
+        changeset
 
-        true ->
-          changeset
-      end
-    end)
+      NaiveDateTime.from_iso8601(time_range["active_period_end"]) == {:error, :invalid_format} ->
+        add_error(changeset, :active_period_end, "Enter a valid datetime")
+
+      true ->
+        changeset
+    end
   end
 
   @spec validate_relationship(Ecto.Changeset.t(), map(), DateTime.t()) :: Ecto.Changeset.t()

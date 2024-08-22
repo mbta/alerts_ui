@@ -708,7 +708,6 @@ defmodule AlertsUIWeb.SharedComponents do
       min="2024-07-18T12:43"
       value="2024-07-18T12:43
       max="2024-07-19T12:43"
-      prompt="All"
     />
   """
   attr :label, :string, default: nil
@@ -726,8 +725,6 @@ defmodule AlertsUIWeb.SharedComponents do
   attr :field, FormField,
     required: true,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
-
-  attr :prompt, :string, default: nil, doc: "the prompt for select inputs"
 
   attr :hidden, :boolean, default: false, doc: "hides component if true"
 
