@@ -462,7 +462,7 @@ defmodule AlertsUIWeb.SharedComponents do
         id={@id}
         name={@name}
         class={[
-          "bg-bg-elevation-5 border border-border-primary pl-3 min-w-[99%] [color-scheme:light]
+          "bg-bg-elevation-5 border border-bg-elevation-6 pl-3 py-1.5 min-w-[99%] p-0 [color-scheme:light]
             rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto
             disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
             focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25)",
@@ -534,7 +534,7 @@ defmodule AlertsUIWeb.SharedComponents do
         class={[
           "min-h-full min-w-fit flex flex-col rounded border
           bg-bg-elevation-5 disabled:bg-bg-elevation-3
-          border-border-primary ring-0 ring-border-focus
+          border-bg-elevation-6 ring-0 ring-border-focus
           focus:ring-1 focus:border-border-focus
           focus-within:ring-1 focus-within:border-border-focus",
           @errors != [] && "border-danger focus:border-danger"
@@ -547,7 +547,7 @@ defmodule AlertsUIWeb.SharedComponents do
           placeholder="⌕ Search..."
           {@rest}
         />
-        <hr class="w-5/6 self-center border-y-1 border-border-primary min-h-[1rem]" />
+        <hr class="w-5/6 self-center border-y-1 border-bg-elevation-6 min-h-[1rem]" />
         <div :if={@loading} class="-mt-4 ml-4 z-50">Loading ...</div>
         <.select
           multiple={@multiple}
@@ -610,7 +610,7 @@ defmodule AlertsUIWeb.SharedComponents do
     <.text_input />
   """
   attr :label, :string, default: nil
-  attr :class, :string, default: "", doc: "additional classes to add"
+  attr :class, :any, default: "", doc: "additional classes to add"
 
   attr :field, FormField,
     required: true,
@@ -637,10 +637,11 @@ defmodule AlertsUIWeb.SharedComponents do
         placeholder={@placeholder}
         value={@value}
         class={[
-          ["bg-bg-input-default border border-border-primary pl-3 py-1.5
+          "bg-bg-input-default border border-bg-elevation-6 pl-2 py-1.5
             rounded text-text-primary disabled:text-text-secondary
             disabled:bg-bg-elevation-3 ring-0  focus:ring-0 ring-border-focus
-            focus:border-border-focus", @class],
+            focus:border-border-focus",
+          @class,
           @errors != [] && "border-danger focus:border-danger"
         ]}
         {@rest}
@@ -681,7 +682,7 @@ defmodule AlertsUIWeb.SharedComponents do
         name={@name}
         placeholder={@placeholder}
         class={[
-          "bg-bg-input-default border border-border-primary pl-3 py-1.5
+          "bg-bg-input-default border border-bg-elevation-6 pl-3 py-1.5
             rounded text-text-primary disabled:text-text-secondary
             disabled:bg-bg-elevation-3 ring-0 ring-border-focus
             focus:ring-1 focus:border-border-focus",
