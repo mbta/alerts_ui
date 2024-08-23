@@ -16,7 +16,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       label: "Time Range"
     },
     alert_data: %{},
-    editing: false
+    current_time: "2024-04-30T09:33:20"
   }
 
   describe "component" do
@@ -24,7 +24,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       assert render_component(TimeRange, @assigns) =~ ~s(id="time_range_form")
     end
 
-    test "enddate picker only populated if pick option selected" do
+    test "enddate picker only active if pick option selected" do
       {:ok, view, _html} =
         live_isolated_component(
           TimeRange,
@@ -32,18 +32,19 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         )
 
       assert view
-             |> render() =~ ~s(id=\"end-selector-div\" class=\"hidden\")
+             |> render() =~ ~s(\" type=\"datetime-local\" disabled=\"disabled\")
 
       view
       |> element("form")
       |> render_change(%{
         "time_range" => %{
-          "active_period_end_specifier" => "pick_a_date_and_time"
+          "active_period_start_specifier" => "custom",
+          "active_period_end_specifier" => "custom"
         }
       })
 
       refute view
-             |> render() =~ ~s(id=\"end-selector-div\" class=\"hidden\")
+             |> render() =~ ~s(\" type=\"datetime-local\" disabled=\"disabled\")
     end
 
     test "works if editing" do
@@ -55,13 +56,79 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
             editing: true,
             alert_data: %{
               active_period_start: ~N[2024-04-30 11:54:00],
-              active_period_end_specifier: :pick_a_date_and_time
+              active_period_end_specifier: :custom
             }
           })
         )
 
       assert view
-             |> render() =~ "pick a date and time"
+             |> render() =~ "custom"
+    end
+
+    test "displays error if start before current time" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end" => "",
+          "active_period_start" => "2024-04-28T10:54:00",
+          "active_period_start_specifier" => "custom"
+        }
+      })
+
+      assert render(view) =~ ~s(Effect can&#39;t start in the past)
+    end
+
+    test "displays error if start invalid" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_start" => "foo",
+          "active_period_start_specifier" => "custom"
+        }
+      })
+
+      assert render(view) =~ ~s(Enter a valid datetime)
+    end
+
+    test "displays error if end invalid" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end" => "foo",
+          "active_period_end_specifier" => "custom"
+        }
+      })
+
+      assert render(view) =~ ~s(Enter a valid datetime)
+    end
+
+    test "displays error if end after start" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end" => "2024-05-01T09:54:00",
+          "active_period_start" => "2024-05-01T10:54:00",
+          "active_period_end_specifier" => "custom"
+        }
+      })
+
+      assert render(view) =~ ~s(Effect must end after 05/01/2024, 10:54:00 AM)
     end
 
     test "it sends section_completed if no error in changeset" do
@@ -72,9 +139,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       |> element("form")
       |> render_change(%{
         "time_range" => %{
-          "active_period_end" => "2024-05-01T09:54",
-          "active_period_end_specifier" => "pick_a_date_and_time",
-          "active_period_start" => "2024-05-01T08:54"
+          "active_period_end" => "2024-05-01T09:54:00",
+          "active_period_start" => "2024-05-01T08:54:00",
+          "active_period_end_specifier" => "custom"
         }
       })
 
@@ -82,7 +149,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
                       {:section_completed,
                        %TimeRange{
                          active_period_end: ~N[2024-05-01 09:54:00],
-                         active_period_end_specifier: :pick_a_date_and_time,
+                         active_period_end_specifier: :custom,
                          active_period_start: ~N[2024-05-01 08:54:00]
                        }}}
     end

@@ -170,5 +170,20 @@
       class="max-w-[16rem]"
       show_icons={true}
     />
+    <.datetime
+      field={@form[:datetime]}
+      min={@current_time}
+      value={@current_time}
+      label="Datetime"
+      class="min-w-[16rem] max-w-[16rem]"
+    />
+    <.datetime
+      field={@form[:datetime]}
+      min={@current_time}
+      value={@current_time}
+      label="Disabled Datetime"
+      class="min-w-[16rem] max-w-[16rem]"
+      disabled={true}
+    />
   </.form>
 </div>

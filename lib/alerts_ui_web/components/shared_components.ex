@@ -445,7 +445,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :hidden, :boolean, default: false, doc: "hides component if true"
 
-  attr :rest, :global, include: ~w(disabled size)
+  attr :rest, :global, include: ~w(disabled size phx-debounce)
 
   def select(%{field: %FormField{} = field} = assigns) do
     assigns =
@@ -465,7 +465,7 @@ defmodule AlertsUIWeb.SharedComponents do
           "bg-bg-elevation-5 border border-bg-elevation-6 pl-3 py-1.5 min-w-[99%] p-0 [color-scheme:light]
             rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto
             disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
-            focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25)",
+            focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) h-10",
           @select_class,
           @errors != [] && "border-danger focus:border-danger"
         ]}
@@ -516,7 +516,7 @@ defmodule AlertsUIWeb.SharedComponents do
     required: true,
     doc: "the options to pass to Phoenix.HTML.Form.options_for_select/2"
 
-  attr :rest, :global, include: ~w(disabled)
+  attr :rest, :global, include: ~w(disabled phx-debounce)
 
   def filtered_select(
         %{field: %FormField{} = field, filter_field: %FormField{} = filter_field} = assigns
@@ -691,6 +691,73 @@ defmodule AlertsUIWeb.SharedComponents do
         ]}
         {@rest}
       ><%= Form.normalize_value("textarea", @value) %></textarea>
+      <.input_error :for={msg <- @errors}><%= msg %></.input_error>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a date/time input.
+
+  You can use this as a date or a time input by passing those as the type.
+  Default type is datetime-local
+  ##Examples
+    <.datetime
+      label="Datetime selector"
+      field={@form[:field_name]}
+      min="2024-07-18T12:43"
+      value="2024-07-18T12:43
+      max="2024-07-19T12:43"
+    />
+  """
+  attr :label, :string, default: nil
+
+  attr :class, :string, default: "", doc: "classes to add to the containing div"
+
+  attr :min, :string, default: ""
+
+  attr :max, :string, default: ""
+
+  attr :value, :string, default: ""
+
+  attr :type, :string, default: "datetime-local"
+
+  attr :field, FormField,
+    required: true,
+    doc: "a form field struct retrieved from the form, for example: @form[:email]"
+
+  attr :hidden, :boolean, default: false, doc: "hides component if true"
+
+  attr :rest, :global, include: ~w(disabled phx-debounce)
+
+  def datetime(%{field: %FormField{} = field} = assigns) do
+    assigns =
+      assigns
+      |> assign(field: nil, id: field.id, name: field.name)
+      |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
+      |> assign_new(:name, fn -> if assigns.multiple, do: field.name <> "[]", else: field.name end)
+
+    ~H"""
+    <div phx-feedback-for={@name} class={["#{@class}", @hidden && "hidden"]}>
+      <.label for={@id} class={if is_nil(@label), do: "hidden"}><%= @label %></.label>
+      <input
+        id={@id}
+        name={@name}
+        min={@min}
+        max={@max}
+        value={@value}
+        step="1"
+        class={[
+          "bg-bg-elevation-5 border border-border-primary pl-3 py-1.5 min-w-[99%] p-0
+            rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto
+            disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
+            focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25)",
+          @errors != [] && "border-danger focus:border-danger"
+        ]}
+        type={@type}
+        {@rest}
+      />
+
       <.input_error :for={msg <- @errors}><%= msg %></.input_error>
     </div>
     """
