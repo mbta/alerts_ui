@@ -28,7 +28,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     field :active_period_end, :naive_datetime
   end
 
-  @fields ~w[active_period_start active_period_end active_period_end_specifier active_period_start_specifier]a
+  @required_fields ~w[active_period_start]a
+  @fields ~w[active_period_end active_period_end_specifier active_period_start_specifier]a ++
+            @required_fields
 
   @impl true
   def mount(socket) do
@@ -132,7 +134,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
     changeset =
       changeset(%__MODULE__{}, time_range)
-      |> validate_validity(time_range)
       |> validate_relationship(time_range, current_time)
       |> Map.put(:action, :validate)
 
@@ -151,27 +152,17 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   end
 
   defp changeset(changeset, params \\ %{}) do
-    cast(changeset, params, @fields)
-  end
+    custom_errors = [
+      active_period_start: "Enter a valid datetime",
+      active_period_end: "Enter a valid datetime"
+    ]
 
-  @spec validate_validity(Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
-  def validate_validity(changeset, time_range) do
-    changeset =
-      case NaiveDateTime.from_iso8601(time_range["active_period_start"]) do
-        {:ok, _} -> changeset
-        {:error, _} -> add_error(changeset, :active_period_start, "Enter a valid datetime")
-      end
-
-    cond do
-      time_range["active_period_end"] == "" ->
-        changeset
-
-      NaiveDateTime.from_iso8601(time_range["active_period_end"]) == {:error, :invalid_format} ->
-        add_error(changeset, :active_period_end, "Enter a valid datetime")
-
-      true ->
-        changeset
-    end
+    changeset
+    |> cast(params, @fields,
+      empty_values: [""],
+      message: fn field, _meta -> custom_errors[field] end
+    )
+    |> validate_required(@required_fields, message: "Enter a valid datetime")
   end
 
   @spec validate_relationship(Ecto.Changeset.t(), map(), DateTime.t()) :: Ecto.Changeset.t()
@@ -226,26 +217,10 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   @impl true
   def render(assigns) do
-    start_datetime =
-      if assigns.form.params["active_period_start"] in [nil, ""] do
-        assigns.current_time
-      else
-        assigns.form.params["active_period_start"]
-      end
-
-    end_datetime =
-      if assigns.form.params["active_period_end"] in [nil] do
-        assigns.current_time
-      else
-        assigns.form.params["active_period_end"]
-      end
-
     assigns =
       assign(assigns,
         start_values: @start_values,
-        end_values: @end_values,
-        start_datetime: start_datetime,
-        end_datetime: end_datetime
+        end_values: @end_values
       )
 
     ~H"""

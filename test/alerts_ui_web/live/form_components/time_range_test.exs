@@ -90,7 +90,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       |> element("form")
       |> render_change(%{
         "time_range" => %{
-          "active_period_end" => "",
           "active_period_start" => "foo",
           "active_period_start_specifier" => "custom"
         }
