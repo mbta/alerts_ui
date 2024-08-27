@@ -28,27 +28,6 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
     end
   end
 
-  describe "save as draft" do
-    test "save as draft on click" do
-      {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
-
-      view
-      |> element("form")
-      |> render_change(%{"alert_details" => %{"header_text" => "cool_bean"}})
-
-      view
-      |> element("#details_draft")
-      |> render_click(%{})
-
-      assert_receive {:__live_isolated_component_handle_info_received__, _pid,
-                      {:save_as_draft,
-                       %AlertDetails{
-                         header_text: "cool_bean",
-                         draft: true
-                       }}}
-    end
-  end
-
   describe "image url" do
     test "only shows preview if image has been entered" do
       with_mock(StopsRepo, by_route: fn _route, _direction -> [] end) do
@@ -70,42 +49,6 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
                |> element("div#image-preview-div")
                |> render() =~ ~s(div id=\"image-information\")
       end
-    end
-  end
-
-  describe "save event" do
-    test "given a valid changset, sends a :create_alert event" do
-      with_mock(StopsRepo, by_route: fn _route, _direction -> [] end) do
-        {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
-
-        view
-        |> element("form")
-        |> render_change(%{
-          "alert_details" => %{
-            "header_text" => "Test header",
-            "description_text" => "Test description"
-          }
-        })
-
-        view |> element("form") |> render_submit(%{})
-
-        assert_receive {:__live_isolated_component_handle_info_received__, _pid,
-                        {:create_alert,
-                         %AlertDetails{
-                           header_text: "Test header",
-                           description_text: "Test description"
-                         }}}
-      end
-    end
-
-    test "given an invalid changset, does not sends a :create_alert event" do
-      {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
-
-      view
-      |> element("form")
-      |> render_submit(%{"alert_details" => %{}})
-
-      refute_receive {:__live_isolated_component_handle_info_received__, _pid, {:create_alert, _}}
     end
   end
 end

@@ -56,10 +56,19 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
         send(view.pid, {:section_completed, service_changeset})
 
+        {:error, changeset} =
+          Ecto.Changeset.change(%AlertDetails{})
+          |> AlertDetails.changeset(%{header_text: nil})
+          |> apply_action(:validate)
+
+        send(view.pid, {:create_alert, changeset})
+        failure_rendered_view = render(view)
+        assert failure_rendered_view =~ "header_text: is required"
+
         {:ok, changeset} =
           Ecto.Changeset.change(%AlertDetails{})
-          |> AlertDetails.changeset(%{header_text: "cool", description_text: nil})
-          |> apply_action(:insert)
+          |> AlertDetails.changeset(%{header_text: "cool"})
+          |> apply_action(:validate)
 
         send(view.pid, {:create_alert, changeset})
         rendered_view = render(view)

@@ -34,11 +34,8 @@ window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
 window.addEventListener("phx:copy", (event) => {
   console.log(event)
   if ("clipboard" in navigator) {
-    console.log(2)
     const text = event.target.textContent.trim();
     navigator.clipboard.writeText(text);
-  } else {
-    alert("Sorry, your browser does not support clipboard copy.");
   }
 });
 
