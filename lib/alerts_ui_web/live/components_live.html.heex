@@ -119,14 +119,14 @@
       label="filtered_select"
       field={@form[:filtered_select]}
       filter_field={@form[:filtered_select_filter]}
-      options={filtered_select_options()}
+      options={filtered_select_options(@form[:filtered_select_filter].value)}
       class="max-w-[16rem]"
     />
     <.filtered_select
       label="Disabled filtered_select"
       field={@form[:filtered_select]}
       filter_field={@form[:filtered_select_filter]}
-      options={filtered_select_options()}
+      options={filtered_select_options(@form[:filtered_select_filter].value)}
       disabled={true}
       class="max-w-[16rem]"
     />
@@ -134,7 +134,7 @@
       label="Errored filtered_select"
       field={@form[:filtered_select_error]}
       filter_field={@form[:filtered_select_filter]}
-      options={filtered_select_options()}
+      options={filtered_select_options(@form[:filtered_select_filter].value)}
       prompt="All"
       disabled={true}
       class="max-w-[16rem]"

@@ -155,17 +155,25 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   @impl true
   def render(assigns) do
-    route_id_options = SelectFormatter.formatted_select_options(assigns.available_routes)
+    route_filter_value = assigns.form[:route_ids_filter].value
+
+    route_id_options =
+      SelectFormatter.formatted_select_options(assigns.available_routes, route_filter_value)
 
     direction_options =
       SelectFormatter.formatted_direction_options(assigns.form[:route_ids].value)
 
+    trip_filter_value = assigns.form[:trip_ids_filter].value
+
     trip_id_options =
       assigns.available_schedules
       |> Enum.group_by(&SelectFormatter.name_for_option(&1.route))
-      |> SelectFormatter.formatted_trip_options()
+      |> SelectFormatter.formatted_trip_options(trip_filter_value)
 
-    stop_id_options = SelectFormatter.formatted_select_options(assigns.available_stops)
+    stop_filter_value = assigns.form[:stop_ids_filter].value
+
+    stop_id_options =
+      SelectFormatter.formatted_select_options(assigns.available_stops, stop_filter_value)
 
     assigns =
       assign(assigns,

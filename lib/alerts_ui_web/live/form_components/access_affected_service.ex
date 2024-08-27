@@ -113,18 +113,25 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
 
     stops = assigns.available_stops |> Enum.filter(&filter_stop_by_types(&1, params))
 
+    type_filter_value = assigns.form[:facility_types_filter].value
+
     facility_type_options =
       assigns.facility_types
       |> Enum.filter(&filter_type_by_stop_ids(&1, params, stops))
       |> Enum.map(&{&1 |> String.capitalize() |> String.replace("_", " "), &1})
+      |> SelectFormatter.filter_options(type_filter_value)
+
+    stop_filter_value = assigns.form[:stop_ids_filter].value
 
     stop_id_options =
-      SelectFormatter.formatted_select_options(stops)
+      SelectFormatter.formatted_select_options(stops, stop_filter_value)
+
+    facility_filter_value = assigns.form[:facility_id_filter].value
 
     facility_id_options =
       assigns.available_facilities
       |> Enum.filter(&filter_facility_by_type_and_stop_ids(&1, params))
-      |> SelectFormatter.formatted_select_options()
+      |> SelectFormatter.formatted_select_options(facility_filter_value)
       |> Enum.map(fn {name, id} -> {String.slice(name, 0..80), id} end)
 
     assigns =

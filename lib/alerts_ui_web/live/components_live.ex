@@ -100,7 +100,20 @@ defmodule AlertsUIWeb.ComponentsLive do
     ]
   end
 
-  defp filtered_select_options do
+  defp filtered_select_options(filter_value) do
+    select_options()
+    |> Enum.filter(fn {option, _value} ->
+      option = String.downcase(option || "")
+
+      case filter_value do
+        nil -> true
+        "" -> true
+        _ -> String.contains?(option, filter_value)
+      end
+    end)
+  end
+
+  defp select_options do
     [
       {"Aardvark", "aardvark"},
       {"Agouti", "agouti"},
