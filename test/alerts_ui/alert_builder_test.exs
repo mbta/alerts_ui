@@ -37,6 +37,7 @@ defmodule AlertsUI.AlertBuilderTest do
           route_type: 1,
           description_text: "ok",
           header_text: "hello",
+          banner_text: "important banner text",
           effect_name: "Delay",
           route_ids: ["57"],
           direction: "default",
@@ -72,7 +73,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  cause_detail: "disabled train",
                  url: "http://www.example.com",
                  image_url: "http://www.example.com/example.jpg",
-                 image_alternative_text: "an example image"
+                 image_alternative_text: "an example image",
+                 banner_text: "important banner text"
                }
 
         result |> Alerts.create_or_update_alert()
@@ -107,6 +109,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  url: nil,
                  image_url: nil,
                  image_alternative_text: nil,
+                 banner_text: nil,
                  informed_entity: [
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
@@ -190,7 +193,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  cause_detail: "freight train interference",
                  url: nil,
                  image_url: nil,
-                 image_alternative_text: nil
+                 image_alternative_text: nil,
+                 banner_text: nil
                }
 
         result |> Alerts.create_or_update_alert()

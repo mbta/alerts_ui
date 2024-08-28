@@ -163,6 +163,17 @@
       field={@form[:textarea_error]}
       placeholder="Errored TextArea"
     />
+    <div class="flex flex-col w-[16rem]">
+      <.textarea
+        field={@form[:textarea]}
+        label="Text Area with Counter"
+        phx-debounce={120}
+        maxlength="20"
+        value={@form[:textarea].value}
+        class="min-w-[16rem]"
+      />
+      <.textarea_counter character_limit={20} field={@form[:textarea]} />
+    </div>
     <.toggle_checkgroup
       label="Checkgroup with icons"
       field={@form[:toggle_checkgroup]}
@@ -170,6 +181,7 @@
       class="max-w-[16rem]"
       show_icons={true}
     />
+
     <.datetime
       field={@form[:datetime]}
       min={@current_time}
@@ -184,6 +196,13 @@
       label="Disabled Datetime"
       class="min-w-[16rem] max-w-[16rem]"
       disabled={true}
+    />
+    <.checkbox label="Checkbox" field={@form[:checkbox]} />
+    <.checkbox
+      label="Checkbox with a different image"
+      field={@form[:checkbox_icon]}
+      class="h-5 w-5 border border-border-primary rounded-sm"
+      check_class="w-[100%] h-[100%] checked:before:hero-truck leading-normal checked:before:mb-8"
     />
   </.form>
 </div>

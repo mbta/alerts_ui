@@ -238,7 +238,6 @@ defmodule AlertsUIWeb.SharedComponents do
     <button
       class={"
       text-text-white
-      bg-secondary-border
       border-secondary-border
       border-1
       px-4
@@ -585,11 +584,12 @@ defmodule AlertsUIWeb.SharedComponents do
   Renders an error block that works with inputs.
   """
   attr :for, :string, default: nil
+  attr :class, :string, default: "", doc: "additional classes to add"
   slot :inner_block, required: true
 
   def input_error(assigns) do
     ~H"""
-    <p for={@for} class="flex gap-2 mt-1 text-sm text-text-error">
+    <p for={@for} class={[@class, "flex gap-2 text-sm text-text-error"]}>
       <CoreComponents.icon name="hero-exclamation-circle" class="flex-none h-4 mt-0.5 w-4" />
       <%= render_slot(@inner_block) %>
     </p>
@@ -608,8 +608,8 @@ defmodule AlertsUIWeb.SharedComponents do
     required: true,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
-  attr :placeholder, :string, default: nil, doc: "placeholder text"
-  attr :rest, :global, include: ~w(disabled phx-debounce)
+  attr :rest, :global,
+    include: ~w(disabled phx-debounce maxlength minlength placeholder spellcheck)
 
   def text_input(%{field: %FormField{} = field} = assigns) do
     assigns =
@@ -626,7 +626,6 @@ defmodule AlertsUIWeb.SharedComponents do
         type="text"
         id={@id}
         name={@name}
-        placeholder={@placeholder}
         value={@value}
         class={[
           "bg-bg-input-default border border-bg-elevation-6 pl-2 py-1.5
@@ -655,8 +654,10 @@ defmodule AlertsUIWeb.SharedComponents do
     required: true,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
-  attr :placeholder, :string, default: nil, doc: "placeholder text"
-  attr :rest, :global, include: ~w(disabled phx-debounce)
+  attr :rest, :global,
+    include: ~w(disabled phx-debounce maxlength minlength placeholder spellcheck phx-change)
+
+  attr :value, :string, default: nil, doc: "you can override the value"
 
   def textarea(%{field: %FormField{} = field} = assigns) do
     assigns =
@@ -664,26 +665,122 @@ defmodule AlertsUIWeb.SharedComponents do
       |> assign(field: nil, id: field.id)
       |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
       |> assign_new(:name, fn -> field.name end)
-      |> assign_new(:value, fn -> field.value end)
+      |> assign_new(:value, fn -> assigns.value || field.value end)
 
     ~H"""
-    <div phx-feedback-for={@name} class="mb-5">
+    <div phx-feedback-for={@name} class="z-20">
       <.label for={@id}><%= @label %></.label>
       <textarea
         id={@id}
         name={@name}
-        placeholder={@placeholder}
+        resize="none"
+        value="true"
         class={[
-          "bg-bg-input-default border border-bg-elevation-6 pl-3 py-1.5
+          "bg-bg-input-default border border-bg-elevation-6 px-3 py-1.5
             rounded text-text-primary disabled:text-text-secondary
             disabled:bg-bg-elevation-3 ring-0 ring-border-focus
-            focus:ring-1 focus:border-border-focus",
+            focus:ring-1 focus:border-border-focus invalid:border-danger",
           @class,
           @errors != [] && "border-danger focus:border-danger"
         ]}
         {@rest}
-      ><%= Form.normalize_value("textarea", @value) %></textarea>
-      <.input_error :for={msg <- @errors}><%= msg %></.input_error>
+      ><%=  @value%></textarea>
+      <.input_error :for={msg <- @errors} class="-mt-[1.5rem] ml-1 relative"><%= msg %></.input_error>
+    </div>
+    """
+  end
+
+  @doc """
+  Text area with counter.
+
+  ## Examples
+
+      <.textarea_counter field={@form[:fieldname]} />
+  """
+
+  attr :class, :string, default: "", doc: "additional classes to add"
+  attr :character_limit, :integer, required: true
+
+  attr :field, FormField,
+    required: true,
+    doc: "the form field the counter is associated with"
+
+  attr :rest, :global, include: ~w(disabled)
+
+  def textarea_counter(%{field: %FormField{} = field} = assigns) do
+    assigns =
+      assigns
+      |> assign_new(:value, fn -> field.value end)
+      |> assign(
+        :error_length,
+        Enum.map(field.errors, &CoreComponents.translate_error(&1)) |> length
+      )
+
+    ~H"""
+    <div class={[
+      "flex flex-row justify-end min-w-[100%] text-sm text-text-secondary bg-bg-elevation-3 px-2 pt-4 rounded-b border border-bg-elevation-6 border-t-0 -mt-2",
+      if(@error_length > 0, do: "border-danger"),
+      if(String.length(@value || "") == @character_limit, do: "text-danger ")
+    ]}>
+      <%= String.length(@value || "") %>/<%= @character_limit %><span
+        :if={String.length(@value || "") == @character_limit}
+        class="ml-1"
+      > Character limit reached</span>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a checkbox input.
+
+  ## Examples
+
+      <.checkbox field={@form[:fieldname]} />
+  """
+  attr :id, :any, default: nil
+  attr :value, :any
+  attr :hidden, :boolean, default: false
+  attr :class, :string, default: "", doc: "additional classes to add to container div"
+  attr :check_class, :string, default: "", doc: "additional classes to add directly to input"
+  attr :label, :string, default: nil
+
+  attr :field, FormField,
+    doc: "a form field struct retrieved from the form, for example: @form[:email]"
+
+  attr :errors, :list, default: []
+  attr :checked, :boolean, doc: "the checked flag for checkbox inputs"
+
+  attr :rest, :global, include: ~w(phx-debounce disabled)
+
+  def checkbox(%{field: %FormField{} = field} = assigns) do
+    assigns =
+      assigns
+      |> assign(id: assigns.id || field.id)
+      |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
+      |> assign(:name, field.name)
+      |> assign_new(:checked, fn -> Form.normalize_value("checkbox", field.value) end)
+
+    ~H"""
+    <div>
+      <.label :if={@label} for={@id}><%= @label %></.label>
+      <div phx-feedback-for={@name} class={@class}>
+        <input type="hidden" name={@name} value="false" />
+        <input
+          type="checkbox"
+          id={@id}
+          name={@name}
+          value="true"
+          checked={@checked}
+          class={[
+            "[appearance:none] hover:bg-primary-hover w-4 h-4 checked:bg-primary checked:before:content-['']
+            rounded-sm bg-bg-input-default checked:before:content-['✓'] font-bold leading-none",
+            @check_class,
+            if(length(@errors) > 0, do: "border border-1 border-danger focus:border-danger")
+          ]}
+          {@rest}
+        />
+        <.input_error :for={msg <- @errors}><%= msg %></.input_error>
+      </div>
     </div>
     """
   end

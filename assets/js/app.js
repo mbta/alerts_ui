@@ -39,3 +39,10 @@ liveSocket.connect()
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
 
+// Copy to the clipboard
+window.addEventListener("phx:copy", (event) => {
+  if ("clipboard" in navigator) {
+    let text = event.target.value;
+    navigator.clipboard.writeText(text)
+  }
+})

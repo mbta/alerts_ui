@@ -18,8 +18,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     field :image_alternative_text, :string
   end
 
-  @required_fields ~w[header_text description_text]a
-  @fields @required_fields ++ ~w[draft cause_detail url image_url image_alternative_text]a
+  @fields ~w[header_text description_text draft cause_detail url image_url image_alternative_text]a
 
   @impl true
   def mount(socket) do
@@ -30,33 +29,39 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
 
   @impl true
   def update(%{alert_data: alert_data} = assigns, socket) do
-    edit_alert_data =
-      %{
-        header_text: Map.get(alert_data, :header_text),
-        description_text: Map.get(alert_data, :description_text),
-        cause_detail: Map.get(alert_data, :cause_detail),
-        url: Map.get(alert_data, :url),
-        image_url: Map.get(alert_data, :image_url),
-        image_alternative_text: Map.get(alert_data, :image_alternative_text)
-      }
-
     changeset =
       %__MODULE__{}
-      |> changeset(edit_alert_data)
+      |> changeset(alert_data)
 
     form = to_form(changeset)
-    assigns = edit_alert_data |> Map.put(:form, form) |> Map.merge(assigns)
+    assigns = assigns |> Map.put(:form, form)
     {:ok, assign(socket, assigns)}
   end
 
+  @impl true
   def handle_event("validate", %{"alert_details" => alert_details}, socket) do
+    changeset = changeset(%__MODULE__{}, alert_details)
+
+    changeset
+    |> apply_action(:insert)
+    |> case do
+      {:ok, changeset} ->
+        send(self(), {:section_completed, changeset})
+        changeset
+
+      {:error, changeset} ->
+        changeset
+    end
+
     form =
-      %__MODULE__{}
-      |> changeset(alert_details)
+      changeset
       |> Map.put(:action, :validate)
       |> to_form()
 
-    {:noreply, assign(socket, %{form: form, alert_details: alert_details})}
+    {:noreply,
+     assign(socket, %{
+       form: form
+     })}
   end
 
   def handle_event("validate_image_url", %{"alert_details" => alert_details}, socket) do
@@ -93,38 +98,6 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
      })}
   end
 
-  @impl true
-  def handle_event("save_as_draft", _params, socket) do
-    changes = Map.put(socket.assigns.form.source.changes, :draft, true)
-
-    %__MODULE__{}
-    |> draft_changeset(changes)
-    |> apply_action(:insert)
-    |> case do
-      {:ok, changeset} ->
-        send(self(), {:save_as_draft, changeset})
-        {:noreply, socket}
-
-      {:error, changeset} ->
-        {:noreply, assign(socket, :form, to_form(changeset))}
-    end
-  end
-
-  @impl true
-  def handle_event("save", _params, socket) do
-    %__MODULE__{}
-    |> changeset(socket.assigns.form.source.changes)
-    |> apply_action(:insert)
-    |> case do
-      {:ok, changeset} ->
-        send(self(), {:create_alert, changeset})
-        {:noreply, socket}
-
-      {:error, changeset} ->
-        {:noreply, assign(socket, :form, to_form(changeset))}
-    end
-  end
-
   def draft_changeset(changeset, params) do
     cast(changeset, params, @fields)
   end
@@ -132,7 +105,10 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   def changeset(changeset, params \\ %{}) do
     changeset
     |> cast(params, @fields)
-    |> validate_required(@required_fields, message: "is required")
+    |> validate_change(:url, fn :url, url ->
+      if url_valid?(url), do: [], else: [url: "Enter a valid URL"]
+    end)
+    |> validate_required(:header_text, message: "Enter alert text")
   end
 
   @impl true
@@ -150,6 +126,9 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       class={unless @progress.name == "details", do: "hidden", else: "min-w-full flex flex-col mt-4"}
       id="details_view"
     >
+      <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
+        Alert details
+      </.h5>
       <.form
         for={@form}
         phx-target={@myself}
@@ -165,26 +144,36 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           class="max-w-[16rem]"
           id="cause_input"
         />
-        <.textarea
-          field={@form[:header_text]}
-          label="Header"
-          phx-debounce={120}
-          id="header_input"
-          class="min-w-[50%]"
-        />
-        <.textarea
-          field={@form[:description_text]}
-          label="Description"
-          phx-debounce={120}
-          id="description_input"
-          class="min-w-[50%]"
-        />
+        <div class="flex flex-col w-[50%]">
+          <.textarea
+            field={@form[:header_text]}
+            label="Message"
+            phx-debounce={120}
+            maxlength="255"
+            id="header_input"
+            class="w-[100%] min-h-[10rem] border-b-0 z-20"
+            value={@form[:header_text].value}
+          />
+          <.textarea_counter character_limit={255} field={@form[:header_text]} />
+        </div>
+        <div class="flex flex-col w-[50%]">
+          <.textarea
+            field={@form[:description_text]}
+            label="Additional information"
+            phx-debounce={120}
+            id="description_input"
+            class="w-[100%] min-h-[10rem] border-b-0 z-20"
+            maxlength="255"
+            value={@form[:description_text].value}
+          />
+          <.textarea_counter character_limit={255} field={@form[:description_text]} />
+        </div>
         <.text_input
           field={@form[:url]}
           label="URL"
           phx-debounce={120}
           id="url_input"
-          class="min-w-[50%]"
+          class="w-[50%]"
         />
         <div id="image-preview-div">
           <.text_input
@@ -196,7 +185,6 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
             id="image_url_input"
             class={["min-w-[50%]", if(@form[:image_url].value not in ["", nil], do: "border-b-0")]}
           />
-
           <div
             :if={@form[:image_url].value not in ["", nil]}
             id="image-information"
@@ -214,23 +202,13 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         </div>
         <.text_input
           field={@form[:image_alternative_text]}
-          label="Image Alt Text"
+          label="Image alt text"
           phx-debounce={120}
           id="image_alt_text_input"
-          class="min-w-[50%]"
+          class="w-[50%]"
+          spellcheck="true"
         />
-        <.button_primary class="basis-8 self-center min-w-[10%]" name="save">Publish</.button_primary>
       </.form>
-      <.button_secondary
-        phx-target={@myself}
-        phx-click="save_as_draft"
-        type="button"
-        name="draft"
-        id="details_draft"
-        class="mt-8 basis-8 self-center min-w-[10%]"
-      >
-        Save as Draft
-      </.button_secondary>
     </div>
     """
   end

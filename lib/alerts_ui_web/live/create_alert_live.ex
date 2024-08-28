@@ -30,6 +30,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
     AccessAffectedService,
     AffectedService,
     AlertDetails,
+    Delivery,
     RouteTypeAndEffect,
     StopRouteAffectedService,
     SuccessfulSubmission,
