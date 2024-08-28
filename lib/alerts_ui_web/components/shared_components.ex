@@ -772,8 +772,8 @@ defmodule AlertsUIWeb.SharedComponents do
           value="true"
           checked={@checked}
           class={[
-            "
-        [appearance:none] hover:bg-primary-hover w-4 h-4 checked:bg-primary rounded-sm bg-bg-input-default checked:before:content-['✓'] font-bold leading-none",
+            "[appearance:none] hover:bg-primary-hover w-4 h-4 checked:bg-primary checked:before:content-['']
+            rounded-sm bg-bg-input-default checked:before:content-['✓'] font-bold leading-none",
             @check_class,
             if(length(@errors) > 0, do: "border border-1 border-danger focus:border-danger")
           ]}

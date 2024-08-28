@@ -43,8 +43,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
       |> changeset(Map.merge(form_params, banner_text_map))
       |> to_form()
 
-    assigns = assigns |> Map.put(:form, form)
-    {:ok, assign(socket, assigns)}
+    {:ok, socket |> assign(assigns) |> assign(form: form)}
   end
 
   def draft_changeset(changeset, params) do
@@ -61,7 +60,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
     validate(delivery, socket)
   end
 
-  def handle_event("view_checkbox", %{"delivery" => delivery}, socket) do
+  def handle_event("view_banner", %{"delivery" => delivery}, socket) do
     if Form.normalize_value("checkbox", delivery["view_banner"]) == false do
       delivery
       |> Map.put("banner_text", nil)
@@ -74,7 +73,8 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
 
   def handle_event("banner_text_change", %{"delivery" => delivery}, socket) do
     # disables sync if user types in banner field
-    Map.put(delivery, "banner_sync_toggle", false)
+    delivery
+    |> Map.put("banner_sync_toggle", false)
     |> validate(socket)
   end
 
@@ -152,7 +152,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
       >
         <div id="banner_div" class="flex flex-col w-[50%]">
           <div class="flex flex-row mb-2">
-            <.checkbox field={@form[:view_banner]} phx-change="view_checkbox" phx-target={@myself} />
+            <.checkbox field={@form[:view_banner]} phx-change="view_banner" phx-target={@myself} />
             <span class="ml-4">Banner on all MBTA.com pages</span>
           </div>
           <div :if={Form.normalize_value("checkbox", @form[:view_banner].value)} class="flex flex-row">
@@ -174,7 +174,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
               <.checkbox
                 field={@form[:banner_sync_toggle]}
                 class="h-7 w-7 border border-border-primary rounded-sm"
-                check_class="w-[100%] h-[100%] checked:before:content-[''] checked:before:hero-arrow-path leading-normal"
+                check_class="w-[100%] h-[100%] checked:before:hero-arrow-path leading-normal"
               />
 
               <button
