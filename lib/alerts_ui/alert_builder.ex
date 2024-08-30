@@ -36,7 +36,8 @@ defmodule AlertsUI.AlertBuilder do
           image_alternative_text: String.t() | nil,
           header_text: String.t(),
           description_text: String.t(),
-          banner_text: String.t() | nil
+          banner_text: String.t() | nil,
+          draft: boolean | nil
         }
   @type direction_t :: 0 | 1
   @type stop_with_context_t :: {Stop.t(), Route.id_t(), direction_t(), RoutePattern.stop_type()}
@@ -550,6 +551,8 @@ defmodule AlertsUI.AlertBuilder do
       }
     end)
   end
+
+  defp build_informed_entities(_mode, _data, _effect), do: []
 
   @spec get_trips([String.t()]) :: [Trip.t()]
   defp get_trips(trip_ids) do

@@ -39,18 +39,38 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   end
 
   @impl true
+  def update(%{submitted: submitted}, socket) do
+    socket =
+      if submitted do
+        form =
+          %__MODULE__{}
+          |> changeset(socket.assigns.form.params)
+          |> validate_required(:header_text, message: "Enter alert text")
+          |> Map.put(:action, :validate)
+          |> to_form()
+
+        assign(socket, form: form)
+      else
+        socket
+      end
+
+    {:ok, socket}
+  end
+
+  @impl true
   def handle_event("validate", %{"alert_details" => alert_details}, socket) do
     changeset = changeset(%__MODULE__{}, alert_details)
 
-    changeset
-    |> apply_action(:insert)
-    |> case do
+    case apply_action(
+           changeset |> validate_required(:header_text, message: "Enter alert text"),
+           :validate
+         ) do
       {:ok, changeset} ->
+        send(self(), {:add_errors, [], __MODULE__})
         send(self(), {:section_completed, changeset})
-        changeset
 
       {:error, changeset} ->
-        changeset
+        send(self(), {:add_errors, changeset.errors, __MODULE__})
     end
 
     form =
@@ -98,17 +118,12 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
      })}
   end
 
-  def draft_changeset(changeset, params) do
-    cast(changeset, params, @fields)
-  end
-
   def changeset(changeset, params \\ %{}) do
     changeset
     |> cast(params, @fields)
     |> validate_change(:url, fn :url, url ->
       if url_valid?(url), do: [], else: [url: "Enter a valid URL"]
     end)
-    |> validate_required(:header_text, message: "Enter alert text")
   end
 
   @impl true

@@ -9,7 +9,6 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
 
   @primary_key false
   embedded_schema do
-    field :draft, :boolean
     field :banner_text, :string
     field :banner_sync_toggle, :boolean, default: true
     field :view_banner, :boolean, default: false
@@ -46,8 +45,23 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
     {:ok, socket |> assign(assigns) |> assign(form: form)}
   end
 
-  def draft_changeset(changeset, params) do
-    cast(changeset, params, @fields)
+  @impl true
+  def update(%{submitted: submitted}, socket) do
+    socket =
+      if submitted do
+        form =
+          %__MODULE__{}
+          |> changeset(socket.assigns.form.params)
+          |> validate_banner_acceptance(banner_text?(socket.assigns.form.params, socket))
+          |> Map.put(:action, :validate)
+          |> to_form()
+
+        assign(socket, form: form)
+      else
+        socket
+      end
+
+    {:ok, socket}
   end
 
   def changeset(changeset, params \\ %{}) do
@@ -78,50 +92,23 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
     |> validate(socket)
   end
 
-  @impl true
-  def handle_event("save_as_draft", _params, socket) do
-    changes = Map.put(socket.assigns.form.source.changes, :draft, true)
-
-    %__MODULE__{}
-    |> draft_changeset(changes)
-    |> apply_action(:insert)
-    |> case do
-      {:ok, changeset} ->
-        send(self(), {:save_as_draft, changeset})
-        {:noreply, socket}
-
-      {:error, changeset} ->
-        {:noreply, assign(socket, :form, to_form(changeset))}
-    end
-  end
-
-  @impl true
-  def handle_event("save", _params, socket) do
-    %__MODULE__{}
-    |> changeset(socket.assigns.form.source.changes)
-    |> apply_action(:insert)
-    |> case do
-      {:ok, changeset} ->
-        send(self(), {:create_alert, changeset})
-        {:noreply, socket}
-
-      {:error, changeset} ->
-        {:noreply, assign(socket, :form, to_form(changeset))}
-    end
-  end
-
   def validate(delivery, socket) do
     delivery = Map.merge(socket.assigns.form.params, delivery)
+
+    banner_text?(delivery, socket)
+
     changeset = changeset(%__MODULE__{}, delivery)
 
-    changeset
-    |> apply_action(:insert)
-    |> case do
+    case changeset
+         |> validate_banner_acceptance(banner_text?(delivery, socket))
+         |> apply_action(:validate) do
       {:ok, changeset} ->
+        send(self(), {:add_errors, [], __MODULE__})
         send(self(), {:section_completed, changeset})
 
       {:error, changeset} ->
-        changeset
+        send(self(), {:add_errors, changeset.errors, __MODULE__})
+        send(self(), {:section_completed, changeset})
     end
 
     form =
@@ -130,6 +117,20 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
       |> to_form()
 
     {:noreply, assign(socket, %{form: form})}
+  end
+
+  defp validate_banner_acceptance(changeset, true),
+    do:
+      validate_acceptance(changeset, :accept_banner, message: "Check box to show you understand")
+
+  defp validate_banner_acceptance(changeset, false), do: changeset
+
+  defp banner_text?(params, socket) do
+    if Map.get(params, "banner_sync_toggle") do
+      Map.get(socket.assigns.alert_data, :header_text)
+    else
+      Map.get(params, "banner_text")
+    end not in [nil, ""]
   end
 
   @impl true
@@ -199,19 +200,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
             </span>
           </div>
         </div>
-        <.button_primary class="basis-8 self-center min-w-[10%]" name="save">Publish</.button_primary>
       </.form>
-
-      <.button_secondary
-        phx-target={@myself}
-        phx-click="save_as_draft"
-        type="button"
-        name="draft"
-        id="details_draft"
-        class="mt-8 basis-8 self-center min-w-[10%]"
-      >
-        Save as Draft
-      </.button_secondary>
     </div>
     """
   end

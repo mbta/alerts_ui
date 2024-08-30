@@ -21,10 +21,9 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   embedded_schema do
     field :route_type, :integer
     field :effect_name, :string
-    field :draft, :boolean
   end
 
-  @fields ~w[route_type effect_name draft]a
+  @fields ~w[route_type effect_name]a
   @required_fields ~w[effect_name]a
 
   @impl true
@@ -42,11 +41,6 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
       })
 
     {:ok, socket}
-  end
-
-  def draft_changeset(changeset, params) do
-    changeset
-    |> cast(params, @fields)
   end
 
   def changeset(changeset, params) do
@@ -69,26 +63,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   end
 
   @impl true
-  def handle_event("save_as_draft", params, socket) do
-    %{
-      effect_name: Map.get(params, "effect_name"),
-      route_type: InformedEntity.route_type_mapping(Map.get(params, "route_type")),
-      draft: true
-    }
-    |> then(&draft_changeset(%__MODULE__{}, &1))
-    |> apply_action(:insert)
-    |> case do
-      {:ok, changeset} ->
-        send(self(), {:save_as_draft, changeset})
-        {:noreply, socket}
-
-      {:error, changeset} ->
-        {:noreply, assign(socket, :changeset, changeset |> to_form())}
-    end
-  end
-
-  @impl true
-  def handle_event("save", _params, socket) do
+  def handle_event("complete_step", _params, socket) do
     changeset_params = %{
       effect_name: socket.assigns.selected_effect,
       route_type: InformedEntity.route_type_mapping(socket.assigns.selected_route_type)
@@ -124,7 +99,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
       <.form
         for={@changeset}
         phx-target={@myself}
-        phx-submit="save"
+        phx-submit="complete_step"
         class="form-control gap-4 min-w-full"
         id="route_types_form"
       >
@@ -157,18 +132,6 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
           </div>
         </div>
       </.form>
-      <.button_secondary
-        phx-target={@myself}
-        phx-click="save_as_draft"
-        phx-value-effect_name={@selected_effect}
-        phx-value-route_type={@selected_route_type}
-        name="draft"
-        id="draft"
-        hidden={is_nil(@selected_route_type)}
-        class="mt-24 basis-8 self-center min-w-[15%] font-extrabold"
-      >
-        Save as Draft
-      </.button_secondary>
     </div>
     """
   end

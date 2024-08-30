@@ -25,26 +25,8 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffectTest do
     end
   end
 
-  describe "save as draft" do
-    test "save as draft on click" do
-      {:ok, view, _html} = live_isolated_component(RouteTypeAndEffect, @assigns)
-
-      view
-      |> element("#draft")
-      |> render_click(%{
-        "route_type" => "Bus"
-      })
-
-      assert_receive {:__live_isolated_component_handle_info_received__, _pid,
-                      {:save_as_draft,
-                       %RouteTypeAndEffect{
-                         route_type: 3
-                       }}}
-    end
-  end
-
-  describe "save event" do
-    test "given a valid changset, sends a :create_alert event" do
+  describe "complete_step event" do
+    test "given a valid changset, goes to next step" do
       assigns =
         @assigns
         |> Map.put(:selected_effect, "Detour")
@@ -64,14 +46,15 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffectTest do
                        }}}
     end
 
-    test "given an invalid changset, does not sends a :create_alert event" do
+    test "given an invalid changset, does not sends a :step_completed event" do
       {:ok, view, _html} = live_isolated_component(RouteTypeAndEffect, @assigns)
 
       view
       |> element("form")
       |> render_submit(%{"alert_details" => %{}})
 
-      refute_receive {:__live_isolated_component_handle_info_received__, _pid, {:create_alert, _}}
+      refute_receive {:__live_isolated_component_handle_info_received__, _pid,
+                      {:step_completed, _}}
     end
   end
 end

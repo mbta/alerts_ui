@@ -1,4 +1,4 @@
-<div class="flex flex-col items-center justify-center min-w-full">
+<div class="flex flex-col items-center justify-center min-w-full" , id="form_container">
   <.live_component module={Timeline} id="timeline" progress={@progress} steps={@steps} />
   <div class="min-w-[75%] flex flex-col items-center justify-center" id="article-view">
     <article class="min-w-full flex flex-col items-center justify-center px-4">
@@ -10,14 +10,7 @@
       />
 
       <.live_component
-        module={
-          case @combination do
-            :SR -> StopRouteAffectedService
-            :ACCESS -> AccessAffectedService
-            nil -> SystemwideAffectedService
-            _ -> AffectedService
-          end
-        }
+        module={choose_affected_service_component(@combination)}
         id="affected_service"
         progress={@progress}
         alert_data={@alert_data}
@@ -28,6 +21,7 @@
         available_stops={@available_stops}
         available_facilities={@available_facilities}
         editing={@editing}
+        submitted={@submitted}
       />
       <.live_component
         module={TimeRange}
@@ -38,7 +32,7 @@
       />
       <.live_component
         module={AlertDetails}
-        id="details"
+        id="alert_details"
         progress={@progress}
         alert_data={@alert_data}
         route_type={route_type(@alert_data)}
@@ -52,10 +46,10 @@
         route_type={route_type(@alert_data)}
         combination={@combination}
       />
-
+      <.live_component module={Submit} id="submit" progress={@progress} />
       <.live_component
         module={SuccessfulSubmission}
-        id="success"
+        id="successful_submission"
         progress={@progress}
         alert_uuid={@alert_uuid}
         show_created_alert={@show_created_alert}

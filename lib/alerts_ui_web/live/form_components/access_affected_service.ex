@@ -68,13 +68,35 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
       |> changeset(alert_data)
       |> to_form()
 
-    assigns =
-      alert_data
-      |> Map.put(:form, form)
-      |> Map.merge(assigns)
-      |> Map.merge(%{facility_types: facility_types, effect_name: effect_name})
+    socket =
+      assign(socket, assigns)
+      |> assign(
+        form: form,
+        alert_data: alert_data,
+        facility_types: facility_types,
+        effect_name: effect_name
+      )
 
-    {:ok, assign(socket, assigns)}
+    {:ok, socket}
+  end
+
+  @impl true
+  def update(%{submitted: submitted}, socket) do
+    socket =
+      if submitted do
+        form =
+          %__MODULE__{}
+          |> changeset(socket.assigns.form.params)
+          |> validate_required(@required_fields)
+          |> Map.put(:action, :validate)
+          |> to_form()
+
+        assign(socket, form: form)
+      else
+        socket
+      end
+
+    {:ok, socket}
   end
 
   @impl true
@@ -83,14 +105,15 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
         %{"access_affected_service" => access_affected_service},
         socket
       ) do
-    changeset = changeset(%__MODULE__{}, access_affected_service) |> Map.put(:action, :validate)
+    changeset = changeset(%__MODULE__{}, access_affected_service)
 
-    case apply_action(changeset, :insert) do
+    case apply_action(changeset |> validate_required(@required_fields), :validate) do
       {:ok, changeset} ->
+        send(self(), {:add_errors, [], __MODULE__})
         send(self(), {:section_completed, changeset})
 
       {:error, changeset} ->
-        changeset
+        send(self(), {:add_errors, changeset.errors, __MODULE__})
     end
 
     form =
@@ -98,13 +121,12 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
       |> Map.put(:action, :validate)
       |> to_form()
 
-    {:noreply, assign(socket, %{form: form, access_affected_service: access_affected_service})}
+    {:noreply, assign(socket, %{form: form})}
   end
 
   def changeset(changeset, params) do
     changeset
     |> cast(params, @fields)
-    |> validate_required(@required_fields)
   end
 
   @impl true

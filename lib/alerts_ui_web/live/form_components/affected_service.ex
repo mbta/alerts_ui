@@ -54,6 +54,27 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   end
 
   @impl true
+  def update(%{submitted: submitted}, socket) do
+    socket =
+      if submitted do
+        form =
+          %__MODULE__{}
+          |> changeset(socket.assigns.form.params)
+          |> validate_required(
+            ServiceEffectCombinations.required_fields(socket.assigns.combination)
+          )
+          |> Map.put(:action, :validate)
+          |> to_form()
+
+        assign(socket, form: form)
+      else
+        socket
+      end
+
+    {:ok, socket}
+  end
+
+  @impl true
   def handle_event("validate", %{"affected_service" => affected_service}, socket) do
     affected_service =
       affected_service
@@ -64,22 +85,25 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     changeset = validate(affected_service, socket.assigns)
 
-    changeset
-    |> apply_action(:insert)
-    |> case do
+    case changeset
+         |> validate_required(
+           ServiceEffectCombinations.required_fields(socket.assigns.combination)
+         )
+         |> apply_action(:validate) do
       {:ok, changeset} ->
+        send(self(), {:add_errors, [], __MODULE__})
         send(self(), {:section_completed, changeset})
-        changeset
 
       {:error, changeset} ->
-        changeset
+        send(self(), {:add_errors, changeset.errors, __MODULE__})
     end
 
-    {:noreply,
-     assign(socket, %{
-       form: to_form(changeset |> Map.put(:action, :validate)),
-       affected_service: affected_service
-     })}
+    form =
+      changeset
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    {:noreply, assign(socket, %{form: form})}
   end
 
   @impl true
@@ -127,13 +151,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     affected_service = Map.put(affected_service, "trip_information_by_id", trip_information_by_id)
 
     %__MODULE__{}
-    |> changeset(affected_service, Map.get(assigns, :combination))
+    |> changeset(affected_service)
   end
 
-  def changeset(changeset, params, combination \\ nil) do
+  def changeset(changeset, params) do
     changeset
     |> cast(params, @fields)
-    |> validate_required(ServiceEffectCombinations.required_fields(combination))
   end
 
   def clean_route_ids(affected_service, form) do

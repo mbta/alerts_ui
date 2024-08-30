@@ -100,6 +100,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   end
 
   @impl true
+  def update(%{submitted: _submitted}, socket), do: {:ok, socket}
+
+  @impl true
   def handle_event(
         "validate",
         %{"time_range" => time_range},
@@ -135,20 +138,24 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     changeset =
       changeset(%__MODULE__{}, time_range)
       |> validate_relationship(time_range, current_time)
-      |> Map.put(:action, :validate)
 
     changeset
-    |> apply_action(:insert)
+    |> apply_action(:validate)
     |> case do
       {:ok, changeset} ->
+        send(self(), {:add_errors, [], __MODULE__})
         send(self(), {:section_completed, changeset})
-        changeset
 
       {:error, changeset} ->
-        changeset
+        send(self(), {:add_errors, changeset.errors, __MODULE__})
     end
 
-    {:noreply, assign(socket, %{form: to_form(changeset)})}
+    form =
+      changeset
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    {:noreply, assign(socket, %{form: form})}
   end
 
   defp changeset(changeset, params \\ %{}) do

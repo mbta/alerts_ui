@@ -41,6 +41,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         |> element("form")
         |> render_change(%{
           "alert_details" => %{
+            "header_text" => "hello",
             "image_url" => "https://example.com/image.jpg"
           }
         })
