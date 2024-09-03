@@ -59,7 +59,24 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
 
   @impl true
   def handle_event("validate", %{"alert_details" => alert_details}, socket) do
-    changeset = changeset(%__MODULE__{}, alert_details)
+    image_size = alert_details["image_url"] |> get_image_size()
+    image_path = alert_details["image_url"] |> get_image_path()
+
+    changeset =
+      %__MODULE__{}
+      |> changeset(alert_details)
+      |> validate_change(:image_url, fn :image_url, _image_url ->
+        if is_number(image_size),
+          do: [],
+          else: [image_url: "Enter a valid image URL"]
+      end)
+      |> then(fn changeset ->
+        if alert_details["image_url"] in [nil, ""] do
+          changeset
+        else
+          validate_required(changeset, :image_alternative_text, message: "Enter alt text")
+        end
+      end)
 
     case apply_action(
            changeset |> validate_required(:header_text, message: "Enter alert text"),
@@ -80,39 +97,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
 
     {:noreply,
      assign(socket, %{
-       form: form
-     })}
-  end
-
-  def handle_event("validate_image_url", %{"alert_details" => alert_details}, socket) do
-    image_size = alert_details["image_url"] |> get_image_size()
-    image_path = alert_details["image_url"] |> get_image_path()
-
-    changeset =
-      %__MODULE__{}
-      |> changeset(alert_details)
-      |> validate_change(:image_url, fn :image_url, _image_url ->
-        if is_number(image_size),
-          do: [],
-          else: [image_url: "Enter a valid image URL"]
-      end)
-      |> then(fn changeset ->
-        if alert_details["image_url"] in [nil, ""] do
-          changeset
-        else
-          validate_required(changeset, :image_alternative_text, message: "Enter alt text")
-        end
-      end)
-
-    form =
-      changeset
-      |> Map.put(:action, :validate)
-      |> to_form()
-
-    {:noreply,
-     assign(socket, %{
        form: form,
-       alert_details: alert_details,
        image_size: image_size,
        image_path: image_path
      })}
@@ -195,8 +180,6 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
             field={@form[:image_url]}
             label="Image URL"
             phx-debounce={500}
-            phx-target={@myself}
-            phx-change="validate_image_url"
             id="image_url_input"
             class={["min-w-[50%]", if(@form[:image_url].value not in ["", nil], do: "border-b-0")]}
           />
