@@ -31,7 +31,11 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   def update(%{alert_data: alert_data} = assigns, socket) do
     changeset =
       %__MODULE__{}
-      |> changeset(alert_data)
+      |> changeset(
+        alert_data
+        |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
+        |> Map.merge(socket.assigns.form.params)
+      )
 
     form = to_form(changeset)
     assigns = assigns |> Map.put(:form, form)
@@ -85,6 +89,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       {:ok, changeset} ->
         send(self(), {:add_errors, [], __MODULE__})
         send(self(), {:section_completed, changeset})
+        changeset
 
       {:error, changeset} ->
         send(self(), {:add_errors, changeset.errors, __MODULE__})

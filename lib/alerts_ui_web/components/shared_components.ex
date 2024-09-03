@@ -835,6 +835,7 @@ defmodule AlertsUIWeb.SharedComponents do
         min={@min}
         max={@max}
         value={@value}
+        step="1"
         class={[
           "bg-bg-elevation-5 border border-border-primary pl-3 py-1.5 min-w-[99%] p-0
             rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto

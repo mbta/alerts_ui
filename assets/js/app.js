@@ -49,6 +49,5 @@ window.addEventListener("phx:copy", (event) => {
 
 // Scroll to top
 window.addEventListener("phx:scroll_to_top", (event) => {
-  console.log("!!!!!!")
   window.scrollTo(0, 0)
 })

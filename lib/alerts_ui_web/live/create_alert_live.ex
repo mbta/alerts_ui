@@ -90,7 +90,6 @@ defmodule AlertsUIWeb.CreateAlertLive do
         steps: @steps,
         alert_data: alert_data,
         combination: Map.get(alert_data, :combination),
-        submitted_changesets: %{},
         available_routes: [],
         available_schedules: [],
         available_stops: [],
@@ -210,13 +209,13 @@ defmodule AlertsUIWeb.CreateAlertLive do
           |> Alerts.parse_changeset_errors()
           |> format_errors
 
-        socket = add_errors(socket, errors)
+        socket = display_errors(socket, errors)
         {:noreply, socket}
     end
   end
 
   @impl true
-  def handle_info({:add_errors, errors, name}, socket) do
+  def handle_info({:display_errors, errors, name}, socket) do
     updated_errors = socket.assigns.errors |> Map.put(name, errors)
     {:noreply, assign(socket, errors: updated_errors)}
   end
@@ -255,17 +254,17 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   def handle_info(:create_alert, socket) do
-    all_errors = Map.values(socket.assigns.errors) |> List.flatten()
+    errors = Map.values(socket.assigns.errors) |> List.flatten()
 
     socket =
-      if Enum.empty?(all_errors) do
+      if Enum.empty?(errors) do
         create_alert(socket)
       else
         formatted_errors =
-          all_errors
+          errors
           |> Enum.map_join("; ", fn {title, {message, _error}} -> "#{title}: #{message}" end)
 
-        add_errors(socket, formatted_errors)
+        display_errors(socket, formatted_errors)
       end
 
     {:noreply, socket}
@@ -301,11 +300,11 @@ defmodule AlertsUIWeb.CreateAlertLive do
           |> Alerts.parse_changeset_errors()
           |> format_errors
 
-        add_errors(socket, errors)
+        display_errors(socket, errors)
     end
   end
 
-  defp add_errors(socket, errors) do
+  defp display_errors(socket, errors) do
     [
       {choose_affected_service_component(socket.assigns.combination), "affected_service"},
       {TimeRange, "time_range"},

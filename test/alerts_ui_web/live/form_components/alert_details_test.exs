@@ -36,6 +36,18 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         refute view
                |> element("div#image-preview-div")
                |> render() =~ ~s(div id=\"image-information\")
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_details" => %{
+            "image_url" => "https://example.com/image.jpg"
+          }
+        })
+
+        assert view
+               |> element("div#image-preview-div")
+               |> render() =~ ~s(div id=\"image-information\")
       end
     end
   end
