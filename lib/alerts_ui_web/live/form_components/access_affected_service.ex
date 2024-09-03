@@ -107,7 +107,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
       ) do
     changeset = changeset(%__MODULE__{}, access_affected_service)
 
-    case apply_action(changeset |> validate_required(@required_fields), :validate) do
+    case apply_action(changeset, :validate) do
       {:ok, changeset} ->
         send(self(), {:add_errors, [], __MODULE__})
         send(self(), {:section_completed, changeset})

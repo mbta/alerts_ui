@@ -109,7 +109,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     affected_service = populate_default_routes(affected_service)
     changeset = validate(affected_service, socket.assigns)
 
-    case apply_action(changeset |> validate_required(@required_fields), :validate) do
+    case apply_action(changeset, :validate) do
       {:ok, changeset} ->
         send(self(), {:add_errors, [], __MODULE__})
         send(self(), {:section_completed, changeset})

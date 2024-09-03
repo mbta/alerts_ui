@@ -215,7 +215,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   @impl true
-  def handle_info({:display_errors, errors, name}, socket) do
+  def handle_info({:add_errors, errors, name}, socket) do
     updated_errors = socket.assigns.errors |> Map.put(name, errors)
     {:noreply, assign(socket, errors: updated_errors)}
   end

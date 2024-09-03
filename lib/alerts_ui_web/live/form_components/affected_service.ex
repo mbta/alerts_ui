@@ -85,11 +85,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     changeset = validate(affected_service, socket.assigns)
 
-    case changeset
-         |> validate_required(
-           ServiceEffectCombinations.required_fields(socket.assigns.combination)
-         )
-         |> apply_action(:validate) do
+    case apply_action(changeset, :validate) do
       {:ok, changeset} ->
         send(self(), {:add_errors, [], __MODULE__})
         send(self(), {:section_completed, changeset})

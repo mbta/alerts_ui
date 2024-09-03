@@ -127,7 +127,6 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
   defp changeset(changeset, params) do
     changeset
     |> cast(params, @fields)
-    |> validate_required(@required_fields)
   end
 
   defp service_type_options do

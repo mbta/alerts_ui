@@ -83,7 +83,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       end)
 
     case apply_action(
-           changeset |> validate_required(:header_text, message: "Enter alert text"),
+           changeset,
            :validate
          ) do
       {:ok, changeset} ->
