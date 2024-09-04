@@ -54,7 +54,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
       |> InformedEntity.facility_effect_to_types()
 
     send(self(), {:fetch_available_facilities, facility_types})
-
+    # IO.inspect(socket.assigns.available_facilities)
     alert_data =
       if is_struct(alert_data) do
         Map.from_struct(alert_data)
@@ -220,8 +220,10 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
   defp filter_facility_by_type_and_stop_ids(facility, params) do
     # returns true if facility in list if it belongs to a selected stop, is of a selected
     # facility type, or has already been selected by the user.
+    stop_ids = Map.get(params, "stop_ids", []) || []
+
     in_stop_ids =
-      if params["stop_ids"] && params["stop_ids"] !== ["default"] do
+      if !Enum.empty?(stop_ids) && stop_ids !== ["default"] do
         facility.stop.id in params["stop_ids"]
       else
         true
@@ -248,7 +250,9 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
   end
 
   defp filter_type_by_stop_ids(type, params, stops) do
-    if params["stop_ids"] && params["stop_ids"] !== ["default"] do
+    stop_ids = Map.get(params, "stop_ids", []) || []
+
+    if !Enum.empty?(stop_ids) && stop_ids !== ["default"] do
       types_from_stops =
         stops
         |> Enum.filter(&(&1.id in params["stop_ids"]))
