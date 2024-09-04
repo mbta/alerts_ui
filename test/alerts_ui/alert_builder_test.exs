@@ -2155,4 +2155,18 @@ defmodule AlertsUI.AlertBuilderTest do
              ]
     end
   end
+
+  test "informed entity is empty list if alert data doesn't match anything" do
+    alert_data = %{
+      route_type: nil,
+      effect_name: "Delay",
+      header_text: "test header",
+      description_text: "test description",
+      route_ids: []
+    }
+
+    result = AlertBuilder.build_alert(alert_data, :RDS)
+
+    assert result.informed_entity == []
+  end
 end

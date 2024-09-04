@@ -39,6 +39,25 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
   end
 
   @impl true
+  def update(%{submitted: submitted}, socket) do
+    socket =
+      if submitted do
+        form =
+          %__MODULE__{}
+          |> changeset(socket.assigns.form.params)
+          |> validate_required(@required_fields)
+          |> Map.put(:action, :validate)
+          |> to_form()
+
+        assign(socket, form: form)
+      else
+        socket
+      end
+
+    {:ok, socket}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <div
@@ -84,10 +103,11 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
 
     case apply_action(changeset, :insert) do
       {:ok, changeset} ->
+        send(self(), {:add_errors, [], __MODULE__})
         send(self(), {:section_completed, changeset})
 
       {:error, changeset} ->
-        changeset
+        send(self(), {:add_errors, changeset.errors, __MODULE__})
     end
 
     form =
@@ -107,7 +127,6 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
   defp changeset(changeset, params) do
     changeset
     |> cast(params, @fields)
-    |> validate_required(@required_fields)
   end
 
   defp service_type_options do

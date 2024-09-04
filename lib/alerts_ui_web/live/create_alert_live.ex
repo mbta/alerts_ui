@@ -33,6 +33,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
     Delivery,
     RouteTypeAndEffect,
     StopRouteAffectedService,
+    Submit,
     SuccessfulSubmission,
     SystemwideAffectedService,
     Timeline,
@@ -95,7 +96,9 @@ defmodule AlertsUIWeb.CreateAlertLive do
         available_facilities: [],
         alert_uuid: nil,
         alert_id: alert_id,
-        editing: editing
+        editing: editing,
+        errors: %{},
+        submitted: false
       })
 
     {:ok, socket}
@@ -190,9 +193,9 @@ defmodule AlertsUIWeb.CreateAlertLive do
      assign(socket, available_facilities: available_facilities, available_stops: available_stops)}
   end
 
-  def handle_info({:save_as_draft, changeset}, socket) do
+  def handle_info(:save_as_draft, socket) do
     socket.assigns.alert_data
-    |> Map.merge(changeset |> Map.from_struct())
+    |> Map.put(:draft, true)
     |> AlertBuilder.build_alert(Map.get(socket.assigns, :combination))
     |> Alerts.create_draft_alert()
     |> case do
@@ -206,9 +209,15 @@ defmodule AlertsUIWeb.CreateAlertLive do
           |> Alerts.parse_changeset_errors()
           |> format_errors
 
-        socket = put_flash(socket, :error, errors)
+        socket = display_errors(socket, errors)
         {:noreply, socket}
     end
+  end
+
+  @impl true
+  def handle_info({:add_errors, errors, name}, socket) do
+    updated_errors = socket.assigns.errors |> Map.put(name, errors)
+    {:noreply, assign(socket, errors: updated_errors)}
   end
 
   @impl true
@@ -244,10 +253,26 @@ defmodule AlertsUIWeb.CreateAlertLive do
     {:noreply, assign(socket, assigns)}
   end
 
-  def handle_info({:create_alert, changeset}, socket) do
+  def handle_info(:create_alert, socket) do
+    errors = Map.values(socket.assigns.errors) |> List.flatten()
+
+    socket =
+      if Enum.empty?(errors) do
+        create_alert(socket)
+      else
+        formatted_errors =
+          errors
+          |> Enum.map_join("; ", fn {title, {message, _error}} -> "#{title}: #{message}" end)
+
+        display_errors(socket, formatted_errors)
+      end
+
+    {:noreply, socket}
+  end
+
+  defp create_alert(socket) do
     alert_map =
       socket.assigns.alert_data
-      |> Map.merge(changeset |> Map.from_struct())
       |> AlertBuilder.build_alert(socket.assigns.combination)
 
     existing_alert =
@@ -267,7 +292,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
           alert_uuid: alert.id
         }
 
-        {:noreply, assign(socket, assigns)}
+        assign(socket, assigns)
 
       {:error, result} ->
         errors =
@@ -275,9 +300,22 @@ defmodule AlertsUIWeb.CreateAlertLive do
           |> Alerts.parse_changeset_errors()
           |> format_errors
 
-        socket = put_flash(socket, :error, errors)
-        {:noreply, socket}
+        display_errors(socket, errors)
     end
+  end
+
+  defp display_errors(socket, errors) do
+    [
+      {choose_affected_service_component(socket.assigns.combination), "affected_service"},
+      {TimeRange, "time_range"},
+      {AlertDetails, "alert_details"},
+      {Delivery, "delivery"}
+    ]
+    |> Enum.each(fn {module_name, id} -> send_update(module_name, id: id, submitted: true) end)
+
+    socket
+    |> push_event("scroll_to_top", %{})
+    |> put_flash(:error, errors)
   end
 
   @spec directions_from_selection(String.t() | nil) :: [Trip.direction_id_t()]
@@ -342,5 +380,14 @@ defmodule AlertsUIWeb.CreateAlertLive do
     |> Enum.flat_map(fn route ->
       Enum.flat_map(direction_array, &StopsRepo.by_route(route, &1))
     end)
+  end
+
+  defp choose_affected_service_component(combination) do
+    case combination do
+      :SR -> StopRouteAffectedService
+      :ACCESS -> AccessAffectedService
+      nil -> SystemwideAffectedService
+      _ -> AffectedService
+    end
   end
 end

@@ -81,6 +81,25 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   end
 
   @impl true
+  def update(%{submitted: submitted}, socket) do
+    socket =
+      if submitted do
+        form =
+          %__MODULE__{}
+          |> changeset(socket.assigns.form.params)
+          |> validate_required(@required_fields)
+          |> Map.put(:action, :validate)
+          |> to_form()
+
+        assign(socket, form: form)
+      else
+        socket
+      end
+
+    {:ok, socket}
+  end
+
+  @impl true
   def handle_event("validate", %{"stop_route_affected_service" => affected_service}, socket) do
     get_routes_by_stop_ids(
       Map.get(affected_service, "stop_ids", []),
@@ -90,18 +109,21 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     affected_service = populate_default_routes(affected_service)
     changeset = validate(affected_service, socket.assigns)
 
-    changeset
-    |> apply_action(:insert)
-    |> case do
+    case apply_action(changeset, :validate) do
       {:ok, changeset} ->
+        send(self(), {:add_errors, [], __MODULE__})
         send(self(), {:section_completed, changeset})
-        changeset
 
       {:error, changeset} ->
-        changeset
+        send(self(), {:add_errors, changeset.errors, __MODULE__})
     end
 
-    {:noreply, assign(socket, %{form: to_form(changeset |> Map.put(:action, :validate))})}
+    form =
+      changeset
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    {:noreply, assign(socket, %{form: form})}
   end
 
   @impl true
@@ -120,7 +142,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   def changeset(changeset, params) do
     changeset
     |> cast(params, @fields)
-    |> validate_required(@required_fields)
   end
 
   def get_stops_by_route_type(route_type) do

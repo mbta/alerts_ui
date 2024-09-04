@@ -5,6 +5,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
   import AlertsUI.Support.Factory
   import Ecto.Changeset
   import Mock
+  alias AlertsUI.Alerts
   alias AlertsUIWeb.FormComponents.{AffectedService, AlertDetails, RouteTypeAndEffect, TimeRange}
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
@@ -59,9 +60,11 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         {:error, changeset} =
           Ecto.Changeset.change(%AlertDetails{})
           |> AlertDetails.changeset(%{header_text: nil})
+          |> validate_required([:header_text])
           |> apply_action(:validate)
 
-        send(view.pid, {:create_alert, changeset})
+        send(view.pid, {:section_completed, changeset})
+        send(view.pid, :create_alert)
         failure_rendered_view = render(view)
         assert failure_rendered_view =~ "header_text: is required"
 
@@ -70,7 +73,8 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
           |> AlertDetails.changeset(%{header_text: "cool"})
           |> apply_action(:validate)
 
-        send(view.pid, {:create_alert, changeset})
+        send(view.pid, {:section_completed, changeset})
+        send(view.pid, :create_alert)
         rendered_view = render(view)
         assert rendered_view =~ "created successfully"
       end
@@ -194,7 +198,8 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
           })
           |> apply_action(:insert)
 
-        send(view.pid, {:create_alert, details_changeset})
+        send(view.pid, {:section_completed, details_changeset})
+        send(view.pid, :create_alert)
 
         success_rendered_view = render(view)
         assert success_rendered_view =~ ~s(id="success_view")
@@ -286,32 +291,31 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
       {:ok, changeset} =
         Ecto.Changeset.change(%RouteTypeAndEffect{
-          route_type: 3,
-          draft: true
+          route_type: 3
         })
         |> apply_action(:insert)
 
-      send(view.pid, {:save_as_draft, changeset})
+      send(view.pid, {:step_completed, changeset})
+      send(view.pid, :save_as_draft)
       assert_redirect(view, "/alerts/new", 500)
     end
 
     @tag :logged_in_user
     test "save as draft shows error on error", %{conn: conn} do
-      insert(:alert, alert_id: "1")
-      conn = log_in_user(conn)
-      {:ok, view, _html} = live(conn, "/alerts/new")
-
-      {:ok, changeset} =
-        Ecto.Changeset.change(%RouteTypeAndEffect{
-          route_type: 3,
-          draft: false
-        })
-        |> apply_action(:insert)
-
-      send(view.pid, {:save_as_draft, changeset})
-      rendered_view = render(view)
-
-      rendered_view =~ "draft: draft status must be true"
+      # insert(:alert, alert_id: "1")
+      with_mock(Alerts,
+        parse_changeset_errors: fn _ -> [{"error title", ["message", "message2"]}] end,
+        create_draft_alert: fn _alert_data ->
+          {:error, Ecto.Changeset.cast({%{}, %{}}, %{}, [])}
+        end
+      ) do
+        conn = log_in_user(conn)
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        send(view.pid, :save_as_draft)
+        rendered_view = render(view)
+        refute_redirected(view, "/alerts/new")
+        rendered_view =~ "error title: message, message2"
+      end
     end
   end
 end

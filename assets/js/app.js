@@ -46,3 +46,8 @@ window.addEventListener("phx:copy", (event) => {
     navigator.clipboard.writeText(text)
   }
 })
+
+// Scroll to top
+window.addEventListener("phx:scroll_to_top", (event) => {
+  window.scrollTo(0, 0)
+})

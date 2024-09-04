@@ -31,7 +31,11 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   def update(%{alert_data: alert_data} = assigns, socket) do
     changeset =
       %__MODULE__{}
-      |> changeset(alert_data)
+      |> changeset(
+        alert_data
+        |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
+        |> Map.merge(socket.assigns.form.params)
+      )
 
     form = to_form(changeset)
     assigns = assigns |> Map.put(:form, form)
@@ -39,32 +43,26 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   end
 
   @impl true
-  def handle_event("validate", %{"alert_details" => alert_details}, socket) do
-    changeset = changeset(%__MODULE__{}, alert_details)
+  def update(%{submitted: submitted}, socket) do
+    socket =
+      if submitted do
+        form =
+          %__MODULE__{}
+          |> changeset(socket.assigns.form.params)
+          |> validate_required(:header_text, message: "Enter alert text")
+          |> Map.put(:action, :validate)
+          |> to_form()
 
-    changeset
-    |> apply_action(:insert)
-    |> case do
-      {:ok, changeset} ->
-        send(self(), {:section_completed, changeset})
-        changeset
+        assign(socket, form: form)
+      else
+        socket
+      end
 
-      {:error, changeset} ->
-        changeset
-    end
-
-    form =
-      changeset
-      |> Map.put(:action, :validate)
-      |> to_form()
-
-    {:noreply,
-     assign(socket, %{
-       form: form
-     })}
+    {:ok, socket}
   end
 
-  def handle_event("validate_image_url", %{"alert_details" => alert_details}, socket) do
+  @impl true
+  def handle_event("validate", %{"alert_details" => alert_details}, socket) do
     image_size = alert_details["image_url"] |> get_image_size()
     image_path = alert_details["image_url"] |> get_image_path()
 
@@ -84,6 +82,19 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         end
       end)
 
+    case apply_action(
+           changeset,
+           :validate
+         ) do
+      {:ok, changeset} ->
+        send(self(), {:add_errors, [], __MODULE__})
+        send(self(), {:section_completed, changeset})
+        changeset
+
+      {:error, changeset} ->
+        send(self(), {:add_errors, changeset.errors, __MODULE__})
+    end
+
     form =
       changeset
       |> Map.put(:action, :validate)
@@ -92,14 +103,9 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     {:noreply,
      assign(socket, %{
        form: form,
-       alert_details: alert_details,
        image_size: image_size,
        image_path: image_path
      })}
-  end
-
-  def draft_changeset(changeset, params) do
-    cast(changeset, params, @fields)
   end
 
   def changeset(changeset, params \\ %{}) do
@@ -108,7 +114,6 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     |> validate_change(:url, fn :url, url ->
       if url_valid?(url), do: [], else: [url: "Enter a valid URL"]
     end)
-    |> validate_required(:header_text, message: "Enter alert text")
   end
 
   @impl true
@@ -180,8 +185,6 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
             field={@form[:image_url]}
             label="Image URL"
             phx-debounce={500}
-            phx-target={@myself}
-            phx-change="validate_image_url"
             id="image_url_input"
             class={["min-w-[50%]", if(@form[:image_url].value not in ["", nil], do: "border-b-0")]}
           />
