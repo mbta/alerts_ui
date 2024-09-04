@@ -78,7 +78,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
     alert_data =
       if is_nil(alert_id),
         do: %{},
-        else: AlertData.build_alert_data(alert_id)
+        else: AlertData.build_alert_data(alert_id) |> Map.from_struct()
 
     [first_step, second_step | _] = @steps
     editing = socket.assigns.live_action == :edit

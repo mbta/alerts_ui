@@ -54,7 +54,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
       |> InformedEntity.facility_effect_to_types()
 
     send(self(), {:fetch_available_facilities, facility_types})
-    # IO.inspect(socket.assigns.available_facilities)
+
     alert_data =
       if is_struct(alert_data) do
         Map.from_struct(alert_data)

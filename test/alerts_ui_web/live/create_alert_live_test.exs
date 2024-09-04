@@ -28,7 +28,10 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
     @tag :logged_in_user
     test "submitting first part of form unhides second part", %{conn: conn} do
-      with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
+      with_mocks([
+        {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
+        {StopsRepo, [], by_route: fn _, _ -> [] end}
+      ]) do
         insert(:alert, alert_id: "1")
         {:ok, view, _html} = live(conn, "/alerts/new")
 
@@ -155,7 +158,10 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
     @tag :logged_in_user
     test "submitting the second part of the form saves the alert", %{conn: conn} do
-      with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
+      with_mocks([
+        {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
+        {StopsRepo, [], by_route: fn _, _ -> [] end}
+      ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
         first_rendered_view = render(view)
         assert first_rendered_view =~ ~s(id="route_view")

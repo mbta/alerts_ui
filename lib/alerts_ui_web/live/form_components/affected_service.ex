@@ -51,6 +51,11 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       stop_ids: Map.get(alert_data, :stop_ids) || []
     }
 
+    get_stops_by_route_ids(
+      alert_data.route_ids,
+      alert_data.direction
+    )
+
     form =
       %__MODULE__{}
       |> changeset(alert_data)
