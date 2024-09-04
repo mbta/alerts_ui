@@ -202,21 +202,21 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
           <.filtered_select
             label="Stops"
             field={@form[:stop_ids]}
+            loading={Enum.empty?(@stop_id_options)}
             filter_field={@form[:stop_ids_filter]}
             options={@stop_id_options}
             class="min-w-[24rem]"
           />
-
-          <%= if show_routes_input?(assigns) do %>
-            <.filtered_select
-              label="Routes"
-              field={@form[:route_ids]}
-              filter_field={@form[:route_ids_filter]}
-              id="stop_route_routes"
-              options={@route_id_options}
-              class="min-w-[18rem]"
-            />
-          <% end %>
+          <.filtered_select
+            label="Routes"
+            field={@form[:route_ids]}
+            filter_field={@form[:route_ids_filter]}
+            loading={Enum.empty?(@route_id_options) and !disable_routes_input?(assigns)}
+            disabled={disable_routes_input?(assigns)}
+            id="stop_route_routes"
+            options={@route_id_options}
+            class="min-w-[18rem]"
+          />
         </fieldset>
       </.form>
       <hr />
@@ -224,9 +224,9 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     """
   end
 
-  @spec show_routes_input?(map()) :: boolean()
-  defp show_routes_input?(%{form: form}) do
-    form[:stop_ids].value not in [nil, []]
+  @spec disable_routes_input?(map()) :: boolean()
+  defp disable_routes_input?(%{form: form}) do
+    form[:stop_ids].value in [nil, []]
   end
 
   @spec populate_default_routes(map()) :: map()

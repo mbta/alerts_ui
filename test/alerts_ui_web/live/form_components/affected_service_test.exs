@@ -10,8 +10,17 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
   alias AlertsUIWeb.Step
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
+  alias MBTAV3API.Schedules.{Schedule, Trip}
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
+
+  @schedule %Schedule{
+    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
+    stop: %Stop{id: "place-sstat", name: "South Station"},
+    arrival_time: nil,
+    departure_time: ~U[2024-02-21 14:15:00.00Z]
+  }
 
   @assigns %{
     id: "affected_service",
@@ -23,8 +32,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     },
     route_type: 1,
     available_routes: [],
-    available_schedules: [],
-    available_stops: [],
+    available_schedules: [@schedule],
+    available_stops: [%Stop{id: "place-sstat", name: "South Station"}],
     alert_data: %{},
     combination: :RDTS,
     editing: false
@@ -127,7 +136,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       end
     end
 
-    test "only shows stop element once route is selected" do
+    test "stop element disabled until route is selected" do
       with_mock(StopsRepo, by_route: fn _route, _direction -> [] end) do
         {:ok, view, _html} =
           live_isolated_component(AffectedService, %{

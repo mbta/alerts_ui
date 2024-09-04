@@ -218,6 +218,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             label={if @route_type in [0, 1, 2], do: "Line(s)", else: "Route(s)"}
             field={@form[:route_ids]}
             filter_field={@form[:route_ids_filter]}
+            loading={Enum.empty?(@route_id_options)}
             options={@route_id_options}
             class={"min-w-[18rem] #{@route_type !== 3 && "hidden"}"}
           />
@@ -238,6 +239,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
               field={@form[:trip_ids]}
               filter_field={@form[:trip_ids_filter]}
               options={@trip_id_options}
+              loading={
+                Enum.empty?(@trip_id_options) and !disable_trip_input?(@form[:route_ids].value)
+              }
               class="min-w-[24rem]"
               disabled={disable_trip_input?(@form[:route_ids].value)}
               prompt={if disable_trip_input?(@form[:route_ids].value), do: nil, else: "All Trips"}
@@ -262,6 +266,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
                 field={@form[:stop_ids]}
                 filter_field={@form[:stop_ids_filter]}
                 options={@stop_id_options}
+                loading={
+                  Enum.empty?(@stop_id_options) and !disable_stop_input?(@form[:route_ids].value)
+                }
                 class="min-w-[24rem] min-h-[90%]"
                 disabled={disable_stop_input?(@form[:route_ids].value)}
                 prompt={
