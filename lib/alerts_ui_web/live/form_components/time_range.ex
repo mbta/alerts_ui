@@ -88,7 +88,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
     changeset = changeset(%__MODULE__{}, alert_data)
 
-    send(self(), {:section_completed, changeset})
+    send(self(), {:section_completed, apply_action!(changeset, :validate)})
     form = to_form(changeset)
 
     assigns =

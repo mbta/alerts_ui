@@ -78,7 +78,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
     alert_data =
       if is_nil(alert_id),
         do: %{},
-        else: AlertData.build_alert_data(alert_id)
+        else: AlertData.build_alert_data(alert_id) |> Map.from_struct()
 
     [first_step, second_step | _] = @steps
     editing = socket.assigns.live_action == :edit
@@ -139,7 +139,6 @@ defmodule AlertsUIWeb.CreateAlertLive do
     opts = direction_option([stop_sequences: :first], directions)
 
     available_schedules = SchedulesRepo.by_route_ids(route_ids, opts)
-
     {:noreply, assign(socket, available_schedules: available_schedules)}
   end
 
@@ -222,17 +221,26 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   @impl true
   def handle_info({:section_completed, changeset}, socket) do
-    assigns =
-      %{
-        alert_data: Map.merge(socket.assigns.alert_data, changeset |> Map.from_struct())
-      }
+    assigns = %{
+      alert_data: Map.merge(socket.assigns.alert_data, changeset |> Map.from_struct())
+    }
 
     {:noreply, assign(socket, assigns)}
   end
 
   @impl true
   def handle_info({:step_completed, changeset}, socket) do
-    alert_data = Map.merge(socket.assigns.alert_data, changeset |> Map.from_struct())
+    # make sure no selections are still entered in case we were previously in the second page.
+    clean_affected_services = %{
+      stop_ids: [],
+      route_ids: [],
+      trip_ids: [],
+      direction_ids: [],
+      facility_id: []
+    }
+
+    new_alert_data = Map.merge(socket.assigns.alert_data, clean_affected_services)
+    alert_data = Map.merge(new_alert_data, changeset |> Map.from_struct())
     route_type = Map.get(alert_data, :route_type)
     effect_name = Map.get(alert_data, :effect_name)
 
@@ -247,7 +255,9 @@ defmodule AlertsUIWeb.CreateAlertLive do
     assigns = %{
       progress: get_step_by_name(socket.assigns.progress.next),
       alert_data: alert_data,
-      combination: combination
+      combination: combination,
+      available_stops: [],
+      available_trips: []
     }
 
     {:noreply, assign(socket, assigns)}

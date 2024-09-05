@@ -22,7 +22,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
     },
     route_type: 1,
     available_stops: [],
-    available_routes: [%MBTAV3API.Routes.Route{sort_order: 1, id: "1"}],
+    available_routes: [%MBTAV3API.Routes.Route{sort_order: 1, id: "1", name: "route_number_1"}],
     alert_data: %{},
     editing: false
   }
@@ -32,7 +32,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       assert render_component(StopRouteAffectedService, @assigns) =~ ~s(id="service_form")
     end
 
-    test "route options are only populated once a stop is chosen" do
+    test "route options are disabled until a stop is chosen" do
       with_mock(StopsRepo, by_route: fn _route, _direction -> [] end) do
         {:ok, view, _html} =
           live_isolated_component(StopRouteAffectedService, %{
@@ -40,15 +40,18 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
             | alert_data: %{route_type: 3, effect_name: "Delay"}
           })
 
-        refute view
-               |> render() =~ "Routes"
+        assert view
+               |> render() =~ ~s(disabled="disabled")
 
         view
         |> element("form")
         |> render_change(%{"stop_route_affected_service" => %{"stop_ids" => ["1"]}})
 
+        refute view
+               |> render() =~ ~s(disabled="disabled")
+
         assert view
-               |> render() =~ "Routes"
+               |> render() =~ ~s(route_number_1)
       end
     end
 

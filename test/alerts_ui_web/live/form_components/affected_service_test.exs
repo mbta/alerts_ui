@@ -10,8 +10,17 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
   alias AlertsUIWeb.Step
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
+  alias MBTAV3API.Schedules.{Schedule, Trip}
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
+
+  @schedule %Schedule{
+    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
+    stop: %Stop{id: "place-sstat", name: "South Station"},
+    arrival_time: nil,
+    departure_time: ~U[2024-02-21 14:15:00.00Z]
+  }
 
   @assigns %{
     id: "affected_service",
@@ -23,8 +32,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     },
     route_type: 1,
     available_routes: [],
-    available_schedules: [],
-    available_stops: [],
+    available_schedules: [@schedule],
+    available_stops: [%Stop{id: "place-sstat", name: "South Station"}],
     alert_data: %{},
     combination: :RDTS,
     editing: false
@@ -43,17 +52,23 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
             | alert_data: %{route_type: 3, effect_name: "Delay"}
           })
 
-        refute view
-               |> element("select#affected_service_direction")
-               |> render() =~ "Both Directions"
+        first_rendered_view =
+          view
+          |> element("select#affected_service_direction")
+          |> render()
+
+        refute first_rendered_view =~ "Inbound"
 
         view
         |> element("form")
         |> render_change(%{"affected_service" => %{"route_ids" => ["1"]}})
 
-        assert view
-               |> element("select#affected_service_direction")
-               |> render() =~ "Both Directions"
+        second_rendered_view =
+          view
+          |> element("select#affected_service_direction")
+          |> render()
+
+        assert second_rendered_view =~ "Inbound"
       end
     end
 
@@ -121,7 +136,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       end
     end
 
-    test "only shows stop element once route is selected" do
+    test "stop element disabled until route is selected" do
       with_mock(StopsRepo, by_route: fn _route, _direction -> [] end) do
         {:ok, view, _html} =
           live_isolated_component(AffectedService, %{
@@ -145,7 +160,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       end
     end
 
-    test "disables stop selection if multiple routes selected" do
+    test "enables stop selection if one route selected" do
       stops = [%Stop{id: "1", name: "cool stop name"}]
 
       with_mock(StopsRepo, by_route: fn _route, _direction -> stops end) do
@@ -155,8 +170,32 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
             | alert_data: %{route_type: 4, effect_name: "Shuttle"}
           })
 
+        assert view
+               |> render() =~ ~s(disabled="disabled")
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "affected_service" => %{
+            "route_ids" => ["1"],
+            "directions" => [0]
+          }
+        })
+
         refute view
                |> render() =~ ~s(disabled="disabled")
+      end
+    end
+
+    test "disables stop selection if multiple routes selected" do
+      stops = [%Stop{id: "1", name: "cool stop name"}]
+
+      with_mock(StopsRepo, by_route: fn _route, _direction -> stops end) do
+        {:ok, view, _html} =
+          live_isolated_component(AffectedService, %{
+            @assigns
+            | alert_data: %{route_type: 4, effect_name: "Shuttle"}
+          })
 
         view
         |> element("form")

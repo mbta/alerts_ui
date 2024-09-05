@@ -39,16 +39,32 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   end
 
   @impl true
-  def update(%{alert_data: alert_data, editing: editing} = assigns, socket) do
+  def update(%{alert_data: alert_data} = assigns, socket) do
     route_type = Map.get(alert_data, :route_type)
     route_types = all_route_types(route_type)
     send(self(), {:fetch_available_routes, route_types})
 
+    alert_data = %{
+      route_ids: Map.get(alert_data, :route_ids) || [],
+      direction: Map.get(alert_data, :direction) || "default",
+      trip_ids: Map.get(alert_data, :trip_ids) || [],
+      stop_ids: Map.get(alert_data, :stop_ids) || []
+    }
+
+    get_stops_by_route_ids(
+      alert_data.route_ids,
+      alert_data.direction
+    )
+
+    form =
+      %__MODULE__{}
+      |> changeset(alert_data)
+      |> to_form()
+
     assigns =
-      case editing do
-        true -> update_for_edit(alert_data, assigns)
-        false -> assigns
-      end
+      assigns
+      |> Map.put(:form, form)
+      |> Map.put(:alert_data, alert_data)
 
     {:ok, assign(socket, assigns)}
   end
@@ -105,29 +121,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   @impl true
   def handle_event("validate", _, socket) do
     {:noreply, socket}
-  end
-
-  def update_for_edit(alert_data, assigns) do
-    edit_alert_data =
-      %{
-        route_ids: Map.get(alert_data, :route_ids) || [],
-        direction: Map.get(alert_data, :direction) || "default",
-        trip_ids: Map.get(alert_data, :trip_ids) || [],
-        stop_ids: Map.get(alert_data, :stop_ids) || []
-      }
-
-    changeset =
-      validate(edit_alert_data |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end), assigns)
-
-    {:ok, completed_changeset} =
-      changeset
-      |> apply_action(:insert)
-
-    send(self(), {:section_completed, completed_changeset})
-
-    form = to_form(changeset)
-
-    edit_alert_data |> Map.put(:form, form) |> Map.merge(assigns)
   end
 
   def validate(affected_service, assigns) do
@@ -225,6 +218,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             label={if @route_type in [0, 1, 2], do: "Line(s)", else: "Route(s)"}
             field={@form[:route_ids]}
             filter_field={@form[:route_ids_filter]}
+            loading={Enum.empty?(@route_id_options)}
             options={@route_id_options}
             class={"min-w-[18rem] #{@route_type !== 3 && "hidden"}"}
           />
@@ -245,8 +239,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
               field={@form[:trip_ids]}
               filter_field={@form[:trip_ids_filter]}
               options={@trip_id_options}
+              loading={
+                Enum.empty?(@trip_id_options) and !disable_trip_input?(@form[:route_ids].value)
+              }
               class="min-w-[24rem]"
-              prompt={if Map.has_key?(@form.params, "route_ids"), do: "All Trips", else: nil}
+              disabled={disable_trip_input?(@form[:route_ids].value)}
+              prompt={if disable_trip_input?(@form[:route_ids].value), do: nil, else: "All Trips"}
             />
           <% end %>
           <div class="flex flex-col justify-start">
@@ -255,9 +253,11 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
                 label="Stop(s)"
                 field={@form[:direction]}
                 options={@direction_options}
-                disabled={disable_input?(@form[:route_ids].value, @editing)}
-                prompt={if Map.has_key?(@form.params, "route_ids"), do: "Both Directions", else: nil}
-                class="min-w-[24rem]"
+                disabled={disable_stop_input?(@form[:route_ids].value)}
+                prompt={
+                  if disable_stop_input?(@form[:route_ids].value), do: nil, else: "Both Directions"
+                }
+                class="min-w-[30rem]"
               />
             <% end %>
 
@@ -266,12 +266,15 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
                 field={@form[:stop_ids]}
                 filter_field={@form[:stop_ids_filter]}
                 options={@stop_id_options}
+                loading={
+                  Enum.empty?(@stop_id_options) and !disable_stop_input?(@form[:route_ids].value)
+                }
                 class="min-w-[24rem] min-h-[90%]"
-                disabled={disable_input?(@form[:route_ids].value, @editing)}
+                disabled={disable_stop_input?(@form[:route_ids].value)}
                 prompt={
-                  if Map.has_key?(@form.params, "route_ids"),
-                    do: "All Stops",
-                    else: nil
+                  if disable_stop_input?(@form[:route_ids].value),
+                    do: nil,
+                    else: "All Stops"
                 }
               />
             <% end %>
@@ -332,9 +335,13 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     combination in [:RDS, :RDTS, :RDS, :RDT]
   end
 
-  @spec disable_input?(list() | nil, boolean()) :: boolean()
-  defp disable_input?(_route_ids, true), do: false
-  defp disable_input?(route_ids, _editing), do: !is_nil(route_ids) and length(route_ids) > 1
+  @spec disable_stop_input?(list() | nil) :: boolean()
+  defp disable_stop_input?(route_ids) when is_list(route_ids), do: length(route_ids) !== 1
+  defp disable_stop_input?(_route_ids), do: false
+
+  @spec disable_trip_input?(list() | nil) :: boolean()
+  defp disable_trip_input?(route_ids) when is_list(route_ids), do: Enum.empty?(route_ids)
+  defp disable_trip_input?(_route_ids), do: false
 
   # We lump subway together in the interface, so when asked for either light or
   # heavy rail include both.
