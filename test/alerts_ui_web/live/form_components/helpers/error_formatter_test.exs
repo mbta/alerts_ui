@@ -1,0 +1,43 @@
+defmodule AlertsUIWeb.FormComponents.Helpers.ErrorFormatterTest do
+  @moduledoc false
+  use AlertsUIWeb.ConnCase
+  alias AlertsUI.Models.Alert
+  alias AlertsUIWeb.FormComponents.Helpers.ErrorFormatter
+
+  describe "parse_field_errors/1" do
+    test "puts errors for fields in correct format from list" do
+      error_list = [facility_id: {"can't be blank", [validation: :required]}]
+      result = ErrorFormatter.parse_field_errors(error_list)
+
+      assert result == [facility_id: {"Select an amenity", [validation: :required]}]
+    end
+
+    test "puts errors for fields in correct format from changeset" do
+      changeset =
+        Alert.changeset(%Alert{}, %{informed_entity: [%{route_id: "1"}]})
+
+      result = ErrorFormatter.parse_field_errors(changeset)
+
+      assert result == [header_text: {"Enter message text", []}]
+    end
+
+    test "puts errors for fields in correct format from error map" do
+      errors = %{
+        header_text: ["is required"],
+        informed_entity: ["should have at least 1 item(s)", "can't be blank"],
+        other_field: ["error_1", "error_2"]
+      }
+
+      result = ErrorFormatter.parse_field_errors(errors, :RDTS) |> Enum.sort()
+
+      assert result == [
+               {:direction, {"Select direction", []}},
+               {:header_text, {"Enter message text", []}},
+               {:other_field, {"error_1, error_2", []}},
+               {:route_ids, {"Select route(s)", []}},
+               {:stop_ids, {"Select stop(s)", []}},
+               {:trip_ids, {"Select trip(s)", []}}
+             ]
+    end
+  end
+end

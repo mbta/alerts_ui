@@ -10,7 +10,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
   import Ecto.Changeset
 
   alias AlertsUI.Models.InformedEntity
-  alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
+  alias AlertsUIWeb.FormComponents.Helpers.{ErrorFormatter, SelectFormatter}
 
   @primary_key false
   embedded_schema do
@@ -84,12 +84,22 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
   def update(%{submitted: submitted}, socket) do
     socket =
       if submitted do
-        form =
+        changeset =
           %__MODULE__{}
           |> changeset(socket.assigns.form.params)
           |> validate_required(@required_fields)
-          |> Map.put(:action, :validate)
+
+        errors =
+          case changeset |> apply_action(:validate) do
+            {:ok, _changeset} -> []
+            {:error, changeset} -> ErrorFormatter.parse_field_errors(changeset)
+          end
+
+        form =
+          changeset
           |> to_form()
+          |> Map.put(:errors, errors)
+          |> Map.put(:action, :validate)
 
         assign(socket, form: form)
       else
@@ -107,13 +117,14 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
       ) do
     changeset = changeset(%__MODULE__{}, access_affected_service)
 
-    case apply_action(changeset, :validate) do
+    case apply_action(changeset |> validate_required(@required_fields), :validate) do
       {:ok, changeset} ->
         send(self(), {:add_errors, [], __MODULE__})
         send(self(), {:section_completed, changeset})
 
       {:error, changeset} ->
-        send(self(), {:add_errors, changeset.errors, __MODULE__})
+        send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
+        send(self(), {:section_completed, changeset})
     end
 
     form =

@@ -69,7 +69,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         send(view.pid, {:section_completed, changeset})
         send(view.pid, :create_alert)
         failure_rendered_view = render(view)
-        assert failure_rendered_view =~ "header_text: is required"
+        assert failure_rendered_view =~ "Enter message text"
 
         {:ok, changeset} =
           Ecto.Changeset.change(%AlertDetails{})
@@ -308,9 +308,8 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
     @tag :logged_in_user
     test "save as draft shows error on error", %{conn: conn} do
-      # insert(:alert, alert_id: "1")
       with_mock(Alerts,
-        parse_changeset_errors: fn _ -> [{"error title", ["message", "message2"]}] end,
+        parse_changeset_errors: fn _ -> %{error_title: ["message", "message2"]} end,
         create_draft_alert: fn _alert_data ->
           {:error, Ecto.Changeset.cast({%{}, %{}}, %{}, [])}
         end
