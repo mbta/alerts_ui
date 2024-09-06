@@ -238,17 +238,17 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         for={@form}
         phx-target={@myself}
         phx-change="validate"
-        class="form-control mb-16 min-h-[30rem]"
+        class="form-control mb-16 h-[30rem]"
         id="service_form"
       >
-        <fieldset class="flex flex-row gap-x-12 min-h-[30rem]">
+        <fieldset class="flex flex-row gap-x-12 h-[30rem]">
           <.filtered_select
             label={if @route_type in [0, 1, 2], do: "Line(s)", else: "Route(s)"}
             field={@form[:route_ids]}
             filter_field={@form[:route_ids_filter]}
             loading={Enum.empty?(@route_id_options)}
             options={@route_id_options}
-            class={"min-w-[18rem] #{@route_type !== 3 && "hidden"}"}
+            class={"min-w-[18rem] min-h-[30rem] #{@route_type !== 3 && "hidden"}"}
           />
           <div class="mb-8">
             <.toggle_checkgroup
@@ -290,21 +290,23 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             <% end %>
 
             <%= if show_stops_input?(assigns) do %>
-              <.filtered_select
-                field={@form[:stop_ids]}
-                filter_field={@form[:stop_ids_filter]}
-                options={@stop_id_options}
-                loading={
-                  Enum.empty?(@stop_id_options) and !disable_stop_input?(@form[:route_ids].value)
-                }
-                class="min-w-[24rem] min-h-[90%]"
-                disabled={disable_stop_input?(@form[:route_ids].value)}
-                prompt={
-                  if disable_stop_input?(@form[:route_ids].value),
-                    do: nil,
-                    else: "All Stops"
-                }
-              />
+              <div class="min-h-[90%]">
+                <.filtered_select
+                  field={@form[:stop_ids]}
+                  filter_field={@form[:stop_ids_filter]}
+                  options={@stop_id_options}
+                  loading={
+                    Enum.empty?(@stop_id_options) and !disable_stop_input?(@form[:route_ids].value)
+                  }
+                  class="min-w-[24rem] h-[100%]"
+                  disabled={disable_stop_input?(@form[:route_ids].value)}
+                  prompt={
+                    if disable_stop_input?(@form[:route_ids].value),
+                      do: nil,
+                      else: "All Stops"
+                  }
+                />
+              </div>
             <% end %>
           </div>
         </fieldset>
