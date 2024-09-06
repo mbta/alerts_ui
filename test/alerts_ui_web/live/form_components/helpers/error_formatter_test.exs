@@ -23,7 +23,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ErrorFormatterTest do
 
     test "puts errors for fields in correct format from error map" do
       errors = %{
-        header_text: ["is required"],
+        header_text: ["is required", "error_2"],
         informed_entity: ["should have at least 1 item(s)", "can't be blank"],
         other_field: ["error_1", "error_2"]
       }
