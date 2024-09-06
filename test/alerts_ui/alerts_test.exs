@@ -411,6 +411,84 @@ defmodule AlertsUI.AlertsTest do
     end
   end
 
+  describe "filter_on_notification_period/2" do
+    test "returns all if no notification period" do
+      current_time = ~U[2024-09-06 04:00:00Z]
+
+      alerts = [
+        build(:alert, %{alert_id: "123"}),
+        build(:alert, %{alert_id: "234"}),
+        build(:alert, %{alert_id: "456"})
+      ]
+
+      result = Alerts.filter_on_notification_period(alerts, current_time)
+      assert result |> Enum.map(fn r -> r.alert_id end) |> Enum.sort() == ["123", "234", "456"]
+    end
+
+    test "filters out if notification start after current time" do
+      current_time = ~U[2024-09-06 04:00:00Z]
+
+      alerts = [
+        build(:alert, %{
+          alert_id: "123",
+          notification_period_start: DateTime.add(current_time, -1, :hour)
+        }),
+        build(:alert, %{
+          alert_id: "234",
+          notification_period_start: DateTime.add(current_time, 1, :hour)
+        }),
+        build(:alert, %{alert_id: "456", notification_period_start: nil})
+      ]
+
+      result = Alerts.filter_on_notification_period(alerts, ~U[2024-09-06 04:00:00Z])
+      assert result |> Enum.map(fn r -> r.alert_id end) |> Enum.sort() == ["123", "456"]
+    end
+
+    test "filters out if notification end before current time" do
+      current_time = ~U[2024-09-06 04:00:00Z]
+
+      alerts = [
+        build(:alert, %{
+          alert_id: "123",
+          notification_period_end: DateTime.add(current_time, -1, :hour)
+        }),
+        build(:alert, %{
+          alert_id: "234",
+          notification_period_end: DateTime.add(current_time, 1, :hour)
+        }),
+        build(:alert, %{alert_id: "456", notification_period_end: nil})
+      ]
+
+      result = Alerts.filter_on_notification_period(alerts, ~U[2024-09-06 04:00:00Z])
+      assert result |> Enum.map(fn r -> r.alert_id end) |> Enum.sort() == ["234", "456"]
+    end
+
+    test "filters out alerts if current time is not within notification period" do
+      current_time = ~U[2024-09-06 04:00:00Z]
+
+      alerts = [
+        build(:alert, %{
+          alert_id: "123",
+          notification_period_start: DateTime.add(current_time, -1, :hour),
+          notification_period_end: DateTime.add(current_time, -1, :hour)
+        }),
+        build(:alert, %{
+          alert_id: "234",
+          notification_period_start: DateTime.add(current_time, 1, :hour),
+          notification_period_end: DateTime.add(current_time, 2, :hour)
+        }),
+        build(:alert, %{
+          alert_id: "456",
+          notification_period_start: DateTime.add(current_time, -1, :hour),
+          notification_period_end: DateTime.add(current_time, 2, :hour)
+        })
+      ]
+
+      result = Alerts.filter_on_notification_period(alerts, ~U[2024-09-06 04:00:00Z])
+      assert result |> Enum.map(fn r -> r.alert_id end) |> Enum.sort() == ["456"]
+    end
+  end
+
   describe "list_all_open/0" do
     test "lists all alerts" do
       insert(:alert, %{alert_id: "234", closed_timestamp: ~U[2023-10-14 00:01:00Z]})

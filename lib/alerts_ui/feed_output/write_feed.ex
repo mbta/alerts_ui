@@ -17,6 +17,7 @@ defmodule AlertsUI.FeedOutput.WriteFeed do
     open_alerts =
       Alerts.list_all_open()
       |> Alerts.close_if_end_is_past()
+      |> Alerts.filter_on_notification_period()
       |> Enum.map(&CreateOutputAlert.build_alert/1)
 
     with {:ok, enhanced_alerts_json} <-
