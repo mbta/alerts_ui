@@ -215,7 +215,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
             loading={Enum.empty?(@stop_id_options)}
             filter_field={@form[:stop_ids_filter]}
             options={@stop_id_options}
-            class="min-w-[24rem]"
+            class="min-w-[24rem] min-h-[30rem]"
           />
           <.filtered_select
             label="Routes"

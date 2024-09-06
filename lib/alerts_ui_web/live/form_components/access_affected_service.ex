@@ -201,7 +201,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             filter_field={@form[:stop_ids_filter]}
             options={@stop_id_options}
             loading={Enum.empty?(@stop_id_options)}
-            class="min-w-[26rem]"
+            class="min-w-[26rem] min-h-[30rem]"
             prompt="All Stops"
           />
           <.filtered_select
