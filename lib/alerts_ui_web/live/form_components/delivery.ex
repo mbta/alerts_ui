@@ -5,6 +5,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
   use AlertsUIWeb, :live_component
   use AlertsUI.Schema
   import Ecto.Changeset
+  alias AlertsUIWeb.FormComponents.Helpers.ErrorFormatter
   alias Phoenix.HTML.Form
 
   @primary_key false
@@ -107,7 +108,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
         send(self(), {:section_completed, changeset})
 
       {:error, changeset} ->
-        send(self(), {:add_errors, changeset.errors, __MODULE__})
+        send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
         send(self(), {:section_completed, changeset})
     end
 

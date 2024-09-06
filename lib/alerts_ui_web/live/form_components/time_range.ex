@@ -7,6 +7,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   import Ecto.Changeset
 
   alias AlertsUI.Models.ActivePeriod
+  alias AlertsUIWeb.FormComponents.Helpers.ErrorFormatter
 
   @start_values [
     :now,
@@ -147,7 +148,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         send(self(), {:section_completed, changeset})
 
       {:error, changeset} ->
-        send(self(), {:add_errors, changeset.errors, __MODULE__})
+        send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
     end
 
     form =

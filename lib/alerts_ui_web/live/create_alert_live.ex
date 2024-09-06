@@ -43,6 +43,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
   alias AlertsUIWeb.FormComponents.Helpers.{
     AlertData,
     EffectsForRouteTypes,
+    ErrorFormatter,
     ServiceEffectCombinations
   }
 
@@ -206,7 +207,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
         errors =
           result
           |> Alerts.parse_changeset_errors()
-          |> format_errors
+          |> format_errors(socket.assigns.combination)
 
         socket = display_errors(socket, errors)
         {:noreply, socket}
@@ -272,7 +273,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
       else
         formatted_errors =
           errors
-          |> Enum.map_join("; ", fn {title, {message, _error}} -> "#{title}: #{message}" end)
+          |> Enum.map_join("; ", fn {_title, {message, _error}} -> "#{message}" end)
 
         display_errors(socket, formatted_errors)
       end
@@ -308,7 +309,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
         errors =
           result
           |> Alerts.parse_changeset_errors()
-          |> format_errors
+          |> format_errors(socket.assigns.combination)
 
         display_errors(socket, errors)
     end
@@ -324,6 +325,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
     |> Enum.each(fn {module_name, id} -> send_update(module_name, id: id, submitted: true) end)
 
     socket
+    |> clear_flash
     |> push_event("scroll_to_top", %{})
     |> put_flash(:error, errors)
   end
@@ -341,21 +343,10 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   defp direction_option(opts, _both_directions), do: opts
 
-  defp format_errors(errors) do
-    Enum.map_join(errors, "; ", fn {title, values} ->
-      values =
-        values
-        |> Enum.map_join(", ", &parse_inner_value(&1))
-
-      "#{title}: #{values}"
-    end)
-  end
-
-  defp parse_inner_value(value) do
-    case is_map(value) do
-      true -> format_errors(value)
-      false -> value
-    end
+  defp format_errors(errors, combination) do
+    errors
+    |> ErrorFormatter.parse_field_errors(combination)
+    |> Enum.map_join("; ", fn {_title, {message, _error}} -> "#{message}" end)
   end
 
   defp get_step_by_name(name) do

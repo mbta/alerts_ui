@@ -7,7 +7,13 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   import Ecto.Changeset
 
   alias AlertsUI.Models.InformedEntity
-  alias AlertsUIWeb.FormComponents.Helpers.{SelectFormatter, ServiceEffectCombinations}
+
+  alias AlertsUIWeb.FormComponents.Helpers.{
+    ErrorFormatter,
+    SelectFormatter,
+    ServiceEffectCombinations
+  }
+
   alias MBTAV3API.Routes.Route
 
   @primary_key false
@@ -71,16 +77,31 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   @impl true
   def update(%{submitted: submitted}, socket) do
+    form_params =
+      Map.update(socket.assigns.form.params, "route_ids", nil, fn route_ids ->
+        if Enum.empty?(route_ids), do: nil, else: route_ids
+      end)
+
     socket =
       if submitted do
-        form =
+        changeset =
           %__MODULE__{}
-          |> changeset(socket.assigns.form.params)
+          |> changeset(form_params)
           |> validate_required(
             ServiceEffectCombinations.required_fields(socket.assigns.combination)
           )
-          |> Map.put(:action, :validate)
+
+        errors =
+          case changeset |> apply_action(:validate) do
+            {:ok, _changeset} -> []
+            {:error, changeset} -> ErrorFormatter.parse_field_errors(changeset)
+          end
+
+        form =
+          changeset
           |> to_form()
+          |> Map.put(:errors, errors)
+          |> Map.put(:action, :validate)
 
         assign(socket, form: form)
       else
@@ -101,13 +122,20 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     changeset = validate(affected_service, socket.assigns)
 
-    case apply_action(changeset, :validate) do
+    case apply_action(
+           changeset
+           |> validate_required(
+             ServiceEffectCombinations.required_fields(socket.assigns.combination)
+           ),
+           :validate
+         ) do
       {:ok, changeset} ->
         send(self(), {:add_errors, [], __MODULE__})
         send(self(), {:section_completed, changeset})
 
       {:error, changeset} ->
-        send(self(), {:add_errors, changeset.errors, __MODULE__})
+        send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
+        send(self(), {:section_completed, changeset})
     end
 
     form =

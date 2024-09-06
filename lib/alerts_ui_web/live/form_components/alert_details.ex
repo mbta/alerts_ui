@@ -6,6 +6,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   use AlertsUI.Schema
   import Ecto.Changeset
   alias AlertsUI.Models.Cause
+  alias AlertsUIWeb.FormComponents.Helpers.ErrorFormatter
 
   @primary_key false
   embedded_schema do
@@ -18,7 +19,9 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     field :image_alternative_text, :string
   end
 
-  @fields ~w[header_text description_text draft cause_detail url image_url image_alternative_text]a
+  @required_fields ~w[header_text]a
+  @fields ~w[description_text draft cause_detail url image_url image_alternative_text]a ++
+            @required_fields
 
   @impl true
   def mount(socket) do
@@ -46,12 +49,23 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   def update(%{submitted: submitted}, socket) do
     socket =
       if submitted do
-        form =
+        changeset =
           %__MODULE__{}
           |> changeset(socket.assigns.form.params)
-          |> validate_required(:header_text, message: "Enter alert text")
-          |> Map.put(:action, :validate)
+          |> validate_required(@required_fields)
+          |> validate_image_fields(socket.assigns.image_size)
+
+        errors =
+          case changeset |> apply_action(:validate) do
+            {:ok, _changeset} -> []
+            {:error, changeset} -> ErrorFormatter.parse_field_errors(changeset)
+          end
+
+        form =
+          changeset
           |> to_form()
+          |> Map.put(:action, :validate)
+          |> Map.put(:errors, errors)
 
         assign(socket, form: form)
       else
@@ -69,21 +83,10 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     changeset =
       %__MODULE__{}
       |> changeset(alert_details)
-      |> validate_change(:image_url, fn :image_url, _image_url ->
-        if is_number(image_size),
-          do: [],
-          else: [image_url: "Enter a valid image URL"]
-      end)
-      |> then(fn changeset ->
-        if alert_details["image_url"] in [nil, ""] do
-          changeset
-        else
-          validate_required(changeset, :image_alternative_text, message: "Enter alt text")
-        end
-      end)
+      |> validate_image_fields(image_size)
 
     case apply_action(
-           changeset,
+           changeset |> validate_required(@required_fields),
            :validate
          ) do
       {:ok, changeset} ->
@@ -92,7 +95,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         changeset
 
       {:error, changeset} ->
-        send(self(), {:add_errors, changeset.errors, __MODULE__})
+        send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
     end
 
     form =
@@ -108,11 +111,29 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
      })}
   end
 
+  defp validate_image_fields(changeset, image_size) do
+    changeset
+    |> validate_change(:image_url, fn :image_url, _image_url ->
+      if is_number(image_size),
+        do: [],
+        else: [image_url: "Enter a valid image URL"]
+    end)
+    |> then(fn changeset ->
+      if Map.get(changeset.changes, :image_url) in [nil, ""] do
+        changeset
+      else
+        validate_required(changeset, :image_alternative_text, message: "Enter alt text")
+      end
+    end)
+  end
+
   def changeset(changeset, params \\ %{}) do
     changeset
     |> cast(params, @fields)
     |> validate_change(:url, fn :url, url ->
-      if url_valid?(url), do: [], else: [url: "Enter a valid URL"]
+      if url_valid?(url),
+        do: [],
+        else: [url: "Enter a correctly formatted URL (e.g. http://www.example.com) "]
     end)
   end
 
