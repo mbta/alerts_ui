@@ -238,28 +238,28 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         for={@form}
         phx-target={@myself}
         phx-change="validate"
-        class="form-control mb-16 h-[30rem]"
+        class="form-control mb-16"
         id="service_form"
       >
-        <fieldset class="flex flex-row gap-x-12 h-[30rem]">
+        <fieldset class="flex flex-row gap-x-12">
           <.filtered_select
+            :if={@route_type === 3}
             label={if @route_type in [0, 1, 2], do: "Line(s)", else: "Route(s)"}
             field={@form[:route_ids]}
             filter_field={@form[:route_ids_filter]}
             loading={Enum.empty?(@route_id_options)}
             options={@route_id_options}
-            class={"min-w-[18rem] min-h-[30rem] #{@route_type !== 3 && "hidden"}"}
+            class="min-w-[18rem] min-h-[30rem]"
           />
-          <div class="mb-8">
-            <.toggle_checkgroup
-              label={if @route_type in [0, 1, 2], do: "Line(s)", else: "Route(s)"}
-              field={@form[:route_ids]}
-              options={@route_id_options}
-              icon_type={icon_type(@route_type)}
-              class={@route_type === 3 && "hidden"}
-              show_icons={true}
-            />
-          </div>
+          <.toggle_checkgroup
+            :if={@route_type !== 3}
+            label={if @route_type in [0, 1, 2], do: "Line(s)", else: "Route(s)"}
+            field={@form[:route_ids]}
+            options={@route_id_options}
+            icon_type={icon_type(@route_type)}
+            show_icons={true}
+            class="mb-8"
+          />
 
           <%= if show_trips_input?(assigns) do %>
             <.filtered_select
@@ -278,7 +278,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
           <div class="flex flex-col justify-start">
             <%= if show_directions_input?(assigns) do %>
               <.select
-                label="Stop(s)"
+                label={if show_stops_input?(assigns), do: "Stop(s)", else: "Direction"}
                 field={@form[:direction]}
                 options={@direction_options}
                 disabled={disable_stop_input?(@form[:route_ids].value)}
