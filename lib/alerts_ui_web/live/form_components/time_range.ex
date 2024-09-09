@@ -9,6 +9,12 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   alias AlertsUI.Models.ActivePeriod
   alias AlertsUIWeb.FormComponents.Helpers.ErrorFormatter
 
+  @alert_timing_values [
+    :"one-time",
+    :scheduled,
+    :recurring
+  ]
+
   @start_values [
     :now,
     :custom
@@ -23,6 +29,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   @primary_key false
   embedded_schema do
+    field :alert_timing, Ecto.Enum, values: @alert_timing_values
     field :active_period_start, :naive_datetime
     field :active_period_start_specifier, Ecto.Enum, values: @start_values
     field :active_period_end_specifier, Ecto.Enum, values: @end_values
@@ -228,7 +235,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     assigns =
       assign(assigns,
         start_values: @start_values,
-        end_values: @end_values
+        end_values: @end_values,
+        alert_timing_values: @alert_timing_values
       )
 
     ~H"""
@@ -247,7 +255,14 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         id="time_range_form"
       >
         <fieldset class="">
-          <div id="start-selector-div" class="flex flex-row gap-8 mb-8">
+          <.select
+            label="Alert timing"
+            field={@form[:alert_timing]}
+            options={values_to_options(@alert_timing_values)}
+            class="min-w-[16rem] max-w-[16rem]"
+            phx-debounce={120}
+          />
+          <div id="start-selector-div" class="flex flex-row gap-8 my-8">
             <.select
               label="Effect start"
               field={@form[:active_period_start_specifier]}

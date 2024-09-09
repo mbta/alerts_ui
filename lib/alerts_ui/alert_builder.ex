@@ -39,6 +39,8 @@ defmodule AlertsUI.AlertBuilder do
           banner_text: String.t() | nil,
           draft: boolean | nil,
           last_push_notification_timestamp: NaiveDateTime.t() | nil
+          notification_period_start: DateTime.t() | nil,
+          notification_period_end: DateTime.t() | nil
         }
   @type direction_t :: 0 | 1
   @type stop_with_context_t :: {Stop.t(), Route.id_t(), direction_t(), RoutePattern.stop_type()}
@@ -99,6 +101,8 @@ defmodule AlertsUI.AlertBuilder do
       last_push_notification_timestamp:
         Map.get(alert_data, :last_push_notification_timestamp) |> naive_eastern_datetime_to_utc,
       informed_entity: build_informed_entities(combination, alert_data, effect_name)
+      notification_period_start: Map.get(alert_data, :notification_period_start),
+      notification_period_end: Map.get(alert_data, :notification_period_end)
     }
     |> Map.merge(active_period_map)
   end
