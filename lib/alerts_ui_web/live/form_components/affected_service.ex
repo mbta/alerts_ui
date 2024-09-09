@@ -241,7 +241,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         class="form-control mb-16"
         id="service_form"
       >
-        <fieldset class="flex flex-row gap-x-12">
+        <fieldset class="flex flex-row gap-x-12 min-h-[32rem]">
           <.filtered_select
             :if={@route_type === 3}
             label={if @route_type in [0, 1, 2], do: "Line(s)", else: "Route(s)"}
@@ -258,7 +258,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             options={@route_id_options}
             icon_type={icon_type(@route_type)}
             show_icons={true}
-            class="mb-8"
+            class="min-h-[30rem]"
           />
 
           <%= if show_trips_input?(assigns) do %>
@@ -270,7 +270,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
               loading={
                 Enum.empty?(@trip_id_options) and !disable_trip_input?(@form[:route_ids].value)
               }
-              class="min-w-[24rem]"
+              class="min-w-[24rem] min-h-[30rem] max-h-[30rem]"
               disabled={disable_trip_input?(@form[:route_ids].value)}
               prompt={if disable_trip_input?(@form[:route_ids].value), do: nil, else: "All Trips"}
             />
@@ -298,7 +298,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
                   loading={
                     Enum.empty?(@stop_id_options) and !disable_stop_input?(@form[:route_ids].value)
                   }
-                  class="min-w-[24rem] h-[100%]"
+                  class="min-w-[24rem] min-h-[30rem] h-[30rem]"
                   disabled={disable_stop_input?(@form[:route_ids].value)}
                   prompt={
                     if disable_stop_input?(@form[:route_ids].value),
