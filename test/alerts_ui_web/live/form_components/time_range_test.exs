@@ -131,6 +131,58 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       assert render(view) =~ ~s(Effect must end after 05/01/2024, 10:54:00 AM)
     end
 
+    test "scheduled section is hidden unless scheduled is selected" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
+      refute view |> render() =~ ~s(id=\"scheduled-selector-div\")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "alert_timing_dropdown" => "scheduled"
+        }
+      })
+
+      assert view |> render() =~ ~s(id=\"scheduled-selector-div\")
+    end
+
+    test "scheduled start time must be after active period start" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "alert_timing_dropdown" => "scheduled",
+          "active_period_start" => "2024-05-01T10:54:00",
+          "notification_period_start" => "2024-04-29T10:54:00"
+        }
+      })
+
+      assert render(view) =~ ~s(Effect must start after 05/01/2024, 10:54:00 AM)
+    end
+
+    test "scheduled start time must be before active period end" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "alert_timing_dropdown" => "scheduled",
+          "active_period_end_specifier" => "custom",
+          "active_period_end" => "2024-05-01T10:54:00",
+          "notification_period_start" => "2024-05-02T10:54:00"
+        }
+      })
+
+      assert render(view) =~ ~s(Effect must end before 05/01/2024, 10:54:00 AM)
+    end
+
     test "it sends section_completed if no error in changeset" do
       {:ok, view, _html} =
         live_isolated_component(TimeRange, @assigns)
