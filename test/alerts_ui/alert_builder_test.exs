@@ -1425,6 +1425,64 @@ defmodule AlertsUI.AlertBuilderTest do
       end
     end
 
+    test "RDTS informed entity with trips and stops uses parents stops if no child stops available" do
+      alert_data = %{
+        route_type: 4,
+        effect_name: "Delay",
+        route_ids: ["Boat-EastBoston"],
+        direction: "default",
+        trip_ids: ["default", "Boat-EastBoston-1115-Long-BEB-01-Weekday-Summer-24"],
+        trip_information_by_id: %{
+          "Boat-EastBoston-1115-Long-BEB-01-Weekday-Summer-24" => %{
+            direction_id: 0,
+            route_id: "Boat-EastBoston"
+          }
+        },
+        stop_ids: ["Boat-Long"],
+        header_text: "t",
+        description_text: "t"
+      }
+
+      parent_stops = [%Stop{id: "Boat-Long"}]
+
+      child_stops = []
+
+      with_mocks([
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _route_id, _opts ->
+             [%APIRoutePattern{direction_id: 0, stops: child_stops}]
+           end,
+           included_stops_by_route_id: fn _route_id, _direction -> child_stops end
+         ]},
+        {StopsRepo, [], [by_route: fn _route_id, _direction -> parent_stops ++ child_stops end]},
+        {SchedulesRepo, [],
+         [
+           trip: fn "Boat-EastBoston-1115-Long-BEB-01-Weekday-Summer-24" ->
+             %Trip{id: "Boat-EastBoston-1115-Long-BEB-01-Weekday-Summer-24", direction_id: 0}
+           end
+         ]},
+        {RoutesRepo, [], [get: fn route_id -> %Route{id: route_id, type: 2} end]}
+      ]) do
+        result = AlertBuilder.build_alert(alert_data, :RDTS)
+
+        assert result.informed_entity == [
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   agency_id: "1",
+                   route_id: "Boat-EastBoston",
+                   route_type: 4,
+                   stop_id: "Boat-Long",
+                   trip: %{
+                     direction_id: 0,
+                     route_id: "Boat-EastBoston",
+                     trip_id: "Boat-EastBoston-1115-Long-BEB-01-Weekday-Summer-24"
+                   }
+                 }
+               ]
+      end
+    end
+
     test "RDTS CR track change 1 trip" do
       alert_data = %{
         route_type: 2,
