@@ -1,6 +1,7 @@
 defmodule AlertsUIWeb.FormComponents.DeliveryTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
+  use AlertsUIWeb, :live_view
 
   import LiveIsolatedComponent
   import Phoenix.LiveViewTest
@@ -17,7 +18,7 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
       label: "Alert Details"
     },
     route_type: 1,
-    alert_data: %{header_text: "example_header_text"}
+    alert_data: %{}
   }
 
   describe "component" do
@@ -46,15 +47,12 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
     end
 
     test "banner text syncs with header text" do
-      {:ok, view, _html} = live_isolated_component(Delivery, @assigns)
-
-      view
-      |> element("form")
-      |> render_change(%{
-        "delivery" => %{
-          "view_banner" => "true"
-        }
-      })
+      {:ok, view, _html} =
+        live_isolated_component(
+          Delivery,
+          @assigns
+          |> Map.put(:alert_data, %{header_text: "example_header_text", view_banner: true})
+        )
 
       assert view
              |> element("div#banner_div")

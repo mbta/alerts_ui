@@ -38,7 +38,7 @@ defmodule AlertsUI.AlertBuilder do
           description_text: String.t(),
           banner_text: String.t() | nil,
           draft: boolean | nil,
-          last_push_notification: DateTime.t() | nil
+          last_push_notification_timestamp: NaiveDateTime.t() | nil
         }
   @type direction_t :: 0 | 1
   @type stop_with_context_t :: {Stop.t(), Route.id_t(), direction_t(), RoutePattern.stop_type()}
@@ -96,8 +96,8 @@ defmodule AlertsUI.AlertBuilder do
       effect: Map.get(effect_map, :effect),
       effect_detail: Map.get(effect_map, :effect_detail),
       draft: Map.get(alert_data, :draft, false),
-      last_push_notification:
-        Map.get(alert_data, :last_push_notification) |> naive_eastern_datetime_to_utc,
+      last_push_notification_timestamp:
+        Map.get(alert_data, :last_push_notification_timestamp) |> naive_eastern_datetime_to_utc,
       informed_entity: build_informed_entities(combination, alert_data, effect_name)
     }
     |> Map.merge(active_period_map)
@@ -624,6 +624,7 @@ defmodule AlertsUI.AlertBuilder do
     }
   end
 
+  defp maybe_add_direction(informed_entity, nil), do: informed_entity
   defp maybe_add_direction(informed_entity, "default"), do: informed_entity
 
   defp maybe_add_direction(informed_entity, direction_id) do
