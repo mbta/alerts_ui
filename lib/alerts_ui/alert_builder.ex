@@ -37,7 +37,8 @@ defmodule AlertsUI.AlertBuilder do
           header_text: String.t(),
           description_text: String.t(),
           banner_text: String.t() | nil,
-          draft: boolean | nil
+          draft: boolean | nil,
+          last_push_notification: DateTime.t() | nil
         }
   @type direction_t :: 0 | 1
   @type stop_with_context_t :: {Stop.t(), Route.id_t(), direction_t(), RoutePattern.stop_type()}
@@ -95,6 +96,8 @@ defmodule AlertsUI.AlertBuilder do
       effect: Map.get(effect_map, :effect),
       effect_detail: Map.get(effect_map, :effect_detail),
       draft: Map.get(alert_data, :draft, false),
+      last_push_notification:
+        Map.get(alert_data, :last_push_notification) |> naive_eastern_datetime_to_utc,
       informed_entity: build_informed_entities(combination, alert_data, effect_name)
     }
     |> Map.merge(active_period_map)
@@ -726,4 +729,10 @@ defmodule AlertsUI.AlertBuilder do
   @spec maybe_integer_to_string(integer() | String.t()) :: String.t()
   defp maybe_integer_to_string(value) when is_integer(value), do: Integer.to_string(value)
   defp maybe_integer_to_string(value), do: value
+
+  @spec naive_eastern_datetime_to_utc(NaiveDateTime.t() | nil) :: DateTime.t() | nil
+  def naive_eastern_datetime_to_utc(nil), do: nil
+
+  def naive_eastern_datetime_to_utc(naive),
+    do: naive |> DateTime.from_naive!("America/New_York") |> Timex.Timezone.convert("Etc/UTC")
 end
