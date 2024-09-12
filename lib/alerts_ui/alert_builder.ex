@@ -1,6 +1,9 @@
 defmodule AlertsUI.AlertBuilder do
   @moduledoc """
     Builds an alert from form data
+
+    All incoming times are naive datetimes created in the eastern timezone
+    and need to be converted to UTC for storage
   """
 
   alias AlertsUI.Activities
@@ -27,9 +30,9 @@ defmodule AlertsUI.AlertBuilder do
           child_stops_with_context: [stop_with_context_t()] | [],
           trip_ids: [String.t()],
           service_types: [Route.type_int()],
-          active_period_start: DateTime.t() | nil,
+          active_period_start: NaiveDateTime.t() | nil,
           active_period_end_specifier: atom() | nil,
-          active_period_end: DateTime.t() | nil,
+          active_period_end: NaiveDateTime.t() | nil,
           cause_detail: String.t(),
           url: String.t() | nil,
           image_url: String.t() | nil,
@@ -38,9 +41,9 @@ defmodule AlertsUI.AlertBuilder do
           description_text: String.t(),
           banner_text: String.t() | nil,
           draft: boolean | nil,
-          last_push_notification_timestamp: NaiveDateTime.t() | nil
-          notification_period_start: DateTime.t() | nil,
-          notification_period_end: DateTime.t() | nil
+          last_push_notification_timestamp: NaiveDateTime.t() | nil,
+          notification_period_start: NaiveDateTime.t() | nil,
+          notification_period_end: NaiveDateTime.t() | nil
         }
   @type direction_t :: 0 | 1
   @type stop_with_context_t :: {Stop.t(), Route.id_t(), direction_t(), RoutePattern.stop_type()}
@@ -101,8 +104,10 @@ defmodule AlertsUI.AlertBuilder do
       last_push_notification_timestamp:
         Map.get(alert_data, :last_push_notification_timestamp) |> naive_eastern_datetime_to_utc,
       informed_entity: build_informed_entities(combination, alert_data, effect_name)
-      notification_period_start: Map.get(alert_data, :notification_period_start),
-      notification_period_end: Map.get(alert_data, :notification_period_end)
+      notification_period_start:
+        Map.get(alert_data, :notification_period_start) |> naive_eastern_datetime_to_utc,
+      notification_period_end:
+        Map.get(alert_data, :notification_period_end) |> naive_eastern_datetime_to_utc
     }
     |> Map.merge(active_period_map)
   end
@@ -218,6 +223,7 @@ defmodule AlertsUI.AlertBuilder do
           active_period_end_specifier: atom() | nil
         }) :: active_period_data_t() | %{}
   defp build_active_period(%{active_period_start: nil}), do: %{}
+  defp build_active_period(%{active_period_end_specifier: nil}), do: %{}
 
   defp build_active_period(%{
          active_period_start: naive_start,

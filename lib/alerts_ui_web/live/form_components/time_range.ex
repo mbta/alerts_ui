@@ -48,9 +48,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       active_period_start:
         DateTime.now!("America/New_York") |> DateTime.to_naive() |> naive_datetime_to_iso8601(),
       active_period_end: end_of_service_datetime(),
-      active_period_end_specifier: :later_today,
-      active_period_start_specifier: :now,
-      alert_timing_dropdown: :"one-time",
       notification_period_start: ""
     }
 

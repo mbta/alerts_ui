@@ -79,7 +79,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  banner_text: "important banner text",
                  last_push_notification_timestamp: ~U[2024-04-30 15:54:00Z]
                  notification_period_end: nil,
-                 notification_period_start: ~N[2024-04-30 12:54:00]
+                 notification_period_start: ~U[2024-04-30 16:54:00Z]
                }
 
         result |> Alerts.create_or_update_alert()
