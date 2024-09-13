@@ -5,7 +5,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   use AlertsUIWeb, :live_component
   use AlertsUI.Schema
   import Ecto.Changeset
-  alias AlertsUI.Models.Cause
+  alias AlertsUI.Models.{Cause, SeverityLevel}
   alias AlertsUIWeb.FormComponents.Helpers.ErrorFormatter
 
   @primary_key false
@@ -17,16 +17,36 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     field :url, :string
     field :image_url, :string
     field :image_alternative_text, :string
+    field :severity, :integer, default: 4
   end
 
   @required_fields ~w[header_text]a
-  @fields ~w[description_text draft cause_detail url image_url image_alternative_text]a ++
+  @fields ~w[description_text draft cause_detail url image_url image_alternative_text severity]a ++
             @required_fields
 
   @impl true
   def mount(socket) do
+    cause_options =
+      formatted_causes(
+        Map.get(socket.assigns, :route_type),
+        Map.get(socket.assigns, :combination)
+      )
+
+    severity_options =
+      SeverityLevel.severity_tuples()
+      |> Enum.map(fn {desc, severity, _level} -> {desc, severity} end)
+
     form = %__MODULE__{} |> changeset() |> to_form()
-    socket = assign(socket, %{form: form, image_size: nil, image_path: nil})
+
+    socket =
+      assign(socket, %{
+        form: form,
+        image_size: nil,
+        image_path: nil,
+        severity_options: severity_options,
+        cause_options: cause_options
+      })
+
     {:ok, socket}
   end
 
@@ -139,14 +159,6 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
 
   @impl true
   def render(assigns) do
-    cause_options =
-      formatted_causes(Map.get(assigns, :route_type), Map.get(assigns, :combination))
-
-    assigns =
-      assign(assigns,
-        cause_options: cause_options
-      )
-
     ~H"""
     <div
       class={unless @progress.name == "details", do: "hidden", else: "min-w-full flex flex-col mt-4"}
@@ -163,13 +175,22 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         class="form-control gap-12"
         id="details_form"
       >
-        <.select
-          label="Cause"
-          field={@form[:cause_detail]}
-          options={@cause_options}
-          class="max-w-[16rem]"
-          id="cause_input"
-        />
+        <div class="flex flex-row">
+          <.select
+            label="Cause"
+            field={@form[:cause_detail]}
+            options={@cause_options}
+            class="max-w-[16rem] mr-8"
+            id="cause_input"
+          />
+          <.select
+            label="Severity"
+            field={@form[:severity]}
+            options={@severity_options}
+            class="max-w-[16rem]"
+            id="severity_input"
+          />
+        </div>
         <div class="flex flex-row">
           <div class="flex flex-col w-[50%]">
             <.textarea
