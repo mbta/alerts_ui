@@ -48,7 +48,8 @@ defmodule AlertsUI.AlertBuilderTest do
           image_url: "http://www.example.com/example.jpg",
           image_alternative_text: "an example image",
           last_push_notification_timestamp: ~N[2024-04-30 11:54:00],
-          notification_period_start: ~N[2024-04-30 12:54:00]
+          notification_period_start: ~N[2024-04-30 12:54:00],
+          severity: 3
         }
 
         result = AlertBuilder.build_alert(alert_data, :R)
@@ -79,6 +80,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  banner_text: "important banner text",
                  last_push_notification_timestamp: ~U[2024-04-30 15:54:00Z],
                  notification_period_start: ~U[2024-04-30 16:54:00Z]
+                 severity: 3,
+                 severity_level: :WARNING
                }
 
         result |> Alerts.create_or_update_alert()
@@ -150,6 +153,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  cause: :UNKNOWN_CAUSE,
                  last_push_notification_timestamp: nil,
                  notification_period_start: nil
+                 severity: nil,
+                 severity_level: nil
                }
 
         result |> Alerts.create_or_update_alert()
@@ -204,6 +209,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  banner_text: nil,
                  last_push_notification_timestamp: nil,
                  notification_period_start: ~U[2024-04-30 15:54:00Z]
+                 severity: nil,
+                 severity_level: nil
                }
 
         result |> Alerts.create_or_update_alert()

@@ -22,6 +22,8 @@ defmodule AlertsUI.Models.SeverityLevel do
   Returns severity level given an integer
 
   ## Examples
+      iex> AlertsUI.Models.SeverityLevel.severity_level_by_severity(nil)
+      nil
       iex> AlertsUI.Models.SeverityLevel.severity_level_by_severity(0)
       nil
       iex> AlertsUI.Models.SeverityLevel.severity_level_by_severity(1)
