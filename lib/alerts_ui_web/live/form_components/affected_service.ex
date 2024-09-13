@@ -243,24 +243,21 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       >
         <fieldset class="flex flex-row gap-x-12 min-h-[32rem]">
           <.filtered_select
-            :if={@route_type === 3}
             label={if @route_type in [0, 1, 2], do: "Line(s)", else: "Route(s)"}
             field={@form[:route_ids]}
             filter_field={@form[:route_ids_filter]}
             loading={Enum.empty?(@route_id_options)}
             options={@route_id_options}
-            class="min-w-[18rem] min-h-[30rem]"
+            class={"min-w-[18rem] min-h-[30rem] #{@route_type !== 3 && "hidden"}"}
           />
           <.toggle_checkgroup
-            :if={@route_type !== 3}
             label={if @route_type in [0, 1, 2], do: "Line(s)", else: "Route(s)"}
             field={@form[:route_ids]}
             options={@route_id_options}
             icon_type={icon_type(@route_type)}
+            class={@route_type === 3 && "hidden"}
             show_icons={true}
-            class="min-h-[30rem]"
           />
-
           <%= if show_trips_input?(assigns) do %>
             <.filtered_select
               label="Trip(s)"
