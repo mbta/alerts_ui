@@ -170,29 +170,42 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           class="max-w-[16rem]"
           id="cause_input"
         />
-        <div class="flex flex-col w-[50%]">
-          <.textarea
-            field={@form[:header_text]}
-            label="Message"
-            phx-debounce={120}
-            maxlength="255"
-            id="header_input"
-            class="w-[100%] min-h-[10rem] border-b-0 z-20"
-            value={@form[:header_text].value}
-          />
-          <.textarea_counter character_limit={255} field={@form[:header_text]} />
+        <div class="flex flex-row">
+          <div class="flex flex-col w-[50%]">
+            <.textarea
+              field={@form[:header_text]}
+              label="Main message"
+              phx-debounce={120}
+              maxlength="255"
+              id="header_input"
+              class="w-[100%] min-h-[10rem] border-b-0 z-20"
+              value={@form[:header_text].value}
+            />
+            <.textarea_counter character_limit={255} field={@form[:header_text]} />
+          </div>
+          <div class="flex flex-col justify-center ml-4">
+            <.copy_button copy_id="#alert_details_header_text" title="Copy main message to Clipboard" />
+          </div>
         </div>
-        <div class="flex flex-col w-[50%]">
-          <.textarea
-            field={@form[:description_text]}
-            label="Additional information"
-            phx-debounce={120}
-            id="description_input"
-            class="w-[100%] min-h-[10rem] border-b-0 z-20"
-            maxlength="255"
-            value={@form[:description_text].value}
-          />
-          <.textarea_counter character_limit={255} field={@form[:description_text]} />
+        <div class="flex flex-row">
+          <div class="flex flex-col w-[50%]">
+            <.textarea
+              field={@form[:description_text]}
+              label="Supporting information"
+              phx-debounce={120}
+              id="description_input"
+              class="w-[100%] min-h-[10rem] border-b-0 z-20"
+              maxlength="255"
+              value={@form[:description_text].value}
+            />
+            <.textarea_counter character_limit={255} field={@form[:description_text]} />
+          </div>
+          <div class="flex flex-col justify-center ml-4">
+            <.copy_button
+              copy_id="#alert_details_description_text"
+              title="Copy supporting information to Clipboard"
+            />
+          </div>
         </div>
         <.text_input
           field={@form[:url]}
