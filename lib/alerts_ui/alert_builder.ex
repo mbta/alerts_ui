@@ -465,6 +465,45 @@ defmodule AlertsUI.AlertBuilder do
   defp build_informed_entities(:RDTS, %{trip_ids: []} = alert_data, effect),
     do: build_informed_entities(:RDS, alert_data, effect)
 
+  # Only parent stops
+  defp build_informed_entities(
+         :RDTS,
+         %{
+           stop_ids: [_ | _] = stop_ids,
+           child_stops_with_context: [],
+           trip_ids: [_ | _] = trip_ids,
+           route_type: route_type,
+           route_ids: route_ids
+         },
+         effect
+       ) do
+    trips = get_trips(trip_ids)
+
+    stop_ids
+    |> stop_route_pairs(route_ids)
+    |> Enum.filter(&on_route?(&1, "default"))
+    |> Enum.flat_map(fn {stop_id, route_id} ->
+      trips
+      |> Enum.map(fn %Trip{id: trip_id, direction_id: trip_direction_id} ->
+        %{
+          activities: Activities.for_effect(effect),
+          route_id: route_id,
+          route_type: route_type,
+          agency_id: Routes.agency_id(route_id),
+          trip:
+            build_trip(
+              trip_id,
+              trip_direction_id,
+              route_id
+            ),
+          stop_id: stop_id
+        }
+      end)
+    end)
+    |> Enum.uniq()
+  end
+
+  # Child stops
   defp build_informed_entities(
          :RDTS,
          %{
@@ -563,7 +602,9 @@ defmodule AlertsUI.AlertBuilder do
   end
 
   @spec get_trip(String.t()) :: Trip.t() | nil
-  defp get_trip(trip_id), do: SchedulesRepo.trip(trip_id)
+  defp get_trip(trip_id) do
+    SchedulesRepo.trip(trip_id)
+  end
 
   @spec trip_directions([Trip.t()]) :: [Trip.direction_id_t()]
   defp trip_directions(trips) do
