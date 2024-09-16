@@ -216,8 +216,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         description_text: "description text",
         informed_entity: [],
         active_period_start: ~U[2024-05-02 16:09:34.007545Z],
-        active_period_end: nil,
-        active_period: [%{start: ~U[2024-05-02 16:09:34.007545Z], end: nil}],
+        active_period_end: ~U[2024-05-02 18:09:34.007545Z],
+        active_period: [
+          %{start: ~U[2024-05-02 16:09:34.007545Z], end: ~U[2024-05-02 18:09:34.007545Z]}
+        ],
         duration_certainty: :ESTIMATED
       })
 

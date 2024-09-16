@@ -111,7 +111,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   end
 
   def determine_specifier(nil, nil, _ap_start), do: nil
-  def determine_specifier(nil, :ESTIMATED, _ap_start), do: :later_today
+  def determine_specifier(_ap_end, :ESTIMATED, _ap_start), do: :later_today
   def determine_specifier(nil, :UNKNOWN, _ap_start), do: :until_further_notice
 
   def determine_specifier(ap_end, :KNOWN, ap_start) when not is_nil(ap_end) do
