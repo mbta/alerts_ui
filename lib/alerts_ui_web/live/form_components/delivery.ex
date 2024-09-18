@@ -14,20 +14,25 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
     field :banner_sync_toggle, :boolean, default: true
     field :view_banner, :boolean, default: false
     field :accept_banner, :boolean, default: false
+    field :last_push_notification_timestamp, :naive_datetime
+    field :notification_toggle, :boolean, default: true
   end
 
-  @fields ~w[banner_text banner_sync_toggle view_banner accept_banner]a
+  @fields ~w[banner_text banner_sync_toggle view_banner accept_banner last_push_notification_timestamp notification_toggle]a
 
   @impl true
   def mount(socket) do
-    form = %__MODULE__{} |> changeset() |> to_form()
+    form =
+      %__MODULE__{}
+      |> changeset(%{"last_push_notification_timestamp" => current_time()})
+      |> to_form()
+
     socket = assign(socket, %{form: form})
     {:ok, socket}
   end
 
   @impl true
   def update(%{alert_data: alert_data} = assigns, socket) do
-    form_params = socket.assigns.form.params
     form = socket.assigns.form
 
     banner_text_map =
@@ -38,9 +43,27 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
         %{}
       end
 
+    data =
+      alert_data
+      |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
+      |> Map.merge(form.params)
+      |> Map.merge(banner_text_map)
+
+    data =
+      if Map.get(form.params, :banner_text) do
+        Map.put(data, "view_banner", true)
+      else
+        data
+      end
+
+    changeset = changeset(%__MODULE__{}, data)
+
+    changes = changeset |> apply_action!(:validate)
+
+    send(self(), {:section_completed, changes})
+
     form =
-      %__MODULE__{}
-      |> changeset(Map.merge(form_params, banner_text_map))
+      changeset
       |> to_form()
 
     {:ok, socket |> assign(assigns) |> assign(form: form)}
@@ -81,7 +104,18 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
       |> Map.put("banner_text", nil)
       |> Map.put("banner_sync_toggle", false)
     else
-      Map.put(delivery, "banner_sync_toggle", true)
+      delivery
+      |> Map.put("banner_sync_toggle", true)
+      |> Map.put("banner_text", socket.assigns.alert_data[:header_text])
+    end
+    |> validate(socket)
+  end
+
+  def handle_event("notification_toggle_change", %{"delivery" => delivery}, socket) do
+    if Form.normalize_value("checkbox", delivery["notification_toggle"]) == false do
+      Map.put(delivery, "last_push_notification_timestamp", nil)
+    else
+      Map.put(delivery, "last_push_notification_timestamp", current_time())
     end
     |> validate(socket)
   end
@@ -149,9 +183,21 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
         phx-target={@myself}
         phx-submit="save"
         phx-change="validate"
-        class="form-control gap-12"
+        class="form-control gap-8"
         id="delivery_form"
+        hidden={:last_push_notification_timestamp}
       >
+        <div class="flex flex-row mt-4">
+          <.checkbox
+            field={@form[:notification_toggle]}
+            phx-change="notification_toggle_change"
+            phx-target={@myself}
+          />
+
+          <span class="ml-4">
+            Email/SMS to T-alert suscribers
+          </span>
+        </div>
         <div id="banner_div" class="flex flex-col w-[50%]">
           <div class="flex flex-row mb-2">
             <.checkbox field={@form[:view_banner]} phx-change="view_banner" phx-target={@myself} />
@@ -205,4 +251,8 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
     </div>
     """
   end
+
+  def current_time,
+    do:
+      DateTime.now!("America/New_York") |> DateTime.to_naive() |> NaiveDateTime.truncate(:second)
 end
