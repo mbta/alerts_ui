@@ -86,7 +86,7 @@ defmodule AlertsUI.Models.Alert do
           recurrence_text: String.t() | nil,
           alert_lifecycle: atom() | nil,
           duration_certainty: atom() | nil,
-          reminder_times: [integer()] | nil,
+          reminder_times: [DateTime.t()] | nil,
           active_period: [ActivePeriod.t()] | nil,
           active_period_start: DateTime.t() | nil,
           active_period_end: DateTime.t() | nil,
@@ -153,7 +153,7 @@ defmodule AlertsUI.Models.Alert do
     field :recurrence_text, :string
     field :alert_lifecycle, Ecto.Enum, values: @alert_lifecycle
     field :duration_certainty, Ecto.Enum, values: @duration_certainty
-    field :reminder_times, {:array, :integer}
+    field :reminder_times, {:array, :utc_datetime}
     embeds_many :active_period, ActivePeriod, on_replace: :delete
     field :active_period_start, :utc_datetime
     field :active_period_end, :utc_datetime

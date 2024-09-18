@@ -40,7 +40,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
           recurrence_text: alert.recurrence_text |> build_translated_string,
           alert_lifecycle: alert.active_period_start |> AlertLifecycle.get_alert_lifecycle(),
           duration_certainty: alert.duration_certainty,
-          reminder_times: alert.reminder_times,
+          reminder_times: alert.reminder_times |> Enum.map(&date_time_to_unix/1),
           active_period: alert.active_period |> build_active_periods,
           image: alert.image_url |> build_translated_image,
           image_alternative_text: alert.image_alternative_text |> build_translated_string,

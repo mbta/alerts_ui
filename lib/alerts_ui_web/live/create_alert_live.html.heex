@@ -43,7 +43,13 @@
         id="delivery"
         progress={@progress}
         alert_data={@alert_data}
-        route_type={route_type(@alert_data)}
+        combination={@combination}
+      />
+      <.live_component
+        module={RiderReminders}
+        id="rider_reminders"
+        progress={@progress}
+        alert_data={@alert_data}
         combination={@combination}
       />
       <.live_component module={Submit} id="submit" progress={@progress} />

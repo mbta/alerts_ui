@@ -197,7 +197,7 @@ defmodule AlertsUIWeb.SharedComponents do
       bg-primary
       border-primary
       border-1
-      px-4
+      px-1
       py-3
       rounded-md
       hover:bg-primary-hover
@@ -206,7 +206,6 @@ defmodule AlertsUIWeb.SharedComponents do
       active:border-primary-active
       focus:border-primary-active
       focus:border-4
-      focus:px-3
       focus:py-2
       disabled:bg-primary-disabled
       disabled:border-primary-disabled
@@ -238,10 +237,11 @@ defmodule AlertsUIWeb.SharedComponents do
     ~H"""
     <button
       class={"
-      text-text-white
-      border-secondary-border
+      text-primary
+      border
+      border-primary
       border-1
-      px-4
+      px-1
       py-3
       rounded-md
       hover:bg-secondary-hover
@@ -249,7 +249,6 @@ defmodule AlertsUIWeb.SharedComponents do
       active:border-secondary-active
       focus:border-secondary-focus-border
       focus:border-4
-      focus:px-3
       focus:py-2
       disabled:bg-secondary-disabled
       disabled:border-secondary-disabled
@@ -839,7 +838,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :max, :string, default: ""
 
-  attr :value, :string, default: ""
+  attr :value, :string, default: nil
 
   attr :type, :string, default: "datetime-local"
 
@@ -866,7 +865,7 @@ defmodule AlertsUIWeb.SharedComponents do
         name={@name}
         min={@min}
         max={@max}
-        value={@value}
+        value={Form.normalize_value("datetime-local", @value)}
         step="1"
         class={[
           "bg-bg-elevation-5 border border-border-primary pl-3 py-1.5 min-w-[99%] p-0

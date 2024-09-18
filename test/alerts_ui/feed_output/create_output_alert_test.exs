@@ -80,6 +80,10 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
         informed_entity: [
           informed_entity_1,
           informed_entity_2
+        ],
+        reminder_times: [
+          ~U[2023-09-22 14:19:54Z],
+          ~U[2023-09-22 14:20:54Z]
         ]
       })
 
@@ -149,6 +153,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
               end: DateTime.to_unix(active_period_end)
             }
           ],
+          reminder_times: [1_695_392_394, 1_695_392_454],
           informed_entity: [
             %{
               agency_id: "1",

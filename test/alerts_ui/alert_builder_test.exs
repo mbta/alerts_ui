@@ -49,7 +49,12 @@ defmodule AlertsUI.AlertBuilderTest do
           image_alternative_text: "an example image",
           last_push_notification_timestamp: ~N[2024-04-30 11:54:00],
           notification_period_start: ~N[2024-04-30 12:54:00],
-          severity: 3
+          severity: 3,
+          reminder_times: [
+            ~N[2024-04-30 12:04:00],
+            ~N[2024-04-30 12:14:00],
+            ~N[2024-04-30 12:24:00]
+          ]
         }
 
         result = AlertBuilder.build_alert(alert_data, :R)
@@ -81,7 +86,12 @@ defmodule AlertsUI.AlertBuilderTest do
                  last_push_notification_timestamp: ~U[2024-04-30 15:54:00Z],
                  notification_period_start: ~U[2024-04-30 16:54:00Z],
                  severity: 3,
-                 severity_level: :WARNING
+                 severity_level: :WARNING,
+                 reminder_times: [
+                   ~U[2024-04-30 16:04:00Z],
+                   ~U[2024-04-30 16:14:00Z],
+                   ~U[2024-04-30 16:24:00Z]
+                 ]
                }
 
         result |> Alerts.create_or_update_alert()
@@ -154,7 +164,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  last_push_notification_timestamp: nil,
                  notification_period_start: nil,
                  severity: nil,
-                 severity_level: nil
+                 severity_level: nil,
+                 reminder_times: nil
                }
 
         result |> Alerts.create_or_update_alert()
@@ -210,7 +221,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  last_push_notification_timestamp: nil,
                  notification_period_start: ~U[2024-04-30 15:54:00Z],
                  severity: nil,
-                 severity_level: nil
+                 severity_level: nil,
+                 reminder_times: nil
                }
 
         result |> Alerts.create_or_update_alert()

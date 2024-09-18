@@ -43,7 +43,8 @@ defmodule AlertsUI.AlertBuilder do
           draft: boolean | nil,
           last_push_notification_timestamp: NaiveDateTime.t() | nil,
           notification_period_start: NaiveDateTime.t() | nil,
-          severity: integer()
+          severity: integer(),
+          reminder_times: [NaiveDateTime.t()] | nil
         }
   @type direction_t :: 0 | 1
   @type stop_with_context_t :: {Stop.t(), Route.id_t(), direction_t(), RoutePattern.stop_type()}
@@ -68,6 +69,12 @@ defmodule AlertsUI.AlertBuilder do
     cause = Cause.get_by_mode_and_detail(route_type, cause_detail)
 
     severity = Map.get(alert_data, :severity)
+    reminder_times =
+      if Map.get(alert_data, :reminder_times) do
+        Enum.map(alert_data.reminder_times, &naive_eastern_datetime_to_utc/1)
+      else
+        nil
+      end
 
     route_ids =
       alert_data
@@ -109,7 +116,8 @@ defmodule AlertsUI.AlertBuilder do
       notification_period_start:
         Map.get(alert_data, :notification_period_start) |> naive_eastern_datetime_to_utc,
       severity: severity,
-      severity_level: SeverityLevel.severity_level_by_severity(severity)
+      severity_level: SeverityLevel.severity_level_by_severity(severity),
+      reminder_times: reminder_times
     }
     |> Map.merge(active_period_map)
   end
