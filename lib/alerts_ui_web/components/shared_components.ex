@@ -373,7 +373,10 @@ defmodule AlertsUIWeb.SharedComponents do
       |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
 
     ~H"""
-    <div phx-feedback-for={@name} class={["grid grid-cols-1 gap-1 text-sm items-baseline", @class]}>
+    <div
+      phx-feedback-for={@name}
+      class={["grid grid-cols-1 gap-1 text-sm items-baseline content-start", @class]}
+    >
       <.label for={@id} class={if is_nil(@label), do: "hidden"}><%= @label %></.label>
       <div :for={{option_name, id} <- @options} class="">
         <.label for={id}>
@@ -533,7 +536,7 @@ defmodule AlertsUIWeb.SharedComponents do
       <.label for={@id}><%= @label %></.label>
       <div
         class={[
-          "min-h-full min-w-fit flex flex-col rounded border
+          "min-h-[100%] grow min-w-fit flex flex-col rounded border
           bg-bg-elevation-5 disabled:bg-bg-elevation-3
           border-bg-elevation-6 ring-0 ring-border-focus
           focus:ring-1 focus:border-border-focus
@@ -556,8 +559,8 @@ defmodule AlertsUIWeb.SharedComponents do
           options={@options}
           field={@field}
           prompt={if @loading, do: nil, else: @prompt}
-          class="min-h-full m-0"
-          select_class="min-w-full min-h-[86%] pt-0 mt-0 [scrollbar-width:thin] overflow-auto
+          class="min-h-[100%] h-[100%] m-0"
+          select_class="min-w-full min-h-[87%] pt-0 mt-0 [scrollbar-width:thin] overflow-auto
             border-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-t-none [appearance:none]"
           {@rest}
         />

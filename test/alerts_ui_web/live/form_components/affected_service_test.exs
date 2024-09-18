@@ -250,7 +250,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
           })
         )
 
-      assert view |> render() =~ ~s(<option selected="selected" value="CR-Worcester">)
+      assert view |> render() =~ ~s(value=\"CR-Worcester\" checked=\"checked\")
       assert view |> render() =~ ~s(<option selected="selected" value="0">Outbound</option>)
       assert view |> render() =~ ~s(<option selected="selected" value="place-sstat">)
       assert view |> render() =~ ~s(<option value="CR-627999-541-1">)
