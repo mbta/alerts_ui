@@ -475,7 +475,9 @@ defmodule AlertsUIWeb.SharedComponents do
         multiple={@multiple}
         {@rest}
       >
-        <option :if={@prompt} value="default"><%= @prompt %></option>
+        <option :if={@prompt} value="default" selected={@value in ["default", []]}>
+          <%= @prompt %>
+        </option>
         <%= Form.options_for_select(@options, @value) %>
       </select>
       <.input_error :for={msg <- @errors}><%= msg %></.input_error>
