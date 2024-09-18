@@ -77,23 +77,15 @@ defmodule AlertsUI.Alerts do
   defp end_is_past(current_time, end_time),
     do: DateTime.compare(current_time, end_time) in [:eq, :gt]
 
-  @spec filter_on_notification_period([Alert.t()], DateTime.t()) :: [Alert.t()]
-  def filter_on_notification_period(alerts, current_time \\ DateTime.utc_now()) do
+  @spec filter_on_notification_period_start([Alert.t()], DateTime.t()) :: [Alert.t()]
+  def filter_on_notification_period_start(alerts, current_time \\ DateTime.utc_now()) do
     Enum.filter(
       alerts,
       fn alert ->
         notification_start = Map.get(alert, :notification_period_start, nil)
-        notification_end = Map.get(alert, :notification_period_end, nil)
 
-        starts_before_current_time =
-          is_nil(notification_start) or
-            DateTime.compare(notification_start, current_time) in [:lt, :eq]
-
-        ends_after_current_time =
-          is_nil(notification_end) or
-            DateTime.compare(notification_end, current_time) in [:gt, :eq]
-
-        starts_before_current_time and ends_after_current_time
+        is_nil(notification_start) or
+          DateTime.compare(notification_start, current_time) in [:lt, :eq]
       end
     )
   end

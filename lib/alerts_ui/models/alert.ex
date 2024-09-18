@@ -52,8 +52,7 @@ defmodule AlertsUI.Models.Alert do
   image_alternative_text
   active_period_start
   active_period_end
-  notification_period_start
-  notification_period_end)a
+  notification_period_start)a
 
   @cause Cause.causes()
   @effect Effect.effects()
@@ -96,8 +95,7 @@ defmodule AlertsUI.Models.Alert do
           tts_header_text: String.t() | nil,
           tts_description_text: String.t() | nil,
           informed_entity: [InformedEntity.t()],
-          notification_period_start: DateTime.t() | nil,
-          notification_period_end: DateTime.t() | nil
+          notification_period_start: DateTime.t() | nil
         }
 
   @derive {
@@ -166,7 +164,6 @@ defmodule AlertsUI.Models.Alert do
     has_many :informed_entity, InformedEntity, on_replace: :nilify
     field :draft, :boolean, default: false
     field :notification_period_start, :utc_datetime
-    field :notification_period_end, :utc_datetime
     timestamps()
   end
 

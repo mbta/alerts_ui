@@ -44,7 +44,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       })
 
       refute view
-             |> render() =~ ~s(\" type=\"datetime-local\" disabled=\"disabled\")
+             |> render() =~ ~s(" type="datetime-local" disabled="disabled")
     end
 
     test "works if editing" do
@@ -135,7 +135,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       {:ok, view, _html} =
         live_isolated_component(TimeRange, @assigns)
 
-      refute view |> render() =~ ~s(id=\"scheduled-selector-div\")
+      refute view |> render() =~ ~s(id="scheduled-selector-div")
 
       view
       |> element("form")
@@ -145,7 +145,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         }
       })
 
-      assert view |> render() =~ ~s(id=\"scheduled-selector-div\")
+      assert view |> render() =~ ~s(id="scheduled-selector-div")
     end
 
     test "scheduled start time must be after active period start" do

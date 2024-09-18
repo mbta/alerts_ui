@@ -23,8 +23,7 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
       insert(:alert,
         alert_id: "345abc",
         active_period_start: ~U[2023-10-12 00:01:00Z],
-        active_period_end: four_minutes_ago,
-        notification_period_end: DateTime.add(current_time, 1, :hour)
+        active_period_end: four_minutes_ago
       )
 
       insert(:alert,
