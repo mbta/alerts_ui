@@ -30,8 +30,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   embedded_schema do
     field :alert_timing_dropdown, Ecto.Enum, values: @alert_timing_dropdown_values
     field :active_period_start, :naive_datetime
-    field :active_period_start_specifier, Ecto.Enum, values: @start_values
-    field :active_period_end_specifier, Ecto.Enum, values: @end_values
+    field :active_period_start_specifier, Ecto.Enum, values: @start_values, default: :now
+    field :active_period_end_specifier, Ecto.Enum, values: @end_values, default: :later_today
     field :active_period_end, :naive_datetime
     field :notification_period_start, :naive_datetime
   end
