@@ -77,6 +77,19 @@ defmodule AlertsUI.Alerts do
   defp end_is_past(current_time, end_time),
     do: DateTime.compare(current_time, end_time) in [:eq, :gt]
 
+  @spec filter_on_notification_period_start([Alert.t()], DateTime.t()) :: [Alert.t()]
+  def filter_on_notification_period_start(alerts, current_time \\ DateTime.utc_now()) do
+    Enum.filter(
+      alerts,
+      fn alert ->
+        notification_start = Map.get(alert, :notification_period_start, nil)
+
+        is_nil(notification_start) or
+          DateTime.compare(notification_start, current_time) in [:lt, :eq]
+      end
+    )
+  end
+
   @spec list_all_open() :: [Alert.t()]
   def list_all_open do
     # Using an inner join here reduces the
