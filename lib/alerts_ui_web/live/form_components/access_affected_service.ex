@@ -38,6 +38,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
        facility_types: [],
        available_facilities: [],
        available_stops: [],
+       edited: false,
        alert_data: %{
          facility_id: ""
        }
@@ -45,7 +46,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
   end
 
   @impl true
-  def update(%{alert_data: alert_data} = assigns, socket) do
+  def update(%{alert_data: alert_data, editing: editing} = assigns, socket) do
     effect_name = Map.get(alert_data, :effect_name) || socket.assigns.effect_name
 
     facility_types =
@@ -55,29 +56,33 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
 
     send(self(), {:fetch_available_facilities, facility_types})
 
-    alert_data =
-      if is_struct(alert_data) do
-        Map.from_struct(alert_data)
+    assigns =
+      if editing == true and socket.assigns.edited == false do
+        alert_data =
+          if is_struct(alert_data) do
+            Map.from_struct(alert_data)
+          else
+            alert_data
+          end
+          |> Map.put_new(:facility_id, "")
+
+        form =
+          %__MODULE__{}
+          |> changeset(alert_data)
+          |> to_form()
+
+        Map.merge(assigns, %{
+          form: form,
+          alert_data: alert_data,
+          facility_types: facility_types,
+          edited: true
+        })
       else
-        alert_data
+        assigns
       end
-      |> Map.put_new(:facility_id, "")
+      |> Map.merge(%{effect_name: effect_name, facility_types: facility_types})
 
-    form =
-      %__MODULE__{}
-      |> changeset(alert_data)
-      |> to_form()
-
-    socket =
-      assign(socket, assigns)
-      |> assign(
-        form: form,
-        alert_data: alert_data,
-        facility_types: facility_types,
-        effect_name: effect_name
-      )
-
-    {:ok, socket}
+    {:ok, assign(socket, assigns)}
   end
 
   @impl true

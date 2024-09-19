@@ -40,44 +40,49 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         form: form,
         button_selected_routes: [],
         direction_names_map: []
+        edited: false
       })
 
     {:ok, socket}
   end
 
   @impl true
-  def update(%{alert_data: alert_data} = assigns, socket) do
+  def update(%{alert_data: alert_data, editing: editing} = assigns, socket) do
     route_type = Map.get(alert_data, :route_type)
     route_types = all_route_types(route_type)
     send(self(), {:fetch_available_routes, route_types})
 
-    alert_data = %{
-      route_ids: Map.get(alert_data, :route_ids) || [],
-      direction: Map.get(alert_data, :direction) || "default",
-      trip_ids: Map.get(alert_data, :trip_ids) || [],
-      stop_ids: Map.get(alert_data, :stop_ids) || []
-    }
-
-    direction_names_map =
-      Map.new(assigns.available_routes, &{&1.id, &1.direction_names})
-
-    get_stops_by_route_ids(
-      alert_data.route_ids,
-      alert_data.direction
-    )
-
-    form =
-      %__MODULE__{}
-      |> changeset(alert_data)
-      |> to_form()
+  direction_names_map =
+    Map.new(assigns.available_routes, &{&1.id, &1.direction_names})
 
     assigns =
-      assigns
-      |> Map.put(:form, form)
-      |> Map.put(:alert_data, alert_data)
-      |> Map.put(:direction_names_map, direction_names_map)
+      if editing == true and socket.assigns.edited == false do
+        alert_data = %{
+          route_ids: Map.get(alert_data, :route_ids) || [],
+          direction: Map.get(alert_data, :direction) || "default",
+          trip_ids: Map.get(alert_data, :trip_ids) || [],
+          stop_ids: Map.get(alert_data, :stop_ids) || []
+        }
 
-    {:ok, assign(socket, assigns)}
+        get_stops_by_route_ids(
+          alert_data.route_ids,
+          alert_data.direction
+        )
+
+        form =
+          %__MODULE__{}
+          |> changeset(alert_data)
+          |> to_form()
+
+        assigns
+        |> Map.put(:form, form)
+        |> Map.put(:alert_data, alert_data)
+        |> Map.put(:edited, true)
+      else
+        assigns
+      end
+
+    {:ok, assign(socket, assigns |> Map.put(direction_names_map: direction_names_map))}
   end
 
   @impl true
@@ -372,11 +377,11 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   @spec disable_stop_input?(list() | nil) :: boolean()
   defp disable_stop_input?(route_ids) when is_list(route_ids), do: length(route_ids) !== 1
-  defp disable_stop_input?(_route_ids), do: false
+  defp disable_stop_input?(_route_ids), do: true
 
   @spec disable_trip_input?(list() | nil) :: boolean()
   defp disable_trip_input?(route_ids) when is_list(route_ids), do: Enum.empty?(route_ids)
-  defp disable_trip_input?(_route_ids), do: false
+  defp disable_trip_input?(_route_ids), do: true
 
   # We lump subway together in the interface, so when asked for either light or
   # heavy rail include both.
