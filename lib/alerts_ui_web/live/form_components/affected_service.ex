@@ -39,7 +39,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       |> assign(%{
         form: form,
         button_selected_routes: [],
-        direction_names_map: []
+        direction_names_map: [],
         edited: false
       })
 
@@ -52,8 +52,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     route_types = all_route_types(route_type)
     send(self(), {:fetch_available_routes, route_types})
 
-  direction_names_map =
-    Map.new(assigns.available_routes, &{&1.id, &1.direction_names})
+    direction_names_map =
+      Map.new(assigns.available_routes, &{&1.id, &1.direction_names})
 
     assigns =
       if editing == true and socket.assigns.edited == false do
@@ -81,8 +81,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       else
         assigns
       end
+      |> Map.put(:direction_names_map, direction_names_map)
 
-    {:ok, assign(socket, assigns |> Map.put(direction_names_map: direction_names_map))}
+    {:ok, assign(socket, assigns)}
   end
 
   @impl true
