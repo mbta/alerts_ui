@@ -335,6 +335,32 @@ defmodule AlertsUIWeb.SharedComponents do
   end
 
   @doc """
+  Renders a copy to clipboard.
+
+  ##Examples
+    <.copy_button copy_id="#input-id" title="copy input text"/>
+  """
+  attr :copy_id, :string, required: true, doc: "id of input component with text to be copied"
+  attr :title, :string, default: "Copy text to clipboard", doc: "text to be displayed on hover"
+  attr :rest, :global, include: ~w(phx-target phx-click name id value disabled)
+
+  attr :class, :string, default: "", doc: "additional classes to add"
+  attr :hidden, :boolean, default: false, doc: "hides component if true"
+
+  def copy_button(assigns) do
+    ~H"""
+    <button
+      class="h-7 w-7 mt-4 border border-border-primary bg-bg-input-default active:bg-menu-active rounded-sm hover:bg-primary-hover"
+      phx-click={JS.dispatch("phx:copy", to: @copy_id)}
+      title={@title}
+      type="button"
+    >
+      <span class="hero-square-2-stack-solid w-5 h-5 stroke-3" />
+    </button>
+    """
+  end
+
+  @doc """
   Renders a checkgroup.
 
   ##Examples

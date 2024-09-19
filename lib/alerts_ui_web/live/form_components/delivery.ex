@@ -224,15 +224,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
                 class="h-7 w-7 border border-border-primary rounded-sm"
                 check_class="w-[100%] h-[100%] checked:before:hero-arrow-path leading-normal"
               />
-
-              <button
-                class="h-7 w-7 mt-4 border border-border-primary bg-bg-input-default active:bg-menu-active rounded-sm hover:bg-primary-hover"
-                phx-click={JS.dispatch("phx:copy", to: "#delivery_banner_text")}
-                title="Copy banner text to Clipboard"
-                type="button"
-              >
-                <span class="hero-square-2-stack-solid w-5 h-5 stroke-3" />
-              </button>
+              <.copy_button copy_id="#delivery_banner_text" title="Copy banner text to Clipboard" />
             </div>
           </div>
           <div
