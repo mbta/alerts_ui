@@ -85,13 +85,28 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
     end
   end
 
-  @spec formatted_direction_options([String.t()] | nil) :: keyword(String.t())
-  def formatted_direction_options([_ | _]) do
+  @spec formatted_direction_options([String.t()] | nil, map()) :: keyword(String.t())
+  def formatted_direction_options([route_id], direction_names_map) do
+    directions = Map.get(direction_names_map, route_id)
+
+    if directions do
+      Enum.map(directions, fn {k, v} ->
+        {v, Integer.to_string(k)}
+      end)
+    else
+      [
+        Outbound: "0",
+        Inbound: "1"
+      ]
+    end
+  end
+
+  def formatted_direction_options([_ | _], _) do
     [
       Outbound: "0",
       Inbound: "1"
     ]
   end
 
-  def formatted_direction_options(_), do: []
+  def formatted_direction_options(_, _), do: []
 end

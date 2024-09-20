@@ -38,7 +38,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       socket
       |> assign(%{
         form: form,
-        button_selected_routes: []
+        button_selected_routes: [],
+        direction_names_map: []
       })
 
     {:ok, socket}
@@ -57,6 +58,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       stop_ids: Map.get(alert_data, :stop_ids) || []
     }
 
+    direction_names_map =
+      Map.new(assigns.available_routes, &{&1.id, &1.direction_names})
+
     get_stops_by_route_ids(
       alert_data.route_ids,
       alert_data.direction
@@ -71,6 +75,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       assigns
       |> Map.put(:form, form)
       |> Map.put(:alert_data, alert_data)
+      |> Map.put(:direction_names_map, direction_names_map)
 
     {:ok, assign(socket, assigns)}
   end
@@ -201,7 +206,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       SelectFormatter.formatted_select_options(assigns.available_routes, route_filter_value)
 
     direction_options =
-      SelectFormatter.formatted_direction_options(assigns.form[:route_ids].value)
+      SelectFormatter.formatted_direction_options(
+        assigns.form[:route_ids].value,
+        assigns.direction_names_map
+      )
 
     trip_filter_value = assigns.form[:trip_ids_filter].value
 

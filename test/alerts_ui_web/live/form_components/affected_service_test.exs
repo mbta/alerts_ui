@@ -47,17 +47,27 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     test "direction options are only populated once a route is chosen" do
       with_mock(StopsRepo, by_route: fn _route, _direction -> [] end) do
         {:ok, view, _html} =
-          live_isolated_component(AffectedService, %{
+          live_isolated_component(
+            AffectedService,
             @assigns
-            | alert_data: %{route_type: 3, effect_name: "Delay"}
-          })
+            |> Map.merge(%{
+              alert_data: %{route_type: 3, effect_name: "Delay"},
+              available_routes: [
+                %Route{
+                  id: "1",
+                  direction_names: %{0 => "Westbound", 1 => "Eastbound"},
+                  sort_order: 3
+                }
+              ]
+            })
+          )
 
         first_rendered_view =
           view
           |> element("select#affected_service_direction")
           |> render()
 
-        refute first_rendered_view =~ "Inbound"
+        refute first_rendered_view =~ "Eastbound"
 
         view
         |> element("form")
@@ -68,7 +78,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
           |> element("select#affected_service_direction")
           |> render()
 
-        assert second_rendered_view =~ "Inbound"
+        assert second_rendered_view =~ "Eastbound"
       end
     end
 

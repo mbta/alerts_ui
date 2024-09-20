@@ -208,13 +208,30 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
   end
 
   describe "formatted_direction_options/1" do
-    test "it returns direction options" do
-      results = SelectFormatter.formatted_direction_options(["1"])
+    test "it returns direction options if there are multiple routes" do
+      results = SelectFormatter.formatted_direction_options(["1", "2"], %{})
 
       assert results == [
                Outbound: "0",
                Inbound: "1"
              ]
+    end
+
+    test "it returns correctly formatted direction options if only one route" do
+      direction_map = %{
+        "1" => %{0 => "Westbound", 1 => "Eastbound"},
+        "2" => %{0 => "Northbound", 1 => "Southbound"}
+      }
+
+      results = SelectFormatter.formatted_direction_options(["1"], direction_map)
+
+      assert results == [{"Westbound", "0"}, {"Eastbound", "1"}]
+    end
+
+    test "it returns empty list if direction is nil" do
+      results = SelectFormatter.formatted_direction_options(nil, %{})
+
+      assert results == []
     end
   end
 end
