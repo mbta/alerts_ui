@@ -24,58 +24,62 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   def mount(socket) do
     form = %__MODULE__{} |> changeset(%{}) |> to_form()
 
-    socket = socket |> assign(%{form: form, available_routes: []})
+    socket = socket |> assign(%{form: form, available_routes: [], edited: false})
 
     {:ok, socket}
   end
 
   @impl true
-  def update(%{alert_data: alert_data, available_routes: available_routes} = assigns, socket) do
+  def update(
+        %{alert_data: alert_data, available_routes: available_routes, editing: editing} = assigns,
+        socket
+      ) do
     route_type = Map.get(alert_data, :route_type)
     get_stops_by_route_type(route_type)
 
-    stop_ids = Map.get(alert_data, :stop_ids)
-
-    if Enum.empty?(available_routes) do
-      get_routes_by_stop_ids(
-        stop_ids,
-        alert_data.route_type
-      )
-    end
-
-    route_ids = assigns.available_routes |> Enum.map(& &1.id)
-
-    new_alert_data =
-      %{
-        route_ids: route_ids,
-        stop_ids: stop_ids,
-        route_type: route_type,
-        route_types_by_id: routes_with_types(available_routes, route_ids)
-      }
-
-    changeset =
-      %__MODULE__{}
-      |> cast(new_alert_data, @fields)
-
-    if socket.assigns.available_routes == assigns.available_routes do
-      changeset
-      |> validate_required(@required_fields)
-      |> apply_action(:insert)
-      |> case do
-        {:ok, changeset} ->
-          send(self(), {:section_completed, changeset})
-
-        _ ->
-          nil
-      end
-    end
-
-    form = to_form(changeset |> Map.put(:action, :validate))
-
     assigns =
-      assigns
-      |> Map.put(:form, form)
-      |> Map.put(:alert_data, new_alert_data)
+      if editing == true and socket.assigns.edited == false do
+        stop_ids = Map.get(alert_data, :stop_ids)
+
+        if Enum.empty?(available_routes) do
+          get_routes_by_stop_ids(
+            stop_ids,
+            alert_data.route_type
+          )
+        end
+
+        route_ids = assigns.available_routes |> Enum.map(& &1.id)
+
+        new_alert_data =
+          %{
+            route_ids: route_ids,
+            stop_ids: stop_ids,
+            route_type: route_type,
+            route_types_by_id: routes_with_types(available_routes, route_ids),
+            edited: true
+          }
+
+        changeset =
+          %__MODULE__{}
+          |> cast(new_alert_data, @fields)
+
+        if socket.assigns.available_routes == assigns.available_routes do
+          changes =
+            changeset
+            |> validate_required(@required_fields)
+            |> apply_action!(:validate)
+
+          send(self(), {:section_completed, changes})
+        end
+
+        form = to_form(changeset |> Map.put(:action, :validate))
+
+        assigns
+        |> Map.put(:form, form)
+        |> Map.put(:alert_data, new_alert_data)
+      else
+        assigns
+      end
 
     {:ok, assign(socket, assigns)}
   end

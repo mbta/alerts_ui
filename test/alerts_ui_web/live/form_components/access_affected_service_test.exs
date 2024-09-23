@@ -1,13 +1,17 @@
-defmodule AlertsUIWeb.FormComponents.AccessServiceTest do
+defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
+  use AlertsUIWeb, :live_view
+  import Mock
 
   import LiveIsolatedComponent
   import Phoenix.LiveViewTest
 
-  alias AlertsUIWeb.FormComponents.AccessAffectedService
+  alias AlertsUIWeb.FormComponents.{AccessAffectedService, RouteTypeAndEffect}
   alias AlertsUIWeb.Step
   alias MBTAV3API.Facilities.Facility
+  alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
+  alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
 
   @assigns %{
     id: "details",
@@ -56,6 +60,31 @@ defmodule AlertsUIWeb.FormComponents.AccessServiceTest do
              |> element("select#access_affected_service_facility_id")
              |> render() =~
                ~s(<option selected="selected" value="Facility-3">Example Facility</option>)
+    end
+
+    @tag :logged_in_user
+    test "shows missing field error upon submission", %{conn: conn} do
+      with_mocks([
+        {RoutePatternsRepo, [], [included_stops_by_route_id: fn _route_id, _direction -> [] end]},
+        {FacilitiesRepo, [], get_by_type: fn _types, _opts -> [] end}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        send(
+          view.pid,
+          {:step_completed, %RouteTypeAndEffect{route_type: nil, effect_name: "Parking Issue"}}
+        )
+
+        refute view
+               |> render() =~
+                 ~s(text-text-error)
+
+        send_update(view.pid, AccessAffectedService, id: "affected_service", submitted: true)
+
+        assert view
+               |> render() =~
+                 ~s(text-text-error)
+      end
     end
   end
 end

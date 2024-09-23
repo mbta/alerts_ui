@@ -1,13 +1,15 @@
 defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
+  use AlertsUIWeb, :live_view
 
   import LiveIsolatedComponent
   import Mock
   import Phoenix.LiveViewTest
 
-  alias AlertsUIWeb.FormComponents.AffectedService
+  alias AlertsUIWeb.FormComponents.{AffectedService, RouteTypeAndEffect}
   alias AlertsUIWeb.Step
+  alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
   alias MBTAV3API.Schedules.{Schedule, Trip}
@@ -264,6 +266,30 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       assert view |> render() =~ ~s(<option selected="selected" value="0">Outbound</option>)
       assert view |> render() =~ ~s(<option selected="selected" value="place-sstat">)
       assert view |> render() =~ ~s(<option value="CR-627999-541-1">)
+    end
+
+    @tag :logged_in_user
+    test "shows missing field error upon submission", %{conn: conn} do
+      with_mocks([
+        {RoutePatternsRepo, [], [included_stops_by_route_id: fn _route_id, _direction -> [] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        send(
+          view.pid,
+          {:step_completed, %RouteTypeAndEffect{route_type: 3, effect_name: "Detour"}}
+        )
+
+        refute view
+               |> render() =~
+                 ~s(text-text-error)
+
+        send_update(view.pid, AffectedService, id: "affected_service", submitted: true)
+
+        assert view
+               |> render() =~
+                 ~s(text-text-error)
+      end
     end
   end
 end
