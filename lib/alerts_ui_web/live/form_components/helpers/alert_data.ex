@@ -33,7 +33,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :url,
     :image_url,
     :image_alternative_text,
-    :notification_period_start
+    :notification_period_start,
+    :severity
   ]
 
   @type t :: %__MODULE__{
@@ -55,7 +56,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           url: String.t() | nil,
           image_url: String.t() | nil,
           image_alternative_text: String.t() | nil,
-          notification_period_start: NaiveDateTime.t() | nil
+          notification_period_start: NaiveDateTime.t() | nil,
+          severity: integer() | nil
         }
 
   @spec build_alert_data(nil | String.t()) :: t()
@@ -103,7 +105,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       image_url: alert.image_url,
       image_alternative_text: alert.image_alternative_text,
       banner_text: alert.banner_text,
-      notification_period_start: shift_to_naive(alert.notification_period_start)
+      notification_period_start: shift_to_naive(alert.notification_period_start),
+      severity: alert.severity
     }
   end
 

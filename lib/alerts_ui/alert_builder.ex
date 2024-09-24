@@ -7,7 +7,7 @@ defmodule AlertsUI.AlertBuilder do
   """
 
   alias AlertsUI.Activities
-  alias AlertsUI.Models.{ActivePeriod, Cause, Effect, InformedEntity, RoutePattern}
+  alias AlertsUI.Models.{ActivePeriod, Cause, Effect, InformedEntity, RoutePattern, SeverityLevel}
   alias AlertsUI.Routes
   alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
   alias MBTAV3API.Facilities.Facility
@@ -42,7 +42,8 @@ defmodule AlertsUI.AlertBuilder do
           banner_text: String.t() | nil,
           draft: boolean | nil,
           last_push_notification_timestamp: NaiveDateTime.t() | nil,
-          notification_period_start: NaiveDateTime.t() | nil
+          notification_period_start: NaiveDateTime.t() | nil,
+          severity: integer()
         }
   @type direction_t :: 0 | 1
   @type stop_with_context_t :: {Stop.t(), Route.id_t(), direction_t(), RoutePattern.stop_type()}
@@ -65,6 +66,8 @@ defmodule AlertsUI.AlertBuilder do
     route_type = Map.get(alert_data, :route_type)
     cause_detail = Map.get(alert_data, :cause_detail, "")
     cause = Cause.get_by_mode_and_detail(route_type, cause_detail)
+
+    severity = Map.get(alert_data, :severity)
 
     route_ids =
       alert_data
@@ -104,7 +107,9 @@ defmodule AlertsUI.AlertBuilder do
         Map.get(alert_data, :last_push_notification_timestamp) |> naive_eastern_datetime_to_utc,
       informed_entity: build_informed_entities(combination, alert_data, effect_name),
       notification_period_start:
-        Map.get(alert_data, :notification_period_start) |> naive_eastern_datetime_to_utc
+        Map.get(alert_data, :notification_period_start) |> naive_eastern_datetime_to_utc,
+      severity: severity,
+      severity_level: SeverityLevel.severity_level_by_severity(severity)
     }
     |> Map.merge(active_period_map)
   end
