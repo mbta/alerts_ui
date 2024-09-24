@@ -38,16 +38,10 @@ defmodule AlertsUI.Models.SeverityLevel do
   @spec severity_level_by_severity(integer()) :: atom() | nil
   def severity_level_by_severity(severity) do
     severity_tuples()
-    |> Enum.flat_map(fn {_, sev, level} ->
-      case sev == severity do
-        true -> [level]
-        false -> []
-      end
+    |> Enum.find_value(fn
+      {_, ^severity, level} -> level
+      _ -> nil
     end)
-    |> case do
-      [] -> nil
-      [level] -> level
-    end
   end
 
   @type severity_description :: String.t()
