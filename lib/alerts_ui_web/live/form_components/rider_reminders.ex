@@ -6,25 +6,67 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
   use AlertsUI.Schema
   import Ecto.Changeset
 
-  @specifiers [:select, :now, :custom]
+  @reminder_time_specifiers [:select, :now, :custom]
 
   @primary_key false
   embedded_schema do
     embeds_many :reminder_times, ReminderTimes, on_replace: :delete do
-      field :specifier, Ecto.Enum, values: [:select, :now, :custom], default: :select
+      field :reminder_time_specifier, Ecto.Enum,
+        values: [:select, :now, :custom],
+        default: :select
+
       field :reminder_time, :naive_datetime
       field :min_time, :naive_datetime
       field :max_time, :naive_datetime
     end
   end
 
-  @reminder_time_fields ~w[specifier reminder_time min_time max_time]a
+  @reminder_time_fields ~w[reminder_time_specifier reminder_time min_time max_time]a
 
   @impl true
   def mount(socket) do
     current_time = current_time()
     form = %__MODULE__{} |> changeset(%{}) |> to_form()
-    {:ok, assign(socket, form: form, current_time: current_time, specifiers: @specifiers)}
+
+    {:ok,
+     assign(socket,
+       form: form,
+       current_time: current_time,
+       reminder_time_specifiers: @reminder_time_specifiers,
+       edited: false
+     )}
+  end
+
+  @impl true
+  def update(%{editing: editing, alert_data: alert_data} = assigns, socket) do
+    assigns =
+      if editing == true and socket.assigns.edited == false and !is_nil(alert_data.reminder_times) do
+        processed_reminder_times =
+          alert_data.reminder_times
+          |> Enum.with_index(fn element, index -> {element, Integer.to_string(index)} end)
+          |> Enum.reduce(%{}, fn {element, index}, acc ->
+            Map.put(acc, index, %{
+              "_persistent_id" => index,
+              "reminder_time" => NaiveDateTime.to_iso8601(element),
+              "min_time" => socket.assigns.current_time |> naive_datetime_to_iso8601(),
+              "max_time" =>
+                Map.get(alert_data, :active_period_end) |> naive_datetime_to_iso8601(),
+              "reminder_time_specifier" => "custom"
+            })
+          end)
+
+        changeset =
+          changeset(%__MODULE__{}, %{
+            "reminder_times" => processed_reminder_times
+          })
+
+        form = changeset |> to_form
+        Map.merge(assigns, %{form: form, edited: true})
+      else
+        assigns
+      end
+
+    {:ok, assign(socket, assigns)}
   end
 
   def changeset(changeset, params) do
@@ -37,10 +79,9 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
     )
   end
 
-  @doc false
   def reminder_changeset(reminder_time, params, _cardinality) do
     new_reminder_time =
-      case Map.get(params, "specifier") do
+      case Map.get(params, "reminder_time_specifier") do
         "now" -> params["min_time"]
         "custom" -> Map.get(params, "reminder_time", "")
         _ -> ""
@@ -62,9 +103,9 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
       end
     end)
     |> validate_change(:reminder_time, fn :reminder_time, reminder_time ->
-      max_time = params["max_time"] |> NaiveDateTime.from_iso8601!()
+      {result, max_time} = params["max_time"] |> NaiveDateTime.from_iso8601()
 
-      if NaiveDateTime.compare(max_time, reminder_time) === :lt do
+      if result == :ok and NaiveDateTime.compare(max_time, reminder_time) === :lt do
         [reminder_time: "Reminder must be before effect end"]
       else
         []
@@ -129,8 +170,8 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
               <input type="hidden" name="rider_reminders[reminder_sort][]" value={rt.index} />
               <.select
                 label="Scheduled reminder"
-                field={rt[:specifier]}
-                options={values_to_options(@specifiers)}
+                field={rt[:reminder_time_specifier]}
+                options={values_to_options(@reminder_time_specifiers)}
                 class="min-w-[16rem] max-w-[16rem] mr-8"
                 phx-debounce={120}
               />
@@ -139,7 +180,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
                 min={@current_time |> naive_datetime_to_iso8601()}
                 max={@active_period_end}
                 field={rt[:reminder_time]}
-                disabled={rt[:specifier].value not in [:custom, "custom"]}
+                disabled={rt[:reminder_time_specifier].value not in [:custom, "custom"]}
                 value={rt[:reminder_time].value}
               />
               <input

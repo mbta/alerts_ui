@@ -69,6 +69,7 @@ defmodule AlertsUI.AlertBuilder do
     cause = Cause.get_by_mode_and_detail(route_type, cause_detail)
 
     severity = Map.get(alert_data, :severity)
+
     reminder_times =
       if Map.get(alert_data, :reminder_times) do
         Enum.map(alert_data.reminder_times, &naive_eastern_datetime_to_utc/1)

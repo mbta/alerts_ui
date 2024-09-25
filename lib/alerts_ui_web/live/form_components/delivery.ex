@@ -127,19 +127,6 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
     |> validate(socket)
   end
 
-  @spec validate(
-          map(),
-          atom()
-          | %{
-              :assigns =>
-                atom()
-                | %{
-                    :form => atom() | %{:params => map(), optional(any()) => any()},
-                    optional(any()) => any()
-                  },
-              optional(any()) => any()
-            }
-        ) :: {:noreply, any()}
   def validate(delivery, socket) do
     delivery = Map.merge(socket.assigns.form.params, delivery)
 
