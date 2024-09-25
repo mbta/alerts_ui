@@ -111,6 +111,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         cause_detail: "hazmat condition",
         severity: 3,
         severity_level: :WARNING,
+        reminder_times: [~U[2024-05-02 16:10:34.007545Z], ~U[2024-05-02 16:11:34.007545Z]],
         informed_entity: [
           %{route_type: 3, route_id: "1"},
           %{route_type: 3, route_id: "2", stop_id: "a2"},
@@ -139,7 +140,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                notification_period_start: ~N[2024-05-02 12:09:34],
                service_types: [],
                cause_detail: "hazmat condition",
-               severity: 3
+               severity: 3,
+               reminder_times: [~N[2024-05-02 12:10:34], ~N[2024-05-02 12:11:34]]
              }
     end
 
