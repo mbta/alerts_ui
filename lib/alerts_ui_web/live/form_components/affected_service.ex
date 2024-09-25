@@ -294,7 +294,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
                 options={@direction_options}
                 disabled={disable_stop_input?(@form[:route_ids].value)}
                 prompt={
-                  if disable_stop_input?(@form[:route_ids].value), do: nil, else: "Both Directions"
+                  if disable_stop_input?(@form[:route_ids].value), do: "", else: "Both Directions"
                 }
                 class="min-w-[30rem]"
               />
@@ -395,7 +395,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   defp all_route_types(_), do: []
 
   defp populate_default_stops(affected_service) do
-    if Map.get(affected_service, "stop_ids") in [nil, "default", ["default"]] do
+    if Map.get(affected_service, "stop_ids") in [nil, "default", ["default"]] or
+         length(affected_service["route_ids"]) !== 1 do
       Map.put(
         affected_service,
         "stop_ids",
