@@ -40,7 +40,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
   @impl true
   def update(%{editing: editing, alert_data: alert_data} = assigns, socket) do
     assigns =
-      if editing == true and socket.assigns.edited == false and !is_nil(alert_data.reminder_times) do
+      if editing and not socket.assigns.edited and not is_nil(alert_data.reminder_times) do
         processed_reminder_times =
           alert_data.reminder_times
           |> Enum.with_index(fn element, index -> {element, Integer.to_string(index)} end)
@@ -122,8 +122,8 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
       {:ok, changes} ->
         clean_reminder_times =
           changes.reminder_times
-          |> Enum.map(fn x -> x.reminder_time end)
-          |> Enum.filter(&(!is_nil(&1)))
+          |> Enum.map(& &1.reminder_time)
+          |> Enum.reject(&is_nil/1)
 
         changes =
           changes
