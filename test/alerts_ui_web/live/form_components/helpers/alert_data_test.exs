@@ -31,7 +31,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                facility_id: "",
                header_text: "cool header text",
                description_text: "description text",
-               service_types: []
+               service_types: [],
+               reminder_times: [~N[2024-09-24 20:01:00]]
              }
     end
 
@@ -61,7 +62,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                trip_ids: ["b1"],
                header_text: "cool header text",
                description_text: "description text",
-               service_types: []
+               service_types: [],
+               reminder_times: [~N[2024-09-24 20:01:00]]
              }
     end
 
@@ -87,7 +89,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                trip_ids: [],
                service_types: [nil],
                header_text: "cool header text",
-               description_text: "description text"
+               description_text: "description text",
+               reminder_times: [~N[2024-09-24 20:01:00]]
              }
     end
 
@@ -111,7 +114,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         cause_detail: "hazmat condition",
         severity: 3,
         severity_level: :WARNING,
-        reminder_times: [~U[2024-05-02 16:10:34.007545Z], ~U[2024-05-02 16:11:34.007545Z]],
+        reminder_times: [
+          build(:reminder_time, %{reminder_time: ~U[2024-05-02 16:10:34.007545Z]}),
+          build(:reminder_time, %{reminder_time: ~U[2024-05-02 16:11:34.007545Z]})
+        ],
         informed_entity: [
           %{route_type: 3, route_id: "1"},
           %{route_type: 3, route_id: "2", stop_id: "a2"},
@@ -166,7 +172,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                trip_ids: [],
                facility_id: "",
                header_text: "cool header text",
-               description_text: "description text"
+               description_text: "description text",
+               reminder_times: [~N[2024-09-24 20:01:00]]
              }
     end
 
@@ -193,7 +200,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                trip_ids: [],
                facility_id: "",
                header_text: "cool header text",
-               description_text: "description text"
+               description_text: "description text",
+               reminder_times: [~N[2024-09-24 20:01:00]]
              }
     end
 
@@ -227,7 +235,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         active_period: [
           %{start: ~U[2024-05-02 16:09:34.007545Z], end: ~U[2024-05-02 18:09:34.007545Z]}
         ],
-        duration_certainty: :ESTIMATED
+        duration_certainty: :ESTIMATED,
+        reminder_times: []
       })
 
       assert AlertData.build_alert_data("1").active_period_end_specifier == :later_today
@@ -250,7 +259,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
             end: utc_datetime_from_local(~D[2024-05-03], ActivePeriod.end_of_service_time())
           }
         ],
-        duration_certainty: :KNOWN
+        duration_certainty: :KNOWN,
+        reminder_times: []
       })
 
       assert AlertData.build_alert_data("1").active_period_end_specifier == :end_of_service_today

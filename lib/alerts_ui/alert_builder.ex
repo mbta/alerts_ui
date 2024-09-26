@@ -71,11 +71,8 @@ defmodule AlertsUI.AlertBuilder do
     severity = Map.get(alert_data, :severity)
 
     reminder_times =
-      if Map.get(alert_data, :reminder_times) do
-        Enum.map(alert_data.reminder_times, &naive_eastern_datetime_to_utc/1)
-      else
-        nil
-      end
+      Map.get(alert_data, :reminder_times, [])
+      |> Enum.map(&%{reminder_time: naive_eastern_datetime_to_utc(&1)})
 
     route_ids =
       alert_data

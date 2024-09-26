@@ -44,7 +44,8 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
             ],
             "alert_lifecycle" => "ONGOING",
             "last_modified_timestamp" => current_time |> DateTime.to_unix(),
-            "created_timestamp" => current_time |> DateTime.to_unix()
+            "created_timestamp" => current_time |> DateTime.to_unix(),
+            "reminder_times" => [1_727_222_460]
           },
           "id" => "123abc"
         },
@@ -58,7 +59,8 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
             ],
             "alert_lifecycle" => "ONGOING",
             "last_modified_timestamp" => current_time |> DateTime.to_unix(),
-            "created_timestamp" => current_time |> DateTime.to_unix()
+            "created_timestamp" => current_time |> DateTime.to_unix(),
+            "reminder_times" => [1_727_222_460]
           },
           "id" => "234abc"
         },
@@ -74,7 +76,8 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
             "duration_certainty" => "KNOWN",
             "last_modified_timestamp" => current_time |> DateTime.to_unix(),
             "created_timestamp" => current_time |> DateTime.to_unix(),
-            "alert_lifecycle" => "ONGOING"
+            "alert_lifecycle" => "ONGOING",
+            "reminder_times" => [1_727_222_460]
           },
           "id" => "345abc"
         }

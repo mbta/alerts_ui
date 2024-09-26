@@ -7,6 +7,7 @@ defmodule AlertsUI.Support.Factory do
     Alert,
     ExtendedTime,
     InformedEntity,
+    ReminderTime,
     TripDescriptor
   }
 
@@ -19,6 +20,11 @@ defmodule AlertsUI.Support.Factory do
   @spec informed_entity_with_trip_factory() :: AlertsUI.Models.InformedEntity.t()
   def informed_entity_with_trip_factory do
     %InformedEntity{route_id: "1", trip: build(:trip_descriptor)}
+  end
+
+  @spec reminder_time_factory() :: AlertsUI.Models.ReminderTime.t()
+  def reminder_time_factory do
+    %ReminderTime{reminder_time: ~U[2024-09-25 00:01:00Z]}
   end
 
   @spec active_period_factory() :: AlertsUI.Models.ActivePeriod.t()
@@ -34,7 +40,8 @@ defmodule AlertsUI.Support.Factory do
       active_period: [
         build(:active_period)
       ],
-      informed_entity: [build(:informed_entity_with_trip)]
+      informed_entity: [build(:informed_entity_with_trip)],
+      reminder_times: [build(:reminder_time)]
     }
   end
 

@@ -82,8 +82,8 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
           informed_entity_2
         ],
         reminder_times: [
-          ~U[2023-09-22 14:19:54Z],
-          ~U[2023-09-22 14:20:54Z]
+          build(:reminder_time, %{reminder_time: ~U[2023-09-22 14:19:54Z]}),
+          build(:reminder_time, %{reminder_time: ~U[2023-09-22 14:20:54Z]})
         ]
       })
 

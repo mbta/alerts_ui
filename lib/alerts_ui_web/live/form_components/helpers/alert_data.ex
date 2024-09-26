@@ -82,10 +82,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
     active_period_end = shift_to_naive(alert.active_period_end)
 
-    reminder_times =
-      if Map.get(alert, :reminder_times),
-        do: Enum.map(alert.reminder_times, &shift_to_naive/1),
-        else: nil
+    reminder_times = Enum.map(alert.reminder_times, &shift_to_naive(&1.reminder_time))
 
     %__MODULE__{
       route_type: route_type,

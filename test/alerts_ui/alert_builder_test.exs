@@ -88,9 +88,9 @@ defmodule AlertsUI.AlertBuilderTest do
                  severity: 3,
                  severity_level: :WARNING,
                  reminder_times: [
-                   ~U[2024-04-30 16:04:00Z],
-                   ~U[2024-04-30 16:14:00Z],
-                   ~U[2024-04-30 16:24:00Z]
+                   %{reminder_time: ~U[2024-04-30 16:04:00Z]},
+                   %{reminder_time: ~U[2024-04-30 16:14:00Z]},
+                   %{reminder_time: ~U[2024-04-30 16:24:00Z]}
                  ]
                }
 
@@ -165,7 +165,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  notification_period_start: nil,
                  severity: nil,
                  severity_level: nil,
-                 reminder_times: nil
+                 reminder_times: []
                }
 
         result |> Alerts.create_or_update_alert()
@@ -222,7 +222,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  notification_period_start: ~U[2024-04-30 15:54:00Z],
                  severity: nil,
                  severity_level: nil,
-                 reminder_times: nil
+                 reminder_times: []
                }
 
         result |> Alerts.create_or_update_alert()

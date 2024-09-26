@@ -13,6 +13,7 @@ defmodule AlertsUI.Models.Alert do
     DurationCertainty,
     Effect,
     InformedEntity,
+    ReminderTime,
     SeverityLevel
   }
 
@@ -45,7 +46,6 @@ defmodule AlertsUI.Models.Alert do
   recurrence_text
   alert_lifecycle
   duration_certainty
-  reminder_times
   tts_header_text
   tts_description_text
   image_url
@@ -86,7 +86,7 @@ defmodule AlertsUI.Models.Alert do
           recurrence_text: String.t() | nil,
           alert_lifecycle: atom() | nil,
           duration_certainty: atom() | nil,
-          reminder_times: [DateTime.t()] | nil,
+          reminder_times: [ReminderTime.t()] | nil,
           active_period: [ActivePeriod.t()] | nil,
           active_period_start: DateTime.t() | nil,
           active_period_end: DateTime.t() | nil,
@@ -153,7 +153,7 @@ defmodule AlertsUI.Models.Alert do
     field :recurrence_text, :string
     field :alert_lifecycle, Ecto.Enum, values: @alert_lifecycle
     field :duration_certainty, Ecto.Enum, values: @duration_certainty
-    field :reminder_times, {:array, :utc_datetime}
+    has_many :reminder_times, ReminderTime, on_replace: :delete
     embeds_many :active_period, ActivePeriod, on_replace: :delete
     field :active_period_start, :utc_datetime
     field :active_period_end, :utc_datetime
@@ -173,6 +173,7 @@ defmodule AlertsUI.Models.Alert do
     |> cast(params, @permitted_fields)
     |> cast_embed(:active_period, required: false, with: &ActivePeriod.changeset/2)
     |> cast_assoc(:informed_entity, required: true, with: &InformedEntity.changeset/2)
+    |> cast_assoc(:reminder_times, required: false, with: &ReminderTime.changeset/2)
     |> validate_inclusion(:effect, @effect)
     |> validate_inclusion(:cause, @cause)
     |> validate_inclusion(:severity_level, @severity_level)
