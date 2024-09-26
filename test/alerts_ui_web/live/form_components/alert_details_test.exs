@@ -3,12 +3,10 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
   use AlertsUIWeb.ConnCase
 
   import LiveIsolatedComponent
-  import Mock
   import Phoenix.LiveViewTest
 
   alias AlertsUIWeb.FormComponents.AlertDetails
   alias AlertsUIWeb.Step
-  alias MBTAV3API.Stops.Repo, as: StopsRepo
 
   @assigns %{
     id: "details",
@@ -18,7 +16,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
       next: "success",
       label: "Alert Details"
     },
-    route_type: 1,
+    route_type: 4,
+    combination: :RDT,
     alert_data: %{}
   }
 
@@ -26,29 +25,34 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
     test "renders" do
       assert render_component(AlertDetails, @assigns) =~ ~s(id="details_form")
     end
+
+    test "gets causes correctly" do
+      {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
+
+      assert view
+             |> render() =~ ~s(fog)
+    end
   end
 
   describe "image url" do
     test "only shows preview if image has been entered" do
-      with_mock(StopsRepo, by_route: fn _route, _direction -> [] end) do
-        {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
+      {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
 
-        refute view
-               |> element("div#image-preview-div")
-               |> render() =~ ~s(div id=\"image-information\")
+      refute view
+             |> element("div#image-preview-div")
+             |> render() =~ ~s(div id=\"image-information\")
 
-        view
-        |> element("form")
-        |> render_change(%{
-          "alert_details" => %{
-            "image_url" => "https://example.com/image.jpg"
-          }
-        })
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_details" => %{
+          "image_url" => "https://example.com/image.jpg"
+        }
+      })
 
-        assert view
-               |> element("div#image-preview-div")
-               |> render() =~ ~s(div id=\"image-information\")
-      end
+      assert view
+             |> element("div#image-preview-div")
+             |> render() =~ ~s(div id=\"image-information\")
     end
   end
 end
