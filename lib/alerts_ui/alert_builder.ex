@@ -33,6 +33,8 @@ defmodule AlertsUI.AlertBuilder do
           active_period_start: NaiveDateTime.t() | nil,
           active_period_end_specifier: atom() | nil,
           active_period_end: NaiveDateTime.t() | nil,
+          active_period_start_date: Date.t() | nil,
+          active_period_end_date: Date.t() | nil,
           cause_detail: String.t(),
           url: String.t() | nil,
           image_url: String.t() | nil,

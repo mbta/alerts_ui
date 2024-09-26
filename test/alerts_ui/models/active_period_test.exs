@@ -187,9 +187,43 @@ defmodule AlertsUI.Models.ActivePeriodTest do
       assert ~D[2023-10-11] = ActivePeriod.end_of_service_date(start_time)
     end
 
-    test "returns same date if time is after service start" do
+    test "returns same date if time is before service start" do
       start_time = DateTime.new!(~D[2023-10-10], ~T[02:00:00], "America/New_York")
       assert ~D[2023-10-10] = ActivePeriod.end_of_service_date(start_time)
+    end
+
+    test "works with naive date time" do
+      start_time = NaiveDateTime.new!(~D[2023-10-10], ~T[01:00:00])
+      assert ~D[2023-10-10] = ActivePeriod.end_of_service_date(start_time)
+    end
+  end
+
+  describe "end_of_service_datetime/1" do
+    test "adds 1 to date if time is after service start" do
+      start_time = DateTime.new!(~D[2023-10-10], ~T[13:00:00], "America/New_York")
+      assert ~U[2023-10-11 03:00:00Z] = ActivePeriod.end_of_service_datetime(start_time)
+    end
+
+    test "returns same date if time is before service start" do
+      start_time = DateTime.new!(~D[2023-10-10], ~T[02:00:00], "America/New_York")
+      assert ~U[2023-10-10 03:00:00Z] = ActivePeriod.end_of_service_datetime(start_time)
+    end
+
+    test "works with naive date time" do
+      start_time = NaiveDateTime.new!(~D[2023-10-10], ~T[01:00:00])
+      assert ~U[2023-10-10 03:00:00Z] = ActivePeriod.end_of_service_datetime(start_time)
+    end
+  end
+
+  describe "next_start_of_service_datetime/1" do
+    test "adds 1 to date if time is after service start" do
+      start_time = DateTime.new!(~D[2023-10-10], ~T[13:00:00], "America/New_York")
+      assert ~U[2023-10-11 03:00:00Z] = ActivePeriod.next_start_of_service_datetime(start_time)
+    end
+
+    test "returns same date if time is before service start" do
+      start_time = DateTime.new!(~D[2023-10-10], ~T[02:00:00], "America/New_York")
+      assert ~U[2023-10-10 03:00:00Z] = ActivePeriod.next_start_of_service_datetime(start_time)
     end
   end
 end

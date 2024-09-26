@@ -16,7 +16,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       label: "Time Range"
     },
     alert_data: %{},
-    current_time: "2024-04-30T09:33:20"
+    # "2024-04-30T09:33:20",
+    current_time: ~U[2024-04-30 15:54:00Z],
+    editing: false
   }
 
   describe "component" do
@@ -90,7 +92,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       |> element("form")
       |> render_change(%{
         "time_range" => %{
-          "active_period_start" => "foo",
+          "active_period_start" => "",
           "active_period_start_specifier" => "custom"
         }
       })
@@ -106,7 +108,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       |> element("form")
       |> render_change(%{
         "time_range" => %{
-          "active_period_end" => "foo",
+          "active_period_end" => "",
           "active_period_end_specifier" => "custom"
         }
       })
