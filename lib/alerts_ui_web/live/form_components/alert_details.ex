@@ -26,12 +26,6 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
 
   @impl true
   def mount(socket) do
-    cause_options =
-      formatted_causes(
-        Map.get(socket.assigns, :route_type),
-        Map.get(socket.assigns, :combination)
-      )
-
     severity_options =
       SeverityLevel.severity_tuples()
       |> Enum.map(fn {desc, severity, _level} -> {desc, severity} end)
@@ -44,7 +38,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         image_size: nil,
         image_path: nil,
         severity_options: severity_options,
-        cause_options: cause_options
+        cause_options: []
       })
 
     {:ok, socket}
@@ -52,6 +46,12 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
 
   @impl true
   def update(%{alert_data: alert_data} = assigns, socket) do
+    cause_options =
+      formatted_causes(
+        Map.get(assigns, :route_type),
+        Map.get(assigns, :combination)
+      )
+
     changeset =
       %__MODULE__{}
       |> changeset(
@@ -61,7 +61,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       )
 
     form = to_form(changeset)
-    assigns = assigns |> Map.put(:form, form)
+    assigns = assigns |> Map.merge(%{form: form, cause_options: cause_options})
     {:ok, assign(socket, assigns)}
   end
 
