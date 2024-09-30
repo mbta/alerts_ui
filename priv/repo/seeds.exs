@@ -45,7 +45,7 @@ informed_entity_2 =
     activities: [:PARK_CAR, :STORE_BIKE]
   })
 
-reminder_time = Repo.insert!(%ReminderTime{reminder_time: ~U[2024-09-125 00:03:00Z]})
+reminder_time = Repo.insert!(%ReminderTime{reminder_time: ~U[2024-09-25 00:03:00Z]})
 
 Repo.insert!(%Alert{
   alert_id: "12345",
@@ -72,5 +72,6 @@ Repo.insert!(%Alert{
   ],
   image_url: "https://example.com/image1.png",
   image_alternative_text: "an alert image",
-  informed_entity: [informed_entity_1, informed_entity_2]
+  informed_entity: [informed_entity_1, informed_entity_2],
+  reminder_times: [reminder_time]
 })
