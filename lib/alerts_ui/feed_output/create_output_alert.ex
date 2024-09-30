@@ -40,7 +40,8 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
           recurrence_text: alert.recurrence_text |> build_translated_string,
           alert_lifecycle: alert.active_period_start |> AlertLifecycle.get_alert_lifecycle(),
           duration_certainty: alert.duration_certainty,
-          reminder_times: alert.reminder_times,
+          reminder_times:
+            alert.reminder_times |> Enum.map(& &1.reminder_time) |> build_reminder_times(),
           active_period: alert.active_period |> build_active_periods,
           image: alert.image_url |> build_translated_image,
           image_alternative_text: alert.image_alternative_text |> build_translated_string,
@@ -73,6 +74,9 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
     }
     |> Map.filter(&filter_out_nil_values/1)
   end
+
+  defp build_reminder_times([]), do: nil
+  defp build_reminder_times(reminder_times), do: Enum.map(reminder_times, &date_time_to_unix/1)
 
   def build_informed_entities(nil), do: nil
 
@@ -155,6 +159,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
   end
 
   defp date_time_to_unix(nil), do: nil
+  defp date_time_to_unix(times) when is_list(times), do: Enum.map(times, &date_time_to_unix/1)
   defp date_time_to_unix(time), do: DateTime.to_unix(time)
 
   defp filter_out_nil_values({_key, value}), do: !is_nil(value)
