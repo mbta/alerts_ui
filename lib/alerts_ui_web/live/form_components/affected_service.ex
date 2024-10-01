@@ -90,7 +90,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   def update(%{submitted: submitted}, socket) do
     form_params =
       Map.update(socket.assigns.form.params, "route_ids", nil, fn route_ids ->
-        if Enum.empty?(route_ids), do: nil, else: route_ids
+        if is_nil(route_ids) or Enum.empty?(route_ids), do: nil, else: route_ids
       end)
 
     socket =

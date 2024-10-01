@@ -27,7 +27,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :combination,
     :active_period_start,
     :active_period_end,
+    :active_period_start_date,
+    :active_period_end_date,
     :active_period_end_specifier,
+    :active_period_start_specifier,
     :service_types,
     :cause_detail,
     :url,
@@ -50,8 +53,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           banner_text: String.t() | nil,
           combination: atom(),
           active_period_start: NaiveDateTime.t() | nil,
-          active_period_end_specifier: atom() | nil,
+          active_period_start_date: Date.t() | nil,
+          active_period_end_specifier: atom(),
+          active_period_start_specifier: atom() | nil,
           active_period_end: NaiveDateTime.t() | nil,
+          active_period_end_date: Date.t() | nil,
           service_types: [Route.type_int()],
           cause_detail: String.t(),
           url: String.t() | nil,
@@ -80,6 +86,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
         ServiceEffectCombinations.get_combination(route_type, effect_name)
       end
 
+    active_period_start = shift_to_naive(alert.active_period_start)
     active_period_end = shift_to_naive(alert.active_period_end)
 
     reminder_times = Enum.map(alert.reminder_times, &shift_to_naive(&1.reminder_time))
@@ -95,13 +102,15 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       header_text: alert.header_text,
       description_text: alert.description_text,
       combination: combination,
-      active_period_start: shift_to_naive(alert.active_period_start),
+      active_period_start: active_period_start,
       active_period_end: active_period_end,
+      active_period_end_date: end_date(active_period_end),
+      active_period_start_date: start_date(active_period_start),
+      active_period_start_specifier: determine_start_specifier(active_period_start),
       active_period_end_specifier:
-        determine_specifier(
+        determine_end_specifier(
           active_period_end,
-          alert.duration_certainty,
-          alert.active_period_start
+          alert.duration_certainty
         ),
       service_types: Alert.service_types(alert),
       cause_detail: alert.cause_detail,
@@ -121,19 +130,31 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     time |> Timex.Timezone.convert("America/New_York") |> DateTime.to_naive()
   end
 
-  def determine_specifier(nil, nil, _ap_start), do: nil
-  def determine_specifier(_ap_end, :ESTIMATED, _ap_start), do: :later_today
-  def determine_specifier(nil, :UNKNOWN, _ap_start), do: :until_further_notice
+  def start_date(nil), do: nil
+  def start_date(ap_start), do: NaiveDateTime.to_date(ap_start)
 
-  def determine_specifier(ap_end, :KNOWN, ap_start) when not is_nil(ap_end) do
-    end_is_at_end_of_service =
-      Time.compare(NaiveDateTime.to_time(ap_end), ActivePeriod.end_of_service_time()) == :eq
+  def end_date(nil), do: nil
+  def end_date(ap_end), do: ap_end |> NaiveDateTime.to_date() |> Date.add(-1)
 
-    less_than_a_day_apart = NaiveDateTime.diff(ap_end, ap_start, :hour) <= 24
+  def determine_start_specifier(nil), do: nil
 
-    case end_is_at_end_of_service and less_than_a_day_apart do
-      true -> :end_of_service_today
-      false -> :custom
+  def determine_start_specifier(ap_start) do
+    if ap_start |> NaiveDateTime.to_time() == ActivePeriod.start_of_service_time() do
+      :start_of_service
+    else
+      :custom
+    end
+  end
+
+  def determine_end_specifier(nil, nil), do: nil
+  def determine_end_specifier(_ap_end, :ESTIMATED), do: :later_today
+  def determine_end_specifier(nil, :UNKNOWN), do: :until_further_notice
+
+  def determine_end_specifier(ap_end, :KNOWN) do
+    if ap_end |> NaiveDateTime.to_time() == ActivePeriod.end_of_service_time() do
+      :end_of_service
+    else
+      :custom
     end
   end
 end

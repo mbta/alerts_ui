@@ -19,10 +19,6 @@ defmodule AlertsUI.Models.ActivePeriod do
     field :end, :utc_datetime
   end
 
-  @spec changeset(AlertsUI.Models.ActivePeriod.t(), %{
-          optional(:__struct__) => none(),
-          optional(atom() | binary()) => any()
-        }) :: Ecto.Changeset.t()
   def changeset(%__MODULE__{} = active_period, params) do
     case {Map.get(params, :start), Map.get(params, :end)} do
       {nil, nil} ->

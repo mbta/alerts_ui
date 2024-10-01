@@ -47,12 +47,13 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
     alert_data = %{
       notification_period_start: "",
-      active_period_start: current_time |> DateTime.to_naive() |> naive_datetime_to_iso8601(),
-      active_period_start_date: current_time |> DateTime.to_date() |> Date.to_iso8601(),
+      active_period_start: current_time |> naive_datetime_to_iso8601(),
+      active_period_start_date: current_time |> NaiveDateTime.to_date() |> Date.to_iso8601(),
       active_period_end:
         ActivePeriod.end_of_service_datetime(current_time)
-        |> DateTime.to_naive(),
-      active_period_end_date: ActivePeriod.end_of_service_date(current_time)
+        |> DateTime.to_naive()
+        |> naive_datetime_to_iso8601,
+      active_period_end_date: ActivePeriod.end_of_service_date(current_time) |> Date.to_iso8601()
     }
 
     form = changeset(%__MODULE__{}, alert_data) |> to_form
@@ -76,14 +77,13 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         else
           Map.put(alert_data, :alert_timing_dropdown, "scheduled")
         end
-        |> Map.put(:active_period_start_specifier, "custom")
         |> Enum.filter(fn {_k, v} -> !is_nil(v) end)
       else
         alert_data
       end
       |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
 
-    changeset = changeset(%__MODULE__{}, Map.merge(socket.assigns.form.params, alert_data))
+    changeset = changeset(%__MODULE__{}, alert_data)
 
     changes =
       changeset
@@ -92,17 +92,46 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     send(self(), {:section_completed, changes})
     form = changeset |> to_form
 
-    Map.merge(assigns, %{form: form, edited: true})
+    assigns = Map.merge(assigns, %{form: form, edited: true})
     {:ok, assign(socket, assigns)}
   end
 
-  # @impl true
-  # def update(assigns, socket) do
-  # TODO update~submit
-  # fancy required fields
-  # relationships (2 places)
-  #   {:ok, assign(socket, assigns)}
-  # end
+  @impl true
+  def update(%{submitted: submitted}, socket) do
+    socket =
+      if submitted do
+        form_params = socket.assigns.form.params
+
+        changeset =
+          %__MODULE__{}
+          |> changeset(socket.assigns.form.params)
+          |> validate_required(
+            required_start_field_by_specifier(form_params["active_period_start_specifier"]) ++
+              required_end_field_by_specifier(form_params["active_period_end_specifier"]) ++
+              required_notification_field_by_specifier(form_params["alert_timing_dropdown"])
+          )
+          |> validate_relationship(form_params)
+          |> validate_start_is_after_now
+
+        errors =
+          case changeset |> apply_action(:validate) do
+            {:ok, _changeset} -> []
+            {:error, changeset} -> ErrorFormatter.parse_field_errors(changeset)
+          end
+
+        form =
+          changeset
+          |> to_form()
+          |> Map.put(:action, :validate)
+          |> Map.put(:errors, errors)
+
+        assign(socket, form: form)
+      else
+        socket
+      end
+
+    {:ok, socket}
+  end
 
   @impl true
   def handle_event(
@@ -110,60 +139,14 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         %{"time_range" => time_range},
         socket
       ) do
-    start_datetime =
-      case time_range["active_period_start_specifier"] do
-        "now" ->
-          socket.assigns.current_time
-
-        "start_of_service" ->
-          if time_range["active_period_start_date"] do
-            NaiveDateTime.new!(
-              time_range["active_period_start_date"] |> Date.from_iso8601!(),
-              ActivePeriod.start_of_service_time()
-            )
-          else
-            socket.assigns.current_time
-          end
-
-        "custom" ->
-          time_range["active_period_start"]
-      end
-
-    end_datetime =
-      case time_range["active_period_end_specifier"] do
-        "later_today" ->
-          if time_range["active_period_end_date"] do
-            time_range["active_period_end_date"]
-            |> Date.from_iso8601!()
-            |> Date.add(1)
-            |> NaiveDateTime.new!(ActivePeriod.end_of_service_time())
-          else
-            socket.assigns.current_time |> ActivePeriod.end_of_service_datetime()
-          end
-
-        "end_of_service" ->
-          if time_range["active_period_end_date"] do
-            time_range["active_period_end_date"]
-            |> Date.from_iso8601!()
-            |> Date.add(1)
-            |> NaiveDateTime.new!(ActivePeriod.end_of_service_time())
-          else
-            socket.assigns.current_time |> ActivePeriod.end_of_service_datetime()
-          end
-
-        "until_further_notice" ->
-          ""
-
-        "custom" ->
-          time_range["active_period_end"]
-      end
+    start_datetime = set_start_datetime(time_range, socket.assigns.current_time)
+    end_datetime = set_end_datetime(time_range, socket.assigns.current_time)
 
     time_range =
       Map.merge(time_range, %{
         "active_period_start" => start_datetime,
         "active_period_end" => end_datetime
       })
-      |> IO.inspect()
 
     changeset =
       changeset(%__MODULE__{}, time_range)
@@ -171,7 +154,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     changeset =
       if changeset.valid? do
         changeset
-        |> validate_relationship(time_range, socket.assigns.current_time)
+        |> validate_relationship(time_range)
       else
         changeset
       end
@@ -179,10 +162,10 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     changeset
     |> validate_required(
       required_start_field_by_specifier(time_range["active_period_start_specifier"]) ++
-        required_end_field_by_specifier(time_range["active_period_end_specifier"])
+        required_end_field_by_specifier(time_range["active_period_end_specifier"]) ++
+        required_notification_field_by_specifier(time_range["alert_timing_dropdown"])
     )
     |> apply_action(:validate)
-    # |> IO.inspect()
     |> case do
       {:ok, changes} ->
         send(self(), {:add_errors, [], __MODULE__})
@@ -199,24 +182,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
     {:noreply, assign(socket, %{form: form})}
   end
-
-  # def handle_event("specifier_change", %{"time_range" => time_range}, socket) do
-  #   time_range =
-  #     if time_range["active_period_start_specifier"] === "custom" do
-  #       Map.put(time_range, "active_period_start",  DateTime.now!("America/New_York") |> DateTime.to_naive() |> naive_datetime_to_iso8601())
-  #     else
-  #       time_range
-  #     end
-  #     # end_of_service_datetime()
-  #   time_range = Map.merge(socket.assigns.form.params, time_range)
-
-  #   form =
-  #     changeset(%__MODULE__{}, time_range)
-  #     |> Map.put(:action, :validate)
-  #     |> to_form()
-
-  #   {:noreply, assign(socket, %{form: form})}
-  # end
 
   def handle_event("alert_timing_dropdown_change", %{"time_range" => time_range}, socket) do
     time_range =
@@ -236,6 +201,62 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     {:noreply, assign(socket, %{form: form})}
   end
 
+  defp set_start_datetime(time_range, current_time) do
+    case time_range["active_period_start_specifier"] do
+      "now" ->
+        current_time |> naive_datetime_to_iso8601()
+
+      "start_of_service" ->
+        if time_range["active_period_start_date"] in [nil, ""] do
+          current_time
+        else
+          time_range["active_period_start_date"]
+          |> Date.from_iso8601!()
+          |> NaiveDateTime.new!(ActivePeriod.start_of_service_time())
+        end
+        |> naive_datetime_to_iso8601()
+
+      "custom" ->
+        time_range["active_period_start"] |> String.pad_trailing(19, ":00")
+    end
+  end
+
+  defp set_end_datetime(time_range, current_time) do
+    case time_range["active_period_end_specifier"] do
+      "later_today" ->
+        if time_range["active_period_end_date"] in [nil, ""] do
+          current_time
+          |> ActivePeriod.end_of_service_datetime()
+          |> DateTime.to_naive()
+        else
+          time_range["active_period_end_date"]
+          |> Date.from_iso8601!()
+          |> Date.add(1)
+          |> NaiveDateTime.new!(ActivePeriod.end_of_service_time())
+        end
+        |> naive_datetime_to_iso8601()
+
+      "end_of_service" ->
+        if time_range["active_period_end_date"] in ["", nil] do
+          current_time
+          |> ActivePeriod.end_of_service_datetime()
+          |> DateTime.to_naive()
+        else
+          time_range["active_period_end_date"]
+          |> Date.from_iso8601!()
+          |> Date.add(1)
+          |> NaiveDateTime.new!(ActivePeriod.end_of_service_time())
+        end
+        |> naive_datetime_to_iso8601()
+
+      "until_further_notice" ->
+        ""
+
+      "custom" ->
+        time_range["active_period_end"]
+    end
+  end
+
   defp changeset(changeset, params) do
     custom_errors = [
       active_period_start: "Enter a valid datetime",
@@ -246,22 +267,16 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     ]
 
     changeset
-    |> cast(params, @fields,
-      # empty_values: [""],
-      message: fn field, _meta -> custom_errors[field] end
-    )
-
-    # |> validate_required(@required_fields, message: "Enter a valid datetime")
+    |> cast(params, @fields, message: fn field, _meta -> custom_errors[field] end)
   end
 
-  @spec validate_relationship(Ecto.Changeset.t(), map(), DateTime.t()) :: Ecto.Changeset.t()
-  def validate_relationship(changeset, time_range, current_time) do
+  @spec validate_relationship(Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
+  def validate_relationship(changeset, time_range) do
     changeset
     |> validate_change(:active_period_start, fn :active_period_start, active_period_start ->
       validate_active_period_start(
         active_period_start,
-        time_range["active_period_end"],
-        current_time
+        time_range["active_period_end"]
       )
     end)
     |> validate_change(:active_period_end, fn :active_period_end, active_period_end ->
@@ -321,11 +336,11 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
             />
             <.datetime
               field={@form[:active_period_start]}
-              min={@current_time |> DateTime.to_naive() |> naive_datetime_to_iso8601()}
+              min={@current_time |> naive_datetime_to_iso8601()}
               max={@form[:active_period_end].value}
               value={@form[:active_period_start].value}
               label="Start datetime"
-              class={"min-w-[16rem] h-10 " <> (if @form.params["active_period_start_specifier"] === "custom", do: "", else: "hidden")}
+              class={"min-w-[16rem] h-10 " <> (if @form[:active_period_start_specifier].value === :custom, do: "", else: "hidden")}
               phx-debounce={120}
             />
             <.datetime
@@ -335,10 +350,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
               max={@form[:active_period_end].value |> naive_datetime_to_iso_date}
               value={@form[:active_period_start_date].value}
               label="Start date"
-              class={"min-w-[16rem] h-10 " <> (if @form.params["active_period_start_specifier"] === "start_of_service", do: "", else: "hidden")}
+              class={"min-w-[16rem] h-10 " <> (if @form[:active_period_start_specifier].value === :start_of_service, do: "", else: "hidden")}
               phx-debounce={120}
             />
-            <%= @form[:active_period_start].value %>
           </div>
 
           <div id="end-selector-div" class="flex flex-row gap-8 mb-8">
@@ -354,7 +368,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
               min={@form[:active_period_start].value}
               value={@form[:active_period_end].value}
               label="End datetime"
-              class={"min-w-[16rem] h-10 " <> (if @form.params["active_period_end_specifier"] === "custom", do: "", else: "hidden")}
+              class={"min-w-[16rem] h-10 " <> (if @form[:active_period_end_specifier].value === :custom, do: "", else: "hidden")}
               phx-debounce={120}
             />
             <.datetime
@@ -363,10 +377,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
               min={@form[:active_period_start].value |> naive_datetime_to_iso_date}
               value={@form[:active_period_end_date].value}
               label="End date"
-              class={"min-w-[16rem] h-10 " <> (if @form.params["active_period_end_specifier"] === "end_of_service", do: "", else: "hidden")}
+              class={"min-w-[16rem] h-10 " <> (if @form[:active_period_end_specifier].value === :end_of_service, do: "", else: "hidden")}
               phx-debounce={120}
             />
-            <%= @form[:active_period_end].value %>
           </div>
           <div
             :if={@form[:alert_timing_dropdown].value === :scheduled}
@@ -390,79 +403,43 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     """
   end
 
-  defp max_start_time(form, current_time) do
-    case form[:active_period_end_specifier].value do
-      "later_today" ->
-        ActivePeriod.end_of_service_datetime(current_time)
+  defp validate_active_period_start(active_period_start, active_period_end) do
+    {end_validity, end_time} = NaiveDateTime.from_iso8601(active_period_end)
 
-      :later_today ->
-        ActivePeriod.end_of_service_datetime(current_time)
-
-      :end_of_service ->
-        ActivePeriod.end_of_service_datetime(current_time)
-
-      :until_further_notice ->
-        "nil"
-
-      :custom ->
-        if form[:active_period_end].value in [nil, ""],
-          do: "",
-          else: form[:active_period_end].value
+    if end_validity === :ok and
+         NaiveDateTime.compare(
+           active_period_start,
+           end_time
+         ) in [:gt] do
+      [
+        active_period_start: {"Effect must start before #{formatted_datetime(end_time)}", []}
+      ]
+    else
+      []
     end
   end
 
-  defp min_end_time(form, current_time) do
-    case form[:active_period_start_specifier].value do
-      "now" ->
-        current_time |> DateTime.to_naive()
-
-      :now ->
-        current_time |> DateTime.to_naive()
-
-      :start_of_service ->
-        form[:active_period_start].value
-
-      :custom ->
-        if form[:active_period_start].value in [nil, ""],
-          do: current_time |> DateTime.to_naive(),
-          else: form[:active_period_start].value
-    end
-  end
-
-  defp validate_active_period_start(active_period_start, active_period_end, current_time) do
-    # {end_validity, end_time} = NaiveDateTime.from_iso8601(active_period_end)
-
-    cond do
-      NaiveDateTime.compare(
-        active_period_start,
-        current_time
-      ) in [:lt] ->
-        [
-          active_period_start: {"Effect can't start in the past", []}
-        ]
-
-      NaiveDateTime.compare(
-        active_period_start,
-        active_period_end
-      ) in [:gt] ->
-        [
-          active_period_start:
-            {"Effect must start before #{formatted_datetime(active_period_end)}", []}
-        ]
-
-      true ->
+  defp validate_start_is_after_now(changeset) do
+    validate_change(changeset, :active_period_start, fn :active_period_start,
+                                                        active_period_start ->
+      if NaiveDateTime.compare(active_period_start, current_time()) in [:lt] do
+        [active_period_start: "Effect can't start in the past"]
+      else
         []
-    end
+      end
+    end)
   end
 
   defp validate_active_period_end(active_period_end, active_period_start) do
-    if NaiveDateTime.compare(
-         active_period_end,
-         active_period_start
-       ) in [:lt] do
+    {start_validity, start_time} = NaiveDateTime.from_iso8601(active_period_start)
+
+    if start_validity === :ok and
+         NaiveDateTime.compare(
+           active_period_end,
+           start_time
+         ) in [:lt] do
       [
-        active_period_end:
-          {"Effect must end after #{formatted_datetime(active_period_start)}", []}
+        active_period_end: {"Effect must end after #{formatted_datetime(start_time)}", []}
       ]
     else
       []
@@ -474,16 +451,17 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
          active_period_start,
          active_period_end
        ) do
-    start_time = NaiveDateTime.from_iso8601!(active_period_start)
+    {start_validity, start_time} = NaiveDateTime.from_iso8601(active_period_start)
 
     {end_validity, end_time} =
       NaiveDateTime.from_iso8601(active_period_end)
 
     cond do
-      NaiveDateTime.compare(
-        notification_period_start,
-        start_time
-      ) in [:lt] ->
+      start_validity === :ok &&
+          NaiveDateTime.compare(
+            notification_period_start,
+            start_time
+          ) in [:lt] ->
         [
           notification_period_start:
             {"Effect must start after #{formatted_datetime(start_time)}", []}
@@ -505,42 +483,44 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   end
 
   defp required_start_field_by_specifier(specifier) do
-    %{
-      "custom" => [:active_period_start],
-      "start_of_service" => [:active_period_start_date]
-    }
-    |> Map.get(specifier, [])
+    case specifier do
+      "custom" -> [:active_period_start]
+      "start_of_service" -> [:active_period_start_date]
+      _ -> []
+    end
   end
 
   defp required_end_field_by_specifier(specifier) do
-    %{
-      "custom" => [:active_period_end],
-      "end_of_service" => [:active_period_end_date]
-    }
-    |> Map.get(specifier, [])
+    case specifier do
+      "custom" -> [:active_period_end]
+      "end_of_service" -> [:active_period_end_date]
+      _ -> []
+    end
   end
 
+  defp required_notification_field_by_specifier(specifier),
+    do: if(specifier === "scheduled", do: [:notification_period_start], else: [])
+
   defp current_time,
-    do: DateTime.now!("America/New_York")
+    do: DateTime.now!("America/New_York") |> DateTime.to_naive()
 
   defp next_start_of_service_date(current_time) do
     ActivePeriod.next_start_of_service_date(current_time)
     |> Date.to_iso8601()
   end
 
-  defp end_of_service_date(current_time) do
-    ActivePeriod.end_of_service_date(current_time)
-    |> Date.to_iso8601()
-  end
-
-  def naive_datetime_to_iso_date(nil), do: ""
-  def naive_datetime_to_iso_date(""), do: ""
-
-  def naive_datetime_to_iso_date(datetime),
+  def naive_datetime_to_iso_date(%NaiveDateTime{} = datetime),
     do: datetime |> NaiveDateTime.to_date() |> Date.to_iso8601()
 
-  defp naive_datetime_to_iso8601(datetime),
-    do: datetime |> NaiveDateTime.truncate(:second) |> NaiveDateTime.to_iso8601()
+  def naive_datetime_to_iso_date(_), do: ""
+
+  defp naive_datetime_to_iso8601(%NaiveDateTime{} = datetime),
+    do:
+      datetime
+      |> NaiveDateTime.truncate(:millisecond)
+      |> NaiveDateTime.to_iso8601()
+
+  defp naive_datetime_to_iso8601(_), do: ""
 
   defp values_to_options(values) do
     Enum.map(values, fn value ->
@@ -548,11 +528,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       {name, value}
     end)
   end
-
-  # defp current_time_plus_2_hours(current_time) do
-  #   NaiveDateTime.add(NaiveDateTime.from_iso8601!(current_time), 2, :hour)
-  #   |> naive_datetime_to_iso8601()
-  # end
 
   defp formatted_datetime(datetime, format_string \\ "{0M}/{0D}/{YYYY}, {0h12}:{0m}:{0s} {AM}"),
     do: Timex.format!(datetime, format_string)

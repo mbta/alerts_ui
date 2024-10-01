@@ -169,11 +169,24 @@ defmodule AlertsUI.Models.Alert do
 
   @spec changeset(any(), map()) :: Ecto.Changeset.t()
   def changeset(%__MODULE__{} = alert, params) do
+    current_time = Map.get(params, :current_time)
+
     alert
     |> cast(params, @permitted_fields)
     |> cast_embed(:active_period, required: false, with: &ActivePeriod.changeset/2)
     |> cast_assoc(:informed_entity, required: true, with: &InformedEntity.changeset/2)
     |> cast_assoc(:reminder_times, required: false, with: &ReminderTime.changeset/2)
+    |> validate_change(:active_period_start, fn :active_period_start, active_period_start ->
+      if is_nil(current_time) or
+           DateTime.compare(active_period_start, DateTime.truncate(current_time, :second)) in [
+             :eq,
+             :gt
+           ] do
+        []
+      else
+        [active_period_start: "Effect can't start in the past"]
+      end
+    end)
     |> validate_inclusion(:effect, @effect)
     |> validate_inclusion(:cause, @cause)
     |> validate_inclusion(:severity_level, @severity_level)
