@@ -116,7 +116,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         }
       })
 
-      assert render(view) =~ ~s(Effect must end after 05/01/2024, 10:54:00 AM)
+      assert render(view) =~ ~s(Effect must end after 05/01/2024, 10:54 AM)
     end
 
     test "scheduled section is hidden unless scheduled is selected" do
@@ -151,7 +151,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         }
       })
 
-      assert render(view) =~ ~s(Effect must start after 05/01/2024, 10:54:00 AM)
+      assert render(view) =~ ~s(Effect must start after 05/01/2024, 10:54 AM)
     end
 
     test "scheduled start time must be before active period end" do
@@ -169,7 +169,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         }
       })
 
-      assert render(view) =~ ~s(Effect must end before 05/01/2024, 10:54:00 AM)
+      assert render(view) =~ ~s(Effect must end before 05/01/2024, 10:54 AM)
     end
 
     test "it sends section_completed if no error in changeset" do
