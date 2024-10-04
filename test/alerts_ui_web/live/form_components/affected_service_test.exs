@@ -36,9 +36,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     available_routes: [],
     available_schedules: [@schedule],
     available_stops: [%Stop{id: "place-sstat", name: "South Station"}],
-    alert_data: %{},
+    alert_data: %{route_ids: ["CR-Worcester"]},
     combination: :RDTS,
-    editing: false
+    editing: true
   }
 
   describe "component" do
@@ -140,7 +140,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
 
         view
         |> element("form")
-        |> render_change(%{"affected_service" => %{"route_ids" => ["1"]}})
+        |> render_change(%{"affected_service" => %{"route_ids" => ["CR-Worcester"]}})
 
         assert view
                |> element("select#affected_service_trip_ids")
@@ -236,7 +236,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
             available_schedules: [
               %MBTAV3API.Schedules.Schedule{
                 route: %MBTAV3API.Routes.Route{
-                  id: "CR-Fitchburg",
+                  id: "CR-Worcester",
                   type: 2
                 },
                 trip: %MBTAV3API.Schedules.Trip{

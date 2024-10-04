@@ -221,6 +221,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     trip_id_options =
       assigns.available_schedules
+      |> Enum.filter(fn schedule ->
+        schedule.route.id in Map.get(assigns.form[:route_ids], :value, [])
+      end)
       |> Enum.group_by(&SelectFormatter.name_for_option(&1.route))
       |> SelectFormatter.formatted_trip_options(trip_filter_value)
 
