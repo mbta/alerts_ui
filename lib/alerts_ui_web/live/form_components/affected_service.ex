@@ -47,6 +47,28 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     {:ok, socket}
   end
 
+  def update(%{refresh: true}, socket) do
+    alert_data = %{
+      route_ids: [],
+      direction: "default",
+      trip_ids: [],
+      stop_ids: []
+    }
+
+    form =
+      %__MODULE__{}
+      |> changeset(alert_data)
+      |> to_form()
+
+    assigns = %{
+      form: form,
+      available_schedules: [],
+      available_stops: []
+    }
+
+    {:ok, assign(socket, assigns)}
+  end
+
   @impl true
   def update(%{alert_data: alert_data, editing: editing} = assigns, socket) do
     route_type = Map.get(alert_data, :route_type)
@@ -207,6 +229,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   @impl true
   def render(assigns) do
+    route_ids = assigns.form[:route_ids].value || []
     route_filter_value = assigns.form[:route_ids_filter].value
 
     route_id_options =
@@ -214,24 +237,32 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     direction_options =
       SelectFormatter.formatted_direction_options(
-        assigns.form[:route_ids].value,
+        route_ids,
         assigns.direction_names_map
       )
 
     trip_filter_value = assigns.form[:trip_ids_filter].value
 
     trip_id_options =
-      assigns.available_schedules
-      |> Enum.filter(fn schedule ->
-        schedule.route.id in Map.get(assigns.form[:route_ids], :value, [])
-      end)
-      |> Enum.group_by(&SelectFormatter.name_for_option(&1.route))
-      |> SelectFormatter.formatted_trip_options(trip_filter_value)
+      if length(route_ids) > 0 do
+        assigns.available_schedules
+        |> Enum.filter(fn schedule ->
+          schedule.route.id in Map.get(assigns.form[:route_ids], :value, [])
+        end)
+        |> Enum.group_by(&SelectFormatter.name_for_option(&1.route))
+        |> SelectFormatter.formatted_trip_options(trip_filter_value)
+      else
+        []
+      end
 
     stop_filter_value = assigns.form[:stop_ids_filter].value
 
     stop_id_options =
-      SelectFormatter.formatted_select_options(assigns.available_stops, stop_filter_value)
+      if length(route_ids) === 1 do
+        SelectFormatter.formatted_select_options(assigns.available_stops, stop_filter_value)
+      else
+        []
+      end
 
     assigns =
       assign(assigns,
@@ -401,8 +432,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   defp all_route_types(_), do: []
 
   defp populate_default_stops(affected_service) do
-    if Map.get(affected_service, "stop_ids") in [nil, "default", ["default"]] or
-         length(affected_service["route_ids"]) !== 1 do
+    if Map.get(affected_service, "stop_ids") in [nil, "default", ["default"]] do
       Map.put(
         affected_service,
         "stop_ids",

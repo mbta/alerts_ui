@@ -242,8 +242,10 @@ defmodule AlertsUIWeb.CreateAlertLive do
       facility_id: []
     }
 
-    new_alert_data = Map.merge(socket.assigns.alert_data, clean_affected_services)
-    alert_data = Map.merge(new_alert_data, changeset |> Map.from_struct())
+    alert_data =
+      Map.merge(socket.assigns.alert_data, clean_affected_services)
+      |> Map.merge(changeset |> Map.from_struct())
+
     route_type = Map.get(alert_data, :route_type)
     effect_name = Map.get(alert_data, :effect_name, "")
 
@@ -258,11 +260,13 @@ defmodule AlertsUIWeb.CreateAlertLive do
     assigns = %{
       progress: get_step_by_name(socket.assigns.progress.next),
       alert_data: alert_data,
-      combination: combination,
+      available_routes: [],
       available_stops: [],
-      available_trips: []
+      available_trips: [],
+      combination: combination
     }
 
+    send_update(AffectedService, id: "affected_service", refresh: true)
     {:noreply, assign(socket, assigns)}
   end
 
