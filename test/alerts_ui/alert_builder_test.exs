@@ -17,6 +17,7 @@ defmodule AlertsUI.AlertBuilderTest do
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
 
+  @end_of_service_eastern ActivePeriod.end_of_service_time()
   @end_of_service_utc ActivePeriod.end_of_service_time() |> Time.add(4, :hour)
 
   @alert_data %{
@@ -43,6 +44,7 @@ defmodule AlertsUI.AlertBuilderTest do
           direction: "default",
           active_period_start: ~N[2024-04-30 11:54:00],
           active_period_end_specifier: :until_further_notice,
+          active_period_start_specifier: :custom,
           cause_detail: "disabled train",
           url: "http://www.example.com",
           image_url: "http://www.example.com/example.jpg",
@@ -57,7 +59,7 @@ defmodule AlertsUI.AlertBuilderTest do
           ]
         }
 
-        result = AlertBuilder.build_alert(alert_data, :R)
+        result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 05:54:00Z])
 
         assert result == %{
                  effect: :SIGNIFICANT_DELAYS,
@@ -91,7 +93,8 @@ defmodule AlertsUI.AlertBuilderTest do
                    %{reminder_time: ~U[2024-04-30 16:04:00Z]},
                    %{reminder_time: ~U[2024-04-30 16:14:00Z]},
                    %{reminder_time: ~U[2024-04-30 16:24:00Z]}
-                 ]
+                 ],
+                 current_time: ~U[2024-04-30 05:54:00Z]
                }
 
         result |> Alerts.create_or_update_alert()
@@ -114,10 +117,11 @@ defmodule AlertsUI.AlertBuilderTest do
           direction: "default",
           active_period_start: ~N[2024-04-30 11:54:00],
           active_period_end_specifier: :until_further_notice,
+          active_period_start_specifier: :custom,
           cause_detail: ""
         }
 
-        result = AlertBuilder.build_alert(alert_data, :R)
+        result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 05:54:00Z])
 
         assert result == %{
                  effect: :SIGNIFICANT_DELAYS,
@@ -165,7 +169,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  notification_period_start: nil,
                  severity: nil,
                  severity_level: nil,
-                 reminder_times: []
+                 reminder_times: [],
+                 current_time: ~U[2024-04-30 05:54:00Z]
                }
 
         result |> Alerts.create_or_update_alert()
@@ -188,11 +193,12 @@ defmodule AlertsUI.AlertBuilderTest do
           direction: "default",
           active_period_start: ~N[2024-04-30 11:54:00],
           active_period_end_specifier: :until_further_notice,
+          active_period_start_specifier: :custom,
           cause_detail: "freight train interference",
           notification_period_start: ~N[2024-04-30 11:54:00]
         }
 
-        result = AlertBuilder.build_alert(alert_data, :R)
+        result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 05:54:00Z])
 
         assert result == %{
                  effect: :SIGNIFICANT_DELAYS,
@@ -222,7 +228,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  notification_period_start: ~U[2024-04-30 15:54:00Z],
                  severity: nil,
                  severity_level: nil,
-                 reminder_times: []
+                 reminder_times: [],
+                 current_time: ~U[2024-04-30 05:54:00Z]
                }
 
         result |> Alerts.create_or_update_alert()
@@ -237,8 +244,9 @@ defmodule AlertsUI.AlertBuilderTest do
         alert_data =
           %{
             active_period_start: ~N[2024-04-30 11:54:00],
-            active_period_end: nil,
-            active_period_end_specifier: :later_today
+            active_period_end: NaiveDateTime.new!(~D[2024-05-01], @end_of_service_eastern),
+            active_period_end_specifier: :later_today,
+            active_period_start_specifier: :custom
           }
           |> Map.merge(@alert_data)
 
@@ -263,7 +271,8 @@ defmodule AlertsUI.AlertBuilderTest do
           %{
             active_period_start: ~N[2024-04-30 11:54:00],
             active_period_end: nil,
-            active_period_end_specifier: :until_further_notice
+            active_period_end_specifier: :until_further_notice,
+            active_period_start_specifier: :custom
           }
           |> Map.merge(@alert_data)
 
@@ -282,7 +291,8 @@ defmodule AlertsUI.AlertBuilderTest do
           %{
             active_period_start: ~N[2024-04-30 11:54:00],
             active_period_end: ~N[2024-04-30 23:54:00],
-            active_period_end_specifier: :custom
+            active_period_end_specifier: :custom,
+            active_period_start_specifier: :custom
           }
           |> Map.merge(@alert_data)
 
@@ -298,13 +308,36 @@ defmodule AlertsUI.AlertBuilderTest do
       end
     end
 
+    test "builds active period with start time of now" do
+      with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
+        original_start_time = ~U[2024-04-30 05:54:00Z] |> DateTime.add(-5, :minute)
+
+        alert_data =
+          %{
+            active_period_start:
+              original_start_time
+              |> DateTime.shift_zone!("America/New_York")
+              |> DateTime.to_naive(),
+            active_period_end: ~N[2024-04-30 23:54:00],
+            active_period_end_specifier: :custom,
+            active_period_start_specifier: :now
+          }
+          |> Map.merge(@alert_data)
+
+        result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 05:54:00Z])
+
+        assert result.active_period_start == ~U[2024-04-30 05:54:00Z]
+      end
+    end
+
     test "builds active period with end value end_of_service_today when time is before midnight" do
       with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
         alert_data =
           %{
             active_period_start: ~N[2024-04-30 11:54:00],
-            active_period_end: nil,
-            active_period_end_specifier: :end_of_service_today
+            active_period_end: NaiveDateTime.new!(~D[2024-05-01], @end_of_service_eastern),
+            active_period_end_specifier: :end_of_service,
+            active_period_start_specifier: :custom
           }
           |> Map.merge(@alert_data)
 
@@ -328,8 +361,9 @@ defmodule AlertsUI.AlertBuilderTest do
         alert_data =
           %{
             active_period_start: ~N[2024-04-30 01:54:00],
-            active_period_end: nil,
-            active_period_end_specifier: :end_of_service_today
+            active_period_end: NaiveDateTime.new!(~D[2024-04-30], @end_of_service_eastern),
+            active_period_end_specifier: :end_of_service,
+            active_period_start_specifier: :custom
           }
           |> Map.merge(@alert_data)
 
