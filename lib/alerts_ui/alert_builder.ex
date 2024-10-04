@@ -268,18 +268,15 @@ defmodule AlertsUI.AlertBuilder do
       active_period_start: utc_start,
       active_period_end: utc_end,
       active_period: [%{start: utc_start, end: utc_end}],
-      duration_certainty: duration_certainty_map(active_period_end_specifier)
+      duration_certainty:
+        active_period_end_specifier_to_duration_certainty(active_period_end_specifier)
     }
   end
 
-  defp duration_certainty_map(specifier) do
-    %{
-      later_today: :ESTIMATED,
-      until_further_notice: :UNKNOWN,
-      end_of_service: :KNOWN,
-      custom: :KNOWN
-    }[specifier]
-  end
+  defp active_period_end_specifier_to_duration_certainty(:later_today), do: :ESTIMATED
+  defp active_period_end_specifier_to_duration_certainty(:until_further_notice), do: :UNKNOWN
+  defp active_period_end_specifier_to_duration_certainty(:end_of_service), do: :KNOWN
+  defp active_period_end_specifier_to_duration_certainty(:custom), do: :KNOWN
 
   defp build_active_period_start(_start_time, :now, current_time) do
     current_time
