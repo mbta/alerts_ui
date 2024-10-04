@@ -194,7 +194,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
           />
 
           <span class="ml-4">
-            Email/SMS to T-alert suscribers
+            Email/SMS to T-alerts subscribers
           </span>
         </div>
         <div id="banner_div" class="flex flex-col w-[50%]">

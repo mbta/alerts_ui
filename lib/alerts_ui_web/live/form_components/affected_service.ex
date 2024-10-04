@@ -238,8 +238,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         direction_options: direction_options,
         trip_id_options: trip_id_options,
         stop_id_options: stop_id_options,
-        service_type_name:
-          (assigns.route_type |> InformedEntity.route_code_mapping() || "") |> String.downcase()
+        service_type_name: assigns.route_type |> InformedEntity.route_code_mapping() || nil
       )
 
     ~H"""
@@ -247,7 +246,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       class={unless @progress.name == "details", do: "hidden", else: "min-w-full mb-8 min-h-[32rem]"}
       id="service_view"
     >
-      <.h1 class="mb-8">Create new <%= @service_type_name %> alert</.h1>
+      <.h1 class="mb-8">
+        Create new <%= route_atom_to_string(@service_type_name) %>
+        <%= (@effect_name || "") |> String.downcase() %> alert
+      </.h1>
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
         Affected service
       </.h5>
@@ -332,8 +334,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   defp icon_type(route_type) do
     case route_type do
-      2 -> "Commuter Rail"
-      4 -> "Ferry"
+      2 -> :commuter_rail
+      4 -> :ferry
       _ -> nil
     end
   end

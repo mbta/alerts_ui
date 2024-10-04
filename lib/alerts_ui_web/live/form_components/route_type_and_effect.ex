@@ -9,12 +9,12 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   alias AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes
 
   @route_types [
-    "Bus",
-    "Subway",
-    "Commuter Rail",
-    "Ferry",
-    "Access",
-    "Systemwide"
+    :bus,
+    :subway,
+    :commuter_rail,
+    :ferry,
+    :access,
+    :systemwide
   ]
 
   @primary_key false
@@ -27,6 +27,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   @required_fields ~w[effect_name]a
 
   @impl true
+  @spec mount(any()) :: {:ok, any()}
   def mount(socket) do
     changeset = %__MODULE__{} |> change() |> to_form()
 
@@ -58,7 +59,8 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
 
   @impl true
   def handle_event("route_type", %{"value" => route_type}, socket) do
-    effects = EffectsForRouteTypes.list_effects(route_type)
+    effects =
+      EffectsForRouteTypes.list_effects(route_type |> String.to_existing_atom())
 
     {:noreply,
      assign(socket, %{selected_route_type: route_type, effects: effects, selected_effect: nil})}
@@ -71,9 +73,20 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
 
   @impl true
   def handle_event("complete_step", _params, socket) do
+    selected_effect =
+      if socket.assigns.selected_effect do
+        socket.assigns.selected_effect
+      else
+        nil
+      end
+
     changeset_params = %{
-      effect_name: socket.assigns.selected_effect,
-      route_type: InformedEntity.route_type_mapping(socket.assigns.selected_route_type)
+      effect_name: selected_effect,
+      route_type:
+        InformedEntity.route_type_mapping(
+          (socket.assigns.selected_route_type || "")
+          |> String.to_existing_atom()
+        )
     }
 
     changeset(%__MODULE__{}, changeset_params)
@@ -157,7 +170,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
       value={@route_type}
       icon={@route_type}
     >
-      <%= @route_type %>
+      <%= route_atom_to_string(@route_type) |> :string.titlecase() %>
     </.button_toggle>
     """
   end
@@ -179,7 +192,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
       value={@effect}
       active={@active_effect}
     >
-      <%= @effect %>
+      <%= @effect |> String.replace("_", " ") |> String.capitalize() %>
     </.button_toggle>
     """
   end

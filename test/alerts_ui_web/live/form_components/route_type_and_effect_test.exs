@@ -30,7 +30,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffectTest do
       assigns =
         @assigns
         |> Map.put(:selected_effect, "Detour")
-        |> Map.put(:selected_route_type, "Bus")
+        |> Map.put(:selected_route_type, "bus")
 
       {:ok, view, _html} = live_isolated_component(RouteTypeAndEffect, assigns)
 

@@ -5,12 +5,12 @@ defmodule AlertsUIWeb.IconComponentsTest do
 
   describe "icon/1" do
     test "generates an svg or a stylized span element for the requested icon type" do
-      assert_rendered(mode_icon(%{type: "Bus"}), "<svg")
-      assert_rendered(mode_icon(%{type: "Subway"}), "<svg")
-      assert_rendered(mode_icon(%{type: "Commuter Rail"}), "<svg")
-      assert_rendered(mode_icon(%{type: "Ferry"}), "<svg")
-      assert_rendered(mode_icon(%{type: "Systemwide"}), "<svg")
-      assert_rendered(mode_icon(%{type: "Access"}), "<svg")
+      assert_rendered(mode_icon(%{type: :bus}), "<svg")
+      assert_rendered(mode_icon(%{type: :subway}), "<svg")
+      assert_rendered(mode_icon(%{type: :commuter_rail}), "<svg")
+      assert_rendered(mode_icon(%{type: :ferry}), "<svg")
+      assert_rendered(mode_icon(%{type: :systemwide}), "<svg")
+      assert_rendered(mode_icon(%{type: :access}), "<svg")
       assert_rendered(mode_icon(%{type: "Red Line"}), "<svg")
       assert_rendered(mode_icon(%{type: "Blue Line"}), "<svg")
       assert_rendered(mode_icon(%{type: "Orange Line"}), "<svg")

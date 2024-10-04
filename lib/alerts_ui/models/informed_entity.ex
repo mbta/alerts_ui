@@ -142,33 +142,33 @@ defmodule AlertsUI.Models.InformedEntity do
   def facility_effect_to_types(:PARKING_ISSUE), do: ["PARKING_AREA", "PICK_DROP"]
 
   @doc """
-  Map route type names to integer codes.
+  Map route type atoms to integer codes.
 
     ## Examples
-      iex> InformedEntity.route_type_mapping("Light Rail")
+      iex> InformedEntity.route_type_mapping(:light_rail)
       0
   """
-  @spec route_type_mapping(String.t()) :: Route.type_int() | nil
-  def route_type_mapping("Light Rail"), do: 0
-  def route_type_mapping("Subway"), do: 1
-  def route_type_mapping("Commuter Rail"), do: 2
-  def route_type_mapping("Bus"), do: 3
-  def route_type_mapping("Ferry"), do: 4
+  @spec route_type_mapping(atom()) :: Route.type_int() | nil
+  def route_type_mapping(:light_rail), do: 0
+  def route_type_mapping(:subway), do: 1
+  def route_type_mapping(:commuter_rail), do: 2
+  def route_type_mapping(:bus), do: 3
+  def route_type_mapping(:ferry), do: 4
   def route_type_mapping(_), do: nil
 
   @doc """
-  Map route type codes to service type names.
+  Map route type codes to service type stoms.
 
     ## Examples
       iex> InformedEntity.route_code_mapping(0)
-      "Light Rail"
+      :light_rail
   """
   @spec route_code_mapping(Route.type_int()) :: String.t() | nil
-  def route_code_mapping(0), do: "Light Rail"
-  def route_code_mapping(1), do: "Subway"
-  def route_code_mapping(2), do: "Commuter Rail"
-  def route_code_mapping(3), do: "Bus"
-  def route_code_mapping(4), do: "Ferry"
+  def route_code_mapping(0), do: :light_rail
+  def route_code_mapping(1), do: :subway
+  def route_code_mapping(2), do: :commuter_rail
+  def route_code_mapping(3), do: :bus
+  def route_code_mapping(4), do: :ferry
   def route_code_mapping(_), do: nil
 
   @doc """
