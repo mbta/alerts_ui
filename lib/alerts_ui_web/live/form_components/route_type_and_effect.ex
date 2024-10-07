@@ -157,7 +157,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   end
 
   def route_type_buttons(assigns, route_type) do
-    active_route = route_type == assigns.selected_route_type
+    active_route = route_type == (assigns.selected_route_type || "") |> String.to_existing_atom()
 
     assigns = assign(assigns, %{route_type: route_type, active_route: active_route})
 
