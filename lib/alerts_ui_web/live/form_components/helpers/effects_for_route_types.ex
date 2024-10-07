@@ -9,20 +9,20 @@ defmodule AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes do
   ## Examples
       iex> is_list(EffectsForRouteTypes.list_effects(nil))
       true
-      iex> is_list(EffectsForRouteTypes.list_effects("Subway"))
+      iex> is_list(EffectsForRouteTypes.list_effects(:subway))
       true
-      iex> is_list(EffectsForRouteTypes.list_effects("Commuter Rail"))
+      iex> is_list(EffectsForRouteTypes.list_effects(:commuter_rail))
       true
-      iex> is_list(EffectsForRouteTypes.list_effects("Bus"))
+      iex> is_list(EffectsForRouteTypes.list_effects(:bus))
       true
-      iex> is_list(EffectsForRouteTypes.list_effects("Ferry"))
+      iex> is_list(EffectsForRouteTypes.list_effects(:ferry))
       true
-      iex> is_list(EffectsForRouteTypes.list_effects("Systemwide"))
+      iex> is_list(EffectsForRouteTypes.list_effects(:systemwide))
       true
   """
   def list_effects(nil), do: Effect.effect_names()
 
-  def list_effects("Subway"),
+  def list_effects(:subway),
     do: [
       "Delay",
       "Extra Service",
@@ -34,7 +34,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes do
       "Suspension"
     ]
 
-  def list_effects("Commuter Rail"),
+  def list_effects(:commuter_rail),
     do: [
       "Cancellation",
       "Delay",
@@ -48,7 +48,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes do
       "Track Change"
     ]
 
-  def list_effects("Bus"),
+  def list_effects(:bus),
     do: [
       "Cancellation",
       "Delay",
@@ -64,7 +64,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes do
       "Suspension"
     ]
 
-  def list_effects("Ferry"),
+  def list_effects(:ferry),
     do: [
       "Cancellation",
       "Delay",
@@ -77,7 +77,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes do
       "Suspension"
     ]
 
-  def list_effects("Access"),
+  def list_effects(:access),
     do: [
       "Elevator Closure",
       "Parking Closure",
@@ -88,7 +88,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes do
       "Facility Issue"
     ]
 
-  def list_effects("Systemwide"),
+  def list_effects(:systemwide),
     do: [
       "Amber Alert",
       "Delay",

@@ -130,7 +130,7 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
   end
 
   defp service_type_options do
-    Enum.map(["Bus", "Commuter Rail", "Ferry", "Subway"], fn name ->
+    Enum.map([:bus, :commuter_rail, :ferry, :subway], fn name ->
       {name, InformedEntity.route_type_mapping(name) |> Integer.to_string()}
     end)
   end

@@ -9,7 +9,7 @@ defmodule AlertsUIWeb.IconComponents do
   """
   attr :type, :string, required: true
 
-  def mode_icon(%{type: "Bus"} = assigns) do
+  def mode_icon(%{type: :bus} = assigns) do
     ~H"""
     <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
       <title>
@@ -27,7 +27,7 @@ defmodule AlertsUIWeb.IconComponents do
     """
   end
 
-  def mode_icon(%{type: "Subway"} = assigns) do
+  def mode_icon(%{type: :subway} = assigns) do
     ~H"""
     <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
       <title>
@@ -43,7 +43,7 @@ defmodule AlertsUIWeb.IconComponents do
     """
   end
 
-  def mode_icon(%{type: "Commuter Rail"} = assigns) do
+  def mode_icon(%{type: :commuter_rail} = assigns) do
     ~H"""
     <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
       <title>
@@ -58,7 +58,7 @@ defmodule AlertsUIWeb.IconComponents do
     """
   end
 
-  def mode_icon(%{type: "Ferry"} = assigns) do
+  def mode_icon(%{type: :ferry} = assigns) do
     ~H"""
     <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
       <title>
@@ -73,7 +73,7 @@ defmodule AlertsUIWeb.IconComponents do
     """
   end
 
-  def mode_icon(%{type: "Systemwide"} = assigns) do
+  def mode_icon(%{type: :systemwide} = assigns) do
     ~H"""
     <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
       <title>
@@ -91,7 +91,7 @@ defmodule AlertsUIWeb.IconComponents do
     """
   end
 
-  def mode_icon(%{type: "Access"} = assigns) do
+  def mode_icon(%{type: :access} = assigns) do
     ~H"""
     <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
       <title>

@@ -24,7 +24,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
     available_stops: [],
     available_routes: [%MBTAV3API.Routes.Route{sort_order: 1, id: "1", name: "route_number_1"}],
     alert_data: %{},
-    editing: false
+    editing: false,
+    effect_name: "Delay"
   }
 
   describe "component" do
@@ -37,7 +38,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         {:ok, view, _html} =
           live_isolated_component(StopRouteAffectedService, %{
             @assigns
-            | alert_data: %{route_type: 3, effect_name: "Delay"}
+            | alert_data: %{route_type: 3}
           })
 
         assert view
@@ -64,6 +65,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
             editing: true,
             available_stops: [%Stop{id: "place-aqucl"}, %Stop{id: "place-andrw"}],
             available_routes: [%Route{id: "Blue", type: 1}, %Route{id: "Green", type: 1}],
+            effect_name: "DELAY",
             alert_data: %{
               stop_ids: ["place-aqucl"],
               route_ids: ["Blue"],
@@ -81,7 +83,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         {:ok, view, _html} =
           live_isolated_component(StopRouteAffectedService, %{
             @assigns
-            | alert_data: %{route_type: 3, effect_name: "Delay"}
+            | alert_data: %{route_type: 3}
           })
 
         view

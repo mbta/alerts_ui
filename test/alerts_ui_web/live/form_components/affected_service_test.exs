@@ -38,7 +38,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     available_stops: [%Stop{id: "place-sstat", name: "South Station"}],
     alert_data: %{route_ids: ["CR-Worcester"]},
     combination: :RDTS,
-    editing: true
+    editing: true,
+    effect_name: "Delay"
   }
 
   describe "component" do

@@ -12,6 +12,7 @@ defmodule AlertsUIWeb.SharedComponents do
   import AlertsUIWeb.IconComponents
 
   alias AlertsUIWeb.CoreComponents
+  alias AlertsUIWeb.FormComponents.Helpers.ContentFormatter
   alias Phoenix.HTML.{Form, FormField}
   alias Phoenix.LiveView.JS
 
@@ -422,7 +423,11 @@ defmodule AlertsUIWeb.SharedComponents do
               <div class={[unless(@show_icons, do: "hidden"), "mr-3 self-center"]}>
                 <.mode_icon type={if @icon_type, do: @icon_type, else: option_name} />
               </div>
-              <%= option_name %>
+              <%= if is_atom(option_name) do
+                ContentFormatter.route_atom_to_string(option_name) |> :string.titlecase()
+              else
+                option_name
+              end %>
             </div>
           </div>
         </.label>

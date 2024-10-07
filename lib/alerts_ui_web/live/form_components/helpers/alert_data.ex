@@ -80,7 +80,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
     combination =
       if is_nil(route_type) and
-           effect_name in EffectsForRouteTypes.list_effects("Access") do
+           effect_name in EffectsForRouteTypes.list_effects(:access) do
         :ACCESS
       else
         ServiceEffectCombinations.get_combination(route_type, effect_name)

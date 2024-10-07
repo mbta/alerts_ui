@@ -7,7 +7,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   import Ecto.Changeset
 
   alias AlertsUI.Models.InformedEntity
-  alias AlertsUIWeb.FormComponents.Helpers.{ErrorFormatter, SelectFormatter}
+  alias AlertsUIWeb.FormComponents.Helpers.{ContentFormatter, ErrorFormatter, SelectFormatter}
 
   @primary_key false
   embedded_schema do
@@ -83,7 +83,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       end
       |> Map.put(
         :service_type_name,
-        (assigns.route_type |> InformedEntity.route_code_mapping() || "") |> String.downcase()
+        assigns.route_type |> InformedEntity.route_code_mapping() || nil
       )
 
     {:ok, assign(socket, assigns)}
@@ -210,7 +210,10 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       class={unless @progress.name == "details", do: "hidden", else: "min-w-full mb-8 min-h-[32rem]"}
       id="stop_route_service_view"
     >
-      <.h1 class="mb-8">Create new <%= @service_type_name %> alert</.h1>
+      <.h1 class="mb-8">
+        Create new <%= ContentFormatter.route_atom_to_string(@service_type_name) %> <%= @effect_name
+        |> String.downcase() %> alert
+      </.h1>
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
         Affected service
       </.h5>

@@ -245,11 +245,11 @@ defmodule AlertsUIWeb.CreateAlertLive do
     new_alert_data = Map.merge(socket.assigns.alert_data, clean_affected_services)
     alert_data = Map.merge(new_alert_data, changeset |> Map.from_struct())
     route_type = Map.get(alert_data, :route_type)
-    effect_name = Map.get(alert_data, :effect_name)
+    effect_name = Map.get(alert_data, :effect_name, "")
 
     combination =
       if is_nil(route_type) and
-           effect_name in EffectsForRouteTypes.list_effects("Access") do
+           effect_name in EffectsForRouteTypes.list_effects(:access) do
         :ACCESS
       else
         ServiceEffectCombinations.get_combination(route_type, effect_name)
@@ -357,6 +357,9 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   @spec route_type(map()) :: Route.type_int() | nil
   defp route_type(alert_data), do: Map.get(alert_data, :route_type)
+
+  @spec route_type(map()) :: String.t() | nil
+  defp effect_name(alert_data), do: Map.get(alert_data, :effect_name)
 
   @spec maybe_include_virtual_green_line([Route.t()]) :: [Route.t()]
   defp maybe_include_virtual_green_line(routes) do
