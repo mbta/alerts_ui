@@ -7,7 +7,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   import Ecto.Changeset
 
   alias AlertsUI.Models.InformedEntity
-  alias AlertsUIWeb.FormComponents.Helpers.{ErrorFormatter, SelectFormatter}
+  alias AlertsUIWeb.FormComponents.Helpers.{ContentFormatter, ErrorFormatter, SelectFormatter}
 
   @primary_key false
   embedded_schema do
@@ -211,7 +211,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       id="stop_route_service_view"
     >
       <.h1 class="mb-8">
-        Create new <%= route_atom_to_string(@service_type_name) %> <%= @effect_name
+        Create new <%= ContentFormatter.route_atom_to_string(@service_type_name) %> <%= @effect_name
         |> String.downcase() %> alert
       </.h1>
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">

@@ -6,7 +6,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   use AlertsUI.Schema
   import Ecto.Changeset
   alias AlertsUI.Models.InformedEntity
-  alias AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes
+  alias AlertsUIWeb.FormComponents.Helpers.{ContentFormatter, EffectsForRouteTypes}
 
   @route_types [
     :bus,
@@ -170,7 +170,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
       value={@route_type}
       icon={@route_type}
     >
-      <%= route_atom_to_string(@route_type) |> :string.titlecase() %>
+      <%= ContentFormatter.route_atom_to_string(@route_type) |> :string.titlecase() %>
     </.button_toggle>
     """
   end

@@ -12,6 +12,7 @@ defmodule AlertsUIWeb.SharedComponents do
   import AlertsUIWeb.IconComponents
 
   alias AlertsUIWeb.CoreComponents
+  alias AlertsUIWeb.FormComponents.Helpers.ContentFormatter
   alias Phoenix.HTML.{Form, FormField}
   alias Phoenix.LiveView.JS
 
@@ -423,7 +424,7 @@ defmodule AlertsUIWeb.SharedComponents do
                 <.mode_icon type={if @icon_type, do: @icon_type, else: option_name} />
               </div>
               <%= if is_atom(option_name) do
-                route_atom_to_string(option_name)
+                ContentFormatter.route_atom_to_string(option_name) |> :string.titlecase()
               else
                 option_name
               end %>
@@ -435,11 +436,6 @@ defmodule AlertsUIWeb.SharedComponents do
     </div>
     """
   end
-
-  def route_atom_to_string(:commuter_rail), do: "Commuter Rail"
-
-  def route_atom_to_string(route_atom),
-    do: route_atom |> Atom.to_string() |> String.replace("_", " ")
 
   defp normalize_strings_to_integers(values) when is_list(values),
     do:
