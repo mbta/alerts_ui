@@ -9,7 +9,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   alias AlertsUI.Models.ActivePeriod
   alias AlertsUIWeb.FormComponents.Helpers.{ErrorFormatter, TimeRangeValidators}
 
-  @alert_timing_dropdown_values [
+  @alert_timing_values [
     :"one-time",
     :recurring,
     :scheduled
@@ -30,8 +30,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   @primary_key false
   embedded_schema do
-    field :alert_timing_dropdown, Ecto.Enum,
-      values: @alert_timing_dropdown_values,
+    field :alert_timing, Ecto.Enum,
+      values: @alert_timing_values,
       default: :"one-time"
 
     field :active_period_start, :naive_datetime
@@ -48,11 +48,14 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     field :active_period_end, :naive_datetime
     field :active_period_end_date, :date
     field :active_period_end_time, :time
-    field :days_of_week, {:array, :string}
+
+    field :days_of_week, {:array, Ecto.Enum},
+      values: ~w[sunday monday tuesday wednesday thursday friday saturday]a
+
     field :notification_period_start, :naive_datetime
   end
 
-  @fields ~w[active_period_end active_period_end_specifier alert_timing_dropdown active_period_start_specifier notification_period_start active_period_start active_period_start_date active_period_end_date active_period_end_time active_period_start_time days_of_week active_period_start_time_specifier active_period_end_time_specifier]a
+  @fields ~w[active_period_end active_period_end_specifier alert_timing active_period_start_specifier notification_period_start active_period_start active_period_start_date active_period_end_date active_period_end_time active_period_start_time days_of_week active_period_start_time_specifier active_period_end_time_specifier]a
 
   @impl true
   def mount(socket) do
@@ -75,7 +78,16 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       assign(socket, %{
         form: form,
         current_time: current_time,
-        edited: false
+        edited: false,
+        day_of_week_options: [
+          Sunday: :sunday,
+          Monday: :monday,
+          Tuesday: :tuesday,
+          Wednesday: :wednesday,
+          Thursday: :thursday,
+          Friday: :friday,
+          Saturday: :saturday
+        ]
       })
 
     {:ok, socket}
@@ -89,7 +101,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           if Map.get(alert_data, :notification_period_start) in [nil, ""] do
             alert_data
           else
-            Map.put(alert_data, :alert_timing_dropdown, "scheduled")
+            Map.put(alert_data, :alert_timing, "scheduled")
           end
           |> Enum.filter(fn {_k, v} -> !is_nil(v) end)
           |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
@@ -122,7 +134,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           |> changeset(form_params)
           |> TimeRangeValidators.validate_required_fields(form_params)
           |> TimeRangeValidators.validate_relationships(
-            form_params["alert_timing_dropdown"],
+            form_params["alert_timing"],
             form_params
           )
           |> TimeRangeValidators.validate_notification(form_params)
@@ -155,7 +167,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         socket
       ) do
     time_range =
-      case time_range["alert_timing_dropdown"] do
+      case time_range["alert_timing"] do
         "one-time" ->
           start_datetime = set_start_datetime(time_range, socket.assigns.current_time)
           end_datetime = set_end_datetime(time_range, socket.assigns.current_time)
@@ -168,12 +180,12 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         "recurring" ->
           start_time = set_start_time(time_range)
           end_time = set_end_time(time_range)
-          # end_date = set_end_date(time_range)
+          start_date = set_start_date(time_range, socket.assigns.current_time)
 
           Map.merge(time_range, %{
             "active_period_start_time" => start_time,
-            "active_period_end_time" => end_time
-            # "active_period_end_date" => end_date
+            "active_period_end_time" => end_time,
+            "active_period_start_date" => start_date
           })
 
         _ ->
@@ -187,7 +199,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       if changeset.valid? do
         changeset
         |> TimeRangeValidators.validate_relationships(
-          time_range["alert_timing_dropdown"],
+          time_range["alert_timing"],
           time_range
         )
         |> TimeRangeValidators.validate_notification(time_range)
@@ -198,6 +210,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     changeset
     |> TimeRangeValidators.validate_required_fields(time_range)
     |> apply_action(:validate)
+    # |> IO.inspect
     |> case do
       {:ok, changes} ->
         send(self(), {:add_errors, [], __MODULE__})
@@ -215,9 +228,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     {:noreply, assign(socket, %{form: form})}
   end
 
-  def handle_event("alert_timing_dropdown_change", %{"time_range" => time_range}, socket) do
+  def handle_event("alert_timing_change", %{"time_range" => time_range}, socket) do
     time_range =
-      if time_range["alert_timing_dropdown"] !== "scheduled" do
+      if time_range["alert_timing"] !== "scheduled" do
         Map.put(time_range, "notification_period_start", "")
       else
         time_range
@@ -225,8 +238,22 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
     time_range = Map.merge(socket.assigns.form.params, time_range)
 
+    changeset = changeset(%__MODULE__{}, time_range)
+
+    changeset
+    |> TimeRangeValidators.validate_required_fields(time_range)
+    |> apply_action(:validate)
+    |> case do
+      {:ok, changes} ->
+        send(self(), {:add_errors, [], __MODULE__})
+        send(self(), {:section_completed, changes})
+
+      {:error, changeset} ->
+        send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
+    end
+
     form =
-      changeset(%__MODULE__{}, time_range)
+      changeset
       |> Map.put(:action, :validate)
       |> to_form()
 
@@ -264,6 +291,13 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     case time_range["active_period_end_time_specifier"] do
       "end_of_service" -> ActivePeriod.end_of_service_time()
       "custom" -> time_range["active_period_end_time"]
+    end
+  end
+
+  defp set_start_date(time_range, current_time) do
+    case time_range["active_period_start_specifier"] do
+      "now" -> current_time |> NaiveDateTime.to_date()
+      "custom" -> time_range["active_period_start_date"]
     end
   end
 
@@ -322,7 +356,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       assign(assigns,
         start_values: @start_values,
         end_values: @end_values,
-        alert_timing_dropdown_values: @alert_timing_dropdown_values
+        alert_timing_values: @alert_timing_values
       )
 
     ~H"""
@@ -343,17 +377,17 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         <fieldset class="">
           <.select
             label="Alert timing"
-            field={@form[:alert_timing_dropdown]}
-            options={values_to_options(@alert_timing_dropdown_values)}
+            field={@form[:alert_timing]}
+            options={values_to_options(@alert_timing_values)}
             class="min-w-[16rem] max-w-[16rem]"
             phx-debounce={120}
-            phx-change="alert_timing_dropdown_change"
+            phx-change="alert_timing_change"
             phx-target={@myself}
           />
           <%= one_time_alert_component(assigns) %>
           <%= recurring_alert_component(assigns) %>
           <div
-            :if={@form[:alert_timing_dropdown].value === :scheduled}
+            :if={@form[:alert_timing].value === :scheduled}
             id="scheduled-selector-div"
             class="flex flex-row gap-8 my-8"
           >
@@ -377,8 +411,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   defp one_time_alert_component(assigns) do
     ~H"""
     <div
-      :if={@form[:alert_timing_dropdown].value in [:"one-time", "one-time"]}
-      class="flex flex-col gap-8 my-8"
+      :if={@form[:alert_timing].value in [:"one-time", "one-time"]}
+      class="flex flex-row gap-8 my-8"
     >
       <div id="start-selector-div" class="flex flex-row gap-8">
         <.select
@@ -440,31 +474,19 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   end
 
   defp recurring_alert_component(assigns) do
-    assigns =
-      assigns
-      |> Map.put(:day_of_week_options,
-        Sunday: "sunday",
-        Monday: "monday",
-        Tuesday: "tuesday",
-        Wednesday: "wednesday",
-        Thursday: "thursday",
-        Friday: "friday",
-        Saturday: "saturday"
-      )
-
     ~H"""
-    <div :if={@form[:alert_timing_dropdown].value === :recurring} class="flex flex-col gap-8 my-8">
-      <div class="flex flex-col gap-8 my-4">
+    <div :if={@form[:alert_timing].value === :recurring} class="flex flex-col gap-8 my-8">
+      <div class="flex flex-row gap-8 my-4">
         <div id="start-selector-div" class="flex flex-row gap-8">
           <.select
-            label="Effect start time"
+            label="Effect start"
             field={@form[:active_period_start_time_specifier]}
             options={values_to_options([:start_of_service, :custom])}
             class="min-w-[16rem] max-w-[16rem]"
             phx-debounce={120}
           />
           <.datetime
-            label="Start time"
+            label="Effect start time"
             type="time"
             field={@form[:active_period_start_time]}
             value={@form[:active_period_start_time].value}
@@ -475,14 +497,14 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
         <div id="end-selector-div" class="flex flex-row gap-8">
           <.select
-            label="Effect end time"
+            label="Effect end"
             field={@form[:active_period_end_time_specifier]}
             options={values_to_options([:end_of_service, :custom])}
             class="min-w-[16rem] max-w-[16rem]"
             phx-debounce={120}
           />
           <.datetime
-            label="End time"
+            label="Effect end time"
             type="time"
             field={@form[:active_period_end_time]}
             value={@form[:active_period_end_time].value}
@@ -492,7 +514,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         </div>
       </div>
 
-      <div class="flex flex-col gap-8 my-4">
+      <div class="flex flex-row gap-8 my-4">
         <div id="start-selector-div" class="flex flex-row gap-8">
           <.select
             label="Recurring alert start"
@@ -529,15 +551,15 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           />
         </div>
       </div>
-
-      <.toggle_checkgroup
-        field={@form[:days_of_week]}
-        options={@day_of_week_options}
-        class="flex-row"
-        button_class="min-w-[12rem]"
-        show_icons={false}
-      />
     </div>
+    <.toggle_checkgroup
+      :if={@form[:alert_timing].value === :recurring}
+      field={@form[:days_of_week]}
+      options={@day_of_week_options}
+      class="flex-row"
+      button_class="min-w-[12rem]"
+      show_icons={false}
+    />
     """
   end
 

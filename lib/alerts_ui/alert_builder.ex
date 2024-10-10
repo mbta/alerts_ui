@@ -6,7 +6,7 @@ defmodule AlertsUI.AlertBuilder do
     and need to be converted to UTC datetimes
   """
 
-  alias AlertsUI.Activities
+  alias AlertsUI.{ActivePeriodBuilder, Activities}
   alias AlertsUI.Models.{Cause, Effect, InformedEntity, RoutePattern, SeverityLevel}
   alias AlertsUI.Routes
   alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
@@ -30,12 +30,16 @@ defmodule AlertsUI.AlertBuilder do
           child_stops_with_context: [stop_with_context_t()] | [],
           trip_ids: [String.t()],
           service_types: [Route.type_int()],
-          active_period_start: NaiveDateTime.t() | nil,
+          alert_timing: atom(),
           active_period_end_specifier: atom() | nil,
           active_period_start_specifier: atom() | nil,
+          active_period_start: NaiveDateTime.t() | nil,
           active_period_end: NaiveDateTime.t() | nil,
           active_period_start_date: Date.t() | nil,
           active_period_end_date: Date.t() | nil,
+          active_period_start_time: Time.t() | nil,
+          active_period_end_time: Time.t() | nil,
+          days_of_week: atom() | nil,
           cause_detail: String.t(),
           url: String.t() | nil,
           image_url: String.t() | nil,
@@ -51,12 +55,6 @@ defmodule AlertsUI.AlertBuilder do
         }
   @type direction_t :: 0 | 1
   @type stop_with_context_t :: {Stop.t(), Route.id_t(), direction_t(), RoutePattern.stop_type()}
-  @type active_period_data_t :: %{
-          active_period: [any()],
-          active_period_start: DateTime.t(),
-          active_period_end: DateTime.t() | nil,
-          duration_certainty: atom()
-        }
 
   @spec build_alert(
           alert_data_t(),
@@ -79,7 +77,7 @@ defmodule AlertsUI.AlertBuilder do
 
     reminder_times =
       Map.get(alert_data, :reminder_times, [])
-      |> Enum.map(&%{reminder_time: naive_eastern_datetime_to_utc(&1)})
+      |> Enum.map(&%{reminder_time: ActivePeriodBuilder.naive_eastern_datetime_to_utc(&1)})
 
     route_ids =
       alert_data
@@ -97,15 +95,26 @@ defmodule AlertsUI.AlertBuilder do
       |> Map.put(:service_types, expand_subway_service_types(service_types))
 
     active_period_map =
-      build_active_period(
-        %{
-          active_period_start: Map.get(alert_data, :active_period_start),
-          active_period_end: Map.get(alert_data, :active_period_end),
+      if Map.get(alert_data, :alert_timing) === :recurring do
+        ActivePeriodBuilder.build_recurring_active_period(%{
+          active_period_start_time: Map.get(alert_data, :active_period_start_time),
+          active_period_end_time: Map.get(alert_data, :active_period_end_time),
+          active_period_start_date: Map.get(alert_data, :active_period_start_date),
+          active_period_end_date: Map.get(alert_data, :active_period_end_date),
           active_period_end_specifier: Map.get(alert_data, :active_period_end_specifier),
-          active_period_start_specifier: Map.get(alert_data, :active_period_start_specifier)
-        },
-        current_time
-      )
+          days_of_week: Map.get(alert_data, :days_of_week)
+        })
+      else
+        ActivePeriodBuilder.build_one_time_active_period(
+          %{
+            active_period_start: Map.get(alert_data, :active_period_start),
+            active_period_end: Map.get(alert_data, :active_period_end),
+            active_period_end_specifier: Map.get(alert_data, :active_period_end_specifier),
+            active_period_start_specifier: Map.get(alert_data, :active_period_start_specifier)
+          },
+          current_time
+        )
+      end
 
     %{
       header_text: Map.get(alert_data, :header_text),
@@ -120,10 +129,12 @@ defmodule AlertsUI.AlertBuilder do
       effect_detail: Map.get(effect_map, :effect_detail),
       draft: Map.get(alert_data, :draft, false),
       last_push_notification_timestamp:
-        Map.get(alert_data, :last_push_notification_timestamp) |> naive_eastern_datetime_to_utc,
+        Map.get(alert_data, :last_push_notification_timestamp)
+        |> ActivePeriodBuilder.naive_eastern_datetime_to_utc(),
       informed_entity: build_informed_entities(combination, alert_data, effect_name),
       notification_period_start:
-        Map.get(alert_data, :notification_period_start) |> naive_eastern_datetime_to_utc,
+        Map.get(alert_data, :notification_period_start)
+        |> ActivePeriodBuilder.naive_eastern_datetime_to_utc(),
       severity: severity,
       severity_level: SeverityLevel.severity_level_by_severity(severity),
       reminder_times: reminder_times,
@@ -236,62 +247,6 @@ defmodule AlertsUI.AlertBuilder do
       }
     end)
   end
-
-  @spec build_active_period(
-          %{
-            active_period_start: NaiveDateTime.t() | nil,
-            active_period_end: NaiveDateTime.t() | nil,
-            active_period_end_specifier: atom() | nil,
-            active_period_start_specifier: atom() | nil
-          },
-          DateTime.t()
-        ) :: active_period_data_t() | %{}
-  defp build_active_period(%{active_period_start: nil}, _), do: %{}
-  defp build_active_period(%{active_period_end_specifier: nil}, _), do: %{}
-  defp build_active_period(%{active_period_start_specifier: nil}, _), do: %{}
-
-  defp build_active_period(
-         %{
-           active_period_start: naive_start,
-           active_period_start_specifier: active_period_start_specifier,
-           active_period_end_specifier: active_period_end_specifier,
-           active_period_end: naive_end
-         },
-         current_time
-       ) do
-    utc_start =
-      build_active_period_start(naive_start, active_period_start_specifier, current_time)
-
-    utc_end = build_active_period_end(naive_end)
-
-    %{
-      active_period_start: utc_start,
-      active_period_end: utc_end,
-      active_period: [%{start: utc_start, end: utc_end}],
-      duration_certainty:
-        active_period_end_specifier_to_duration_certainty(active_period_end_specifier)
-    }
-  end
-
-  defp active_period_end_specifier_to_duration_certainty(:later_today), do: :ESTIMATED
-  defp active_period_end_specifier_to_duration_certainty(:until_further_notice), do: :UNKNOWN
-  defp active_period_end_specifier_to_duration_certainty(:end_of_service), do: :KNOWN
-  defp active_period_end_specifier_to_duration_certainty(:custom), do: :KNOWN
-
-  defp build_active_period_start(_start_time, :now, current_time) do
-    current_time
-  end
-
-  defp build_active_period_start(naive_start, _specifier, _time) do
-    naive_start |> eastern_naive_to_utc
-  end
-
-  defp build_active_period_end(nil), do: nil
-  defp build_active_period_end(naive_end), do: naive_end |> eastern_naive_to_utc
-
-  defp eastern_naive_to_utc(naive_time),
-    do:
-      naive_time |> DateTime.from_naive!("America/New_York") |> Timex.Timezone.convert("Etc/UTC")
 
   defp expand_subway_service_types(service_types) do
     service_types
@@ -725,10 +680,4 @@ defmodule AlertsUI.AlertBuilder do
   @spec maybe_integer_to_string(integer() | String.t()) :: String.t()
   defp maybe_integer_to_string(value) when is_integer(value), do: Integer.to_string(value)
   defp maybe_integer_to_string(value), do: value
-
-  @spec naive_eastern_datetime_to_utc(NaiveDateTime.t() | nil) :: DateTime.t() | nil
-  def naive_eastern_datetime_to_utc(nil), do: nil
-
-  def naive_eastern_datetime_to_utc(naive),
-    do: naive |> DateTime.from_naive!("America/New_York") |> Timex.Timezone.convert("Etc/UTC")
 end

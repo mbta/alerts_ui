@@ -133,7 +133,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
 
   @spec validate_required_fields(Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
   def validate_required_fields(changeset, params) do
-    required_fields_by_specifier(params["alert_timing_dropdown"], changeset, params)
+    required_fields_by_specifier(params["alert_timing"], changeset, params)
   end
 
   defp required_fields_by_specifier("one-time", changeset, params) do

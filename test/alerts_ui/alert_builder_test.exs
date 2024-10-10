@@ -5,7 +5,6 @@ defmodule AlertsUI.AlertBuilderTest do
   import Mock
   alias AlertsUI.AlertBuilder
   alias AlertsUI.Alerts
-  alias AlertsUI.Models.ActivePeriod
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
@@ -16,18 +15,6 @@ defmodule AlertsUI.AlertBuilderTest do
   alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
-
-  @end_of_service_eastern ActivePeriod.end_of_service_time()
-  @end_of_service_utc ActivePeriod.end_of_service_time() |> Time.add(4, :hour)
-
-  @alert_data %{
-    route_type: 1,
-    description_text: "ok",
-    header_text: "hello",
-    effect_name: "Delay",
-    route_ids: ["Red"],
-    direction: "1"
-  }
 
   describe "build_alert/1" do
     test "builds alert from map" do
@@ -43,6 +30,7 @@ defmodule AlertsUI.AlertBuilderTest do
           route_ids: ["57"],
           direction: "default",
           active_period_start: ~N[2024-04-30 11:54:00],
+          alert_timing: :"one-time",
           active_period_end_specifier: :until_further_notice,
           active_period_start_specifier: :custom,
           cause_detail: "disabled train",
@@ -236,149 +224,6 @@ defmodule AlertsUI.AlertBuilderTest do
         [alert_1, alert_2] = Alerts.list_all() |> Enum.sort()
         assert alert_1.alert_id |> String.to_integer() > alert_2.alert_id |> String.to_integer()
         assert alert_2.alert_id == existing_alert.alert_id
-      end
-    end
-
-    test "builds active period with end value later_today" do
-      with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
-        alert_data =
-          %{
-            active_period_start: ~N[2024-04-30 11:54:00],
-            active_period_end: NaiveDateTime.new!(~D[2024-05-01], @end_of_service_eastern),
-            active_period_end_specifier: :later_today,
-            active_period_start_specifier: :custom
-          }
-          |> Map.merge(@alert_data)
-
-        result = AlertBuilder.build_alert(alert_data, :R)
-
-        assert result.active_period == [
-                 %{
-                   start: ~U[2024-04-30 15:54:00Z],
-                   end: DateTime.new!(~D[2024-05-01], @end_of_service_utc)
-                 }
-               ]
-
-        assert result.active_period_start == ~U[2024-04-30 15:54:00Z]
-        assert result.active_period_end == DateTime.new!(~D[2024-05-01], @end_of_service_utc)
-        assert result.duration_certainty == :ESTIMATED
-      end
-    end
-
-    test "builds active period with end value further_notice" do
-      with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
-        alert_data =
-          %{
-            active_period_start: ~N[2024-04-30 11:54:00],
-            active_period_end: nil,
-            active_period_end_specifier: :until_further_notice,
-            active_period_start_specifier: :custom
-          }
-          |> Map.merge(@alert_data)
-
-        result = AlertBuilder.build_alert(alert_data, :R)
-
-        assert result.active_period == [%{start: ~U[2024-04-30 15:54:00Z], end: nil}]
-        assert result.active_period_start == ~U[2024-04-30 15:54:00Z]
-        assert result.active_period_end == nil
-        assert result.duration_certainty == :UNKNOWN
-      end
-    end
-
-    test "builds active period with end value pick" do
-      with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
-        alert_data =
-          %{
-            active_period_start: ~N[2024-04-30 11:54:00],
-            active_period_end: ~N[2024-04-30 23:54:00],
-            active_period_end_specifier: :custom,
-            active_period_start_specifier: :custom
-          }
-          |> Map.merge(@alert_data)
-
-        result = AlertBuilder.build_alert(alert_data, :R)
-
-        assert result.active_period == [
-                 %{start: ~U[2024-04-30 15:54:00Z], end: ~U[2024-05-01 03:54:00Z]}
-               ]
-
-        assert result.active_period_start == ~U[2024-04-30 15:54:00Z]
-        assert result.active_period_end == ~U[2024-05-01 03:54:00Z]
-        assert result.duration_certainty == :KNOWN
-      end
-    end
-
-    test "builds active period with start time of now" do
-      with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
-        original_start_time = ~U[2024-04-30 05:54:00Z] |> DateTime.add(-5, :minute)
-
-        alert_data =
-          %{
-            active_period_start:
-              original_start_time
-              |> DateTime.shift_zone!("America/New_York")
-              |> DateTime.to_naive(),
-            active_period_end: ~N[2024-04-30 23:54:00],
-            active_period_end_specifier: :custom,
-            active_period_start_specifier: :now
-          }
-          |> Map.merge(@alert_data)
-
-        result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 05:54:00Z])
-
-        assert result.active_period_start == ~U[2024-04-30 05:54:00Z]
-      end
-    end
-
-    test "builds active period with end value end_of_service_today when time is before midnight" do
-      with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
-        alert_data =
-          %{
-            active_period_start: ~N[2024-04-30 11:54:00],
-            active_period_end: NaiveDateTime.new!(~D[2024-05-01], @end_of_service_eastern),
-            active_period_end_specifier: :end_of_service,
-            active_period_start_specifier: :custom
-          }
-          |> Map.merge(@alert_data)
-
-        result = AlertBuilder.build_alert(alert_data, :R)
-
-        assert result.active_period == [
-                 %{
-                   start: ~U[2024-04-30 15:54:00Z],
-                   end: DateTime.new!(~D[2024-05-01], @end_of_service_utc)
-                 }
-               ]
-
-        assert result.active_period_start == ~U[2024-04-30 15:54:00Z]
-        assert result.active_period_end == DateTime.new!(~D[2024-05-01], @end_of_service_utc)
-        assert result.duration_certainty == :KNOWN
-      end
-    end
-
-    test "builds active period with end value end_of_service_today when time is after midnight" do
-      with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
-        alert_data =
-          %{
-            active_period_start: ~N[2024-04-30 01:54:00],
-            active_period_end: NaiveDateTime.new!(~D[2024-04-30], @end_of_service_eastern),
-            active_period_end_specifier: :end_of_service,
-            active_period_start_specifier: :custom
-          }
-          |> Map.merge(@alert_data)
-
-        result = AlertBuilder.build_alert(alert_data, :R)
-
-        assert result.active_period == [
-                 %{
-                   start: ~U[2024-04-30 05:54:00Z],
-                   end: DateTime.new!(~D[2024-04-30], @end_of_service_utc)
-                 }
-               ]
-
-        assert result.active_period_start == ~U[2024-04-30 05:54:00Z]
-        assert result.active_period_end == DateTime.new!(~D[2024-04-30], @end_of_service_utc)
-        assert result.duration_certainty == :KNOWN
       end
     end
 

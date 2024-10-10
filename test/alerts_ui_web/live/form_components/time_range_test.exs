@@ -129,7 +129,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       |> element("form")
       |> render_change(%{
         "time_range" => %{
-          "alert_timing_dropdown" => "scheduled"
+          "alert_timing" => "scheduled"
         }
       })
 
@@ -144,7 +144,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       |> element("form")
       |> render_change(%{
         "time_range" => %{
-          "alert_timing_dropdown" => "scheduled",
+          "alert_timing" => "scheduled",
           "active_period_start" => "2024-05-01T10:54:00",
           "active_period_start_specifier" => "custom",
           "notification_period_start" => "2024-04-29T10:54:00"
@@ -162,7 +162,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       |> element("form")
       |> render_change(%{
         "time_range" => %{
-          "alert_timing_dropdown" => "scheduled",
+          "alert_timing" => "scheduled",
           "active_period_end_specifier" => "custom",
           "active_period_end" => "2024-05-01T10:54:00",
           "notification_period_start" => "2024-05-02T10:54:00"
