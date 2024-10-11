@@ -136,6 +136,25 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       assert view |> render() =~ ~s(id="scheduled-selector-div")
     end
 
+    test "recurring section is hidden unless recurring is selected" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
+      refute view |> render() =~ ~s(Sunday)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "alert_timing" => "recurring",
+          "active_period_start_time_specifier" => "custom",
+          "active_period_end_time_specifier" => "custom"
+        }
+      })
+
+      assert view |> render() =~ ~s(Sunday)
+    end
+
     test "scheduled start time must be after active period start" do
       {:ok, view, _html} =
         live_isolated_component(TimeRange, @assigns)

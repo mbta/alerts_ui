@@ -20,14 +20,19 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
 
   def validate_relationships(changeset, "recurring", time_range) do
     changeset
-    |> validate_change(:active_period_start, fn :active_period_start, active_period_start ->
-      validate_active_period_start(
-        active_period_start,
-        time_range["active_period_end"]
+    |> validate_change(:active_period_start_date, fn :active_period_start_date,
+                                                     active_period_start_date ->
+      validate_active_period_start_date(
+        active_period_start_date,
+        time_range["active_period_end_date"]
       )
     end)
-    |> validate_change(:active_period_end, fn :active_period_end, active_period_end ->
-      validate_active_period_end(active_period_end, time_range["active_period_start"])
+    |> validate_change(:active_period_end_date, fn :active_period_end_date,
+                                                   active_period_end_date ->
+      validate_active_period_end_date(
+        active_period_end_date,
+        time_range["active_period_start_date"]
+      )
     end)
   end
 
@@ -58,6 +63,33 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
     end
   end
 
+  defp validate_active_period_start_date(
+         active_period_start_date,
+         %Date{} = active_period_end_date
+       ) do
+    if Date.compare(
+         active_period_start_date,
+         active_period_end_date
+       ) in [:gt] do
+      [
+        active_period_start_date:
+          "Effect must start before #{formatted_datetime(active_period_end_date, "{0M}/{0D}/{YYYY}")}"
+      ]
+    else
+      []
+    end
+  end
+
+  defp validate_active_period_start_date(active_period_start_date, active_period_end_date) do
+    {end_validity, end_date} = Date.from_iso8601(active_period_end_date)
+
+    if end_validity === :ok do
+      validate_active_period_start_date(active_period_start_date, end_date)
+    else
+      []
+    end
+  end
+
   defp validate_active_period_end(active_period_end, %NaiveDateTime{} = active_period_start) do
     if NaiveDateTime.compare(
          active_period_end,
@@ -78,6 +110,30 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
 
     if start_validity === :ok do
       validate_active_period_end(active_period_end, start_time)
+    else
+      []
+    end
+  end
+
+  defp validate_active_period_end_date(active_period_end_date, %Date{} = active_period_start_date) do
+    if Date.compare(
+         active_period_end_date,
+         active_period_start_date
+       ) in [:lt] do
+      [
+        active_period_end_date:
+          "Effect must end after #{formatted_datetime(active_period_start_date, "{0M}/{0D}/{YYYY}")}"
+      ]
+    else
+      []
+    end
+  end
+
+  defp validate_active_period_end_date(active_period_end_date, active_period_start_date) do
+    {start_validity, start_date} = Date.from_iso8601(active_period_start_date)
+
+    if start_validity === :ok do
+      validate_active_period_end_date(active_period_end_date, start_date)
     else
       []
     end

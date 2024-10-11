@@ -9,7 +9,6 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
   def build_alert(alert) do
     # cause_detail and effect_detail should be translated_string types according to GTFS spec
     # but in the current feed they are simple strings
-
     %{
       id: alert.alert_id,
       alert:
