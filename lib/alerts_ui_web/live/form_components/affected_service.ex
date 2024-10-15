@@ -70,6 +70,11 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
           alert_data.direction
         )
 
+        get_schedules_by_route_ids(
+          alert_data.route_ids,
+          alert_data.direction
+        )
+
         form =
           %__MODULE__{}
           |> changeset(alert_data)
