@@ -244,21 +244,21 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     trip_filter_value = assigns.form[:trip_ids_filter].value
 
     trip_id_options =
-      if length(route_ids) > 0 do
+      if Enum.empty?(route_ids) do
+        []
+      else
         assigns.available_schedules
         |> Enum.filter(fn schedule ->
           schedule.route.id in Map.get(assigns.form[:route_ids], :value, [])
         end)
         |> Enum.group_by(&SelectFormatter.name_for_option(&1.route))
         |> SelectFormatter.formatted_trip_options(trip_filter_value)
-      else
-        []
       end
 
     stop_filter_value = assigns.form[:stop_ids_filter].value
 
     stop_id_options =
-      if length(route_ids) === 1 do
+      if match?([_route_id], route_ids) do
         SelectFormatter.formatted_select_options(assigns.available_stops, stop_filter_value)
       else
         []
