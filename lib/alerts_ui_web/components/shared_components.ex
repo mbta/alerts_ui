@@ -478,6 +478,8 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :hidden, :boolean, default: false, doc: "hides component if true"
 
+  attr :disabled, :boolean, default: false, doc: "whether the element is disabled"
+
   attr :rest, :global, include: ~w(disabled size phx-debounce)
 
   def select(%{field: %FormField{} = field} = assigns) do
@@ -490,7 +492,12 @@ defmodule AlertsUIWeb.SharedComponents do
 
     ~H"""
     <div phx-feedback-for={@name} class={["#{@class}", @hidden && "hidden"]}>
-      <.label for={@id} class={if is_nil(@label), do: "hidden"}><%= @label %></.label>
+      <.label
+        for={@id}
+        class={(if is_nil(@label), do: "hidden ", else: "") <> (if @disabled, do: "text-text-disabled", else: "")}
+      >
+        <%= @label %>
+      </.label>
       <select
         id={@id}
         name={@name}
@@ -503,6 +510,7 @@ defmodule AlertsUIWeb.SharedComponents do
           @errors != [] && "border-danger focus:border-danger"
         ]}
         multiple={@multiple}
+        disabled={@disabled}
         {@rest}
       >
         <option :if={@prompt} value="default" selected={@value in ["default", []]}>
@@ -552,6 +560,8 @@ defmodule AlertsUIWeb.SharedComponents do
     required: true,
     doc: "the options to pass to Phoenix.HTML.Form.options_for_select/2"
 
+  attr :disabled, :boolean, default: false, doc: "whether the element is disabled"
+
   attr :rest, :global, include: ~w(disabled phx-debounce)
 
   def filtered_select(
@@ -565,7 +575,9 @@ defmodule AlertsUIWeb.SharedComponents do
 
     ~H"""
     <div {@rest} class={["flex flex-col justify-start", @class]}>
-      <.label for={@id}><%= @label %></.label>
+      <.label for={@id} class={if @disabled, do: "text-text-disabled"}>
+        <%= @label %>
+      </.label>
       <div
         class={[
           "min-h-[100%] grow min-w-fit flex flex-col rounded border
@@ -580,7 +592,8 @@ defmodule AlertsUIWeb.SharedComponents do
         <.text_input
           class="min-w-full py-[.6rem] mb-0 border-0 ring-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-b-none"
           field={@filter_field}
-          placeholder="⌕ Search..."
+          placeholder={if @disabled, do: nil, else: "⌕ Search..."}
+          disabled={@disabled}
           {@rest}
         />
         <hr class="w-5/6 self-center border-y-1 border-bg-elevation-6 min-h-[1rem]" />
@@ -591,6 +604,7 @@ defmodule AlertsUIWeb.SharedComponents do
           options={@options}
           field={@field}
           prompt={if @loading, do: nil, else: @prompt}
+          disabled={@disabled}
           class="min-h-[100%] h-[100%] m-0"
           select_class="min-w-full min-h-[87%] pt-0 mt-0 [scrollbar-width:thin] overflow-auto
             border-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-t-none [appearance:none]"
