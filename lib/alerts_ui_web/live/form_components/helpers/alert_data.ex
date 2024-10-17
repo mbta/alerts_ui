@@ -99,7 +99,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       end
 
     active_period_map =
-      if length(alert.active_period) == 1 do
+      if match?([_active_period], alert.active_period) do
         determine_one_time_active_period(alert)
       else
         determine_recurring_active_period(alert)

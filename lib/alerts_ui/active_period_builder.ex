@@ -69,8 +69,13 @@ defmodule AlertsUI.ActivePeriodBuilder do
       }) do
     weekday_integers = Enum.map(days_of_week, &Timex.day_to_num/1)
 
+    # if there is no end date, add active periods for 365 days (not 1 year) out
     end_date =
-      if end_specifier == :until_further_notice, do: Date.add(start_date, 365), else: end_date
+      if end_specifier == :until_further_notice do
+        Date.add(start_date, 365)
+      else
+        end_date
+      end
 
     list_of_dates =
       Date.range(start_date, end_date) |> Enum.filter(&(Timex.weekday(&1) in weekday_integers))
@@ -93,9 +98,11 @@ defmodule AlertsUI.ActivePeriodBuilder do
       end)
 
     active_period_end =
-      if end_specifier == :until_further_notice,
-        do: nil,
-        else: (active_periods |> Enum.reverse() |> hd).end
+      if end_specifier == :until_further_notice do
+        nil
+      else
+        List.last(active_periods).end
+      end
 
     %{
       active_period_start: hd(active_periods).start,
