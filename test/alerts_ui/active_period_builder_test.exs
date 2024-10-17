@@ -214,6 +214,7 @@ defmodule AlertsUI.ActivePeriodBuilderTest do
 
       assert result.active_period_start == ~U[2024-10-15 13:00:00Z]
       assert result.active_period_end == ~U[2024-10-25 06:30:00Z]
+      assert result.duration_certainty == :KNOWN
 
       assert result.active_period == [
                %{start: ~U[2024-10-15 13:00:00Z], end: ~U[2024-10-16 06:30:00Z]},
@@ -240,6 +241,7 @@ defmodule AlertsUI.ActivePeriodBuilderTest do
       assert result.active_period_end == nil
       assert (result.active_period |> Enum.reverse() |> hd).end == ~U[2025-10-11 14:30:00Z]
       assert length(result.active_period) == 53
+      assert result.duration_certainty == :UNKNOWN
     end
   end
 end

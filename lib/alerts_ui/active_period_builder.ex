@@ -104,11 +104,18 @@ defmodule AlertsUI.ActivePeriodBuilder do
         List.last(active_periods).end
       end
 
+    duration_certainty =
+      if end_specifier == :until_further_notice do
+        :UNKNOWN
+      else
+        :KNOWN
+      end
+
     %{
       active_period_start: hd(active_periods).start,
       active_period_end: active_period_end,
       active_period: active_periods,
-      duration_certainty: :KNOWN
+      duration_certainty: duration_certainty
     }
   end
 
