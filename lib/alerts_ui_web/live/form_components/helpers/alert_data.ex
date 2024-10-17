@@ -25,12 +25,18 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :description_text,
     :banner_text,
     :combination,
+    :alert_timing,
     :active_period_start,
     :active_period_end,
     :active_period_start_date,
     :active_period_end_date,
+    :active_period_start_time,
+    :active_period_end_time,
+    :active_period_end_time_specifier,
+    :active_period_start_time_specifier,
     :active_period_end_specifier,
     :active_period_start_specifier,
+    :days_of_week,
     :service_types,
     :cause_detail,
     :url,
@@ -52,12 +58,18 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           description_text: String.t(),
           banner_text: String.t() | nil,
           combination: atom(),
+          alert_timing: atom(),
           active_period_start: NaiveDateTime.t() | nil,
           active_period_start_date: Date.t() | nil,
-          active_period_end_specifier: atom(),
+          active_period_start_time: Time.t() | nil,
           active_period_start_specifier: atom() | nil,
+          active_period_start_time_specifier: atom() | nil,
           active_period_end: NaiveDateTime.t() | nil,
           active_period_end_date: Date.t() | nil,
+          active_period_end_time: Time.t() | nil,
+          active_period_end_specifier: atom(),
+          active_period_end_time_specifier: atom() | nil,
+          days_of_week: [atom()] | nil,
           service_types: [Route.type_int()],
           cause_detail: String.t(),
           url: String.t() | nil,
@@ -86,8 +98,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
         ServiceEffectCombinations.get_combination(route_type, effect_name)
       end
 
-    active_period_start = shift_to_naive(alert.active_period_start)
-    active_period_end = shift_to_naive(alert.active_period_end)
+    active_period_map =
+      if match?([_active_period], alert.active_period) do
+        determine_one_time_active_period(alert)
+      else
+        determine_recurring_active_period(alert)
+      end
 
     reminder_times = Enum.map(alert.reminder_times, &shift_to_naive(&1.reminder_time))
 
@@ -102,16 +118,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       header_text: alert.header_text,
       description_text: alert.description_text,
       combination: combination,
-      active_period_start: active_period_start,
-      active_period_end: active_period_end,
-      active_period_end_date: end_date(active_period_end),
-      active_period_start_date: start_date(active_period_start),
-      active_period_start_specifier: determine_start_specifier(active_period_start),
-      active_period_end_specifier:
-        determine_end_specifier(
-          active_period_end,
-          alert.duration_certainty
-        ),
       service_types: Alert.service_types(alert),
       cause_detail: alert.cause_detail,
       url: alert.url,
@@ -122,6 +128,60 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       severity: alert.severity,
       reminder_times: reminder_times
     }
+    |> Map.merge(active_period_map)
+  end
+
+  def determine_one_time_active_period(alert) do
+    active_period_start = shift_to_naive(alert.active_period_start)
+    active_period_end = shift_to_naive(alert.active_period_end)
+
+    end_specifier =
+      determine_end_specifier(
+        active_period_end,
+        alert.duration_certainty
+      )
+
+    %{
+      alert_timing: :"one-time",
+      active_period_start: shift_to_naive(alert.active_period_start),
+      active_period_end: shift_to_naive(alert.active_period_end),
+      active_period_end_date: end_date(active_period_end, end_specifier),
+      active_period_start_date: start_date(active_period_start),
+      active_period_start_specifier: determine_start_specifier(active_period_start),
+      active_period_end_specifier: end_specifier
+    }
+  end
+
+  def determine_recurring_active_period(%{active_period: active_period} = alert) do
+    start_datetime = hd(active_period).start |> shift_to_naive
+    end_datetime = hd(active_period).end |> shift_to_naive
+    end_specifier = if alert.active_period_end, do: :custom, else: :until_further_notice
+
+    %{
+      alert_timing: :recurring,
+      active_period_start_time_specifier: determine_start_specifier(start_datetime),
+      active_period_end_time_specifier: determine_end_specifier(end_datetime, :KNOWN),
+      active_period_start_specifier: :custom,
+      active_period_end_specifier: end_specifier,
+      active_period_start_time: start_datetime |> NaiveDateTime.to_time(),
+      active_period_end_time: end_datetime |> NaiveDateTime.to_time(),
+      active_period_start_date: start_datetime |> start_date,
+      active_period_end_date: alert.active_period_end |> end_date(end_specifier),
+      days_of_week: get_weekdays(alert.active_period)
+    }
+  end
+
+  def get_weekdays(active_periods) do
+    active_periods
+    |> Enum.map(& &1.start)
+    |> Enum.take(7)
+    |> Enum.map(&Timex.weekday/1)
+    |> Enum.uniq()
+    |> Enum.map(fn weekday_int ->
+      Timex.Translator.get_weekdays("en")[weekday_int]
+      |> String.downcase()
+      |> String.to_existing_atom()
+    end)
   end
 
   def shift_to_naive(nil), do: nil
@@ -133,8 +193,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   def start_date(nil), do: nil
   def start_date(ap_start), do: NaiveDateTime.to_date(ap_start)
 
-  def end_date(nil), do: nil
-  def end_date(ap_end), do: ap_end |> NaiveDateTime.to_date() |> Date.add(-1)
+  def end_date(nil, _), do: nil
+  def end_date(ap_end, :end_of_service), do: ap_end |> NaiveDateTime.to_date() |> Date.add(-1)
+  def end_date(ap_end, :later_today), do: ap_end |> NaiveDateTime.to_date() |> Date.add(-1)
+  def end_date(ap_end, _), do: ap_end |> NaiveDateTime.to_date()
 
   def determine_start_specifier(nil), do: nil
 

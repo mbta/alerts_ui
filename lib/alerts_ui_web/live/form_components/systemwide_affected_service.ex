@@ -85,6 +85,7 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
             field={@form[:service_types]}
             options={service_type_options()}
             show_icons={true}
+            class="flex-col"
           />
         </fieldset>
       </.form>

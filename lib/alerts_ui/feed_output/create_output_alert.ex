@@ -9,7 +9,6 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
   def build_alert(alert) do
     # cause_detail and effect_detail should be translated_string types according to GTFS spec
     # but in the current feed they are simple strings
-
     %{
       id: alert.alert_id,
       alert:
@@ -42,7 +41,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
           duration_certainty: alert.duration_certainty,
           reminder_times:
             alert.reminder_times |> Enum.map(& &1.reminder_time) |> build_reminder_times(),
-          active_period: alert.active_period |> build_active_periods,
+          active_period: alert.active_period |> build_one_time_active_periods,
           image: alert.image_url |> build_translated_image,
           image_alternative_text: alert.image_alternative_text |> build_translated_string,
           tts_header_text: alert.tts_header_text |> build_translated_string,
@@ -61,13 +60,13 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
     }
   end
 
-  def build_active_periods(nil), do: nil
+  def build_one_time_active_periods(nil), do: nil
 
-  def build_active_periods(active_periods) do
-    Enum.map(active_periods, &build_active_period/1)
+  def build_one_time_active_periods(active_periods) do
+    Enum.map(active_periods, &build_one_time_active_period/1)
   end
 
-  defp build_active_period(active_period) do
+  defp build_one_time_active_period(active_period) do
     %{
       start: active_period.start |> date_time_to_unix,
       end: get_in(active_period, [Access.key!(:end)]) |> date_time_to_unix

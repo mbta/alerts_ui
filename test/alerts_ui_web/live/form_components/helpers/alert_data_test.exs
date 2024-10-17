@@ -32,7 +32,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                header_text: "cool header text",
                description_text: "description text",
                service_types: [],
-               reminder_times: [~N[2024-09-24 20:01:00]]
+               reminder_times: [~N[2024-09-24 20:01:00]],
+               alert_timing: :"one-time"
              }
     end
 
@@ -63,7 +64,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                header_text: "cool header text",
                description_text: "description text",
                service_types: [],
-               reminder_times: [~N[2024-09-24 20:01:00]]
+               reminder_times: [~N[2024-09-24 20:01:00]],
+               alert_timing: :"one-time"
              }
     end
 
@@ -90,7 +92,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                service_types: [nil],
                header_text: "cool header text",
                description_text: "description text",
-               reminder_times: [~N[2024-09-24 20:01:00]]
+               reminder_times: [~N[2024-09-24 20:01:00]],
+               alert_timing: :"one-time"
              }
     end
 
@@ -146,11 +149,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                active_period_start: ~N[2024-05-02 12:09:34],
                notification_period_start: ~N[2024-05-02 12:09:34],
                active_period_start_date: ~D[2024-05-02],
-               active_period_end_date: ~D[2024-05-02],
+               active_period_end_date: ~D[2024-05-03],
                service_types: [],
                cause_detail: "hazmat condition",
                severity: 3,
-               reminder_times: [~N[2024-05-02 12:10:34], ~N[2024-05-02 12:11:34]]
+               reminder_times: [~N[2024-05-02 12:10:34], ~N[2024-05-02 12:11:34]],
+               alert_timing: :"one-time"
              }
     end
 
@@ -176,7 +180,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                facility_id: "",
                header_text: "cool header text",
                description_text: "description text",
-               reminder_times: [~N[2024-09-24 20:01:00]]
+               reminder_times: [~N[2024-09-24 20:01:00]],
+               alert_timing: :"one-time"
              }
     end
 
@@ -204,7 +209,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                facility_id: "",
                header_text: "cool header text",
                description_text: "description text",
-               reminder_times: [~N[2024-09-24 20:01:00]]
+               reminder_times: [~N[2024-09-24 20:01:00]],
+               alert_timing: :"one-time"
              }
     end
 
@@ -266,7 +272,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         reminder_times: []
       })
 
-      assert AlertData.build_alert_data("1").active_period_end_specifier == :end_of_service
+      alert_data = AlertData.build_alert_data("1")
+      assert alert_data.active_period_end_specifier == :end_of_service
+      assert alert_data.active_period_end_date == ~D[2024-05-02]
     end
 
     test "handles known end-of-service duration at other time" do
@@ -334,6 +342,86 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       })
 
       assert AlertData.build_alert_data("1").active_period_start_specifier == :custom
+    end
+
+    test "handles recurring alert" do
+      insert(:alert, %{
+        alert_id: "1",
+        effect: :ACCESSIBILITY_ISSUE,
+        effect_detail: "ACCESS_ISSUE",
+        header_text: "cool header text",
+        description_text: "description text",
+        informed_entity: [],
+        active_period_start: ~U[2024-05-02 16:09:34.007545Z],
+        active_period_end: ~U[2024-05-04 17:09:34.007545Z],
+        active_period: [
+          %{
+            start: ~U[2024-05-02 16:09:34.007545Z],
+            end: ~U[2024-05-02 17:09:34.007545Z]
+          },
+          %{
+            start: ~U[2024-05-03 16:09:34.007545Z],
+            end: ~U[2024-05-03 17:09:34.007545Z]
+          },
+          %{
+            start: ~U[2024-05-04 16:09:34.007545Z],
+            end: ~U[2024-05-04 17:09:34.007545Z]
+          }
+        ],
+        duration_certainty: :KNOWN
+      })
+
+      alert = AlertData.build_alert_data("1")
+      assert alert.alert_timing == :recurring
+      assert alert.days_of_week == [:thursday, :friday, :saturday]
+      assert alert.active_period_start_specifier == :custom
+      assert alert.active_period_end_specifier == :custom
+      assert alert.active_period_start_time == ~T[12:09:34]
+      assert alert.active_period_end_time == ~T[13:09:34]
+      assert alert.active_period_start_date == ~D[2024-05-02]
+      assert alert.active_period_end_date == ~D[2024-05-04]
+    end
+
+    test "handles recurring alert with no set end" do
+      insert(:alert, %{
+        alert_id: "1",
+        effect: :ACCESSIBILITY_ISSUE,
+        effect_detail: "ACCESS_ISSUE",
+        header_text: "cool header text",
+        description_text: "description text",
+        informed_entity: [],
+        active_period_start: ~U[2024-05-02 16:09:34.007545Z],
+        active_period_end: nil,
+        active_period: [
+          %{
+            start: ~U[2024-05-02 16:09:34.007545Z],
+            end: ~U[2024-05-03 07:00:00Z]
+          },
+          %{
+            start: ~U[2024-05-04 16:09:34.007545Z],
+            end: ~U[2024-05-03 07:00:00Z]
+          },
+          %{
+            start: ~U[2024-05-09 16:09:34.007545Z],
+            end: ~U[2024-05-10 07:00:00Z]
+          },
+          %{
+            start: ~U[2024-05-11 16:09:34.007545Z],
+            end: ~U[2024-05-12 07:00:00Z]
+          }
+        ],
+        duration_certainty: :KNOWN
+      })
+
+      alert = AlertData.build_alert_data("1")
+      assert alert.alert_timing == :recurring
+      assert alert.days_of_week == [:thursday, :saturday]
+      assert alert.active_period_start_specifier == :custom
+      assert alert.active_period_end_specifier == :until_further_notice
+      assert alert.active_period_start_time == ~T[12:09:34]
+      assert alert.active_period_end_time == ~T[03:00:00]
+      assert alert.active_period_start_date == ~D[2024-05-02]
+      assert alert.active_period_end_date == nil
     end
   end
 

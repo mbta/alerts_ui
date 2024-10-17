@@ -388,6 +388,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :label, :string, default: nil
   attr :class, :string, default: "", doc: "additional classes to add"
+  attr :button_class, :string, default: "", doc: "classes to add to buttons"
   attr :rest, :global, include: ~w(disabled form readonly)
 
   def toggle_checkgroup(%{field: %FormField{} = field} = assigns) do
@@ -399,12 +400,9 @@ defmodule AlertsUIWeb.SharedComponents do
       |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
 
     ~H"""
-    <div
-      phx-feedback-for={@name}
-      class={["grid grid-cols-1 gap-1 text-sm items-baseline content-start", @class]}
-    >
+    <div phx-feedback-for={@name} class={["flex gap-1 text-sm items-baseline content-start", @class]}>
       <.label for={@id} class={if is_nil(@label), do: "hidden"}><%= @label %></.label>
-      <div :for={{option_name, id} <- @options} class="">
+      <div :for={{option_name, id} <- @options} class={["min-w-[100%]", @button_class]}>
         <.label for={id}>
           <div class={[
             @base_toggle_classes,
