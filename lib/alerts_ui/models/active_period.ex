@@ -5,6 +5,7 @@ defmodule AlertsUI.Models.ActivePeriod do
   """
   use AlertsUI.Schema
   import Ecto.Changeset
+  alias AlertsUI.Models.Alert
 
   @start_of_service ~T[03:00:00]
   @end_of_service ~T[03:00:00]
@@ -14,9 +15,11 @@ defmodule AlertsUI.Models.ActivePeriod do
           end: DateTime.t() | nil
         }
 
-  embedded_schema do
+  schema "active_period" do
+    belongs_to :alert, Alert
     field :start, :utc_datetime
     field :end, :utc_datetime
+    timestamps()
   end
 
   def changeset(%__MODULE__{} = active_period, params) do

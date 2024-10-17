@@ -154,7 +154,7 @@ defmodule AlertsUI.Models.Alert do
     field :alert_lifecycle, Ecto.Enum, values: @alert_lifecycle
     field :duration_certainty, Ecto.Enum, values: @duration_certainty
     has_many :reminder_times, ReminderTime, on_replace: :delete
-    embeds_many :active_period, ActivePeriod, on_replace: :delete
+    has_many :active_period, ActivePeriod, on_replace: :delete
     field :active_period_start, :utc_datetime
     field :active_period_end, :utc_datetime
     field :image_url, :string
@@ -173,7 +173,7 @@ defmodule AlertsUI.Models.Alert do
 
     alert
     |> cast(params, @permitted_fields)
-    |> cast_embed(:active_period, required: false, with: &ActivePeriod.changeset/2)
+    |> cast_assoc(:active_period, required: false, with: &ActivePeriod.changeset/2)
     |> cast_assoc(:informed_entity, required: true, with: &InformedEntity.changeset/2)
     |> cast_assoc(:reminder_times, required: false, with: &ReminderTime.changeset/2)
     |> validate_change(:active_period_start, fn :active_period_start, active_period_start ->
@@ -201,8 +201,9 @@ defmodule AlertsUI.Models.Alert do
   def draft_changeset(%__MODULE__{} = alert, params) do
     alert
     |> cast(params, @permitted_fields)
-    |> cast_embed(:active_period, required: false, with: &ActivePeriod.changeset/2)
+    |> cast_assoc(:active_period, required: false, with: &ActivePeriod.changeset/2)
     |> cast_assoc(:informed_entity, required: false, with: &InformedEntity.changeset/2)
+    |> cast_assoc(:reminder_times, required: false, with: &ReminderTime.changeset/2)
     |> validate_acceptance(:draft, message: "draft status must be true")
     |> validate_inclusion(:effect, @effect)
     |> validate_inclusion(:cause, @cause)

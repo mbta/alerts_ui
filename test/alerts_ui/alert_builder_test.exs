@@ -162,7 +162,7 @@ defmodule AlertsUI.AlertBuilderTest do
                }
 
         result |> Alerts.create_or_update_alert()
-        [alert_1, alert_2] = Alerts.list_all() |> Enum.sort()
+        [alert_1, alert_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id, :desc)
         assert alert_2.alert_id == existing_alert.alert_id
         assert alert_1.alert_id |> String.to_integer() > alert_2.alert_id |> String.to_integer()
       end
@@ -221,7 +221,7 @@ defmodule AlertsUI.AlertBuilderTest do
                }
 
         result |> Alerts.create_or_update_alert()
-        [alert_1, alert_2] = Alerts.list_all() |> Enum.sort()
+        [alert_1, alert_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id, :desc)
         assert alert_1.alert_id |> String.to_integer() > alert_2.alert_id |> String.to_integer()
         assert alert_2.alert_id == existing_alert.alert_id
       end
