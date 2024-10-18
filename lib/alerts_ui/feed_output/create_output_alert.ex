@@ -5,8 +5,8 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
   alias AlertsUI.Models.{Alert, AlertLifecycle}
   alias AlertsUI.TimeframeText
 
-  @spec build_alert(Alert.t()) :: %{id: String.t(), alert: map()}
-  def build_alert(alert) do
+  @spec build_alert(Alert.t(), DateTime.t()) :: %{id: String.t(), alert: map()}
+  def build_alert(alert, current_time \\ DateTime.utc_now()) do
     # cause_detail and effect_detail should be translated_string types according to GTFS spec
     # but in the current feed they are simple strings
     %{
@@ -41,7 +41,10 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
           duration_certainty: alert.duration_certainty,
           reminder_times:
             alert.reminder_times |> Enum.map(& &1.reminder_time) |> build_reminder_times(),
-          active_period: alert.active_period |> build_one_time_active_periods,
+          active_period:
+            alert.active_period
+            |> Enum.filter(&end_is_in_future(&1.end, current_time))
+            |> build_one_time_active_periods,
           image: alert.image_url |> build_translated_image,
           image_alternative_text: alert.image_alternative_text |> build_translated_string,
           tts_header_text: alert.tts_header_text |> build_translated_string,
@@ -64,6 +67,12 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
 
   def build_one_time_active_periods(active_periods) do
     Enum.map(active_periods, &build_one_time_active_period/1)
+  end
+
+  defp end_is_in_future(nil, _current_time), do: true
+
+  defp end_is_in_future(end_time, current_time) do
+    DateTime.compare(end_time, current_time) in [:eq, :gt]
   end
 
   defp build_one_time_active_period(active_period) do

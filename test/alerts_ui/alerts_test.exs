@@ -37,10 +37,7 @@ defmodule AlertsUI.AlertsTest do
             header_text: "old header text",
             active_period: [
               build(:active_period),
-              build(:active_period, %{
-                start: ~U[2023-10-12 00:01:00Z],
-                end: ~U[2023-10-13 00:01:00Z]
-              })
+              %{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:01:00Z]}
             ]
           }
         )
@@ -53,7 +50,7 @@ defmodule AlertsUI.AlertsTest do
         })
 
       Alerts.create_or_update_alert(new_params, existing_alert)
-      updated_alert = Alerts.get_by_id(existing_alert.id)
+      updated_alert = Repo.get_by(Alert, id: existing_alert.id)
       assert updated_alert.alert_id == "123"
       assert updated_alert.header_text == "new header text"
       assert (updated_alert.active_period |> hd).end == ~U[2023-10-13 00:03:00Z]
