@@ -368,12 +368,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
             end: ~U[2024-05-04 17:09:34.007545Z]
           }
         ],
-        duration_certainty: :KNOWN
+        duration_certainty: :KNOWN,
+        recurrence_days: [:thursday, :friday, :saturday]
       })
 
       alert = AlertData.build_alert_data("1")
       assert alert.alert_timing == :recurring
-      assert alert.days_of_week == [:thursday, :friday, :saturday]
+      assert alert.recurrence_days == [:thursday, :friday, :saturday]
       assert alert.active_period_start_specifier == :custom
       assert alert.active_period_end_specifier == :custom
       assert alert.active_period_start_time == ~T[12:09:34]
@@ -410,12 +411,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
             end: ~U[2024-05-12 07:00:00Z]
           }
         ],
-        duration_certainty: :KNOWN
+        duration_certainty: :KNOWN,
+        recurrence_days: [:thursday, :saturday]
       })
 
       alert = AlertData.build_alert_data("1")
       assert alert.alert_timing == :recurring
-      assert alert.days_of_week == [:thursday, :saturday]
+      assert alert.recurrence_days == [:thursday, :saturday]
       assert alert.active_period_start_specifier == :custom
       assert alert.active_period_end_specifier == :until_further_notice
       assert alert.active_period_start_time == ~T[12:09:34]

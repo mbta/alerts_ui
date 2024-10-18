@@ -36,7 +36,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :active_period_start_time_specifier,
     :active_period_end_specifier,
     :active_period_start_specifier,
-    :days_of_week,
+    :recurrence_days,
     :service_types,
     :cause_detail,
     :url,
@@ -69,7 +69,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           active_period_end_time: Time.t() | nil,
           active_period_end_specifier: atom(),
           active_period_end_time_specifier: atom() | nil,
-          days_of_week: [atom()] | nil,
+          recurrence_days: [atom()] | nil,
           service_types: [Route.type_int()],
           cause_detail: String.t(),
           url: String.t() | nil,
@@ -77,7 +77,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           image_alternative_text: String.t() | nil,
           notification_period_start: NaiveDateTime.t() | nil,
           severity: integer() | nil,
-          reminder_times: [NaiveDateTime.t()] | nil
+          reminder_times: [NaiveDateTime.t()] | nil,
+          recurrence_days: [atom()] | nil
         }
 
   @spec build_alert_data(nil | String.t()) :: t()
@@ -167,21 +168,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       active_period_end_time: end_datetime |> NaiveDateTime.to_time(),
       active_period_start_date: start_datetime |> start_date,
       active_period_end_date: alert.active_period_end |> end_date(end_specifier),
-      days_of_week: get_weekdays(alert.active_period)
+      recurrence_days: alert.recurrence_days
     }
-  end
-
-  def get_weekdays(active_periods) do
-    active_periods
-    |> Enum.map(& &1.start)
-    |> Enum.take(7)
-    |> Enum.map(&Timex.weekday/1)
-    |> Enum.uniq()
-    |> Enum.map(fn weekday_int ->
-      Timex.Translator.get_weekdays("en")[weekday_int]
-      |> String.downcase()
-      |> String.to_existing_atom()
-    end)
   end
 
   def shift_to_naive(nil), do: nil

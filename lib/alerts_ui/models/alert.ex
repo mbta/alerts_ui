@@ -52,7 +52,8 @@ defmodule AlertsUI.Models.Alert do
   image_alternative_text
   active_period_start
   active_period_end
-  notification_period_start)a
+  notification_period_start
+  recurrence_days)a
 
   @cause Cause.causes()
   @effect Effect.effects()
@@ -164,6 +165,10 @@ defmodule AlertsUI.Models.Alert do
     has_many :informed_entity, InformedEntity, on_replace: :nilify
     field :draft, :boolean, default: false
     field :notification_period_start, :utc_datetime
+
+    field :recurrence_days, {:array, Ecto.Enum},
+      values: ~w[sunday monday tuesday wednesday thursday friday saturday]a
+
     timestamps()
   end
 

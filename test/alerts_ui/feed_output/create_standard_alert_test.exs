@@ -7,7 +7,7 @@ defmodule AlertsUI.FeedOutput.CreateStandardAlertTest do
     test "returns standard alert" do
       test_alert =
         build(:alert, %{alert_id: "234", header_text: "hi mom", alert_lifecycle: "ONGOING"})
-        |> CreateOutputAlert.build_alert()
+        |> CreateOutputAlert.build_alert(~U[2023-09-12 00:01:00Z])
 
       result = CreateStandardAlert.build_standard_alert(test_alert)
 

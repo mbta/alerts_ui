@@ -82,7 +82,8 @@ defmodule AlertsUI.AlertBuilderTest do
                    %{reminder_time: ~U[2024-04-30 16:14:00Z]},
                    %{reminder_time: ~U[2024-04-30 16:24:00Z]}
                  ],
-                 current_time: ~U[2024-04-30 05:54:00Z]
+                 current_time: ~U[2024-04-30 05:54:00Z],
+                 recurrence_days: nil
                }
 
         result |> Alerts.create_or_update_alert()
@@ -158,7 +159,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  severity: nil,
                  severity_level: nil,
                  reminder_times: [],
-                 current_time: ~U[2024-04-30 05:54:00Z]
+                 current_time: ~U[2024-04-30 05:54:00Z],
+                 recurrence_days: nil
                }
 
         result |> Alerts.create_or_update_alert()
@@ -217,7 +219,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  severity: nil,
                  severity_level: nil,
                  reminder_times: [],
-                 current_time: ~U[2024-04-30 05:54:00Z]
+                 current_time: ~U[2024-04-30 05:54:00Z],
+                 recurrence_days: nil
                }
 
         result |> Alerts.create_or_update_alert()

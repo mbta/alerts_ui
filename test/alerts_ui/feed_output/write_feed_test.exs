@@ -11,32 +11,40 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
       insert(:alert,
         alert_id: "123abc",
         active_period_start: ~U[2023-10-12 00:01:00Z],
+        active_period: [
+          build(:active_period, %{start: ~U[2023-10-12 00:01:00Z], end: four_minutes_ago})
+        ],
         closed_timestamp: four_minutes_ago
       )
 
       insert(:alert,
         alert_id: "234abc",
         active_period_start: ~U[2023-10-12 00:01:00Z],
+        active_period: [build(:active_period, %{start: ~U[2023-10-12 00:01:00Z], end: nil})],
         notification_period_start: DateTime.add(current_time, -1, :hour)
       )
 
       insert(:alert,
         alert_id: "345abc",
         active_period_start: ~U[2023-10-12 00:01:00Z],
-        active_period_end: four_minutes_ago
+        active_period_end: four_minutes_ago,
+        active_period: [
+          build(:active_period, %{start: ~U[2023-10-12 00:01:00Z], end: four_minutes_ago})
+        ]
       )
 
       insert(:alert,
         alert_id: "456abc",
         active_period_start: ~U[2023-10-12 00:01:00Z],
-        notification_period_start: DateTime.add(current_time, 1, :hour)
+        notification_period_start: DateTime.add(current_time, 1, :hour),
+        active_period: [build(:active_period, %{start: ~U[2023-10-12 00:01:00Z], end: nil})]
       )
 
       expected_alerts = [
         %{
           "alert" => %{
             "closed_timestamp" => four_minutes_ago |> DateTime.to_unix(),
-            "active_period" => [%{"end" => 1_697_155_260, "start" => 1_697_068_860}],
+            "active_period" => [],
             "description_text" => %{"translation" => [%{"language" => "en", "text" => "b"}]},
             "header_text" => %{"translation" => [%{"language" => "en", "text" => "a"}]},
             "informed_entity" => [
@@ -51,7 +59,7 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
         },
         %{
           "alert" => %{
-            "active_period" => [%{"end" => 1_697_155_260, "start" => 1_697_068_860}],
+            "active_period" => [%{"start" => 1_697_068_860}],
             "description_text" => %{"translation" => [%{"language" => "en", "text" => "b"}]},
             "header_text" => %{"translation" => [%{"language" => "en", "text" => "a"}]},
             "informed_entity" => [
@@ -67,7 +75,7 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
         %{
           "alert" => %{
             "closed_timestamp" => current_time |> DateTime.to_unix(),
-            "active_period" => [%{"end" => 1_697_155_260, "start" => 1_697_068_860}],
+            "active_period" => [],
             "description_text" => %{"translation" => [%{"language" => "en", "text" => "b"}]},
             "header_text" => %{"translation" => [%{"language" => "en", "text" => "a"}]},
             "informed_entity" => [

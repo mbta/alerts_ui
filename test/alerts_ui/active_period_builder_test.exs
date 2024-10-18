@@ -150,7 +150,7 @@ defmodule AlertsUI.ActivePeriodBuilderTest do
           active_period_start_time: ~T[13:00:00],
           active_period_end_time: ~T[15:30:00],
           active_period_end_specifier: :custom,
-          days_of_week: [:monday, :wednesday, :friday]
+          recurrence_days: [:monday, :wednesday, :friday]
         }
 
       result = ActivePeriodBuilder.build_recurring_active_period(alert_data)
@@ -207,7 +207,7 @@ defmodule AlertsUI.ActivePeriodBuilderTest do
           active_period_start_time: ~T[09:00:00],
           active_period_end_time: ~T[02:30:00],
           active_period_end_specifier: :custom,
-          days_of_week: [:tuesday, :thursday]
+          recurrence_days: [:tuesday, :thursday]
         }
 
       result = ActivePeriodBuilder.build_recurring_active_period(alert_data)
@@ -232,7 +232,7 @@ defmodule AlertsUI.ActivePeriodBuilderTest do
           active_period_start_time: ~T[09:00:00],
           active_period_end_time: ~T[10:30:00],
           active_period_end_specifier: :until_further_notice,
-          days_of_week: [:saturday]
+          recurrence_days: [:saturday]
         }
 
       result = ActivePeriodBuilder.build_recurring_active_period(alert_data)
