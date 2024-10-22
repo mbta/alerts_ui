@@ -10,14 +10,14 @@ defmodule AlertsUI.RecurringAlertUpdater do
   alias AlertsUI.Alerts
 
   @impl Oban.Worker
-  def perform(_job, opts \\ []) do
+  def perform(_job, _opts \\ []) do
     Logger.info("#{__MODULE__}: Updating recurring alerts")
 
-    :timer.tc(&update_alerts/1, [opts])
+    :timer.tc(&update_alerts/0)
     |> log_results()
   end
 
-  defp update_alerts(_opts) do
+  defp update_alerts do
     update_results =
       Alerts.list_all_open()
       |> Alerts.filter_on_notification_period_start()
