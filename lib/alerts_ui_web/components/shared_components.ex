@@ -263,13 +263,13 @@ defmodule AlertsUIWeb.SharedComponents do
     """
   end
 
-  @spec toggle_button_classes() :: [
+  @spec toggle_button_classes(boolean()) :: [
           {:base_toggle_classes, String.t()}
           | {:toggled_off, String.t()}
           | {:toggled_on, String.t()},
           ...
         ]
-  def toggle_button_classes do
+  def toggle_button_classes(use_outline_buttons) do
     [
       base_toggle_classes: "font-medium
         border-[1px]
@@ -283,14 +283,26 @@ defmodule AlertsUIWeb.SharedComponents do
         text-text-invert
         hover:bg-primary-hover
         focus:bg-primary-hover
-        active:bg-primary-active",
-      toggled_off: "bg-bg-input-default
-        text-text-primary
-        border-bg-elevation-6
-        hover:bg-secondary-hover
-        focus:bg-secondary-hover
-        active:bg-secondary-active"
-    ]
+        active:bg-primary-active"
+    ] ++ toggled_off_classes(use_outline_buttons)
+  end
+
+  defp toggled_off_classes(true) do
+    [toggled_off: "text-primary
+    border-primary
+    hover:bg-secondary-hover
+    active:border-secondary-active
+    focus:border-secondary-focus-border
+    focus:border-4
+    focus:py-2"]
+  end
+
+  defp toggled_off_classes(false) do
+    [toggled_off: "bg-bg-input-default
+    border-bg-elevation-6
+    hover:bg-secondary-hover
+    focus:bg-secondary-hover
+    active:bg-secondary-active"]
   end
 
   @doc """
@@ -307,12 +319,13 @@ defmodule AlertsUIWeb.SharedComponents do
   attr :icon, :string, default: nil, doc: "optional name of icon"
   attr :hidden, :boolean, default: false, doc: "hides component if true"
   attr :active, :boolean, default: true, doc: "switches to active colors if true"
+  attr :use_outline_buttons, :boolean, default: false, doc: "whether to use outline button type"
   slot :inner_block, required: true
 
   def button_toggle(assigns) do
     assigns =
       assigns
-      |> assign(toggle_button_classes())
+      |> assign(toggle_button_classes(assigns.use_outline_buttons))
 
     ~H"""
     <button
@@ -386,6 +399,8 @@ defmodule AlertsUIWeb.SharedComponents do
     default: false,
     doc: "whether to show icons. Icon will display option name unless icon_type is set."
 
+  attr :use_outline_buttons, :boolean, default: false, doc: "whether to use outline button type"
+
   attr :label, :string, default: nil
   attr :class, :string, default: "", doc: "additional classes to add"
   attr :button_class, :string, default: "", doc: "classes to add to buttons"
@@ -396,13 +411,13 @@ defmodule AlertsUIWeb.SharedComponents do
       assigns
       |> assign(id: field.id, field_value: normalize_strings_to_integers(field.value))
       |> assign_new(:name, fn -> field.name <> "[]" end)
-      |> assign(toggle_button_classes())
+      |> assign(toggle_button_classes(assigns.use_outline_buttons))
       |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
 
     ~H"""
     <div phx-feedback-for={@name} class={["flex gap-1 text-sm items-baseline content-start", @class]}>
       <.label for={@id} class={if is_nil(@label), do: "hidden"}><%= @label %></.label>
-      <div :for={{option_name, id} <- @options} class={["min-w-[100%]", @button_class]}>
+      <div :for={{option_name, id} <- @options} class={["flex-1", @button_class]}>
         <.label for={id}>
           <div class={[
             @base_toggle_classes,
@@ -417,8 +432,8 @@ defmodule AlertsUIWeb.SharedComponents do
               class="hidden"
               {@rest}
             />
-            <div class="flex flex-row justify-left align-center">
-              <div class={[unless(@show_icons, do: "hidden"), "mr-3 self-center"]}>
+            <div class={["flex flex-row justify-left align-center", @button_class]}>
+              <div :if={@show_icons} class="mr-3 self-center">
                 <.mode_icon type={if @icon_type, do: @icon_type, else: option_name} />
               </div>
               <%= if is_atom(option_name) do

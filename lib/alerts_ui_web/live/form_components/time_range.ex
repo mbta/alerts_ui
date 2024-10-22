@@ -80,13 +80,13 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         current_time: current_time,
         edited: false,
         day_of_week_options: [
-          Sunday: :sunday,
           Monday: :monday,
           Tuesday: :tuesday,
           Wednesday: :wednesday,
           Thursday: :thursday,
           Friday: :friday,
-          Saturday: :saturday
+          Saturday: :saturday,
+          Sunday: :sunday
         ]
       })
 
@@ -556,8 +556,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       :if={@form[:alert_timing].value === :recurring}
       field={@form[:days_of_week]}
       options={@day_of_week_options}
-      class="flex-row"
-      button_class="min-w-[12rem]"
+      class="flex-row gap-2 max-w-[50%]"
+      button_class="justify-center"
+      use_outline_buttons={true}
       show_icons={false}
     />
     """

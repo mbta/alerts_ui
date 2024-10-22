@@ -312,6 +312,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             options={@route_id_options}
             icon_type={icon_type(@route_type)}
             class={"flex-col #{if @route_type === 3, do: "hidden"}"}
+            button_class="min-w-[100%]"
             show_icons={true}
           />
           <%= if show_trips_input?(assigns) do %>
