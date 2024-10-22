@@ -104,14 +104,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   @impl true
   def render(assigns) do
     ~H"""
-    <div
-      class={
-        unless @progress.name == "route_type_and_effect",
-          do: "hidden",
-          else: "min-w-full flex flex-col mb-8"
-      }
-      id="route_view"
-    >
+    <div class="min-w-full flex flex-col mb-8" id="route_view">
       <.h1 class="mb-8">Create new alert</.h1>
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
         Alert type

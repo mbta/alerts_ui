@@ -171,10 +171,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
   @impl true
   def render(assigns) do
     ~H"""
-    <div
-      class={unless @progress.name == "details", do: "hidden", else: "min-w-full flex flex-col mt-8"}
-      id="delivery_view"
-    >
+    <div class="min-w-full flex flex-col mt-8" id="delivery_view">
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
         Delivery
       </.h5>

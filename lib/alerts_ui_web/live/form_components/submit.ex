@@ -20,10 +20,7 @@ defmodule AlertsUIWeb.FormComponents.Submit do
   @impl true
   def render(assigns) do
     ~H"""
-    <div
-      class={unless @progress.name == "details", do: "hidden", else: "min-w-full flex flex-col mt-4"}
-      id="submit_view"
-    >
+    <div class="min-w-full flex flex-col mt-4" id="submit_view">
       <.button_primary
         class="mt-8 basis-8 self-center min-w-[10%]"
         phx-target={@myself}

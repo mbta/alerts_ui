@@ -279,10 +279,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       )
 
     ~H"""
-    <div
-      class={unless @progress.name == "details", do: "hidden", else: "min-w-full mb-8 min-h-[32rem]"}
-      id="service_view"
-    >
+    <div class="min-w-full mb-8 min-h-[32rem]" id="service_view">
       <.h1 class="mb-8">
         Create new <%= ContentFormatter.route_atom_to_string(@service_type_name) %>
         <%= (@effect_name || "") |> String.downcase() %> alert
