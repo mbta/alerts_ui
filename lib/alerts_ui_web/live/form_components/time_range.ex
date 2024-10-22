@@ -65,10 +65,13 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       notification_period_start: "",
       active_period_start: current_time |> naive_datetime_to_iso8601(),
       active_period_start_date: current_time |> NaiveDateTime.to_date(),
+      active_period_start_time: current_time |> NaiveDateTime.to_time(),
       active_period_end:
         ActivePeriod.end_of_service_datetime(current_time)
         |> DateTime.to_naive()
         |> naive_datetime_to_iso8601,
+      active_period_end_time:
+        ActivePeriod.end_of_service_datetime(current_time) |> DateTime.to_time(),
       active_period_end_date: ActivePeriod.end_of_service_date(current_time)
     }
 
@@ -581,7 +584,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           (@form[:active_period_start_date].value |> formatted_datetime("{0M}/{0D}/{YYYY}")) %>
       </div>
       <div>
-        <%= "end datetime: " <>
+        <%= "end date: " <>
           (@form[:active_period_end_date].value |> formatted_datetime("{0M}/{0D}/{YYYY}")) %>
       </div>
     </div>
