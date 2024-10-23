@@ -232,22 +232,10 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   @impl true
-  def handle_info({:step_completed, changeset}, socket) do
-    # make sure no selections are still entered in case we were previously in the second page.
-    clean_affected_services = %{
-      stop_ids: [],
-      route_ids: [],
-      trip_ids: [],
-      direction_ids: [],
-      facility_id: []
-    }
-
-    alert_data =
-      Map.merge(socket.assigns.alert_data, clean_affected_services)
-      |> Map.merge(changeset |> Map.from_struct())
-
+  def handle_info({:step_completed, changes}, socket) do
+    alert_data = Map.merge(socket.assigns.alert_data, changes |> Map.from_struct())
     route_type = Map.get(alert_data, :route_type)
-    effect_name = Map.get(alert_data, :effect_name, "")
+    effect_name = Map.get(alert_data, :effect_name)
 
     combination =
       if is_nil(route_type) and
@@ -260,13 +248,9 @@ defmodule AlertsUIWeb.CreateAlertLive do
     assigns = %{
       progress: get_step_by_name(socket.assigns.progress.next),
       alert_data: alert_data,
-      available_routes: [],
-      available_stops: [],
-      available_trips: [],
       combination: combination
     }
 
-    send_update(AffectedService, id: "affected_service", refresh: true)
     {:noreply, assign(socket, assigns)}
   end
 

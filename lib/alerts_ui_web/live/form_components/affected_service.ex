@@ -47,28 +47,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     {:ok, socket}
   end
 
-  def update(%{refresh: true}, socket) do
-    alert_data = %{
-      route_ids: [],
-      direction: "default",
-      trip_ids: [],
-      stop_ids: []
-    }
-
-    form =
-      %__MODULE__{}
-      |> changeset(alert_data)
-      |> to_form()
-
-    assigns = %{
-      form: form,
-      available_schedules: [],
-      available_stops: []
-    }
-
-    {:ok, assign(socket, assigns)}
-  end
-
   @impl true
   def update(%{alert_data: alert_data, editing: editing} = assigns, socket) do
     route_type = Map.get(alert_data, :route_type)
