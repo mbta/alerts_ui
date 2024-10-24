@@ -10,4 +10,8 @@ defmodule AlertsUI.Repo.Migrations.AddRecurrenceDays do
       add :recurrence_days, {:array, :weekdays}
     end
   end
+
+  def down do
+    execute("DROP TYPE weekdays")
+  end
 end
