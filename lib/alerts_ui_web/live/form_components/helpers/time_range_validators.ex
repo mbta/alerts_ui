@@ -206,7 +206,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
 
   defp required_fields_by_specifier("recurring", changeset, params) do
     changeset
-    |> validate_required([:days_of_week],
+    |> validate_required([:recurrence_days],
       message: "Select one or more days for alert to recur"
     )
     |> validate_required(

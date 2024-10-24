@@ -34,20 +34,35 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedServiceTest do
 
       view
       |> element("form")
-      |> render_change(%{"systemwide_affected_service" => %{"service_types" => ["3"]}})
+      |> render_change(%{"systemwide_affected_service" => %{"service_types" => ["2"]}})
 
       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
-                      {:section_completed, %SystemwideAffectedService{service_types: [3]}}}
+                      {:section_completed, %SystemwideAffectedService{service_types: [2]}}}
+    end
+
+    @tag capture_log: true
+    test "it sends add_errors if errors in changeset" do
+      {:ok, view, _html} = live_isolated_component(SystemwideAffectedService, @assigns)
+
+      view
+      |> element("form")
+      |> render_change(%{"systemwide_affected_service" => %{"service_types" => ["a"]}})
+
+      refute_receive {:__live_isolated_component_handle_info_received__, _pid,
+                      {:section_completed, _data}}
+
+      assert_receive {:__live_isolated_component_handle_info_received__, _pid,
+                      {:add_errors, _, _}}
     end
 
     test "renders while editing an existing alerts" do
-      alert_data = Map.put(@assigns.alert_data, :service_types, [3])
+      alert_data = Map.put(@assigns.alert_data, :service_types, [1])
       assigns = %{@assigns | alert_data: alert_data, editing: true}
 
       {:ok, view, _html} = live_isolated_component(SystemwideAffectedService, assigns)
 
       rendered_view = render(view)
-      assert rendered_view =~ ~s( value="3" checked="checked" )
+      assert rendered_view =~ ~s( value="1" checked="checked" )
     end
   end
 

@@ -4,6 +4,10 @@ defmodule AlertsUI.ActivePeriodBuilder do
 
     All incoming times are naive datetimes created in the eastern timezone
     and need to be converted to UTC datetimes
+
+    active_period_end == nil is what we're looking at to tell
+    if a recurring alert has no set end and thus needs updating
+    Do not change that without also changing the recurring alert updater
   """
 
   @type active_period_data_t :: %{
@@ -56,7 +60,7 @@ defmodule AlertsUI.ActivePeriodBuilder do
           active_period_end_specifier: :until_further_notice | :custom,
           active_period_start_date: Date.t(),
           active_period_end_date: Date.t(),
-          days_of_week: [atom()]
+          recurrence_days: [atom()]
         }) :: active_period_data_t() | %{}
 
   def build_recurring_active_period(%{
@@ -65,14 +69,13 @@ defmodule AlertsUI.ActivePeriodBuilder do
         active_period_start_date: start_date,
         active_period_end_date: end_date,
         active_period_end_specifier: end_specifier,
-        days_of_week: days_of_week
+        recurrence_days: recurrence_days
       }) do
-    weekday_integers = Enum.map(days_of_week, &Timex.day_to_num/1)
+    weekday_integers = Enum.map(recurrence_days, &Timex.day_to_num/1)
 
-    # if there is no end date, add active periods for 365 days (not 1 year) out
     end_date =
       if end_specifier == :until_further_notice do
-        Date.add(start_date, 365)
+        Timex.shift(start_date, years: 1)
       else
         end_date
       end

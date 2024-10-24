@@ -50,7 +50,7 @@ defmodule AlertsUI.AlertsTest do
         })
 
       Alerts.create_or_update_alert(new_params, existing_alert)
-      updated_alert = Repo.get_by(Alert, id: existing_alert.id)
+      updated_alert = Alerts.get_by_id(existing_alert.id)
       assert updated_alert.alert_id == "123"
       assert updated_alert.header_text == "new header text"
       assert (updated_alert.active_period |> hd).end == ~U[2023-10-13 00:03:00Z]
@@ -263,6 +263,90 @@ defmodule AlertsUI.AlertsTest do
       refute is_nil(result1.closed_timestamp)
       assert result2.closed_timestamp == nil
       assert result3.closed_timestamp == nil
+    end
+  end
+
+  describe "update_recurring_active_periods/1" do
+    test "adds more active periods to end of recurring alert" do
+      alert =
+        insert(:alert, %{
+          alert_id: "123",
+          recurrence_days: [:monday, :tuesday, :wednesday, :thursday, :friday],
+          active_period: [
+            build(:active_period, %{
+              start: ~U[2024-10-21 13:00:00Z],
+              end: ~U[2024-10-21 16:00:00Z]
+            }),
+            build(:active_period, %{
+              start: ~U[2024-10-22 13:00:00Z],
+              end: ~U[2024-10-22 16:00:00Z]
+            }),
+            build(:active_period, %{
+              start: ~U[2024-10-23 13:00:00Z],
+              end: ~U[2024-10-23 16:00:00Z]
+            })
+          ],
+          active_period_end: nil
+        })
+
+      Alerts.update_recurring_active_periods(alert, ~U[2023-10-24 13:00:00Z])
+
+      [ap_1, ap_2, ap_3, ap_4] = Alerts.get_by_alert_id("123").active_period
+      assert [~U[2024-10-21 13:00:00Z], ~U[2024-10-21 16:00:00Z]] = [ap_1.start, ap_1.end]
+      assert [~U[2024-10-22 13:00:00Z], ~U[2024-10-22 16:00:00Z]] = [ap_2.start, ap_2.end]
+      assert [~U[2024-10-23 13:00:00Z], ~U[2024-10-23 16:00:00Z]] = [ap_3.start, ap_3.end]
+      assert [~U[2024-10-24 13:00:00Z], ~U[2024-10-24 16:00:00Z]] = [ap_4.start, ap_4.end]
+    end
+
+    test "adds more active periods to end of recurring alert when start and end are different days" do
+      alert =
+        insert(:alert, %{
+          alert_id: "123",
+          recurrence_days: [:monday, :tuesday, :wednesday, :thursday, :friday],
+          active_period: [
+            build(:active_period, %{
+              start: ~U[2024-10-22 13:00:00Z],
+              end: ~U[2024-10-23 01:00:00Z]
+            }),
+            build(:active_period, %{
+              start: ~U[2024-10-23 13:00:00Z],
+              end: ~U[2024-10-24 01:00:00Z]
+            })
+          ],
+          active_period_end: nil
+        })
+
+      Alerts.update_recurring_active_periods(alert, ~U[2023-10-24 13:00:00Z])
+
+      [ap_1, ap_2, ap_3] = Alerts.get_by_alert_id("123").active_period
+      assert [~U[2024-10-22 13:00:00Z], ~U[2024-10-23 01:00:00Z]] = [ap_1.start, ap_1.end]
+      assert [~U[2024-10-23 13:00:00Z], ~U[2024-10-24 01:00:00Z]] = [ap_2.start, ap_2.end]
+      assert [~U[2024-10-24 13:00:00Z], ~U[2024-10-25 01:00:00Z]] = [ap_3.start, ap_3.end]
+    end
+
+    test "doesn't add active periods if alert doesn't recur on that day" do
+      alert =
+        insert(:alert, %{
+          alert_id: "123",
+          recurrence_days: [:monday, :tuesday, :wednesday],
+          active_period: [
+            build(:active_period, %{
+              start: ~U[2024-10-22 13:00:00Z],
+              end: ~U[2024-10-23 01:00:00Z]
+            }),
+            build(:active_period, %{
+              start: ~U[2024-10-23 13:00:00Z],
+              end: ~U[2024-10-24 01:00:00Z]
+            })
+          ],
+          active_period_end: nil
+        })
+
+      Alerts.update_recurring_active_periods(alert, ~U[2023-10-24 13:00:00Z])
+
+      [ap_1, ap_2] = Alerts.get_by_alert_id("123").active_period
+      assert [~U[2024-10-22 13:00:00Z], ~U[2024-10-23 01:00:00Z]] = [ap_1.start, ap_1.end]
+      assert [~U[2024-10-23 13:00:00Z], ~U[2024-10-24 01:00:00Z]] = [ap_2.start, ap_2.end]
     end
   end
 

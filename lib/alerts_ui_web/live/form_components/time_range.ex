@@ -49,13 +49,13 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     field :active_period_end_date, :date
     field :active_period_end_time, :time
 
-    field :days_of_week, {:array, Ecto.Enum},
+    field :recurrence_days, {:array, Ecto.Enum},
       values: ~w[sunday monday tuesday wednesday thursday friday saturday]a
 
     field :notification_period_start, :naive_datetime
   end
 
-  @fields ~w[active_period_end active_period_end_specifier alert_timing active_period_start_specifier notification_period_start active_period_start active_period_start_date active_period_end_date active_period_end_time active_period_start_time days_of_week active_period_start_time_specifier active_period_end_time_specifier]a
+  @fields ~w[active_period_end active_period_end_specifier alert_timing active_period_start_specifier notification_period_start active_period_start active_period_start_date active_period_end_date active_period_end_time active_period_start_time recurrence_days active_period_start_time_specifier active_period_end_time_specifier]a
 
   @impl true
   def mount(socket) do
@@ -554,7 +554,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     </div>
     <.toggle_checkgroup
       :if={@form[:alert_timing].value === :recurring}
-      field={@form[:days_of_week]}
+      field={@form[:recurrence_days]}
       options={@day_of_week_options}
       class="flex-row gap-2 max-w-[50%]"
       button_class="justify-center"

@@ -77,6 +77,43 @@ defmodule AlertsUI.Alerts do
   defp end_is_past(current_time, end_time),
     do: DateTime.compare(current_time, end_time) in [:eq, :gt]
 
+  def update_recurring_active_periods(alert, current_time \\ DateTime.utc_now()) do
+    weekday_integers = Enum.map(alert.recurrence_days, &Timex.day_to_num/1)
+
+    %{start: last_ap_start, end: last_ap_end} = alert.active_period |> Enum.reverse() |> hd
+    last_ap_start_date = DateTime.to_date(last_ap_start)
+
+    next_day_modifier =
+      if Date.compare(DateTime.to_date(last_ap_end), last_ap_start_date) == :gt, do: 1, else: 0
+
+    last_ap_start
+    |> DateTime.to_date()
+    |> Date.range(Timex.shift(DateTime.to_date(current_time), years: 1))
+    |> Enum.filter(&(Timex.weekday(&1) in weekday_integers))
+    |> Enum.reject(&(&1 === last_ap_start_date))
+    |> Enum.map(fn date ->
+      %{
+        start:
+          date
+          |> DateTime.new!(DateTime.to_time(last_ap_start)),
+        end:
+          date
+          |> Date.add(next_day_modifier)
+          |> DateTime.new!(DateTime.to_time(last_ap_end))
+      }
+    end)
+    |> Enum.map(fn active_period_params ->
+      alert
+      |> Ecto.build_assoc(:active_period)
+      |> cast(active_period_params, [:start, :end])
+      |> PaperTrail.insert()
+      |> case do
+        {:ok, %{model: alert}} -> {:ok, alert}
+        {:error, result} -> {:error, result}
+      end
+    end)
+  end
+
   @spec filter_on_notification_period_start([Alert.t()], DateTime.t()) :: [Alert.t()]
   def filter_on_notification_period_start(alerts, current_time \\ DateTime.utc_now()) do
     Enum.filter(
@@ -101,7 +138,7 @@ defmodule AlertsUI.Alerts do
         where: is_nil(a.closed_timestamp),
         inner_join: ie in AlertsUI.Models.InformedEntity,
         on: ie.alert_id == a.id,
-        preload: [:reminder_times, informed_entity: {ie, :trip}],
+        preload: [:active_period, :reminder_times, informed_entity: {ie, :trip}],
         order_by: [asc: a.alert_id]
       )
     )
@@ -115,7 +152,7 @@ defmodule AlertsUI.Alerts do
         where: not is_nil(a.closed_timestamp) and a.closed_timestamp > from_now(-5, "minute"),
         inner_join: ie in AlertsUI.Models.InformedEntity,
         on: ie.alert_id == a.id,
-        preload: [:reminder_times, informed_entity: {ie, :trip}],
+        preload: [:active_period, :reminder_times, informed_entity: {ie, :trip}],
         order_by: [asc: a.alert_id]
       )
     )
@@ -126,7 +163,7 @@ defmodule AlertsUI.Alerts do
     Repo.all(
       from(
         a in Alert,
-        preload: [informed_entity: [:trip]]
+        preload: [:active_period, :reminder_times, informed_entity: [:trip]]
       )
     )
   end
@@ -136,7 +173,7 @@ defmodule AlertsUI.Alerts do
     Repo.get_by(
       from(
         a in Alert,
-        preload: [:reminder_times, informed_entity: [:trip]]
+        preload: [:active_period, :reminder_times, informed_entity: [:trip]]
       ),
       alert_id: alert_id
     )
@@ -147,7 +184,7 @@ defmodule AlertsUI.Alerts do
     Repo.get_by(
       from(
         a in Alert,
-        preload: [:reminder_times, informed_entity: [:trip]]
+        preload: [:active_period, :reminder_times, informed_entity: [:trip]]
       ),
       id: uuid
     )

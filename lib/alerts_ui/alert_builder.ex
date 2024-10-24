@@ -39,7 +39,7 @@ defmodule AlertsUI.AlertBuilder do
           active_period_end_date: Date.t() | nil,
           active_period_start_time: Time.t() | nil,
           active_period_end_time: Time.t() | nil,
-          days_of_week: atom() | nil,
+          recurrence_days: atom() | nil,
           cause_detail: String.t(),
           url: String.t() | nil,
           image_url: String.t() | nil,
@@ -51,7 +51,8 @@ defmodule AlertsUI.AlertBuilder do
           last_push_notification_timestamp: NaiveDateTime.t() | nil,
           notification_period_start: NaiveDateTime.t() | nil,
           severity: integer(),
-          reminder_times: [NaiveDateTime.t()] | nil
+          reminder_times: [NaiveDateTime.t()] | nil,
+          recurrence_days: [atom()] | nil
         }
   @type direction_t :: 0 | 1
   @type stop_with_context_t :: {Stop.t(), Route.id_t(), direction_t(), RoutePattern.stop_type()}
@@ -102,7 +103,7 @@ defmodule AlertsUI.AlertBuilder do
           active_period_start_date: Map.get(alert_data, :active_period_start_date),
           active_period_end_date: Map.get(alert_data, :active_period_end_date),
           active_period_end_specifier: Map.get(alert_data, :active_period_end_specifier),
-          days_of_week: Map.get(alert_data, :days_of_week)
+          recurrence_days: Map.get(alert_data, :recurrence_days)
         })
       else
         ActivePeriodBuilder.build_one_time_active_period(
@@ -138,7 +139,8 @@ defmodule AlertsUI.AlertBuilder do
       severity: severity,
       severity_level: SeverityLevel.severity_level_by_severity(severity),
       reminder_times: reminder_times,
-      current_time: current_time
+      current_time: current_time,
+      recurrence_days: Map.get(alert_data, :recurrence_days)
     }
     |> Map.merge(active_period_map)
   end

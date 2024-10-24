@@ -197,6 +197,39 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
       actual = CreateOutputAlert.build_alert(existing_alert)
       assert expected == actual
     end
+
+    test "filters out old recurring alerts" do
+      insert(:alert, %{
+        alert_id: "524486",
+        active_period: [
+          build(:active_period, %{start: ~U[2023-09-22 00:00:54Z], end: ~U[2023-09-22 14:20:54Z]}),
+          build(:active_period, %{start: ~U[2023-09-23 00:00:54Z], end: ~U[2023-09-23 14:20:54Z]}),
+          build(:active_period, %{start: ~U[2023-09-24 00:00:54Z], end: ~U[2023-09-24 00:00:54Z]})
+        ],
+        active_period_start: ~U[2023-09-22 00:00:54Z],
+        active_period_end: ~U[2023-09-22 00:00:54Z]
+      })
+
+      existing_alert = Alerts.get_by_alert_id("524486")
+      expected = CreateOutputAlert.build_alert(existing_alert, ~U[2023-09-23 00:04:54Z])
+
+      assert expected == %{
+               id: "524486",
+               alert: %{
+                 header_text: %{translation: [%{text: "a", language: "en"}]},
+                 description_text: %{translation: [%{text: "b", language: "en"}]},
+                 created_timestamp: DateTime.utc_now() |> DateTime.to_unix(),
+                 last_modified_timestamp: DateTime.utc_now() |> DateTime.to_unix(),
+                 alert_lifecycle: :ONGOING,
+                 reminder_times: [1_727_222_460],
+                 active_period: [
+                   %{end: 1_695_478_854, start: 1_695_427_254},
+                   %{start: 1_695_513_654, end: 1_695_513_654}
+                 ],
+                 informed_entity: [%{route_id: "1", trip: %{trip_id: "1"}, activities: []}]
+               }
+             }
+    end
   end
 
   describe "build_gtfs_header/1" do
