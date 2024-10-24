@@ -15,11 +15,11 @@ defmodule AlertsUI.Repo.Migrations.BackfillActivePeriods do
 
   def down do
     alter table("alerts") do
-      add :active_period, {:array, :integer}
+      add :active_period, {:array, :map}
     end
 
     execute("WITH ap_agg AS (
-      select array_agg(json_build_object('start', cast(extract(epoch from \"start\") as integer), 'end', cast(extract(epoch from \"end\") as integer))) as ap
+      select array_agg(json_build_object('start', \"start\", 'end', \"end\")) as ap
       FROM active_period)
       UPDATE alerts
       SET active_period = ap_agg.ap

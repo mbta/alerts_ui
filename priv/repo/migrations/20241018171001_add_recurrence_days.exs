@@ -12,6 +12,6 @@ defmodule AlertsUI.Repo.Migrations.AddRecurrenceDays do
   end
 
   def down do
-    execute("DROP TYPE weekdays")
+    execute("DROP TYPE weekdays CASCADE")
   end
 end
