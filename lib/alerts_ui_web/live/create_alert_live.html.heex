@@ -1,4 +1,4 @@
-<div class="flex flex-col items-center justify-center min-w-full" , id="form_container">
+<div class="flex flex-col items-center justify-center min-w-full" id="form_container">
   <.live_component module={Timeline} id="timeline" progress={@progress} steps={@steps} />
   <div class="min-w-[75%] flex flex-col items-center justify-center" id="article-view">
     <article class="min-w-full flex flex-col items-center justify-center px-4">
@@ -8,53 +8,55 @@
         progress={@progress}
         alert_data={@alert_data}
       />
-
+      <div :if={@progress.name == "details"} class="w-full">
+        <.live_component
+          module={choose_affected_service_component(@combination)}
+          id="affected_service"
+          progress={@progress}
+          alert_data={@alert_data}
+          combination={@combination}
+          route_type={route_type(@alert_data)}
+          effect_name={effect_name(@alert_data)}
+          available_routes={@available_routes}
+          available_schedules={@available_schedules}
+          available_stops={@available_stops}
+          available_facilities={@available_facilities}
+          editing={@editing}
+          submitted={@submitted}
+        />
+        <.live_component
+          module={TimeRange}
+          id="time_range"
+          progress={@progress}
+          alert_data={@alert_data}
+          editing={@editing}
+        />
+        <.live_component
+          module={AlertDetails}
+          id="alert_details"
+          progress={@progress}
+          alert_data={@alert_data}
+          route_type={route_type(@alert_data)}
+          combination={@combination}
+        />
+        <.live_component
+          module={Delivery}
+          id="delivery"
+          progress={@progress}
+          alert_data={@alert_data}
+          combination={@combination}
+        />
+        <.live_component
+          module={RiderReminders}
+          id="rider_reminders"
+          progress={@progress}
+          alert_data={@alert_data}
+          editing={@editing}
+        />
+        <.live_component module={Submit} id="submit" progress={@progress} />
+      </div>
       <.live_component
-        module={choose_affected_service_component(@combination)}
-        id="affected_service"
-        progress={@progress}
-        alert_data={@alert_data}
-        combination={@combination}
-        route_type={route_type(@alert_data)}
-        effect_name={effect_name(@alert_data)}
-        available_routes={@available_routes}
-        available_schedules={@available_schedules}
-        available_stops={@available_stops}
-        available_facilities={@available_facilities}
-        editing={@editing}
-        submitted={@submitted}
-      />
-      <.live_component
-        module={TimeRange}
-        id="time_range"
-        progress={@progress}
-        alert_data={@alert_data}
-        editing={@editing}
-      />
-      <.live_component
-        module={AlertDetails}
-        id="alert_details"
-        progress={@progress}
-        alert_data={@alert_data}
-        route_type={route_type(@alert_data)}
-        combination={@combination}
-      />
-      <.live_component
-        module={Delivery}
-        id="delivery"
-        progress={@progress}
-        alert_data={@alert_data}
-        combination={@combination}
-      />
-      <.live_component
-        module={RiderReminders}
-        id="rider_reminders"
-        progress={@progress}
-        alert_data={@alert_data}
-        editing={@editing}
-      />
-      <.live_component module={Submit} id="submit" progress={@progress} />
-      <.live_component
+        :if={@progress.name == "success"}
         module={SuccessfulSubmission}
         id="successful_submission"
         progress={@progress}

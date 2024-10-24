@@ -150,10 +150,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
     assigns = Map.put(assigns, :active_period_end, naive_datetime_to_iso8601(active_period_end))
 
     ~H"""
-    <div
-      class={unless @progress.name == "details", do: "hidden", else: "min-w-full flex flex-col mt-8"}
-      id="rider_reminder_view"
-    >
+    <div class="min-w-full flex flex-col mt-8" id="rider_reminder_view">
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
         Rider Reminders
       </.h5>

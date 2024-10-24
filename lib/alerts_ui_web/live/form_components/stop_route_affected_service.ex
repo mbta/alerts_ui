@@ -36,7 +36,10 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         socket
       ) do
     route_type = Map.get(alert_data, :route_type)
-    get_stops_by_route_type(route_type)
+
+    if Map.get(alert_data, :available_stops) in [nil, []] do
+      get_stops_by_route_type(route_type)
+    end
 
     assigns =
       if editing == true and socket.assigns.edited == false do
@@ -206,10 +209,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       )
 
     ~H"""
-    <div
-      class={unless @progress.name == "details", do: "hidden", else: "min-w-full mb-8 min-h-[32rem]"}
-      id="stop_route_service_view"
-    >
+    <div class="min-w-full mb-8 min-h-[32rem]" id="stop_route_service_view">
       <.h1 class="mb-8">
         Create new <%= ContentFormatter.route_atom_to_string(@service_type_name) %> <%= @effect_name
         |> String.downcase() %> alert
@@ -239,7 +239,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
             filter_field={@form[:route_ids_filter]}
             loading={Enum.empty?(@route_id_options) and !disable_routes_input?(assigns)}
             disabled={disable_routes_input?(assigns)}
-            id="stop_route_routes"
             options={@route_id_options}
             class="min-w-[18rem]"
           />

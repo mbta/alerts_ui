@@ -47,28 +47,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     {:ok, socket}
   end
 
-  def update(%{refresh: true}, socket) do
-    alert_data = %{
-      route_ids: [],
-      direction: "default",
-      trip_ids: [],
-      stop_ids: []
-    }
-
-    form =
-      %__MODULE__{}
-      |> changeset(alert_data)
-      |> to_form()
-
-    assigns = %{
-      form: form,
-      available_schedules: [],
-      available_stops: []
-    }
-
-    {:ok, assign(socket, assigns)}
-  end
-
   @impl true
   def update(%{alert_data: alert_data, editing: editing} = assigns, socket) do
     route_type = Map.get(alert_data, :route_type)
@@ -279,10 +257,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       )
 
     ~H"""
-    <div
-      class={unless @progress.name == "details", do: "hidden", else: "min-w-full mb-8 min-h-[32rem]"}
-      id="service_view"
-    >
+    <div class="min-w-full mb-8 min-h-[32rem]" id="service_view">
       <.h1 class="mb-8">
         Create new <%= ContentFormatter.route_atom_to_string(@service_type_name) %>
         <%= (@effect_name || "") |> String.downcase() %> alert

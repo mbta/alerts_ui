@@ -42,10 +42,7 @@ defmodule AlertsUIWeb.FormComponents.SuccessfulSubmission do
   @impl true
   def render(assigns) do
     ~H"""
-    <div
-      class={unless @progress.name == "success", do: "hidden", else: "min-w-full"}
-      id="success_view"
-    >
+    <div class="min-w-full" id="success_view">
       <.h3 class="mr-4">Alert #<%= @alert_id %> created successfully</.h3>
       <.button_primary
         phx-click="ok"
