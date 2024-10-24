@@ -257,7 +257,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       )
 
     ~H"""
-    <div class="min-w-full mb-8 min-h-[32rem]" id="service_view">
+    <div class="min-w-full min-h-[40rem] flex flex-col" id="service_view">
       <.h1 class="mb-8">
         Create new <%= ContentFormatter.route_atom_to_string(@service_type_name) %>
         <%= (@effect_name || "") |> String.downcase() %> alert
@@ -269,17 +269,17 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         for={@form}
         phx-target={@myself}
         phx-change="validate"
-        class="form-control mb-16"
+        class={["form-control flex flex-row gap-x-8 mb-4", @route_type !== 2 && "h-[40rem]"]}
         id="service_form"
       >
-        <fieldset class="flex flex-row gap-x-12 min-h-[32rem]">
+        <div class="min-w-[25%]">
           <.filtered_select
             label={if @route_type in [0, 1, 2], do: "Line(s)", else: "Route(s)"}
             field={@form[:route_ids]}
             filter_field={@form[:route_ids_filter]}
             loading={Enum.empty?(@route_id_options)}
             options={@route_id_options}
-            class={"min-w-[18rem] min-h-[30rem] #{@route_type !== 3 && "hidden"}"}
+            class={"#{@route_type !== 3 && "hidden"} h-full"}
           />
           <.toggle_checkgroup
             label={if @route_type in [0, 1, 2], do: "Line(s)", else: "Route(s)"}
@@ -290,57 +290,53 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             button_class="min-w-[100%]"
             show_icons={true}
           />
-          <%= if show_trips_input?(assigns) do %>
-            <.filtered_select
-              label="Trip(s)"
-              field={@form[:trip_ids]}
-              filter_field={@form[:trip_ids_filter]}
-              options={@trip_id_options}
-              loading={
-                Enum.empty?(@trip_id_options) and !disable_trip_input?(@form[:route_ids].value)
+        </div>
+        <%= if show_trips_input?(assigns) do %>
+          <.filtered_select
+            label="Trip(s)"
+            field={@form[:trip_ids]}
+            filter_field={@form[:trip_ids_filter]}
+            options={@trip_id_options}
+            loading={Enum.empty?(@trip_id_options) and !disable_trip_input?(@form[:route_ids].value)}
+            class="min-w-[25%]"
+            disabled={disable_trip_input?(@form[:route_ids].value)}
+            prompt={if disable_trip_input?(@form[:route_ids].value), do: nil, else: "All Trips"}
+          />
+        <% end %>
+        <div class="flex flex-col justify-start min-w-[25%]">
+          <%= if show_directions_input?(assigns) do %>
+            <.select
+              label={if show_stops_input?(assigns), do: "Stop(s)", else: "Direction"}
+              field={@form[:direction]}
+              options={@direction_options}
+              disabled={disable_stop_input?(@form[:route_ids].value)}
+              prompt={
+                if disable_stop_input?(@form[:route_ids].value), do: "", else: "Both Directions"
               }
-              class="min-w-[24rem] min-h-[30rem] max-h-[30rem]"
-              disabled={disable_trip_input?(@form[:route_ids].value)}
-              prompt={if disable_trip_input?(@form[:route_ids].value), do: nil, else: "All Trips"}
             />
           <% end %>
-          <div class="flex flex-col justify-start">
-            <%= if show_directions_input?(assigns) do %>
-              <.select
-                label={if show_stops_input?(assigns), do: "Stop(s)", else: "Direction"}
-                field={@form[:direction]}
-                options={@direction_options}
+          <div class="min-w-[100%] min-h-[90%]">
+            <%= if show_stops_input?(assigns) do %>
+              <.filtered_select
+                field={@form[:stop_ids]}
+                filter_field={@form[:stop_ids_filter]}
+                options={@stop_id_options}
+                loading={
+                  Enum.empty?(@stop_id_options) and !disable_stop_input?(@form[:route_ids].value)
+                }
+                class="min-h-full"
                 disabled={disable_stop_input?(@form[:route_ids].value)}
                 prompt={
-                  if disable_stop_input?(@form[:route_ids].value), do: "", else: "Both Directions"
+                  if disable_stop_input?(@form[:route_ids].value),
+                    do: nil,
+                    else: "All Stops"
                 }
-                class="min-w-[30rem]"
               />
             <% end %>
-
-            <%= if show_stops_input?(assigns) do %>
-              <div class="min-h-[90%]">
-                <.filtered_select
-                  field={@form[:stop_ids]}
-                  filter_field={@form[:stop_ids_filter]}
-                  options={@stop_id_options}
-                  loading={
-                    Enum.empty?(@stop_id_options) and !disable_stop_input?(@form[:route_ids].value)
-                  }
-                  class="min-w-[24rem] min-h-[30rem] h-[30rem]"
-                  disabled={disable_stop_input?(@form[:route_ids].value)}
-                  prompt={
-                    if disable_stop_input?(@form[:route_ids].value),
-                      do: nil,
-                      else: "All Stops"
-                  }
-                />
-              </div>
-            <% end %>
           </div>
-        </fieldset>
+        </div>
       </.form>
-      <hr />
+      <hr class="mt-4" />
     </div>
     """
   end
