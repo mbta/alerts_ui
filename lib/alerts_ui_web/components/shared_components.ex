@@ -590,7 +590,7 @@ defmodule AlertsUIWeb.SharedComponents do
       </.label>
       <div
         class={[
-          "flex flex-col rounded border grow
+          "flex flex-col rounded border grow h-2
           border-bg-elevation-6 ring-0 ring-border-focus
           focus:ring-1 focus:border-border-focus
           focus-within:ring-1 focus-within:border-border-focus",
