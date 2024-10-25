@@ -65,10 +65,13 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       notification_period_start: "",
       active_period_start: current_time |> naive_datetime_to_iso8601(),
       active_period_start_date: current_time |> NaiveDateTime.to_date(),
+      active_period_start_time: current_time |> NaiveDateTime.to_time(),
       active_period_end:
         ActivePeriod.end_of_service_datetime(current_time)
         |> DateTime.to_naive()
         |> naive_datetime_to_iso8601,
+      active_period_end_time:
+        ActivePeriod.end_of_service_datetime(current_time) |> DateTime.to_time(),
       active_period_end_date: ActivePeriod.end_of_service_date(current_time)
     }
 
@@ -470,6 +473,14 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         />
       </div>
     </div>
+    <div :if={@form[:alert_timing].value in [:"one-time", "one-time"]} class="flex flex-col">
+      <div>
+        <%= "start datetime: " <> (@form[:active_period_start].value |> formatted_datetime) %>
+      </div>
+      <div>
+        <%= "end datetime: " <> (@form[:active_period_end].value |> formatted_datetime) %>
+      </div>
+    </div>
     """
   end
 
@@ -561,6 +572,22 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       use_outline_buttons={true}
       show_icons={false}
     />
+    <div :if={@form[:alert_timing].value === :recurring} class="flex flex-col">
+      <div>
+        start time: <%= @form[:active_period_start_time].value || "" %>
+      </div>
+      <div>
+        end time: <%= @form[:active_period_end_time].value || "" %>
+      </div>
+      <div>
+        <%= "start date: " <>
+          (@form[:active_period_start_date].value |> formatted_datetime("{0M}/{0D}/{YYYY}")) %>
+      </div>
+      <div>
+        <%= "end date: " <>
+          (@form[:active_period_end_date].value |> formatted_datetime("{0M}/{0D}/{YYYY}")) %>
+      </div>
+    </div>
     """
   end
 
@@ -591,5 +618,15 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       name = value |> Atom.to_string() |> String.replace("_", " ") |> String.capitalize()
       {name, value}
     end)
+  end
+
+  defp formatted_datetime(datetime, format_string \\ "{0M}/{0D}/{YYYY}, {0h12}:{0m} {AM}")
+  defp formatted_datetime(nil, _), do: ""
+
+  defp formatted_datetime(datetime, format_string) do
+    case Timex.format(datetime, format_string) do
+      {:ok, formatted_time} -> formatted_time
+      {:error, _} -> "invalid datetime"
+    end
   end
 end
