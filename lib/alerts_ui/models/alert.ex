@@ -199,6 +199,7 @@ defmodule AlertsUI.Models.Alert do
     |> validate_inclusion(:duration_certainty, @duration_certainty)
     |> validate_required([:header_text], message: "is required")
     |> validate_length(:informed_entity, min: 1)
+    |> validate_length(:active_period, min: 1)
     |> unique_constraint(:alert_id)
   end
 
