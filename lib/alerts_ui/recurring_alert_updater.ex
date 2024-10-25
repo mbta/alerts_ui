@@ -46,7 +46,7 @@ defmodule AlertsUI.RecurringAlertUpdater do
 
   @spec log_results({integer(), :ok} | {integer(), {:error, String.t()}}) :: :ok
   defp log_results({export_time, :ok}),
-    do: Logger.info("#{__MODULE__}: Wrote alerts feed: time_ms=#{export_time / 1_000}")
+    do: Logger.info("#{__MODULE__}: Updated recurring alerts: time_ms=#{export_time / 1_000}")
 
   defp log_results({_, {:error, errors}}),
     do: Logger.warning("Error updating recurring alerts: #{Enum.join(errors, ", ")}")
