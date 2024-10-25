@@ -512,10 +512,10 @@ defmodule AlertsUIWeb.SharedComponents do
         id={@id}
         name={@name}
         class={[
-          "bg-bg-elevation-5 border border-bg-elevation-6 pl-3 min-w-[99%] p-0 [color-scheme:light]
+          "bg-bg-elevation-5 border border-bg-elevation-6 px-3 min-w-[99%] p-0 [color-scheme:light]
             rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto
             disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
-            focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) h-10 [&>*]:mb-[.25rem] [&>*]:truncate",
+            focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) h-10 [&_*]:pb-[.40rem] [&_*]:whitespace-pre-wrap [&_*]:truncate",
           @select_class,
           @errors != [] && "border-danger focus:border-danger"
         ]}
@@ -550,6 +550,8 @@ defmodule AlertsUIWeb.SharedComponents do
   attr :label, :string, default: nil
 
   attr :class, :string, default: "", doc: "additional classes to add"
+
+  attr :select_class, :string, default: "", doc: "additional classes to add to select component"
 
   attr :loading, :boolean, default: false, doc: "in loading state if true"
 
@@ -615,8 +617,8 @@ defmodule AlertsUIWeb.SharedComponents do
           prompt={if @loading, do: "Loading...", else: @prompt}
           disabled={@disabled}
           class="m-0"
-          select_class="min-w-full pt-0 mt-0 [scrollbar-width:thin] overflow-auto
-            border-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-t-none [appearance:none] max-w-[100%] h-full"
+          select_class={"min-w-full pt-0 mt-0 [scrollbar-width:thin] overflow-auto
+            border-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-t-none [appearance:none] max-w-[100%] h-full " <> @select_class}
           {@rest}
         />
       </div>
