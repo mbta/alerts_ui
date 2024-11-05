@@ -504,21 +504,18 @@ defmodule AlertsUIWeb.SharedComponents do
       |> assign_new(:value, fn -> field.value end)
 
     ~H"""
-    <div phx-feedback-for={@name} class={["#{@class}", @hidden && "hidden"]}>
-      <.label
-        for={@id}
-        class={(if is_nil(@label), do: "hidden ", else: "") <> (if @disabled, do: "text-text-disabled", else: "")}
-      >
+    <div phx-feedback-for={@name} class={["#{@class}", @hidden && "hidden", "h-full"]}>
+      <.label :if={@label} for={@id} class={if @disabled, do: "text-text-disabled", else: ""}>
         <%= @label %>
       </.label>
       <select
         id={@id}
         name={@name}
         class={[
-          "bg-bg-elevation-5 border border-bg-elevation-6 pl-3 min-w-[99%] p-0 [color-scheme:light]
+          "bg-bg-elevation-5 border border-bg-elevation-6 px-3 min-w-[99%] p-0 [color-scheme:light]
             rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto
             disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
-            focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) h-10",
+            focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) h-10 [&_*]:pb-[.40rem] [&_*]:whitespace-pre-wrap [&_*]:truncate",
           @select_class,
           @errors != [] && "border-danger focus:border-danger"
         ]}
@@ -553,6 +550,8 @@ defmodule AlertsUIWeb.SharedComponents do
   attr :label, :string, default: nil
 
   attr :class, :string, default: "", doc: "additional classes to add"
+
+  attr :select_class, :string, default: "", doc: "additional classes to add to select component"
 
   attr :loading, :boolean, default: false, doc: "in loading state if true"
 
@@ -593,12 +592,12 @@ defmodule AlertsUIWeb.SharedComponents do
       </.label>
       <div
         class={[
-          "min-h-[100%] grow min-w-fit flex flex-col rounded border
-          bg-bg-elevation-5 disabled:bg-bg-elevation-3
+          "flex flex-col rounded border grow h-2
           border-bg-elevation-6 ring-0 ring-border-focus
           focus:ring-1 focus:border-border-focus
           focus-within:ring-1 focus-within:border-border-focus",
-          @errors != [] && "border-danger focus:border-danger"
+          @errors != [] && "border-danger focus:border-danger",
+          if(@disabled, do: "bg-bg-elevation-3", else: "bg-bg-elevation-5")
         ]}
         {@rest}
       >
@@ -610,17 +609,16 @@ defmodule AlertsUIWeb.SharedComponents do
           {@rest}
         />
         <hr class="w-5/6 self-center border-y-1 border-bg-elevation-6 min-h-[1rem]" />
-        <div :if={@loading} class="-mt-4 ml-4 z-50">Loading ...</div>
         <.select
           multiple={@multiple}
           size="20"
           options={@options}
           field={@field}
-          prompt={if @loading, do: nil, else: @prompt}
+          prompt={if @loading, do: "Loading...", else: @prompt}
           disabled={@disabled}
-          class="min-h-[100%] h-[100%] m-0"
-          select_class="min-w-full min-h-[87%] pt-0 mt-0 [scrollbar-width:thin] overflow-auto
-            border-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-t-none [appearance:none]"
+          class="m-0"
+          select_class={"min-w-full pt-0 mt-0 [scrollbar-width:thin] overflow-auto
+            border-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-t-none [appearance:none] max-w-[100%] h-full " <> @select_class}
           {@rest}
         />
       </div>

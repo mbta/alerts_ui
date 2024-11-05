@@ -221,28 +221,27 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         for={@form}
         phx-target={@myself}
         phx-change="validate"
-        class="form-control gap-4 mb-16 min-h-[30rem]"
+        class="form-control gap-4 mb-16 flex flex-row gap-x-8"
         id="service_form"
       >
-        <fieldset class="flex flex-row gap-x-12 min-h-[30rem]">
-          <.filtered_select
-            label="Stops"
-            field={@form[:stop_ids]}
-            loading={Enum.empty?(@stop_id_options)}
-            filter_field={@form[:stop_ids_filter]}
-            options={@stop_id_options}
-            class="min-w-[24rem] min-h-[30rem]"
-          />
-          <.filtered_select
-            label="Routes"
-            field={@form[:route_ids]}
-            filter_field={@form[:route_ids_filter]}
-            loading={Enum.empty?(@route_id_options) and !disable_routes_input?(assigns)}
-            disabled={disable_routes_input?(assigns)}
-            options={@route_id_options}
-            class="min-w-[18rem]"
-          />
-        </fieldset>
+        <.filtered_select
+          label="Stops"
+          field={@form[:stop_ids]}
+          loading={Enum.empty?(@stop_id_options)}
+          filter_field={@form[:stop_ids_filter]}
+          options={@stop_id_options}
+          class="min-w-[25%]"
+        />
+        <.filtered_select
+          label="Routes"
+          field={@form[:route_ids]}
+          filter_field={@form[:route_ids_filter]}
+          loading={Enum.empty?(@route_id_options) and !disable_routes_input?(assigns)}
+          disabled={disable_routes_input?(assigns)}
+          id="stop_route_routes"
+          options={@route_id_options}
+          class="min-w-[25%]"
+        />
       </.form>
       <hr />
     </div>

@@ -189,17 +189,17 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
         for={@form}
         phx-target={@myself}
         phx-change="validate"
-        class="form-control mb-16 min-h-[30rem]"
+        class="form-control mb-16 min-h-[40rem]"
         id="service_form"
       >
-        <fieldset class="flex flex-row gap-x-12 min-h-[30rem]">
+        <fieldset class="flex flex-row gap-x-8 min-h-[40rem]">
           <.filtered_select
             label="Stops"
             field={@form[:stop_ids]}
             filter_field={@form[:stop_ids_filter]}
             options={@stop_id_options}
             loading={Enum.empty?(@stop_id_options)}
-            class="min-w-[18rem] min-h-[30rem]"
+            class="min-w-[25%] min-h-[40rem]"
             prompt="All Stops"
           />
           <.filtered_select
@@ -207,7 +207,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             field={@form[:facility_types]}
             filter_field={@form[:facility_types_filter]}
             options={@facility_type_options}
-            class="min-w-[18rem]"
+            class="min-w-[25%]"
             prompt="All Categories"
           />
           <.filtered_select
@@ -216,12 +216,13 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             filter_field={@form[:facility_id_filter]}
             options={@facility_id_options}
             loading={Enum.empty?(@facility_id_options)}
-            class="min-w-[18rem]"
+            class="min-w-[25%] max-w-[25%]"
             multiple={false}
+            select_class="max-h-[90%]"
           />
         </fieldset>
       </.form>
-      <hr />
+      <hr class="mt-8" />
     </div>
     """
   end

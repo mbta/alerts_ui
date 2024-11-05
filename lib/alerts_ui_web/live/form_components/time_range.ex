@@ -377,34 +377,32 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         class="form-control gap-4"
         id="time_range_form"
       >
-        <fieldset class="">
-          <.select
-            label="Alert timing"
-            field={@form[:alert_timing]}
-            options={values_to_options(@alert_timing_values)}
-            class="min-w-[16rem] max-w-[16rem]"
+        <.select
+          label="Alert timing"
+          field={@form[:alert_timing]}
+          options={values_to_options(@alert_timing_values)}
+          class="min-w-[16rem] max-w-[16rem]"
+          phx-debounce={120}
+          phx-change="alert_timing_change"
+          phx-target={@myself}
+        />
+        <%= one_time_alert_component(assigns) %>
+        <%= recurring_alert_component(assigns) %>
+        <div
+          :if={@form[:alert_timing].value === :scheduled}
+          id="scheduled-selector-div"
+          class="flex flex-row gap-8 my-8"
+        >
+          <.datetime
+            label="Schedule alert for date and time"
+            field={@form[:notification_period_start]}
+            min={@form[:active_period_start].value}
+            max={@form[:active_period_end].value}
+            value={@form[:notification_period_start].value}
+            class="min-w-[16rem] h-10"
             phx-debounce={120}
-            phx-change="alert_timing_change"
-            phx-target={@myself}
           />
-          <%= one_time_alert_component(assigns) %>
-          <%= recurring_alert_component(assigns) %>
-          <div
-            :if={@form[:alert_timing].value === :scheduled}
-            id="scheduled-selector-div"
-            class="flex flex-row gap-8 my-8"
-          >
-            <.datetime
-              label="Schedule alert for date and time"
-              field={@form[:notification_period_start]}
-              min={@form[:active_period_start].value}
-              max={@form[:active_period_end].value}
-              value={@form[:notification_period_start].value}
-              class="min-w-[16rem] h-10"
-              phx-debounce={120}
-            />
-          </div>
-        </fieldset>
+        </div>
       </.form>
       <hr class="mt-8" />
     </div>
