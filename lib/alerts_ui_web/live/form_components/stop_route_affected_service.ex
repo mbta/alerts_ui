@@ -244,7 +244,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
           class="min-w-[25%]"
         />
       </.form>
-      <hr />
+      <hr class="mt-4" />
     </div>
     """
   end
