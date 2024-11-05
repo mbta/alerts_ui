@@ -213,7 +213,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     changeset
     |> TimeRangeValidators.validate_required_fields(time_range)
     |> apply_action(:validate)
-    # |> IO.inspect
     |> case do
       {:ok, changes} ->
         send(self(), {:add_errors, [], __MODULE__})
@@ -425,9 +424,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         />
         <.datetime
           field={@form[:active_period_start]}
-          min={@current_time |> naive_datetime_to_iso8601()}
-          max={@form[:active_period_end].value}
-          value={@form[:active_period_start].value}
+          min={naive_datetime_to_iso8601(@current_time)}
+          max={naive_datetime_to_iso8601(@form[:active_period_end].value)}
+          value={naive_datetime_to_iso8601(@form[:active_period_start].value)}
           label="Start datetime"
           class={"min-w-[16rem] h-10 " <> (if @form[:active_period_start_specifier].value === :custom, do: "", else: "hidden")}
           phx-debounce={120}
@@ -454,8 +453,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         />
         <.datetime
           field={@form[:active_period_end]}
-          min={@form[:active_period_start].value}
-          value={@form[:active_period_end].value}
+          min={naive_datetime_to_iso8601(@form[:active_period_start].value)}
+          value={naive_datetime_to_iso8601(@form[:active_period_end].value)}
           label="End datetime"
           class={"min-w-[16rem] h-10 " <> (if @form[:active_period_end_specifier].value === :custom, do: "", else: "hidden")}
           phx-debounce={120}
@@ -498,7 +497,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
             label="Effect start time"
             type="time"
             field={@form[:active_period_start_time]}
-            value={@form[:active_period_start_time].value}
+            value={time_to_iso8601(@form[:active_period_start_time].value)}
             class={"min-w-[16rem] h-10 " <> (if @form[:active_period_start_time_specifier].value === :custom, do: "", else: "hidden")}
             phx-debounce={120}
           />
@@ -516,7 +515,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
             label="Effect end time"
             type="time"
             field={@form[:active_period_end_time]}
-            value={@form[:active_period_end_time].value}
+            value={time_to_iso8601(@form[:active_period_end_time].value)}
             class={"min-w-[16rem] h-10 " <> (if @form[:active_period_end_time_specifier].value === :custom, do: "", else: "hidden")}
             phx-debounce={120}
           />
@@ -572,10 +571,10 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     />
     <div :if={@form[:alert_timing].value === :recurring} class="flex flex-col">
       <div>
-        start time: <%= @form[:active_period_start_time].value || "" %>
+        start time: <%= time_to_iso8601(@form[:active_period_start_time].value) %>
       </div>
       <div>
-        end time: <%= @form[:active_period_end_time].value || "" %>
+        end time: <%= time_to_iso8601(@form[:active_period_end_time].value) %>
       </div>
       <div>
         <%= "start date: " <>
@@ -583,7 +582,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       </div>
       <div>
         <%= "end date: " <>
-          (@form[:active_period_end_date].value |> formatted_datetime("{0M}/{0D}/{YYYY}")) %>
+          if @form[:active_period_end_specifier].value == :custom,
+            do: @form[:active_period_end_date].value |> formatted_datetime("{0M}/{0D}/{YYYY}"),
+            else: "-" %>
       </div>
     </div>
     """
@@ -608,8 +609,17 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       datetime
       |> NaiveDateTime.truncate(:second)
       |> NaiveDateTime.to_iso8601()
+      |> String.slice(0..-4//1)
 
   defp naive_datetime_to_iso8601(_), do: ""
+
+  defp time_to_iso8601(%Time{} = time),
+    do:
+      time
+      |> Time.to_iso8601()
+      |> String.slice(0..-4//1)
+
+  defp time_to_iso8601(_), do: ""
 
   defp values_to_options(values) do
     Enum.map(values, fn value ->
