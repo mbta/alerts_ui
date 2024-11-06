@@ -172,8 +172,19 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     time_range =
       case time_range["alert_timing"] do
         "one-time" ->
-          start_datetime = set_start_datetime(time_range, socket.assigns.current_time)
-          end_datetime = set_end_datetime(time_range, socket.assigns.current_time)
+          start_datetime =
+            set_start_datetime(
+              time_range,
+              socket.assigns.current_time,
+              socket.assigns.form.params["active_period_start_specifier"]
+            )
+
+          end_datetime =
+            set_end_datetime(
+              time_range,
+              socket.assigns.current_time,
+              socket.assigns.form.params["active_period_end_specifier"]
+            )
 
           Map.merge(time_range, %{
             "active_period_start" => start_datetime,
@@ -191,7 +202,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
             "active_period_start_date" => start_date
           })
 
-        _ ->
+        "scheduled" ->
           time_range
       end
 
@@ -206,12 +217,12 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           time_range
         )
         |> TimeRangeValidators.validate_notification(time_range)
+        |> TimeRangeValidators.validate_required_fields(time_range)
       else
         changeset
       end
 
     changeset
-    |> TimeRangeValidators.validate_required_fields(time_range)
     |> apply_action(:validate)
     |> case do
       {:ok, changes} ->
@@ -262,7 +273,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     {:noreply, assign(socket, %{form: form})}
   end
 
-  defp set_start_datetime(time_range, current_time) do
+  defp set_start_datetime(time_range, current_time, previous_state) do
     case time_range["active_period_start_specifier"] do
       "now" ->
         current_time |> naive_datetime_to_iso8601()
@@ -278,7 +289,11 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         |> naive_datetime_to_iso8601()
 
       "custom" ->
-        time_range["active_period_start"] |> String.pad_trailing(19, ":00")
+        if previous_state !== "custom" do
+          current_time |> naive_datetime_to_iso8601()
+        else
+          time_range["active_period_start"]
+        end
     end
   end
 
@@ -303,7 +318,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     end
   end
 
-  defp set_end_datetime(time_range, current_time) do
+  defp set_end_datetime(time_range, current_time, previous_state) do
     case time_range["active_period_end_specifier"] do
       "later_today" ->
         if time_range["active_period_end_date"] in [nil, ""] do
@@ -335,7 +350,11 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         ""
 
       "custom" ->
-        time_range["active_period_end"]
+        if previous_state !== "custom" do
+          current_time |> naive_datetime_to_iso8601()
+        else
+          time_range["active_period_end"]
+        end
     end
   end
 
