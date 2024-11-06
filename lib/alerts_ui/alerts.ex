@@ -77,14 +77,23 @@ defmodule AlertsUI.Alerts do
   defp end_is_past(current_time, end_time),
     do: DateTime.compare(current_time, end_time) in [:eq, :gt]
 
-  def update_recurring_active_periods(alert, current_time \\ DateTime.utc_now()) do
+  @spec update_recurring_active_periods(Alert.t(), DateTime.t()) ::
+          {:ok, Alert.t()} | {:error, binary()}
+  def update_recurring_active_periods(alert, current_time \\ DateTime.utc_now())
+
+  def update_recurring_active_periods(
+        %{active_period: [_ | _], recurrence_days: [_ | _]} = alert,
+        current_time
+      ) do
+    %{start: last_ap_start, end: last_ap_end} = alert.active_period |> Enum.reverse() |> hd
     weekday_integers = Enum.map(alert.recurrence_days, &Timex.day_to_num/1)
 
-    %{start: last_ap_start, end: last_ap_end} = alert.active_period |> Enum.reverse() |> hd
     last_ap_start_date = DateTime.to_date(last_ap_start)
 
     next_day_modifier =
-      if Date.compare(DateTime.to_date(last_ap_end), last_ap_start_date) == :gt, do: 1, else: 0
+      if Date.compare(DateTime.to_date(last_ap_end), last_ap_start_date) == :gt,
+        do: 1,
+        else: 0
 
     last_ap_start
     |> DateTime.to_date()
@@ -113,6 +122,8 @@ defmodule AlertsUI.Alerts do
       end
     end)
   end
+
+  def update_recurring_active_periods(alert, _current_time), do: {:ok, alert}
 
   @spec filter_on_notification_period_start([Alert.t()], DateTime.t()) :: [Alert.t()]
   def filter_on_notification_period_start(alerts, current_time \\ DateTime.utc_now()) do
