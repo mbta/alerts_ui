@@ -72,13 +72,14 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
         class="form-control"
         id="systemwide-affected-service-form"
       >
-        <fieldset class="mb-8 min-h-36 max-w-[25%]">
+        <fieldset class="mb-8 min-h-36 max-w-[15%]">
           <.toggle_checkgroup
             label="Service types impacted"
             field={@form[:service_types]}
             options={service_type_options()}
             show_icons={true}
             class="flex-col"
+            button_class="min-w-[100%]"
           />
         </fieldset>
       </.form>
