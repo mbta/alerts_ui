@@ -65,13 +65,12 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       notification_period_start: "",
       active_period_start: current_time |> naive_datetime_to_iso8601(),
       active_period_start_date: current_time |> NaiveDateTime.to_date(),
-      active_period_start_time: current_time |> NaiveDateTime.to_time(),
+      active_period_start_time: ActivePeriod.start_of_service_time(),
       active_period_end:
         ActivePeriod.end_of_service_datetime(current_time)
         |> DateTime.to_naive()
         |> naive_datetime_to_iso8601,
-      active_period_end_time:
-        ActivePeriod.end_of_service_datetime(current_time) |> DateTime.to_time(),
+      active_period_end_time: ActivePeriod.end_of_service_time(),
       active_period_end_date: ActivePeriod.end_of_service_date(current_time)
     }
 
@@ -169,21 +168,24 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         %{"time_range" => time_range},
         socket
       ) do
+    form_params = socket.assigns.form.params
+    current_time = socket.assigns.current_time
+
     time_range =
       case time_range["alert_timing"] do
         "one-time" ->
           start_datetime =
             set_start_datetime(
               time_range,
-              socket.assigns.current_time,
-              socket.assigns.form.params["active_period_start_specifier"]
+              current_time,
+              form_params["active_period_start_specifier"]
             )
 
           end_datetime =
             set_end_datetime(
               time_range,
-              socket.assigns.current_time,
-              socket.assigns.form.params["active_period_end_specifier"]
+              current_time,
+              form_params["active_period_end_specifier"]
             )
 
           Map.merge(time_range, %{
@@ -192,9 +194,21 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           })
 
         "recurring" ->
-          start_time = set_start_time(time_range)
-          end_time = set_end_time(time_range)
-          start_date = set_start_date(time_range, socket.assigns.current_time)
+          start_time =
+            set_start_time(
+              time_range,
+              current_time,
+              form_params["active_period_start_time_specifier"]
+            )
+
+          end_time =
+            set_end_time(
+              time_range,
+              current_time,
+              form_params["active_period_end_time_specifier"]
+            )
+
+          start_date = set_start_date(time_range, current_time)
 
           Map.merge(time_range, %{
             "active_period_start_time" => start_time,
@@ -297,17 +311,31 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     end
   end
 
-  defp set_start_time(time_range) do
+  defp set_start_time(time_range, current_time, previous_state) do
     case time_range["active_period_start_time_specifier"] do
-      "start_of_service" -> ActivePeriod.start_of_service_time()
-      "custom" -> time_range["active_period_start_time"]
+      "start_of_service" ->
+        ActivePeriod.start_of_service_time()
+
+      "custom" ->
+        if previous_state !== "custom" do
+          current_time |> NaiveDateTime.to_time() |> time_to_iso8601()
+        else
+          time_range["active_period_start_time"]
+        end
     end
   end
 
-  defp set_end_time(time_range) do
+  defp set_end_time(time_range, current_time, previous_state) do
     case time_range["active_period_end_time_specifier"] do
-      "end_of_service" -> ActivePeriod.end_of_service_time()
-      "custom" -> time_range["active_period_end_time"]
+      "end_of_service" ->
+        ActivePeriod.end_of_service_time()
+
+      "custom" ->
+        if previous_state !== "custom" do
+          current_time |> NaiveDateTime.to_time() |> time_to_iso8601()
+        else
+          time_range["active_period_end_time"]
+        end
     end
   end
 
@@ -656,4 +684,10 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       {:error, _} -> "invalid datetime"
     end
   end
+
+  defp time_to_iso8601(%Time{} = time),
+    do:
+      time
+      |> Time.to_iso8601()
+      |> String.slice(0..-4//1)
 end
