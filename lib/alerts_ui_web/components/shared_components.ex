@@ -878,7 +878,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :hidden, :boolean, default: false, doc: "hides component if true"
 
-  attr :rest, :global, include: ~w(disabled phx-debounce)
+  attr :rest, :global, include: ~w(disabled phx-debounce step)
 
   def datetime(%{field: %FormField{} = field} = assigns) do
     assigns =
@@ -896,7 +896,6 @@ defmodule AlertsUIWeb.SharedComponents do
         min={@min}
         max={@max}
         value={Form.normalize_value("datetime-local", @value)}
-        step="1"
         class={[
           "bg-bg-elevation-5 border border-border-primary pl-3 py-1.5 min-w-[99%] p-0
             rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto
