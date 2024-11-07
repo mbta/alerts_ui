@@ -5,6 +5,11 @@ defmodule AlertsUI.ActivePeriodBuilder do
     All incoming times are naive datetimes created in the eastern timezone
     and need to be converted to UTC datetimes
 
+    if the end_specifier for a one-time active period is :end_of_service,
+    the date has been shifted 1 day back
+    so that the user sees the date of the "service day", not the actual date.
+    thus in that case this code shifts it back 1 day forward
+
     active_period_end == nil is what we're looking at to tell
     if a recurring alert has no set end and thus needs updating
     Do not change that without also changing the recurring alert updater
@@ -43,7 +48,7 @@ defmodule AlertsUI.ActivePeriodBuilder do
     utc_start =
       build_one_time_active_period_start(naive_start, active_period_start_specifier, current_time)
 
-    utc_end = build_one_time_active_period_end(naive_end)
+    utc_end = build_one_time_active_period_end(naive_end, active_period_end_specifier)
 
     %{
       active_period_start: utc_start,
@@ -135,8 +140,16 @@ defmodule AlertsUI.ActivePeriodBuilder do
     naive_start |> naive_eastern_datetime_to_utc
   end
 
-  defp build_one_time_active_period_end(nil), do: nil
-  defp build_one_time_active_period_end(naive_end), do: naive_end |> naive_eastern_datetime_to_utc
+  defp build_one_time_active_period_end(nil, _), do: nil
+
+  defp build_one_time_active_period_end(naive_end, end_specifier) do
+    if end_specifier == :end_of_service do
+      naive_end |> NaiveDateTime.add(1, :day)
+    else
+      naive_end
+    end
+    |> naive_eastern_datetime_to_utc
+  end
 
   @spec naive_eastern_datetime_to_utc(NaiveDateTime.t() | nil) :: DateTime.t() | nil
   def naive_eastern_datetime_to_utc(nil), do: nil
