@@ -63,7 +63,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
     alert_data = %{
       notification_period_start: "",
-      active_period_start: current_time |> naive_datetime_to_iso8601(),
+      active_period_start: current_time,
       active_period_start_date: current_time |> NaiveDateTime.to_date(),
       active_period_start_time: ActivePeriod.start_of_service_time(),
       active_period_end:
@@ -71,7 +71,11 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         |> DateTime.to_naive()
         |> naive_datetime_to_iso8601,
       active_period_end_time: ActivePeriod.end_of_service_time(),
-      active_period_end_date: ActivePeriod.end_of_service_date(current_time)
+      active_period_end_date:
+        current_time
+        |> ActivePeriod.end_of_service_datetime()
+        |> shifted_active_period_end()
+        |> NaiveDateTime.to_date()
     }
 
     form = changeset(%__MODULE__{}, alert_data) |> to_form
@@ -349,37 +353,26 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   defp set_end_datetime(time_range, current_time, previous_state) do
     case time_range["active_period_end_specifier"] do
       "later_today" ->
-        if time_range["active_period_end_date"] in [nil, ""] do
-          current_time
-          |> ActivePeriod.end_of_service_datetime()
-          |> DateTime.to_naive()
-        else
-          time_range["active_period_end_date"]
-          |> Date.from_iso8601!()
-          |> Date.add(1)
-          |> NaiveDateTime.new!(ActivePeriod.end_of_service_time())
-        end
-        |> naive_datetime_to_iso8601()
+        current_time
+        |> ActivePeriod.end_of_service_datetime()
+        |> DateTime.to_naive()
 
       "end_of_service" ->
-        if time_range["active_period_end_date"] in ["", nil] do
-          current_time
-          |> ActivePeriod.end_of_service_datetime()
-          |> DateTime.to_naive()
+        if previous_state !== "end_of_service" do
+          shifted_active_period_end(current_time)
+          |> naive_datetime_to_iso8601()
         else
           time_range["active_period_end_date"]
           |> Date.from_iso8601!()
-          |> Date.add(1)
           |> NaiveDateTime.new!(ActivePeriod.end_of_service_time())
         end
-        |> naive_datetime_to_iso8601()
 
       "until_further_notice" ->
         ""
 
       "custom" ->
         if previous_state !== "custom" do
-          current_time |> naive_datetime_to_iso8601()
+          ""
         else
           time_range["active_period_end"]
         end
@@ -522,7 +515,17 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         <%= "start datetime: " <> (@form[:active_period_start].value |> formatted_datetime) %>
       </div>
       <div>
-        <%= "end datetime: " <> (@form[:active_period_end].value |> formatted_datetime) %>
+        <%= "end datetime: " <>
+          if !is_binary(@form[:active_period_end].value) do
+            @form[:active_period_end].value
+            |> NaiveDateTime.add(
+              if(@form[:active_period_end_specifier].value == :end_of_service, do: 1, else: 0),
+              :day
+            )
+            |> formatted_datetime
+          else
+            "-"
+          end %>
       </div>
     </div>
     """
@@ -660,11 +663,11 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   defp naive_datetime_to_iso8601(_), do: ""
 
-  defp time_to_iso8601(%Time{} = time),
-    do:
-      time
-      |> Time.to_iso8601()
-      |> String.slice(0..-4//1)
+  defp time_to_iso8601(%Time{} = time) do
+    time
+    |> Time.to_iso8601()
+    |> String.slice(0..-4//1)
+  end
 
   defp time_to_iso8601(_), do: ""
 
@@ -685,9 +688,10 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     end
   end
 
-  defp time_to_iso8601(%Time{} = time),
-    do:
-      time
-      |> Time.to_iso8601()
-      |> String.slice(0..-4//1)
+  defp shifted_active_period_end(datetime) do
+    datetime
+    |> ActivePeriod.end_of_service_datetime()
+    |> DateTime.add(-1, :day)
+    |> DateTime.to_naive()
+  end
 end
