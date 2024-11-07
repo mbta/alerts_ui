@@ -277,7 +277,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       assert alert_data.active_period_end_date == ~D[2024-05-02]
     end
 
-    test "handles known end-of-service duration at other time" do
+    test "handles known duration at other time" do
       insert(:alert, %{
         alert_id: "1",
         effect: :ACCESSIBILITY_ISSUE,

@@ -144,8 +144,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
     %{
       alert_timing: :"one-time",
-      active_period_start: shift_to_naive(alert.active_period_start),
-      active_period_end: shift_to_naive(alert.active_period_end),
+      active_period_start: active_period_start,
+      active_period_end: active_period_end(active_period_end, end_specifier),
       active_period_end_date: end_date(active_period_end, end_specifier),
       active_period_start_date: start_date(active_period_start),
       active_period_start_specifier: determine_start_specifier(active_period_start),
@@ -185,6 +185,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   def end_date(ap_end, :end_of_service), do: ap_end |> NaiveDateTime.to_date() |> Date.add(-1)
   def end_date(ap_end, :later_today), do: ap_end |> NaiveDateTime.to_date() |> Date.add(-1)
   def end_date(ap_end, _), do: ap_end |> NaiveDateTime.to_date()
+
+  def active_period_end(nil, _), do: nil
+  def active_period_end(ap_end, :end_of_service), do: ap_end |> NaiveDateTime.add(-1, :day)
+  def active_period_end(ap_end, :later_today), do: ap_end |> NaiveDateTime.add(-1, :day)
+  def active_period_end(ap_end, _), do: ap_end
 
   def determine_start_specifier(nil), do: nil
 
