@@ -33,7 +33,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                description_text: "description text",
                service_types: [],
                reminder_times: [~N[2024-09-24 20:01:00]],
-               alert_timing: :"one-time"
+               alert_timing: "one-time"
              }
     end
 
@@ -65,7 +65,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                description_text: "description text",
                service_types: [],
                reminder_times: [~N[2024-09-24 20:01:00]],
-               alert_timing: :"one-time"
+               alert_timing: "one-time"
              }
     end
 
@@ -93,7 +93,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                header_text: "cool header text",
                description_text: "description text",
                reminder_times: [~N[2024-09-24 20:01:00]],
-               alert_timing: :"one-time"
+               alert_timing: "one-time"
              }
     end
 
@@ -154,7 +154,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                cause_detail: "hazmat condition",
                severity: 3,
                reminder_times: [~N[2024-05-02 12:10:34], ~N[2024-05-02 12:11:34]],
-               alert_timing: :"one-time"
+               alert_timing: "one-time"
              }
     end
 
@@ -181,7 +181,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                header_text: "cool header text",
                description_text: "description text",
                reminder_times: [~N[2024-09-24 20:01:00]],
-               alert_timing: :"one-time"
+               alert_timing: "one-time"
              }
     end
 
@@ -210,7 +210,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                header_text: "cool header text",
                description_text: "description text",
                reminder_times: [~N[2024-09-24 20:01:00]],
-               alert_timing: :"one-time"
+               alert_timing: "one-time"
              }
     end
 
@@ -377,7 +377,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       })
 
       alert = AlertData.build_alert_data("1")
-      assert alert.alert_timing == :recurring
+      assert alert.alert_timing == "recurring"
       assert alert.recurrence_days == [:thursday, :friday, :saturday]
       assert alert.active_period_start_specifier == :custom
       assert alert.active_period_end_specifier == :custom
@@ -420,7 +420,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       })
 
       alert = AlertData.build_alert_data("1")
-      assert alert.alert_timing == :recurring
+      assert alert.alert_timing == "recurring"
       assert alert.recurrence_days == [:thursday, :saturday]
       assert alert.active_period_start_specifier == :custom
       assert alert.active_period_end_specifier == :until_further_notice
