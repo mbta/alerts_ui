@@ -24,7 +24,8 @@ defmodule AlertsUIWeb.FormComponents.TimelineTest do
   @assigns %{
     id: "timeline",
     steps: @steps,
-    progress: hd(@steps)
+    progress: hd(@steps),
+    editing: false
   }
 
   describe "previous_steps/3" do
