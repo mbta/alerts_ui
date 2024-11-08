@@ -5,16 +5,27 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
   import Ecto.Changeset
 
   @spec validate_relationships(Ecto.Changeset.t(), String.t(), map()) :: Ecto.Changeset.t()
+  def validate_relationships(changeset, "one-time", %{"active_period_start" => ""}), do: changeset
+  def validate_relationships(changeset, "one-time", %{"active_period_end" => ""}), do: changeset
+
   def validate_relationships(changeset, "one-time", time_range) do
+    naive_start = ensure_naive_datetime_format(time_range["active_period_start"])
+    naive_end = ensure_naive_datetime_format(time_range["active_period_end"])
+
+    end_shift = if time_range["active_period_end_specifier"] == "end_of_service", do: 1, else: 0
+
     changeset
     |> validate_change(:active_period_start, fn :active_period_start, active_period_start ->
       validate_active_period_start(
         active_period_start,
-        time_range["active_period_end"]
+        naive_end |> NaiveDateTime.add(end_shift, :day)
       )
     end)
     |> validate_change(:active_period_end, fn :active_period_end, active_period_end ->
-      validate_active_period_end(active_period_end, time_range["active_period_start"])
+      validate_active_period_end(
+        active_period_end |> NaiveDateTime.add(end_shift, :day),
+        naive_start
+      )
     end)
   end
 
@@ -38,7 +49,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
 
   def validate_relationships(changeset, _, _), do: changeset
 
-  defp validate_active_period_start(active_period_start, %NaiveDateTime{} = active_period_end) do
+  defp validate_active_period_start(active_period_start, active_period_end) do
     if NaiveDateTime.compare(
          active_period_start,
          active_period_end
@@ -48,16 +59,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
         active_period_start_date:
           "Effect must start before #{formatted_datetime(active_period_end, "{0M}/{0D}/{YYYY}")}"
       ]
-    else
-      []
-    end
-  end
-
-  defp validate_active_period_start(active_period_start, active_period_end) do
-    {end_validity, end_time} = NaiveDateTime.from_iso8601(active_period_end)
-
-    if end_validity === :ok do
-      validate_active_period_start(active_period_start, end_time)
     else
       []
     end
@@ -90,7 +91,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
     end
   end
 
-  defp validate_active_period_end(active_period_end, %NaiveDateTime{} = active_period_start) do
+  defp validate_active_period_end(active_period_end, active_period_start) do
     if NaiveDateTime.compare(
          active_period_end,
          active_period_start
@@ -100,16 +101,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
         active_period_end_date:
           "Effect must end after #{formatted_datetime(active_period_start, "{0M}/{0D}/{YYYY}")}"
       ]
-    else
-      []
-    end
-  end
-
-  defp validate_active_period_end(active_period_end, active_period_start) do
-    {start_validity, start_time} = NaiveDateTime.from_iso8601(active_period_start)
-
-    if start_validity === :ok do
-      validate_active_period_end(active_period_end, start_time)
     else
       []
     end
@@ -277,4 +268,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
 
   defp formatted_datetime(datetime, format_string \\ "{0M}/{0D}/{YYYY}, {0h12}:{0m} {AM}"),
     do: Timex.format!(datetime, format_string)
+
+  defp ensure_naive_datetime_format(datetime) when is_binary(datetime) do
+    datetime |> String.pad_trailing(19, ":00") |> NaiveDateTime.from_iso8601!()
+  end
+
+  defp ensure_naive_datetime_format(%NaiveDateTime{} = datetime), do: datetime
 end

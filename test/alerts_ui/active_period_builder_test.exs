@@ -92,12 +92,12 @@ defmodule AlertsUI.ActivePeriodBuilderTest do
       assert result.active_period_start == ~U[2024-04-30 05:54:00Z]
     end
 
-    test "builds active period with end value end_of_service_today when time is before midnight" do
+    test "builds active period with end value later_today when time is before midnight" do
       alert_data =
         %{
           active_period_start: ~N[2024-04-30 11:54:00],
           active_period_end: NaiveDateTime.new!(~D[2024-05-01], @end_of_service_eastern),
-          active_period_end_specifier: :end_of_service,
+          active_period_end_specifier: :later_today,
           active_period_start_specifier: :custom
         }
 
@@ -113,15 +113,15 @@ defmodule AlertsUI.ActivePeriodBuilderTest do
 
       assert result.active_period_start == ~U[2024-04-30 15:54:00Z]
       assert result.active_period_end == DateTime.new!(~D[2024-05-01], @end_of_service_utc)
-      assert result.duration_certainty == :KNOWN
+      assert result.duration_certainty == :ESTIMATED
     end
 
-    test "builds active period with end value end_of_service_today when time is after midnight" do
+    test "builds active period with end value later_today when time is after midnight" do
       alert_data =
         %{
           active_period_start: ~N[2024-04-30 01:54:00],
           active_period_end: NaiveDateTime.new!(~D[2024-04-30], @end_of_service_eastern),
-          active_period_end_specifier: :end_of_service,
+          active_period_end_specifier: :later_today,
           active_period_start_specifier: :custom
         }
 
@@ -137,6 +137,30 @@ defmodule AlertsUI.ActivePeriodBuilderTest do
 
       assert result.active_period_start == ~U[2024-04-30 05:54:00Z]
       assert result.active_period_end == DateTime.new!(~D[2024-04-30], @end_of_service_utc)
+      assert result.duration_certainty == :ESTIMATED
+    end
+
+    test "builds active period with end value end_of_service with properly shifted date" do
+      alert_data =
+        %{
+          active_period_start: ~N[2024-04-30 11:54:00],
+          active_period_end: NaiveDateTime.new!(~D[2024-05-01], @end_of_service_eastern),
+          active_period_end_specifier: :end_of_service,
+          active_period_start_specifier: :custom
+        }
+
+      result =
+        ActivePeriodBuilder.build_one_time_active_period(alert_data, ~U[2024-04-15 05:54:00Z])
+
+      assert result.active_period == [
+               %{
+                 start: ~U[2024-04-30 15:54:00Z],
+                 end: DateTime.new!(~D[2024-05-02], @end_of_service_utc)
+               }
+             ]
+
+      assert result.active_period_start == ~U[2024-04-30 15:54:00Z]
+      assert result.active_period_end == DateTime.new!(~D[2024-05-02], @end_of_service_utc)
       assert result.duration_certainty == :KNOWN
     end
   end
