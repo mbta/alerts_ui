@@ -188,7 +188,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
   def active_period_end(nil, _), do: nil
   def active_period_end(ap_end, :end_of_service), do: ap_end |> NaiveDateTime.add(-1, :day)
-  def active_period_end(ap_end, :later_today), do: ap_end |> NaiveDateTime.add(-1, :day)
   def active_period_end(ap_end, _), do: ap_end
 
   def determine_start_specifier(nil), do: nil

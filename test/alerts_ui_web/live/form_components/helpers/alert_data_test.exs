@@ -248,7 +248,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         reminder_times: []
       })
 
-      assert AlertData.build_alert_data("1").active_period_end_specifier == :later_today
+      result = AlertData.build_alert_data("1")
+      assert result.active_period_end_specifier == :later_today
+      assert result.active_period_end == local_naive_from_utc(~U[2024-05-02 18:09:34Z])
     end
 
     test "handles known duration at an end-of-service-time" do
@@ -296,7 +298,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         duration_certainty: :KNOWN
       })
 
-      assert AlertData.build_alert_data("1").active_period_end_specifier == :custom
+      result = AlertData.build_alert_data("1")
+      assert result.active_period_end_specifier == :custom
+      assert result.active_period_end == local_naive_from_utc(~U[2024-05-02 17:09:34Z])
     end
 
     test "handles start specifier at start-of-service time" do
@@ -429,5 +433,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
   defp utc_datetime_from_local(date, time) do
     DateTime.new!(date, time, "America/New_York") |> DateTime.shift_zone!("Etc/UTC")
+  end
+
+  defp local_naive_from_utc(datetime) do
+    datetime |> DateTime.shift_zone!("America/New_York") |> DateTime.to_naive()
   end
 end

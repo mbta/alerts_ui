@@ -142,13 +142,15 @@ defmodule AlertsUI.ActivePeriodBuilder do
 
   defp build_one_time_active_period_end(nil, _), do: nil
 
-  defp build_one_time_active_period_end(naive_end, end_specifier) do
-    if end_specifier == :end_of_service do
-      naive_end |> NaiveDateTime.add(1, :day)
-    else
-      naive_end
-    end
+  defp build_one_time_active_period_end(naive_end, :end_of_service) do
+    # shift date to date of actual end-of-service
+    naive_end
+    |> NaiveDateTime.add(1, :day)
     |> naive_eastern_datetime_to_utc
+  end
+
+  defp build_one_time_active_period_end(naive_end, _) do
+    naive_eastern_datetime_to_utc(naive_end)
   end
 
   @spec naive_eastern_datetime_to_utc(NaiveDateTime.t() | nil) :: DateTime.t() | nil

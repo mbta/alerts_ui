@@ -78,7 +78,15 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         |> NaiveDateTime.to_date()
     }
 
-    form = changeset(%__MODULE__{}, alert_data) |> to_form
+    changeset = changeset(%__MODULE__{}, alert_data)
+
+    changes =
+      changeset
+      |> apply_action!(:validate)
+
+    send(self(), {:section_completed, changes})
+
+    form = changeset |> to_form
 
     socket =
       assign(socket, %{
