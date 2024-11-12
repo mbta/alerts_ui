@@ -40,8 +40,6 @@ defmodule AlertsUI.RecurringAlertUpdater do
     else
       {:error, errors}
     end
-
-    :ok
   end
 
   @spec log_results({integer(), :ok} | {integer(), {:error, String.t()}}) :: :ok
