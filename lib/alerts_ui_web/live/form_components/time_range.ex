@@ -141,6 +141,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   def update(%{submitted: submitted}, socket) do
     socket =
       if submitted do
+        current_time = current_time()
         form_params = socket.assigns.form.params
 
         changeset =
@@ -152,7 +153,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
             form_params
           )
           |> TimeRangeValidators.validate_notification(form_params)
-          |> TimeRangeValidators.validate_start_is_after_now(socket.assigns.current_time)
+          |> TimeRangeValidators.validate_start_is_after_now(current_time)
 
         errors =
           case changeset |> apply_action(:validate) do
@@ -166,7 +167,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           |> Map.put(:action, :validate)
           |> Map.put(:errors, errors)
 
-        assign(socket, form: form)
+        assign(socket, form: form, current_time: current_time)
       else
         socket
       end
@@ -220,12 +221,25 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
               form_params["active_period_end_time_specifier"]
             )
 
-          start_date = set_start_date(time_range, current_time)
+          start_date =
+            set_start_date(
+              time_range,
+              current_time,
+              form_params["active_period_end_time_specifier"]
+            )
+
+          end_date =
+            set_end_date(
+              time_range,
+              current_time,
+              form_params["active_period_end_time_specifier"]
+            )
 
           Map.merge(time_range, %{
             "active_period_start_time" => start_time,
             "active_period_end_time" => end_time,
-            "active_period_start_date" => start_date
+            "active_period_start_date" => start_date,
+            "active_period_end_date" => end_date
           })
 
         "scheduled" ->
@@ -242,6 +256,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           time_range["alert_timing"],
           time_range
         )
+        |> TimeRangeValidators.validate_start_is_after_now(socket.assigns.current_time)
         |> TimeRangeValidators.validate_notification(time_range)
         |> TimeRangeValidators.validate_required_fields(time_range)
       else
@@ -351,10 +366,35 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     end
   end
 
-  defp set_start_date(time_range, current_time) do
+  defp set_start_date(time_range, current_time, previous_state) do
     case time_range["active_period_start_specifier"] do
-      "now" -> current_time |> NaiveDateTime.to_date()
-      "custom" -> time_range["active_period_start_date"]
+      "now" ->
+        current_time |> NaiveDateTime.to_date()
+
+      "custom" ->
+        if previous_state !== "custom" do
+          current_time |> NaiveDateTime.to_date()
+        else
+          time_range["active_period_start_date"]
+        end
+    end
+  end
+
+  defp set_end_date(time_range, current_time, previous_state) do
+    case time_range["active_period_end_specifier"] do
+      "custom" ->
+        if previous_state !== "custom" do
+          shifted_active_period_end(current_time)
+          |> NaiveDateTime.to_date()
+        else
+          time_range["active_period_end_date"]
+        end
+
+      "until_further_notice" ->
+        ""
+
+      _ ->
+        time_range["active_period_end_date"]
     end
   end
 
@@ -640,9 +680,19 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       </div>
       <div>
         <%= "end date: " <>
-          if @form[:active_period_end_specifier].value == :custom,
-            do: @form[:active_period_end_date].value |> formatted_datetime("{0M}/{0D}/{YYYY}"),
-            else: "-" %>
+          if @form[:active_period_end_specifier].value == :custom do
+            @form[:active_period_end_date].value
+            |> Date.add(
+              if(
+                @form[:active_period_end_time_specifier].value in [:end_of_service, "end_of_service"],
+                do: 1,
+                else: 0
+              )
+            )
+            |> formatted_datetime("{0M}/{0D}/{YYYY}")
+          else
+            "-"
+          end %>
       </div>
     </div>
     """

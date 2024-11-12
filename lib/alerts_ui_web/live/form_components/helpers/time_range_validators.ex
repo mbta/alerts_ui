@@ -10,18 +10,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
 
   def validate_relationships(changeset, "one-time", time_range) do
     naive_start = ensure_naive_datetime_format(time_range["active_period_start"])
-    naive_end = ensure_naive_datetime_format(time_range["active_period_end"])
 
-    end_shift = if time_range["active_period_end_specifier"] == "end_of_service", do: 1, else: 0
+    end_shift =
+      if time_range["active_period_end_specifier"] == "end_of_service",
+        do: 1,
+        else: 0
 
-    changeset
-    |> validate_change(:active_period_start, fn :active_period_start, active_period_start ->
-      validate_active_period_start(
-        active_period_start,
-        naive_end |> NaiveDateTime.add(end_shift, :day)
-      )
-    end)
-    |> validate_change(:active_period_end, fn :active_period_end, active_period_end ->
+    validate_change(changeset, :active_period_end, fn :active_period_end, active_period_end ->
       validate_active_period_end(
         active_period_end |> NaiveDateTime.add(end_shift, :day),
         naive_start
@@ -48,21 +43,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
   end
 
   def validate_relationships(changeset, _, _), do: changeset
-
-  defp validate_active_period_start(active_period_start, active_period_end) do
-    if NaiveDateTime.compare(
-         active_period_start,
-         active_period_end
-       ) in [:gt] do
-      [
-        active_period_start: "Effect must start before #{formatted_datetime(active_period_end)}",
-        active_period_start_date:
-          "Effect must start before #{formatted_datetime(active_period_end, "{0M}/{0D}/{YYYY}")}"
-      ]
-    else
-      []
-    end
-  end
 
   defp validate_active_period_start_date(
          active_period_start_date,
