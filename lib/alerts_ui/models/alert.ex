@@ -183,10 +183,7 @@ defmodule AlertsUI.Models.Alert do
     |> cast_assoc(:reminder_times, required: false, with: &ReminderTime.changeset/2)
     |> validate_change(:active_period_start, fn :active_period_start, active_period_start ->
       if is_nil(current_time) or
-           DateTime.compare(active_period_start, DateTime.truncate(current_time, :second)) in [
-             :eq,
-             :gt
-           ] do
+           DateTime.diff(current_time, active_period_start, :minute) < 1 do
         []
       else
         [active_period_start: "Effect can't start in the past"]

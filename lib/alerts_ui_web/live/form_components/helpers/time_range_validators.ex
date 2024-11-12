@@ -232,10 +232,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
   def validate_start_is_after_now(changeset, current_time) do
     validate_change(changeset, :active_period_start, fn :active_period_start,
                                                         active_period_start ->
-      if NaiveDateTime.compare(
-           active_period_start,
-           current_time |> NaiveDateTime.truncate(:second)
-         ) in [:lt] do
+      if NaiveDateTime.diff(current_time, active_period_start, :minute) > 1 do
         [
           active_period_start: "Effect can't start in the past",
           active_period_start_date: "Effect can't start in the past"
