@@ -263,7 +263,9 @@ defmodule AlertsUIWeb.CreateAlertLive do
       else
         formatted_errors =
           errors
-          |> Enum.map_join("; ", fn {_title, {message, _error}} -> "#{message}" end)
+          |> Enum.map(fn {_title, {message, _error}} -> "#{message}" end)
+          |> Enum.uniq()
+          |> Enum.join(";")
 
         display_errors(socket, formatted_errors)
       end
@@ -336,6 +338,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
   defp format_errors(errors, combination) do
     errors
     |> ErrorFormatter.parse_field_errors(combination)
+    |> Enum.uniq()
     |> Enum.map_join("; ", fn {_title, {message, _error}} -> "#{message}" end)
   end
 

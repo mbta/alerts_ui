@@ -66,6 +66,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       active_period_start: current_time,
       active_period_start_date: current_time |> NaiveDateTime.to_date(),
       active_period_start_time: ActivePeriod.start_of_service_time(),
+      active_period_start_specifier: "now",
       active_period_end:
         ActivePeriod.end_of_service_datetime(current_time)
         |> DateTime.to_naive()
@@ -142,7 +143,17 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     socket =
       if submitted do
         current_time = current_time()
+
         form_params = socket.assigns.form.params
+
+        updated_start =
+          if form_params["active_period_start_specifier"] == "now" do
+            current_time
+          else
+            form_params["active_period_start"]
+          end
+
+        form_params = Map.put(form_params, "active_period_start", updated_start)
 
         changeset =
           %__MODULE__{}
@@ -225,14 +236,14 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
             set_start_date(
               time_range,
               current_time,
-              form_params["active_period_end_time_specifier"]
+              form_params["active_period_start_specifier"]
             )
 
           end_date =
             set_end_date(
               time_range,
               current_time,
-              form_params["active_period_end_time_specifier"]
+              form_params["active_period_end_specifier"]
             )
 
           Map.merge(time_range, %{
@@ -680,7 +691,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       </div>
       <div>
         <%= "end date: " <>
-          if @form[:active_period_end_specifier].value == :custom do
+          if @form[:active_period_end_specifier].value == :custom and
+               @form[:active_period_end_date].value not in ["", nil] do
             @form[:active_period_end_date].value
             |> Date.add(
               if(

@@ -26,13 +26,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
 
   def validate_relationships(changeset, "recurring", time_range) do
     changeset
-    |> validate_change(:active_period_start_date, fn :active_period_start_date,
-                                                     active_period_start_date ->
-      validate_active_period_start_date(
-        active_period_start_date,
-        time_range["active_period_end_date"]
-      )
-    end)
     |> validate_change(:active_period_end_date, fn :active_period_end_date,
                                                    active_period_end_date ->
       validate_active_period_end_date(
@@ -43,33 +36,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
   end
 
   def validate_relationships(changeset, _, _), do: changeset
-
-  defp validate_active_period_start_date(
-         active_period_start_date,
-         %Date{} = active_period_end_date
-       ) do
-    if Date.compare(
-         active_period_start_date,
-         active_period_end_date
-       ) in [:gt] do
-      [
-        active_period_start_date:
-          "Effect must start before #{formatted_datetime(active_period_end_date, "{0M}/{0D}/{YYYY}")}"
-      ]
-    else
-      []
-    end
-  end
-
-  defp validate_active_period_start_date(active_period_start_date, active_period_end_date) do
-    {end_validity, end_date} = Date.from_iso8601(active_period_end_date)
-
-    if end_validity === :ok do
-      validate_active_period_start_date(active_period_start_date, end_date)
-    else
-      []
-    end
-  end
 
   defp validate_active_period_end(active_period_end, active_period_start) do
     if NaiveDateTime.compare(
@@ -182,17 +148,25 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
     )
     |> validate_required(
       required_recurring_time_field_by_specifier(
-        params["active_period_start_specifier"],
+        params["active_period_start_time_specifier"],
         :active_period_start_time
       ),
       message: "Enter a valid time range start"
     )
     |> validate_required(
       required_recurring_time_field_by_specifier(
-        params["active_period_end_specifier"],
+        params["active_period_end_time_specifier"],
         :active_period_end_time
       ),
       message: "Enter a valid time range end"
+    )
+    |> validate_required([:active_period_start_date], message: "Enter a valid start date")
+    |> validate_required(
+      if(params["active_period_end_specifier"] == "custom",
+        do: [:active_period_end_date],
+        else: []
+      ),
+      message: "Enter a valid end date"
     )
   end
 
@@ -230,11 +204,20 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
   end
 
   def validate_start_is_after_now(changeset, current_time) do
-    validate_change(changeset, :active_period_start, fn :active_period_start,
-                                                        active_period_start ->
+    changeset
+    |> validate_change(:active_period_start, fn :active_period_start, active_period_start ->
       if NaiveDateTime.diff(current_time, active_period_start, :minute) > 1 do
         [
-          active_period_start: "Effect can't start in the past",
+          active_period_start: "Effect can't start in the past"
+        ]
+      else
+        []
+      end
+    end)
+    |> validate_change(:active_period_start_date, fn :active_period_start_date,
+                                                     active_period_start_date ->
+      if Date.diff(NaiveDateTime.to_date(current_time), active_period_start_date) > 1 do
+        [
           active_period_start_date: "Effect can't start in the past"
         ]
       else
