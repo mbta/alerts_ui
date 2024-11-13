@@ -34,7 +34,11 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
     end
 
     test "it sends section_completed if no error in changeset" do
-      {:ok, view, _html} = live_isolated_component(AccessAffectedService, @assigns)
+      {:ok, view, _html} =
+        live_isolated_component(AccessAffectedService, %{
+          @assigns
+          | alert_data: %{route_type: nil, effect_name: "Access Issue"}
+        })
 
       view
       |> element("form")
@@ -42,6 +46,26 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
 
       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
                       {:section_completed, %AccessAffectedService{facility_id: "Facility-3"}}}
+    end
+
+    test "it sends errors if errors changeset" do
+      :FACILITY_ISSUE
+
+      {:ok, view, _html} =
+        live_isolated_component(AccessAffectedService, %{
+          @assigns
+          | alert_data: %{route_type: nil, effect_name: "Facility Issue"}
+        })
+
+      view
+      |> element("form")
+      |> render_change(%{"access_affected_service" => %{"facility_id" => nil}})
+
+      assert_receive {:__live_isolated_component_handle_info_received__, _pid,
+                      {:section_completed,
+                       %Ecto.Changeset{
+                         errors: [facility_id: {"can't be blank", [validation: :required]}]
+                       }}}
     end
 
     test "renders while editing an existing alerts" do

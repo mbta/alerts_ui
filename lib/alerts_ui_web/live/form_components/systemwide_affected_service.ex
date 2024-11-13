@@ -122,7 +122,7 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
   defp changeset(changeset, params) do
     changeset
     |> cast(params, @fields)
-    |> validate_length(:service_types, min: 1)
+    |> validate_length(:service_types, min: 1, message: "Select a service type")
   end
 
   defp service_type_options do
