@@ -263,6 +263,9 @@ defmodule AlertsUIWeb.CreateAlertLive do
       else
         formatted_errors =
           errors
+          |> Enum.filter(fn {title, {_, _}} ->
+            title not in [:active_period_start_date, :active_period_end_date]
+          end)
           |> Enum.map(fn {_title, {message, _error}} -> "#{message}" end)
           |> Enum.uniq()
           |> Enum.join(";")
