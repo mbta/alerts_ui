@@ -25,7 +25,7 @@ defmodule AlertsUIWeb.FormComponents.Timeline do
 
     ~H"""
     <button
-      disabled={@step.name not in @previous_steps}
+      disabled={disable_button(@step.name, @previous_steps, @editing)}
       type="button"
       phx-click="move_progress"
       class={"btn #{@button_class} rounded-full min-w-full font-extrabold"}
@@ -35,6 +35,10 @@ defmodule AlertsUIWeb.FormComponents.Timeline do
       <%= @step.label %> ►
     </button>
     """
+  end
+
+  defp disable_button(name, previous_steps, editing) do
+    name not in previous_steps or (editing and name === "route_type_and_effect")
   end
 
   @spec previous_steps(Step.t(), [Step.t()], [String.t()]) :: [String.t()]
