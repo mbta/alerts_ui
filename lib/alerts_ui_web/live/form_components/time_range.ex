@@ -431,7 +431,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
       "custom" ->
         if previous_state !== "custom" do
-          ""
+          current_time |> naive_datetime_to_iso8601()
         else
           time_range["active_period_end"]
         end
@@ -535,7 +535,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         <.datetime
           field={@form[:active_period_start]}
           min={naive_datetime_to_iso8601(@current_time)}
-          max={naive_datetime_to_iso8601(@form[:active_period_end].value)}
           value={naive_datetime_to_iso8601(@form[:active_period_start].value)}
           label="Start datetime"
           class={"min-w-[16rem] h-10 " <> (if @form[:active_period_start_specifier].value === :custom, do: "", else: "hidden")}
@@ -586,15 +585,15 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       </div>
       <div>
         <%= "end datetime: " <>
-          if !is_binary(@form[:active_period_end].value) do
+          if is_nil(@form[:active_period_end].value) or is_binary(@form[:active_period_end].value) do
+            "-"
+          else
             @form[:active_period_end].value
             |> NaiveDateTime.add(
               if(@form[:active_period_end_specifier].value == :end_of_service, do: 1, else: 0),
               :day
             )
             |> formatted_datetime
-          else
-            "-"
           end %>
       </div>
     </div>
