@@ -508,6 +508,17 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   end
 
   defp one_time_alert_component(assigns) do
+    # add error to end specifier dropdown if there's no date picker to show it on
+    assigns =
+      update_in(assigns.form.errors, fn errors ->
+        if Keyword.has_key?(errors, :active_period_end) and
+             assigns.form.params["active_period_end_specifier"] == "later_today" do
+          Keyword.put_new(errors, :active_period_end_specifier, errors[:active_period_end])
+        else
+          errors
+        end
+      end)
+
     ~H"""
     <div
       :if={@form[:alert_timing].value in [:"one-time", "one-time"]}
