@@ -88,7 +88,7 @@ defmodule AlertsUI.ActivePeriodBuilder do
     list_of_dates =
       Date.range(start_date, end_date) |> Enum.filter(&(Timex.weekday(&1) in weekday_integers))
 
-    next_day_modifier = if Time.after?(start_time, end_time), do: 1, else: 0
+    next_day_modifier = if Time.before?(start_time, end_time), do: 0, else: 1
 
     active_periods =
       Enum.map(list_of_dates, fn date ->

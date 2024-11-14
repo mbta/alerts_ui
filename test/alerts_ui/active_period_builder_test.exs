@@ -223,6 +223,39 @@ defmodule AlertsUI.ActivePeriodBuilderTest do
              ]
     end
 
+    test "builds active periods when times are the same" do
+      alert_data =
+        %{
+          active_period_start_date: ~D[2024-10-14],
+          active_period_end_date: ~D[2024-10-18],
+          active_period_start_time: ~T[13:00:00],
+          active_period_end_time: ~T[13:00:00],
+          active_period_end_specifier: :custom,
+          recurrence_days: [:monday, :wednesday, :friday]
+        }
+
+      result = ActivePeriodBuilder.build_recurring_active_period(alert_data)
+
+      assert result.active_period_start == ~U[2024-10-14 17:00:00Z]
+      assert result.active_period_end == ~U[2024-10-19 17:00:00Z]
+      assert result.duration_certainty == :KNOWN
+
+      assert result.active_period == [
+               %{
+                 start: ~U[2024-10-14 17:00:00Z],
+                 end: ~U[2024-10-15 17:00:00Z]
+               },
+               %{
+                 start: ~U[2024-10-16 17:00:00Z],
+                 end: ~U[2024-10-17 17:00:00Z]
+               },
+               %{
+                 start: ~U[2024-10-18 17:00:00Z],
+                 end: ~U[2024-10-19 17:00:00Z]
+               }
+             ]
+    end
+
     test "builds active periods when end is next day" do
       alert_data =
         %{
