@@ -683,8 +683,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       :if={@form[:alert_timing].value === :recurring}
       field={@form[:recurrence_days]}
       options={@day_of_week_options}
-      class="flex-row gap-2 max-w-[50%]"
+      class="max-w-[50%]"
       button_class="justify-center"
+      column={false}
       use_outline_buttons={true}
       show_icons={false}
     />

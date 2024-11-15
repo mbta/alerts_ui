@@ -389,6 +389,8 @@ defmodule AlertsUIWeb.SharedComponents do
     required: true,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
+  attr :column, :boolean, default: true, doc: "whether to arrange buttons in column (or row)"
+
   attr :options, :list, default: []
 
   attr :icon_type, :string,
@@ -415,36 +417,43 @@ defmodule AlertsUIWeb.SharedComponents do
       |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
 
     ~H"""
-    <div phx-feedback-for={@name} class={["flex gap-1 text-sm items-baseline content-start", @class]}>
+    <div
+      phx-feedback-for={@name}
+      class={["flex flex-col gap-1 text-sm items-baseline content-start", @class]}
+    >
       <.label for={@id} class={if is_nil(@label), do: "hidden"}><%= @label %></.label>
-      <div :for={{option_name, id} <- @options} class={["flex-1", @button_class]}>
-        <.label for={id}>
-          <div class={[
-            @base_toggle_classes,
-            if(@field_value && id in @field_value, do: @toggled_on, else: @toggled_off)
-          ]}>
-            <input
-              type="checkbox"
-              id={id}
-              name={@name}
-              value={id}
-              checked={@field_value && id in @field_value}
-              class="hidden"
-              {@rest}
-            />
-            <div class={["flex flex-row justify-left align-center", @button_class]}>
-              <div :if={@show_icons} class="mr-3 self-center">
-                <.mode_icon type={if @icon_type, do: @icon_type, else: option_name} />
+
+      <div class={["flex gap-2 w-[100%]", if(@column, do: "flex-col", else: "flex-row")]}>
+        <div :for={{option_name, id} <- @options} class={["flex-1", @button_class]}>
+          <.label for={id}>
+            <div class={[
+              @base_toggle_classes,
+              if(@field_value && id in @field_value, do: @toggled_on, else: @toggled_off)
+            ]}>
+              <input
+                type="checkbox"
+                id={id}
+                name={@name}
+                value={id}
+                checked={@field_value && id in @field_value}
+                class="hidden"
+                {@rest}
+              />
+              <div class={["flex flex-row justify-left align-center", @button_class]}>
+                <div :if={@show_icons} class="mr-3 self-center">
+                  <.mode_icon type={if @icon_type, do: @icon_type, else: option_name} />
+                </div>
+                <%= if is_atom(option_name) do
+                  ContentFormatter.route_atom_to_string(option_name) |> :string.titlecase()
+                else
+                  option_name
+                end %>
               </div>
-              <%= if is_atom(option_name) do
-                ContentFormatter.route_atom_to_string(option_name) |> :string.titlecase()
-              else
-                option_name
-              end %>
             </div>
-          </div>
-        </.label>
+          </.label>
+        </div>
       </div>
+
       <.input_error :for={msg <- @errors}><%= msg %></.input_error>
     </div>
     """
