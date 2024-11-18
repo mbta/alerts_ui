@@ -11,8 +11,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   @alert_timing_values [
     :"one-time",
-    :recurring,
-    :scheduled
+    :recurring
   ]
 
   @start_values [
@@ -113,11 +112,12 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     assigns =
       if editing == true and socket.assigns.edited === false do
         alert_data =
-          if Map.get(alert_data, :notification_period_start) in [nil, ""] do
-            alert_data
-          else
-            Map.put(alert_data, :alert_timing, "scheduled")
-          end
+          # if Map.get(alert_data, :notification_period_start) in [nil, ""] do
+          #   alert_data
+          # else
+          #   Map.put(alert_data, :alert_timing, "scheduled")
+          # end
+          alert_data
           |> Enum.filter(fn {_k, v} -> !is_nil(v) end)
           |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
 
@@ -252,9 +252,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
             "active_period_start_date" => start_date,
             "active_period_end_date" => end_date
           })
-
-        "scheduled" ->
-          time_range
       end
 
     changeset =
@@ -293,37 +290,38 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     {:noreply, assign(socket, %{form: form})}
   end
 
-  def handle_event("alert_timing_change", %{"time_range" => time_range}, socket) do
-    time_range =
-      if time_range["alert_timing"] !== "scheduled" do
-        Map.put(time_range, "notification_period_start", "")
-      else
-        time_range
-      end
+  # def handle_event("alert_timing_change", %{"time_range" => time_range}, socket) do
+  #   #TODO make this check box instead of dropdown
+  #   time_range =
+  #     if time_range["alert_timing"] !== "scheduled" do
+  #       Map.put(time_range, "notification_period_start", "")
+  #     else
+  #       time_range
+  #     end
 
-    time_range = Map.merge(socket.assigns.form.params, time_range)
+  #   time_range = Map.merge(socket.assigns.form.params, time_range)
 
-    changeset = changeset(%__MODULE__{}, time_range)
+  #   changeset = changeset(%__MODULE__{}, time_range)
 
-    changeset
-    |> TimeRangeValidators.validate_required_fields(time_range)
-    |> apply_action(:validate)
-    |> case do
-      {:ok, changes} ->
-        send(self(), {:add_errors, [], __MODULE__})
-        send(self(), {:section_completed, changes})
+  #   changeset
+  #   |> TimeRangeValidators.validate_required_fields(time_range)
+  #   |> apply_action(:validate)
+  #   |> case do
+  #     {:ok, changes} ->
+  #       send(self(), {:add_errors, [], __MODULE__})
+  #       send(self(), {:section_completed, changes})
 
-      {:error, changeset} ->
-        send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
-    end
+  #     {:error, changeset} ->
+  #       send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
+  #   end
 
-    form =
-      changeset
-      |> Map.put(:action, :validate)
-      |> to_form()
+  #   form =
+  #     changeset
+  #     |> Map.put(:action, :validate)
+  #     |> to_form()
 
-    {:noreply, assign(socket, %{form: form})}
-  end
+  #   {:noreply, assign(socket, %{form: form})}
+  # end
 
   defp set_start_datetime(time_range, current_time, previous_state) do
     case time_range["active_period_start_specifier"] do
@@ -481,15 +479,14 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           options={values_to_options(@alert_timing_values)}
           class="min-w-[16rem] max-w-[16rem]"
           phx-debounce={120}
-          phx-change="alert_timing_change"
-          phx-target={@myself}
         />
         <%= one_time_alert_component(assigns) %>
         <%= recurring_alert_component(assigns) %>
         <div
-          :if={@form[:alert_timing].value === :scheduled}
+          :if={true}
           id="scheduled-selector-div"
           class="flex flex-row gap-8 my-8"
+
         >
           <.datetime
             label="Schedule alert for date and time"
