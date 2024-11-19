@@ -140,21 +140,21 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       assert render(view) =~ ~s(Effect must end after 05/01/2024, 10:54 AM)
     end
 
-    test "scheduled section is hidden unless scheduled is selected" do
+    test "scheduled datetime is hidden unless selection is made" do
       {:ok, view, _html} =
         live_isolated_component(TimeRange, @assigns)
 
-      refute view |> render() =~ ~s(id="scheduled-selector-div")
+      refute view |> render() =~ ~s(id="time_range_notification_period_start")
 
       view
       |> element("form")
       |> render_change(%{
         "time_range" => %{
-          "alert_timing" => "scheduled"
+          "notification_specifier" => "custom"
         }
       })
 
-      assert view |> render() =~ ~s(id="scheduled-selector-div")
+      assert view |> render() =~ ~s(id="time_range_notification_period_start")
     end
 
     test "recurring section is hidden unless recurring is selected" do
@@ -176,7 +176,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       assert view |> render() =~ ~s(Sunday)
     end
 
-    test "scheduled start time must be after active period start" do
+    test "scheduled start time must be after current time" do
       {:ok, view, _html} =
         live_isolated_component(TimeRange, @assigns)
 
@@ -184,17 +184,15 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       |> element("form")
       |> render_change(%{
         "time_range" => %{
-          "alert_timing" => "scheduled",
-          "active_period_start" => "2024-05-01T10:54:00",
-          "active_period_start_specifier" => "custom",
+          "notification_specifier" => "custom",
           "notification_period_start" => "2024-04-29T10:54:00"
         }
       })
 
-      assert render(view) =~ ~s(Effect must start after 05/01/2024, 10:54 AM)
+      assert render(view) =~ ~s(Notifications can’t be set in the past)
     end
 
-    test "scheduled start time must be before active period end" do
+    test "scheduled start time must be before active period start" do
       {:ok, view, _html} =
         live_isolated_component(TimeRange, @assigns)
 
@@ -202,14 +200,22 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       |> element("form")
       |> render_change(%{
         "time_range" => %{
-          "alert_timing" => "scheduled",
-          "active_period_end_specifier" => "custom",
-          "active_period_end" => "2024-05-01T10:54:00",
+          "alert_timing" => "one-time",
+          "active_period_start_specifier" => "custom"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_start" => "2024-05-01T10:54:00",
+          "notification_specifier" => "custom",
           "notification_period_start" => "2024-05-02T10:54:00"
         }
       })
 
-      assert render(view) =~ ~s(Effect must end before 05/01/2024, 10:54 AM)
+      assert render(view) =~ ~s(Notification period must end before 05/01/2024, 10:54 AM)
     end
 
     test "it sends section_completed if no error in changeset" do
