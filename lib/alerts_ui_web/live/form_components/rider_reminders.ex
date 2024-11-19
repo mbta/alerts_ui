@@ -163,7 +163,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
       >
         <div>
           <.inputs_for :let={rt} field={@form[:reminder_times]}>
-            <div class="flex flex-row w-[50%] mb-4" id="reminder-time-component">
+            <div class="flex flex-row w-[50%] mb-4" id={"reminder-time-component-#{rt.index}"}>
               <input type="hidden" name="rider_reminders[reminder_sort][]" value={rt.index} />
               <.select
                 label="Scheduled reminder"
