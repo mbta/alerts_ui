@@ -553,7 +553,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
             phx-change="validate_notification_period"
           />
         </div>
-        <%= "notification_period_start: #{@form[:notification_period_start].value |> formatted_datetime}" %>
       </.form>
       <hr class="mt-8" />
     </div>

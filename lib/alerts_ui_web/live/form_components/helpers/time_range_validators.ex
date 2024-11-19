@@ -44,8 +44,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
        ) in [:lt, :eq] do
       [
         active_period_end: "Effect must end after #{formatted_datetime(active_period_start)}",
-        active_period_end_date:
-          "Effect must end after #{formatted_datetime(active_period_start, "{0M}/{0D}/{YYYY}")}"
+        active_period_end_date: "Effect must end after #{formatted_datetime(active_period_start)}"
       ]
     else
       []
@@ -59,7 +58,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
        ) in [:lt] do
       [
         active_period_end_date:
-          "Effect must end after #{formatted_datetime(active_period_start_date, "{0M}/{0D}/{YYYY}")}"
+          "Effect must end after #{formatted_datetime(active_period_start_date)}"
       ]
     else
       []
