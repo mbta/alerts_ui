@@ -41,7 +41,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
     if NaiveDateTime.compare(
          active_period_end,
          active_period_start
-       ) in [:lt] do
+       ) in [:lt, :eq] do
       [
         active_period_end: "Effect must end after #{formatted_datetime(active_period_start)}",
         active_period_end_date:
