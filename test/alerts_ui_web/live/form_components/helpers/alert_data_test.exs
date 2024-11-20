@@ -143,8 +143,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                trip_ids: ["b1"],
                header_text: "cool header text",
                description_text: "description text",
-               active_period_start_specifier: :custom,
-               active_period_end_specifier: :custom,
+               active_period_start_specifier: "custom",
+               active_period_end_specifier: "custom",
                active_period_end: ~N[2024-05-03 21:09:34],
                active_period_start: ~N[2024-05-02 12:09:34],
                notification_period_start: ~N[2024-05-02 12:09:34],
@@ -229,7 +229,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         duration_certainty: :UNKNOWN
       })
 
-      assert AlertData.build_alert_data("1").active_period_end_specifier == :until_further_notice
+      assert AlertData.build_alert_data("1").active_period_end_specifier == "until_further_notice"
     end
 
     test "handles estimated duration" do
@@ -250,7 +250,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       })
 
       result = AlertData.build_alert_data("1")
-      assert result.active_period_end_specifier == :later_today
+      assert result.active_period_end_specifier == "later_today"
       assert result.active_period_end == local_naive_from_utc(~U[2024-05-02 18:09:34Z])
     end
 
@@ -276,7 +276,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       })
 
       alert_data = AlertData.build_alert_data("1")
-      assert alert_data.active_period_end_specifier == :end_of_service
+      assert alert_data.active_period_end_specifier == "end_of_service"
       assert alert_data.active_period_end_date == ~D[2024-05-02]
     end
 
@@ -300,7 +300,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       })
 
       result = AlertData.build_alert_data("1")
-      assert result.active_period_end_specifier == :custom
+      assert result.active_period_end_specifier == "custom"
       assert result.active_period_end == local_naive_from_utc(~U[2024-05-02 17:09:34Z])
     end
 
@@ -324,7 +324,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         duration_certainty: :KNOWN
       })
 
-      assert AlertData.build_alert_data("1").active_period_start_specifier == :start_of_service
+      assert AlertData.build_alert_data("1").active_period_start_specifier == "start_of_service"
     end
 
     test "handles start specifier at other time" do
@@ -346,7 +346,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         duration_certainty: :KNOWN
       })
 
-      assert AlertData.build_alert_data("1").active_period_start_specifier == :custom
+      assert AlertData.build_alert_data("1").active_period_start_specifier == "custom"
     end
 
     test "handles recurring alert" do
@@ -379,9 +379,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       alert = AlertData.build_alert_data("1")
       assert alert.alert_timing == "recurring"
-      assert alert.recurrence_days == [:thursday, :friday, :saturday]
-      assert alert.active_period_start_specifier == :custom
-      assert alert.active_period_end_specifier == :custom
+      assert alert.recurrence_days == ["thursday", "friday", "saturday"]
+      assert alert.active_period_start_specifier == "custom"
+      assert alert.active_period_end_specifier == "custom"
       assert alert.active_period_start_time == ~T[12:09:34]
       assert alert.active_period_end_time == ~T[13:09:34]
       assert alert.active_period_start_date == ~D[2024-05-02]
@@ -417,14 +417,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
           }
         ],
         duration_certainty: :KNOWN,
-        recurrence_days: [:thursday, :saturday]
+        recurrence_days: ["thursday", "saturday"]
       })
 
       alert = AlertData.build_alert_data("1")
       assert alert.alert_timing == "recurring"
-      assert alert.recurrence_days == [:thursday, :saturday]
-      assert alert.active_period_start_specifier == :custom
-      assert alert.active_period_end_specifier == :until_further_notice
+      assert alert.recurrence_days == ["thursday", "saturday"]
+      assert alert.active_period_start_specifier == "custom"
+      assert alert.active_period_end_specifier == "until_further_notice"
       assert alert.active_period_start_time == ~T[12:09:34]
       assert alert.active_period_end_time == ~T[03:00:00]
       assert alert.active_period_start_date == ~D[2024-05-02]
