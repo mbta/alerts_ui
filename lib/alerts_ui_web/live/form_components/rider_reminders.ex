@@ -94,7 +94,8 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
       message: fn _field, _meta -> "Enter a valid datetime" end
     )
     |> validate_change(:reminder_time, fn :reminder_time, reminder_time ->
-      min_time = params["min_time"] |> NaiveDateTime.from_iso8601!()
+      min_time =
+        params["min_time"] |> String.pad_trailing(19, ":00") |> NaiveDateTime.from_iso8601!()
 
       if NaiveDateTime.compare(min_time, reminder_time) === :gt do
         [reminder_time: "Reminder can't be set in the past"]
@@ -103,7 +104,8 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
       end
     end)
     |> validate_change(:reminder_time, fn :reminder_time, reminder_time ->
-      {result, max_time} = params["max_time"] |> NaiveDateTime.from_iso8601()
+      {result, max_time} =
+        params["max_time"] |> String.pad_trailing(19, ":00") |> NaiveDateTime.from_iso8601()
 
       if result == :ok and NaiveDateTime.compare(max_time, reminder_time) === :lt do
         [reminder_time: "Reminder must be before effect end"]
@@ -177,8 +179,10 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
                 min={@current_time |> naive_datetime_to_iso8601()}
                 max={@active_period_end}
                 field={rt[:reminder_time]}
-                disabled={rt[:reminder_time_specifier].value not in [:custom, "custom"]}
                 value={rt[:reminder_time].value}
+                class={
+                  if rt[:reminder_time_specifier].value in [:custom, "custom"], do: "", else: "hidden"
+                }
               />
               <input
                 type="hidden"
@@ -243,8 +247,12 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
 
   defp naive_datetime_to_iso8601(nil), do: ""
 
-  defp naive_datetime_to_iso8601(datetime),
-    do: datetime |> NaiveDateTime.truncate(:second) |> NaiveDateTime.to_iso8601()
+  defp naive_datetime_to_iso8601(datetime) do
+    datetime
+    |> NaiveDateTime.truncate(:second)
+    |> NaiveDateTime.to_iso8601()
+    |> String.slice(0..-4//1)
+  end
 
   defp values_to_options(values) do
     Enum.map(values, fn value ->
