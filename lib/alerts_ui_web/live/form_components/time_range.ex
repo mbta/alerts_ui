@@ -29,6 +29,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   @notification_values [
     :same_as_effect_period,
+    :now,
     :start_of_service,
     :custom
   ]
@@ -297,32 +298,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   end
 
   def handle_event("validate_notification_period", %{"time_range" => time_range}, socket) do
-    previous_state = socket.assigns.form.params["notification_specifier"]
-
     time_range = Map.merge(socket.assigns.form.params, time_range)
 
-    notification_period_start =
-      case time_range["notification_specifier"] do
-        "same_as_effect_period" ->
-          nil
-
-        "start_of_service" ->
-          if time_range["notification_period_start_date"] in ["", nil] do
-            nil
-          else
-            NaiveDateTime.new!(
-              time_range["notification_period_start_date"] |> Date.from_iso8601!(),
-              ActivePeriod.start_of_service_time()
-            )
-          end
-
-        "custom" ->
-          if previous_state !== "custom" do
-            socket.assigns.current_time
-          else
-            time_range["notification_period_start"]
-          end
-      end
+    notification_period_start = notification_period_start(time_range, socket.assigns)
 
     time_range = Map.put(time_range, "notification_period_start", notification_period_start)
 
@@ -355,6 +333,35 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       |> to_form()
 
     {:noreply, assign(socket, %{form: form})}
+  end
+
+  def notification_period_start(time_range, assigns) do
+    previous_state = assigns.form.params["notification_specifier"]
+
+    case time_range["notification_specifier"] do
+      "same_as_effect_period" ->
+        nil
+
+      "now" ->
+        assigns.current_time
+
+      "start_of_service" ->
+        if time_range["notification_period_start_date"] in ["", nil] do
+          nil
+        else
+          NaiveDateTime.new!(
+            time_range["notification_period_start_date"] |> Date.from_iso8601!(),
+            ActivePeriod.start_of_service_time()
+          )
+        end
+
+      "custom" ->
+        if previous_state !== "custom" do
+          assigns.current_time
+        else
+          time_range["notification_period_start"]
+        end
+    end
   end
 
   defp set_start_datetime(time_range, current_time, previous_state) do

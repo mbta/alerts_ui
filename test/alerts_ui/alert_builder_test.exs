@@ -38,7 +38,8 @@ defmodule AlertsUI.AlertBuilderTest do
           image_url: "http://www.example.com/example.jpg",
           image_alternative_text: "an example image",
           last_push_notification_timestamp: ~N[2024-04-30 11:54:00],
-          notification_period_start: ~N[2024-04-30 12:54:00],
+          notification_period_start: ~N[2024-04-30 05:52:00],
+          notification_specifier: :now,
           severity: 3,
           reminder_times: [
             ~N[2024-04-30 12:04:00],
@@ -74,7 +75,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  image_alternative_text: "an example image",
                  banner_text: "important banner text",
                  last_push_notification_timestamp: ~U[2024-04-30 15:54:00Z],
-                 notification_period_start: ~U[2024-04-30 16:54:00Z],
+                 notification_period_start: ~U[2024-04-30 05:54:00Z],
                  severity: 3,
                  severity_level: :WARNING,
                  reminder_times: [

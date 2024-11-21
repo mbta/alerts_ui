@@ -17,6 +17,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
     },
     alert_data: %{},
     current_time: ~U[2024-04-30 15:54:00Z],
+    edited: false,
     editing: false
   }
 
@@ -52,17 +53,15 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
     test "works if editing" do
       {:ok, view, _html} =
-        live_isolated_component(
-          TimeRange,
-          @assigns
-          |> Map.merge(%{
-            editing: true,
-            alert_data: %{
-              active_period_start: ~N[2024-04-30 11:54:00],
-              active_period_end_specifier: :custom
-            }
-          })
-        )
+        live_isolated_component(TimeRange, @assigns)
+
+      live_assign(view, %{
+        editing: true,
+        alert_data: %{
+          active_period_start: ~N[2024-04-30 11:54:00],
+          active_period_end_specifier: :custom
+        }
+      })
 
       assert view
              |> render() =~ "custom"
@@ -197,7 +196,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         live_isolated_component(TimeRange, @assigns)
 
       view
-      |> element("form")
+      |> element("#time_range_notification_specifier")
       |> render_change(%{
         "time_range" => %{
           "alert_timing" => "one-time",
@@ -227,7 +226,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       |> render_change(%{
         "time_range" => %{
           "active_period_end_specifier" => "custom",
-          "active_period_start_specifier" => "custom"
+          "active_period_start_specifier" => "custom",
+          "notification_specifier" => "now"
         }
       })
 
@@ -236,7 +236,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       |> render_change(%{
         "time_range" => %{
           "active_period_end" => "2024-05-01T09:54:00",
-          "active_period_start" => "2024-05-01T08:54:00"
+          "active_period_start" => "2024-05-01T08:54:00",
+          "notification_period_start" => "2024-05-01T07:54:00"
         }
       })
 
@@ -245,7 +246,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
                        %TimeRange{
                          active_period_end: ~N[2024-05-01 09:54:00],
                          active_period_end_specifier: :custom,
-                         active_period_start: ~N[2024-05-01 08:54:00]
+                         active_period_start: ~N[2024-05-01 08:54:00],
+                         notification_period_start: ~N[2024-05-01 07:54:00]
                        }}}
     end
   end
