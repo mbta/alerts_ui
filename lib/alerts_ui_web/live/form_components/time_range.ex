@@ -87,7 +87,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         |> ActivePeriod.end_of_service_datetime()
         |> shifted_active_period_end()
         |> NaiveDateTime.to_date(),
-      notification_period_start_date: current_time |> naive_datetime_to_iso_date
+      notification_period_start_date: current_time |> naive_datetime_to_iso_date,
+      active_period_start_time_specifier: "start_of_service",
+      active_period_end_time_specifier: "end_of_service"
     }
 
     changeset = changeset(%__MODULE__{}, alert_data)
@@ -200,6 +202,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         socket
       ) do
     form_params = socket.assigns.form.params
+    time_range = Map.merge(socket.assigns.form.params, time_range)
     current_time = socket.assigns.current_time
 
     time_range =
