@@ -76,17 +76,33 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
   end
 
   def validate_notification(changeset, time_range, current_time) do
-    naive_start = ensure_naive_datetime_format(time_range["active_period_start"])
+    naive_start =
+      if time_range["alert_timing"] == "one-time" do
+        ensure_naive_datetime_format(time_range["active_period_start"])
+      else
+        start_date = time_range["active_period_start_date"] |> ensure_date_format
+        start_time = time_range["active_period_start_time"] |> ensure_time_format
 
-    changeset
-    |> validate_change(:notification_period_start, fn :notification_period_start,
-                                                      notification_period_start ->
-      validate_notification_period_start(
-        notification_period_start,
-        current_time,
-        naive_start
-      )
-    end)
+        if is_nil(start_time) or is_nil(start_date) do
+          nil
+        else
+          NaiveDateTime.new!(start_date, start_time)
+        end
+      end
+
+    if naive_start do
+      changeset
+      |> validate_change(:notification_period_start, fn :notification_period_start,
+                                                        notification_period_start ->
+        validate_notification_period_start(
+          notification_period_start,
+          current_time,
+          naive_start
+        )
+      end)
+    else
+      changeset
+    end
   end
 
   defp validate_notification_period_start(
@@ -111,9 +127,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
           ) in [:gt] ->
         [
           notification_period_start:
-            {"Notification period must end before #{formatted_datetime(naive_start)}", []},
-          notification_period_date:
-            {"Notification period must end before #{formatted_datetime(naive_start)}", []}
+            {"Notification period must start before #{formatted_datetime(naive_start)}", []},
+          notification_period_start_date:
+            {"Notification period must start before #{formatted_datetime(naive_start)}", []}
         ]
 
       true ->
@@ -169,6 +185,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
       case params["notification_specifier"] do
         "same_as_effect_period" -> []
         "start_of_service" -> [:notification_period_start_date]
+        "now" -> [:notification_period_start]
         "custom" -> [:notification_period_start]
       end,
       message: "Enter a valid end date"
@@ -241,4 +258,20 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
   end
 
   defp ensure_naive_datetime_format(%NaiveDateTime{} = datetime), do: datetime
+
+  defp ensure_time_format(%Time{} = time), do: time
+
+  defp ensure_time_format(""), do: nil
+
+  defp ensure_time_format(time) when is_binary(time) do
+    time |> String.pad_trailing(8, ":00") |> Time.from_iso8601!()
+  end
+
+  defp ensure_date_format(%Date{} = date), do: date
+
+  defp ensure_date_format(""), do: nil
+
+  defp ensure_date_format(date) when is_binary(date) do
+    date |> Date.from_iso8601!()
+  end
 end

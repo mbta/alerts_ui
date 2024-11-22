@@ -183,6 +183,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       |> element("form")
       |> render_change(%{
         "time_range" => %{
+          "alert_timing" => "recurring",
+          "active_period_start_specifier" => "custom",
+          "active_period_start" => "2024-05-01T10:54:00",
           "notification_specifier" => "custom",
           "notification_period_start" => "2024-04-29T10:54:00"
         }
@@ -214,7 +217,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         }
       })
 
-      assert render(view) =~ ~s(Notification period must end before 05/01/2024, 10:54 AM)
+      assert render(view) =~ ~s(Notification period must start before 05/01/2024, 10:54 AM)
     end
 
     test "it sends section_completed if no error in changeset" do

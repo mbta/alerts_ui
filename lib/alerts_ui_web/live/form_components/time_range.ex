@@ -532,7 +532,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
             label="Notification period"
             field={@form[:notification_specifier]}
             options={values_to_options(@notification_values)}
-            class="min-w-[16rem] max-w-[16rem]"
+            class="min-w-[16rem] h-10"
             phx-debounce={120}
             phx-target={@myself}
             phx-change="validate_notification_period"
@@ -545,7 +545,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
             min={@current_time |> naive_datetime_to_iso_date}
             max={@form[:active_period_start].value |> naive_datetime_to_iso_date}
             value={@form[:notification_period_start_date].value}
-            class="min-w-[16rem] h-10"
+            class="min-w-[16rem] max-w-[16rem] h-10"
             phx-debounce={120}
             phx-target={@myself}
             phx-change="validate_notification_period"
@@ -557,10 +557,23 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
             min={@form[:active_period_start].value}
             max={@form[:active_period_end].value}
             value={@form[:notification_period_start].value}
-            class="min-w-[16rem] h-10"
+            class="min-w-[16rem] max-w-[16rem] h-10"
             phx-debounce={120}
             phx-target={@myself}
             phx-change="validate_notification_period"
+          />
+          <p class="pt-8">to</p>
+          <input
+            type="text"
+            id="closed-placeholder"
+            value="When alert is closed"
+            placeholder="When alert is closed"
+            disabled={true}
+            class="border border-bg-elevation-6 pl-2
+                rounded text-text-secondary
+                bg-bg-elevation-3 ring-0  ring-border-focus
+                mt-[1.75rem] h-10 min-w-[16rem]"
+            ,
           />
         </div>
       </.form>
