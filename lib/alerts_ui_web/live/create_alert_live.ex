@@ -138,9 +138,10 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   def handle_info({:fetch_available_schedules, route_ids, direction}, socket) do
     directions = directions_from_selection(direction)
-    opts = direction_option([stop_sequences: :first], directions)
+    opts = direction_option([stop_sequences: [:first, :last]], directions)
 
-    available_schedules = SchedulesRepo.by_route_ids(route_ids, opts)
+    available_schedules = route_ids |> SchedulesRepo.by_route_ids(opts) |> filter_out_old_trips
+
     {:noreply, assign(socket, available_schedules: available_schedules)}
   end
 
@@ -389,5 +390,21 @@ defmodule AlertsUIWeb.CreateAlertLive do
       nil -> SystemwideAffectedService
       _ -> AffectedService
     end
+  end
+
+  def filter_out_old_trips(schedules, current_time \\ DateTime.utc_now()) do
+    schedules
+    |> Enum.group_by(& &1.trip.id)
+    |> Enum.reduce([], fn {_k, [first_stop, last_stop]}, acc ->
+      one_hour_from_arrival = Timex.shift(last_stop.arrival_time, hours: 1)
+
+      if DateTime.compare(one_hour_from_arrival, current_time) in [:gt, :eq] do
+        [first_stop | acc]
+      else
+        acc
+      end
+    end)
+    |> Enum.reverse()
+    |> Enum.sort_by(& &1.departure_time, DateTime)
   end
 end

@@ -6,6 +6,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
   import Ecto.Changeset
   import Mock
   alias AlertsUI.Alerts
+  alias AlertsUIWeb.CreateAlertLive
   alias AlertsUIWeb.FormComponents.{AffectedService, AlertDetails, RouteTypeAndEffect, TimeRange}
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
@@ -321,6 +322,67 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         refute_redirected(view, "/alerts/new")
         rendered_view =~ "error title: message, message2"
       end
+    end
+  end
+
+  describe "filter_out_old_trips/2" do
+    test "properly filters out trips whose arrival time for the last trip is in the past" do
+      current_time = ~U[2024-11-15 14:06:43Z]
+
+      schedules = [
+        %MBTAV3API.Schedules.Schedule{
+          trip: %MBTAV3API.Schedules.Trip{
+            id: "FRMLThuFri-709657-400",
+            name: "400"
+          },
+          arrival_time: nil,
+          departure_time: ~U[2024-11-15 10:01:43Z]
+        },
+        %MBTAV3API.Schedules.Schedule{
+          trip: %MBTAV3API.Schedules.Trip{
+            id: "FRMLThuFri-709657-400",
+            name: "400"
+          },
+          arrival_time: ~U[2024-11-15 12:01:00Z],
+          departure_time: nil
+        },
+        %MBTAV3API.Schedules.Schedule{
+          trip: %MBTAV3API.Schedules.Trip{
+            id: "FRMLThuFri-709637-485",
+            name: "485"
+          },
+          arrival_time: nil,
+          departure_time: ~U[2024-11-15 14:30:00Z]
+        },
+        %MBTAV3API.Schedules.Schedule{
+          trip: %MBTAV3API.Schedules.Trip{
+            id: "FRMLThuFri-709637-485",
+            name: "485"
+          },
+          arrival_time: ~U[2024-11-15 15:25:00Z],
+          departure_time: nil
+        },
+        %MBTAV3API.Schedules.Schedule{
+          trip: %MBTAV3API.Schedules.Trip{
+            id: "FRMLThuFri-709631-494",
+            name: "494"
+          },
+          arrival_time: nil,
+          departure_time: ~U[2024-11-15 20:25:00Z]
+        },
+        %MBTAV3API.Schedules.Schedule{
+          trip: %MBTAV3API.Schedules.Trip{
+            id: "FRMLThuFri-709631-494",
+            name: "494"
+          },
+          arrival_time: ~U[2024-11-15 23:30:00Z],
+          departure_time: nil
+        }
+      ]
+
+      [trip1, trip2] = CreateAlertLive.filter_out_old_trips(schedules, current_time)
+      assert trip1.departure_time == ~U[2024-11-15 14:30:00Z]
+      assert trip2.departure_time == ~U[2024-11-15 20:25:00Z]
     end
   end
 end
