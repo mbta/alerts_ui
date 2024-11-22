@@ -38,7 +38,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     available_stops: [%Stop{id: "place-sstat", name: "South Station"}],
     alert_data: %{route_ids: ["CR-Worcester"]},
     combination: :RDTS,
-    editing: true,
+    editing: false,
     effect_name: "Delay"
   }
 
@@ -233,40 +233,26 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
             editing: true,
             available_stops: [%Stop{id: "place-sstat"}],
             available_routes: [%Route{id: "CR-Worcester", type: 2}],
-            available_trips: [%{id: "CR-628038-501-1"}],
-            available_schedules: [
-              %MBTAV3API.Schedules.Schedule{
-                route: %MBTAV3API.Routes.Route{
-                  id: "CR-Worcester",
-                  type: 2
-                },
-                trip: %MBTAV3API.Schedules.Trip{
-                  id: "CR-627999-541-1"
-                },
-                stop: %MBTAV3API.Stops.Stop{
-                  id: "place-sstat"
-                },
-                platform_stop_id: "NEC-2287"
-              }
-            ],
+            available_trips: [%{id: "CR-683322-595"}],
+            available_schedules: [],
             alert_data: %{
               direction: "0",
               route_type: 2,
               stop_ids: ["place-sstat"],
               combination: :RDTS,
               route_ids: ["CR-Worcester"],
-              trip_ids: ["CR-628038-501-1"],
-              trip_information_by_id: %{
-                "CR-628038-501-1" => %{route_id: "CR-Worcester", direction_id: 0}
-              }
+              trip_ids: ["CR-683322-595"]
             }
           })
         )
 
+      live_assign(view, :available_schedules, [@schedule])
       assert view |> render() =~ ~s(value=\"CR-Worcester\" checked=\"checked\")
       assert view |> render() =~ ~s(<option selected="selected" value="0">Outbound</option>)
       assert view |> render() =~ ~s(<option selected="selected" value="place-sstat">)
-      assert view |> render() =~ ~s(<option value="CR-627999-541-1">)
+
+      assert view |> render() =~
+               ~s(<option selected="selected" value="CR-683322-595">595 \(9:15 AM from South Station\)</option>)
     end
 
     @tag :logged_in_user

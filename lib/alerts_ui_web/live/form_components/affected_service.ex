@@ -40,11 +40,38 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       |> assign(%{
         form: form,
         button_selected_routes: [],
-        direction_names_map: [],
+        direction_names_map: %{},
         edited: false
       })
 
     {:ok, socket}
+  end
+
+  @impl true
+  def update(
+        %{
+          alert_data: alert_data,
+          editing: true,
+          available_schedules: [_ | _] = available_schedules
+        } = assigns,
+        socket
+      ) do
+    alert_data =
+      Map.put(
+        alert_data,
+        :trip_information_by_id,
+        trip_information_by_id(available_schedules, Map.get(alert_data, :trip_ids, []))
+      )
+
+    changeset = %__MODULE__{} |> changeset(alert_data)
+
+    changes =
+      changeset
+      |> apply_action!(:validate)
+
+    send(self(), {:section_completed, changes})
+
+    {:ok, assign(socket, assigns)}
   end
 
   @impl true
@@ -57,7 +84,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       Map.new(assigns.available_routes, &{&1.id, &1.direction_names})
 
     assigns =
-      if editing == true and socket.assigns.edited == false do
+      if editing == true and socket.assigns.edited === false do
         alert_data = %{
           route_ids: Map.get(alert_data, :route_ids) || [],
           direction: Map.get(alert_data, :direction) || "default",
@@ -75,10 +102,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
           alert_data.direction
         )
 
-        form =
-          %__MODULE__{}
-          |> changeset(alert_data)
-          |> to_form()
+        form = %__MODULE__{} |> changeset(alert_data) |> to_form()
 
         assigns
         |> Map.put(:form, form)
