@@ -562,7 +562,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
             phx-target={@myself}
             phx-change="validate_notification_period"
           />
-          <p class="pt-8">to</p>
+          <p class="pt-[2rem]">to</p>
           <input
             type="text"
             id="closed-placeholder"
@@ -626,7 +626,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           phx-debounce={120}
         />
       </div>
-
+      <p class="pt-[2rem]">to</p>
       <div id="end-selector-div" class="flex flex-row gap-8">
         <.select
           label=""
@@ -696,7 +696,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
             phx-debounce={120}
           />
         </div>
-
+        <p class="pt-[2rem]">to</p>
         <div id="end-selector-div" class="flex flex-row gap-8">
           <.select
             label="Effect end"
@@ -734,7 +734,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
             phx-debounce={120}
           />
         </div>
-
+        <p class="pt-[2rem]">to</p>
         <div id="end-selector-div" class="flex flex-row gap-8">
           <.select
             label="Recurring alert end"
