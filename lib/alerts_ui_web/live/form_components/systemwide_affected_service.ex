@@ -10,6 +10,7 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
   import Ecto.Changeset
 
   alias AlertsUI.Models.InformedEntity
+  alias AlertsUIWeb.FormComponents.Helpers.ErrorFormatter
 
   @primary_key false
   embedded_schema do
@@ -18,6 +19,22 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
 
   @fields ~w[service_types]a
   @required_fields ~w[service_types]a
+
+  @impl true
+  def mount(socket) do
+    changeset = changeset(%__MODULE__{}, %{})
+
+    {_result, error_changeset} =
+      apply_action(
+        changeset
+        |> validate_required(@required_fields),
+        :validate
+      )
+
+    send(self(), {:add_errors, ErrorFormatter.parse_field_errors(error_changeset), __MODULE__})
+
+    {:ok, socket}
+  end
 
   @impl true
   def update(%{alert_data: alert_data} = assigns, socket) do

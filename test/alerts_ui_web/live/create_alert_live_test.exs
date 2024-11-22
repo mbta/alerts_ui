@@ -77,6 +77,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
           |> AlertDetails.changeset(%{header_text: "cool"})
           |> apply_action(:validate)
 
+        send(view.pid, {:add_errors, [], AlertDetails})
         send(view.pid, {:section_completed, changeset})
         send(view.pid, :create_alert)
         rendered_view = render(view)
@@ -205,6 +206,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
           })
           |> apply_action(:insert)
 
+        send(view.pid, {:add_errors, [], AlertDetails})
         send(view.pid, {:section_completed, details_changeset})
         send(view.pid, :create_alert)
 
@@ -264,6 +266,8 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
     @tag :logged_in_user
     test "displays a list of facilities", %{conn: conn} do
+      :ELEVATOR_CLOSURE
+
       facilities = [
         %Facility{id: "1", long_name: "real big elevator", stop: %Stop{id: 2, name: "stop"}}
       ]

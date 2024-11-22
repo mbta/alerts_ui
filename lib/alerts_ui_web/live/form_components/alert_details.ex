@@ -30,11 +30,20 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       SeverityLevel.severity_tuples()
       |> Enum.map(fn {desc, severity, _level} -> {desc, severity} end)
 
-    form = %__MODULE__{} |> changeset() |> to_form()
+    changeset = changeset(%__MODULE__{}, %{})
+
+    {_result, error_changeset} =
+      apply_action(
+        changeset
+        |> validate_required(@required_fields),
+        :validate
+      )
+
+    send(self(), {:add_errors, ErrorFormatter.parse_field_errors(error_changeset), __MODULE__})
 
     socket =
       assign(socket, %{
-        form: form,
+        form: to_form(changeset),
         image_size: nil,
         image_path: nil,
         severity_options: severity_options,
