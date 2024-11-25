@@ -73,6 +73,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     current_time = current_time()
 
     alert_data = %{
+      alert_timing: "one-time",
       active_period_start: current_time,
       active_period_start_date: current_time |> NaiveDateTime.to_date(),
       active_period_start_time: ActivePeriod.start_of_service_time(),
@@ -554,9 +555,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
             :if={@form[:notification_specifier].value === :custom}
             label=""
             field={@form[:notification_period_start]}
-            min={@form[:active_period_start].value}
-            max={@form[:active_period_end].value}
-            value={@form[:notification_period_start].value}
+            min={@form[:active_period_start].value |> naive_datetime_to_iso8601}
+            max={@form[:active_period_end].value |> naive_datetime_to_iso8601}
+            value={@form[:notification_period_start].value |> naive_datetime_to_iso8601}
             class="min-w-[16rem] max-w-[16rem] h-10"
             phx-debounce={120}
             phx-target={@myself}

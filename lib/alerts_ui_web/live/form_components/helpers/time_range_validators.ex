@@ -110,11 +110,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
          current_time,
          naive_start
        ) do
+    NaiveDateTime.diff(
+      notification_period_start,
+      current_time,
+      :minute
+    )
+
     cond do
-      NaiveDateTime.compare(
-        notification_period_start,
-        current_time
-      ) in [:lt] ->
+      NaiveDateTime.diff(current_time, notification_period_start, :minute) > 1 ->
         [
           notification_period_start: {"Notifications can’t be set in the past", []},
           notification_period_start_date: {"Notifications can’t be set in the past", []}
@@ -127,9 +130,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
           ) in [:gt] ->
         [
           notification_period_start:
-            {"Notification period must start before #{formatted_datetime(naive_start)}", []},
+            {"Notification period must start on or before #{formatted_datetime(naive_start)}", []},
           notification_period_start_date:
-            {"Notification period must start before #{formatted_datetime(naive_start)}", []}
+            {"Notification period must start on or before #{formatted_datetime(naive_start)}", []}
         ]
 
       true ->

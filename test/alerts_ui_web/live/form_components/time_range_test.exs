@@ -217,7 +217,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         }
       })
 
-      assert render(view) =~ ~s(Notification period must start before 05/01/2024, 10:54 AM)
+      assert render(view) =~ ~s(Notification period must start on or before 05/01/2024, 10:54 AM)
     end
 
     test "it sends section_completed if no error in changeset" do
