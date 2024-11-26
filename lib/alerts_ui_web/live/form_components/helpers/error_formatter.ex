@@ -28,7 +28,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ErrorFormatter do
     traverse_errors(changeset, fn _changeset, field, {msg, _opts} ->
       Map.get(@field_name_to_error_message, field, msg)
     end)
-    |> Enum.map(fn {k, [v]} -> {k, {v, []}} end)
+    |> Enum.map(fn {k, v} -> {k, {v |> Enum.join(", "), []}} end)
   end
 
   def parse_field_errors(error_map, combination) when is_map(error_map) do

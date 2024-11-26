@@ -505,7 +505,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   @impl true
   def render(assigns) do
     one_time_duration_text = TimeRangeDurationText.one_time_duration_text(assigns.form.params)
-    recurring_duration_text = RecurringDurationText.recurring_duration_text(assigns.form.params)
 
     assigns =
       assign(assigns,
@@ -514,7 +513,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         alert_timing_values: @alert_timing_values,
         notification_values: @notification_values,
         one_time_duration_text: one_time_duration_text,
-        recurring_duration_text: recurring_duration_text
+        recurring_duration_text: recurring_duration_text,
+        one_time_duration_text: one_time_duration_text
       )
 
     ~H"""
@@ -554,7 +554,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           }
           class="text-text-secondary"
         >
-          Effect duration: <%= @recurring_duration_text %>
+          Effect duration: <%= RecurringDurationText.recurring_duration_text(assigns) %>
         </div>
         <div
           :if={@form[:alert_timing].value === :scheduled}
@@ -755,7 +755,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           <.select
             label="Recurring alert end"
             field={@form[:active_period_end_specifier]}
-            options={[{"When alert is closed", :until_further_notice}, {"Custom", :custom}]}
+            options={[{"When ", :until_further_notice}, {"Custom", :custom}]}
             class="min-w-[16rem] max-w-[16rem]"
             phx-debounce={120}
           />

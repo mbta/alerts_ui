@@ -3,8 +3,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.RecurringDurationText do
     Validators for time range component
   """
   use Timex
+  use AlertsUIWeb, :live_component
 
-  def recurring_duration_text(params) do
+  def recurring_duration_text(assigns) do
+    params = assigns.form.params
     start_time = params["active_period_start_time"] |> ensure_time_format()
     end_time = params["active_period_end_time"] |> ensure_time_format()
 
@@ -16,12 +18,27 @@ defmodule AlertsUIWeb.FormComponents.Helpers.RecurringDurationText do
 
     duration_text = duration(start_time, end_time)
 
+    plus_one = Time.compare(start_time, end_time) !== :lt
+
     weekday_text = weekday_text(params["recurrence_days"])
 
     start_date_text = date_text(start_date, nil)
     end_date_text = date_text(end_date, params["active_period_end_specifier"])
 
-    "#{start_time_text} – #{end_time_text}#{duration_text} every #{weekday_text} from #{start_date_text} until #{end_date_text}"
+    assigns =
+      assign(assigns,
+        start_time_text: start_time_text,
+        end_time_text: end_time_text,
+        plus_one: plus_one,
+        duration_text: duration_text,
+        weekday_text: weekday_text,
+        start_date_text: start_date_text,
+        end_date_text: end_date_text
+      )
+
+    ~H"""
+    <%= "#{@start_time_text} – #{@end_time_text}" %><sup :if={@plus_one}>+1</sup><%= " #{@duration_text} every #{@weekday_text} from #{@start_date_text} until #{@end_date_text}" %>
+    """
   end
 
   def time_text(nil), do: ""
@@ -32,7 +49,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.RecurringDurationText do
   end
 
   def date_text(_, "until_further_notice") do
-    "alert is closed"
+    "alert is manually closed"
   end
 
   def date_text(nil, _), do: ""
@@ -45,17 +62,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.RecurringDurationText do
   defp duration(_, nil), do: ""
 
   defp duration(start_time, end_time) do
-    plus_one =
-      if Time.compare(start_time, end_time) === :lt do
-        ""
-      else
-        "+1"
-      end
-
-    "#{plus_one} (#{duration_text(start_time, end_time)})"
-  end
-
-  defp duration_text(start_time, end_time) do
     Time.diff(end_time, start_time, :minute)
 
     minutes =
@@ -65,9 +71,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.RecurringDurationText do
         1440 + Time.diff(end_time, start_time, :minute)
       end
 
-    minutes
-    |> Duration.from_minutes()
-    |> Timex.format_duration(:humanized)
+    duration_text =
+      minutes
+      |> Duration.from_minutes()
+      |> Timex.format_duration(:humanized)
+
+    "(#{duration_text})"
   end
 
   def weekday_text(nil), do: ""

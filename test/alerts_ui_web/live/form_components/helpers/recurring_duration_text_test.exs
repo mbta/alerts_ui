@@ -1,6 +1,8 @@
 defmodule AlertsUIWeb.FormComponents.Helpers.RecurringDurationTextTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
+
+  import Phoenix.LiveViewTest
   alias AlertsUIWeb.FormComponents.Helpers.RecurringDurationText
 
   describe("recurring_duration_text/1") do
@@ -16,8 +18,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.RecurringDurationTextTest do
       expected =
         "7:35 AM – 9:45 PM (14 hours, 10 minutes) every Wednesday from Mon Nov 25, 2024 until Wed Jan 01, 2025"
 
-      actual = RecurringDurationText.recurring_duration_text(params)
-      assert expected == actual
+      actual =
+        render_component(&RecurringDurationText.recurring_duration_text/1,
+          form: %{params: params}
+        )
+
+      assert expected =~ actual
     end
 
     test "with end date and equal start and end time" do
@@ -30,9 +36,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.RecurringDurationTextTest do
       }
 
       expected =
-        "7:35 AM – 7:35 AM+1 (1 day) every Tuesday and Thursday from Tue Nov 26, 2024 until Thu Jan 02, 2025"
+        "7:35 AM – 7:35 AM<sup>+1</sup> (1 day) every Tuesday and Thursday from Tue Nov 26, 2024 until Thu Jan 02, 2025"
 
-      actual = RecurringDurationText.recurring_duration_text(params)
+      actual =
+        render_component(&RecurringDurationText.recurring_duration_text/1,
+          form: %{params: params}
+        )
+
       assert expected == actual
     end
 
@@ -46,9 +56,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.RecurringDurationTextTest do
       }
 
       expected =
-        "9:45 AM – 7:35 AM+1 (21 hours, 50 minutes) every Tuesday, Wednesday, and Thursday from Tue Nov 26, 2024 until Thu Jan 02, 2025"
+        "9:45 AM – 7:35 AM<sup>+1</sup> (21 hours, 50 minutes) every Tuesday, Wednesday, and Thursday from Tue Nov 26, 2024 until Thu Jan 02, 2025"
 
-      actual = RecurringDurationText.recurring_duration_text(params)
+      actual =
+        render_component(&RecurringDurationText.recurring_duration_text/1,
+          form: %{params: params}
+        )
+
       assert expected == actual
     end
 
@@ -71,9 +85,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.RecurringDurationTextTest do
       }
 
       expected =
-        "11:45 AM – 3:45 AM+1 (16 hours) every day from Tue Nov 26, 2024 until alert is closed"
+        "11:45 AM – 3:45 AM<sup>+1</sup> (16 hours) every day from Tue Nov 26, 2024 until alert is manually closed"
 
-      actual = RecurringDurationText.recurring_duration_text(params)
+      actual =
+        render_component(&RecurringDurationText.recurring_duration_text/1,
+          form: %{params: params}
+        )
+
       assert expected == actual
     end
   end
