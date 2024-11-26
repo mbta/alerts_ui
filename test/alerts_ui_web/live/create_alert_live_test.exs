@@ -67,6 +67,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
           |> validate_required([:header_text])
           |> apply_action(:validate)
 
+        send(view.pid, {:add_errors, [], AffectedService})
         send(view.pid, {:section_completed, changeset})
         send(view.pid, :create_alert)
         failure_rendered_view = render(view)
@@ -206,6 +207,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
           })
           |> apply_action(:insert)
 
+        send(view.pid, {:add_errors, [], AffectedService})
         send(view.pid, {:add_errors, [], AlertDetails})
         send(view.pid, {:section_completed, details_changeset})
         send(view.pid, :create_alert)

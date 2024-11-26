@@ -41,7 +41,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         form: form,
         button_selected_routes: [],
         direction_names_map: %{},
-        edited: false
+        updated: false
       })
 
     {:ok, socket}
@@ -75,7 +75,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   end
 
   @impl true
-  def update(%{alert_data: alert_data, editing: editing} = assigns, socket) do
+  def update(
+        %{alert_data: alert_data, editing: editing, combination: combination} = assigns,
+        socket
+      ) do
     route_type = Map.get(alert_data, :route_type)
     route_types = all_route_types(route_type)
     send(self(), {:fetch_available_routes, route_types})
@@ -84,30 +87,51 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       Map.new(assigns.available_routes, &{&1.id, &1.direction_names})
 
     assigns =
-      if editing == true and socket.assigns.edited === false do
-        alert_data = %{
-          route_ids: Map.get(alert_data, :route_ids) || [],
-          direction: Map.get(alert_data, :direction) || "default",
-          trip_ids: Map.get(alert_data, :trip_ids) || [],
-          stop_ids: Map.get(alert_data, :stop_ids) || []
-        }
+      if socket.assigns.updated == false do
+        alert_data =
+          if editing === true do
+            alert_data = %{
+              route_ids: Map.get(alert_data, :route_ids) || [],
+              direction: Map.get(alert_data, :direction) || "default",
+              trip_ids: Map.get(alert_data, :trip_ids) || [],
+              stop_ids: Map.get(alert_data, :stop_ids) || []
+            }
 
-        get_stops_by_route_ids(
-          alert_data.route_ids,
-          alert_data.direction
-        )
+            get_stops_by_route_ids(
+              alert_data.route_ids,
+              alert_data.direction
+            )
 
-        get_schedules_by_route_ids(
-          alert_data.route_ids,
-          alert_data.direction
-        )
+            get_schedules_by_route_ids(
+              alert_data.route_ids,
+              alert_data.direction
+            )
 
-        form = %__MODULE__{} |> changeset(alert_data) |> to_form()
+            alert_data
+          else
+            %{}
+          end
+
+        changeset = changeset(%__MODULE__{}, alert_data)
+
+        {result, error_changeset} =
+          apply_action(
+            changeset
+            |> validate_required(ServiceEffectCombinations.required_fields(combination)),
+            :validate
+          )
+
+        if result === :error do
+          send(
+            self(),
+            {:add_errors, ErrorFormatter.parse_field_errors(error_changeset), __MODULE__}
+          )
+        end
 
         assigns
-        |> Map.put(:form, form)
+        |> Map.put(:form, to_form(changeset))
         |> Map.put(:alert_data, alert_data)
-        |> Map.put(:edited, true)
+        |> Map.put(:updated, true)
       else
         assigns
       end
