@@ -228,14 +228,17 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
 
   defp traverse_inner_errors({key, value}) do
     new_value =
-      Enum.reduce(value, "", fn reminder_map, acc ->
+      value
+      |> Enum.uniq()
+      |> Enum.reduce([], fn reminder_map, acc ->
         if is_list(Map.get(reminder_map, :reminder_time)) do
-          acc <> hd(reminder_map.reminder_time) <> ";"
+          [hd(reminder_map.reminder_time) | acc]
         else
           acc
         end
-        |> String.slice(0..-2//1)
       end)
+      |> List.flatten()
+      |> Enum.join(";")
 
     {key, {new_value, []}}
   end
