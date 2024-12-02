@@ -92,7 +92,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
     params = Map.put(params, "reminder_time", new_reminder_time)
 
     cast(reminder_time, params, @reminder_time_fields)
-    |> validate_required(:reminder_time, message: "Enter a valid reminder datetime")
+    |> validate_required(:reminder_time, message: "Enter a valid date and time")
     |> validate_change(:reminder_time, fn :reminder_time, reminder_time ->
       min_time =
         params["min_time"] |> String.pad_trailing(19, ":00") |> NaiveDateTime.from_iso8601!()
@@ -176,7 +176,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
               <.datetime
                 label="Reminder date and time"
                 min={@current_time |> naive_datetime_to_iso8601()}
-                max={@active_period_end}
+                max="9999-12-31T23:59"
                 field={rt[:reminder_time]}
                 value={rt[:reminder_time].value}
                 class={
