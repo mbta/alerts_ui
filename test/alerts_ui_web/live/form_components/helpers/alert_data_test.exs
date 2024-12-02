@@ -148,6 +148,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                active_period_end: ~N[2024-05-03 21:09:34],
                active_period_start: ~N[2024-05-02 12:09:34],
                notification_period_start: ~N[2024-05-02 12:09:34],
+               notification_specifier: :custom,
                active_period_start_date: ~D[2024-05-02],
                active_period_end_date: ~D[2024-05-03],
                service_types: [],

@@ -644,7 +644,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   def label(assigns) do
     ~H"""
-    <label for={@for} class={["block font-medium leading-tight mb-2", @class]}>
+    <label for={@for} class={["block font-medium leading-tight mb-2 min-h-[1.3rem]", @class]}>
       <%= render_slot(@inner_block) %>
     </label>
     """

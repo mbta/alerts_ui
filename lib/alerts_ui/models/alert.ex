@@ -189,6 +189,15 @@ defmodule AlertsUI.Models.Alert do
         [active_period_start: "Effect can't start in the past"]
       end
     end)
+    |> validate_change(:notification_period_start, fn :notification_period_start,
+                                                      notification_period_start ->
+      if is_nil(current_time) or
+           DateTime.diff(current_time, notification_period_start, :minute) < 1 do
+        []
+      else
+        [notification_period_start: "Notifications can’t be set in the past"]
+      end
+    end)
     |> validate_inclusion(:effect, @effect)
     |> validate_inclusion(:cause, @cause)
     |> validate_inclusion(:severity_level, @severity_level)

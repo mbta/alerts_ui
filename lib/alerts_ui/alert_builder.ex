@@ -50,6 +50,7 @@ defmodule AlertsUI.AlertBuilder do
           draft: boolean | nil,
           last_push_notification_timestamp: NaiveDateTime.t() | nil,
           notification_period_start: NaiveDateTime.t() | nil,
+          notification_specifier: atom() | nil,
           severity: integer(),
           reminder_times: [NaiveDateTime.t()] | nil,
           recurrence_days: [atom()] | nil
@@ -117,6 +118,14 @@ defmodule AlertsUI.AlertBuilder do
         )
       end
 
+    notification_period_start =
+      if Map.get(alert_data, :notification_specifier) === :now do
+        current_time
+      else
+        Map.get(alert_data, :notification_period_start)
+        |> ActivePeriodBuilder.naive_eastern_datetime_to_utc()
+      end
+
     %{
       header_text: Map.get(alert_data, :header_text),
       description_text: Map.get(alert_data, :description_text),
@@ -133,9 +142,7 @@ defmodule AlertsUI.AlertBuilder do
         Map.get(alert_data, :last_push_notification_timestamp)
         |> ActivePeriodBuilder.naive_eastern_datetime_to_utc(),
       informed_entity: build_informed_entities(combination, alert_data, effect_name),
-      notification_period_start:
-        Map.get(alert_data, :notification_period_start)
-        |> ActivePeriodBuilder.naive_eastern_datetime_to_utc(),
+      notification_period_start: notification_period_start,
       severity: severity,
       severity_level: SeverityLevel.severity_level_by_severity(severity),
       reminder_times: reminder_times,

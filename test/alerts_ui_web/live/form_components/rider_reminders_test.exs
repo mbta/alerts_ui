@@ -16,7 +16,8 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
       label: "Rider Reminders"
     },
     alert_data: %{},
-    editing: false
+    editing: false,
+    edited: false
   }
 
   describe "component" do

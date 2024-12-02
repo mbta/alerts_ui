@@ -43,6 +43,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :image_url,
     :image_alternative_text,
     :notification_period_start,
+    :notification_specifier,
     :severity,
     :reminder_times
   ]
@@ -108,6 +109,15 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
     reminder_times = Enum.map(alert.reminder_times, &shift_to_naive(&1.reminder_time))
 
+    notification_period_start = shift_to_naive(alert.notification_period_start)
+
+    notification_specifier =
+      if is_nil(notification_period_start) do
+        nil
+      else
+        :custom
+      end
+
     %__MODULE__{
       route_type: route_type,
       direction: Alert.get_direction(informed_entities),
@@ -125,7 +135,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       image_url: alert.image_url,
       image_alternative_text: alert.image_alternative_text,
       banner_text: alert.banner_text,
-      notification_period_start: shift_to_naive(alert.notification_period_start),
+      notification_period_start: notification_period_start,
+      notification_specifier: notification_specifier,
       severity: alert.severity,
       reminder_times: reminder_times
     }
