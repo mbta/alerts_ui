@@ -175,7 +175,7 @@ defmodule AlertsUI.Models.Alert do
   @spec changeset(any(), map()) :: Ecto.Changeset.t()
   def changeset(%__MODULE__{} = alert, params) do
     current_time = Map.get(params, :current_time)
-
+    # TODO validate here (try using validator fucntions?)
     alert
     |> cast(params, @permitted_fields)
     |> cast_assoc(:active_period, required: false, with: &ActivePeriod.changeset/2)

@@ -158,6 +158,71 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       assert view |> render() =~ ~s(Sunday)
     end
 
+    test "if recurring, start date must match weekday selection" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
+      refute view |> render() =~ ~s(Sunday)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "alert_timing" => "recurring",
+          "active_period_start_date_specifier" => "custom",
+          "active_period_start_date" => "2024-12-04",
+          "recurrence_days" => ["monday"]
+        }
+      })
+
+      assert view |> render() =~ ~s(Alert start day must match a selected day of the week.)
+    end
+
+    test "scheduled start time must be after current time" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "alert_timing" => "recurring",
+          "active_period_start_specifier" => "custom",
+          "active_period_start" => "2024-05-01T10:54:00",
+          "notification_specifier" => "custom",
+          "notification_period_start" => "2024-04-29T10:54:00"
+        }
+      })
+
+      assert render(view) =~ ~s(Notifications can’t be set in the past)
+    end
+
+    test "scheduled start time must be before active period start" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
+      view
+      |> element("#time_range_notification_specifier")
+      |> render_change(%{
+        "time_range" => %{
+          "alert_timing" => "one-time",
+          "active_period_start_specifier" => "custom"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_start" => "2024-05-01T10:54:00",
+          "notification_specifier" => "custom",
+          "notification_period_start" => "2024-05-02T10:54:00"
+        }
+      })
+
+      assert render(view) =~ ~s(Notification period must start on or before 05/01/2024, 10:54 AM)
+    end
+
     test "it sends section_completed if no error in changeset" do
       {:ok, view, _html} =
         live_isolated_component(TimeRange, @assigns)

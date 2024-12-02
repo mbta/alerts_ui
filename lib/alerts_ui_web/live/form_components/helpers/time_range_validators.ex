@@ -34,6 +34,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
         time_range
       )
     end)
+    |> validate_change(:active_period_start_date, fn :active_period_start_date,
+                                                     active_period_start_date ->
+      validate_start_date_matches_weekday(
+        active_period_start_date,
+        time_range["recurrence_days"],
+        time_range["active_period_start_specifier"]
+      )
+    end)
   end
 
   def validate_relationships(changeset, _, _), do: changeset
@@ -160,6 +168,35 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
       end,
       message: "Enter a valid date and/or time"
     )
+  end
+
+  defp validate_start_date_matches_weekday(start_date, recurrence_days, "now") do
+    cond do
+      recurrence_days in [[], nil] ->
+        []
+
+      Timex.weekday(start_date) in Enum.map(recurrence_days, &Timex.day_to_num/1) ->
+        []
+
+      true ->
+        [
+          active_period_start_specifier:
+            {"Alert start day must match a selected day of the week.", []}
+        ]
+    end
+  end
+
+  defp validate_start_date_matches_weekday(start_date, recurrence_days, "custom") do
+    cond do
+      recurrence_days in [[], nil] ->
+        []
+
+      Timex.weekday(start_date) in Enum.map(recurrence_days, &Timex.day_to_num/1) ->
+        []
+
+      true ->
+        [active_period_start_date: {"Alert start day must match a selected day of the week.", []}]
+    end
   end
 
   @spec validate_required_fields(Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
