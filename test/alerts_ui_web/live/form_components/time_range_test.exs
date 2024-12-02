@@ -63,7 +63,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         }
       })
 
-
       assert view
              |> render() =~ "custom"
     end

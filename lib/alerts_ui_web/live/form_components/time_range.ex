@@ -513,7 +513,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         alert_timing_values: @alert_timing_values,
         notification_values: @notification_values,
         one_time_duration_text: one_time_duration_text,
-        recurring_duration_text: recurring_duration_text,
         one_time_duration_text: one_time_duration_text
       )
 
@@ -556,11 +555,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         >
           Effect duration: <%= RecurringDurationText.recurring_duration_text(assigns) %>
         </div>
-        <div
-          :if={@form[:alert_timing].value === :scheduled}
-          id="scheduled-selector-div"
-          class="flex flex-row gap-8 my-8"
-        >
         <div id="scheduled-selector-div" class="flex flex-row gap-8 my-8">
           <.select
             label="Notification period"
@@ -755,7 +749,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           <.select
             label="Recurring alert end"
             field={@form[:active_period_end_specifier]}
-            options={[{"When ", :until_further_notice}, {"Custom", :custom}]}
+            options={[{"When alert is closed", :until_further_notice}, {"Custom", :custom}]}
             class="min-w-[16rem] max-w-[16rem]"
             phx-debounce={120}
           />
@@ -820,19 +814,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       {name, value}
     end)
   end
-
-  defp formatted_datetime(datetime, format_string \\ "{0M}/{0D}/{YYYY}, {0h12}:{0m} {AM}")
-
-  defp formatted_datetime(nil, _), do: ""
-  defp formatted_datetime("", _), do: ""
-
-  defp formatted_datetime(datetime, format_string) do
-    case Timex.format(datetime, format_string) do
-      {:ok, formatted_time} -> formatted_time
-      {:error, _} -> "invalid datetime"
-    end
-  end
-
 
   defp shifted_active_period_end(datetime) do
     datetime
