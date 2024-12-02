@@ -6,6 +6,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
   import Phoenix.LiveViewTest
   alias AlertsUIWeb.FormComponents.TimeRange
   alias AlertsUIWeb.Step
+  alias MBTAV3API.Schedules.{Schedule, Trip}
 
   @assigns %{
     id: "time_range",
@@ -15,7 +16,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       next: "success",
       label: "Time Range"
     },
-    alert_data: %{},
+    alert_data: %{trip_ids: ["CR-683322-595"]},
     current_time: ~U[2024-04-30 15:54:00Z],
     edited: false,
     editing: false
@@ -137,6 +138,85 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       })
 
       assert render(view) =~ ~s(Effect must end after 05/01/2024, 10:54 AM)
+    end
+
+    test "displays error if start after trip end" do
+      schedule = %Schedule{
+        trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
+        arrival_time: ~U[2024-05-01 09:15:00.00Z],
+        departure_time: ~U[2024-05-01 08:15:00.00Z]
+      }
+
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns |> Map.put(:available_schedules, [schedule]))
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end_specifier" => "custom",
+          "active_period_start_specifier" => "custom"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end" => "2024-05-01T11:54:00",
+          "active_period_start" => "2024-05-01T10:16:00"
+        }
+      })
+
+      assert render(view) =~ ~s(Effect must start before 05/01/2024, 10:15 AM)
+    end
+
+    test "doesn't display error if start within 1 hour of trip end" do
+      schedule = %Schedule{
+        trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
+        arrival_time: ~U[2024-05-01 09:15:00.00Z],
+        departure_time: ~U[2024-05-01 08:15:00.00Z]
+      }
+
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns |> Map.put(:available_schedules, [schedule]))
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end_specifier" => "custom",
+          "active_period_start_specifier" => "custom"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end" => "2024-05-01T11:54:00",
+          "active_period_start" => "2024-05-01T10:14:00"
+        }
+      })
+
+      refute render(view) =~ ~s(Effect must start before 05/01/2024, 10:15 AM)
+    end
+
+    test "scheduled datetime is hidden unless selection is made" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
+      refute view |> render() =~ ~s(id="time_range_notification_period_start")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "notification_specifier" => "custom"
+        }
+      })
+
+      assert view |> render() =~ ~s(id="time_range_notification_period_start")
     end
 
     test "recurring section is hidden unless recurring is selected" do

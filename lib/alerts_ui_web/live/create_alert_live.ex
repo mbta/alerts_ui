@@ -400,7 +400,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
       one_hour_from_arrival = Timex.shift(last_stop.arrival_time, hours: 1)
 
       if DateTime.compare(one_hour_from_arrival, current_time) in [:gt, :eq] do
-        [first_stop | acc]
+        [first_stop |> Map.put(:arrival_time, last_stop.arrival_time) | acc]
       else
         acc
       end

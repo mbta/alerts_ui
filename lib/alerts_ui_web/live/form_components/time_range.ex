@@ -117,6 +117,16 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   @impl true
   def update(%{editing: editing, alert_data: alert_data} = assigns, socket) do
+    trip_ids = Map.get(alert_data, :trip_ids, [])
+
+    trip_arrival_time =
+      assigns
+      |> Map.get(:available_schedules, [])
+      |> Enum.filter(&(&1.trip.id in trip_ids))
+      |> Enum.map(& &1.arrival_time)
+      |> Enum.max(DateTime, fn -> nil end)
+      |> utc_datetime_to_naive()
+
     assigns =
       if editing == true and socket.assigns.edited === false do
         alert_data =
@@ -137,6 +147,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       else
         assigns
       end
+      |> Map.put(:trip_arrival_time, trip_arrival_time)
 
     {:ok, assign(socket, assigns)}
   end
@@ -166,6 +177,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
             form_params["alert_timing"],
             form_params
           )
+          |> TimeRangeValidators.validate_start_is_before_trip(socket.assigns.trip_arrival_time)
           |> TimeRangeValidators.validate_start_is_after_now(
             current_time,
             form_params
@@ -277,6 +289,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           socket.assigns.current_time,
           time_range
         )
+        |> TimeRangeValidators.validate_start_is_before_trip(socket.assigns.trip_arrival_time)
         |> TimeRangeValidators.validate_required_fields(time_range)
       else
         changeset
@@ -692,4 +705,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     |> DateTime.add(-1, :day)
     |> DateTime.to_naive()
   end
+
+  defp utc_datetime_to_naive(nil), do: nil
+  defp utc_datetime_to_naive(datetime), do: DateTime.to_naive(datetime)
 end
