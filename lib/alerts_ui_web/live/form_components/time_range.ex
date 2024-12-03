@@ -7,7 +7,13 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   import Ecto.Changeset
 
   alias AlertsUI.Models.ActivePeriod
-  alias AlertsUIWeb.FormComponents.Helpers.{ErrorFormatter, TimeRangeValidators}
+
+  alias AlertsUIWeb.FormComponents.Helpers.{
+    ErrorFormatter,
+    RecurringDurationText,
+    TimeRangeDurationText,
+    TimeRangeValidators
+  }
 
   @alert_timing_values [
     :"one-time",
@@ -78,6 +84,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       active_period_start_date: current_time |> NaiveDateTime.to_date(),
       active_period_start_time: ActivePeriod.start_of_service_time(),
       active_period_start_specifier: "now",
+      active_period_end_specifier: "later_today",
+      recurrence_days: [],
       active_period_end:
         ActivePeriod.end_of_service_datetime(current_time)
         |> DateTime.to_naive()
@@ -496,12 +504,16 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   @impl true
   def render(assigns) do
+    one_time_duration_text = TimeRangeDurationText.one_time_duration_text(assigns.form.params)
+
     assigns =
       assign(assigns,
         start_values: @start_values,
         end_values: @end_values,
         alert_timing_values: @alert_timing_values,
-        notification_values: @notification_values
+        notification_values: @notification_values,
+        one_time_duration_text: one_time_duration_text,
+        one_time_duration_text: one_time_duration_text
       )
 
     ~H"""
@@ -527,7 +539,22 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           phx-debounce={120}
         />
         <%= one_time_alert_component(assigns) %>
+        <div
+          :if={@form[:alert_timing].value in [:"one-time", "one-time"] and Enum.empty?(@form.errors)}
+          class="text-text-secondary"
+        >
+          Effect duration: <%= @one_time_duration_text %>
+        </div>
         <%= recurring_alert_component(assigns) %>
+        <div
+          :if={
+            @form[:alert_timing].value in [:recurring, "recurring"] and Enum.empty?(@form.errors) and
+              @form[:recurrence_days].value not in [[], nil]
+          }
+          class="text-text-secondary"
+        >
+          Effect duration: <%= RecurringDurationText.recurring_duration_text(assigns) %>
+        </div>
         <div id="scheduled-selector-div" class="flex flex-row gap-8 my-8">
           <.select
             label="Notification period"
@@ -655,24 +682,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         />
       </div>
     </div>
-    <div :if={@form[:alert_timing].value in [:"one-time", "one-time"]} class="flex flex-col">
-      <div>
-        <%= "start datetime: " <> (@form[:active_period_start].value |> formatted_datetime) %>
-      </div>
-      <div>
-        <%= "end datetime: " <>
-          if is_nil(@form[:active_period_end].value) or is_binary(@form[:active_period_end].value) do
-            "-"
-          else
-            @form[:active_period_end].value
-            |> NaiveDateTime.add(
-              if(@form[:active_period_end_specifier].value == :end_of_service, do: 1, else: 0),
-              :day
-            )
-            |> formatted_datetime
-          end %>
-      </div>
-    </div>
     """
   end
 
@@ -765,35 +774,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       use_outline_buttons={true}
       show_icons={false}
     />
-    <div :if={@form[:alert_timing].value === :recurring} class="flex flex-col">
-      <div>
-        start time: <%= time_to_iso8601(@form[:active_period_start_time].value) %>
-      </div>
-      <div>
-        end time: <%= time_to_iso8601(@form[:active_period_end_time].value) %>
-      </div>
-      <div>
-        <%= "start date: " <>
-          (@form[:active_period_start_date].value |> formatted_datetime("{0M}/{0D}/{YYYY}")) %>
-      </div>
-      <div>
-        <%= "end date: " <>
-          if @form[:active_period_end_specifier].value == :custom and
-               @form[:active_period_end_date].value not in ["", nil] do
-            @form[:active_period_end_date].value
-            |> Date.add(
-              if(
-                @form[:active_period_end_time_specifier].value in [:end_of_service, "end_of_service"],
-                do: 1,
-                else: 0
-              )
-            )
-            |> formatted_datetime("{0M}/{0D}/{YYYY}")
-          else
-            "-"
-          end %>
-      </div>
-    </div>
     """
   end
 
@@ -833,18 +813,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       name = value |> Atom.to_string() |> String.replace("_", " ") |> String.capitalize()
       {name, value}
     end)
-  end
-
-  defp formatted_datetime(datetime, format_string \\ "{0M}/{0D}/{YYYY}, {0h12}:{0m} {AM}")
-
-  defp formatted_datetime(nil, _), do: ""
-  defp formatted_datetime("", _), do: ""
-
-  defp formatted_datetime(datetime, format_string) do
-    case Timex.format(datetime, format_string) do
-      {:ok, formatted_time} -> formatted_time
-      {:error, _} -> "invalid datetime"
-    end
   end
 
   defp shifted_active_period_end(datetime) do

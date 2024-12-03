@@ -59,7 +59,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         editing: true,
         alert_data: %{
           active_period_start: ~N[2024-04-30 11:54:00],
-          active_period_end_specifier: :custom
+          active_period_end_specifier: "custom"
         }
       })
 
