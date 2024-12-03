@@ -32,14 +32,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
 
     changeset = changeset(%__MODULE__{}, %{})
 
-    {_result, error_changeset} =
-      apply_action(
-        changeset
-        |> validate_required(@required_fields),
-        :validate
-      )
-
-    send(self(), {:add_errors, ErrorFormatter.parse_field_errors(error_changeset), __MODULE__})
+    send_changeset(changeset)
 
     socket =
       assign(socket, %{
@@ -68,6 +61,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
         |> Map.merge(socket.assigns.form.params)
       )
+
+    send_changeset(changeset)
 
     form = to_form(changeset)
     assigns = assigns |> Map.merge(%{form: form, cause_options: cause_options})
@@ -114,18 +109,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       |> changeset(alert_details)
       |> validate_image_fields(image_size)
 
-    case apply_action(
-           changeset |> validate_required(@required_fields),
-           :validate
-         ) do
-      {:ok, changeset} ->
-        send(self(), {:add_errors, [], __MODULE__})
-        send(self(), {:section_completed, changeset})
-        changeset
-
-      {:error, changeset} ->
-        send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
-    end
+    send_changeset(changeset)
 
     form =
       changeset
@@ -275,6 +259,21 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       </.form>
     </div>
     """
+  end
+
+  defp send_changeset(changeset) do
+    case apply_action(
+           changeset |> validate_required(@required_fields),
+           :validate
+         ) do
+      {:ok, changeset} ->
+        send(self(), {:add_errors, [], __MODULE__})
+        send(self(), {:section_completed, changeset})
+        changeset
+
+      {:error, changeset} ->
+        send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
+    end
   end
 
   defp formatted_causes(route_type, combination) do
