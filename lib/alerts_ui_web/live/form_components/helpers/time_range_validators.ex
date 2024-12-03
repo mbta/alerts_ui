@@ -233,8 +233,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
     |> validate_change(:active_period_start, fn :active_period_start, active_period_start ->
       if NaiveDateTime.diff(current_time, active_period_start, :minute) > 1 do
         [
-          active_period_start: "Effect can't start in the past",
-          active_period_start_date: "Effect can't start in the past"
+          active_period_start: "Effect can't start in the past"
         ]
       else
         []
@@ -242,7 +241,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
     end)
     |> validate_change(:active_period_start_date, fn :active_period_start_date,
                                                      active_period_start_date ->
-      if Date.diff(NaiveDateTime.to_date(current_time), active_period_start_date) > 1 do
+      if Date.diff(NaiveDateTime.to_date(current_time), active_period_start_date) > 0 do
         [
           active_period_start_date: "Effect can't start in the past"
         ]
