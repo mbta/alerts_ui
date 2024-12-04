@@ -322,6 +322,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     changeset =
       if changeset.valid? do
         changeset
+        |> TimeRangeValidators.validate_start_is_after_now(socket.assigns.current_time)
         |> TimeRangeValidators.validate_notification(time_range, socket.assigns.current_time)
         |> TimeRangeValidators.validate_required_fields(time_range)
       else
@@ -512,7 +513,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         end_values: @end_values,
         alert_timing_values: @alert_timing_values,
         notification_values: @notification_values,
-        one_time_duration_text: one_time_duration_text,
         one_time_duration_text: one_time_duration_text
       )
 

@@ -110,12 +110,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
          current_time,
          naive_start
        ) do
-    NaiveDateTime.diff(
-      notification_period_start,
-      current_time,
-      :minute
-    )
-
     cond do
       NaiveDateTime.diff(current_time, notification_period_start, :minute) > 1 ->
         [
@@ -124,10 +118,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
         ]
 
       naive_start &&
-          NaiveDateTime.compare(
-            notification_period_start,
-            naive_start
-          ) in [:gt] ->
+          NaiveDateTime.diff(naive_start, notification_period_start, :minute) > 1 ->
         [
           notification_period_start:
             {"Notification period must start on or before #{formatted_datetime(naive_start)}", []},
