@@ -175,7 +175,7 @@ defmodule AlertsUI.Models.Alert do
   @spec changeset(any(), map()) :: Ecto.Changeset.t()
   def changeset(%__MODULE__{} = alert, params) do
     current_time = Map.get(params, :current_time)
-    # TODO validate here (try using validator fucntions?)
+
     alert
     |> cast(params, @permitted_fields)
     |> cast_assoc(:active_period, required: false, with: &ActivePeriod.changeset/2)
@@ -187,6 +187,22 @@ defmodule AlertsUI.Models.Alert do
         []
       else
         [active_period_start: "Effect can't start in the past"]
+      end
+    end)
+    |> validate_change(:recurrence_days, fn :recurrence_days, recurrence_days ->
+      active_period_start = Map.get(params, :active_period_start)
+
+      cond do
+        Enum.empty?(recurrence_days) ->
+          []
+
+        Timex.weekday(active_period_start) in Enum.map(recurrence_days, &Timex.day_to_num/1) ->
+          []
+
+        true ->
+          [
+            recurrence_days: {"Alert start day must match a selected day of the week.", []}
+          ]
       end
     end)
     |> validate_change(:notification_period_start, fn :notification_period_start,
