@@ -77,11 +77,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
 
   def validate_notification(changeset, time_range, current_time) do
     naive_start =
-      if time_range["alert_timing"] == "one-time" do
-        ensure_naive_datetime_format(time_range["active_period_start"])
+      if time_range.alert_timing == :"one-time" do
+        ensure_naive_datetime_format(time_range.active_period_start)
       else
-        start_date = time_range["active_period_start_date"] |> ensure_date_format
-        start_time = time_range["active_period_start_time"] |> ensure_time_format
+        start_date = time_range.active_period_start_date |> ensure_date_format
+        start_time = time_range.active_period_start_time |> ensure_time_format
 
         if is_nil(start_time) or is_nil(start_date) do
           nil
@@ -110,6 +110,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
          current_time,
          naive_start
        ) do
+
     cond do
       NaiveDateTime.diff(current_time, notification_period_start, :minute) > 1 ->
         [
@@ -118,7 +119,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
         ]
 
       naive_start &&
-          NaiveDateTime.diff(naive_start, notification_period_start, :minute) > 1 ->
+          NaiveDateTime.diff(notification_period_start, naive_start, :minute) > 1 ->
         [
           notification_period_start:
             {"Notification period must start on or before #{formatted_datetime(naive_start)}", []},
@@ -129,6 +130,20 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
       true ->
         []
     end
+  end
+
+  @spec validate_required_notification_fields(Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
+  def validate_required_notification_fields(changeset, params) do
+    changeset
+    |>  validate_required(
+      case params["notification_specifier"] do
+        "same_as_effect_period" -> []
+        "start_of_service" -> [:notification_period_start_date]
+        "now" -> [:notification_period_start]
+        "custom" -> [:notification_period_start]
+      end,
+      message: "Enter a valid date and/or time"
+    )
   end
 
   @spec validate_required_fields(Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
@@ -175,22 +190,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
       ),
       message: "Enter a valid end date"
     )
-    |> validate_required(
-      case params["notification_specifier"] do
-        "same_as_effect_period" -> []
-        "start_of_service" -> [:notification_period_start_date]
-        "now" -> [:notification_period_start]
-        "custom" -> [:notification_period_start]
-      end,
-      message: "Enter a valid end date"
-    )
-  end
-
-  defp required_fields_by_specifier("scheduled", changeset, _) do
-    changeset
-    |> validate_required([:notification_period_start],
-      message: "Enter a valid scheduled alert start"
-    )
   end
 
   defp required_fields_by_specifier(nil, changeset, _), do: changeset
@@ -224,7 +223,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
     |> validate_change(:active_period_start, fn :active_period_start, active_period_start ->
       if NaiveDateTime.diff(current_time, active_period_start, :minute) > 1 do
         [
-          active_period_start: "Effect can't start in the past"
+          active_period_start: "Effect can't start in the past",
+          active_period_start_date: "Effect can't start in the past"
         ]
       else
         []
@@ -246,6 +246,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
     do: Timex.format!(datetime, format_string)
 
   defp ensure_naive_datetime_format(""), do: nil
+  defp ensure_naive_datetime_format(nil), do: nil
 
   defp ensure_naive_datetime_format(datetime) when is_binary(datetime) do
     datetime |> String.pad_trailing(19, ":00") |> NaiveDateTime.from_iso8601!()
@@ -257,6 +258,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
 
   defp ensure_time_format(""), do: nil
 
+  defp ensure_time_format(nil), do: nil
+
   defp ensure_time_format(time) when is_binary(time) do
     time |> String.pad_trailing(8, ":00") |> Time.from_iso8601!()
   end
@@ -264,6 +267,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
   defp ensure_date_format(%Date{} = date), do: date
 
   defp ensure_date_format(""), do: nil
+
+  defp ensure_date_format(nil), do: nil
 
   defp ensure_date_format(date) when is_binary(date) do
     date |> Date.from_iso8601!()
