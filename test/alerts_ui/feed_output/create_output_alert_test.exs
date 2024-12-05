@@ -211,15 +211,13 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
       })
 
       existing_alert = Alerts.get_by_alert_id("524486")
-      expected = CreateOutputAlert.build_alert(existing_alert, ~U[2023-09-23 00:04:54Z])
+      actual = CreateOutputAlert.build_alert(existing_alert, ~U[2023-09-23 00:04:54Z])
 
-      assert expected == %{
+      assert %{
                id: "524486",
                alert: %{
                  header_text: %{translation: [%{text: "a", language: "en"}]},
                  description_text: %{translation: [%{text: "b", language: "en"}]},
-                 created_timestamp: DateTime.utc_now() |> DateTime.to_unix(),
-                 last_modified_timestamp: DateTime.utc_now() |> DateTime.to_unix(),
                  alert_lifecycle: :ONGOING,
                  reminder_times: [1_727_222_460],
                  active_period: [
@@ -228,7 +226,13 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
                  ],
                  informed_entity: [%{route_id: "1", trip: %{trip_id: "1"}, activities: []}]
                }
-             }
+             } = actual
+
+      assert abs(actual.alert.created_timestamp - (DateTime.utc_now() |> DateTime.to_unix())) < 2
+
+      assert abs(
+               actual.alert.last_modified_timestamp - (DateTime.utc_now() |> DateTime.to_unix())
+             ) < 2
     end
   end
 
