@@ -40,66 +40,104 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
         active_period: [build(:active_period, %{start: ~U[2023-10-12 00:01:00Z], end: nil})]
       )
 
-      expected_alerts = [
-        %{
-          "alert" => %{
-            "closed_timestamp" => four_minutes_ago |> DateTime.to_unix(),
-            "active_period" => [],
-            "description_text" => %{"translation" => [%{"language" => "en", "text" => "b"}]},
-            "header_text" => %{"translation" => [%{"language" => "en", "text" => "a"}]},
-            "informed_entity" => [
-              %{"activities" => [], "route_id" => "1", "trip" => %{"trip_id" => "1"}}
-            ],
-            "alert_lifecycle" => "ONGOING",
-            "last_modified_timestamp" => current_time |> DateTime.to_unix(),
-            "created_timestamp" => current_time |> DateTime.to_unix(),
-            "reminder_times" => [1_727_222_460]
-          },
-          "id" => "123abc"
-        },
-        %{
-          "alert" => %{
-            "active_period" => [%{"start" => 1_697_068_860}],
-            "description_text" => %{"translation" => [%{"language" => "en", "text" => "b"}]},
-            "header_text" => %{"translation" => [%{"language" => "en", "text" => "a"}]},
-            "informed_entity" => [
-              %{"activities" => [], "route_id" => "1", "trip" => %{"trip_id" => "1"}}
-            ],
-            "alert_lifecycle" => "ONGOING",
-            "last_modified_timestamp" => current_time |> DateTime.to_unix(),
-            "created_timestamp" => current_time |> DateTime.to_unix(),
-            "reminder_times" => [1_727_222_460]
-          },
-          "id" => "234abc"
-        },
-        %{
-          "alert" => %{
-            "closed_timestamp" => current_time |> DateTime.to_unix(),
-            "active_period" => [],
-            "description_text" => %{"translation" => [%{"language" => "en", "text" => "b"}]},
-            "header_text" => %{"translation" => [%{"language" => "en", "text" => "a"}]},
-            "informed_entity" => [
-              %{"activities" => [], "route_id" => "1", "trip" => %{"trip_id" => "1"}}
-            ],
-            "duration_certainty" => "KNOWN",
-            "last_modified_timestamp" => current_time |> DateTime.to_unix(),
-            "created_timestamp" => current_time |> DateTime.to_unix(),
-            "alert_lifecycle" => "ONGOING",
-            "reminder_times" => [1_727_222_460]
-          },
-          "id" => "345abc"
-        }
-      ]
-
       {:ok, actual} = WriteFeed.write_feed()
+      [alert_1, alert_2, alert_3] = actual["entity"] |> Enum.sort_by(& &1["id"])
+
+      assert %{
+               "alert" => %{
+                 "active_period" => [],
+                 "description_text" => %{"translation" => [%{"language" => "en", "text" => "b"}]},
+                 "header_text" => %{"translation" => [%{"language" => "en", "text" => "a"}]},
+                 "informed_entity" => [
+                   %{"activities" => [], "route_id" => "1", "trip" => %{"trip_id" => "1"}}
+                 ],
+                 "alert_lifecycle" => "ONGOING",
+                 "reminder_times" => [1_727_222_460]
+               },
+               "id" => "123abc"
+             } = alert_1
+
+      assert within_2_milliseconds(
+               alert_1["alert"]["created_timestamp"],
+               current_time |> DateTime.to_unix()
+             )
+
+      assert within_2_milliseconds(
+               alert_1["alert"]["last_modified_timestamp"],
+               current_time |> DateTime.to_unix()
+             )
+
+      assert within_2_milliseconds(
+               alert_1["alert"]["closed_timestamp"],
+               four_minutes_ago |> DateTime.to_unix()
+             )
+
+      assert %{
+               "alert" => %{
+                 "active_period" => [%{"start" => 1_697_068_860}],
+                 "description_text" => %{"translation" => [%{"language" => "en", "text" => "b"}]},
+                 "header_text" => %{"translation" => [%{"language" => "en", "text" => "a"}]},
+                 "informed_entity" => [
+                   %{"activities" => [], "route_id" => "1", "trip" => %{"trip_id" => "1"}}
+                 ],
+                 "alert_lifecycle" => "ONGOING",
+                 "reminder_times" => [1_727_222_460]
+               },
+               "id" => "234abc"
+             } = alert_2
+
+      assert within_2_milliseconds(
+               alert_2["alert"]["created_timestamp"],
+               current_time |> DateTime.to_unix()
+             )
+
+      assert within_2_milliseconds(
+               alert_2["alert"]["last_modified_timestamp"],
+               current_time |> DateTime.to_unix()
+             )
+
+      assert alert_2["alert"]["closed_timestamp"] === nil
+
+      %{
+        "alert" => %{
+          "active_period" => [],
+          "description_text" => %{"translation" => [%{"language" => "en", "text" => "b"}]},
+          "header_text" => %{"translation" => [%{"language" => "en", "text" => "a"}]},
+          "informed_entity" => [
+            %{"activities" => [], "route_id" => "1", "trip" => %{"trip_id" => "1"}}
+          ],
+          "duration_certainty" => "KNOWN",
+          "alert_lifecycle" => "ONGOING",
+          "reminder_times" => [1_727_222_460]
+        },
+        "id" => "345abc"
+      } = alert_3
+
+      assert within_2_milliseconds(
+               alert_3["alert"]["created_timestamp"],
+               current_time |> DateTime.to_unix()
+             )
+
+      assert within_2_milliseconds(
+               alert_3["alert"]["last_modified_timestamp"],
+               current_time |> DateTime.to_unix()
+             )
+
+      assert within_2_milliseconds(
+               alert_3["alert"]["closed_timestamp"],
+               current_time |> DateTime.to_unix()
+             )
 
       assert %{
                "gtfs_realtime_version" => "2.0",
                "incrementality" => "FULL_DATASET",
                "timestamp" => _
              } = actual["header"]
-
-      assert expected_alerts == actual["entity"] |> Enum.sort_by(& &1["id"])
     end
+  end
+
+  defp within_2_milliseconds(time_1, time_2) do
+    # account for small delays in running tests that make the times differ slightly
+    abs(time_1 - time_2) < 2
   end
 end
