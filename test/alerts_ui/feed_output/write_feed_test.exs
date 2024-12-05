@@ -57,17 +57,17 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
                "id" => "123abc"
              } = alert_1
 
-      assert within_2_milliseconds(
+      assert within_two_seconds(
                alert_1["alert"]["created_timestamp"],
                current_time |> DateTime.to_unix()
              )
 
-      assert within_2_milliseconds(
+      assert within_two_seconds(
                alert_1["alert"]["last_modified_timestamp"],
                current_time |> DateTime.to_unix()
              )
 
-      assert within_2_milliseconds(
+      assert within_two_seconds(
                alert_1["alert"]["closed_timestamp"],
                four_minutes_ago |> DateTime.to_unix()
              )
@@ -86,12 +86,12 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
                "id" => "234abc"
              } = alert_2
 
-      assert within_2_milliseconds(
+      assert within_two_seconds(
                alert_2["alert"]["created_timestamp"],
                current_time |> DateTime.to_unix()
              )
 
-      assert within_2_milliseconds(
+      assert within_two_seconds(
                alert_2["alert"]["last_modified_timestamp"],
                current_time |> DateTime.to_unix()
              )
@@ -113,17 +113,17 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
         "id" => "345abc"
       } = alert_3
 
-      assert within_2_milliseconds(
+      assert within_two_seconds(
                alert_3["alert"]["created_timestamp"],
                current_time |> DateTime.to_unix()
              )
 
-      assert within_2_milliseconds(
+      assert within_two_seconds(
                alert_3["alert"]["last_modified_timestamp"],
                current_time |> DateTime.to_unix()
              )
 
-      assert within_2_milliseconds(
+      assert within_two_seconds(
                alert_3["alert"]["closed_timestamp"],
                current_time |> DateTime.to_unix()
              )
@@ -136,7 +136,7 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
     end
   end
 
-  defp within_2_milliseconds(time_1, time_2) do
+  defp within_two_seconds(time_1, time_2) do
     # account for small delays in running tests that make the times differ slightly
     abs(time_1 - time_2) < 2
   end
