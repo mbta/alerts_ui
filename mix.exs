@@ -11,6 +11,7 @@ defmodule AlertsUI.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
+      preferred_cli_env: ["ecto.test_setup": :test],
       dialyzer: [
         plt_add_apps: [:laboratory]
       ],
