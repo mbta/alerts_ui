@@ -9,6 +9,12 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
       active_period_start = DateTime.utc_now() |> DateTime.add(40, :day)
       active_period_end = active_period_start |> DateTime.add(1, :hour)
 
+      active_period_start_in_unix = DateTime.to_unix(active_period_start)
+      active_period_end_in_unix = DateTime.to_unix(active_period_end)
+
+      expected_time_frame_text =
+        "#{Timex.month_name(active_period_end.month)} #{active_period_end.day}"
+
       trip1 =
         build(:trip_descriptor, %{
           route_id: "CR-Lowell",
@@ -89,113 +95,120 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
 
       existing_alert = Alerts.get_by_alert_id("524485")
 
-      expected = %{
-        id: "524485",
-        alert: %{
-          effect: :OTHER_EFFECT,
-          effect_detail: "DELAY",
-          cause: :UNKNOWN_CAUSE,
-          cause_detail: "UNKNOWN_CAUSE",
-          header_text: %{
-            translation: [
-              %{
-                text:
-                  "On weekdays, through October, between 8:00 am and 4:00 pm, Lowell Line passengers may experience delays of 5-10 minutes in both directions due to tie replacement work between Lowell and Wilmington. ",
-                language: "en"
-              }
-            ]
-          },
-          description_text: %{
-            translation: [
-              %{
-                text:
-                  "Affected trips:\r\n307 (7:40 am from North Station)\r\n308 (8:05 am from Lowell)\r\n309 (8:25 am from North Station)\r\n310 (8:50 am from Lowell)\r\n311 (9:10 am from North Station)\r\n312 (9:30 am from Lowell)\r\n313 (10:10 am from North Station)\r\n314 (10:12 am from Lowell)\r\n315 (11:10 am from North Station)\r\n316 (11:12 am from Lowell)\r\n317 (12:10 pm from North Station)\r\n318 (12:12 pm from Lowell)\r\n319 (1:10 pm from North Station)\r\n320 (1:12 pm from Lowell)\r\n321 (2:10 pm from North Station)\r\n322 (2:12 pm from Lowell)\r\n323 (3:10 pm from North Station)\r\n324 (3:12 pm from Lowell)",
-                language: "en"
-              }
-            ]
-          },
-          severity_level: :WARNING,
-          service_effect_text: %{
-            translation: [
-              %{
-                text: "Lowell Line delay",
-                language: "en"
-              }
-            ]
-          },
-          short_header_text: %{
-            translation: [
-              %{
-                text:
-                  "On weekdays, from Sep 25th through mid-Oct, between 8am & 4pm, Lowell Ln passengers may experience delays of 5-10 minutes both ways due to t",
-                language: "en"
-              }
-            ]
-          },
-          severity: 3,
-          created_timestamp: DateTime.utc_now() |> DateTime.to_unix(),
-          last_modified_timestamp: DateTime.utc_now() |> DateTime.to_unix(),
-          last_push_notification_timestamp: 1_695_305_934,
-          closed_timestamp: 1_695_392_334,
-          timeframe_text: %{
-            translation: [
-              %{
-                text: "#{Timex.month_name(active_period_end.month)} #{active_period_end.day}",
-                language: "en"
-              }
-            ]
-          },
-          alert_lifecycle: :UPCOMING,
-          duration_certainty: :KNOWN,
-          active_period: [
-            %{
-              start: DateTime.to_unix(active_period_start),
-              end: DateTime.to_unix(active_period_end)
-            }
-          ],
-          reminder_times: [1_695_392_394, 1_695_392_454],
-          informed_entity: [
-            %{
-              agency_id: "1",
-              route_type: 2,
-              route_id: "CR-Lowell",
-              stop_id: "1003",
-              facility_id: "park-qamnl-garage",
-              trip: %{
-                route_id: "CR-Lowell",
-                trip_id: "CR-627689-308",
-                direction_id: 1,
-                start_date: "20230921",
-                start_time: "25:40:30"
-              },
-              activities: [
-                :BOARD,
-                :EXIT,
-                :RIDE
-              ]
-            },
-            %{
-              agency_id: "1",
-              route_type: 2,
-              route_id: "CR-Lowell",
-              trip: %{
-                route_id: "CR-Lowell",
-                trip_id: "CR-627691-310",
-                direction_id: 1,
-                start_time: "01:40:30"
-              },
-              activities: [
-                :BOARD,
-                :EXIT,
-                :RIDE
-              ]
-            }
-          ]
-        }
-      }
-
       actual = CreateOutputAlert.build_alert(existing_alert)
-      assert expected == actual
+
+      assert %{
+               id: "524485",
+               alert: %{
+                 effect: :OTHER_EFFECT,
+                 effect_detail: "DELAY",
+                 cause: :UNKNOWN_CAUSE,
+                 cause_detail: "UNKNOWN_CAUSE",
+                 header_text: %{
+                   translation: [
+                     %{
+                       text:
+                         "On weekdays, through October, between 8:00 am and 4:00 pm, Lowell Line passengers may experience delays of 5-10 minutes in both directions due to tie replacement work between Lowell and Wilmington. ",
+                       language: "en"
+                     }
+                   ]
+                 },
+                 description_text: %{
+                   translation: [
+                     %{
+                       text:
+                         "Affected trips:\r\n307 (7:40 am from North Station)\r\n308 (8:05 am from Lowell)\r\n309 (8:25 am from North Station)\r\n310 (8:50 am from Lowell)\r\n311 (9:10 am from North Station)\r\n312 (9:30 am from Lowell)\r\n313 (10:10 am from North Station)\r\n314 (10:12 am from Lowell)\r\n315 (11:10 am from North Station)\r\n316 (11:12 am from Lowell)\r\n317 (12:10 pm from North Station)\r\n318 (12:12 pm from Lowell)\r\n319 (1:10 pm from North Station)\r\n320 (1:12 pm from Lowell)\r\n321 (2:10 pm from North Station)\r\n322 (2:12 pm from Lowell)\r\n323 (3:10 pm from North Station)\r\n324 (3:12 pm from Lowell)",
+                       language: "en"
+                     }
+                   ]
+                 },
+                 severity_level: :WARNING,
+                 service_effect_text: %{
+                   translation: [
+                     %{
+                       text: "Lowell Line delay",
+                       language: "en"
+                     }
+                   ]
+                 },
+                 short_header_text: %{
+                   translation: [
+                     %{
+                       text:
+                         "On weekdays, from Sep 25th through mid-Oct, between 8am & 4pm, Lowell Ln passengers may experience delays of 5-10 minutes both ways due to t",
+                       language: "en"
+                     }
+                   ]
+                 },
+                 severity: 3,
+                 last_push_notification_timestamp: 1_695_305_934,
+                 closed_timestamp: 1_695_392_334,
+                 timeframe_text: %{
+                   translation: [
+                     %{
+                       text: ^expected_time_frame_text,
+                       language: "en"
+                     }
+                   ]
+                 },
+                 alert_lifecycle: :UPCOMING,
+                 duration_certainty: :KNOWN,
+                 active_period: [
+                   %{
+                     start: ^active_period_start_in_unix,
+                     end: ^active_period_end_in_unix
+                   }
+                 ],
+                 reminder_times: [1_695_392_394, 1_695_392_454],
+                 informed_entity: [
+                   %{
+                     agency_id: "1",
+                     route_type: 2,
+                     route_id: "CR-Lowell",
+                     stop_id: "1003",
+                     facility_id: "park-qamnl-garage",
+                     trip: %{
+                       route_id: "CR-Lowell",
+                       trip_id: "CR-627689-308",
+                       direction_id: 1,
+                       start_date: "20230921",
+                       start_time: "25:40:30"
+                     },
+                     activities: [
+                       :BOARD,
+                       :EXIT,
+                       :RIDE
+                     ]
+                   },
+                   %{
+                     agency_id: "1",
+                     route_type: 2,
+                     route_id: "CR-Lowell",
+                     trip: %{
+                       route_id: "CR-Lowell",
+                       trip_id: "CR-627691-310",
+                       direction_id: 1,
+                       start_time: "01:40:30"
+                     },
+                     activities: [
+                       :BOARD,
+                       :EXIT,
+                       :RIDE
+                     ]
+                   }
+                 ]
+               }
+             } = actual
+
+      assert within_two_seconds(
+               actual.alert.created_timestamp,
+               DateTime.utc_now() |> DateTime.to_unix()
+             )
+
+      assert within_two_seconds(
+               actual.alert.last_modified_timestamp,
+               DateTime.utc_now() |> DateTime.to_unix()
+             )
     end
 
     test "filters out old recurring alerts" do
@@ -211,15 +224,13 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
       })
 
       existing_alert = Alerts.get_by_alert_id("524486")
-      expected = CreateOutputAlert.build_alert(existing_alert, ~U[2023-09-23 00:04:54Z])
+      actual = CreateOutputAlert.build_alert(existing_alert, ~U[2023-09-23 00:04:54Z])
 
-      assert expected == %{
+      assert %{
                id: "524486",
                alert: %{
                  header_text: %{translation: [%{text: "a", language: "en"}]},
                  description_text: %{translation: [%{text: "b", language: "en"}]},
-                 created_timestamp: DateTime.utc_now() |> DateTime.to_unix(),
-                 last_modified_timestamp: DateTime.utc_now() |> DateTime.to_unix(),
                  alert_lifecycle: :ONGOING,
                  reminder_times: [1_727_222_460],
                  active_period: [
@@ -228,7 +239,17 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
                  ],
                  informed_entity: [%{route_id: "1", trip: %{trip_id: "1"}, activities: []}]
                }
-             }
+             } = actual
+
+      assert within_two_seconds(
+               actual.alert.created_timestamp,
+               DateTime.utc_now() |> DateTime.to_unix()
+             )
+
+      assert within_two_seconds(
+               actual.alert.last_modified_timestamp,
+               DateTime.utc_now() |> DateTime.to_unix()
+             )
     end
   end
 
@@ -237,5 +258,10 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
       assert %{gtfs_realtime_version: "2.0", incrementality: :FULL_DATASET, timestamp: _} =
                CreateOutputAlert.build_gtfs_header()
     end
+  end
+
+  defp within_two_seconds(time_1, time_2) do
+    # account for small delays in running tests that make the times differ slightly
+    abs(time_1 - time_2) < 2
   end
 end
