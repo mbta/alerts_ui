@@ -31,7 +31,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
                                                    active_period_end_date ->
       validate_active_period_end_date(
         active_period_end_date,
-        time_range["active_period_start_date"]
+        time_range
       )
     end)
   end
@@ -58,25 +58,35 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
   defp end_error(_, ap_start),
     do: [active_period_end: "Effect must end after #{formatted_datetime(ap_start)}"]
 
-  defp validate_active_period_end_date(active_period_end_date, %Date{} = active_period_start_date) do
-    if Date.compare(
-         active_period_end_date,
-         active_period_start_date
-       ) in [:lt] do
+  defp validate_active_period_end_date(active_period_end_date, time_range) do
+    start_date = Map.get(time_range, "active_period_start_date") |> ensure_date_format
+    start_time = Map.get(time_range, "active_period_start_time") |> ensure_time_format
+
+    naive_start =
+      if is_nil(start_time) or is_nil(start_date) do
+        nil
+      else
+        NaiveDateTime.new!(start_date, start_time)
+      end
+
+    end_date = active_period_end_date
+    end_time = Map.get(time_range, "active_period_end_time") |> ensure_time_format
+
+    naive_end =
+      if is_nil(end_time) or is_nil(end_date) do
+        nil
+      else
+        NaiveDateTime.new!(end_date, end_time)
+      end
+
+    if naive_start && naive_end &&
+         Date.compare(
+           naive_end,
+           naive_start
+         ) in [:lt] do
       [
-        active_period_end_date:
-          "Effect must end after #{formatted_datetime(active_period_start_date)}"
+        active_period_end_date: "Effect must end after #{formatted_datetime(naive_start)}"
       ]
-    else
-      []
-    end
-  end
-
-  defp validate_active_period_end_date(active_period_end_date, active_period_start_date) do
-    {start_validity, start_date} = Date.from_iso8601(active_period_start_date)
-
-    if start_validity === :ok do
-      validate_active_period_end_date(active_period_end_date, start_date)
     else
       []
     end
@@ -171,7 +181,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
 
   defp required_fields_by_specifier("recurring", changeset, params) do
     changeset
-    |> validate_required([:recurrence_days],
+    |> validate_length(:recurrence_days,
+      min: 1,
       message: "Select one or more days for alert to recur"
     )
     |> validate_required(
@@ -224,20 +235,70 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
     end
   end
 
-  def validate_start_is_after_now(changeset, current_time, specifier) do
+  @spec validate_start_is_after_now(Ecto.Changeset.t(), any(), any()) :: Ecto.Changeset.t()
+  def validate_start_is_after_now(
+        changeset,
+        current_time,
+        %{"alert_timing" => "one-time"} = time_range
+      ) do
     changeset
     |> validate_change(:active_period_start, fn :active_period_start, active_period_start ->
-      if NaiveDateTime.diff(current_time, active_period_start, :minute) > 1 do
-        start_error(specifier)
-      else
-        []
-      end
+      time_in_past = NaiveDateTime.diff(current_time, active_period_start, :minute) > 1
+
+      start_error(
+        time_in_past,
+        time_range["alert_timing"],
+        time_range["active_period_start_specifier"]
+      )
     end)
   end
 
-  defp start_error("custom"), do: [active_period_start: "Effect can't start in the past"]
+  @spec validate_start_is_after_now(Ecto.Changeset.t(), any(), any()) :: Ecto.Changeset.t()
+  def validate_start_is_after_now(
+        changeset,
+        current_time,
+        %{"alert_timing" => "recurring"} = time_range
+      ) do
+    start_date = Map.get(time_range, "active_period_start_date") |> ensure_date_format
+    start_time = Map.get(time_range, "active_period_start_time") |> ensure_time_format
 
-  defp start_error(_), do: [active_period_start_date: "Effect can't start in the past"]
+    naive_start =
+      if is_nil(start_time) or is_nil(start_date) do
+        nil
+      else
+        NaiveDateTime.new!(start_date, start_time)
+      end
+
+    if naive_start do
+      changeset
+      |> validate_change(:active_period_start_date, fn :active_period_start_date,
+                                                       _active_period_start_date ->
+        time_in_past = NaiveDateTime.diff(current_time, naive_start, :minute) > 1
+
+        start_error(
+          time_in_past,
+          time_range["alert_timing"],
+          time_range["active_period_start_specifier"]
+        )
+      end)
+    else
+      changeset
+    end
+  end
+
+  defp start_error(false, _, _), do: []
+
+  defp start_error(true, "one-time", "custom"),
+    do: [active_period_start: "Effect can't start in the past"]
+
+  defp start_error(true, "one-time", _),
+    do: [active_period_start_date: "Effect can't start in the past"]
+
+  defp start_error(true, "recurring", "now"),
+    do: [active_period_start_specifier: "Effect can't start in the past"]
+
+  defp start_error(true, "recurring", _),
+    do: [active_period_start_date: "Effect can't start in the past"]
 
   defp formatted_datetime(datetime, format_string \\ "{0M}/{0D}/{YYYY}, {0h12}:{0m} {AM}"),
     do: Timex.format!(datetime, format_string)

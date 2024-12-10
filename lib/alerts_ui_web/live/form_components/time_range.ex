@@ -168,7 +168,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           )
           |> TimeRangeValidators.validate_start_is_after_now(
             current_time,
-            form_params["active_period_start_specifier"]
+            form_params
           )
 
         errors =
@@ -272,7 +272,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         )
         |> TimeRangeValidators.validate_start_is_after_now(
           socket.assigns.current_time,
-          form_params["active_period_start_specifier"]
+          time_range
         )
         |> TimeRangeValidators.validate_required_fields(time_range)
       else

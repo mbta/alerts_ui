@@ -36,6 +36,14 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriodTest do
           @assigns
         )
 
+      view
+      |> element("form")
+      |> render_change(%{
+        "notification_period" => %{
+          "notification_specifier" => "same_as_effect_period"
+        }
+      })
+
       refute view
              |> render() =~
                ~s(id="closed-placeholder" value="When alert is closed" placeholder="When alert is closed" disabled="disabled")
@@ -44,7 +52,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriodTest do
       |> element("form")
       |> render_change(%{
         "notification_period" => %{
-          "notification_specifier" => "custom"
+          "notification_specifier" => "now"
         }
       })
 
@@ -129,15 +137,8 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriodTest do
       |> element("form")
       |> render_change(%{
         "notification_period" => %{
-          "notification_specifier" => "custom"
-        }
-      })
-
-      view
-      |> element("form")
-      |> render_change(%{
-        "notification_period" => %{
-          "notification_period_start" => "2024-05-02T10:54:00"
+          "notification_specifier" => "start_of_service",
+          "notification_period_start_date" => "2024-05-02"
         }
       })
 
