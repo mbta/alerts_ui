@@ -13,7 +13,6 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
     TimeRangeValidators
   }
 
-
   @notification_values [
     :same_as_effect_period,
     :now,
@@ -41,7 +40,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
       notification_period_start_date: current_time |> naive_datetime_to_iso_date
     }
 
-    form = changeset(%__MODULE__{}, alert_data)|> to_form
+    form = changeset(%__MODULE__{}, alert_data) |> to_form
 
     socket =
       assign(socket, %{
@@ -55,7 +54,6 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
 
   @impl true
   def update(%{editing: editing, alert_data: alert_data} = assigns, socket) do
-
     assigns =
       if editing == true and socket.assigns.edited === false do
         alert_data =
@@ -77,8 +75,15 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
         assigns
       end
 
-      time_range = Map.take(alert_data, [:active_period_start, :active_period_start_time, :active_period_start_date, :alert_timing])
-      assigns = assigns |> Map.put(:time_range, time_range)
+    time_range =
+      Map.take(alert_data, [
+        :active_period_start,
+        :active_period_start_time,
+        :active_period_start_date,
+        :alert_timing
+      ])
+
+    assigns = assigns |> Map.put(:time_range, time_range)
 
     {:ok, assign(socket, assigns)}
   end
@@ -94,7 +99,6 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
           |> changeset(socket.assigns.form.params)
           |> TimeRangeValidators.validate_notification(socket.assigns.time_range, current_time)
           |> TimeRangeValidators.validate_required_notification_fields(socket.assigns.form.params)
-
 
         errors =
           case changeset |> apply_action(:validate) do
@@ -116,14 +120,14 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
     {:ok, socket}
   end
 
-
   @impl true
   def handle_event("validate", %{"notification_period" => notification_period}, socket) do
     notification_period = Map.merge(socket.assigns.form.params, notification_period)
 
     notification_period_start = notification_period_start(notification_period, socket.assigns)
 
-    notification_period = Map.put(notification_period, "notification_period_start", notification_period_start)
+    notification_period =
+      Map.put(notification_period, "notification_period_start", notification_period_start)
 
     changeset =
       changeset(%__MODULE__{}, notification_period)
@@ -131,7 +135,10 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
     changeset =
       if changeset.valid? do
         changeset
-        |> TimeRangeValidators.validate_notification(socket.assigns.time_range, socket.assigns.current_time)
+        |> TimeRangeValidators.validate_notification(
+          socket.assigns.time_range,
+          socket.assigns.current_time
+        )
         |> TimeRangeValidators.validate_required_fields(notification_period)
       else
         changeset
@@ -202,10 +209,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
       )
 
     ~H"""
-    <div
-      class="min-w-full flex flex-col mt-4"
-      id="notification_period_view"
-    >
+    <div class="min-w-full flex flex-col mt-4" id="notification_period_view">
       <.form
         for={@form}
         phx-target={@myself}
@@ -248,7 +252,9 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
             class="min-w-[16rem] max-w-[16rem] h-10"
             phx-debounce={120}
           />
-          <p class="pt-[2rem]" :if={@form[:notification_specifier].value !== :same_as_effect_period}>to</p>
+          <p :if={@form[:notification_specifier].value !== :same_as_effect_period} class="pt-[2rem]">
+            to
+          </p>
           <input
             :if={@form[:notification_specifier].value !== :same_as_effect_period}
             disabled={true}
@@ -271,7 +277,6 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
   defp current_time,
     do:
       DateTime.now!("America/New_York") |> DateTime.to_naive() |> NaiveDateTime.truncate(:second)
-
 
   def naive_datetime_to_iso_date(%NaiveDateTime{} = datetime),
     do: datetime |> NaiveDateTime.to_date() |> Date.to_iso8601()

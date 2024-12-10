@@ -110,7 +110,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
          current_time,
          naive_start
        ) do
-
     cond do
       NaiveDateTime.diff(current_time, notification_period_start, :minute) > 1 ->
         [
@@ -135,7 +134,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
   @spec validate_required_notification_fields(Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
   def validate_required_notification_fields(changeset, params) do
     changeset
-    |>  validate_required(
+    |> validate_required(
       case params["notification_specifier"] do
         "same_as_effect_period" -> []
         "start_of_service" -> [:notification_period_start_date]
