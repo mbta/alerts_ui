@@ -38,6 +38,8 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
   end
 
   @impl true
+  @spec update(%{:alert_data => any(), :editing => boolean(), optional(any()) => any()}, any()) ::
+          {:ok, any()}
   def update(%{editing: editing, alert_data: alert_data} = assigns, socket) do
     assigns =
       if editing and not socket.assigns.edited and not is_nil(alert_data.reminder_times) do
@@ -71,7 +73,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
 
   def changeset(changeset, params) do
     changeset
-    |> cast(params, [], force_changes: true)
+    |> cast(params, [])
     |> cast_embed(:reminder_times,
       sort_param: :reminder_sort,
       drop_param: :reminder_drop,
@@ -84,26 +86,26 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
       case Map.get(params, "reminder_time_specifier") do
         "now" -> params["min_time"]
         "custom" -> Map.get(params, "reminder_time", "")
-        _ -> ""
+        _ -> nil
       end
 
     params = Map.put(params, "reminder_time", new_reminder_time)
 
-    cast(reminder_time, params, @reminder_time_fields,
-      force_changes: true,
-      message: fn _field, _meta -> "Enter a valid datetime" end
-    )
+    cast(reminder_time, params, @reminder_time_fields)
+    |> validate_required(:reminder_time, message: "Enter a valid date and time")
     |> validate_change(:reminder_time, fn :reminder_time, reminder_time ->
-      min_time = params["min_time"] |> NaiveDateTime.from_iso8601!()
+      min_time =
+        params["min_time"] |> String.pad_trailing(19, ":00") |> NaiveDateTime.from_iso8601!()
 
-      if NaiveDateTime.compare(min_time, reminder_time) === :gt do
+      if NaiveDateTime.diff(min_time, reminder_time, :minute) > 1 do
         [reminder_time: "Reminder can't be set in the past"]
       else
         []
       end
     end)
     |> validate_change(:reminder_time, fn :reminder_time, reminder_time ->
-      {result, max_time} = params["max_time"] |> NaiveDateTime.from_iso8601()
+      {result, max_time} =
+        params["max_time"] |> String.pad_trailing(19, ":00") |> NaiveDateTime.from_iso8601()
 
       if result == :ok and NaiveDateTime.compare(max_time, reminder_time) === :lt do
         [reminder_time: "Reminder must be before effect end"]
@@ -123,7 +125,6 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
         clean_reminder_times =
           changes.reminder_times
           |> Enum.map(& &1.reminder_time)
-          |> Enum.reject(&is_nil/1)
 
         changes =
           changes
@@ -163,7 +164,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
       >
         <div>
           <.inputs_for :let={rt} field={@form[:reminder_times]}>
-            <div class="flex flex-row w-[50%] mb-4" id="reminder-time-component">
+            <div class="flex flex-row w-[50%] mb-4" id={"reminder-time-component-#{rt.index}"}>
               <input type="hidden" name="rider_reminders[reminder_sort][]" value={rt.index} />
               <.select
                 label="Scheduled reminder"
@@ -175,10 +176,12 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
               <.datetime
                 label="Reminder date and time"
                 min={@current_time |> naive_datetime_to_iso8601()}
-                max={@active_period_end}
+                max="9999-12-31T23:59"
                 field={rt[:reminder_time]}
-                disabled={rt[:reminder_time_specifier].value not in [:custom, "custom"]}
                 value={rt[:reminder_time].value}
+                class={
+                  if rt[:reminder_time_specifier].value in [:custom, "custom"], do: "", else: "hidden"
+                }
               />
               <input
                 type="hidden"
@@ -225,14 +228,17 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
 
   defp traverse_inner_errors({key, value}) do
     new_value =
-      Enum.reduce(value, "", fn reminder_map, acc ->
+      value
+      |> Enum.uniq()
+      |> Enum.reduce([], fn reminder_map, acc ->
         if is_list(Map.get(reminder_map, :reminder_time)) do
-          acc <> hd(reminder_map.reminder_time) <> ";"
+          [hd(reminder_map.reminder_time) | acc]
         else
           acc
         end
-        |> String.slice(0..-2//1)
       end)
+      |> List.flatten()
+      |> Enum.join(";")
 
     {key, {new_value, []}}
   end
@@ -243,8 +249,12 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
 
   defp naive_datetime_to_iso8601(nil), do: ""
 
-  defp naive_datetime_to_iso8601(datetime),
-    do: datetime |> NaiveDateTime.truncate(:second) |> NaiveDateTime.to_iso8601()
+  defp naive_datetime_to_iso8601(datetime) do
+    datetime
+    |> NaiveDateTime.truncate(:second)
+    |> NaiveDateTime.to_iso8601()
+    |> String.slice(0..-4//1)
+  end
 
   defp values_to_options(values) do
     Enum.map(values, fn value ->

@@ -34,7 +34,7 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
       )
 
     refute view
-           |> render() =~ ~s(id="reminder-time-component")
+           |> render() =~ ~s(id="reminder-time-component-0")
 
     view
     |> element("form")
@@ -43,7 +43,7 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
     })
 
     assert view
-           |> render() =~ ~s(id="reminder-time-component")
+           |> render() =~ ~s(id="reminder-time-component-0")
   end
 
   test "reminder picker disappears when X is pressed" do
@@ -60,7 +60,7 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
     })
 
     assert view
-           |> render() =~ ~s(id="reminder-time-component")
+           |> render() =~ ~s(id="reminder-time-component-0")
 
     view
     |> element("form")
@@ -69,7 +69,7 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
     })
 
     refute view
-           |> render() =~ ~s(id="reminder-time-component")
+           |> render() =~ ~s(id="reminder-time-component-0")
   end
 
   test "shows error if time entered is before current time" do
