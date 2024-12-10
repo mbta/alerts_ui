@@ -30,11 +30,13 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       SeverityLevel.severity_tuples()
       |> Enum.map(fn {desc, severity, _level} -> {desc, severity} end)
 
-    form = %__MODULE__{} |> changeset() |> to_form()
+    changeset = changeset(%__MODULE__{}, %{})
+
+    send_changeset(changeset)
 
     socket =
       assign(socket, %{
-        form: form,
+        form: to_form(changeset),
         image_size: nil,
         image_path: nil,
         severity_options: severity_options,
@@ -59,6 +61,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
         |> Map.merge(socket.assigns.form.params)
       )
+
+    send_changeset(changeset)
 
     form = to_form(changeset)
     assigns = assigns |> Map.merge(%{form: form, cause_options: cause_options})
@@ -105,18 +109,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       |> changeset(alert_details)
       |> validate_image_fields(image_size)
 
-    case apply_action(
-           changeset |> validate_required(@required_fields),
-           :validate
-         ) do
-      {:ok, changeset} ->
-        send(self(), {:add_errors, [], __MODULE__})
-        send(self(), {:section_completed, changeset})
-        changeset
-
-      {:error, changeset} ->
-        send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
-    end
+    send_changeset(changeset)
 
     form =
       changeset
@@ -266,6 +259,21 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       </.form>
     </div>
     """
+  end
+
+  defp send_changeset(changeset) do
+    case apply_action(
+           changeset |> validate_required(@required_fields),
+           :validate
+         ) do
+      {:ok, changeset} ->
+        send(self(), {:add_errors, [], __MODULE__})
+        send(self(), {:section_completed, changeset})
+        changeset
+
+      {:error, changeset} ->
+        send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
+    end
   end
 
   defp formatted_causes(route_type, combination) do

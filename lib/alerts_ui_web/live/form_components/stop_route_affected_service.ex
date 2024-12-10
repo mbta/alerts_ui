@@ -19,13 +19,22 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   end
 
   @fields ~w[route_ids stop_ids route_types_by_id route_ids_filter stop_ids_filter]a
-  @required_fields ~w[route_ids stop_ids route_types_by_id]a
+  @required_fields ~w[route_ids stop_ids]a
 
   @impl true
   def mount(socket) do
-    form = %__MODULE__{} |> changeset(%{}) |> to_form()
+    changeset = changeset(%__MODULE__{}, %{})
 
-    socket = socket |> assign(%{form: form, available_routes: [], edited: false})
+    {_result, error_changeset} =
+      apply_action(
+        changeset
+        |> validate_required(@required_fields),
+        :validate
+      )
+
+    send(self(), {:add_errors, ErrorFormatter.parse_field_errors(error_changeset), __MODULE__})
+
+    socket = socket |> assign(%{form: to_form(changeset), available_routes: [], edited: false})
 
     {:ok, socket}
   end

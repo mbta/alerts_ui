@@ -27,14 +27,20 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
 
   @impl true
   def mount(socket) do
-    form =
-      %__MODULE__{}
-      |> changeset(%{})
-      |> to_form()
+    changeset = changeset(%__MODULE__{}, %{})
+
+    {_result, error_changeset} =
+      apply_action(
+        changeset
+        |> validate_required(@required_fields),
+        :validate
+      )
+
+    send(self(), {:add_errors, ErrorFormatter.parse_field_errors(error_changeset), __MODULE__})
 
     {:ok,
      assign(socket, %{
-       form: form,
+       form: to_form(changeset),
        facility_types: [],
        available_facilities: [],
        available_stops: [],
