@@ -203,14 +203,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       |> render_change(%{
         "time_range" => %{
           "alert_timing" => "one-time",
-          "active_period_start_specifier" => "custom"
-        }
-      })
-
-      view
-      |> element("form")
-      |> render_change(%{
-        "time_range" => %{
+          "active_period_start_specifier" => "custom",
           "active_period_start" => "2024-05-01T10:54:00",
           "notification_specifier" => "custom",
           "notification_period_start" => "2024-05-02T10:54:00"
@@ -240,7 +233,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         "time_range" => %{
           "active_period_end" => "2024-05-01T09:54:00",
           "active_period_start" => "2024-05-01T08:54:00",
-          "notification_period_start" => "2024-05-01T07:54:00"
+          "notification_period_start" => "2024-05-01T08:55:00"
         }
       })
 
@@ -250,7 +243,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
                          active_period_end: ~N[2024-05-01 09:54:00],
                          active_period_end_specifier: :custom,
                          active_period_start: ~N[2024-05-01 08:54:00],
-                         notification_period_start: ~N[2024-05-01 07:54:00]
+                         notification_period_start: ~N[2024-05-01 08:55:00]
                        }}}
     end
   end
