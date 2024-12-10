@@ -19,7 +19,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
     validate_change(changeset, :active_period_end, fn :active_period_end, active_period_end ->
       validate_active_period_end(
         active_period_end |> NaiveDateTime.add(end_shift, :day),
-        naive_start
+        naive_start,
+        time_range["active_period_end_specifier"]
       )
     end)
   end
@@ -37,19 +38,25 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
 
   def validate_relationships(changeset, _, _), do: changeset
 
-  defp validate_active_period_end(active_period_end, active_period_start) do
+  defp validate_active_period_end(active_period_end, active_period_start, specifier) do
     if NaiveDateTime.compare(
          active_period_end,
          active_period_start
        ) in [:lt, :eq] do
-      [
-        active_period_end: "Effect must end after #{formatted_datetime(active_period_start)}",
-        active_period_end_date: "Effect must end after #{formatted_datetime(active_period_start)}"
-      ]
+      end_error(specifier, active_period_start)
     else
       []
     end
   end
+
+  defp end_error("later_today", ap_start),
+    do: [active_period_end_specifier: "Effect must end after #{formatted_datetime(ap_start)}"]
+
+  defp end_error("end_of_service", ap_start),
+    do: [active_period_end_date: "Effect must end after #{formatted_datetime(ap_start)}"]
+
+  defp end_error(_, ap_start),
+    do: [active_period_end: "Effect must end after #{formatted_datetime(ap_start)}"]
 
   defp validate_active_period_end_date(active_period_end_date, %Date{} = active_period_start_date) do
     if Date.compare(
@@ -77,11 +84,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
 
   def validate_notification(changeset, time_range, current_time) do
     naive_start =
-      if time_range.alert_timing == :"one-time" do
+      if Map.get(time_range, :alert_timing) == :"one-time" do
         ensure_naive_datetime_format(time_range.active_period_start)
       else
-        start_date = time_range.active_period_start_date |> ensure_date_format
-        start_time = time_range.active_period_start_time |> ensure_time_format
+        start_date = Map.get(time_range, :active_period_start_date) |> ensure_date_format
+        start_time = Map.get(time_range, :active_period_start_time) |> ensure_time_format
 
         if is_nil(start_time) or is_nil(start_date) do
           nil
@@ -217,29 +224,20 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
     end
   end
 
-  def validate_start_is_after_now(changeset, current_time) do
+  def validate_start_is_after_now(changeset, current_time, specifier) do
     changeset
     |> validate_change(:active_period_start, fn :active_period_start, active_period_start ->
       if NaiveDateTime.diff(current_time, active_period_start, :minute) > 1 do
-        [
-          active_period_start: "Effect can't start in the past",
-          active_period_start_date: "Effect can't start in the past"
-        ]
-      else
-        []
-      end
-    end)
-    |> validate_change(:active_period_start_date, fn :active_period_start_date,
-                                                     active_period_start_date ->
-      if Date.diff(NaiveDateTime.to_date(current_time), active_period_start_date) > 0 do
-        [
-          active_period_start_date: "Effect can't start in the past"
-        ]
+        start_error(specifier)
       else
         []
       end
     end)
   end
+
+  defp start_error("custom"), do: [active_period_start: "Effect can't start in the past"]
+
+  defp start_error(_), do: [active_period_start_date: "Effect can't start in the past"]
 
   defp formatted_datetime(datetime, format_string \\ "{0M}/{0D}/{YYYY}, {0h12}:{0m} {AM}"),
     do: Timex.format!(datetime, format_string)

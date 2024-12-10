@@ -61,31 +61,44 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
           |> Enum.filter(fn {_k, v} -> !is_nil(v) end)
           |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
 
-        changeset = changeset(%__MODULE__{}, Map.merge(socket.assigns.form.params, alert_data))
+        Map.merge(socket.assigns.form.params, alert_data)
 
-        changes =
-          changeset
-          |> apply_action!(:validate)
-
-        send(self(), {:section_completed, changes})
-        form = changeset |> to_form
-
-        Map.merge(assigns, %{form: form, edited: true})
+        Map.merge(assigns, %{edited: true, alert_data: alert_data})
       else
         assigns
       end
+      |> Map.put(
+        :time_range,
+        Map.take(alert_data, [
+          :active_period_start,
+          :active_period_start_time,
+          :active_period_start_date,
+          :alert_timing
+        ])
+      )
 
-    time_range =
-      Map.take(alert_data, [
-        :active_period_start,
-        :active_period_start_time,
-        :active_period_start_date,
-        :alert_timing
-      ])
+    changeset =
+      %__MODULE__{}
+      |> changeset(alert_data)
+      |> TimeRangeValidators.validate_notification(
+        assigns.time_range,
+        socket.assigns.current_time
+      )
 
-    assigns = assigns |> Map.put(:time_range, time_range)
+    changeset
+    |> apply_action(:validate)
+    |> case do
+      {:ok, changes} ->
+        send(self(), {:add_errors, [], __MODULE__})
+        send(self(), {:section_completed, changes})
 
-    {:ok, assign(socket, assigns)}
+      {:error, changeset} ->
+        send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
+    end
+
+    form = changeset |> to_form
+
+    {:ok, assign(socket, assigns |> Map.put(:form, form))}
   end
 
   @impl true
@@ -139,7 +152,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
           socket.assigns.time_range,
           socket.assigns.current_time
         )
-        |> TimeRangeValidators.validate_required_fields(notification_period)
+        |> TimeRangeValidators.validate_required_notification_fields(notification_period)
       else
         changeset
       end
@@ -184,10 +197,10 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
         end
 
       "custom" ->
-        if previous_state !== "custom" do
-          assigns.current_time
-        else
+        if previous_state in ["custom", :custom] do
           notification_period["notification_period_start"]
+        else
+          assigns.current_time
         end
     end
   end
