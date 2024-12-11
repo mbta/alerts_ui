@@ -265,21 +265,30 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
             class="min-w-[16rem] max-w-[16rem] h-10"
             phx-debounce={120}
           />
-          <p :if={@form[:notification_specifier].value !== :same_as_effect_period} class="pt-[2rem]">
-            to
-          </p>
-          <input
-            :if={@form[:notification_specifier].value !== :same_as_effect_period}
-            disabled={true}
-            type="text"
-            id="closed-placeholder"
-            value="When alert is closed"
-            placeholder="When alert is closed"
-            class="border border-bg-elevation-6 pl-2
-                rounded text-text-secondary
-                bg-bg-elevation-3 ring-0  ring-border-focus
-                mt-[1.75rem] h-10 min-w-[16rem]"
-          />
+          <div
+            :if={
+              @form[:notification_specifier].value not in [
+                :same_as_effect_period,
+                "same_as_effect_period"
+              ]
+            }
+            class="flex flex-row"
+          >
+            <p class="pt-[2rem] mr-[2rem]">
+              to
+            </p>
+            <input
+              disabled={true}
+              type="text"
+              id="closed-placeholder"
+              value="When alert is closed"
+              placeholder="When alert is closed"
+              class="border border-bg-elevation-6 pl-2
+                  rounded text-text-secondary
+                  bg-bg-elevation-3 ring-0  ring-border-focus
+                  mt-[1.75rem] h-10 min-w-[16rem]"
+            />
+          </div>
         </div>
       </.form>
       <hr class="mt-8" />
