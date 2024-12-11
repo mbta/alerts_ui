@@ -361,6 +361,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         else
           time_range["active_period_start_date"]
         end
+
+      _ ->
+        time_range["active_period_start_date"]
     end
   end
 
