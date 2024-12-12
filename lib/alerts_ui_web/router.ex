@@ -82,6 +82,7 @@ defmodule AlertsUIWeb.Router do
 
   scope "/", AlertsUIWeb do
     get("/_health", HealthController, :index)
+    get("/_version", VersionController, :index)
   end
 
   # Other scopes may use custom stacks.

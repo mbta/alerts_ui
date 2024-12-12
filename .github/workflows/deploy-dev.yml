@@ -32,6 +32,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           docker-repo: ${{ secrets.DOCKER_REPO }}
+          docker-additional-args: "--build-arg GIT_SHA=${{github.sha}}"
       - uses: mbta/actions/deploy-ecs@v2
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
