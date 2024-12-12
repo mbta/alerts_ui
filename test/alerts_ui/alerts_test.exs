@@ -259,6 +259,7 @@ defmodule AlertsUI.AlertsTest do
       insert(:alert, %{
         alert_id: "123",
         active_period: [%{start: ~U[2024-12-11 09:00:00Z], end: ~U[2024-12-11 11:00:00Z]}],
+        active_period_start: ~U[2024-12-11 09:00:00Z],
         active_period_end: ~U[2024-12-11 11:00:00Z],
         duration_certainty: :ESTIMATED
       })
@@ -272,29 +273,31 @@ defmodule AlertsUI.AlertsTest do
     end
 
     test "update active_period and active_period_end if duration estimated and start in past" do
-      current_time = ~U[2024-12-11 00:08:00Z]
+      current_time = ~U[2024-12-11 07:00:00Z]
 
       insert(:alert, %{
         alert_id: "123",
-        active_period: [%{start: ~U[2024-12-11 06:00:00Z], end: ~U[2024-12-11 09:00:00Z]}],
-        active_period_end: ~U[2024-12-11 09:00:00Z],
+        active_period: [%{start: ~U[2024-12-11 06:00:00Z], end: ~U[2024-12-11 08:00:00Z]}],
+        active_period_start: ~U[2024-12-11 06:00:00Z],
+        active_period_end: ~U[2024-12-11 08:00:00Z],
         duration_certainty: :ESTIMATED
       })
 
       [result] = Alerts.list_all_open() |> Alerts.update_end_if_estimated(current_time)
 
-      assert [%{start: ~U[2024-12-11 06:00:00Z], end: ~U[2024-12-11 10:00:00Z]}] =
+      assert [%{start: ~U[2024-12-11 06:00:00Z], end: ~U[2024-12-11 09:00:00Z]}] =
                result.active_period
 
-      assert result.active_period_end == ~U[2024-12-11 10:00:00Z]
+      assert result.active_period_end == ~U[2024-12-11 09:00:00Z]
     end
 
     test "update end to end of service if eos is less than 2 hours from now" do
-      current_time = ~U[2024-12-11 00:02:00Z]
+      current_time = ~U[2024-12-11 02:00:00Z]
 
       insert(:alert, %{
         alert_id: "123",
         active_period: [%{start: ~U[2024-12-10 23:00:00Z], end: ~U[2024-12-11 01:00:00Z]}],
+        active_period_start: ~U[2024-12-10 23:00:00Z],
         active_period_end: ~U[2024-12-11 01:00:00Z],
         duration_certainty: :ESTIMATED
       })
@@ -319,6 +322,24 @@ defmodule AlertsUI.AlertsTest do
 
       assert [%{start: ~U[2024-12-11 06:00:00Z], end: ~U[2024-12-11 09:00:00Z]}] =
                result.active_period
+
+      assert result.active_period_end == ~U[2024-12-11 09:00:00Z]
+    end
+
+    test "make no change if multiple active periods" do
+      current_time = ~U[2024-12-11 00:08:00Z]
+
+      insert(:alert, %{
+        alert_id: "123",
+        active_period: [
+          %{start: ~U[2024-12-10 06:00:00Z], end: ~U[2024-12-10 09:00:00Z]},
+          %{start: ~U[2024-12-11 06:00:00Z], end: ~U[2024-12-11 09:00:00Z]}
+        ],
+        active_period_end: ~U[2024-12-11 09:00:00Z],
+        duration_certainty: :KNOWN
+      })
+
+      [result] = Alerts.list_all_open() |> Alerts.update_end_if_estimated(current_time)
 
       assert result.active_period_end == ~U[2024-12-11 09:00:00Z]
     end
