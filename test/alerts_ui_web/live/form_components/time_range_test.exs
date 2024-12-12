@@ -116,7 +116,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       assert render(view) =~ ~s(Enter a valid datetime)
     end
 
-    test "displays error if end after start" do
+    test "displays error if end before start" do
       {:ok, view, _html} =
         live_isolated_component(TimeRange, @assigns)
 

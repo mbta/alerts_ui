@@ -56,6 +56,11 @@ defmodule AlertsUI.Alerts do
     DateTime.compare(incoming_time, stored_time) != :lt
   end
 
+  @spec update_end_if_estimated([Alert.t()], DateTime.t()) :: [Alert.t()]
+  def update_end_if_estimated(alerts, current_time \\ DateTime.utc_now()) do
+    alerts
+  end
+
   @spec close_if_end_is_past([Alert.t()], DateTime.t()) :: [Alert.t()]
   def close_if_end_is_past(alerts, current_time \\ DateTime.utc_now()) do
     current_time = DateTime.truncate(current_time, :second)
