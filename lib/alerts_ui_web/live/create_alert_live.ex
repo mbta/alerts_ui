@@ -31,6 +31,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
     AffectedService,
     AlertDetails,
     Delivery,
+    NotificationPeriod,
     RiderReminders,
     RouteTypeAndEffect,
     StopRouteAffectedService,
