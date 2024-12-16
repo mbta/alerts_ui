@@ -61,7 +61,8 @@ RUN addgroup --system alertsui && adduser --system --ingroup alertsui alertsui
 USER alertsui
 
 # Set environment
-ENV MIX_ENV=prod PHX_SERVER=true TERM=xterm LANG=C.UTF-8 REPLACE_OS_VARS=true
+ARG GIT_SHA=none
+ENV MIX_ENV=prod PHX_SERVER=true TERM=xterm LANG=C.UTF-8 REPLACE_OS_VARS=true GIT_SHA=$GIT_SHA
 
 WORKDIR /home/alertsui
 COPY --from=app-builder --chown=alertsui:alertsui  /root/_build/prod/rel/alerts_ui .
