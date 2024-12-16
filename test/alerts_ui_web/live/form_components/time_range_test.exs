@@ -35,7 +35,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
       assert view
              |> render() =~
-               ~s(<div phx-feedback-for="time_range[active_period_end_date]" class="min-w-[16rem] h-10 hidden">)
+               ~s(<div phx-feedback-for="time_range[active_period_end_date]" class="min-w-[16rem] max-w-[16rem] h-10 hidden">)
 
       view
       |> element("form")
@@ -48,7 +48,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
       refute view
              |> render() =~
-               ~s(<div phx-feedback-for="time_range[active_period_end_date]" class="min-w-[16rem] h-10 hidden">)
+               ~s(<div phx-feedback-for="time_range[active_period_end_date]" class="min-w-[16rem] max-w-[16rem] h-10 hidden">)
     end
 
     test "works if editing" do
@@ -156,6 +156,26 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       })
 
       assert view |> render() =~ ~s(Sunday)
+    end
+
+    test "if recurring, start date must match weekday selection" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
+      refute view |> render() =~ ~s(Sunday)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "alert_timing" => "recurring",
+          "active_period_start_date_specifier" => "custom",
+          "active_period_start_date" => "2024-12-04",
+          "recurrence_days" => ["monday"]
+        }
+      })
+
+      assert view |> render() =~ ~s(Alert start day must match a selected day of the week.)
     end
 
     test "it sends section_completed if no error in changeset" do
