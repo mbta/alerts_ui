@@ -758,7 +758,7 @@ defmodule AlertsUIWeb.SharedComponents do
         <hr class="w-5/6 self-center border-y-1 border-bg-elevation-6 min-h-[1rem]" />
         <.select
           multiple={@multiple}
-          size="20"
+          size="2"
           options={@options}
           field={@field}
           prompt={if @loading, do: "Loading...", else: @prompt}
