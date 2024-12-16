@@ -198,7 +198,10 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         socket
       ) do
     form_params = socket.assigns.form.params
+
+    time_range = Map.put_new(time_range, "recurrence_days", [])
     time_range = Map.merge(socket.assigns.form.params, time_range)
+
     current_time = socket.assigns.current_time
 
     time_range =
