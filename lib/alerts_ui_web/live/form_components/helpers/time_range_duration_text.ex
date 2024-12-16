@@ -39,6 +39,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationText do
     "later today"
   end
 
+  defp end_text(:later_today, _end_dt) do
+    "later today"
+  end
+
   defp end_text(_, nil), do: ""
 
   defp end_text("end_of_service", end_dt) do

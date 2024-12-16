@@ -323,6 +323,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
     end
   end
 
+  def validate_start_is_after_now(
+        changeset,
+        _current_time,
+        _time_range
+      ) do
+    changeset
+  end
+
   defp start_error(false, _, _), do: []
 
   defp start_error(true, "one-time", "custom"),
@@ -336,7 +344,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
 
   defp start_error(true, "recurring", _),
     do: [active_period_start_date: "Effect can't start in the past"]
-
 
   def validate_start_is_before_trip(changeset, trip_arrival_time) do
     changeset

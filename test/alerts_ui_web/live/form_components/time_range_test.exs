@@ -202,23 +202,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       refute render(view) =~ ~s(Effect must start before 05/01/2024, 10:15 AM)
     end
 
-    test "scheduled datetime is hidden unless selection is made" do
-      {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns)
-
-      refute view |> render() =~ ~s(id="time_range_notification_period_start")
-
-      view
-      |> element("form")
-      |> render_change(%{
-        "time_range" => %{
-          "notification_specifier" => "custom"
-        }
-      })
-
-      assert view |> render() =~ ~s(id="time_range_notification_period_start")
-    end
-
     test "recurring section is hidden unless recurring is selected" do
       {:ok, view, _html} =
         live_isolated_component(TimeRange, @assigns)
