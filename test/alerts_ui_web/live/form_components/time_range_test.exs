@@ -225,6 +225,43 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       {:ok, view, _html} =
         live_isolated_component(TimeRange, @assigns)
 
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "alert_timing" => "recurring"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_start_time_specifier" => "custom",
+          "active_period_start_date_specifier" => "custom",
+          "active_period_start_time" => "10:00:00",
+          "active_period_start_date" => ~D[2024-12-04],
+          "recurrence_days" => ["monday"]
+        }
+      })
+
+      assert view |> render() =~ ~s(Alert start day must match a selected day of the week.)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "recurrence_days" => ["tuesday"]
+        }
+      })
+
+      refute view |> render() =~ ~s(Alert start day must match a selected day of the week.)
+    end
+
+    test "does not show reccurrence error if no weekdays selected" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
       refute view |> render() =~ ~s(Sunday)
 
       view
@@ -234,11 +271,11 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
           "alert_timing" => "recurring",
           "active_period_start_date_specifier" => "custom",
           "active_period_start_date" => "2024-12-04",
-          "recurrence_days" => ["monday"]
+          "recurrence_days" => []
         }
       })
 
-      assert view |> render() =~ ~s(Alert start day must match a selected day of the week.)
+      refute view |> render() =~ ~s(Alert start day must match a selected day of the week.)
     end
 
     test "it sends section_completed if no error in changeset" do
