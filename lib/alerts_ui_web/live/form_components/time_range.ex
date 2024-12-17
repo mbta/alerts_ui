@@ -117,28 +117,58 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   @impl true
   def update(%{editing: editing, alert_data: alert_data} = assigns, socket) do
-    assigns =
+    trip_ids = Map.get(alert_data, :trip_ids, [])
+
+    trip_arrival_time =
+      assigns
+      |> Map.get(:available_schedules, [])
+      |> Enum.filter(&(&1.trip.id in trip_ids))
+      |> Enum.map(& &1.arrival_time)
+      |> Enum.max(DateTime, fn -> nil end)
+      |> utc_datetime_to_naive()
+
+    alert_data =
       if editing == true and socket.assigns.edited === false do
-        alert_data =
-          alert_data
-          |> Enum.filter(fn {_k, v} -> !is_nil(v) end)
-          |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
-
-        changeset = changeset(%__MODULE__{}, Map.merge(socket.assigns.form.params, alert_data))
-
-        changes =
-          changeset
-          |> apply_action!(:validate)
-
-        send(self(), {:section_completed, changes})
-        form = changeset |> to_form
-
-        Map.merge(assigns, %{form: form, edited: true})
+        alert_data
+        |> Enum.filter(fn {_k, v} -> !is_nil(v) end)
+        |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
       else
-        assigns
+        %{}
       end
 
-    {:ok, assign(socket, assigns)}
+    assigns =
+      assigns
+      |> Map.put(:trip_arrival_time, trip_arrival_time)
+      |> Map.put(:edited, true)
+      |> Map.put(:alert_data, Map.merge(socket.assigns.form.params, alert_data))
+
+    changeset =
+      %__MODULE__{}
+      |> changeset(assigns.alert_data)
+      |> TimeRangeValidators.validate_required_fields(assigns.alert_data)
+      |> TimeRangeValidators.validate_relationships(
+        assigns.alert_data["alert_timing"],
+        assigns.alert_data
+      )
+      |> TimeRangeValidators.validate_start_is_before_trip(assigns.trip_arrival_time)
+      |> TimeRangeValidators.validate_start_is_after_now(
+        socket.assigns.current_time,
+        assigns.alert_data
+      )
+
+    errors =
+      case changeset |> apply_action(:validate) do
+        {:ok, _changeset} -> []
+        {:error, changeset} -> ErrorFormatter.parse_field_errors(changeset)
+      end
+
+    form =
+      changeset
+      |> to_form()
+      |> Map.put(:action, :validate)
+      |> Map.put(:errors, errors)
+
+    {:ok, assign(socket, assigns |> Map.put(:form, form))}
   end
 
   @impl true
@@ -166,6 +196,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
             form_params["alert_timing"],
             form_params
           )
+          |> TimeRangeValidators.validate_start_is_before_trip(socket.assigns.trip_arrival_time)
           |> TimeRangeValidators.validate_start_is_after_now(
             current_time,
             form_params
@@ -277,6 +308,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           socket.assigns.current_time,
           time_range
         )
+        |> TimeRangeValidators.validate_start_is_before_trip(socket.assigns.trip_arrival_time)
         |> TimeRangeValidators.validate_required_fields(time_range)
       else
         changeset
@@ -505,7 +537,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           max="9999-12-31T23:59"
           value={naive_datetime_to_iso8601(@form[:active_period_start].value)}
           label="Start date and time"
-          class={"min-w-[16rem] h-10 " <> (if @form[:active_period_start_specifier].value === :custom, do: "", else: "hidden")}
+          class={"min-w-[16rem] max-w-[16rem] h-10 " <> (if @form[:active_period_start_specifier].value === :custom, do: "", else: "hidden")}
           phx-debounce={120}
         />
         <.datetime
@@ -692,4 +724,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     |> DateTime.add(-1, :day)
     |> DateTime.to_naive()
   end
+
+  defp utc_datetime_to_naive(nil), do: nil
+  defp utc_datetime_to_naive(datetime), do: DateTime.to_naive(datetime)
 end

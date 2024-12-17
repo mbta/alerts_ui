@@ -323,6 +323,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
     end
   end
 
+  def validate_start_is_after_now(
+        changeset,
+        _current_time,
+        _time_range
+      ) do
+    changeset
+  end
+
   defp start_error(false, _, _), do: []
 
   defp start_error(true, "one-time", "custom"),
@@ -336,6 +344,21 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
 
   defp start_error(true, "recurring", _),
     do: [active_period_start_date: "Effect can't start in the past"]
+
+  def validate_start_is_before_trip(changeset, trip_arrival_time) do
+    changeset
+    |> validate_change(:active_period_start, fn :active_period_start, active_period_start ->
+      if !is_nil(trip_arrival_time) and
+           NaiveDateTime.diff(active_period_start, trip_arrival_time, :minute) > 60 do
+        [
+          active_period_start:
+            "Effect must start before #{formatted_datetime(trip_arrival_time |> NaiveDateTime.add(1, :hour))}"
+        ]
+      else
+        []
+      end
+    end)
+  end
 
   defp formatted_datetime(datetime, format_string \\ "{0M}/{0D}/{YYYY}, {0h12}:{0m} {AM}"),
     do: Timex.format!(datetime, format_string)
