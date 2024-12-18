@@ -73,13 +73,12 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       active_period_end_specifier: "later_today",
       recurrence_days: [],
       active_period_end:
-        ActivePeriod.end_of_service_datetime(current_time)
-        |> DateTime.to_naive()
+        ActivePeriod.end_of_service_datetime_naive(current_time)
         |> naive_datetime_to_iso8601,
       active_period_end_time: ActivePeriod.end_of_service_time(),
       active_period_end_date:
         current_time
-        |> ActivePeriod.end_of_service_datetime()
+        |> ActivePeriod.end_of_service_datetime_naive()
         |> shifted_active_period_end()
         |> NaiveDateTime.to_date(),
       active_period_start_time_specifier: "start_of_service",
@@ -423,8 +422,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     case time_range["active_period_end_specifier"] do
       "later_today" ->
         current_time
-        |> ActivePeriod.end_of_service_datetime()
-        |> DateTime.to_naive()
+        |> ActivePeriod.end_of_service_datetime_naive()
 
       "end_of_service" ->
         if previous_state !== "end_of_service" do
@@ -719,9 +717,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   defp shifted_active_period_end(datetime) do
     datetime
-    |> ActivePeriod.end_of_service_datetime()
-    |> DateTime.add(-1, :day)
-    |> DateTime.to_naive()
+    |> ActivePeriod.end_of_service_datetime_naive()
+    |> NaiveDateTime.add(-1, :day)
   end
 
   defp utc_datetime_to_naive(nil), do: nil

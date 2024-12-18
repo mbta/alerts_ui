@@ -71,7 +71,7 @@ defmodule AlertsUI.Alerts do
          true,
          current_time
        ) do
-    end_of_service = ActivePeriod.end_of_service_datetime(active_period.start)
+    end_of_service = ActivePeriod.end_of_service_datetime_utc(active_period.start)
 
     two_hours_from_now = DateTime.add(current_time, 2, :hour)
 

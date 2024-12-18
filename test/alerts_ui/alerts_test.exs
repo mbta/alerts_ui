@@ -273,37 +273,42 @@ defmodule AlertsUI.AlertsTest do
     end
 
     test "update active_period and active_period_end if duration estimated and start in past" do
-      current_time = ~U[2024-12-11 07:00:00Z]
+      current_time = ~U[2024-12-11 12:00:00Z]
 
       insert(:alert, %{
         alert_id: "123",
-        active_period: [%{start: ~U[2024-12-11 06:00:00Z], end: ~U[2024-12-11 08:00:00Z]}],
-        active_period_start: ~U[2024-12-11 06:00:00Z],
-        active_period_end: ~U[2024-12-11 08:00:00Z],
+        active_period: [%{start: ~U[2024-12-11 11:00:00Z], end: ~U[2024-12-11 13:00:00Z]}],
+        active_period_start: ~U[2024-12-11 11:00:00Z],
+        active_period_end: ~U[2024-12-11 13:00:00Z],
         duration_certainty: :ESTIMATED
       })
 
       [result] = Alerts.list_all_open() |> Alerts.update_end_if_estimated(current_time)
 
-      assert [%{start: ~U[2024-12-11 06:00:00Z], end: ~U[2024-12-11 09:00:00Z]}] =
+      assert [%{start: ~U[2024-12-11 11:00:00Z], end: ~U[2024-12-11 14:00:00Z]}] =
                result.active_period
 
-      assert result.active_period_end == ~U[2024-12-11 09:00:00Z]
+      assert result.active_period_end == ~U[2024-12-11 14:00:00Z]
     end
 
     test "update end to end of service if eos is less than 2 hours from now" do
-      current_time = ~U[2024-12-11 02:00:00Z]
+      current_time = ~U[2024-12-11 06:30:00Z]
 
       insert(:alert, %{
         alert_id: "123",
-        active_period: [%{start: ~U[2024-12-10 23:00:00Z], end: ~U[2024-12-11 01:00:00Z]}],
+        active_period: [%{start: ~U[2024-12-10 23:00:00Z], end: ~U[2024-12-11 05:00:00Z]}],
         active_period_start: ~U[2024-12-10 23:00:00Z],
         active_period_end: ~U[2024-12-11 01:00:00Z],
         duration_certainty: :ESTIMATED
       })
 
       [result] = Alerts.list_all_open() |> Alerts.update_end_if_estimated(current_time)
-      expected_end = DateTime.new!(~D[2024-12-11], ActivePeriod.end_of_service_time())
+
+      expected_end =
+        NaiveDateTime.new!(~D[2024-12-11], ActivePeriod.end_of_service_time())
+        |> DateTime.from_naive!("America/New_York")
+        |> DateTime.shift_zone!("Etc/UTC")
+
       assert [%{start: ~U[2024-12-10 23:00:00Z], end: ^expected_end}] = result.active_period
       assert result.active_period_end == expected_end
     end

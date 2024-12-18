@@ -49,7 +49,7 @@ defmodule AlertsUI.ActivePeriodBuilder do
       build_one_time_active_period_start(naive_start, active_period_start_specifier, current_time)
 
     utc_end =
-      build_one_time_active_period_end(naive_end, active_period_end_specifier, utc_start)
+      build_one_time_active_period_end(naive_end, active_period_end_specifier, naive_start)
 
     %{
       active_period_start: utc_start,
@@ -143,15 +143,15 @@ defmodule AlertsUI.ActivePeriodBuilder do
 
   defp build_one_time_active_period_end(nil, _, _), do: nil
 
-  defp build_one_time_active_period_end(naive_end, :end_of_service, _) do
+  defp build_one_time_active_period_end(naive_end, :end_of_service, _naive_start) do
     # shift date to date of actual end-of-service
     naive_end
     |> NaiveDateTime.add(1, :day)
     |> naive_eastern_datetime_to_utc
   end
 
-  defp build_one_time_active_period_end(_naive_end, :later_today, start_time) do
-    DateTime.add(start_time, 2, :hour)
+  defp build_one_time_active_period_end(_naive_end, :later_today, naive_start) do
+    NaiveDateTime.add(naive_start, 2, :hour) |> naive_eastern_datetime_to_utc
   end
 
   defp build_one_time_active_period_end(naive_end, _, _) do

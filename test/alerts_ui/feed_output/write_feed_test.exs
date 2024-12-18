@@ -41,12 +41,17 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
       )
 
       insert(:alert,
-      alert_id: "567abc",
-      active_period_start: DateTime.add(current_time, -1, :hour),
-      active_period_end: DateTime.add(current_time, 1, :hour),
-      duration_certainty: :ESTIMATED,
-      active_period: [build(:active_period, %{start: DateTime.add(current_time, -1, :hour), end: DateTime.add(current_time, 1, :hour)})]
-    )
+        alert_id: "567abc",
+        active_period_start: DateTime.add(current_time, -1, :hour),
+        active_period_end: DateTime.add(current_time, 1, :hour),
+        duration_certainty: :ESTIMATED,
+        active_period: [
+          build(:active_period, %{
+            start: DateTime.add(current_time, -1, :hour),
+            end: DateTime.add(current_time, 1, :hour)
+          })
+        ]
+      )
 
       {:ok, actual} = WriteFeed.write_feed()
       [alert_1, alert_2, alert_3, alert_4] = actual["entity"] |> Enum.sort_by(& &1["id"])
@@ -136,21 +141,22 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
                current_time |> DateTime.to_unix()
              )
 
-             expected_start = current_time |> DateTime.add(-1, :hour) |> DateTime.to_unix()
-             expected_end = current_time |> DateTime.add(2, :hour) |> DateTime.to_unix()
-             %{
-              "alert" => %{
-                "active_period" => [%{"start" => ^expected_start, "end" => ^expected_end}],
-                "description_text" => %{"translation" => [%{"language" => "en", "text" => "b"}]},
-                "header_text" => %{"translation" => [%{"language" => "en", "text" => "a"}]},
-                "informed_entity" => [
-                  %{"activities" => [], "route_id" => "1", "trip" => %{"trip_id" => "1"}}
-                ],
-                "duration_certainty" => "ESTIMATED",
-                "alert_lifecycle" => "NEW",
-              },
-              "id" => "567abc"
-            } = alert_4
+      expected_start = current_time |> DateTime.add(-1, :hour) |> DateTime.to_unix()
+      expected_end = current_time |> DateTime.add(2, :hour) |> DateTime.to_unix()
+
+      %{
+        "alert" => %{
+          "active_period" => [%{"start" => ^expected_start, "end" => ^expected_end}],
+          "description_text" => %{"translation" => [%{"language" => "en", "text" => "b"}]},
+          "header_text" => %{"translation" => [%{"language" => "en", "text" => "a"}]},
+          "informed_entity" => [
+            %{"activities" => [], "route_id" => "1", "trip" => %{"trip_id" => "1"}}
+          ],
+          "duration_certainty" => "ESTIMATED",
+          "alert_lifecycle" => "NEW"
+        },
+        "id" => "567abc"
+      } = alert_4
 
       assert %{
                "gtfs_realtime_version" => "2.0",
