@@ -390,7 +390,13 @@ defmodule AlertsUIWeb.CreateAlertLive do
       one_hour_from_arrival = Timex.shift(last_stop.arrival_time, hours: 1)
 
       if DateTime.compare(one_hour_from_arrival, current_time) in [:gt, :eq] do
-        [first_stop |> Map.put(:arrival_time, last_stop.arrival_time) | acc]
+        # stash last stop name in note field- needed for ferry trip names
+        stop = first_stop.stop |> Map.put(:note, last_stop.stop.name)
+
+        schedule_to_return =
+          first_stop |> Map.put(:stop, stop) |> Map.put(:arrival_time, last_stop.arrival_time)
+
+        [schedule_to_return | acc]
       else
         acc
       end

@@ -2,7 +2,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
   alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
-
+  alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.{Schedule, Trip}
   alias MBTAV3API.Stops.Stop
@@ -16,7 +16,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
         %Route{id: "101", name: "alice", sort_order: 1}
       ]
 
-      results = SelectFormatter.formatted_select_options(objects)
+      results = SelectFormatter.formatted_select_options(objects, nil)
 
       assert results == [
                {"alice", "101"},
@@ -33,7 +33,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
         %Stop{id: "101", name: "alice"}
       ]
 
-      results = SelectFormatter.formatted_select_options(objects)
+      results = SelectFormatter.formatted_select_options(objects, nil)
 
       assert results == [
                {"joe", "202"},
@@ -46,24 +46,41 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
   describe "formatted_select_options/2" do
     test "it returns properly filtered options" do
       objects = [
-        %Route{id: "505", name: "ear"},
-        %Route{id: "404", name: "cat"},
-        %Route{id: "303", name: "dog"},
-        %Route{id: "202", name: "bear"},
-        %Route{id: "101", name: "ant"}
+        %Facility{
+          id: "952",
+          type: "ELEVATOR",
+          short_name: "Alewife platform to lobby",
+          long_name: "Charles/MGH Elevator 952 (Alewife platform to lobby)"
+        },
+        %Facility{
+          id: "951",
+          type: "ELEVATOR",
+          short_name: "Ashmont/Braintree platform to lobby"
+        },
+        %Facility{
+          id: "861",
+          type: "ELEVATOR",
+          short_name: "Ashmont/Braintree platform to Massachusetts Avenue"
+        },
+        %Facility{
+          id: "860",
+          type: "ELEVATOR",
+          short_name: "Alewife platform to Massachusetts Avenue",
+          long_name: "Central Elevator 860 (Alewife platform to Massachusetts Avenue)"
+        }
       ]
 
-      results = SelectFormatter.formatted_select_options(objects, "ear")
+      results = SelectFormatter.formatted_select_options(objects, "Ashmont/Braintree", nil)
 
       assert results == [
-               {"ear", "505"},
-               {"bear", "202"}
+               {"Ashmont/Braintree platform to lobby", "951"},
+               {"Ashmont/Braintree platform to Massachusetts Avenue", "861"}
              ]
     end
   end
 
   describe "formatted_trip_options/2" do
-    test "it properly formats trips" do
+    test "it properly formats non-ferry trips" do
       trip_map = %{
         "Framingham/Worcester line" => [
           %Schedule{
@@ -97,13 +114,45 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
         ]
       }
 
-      results = SelectFormatter.formatted_trip_options(trip_map)
+      results = SelectFormatter.formatted_trip_options(trip_map, 2)
 
       assert results == [
                {"527 (9:01 AM from South Station)", "CR-683300-527"},
                {"595 (9:15 AM from South Station)", "CR-683322-595"},
                {"594 (9:45 AM from Framingham)", "CR-683321-594"},
                {"529 (10:01 AM from South Station)", "CR-683302-529"}
+             ]
+    end
+
+    test "it properly formats ferry trips" do
+      trip_map = %{
+        "Framingham/Worcester line" => [
+          %MBTAV3API.Schedules.Schedule{
+            route: %MBTAV3API.Routes.Route{
+              id: "Boat-F4",
+              type: 4,
+              name: "Charlestown Ferry"
+            },
+            trip: %MBTAV3API.Schedules.Trip{
+              id: "Boat-F4-1430-Long-B-01-Weekday-Fall-24",
+              name: ""
+            },
+            stop: %MBTAV3API.Stops.Stop{
+              id: "Boat-Long-South",
+              name: "Long Wharf (South)",
+              note: "Charlestown Navy Yard"
+            },
+            arrival_time: nil,
+            departure_time: ~U[2024-02-21 15:01:00.00Z]
+          }
+        ]
+      }
+
+      results = SelectFormatter.formatted_trip_options(trip_map, 4)
+
+      assert results == [
+               {"10:01 AM from Long Wharf (South) to Charlestown Navy Yard",
+                "Boat-F4-1430-Long-B-01-Weekday-Fall-24"}
              ]
     end
 
@@ -143,7 +192,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
         ]
       }
 
-      results = SelectFormatter.formatted_trip_options(trip_map)
+      results = SelectFormatter.formatted_trip_options(trip_map, 2)
 
       assert results == [
                {"Framingham/Worcester line",
@@ -195,7 +244,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
         ]
       }
 
-      results = SelectFormatter.formatted_trip_options(trip_map, "Forest")
+      results = SelectFormatter.formatted_trip_options(trip_map, 2, "Forest")
 
       assert results == [
                {"Framingham/Worcester line", []},

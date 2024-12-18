@@ -50,7 +50,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes do
 
   def list_effects(:bus),
     do: [
-      "Cancellation",
       "Delay",
       "Detour",
       "Extra Service",

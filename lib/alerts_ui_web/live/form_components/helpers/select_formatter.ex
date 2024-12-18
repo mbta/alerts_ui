@@ -9,18 +9,19 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   alias MBTAV3API.Schedules.{Schedule, Trip}
   alias MBTAV3API.Stops.Stop
 
-  @spec formatted_select_options([Route.t() | Stop.t()]) :: keyword(String.t())
-  def formatted_select_options(objects) do
+  @spec formatted_select_options([Route.t() | Stop.t()], integer() | nil) :: keyword(String.t())
+  def formatted_select_options(objects, route_type) do
     objects
     |> Enum.uniq()
     |> Enum.sort_by(&sort_order/1)
-    |> Enum.map(fn object -> {name_for_option(object), id_for_option(object)} end)
+    |> Enum.map(fn object -> {name_for_option(object, route_type), id_for_option(object)} end)
   end
 
-  @spec formatted_select_options([Route.t() | Stop.t()], String.t()) :: keyword(String.t())
-  def formatted_select_options(objects, filter_value) do
+  @spec formatted_select_options([Route.t() | Stop.t()], String.t(), integer() | nil) ::
+          keyword(String.t())
+  def formatted_select_options(objects, filter_value, route_type) do
     objects
-    |> formatted_select_options()
+    |> formatted_select_options(route_type)
     |> filter_options(filter_value)
   end
 
@@ -45,23 +46,40 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   def sort_order(%Facility{}), do: nil
   def sort_order(%Route{sort_order: sort_order}), do: sort_order
 
-  @spec name_for_option(Stop.t() | Route.t() | Schedule.t() | Facility.t()) :: String.t()
-  def name_for_option(%Stop{name: name}), do: name
+  @spec name_for_option(Stop.t() | Route.t() | Facility.t() | Schedule.t(), integer() | nil) ::
+          String.t()
+  def name_for_option(item, route_type \\ nil)
+  def name_for_option(%Stop{name: name}, _rt), do: name
 
-  def name_for_option(%Route{name: empty_name, long_name: long_name})
+  def name_for_option(%Route{name: empty_name, long_name: long_name}, _rt)
       when is_nil(empty_name) or empty_name == "",
       do: long_name
 
-  def name_for_option(%Route{name: name}), do: name
+  def name_for_option(%Route{name: name}, _rt), do: name
 
-  def name_for_option(%Facility{long_name: nil, short_name: short_name}), do: short_name
-  def name_for_option(%Facility{long_name: long_name}), do: long_name
+  def name_for_option(%Facility{long_name: nil, short_name: short_name}, _rt),
+    do: short_name
 
-  def name_for_option(%Schedule{
-        trip: %Trip{name: trip_name},
-        stop: %Stop{name: stop_name},
-        departure_time: departure_time
-      }) do
+  def name_for_option(%Facility{long_name: long_name}, _rt), do: long_name
+
+  def name_for_option(
+        %Schedule{
+          stop: %Stop{name: stop_name, note: last_stop_name},
+          departure_time: departure_time
+        },
+        4
+      ) do
+    "#{DateTimeHelpers.friendly_time(departure_time)} from #{stop_name} to #{last_stop_name}"
+  end
+
+  def name_for_option(
+        %Schedule{
+          trip: %Trip{name: trip_name},
+          stop: %Stop{name: stop_name},
+          departure_time: departure_time
+        },
+        _route_type
+      ) do
     "#{trip_name} (#{DateTimeHelpers.friendly_time(departure_time)} from #{stop_name})"
   end
 
@@ -71,16 +89,17 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   def id_for_option(%Facility{id: id}), do: id
   def id_for_option(%Schedule{trip: %Trip{id: id}}), do: id
 
-  @spec formatted_trip_options(%{String.t() => [Schedule.t()]}, String.t()) :: keyword(String.t())
-  def formatted_trip_options(schedules_by_route_name, filter_value \\ "") do
+  @spec formatted_trip_options(%{String.t() => [Schedule.t()]}, integer(), String.t()) ::
+          keyword(String.t())
+  def formatted_trip_options(schedules_by_route_name, route_type, filter_value \\ "") do
     if schedules_by_route_name |> Map.keys() |> length() <= 1 do
       schedules_by_route_name
       |> Map.values()
       |> List.flatten()
-      |> formatted_select_options(filter_value)
+      |> formatted_select_options(filter_value, route_type)
     else
       Enum.reduce(schedules_by_route_name, [], fn {route_name, schedules}, acc ->
-        acc ++ [{route_name, formatted_select_options(schedules, filter_value)}]
+        acc ++ [{route_name, formatted_select_options(schedules, filter_value, route_type)}]
       end)
     end
   end

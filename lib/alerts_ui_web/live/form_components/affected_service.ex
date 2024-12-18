@@ -297,7 +297,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       if assigns.available_routes.ok? && assigns.available_routes.result do
         SelectFormatter.formatted_select_options(
           assigns.available_routes.result,
-          route_filter_value
+          route_filter_value,
+          assigns.route_type
         )
       else
         []
@@ -325,7 +326,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
           schedule.route.id in Map.get(assigns.form[:route_ids], :value, [])
         end)
         |> Enum.group_by(&SelectFormatter.name_for_option(&1.route))
-        |> SelectFormatter.formatted_trip_options(trip_filter_value)
+        |> SelectFormatter.formatted_trip_options(assigns.route_type, trip_filter_value)
       else
         []
       end
@@ -336,7 +337,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       if async_available?(assigns, :available_stops) do
         SelectFormatter.formatted_select_options(
           assigns.available_stops.result,
-          stop_filter_value
+          stop_filter_value,
+          assigns.route_type
         )
       else
         []
