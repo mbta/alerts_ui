@@ -243,8 +243,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
               class={["max-h-[8rem] mt-4", if(@form[:image_url].value in ["", nil], do: "hidden")]}
             />
             <div class="flex flex-col justify-center ml-4">
-              <p :if={@image_path}><%= @image_path %></p>
-              <p :if={@image_size}><%= "#{@image_size} mB" %></p>
+              <p :if={@image_path}>{@image_path}</p>
+              <p :if={@image_size}>{"#{@image_size} mB"}</p>
             </div>
           </div>
         </div>

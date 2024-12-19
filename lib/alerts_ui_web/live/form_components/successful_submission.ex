@@ -43,7 +43,7 @@ defmodule AlertsUIWeb.FormComponents.SuccessfulSubmission do
   def render(assigns) do
     ~H"""
     <div class="min-w-full" id="success_view">
-      <.h3 class="mr-4">Alert #<%= @alert_id %> created successfully</.h3>
+      <.h3 class="mr-4">Alert #{@alert_id} created successfully</.h3>
       <.button_primary
         phx-click="ok"
         phx-target={@myself}

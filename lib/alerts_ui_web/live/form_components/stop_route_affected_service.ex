@@ -220,8 +220,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     ~H"""
     <div class="min-w-full min-h-[40rem] flex flex-col" id="stop_route_service_view">
       <.h1 class="mb-8">
-        Create new <%= ContentFormatter.route_atom_to_string(@service_type_name) %> <%= @effect_name
-        |> String.downcase() %> alert
+        Create new {ContentFormatter.route_atom_to_string(@service_type_name)} {@effect_name
+        |> String.downcase()} alert
       </.h1>
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
         Affected service
@@ -248,7 +248,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
           filter_field={@form[:route_ids_filter]}
           loading={Enum.empty?(@route_id_options) and !disable_routes_input?(assigns)}
           disabled={disable_routes_input?(assigns)}
-          id="stop_route_routes"
           options={@route_id_options}
           class="min-w-[25%]"
         />

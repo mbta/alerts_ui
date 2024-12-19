@@ -37,7 +37,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.RecurringDurationText do
       )
 
     ~H"""
-    <%= "#{@start_time_text} – #{@end_time_text}" %><sup :if={@plus_one}>+1</sup><%= " #{@duration_text} every #{@weekday_text} from #{@start_date_text} until #{@end_date_text}" %>
+    {"#{@start_time_text} – #{@end_time_text}"}<sup :if={@plus_one}>+1</sup>{" #{@duration_text} every #{@weekday_text} from #{@start_date_text} until #{@end_date_text}"}
     """
   end
 

@@ -495,14 +495,14 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           class="min-w-[16rem] max-w-[16rem]"
           phx-debounce={120}
         />
-        <%= one_time_alert_component(assigns) %>
+        {one_time_alert_component(assigns)}
         <div
           :if={@form[:alert_timing].value in [:"one-time", "one-time"] and Enum.empty?(@form.errors)}
           class="text-text-secondary"
         >
-          Effect duration: <%= @one_time_duration_text %>
+          Effect duration: {@one_time_duration_text}
         </div>
-        <%= recurring_alert_component(assigns) %>
+        {recurring_alert_component(assigns)}
         <div
           :if={
             @form[:alert_timing].value in [:recurring, "recurring"] and Enum.empty?(@form.errors) and
@@ -510,7 +510,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           }
           class="text-text-secondary"
         >
-          Effect duration: <%= RecurringDurationText.recurring_duration_text(assigns) %>
+          Effect duration: {RecurringDurationText.recurring_duration_text(assigns)}
         </div>
       </.form>
     </div>
@@ -523,7 +523,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       :if={@form[:alert_timing].value in [:"one-time", "one-time"]}
       class="flex flex-row gap-8 my-8"
     >
-      <div id="start-selector-div" class="flex flex-row gap-8">
+      <div class="flex flex-row gap-8">
         <.select
           label="Effect period"
           field={@form[:active_period_start_specifier]}
@@ -554,7 +554,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         />
       </div>
       <p class="pt-[2rem]">to</p>
-      <div id="end-selector-div" class="flex flex-row gap-8">
+      <div class="flex flex-row gap-8">
         <.select
           label=""
           field={@form[:active_period_end_specifier]}
@@ -590,7 +590,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     ~H"""
     <div :if={@form[:alert_timing].value === :recurring} class="flex flex-col gap-8 my-8">
       <div class="flex flex-row gap-8 my-4">
-        <div id="start-selector-div" class="flex flex-row gap-8">
+        <div class="flex flex-row gap-8">
           <.select
             label="Effect start"
             field={@form[:active_period_start_time_specifier]}
@@ -608,7 +608,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           />
         </div>
         <p class="pt-[2rem]">to</p>
-        <div id="end-selector-div" class="flex flex-row gap-8">
+        <div class="flex flex-row gap-8">
           <.select
             label="Effect end"
             field={@form[:active_period_end_time_specifier]}
@@ -628,7 +628,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       </div>
 
       <div class="flex flex-row gap-8 my-4">
-        <div id="start-selector-div" class="flex flex-row gap-8">
+        <div class="flex flex-row gap-8">
           <.select
             label="Recurring alert start"
             field={@form[:active_period_start_specifier]}
@@ -647,7 +647,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           />
         </div>
         <p class="pt-[2rem]">to</p>
-        <div id="end-selector-div" class="flex flex-row gap-8">
+        <div class="flex flex-row gap-8">
           <.select
             label="Recurring alert end"
             field={@form[:active_period_end_specifier]}
