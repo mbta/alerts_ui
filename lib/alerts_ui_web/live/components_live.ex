@@ -62,6 +62,16 @@ defmodule AlertsUIWeb.ComponentsLive do
     {:noreply, assign(socket, %{form: form})}
   end
 
+  @impl true
+  def handle_event("accepted_modal", _params, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("cancelled_modal", _params, socket) do
+    {:noreply, socket}
+  end
+
   @doc """
   Renders a color block with a label.
 

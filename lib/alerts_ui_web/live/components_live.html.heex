@@ -78,9 +78,28 @@
     Paragraph text. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras consequat erat nec enim ultrices bibendum. Nulla fermentum felis in ultrices tincidunt. Donec luctus placerat neque, eu porta ante aliquam vitae. Cras consequat tristique vulputate. Morbi at erat neque. Suspendisse porttitor erat tellus, in sodales magna faucibus nec. Quisque dignissim enim id metus suscipit luctus. Nunc in cursus nibh, sed tincidunt mauris.
   </.p>
 
+  <.h2>Modal</.h2>
+  <.button_primary phx-click={show_modal("example-modal")} class="mb-8 w-[8rem]">
+    Show Modal
+  </.button_primary>
+  <.modal
+    id="example-modal"
+    header_text="Modal header"
+    cancel_event_name="cancelled_modal"
+    accept_event_name="accepted_modal"
+  >
+    Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+    Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
+    when an unknown printer took a galley of type and scrambled it to make a type specimen book.
+    It has survived not only five centuries, but also the leap into electronic typesetting,
+    remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset
+    sheets containing Lorem Ipsum passages, and more recently with desktop publishing software
+    like Aldus PageMaker including versions of Lorem Ipsum.
+  </.modal>
+
   <.h2>Buttons</.h2>
 
-  <div class="inline-grid gap-4 grid-cols-1 mb-4">
+  <div class="inline-grid gap-4 grid-cols-1 mb-8">
     <.button_primary>Primary Button</.button_primary>
     <br />
     <.button_secondary>Secondary Button</.button_secondary>
@@ -88,6 +107,7 @@
     <.button_toggle>Toggle Button (active)</.button_toggle>
     <.button_toggle icon="Red Line">Toggle Button with Icon</.button_toggle>
     <.button_toggle active={false}>Toggle Button (inactive)</.button_toggle>
+    <br />
   </div>
 
   <.h2>Form Fields</.h2>
@@ -98,7 +118,7 @@
       field={@form[:single_select]}
       options={single_select_options()}
       prompt="All"
-      class="max-w-[16rem]"
+      class="max-w-[16rem] mb-8"
     />
     <.select
       label="Disabled Select"
@@ -106,21 +126,21 @@
       options={single_select_options()}
       prompt="All"
       disabled={true}
-      class="max-w-[16rem]"
+      class="max-w-[16rem] mb-8"
     />
     <.select
       label="Errored Select"
       field={@form[:single_select_error]}
       options={single_select_options()}
       prompt="All"
-      class="max-w-[16rem]"
+      class="max-w-[16rem] mb-8"
     />
     <.filtered_select
       label="filtered_select"
       field={@form[:filtered_select]}
       filter_field={@form[:filtered_select_filter]}
       options={filtered_select_options(@form[:filtered_select_filter].value)}
-      class="max-w-[16rem]"
+      class="max-w-[16rem] mb-[4rem] min-h-[12rem]"
     />
     <.filtered_select
       label="Disabled filtered_select"
@@ -128,7 +148,7 @@
       filter_field={@form[:filtered_select_filter_disabled]}
       options={filtered_select_options(@form[:filtered_select_filter].value)}
       disabled={true}
-      class="max-w-[16rem]"
+      class="max-w-[16rem] mb-8 mb-[4rem] min-h-[12rem]"
     />
     <.filtered_select
       label="Errored filtered_select"
@@ -137,31 +157,40 @@
       options={filtered_select_options(@form[:filtered_select_filter].value)}
       prompt="All"
       disabled={true}
-      class="max-w-[16rem]"
+      class="max-w-[16rem] mb-8 mb-[4rem] min-h-[12rem]"
     />
-    <.text_input label="Text Input" field={@form[:text_input]} placeholder="Text Input" />
+    <.text_input
+      label="Text Input"
+      field={@form[:text_input]}
+      placeholder="Text Input"
+      class="mb-8"
+    />
     <.text_input
       label="Disabled Text Input"
       field={@form[:text_input_disabled]}
       placeholder="Disabled Text Input"
       disabled={true}
+      class="mb-8"
     />
     <.text_input
       label="Errored Text Input"
       field={@form[:text_input_error]}
       placeholder="Errored Text Input"
+      class="mb-8"
     />
-    <.textarea label="TextArea" field={@form[:textarea]} placeholder="TextArea" />
+    <.textarea label="TextArea" field={@form[:textarea]} placeholder="TextArea" class="mb-8" />
     <.textarea
       label="Disabled TextArea"
       field={@form[:textarea_disabled]}
       placeholder="Disabled TextArea"
       disabled={true}
+      class="mb-8"
     />
     <.textarea
       label="Errored TextArea"
       field={@form[:textarea_error]}
       placeholder="Errored TextArea"
+      class="mb-8"
     />
     <div class="flex flex-col w-[16rem]">
       <.textarea

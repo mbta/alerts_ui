@@ -9,7 +9,7 @@ defmodule AlertsUIWeb.SharedComponents do
   Icons are provided by [heroicons](https://heroicons.com). See `icon/1` for usage.
   """
   use Phoenix.Component
-  import AlertsUIWeb.IconComponents
+  import AlertsUIWeb.{Gettext, IconComponents}
 
   alias AlertsUIWeb.CoreComponents
   alias AlertsUIWeb.FormComponents.Helpers.ContentFormatter
@@ -197,7 +197,7 @@ defmodule AlertsUIWeb.SharedComponents do
       text-text-dark
       bg-primary
       border-primary
-      border-1
+      border-2
       px-1
       py-3
       rounded-md
@@ -206,8 +206,6 @@ defmodule AlertsUIWeb.SharedComponents do
       active:bg-primary-active
       active:border-primary-active
       focus:border-primary-active
-      focus:border-4
-      focus:py-2
       disabled:bg-primary-disabled
       disabled:border-primary-disabled
       #{if @hidden, do: "hidden", else: ""}
@@ -241,7 +239,7 @@ defmodule AlertsUIWeb.SharedComponents do
       text-primary
       border
       border-primary
-      border-1
+      border-2
       px-1
       py-3
       rounded-md
@@ -249,8 +247,6 @@ defmodule AlertsUIWeb.SharedComponents do
       active:bg-secondary-active
       active:border-secondary-active
       focus:border-secondary-focus-border
-      focus:border-4
-      focus:py-2
       disabled:bg-secondary-disabled
       disabled:border-secondary-disabled
       #{if @hidden, do: "hidden", else: ""}
@@ -466,6 +462,148 @@ defmodule AlertsUIWeb.SharedComponents do
       end)
 
   defp normalize_strings_to_integers(value), do: value
+
+  @doc """
+  Renders a modal.
+
+  ## Examples
+
+      <.modal id="confirm-modal">
+        This is a modal.
+      </.modal>
+
+  JS commands may be passed to the `:on_cancel` to configure
+  the closing/cancel event, for example:
+
+      <.modal id="confirm" on_cancel={JS.navigate(~p"/posts")}>
+        This is another modal.
+      </.modal>
+
+  """
+  attr :header_text, :string, default: ""
+  attr :accept_button_text, :string, default: "Accept"
+  attr :cancel_button_text, :string, default: "Cancel"
+  attr :cancel_event_name, :string, default: nil
+  attr :accept_event_name, :string, default: nil
+  attr :id, :string, required: true
+  attr :show, :boolean, default: false
+  attr :on_cancel, JS, default: %JS{}
+  slot :inner_block, required: true
+
+  def modal(assigns) do
+    ~H"""
+    <div
+      id={@id}
+      phx-mounted={@show && show_modal(@id)}
+      phx-remove={hide_modal(@id)}
+      data-cancel={JS.exec(@on_cancel, "phx-remove")}
+      class="relative z-50 hidden"
+    >
+      <div id={"#{@id}-bg"} class="bg-black/90 fixed inset-0 transition-opacity" aria-hidden="true" />
+      <div
+        class="fixed inset-0 overflow-y-auto"
+        aria-labelledby={"#{@id}-title"}
+        aria-describedby={"#{@id}-description"}
+        role="dialog"
+        aria-modal="true"
+        tabindex="0"
+      >
+        <div class="flex min-h-full items-center justify-center">
+          <div class="w-full max-w-lg p-4 sm:p-6 lg:py-8">
+            <.focus_wrap
+              id={"#{@id}-container"}
+              phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
+              phx-key="escape"
+              phx-click-away={JS.exec("data-cancel", to: "##{@id}")}
+              class="shadow-zinc-700/10 ring-zinc-700/10 relative hidden rounded-md bg-bg-elevation-4 border-1 border-bg-elevation-6 shadow-lg ring-1 transition
+              min-h-[25rem]"
+            >
+              <div class="flex flex-row justify-between px-8 py-4">
+                <h1 class="font-sm text-xl">{@header_text}</h1>
+                <button
+                  phx-click={JS.exec("data-cancel", to: "##{@id}")}
+                  type="button"
+                  class="opacity-20 hover:opacity-40"
+                  aria-label={gettext("close")}
+                >
+                  <AlertsUIWeb.CoreComponents.icon name="hero-x-mark-solid" class="h-8 w-8" />
+                </button>
+              </div>
+              <hr class="w-[100%] border-y-1 border-bg-elevation-6" />
+              <div id={"#{@id}-content"} class="px-8 py-4">
+                {render_slot(@inner_block)}
+              </div>
+              <hr class="w-[100%] border-y-1 border-bg-elevation-6" />
+              <div class="flex flex-row justify-end px-8 py-4">
+                <.button_secondary
+                  :if={@cancel_event_name}
+                  class="mr-4 w-24"
+                  phx-remove={hide_modal(@id)}
+                  phx-click={JS.push(@cancel_event_name) |> JS.exec("phx-remove")}
+                >
+                  {@cancel_button_text}
+                </.button_secondary>
+                <.button_primary
+                  :if={@accept_event_name}
+                  class="w-24"
+                  phx-remove={hide_modal(@id)}
+                  phx-click={JS.push(@accept_event_name) |> JS.exec("phx-remove")}
+                >
+                  {@accept_button_text}
+                </.button_primary>
+              </div>
+            </.focus_wrap>
+          </div>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  def show_modal(js \\ %JS{}, id) when is_binary(id) do
+    js
+    |> JS.show(to: "##{id}")
+    |> JS.show(
+      to: "##{id}-bg",
+      transition: {"transition-all transform ease-out duration-300", "opacity-0", "opacity-100"}
+    )
+    |> show("##{id}-container")
+    |> JS.add_class("overflow-hidden", to: "body")
+    |> JS.focus_first(to: "##{id}-content")
+  end
+
+  def hide_modal(js \\ %JS{}, id) do
+    js
+    |> JS.hide(
+      to: "##{id}-bg",
+      transition: {"transition-all transform ease-in duration-200", "opacity-100", "opacity-0"}
+    )
+    |> hide("##{id}-container")
+    |> JS.hide(to: "##{id}", transition: {"block", "block", "hidden"})
+    |> JS.remove_class("overflow-hidden", to: "body")
+    |> JS.pop_focus()
+  end
+
+  def show(js \\ %JS{}, selector) do
+    JS.show(js,
+      to: selector,
+      transition:
+        {"transition-all transform ease-out duration-300",
+         "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95",
+         "opacity-100 translate-y-0 sm:scale-100"}
+    )
+  end
+
+  def hide(js \\ %JS{}, selector) do
+    JS.hide(js,
+      to: selector,
+      time: 200,
+      transition:
+        {"transition-all transform ease-in duration-200",
+         "opacity-100 translate-y-0 sm:scale-100",
+         "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"}
+    )
+  end
 
   @doc """
   Renders a select input.
