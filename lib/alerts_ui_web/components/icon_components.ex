@@ -251,7 +251,7 @@ defmodule AlertsUIWeb.IconComponents do
   def mode_icon(%{type: "CR-" <> _} = assigns) do
     ~H"""
     <span class="align-middle bg-mbta-commuter-rail font-bold h-full py-1 px-2 rounded-3xl text-sm text-white uppercase">
-      <%= route_name(@type) %>
+      {route_name(@type)}
     </span>
     """
   end
@@ -260,7 +260,7 @@ defmodule AlertsUIWeb.IconComponents do
   def mode_icon(assigns) do
     ~H"""
     <span class="align-middle bg-mbta-bus font-bold h-full py-1 px-2 rounded text-black text-sm uppercase">
-      <%= route_name(@type) %>
+      {route_name(@type)}
     </span>
     """
   end

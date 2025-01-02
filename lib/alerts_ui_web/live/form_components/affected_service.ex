@@ -307,8 +307,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     ~H"""
     <div class="min-w-full min-h-[40rem] flex flex-col" id="service_view">
       <.h1 class="mb-8">
-        Create new <%= ContentFormatter.route_atom_to_string(@service_type_name) %>
-        <%= (@effect_name || "") |> String.downcase() %> alert
+        Create new {ContentFormatter.route_atom_to_string(@service_type_name)}
+        {(@effect_name || "") |> String.downcase()} alert
       </.h1>
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
         Affected service

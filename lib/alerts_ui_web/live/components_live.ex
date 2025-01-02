@@ -11,20 +11,28 @@ defmodule AlertsUIWeb.ComponentsLive do
   embedded_schema do
     field :single_select, {:array, :integer}
     field :single_select_error, {:array, :integer}
+    field :single_select_disabled, {:array, :integer}
     field :filtered_select, {:array, :string}
     field :filtered_select_filter, :string
+    field :filtered_select_filter_error, :string
+    field :filtered_select_filter_disabled, :string
     field :filtered_select_error, {:array, :string}
+    field :filtered_select_disabled, {:array, :string}
     field :text_input, :string
+    field :text_input_disabled, :string
     field :text_input_error, :string
     field :textarea, :string
+    field :textarea_disabled, :string
     field :textarea_error, :string
+    field :textarea_counter, :string
     field :toggle_checkgroup, :string
     field :datetime, :string
+    field :datetime_disabled, :string
     field :checkbox, :boolean
     field :checkbox_icon, :boolean
   end
 
-  @fields ~w[single_select filtered_select text_input textarea single_select_error filtered_select_error text_input_error textarea_error filtered_select_filter toggle_checkgroup  datetime checkbox checkbox_icon]a
+  @fields ~w[single_select filtered_select text_input text_input_disabled textarea textarea_disabled textarea_counter single_select_error single_select_disabled datetime_disabled filtered_select_error filtered_select_disabled text_input_error textarea_error filtered_select_filter filtered_select_filter_error filtered_select_filter_disabled toggle_checkgroup  datetime checkbox checkbox_icon]a
   @errored_fields ~w[single_select_error filtered_select_error text_input_error textarea_error]a
 
   @impl true
@@ -70,7 +78,7 @@ defmodule AlertsUIWeb.ComponentsLive do
     <div class="flex flex-col">
       <div class="w-20 h-20" style={"background-color: #{@value}"}></div>
       <div class="text-sm py-1">
-        <%= @name %>
+        {@name}
       </div>
     </div>
     """

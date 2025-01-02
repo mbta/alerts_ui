@@ -78,7 +78,7 @@
         show_created_alert={@show_created_alert}
       />
     </article>
-    <.flash kind={:info} title="Success!" flash={@flash} />
-    <.form_error_flash title="Please fix these issues:" flash={@flash} />
+    <.flash kind={:info} title="Success!" flash={@flash} id="success-flash" />
+    <.form_error_flash title="Please fix these issues:" flash={@flash} id="error-flash" />
   </div>
 </div>

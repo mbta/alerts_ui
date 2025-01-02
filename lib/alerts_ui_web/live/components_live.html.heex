@@ -102,7 +102,7 @@
     />
     <.select
       label="Disabled Select"
-      field={@form[:single_select]}
+      field={@form[:single_select_disabled]}
       options={single_select_options()}
       prompt="All"
       disabled={true}
@@ -124,8 +124,8 @@
     />
     <.filtered_select
       label="Disabled filtered_select"
-      field={@form[:filtered_select]}
-      filter_field={@form[:filtered_select_filter]}
+      field={@form[:filtered_select_disabled]}
+      filter_field={@form[:filtered_select_filter_disabled]}
       options={filtered_select_options(@form[:filtered_select_filter].value)}
       disabled={true}
       class="max-w-[16rem]"
@@ -133,7 +133,7 @@
     <.filtered_select
       label="Errored filtered_select"
       field={@form[:filtered_select_error]}
-      filter_field={@form[:filtered_select_filter]}
+      filter_field={@form[:filtered_select_filter_error]}
       options={filtered_select_options(@form[:filtered_select_filter].value)}
       prompt="All"
       disabled={true}
@@ -142,7 +142,7 @@
     <.text_input label="Text Input" field={@form[:text_input]} placeholder="Text Input" />
     <.text_input
       label="Disabled Text Input"
-      field={@form[:text_input]}
+      field={@form[:text_input_disabled]}
       placeholder="Disabled Text Input"
       disabled={true}
     />
@@ -154,7 +154,7 @@
     <.textarea label="TextArea" field={@form[:textarea]} placeholder="TextArea" />
     <.textarea
       label="Disabled TextArea"
-      field={@form[:textarea]}
+      field={@form[:textarea_disabled]}
       placeholder="Disabled TextArea"
       disabled={true}
     />
@@ -165,14 +165,14 @@
     />
     <div class="flex flex-col w-[16rem]">
       <.textarea
-        field={@form[:textarea]}
+        field={@form[:textarea_counter]}
         label="Text Area with Counter"
         phx-debounce={120}
         maxlength="20"
-        value={@form[:textarea].value}
+        value={@form[:textarea_counter].value}
         class="min-w-[16rem]"
       />
-      <.textarea_counter character_limit={20} field={@form[:textarea]} />
+      <.textarea_counter character_limit={20} field={@form[:textarea_counter]} />
     </div>
     <.toggle_checkgroup
       label="Checkgroup with icons"
@@ -190,7 +190,7 @@
       class="min-w-[16rem] max-w-[16rem]"
     />
     <.datetime
-      field={@form[:datetime]}
+      field={@form[:datetime_disabled]}
       min={@current_time}
       value={@current_time}
       label="Disabled Datetime"

@@ -43,12 +43,12 @@
         <:col :let={alert} label="Route" field={:alert_id}>
           <.informed_entity_icon entities={AlertsUI.Models.Alert.entities_with_icons(alert)} />
         </:col>
-        <:col :let={alert} label="Alert ID" field={:integer_alert_id}><%= alert.alert_id %></:col>
+        <:col :let={alert} label="Alert ID" field={:integer_alert_id}>{alert.alert_id}</:col>
         <:col :let={alert} label="Description" field={:header_text} col_style="min-width: 20rem;">
-          <%= alert.header_text %>
+          {alert.header_text}
         </:col>
         <:col :let={alert} label="Created At" field={:created_at}>
-          <%= DateTimeHelpers.friendly_date_time(alert.created_at) %>
+          {DateTimeHelpers.friendly_date_time(alert.created_at)}
         </:col>
         <:col
           :let={alert}
@@ -56,7 +56,7 @@
           field={:active_period_start}
           directions={{:asc_nulls_first, :desc_nulls_last}}
         >
-          <%= DateTimeHelpers.friendly_date_time(alert.active_period_start) %>
+          {DateTimeHelpers.friendly_date_time(alert.active_period_start)}
         </:col>
         <:col
           :let={alert}
@@ -64,10 +64,10 @@
           field={:active_period_end}
           directions={{:asc_nulls_first, :desc_nulls_last}}
         >
-          <%= DateTimeHelpers.friendly_date_time(alert.active_period_end) %>
+          {DateTimeHelpers.friendly_date_time(alert.active_period_end)}
         </:col>
         <:col :let={alert} label="Closed At" field={:closed_timestamp}>
-          <%= DateTimeHelpers.friendly_date_time(alert.closed_timestamp) %>
+          {DateTimeHelpers.friendly_date_time(alert.closed_timestamp)}
         </:col>
         <:col :let={alert}>
           <div class="badge badge-neutral badge-outline">

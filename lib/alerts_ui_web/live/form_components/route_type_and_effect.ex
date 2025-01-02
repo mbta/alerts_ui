@@ -129,7 +129,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
         <div class="flex flex-row mb-8 justify-center md:justify-start">
           <div class="grid sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6 gap-2">
             <div :for={route_type <- @route_types}>
-              <%= route_type_buttons(assigns, route_type) %>
+              {route_type_buttons(assigns, route_type)}
             </div>
             <input type="hidden" id="route_type" name="route_type" value={@selected_route_type} />
           </div>
@@ -146,7 +146,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
           </p>
           <div class="grid sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6 gap-2">
             <div :for={effect <- @effects} class={if is_nil(@selected_route_type), do: "hidden"}>
-              <%= effect_buttons(assigns, effect) %>
+              {effect_buttons(assigns, effect)}
             </div>
             <input type="hidden" id="effect_name" name="effect_name" value={@selected_effect} />
           </div>
@@ -170,7 +170,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
       value={@route_type}
       icon={@route_type}
     >
-      <%= ContentFormatter.route_atom_to_string(@route_type) |> :string.titlecase() %>
+      {ContentFormatter.route_atom_to_string(@route_type) |> :string.titlecase()}
     </.button_toggle>
     """
   end
@@ -192,7 +192,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
       value={@effect}
       active={@active_effect}
     >
-      <%= @effect |> String.replace("_", " ") |> String.capitalize() %>
+      {@effect |> String.replace("_", " ") |> String.capitalize()}
     </.button_toggle>
     """
   end

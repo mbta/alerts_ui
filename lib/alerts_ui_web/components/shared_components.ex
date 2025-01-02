@@ -31,7 +31,7 @@ defmodule AlertsUIWeb.SharedComponents do
   def body(assigns) do
     ~H"""
     <body class="bg-bg-primary font-body font-normal text-base text-text-primary">
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </body>
     """
   end
@@ -51,7 +51,7 @@ defmodule AlertsUIWeb.SharedComponents do
   def p(assigns) do
     ~H"""
     <p class="mb-4">
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </p>
     """
   end
@@ -71,7 +71,7 @@ defmodule AlertsUIWeb.SharedComponents do
   def h1(assigns) do
     ~H"""
     <h1 class={"font-medium mb-4 text-4xl #{if @hidden, do: "hidden", else: ""} #{@class}"}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </h1>
     """
   end
@@ -91,7 +91,7 @@ defmodule AlertsUIWeb.SharedComponents do
   def h2(assigns) do
     ~H"""
     <h2 class={"font-medium mb-4 text-3xl #{if @hidden, do: "hidden", else: ""} #{@class}"}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </h2>
     """
   end
@@ -111,7 +111,7 @@ defmodule AlertsUIWeb.SharedComponents do
   def h3(assigns) do
     ~H"""
     <h3 class={"font-bold mb-2 text-2xl #{if @hidden, do: "hidden", else: ""} #{@class}"}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </h3>
     """
   end
@@ -131,7 +131,7 @@ defmodule AlertsUIWeb.SharedComponents do
   def h4(assigns) do
     ~H"""
     <h4 class={"font-medium mb-2 text-xl #{if @hidden, do: "hidden", else: ""} #{@class}"}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </h4>
     """
   end
@@ -151,7 +151,7 @@ defmodule AlertsUIWeb.SharedComponents do
   def h5(assigns) do
     ~H"""
     <h5 class={"font-medium mb-1 text-lg #{if @hidden, do: "hidden", else: ""} #{@class}"}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </h5>
     """
   end
@@ -171,7 +171,7 @@ defmodule AlertsUIWeb.SharedComponents do
   def h6(assigns) do
     ~H"""
     <h6 class={"font-medium mb-1 text-base #{if @hidden, do: "hidden", else: ""} #{@class}"}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </h6>
     """
   end
@@ -215,7 +215,7 @@ defmodule AlertsUIWeb.SharedComponents do
     "}
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </button>
     """
   end
@@ -258,7 +258,7 @@ defmodule AlertsUIWeb.SharedComponents do
     "}
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </button>
     """
   end
@@ -341,7 +341,7 @@ defmodule AlertsUIWeb.SharedComponents do
         <div class={"#{unless @icon, do: "hidden"} mr-3 self-center"}>
           <.mode_icon type={@icon} />
         </div>
-        <%= render_slot(@inner_block) %>
+        {render_slot(@inner_block)}
       </div>
     </button>
     """
@@ -421,7 +421,7 @@ defmodule AlertsUIWeb.SharedComponents do
       phx-feedback-for={@name}
       class={["flex flex-col gap-1 text-sm items-baseline content-start", @class]}
     >
-      <.label for={@id} class={if is_nil(@label), do: "hidden"}><%= @label %></.label>
+      <.label for={@id} class={if is_nil(@label), do: "hidden"}>{@label}</.label>
 
       <div class={["flex gap-2 w-[100%]", if(@column, do: "flex-col", else: "flex-row")]}>
         <div :for={{option_name, id} <- @options} class={["flex-1", @button_class]}>
@@ -443,18 +443,18 @@ defmodule AlertsUIWeb.SharedComponents do
                 <div :if={@show_icons} class="mr-3 self-center">
                   <.mode_icon type={if @icon_type, do: @icon_type, else: option_name} />
                 </div>
-                <%= if is_atom(option_name) do
+                {if is_atom(option_name) do
                   ContentFormatter.route_atom_to_string(option_name) |> :string.titlecase()
                 else
                   option_name
-                end %>
+                end}
               </div>
             </div>
           </.label>
         </div>
       </div>
 
-      <.input_error :for={msg <- @errors}><%= msg %></.input_error>
+      <.input_error :for={msg <- @errors}>{msg}</.input_error>
     </div>
     """
   end
@@ -515,7 +515,7 @@ defmodule AlertsUIWeb.SharedComponents do
     ~H"""
     <div phx-feedback-for={@name} class={["#{@class}", @hidden && "hidden", "h-full"]}>
       <.label :if={@label} for={@id} class={if @disabled, do: "text-text-disabled", else: ""}>
-        <%= @label %>
+        {@label}
       </.label>
       <select
         id={@id}
@@ -533,11 +533,11 @@ defmodule AlertsUIWeb.SharedComponents do
         {@rest}
       >
         <option :if={@prompt} value="default" selected={@value in ["default", []]}>
-          <%= @prompt %>
+          {@prompt}
         </option>
-        <%= Form.options_for_select(@options, @value) %>
+        {Form.options_for_select(@options, @value)}
       </select>
-      <.input_error :for={msg <- @errors}><%= msg %></.input_error>
+      <.input_error :for={msg <- @errors}>{msg}</.input_error>
     </div>
     """
   end
@@ -597,7 +597,7 @@ defmodule AlertsUIWeb.SharedComponents do
     ~H"""
     <div {@rest} class={["flex flex-col justify-start", @class]}>
       <.label for={@id} class={if @disabled, do: "text-text-disabled"}>
-        <%= @label %>
+        {@label}
       </.label>
       <div
         class={[
@@ -645,7 +645,7 @@ defmodule AlertsUIWeb.SharedComponents do
   def label(assigns) do
     ~H"""
     <label for={@for} class={["block font-medium leading-tight mb-2 min-h-[1.3rem]", @class]}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </label>
     """
   end
@@ -661,7 +661,7 @@ defmodule AlertsUIWeb.SharedComponents do
     ~H"""
     <p for={@for} class={[@class, "flex gap-2 text-sm text-text-error"]}>
       <CoreComponents.icon name="hero-exclamation-circle" class="flex-none h-4 mt-0.5 w-4" />
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </p>
     """
   end
@@ -691,7 +691,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
     ~H"""
     <div phx-feedback-for={@name}>
-      <.label :if={not is_nil(@label)} for={@id}><%= @label %></.label>
+      <.label :if={not is_nil(@label)} for={@id}>{@label}</.label>
       <input
         type="text"
         id={@id}
@@ -707,7 +707,7 @@ defmodule AlertsUIWeb.SharedComponents do
         ]}
         {@rest}
       />
-      <.input_error :for={msg <- @errors}><%= msg %></.input_error>
+      <.input_error :for={msg <- @errors}>{msg}</.input_error>
     </div>
     """
   end
@@ -739,7 +739,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
     ~H"""
     <div phx-feedback-for={@name} class="z-20">
-      <.label for={@id}><%= @label %></.label>
+      <.label for={@id}>{@label}</.label>
       <textarea
         id={@id}
         name={@name}
@@ -755,7 +755,7 @@ defmodule AlertsUIWeb.SharedComponents do
         ]}
         {@rest}
       ><%=  @value%></textarea>
-      <.input_error :for={msg <- @errors} class="-mt-[1.5rem] ml-1 relative"><%= msg %></.input_error>
+      <.input_error :for={msg <- @errors} class="-mt-[1.5rem] ml-1 relative">{msg}</.input_error>
     </div>
     """
   end
@@ -792,7 +792,7 @@ defmodule AlertsUIWeb.SharedComponents do
       if(@error_length > 0, do: "border-danger"),
       if(String.length(@value || "") == @character_limit, do: "text-danger ")
     ]}>
-      <%= String.length(@value || "") %>/<%= @character_limit %><span
+      {String.length(@value || "")}/{@character_limit}<span
         :if={String.length(@value || "") == @character_limit}
         class="ml-1"
       > Character limit reached</span>
@@ -832,7 +832,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
     ~H"""
     <div>
-      <.label :if={@label} for={@id}><%= @label %></.label>
+      <.label :if={@label} for={@id}>{@label}</.label>
       <div phx-feedback-for={@name} class={@class}>
         <input type="hidden" name={@name} value="false" />
         <input
@@ -849,7 +849,7 @@ defmodule AlertsUIWeb.SharedComponents do
           ]}
           {@rest}
         />
-        <.input_error :for={msg <- @errors}><%= msg %></.input_error>
+        <.input_error :for={msg <- @errors}>{msg}</.input_error>
       </div>
     </div>
     """
@@ -898,7 +898,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
     ~H"""
     <div phx-feedback-for={@name} class={["#{@class}", @hidden && "hidden"]}>
-      <.label for={@id} class={if is_nil(@label), do: "hidden"}><%= @label %></.label>
+      <.label for={@id} class={if is_nil(@label), do: "hidden"}>{@label}</.label>
       <input
         id={@id}
         name={@name}
@@ -916,7 +916,7 @@ defmodule AlertsUIWeb.SharedComponents do
         {@rest}
       />
 
-      <.input_error :for={msg <- @errors}><%= msg %></.input_error>
+      <.input_error :for={msg <- @errors}>{msg}</.input_error>
     </div>
     """
   end
@@ -951,11 +951,11 @@ defmodule AlertsUIWeb.SharedComponents do
     >
       <p :if={@title} class="flex items-center gap-1.5 text-sm font-semibold leading-6">
         <div class="hero-exclamation-circle-mini h-4 w-4" />
-        <%= @title %>
+        {@title}
       </p>
       <div :for={msg_line <- String.split(msg, ";")}>
         <li class="mt-2 ml-2 text-sm leading-5">
-          <%= msg_line %>
+          {msg_line}
         </li>
       </div>
       <button type="button" class="group absolute top-1 right-1 p-2" aria-label="close">
