@@ -19,7 +19,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
     alert_data: %{trip_ids: ["CR-683322-595"]},
     current_time: ~U[2024-04-30 15:54:00Z],
     edited: false,
-    editing: false
+    editing: false,
+    selected_trips: []
   }
 
   describe "component" do
@@ -148,7 +149,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       }
 
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns |> Map.put(:available_schedules, [schedule]))
+        live_isolated_component(TimeRange, @assigns |> Map.put(:selected_trips, [schedule]))
 
       view
       |> element("form")
@@ -179,7 +180,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       }
 
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns |> Map.put(:available_schedules, [schedule]))
+        live_isolated_component(TimeRange, @assigns |> Map.put(:selected_trips, [schedule]))
 
       view
       |> element("form")

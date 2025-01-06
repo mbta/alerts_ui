@@ -40,8 +40,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       |> assign(%{
         form: form,
         button_selected_routes: [],
-        direction_names_map: %{},
-        updated: false
+        updated: false,
+        available_routes: %{},
+        available_schedules: %{},
+        available_stops: %{}
       })
 
     {:ok, socket}
@@ -51,91 +53,96 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   def update(
         %{
           alert_data: alert_data,
-          editing: true,
-          available_schedules: [_ | _] = available_schedules
+          editing: true
         } = assigns,
         socket
       ) do
-    alert_data =
-      Map.put(
-        alert_data,
-        :trip_information_by_id,
-        trip_information_by_id(available_schedules, Map.get(alert_data, :trip_ids, []))
-      )
+    trip_information_by_id =
+      if Map.has_key?(assigns, :available_schedules) do
+        trip_information_by_id(
+          Map.get(assigns.available_schedules, :result, []),
+          Map.get(alert_data, :trip_ids, [])
+        )
+      else
+        %{}
+      end
 
-    changeset = %__MODULE__{} |> changeset(alert_data)
+    alert_data = Map.put(alert_data, :trip_information_by_id, trip_information_by_id)
+
+    changeset =
+      %__MODULE__{}
+      |> changeset(alert_data)
 
     changes =
       changeset
       |> apply_action!(:validate)
 
+    assigns =
+      assigns
+      |> Map.put(:form, to_form(changeset))
+      |> Map.put(:alert_data, alert_data)
+
     send(self(), {:section_completed, changes})
 
-    {:ok, assign(socket, assigns)}
+    route_type = Map.get(alert_data, :route_type)
+    route_types = all_route_types(route_type)
+
+    direction = alert_data.direction
+    route_ids = alert_data.route_ids
+
+    socket =
+      socket
+      |> assign(assigns)
+      |> assign_async([:available_routes, :available_stops, :available_schedules], fn ->
+        {:ok,
+         %{
+           available_routes: AlertsUIWeb.CreateAlertLive.get_routes(route_types),
+           available_stops:
+             AlertsUIWeb.CreateAlertLive.get_stops(
+               route_ids,
+               direction
+             ),
+           available_schedules:
+             AlertsUIWeb.CreateAlertLive.get_schedules(
+               route_ids,
+               direction
+             )
+         }}
+      end)
+
+    {:ok, socket}
   end
 
   @impl true
   def update(
-        %{alert_data: alert_data, editing: editing, combination: combination} = assigns,
+        %{alert_data: alert_data, combination: combination} = assigns,
         socket
       ) do
+    changeset = changeset(%__MODULE__{}, alert_data)
+
+    {result, error_changeset} =
+      apply_action(
+        changeset
+        |> validate_required(ServiceEffectCombinations.required_fields(combination)),
+        :validate
+      )
+
+    if result === :error do
+      send(
+        self(),
+        {:add_errors, ErrorFormatter.parse_field_errors(error_changeset), __MODULE__}
+      )
+    end
+
     route_type = Map.get(alert_data, :route_type)
     route_types = all_route_types(route_type)
-    send(self(), {:fetch_available_routes, route_types})
 
-    direction_names_map =
-      Map.new(assigns.available_routes, &{&1.id, &1.direction_names})
-
-    assigns =
-      if socket.assigns.updated == false do
-        alert_data =
-          if editing === true do
-            alert_data = %{
-              route_ids: Map.get(alert_data, :route_ids) || [],
-              direction: Map.get(alert_data, :direction) || "default",
-              trip_ids: Map.get(alert_data, :trip_ids) || [],
-              stop_ids: Map.get(alert_data, :stop_ids) || []
-            }
-
-            get_stops_by_route_ids(
-              alert_data.route_ids,
-              alert_data.direction
-            )
-
-            get_schedules_by_route_ids(
-              alert_data.route_ids,
-              alert_data.direction
-            )
-
-            alert_data
-          else
-            %{}
-          end
-
-        changeset = changeset(%__MODULE__{}, alert_data)
-
-        {result, error_changeset} =
-          apply_action(
-            changeset
-            |> validate_required(ServiceEffectCombinations.required_fields(combination)),
-            :validate
-          )
-
-        if result === :error do
-          send(
-            self(),
-            {:add_errors, ErrorFormatter.parse_field_errors(error_changeset), __MODULE__}
-          )
-        end
-
-        assigns
-        |> Map.put(:form, to_form(changeset))
-        |> Map.put(:alert_data, alert_data)
-        |> Map.put(:updated, true)
-      else
-        assigns
-      end
-      |> Map.put(:direction_names_map, direction_names_map)
+    socket =
+      socket
+      |> assign(assigns)
+      |> assign_async(:available_routes, fn ->
+        {:ok, %{available_routes: AlertsUIWeb.CreateAlertLive.get_routes(route_types)}}
+      end)
 
     {:ok, assign(socket, assigns)}
   end
@@ -195,8 +202,15 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
            :validate
          ) do
       {:ok, changeset} ->
+        available_schedules = Map.get(socket.assigns.available_schedules, :result, [])
+
+        selected_trips =
+          available_schedules
+          |> Enum.filter(&(&1.trip.id in affected_service["trip_ids"]))
+
         send(self(), {:add_errors, [], __MODULE__})
         send(self(), {:section_completed, changeset})
+        send(self(), {:selected_trips, selected_trips})
 
       {:error, changeset} ->
         send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
@@ -208,6 +222,27 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       |> Map.put(:action, :validate)
       |> to_form()
 
+    direction = affected_service["direction"]
+    route_ids = Map.get(affected_service, "route_ids", [])
+
+    socket =
+      socket
+      |> assign_async([:available_stops, :available_schedules], fn ->
+        {:ok,
+         %{
+           available_stops:
+             AlertsUIWeb.CreateAlertLive.get_stops(
+               route_ids,
+               direction
+             ),
+           available_schedules:
+             AlertsUIWeb.CreateAlertLive.get_schedules(
+               route_ids,
+               direction
+             )
+         }}
+      end)
+
     {:noreply, assign(socket, %{form: form})}
   end
 
@@ -217,18 +252,11 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   end
 
   def validate(affected_service, assigns) do
-    get_stops_by_route_ids(
-      Map.get(affected_service, "route_ids", []),
-      affected_service["direction"]
-    )
-
-    get_schedules_by_route_ids(
-      Map.get(affected_service, "route_ids", []),
-      affected_service["direction"]
-    )
-
     trip_information_by_id =
-      trip_information_by_id(assigns.available_schedules, affected_service["trip_ids"])
+      trip_information_by_id(
+        Map.get(assigns.available_schedules, :result, []),
+        Map.get(affected_service, :trip_ids, [])
+      )
 
     affected_service = Map.put(affected_service, "trip_information_by_id", trip_information_by_id)
 
@@ -264,33 +292,51 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     route_filter_value = assigns.form[:route_ids_filter].value
 
     route_id_options =
-      SelectFormatter.formatted_select_options(assigns.available_routes, route_filter_value)
+      if assigns.available_routes.ok? && assigns.available_routes.result do
+        SelectFormatter.formatted_select_options(
+          assigns.available_routes.result,
+          route_filter_value
+        )
+      else
+        []
+      end
+
+    direction_names_map =
+      if assigns.available_routes.ok? &&
+           assigns.available_routes.result do
+        Map.new(assigns.available_routes.result, &{&1.id, &1.direction_names})
+      else
+        %{}
+      end
 
     direction_options =
       SelectFormatter.formatted_direction_options(
         route_ids,
-        assigns.direction_names_map
+        direction_names_map
       )
 
     trip_filter_value = assigns.form[:trip_ids_filter].value
 
     trip_id_options =
-      if Enum.empty?(route_ids) do
-        []
-      else
-        assigns.available_schedules
+      if async_available?(assigns, :available_schedules) do
+        assigns.available_schedules.result
         |> Enum.filter(fn schedule ->
           schedule.route.id in Map.get(assigns.form[:route_ids], :value, [])
         end)
         |> Enum.group_by(&SelectFormatter.name_for_option(&1.route))
         |> SelectFormatter.formatted_trip_options(trip_filter_value)
+      else
+        []
       end
 
     stop_filter_value = assigns.form[:stop_ids_filter].value
 
     stop_id_options =
-      if match?([_route_id], route_ids) do
-        SelectFormatter.formatted_select_options(assigns.available_stops, stop_filter_value)
+      if async_available?(assigns, :available_stops) do
+        SelectFormatter.formatted_select_options(
+          assigns.available_stops.result,
+          stop_filter_value
+        )
       else
         []
       end
@@ -325,7 +371,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             label={if @route_type in [0, 1, 2], do: "Line(s)", else: "Route(s)"}
             field={@form[:route_ids]}
             filter_field={@form[:route_ids_filter]}
-            loading={Enum.empty?(@route_id_options)}
+            loading={@available_routes.loading}
             options={@route_id_options}
             class={"#{@route_type !== 3 && "hidden"} h-full"}
           />
@@ -345,7 +391,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             field={@form[:trip_ids]}
             filter_field={@form[:trip_ids_filter]}
             options={@trip_id_options}
-            loading={Enum.empty?(@trip_id_options) and !disable_trip_input?(@form[:route_ids].value)}
+
+            loading={Map.get(@available_schedules, :loading, true)}
             class="w-[33%]"
             disabled={disable_trip_input?(@form[:route_ids].value)}
             prompt={if disable_trip_input?(@form[:route_ids].value), do: nil, else: "All Trips"}
@@ -369,9 +416,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
                 field={@form[:stop_ids]}
                 filter_field={@form[:stop_ids_filter]}
                 options={@stop_id_options}
-                loading={
-                  Enum.empty?(@stop_id_options) and !disable_stop_input?(@form[:route_ids].value)
-                }
+                loading={Map.get(@available_stops, :loading, true)}
                 class="min-h-full"
                 disabled={disable_stop_input?(@form[:route_ids].value)}
                 prompt={
@@ -397,6 +442,11 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     end
   end
 
+  def async_available?(assigns, key) do
+    Map.get(assigns[key], :result) && assigns[key].ok? &&
+      assigns[key].result
+  end
+
   def trip_information_by_id(available_schedules, trip_ids) do
     available_schedules
     |> Stream.filter(fn schedule -> schedule.trip.id in trip_ids end)
@@ -406,21 +456,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         route_id: schedule.route.id
       })
     end)
-  end
-
-  @spec get_stops_by_route_ids(String.t(), list()) :: any()
-  def get_stops_by_route_ids(route_ids, direction) do
-    send(
-      self(),
-      {:fetch_available_stops, direction, route_ids}
-    )
-  end
-
-  def get_schedules_by_route_ids(route_ids, direction) do
-    send(
-      self(),
-      {:fetch_available_schedules, route_ids, direction}
-    )
   end
 
   @spec show_trips_input?(map()) :: boolean()
@@ -439,6 +474,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   end
 
   @spec disable_stop_input?(list() | nil) :: boolean()
+  defp disable_stop_input?(nil), do: true
   defp disable_stop_input?(route_ids) when is_list(route_ids), do: length(route_ids) !== 1
   defp disable_stop_input?(_route_ids), do: true
 

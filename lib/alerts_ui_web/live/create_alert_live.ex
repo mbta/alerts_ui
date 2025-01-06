@@ -93,9 +93,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
         steps: @steps,
         alert_data: alert_data,
         combination: Map.get(alert_data, :combination),
-        available_routes: [],
-        available_schedules: [],
-        available_stops: [],
+        selected_trips: [],
         available_facilities: [],
         alert_uuid: nil,
         alert_id: alert_id,
@@ -115,6 +113,31 @@ defmodule AlertsUIWeb.CreateAlertLive do
   @impl true
   def handle_event("move_progress", %{"value" => name}, socket) do
     {:noreply, assign(socket, :progress, get_step_by_name(name))}
+  end
+
+  def get_routes(route_types) do
+    route_types
+    |> RoutesRepo.by_type()
+    |> maybe_include_virtual_green_line()
+  end
+
+  def get_schedules(route_ids, direction) do
+    directions = directions_from_selection(direction)
+    opts = direction_option([stop_sequences: [:first, :last]], directions)
+
+    route_ids |> SchedulesRepo.by_route_ids(opts) |> filter_out_old_trips
+  end
+
+  def get_stops(route_ids, direction) do
+    route_ids = Routes.expanding_green_line(route_ids)
+
+    direction
+    |> directions_from_selection()
+    |> available_stops(route_ids)
+  end
+
+  def handle_info({:selected_trips, selected_trips}, socket) do
+    {:noreply, assign(socket, selected_trips: selected_trips)}
   end
 
   def handle_info({:fetch_available_routes, route_types}, socket) do
