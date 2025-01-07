@@ -3,7 +3,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
   use AlertsUIWeb.ConnCase
 
   import LiveIsolatedComponent
-  import Mock
   import Phoenix.LiveViewTest
 
   alias AlertsUIWeb.FormComponents.StopRouteAffectedService
@@ -11,6 +10,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
+  alias Phoenix.LiveView.AsyncResult
 
   @assigns %{
     id: "affected_service",
@@ -21,12 +21,13 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       label: "Alert Details"
     },
     route_type: 1,
-    available_stops: [],
-    available_routes: [%MBTAV3API.Routes.Route{sort_order: 1, id: "1", name: "route_number_1"}],
     alert_data: %{},
     editing: false,
     effect_name: "Delay"
   }
+
+  @route %Route{sort_order: 1, id: "Blue", name: "route_number_1"}
+  @stop %Stop{id: "place-aqucl"}
 
   describe "component" do
     test "renders" do
@@ -34,26 +35,54 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
     end
 
     test "route options are disabled until a stop is chosen" do
-      with_mock(StopsRepo, by_route: fn _route, _direction -> [] end) do
-        {:ok, view, _html} =
-          live_isolated_component(StopRouteAffectedService, %{
-            @assigns
-            | alert_data: %{route_type: 3}
-          })
+      {:ok, view, _html} =
+        live_isolated_component(StopRouteAffectedService, %{
+          @assigns
+          | alert_data: %{route_type: 1}
+        })
 
-        assert view
-               |> render() =~ ~s(disabled="disabled")
+      view
+      |> live_assign(%{
+        available_stops: %AsyncResult{
+          ok?: true,
+          loading: false,
+          failed: false,
+          result: [@stop]
+        }
+      })
 
-        view
-        |> element("form")
-        |> render_change(%{"stop_route_affected_service" => %{"stop_ids" => ["1"]}})
+      assert view
+             |> render() =~ ~s(disabled="disabled")
 
-        refute view
-               |> render() =~ ~s(disabled="disabled")
+      view
+      |> live_assign(%{
+        available_stops: %AsyncResult{
+          ok?: true,
+          loading: false,
+          failed: false,
+          result: [@route]
+        }
+      })
 
-        assert view
-               |> render() =~ ~s(route_number_1)
-      end
+      view
+      |> element("form")
+      |> render_change(%{"stop_route_affected_service" => %{"stop_ids" => ["Blue"]}})
+
+      refute view
+             |> render() =~ ~s(disabled="disabled")
+
+      view
+      |> live_assign(%{
+        available_routes: %AsyncResult{
+          ok?: true,
+          loading: false,
+          failed: false,
+          result: [@route]
+        }
+      })
+
+      assert view
+             |> render() =~ ~s(route_number_1)
     end
 
     test "works correctly if editing" do
@@ -63,8 +92,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
           @assigns
           |> Map.merge(%{
             editing: true,
-            available_stops: [%Stop{id: "place-aqucl"}, %Stop{id: "place-andrw"}],
-            available_routes: [%Route{id: "Blue", type: 1}, %Route{id: "Green", type: 1}],
             effect_name: "DELAY",
             alert_data: %{
               stop_ids: ["place-aqucl"],
@@ -74,31 +101,51 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
           })
         )
 
+      view
+      |> live_assign(%{
+        available_routes: %AsyncResult{
+          ok?: true,
+          loading: false,
+          failed: false,
+          result: [@route]
+        }
+      })
+
+      view
+      |> live_assign(%{
+        available_stops: %AsyncResult{
+          ok?: true,
+          loading: false,
+          failed: false,
+          result: [@stop]
+        }
+      })
+
+      # available_stops: [%Stop{id: "place-aqucl"}, %Stop{id: "place-andrw"}],
+      # available_routes: [%Route{id: "Blue", type: 1}, %Route{id: "Green", type: 1}],
       assert view |> render() =~ ~s(<option selected="selected" value="place-aqucl">)
       assert view |> render() =~ ~s(<option selected="selected" value="Blue">)
     end
 
     test "it sends section_completed if no error in changeset" do
-      with_mock(StopsRepo, by_route: fn _route, _direction -> [] end) do
-        {:ok, view, _html} =
-          live_isolated_component(StopRouteAffectedService, %{
-            @assigns
-            | alert_data: %{route_type: 3}
-          })
-
-        view
-        |> element("form")
-        |> render_change(%{
-          "stop_route_affected_service" => %{"stop_ids" => ["1"], "route_ids" => ["1"]}
+      {:ok, view, _html} =
+        live_isolated_component(StopRouteAffectedService, %{
+          @assigns
+          | alert_data: %{route_type: 3}
         })
 
-        assert_receive {:__live_isolated_component_handle_info_received__, _pid,
-                        {:section_completed,
-                         %StopRouteAffectedService{
-                           stop_ids: ["1"],
-                           route_ids: ["1"]
-                         }}}
-      end
+      view
+      |> element("form")
+      |> render_change(%{
+        "stop_route_affected_service" => %{"stop_ids" => ["1"], "route_ids" => ["1"]}
+      })
+
+      assert_receive {:__live_isolated_component_handle_info_received__, _pid,
+                      {:section_completed,
+                       %StopRouteAffectedService{
+                         stop_ids: ["1"],
+                         route_ids: ["1"]
+                       }}}
     end
   end
 end

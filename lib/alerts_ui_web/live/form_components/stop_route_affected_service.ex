@@ -34,71 +34,86 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
     send(self(), {:add_errors, ErrorFormatter.parse_field_errors(error_changeset), __MODULE__})
 
-    socket = socket |> assign(%{form: to_form(changeset), available_routes: [], edited: false})
+    socket =
+      socket
+      |> assign(%{
+        form: to_form(changeset),
+        available_routes: %{},
+        available_stops: %{},
+        edited: false
+      })
 
     {:ok, socket}
   end
 
   @impl true
   def update(
-        %{alert_data: alert_data, available_routes: available_routes, editing: editing} = assigns,
+        %{alert_data: alert_data, editing: true} = assigns,
         socket
       ) do
     route_type = Map.get(alert_data, :route_type)
 
-    if Map.get(alert_data, :available_stops) in [nil, []] do
-      get_stops_by_route_type(route_type)
-    end
+    changeset =
+      %__MODULE__{}
+      |> changeset(alert_data)
+
+    changes =
+      changeset
+      |> apply_action!(:validate)
+
+    send(self(), {:add_errors, [], __MODULE__})
+    send(self(), {:section_completed, changes})
+
+    form = to_form(changeset |> Map.put(:action, :validate))
 
     assigns =
-      if editing == true and socket.assigns.edited == false do
-        stop_ids = Map.get(alert_data, :stop_ids)
-
-        if Enum.empty?(available_routes) do
-          get_routes_by_stop_ids(
-            stop_ids,
-            alert_data.route_type
-          )
-        end
-
-        route_ids = assigns.available_routes |> Enum.map(& &1.id)
-
-        new_alert_data =
-          %{
-            route_ids: route_ids,
-            stop_ids: stop_ids,
-            route_type: route_type,
-            route_types_by_id: routes_with_types(available_routes, route_ids),
-            edited: true
-          }
-
-        changeset =
-          %__MODULE__{}
-          |> cast(new_alert_data, @fields)
-
-        if socket.assigns.available_routes == assigns.available_routes do
-          changes =
-            changeset
-            |> validate_required(@required_fields)
-            |> apply_action!(:validate)
-
-          send(self(), {:section_completed, changes})
-        end
-
-        form = to_form(changeset |> Map.put(:action, :validate))
-
-        assigns
-        |> Map.put(:form, form)
-        |> Map.put(:alert_data, new_alert_data)
-      else
-        assigns
-      end
+      assigns
       |> Map.put(
         :service_type_name,
-        assigns.route_type |> InformedEntity.route_code_mapping() || nil
+        route_type |> InformedEntity.route_code_mapping() || nil
+      )
+      |> Map.put(:form, form)
+
+    socket =
+      socket
+      |> assign(assigns)
+      |> assign_async([:available_stops, :available_routes], fn ->
+        {:ok,
+         %{
+           available_stops: AlertsUIWeb.CreateAlertLive.get_stops_by_route_type(route_type),
+           available_routes:
+             AlertsUIWeb.CreateAlertLive.get_routes_by_stop(
+               Map.get(alert_data, :stop_ids, []),
+               route_type
+             )
+         }}
+      end)
+
+    {:ok, socket}
+  end
+
+  @impl true
+  def update(
+        %{alert_data: alert_data} = assigns,
+        socket
+      ) do
+    route_type = Map.get(alert_data, :route_type)
+
+    assigns =
+      assigns
+      |> Map.put(
+        :service_type_name,
+        route_type |> InformedEntity.route_code_mapping() || nil
       )
 
-    {:ok, assign(socket, assigns)}
+    socket =
+      socket
+      |> assign(assigns)
+      |> assign_async([:available_stops], fn ->
+        {:ok, %{available_stops: AlertsUIWeb.CreateAlertLive.get_stops_by_route_type(route_type)}}
+      end)
+
+    {:ok, socket}
   end
 
   @impl true
@@ -132,11 +147,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
   @impl true
   def handle_event("validate", %{"stop_route_affected_service" => affected_service}, socket) do
-    get_routes_by_stop_ids(
-      Map.get(affected_service, "stop_ids", []),
-      socket.assigns.alert_data.route_type
-    )
-
     affected_service = populate_default_routes(affected_service)
     changeset = validate(affected_service, socket.assigns)
 
@@ -154,7 +164,23 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       |> Map.put(:action, :validate)
       |> to_form()
 
-    {:noreply, assign(socket, %{form: form})}
+    route_type = socket.assigns.alert_data.route_type
+
+    socket =
+      socket
+      |> assign(%{form: form})
+      |> assign_async([:available_routes], fn ->
+        {:ok,
+         %{
+           available_routes:
+             AlertsUIWeb.CreateAlertLive.get_routes_by_stop(
+               Map.get(affected_service, "stop_ids", []),
+               route_type
+             )
+         }}
+      end)
+
+    {:noreply, socket}
   end
 
   @impl true
@@ -163,7 +189,12 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   end
 
   def validate(affected_service, assigns) do
-    routes_with_types = routes_with_types(assigns.available_routes, affected_service["route_ids"])
+    routes_with_types =
+      routes_with_types(
+        Map.get(assigns.available_routes, :result) || [],
+        affected_service["route_ids"]
+      )
+
     affected_service = Map.put(affected_service, "route_types_by_id", routes_with_types)
 
     %__MODULE__{}
@@ -175,13 +206,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     |> cast(params, @fields)
   end
 
-  def get_stops_by_route_type(route_type) do
-    send(
-      self(),
-      {:fetch_stops_by_route_type, route_type}
-    )
-  end
-
   def routes_with_types(available_routes, route_ids) do
     available_routes
     |> Stream.filter(fn route -> route.id in route_ids end)
@@ -190,26 +214,31 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     end)
   end
 
-  def get_routes_by_stop_ids(nil, _route_type), do: nil
-
-  def get_routes_by_stop_ids(stop_ids, route_type) do
-    send(
-      self(),
-      {:fetch_routes_by_stop, stop_ids, route_type}
-    )
-  end
-
   @impl true
   def render(assigns) do
     route_filter_value = assigns.form[:route_ids_filter].value
 
     route_id_options =
-      SelectFormatter.formatted_select_options(assigns.available_routes, route_filter_value)
+      if async_available?(assigns, :available_routes) do
+        SelectFormatter.formatted_select_options(
+          assigns.available_routes.result,
+          route_filter_value
+        )
+      else
+        []
+      end
 
     stop_filter_value = assigns.form[:stop_ids_filter].value
 
     stop_id_options =
-      SelectFormatter.formatted_select_options(assigns.available_stops, stop_filter_value)
+      if async_available?(assigns, :available_stops) do
+        SelectFormatter.formatted_select_options(
+          assigns.available_stops.result,
+          stop_filter_value
+        )
+      else
+        []
+      end
 
     assigns =
       assign(assigns,
@@ -236,7 +265,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         <.filtered_select
           label="Stops"
           field={@form[:stop_ids]}
-          loading={Enum.empty?(@stop_id_options)}
+          loading={Map.get(@available_stops, :loading, true)}
           filter_field={@form[:stop_ids_filter]}
           options={@stop_id_options}
           class="min-w-[45%]"
@@ -246,7 +275,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
           label="Routes"
           field={@form[:route_ids]}
           filter_field={@form[:route_ids_filter]}
-          loading={Enum.empty?(@route_id_options) and !disable_routes_input?(assigns)}
+          loading={Map.get(@available_routes, :loading, true)}
           disabled={disable_routes_input?(assigns)}
           options={@route_id_options}
           class="min-w-[45%]"
@@ -255,6 +284,11 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       <hr class="mt-4" />
     </div>
     """
+  end
+
+  defp async_available?(assigns, key) do
+    Map.get(assigns[key], :result) && assigns[key].ok? &&
+      assigns[key].result
   end
 
   @spec disable_routes_input?(map()) :: boolean()

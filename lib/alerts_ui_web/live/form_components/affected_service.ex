@@ -227,6 +227,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     socket =
       socket
+      |> assign(%{form: form})
       |> assign_async([:available_stops, :available_schedules], fn ->
         {:ok,
          %{
@@ -243,7 +244,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
          }}
       end)
 
-    {:noreply, assign(socket, %{form: form})}
+    {:noreply, socket}
   end
 
   @impl true
@@ -302,8 +303,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       end
 
     direction_names_map =
-      if assigns.available_routes.ok? &&
-           assigns.available_routes.result do
+      if async_available?(assigns, :available_routes) do
         Map.new(assigns.available_routes.result, &{&1.id, &1.direction_names})
       else
         %{}
@@ -391,7 +391,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             field={@form[:trip_ids]}
             filter_field={@form[:trip_ids_filter]}
             options={@trip_id_options}
-
             loading={Map.get(@available_schedules, :loading, true)}
             class="w-[33%]"
             disabled={disable_trip_input?(@form[:route_ids].value)}
@@ -442,7 +441,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     end
   end
 
-  def async_available?(assigns, key) do
+  defp async_available?(assigns, key) do
     Map.get(assigns[key], :result) && assigns[key].ok? &&
       assigns[key].result
   end

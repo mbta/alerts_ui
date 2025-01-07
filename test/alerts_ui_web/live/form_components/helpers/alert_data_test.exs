@@ -159,6 +159,196 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
              }
     end
 
+    test "uses only green line route if all branches in informed entity" do
+      insert(:alert, %{
+        alert_id: "1",
+        effect: :SIGNIFICANT_DELAYS,
+        effect_detail: "DELAY",
+        header_text: "cool header text",
+        description_text: "description text",
+        active_period_start: ~U[2024-05-02 16:09:34.007545Z],
+        active_period_end: ~U[2024-05-04 01:09:34.007545Z],
+        active_period: [
+          %{start: ~U[2024-05-02 16:09:34.007545Z], end: ~U[2024-05-04 01:09:34.007545Z]}
+        ],
+        duration_certainty: :KNOWN,
+        cause_detail: "hazmat condition",
+        severity: 3,
+        severity_level: :WARNING,
+        informed_entity: [
+          %{
+            route_id: "Green-E",
+            route_type: 1
+          },
+          %{
+            route_id: "Green-D",
+            route_type: 1
+          },
+          %{
+            agency_id: "1",
+            route_id: "Green-C",
+            route_type: 1
+          },
+          %{
+            route_id: "Green-B",
+            route_type: 1
+          },
+          %{
+            route_id: "Blue",
+            route_type: 1
+          }
+        ]
+      })
+
+      assert AlertData.build_alert_data("1").route_ids == ["Blue", "Green"]
+    end
+
+    test "uses only green line route if multiple GL branchs and has at least 1 stop" do
+      insert(:alert, %{
+        alert_id: "1",
+        effect: :SIGNIFICANT_DELAYS,
+        effect_detail: "DELAY",
+        header_text: "cool header text",
+        description_text: "description text",
+        active_period_start: ~U[2024-05-02 16:09:34.007545Z],
+        active_period_end: ~U[2024-05-04 01:09:34.007545Z],
+        active_period: [
+          %{start: ~U[2024-05-02 16:09:34.007545Z], end: ~U[2024-05-04 01:09:34.007545Z]}
+        ],
+        duration_certainty: :KNOWN,
+        cause_detail: "hazmat condition",
+        severity: 3,
+        severity_level: :WARNING,
+        informed_entity: [
+          %{
+            route_id: "Green-B",
+            route_type: 1,
+            direction_id: 0,
+            stop_id: "71151"
+          },
+          %{
+            route_id: "Green-C",
+            route_type: 1,
+            direction_id: 0,
+            stop_id: "70151"
+          },
+          %{
+            route_id: "Green-D",
+            route_type: 1,
+            direction_id: 1,
+            stop_id: "70150"
+          }
+        ]
+      })
+
+      assert AlertData.build_alert_data("1").route_ids == ["Green"]
+      assert AlertData.build_alert_data("1").stop_ids == ["71151", "70151", "70150"]
+    end
+
+    test "uses original green line branch routes if not all branches and no stops" do
+      insert(:alert, %{
+        alert_id: "1",
+        effect: :SIGNIFICANT_DELAYS,
+        effect_detail: "DELAY",
+        header_text: "cool header text",
+        description_text: "description text",
+        active_period_start: ~U[2024-05-02 16:09:34.007545Z],
+        active_period_end: ~U[2024-05-04 01:09:34.007545Z],
+        active_period: [
+          %{start: ~U[2024-05-02 16:09:34.007545Z], end: ~U[2024-05-04 01:09:34.007545Z]}
+        ],
+        duration_certainty: :KNOWN,
+        cause_detail: "hazmat condition",
+        severity: 3,
+        severity_level: :WARNING,
+        informed_entity: [
+          %{
+            route_id: "Green-B",
+            route_type: 1
+          },
+          %{
+            route_id: "Green-C",
+            route_type: 1
+          },
+          %{
+            route_id: "Green-D",
+            route_type: 1
+          },
+          %{
+            route_id: "Blue",
+            route_type: 1
+          }
+        ]
+      })
+
+      assert AlertData.build_alert_data("1").route_ids == [
+               "Green-B",
+               "Green-C",
+               "Green-D",
+               "Blue"
+             ]
+    end
+
+    test "uses original green line branch route if stops and 1 branch" do
+      insert(:alert, %{
+        alert_id: "1",
+        effect: :SIGNIFICANT_DELAYS,
+        effect_detail: "DELAY",
+        header_text: "cool header text",
+        description_text: "description text",
+        active_period_start: ~U[2024-05-02 16:09:34.007545Z],
+        active_period_end: ~U[2024-05-04 01:09:34.007545Z],
+        active_period: [
+          %{start: ~U[2024-05-02 16:09:34.007545Z], end: ~U[2024-05-04 01:09:34.007545Z]}
+        ],
+        duration_certainty: :KNOWN,
+        cause_detail: "hazmat condition",
+        severity: 3,
+        severity_level: :WARNING,
+        informed_entity: [
+          %{
+            route_id: "Green-B",
+            route_type: 1,
+            stop_id: "70150"
+          },
+          %{
+            route_id: "Green-B",
+            route_type: 1,
+            stop_id: "70151"
+          }
+        ]
+      })
+
+      assert AlertData.build_alert_data("1").route_ids == ["Green-B"]
+    end
+
+    test "keeps green line branch if 1 branch and no stops" do
+      insert(:alert, %{
+        alert_id: "1",
+        effect: :SIGNIFICANT_DELAYS,
+        effect_detail: "DELAY",
+        header_text: "cool header text",
+        description_text: "description text",
+        active_period_start: ~U[2024-05-02 16:09:34.007545Z],
+        active_period_end: ~U[2024-05-04 01:09:34.007545Z],
+        active_period: [
+          %{start: ~U[2024-05-02 16:09:34.007545Z], end: ~U[2024-05-04 01:09:34.007545Z]}
+        ],
+        duration_certainty: :KNOWN,
+        cause_detail: "hazmat condition",
+        severity: 3,
+        severity_level: :WARNING,
+        informed_entity: [
+          %{
+            route_id: "Green-B",
+            route_type: 1
+          }
+        ]
+      })
+
+      assert AlertData.build_alert_data("1").route_ids == ["Green-B"]
+    end
+
     test "builds data for a systemwide alert" do
       insert(:alert, %{
         alert_id: "1",
