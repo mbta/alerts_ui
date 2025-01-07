@@ -12,6 +12,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
+  alias Phoenix.LiveView.AsyncResult
 
   @assigns %{
     id: "details",
@@ -22,9 +23,10 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
       label: "Alert Details"
     },
     alert_data: %{route_type: nil, effect_name: "Bike Issue"},
-    available_facilities: [%Facility{id: "Facility-3", long_name: "Example Facility"}],
     editing: false
   }
+
+  @facility %Facility{id: "Facility-3", long_name: "Example Facility"}
 
   describe "component" do
     test "renders" do
@@ -34,6 +36,8 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
     end
 
     test "it sends section_completed if no error in changeset" do
+      :ACCESS_ISSUE
+
       {:ok, view, _html} =
         live_isolated_component(AccessAffectedService, %{
           @assigns
@@ -79,6 +83,16 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
       assigns = @assigns |> Map.merge(%{alert_data: alert_data, editing: true})
 
       {:ok, view, _html} = live_isolated_component(AccessAffectedService, assigns)
+
+      view
+      |> live_assign(%{
+        available_facilities: %AsyncResult{
+          ok?: true,
+          loading: false,
+          failed: false,
+          result: %{facilities: [@facility], stops: []}
+        }
+      })
 
       assert view
              |> element("select#access_affected_service_facility_id")

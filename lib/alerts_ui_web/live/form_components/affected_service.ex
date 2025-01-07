@@ -7,6 +7,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   import Ecto.Changeset
 
   alias AlertsUI.Models.InformedEntity
+  alias AlertsUIWeb.CreateAlertLive
 
   alias AlertsUIWeb.FormComponents.Helpers.{
     ContentFormatter,
@@ -96,14 +97,14 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       |> assign_async([:available_routes, :available_stops, :available_schedules], fn ->
         {:ok,
          %{
-           available_routes: AlertsUIWeb.CreateAlertLive.get_routes(route_types),
+           available_routes: CreateAlertLive.get_routes(route_types),
            available_stops:
-             AlertsUIWeb.CreateAlertLive.get_stops(
+             CreateAlertLive.get_stops(
                route_ids,
                direction
              ),
            available_schedules:
-             AlertsUIWeb.CreateAlertLive.get_schedules(
+             CreateAlertLive.get_schedules(
                route_ids,
                direction
              )
@@ -141,7 +142,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       socket
       |> assign(assigns)
       |> assign_async(:available_routes, fn ->
-        {:ok, %{available_routes: AlertsUIWeb.CreateAlertLive.get_routes(route_types)}}
+        {:ok, %{available_routes: CreateAlertLive.get_routes(route_types)}}
       end)
 
     {:ok, assign(socket, assigns)}
@@ -232,12 +233,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         {:ok,
          %{
            available_stops:
-             AlertsUIWeb.CreateAlertLive.get_stops(
+             CreateAlertLive.get_stops(
                route_ids,
                direction
              ),
            available_schedules:
-             AlertsUIWeb.CreateAlertLive.get_schedules(
+             CreateAlertLive.get_schedules(
                route_ids,
                direction
              )

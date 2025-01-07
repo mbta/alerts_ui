@@ -7,6 +7,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   import Ecto.Changeset
 
   alias AlertsUI.Models.InformedEntity
+  alias AlertsUIWeb.CreateAlertLive
   alias AlertsUIWeb.FormComponents.Helpers.{ContentFormatter, ErrorFormatter, SelectFormatter}
 
   @primary_key false
@@ -80,9 +81,9 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       |> assign_async([:available_stops, :available_routes], fn ->
         {:ok,
          %{
-           available_stops: AlertsUIWeb.CreateAlertLive.get_stops_by_route_type(route_type),
+           available_stops: CreateAlertLive.get_stops_by_route_type(route_type),
            available_routes:
-             AlertsUIWeb.CreateAlertLive.get_routes_by_stop(
+             CreateAlertLive.get_routes_by_stop(
                Map.get(alert_data, :stop_ids, []),
                route_type
              )
@@ -110,7 +111,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       socket
       |> assign(assigns)
       |> assign_async([:available_stops], fn ->
-        {:ok, %{available_stops: AlertsUIWeb.CreateAlertLive.get_stops_by_route_type(route_type)}}
+        {:ok, %{available_stops: CreateAlertLive.get_stops_by_route_type(route_type)}}
       end)
 
     {:ok, socket}
@@ -173,7 +174,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         {:ok,
          %{
            available_routes:
-             AlertsUIWeb.CreateAlertLive.get_routes_by_stop(
+             CreateAlertLive.get_routes_by_stop(
                Map.get(affected_service, "stop_ids", []),
                route_type
              )

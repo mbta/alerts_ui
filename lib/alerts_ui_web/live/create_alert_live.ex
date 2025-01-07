@@ -149,11 +149,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
     |> maybe_include_virtual_green_line()
   end
 
-  def handle_info({:selected_trips, selected_trips}, socket) do
-    {:noreply, assign(socket, selected_trips: selected_trips)}
-  end
-
-  def handle_info({:fetch_available_facilities, facility_types}, socket) do
+  def get_facilities(facility_types) do
     facilties_from_api = FacilitiesRepo.get_by_type(facility_types, include: "stop")
 
     available_facilities =
@@ -183,8 +179,11 @@ defmodule AlertsUIWeb.CreateAlertLive do
       |> Map.values()
       |> Enum.sort_by(& &1.name)
 
-    {:noreply,
-     assign(socket, available_facilities: available_facilities, available_stops: available_stops)}
+    %{stops: available_stops, facilities: available_facilities}
+  end
+
+  def handle_info({:selected_trips, selected_trips}, socket) do
+    {:noreply, assign(socket, selected_trips: selected_trips)}
   end
 
   def handle_info(:save_as_draft, socket) do
