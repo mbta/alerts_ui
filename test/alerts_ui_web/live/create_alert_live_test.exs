@@ -253,8 +253,6 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
           |> apply_action(:insert)
 
         send(view.pid, {:step_completed, changeset})
-        send(view.pid, {:fetch_available_routes, ["3"]})
-        send(view.pid, {:fetch_available_stops, 0, ["12"]})
 
         view
         |> element("#service_form")
@@ -289,11 +287,10 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
           |> apply_action(:insert)
 
         send(view.pid, {:step_completed, changeset})
-        send(view.pid, {:fetch_available_facilities, ["ELEVATOR"]})
 
         assert view
                |> element("#service_form")
-               |> render() =~ "real big elevator"
+               |> render_async() =~ "real big elevator"
       end
     end
 
