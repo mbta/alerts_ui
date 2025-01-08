@@ -767,7 +767,13 @@ defmodule AlertsUIWeb.SharedComponents do
           size="2"
           options={if @loading, do: [], else: @options}
           field={@field}
-          prompt={if @loading, do: "Loading...", else: @prompt}
+          prompt={
+            cond do
+              @disabled -> nil
+              @loading -> "Loading..."
+              true -> @prompt
+            end
+          }
           disabled={@disabled}
           loading={@loading}
           class="m-0"
