@@ -206,7 +206,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
               phx-debounce={120}
               id="description_input"
               class="w-[100%] min-h-[10rem] border-b-0 z-20"
-              maxlength="255"
+              maxlength="3000"
               value={@form[:description_text].value}
             />
             <.textarea_counter character_limit={255} field={@form[:description_text]} />
