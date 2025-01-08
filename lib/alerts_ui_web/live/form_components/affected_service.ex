@@ -388,47 +388,61 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             show_icons={true}
           />
         </div>
-        <%= if show_trips_input?(assigns) do %>
-          <.filtered_select
-            label="Trip(s)"
-            field={@form[:trip_ids]}
-            filter_field={@form[:trip_ids_filter]}
-            options={@trip_id_options}
-            loading={Map.get(@available_schedules, :loading, true)}
-            class="w-[33%]"
-            disabled={disable_trip_input?(@form[:route_ids].value)}
-            prompt={if disable_trip_input?(@form[:route_ids].value), do: nil, else: "All Trips"}
+
+        <div :if={show_trips_input?(assigns)} class="flex flex-col justify-start w-[33%]">
+          <.select
+            :if={show_directions_input?(assigns)}
+            label={if show_stops_input?(assigns), do: "Stop(s)", else: "Direction"}
+            field={@form[:direction]}
+            options={@direction_options}
+            disabled={disable_stop_input?(@form[:route_ids].value)}
+            prompt={if disable_stop_input?(@form[:route_ids].value), do: "", else: "Both Directions"}
+
           />
-        <% end %>
-        <div class="flex flex-col justify-start w-[33%]">
-          <%= if show_directions_input?(assigns) do %>
-            <.select
-              label={if show_stops_input?(assigns), do: "Stop(s)", else: "Direction"}
-              field={@form[:direction]}
-              options={@direction_options}
-              disabled={disable_stop_input?(@form[:route_ids].value)}
-              prompt={
-                if disable_stop_input?(@form[:route_ids].value), do: "", else: "Both Directions"
-              }
-            />
-          <% end %>
           <div class="min-w-[100%] min-h-[90%]">
-            <%= if show_stops_input?(assigns) do %>
-              <.filtered_select
-                field={@form[:stop_ids]}
-                filter_field={@form[:stop_ids_filter]}
-                options={@stop_id_options}
-                loading={Map.get(@available_stops, :loading, true)}
-                class="min-h-full"
-                disabled={disable_stop_input?(@form[:route_ids].value)}
-                prompt={
-                  if disable_stop_input?(@form[:route_ids].value),
-                    do: nil,
-                    else: "All Stops"
-                }
-              />
-            <% end %>
+
+            <.filtered_select
+              label="Trip(s)"
+              field={@form[:trip_ids]}
+              filter_field={@form[:trip_ids_filter]}
+              options={@trip_id_options}
+              loading={Map.get(@available_schedules, :loading, true)}
+              class={
+                "min-w-[100%] " <>
+                if(not show_trips_input?(assigns), do: "min-h-[90%]", else: "min-h-full")
+              }
+              disabled={disable_trip_input?(@form[:route_ids].value)}
+              prompt={if disable_trip_input?(@form[:route_ids].value), do: nil, else: "All Trips"}
+            />
+
           </div>
+        </div>
+        <div class="flex flex-col justify-start w-[33%]">
+          <.select
+            :if={show_directions_input?(assigns) && !show_trips_input?(assigns)}
+            label={if show_stops_input?(assigns), do: "Stop(s)", else: "Direction"}
+            field={@form[:direction]}
+            options={@direction_options}
+            disabled={disable_stop_input?(@form[:route_ids].value)}
+            prompt={if disable_stop_input?(@form[:route_ids].value), do: "", else: "Both Directions"}
+          />
+          <.filtered_select
+            :if={show_stops_input?(assigns)}
+            field={@form[:stop_ids]}
+            filter_field={@form[:stop_ids_filter]}
+            options={@stop_id_options}
+            loading={Map.get(@available_stops, :loading, true)}
+            class={
+              "min-w-[100%] " <>
+              if(not show_trips_input?(assigns), do: "min-h-[90%]", else: "min-h-full")
+            }
+            disabled={disable_stop_input?(@form[:route_ids].value)}
+            prompt={
+              if disable_stop_input?(@form[:route_ids].value),
+                do: nil,
+                else: "All Stops"
+            }
+          />
         </div>
       </.form>
       <hr class="mt-4" />
