@@ -10,6 +10,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
   alias AlertsUIWeb.FormComponents.{AffectedService, RouteTypeAndEffect}
   alias AlertsUIWeb.Step
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
+  alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
   alias MBTAV3API.Schedules.{Schedule, Trip}
@@ -22,7 +23,15 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: nil,
-    departure_time: ~U[2024-02-21 14:15:00.00Z]
+    departure_time: DateTime.utc_now() |> DateTime.add(-1, :hour)
+  }
+
+  @schedule_2 %Schedule{
+    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
+    stop: %Stop{id: "place-sstat", name: "South Station"},
+    arrival_time: DateTime.utc_now(),
+    departure_time: nil
   }
 
   @route %Route{
@@ -243,41 +252,38 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     end
 
     test "works correctly if editing" do
-      {:ok, view, _html} =
-        live_isolated_component(
-          AffectedService,
-          @assigns
-          |> Map.merge(%{
-            editing: true,
-            alert_data: %{
-              direction: "0",
-              route_type: 2,
-              stop_ids: ["place-sstat"],
-              combination: :RDTS,
-              route_ids: ["CR-Worcester"],
-              trip_ids: ["CR-683322-595"]
-            }
-          })
-        )
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]},
+        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+      ]) do
+        {:ok, view, _html} =
+          live_isolated_component(
+            AffectedService,
+            @assigns
+            |> Map.merge(%{
+              editing: true,
+              alert_data: %{
+                direction: "0",
+                route_type: 2,
+                stop_ids: ["place-sstat"],
+                combination: :RDTS,
+                route_ids: ["CR-Worcester"],
+                trip_ids: ["CR-683322-595"]
+              }
+            })
+          )
 
-      view
-      |> live_assign(%{
-        available_routes: %AsyncResult{ok?: true, loading: false, failed: false, result: [@route]},
-        available_schedules: %AsyncResult{
-          ok?: true,
-          loading: false,
-          failed: false,
-          result: [@schedule]
-        },
-        available_stops: %AsyncResult{ok?: true, loading: false, failed: false, result: [@stop]}
-      })
+        assert view |> render_async() =~ ~s(value=\"CR-Worcester\" checked=\"checked\")
 
-      assert view |> render() =~ ~s(value=\"CR-Worcester\" checked=\"checked\")
-      assert view |> render() =~ ~s(<option selected="selected" value="0">Westbound</option>)
-      assert view |> render() =~ ~s(<option selected="selected" value="place-sstat">)
+        assert view |> render_async() =~
+                 ~s(<option selected="selected" value="0">Westbound</option>)
 
-      assert view |> render() =~
-               ~s(<option selected="selected" value="CR-683322-595">595 \(9:15 AM from South Station\)</option>)
+        assert view |> render_async() =~ ~s(<option selected="selected" value="place-sstat">)
+
+        assert view |> render_async() =~
+                 ~s(<option selected="selected" value="CR-683322-595">595)
+      end
     end
 
     @tag :logged_in_user

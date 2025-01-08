@@ -5,6 +5,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
   import Mock
 
   import LiveIsolatedComponent
+  import Mock
   import Phoenix.LiveViewTest
 
   alias AlertsUIWeb.FormComponents.{AccessAffectedService, RouteTypeAndEffect}
@@ -12,7 +13,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
-  alias Phoenix.LiveView.AsyncResult
+  alias MBTAV3API.Stops.Stop
 
   @assigns %{
     id: "details",
@@ -26,7 +27,11 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
     editing: false
   }
 
-  @facility %Facility{id: "Facility-3", long_name: "Example Facility"}
+  @facility %Facility{
+    id: "Facility-3",
+    long_name: "Example Facility",
+    stop: %Stop{id: "place-sstat", name: "South Station"}
+  }
 
   describe "component" do
     test "renders" do
@@ -73,31 +78,23 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
     end
 
     test "renders while editing an existing alerts" do
-      :BIKE_ISSUE
+      with_mock(FacilitiesRepo, get_by_type: fn _facility_types, _opts -> [@facility] end) do
+        :BIKE_ISSUE
 
-      alert_data = %AlertsUIWeb.FormComponents.Helpers.AlertData{
-        facility_id: "Facility-3",
-        effect_name: "Bike Issue"
-      }
-
-      assigns = @assigns |> Map.merge(%{alert_data: alert_data, editing: true})
-
-      {:ok, view, _html} = live_isolated_component(AccessAffectedService, assigns)
-
-      view
-      |> live_assign(%{
-        available_facilities: %AsyncResult{
-          ok?: true,
-          loading: false,
-          failed: false,
-          result: %{facilities: [@facility], stops: []}
+        alert_data = %AlertsUIWeb.FormComponents.Helpers.AlertData{
+          facility_id: "Facility-3",
+          effect_name: "Bike Issue"
         }
-      })
 
-      assert view
-             |> element("select#access_affected_service_facility_id")
-             |> render() =~
-               ~s(<option selected="selected" value="Facility-3">Example Facility</option>)
+        assigns = @assigns |> Map.merge(%{alert_data: alert_data, editing: true})
+
+        {:ok, view, _html} = live_isolated_component(AccessAffectedService, assigns)
+
+        assert view
+               |> element("select#access_affected_service_facility_id")
+               |> render_async() =~
+                 ~s(<option selected="selected" value="Facility-3">Example Facility</option>)
+      end
     end
 
     @tag :logged_in_user

@@ -3,11 +3,14 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
   use AlertsUIWeb.ConnCase
 
   import LiveIsolatedComponent
+  import Mock
   import Phoenix.LiveViewTest
 
   alias AlertsUIWeb.FormComponents.StopRouteAffectedService
   alias AlertsUIWeb.Step
+  alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
+  alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
   alias Phoenix.LiveView.AsyncResult
 
@@ -85,45 +88,28 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
     end
 
     test "works correctly if editing" do
-      {:ok, view, _html} =
-        live_isolated_component(
-          StopRouteAffectedService,
-          @assigns
-          |> Map.merge(%{
-            editing: true,
-            effect_name: "DELAY",
-            alert_data: %{
-              stop_ids: ["place-aqucl"],
-              route_ids: ["Blue"],
-              route_type: 1
-            }
-          })
-        )
+      with_mocks([
+        {RoutesRepo, [], [get_routes_by_stop: fn _route_id -> [@route] end]},
+        {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
+      ]) do
+        {:ok, view, _html} =
+          live_isolated_component(
+            StopRouteAffectedService,
+            @assigns
+            |> Map.merge(%{
+              editing: true,
+              effect_name: "DELAY",
+              alert_data: %{
+                stop_ids: ["place-aqucl"],
+                route_ids: ["Blue"],
+                route_type: 1
+              }
+            })
+          )
 
-      view
-      |> live_assign(%{
-        available_routes: %AsyncResult{
-          ok?: true,
-          loading: false,
-          failed: false,
-          result: [@route]
-        }
-      })
-
-      view
-      |> live_assign(%{
-        available_stops: %AsyncResult{
-          ok?: true,
-          loading: false,
-          failed: false,
-          result: [@stop]
-        }
-      })
-
-      # available_stops: [%Stop{id: "place-aqucl"}, %Stop{id: "place-andrw"}],
-      # available_routes: [%Route{id: "Blue", type: 1}, %Route{id: "Green", type: 1}],
-      assert view |> render() =~ ~s(<option selected="selected" value="place-aqucl">)
-      assert view |> render() =~ ~s(<option selected="selected" value="Blue">)
+        assert view |> render_async() =~ ~s(<option selected="selected" value="place-aqucl">)
+        assert view |> render_async() =~ ~s(<option selected="selected" value="Blue">)
+      end
     end
 
     test "it sends section_completed if no error in changeset" do
