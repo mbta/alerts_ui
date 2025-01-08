@@ -113,7 +113,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
     notification_specifier =
       if is_nil(notification_period_start) do
-        nil
+        :same_as_effect_period
       else
         :custom
       end
