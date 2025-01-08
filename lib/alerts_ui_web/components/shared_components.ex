@@ -624,6 +624,8 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :class, :string, default: "", doc: "classes to add to the containing div"
 
+  attr :loading, :boolean, default: false, doc: "in loading state if true"
+
   attr :field, FormField,
     required: true,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
@@ -670,7 +672,11 @@ defmodule AlertsUIWeb.SharedComponents do
         disabled={@disabled}
         {@rest}
       >
-        <option :if={@prompt} value="default" selected={@value in ["default", []]}>
+        <option
+          :if={@prompt}
+          value="default"
+          selected={if @loading, do: false, else: @value in ["default", []]}
+        >
           {@prompt}
         </option>
         {Form.options_for_select(@options, @value)}
@@ -759,10 +765,11 @@ defmodule AlertsUIWeb.SharedComponents do
         <.select
           multiple={@multiple}
           size="2"
-          options={@options}
+          options={if @loading, do: [], else: @options}
           field={@field}
           prompt={if @loading, do: "Loading...", else: @prompt}
           disabled={@disabled}
+          loading={@loading}
           class="m-0"
           select_class={"min-w-full pt-0 mt-0 [scrollbar-width:thin] overflow-auto
             border-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-t-none [appearance:none] max-w-[100%] h-full " <> @select_class}
