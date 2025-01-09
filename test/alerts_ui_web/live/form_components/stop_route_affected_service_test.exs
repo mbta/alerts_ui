@@ -89,7 +89,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
 
     test "works correctly if editing" do
       with_mocks([
-        {RoutesRepo, [], [get_routes_by_stop: fn _route_id -> [@route] end]},
+        {RoutesRepo, [], [by_stop: fn _route_id -> [@route] end]},
         {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
