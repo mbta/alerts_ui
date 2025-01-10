@@ -10,6 +10,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
   import Ecto.Changeset
 
   alias AlertsUI.Models.InformedEntity
+  alias AlertsUIWeb.CreateAlertLive
   alias AlertsUIWeb.FormComponents.Helpers.{ErrorFormatter, SelectFormatter}
 
   @primary_key false
@@ -42,8 +43,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
      assign(socket, %{
        form: to_form(changeset),
        facility_types: [],
-       available_facilities: [],
-       available_stops: [],
+       available_facilities: %{},
        edited: false,
        alert_data: %{
          facility_id: ""
@@ -60,10 +60,10 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
       |> string_to_formatted_atom
       |> InformedEntity.facility_effect_to_types()
 
-    send(self(), {:fetch_available_facilities, facility_types})
-
     assigns =
       if editing == true and socket.assigns.edited == false do
+        send(self(), {:add_errors, [], __MODULE__})
+
         alert_data =
           if is_struct(alert_data) do
             Map.from_struct(alert_data)
@@ -88,7 +88,14 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
       end
       |> Map.merge(%{effect_name: effect_name, facility_types: facility_types})
 
-    {:ok, assign(socket, assigns)}
+    socket =
+      socket
+      |> assign(assigns)
+      |> assign_async([:available_facilities], fn ->
+        {:ok, %{available_facilities: CreateAlertLive.get_facilities(facility_types)}}
+      end)
+
+    {:ok, socket}
   end
 
   @impl true
@@ -155,7 +162,13 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
   def render(assigns) do
     params = assigns.form.params
 
-    stops = assigns.available_stops |> Enum.filter(&filter_stop_by_types(&1, params))
+    stops =
+      if async_available?(assigns, :available_facilities) do
+        assigns.available_facilities.result.stops
+        |> Enum.filter(&filter_stop_by_types(&1, params))
+      else
+        []
+      end
 
     type_filter_value = assigns.form[:facility_types_filter].value
 
@@ -173,10 +186,14 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     facility_filter_value = assigns.form[:facility_id_filter].value
 
     facility_id_options =
-      assigns.available_facilities
-      |> Enum.filter(&filter_facility_by_type_and_stop_ids(&1, params))
-      |> SelectFormatter.formatted_select_options(facility_filter_value)
-      |> Enum.map(fn {name, id} -> {String.slice(name, 0..80), id} end)
+      if async_available?(assigns, :available_facilities) do
+        assigns.available_facilities.result.facilities
+        |> Enum.filter(&filter_facility_by_type_and_stop_ids(&1, params))
+        |> SelectFormatter.formatted_select_options(facility_filter_value)
+        |> Enum.map(fn {name, id} -> {String.slice(name, 0..80), id} end)
+      else
+        []
+      end
 
     assigns =
       assign(assigns,
@@ -204,7 +221,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             field={@form[:stop_ids]}
             filter_field={@form[:stop_ids_filter]}
             options={@stop_id_options}
-            loading={Enum.empty?(@stop_id_options)}
+            loading={@available_facilities.loading}
             class="min-h-[50rem] min-w-[30%]"
             prompt="All Stops"
           />
@@ -221,7 +238,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             field={@form[:facility_id]}
             filter_field={@form[:facility_id_filter]}
             options={@facility_id_options}
-            loading={Enum.empty?(@facility_id_options)}
+            loading={@available_facilities.loading}
             class="min-w-[30%] max-w-[30%]"
             multiple={false}
             select_class="max-h-[90%]"
@@ -231,6 +248,11 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
       <hr class="mt-8" />
     </div>
     """
+  end
+
+  defp async_available?(assigns, key) do
+    Map.get(assigns[key], :result) && assigns[key].ok? &&
+      assigns[key].result
   end
 
   defp filter_facility_by_type_and_stop_ids(facility, params) do

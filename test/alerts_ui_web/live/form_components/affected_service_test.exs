@@ -10,19 +10,39 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
   alias AlertsUIWeb.FormComponents.{AffectedService, RouteTypeAndEffect}
   alias AlertsUIWeb.Step
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
+  alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
   alias MBTAV3API.Schedules.{Schedule, Trip}
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
+  alias Phoenix.LiveView.AsyncResult
 
   @schedule %Schedule{
     route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
     trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: nil,
-    departure_time: ~U[2024-02-21 14:15:00.00Z]
+    departure_time: DateTime.utc_now() |> DateTime.add(-1, :hour)
   }
+
+  @schedule_2 %Schedule{
+    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
+    stop: %Stop{id: "place-sstat", name: "South Station"},
+    arrival_time: DateTime.utc_now(),
+    departure_time: nil
+  }
+
+  @route %Route{
+    direction_names: %{0 => "Westbound", 1 => "Eastbound"},
+    sort_order: 3,
+    id: "CR-Worcester",
+    type: 2,
+    name: "Framingham/Worcester Line"
+  }
+
+  @stop %Stop{id: "place-sstat", name: "South Station"}
 
   @assigns %{
     id: "affected_service",
@@ -33,9 +53,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       label: "Alert Details"
     },
     route_type: 1,
-    available_routes: [],
-    available_schedules: [@schedule],
-    available_stops: [%Stop{id: "place-sstat", name: "South Station"}],
     alert_data: %{route_ids: ["CR-Worcester"]},
     combination: :RDTS,
     editing: false,
@@ -54,19 +71,18 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
             AffectedService,
             @assigns
             |> Map.merge(%{
-              alert_data: %{route_type: 3, effect_name: "Delay"},
-              available_routes: [
-                %Route{
-                  id: "1",
-                  direction_names: %{0 => "Westbound", 1 => "Eastbound"},
-                  sort_order: 3
-                }
-              ]
+              alert_data: %{route_type: 3, effect_name: "Delay"}
             })
           )
 
         first_rendered_view =
           view
+          |> live_assign(:available_routes, %AsyncResult{
+            ok?: true,
+            loading: false,
+            failed: false,
+            result: [@route]
+          })
           |> element("select#affected_service_direction")
           |> render()
 
@@ -74,7 +90,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
 
         view
         |> element("form")
-        |> render_change(%{"affected_service" => %{"route_ids" => ["1"]}})
+        |> render_change(%{"affected_service" => %{"route_ids" => ["CR-Worcester"]}})
 
         second_rendered_view =
           view
@@ -128,7 +144,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     end
 
     test "trip options are only populated once a route is chosen" do
-      with_mock(SchedulesRepo, by_route_ids: fn _route_ids, _opts -> [] end) do
+      with_mock(SchedulesRepo, by_route_ids: fn _route_ids, _opts -> [@schedule] end) do
         {:ok, view, _html} =
           live_isolated_component(AffectedService, %{
             @assigns
@@ -144,7 +160,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         |> render_change(%{"affected_service" => %{"route_ids" => ["CR-Worcester"]}})
 
         assert view
-               |> element("select#affected_service_trip_ids")
+               |> live_assign(:available_schedules, %AsyncResult{
+                 ok?: true,
+                 loading: false,
+                 failed: false,
+                 result: [@schedule]
+               })
                |> render() =~ "All Trips"
       end
     end
@@ -169,6 +190,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         })
 
         assert view
+               |> live_assign(:available_stops, %AsyncResult{
+                 ok?: true,
+                 loading: false,
+                 failed: false,
+                 result: [@stop]
+               })
                |> render() =~ "All Stops"
       end
     end
@@ -225,34 +252,38 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     end
 
     test "works correctly if editing" do
-      {:ok, view, _html} =
-        live_isolated_component(
-          AffectedService,
-          @assigns
-          |> Map.merge(%{
-            editing: true,
-            available_stops: [%Stop{id: "place-sstat"}],
-            available_routes: [%Route{id: "CR-Worcester", type: 2}],
-            available_trips: [%{id: "CR-683322-595"}],
-            available_schedules: [],
-            alert_data: %{
-              direction: "0",
-              route_type: 2,
-              stop_ids: ["place-sstat"],
-              combination: :RDTS,
-              route_ids: ["CR-Worcester"],
-              trip_ids: ["CR-683322-595"]
-            }
-          })
-        )
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]},
+        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+      ]) do
+        {:ok, view, _html} =
+          live_isolated_component(
+            AffectedService,
+            @assigns
+            |> Map.merge(%{
+              editing: true,
+              alert_data: %{
+                direction: "0",
+                route_type: 2,
+                stop_ids: ["place-sstat"],
+                combination: :RDTS,
+                route_ids: ["CR-Worcester"],
+                trip_ids: ["CR-683322-595"]
+              }
+            })
+          )
 
-      live_assign(view, :available_schedules, [@schedule])
-      assert view |> render() =~ ~s(value=\"CR-Worcester\" checked=\"checked\")
-      assert view |> render() =~ ~s(<option selected="selected" value="0">Outbound</option>)
-      assert view |> render() =~ ~s(<option selected="selected" value="place-sstat">)
+        assert view |> render_async() =~ ~s(value=\"CR-Worcester\" checked=\"checked\")
 
-      assert view |> render() =~
-               ~s(<option selected="selected" value="CR-683322-595">595 \(9:15 AM from South Station\)</option>)
+        assert view |> render_async() =~
+                 ~s(<option selected="selected" value="0">Westbound</option>)
+
+        assert view |> render_async() =~ ~s(<option selected="selected" value="place-sstat">)
+
+        assert view |> render_async() =~
+                 ~s(<option selected="selected" value="CR-683322-595">595)
+      end
     end
 
     @tag :logged_in_user

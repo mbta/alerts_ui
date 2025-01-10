@@ -23,9 +23,6 @@
           combination={@combination}
           route_type={route_type(@alert_data)}
           effect_name={effect_name(@alert_data)}
-          available_routes={@available_routes}
-          available_schedules={@available_schedules}
-          available_stops={@available_stops}
           available_facilities={@available_facilities}
           editing={@editing}
           submitted={@submitted}
@@ -36,7 +33,7 @@
           progress={@progress}
           alert_data={@alert_data}
           editing={@editing}
-          available_schedules={@available_schedules}
+          selected_trips={@selected_trips}
         />
         <.live_component
           module={NotificationPeriod}

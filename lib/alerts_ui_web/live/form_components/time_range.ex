@@ -116,13 +116,12 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   end
 
   @impl true
-  def update(%{editing: editing, alert_data: alert_data} = assigns, socket) do
-    trip_ids = Map.get(alert_data, :trip_ids, [])
-
+  def update(
+        %{editing: editing, alert_data: alert_data, selected_trips: selected_trips} = assigns,
+        socket
+      ) do
     trip_arrival_time =
-      assigns
-      |> Map.get(:available_schedules, [])
-      |> Enum.filter(&(&1.trip.id in trip_ids))
+      selected_trips
       |> Enum.map(& &1.arrival_time)
       |> Enum.max(DateTime, fn -> nil end)
       |> utc_datetime_to_naive()

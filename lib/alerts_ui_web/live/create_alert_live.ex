@@ -93,9 +93,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
         steps: @steps,
         alert_data: alert_data,
         combination: Map.get(alert_data, :combination),
-        available_routes: [],
-        available_schedules: [],
-        available_stops: [],
+        selected_trips: [],
         available_facilities: [],
         alert_uuid: nil,
         alert_id: alert_id,
@@ -117,52 +115,41 @@ defmodule AlertsUIWeb.CreateAlertLive do
     {:noreply, assign(socket, :progress, get_step_by_name(name))}
   end
 
-  def handle_info({:fetch_available_routes, route_types}, socket) do
-    available_routes =
-      route_types
-      |> RoutesRepo.by_type()
-      |> maybe_include_virtual_green_line()
-
-    {:noreply, assign(socket, available_routes: available_routes)}
+  def get_routes(route_types) do
+    route_types
+    |> RoutesRepo.by_type()
+    |> maybe_include_virtual_green_line()
   end
 
-  def handle_info({:fetch_routes_by_stop, stop_ids, route_type}, socket) do
-    available_routes =
-      if route_type == 3,
-        do: Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1, type: 3)),
-        else: Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1))
-
-    available_routes = maybe_include_virtual_green_line(available_routes)
-
-    {:noreply, assign(socket, available_routes: available_routes)}
-  end
-
-  def handle_info({:fetch_available_schedules, route_ids, direction}, socket) do
+  def get_schedules(route_ids, direction) do
     directions = directions_from_selection(direction)
     opts = direction_option([stop_sequences: [:first, :last]], directions)
 
-    available_schedules = route_ids |> SchedulesRepo.by_route_ids(opts) |> filter_out_old_trips
-
-    {:noreply, assign(socket, available_schedules: available_schedules)}
+    route_ids |> SchedulesRepo.by_route_ids(opts) |> filter_out_old_trips
   end
 
-  def handle_info({:fetch_available_stops, direction, route_ids}, socket) do
+  def get_stops(route_ids, direction) do
     route_ids = Routes.expanding_green_line(route_ids)
 
-    available_stops =
-      direction
-      |> directions_from_selection()
-      |> available_stops(route_ids)
-
-    {:noreply, assign(socket, available_stops: available_stops)}
+    direction
+    |> directions_from_selection()
+    |> available_stops(route_ids)
   end
 
-  def handle_info({:fetch_stops_by_route_type, route_type}, socket) do
-    available_stops = StopsRepo.by_route_type(route_type) |> Enum.sort_by(& &1.name)
-    {:noreply, assign(socket, available_stops: available_stops)}
+  def get_stops_by_route_type(route_type) do
+    StopsRepo.by_route_type(route_type) |> Enum.sort_by(& &1.name)
   end
 
-  def handle_info({:fetch_available_facilities, facility_types}, socket) do
+  def get_routes_by_stop(stop_ids, route_type) do
+    if route_type == 3 do
+      Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1, type: 3))
+    else
+      Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1))
+    end
+    |> maybe_include_virtual_green_line()
+  end
+
+  def get_facilities(facility_types) do
     facilties_from_api = FacilitiesRepo.get_by_type(facility_types, include: "stop")
 
     available_facilities =
@@ -192,8 +179,11 @@ defmodule AlertsUIWeb.CreateAlertLive do
       |> Map.values()
       |> Enum.sort_by(& &1.name)
 
-    {:noreply,
-     assign(socket, available_facilities: available_facilities, available_stops: available_stops)}
+    %{stops: available_stops, facilities: available_facilities}
+  end
+
+  def handle_info({:selected_trips, selected_trips}, socket) do
+    {:noreply, assign(socket, selected_trips: selected_trips)}
   end
 
   def handle_info(:save_as_draft, socket) do
