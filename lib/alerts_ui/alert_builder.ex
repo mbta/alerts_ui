@@ -223,7 +223,7 @@ defmodule AlertsUI.AlertBuilder do
   @spec get_route_patterns(Route.id_t(), String.t()) :: [APIRoutePattern.t()]
   defp get_route_patterns(route_id, direction) do
     opts =
-      [include: "representative_trip.stops"]
+      ["filter[canonical]": true, include: "representative_trip.stops"]
       |> route_pattern_direction_opts(direction)
 
     RoutePatterns.by_route_id(route_id, opts)
