@@ -338,6 +338,10 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
             id: "FRMLThuFri-709657-400",
             name: "400"
           },
+          stop: %MBTAV3API.Stops.Stop{
+            id: "place-sstat",
+            name: "South Station"
+          },
           arrival_time: nil,
           departure_time: ~U[2024-11-15 10:01:43Z]
         },
@@ -346,6 +350,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
             id: "FRMLThuFri-709657-400",
             name: "400"
           },
+          stop: %Stop{id: "place-WML-0214", name: "Framingham"},
           arrival_time: ~U[2024-11-15 12:01:00Z],
           departure_time: nil
         },
@@ -353,6 +358,10 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
           trip: %MBTAV3API.Schedules.Trip{
             id: "FRMLThuFri-709637-485",
             name: "485"
+          },
+          stop: %MBTAV3API.Stops.Stop{
+            id: "place-sstat",
+            name: "South Station"
           },
           arrival_time: nil,
           departure_time: ~U[2024-11-15 14:30:00Z]
@@ -362,6 +371,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
             id: "FRMLThuFri-709637-485",
             name: "485"
           },
+          stop: %Stop{id: "place-WML-0214", name: "Framingham"},
           arrival_time: ~U[2024-11-15 15:25:00Z],
           departure_time: nil
         },
@@ -369,6 +379,10 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
           trip: %MBTAV3API.Schedules.Trip{
             id: "FRMLThuFri-709631-494",
             name: "494"
+          },
+          stop: %MBTAV3API.Stops.Stop{
+            id: "place-sstat",
+            name: "South Station"
           },
           arrival_time: nil,
           departure_time: ~U[2024-11-15 20:25:00Z]
@@ -378,6 +392,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
             id: "FRMLThuFri-709631-494",
             name: "494"
           },
+          stop: %Stop{id: "place-WML-0214", name: "Framingham"},
           arrival_time: ~U[2024-11-15 23:30:00Z],
           departure_time: nil
         }
