@@ -371,7 +371,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       >
         <div class="w-[33%]">
           <.filtered_select
-            label={if @route_type in [0, 1, 2], do: "Line(s)", else: "Route(s)"}
+            label={if @route_type in [0, 1, 2], do: "Lines", else: "Routes"}
             field={@form[:route_ids]}
             filter_field={@form[:route_ids_filter]}
             loading={@available_routes.loading}
@@ -379,7 +379,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             class={"#{@route_type !== 3 && "hidden"} h-full"}
           />
           <.toggle_checkgroup
-            label={if @route_type in [0, 1, 2], do: "Line(s)", else: "Route(s)"}
+            label={if @route_type in [0, 1, 2], do: "Lines", else: "Routes"}
             field={@form[:route_ids]}
             options={@route_id_options}
             icon_type={icon_type(@route_type)}
@@ -392,17 +392,20 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         <div :if={show_trips_input?(assigns)} class="flex flex-col justify-start w-[33%]">
           <.select
             :if={show_directions_input?(assigns)}
-            label={if show_stops_input?(assigns), do: "Stop(s)", else: "Direction"}
+            label={
+              cond do
+                show_trips_input?(assigns) -> "Trips"
+                show_stops_input?(assigns) -> "Stops"
+                true -> "Direction"
+              end
+            }
             field={@form[:direction]}
             options={@direction_options}
             disabled={disable_stop_input?(@form[:route_ids].value)}
             prompt={if disable_stop_input?(@form[:route_ids].value), do: "", else: "Both Directions"}
-
           />
           <div class="min-w-[100%] min-h-[90%]">
-
             <.filtered_select
-              label="Trip(s)"
               field={@form[:trip_ids]}
               filter_field={@form[:trip_ids_filter]}
               options={@trip_id_options}
@@ -414,13 +417,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
               disabled={disable_trip_input?(@form[:route_ids].value)}
               prompt={if disable_trip_input?(@form[:route_ids].value), do: nil, else: "All Trips"}
             />
-
           </div>
         </div>
         <div class="flex flex-col justify-start w-[33%]">
           <.select
             :if={show_directions_input?(assigns) && !show_trips_input?(assigns)}
-            label={if show_stops_input?(assigns), do: "Stop(s)", else: "Direction"}
+            label={if show_stops_input?(assigns), do: "Stops", else: "Direction"}
             field={@form[:direction]}
             options={@direction_options}
             disabled={disable_stop_input?(@form[:route_ids].value)}
@@ -428,6 +430,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
           />
           <.filtered_select
             :if={show_stops_input?(assigns)}
+            label={if show_trips_input?(assigns), do: "Stops", else: nil}
             field={@form[:stop_ids]}
             filter_field={@form[:stop_ids_filter]}
             options={@stop_id_options}
