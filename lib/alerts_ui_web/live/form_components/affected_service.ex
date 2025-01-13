@@ -59,7 +59,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         socket
       ) do
     trip_information_by_id =
-      if Map.has_key?(assigns, :available_schedules) do
+      if async_available?(assigns, :available_schedules) do
         trip_information_by_id(
           Map.get(assigns.available_schedules, :result, []),
           Map.get(alert_data, :trip_ids, [])
@@ -255,10 +255,14 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   def validate(affected_service, assigns) do
     trip_information_by_id =
-      trip_information_by_id(
-        Map.get(assigns.available_schedules, :result, []),
-        Map.get(affected_service, :trip_ids, [])
-      )
+      if async_available?(assigns, :available_schedules) do
+        trip_information_by_id(
+          assigns.available_schedules.result,
+          Map.get(affected_service, :trip_ids, [])
+        )
+      else
+        %{}
+      end
 
     affected_service = Map.put(affected_service, "trip_information_by_id", trip_information_by_id)
 
@@ -462,7 +466,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   end
 
   defp async_available?(assigns, key) do
-    Map.get(assigns[key], :result) && assigns[key].ok? &&
+    Map.get(assigns, key) && Map.get(assigns[key], :result) && assigns[key].ok? &&
       assigns[key].result
   end
 
