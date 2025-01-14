@@ -319,10 +319,9 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   @spec directions_from_selection(String.t() | nil) :: [Trip.direction_id_t()]
   # Both directions
-  defp directions_from_selection("default"), do: [0, 1]
   defp directions_from_selection("0"), do: [0]
   defp directions_from_selection("1"), do: [1]
-  defp directions_from_selection(_), do: []
+  defp directions_from_selection(_), do: [0, 1]
 
   @spec direction_option(keyword(), [Trip.direction_id_t()]) :: keyword()
   defp direction_option(opts, [single_direction_id | []]),
@@ -364,9 +363,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
   def green_line_route?(%Route{id: "Green-E"}), do: true
   def green_line_route?(_), do: false
 
-  @spec available_stops([String.t()], [String.t()]) :: [Stop.t()]
-  defp available_stops([], _route_ids), do: []
-
+  @spec available_stops([integer()], [String.t()]) :: [Stop.t()]
   defp available_stops(direction_array, route_ids) do
     route_ids
     |> Enum.flat_map(fn route ->
