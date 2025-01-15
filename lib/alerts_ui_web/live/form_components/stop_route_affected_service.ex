@@ -73,6 +73,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         route_type |> InformedEntity.route_code_mapping() || nil
       )
       |> Map.put(:form, form)
+      |> Map.put(:route_type, route_type)
 
     socket =
       socket
@@ -222,7 +223,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       if async_available?(assigns, :available_routes) do
         SelectFormatter.formatted_select_options(
           assigns.available_routes.result,
-          route_filter_value
+          route_filter_value,
+          assigns.route_type
         )
       else
         []
@@ -234,7 +236,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       if async_available?(assigns, :available_stops) do
         SelectFormatter.formatted_select_options(
           assigns.available_stops.result,
-          stop_filter_value
+          stop_filter_value,
+          assigns.route_type
         )
       else
         []
