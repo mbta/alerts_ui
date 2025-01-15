@@ -6,22 +6,16 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
   use AlertsUI.Schema
   import Ecto.Changeset
 
-  @reminder_time_specifiers [:select, :now, :custom]
-
   @primary_key false
   embedded_schema do
     embeds_many :reminder_times, ReminderTimes, on_replace: :delete do
-      field :reminder_time_specifier, Ecto.Enum,
-        values: [:select, :now, :custom],
-        default: :select
-
       field :reminder_time, :naive_datetime
       field :min_time, :naive_datetime
       field :max_time, :naive_datetime
     end
   end
 
-  @reminder_time_fields ~w[reminder_time_specifier reminder_time min_time max_time]a
+  @reminder_time_fields ~w[reminder_time min_time max_time]a
 
   @impl true
   def mount(socket) do
@@ -32,41 +26,63 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
      assign(socket,
        form: form,
        current_time: current_time,
-       reminder_time_specifiers: @reminder_time_specifiers,
-       edited: false
+       edited: false,
+       notification_start: "",
+       effect_end: ""
      )}
   end
 
   @impl true
-  @spec update(%{:alert_data => any(), :editing => boolean(), optional(any()) => any()}, any()) ::
-          {:ok, any()}
-  def update(%{editing: editing, alert_data: alert_data} = assigns, socket) do
-    assigns =
-      if editing and not socket.assigns.edited and not is_nil(alert_data.reminder_times) do
-        processed_reminder_times =
-          alert_data.reminder_times
-          |> Enum.with_index(fn element, index -> {element, Integer.to_string(index)} end)
-          |> Enum.reduce(%{}, fn {element, index}, acc ->
-            Map.put(acc, index, %{
-              "_persistent_id" => index,
-              "reminder_time" => NaiveDateTime.to_iso8601(element),
-              "min_time" => socket.assigns.current_time |> naive_datetime_to_iso8601(),
-              "max_time" =>
-                Map.get(alert_data, :active_period_end) |> naive_datetime_to_iso8601(),
-              "reminder_time_specifier" => "custom"
-            })
-          end)
 
-        changeset =
-          changeset(%__MODULE__{}, %{
-            "reminder_times" => processed_reminder_times
-          })
-
-        form = changeset |> to_form
-        Map.merge(assigns, %{form: form, edited: true})
-      else
-        assigns
+  def update(%{alert_data: alert_data} = assigns, socket) do
+    notification_start =
+      cond do
+        Map.get(alert_data, :notification_period_start) -> alert_data.notification_period_start
+        Map.get(alert_data, :active_period_start) -> alert_data.active_period_start
+        true -> nil
       end
+
+    effect_end =
+      cond do
+        Map.get(alert_data, :active_period_end) in ["", nil] ->
+          ~N[9999-12-31 23:59:59]
+
+        Map.get(alert_data, :active_period_end_specifier) in [:end_of_service, "end_of_service"] ->
+          NaiveDateTime.add(alert_data.active_period_end, 1, :day)
+
+        true ->
+          alert_data.active_period_end
+      end
+
+    processed_reminder_times =
+      (Map.get(alert_data, :reminder_times, []) || [])
+      |> Enum.with_index(fn element, index -> {element, Integer.to_string(index)} end)
+      |> Enum.reduce(%{}, fn {element, index}, acc ->
+        Map.put(acc, index, %{
+          "_persistent_id" => index,
+          "reminder_time" => NaiveDateTime.to_iso8601(element),
+          "min_time" => notification_start |> naive_datetime_to_iso8601(),
+          "max_time" => effect_end |> naive_datetime_to_iso8601()
+        })
+      end)
+
+    changeset =
+      changeset(%__MODULE__{}, %{
+        "reminder_times" => processed_reminder_times
+      })
+
+    validate(changeset)
+
+    form =
+      changeset
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    assigns =
+      assigns
+      |> Map.merge(%{form: form, edited: true})
+      |> Map.put(:notification_start, notification_start)
+      |> Map.put(:effect_end, effect_end)
 
     {:ok, assign(socket, assigns)}
   end
@@ -82,23 +98,17 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
   end
 
   def reminder_changeset(reminder_time, params, _cardinality) do
-    new_reminder_time =
-      case Map.get(params, "reminder_time_specifier") do
-        "now" -> params["min_time"]
-        "custom" -> Map.get(params, "reminder_time", "")
-        _ -> nil
-      end
-
-    params = Map.put(params, "reminder_time", new_reminder_time)
-
     cast(reminder_time, params, @reminder_time_fields)
     |> validate_required(:reminder_time, message: "Enter a valid date and time")
     |> validate_change(:reminder_time, fn :reminder_time, reminder_time ->
-      min_time =
-        params["min_time"] |> String.pad_trailing(19, ":00") |> NaiveDateTime.from_iso8601!()
+      {status, min_time} =
+        params["min_time"] |> String.pad_trailing(19, ":00") |> NaiveDateTime.from_iso8601()
 
-      if NaiveDateTime.diff(min_time, reminder_time, :minute) > 1 do
-        [reminder_time: "Reminder can't be set in the past"]
+      if status == :ok and NaiveDateTime.diff(min_time, reminder_time, :minute) > 1 do
+        [
+          reminder_time:
+            "Reminder time must be after notifications start #{min_time |> formatted_datetime}"
+        ]
       else
         []
       end
@@ -108,17 +118,17 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
         params["max_time"] |> String.pad_trailing(19, ":00") |> NaiveDateTime.from_iso8601()
 
       if result == :ok and NaiveDateTime.compare(max_time, reminder_time) === :lt do
-        [reminder_time: "Reminder must be before effect end"]
+        [
+          reminder_time:
+            "Reminder time must be before the end of the effect period #{max_time |> formatted_datetime}"
+        ]
       else
         []
       end
     end)
   end
 
-  @impl true
-  def handle_event("validate", %{"rider_reminders" => rider_reminders}, socket) do
-    changeset = changeset(%__MODULE__{}, rider_reminders)
-
+  def validate(changeset) do
     case changeset
          |> apply_action(:validate) do
       {:ok, changes} ->
@@ -136,6 +146,13 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
       {:error, changeset} ->
         send(self(), {:add_errors, parse_field_errors(changeset), __MODULE__})
     end
+  end
+
+  @impl true
+  def handle_event("validate", %{"rider_reminders" => rider_reminders}, socket) do
+    changeset = changeset(%__MODULE__{}, rider_reminders)
+
+    validate(changeset)
 
     form =
       changeset
@@ -143,6 +160,11 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
       |> to_form()
 
     {:noreply, assign(socket, %{form: form})}
+  end
+
+  @impl true
+  def handle_event("validate", _, socket) do
+    {:noreply, socket}
   end
 
   @impl true
@@ -166,22 +188,12 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
           <.inputs_for :let={rt} field={@form[:reminder_times]}>
             <div class="flex flex-row w-[50%] mb-4" id={"reminder-time-component-#{rt.index}"}>
               <input type="hidden" name="rider_reminders[reminder_sort][]" value={rt.index} />
-              <.select
-                label="Scheduled reminder"
-                field={rt[:reminder_time_specifier]}
-                options={values_to_options(@reminder_time_specifiers)}
-                class="min-w-[16rem] max-w-[16rem] mr-8"
-                phx-debounce={120}
-              />
               <.datetime
                 label="Reminder date and time"
-                min={@current_time |> naive_datetime_to_iso8601()}
-                max="9999-12-31T23:59"
+                min={@notification_start |> naive_datetime_to_iso8601()}
+                max={@effect_end |> naive_datetime_to_iso8601()}
                 field={rt[:reminder_time]}
                 value={rt[:reminder_time].value}
-                class={
-                  if rt[:reminder_time_specifier].value in [:custom, "custom"], do: "", else: "hidden"
-                }
               />
               <input
                 type="hidden"
@@ -249,6 +261,8 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
 
   defp naive_datetime_to_iso8601(nil), do: ""
 
+  defp naive_datetime_to_iso8601(iso_datetime) when is_binary(iso_datetime), do: iso_datetime
+
   defp naive_datetime_to_iso8601(datetime) do
     datetime
     |> NaiveDateTime.truncate(:second)
@@ -256,10 +270,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
     |> String.slice(0..-4//1)
   end
 
-  defp values_to_options(values) do
-    Enum.map(values, fn value ->
-      name = value |> Atom.to_string() |> String.replace("_", " ") |> String.capitalize()
-      {name, value}
-    end)
+  defp formatted_datetime(datetime) do
+    Timex.format!(datetime, "{0M}/{0D}/{YYYY}, {0h12}:{0m} {AM}")
   end
 end

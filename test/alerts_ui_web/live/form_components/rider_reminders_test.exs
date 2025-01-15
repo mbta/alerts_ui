@@ -72,11 +72,85 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
            |> render() =~ ~s(id="reminder-time-component-0")
   end
 
-  test "shows error if time entered is before current time" do
+  test "doesn't error if time entered is within notification period" do
     {:ok, view, _html} =
       live_isolated_component(
         RiderReminders,
         @assigns
+        |> Map.put(:alert_data, %{
+          active_period_start: ~N[2024-09-26 04:00:00],
+          notification_start: ~N[2024-09-26 02:00:00]
+        })
+      )
+
+    view
+    |> element("form")
+    |> render_change(%{
+      "rider_reminders" => %{"reminder_sort" => ["new"]}
+    })
+
+    view
+    |> element("form")
+    |> render_change(%{
+      "rider_reminders" => %{
+        "reminder_sort" => ["0"],
+        "reminder_times" => %{
+          "0" => %{
+            "_persistent_id" => "0",
+            "max_time" => "2024-09-27T03:00:00",
+            "min_time" => "2024-09-26 02:00:00",
+            "reminder_time" => "2024-09-26 03:00:00",
+            "reminder_time_specifier" => "custom"
+          }
+        }
+      }
+    })
+
+    refute render(view) =~ ~s(Reminder time must be after notifications start)
+  end
+
+  test "shows error if time entered is before effect start" do
+    {:ok, view, _html} =
+      live_isolated_component(
+        RiderReminders,
+        @assigns |> Map.put(:alert_data, %{active_period_start: ~N[2024-09-26 04:00:00]})
+      )
+
+    view
+    |> element("form")
+    |> render_change(%{
+      "rider_reminders" => %{"reminder_sort" => ["new"]}
+    })
+
+    view
+    |> element("form")
+    |> render_change(%{
+      "rider_reminders" => %{
+        "reminder_sort" => ["0"],
+        "reminder_times" => %{
+          "0" => %{
+            "_persistent_id" => "0",
+            "max_time" => "2024-09-26T04:00:00",
+            "min_time" => "2024-09-25T13:04:12",
+            "reminder_time" => "2024-09-25T12:12:12",
+            "reminder_time_specifier" => "custom"
+          }
+        }
+      }
+    })
+
+    assert render(view) =~ ~s(Reminder time must be after notifications start)
+  end
+
+  test "shows error if time entered is before notification period" do
+    {:ok, view, _html} =
+      live_isolated_component(
+        RiderReminders,
+        @assigns
+        |> Map.put(:alert_data, %{
+          active_period_start: ~N[2024-09-26 02:00:00],
+          notification_start: ~N[2024-09-26 04:00:00]
+        })
       )
 
     view
@@ -102,14 +176,18 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
       }
     })
 
-    assert render(view) =~ ~s(Reminder can&#39;t be set in the past)
+    assert render(view) =~ ~s(Reminder time must be after notifications start)
   end
 
-  test "shows error if time entered is aftercurrent time" do
+  test "shows error if time entered is after effect start" do
     {:ok, view, _html} =
       live_isolated_component(
         RiderReminders,
         @assigns
+        |> Map.put(:alert_data, %{
+          active_period_start: ~N[2024-09-25 13:04:12],
+          active_period_end: ~N[2024-09-25 03:00:00]
+        })
       )
 
     view
@@ -137,7 +215,7 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
 
     rendered_view = render(view)
 
-    assert rendered_view =~ ~s(Reminder must be before effect end)
+    assert rendered_view =~ ~s(Reminder time must be before the end of the effect period)
   end
 
   test "works if editing" do
@@ -147,7 +225,10 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
         @assigns
         |> Map.merge(%{
           editing: true,
-          alert_data: %{reminder_times: [~N[2024-04-30 11:54:00], ~N[2024-04-30 12:54:00]]}
+          alert_data: %{
+            reminder_times: [~N[2024-04-30 11:54:00], ~N[2024-04-30 12:54:00]],
+            active_period_start: ~N[2024-04-30 11:45:00]
+          }
         })
       )
 
