@@ -141,7 +141,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       assert render(view) =~ ~s(Effect must end after 05/01/2024, 10:54 AM)
     end
 
-    test "displays error if start after trip end" do
+    test "displays error if start after trip end when start changes" do
       schedule = %Schedule{
         trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
         arrival_time: ~U[2024-05-01 09:15:00.00Z],
@@ -168,6 +168,39 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
           "active_period_start" => "2024-05-01T10:16:00"
         }
       })
+
+      assert render(view) =~ ~s(Effect must start before 05/01/2024, 10:15 AM)
+    end
+
+    test "displays error if start after trip end when trip changes" do
+      schedule = %Schedule{
+        trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
+        arrival_time: ~U[2024-05-01 09:15:00.00Z],
+        departure_time: ~U[2024-05-01 08:15:00.00Z]
+      }
+
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end_specifier" => "custom",
+          "active_period_start_specifier" => "custom"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end" => "2024-05-01T11:54:00",
+          "active_period_start" => "2024-05-01T10:16:00"
+        }
+      })
+
+      live_assign(view, :selected_trips, [schedule])
 
       assert render(view) =~ ~s(Effect must start before 05/01/2024, 10:15 AM)
     end

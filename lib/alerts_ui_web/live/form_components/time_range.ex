@@ -178,8 +178,39 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         %{selected_trips: selected_trips} = assigns,
         socket
       ) do
-    {:ok,
-     assign(socket, assigns |> Map.put(:trip_arrival_time, get_trip_arrival_time(selected_trips)))}
+    trip_arrival_time = get_trip_arrival_time(selected_trips)
+
+    changeset =
+      %__MODULE__{}
+      |> changeset(socket.assigns.form.params)
+      |> TimeRangeValidators.validate_start_is_before_trip(trip_arrival_time)
+
+    changeset
+    |> apply_action(:validate)
+    |> case do
+      {:ok, changes} ->
+        send(self(), {:add_errors, [], __MODULE__})
+        send(self(), {:section_completed, changes})
+
+      {:error, changeset} ->
+        send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
+    end
+
+    errors =
+      if changeset.valid? do
+        []
+      else
+        ErrorFormatter.parse_field_errors(changeset)
+      end
+
+    form =
+      changeset
+      |> to_form()
+      |> Map.put(:action, :validate)
+      |> Map.put(:errors, errors)
+
+    assigns = assigns |> Map.put(:trip_arrival_time, trip_arrival_time) |> Map.put(:form, form)
+    {:ok, assign(socket, assigns)}
   end
 
   @impl true
