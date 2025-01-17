@@ -48,11 +48,9 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
   @impl true
   def update(
-        %{alert_data: alert_data, editing: true} = assigns,
+        %{alert_data: alert_data, editing: true, route_type: route_type} = assigns,
         socket
       ) do
-    route_type = Map.get(alert_data, :route_type)
-
     changeset =
       %__MODULE__{}
       |> changeset(alert_data)
@@ -95,11 +93,9 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
   @impl true
   def update(
-        %{alert_data: alert_data} = assigns,
+        %{route_type: route_type} = assigns,
         socket
       ) do
-    route_type = Map.get(alert_data, :route_type)
-
     assigns =
       assigns
       |> Map.put(
@@ -165,7 +161,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       |> Map.put(:action, :validate)
       |> to_form()
 
-    route_type = socket.assigns.alert_data.route_type
+    route_type = socket.assigns.route_type
 
     socket =
       socket

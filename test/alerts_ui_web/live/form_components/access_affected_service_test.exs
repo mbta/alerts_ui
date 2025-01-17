@@ -57,6 +57,28 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
                       {:section_completed, %AccessAffectedService{facility_id: "Facility-3"}}}
     end
 
+    test "search works" do
+      with_mock(FacilitiesRepo, get_by_type: fn _facility_types, _opts -> [@facility] end) do
+        :BIKE_ISSUE
+
+        {:ok, view, _html} = live_isolated_component(AccessAffectedService, @assigns)
+
+        assert view
+               |> element("select#access_affected_service_facility_id")
+               |> render_async() =~
+                 ~s(<option value="Facility-3">Example Facility</option>)
+
+        view
+        |> element("form")
+        |> render_change(%{"access_affected_service" => %{"facility_id_filter" => "q"}})
+
+        refute view
+               |> element("select#access_affected_service_facility_id")
+               |> render_async() =~
+                 ~s(<option selected="selected" value="Facility-3">Example Facility</option>)
+      end
+    end
+
     test "it sends errors if errors changeset" do
       :FACILITY_ISSUE
 

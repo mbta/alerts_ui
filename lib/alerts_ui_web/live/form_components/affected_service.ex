@@ -54,6 +54,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   def update(
         %{
           alert_data: alert_data,
+          route_type: route_type,
           editing: true
         } = assigns,
         socket
@@ -85,7 +86,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     send(self(), {:section_completed, changes})
 
-    route_type = Map.get(alert_data, :route_type)
     route_types = all_route_types(route_type)
 
     direction = alert_data.direction
@@ -116,7 +116,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   @impl true
   def update(
-        %{alert_data: alert_data, combination: combination} = assigns,
+        %{alert_data: alert_data, combination: combination, route_type: route_type} = assigns,
         socket
       ) do
     changeset = changeset(%__MODULE__{}, alert_data)
@@ -135,7 +135,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       )
     end
 
-    route_type = Map.get(alert_data, :route_type)
     route_types = all_route_types(route_type)
 
     socket =

@@ -251,6 +251,37 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       end
     end
 
+    test "search works" do
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]},
+        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+      ]) do
+        {:ok, view, _html} =
+          live_isolated_component(AffectedService, @assigns)
+
+        view
+        |> element("form")
+        |> render_change(%{"affected_service" => %{"route_ids" => ["CR-Worcester"]}})
+
+        assert view |> render_async() =~
+                 ~s(<option value="CR-683322-595">595)
+
+        assert view |> render_async() =~ ~s(<option value="place-sstat">)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "affected_service" => %{"trip_ids_filter" => "x", "stop_ids_filter" => "x"}
+        })
+
+        refute view |> render_async() =~
+                 ~s(<option value="CR-683322-595">595)
+
+        refute view |> render_async() =~ ~s(<option value="place-sstat">)
+      end
+    end
+
     test "works correctly if editing" do
       with_mocks([
         {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},
