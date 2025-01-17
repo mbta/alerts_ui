@@ -180,8 +180,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
 
     stop_filter_value = assigns.form[:stop_ids_filter].value
 
-    stop_id_options =
-      SelectFormatter.formatted_select_options(stops, stop_filter_value)
+    stop_id_options = SelectFormatter.formatted_select_options(stops, stop_filter_value, nil)
 
     facility_filter_value = assigns.form[:facility_id_filter].value
 
@@ -189,7 +188,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
       if async_available?(assigns, :available_facilities) do
         assigns.available_facilities.result.facilities
         |> Enum.filter(&filter_facility_by_type_and_stop_ids(&1, params))
-        |> SelectFormatter.formatted_select_options(facility_filter_value)
+        |> SelectFormatter.formatted_select_options(facility_filter_value, nil)
         |> Enum.map(fn {name, id} -> {String.slice(name, 0..80), id} end)
       else
         []

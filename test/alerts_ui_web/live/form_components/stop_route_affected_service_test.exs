@@ -87,6 +87,38 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
              |> render() =~ ~s(route_number_1)
     end
 
+    test "search works" do
+      with_mocks([
+        {RoutesRepo, [], [by_stop: fn _route_id -> [@route] end]},
+        {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
+      ]) do
+        {:ok, view, _html} =
+          live_isolated_component(
+            StopRouteAffectedService,
+            @assigns
+          )
+
+        assert view |> render_async() =~ ~s(<option value="place-aqucl">)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "stop_route_affected_service" => %{"stop_ids" => ["place-aqucl"]}
+        })
+
+        assert view |> render_async() =~ ~s(<option value="Blue">)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "stop_route_affected_service" => %{"stop_ids_filter" => "x", "route_ids_filter" => "x"}
+        })
+
+        refute view |> render_async() =~ ~s(<option value="place-aqucl">)
+        refute view |> render_async() =~ ~s(<option value="Blue">)
+      end
+    end
+
     test "works correctly if editing" do
       with_mocks([
         {RoutesRepo, [], [by_stop: fn _route_id -> [@route] end]},
