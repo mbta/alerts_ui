@@ -24,12 +24,12 @@ defmodule AlertsUI.ActivePeriodBuilderTest do
       assert result.active_period == [
                %{
                  start: ~U[2024-04-30 15:54:00Z],
-                 end: DateTime.new!(~D[2024-05-01], @end_of_service_utc)
+                 end: ~U[2024-04-30 17:54:00Z]
                }
              ]
 
       assert result.active_period_start == ~U[2024-04-30 15:54:00Z]
-      assert result.active_period_end == DateTime.new!(~D[2024-05-01], @end_of_service_utc)
+      assert result.active_period_end == ~U[2024-04-30 17:54:00Z]
       assert result.duration_certainty == :ESTIMATED
     end
 
@@ -107,12 +107,12 @@ defmodule AlertsUI.ActivePeriodBuilderTest do
       assert result.active_period == [
                %{
                  start: ~U[2024-04-30 15:54:00Z],
-                 end: DateTime.new!(~D[2024-05-01], @end_of_service_utc)
+                 end: ~U[2024-04-30 17:54:00Z]
                }
              ]
 
       assert result.active_period_start == ~U[2024-04-30 15:54:00Z]
-      assert result.active_period_end == DateTime.new!(~D[2024-05-01], @end_of_service_utc)
+      assert result.active_period_end == ~U[2024-04-30 17:54:00Z]
       assert result.duration_certainty == :ESTIMATED
     end
 
@@ -131,12 +131,12 @@ defmodule AlertsUI.ActivePeriodBuilderTest do
       assert result.active_period == [
                %{
                  start: ~U[2024-04-30 05:54:00Z],
-                 end: DateTime.new!(~D[2024-04-30], @end_of_service_utc)
+                 end: ~U[2024-04-30 07:54:00Z]
                }
              ]
 
       assert result.active_period_start == ~U[2024-04-30 05:54:00Z]
-      assert result.active_period_end == DateTime.new!(~D[2024-04-30], @end_of_service_utc)
+      assert result.active_period_end == ~U[2024-04-30 07:54:00Z]
       assert result.duration_certainty == :ESTIMATED
     end
 

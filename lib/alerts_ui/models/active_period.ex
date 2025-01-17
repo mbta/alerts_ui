@@ -129,8 +129,18 @@ defmodule AlertsUI.Models.ActivePeriod do
     end
   end
 
-  @spec end_of_service_datetime(NaiveDateTime.t() | DateTime.t(), Time.t()) :: DateTime.t()
-  def end_of_service_datetime(start_time, end_of_service_time \\ @end_of_service) do
-    DateTime.new!(end_of_service_date(start_time, end_of_service_time), end_of_service_time)
+  @spec end_of_service_datetime_naive(NaiveDateTime.t(), Time.t()) ::
+          NaiveDateTime.t()
+  def end_of_service_datetime_naive(start_time, end_of_service_time \\ @end_of_service) do
+    # for use in front end only
+    NaiveDateTime.new!(end_of_service_date(start_time, end_of_service_time), end_of_service_time)
+  end
+
+  @spec end_of_service_datetime_utc(DateTime.t(), Time.t()) ::
+          DateTime.t()
+  def end_of_service_datetime_utc(start_time, end_of_service_time \\ @end_of_service) do
+    NaiveDateTime.new!(end_of_service_date(start_time, end_of_service_time), end_of_service_time)
+    |> DateTime.from_naive!("America/New_York")
+    |> DateTime.shift_zone!("Etc/UTC")
   end
 end

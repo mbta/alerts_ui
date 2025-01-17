@@ -4,7 +4,7 @@ defmodule AlertsUI.Alerts do
   """
   import Ecto.Changeset
   import Ecto.Query
-  alias AlertsUI.Models.Alert
+  alias AlertsUI.Models.{ActivePeriod, Alert}
   alias AlertsUI.Repo
   require Logger
 
@@ -56,13 +56,55 @@ defmodule AlertsUI.Alerts do
     DateTime.compare(incoming_time, stored_time) != :lt
   end
 
+  @spec update_end_if_estimated([Alert.t()], DateTime.t()) :: [Alert.t()]
+  def update_end_if_estimated(alerts, current_time \\ DateTime.utc_now()) do
+    alerts
+    |> Enum.map(fn alert ->
+      start_is_past = time_is_past(current_time, alert.active_period_start)
+
+      update_alert_end(alert, start_is_past, current_time)
+    end)
+  end
+
+  defp update_alert_end(
+         %Alert{active_period: [active_period], duration_certainty: :ESTIMATED} = alert,
+         true,
+         current_time
+       ) do
+    end_of_service = ActivePeriod.end_of_service_datetime_utc(active_period.start)
+
+    two_hours_from_now = DateTime.add(current_time, 2, :hour)
+
+    new_end_time =
+      if DateTime.compare(end_of_service, two_hours_from_now) in [:eq, :gt] do
+        two_hours_from_now
+      else
+        end_of_service
+      end
+
+    params = %{
+      active_period: [%{start: active_period.start, end: new_end_time}],
+      active_period_end: new_end_time
+    }
+
+    alert
+    |> Alert.changeset(params)
+    |> PaperTrail.update()
+    |> case do
+      {:ok, %{model: alert}} -> alert
+      {:error, result} -> result
+    end
+  end
+
+  defp update_alert_end(alert, _, _), do: alert
+
   @spec close_if_end_is_past([Alert.t()], DateTime.t()) :: [Alert.t()]
   def close_if_end_is_past(alerts, current_time \\ DateTime.utc_now()) do
     current_time = DateTime.truncate(current_time, :second)
 
     alerts
     |> Enum.map(fn alert ->
-      end_is_past = end_is_past(current_time, alert.active_period_end)
+      end_is_past = time_is_past(current_time, alert.active_period_end)
 
       if end_is_past do
         close(alert)
@@ -72,9 +114,9 @@ defmodule AlertsUI.Alerts do
     end)
   end
 
-  defp end_is_past(_current_time, nil), do: false
+  defp time_is_past(_current_time, nil), do: false
 
-  defp end_is_past(current_time, end_time),
+  defp time_is_past(current_time, end_time),
     do: DateTime.compare(current_time, end_time) in [:eq, :gt]
 
   @spec update_recurring_active_periods(Alert.t(), DateTime.t()) ::
