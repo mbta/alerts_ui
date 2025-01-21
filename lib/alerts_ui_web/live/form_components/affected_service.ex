@@ -257,7 +257,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       if async_available?(assigns, :available_schedules) do
         trip_information_by_id(
           assigns.available_schedules.result,
-          Map.get(affected_service, :trip_ids, [])
+          Map.get(affected_service, "trip_ids", [])
         )
       else
         %{}
