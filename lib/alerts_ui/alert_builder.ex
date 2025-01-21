@@ -173,8 +173,8 @@ defmodule AlertsUI.AlertBuilder do
       if is_nil(Map.get(line, :route_ids)) do
         [original_route]
       else
-        combo_route_ids = Map.get(line, :route_ids) -- [original_route.id]
-        combo_routes = Enum.map(combo_route_ids, &RoutesRepo.get(&1, include: "line")) || %{}
+        combo_route_ids = Map.get(line, :route_ids, []) -- [original_route.id]
+        combo_routes = Enum.map(combo_route_ids, &RoutesRepo.get(&1, include: "line"))
         combo_routes ++ [original_route]
       end
     end)

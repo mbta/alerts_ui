@@ -11,9 +11,24 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
+  alias MBTAV3API.RoutePatterns.RoutePattern
+  alias MBTAV3API.Routes.Repo, as: RoutesRepo
+  alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
+
+  @route %Route{
+    direction_names: %{0 => "Westbound", 1 => "Eastbound"},
+    sort_order: 3,
+    id: "CR-Worcester",
+    type: 2,
+    name: "Framingham/Worcester Line"
+  }
+
+  @stop %Stop{id: "place-sstat", name: "South Station"}
+
+  @route_pattern %RoutePattern{direction_id: 0, stops: [@stop]}
 
   describe "create alerts page" do
     @tag :logged_in_user
@@ -30,13 +45,14 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
     @tag :logged_in_user
     test "submitting first part of form unhides second part", %{conn: conn} do
       with_mocks([
-        {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
-        {StopsRepo, [], by_route: fn _, _ -> [] end}
+        {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [@route_pattern] end]},
+        {StopsRepo, [], by_route: fn _, _ -> [@stop] end},
+        {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]}
       ]) do
         insert(:alert, alert_id: "1")
         {:ok, view, _html} = live(conn, "/alerts/new")
 
-        first_rendered_view = render(view)
+        first_rendered_view = render_async(view)
         assert first_rendered_view =~ ~s(class="min-w-full flex flex-col mb-8" id="route_view")
         refute first_rendered_view =~ ~s(class="min-w-full flex flex-col mt-4" id="details_view")
 
@@ -46,7 +62,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
         send(view.pid, {:step_completed, changeset})
 
-        second_rendered_view = render(view)
+        second_rendered_view = render_async(view)
         refute second_rendered_view =~ ~s(class="min-w-full flex flex-col mb-8" id="route_view")
         assert second_rendered_view =~ ~s(class="min-w-full flex flex-col mt-4" id="details_view")
 
@@ -81,7 +97,8 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         send(view.pid, {:add_errors, [], AlertDetails})
         send(view.pid, {:section_completed, changeset})
         send(view.pid, :create_alert)
-        rendered_view = render(view)
+        rendered_view = render_async(view)
+
         assert rendered_view =~ "created successfully"
       end
     end
@@ -162,8 +179,9 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
     @tag :logged_in_user
     test "submitting the second part of the form saves the alert", %{conn: conn} do
       with_mocks([
-        {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
-        {StopsRepo, [], by_route: fn _, _ -> [] end}
+        {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [@route_pattern] end]},
+        {StopsRepo, [], by_route: fn _, _ -> [@stop] end},
+        {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
         first_rendered_view = render(view)
