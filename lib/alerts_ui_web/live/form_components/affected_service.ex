@@ -188,7 +188,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     affected_service =
       affected_service
       |> Map.put_new("direction", "default")
-      |> clean_route_ids(socket.assigns.form)
+      |> clean_route_ids(socket.assigns.form, socket.assigns.effect_name)
       |> populate_default_stops()
       |> populate_default_trips()
 
@@ -257,7 +257,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       if async_available?(assigns, :available_schedules) do
         trip_information_by_id(
           assigns.available_schedules.result,
-          Map.get(affected_service, :trip_ids, [])
+          Map.get(affected_service, "trip_ids", [])
         )
       else
         %{}
@@ -274,7 +274,32 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     |> cast(params, @fields)
   end
 
-  def clean_route_ids(affected_service, form) do
+  def clean_route_ids(affected_service, _form, "Detour") do
+    IO.inspect(affected_service)
+    # existing_route_ids = form.params["route_ids"] || []
+    incoming_route_id = affected_service["route_ids"] || nil
+
+        # incoming_route_ids = if is_binary(incoming_route_ids) do
+    #   List.wrap(incoming_route_ids)
+    # else
+    #   incoming_route_ids
+    # end
+
+
+      # new_route_ids = List.wrap(incoming_route_id) |> Enum.reject(&is_nil/1) |> IO.inspect
+      # Enum.reduce(incoming_route_ids, existing_route_ids, fn route_id, acc ->
+      #   if route_id in acc do
+      #     acc -- [route_id]
+      #   else
+      #     [route_id | acc]
+      #   end
+      # end) |> IO.inspect
+
+      # affected_service |> Map.put("route_ids", new_route_ids)
+      affected_service
+  end
+
+  def clean_route_ids(affected_service, form, _) do
     # necessary to prevent duplication when input is checkbox group
     existing_route_ids = form.params["route_ids"] || []
     incoming_route_ids = affected_service["route_ids"] || []
@@ -288,7 +313,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         end
       end)
 
-    affected_service |> Map.put("route_ids", new_route_ids)
+    affected_service |> Map.put("route_ids", new_route_ids) |> Enum.uniq
   end
 
   @impl true
