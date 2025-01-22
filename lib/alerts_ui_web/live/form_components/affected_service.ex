@@ -21,6 +21,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   @primary_key false
   embedded_schema do
     field :route_ids, {:array, :string}
+    field :single_route_id, :string
     field :route_ids_filter, :string
     field :direction, :string
     field :trip_ids, {:array, :string}
@@ -30,7 +31,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     field :trip_information_by_id, {:map, :map}
   end
 
-  @fields ~w[route_ids direction trip_ids stop_ids trip_information_by_id route_ids_filter trip_ids_filter stop_ids_filter]a
+  @fields ~w[route_ids direction trip_ids stop_ids trip_information_by_id route_ids_filter trip_ids_filter stop_ids_filter single_route_id]a
 
   @impl true
   def mount(socket) do
@@ -63,7 +64,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       if async_available?(assigns, :available_schedules) do
         trip_information_by_id(
           Map.get(assigns.available_schedules, :result, []),
-          Map.get(alert_data, :trip_ids, [])
+          Map.get(alert_data, "trip_ids", [])
         )
       else
         %{}
@@ -275,28 +276,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   end
 
   def clean_route_ids(affected_service, _form, "Detour") do
-    IO.inspect(affected_service)
-    # existing_route_ids = form.params["route_ids"] || []
-    incoming_route_id = affected_service["route_ids"] || nil
+    incoming_route_id = affected_service["single_route_id"] || nil
 
-        # incoming_route_ids = if is_binary(incoming_route_ids) do
-    #   List.wrap(incoming_route_ids)
-    # else
-    #   incoming_route_ids
-    # end
-
-
-      # new_route_ids = List.wrap(incoming_route_id) |> Enum.reject(&is_nil/1) |> IO.inspect
-      # Enum.reduce(incoming_route_ids, existing_route_ids, fn route_id, acc ->
-      #   if route_id in acc do
-      #     acc -- [route_id]
-      #   else
-      #     [route_id | acc]
-      #   end
-      # end) |> IO.inspect
-
-      # affected_service |> Map.put("route_ids", new_route_ids)
-      affected_service
+    affected_service
+    |> Map.put("route_ids", List.wrap(incoming_route_id) |> Enum.reject(&is_nil/1))
   end
 
   def clean_route_ids(affected_service, form, _) do
@@ -313,7 +296,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         end
       end)
 
-    affected_service |> Map.put("route_ids", new_route_ids) |> Enum.uniq
+    affected_service |> Map.put("route_ids", new_route_ids)
   end
 
   @impl true
@@ -400,11 +383,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         <div class="w-[33%]">
           <.filtered_select
             label={if @route_type in [0, 1, 2], do: "Lines", else: "Routes"}
-            field={@form[:route_ids]}
+            field={if @effect_name == "Detour", do: @form[:single_route_id], else: @form[:route_ids]}
             filter_field={@form[:route_ids_filter]}
             loading={@available_routes.loading}
             options={@route_id_options}
             class={"#{@route_type !== 3 && "hidden"} h-full"}
+            multiple={if @effect_name == "Detour", do: false, else: true}
           />
           <.toggle_checkgroup
             label={if @route_type in [0, 1, 2], do: "Lines", else: "Routes"}
