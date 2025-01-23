@@ -7,11 +7,12 @@ defmodule AlertsUI.AlertBuilder do
   """
 
   alias AlertsUI.{ActivePeriodBuilder, Activities}
-  alias AlertsUI.Models.{Cause, Effect, InformedEntity, RoutePattern, SeverityLevel}
+  alias AlertsUI.Models.{Cause, Effect, RoutePattern, SeverityLevel}
   alias AlertsUI.Routes
   alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
+  alias MBTAV3API.Lines.Repo, as: LinesRepo
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatterns
   alias MBTAV3API.RoutePatterns.RoutePattern, as: APIRoutePattern
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
@@ -81,10 +82,15 @@ defmodule AlertsUI.AlertBuilder do
       Map.get(alert_data, :reminder_times, [])
       |> Enum.map(&%{reminder_time: ActivePeriodBuilder.naive_eastern_datetime_to_utc(&1)})
 
-    route_ids =
-      alert_data
-      |> Map.get(:route_ids, [])
-      |> add_combo_route_ids()
+    routes =
+      Map.get(alert_data, :route_ids, [])
+      |> Enum.filter(&(&1 !== "default"))
+      |> Routes.expanding_green_line()
+      |> Enum.map(&(RoutesRepo.get(&1, include: "line") || %{}))
+      |> Enum.reject(&(&1 == %{}))
+      |> add_combo_routes()
+
+    route_ids = Enum.map(routes, & &1.id)
 
     alert_data =
       alert_data
@@ -92,7 +98,7 @@ defmodule AlertsUI.AlertBuilder do
       |> Map.put(:stop_ids, add_child_stops(stop_ids, route_ids, direction_id))
       |> Map.put(
         :child_stops_with_context,
-        child_stops_with_context(route_ids, direction_id, stop_ids)
+        child_stops_with_context(routes, direction_id, stop_ids)
       )
       |> Map.put(:service_types, expand_subway_service_types(service_types))
 
@@ -152,21 +158,27 @@ defmodule AlertsUI.AlertBuilder do
     |> Map.merge(active_period_map)
   end
 
-  @spec add_combo_route_ids([Route.id_t()]) :: [Route.id_t()]
+  @spec add_combo_routes([Route.id_t()]) :: [Route.t()]
 
-  defp add_combo_route_ids(route_ids) do
-    route_ids
-    |> Enum.flat_map(fn route_id ->
-      combo_map = InformedEntity.route_to_combo_route_mapping()
+  defp add_combo_routes(routes) do
+    routes
+    |> Enum.flat_map(fn original_route ->
+      line =
+        if Map.get(original_route, :line_id) do
+          LinesRepo.get(original_route.line_id, []) || %{}
+        else
+          %{}
+        end
 
-      case combo_id = Map.get(combo_map, route_id, nil) do
-        nil -> []
-        _ -> [combo_id]
+      if is_nil(Map.get(line, :route_ids)) do
+        [original_route]
+      else
+        combo_route_ids = Map.get(line, :route_ids, []) -- [original_route.id]
+        combo_routes = Enum.map(combo_route_ids, &RoutesRepo.get(&1, include: "line"))
+        combo_routes ++ [original_route]
       end
     end)
     |> Enum.dedup()
-    |> Enum.concat(route_ids)
-    |> Enum.filter(&(&1 !== "default"))
   end
 
   defp add_child_stops(nil, _route_ids, _direction), do: nil
@@ -192,20 +204,17 @@ defmodule AlertsUI.AlertBuilder do
             stop_with_context_t()
           ]
 
-  defp child_stops_with_context(route_ids, direction, parent_stop_ids) do
-    route_ids
-    |> Routes.expanding_green_line()
-    |> Enum.flat_map(fn route_id ->
-      route_type = Map.get(RoutesRepo.get(route_id) || %{}, :type)
-
-      route_id
+  defp child_stops_with_context(routes, direction, parent_stop_ids) do
+    routes
+    |> Enum.flat_map(fn route ->
+      route.id
       |> get_route_patterns(direction)
       |> Enum.flat_map(fn route_pattern ->
         route_pattern_stops_with_context_for_parents(
           route_pattern,
-          route_id,
+          route.id,
           parent_stop_ids,
-          route_type
+          route.type
         )
       end)
     end)
