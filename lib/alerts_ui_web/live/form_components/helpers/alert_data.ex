@@ -120,7 +120,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
         :custom
       end
 
-    route_ids = Alert.gather_route_ids(informed_entities)
+    route_ids = alert.original_route_selections || []
 
     single_route_id =
       if effect_name == "Detour" and length(route_ids) === 1 do

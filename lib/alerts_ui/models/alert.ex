@@ -53,7 +53,8 @@ defmodule AlertsUI.Models.Alert do
   active_period_start
   active_period_end
   notification_period_start
-  recurrence_days)a
+  recurrence_days
+  original_route_selections)a
 
   @cause Cause.causes()
   @effect Effect.effects()
@@ -96,7 +97,8 @@ defmodule AlertsUI.Models.Alert do
           tts_header_text: String.t() | nil,
           tts_description_text: String.t() | nil,
           informed_entity: [InformedEntity.t()],
-          notification_period_start: DateTime.t() | nil
+          notification_period_start: DateTime.t() | nil,
+          original_route_selections: [String.t()] | nil
         }
 
   @derive {
@@ -168,6 +170,8 @@ defmodule AlertsUI.Models.Alert do
 
     field :recurrence_days, {:array, Ecto.Enum},
       values: ~w[sunday monday tuesday wednesday thursday friday saturday]a
+
+    field :original_route_selections, {:array, :string}
 
     timestamps()
   end

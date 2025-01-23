@@ -82,8 +82,10 @@ defmodule AlertsUI.AlertBuilder do
       Map.get(alert_data, :reminder_times, [])
       |> Enum.map(&%{reminder_time: ActivePeriodBuilder.naive_eastern_datetime_to_utc(&1)})
 
+    original_route_selections = Map.get(alert_data, :route_ids, [])
+
     routes =
-      Map.get(alert_data, :route_ids, [])
+      original_route_selections
       |> Enum.filter(&(&1 !== "default"))
       |> Enum.uniq()
       |> Routes.expanding_green_line()
@@ -151,6 +153,7 @@ defmodule AlertsUI.AlertBuilder do
       informed_entity:
         build_informed_entities(combination, alert_data, effect_name)
         |> Enum.uniq(),
+      original_route_selections: original_route_selections,
       notification_period_start: notification_period_start,
       severity: severity,
       severity_level: SeverityLevel.severity_level_by_severity(severity),
