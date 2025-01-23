@@ -123,7 +123,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       direction: Alert.get_direction(informed_entities),
       effect_name: effect_name,
       facility_id: Alert.gather_facility_ids(informed_entities) |> List.first(""),
-      route_ids: Alert.gather_route_ids(informed_entities),
+      route_ids: alert.original_route_selections || [],
       stop_ids: Alert.gather_parent_stop_ids(informed_entities),
       trip_ids: Alert.gather_trip_ids(informed_entities),
       header_text: alert.header_text,
