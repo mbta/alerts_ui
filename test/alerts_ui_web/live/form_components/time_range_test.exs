@@ -53,7 +53,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
                ~s(<div phx-feedback-for="time_range[active_period_end_date]" class="min-w-[16rem] max-w-[16rem] h-10 hidden">)
     end
 
-    test "works if editing" do
+    test "editing with error field sends error" do
       {:ok, view, _html} =
         live_isolated_component(TimeRange, @assigns)
 
@@ -67,6 +67,43 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
       assert view
              |> render() =~ "custom"
+
+      assert_receive {:__live_isolated_component_handle_info_received__, _pid,
+                      {:add_errors,
+                       [{:active_period_start_date, {"Effect can't start in the past", []}}],
+                       AlertsUIWeb.FormComponents.TimeRange}}
+    end
+
+    test "editing with no errors sends data" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
+      start_time =
+        DateTime.utc_now()
+        |> DateTime.add(1, :hour)
+        |> DateTime.shift_zone!("America/New_York")
+        |> DateTime.truncate(:second)
+        |> DateTime.to_naive()
+
+      live_assign(view, %{
+        editing: true,
+        alert_data: %{
+          active_period_start: start_time,
+          active_period_start_specifier: "custom"
+        }
+      })
+
+      assert view
+             |> render() =~ "custom"
+
+      assert_receive {:__live_isolated_component_handle_info_received__, _pid,
+                      {:add_errors, [], AlertsUIWeb.FormComponents.TimeRange}}
+
+      assert_receive {:__live_isolated_component_handle_info_received__, _pid,
+                      {:section_completed,
+                       %TimeRange{
+                         active_period_start: ^start_time
+                       }}}
     end
 
     test "displays error if start invalid" do
