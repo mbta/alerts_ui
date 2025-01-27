@@ -165,11 +165,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
              }
     end
 
-    test "handles detour alert with single route" do
+    test "handles detour alert with one route" do
       insert(:alert, %{
         alert_id: "1",
         effect: :DETOUR,
         effect_detail: "DETOUR",
+        effect_name: "Detour",
         header_text: "cool header text",
         description_text: "description text",
         duration_certainty: :KNOWN,
@@ -187,6 +188,31 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       result = AlertData.build_alert_data("1")
       assert result.single_route_id == "1"
+    end
+
+    test "handles multi-route detour alert" do
+      insert(:alert, %{
+        alert_id: "1",
+        effect: :DETOUR,
+        effect_detail: "DETOUR",
+        effect_name: "Multi-Route Detour",
+        header_text: "cool header text",
+        description_text: "description text",
+        duration_certainty: :KNOWN,
+        active_period_start: ~U[2024-05-02 16:09:34.007545Z],
+        active_period_end: ~U[2024-05-04 01:09:34.007545Z],
+        active_period: [
+          %{start: ~U[2024-05-02 16:09:34.007545Z], end: ~U[2024-05-04 01:09:34.007545Z]}
+        ],
+        notification_period_start: ~U[2024-05-02 16:09:34.007545Z],
+        original_route_selections: ["1"],
+        informed_entity: [
+          %{route_type: 3, route_id: "1"}
+        ]
+      })
+
+      result = AlertData.build_alert_data("1")
+      assert result.single_route_id == nil
     end
 
     test "gets route ids from original_route_selections field" do

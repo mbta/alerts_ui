@@ -92,7 +92,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     effect_map = Effect.effect_map_by_detail(alert.effect_detail)
     informed_entities = alert.informed_entity
     route_type = Alert.get_route_type(alert)
-    effect_name = Map.get(effect_map, :effect_name)
+    effect_name = alert.effect_name || Map.get(effect_map, :effect_name)
 
     combination =
       if is_nil(route_type) and

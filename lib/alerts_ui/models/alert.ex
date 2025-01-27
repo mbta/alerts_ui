@@ -29,6 +29,7 @@ defmodule AlertsUI.Models.Alert do
   banner_text
   effect
   effect_detail
+  effect_name
   cause
   cause_detail
   header_text
@@ -70,6 +71,7 @@ defmodule AlertsUI.Models.Alert do
           banner_text: String.t() | nil,
           effect: atom() | nil,
           effect_detail: String.t() | nil,
+          effect_name: String.t() | nil,
           cause: atom() | nil,
           cause_detail: String.t() | nil,
           draft: boolean(),
@@ -138,6 +140,7 @@ defmodule AlertsUI.Models.Alert do
     field :alert_id, :string
     field :effect, Ecto.Enum, values: @effect
     field :effect_detail, :string
+    field :effect_name, :string
     field :banner_text, :string
     field :cause, Ecto.Enum, values: @cause
     field :cause_detail, :string

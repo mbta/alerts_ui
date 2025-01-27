@@ -146,6 +146,7 @@ defmodule AlertsUI.AlertBuilder do
       cause_detail: cause_detail,
       effect: Map.get(effect_map, :effect),
       effect_detail: Map.get(effect_map, :effect_detail),
+      effect_name: effect_name,
       draft: Map.get(alert_data, :draft, false),
       last_push_notification_timestamp:
         Map.get(alert_data, :last_push_notification_timestamp)
