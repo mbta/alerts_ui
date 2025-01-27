@@ -19,6 +19,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :direction,
     :facility_id,
     :route_ids,
+    :single_route_id,
     :stop_ids,
     :trip_ids,
     :header_text,
@@ -53,6 +54,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           direction: String.t(),
           facility_id: String.t(),
           route_ids: [String.t()],
+          single_route_id: String.t(),
           stop_ids: [String.t()],
           trip_ids: [String.t()],
           header_text: String.t(),
@@ -118,12 +120,22 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
         :custom
       end
 
+    route_ids = Alert.gather_route_ids(informed_entities)
+
+    single_route_id =
+      if effect_name == "Detour" and length(route_ids) === 1 do
+        hd(route_ids)
+      else
+        nil
+      end
+
     %__MODULE__{
       route_type: route_type,
       direction: Alert.get_direction(informed_entities),
       effect_name: effect_name,
       facility_id: Alert.gather_facility_ids(informed_entities) |> List.first(""),
-      route_ids: Alert.gather_route_ids(informed_entities),
+      route_ids: route_ids,
+      single_route_id: single_route_id,
       stop_ids: Alert.gather_parent_stop_ids(informed_entities),
       trip_ids: Alert.gather_trip_ids(informed_entities),
       header_text: alert.header_text,
