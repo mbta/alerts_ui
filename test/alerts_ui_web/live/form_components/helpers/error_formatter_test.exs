@@ -9,7 +9,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ErrorFormatterTest do
       error_list = [facility_id: {"can't be blank", [validation: :required]}]
       result = ErrorFormatter.parse_field_errors(error_list)
 
-      assert result == [facility_id: {"Select an amenity", [validation: :required]}]
+      assert result == [facility_id: {"Select a facility", [validation: :required]}]
     end
 
     test "puts errors for fields in correct format from changeset" do
