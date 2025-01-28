@@ -17,7 +17,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         effect_detail: "ACCESS_ISSUE",
         header_text: "cool header text",
         description_text: "description text",
-        informed_entity: []
+        informed_entity: [],
+        original_route_selections: []
       })
 
       assert AlertData.build_alert_data("1") == %AlertData{
@@ -50,7 +51,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
           %{route_type: 1, route_id: "2", stop_id: "a2", direction_id: 0},
           %{route_type: 1, route_id: "3", stop_id: "a3", direction_id: 1},
           %{route_type: 1, route_id: "4", trip: build(:trip_descriptor, %{trip_id: "b1"})}
-        ]
+        ],
+        original_route_selections: ["1", "2", "3", "4"]
       })
 
       assert AlertData.build_alert_data("1") == %AlertData{
@@ -129,7 +131,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
           %{route_type: 3, route_id: "2", stop_id: "a2"},
           %{route_type: 3, route_id: "3", stop_id: "a3"},
           %{route_type: 3, route_id: "4", trip: build(:trip_descriptor, %{trip_id: "b1"})}
-        ]
+        ],
+        original_route_selections: ["1", "2", "3", "4"]
       })
 
       assert AlertData.build_alert_data("1") == %AlertData{
@@ -162,11 +165,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
              }
     end
 
-    test "handles detour alert with single route" do
+    test "handles detour alert with one route" do
       insert(:alert, %{
         alert_id: "1",
         effect: :DETOUR,
         effect_detail: "DETOUR",
+        effect_name: "Detour",
         header_text: "cool header text",
         description_text: "description text",
         duration_certainty: :KNOWN,
@@ -175,6 +179,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         active_period: [
           %{start: ~U[2024-05-02 16:09:34.007545Z], end: ~U[2024-05-04 01:09:34.007545Z]}
         ],
+        notification_period_start: ~U[2024-05-02 16:09:34.007545Z],
+        original_route_selections: ["1"],
         informed_entity: [
           %{route_type: 3, route_id: "1"}
         ]
@@ -182,6 +188,61 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       result = AlertData.build_alert_data("1")
       assert result.single_route_id == "1"
+    end
+
+    test "handles multi-route detour alert" do
+      insert(:alert, %{
+        alert_id: "1",
+        effect: :DETOUR,
+        effect_detail: "DETOUR",
+        effect_name: "Multi-Route Detour",
+        header_text: "cool header text",
+        description_text: "description text",
+        duration_certainty: :KNOWN,
+        active_period_start: ~U[2024-05-02 16:09:34.007545Z],
+        active_period_end: ~U[2024-05-04 01:09:34.007545Z],
+        active_period: [
+          %{start: ~U[2024-05-02 16:09:34.007545Z], end: ~U[2024-05-04 01:09:34.007545Z]}
+        ],
+        notification_period_start: ~U[2024-05-02 16:09:34.007545Z],
+        original_route_selections: ["1"],
+        informed_entity: [
+          %{route_type: 3, route_id: "1"}
+        ]
+      })
+
+      result = AlertData.build_alert_data("1")
+      assert result.single_route_id == nil
+    end
+
+    test "gets route ids from original_route_selections field" do
+      insert(:alert, %{
+        alert_id: "1",
+        effect: :SIGNIFICANT_DELAYS,
+        effect_detail: "DELAY",
+        header_text: "cool header text",
+        description_text: "description text",
+        active_period_start: ~U[2024-05-02 16:09:34.007545Z],
+        active_period_end: ~U[2024-05-04 01:09:34.007545Z],
+        active_period: [
+          %{start: ~U[2024-05-02 16:09:34.007545Z], end: ~U[2024-05-04 01:09:34.007545Z]}
+        ],
+        notification_period_start: ~U[2024-05-02 16:09:34.007545Z],
+        duration_certainty: :KNOWN,
+        cause_detail: "hazmat condition",
+        severity: 3,
+        severity_level: :WARNING,
+        informed_entity: [
+          %{route_type: 1, route_id: "Green-B"},
+          %{route_type: 1, route_id: "Green-C", stop_id: "a2"},
+          %{route_type: 1, route_id: "Green-E", stop_id: "a3"},
+          %{route_type: 1, route_id: "Blue", trip: build(:trip_descriptor, %{trip_id: "b1"})}
+        ],
+        original_route_selections: ["Green", "Blue"]
+      })
+
+      result = AlertData.build_alert_data("1")
+      assert result.route_ids == ["Green", "Blue"]
     end
 
     test "builds data for a systemwide alert" do

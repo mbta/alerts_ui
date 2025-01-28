@@ -57,6 +57,7 @@ defmodule AlertsUI.AlertBuilderTest do
 
         assert result == %{
                  effect: :SIGNIFICANT_DELAYS,
+                 effect_name: "Delay",
                  description_text: "ok",
                  header_text: "hello",
                  informed_entity: [
@@ -89,7 +90,8 @@ defmodule AlertsUI.AlertBuilderTest do
                    %{reminder_time: ~U[2024-04-30 16:24:00Z]}
                  ],
                  current_time: ~U[2024-04-30 05:54:00Z],
-                 recurrence_days: nil
+                 recurrence_days: nil,
+                 original_route_selections: ["57"]
                }
 
         result |> Alerts.create_or_update_alert()
@@ -174,6 +176,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    }
                  ],
                  effect_detail: "DELAY",
+                 effect_name: "Delay",
                  draft: false,
                  active_period: [%{start: ~U[2024-04-30 15:54:00Z], end: nil}],
                  active_period_end: nil,
@@ -187,7 +190,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  severity_level: nil,
                  reminder_times: [],
                  current_time: ~U[2024-04-30 05:54:00Z],
-                 recurrence_days: nil
+                 recurrence_days: nil,
+                 original_route_selections: ["24", "27", "57"]
                }
 
         result |> Alerts.create_or_update_alert()
@@ -222,6 +226,7 @@ defmodule AlertsUI.AlertBuilderTest do
 
         assert result == %{
                  effect: :SIGNIFICANT_DELAYS,
+                 effect_name: "Delay",
                  description_text: "ok",
                  header_text: "hello",
                  informed_entity: [
@@ -250,7 +255,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  severity_level: nil,
                  reminder_times: [],
                  current_time: ~U[2024-04-30 05:54:00Z],
-                 recurrence_days: nil
+                 recurrence_days: nil,
+                 original_route_selections: ["CapeFlyer"]
                }
 
         result |> Alerts.create_or_update_alert()
