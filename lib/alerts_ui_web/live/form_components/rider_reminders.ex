@@ -107,7 +107,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
       if status == :ok and NaiveDateTime.diff(min_time, reminder_time, :minute) > 1 do
         [
           reminder_time:
-            "Reminder time must be after notifications start #{min_time |> formatted_datetime}"
+            "Reminder time must be after notification period starts (#{min_time |> formatted_datetime})"
         ]
       else
         []
@@ -120,7 +120,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
       if result == :ok and NaiveDateTime.compare(max_time, reminder_time) === :lt do
         [
           reminder_time:
-            "Reminder time must be before the end of the effect period #{max_time |> formatted_datetime}"
+            "Reminder time must be before notification period ends (#{max_time |> formatted_datetime})"
         ]
       else
         []
@@ -206,7 +206,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
                 value={@active_period_end}
               />
               <button
-                class="ml-2"
+                class="ml-2 mt-[12%] flex"
                 type="button"
                 name="rider_reminders[reminder_drop][]"
                 value={rt.index}

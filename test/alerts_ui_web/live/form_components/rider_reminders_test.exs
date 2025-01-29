@@ -106,7 +106,7 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
       }
     })
 
-    refute render(view) =~ ~s(Reminder time must be after notifications start)
+    refute render(view) =~ ~s(Reminder time must be after notification period starts)
   end
 
   test "shows error if time entered is before effect start" do
@@ -139,7 +139,7 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
       }
     })
 
-    assert render(view) =~ ~s(Reminder time must be after notifications start)
+    assert render(view) =~ ~s(Reminder time must be after notification period starts)
   end
 
   test "shows error if time entered is before notification period" do
@@ -176,7 +176,7 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
       }
     })
 
-    assert render(view) =~ ~s(Reminder time must be after notifications start)
+    assert render(view) =~ ~s(Reminder time must be after notification period starts)
   end
 
   test "shows error if time entered is after effect start" do
@@ -215,7 +215,7 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
 
     rendered_view = render(view)
 
-    assert rendered_view =~ ~s(Reminder time must be before the end of the effect period)
+    assert rendered_view =~ ~s(Reminder time must be before notification period ends)
   end
 
   test "works if editing" do
