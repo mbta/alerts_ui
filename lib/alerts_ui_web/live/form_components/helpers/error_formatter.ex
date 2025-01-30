@@ -13,7 +13,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ErrorFormatter do
     stop_ids: "Select stop(s)",
     trip_ids: "Select trip(s)",
     direction: "Select direction",
-    facility_id: "Select an amenity",
+    facility_id: "Select a facility",
     accept_banner: "Check box to show you understand"
   }
 

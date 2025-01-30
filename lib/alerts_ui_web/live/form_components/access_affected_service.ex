@@ -233,7 +233,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             prompt="All Categories"
           />
           <.filtered_select
-            label="Amenities"
+            label="Facilities"
             field={@form[:facility_id]}
             filter_field={@form[:facility_id_filter]}
             options={@facility_id_options}
