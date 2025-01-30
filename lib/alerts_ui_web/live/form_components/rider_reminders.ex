@@ -206,7 +206,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
                 value={@active_period_end}
               />
               <button
-                class="ml-2 mt-[12%] flex"
+                class="ml-2 flex max-h-[3.2rem] items-end"
                 type="button"
                 name="rider_reminders[reminder_drop][]"
                 value={rt.index}
