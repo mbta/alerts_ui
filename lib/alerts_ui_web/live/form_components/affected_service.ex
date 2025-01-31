@@ -418,6 +418,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
           />
           <div class="min-w-[100%] min-h-[90%]">
             <.filtered_select
+              phx-change={JS.dispatch("phx:default_selection", to: "#" <> @form[:trip_ids].id)}
               field={@form[:trip_ids]}
               filter_field={@form[:trip_ids_filter]}
               options={@trip_id_options}
@@ -442,6 +443,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
           />
           <.filtered_select
             :if={show_stops_input?(assigns)}
+            phx-change={JS.dispatch("phx:default_selection", to: "#" <> @form[:stop_ids].id)}
             label={if show_trips_input?(assigns), do: "Stops", else: nil}
             field={@form[:stop_ids]}
             filter_field={@form[:stop_ids_filter]}

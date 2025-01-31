@@ -51,3 +51,14 @@ window.addEventListener("phx:copy", (event) => {
 window.addEventListener("phx:scroll_to_top", (event) => {
   window.scrollTo(0, 0)
 })
+
+// unselect default selection if other items are selected at the same time
+window.addEventListener("phx:default_selection", (event) => {
+  selected_items = Array.from(event.target.options).filter((option) => {
+    return option.selected == true
+  })
+  just_values = selected_items.map(option => option.value)
+  if (just_values.length > 1 && just_values.includes("default")) {
+    selected_items[0].selected = false
+  }
+})
