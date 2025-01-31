@@ -209,7 +209,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
               maxlength="3000"
               value={@form[:description_text].value}
             />
-            <.textarea_counter character_limit={255} field={@form[:description_text]} />
+            <.textarea_counter character_limit={3000} field={@form[:description_text]} />
           </div>
           <div class="flex flex-col justify-center ml-4">
             <.copy_button
