@@ -216,7 +216,6 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
       >
         <fieldset class="flex flex-row gap-x-8 min-h-[50rem]">
           <.filtered_select
-            phx-change={JS.dispatch("phx:default_selection", to: "#" <> @form[:stop_ids].id)}
             label="Stops"
             field={@form[:stop_ids]}
             filter_field={@form[:stop_ids_filter]}
@@ -226,7 +225,6 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             prompt="All Stops"
           />
           <.filtered_select
-            phx-change={JS.dispatch("phx:default_selection", to: "#" <> @form[:facility_types].id)}
             label="Categories"
             field={@form[:facility_types]}
             filter_field={@form[:facility_types_filter]}

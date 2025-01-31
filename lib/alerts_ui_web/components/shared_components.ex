@@ -763,6 +763,7 @@ defmodule AlertsUIWeb.SharedComponents do
         />
         <hr class="w-5/6 self-center border-y-1 border-bg-elevation-6 min-h-[1rem]" />
         <.select
+          phx-change={JS.dispatch("phx:default_selection", to: "#" <> @id)}
           multiple={@multiple}
           size="2"
           options={if @loading, do: [], else: @options}
