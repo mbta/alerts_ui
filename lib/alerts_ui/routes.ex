@@ -5,7 +5,7 @@ defmodule AlertsUI.Routes do
 
   alias MBTAV3API.Routes.Route
 
-  @green_line_branch_ids ["Green-B", "Green-C", "Green-D", "Green-E"]
+  @green_line_branch_ids ["Green-E", "Green-D", "Green-C", "Green-B"]
 
   @doc """
   Takes a list of route IDs and expands the virtual Green line route to turn it

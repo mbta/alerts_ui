@@ -46,6 +46,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
     AlertData,
     EffectsForRouteTypes,
     ErrorFormatter,
+    GreenLine,
     ServiceEffectCombinations
   }
 
@@ -128,9 +129,25 @@ defmodule AlertsUIWeb.CreateAlertLive do
     route_ids |> SchedulesRepo.by_route_ids(opts) |> filter_out_old_trips
   end
 
-  def get_stops(route_ids, direction) do
+  def get_stops(["Green"] = route_ids, direction) do
     route_ids = Routes.expanding_green_line(route_ids)
 
+    stops =
+      route_ids
+      |> Enum.map(fn route_id ->
+        stops = StopsRepo.by_route(route_id, 0)
+        {route_id, stops}
+      end)
+      |> GreenLine.put_stops_in_order()
+
+    if direction == "1" do
+      Enum.reverse(stops)
+    else
+      stops
+    end
+  end
+
+  def get_stops(route_ids, direction) do
     direction
     |> directions_from_selection()
     |> available_stops(route_ids)
@@ -364,6 +381,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
   def green_line_route?(_), do: false
 
   @spec available_stops([integer()], [String.t()]) :: [Stop.t()]
+
   defp available_stops(direction_array, route_ids) do
     route_ids
     |> Enum.flat_map(fn route ->
