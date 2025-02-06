@@ -215,18 +215,19 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLine do
     stop_tree.starting_nodes |> Enum.flat_map(fn node_id -> paths_from(stop_tree, node_id) end)
   end
 
-  def paths_from(stop_tree, id) do
-    if end_node?(stop_tree, id) do
-      [id]
+  def paths_from(stop_tree, stop_id) do
+    if end_node?(stop_tree, stop_id) do
+      [stop_id]
     else
-      get_paths_from(stop_tree, id)
+      get_paths_from(stop_tree, stop_id)
     end
   end
 
-  defp get_paths_from(stop_tree, id) do
-    next_stop_ids(stop_tree, id)
+  defp get_paths_from(stop_tree, stop_id) do
+    next_stop_ids(stop_tree, stop_id)
     |> Enum.flat_map(fn next_id ->
-      paths_from(stop_tree, next_id) |> Enum.map(fn ids -> prepend_stop_id(ids, id) end)
+      paths_from(stop_tree, next_id)
+      |> Enum.map(fn stop_ids -> prepend_stop_id(stop_ids, stop_id) end)
     end)
   end
 
@@ -238,16 +239,16 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLine do
     [stop_id | stop_tree_ids] |> List.flatten([])
   end
 
-  def end_node?(stop_tree, id) do
-    stop_tree |> next_stop_ids(id) |> length === 0
+  def end_node?(stop_tree, stop_id) do
+    stop_tree |> next_stop_ids(stop_id) |> length === 0
   end
 
-  def next_stop_ids(stop_tree, id) do
-    stop_tree.edges[id].next
+  def next_stop_ids(stop_tree, stop_id) do
+    stop_tree.edges[stop_id].next
   end
 
-  def previous_stop_ids(stop_tree, id) do
-    stop_tree.edges[id].previous
+  def previous_stop_ids(stop_tree, stop_id) do
+    stop_tree.edges[stop_id].previous
   end
 
   def max_value_from_list(value_list) do

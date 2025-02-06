@@ -14,7 +14,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLineTest do
   #                  c1 ---> c2                  y1
   ###
 
-  @branching_stop_tree %{
+  @stop_tree %{
     by_id: %{
       "a1" => %{id: "a1", value: %Stop{id: "a1"}},
       "a2" => %{id: "a2", value: %Stop{id: "a2"}},
@@ -59,14 +59,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLineTest do
         ["c1", "c2", "m2", "m3", "y1"]
       ]
 
-      actual = GreenLine.paths(@branching_stop_tree)
+      actual = GreenLine.paths(@stop_tree)
       assert expected === actual
     end
   end
 
   describe "longest_path_length/1" do
     test "returns the length of the longest path through the tree" do
-      assert GreenLine.longest_path_length(@branching_stop_tree) === 8
+      assert GreenLine.longest_path_length(@stop_tree) === 8
     end
   end
 
@@ -83,30 +83,30 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLineTest do
         MapSet.new(["x2"])
       ]
 
-      actual = GreenLine.slices(@branching_stop_tree)
+      actual = GreenLine.slices(@stop_tree)
       assert expected === actual
     end
   end
 
   describe "slice_for_id/2" do
     test "returns the slice of the tree for a given ID" do
-      assert GreenLine.slice_for_id(@branching_stop_tree, "c2") === MapSet.new(["m1", "c2"])
+      assert GreenLine.slice_for_id(@stop_tree, "c2") === MapSet.new(["m1", "c2"])
     end
   end
 
   describe "new_branches_starting_in_slice/2" do
     test "returns stop_id for branches starting in same slice as given stop_id" do
-      assert GreenLine.new_branches_starting_in_slice(@branching_stop_tree, "b1") === []
-      assert GreenLine.new_branches_starting_in_slice(@branching_stop_tree, "b2") === ["a1"]
-      assert GreenLine.new_branches_starting_in_slice(@branching_stop_tree, "b3") === ["c1"]
+      assert GreenLine.new_branches_starting_in_slice(@stop_tree, "b1") === []
+      assert GreenLine.new_branches_starting_in_slice(@stop_tree, "b2") === ["a1"]
+      assert GreenLine.new_branches_starting_in_slice(@stop_tree, "b3") === ["c1"]
     end
   end
 
   describe "next_primary_and_branches/2" do
     test "given next ids, separates primary path ids from branch ones" do
-      next_ids = GreenLine.next_stop_ids(@branching_stop_tree, "m3")
+      next_ids = GreenLine.next_stop_ids(@stop_tree, "m3")
       expected = ["x1", ["y1"]]
-      actual = GreenLine.next_primary_and_branches(@branching_stop_tree, next_ids)
+      actual = GreenLine.next_primary_and_branches(@stop_tree, next_ids)
       assert expected === actual
     end
   end
@@ -114,7 +114,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLineTest do
   describe "stops_to_terminus/3" do
     test "given an id, returns all stops on branch to end" do
       expected = ["x2", "x1", "m3", "m2", "m1", "b3", "b2", "b1", "y1"]
-      actual = GreenLine.stops_to_terminus(@branching_stop_tree, "b1")
+      actual = GreenLine.stops_to_terminus(@stop_tree, "b1")
       assert expected === actual
     end
   end
@@ -139,7 +139,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLineTest do
         "x2"
       ]
 
-      actual = GreenLine.next_stop_or_branch(@branching_stop_tree, "b1", [], []) |> List.flatten()
+      actual = GreenLine.next_stop_or_branch(@stop_tree, "b1", [], []) |> List.flatten()
       assert expected === actual
     end
   end
