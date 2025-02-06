@@ -139,7 +139,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLineTest do
         "x2"
       ]
 
-      actual = GreenLine.next_stop_or_branch(@branching_stop_tree, "b1", [], [])
+      actual = GreenLine.next_stop_or_branch(@branching_stop_tree, "b1", [], []) |> List.flatten()
       assert expected === actual
     end
   end

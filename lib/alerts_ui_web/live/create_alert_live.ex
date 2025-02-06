@@ -130,7 +130,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   def get_stops(["Green"] = route_ids, direction) do
-    route_ids = Routes.expanding_green_line(route_ids)
+    route_ids = Routes.expanding_green_line(route_ids) |> Enum.reverse()
 
     stops =
       route_ids

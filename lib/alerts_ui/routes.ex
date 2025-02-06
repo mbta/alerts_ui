@@ -5,7 +5,7 @@ defmodule AlertsUI.Routes do
 
   alias MBTAV3API.Routes.Route
 
-  @green_line_branch_ids ["Green-E", "Green-D", "Green-C", "Green-B"]
+  @green_line_branch_ids ["Green-B", "Green-C", "Green-D", "Green-E"]
 
   @doc """
   Takes a list of route IDs and expands the virtual Green line route to turn it
@@ -16,7 +16,7 @@ defmodule AlertsUI.Routes do
       iex> Routes.expanding_green_line(["39", "Green", "Red", "Green-C"])
       ["39", "Green-B", "Green-C", "Green-D", "Green-E", "Red"]
   """
-  @spec expanding_green_line([Route.t()]) :: [Route.t()]
+  @spec expanding_green_line([Route.id_t() | String.t()]) :: [Route.id_t()]
   def expanding_green_line(route_ids) do
     route_ids
     |> Enum.flat_map(fn route_id ->

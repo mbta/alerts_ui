@@ -22,30 +22,32 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLine do
     |> Enum.map(&node_for_id(polytree, &1).value)
   end
 
+  def next_stop_or_branch(stop_tree, stop_id, merging_in_branches, splitting_off_branches)
+      when length(splitting_off_branches) > 0 do
+    {splitting_off_branch, remaining_splitting_off_branches} =
+      List.pop_at(splitting_off_branches, -1)
+
+    branch_stop_ids = stops_to_terminus(stop_tree, splitting_off_branch)
+    {terminal_stop_id, non_terminal_stops} = List.pop_at(branch_stop_ids, -1)
+
+    [
+      terminal_stop_id,
+      non_terminal_stops |> Enum.reverse(),
+      next_stop_or_branch(
+        stop_tree,
+        stop_id,
+        merging_in_branches,
+        remaining_splitting_off_branches
+      )
+    ]
+  end
+
   def next_stop_or_branch(stop_tree, stop_id, merging_in_branches, splitting_off_branches) do
     next_ids = next_stop_ids(stop_tree, stop_id)
     new_merging_in_branches = new_merging_in_branches(merging_in_branches, stop_tree, stop_id)
     merging_branch = merging_branch(stop_id, new_merging_in_branches)
 
     cond do
-      length(splitting_off_branches) > 0 ->
-        {splitting_off_branch, remaining_splitting_off_branches} =
-          List.pop_at(splitting_off_branches, -1)
-
-        branch_stop_ids = stops_to_terminus(stop_tree, splitting_off_branch)
-        {terminal_stop_id, non_terminal_stops} = List.pop_at(branch_stop_ids, -1)
-
-        [
-          terminal_stop_id,
-          non_terminal_stops |> Enum.reverse(),
-          next_stop_or_branch(
-            stop_tree,
-            stop_id,
-            merging_in_branches,
-            remaining_splitting_off_branches
-          )
-        ]
-
       length(merging_branch) > 0 ->
         remaining_merging_in_branches = Enum.filter(merging_in_branches, &(&1 !== merging_branch))
         [starting_id | non_starting_stops] = merging_branch
@@ -217,11 +219,15 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLine do
     if end_node?(stop_tree, id) do
       [id]
     else
-      next_stop_ids(stop_tree, id)
-      |> Enum.flat_map(fn next_id ->
-        paths_from(stop_tree, next_id) |> Enum.map(fn ids -> prepend_stop_id(ids, id) end)
-      end)
+      get_paths_from(stop_tree, id)
     end
+  end
+
+  defp get_paths_from(stop_tree, id) do
+    next_stop_ids(stop_tree, id)
+    |> Enum.flat_map(fn next_id ->
+      paths_from(stop_tree, next_id) |> Enum.map(fn ids -> prepend_stop_id(ids, id) end)
+    end)
   end
 
   def prepend_stop_id(stop_tree_ids, stop_id) when is_binary(stop_tree_ids) do
