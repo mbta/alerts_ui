@@ -764,7 +764,7 @@ defmodule AlertsUIWeb.SharedComponents do
         <div
           :if={@no_results && !@loading}
           class={[
-            "absolute ml-[1lintrem] text-text-disabled",
+            "absolute ml-[1rem] text-text-disabled",
             if(@prompt, do: "mt-[5.5rem]", else: "mt-[4rem]")
           ]}
         >
