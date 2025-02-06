@@ -386,6 +386,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             field={if @effect_name == "Detour", do: @form[:single_route_id], else: @form[:route_ids]}
             filter_field={@form[:route_ids_filter]}
             loading={@available_routes.loading}
+            no_results={Enum.empty?(@route_id_options)}
             options={@route_id_options}
             class={"#{@route_type !== 3 && "hidden"} h-full"}
             multiple={if @effect_name == "Detour", do: false, else: true}
@@ -450,6 +451,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             filter_field={@form[:stop_ids_filter]}
             options={@stop_id_options}
             loading={Map.get(@available_stops, :loading, true)}
+            no_results={
+              Enum.empty?(@stop_id_options) && !disable_stop_input?(@form[:route_ids].value)
+            }
             class={
               "min-w-[100%] " <>
               if(not show_trips_input?(assigns), do: "min-h-[90%]", else: "min-h-full")

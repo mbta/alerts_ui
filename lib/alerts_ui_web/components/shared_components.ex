@@ -761,7 +761,13 @@ defmodule AlertsUIWeb.SharedComponents do
           {@rest}
         />
         <hr class="w-5/6 self-center border-y-1 border-bg-elevation-6 min-h-[1rem]" />
-        <div :if={@no_results} class="absolute mt-[6rem] ml-[.75rem] text-text-disabled">
+        <div
+          :if={@no_results && !@loading}
+          class={[
+            "absolute ml-[1lintrem] text-text-disabled",
+            if(@prompt, do: "mt-[5.5rem]", else: "mt-[4rem]")
+          ]}
+        >
           No results
         </div>
         <.select
