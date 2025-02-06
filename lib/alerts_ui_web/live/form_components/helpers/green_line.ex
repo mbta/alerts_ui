@@ -1,14 +1,24 @@
 defmodule AlertsUIWeb.FormComponents.Helpers.GreenLine do
+  @moduledoc """
+    Given a list of stops chunked by route id, models their branching structure as a polytree and
+    returns a list of stops "in order" according to the following rubric:
+      Using the head of the longest (aka 'primary') route through the tree,
+      - if there aren't any branches at that node, return the next node.
+      - if there's a branch merging INTO it, start at the head of that branch, get all its stops, and place them before the node.
+      - if there are branches coming from it, gather the stops to the end of that branch, and place them after the node.
+      - continue to the end of the primary branch.
+      - this is recursive, so branches off branches follow the same logic.
+      This code is heavily based on DotCom's logic for the same task.
+  """
   def put_stops_in_order(stops_by_route_id) do
     polytree =
       stops_by_route_id
-      |> Enum.map(fn {route_id, stops} ->
+      |> Enum.map(fn {_route_id, stops} ->
         stops |> Enum.map(fn stop -> {stop.id, stop} end)
       end)
       |> UnrootedPolytree.from_lists()
 
     next_stop_or_branch(polytree, hd(longest_path(polytree)), [], [])
-    |> List.flatten()
     |> Enum.map(&node_for_id(polytree, &1).value)
   end
 
@@ -71,14 +81,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLine do
 
           [
             stop_id,
-            [],
             next_stop_or_branch(stop_tree, next_id, merging_in_branches_with_next, [])
           ]
         end
 
       true ->
-        [stop_id, [], next_ids]
+        [stop_id, next_ids]
     end
+    |> List.flatten()
   end
 
   def merging_in_branches_with_next(stop_tree, new_merging_in_branches) do
@@ -99,17 +109,16 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLine do
     Enum.find(new_merging_in_branches, [], fn branch -> List.last(branch) === stop_id end)
   end
 
-  def stops_to_terminus(stop_tree, stop_id)
-
-  def stops_to_terminus(stop_tree, stop_id, acc \\ []) do
-    acc = [stop_id | acc]
+  def stops_to_terminus(stop_tree, stop_id, stops \\ []) do
+    stops = [stop_id | stops]
     next_stop_ids = next_stop_ids(stop_tree, stop_id)
 
     if length(next_stop_ids) > 0 do
-      next_stop_ids |> Enum.flat_map(fn s_id -> stops_to_terminus(stop_tree, s_id, acc) end)
+      next_stop_ids |> Enum.flat_map(fn s_id -> stops_to_terminus(stop_tree, s_id, stops) end)
     else
-      acc
+      stops
     end
+    |> Enum.uniq()
   end
 
   def next_primary_and_branches(stop_tree, stop_ids) do
@@ -121,55 +130,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLine do
     end
   end
 
-  def is_on_primary_path(stop_tree, stop_id) do
-    stop_id in longest_path(stop_tree)
-  end
-
-  def stop_adjacent_to_merge(stop_tree, stop_id) do
-    stop_before_merging(stop_tree, stop_id) || stop_after_branching_off(stop_tree, stop_id)
-  end
-
-  def stop_before_merging(stop_tree, stop_id) do
-    if is_end_node(stop_tree, stop_id) do
-      nil
-    else
-      next_id = next_stop_ids(stop_tree, stop_id) |> Enum.at(0)
-
-      if is_merge_node(stop_tree, next_id) do
-        stop_id
-      else
-        stop_before_merging(stop_tree, next_id)
-      end
-    end
-  end
-
-  def stop_after_branching_off(stop_tree, stop_id) do
-    if is_start_node(stop_tree, stop_id) do
-      nil
-    else
-      previous_id = previous_stop_ids(stop_tree, stop_id) |> Enum.at(0)
-
-      if is_branching_node(stop_tree, previous_id) do
-        stop_id
-      else
-        stop_after_branching_off(stop_tree, previous_id)
-      end
-    end
-  end
-
-  def by_branch(stop_id, stop_tree) do
-    if is_on_primary_path(stop_tree, stop_id) do
-      "A"
-    else
-      node_for_id(stop_tree, stop_id).value.route_id
-    end
-  end
-
   def new_branches_starting_in_slice(stop_tree, stop_id) do
     stop_tree
     |> slice_for_id(stop_id)
-    |> Enum.filter(fn id ->
-      id !== stop_id && is_start_node(stop_tree, id)
+    |> Enum.filter(fn new_id ->
+      new_id !== stop_id && new_id in stop_tree.starting_nodes
     end)
   end
 
@@ -226,16 +191,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLine do
     result
   end
 
-  def is_merge_node(stop_tree, stop_id) do
+  def merge_node?(stop_tree, stop_id) do
     stop_tree |> previous_stop_ids(stop_id) |> length > 1
   end
 
-  def is_branching_node(stop_tree, stop_id) do
+  def branching_node?(stop_tree, stop_id) do
     stop_tree |> next_stop_ids(stop_id) |> length > 1
-  end
-
-  def is_start_node(stop_tree, stop_id) do
-    stop_id in stop_tree.starting_nodes
   end
 
   def longest_path(stop_tree) do
@@ -253,7 +214,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLine do
   end
 
   def paths_from(stop_tree, id) do
-    if is_end_node(stop_tree, id) do
+    if end_node?(stop_tree, id) do
       [id]
     else
       next_stop_ids(stop_tree, id)
@@ -271,20 +232,16 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLine do
     [stop_id | stop_tree_ids] |> List.flatten([])
   end
 
-  def is_end_node(stop_tree, id) do
+  def end_node?(stop_tree, id) do
     stop_tree |> next_stop_ids(id) |> length === 0
   end
 
   def next_stop_ids(stop_tree, id) do
-    edges_for_id(stop_tree, id).next
+    stop_tree.edges[id].next
   end
 
   def previous_stop_ids(stop_tree, id) do
-    edges_for_id(stop_tree, id).previous
-  end
-
-  def edges_for_id(stop_tree, id) do
-    stop_tree.edges[id]
+    stop_tree.edges[id].previous
   end
 
   def max_value_from_list(value_list) do
