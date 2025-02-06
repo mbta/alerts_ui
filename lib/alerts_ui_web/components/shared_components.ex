@@ -721,6 +721,8 @@ defmodule AlertsUIWeb.SharedComponents do
     required: true,
     doc: "the options to pass to Phoenix.HTML.Form.options_for_select/2"
 
+  attr :no_results, :boolean, default: false, doc: "true if result has been returned but is empty"
+
   attr :disabled, :boolean, default: false, doc: "whether the element is disabled"
 
   attr :rest, :global, include: ~w(disabled phx-debounce)
@@ -759,6 +761,9 @@ defmodule AlertsUIWeb.SharedComponents do
           {@rest}
         />
         <hr class="w-5/6 self-center border-y-1 border-bg-elevation-6 min-h-[1rem]" />
+        <div :if={@no_results} class="absolute mt-[6rem] ml-[.75rem] text-text-disabled">
+          No results
+        </div>
         <.select
           multiple={@multiple}
           size="2"

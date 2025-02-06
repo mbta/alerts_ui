@@ -422,6 +422,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
               filter_field={@form[:trip_ids_filter]}
               options={@trip_id_options}
               loading={Map.get(@available_schedules, :loading, true)}
+              no_results={
+                Enum.empty?(@trip_id_options) && !disable_trip_input?(@form[:route_ids].value)
+              }
               class={
                 "min-w-[100%] " <>
                 if(not show_trips_input?(assigns), do: "min-h-[90%]", else: "min-h-full")
