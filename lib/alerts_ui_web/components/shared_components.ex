@@ -672,11 +672,7 @@ defmodule AlertsUIWeb.SharedComponents do
         disabled={@disabled}
         {@rest}
       >
-        <option
-          :if={@prompt}
-          value="default"
-          selected={if @loading, do: false, else: @value in ["default", []]}
-        >
+        <option :if={@prompt} value="default" selected={true}>
           {@prompt}
         </option>
         {Form.options_for_select(@options, @value)}
@@ -759,11 +755,11 @@ defmodule AlertsUIWeb.SharedComponents do
           field={@filter_field}
           placeholder={if @disabled, do: nil, else: "⌕ Search..."}
           disabled={@disabled}
+          phx-debounce="100"
           {@rest}
         />
         <hr class="w-5/6 self-center border-y-1 border-bg-elevation-6 min-h-[1rem]" />
         <.select
-          phx-change={JS.dispatch("phx:default_selection", to: "#" <> @id)}
           multiple={@multiple}
           size="2"
           options={if @loading, do: [], else: @options}
