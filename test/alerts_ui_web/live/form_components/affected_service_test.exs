@@ -223,7 +223,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         })
 
         refute view
-               |> render() =~ ~s(disabled="disabled")
+               |> render() =~ ~s(multiple=\"multiple\" disabled=\"disabled\")
       end
     end
 

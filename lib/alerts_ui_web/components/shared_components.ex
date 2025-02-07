@@ -642,6 +642,8 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :disabled, :boolean, default: false, doc: "whether the element is disabled"
 
+  attr :no_results, :boolean, default: false, doc: "true if result has been returned but is empty"
+
   attr :rest, :global, include: ~w(disabled size phx-debounce)
 
   def select(%{field: %FormField{} = field} = assigns) do
@@ -672,8 +674,16 @@ defmodule AlertsUIWeb.SharedComponents do
         disabled={@disabled}
         {@rest}
       >
-        <option :if={@prompt} value="default" selected={true}>
+        <option
+          :if={@prompt}
+          value="default"
+          selected={if @loading, do: false, else: true}
+          disabled={if @loading, do: true, else: false}
+        >
           {@prompt}
+        </option>
+        <option :if={@no_results && !@loading} value="" selected={false} disabled={true}>
+          No results
         </option>
         {Form.options_for_select(@options, @value)}
       </select>
@@ -761,20 +771,12 @@ defmodule AlertsUIWeb.SharedComponents do
           {@rest}
         />
         <hr class="w-5/6 self-center border-y-1 border-bg-elevation-6 min-h-[1rem]" />
-        <div
-          :if={@no_results && !@loading}
-          class={[
-            "absolute ml-[1rem] text-text-disabled",
-            if(@prompt, do: "mt-[5.5rem]", else: "mt-[4rem]")
-          ]}
-        >
-          No results
-        </div>
         <.select
           multiple={@multiple}
           size="2"
           options={if @loading, do: [], else: @options}
           field={@field}
+          no_results={@no_results}
           prompt={
             cond do
               @disabled -> nil
