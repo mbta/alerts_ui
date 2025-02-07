@@ -193,14 +193,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLine do
     result
   end
 
-  def merge_node?(stop_tree, stop_id) do
-    stop_tree |> previous_stop_ids(stop_id) |> length > 1
-  end
-
-  def branching_node?(stop_tree, stop_id) do
-    stop_tree |> next_stop_ids(stop_id) |> length > 1
-  end
-
   def longest_path(stop_tree) do
     stop_tree
     |> paths()

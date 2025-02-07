@@ -5,14 +5,23 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLineTest do
   alias MBTAV3API.Stops.Stop
 
   ###
-  #          a1 ---> a2                          x1 ---> x2
+  #          a1 ---> a2                          q1 ---> q2
   #                        \                    ˄
   #                         ˅                  /
   #  b1 ---> b2 ---> b3 ---> m1 ---> m2 ---> m3
   #                                 ˄          \
   #                                /            ˅
-  #                  c1 ---> c2                  y1
+  #                  c1 ---> c2                  p1
   ###
+
+  @stops_by_route %{
+    "a" => [%{id: "a1"}, %{id: "a2"}, %{id: "m1"}],
+    "b" => [%{id: "b1"}, %{id: "b2"}, %{id: "b3"}, %{id: "m1"}],
+    "c" => [%{id: "c1"}, %{id: "c2"}, %{id: "m2"}],
+    "m" => [%{id: "m1"}, %{id: "m2"}, %{id: "m3"}],
+    "p" => [%{id: "m3"}, %{id: "p1"}],
+    "q" => [%{id: "m3"}, %{id: "q1"}, %{id: "q2"}]
+  }
 
   @stop_tree %{
     by_id: %{
@@ -26,9 +35,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLineTest do
       "m1" => %{id: "m1", value: %Stop{id: "m1"}},
       "m2" => %{id: "m2", value: %Stop{id: "m2"}},
       "m3" => %{id: "m3", value: %Stop{id: "m3"}},
-      "x1" => %{id: "x1", value: %Stop{id: "x1"}},
-      "x2" => %{id: "x2", value: %Stop{id: "x2"}},
-      "y1" => %{id: "y1", value: %Stop{id: "y1"}}
+      "p1" => %{id: "p1", value: %Stop{id: "p1"}},
+      "q1" => %{id: "q1", value: %Stop{id: "q1"}},
+      "q2" => %{id: "q2", value: %Stop{id: "q2"}}
     },
     edges: %{
       "a1" => %{next: ["a2"], previous: []},
@@ -40,23 +49,41 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLineTest do
       "c2" => %{next: ["m2"], previous: ["c1"]},
       "m1" => %{next: ["m2"], previous: ["a2", "b3"]},
       "m2" => %{next: ["m3"], previous: ["c2", "m1"]},
-      "m3" => %{next: ["x1", "y1"], previous: ["m2"]},
-      "x1" => %{next: ["x2"], previous: ["m3"]},
-      "x2" => %{next: [], previous: ["x1"]},
-      "y1" => %{next: [], previous: ["m3"]}
+      "m3" => %{next: ["q1", "p1"], previous: ["m2"]},
+      "p1" => %{next: [], previous: ["m3"]},
+      "q1" => %{next: ["q2"], previous: ["m3"]},
+      "q2" => %{next: [], previous: ["q1"]}
     },
     starting_nodes: ["a1", "b1", "c1"]
   }
 
+  @correct_stop_order [
+    "b1",
+    "b2",
+    "b3",
+    "a1",
+    "m1",
+    "a2",
+    "m1",
+    "c1",
+    "m2",
+    "c2",
+    "m2",
+    "m3",
+    "p1",
+    "q1",
+    "q2"
+  ]
+
   describe "paths/1" do
     test "returns every possible path through the tree" do
       expected = [
-        ["a1", "a2", "m1", "m2", "m3", "x1", "x2"],
-        ["a1", "a2", "m1", "m2", "m3", "y1"],
-        ["b1", "b2", "b3", "m1", "m2", "m3", "x1", "x2"],
-        ["b1", "b2", "b3", "m1", "m2", "m3", "y1"],
-        ["c1", "c2", "m2", "m3", "x1", "x2"],
-        ["c1", "c2", "m2", "m3", "y1"]
+        ["a1", "a2", "m1", "m2", "m3", "q1", "q2"],
+        ["a1", "a2", "m1", "m2", "m3", "p1"],
+        ["b1", "b2", "b3", "m1", "m2", "m3", "q1", "q2"],
+        ["b1", "b2", "b3", "m1", "m2", "m3", "p1"],
+        ["c1", "c2", "m2", "m3", "q1", "q2"],
+        ["c1", "c2", "m2", "m3", "p1"]
       ]
 
       actual = GreenLine.paths(@stop_tree)
@@ -79,8 +106,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLineTest do
         MapSet.new(["m1", "c2"]),
         MapSet.new(["m2"]),
         MapSet.new(["m3"]),
-        MapSet.new(["x1", "y1"]),
-        MapSet.new(["x2"])
+        MapSet.new(["q1", "p1"]),
+        MapSet.new(["q2"])
       ]
 
       actual = GreenLine.slices(@stop_tree)
@@ -105,7 +132,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLineTest do
   describe "next_primary_and_branches/2" do
     test "given next ids, separates primary path ids from branch ones" do
       next_ids = GreenLine.next_stop_ids(@stop_tree, "m3")
-      expected = ["x1", ["y1"]]
+      expected = ["q1", ["p1"]]
       actual = GreenLine.next_primary_and_branches(@stop_tree, next_ids)
       assert expected === actual
     end
@@ -113,7 +140,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLineTest do
 
   describe "stops_to_terminus/3" do
     test "given an id, returns all stops on branch to end" do
-      expected = ["x2", "x1", "m3", "m2", "m1", "b3", "b2", "b1", "y1"]
+      expected = ["q2", "q1", "m3", "m2", "m1", "b3", "b2", "b1", "p1"]
       actual = GreenLine.stops_to_terminus(@stop_tree, "b1")
       assert expected === actual
     end
@@ -121,26 +148,17 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLineTest do
 
   describe "next_stop_or_branch/4" do
     test "given a polytree and a starting node returns list of stops in order" do
-      expected = [
-        "b1",
-        "b2",
-        "b3",
-        "a1",
-        "m1",
-        "a2",
-        "m1",
-        "c1",
-        "m2",
-        "c2",
-        "m2",
-        "m3",
-        "y1",
-        "x1",
-        "x2"
-      ]
-
+      expected = @correct_stop_order
       actual = GreenLine.next_stop_or_branch(@stop_tree, "b1", [], []) |> List.flatten()
       assert expected === actual
+    end
+  end
+
+  describe "put_stops_in_order/1" do
+    test "given a keyword list of stops by route, return stops in order" do
+      expected = @correct_stop_order
+      actual = GreenLine.put_stops_in_order(@stops_by_route)
+      assert expected === actual |> Enum.map(& &1.id)
     end
   end
 end
