@@ -18,6 +18,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations do
       :RDS
       iex> ServiceEffectCombinations.get_combination(1, "Station Closure")
       :SR
+      iex> ServiceEffectCombinations.get_combination(1, "Extra Service")
+      :R
       iex> ServiceEffectCombinations.get_combination(2, "Suspension")
       :RDS
       iex> ServiceEffectCombinations.get_combination(2, "Delay")
@@ -44,6 +46,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations do
       :SR
       iex> ServiceEffectCombinations.get_combination(4, "Extra Service")
       :R
+      iex> ServiceEffectCombinations.required_fields(nil)
+      []
+      iex> ServiceEffectCombinations.required_fields(:R)
+      ~w[route_ids]a
+      iex> ServiceEffectCombinations.required_fields(:SR)
+      ~w[route_ids stop_ids]a
+      iex> ServiceEffectCombinations.required_fields(:RDT)
+      ~w[route_ids direction trip_ids]a
   """
 
   @spec get_combination(Route.type_int() | nil, String.t() | nil) ::

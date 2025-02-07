@@ -204,6 +204,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
     required_fields_by_specifier(params["alert_timing"], changeset, params)
   end
 
+  defp required_fields_by_specifier(:"one-time", changeset, params),
+    do: required_fields_by_specifier("one-time", changeset, params)
+
   defp required_fields_by_specifier("one-time", changeset, params) do
     changeset
     |> validate_required(
@@ -215,6 +218,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
       message: "Enter a valid time range end"
     )
   end
+
+  defp required_fields_by_specifier(:recurring, changeset, params),
+    do: required_fields_by_specifier("recurring", changeset, params)
 
   defp required_fields_by_specifier("recurring", changeset, params) do
     changeset

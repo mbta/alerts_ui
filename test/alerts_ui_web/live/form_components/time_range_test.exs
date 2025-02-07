@@ -53,7 +53,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
                ~s(<div phx-feedback-for="time_range[active_period_end_date]" class="min-w-[16rem] max-w-[16rem] h-10 hidden">)
     end
 
-    test "works if editing" do
+    test "editing with error field sends error" do
       {:ok, view, _html} =
         live_isolated_component(TimeRange, @assigns)
 
@@ -67,6 +67,43 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
       assert view
              |> render() =~ "custom"
+
+      assert_receive {:__live_isolated_component_handle_info_received__, _pid,
+                      {:add_errors,
+                       [{:active_period_start_date, {"Effect can't start in the past", []}}],
+                       AlertsUIWeb.FormComponents.TimeRange}}
+    end
+
+    test "editing with no errors sends data" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
+      start_time =
+        DateTime.utc_now()
+        |> DateTime.add(1, :hour)
+        |> DateTime.shift_zone!("America/New_York")
+        |> DateTime.truncate(:second)
+        |> DateTime.to_naive()
+
+      live_assign(view, %{
+        editing: true,
+        alert_data: %{
+          active_period_start: start_time,
+          active_period_start_specifier: "custom"
+        }
+      })
+
+      assert view
+             |> render() =~ "custom"
+
+      assert_receive {:__live_isolated_component_handle_info_received__, _pid,
+                      {:add_errors, [], AlertsUIWeb.FormComponents.TimeRange}}
+
+      assert_receive {:__live_isolated_component_handle_info_received__, _pid,
+                      {:section_completed,
+                       %TimeRange{
+                         active_period_start: ^start_time
+                       }}}
     end
 
     test "displays error if start invalid" do
@@ -141,7 +178,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       assert render(view) =~ ~s(Effect must end after 05/01/2024, 10:54 AM)
     end
 
-    test "displays error if start after trip end" do
+    test "displays error if start after trip end when start changes" do
       schedule = %Schedule{
         trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
         arrival_time: ~U[2024-05-01 09:15:00.00Z],
@@ -168,6 +205,39 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
           "active_period_start" => "2024-05-01T10:16:00"
         }
       })
+
+      assert render(view) =~ ~s(Effect must start before 05/01/2024, 10:15 AM)
+    end
+
+    test "displays error if start after trip end when trip changes" do
+      schedule = %Schedule{
+        trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
+        arrival_time: ~U[2024-05-01 09:15:00.00Z],
+        departure_time: ~U[2024-05-01 08:15:00.00Z]
+      }
+
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end_specifier" => "custom",
+          "active_period_start_specifier" => "custom"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end" => "2024-05-01T11:54:00",
+          "active_period_start" => "2024-05-01T10:16:00"
+        }
+      })
+
+      live_assign(view, :selected_trips, [schedule])
 
       assert render(view) =~ ~s(Effect must start before 05/01/2024, 10:15 AM)
     end

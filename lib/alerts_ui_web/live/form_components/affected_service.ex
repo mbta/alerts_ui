@@ -203,7 +203,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
            :validate
          ) do
       {:ok, changeset} ->
-        available_schedules = Map.get(socket.assigns.available_schedules, :result, [])
+        available_schedules = Map.get(socket.assigns.available_schedules, :result, []) || []
 
         selected_trips =
           available_schedules

@@ -82,7 +82,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         |> shifted_active_period_end()
         |> NaiveDateTime.to_date(),
       active_period_start_time_specifier: "start_of_service",
-      active_period_end_time_specifier: "end_of_service"
+      active_period_end_time_specifier: "end_of_service",
+      edited: false
     }
 
     changeset = changeset(%__MODULE__{}, alert_data)
@@ -116,48 +117,90 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   @impl true
   def update(
-        %{editing: editing, alert_data: alert_data, selected_trips: selected_trips} = assigns,
+        %{alert_data: alert_data, editing: true, selected_trips: selected_trips} = assigns,
         socket
       ) do
-    trip_arrival_time =
-      selected_trips
-      |> Enum.map(& &1.arrival_time)
-      |> Enum.max(DateTime, fn -> nil end)
-      |> utc_datetime_to_naive()
-
-    alert_data =
-      if editing == true and socket.assigns.edited === false do
-        alert_data
-        |> Enum.filter(fn {_k, v} -> !is_nil(v) end)
-        |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
-      else
-        %{}
-      end
+    trip_arrival_time = get_trip_arrival_time(selected_trips)
 
     assigns =
-      assigns
-      |> Map.put(:trip_arrival_time, trip_arrival_time)
-      |> Map.put(:edited, true)
-      |> Map.put(:alert_data, Map.merge(socket.assigns.form.params, alert_data))
+      if socket.assigns.edited == false do
+        alert_data =
+          alert_data
+          |> Enum.filter(fn {_k, v} -> !is_nil(v) end)
+          |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
+
+        assigns =
+          assigns
+          |> Map.put(:alert_data, Map.merge(socket.assigns.form.params, alert_data))
+          |> Map.put(:trip_arrival_time, trip_arrival_time)
+
+        changeset =
+          %__MODULE__{}
+          |> changeset(assigns.alert_data)
+          |> TimeRangeValidators.validate_required_fields(assigns.alert_data)
+          |> TimeRangeValidators.validate_relationships(
+            assigns.alert_data["alert_timing"],
+            assigns.alert_data
+          )
+          |> TimeRangeValidators.validate_start_is_before_trip(assigns.trip_arrival_time)
+          |> TimeRangeValidators.validate_start_is_after_now(
+            socket.assigns.current_time,
+            assigns.alert_data
+          )
+
+        changeset
+        |> apply_action(:validate)
+        |> case do
+          {:ok, changes} ->
+            send(self(), {:add_errors, [], __MODULE__})
+            send(self(), {:section_completed, changes})
+
+          {:error, changeset} ->
+            send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
+        end
+
+        form =
+          changeset
+          |> to_form()
+          |> Map.put(:action, :validate)
+
+        assigns |> Map.merge(%{form: form, edited: true})
+      else
+        assigns
+        |> Map.put(:trip_arrival_time, trip_arrival_time)
+      end
+
+    {:ok, assign(socket, assigns)}
+  end
+
+  @impl true
+  def update(
+        %{selected_trips: selected_trips} = assigns,
+        socket
+      ) do
+    trip_arrival_time = get_trip_arrival_time(selected_trips)
 
     changeset =
       %__MODULE__{}
-      |> changeset(assigns.alert_data)
-      |> TimeRangeValidators.validate_required_fields(assigns.alert_data)
-      |> TimeRangeValidators.validate_relationships(
-        assigns.alert_data["alert_timing"],
-        assigns.alert_data
-      )
-      |> TimeRangeValidators.validate_start_is_before_trip(assigns.trip_arrival_time)
-      |> TimeRangeValidators.validate_start_is_after_now(
-        socket.assigns.current_time,
-        assigns.alert_data
-      )
+      |> changeset(socket.assigns.form.params)
+      |> TimeRangeValidators.validate_start_is_before_trip(trip_arrival_time)
+
+    changeset
+    |> apply_action(:validate)
+    |> case do
+      {:ok, changes} ->
+        send(self(), {:add_errors, [], __MODULE__})
+        send(self(), {:section_completed, changes})
+
+      {:error, changeset} ->
+        send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
+    end
 
     errors =
-      case changeset |> apply_action(:validate) do
-        {:ok, _changeset} -> []
-        {:error, changeset} -> ErrorFormatter.parse_field_errors(changeset)
+      if changeset.valid? do
+        []
+      else
+        ErrorFormatter.parse_field_errors(changeset)
       end
 
     form =
@@ -166,7 +209,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       |> Map.put(:action, :validate)
       |> Map.put(:errors, errors)
 
-    {:ok, assign(socket, assigns |> Map.put(:form, form))}
+    assigns = assigns |> Map.put(:trip_arrival_time, trip_arrival_time) |> Map.put(:form, form)
+    {:ok, assign(socket, assigns)}
   end
 
   @impl true
@@ -218,6 +262,13 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       end
 
     {:ok, socket}
+  end
+
+  defp get_trip_arrival_time(selected_trips) do
+    selected_trips
+    |> Enum.map(& &1.arrival_time)
+    |> Enum.max(DateTime, fn -> nil end)
+    |> utc_datetime_to_naive()
   end
 
   @impl true
@@ -357,6 +408,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   defp set_start_time(time_range, current_time, previous_state) do
     case time_range["active_period_start_time_specifier"] do
+      :start_of_service ->
+        ActivePeriod.start_of_service_time()
+
       "start_of_service" ->
         ActivePeriod.start_of_service_time()
 
@@ -371,6 +425,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   defp set_end_time(time_range, current_time, previous_state) do
     case time_range["active_period_end_time_specifier"] do
+      :end_of_service ->
+        ActivePeriod.end_of_service_time()
+
       "end_of_service" ->
         ActivePeriod.end_of_service_time()
 
@@ -425,13 +482,17 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         |> ActivePeriod.end_of_service_datetime_naive()
 
       "end_of_service" ->
-        if previous_state !== "end_of_service" do
-          shifted_active_period_end(current_time)
-          |> naive_datetime_to_iso8601()
-        else
-          time_range["active_period_end_date"]
-          |> Date.from_iso8601!()
-          |> NaiveDateTime.new!(ActivePeriod.end_of_service_time())
+        cond do
+          previous_state !== "end_of_service" ->
+            shifted_active_period_end(current_time) |> naive_datetime_to_iso8601()
+
+          time_range["active_period_end_date"] in ["", nil] ->
+            ""
+
+          true ->
+            time_range["active_period_end_date"]
+            |> Date.from_iso8601!()
+            |> NaiveDateTime.new!(ActivePeriod.end_of_service_time())
         end
 
       "until_further_notice" ->

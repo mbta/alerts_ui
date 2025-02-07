@@ -48,6 +48,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.RecurringDurationText do
     Timex.format!(time, "{h12}:{0m} {AM}")
   end
 
+  def date_text(_, :until_further_notice) do
+    "alert is manually closed"
+  end
+
   def date_text(_, "until_further_notice") do
     "alert is manually closed"
   end
@@ -94,7 +98,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.RecurringDurationText do
   def weekday_text(weekday_list) do
     [hd | tail] =
       weekday_list
-      |> Enum.map(&String.capitalize/1)
+      |> Enum.map(fn weekday ->
+        if is_atom(weekday) do
+          Atom.to_string(weekday)
+        else
+          weekday
+        end
+        |> String.capitalize()
+      end)
       |> Enum.reverse()
 
     ["and " <> hd | tail]

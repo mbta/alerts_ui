@@ -63,6 +63,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         send(view.pid, {:step_completed, changeset})
 
         second_rendered_view = render_async(view)
+
         refute second_rendered_view =~ ~s(class="min-w-full flex flex-col mb-8" id="route_view")
         assert second_rendered_view =~ ~s(class="min-w-full flex flex-col mt-4" id="details_view")
 
@@ -97,8 +98,8 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         send(view.pid, {:add_errors, [], AlertDetails})
         send(view.pid, {:section_completed, changeset})
         send(view.pid, :create_alert)
-        rendered_view = render_async(view)
 
+        rendered_view = render_async(view)
         assert rendered_view =~ "created successfully"
       end
     end
@@ -305,6 +306,8 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
           |> apply_action(:insert)
 
         send(view.pid, {:step_completed, changeset})
+
+        view |> render_async
 
         assert view
                |> element("#service_form")

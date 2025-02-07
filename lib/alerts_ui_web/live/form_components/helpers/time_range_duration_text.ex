@@ -31,6 +31,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationText do
     Timex.format!(start_dt, "{WDshort} {Mshort} {0D}, {YYYY} @ {h12}:{0m} {AM}")
   end
 
+  defp end_text(:until_further_notice, end_dt), do: end_text("until_further_notice", end_dt)
+
   defp end_text("until_further_notice", _end_dt) do
     "alert is manually closed"
   end
@@ -45,15 +47,21 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationText do
 
   defp end_text(_, nil), do: ""
 
+  defp end_text(:end_of_service, end_dt), do: end_text("end_of_service", end_dt)
+
   defp end_text("end_of_service", end_dt) do
     end_dt = NaiveDateTime.add(end_dt, 1, :day)
 
     Timex.format!(end_dt, "{WDshort} {Mshort} {0D}, {YYYY} @ {h12}:{0m} {AM}")
   end
 
+  defp end_text(:custom, end_dt), do: end_text("custom", end_dt)
+
   defp end_text("custom", end_dt) do
     Timex.format!(end_dt, "{WDshort} {Mshort} {0D}, {YYYY} @ {h12}:{0m} {AM}")
   end
+
+  defp duration(:until_further_notice, _, _), do: "(indefinite)"
 
   defp duration("until_further_notice", _start_dt, _end_dt) do
     "(indefinite)"
@@ -62,9 +70,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationText do
   defp duration(_, nil, _), do: ""
   defp duration(_, _, nil), do: ""
 
+  defp duration(:later_today, start_dt, end_dt), do: duration("later_today", start_dt, end_dt)
+
   defp duration("later_today", start_dt, end_dt) do
     "(max #{duration_text(start_dt, end_dt)})"
   end
+
+  defp duration(:end_of_service, start_dt, end_dt),
+    do: duration("end_of_service", start_dt, end_dt)
 
   defp duration("end_of_service", start_dt, end_dt) do
     end_dt = NaiveDateTime.add(end_dt, 1, :day)
