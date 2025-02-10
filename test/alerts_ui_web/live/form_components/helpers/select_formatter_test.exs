@@ -70,7 +70,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
         }
       ]
 
-      results = SelectFormatter.formatted_select_options(objects, "Ashmont/Braintree", nil)
+      results = SelectFormatter.formatted_select_options(objects, "Ashmont/Braintree", nil, [])
 
       assert results == [
                {"Ashmont/Braintree platform to lobby", "951"},
@@ -114,7 +114,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
         ]
       }
 
-      results = SelectFormatter.formatted_trip_options(trip_map, 2)
+      results = SelectFormatter.formatted_trip_options(trip_map, 2, "", [])
 
       assert results == [
                {"527 (9:01 AM from South Station)", "CR-683300-527"},
@@ -148,7 +148,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
         ]
       }
 
-      results = SelectFormatter.formatted_trip_options(trip_map, 4)
+      results = SelectFormatter.formatted_trip_options(trip_map, 4, "", [])
 
       assert results == [
                {"10:01 AM from Long Wharf (South) to Charlestown Navy Yard",
@@ -192,7 +192,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
         ]
       }
 
-      results = SelectFormatter.formatted_trip_options(trip_map, 2)
+      results = SelectFormatter.formatted_trip_options(trip_map, 2, "", [])
 
       assert results == [
                {"Framingham/Worcester line",
@@ -244,7 +244,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
         ]
       }
 
-      results = SelectFormatter.formatted_trip_options(trip_map, 2, "Forest")
+      results = SelectFormatter.formatted_trip_options(trip_map, 2, "Forest", [])
 
       assert results == [
                {"Framingham/Worcester line", []},

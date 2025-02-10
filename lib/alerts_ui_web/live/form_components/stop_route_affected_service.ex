@@ -215,25 +215,30 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   def render(assigns) do
     route_filter_value = assigns.form[:route_ids_filter].value
 
+    route_ids = assigns.form[:route_ids].value || []
+
     route_id_options =
       if async_available?(assigns, :available_routes) do
         SelectFormatter.formatted_select_options(
           assigns.available_routes.result,
           route_filter_value,
-          assigns.route_type
+          assigns.route_type,
+          route_ids
         )
       else
         []
       end
 
     stop_filter_value = assigns.form[:stop_ids_filter].value
+    stop_ids = assigns.form[:stop_ids].value || []
 
     stop_id_options =
       if async_available?(assigns, :available_stops) do
         SelectFormatter.formatted_select_options(
           assigns.available_stops.result,
           stop_filter_value,
-          assigns.route_type
+          assigns.route_type,
+          stop_ids
         )
       else
         []

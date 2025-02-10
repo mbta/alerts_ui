@@ -309,7 +309,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         SelectFormatter.formatted_select_options(
           assigns.available_routes.result,
           route_filter_value,
-          assigns.route_type
+          assigns.route_type,
+          route_ids
         )
       else
         []
@@ -328,6 +329,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         direction_names_map
       )
 
+    trip_ids = assigns.form[:trip_ids].value || []
     trip_filter_value = assigns.form[:trip_ids_filter].value
 
     trip_id_options =
@@ -337,11 +339,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
           schedule.route.id in Map.get(assigns.form[:route_ids], :value, [])
         end)
         |> Enum.group_by(&SelectFormatter.name_for_option(&1.route))
-        |> SelectFormatter.formatted_trip_options(assigns.route_type, trip_filter_value)
+        |> SelectFormatter.formatted_trip_options(assigns.route_type, trip_filter_value, trip_ids)
       else
         []
       end
 
+    stop_ids = assigns.form[:stop_ids].value || []
     stop_filter_value = assigns.form[:stop_ids_filter].value
 
     stop_id_options =
@@ -349,7 +352,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         SelectFormatter.formatted_select_options(
           assigns.available_stops.result,
           stop_filter_value,
-          assigns.route_type
+          assigns.route_type,
+          stop_ids
         )
       else
         []

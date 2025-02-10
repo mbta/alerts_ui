@@ -19,23 +19,23 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
 
   @spec formatted_select_options([Route.t() | Stop.t()], String.t(), integer() | nil) ::
           keyword(String.t())
-  def formatted_select_options(objects, filter_value, route_type) do
+  def formatted_select_options(objects, filter_value, route_type, values_to_keep \\ []) do
     objects
     |> formatted_select_options(route_type)
-    |> filter_options(filter_value)
+    |> filter_options(filter_value, values_to_keep)
   end
 
-  @spec filter_options(list(), String.t() | nil) :: list()
-  def filter_options(options, nil), do: options
-  def filter_options(options, ""), do: options
+  @spec filter_options(list(), String.t() | nil, [String.t()]) :: list()
+  def filter_options(options, nil, _), do: options
+  def filter_options(options, "", _), do: options
 
-  def filter_options(options, filter_value) do
+  def filter_options(options, filter_value, values_to_keep) do
     filter_value = String.downcase(filter_value || "")
 
-    Enum.filter(options, fn {option, _value} ->
+    Enum.filter(options, fn {option, value} ->
       (option || "")
       |> String.downcase()
-      |> String.contains?(filter_value)
+      |> String.contains?(filter_value) || value in values_to_keep
     end)
   end
 
@@ -89,14 +89,16 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   def id_for_option(%Facility{id: id}), do: id
   def id_for_option(%Schedule{trip: %Trip{id: id}}), do: id
 
-  @spec formatted_trip_options(%{String.t() => [Schedule.t()]}, integer(), String.t()) ::
+  @spec formatted_trip_options(%{String.t() => [Schedule.t()]}, integer(), String.t(), [
+          String.t()
+        ]) ::
           keyword(String.t())
-  def formatted_trip_options(schedules_by_route_name, route_type, filter_value \\ "") do
+  def formatted_trip_options(schedules_by_route_name, route_type, filter_value, options_to_keep) do
     if schedules_by_route_name |> Map.keys() |> length() <= 1 do
       schedules_by_route_name
       |> Map.values()
       |> List.flatten()
-      |> formatted_select_options(filter_value, route_type)
+      |> formatted_select_options(filter_value, route_type, options_to_keep)
     else
       Enum.reduce(schedules_by_route_name, [], fn {route_name, schedules}, acc ->
         acc ++ [{route_name, formatted_select_options(schedules, filter_value, route_type)}]
