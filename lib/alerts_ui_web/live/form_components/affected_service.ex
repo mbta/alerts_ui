@@ -306,12 +306,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     route_id_options =
       if assigns.available_routes.ok? && assigns.available_routes.result do
-        SelectFormatter.formatted_select_options(
-          assigns.available_routes.result,
-          route_filter_value,
-          assigns.route_type,
-          route_ids
-        )
+        SelectFormatter.formatted_select_options(%SelectFormatter{
+          options: assigns.available_routes.result,
+          filter_value: route_filter_value,
+          route_type: assigns.route_type,
+          values_to_keep: route_ids
+        })
       else
         []
       end
@@ -334,12 +334,19 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     trip_id_options =
       if async_available?(assigns, :available_schedules) do
-        assigns.available_schedules.result
-        |> Enum.filter(fn schedule ->
-          schedule.route.id in Map.get(assigns.form[:route_ids], :value, [])
-        end)
-        |> Enum.group_by(&SelectFormatter.name_for_option(&1.route))
-        |> SelectFormatter.formatted_trip_options(assigns.route_type, trip_filter_value, trip_ids)
+        schedules_by_route_type =
+          assigns.available_schedules.result
+          |> Enum.filter(fn schedule ->
+            schedule.route.id in Map.get(assigns.form[:route_ids], :value, [])
+          end)
+          |> Enum.group_by(&SelectFormatter.name_for_option(&1.route))
+
+        SelectFormatter.formatted_select_options(%SelectFormatter{
+          schedules_by_route_name: schedules_by_route_type,
+          route_type: assigns.route_type,
+          filter_value: trip_filter_value,
+          values_to_keep: trip_ids
+        })
       else
         []
       end
@@ -349,12 +356,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     stop_id_options =
       if async_available?(assigns, :available_stops) do
-        SelectFormatter.formatted_select_options(
-          assigns.available_stops.result,
-          stop_filter_value,
-          assigns.route_type,
-          stop_ids
-        )
+        SelectFormatter.formatted_select_options(%SelectFormatter{
+          options: assigns.available_stops.result,
+          filter_value: stop_filter_value,
+          route_type: assigns.route_type,
+          values_to_keep: stop_ids
+        })
       else
         []
       end

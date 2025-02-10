@@ -173,27 +173,43 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     type_filter_value = assigns.form[:facility_types_filter].value
     facility_types = assigns.form[:facility_types].value || []
 
-    facility_type_options =
+    types =
       assigns.facility_types
       |> Enum.filter(&filter_type_by_stop_ids(&1, params, stops))
       |> Enum.map(&{&1 |> String.capitalize() |> String.replace("_", " "), &1})
-      |> SelectFormatter.filter_options(type_filter_value, facility_types)
+
+    facility_type_options =
+      SelectFormatter.filter_options(
+        types,
+        type_filter_value,
+        facility_types
+      )
 
     stop_filter_value = assigns.form[:stop_ids_filter].value
 
     stop_ids = assigns.form[:stop_ids].value || []
 
     stop_id_options =
-      SelectFormatter.formatted_select_options(stops, stop_filter_value, nil, stop_ids)
+      SelectFormatter.formatted_select_options(%SelectFormatter{
+        options: stops,
+        filter_value: stop_filter_value,
+        values_to_keep: stop_ids
+      })
 
     facility_filter_value = assigns.form[:facility_id_filter].value
-    facility_id = (assigns.form[:facility_id].value || "") |> List.wrap()
+    facility_id = assigns.form[:facility_id].value || ""
 
     facility_id_options =
       if async_available?(assigns, :available_facilities) do
-        assigns.available_facilities.result.facilities
-        |> Enum.filter(&filter_facility_by_type_and_stop_ids(&1, params))
-        |> SelectFormatter.formatted_select_options(facility_filter_value, nil, facility_id)
+        options =
+          assigns.available_facilities.result.facilities
+          |> Enum.filter(&filter_facility_by_type_and_stop_ids(&1, params))
+
+        SelectFormatter.formatted_select_options(%SelectFormatter{
+          options: options,
+          filter_value: facility_filter_value,
+          values_to_keep: List.wrap(facility_id)
+        })
         |> Enum.map(fn {name, id} -> {String.slice(name, 0..80), id} end)
       else
         []

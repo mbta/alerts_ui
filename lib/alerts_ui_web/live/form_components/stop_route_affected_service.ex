@@ -219,12 +219,12 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
     route_id_options =
       if async_available?(assigns, :available_routes) do
-        SelectFormatter.formatted_select_options(
-          assigns.available_routes.result,
-          route_filter_value,
-          assigns.route_type,
-          route_ids
-        )
+        SelectFormatter.formatted_select_options(%SelectFormatter{
+          options: assigns.available_routes.result,
+          filter_value: route_filter_value,
+          route_type: assigns.route_type,
+          values_to_keep: route_ids
+        })
       else
         []
       end
@@ -234,12 +234,12 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
     stop_id_options =
       if async_available?(assigns, :available_stops) do
-        SelectFormatter.formatted_select_options(
-          assigns.available_stops.result,
-          stop_filter_value,
-          assigns.route_type,
-          stop_ids
-        )
+        SelectFormatter.formatted_select_options(%SelectFormatter{
+          options: assigns.available_stops.result,
+          filter_value: stop_filter_value,
+          route_type: assigns.route_type,
+          values_to_keep: stop_ids
+        })
       else
         []
       end

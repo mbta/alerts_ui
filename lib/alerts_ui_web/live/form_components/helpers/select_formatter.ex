@@ -9,20 +9,49 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   alias MBTAV3API.Schedules.{Schedule, Trip}
   alias MBTAV3API.Stops.Stop
 
-  @spec formatted_select_options([Route.t() | Stop.t()], integer() | nil) :: keyword(String.t())
-  def formatted_select_options(objects, route_type) do
-    objects
+  defstruct options: nil,
+            filter_value: "",
+            route_type: nil,
+            values_to_keep: [],
+            schedules_by_route_name: nil
+
+  @type t :: %__MODULE__{
+          options: [Route.t() | Stop.t()] | nil,
+          filter_value: String.t(),
+          route_type: integer() | nil,
+          values_to_keep: [String.t()],
+          schedules_by_route_name: %{} | nil
+        }
+
+  @spec formatted_select_options(t()) :: keyword(String.t())
+  def formatted_select_options(%__MODULE__{options: options} = filterable)
+      when not is_nil(options) do
+    options
     |> Enum.uniq()
     |> Enum.sort_by(&sort_order/1)
-    |> Enum.map(fn object -> {name_for_option(object, route_type), id_for_option(object)} end)
+    |> Enum.map(fn object ->
+      {name_for_option(object, filterable.route_type), id_for_option(object)}
+    end)
+    |> filter_options(filterable.filter_value, filterable.values_to_keep)
   end
 
-  @spec formatted_select_options([Route.t() | Stop.t()], String.t(), integer() | nil) ::
-          keyword(String.t())
-  def formatted_select_options(objects, filter_value, route_type, values_to_keep \\ []) do
-    objects
-    |> formatted_select_options(route_type)
-    |> filter_options(filter_value, values_to_keep)
+  def formatted_select_options(
+        %__MODULE__{schedules_by_route_name: schedules_by_route_name} = filterable
+      )
+      when not is_nil(schedules_by_route_name) do
+    if schedules_by_route_name |> Map.keys() |> length() <= 1 do
+      options =
+        schedules_by_route_name
+        |> Map.values()
+        |> List.flatten()
+
+      Map.put(filterable, :options, options)
+      |> formatted_select_options()
+    else
+      Enum.reduce(schedules_by_route_name, [], fn {route_name, schedules}, acc ->
+        acc ++ [{route_name, formatted_select_options(Map.put(filterable, :options, schedules))}]
+      end)
+    end
   end
 
   @spec filter_options(list(), String.t() | nil, [String.t()]) :: list()
@@ -88,23 +117,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   def id_for_option(%Route{id: id}), do: id
   def id_for_option(%Facility{id: id}), do: id
   def id_for_option(%Schedule{trip: %Trip{id: id}}), do: id
-
-  @spec formatted_trip_options(%{String.t() => [Schedule.t()]}, integer(), String.t(), [
-          String.t()
-        ]) ::
-          keyword(String.t())
-  def formatted_trip_options(schedules_by_route_name, route_type, filter_value, options_to_keep) do
-    if schedules_by_route_name |> Map.keys() |> length() <= 1 do
-      schedules_by_route_name
-      |> Map.values()
-      |> List.flatten()
-      |> formatted_select_options(filter_value, route_type, options_to_keep)
-    else
-      Enum.reduce(schedules_by_route_name, [], fn {route_name, schedules}, acc ->
-        acc ++ [{route_name, formatted_select_options(schedules, filter_value, route_type)}]
-      end)
-    end
-  end
 
   @spec formatted_direction_options([String.t()] | nil, map()) :: keyword(String.t())
   def formatted_direction_options([route_id], direction_names_map) do
