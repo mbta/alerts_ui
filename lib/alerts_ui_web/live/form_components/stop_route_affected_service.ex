@@ -218,31 +218,23 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     route_ids = assigns.form[:route_ids].value || []
 
     route_id_options =
-      if async_available?(assigns, :available_routes) do
-        SelectFormatter.formatted_select_options(%SelectFormatter{
-          options: assigns.available_routes.result,
-          filter_value: route_filter_value,
-          route_type: assigns.route_type,
-          values_to_keep: route_ids
-        })
-      else
-        []
-      end
+      SelectFormatter.formatted_select_options(%SelectFormatter{
+        options: Map.get(assigns.available_routes, :result, []) || [],
+        filter_value: route_filter_value,
+        route_type: assigns.route_type,
+        values_to_keep: route_ids
+      })
 
     stop_filter_value = assigns.form[:stop_ids_filter].value
     stop_ids = assigns.form[:stop_ids].value || []
 
     stop_id_options =
-      if async_available?(assigns, :available_stops) do
-        SelectFormatter.formatted_select_options(%SelectFormatter{
-          options: assigns.available_stops.result,
-          filter_value: stop_filter_value,
-          route_type: assigns.route_type,
-          values_to_keep: stop_ids
-        })
-      else
-        []
-      end
+      SelectFormatter.formatted_select_options(%SelectFormatter{
+        options: Map.get(assigns.available_stops, :result) || [],
+        filter_value: stop_filter_value,
+        route_type: assigns.route_type,
+        values_to_keep: stop_ids
+      })
 
     assigns =
       assign(assigns,
@@ -290,11 +282,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       <hr class="mt-4" />
     </div>
     """
-  end
-
-  defp async_available?(assigns, key) do
-    Map.get(assigns[key], :result) && assigns[key].ok? &&
-      assigns[key].result
   end
 
   @spec disable_routes_input?(map()) :: boolean()

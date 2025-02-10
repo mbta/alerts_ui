@@ -305,16 +305,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     route_filter_value = assigns.form[:route_ids_filter].value
 
     route_id_options =
-      if assigns.available_routes.ok? && assigns.available_routes.result do
-        SelectFormatter.formatted_select_options(%SelectFormatter{
-          options: assigns.available_routes.result,
-          filter_value: route_filter_value,
-          route_type: assigns.route_type,
-          values_to_keep: route_ids
-        })
-      else
-        []
-      end
+      SelectFormatter.formatted_select_options(%SelectFormatter{
+        options: Map.get(assigns.available_routes, :result, []) || [],
+        filter_value: route_filter_value,
+        route_type: assigns.route_type,
+        values_to_keep: route_ids
+      })
 
     direction_names_map =
       if async_available?(assigns, :available_routes) do
@@ -355,16 +351,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     stop_filter_value = assigns.form[:stop_ids_filter].value
 
     stop_id_options =
-      if async_available?(assigns, :available_stops) do
-        SelectFormatter.formatted_select_options(%SelectFormatter{
-          options: assigns.available_stops.result,
-          filter_value: stop_filter_value,
-          route_type: assigns.route_type,
-          values_to_keep: stop_ids
-        })
-      else
-        []
-      end
+      SelectFormatter.formatted_select_options(%SelectFormatter{
+        options: Map.get(assigns.available_stops, :result, []) || [],
+        filter_value: stop_filter_value,
+        route_type: assigns.route_type,
+        values_to_keep: stop_ids
+      })
 
     assigns =
       assign(assigns,
