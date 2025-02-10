@@ -767,7 +767,7 @@ defmodule AlertsUIWeb.SharedComponents do
           field={@filter_field}
           placeholder={if @disabled, do: nil, else: "⌕ Search..."}
           disabled={@disabled}
-          phx-debounce="100"
+          phx-debounce="250"
           {@rest}
         />
         <hr class="w-5/6 self-center border-y-1 border-bg-elevation-6 min-h-[1rem]" />
