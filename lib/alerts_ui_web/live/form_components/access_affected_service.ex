@@ -221,6 +221,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             filter_field={@form[:stop_ids_filter]}
             options={@stop_id_options}
             loading={@available_facilities.loading}
+            no_results={Enum.empty?(@stop_id_options)}
             class="min-h-[50rem] min-w-[30%]"
             prompt="All Stops"
           />
@@ -228,6 +229,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             label="Categories"
             field={@form[:facility_types]}
             filter_field={@form[:facility_types_filter]}
+            no_results={Enum.empty?(@facility_type_options)}
             options={@facility_type_options}
             class="min-w-[30%]"
             prompt="All Categories"
@@ -238,6 +240,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             filter_field={@form[:facility_id_filter]}
             options={@facility_id_options}
             loading={@available_facilities.loading}
+            no_results={Enum.empty?(@facility_id_options)}
             class="min-w-[30%] max-w-[30%]"
             multiple={false}
             select_class="max-h-[90%]"

@@ -265,6 +265,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
           label="Stops"
           field={@form[:stop_ids]}
           loading={Map.get(@available_stops, :loading, true)}
+          no_results={Enum.empty?(@stop_id_options)}
           filter_field={@form[:stop_ids_filter]}
           options={@stop_id_options}
           class="min-w-[45%]"
@@ -275,6 +276,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
           field={@form[:route_ids]}
           filter_field={@form[:route_ids_filter]}
           loading={Map.get(@available_routes, :loading, true)}
+          no_results={Enum.empty?(@route_id_options) && !disable_routes_input?(assigns)}
           disabled={disable_routes_input?(assigns)}
           options={@route_id_options}
           class="min-w-[45%]"

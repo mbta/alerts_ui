@@ -54,7 +54,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       })
 
       assert view
-             |> render() =~ ~s(disabled="disabled")
+             |> render() =~ ~s(multiple=\"multiple\" disabled=\"disabled\")
 
       view
       |> live_assign(%{
@@ -71,7 +71,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       |> render_change(%{"stop_route_affected_service" => %{"stop_ids" => ["Blue"]}})
 
       refute view
-             |> render() =~ ~s(disabled="disabled")
+             |> render() =~ ~s(multiple=\"multiple\" disabled=\"disabled\")
 
       view
       |> live_assign(%{
