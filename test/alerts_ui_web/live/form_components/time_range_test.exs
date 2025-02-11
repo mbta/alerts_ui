@@ -209,7 +209,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       assert render(view) =~ ~s(Effect must start before 05/01/2024, 10:15 AM)
     end
 
-    test "displays error if start after trip end when trip changes" do
+    test "start and end time updated if trip changes" do
       schedule = %Schedule{
         trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
         arrival_time: ~U[2024-05-01 09:15:00.00Z],
@@ -239,7 +239,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
       live_assign(view, :selected_trips, [schedule])
 
-      assert render(view) =~ ~s(Effect must start before 05/01/2024, 10:15 AM)
+      assert render(view) =~ ~s(value=\"2024-05-01T08:15\")
+      assert render(view) =~ ~s(value=\"2024-05-01T10:15\")
     end
 
     test "doesn't display error if start within 1 hour of trip end" do
