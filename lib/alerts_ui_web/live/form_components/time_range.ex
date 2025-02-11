@@ -120,6 +120,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         %{alert_data: alert_data, editing: true, selected_trips: selected_trips} = assigns,
         socket
       ) do
+    # TODO donut forget me 🍩🍩🍩
     trip_arrival_time = get_trip_arrival_time(selected_trips)
 
     assigns =
@@ -178,11 +179,26 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         %{selected_trips: selected_trips} = assigns,
         socket
       ) do
+    trip_departure_time = get_trip_departure_time(selected_trips)
     trip_arrival_time = get_trip_arrival_time(selected_trips)
+
+    form_params =
+      if trip_departure_time && trip_arrival_time do
+        new_params = %{
+          "active_period_start" => trip_departure_time,
+          "active_period_start_specifier" => "custom",
+          "active_period_end" => NaiveDateTime.add(trip_arrival_time, 1, :hour),
+          "active_period_end_specifier" => "custom"
+        }
+
+        Map.merge(socket.assigns.form.params, new_params)
+      else
+        socket.assigns.form.params
+      end
 
     changeset =
       %__MODULE__{}
-      |> changeset(socket.assigns.form.params)
+      |> changeset(form_params)
       |> TimeRangeValidators.validate_start_is_before_trip(trip_arrival_time)
 
     changeset
@@ -264,6 +280,13 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     {:ok, socket}
   end
 
+  defp get_trip_departure_time(selected_trips) do
+    selected_trips
+    |> Enum.map(& &1.departure_time)
+    |> Enum.min(DateTime, fn -> nil end)
+    |> utc_datetime_to_naive()
+  end
+
   defp get_trip_arrival_time(selected_trips) do
     selected_trips
     |> Enum.map(& &1.arrival_time)
@@ -272,6 +295,21 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   end
 
   @impl true
+  @spec handle_event(
+          <<_::64>>,
+          map(),
+          atom()
+          | %{
+              :assigns =>
+                atom()
+                | %{
+                    :current_time => any(),
+                    :form => atom() | %{:params => map(), optional(any()) => any()},
+                    optional(any()) => any()
+                  },
+              optional(any()) => any()
+            }
+        ) :: {:noreply, any()}
   def handle_event(
         "validate",
         %{"time_range" => time_range},
