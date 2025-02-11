@@ -24,15 +24,20 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
         }
 
   @spec formatted_select_options(t()) :: keyword(String.t())
-  def formatted_select_options(%__MODULE__{options: options} = filterable)
+  def formatted_select_options(%__MODULE__{
+        options: options,
+        route_type: route_type,
+        filter_value: filter_value,
+        values_to_keep: values_to_keep
+      })
       when not is_nil(options) do
     options
     |> Enum.uniq()
     |> Enum.sort_by(&sort_order/1)
     |> Enum.map(fn object ->
-      {name_for_option(object, filterable.route_type), id_for_option(object)}
+      {name_for_option(object, route_type), id_for_option(object)}
     end)
-    |> filter_options(filterable.filter_value, filterable.values_to_keep)
+    |> filter_options(filter_value, values_to_keep)
   end
 
   def formatted_select_options(
