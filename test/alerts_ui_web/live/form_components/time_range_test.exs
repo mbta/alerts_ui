@@ -181,8 +181,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
     test "displays error if start after trip end when start changes" do
       schedule = %Schedule{
         trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
-        arrival_time: ~U[2024-05-01 09:15:00.00Z],
-        departure_time: ~U[2024-05-01 08:15:00.00Z]
+        arrival_time: ~U[2024-05-01 13:15:00.00Z] |> DateTime.shift_zone!("America/New_York"),
+        departure_time: ~U[2024-05-01 12:15:00.00Z] |> DateTime.shift_zone!("America/New_York")
       }
 
       {:ok, view, _html} =
@@ -209,15 +209,18 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       assert render(view) =~ ~s(Effect must start before 05/01/2024, 10:15 AM)
     end
 
-    test "start and end time updated if trip changes" do
+    test "start and end time updated if trip changes and departure before current time" do
       schedule = %Schedule{
         trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
-        arrival_time: ~U[2024-05-01 09:15:00.00Z],
-        departure_time: ~U[2024-05-01 08:15:00.00Z]
+        arrival_time: ~U[2024-05-01 13:15:00.00Z] |> DateTime.shift_zone!("America/New_York"),
+        departure_time: ~U[2024-05-01 12:15:00.00Z] |> DateTime.shift_zone!("America/New_York")
       }
 
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns)
+        live_isolated_component(
+          TimeRange,
+          @assigns |> Map.put(:current_time, ~N[2024-05-01 08:15:00])
+        )
 
       view
       |> element("form")
@@ -239,7 +242,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
       live_assign(view, :selected_trips, [schedule])
 
-      assert render(view) =~ ~s(value=\"2024-05-01T08:15\")
+      assert render(view) =~ ~s(value=\"now\")
       assert render(view) =~ ~s(value=\"2024-05-01T10:15\")
     end
 

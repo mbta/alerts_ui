@@ -172,18 +172,32 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   def update(
         %{selected_trips: selected_trips} = assigns,
         socket
-      ) do
+      )
+      when not is_nil(selected_trips) do
     trip_departure_time = get_trip_departure_time(selected_trips)
     trip_arrival_time = get_trip_arrival_time(selected_trips)
 
     form_params =
       if trip_departure_time && trip_arrival_time do
-        new_params = %{
-          "active_period_start" => trip_departure_time,
-          "active_period_start_specifier" => "custom",
+        start_params =
+          if NaiveDateTime.compare(trip_departure_time, socket.assigns.current_time) == :gt do
+            %{
+              "active_period_start" => trip_departure_time,
+              "active_period_start_specifier" => "custom"
+            }
+          else
+            %{
+              "active_period_start" => socket.assigns.current_time,
+              "active_period_start_specifier" => "now"
+            }
+          end
+
+        end_params = %{
           "active_period_end" => NaiveDateTime.add(trip_arrival_time, 1, :hour),
           "active_period_end_specifier" => "custom"
         }
+
+        new_params = Map.merge(start_params, end_params)
 
         Map.merge(socket.assigns.form.params, new_params)
       else
@@ -272,6 +286,11 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       end
 
     {:ok, socket}
+  end
+
+  @impl true
+  def update(assigns, socket) do
+    {:ok, assign(socket, assigns)}
   end
 
   defp get_trip_departure_time(selected_trips) do
