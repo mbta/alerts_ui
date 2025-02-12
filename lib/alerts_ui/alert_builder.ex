@@ -91,7 +91,7 @@ defmodule AlertsUI.AlertBuilder do
       |> Routes.expanding_green_line()
       |> Enum.map(&(RoutesRepo.get(&1, include: "line") || %{}))
       |> Enum.reject(&(&1 == %{}))
-      |> add_combo_routes()
+      |> add_combo_routes(route_type)
 
     route_ids = Enum.map(routes, & &1.id)
 
@@ -165,9 +165,9 @@ defmodule AlertsUI.AlertBuilder do
     |> Map.merge(active_period_map)
   end
 
-  @spec add_combo_routes([Route.id_t()]) :: [Route.t()]
+  @spec add_combo_routes([Route.id_t()], Route.type_int()) :: [Route.t()]
 
-  defp add_combo_routes(routes) do
+  defp add_combo_routes(routes, route_type) do
     routes
     |> Enum.flat_map(fn original_route ->
       line =
@@ -181,10 +181,14 @@ defmodule AlertsUI.AlertBuilder do
         [original_route]
       else
         combo_route_ids = Map.get(line, :route_ids, []) -- [original_route.id]
-        combo_routes = Enum.map(combo_route_ids, &RoutesRepo.get(&1, include: "line"))
+
+        combo_routes =
+          Enum.map(combo_route_ids, &RoutesRepo.get(&1, include: "line"))
+
         combo_routes ++ [original_route]
       end
     end)
+    |> Enum.filter(fn route -> route.type === route_type end)
     |> Enum.dedup()
   end
 
@@ -201,10 +205,12 @@ defmodule AlertsUI.AlertBuilder do
     |> Enum.filter(&(&1 !== "default"))
   end
 
-  defp get_stops(route_id, "default"), do: RoutePatterns.included_stops_by_route_id(route_id, [])
+  defp get_stops(route_id, "default"),
+    do: RoutePatterns.included_stops_by_route_id(route_id, canonical: true)
 
   defp get_stops(route_id, direction),
-    do: RoutePatterns.included_stops_by_route_id(route_id, direction_id: direction)
+    do:
+      RoutePatterns.included_stops_by_route_id(route_id, direction_id: direction, canonical: true)
 
   @spec child_stops_with_context([Route.id_t()], String.t(), [Stop.id_t()]) ::
           [
@@ -216,6 +222,10 @@ defmodule AlertsUI.AlertBuilder do
     |> Enum.flat_map(fn route ->
       route.id
       |> get_route_patterns(direction)
+      |> Enum.filter(fn route_pattern ->
+        parents_from_route_pattern = Enum.map(route_pattern.stops, & &1.parent_id)
+        Enum.all?(parent_stop_ids, fn stop_id -> stop_id in parents_from_route_pattern end)
+      end)
       |> Enum.flat_map(fn route_pattern ->
         route_pattern_stops_with_context_for_parents(
           route_pattern,
