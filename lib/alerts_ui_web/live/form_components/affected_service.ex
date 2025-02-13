@@ -91,26 +91,19 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     direction = alert_data.direction
     route_ids = alert_data.route_ids
+    required_fields = ServiceEffectCombinations.required_fields(assigns.combination)
 
     socket =
       socket
       |> assign(assigns)
-      |> assign_async([:available_routes, :available_stops, :available_schedules], fn ->
+      |> assign_async([:available_routes], fn ->
         {:ok,
          %{
-           available_routes: CreateAlertLive.get_routes(route_types),
-           available_stops:
-             CreateAlertLive.get_stops(
-               route_ids,
-               direction
-             ),
-           available_schedules:
-             CreateAlertLive.get_schedules(
-               route_ids,
-               direction
-             )
+           available_routes: CreateAlertLive.get_routes(route_types)
          }}
       end)
+      |> assign_stops(route_ids, direction, required_fields)
+      |> assign_schedules(route_ids, direction, required_fields)
 
     {:ok, socket}
   end
@@ -203,11 +196,16 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
            :validate
          ) do
       {:ok, changeset} ->
-        available_schedules = Map.get(socket.assigns.available_schedules, :result, []) || []
+        available_schedules =
+          Map.get(socket.assigns.available_schedules, :result)
 
         selected_trips =
-          available_schedules
-          |> Enum.filter(&(&1.trip.id in affected_service["trip_ids"]))
+          if available_schedules do
+            available_schedules
+            |> Enum.filter(&(&1.trip.id in affected_service["trip_ids"]))
+          else
+            nil
+          end
 
         send(self(), {:add_errors, [], __MODULE__})
         send(self(), {:section_completed, changeset})
@@ -225,25 +223,13 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     direction = affected_service["direction"]
     route_ids = Map.get(affected_service, "route_ids", [])
+    required_fields = ServiceEffectCombinations.required_fields(socket.assigns.combination)
 
     socket =
       socket
       |> assign(%{form: form})
-      |> assign_async([:available_stops, :available_schedules], fn ->
-        {:ok,
-         %{
-           available_stops:
-             CreateAlertLive.get_stops(
-               route_ids,
-               direction
-             ),
-           available_schedules:
-             CreateAlertLive.get_schedules(
-               route_ids,
-               direction
-             )
-         }}
-      end)
+      |> assign_stops(route_ids, direction, required_fields)
+      |> assign_schedules(route_ids, direction, required_fields)
 
     {:noreply, socket}
   end
@@ -297,6 +283,40 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       end)
 
     affected_service |> Map.put("route_ids", new_route_ids)
+  end
+
+  def assign_stops(socket, route_ids, direction, fields) do
+    if :stop_ids in fields do
+      assign_async(socket, [:available_stops], fn ->
+        {:ok,
+         %{
+           available_stops:
+             CreateAlertLive.get_stops(
+               route_ids,
+               direction
+             )
+         }}
+      end)
+    else
+      socket
+    end
+  end
+
+  def assign_schedules(socket, route_ids, direction, fields) do
+    if :trip_ids in fields do
+      assign_async(socket, [:available_schedules], fn ->
+        {:ok,
+         %{
+           available_schedules:
+             CreateAlertLive.get_schedules(
+               route_ids,
+               direction
+             )
+         }}
+      end)
+    else
+      socket
+    end
   end
 
   @impl true

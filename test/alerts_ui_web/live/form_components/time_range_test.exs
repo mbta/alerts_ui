@@ -17,7 +17,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       label: "Time Range"
     },
     alert_data: %{trip_ids: ["CR-683322-595"]},
-    current_time: ~U[2024-04-30 15:54:00Z],
+    current_time: ~N[2024-04-30 15:54:00],
     edited: false,
     editing: false,
     selected_trips: []
@@ -89,7 +89,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         editing: true,
         alert_data: %{
           active_period_start: start_time,
-          active_period_start_specifier: "custom"
+          active_period_start_specifier: "custom",
+          active_period_end_specifier: "until_further_notice",
+          active_period_end: ""
         }
       })
 
@@ -207,6 +209,38 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       })
 
       assert render(view) =~ ~s(Effect must start before 05/01/2024, 10:15 AM)
+    end
+
+    test "start and end time updated if 'all trips' selected" do
+      {:ok, view, _html} =
+        live_isolated_component(
+          TimeRange,
+          @assigns |> Map.put(:current_time, ~N[2024-05-01 08:15:00])
+        )
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end_specifier" => "custom",
+          "active_period_start_specifier" => "custom"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end" => "2024-05-01T11:54:00",
+          "active_period_start" => "2024-05-01T10:16:00"
+        }
+      })
+
+      live_assign(view, :selected_trips, [])
+
+      assert render(view) =~ ~s(value=\"now\")
+      assert render(view) =~ ~s(value=\"later_today\")
+      assert render(view) =~ ~s(value=\"2024-05-01T08:15\")
     end
 
     test "start and end time updated if trip changes and departure before current time" do

@@ -1,6 +1,7 @@
 defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
+  use ExUnit.Case, async: false
   use AlertsUIWeb, :live_view
 
   import LiveIsolatedComponent
@@ -171,14 +172,18 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     end
 
     test "stop element disabled until route is selected" do
-      with_mock(StopsRepo, by_route: fn _route, _direction -> [] end) do
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]},
+        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+      ]) do
         {:ok, view, _html} =
           live_isolated_component(AffectedService, %{
             @assigns
             | alert_data: %{route_type: 4, effect_name: "Shuttle"}
           })
 
-        refute render(view) =~ "All Stops"
+        refute render_async(view) =~ "All Stops"
 
         view
         |> element("form")
@@ -189,14 +194,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
           }
         })
 
-        assert view
-               |> live_assign(:available_stops, %AsyncResult{
-                 ok?: true,
-                 loading: false,
-                 failed: false,
-                 result: [@stop]
-               })
-               |> render() =~ "All Stops"
+        assert view |> render_async() =~ "All Stops"
       end
     end
 
@@ -298,7 +296,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
                 direction: "0",
                 route_type: 2,
                 stop_ids: ["place-sstat"],
-                combination: :RDTS,
                 route_ids: ["CR-Worcester"],
                 trip_ids: ["CR-683322-595"]
               }
@@ -320,7 +317,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     @tag :logged_in_user
     test "shows missing field error upon submission", %{conn: conn} do
       with_mocks([
-        {RoutePatternsRepo, [], [included_stops_by_route_id: fn _route_id, _direction -> [] end]}
+        {RoutePatternsRepo, [], [included_stops_by_route_id: fn _route_id, _direction -> [] end]},
+        {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]},
+        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
 
@@ -330,13 +330,13 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         )
 
         refute view
-               |> render() =~
+               |> render_async() =~
                  ~s(text-text-error)
 
         send_update(view.pid, AffectedService, id: "affected_service", submitted: true)
 
         assert view
-               |> render() =~
+               |> render_async() =~
                  ~s(text-text-error)
       end
     end
