@@ -351,6 +351,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
   defp start_error(true, "recurring", _),
     do: [active_period_start_date: "Effect can't start in the past"]
 
+  def validate_start_is_before_trip(changeset, nil), do: changeset
+
   def validate_start_is_before_trip(changeset, trip_arrival_time) do
     changeset
     |> validate_change(:active_period_start, fn :active_period_start, active_period_start ->

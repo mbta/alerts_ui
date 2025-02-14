@@ -234,7 +234,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
   def handle_info({:section_completed, changeset}, socket) do
     assigns =
       %{
-        alert_data: Map.merge(socket.assigns.alert_data, changeset |> Map.from_struct())
+        alert_data: Map.merge(socket.assigns.alert_data, changeset |> Map.from_struct()),
+        selected_trips: nil
       }
 
     {:noreply, assign(socket, assigns)}
