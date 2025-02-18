@@ -22,6 +22,8 @@ defmodule AlertsUI.AlertBuilder do
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
 
+  @green_line_branch_ids Routes.green_line_branch_ids()
+
   @type alert_data_t :: %{
           route_type: Route.type_int() | nil,
           facility_id: String.t(),
@@ -70,7 +72,7 @@ defmodule AlertsUI.AlertBuilder do
     effect_map = Effect.effect_map_by_name(effect_name)
     stop_ids = Map.get(alert_data, :stop_ids)
     direction_id = Map.get(alert_data, :direction)
-    service_types = Map.get(alert_data, :service_types, [])
+    service_types = Map.get(alert_data, :service_types, []) |> expand_subway_service_types()
 
     route_type = Map.get(alert_data, :route_type)
     cause_detail = Map.get(alert_data, :cause_detail, "")
@@ -91,7 +93,7 @@ defmodule AlertsUI.AlertBuilder do
       |> Routes.expanding_green_line()
       |> Enum.map(&(RoutesRepo.get(&1, include: "line") || %{}))
       |> Enum.reject(&(&1 == %{}))
-      |> add_combo_routes(route_type)
+      |> add_combo_routes()
 
     route_ids = Enum.map(routes, & &1.id)
 
@@ -103,7 +105,7 @@ defmodule AlertsUI.AlertBuilder do
         :child_stops_with_context,
         child_stops_with_context(routes, direction_id, stop_ids)
       )
-      |> Map.put(:service_types, expand_subway_service_types(service_types))
+      |> Map.put(:service_types, service_types)
 
     active_period_map =
       if Map.get(alert_data, :alert_timing) === :recurring do
@@ -165,9 +167,9 @@ defmodule AlertsUI.AlertBuilder do
     |> Map.merge(active_period_map)
   end
 
-  @spec add_combo_routes([Route.id_t()], Route.type_int()) :: [Route.t()]
+  @spec add_combo_routes([Route.id_t()]) :: [Route.t()]
 
-  defp add_combo_routes(routes, route_type) do
+  defp add_combo_routes(routes) do
     routes
     |> Enum.flat_map(fn original_route ->
       line =
@@ -177,18 +179,13 @@ defmodule AlertsUI.AlertBuilder do
           %{}
         end
 
-      if is_nil(Map.get(line, :route_ids)) do
+      if is_nil(Map.get(line, :routes)) do
         [original_route]
       else
-        combo_route_ids = Map.get(line, :route_ids, []) -- [original_route.id]
-
-        combo_routes =
-          Enum.map(combo_route_ids, &RoutesRepo.get(&1, include: "line"))
-
-        combo_routes ++ [original_route]
+        line.routes ++ [original_route]
       end
     end)
-    |> Enum.filter(fn route -> route.type === route_type end)
+    |> Enum.filter(fn route -> route.description !== :rail_replacement_bus end)
     |> Enum.dedup()
   end
 
@@ -222,10 +219,7 @@ defmodule AlertsUI.AlertBuilder do
     |> Enum.flat_map(fn route ->
       route.id
       |> get_route_patterns(direction)
-      |> Enum.filter(fn route_pattern ->
-        parents_from_route_pattern = Enum.map(route_pattern.stops, & &1.parent_id)
-        Enum.all?(parent_stop_ids, fn stop_id -> stop_id in parents_from_route_pattern end)
-      end)
+      |> filtered_route_patterns(parent_stop_ids, direction)
       |> Enum.flat_map(fn route_pattern ->
         route_pattern_stops_with_context_for_parents(
           route_pattern,
@@ -235,6 +229,44 @@ defmodule AlertsUI.AlertBuilder do
         )
       end)
     end)
+  end
+
+  defp filtered_route_patterns(route_patterns, parent_stop_ids, direction) do
+    route_patterns
+    |> Enum.filter(fn route_pattern ->
+      route_id = route_pattern.route_id
+
+      parent_stop_ids = filtered_parent_stop_ids(route_id, direction, parent_stop_ids)
+
+      stops_from_route_pattern = Enum.map(route_pattern.stops, & &1.id)
+      parents_from_route_pattern = Enum.map(route_pattern.stops, & &1.parent_id)
+
+      Enum.all?(parent_stop_ids, fn stop_id ->
+        stop_id in (parents_from_route_pattern ++ stops_from_route_pattern)
+      end)
+    end)
+  end
+
+  @spec filtered_parent_stop_ids(Route.id_t(), String.t(), [Stop.t()]) :: [Stop.t()]
+  # Filters out selected stops for green line that aren't the branch we're currently dealing with
+  defp filtered_parent_stop_ids(route_id, "default", parent_stop_ids)
+       when route_id in @green_line_branch_ids do
+    stops_on_route = StopsRepo.by_route(route_id, 0) ++ StopsRepo.by_route(route_id, 1)
+
+    parent_stop_ids
+    |> Enum.filter(fn parent_stop_id -> parent_stop_id in stops_on_route end)
+  end
+
+  defp filtered_parent_stop_ids(route_id, direction, parent_stop_ids)
+       when route_id in @green_line_branch_ids do
+    stops_on_route = StopsRepo.by_route(route_id, String.to_integer(direction))
+
+    parent_stop_ids
+    |> Enum.filter(fn parent_stop_id -> parent_stop_id in stops_on_route end)
+  end
+
+  defp filtered_parent_stop_ids(_route_id, _direction, parent_stop_ids) do
+    parent_stop_ids
   end
 
   @spec get_route_patterns(Route.id_t(), String.t()) :: [APIRoutePattern.t()]
@@ -694,8 +726,9 @@ defmodule AlertsUI.AlertBuilder do
   end
 
   @spec route_type(%{String.t() => Route.type_int()}, Route.id_t()) :: Route.type_int()
+
   defp route_type(route_types_by_id, route_id) do
-    if route_id in Routes.green_line_branch_ids() do
+    if route_id in @green_line_branch_ids do
       route_types_by_id[route_id] || route_types_by_id["Green"]
     else
       route_types_by_id[route_id]

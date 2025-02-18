@@ -110,21 +110,55 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutesRepo, [],
          [
            get: fn
-             "24", _opts -> %Route{id: "24", line_id: "line-24", type: 1}
-             "27", _opts -> %Route{id: "27", line_id: "line-27", type: 1}
-             "57", _opts -> %Route{id: "57", line_id: nil, type: 1}
-             "2427", _opts -> %Route{id: "2427", line_id: nil, type: 1}
-             "Shuttle_JFKPark", _opts -> %Route{id: "Green-B", line_id: nil, type: 3}
+             "24", _opts ->
+               %Route{id: "24", line_id: "line-24", type: 1, description: :rapid_transit}
+
+             "27", _opts ->
+               %Route{id: "27", line_id: "line-27", type: 1, description: :rapid_transit}
+
+             "57", _opts ->
+               %Route{id: "57", line_id: nil, type: 1, description: :rapid_transit}
+
+             "2427", _opts ->
+               %Route{id: "2427", line_id: nil, type: 0, description: :rapid_transit}
+
+             "Shuttle_JFKPark", _opts ->
+               %Route{
+                 id: "Shuttle_JFKPark",
+                 line_id: nil,
+                 type: 3,
+                 description: :rail_replacement_bus
+               }
            end
          ]},
         {LinesRepo, [],
          [
            get: fn
              "line-24", _opts ->
-               %Line{id: "line-24", route_ids: ["24", "2427"]}
+               %Line{
+                 id: "line-24",
+                 route_ids: ["24", "2427"],
+                 routes: [
+                   %Route{id: "24", line_id: "line-24", type: 1, description: :rapid_transit},
+                   %Route{id: "2427", type: 1, description: :rapid_transit}
+                 ]
+               }
 
              "line-27", _opts ->
-               %Line{id: "line-27", route_ids: ["27", "2427", "Shuttle_JFKPark"]}
+               %Line{
+                 id: "line-27",
+                 route_ids: ["27", "2427", "Shuttle_JFKPark"],
+                 routes: [
+                   %Route{id: "27", line_id: "line-27", type: 1, description: :rapid_transit},
+                   %Route{id: "2427", type: 1, description: :rapid_transit},
+                   %Route{
+                     id: "Shuttle_JFKPark",
+                     line_id: nil,
+                     type: 3,
+                     description: :rail_replacement_bus
+                   }
+                 ]
+               }
            end
          ]}
       ]) do
@@ -155,14 +189,14 @@ defmodule AlertsUI.AlertBuilderTest do
                  banner_text: nil,
                  informed_entity: [
                    %{
-                     activities: [:BOARD, :EXIT, :RIDE],
-                     route_id: "2427",
+                     agency_id: "1",
+                     route_id: "24",
                      route_type: 1,
-                     agency_id: "1"
+                     activities: [:BOARD, :EXIT, :RIDE]
                    },
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
-                     route_id: "24",
+                     route_id: "2427",
                      route_type: 1,
                      agency_id: "1"
                    },
@@ -686,7 +720,8 @@ defmodule AlertsUI.AlertBuilderTest do
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
         {StopsRepo, [], [by_route: fn _route_id, _direction -> parent_stops ++ child_stops end]},
-        {RoutesRepo, [], [get: fn route_id, _opts -> %{id: route_id, type: 3} end]}
+        {RoutesRepo, [],
+         [get: fn route_id, _opts -> %{id: route_id, type: 3, description: :local_bus} end]}
       ]) do
         result = AlertBuilder.build_alert(alert_data, :RDS)
 
@@ -742,9 +777,9 @@ defmodule AlertsUI.AlertBuilderTest do
         header_text: "hello",
         effect_name: "Delay",
         stop_ids: ["place-hymnl", "place-kencl", "place-fenwy"],
-        route_ids: ["Green", "Green-D"],
+        route_ids: ["Green"],
         trip_ids: nil,
-        direction: "1"
+        direction: "default"
       }
 
       with_mocks([
@@ -752,16 +787,44 @@ defmodule AlertsUI.AlertBuilderTest do
          [
            by_route_id: fn
              "Green-B", _ ->
-               [%APIRoutePattern{direction_id: 1, stops: [hynes_child, kenmore_child]}]
+               [
+                 %APIRoutePattern{
+                   direction_id: 0,
+                   stops: [hynes_child, kenmore_child],
+                   route_id: "Green-B"
+                 },
+                 %APIRoutePattern{
+                   direction_id: 1,
+                   stops: [kenmore_child, hynes_child],
+                   route_id: "Green-B"
+                 }
+               ]
 
              "Green-C", _ ->
-               [%APIRoutePattern{direction_id: 1, stops: [hynes_child, kenmore_child]}]
+               [
+                 %APIRoutePattern{
+                   direction_id: 0,
+                   stops: [kenmore_child, hynes_child],
+                   route_id: "Green-C"
+                 },
+                 %APIRoutePattern{
+                   direction_id: 1,
+                   stops: [hynes_child, kenmore_child],
+                   route_id: "Green-C"
+                 }
+               ]
 
              "Green-D", _ ->
                [
                  %APIRoutePattern{
+                   direction_id: 0,
+                   stops: [fenway_child, kenmore_child, hynes_child],
+                   route_id: "Green-D"
+                 },
+                 %APIRoutePattern{
                    direction_id: 1,
-                   stops: [hynes_child, kenmore_child, fenway_child]
+                   stops: [hynes_child, kenmore_child, fenway_child],
+                   route_id: "Green-D"
                  }
                ]
 
@@ -787,59 +850,115 @@ defmodule AlertsUI.AlertBuilderTest do
 
         assert result.informed_entity == [
                  %{
+                   agency_id: "1",
+                   route_id: "Green-B",
+                   route_type: 1,
+                   direction_id: 0,
+                   stop_id: "hynes-child",
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 },
+                 %{
+                   agency_id: "1",
+                   route_id: "Green-B",
+                   route_type: 1,
+                   direction_id: 0,
+                   stop_id: "kenmore-child",
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 },
+                 %{
+                   agency_id: "1",
+                   route_id: "Green-B",
+                   route_type: 1,
+                   direction_id: 1,
+                   stop_id: "kenmore-child",
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 },
+                 %{
                    activities: [:BOARD, :EXIT, :RIDE],
+                   agency_id: "1",
                    direction_id: 1,
                    route_id: "Green-B",
                    route_type: 1,
-                   agency_id: "1",
                    stop_id: "hynes-child"
                  },
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
-                   route_id: "Green-B",
-                   route_type: 1,
                    agency_id: "1",
-                   direction_id: 1,
+                   direction_id: 0,
+                   route_id: "Green-C",
+                   route_type: 1,
                    stop_id: "kenmore-child"
                  },
                  %{
+                   agency_id: "1",
+                   route_id: "Green-C",
+                   route_type: 1,
+                   direction_id: 0,
+                   stop_id: "hynes-child",
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 },
+                 %{
                    activities: [:BOARD, :EXIT, :RIDE],
+                   agency_id: "1",
                    direction_id: 1,
                    route_id: "Green-C",
                    route_type: 1,
-                   agency_id: "1",
                    stop_id: "hynes-child"
                  },
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
+                   agency_id: "1",
                    direction_id: 1,
                    route_id: "Green-C",
                    route_type: 1,
-                   agency_id: "1",
                    stop_id: "kenmore-child"
                  },
                  %{
+                   agency_id: "1",
+                   route_id: "Green-D",
+                   route_type: 1,
+                   direction_id: 0,
+                   stop_id: "fenway-child",
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 },
+                 %{
+                   agency_id: "1",
+                   route_id: "Green-D",
+                   route_type: 1,
+                   direction_id: 0,
+                   stop_id: "kenmore-child",
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 },
+                 %{
+                   agency_id: "1",
+                   route_id: "Green-D",
+                   route_type: 1,
+                   direction_id: 0,
+                   stop_id: "hynes-child",
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 },
+                 %{
                    activities: [:BOARD, :EXIT, :RIDE],
+                   agency_id: "1",
                    direction_id: 1,
                    route_id: "Green-D",
                    route_type: 1,
-                   agency_id: "1",
                    stop_id: "hynes-child"
                  },
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
+                   agency_id: "1",
                    direction_id: 1,
                    route_id: "Green-D",
                    route_type: 1,
-                   agency_id: "1",
                    stop_id: "kenmore-child"
                  },
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
+                   agency_id: "1",
                    direction_id: 1,
                    route_id: "Green-D",
                    route_type: 1,
-                   agency_id: "1",
                    stop_id: "fenway-child"
                  }
                ]

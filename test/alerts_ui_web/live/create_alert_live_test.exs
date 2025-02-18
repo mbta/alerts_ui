@@ -28,7 +28,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
   @stop %Stop{id: "place-sstat", name: "South Station"}
 
-  @route_pattern %RoutePattern{direction_id: 0, stops: [@stop]}
+  @route_pattern %RoutePattern{direction_id: 0, stops: [@stop], route_id: "CR-Worcester"}
 
   describe "create alerts page" do
     @tag :logged_in_user
@@ -45,7 +45,11 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
     @tag :logged_in_user
     test "submitting first part of form unhides second part", %{conn: conn} do
       with_mocks([
-        {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [@route_pattern] end]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _route_id, _opts -> [@route_pattern] end,
+           included_stops_by_route_id: fn _route_id, _ -> [@stop] end
+         ]},
         {StopsRepo, [], by_route: fn _, _ -> [@stop] end},
         {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]}
       ]) do
@@ -57,7 +61,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         refute first_rendered_view =~ ~s(class="min-w-full flex flex-col mt-4" id="details_view")
 
         {:ok, changeset} =
-          Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 3, effect_name: "Detour"})
+          Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 2, effect_name: "Suspension"})
           |> apply_action(:insert)
 
         send(view.pid, {:step_completed, changeset})
@@ -70,9 +74,9 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         # Submit service section
         {:ok, service_changeset} =
           Ecto.Changeset.change(%AffectedService{
-            route_ids: ["1", "2"],
+            route_ids: [@route.id],
             direction: "default",
-            stop_ids: []
+            stop_ids: [@stop.id]
           })
           |> apply_action(:insert)
 
@@ -100,6 +104,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         send(view.pid, :create_alert)
 
         rendered_view = render_async(view)
+
         assert rendered_view =~ "created successfully"
       end
     end
@@ -189,7 +194,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
         # Submit the first part
         {:ok, changeset} =
-          Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 3, effect_name: "Detour"})
+          Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 2, effect_name: "Suspension"})
           |> apply_action(:insert)
 
         send(view.pid, {:step_completed, changeset})
