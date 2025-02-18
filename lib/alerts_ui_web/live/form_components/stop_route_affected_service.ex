@@ -92,52 +92,39 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   end
 
   @impl true
+  def update(%{submitted: true}, socket) do
+    changeset =
+      %__MODULE__{}
+      |> changeset(socket.assigns.form.params)
+      |> validate_required(@required_fields)
+
+    errors =
+      case changeset |> apply_action(:validate) do
+        {:ok, _changeset} -> []
+        {:error, changeset} -> ErrorFormatter.parse_field_errors(changeset)
+      end
+
+    form =
+      changeset
+      |> to_form()
+      |> Map.put(:errors, errors)
+      |> Map.put(:action, :validate)
+
+    {:ok, assign(socket, form: form)}
+  end
+
+  @impl true
   def update(
         %{route_type: route_type} = assigns,
         socket
       ) do
-    assigns =
-      assigns
-      |> Map.put(
-        :service_type_name,
-        route_type |> InformedEntity.route_code_mapping() || nil
-      )
-
     socket =
       socket
       |> assign(assigns)
+      |> assign(service_type_name: route_type |> InformedEntity.route_code_mapping() || nil)
       |> assign_async([:available_stops], fn ->
         {:ok, %{available_stops: CreateAlertLive.get_stops_by_route_type(route_type)}}
       end)
-
-    {:ok, socket}
-  end
-
-  @impl true
-  def update(%{submitted: submitted}, socket) do
-    socket =
-      if submitted do
-        changeset =
-          %__MODULE__{}
-          |> changeset(socket.assigns.form.params)
-          |> validate_required(@required_fields)
-
-        errors =
-          case changeset |> apply_action(:validate) do
-            {:ok, _changeset} -> []
-            {:error, changeset} -> ErrorFormatter.parse_field_errors(changeset)
-          end
-
-        form =
-          changeset
-          |> to_form()
-          |> Map.put(:errors, errors)
-          |> Map.put(:action, :validate)
-
-        assign(socket, form: form)
-      else
-        socket
-      end
 
     {:ok, socket}
   end

@@ -27,17 +27,16 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
     {_result, error_changeset} =
       apply_action(
         changeset
-        |> validate_required(@required_fields),
+        |> validate_required(@required_fields, message: "Select a service type"),
         :validate
       )
 
     send(self(), {:add_errors, ErrorFormatter.parse_field_errors(error_changeset), __MODULE__})
-
-    {:ok, socket}
+    {:ok, assign(socket, form: to_form(changeset))}
   end
 
   @impl true
-  def update(%{alert_data: alert_data} = assigns, socket) do
+  def update(%{alert_data: alert_data, editing: true} = assigns, socket) do
     incoming_alert_data = %{
       service_types: Map.get(alert_data, :service_types, [])
     }
@@ -62,7 +61,7 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
         form =
           %__MODULE__{}
           |> changeset(socket.assigns.form.params)
-          |> validate_required(@required_fields)
+          |> validate_required(@required_fields, message: "Select a service type")
           |> Map.put(:action, :validate)
           |> to_form()
 
@@ -72,6 +71,11 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
       end
 
     {:ok, socket}
+  end
+
+  @impl true
+  def update(assigns, socket) do
+    {:ok, assign(socket, assigns)}
   end
 
   @impl true

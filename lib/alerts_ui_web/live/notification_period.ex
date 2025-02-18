@@ -53,9 +53,9 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
   end
 
   @impl true
-  def update(%{editing: editing, alert_data: alert_data} = assigns, socket) do
+  def update(%{editing: true, alert_data: alert_data} = assigns, socket) do
     assigns =
-      if editing == true and socket.assigns.edited === false do
+      if socket.assigns.edited === false do
         alert_data =
           alert_data
           |> Enum.filter(fn {_k, v} -> !is_nil(v) end)
@@ -102,35 +102,47 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
   end
 
   @impl true
-  def update(%{submitted: submitted}, socket) do
-    socket =
-      if submitted do
-        current_time = current_time()
+  def update(%{submitted: true}, socket) do
+    current_time = current_time()
 
-        changeset =
-          %__MODULE__{}
-          |> changeset(socket.assigns.form.params)
-          |> TimeRangeValidators.validate_notification(socket.assigns.time_range, current_time)
-          |> TimeRangeValidators.validate_required_notification_fields(socket.assigns.form.params)
+    changeset =
+      %__MODULE__{}
+      |> changeset(socket.assigns.form.params)
+      |> TimeRangeValidators.validate_notification(socket.assigns.time_range, current_time)
+      |> TimeRangeValidators.validate_required_notification_fields(socket.assigns.form.params)
 
-        errors =
-          case changeset |> apply_action(:validate) do
-            {:ok, _changeset} -> []
-            {:error, changeset} -> ErrorFormatter.parse_field_errors(changeset)
-          end
-
-        form =
-          changeset
-          |> to_form()
-          |> Map.put(:action, :validate)
-          |> Map.put(:errors, errors)
-
-        assign(socket, form: form, current_time: current_time)
-      else
-        socket
+    errors =
+      case changeset |> apply_action(:validate) do
+        {:ok, _changeset} -> []
+        {:error, changeset} -> ErrorFormatter.parse_field_errors(changeset)
       end
 
+    form =
+      changeset
+      |> to_form()
+      |> Map.put(:action, :validate)
+      |> Map.put(:errors, errors)
+
+    socket = assign(socket, form: form, current_time: current_time)
+
     {:ok, socket}
+  end
+
+  @impl true
+  def update(%{alert_data: alert_data} = assigns, socket) do
+    assigns =
+      assigns
+      |> Map.put(
+        :time_range,
+        Map.take(alert_data, [
+          :active_period_start,
+          :active_period_start_time,
+          :active_period_start_date,
+          :alert_timing
+        ])
+      )
+
+    {:ok, assign(socket, assigns)}
   end
 
   @impl true
