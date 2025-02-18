@@ -6,6 +6,40 @@ defmodule AlertsUIWeb.FormComponents.Helpers.RecurringDurationTextTest do
   alias AlertsUIWeb.FormComponents.Helpers.RecurringDurationText
 
   describe("recurring_duration_text/1") do
+    test "manages with nil data" do
+      params = %{}
+
+      expected =
+        " –   every  from  until "
+
+      actual =
+        render_component(&RecurringDurationText.recurring_duration_text/1,
+          form: %{params: params}
+        )
+
+      assert expected =~ actual
+    end
+
+    test "manages with incomplete data" do
+      params = %{
+        "active_period_start_time" => "",
+        "active_period_end_time" => "",
+        "active_period_start_date" => "",
+        "active_period_end_date" => "",
+        "recurrence_days" => []
+      }
+
+      expected =
+        " –   every  from  until "
+
+      actual =
+        render_component(&RecurringDurationText.recurring_duration_text/1,
+          form: %{params: params}
+        )
+
+      assert expected =~ actual
+    end
+
     test "with end date and no +1" do
       params = %{
         "active_period_start_time" => ~T[07:35:00],

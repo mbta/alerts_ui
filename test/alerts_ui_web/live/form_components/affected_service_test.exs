@@ -64,6 +64,54 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       assert render_component(AffectedService, @assigns) =~ ~s(id="service_form")
     end
 
+    test "correct renders when green line chosen" do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _route_types ->
+             [
+               %Route{
+                 direction_names: %{0 => "Westbound", 1 => "Eastbound"},
+                 sort_order: 3,
+                 id: "Green-B",
+                 type: 1,
+                 name: "Green Line"
+               }
+             ]
+           end,
+           green_line: fn ->
+             %Route{
+               id: "Green",
+               name: "Green Line",
+               direction_names: %{0 => "Westbound", 1 => "Eastbound"},
+               type: 0,
+               sort_order: 10_030
+             }
+           end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction ->
+             [%Stop{id: "stop_1", name: "Stop 1"}, %Stop{id: "stop_2", name: "Stop 2"}]
+           end
+         ]}
+      ]) do
+        {:ok, view, _html} =
+          live_isolated_component(
+            AffectedService,
+            @assigns
+            |> Map.merge(%{route_type: 1, combination: :RDS})
+          )
+
+        view
+        |> element("form")
+        |> render_change(%{"affected_service" => %{"route_ids" => ["Green"]}})
+
+        assert view |> render_async() =~
+                 ~s(<option value=\"stop_1\">Stop 1</option><option value=\"stop_2\">Stop 2</option>)
+      end
+    end
+
     test "direction options are only populated once a route is chosen" do
       with_mock(StopsRepo, by_route: fn _route, _direction -> [] end) do
         {:ok, view, _html} =

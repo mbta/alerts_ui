@@ -18,7 +18,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.RecurringDurationText do
 
     duration_text = duration(start_time, end_time)
 
-    plus_one = Time.compare(start_time, end_time) !== :lt
+    plus_one = plus_one?(start_time, end_time)
 
     weekday_text = weekday_text(params["recurrence_days"])
 
@@ -47,6 +47,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.RecurringDurationText do
   def time_text(time) do
     Timex.format!(time, "{h12}:{0m} {AM}")
   end
+
+  def plus_one?(%Time{} = start_time, %Time{} = end_time) do
+    Time.compare(start_time, end_time) !== :lt
+  end
+
+  def plus_one?(_start_time, _end_time), do: false
 
   def date_text(_, :until_further_notice) do
     "alert is manually closed"
