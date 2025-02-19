@@ -296,7 +296,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
     end)
   end
 
-  @spec validate_start_is_after_now(Ecto.Changeset.t(), any(), any()) :: Ecto.Changeset.t()
   def validate_start_is_after_now(
         changeset,
         current_time,
