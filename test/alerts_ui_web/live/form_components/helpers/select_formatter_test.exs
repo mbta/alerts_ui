@@ -9,14 +9,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
 
   describe "formatted_select_options/1" do
     test "it returns properly formatted and ordered routes" do
-      objects = [
+      options = [
         %Route{id: "202", name: "joe", sort_order: 2},
         %Route{id: "303", name: "", long_name: "bob", sort_order: 3},
         %Route{id: "202", name: "joe", sort_order: 2},
         %Route{id: "101", name: "alice", sort_order: 1}
       ]
 
-      results = SelectFormatter.formatted_select_options(objects, nil)
+      results = SelectFormatter.formatted_select_options(%SelectFormatter{options: options})
 
       assert results == [
                {"alice", "101"},
@@ -26,14 +26,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
     end
 
     test "it keeps original order for stops" do
-      objects = [
+      options = [
         %Stop{id: "202", name: "joe"},
         %Stop{id: "303", name: "bob"},
         %Stop{id: "303", name: "bob"},
         %Stop{id: "101", name: "alice"}
       ]
 
-      results = SelectFormatter.formatted_select_options(objects, nil)
+      results = SelectFormatter.formatted_select_options(%SelectFormatter{options: options})
 
       assert results == [
                {"joe", "202"},
@@ -45,7 +45,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
 
   describe "formatted_select_options/2" do
     test "it returns properly filtered options" do
-      objects = [
+      options = [
         %Facility{
           id: "952",
           type: "ELEVATOR",
@@ -70,7 +70,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
         }
       ]
 
-      results = SelectFormatter.formatted_select_options(objects, "Ashmont/Braintree", nil)
+      results =
+        SelectFormatter.formatted_select_options(%SelectFormatter{
+          options: options,
+          filter_value: "Ashmont/Braintree"
+        })
 
       assert results == [
                {"Ashmont/Braintree platform to lobby", "951"},
@@ -114,7 +118,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
         ]
       }
 
-      results = SelectFormatter.formatted_trip_options(trip_map, 2)
+      results =
+        SelectFormatter.formatted_select_options(%SelectFormatter{
+          schedules_by_route_name: trip_map,
+          route_type: 2
+        })
 
       assert results == [
                {"527 (9:01 AM from South Station)", "CR-683300-527"},
@@ -148,7 +156,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
         ]
       }
 
-      results = SelectFormatter.formatted_trip_options(trip_map, 4)
+      results =
+        SelectFormatter.formatted_select_options(%SelectFormatter{
+          schedules_by_route_name: trip_map,
+          route_type: 4
+        })
 
       assert results == [
                {"10:01 AM from Long Wharf (South) to Charlestown Navy Yard",
@@ -192,7 +204,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
         ]
       }
 
-      results = SelectFormatter.formatted_trip_options(trip_map, 2)
+      results =
+        SelectFormatter.formatted_select_options(%SelectFormatter{
+          schedules_by_route_name: trip_map,
+          route_type: 2
+        })
 
       assert results == [
                {"Framingham/Worcester line",
@@ -244,7 +260,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
         ]
       }
 
-      results = SelectFormatter.formatted_trip_options(trip_map, 2, "Forest")
+      results =
+        SelectFormatter.formatted_select_options(%SelectFormatter{
+          schedules_by_route_name: trip_map,
+          route_type: 2,
+          filter_value: "Forest"
+        })
 
       assert results == [
                {"Framingham/Worcester line", []},

@@ -325,15 +325,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     route_filter_value = assigns.form[:route_ids_filter].value
 
     route_id_options =
-      if assigns.available_routes.ok? && assigns.available_routes.result do
-        SelectFormatter.formatted_select_options(
-          assigns.available_routes.result,
-          route_filter_value,
-          assigns.route_type
-        )
-      else
-        []
-      end
+      SelectFormatter.formatted_select_options(%SelectFormatter{
+        options: Map.get(assigns.available_routes, :result, []) || [],
+        filter_value: route_filter_value,
+        route_type: assigns.route_type,
+        values_to_keep: route_ids
+      })
 
     direction_names_map =
       if async_available?(assigns, :available_routes) do
@@ -348,32 +345,38 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         direction_names_map
       )
 
+    trip_ids = assigns.form[:trip_ids].value || []
     trip_filter_value = assigns.form[:trip_ids_filter].value
 
     trip_id_options =
       if async_available?(assigns, :available_schedules) do
-        assigns.available_schedules.result
-        |> Enum.filter(fn schedule ->
-          schedule.route.id in Map.get(assigns.form[:route_ids], :value, [])
-        end)
-        |> Enum.group_by(&SelectFormatter.name_for_option(&1.route))
-        |> SelectFormatter.formatted_trip_options(assigns.route_type, trip_filter_value)
+        schedules_by_route_type =
+          assigns.available_schedules.result
+          |> Enum.filter(fn schedule ->
+            schedule.route.id in Map.get(assigns.form[:route_ids], :value, [])
+          end)
+          |> Enum.group_by(&SelectFormatter.name_for_option(&1.route))
+
+        SelectFormatter.formatted_select_options(%SelectFormatter{
+          schedules_by_route_name: schedules_by_route_type,
+          route_type: assigns.route_type,
+          filter_value: trip_filter_value,
+          values_to_keep: trip_ids
+        })
       else
         []
       end
 
+    stop_ids = assigns.form[:stop_ids].value || []
     stop_filter_value = assigns.form[:stop_ids_filter].value
 
     stop_id_options =
-      if async_available?(assigns, :available_stops) do
-        SelectFormatter.formatted_select_options(
-          assigns.available_stops.result,
-          stop_filter_value,
-          assigns.route_type
-        )
-      else
-        []
-      end
+      SelectFormatter.formatted_select_options(%SelectFormatter{
+        options: Map.get(assigns.available_stops, :result, []) || [],
+        filter_value: stop_filter_value,
+        route_type: assigns.route_type,
+        values_to_keep: stop_ids
+      })
 
     assigns =
       assign(assigns,
