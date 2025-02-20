@@ -257,6 +257,45 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       |> TimeRangeValidators.validate_start_is_before_trip(
         Map.get(socket.assigns, :trip_arrival_time)
       )
+
+    changeset =
+      if socket.assigns.editing do
+        changeset
+      else
+        TimeRangeValidators.validate_start_is_after_now(
+          changeset,
+          current_time,
+          form_params
+        )
+      end
+
+    errors =
+      case changeset |> apply_action(:validate) do
+        {:ok, _changeset} -> []
+        {:error, changeset} -> ErrorFormatter.parse_field_errors(changeset)
+      end
+
+    form =
+      changeset
+      |> to_form()
+      |> Map.put(:action, :validate)
+      |> Map.put(:errors, errors)
+
+    assign(socket, form: form, current_time: current_time)
+
+    form_params = Map.put(form_params, "active_period_start", updated_start)
+
+    changeset =
+      %__MODULE__{}
+      |> changeset(form_params)
+      |> TimeRangeValidators.validate_required_fields(form_params)
+      |> TimeRangeValidators.validate_relationships(
+        form_params["alert_timing"],
+        form_params
+      )
+      |> TimeRangeValidators.validate_start_is_before_trip(
+        Map.get(socket.assigns, :trip_arrival_time)
+      )
       |> TimeRangeValidators.validate_start_is_after_now(
         current_time,
         form_params

@@ -100,7 +100,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
     end
   end
 
-  def validate_notification(changeset, time_range, current_time) do
+  def validate_notification(changeset, time_range, current_time, editing \\ false) do
     naive_start =
       if Map.get(time_range, :alert_timing) == :"one-time" do
         ensure_naive_datetime_format(time_range.active_period_start)
@@ -122,7 +122,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
         validate_notification_period_start(
           notification_period_start,
           current_time,
-          naive_start
+          naive_start,
+          editing
         )
       end)
     else
@@ -133,10 +134,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
   defp validate_notification_period_start(
          notification_period_start,
          current_time,
-         naive_start
+         naive_start,
+         editing
        ) do
     cond do
-      NaiveDateTime.diff(current_time, notification_period_start, :minute) > 1 ->
+      NaiveDateTime.diff(current_time, notification_period_start, :minute) > 1 and not editing ->
         [
           notification_period_start: {"Notifications can’t be set in the past", []},
           notification_period_start_date: {"Notifications can’t be set in the past", []}
