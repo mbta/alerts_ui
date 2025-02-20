@@ -12,6 +12,8 @@ defmodule AlertsUIWeb.ComponentsLive do
     field :single_select, {:array, :integer}
     field :single_select_error, {:array, :integer}
     field :single_select_disabled, {:array, :integer}
+    field :modal_filter, :string
+    field :modal_filter_filter, :string
     field :filtered_select, {:array, :string}
     field :filtered_select_filter, :string
     field :filtered_select_filter_error, :string
@@ -32,14 +34,14 @@ defmodule AlertsUIWeb.ComponentsLive do
     field :checkbox_icon, :boolean
   end
 
-  @fields ~w[single_select filtered_select text_input text_input_disabled textarea textarea_disabled textarea_counter single_select_error single_select_disabled datetime_disabled filtered_select_error filtered_select_disabled text_input_error textarea_error filtered_select_filter filtered_select_filter_error filtered_select_filter_disabled toggle_checkgroup  datetime checkbox checkbox_icon]a
+  @fields ~w[single_select filtered_select text_input text_input_disabled textarea textarea_disabled textarea_counter single_select_error single_select_disabled datetime_disabled filtered_select_error filtered_select_disabled text_input_error textarea_error filtered_select_filter filtered_select_filter_error filtered_select_filter_disabled toggle_checkgroup datetime checkbox checkbox_icon modal_filter]a
   @errored_fields ~w[single_select_error filtered_select_error text_input_error textarea_error]a
 
   @impl true
   def mount(_params, _session, socket) do
     form =
       %__MODULE__{}
-      |> changeset(%{})
+      |> changeset(%{modal_filter: "default"})
       |> Map.put(:action, :validate)
       |> to_form()
 
@@ -49,7 +51,8 @@ defmodule AlertsUIWeb.ComponentsLive do
       |> NaiveDateTime.truncate(:second)
       |> NaiveDateTime.to_iso8601()
 
-    {:ok, assign(socket, %{form: form, current_time: current_time})}
+    {:ok,
+     assign(socket, %{form: form, current_time: current_time, modal_filter_value: "default"})}
   end
 
   @impl true
@@ -65,6 +68,12 @@ defmodule AlertsUIWeb.ComponentsLive do
   @impl true
   def handle_event("accepted_modal", _params, socket) do
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("accepted_filter_modal", _params, socket) do
+    socket.assigns.form.params["modal_filter"]
+    {:noreply, assign(socket, modal_filter_value: socket.assigns.form.params["modal_filter"])}
   end
 
   @impl true
@@ -120,9 +129,16 @@ defmodule AlertsUIWeb.ComponentsLive do
     ]
   end
 
-  defp filtered_select_options(filter_value) do
-    select_options()
+  defp filtered_select_options(filter_value, select_options) do
+    select_options
     |> Enum.filter(fn {option, _value} ->
+      option =
+        if is_atom(option) do
+          Atom.to_string(option)
+        else
+          option
+        end
+
       option = String.downcase(option || "")
 
       case filter_value do
