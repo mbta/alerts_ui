@@ -42,7 +42,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       |> assign(%{
         form: form,
         button_selected_routes: [],
-        updated: false,
         available_routes: %{},
         available_schedules: %{},
         available_stops: %{}
@@ -61,13 +60,19 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         socket
       ) do
     trip_information_by_id =
-      if async_available?(assigns, :available_schedules) do
-        trip_information_by_id(
-          Map.get(assigns.available_schedules, :result, []),
-          Map.get(alert_data, "trip_ids", [])
-        )
+      if Map.get(alert_data, :trip_information_by_id) do
+        alert_data.trip_information_by_id
       else
-        %{}
+        available_schedules =
+          CreateAlertLive.get_schedules(
+            alert_data.route_ids,
+            alert_data.direction
+          )
+
+        trip_information_by_id(
+          available_schedules,
+          Map.get(alert_data, :trip_ids, [])
+        )
       end
 
     alert_data = Map.put(alert_data, :trip_information_by_id, trip_information_by_id)
@@ -109,26 +114,37 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   end
 
   @impl true
+  def update(%{submitted: true}, socket) do
+    form_params =
+      Map.update(socket.assigns.form.params, "route_ids", nil, fn route_ids ->
+        if is_nil(route_ids) or Enum.empty?(route_ids), do: nil, else: route_ids
+      end)
+
+    changeset =
+      %__MODULE__{}
+      |> changeset(form_params)
+      |> validate_required(ServiceEffectCombinations.required_fields(socket.assigns.combination))
+
+    errors =
+      case changeset |> apply_action(:validate) do
+        {:ok, _changeset} -> []
+        {:error, changeset} -> ErrorFormatter.parse_field_errors(changeset)
+      end
+
+    form =
+      changeset
+      |> to_form()
+      |> Map.put(:errors, errors)
+      |> Map.put(:action, :validate)
+
+    {:ok, assign(socket, form: form)}
+  end
+
+  @impl true
   def update(
-        %{alert_data: alert_data, combination: combination, route_type: route_type} = assigns,
+        %{route_type: route_type} = assigns,
         socket
       ) do
-    changeset = changeset(%__MODULE__{}, alert_data)
-
-    {result, error_changeset} =
-      apply_action(
-        changeset
-        |> validate_required(ServiceEffectCombinations.required_fields(combination)),
-        :validate
-      )
-
-    if result === :error do
-      send(
-        self(),
-        {:add_errors, ErrorFormatter.parse_field_errors(error_changeset), __MODULE__}
-      )
-    end
-
     route_types = all_route_types(route_type)
 
     socket =
@@ -137,42 +153,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       |> assign_async(:available_routes, fn ->
         {:ok, %{available_routes: CreateAlertLive.get_routes(route_types)}}
       end)
-
-    {:ok, assign(socket, assigns)}
-  end
-
-  @impl true
-  def update(%{submitted: submitted}, socket) do
-    form_params =
-      Map.update(socket.assigns.form.params, "route_ids", nil, fn route_ids ->
-        if is_nil(route_ids) or Enum.empty?(route_ids), do: nil, else: route_ids
-      end)
-
-    socket =
-      if submitted do
-        changeset =
-          %__MODULE__{}
-          |> changeset(form_params)
-          |> validate_required(
-            ServiceEffectCombinations.required_fields(socket.assigns.combination)
-          )
-
-        errors =
-          case changeset |> apply_action(:validate) do
-            {:ok, _changeset} -> []
-            {:error, changeset} -> ErrorFormatter.parse_field_errors(changeset)
-          end
-
-        form =
-          changeset
-          |> to_form()
-          |> Map.put(:errors, errors)
-          |> Map.put(:action, :validate)
-
-        assign(socket, form: form)
-      else
-        socket
-      end
 
     {:ok, socket}
   end

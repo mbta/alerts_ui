@@ -200,7 +200,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLine do
   end
 
   def longest_path_length(stop_tree) do
-    stop_tree |> paths() |> Enum.map(&length(&1)) |> max_value_from_list
+    stop_tree |> paths() |> Enum.map(&length(&1)) |> Enum.max()
   end
 
   def paths(stop_tree) do
@@ -241,12 +241,5 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLine do
 
   def previous_stop_ids(stop_tree, stop_id) do
     stop_tree.edges[stop_id].previous
-  end
-
-  def max_value_from_list(value_list) do
-    value_list
-    |> Enum.reduce(0, fn val, acc ->
-      max(val, acc)
-    end)
   end
 end

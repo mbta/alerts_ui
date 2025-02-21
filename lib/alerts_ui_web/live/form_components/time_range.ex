@@ -240,54 +240,49 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   end
 
   @impl true
-  def update(%{submitted: submitted}, socket) do
-    socket =
-      if submitted do
-        current_time = current_time()
+  def update(%{submitted: true}, socket) do
+    current_time = current_time()
 
-        form_params = socket.assigns.form.params
+    form_params = socket.assigns.form.params
 
-        updated_start =
-          if form_params["active_period_start_specifier"] == "now" do
-            current_time
-          else
-            form_params["active_period_start"]
-          end
-
-        form_params = Map.put(form_params, "active_period_start", updated_start)
-
-        changeset =
-          %__MODULE__{}
-          |> changeset(form_params)
-          |> TimeRangeValidators.validate_required_fields(form_params)
-          |> TimeRangeValidators.validate_relationships(
-            form_params["alert_timing"],
-            form_params
-          )
-          |> TimeRangeValidators.validate_start_is_before_trip(
-            Map.get(socket.assigns, :trip_arrival_time)
-          )
-          |> TimeRangeValidators.validate_start_is_after_now(
-            current_time,
-            form_params
-          )
-
-        errors =
-          case changeset |> apply_action(:validate) do
-            {:ok, _changeset} -> []
-            {:error, changeset} -> ErrorFormatter.parse_field_errors(changeset)
-          end
-
-        form =
-          changeset
-          |> to_form()
-          |> Map.put(:action, :validate)
-          |> Map.put(:errors, errors)
-
-        assign(socket, form: form, current_time: current_time)
+    updated_start =
+      if form_params["active_period_start_specifier"] == "now" do
+        current_time
       else
-        socket
+        form_params["active_period_start"]
       end
+
+    form_params = Map.put(form_params, "active_period_start", updated_start)
+
+    changeset =
+      %__MODULE__{}
+      |> changeset(form_params)
+      |> TimeRangeValidators.validate_required_fields(form_params)
+      |> TimeRangeValidators.validate_relationships(
+        form_params["alert_timing"],
+        form_params
+      )
+      |> TimeRangeValidators.validate_start_is_before_trip(
+        Map.get(socket.assigns, :trip_arrival_time)
+      )
+      |> TimeRangeValidators.validate_start_is_after_now(
+        current_time,
+        form_params
+      )
+
+    errors =
+      case changeset |> apply_action(:validate) do
+        {:ok, _changeset} -> []
+        {:error, changeset} -> ErrorFormatter.parse_field_errors(changeset)
+      end
+
+    form =
+      changeset
+      |> to_form()
+      |> Map.put(:action, :validate)
+      |> Map.put(:errors, errors)
+
+    socket = assign(socket, form: form, current_time: current_time)
 
     {:ok, socket}
   end
