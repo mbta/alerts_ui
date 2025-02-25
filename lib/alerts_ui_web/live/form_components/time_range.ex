@@ -117,12 +117,10 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   @impl true
   def update(
-        %{alert_data: alert_data, editing: true, selected_trips: selected_trips, edited: false} =
+        %{alert_data: alert_data, editing: true} =
           assigns,
-        socket
+        %{assigns: %{edited: false}} = socket
       ) do
-    trip_arrival_time = get_trip_arrival_time(selected_trips)
-
     alert_data =
       alert_data
       |> Enum.filter(fn {_k, v} -> !is_nil(v) end)
@@ -131,7 +129,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     assigns =
       assigns
       |> Map.put(:alert_data, Map.merge(socket.assigns.form.params, alert_data))
-      |> Map.put(:trip_arrival_time, trip_arrival_time)
 
     changeset =
       %__MODULE__{}
@@ -139,11 +136,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       |> TimeRangeValidators.validate_required_fields(assigns.alert_data)
       |> TimeRangeValidators.validate_relationships(
         assigns.alert_data["alert_timing"],
-        assigns.alert_data
-      )
-      |> TimeRangeValidators.validate_start_is_before_trip(assigns.trip_arrival_time)
-      |> TimeRangeValidators.validate_start_is_after_now(
-        socket.assigns.current_time,
         assigns.alert_data
       )
 
@@ -251,6 +243,45 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       else
         form_params["active_period_start"]
       end
+
+    form_params = Map.put(form_params, "active_period_start", updated_start)
+
+    changeset =
+      %__MODULE__{}
+      |> changeset(form_params)
+      |> TimeRangeValidators.validate_required_fields(form_params)
+      |> TimeRangeValidators.validate_relationships(
+        form_params["alert_timing"],
+        form_params
+      )
+      |> TimeRangeValidators.validate_start_is_before_trip(
+        Map.get(socket.assigns, :trip_arrival_time)
+      )
+
+    changeset =
+      if socket.assigns.editing do
+        changeset
+      else
+        TimeRangeValidators.validate_start_is_after_now(
+          changeset,
+          current_time,
+          form_params
+        )
+      end
+
+    errors =
+      case changeset |> apply_action(:validate) do
+        {:ok, _changeset} -> []
+        {:error, changeset} -> ErrorFormatter.parse_field_errors(changeset)
+      end
+
+    form =
+      changeset
+      |> to_form()
+      |> Map.put(:action, :validate)
+      |> Map.put(:errors, errors)
+
+    assign(socket, form: form, current_time: current_time)
 
     form_params = Map.put(form_params, "active_period_start", updated_start)
 

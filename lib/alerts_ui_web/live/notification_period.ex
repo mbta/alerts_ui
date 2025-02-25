@@ -80,10 +80,6 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
     changeset =
       %__MODULE__{}
       |> changeset(alert_data)
-      |> TimeRangeValidators.validate_notification(
-        assigns.time_range,
-        socket.assigns.current_time
-      )
 
     changeset
     |> apply_action(:validate)
@@ -108,7 +104,11 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
     changeset =
       %__MODULE__{}
       |> changeset(socket.assigns.form.params)
-      |> TimeRangeValidators.validate_notification(socket.assigns.time_range, current_time)
+      |> TimeRangeValidators.validate_notification(
+        socket.assigns.time_range,
+        current_time,
+        socket.assigns.editing
+      )
       |> TimeRangeValidators.validate_required_notification_fields(socket.assigns.form.params)
 
     errors =
