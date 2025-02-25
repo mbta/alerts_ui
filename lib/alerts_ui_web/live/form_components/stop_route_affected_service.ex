@@ -252,7 +252,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
           no_results={Enum.empty?(@stop_id_options)}
           filter_field={@form[:stop_ids_filter]}
           options={@stop_id_options}
-          class="min-w-[45%]"
+          class="min-w-[25%] max-w-[25%]"
         />
 
         <.filtered_select
@@ -263,7 +263,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
           no_results={Enum.empty?(@route_id_options) && !disable_routes_input?(assigns)}
           disabled={disable_routes_input?(assigns)}
           options={@route_id_options}
-          class="min-w-[45%]"
+          class="min-w-[25%] max-w-[25%]"
         />
       </.form>
       <hr class="mt-4" />
