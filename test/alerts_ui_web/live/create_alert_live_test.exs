@@ -110,7 +110,6 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         {RoutePatternsRepo, [], [included_stops_by_route_id: fn _route_id, _direction -> [] end]},
         {FacilitiesRepo, [], get_by_type: fn _types, _opts -> [] end}
       ]) do
-        insert(:alert, alert_id: "1")
         {:ok, view, _html} = live(conn, "/alerts/new")
 
         {:ok, changeset} =
