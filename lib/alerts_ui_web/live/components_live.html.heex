@@ -87,6 +87,8 @@
     header_text="Modal header"
     cancel_event_name="cancelled_modal"
     accept_event_name="accepted_modal"
+    cancel_button_text="Reset"
+    accept_button_text="Apply"
   >
     Lorem Ipsum is simply dummy text of the printing and typesetting industry.
     Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
@@ -135,18 +137,51 @@
       prompt="All"
       class="max-w-[16rem] mb-8"
     />
+
+    <.modal
+      id="filter-modal"
+      header_text="Filter by word length"
+      cancel_event_name="cancelled_modal"
+      accept_event_name="accepted_filter_modal"
+      accept_button_text="Apply"
+    >
+      <.filtered_select
+        label="Length"
+        multiple={false}
+        field={@form[:modal_filter]}
+        filter_field={@form[:modal_filter_filter]}
+        options={
+          filtered_select_options(@form[:modal_filter_filter].value, single_select_options())
+        }
+        prompt="All"
+        class="h-[35rem]"
+        select_class="max-h-[90%]"
+      />
+    </.modal>
+
     <.filtered_select
       label="filtered_select"
+      modal_filter_id="filter-modal"
+      modal_filter_title={"Filter: #{@form[:modal_filter].value}"}
       field={@form[:filtered_select]}
       filter_field={@form[:filtered_select_filter]}
-      options={filtered_select_options(@form[:filtered_select_filter].value)}
+      options={
+        filtered_select_options(@form[:filtered_select_filter].value, select_options())
+        |> Enum.filter(fn {key, _value} ->
+          cond do
+            @modal_filter_value == "default" -> true
+            String.length(key) === String.to_integer(@modal_filter_value) -> true
+            true -> false
+          end
+        end)
+      }
       class="max-w-[16rem] mb-[4rem] min-h-[12rem]"
     />
     <.filtered_select
       label="Disabled filtered_select"
       field={@form[:filtered_select_disabled]}
       filter_field={@form[:filtered_select_filter_disabled]}
-      options={filtered_select_options(@form[:filtered_select_filter].value)}
+      options={filtered_select_options(@form[:filtered_select_filter].value, select_options())}
       disabled={true}
       class="max-w-[16rem] mb-8 mb-[4rem] min-h-[12rem]"
     />
@@ -154,7 +189,7 @@
       label="Errored filtered_select"
       field={@form[:filtered_select_error]}
       filter_field={@form[:filtered_select_filter_error]}
-      options={filtered_select_options(@form[:filtered_select_filter].value)}
+      options={filtered_select_options(@form[:filtered_select_filter].value, select_options())}
       prompt="All"
       disabled={true}
       class="max-w-[16rem] mb-8 mb-[4rem] min-h-[12rem]"

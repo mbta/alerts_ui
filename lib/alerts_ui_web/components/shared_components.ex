@@ -509,14 +509,14 @@ defmodule AlertsUIWeb.SharedComponents do
         tabindex="0"
       >
         <div class="flex min-h-full items-center justify-center">
-          <div class="w-full max-w-lg p-4 sm:p-6 lg:py-8">
+          <div class="w-full max-w-[25%] p-4 sm:p-6 lg:py-8">
             <.focus_wrap
               id={"#{@id}-container"}
               phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
               phx-key="escape"
               phx-click-away={JS.exec("data-cancel", to: "##{@id}")}
               class="shadow-zinc-700/10 ring-zinc-700/10 relative hidden rounded-md bg-bg-elevation-4 border-1 border-bg-elevation-6 shadow-lg ring-1 transition
-              min-h-[25rem]"
+              min-h-[25rem] border border-bg-elevation-6"
             >
               <div class="flex flex-row justify-between px-8 py-4">
                 <h1 class="font-sm text-xl">{@header_text}</h1>
@@ -538,6 +538,7 @@ defmodule AlertsUIWeb.SharedComponents do
                 <.button_secondary
                   :if={@cancel_event_name}
                   class="mr-4 w-24"
+                  type="button"
                   phx-remove={hide_modal(@id)}
                   phx-click={JS.push(@cancel_event_name) |> JS.exec("phx-remove")}
                 >
@@ -546,6 +547,7 @@ defmodule AlertsUIWeb.SharedComponents do
                 <.button_primary
                   :if={@accept_event_name}
                   class="w-24"
+                  type="button"
                   phx-remove={hide_modal(@id)}
                   phx-click={JS.push(@accept_event_name) |> JS.exec("phx-remove")}
                 >
@@ -725,6 +727,14 @@ defmodule AlertsUIWeb.SharedComponents do
     doc:
       "a form field struct for the filter retrieved from the form, for example: @form[:filtered_select_filter]"
 
+  attr :modal_filter_id, :string,
+    default: nil,
+    doc: "id for modal filter associated with select. will not display if nil."
+
+  attr :modal_filter_title, :string,
+    default: "filter",
+    doc: "text that opens modal filter when clicked"
+
   attr :prompt, :string, default: nil, doc: "the prompt for filtered_select inputs"
 
   attr :options, :list,
@@ -748,12 +758,22 @@ defmodule AlertsUIWeb.SharedComponents do
 
     ~H"""
     <div {@rest} class={["flex flex-col justify-start", @class]}>
-      <.label for={@id} class={if @disabled, do: "text-text-disabled"}>
-        {@label}
-      </.label>
+      <div class="flex flex-row justify-between">
+        <.label for={@id} class={if @disabled, do: "text-text-disabled"}>
+          {@label}
+        </.label>
+        <button
+          :if={@modal_filter_id}
+          phx-click={show_modal(@modal_filter_id)}
+          class="leading-tight mb-2 min-h-[1.3rem] text-primary"
+          type="button"
+        >
+          <span class="hero-funnel-mini w-4 h-4 mr-2 bg-primary" />{@modal_filter_title}
+        </button>
+      </div>
       <div
         class={[
-          "flex flex-col rounded border grow h-2
+          "flex flex-col rounded border grow h-8 w-[100%]
           border-bg-elevation-6 ring-0 ring-border-focus
           focus:ring-1 focus:border-border-focus
           focus-within:ring-1 focus-within:border-border-focus",
@@ -805,7 +825,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   def label(assigns) do
     ~H"""
-    <label for={@for} class={["block font-medium leading-tight mb-2 min-h-[1.3rem]", @class]}>
+    <label for={@for} class={["leading-tight mb-2 min-h-[1.3rem]", @class]}>
       {render_slot(@inner_block)}
     </label>
     """
