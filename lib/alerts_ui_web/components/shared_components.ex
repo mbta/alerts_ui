@@ -485,6 +485,11 @@ defmodule AlertsUIWeb.SharedComponents do
   attr :cancel_button_text, :string, default: "Cancel"
   attr :cancel_event_name, :string, default: nil
   attr :accept_event_name, :string, default: nil
+
+  attr :target_id, :string,
+    default: "",
+    doc: "The target to send the events to (eg form component id)"
+
   attr :id, :string, required: true
   attr :show, :boolean, default: false
   attr :on_cancel, JS, default: %JS{}
@@ -540,7 +545,7 @@ defmodule AlertsUIWeb.SharedComponents do
                   class="mr-4 w-24"
                   type="button"
                   phx-remove={hide_modal(@id)}
-                  phx-click={JS.push(@cancel_event_name) |> JS.exec("phx-remove")}
+                  phx-click={JS.push(@cancel_event_name, target: @target_id) |> JS.exec("phx-remove")}
                 >
                   {@cancel_button_text}
                 </.button_secondary>
@@ -549,7 +554,7 @@ defmodule AlertsUIWeb.SharedComponents do
                   class="w-24"
                   type="button"
                   phx-remove={hide_modal(@id)}
-                  phx-click={JS.push(@accept_event_name) |> JS.exec("phx-remove")}
+                  phx-click={JS.push(@accept_event_name, target: @target_id) |> JS.exec("phx-remove")}
                 >
                   {@accept_button_text}
                 </.button_primary>
