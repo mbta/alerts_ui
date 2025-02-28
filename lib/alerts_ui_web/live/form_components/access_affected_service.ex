@@ -214,7 +214,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
       SelectFormatter.formatted_select_options(%SelectFormatter{
         options: stops,
         filter_value: stop_filter_value,
-        values_to_keep: stop_id
+        values_to_keep: stop_id |> List.wrap()
       })
 
     facility_filter_value = assigns.form[:facility_id_filter].value
@@ -251,7 +251,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     ~H"""
     <div class="min-w-full flex flex-col" id="access_service_view">
       <.h1 class="mb-8">Create new access {@effect_name |> String.downcase()} alert</.h1>
-      <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
+      <.h5 class="text-text-secondary w-full text-center md:text-left mb-4">
         Affected service
       </.h5>
       <.form
@@ -261,6 +261,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
         class="form-control"
         id="service_form"
       >
+
 
         <fieldset class="flex flex-row gap-x-8">
           <.modal
@@ -278,7 +279,8 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
               options={@stop_id_options}
               loading={@available_facilities.loading}
               no_results={Enum.empty?(@stop_id_options)}
-              class="h-[32rem] min-w-[30%]"
+              class="min-h-[90%]"
+              select_class="h-[32rem]"
               prompt="All Stops"
               multiple={false}
             />

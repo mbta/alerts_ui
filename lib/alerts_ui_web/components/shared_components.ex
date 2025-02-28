@@ -808,7 +808,7 @@ defmodule AlertsUIWeb.SharedComponents do
         <hr class="w-5/6 self-center border-y-1 border-bg-elevation-6 min-h-[1rem]" />
         <.select
           multiple={@multiple}
-          size="2"
+          size="15"
           options={if @loading, do: [], else: @options}
           field={@field}
           no_results={@no_results}
