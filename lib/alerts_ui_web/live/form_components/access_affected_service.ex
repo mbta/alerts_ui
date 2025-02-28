@@ -45,6 +45,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
        facility_types: [],
        available_facilities: %{},
        stop_id_filter_value: "default",
+       filter_title_value: "All stops",
        alert_data: %{
          facility_id: ""
        }
@@ -161,8 +162,27 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
 
   @impl true
   def handle_event("accepted_stops_modal", _params, socket) do
-    socket.assigns.form.params["stop_id"]
-    {:noreply, assign(socket, stop_id_filter_value: socket.assigns.form.params["stop_id"])}
+    stops =
+      if async_available?(socket.assigns, :available_facilities) do
+        socket.assigns.available_facilities.result.stops
+      else
+        []
+      end
+
+    selected_stop_id = socket.assigns.form.params["stop_id"]
+
+    filter_title_value =
+      if selected_stop_id in [nil, "", "default"] do
+        "All stops"
+      else
+        Enum.filter(stops, &(&1.id === selected_stop_id)) |> Enum.map(& &1.name) |> hd
+      end
+
+    {:noreply,
+     assign(socket,
+       stop_id_filter_value: selected_stop_id,
+       filter_title_value: filter_title_value
+     )}
   end
 
   @impl true
@@ -182,7 +202,6 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     stops =
       if async_available?(assigns, :available_facilities) do
         assigns.available_facilities.result.stops
-        |> Enum.filter(&filter_stop_by_types(&1, params))
       else
         []
       end
@@ -206,7 +225,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
         options =
           assigns.available_facilities.result.facilities
           |> Enum.filter(
-            &filter_facility_by_type_and_stop_ids(
+            &filter_facility_by_stop_ids(
               &1,
               assigns.stop_id_filter_value,
               params["facility_id"]
@@ -223,18 +242,10 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
         []
       end
 
-    filter_title_value =
-      if stop_id in [nil, "", "default"] do
-        "All stops"
-      else
-        assigns.form[:stop_id].value
-      end
-
     assigns =
       assign(assigns,
         stop_id_options: stop_id_options,
-        facility_id_options: facility_id_options,
-        filter_title_value: filter_title_value
+        facility_id_options: facility_id_options
       )
 
     ~H"""
@@ -296,9 +307,8 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
       assigns[key].result
   end
 
-  defp filter_facility_by_type_and_stop_ids(facility, stop_id_filter_value, facility_id) do
+  defp filter_facility_by_stop_ids(facility, stop_id_filter_value, facility_id) do
     # returns true if facility in list if it belongs to a selected stop or has already been selected by the user.
-
     equals_stop_id =
       if stop_id_filter_value !== "" && stop_id_filter_value !== "default" do
         facility.stop.id === stop_id_filter_value
@@ -307,16 +317,6 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
       end
 
     equals_stop_id or facility.id == facility_id
-  end
-
-  defp filter_stop_by_types(stop, params) do
-    if params["facility_types"] && params["facility_types"] !== ["default"] do
-      Enum.any?(Map.get(stop, :facility_types, []), fn type ->
-        type in params["facility_types"]
-      end)
-    else
-      true
-    end
   end
 
   defp string_to_formatted_atom(string) do
