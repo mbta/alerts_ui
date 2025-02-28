@@ -142,10 +142,27 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   @impl true
   def update(
-        %{route_type: route_type} = assigns,
+        %{route_type: route_type, alert_data: alert_data} = assigns,
         socket
       ) do
     route_types = all_route_types(route_type)
+
+    # make sure initial errors get sent up to create_alert_live even if no events fire
+    changeset =
+      %__MODULE__{}
+      |> changeset(alert_data)
+
+    case apply_action(
+           changeset
+           |> validate_required(ServiceEffectCombinations.required_fields(assigns.combination)),
+           :validate
+         ) do
+      {:ok, _changeset} ->
+        send(self(), {:add_errors, [], __MODULE__})
+
+      {:error, changeset} ->
+        send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
+    end
 
     socket =
       socket

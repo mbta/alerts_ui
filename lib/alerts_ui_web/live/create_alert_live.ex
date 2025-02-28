@@ -258,7 +258,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
     assigns = %{
       progress: get_step_by_name(socket.assigns.progress.next),
       alert_data: alert_data,
-      combination: combination
+      combination: combination,
+      errors: %{}
     }
 
     {:noreply, assign(socket, assigns)}
