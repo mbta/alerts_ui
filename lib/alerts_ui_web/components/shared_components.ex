@@ -679,7 +679,13 @@ defmodule AlertsUIWeb.SharedComponents do
         <option
           :if={@prompt}
           value="default"
-          selected={if @loading, do: false, else: true}
+          selected={
+            cond do
+              @loading -> false
+              is_list(@value) and length(@value -- ["default"]) >= 1 -> false
+              true -> true
+            end
+          }
           disabled={if @loading, do: true, else: false}
         >
           {@prompt}
