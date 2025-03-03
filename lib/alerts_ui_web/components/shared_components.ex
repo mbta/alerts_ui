@@ -807,7 +807,8 @@ defmodule AlertsUIWeb.SharedComponents do
             cond do
               @disabled -> nil
               @loading -> "Loading..."
-              true -> @prompt
+              @filter_field.value in [nil, ""] -> @prompt
+              true -> nil
             end
           }
           disabled={@disabled}
