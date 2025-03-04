@@ -764,7 +764,10 @@ defmodule AlertsUIWeb.SharedComponents do
 
     ~H"""
     <div {@rest} class={["flex flex-col justify-start", @class]}>
-      <div class="flex flex-row justify-between">
+      <div
+        :if={@modal_filter_id || @label}
+        class="flex flex-row justify-between"
+      >
         <.label for={@id} class={if @disabled, do: "text-text-disabled"}>
           {@label}
         </.label>
