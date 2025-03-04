@@ -437,20 +437,18 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             disabled={disable_stop_input?(@form[:route_ids].value)}
             prompt={if disable_stop_input?(@form[:route_ids].value), do: "", else: "Both Directions"}
           />
-            <.filtered_select
-              field={@form[:trip_ids]}
-              filter_field={@form[:trip_ids_filter]}
-              options={@trip_id_options}
-              loading={Map.get(@available_schedules, :loading, true)}
-              no_results={
-                Enum.empty?(@trip_id_options) && !disable_trip_input?(@form[:route_ids].value)
-              }
-              class={
-                "min-w-[100%] h-full"
-              }
-              disabled={disable_trip_input?(@form[:route_ids].value)}
-              prompt={if disable_trip_input?(@form[:route_ids].value), do: nil, else: "All Trips"}
-            />
+          <.filtered_select
+            field={@form[:trip_ids]}
+            filter_field={@form[:trip_ids_filter]}
+            options={@trip_id_options}
+            loading={Map.get(@available_schedules, :loading, true)}
+            no_results={
+              Enum.empty?(@trip_id_options) && !disable_trip_input?(@form[:route_ids].value)
+            }
+            class="min-w-[100%] h-full"
+            disabled={disable_trip_input?(@form[:route_ids].value)}
+            prompt={if disable_trip_input?(@form[:route_ids].value), do: nil, else: "All Trips"}
+          />
         </div>
         <div class="flex flex-col justify-start w-[33%]">
           <.select
@@ -471,7 +469,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             no_results={
               Enum.empty?(@stop_id_options) && !disable_stop_input?(@form[:route_ids].value)
             }
-            class={"min-w-[100%] h-full"}
+            class="min-w-[100%] h-full"
             disabled={disable_stop_input?(@form[:route_ids].value)}
             prompt={
               if disable_stop_input?(@form[:route_ids].value),
