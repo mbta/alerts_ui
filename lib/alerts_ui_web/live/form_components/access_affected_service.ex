@@ -251,7 +251,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     ~H"""
     <div class="min-w-full flex flex-col" id="access_service_view">
       <.h1 class="mb-8">Create new access {@effect_name |> String.downcase()} alert</.h1>
-      <.h5 class="text-text-secondary w-full text-center md:text-left mb-4">
+      <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
         Affected service
       </.h5>
       <.form
@@ -261,9 +261,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
         class="form-control"
         id="service_form"
       >
-
-
-        <fieldset class="flex flex-row gap-x-8">
+        <fieldset class="flex flex-row">
           <.modal
             id="stops-filter-modal"
             header_text="Filter by stop"
@@ -279,8 +277,6 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
               options={@stop_id_options}
               loading={@available_facilities.loading}
               no_results={Enum.empty?(@stop_id_options)}
-              class="min-h-[90%]"
-              select_class="h-[32rem]"
               prompt="All Stops"
               multiple={false}
             />
@@ -312,10 +308,10 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
   defp filter_facility_by_stop_ids(facility, stop_id_filter_value, facility_id) do
     # returns true if facility in list if it belongs to a selected stop or has already been selected by the user.
     equals_stop_id =
-      if stop_id_filter_value !== "" && stop_id_filter_value !== "default" do
-        facility.stop.id === stop_id_filter_value
-      else
+      if stop_id_filter_value === "default" do
         true
+      else
+        facility.stop.id === stop_id_filter_value
       end
 
     equals_stop_id or facility.id == facility_id

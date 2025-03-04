@@ -514,7 +514,7 @@ defmodule AlertsUIWeb.SharedComponents do
         tabindex="0"
       >
         <div class="flex min-h-full items-center justify-center">
-          <div class="w-full max-w-[25%] p-4 sm:p-6 lg:py-8">
+          <div class="w-full max-w-[15%] sm:p-6 lg:py-8">
             <.focus_wrap
               id={"#{@id}-container"}
               phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
@@ -523,7 +523,7 @@ defmodule AlertsUIWeb.SharedComponents do
               class="shadow-zinc-700/10 ring-zinc-700/10 relative hidden rounded-md bg-bg-elevation-4 border-1 border-bg-elevation-6 shadow-lg ring-1 transition
               min-h-[25rem] border border-bg-elevation-6"
             >
-              <div class="flex flex-row justify-between px-8 py-4">
+              <div class="flex flex-row justify-between px-4 py-4">
                 <h1 class="font-sm text-xl">{@header_text}</h1>
                 <button
                   phx-click={JS.exec("data-cancel", to: "##{@id}")}
@@ -535,11 +535,11 @@ defmodule AlertsUIWeb.SharedComponents do
                 </button>
               </div>
               <hr class="w-[100%] border-y-1 border-bg-elevation-6" />
-              <div id={"#{@id}-content"} class="px-8 py-4">
+              <div id={"#{@id}-content"} class="px-4 py-4">
                 {render_slot(@inner_block)}
               </div>
               <hr class="w-[100%] border-y-1 border-bg-elevation-6" />
-              <div class="flex flex-row justify-end px-8 py-4">
+              <div class="flex flex-row justify-end px-4 py-4">
                 <.button_secondary
                   :if={@cancel_event_name}
                   class="mr-4 w-24"
