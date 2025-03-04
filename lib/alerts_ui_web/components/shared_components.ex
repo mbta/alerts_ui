@@ -417,7 +417,7 @@ defmodule AlertsUIWeb.SharedComponents do
       phx-feedback-for={@name}
       class={["flex flex-col gap-1 text-sm items-baseline content-start", @class]}
     >
-      <.label for={@id} class={["text-base", (if is_nil(@label), do: "hidden")]}>{@label}</.label>
+      <.label for={@id} class={["text-base", if(is_nil(@label), do: "hidden")]}>{@label}</.label>
 
       <div class={["flex gap-2 w-[100%]", if(@column, do: "flex-col", else: "flex-row")]}>
         <div :for={{option_name, id} <- @options} class={["flex-1", @button_class]}>
@@ -658,7 +658,11 @@ defmodule AlertsUIWeb.SharedComponents do
 
     ~H"""
     <div phx-feedback-for={@name} class={["#{@class}", @hidden && "hidden"]}>
-      <.label :if={@label} for={@id} class={["inline-block", (if @disabled, do: "text-text-disabled", else: "")]}>
+      <.label
+        :if={@label}
+        for={@id}
+        class={["inline-block", if(@disabled, do: "text-text-disabled", else: "")]}
+      >
         {@label}
       </.label>
       <select
