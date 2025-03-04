@@ -230,7 +230,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       )
 
     ~H"""
-    <div class="min-w-full min-h-[50rem] flex flex-col" id="stop_route_service_view">
+    <div class="min-w-full flex flex-col" id="stop_route_service_view">
       <.h1 class="mb-8">
         Create new {ContentFormatter.route_atom_to_string(@service_type_name)} {@effect_name
         |> String.downcase()} alert
@@ -242,7 +242,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         for={@form}
         phx-target={@myself}
         phx-change="validate"
-        class="form-control flex flex-row gap-x-8 mb-4 h-[50rem]"
+        class="form-control flex flex-row gap-x-8 mb-4 h-[32rem]"
         id="service_form"
       >
         <.filtered_select

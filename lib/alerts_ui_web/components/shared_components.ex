@@ -657,7 +657,7 @@ defmodule AlertsUIWeb.SharedComponents do
       |> assign_new(:value, fn -> field.value end)
 
     ~H"""
-    <div phx-feedback-for={@name} class={["#{@class}", @hidden && "hidden", "h-full"]}>
+    <div phx-feedback-for={@name} class={["#{@class}", @hidden && "hidden"]}>
       <.label :if={@label} for={@id} class={if @disabled, do: "text-text-disabled", else: ""}>
         {@label}
       </.label>
@@ -665,7 +665,7 @@ defmodule AlertsUIWeb.SharedComponents do
         id={@id}
         name={@name}
         class={[
-          "bg-bg-elevation-5 border border-bg-elevation-6 px-3 min-w-[99%] p-0 [color-scheme:light]
+          "bg-bg-elevation-5 border border-bg-elevation-6 px-3 mb-2 min-w-[100%] p-0 [color-scheme:light]
             rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto
             disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
             focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) h-10 [&_*]:pb-[.40rem] [&_*]:whitespace-pre-wrap [&_*]:truncate",
@@ -782,7 +782,7 @@ defmodule AlertsUIWeb.SharedComponents do
       </div>
       <div
         class={[
-          "flex flex-col rounded border grow h-8 w-[100%]
+          "flex flex-col rounded border grow w-[100%]
           border-bg-elevation-6 ring-0 ring-border-focus
           focus:ring-1 focus:border-border-focus
           focus-within:ring-1 focus-within:border-border-focus",
@@ -815,7 +815,7 @@ defmodule AlertsUIWeb.SharedComponents do
           }
           disabled={@disabled}
           loading={@loading}
-          class="m-0"
+          class="m-0 h-full"
           select_class={"min-w-full pt-0 mt-0 [scrollbar-width:thin] overflow-auto
             border-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-t-none [appearance:none] max-w-[100%] h-full " <> @select_class}
           {@rest}
@@ -834,7 +834,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   def label(assigns) do
     ~H"""
-    <label for={@for} class={["leading-tight mb-2 min-h-[1.3rem]", @class]}>
+    <label for={@for} class={["leading-tight inline-block mb-2 min-h-[1.3rem]", @class]}>
       {render_slot(@inner_block)}
     </label>
     """
