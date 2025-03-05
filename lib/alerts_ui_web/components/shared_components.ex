@@ -492,6 +492,11 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :id, :string, required: true
   attr :show, :boolean, default: false
+
+  attr :target_id, :string,
+    default: "",
+    doc: "The target to send the events to (eg form component id)"
+
   attr :on_cancel, JS, default: %JS{}
   slot :inner_block, required: true
 
