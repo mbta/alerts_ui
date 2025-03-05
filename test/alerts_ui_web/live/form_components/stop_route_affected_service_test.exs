@@ -29,7 +29,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
   }
 
   @route %Route{sort_order: 1, id: "Blue", name: "route_number_1"}
-  @stop %Stop{id: "place-aqucl"}
+  @stop %Stop{id: "place-aqucl", name: "Aquarium"}
 
   describe "component" do
     test "renders" do
@@ -89,7 +89,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
 
     test "search works" do
       with_mocks([
-        {RoutesRepo, [], [by_stop: fn _route_id -> [@route] end]},
+        {RoutesRepo, [],
+         [by_stop: fn _route_id -> [@route] end, by_type: fn _types -> [@route] end]},
         {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
@@ -106,7 +107,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
           "stop_route_affected_service" => %{"stop_ids" => ["place-aqucl"]}
         })
 
-        assert view |> render_async() =~ ~s(<option value="Blue">)
+        assert view |> element("#stop_route_affected_service_route_ids") |> render_async() =~
+                 ~s(<option value="Blue">)
 
         view
         |> element("form")
@@ -115,13 +117,44 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         })
 
         refute view |> render_async() =~ ~s(<option value="place-aqucl">)
-        refute view |> render_async() =~ ~s(<option value="Blue">)
+
+        refute view |> element("#stop_route_affected_service_route_ids") |> render_async() =~
+                 ~s(<option value="Blue">)
+      end
+    end
+
+    test "modal search works" do
+      with_mocks([
+        {RoutesRepo, [],
+         [by_stop: fn _route_id -> [@route] end, by_type: fn _types -> [@route] end]},
+        {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
+      ]) do
+        {:ok, view, _html} =
+          live_isolated_component(
+            StopRouteAffectedService,
+            @assigns
+          )
+
+        assert view
+               |> element("select#stop_route_affected_service_modal_route_id")
+               |> render_async() =~
+                 ~s(<option value="Blue">route_number_1</option>)
+
+        view
+        |> element("form")
+        |> render_change(%{"stop_route_affected_service" => %{"modal_route_id_filter" => "q"}})
+
+        refute view
+               |> element("select#stop_route_affected_service_modal_route_id")
+               |> render_async() =~
+                 ~s(<option value="Blue">route_number_1</option>)
       end
     end
 
     test "works correctly if editing" do
       with_mocks([
-        {RoutesRepo, [], [by_stop: fn _route_id -> [@route] end]},
+        {RoutesRepo, [],
+         [by_stop: fn _route_id -> [@route] end, by_type: fn _types -> [@route] end]},
         {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
       ]) do
         {:ok, view, _html} =

@@ -262,15 +262,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     stop_filter_value = assigns.form[:stop_ids_filter].value
     stop_ids = assigns.form[:stop_ids].value || []
 
-    # options = (Map.get(assigns.available_stops, :result) || []) |> filter_stops_by_stop_ids(stop, stop_id_filter_value, selected_stop_id)
-    # stop_id_options =
-    #   SelectFormatter.formatted_select_options(%SelectFormatter{
-    #     options: options,
-    #     filter_value: stop_filter_value,
-    #     route_type: assigns.route_type,
-    #     values_to_keep: stop_ids
-    #   })
-
     stop_id_options =
       if async_available?(assigns, :available_stops) do
         options =
@@ -279,7 +270,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
             &filter_stops_by_stop_ids(
               &1,
               assigns.stop_id_filter_value,
-              assigns.form.params["stop_ids"]
+              stop_ids
             )
           )
 
@@ -342,8 +333,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
             options={@modal_route_id_options}
             loading={@available_filter_routes.loading}
             no_results={Enum.empty?(@modal_route_id_options)}
-            class="min-h-[90%] h-[30rem]"
-            select_class="h-[30rem]"
+            class="h-[32rem]"
             prompt="All routes"
             multiple={false}
           />
@@ -396,15 +386,12 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       assigns[key].result
   end
 
+  defp filter_stops_by_stop_ids(_stop, [], _selected_stop_ids) do
+    true
+  end
+
   defp filter_stops_by_stop_ids(stop, stop_id_filter_value, selected_stop_ids) do
     # returns true if stop in list is in list from modal filter or has already been selected by the user.
-    equals_stop_id =
-      if stop_id_filter_value === [] do
-        true
-      else
-        stop.id in stop_id_filter_value
-      end
-
-    equals_stop_id or stop.id in selected_stop_ids
+    stop.id in (stop_id_filter_value ++ selected_stop_ids)
   end
 end

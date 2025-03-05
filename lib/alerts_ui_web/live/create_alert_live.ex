@@ -154,7 +154,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   def get_stops_by_route_type(route_type) do
-    StopsRepo.by_route_type(route_type, include: "route") |> Enum.sort_by(& &1.name)
+    StopsRepo.by_route_type(route_type) |> Enum.sort_by(& &1.name)
   end
 
   def get_routes_by_stop(stop_ids, route_type) do
