@@ -385,7 +385,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       )
 
     ~H"""
-    <div class="min-w-[100%] self-start min-h-[50rem] flex flex-col" id="service_view">
+    <div class="min-w-[100%] self-start flex flex-col" id="service_view">
       <.h1 class="mb-8">
         Create new {ContentFormatter.route_atom_to_string(@service_type_name)}
         {(@effect_name || "") |> String.downcase()} alert
@@ -397,7 +397,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         for={@form}
         phx-target={@myself}
         phx-change="validate"
-        class={["form-control flex flex-row gap-x-8 mb-4", @route_type !== 2 && "h-[50rem]"]}
+        class={["form-control flex flex-row gap-x-8 mb-4", @route_type !== 2 && "min-h-[32rem]"]}
         id="service_form"
       >
         <div class="w-[33%]">
@@ -437,23 +437,18 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             disabled={disable_stop_input?(@form[:route_ids].value)}
             prompt={if disable_stop_input?(@form[:route_ids].value), do: "", else: "Both Directions"}
           />
-          <div class="min-w-[100%] min-h-[90%]">
-            <.filtered_select
-              field={@form[:trip_ids]}
-              filter_field={@form[:trip_ids_filter]}
-              options={@trip_id_options}
-              loading={Map.get(@available_schedules, :loading, true)}
-              no_results={
-                Enum.empty?(@trip_id_options) && !disable_trip_input?(@form[:route_ids].value)
-              }
-              class={
-                "min-w-[100%] " <>
-                if(not show_trips_input?(assigns), do: "min-h-[90%]", else: "min-h-full")
-              }
-              disabled={disable_trip_input?(@form[:route_ids].value)}
-              prompt={if disable_trip_input?(@form[:route_ids].value), do: nil, else: "All Trips"}
-            />
-          </div>
+          <.filtered_select
+            field={@form[:trip_ids]}
+            filter_field={@form[:trip_ids_filter]}
+            options={@trip_id_options}
+            loading={Map.get(@available_schedules, :loading, true)}
+            no_results={
+              Enum.empty?(@trip_id_options) && !disable_trip_input?(@form[:route_ids].value)
+            }
+            class="min-w-[100%] h-full"
+            disabled={disable_trip_input?(@form[:route_ids].value)}
+            prompt={if disable_trip_input?(@form[:route_ids].value), do: nil, else: "All Trips"}
+          />
         </div>
         <div class="flex flex-col justify-start w-[33%]">
           <.select
@@ -474,10 +469,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             no_results={
               Enum.empty?(@stop_id_options) && !disable_stop_input?(@form[:route_ids].value)
             }
-            class={
-              "min-w-[100%] " <>
-              if(not show_trips_input?(assigns), do: "min-h-[90%]", else: "min-h-full")
-            }
+            class="min-w-[100%] h-full"
             disabled={disable_stop_input?(@form[:route_ids].value)}
             prompt={
               if disable_stop_input?(@form[:route_ids].value),

@@ -237,10 +237,10 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
         for={@form}
         phx-target={@myself}
         phx-change="validate"
-        class="form-control mb-16 min-h-[50rem]"
+        class="form-control"
         id="service_form"
       >
-        <fieldset class="flex flex-row gap-x-8 min-h-[50rem]">
+        <fieldset class="flex flex-row gap-x-8">
           <.filtered_select
             label="Stops"
             field={@form[:stop_ids]}
@@ -248,7 +248,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             options={@stop_id_options}
             loading={@available_facilities.loading}
             no_results={Enum.empty?(@stop_id_options)}
-            class="min-h-[50rem] min-w-[30%]"
+            class="h-[32rem] min-w-[30%]"
             prompt="All Stops"
           />
           <.filtered_select
@@ -269,7 +269,6 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             no_results={Enum.empty?(@facility_id_options)}
             class="min-w-[30%] max-w-[30%]"
             multiple={false}
-            select_class="max-h-[90%]"
           />
         </fieldset>
       </.form>

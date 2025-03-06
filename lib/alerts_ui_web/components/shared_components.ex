@@ -417,7 +417,7 @@ defmodule AlertsUIWeb.SharedComponents do
       phx-feedback-for={@name}
       class={["flex flex-col gap-1 text-sm items-baseline content-start", @class]}
     >
-      <.label for={@id} class={if is_nil(@label), do: "hidden"}>{@label}</.label>
+      <.label for={@id} class={"text-base #{if is_nil(@label), do: "hidden"}"}>{@label}</.label>
 
       <div class={["flex gap-2 w-[100%]", if(@column, do: "flex-col", else: "flex-row")]}>
         <div :for={{option_name, id} <- @options} class={["flex-1", @button_class]}>
@@ -657,15 +657,19 @@ defmodule AlertsUIWeb.SharedComponents do
       |> assign_new(:value, fn -> field.value end)
 
     ~H"""
-    <div phx-feedback-for={@name} class={["#{@class}", @hidden && "hidden", "h-full"]}>
-      <.label :if={@label} for={@id} class={if @disabled, do: "text-text-disabled", else: ""}>
+    <div phx-feedback-for={@name} class={["#{@class}", @hidden && "hidden"]}>
+      <.label
+        :if={@label}
+        for={@id}
+        class={"inline-block #{if @disabled, do: "text-text-disabled", else: ""}"}
+      >
         {@label}
       </.label>
       <select
         id={@id}
         name={@name}
         class={[
-          "bg-bg-elevation-5 border border-bg-elevation-6 px-3 min-w-[99%] p-0 [color-scheme:light]
+          "bg-bg-elevation-5 border border-bg-elevation-6 px-3 mb-2 min-w-[100%] p-0 [color-scheme:light]
             rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto
             disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
             focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) h-10 [&_*]:pb-[.40rem] [&_*]:whitespace-pre-wrap [&_*]:truncate",
@@ -764,7 +768,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
     ~H"""
     <div {@rest} class={["flex flex-col justify-start", @class]}>
-      <div class="flex flex-row justify-between">
+      <div :if={@modal_filter_id || @label} class="flex flex-row justify-between">
         <.label for={@id} class={if @disabled, do: "text-text-disabled"}>
           {@label}
         </.label>
@@ -779,7 +783,7 @@ defmodule AlertsUIWeb.SharedComponents do
       </div>
       <div
         class={[
-          "flex flex-col rounded border grow h-8 w-[100%]
+          "flex flex-col rounded border grow w-[100%]
           border-bg-elevation-6 ring-0 ring-border-focus
           focus:ring-1 focus:border-border-focus
           focus-within:ring-1 focus-within:border-border-focus",
@@ -812,7 +816,7 @@ defmodule AlertsUIWeb.SharedComponents do
           }
           disabled={@disabled}
           loading={@loading}
-          class="m-0"
+          class="m-0 h-full"
           select_class={"min-w-full pt-0 mt-0 [scrollbar-width:thin] overflow-auto
             border-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-t-none [appearance:none] max-w-[100%] h-full " <> @select_class}
           {@rest}
