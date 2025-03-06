@@ -400,7 +400,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         class={["form-control flex flex-row gap-x-8 mb-4", @route_type !== 2 && "min-h-[32rem]"]}
         id="service_form"
       >
-        <div class="w-[33%]">
+        <div class="w-[25%]">
           <.filtered_select
             label={if @route_type in [0, 1, 2], do: "Lines", else: "Routes"}
             field={if @effect_name == "Detour", do: @form[:single_route_id], else: @form[:route_ids]}
@@ -422,7 +422,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
           />
         </div>
 
-        <div :if={show_trips_input?(assigns)} class="flex flex-col justify-start w-[33%]">
+        <div :if={show_trips_input?(assigns)} class="flex flex-col justify-start w-[25%]">
           <.select
             :if={show_directions_input?(assigns)}
             label={
@@ -450,7 +450,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             prompt={if disable_trip_input?(@form[:route_ids].value), do: nil, else: "All Trips"}
           />
         </div>
-        <div class="flex flex-col justify-start w-[33%]">
+        <div class="flex flex-col justify-start w-[25%]">
           <.select
             :if={show_directions_input?(assigns) && !show_trips_input?(assigns)}
             label={if show_stops_input?(assigns), do: "Stops", else: "Direction"}
