@@ -514,7 +514,7 @@ defmodule AlertsUIWeb.SharedComponents do
         tabindex="0"
       >
         <div class="flex min-h-full items-center justify-center">
-          <div class="w-full max-w-[15%] sm:p-6 lg:py-8">
+          <div class="w-full max-w-[22rem] sm:p-6 lg:py-8">
             <.focus_wrap
               id={"#{@id}-container"}
               phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}

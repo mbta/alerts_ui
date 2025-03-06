@@ -172,7 +172,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     selected_stop_id = socket.assigns.form.params["stop_id"]
 
     filter_title_value =
-      if selected_stop_id in [nil, "", "default"] do
+      if selected_stop_id in [nil, "", "default"] or Enum.empty?(stops) do
         "All stops"
       else
         Enum.filter(stops, &(&1.id === selected_stop_id)) |> Enum.map(& &1.name) |> hd
