@@ -485,6 +485,11 @@ defmodule AlertsUIWeb.SharedComponents do
   attr :cancel_button_text, :string, default: "Cancel"
   attr :cancel_event_name, :string, default: nil
   attr :accept_event_name, :string, default: nil
+
+  attr :target_id, :string,
+    default: "",
+    doc: "The target to send the events to (eg form component id)"
+
   attr :id, :string, required: true
   attr :show, :boolean, default: false
   attr :on_cancel, JS, default: %JS{}
@@ -509,7 +514,7 @@ defmodule AlertsUIWeb.SharedComponents do
         tabindex="0"
       >
         <div class="flex min-h-full items-center justify-center">
-          <div class="w-full max-w-[25%] p-4 sm:p-6 lg:py-8">
+          <div class="w-full min-w-[20rem] w-[25%] sm:p-6 lg:py-8">
             <.focus_wrap
               id={"#{@id}-container"}
               phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
@@ -518,7 +523,7 @@ defmodule AlertsUIWeb.SharedComponents do
               class="shadow-zinc-700/10 ring-zinc-700/10 relative hidden rounded-md bg-bg-elevation-4 border-1 border-bg-elevation-6 shadow-lg ring-1 transition
               min-h-[25rem] border border-bg-elevation-6"
             >
-              <div class="flex flex-row justify-between px-8 py-4">
+              <div class="flex flex-row justify-between px-4 py-4">
                 <h1 class="font-sm text-xl">{@header_text}</h1>
                 <button
                   phx-click={JS.exec("data-cancel", to: "##{@id}")}
@@ -530,17 +535,17 @@ defmodule AlertsUIWeb.SharedComponents do
                 </button>
               </div>
               <hr class="w-[100%] border-y-1 border-bg-elevation-6" />
-              <div id={"#{@id}-content"} class="px-8 py-4">
+              <div id={"#{@id}-content"} class="px-4 py-4">
                 {render_slot(@inner_block)}
               </div>
               <hr class="w-[100%] border-y-1 border-bg-elevation-6" />
-              <div class="flex flex-row justify-end px-8 py-4">
+              <div class="flex flex-row justify-end px-4 py-4 gap-2">
                 <.button_secondary
                   :if={@cancel_event_name}
-                  class="mr-4 w-24"
+                  class="w-24"
                   type="button"
                   phx-remove={hide_modal(@id)}
-                  phx-click={JS.push(@cancel_event_name) |> JS.exec("phx-remove")}
+                  phx-click={JS.push(@cancel_event_name, target: @target_id) |> JS.exec("phx-remove")}
                 >
                   {@cancel_button_text}
                 </.button_secondary>
@@ -549,7 +554,7 @@ defmodule AlertsUIWeb.SharedComponents do
                   class="w-24"
                   type="button"
                   phx-remove={hide_modal(@id)}
-                  phx-click={JS.push(@accept_event_name) |> JS.exec("phx-remove")}
+                  phx-click={JS.push(@accept_event_name, target: @target_id) |> JS.exec("phx-remove")}
                 >
                   {@accept_button_text}
                 </.button_primary>
