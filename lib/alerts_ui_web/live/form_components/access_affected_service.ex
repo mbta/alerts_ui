@@ -279,6 +279,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
               no_results={Enum.empty?(@stop_id_options)}
               prompt="All Stops"
               multiple={false}
+              class="h-[32rem]"
             />
           </.modal>
           <.filtered_select
@@ -290,7 +291,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             options={@facility_id_options}
             loading={@available_facilities.loading}
             no_results={Enum.empty?(@facility_id_options)}
-            class="w-[25%]"
+            class="w-[25%] h-[32rem]"
             multiple={false}
           />
         </fieldset>

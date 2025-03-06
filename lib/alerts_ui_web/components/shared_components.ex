@@ -514,7 +514,7 @@ defmodule AlertsUIWeb.SharedComponents do
         tabindex="0"
       >
         <div class="flex min-h-full items-center justify-center">
-          <div class="w-full max-w-[22rem] sm:p-6 lg:py-8">
+          <div class="w-full min-w-[20rem] w-[25%] sm:p-6 lg:py-8">
             <.focus_wrap
               id={"#{@id}-container"}
               phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
@@ -539,10 +539,10 @@ defmodule AlertsUIWeb.SharedComponents do
                 {render_slot(@inner_block)}
               </div>
               <hr class="w-[100%] border-y-1 border-bg-elevation-6" />
-              <div class="flex flex-row justify-end px-4 py-4">
+              <div class="flex flex-row justify-end px-4 py-4 gap-2">
                 <.button_secondary
                   :if={@cancel_event_name}
-                  class="mr-4 w-24"
+                  class="w-24"
                   type="button"
                   phx-remove={hide_modal(@id)}
                   phx-click={JS.push(@cancel_event_name, target: @target_id) |> JS.exec("phx-remove")}
@@ -808,7 +808,7 @@ defmodule AlertsUIWeb.SharedComponents do
         <hr class="w-5/6 self-center border-y-1 border-bg-elevation-6 min-h-[1rem]" />
         <.select
           multiple={@multiple}
-          size="15"
+          size="2"
           options={if @loading, do: [], else: @options}
           field={@field}
           no_results={@no_results}
