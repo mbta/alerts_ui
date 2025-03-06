@@ -248,7 +248,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             options={@stop_id_options}
             loading={@available_facilities.loading}
             no_results={Enum.empty?(@stop_id_options)}
-            class="h-[32rem] min-w-[30%]"
+            class="h-[32rem] w-[25%]"
             prompt="All Stops"
           />
           <.filtered_select
@@ -257,7 +257,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             filter_field={@form[:facility_types_filter]}
             no_results={Enum.empty?(@facility_type_options)}
             options={@facility_type_options}
-            class="min-w-[30%]"
+            class="w-[25%]"
             prompt="All Categories"
           />
           <.filtered_select
@@ -267,7 +267,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             options={@facility_id_options}
             loading={@available_facilities.loading}
             no_results={Enum.empty?(@facility_id_options)}
-            class="min-w-[30%] max-w-[30%]"
+            class="w-[25%]"
             multiple={false}
           />
         </fieldset>
