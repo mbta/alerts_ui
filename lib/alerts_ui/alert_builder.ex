@@ -232,19 +232,32 @@ defmodule AlertsUI.AlertBuilder do
   end
 
   defp filtered_route_patterns(route_patterns, parent_stop_ids, direction) do
-    route_patterns
-    |> Enum.filter(fn route_pattern ->
-      route_id = route_pattern.route_id
+    # determines which route patterns to use in the case of a route with
+    # multiple branches and thus multiple patterns (eg red line)
+    # Uses 1 route pattern if only one has all the stops on it,
+    # otherwise uses all of them.
+    route_patterns = route_patterns |> Enum.reject(&(&1.route_id =~ "Shuttle"))
 
-      parent_stop_ids = filtered_parent_stop_ids(route_id, direction, parent_stop_ids)
+    route_pattern_match =
+      route_patterns
+      |> Enum.filter(fn route_pattern ->
+        route_id = route_pattern.route_id
 
-      stops_from_route_pattern = Enum.map(route_pattern.stops, & &1.id)
-      parents_from_route_pattern = Enum.map(route_pattern.stops, & &1.parent_id)
+        parent_stop_ids = filtered_parent_stop_ids(route_id, direction, parent_stop_ids)
 
-      Enum.all?(parent_stop_ids, fn stop_id ->
-        stop_id in (parents_from_route_pattern ++ stops_from_route_pattern)
+        stops_from_route_pattern = Enum.map(route_pattern.stops, & &1.id)
+        parents_from_route_pattern = Enum.map(route_pattern.stops, & &1.parent_id)
+
+        Enum.all?(parent_stop_ids, fn stop_id ->
+          stop_id in (parents_from_route_pattern ++ stops_from_route_pattern)
+        end)
       end)
-    end)
+
+    if Enum.empty?(route_pattern_match) do
+      route_patterns
+    else
+      route_pattern_match
+    end
   end
 
   @spec filtered_parent_stop_ids(Route.id_t(), String.t(), [Stop.t()]) :: [Stop.t()]

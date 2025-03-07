@@ -424,8 +424,8 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [],
          [
-           by_route_id: fn _route_id, _opts ->
-             [%APIRoutePattern{direction_id: 1, stops: child_stops}]
+           by_route_id: fn route_id, _opts ->
+             [%APIRoutePattern{direction_id: 1, stops: child_stops, route_id: route_id}]
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
@@ -481,8 +481,8 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [],
          [
-           by_route_id: fn _route_id, _opts ->
-             [%APIRoutePattern{direction_id: 0, stops: parent_stops}]
+           by_route_id: fn route_id, _opts ->
+             [%APIRoutePattern{direction_id: 0, stops: parent_stops, route_id: route_id}]
            end,
            included_stops_by_route_id: fn _route_id, _direction -> parent_stops end
          ]},
@@ -549,8 +549,8 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [],
          [
-           by_route_id: fn _route_id, _opts ->
-             [%APIRoutePattern{direction_id: 0, stops: child_stops}]
+           by_route_id: fn route_id, _opts ->
+             [%APIRoutePattern{direction_id: 0, stops: child_stops, route_id: route_id}]
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
@@ -620,8 +620,8 @@ defmodule AlertsUI.AlertBuilderTest do
            by_route_id: fn "Red",
                            ["filter[canonical]": true, include: "representative_trip.stops"] ->
              [
-               %APIRoutePattern{direction_id: 0, stops: child_stops_0},
-               %APIRoutePattern{direction_id: 1, stops: child_stops_1}
+               %APIRoutePattern{direction_id: 0, stops: child_stops_0, route_id: "Red"},
+               %APIRoutePattern{direction_id: 1, stops: child_stops_1, route_id: "Red"}
              ]
            end,
            included_stops_by_route_id: fn _route_id, _direction ->
@@ -714,8 +714,8 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [],
          [
-           by_route_id: fn _route_id, _opts ->
-             [%APIRoutePattern{direction_id: 1, stops: child_stops}]
+           by_route_id: fn route_id, _opts ->
+             [%APIRoutePattern{direction_id: 1, stops: child_stops, route_id: route_id}]
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
@@ -1366,8 +1366,8 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [],
          [
-           by_route_id: fn _route_id, _opts ->
-             [%APIRoutePattern{direction_id: 1, stops: child_stops}]
+           by_route_id: fn route_id, _opts ->
+             [%APIRoutePattern{direction_id: 1, stops: child_stops, route_id: route_id}]
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
@@ -1484,8 +1484,8 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [],
          [
-           by_route_id: fn _route_id, _opts ->
-             [%APIRoutePattern{direction_id: 0, stops: child_stops}]
+           by_route_id: fn route_id, _opts ->
+             [%APIRoutePattern{direction_id: 0, stops: child_stops, route_id: route_id}]
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
@@ -1550,8 +1550,8 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [],
          [
-           by_route_id: fn _route_id, _opts ->
-             [%APIRoutePattern{direction_id: 0, stops: child_stops}]
+           by_route_id: fn route_id, _opts ->
+             [%APIRoutePattern{direction_id: 0, stops: child_stops, route_id: route_id}]
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
@@ -1616,8 +1616,8 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [],
          [
-           by_route_id: fn _route_id, _opts ->
-             [%APIRoutePattern{direction_id: 0, stops: child_stops}]
+           by_route_id: fn route_id, _opts ->
+             [%APIRoutePattern{direction_id: 0, stops: child_stops, route_id: route_id}]
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
@@ -1690,8 +1690,8 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [],
          [
-           by_route_id: fn _route_id, _opts ->
-             [%APIRoutePattern{direction_id: 0, stops: child_stops}]
+           by_route_id: fn route_id, _opts ->
+             [%APIRoutePattern{direction_id: 0, stops: child_stops, route_id: route_id}]
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
@@ -1766,8 +1766,8 @@ defmodule AlertsUI.AlertBuilderTest do
            by_route_id: fn "CR-Fitchburg",
                            ["filter[canonical]": true, include: "representative_trip.stops"] ->
              [
-               %APIRoutePattern{direction_id: 0, stops: child_stops_0},
-               %APIRoutePattern{direction_id: 1, stops: child_stops_1}
+               %APIRoutePattern{direction_id: 0, stops: child_stops_0, route_id: "CR-Fitchburg"},
+               %APIRoutePattern{direction_id: 1, stops: child_stops_1, route_id: "CR-Fitchburg"}
              ]
            end,
            included_stops_by_route_id: fn _route_id, _direction ->
@@ -1844,8 +1844,8 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [],
          [
-           by_route_id: fn _route_id, _opts ->
-             [%APIRoutePattern{direction_id: 0, stops: child_stops}]
+           by_route_id: fn route_id, _opts ->
+             [%APIRoutePattern{direction_id: 0, stops: child_stops, route_id: route_id}]
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
@@ -1920,8 +1920,8 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [],
          [
-           by_route_id: fn _route_id, _opts ->
-             [%APIRoutePattern{direction_id: 0, stops: child_stops}]
+           by_route_id: fn route_id, _opts ->
+             [%APIRoutePattern{direction_id: 0, stops: child_stops, route_id: route_id}]
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
@@ -1967,8 +1967,8 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [],
          [
-           by_route_id: fn _route_id, _opts ->
-             [%APIRoutePattern{direction_id: 0, stops: child_stops}]
+           by_route_id: fn route_id, _opts ->
+             [%APIRoutePattern{direction_id: 0, stops: child_stops, route_id: route_id}]
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
@@ -2074,8 +2074,8 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [],
          [
-           by_route_id: fn _route_id, _opts ->
-             [%APIRoutePattern{direction_id: 0, stops: child_stops}]
+           by_route_id: fn route_id, _opts ->
+             [%APIRoutePattern{direction_id: 0, stops: child_stops, route_id: route_id}]
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
