@@ -666,7 +666,7 @@ defmodule AlertsUIWeb.SharedComponents do
       <.label
         :if={@label}
         for={@id}
-        class={"inline-block #{if @disabled, do: "text-text-disabled", else: ""}"}
+        class={"block #{if @disabled, do: "text-text-disabled", else: ""}"}
       >
         {@label}
       </.label>
@@ -1095,7 +1095,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
     ~H"""
     <div phx-feedback-for={@name} class={["#{@class}", @hidden && "hidden"]}>
-      <.label for={@id} class={if is_nil(@label), do: "hidden"}>{@label}</.label>
+      <.label for={@id} class={"block #{if is_nil(@label), do: "hidden"}"}>{@label}</.label>
       <input
         id={@id}
         name={@name}

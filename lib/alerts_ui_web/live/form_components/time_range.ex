@@ -647,67 +647,63 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     ~H"""
     <div
       :if={@form[:alert_timing].value in [:"one-time", "one-time"]}
-      class="flex flex-row gap-8 my-8"
+      class="flex flex-row gap-8 mt-8"
     >
-      <div class="flex flex-row gap-8">
-        <.select
-          label="Effect period"
-          field={@form[:active_period_start_specifier]}
-          options={values_to_options(@start_values)}
-          class="min-w-[16rem] max-w-[16rem]"
-          phx-debounce={120}
-        />
-        <.datetime
-          field={@form[:active_period_start]}
-          min={naive_datetime_to_iso8601(@current_time)}
-          max="9999-12-31T23:59"
-          value={naive_datetime_to_iso8601(@form[:active_period_start].value)}
-          label="Start date and time"
-          class={"min-w-[16rem] max-w-[16rem] h-10 " <> (if @form[:active_period_start_specifier].value === :custom, do: "", else: "hidden")}
-          phx-debounce={120}
-        />
-        <.datetime
-          type="date"
-          field={@form[:active_period_start_date]}
-          min={next_start_of_service_date(@current_time)}
-          max={
-            [naive_datetime_to_iso_date(@form[:active_period_end].value), "9999-12-31"] |> Enum.max()
-          }
-          value={@form[:active_period_start_date].value}
-          label="Start date"
-          class={"min-w-[16rem] max-w-[16rem] h-10 " <> (if @form[:active_period_start_specifier].value === :start_of_service, do: "", else: "hidden")}
-          phx-debounce={120}
-        />
-      </div>
-      <p class="pt-[2rem]">to</p>
-      <div class="flex flex-row gap-8">
-        <.select
-          label=""
-          field={@form[:active_period_end_specifier]}
-          options={values_to_options(@end_values)}
-          class="min-w-[16rem] max-w-[16rem]"
-          phx-debounce={120}
-        />
-        <.datetime
-          field={@form[:active_period_end]}
-          min={naive_datetime_to_iso8601(@form[:active_period_start].value)}
-          max="9999-12-31T23:59"
-          value={naive_datetime_to_iso8601(@form[:active_period_end].value)}
-          label="End date and time"
-          class={"min-w-[16rem] max-w-[16rem] h-10 " <> (if @form[:active_period_end_specifier].value === :custom, do: "", else: "hidden")}
-          phx-debounce={120}
-        />
-        <.datetime
-          type="date"
-          field={@form[:active_period_end_date]}
-          min={@form[:active_period_start].value |> naive_datetime_to_iso_date}
-          max="9999-12-31"
-          value={@form[:active_period_end_date].value}
-          label="End date"
-          class={"min-w-[16rem] max-w-[16rem] h-10 " <> (if @form[:active_period_end_specifier].value === :end_of_service, do: "", else: "hidden")}
-          phx-debounce={120}
-        />
-      </div>
+      <.select
+        label="Effect period"
+        field={@form[:active_period_start_specifier]}
+        options={values_to_options(@start_values)}
+        class="min-w-[16rem] max-w-[16rem]"
+        phx-debounce={120}
+      />
+      <.datetime
+        field={@form[:active_period_start]}
+        min={naive_datetime_to_iso8601(@current_time)}
+        max="9999-12-31T23:59"
+        value={naive_datetime_to_iso8601(@form[:active_period_start].value)}
+        label="Start date and time"
+        class={"min-w-[16rem] max-w-[16rem] " <> (if @form[:active_period_start_specifier].value === :custom, do: "", else: "hidden")}
+        phx-debounce={120}
+      />
+      <.datetime
+        type="date"
+        field={@form[:active_period_start_date]}
+        min={next_start_of_service_date(@current_time)}
+        max={
+          [naive_datetime_to_iso_date(@form[:active_period_end].value), "9999-12-31"] |> Enum.max()
+        }
+        value={@form[:active_period_start_date].value}
+        label="Start date"
+        class={"min-w-[16rem] max-w-[16rem] " <> (if @form[:active_period_start_specifier].value === :start_of_service, do: "", else: "hidden")}
+        phx-debounce={120}
+      />
+      <p class="pt-[2.5rem]">to</p>
+      <.select
+        label=""
+        field={@form[:active_period_end_specifier]}
+        options={values_to_options(@end_values)}
+        class="min-w-[16rem] max-w-[16rem]"
+        phx-debounce={120}
+      />
+      <.datetime
+        type="date"
+        field={@form[:active_period_end_date]}
+        min={@form[:active_period_start].value |> naive_datetime_to_iso_date}
+        max="9999-12-31"
+        value={@form[:active_period_end_date].value}
+        label="End date"
+        class={"min-w-[16rem] max-w-[16rem] " <> (if @form[:active_period_end_specifier].value === :end_of_service, do: "", else: "hidden")}
+        phx-debounce={120}
+      />
+      <.datetime
+        field={@form[:active_period_end]}
+        min={naive_datetime_to_iso8601(@form[:active_period_start].value)}
+        max="9999-12-31T23:59"
+        value={naive_datetime_to_iso8601(@form[:active_period_end].value)}
+        label="End date and time"
+        class={"min-w-[16rem] max-w-[16rem] " <> (if @form[:active_period_end_specifier].value === :custom, do: "", else: "hidden")}
+        phx-debounce={120}
+      />
     </div>
     """
   end
