@@ -762,6 +762,221 @@ defmodule AlertsUI.AlertBuilderTest do
       end
     end
 
+    test "RDS informed entities with Red line stops on 2 branches" do
+      jfk = %Stop{id: "place-jfk"}
+      ashmont = %Stop{id: "place-asmnl"}
+      braintree = %Stop{id: "place-brntn"}
+
+      jfk_child = %Stop{id: "jfk-child", parent_id: jfk.id, vehicle_type: 1}
+      ashmont_child = %Stop{id: "ashmont-child", parent_id: ashmont.id, vehicle_type: 1}
+      braintree_child = %Stop{id: "braintree-child", parent_id: braintree.id, vehicle_type: 1}
+
+      alert_data = %{
+        route_type: 1,
+        description_text: "description",
+        header_text: "header",
+        effect_name: "Shuttle",
+        stop_ids: ["place-jfk", "place-asmnl", "place-brntn"],
+        route_ids: ["Red"],
+        trip_ids: nil,
+        direction: "default"
+      }
+
+      with_mocks([
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn
+             "Red", _ ->
+               [
+                 %APIRoutePattern{
+                   direction_id: 0,
+                   stops: [jfk_child, ashmont_child],
+                   route_id: "Red"
+                 },
+                 %APIRoutePattern{
+                   direction_id: 1,
+                   stops: [ashmont_child, jfk_child],
+                   route_id: "Red"
+                 },
+                 %APIRoutePattern{
+                   direction_id: 0,
+                   stops: [jfk_child, braintree_child],
+                   route_id: "Red"
+                 },
+                 %APIRoutePattern{
+                   direction_id: 1,
+                   stops: [braintree_child, jfk_child],
+                   route_id: "Red"
+                 }
+               ]
+           end,
+           included_stops_by_route_id: fn _route_id, _direction ->
+             [jfk_child, ashmont_child, braintree_child]
+           end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn
+             "Red", _ -> [jfk, ashmont, braintree]
+           end
+         ]},
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
+      ]) do
+        result = AlertBuilder.build_alert(alert_data, :RDS)
+
+        assert result.informed_entity ==
+                 [
+                   %{
+                     activities: [:BOARD, :RIDE],
+                     agency_id: "1",
+                     direction_id: 0,
+                     route_id: "Red",
+                     route_type: 1,
+                     stop_id: "jfk-child"
+                   },
+                   %{
+                     activities: [:EXIT, :RIDE],
+                     agency_id: "1",
+                     direction_id: 0,
+                     route_id: "Red",
+                     route_type: 1,
+                     stop_id: "ashmont-child"
+                   },
+                   %{
+                     activities: [:BOARD, :RIDE],
+                     agency_id: "1",
+                     direction_id: 1,
+                     route_id: "Red",
+                     route_type: 1,
+                     stop_id: "ashmont-child"
+                   },
+                   %{
+                     activities: [:EXIT, :RIDE],
+                     agency_id: "1",
+                     direction_id: 1,
+                     route_id: "Red",
+                     route_type: 1,
+                     stop_id: "jfk-child"
+                   },
+                   %{
+                     activities: [:EXIT, :RIDE],
+                     agency_id: "1",
+                     route_id: "Red",
+                     route_type: 1,
+                     direction_id: 0,
+                     stop_id: "braintree-child"
+                   },
+                   %{
+                     activities: [:BOARD, :RIDE],
+                     agency_id: "1",
+                     route_id: "Red",
+                     route_type: 1,
+                     direction_id: 1,
+                     stop_id: "braintree-child"
+                   }
+                 ]
+      end
+    end
+
+    test "RDS informed entities with Red line stops on 1 branch" do
+      jfk = %Stop{id: "place-jfk"}
+      ashmont = %Stop{id: "place-asmnl"}
+      braintree = %Stop{id: "place-brntn"}
+
+      jfk_child = %Stop{id: "jfk-child", parent_id: jfk.id, vehicle_type: 1}
+      ashmont_child = %Stop{id: "ashmont-child", parent_id: ashmont.id, vehicle_type: 1}
+      braintree_child = %Stop{id: "braintree-child", parent_id: braintree.id, vehicle_type: 1}
+
+      alert_data = %{
+        route_type: 1,
+        description_text: "description",
+        header_text: "header",
+        effect_name: "Shuttle",
+        stop_ids: ["place-jfk", "place-asmnl"],
+        route_ids: ["Red"],
+        trip_ids: nil,
+        direction: "default"
+      }
+
+      with_mocks([
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn
+             "Red", _ ->
+               [
+                 %APIRoutePattern{
+                   direction_id: 0,
+                   stops: [jfk_child, ashmont_child],
+                   route_id: "Red"
+                 },
+                 %APIRoutePattern{
+                   direction_id: 1,
+                   stops: [ashmont_child, jfk_child],
+                   route_id: "Red"
+                 },
+                 %APIRoutePattern{
+                   direction_id: 0,
+                   stops: [jfk_child, braintree_child],
+                   route_id: "Red"
+                 },
+                 %APIRoutePattern{
+                   direction_id: 1,
+                   stops: [braintree_child, jfk_child],
+                   route_id: "Red"
+                 }
+               ]
+           end,
+           included_stops_by_route_id: fn _route_id, _direction ->
+             [jfk_child, ashmont_child, braintree_child]
+           end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn
+             "Red", _ -> [jfk, ashmont, braintree]
+           end
+         ]},
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
+      ]) do
+        result = AlertBuilder.build_alert(alert_data, :RDS)
+
+        assert result.informed_entity == [
+                 %{
+                   activities: [:BOARD, :RIDE],
+                   agency_id: "1",
+                   direction_id: 0,
+                   route_id: "Red",
+                   route_type: 1,
+                   stop_id: "jfk-child"
+                 },
+                 %{
+                   activities: [:EXIT, :RIDE],
+                   agency_id: "1",
+                   direction_id: 0,
+                   route_id: "Red",
+                   route_type: 1,
+                   stop_id: "ashmont-child"
+                 },
+                 %{
+                   activities: [:BOARD, :RIDE],
+                   agency_id: "1",
+                   direction_id: 1,
+                   route_id: "Red",
+                   route_type: 1,
+                   stop_id: "ashmont-child"
+                 },
+                 %{
+                   activities: [:EXIT, :RIDE],
+                   agency_id: "1",
+                   direction_id: 1,
+                   route_id: "Red",
+                   route_type: 1,
+                   stop_id: "jfk-child"
+                 }
+               ]
+      end
+    end
+
     test "RDS informed entities expanding Green Line routes" do
       hynes = %Stop{id: "place-hymnl"}
       kenmore = %Stop{id: "place-kencl"}
