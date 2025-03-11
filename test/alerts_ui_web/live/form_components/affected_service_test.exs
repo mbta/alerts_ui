@@ -7,18 +7,19 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
   import Mock
   import Phoenix.LiveViewTest
 
+  alias AlertsUI.Models.EnhancedSchedule
   alias AlertsUIWeb.FormComponents.{AffectedService, RouteTypeAndEffect}
   alias AlertsUIWeb.Step
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
-  alias MBTAV3API.Schedules.{Schedule, Trip}
+  alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
   alias Phoenix.LiveView.AsyncResult
 
-  @schedule %Schedule{
+  @schedule %EnhancedSchedule{
     route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
     trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
@@ -26,9 +27,25 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     departure_time: DateTime.utc_now() |> DateTime.add(-1, :hour)
   }
 
-  @schedule_2 %Schedule{
+  @schedule_2 %EnhancedSchedule{
     route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
     trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
+    stop: %Stop{id: "place-sstat", name: "South Station"},
+    arrival_time: DateTime.utc_now(),
+    departure_time: nil
+  }
+
+  @schedule_3 %EnhancedSchedule{
+    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    trip: %Trip{id: "CR-683322-596", name: "596", direction_id: 0},
+    stop: %Stop{id: "place-sstat", name: "South Station"},
+    arrival_time: DateTime.utc_now(),
+    departure_time: DateTime.utc_now() |> DateTime.add(-1, :hour)
+  }
+
+  @schedule_4 %EnhancedSchedule{
+    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    trip: %Trip{id: "CR-683322-596", name: "596", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: DateTime.utc_now(),
     departure_time: nil
@@ -58,6 +75,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     editing: false,
     effect_name: "Delay"
   }
+
+  @todays_date DateTime.utc_now()
+               |> DateTime.shift_zone!("America/New_York")
+               |> DateTime.to_date()
 
   describe "component" do
     test "renders" do
@@ -218,6 +239,56 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       end
     end
 
+    test "trip options populated if all trips is selected" do
+      today = @todays_date |> Date.to_string()
+      tomorrow = Date.add(@todays_date, 1)
+
+      with_mock(SchedulesRepo,
+        by_route_ids: fn
+          ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^today] ->
+            [@schedule, @schedule_2]
+
+          ["CR-Worcester"], [stop_sequences: [:first, :last], date: @todays_date] ->
+            [@schedule, @schedule_2]
+
+          ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^tomorrow] ->
+            [@schedule_3, @schedule_4]
+        end,
+        end_of_rating: fn -> Date.add(@todays_date, 1) end
+      ) do
+        {:ok, view, _html} =
+          live_isolated_component(AffectedService, %{
+            @assigns
+            | alert_data: %{route_type: 2, effect_name: "Delay"}
+          })
+
+        refute view
+               |> element("select#affected_service_trip_ids")
+               |> render() =~ "All Trips"
+
+        view
+        |> element("form")
+        |> render_change(%{"affected_service" => %{"route_ids" => ["CR-Worcester"]}})
+
+        live_assign(view, %{modal_filter_value: nil, modal_date: nil})
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "affected_service" => %{"modal_filter_value" => nil, "modal_date" => nil}
+        })
+
+        assert view
+               |> live_assign(:available_schedules, %AsyncResult{
+                 ok?: true,
+                 loading: false,
+                 failed: false,
+                 result: [@schedule]
+               })
+               |> render() =~ "All future trips"
+      end
+    end
+
     test "stop element disabled until route is selected" do
       with_mocks([
         {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},
@@ -330,7 +401,11 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     test "works correctly if editing" do
       with_mocks([
         {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},
-        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end,
+           end_of_rating: fn -> DateTime.utc_now() |> DateTime.to_date() |> Date.add(10) end
+         ]},
         {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
       ]) do
         {:ok, view, _html} =

@@ -6,6 +6,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   use AlertsUI.Schema
   import Ecto.Changeset
 
+  alias AlertsUI.Models.ActivePeriod
   alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.CreateAlertLive
 
@@ -30,13 +31,32 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     field :stop_ids, {:array, :string}
     field :stop_ids_filter, :string
     field :trip_information_by_id, {:map, :map}
+    field :modal_date, :date
+    field :modal_date_filter, :string
   end
 
-  @fields ~w[route_ids direction trip_ids stop_ids trip_information_by_id route_ids_filter trip_ids_filter stop_ids_filter single_route_id]a
+  @fields ~w[route_ids direction trip_ids stop_ids trip_information_by_id route_ids_filter trip_ids_filter stop_ids_filter single_route_id modal_date modal_date_filter]a
 
   @impl true
   def mount(socket) do
-    changeset = changeset(%__MODULE__{}, %{})
+    service_dates =
+      Enum.to_list(0..6)
+      |> Enum.map(fn x ->
+        DateTime.utc_now()
+        |> DateTime.shift_zone!("America/New_York")
+        |> ActivePeriod.datetime_to_service_date()
+        |> Date.add(x)
+      end)
+
+    modal_options =
+      service_dates
+      |> Enum.map(fn date ->
+        {Timex.format!(date, "{WDfull} {M}/{0D}"), Date.to_iso8601(date)}
+      end)
+
+    changeset = changeset(%__MODULE__{}, %{modal_date: hd(service_dates) |> Date.to_iso8601()})
+
+    form = to_form(changeset)
 
     socket =
       socket
@@ -45,7 +65,13 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         button_selected_routes: [],
         available_routes: %{},
         available_schedules: %{},
-        available_stops: %{}
+        available_stops: %{},
+        service_dates: service_dates,
+        todays_date: hd(service_dates) |> Date.to_iso8601(),
+        modal_date: hd(service_dates) |> Date.to_iso8601(),
+        modal_filter_value: hd(service_dates) |> Date.to_iso8601(),
+        modal_options: modal_options,
+        filter_title_value: modal_options |> Enum.map(fn {option, _value} -> option end) |> hd
       })
 
     {:ok, socket}
@@ -67,7 +93,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         available_schedules =
           CreateAlertLive.get_schedules(
             alert_data.route_ids,
-            alert_data.direction
+            alert_data.direction,
+            nil
           )
 
         trip_information_by_id(
@@ -76,7 +103,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         )
       end
 
-    alert_data = Map.put(alert_data, :trip_information_by_id, trip_information_by_id)
+    params = socket.assigns.form.params |> Map.new(fn {k, v} -> {String.to_atom(k), v} end)
+
+    alert_data =
+      Map.put(alert_data, :trip_information_by_id, trip_information_by_id)
+      |> Map.put(:modal_date, nil)
+      |> Map.merge(params)
 
     changeset =
       %__MODULE__{}
@@ -88,8 +120,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     assigns =
       assigns
-      |> Map.put(:form, to_form(changeset))
-      |> Map.put(:alert_data, alert_data)
+      |> Map.put(:modal_filter_value, nil)
+      |> Map.put(:filter_title_value, "All future trips")
 
     send(self(), {:section_completed, changes})
 
@@ -102,6 +134,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     socket =
       socket
       |> assign(assigns)
+      |> assign(:form, changeset |> to_form())
       |> assign_async([:available_routes], fn ->
         {:ok,
          %{
@@ -149,9 +182,15 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     route_types = all_route_types(route_type)
 
     # make sure initial errors get sent up to create_alert_live even if no events fire
+<<<<<<< HEAD
     # For other form components, this is done in the mount, but we can't do that here
     # because assigns won't be populated yet, and that's how we get the required_fields
     changeset = changeset(%__MODULE__{}, alert_data)
+=======
+    changeset =
+      %__MODULE__{}
+      |> changeset(Map.merge(alert_data, socket.assigns))
+>>>>>>> a3b4051 (trips filter modal)
 
     case apply_action(
            changeset
@@ -234,6 +273,39 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     {:noreply, socket}
   end
 
+  @impl true
+  def handle_event("accepted_dates_modal", _params, socket) do
+    params = socket.assigns.form.params
+
+    modal_date =
+      if params["modal_date"] in [nil, "", "default"] do
+        nil
+      else
+        params["modal_date"]
+      end
+
+    {filter_title_value, _} =
+      socket.assigns.modal_options
+      |> Enum.find({"All future trips", nil}, fn {_option, value} -> value == modal_date end)
+
+    required_fields = ServiceEffectCombinations.required_fields(socket.assigns.combination)
+
+    socket =
+      socket
+      |> assign(
+        filter_title_value: filter_title_value,
+        modal_filter_value: modal_date
+      )
+      |> assign_schedules(params["route_ids"], params["direction"], required_fields)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("cancelled_modal", _params, socket) do
+    {:noreply, socket}
+  end
+
   def validate(affected_service, assigns) do
     trip_information_by_id =
       if Helpers.async_available?(assigns, :available_schedules) do
@@ -299,13 +371,16 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   def assign_schedules(socket, route_ids, direction, fields) do
     if :trip_ids in fields do
+      service_date = socket.assigns.modal_filter_value
+
       assign_async(socket, [:available_schedules], fn ->
         {:ok,
          %{
            available_schedules:
              CreateAlertLive.get_schedules(
                route_ids,
-               direction
+               direction,
+               service_date
              )
          }}
       end)
@@ -388,10 +463,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         for={@form}
         phx-target={@myself}
         phx-change="validate"
-        class={["form-control flex flex-row gap-x-8 mb-4", @route_type !== 2 && "min-h-[32rem]"]}
+        class={["form-control flex flex-row mb-4", @route_type !== 2 && "min-h-[32rem]"]}
         id="service_form"
       >
-        <div class="w-[25%]">
+        <div class="w-[25%] mr-8">
           <.filtered_select
             label={if @route_type in [0, 1, 2], do: "Lines", else: "Routes"}
             field={if @effect_name == "Detour", do: @form[:single_route_id], else: @form[:route_ids]}
@@ -413,7 +488,26 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
           />
         </div>
 
-        <div :if={show_trips_input?(assigns)} class="flex flex-col justify-start w-[25%]">
+        <.modal
+          :if={show_trips_input?(assigns)}
+          id="dates-filter-modal"
+          header_text="Filter by day"
+          cancel_event_name="cancelled_modal"
+          accept_event_name="accepted_dates_modal"
+          accept_button_text="Apply"
+          target_id="#service_form"
+        >
+          <.filtered_select
+            label="Upcoming dates"
+            field={@form[:modal_date]}
+            filter_field={@form[:modal_date_filter]}
+            options={@modal_options}
+            class="h-[32rem]"
+            prompt="All future trips"
+            multiple={false}
+          />
+        </.modal>
+        <div :if={show_trips_input?(assigns)} class="flex flex-col justify-start w-[25%] mr-8">
           <.select
             :if={show_directions_input?(assigns)}
             label={
@@ -431,6 +525,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
           <.filtered_select
             field={@form[:trip_ids]}
             filter_field={@form[:trip_ids_filter]}
+            modal_filter_id="dates-filter-modal"
+            modal_filter_title={"Filter: #{@filter_title_value}"}
             options={@trip_id_options}
             loading={Map.get(@available_schedules, :loading, true)}
             no_results={

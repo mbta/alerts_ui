@@ -780,10 +780,17 @@ defmodule AlertsUIWeb.SharedComponents do
         <button
           :if={@modal_filter_id}
           phx-click={show_modal(@modal_filter_id)}
-          class="leading-tight mb-2 min-h-[1.3rem] text-primary text-right"
+          class={[
+            "leading-tight mb-2 min-h-[1.3rem] text-right",
+            if(@disabled, do: "text-text-disabled", else: "text-primary")
+          ]}
           type="button"
+          disabled={@disabled}
         >
-          <span class="hero-funnel-mini w-4 h-4 mr-2 bg-primary" />{@modal_filter_title}
+          <span class={[
+            "hero-funnel-mini w-4 h-4 mr-2",
+            if(@disabled, do: "text-text-disabled", else: "bg-primary")
+          ]} />{@modal_filter_title}
         </button>
       </div>
       <div
