@@ -251,7 +251,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     ~H"""
     <div class="min-w-full flex flex-col" id="access_service_view">
       <.h1 class="!mb-0">Create new alert</.h1>
-      <.p>Access • {String.capitalize(@effect_name)}</.p>
+      <.p>Access • {@effect_name}</.p>
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
         Affected service
       </.h5>
