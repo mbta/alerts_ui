@@ -485,13 +485,13 @@ defmodule AlertsUIWeb.SharedComponents do
   attr :cancel_button_text, :string, default: "Cancel"
   attr :cancel_event_name, :string, default: nil
   attr :accept_event_name, :string, default: nil
-  attr :id, :string, required: true
-  attr :show, :boolean, default: false
 
   attr :target_id, :string,
     default: "",
     doc: "The target to send the events to (eg form component id)"
 
+  attr :id, :string, required: true
+  attr :show, :boolean, default: false
   attr :on_cancel, JS, default: %JS{}
   slot :inner_block, required: true
 
