@@ -1095,7 +1095,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
     ~H"""
     <div phx-feedback-for={@name} class={["#{@class}", @hidden && "hidden"]}>
-      <.label for={@id} class={"block #{if is_nil(@label), do: "hidden"}"}>{@label}</.label>
+      <.label for={@id} class="block">{@label}</.label>
       <input
         id={@id}
         name={@name}
