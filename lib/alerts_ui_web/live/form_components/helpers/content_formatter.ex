@@ -16,5 +16,5 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ContentFormatter do
   def route_atom_to_string(:commuter_rail), do: "Commuter Rail"
 
   def route_atom_to_string(route_atom),
-    do: route_atom |> Atom.to_string() |> String.replace("_", " ") |> String.capitalize
+    do: route_atom |> Atom.to_string() |> String.replace("_", " ") |> String.capitalize()
 end
