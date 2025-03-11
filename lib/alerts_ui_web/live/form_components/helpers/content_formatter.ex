@@ -9,7 +9,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ContentFormatter do
       iex> ContentFormatter.route_atom_to_string(:commuter_rail)
       "Commuter Rail"
       iex> ContentFormatter.route_atom_to_string(:bus)
-      "bus"
+      "Bus"
   """
 
   @spec route_atom_to_string(atom()) :: String.t()
