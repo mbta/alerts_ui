@@ -514,7 +514,7 @@ defmodule AlertsUIWeb.SharedComponents do
         tabindex="0"
       >
         <div class="flex min-h-full items-center justify-center">
-          <div class="w-full min-w-[20rem] w-[25%] sm:p-6 lg:py-8">
+          <div class="min-w-[20rem] w-[25%] sm:p-6 lg:py-8">
             <.focus_wrap
               id={"#{@id}-container"}
               phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
@@ -780,7 +780,7 @@ defmodule AlertsUIWeb.SharedComponents do
         <button
           :if={@modal_filter_id}
           phx-click={show_modal(@modal_filter_id)}
-          class="leading-tight mb-2 min-h-[1.3rem] text-primary"
+          class="leading-tight mb-2 min-h-[1.3rem] text-primary text-right"
           type="button"
         >
           <span class="hero-funnel-mini w-4 h-4 mr-2 bg-primary" />{@modal_filter_title}
