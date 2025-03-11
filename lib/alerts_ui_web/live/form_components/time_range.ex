@@ -661,7 +661,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         min={naive_datetime_to_iso8601(@current_time)}
         max="9999-12-31T23:59"
         value={naive_datetime_to_iso8601(@form[:active_period_start].value)}
-        label="Start date and time"
+        label=""
         class={"min-w-[16rem] max-w-[16rem] " <> (if @form[:active_period_start_specifier].value === :custom, do: "", else: "hidden")}
         phx-debounce={120}
       />
@@ -673,7 +673,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           [naive_datetime_to_iso_date(@form[:active_period_end].value), "9999-12-31"] |> Enum.max()
         }
         value={@form[:active_period_start_date].value}
-        label="Start date"
+        label=""
         class={"min-w-[16rem] max-w-[16rem] " <> (if @form[:active_period_start_specifier].value === :start_of_service, do: "", else: "hidden")}
         phx-debounce={120}
       />
@@ -691,7 +691,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         min={@form[:active_period_start].value |> naive_datetime_to_iso_date}
         max="9999-12-31"
         value={@form[:active_period_end_date].value}
-        label="End date"
+        label=""
         class={"min-w-[16rem] max-w-[16rem] " <> (if @form[:active_period_end_specifier].value === :end_of_service, do: "", else: "hidden")}
         phx-debounce={120}
       />
@@ -700,7 +700,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         min={naive_datetime_to_iso8601(@form[:active_period_start].value)}
         max="9999-12-31T23:59"
         value={naive_datetime_to_iso8601(@form[:active_period_end].value)}
-        label="End date and time"
+        label=""
         class={"min-w-[16rem] max-w-[16rem] " <> (if @form[:active_period_end_specifier].value === :custom, do: "", else: "hidden")}
         phx-debounce={120}
       />
