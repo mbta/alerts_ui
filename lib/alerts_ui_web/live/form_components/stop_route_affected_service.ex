@@ -8,6 +8,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.CreateAlertLive
   alias AlertsUIWeb.FormComponents.Helpers.{ContentFormatter, ErrorFormatter, SelectFormatter}
+  alias Phoenix.LiveView.AsyncResult
 
   @primary_key false
   embedded_schema do
@@ -46,6 +47,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     {:ok, socket}
   end
 
+  # Occurs when alert is being edited
   @impl true
   def update(
         %{alert_data: alert_data, editing: true, route_type: route_type} = assigns,
@@ -91,6 +93,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     {:ok, socket}
   end
 
+  # The form was submitted but submission had an error, so the same component rerenders
   @impl true
   def update(%{submitted: true}, socket) do
     changeset =
@@ -130,7 +133,11 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   end
 
   @impl true
-  def handle_event("validate", %{"stop_route_affected_service" => affected_service}, socket) do
+  def handle_event(
+        "validate",
+        %{"stop_route_affected_service" => affected_service} = params,
+        socket
+      ) do
     affected_service = populate_default_routes(affected_service)
     changeset = validate(affected_service, socket.assigns)
 
@@ -150,19 +157,22 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
     route_type = socket.assigns.route_type
 
+    socket = assign(socket, %{form: form})
+
     socket =
-      socket
-      |> assign(%{form: form})
-      |> assign_async([:available_routes], fn ->
-        {:ok,
-         %{
-           available_routes:
-             CreateAlertLive.get_routes_by_stop(
-               Map.get(affected_service, "stop_ids", []),
-               route_type
-             )
-         }}
-      end)
+      # Only fetch routes by stop on stop selection
+      if params["_target"] === ["stop_route_affected_service", "stop_ids"] do
+        socket
+        |> assign(:available_routes, AsyncResult.loading())
+        |> start_async(:get_available_routes, fn ->
+          CreateAlertLive.get_routes_by_stop(
+            Map.get(affected_service, "stop_ids", []),
+            route_type
+          )
+        end)
+      else
+        socket
+      end
 
     {:noreply, socket}
   end
@@ -170,6 +180,47 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   @impl true
   def handle_event("validate", _, socket) do
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_async(:get_available_routes, {:ok, fetched_routes}, socket) do
+    %{available_routes: available_routes} = socket.assigns
+
+    changeset =
+      validate(
+        %{
+          "stop_ids" => socket.assigns.form.params["stop_ids"],
+          "route_ids" => Enum.map(fetched_routes, & &1.id)
+        },
+        socket.assigns
+      )
+
+    case apply_action(changeset |> validate_required(@required_fields), :validate) do
+      {:ok, changeset} ->
+        send(self(), {:add_errors, [], __MODULE__})
+        send(self(), {:section_completed, changeset})
+
+      {:error, changeset} ->
+        send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
+        send(self(), {:section_completed, changeset})
+    end
+
+    form =
+      changeset
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    {:noreply,
+     assign(socket, :available_routes, AsyncResult.ok(available_routes, fetched_routes))
+     |> assign(%{form: form})}
+  end
+
+  @impl true
+  def handle_async(:get_available_routes, {:exit, reason}, socket) do
+    %{available_routes: available_routes} = socket.assigns
+
+    {:noreply,
+     assign(socket, :available_routes, AsyncResult.failed(available_routes, {:exit, reason}))}
   end
 
   def validate(affected_service, assigns) do
