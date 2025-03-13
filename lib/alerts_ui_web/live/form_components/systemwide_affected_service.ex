@@ -55,20 +55,15 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
   end
 
   @impl true
-  def update(%{submitted: submitted}, socket) do
-    socket =
-      if submitted do
-        form =
-          %__MODULE__{}
-          |> changeset(socket.assigns.form.params)
-          |> validate_required(@required_fields, message: "Select a service type")
-          |> Map.put(:action, :validate)
-          |> to_form()
+  def update(%{submitted: true}, socket) do
+    form =
+      %__MODULE__{}
+      |> changeset(socket.assigns.form.params)
+      |> validate_required(@required_fields, message: "Select a service type")
+      |> Map.put(:action, :validate)
+      |> to_form()
 
-        assign(socket, form: form)
-      else
-        socket
-      end
+    socket = assign(socket, form: form)
 
     {:ok, socket}
   end
