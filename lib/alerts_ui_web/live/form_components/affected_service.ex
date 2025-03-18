@@ -103,7 +103,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         )
       end
 
-    params = socket.assigns.form.params |> Map.new(fn {k, v} -> {String.to_atom(k), v} end)
+    params =
+      socket.assigns.form.params |> Map.new(fn {k, v} -> {String.to_existing_atom(k), v} end)
 
     alert_data =
       Map.put(alert_data, :trip_information_by_id, trip_information_by_id)
