@@ -151,6 +151,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       changeset
       |> Map.put(:action, :validate)
       |> to_form()
+      |> IO.inspect(label: "form")
 
     route_type = socket.assigns.route_type
 
@@ -170,13 +171,10 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
   # On route select, don't need to do anything but save the change
   @impl true
-  def handle_event(
-        "validate",
-        %{"stop_route_affected_service" => affected_service},
-        socket
-      ) do
+  def handle_event("validate", %{"stop_route_affected_service" => affected_service}, socket) do
     available_routes = Map.get(socket.assigns.available_routes, :result, [])
     affected_service = add_routes_with_types(affected_service, available_routes)
+    |> IO.inspect(label: "affected")
 
     changeset = build_changeset(%__MODULE__{}, affected_service)
 
@@ -193,6 +191,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       changeset
       |> Map.put(:action, :validate)
       |> to_form()
+      |> IO.inspect(label: "form")
 
     {:noreply, assign(socket, form: form)}
   end
@@ -208,10 +207,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     # "Validate" was misleading because it was only adding routes to the affected_service object
     affected_service =
       add_routes_with_types(
-        %{
-          "stop_ids" => socket.assigns.form.params["stop_ids"],
-          "route_ids" => Enum.map(fetched_routes, & &1.id)
-        },
+        Map.merge(socket.assigns.form.params, %{"route_ids" => Enum.map(fetched_routes, & &1.id)}),
         fetched_routes
       )
 
