@@ -231,10 +231,10 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
     ~H"""
     <div class="min-w-full flex flex-col" id="stop_route_service_view">
-      <.h1 class="mb-8">
-        Create new {ContentFormatter.route_atom_to_string(@service_type_name)} {@effect_name
-        |> String.downcase()} alert
-      </.h1>
+      <.h1 class="!mb-0">Create new alert</.h1>
+      <.p>
+        {ContentFormatter.route_atom_to_string(@service_type_name)} • {@effect_name}
+      </.p>
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
         Affected service
       </.h5>

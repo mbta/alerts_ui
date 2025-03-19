@@ -19,6 +19,7 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedServiceTest do
       label: "Alert Details"
     },
     alert_data: %{route_type: nil, effect_name: "Suspension"},
+    effect_name: "Suspension",
     editing: false
   }
 

@@ -170,7 +170,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
       value={@route_type}
       icon={@route_type}
     >
-      {ContentFormatter.route_atom_to_string(@route_type) |> :string.titlecase()}
+      {ContentFormatter.route_atom_to_string(@route_type)}
     </.button_toggle>
     """
   end

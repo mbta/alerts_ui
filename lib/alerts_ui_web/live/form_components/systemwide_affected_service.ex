@@ -77,7 +77,8 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
   def render(assigns) do
     ~H"""
     <div class="min-w-full flex flex-col" id="systemwide_service_view">
-      <.h1 class="mb-8">Create new systemwide alert</.h1>
+      <.h1 class="!mb-0">Create new alert</.h1>
+      <.p>Systemwide • {@effect_name}</.p>
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
         Affected service
       </.h5>
