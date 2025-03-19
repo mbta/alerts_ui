@@ -7,7 +7,13 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   import Ecto.Changeset
   alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.CreateAlertLive
-  alias AlertsUIWeb.FormComponents.Helpers.{ContentFormatter, ErrorFormatter, SelectFormatter}
+
+  alias AlertsUIWeb.FormComponents.Helpers.{
+    ContentFormatter,
+    ErrorFormatter,
+    Helpers,
+    SelectFormatter
+  }
 
   @primary_key false
   embedded_schema do
@@ -43,7 +49,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         available_routes: %{},
         available_stops: %{},
         available_filter_routes: %{},
-        edited: false,
         filter_title_value: "All routes",
         stop_id_filter_value: []
       })
@@ -185,7 +190,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   @impl true
   def handle_event("accepted_routes_modal", _params, socket) do
     routes =
-      if async_available?(socket.assigns, :available_filter_routes) do
+      if Helpers.async_available?(socket.assigns, :available_filter_routes) do
         socket.assigns.available_filter_routes.result
       else
         []
@@ -197,7 +202,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       if selected_route_id in [nil, "", "default"] do
         "All routes"
       else
-        Enum.filter(routes, &(&1.id === selected_route_id)) |> Enum.map(& &1.name) |> hd
+        Enum.find(routes, &(&1.id === selected_route_id)).name
       end
 
     stop_id_filter_value =
@@ -208,7 +213,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       |> Enum.map(& &1.id)
 
     {:noreply,
-     assign(socket,
+     socket
+     |> assign(
        stop_id_filter_value: stop_id_filter_value,
        filter_title_value: filter_title_value
      )}
@@ -263,7 +269,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     stop_ids = assigns.form[:stop_ids].value || []
 
     stop_id_options =
-      if async_available?(assigns, :available_stops) do
+      if Helpers.async_available?(assigns, :available_stops) do
         options =
           assigns.available_stops.result
           |> Enum.filter(
@@ -379,11 +385,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     else
       affected_service
     end
-  end
-
-  defp async_available?(assigns, key) do
-    Map.get(assigns, key) && Map.get(assigns[key], :result) && assigns[key].ok? &&
-      assigns[key].result
   end
 
   defp filter_stops_by_stop_ids(_stop, [], _selected_stop_ids) do
