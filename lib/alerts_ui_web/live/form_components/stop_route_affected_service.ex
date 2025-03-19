@@ -65,6 +65,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     # Reformatted to make this look like the other instances of this same logic
     form =
       changeset
+      # needed?
       |> Map.put(:action, :validate)
       |> to_form()
 
@@ -108,6 +109,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     form =
       changeset
       |> Map.put(:errors, errors)
+      # needed?
       |> Map.put(:action, :validate)
       |> to_form()
 
@@ -130,31 +132,57 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     {:ok, socket}
   end
 
+  # On stop select, need to populate and select all of the route_ids
   @impl true
-  # Runs form validation each time the form changes
   def handle_event(
         "validate",
-        %{"stop_route_affected_service" => affected_service} = params,
+        %{
+          "_target" => ["stop_route_affected_service", "stop_ids"],
+          "stop_route_affected_service" => affected_service
+        },
         socket
       ) do
-    # Largest TODO work for me here: making sure this validate function is right. Forgive the weird WIP comments
-    # This is strangely on a delay... so when we're validating, affected routes is the old previous thing
-    IO.inspect(params, label: "params")
-    affected_service = populate_default_routes(affected_service)
-    |> IO.inspect(label: "populated default routes")
-
-    # When a new stop is picked, default routes is not yet accurate
     available_routes = Map.get(socket.assigns.available_routes, :result, [])
     affected_service = add_routes_with_types(affected_service, available_routes)
 
     changeset = build_changeset(%__MODULE__{}, affected_service)
-    |> IO.inspect(label: "changeset")
-    # confirmed with the changeset that the affected routes are not accurate and we should fix this
+
+    form =
+      changeset
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    route_type = socket.assigns.route_type
+
+    socket =
+      socket
+      |> assign(:available_routes, AsyncResult.loading())
+      |> start_async(:get_available_routes, fn ->
+        CreateAlertLive.get_routes_by_stop(
+          Map.get(affected_service, "stop_ids", []),
+          route_type
+        )
+      end)
+      |> assign(form: form)
+
+    {:noreply, socket}
+  end
+
+  # On route select, don't need to do anything but save the change
+  @impl true
+  def handle_event(
+        "validate",
+        %{"stop_route_affected_service" => affected_service},
+        socket
+      ) do
+    available_routes = Map.get(socket.assigns.available_routes, :result, [])
+    affected_service = add_routes_with_types(affected_service, available_routes)
+
+    changeset = build_changeset(%__MODULE__{}, affected_service)
 
     case apply_action(changeset |> validate_required(@required_fields), :validate) do
       {:ok, changeset} ->
         send(self(), {:add_errors, [], __MODULE__})
-        # is this correct?
         send(self(), {:section_completed, changeset})
 
       {:error, changeset} ->
@@ -166,24 +194,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       |> Map.put(:action, :validate)
       |> to_form()
 
-    route_type = socket.assigns.route_type
-    socket =
-      # Only fetch routes on stop selection
-      if params["_target"] === ["stop_route_affected_service", "stop_ids"] do
-        socket
-        |> assign(:available_routes, AsyncResult.loading())
-        |> start_async(:get_available_routes, fn ->
-          CreateAlertLive.get_routes_by_stop(
-            Map.get(affected_service, "stop_ids", []),
-            route_type
-          )
-        end)
-      else
-        socket
-      end
-      |> assign(form: form)
-
-    {:noreply, socket}
+    {:noreply, assign(socket, form: form)}
   end
 
   @impl true
@@ -195,10 +206,14 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   def handle_async(:get_available_routes, {:ok, fetched_routes}, socket) do
     %{available_routes: available_routes} = socket.assigns
     # "Validate" was misleading because it was only adding routes to the affected_service object
-    affected_service = add_routes_with_types(%{
+    affected_service =
+      add_routes_with_types(
+        %{
           "stop_ids" => socket.assigns.form.params["stop_ids"],
           "route_ids" => Enum.map(fetched_routes, & &1.id)
-        }, fetched_routes)
+        },
+        fetched_routes
+      )
 
     changeset = build_changeset(%__MODULE__{}, affected_service)
 
@@ -213,12 +228,14 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
     form =
       changeset
+      # Why this here, when apply_action also happened?
       |> Map.put(:action, :validate)
       |> to_form()
 
-    socket = socket
-    |> assign(:available_routes, AsyncResult.ok(available_routes, fetched_routes))
-    |> assign(form: form)
+    socket =
+      socket
+      |> assign(:available_routes, AsyncResult.ok(available_routes, fetched_routes))
+      |> assign(form: form)
 
     {:noreply, socket}
   end
@@ -234,10 +251,10 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   # Seemed like validate was just putting available_routes on "affected_service"
   # so refactored and combined with "routes_with_types"
   def add_routes_with_types(affected_service, available_routes) do
-    routes_with_types = 
+    routes_with_types =
       available_routes
       |> Stream.filter(fn route -> route.id in affected_service["route_ids"] end)
-      |> Enum.reduce(%{}, fn route, acc -> 
+      |> Enum.reduce(%{}, fn route, acc ->
         Map.put(acc, route.id, route.type)
       end)
 
@@ -326,14 +343,5 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   @spec disable_routes_input?(map()) :: boolean()
   defp disable_routes_input?(%{form: form}) do
     form[:stop_ids].value in [nil, []]
-  end
-
-  @spec populate_default_routes(map()) :: map()
-  defp populate_default_routes(affected_service) do
-    if affected_service |> Map.get("route_ids") |> is_nil do
-      Map.put(affected_service, "route_ids", [])
-    else
-      affected_service
-    end
   end
 end
