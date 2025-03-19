@@ -22,9 +22,10 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   @fields ~w[route_ids stop_ids route_types_by_id route_ids_filter stop_ids_filter]a
   @required_fields ~w[route_ids stop_ids]a
 
+  # The "form" value on line 42 does NOT include the validation on line 33
   @impl true
   def mount(socket) do
-    changeset = changeset(%__MODULE__{}, %{})
+    changeset = build_changeset(%__MODULE__{}, %{})
 
     {_result, error_changeset} =
       apply_action(
@@ -47,37 +48,33 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     {:ok, socket}
   end
 
+  # The "form" never goes through the `validate_required` logic and doesn't need to (because this is edit only)
   # Occurs when alert is being edited
   @impl true
   def update(
         %{alert_data: alert_data, editing: true, route_type: route_type} = assigns,
         socket
       ) do
-    changeset =
-      %__MODULE__{}
-      |> changeset(alert_data)
-
-    changes =
-      changeset
-      |> apply_action!(:validate)
+    changeset = build_changeset(%__MODULE__{}, alert_data)
+    # No need to use single pipe if not a chain
+    changes = apply_action!(changeset, :validate)
 
     send(self(), {:add_errors, [], __MODULE__})
     send(self(), {:section_completed, changes})
 
-    form = to_form(changeset |> Map.put(:action, :validate))
+    # Reformatted to make this look like the other instances of this same logic
+    form =
+      changeset
+      |> Map.put(:action, :validate)
+      |> to_form()
 
-    assigns =
-      assigns
-      |> Map.put(
-        :service_type_name,
-        route_type |> InformedEntity.route_code_mapping() || nil
-      )
-      |> Map.put(:form, form)
-      |> Map.put(:route_type, route_type)
-
+    # Other functions put the assigns inline with the socket logic
     socket =
       socket
       |> assign(assigns)
+      |> assign(service_type_name: route_type |> InformedEntity.route_code_mapping() || nil)
+      |> assign(form: form)
+      |> assign(route_type: route_type)
       |> assign_async([:available_stops, :available_routes], fn ->
         {:ok,
          %{
@@ -93,25 +90,26 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     {:ok, socket}
   end
 
+  # The "form" value on line 108 DOES include the validation from line 100
   # The form was submitted but submission had an error, so the same component rerenders
   @impl true
   def update(%{submitted: true}, socket) do
     changeset =
       %__MODULE__{}
-      |> changeset(socket.assigns.form.params)
+      |> build_changeset(socket.assigns.form.params)
       |> validate_required(@required_fields)
 
     errors =
-      case changeset |> apply_action(:validate) do
+      case apply_action(changeset, :validate) do
         {:ok, _changeset} -> []
         {:error, changeset} -> ErrorFormatter.parse_field_errors(changeset)
       end
 
     form =
       changeset
-      |> to_form()
       |> Map.put(:errors, errors)
       |> Map.put(:action, :validate)
+      |> to_form()
 
     {:ok, assign(socket, form: form)}
   end
@@ -133,17 +131,30 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   end
 
   @impl true
+  # Runs form validation each time the form changes
   def handle_event(
         "validate",
         %{"stop_route_affected_service" => affected_service} = params,
         socket
       ) do
+    # Largest TODO work for me here: making sure this validate function is right. Forgive the weird WIP comments
+    # This is strangely on a delay... so when we're validating, affected routes is the old previous thing
+    IO.inspect(params, label: "params")
     affected_service = populate_default_routes(affected_service)
-    changeset = validate(affected_service, socket.assigns)
+    |> IO.inspect(label: "populated default routes")
+
+    # When a new stop is picked, default routes is not yet accurate
+    available_routes = Map.get(socket.assigns.available_routes, :result, [])
+    affected_service = add_routes_with_types(affected_service, available_routes)
+
+    changeset = build_changeset(%__MODULE__{}, affected_service)
+    |> IO.inspect(label: "changeset")
+    # confirmed with the changeset that the affected routes are not accurate and we should fix this
 
     case apply_action(changeset |> validate_required(@required_fields), :validate) do
       {:ok, changeset} ->
         send(self(), {:add_errors, [], __MODULE__})
+        # is this correct?
         send(self(), {:section_completed, changeset})
 
       {:error, changeset} ->
@@ -156,11 +167,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       |> to_form()
 
     route_type = socket.assigns.route_type
-
-    socket = assign(socket, %{form: form})
-
     socket =
-      # Only fetch routes by stop on stop selection
+      # Only fetch routes on stop selection
       if params["_target"] === ["stop_route_affected_service", "stop_ids"] do
         socket
         |> assign(:available_routes, AsyncResult.loading())
@@ -173,6 +181,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       else
         socket
       end
+      |> assign(form: form)
 
     {:noreply, socket}
   end
@@ -185,15 +194,13 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   @impl true
   def handle_async(:get_available_routes, {:ok, fetched_routes}, socket) do
     %{available_routes: available_routes} = socket.assigns
-
-    changeset =
-      validate(
-        %{
+    # "Validate" was misleading because it was only adding routes to the affected_service object
+    affected_service = add_routes_with_types(%{
           "stop_ids" => socket.assigns.form.params["stop_ids"],
           "route_ids" => Enum.map(fetched_routes, & &1.id)
-        },
-        socket.assigns
-      )
+        }, fetched_routes)
+
+    changeset = build_changeset(%__MODULE__{}, affected_service)
 
     case apply_action(changeset |> validate_required(@required_fields), :validate) do
       {:ok, changeset} ->
@@ -202,7 +209,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
       {:error, changeset} ->
         send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
-        send(self(), {:section_completed, changeset})
     end
 
     form =
@@ -210,9 +216,11 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       |> Map.put(:action, :validate)
       |> to_form()
 
-    {:noreply,
-     assign(socket, :available_routes, AsyncResult.ok(available_routes, fetched_routes))
-     |> assign(%{form: form})}
+    socket = socket
+    |> assign(:available_routes, AsyncResult.ok(available_routes, fetched_routes))
+    |> assign(form: form)
+
+    {:noreply, socket}
   end
 
   @impl true
@@ -223,30 +231,23 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
      assign(socket, :available_routes, AsyncResult.failed(available_routes, {:exit, reason}))}
   end
 
-  def validate(affected_service, assigns) do
-    routes_with_types =
-      routes_with_types(
-        Map.get(assigns.available_routes, :result) || [],
-        affected_service["route_ids"]
-      )
+  # Seemed like validate was just putting available_routes on "affected_service"
+  # so refactored and combined with "routes_with_types"
+  def add_routes_with_types(affected_service, available_routes) do
+    routes_with_types = 
+      available_routes
+      |> Stream.filter(fn route -> route.id in affected_service["route_ids"] end)
+      |> Enum.reduce(%{}, fn route, acc -> 
+        Map.put(acc, route.id, route.type)
+      end)
 
-    affected_service = Map.put(affected_service, "route_types_by_id", routes_with_types)
-
-    %__MODULE__{}
-    |> changeset(affected_service)
+    Map.put(affected_service, "route_types_by_id", routes_with_types)
   end
 
-  def changeset(changeset, params) do
+  # renamed to make it clear that this is the function that DOES the casting
+  def build_changeset(changeset, params) do
     changeset
     |> cast(params, @fields)
-  end
-
-  def routes_with_types(available_routes, route_ids) do
-    available_routes
-    |> Stream.filter(fn route -> route.id in route_ids end)
-    |> Enum.reduce(%{}, fn route, acc ->
-      Map.put(acc, route.id, route.type)
-    end)
   end
 
   @impl true
