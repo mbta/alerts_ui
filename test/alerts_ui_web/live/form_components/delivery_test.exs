@@ -17,8 +17,7 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
       next: "success",
       label: "Alert Details"
     },
-    route_type: 1,
-    alert_data: %{}
+    route_type: 1
   }
 
   describe "component" do
@@ -51,12 +50,29 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
         live_isolated_component(
           Delivery,
           @assigns
-          |> Map.put(:alert_data, %{header_text: "example_header_text", view_banner: true})
+          |> Map.merge(%{header_text: "example_header_text", view_banner: true})
         )
 
       assert view
              |> element("div#banner_div")
              |> render() =~ ~s(example_header_text)
+    end
+
+    test "editing works" do
+      {:ok, view, _html} =
+        live_isolated_component(
+          Delivery,
+          @assigns
+          |> Map.merge(%{
+            banner_text: "example_banner_text",
+            view_banner: true,
+            banner_sync_toggle: false
+          })
+        )
+
+      assert view
+             |> element("div#banner_div")
+             |> render() =~ ~s(example_banner_text)
     end
   end
 end

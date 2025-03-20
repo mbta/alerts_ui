@@ -8,61 +8,78 @@
   />
   <div class="flex flex-col items-center justify-center w-[90%]" id="article-view">
     <article class="flex flex-col items-center justify-center w-[100%]">
-      <.live_component
-        module={RouteTypeAndEffect}
-        id="route_type"
-        progress={@progress}
-        alert_data={@alert_data}
-      />
+      <.live_component module={RouteTypeAndEffect} id="route_type" progress={@progress} />
       <div :if={@progress.name == "details"} class="w-full">
         <.live_component
           module={choose_affected_service_component(@combination)}
           id="affected_service"
           progress={@progress}
-          alert_data={@alert_data}
           combination={@combination}
-          route_type={route_type(@alert_data)}
-          effect_name={effect_name(@alert_data)}
-          available_facilities={@available_facilities}
-          editing={@editing}
+          route_type={@route_type}
+          effect_name={@effect_name}
           submitted={@submitted}
+          facility_id={@facility_id}
+          route_ids={@route_ids}
+          stop_ids={@stop_ids}
+          trip_ids={@trip_ids}
+          direction={@direction}
         />
         <.live_component
           module={TimeRange}
           id="time_range"
           progress={@progress}
-          alert_data={@alert_data}
-          editing={@editing}
           selected_trips={@selected_trips}
+          active_period_start={@active_period_start}
+          active_period_end={@active_period_end}
+          active_period_start_specifier={@active_period_start_specifier}
+          active_period_end_specifier={@active_period_end_specifier}
+          active_period_start_date={@active_period_start_date}
+          active_period_start_time={@active_period_start_time}
+          recurrence_days={@recurrence_days}
+          active_period_end_time={@active_period_end_time}
+          active_period_end_date={@active_period_end_date}
+          active_period_start_time_specifier={@active_period_start_time_specifier}
+          editing={@editing}
         />
         <.live_component
           module={NotificationPeriod}
           id="notification_period"
           progress={@progress}
-          alert_data={@alert_data}
-          editing={@editing}
         />
         <.live_component
           module={AlertDetails}
           id="alert_details"
           progress={@progress}
-          alert_data={@alert_data}
-          route_type={route_type(@alert_data)}
+          route_type={@route_type}
           combination={@combination}
+          header_text={@header_text}
+          description_text={@description_text}
+          cause_detail={@cause_detail}
+          url={@url}
+          image_url={@image_url}
+          image_alternative_text={@image_alternative_text}
+          severity={@severity}
         />
         <.live_component
           module={Delivery}
           id="delivery"
           progress={@progress}
-          alert_data={@alert_data}
           combination={@combination}
+          banner_text={@banner_text}
+          header_text={@header_text}
+          view_banner={@view_banner}
+          banner_sync_toggle={@banner_sync_toggle}
         />
         <.live_component
           module={RiderReminders}
           id="rider_reminders"
           progress={@progress}
-          alert_data={@alert_data}
           editing={@editing}
+          reminder_times={@reminder_times}
+          notification_period_start={@notification_period_start}
+          active_period_start={@active_period_start}
+          active_period_end_specifier={@active_period_end_specifier}
+          active_period_end={@active_period_end}
         />
         <.live_component module={Submit} id="submit" progress={@progress} />
       </div>

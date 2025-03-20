@@ -15,9 +15,12 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
       next: "success",
       label: "Rider Reminders"
     },
-    alert_data: %{},
-    editing: false,
-    edited: false
+    active_period_end_specifier: :later_today,
+    reminder_times: [],
+    active_period_start: nil,
+    notification_period_start: nil,
+    notification_period_specifier: :same_as_effect_period,
+    active_period_end: nil
   }
 
   describe "component" do
@@ -224,11 +227,8 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
         RiderReminders,
         @assigns
         |> Map.merge(%{
-          editing: true,
-          alert_data: %{
-            reminder_times: [~N[2024-04-30 11:54:00], ~N[2024-04-30 12:54:00]],
-            active_period_start: ~N[2024-04-30 11:45:00]
-          }
+          reminder_times: [~N[2024-04-30 11:54:00], ~N[2024-04-30 12:54:00]],
+          active_period_start: ~N[2024-04-30 11:45:00]
         })
       )
 

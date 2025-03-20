@@ -25,6 +25,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :header_text,
     :description_text,
     :banner_text,
+    :view_banner,
+    :banner_sync_toggle,
     :combination,
     :alert_timing,
     :active_period_start,
@@ -60,6 +62,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           header_text: String.t(),
           description_text: String.t(),
           banner_text: String.t() | nil,
+          view_banner: boolean(),
+          banner_sync_toggle: boolean(),
           combination: atom(),
           alert_timing: atom(),
           active_period_start: NaiveDateTime.t() | nil,
@@ -102,12 +106,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
         ServiceEffectCombinations.get_combination(route_type, effect_name)
       end
 
-    active_period_map =
-      if match?([_active_period], alert.active_period) do
-        determine_one_time_active_period(alert)
-      else
-        determine_recurring_active_period(alert)
-      end
+    active_period_map = determine_active_period(alert)
 
     reminder_times = Enum.map(alert.reminder_times, &shift_to_naive(&1.reminder_time))
 
@@ -122,16 +121,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
     route_ids = alert.original_route_selections || []
 
-    single_route_id =
-      if effect_name == "Detour" and length(route_ids) === 1 do
-        hd(route_ids)
-      else
-        nil
-      end
+    single_route_id = single_route_id(effect_name, route_ids)
+
+    view_banner = if is_nil(alert.banner_text), do: false, else: true
 
     %__MODULE__{
       route_type: route_type,
-      direction: Alert.get_direction(informed_entities),
+      direction: Alert.get_direction(informed_entities) || "default",
       effect_name: effect_name,
       facility_id: Alert.gather_facility_ids(informed_entities) |> List.first(""),
       route_ids: route_ids,
@@ -147,6 +143,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       image_url: alert.image_url,
       image_alternative_text: alert.image_alternative_text,
       banner_text: alert.banner_text,
+      view_banner: view_banner,
+      banner_sync_toggle: !view_banner,
       notification_period_start: notification_period_start,
       notification_specifier: notification_specifier,
       severity: alert.severity,
@@ -155,7 +153,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     |> Map.merge(active_period_map)
   end
 
-  def determine_one_time_active_period(alert) do
+  def single_route_id(effect_name, [route_id]) when effect_name === "Detour" do
+    route_id
+  end
+
+  def single_route_id(_effect_name, _route_ids), do: nil
+
+  def determine_active_period(%{active_period: [_active_period]} = alert) do
+    # one time active period
     active_period_start = shift_to_naive(alert.active_period_start)
     active_period_end = shift_to_naive(alert.active_period_end)
 
@@ -176,7 +181,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     }
   end
 
-  def determine_recurring_active_period(%{active_period: active_period} = alert) do
+  def determine_active_period(%{active_period: active_period} = alert) do
+    # recurring active period
     start_datetime = hd(active_period).start |> shift_to_naive
     end_datetime = hd(active_period).end |> shift_to_naive
     end_specifier = if alert.active_period_end, do: "custom", else: "until_further_notice"

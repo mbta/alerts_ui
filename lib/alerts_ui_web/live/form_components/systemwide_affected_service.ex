@@ -36,25 +36,6 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
   end
 
   @impl true
-  def update(%{alert_data: alert_data, editing: true} = assigns, socket) do
-    incoming_alert_data = %{
-      service_types: Map.get(alert_data, :service_types, [])
-    }
-
-    form =
-      %__MODULE__{}
-      |> changeset(incoming_alert_data)
-      |> to_form()
-
-    assigns =
-      incoming_alert_data
-      |> Map.put(:form, form)
-      |> Map.merge(assigns)
-
-    {:ok, assign(socket, assigns)}
-  end
-
-  @impl true
   def update(%{submitted: true}, socket) do
     form =
       %__MODULE__{}
@@ -70,6 +51,13 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
 
   @impl true
   def update(assigns, socket) do
+    form =
+      %__MODULE__{}
+      |> changeset(%{service_types: Map.get(assigns, :service_types)})
+      |> to_form()
+
+    socket = socket |> assign(assigns) |> assign(%{form: form})
+
     {:ok, assign(socket, assigns)}
   end
 
@@ -116,7 +104,7 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
     case apply_action(changeset, :insert) do
       {:ok, changeset} ->
         send(self(), {:add_errors, [], __MODULE__})
-        send(self(), {:section_completed, changeset})
+        send(self(), {:on_form_section_change, changeset})
 
       {:error, changeset} ->
         send(self(), {:add_errors, changeset.errors, __MODULE__})

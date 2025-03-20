@@ -24,7 +24,7 @@ defmodule AlertsUI.AlertBuilder do
 
   @green_line_branch_ids Routes.green_line_branch_ids()
 
-  @type alert_data_t :: %{
+  @type form_data_t :: %{
           route_type: Route.type_int() | nil,
           facility_id: String.t(),
           direction: String.t(),
@@ -62,29 +62,29 @@ defmodule AlertsUI.AlertBuilder do
   @type stop_with_context_t :: {Stop.t(), Route.id_t(), direction_t(), RoutePattern.stop_type()}
 
   @spec build_alert(
-          alert_data_t(),
+          form_data_t(),
           ServiceEffectCombinations.service_effect_combination(),
           DateTime.t()
         ) ::
           map()
-  def build_alert(alert_data, combination, current_time \\ DateTime.utc_now()) do
-    effect_name = Map.get(alert_data, :effect_name)
+  def build_alert(form_data, combination, current_time \\ DateTime.utc_now()) do
+    effect_name = Map.get(form_data, :effect_name)
     effect_map = Effect.effect_map_by_name(effect_name)
-    stop_ids = Map.get(alert_data, :stop_ids)
-    direction_id = Map.get(alert_data, :direction)
-    service_types = Map.get(alert_data, :service_types, []) |> expand_subway_service_types()
+    stop_ids = Map.get(form_data, :stop_ids)
+    direction_id = Map.get(form_data, :direction)
+    service_types = Map.get(form_data, :service_types, []) |> expand_subway_service_types()
 
-    route_type = Map.get(alert_data, :route_type)
-    cause_detail = Map.get(alert_data, :cause_detail, "")
+    route_type = Map.get(form_data, :route_type)
+    cause_detail = Map.get(form_data, :cause_detail, "")
     cause = Cause.get_by_mode_and_detail(route_type, cause_detail)
 
-    severity = Map.get(alert_data, :severity)
+    severity = Map.get(form_data, :severity)
 
     reminder_times =
-      Map.get(alert_data, :reminder_times, [])
+      Map.get(form_data, :reminder_times, [])
       |> Enum.map(&%{reminder_time: ActivePeriodBuilder.naive_eastern_datetime_to_utc(&1)})
 
-    original_route_selections = Map.get(alert_data, :route_ids, [])
+    original_route_selections = Map.get(form_data, :route_ids, []) || []
 
     routes =
       original_route_selections
@@ -97,8 +97,8 @@ defmodule AlertsUI.AlertBuilder do
 
     route_ids = Enum.map(routes, & &1.id)
 
-    alert_data =
-      alert_data
+    form_data =
+      form_data
       |> Map.put(:route_ids, route_ids)
       |> Map.put(:stop_ids, add_child_stops(stop_ids, route_ids, direction_id))
       |> Map.put(
@@ -108,53 +108,53 @@ defmodule AlertsUI.AlertBuilder do
       |> Map.put(:service_types, service_types)
 
     active_period_map =
-      if Map.get(alert_data, :alert_timing) === :recurring do
+      if Map.get(form_data, :alert_timing) === :recurring do
         ActivePeriodBuilder.build_recurring_active_period(%{
-          active_period_start_time: Map.get(alert_data, :active_period_start_time),
-          active_period_end_time: Map.get(alert_data, :active_period_end_time),
-          active_period_start_date: Map.get(alert_data, :active_period_start_date),
-          active_period_end_date: Map.get(alert_data, :active_period_end_date),
-          active_period_end_specifier: Map.get(alert_data, :active_period_end_specifier),
-          recurrence_days: Map.get(alert_data, :recurrence_days)
+          active_period_start_time: Map.get(form_data, :active_period_start_time),
+          active_period_end_time: Map.get(form_data, :active_period_end_time),
+          active_period_start_date: Map.get(form_data, :active_period_start_date),
+          active_period_end_date: Map.get(form_data, :active_period_end_date),
+          active_period_end_specifier: Map.get(form_data, :active_period_end_specifier),
+          recurrence_days: Map.get(form_data, :recurrence_days)
         })
       else
         ActivePeriodBuilder.build_one_time_active_period(
           %{
-            active_period_start: Map.get(alert_data, :active_period_start),
-            active_period_end: Map.get(alert_data, :active_period_end),
-            active_period_end_specifier: Map.get(alert_data, :active_period_end_specifier),
-            active_period_start_specifier: Map.get(alert_data, :active_period_start_specifier)
+            active_period_start: Map.get(form_data, :active_period_start),
+            active_period_end: Map.get(form_data, :active_period_end),
+            active_period_end_specifier: Map.get(form_data, :active_period_end_specifier),
+            active_period_start_specifier: Map.get(form_data, :active_period_start_specifier)
           },
           current_time
         )
       end
 
     notification_period_start =
-      if Map.get(alert_data, :notification_specifier) === :now do
+      if Map.get(form_data, :notification_specifier) === :now do
         current_time
       else
-        Map.get(alert_data, :notification_period_start)
+        Map.get(form_data, :notification_period_start)
         |> ActivePeriodBuilder.naive_eastern_datetime_to_utc()
       end
 
     %{
-      header_text: Map.get(alert_data, :header_text),
-      description_text: Map.get(alert_data, :description_text),
-      banner_text: Map.get(alert_data, :banner_text),
-      url: Map.get(alert_data, :url),
-      image_url: Map.get(alert_data, :image_url),
-      image_alternative_text: Map.get(alert_data, :image_alternative_text),
+      header_text: Map.get(form_data, :header_text),
+      description_text: Map.get(form_data, :description_text),
+      banner_text: Map.get(form_data, :banner_text),
+      url: Map.get(form_data, :url),
+      image_url: Map.get(form_data, :image_url),
+      image_alternative_text: Map.get(form_data, :image_alternative_text),
       cause: cause,
       cause_detail: cause_detail,
       effect: Map.get(effect_map, :effect),
       effect_detail: Map.get(effect_map, :effect_detail),
       effect_name: effect_name,
-      draft: Map.get(alert_data, :draft, false),
+      draft: Map.get(form_data, :draft, false),
       last_push_notification_timestamp:
-        Map.get(alert_data, :last_push_notification_timestamp)
+        Map.get(form_data, :last_push_notification_timestamp)
         |> ActivePeriodBuilder.naive_eastern_datetime_to_utc(),
       informed_entity:
-        build_informed_entities(combination, alert_data, effect_name)
+        build_informed_entities(combination, form_data, effect_name)
         |> Enum.uniq(),
       original_route_selections: original_route_selections,
       notification_period_start: notification_period_start,
@@ -162,7 +162,7 @@ defmodule AlertsUI.AlertBuilder do
       severity_level: SeverityLevel.severity_level_by_severity(severity),
       reminder_times: reminder_times,
       current_time: current_time,
-      recurrence_days: Map.get(alert_data, :recurrence_days)
+      recurrence_days: Map.get(form_data, :recurrence_days)
     }
     |> Map.merge(active_period_map)
   end
@@ -316,7 +316,7 @@ defmodule AlertsUI.AlertBuilder do
 
   @spec build_informed_entities(
           ServiceEffectCombinations.service_effect_combination() | nil,
-          alert_data_t(),
+          form_data_t(),
           Effect.effect_name()
         ) ::
           [map()]
@@ -373,8 +373,8 @@ defmodule AlertsUI.AlertBuilder do
   end
 
   # No stops, treat like :R
-  defp build_informed_entities(:RDS, %{stop_ids: []} = alert_data, effect),
-    do: build_informed_entities(:R, alert_data, effect)
+  defp build_informed_entities(:RDS, %{stop_ids: []} = form_data, effect),
+    do: build_informed_entities(:R, form_data, effect)
 
   # Did not get stops from route patterns (fallback)
   defp build_informed_entities(
@@ -427,10 +427,10 @@ defmodule AlertsUI.AlertBuilder do
 
   defp build_informed_entities(
          :RDT,
-         %{trip_ids: []} = alert_data,
+         %{trip_ids: []} = form_data,
          effect
        ) do
-    build_informed_entities(:R, alert_data, effect)
+    build_informed_entities(:R, form_data, effect)
   end
 
   defp build_informed_entities(
@@ -461,14 +461,14 @@ defmodule AlertsUI.AlertBuilder do
     end)
   end
 
-  defp build_informed_entities(:RDTS, %{stop_ids: [], trip_ids: []} = alert_data, effect),
-    do: build_informed_entities(:R, alert_data, effect)
+  defp build_informed_entities(:RDTS, %{stop_ids: [], trip_ids: []} = form_data, effect),
+    do: build_informed_entities(:R, form_data, effect)
 
-  defp build_informed_entities(:RDTS, %{stop_ids: []} = alert_data, effect),
-    do: build_informed_entities(:RDT, alert_data, effect)
+  defp build_informed_entities(:RDTS, %{stop_ids: []} = form_data, effect),
+    do: build_informed_entities(:RDT, form_data, effect)
 
-  defp build_informed_entities(:RDTS, %{trip_ids: []} = alert_data, effect),
-    do: build_informed_entities(:RDS, alert_data, effect)
+  defp build_informed_entities(:RDTS, %{trip_ids: []} = form_data, effect),
+    do: build_informed_entities(:RDS, form_data, effect)
 
   # Did not get stops from route patterns (fallback)
   defp build_informed_entities(

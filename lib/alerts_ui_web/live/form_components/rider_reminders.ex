@@ -33,29 +33,37 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
   end
 
   @impl true
-
-  def update(%{alert_data: alert_data} = assigns, socket) do
+  def update(
+        %{
+          notification_period_start: notification_period_start,
+          active_period_start: active_period_start,
+          reminder_times: reminder_times,
+          active_period_end_specifier: active_period_end_specifier,
+          active_period_end: active_period_end
+        } = assigns,
+        socket
+      ) do
     notification_start =
       cond do
-        Map.get(alert_data, :notification_period_start) -> alert_data.notification_period_start
-        Map.get(alert_data, :active_period_start) -> alert_data.active_period_start
+        notification_period_start -> notification_period_start
+        active_period_start -> active_period_start
         true -> nil
       end
 
     effect_end =
       cond do
-        Map.get(alert_data, :active_period_end) in ["", nil] ->
+        active_period_end in ["", nil] ->
           ~N[9999-12-31 23:59:59]
 
-        Map.get(alert_data, :active_period_end_specifier) in [:end_of_service, "end_of_service"] ->
-          NaiveDateTime.add(alert_data.active_period_end, 1, :day)
+        active_period_end_specifier in [:end_of_service, "end_of_service"] ->
+          NaiveDateTime.add(active_period_end, 1, :day)
 
         true ->
-          alert_data.active_period_end
+          active_period_end
       end
 
     processed_reminder_times =
-      (Map.get(alert_data, :reminder_times, []) || [])
+      reminder_times
       |> Enum.with_index(fn element, index -> {element, Integer.to_string(index)} end)
       |> Enum.reduce(%{}, fn {element, index}, acc ->
         Map.put(acc, index, %{
@@ -141,7 +149,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
           |> Map.put(:reminder_times, clean_reminder_times)
 
         send(self(), {:add_errors, [], __MODULE__})
-        send(self(), {:section_completed, changes})
+        send(self(), {:on_form_section_change, changes})
 
       {:error, changeset} ->
         send(self(), {:add_errors, parse_field_errors(changeset), __MODULE__})
@@ -169,7 +177,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
 
   @impl true
   def render(assigns) do
-    active_period_end = Map.get(assigns.alert_data, :active_period_end)
+    active_period_end = Map.get(assigns, :active_period_end)
     assigns = Map.put(assigns, :active_period_end, naive_datetime_to_iso8601(active_period_end))
 
     ~H"""

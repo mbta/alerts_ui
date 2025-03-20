@@ -46,50 +46,8 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
        available_facilities: %{},
        stop_id_filter_value: "default",
        filter_title_value: "All stops",
-       alert_data: %{
-         facility_id: ""
-       }
+       facility_id: ""
      })}
-  end
-
-  @impl true
-  def update(%{alert_data: alert_data, editing: true} = assigns, socket) do
-    effect_name = Map.get(alert_data, :effect_name) || socket.assigns.effect_name
-
-    facility_types =
-      effect_name
-      |> string_to_formatted_atom
-      |> InformedEntity.facility_effect_to_types()
-
-    send(self(), {:add_errors, [], __MODULE__})
-
-    alert_data =
-      if is_struct(alert_data) do
-        Map.from_struct(alert_data)
-      else
-        alert_data
-      end
-      |> Map.put_new(:facility_id, "")
-
-    form =
-      %__MODULE__{}
-      |> changeset(alert_data)
-      |> to_form()
-
-    socket =
-      socket
-      |> assign(assigns)
-      |> assign(
-        form: form,
-        alert_data: alert_data,
-        facility_types: facility_types,
-        effect_name: effect_name
-      )
-      |> assign_async([:available_facilities], fn ->
-        {:ok, %{available_facilities: CreateAlertLive.get_facilities(facility_types)}}
-      end)
-
-    {:ok, socket}
   end
 
   @impl true
@@ -115,18 +73,38 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
   end
 
   @impl true
-  def update(%{alert_data: alert_data} = assigns, socket) do
-    effect_name = Map.get(alert_data, :effect_name) || socket.assigns.effect_name
+  def update(assigns, socket) do
+    effect_name = Map.get(assigns, :effect_name) || socket.assigns.effect_name
 
     facility_types =
       effect_name
       |> string_to_formatted_atom
       |> InformedEntity.facility_effect_to_types()
 
+    changeset =
+      %__MODULE__{}
+      |> changeset(assigns)
+      |> validate_required(@required_fields)
+
+    case apply_action(changeset |> validate_required(@required_fields), :validate) do
+      {:ok, changeset} ->
+        send(self(), {:add_errors, [], __MODULE__})
+        send(self(), {:on_form_section_change, changeset})
+
+      {:error, changeset} ->
+        nil
+        send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
+    end
+
+    form =
+      changeset
+      |> to_form()
+      |> Map.put(:action, :validate)
+
     socket =
       socket
       |> assign(assigns)
-      |> assign(effect_name: effect_name, facility_types: facility_types)
+      |> assign(facility_types: facility_types, form: form)
       |> assign_async([:available_facilities], fn ->
         {:ok, %{available_facilities: CreateAlertLive.get_facilities(facility_types)}}
       end)
@@ -145,11 +123,11 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     case apply_action(changeset |> validate_required(@required_fields), :validate) do
       {:ok, changeset} ->
         send(self(), {:add_errors, [], __MODULE__})
-        send(self(), {:section_completed, changeset})
+        send(self(), {:on_form_section_change, changeset})
 
       {:error, changeset} ->
         send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
-        send(self(), {:section_completed, changeset})
+        send(self(), {:on_form_section_change, changeset})
     end
 
     form =

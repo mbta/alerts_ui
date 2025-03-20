@@ -53,15 +53,21 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       label: "Alert Details"
     },
     route_type: 1,
-    alert_data: %{route_ids: ["CR-Worcester"]},
+    route_ids: [],
     combination: :RDTS,
     editing: false,
-    effect_name: "Delay"
+    effect_name: "Delay",
+    direction: "default"
   }
 
   describe "component" do
     test "renders" do
-      assert render_component(AffectedService, @assigns) =~ ~s(id="service_form")
+      with_mock(
+        SchedulesRepo,
+        by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end
+      ) do
+        assert render_component(AffectedService, @assigns) =~ ~s(id="service_form")
+      end
     end
 
     test "correct renders when green line chosen" do
@@ -89,6 +95,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
              }
            end
          ]},
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]},
         {StopsRepo, [],
          [
            by_route: fn _route, _direction ->
@@ -113,13 +120,17 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     end
 
     test "direction options are only populated once a route is chosen" do
-      with_mock(StopsRepo, by_route: fn _route, _direction -> [] end) do
+      with_mocks([
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]},
+        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+      ]) do
         {:ok, view, _html} =
           live_isolated_component(
             AffectedService,
             @assigns
             |> Map.merge(%{
-              alert_data: %{route_type: 3, effect_name: "Delay"}
+              route_type: 3,
+              effect_name: "Delay"
             })
           )
 
@@ -150,54 +161,59 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     end
 
     test "trip select is only shown for commuter rail and ferry" do
-      {:ok, cr_view, _html} =
-        live_isolated_component(AffectedService, %{
-          @assigns
-          | alert_data: %{route_type: 2, effect_name: "Delay"}
-        })
+      with_mock(
+        SchedulesRepo,
+        by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end
+      ) do
+        {:ok, cr_view, _html} =
+          live_isolated_component(
+            AffectedService,
+            Map.merge(@assigns, %{route_type: 2, effect_name: "Delay"})
+          )
 
-      assert cr_view
-             |> element("select#affected_service_trip_ids")
-             |> has_element?()
+        assert cr_view
+               |> element("select#affected_service_trip_ids")
+               |> has_element?()
 
-      {:ok, ferry_view, _html} =
-        live_isolated_component(AffectedService, %{
-          @assigns
-          | alert_data: %{route_type: 4, effect_name: "Delay"}
-        })
+        {:ok, ferry_view, _html} =
+          live_isolated_component(
+            AffectedService,
+            Map.merge(@assigns, %{route_type: 4, effect_name: "Delay"})
+          )
 
-      assert ferry_view
-             |> element("select#affected_service_trip_ids")
-             |> has_element?()
+        assert ferry_view
+               |> element("select#affected_service_trip_ids")
+               |> has_element?()
 
-      {:ok, subway_view, _html} =
-        live_isolated_component(
-          AffectedService,
-          @assigns |> Map.merge(%{alert_data: %{route_type: 1}, combination: :RDS})
-        )
+        {:ok, subway_view, _html} =
+          live_isolated_component(
+            AffectedService,
+            @assigns |> Map.merge(%{route_type: 1, combination: :RDS})
+          )
 
-      refute subway_view
-             |> element("select#affected_service_trip_ids")
-             |> has_element?()
+        refute subway_view
+               |> element("select#affected_service_trip_ids")
+               |> has_element?()
 
-      {:ok, bus_view, _html} =
-        live_isolated_component(
-          AffectedService,
-          @assigns |> Map.merge(%{alert_data: %{route_type: 3}, combination: :RDS})
-        )
+        {:ok, bus_view, _html} =
+          live_isolated_component(
+            AffectedService,
+            @assigns |> Map.merge(%{route_type: 3, combination: :RDS})
+          )
 
-      refute bus_view
-             |> element("select#affected_service_trip_ids")
-             |> has_element?()
+        refute bus_view
+               |> element("select#affected_service_trip_ids")
+               |> has_element?()
+      end
     end
 
     test "trip options are only populated once a route is chosen" do
       with_mock(SchedulesRepo, by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end) do
         {:ok, view, _html} =
-          live_isolated_component(AffectedService, %{
-            @assigns
-            | alert_data: %{route_type: 2, effect_name: "Delay"}
-          })
+          live_isolated_component(
+            AffectedService,
+            Map.merge(@assigns, %{route_type: 2, effect_name: "Delay"})
+          )
 
         refute view
                |> element("select#affected_service_trip_ids")
@@ -207,14 +223,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         |> element("form")
         |> render_change(%{"affected_service" => %{"route_ids" => ["CR-Worcester"]}})
 
-        assert view
-               |> live_assign(:available_schedules, %AsyncResult{
-                 ok?: true,
-                 loading: false,
-                 failed: false,
-                 result: [@schedule]
-               })
-               |> render() =~ "All Trips"
+        assert view |> render() =~ "All Trips"
       end
     end
 
@@ -225,10 +234,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
-          live_isolated_component(AffectedService, %{
-            @assigns
-            | alert_data: %{route_type: 4, effect_name: "Shuttle"}
-          })
+          live_isolated_component(
+            AffectedService,
+            Map.merge(@assigns, %{route_type: 4, effect_name: "Shuttle"})
+          )
 
         refute render_async(view) =~ "All Stops"
 
@@ -246,14 +255,15 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     end
 
     test "enables stop selection if one route selected" do
-      stops = [%Stop{id: "1", name: "cool stop name"}]
-
-      with_mock(StopsRepo, by_route: fn _route, _direction -> stops end) do
+      with_mocks([
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]},
+        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+      ]) do
         {:ok, view, _html} =
-          live_isolated_component(AffectedService, %{
-            @assigns
-            | alert_data: %{route_type: 4, effect_name: "Shuttle"}
-          })
+          live_isolated_component(
+            AffectedService,
+            Map.merge(@assigns, %{route_type: 4, effect_name: "Shuttle"})
+          )
 
         assert view
                |> render() =~ ~s(disabled="disabled")
@@ -275,12 +285,15 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     test "disables stop selection if multiple routes selected" do
       stops = [%Stop{id: "1", name: "cool stop name"}]
 
-      with_mock(StopsRepo, by_route: fn _route, _direction -> stops end) do
+      with_mocks([
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]},
+        {StopsRepo, [], [by_route: fn _route, _direction -> stops end]}
+      ]) do
         {:ok, view, _html} =
-          live_isolated_component(AffectedService, %{
-            @assigns
-            | alert_data: %{route_type: 4, effect_name: "Shuttle"}
-          })
+          live_isolated_component(
+            AffectedService,
+            Map.merge(@assigns, %{route_type: 4, effect_name: "Shuttle"})
+          )
 
         view
         |> element("form")
@@ -339,13 +352,11 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
             @assigns
             |> Map.merge(%{
               editing: true,
-              alert_data: %{
-                direction: "0",
-                route_type: 2,
-                stop_ids: ["place-sstat"],
-                route_ids: ["CR-Worcester"],
-                trip_ids: ["CR-683322-595"]
-              }
+              direction: "0",
+              route_type: 2,
+              stop_ids: ["place-sstat"],
+              route_ids: ["CR-Worcester"],
+              trip_ids: ["CR-683322-595"]
             })
           )
 

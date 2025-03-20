@@ -47,29 +47,6 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   end
 
   @impl true
-  def update(%{alert_data: alert_data} = assigns, socket) do
-    cause_options =
-      formatted_causes(
-        Map.get(assigns, :route_type),
-        Map.get(assigns, :combination)
-      )
-
-    changeset =
-      %__MODULE__{}
-      |> changeset(
-        alert_data
-        |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
-        |> Map.merge(socket.assigns.form.params)
-      )
-
-    send_changeset(changeset)
-
-    form = to_form(changeset)
-    assigns = assigns |> Map.merge(%{form: form, cause_options: cause_options})
-    {:ok, assign(socket, assigns)}
-  end
-
-  @impl true
   def update(%{submitted: submitted}, socket) do
     socket =
       if submitted do
@@ -97,6 +74,29 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       end
 
     {:ok, socket}
+  end
+
+  @impl true
+  def update(assigns, socket) do
+    cause_options =
+      formatted_causes(
+        Map.get(assigns, :route_type),
+        Map.get(assigns, :combination)
+      )
+
+    changeset =
+      %__MODULE__{}
+      |> changeset(
+        assigns
+        |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
+        |> Map.merge(socket.assigns.form.params)
+      )
+
+    send_changeset(changeset)
+
+    form = to_form(changeset)
+    socket = socket |> assign(assigns) |> assign(%{form: form, cause_options: cause_options})
+    {:ok, assign(socket, assigns)}
   end
 
   @impl true
@@ -268,7 +268,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
          ) do
       {:ok, changeset} ->
         send(self(), {:add_errors, [], __MODULE__})
-        send(self(), {:section_completed, changeset})
+        send(self(), {:on_form_section_change, changeset})
         changeset
 
       {:error, changeset} ->

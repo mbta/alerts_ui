@@ -36,11 +36,11 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
   def mount(socket) do
     current_time = current_time()
 
-    alert_data = %{
+    default_params = %{
       notification_period_start_date: current_time |> naive_datetime_to_iso_date
     }
 
-    form = changeset(%__MODULE__{}, alert_data) |> to_form
+    form = changeset(%__MODULE__{}, default_params) |> to_form
 
     socket =
       assign(socket, %{
@@ -53,23 +53,17 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
   end
 
   @impl true
-  def update(%{editing: true, alert_data: alert_data} = assigns, socket) do
-    assigns =
-      if socket.assigns.edited === false do
-        alert_data =
-          alert_data
-          |> Enum.filter(fn {_k, v} -> !is_nil(v) end)
-          |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
+  def update(%{editing: true} = assigns, %{assigns: %{edited: false}} = socket) do
+    foo =
+      assigns
+      |> Enum.filter(fn {_k, v} -> !is_nil(v) end)
+      |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
 
-        Map.merge(socket.assigns.form.params, alert_data)
-
-        Map.merge(assigns, %{edited: true, alert_data: alert_data})
-      else
-        assigns
-      end
+    foo =
+      Map.merge(socket.assigns.form.params, foo)
       |> Map.put(
-        :time_range,
-        Map.take(alert_data, [
+        "time_range",
+        Map.take(assigns, [
           :active_period_start,
           :active_period_start_time,
           :active_period_start_date,
@@ -79,14 +73,14 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
 
     changeset =
       %__MODULE__{}
-      |> changeset(alert_data)
+      |> changeset(foo)
 
     changeset
     |> apply_action(:validate)
     |> case do
       {:ok, changes} ->
         send(self(), {:add_errors, [], __MODULE__})
-        send(self(), {:section_completed, changes})
+        send(self(), {:on_form_section_change, changes})
 
       {:error, changeset} ->
         send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
@@ -94,7 +88,12 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
 
     form = changeset |> to_form
 
-    {:ok, assign(socket, assigns |> Map.put(:form, form))}
+    socket =
+      socket
+      |> assign(assigns)
+      |> assign(form: form, edited: true)
+
+    {:ok, socket}
   end
 
   @impl true
@@ -129,12 +128,12 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
   end
 
   @impl true
-  def update(%{alert_data: alert_data} = assigns, socket) do
+  def update(assigns, socket) do
     assigns =
       assigns
       |> Map.put(
         :time_range,
-        Map.take(alert_data, [
+        Map.take(assigns, [
           :active_period_start,
           :active_period_start_time,
           :active_period_start_date,
@@ -174,7 +173,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
     |> case do
       {:ok, changes} ->
         send(self(), {:add_errors, [], __MODULE__})
-        send(self(), {:section_completed, changes})
+        send(self(), {:on_form_section_change, changes})
 
       {:error, changeset} ->
         send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})

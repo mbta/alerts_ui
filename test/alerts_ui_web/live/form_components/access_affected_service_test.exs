@@ -23,8 +23,8 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
       next: "success",
       label: "Alert Details"
     },
-    alert_data: %{route_type: nil, effect_name: "Bike Issue"},
-    editing: false
+    route_type: nil,
+    effect_name: "Bike Issue"
   }
 
   @facility %Facility{
@@ -44,17 +44,17 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
       :ACCESS_ISSUE
 
       {:ok, view, _html} =
-        live_isolated_component(AccessAffectedService, %{
-          @assigns
-          | alert_data: %{route_type: nil, effect_name: "Access Issue"}
-        })
+        live_isolated_component(
+          AccessAffectedService,
+          Map.merge(@assigns, %{route_type: nil, effect_name: "Access Issue"})
+        )
 
       view
       |> element("form")
       |> render_change(%{"access_affected_service" => %{"facility_id" => "Facility-3"}})
 
       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
-                      {:section_completed, %AccessAffectedService{facility_id: "Facility-3"}}}
+                      {:on_form_section_change, %AccessAffectedService{facility_id: "Facility-3"}}}
     end
 
     test "search works" do
@@ -105,17 +105,17 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
       :FACILITY_ISSUE
 
       {:ok, view, _html} =
-        live_isolated_component(AccessAffectedService, %{
-          @assigns
-          | alert_data: %{route_type: nil, effect_name: "Facility Issue"}
-        })
+        live_isolated_component(
+          AccessAffectedService,
+          Map.merge(@assigns, %{route_type: nil, effect_name: "Facility Issue"})
+        )
 
       view
       |> element("form")
       |> render_change(%{"access_affected_service" => %{"facility_id" => nil}})
 
       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
-                      {:section_completed,
+                      {:on_form_section_change,
                        %Ecto.Changeset{
                          errors: [facility_id: {"can't be blank", [validation: :required]}]
                        }}}
@@ -125,12 +125,9 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
       with_mock(FacilitiesRepo, get_by_type: fn _facility_types, _opts -> [@facility] end) do
         :BIKE_ISSUE
 
-        alert_data = %AlertsUIWeb.FormComponents.Helpers.AlertData{
-          facility_id: "Facility-3",
-          effect_name: "Bike Issue"
-        }
-
-        assigns = @assigns |> Map.merge(%{alert_data: alert_data, editing: true})
+        assigns =
+          @assigns
+          |> Map.merge(%{facility_id: "Facility-3", effect_name: "Bike Issue"})
 
         {:ok, view, _html} = live_isolated_component(AccessAffectedService, assigns)
 
@@ -147,6 +144,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
         {RoutePatternsRepo, [], [included_stops_by_route_id: fn _route_id, _direction -> [] end]},
         {FacilitiesRepo, [], get_by_type: fn _types, _opts -> [] end}
       ]) do
+        :PARKING_ISSUE
         {:ok, view, _html} = live(conn, "/alerts/new")
 
         send(

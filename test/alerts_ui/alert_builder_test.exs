@@ -26,7 +26,7 @@ defmodule AlertsUI.AlertBuilderTest do
       ]) do
         existing_alert = insert(:alert, alert_id: "0")
 
-        alert_data = %{
+        form_data = %{
           route_type: 1,
           description_text: "ok",
           header_text: "hello",
@@ -53,7 +53,7 @@ defmodule AlertsUI.AlertBuilderTest do
           ]
         }
 
-        result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 05:54:00Z])
+        result = AlertBuilder.build_alert(form_data, :R, ~U[2024-04-30 05:54:00Z])
 
         assert result == %{
                  effect: :SIGNIFICANT_DELAYS,
@@ -164,7 +164,7 @@ defmodule AlertsUI.AlertBuilderTest do
       ]) do
         existing_alert = insert(:alert, alert_id: "0")
 
-        alert_data = %{
+        form_data = %{
           route_type: 1,
           description_text: "ok",
           header_text: "hello",
@@ -177,7 +177,7 @@ defmodule AlertsUI.AlertBuilderTest do
           cause_detail: ""
         }
 
-        result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 05:54:00Z])
+        result = AlertBuilder.build_alert(form_data, :R, ~U[2024-04-30 05:54:00Z])
 
         assert result == %{
                  effect: :SIGNIFICANT_DELAYS,
@@ -318,7 +318,7 @@ defmodule AlertsUI.AlertBuilderTest do
       ]) do
         existing_alert = insert(:alert, alert_id: "0")
 
-        alert_data = %{
+        form_data = %{
           route_type: 2,
           description_text: "ok",
           header_text: "hello",
@@ -332,7 +332,7 @@ defmodule AlertsUI.AlertBuilderTest do
           notification_period_start: ~N[2024-04-30 11:54:00]
         }
 
-        result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 05:54:00Z])
+        result = AlertBuilder.build_alert(form_data, :R, ~U[2024-04-30 05:54:00Z])
 
         assert result == %{
                  effect: :SIGNIFICANT_DELAYS,
@@ -381,7 +381,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [], by_route_id: fn _route_id, _opts -> [] end},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]}
       ]) do
-        alert_data = %{
+        form_data = %{
           route_type: 3,
           description_text: "ok",
           header_text: "hello",
@@ -392,7 +392,7 @@ defmodule AlertsUI.AlertBuilderTest do
           direction: "default"
         }
 
-        result = AlertBuilder.build_alert(alert_data, :RDS)
+        result = AlertBuilder.build_alert(form_data, :RDS)
 
         assert result.informed_entity == [
                  %{
@@ -413,7 +413,7 @@ defmodule AlertsUI.AlertBuilderTest do
          ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]}
       ]) do
-        alert_data = %{
+        form_data = %{
           route_type: 3,
           description_text: "ok",
           header_text: "hello",
@@ -424,7 +424,7 @@ defmodule AlertsUI.AlertBuilderTest do
           direction: "default"
         }
 
-        result = AlertBuilder.build_alert(alert_data, :RDS)
+        result = AlertBuilder.build_alert(form_data, :RDS)
 
         assert result.informed_entity == [
                  %{
@@ -448,7 +448,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]}
       ]) do
-        alert_data = %{
+        form_data = %{
           route_type: 3,
           description_text: "ok",
           header_text: "hello",
@@ -459,7 +459,7 @@ defmodule AlertsUI.AlertBuilderTest do
           direction: "1"
         }
 
-        result = AlertBuilder.build_alert(alert_data, :RDS)
+        result = AlertBuilder.build_alert(form_data, :RDS)
 
         assert result.informed_entity == [
                  %{
@@ -474,7 +474,7 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "properly builds RDS informed entity with one route, multiple stops and direction" do
-      alert_data = %{
+      form_data = %{
         route_type: 3,
         description_text: "ok",
         header_text: "hello",
@@ -504,7 +504,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {StopsRepo, [], [by_route: fn _route_id, _direction -> parent_stops ++ child_stops end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]}
       ]) do
-        result = AlertBuilder.build_alert(alert_data, :RDS)
+        result = AlertBuilder.build_alert(form_data, :RDS)
 
         assert result.informed_entity == [
                  %{
@@ -536,7 +536,7 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "RDS Bus detour with multiple stops" do
-      alert_data = %{
+      form_data = %{
         direction: "0",
         stop_ids: ["1", "2"],
         route_type: 3,
@@ -561,7 +561,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {StopsRepo, [], [by_route: fn _route_id, _direction -> parent_stops end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]}
       ]) do
-        result = AlertBuilder.build_alert(alert_data, :RDS)
+        result = AlertBuilder.build_alert(form_data, :RDS)
 
         assert result.informed_entity == [
                  %{
@@ -585,7 +585,7 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "RDS CR track change all trips" do
-      alert_data = %{
+      form_data = %{
         route_type: 2,
         effect_name: "Track Change",
         route_ids: ["CR-Haverhill"],
@@ -629,7 +629,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {StopsRepo, [], [by_route: fn _route_id, _direction -> parent_stops ++ child_stops end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2} end]}
       ]) do
-        result = AlertBuilder.build_alert(alert_data, :RDTS)
+        result = AlertBuilder.build_alert(form_data, :RDTS)
 
         assert result.informed_entity == [
                  %{
@@ -653,7 +653,7 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "RDS Subway shuttle at start of line" do
-      alert_data = %{
+      form_data = %{
         route_type: 1,
         effect_name: "Shuttle",
         route_ids: ["Red"],
@@ -708,7 +708,7 @@ defmodule AlertsUI.AlertBuilderTest do
          ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
       ]) do
-        result = AlertBuilder.build_alert(alert_data, :RDS)
+        result = AlertBuilder.build_alert(form_data, :RDS)
 
         assert result.informed_entity == [
                  %{
@@ -764,7 +764,7 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "properly builds RDS informed entity with multiple routes, multiple stops and direction" do
-      alert_data = %{
+      form_data = %{
         route_type: 3,
         description_text: "ok",
         header_text: "hello",
@@ -795,7 +795,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutesRepo, [],
          [get: fn route_id, _opts -> %{id: route_id, type: 3, description: :local_bus} end]}
       ]) do
-        result = AlertBuilder.build_alert(alert_data, :RDS)
+        result = AlertBuilder.build_alert(form_data, :RDS)
 
         assert result.informed_entity == [
                  %{
@@ -1058,7 +1058,7 @@ defmodule AlertsUI.AlertBuilderTest do
       kenmore_child = %Stop{id: "kenmore-child", parent_id: kenmore.id, vehicle_type: 1}
       fenway_child = %Stop{id: "fenway-child", parent_id: fenway.id, vehicle_type: 1}
 
-      alert_data = %{
+      form_data = %{
         route_type: 1,
         description_text: "ok",
         header_text: "hello",
@@ -1133,7 +1133,7 @@ defmodule AlertsUI.AlertBuilderTest do
          ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
       ]) do
-        result = AlertBuilder.build_alert(alert_data, :RDS)
+        result = AlertBuilder.build_alert(form_data, :RDS)
 
         assert result.informed_entity == [
                  %{
@@ -1257,7 +1257,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [], by_route_id: fn _route_id, _opts -> [] end},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]}
       ]) do
-        alert_data = %{
+        form_data = %{
           route_type: 3,
           description_text: "ok",
           header_text: "hello",
@@ -1266,7 +1266,7 @@ defmodule AlertsUI.AlertBuilderTest do
           direction: "default"
         }
 
-        result = AlertBuilder.build_alert(alert_data, :R)
+        result = AlertBuilder.build_alert(form_data, :R)
 
         assert result.informed_entity == [
                  %{
@@ -1290,7 +1290,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [], by_route_id: fn _route_id, _opts -> [] end},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
       ]) do
-        alert_data = %{
+        form_data = %{
           route_type: 1,
           description_text: "ok",
           header_text: "hello",
@@ -1299,7 +1299,7 @@ defmodule AlertsUI.AlertBuilderTest do
           direction: "default"
         }
 
-        result = AlertBuilder.build_alert(alert_data, :R)
+        result = AlertBuilder.build_alert(form_data, :R)
 
         assert result.informed_entity == [
                  %{
@@ -1341,7 +1341,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [], by_route_id: fn _route_id, _opts -> [] end},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]}
       ]) do
-        alert_data = %{
+        form_data = %{
           route_type: 3,
           description_text: "ok",
           header_text: "hello",
@@ -1350,7 +1350,7 @@ defmodule AlertsUI.AlertBuilderTest do
           direction: "1"
         }
 
-        result = AlertBuilder.build_alert(alert_data, :R)
+        result = AlertBuilder.build_alert(form_data, :R)
 
         assert result.informed_entity == [
                  %{
@@ -1376,7 +1376,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
       ]) do
-        alert_data = %{
+        form_data = %{
           route_type: 1,
           description_text: "ok",
           header_text: "hello",
@@ -1385,7 +1385,7 @@ defmodule AlertsUI.AlertBuilderTest do
           direction: "1"
         }
 
-        result = AlertBuilder.build_alert(alert_data, :R)
+        result = AlertBuilder.build_alert(form_data, :R)
 
         assert result.informed_entity == [
                  %{
@@ -1429,7 +1429,7 @@ defmodule AlertsUI.AlertBuilderTest do
 
     test "properly builds RDT informed entity" do
       with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
-        alert_data = %{
+        form_data = %{
           route_type: 3,
           description_text: "ok",
           header_text: "hello",
@@ -1443,7 +1443,7 @@ defmodule AlertsUI.AlertBuilderTest do
           }
         }
 
-        result = AlertBuilder.build_alert(alert_data, :RDT)
+        result = AlertBuilder.build_alert(form_data, :RDT)
 
         assert result.informed_entity == [
                  %{
@@ -1485,7 +1485,7 @@ defmodule AlertsUI.AlertBuilderTest do
 
     test "properly builds RDT informed entity with multiple routes, multiple trips" do
       with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
-        alert_data = %{
+        form_data = %{
           route_type: 3,
           description_text: "ok",
           header_text: "hello",
@@ -1499,7 +1499,7 @@ defmodule AlertsUI.AlertBuilderTest do
           }
         }
 
-        result = AlertBuilder.build_alert(alert_data, :RDT)
+        result = AlertBuilder.build_alert(form_data, :RDT)
 
         assert result.informed_entity == [
                  %{
@@ -1544,7 +1544,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]}
       ]) do
-        alert_data = %{
+        form_data = %{
           route_type: 3,
           description_text: "ok",
           header_text: "hello",
@@ -1554,7 +1554,7 @@ defmodule AlertsUI.AlertBuilderTest do
           direction: "default"
         }
 
-        result = AlertBuilder.build_alert(alert_data, :RDT)
+        result = AlertBuilder.build_alert(form_data, :RDT)
 
         assert result.informed_entity == [
                  %{
@@ -1569,7 +1569,7 @@ defmodule AlertsUI.AlertBuilderTest do
 
     test "RDTS informed entity with trips and no stops selected treated as RDT" do
       with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
-        alert_data = %{
+        form_data = %{
           route_type: 3,
           description_text: "ok",
           header_text: "hello",
@@ -1585,7 +1585,7 @@ defmodule AlertsUI.AlertBuilderTest do
           direction: "default"
         }
 
-        result = AlertBuilder.build_alert(alert_data, :RDTS)
+        result = AlertBuilder.build_alert(form_data, :RDTS)
 
         assert result.informed_entity == [
                  %{
@@ -1626,7 +1626,7 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "RDTS informed entity with stops and no trips selected treated as RDS" do
-      alert_data = %{
+      form_data = %{
         route_type: 3,
         description_text: "ok",
         header_text: "hello",
@@ -1661,7 +1661,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {StopsRepo, [], [by_route: fn _route_id, _direction -> parent_stops ++ child_stops end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]}
       ]) do
-        result = AlertBuilder.build_alert(alert_data, :RDTS)
+        result = AlertBuilder.build_alert(form_data, :RDTS)
 
         assert result.informed_entity == [
                  %{
@@ -1697,7 +1697,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [], by_route_id: fn _route_id, _opts -> [] end},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]}
       ]) do
-        alert_data = %{
+        form_data = %{
           route_type: 3,
           description_text: "ok",
           header_text: "hello",
@@ -1708,7 +1708,7 @@ defmodule AlertsUI.AlertBuilderTest do
           direction: "default"
         }
 
-        result = AlertBuilder.build_alert(alert_data, :RDTS)
+        result = AlertBuilder.build_alert(form_data, :RDTS)
 
         assert result.informed_entity == [
                  %{
@@ -1728,7 +1728,7 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "RDTS informed entity with trips and stops is build properly" do
-      alert_data = %{
+      form_data = %{
         route_type: 2,
         effect_name: "Delay",
         route_ids: ["CR-Fitchburg"],
@@ -1781,7 +1781,7 @@ defmodule AlertsUI.AlertBuilderTest do
          [trip: fn "CR-627754-435" -> %Trip{id: "CR-627754-435", direction_id: 0} end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2} end]}
       ]) do
-        result = AlertBuilder.build_alert(alert_data, :RDTS)
+        result = AlertBuilder.build_alert(form_data, :RDTS)
 
         assert result.informed_entity == [
                  %{
@@ -1813,7 +1813,7 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "RDTS informed entity with trips and stops uses parents stops if no child stops available" do
-      alert_data = %{
+      form_data = %{
         route_type: 4,
         effect_name: "Delay",
         route_ids: ["Boat-EastBoston"],
@@ -1851,7 +1851,7 @@ defmodule AlertsUI.AlertBuilderTest do
          ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 4} end]}
       ]) do
-        result = AlertBuilder.build_alert(alert_data, :RDTS)
+        result = AlertBuilder.build_alert(form_data, :RDTS)
 
         assert result.informed_entity == [
                  %{
@@ -1871,7 +1871,7 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "RDTS CR track change 1 trip" do
-      alert_data = %{
+      form_data = %{
         route_type: 2,
         effect_name: "Track Change",
         description_text: "CR track change",
@@ -1913,7 +1913,7 @@ defmodule AlertsUI.AlertBuilderTest do
          [trip: fn "CR-627678-295" -> %Trip{id: "CR-627678-295", direction_id: 0} end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2} end]}
       ]) do
-        result = AlertBuilder.build_alert(alert_data, :RDTS)
+        result = AlertBuilder.build_alert(form_data, :RDTS)
 
         assert result.informed_entity == [
                  %{
@@ -1945,7 +1945,7 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "RDTS CR delay does not include duplicate informed entities" do
-      alert_data = %{
+      form_data = %{
         route_type: 2,
         effect_name: "Track Change",
         description_text: "CR track change",
@@ -1987,7 +1987,7 @@ defmodule AlertsUI.AlertBuilderTest do
          [trip: fn "CR-627678-295" -> %Trip{id: "CR-627678-295", direction_id: 0} end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2} end]}
       ]) do
-        result = AlertBuilder.build_alert(alert_data, :RDTS)
+        result = AlertBuilder.build_alert(form_data, :RDTS)
 
         assert result.informed_entity == [
                  %{
@@ -2021,7 +2021,7 @@ defmodule AlertsUI.AlertBuilderTest do
     test "RDTS CR delay does not include child stops for other direction than trip" do
       trip_id = "CR-627754-435"
 
-      alert_data = %{
+      form_data = %{
         route_type: 2,
         effect_name: "Delay",
         description_text: "CR delay",
@@ -2070,7 +2070,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {SchedulesRepo, [], [trip: fn ^trip_id -> %Trip{id: trip_id, direction_id: 0} end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2} end]}
       ]) do
-        result = AlertBuilder.build_alert(alert_data, :RDTS)
+        result = AlertBuilder.build_alert(form_data, :RDTS)
 
         assert result.informed_entity == [
                  %{
@@ -2102,7 +2102,7 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "SR informed entity routes and stops includes route type" do
-      alert_data = %{
+      form_data = %{
         route_type: 1,
         description_text: "ok",
         header_text: "hello",
@@ -2139,7 +2139,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {StopsRepo, [], [by_route: fn _route_id, _direction -> parent_stops ++ child_stops end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
       ]) do
-        result = AlertBuilder.build_alert(alert_data, :SR)
+        result = AlertBuilder.build_alert(form_data, :SR)
 
         assert result.informed_entity == [
                  %{
@@ -2189,7 +2189,7 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "SR informed entity when stop has no child stops" do
-      alert_data = %{
+      form_data = %{
         stop_ids: ["Boat-Charlestown"],
         route_type: 4,
         route_ids: ["Boat-F4"],
@@ -2229,7 +2229,7 @@ defmodule AlertsUI.AlertBuilderTest do
            end
          ]}
       ]) do
-        result = AlertBuilder.build_alert(alert_data, :SR)
+        result = AlertBuilder.build_alert(form_data, :SR)
 
         assert result.informed_entity == [
                  %{
@@ -2244,7 +2244,7 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "SR informed entity expanding Green Line routes" do
-      alert_data = %{
+      form_data = %{
         route_type: 0,
         description_text: "ok",
         header_text: "hello",
@@ -2287,7 +2287,7 @@ defmodule AlertsUI.AlertBuilderTest do
          ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 0} end]}
       ]) do
-        result = AlertBuilder.build_alert(alert_data, :SR)
+        result = AlertBuilder.build_alert(form_data, :SR)
 
         assert result.informed_entity == [
                  %{
@@ -2344,7 +2344,7 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "SR CR Station Issue" do
-      alert_data = %{
+      form_data = %{
         route_type: 2,
         route_ids: ["CR-Kingston"],
         stop_ids: ["place-PB-0194"],
@@ -2382,7 +2382,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {StopsRepo, [], [by_route: fn _route_id, _direction -> parent_stops ++ child_stops end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2} end]}
       ]) do
-        result = AlertBuilder.build_alert(alert_data, :SR)
+        result = AlertBuilder.build_alert(form_data, :SR)
 
         assert result.informed_entity == [
                  %{
@@ -2397,7 +2397,7 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "builds systemwide bus informed entity" do
-      alert_data = %{
+      form_data = %{
         route_type: nil,
         effect_name: "Delay",
         service_types: [3],
@@ -2405,7 +2405,7 @@ defmodule AlertsUI.AlertBuilderTest do
         description_text: "test description"
       }
 
-      result = AlertBuilder.build_alert(alert_data, nil)
+      result = AlertBuilder.build_alert(form_data, nil)
 
       assert result.informed_entity == [
                %{
@@ -2417,7 +2417,7 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "builds systemwide subway informed entities" do
-      alert_data = %{
+      form_data = %{
         route_type: nil,
         effect_name: "Delay",
         service_types: [1],
@@ -2425,7 +2425,7 @@ defmodule AlertsUI.AlertBuilderTest do
         description_text: "test description"
       }
 
-      result = AlertBuilder.build_alert(alert_data, nil)
+      result = AlertBuilder.build_alert(form_data, nil)
 
       assert result.informed_entity == [
                %{
@@ -2442,7 +2442,7 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "builds systemwide informed entities for multiple service types" do
-      alert_data = %{
+      form_data = %{
         route_type: nil,
         effect_name: "Delay",
         service_types: [3, 1],
@@ -2450,7 +2450,7 @@ defmodule AlertsUI.AlertBuilderTest do
         description_text: "test description"
       }
 
-      result = AlertBuilder.build_alert(alert_data, nil)
+      result = AlertBuilder.build_alert(form_data, nil)
 
       assert result.informed_entity == [
                %{
@@ -2472,14 +2472,14 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "builds systemwide informed entities for all service types" do
-      alert_data = %{
+      form_data = %{
         route_type: nil,
         effect_name: "Delay",
         header_text: "test header",
         description_text: "test description"
       }
 
-      result = AlertBuilder.build_alert(alert_data, nil)
+      result = AlertBuilder.build_alert(form_data, nil)
 
       assert result.informed_entity == [
                %{
@@ -2491,7 +2491,7 @@ defmodule AlertsUI.AlertBuilderTest do
   end
 
   test "builds facility informed entities" do
-    alert_data = %{
+    form_data = %{
       route_type: nil,
       effect_name: "Elevator Closure",
       header_text: "test header",
@@ -2550,7 +2550,7 @@ defmodule AlertsUI.AlertBuilderTest do
       {StopsRepo, [], [get!: fn _stop_id -> stop end]},
       {RoutesRepo, [], [by_stop: fn _stop_id -> [route] end]}
     ]) do
-      result = AlertBuilder.build_alert(alert_data, :ACCESS)
+      result = AlertBuilder.build_alert(form_data, :ACCESS)
 
       assert result.informed_entity == [
                %{
@@ -2582,7 +2582,7 @@ defmodule AlertsUI.AlertBuilderTest do
   end
 
   test "builds facility informed entities with nil stop" do
-    alert_data = %{
+    form_data = %{
       route_type: nil,
       effect_name: "Elevator Closure",
       header_text: "test header",
@@ -2606,7 +2606,7 @@ defmodule AlertsUI.AlertBuilderTest do
     with_mocks([
       {FacilitiesRepo, [], [get: fn _facility_id -> facility end]}
     ]) do
-      result = AlertBuilder.build_alert(alert_data, :ACCESS)
+      result = AlertBuilder.build_alert(form_data, :ACCESS)
 
       assert result.informed_entity == [
                %{
@@ -2618,7 +2618,7 @@ defmodule AlertsUI.AlertBuilderTest do
   end
 
   test "informed entity is empty list if alert data doesn't match anything" do
-    alert_data = %{
+    form_data = %{
       route_type: nil,
       effect_name: "Delay",
       header_text: "test header",
@@ -2626,7 +2626,7 @@ defmodule AlertsUI.AlertBuilderTest do
       route_ids: []
     }
 
-    result = AlertBuilder.build_alert(alert_data, :RDS)
+    result = AlertBuilder.build_alert(form_data, :RDS)
 
     assert result.informed_entity == []
   end

@@ -61,14 +61,14 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   # Occurs when alert is being edited
   @impl true
   def update(
-        %{alert_data: alert_data, editing: true, route_type: route_type} = assigns,
+        %{editing: true, route_type: route_type} = assigns,
         socket
       ) do
-    changeset = build_changeset(%__MODULE__{}, alert_data)
+    changeset = build_changeset(%__MODULE__{}, assigns)
     changes = apply_action!(changeset, :validate)
 
     send(self(), {:add_errors, [], __MODULE__})
-    send(self(), {:section_completed, changes})
+    send(self(), {:on_form_section_change, changes})
 
     form =
       changeset
@@ -87,7 +87,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
            available_stops: CreateAlertLive.get_stops_by_route_type(route_type),
            available_routes:
              CreateAlertLive.get_routes_by_stop(
-               Map.get(alert_data, :stop_ids, []),
+               Map.get(assigns, :stop_ids, []),
                route_type
              ),
            available_filter_routes: CreateAlertLive.get_routes(route_type)
@@ -127,6 +127,29 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         %{route_type: route_type} = assigns,
         socket
       ) do
+    changeset =
+      %__MODULE__{}
+      |> build_changeset(assigns)
+
+    case apply_action(changeset |> validate_required(@required_fields), :validate) do
+      {:ok, _changes} ->
+        send(self(), {:add_errors, [], __MODULE__})
+
+      {:error, changeset} ->
+        send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
+    end
+
+    form = to_form(changeset |> Map.put(:action, :validate))
+
+    assigns =
+      assigns
+      |> Map.put(
+        :service_type_name,
+        route_type |> InformedEntity.route_code_mapping() || nil
+      )
+      |> Map.put(:form, form)
+      |> Map.put(:route_type, route_type)
+
     socket =
       socket
       |> assign(assigns)
@@ -193,7 +216,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     case apply_action(changeset |> validate_required(@required_fields), :validate) do
       {:ok, changeset} ->
         send(self(), {:add_errors, [], __MODULE__})
-        send(self(), {:section_completed, changeset})
+        send(self(), {:on_form_section_change, changeset})
 
       {:error, changeset} ->
         send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
@@ -265,7 +288,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     case apply_action(changeset |> validate_required(@required_fields), :validate) do
       {:ok, changeset} ->
         send(self(), {:add_errors, [], __MODULE__})
-        send(self(), {:section_completed, changeset})
+        send(self(), {:on_form_section_change, changeset})
 
       {:error, changeset} ->
         send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})

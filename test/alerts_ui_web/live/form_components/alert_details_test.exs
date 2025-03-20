@@ -17,8 +17,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
       label: "Alert Details"
     },
     route_type: 4,
-    combination: :RDT,
-    alert_data: %{}
+    combination: :RDT
   }
 
   describe "component" do
@@ -31,6 +30,18 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
 
       assert view
              |> render() =~ ~s(fog)
+    end
+
+    test "works when editing" do
+      new_assigns = %{
+        header_text: "new header text"
+      }
+
+      {:ok, view, _html} =
+        live_isolated_component(AlertDetails, @assigns |> Map.merge(new_assigns))
+
+      assert view
+             |> render() =~ ~s(new header text)
     end
   end
 

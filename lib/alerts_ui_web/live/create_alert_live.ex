@@ -76,31 +76,80 @@ defmodule AlertsUIWeb.CreateAlertLive do
   ]
 
   @impl true
+  @spec mount(
+          map(),
+          any(),
+          atom()
+          | %{
+              :assigns => atom() | %{:live_action => any(), optional(any()) => any()},
+              optional(any()) => any()
+            }
+        ) :: {:ok, any()}
   def mount(params, _session, socket) do
     alert_id = Map.get(params, "alert_id")
 
-    alert_data =
-      if is_nil(alert_id),
-        do: %{},
-        else: AlertData.build_alert_data(alert_id) |> Map.from_struct()
+    default_form_data =
+      %{
+        route_type: nil,
+        effect_name: nil,
+        route_ids: nil,
+        trip_ids: nil,
+        stop_ids: nil,
+        direction: "",
+        combination: nil,
+        facility_id: nil,
+        header_text: nil,
+        description_text: nil,
+        cause_detail: nil,
+        url: nil,
+        image_url: nil,
+        image_alternative_text: nil,
+        severity: nil,
+        banner_text: nil,
+        view_banner: nil,
+        banner_sync_toggle: nil,
+        reminder_times: [],
+        notification_period_start: nil,
+        notification_specifier: :same_as_effect_period,
+        active_period_end_specifier: :later_today,
+        active_period_start: nil,
+        active_period_end: nil,
+        alert_timing: :"one-time",
+        active_period_start_date: nil,
+        active_period_start_time: nil,
+        active_period_start_specifier: :now,
+        recurrence_days: [],
+        active_period_end_time: nil,
+        active_period_end_date: nil,
+        active_period_start_time_specifier: :start_of_service,
+        active_period_end_time_specifier: :end_of_service
+      }
+      |> Map.put(:selected_trips, nil)
+
+    default_form_data =
+      if is_nil(alert_id) do
+        default_form_data
+      else
+        edit_data = AlertData.build_alert_data(alert_id) |> Map.from_struct()
+        Map.merge(default_form_data, edit_data)
+      end
 
     [first_step, second_step | _] = @steps
     editing = socket.assigns.live_action == :edit
 
     socket =
-      assign(socket, %{
+      socket
+      |> assign(default_form_data)
+      |> assign(%{
         page_title: "Create an Alert",
         progress: if(editing, do: second_step, else: first_step),
         steps: @steps,
-        alert_data: alert_data,
-        combination: Map.get(alert_data, :combination),
-        selected_trips: [],
-        available_facilities: [],
+        combination: default_form_data.combination,
         alert_uuid: nil,
         alert_id: alert_id,
-        editing: editing,
         errors: %{},
-        submitted: false
+        submitted: false,
+        editing: editing
       })
 
     {:ok, socket}
@@ -122,12 +171,16 @@ defmodule AlertsUIWeb.CreateAlertLive do
     |> maybe_include_virtual_green_line()
   end
 
+  def get_schedules(nil, _), do: []
+
   def get_schedules(route_ids, direction) do
     directions = directions_from_selection(direction)
     opts = direction_option([stop_sequences: [:first, :last]], directions)
 
     route_ids |> SchedulesRepo.by_route_ids(opts) |> filter_out_old_trips
   end
+
+  def get_stops(nil, _direction), do: []
 
   def get_stops(["Green"] = route_ids, direction) do
     route_ids = Routes.expanding_green_line(route_ids) |> Enum.reverse()
@@ -156,6 +209,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
   def get_stops_by_route_type(route_type) do
     StopsRepo.by_route_type(route_type) |> Enum.sort_by(& &1.name)
   end
+
+  def get_routes_by_stop(nil, _), do: []
 
   def get_routes_by_stop(stop_ids, route_type) do
     if route_type == 3 do
@@ -204,7 +259,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   def handle_info(:save_as_draft, socket) do
-    socket.assigns.alert_data
+    socket.assigns
     |> Map.put(:draft, true)
     |> AlertBuilder.build_alert(Map.get(socket.assigns, :combination))
     |> Alerts.create_draft_alert()
@@ -231,20 +286,16 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   @impl true
-  def handle_info({:section_completed, changeset}, socket) do
-    assigns =
-      %{
-        alert_data: Map.merge(socket.assigns.alert_data, changeset |> Map.from_struct())
-      }
 
-    {:noreply, assign(socket, assigns)}
+  def handle_info({:on_form_section_change, changes}, socket) do
+    {:noreply, assign(socket, Map.from_struct(changes))}
   end
 
   @impl true
   def handle_info({:step_completed, changes}, socket) do
-    alert_data = Map.merge(socket.assigns.alert_data, changes |> Map.from_struct())
-    route_type = Map.get(alert_data, :route_type)
-    effect_name = Map.get(alert_data, :effect_name)
+    socket = assign(socket, Map.from_struct(changes))
+    route_type = Map.get(socket.assigns, :route_type)
+    effect_name = Map.get(socket.assigns, :effect_name)
 
     combination =
       if is_nil(route_type) and
@@ -254,15 +305,19 @@ defmodule AlertsUIWeb.CreateAlertLive do
         ServiceEffectCombinations.get_combination(route_type, effect_name)
       end
 
-    assigns = %{
-      progress: get_step_by_name(socket.assigns.progress.next),
-      alert_data: alert_data,
-      combination: combination,
-      selected_trips: nil,
-      errors: %{}
-    }
+    socket =
+      assign(socket, %{
+        progress: get_step_by_name(socket.assigns.progress.next),
+        combination: combination,
+        errors: %{},
+        selected_trips: nil,
+        route_ids: [],
+        stop_ids: [],
+        trip_ids: [],
+        direction: ""
+      })
 
-    {:noreply, assign(socket, assigns)}
+    {:noreply, socket}
   end
 
   def handle_info(:create_alert, socket) do
@@ -289,7 +344,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   defp create_alert(socket) do
     alert_map =
-      socket.assigns.alert_data
+      socket.assigns
       |> AlertBuilder.build_alert(socket.assigns.combination)
 
     existing_alert =
@@ -305,7 +360,6 @@ defmodule AlertsUIWeb.CreateAlertLive do
       {:ok, alert} ->
         assigns = %{
           progress: get_step_by_name(socket.assigns.progress.next),
-          alert_data: %{},
           alert_uuid: alert.id
         }
 
@@ -358,12 +412,6 @@ defmodule AlertsUIWeb.CreateAlertLive do
   defp get_step_by_name(name) do
     Enum.find(@steps, &(&1.name == name))
   end
-
-  @spec route_type(map()) :: Route.type_int() | nil
-  defp route_type(alert_data), do: Map.get(alert_data, :route_type)
-
-  @spec route_type(map()) :: String.t() | nil
-  defp effect_name(alert_data), do: Map.get(alert_data, :effect_name)
 
   @spec maybe_include_virtual_green_line([Route.t()]) :: [Route.t()]
   defp maybe_include_virtual_green_line(routes) do

@@ -23,7 +23,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       assert AlertData.build_alert_data("1") == %AlertData{
                combination: :ACCESS,
-               direction: nil,
+               direction: "default",
                effect_name: "Access Issue",
                route_type: nil,
                route_ids: [],
@@ -35,7 +35,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                service_types: [],
                reminder_times: [~N[2024-09-24 20:01:00]],
                notification_specifier: :same_as_effect_period,
-               alert_timing: "one-time"
+               alert_timing: "one-time",
+               view_banner: false,
+               banner_sync_toggle: true
              }
     end
 
@@ -57,7 +59,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       assert AlertData.build_alert_data("1") == %AlertData{
                combination: :RDS,
-               direction: nil,
+               direction: "default",
                effect_name: "Delay",
                facility_id: "",
                route_type: 1,
@@ -69,7 +71,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                service_types: [],
                reminder_times: [~N[2024-09-24 20:01:00]],
                notification_specifier: :same_as_effect_period,
-               alert_timing: "one-time"
+               alert_timing: "one-time",
+               view_banner: false,
+               banner_sync_toggle: true
              }
     end
 
@@ -87,7 +91,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       assert AlertData.build_alert_data("1") == %AlertData{
                combination: :ACCESS,
-               direction: nil,
+               direction: "default",
                effect_name: "Bike Issue",
                facility_id: "example-facility",
                stop_ids: [],
@@ -98,7 +102,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                description_text: "description text",
                reminder_times: [~N[2024-09-24 20:01:00]],
                alert_timing: "one-time",
-               notification_specifier: :same_as_effect_period
+               notification_specifier: :same_as_effect_period,
+               view_banner: false,
+               banner_sync_toggle: true
              }
     end
 
@@ -137,7 +143,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       assert AlertData.build_alert_data("1") == %AlertData{
                combination: :RDS,
-               direction: nil,
+               direction: "default",
                effect_name: "Delay",
                url: "http://www.example.com",
                image_url: "http://www.example.com/example.jpg",
@@ -161,7 +167,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                cause_detail: "hazmat condition",
                severity: 3,
                reminder_times: [~N[2024-05-02 12:10:34], ~N[2024-05-02 12:11:34]],
-               alert_timing: "one-time"
+               alert_timing: "one-time",
+               view_banner: false,
+               banner_sync_toggle: true
              }
     end
 
@@ -269,7 +277,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                description_text: "description text",
                reminder_times: [~N[2024-09-24 20:01:00]],
                notification_specifier: :same_as_effect_period,
-               alert_timing: "one-time"
+               alert_timing: "one-time",
+               view_banner: false,
+               banner_sync_toggle: true,
+               direction: "default"
              }
     end
 
@@ -299,7 +310,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                description_text: "description text",
                reminder_times: [~N[2024-09-24 20:01:00]],
                alert_timing: "one-time",
-               notification_specifier: :same_as_effect_period
+               notification_specifier: :same_as_effect_period,
+               view_banner: false,
+               banner_sync_toggle: true,
+               direction: "default"
              }
     end
 

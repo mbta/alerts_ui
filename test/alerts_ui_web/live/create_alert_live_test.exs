@@ -48,7 +48,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         {RoutePatternsRepo, [],
          [
            by_route_id: fn _route_id, _opts -> [@route_pattern] end,
-           included_stops_by_route_id: fn _route_id, _ -> [@stop] end
+           included_stops_by_route_id: fn _route_id, _opts -> [@stop] end
          ]},
         {StopsRepo, [], by_route: fn _, _ -> [@stop] end},
         {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]}
@@ -71,46 +71,36 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         refute second_rendered_view =~ ~s(class="min-w-full flex flex-col mb-8" id="route_view")
         assert second_rendered_view =~ ~s(class="min-w-full flex flex-col mt-4" id="details_view")
 
-        # Submit service section
-        {:ok, service_changeset} =
-          Ecto.Changeset.change(%AffectedService{
-            route_ids: [@route.id],
+        view
+        |> element("#service_form")
+        |> render_change(%{
+          "affected_service" => %{
             direction: "default",
+            single_route_id: @route.id,
+            route_ids: [@route.id],
             stop_ids: [@stop.id]
-          })
-          |> apply_action(:insert)
+          }
+        })
 
-        send(view.pid, {:section_completed, service_changeset})
 
-        {:error, changeset} =
-          Ecto.Changeset.change(%AlertDetails{})
-          |> AlertDetails.changeset(%{header_text: nil})
-          |> validate_required([:header_text])
-          |> apply_action(:validate)
-
-        send(view.pid, {:add_errors, [], AffectedService})
-        send(view.pid, {:section_completed, changeset})
         send(view.pid, :create_alert)
-        failure_rendered_view = render(view)
+        failure_rendered_view = render_async(view)
         assert failure_rendered_view =~ "Enter message text"
 
-        {:ok, changeset} =
-          Ecto.Changeset.change(%AlertDetails{})
-          |> AlertDetails.changeset(%{header_text: "cool"})
-          |> apply_action(:validate)
+        view
+        |> element("#details_form")
+        |> render_change(%{"alert_details" => %{header_text: "cool"}})
 
-        send(view.pid, {:add_errors, [], AlertDetails})
-        send(view.pid, {:section_completed, changeset})
         send(view.pid, :create_alert)
 
         rendered_view = render_async(view)
-
         assert rendered_view =~ "created successfully"
       end
     end
 
     @tag :logged_in_user
     test "shows correct affected service for access combination", %{conn: conn} do
+      :PARKING_ISSUE
       with_mocks([
         {RoutePatternsRepo, [], [included_stops_by_route_id: fn _route_id, _direction -> [] end]},
         {FacilitiesRepo, [], get_by_type: fn _types, _opts -> [] end}
@@ -210,7 +200,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
           })
           |> apply_action(:insert)
 
-        send(view.pid, {:section_completed, service_changeset})
+        send(view.pid, {:on_form_section_change, service_changeset})
 
         # Submit time range
         {:ok, time_range_changeset} =
@@ -220,7 +210,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
           })
           |> apply_action(:insert)
 
-        send(view.pid, {:section_completed, time_range_changeset})
+        send(view.pid, {:on_form_section_change, time_range_changeset})
 
         # Submit details
         {:ok, details_changeset} =
@@ -232,7 +222,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
         send(view.pid, {:add_errors, [], AffectedService})
         send(view.pid, {:add_errors, [], AlertDetails})
-        send(view.pid, {:section_completed, details_changeset})
+        send(view.pid, {:on_form_section_change, details_changeset})
         send(view.pid, :create_alert)
 
         success_rendered_view = render(view)

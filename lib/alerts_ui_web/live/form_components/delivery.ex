@@ -32,44 +32,6 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
   end
 
   @impl true
-  def update(%{alert_data: alert_data} = assigns, socket) do
-    form = socket.assigns.form
-
-    banner_text_map =
-      if Form.normalize_value("checkbox", form[:banner_sync_toggle].value) and
-           Form.normalize_value("checkbox", form[:view_banner].value) do
-        %{"banner_text" => Map.get(alert_data, :header_text, "")}
-      else
-        %{}
-      end
-
-    data =
-      alert_data
-      |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
-      |> Map.merge(form.params)
-      |> Map.merge(banner_text_map)
-
-    data =
-      if Map.get(form.params, :banner_text) do
-        Map.put(data, "view_banner", true)
-      else
-        data
-      end
-
-    changeset = changeset(%__MODULE__{}, data)
-
-    changes = changeset |> apply_action!(:validate)
-
-    send(self(), {:section_completed, changes})
-
-    form =
-      changeset
-      |> to_form()
-
-    {:ok, socket |> assign(assigns) |> assign(form: form)}
-  end
-
-  @impl true
   def update(%{submitted: submitted}, socket) do
     socket =
       if submitted do
@@ -86,6 +48,44 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
       end
 
     {:ok, socket}
+  end
+
+  @impl true
+  def update(assigns, socket) do
+    form = socket.assigns.form
+
+    banner_text_map =
+      if Form.normalize_value("checkbox", form[:banner_sync_toggle].value) and
+           Form.normalize_value("checkbox", form[:view_banner].value) do
+        %{"banner_text" => Map.get(assigns, :header_text, "")}
+      else
+        %{}
+      end
+
+    data =
+      assigns
+      |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
+      |> Map.merge(form.params)
+      |> Map.merge(banner_text_map)
+
+    data =
+      if Map.get(form.params, :banner_text) do
+        Map.put(data, "view_banner", true)
+      else
+        data
+      end
+
+    changeset = changeset(%__MODULE__{}, data)
+
+    changes = changeset |> apply_action!(:validate)
+
+    send(self(), {:on_form_section_change, changes})
+
+    form =
+      changeset
+      |> to_form()
+
+    {:ok, socket |> assign(assigns) |> assign(form: form)}
   end
 
   def changeset(changeset, params \\ %{}) do
@@ -106,7 +106,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
     else
       delivery
       |> Map.put("banner_sync_toggle", true)
-      |> Map.put("banner_text", socket.assigns.alert_data[:header_text])
+      |> Map.put("banner_text", socket.assigns[:header_text])
     end
     |> validate(socket)
   end
@@ -139,11 +139,10 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
          |> apply_action(:validate) do
       {:ok, changeset} ->
         send(self(), {:add_errors, [], __MODULE__})
-        send(self(), {:section_completed, changeset})
+        send(self(), {:on_form_section_change, changeset})
 
       {:error, changeset} ->
         send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
-        send(self(), {:section_completed, changeset})
     end
 
     form =
@@ -162,7 +161,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
 
   defp banner_text?(params, socket) do
     if Map.get(params, "banner_sync_toggle") do
-      Map.get(socket.assigns.alert_data, :header_text)
+      Map.get(socket.assigns, :header_text)
     else
       Map.get(params, "banner_text")
     end not in [nil, ""]
