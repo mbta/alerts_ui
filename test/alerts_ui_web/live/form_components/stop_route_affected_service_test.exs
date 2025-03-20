@@ -103,19 +103,24 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         view
         |> element("form")
         |> render_change(%{
+          "_target" => ["stop_route_affected_service", "stop_ids"],
           "stop_route_affected_service" => %{"stop_ids" => ["place-aqucl"]}
         })
 
-        assert view |> render_async() =~ ~s(<option value="Blue">)
+        assert view |> render_async() =~ ~s(<option selected="selected" value="Blue">)
 
         view
         |> element("form")
         |> render_change(%{
-          "stop_route_affected_service" => %{"stop_ids_filter" => "x", "route_ids_filter" => "x"}
+          "stop_route_affected_service" => %{
+            "route_ids" => [],
+            "stop_ids_filter" => "x",
+            "route_ids_filter" => "x"
+          }
         })
 
         refute view |> render_async() =~ ~s(<option value="place-aqucl">)
-        refute view |> render_async() =~ ~s(<option value="Blue">)
+        refute view |> render_async() =~ ~s(<option selected="selected" value="Blue">)
       end
     end
 

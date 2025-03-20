@@ -22,7 +22,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   @fields ~w[route_ids stop_ids route_types_by_id route_ids_filter stop_ids_filter]a
   @required_fields ~w[route_ids stop_ids]a
 
-  # The "form" value on line 42 does NOT include the validation on line 33
   @impl true
   def mount(socket) do
     changeset = build_changeset(%__MODULE__{}, %{})
@@ -48,7 +47,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     {:ok, socket}
   end
 
-  # The "form" never goes through the `validate_required` logic and doesn't need to (because this is edit only)
   # Occurs when alert is being edited
   @impl true
   def update(
@@ -56,20 +54,16 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         socket
       ) do
     changeset = build_changeset(%__MODULE__{}, alert_data)
-    # No need to use single pipe if not a chain
     changes = apply_action!(changeset, :validate)
 
     send(self(), {:add_errors, [], __MODULE__})
     send(self(), {:section_completed, changes})
 
-    # Reformatted to make this look like the other instances of this same logic
     form =
       changeset
-      # needed?
       |> Map.put(:action, :validate)
       |> to_form()
 
-    # Other functions put the assigns inline with the socket logic
     socket =
       socket
       |> assign(assigns)
@@ -91,13 +85,14 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     {:ok, socket}
   end
 
-  # The "form" value on line 108 DOES include the validation from line 100
   # The form was submitted but submission had an error, so the same component rerenders
   @impl true
   def update(%{submitted: true}, socket) do
     changeset =
       %__MODULE__{}
       |> build_changeset(socket.assigns.form.params)
+      # The only instance where the changeset itself contains the validation, so that
+      # inline errors appear after submit
       |> validate_required(@required_fields)
 
     errors =
@@ -109,7 +104,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     form =
       changeset
       |> Map.put(:errors, errors)
-      # needed?
       |> Map.put(:action, :validate)
       |> to_form()
 
@@ -172,7 +166,11 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   @impl true
   def handle_event("validate", %{"stop_route_affected_service" => affected_service}, socket) do
     available_routes = Map.get(socket.assigns.available_routes, :result, [])
-    affected_service = add_routes_with_types(affected_service, available_routes)
+
+    affected_service =
+      affected_service
+      |> populate_default_routes()
+      |> add_routes_with_types(available_routes)
 
     changeset = build_changeset(%__MODULE__{}, affected_service)
 
@@ -201,7 +199,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   @impl true
   def handle_async(:get_available_routes, {:ok, fetched_routes}, socket) do
     %{available_routes: available_routes} = socket.assigns
-    # "Validate" was misleading because it was only adding routes to the affected_service object
+
     affected_service =
       add_routes_with_types(
         Map.merge(socket.assigns.form.params, %{"route_ids" => Enum.map(fetched_routes, & &1.id)}),
@@ -221,7 +219,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
     form =
       changeset
-      # Why this here, when apply_action also happened?
       |> Map.put(:action, :validate)
       |> to_form()
 
@@ -241,8 +238,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
      assign(socket, :available_routes, AsyncResult.failed(available_routes, {:exit, reason}))}
   end
 
-  # Seemed like validate was just putting available_routes on "affected_service"
-  # so refactored and combined with "routes_with_types"
   def add_routes_with_types(affected_service, available_routes) do
     routes_with_types =
       available_routes
@@ -254,7 +249,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     Map.put(affected_service, "route_types_by_id", routes_with_types)
   end
 
-  # renamed to make it clear that this is the function that DOES the casting
   def build_changeset(changeset, params) do
     changeset
     |> cast(params, @fields)
@@ -336,5 +330,14 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   @spec disable_routes_input?(map()) :: boolean()
   defp disable_routes_input?(%{form: form}) do
     form[:stop_ids].value in [nil, []]
+  end
+
+  # At a minimum, this is needed for testing. See "search works" test
+  @spec populate_default_routes(map()) :: map()
+  defp populate_default_routes(affected_service) do
+    case Map.get(affected_service, "route_ids") do
+      nil -> Map.put(affected_service, "route_ids", [])
+      _ -> affected_service
+    end
   end
 end
