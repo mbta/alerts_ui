@@ -12,6 +12,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   alias AlertsUIWeb.FormComponents.Helpers.{
     ContentFormatter,
     ErrorFormatter,
+    Helpers,
     SelectFormatter,
     ServiceEffectCombinations
   }
@@ -238,7 +239,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   def validate(affected_service, assigns) do
     trip_information_by_id =
-      if async_available?(assigns, :available_schedules) do
+      if Helpers.async_available?(assigns, :available_schedules) do
         trip_information_by_id(
           assigns.available_schedules.result,
           Map.get(affected_service, "trip_ids", [])
@@ -330,7 +331,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       })
 
     direction_names_map =
-      if async_available?(assigns, :available_routes) do
+      if Helpers.async_available?(assigns, :available_routes) do
         Map.new(assigns.available_routes.result, &{&1.id, &1.direction_names})
       else
         %{}
@@ -346,7 +347,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     trip_filter_value = assigns.form[:trip_ids_filter].value
 
     trip_id_options =
-      if async_available?(assigns, :available_schedules) do
+      if Helpers.async_available?(assigns, :available_schedules) do
         schedules_by_route_type =
           assigns.available_schedules.result
           |> Enum.filter(fn schedule ->
@@ -490,11 +491,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       4 -> :ferry
       _ -> nil
     end
-  end
-
-  defp async_available?(assigns, key) do
-    Map.get(assigns, key) && Map.get(assigns[key], :result) && assigns[key].ok? &&
-      assigns[key].result
   end
 
   def trip_information_by_id(available_schedules, trip_ids) do
