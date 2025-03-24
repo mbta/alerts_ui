@@ -11,7 +11,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
 
   alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.CreateAlertLive
-  alias AlertsUIWeb.FormComponents.Helpers.{ErrorFormatter, SelectFormatter}
+  alias AlertsUIWeb.FormComponents.Helpers.{ErrorFormatter, Helpers, SelectFormatter}
 
   @primary_key false
   embedded_schema do
@@ -163,7 +163,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
   @impl true
   def handle_event("accepted_stops_modal", _params, socket) do
     stops =
-      if async_available?(socket.assigns, :available_facilities) do
+      if Helpers.async_available?(socket.assigns, :available_facilities) do
         socket.assigns.available_facilities.result.stops
       else
         []
@@ -200,7 +200,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     params = assigns.form.params
 
     stops =
-      if async_available?(assigns, :available_facilities) do
+      if Helpers.async_available?(assigns, :available_facilities) do
         assigns.available_facilities.result.stops
       else
         []
@@ -221,7 +221,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     facility_id = assigns.form[:facility_id].value || ""
 
     facility_id_options =
-      if async_available?(assigns, :available_facilities) do
+      if Helpers.async_available?(assigns, :available_facilities) do
         options =
           assigns.available_facilities.result.facilities
           |> Enum.filter(
@@ -250,7 +250,8 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
 
     ~H"""
     <div class="min-w-full flex flex-col" id="access_service_view">
-      <.h1 class="mb-8">Create new access {@effect_name |> String.downcase()} alert</.h1>
+      <.h1 class="!mb-0">Create new alert</.h1>
+      <.p>Access • {@effect_name}</.p>
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
         Affected service
       </.h5>
@@ -299,11 +300,6 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
       <hr class="mt-8" />
     </div>
     """
-  end
-
-  defp async_available?(assigns, key) do
-    Map.get(assigns[key], :result) && assigns[key].ok? &&
-      assigns[key].result
   end
 
   defp filter_facility_by_stop_ids(facility, stop_id_filter_value, facility_id) do

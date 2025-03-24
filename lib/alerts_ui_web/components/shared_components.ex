@@ -440,7 +440,7 @@ defmodule AlertsUIWeb.SharedComponents do
                   <.mode_icon type={if @icon_type, do: @icon_type, else: option_name} />
                 </div>
                 {if is_atom(option_name) do
-                  ContentFormatter.route_atom_to_string(option_name) |> :string.titlecase()
+                  ContentFormatter.route_atom_to_string(option_name)
                 else
                   option_name
                 end}
@@ -1095,7 +1095,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
     ~H"""
     <div phx-feedback-for={@name} class={["#{@class}", @hidden && "hidden"]}>
-      <.label for={@id} class={"block #{if is_nil(@label), do: "hidden"}"}>{@label}</.label>
+      <.label for={@id} class="block">{@label}</.label>
       <input
         id={@id}
         name={@name}

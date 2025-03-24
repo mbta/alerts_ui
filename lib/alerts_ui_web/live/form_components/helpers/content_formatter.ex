@@ -9,12 +9,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ContentFormatter do
       iex> ContentFormatter.route_atom_to_string(:commuter_rail)
       "Commuter Rail"
       iex> ContentFormatter.route_atom_to_string(:bus)
-      "bus"
+      "Bus"
   """
 
   @spec route_atom_to_string(atom()) :: String.t()
   def route_atom_to_string(:commuter_rail), do: "Commuter Rail"
 
   def route_atom_to_string(route_atom),
-    do: route_atom |> Atom.to_string() |> String.replace("_", " ")
+    do: route_atom |> Atom.to_string() |> String.replace("_", " ") |> String.capitalize()
 end
