@@ -92,7 +92,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
 
     test "route options are all selected by default and allows user entry" do
       with_mocks([
-        {RoutesRepo, [], [by_stop: fn _stop_id -> @routes end]},
+        {RoutesRepo, [],
+         [by_stop: fn _stop_id -> @routes end, by_type: fn _types -> @routes end]},
         {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
@@ -128,8 +129,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
 
     test "search works" do
       with_mocks([
-        {RoutesRepo, [], 
-          [by_stop: fn _stop_id -> @routes end, by_type: fn _types -> @routes end]},
+        {RoutesRepo, [],
+         [by_stop: fn _stop_id -> @routes end, by_type: fn _types -> @routes end]},
         {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
@@ -170,7 +171,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
     test "modal search works" do
       with_mocks([
         {RoutesRepo, [],
-         [by_stop: fn _route_id -> [@route] end, by_type: fn _types -> [@route] end]},
+         [by_stop: fn _route_id -> @routes end, by_type: fn _types -> @routes end]},
         {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
@@ -251,7 +252,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_stop: fn _stop_id, _ -> [@route_one, @route_two] end,
+           by_stop: fn _stop_id, _ -> @routes end,
+           by_type: fn _types -> @routes end,
            get: fn
              "Blue", _ -> @route_one
              "Bluer", _ -> @route_two
@@ -325,7 +327,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_stop: fn _stop_id, _ -> [@route_one, @route_two] end,
+           by_stop: fn _stop_id, _ -> @routes end,
+           by_type: fn _types -> @routes end,
            get: fn
              "Blue", _ -> @route_one
              "Bluer", _ -> @route_two

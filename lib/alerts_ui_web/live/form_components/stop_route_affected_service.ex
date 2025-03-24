@@ -7,12 +7,14 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   import Ecto.Changeset
   alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.CreateAlertLive
+
   alias AlertsUIWeb.FormComponents.Helpers.{
     ContentFormatter,
     ErrorFormatter,
     Helpers,
     SelectFormatter
   }
+
   alias Phoenix.LiveView.AsyncResult
 
   @primary_key false
@@ -211,6 +213,44 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   end
 
   @impl true
+  def handle_event("accepted_routes_modal", _params, socket) do
+    routes =
+      if Helpers.async_available?(socket.assigns, :available_filter_routes) do
+        socket.assigns.available_filter_routes.result
+      else
+        []
+      end
+
+    selected_route_id = socket.assigns.form.params["modal_route_id"]
+
+    filter_title_value =
+      if selected_route_id in [nil, "", "default"] do
+        "All routes"
+      else
+        Enum.find(routes, &(&1.id === selected_route_id)).name
+      end
+
+    stop_id_filter_value =
+      CreateAlertLive.get_stops(
+        [selected_route_id],
+        "default"
+      )
+      |> Enum.map(& &1.id)
+
+    {:noreply,
+     socket
+     |> assign(
+       stop_id_filter_value: stop_id_filter_value,
+       filter_title_value: filter_title_value
+     )}
+  end
+
+  @impl true
+  def handle_event("cancelled_modal", _params, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_async(:get_available_routes, {:ok, fetched_routes}, socket) do
     %{available_routes: available_routes} = socket.assigns
 
@@ -250,44 +290,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
     {:noreply,
      assign(socket, :available_routes, AsyncResult.failed(available_routes, {:exit, reason}))}
-  end
-
-  @impl true
-  def handle_event("accepted_routes_modal", _params, socket) do
-    routes =
-      if Helpers.async_available?(socket.assigns, :available_filter_routes) do
-        socket.assigns.available_filter_routes.result
-      else
-        []
-      end
-
-    selected_route_id = socket.assigns.form.params["modal_route_id"]
-
-    filter_title_value =
-      if selected_route_id in [nil, "", "default"] do
-        "All routes"
-      else
-        Enum.find(routes, &(&1.id === selected_route_id)).name
-      end
-
-    stop_id_filter_value =
-      CreateAlertLive.get_stops(
-        [selected_route_id],
-        "default"
-      )
-      |> Enum.map(& &1.id)
-
-    {:noreply,
-     socket
-     |> assign(
-       stop_id_filter_value: stop_id_filter_value,
-       filter_title_value: filter_title_value
-     )}
-  end
-
-  @impl true
-  def handle_event("cancelled_modal", _params, socket) do
-    {:noreply, socket}
   end
 
   def add_routes_with_types(affected_service, available_routes) do
