@@ -212,23 +212,28 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
 
   describe "end-to-end" do
     @tag :logged_in_user
-    test "route options are all selected by default and correctly create informed entities", %{conn: conn} do
+    test "route options are all selected by default and correctly create informed entities", %{
+      conn: conn
+    } do
       with_mocks([
-        {RoutesRepo, [], [
-          by_stop: fn _stop_id, _ -> [@route_one, @route_two] end,
-          get: fn 
-              "Blue", _ -> @route_one
-              "Bluer", _ -> @route_two
-            end
-          ]},
-        {StopsRepo, [], [
-          by_route_type: fn _route_type -> [@stop] end,
-          by_route: fn _, _ -> [@stop] end
-          ]},
-        {RoutePatternsRepo, [], [
-          by_route_id: fn _route_id, _opts -> [] end,
-          included_stops_by_route_id: fn _route_id, _direction -> [] end
-          ]}
+        {RoutesRepo, [],
+         [
+           by_stop: fn _stop_id, _ -> [@route_one, @route_two] end,
+           get: fn
+             "Blue", _ -> @route_one
+             "Bluer", _ -> @route_two
+           end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _route_type -> [@stop] end,
+           by_route: fn _, _ -> [@stop] end
+         ]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _route_id, _opts -> [] end,
+           included_stops_by_route_id: fn _route_id, _direction -> [] end
+         ]}
       ]) do
         conn = put_resp_cookie(conn, "show_created_alert", "true")
 
@@ -254,11 +259,11 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         |> render_change(%{
           _target: ["stop_route_affected_service", "stop_ids"],
           stop_route_affected_service: %{stop_ids: ["place-aqucl"]}
-          })
+        })
 
         assert view |> render_async() =~ ~s(<option selected="selected" value="Blue">)
         assert view |> render_async() =~ ~s(<option selected="selected" value="Bluer">)
-                
+
         view
         |> element("#details_form")
         |> render_change(%{
@@ -269,34 +274,40 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         |> element("button#save", "Publish")
         |> render_click()
 
-        assert [ %{route_id: "Blue"}, %{route_id: "Bluer"} ] = view
-        |> element("#success_view h3")
-        |> render()
-        |> String.replace("<h3 class=\"font-bold mb-2 text-2xl  mr-4\">\n  Alert #", "")
-        |> String.replace(" created successfully\n</h3>", "")
-        |> AlertsUI.Alerts.get_by_alert_id()
-        |> Map.get(:informed_entity)
+        assert [%{route_id: "Blue"}, %{route_id: "Bluer"}] =
+                 view
+                 |> element("#success_view h3")
+                 |> render()
+                 |> String.replace("<h3 class=\"font-bold mb-2 text-2xl  mr-4\">\n  Alert #", "")
+                 |> String.replace(" created successfully\n</h3>", "")
+                 |> AlertsUI.Alerts.get_by_alert_id()
+                 |> Map.get(:informed_entity)
       end
     end
 
     @tag :logged_in_user
-    test "selecting a subset of the default routes correctly creates informed entities", %{conn: conn} do
+    test "selecting a subset of the default routes correctly creates informed entities", %{
+      conn: conn
+    } do
       with_mocks([
-        {RoutesRepo, [], [
-          by_stop: fn _stop_id, _ -> [@route_one, @route_two] end,
-          get: fn 
-              "Blue", _ -> @route_one
-              "Bluer", _ -> @route_two
-            end
-          ]},
-        {StopsRepo, [], [
-          by_route_type: fn _route_type -> [@stop] end,
-          by_route: fn _, _ -> [@stop] end
-          ]},
-        {RoutePatternsRepo, [], [
-          by_route_id: fn _route_id, _opts -> [] end,
-          included_stops_by_route_id: fn _route_id, _direction -> [] end
-          ]}
+        {RoutesRepo, [],
+         [
+           by_stop: fn _stop_id, _ -> [@route_one, @route_two] end,
+           get: fn
+             "Blue", _ -> @route_one
+             "Bluer", _ -> @route_two
+           end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _route_type -> [@stop] end,
+           by_route: fn _, _ -> [@stop] end
+         ]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _route_id, _opts -> [] end,
+           included_stops_by_route_id: fn _route_id, _direction -> [] end
+         ]}
       ]) do
         conn = put_resp_cookie(conn, "show_created_alert", "true")
 
@@ -321,18 +332,18 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         |> render_change(%{
           _target: ["stop_route_affected_service", "stop_ids"],
           stop_route_affected_service: %{stop_ids: ["place-aqucl"]}
-          })
+        })
 
         view
         |> element("#service_form")
         |> render_change(%{
           _target: ["stop_route_affected_service", "route_ids"],
           stop_route_affected_service: %{route_ids: ["Bluer"]}
-          })
+        })
 
         assert view |> render_async() =~ ~s(<option value="Blue">)
         assert view |> render_async() =~ ~s(<option selected="selected" value="Bluer">)
-                
+
         view
         |> element("#details_form")
         |> render_change(%{
@@ -343,13 +354,14 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         |> element("button#save", "Publish")
         |> render_click()
 
-        assert [%{route_id: "Bluer"}] = view
-        |> element("#success_view h3")
-        |> render()
-        |> String.replace("<h3 class=\"font-bold mb-2 text-2xl  mr-4\">\n  Alert #", "")
-        |> String.replace(" created successfully\n</h3>", "")
-        |> AlertsUI.Alerts.get_by_alert_id()
-        |> Map.get(:informed_entity)
+        assert [%{route_id: "Bluer"}] =
+                 view
+                 |> element("#success_view h3")
+                 |> render()
+                 |> String.replace("<h3 class=\"font-bold mb-2 text-2xl  mr-4\">\n  Alert #", "")
+                 |> String.replace(" created successfully\n</h3>", "")
+                 |> AlertsUI.Alerts.get_by_alert_id()
+                 |> Map.get(:informed_entity)
       end
     end
   end
