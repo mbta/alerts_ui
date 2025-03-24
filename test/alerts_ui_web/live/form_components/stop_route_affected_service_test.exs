@@ -8,6 +8,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
 
   alias AlertsUIWeb.FormComponents.StopRouteAffectedService
   alias AlertsUIWeb.Step
+  alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Stops.Repo, as: StopsRepo
@@ -28,7 +29,9 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
     effect_name: "Delay"
   }
 
-  @route %Route{sort_order: 1, id: "Blue", name: "route_number_1"}
+  @route_one %Route{sort_order: 1, id: "Blue", name: "route_number_1"}
+  @route_two %Route{sort_order: 1, id: "Bluer", name: "route_number_2"}
+  @routes [@route_one, @route_two]
   @stop %Stop{id: "place-aqucl", name: "Aquarium"}
 
   describe "component" do
@@ -62,7 +65,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
           ok?: true,
           loading: false,
           failed: false,
-          result: [@route]
+          result: @routes
         }
       })
 
@@ -79,7 +82,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
           ok?: true,
           loading: false,
           failed: false,
-          result: [@route]
+          result: @routes
         }
       })
 
@@ -87,10 +90,10 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
              |> render() =~ ~s(route_number_1)
     end
 
-    test "search works" do
+    test "route options are all selected by default and allows user entry" do
       with_mocks([
         {RoutesRepo, [],
-         [by_stop: fn _route_id -> [@route] end, by_type: fn _types -> [@route] end]},
+         [by_stop: fn _stop_id -> @routes end, by_type: fn _types -> @routes end]},
         {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
@@ -104,29 +107,71 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         view
         |> element("form")
         |> render_change(%{
+          "_target" => ["stop_route_affected_service", "stop_ids"],
           "stop_route_affected_service" => %{"stop_ids" => ["place-aqucl"]}
         })
 
-        assert view |> element("#stop_route_affected_service_route_ids") |> render_async() =~
-                 ~s(<option value="Blue">)
+        assert view |> render_async() =~ ~s(<option selected="selected" value="place-aqucl">)
+        assert view |> render_async() =~ ~s(<option selected="selected" value="Blue">)
+        assert view |> render_async() =~ ~s(<option selected="selected" value="Bluer">)
 
         view
         |> element("form")
         |> render_change(%{
-          "stop_route_affected_service" => %{"stop_ids_filter" => "x", "route_ids_filter" => "x"}
+          "stop_route_affected_service" => %{"route_ids" => ["Bluer"]}
+        })
+
+        refute view |> render_async() =~ ~s(<option value="place-aqucl">)
+        refute view |> render_async() =~ ~s(<option selected="selected" value="Blue">)
+        assert view |> render_async() =~ ~s(<option selected="selected" value="Bluer">)
+      end
+    end
+
+    test "search works" do
+      with_mocks([
+        {RoutesRepo, [],
+         [by_stop: fn _stop_id -> @routes end, by_type: fn _types -> @routes end]},
+        {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
+      ]) do
+        {:ok, view, _html} =
+          live_isolated_component(
+            StopRouteAffectedService,
+            @assigns
+          )
+
+        assert view |> render_async() =~ ~s(<option value="place-aqucl">)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["stop_route_affected_service", "stop_ids"],
+          "stop_route_affected_service" => %{"stop_ids" => ["place-aqucl"]}
+        })
+
+        assert view |> element("#stop_route_affected_service_route_ids") |> render_async() =~
+                 ~s(<option selected="selected" value="Blue">)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "stop_route_affected_service" => %{
+            "route_ids" => [],
+            "stop_ids_filter" => "x",
+            "route_ids_filter" => "x"
+          }
         })
 
         refute view |> render_async() =~ ~s(<option value="place-aqucl">)
 
         refute view |> element("#stop_route_affected_service_route_ids") |> render_async() =~
-                 ~s(<option value="Blue">)
+                 ~s(<option selected="selected" value="Blue">)
       end
     end
 
     test "modal search works" do
       with_mocks([
         {RoutesRepo, [],
-         [by_stop: fn _route_id -> [@route] end, by_type: fn _types -> [@route] end]},
+         [by_stop: fn _route_id -> @routes end, by_type: fn _types -> @routes end]},
         {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
@@ -154,7 +199,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
     test "works correctly if editing" do
       with_mocks([
         {RoutesRepo, [],
-         [by_stop: fn _route_id -> [@route] end, by_type: fn _types -> [@route] end]},
+         [by_stop: fn _stop_id -> @routes end, by_type: fn _types -> @routes end]},
         {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
@@ -196,6 +241,164 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
                          stop_ids: ["1"],
                          route_ids: ["1"]
                        }}}
+    end
+  end
+
+  describe "end-to-end" do
+    @tag :logged_in_user
+    test "route options are all selected by default and correctly create informed entities", %{
+      conn: conn
+    } do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_stop: fn _stop_id, _ -> @routes end,
+           by_type: fn _types -> @routes end,
+           get: fn
+             "Blue", _ -> @route_one
+             "Bluer", _ -> @route_two
+           end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _route_type -> [@stop] end,
+           by_route: fn _, _ -> [@stop] end
+         ]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _route_id, _opts -> [] end,
+           included_stops_by_route_id: fn _route_id, _direction -> [] end
+         ]}
+      ]) do
+        conn = put_resp_cookie(conn, "show_created_alert", "true")
+
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        view
+        |> element("#route_types_form button", "Bus")
+        |> render_click()
+
+        view
+        |> element("#route_types_form button", "Multi-route detour")
+        |> render_click()
+
+        view
+        |> element("#route_types_form")
+        |> render_submit()
+
+        render_async(view)
+
+        view
+        |> element("#service_form")
+        # Don't like having to hardcode this. If there's a better way to mock, that'd be great!
+        |> render_change(%{
+          _target: ["stop_route_affected_service", "stop_ids"],
+          stop_route_affected_service: %{stop_ids: ["place-aqucl"]}
+        })
+
+        assert view |> render_async() =~ ~s(<option selected="selected" value="Blue">)
+        assert view |> render_async() =~ ~s(<option selected="selected" value="Bluer">)
+
+        view
+        |> element("#details_form")
+        |> render_change(%{
+          alert_details: %{header_text: "hello"}
+        })
+
+        view
+        |> element("button#save", "Publish")
+        |> render_click()
+
+        assert [%{route_id: "Blue"}, %{route_id: "Bluer"}] =
+                 view
+                 |> element("#success_view h3")
+                 |> render()
+                 |> String.replace("<h3 class=\"font-bold mb-2 text-2xl  mr-4\">\n  Alert #", "")
+                 |> String.replace(" created successfully\n</h3>", "")
+                 |> AlertsUI.Alerts.get_by_alert_id()
+                 |> Map.get(:informed_entity)
+      end
+    end
+
+    @tag :logged_in_user
+    test "selecting a subset of the default routes correctly creates informed entities", %{
+      conn: conn
+    } do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_stop: fn _stop_id, _ -> @routes end,
+           by_type: fn _types -> @routes end,
+           get: fn
+             "Blue", _ -> @route_one
+             "Bluer", _ -> @route_two
+           end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _route_type -> [@stop] end,
+           by_route: fn _, _ -> [@stop] end
+         ]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _route_id, _opts -> [] end,
+           included_stops_by_route_id: fn _route_id, _direction -> [] end
+         ]}
+      ]) do
+        conn = put_resp_cookie(conn, "show_created_alert", "true")
+
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        view
+        |> element("#route_types_form button", "Bus")
+        |> render_click()
+
+        view
+        |> element("#route_types_form button", "Multi-route detour")
+        |> render_click()
+
+        view
+        |> element("#route_types_form")
+        |> render_submit()
+
+        render_async(view)
+
+        view
+        |> element("#service_form")
+        |> render_change(%{
+          _target: ["stop_route_affected_service", "stop_ids"],
+          stop_route_affected_service: %{stop_ids: ["place-aqucl"]}
+        })
+
+        view
+        |> element("#service_form")
+        |> render_change(%{
+          _target: ["stop_route_affected_service", "route_ids"],
+          stop_route_affected_service: %{route_ids: ["Bluer"]}
+        })
+
+        assert view |> render_async() =~ ~s(<option value="Blue">)
+        assert view |> render_async() =~ ~s(<option selected="selected" value="Bluer">)
+
+        view
+        |> element("#details_form")
+        |> render_change(%{
+          alert_details: %{header_text: "hello"}
+        })
+
+        view
+        |> element("button#save", "Publish")
+        |> render_click()
+
+        assert [%{route_id: "Bluer"}] =
+                 view
+                 |> element("#success_view h3")
+                 |> render()
+                 |> String.replace("<h3 class=\"font-bold mb-2 text-2xl  mr-4\">\n  Alert #", "")
+                 |> String.replace(" created successfully\n</h3>", "")
+                 |> AlertsUI.Alerts.get_by_alert_id()
+                 |> Map.get(:informed_entity)
+      end
     end
   end
 end

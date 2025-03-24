@@ -15,6 +15,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     SelectFormatter
   }
 
+  alias Phoenix.LiveView.AsyncResult
+
   @primary_key false
   embedded_schema do
     field :route_ids, {:array, :string}
@@ -31,7 +33,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
   @impl true
   def mount(socket) do
-    changeset = changeset(%__MODULE__{}, %{})
+    changeset = build_changeset(%__MODULE__{}, %{})
 
     {_result, error_changeset} =
       apply_action(
@@ -56,36 +58,29 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     {:ok, socket}
   end
 
+  # Occurs when alert is being edited
   @impl true
   def update(
         %{alert_data: alert_data, editing: true, route_type: route_type} = assigns,
         socket
       ) do
-    changeset =
-      %__MODULE__{}
-      |> changeset(alert_data)
-
-    changes =
-      changeset
-      |> apply_action!(:validate)
+    changeset = build_changeset(%__MODULE__{}, alert_data)
+    changes = apply_action!(changeset, :validate)
 
     send(self(), {:add_errors, [], __MODULE__})
     send(self(), {:section_completed, changes})
 
-    form = to_form(changeset |> Map.put(:action, :validate))
-
-    assigns =
-      assigns
-      |> Map.put(
-        :service_type_name,
-        route_type |> InformedEntity.route_code_mapping() || nil
-      )
-      |> Map.put(:form, form)
-      |> Map.put(:route_type, route_type)
+    form =
+      changeset
+      |> Map.put(:action, :validate)
+      |> to_form()
 
     socket =
       socket
       |> assign(assigns)
+      |> assign(service_type_name: route_type |> InformedEntity.route_code_mapping() || nil)
+      |> assign(form: form)
+      |> assign(route_type: route_type)
       |> assign_async([:available_stops, :available_routes, :available_filter_routes], fn ->
         {:ok,
          %{
@@ -102,24 +97,27 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     {:ok, socket}
   end
 
+  # The form was submitted but submission had an error, so the same component rerenders
   @impl true
   def update(%{submitted: true}, socket) do
     changeset =
       %__MODULE__{}
-      |> changeset(socket.assigns.form.params)
+      |> build_changeset(socket.assigns.form.params)
+      # The only instance where the changeset itself contains the validation, so that
+      # inline errors appear after submit
       |> validate_required(@required_fields)
 
     errors =
-      case changeset |> apply_action(:validate) do
+      case apply_action(changeset, :validate) do
         {:ok, _changeset} -> []
         {:error, changeset} -> ErrorFormatter.parse_field_errors(changeset)
       end
 
     form =
       changeset
-      |> to_form()
       |> Map.put(:errors, errors)
       |> Map.put(:action, :validate)
+      |> to_form()
 
     {:ok, assign(socket, form: form)}
   end
@@ -144,10 +142,53 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     {:ok, socket}
   end
 
+  # On stop select, need to populate and select all of the route_ids
+  @impl true
+  def handle_event(
+        "validate",
+        %{
+          "_target" => ["stop_route_affected_service", "stop_ids"],
+          "stop_route_affected_service" => affected_service
+        },
+        socket
+      ) do
+    available_routes = Map.get(socket.assigns.available_routes, :result, [])
+    affected_service = add_routes_with_types(affected_service, available_routes)
+
+    changeset = build_changeset(%__MODULE__{}, affected_service)
+
+    form =
+      changeset
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    route_type = socket.assigns.route_type
+
+    socket =
+      socket
+      |> assign(:available_routes, AsyncResult.loading())
+      |> start_async(:get_available_routes, fn ->
+        CreateAlertLive.get_routes_by_stop(
+          Map.get(affected_service, "stop_ids", []),
+          route_type
+        )
+      end)
+      |> assign(form: form)
+
+    {:noreply, socket}
+  end
+
+  # On route select, don't need to do anything but save the change
   @impl true
   def handle_event("validate", %{"stop_route_affected_service" => affected_service}, socket) do
-    affected_service = populate_default_routes(affected_service)
-    changeset = validate(affected_service, socket.assigns)
+    available_routes = Map.get(socket.assigns.available_routes, :result, [])
+
+    affected_service =
+      affected_service
+      |> populate_default_routes()
+      |> add_routes_with_types(available_routes)
+
+    changeset = build_changeset(%__MODULE__{}, affected_service)
 
     case apply_action(changeset |> validate_required(@required_fields), :validate) do
       {:ok, changeset} ->
@@ -163,23 +204,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       |> Map.put(:action, :validate)
       |> to_form()
 
-    route_type = socket.assigns.route_type
-
-    socket =
-      socket
-      |> assign(%{form: form})
-      |> assign_async([:available_routes], fn ->
-        {:ok,
-         %{
-           available_routes:
-             CreateAlertLive.get_routes_by_stop(
-               Map.get(affected_service, "stop_ids", []),
-               route_type
-             )
-         }}
-      end)
-
-    {:noreply, socket}
+    {:noreply, assign(socket, form: form)}
   end
 
   @impl true
@@ -225,30 +250,62 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     {:noreply, socket}
   end
 
-  def validate(affected_service, assigns) do
-    routes_with_types =
-      routes_with_types(
-        Map.get(assigns.available_routes, :result) || [],
-        affected_service["route_ids"]
+  @impl true
+  def handle_async(:get_available_routes, {:ok, fetched_routes}, socket) do
+    %{available_routes: available_routes} = socket.assigns
+
+    affected_service =
+      add_routes_with_types(
+        Map.merge(socket.assigns.form.params, %{"route_ids" => Enum.map(fetched_routes, & &1.id)}),
+        fetched_routes
       )
 
-    affected_service = Map.put(affected_service, "route_types_by_id", routes_with_types)
+    changeset = build_changeset(%__MODULE__{}, affected_service)
 
-    %__MODULE__{}
-    |> changeset(affected_service)
+    case apply_action(changeset |> validate_required(@required_fields), :validate) do
+      {:ok, changeset} ->
+        send(self(), {:add_errors, [], __MODULE__})
+        send(self(), {:section_completed, changeset})
+
+      {:error, changeset} ->
+        send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
+    end
+
+    form =
+      changeset
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    socket =
+      socket
+      |> assign(:available_routes, AsyncResult.ok(available_routes, fetched_routes))
+      |> assign(form: form)
+
+    {:noreply, socket}
   end
 
-  def changeset(changeset, params) do
+  @impl true
+  def handle_async(:get_available_routes, {:exit, reason}, socket) do
+    %{available_routes: available_routes} = socket.assigns
+
+    {:noreply,
+     assign(socket, :available_routes, AsyncResult.failed(available_routes, {:exit, reason}))}
+  end
+
+  def add_routes_with_types(affected_service, available_routes) do
+    routes_with_types =
+      available_routes
+      |> Stream.filter(fn route -> route.id in affected_service["route_ids"] end)
+      |> Enum.reduce(%{}, fn route, acc ->
+        Map.put(acc, route.id, route.type)
+      end)
+
+    Map.put(affected_service, "route_types_by_id", routes_with_types)
+  end
+
+  def build_changeset(changeset, params) do
     changeset
     |> cast(params, @fields)
-  end
-
-  def routes_with_types(available_routes, route_ids) do
-    available_routes
-    |> Stream.filter(fn route -> route.id in route_ids end)
-    |> Enum.reduce(%{}, fn route, acc ->
-      Map.put(acc, route.id, route.type)
-    end)
   end
 
   @impl true
@@ -378,12 +435,12 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     form[:stop_ids].value in [nil, []]
   end
 
+  # At a minimum, this is needed for testing. See "search works" test
   @spec populate_default_routes(map()) :: map()
   defp populate_default_routes(affected_service) do
-    if affected_service |> Map.get("route_ids") |> is_nil do
-      Map.put(affected_service, "route_ids", [])
-    else
-      affected_service
+    case Map.get(affected_service, "route_ids") do
+      nil -> Map.put(affected_service, "route_ids", [])
+      _ -> affected_service
     end
   end
 
