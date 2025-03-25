@@ -239,6 +239,78 @@ defmodule AlertsUI.AlertBuilderTest do
       end
     end
 
+    test "it does not filter out shuttle routes if they were part of the original selection" do
+      with_mocks([
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _route_id, _opts -> [] end
+         ]},
+        {RoutesRepo, [],
+         [
+           get: fn
+             "24", _opts ->
+               %Route{id: "24", line_id: "line-24", type: 1, description: :rapid_transit}
+
+             "Shuttle_JFKPark", _opts ->
+               %Route{
+                 id: "Shuttle_JFKPark",
+                 line_id: nil,
+                 type: 3,
+                 description: :rail_replacement_bus
+               }
+           end
+         ]},
+        {LinesRepo, [],
+         [
+           get: fn
+             "line-24", _opts ->
+               %Line{
+                 id: "line-24",
+                 route_ids: [],
+                 routes: []
+               }
+           end
+         ]}
+      ]) do
+        existing_alert = insert(:alert, alert_id: "0")
+
+        alert_data = %{
+          route_type: 1,
+          description_text: "ok",
+          header_text: "hello",
+          effect_name: "Delay",
+          route_ids: ["24", "Shuttle_JFKPark"],
+          direction: "default",
+          active_period_start: ~N[2024-04-30 11:54:00],
+          active_period_end_specifier: :until_further_notice,
+          active_period_start_specifier: :custom,
+          cause_detail: ""
+        }
+
+        result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 05:54:00Z])
+
+        assert result.informed_entity == [
+                 %{
+                   agency_id: "1",
+                   route_id: "24",
+                   route_type: 1,
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "Shuttle_JFKPark",
+                   route_type: 1,
+                   agency_id: "1"
+                 }
+               ]
+
+        result |> Alerts.create_or_update_alert()
+        [alert_1, alert_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id, :desc)
+        assert alert_2.alert_id == existing_alert.alert_id
+        assert alert_1.alert_id |> String.to_integer() > alert_2.alert_id |> String.to_integer()
+      end
+    end
+
     test "uses the correct agency ID for the CapeFLYER" do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},

@@ -169,8 +169,12 @@ defmodule AlertsUI.AlertBuilder do
 
   @spec add_combo_routes([Route.id_t()]) :: [Route.t()]
 
-  defp add_combo_routes(routes) do
-    routes
+  defp add_combo_routes(selected_routes) do
+    # For every route, get its line (if present) and make an API call to to
+    # the line route to get any associated combo routes it has
+    # We want to include combo routes with the informed entity
+    # unless they're shuttle routes.
+    selected_routes
     |> Enum.flat_map(fn original_route ->
       line =
         if Map.get(original_route, :line_id) do
@@ -182,10 +186,10 @@ defmodule AlertsUI.AlertBuilder do
       if is_nil(Map.get(line, :routes)) do
         [original_route]
       else
-        line.routes ++ [original_route]
+        # filter out shuttle routes unless they were part of the original selection
+        Enum.filter(line.routes, &(&1.description !== :rail_replacement_bus)) ++ [original_route]
       end
     end)
-    |> Enum.filter(fn route -> route.description !== :rail_replacement_bus end)
     |> Enum.dedup()
   end
 
