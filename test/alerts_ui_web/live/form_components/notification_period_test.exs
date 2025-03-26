@@ -15,8 +15,10 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriodTest do
       next: "success",
       label: "Notification Period"
     },
-    alert_timing: :"one-time",
-    active_period_start: ~N[2024-04-30 15:54:00Z],
+    alert_data: %{
+      alert_timing: :"one-time",
+      active_period_start: ~N[2024-04-30 15:54:00Z]
+    },
     current_time: ~U[2024-04-30 15:54:00Z],
     edited: false,
     editing: false
@@ -65,10 +67,8 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriodTest do
 
       live_assign(view, %{
         editing: true,
-        alert_data: %{
-          notification_period_start: ~N[2024-04-30 11:54:00],
-          notification_specifier: "custom"
-        }
+        notification_period_start: ~N[2024-04-30 11:54:00],
+        notification_specifier: "custom"
       })
 
       assert view
@@ -129,7 +129,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriodTest do
       }
 
       {:ok, view, _html} =
-        live_isolated_component(NotificationPeriod, @assigns |> Map.merge(new_alert_data))
+        live_isolated_component(NotificationPeriod, %{@assigns | alert_data: new_alert_data})
 
       view
       |> element("form")

@@ -64,7 +64,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   def mount(socket) do
     current_time = current_time()
 
-    initial_data = %{
+    alert_data = %{
       alert_timing: "one-time",
       active_period_start: current_time,
       active_period_start_date: current_time |> NaiveDateTime.to_date(),
@@ -82,16 +82,17 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         |> shifted_active_period_end()
         |> NaiveDateTime.to_date(),
       active_period_start_time_specifier: "start_of_service",
-      active_period_end_time_specifier: "end_of_service"
+      active_period_end_time_specifier: "end_of_service",
+      edited: false
     }
 
-    changeset = changeset(%__MODULE__{}, initial_data)
+    changeset = changeset(%__MODULE__{}, alert_data)
 
     changes =
       changeset
       |> apply_action!(:validate)
 
-    send(self(), {:on_form_section_change, changes})
+    send(self(), {:section_completed, changes})
 
     form = changeset |> to_form
 
@@ -116,25 +117,26 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   @impl true
   def update(
-        %{editing: true} =
+        %{alert_data: alert_data, editing: true} =
           assigns,
         %{assigns: %{edited: false}} = socket
       ) do
-    form_params =
-      assigns
+    alert_data =
+      alert_data
       |> Enum.filter(fn {_k, v} -> !is_nil(v) end)
       |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
 
-    form_params =
-      Map.merge(socket.assigns.form.params, form_params)
+    assigns =
+      assigns
+      |> Map.put(:alert_data, Map.merge(socket.assigns.form.params, alert_data))
 
     changeset =
       %__MODULE__{}
-      |> changeset(assigns)
-      |> TimeRangeValidators.validate_required_fields(form_params)
+      |> changeset(assigns.alert_data)
+      |> TimeRangeValidators.validate_required_fields(assigns.alert_data)
       |> TimeRangeValidators.validate_relationships(
-        form_params["alert_timing"],
-        form_params
+        assigns.alert_data["alert_timing"],
+        assigns.alert_data
       )
 
     changeset
@@ -142,7 +144,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     |> case do
       {:ok, changes} ->
         send(self(), {:add_errors, [], __MODULE__})
-        send(self(), {:on_form_section_change, changes})
+        send(self(), {:section_completed, changes})
 
       {:error, changeset} ->
         send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
@@ -214,7 +216,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
         new_params = Map.merge(start_params, end_params)
 
-        Map.merge(new_params, socket.assigns.form.params)
+        Map.merge(socket.assigns.form.params, new_params)
       else
         socket.assigns.form.params
       end
@@ -317,47 +319,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   end
 
   @impl true
-  def update(
-        assigns,
-        socket
-      ) do
-    form_params =
-      assigns
-      |> Enum.filter(fn {_k, v} -> !is_nil(v) end)
-      |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
-
-    form_params = Map.merge(form_params, socket.assigns.form.params)
-
-    changeset =
-      %__MODULE__{}
-      |> changeset(form_params)
-      |> TimeRangeValidators.validate_required_fields(form_params)
-      |> TimeRangeValidators.validate_relationships(
-        form_params["alert_timing"],
-        form_params
-      )
-
-    changeset
-    |> apply_action(:validate)
-    |> case do
-      {:ok, changes} ->
-        send(self(), {:add_errors, [], __MODULE__})
-        send(self(), {:on_form_section_change, changes})
-
-      {:error, changeset} ->
-        send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
-    end
-
-    form =
-      changeset
-      |> to_form()
-      |> Map.put(:action, :validate)
-
-    assigns = assigns |> Map.put(:form, form)
+  def update(assigns, socket) do
     {:ok, assign(socket, assigns)}
   end
-
-  defp get_trip_departure_time(nil), do: nil
 
   defp get_trip_departure_time(selected_trips) do
     selected_trips
@@ -365,8 +329,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     |> Enum.min(DateTime, fn -> nil end)
     |> utc_datetime_to_naive()
   end
-
-  defp get_trip_arrival_time(nil), do: nil
 
   defp get_trip_arrival_time(selected_trips) do
     selected_trips
@@ -474,7 +436,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     |> case do
       {:ok, changes} ->
         send(self(), {:add_errors, [], __MODULE__})
-        send(self(), {:on_form_section_change, changes})
+        send(self(), {:section_completed, changes})
 
       {:error, changeset} ->
         send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})

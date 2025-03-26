@@ -16,9 +16,11 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       next: "success",
       label: "Time Range"
     },
-    trip_ids: ["CR-683322-595"],
+    alert_data: %{trip_ids: ["CR-683322-595"]},
     current_time: ~N[2024-04-30 15:54:00],
-    selected_trips: nil
+    edited: false,
+    editing: false,
+    selected_trips: []
   }
 
   describe "component" do
@@ -56,8 +58,11 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         live_isolated_component(TimeRange, @assigns)
 
       live_assign(view, %{
-        active_period_start: ~N[2024-04-30 11:54:00],
-        active_period_end_specifier: "custom"
+        editing: true,
+        alert_data: %{
+          active_period_start: ~N[2024-04-30 11:54:00],
+          active_period_end_specifier: "custom"
+        }
       })
 
       assert view
@@ -71,16 +76,16 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
     test "editing with error field sends error" do
       {:ok, view, _html} =
-        live_isolated_component(
-          TimeRange,
-          @assigns
-          |> Map.merge(%{
-            active_period_start: ~N[2024-04-30 11:54:00],
-            active_period_end: ~N[2024-04-30 10:54:00],
-            active_period_end_specifier: "custom",
-            editing: true
-          })
-        )
+        live_isolated_component(TimeRange, @assigns)
+
+      live_assign(view, %{
+        editing: true,
+        alert_data: %{
+          active_period_start: ~N[2024-04-30 11:54:00],
+          active_period_end: ~N[2024-04-30 10:54:00],
+          active_period_end_specifier: "custom"
+        }
+      })
 
       assert view
              |> render() =~ "custom"
@@ -92,6 +97,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
     end
 
     test "editing with no errors sends data" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
       start_time =
         DateTime.utc_now()
         |> DateTime.add(1, :hour)
@@ -99,16 +107,15 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         |> DateTime.truncate(:second)
         |> DateTime.to_naive()
 
-      new_assigns = %{
-        active_period_start: start_time,
-        active_period_start_specifier: "custom",
-        active_period_end_specifier: "until_further_notice",
-        active_period_end: "",
-        editing: true
-      }
-
-      {:ok, view, _html} =
-        live_isolated_component(TimeRange, Map.merge(@assigns, new_assigns))
+      live_assign(view, %{
+        editing: true,
+        alert_data: %{
+          active_period_start: start_time,
+          active_period_start_specifier: "custom",
+          active_period_end_specifier: "until_further_notice",
+          active_period_end: ""
+        }
+      })
 
       assert view
              |> render() =~ "custom"
@@ -117,7 +124,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
                       {:add_errors, [], AlertsUIWeb.FormComponents.TimeRange}}
 
       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
-                      {:on_form_section_change,
+                      {:section_completed,
                        %TimeRange{
                          active_period_start: ^start_time
                        }}}
@@ -425,7 +432,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       })
 
       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
-                      {:on_form_section_change,
+                      {:section_completed,
                        %TimeRange{
                          active_period_end: ~N[2024-05-01 09:54:00],
                          active_period_end_specifier: :custom,

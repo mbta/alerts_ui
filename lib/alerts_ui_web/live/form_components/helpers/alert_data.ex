@@ -28,18 +28,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :view_banner,
     :banner_sync_toggle,
     :combination,
-    :alert_timing,
-    :active_period_start,
-    :active_period_end,
-    :active_period_start_date,
-    :active_period_end_date,
-    :active_period_start_time,
-    :active_period_end_time,
-    :active_period_end_time_specifier,
-    :active_period_start_time_specifier,
-    :active_period_end_specifier,
-    :active_period_start_specifier,
-    :recurrence_days,
     :service_types,
     :cause_detail,
     :url,
@@ -48,8 +36,24 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :notification_period_start,
     :notification_specifier,
     :severity,
-    :reminder_times
+    :reminder_times,
+    :alert_data
   ]
+
+  @type active_period_t :: %{
+          active_period_start: NaiveDateTime.t() | nil,
+          active_period_start_date: Date.t() | nil,
+          active_period_start_time: Time.t() | nil,
+          active_period_start_specifier: String.t() | nil,
+          active_period_start_time_specifier: String.t() | nil,
+          active_period_end: NaiveDateTime.t() | nil,
+          active_period_end_date: Date.t() | nil,
+          active_period_end_time: Time.t() | nil,
+          active_period_end_specifier: String.t(),
+          active_period_end_time_specifier: String.t() | nil,
+          alert_timing: atom(),
+          recurrence_days: [atom()] | nil
+        }
 
   @type t :: %__MODULE__{
           route_type: Route.type_int(),
@@ -65,30 +69,18 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           view_banner: boolean(),
           banner_sync_toggle: boolean(),
           combination: atom(),
-          alert_timing: atom(),
-          active_period_start: NaiveDateTime.t() | nil,
-          active_period_start_date: Date.t() | nil,
-          active_period_start_time: Time.t() | nil,
-          active_period_start_specifier: String.t() | nil,
-          active_period_start_time_specifier: String.t() | nil,
-          active_period_end: NaiveDateTime.t() | nil,
-          active_period_end_date: Date.t() | nil,
-          active_period_end_time: Time.t() | nil,
-          active_period_end_specifier: String.t(),
-          active_period_end_time_specifier: String.t() | nil,
-          recurrence_days: [String.t()] | nil,
+          alert_data: active_period_t(),
+          notification_specifier: String.t(),
+          notification_period_start: NaiveDateTime.t() | nil,
           service_types: [Route.type_int()],
           cause_detail: String.t(),
           url: String.t() | nil,
           image_url: String.t() | nil,
           image_alternative_text: String.t() | nil,
-          notification_period_start: NaiveDateTime.t() | nil,
           severity: integer() | nil,
-          reminder_times: [NaiveDateTime.t()] | nil,
-          recurrence_days: [atom()] | nil
+          reminder_times: [NaiveDateTime.t()] | nil
         }
 
-  @spec build_alert_data(nil | String.t()) :: t()
   def build_alert_data(nil), do: %__MODULE__{}
 
   def build_alert_data(alert_id) do
@@ -106,8 +98,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
         ServiceEffectCombinations.get_combination(route_type, effect_name)
       end
 
-    active_period_map = determine_active_period(alert)
-
     reminder_times = Enum.map(alert.reminder_times, &shift_to_naive(&1.reminder_time))
 
     notification_period_start = shift_to_naive(alert.notification_period_start)
@@ -118,6 +108,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       else
         :custom
       end
+
+    active_period_map =
+      determine_active_period(alert)
 
     route_ids = alert.original_route_selections || []
 
@@ -150,7 +143,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       severity: alert.severity,
       reminder_times: reminder_times
     }
-    |> Map.merge(active_period_map)
+    |> Map.put(:alert_data, active_period_map)
   end
 
   def single_route_id(effect_name, [route_id]) when effect_name === "Detour" do

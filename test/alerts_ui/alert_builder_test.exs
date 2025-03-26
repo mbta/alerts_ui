@@ -34,17 +34,19 @@ defmodule AlertsUI.AlertBuilderTest do
           effect_name: "Delay",
           route_ids: ["57"],
           direction: "default",
-          active_period_start: ~N[2024-04-30 11:54:00],
-          alert_timing: :"one-time",
-          active_period_end_specifier: :until_further_notice,
-          active_period_start_specifier: :custom,
+          alert_data: %{
+            active_period_start: ~N[2024-04-30 11:54:00],
+            alert_timing: :"one-time",
+            active_period_end_specifier: :until_further_notice,
+            active_period_start_specifier: :custom
+          },
+          notification_period_start: ~N[2024-04-30 05:52:00],
+          notification_specifier: :now,
           cause_detail: "disabled train",
           url: "http://www.example.com",
           image_url: "http://www.example.com/example.jpg",
           image_alternative_text: "an example image",
           last_push_notification_timestamp: ~N[2024-04-30 11:54:00],
-          notification_period_start: ~N[2024-04-30 05:52:00],
-          notification_specifier: :now,
           severity: 3,
           reminder_times: [
             ~N[2024-04-30 12:04:00],
@@ -171,9 +173,11 @@ defmodule AlertsUI.AlertBuilderTest do
           effect_name: "Delay",
           route_ids: ["24", "27", "57"],
           direction: "default",
-          active_period_start: ~N[2024-04-30 11:54:00],
-          active_period_end_specifier: :until_further_notice,
-          active_period_start_specifier: :custom,
+          alert_data: %{
+            active_period_start: ~N[2024-04-30 11:54:00],
+            active_period_end_specifier: :until_further_notice,
+            active_period_start_specifier: :custom
+          },
           cause_detail: ""
         }
 
@@ -325,10 +329,12 @@ defmodule AlertsUI.AlertBuilderTest do
           effect_name: "Delay",
           route_ids: ["CapeFlyer"],
           direction: "default",
-          active_period_start: ~N[2024-04-30 11:54:00],
-          active_period_end_specifier: :until_further_notice,
-          active_period_start_specifier: :custom,
           cause_detail: "freight train interference",
+          alert_data: %{
+            active_period_start: ~N[2024-04-30 11:54:00],
+            active_period_end_specifier: :until_further_notice,
+            active_period_start_specifier: :custom
+          },
           notification_period_start: ~N[2024-04-30 11:54:00]
         }
 

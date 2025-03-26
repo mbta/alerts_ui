@@ -45,6 +45,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
     @tag :logged_in_user
     test "submitting first part of form unhides second part", %{conn: conn} do
       with_mocks([
+        {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [] end},
         {RoutePatternsRepo, [],
          [
            by_route_id: fn _route_id, _opts -> [@route_pattern] end,
@@ -157,7 +158,10 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
     @tag :logged_in_user
     test "shows correct affected service for other combination", %{conn: conn} do
-      with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
+      with_mocks([
+        {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [] end},
+        {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]}
+      ]) do
         insert(:alert, alert_id: "1")
         {:ok, view, _html} = live(conn, "/alerts/new")
 
@@ -174,6 +178,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
     @tag :logged_in_user
     test "submitting the second part of the form saves the alert", %{conn: conn} do
       with_mocks([
+        {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [] end},
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [@route_pattern] end]},
         {StopsRepo, [], by_route: fn _, _ -> [@stop] end},
         {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]}
@@ -232,22 +237,26 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
     @tag :logged_in_user
     test "clicking on timeline moves view back", %{conn: conn} do
-      insert(:alert, alert_id: "1")
-      {:ok, view, _html} = live(conn, "/alerts/new")
+      with_mocks([
+        {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [] end}
+      ]) do
+        insert(:alert, alert_id: "1")
+        {:ok, view, _html} = live(conn, "/alerts/new")
 
-      {:ok, changeset} =
-        Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 3, effect_name: "Detour"})
-        |> apply_action(:insert)
+        {:ok, changeset} =
+          Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 3, effect_name: "Detour"})
+          |> apply_action(:insert)
 
-      send(view.pid, {:step_completed, changeset})
+        send(view.pid, {:step_completed, changeset})
 
-      clicked_view =
-        view
-        |> element("#route_type_and_effect")
-        |> render_click()
+        clicked_view =
+          view
+          |> element("#route_type_and_effect")
+          |> render_click()
 
-      assert clicked_view =~ ~s(class="min-w-full flex flex-col mb-8" id="route_view")
-      refute clicked_view =~ ~s(class="min-w-full flex flex-col mt-4" id="details_view")
+        assert clicked_view =~ ~s(class="min-w-full flex flex-col mb-8" id="route_view")
+        refute clicked_view =~ ~s(class="min-w-full flex flex-col mt-4" id="details_view")
+      end
     end
 
     @tag :logged_in_user

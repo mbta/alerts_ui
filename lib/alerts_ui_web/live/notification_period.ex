@@ -53,17 +53,20 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
   end
 
   @impl true
-  def update(%{editing: true} = assigns, %{assigns: %{edited: false}} = socket) do
-    foo =
+  def update(
+        %{editing: true, alert_data: alert_data} = assigns,
+        %{assigns: %{edited: false}} = socket
+      ) do
+    new_assigns =
       assigns
       |> Enum.filter(fn {_k, v} -> !is_nil(v) end)
       |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
 
-    foo =
-      Map.merge(socket.assigns.form.params, foo)
+    new_assigns =
+      Map.merge(socket.assigns.form.params, new_assigns)
       |> Map.put(
         "time_range",
-        Map.take(assigns, [
+        Map.take(alert_data, [
           :active_period_start,
           :active_period_start_time,
           :active_period_start_date,
@@ -71,9 +74,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
         ])
       )
 
-    changeset =
-      %__MODULE__{}
-      |> changeset(foo)
+    changeset = changeset(%__MODULE__{}, new_assigns)
 
     changeset
     |> apply_action(:validate)
@@ -128,12 +129,12 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
   end
 
   @impl true
-  def update(assigns, socket) do
+  def update(%{alert_data: alert_data} = assigns, socket) do
     assigns =
       assigns
       |> Map.put(
         :time_range,
-        Map.take(assigns, [
+        Map.take(alert_data, [
           :active_period_start,
           :active_period_start_time,
           :active_period_start_date,

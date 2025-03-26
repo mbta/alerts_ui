@@ -111,18 +111,20 @@ defmodule AlertsUIWeb.CreateAlertLive do
         reminder_times: [],
         notification_period_start: nil,
         notification_specifier: :same_as_effect_period,
-        active_period_end_specifier: :later_today,
-        active_period_start: nil,
-        active_period_end: nil,
-        alert_timing: :"one-time",
-        active_period_start_date: nil,
-        active_period_start_time: nil,
-        active_period_start_specifier: :now,
-        recurrence_days: [],
-        active_period_end_time: nil,
-        active_period_end_date: nil,
-        active_period_start_time_specifier: :start_of_service,
-        active_period_end_time_specifier: :end_of_service
+        alert_data: %{
+          active_period_end_specifier: :later_today,
+          active_period_start: nil,
+          active_period_end: nil,
+          alert_timing: :"one-time",
+          active_period_start_date: nil,
+          active_period_start_time: nil,
+          active_period_start_specifier: :now,
+          recurrence_days: [],
+          active_period_end_time: nil,
+          active_period_end_date: nil,
+          active_period_start_time_specifier: :start_of_service,
+          active_period_end_time_specifier: :end_of_service
+        }
       }
       |> Map.put(:selected_trips, nil)
 
@@ -286,7 +288,16 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   @impl true
+  def handle_info({:section_completed, changeset}, socket) do
+    assigns =
+      %{
+        alert_data: Map.merge(socket.assigns.alert_data, changeset |> Map.from_struct())
+      }
 
+    {:noreply, assign(socket, assigns)}
+  end
+
+  @impl true
   def handle_info({:on_form_section_change, changes}, socket) do
     {:noreply, assign(socket, Map.from_struct(changes))}
   end

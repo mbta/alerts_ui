@@ -271,6 +271,10 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
 
   defp naive_datetime_to_iso8601(iso_datetime) when is_binary(iso_datetime), do: iso_datetime
 
+  defp naive_datetime_to_iso8601({datetime}) do
+    naive_datetime_to_iso8601(datetime)
+  end
+
   defp naive_datetime_to_iso8601(datetime) do
     datetime
     |> NaiveDateTime.truncate(:second)
