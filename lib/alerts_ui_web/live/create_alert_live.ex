@@ -111,7 +111,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
         reminder_times: [],
         notification_period_start: nil,
         notification_specifier: :same_as_effect_period,
-        alert_data: %{
+        active_period_data: %{
           active_period_end_specifier: :later_today,
           active_period_start: nil,
           active_period_end: nil,
@@ -288,10 +288,11 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   @impl true
-  def handle_info({:section_completed, changeset}, socket) do
+  def handle_info({:on_time_range_change, changeset}, socket) do
     assigns =
       %{
-        alert_data: Map.merge(socket.assigns.alert_data, changeset |> Map.from_struct())
+        active_period_data:
+          Map.merge(socket.assigns.active_period_data, changeset |> Map.from_struct())
       }
 
     {:noreply, assign(socket, assigns)}

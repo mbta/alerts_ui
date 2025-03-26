@@ -15,7 +15,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriodTest do
       next: "success",
       label: "Notification Period"
     },
-    alert_data: %{
+    active_period_data: %{
       alert_timing: :"one-time",
       active_period_start: ~N[2024-04-30 15:54:00Z]
     },
@@ -122,14 +122,17 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriodTest do
     end
 
     test "scheduled start time must be before active period start" do
-      new_alert_data = %{
+      new_active_period_data = %{
         alert_timing: :"one-time",
         active_period_start_specifier: :custom,
         active_period_start: ~N[2024-05-01 10:54:00Z]
       }
 
       {:ok, view, _html} =
-        live_isolated_component(NotificationPeriod, %{@assigns | alert_data: new_alert_data})
+        live_isolated_component(NotificationPeriod, %{
+          @assigns
+          | active_period_data: new_active_period_data
+        })
 
       view
       |> element("form")

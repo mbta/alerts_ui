@@ -16,7 +16,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       next: "success",
       label: "Time Range"
     },
-    alert_data: %{trip_ids: ["CR-683322-595"]},
+    active_period_data: %{trip_ids: ["CR-683322-595"]},
     current_time: ~N[2024-04-30 15:54:00],
     edited: false,
     editing: false,
@@ -59,7 +59,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
       live_assign(view, %{
         editing: true,
-        alert_data: %{
+        active_period_data: %{
           active_period_start: ~N[2024-04-30 11:54:00],
           active_period_end_specifier: "custom"
         }
@@ -80,7 +80,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
       live_assign(view, %{
         editing: true,
-        alert_data: %{
+        active_period_data: %{
           active_period_start: ~N[2024-04-30 11:54:00],
           active_period_end: ~N[2024-04-30 10:54:00],
           active_period_end_specifier: "custom"
@@ -109,7 +109,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
       live_assign(view, %{
         editing: true,
-        alert_data: %{
+        active_period_data: %{
           active_period_start: start_time,
           active_period_start_specifier: "custom",
           active_period_end_specifier: "until_further_notice",
@@ -124,7 +124,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
                       {:add_errors, [], AlertsUIWeb.FormComponents.TimeRange}}
 
       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
-                      {:section_completed,
+                      {:on_time_range_change,
                        %TimeRange{
                          active_period_start: ^start_time
                        }}}
@@ -432,7 +432,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       })
 
       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
-                      {:section_completed,
+                      {:on_time_range_change,
                        %TimeRange{
                          active_period_end: ~N[2024-05-01 09:54:00],
                          active_period_end_specifier: :custom,

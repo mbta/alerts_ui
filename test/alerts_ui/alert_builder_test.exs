@@ -34,7 +34,7 @@ defmodule AlertsUI.AlertBuilderTest do
           effect_name: "Delay",
           route_ids: ["57"],
           direction: "default",
-          alert_data: %{
+          active_period_data: %{
             active_period_start: ~N[2024-04-30 11:54:00],
             alert_timing: :"one-time",
             active_period_end_specifier: :until_further_notice,
@@ -100,6 +100,60 @@ defmodule AlertsUI.AlertBuilderTest do
         [alert_1, alert_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id)
         assert alert_1.alert_id == existing_alert.alert_id
         assert alert_2.alert_id |> String.to_integer() > alert_1.alert_id |> String.to_integer()
+      end
+    end
+
+    test "builds recurring alert from map" do
+      with_mocks([
+        {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id} end]}
+      ]) do
+        form_data = %{
+          route_type: 1,
+          description_text: "ok",
+          header_text: "hello",
+          banner_text: "important banner text",
+          effect_name: "Delay",
+          route_ids: ["57"],
+          direction: "default",
+          active_period_data: %{
+            active_period_start_date: ~D[2024-10-14],
+            active_period_end_date: ~D[2024-11-01],
+            active_period_start_time: ~T[13:00:00],
+            active_period_end_time: ~T[15:30:00],
+            active_period_end_specifier: :custom,
+            recurrence_days: [:monday, :wednesday, :friday],
+            alert_timing: :recurring
+          },
+          notification_period_start: ~N[2024-04-30 05:52:00],
+          notification_specifier: :now,
+          cause_detail: "disabled train",
+          url: "http://www.example.com",
+          image_url: "http://www.example.com/example.jpg",
+          image_alternative_text: "an example image",
+          last_push_notification_timestamp: ~N[2024-04-30 11:54:00],
+          severity: 3
+        }
+
+        result = AlertBuilder.build_alert(form_data, :R, ~U[2024-04-30 05:54:00Z])
+
+        assert result.active_period == [
+                 %{end: ~U[2024-10-14 19:30:00Z], start: ~U[2024-10-14 17:00:00Z]},
+                 %{start: ~U[2024-10-16 17:00:00Z], end: ~U[2024-10-16 19:30:00Z]},
+                 %{start: ~U[2024-10-18 17:00:00Z], end: ~U[2024-10-18 19:30:00Z]},
+                 %{start: ~U[2024-10-21 17:00:00Z], end: ~U[2024-10-21 19:30:00Z]},
+                 %{start: ~U[2024-10-23 17:00:00Z], end: ~U[2024-10-23 19:30:00Z]},
+                 %{start: ~U[2024-10-25 17:00:00Z], end: ~U[2024-10-25 19:30:00Z]},
+                 %{start: ~U[2024-10-28 17:00:00Z], end: ~U[2024-10-28 19:30:00Z]},
+                 %{start: ~U[2024-10-30 17:00:00Z], end: ~U[2024-10-30 19:30:00Z]},
+                 %{start: ~U[2024-11-01 17:00:00Z], end: ~U[2024-11-01 19:30:00Z]}
+               ]
+
+        assert result.duration_certainty == :KNOWN
+
+        assert result.active_period_end == ~U[2024-11-01 19:30:00Z]
+        assert result.active_period_start == ~U[2024-10-14 17:00:00Z]
+        assert result.recurrence_days == [:monday, :wednesday, :friday]
       end
     end
 
@@ -173,7 +227,7 @@ defmodule AlertsUI.AlertBuilderTest do
           effect_name: "Delay",
           route_ids: ["24", "27", "57"],
           direction: "default",
-          alert_data: %{
+          active_period_data: %{
             active_period_start: ~N[2024-04-30 11:54:00],
             active_period_end_specifier: :until_further_notice,
             active_period_start_specifier: :custom
@@ -330,7 +384,7 @@ defmodule AlertsUI.AlertBuilderTest do
           route_ids: ["CapeFlyer"],
           direction: "default",
           cause_detail: "freight train interference",
-          alert_data: %{
+          active_period_data: %{
             active_period_start: ~N[2024-04-30 11:54:00],
             active_period_end_specifier: :until_further_notice,
             active_period_start_specifier: :custom

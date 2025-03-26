@@ -83,7 +83,6 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
           }
         })
 
-
         send(view.pid, :create_alert)
         failure_rendered_view = render_async(view)
         assert failure_rendered_view =~ "Enter message text"
@@ -102,6 +101,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
     @tag :logged_in_user
     test "shows correct affected service for access combination", %{conn: conn} do
       :PARKING_ISSUE
+
       with_mocks([
         {RoutePatternsRepo, [], [included_stops_by_route_id: fn _route_id, _direction -> [] end]},
         {FacilitiesRepo, [], get_by_type: fn _types, _opts -> [] end}

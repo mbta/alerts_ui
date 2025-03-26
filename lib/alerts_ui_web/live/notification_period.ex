@@ -54,7 +54,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
 
   @impl true
   def update(
-        %{editing: true, alert_data: alert_data} = assigns,
+        %{editing: true, active_period_data: active_period_data} = assigns,
         %{assigns: %{edited: false}} = socket
       ) do
     new_assigns =
@@ -66,7 +66,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
       Map.merge(socket.assigns.form.params, new_assigns)
       |> Map.put(
         "time_range",
-        Map.take(alert_data, [
+        Map.take(active_period_data, [
           :active_period_start,
           :active_period_start_time,
           :active_period_start_date,
@@ -129,12 +129,12 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
   end
 
   @impl true
-  def update(%{alert_data: alert_data} = assigns, socket) do
+  def update(%{active_period_data: active_period_data} = assigns, socket) do
     assigns =
       assigns
       |> Map.put(
         :time_range,
-        Map.take(alert_data, [
+        Map.take(active_period_data, [
           :active_period_start,
           :active_period_start_time,
           :active_period_start_date,

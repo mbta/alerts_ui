@@ -64,7 +64,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   def mount(socket) do
     current_time = current_time()
 
-    alert_data = %{
+    active_period_data = %{
       alert_timing: "one-time",
       active_period_start: current_time,
       active_period_start_date: current_time |> NaiveDateTime.to_date(),
@@ -86,13 +86,13 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       edited: false
     }
 
-    changeset = changeset(%__MODULE__{}, alert_data)
+    changeset = changeset(%__MODULE__{}, active_period_data)
 
     changes =
       changeset
       |> apply_action!(:validate)
 
-    send(self(), {:section_completed, changes})
+    send(self(), {:on_time_range_change, changes})
 
     form = changeset |> to_form
 
@@ -117,26 +117,26 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   @impl true
   def update(
-        %{alert_data: alert_data, editing: true} =
+        %{active_period_data: active_period_data, editing: true} =
           assigns,
         %{assigns: %{edited: false}} = socket
       ) do
-    alert_data =
-      alert_data
+    active_period_data =
+      active_period_data
       |> Enum.filter(fn {_k, v} -> !is_nil(v) end)
       |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
 
     assigns =
       assigns
-      |> Map.put(:alert_data, Map.merge(socket.assigns.form.params, alert_data))
+      |> Map.put(:active_period_data, Map.merge(socket.assigns.form.params, active_period_data))
 
     changeset =
       %__MODULE__{}
-      |> changeset(assigns.alert_data)
-      |> TimeRangeValidators.validate_required_fields(assigns.alert_data)
+      |> changeset(assigns.active_period_data)
+      |> TimeRangeValidators.validate_required_fields(assigns.active_period_data)
       |> TimeRangeValidators.validate_relationships(
-        assigns.alert_data["alert_timing"],
-        assigns.alert_data
+        assigns.active_period_data["alert_timing"],
+        assigns.active_period_data
       )
 
     changeset
@@ -144,7 +144,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     |> case do
       {:ok, changes} ->
         send(self(), {:add_errors, [], __MODULE__})
-        send(self(), {:section_completed, changes})
+        send(self(), {:on_time_range_change, changes})
 
       {:error, changeset} ->
         send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
@@ -436,7 +436,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     |> case do
       {:ok, changes} ->
         send(self(), {:add_errors, [], __MODULE__})
-        send(self(), {:section_completed, changes})
+        send(self(), {:on_time_range_change, changes})
 
       {:error, changeset} ->
         send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})

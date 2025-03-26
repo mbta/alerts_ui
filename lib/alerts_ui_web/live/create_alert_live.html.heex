@@ -29,14 +29,14 @@
           id="time_range"
           progress={@progress}
           selected_trips={@selected_trips}
-          alert_data={@alert_data}
+          active_period_data={@active_period_data}
           editing={@editing}
         />
         <.live_component
           module={NotificationPeriod}
           notification_period_start={@notification_period_start}
           notification_specifier={@notification_specifier}
-          alert_data={@alert_data}
+          active_period_data={@active_period_data}
           id="notification_period"
           progress={@progress}
         />
@@ -71,9 +71,9 @@
           editing={@editing}
           reminder_times={@reminder_times}
           notification_period_start={@notification_period_start}
-          active_period_start={{Map.get(@alert_data, :active_period_start)}}
-          active_period_end_specifier={Map.get(@alert_data, :active_period_end_specifier)}
-          active_period_end={Map.get(@alert_data, :active_period_end)}
+          active_period_start={{Map.get(@active_period_data, :active_period_start)}}
+          active_period_end_specifier={Map.get(@active_period_data, :active_period_end_specifier)}
+          active_period_end={Map.get(@active_period_data, :active_period_end)}
         />
         <.live_component module={Submit} id="submit" progress={@progress} />
       </div>

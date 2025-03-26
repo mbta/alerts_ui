@@ -25,7 +25,6 @@ defmodule AlertsUI.AlertBuilder do
   @green_line_branch_ids Routes.green_line_branch_ids()
 
   @type form_data_t :: %{
-          alert_data: map() | nil,
           route_type: Route.type_int() | nil,
           facility_id: String.t(),
           direction: String.t(),
@@ -34,7 +33,7 @@ defmodule AlertsUI.AlertBuilder do
           child_stops_with_context: [stop_with_context_t()] | [],
           trip_ids: [String.t()],
           service_types: [Route.type_int()],
-          alert_data: %{
+          active_period_data: %{
             alert_timing: atom(),
             active_period_end_specifier: atom() | nil,
             active_period_start_specifier: atom() | nil,
@@ -70,7 +69,7 @@ defmodule AlertsUI.AlertBuilder do
         ) ::
           map()
   def build_alert(form_data, combination, current_time \\ DateTime.utc_now()) do
-    alert_data = Map.get(form_data, :alert_data, %{})
+    active_period_data = Map.get(form_data, :active_period_data, %{})
     effect_name = Map.get(form_data, :effect_name)
     effect_map = Effect.effect_map_by_name(effect_name)
     stop_ids = Map.get(form_data, :stop_ids)
@@ -111,22 +110,24 @@ defmodule AlertsUI.AlertBuilder do
       |> Map.put(:service_types, service_types)
 
     active_period_map =
-      if Map.get(form_data, :alert_timing) === :recurring do
+      if Map.get(active_period_data, :alert_timing) === :recurring do
         ActivePeriodBuilder.build_recurring_active_period(%{
-          active_period_start_time: Map.get(alert_data, :active_period_start_time),
-          active_period_end_time: Map.get(alert_data, :active_period_end_time),
-          active_period_start_date: Map.get(alert_data, :active_period_start_date),
-          active_period_end_date: Map.get(alert_data, :active_period_end_date),
-          active_period_end_specifier: Map.get(alert_data, :active_period_end_specifier),
-          recurrence_days: Map.get(alert_data, :recurrence_days)
+          active_period_start_time: Map.get(active_period_data, :active_period_start_time),
+          active_period_end_time: Map.get(active_period_data, :active_period_end_time),
+          active_period_start_date: Map.get(active_period_data, :active_period_start_date),
+          active_period_end_date: Map.get(active_period_data, :active_period_end_date),
+          active_period_end_specifier: Map.get(active_period_data, :active_period_end_specifier),
+          recurrence_days: Map.get(active_period_data, :recurrence_days)
         })
       else
         ActivePeriodBuilder.build_one_time_active_period(
           %{
-            active_period_start: Map.get(alert_data, :active_period_start),
-            active_period_end: Map.get(alert_data, :active_period_end),
-            active_period_end_specifier: Map.get(alert_data, :active_period_end_specifier),
-            active_period_start_specifier: Map.get(alert_data, :active_period_start_specifier)
+            active_period_start: Map.get(active_period_data, :active_period_start),
+            active_period_end: Map.get(active_period_data, :active_period_end),
+            active_period_end_specifier:
+              Map.get(active_period_data, :active_period_end_specifier),
+            active_period_start_specifier:
+              Map.get(active_period_data, :active_period_start_specifier)
           },
           current_time
         )
@@ -165,7 +166,7 @@ defmodule AlertsUI.AlertBuilder do
       severity_level: SeverityLevel.severity_level_by_severity(severity),
       reminder_times: reminder_times,
       current_time: current_time,
-      recurrence_days: Map.get(alert_data, :recurrence_days)
+      recurrence_days: Map.get(active_period_data, :recurrence_days)
     }
     |> Map.merge(active_period_map)
   end

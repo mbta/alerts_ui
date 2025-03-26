@@ -37,7 +37,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :notification_specifier,
     :severity,
     :reminder_times,
-    :alert_data
+    :active_period_data
   ]
 
   @type active_period_t :: %{
@@ -69,7 +69,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           view_banner: boolean(),
           banner_sync_toggle: boolean(),
           combination: atom(),
-          alert_data: active_period_t(),
+          active_period_data: active_period_t(),
           notification_specifier: String.t(),
           notification_period_start: NaiveDateTime.t() | nil,
           service_types: [Route.type_int()],
@@ -143,7 +143,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       severity: alert.severity,
       reminder_times: reminder_times
     }
-    |> Map.put(:alert_data, active_period_map)
+    |> Map.put(:active_period_data, active_period_map)
   end
 
   def single_route_id(effect_name, [route_id]) when effect_name === "Detour" do
