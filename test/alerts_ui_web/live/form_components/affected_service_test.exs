@@ -388,4 +388,42 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       end
     end
   end
+
+  describe "end-to-end" do
+    @tag :logged_in_user
+    test "publishing a bus delay AFTER selecting and deselecting will put up a flash error for the missing route",
+         %{
+           conn: conn
+         } do
+      {:ok, view, _html} = live(conn, "/alerts/new")
+
+      view
+      |> element("#route_types_form button", "Bus")
+      |> render_click()
+
+      view
+      |> element("#route_types_form button", "Delay")
+      |> render_click()
+
+      view
+      |> element("#route_types_form")
+      |> render_submit()
+
+      view
+      |> element("#service_form")
+      |> render_change(%{
+        affected_service: %{route_ids: []}
+      })
+
+      view
+      |> element("button#save", "Publish")
+      |> render_click()
+
+      # Inline
+      assert has_element?(view, "p.text-text-error", "Select route(s)")
+
+      # Flash
+      assert has_element?(view, "p", "Select route(s);Enter message text")
+    end
+  end
 end
