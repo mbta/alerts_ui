@@ -117,7 +117,7 @@ defmodule AlertsUI.AlertBuilderTest do
                %Route{id: "27", line_id: "line-27", type: 1, description: :rapid_transit}
 
              "57", _opts ->
-               %Route{id: "57", line_id: nil, type: 1, description: :rapid_transit}
+               %Route{id: "57", line_id: "", type: 1, description: :rapid_transit}
 
              "2427", _opts ->
                %Route{id: "2427", line_id: nil, type: 0, description: :rapid_transit}
@@ -2214,7 +2214,20 @@ defmodule AlertsUI.AlertBuilderTest do
          ]},
         {StopsRepo, [], [by_route: fn _route_id, _direction -> parent_stops ++ child_stops end]},
         {RoutesRepo, [],
-         [get: fn "Boat-F4", _opts -> %Route{id: "Boat-F4", line_id: "line-24", type: 4} end]}
+         [get: fn "Boat-F4", _opts -> %Route{id: "Boat-F4", line_id: "line-Boat-F4", type: 4} end]},
+        {LinesRepo, [],
+         [
+           get: fn
+             "line-Boat-F4", _opts ->
+               %Line{
+                 id: "line-Boat-F4",
+                 route_ids: ["line-Boat-F4"],
+                 routes: [
+                   %Route{id: "Boat-F4", line_id: "line-Boat-F4", type: 4}
+                 ]
+               }
+           end
+         ]}
       ]) do
         result = AlertBuilder.build_alert(alert_data, :SR)
 

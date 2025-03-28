@@ -176,18 +176,14 @@ defmodule AlertsUI.AlertBuilder do
     # unless they're shuttle routes.
     selected_routes
     |> Enum.flat_map(fn original_route ->
-      line =
-        if Map.get(original_route, :line_id) do
-          LinesRepo.get(original_route.line_id, []) || %{}
-        else
-          %{}
-        end
-
-      if is_nil(Map.get(line, :routes)) do
+      if Map.get(original_route, :line_id) in ["", nil] do
         [original_route]
       else
+        line = LinesRepo.get(original_route.line_id, [])
+
         # filter out shuttle routes unless they were part of the original selection
-        Enum.filter(line.routes, &(&1.description !== :rail_replacement_bus)) ++ [original_route]
+        Enum.filter(line.routes, &(&1.description !== :rail_replacement_bus)) ++
+          [original_route]
       end
     end)
     |> Enum.dedup()
@@ -240,10 +236,10 @@ defmodule AlertsUI.AlertBuilder do
     # multiple branches and thus multiple patterns (eg red line)
     # Uses 1 route pattern if only one has all the stops on it,
     # otherwise uses all of them.
-    route_patterns = route_patterns |> Enum.reject(&(&1.route_id =~ "Shuttle"))
 
     route_pattern_match =
       route_patterns
+      |> Enum.reject(&(&1.route_id =~ "Shuttle"))
       |> Enum.filter(fn route_pattern ->
         route_id = route_pattern.route_id
 
