@@ -186,7 +186,7 @@ defmodule AlertsUI.AlertBuilder do
           [original_route]
       end
     end)
-    |> Enum.dedup()
+    |> Enum.uniq()
   end
 
   defp add_child_stops(nil, _route_ids, _direction), do: nil
@@ -219,7 +219,7 @@ defmodule AlertsUI.AlertBuilder do
     |> Enum.flat_map(fn route ->
       route.id
       |> get_route_patterns(direction)
-      |> filtered_route_patterns(parent_stop_ids, direction)
+      |> filtered_route_patterns(parent_stop_ids)
       |> Enum.flat_map(fn route_pattern ->
         route_pattern_stops_with_context_for_parents(
           route_pattern,
@@ -231,7 +231,7 @@ defmodule AlertsUI.AlertBuilder do
     end)
   end
 
-  defp filtered_route_patterns(route_patterns, parent_stop_ids, direction) do
+  defp filtered_route_patterns(route_patterns, parent_stop_ids) do
     # determines which route patterns to use in the case of a route with
     # multiple branches and thus multiple patterns (eg red line)
     # Uses 1 route pattern if only one has all the stops on it,
@@ -241,10 +241,6 @@ defmodule AlertsUI.AlertBuilder do
       route_patterns
       |> Enum.reject(&(&1.route_id =~ "Shuttle"))
       |> Enum.filter(fn route_pattern ->
-        route_id = route_pattern.route_id
-
-        parent_stop_ids = filtered_parent_stop_ids(route_id, direction, parent_stop_ids)
-
         stops_from_route_pattern = Enum.map(route_pattern.stops, & &1.id)
         parents_from_route_pattern = Enum.map(route_pattern.stops, & &1.parent_id)
 
@@ -258,28 +254,6 @@ defmodule AlertsUI.AlertBuilder do
     else
       route_pattern_match
     end
-  end
-
-  @spec filtered_parent_stop_ids(Route.id_t(), String.t(), [Stop.t()]) :: [Stop.t()]
-  # Filters out selected stops for green line that aren't the branch we're currently dealing with
-  defp filtered_parent_stop_ids(route_id, "default", parent_stop_ids)
-       when route_id in @green_line_branch_ids do
-    stops_on_route = StopsRepo.by_route(route_id, 0) ++ StopsRepo.by_route(route_id, 1)
-
-    parent_stop_ids
-    |> Enum.filter(fn parent_stop_id -> parent_stop_id in stops_on_route end)
-  end
-
-  defp filtered_parent_stop_ids(route_id, direction, parent_stop_ids)
-       when route_id in @green_line_branch_ids do
-    stops_on_route = StopsRepo.by_route(route_id, String.to_integer(direction))
-
-    parent_stop_ids
-    |> Enum.filter(fn parent_stop_id -> parent_stop_id in stops_on_route end)
-  end
-
-  defp filtered_parent_stop_ids(_route_id, _direction, parent_stop_ids) do
-    parent_stop_ids
   end
 
   @spec get_route_patterns(Route.id_t(), String.t()) :: [APIRoutePattern.t()]
