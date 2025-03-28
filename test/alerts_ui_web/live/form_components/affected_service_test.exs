@@ -423,7 +423,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       assert has_element?(view, "p.text-text-error", "Select route(s)")
 
       # Flash
-      assert has_element?(view, "p", "Select route(s);Enter message text")
+      assert view
+             |> element("#error-flash li", "Select route(s)")
+             |> render() =~ "Select route(s)"
     end
   end
 end

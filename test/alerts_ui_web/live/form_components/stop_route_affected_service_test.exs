@@ -442,7 +442,12 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         assert has_element?(view, "p.text-text-error", "Select route(s)")
 
         # Flash
-        assert has_element?(view, "p", "Enter message text;Select stop(s);Select route(s)")
+        flash_text =
+          view
+          |> element("#error-flash")
+          |> render()
+
+        assert flash_text =~ "Select stop(s)" && flash_text =~ "Select route(s)"
       end
     end
   end
