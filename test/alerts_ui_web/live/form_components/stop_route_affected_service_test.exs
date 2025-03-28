@@ -402,7 +402,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
     end
 
     @tag :logged_in_user
-    test "publishing a bus delay AFTER selecting and deselecting will put up a flash error for the missing route",
+    test "publishing a bus multi-route detour AFTER selecting and deselecting will put up a flash error for the missing route",
          %{
            conn: conn
          } do
