@@ -22,6 +22,8 @@ defmodule AlertsUI.AlertBuilder do
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
 
+  @green_line_branch_ids Routes.green_line_branch_ids()
+
   @type alert_data_t :: %{
           route_type: Route.type_int() | nil,
           facility_id: String.t(),
@@ -70,7 +72,7 @@ defmodule AlertsUI.AlertBuilder do
     effect_map = Effect.effect_map_by_name(effect_name)
     stop_ids = Map.get(alert_data, :stop_ids)
     direction_id = Map.get(alert_data, :direction)
-    service_types = Map.get(alert_data, :service_types, [])
+    service_types = Map.get(alert_data, :service_types, []) |> expand_subway_service_types()
 
     route_type = Map.get(alert_data, :route_type)
     cause_detail = Map.get(alert_data, :cause_detail, "")
@@ -103,7 +105,7 @@ defmodule AlertsUI.AlertBuilder do
         :child_stops_with_context,
         child_stops_with_context(routes, direction_id, stop_ids)
       )
-      |> Map.put(:service_types, expand_subway_service_types(service_types))
+      |> Map.put(:service_types, service_types)
 
     active_period_map =
       if Map.get(alert_data, :alert_timing) === :recurring do
@@ -167,25 +169,24 @@ defmodule AlertsUI.AlertBuilder do
 
   @spec add_combo_routes([Route.id_t()]) :: [Route.t()]
 
-  defp add_combo_routes(routes) do
-    routes
+  defp add_combo_routes(selected_routes) do
+    # For every route, get its line (if present) and make an API call to to
+    # the line route to get any associated combo routes it has
+    # We want to include combo routes with the informed entity
+    # unless they're shuttle routes.
+    selected_routes
     |> Enum.flat_map(fn original_route ->
-      line =
-        if Map.get(original_route, :line_id) do
-          LinesRepo.get(original_route.line_id, []) || %{}
-        else
-          %{}
-        end
-
-      if is_nil(Map.get(line, :route_ids)) do
+      if Map.get(original_route, :line_id) in ["", nil] do
         [original_route]
       else
-        combo_route_ids = Map.get(line, :route_ids, []) -- [original_route.id]
-        combo_routes = Enum.map(combo_route_ids, &RoutesRepo.get(&1, include: "line"))
-        combo_routes ++ [original_route]
+        line = LinesRepo.get(original_route.line_id, [])
+
+        # filter out shuttle routes unless they were part of the original selection
+        Enum.filter(line.routes, &(&1.description !== :rail_replacement_bus)) ++
+          [original_route]
       end
     end)
-    |> Enum.dedup()
+    |> Enum.uniq()
   end
 
   defp add_child_stops(nil, _route_ids, _direction), do: nil
@@ -201,10 +202,12 @@ defmodule AlertsUI.AlertBuilder do
     |> Enum.filter(&(&1 !== "default"))
   end
 
-  defp get_stops(route_id, "default"), do: RoutePatterns.included_stops_by_route_id(route_id, [])
+  defp get_stops(route_id, "default"),
+    do: RoutePatterns.included_stops_by_route_id(route_id, canonical: true)
 
   defp get_stops(route_id, direction),
-    do: RoutePatterns.included_stops_by_route_id(route_id, direction_id: direction)
+    do:
+      RoutePatterns.included_stops_by_route_id(route_id, direction_id: direction, canonical: true)
 
   @spec child_stops_with_context([Route.id_t()], String.t(), [Stop.id_t()]) ::
           [
@@ -216,6 +219,7 @@ defmodule AlertsUI.AlertBuilder do
     |> Enum.flat_map(fn route ->
       route.id
       |> get_route_patterns(direction)
+      |> filtered_route_patterns(parent_stop_ids)
       |> Enum.flat_map(fn route_pattern ->
         route_pattern_stops_with_context_for_parents(
           route_pattern,
@@ -225,6 +229,31 @@ defmodule AlertsUI.AlertBuilder do
         )
       end)
     end)
+  end
+
+  defp filtered_route_patterns(route_patterns, parent_stop_ids) do
+    # determines which route patterns to use in the case of a route with
+    # multiple branches and thus multiple patterns (eg red line)
+    # Uses 1 route pattern if only one has all the stops on it,
+    # otherwise uses all of them.
+
+    route_pattern_match =
+      route_patterns
+      |> Enum.reject(&(&1.route_id =~ "Shuttle"))
+      |> Enum.filter(fn route_pattern ->
+        stops_from_route_pattern = Enum.map(route_pattern.stops, & &1.id)
+        parents_from_route_pattern = Enum.map(route_pattern.stops, & &1.parent_id)
+
+        Enum.all?(parent_stop_ids, fn stop_id ->
+          stop_id in (parents_from_route_pattern ++ stops_from_route_pattern)
+        end)
+      end)
+
+    if Enum.empty?(route_pattern_match) do
+      route_patterns
+    else
+      route_pattern_match
+    end
   end
 
   @spec get_route_patterns(Route.id_t(), String.t()) :: [APIRoutePattern.t()]
@@ -684,8 +713,9 @@ defmodule AlertsUI.AlertBuilder do
   end
 
   @spec route_type(%{String.t() => Route.type_int()}, Route.id_t()) :: Route.type_int()
+
   defp route_type(route_types_by_id, route_id) do
-    if route_id in Routes.green_line_branch_ids() do
+    if route_id in @green_line_branch_ids do
       route_types_by_id[route_id] || route_types_by_id["Green"]
     else
       route_types_by_id[route_id]
