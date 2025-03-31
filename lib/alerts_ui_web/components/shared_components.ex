@@ -633,6 +633,14 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :loading, :boolean, default: false, doc: "in loading state if true"
 
+  attr :modal_filter_id, :string,
+    default: nil,
+    doc: "id for modal filter associated with select. will not display if nil."
+
+  attr :modal_filter_title, :string,
+    default: nil,
+    doc: "text that opens modal filter when clicked"
+
   attr :field, FormField,
     required: true,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
@@ -663,13 +671,26 @@ defmodule AlertsUIWeb.SharedComponents do
 
     ~H"""
     <div phx-feedback-for={@name} class={["#{@class}", @hidden && "hidden"]}>
-      <.label
-        :if={@label}
-        for={@id}
-        class={"block #{if @disabled, do: "text-text-disabled", else: ""}"}
-      >
-        {@label}
-      </.label>
+      <div :if={@modal_filter_id || @label} class="flex flex-row justify-between">
+        <.label for={@id} class={"block #{if @disabled, do: "text-text-disabled", else: ""}"}>
+          {@label}
+        </.label>
+        <button
+          :if={@modal_filter_id}
+          phx-click={show_modal(@modal_filter_id)}
+          class={[
+            "leading-tight mb-2 min-h-[1.3rem] text-right",
+            if(@disabled, do: "text-text-disabled", else: "text-primary")
+          ]}
+          type="button"
+          disabled={@disabled}
+        >
+          <span class={[
+            "hero-funnel-mini w-4 h-4 mr-2",
+            if(@disabled, do: "text-text-disabled", else: "bg-primary")
+          ]} />{@modal_filter_title}
+        </button>
+      </div>
       <select
         id={@id}
         name={@name}

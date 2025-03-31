@@ -519,6 +519,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
               end
             }
             field={@form[:direction]}
+            modal_filter_id="dates-filter-modal"
+            modal_filter_title={"Filter: #{@filter_title_value}"}
             options={@direction_options}
             disabled={disable_stop_input?(@form[:route_ids].value)}
             prompt={if disable_stop_input?(@form[:route_ids].value), do: "", else: "Both Directions"}
@@ -526,8 +528,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
           <.filtered_select
             field={@form[:trip_ids]}
             filter_field={@form[:trip_ids_filter]}
-            modal_filter_id="dates-filter-modal"
-            modal_filter_title={"Filter: #{@filter_title_value}"}
             options={@trip_id_options}
             loading={Map.get(@available_schedules, :loading, true)}
             no_results={
