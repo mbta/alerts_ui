@@ -31,7 +31,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     field :stop_ids, {:array, :string}
     field :stop_ids_filter, :string
     field :trip_information_by_id, {:map, :map}
-    field :modal_date, :date
+    field :modal_date, :string
     field :modal_date_filter, :string
   end
 
@@ -122,7 +122,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     assigns =
       assigns
       |> Map.put(:modal_filter_value, nil)
-      |> Map.put(:filter_title_value, "All future trips")
 
     send(self(), {:section_completed, changes})
 
@@ -285,18 +284,11 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         params["modal_date"]
       end
 
-    {filter_title_value, _} =
-      socket.assigns.modal_options
-      |> Enum.find({"All future trips", nil}, fn {_option, value} -> value == modal_date end)
-
     required_fields = ServiceEffectCombinations.required_fields(socket.assigns.combination)
 
     socket =
       socket
-      |> assign(
-        filter_title_value: filter_title_value,
-        modal_filter_value: modal_date
-      )
+      |> assign(modal_filter_value: modal_date)
       |> assign_schedules(params["route_ids"], params["direction"], required_fields)
 
     {:noreply, socket}
@@ -442,13 +434,20 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         values_to_keep: stop_ids
       })
 
+    {filter_title_value, _} =
+      assigns.modal_options
+      |> Enum.find({"All future trips", nil}, fn {_option, value} ->
+        value == assigns.modal_filter_value
+      end)
+
     assigns =
       assign(assigns,
         route_id_options: route_id_options,
         direction_options: direction_options,
         trip_id_options: trip_id_options,
         stop_id_options: stop_id_options,
-        service_type_name: assigns.route_type |> InformedEntity.route_code_mapping() || nil
+        service_type_name: assigns.route_type |> InformedEntity.route_code_mapping() || nil,
+        filter_title_value: filter_title_value
       )
 
     ~H"""
