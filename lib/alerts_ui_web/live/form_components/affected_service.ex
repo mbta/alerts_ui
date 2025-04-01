@@ -345,17 +345,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     trip_id_options =
       if Helpers.async_available?(assigns, :available_schedules) do
-        schedules_by_route_type =
-          assigns.available_schedules.result
-          |> Enum.filter(fn schedule ->
-            # If a line was selected and deselected, value here may be set to nil
-            schedule.route.id in (Map.get(assigns.form[:route_ids], :value) || [])
-            # schedule.route.id in Map.get(assigns.form[:route_ids], :value, [])
-          end)
-          |> Enum.group_by(&SelectFormatter.name_for_option(&1.route))
-
         SelectFormatter.formatted_select_options(%SelectFormatter{
-          schedules_by_route_name: schedules_by_route_type,
+          schedules_by_route_name: get_schedules_by_route_type(assigns),
           route_type: assigns.route_type,
           filter_value: trip_filter_value,
           values_to_keep: trip_ids
@@ -560,5 +551,14 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     else
       affected_service
     end
+  end
+
+  defp get_schedules_by_route_type(assigns) do
+    assigns.available_schedules.result
+    |> Enum.filter(fn schedule ->
+      # If a line was selected and deselected, value here may be set to nil
+      schedule.route.id in (assigns.form[:route_ids].value || [])
+    end)
+    |> Enum.group_by(&SelectFormatter.name_for_option(&1.route))
   end
 end
