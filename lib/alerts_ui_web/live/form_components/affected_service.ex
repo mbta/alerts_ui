@@ -348,7 +348,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         schedules_by_route_type =
           assigns.available_schedules.result
           |> Enum.filter(fn schedule ->
-            schedule.route.id in Map.get(assigns.form[:route_ids], :value, [])
+            # If a line was selected and deselected, value here may be set to nil
+            schedule.route.id in (Map.get(assigns.form[:route_ids], :value) || [])
+            # schedule.route.id in Map.get(assigns.form[:route_ids], :value, [])
           end)
           |> Enum.group_by(&SelectFormatter.name_for_option(&1.route))
 

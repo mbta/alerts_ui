@@ -427,5 +427,49 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
              |> element("#error-flash li", "Select route(s)")
              |> render() =~ "Select route(s)"
     end
+
+    @tag :logged_in_user
+    test "allows a CR Line to be selected then deselected without erroring", %{
+      conn: conn
+    } do
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        view
+        |> element("#route_types_form button", "Commuter Rail")
+        |> render_click()
+
+        view
+        |> element("#route_types_form button", "Delay")
+        |> render_click()
+
+        view
+        |> element("#route_types_form")
+        |> render_submit()
+
+        render_async(view)
+
+        # Mock selecting Framingham line
+        view
+        |> element("#service_form")
+        |> render_change(%{
+          affected_service: %{route_ids: ["CR-Worcester"]}
+        })
+
+        assert view |> render() =~ ~s(value="CR-Worcester" checked="checked")
+
+        # Mock deselecting Framingham
+        view
+        |> element("#service_form")
+        |> render_change(%{
+          affected_service: %{route_ids: ["CR-Worcester"]}
+        })
+
+        refute view |> render() =~ ~s(value="CR-Worcester" checked="checked")
+      end
+    end
   end
 end
