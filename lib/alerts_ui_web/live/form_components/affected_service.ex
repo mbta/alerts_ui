@@ -194,12 +194,17 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
     end
 
+    # don't re-fetch routes if we already have them- prevents weird unselect render error
     socket =
-      socket
+      if socket.assigns.available_routes === %{} do
+        socket
+        |> assign_async(:available_routes, fn ->
+          {:ok, %{available_routes: CreateAlertLive.get_routes(route_types)}}
+        end)
+      else
+        socket
+      end
       |> assign(assigns)
-      |> assign_async(:available_routes, fn ->
-        {:ok, %{available_routes: CreateAlertLive.get_routes(route_types)}}
-      end)
 
     {:ok, socket}
   end
