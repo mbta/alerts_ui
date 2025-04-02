@@ -122,8 +122,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
     |> maybe_include_virtual_green_line()
   end
 
+  # get all schedules from today until end of rating
   def get_schedules(route_ids, direction, nil) do
-    # get all schedules from today until end of rating
     directions = directions_from_selection(direction)
 
     today =
