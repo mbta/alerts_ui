@@ -36,12 +36,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   @impl true
   def mount(socket) do
-    form = %__MODULE__{} |> changeset(%{}) |> to_form()
+    changeset = changeset(%__MODULE__{}, %{})
 
     socket =
       socket
       |> assign(%{
-        form: form,
+        form: to_form(changeset),
         button_selected_routes: [],
         available_routes: %{},
         available_schedules: %{},
@@ -149,9 +149,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     route_types = all_route_types(route_type)
 
     # make sure initial errors get sent up to create_alert_live even if no events fire
-    changeset =
-      %__MODULE__{}
-      |> changeset(alert_data)
+    # For other form components, this is done in the mount, but we can't do that here
+    # because assigns won't be populated yet, and that's how we get the required_fields
+    changeset = changeset(%__MODULE__{}, alert_data)
 
     case apply_action(
            changeset
@@ -181,18 +181,16 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       affected_service
       |> Map.put_new("direction", "default")
       |> clean_route_ids(socket.assigns.form, socket.assigns.effect_name)
+      # Stops / trips have default values, but all other empty lists among the fields
+      # should be omitted. That means they have been deselected
+      |> Helpers.filter_empty_list_fields()
       |> populate_default_stops()
       |> populate_default_trips()
 
     changeset = validate(affected_service, socket.assigns)
 
-    case apply_action(
-           changeset
-           |> validate_required(
-             ServiceEffectCombinations.required_fields(socket.assigns.combination)
-           ),
-           :validate
-         ) do
+    # If we validate before the apply, the apply will fail. Validate separately
+    case apply_action(changeset, :validate) do
       {:ok, changeset} ->
         available_schedules =
           Map.get(socket.assigns.available_schedules, :result)
@@ -211,7 +209,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
       {:error, changeset} ->
         send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
-        send(self(), {:section_completed, changeset})
     end
 
     form =
@@ -348,15 +345,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     trip_id_options =
       if Helpers.async_available?(assigns, :available_schedules) do
-        schedules_by_route_type =
-          assigns.available_schedules.result
-          |> Enum.filter(fn schedule ->
-            schedule.route.id in Map.get(assigns.form[:route_ids], :value, [])
-          end)
-          |> Enum.group_by(&SelectFormatter.name_for_option(&1.route))
-
         SelectFormatter.formatted_select_options(%SelectFormatter{
-          schedules_by_route_name: schedules_by_route_type,
+          schedules_by_route_name: get_schedules_by_route_type(assigns),
           route_type: assigns.route_type,
           filter_value: trip_filter_value,
           values_to_keep: trip_ids
@@ -538,6 +528,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   defp all_route_types(4), do: [4]
   defp all_route_types(_), do: []
 
+  # Each of these are only used once in the validation flow... what exactly should we do here?
   defp populate_default_stops(affected_service) do
     if Map.get(affected_service, "stop_ids") in [nil, "default", ["default"]] do
       Map.put(
@@ -560,5 +551,14 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     else
       affected_service
     end
+  end
+
+  defp get_schedules_by_route_type(assigns) do
+    assigns.available_schedules.result
+    |> Enum.filter(fn schedule ->
+      # If a line was selected and deselected, value here may be set to nil
+      schedule.route.id in (assigns.form[:route_ids].value || [])
+    end)
+    |> Enum.group_by(&SelectFormatter.name_for_option(&1.route))
   end
 end

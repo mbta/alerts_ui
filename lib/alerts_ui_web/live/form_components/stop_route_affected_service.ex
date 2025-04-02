@@ -183,10 +183,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   def handle_event("validate", %{"stop_route_affected_service" => affected_service}, socket) do
     available_routes = Map.get(socket.assigns.available_routes, :result, [])
 
-    affected_service =
-      affected_service
-      |> populate_default_routes()
-      |> add_routes_with_types(available_routes)
+    affected_service = add_routes_with_types(affected_service, available_routes)
 
     changeset = build_changeset(%__MODULE__{}, affected_service)
 
@@ -295,7 +292,9 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   def add_routes_with_types(affected_service, available_routes) do
     routes_with_types =
       available_routes
-      |> Stream.filter(fn route -> route.id in affected_service["route_ids"] end)
+      |> Stream.filter(fn route ->
+        !is_nil(affected_service["route_ids"]) && route.id in affected_service["route_ids"]
+      end)
       |> Enum.reduce(%{}, fn route, acc ->
         Map.put(acc, route.id, route.type)
       end)
@@ -433,15 +432,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   @spec disable_routes_input?(map()) :: boolean()
   defp disable_routes_input?(%{form: form}) do
     form[:stop_ids].value in [nil, []]
-  end
-
-  # At a minimum, this is needed for testing. See "search works" test
-  @spec populate_default_routes(map()) :: map()
-  defp populate_default_routes(affected_service) do
-    case Map.get(affected_service, "route_ids") do
-      nil -> Map.put(affected_service, "route_ids", [])
-      _ -> affected_service
-    end
   end
 
   defp filter_stops_by_stop_ids(_stop, [], _selected_stop_ids) do

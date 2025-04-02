@@ -400,5 +400,55 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
                  |> Map.get(:informed_entity)
       end
     end
+
+    @tag :logged_in_user
+    test "publishing a bus multi-route detour AFTER selecting and deselecting will put up a flash error for the missing route",
+         %{
+           conn: conn
+         } do
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _types -> @routes end]},
+        {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        view
+        |> element("#route_types_form button", "Bus")
+        |> render_click()
+
+        view
+        |> element("#route_types_form button", "Multi-route detour")
+        |> render_click()
+
+        view
+        |> element("#route_types_form")
+        |> render_submit()
+
+        view
+        |> element("#service_form")
+        |> render_change(%{
+          affected_service: %{
+            stop_ids: [],
+            route_ids: []
+          }
+        })
+
+        view
+        |> element("button#save", "Publish")
+        |> render_click()
+
+        # Inline
+        assert has_element?(view, "p.text-text-error", "Select stop(s)")
+        assert has_element?(view, "p.text-text-error", "Select route(s)")
+
+        # Flash
+        flash_text =
+          view
+          |> element("#error-flash")
+          |> render()
+
+        assert flash_text =~ "Select stop(s)" && flash_text =~ "Select route(s)"
+      end
+    end
   end
 end
