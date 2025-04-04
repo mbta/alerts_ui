@@ -162,7 +162,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   @impl true
   def update(
-        %{selected_trips: []} = assigns,
+        %{selected_schedules: []} = assigns,
         socket
       ) do
     new_params = %{
@@ -187,12 +187,12 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   @impl true
   def update(
-        %{selected_trips: selected_trips} = assigns,
+        %{selected_schedules: selected_schedules} = assigns,
         socket
       )
-      when not is_nil(selected_trips) do
-    trip_departure_time = get_trip_departure_time(selected_trips)
-    trip_arrival_time = get_trip_arrival_time(selected_trips)
+      when not is_nil(selected_schedules) do
+    trip_departure_time = get_trip_departure_time(selected_schedules)
+    trip_arrival_time = get_trip_arrival_time(selected_schedules)
 
     form_params =
       if trip_departure_time && trip_arrival_time do
@@ -323,15 +323,15 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     {:ok, assign(socket, assigns)}
   end
 
-  defp get_trip_departure_time(selected_trips) do
-    selected_trips
+  defp get_trip_departure_time(selected_schedules) do
+    selected_schedules
     |> Enum.map(& &1.departure_time)
     |> Enum.min(DateTime, fn -> nil end)
     |> utc_datetime_to_naive()
   end
 
-  defp get_trip_arrival_time(selected_trips) do
-    selected_trips
+  defp get_trip_arrival_time(selected_schedules) do
+    selected_schedules
     |> Enum.map(& &1.arrival_time)
     |> Enum.max(DateTime, fn -> nil end)
     |> utc_datetime_to_naive()

@@ -20,7 +20,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
     current_time: ~N[2024-04-30 15:54:00],
     edited: false,
     editing: false,
-    selected_trips: []
+    selected_schedules: []
   }
 
   describe "component" do
@@ -210,7 +210,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       }
 
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns |> Map.put(:selected_trips, [schedule]))
+        live_isolated_component(TimeRange, @assigns |> Map.put(:selected_schedules, [schedule]))
 
       view
       |> element("form")
@@ -258,7 +258,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         }
       })
 
-      live_assign(view, :selected_trips, [])
+      live_assign(view, :selected_schedules, [])
 
       assert render(view) =~ ~s(value=\"now\")
       assert render(view) =~ ~s(value=\"later_today\")
@@ -296,7 +296,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         }
       })
 
-      live_assign(view, :selected_trips, [schedule])
+      live_assign(view, :selected_schedules, [schedule])
 
       assert render(view) =~ ~s(value=\"now\")
       assert render(view) =~ ~s(value=\"2024-05-01T10:15\")
@@ -310,7 +310,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       }
 
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns |> Map.put(:selected_trips, [schedule]))
+        live_isolated_component(TimeRange, @assigns |> Map.put(:selected_schedules, [schedule]))
 
       view
       |> element("form")

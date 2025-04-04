@@ -67,7 +67,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         available_schedules: %{},
         available_stops: %{},
         service_dates: service_dates,
-        todays_date: hd(service_dates) |> Date.to_iso8601(),
         modal_date: hd(service_dates) |> Date.to_iso8601(),
         modal_filter_value: hd(service_dates) |> Date.to_iso8601(),
         modal_options: modal_options,
@@ -234,7 +233,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         available_schedules =
           Map.get(socket.assigns.available_schedules, :result)
 
-        selected_trips =
+        selected_schedules =
           if available_schedules do
             available_schedules
             |> Enum.filter(&(&1.trip.id in affected_service["trip_ids"]))
@@ -244,7 +243,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
         send(self(), {:add_errors, [], __MODULE__})
         send(self(), {:section_completed, changeset})
-        send(self(), {:selected_trips, selected_trips})
+        send(self(), {:selected_schedules, selected_schedules})
 
       {:error, changeset} ->
         send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})

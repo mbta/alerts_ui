@@ -94,7 +94,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
         steps: @steps,
         alert_data: alert_data,
         combination: Map.get(alert_data, :combination),
-        selected_trips: [],
+        selected_schedules: [],
         available_facilities: [],
         alert_uuid: nil,
         alert_id: alert_id,
@@ -124,8 +124,6 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   # get all schedules from today until end of rating
   def get_schedules(route_ids, direction, nil) do
-    directions = directions_from_selection(direction)
-
     today =
       DateTime.utc_now()
       |> DateTime.shift_zone!("America/New_York")
@@ -136,14 +134,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
     schedules =
       Date.range(today, end_of_rating)
       |> Enum.flat_map(fn date ->
-        opts = [stop_sequences: [:first, :last], date: date] |> direction_option(directions)
-
         route_ids
-        |> SchedulesRepo.by_route_ids(opts)
-        |> Enum.map(fn schedule ->
-          map = Map.from_struct(schedule)
-          Kernel.struct(EnhancedSchedule, map)
-        end)
+        |> schedules(direction, date)
         |> Enum.group_by(& &1.trip.id)
         |> Enum.map(fn {_k, [first_schedule, last_schedule]} ->
           update_stop(first_schedule, last_schedule)
@@ -152,12 +144,16 @@ defmodule AlertsUIWeb.CreateAlertLive do
       |> Enum.uniq_by(&{&1.trip.id, DateTime.to_time(&1.departure_time), &1.trip.name})
       |> Enum.sort_by(&(&1.departure_time |> DateTime.to_time()), Time)
 
+    # get a map (by {departure time, trip name}) of all schedules whose combination of
+    # departure time and trip name occur more than once in the list of schedules
     freq =
       schedules
       |> Enum.frequencies_by(&{DateTime.to_time(&1.departure_time), &1.trip.name})
       |> Enum.filter(fn {_k, v} -> v > 1 end)
       |> Enum.into(%{})
 
+    # set the `:duplicate_name?` of all the schedules that appear in the frequency list above
+    # to `true`
     Enum.map(schedules, fn schedule ->
       if Map.has_key?(freq, {DateTime.to_time(schedule.departure_time), schedule.trip.name}) do
         Map.put(schedule, :duplicate_name?, true)
@@ -169,6 +165,12 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   def get_schedules(route_ids, direction, date) do
     # get schedules for 1 day
+    route_ids
+    |> schedules(direction, date)
+    |> filter_out_old_trips
+  end
+
+  def schedules(route_ids, direction, date) do
     directions = directions_from_selection(direction)
     opts = [stop_sequences: [:first, :last], date: date] |> direction_option(directions)
 
@@ -178,7 +180,6 @@ defmodule AlertsUIWeb.CreateAlertLive do
       map = Map.from_struct(schedule)
       Kernel.struct(EnhancedSchedule, map)
     end)
-    |> filter_out_old_trips
   end
 
   def get_stops(["Green"] = route_ids, direction) do
@@ -251,8 +252,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
     %{stops: available_stops, facilities: available_facilities}
   end
 
-  def handle_info({:selected_trips, selected_trips}, socket) do
-    {:noreply, assign(socket, selected_trips: selected_trips)}
+  def handle_info({:selected_schedules, selected_schedules}, socket) do
+    {:noreply, assign(socket, selected_schedules: selected_schedules)}
   end
 
   def handle_info(:save_as_draft, socket) do
@@ -310,7 +311,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
       progress: get_step_by_name(socket.assigns.progress.next),
       alert_data: alert_data,
       combination: combination,
-      selected_trips: nil,
+      selected_schedules: nil,
       errors: %{}
     }
 
