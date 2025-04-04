@@ -195,23 +195,67 @@ defmodule AlertsUI.AlertBuilder do
   defp child_stops_with_context(routes, direction, parent_stop_ids) do
     routes
     |> Enum.flat_map(fn route ->
-      route.id
-      # get relevant route patterns for the routes
-      # so we can look at their representative trips
-      |> get_route_patterns(direction, route.type)
-      # remove route patterns for branches we don't want
-      |> filtered_route_patterns(parent_stop_ids)
-      |> Enum.flat_map(fn route_pattern ->
-        # build list of stops we want to include
-        route_pattern_stops_with_context_for_parents(
-          route_pattern,
-          route.id,
-          parent_stop_ids,
-          route.type
-        )
-      end)
+      canonical_route_patterns =
+        route.id
+        # get relevant route patterns for the routes
+        # so we can look at their representative trips
+        |> get_route_patterns(direction, route.type)
+
+      child_stops_context =
+        canonical_route_patterns
+        # remove route patterns for branches we don't want
+        |> filtered_route_patterns(parent_stop_ids)
+        |> Enum.flat_map(fn route_pattern ->
+          route_pattern_stops_with_context_for_parents(
+            # build list of stops we want to include
+            route_pattern,
+            route.id,
+            parent_stop_ids,
+            route.type
+          )
+        end)
+
+      # in the case of Subway & CR, detect platforms at the nodes of branches that
+      # need to be included in informed entities
+      neighbor_stops =
+        get_neighbor_stops(child_stops_context, canonical_route_patterns, parent_stop_ids, route)
+
+      child_stops_context ++ neighbor_stops
     end)
   end
+
+  defp get_neighbor_stops(child_stops_context, canonical_route_patterns, parent_stop_ids, route)
+       when route.type in [0, 1, 2] do
+    all_route_pattern_stops =
+      canonical_route_patterns
+      |> Enum.map(& &1.stops())
+
+    child_stops_with_direction =
+      Enum.map(child_stops_context, fn {child_stop, _, child_direction, _} ->
+        {child_stop, child_direction}
+      end)
+
+    Enum.map(child_stops_with_direction, fn {child_stop, child_direction} ->
+      get_neighbors(all_route_pattern_stops, child_stop, child_direction)
+    end)
+    |> List.flatten()
+    |> Enum.reject(fn {neighbor_stop, _direction} ->
+      neighbor_stop.id in Enum.map(child_stops_with_direction, fn {s, _d} -> s.id end)
+    end)
+    |> Enum.filter(fn {neighbor_stop, _direction} ->
+      neighbor_stop.parent_id in parent_stop_ids
+    end)
+    |> Enum.map(fn {neighbor_stop, direction} ->
+      {
+        neighbor_stop,
+        route.id,
+        direction,
+        if(direction == 0, do: :last, else: :first)
+      }
+    end)
+  end
+
+  defp get_neighbor_stops(_, _, _, _), do: []
 
   defp filtered_route_patterns(route_patterns, parent_stop_ids) do
     # determines which route patterns to use in the case of a route with
@@ -221,7 +265,6 @@ defmodule AlertsUI.AlertBuilder do
 
     route_pattern_match =
       route_patterns
-      |> Enum.reject(&(&1.route_id =~ "Shuttle"))
       |> Enum.filter(fn route_pattern ->
         stops_from_route_pattern = Enum.map(route_pattern.stops, & &1.id)
         parents_from_route_pattern = Enum.map(route_pattern.stops, & &1.parent_id)
@@ -253,7 +296,9 @@ defmodule AlertsUI.AlertBuilder do
       ["filter[canonical]": true, include: "representative_trip.stops"]
       |> route_pattern_direction_opts(direction)
 
-    RoutePatterns.by_route_id(route_id, opts)
+    route_id
+    |> RoutePatterns.by_route_id(opts)
+    |> Enum.filter(&(&1.typicality < 4))
   end
 
   @spec route_pattern_direction_opts(keyword(), String.t()) :: keyword()
@@ -272,6 +317,7 @@ defmodule AlertsUI.AlertBuilder do
         ) :: [
           stop_with_context_t()
         ]
+
   defp route_pattern_stops_with_context_for_parents(
          route_pattern,
          route_id,
@@ -311,6 +357,32 @@ defmodule AlertsUI.AlertBuilder do
     |> Enum.filter(fn stop ->
       stop.parent_id in parent_stop_ids
     end)
+  end
+
+  defp get_neighbors(stops_list, stop, direction) when direction == 1 do
+    stops_list
+    |> Enum.map(&Enum.reverse/1)
+    |> neighbors(stop, direction)
+  end
+
+  defp get_neighbors(stops_list, stop, direction) do
+    neighbors(stops_list, stop, direction)
+  end
+
+  defp neighbors(stops_list, stop, direction) do
+    stops_list
+    |> Enum.map(fn stops ->
+      index = Enum.find_index(stops, fn s -> s.id === stop.id end)
+
+      if index && length(stops) >= index - 1 do
+        Enum.at(stops, index + 1)
+      else
+        nil
+      end
+    end)
+    |> Enum.reject(&is_nil/1)
+    |> Enum.uniq()
+    |> Enum.map(&{&1, direction})
   end
 
   defp expand_subway_service_types(service_types) do
