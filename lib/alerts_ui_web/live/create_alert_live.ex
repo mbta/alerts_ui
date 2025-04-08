@@ -209,8 +209,17 @@ defmodule AlertsUIWeb.CreateAlertLive do
     |> available_stops(route_ids)
   end
 
-  def get_stops_by_route_type(route_type) do
+  def get_stops_by_route_type(route_type, route_id \\ nil)
+
+  def get_stops_by_route_type(route_type, route_id) when is_nil(route_id) do
     StopsRepo.by_route_type(route_type) |> Enum.sort_by(& &1.name)
+  end
+
+  def get_stops_by_route_type(route_type, route_id) do
+    Enum.flat_map([0, 1], fn direction ->
+      opts = [direction_id: direction, route: route_id]
+      StopsRepo.by_route_type(route_type, opts)
+    end)
   end
 
   def get_routes_by_stop(stop_ids, route_type) do

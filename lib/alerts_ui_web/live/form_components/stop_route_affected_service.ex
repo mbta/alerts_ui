@@ -81,10 +81,10 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       |> assign(service_type_name: route_type |> InformedEntity.route_code_mapping() || nil)
       |> assign(form: form)
       |> assign(route_type: route_type)
-      |> assign_async([:available_stops, :available_routes, :available_filter_routes], fn ->
+      |> assign_stops(route_type)
+      |> assign_async([:available_routes, :available_filter_routes], fn ->
         {:ok,
          %{
-           available_stops: CreateAlertLive.get_stops_by_route_type(route_type),
            available_routes:
              CreateAlertLive.get_routes_by_stop(
                Map.get(alert_data, :stop_ids, []),
@@ -131,15 +131,25 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       socket
       |> assign(assigns)
       |> assign(service_type_name: route_type |> InformedEntity.route_code_mapping() || nil)
-      |> assign_async([:available_stops, :available_filter_routes], fn ->
+      |> assign_stops(route_type)
+      |> assign_async([:available_filter_routes], fn ->
         {:ok,
          %{
-           available_stops: CreateAlertLive.get_stops_by_route_type(route_type),
            available_filter_routes: CreateAlertLive.get_routes(route_type)
          }}
       end)
 
     {:ok, socket}
+  end
+
+  defp assign_stops(socket, route_type, route_id \\ nil) do
+    if socket.assigns.available_stops == %{} do
+      assign_async(socket, :available_stops, fn ->
+        {:ok, %{available_stops: CreateAlertLive.get_stops_by_route_type(route_type, route_id)}}
+      end)
+    else
+      socket
+    end
   end
 
   # On stop select, need to populate and select all of the route_ids
@@ -207,9 +217,10 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       end
 
     selected_route_id = socket.assigns.form.params["modal_route_id"]
+    selected_route_id = if selected_route_id in ["", "default"], do: nil, else: selected_route_id
 
     filter_title_value =
-      if selected_route_id in [nil, "", "default"] do
+      if is_nil(selected_route_id) do
         "All routes"
       else
         Enum.find(routes, &(&1.id === selected_route_id)).name
@@ -222,8 +233,20 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       )
       |> Enum.map(& &1.id)
 
+      route_type = socket.assigns.route_type
+
     {:noreply,
      socket
+     |> assign_async([:available_stops], fn ->
+      {:ok,
+       %{
+         available_stops:
+           CreateAlertLive.get_stops_by_route_type(
+             route_type,
+             selected_route_id
+           )
+       }}
+    end)
      |> assign(
        stops_filtered_by_route: stops_filtered_by_route,
        filter_title_value: filter_title_value
@@ -457,4 +480,5 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     # returns true if stop in list is in list from modal filter or has already been selected by the user.
     stop.id in (stops_filtered_by_route ++ selected_stop_ids)
   end
+
 end
