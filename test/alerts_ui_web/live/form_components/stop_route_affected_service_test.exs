@@ -17,7 +17,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
   alias Phoenix.LiveView.AsyncResult
 
   @assigns %{
-    id: "affected_service",
+    id: "stop_route_affected_service",
     progress: %Step{
       name: "details",
       previous: "route_type_and_effect",
@@ -27,7 +27,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
     route_type: 1,
     alert_data: %{},
     editing: false,
-    effect_name: "Delay"
+    effect_name: "Station Closure"
   }
 
   @route_one %Route{sort_order: 1, id: "Blue", name: "route_number_1"}
@@ -41,6 +41,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
   @routes [@route_one, @route_two]
   @stop %Stop{id: "place-aqucl", name: "Aquarium"}
   @stop_two %Stop{id: "place-pktrm", name: "Park Street"}
+
 
   describe "component" do
     test "renders" do
@@ -224,6 +225,46 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
     end
 
     test "modal search works" do
+      with_mocks([
+        {RoutesRepo, [],
+         [by_stop: fn _route_id -> @routes end, by_type: fn _types -> @routes end]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _route_type, [direction_id: _any, route: "Blue"] -> [@stop_two] end,
+           by_route_type: fn _route_type -> [@stop, @stop_two] end
+         ]}
+      ]) do
+        {:ok, view, _html} =
+          live_isolated_component(
+            StopRouteAffectedService,
+            @assigns
+          )
+
+        assert view
+               |> element("select##stop_route_affected_service_stop_ids")
+               |> render_async() =~
+                 ~s(<option value="#{@stop.id}">#{@stop.name}</option>)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "stop_route_affected_service" => %{
+            "modal_route_id" => "Blue"
+          }
+        })
+
+        view
+        |> with_target("#stop_route_service_view")
+        |> render_hook(:accepted_routes_modal, %{})
+
+        refute view
+               |> element("select##stop_route_affected_service_stop_ids")
+               |> render_async() =~
+                 ~s(<option value="#{@stop.id}">#{@stop.name}</option>)
+      end
+    end
+
+    test "modal filtering works" do
       with_mocks([
         {RoutesRepo, [],
          [by_stop: fn _route_id -> @routes end, by_type: fn _types -> @routes end]},

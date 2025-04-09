@@ -199,6 +199,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       |> Map.put(:action, :validate)
       |> to_form()
 
+    # |> IO.inspect
+
     {:noreply, assign(socket, form: form)}
   end
 
