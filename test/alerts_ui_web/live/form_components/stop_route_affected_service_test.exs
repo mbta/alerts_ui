@@ -224,7 +224,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       end
     end
 
-    test "modal search works" do
+    test "modal filtering works" do
       with_mocks([
         {RoutesRepo, [],
          [by_stop: fn _route_id -> @routes end, by_type: fn _types -> @routes end]},
@@ -264,7 +264,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       end
     end
 
-    test "modal filtering works" do
+    test "modal search works" do
       with_mocks([
         {RoutesRepo, [],
          [by_stop: fn _route_id -> @routes end, by_type: fn _types -> @routes end]},
