@@ -152,11 +152,11 @@ defmodule AlertsUIWeb.CreateAlertLive do
       |> Enum.filter(fn {_k, v} -> v > 1 end)
       |> Enum.into(%{})
 
-    # set the `:duplicate_name?` of all the schedules that appear in the frequency list above
+    # set the `:use_trip_id_in_name?` of all the schedules that appear in the frequency list above
     # to `true`
     Enum.map(schedules, fn schedule ->
       if Map.has_key?(freq, {DateTime.to_time(schedule.departure_time), schedule.trip.name}) do
-        Map.put(schedule, :duplicate_name?, true)
+        Map.put(schedule, :use_trip_id_in_name?, true)
       else
         schedule
       end

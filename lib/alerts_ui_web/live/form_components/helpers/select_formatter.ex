@@ -117,7 +117,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
           trip: %Trip{name: trip_name, id: trip_id},
           stop: %Stop{name: stop_name},
           departure_time: departure_time,
-          duplicate_name?: true
+          use_trip_id_in_name?: true
         },
         _route_type
       ) do

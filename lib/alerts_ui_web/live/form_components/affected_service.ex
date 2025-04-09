@@ -66,7 +66,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         available_routes: %{},
         available_schedules: %{},
         available_stops: %{},
-        service_dates: service_dates,
         modal_date: hd(service_dates) |> Date.to_iso8601(),
         modal_filter_value: hd(service_dates) |> Date.to_iso8601(),
         modal_options: modal_options,

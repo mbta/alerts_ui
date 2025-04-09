@@ -94,7 +94,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
             stop: %Stop{id: "place-sstat", name: "South Station"},
             arrival_time: nil,
             departure_time: ~U[2024-02-21 14:01:00.00Z],
-            duplicate_name?: true
+            use_trip_id_in_name?: true
           },
           %EnhancedSchedule{
             route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
@@ -102,7 +102,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
             stop: %Stop{id: "place-sstat", name: "South Station"},
             arrival_time: nil,
             departure_time: ~U[2024-02-21 14:01:00.00Z],
-            duplicate_name?: true
+            use_trip_id_in_name?: true
           },
           %EnhancedSchedule{
             route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
