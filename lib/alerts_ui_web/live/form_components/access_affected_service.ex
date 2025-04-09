@@ -190,6 +190,11 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     {:noreply, socket}
   end
 
+  @impl true
+  def handle_event("clear_filter", %{"filter-id" => "stops-filter-modal"}, socket) do
+    {:noreply, assign(socket, stop_id_filter_value: "default", filter_title_value: "All stops")}
+  end
+
   def changeset(changeset, params) do
     changeset
     |> cast(params, @fields)
@@ -289,11 +294,13 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             filter_field={@form[:facility_id_filter]}
             modal_filter_id="stops-filter-modal"
             modal_filter_title={"Filter: #{@filter_title_value}"}
+            modal_filter_active={is_filter_active(@stop_id_filter_value)}
             options={@facility_id_options}
             loading={@available_facilities.loading}
             no_results={Enum.empty?(@facility_id_options)}
             class="w-[25%] h-[32rem]"
             multiple={false}
+            target_id="#service_form"
           />
         </fieldset>
       </.form>
@@ -301,6 +308,9 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     </div>
     """
   end
+
+  defp is_filter_active(filter_value) when filter_value in ["", nil, "default"], do: false
+  defp is_filter_active(_), do: true
 
   defp filter_facility_by_stop_ids(facility, stop_id_filter_value, facility_id) do
     # returns true if facility in list if it belongs to a selected stop or has already been selected by the user.

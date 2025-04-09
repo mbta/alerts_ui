@@ -248,6 +248,11 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   end
 
   @impl true
+  def handle_event("clear_filter", %{"filter-id" => "routes-filter-modal"}, socket) do
+    {:noreply, assign(socket, stop_id_filter_value: [], filter_title_value: "All routes")}
+  end
+
+  @impl true
   def handle_async(:get_available_routes, {:ok, fetched_routes}, socket) do
     %{available_routes: available_routes} = socket.assigns
 
@@ -409,8 +414,10 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
           filter_field={@form[:stop_ids_filter]}
           modal_filter_id="routes-filter-modal"
           modal_filter_title={"Filter: #{@filter_title_value}"}
+          modal_filter_active={!Enum.empty?(@stop_id_filter_value)}
           options={@stop_id_options}
           class="w-[25%]"
+          target_id="#service_form"
         />
 
         <.filtered_select
