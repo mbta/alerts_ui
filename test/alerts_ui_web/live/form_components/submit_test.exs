@@ -27,16 +27,4 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
       assert_receive {:__live_isolated_component_handle_info_received__, _pid, :create_alert}
     end
   end
-
-  describe "save as draft" do
-    test "save as draft on click" do
-      {:ok, view, _html} = live_isolated_component(Submit, @assigns)
-
-      view
-      |> element("#draft")
-      |> render_click(%{})
-
-      assert_receive {:__live_isolated_component_handle_info_received__, _pid, :save_as_draft}
-    end
-  end
 end

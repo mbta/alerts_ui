@@ -258,27 +258,6 @@ defmodule AlertsUIWeb.CreateAlertLive do
     {:noreply, assign(socket, selected_schedules: selected_schedules)}
   end
 
-  def handle_info(:save_as_draft, socket) do
-    socket.assigns.alert_data
-    |> Map.put(:draft, true)
-    |> AlertBuilder.build_alert(Map.get(socket.assigns, :combination))
-    |> Alerts.create_draft_alert()
-    |> case do
-      {:ok, _result} ->
-        socket = put_flash(socket, :info, "Draft Saved Successfully")
-        {:noreply, redirect(socket, to: "/alerts/new")}
-
-      {:error, result} ->
-        errors =
-          result
-          |> Alerts.parse_changeset_errors()
-          |> format_errors(socket.assigns.combination)
-
-        socket = display_errors(socket, errors)
-        {:noreply, socket}
-    end
-  end
-
   @impl true
   def handle_info({:add_errors, errors, name}, socket) do
     updated_errors = socket.assigns.errors |> Map.put(name, errors)

@@ -50,7 +50,6 @@ defmodule AlertsUI.AlertBuilder do
           header_text: String.t(),
           description_text: String.t(),
           banner_text: String.t() | nil,
-          draft: boolean | nil,
           last_push_notification_timestamp: NaiveDateTime.t() | nil,
           notification_period_start: NaiveDateTime.t() | nil,
           notification_specifier: atom() | nil,
@@ -149,7 +148,6 @@ defmodule AlertsUI.AlertBuilder do
       effect: Map.get(effect_map, :effect),
       effect_detail: Map.get(effect_map, :effect_detail),
       effect_name: effect_name,
-      draft: Map.get(alert_data, :draft, false),
       last_push_notification_timestamp:
         Map.get(alert_data, :last_push_notification_timestamp)
         |> ActivePeriodBuilder.naive_eastern_datetime_to_utc(),
