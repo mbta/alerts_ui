@@ -42,8 +42,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     service_dates =
       Enum.to_list(0..6)
       |> Enum.map(fn x ->
-        DateTime.utc_now()
-        |> DateTime.shift_zone!("America/New_York")
+        DateTime.now!("America/New_York")
         |> ActivePeriod.datetime_to_service_date()
         |> Date.add(x)
       end)
@@ -55,8 +54,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       end)
 
     changeset = changeset(%__MODULE__{}, %{modal_date: hd(service_dates) |> Date.to_iso8601()})
-
-    form = to_form(changeset)
 
     socket =
       socket
@@ -180,15 +177,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     route_types = all_route_types(route_type)
 
     # make sure initial errors get sent up to create_alert_live even if no events fire
-<<<<<<< HEAD
     # For other form components, this is done in the mount, but we can't do that here
     # because assigns won't be populated yet, and that's how we get the required_fields
-    changeset = changeset(%__MODULE__{}, alert_data)
-=======
-    changeset =
-      %__MODULE__{}
-      |> changeset(Map.merge(alert_data, socket.assigns))
->>>>>>> a3b4051 (trips filter modal)
+    changeset = changeset(%__MODULE__{}, Map.merge(alert_data, socket.assigns))
 
     case apply_action(
            changeset

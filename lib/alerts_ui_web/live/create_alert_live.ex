@@ -152,8 +152,10 @@ defmodule AlertsUIWeb.CreateAlertLive do
       |> Enum.filter(fn {_k, v} -> v > 1 end)
       |> Enum.into(%{})
 
-    # set the `:use_trip_id_in_name?` of all the schedules that appear in the frequency list above
-    # to `true`
+    # Some trips can have the same name and departure time but different trip ids, because
+    # they run on different days (eg part of different route patterns)
+    # This sets the `:use_trip_id_in_name?` of all the schedules that appear in the frequency list above
+    # to `true`, so we know to use the trip_id in the display name so users can tell them apart.
     Enum.map(schedules, fn schedule ->
       if Map.has_key?(freq, {DateTime.to_time(schedule.departure_time), schedule.trip.name}) do
         Map.put(schedule, :use_trip_id_in_name?, true)
