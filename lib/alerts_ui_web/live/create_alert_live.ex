@@ -123,7 +123,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   # get all schedules from today until end of rating
-  def get_schedules(route_ids, direction, nil) do
+  def get_schedules_by_date(route_ids, direction, nil) do
     today =
       DateTime.utc_now()
       |> DateTime.shift_zone!("America/New_York")
@@ -135,7 +135,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
       Date.range(today, end_of_rating)
       |> Enum.flat_map(fn date ->
         route_ids
-        |> schedules(direction, date)
+        |> get_schedules(direction, date)
         |> Enum.group_by(& &1.trip.id)
         |> Enum.map(fn {_k, [first_schedule, last_schedule]} ->
           update_stop(first_schedule, last_schedule)
@@ -165,14 +165,14 @@ defmodule AlertsUIWeb.CreateAlertLive do
     end)
   end
 
-  def get_schedules(route_ids, direction, date) do
+  def get_schedules_by_date(route_ids, direction, date) do
     # get schedules for 1 day
     route_ids
-    |> schedules(direction, date)
+    |> get_schedules(direction, date)
     |> filter_out_old_trips
   end
 
-  def schedules(route_ids, direction, date) do
+  def get_schedules(route_ids, direction, date) do
     directions = directions_from_selection(direction)
     opts = [stop_sequences: [:first, :last], date: date] |> direction_option(directions)
 
@@ -475,7 +475,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
     # updates first schedule with arrival time from last schedule, which is otherwise discarded
     # last stop name is needed for ferry trip names
     first_schedule
-    |> Map.put(:arrival_time, last_schedule.arrival_time)
+    |> Map.put(:time_of_last_trip_arrival, last_schedule.arrival_time)
     |> Map.put(:last_stop_name, last_schedule.stop.name)
   end
 end

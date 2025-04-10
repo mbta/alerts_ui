@@ -7,7 +7,8 @@ defmodule AlertsUI.Models.EnhancedSchedule do
   alias MBTAV3API.Schedules.{Schedule, Trip}
   alias MBTAV3API.Stops.Stop
 
-  defstruct Map.keys(Schedule.__struct__()) ++ [use_trip_id_in_name?: false, last_stop_name: ""]
+  defstruct Map.keys(Schedule.__struct__()) ++
+              [use_trip_id_in_name?: false, last_stop_name: "", time_of_last_trip_arrival: nil]
 
   @type t :: %__MODULE__{
           route: Route.t(),
@@ -23,6 +24,7 @@ defmodule AlertsUI.Models.EnhancedSchedule do
           pickup_type: integer,
           platform_stop_id: Stop.id_t(),
           use_trip_id_in_name?: boolean,
-          last_stop_name: String.t()
+          last_stop_name: String.t(),
+          time_of_last_trip_arrival: DateTime.t() | nil
         }
 end

@@ -86,7 +86,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         alert_data.trip_information_by_id
       else
         available_schedules =
-          CreateAlertLive.get_schedules(
+          CreateAlertLive.get_schedules_by_date(
             alert_data.route_ids,
             alert_data.direction,
             nil
@@ -359,7 +359,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         {:ok,
          %{
            available_schedules:
-             CreateAlertLive.get_schedules(
+             CreateAlertLive.get_schedules_by_date(
                route_ids,
                direction,
                service_date
