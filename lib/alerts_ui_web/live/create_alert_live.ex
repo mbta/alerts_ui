@@ -23,7 +23,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   alias AlertsUI.AlertBuilder
   alias AlertsUI.Alerts
-  alias AlertsUI.Models.Alert
+  alias AlertsUI.Models.{ActivePeriod, Alert, EnhancedSchedule}
   alias AlertsUI.Routes
 
   alias AlertsUIWeb.FormComponents.{
@@ -94,7 +94,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
         steps: @steps,
         alert_data: alert_data,
         combination: Map.get(alert_data, :combination),
-        selected_trips: [],
+        selected_schedules: [],
         available_facilities: [],
         alert_uuid: nil,
         alert_id: alert_id,
@@ -122,11 +122,66 @@ defmodule AlertsUIWeb.CreateAlertLive do
     |> maybe_include_virtual_green_line()
   end
 
-  def get_schedules(route_ids, direction) do
-    directions = directions_from_selection(direction)
-    opts = direction_option([stop_sequences: [:first, :last]], directions)
+  # get all schedules from today until end of rating
+  def get_schedules_by_date(route_ids, direction, nil) do
+    today =
+      DateTime.utc_now()
+      |> DateTime.shift_zone!("America/New_York")
+      |> ActivePeriod.datetime_to_service_date()
 
-    route_ids |> SchedulesRepo.by_route_ids(opts) |> filter_out_old_trips
+    end_of_rating = SchedulesRepo.end_of_rating()
+
+    schedules =
+      Date.range(today, end_of_rating)
+      |> Enum.flat_map(fn date ->
+        route_ids
+        |> get_schedules(direction, date)
+        |> Enum.group_by(& &1.trip.id)
+        |> Enum.map(fn {_k, [first_schedule, last_schedule]} ->
+          update_schedule(first_schedule, last_schedule)
+        end)
+      end)
+      |> Enum.uniq_by(&{&1.trip.id, DateTime.to_time(&1.departure_time), &1.trip.name})
+      |> Enum.sort_by(&(&1.departure_time |> DateTime.to_time()), Time)
+
+    # get a map (by {departure time, trip name}) of all schedules whose combination of
+    # departure time and trip name occur more than once in the list of schedules
+    freq =
+      schedules
+      |> Enum.frequencies_by(&{DateTime.to_time(&1.departure_time), &1.trip.name})
+      |> Enum.filter(fn {_k, v} -> v > 1 end)
+      |> Enum.into(%{})
+
+    # Some trips can have the same name and departure time but different trip ids, because
+    # they run on different days (eg part of different route patterns)
+    # This sets the `:use_trip_id_in_name?` of all the schedules that appear in the frequency list above
+    # to `true`, so we know to use the trip_id in the display name so users can tell them apart.
+    Enum.map(schedules, fn schedule ->
+      if Map.has_key?(freq, {DateTime.to_time(schedule.departure_time), schedule.trip.name}) do
+        Map.put(schedule, :use_trip_id_in_name?, true)
+      else
+        schedule
+      end
+    end)
+  end
+
+  def get_schedules_by_date(route_ids, direction, date) do
+    # get schedules for 1 day
+    route_ids
+    |> get_schedules(direction, date)
+    |> filter_out_old_trips
+  end
+
+  def get_schedules(route_ids, direction, date) do
+    directions = directions_from_selection(direction)
+    opts = [stop_sequences: [:first, :last], date: date] |> direction_option(directions)
+
+    route_ids
+    |> SchedulesRepo.by_route_ids(opts)
+    |> Enum.map(fn schedule ->
+      map = Map.from_struct(schedule)
+      Kernel.struct(EnhancedSchedule, map)
+    end)
   end
 
   def get_stops(["Green"] = route_ids, direction) do
@@ -199,8 +254,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
     %{stops: available_stops, facilities: available_facilities}
   end
 
-  def handle_info({:selected_trips, selected_trips}, socket) do
-    {:noreply, assign(socket, selected_trips: selected_trips)}
+  def handle_info({:selected_schedules, selected_schedules}, socket) do
+    {:noreply, assign(socket, selected_schedules: selected_schedules)}
   end
 
   def handle_info(:save_as_draft, socket) do
@@ -258,7 +313,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
       progress: get_step_by_name(socket.assigns.progress.next),
       alert_data: alert_data,
       combination: combination,
-      selected_trips: nil,
+      selected_schedules: nil,
       errors: %{}
     }
 
@@ -403,22 +458,24 @@ defmodule AlertsUIWeb.CreateAlertLive do
   def filter_out_old_trips(schedules, current_time \\ DateTime.utc_now()) do
     schedules
     |> Enum.group_by(& &1.trip.id)
-    |> Enum.reduce([], fn {_k, [first_stop, last_stop]}, acc ->
-      one_hour_from_arrival = Timex.shift(last_stop.arrival_time, hours: 1)
+    |> Enum.reduce([], fn {_k, [first_schedule, last_schedule]}, acc ->
+      one_hour_from_arrival = Timex.shift(last_schedule.arrival_time, hours: 1)
 
       if DateTime.compare(one_hour_from_arrival, current_time) in [:gt, :eq] do
-        # stash last stop name in note field- needed for ferry trip names
-        stop = first_stop.stop |> Map.put(:note, last_stop.stop.name)
-
-        schedule_to_return =
-          first_stop |> Map.put(:stop, stop) |> Map.put(:arrival_time, last_stop.arrival_time)
-
-        [schedule_to_return | acc]
+        [update_schedule(first_schedule, last_schedule) | acc]
       else
         acc
       end
     end)
     |> Enum.reverse()
     |> Enum.sort_by(& &1.departure_time, DateTime)
+  end
+
+  def update_schedule(first_schedule, last_schedule) do
+    # updates first schedule with arrival time from last schedule, which is otherwise discarded
+    # last stop name is needed for ferry trip names
+    first_schedule
+    |> Map.put(:time_of_last_trip_arrival, last_schedule.arrival_time)
+    |> Map.put(:last_stop_name, last_schedule.stop.name)
   end
 end

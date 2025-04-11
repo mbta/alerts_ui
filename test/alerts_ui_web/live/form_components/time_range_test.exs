@@ -4,9 +4,10 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
   import LiveIsolatedComponent
   import Phoenix.LiveViewTest
+  alias AlertsUI.Models.EnhancedSchedule
   alias AlertsUIWeb.FormComponents.TimeRange
   alias AlertsUIWeb.Step
-  alias MBTAV3API.Schedules.{Schedule, Trip}
+  alias MBTAV3API.Schedules.Trip
 
   @assigns %{
     id: "time_range",
@@ -20,7 +21,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
     current_time: ~N[2024-04-30 15:54:00],
     edited: false,
     editing: false,
-    selected_trips: []
+    selected_schedules: []
   }
 
   describe "component" do
@@ -203,14 +204,16 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
     end
 
     test "displays error if start after trip end when start changes" do
-      schedule = %Schedule{
+      schedule = %EnhancedSchedule{
         trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
-        arrival_time: ~U[2024-05-01 13:15:00.00Z] |> DateTime.shift_zone!("America/New_York"),
+        arrival_time: nil,
+        time_of_last_trip_arrival:
+          ~U[2024-05-01 13:15:00.00Z] |> DateTime.shift_zone!("America/New_York"),
         departure_time: ~U[2024-05-01 12:15:00.00Z] |> DateTime.shift_zone!("America/New_York")
       }
 
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns |> Map.put(:selected_trips, [schedule]))
+        live_isolated_component(TimeRange, @assigns |> Map.put(:selected_schedules, [schedule]))
 
       view
       |> element("form")
@@ -258,7 +261,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         }
       })
 
-      live_assign(view, :selected_trips, [])
+      live_assign(view, :selected_schedules, [])
 
       assert render(view) =~ ~s(value=\"now\")
       assert render(view) =~ ~s(value=\"later_today\")
@@ -266,9 +269,11 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
     end
 
     test "start and end time updated if trip changes and departure before current time" do
-      schedule = %Schedule{
+      schedule = %EnhancedSchedule{
         trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
-        arrival_time: ~U[2024-05-01 13:15:00.00Z] |> DateTime.shift_zone!("America/New_York"),
+        arrival_time: nil,
+        time_of_last_trip_arrival:
+          ~U[2024-05-01 13:15:00.00Z] |> DateTime.shift_zone!("America/New_York"),
         departure_time: ~U[2024-05-01 12:15:00.00Z] |> DateTime.shift_zone!("America/New_York")
       }
 
@@ -296,21 +301,22 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         }
       })
 
-      live_assign(view, :selected_trips, [schedule])
+      live_assign(view, :selected_schedules, [schedule])
 
       assert render(view) =~ ~s(value=\"now\")
       assert render(view) =~ ~s(value=\"2024-05-01T10:15\")
     end
 
     test "doesn't display error if start within 1 hour of trip end" do
-      schedule = %Schedule{
+      schedule = %EnhancedSchedule{
         trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
-        arrival_time: ~U[2024-05-01 09:15:00.00Z],
+        arrival_time: nil,
+        time_of_last_trip_arrival: ~U[2024-05-01 09:15:00.00Z],
         departure_time: ~U[2024-05-01 08:15:00.00Z]
       }
 
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns |> Map.put(:selected_trips, [schedule]))
+        live_isolated_component(TimeRange, @assigns |> Map.put(:selected_schedules, [schedule]))
 
       view
       |> element("form")
