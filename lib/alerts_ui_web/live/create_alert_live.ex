@@ -138,7 +138,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
         |> get_schedules(direction, date)
         |> Enum.group_by(& &1.trip.id)
         |> Enum.map(fn {_k, [first_schedule, last_schedule]} ->
-          update_stop(first_schedule, last_schedule)
+          update_schedule(first_schedule, last_schedule)
         end)
       end)
       |> Enum.uniq_by(&{&1.trip.id, DateTime.to_time(&1.departure_time), &1.trip.name})
@@ -462,7 +462,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
       one_hour_from_arrival = Timex.shift(last_schedule.arrival_time, hours: 1)
 
       if DateTime.compare(one_hour_from_arrival, current_time) in [:gt, :eq] do
-        [update_stop(first_schedule, last_schedule) | acc]
+        [update_schedule(first_schedule, last_schedule) | acc]
       else
         acc
       end
@@ -471,7 +471,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
     |> Enum.sort_by(& &1.departure_time, DateTime)
   end
 
-  def update_stop(first_schedule, last_schedule) do
+  def update_schedule(first_schedule, last_schedule) do
     # updates first schedule with arrival time from last schedule, which is otherwise discarded
     # last stop name is needed for ferry trip names
     first_schedule

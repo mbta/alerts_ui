@@ -69,7 +69,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       next: "success",
       label: "Alert Details"
     },
-    route_type: 1,
+    route_type: 2,
     alert_data: %{route_ids: ["CR-Worcester"]},
     combination: :RDTS,
     editing: false,
@@ -239,15 +239,17 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       end
     end
 
-    test "trip options populated if all trips is selected" do
+    test "Filter title updates if 'all trips' selected" do
       today = @todays_date |> Date.to_string()
       tomorrow = Date.add(@todays_date, 1)
 
       with_mock(SchedulesRepo,
         by_route_ids: fn
+          # ISO date used when date is selected
           ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^today] ->
             [@schedule, @schedule_2]
 
+          # Date struct used in all trips- consider refactoring for consistency
           ["CR-Worcester"], [stop_sequences: [:first, :last], date: @todays_date] ->
             [@schedule, @schedule_2]
 
@@ -262,21 +264,15 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
             | alert_data: %{route_type: 2, effect_name: "Delay"}
           })
 
-        refute view
-               |> element("select#affected_service_trip_ids")
-               |> render() =~ "All Trips"
-
         view
         |> element("form")
         |> render_change(%{"affected_service" => %{"route_ids" => ["CR-Worcester"]}})
 
-        live_assign(view, %{modal_filter_value: nil, modal_date: nil})
+        assert view
+               |> element("select#affected_service_trip_ids")
+               |> render() =~ "All Trips"
 
-        view
-        |> element("form")
-        |> render_change(%{
-          "affected_service" => %{"modal_filter_value" => nil, "modal_date" => nil}
-        })
+        live_assign(view, %{modal_filter_value: nil, modal_date: nil})
 
         assert view
                |> live_assign(:available_schedules, %AsyncResult{
@@ -285,7 +281,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
                  failed: false,
                  result: [@schedule]
                })
-               |> render() =~ "All future trips"
+               |> render() =~ "Filter: All future trips"
       end
     end
 
@@ -430,6 +426,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         assert view
                |> render_async() =~
                  ~s(<option value="#{@schedule.trip.id}")
+
+        refute view
+               |> render_async() =~
+                 ~s(<option value="#{@schedule_3.trip.id}")
 
         view
         |> element("form")
