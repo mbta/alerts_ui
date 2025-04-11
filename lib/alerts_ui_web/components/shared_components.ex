@@ -683,6 +683,7 @@ defmodule AlertsUIWeb.SharedComponents do
         ]}
         multiple={@multiple}
         disabled={@disabled}
+        phx-hook="SelectAllAdjuster"
         {@rest}
       >
         <option
