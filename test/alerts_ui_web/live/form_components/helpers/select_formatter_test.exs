@@ -1,10 +1,11 @@
 defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
+  alias AlertsUI.Models.EnhancedSchedule
   alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Routes.Route
-  alias MBTAV3API.Schedules.{Schedule, Trip}
+  alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Stop
 
   describe "formatted_select_options/1" do
@@ -87,28 +88,37 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
     test "it properly formats non-ferry trips" do
       trip_map = %{
         "Framingham/Worcester line" => [
-          %Schedule{
+          %EnhancedSchedule{
             route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
             trip: %Trip{id: "CR-683300-527", name: "527", direction_id: 0},
             stop: %Stop{id: "place-sstat", name: "South Station"},
             arrival_time: nil,
-            departure_time: ~U[2024-02-21 14:01:00.00Z]
+            departure_time: ~U[2024-02-21 14:01:00.00Z],
+            use_trip_id_in_name?: true
           },
-          %Schedule{
+          %EnhancedSchedule{
+            route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+            trip: %Trip{id: "CR-683300-special", name: "527", direction_id: 0},
+            stop: %Stop{id: "place-sstat", name: "South Station"},
+            arrival_time: nil,
+            departure_time: ~U[2024-02-21 14:01:00.00Z],
+            use_trip_id_in_name?: true
+          },
+          %EnhancedSchedule{
             route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
             trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
             stop: %Stop{id: "place-sstat", name: "South Station"},
             arrival_time: nil,
             departure_time: ~U[2024-02-21 14:15:00.00Z]
           },
-          %Schedule{
+          %EnhancedSchedule{
             route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
             trip: %Trip{id: "CR-683321-594", name: "594", direction_id: 1},
             stop: %Stop{id: "place-WML-0214", name: "Framingham"},
             arrival_time: nil,
             departure_time: ~U[2024-02-21 14:45:00.00Z]
           },
-          %Schedule{
+          %EnhancedSchedule{
             route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
             trip: %Trip{id: "CR-683302-529", name: "529", direction_id: 0},
             stop: %Stop{id: "place-sstat", name: "South Station"},
@@ -125,7 +135,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
         })
 
       assert results == [
-               {"527 (9:01 AM from South Station)", "CR-683300-527"},
+               {"527 (9:01 AM from South Station) CR-683300-527", "CR-683300-527"},
+               {"527 (9:01 AM from South Station) CR-683300-special", "CR-683300-special"},
                {"595 (9:15 AM from South Station)", "CR-683322-595"},
                {"594 (9:45 AM from Framingham)", "CR-683321-594"},
                {"529 (10:01 AM from South Station)", "CR-683302-529"}
@@ -135,23 +146,23 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
     test "it properly formats ferry trips" do
       trip_map = %{
         "Framingham/Worcester line" => [
-          %MBTAV3API.Schedules.Schedule{
+          %EnhancedSchedule{
             route: %MBTAV3API.Routes.Route{
               id: "Boat-F4",
               type: 4,
               name: "Charlestown Ferry"
             },
-            trip: %MBTAV3API.Schedules.Trip{
+            trip: %Trip{
               id: "Boat-F4-1430-Long-B-01-Weekday-Fall-24",
               name: ""
             },
-            stop: %MBTAV3API.Stops.Stop{
+            stop: %Stop{
               id: "Boat-Long-South",
-              name: "Long Wharf (South)",
-              note: "Charlestown Navy Yard"
+              name: "Long Wharf (South)"
             },
             arrival_time: nil,
-            departure_time: ~U[2024-02-21 15:01:00.00Z]
+            departure_time: ~U[2024-02-21 15:01:00.00Z],
+            last_stop_name: "Charlestown Navy Yard"
           }
         ]
       }
@@ -171,14 +182,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
     test "it properly formats nested trips" do
       trip_map = %{
         "Framingham/Worcester line" => [
-          %Schedule{
+          %EnhancedSchedule{
             route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
             trip: %Trip{id: "CR-683300-527", name: "527", direction_id: 0},
             stop: %Stop{id: "place-sstat", name: "South Station"},
             arrival_time: nil,
             departure_time: ~U[2024-02-21 14:01:00.00Z]
           },
-          %Schedule{
+          %EnhancedSchedule{
             route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
             trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
             stop: %Stop{id: "place-fram", name: "Framingham"},
@@ -187,14 +198,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
           }
         ],
         "Providence/Stoughton Line" => [
-          %Schedule{
+          %EnhancedSchedule{
             route: %Route{id: "CR-Providence", type: 2, name: "Providence/Stoughton Line"},
             trip: %Trip{id: "CR-687393-839", name: "839", direction_id: 0},
             stop: %Stop{id: "place-sstat", name: "South Station"},
             arrival_time: nil,
             departure_time: ~U[2024-02-21 16:03:00.00Z]
           },
-          %Schedule{
+          %EnhancedSchedule{
             route: %Route{id: "CR-Providence", type: 2, name: "Providence/Stoughton Line"},
             trip: %Trip{id: "CR-687395-841", name: "841", direction_id: 0},
             stop: %Stop{id: "place-forhl", name: "Forest Hills"},
@@ -227,14 +238,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
     test "it properly filters nested trips" do
       trip_map = %{
         "Framingham/Worcester line" => [
-          %Schedule{
+          %EnhancedSchedule{
             route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
             trip: %Trip{id: "CR-683300-527", name: "527", direction_id: 0},
             stop: %Stop{id: "place-sstat", name: "South Station"},
             arrival_time: nil,
             departure_time: ~U[2024-02-21 14:01:00.00Z]
           },
-          %Schedule{
+          %EnhancedSchedule{
             route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
             trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
             stop: %Stop{id: "place-fram", name: "Framingham"},
@@ -243,14 +254,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
           }
         ],
         "Providence/Stoughton Line" => [
-          %Schedule{
+          %EnhancedSchedule{
             route: %Route{id: "CR-Providence", type: 2, name: "Providence/Stoughton Line"},
             trip: %Trip{id: "CR-687393-839", name: "839", direction_id: 0},
             stop: %Stop{id: "place-sstat", name: "South Station"},
             arrival_time: nil,
             departure_time: ~U[2024-02-21 16:03:00.00Z]
           },
-          %Schedule{
+          %EnhancedSchedule{
             route: %Route{id: "CR-Providence", type: 2, name: "Providence/Stoughton Line"},
             trip: %Trip{id: "CR-687395-841", name: "841", direction_id: 0},
             stop: %Stop{id: "place-forhl", name: "Forest Hills"},
