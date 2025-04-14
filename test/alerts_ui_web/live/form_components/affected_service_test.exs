@@ -272,7 +272,17 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
                |> element("select#affected_service_trip_ids")
                |> render() =~ "All Trips"
 
-        live_assign(view, %{modal_filter_value: nil, modal_date: nil})
+        view
+        |> element("form")
+        |> render_change(%{
+          "affected_service" => %{
+            "modal_date" => nil
+          }
+        })
+
+        view
+        |> with_target("#service_view")
+        |> render_hook(:accepted_dates_modal, %{})
 
         assert view
                |> live_assign(:available_schedules, %AsyncResult{
