@@ -447,7 +447,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
          ]},
         {StopsRepo, [],
          [
-           by_route_type: fn _route_type -> [@stop] end,
+           by_route_type: fn _route_type, _opts -> [@stop] end,
            by_route: fn _, _ -> [@stop] end
          ]},
         {RoutePatternsRepo, [],
@@ -516,7 +516,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
          ]},
         {StopsRepo, [],
          [
-           by_route_type: fn _route_type -> [@stop] end,
+           by_route_type: fn _route_type, _opts -> [@stop] end,
            by_route: fn _, _ -> [@stop] end
          ]},
         {RoutePatternsRepo, [],
@@ -581,7 +581,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
          } do
       with_mocks([
         {RoutesRepo, [], [by_type: fn _types -> @routes end]},
-        {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
+        {StopsRepo, [], [by_route_type: fn _route_type, _opts -> [@stop] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
 

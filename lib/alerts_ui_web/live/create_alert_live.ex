@@ -203,16 +203,44 @@ defmodule AlertsUIWeb.CreateAlertLive do
     end
   end
 
-  def get_stops(route_ids, direction) do
+  @spec get_stops([String.t()], nil | String.t(), integer()) :: [MBTAV3API.Stops.Stop.t()]
+  def get_stops(route_ids, direction, route_type) do
     direction
     |> directions_from_selection()
-    |> available_stops(route_ids)
+    |> available_stops(route_ids, route_type)
   end
 
   def get_stops_by_route_type(route_type, route_id \\ nil)
 
+  def get_stops_by_route_type(3, route_id) when is_nil(route_id) do
+    route_id_lists =
+      RoutesRepo.by_type(3)
+      |> Enum.map(& &1.id)
+      |> Enum.chunk_every(20)
+      |> Enum.map(&Enum.join(&1, ","))
+
+    Enum.flat_map([0, 1], fn direction ->
+      Enum.flat_map(route_id_lists, fn route_ids ->
+        opts = Keyword.put([direction_id: direction], :"filter[route]", route_ids)
+
+        StopsRepo.by_route_type(3, opts)
+        |> map_direction_names_to_stops(direction)
+      end)
+    end)
+    |> Enum.sort_by(& &1.name)
+  end
+
   def get_stops_by_route_type(route_type, route_id) when is_nil(route_id) do
     StopsRepo.by_route_type(route_type) |> Enum.sort_by(& &1.name)
+  end
+
+  def get_stops_by_route_type(3, route_id) do
+    Enum.flat_map([0, 1], fn direction ->
+      opts = [direction_id: direction, route: route_id]
+
+      StopsRepo.by_route_type(3, opts)
+      |> map_direction_names_to_stops(direction)
+    end)
   end
 
   def get_stops_by_route_type(route_type, route_id) do
@@ -427,13 +455,29 @@ defmodule AlertsUIWeb.CreateAlertLive do
   def green_line_route?(%Route{id: "Green-E"}), do: true
   def green_line_route?(_), do: false
 
-  @spec available_stops([integer()], [String.t()]) :: [Stop.t()]
+  @spec available_stops([integer()], [String.t()], integer()) :: [Stop.t()]
 
-  defp available_stops(direction_array, route_ids) do
+  defp available_stops(direction_array, route_ids, 3) do
     route_ids
     |> Enum.flat_map(fn route ->
-      Enum.flat_map(direction_array, &StopsRepo.by_route(route, &1))
+      Enum.flat_map(direction_array, fn direction ->
+        route
+        |> StopsRepo.by_route(direction)
+        |> map_direction_names_to_stops(direction)
+      end)
     end)
+  end
+
+  defp available_stops(direction_array, route_ids, _route_type) do
+    route_ids
+    |> Enum.flat_map(fn route ->
+      Enum.flat_map(direction_array, fn direction -> StopsRepo.by_route(route, direction) end)
+    end)
+  end
+
+  defp map_direction_names_to_stops(stops, direction) do
+    direction_word = if direction == 0, do: "outbound", else: "inbound"
+    Enum.map(stops, fn stop -> Map.put(stop, :name, stop.name <> " (#{direction_word})") end)
   end
 
   defp choose_affected_service_component(combination) do
