@@ -66,7 +66,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         modal_date: hd(service_dates) |> Date.to_iso8601(),
         modal_filter_value: hd(service_dates) |> Date.to_iso8601(),
         modal_options: modal_options,
-        filter_title_value: modal_options |> Enum.map(fn {option, _value} -> option end) |> hd
+        filter_title_value: modal_options |> Enum.map(fn {option, _value} -> option end) |> hd,
+        modal_date_filter: ""
       })
 
     {:ok, socket}
@@ -429,12 +430,23 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         values_to_keep: stop_ids
       })
 
+    modal_options =
+      assigns.modal_options
+      |> Enum.filter(fn {option, value} ->
+        filter_value = assigns.form[:modal_date_filter].value || ""
+
+        (option || "")
+        |> String.downcase()
+        |> String.contains?(filter_value) || value == assigns.form[:modal_date].value
+      end)
+
     assigns =
       assign(assigns,
         route_id_options: route_id_options,
         direction_options: direction_options,
         trip_id_options: trip_id_options,
         stop_id_options: stop_id_options,
+        modal_options: modal_options,
         service_type_name: assigns.route_type |> InformedEntity.route_code_mapping() || nil
       )
 
