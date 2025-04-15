@@ -431,14 +431,11 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       })
 
     modal_options =
-      assigns.modal_options
-      |> Enum.filter(fn {option, value} ->
-        filter_value = assigns.form[:modal_date_filter].value || ""
-
-        (option || "")
-        |> String.downcase()
-        |> String.contains?(filter_value) || value == assigns.form[:modal_date].value
-      end)
+      filter_modal_options(
+        assigns.modal_options,
+        assigns.form[:modal_date_filter].value,
+        assigns.form[:modal_date].value
+      )
 
     assigns =
       assign(assigns,
@@ -577,6 +574,17 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       4 -> :ferry
       _ -> nil
     end
+  end
+
+  defp filter_modal_options(modal_options, modal_date_filter, modal_date_value) do
+    modal_options
+    |> Enum.filter(fn {option, value} ->
+      filter_value = modal_date_filter || ""
+
+      (option || "")
+      |> String.downcase()
+      |> String.contains?(filter_value) || value == modal_date_value
+    end)
   end
 
   def trip_information_by_id(available_schedules, trip_ids) do
