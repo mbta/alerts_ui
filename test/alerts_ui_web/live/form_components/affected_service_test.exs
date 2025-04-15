@@ -288,7 +288,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       end
     end
 
-    test "Filter title updates if a different weekday is selected" do
+    test "Schedule updates if a different weekday is selected" do
       today = @todays_date |> Date.to_string()
       tomorrow = @todays_date |> Date.add(1) |> Date.to_string()
 
@@ -340,6 +340,81 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
 
         refute view
                |> render() =~ @schedule.trip.name
+      end
+    end
+
+    test "Filter title updates if a different weekday is selected" do
+      today = @todays_date |> Date.to_string()
+      today_day_name = Timex.format!(@todays_date, "{WDfull} {M}/{0D}")
+      tomorrow = @todays_date |> Date.add(1) |> Date.to_string()
+      tomorrow_day_name = Timex.format!(Date.add(@todays_date, 1), "{WDfull} {M}/{0D}")
+
+      with_mock(SchedulesRepo,
+        by_route_ids: fn
+          # ISO date used when date is selected
+          ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^today] ->
+            [@schedule, @schedule_2]
+
+          # Date struct used in all trips- consider refactoring for consistency
+          ["CR-Worcester"], [stop_sequences: [:first, :last], date: @todays_date] ->
+            [@schedule, @schedule_2]
+
+          ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^tomorrow] ->
+            [@schedule_3, @schedule_4]
+        end,
+        end_of_rating: fn -> Date.add(@todays_date, 1) end
+      ) do
+        {:ok, view, _html} =
+          live_isolated_component(AffectedService, %{
+            @assigns
+            | alert_data: %{route_type: 2, effect_name: "Delay"}
+          })
+
+        view
+        |> element("form")
+        |> render_change(%{"affected_service" => %{"route_ids" => ["CR-Worcester"]}})
+
+        assert view
+               |> render() =~ ~s(Filter: #{today_day_name})
+
+        refute view
+               |> render() =~ ~s(Filter: #{tomorrow_day_name})
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "affected_service" => %{
+            "modal_date" => tomorrow
+          }
+        })
+
+        view
+        |> with_target("#service_view")
+        |> render_hook(:accepted_dates_modal, %{})
+
+        refute view
+               |> render() =~ ~s(Filter: #{today_day_name})
+
+        assert view
+               |> render() =~ ~s(Filter: #{tomorrow_day_name})
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "affected_service" => %{
+            "modal_date" => today
+          }
+        })
+
+        view
+        |> with_target("#service_view")
+        |> render_hook(:accepted_dates_modal, %{})
+
+        assert view
+               |> render() =~ ~s(Filter: #{today_day_name})
+
+        refute view
+               |> render() =~ ~s(Filter: #{tomorrow_day_name})
       end
     end
 
