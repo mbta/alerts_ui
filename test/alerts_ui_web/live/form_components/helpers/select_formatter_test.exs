@@ -74,7 +74,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
       results =
         SelectFormatter.formatted_select_options(%SelectFormatter{
           options: options,
-          filter_value: "Ashmont/Braintree"
+          search_term: "Ashmont/Braintree"
         })
 
       assert results == [
@@ -275,7 +275,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
         SelectFormatter.formatted_select_options(%SelectFormatter{
           schedules_by_route_name: trip_map,
           route_type: 2,
-          filter_value: "Forest"
+          search_term: "Forest"
         })
 
       assert results == [
