@@ -818,7 +818,7 @@ defmodule AlertsUIWeb.SharedComponents do
       |> assign_new(:filter_value, fn -> String.downcase(filter_field.value || "") end)
 
     ~H"""
-    <div {@rest} class={["flex flex-col justify-start", @class]}>
+    <div {@rest} class={["flex flex-col justify-start", @class]} id={"#{@field.id}_selector"}>
       <div :if={@modal_filter_id || @label} class="flex flex-row justify-between">
         <.label for={@id} class={if @disabled, do: "text-text-disabled"}>
           {@label}
@@ -840,6 +840,7 @@ defmodule AlertsUIWeb.SharedComponents do
           {@modal_filter_title}
           <span
             :if={@modal_filter_active}
+            id="clear-button"
             phx-target={@target_id}
             phx-click="clear_filter"
             phx-value-filter-id={@modal_filter_id}
