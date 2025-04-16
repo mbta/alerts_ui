@@ -70,7 +70,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
 
         view
         |> element("form")
-        |> render_change(%{"access_affected_service" => %{"facility_id_filter" => "q"}})
+        |> render_change(%{"access_affected_service" => %{"facility_search_term" => "q"}})
 
         refute view
                |> element("select#access_affected_service_facility_id")
@@ -92,7 +92,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
 
         view
         |> element("form")
-        |> render_change(%{"access_affected_service" => %{"stop_id_filter" => "q"}})
+        |> render_change(%{"access_affected_service" => %{"stop_search_term" => "q"}})
 
         refute view
                |> element("select#access_affected_service_stop_id")
