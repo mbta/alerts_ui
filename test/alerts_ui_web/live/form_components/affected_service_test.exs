@@ -418,6 +418,41 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       end
     end
 
+    test "modal search works" do
+      today = @todays_date |> Date.to_string()
+      tomorrow_day_name = Date.add(@todays_date, 1) |> Timex.format!("{WDfull}")
+
+      with_mock(SchedulesRepo,
+        by_route_ids: fn
+          ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^today] ->
+            [@schedule, @schedule_2]
+        end,
+        end_of_rating: fn -> Date.add(@todays_date, 1) end
+      ) do
+        {:ok, view, _html} =
+          live_isolated_component(AffectedService, %{
+            @assigns
+            | alert_data: %{route_type: 2, effect_name: "Delay"}
+          })
+
+        view
+        |> element("form")
+        |> render_change(%{"affected_service" => %{"route_ids" => ["CR-Worcester"]}})
+
+        assert view
+               |> element("select#affected_service_modal_date")
+               |> render() =~ "#{tomorrow_day_name}"
+
+        view
+        |> element("form")
+        |> render_change(%{"affected_service" => %{"modal_date_filter" => "q"}})
+
+        refute view
+               |> element("select#affected_service_modal_date")
+               |> render() =~ "#{tomorrow_day_name}"
+      end
+    end
+
     test "stop element disabled until route is selected" do
       with_mocks([
         {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},
