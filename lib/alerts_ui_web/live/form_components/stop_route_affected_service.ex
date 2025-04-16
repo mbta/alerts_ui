@@ -52,7 +52,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         available_stops: %{},
         available_filter_routes: %{},
         filter_title_value: "All routes",
-        stops_filtered_by_route: nil
+        stops_filtered_by_route: []
       })
 
     {:ok, socket}
@@ -417,7 +417,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
           filter_field={@form[:stop_search_term]}
           modal_filter_id="routes-filter-modal"
           modal_filter_title={"Filter: #{@filter_title_value}"}
-          modal_filter_active={!is_nil(@stops_filtered_by_route)}
+          modal_filter_active={!Enum.empty?(@stops_filtered_by_route)}
           options={@stop_id_options}
           class="w-[25%]"
           target_id="#service_form"
@@ -444,7 +444,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     form[:stop_ids].value in [nil, []]
   end
 
-  defp filter_stops_by_stop_ids(_stop, nil, _selected_stop_ids) do
+  defp filter_stops_by_stop_ids(_stop, [], _selected_stop_ids) do
     true
   end
 

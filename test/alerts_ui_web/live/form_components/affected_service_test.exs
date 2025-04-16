@@ -7,7 +7,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
   import Mock
   import Phoenix.LiveViewTest
 
-  alias AlertsUI.Models.{ActivePeriod, EnhancedSchedule}
+  alias AlertsUI.Models.EnhancedSchedule
   alias AlertsUIWeb.FormComponents.{AffectedService, RouteTypeAndEffect}
   alias AlertsUIWeb.Step
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
@@ -465,8 +465,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         view
         |> with_target("#service_view")
         |> render_hook(:accepted_dates_modal, %{})
-
-        open_browser(view)
 
         # Clear filter
         view
