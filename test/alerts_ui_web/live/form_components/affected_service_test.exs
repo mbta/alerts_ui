@@ -517,7 +517,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         view
         |> element("form")
         |> render_change(%{
-          "affected_service" => %{"trip_ids_filter" => "x", "stop_ids_filter" => "x"}
+          "affected_service" => %{"trip_search_term" => "x", "stop_search_term" => "x"}
         })
 
         refute view |> render_async() =~
