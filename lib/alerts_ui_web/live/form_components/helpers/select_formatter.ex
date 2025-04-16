@@ -11,14 +11,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   alias MBTAV3API.Stops.Stop
 
   defstruct options: nil,
-            filter_value: "",
+            search_term: "",
             route_type: nil,
             values_to_keep: [],
             schedules_by_route_name: nil
 
   @type t :: %__MODULE__{
           options: [Route.t() | Stop.t()] | nil,
-          filter_value: String.t(),
+          search_term: String.t(),
           route_type: integer() | nil,
           values_to_keep: [String.t()],
           schedules_by_route_name: %{} | nil
@@ -28,7 +28,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   def formatted_select_options(%__MODULE__{
         options: options,
         route_type: route_type,
-        filter_value: filter_value,
+        search_term: search_term,
         values_to_keep: values_to_keep
       })
       when not is_nil(options) do
@@ -38,7 +38,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
     |> Enum.map(fn object ->
       {name_for_option(object, route_type), id_for_option(object)}
     end)
-    |> filter_options(filter_value, values_to_keep)
+    |> apply_search(search_term, values_to_keep)
   end
 
   def formatted_select_options(
@@ -60,17 +60,17 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
     end
   end
 
-  @spec filter_options(list(), String.t() | nil, [String.t()]) :: list()
-  def filter_options(options, nil, _), do: options
-  def filter_options(options, "", _), do: options
+  @spec apply_search(list(), String.t() | nil, [String.t()]) :: list()
+  def apply_search(options, nil, _), do: options
+  def apply_search(options, "", _), do: options
 
-  def filter_options(options, filter_value, values_to_keep) do
-    filter_value = String.downcase(filter_value || "")
+  def apply_search(options, search_term, values_to_keep) do
+    search_term = String.downcase(search_term || "")
 
     Enum.filter(options, fn {option, value} ->
       (option || "")
       |> String.downcase()
-      |> String.contains?(filter_value) || value in values_to_keep
+      |> String.contains?(search_term) || value in values_to_keep
     end)
   end
 

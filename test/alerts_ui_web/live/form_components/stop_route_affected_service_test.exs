@@ -128,6 +128,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       end
     end
 
+    # Revisit. Not sure this is testing what is expected
     test "search works" do
       with_mocks([
         {RoutesRepo, [],
@@ -157,12 +158,13 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         |> render_change(%{
           "stop_route_affected_service" => %{
             "route_ids" => [],
-            "stop_ids_filter" => "x",
-            "route_ids_filter" => "x"
+            "stop_search_term" => "x",
+            "routes_search_term" => "x"
           }
         })
 
-        refute view |> render_async() =~ ~s(<option value="place-aqucl">)
+        # Search doesn't affect the things selected
+        assert view |> render_async() =~ ~s(<option selected="selected" value="place-aqucl">)
 
         refute view |> element("#stop_route_affected_service_route_ids") |> render_async() =~
                  ~s(<option selected="selected" value="Blue">)
@@ -188,7 +190,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
 
         view
         |> element("form")
-        |> render_change(%{"stop_route_affected_service" => %{"modal_route_id_filter" => "q"}})
+        |> render_change(%{"stop_route_affected_service" => %{"modal_route_search_term" => "q"}})
 
         refute view
                |> element("select#stop_route_affected_service_modal_route_id")

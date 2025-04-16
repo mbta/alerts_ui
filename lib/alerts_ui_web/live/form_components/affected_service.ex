@@ -24,18 +24,18 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   embedded_schema do
     field :route_ids, {:array, :string}
     field :single_route_id, :string
-    field :route_ids_filter, :string
+    field :route_search_term, :string
     field :direction, :string
     field :trip_ids, {:array, :string}
-    field :trip_ids_filter, :string
+    field :trip_search_term, :string
     field :stop_ids, {:array, :string}
-    field :stop_ids_filter, :string
+    field :stop_search_term, :string
     field :trip_information_by_id, {:map, :map}
     field :modal_date, :string
-    field :modal_date_filter, :string
+    field :modal_date_search_term, :string
   end
 
-  @fields ~w[route_ids direction trip_ids stop_ids trip_information_by_id route_ids_filter trip_ids_filter stop_ids_filter single_route_id modal_date modal_date_filter]a
+  @fields ~w[route_ids direction trip_ids stop_ids trip_information_by_id route_search_term trip_search_term stop_search_term single_route_id modal_date modal_date_search_term]a
 
   @impl true
   def mount(socket) do
@@ -65,9 +65,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         today: today,
         service_dates: service_dates,
         modal_date: today,
-        modal_filter_value: today,
         modal_options: service_dates,
-        filter_title_value: service_dates |> Enum.map(fn {option, _value} -> option end) |> hd
+        filter_title_value: service_dates |> Enum.map(fn {option, _value} -> option end) |> hd,
+        modal_date_filter: ""
       })
 
     {:ok, socket}
@@ -117,7 +117,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     assigns =
       assigns
-      |> Map.put(:modal_filter_value, nil)
+      |> Map.put(:modal_date, nil)
 
     send(self(), {:section_completed, changes})
 
@@ -284,7 +284,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     socket =
       socket
-      |> assign(modal_filter_value: modal_date, filter_title_value: filter_title_value)
+      |> assign(modal_date: modal_date, filter_title_value: filter_title_value)
       |> assign_schedules(params["route_ids"], params["direction"], required_fields)
 
     {:noreply, socket}
@@ -377,7 +377,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   def assign_schedules(socket, route_ids, direction, fields) do
     if :trip_ids in fields do
-      service_date = socket.assigns.modal_filter_value
+      service_date = socket.assigns.modal_date
 
       assign_async(socket, [:available_schedules], fn ->
         {:ok,
@@ -398,12 +398,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   @impl true
   def render(assigns) do
     route_ids = assigns.form[:route_ids].value || []
-    route_filter_value = assigns.form[:route_ids_filter].value
+    route_search_term = assigns.form[:route_search_term].value
 
     route_id_options =
       SelectFormatter.formatted_select_options(%SelectFormatter{
         options: Map.get(assigns.available_routes, :result, []) || [],
-        filter_value: route_filter_value,
+        search_term: route_search_term,
         route_type: assigns.route_type,
         values_to_keep: route_ids
       })
@@ -422,14 +422,14 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       )
 
     trip_ids = assigns.form[:trip_ids].value || []
-    trip_filter_value = assigns.form[:trip_ids_filter].value
+    trip_search_term = assigns.form[:trip_search_term].value
 
     trip_id_options =
       if Helpers.async_available?(assigns, :available_schedules) do
         SelectFormatter.formatted_select_options(%SelectFormatter{
           schedules_by_route_name: get_schedules_by_route_type(assigns),
           route_type: assigns.route_type,
-          filter_value: trip_filter_value,
+          search_term: trip_search_term,
           values_to_keep: trip_ids
         })
       else
@@ -437,15 +437,22 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       end
 
     stop_ids = assigns.form[:stop_ids].value || []
-    stop_filter_value = assigns.form[:stop_ids_filter].value
+    stop_search_term = assigns.form[:stop_search_term].value
 
     stop_id_options =
       SelectFormatter.formatted_select_options(%SelectFormatter{
         options: Map.get(assigns.available_stops, :result, []) || [],
-        filter_value: stop_filter_value,
+        search_term: stop_search_term,
         route_type: assigns.route_type,
         values_to_keep: stop_ids
       })
+
+    modal_options =
+      filter_modal_options(
+        assigns.modal_options,
+        assigns.form[:modal_date_filter].value,
+        assigns.form[:modal_date].value
+      )
 
     assigns =
       assign(assigns,
@@ -453,6 +460,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         direction_options: direction_options,
         trip_id_options: trip_id_options,
         stop_id_options: stop_id_options,
+        modal_options: modal_options,
         service_type_name: assigns.route_type |> InformedEntity.route_code_mapping() || nil
       )
 
@@ -476,7 +484,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
           <.filtered_select
             label={if @route_type in [0, 1, 2], do: "Lines", else: "Routes"}
             field={if @effect_name == "Detour", do: @form[:single_route_id], else: @form[:route_ids]}
-            filter_field={@form[:route_ids_filter]}
+            filter_field={@form[:route_search_term]}
             loading={@available_routes.loading}
             no_results={Enum.empty?(@route_id_options)}
             options={@route_id_options}
@@ -506,7 +514,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
           <.filtered_select
             label="Upcoming dates"
             field={@form[:modal_date]}
-            filter_field={@form[:modal_date_filter]}
+            filter_field={@form[:modal_date_search_term]}
             options={@modal_options}
             class="h-[32rem]"
             prompt="All future trips"
@@ -534,7 +542,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
           />
           <.filtered_select
             field={@form[:trip_ids]}
-            filter_field={@form[:trip_ids_filter]}
+            filter_field={@form[:trip_search_term]}
             options={@trip_id_options}
             loading={Map.get(@available_schedules, :loading, true)}
             no_results={
@@ -558,7 +566,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             :if={show_stops_input?(assigns)}
             label={if show_trips_input?(assigns), do: "Stops", else: nil}
             field={@form[:stop_ids]}
-            filter_field={@form[:stop_ids_filter]}
+            filter_field={@form[:stop_search_term]}
             options={@stop_id_options}
             loading={Map.get(@available_stops, :loading, true)}
             no_results={
@@ -588,6 +596,17 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       4 -> :ferry
       _ -> nil
     end
+  end
+
+  defp filter_modal_options(modal_options, modal_date_filter, modal_date_value) do
+    modal_options
+    |> Enum.filter(fn {option, value} ->
+      filter_value = modal_date_filter || ""
+
+      (option || "")
+      |> String.downcase()
+      |> String.contains?(filter_value) || value == modal_date_value
+    end)
   end
 
   def trip_information_by_id(available_schedules, trip_ids) do
