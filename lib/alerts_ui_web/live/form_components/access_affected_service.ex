@@ -213,7 +213,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     stop_id_options =
       SelectFormatter.formatted_select_options(%SelectFormatter{
         options: stops,
-        filter_value: stop_filter_value,
+        search_term: stop_filter_value,
         values_to_keep: stop_id |> List.wrap()
       })
 
@@ -234,7 +234,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
 
         SelectFormatter.formatted_select_options(%SelectFormatter{
           options: options,
-          filter_value: facility_filter_value,
+          search_term: facility_filter_value,
           values_to_keep: List.wrap(facility_id)
         })
         |> Enum.map(fn {name, id} -> {String.slice(name, 0..80), id} end)

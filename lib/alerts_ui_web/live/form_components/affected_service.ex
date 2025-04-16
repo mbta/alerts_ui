@@ -385,7 +385,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     route_id_options =
       SelectFormatter.formatted_select_options(%SelectFormatter{
         options: Map.get(assigns.available_routes, :result, []) || [],
-        filter_value: route_filter_value,
+        search_term: route_filter_value,
         route_type: assigns.route_type,
         values_to_keep: route_ids
       })
@@ -411,7 +411,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         SelectFormatter.formatted_select_options(%SelectFormatter{
           schedules_by_route_name: get_schedules_by_route_type(assigns),
           route_type: assigns.route_type,
-          filter_value: trip_filter_value,
+          search_term: trip_filter_value,
           values_to_keep: trip_ids
         })
       else
@@ -424,7 +424,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     stop_id_options =
       SelectFormatter.formatted_select_options(%SelectFormatter{
         options: Map.get(assigns.available_stops, :result, []) || [],
-        filter_value: stop_filter_value,
+        search_term: stop_filter_value,
         route_type: assigns.route_type,
         values_to_keep: stop_ids
       })
