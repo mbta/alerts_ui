@@ -38,7 +38,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
       assert view
              |> render() =~
-               ~s(<div phx-feedback-for="time_range[active_period_end_date]" class="min-w-[16rem] max-w-[16rem] hidden">)
+               ~s(phx-feedback-for="time_range[active_period_end_date]" class="min-w-[16rem] max-w-[16rem] hidden")
 
       view
       |> element("form")
@@ -51,7 +51,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
       refute view
              |> render() =~
-               ~s(<div phx-feedback-for="time_range[active_period_end_date]" class="min-w-[16rem] max-w-[16rem] hidden">)
+               ~s(phx-feedback-for="time_range[active_period_end_date]" class="min-w-[16rem] max-w-[16rem] hidden")
     end
 
     test "editing does not check start time" do
@@ -239,7 +239,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
     test "displays error if start after trip end when 'start of service' is selected" do
       schedule = %EnhancedSchedule{
         trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
-        time_of_last_trip_arrival: ~U[2024-05-01 13:15:00.00Z] |> DateTime.shift_zone!("America/New_York"),
+        time_of_last_trip_arrival:
+          ~U[2024-05-01 13:15:00.00Z] |> DateTime.shift_zone!("America/New_York"),
         departure_time: ~U[2024-05-01 12:15:00.00Z] |> DateTime.shift_zone!("America/New_York")
       }
 
@@ -266,7 +267,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         }
       })
 
-      assert render(view) =~ ~s(Effect must start before 05/01/2024, 10:15 AM)
+      # open_browser(view)
+      assert view |> element("#time_range_active_period_start_date-root-element") |> render =~
+               ~s(Effect must start before 05/01/2024, 10:15 AM)
     end
 
     test "start and end time updated if 'all trips' selected" do
