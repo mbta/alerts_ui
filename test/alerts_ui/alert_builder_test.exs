@@ -38,7 +38,7 @@ defmodule AlertsUI.AlertBuilderTest do
           alert_timing: :"one-time",
           active_period_end_specifier: :until_further_notice,
           active_period_start_specifier: :custom,
-          cause_detail: "disabled train",
+          cause_detail: "DISABLED_TRAIN",
           url: "http://www.example.com",
           image_url: "http://www.example.com/example.jpg",
           image_alternative_text: "an example image",
@@ -74,7 +74,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  active_period_start: ~U[2024-04-30 15:54:00Z],
                  active_period_end: nil,
                  cause: :TECHNICAL_PROBLEM,
-                 cause_detail: "disabled train",
+                 cause_detail: "DISABLED_TRAIN",
                  url: "http://www.example.com",
                  image_url: "http://www.example.com/example.jpg",
                  image_alternative_text: "an example image",
@@ -326,7 +326,7 @@ defmodule AlertsUI.AlertBuilderTest do
           active_period_start: ~N[2024-04-30 11:54:00],
           active_period_end_specifier: :until_further_notice,
           active_period_start_specifier: :custom,
-          cause_detail: "freight train interference",
+          cause_detail: "FREIGHT_TRAIN_INTERFERENCE",
           notification_period_start: ~N[2024-04-30 11:54:00]
         }
 
@@ -351,7 +351,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  active_period_start: ~U[2024-04-30 15:54:00Z],
                  duration_certainty: :UNKNOWN,
                  cause: :OTHER_CAUSE,
-                 cause_detail: "freight train interference",
+                 cause_detail: "FREIGHT_TRAIN_INTERFERENCE",
                  url: nil,
                  image_url: nil,
                  image_alternative_text: nil,

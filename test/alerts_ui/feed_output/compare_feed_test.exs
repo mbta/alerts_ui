@@ -351,13 +351,13 @@ defmodule AlertsUI.FeedOutput.CompareFeedTest do
     test "returns error tuple if lists of alert content does not match" do
       list_1 = [
         build(:alert_entity_data, %{"id" => "123"}),
-        build(:alert_entity_data, %{"id" => "234", "alert" => %{"cause_detail" => "cool"}}),
+        build(:alert_entity_data, %{"id" => "234", "alert" => %{"cause_detail" => "TRAFFIC"}}),
         build(:alert_entity_data, %{"id" => "456"})
       ]
 
       list_2 = [
         build(:alert_entity_data, %{"id" => "123"}),
-        build(:alert_entity_data, %{"id" => "234", "alert" => %{"cause_detail" => "bean"}}),
+        build(:alert_entity_data, %{"id" => "234", "alert" => %{"cause_detail" => "WEATHER"}}),
         build(:alert_entity_data, %{"id" => "456"})
       ]
 
@@ -368,10 +368,14 @@ defmodule AlertsUI.FeedOutput.CompareFeedTest do
             "Alert id: 234",
             %{
               value: %{
-                "cause_detail" => %{removed: "cool", added: "bean", changed: :primitive_change}
+                "cause_detail" => %{
+                  removed: "TRAFFIC",
+                  added: "WEATHER",
+                  changed: :primitive_change
+                }
               },
-              removed: %{"cause_detail" => "cool"},
-              added: %{"cause_detail" => "bean"},
+              removed: %{"cause_detail" => "TRAFFIC"},
+              added: %{"cause_detail" => "WEATHER"},
               changed: :map_change
             }
           ]
@@ -412,7 +416,7 @@ defmodule AlertsUI.FeedOutput.CompareFeedTest do
         build(:alert_entity_data, %{"id" => "123"}),
         build(:alert_entity_data, %{
           "id" => "234",
-          "alert" => %{"cause_detail" => "cool", "informed_entity" => informed_entity_1}
+          "alert" => %{"cause_detail" => "TRAFFIC", "informed_entity" => informed_entity_1}
         }),
         build(:alert_entity_data, %{"id" => "456"})
       ]
@@ -421,7 +425,7 @@ defmodule AlertsUI.FeedOutput.CompareFeedTest do
         build(:alert_entity_data, %{"id" => "123"}),
         build(:alert_entity_data, %{
           "id" => "234",
-          "alert" => %{"cause_detail" => "cool", "informed_entity" => informed_entity_2}
+          "alert" => %{"cause_detail" => "TRAFFIC", "informed_entity" => informed_entity_2}
         }),
         build(:alert_entity_data, %{"id" => "456"})
       ]
@@ -479,7 +483,7 @@ defmodule AlertsUI.FeedOutput.CompareFeedTest do
         build(:alert_entity_data, %{"id" => "123"}),
         build(:alert_entity_data, %{
           "id" => "234",
-          "alert" => %{"cause_detail" => "cool", "active_period" => active_period_1}
+          "alert" => %{"cause_detail" => "TRAFFIC", "active_period" => active_period_1}
         }),
         build(:alert_entity_data, %{"id" => "456"})
       ]
@@ -488,7 +492,7 @@ defmodule AlertsUI.FeedOutput.CompareFeedTest do
         build(:alert_entity_data, %{"id" => "123"}),
         build(:alert_entity_data, %{
           "id" => "234",
-          "alert" => %{"cause_detail" => "cool", "active_period" => active_period_2}
+          "alert" => %{"cause_detail" => "TRAFFIC", "active_period" => active_period_2}
         }),
         build(:alert_entity_data, %{"id" => "456"})
       ]
@@ -524,7 +528,7 @@ defmodule AlertsUI.FeedOutput.CompareFeedTest do
         build(:alert_entity_data, %{
           "id" => "234",
           "alert" => %{
-            "cause_detail" => "cool",
+            "cause_detail" => "TRAFFIC",
             "active_period" => active_period,
             "informed_entity" => informed_entity
           }
@@ -537,7 +541,7 @@ defmodule AlertsUI.FeedOutput.CompareFeedTest do
         build(:alert_entity_data, %{
           "id" => "234",
           "alert" => %{
-            "cause_detail" => "cool",
+            "cause_detail" => "TRAFFIC",
             "active_period" => active_period,
             "informed_entity" => informed_entity
           }

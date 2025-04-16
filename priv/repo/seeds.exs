@@ -72,7 +72,7 @@ Repo.insert!(%Alert{
   effect: :NO_SERVICE,
   effect_detail: "No Service",
   cause: :UNKNOWN_CAUSE,
-  cause_detail: "Unknown Cause",
+  cause_detail: "UNKNOWN_CAUSE",
   header_text: "Test Alert",
   description_text: "There's no service! Due to an unknown cause!",
   severity_level: :UNKNOWN_SEVERITY,
