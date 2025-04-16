@@ -237,14 +237,14 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
     end
 
     test "displays error if start after trip end when 'start of service' is selected" do
-      schedule = %Schedule{
+      schedule = %EnhancedSchedule{
         trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
-        arrival_time: ~U[2024-05-01 13:15:00.00Z] |> DateTime.shift_zone!("America/New_York"),
+        time_of_last_trip_arrival: ~U[2024-05-01 13:15:00.00Z] |> DateTime.shift_zone!("America/New_York"),
         departure_time: ~U[2024-05-01 12:15:00.00Z] |> DateTime.shift_zone!("America/New_York")
       }
 
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns |> Map.put(:selected_trips, [schedule]))
+        live_isolated_component(TimeRange, @assigns |> Map.put(:selected_schedules, [schedule]))
 
       view
       |> element("form")
