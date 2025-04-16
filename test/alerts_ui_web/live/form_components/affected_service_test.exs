@@ -418,6 +418,66 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       end
     end
 
+    test "clear date filter for trips works" do
+      today = Date.to_string(@todays_date)
+      tomorrow = @todays_date |> Date.add(1) |> Date.to_string()
+
+      with_mocks([
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn
+             # ISO date used when date is selected
+             ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^today] ->
+               [@schedule, @schedule_2]
+
+             # Date struct used in all trips- consider refactoring for consistency
+             ["CR-Worcester"], [stop_sequences: [:first, :last], date: @todays_date] ->
+               [@schedule, @schedule_2]
+
+             ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^tomorrow] ->
+               [@schedule_3, @schedule_4]
+           end,
+           end_of_rating: fn -> Date.add(@todays_date, 1) end
+         ]},
+        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+      ]) do
+        {:ok, view, _html} =
+          live_isolated_component(AffectedService, %{
+            @assigns
+            | alert_data: %{route_type: 2, effect_name: "Delay"}
+          })
+
+        # Start with route selection
+        view
+        |> element("form")
+        |> render_change(%{"affected_service" => %{"route_ids" => ["CR-Worcester"]}})
+
+        # Add date filter
+        view
+        |> element("form")
+        |> render_change(%{
+          "affected_service" => %{
+            "modal_date" => tomorrow
+          }
+        })
+
+        # Submit filter
+        view
+        |> with_target("#service_view")
+        |> render_hook(:accepted_dates_modal, %{})
+
+        open_browser(view)
+
+        # Clear filter
+        view
+        |> with_target("#service_view")
+        |> render_click(:clear_filter, %{"filter-id" => "dates-filter-modal"})
+
+        assert render(view) =~ @schedule.trip.name
+        refute render(view) =~ @schedule_3.trip.name
+      end
+    end
+
     test "stop element disabled until route is selected" do
       with_mocks([
         {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},
@@ -524,65 +584,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
                  ~s(<option value="CR-683322-595">595)
 
         refute view |> render_async() =~ ~s(<option value="place-sstat">)
-      end
-    end
-
-    test "modal filtering works" do
-      todays_date = DateTime.now!("America/New_York") |> ActivePeriod.datetime_to_service_date()
-      todays_date_in_iso = Date.to_iso8601(todays_date)
-      tomorrows_date_in_iso = todays_date |> Date.add(1) |> Date.to_iso8601()
-
-      with_mocks([
-        {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},
-        {SchedulesRepo, [],
-         [
-           by_route_ids: fn
-             _route_ids, [stop_sequences: [:first, :last], date: ^todays_date_in_iso] ->
-               [@schedule, @schedule_2]
-
-             _route_ids, [stop_sequences: [:first, :last], date: ^tomorrows_date_in_iso] ->
-               [@schedule_3, @schedule_4]
-           end
-         ]},
-        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
-      ]) do
-        {:ok, view, _html} =
-          live_isolated_component(AffectedService, %{
-            @assigns
-            | alert_data: %{route_type: 2, effect_name: "Delay"}
-          })
-
-        view
-        |> element("form")
-        |> render_change(%{"affected_service" => %{"route_ids" => ["CR-Worcester"]}})
-
-        assert view
-               |> render_async() =~
-                 ~s(<option value="#{@schedule.trip.id}")
-
-        refute view
-               |> render_async() =~
-                 ~s(<option value="#{@schedule_3.trip.id}")
-
-        view
-        |> element("form")
-        |> render_change(%{
-          "affected_service" => %{
-            "modal_date" => tomorrows_date_in_iso
-          }
-        })
-
-        view
-        |> with_target("#service_view")
-        |> render_hook(:accepted_dates_modal, %{})
-
-        refute view
-               |> render_async() =~
-                 ~s(<option value="#{@schedule.trip.id}")
-
-        assert view
-               |> render_async() =~
-                 ~s(<option value="#{@schedule_3.trip.id}")
       end
     end
 
