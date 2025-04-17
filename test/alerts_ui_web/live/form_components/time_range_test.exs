@@ -267,7 +267,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         }
       })
 
-      # open_browser(view)
       assert view |> element("#time_range_active_period_start_date-root-element") |> render =~
                ~s(Effect must start before 05/01/2024, 10:15 AM)
     end
