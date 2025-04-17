@@ -661,6 +661,10 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :disabled, :boolean, default: false, doc: "whether the element is disabled"
 
+  attr :modal_filter_disabled, :boolean,
+    default: false,
+    doc: "whether the modal filter link element is disabled"
+
   attr :no_results, :boolean, default: false, doc: "true if result has been returned but is empty"
 
   attr :target_id, :string,
@@ -688,14 +692,14 @@ defmodule AlertsUIWeb.SharedComponents do
           phx-click={show_modal(@modal_filter_id)}
           class={[
             "leading-tight mb-2 min-h-[1.3rem] text-right",
-            if(@disabled, do: "text-text-disabled", else: "text-primary")
+            if(@modal_filter_disabled, do: "text-text-disabled", else: "text-primary")
           ]}
           type="button"
-          disabled={@disabled}
+          disabled={@modal_filter_disabled}
         >
           <span class={[
             "hero-funnel-mini w-4 h-4 mr-1",
-            if(@disabled, do: "text-text-disabled", else: "bg-primary")
+            if(@modal_filter_disabled, do: "text-text-disabled", else: "bg-primary")
           ]} />
           {@modal_filter_title}
           <span

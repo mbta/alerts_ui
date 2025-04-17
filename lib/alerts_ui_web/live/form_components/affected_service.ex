@@ -537,6 +537,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             modal_filter_active={date_filter_active?(@modal_date, @today)}
             options={@direction_options}
             disabled={disable_stop_input?(@form[:route_ids].value)}
+            modal_filter_disabled={@form[:route_ids].value in [nil, []]}
             prompt={if disable_stop_input?(@form[:route_ids].value), do: "", else: "Both Directions"}
             target_id="#service_form"
           />
