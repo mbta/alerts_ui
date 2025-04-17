@@ -1122,7 +1122,11 @@ defmodule AlertsUIWeb.SharedComponents do
       |> assign_new(:name, fn -> if assigns.multiple, do: field.name <> "[]", else: field.name end)
 
     ~H"""
-    <div phx-feedback-for={@name} class={["#{@class}", @hidden && "hidden"]}>
+    <div
+      phx-feedback-for={@name}
+      class={["#{@class}", @hidden && "hidden"]}
+      id={"#{@id}-root-element"}
+    >
       <.label for={@id} class="block">{@label}</.label>
       <input
         id={@id}
