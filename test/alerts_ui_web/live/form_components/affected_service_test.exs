@@ -7,18 +7,19 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
   import Mock
   import Phoenix.LiveViewTest
 
+  alias AlertsUI.Models.EnhancedSchedule
   alias AlertsUIWeb.FormComponents.{AffectedService, RouteTypeAndEffect}
   alias AlertsUIWeb.Step
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
-  alias MBTAV3API.Schedules.{Schedule, Trip}
+  alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
   alias Phoenix.LiveView.AsyncResult
 
-  @schedule %Schedule{
+  @schedule %EnhancedSchedule{
     route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
     trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
@@ -26,9 +27,25 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     departure_time: DateTime.utc_now() |> DateTime.add(-1, :hour)
   }
 
-  @schedule_2 %Schedule{
+  @schedule_2 %EnhancedSchedule{
     route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
     trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
+    stop: %Stop{id: "place-sstat", name: "South Station"},
+    arrival_time: DateTime.utc_now(),
+    departure_time: nil
+  }
+
+  @schedule_3 %EnhancedSchedule{
+    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    trip: %Trip{id: "CR-683322-596", name: "596", direction_id: 0},
+    stop: %Stop{id: "place-sstat", name: "South Station"},
+    arrival_time: DateTime.utc_now(),
+    departure_time: DateTime.utc_now() |> DateTime.add(-1, :hour)
+  }
+
+  @schedule_4 %EnhancedSchedule{
+    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    trip: %Trip{id: "CR-683322-596", name: "596", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: DateTime.utc_now(),
     departure_time: nil
@@ -52,12 +69,16 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       next: "success",
       label: "Alert Details"
     },
-    route_type: 1,
+    route_type: 2,
     alert_data: %{route_ids: ["CR-Worcester"]},
     combination: :RDTS,
     editing: false,
     effect_name: "Delay"
   }
+
+  @todays_date DateTime.utc_now()
+               |> DateTime.shift_zone!("America/New_York")
+               |> DateTime.to_date()
 
   describe "component" do
     test "renders" do
@@ -218,6 +239,278 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       end
     end
 
+    test "Filter title updates if 'all trips' selected" do
+      today = @todays_date |> Date.to_string()
+      tomorrow = Date.add(@todays_date, 1)
+
+      with_mock(SchedulesRepo,
+        by_route_ids: fn
+          # ISO date used when date is selected
+          ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^today] ->
+            [@schedule, @schedule_2]
+
+          # Date struct used in all trips- consider refactoring for consistency
+          ["CR-Worcester"], [stop_sequences: [:first, :last], date: @todays_date] ->
+            [@schedule, @schedule_2]
+
+          ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^tomorrow] ->
+            [@schedule_3, @schedule_4]
+        end,
+        end_of_rating: fn -> Date.add(@todays_date, 1) end
+      ) do
+        {:ok, view, _html} =
+          live_isolated_component(AffectedService, %{
+            @assigns
+            | alert_data: %{route_type: 2, effect_name: "Delay"}
+          })
+
+        view
+        |> element("form")
+        |> render_change(%{"affected_service" => %{"route_ids" => ["CR-Worcester"]}})
+
+        assert view
+               |> element("select#affected_service_trip_ids")
+               |> render() =~ "All Trips"
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "affected_service" => %{
+            "modal_date" => nil
+          }
+        })
+
+        view
+        |> with_target("#service_view")
+        |> render_hook(:accepted_dates_modal, %{})
+
+        assert view |> render() =~ "Filter: All future trips"
+      end
+    end
+
+    test "Schedule updates if a different weekday is selected" do
+      today = @todays_date |> Date.to_string()
+      tomorrow = @todays_date |> Date.add(1) |> Date.to_string()
+
+      with_mock(SchedulesRepo,
+        by_route_ids: fn
+          # ISO date used when date is selected
+          ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^today] ->
+            [@schedule, @schedule_2]
+
+          # Date struct used in all trips- consider refactoring for consistency
+          ["CR-Worcester"], [stop_sequences: [:first, :last], date: @todays_date] ->
+            [@schedule, @schedule_2]
+
+          ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^tomorrow] ->
+            [@schedule_3, @schedule_4]
+        end,
+        end_of_rating: fn -> Date.add(@todays_date, 1) end
+      ) do
+        {:ok, view, _html} =
+          live_isolated_component(AffectedService, %{
+            @assigns
+            | alert_data: %{route_type: 2, effect_name: "Delay"}
+          })
+
+        view
+        |> element("form")
+        |> render_change(%{"affected_service" => %{"route_ids" => ["CR-Worcester"]}})
+
+        assert view
+               |> render() =~ @schedule.trip.name
+
+        refute view
+               |> render() =~ @schedule_3.trip.name
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "affected_service" => %{
+            "modal_date" => tomorrow
+          }
+        })
+
+        view
+        |> with_target("#service_view")
+        |> render_hook(:accepted_dates_modal, %{})
+
+        assert view
+               |> render() =~ @schedule_3.trip.name
+
+        refute view
+               |> render() =~ @schedule.trip.name
+      end
+    end
+
+    test "Filter title updates if a different weekday is selected" do
+      today = @todays_date |> Date.to_string()
+      today_day_name = Timex.format!(@todays_date, "{WDfull} {M}/{0D}")
+      tomorrow = @todays_date |> Date.add(1) |> Date.to_string()
+      tomorrow_day_name = Timex.format!(Date.add(@todays_date, 1), "{WDfull} {M}/{0D}")
+
+      with_mock(SchedulesRepo,
+        by_route_ids: fn
+          # ISO date used when date is selected
+          ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^today] ->
+            [@schedule, @schedule_2]
+
+          # Date struct used in all trips- consider refactoring for consistency
+          ["CR-Worcester"], [stop_sequences: [:first, :last], date: @todays_date] ->
+            [@schedule, @schedule_2]
+
+          ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^tomorrow] ->
+            [@schedule_3, @schedule_4]
+        end,
+        end_of_rating: fn -> Date.add(@todays_date, 1) end
+      ) do
+        {:ok, view, _html} =
+          live_isolated_component(AffectedService, %{
+            @assigns
+            | alert_data: %{route_type: 2, effect_name: "Delay"}
+          })
+
+        view
+        |> element("form")
+        |> render_change(%{"affected_service" => %{"route_ids" => ["CR-Worcester"]}})
+
+        assert view
+               |> render() =~ ~s(Filter: #{today_day_name})
+
+        refute view
+               |> render() =~ ~s(Filter: #{tomorrow_day_name})
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "affected_service" => %{
+            "modal_date" => tomorrow
+          }
+        })
+
+        view
+        |> with_target("#service_view")
+        |> render_hook(:accepted_dates_modal, %{})
+
+        refute view
+               |> render() =~ ~s(Filter: #{today_day_name})
+
+        assert view
+               |> render() =~ ~s(Filter: #{tomorrow_day_name})
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "affected_service" => %{
+            "modal_date" => today
+          }
+        })
+
+        view
+        |> with_target("#service_view")
+        |> render_hook(:accepted_dates_modal, %{})
+
+        assert view
+               |> render() =~ ~s(Filter: #{today_day_name})
+
+        refute view
+               |> render() =~ ~s(Filter: #{tomorrow_day_name})
+      end
+    end
+
+    test "clear date filter for trips works" do
+      today = Date.to_string(@todays_date)
+      tomorrow = @todays_date |> Date.add(1) |> Date.to_string()
+
+      with_mocks([
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn
+             # ISO date used when date is selected
+             ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^today] ->
+               [@schedule, @schedule_2]
+
+             # Date struct used in all trips- consider refactoring for consistency
+             ["CR-Worcester"], [stop_sequences: [:first, :last], date: @todays_date] ->
+               [@schedule, @schedule_2]
+
+             ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^tomorrow] ->
+               [@schedule_3, @schedule_4]
+           end,
+           end_of_rating: fn -> Date.add(@todays_date, 1) end
+         ]},
+        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+      ]) do
+        {:ok, view, _html} =
+          live_isolated_component(AffectedService, %{
+            @assigns
+            | alert_data: %{route_type: 2, effect_name: "Delay"}
+          })
+
+        # Start with route selection
+        view
+        |> element("form")
+        |> render_change(%{"affected_service" => %{"route_ids" => ["CR-Worcester"]}})
+
+        # Add date filter
+        view
+        |> element("form")
+        |> render_change(%{
+          "affected_service" => %{
+            "modal_date" => tomorrow
+          }
+        })
+
+        # Submit filter
+        view
+        |> with_target("#service_view")
+        |> render_hook(:accepted_dates_modal, %{})
+
+        # Clear filter
+        view
+        |> with_target("#service_view")
+        |> render_click(:clear_filter, %{"filter-id" => "dates-filter-modal"})
+
+        assert render(view) =~ @schedule.trip.name
+        refute render(view) =~ @schedule_3.trip.name
+      end
+    end
+
+    test "modal search works" do
+      today = @todays_date |> Date.to_string()
+      tomorrow_day_name = Date.add(@todays_date, 1) |> Timex.format!("{WDfull}")
+
+      with_mock(SchedulesRepo,
+        by_route_ids: fn
+          ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^today] ->
+            [@schedule, @schedule_2]
+        end,
+        end_of_rating: fn -> Date.add(@todays_date, 1) end
+      ) do
+        {:ok, view, _html} =
+          live_isolated_component(AffectedService, %{
+            @assigns
+            | alert_data: %{route_type: 2, effect_name: "Delay"}
+          })
+
+        view
+        |> element("form")
+        |> render_change(%{"affected_service" => %{"route_ids" => ["CR-Worcester"]}})
+
+        assert view
+               |> element("select#affected_service_modal_date")
+               |> render() =~ "#{tomorrow_day_name}"
+
+        view
+        |> element("form")
+        |> render_change(%{"affected_service" => %{"modal_date_filter" => "q"}})
+
+        refute view
+               |> element("select#affected_service_modal_date")
+               |> render() =~ "#{tomorrow_day_name}"
+      end
+    end
+
     test "stop element disabled until route is selected" do
       with_mocks([
         {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},
@@ -317,7 +610,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         view
         |> element("form")
         |> render_change(%{
-          "affected_service" => %{"trip_ids_filter" => "x", "stop_ids_filter" => "x"}
+          "affected_service" => %{"trip_search_term" => "x", "stop_search_term" => "x"}
         })
 
         refute view |> render_async() =~
@@ -330,7 +623,11 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     test "works correctly if editing" do
       with_mocks([
         {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},
-        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end,
+           end_of_rating: fn -> DateTime.utc_now() |> DateTime.to_date() |> Date.add(10) end
+         ]},
         {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
       ]) do
         {:ok, view, _html} =

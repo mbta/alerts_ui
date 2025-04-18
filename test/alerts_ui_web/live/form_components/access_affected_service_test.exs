@@ -33,6 +33,12 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
     stop: %Stop{id: "place-sstat", name: "South Station"}
   }
 
+  @facility_two %Facility{
+    id: "Facility-7",
+    long_name: "Example Facility Two",
+    stop: %Stop{id: "place-aqucl", name: "Aquarium"}
+  }
+
   describe "component" do
     test "renders" do
       rendered = render_component(AccessAffectedService, @assigns)
@@ -70,7 +76,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
 
         view
         |> element("form")
-        |> render_change(%{"access_affected_service" => %{"facility_id_filter" => "q"}})
+        |> render_change(%{"access_affected_service" => %{"facility_search_term" => "q"}})
 
         refute view
                |> element("select#access_affected_service_facility_id")
@@ -92,12 +98,79 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
 
         view
         |> element("form")
-        |> render_change(%{"access_affected_service" => %{"stop_id_filter" => "q"}})
+        |> render_change(%{"access_affected_service" => %{"stop_search_term" => "q"}})
 
         refute view
                |> element("select#access_affected_service_stop_id")
                |> render_async() =~
                  ~s(<option value="place-sstat">South Station</option>)
+      end
+    end
+
+    test "add stop filter on facilities works" do
+      with_mock(FacilitiesRepo,
+        get_by_type: fn _facility_types, _opts -> [@facility, @facility_two] end
+      ) do
+        {:ok, view, _html} =
+          live_isolated_component(
+            AccessAffectedService,
+            @assigns
+          )
+
+        # Set baseline unfiltered
+        assert view |> render_async() =~ ~s(<option value="Facility-3">)
+        assert view |> render_async() =~ ~s(<option value="Facility-7">)
+
+        # Add stop filter
+        view
+        |> element("form")
+        |> render_change(%{
+          "access_affected_service" => %{"stop_id" => "place-sstat"}
+        })
+
+        # Submit filter
+        view
+        |> with_target("#access_service_view")
+        |> render_click(:accepted_stops_modal)
+
+        # Verify filtered and filter text updated
+        assert view |> render_async() =~ ~s(<option value="Facility-3">)
+        refute view |> render_async() =~ ~s(<option value="Facility-7">)
+        assert view |> render_async() =~ ~s(Filter: South Station)
+      end
+    end
+
+    test "clear route filter for stops works" do
+      with_mock(FacilitiesRepo,
+        get_by_type: fn _facility_types, _opts -> [@facility, @facility_two] end
+      ) do
+        {:ok, view, _html} =
+          live_isolated_component(
+            AccessAffectedService,
+            @assigns
+          )
+
+        # Add stop filter
+        view
+        |> element("form")
+        |> render_change(%{
+          "access_affected_service" => %{"stop_id" => "place-sstat"}
+        })
+
+        # Submit filter
+        view
+        |> with_target("#access_service_view")
+        |> render_click(:accepted_stops_modal)
+
+        # Clear filter
+        view
+        |> with_target("#access_service_view")
+        |> render_click(:clear_filter, %{"filter-id" => "stops-filter-modal"})
+
+        # Verify unfiltered and text changed
+        assert view |> render_async() =~ ~s(<option value="Facility-3">)
+        assert view |> render_async() =~ ~s(<option value="Facility-7">)
+        assert view |> render_async() =~ ~s(Filter: All stops)
       end
     end
 

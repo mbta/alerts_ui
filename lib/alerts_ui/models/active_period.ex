@@ -143,4 +143,17 @@ defmodule AlertsUI.Models.ActivePeriod do
     |> DateTime.from_naive!("America/New_York")
     |> DateTime.shift_zone!("Etc/UTC")
   end
+
+  @spec datetime_to_service_date(DateTime.t()) :: Date.t()
+  def datetime_to_service_date(datetime) do
+    # returns "service date" for datetime- eg 2 am on 1/1/2025 will return 12/31/2024
+    time = DateTime.to_time(datetime)
+    date = DateTime.to_date(datetime)
+
+    if Time.after?(time, ~T[00:00:00]) and Time.before?(time, @end_of_service) do
+      Date.add(date, -1)
+    else
+      date
+    end
+  end
 end

@@ -361,6 +361,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
            NaiveDateTime.diff(active_period_start, trip_arrival_time, :minute) > 60 do
         [
           active_period_start:
+            "Effect must start before #{formatted_datetime(trip_arrival_time |> NaiveDateTime.add(1, :hour))}",
+          active_period_start_date:
             "Effect must start before #{formatted_datetime(trip_arrival_time |> NaiveDateTime.add(1, :hour))}"
         ]
       else

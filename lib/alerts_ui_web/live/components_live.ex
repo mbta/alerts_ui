@@ -129,7 +129,7 @@ defmodule AlertsUIWeb.ComponentsLive do
     ]
   end
 
-  defp filtered_select_options(filter_value, select_options) do
+  defp filtered_select_options(search_term, select_options) do
     select_options
     |> Enum.filter(fn {option, _value} ->
       option =
@@ -141,10 +141,10 @@ defmodule AlertsUIWeb.ComponentsLive do
 
       option = String.downcase(option || "")
 
-      case filter_value do
+      case search_term do
         nil -> true
         "" -> true
-        _ -> String.contains?(option, filter_value)
+        _ -> String.contains?(option, search_term)
       end
     end)
   end

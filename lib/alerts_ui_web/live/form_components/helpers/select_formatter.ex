@@ -3,21 +3,22 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   Formats selection dropdowns for affected service components
   """
 
+  alias AlertsUI.Models.EnhancedSchedule
   alias AlertsUIWeb.DateTimeHelpers
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Routes.Route
-  alias MBTAV3API.Schedules.{Schedule, Trip}
+  alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Stop
 
   defstruct options: nil,
-            filter_value: "",
+            search_term: "",
             route_type: nil,
             values_to_keep: [],
             schedules_by_route_name: nil
 
   @type t :: %__MODULE__{
           options: [Route.t() | Stop.t()] | nil,
-          filter_value: String.t(),
+          search_term: String.t(),
           route_type: integer() | nil,
           values_to_keep: [String.t()],
           schedules_by_route_name: %{} | nil
@@ -27,7 +28,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   def formatted_select_options(%__MODULE__{
         options: options,
         route_type: route_type,
-        filter_value: filter_value,
+        search_term: search_term,
         values_to_keep: values_to_keep
       })
       when not is_nil(options) do
@@ -37,7 +38,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
     |> Enum.map(fn object ->
       {name_for_option(object, route_type), id_for_option(object)}
     end)
-    |> filter_options(filter_value, values_to_keep)
+    |> apply_search(search_term, values_to_keep)
   end
 
   def formatted_select_options(
@@ -59,28 +60,32 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
     end
   end
 
-  @spec filter_options(list(), String.t() | nil, [String.t()]) :: list()
-  def filter_options(options, nil, _), do: options
-  def filter_options(options, "", _), do: options
+  @spec apply_search(list(), String.t() | nil, [String.t()]) :: list()
+  def apply_search(options, nil, _), do: options
+  def apply_search(options, "", _), do: options
 
-  def filter_options(options, filter_value, values_to_keep) do
-    filter_value = String.downcase(filter_value || "")
+  def apply_search(options, search_term, values_to_keep) do
+    search_term = String.downcase(search_term || "")
 
     Enum.filter(options, fn {option, value} ->
       (option || "")
       |> String.downcase()
-      |> String.contains?(filter_value) || value in values_to_keep
+      |> String.contains?(search_term) || value in values_to_keep
     end)
   end
 
-  @spec sort_order(Stop.t() | Route.t() | Schedule.t() | Facility.t()) :: non_neg_integer() | nil
+  @spec sort_order(Stop.t() | Route.t() | EnhancedSchedule.t() | Facility.t()) ::
+          non_neg_integer() | nil
   # keep original order from API
   def sort_order(%Stop{}), do: nil
-  def sort_order(%Schedule{}), do: nil
+  def sort_order(%EnhancedSchedule{}), do: nil
   def sort_order(%Facility{}), do: nil
   def sort_order(%Route{sort_order: sort_order}), do: sort_order
 
-  @spec name_for_option(Stop.t() | Route.t() | Facility.t() | Schedule.t(), integer() | nil) ::
+  @spec name_for_option(
+          Stop.t() | Route.t() | Facility.t() | EnhancedSchedule.t(),
+          integer() | nil
+        ) ::
           String.t()
   def name_for_option(item, route_type \\ nil)
   def name_for_option(%Stop{name: name}, _rt), do: name
@@ -97,8 +102,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   def name_for_option(%Facility{long_name: long_name}, _rt), do: long_name
 
   def name_for_option(
-        %Schedule{
-          stop: %Stop{name: stop_name, note: last_stop_name},
+        %EnhancedSchedule{
+          last_stop_name: last_stop_name,
+          stop: %Stop{name: stop_name},
           departure_time: departure_time
         },
         4
@@ -107,7 +113,19 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   end
 
   def name_for_option(
-        %Schedule{
+        %EnhancedSchedule{
+          trip: %Trip{name: trip_name, id: trip_id},
+          stop: %Stop{name: stop_name},
+          departure_time: departure_time,
+          use_trip_id_in_name?: true
+        },
+        _route_type
+      ) do
+    "#{trip_name} (#{DateTimeHelpers.friendly_time(departure_time)} from #{stop_name}) #{trip_id}"
+  end
+
+  def name_for_option(
+        %EnhancedSchedule{
           trip: %Trip{name: trip_name},
           stop: %Stop{name: stop_name},
           departure_time: departure_time
@@ -117,11 +135,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
     "#{trip_name} (#{DateTimeHelpers.friendly_time(departure_time)} from #{stop_name})"
   end
 
-  @spec id_for_option(Stop.t() | Route.t() | Schedule.t() | Facility.t()) :: String.t()
+  @spec id_for_option(Stop.t() | Route.t() | EnhancedSchedule.t() | Facility.t()) :: String.t()
   def id_for_option(%Stop{id: id}), do: id
   def id_for_option(%Route{id: id}), do: id
   def id_for_option(%Facility{id: id}), do: id
-  def id_for_option(%Schedule{trip: %Trip{id: id}}), do: id
+  def id_for_option(%EnhancedSchedule{trip: %Trip{id: id}}), do: id
 
   @spec formatted_direction_options([String.t()] | nil, map()) :: keyword(String.t())
   def formatted_direction_options([route_id], direction_names_map) do

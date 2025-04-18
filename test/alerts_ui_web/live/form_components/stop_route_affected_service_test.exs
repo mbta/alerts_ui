@@ -33,6 +33,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
   @route_two %Route{sort_order: 1, id: "Bluer", name: "route_number_2"}
   @routes [@route_one, @route_two]
   @stop %Stop{id: "place-aqucl", name: "Aquarium"}
+  @stop_two %Stop{id: "place-pktrm", name: "Park Street"}
 
   describe "component" do
     test "renders" do
@@ -127,6 +128,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       end
     end
 
+    # Revisit. Not sure this is testing what is expected
     test "search works" do
       with_mocks([
         {RoutesRepo, [],
@@ -156,12 +158,13 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         |> render_change(%{
           "stop_route_affected_service" => %{
             "route_ids" => [],
-            "stop_ids_filter" => "x",
-            "route_ids_filter" => "x"
+            "stop_search_term" => "x",
+            "routes_search_term" => "x"
           }
         })
 
-        refute view |> render_async() =~ ~s(<option value="place-aqucl">)
+        # Search doesn't affect the things selected
+        assert view |> render_async() =~ ~s(<option selected="selected" value="place-aqucl">)
 
         refute view |> element("#stop_route_affected_service_route_ids") |> render_async() =~
                  ~s(<option selected="selected" value="Blue">)
@@ -187,12 +190,97 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
 
         view
         |> element("form")
-        |> render_change(%{"stop_route_affected_service" => %{"modal_route_id_filter" => "q"}})
+        |> render_change(%{"stop_route_affected_service" => %{"modal_route_search_term" => "q"}})
 
         refute view
                |> element("select#stop_route_affected_service_modal_route_id")
                |> render_async() =~
                  ~s(<option value="Blue">route_number_1</option>)
+      end
+    end
+
+    test "add route filter on stops works" do
+      with_mocks([
+        {RoutesRepo, [],
+         [by_stop: fn _route_id -> @routes end, by_type: fn _types -> @routes end]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _route_type -> [@stop, @stop_two] end,
+           by_route: fn
+             "Bluer", _ -> [@stop]
+             _, _ -> [@stop, @stop_two]
+           end
+         ]}
+      ]) do
+        {:ok, view, _html} =
+          live_isolated_component(
+            StopRouteAffectedService,
+            @assigns
+          )
+
+        # Set baseline unfiltered
+        assert view |> render_async() =~ ~s(<option value="place-aqucl">)
+        assert view |> render_async() =~ ~s(<option value="place-pktrm">)
+
+        # Add route filter
+        view
+        |> element("form")
+        |> render_change(%{
+          "stop_route_affected_service" => %{"modal_route_id" => "Bluer"}
+        })
+
+        # Submit filter
+        view
+        |> with_target("#stop_route_service_view")
+        |> render_click(:accepted_routes_modal)
+
+        # Verify filtered and filter text updated
+        assert view |> render_async() =~ ~s(<option value="place-aqucl">)
+        refute view |> render_async() =~ ~s(<option value="place-pktrm">)
+        assert view |> render_async() =~ ~s(Filter: route_number_2)
+      end
+    end
+
+    test "clear route filter for stops works" do
+      with_mocks([
+        {RoutesRepo, [],
+         [by_stop: fn _route_id -> @routes end, by_type: fn _types -> @routes end]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _route_type -> [@stop, @stop_two] end,
+           by_route: fn
+             "Bluer", _ -> [@stop]
+             _, _ -> [@stop, @stop_two]
+           end
+         ]}
+      ]) do
+        {:ok, view, _html} =
+          live_isolated_component(
+            StopRouteAffectedService,
+            @assigns
+          )
+
+        # Add route filter
+        view
+        |> element("form")
+        |> render_change(%{
+          "stop_route_affected_service" => %{"modal_route_id" => "Bluer"}
+        })
+
+        # Submit filter
+        view
+        |> with_target("#stop_route_service_view")
+        |> render_click(:accepted_routes_modal)
+
+        # Clear filter
+        view
+        |> with_target("#stop_route_service_view")
+        |> render_click(:clear_filter, %{"filter-id" => "routes-filter-modal"})
+
+        # Verify unfiltered and text changed
+        assert view |> render_async() =~ ~s(<option value="place-aqucl">)
+        assert view |> render_async() =~ ~s(<option value="place-pktrm">)
+        assert view |> render_async() =~ ~s(Filter: All routes)
       end
     end
 

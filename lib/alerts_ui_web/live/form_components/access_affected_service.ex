@@ -16,14 +16,14 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
   @primary_key false
   embedded_schema do
     field :stop_id, :string
-    field :stop_id_filter, :binary
+    field :stop_search_term, :binary
     field :facility_types, {:array, :string}
     field :facility_types_filter, :string
     field :facility_id, :string
-    field :facility_id_filter, :string
+    field :facility_search_term, :string
   end
 
-  @fields ~w[stop_id stop_id_filter facility_types facility_types_filter facility_id facility_id_filter]a
+  @fields ~w[stop_id stop_search_term facility_types facility_types_filter facility_id facility_search_term]a
   @required_fields ~w[facility_id]a
 
   @impl true
@@ -190,6 +190,11 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     {:noreply, socket}
   end
 
+  @impl true
+  def handle_event("clear_filter", %{"filter-id" => "stops-filter-modal"}, socket) do
+    {:noreply, assign(socket, stop_id_filter_value: "default", filter_title_value: "All stops")}
+  end
+
   def changeset(changeset, params) do
     changeset
     |> cast(params, @fields)
@@ -206,18 +211,18 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
         []
       end
 
-    stop_filter_value = assigns.form[:stop_id_filter].value
+    stop_search_term = assigns.form[:stop_search_term].value
 
     stop_id = assigns.form[:stop_id].value || ""
 
     stop_id_options =
       SelectFormatter.formatted_select_options(%SelectFormatter{
         options: stops,
-        filter_value: stop_filter_value,
+        search_term: stop_search_term,
         values_to_keep: stop_id |> List.wrap()
       })
 
-    facility_filter_value = assigns.form[:facility_id_filter].value
+    facility_search_term = assigns.form[:facility_search_term].value
     facility_id = assigns.form[:facility_id].value || ""
 
     facility_id_options =
@@ -234,7 +239,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
 
         SelectFormatter.formatted_select_options(%SelectFormatter{
           options: options,
-          filter_value: facility_filter_value,
+          search_term: facility_search_term,
           values_to_keep: List.wrap(facility_id)
         })
         |> Enum.map(fn {name, id} -> {String.slice(name, 0..80), id} end)
@@ -274,7 +279,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             <.filtered_select
               label="Stops"
               field={@form[:stop_id]}
-              filter_field={@form[:stop_id_filter]}
+              filter_field={@form[:stop_search_term]}
               options={@stop_id_options}
               loading={@available_facilities.loading}
               no_results={Enum.empty?(@stop_id_options)}
@@ -286,14 +291,16 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
           <.filtered_select
             label="Facilities"
             field={@form[:facility_id]}
-            filter_field={@form[:facility_id_filter]}
+            filter_field={@form[:facility_search_term]}
             modal_filter_id="stops-filter-modal"
             modal_filter_title={"Filter: #{@filter_title_value}"}
+            modal_filter_active={filter_active?(@stop_id_filter_value)}
             options={@facility_id_options}
             loading={@available_facilities.loading}
             no_results={Enum.empty?(@facility_id_options)}
             class="w-[25%] h-[32rem]"
             multiple={false}
+            target_id="#service_form"
           />
         </fieldset>
       </.form>
@@ -301,6 +308,9 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     </div>
     """
   end
+
+  defp filter_active?(filter_value) when filter_value in ["", nil, "default"], do: false
+  defp filter_active?(_), do: true
 
   defp filter_facility_by_stop_ids(facility, stop_id_filter_value, facility_id) do
     # returns true if facility in list if it belongs to a selected stop or has already been selected by the user.
