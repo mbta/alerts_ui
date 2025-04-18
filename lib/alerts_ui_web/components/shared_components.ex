@@ -641,6 +641,10 @@ defmodule AlertsUIWeb.SharedComponents do
     default: nil,
     doc: "text that opens modal filter when clicked"
 
+  attr :modal_filter_active, :boolean,
+    default: false,
+    doc: "whether a modal filter has been applied"
+
   attr :field, FormField,
     required: true,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
@@ -658,6 +662,10 @@ defmodule AlertsUIWeb.SharedComponents do
   attr :disabled, :boolean, default: false, doc: "whether the element is disabled"
 
   attr :no_results, :boolean, default: false, doc: "true if result has been returned but is empty"
+
+  attr :target_id, :string,
+    default: "",
+    doc: "The target to send the events to (eg form component id)"
 
   attr :rest, :global, include: ~w(disabled size phx-debounce)
 
@@ -686,9 +694,18 @@ defmodule AlertsUIWeb.SharedComponents do
           disabled={@disabled}
         >
           <span class={[
-            "hero-funnel-mini w-4 h-4 mr-2",
+            "hero-funnel-mini w-4 h-4 mr-1",
             if(@disabled, do: "text-text-disabled", else: "bg-primary")
-          ]} />{@modal_filter_title}
+          ]} />
+          {@modal_filter_title}
+          <span
+            :if={@modal_filter_active}
+            id="clear-button"
+            phx-target={@target_id}
+            phx-click="clear_filter"
+            phx-value-filter-id={@modal_filter_id}
+            class="hero-x-circle-mini w-4 h-4 ml-1 bg-primary"
+          />
         </button>
       </div>
       <select
@@ -771,6 +788,10 @@ defmodule AlertsUIWeb.SharedComponents do
     default: "filter",
     doc: "text that opens modal filter when clicked"
 
+  attr :modal_filter_active, :boolean,
+    default: false,
+    doc: "whether a modal filter has been applied"
+
   attr :prompt, :string, default: nil, doc: "the prompt for filtered_select inputs"
 
   attr :options, :list,
@@ -780,6 +801,10 @@ defmodule AlertsUIWeb.SharedComponents do
   attr :no_results, :boolean, default: false, doc: "true if result has been returned but is empty"
 
   attr :disabled, :boolean, default: false, doc: "whether the element is disabled"
+
+  attr :target_id, :string,
+    default: "",
+    doc: "The target to send the events to (eg form component id)"
 
   attr :rest, :global, include: ~w(disabled phx-debounce)
 
@@ -793,7 +818,7 @@ defmodule AlertsUIWeb.SharedComponents do
       |> assign_new(:filter_value, fn -> String.downcase(filter_field.value || "") end)
 
     ~H"""
-    <div {@rest} class={["flex flex-col justify-start", @class]}>
+    <div {@rest} class={["flex flex-col justify-start", @class]} id={"#{@field.id}_selector"}>
       <div :if={@modal_filter_id || @label} class="flex flex-row justify-between">
         <.label for={@id} class={if @disabled, do: "text-text-disabled"}>
           {@label}
@@ -802,16 +827,25 @@ defmodule AlertsUIWeb.SharedComponents do
           :if={@modal_filter_id}
           phx-click={show_modal(@modal_filter_id)}
           class={[
-            "leading-tight mb-2 min-h-[1.3rem] text-right",
+            "flex items-center leading-tight mb-2 min-h-[1.3rem] text-right",
             if(@disabled, do: "text-text-disabled", else: "text-primary")
           ]}
           type="button"
           disabled={@disabled}
         >
           <span class={[
-            "hero-funnel-mini w-4 h-4 mr-2",
+            "hero-funnel-mini w-4 h-4 mr-1",
             if(@disabled, do: "text-text-disabled", else: "bg-primary")
-          ]} />{@modal_filter_title}
+          ]} />
+          {@modal_filter_title}
+          <span
+            :if={@modal_filter_active}
+            id="clear-button"
+            phx-target={@target_id}
+            phx-click="clear_filter"
+            phx-value-filter-id={@modal_filter_id}
+            class="hero-x-circle-mini w-4 h-4 ml-1 bg-primary"
+          />
         </button>
       </div>
       <div

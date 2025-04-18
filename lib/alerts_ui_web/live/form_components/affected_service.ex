@@ -46,14 +46,13 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         |> ActivePeriod.datetime_to_service_date()
         |> Date.add(x)
       end)
-
-    modal_options =
-      service_dates
       |> Enum.map(fn date ->
         {Timex.format!(date, "{WDfull} {M}/{0D}"), Date.to_iso8601(date)}
       end)
 
-    changeset = changeset(%__MODULE__{}, %{modal_date: hd(service_dates) |> Date.to_iso8601()})
+    today = hd(service_dates) |> elem(1)
+
+    changeset = changeset(%__MODULE__{}, %{modal_date: today})
 
     socket =
       socket
@@ -63,9 +62,11 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         available_routes: %{},
         available_schedules: %{},
         available_stops: %{},
-        modal_date: hd(service_dates) |> Date.to_iso8601(),
-        modal_options: modal_options,
-        filter_title_value: modal_options |> Enum.map(fn {option, _value} -> option end) |> hd,
+        today: today,
+        service_dates: service_dates,
+        modal_date: today,
+        modal_options: service_dates,
+        filter_title_value: service_dates |> Enum.map(fn {option, _value} -> option end) |> hd,
         modal_date_filter: ""
       })
 
@@ -294,6 +295,23 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     {:noreply, socket}
   end
 
+  @impl true
+  def handle_event("clear_filter", %{"filter-id" => "dates-filter-modal"}, socket) do
+    params = socket.assigns.form.params
+
+    default_filter_title =
+      socket.assigns.service_dates |> Enum.map(fn {option, _value} -> option end) |> hd
+
+    required_fields = ServiceEffectCombinations.required_fields(socket.assigns.combination)
+
+    socket =
+      socket
+      |> assign(modal_date: socket.assigns.today, filter_title_value: default_filter_title)
+      |> assign_schedules(params["route_ids"], params["direction"], required_fields)
+
+    {:noreply, socket}
+  end
+
   def validate(affected_service, assigns) do
     trip_information_by_id =
       if Helpers.async_available?(assigns, :available_schedules) do
@@ -516,9 +534,11 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             field={@form[:direction]}
             modal_filter_id="dates-filter-modal"
             modal_filter_title={"Filter: #{@filter_title_value}"}
+            modal_filter_active={date_filter_active?(@modal_date, @today)}
             options={@direction_options}
             disabled={disable_stop_input?(@form[:route_ids].value)}
             prompt={if disable_stop_input?(@form[:route_ids].value), do: "", else: "Both Directions"}
+            target_id="#service_form"
           />
           <.filtered_select
             field={@form[:trip_ids]}
@@ -566,6 +586,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     </div>
     """
   end
+
+  defp date_filter_active?(filter_value, today) when filter_value == today, do: false
+  defp date_filter_active?(_, _), do: true
 
   defp icon_type(route_type) do
     case route_type do
