@@ -343,11 +343,21 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     |> cast(params, @fields)
   end
 
-  def clean_route_ids(affected_service, _form, "Detour") do
-    incoming_route_id = affected_service["single_route_id"] || nil
+  def clean_route_ids(affected_service, form, "Detour") do
+    # if it's a detour alert, we need to set route_ids to equal the single_route_id
+    # from the form, so we don't have to worry about whether it's a list
+    # elsewhere
+    incoming_route_id = Map.get(affected_service, "single_route_id")
+
+    incoming_route_ids =
+      if incoming_route_id do
+        List.wrap(incoming_route_id)
+      else
+        form.params["route_ids"] || []
+      end
 
     affected_service
-    |> Map.put("route_ids", List.wrap(incoming_route_id) |> Enum.reject(&is_nil/1))
+    |> Map.put("route_ids", incoming_route_ids)
   end
 
   def clean_route_ids(affected_service, form, _) do

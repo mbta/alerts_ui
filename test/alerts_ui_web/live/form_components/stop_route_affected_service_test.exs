@@ -59,7 +59,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       })
 
       assert view
-               |> render() =~ ~s(id="stop_route_affected_service_route_ids" disabled="disabled")
+             |> render() =~ ~s(id="stop_route_affected_service_route_ids" disabled="disabled")
 
       view
       |> live_assign(%{
@@ -76,7 +76,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       |> render_change(%{"stop_route_affected_service" => %{"stop_ids" => ["Blue"]}})
 
       refute view
-               |> render() =~ ~s(id="stop_route_affected_service_route_ids" disabled="disabled")
+             |> render() =~ ~s(id="stop_route_affected_service_route_ids" disabled="disabled")
 
       view
       |> live_assign(%{
