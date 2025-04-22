@@ -210,6 +210,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       affected_service
       |> Map.put_new("direction", "default")
       |> clean_route_ids(socket.assigns.form, socket.assigns.effect_name)
+      |> adjust_selections()
       # Stops / trips have default values, but all other empty lists among the fields
       # should be omitted. That means they have been deselected
       |> Helpers.filter_empty_list_fields()
@@ -254,6 +255,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       |> assign(%{form: form})
       |> assign_stops(route_ids, direction, required_fields)
       |> assign_schedules(route_ids, direction, required_fields)
+      # If any of the selections were adjusted server-side, push those changes back
+      # to the client
+      |> push_event("adjustSelections", affected_service)
 
     {:noreply, socket}
   end
@@ -357,6 +361,17 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     affected_service |> Map.put("route_ids", new_route_ids)
   end
+
+  # If the user tries ctrl-click "All Trips" while individual trips are already selected,
+  # the select-all shouldn't work. But the client isn't smart enough to know that
+  # on its own. Here, we update the server-side data, and later we push it to the client
+  @spec adjust_selections(map()) :: map()
+  def adjust_selections(affected_service) do
+    Enum.reduce(affected_service, %{}, fn {k, v}, acc -> Map.put(acc, k, adjust_select_all(v)) end)
+  end
+
+  def adjust_select_all(["default" | others]), do: others
+  def adjust_select_all(keep_all), do: keep_all
 
   def assign_stops(socket, route_ids, direction, fields) do
     if :stop_ids in fields do
@@ -538,7 +553,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             options={@direction_options}
             disabled={disable_stop_input?(@form[:route_ids].value)}
             prompt={if disable_stop_input?(@form[:route_ids].value), do: "", else: "Both Directions"}
-            target_id="#service_form"
           />
           <.filtered_select
             field={@form[:trip_ids]}
@@ -551,6 +565,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             class="min-w-[100%] h-full"
             disabled={disable_trip_input?(@form[:route_ids].value)}
             prompt={if disable_trip_input?(@form[:route_ids].value), do: nil, else: "All Trips"}
+            hook="SelectAllAdjuster"
           />
         </div>
         <div class="flex flex-col justify-start w-[25%]">
@@ -579,6 +594,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
                 do: nil,
                 else: "All Stops"
             }
+            hook="SelectAllAdjuster"
           />
         </div>
       </.form>
