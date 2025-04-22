@@ -553,6 +553,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             options={@direction_options}
             disabled={disable_stop_input?(@form[:route_ids].value)}
             prompt={if disable_stop_input?(@form[:route_ids].value), do: "", else: "Both Directions"}
+            target_id="#service_form"
           />
           <.filtered_select
             field={@form[:trip_ids]}
