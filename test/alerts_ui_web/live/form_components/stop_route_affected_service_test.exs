@@ -31,7 +31,13 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
   }
 
   @route_one %Route{sort_order: 1, id: "Blue", name: "route_number_1"}
-  @route_two %Route{sort_order: 1, id: "Bluer", name: "route_number_2"}
+  @route_two %Route{sort_order: 2, id: "Bluer", name: "route_number_2"}
+  @shuttle_route %Route{
+    sort_order: 3,
+    id: "shuttle",
+    name: "Shuttle Route",
+    description: :rail_replacement_bus
+  }
   @routes [@route_one, @route_two]
   @stop %Stop{id: "place-aqucl", name: "Aquarium"}
   @stop_two %Stop{id: "place-pktrm", name: "Park Street"}
@@ -90,6 +96,32 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
 
       assert view
              |> render() =~ ~s(route_number_1)
+    end
+
+    test "shuttle routes are filtered out" do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_stop: fn _stop_id -> @routes ++ [@shuttle_route] end,
+           by_type: fn _types -> @routes end
+         ]},
+        {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
+      ]) do
+        {:ok, view, _html} =
+          live_isolated_component(
+            StopRouteAffectedService,
+            @assigns
+          )
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["stop_route_affected_service", "stop_ids"],
+          "stop_route_affected_service" => %{"stop_ids" => ["place-aqucl"]}
+        })
+
+        refute view |> render_async() =~ ~s(shuttle)
+      end
     end
 
     test "route options are all selected by default and allows user entry" do
