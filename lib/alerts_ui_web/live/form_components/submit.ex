@@ -6,12 +6,6 @@ defmodule AlertsUIWeb.FormComponents.Submit do
   use AlertsUI.Schema
 
   @impl true
-  def handle_event("save_as_draft", _params, socket) do
-    send(self(), :save_as_draft)
-    {:noreply, socket}
-  end
-
-  @impl true
   def handle_event("save", _params, socket) do
     send(self(), :create_alert)
     {:noreply, socket}
@@ -31,17 +25,6 @@ defmodule AlertsUIWeb.FormComponents.Submit do
       >
         Publish
       </.button_primary>
-
-      <.button_secondary
-        class="basis-8 self-center min-w-[10%]"
-        phx-target={@myself}
-        phx-click="save_as_draft"
-        type="button"
-        name="draft"
-        id="draft"
-      >
-        Save as Draft
-      </.button_secondary>
     </div>
     """
   end

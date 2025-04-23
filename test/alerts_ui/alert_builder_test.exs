@@ -69,7 +69,6 @@ defmodule AlertsUI.AlertBuilderTest do
                    }
                  ],
                  effect_detail: "DELAY",
-                 draft: false,
                  active_period: [%{start: ~U[2024-04-30 15:54:00Z], end: nil}],
                  duration_certainty: :UNKNOWN,
                  active_period_start: ~U[2024-04-30 15:54:00Z],
@@ -215,7 +214,6 @@ defmodule AlertsUI.AlertBuilderTest do
                  ],
                  effect_detail: "DELAY",
                  effect_name: "Delay",
-                 draft: false,
                  active_period: [%{start: ~U[2024-04-30 15:54:00Z], end: nil}],
                  active_period_end: nil,
                  active_period_start: ~U[2024-04-30 15:54:00Z],
@@ -348,7 +346,6 @@ defmodule AlertsUI.AlertBuilderTest do
                    }
                  ],
                  effect_detail: "DELAY",
-                 draft: false,
                  active_period: [%{start: ~U[2024-04-30 15:54:00Z], end: nil}],
                  active_period_end: nil,
                  active_period_start: ~U[2024-04-30 15:54:00Z],
@@ -2195,7 +2192,6 @@ defmodule AlertsUI.AlertBuilderTest do
         route_ids: ["Boat-F4"],
         effect_name: "Dock Closure",
         description_text: "b",
-        draft: nil,
         header_text: "a",
         route_types_by_id: %{"Boat-F4" => 4}
       }
@@ -2351,7 +2347,6 @@ defmodule AlertsUI.AlertBuilderTest do
         effect_name: "Station Issue",
         header_text: "Test 10",
         description_text: "Test 10",
-        draft: nil,
         route_types_by_id: %{"CR-Kingston" => 2}
       }
 

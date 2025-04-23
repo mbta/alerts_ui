@@ -12,7 +12,6 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   embedded_schema do
     field :header_text, :string
     field :description_text, :string
-    field :draft, :boolean
     field :cause_detail, :string, default: ""
     field :url, :string
     field :image_url, :string
@@ -21,7 +20,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   end
 
   @required_fields ~w[header_text]a
-  @fields ~w[description_text draft cause_detail url image_url image_alternative_text severity]a ++
+  @fields ~w[description_text cause_detail url image_url image_alternative_text severity]a ++
             @required_fields
 
   @impl true

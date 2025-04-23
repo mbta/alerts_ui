@@ -318,39 +318,6 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
                |> render_async() =~ "real big elevator"
       end
     end
-
-    @tag :logged_in_user
-    test "save as draft redirects on success", %{conn: conn} do
-      conn = log_in_user(conn)
-      {:ok, view, _html} = live(conn, "/alerts/new")
-
-      {:ok, changeset} =
-        Ecto.Changeset.change(%RouteTypeAndEffect{
-          route_type: 3
-        })
-        |> apply_action(:insert)
-
-      send(view.pid, {:step_completed, changeset})
-      send(view.pid, :save_as_draft)
-      assert_redirect(view, "/alerts/new", 500)
-    end
-
-    @tag :logged_in_user
-    test "save as draft shows error on error", %{conn: conn} do
-      with_mock(Alerts,
-        parse_changeset_errors: fn _ -> %{error_title: ["message", "message2"]} end,
-        create_draft_alert: fn _alert_data ->
-          {:error, Ecto.Changeset.cast({%{}, %{}}, %{}, [])}
-        end
-      ) do
-        conn = log_in_user(conn)
-        {:ok, view, _html} = live(conn, "/alerts/new")
-        send(view.pid, :save_as_draft)
-        rendered_view = render(view)
-        refute_redirected(view, "/alerts/new")
-        rendered_view =~ "error title: message, message2"
-      end
-    end
   end
 
   describe "filter_out_old_trips/2" do
