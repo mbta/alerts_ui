@@ -5,6 +5,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
   import LiveIsolatedComponent
   import Mock
   import Phoenix.LiveViewTest
+  import Test.Support.Helpers
 
   alias AlertsUIWeb.FormComponents.StopRouteAffectedService
   alias AlertsUIWeb.Step
@@ -398,13 +399,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         |> render_click()
 
         assert [%{route_id: "Blue"}, %{route_id: "Bluer"}] =
-                 view
-                 |> element("#success_view h3")
-                 |> render()
-                 |> String.replace("<h3 class=\"font-bold mb-2 text-2xl  mr-4\">\n  Alert #", "")
-                 |> String.replace(" created successfully\n</h3>", "")
-                 |> AlertsUI.Alerts.get_by_alert_id()
-                 |> Map.get(:informed_entity)
+                 parse_entities_from_alert_created_output(view)
       end
     end
 
@@ -478,14 +473,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         |> element("button#save", "Publish")
         |> render_click()
 
-        assert [%{route_id: "Bluer"}] =
-                 view
-                 |> element("#success_view h3")
-                 |> render()
-                 |> String.replace("<h3 class=\"font-bold mb-2 text-2xl  mr-4\">\n  Alert #", "")
-                 |> String.replace(" created successfully\n</h3>", "")
-                 |> AlertsUI.Alerts.get_by_alert_id()
-                 |> Map.get(:informed_entity)
+        assert [%{route_id: "Bluer"}] = parse_entities_from_alert_created_output(view)
       end
     end
 
