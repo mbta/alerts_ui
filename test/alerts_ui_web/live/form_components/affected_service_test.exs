@@ -511,6 +511,33 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       end
     end
 
+    test "date selection disabled until one or more routes selected" do
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]},
+        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+      ]) do
+        {:ok, view, _html} =
+          live_isolated_component(AffectedService, %{
+            @assigns
+            | alert_data: %{route_type: 4, effect_name: "Shuttle"}
+          })
+
+        assert view |> render_async() =~ ~s(id="dates-filter-modal_button" disabled="disabled")
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "affected_service" => %{
+            "route_ids" => ["1", "2"],
+            "directions" => [0]
+          }
+        })
+
+        refute view |> render_async() =~ ~s(id="dates-filter-modal_button" disabled="disabled")
+      end
+    end
+
     test "stop element disabled until route is selected" do
       with_mocks([
         {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},

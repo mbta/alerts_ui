@@ -695,6 +695,7 @@ defmodule AlertsUIWeb.SharedComponents do
             if(@modal_filter_disabled, do: "text-text-disabled", else: "text-primary")
           ]}
           type="button"
+          id={@modal_filter_id <> "_button"}
           disabled={@modal_filter_disabled}
         >
           <span class={[
