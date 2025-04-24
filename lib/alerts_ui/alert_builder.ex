@@ -215,8 +215,6 @@ defmodule AlertsUI.AlertBuilder do
           )
         end)
 
-      # in the case of Subway & CR, detect platforms at the nodes of branches that
-      # need to be included in informed entities
       neighbor_stops =
         get_neighbor_stops(child_stops_context, canonical_route_patterns, parent_stop_ids, route)
 
@@ -226,6 +224,8 @@ defmodule AlertsUI.AlertBuilder do
 
   defp get_neighbor_stops(child_stops_context, canonical_route_patterns, parent_stop_ids, route)
        when route.type in [0, 1, 2] do
+    # in the case of Subway & CR, detect platforms at the nodes of branches that
+    # need to be included in informed entities
     all_route_pattern_stops =
       canonical_route_patterns
       |> Enum.map(& &1.stops())
@@ -236,7 +236,7 @@ defmodule AlertsUI.AlertBuilder do
       end)
 
     Enum.map(child_stops_with_direction, fn {child_stop, child_direction} ->
-      get_neighbors(all_route_pattern_stops, child_stop, child_direction)
+      get_neighbors_for_direction(all_route_pattern_stops, child_stop, child_direction)
     end)
     |> List.flatten()
     |> Enum.reject(fn {neighbor_stop, _direction} ->
@@ -298,7 +298,7 @@ defmodule AlertsUI.AlertBuilder do
 
     route_id
     |> RoutePatterns.by_route_id(opts)
-    |> Enum.filter(&(&1.typicality < 4))
+    |> Enum.reject(&String.contains?(&1.id, "Shuttle"))
   end
 
   @spec route_pattern_direction_opts(keyword(), String.t()) :: keyword()
@@ -359,17 +359,17 @@ defmodule AlertsUI.AlertBuilder do
     end)
   end
 
-  defp get_neighbors(stops_list, stop, direction) when direction == 1 do
+  defp get_neighbors_for_direction(stops_list, stop, direction) when direction == 1 do
     stops_list
     |> Enum.map(&Enum.reverse/1)
-    |> neighbors(stop, direction)
+    |> get_neighbors(stop, direction)
+  end
+
+  defp get_neighbors_for_direction(stops_list, stop, direction) do
+    get_neighbors(stops_list, stop, direction)
   end
 
   defp get_neighbors(stops_list, stop, direction) do
-    neighbors(stops_list, stop, direction)
-  end
-
-  defp neighbors(stops_list, stop, direction) do
     stops_list
     |> Enum.map(fn stops ->
       index = Enum.find_index(stops, fn s -> s.id === stop.id end)

@@ -556,7 +556,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  direction_id: 1,
                  stops: child_stops,
                  route_id: route_id,
-                 typicality: 1
+                 id: "rp_1"
                }
              ]
            end,
@@ -620,7 +620,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  direction_id: 0,
                  stops: parent_stops,
                  route_id: route_id,
-                 typicality: 1
+                 id: "rp_1"
                }
              ]
            end,
@@ -692,7 +692,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  direction_id: 0,
                  stops: child_stops,
                  route_id: route_id,
-                 typicality: 1
+                 id: "rp_1"
                }
              ]
            end,
@@ -768,13 +768,13 @@ defmodule AlertsUI.AlertBuilderTest do
                  direction_id: 0,
                  stops: child_stops_0,
                  route_id: "Red",
-                 typicality: 1
+                 id: "Red-1"
                },
                %APIRoutePattern{
                  direction_id: 1,
                  stops: child_stops_1,
                  route_id: "Red",
-                 typicality: 1
+                 id: "Red-2"
                }
              ]
            end,
@@ -874,7 +874,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  direction_id: 1,
                  stops: child_stops,
                  route_id: route_id,
-                 typicality: 1
+                 id: "rp-1"
                }
              ]
            end,
@@ -953,25 +953,25 @@ defmodule AlertsUI.AlertBuilderTest do
                    direction_id: 0,
                    stops: [jfk_child, ashmont_child],
                    route_id: "Red",
-                   typicality: 1
+                   id: "Red-1"
                  },
                  %APIRoutePattern{
                    direction_id: 1,
                    stops: [ashmont_child, jfk_child],
                    route_id: "Red",
-                   typicality: 1
+                   id: "Red-2"
                  },
                  %APIRoutePattern{
                    direction_id: 0,
                    stops: [jfk_child, braintree_child],
                    route_id: "Red",
-                   typicality: 1
+                   id: "Red-3"
                  },
                  %APIRoutePattern{
                    direction_id: 1,
                    stops: [braintree_child, jfk_child],
                    route_id: "Red",
-                   typicality: 1
+                   id: "Red-4"
                  }
                ]
            end,
@@ -1073,25 +1073,25 @@ defmodule AlertsUI.AlertBuilderTest do
                    direction_id: 0,
                    stops: [jfk_child, ashmont_child],
                    route_id: "Red",
-                   typicality: 1
+                   id: "Red-1"
                  },
                  %APIRoutePattern{
                    direction_id: 1,
                    stops: [ashmont_child, jfk_child],
                    route_id: "Red",
-                   typicality: 1
+                   id: "Red-2"
                  },
                  %APIRoutePattern{
                    direction_id: 0,
                    stops: [jfk_child, braintree_child],
                    route_id: "Red",
-                   typicality: 1
+                   id: "Red-3"
                  },
                  %APIRoutePattern{
                    direction_id: 1,
                    stops: [braintree_child, jfk_child],
                    route_id: "Red",
-                   typicality: 1
+                   id: "Red-4"
                  }
                ]
            end,
@@ -1358,13 +1358,13 @@ defmodule AlertsUI.AlertBuilderTest do
                    direction_id: 0,
                    stops: [hynes_child, kenmore_child],
                    route_id: "Green-B",
-                   typicality: 1
+                   id: "green-b-1"
                  },
                  %APIRoutePattern{
                    direction_id: 1,
                    stops: [kenmore_child, hynes_child],
                    route_id: "Green-B",
-                   typicality: 1
+                   id: "green-b-2"
                  }
                ]
 
@@ -1374,13 +1374,13 @@ defmodule AlertsUI.AlertBuilderTest do
                    direction_id: 0,
                    stops: [kenmore_child, hynes_child],
                    route_id: "Green-C",
-                   typicality: 1
+                   id: "green-c-1"
                  },
                  %APIRoutePattern{
                    direction_id: 1,
                    stops: [hynes_child, kenmore_child],
                    route_id: "Green-C",
-                   typicality: 1
+                   id: "green-c-2"
                  }
                ]
 
@@ -1390,13 +1390,13 @@ defmodule AlertsUI.AlertBuilderTest do
                    direction_id: 0,
                    stops: [fenway_child, kenmore_child, hynes_child],
                    route_id: "Green-D",
-                   typicality: 1
+                   id: "green-d-1"
                  },
                  %APIRoutePattern{
                    direction_id: 1,
                    stops: [hynes_child, kenmore_child, fenway_child],
                    route_id: "Green-D",
-                   typicality: 1
+                   id: "green-d-2"
                  }
                ]
 
@@ -1944,7 +1944,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  direction_id: 1,
                  stops: child_stops,
                  route_id: route_id,
-                 typicality: 1
+                 id: "rp_1"
                }
              ]
            end,
@@ -2065,7 +2065,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  direction_id: 0,
                  stops: child_stops,
                  route_id: route_id,
-                 typicality: 1
+                 id: "rp-1"
                }
              ]
            end,
@@ -2138,7 +2138,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  direction_id: 0,
                  stops: child_stops,
                  route_id: route_id,
-                 typicality: 1
+                 id: "rp_1"
                }
              ]
            end,
@@ -2211,7 +2211,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  direction_id: 0,
                  stops: child_stops,
                  route_id: route_id,
-                 typicality: 1
+                 id: "rp_1"
                }
              ]
            end,
@@ -2292,7 +2292,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  direction_id: 0,
                  stops: child_stops,
                  route_id: route_id,
-                 typicality: 1
+                 id: "rp_1"
                }
              ]
            end,
@@ -2373,13 +2373,13 @@ defmodule AlertsUI.AlertBuilderTest do
                  direction_id: 0,
                  stops: child_stops_0,
                  route_id: "CR-Fitchburg",
-                 typicality: 1
+                 id: "CR-Fitchburg-1"
                },
                %APIRoutePattern{
                  direction_id: 1,
                  stops: child_stops_1,
                  route_id: "CR-Fitchburg",
-                 typicality: 1
+                 id: "CR-Fitchburg-2"
                }
              ]
            end,
@@ -2463,7 +2463,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  direction_id: 0,
                  stops: child_stops,
                  route_id: route_id,
-                 typicality: 1
+                 id: "rp_1"
                }
              ]
            end,
@@ -2545,7 +2545,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  direction_id: 0,
                  stops: child_stops,
                  route_id: route_id,
-                 typicality: 1
+                 id: "rp_1"
                }
              ]
            end,
@@ -2612,7 +2612,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  direction_id: 0,
                  stops: child_stops,
                  route_id: route_id,
-                 typicality: 1
+                 id: "rp_1"
                }
              ]
            end,
@@ -2723,7 +2723,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  direction_id: 0,
                  stops: child_stops,
                  route_id: route_id,
-                 typicality: 1
+                 id: "rp_1"
                }
              ]
            end,
