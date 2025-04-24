@@ -233,7 +233,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
              _route_type, [direction_id: _any, route: "Blue"] -> [@stop_two]
              _route_type, _ -> [@stop, @stop_two]
            end,
-           by_route: fn "Blue", _direction -> [] end
+           by_route: fn "Blue", _direction -> [@stop_two] end
          ]}
       ]) do
         {:ok, view, _html} =

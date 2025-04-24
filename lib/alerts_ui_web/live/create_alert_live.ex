@@ -216,28 +216,24 @@ defmodule AlertsUIWeb.CreateAlertLive do
   def get_stops_by_route_type(route_type, route_id \\ nil)
 
   def get_stops_by_route_type(3, route_id) when is_nil(route_id) do
-    route_id_lists =
-      RoutesRepo.by_type(3)
-      |> Enum.map(& &1.id)
-      |> Enum.chunk_every(20)
-      |> Enum.map(&Enum.join(&1, ","))
+    # used for stop-route combination, bus mode. appends direction names to routes
 
     Enum.flat_map([0, 1], fn direction ->
-      Enum.flat_map(route_id_lists, fn route_ids ->
-        opts = Keyword.put([direction_id: direction], :"filter[route]", route_ids)
+      opts = [direction_id: direction]
 
-        StopsRepo.by_route_type(3, opts)
-        |> map_direction_names_to_stops(direction)
-      end)
+      StopsRepo.by_route_type(3, opts)
+      |> map_direction_names_to_stops(direction)
     end)
     |> Enum.sort_by(& &1.name)
   end
 
   def get_stops_by_route_type(route_type, route_id) when is_nil(route_id) do
+    # used for stop-route combination, other modes
     StopsRepo.by_route_type(route_type, []) |> Enum.sort_by(& &1.name)
   end
 
   def get_stops_by_route_type(3, route_id) do
+    # used for route filter in SR combination, bus mode
     Enum.flat_map([0, 1], fn direction ->
       opts = [direction_id: direction, route: route_id]
 
@@ -247,19 +243,20 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   def get_stops_by_route_type(route_type, route_id) do
+    # used for route filter in SR combination, all other modes
     Enum.flat_map([0, 1], fn direction ->
       opts = [direction_id: direction, route: route_id]
       StopsRepo.by_route_type(route_type, opts)
     end)
   end
 
-  def get_routes_by_stop(stop_ids, route_type) do
-    if route_type == 3 do
-      Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1, "filter[type]": 3))
-      |> Enum.filter(&(Map.get(&1, :description) !== :rail_replacement_bus))
-    else
-      Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1))
-    end
+  def get_routes_by_stop(stop_ids, 3) do
+    Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1, "filter[type]": 3))
+    |> Enum.filter(&(Map.get(&1, :description) !== :rail_replacement_bus))
+  end
+
+  def get_routes_by_stop(stop_ids, _route_type) do
+    Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1))
     |> maybe_include_virtual_green_line()
   end
 

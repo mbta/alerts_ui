@@ -149,7 +149,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
     test "shows correct affected service for stop route combination", %{conn: conn} do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
-        {StopsRepo, [], by_route_type: fn _route_type -> [] end}
+        {StopsRepo, [], by_route_type: fn _route_type, _opts -> [] end}
       ]) do
         insert(:alert, alert_id: "1")
         {:ok, view, _html} = live(conn, "/alerts/new")
