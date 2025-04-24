@@ -173,6 +173,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
     |> filter_out_old_trips
   end
 
+  @spec get_schedules([String.t()], String.t(), Date.t()) :: list()
   def get_schedules(route_ids, direction, date) do
     directions = directions_from_selection(direction)
     opts = [stop_sequences: [:first, :last], date: date] |> direction_option(directions)
@@ -185,7 +186,10 @@ defmodule AlertsUIWeb.CreateAlertLive do
     end)
   end
 
-  def get_stops(["Green"] = route_ids, direction) do
+  @spec get_stops([String.t()], String.t(), integer() | nil) :: list()
+  def get_stops(route_ids, direction, _route_type \\ nil)
+
+  def get_stops(["Green"] = route_ids, direction, _route_type) do
     route_ids = Routes.expanding_green_line(route_ids) |> Enum.reverse()
 
     stops =
@@ -203,7 +207,6 @@ defmodule AlertsUIWeb.CreateAlertLive do
     end
   end
 
-  @spec get_stops([String.t()], nil | String.t(), integer()) :: [MBTAV3API.Stops.Stop.t()]
   def get_stops(route_ids, direction, route_type) do
     direction
     |> directions_from_selection()
@@ -231,7 +234,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   def get_stops_by_route_type(route_type, route_id) when is_nil(route_id) do
-    StopsRepo.by_route_type(route_type) |> Enum.sort_by(& &1.name)
+    StopsRepo.by_route_type(route_type, []) |> Enum.sort_by(& &1.name)
   end
 
   def get_stops_by_route_type(3, route_id) do

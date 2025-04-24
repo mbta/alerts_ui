@@ -42,7 +42,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
   @stop %Stop{id: "place-aqucl", name: "Aquarium"}
   @stop_two %Stop{id: "place-pktrm", name: "Park Street"}
 
-
   describe "component" do
     test "renders" do
       assert render_component(StopRouteAffectedService, @assigns) =~ ~s(id="service_form")
@@ -148,7 +147,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       with_mocks([
         {RoutesRepo, [],
          [by_stop: fn _stop_id -> @routes end, by_type: fn _types -> @routes end]},
-        {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
+        {StopsRepo, [], [by_route_type: fn _route_type, _ -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
           live_isolated_component(
@@ -186,7 +185,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       with_mocks([
         {RoutesRepo, [],
          [by_stop: fn _stop_id -> @routes end, by_type: fn _types -> @routes end]},
-        {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
+        {StopsRepo, [], [by_route_type: fn _route_type, _ -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
           live_isolated_component(
@@ -230,8 +229,11 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
          [by_stop: fn _route_id -> @routes end, by_type: fn _types -> @routes end]},
         {StopsRepo, [],
          [
-           by_route_type: fn _route_type, [direction_id: _any, route: "Blue"] -> [@stop_two] end,
-           by_route_type: fn _route_type -> [@stop, @stop_two] end
+           by_route_type: fn
+             _route_type, [direction_id: _any, route: "Blue"] -> [@stop_two]
+             _route_type, _ -> [@stop, @stop_two]
+           end,
+           by_route: fn "Blue", _direction -> [] end
          ]}
       ]) do
         {:ok, view, _html} =
@@ -244,6 +246,11 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
                |> element("select##stop_route_affected_service_stop_ids")
                |> render_async() =~
                  ~s(<option value="#{@stop.id}">#{@stop.name}</option>)
+
+        assert view
+               |> element("select##stop_route_affected_service_stop_ids")
+               |> render_async() =~
+                 ~s(<option value="#{@stop_two.id}">#{@stop_two.name}</option>)
 
         view
         |> element("form")
@@ -261,6 +268,11 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
                |> element("select##stop_route_affected_service_stop_ids")
                |> render_async() =~
                  ~s(<option value="#{@stop.id}">#{@stop.name}</option>)
+
+        assert view
+               |> element("select##stop_route_affected_service_stop_ids")
+               |> render_async() =~
+                 ~s(<option value="#{@stop_two.id}">#{@stop_two.name}</option>)
       end
     end
 
@@ -268,7 +280,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       with_mocks([
         {RoutesRepo, [],
          [by_stop: fn _route_id -> @routes end, by_type: fn _types -> @routes end]},
-        {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
+        {StopsRepo, [], [by_route_type: fn _route_type, _ -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
           live_isolated_component(
@@ -298,7 +310,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
          [by_stop: fn _route_id -> @routes end, by_type: fn _types -> @routes end]},
         {StopsRepo, [],
          [
-           by_route_type: fn _route_type -> [@stop, @stop_two] end,
+           by_route_type: fn _route_type, _ -> [@stop, @stop_two] end,
            by_route: fn
              "Bluer", _ -> [@stop]
              _, _ -> [@stop, @stop_two]
@@ -340,7 +352,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
          [by_stop: fn _route_id -> @routes end, by_type: fn _types -> @routes end]},
         {StopsRepo, [],
          [
-           by_route_type: fn _route_type -> [@stop, @stop_two] end,
+           by_route_type: fn _route_type, _ -> [@stop, @stop_two] end,
            by_route: fn
              "Bluer", _ -> [@stop]
              _, _ -> [@stop, @stop_two]
@@ -386,7 +398,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       with_mocks([
         {RoutesRepo, [],
          [by_stop: fn _stop_id -> @routes end, by_type: fn _types -> @routes end]},
-        {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
+        {StopsRepo, [], [by_route_type: fn _route_type, _ -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
           live_isolated_component(

@@ -235,20 +235,20 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       )
       |> Enum.map(& &1.id)
 
-      route_type = socket.assigns.route_type
+    route_type = socket.assigns.route_type
 
     {:noreply,
      socket
      |> assign_async([:available_stops], fn ->
-      {:ok,
-       %{
-         available_stops:
-           CreateAlertLive.get_stops_by_route_type(
-             route_type,
-             selected_route_id
-           )
-       }}
-    end)
+       {:ok,
+        %{
+          available_stops:
+            CreateAlertLive.get_stops_by_route_type(
+              route_type,
+              selected_route_id
+            )
+        }}
+     end)
      |> assign(
        stops_filtered_by_route: stops_filtered_by_route,
        filter_title_value: filter_title_value
@@ -482,5 +482,4 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     # returns true if stop in list is in list from modal filter or has already been selected by the user.
     stop.id in (stops_filtered_by_route ++ selected_stop_ids)
   end
-
 end
