@@ -140,7 +140,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
       end
     end
 
-    test "clear route filter for stops works" do
+    test "clear stop filter for facilities works" do
       with_mock(FacilitiesRepo,
         get_by_type: fn _facility_types, _opts -> [@facility, @facility_two] end
       ) do
@@ -167,10 +167,15 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
         |> with_target("#access_service_view")
         |> render_click(:clear_filter, %{"filter-id" => "stops-filter-modal"})
 
-        # Verify unfiltered and text changed
-        assert view |> render_async() =~ ~s(<option value="Facility-3">)
-        assert view |> render_async() =~ ~s(<option value="Facility-7">)
-        assert view |> render_async() =~ ~s(Filter: All stops)
+        # Verify unfiltered
+        assert render(view) =~ ~s(<option value="Facility-3">)
+        assert render(view) =~ ~s(<option value="Facility-7">)
+        # Verify text changed
+        assert render(view) =~ ~s(Filter: All stops)
+        # Verify modal is cleared
+        assert view
+               |> element("select#access_affected_service_stop_id")
+               |> render() =~ ~s(<option value="default" selected="selected">)
       end
     end
 

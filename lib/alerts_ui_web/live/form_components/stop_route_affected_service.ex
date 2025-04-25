@@ -152,9 +152,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         },
         socket
       ) do
-    available_routes = Map.get(socket.assigns.available_routes, :result, [])
-    affected_service = add_routes_with_types(affected_service, available_routes)
-
     changeset = build_changeset(%__MODULE__{}, affected_service)
 
     form =
@@ -181,20 +178,11 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   # On route select, don't need to do anything but save the change
   @impl true
   def handle_event("validate", %{"stop_route_affected_service" => affected_service}, socket) do
-    available_routes = Map.get(socket.assigns.available_routes, :result, [])
-
-    affected_service = add_routes_with_types(affected_service, available_routes)
+    affected_service = add_routes_with_types(affected_service, available_routes(socket))
 
     changeset = build_changeset(%__MODULE__{}, affected_service)
 
-    case apply_action(changeset |> validate_required(@required_fields), :validate) do
-      {:ok, changeset} ->
-        send(self(), {:add_errors, [], __MODULE__})
-        send(self(), {:section_completed, changeset})
-
-      {:error, changeset} ->
-        send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
-    end
+    validate_changeset(changeset)
 
     form =
       changeset
@@ -249,7 +237,22 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
   @impl true
   def handle_event("clear_filter", %{"filter-id" => "routes-filter-modal"}, socket) do
-    {:noreply, assign(socket, stops_filtered_by_route: [], filter_title_value: "All routes")}
+    affected_service =
+      socket.assigns.form.params
+      |> Map.merge(%{"modal_route_id" => ""})
+      |> add_routes_with_types(available_routes(socket))
+
+    changeset = build_changeset(%__MODULE__{}, affected_service)
+
+    # Don't need to validate because the filter field is not required, right?
+
+    form =
+      changeset
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    {:noreply,
+     assign(socket, form: form, stops_filtered_by_route: [], filter_title_value: "All routes")}
   end
 
   @impl true
@@ -257,21 +260,13 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     %{available_routes: available_routes} = socket.assigns
 
     affected_service =
-      add_routes_with_types(
-        Map.merge(socket.assigns.form.params, %{"route_ids" => Enum.map(fetched_routes, & &1.id)}),
-        fetched_routes
-      )
+      socket.assigns.form.params
+      |> Map.merge(%{"route_ids" => Enum.map(fetched_routes, & &1.id)})
+      |> add_routes_with_types(fetched_routes)
 
     changeset = build_changeset(%__MODULE__{}, affected_service)
 
-    case apply_action(changeset |> validate_required(@required_fields), :validate) do
-      {:ok, changeset} ->
-        send(self(), {:add_errors, [], __MODULE__})
-        send(self(), {:section_completed, changeset})
-
-      {:error, changeset} ->
-        send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
-    end
+    validate_changeset(changeset)
 
     form =
       changeset
@@ -307,9 +302,19 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     Map.put(affected_service, "route_types_by_id", routes_with_types)
   end
 
-  def build_changeset(changeset, params) do
-    changeset
-    |> cast(params, @fields)
+  def available_routes(socket), do: Map.get(socket.assigns.available_routes, :result, [])
+
+  def build_changeset(changeset, params), do: cast(changeset, params, @fields)
+
+  def validate_changeset(changeset) do
+    case apply_action(changeset |> validate_required(@required_fields), :validate) do
+      {:ok, changeset} ->
+        send(self(), {:add_errors, [], __MODULE__})
+        send(self(), {:section_completed, changeset})
+
+      {:error, changeset} ->
+        send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
+    end
   end
 
   @impl true
