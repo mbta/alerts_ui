@@ -761,8 +761,7 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [],
          [
-           by_route_id: fn "Red",
-                           ["filter[canonical]": true, include: "representative_trip.stops"] ->
+           by_route_id: fn "Red", [include: "representative_trip.stops"] ->
              [
                %APIRoutePattern{
                  direction_id: 0,
@@ -2366,8 +2365,7 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [],
          [
-           by_route_id: fn "CR-Fitchburg",
-                           ["filter[canonical]": true, include: "representative_trip.stops"] ->
+           by_route_id: fn "CR-Fitchburg", [include: "representative_trip.stops"] ->
              [
                %APIRoutePattern{
                  direction_id: 0,

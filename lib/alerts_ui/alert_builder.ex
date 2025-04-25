@@ -293,7 +293,7 @@ defmodule AlertsUI.AlertBuilder do
 
   defp get_route_patterns(route_id, direction, _route_type) do
     opts =
-      ["filter[canonical]": true, include: "representative_trip.stops"]
+      [include: "representative_trip.stops"]
       |> route_pattern_direction_opts(direction)
 
     route_id
