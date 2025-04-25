@@ -671,6 +671,8 @@ defmodule AlertsUIWeb.SharedComponents do
     default: "",
     doc: "The target to send the events to (eg form component id)"
 
+  attr :hook, :string, default: nil, doc: "a JS hook to be attached to the element"
+
   attr :rest, :global, include: ~w(disabled size phx-debounce)
 
   def select(%{field: %FormField{} = field} = assigns) do
@@ -726,6 +728,7 @@ defmodule AlertsUIWeb.SharedComponents do
         ]}
         multiple={@multiple}
         disabled={@disabled}
+        phx-hook={if(@hook, do: @hook)}
         {@rest}
       >
         <option
@@ -734,7 +737,6 @@ defmodule AlertsUIWeb.SharedComponents do
           selected={
             cond do
               @loading -> false
-              is_list(@value) and length(@value -- ["default"]) >= 1 -> false
               true -> true
             end
           }
@@ -811,7 +813,7 @@ defmodule AlertsUIWeb.SharedComponents do
     default: "",
     doc: "The target to send the events to (eg form component id)"
 
-  attr :rest, :global, include: ~w(disabled phx-debounce)
+  attr :rest, :global, include: ~w(disabled phx-debounce hook)
 
   def filtered_select(
         %{field: %FormField{} = field, filter_field: %FormField{} = filter_field} = assigns

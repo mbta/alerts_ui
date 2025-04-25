@@ -6,6 +6,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
   import LiveIsolatedComponent
   import Mock
   import Phoenix.LiveViewTest
+  import Test.Support.Helpers
 
   alias AlertsUI.Models.EnhancedSchedule
   alias AlertsUIWeb.FormComponents.{AffectedService, RouteTypeAndEffect}
@@ -793,6 +794,86 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         })
 
         refute view |> render() =~ ~s(value="CR-Worcester" checked="checked")
+      end
+    end
+
+    @tag :logged_in_user
+    test "trip select makes 'All Trips' and individual trip selection mutually exclusive", %{
+      conn: conn
+    } do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_stop: fn _stop_id, _ -> [@route] end,
+           by_type: fn _types -> [@route] end,
+           get: fn _, _ -> @route end
+         ]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _route_ids, _opts ->
+             [@schedule, @schedule_2, @schedule_3, @schedule_4]
+           end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _route_type -> [@stop] end,
+           by_route: fn _, _ -> [@stop] end
+         ]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _route_id, _opts -> [] end
+         ]}
+      ]) do
+        conn = put_resp_cookie(conn, "show_created_alert", "true")
+
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        view
+        |> element("#route_types_form button", "Commuter Rail")
+        |> render_click()
+
+        view
+        |> element("#route_types_form button", "Delay")
+        |> render_click()
+
+        view
+        |> element("#route_types_form")
+        |> render_submit()
+
+        render_async(view)
+
+        # Mock selecting Framingham line
+        view
+        |> element("#service_form")
+        |> render_change(%{
+          affected_service: %{route_ids: ["CR-Worcester"]}
+        })
+
+        # Mock user selecting 2 trips in addition to "All Trips"
+        view
+        |> element("#service_form")
+        |> render_change(%{
+          "affected_service" => %{"trip_ids" => ["default", "CR-683322-595", "CR-683322-596"]}
+        })
+
+        # At this time, we CAN'T test the JS hook unless we set up Playwright.
+        # So, we can't check whether the selections look right to the user,
+        # but we can verify that the data on the server is correct when the form
+        # is submitted
+
+        # Fill out other required fields
+        view
+        |> element("#details_form")
+        |> render_change(%{
+          alert_details: %{header_text: "hello"}
+        })
+
+        view
+        |> element("button#save", "Publish")
+        |> render_click()
+
+        assert [%{trip: %{trip_id: "CR-683322-595"}}, %{trip: %{trip_id: "CR-683322-596"}}] =
+                 parse_entities_from_alert_created_output(view)
       end
     end
   end
