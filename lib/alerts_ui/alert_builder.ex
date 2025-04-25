@@ -257,7 +257,7 @@ defmodule AlertsUI.AlertBuilder do
   @spec get_route_patterns(Route.id_t(), String.t()) :: [APIRoutePattern.t()]
   defp get_route_patterns(route_id, direction) do
     opts =
-      ["filter[canonical]": true, include: "representative_trip.stops"]
+      [include: "representative_trip.stops"]
       |> route_pattern_direction_opts(direction)
 
     RoutePatterns.by_route_id(route_id, opts)
@@ -287,8 +287,10 @@ defmodule AlertsUI.AlertBuilder do
        ) do
     route_pattern
     |> RoutePattern.stops()
+    # for bus, use parent id if present, else, regular id
     |> Enum.filter(fn stop ->
-      stop.parent_id in parent_stop_ids and stop.vehicle_type == route_type
+      (stop.parent_id in parent_stop_ids or stop.id in parent_stop_ids) and
+        stop.vehicle_type == route_type
     end)
     |> Enum.map(fn child_stop ->
       {
