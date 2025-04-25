@@ -121,6 +121,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     socket =
       socket
+      |> assign(assigns)
       |> assign(:modal_date, nil)
       |> assign(:form, changeset |> to_form())
       |> assign_async([:available_routes], fn ->
