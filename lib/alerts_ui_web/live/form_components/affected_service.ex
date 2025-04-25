@@ -301,7 +301,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     changeset = build_changeset(%__MODULE__{}, affected_service)
 
-    # Don't need to validate because the filter field is not required, right?
+    # Don't need to validate because the filter field is not required
 
     form =
       changeset
