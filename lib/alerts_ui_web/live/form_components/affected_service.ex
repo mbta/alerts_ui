@@ -214,7 +214,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     affected_service =
       affected_service
       |> Map.put_new("direction", "default")
-      |> clean_route_ids(socket.assigns.form, socket.assigns.effect_name)
+      |> wrap_single_route_id(socket.assigns.form, socket.assigns.effect_name)
+      |> deduplicate_route_ids(socket.assigns.form, socket.assigns.route_type)
       |> adjust_selections()
       # Stops / trips have default values, but all other empty lists among the fields
       # should be omitted. That means they have been deselected
@@ -343,7 +344,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     |> cast(params, @fields)
   end
 
-  def clean_route_ids(affected_service, form, "Detour") do
+  def wrap_single_route_id(affected_service, form, "Detour") do
     # if it's a detour alert, we need to set route_ids to equal the single_route_id
     # from the form, so we don't have to worry about whether it's a list
     # elsewhere
@@ -360,7 +361,11 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     |> Map.put("route_ids", incoming_route_ids)
   end
 
-  def clean_route_ids(affected_service, form, _) do
+  def wrap_single_route_id(affected_service, _form, _effect), do: affected_service
+
+  def deduplicate_route_ids(affected_service, _form, 3), do: affected_service
+
+  def deduplicate_route_ids(affected_service, form, _route_type) do
     # necessary to prevent duplication when input is checkbox group
     existing_route_ids = form.params["route_ids"] || []
     incoming_route_ids = affected_service["route_ids"] || []
