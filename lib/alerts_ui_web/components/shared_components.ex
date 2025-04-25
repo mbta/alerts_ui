@@ -716,8 +716,9 @@ defmodule AlertsUIWeb.SharedComponents do
         </button>
       </div>
       <select
-        id={@id}
         name={@name}
+        id={@id}
+        disabled={@disabled}
         class={[
           "bg-bg-elevation-5 border border-bg-elevation-6 px-3 mb-2 min-w-[100%] p-0 [color-scheme:light]
             rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto

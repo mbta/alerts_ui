@@ -567,29 +567,35 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     end
 
     test "enables stop selection if one route selected" do
-      stops = [%Stop{id: "1", name: "cool stop name"}]
-
-      with_mock(StopsRepo, by_route: fn _route, _direction -> stops end) do
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},
+        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+      ]) do
         {:ok, view, _html} =
-          live_isolated_component(AffectedService, %{
+          live_isolated_component(
+            AffectedService,
             @assigns
-            | alert_data: %{route_type: 4, effect_name: "Shuttle"}
-          })
+            |> Map.merge(%{
+              route_type: 3,
+              effect_name: "Delay",
+              combination: :RDS,
+              alert_data: %{}
+            })
+          )
 
         assert view
-               |> render() =~ ~s(disabled="disabled")
+               |> render() =~ ~s(id="affected_service_stop_ids" disabled="disabled")
 
         view
         |> element("form")
         |> render_change(%{
           "affected_service" => %{
-            "route_ids" => ["1"],
-            "directions" => [0]
+            "route_ids" => ["CR-Worcester"]
           }
         })
 
         refute view
-               |> render() =~ ~s(multiple=\"multiple\" disabled=\"disabled\")
+               |> render() =~ ~s(id="affected_service_stop_ids" disabled="disabled")
       end
     end
 

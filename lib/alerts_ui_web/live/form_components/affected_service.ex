@@ -194,12 +194,17 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
     end
 
+    # don't re-fetch routes if we already have them- prevents weird unselect render error
     socket =
-      socket
+      if socket.assigns.available_routes === %{} do
+        socket
+        |> assign_async(:available_routes, fn ->
+          {:ok, %{available_routes: CreateAlertLive.get_routes(route_types)}}
+        end)
+      else
+        socket
+      end
       |> assign(assigns)
-      |> assign_async(:available_routes, fn ->
-        {:ok, %{available_routes: CreateAlertLive.get_routes(route_types)}}
-      end)
 
     {:ok, socket}
   end
@@ -209,7 +214,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     affected_service =
       affected_service
       |> Map.put_new("direction", "default")
-      |> clean_route_ids(socket.assigns.form, socket.assigns.effect_name)
+      |> wrap_single_route_id(socket.assigns.effect_name)
+      |> deduplicate_route_ids(socket.assigns.form, socket.assigns.route_type)
       |> adjust_selections()
       # Stops / trips have default values, but all other empty lists among the fields
       # should be omitted. That means they have been deselected
@@ -338,14 +344,21 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     |> cast(params, @fields)
   end
 
-  def clean_route_ids(affected_service, _form, "Detour") do
-    incoming_route_id = affected_service["single_route_id"] || nil
+  def wrap_single_route_id(affected_service, "Detour") do
+    # if it's a detour alert, we need to set route_ids to equal the single_route_id
+    # from the form, so we don't have to worry about whether it's a list
+    # elsewhere
+    incoming_route_id = Map.get(affected_service, "single_route_id")
 
     affected_service
-    |> Map.put("route_ids", List.wrap(incoming_route_id) |> Enum.reject(&is_nil/1))
+    |> Map.put("route_ids", List.wrap(incoming_route_id))
   end
 
-  def clean_route_ids(affected_service, form, _) do
+  def wrap_single_route_id(affected_service, _effect), do: affected_service
+
+  def deduplicate_route_ids(affected_service, _form, 3), do: affected_service
+
+  def deduplicate_route_ids(affected_service, form, _route_type) do
     # necessary to prevent duplication when input is checkbox group
     existing_route_ids = form.params["route_ids"] || []
     incoming_route_ids = affected_service["route_ids"] || []
