@@ -195,14 +195,14 @@ defmodule AlertsUI.AlertBuilder do
   defp child_stops_with_context(routes, direction, parent_stop_ids) do
     routes
     |> Enum.flat_map(fn route ->
-      canonical_route_patterns =
+      route_patterns =
         route.id
         # get relevant route patterns for the routes
         # so we can look at their representative trips
         |> get_route_patterns(direction, route.type)
 
       child_stops_context =
-        canonical_route_patterns
+        route_patterns
         # remove route patterns for branches we don't want
         |> filtered_route_patterns(parent_stop_ids)
         |> Enum.flat_map(fn route_pattern ->
@@ -216,18 +216,18 @@ defmodule AlertsUI.AlertBuilder do
         end)
 
       neighbor_stops =
-        get_neighbor_stops(child_stops_context, canonical_route_patterns, parent_stop_ids, route)
+        get_neighbor_stops(child_stops_context, route_patterns, parent_stop_ids, route)
 
       child_stops_context ++ neighbor_stops
     end)
   end
 
-  defp get_neighbor_stops(child_stops_context, canonical_route_patterns, parent_stop_ids, route)
+  defp get_neighbor_stops(child_stops_context, route_patterns, parent_stop_ids, route)
        when route.type in [0, 1, 2] do
     # in the case of Subway & CR, detect platforms at the nodes of branches that
     # need to be included in informed entities
     all_route_pattern_stops =
-      canonical_route_patterns
+      route_patterns
       |> Enum.map(& &1.stops())
 
     child_stops_with_direction =
