@@ -216,7 +216,7 @@ defmodule AlertsUI.AlertBuilder do
     routes
     |> Enum.flat_map(fn route ->
       route.id
-      |> get_route_patterns(direction)
+      |> get_route_patterns(direction, route.type)
       |> filtered_route_patterns(parent_stop_ids)
       |> Enum.flat_map(fn route_pattern ->
         route_pattern_stops_with_context_for_parents(
@@ -254,10 +254,19 @@ defmodule AlertsUI.AlertBuilder do
     end
   end
 
-  @spec get_route_patterns(Route.id_t(), String.t()) :: [APIRoutePattern.t()]
-  defp get_route_patterns(route_id, direction) do
+  @spec get_route_patterns(Route.id_t(), String.t(), integer()) :: [APIRoutePattern.t()]
+  defp get_route_patterns(route_id, direction, 3) do
+    # busses do not have canonical route patterns
     opts =
       [include: "representative_trip.stops"]
+      |> route_pattern_direction_opts(direction)
+
+    RoutePatterns.by_route_id(route_id, opts)
+  end
+
+  defp get_route_patterns(route_id, direction, _route_type) do
+    opts =
+      ["filter[canonical]": true, include: "representative_trip.stops"]
       |> route_pattern_direction_opts(direction)
 
     RoutePatterns.by_route_id(route_id, opts)
@@ -287,11 +296,7 @@ defmodule AlertsUI.AlertBuilder do
        ) do
     route_pattern
     |> RoutePattern.stops()
-    # for bus, use parent id if present, else, regular id
-    |> Enum.filter(fn stop ->
-      (stop.parent_id in parent_stop_ids or stop.id in parent_stop_ids) and
-        stop.vehicle_type == route_type
-    end)
+    |> filter_route_pattern_stops(parent_stop_ids, route_type)
     |> Enum.map(fn child_stop ->
       {
         child_stop,
@@ -299,6 +304,25 @@ defmodule AlertsUI.AlertBuilder do
         route_pattern.direction_id,
         RoutePattern.stop_type(route_pattern, parent_stop_ids, child_stop)
       }
+    end)
+  end
+
+  defp filter_route_pattern_stops(stops, parent_stop_ids, 3) do
+    # for bus, keep stops from route pattern that are in our parent_ids
+    # or have a parent in our parent ids
+    stops
+    |> Enum.filter(fn stop ->
+      (stop.parent_id in parent_stop_ids or stop.id in parent_stop_ids) and
+        stop.vehicle_type == 3
+    end)
+  end
+
+  defp filter_route_pattern_stops(stops, parent_stop_ids, route_type) do
+    # for other modes, keep stops from route pattern that are in our parent_ids
+    stops
+    |> Enum.filter(fn stop ->
+      stop.parent_id in parent_stop_ids and
+        stop.vehicle_type == route_type
     end)
   end
 
