@@ -278,10 +278,15 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         |> with_target("#stop_route_service_view")
         |> render_click(:clear_filter, %{"filter-id" => "routes-filter-modal"})
 
-        # Verify unfiltered and text changed
-        assert view |> render_async() =~ ~s(<option value="place-aqucl">)
-        assert view |> render_async() =~ ~s(<option value="place-pktrm">)
-        assert view |> render_async() =~ ~s(Filter: All routes)
+        # Verify unfiltered
+        assert render(view) =~ ~s(<option value="place-aqucl">)
+        assert render(view) =~ ~s(<option value="place-pktrm">)
+        # Verify text changed
+        assert render(view) =~ ~s(Filter: All routes)
+        # Verify modal is cleared
+        assert view
+               |> element("select#stop_route_affected_service_modal_route_id")
+               |> render() =~ ~s(<option value="default" selected="selected">)
       end
     end
 

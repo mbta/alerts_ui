@@ -28,7 +28,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
 
   @impl true
   def mount(socket) do
-    changeset = changeset(%__MODULE__{}, %{})
+    changeset = build_changeset(%__MODULE__{}, %{})
 
     {_result, error_changeset} =
       apply_action(
@@ -73,7 +73,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
 
     form =
       %__MODULE__{}
-      |> changeset(alert_data)
+      |> build_changeset(alert_data)
       |> to_form()
 
     socket =
@@ -96,7 +96,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
   def update(%{submitted: true}, socket) do
     changeset =
       %__MODULE__{}
-      |> changeset(socket.assigns.form.params)
+      |> build_changeset(socket.assigns.form.params)
       |> validate_required(@required_fields)
 
     errors =
@@ -140,7 +140,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
         %{"access_affected_service" => access_affected_service},
         socket
       ) do
-    changeset = changeset(%__MODULE__{}, access_affected_service)
+    changeset = build_changeset(%__MODULE__{}, access_affected_service)
 
     case apply_action(changeset |> validate_required(@required_fields), :validate) do
       {:ok, changeset} ->
@@ -192,13 +192,22 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
 
   @impl true
   def handle_event("clear_filter", %{"filter-id" => "stops-filter-modal"}, socket) do
-    {:noreply, assign(socket, stop_id_filter_value: "default", filter_title_value: "All stops")}
+    access_affected_service =
+      socket.assigns.form.params
+      |> Map.merge(%{"stop_id" => ""})
+
+    changeset = build_changeset(%__MODULE__{}, access_affected_service)
+
+    form =
+      changeset
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    {:noreply,
+     assign(socket, form: form, stop_id_filter_value: "default", filter_title_value: "All stops")}
   end
 
-  def changeset(changeset, params) do
-    changeset
-    |> cast(params, @fields)
-  end
+  def build_changeset(changeset, params), do: cast(changeset, params, @fields)
 
   @impl true
   def render(assigns) do

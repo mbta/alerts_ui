@@ -421,6 +421,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
 
     test "clear date filter for trips works" do
       today = Date.to_string(@todays_date)
+      today_day_name = Timex.format!(@todays_date, "{WDfull} {M}/{0D}")
       tomorrow = @todays_date |> Date.add(1) |> Date.to_string()
 
       with_mocks([
@@ -472,8 +473,15 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         |> with_target("#service_view")
         |> render_click(:clear_filter, %{"filter-id" => "dates-filter-modal"})
 
+        # Verify unfiltered
         assert render(view) =~ @schedule.trip.name
         refute render(view) =~ @schedule_3.trip.name
+        # Verify text changed
+        assert render(view) =~ ~s(Filter: #{today_day_name})
+        # Verify modal is cleared
+        assert view
+               |> element("select#affected_service_trip_ids")
+               |> render() =~ ~s(<option value="default" selected="selected">)
       end
     end
 

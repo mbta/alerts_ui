@@ -52,7 +52,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     today = hd(service_dates) |> elem(1)
 
-    changeset = changeset(%__MODULE__{}, %{modal_date: today})
+    changeset = build_changeset(%__MODULE__{}, %{modal_date: today})
 
     socket =
       socket
@@ -107,17 +107,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       |> Map.put(:modal_date, nil)
       |> Map.merge(params)
 
-    changeset =
-      %__MODULE__{}
-      |> changeset(alert_data)
+    changeset = build_changeset(%__MODULE__{}, alert_data)
 
-    changes =
-      changeset
-      |> apply_action!(:validate)
-
-    assigns =
-      assigns
-      |> Map.put(:modal_date, nil)
+    changes = apply_action!(changeset, :validate)
 
     send(self(), {:section_completed, changes})
 
@@ -130,6 +122,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     socket =
       socket
       |> assign(assigns)
+      |> assign(:modal_date, nil)
       |> assign(:form, changeset |> to_form())
       |> assign_async([:available_routes], fn ->
         {:ok,
@@ -152,7 +145,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     changeset =
       %__MODULE__{}
-      |> changeset(form_params)
+      |> build_changeset(form_params)
       |> validate_required(ServiceEffectCombinations.required_fields(socket.assigns.combination))
 
     errors =
@@ -180,7 +173,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     # make sure initial errors get sent up to create_alert_live even if no events fire
     # For other form components, this is done in the mount, but we can't do that here
     # because assigns won't be populated yet, and that's how we get the required_fields
-    changeset = changeset(%__MODULE__{}, Map.merge(alert_data, socket.assigns))
+    changeset = build_changeset(%__MODULE__{}, Map.merge(alert_data, socket.assigns))
 
     case apply_action(
            changeset
@@ -307,17 +300,36 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   @impl true
   def handle_event("clear_filter", %{"filter-id" => "dates-filter-modal"}, socket) do
-    params = socket.assigns.form.params
+    affected_service =
+      socket.assigns.form.params
+      |> Map.merge(%{"modal_date" => socket.assigns.today})
 
     default_filter_title =
       socket.assigns.service_dates |> Enum.map(fn {option, _value} -> option end) |> hd
 
     required_fields = ServiceEffectCombinations.required_fields(socket.assigns.combination)
 
+    changeset = build_changeset(%__MODULE__{}, affected_service)
+
+    # Don't need to validate because the filter field is not required
+
+    form =
+      changeset
+      |> Map.put(:action, :validate)
+      |> to_form()
+
     socket =
       socket
-      |> assign(modal_date: socket.assigns.today, filter_title_value: default_filter_title)
-      |> assign_schedules(params["route_ids"], params["direction"], required_fields)
+      |> assign(
+        form: form,
+        modal_date: socket.assigns.today,
+        filter_title_value: default_filter_title
+      )
+      |> assign_schedules(
+        affected_service["route_ids"],
+        affected_service["direction"],
+        required_fields
+      )
 
     {:noreply, socket}
   end
@@ -335,14 +347,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     affected_service = Map.put(affected_service, "trip_information_by_id", trip_information_by_id)
 
-    %__MODULE__{}
-    |> changeset(affected_service)
+    build_changeset(%__MODULE__{}, affected_service)
   end
 
-  def changeset(changeset, params) do
-    changeset
-    |> cast(params, @fields)
-  end
+  def build_changeset(changeset, params), do: cast(changeset, params, @fields)
 
   def wrap_single_route_id(affected_service, "Detour") do
     # if it's a detour alert, we need to set route_ids to equal the single_route_id
