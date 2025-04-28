@@ -310,7 +310,10 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
          [by_stop: fn _route_id -> @routes end, by_type: fn _types -> @routes end]},
         {StopsRepo, [],
          [
-           by_route_type: fn _route_type, _ -> [@stop, @stop_two] end,
+           by_route_type: fn
+             _route_type, [direction_id: 0] -> [@stop]
+             _route_type, [direction_id: 1] -> [@stop_two]
+           end,
            by_route: fn
              "Bluer", _ -> [@stop]
              _, _ -> [@stop, @stop_two]
@@ -320,12 +323,12 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         {:ok, view, _html} =
           live_isolated_component(
             StopRouteAffectedService,
-            @assigns
+            %{@assigns | route_type: 3}
           )
 
         # Set baseline unfiltered
-        assert view |> render_async() =~ ~s(<option value="place-aqucl">)
-        assert view |> render_async() =~ ~s(<option value="place-pktrm">)
+        assert view |> render_async() =~ ~s(<option value="place-aqucl">Aquarium \(outbound\))
+        assert view |> render_async() =~ ~s(<option value="place-pktrm">Park Street \(inbound\))
 
         # Add route filter
         view
@@ -340,7 +343,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         |> render_click(:accepted_routes_modal)
 
         # Verify filtered and filter text updated
-        assert view |> render_async() =~ ~s(<option value="place-aqucl">)
+        assert view |> render_async() =~ ~s(<option value="place-aqucl">Aquarium \(outbound\))
         refute view |> render_async() =~ ~s(<option value="place-pktrm">)
         assert view |> render_async() =~ ~s(Filter: route_number_2)
       end

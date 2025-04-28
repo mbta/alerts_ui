@@ -213,10 +213,10 @@ defmodule AlertsUIWeb.CreateAlertLive do
     |> available_stops(route_ids, route_type)
   end
 
-  def get_stops_by_route_type(route_type, route_id \\ nil)
+  def get_stops_for_stop_route(route_type, route_id \\ nil)
 
-  def get_stops_by_route_type(3, route_id) when is_nil(route_id) do
-    # used for stop-route combination, bus mode. appends direction names to routes
+  def get_stops_for_stop_route(3, route_id) when is_nil(route_id) do
+    # used for stop-route combination, bus mode.
 
     Enum.flat_map([0, 1], fn direction ->
       opts = [direction_id: direction]
@@ -227,27 +227,14 @@ defmodule AlertsUIWeb.CreateAlertLive do
     |> Enum.sort_by(& &1.name)
   end
 
-  def get_stops_by_route_type(route_type, route_id) when is_nil(route_id) do
+  def get_stops_for_stop_route(route_type, route_id) when is_nil(route_id) do
     # used for stop-route combination, other modes
     StopsRepo.by_route_type(route_type, []) |> Enum.sort_by(& &1.name)
   end
 
-  def get_stops_by_route_type(3, route_id) do
-    # used for route filter in SR combination, bus mode
-    Enum.flat_map([0, 1], fn direction ->
-      opts = [direction_id: direction, route: route_id]
-
-      StopsRepo.by_route_type(3, opts)
-      |> map_direction_names_to_stops(direction)
-    end)
-  end
-
-  def get_stops_by_route_type(route_type, route_id) do
-    # used for route filter in SR combination, all other modes
-    Enum.flat_map([0, 1], fn direction ->
-      opts = [direction_id: direction, route: route_id]
-      StopsRepo.by_route_type(route_type, opts)
-    end)
+  def get_stops_for_stop_route(route_type, route_id) do
+    # used with route filter in SR combination
+    available_stops([0, 1], [route_id], route_type)
   end
 
   def get_routes_by_stop(stop_ids, 3) do

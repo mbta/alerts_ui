@@ -609,6 +609,45 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       end
     end
 
+    test "bus stop names have direction appended" do
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},
+        {StopsRepo, [],
+         [
+           by_route: fn
+             _route, 0 -> [@stop]
+             _route, 1 -> [%Stop{id: "place-crtst", name: "Courthouse"}]
+           end
+         ]}
+      ]) do
+        {:ok, view, _html} =
+          live_isolated_component(
+            AffectedService,
+            @assigns
+            |> Map.merge(%{
+              route_type: 3,
+              effect_name: "Delay",
+              combination: :RDS,
+              alert_data: %{}
+            })
+          )
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "affected_service" => %{
+            "route_ids" => ["CR-Worcester"]
+          }
+        })
+
+        assert view
+               |> render() =~ ~s(South Station \(outbound\))
+
+        assert view
+               |> render() =~ ~s(Courthouse \(inbound\))
+      end
+    end
+
     test "disables stop selection if multiple routes selected" do
       stops = [%Stop{id: "1", name: "cool stop name"}]
 
