@@ -33,25 +33,25 @@ defmodule AlertsUI.Models.Cause do
       iex> AlertsUI.Models.Cause.get_by_mode_and_detail(1, "")
       :UNKNOWN_CAUSE
 
-      iex> AlertsUI.Models.Cause.get_by_mode_and_detail(nil, "snow")
+      iex> AlertsUI.Models.Cause.get_by_mode_and_detail(nil, "SNOW")
       :WEATHER
 
-      iex> AlertsUI.Models.Cause.get_by_mode_and_detail(0, "power problem")
+      iex> AlertsUI.Models.Cause.get_by_mode_and_detail(0, "POWER_PROBLEM")
       :TECHNICAL_PROBLEM
 
-      iex> AlertsUI.Models.Cause.get_by_mode_and_detail(1, "fire department activity")
+      iex> AlertsUI.Models.Cause.get_by_mode_and_detail(1, "FIRE_DEPARTMENT_ACTIVITY")
       :OTHER_CAUSE
 
-      iex> AlertsUI.Models.Cause.get_by_mode_and_detail(2, "fire department activity")
+      iex> AlertsUI.Models.Cause.get_by_mode_and_detail(2, "FIRE_DEPARTMENT_ACTIVITY")
       :TECHNICAL_PROBLEM
 
-      iex> AlertsUI.Models.Cause.get_by_mode_and_detail(3, "fire")
+      iex> AlertsUI.Models.Cause.get_by_mode_and_detail(3, "FIRE")
       :TECHNICAL_PROBLEM
 
-      iex> AlertsUI.Models.Cause.get_by_mode_and_detail(4, "severe weather")
+      iex> AlertsUI.Models.Cause.get_by_mode_and_detail(4, "SEVERE_WEATHER")
       :WEATHER
 
-      iex> AlertsUI.Models.Cause.get_by_mode_and_detail(:ACCESS, "electrical work")
+      iex> AlertsUI.Models.Cause.get_by_mode_and_detail(:ACCESS, "ELECTRICAL_WORK")
       :MAINTENANCE
   """
   @spec get_by_mode_and_detail(integer() | nil | :ACCESS, String.t()) :: atom()
@@ -80,104 +80,104 @@ defmodule AlertsUI.Models.Cause do
       nil ->
         # systemwide
         %{
-          "holiday" => :HOLIDAY,
-          "police activity" => :POLICE_ACTIVITY,
-          "snow" => :WEATHER,
-          "special event" => :OTHER_CAUSE,
-          "weather" => :WEATHER
+          "HOLIDAY" => :HOLIDAY,
+          "POLICE_ACTIVITY" => :POLICE_ACTIVITY,
+          "SNOW" => :WEATHER,
+          "SPECIAL_EVENT" => :OTHER_CAUSE,
+          "WEATHER" => :WEATHER
         }
 
       m when m in [0, 1] ->
         %{
-          "accident" => :ACCIDENT,
-          "construction" => :CONSTRUCTION,
-          "disabled train" => :TECHNICAL_PROBLEM,
-          "fire" => :TECHNICAL_PROBLEM,
-          "fire department activity" => :OTHER_CAUSE,
-          "flooding" => :WEATHER,
-          "maintenance" => :MAINTENANCE,
-          "medical emergency" => :MEDICAL_EMERGENCY,
-          "police activity" => :POLICE_ACTIVITY,
-          "power problem" => :TECHNICAL_PROBLEM,
-          "signal problem" => :TECHNICAL_PROBLEM,
-          "snow" => :WEATHER,
-          "special event" => :OTHER_CAUSE,
-          "switch problem" => :TECHNICAL_PROBLEM,
-          "track problem" => :TECHNICAL_PROBLEM,
-          "track work" => :MAINTENANCE,
-          "traffic" => :OTHER_CAUSE,
-          "weather" => :WEATHER
+          "ACCIDENT" => :ACCIDENT,
+          "CONSTRUCTION" => :CONSTRUCTION,
+          "DISABLED_TRAIN" => :TECHNICAL_PROBLEM,
+          "FIRE" => :TECHNICAL_PROBLEM,
+          "FIRE_DEPARTMENT_ACTIVITY" => :OTHER_CAUSE,
+          "FLOODING" => :WEATHER,
+          "MAINTENANCE" => :MAINTENANCE,
+          "MEDICAL_EMERGENCY" => :MEDICAL_EMERGENCY,
+          "POLICE_ACTIVITY" => :POLICE_ACTIVITY,
+          "POWER_PROBLEM" => :TECHNICAL_PROBLEM,
+          "SIGNAL_PROBLEM" => :TECHNICAL_PROBLEM,
+          "SNOW" => :WEATHER,
+          "SPECIAL_EVENT" => :OTHER_CAUSE,
+          "SWITCH_PROBLEM" => :TECHNICAL_PROBLEM,
+          "TRACK_PROBLEM" => :TECHNICAL_PROBLEM,
+          "TRACK_WORK" => :MAINTENANCE,
+          "TRAFFIC" => :OTHER_CAUSE,
+          "WEATHER" => :WEATHER
         }
 
       2 ->
         %{
-          "Amtrak train traffic" => :OTHER_CAUSE,
-          "crossing issue" => :TECHNICAL_PROBLEM,
-          "fire department activity" => :TECHNICAL_PROBLEM,
-          "freight train interference" => :OTHER_CAUSE,
-          "heavy ridership" => :OTHER_CAUSE,
-          "holiday" => :HOLIDAY,
-          "maintenance" => :MAINTENANCE,
-          "mechanical issue" => :TECHNICAL_PROBLEM,
-          "medical emergency" => :MEDICAL_EMERGENCY,
-          "police activity" => :POLICE_ACTIVITY,
-          "rail defect" => :TECHNICAL_PROBLEM,
-          "signal issue" => :TECHNICAL_PROBLEM,
-          "slippery rail" => :WEATHER,
-          "snow" => :WEATHER,
-          "speed restriction" => :OTHER_CAUSE,
-          "switch issue" => :TECHNICAL_PROBLEM,
-          "tie replacement" => :MAINTENANCE,
-          "track work" => :CONSTRUCTION,
-          "train traffic" => :OTHER_CAUSE,
-          "unruly passenger" => :POLICE_ACTIVITY
+          "AMTRAK_TRAIN_TRAFFIC" => :OTHER_CAUSE,
+          "CROSSING_ISSUE" => :TECHNICAL_PROBLEM,
+          "FIRE_DEPARTMENT_ACTIVITY" => :TECHNICAL_PROBLEM,
+          "FREIGHT_TRAIN_INTERFERENCE" => :OTHER_CAUSE,
+          "HEAVY_RIDERSHIP" => :OTHER_CAUSE,
+          "HOLIDAY" => :HOLIDAY,
+          "MAINTENANCE" => :MAINTENANCE,
+          "MECHANICAL_ISSUE" => :TECHNICAL_PROBLEM,
+          "MEDICAL_EMERGENCY" => :MEDICAL_EMERGENCY,
+          "POLICE_ACTIVITY" => :POLICE_ACTIVITY,
+          "RAIL_DEFECT" => :TECHNICAL_PROBLEM,
+          "SIGNAL_ISSUE" => :TECHNICAL_PROBLEM,
+          "SLIPPERY_RAIL" => :WEATHER,
+          "SNOW" => :WEATHER,
+          "SPEED_RESTRICTION" => :OTHER_CAUSE,
+          "SWITCH_ISSUE" => :TECHNICAL_PROBLEM,
+          "TIE_REPLACEMENT" => :MAINTENANCE,
+          "TRACK_WORK" => :CONSTRUCTION,
+          "TRAIN_TRAFFIC" => :OTHER_CAUSE,
+          "UNRULY_PASSENGER" => :POLICE_ACTIVITY
         }
 
       3 ->
         %{
-          "accident" => :ACCIDENT,
-          "construction" => :CONSTRUCTION,
-          "demonstration" => :DEMONSTRATION,
-          "disabled bus" => :TECHNICAL_PROBLEM,
-          "drawbridge being raised" => :OTHER_CAUSE,
-          "electrical work" => :MAINTENANCE,
-          "fire" => :TECHNICAL_PROBLEM,
-          "hazmat condition" => :OTHER_CAUSE,
-          "holiday" => :HOLIDAY,
-          "hurricane" => :WEATHER,
-          "maintenance" => :MAINTENANCE,
-          "medical emergency" => :MEDICAL_EMERGENCY,
-          "parade" => :OTHER_CAUSE,
-          "police activity" => :POLICE_ACTIVITY,
-          "snow" => :WEATHER,
-          "special event" => :OTHER_CAUSE,
-          "tie replacement" => :MAINTENANCE,
-          "traffic" => :OTHER_CAUSE,
-          "weather" => :WEATHER
+          "ACCIDENT" => :ACCIDENT,
+          "CONSTRUCTION" => :CONSTRUCTION,
+          "DEMONSTRATION" => :DEMONSTRATION,
+          "DISABLED_BUS" => :TECHNICAL_PROBLEM,
+          "DRAWBRIDGE_BEING_RAISED" => :OTHER_CAUSE,
+          "ELECTRICAL_WORK" => :MAINTENANCE,
+          "FIRE" => :TECHNICAL_PROBLEM,
+          "HAZMAT_CONDITION" => :OTHER_CAUSE,
+          "HOLIDAY" => :HOLIDAY,
+          "HURRICANE" => :WEATHER,
+          "MAINTENANCE" => :MAINTENANCE,
+          "MEDICAL_EMERGENCY" => :MEDICAL_EMERGENCY,
+          "PARADE" => :OTHER_CAUSE,
+          "POLICE_ACTIVITY" => :POLICE_ACTIVITY,
+          "SNOW" => :WEATHER,
+          "SPECIAL_EVENT" => :OTHER_CAUSE,
+          "TIE_REPLACEMENT" => :MAINTENANCE,
+          "TRAFFIC" => :OTHER_CAUSE,
+          "WEATHER" => :WEATHER
         }
 
       4 ->
         %{
-          "accident" => :ACCIDENT,
-          "Coast Guard restriction" => :OTHER_CAUSE,
-          "fire" => :TECHNICAL_PROBLEM,
-          "fog" => :WEATHER,
-          "high winds" => :WEATHER,
-          "holiday" => :HOLIDAY,
-          "ice in harbor" => :WEATHER,
-          "maintenance" => :MAINTENANCE,
-          "mechanical problem" => :TECHNICAL_PROBLEM,
-          "medical emergency" => :MEDICAL_EMERGENCY,
-          "police activity" => :POLICE_ACTIVITY,
-          "severe weather" => :WEATHER
+          "ACCIDENT" => :ACCIDENT,
+          "COAST_GUARD_RESTRICTION" => :OTHER_CAUSE,
+          "FIRE" => :TECHNICAL_PROBLEM,
+          "FOG" => :WEATHER,
+          "HIGH_WINDS" => :WEATHER,
+          "HOLIDAY" => :HOLIDAY,
+          "ICE_IN_HARBOR" => :WEATHER,
+          "MAINTENANCE" => :MAINTENANCE,
+          "MECHANICAL_PROBLEM" => :TECHNICAL_PROBLEM,
+          "MEDICAL_EMERGENCY" => :MEDICAL_EMERGENCY,
+          "POLICE_ACTIVITY" => :POLICE_ACTIVITY,
+          "SEVERE_WEATHER" => :WEATHER
         }
 
       :ACCESS ->
         %{
-          "construction" => :CONSTRUCTION,
-          "electrical work" => :MAINTENANCE,
-          "fire" => :TECHNICAL_PROBLEM,
-          "maintenance" => :MAINTENANCE
+          "CONSTRUCTION" => :CONSTRUCTION,
+          "ELECTRICAL_WORK" => :MAINTENANCE,
+          "FIRE" => :TECHNICAL_PROBLEM,
+          "MAINTENANCE" => :MAINTENANCE
         }
     end
   end

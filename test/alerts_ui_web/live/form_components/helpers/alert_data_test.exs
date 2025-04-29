@@ -119,7 +119,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         ],
         notification_period_start: ~U[2024-05-02 16:09:34.007545Z],
         duration_certainty: :KNOWN,
-        cause_detail: "hazmat condition",
+        cause_detail: "HAZMAT_CONDITION",
         severity: 3,
         severity_level: :WARNING,
         reminder_times: [
@@ -158,7 +158,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                active_period_start_date: ~D[2024-05-02],
                active_period_end_date: ~D[2024-05-03],
                service_types: [],
-               cause_detail: "hazmat condition",
+               cause_detail: "HAZMAT_CONDITION",
                severity: 3,
                reminder_times: [~N[2024-05-02 12:10:34], ~N[2024-05-02 12:11:34]],
                alert_timing: "one-time"
@@ -229,7 +229,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         ],
         notification_period_start: ~U[2024-05-02 16:09:34.007545Z],
         duration_certainty: :KNOWN,
-        cause_detail: "hazmat condition",
+        cause_detail: "HAZMAT_CONDITION",
         severity: 3,
         severity_level: :WARNING,
         informed_entity: [
