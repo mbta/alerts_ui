@@ -458,7 +458,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
   defp available_stops(direction_array, route_ids, _route_type) do
     route_ids
     |> Enum.flat_map(fn route ->
-      Enum.flat_map(direction_array, fn direction -> StopsRepo.by_route(route, direction) end)
+      Enum.flat_map(direction_array, &StopsRepo.by_route(route, &1))
     end)
   end
 
