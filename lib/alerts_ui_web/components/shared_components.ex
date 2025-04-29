@@ -738,6 +738,7 @@ defmodule AlertsUIWeb.SharedComponents do
           selected={
             cond do
               @loading -> false
+              is_list(@value) and length(@value -- ["default"]) >= 1 -> false
               true -> true
             end
           }
