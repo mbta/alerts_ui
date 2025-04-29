@@ -99,7 +99,7 @@ defmodule AlertsUI.AlertBuilder do
     alert_data =
       alert_data
       |> Map.put(:route_ids, route_ids)
-      |> Map.put(:stop_ids, add_child_stops(stop_ids, route_ids, direction_id))
+      # |> Map.put(:stop_ids, add_child_stops(stop_ids, route_ids, direction_id))
       |> Map.put(
         :child_stops_with_context,
         child_stops_with_context(routes, direction_id, stop_ids)
@@ -187,25 +187,25 @@ defmodule AlertsUI.AlertBuilder do
     |> Enum.uniq()
   end
 
-  defp add_child_stops(nil, _route_ids, _direction), do: nil
-  defp add_child_stops([], _route_ids, _direction), do: []
+  # defp add_child_stops(nil, _route_ids, _direction), do: nil
+  # defp add_child_stops([], _route_ids, _direction), do: []
 
-  defp add_child_stops(stop_ids, route_ids, direction) do
-    Enum.flat_map(route_ids, fn route_id ->
-      get_stops(route_id, direction)
-      |> Enum.filter(&(Map.get(&1, :parent_id) in stop_ids))
-      |> Enum.map(& &1.id)
-    end)
-    |> Enum.concat(stop_ids)
-    |> Enum.filter(&(&1 !== "default"))
-  end
+  # defp add_child_stops(stop_ids, route_ids, direction) do
+  #   Enum.flat_map(route_ids, fn route_id ->
+  #     get_stops(route_id, direction)
+  #     |> Enum.filter(&(Map.get(&1, :parent_id) in stop_ids))
+  #     |> Enum.map(& &1.id)
+  #   end)
+  #   |> Enum.concat(stop_ids)
+  #   |> Enum.filter(&(&1 !== "default"))
+  # end
 
-  defp get_stops(route_id, "default"),
-    do: RoutePatterns.included_stops_by_route_id(route_id, canonical: true)
+  # defp get_stops(route_id, "default"),
+  #   do: RoutePatterns.included_stops_by_route_id(route_id, canonical: true)
 
-  defp get_stops(route_id, direction),
-    do:
-      RoutePatterns.included_stops_by_route_id(route_id, direction_id: direction, canonical: true)
+  # defp get_stops(route_id, direction),
+  #   do:
+  #     RoutePatterns.included_stops_by_route_id(route_id, direction_id: direction, canonical: true)
 
   @spec child_stops_with_context([Route.id_t()], String.t(), [Stop.id_t()]) ::
           [
