@@ -90,12 +90,12 @@ defmodule AlertsUIWeb.ComponentsLive do
 
   """
   attr :name, :string, required: true
-  attr :value, :string, required: true
+  attr :class, :string, required: true
 
   def color_block(assigns) do
     ~H"""
     <div class="flex flex-col">
-      <div class="w-20 h-20" style={"background-color: #{@value}"}></div>
+      <div class={"w-20 h-20 #{@class}"}></div>
       <div class="text-sm py-1">
         {@name}
       </div>
