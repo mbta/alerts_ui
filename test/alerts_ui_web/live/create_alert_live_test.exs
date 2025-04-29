@@ -5,7 +5,6 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
   import AlertsUI.Support.Factory
   import Ecto.Changeset
   import Mock
-  alias AlertsUI.Alerts
   alias AlertsUIWeb.CreateAlertLive
   alias AlertsUIWeb.FormComponents.{AffectedService, AlertDetails, RouteTypeAndEffect, TimeRange}
   alias MBTAV3API.Facilities.Facility
