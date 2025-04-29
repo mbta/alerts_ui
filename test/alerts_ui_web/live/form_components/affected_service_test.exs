@@ -348,9 +348,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
 
     test "Filter title updates if a different weekday is selected" do
       today = @todays_date |> Date.to_string()
-      today_day_name = Timex.format!(@todays_date, "{WDfull} {M}/{0D}")
+      today_day_name = Timex.format!(@todays_date, "{WDshort} {Mshort} {0D}")
       tomorrow = @todays_date |> Date.add(1) |> Date.to_string()
-      tomorrow_day_name = Timex.format!(Date.add(@todays_date, 1), "{WDfull} {M}/{0D}")
+      tomorrow_day_name = Timex.format!(Date.add(@todays_date, 1), "{WDshort} {Mshort} {0D}")
 
       with_mock(SchedulesRepo,
         by_route_ids: fn
@@ -425,7 +425,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
 
     test "clear date filter for trips works" do
       today = Date.to_string(@todays_date)
-      today_day_name = Timex.format!(@todays_date, "{WDfull} {M}/{0D}")
+      today_day_name = Timex.format!(@todays_date, "{WDshort} {Mshort} {0D}")
       tomorrow = @todays_date |> Date.add(1) |> Date.to_string()
 
       with_mocks([
@@ -487,7 +487,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
 
     test "modal search works" do
       today = @todays_date |> Date.to_string()
-      tomorrow_day_name = Date.add(@todays_date, 1) |> Timex.format!("{WDfull}")
+      tomorrow_day_name = Date.add(@todays_date, 1) |> Timex.format!("{WDshort}")
 
       with_mock(SchedulesRepo,
         by_route_ids: fn
