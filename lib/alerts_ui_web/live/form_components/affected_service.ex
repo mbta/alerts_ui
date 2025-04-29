@@ -208,7 +208,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       affected_service
       |> Map.put_new("direction", "default")
       |> wrap_single_route_id(socket.assigns.effect_name)
-      |> deduplicate_route_ids(socket.assigns.form, socket.assigns.route_type)
       |> adjust_selections()
       # Stops / trips have default values, but all other empty lists among the fields
       # should be omitted. That means they have been deselected
@@ -364,25 +363,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   def wrap_single_route_id(affected_service, _effect), do: affected_service
 
-  def deduplicate_route_ids(affected_service, _form, 3), do: affected_service
-
-  def deduplicate_route_ids(affected_service, form, _route_type) do
-    # necessary to prevent duplication when input is checkbox group
-    existing_route_ids = form.params["route_ids"] || []
-    incoming_route_ids = affected_service["route_ids"] || []
-
-    new_route_ids =
-      Enum.reduce(incoming_route_ids, existing_route_ids, fn route_id, acc ->
-        if route_id in acc do
-          acc -- [route_id]
-        else
-          [route_id | acc]
-        end
-      end)
-
-    affected_service |> Map.put("route_ids", new_route_ids)
-  end
-
   # If the user tries ctrl-click "All Trips" while individual trips are already selected,
   # the select-all shouldn't work. But the client isn't smart enough to know that
   # on its own. Here, we update the server-side data, and later we push it to the client
@@ -518,21 +498,23 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       >
         <div class="w-[25%] mr-8">
           <.filtered_select
+            :if={@route_type === 3}
             label={if @route_type in [0, 1, 2], do: "Lines", else: "Routes"}
             field={if @effect_name == "Detour", do: @form[:single_route_id], else: @form[:route_ids]}
             filter_field={@form[:route_search_term]}
             loading={@available_routes.loading}
             no_results={Enum.empty?(@route_id_options)}
             options={@route_id_options}
-            class={"#{@route_type !== 3 && "hidden"} h-full"}
+            class="h-full"
             multiple={if @effect_name == "Detour", do: false, else: true}
           />
           <.toggle_checkgroup
+            :if={@route_type !== 3}
             label={if @route_type in [0, 1, 2], do: "Lines", else: "Routes"}
             field={@form[:route_ids]}
             options={@route_id_options}
             icon_type={icon_type(@route_type)}
-            class={"flex-col #{if @route_type === 3, do: "hidden"}"}
+            class="flex-col"
             button_class="min-w-[100%]"
             show_icons={true}
           />

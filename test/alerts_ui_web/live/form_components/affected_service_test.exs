@@ -277,7 +277,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         |> element("form")
         |> render_change(%{
           "affected_service" => %{
-            "modal_date" => nil
+            "modal_date" => nil,
+            "route_ids" => ["CR-Worcester"]
           }
         })
 
@@ -328,7 +329,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         |> element("form")
         |> render_change(%{
           "affected_service" => %{
-            "modal_date" => tomorrow
+            "modal_date" => tomorrow,
+            "route_ids" => ["CR-Worcester"]
           }
         })
 
@@ -385,7 +387,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         |> element("form")
         |> render_change(%{
           "affected_service" => %{
-            "modal_date" => tomorrow
+            "modal_date" => tomorrow,
+            "route_ids" => ["CR-Worcester"]
           }
         })
 
@@ -403,7 +406,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         |> element("form")
         |> render_change(%{
           "affected_service" => %{
-            "modal_date" => today
+            "modal_date" => today,
+            "route_ids" => ["CR-Worcester"]
           }
         })
 
@@ -449,17 +453,13 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
             | alert_data: %{route_type: 2, effect_name: "Delay"}
           })
 
-        # Start with route selection
-        view
-        |> element("form")
-        |> render_change(%{"affected_service" => %{"route_ids" => ["CR-Worcester"]}})
-
-        # Add date filter
+        # Add route selection and date filter
         view
         |> element("form")
         |> render_change(%{
           "affected_service" => %{
-            "modal_date" => tomorrow
+            "modal_date" => tomorrow,
+            "route_ids" => ["CR-Worcester"]
           }
         })
 
@@ -512,7 +512,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
 
         view
         |> element("form")
-        |> render_change(%{"affected_service" => %{"modal_date_filter" => "q"}})
+        |> render_change(%{
+          "affected_service" => %{"modal_date_filter" => "q", "route_ids" => ["CR-Worcester"]}
+        })
 
         refute view
                |> element("select#affected_service_modal_date")
@@ -804,7 +806,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         view
         |> element("#service_form")
         |> render_change(%{
-          affected_service: %{route_ids: ["CR-Worcester"]}
+          affected_service: %{route_ids: []}
         })
 
         refute view |> render() =~ ~s(value="CR-Worcester" checked="checked")
