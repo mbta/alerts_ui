@@ -377,26 +377,26 @@ defmodule AlertsUI.AlertBuilderTest do
       stops = [
         %Stop{id: 64, parent_id: "place-nubn"},
         %Stop{id: 1, parent_id: nil},
-        %Stop{id: 2, parent_id: nil},
+        %Stop{id: 2, parent_id: nil}
       ]
 
       with_mocks([
-        {RoutePatternsRepo, [], by_route_id: fn _route_id, _opts -> [
-          by_route_id: fn route_id, _opts ->
-            [%APIRoutePattern{direction_id: 0, stops: stops, route_id: route_id}]
-          end,
-        ] end},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn route_id, [direction_id: "0", include: "representative_trip.stops"] ->
+             [%APIRoutePattern{direction_id: 0, stops: stops, route_id: route_id}]
+           end
+         ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]}
       ]) do
         alert_data = %{
           route_type: 3,
-          description_text: "ok",
-          header_text: "hello",
+          header_text: "x",
           effect_name: "Delay",
           stop_ids: ["place-nubn", 1, 2],
           route_ids: ["87"],
           trip_ids: nil,
-          direction: "default"
+          direction: "0"
         }
 
         result = AlertBuilder.build_alert(alert_data, :RDS)
@@ -404,9 +404,27 @@ defmodule AlertsUI.AlertBuilderTest do
         assert result.informed_entity == [
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
-                   route_id: "57",
+                   route_id: "87",
                    route_type: 3,
-                   agency_id: "1"
+                   agency_id: "1",
+                   direction_id: 0,
+                   stop_id: 64
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "87",
+                   route_type: 3,
+                   agency_id: "1",
+                   direction_id: 0,
+                   stop_id: 1
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "87",
+                   route_type: 3,
+                   agency_id: "1",
+                   direction_id: 0,
+                   stop_id: 2
                  }
                ]
       end

@@ -95,14 +95,14 @@ defmodule AlertsUI.AlertBuilder do
       |> add_combo_routes()
 
     route_ids = Enum.map(routes, & &1.id)
+    child_stops_with_context = child_stops_with_context(routes, direction_id, stop_ids)
 
     alert_data =
       alert_data
       |> Map.put(:route_ids, route_ids)
-      # |> Map.put(:stop_ids, add_child_stops(stop_ids, route_ids, direction_id))
       |> Map.put(
         :child_stops_with_context,
-        child_stops_with_context(routes, direction_id, stop_ids)
+        child_stops_with_context
       )
       |> Map.put(:service_types, service_types)
 
@@ -187,26 +187,6 @@ defmodule AlertsUI.AlertBuilder do
     |> Enum.uniq()
   end
 
-  # defp add_child_stops(nil, _route_ids, _direction), do: nil
-  # defp add_child_stops([], _route_ids, _direction), do: []
-
-  # defp add_child_stops(stop_ids, route_ids, direction) do
-  #   Enum.flat_map(route_ids, fn route_id ->
-  #     get_stops(route_id, direction)
-  #     |> Enum.filter(&(Map.get(&1, :parent_id) in stop_ids))
-  #     |> Enum.map(& &1.id)
-  #   end)
-  #   |> Enum.concat(stop_ids)
-  #   |> Enum.filter(&(&1 !== "default"))
-  # end
-
-  # defp get_stops(route_id, "default"),
-  #   do: RoutePatterns.included_stops_by_route_id(route_id, canonical: true)
-
-  # defp get_stops(route_id, direction),
-  #   do:
-  #     RoutePatterns.included_stops_by_route_id(route_id, direction_id: direction, canonical: true)
-
   @spec child_stops_with_context([Route.id_t()], String.t(), [Stop.id_t()]) ::
           [
             stop_with_context_t()
@@ -216,9 +196,13 @@ defmodule AlertsUI.AlertBuilder do
     routes
     |> Enum.flat_map(fn route ->
       route.id
+      # get relevant route patterns for the routes
+      # so we can look at their representative trips
       |> get_route_patterns(direction, route.type)
+      # remove route patterns for branches we don't want
       |> filtered_route_patterns(parent_stop_ids)
       |> Enum.flat_map(fn route_pattern ->
+        # build list of stops we want to include
         route_pattern_stops_with_context_for_parents(
           route_pattern,
           route.id,
@@ -295,8 +279,11 @@ defmodule AlertsUI.AlertBuilder do
          route_type
        ) do
     route_pattern
+    # get just stops from route pattern
     |> RoutePattern.stops()
+    # filter out unwanted stops
     |> filter_route_pattern_stops(parent_stop_ids, route_type)
+    # return stop along with important info (stop type determines activities)
     |> Enum.map(fn child_stop ->
       {
         child_stop,
@@ -312,13 +299,13 @@ defmodule AlertsUI.AlertBuilder do
     # or have a parent in our parent ids
     stops
     |> Enum.filter(fn stop ->
-      (stop.parent_id in parent_stop_ids or stop.id in parent_stop_ids) and
-        stop.vehicle_type == 3
+      stop.parent_id in parent_stop_ids or stop.id in parent_stop_ids
     end)
   end
 
   defp filter_route_pattern_stops(stops, parent_stop_ids, route_type) do
-    # for other modes, keep stops from route pattern that are in our parent_ids
+    # for other modes, keep stops from route pattern whose
+    # parent is in our list of parent ids
     stops
     |> Enum.filter(fn stop ->
       stop.parent_id in parent_stop_ids and
