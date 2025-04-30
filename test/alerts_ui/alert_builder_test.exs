@@ -373,6 +373,45 @@ defmodule AlertsUI.AlertBuilderTest do
       end
     end
 
+    test "bus alerts will retain parents stops if they're on the representative trip" do
+      stops = [
+        %Stop{id: 64, parent_id: "place-nubn"},
+        %Stop{id: 1, parent_id: nil},
+        %Stop{id: 2, parent_id: nil},
+      ]
+
+      with_mocks([
+        {RoutePatternsRepo, [], by_route_id: fn _route_id, _opts -> [
+          by_route_id: fn route_id, _opts ->
+            [%APIRoutePattern{direction_id: 0, stops: stops, route_id: route_id}]
+          end,
+        ] end},
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]}
+      ]) do
+        alert_data = %{
+          route_type: 3,
+          description_text: "ok",
+          header_text: "hello",
+          effect_name: "Delay",
+          stop_ids: ["place-nubn", 1, 2],
+          route_ids: ["87"],
+          trip_ids: nil,
+          direction: "default"
+        }
+
+        result = AlertBuilder.build_alert(alert_data, :RDS)
+
+        assert result.informed_entity == [
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "57",
+                   route_type: 3,
+                   agency_id: "1"
+                 }
+               ]
+      end
+    end
+
     test "properly builds RDS all-stops informed entity with 1 route" do
       with_mocks([
         {RoutePatternsRepo, [], by_route_id: fn _route_id, _opts -> [] end},
