@@ -280,11 +280,22 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
     end
   end
 
-  @spec validate_start_is_after_now(Ecto.Changeset.t(), any(), any()) :: Ecto.Changeset.t()
+  @spec validate_start_is_after_now(Ecto.Changeset.t(), any(), any(), boolean()) ::
+          Ecto.Changeset.t()
+  def validate_start_is_after_now(
+        changeset,
+        _current_time,
+        _time_range,
+        true
+      ) do
+    changeset
+  end
+
   def validate_start_is_after_now(
         changeset,
         current_time,
-        %{"alert_timing" => "one-time"} = time_range
+        %{"alert_timing" => "one-time"} = time_range,
+        _editing
       ) do
     changeset
     |> validate_change(:active_period_start, fn :active_period_start, active_period_start ->
@@ -301,7 +312,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
   def validate_start_is_after_now(
         changeset,
         current_time,
-        %{"alert_timing" => "recurring"} = time_range
+        %{"alert_timing" => "recurring"} = time_range,
+        _editing
       ) do
     start_date = Map.get(time_range, "active_period_start_date") |> ensure_date_format
     start_time = Map.get(time_range, "active_period_start_time") |> ensure_time_format
@@ -333,7 +345,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
   def validate_start_is_after_now(
         changeset,
         _current_time,
-        _time_range
+        _time_range,
+        _editing
       ) do
     changeset
   end
