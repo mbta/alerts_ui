@@ -31,7 +31,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ErrorFormatterTest do
       result = ErrorFormatter.parse_field_errors(errors, :RDTS) |> Enum.sort()
 
       assert result == [
-               {:direction, {"Select direction", []}},
                {:header_text, {"Enter message text", []}},
                {:other_field, {"error_1, error_2", []}},
                {:route_ids, {"Select route(s)", []}},
