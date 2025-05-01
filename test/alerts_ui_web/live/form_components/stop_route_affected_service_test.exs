@@ -311,8 +311,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         {StopsRepo, [],
          [
            by_route_type: fn
-             _route_type, [direction_id: 0] -> [@stop]
-             _route_type, [direction_id: 1] -> [@stop_two]
+             _route_type, ["filter[route]": "Blue,Bluer", direction_id: 0] -> [@stop]
+             _route_type, ["filter[route]": "Blue,Bluer", direction_id: 1] -> [@stop_two]
            end,
            by_route: fn
              "Bluer", _ -> [@stop]
