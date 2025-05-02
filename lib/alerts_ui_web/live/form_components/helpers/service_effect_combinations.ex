@@ -53,7 +53,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations do
       iex> ServiceEffectCombinations.required_fields(:SR)
       ~w[route_ids stop_ids]a
       iex> ServiceEffectCombinations.required_fields(:RDT)
-      ~w[route_ids trip_ids]a
+      ~w[route_ids direction trip_ids]a
   """
 
   @spec get_combination(Route.type_int() | nil, String.t() | nil) ::
@@ -121,7 +121,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations do
   def required_fields(nil), do: []
   def required_fields(:R), do: ~w[route_ids]a
   def required_fields(:SR), do: ~w[route_ids stop_ids]a
-  def required_fields(:RDS), do: ~w[route_ids stop_ids]a
-  def required_fields(:RDT), do: ~w[route_ids trip_ids]a
-  def required_fields(:RDTS), do: ~w[route_ids trip_ids stop_ids]a
+  def required_fields(:RDS), do: ~w[route_ids direction stop_ids]a
+  def required_fields(:RDT), do: ~w[route_ids direction trip_ids]a
+  def required_fields(:RDTS), do: ~w[route_ids direction trip_ids stop_ids]a
 end
