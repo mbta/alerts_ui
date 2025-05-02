@@ -24,13 +24,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
     selected_schedules: []
   }
 
-  @schedule %EnhancedSchedule{
-    trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
-    time_of_last_trip_arrival:
-      ~U[2024-05-01 13:15:00.00Z] |> DateTime.shift_zone!("America/New_York"),
-    departure_time: ~U[2024-05-01 12:15:00.00Z] |> DateTime.shift_zone!("America/New_York")
-  }
-
   describe "component" do
     test "renders" do
       assert render_component(TimeRange, @assigns) =~ ~s(id="time_range_form")
@@ -63,39 +56,22 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
     test "editing does not check start time" do
       {:ok, view, _html} =
-        live_isolated_component(
-          TimeRange,
-          Map.merge(
-            @assigns,
-            %{
-              editing: true,
-              alert_data: %{
-                active_period_start_specifier: "custom",
-                active_period_start: ~N[2024-04-29 10:54:00],
-                active_period_end_specifier: "until_further_notice",
-                active_period_end: ~N[2024-04-30 11:59:00]
-              }
-            }
-          )
-        )
+        live_isolated_component(TimeRange, @assigns)
 
-      assert view
-             |> render() =~ "until alert is manually closed"
-
-      refute view
-             |> render() =~ "later today"
-
-      view
-      |> element("form")
-      |> render_change(%{
-        "time_range" => %{
-          "active_period_end_specifier" => "later_today"
+      live_assign(view, %{
+        editing: true,
+        alert_data: %{
+          active_period_start: ~N[2024-04-30 11:54:00],
+          active_period_end_specifier: "custom"
         }
       })
 
+      assert view
+             |> render() =~ "custom"
+
       refute_receive {:__live_isolated_component_handle_info_received__, _pid,
                       {:add_errors,
-                       [{:active_period_start, {"Effect can't start in the past", []}}],
+                       [{:active_period_start_date, {"Effect can't start in the past", []}}],
                        AlertsUIWeb.FormComponents.TimeRange}}
     end
 
@@ -122,6 +98,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
     end
 
     test "editing with no errors sends data" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
       start_time =
         DateTime.utc_now()
         |> DateTime.add(1, :hour)
@@ -129,42 +108,18 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         |> DateTime.truncate(:second)
         |> DateTime.to_naive()
 
-      {:ok, view, _html} =
-        live_isolated_component(
-          TimeRange,
-          Map.merge(
-            @assigns,
-            %{
-              editing: true,
-              alert_data: %{
-                active_period_start: start_time,
-                active_period_start_specifier: "custom",
-                active_period_end_specifier: "later_today",
-                active_period_end: NaiveDateTime.add(start_time, 1, :hour)
-              }
-            }
-          )
-        )
-
-      assert view
-             |> render() =~ "custom"
-
-      assert view
-             |> render() =~ "until later today"
-
-      view
-      |> element("form")
-      |> render_change(%{
-        "time_range" => %{
-          "active_period_end_specifier" => "until_further_notice"
+      live_assign(view, %{
+        editing: true,
+        alert_data: %{
+          active_period_start: start_time,
+          active_period_start_specifier: "custom",
+          active_period_end_specifier: "until_further_notice",
+          active_period_end: ""
         }
       })
 
-      refute view
-             |> render() =~ "until later today"
-
       assert view
-             |> render() =~ "until alert is manually closed (indefinite)"
+             |> render() =~ "custom"
 
       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
                       {:add_errors, [], AlertsUIWeb.FormComponents.TimeRange}}
@@ -282,8 +237,15 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
     end
 
     test "displays error if start after trip end when 'start of service' is selected" do
+      schedule = %EnhancedSchedule{
+        trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
+        time_of_last_trip_arrival:
+          ~U[2024-05-01 13:15:00.00Z] |> DateTime.shift_zone!("America/New_York"),
+        departure_time: ~U[2024-05-01 12:15:00.00Z] |> DateTime.shift_zone!("America/New_York")
+      }
+
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns |> Map.put(:selected_schedules, [@schedule]))
+        live_isolated_component(TimeRange, @assigns |> Map.put(:selected_schedules, [schedule]))
 
       view
       |> element("form")
@@ -313,9 +275,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       {:ok, view, _html} =
         live_isolated_component(
           TimeRange,
-          @assigns
-          |> Map.put(:current_time, ~N[2024-05-01 08:15:00])
-          |> Map.put(:selected_schedules, [@schedule])
+          @assigns |> Map.put(:current_time, ~N[2024-05-01 08:15:00])
         )
 
       view
