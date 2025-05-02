@@ -166,6 +166,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         %{selected_schedules: []} = assigns,
         socket
       ) do
+    # we want to reset some parameters IF the user had a schedule selected
+    # then selected All Trips. Don't run if All Trips is already selected.
     if socket.assigns.selected_schedules === [] do
       {:ok, assign(socket, assigns)}
     else
