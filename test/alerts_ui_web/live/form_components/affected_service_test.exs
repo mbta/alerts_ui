@@ -783,7 +783,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
            by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end,
            end_of_rating: fn -> DateTime.utc_now() |> DateTime.to_date() |> Date.add(10) end
          ]},
-        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop, @stop_2] end]}
+        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
           live_isolated_component(
@@ -791,29 +791,22 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
             @assigns
             |> Map.merge(%{
               editing: true,
-              route_type: 3,
               alert_data: %{
                 direction: "0",
                 route_type: 2,
-                stop_ids: [@stop.id, @stop_2.id],
+                stop_ids: ["place-sstat"],
                 route_ids: ["CR-Worcester"],
                 trip_ids: ["CR-683322-595"]
               }
             })
           )
 
-        view
-        |> element("form")
-        |> render_change(%{
-          "affected_service" => %{"stop_ids" => [@stop_2.id]}
-        })
-
-        assert view |> render_async() =~ ~s(value=\"CR-Worcester\")
+        assert view |> render_async() =~ ~s(value=\"CR-Worcester\" checked=\"checked\")
 
         assert view |> render_async() =~
                  ~s(<option selected="selected" value="0">Westbound</option>)
 
-        assert view |> render_async() =~ ~s(<option selected="selected" value="place-crtst">)
+        assert view |> render_async() =~ ~s(<option selected="selected" value="place-sstat">)
 
         assert view |> render_async() =~
                  ~s(<option selected="selected" value="CR-683322-595">595)

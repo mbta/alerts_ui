@@ -82,7 +82,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         } = assigns,
         %{assigns: %{edit_data_has_been_filled: false}} = socket
       ) do
-    # designed to run ONCE when editing, to fill in alert information
     trip_information_by_id =
       if Map.get(alert_data, :trip_information_by_id) do
         alert_data.trip_information_by_id

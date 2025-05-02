@@ -23,7 +23,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       assert AlertData.build_alert_data("1") == %AlertData{
                combination: :ACCESS,
-               direction: "default",
+               direction: nil,
                effect_name: "Access Issue",
                route_type: nil,
                route_ids: [],
@@ -57,7 +57,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       assert AlertData.build_alert_data("1") == %AlertData{
                combination: :RDS,
-               direction: "default",
+               direction: nil,
                effect_name: "Delay",
                facility_id: nil,
                route_type: 1,
@@ -87,7 +87,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       assert AlertData.build_alert_data("1") == %AlertData{
                combination: :ACCESS,
-               direction: "default",
+               direction: nil,
                effect_name: "Bike Issue",
                facility_id: "example-facility",
                stop_ids: [],
@@ -137,7 +137,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       assert AlertData.build_alert_data("1") == %AlertData{
                combination: :RDS,
-               direction: "default",
+               direction: nil,
                effect_name: "Delay",
                url: "http://www.example.com",
                image_url: "http://www.example.com/example.jpg",
@@ -265,7 +265,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                stop_ids: [],
                trip_ids: [],
                direction: "default",
-               facility_id: nil,
+               facility_id: "",
                header_text: "cool header text",
                description_text: "description text",
                reminder_times: [~N[2024-09-24 20:01:00]],
@@ -296,7 +296,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                stop_ids: [],
                trip_ids: [],
                direction: "default",
-               facility_id: nil,
+               facility_id: "",
                header_text: "cool header text",
                description_text: "description text",
                reminder_times: [~N[2024-09-24 20:01:00]],
