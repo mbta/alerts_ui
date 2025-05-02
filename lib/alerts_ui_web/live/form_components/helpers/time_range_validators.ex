@@ -288,6 +288,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
         _time_range,
         true
       ) do
+    # this validation shouldn't run if we're editing
     changeset
   end
 
