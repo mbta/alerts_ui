@@ -2,12 +2,21 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
 
+  import AlertsUI.Support.Factory
   import LiveIsolatedComponent
+  import Mock
   import Phoenix.LiveViewTest
+  import Test.Support.Helpers
   alias AlertsUI.Models.EnhancedSchedule
   alias AlertsUIWeb.FormComponents.TimeRange
   alias AlertsUIWeb.Step
+  alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
+  alias MBTAV3API.Routes.Repo, as: RoutesRepo
+  alias MBTAV3API.Routes.Route
+  alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
   alias MBTAV3API.Schedules.Trip
+  alias MBTAV3API.Stops.Repo, as: StopsRepo
+  alias MBTAV3API.Stops.Stop
 
   @assigns %{
     id: "time_range",
@@ -25,11 +34,38 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
   }
 
   @schedule %EnhancedSchedule{
+    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
     trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
+    stop: %Stop{id: "place-sstat", name: "South Station"},
+    arrival_time: nil,
+    departure_time: DateTime.utc_now() |> DateTime.add(-1, :hour),
     time_of_last_trip_arrival:
-      ~U[2024-05-01 13:15:00.00Z] |> DateTime.shift_zone!("America/New_York"),
-    departure_time: ~U[2024-05-01 12:15:00.00Z] |> DateTime.shift_zone!("America/New_York")
+      ~U[2024-05-01 13:15:00.00Z] |> DateTime.shift_zone!("America/New_York")
   }
+
+  # @schedule %EnhancedSchedule{
+  #   time_of_last_trip_arrival:
+  #     ~U[2024-05-01 13:15:00.00Z] |> DateTime.shift_zone!("America/New_York"),
+  #   departure_time: ~U[2024-05-01 12:15:00.00Z] |> DateTime.shift_zone!("America/New_York")
+  # }
+
+  @schedule_2 %EnhancedSchedule{
+    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
+    stop: %Stop{id: "place-sstat", name: "South Station"},
+    arrival_time: DateTime.utc_now(),
+    departure_time: nil
+  }
+
+  @route %Route{
+    direction_names: %{0 => "Westbound", 1 => "Eastbound"},
+    sort_order: 3,
+    id: "CR-Worcester",
+    type: 2,
+    name: "Framingham/Worcester Line"
+  }
+
+  @stop %Stop{id: "place-sstat", name: "South Station"}
 
   describe "component" do
     test "renders" do
@@ -519,6 +555,112 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
                          active_period_end_specifier: :custom,
                          active_period_start: ~N[2024-05-01 08:54:00]
                        }}}
+    end
+
+    @tag :logged_in_user
+    test "end-to-end editing", %{conn: conn} do
+      todays_date =
+        DateTime.utc_now()
+        |> DateTime.shift_zone!("America/New_York")
+        |> DateTime.to_date()
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_stop: fn _stop_id, _ -> [@route] end,
+           by_type: fn _types -> [@route] end,
+           get: fn _, _ -> @route end
+         ]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _route_ids, _opts ->
+             [@schedule, @schedule_2]
+           end,
+           end_of_rating: fn -> Date.add(todays_date, 1) end,
+           trip: fn _ ->
+             %Trip{id: "CR-683322-595", name: "595", direction_id: 0}
+           end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _route_type -> [@stop] end,
+           by_route: fn _, _ -> [@stop] end,
+           get_parent: fn
+             "place-sstat" -> @stop
+           end
+         ]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _route_id, _opts -> [] end,
+           included_stops_by_route_id: fn "CR-Worcester", _ ->
+             [@stop]
+           end
+         ]}
+      ]) do
+        conn = put_resp_cookie(conn, "show_created_alert", "true")
+        trip = build(:trip_descriptor, %{trip_id: @schedule.trip.id})
+        ap = build(:active_period, %{start: ~U[2024-05-10 14:30:54Z]})
+
+        ie =
+          build(:informed_entity, %{
+            route_id: @route.id,
+            route_type: @route.type,
+            activities: [:BOARD],
+            stop_id: @stop.id,
+            trip: trip
+          })
+
+        insert(
+          :alert,
+          %{
+            alert_id: "123",
+            header_text: "example header text",
+            informed_entity: [ie],
+            effect: :SIGNIFICANT_DELAYS,
+            effect_detail: "DELAY",
+            original_route_selections: [@route.id],
+            reminder_times: [],
+            active_period: [ap],
+            active_period_start: ~U[2024-05-10 14:30:54Z],
+            duration_certainty: :UNKNOWN
+          }
+        )
+
+        {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
+
+        rendered_view = render(view)
+
+        assert rendered_view =~ ~s(Until further notice)
+
+        view
+        |> element("#time_range_form")
+        |> render_change(%{
+          "time_range" => %{
+            "active_period_end_specifier" => "custom"
+          }
+        })
+
+        view
+        |> element("#time_range_form")
+        |> render_change(%{
+          "time_range" => %{
+            "active_period_end" =>
+              todays_date
+              |> Date.add(2)
+              |> NaiveDateTime.new!(~T[00:00:00])
+              |> NaiveDateTime.to_iso8601()
+          }
+        })
+
+        view
+        |> element("button#save", "Review and submit")
+        |> render_click()
+
+        created_alert = parse_alert_created_output(view)
+
+        assert created_alert.active_period_end == ~U[2025-05-07 04:00:00Z]
+        assert created_alert.duration_certainty == :KNOWN
+      end
     end
   end
 end
