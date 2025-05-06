@@ -2,6 +2,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText do
   @moduledoc """
     Constructs auto-text for header and description from affected service.
   """
+  alias AlertsUI.Models.{InformedEntity, SeverityLevel}
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Trip
@@ -86,6 +87,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText do
     "description autotext"
   end
 
+  @spec cause(String.t()) :: String.t()
   def cause(cause_detail) when cause_detail in @uses_definite_article do
     "the #{format_cause(cause_detail)}"
   end
@@ -97,6 +99,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText do
   end
 
   def cause(cause_detail), do: format_cause(cause_detail)
+
+  @spec severity(integer()) :: String.t()
+  def severity(severity) do
+    SeverityLevel.severity_description_by_severity(severity)
+  end
 
   defp format_cause(cause_detail) do
     cause_detail |> String.replace("_", " ") |> String.downcase()
