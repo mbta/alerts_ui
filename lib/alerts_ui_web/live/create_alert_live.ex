@@ -215,7 +215,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   def get_stops_for_stop_route(route_type, route_id \\ nil)
 
-  def get_stops_for_stop_route(3, route_id) when is_nil(route_id) do
+  def get_stops_for_stop_route(3, nil) do
     # used for stop-route combination, bus mode.
 
     # direction filtering does nothing if a route id is not
@@ -238,7 +238,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
     |> Enum.sort_by(& &1.name)
   end
 
-  def get_stops_for_stop_route(route_type, route_id) when is_nil(route_id) do
+  def get_stops_for_stop_route(route_type, nil) do
     # used for stop-route combination, other modes
     StopsRepo.by_route_type(route_type, []) |> Enum.sort_by(& &1.name)
   end
@@ -455,23 +455,21 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   @spec available_stops([integer()], [String.t()], integer()) :: [Stop.t()]
 
-  defp available_stops(direction_array, route_ids, 3) do
+  defp available_stops(direction_array, route_ids, route_type) do
     route_ids
     |> Enum.flat_map(fn route ->
-      Enum.flat_map(direction_array, fn direction ->
-        route
-        |> StopsRepo.by_route(direction)
-        |> map_direction_names_to_stops(direction)
-      end)
+      Enum.flat_map(direction_array, &get_stops_by_route(route, &1, route_type))
     end)
   end
 
-  defp available_stops(direction_array, route_ids, _route_type) do
-    route_ids
-    |> Enum.flat_map(fn route ->
-      Enum.flat_map(direction_array, &StopsRepo.by_route(route, &1))
-    end)
+  @spec get_stops_by_route(String.t(), integer(), integer()) :: [Stop.t()]
+  defp get_stops_by_route(route, direction, 3) do
+    route
+    |> StopsRepo.by_route(direction)
+    |> map_direction_names_to_stops(direction)
   end
+
+  defp get_stops_by_route(route, direction, _route_type), do: StopsRepo.by_route(route, direction)
 
   defp map_direction_names_to_stops(stops, direction) do
     direction_word = if direction == 0, do: "outbound", else: "inbound"
