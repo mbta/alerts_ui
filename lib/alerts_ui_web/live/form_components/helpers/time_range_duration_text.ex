@@ -1,6 +1,6 @@
 defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationText do
   @moduledoc """
-    Validators for time range component
+    Constructs one-time time range duration text for time-range component.
   """
   use Timex
 
