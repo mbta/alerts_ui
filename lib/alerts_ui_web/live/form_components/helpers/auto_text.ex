@@ -2,6 +2,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText do
   @moduledoc """
     Constructs auto-text for header and description from affected service.
   """
+  alias AlertsUIWeb.FormComponents.Helpers.{ContentFormatter, SelectFormatter}
   alias AlertsUI.Models.{InformedEntity, SeverityLevel}
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Routes.Route
@@ -13,9 +14,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText do
             routes: [],
             trips: [],
             facility: nil,
+            service_types: [],
             direction: nil,
             severity: nil,
-            cause: nil,
+            cause_detail: "",
             start_specifier: nil,
             end_specifier: nil,
             start_datetime: nil,
@@ -33,9 +35,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText do
           routes: [Route.t()],
           trips: [Trip.t()],
           facility: Facility.t() | nil,
+          service_types: [integer()],
           direction: String.t(),
           severity: integer() | nil,
-          cause: String.t() | nil,
+          cause_detail: String.t(),
           start_specifier: atom() | nil,
           end_specifier: atom() | nil,
           start_datetime: DateTime.t() | nil,
@@ -87,6 +90,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText do
     "description autotext"
   end
 
+  # cause
   @spec cause(String.t()) :: String.t()
   def cause(cause_detail) when cause_detail in @uses_definite_article do
     "the #{format_cause(cause_detail)}"
@@ -100,12 +104,59 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText do
 
   def cause(cause_detail), do: format_cause(cause_detail)
 
-  @spec severity(integer()) :: String.t()
+  # severity
+  @spec severity(integer() | nil) :: String.t()
+  def severity(nil), do: ""
+
   def severity(severity) do
     SeverityLevel.severity_description_by_severity(severity)
   end
 
+  # service type/impacted mode
+  @spec service_types([integer()]) :: String.t()
+
+  def service_types(modes) do
+    modes
+    |> Enum.map(&format_service_type/1)
+    |> join_together
+  end
+
+  # stops
+  @spec stops([Stop.t()]) :: String.t()
+  def stops(stops) do
+    stops
+    |> Enum.map(&SelectFormatter.name_for_option/1)
+    |> join_together
+  end
+
+  # stop form (modifies stops)
+  @spec stop_form([Stop.t()]) :: String.t()
+  def stop_form([]), do: ""
+  def stop_form([_stop]), do: "stop is"
+  def stop_form(_stops), do: "stops are"
+
+  # formatters
+  defp join_together([]), do: ""
+
+  defp join_together([thing]) do
+    thing
+  end
+
+  defp join_together([_, _] = things) do
+    Enum.join(things, " and ")
+  end
+
+  defp join_together(things) do
+    things
+    |> List.replace_at(-1, "and " <> List.last(things))
+    |> Enum.join(", ")
+  end
+
   defp format_cause(cause_detail) do
     cause_detail |> String.replace("_", " ") |> String.downcase()
+  end
+
+  defp format_service_type(mode) do
+    mode |> InformedEntity.route_code_mapping() |> ContentFormatter.route_atom_to_string()
   end
 end
