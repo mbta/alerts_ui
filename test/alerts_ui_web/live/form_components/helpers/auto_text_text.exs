@@ -84,7 +84,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoTextTest do
     end
 
     test "returns severity description for severity integer" do
-      expected = "up to 10 minutes"
+      expected = "about 10 minutes"
       actual = AutoText.severity(3)
       assert expected == actual
     end
