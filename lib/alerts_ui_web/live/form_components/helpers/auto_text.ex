@@ -3,16 +3,15 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText do
     Constructs auto-text for header and description from affected service.
   """
   alias AlertsUIWeb.FormComponents.Helpers.{ContentFormatter, SelectFormatter}
-  alias AlertsUI.Models.{InformedEntity, SeverityLevel}
+  alias AlertsUI.Models.{EnhancedSchedule, InformedEntity, SeverityLevel}
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Routes.Route
-  alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Stop
 
-  defstruct mode: nil,
+  defstruct route_type: nil,
             effect_detail: nil,
             routes: [],
-            trips: [],
+            schedules: [],
             facility: nil,
             service_types: [],
             direction: nil,
@@ -30,10 +29,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText do
             recurrence_days: []
 
   @type t :: %__MODULE__{
-          mode: String.t() | nil,
+          route_type: integer() | nil,
           effect_detail: String.t() | nil,
           routes: [Route.t()],
-          trips: [Trip.t()],
+          schedules: [EnhancedSchedule.t()],
           facility: Facility.t() | nil,
           service_types: [integer()],
           direction: String.t(),
@@ -134,6 +133,24 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText do
   def stop_form([]), do: ""
   def stop_form([_stop]), do: "stop is"
   def stop_form(_stops), do: "stops are"
+
+  # trips
+  @spec trips([EnhancedSchedule.t()], integer()) :: String.t()
+  def trips([], _), do: ""
+
+  def trips(schedules, route_type) do
+    trips_string =
+      schedules
+      |> Enum.map(&SelectFormatter.name_for_option/1)
+      |> join_together
+
+    "#{trip_word(schedules, route_type)} #{trips_string}"
+  end
+
+  defp trip_word([_schedule], 2), do: "train"
+  defp trip_word(_, 2), do: "trains"
+  defp trip_word([_schedule], _), do: "trip"
+  defp trip_word(_, _), do: "trips"
 
   # formatters
   defp join_together([]), do: ""

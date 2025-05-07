@@ -1,13 +1,38 @@
 defmodule AlertsUIWeb.FormComponents.Helpers.AutoTextTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
+  alias AlertsUI.Models.EnhancedSchedule
   alias AlertsUIWeb.FormComponents.Helpers.AutoText
+  alias MBTAV3API.Routes.Route
+  alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Stop
 
   @stop_1 %Stop{id: "place-lech", name: "Lechmere"}
   @stop_2 %Stop{id: "place-lngmd", name: "Longwood Medical Area"}
   @stop_3 %Stop{id: "place-masta", name: "Massachusetts Avenue"}
   @stop_4 %Stop{id: "place-matt", name: "Mattapan"}
+
+  @schedule_1 %EnhancedSchedule{
+    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    trip: %Trip{id: "CR-683300-527", name: "527", direction_id: 0},
+    stop: %Stop{id: "place-sstat", name: "South Station"},
+    departure_time: ~U[2024-02-21 14:01:00.00Z]
+  }
+
+  @schedule_2 %EnhancedSchedule{
+    route: %Route{id: "CR-Providence", type: 2, name: "Providence/Stoughton Line"},
+    trip: %Trip{id: "CR-687395-841", name: "841", direction_id: 0},
+    stop: %Stop{id: "place-forhl", name: "Forest Hills"},
+    arrival_time: nil,
+    departure_time: ~U[2024-02-21 16:15:00.00Z]
+  }
+
+  @schedule_3 %EnhancedSchedule{
+    route: %Route{id: "CR-Providence", type: 2, name: "Providence/Stoughton Line"},
+    trip: %Trip{id: "CR-687393-839", name: "839", direction_id: 0},
+    stop: %Stop{id: "place-sstat", name: "South Station"},
+    departure_time: ~U[2024-02-21 16:03:00.00Z]
+  }
 
   describe "build_header_auto_text/1" do
   end
@@ -116,6 +141,44 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoTextTest do
 
     test "multiple stops" do
       assert AutoText.stop_form([@stop_1, @stop_2]) == "stops are"
+    end
+  end
+
+  describe "trips/2" do
+    test "schedules empty" do
+      assert AutoText.trips([], 0) == ""
+    end
+
+    test "one schedule" do
+      expected = "trip 527 (9:01 AM from South Station)"
+      actual = assert AutoText.trips([@schedule_1], 3)
+      assert expected == actual
+    end
+
+    test "one schedule when commuter rail" do
+      expected = "train 527 (9:01 AM from South Station)"
+      actual = assert AutoText.trips([@schedule_1], 2)
+      assert expected == actual
+    end
+
+    test "two schedules" do
+      expected = "trips 527 (9:01 AM from South Station) and 841 (11:15 AM from Forest Hills)"
+      actual = assert AutoText.trips([@schedule_1, @schedule_2], 3)
+      assert expected == actual
+    end
+
+    test "two schedules when commuter rail" do
+      expected = "trains 527 (9:01 AM from South Station) and 841 (11:15 AM from Forest Hills)"
+      actual = assert AutoText.trips([@schedule_1, @schedule_2], 2)
+      assert expected == actual
+    end
+
+    test "more than two schedules" do
+      expected =
+        "trips 527 (9:01 AM from South Station), 841 (11:15 AM from Forest Hills), and 839 (11:03 AM from South Station)"
+
+      actual = assert AutoText.trips([@schedule_1, @schedule_2, @schedule_3], 3)
+      assert expected == actual
     end
   end
 end
