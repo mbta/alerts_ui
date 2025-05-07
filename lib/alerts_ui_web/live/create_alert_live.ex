@@ -225,7 +225,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
     route_id_lists =
       RoutesRepo.by_type(3)
       |> Enum.map(& &1.id)
-      |> Enum.chunk_every(5)
+      |> Enum.chunk_every(10)
       |> Enum.map(&Enum.join(&1, ","))
 
     available_stops([0, 1], route_id_lists, 3)
