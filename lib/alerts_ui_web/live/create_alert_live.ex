@@ -77,6 +77,12 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   @impl true
   def mount(params, _session, socket) do
+    unless Application.get_env(:alerts_ui, :dev_routes) do
+      # preload api calls into cache to avoid load times
+      # if we're in production
+      get_stops_for_stop_route(3, nil)
+    end
+
     alert_id = Map.get(params, "alert_id")
 
     alert_data =
