@@ -215,11 +215,11 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   def get_routes_by_stop(stop_ids, route_type) do
     if route_type == 3 do
-      Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1, type: 3))
+      Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1, "filter[type]": 3))
+      |> Enum.filter(&(Map.get(&1, :description) !== :rail_replacement_bus))
     else
       Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1))
     end
-    |> Enum.filter(&(Map.get(&1, :description) !== :rail_replacement_bus))
     |> maybe_include_virtual_green_line()
   end
 

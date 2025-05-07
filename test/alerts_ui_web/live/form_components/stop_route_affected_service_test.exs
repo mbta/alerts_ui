@@ -98,19 +98,38 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
              |> render() =~ ~s(route_number_1)
     end
 
-    test "shuttle routes are filtered out" do
+    test "shuttle routes are filtered out of routes filter list" do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_stop: fn _stop_id -> @routes ++ [@shuttle_route] end,
-           by_type: fn _types -> @routes end
+           by_stop: fn _stop_id, ["filter[type]": 3] -> @routes end,
+           by_type: fn 3 -> @routes ++ [@shuttle_route] end
          ]},
         {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
           live_isolated_component(
             StopRouteAffectedService,
-            @assigns
+            %{@assigns | route_type: 3}
+          )
+
+        refute view |> render_async() =~ ~s(shuttle)
+      end
+    end
+
+    test "shuttle routes are filtered when stop selected" do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_stop: fn _stop_id, ["filter[type]": 3] -> @routes ++ [@shuttle_route] end,
+           by_type: fn 3 -> @routes end
+         ]},
+        {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
+      ]) do
+        {:ok, view, _html} =
+          live_isolated_component(
+            StopRouteAffectedService,
+            %{@assigns | route_type: 3}
           )
 
         view
