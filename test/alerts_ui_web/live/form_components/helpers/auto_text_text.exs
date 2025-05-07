@@ -3,6 +3,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoTextTest do
   use AlertsUIWeb.ConnCase
   alias AlertsUI.Models.EnhancedSchedule
   alias AlertsUIWeb.FormComponents.Helpers.AutoText
+  alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Stop
@@ -32,6 +33,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoTextTest do
     trip: %Trip{id: "CR-687393-839", name: "839", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     departure_time: ~U[2024-02-21 16:03:00.00Z]
+  }
+
+  @facility %Facility{
+    id: "952",
+    type: "ELEVATOR",
+    short_name: "Alewife platform to lobby",
+    long_name: "Charles/MGH Elevator 952 (Alewife platform to lobby)"
   }
 
   describe "build_header_auto_text/1" do
@@ -106,26 +114,26 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoTextTest do
     end
   end
 
-  describe "stops/1" do
+  describe "stop_names/1" do
     test "stops empty" do
-      assert AutoText.stops([]) == ""
+      assert AutoText.stop_names([]) == ""
     end
 
     test "one stop" do
       expected = "Lechmere"
-      actual = AutoText.stops([@stop_1])
+      actual = AutoText.stop_names([@stop_1])
       assert expected == actual
     end
 
     test "two stops" do
       expected = "Lechmere and Longwood Medical Area"
-      actual = AutoText.stops([@stop_1, @stop_2])
+      actual = AutoText.stop_names([@stop_1, @stop_2])
       assert expected == actual
     end
 
     test "more than two stops" do
       expected = "Lechmere, Longwood Medical Area, Massachusetts Avenue, and Mattapan"
-      actual = AutoText.stops([@stop_1, @stop_2, @stop_3, @stop_4])
+      actual = AutoText.stop_names([@stop_1, @stop_2, @stop_3, @stop_4])
       assert expected == actual
     end
   end
@@ -144,32 +152,32 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoTextTest do
     end
   end
 
-  describe "trips/2" do
+  describe "trip_names/2" do
     test "schedules empty" do
-      assert AutoText.trips([], 0) == ""
+      assert AutoText.trip_names([], 0) == ""
     end
 
     test "one schedule" do
       expected = "trip 527 (9:01 AM from South Station)"
-      actual = assert AutoText.trips([@schedule_1], 3)
+      actual = assert AutoText.trip_names([@schedule_1], 3)
       assert expected == actual
     end
 
     test "one schedule when commuter rail" do
       expected = "train 527 (9:01 AM from South Station)"
-      actual = assert AutoText.trips([@schedule_1], 2)
+      actual = assert AutoText.trip_names([@schedule_1], 2)
       assert expected == actual
     end
 
     test "two schedules" do
       expected = "trips 527 (9:01 AM from South Station) and 841 (11:15 AM from Forest Hills)"
-      actual = assert AutoText.trips([@schedule_1, @schedule_2], 3)
+      actual = assert AutoText.trip_names([@schedule_1, @schedule_2], 3)
       assert expected == actual
     end
 
     test "two schedules when commuter rail" do
       expected = "trains 527 (9:01 AM from South Station) and 841 (11:15 AM from Forest Hills)"
-      actual = assert AutoText.trips([@schedule_1, @schedule_2], 2)
+      actual = assert AutoText.trip_names([@schedule_1, @schedule_2], 2)
       assert expected == actual
     end
 
@@ -177,7 +185,33 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoTextTest do
       expected =
         "trips 527 (9:01 AM from South Station), 841 (11:15 AM from Forest Hills), and 839 (11:03 AM from South Station)"
 
-      actual = assert AutoText.trips([@schedule_1, @schedule_2, @schedule_3], 3)
+      actual = assert AutoText.trip_names([@schedule_1, @schedule_2, @schedule_3], 3)
+      assert expected == actual
+    end
+  end
+
+  describe "trip_form/1" do
+    test "trips empty" do
+      assert AutoText.trip_form([]) == ""
+    end
+
+    test "one trip" do
+      assert AutoText.trip_form([@schedule_1]) == "trip is"
+    end
+
+    test "multiple trips" do
+      assert AutoText.trip_form([@schedule_1, @schedule_2]) == "trips are"
+    end
+  end
+
+  describe "facility_name/1" do
+    test "facility nil" do
+      assert AutoText.facility_name(nil) == ""
+    end
+
+    test "facility has long name" do
+      expected = "Charles/MGH Elevator 952 (Alewife platform to lobby)"
+      actual = AutoText.facility_name(@facility)
       assert expected == actual
     end
   end

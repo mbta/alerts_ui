@@ -121,8 +121,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText do
   end
 
   # stops
-  @spec stops([Stop.t()]) :: String.t()
-  def stops(stops) do
+  @spec stop_names([Stop.t()]) :: String.t()
+  def stop_names(stops) do
     stops
     |> Enum.map(&SelectFormatter.name_for_option/1)
     |> join_together
@@ -135,10 +135,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText do
   def stop_form(_stops), do: "stops are"
 
   # trips
-  @spec trips([EnhancedSchedule.t()], integer()) :: String.t()
-  def trips([], _), do: ""
+  @spec trip_names([EnhancedSchedule.t()], integer()) :: String.t()
+  def trip_names([], _), do: ""
 
-  def trips(schedules, route_type) do
+  def trip_names(schedules, route_type) do
     trips_string =
       schedules
       |> Enum.map(&SelectFormatter.name_for_option/1)
@@ -151,6 +151,19 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText do
   defp trip_word(_, 2), do: "trains"
   defp trip_word([_schedule], _), do: "trip"
   defp trip_word(_, _), do: "trips"
+
+  @spec trip_form([EnhancedSchedule.t()]) :: String.t()
+  def trip_form([]), do: ""
+  def trip_form([_schedules]), do: "trip is"
+  def trip_form(_schedules), do: "trips are"
+
+  # facilities
+  @spec facility_name(Facility.t()) :: String.t()
+  def facility_name(nil), do: ""
+
+  def facility_name(facility) do
+    SelectFormatter.name_for_option(facility)
+  end
 
   # formatters
   defp join_together([]), do: ""
