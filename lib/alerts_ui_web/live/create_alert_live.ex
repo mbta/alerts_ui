@@ -219,28 +219,22 @@ defmodule AlertsUIWeb.CreateAlertLive do
     # used for stop-route combination, bus mode.
 
     # direction filtering does nothing if a route id is not
-    # included with the call. Including all the route ids
+    # included with the call. Doing 1 call for every route id
     # is too many so we have to chunk them up thus.
+    # note- larger chunks take longer. small chunk is good.
     route_id_lists =
       RoutesRepo.by_type(3)
       |> Enum.map(& &1.id)
-      |> Enum.chunk_every(25)
+      |> Enum.chunk_every(5)
       |> Enum.map(&Enum.join(&1, ","))
 
-    Enum.flat_map([0, 1], fn direction ->
-      Enum.flat_map(route_id_lists, fn route_ids ->
-        opts = Keyword.put([direction_id: direction], :"filter[route]", route_ids)
-
-        StopsRepo.by_route_type(3, opts)
-        |> map_direction_names_to_stops(direction)
-      end)
-    end)
-    |> Enum.sort_by(& &1.name)
+    available_stops([0, 1], route_id_lists, 3)
+    |> Enum.sort_by(&String.downcase(&1.name))
   end
 
   def get_stops_for_stop_route(route_type, nil) do
     # used for stop-route combination, other modes
-    StopsRepo.by_route_type(route_type, []) |> Enum.sort_by(& &1.name)
+    StopsRepo.by_route_type(route_type, []) |> Enum.sort_by(&String.downcase(&1.name))
   end
 
   def get_stops_for_stop_route(route_type, route_id) do
@@ -266,7 +260,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
       # remove facilities that we don't control
       |> Enum.filter(&(!is_nil(&1.stop)))
       |> Enum.uniq()
-      |> Enum.sort_by(& &1.long_name)
+      |> Enum.sort_by(&String.downcase(&1.long_name))
 
     # gather list of stops associated with facilities, along with array of facility types the stop services
     available_stops =
@@ -286,7 +280,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
         end
       end)
       |> Map.values()
-      |> Enum.sort_by(& &1.name)
+      |> Enum.sort_by(&String.downcase(&1.name))
 
     %{stops: available_stops, facilities: available_facilities}
   end
