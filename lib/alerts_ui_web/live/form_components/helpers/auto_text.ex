@@ -134,6 +134,15 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText do
   def stop_form([_stop]), do: "stop is"
   def stop_form(_stops), do: "stops are"
 
+  # stop range (between x and y)
+  @spec stop_range([Stop.t()]) :: String.t()
+  def stop_range([]), do: ""
+  def stop_range([stop]), do: "at " <> SelectFormatter.name_for_option(stop)
+  def stop_range(stops) do
+    stop_names = Enum.map(stops, &SelectFormatter.name_for_option/1)
+    "between #{List.first(stop_names)} and #{List.last(stop_names)}"
+  end
+
   # trips
   @spec trip_names([EnhancedSchedule.t()], integer()) :: String.t()
   def trip_names([], _), do: ""

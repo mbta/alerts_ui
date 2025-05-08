@@ -160,6 +160,24 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoTextTest do
     end
   end
 
+  describe "stop_range/1" do
+    test "stops empty" do
+      assert AutoText.stop_range([]) == ""
+    end
+
+    test "one stop" do
+      expected = "at Lechmere"
+      actual = assert AutoText.stop_range([@stop_1])
+      assert expected == actual
+    end
+
+    test "multiple stops" do
+      expected = "between Lechmere and Mattapan"
+      actual = AutoText.stop_range([@stop_1, @stop_2, @stop_3, @stop_4])
+      assert expected == actual
+    end
+  end
+
   describe "trip_names/2" do
     test "schedules empty" do
       assert AutoText.trip_names([], 0) == ""
