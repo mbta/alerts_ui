@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.AutoText do
+defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   @moduledoc """
     Constructs auto-text for header and description from affected service.
   """
@@ -14,7 +14,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText do
             schedules: [],
             facility: nil,
             service_types: [],
-            direction: nil,
+            direction: [],
             severity: nil,
             cause_detail: "",
             start_specifier: nil,
@@ -35,7 +35,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText do
           schedules: [EnhancedSchedule.t()],
           facility: Facility.t() | nil,
           service_types: [integer()],
-          direction: String.t(),
+          # may need to use `CreateAlertLive.directions_from_selection` to get this
+          direction: [integer()],
           severity: integer() | nil,
           cause_detail: String.t(),
           start_specifier: atom() | nil,
@@ -120,6 +121,17 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText do
     |> join_together
   end
 
+  # directions
+  def direction_name([direction], [route]) do
+    if Map.get(route, :direction_names) do
+      route.direction_names[direction]
+    else
+      Map.get(%{0 => "Outbound", 1 => "Inbound"}, direction)
+    end
+  end
+
+  def direction_name(_direction, _routes), do: ""
+
   # stops
   @spec stop_names([Stop.t()]) :: String.t()
   def stop_names(stops) do
@@ -138,6 +150,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText do
   @spec stop_range([Stop.t()]) :: String.t()
   def stop_range([]), do: ""
   def stop_range([stop]), do: "at " <> SelectFormatter.name_for_option(stop)
+
   def stop_range(stops) do
     stop_names = Enum.map(stops, &SelectFormatter.name_for_option/1)
     "between #{List.first(stop_names)} and #{List.last(stop_names)}"
