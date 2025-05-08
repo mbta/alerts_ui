@@ -102,7 +102,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_stop: fn _stop_id, ["filter[type]": 3] -> @routes end,
+           by_stop: fn _stop_id, ["filter[type]": 3] -> @routes ++ [@shuttle_route] end,
            by_type: fn 3 -> @routes ++ [@shuttle_route] end
          ]},
         {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
@@ -122,7 +122,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         {RoutesRepo, [],
          [
            by_stop: fn _stop_id, ["filter[type]": 3] -> @routes ++ [@shuttle_route] end,
-           by_type: fn 3 -> @routes end
+           by_type: fn 3 -> @routes ++ [@shuttle_route] end
          ]},
         {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
       ]) do
