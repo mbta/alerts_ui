@@ -111,11 +111,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText do
     SeverityLevel.severity_description_by_severity(severity)
   end
 
-  # service type/impacted mode
+  # service type/impacted route_type
   @spec service_types([integer()]) :: String.t()
 
-  def service_types(modes) do
-    modes
+  def service_types(route_types) do
+    route_types
     |> Enum.map(&format_service_type/1)
     |> join_together
   end
@@ -165,7 +165,92 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText do
     SelectFormatter.name_for_option(facility)
   end
 
+  # routes (short)
+  @spec route_names_short([Route.t()], integer()) :: String.t()
+  def route_names_short([], _route_type), do: ""
+
+  def route_names_short(routes, route_type) when length(routes) > 2 do
+    format_service_type(route_type)
+  end
+
+  def route_names_short(routes, _route_type) do
+    route_names(routes)
+  end
+
+  # routes
+  @spec route_names([Route.t()]) :: String.t()
+  def route_names([]), do: ""
+
+  def route_names(routes) when length(routes) > 5 do
+    route_names =
+      routes
+      |> Enum.map(&SelectFormatter.name_for_option/1)
+      |> Enum.group_by(&first_letter_numeric?/1)
+
+    numerical_routes = Map.get(route_names, true, nil)
+    non_numerical_routes = Map.get(route_names, false, nil)
+
+    other_routes_length = length(routes) - 1
+
+    if non_numerical_routes == nil do
+      named_route = hd(numerical_routes)
+      "Route #{named_route} and #{other_routes_length} other routes"
+    else
+      named_route = hd(non_numerical_routes)
+      "#{named_route} and #{other_routes_length} other routes"
+    end
+  end
+
+  def route_names(routes) do
+    route_names =
+      routes
+      |> Enum.map(&SelectFormatter.name_for_option/1)
+      |> Enum.group_by(&first_letter_numeric?/1)
+
+    numerical_routes = Map.get(route_names, true)
+    non_numerical_routes = Map.get(route_names, false)
+
+    numerical_routes_phrase = numerical_routes_phrase(numerical_routes)
+    # if there are numerical routes, non-numerical don't get "and"
+    non_numerical_routes_phrase =
+      non_numerical_routes_phrase(non_numerical_routes, numerical_routes)
+
+    joiner = route_joiner(numerical_routes, non_numerical_routes)
+    "#{non_numerical_routes_phrase}#{joiner}#{numerical_routes_phrase}"
+  end
+
+  defp first_letter_numeric?(route_name) do
+    route_name
+    |> String.first()
+    |> Integer.parse() !== :error
+  end
+
+  defp route_joiner(one, two) when is_nil(one) or is_nil(two) do
+    ""
+  end
+
+  defp route_joiner(_one, _two) do
+    " and "
+  end
+
+  defp numerical_routes_phrase(nil), do: ""
+
+  defp numerical_routes_phrase(numerical_routes) do
+    "#{route_word(numerical_routes)}#{numerical_routes |> join_together}"
+  end
+
+  defp non_numerical_routes_phrase(nil, _), do: ""
+  defp non_numerical_routes_phrase(routes, nil), do: join_together(routes)
+
+  defp non_numerical_routes_phrase(routes, _numerical_routes) do
+    Enum.join(routes, ", ")
+  end
+
+  defp route_word([_route]), do: "Route "
+  defp route_word(_routes), do: "Routes "
+
   # formatters
+  defp join_together(nil), do: ""
   defp join_together([]), do: ""
 
   defp join_together([thing]) do
@@ -186,7 +271,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText do
     cause_detail |> String.replace("_", " ") |> String.downcase()
   end
 
-  defp format_service_type(mode) do
-    mode |> InformedEntity.route_code_mapping() |> ContentFormatter.route_atom_to_string()
+  defp format_service_type(route_type) do
+    route_type |> InformedEntity.route_code_mapping() |> ContentFormatter.route_atom_to_string()
   end
 end

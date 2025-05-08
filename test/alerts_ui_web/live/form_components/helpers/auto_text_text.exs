@@ -13,6 +13,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoTextTest do
   @stop_3 %Stop{id: "place-masta", name: "Massachusetts Avenue"}
   @stop_4 %Stop{id: "place-matt", name: "Mattapan"}
 
+  @route_1 %Route{id: "1", name: "1"}
+  @route_2 %Route{id: "22", name: "22"}
+  @route_3 %Route{id: "333", name: "333"}
+
+  @route_4 %Route{id: "741", name: "SL1"}
+  @route_5 %Route{id: "742", name: "SL2"}
+  @route_6 %Route{id: "746", name: "SLW"}
+
   @schedule_1 %EnhancedSchedule{
     route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
     trip: %Trip{id: "CR-683300-527", name: "527", direction_id: 0},
@@ -212,6 +220,138 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoTextTest do
     test "facility has long name" do
       expected = "Charles/MGH Elevator 952 (Alewife platform to lobby)"
       actual = AutoText.facility_name(@facility)
+      assert expected == actual
+    end
+  end
+
+  describe "route_names_short/2" do
+    test "when routes are empty" do
+      assert AutoText.route_names_short([], 1) == ""
+    end
+
+    test "when there is 1 numeric route" do
+      expected = "Route 1"
+      actual = AutoText.route_names_short([@route_1], 3)
+      assert expected == actual
+    end
+
+    test "when there is 1 non-numeric route" do
+      expected = "SL1"
+      actual = AutoText.route_names_short([@route_4], 3)
+      assert expected == actual
+    end
+
+    test "when there are 2 numeric routes" do
+      expected = "Routes 1 and 22"
+      actual = AutoText.route_names_short([@route_1, @route_2], 3)
+      assert expected == actual
+    end
+
+    test "when there are 2 non-numeric routes" do
+      expected = "SL1 and SL2"
+      actual = AutoText.route_names_short([@route_4, @route_5], 3)
+      assert expected == actual
+    end
+
+    test "when there is 1 numeric and 1 non-numeric routes" do
+      expected = "SL1 and Route 1"
+      actual = AutoText.route_names_short([@route_1, @route_4], 3)
+      assert expected == actual
+    end
+
+    test "when there are more than 3 routes" do
+      expected = "Bus"
+      actual = AutoText.route_names_short([@route_1, @route_4, @route_5], 3)
+      assert expected == actual
+    end
+  end
+
+  describe "route_names/1" do
+    test "when routes are empty" do
+      assert AutoText.route_names([]) == ""
+    end
+
+    test "when there is 1 numeric route" do
+      expected = "Route 1"
+      actual = AutoText.route_names([@route_1])
+      assert expected == actual
+    end
+
+    test "when there are 2 numeric route" do
+      expected = "Routes 1 and 22"
+      actual = AutoText.route_names([@route_1, @route_2])
+      assert expected == actual
+    end
+
+    test "when there are more than 2 numeric routes" do
+      expected = "Routes 1, 22, and 333"
+      actual = AutoText.route_names([@route_1, @route_2, @route_3])
+      assert expected == actual
+    end
+
+    test "when there is 1 non-numeric route" do
+      expected = "SL1"
+      actual = AutoText.route_names([@route_4])
+      assert expected == actual
+    end
+
+    test "when there are 2 non-numeric routes" do
+      expected = "SL1 and SL2"
+      actual = AutoText.route_names([@route_4, @route_5])
+      assert expected == actual
+    end
+
+    test "when there are more than 2 non-numeric routes" do
+      expected = "SL1, SL2, and SLW"
+      actual = AutoText.route_names([@route_4, @route_5, @route_6])
+      assert expected == actual
+    end
+
+    test "when there is 1 numeric and 1 non-numeric route" do
+      expected = "SL1 and Route 1"
+      actual = AutoText.route_names([@route_1, @route_4])
+      assert expected == actual
+    end
+
+    test "when there is 1 numeric and 2 non-numeric routes" do
+      expected = "SL1 and Routes 1 and 22"
+      actual = AutoText.route_names([@route_1, @route_2, @route_4])
+      assert expected == actual
+    end
+
+    test "when there are 2 numeric and 2 non-numeric routes" do
+      expected = "SL1, SL2 and Routes 1 and 22"
+      actual = AutoText.route_names([@route_1, @route_2, @route_4, @route_5])
+      assert expected == actual
+    end
+
+    test "when there are 2 numeric and 3 non-numeric routes" do
+      expected = "SL1, SL2, SLW and Routes 1 and 22"
+      actual = AutoText.route_names([@route_1, @route_2, @route_4, @route_5, @route_6])
+      assert expected == actual
+    end
+
+    test "when there are 6 numeric routes" do
+      expected = "Route 1 and 5 other routes"
+      actual = AutoText.route_names([@route_1, @route_2, @route_3, @route_1, @route_2, @route_3])
+      assert expected == actual
+    end
+
+    test "when there are 6 non-numeric routes" do
+      expected = "SL1 and 5 other routes"
+      actual = AutoText.route_names([@route_4, @route_5, @route_6, @route_4, @route_5, @route_6])
+      assert expected == actual
+    end
+
+    test "when there are 1 numeric and 5 non-numeric routes" do
+      expected = "SL1 and 5 other routes"
+      actual = AutoText.route_names([@route_1, @route_4, @route_5, @route_6, @route_4, @route_5])
+      assert expected == actual
+    end
+
+    test "when there are 5 numeric and 1 non-numeric routes" do
+      expected = "SL1 and 5 other routes"
+      actual = AutoText.route_names([@route_1, @route_2, @route_3, @route_2, @route_3, @route_4])
       assert expected == actual
     end
   end
