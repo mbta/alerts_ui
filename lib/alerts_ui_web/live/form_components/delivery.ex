@@ -76,7 +76,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
         form =
           %__MODULE__{}
           |> changeset(socket.assigns.form.params)
-          |> validate_banner_acceptance(banner_text?(socket.assigns.form.params, socket))
+          |> validate_banner_acceptance(socket.assigns.form.params["view_banner"])
           |> Map.put(:action, :validate)
           |> to_form()
 
@@ -130,12 +130,10 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
   def validate(delivery, socket) do
     delivery = Map.merge(socket.assigns.form.params, delivery)
 
-    banner_text?(delivery, socket)
-
     changeset = changeset(%__MODULE__{}, delivery)
 
     case changeset
-         |> validate_banner_acceptance(banner_text?(delivery, socket))
+         |> validate_banner_acceptance(delivery["view_banner"])
          |> apply_action(:validate) do
       {:ok, changeset} ->
         send(self(), {:add_errors, [], __MODULE__})
@@ -154,19 +152,15 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
     {:noreply, assign(socket, %{form: form})}
   end
 
+  defp validate_banner_acceptance(changeset, "true"),
+    do: validate_banner_acceptance(changeset, true)
+
   defp validate_banner_acceptance(changeset, true),
     do:
       validate_acceptance(changeset, :accept_banner, message: "Check box to show you understand")
 
+  defp validate_banner_acceptance(changeset, "false"), do: changeset
   defp validate_banner_acceptance(changeset, false), do: changeset
-
-  defp banner_text?(params, socket) do
-    if Map.get(params, "banner_sync_toggle") do
-      Map.get(socket.assigns.alert_data, :header_text)
-    else
-      Map.get(params, "banner_text")
-    end not in [nil, ""]
-  end
 
   @impl true
   def render(assigns) do
@@ -188,6 +182,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
             field={@form[:notification_toggle]}
             phx-change="notification_toggle_change"
             phx-target={@myself}
+            id="notification-toggle"
           />
 
           <span class="ml-4">

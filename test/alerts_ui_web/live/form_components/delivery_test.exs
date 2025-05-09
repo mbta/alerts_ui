@@ -6,7 +6,7 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
   import LiveIsolatedComponent
   import Phoenix.LiveViewTest
 
-  alias AlertsUIWeb.FormComponents.Delivery
+  alias AlertsUIWeb.FormComponents.{Delivery, RouteTypeAndEffect}
   alias AlertsUIWeb.Step
 
   @assigns %{
@@ -58,5 +58,38 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
              |> element("div#banner_div")
              |> render() =~ ~s(example_header_text)
     end
+  end
+
+  @tag :logged_in_user
+  test "banner text does not secretly get filled in when unselecting email box", %{conn: conn} do
+    {:ok, view, _html} = live(conn, "/alerts/new")
+
+    send(
+      view.pid,
+      {:step_completed, %RouteTypeAndEffect{route_type: 3, effect_name: "Detour"}}
+    )
+
+    view
+    |> element("#details_form")
+    |> render_change(%{
+      "alert_details" => %{
+        "header_text" => "header text"
+      }
+    })
+
+    view
+    |> element("#notification-toggle")
+    |> render_change(%{
+      "delivery" => %{
+        "notification_toggle" => "false"
+      }
+    })
+
+    view
+    |> element("#save")
+    |> render_click()
+
+    refute view
+           |> render() =~ ~s(Check box to show you understand)
   end
 end
