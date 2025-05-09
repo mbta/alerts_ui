@@ -61,6 +61,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
   }
 
   @stop %Stop{id: "place-sstat", name: "South Station"}
+  @stop_2 %Stop{id: "place-crtst", name: "Courthouse"}
 
   @assigns %{
     id: "affected_service",
@@ -654,14 +655,14 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       end
     end
 
-    test "bus stop names have direction appended" do
+    test "bus stop names have direction appended and are ordered by first outbound to last inbound" do
       with_mocks([
         {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},
         {StopsRepo, [],
          [
            by_route: fn
-             _route, 0 -> [@stop]
-             _route, 1 -> [%Stop{id: "place-crtst", name: "Courthouse"}]
+             _route, 0 -> [@stop, @stop_2]
+             _route, 1 -> [@stop_2, @stop]
            end
          ]}
       ]) do
@@ -686,10 +687,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         })
 
         assert view
-               |> render() =~ ~s(South Station \(outbound\))
-
-        assert view
-               |> render() =~ ~s(Courthouse \(inbound\))
+               |> element("select##affected_service_stop_ids")
+               |> render =~
+                 "<option value=\"place-sstat\">South Station (outbound)</option><option value=\"place-crtst\">Courthouse (outbound)</option><option value=\"place-crtst\">Courthouse (inbound)</option><option value=\"place-sstat\">South Station (inbound)</option>"
       end
     end
 

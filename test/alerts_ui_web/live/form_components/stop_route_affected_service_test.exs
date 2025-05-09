@@ -223,56 +223,45 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       end
     end
 
-    test "modal filtering works" do
+    test "stop order is by name when not filtering and by direction when filtering" do
       with_mocks([
         {RoutesRepo, [],
-         [by_stop: fn _route_id -> @routes end, by_type: fn _types -> @routes end]},
+         [by_stop: fn _route_id -> @routes end, by_type: fn _types -> [@route_one] end]},
         {StopsRepo, [],
          [
-           by_route_type: fn
-             _route_type, [direction_id: _any, route: "Blue"] -> [@stop_two]
-             _route_type, _ -> [@stop, @stop_two]
-           end,
-           by_route: fn "Blue", _direction -> [@stop_two] end
+           by_route: fn
+             "Blue", 0 -> [@stop, @stop_two]
+             "Blue", 1 -> [@stop_two, @stop]
+           end
          ]}
       ]) do
         {:ok, view, _html} =
           live_isolated_component(
             StopRouteAffectedService,
-            @assigns
+            %{@assigns | route_type: 3}
           )
 
         assert view
                |> element("select##stop_route_affected_service_stop_ids")
                |> render_async() =~
-                 ~s(<option value="#{@stop.id}">#{@stop.name}</option>)
+                 "<option value=\"place-aqucl\">Aquarium (inbound)</option><option value=\"place-aqucl\">Aquarium (outbound)</option><option value=\"place-pktrm\">Park Street (inbound)</option><option value=\"place-pktrm\">Park Street (outbound)</option>"
 
-        assert view
-               |> element("select##stop_route_affected_service_stop_ids")
-               |> render_async() =~
-                 ~s(<option value="#{@stop_two.id}">#{@stop_two.name}</option>)
-
+        # Add route filter
         view
         |> element("form")
         |> render_change(%{
-          "stop_route_affected_service" => %{
-            "modal_route_id" => "Blue"
-          }
+          "stop_route_affected_service" => %{"modal_route_id" => "Blue"}
         })
 
+        # Submit filter
         view
         |> with_target("#stop_route_service_view")
-        |> render_hook(:accepted_routes_modal, %{})
-
-        refute view
-               |> element("select##stop_route_affected_service_stop_ids")
-               |> render_async() =~
-                 ~s(<option value="#{@stop.id}">#{@stop.name}</option>)
+        |> render_click(:accepted_routes_modal)
 
         assert view
                |> element("select##stop_route_affected_service_stop_ids")
                |> render_async() =~
-                 ~s(<option value="#{@stop_two.id}">#{@stop_two.name}</option>)
+                 "><option value=\"place-aqucl\">Aquarium (outbound)</option><option value=\"place-pktrm\">Park Street (outbound)</option><option value=\"place-pktrm\">Park Street (inbound)</option><option value=\"place-aqucl\">Aquarium (inbound)</option>"
       end
     end
 
