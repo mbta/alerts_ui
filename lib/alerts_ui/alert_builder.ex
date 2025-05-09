@@ -303,13 +303,13 @@ defmodule AlertsUI.AlertBuilder do
     end)
   end
 
-  defp filter_route_pattern_stops(stops, parent_stop_ids, route_type) do
+  defp filter_route_pattern_stops(stops, parent_stop_ids, _route_type) do
     # for other modes, keep stops from route pattern whose
     # parent is in our list of parent ids
+    # we were formerly checking that the stop vehicle type == the route type
     stops
     |> Enum.filter(fn stop ->
-      stop.parent_id in parent_stop_ids and
-        stop.vehicle_type == route_type
+      stop.parent_id in parent_stop_ids
     end)
   end
 

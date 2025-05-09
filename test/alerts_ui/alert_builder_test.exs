@@ -542,9 +542,9 @@ defmodule AlertsUI.AlertBuilderTest do
       parent_stops = [%Stop{id: "a"}, %Stop{id: "b"}, %Stop{id: "c"}]
 
       child_stops = [
-        %Stop{id: "1", parent_id: "a", vehicle_type: 3},
-        %Stop{id: "2", parent_id: "b", vehicle_type: 3},
-        %Stop{id: "3", parent_id: "c", vehicle_type: 3}
+        %Stop{id: "1", parent_id: "a"},
+        %Stop{id: "2", parent_id: "b"},
+        %Stop{id: "3", parent_id: "c"}
       ]
 
       with_mocks([
@@ -656,19 +656,16 @@ defmodule AlertsUI.AlertBuilderTest do
       child_stops = [
         %Stop{
           id: "WR-0067-01",
-          parent_id: "place-WR-0067",
-          vehicle_type: 2
+          parent_id: "place-WR-0067"
         },
         %Stop{
           id: "WR-0075-01",
-          parent_id: "place-WR-0075",
-          vehicle_type: 2
+          parent_id: "place-WR-0075"
         },
         # Intentional duplicate
         %Stop{
           id: "WR-0075-01",
-          parent_id: "place-WR-0075",
-          vehicle_type: 2
+          parent_id: "place-WR-0075"
         }
       ]
 
@@ -727,17 +724,17 @@ defmodule AlertsUI.AlertBuilderTest do
       ]
 
       child_stops_0 = [
-        %Stop{id: "alfcl-child", parent_id: "place-alfcl", vehicle_type: 1},
-        %Stop{id: "davis-child-0", parent_id: "place-davis", vehicle_type: 1},
-        %Stop{id: "portr-child-0", parent_id: "place-portr", vehicle_type: 1},
-        %Stop{id: "harsq-child-0", parent_id: "place-harsq", vehicle_type: 1}
+        %Stop{id: "alfcl-child", parent_id: "place-alfcl"},
+        %Stop{id: "davis-child-0", parent_id: "place-davis"},
+        %Stop{id: "portr-child-0", parent_id: "place-portr"},
+        %Stop{id: "harsq-child-0", parent_id: "place-harsq"}
       ]
 
       child_stops_1 = [
-        %Stop{id: "harsq-child-1", parent_id: "place-harsq", vehicle_type: 1},
-        %Stop{id: "portr-child-1", parent_id: "place-portr", vehicle_type: 1},
-        %Stop{id: "davis-child-1", parent_id: "place-davis", vehicle_type: 1},
-        %Stop{id: "alfcl-child", parent_id: "place-alfcl", vehicle_type: 1}
+        %Stop{id: "harsq-child-1", parent_id: "place-harsq"},
+        %Stop{id: "portr-child-1", parent_id: "place-portr"},
+        %Stop{id: "davis-child-1", parent_id: "place-davis"},
+        %Stop{id: "alfcl-child", parent_id: "place-alfcl"}
       ]
 
       with_mocks([
@@ -832,9 +829,9 @@ defmodule AlertsUI.AlertBuilderTest do
       parent_stops = [%Stop{id: "a"}, %Stop{id: "b"}, %Stop{id: "c"}]
 
       child_stops = [
-        %Stop{id: "1", parent_id: "a", vehicle_type: 3},
-        %Stop{id: "2", parent_id: "b", vehicle_type: 3},
-        %Stop{id: "3", parent_id: "c", vehicle_type: 3}
+        %Stop{id: "1", parent_id: "a"},
+        %Stop{id: "2", parent_id: "b"},
+        %Stop{id: "3", parent_id: "c"}
       ]
 
       with_mocks([
@@ -893,9 +890,9 @@ defmodule AlertsUI.AlertBuilderTest do
       ashmont = %Stop{id: "place-asmnl"}
       braintree = %Stop{id: "place-brntn"}
 
-      jfk_child = %Stop{id: "jfk-child", parent_id: jfk.id, vehicle_type: 1}
-      ashmont_child = %Stop{id: "ashmont-child", parent_id: ashmont.id, vehicle_type: 1}
-      braintree_child = %Stop{id: "braintree-child", parent_id: braintree.id, vehicle_type: 1}
+      jfk_child = %Stop{id: "jfk-child", parent_id: jfk.id}
+      ashmont_child = %Stop{id: "ashmont-child", parent_id: ashmont.id}
+      braintree_child = %Stop{id: "braintree-child", parent_id: braintree.id}
 
       alert_data = %{
         route_type: 1,
@@ -1009,9 +1006,9 @@ defmodule AlertsUI.AlertBuilderTest do
       ashmont = %Stop{id: "place-asmnl"}
       braintree = %Stop{id: "place-brntn"}
 
-      jfk_child = %Stop{id: "jfk-child", parent_id: jfk.id, vehicle_type: 1}
-      ashmont_child = %Stop{id: "ashmont-child", parent_id: ashmont.id, vehicle_type: 1}
-      braintree_child = %Stop{id: "braintree-child", parent_id: braintree.id, vehicle_type: 1}
+      jfk_child = %Stop{id: "jfk-child", parent_id: jfk.id}
+      ashmont_child = %Stop{id: "ashmont-child", parent_id: ashmont.id}
+      braintree_child = %Stop{id: "braintree-child", parent_id: braintree.id}
 
       alert_data = %{
         route_type: 1,
@@ -1108,9 +1105,9 @@ defmodule AlertsUI.AlertBuilderTest do
       kenmore = %Stop{id: "place-kencl"}
       fenway = %Stop{id: "place-fenwy"}
 
-      hynes_child = %Stop{id: "hynes-child", parent_id: hynes.id, vehicle_type: 1}
-      kenmore_child = %Stop{id: "kenmore-child", parent_id: kenmore.id, vehicle_type: 1}
-      fenway_child = %Stop{id: "fenway-child", parent_id: fenway.id, vehicle_type: 1}
+      hynes_child = %Stop{id: "hynes-child", parent_id: hynes.id}
+      kenmore_child = %Stop{id: "kenmore-child", parent_id: kenmore.id}
+      fenway_child = %Stop{id: "fenway-child", parent_id: fenway.id}
 
       alert_data = %{
         route_type: 1,
@@ -1693,15 +1690,15 @@ defmodule AlertsUI.AlertBuilderTest do
       }
 
       parent_stops = [
-        %Stop{id: "a", vehicle_type: 3},
-        %Stop{id: "b", vehicle_type: 3},
-        %Stop{id: "c", vehicle_type: 3}
+        %Stop{id: "a"},
+        %Stop{id: "b"},
+        %Stop{id: "c"}
       ]
 
       child_stops = [
-        %Stop{id: "1", parent_id: "a", vehicle_type: 3},
-        %Stop{id: "2", parent_id: "b", vehicle_type: 3},
-        %Stop{id: "3", parent_id: "c", vehicle_type: 3}
+        %Stop{id: "1", parent_id: "a"},
+        %Stop{id: "2", parent_id: "b"},
+        %Stop{id: "3", parent_id: "c"}
       ]
 
       with_mocks([
@@ -1801,24 +1798,20 @@ defmodule AlertsUI.AlertBuilderTest do
       child_stops = [
         %Stop{
           id: "FR-0201-01",
-          parent_id: "place-FR-0201",
-          vehicle_type: 2
+          parent_id: "place-FR-0201"
         },
         %Stop{
           id: "FR-0219-01",
-          parent_id: "place-FR-0219",
-          vehicle_type: 2
+          parent_id: "place-FR-0219"
         },
         # Intentional duplicates
         %Stop{
           id: "FR-0201-01",
-          parent_id: "place-FR-0201",
-          vehicle_type: 2
+          parent_id: "place-FR-0201"
         },
         %Stop{
           id: "FR-0219-01",
-          parent_id: "place-FR-0219",
-          vehicle_type: 2
+          parent_id: "place-FR-0219"
         }
       ]
 
@@ -2092,13 +2085,13 @@ defmodule AlertsUI.AlertBuilderTest do
       parent_stops = [%Stop{id: "place-FR-0201"}, %Stop{id: "place-FR-0219"}]
 
       child_stops_0 = [
-        %Stop{id: "FR-0201-01", parent_id: "place-FR-0201", vehicle_type: 2},
-        %Stop{id: "FR-0219-01", parent_id: "place-FR-0219", vehicle_type: 2}
+        %Stop{id: "FR-0201-01", parent_id: "place-FR-0201"},
+        %Stop{id: "FR-0219-01", parent_id: "place-FR-0219"}
       ]
 
       child_stops_1 = [
-        %Stop{id: "FR-0219-02", parent_id: "place-FR-0219", vehicle_type: 2},
-        %Stop{id: "FR-0201-02", parent_id: "place-FR-0201", vehicle_type: 2}
+        %Stop{id: "FR-0219-02", parent_id: "place-FR-0219"},
+        %Stop{id: "FR-0201-02", parent_id: "place-FR-0201"}
       ]
 
       with_mocks([
@@ -2312,9 +2305,9 @@ defmodule AlertsUI.AlertBuilderTest do
       kenmore = %Stop{id: "place-kencl"}
       fenway = %Stop{id: "place-fenwy"}
 
-      hynes_child = %Stop{id: "hynes-child", parent_id: "place-hymnl", vehicle_type: 0}
-      kenmore_child = %Stop{id: "kenmore-child", parent_id: "place-kencl", vehicle_type: 0}
-      fenway_child = %Stop{id: "fenway-child", parent_id: "place-fenwy", vehicle_type: 0}
+      hynes_child = %Stop{id: "hynes-child", parent_id: "place-hymnl"}
+      kenmore_child = %Stop{id: "kenmore-child", parent_id: "place-kencl"}
+      fenway_child = %Stop{id: "fenway-child", parent_id: "place-fenwy"}
       child_stops = [hynes_child, kenmore_child, fenway_child]
 
       with_mocks([
@@ -2412,14 +2405,12 @@ defmodule AlertsUI.AlertBuilderTest do
       child_stops = [
         %Stop{
           id: "PB-0194-S",
-          parent_id: "place-PB-0194",
-          vehicle_type: 2
+          parent_id: "place-PB-0194"
         },
         # Intentional duplicate
         %Stop{
           id: "PB-0194-S",
-          parent_id: "place-PB-0194",
-          vehicle_type: 2
+          parent_id: "place-PB-0194"
         }
       ]
 
