@@ -41,8 +41,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
           cause_detail: String.t(),
           start_specifier: atom() | nil,
           end_specifier: atom() | nil,
-          start_datetime: DateTime.t() | nil,
-          end_datetime: DateTime.t() | nil,
+          start_datetime: NaiveDateTime.t() | nil,
+          end_datetime: NaiveDateTime.t() | nil,
           start_date: Date.t() | nil,
           end_date: Date.t() | nil,
           start_time: Time.t() | nil,
@@ -272,18 +272,18 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   defp route_word(_routes), do: "Routes "
 
   # formatters
-  defp join_together(nil), do: ""
-  defp join_together([]), do: ""
+  def join_together(nil), do: ""
+  def join_together([]), do: ""
 
-  defp join_together([thing]) do
+  def join_together([thing]) do
     thing
   end
 
-  defp join_together([_, _] = things) do
+  def join_together([_, _] = things) do
     Enum.join(things, " and ")
   end
 
-  defp join_together(things) do
+  def join_together(things) do
     things
     |> List.replace_at(-1, "and " <> List.last(things))
     |> Enum.join(", ")
