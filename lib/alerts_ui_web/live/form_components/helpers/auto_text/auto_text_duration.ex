@@ -24,7 +24,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
       ) do
     starts_today? = starts_today?(start_datetime, current_time)
     ends_today? = starts_today?(end_datetime, current_time)
-    start_and_end_same_day? = start_and_end_same_day?(start_datetime, end_datetime)
+
+    start_and_end_same_service_day? =
+      start_and_end_same_service_day?(start_datetime, end_datetime)
+
+    less_than_24_hours_apart? = less_than_24_hours_apart?(start_datetime, end_datetime)
 
     build_onetime_string(%{
       start_datetime: start_datetime,
@@ -33,7 +37,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
       end_specifier: end_specifier,
       starts_today?: starts_today?,
       ends_today?: ends_today?,
-      start_and_end_same_day?: start_and_end_same_day?
+      start_and_end_same_service_day?: start_and_end_same_service_day?,
+      less_than_24_hours_apart?: less_than_24_hours_apart?
     })
   end
 
@@ -86,7 +91,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         end_specifier: :end_of_service,
         ends_today?: false
       }) do
-    "through #{format_date(end_datetime)}"
+    "through #{datetime_to_formatted_date(end_datetime)}"
   end
 
   def build_onetime_string(%{
@@ -95,7 +100,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         end_specifier: :custom,
         ends_today?: false
       }) do
-    "until #{format_date(end_datetime)}"
+    "until #{datetime_to_formatted_date(end_datetime)}"
   end
 
   # # start of "custom" today
@@ -122,7 +127,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         start_specifier: :custom,
         end_specifier: :end_of_service,
         starts_today?: true,
-        start_and_end_same_day?: true
+        start_and_end_same_service_day?: true
       }) do
     "from #{datetime_to_formatted_time(start_datetime)} to end of service"
   end
@@ -133,9 +138,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         start_specifier: :custom,
         end_specifier: :end_of_service,
         starts_today?: true,
-        start_and_end_same_day?: false
+        start_and_end_same_service_day?: false
       }) do
-    "from #{datetime_to_formatted_time(start_datetime)} through #{format_date(end_datetime)}"
+    formatted_end = end_datetime |> ActivePeriod.naive_datetime_to_service_date() |> format_date
+    "from #{datetime_to_formatted_time(start_datetime)} through #{formatted_end}"
   end
 
   def build_onetime_string(%{
@@ -144,7 +150,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         start_specifier: :custom,
         end_specifier: :custom,
         starts_today?: true,
-        start_and_end_same_day?: true
+        start_and_end_same_service_day?: true
       }) do
     "from #{datetime_to_formatted_time(start_datetime)} to #{datetime_to_formatted_time(end_datetime)}"
   end
@@ -155,9 +161,132 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         start_specifier: :custom,
         end_specifier: :custom,
         starts_today?: true,
-        start_and_end_same_day?: false
+        start_and_end_same_service_day?: false
       }) do
-    "from #{datetime_to_formatted_time(start_datetime)} today to #{format_date(end_datetime)} at #{datetime_to_formatted_time(end_datetime)}"
+    "from #{datetime_to_formatted_time(start_datetime)} today to #{datetime_to_formatted_date(end_datetime)} at #{datetime_to_formatted_time(end_datetime)}"
+  end
+
+  # # start of custom in future
+
+  def build_onetime_string(%{
+        start_datetime: start_datetime,
+        end_datetime: end_datetime,
+        start_specifier: :custom,
+        end_specifier: :custom,
+        starts_today?: false,
+        start_and_end_same_service_day?: false
+      }) do
+    "from #{datetime_to_formatted_date(start_datetime)} at #{datetime_to_formatted_time(start_datetime)} - #{datetime_to_formatted_date(end_datetime)} at #{datetime_to_formatted_time(end_datetime)}"
+  end
+
+  def build_onetime_string(%{
+        start_datetime: start_datetime,
+        end_datetime: end_datetime,
+        start_specifier: :custom,
+        end_specifier: :end_of_service,
+        starts_today?: false,
+        start_and_end_same_service_day?: false
+      }) do
+    formatted_end_date =
+      end_datetime |> ActivePeriod.naive_datetime_to_service_date() |> format_date
+
+    "from #{datetime_to_formatted_date(start_datetime)} at #{datetime_to_formatted_time(start_datetime)} - #{formatted_end_date}"
+  end
+
+  def build_onetime_string(%{
+        start_datetime: start_datetime,
+        start_specifier: :custom,
+        end_specifier: :until_further_notice,
+        starts_today?: false,
+        start_and_end_same_service_day?: false
+      }) do
+    "beginning #{datetime_to_formatted_date(start_datetime)} at #{datetime_to_formatted_time(start_datetime)}"
+  end
+
+  def build_onetime_string(%{
+        start_datetime: start_datetime,
+        end_datetime: end_datetime,
+        start_specifier: :custom,
+        end_specifier: :custom,
+        starts_today?: false,
+        start_and_end_same_service_day?: true
+      }) do
+    "from #{datetime_to_formatted_time(start_datetime)} to #{datetime_to_formatted_time(end_datetime)} on #{datetime_to_formatted_date(start_datetime)}"
+  end
+
+  def build_onetime_string(%{
+        start_datetime: start_datetime,
+        start_specifier: :custom,
+        end_specifier: :end_of_service,
+        starts_today?: false,
+        start_and_end_same_service_day?: true
+      }) do
+    "on #{datetime_to_formatted_date(start_datetime)} starting at #{datetime_to_formatted_time(start_datetime)}"
+  end
+
+  # # start of "start of service" in future
+  def build_onetime_string(%{
+        start_datetime: start_datetime,
+        start_specifier: :start_of_service,
+        end_specifier: :end_of_service,
+        starts_today?: false,
+        less_than_24_hours_apart?: true
+      }) do
+    "on #{datetime_to_formatted_date(start_datetime)}"
+  end
+
+  def build_onetime_string(%{
+        start_datetime: start_datetime,
+        start_specifier: :start_of_service,
+        end_specifier: :until_further_notice,
+        starts_today?: false,
+        start_and_end_same_service_day?: false
+      }) do
+    "beginning #{datetime_to_formatted_date(start_datetime)}"
+  end
+
+  def build_onetime_string(%{
+        start_datetime: start_datetime,
+        end_datetime: end_datetime,
+        start_specifier: :start_of_service,
+        end_specifier: :end_of_service,
+        starts_today?: false,
+        start_and_end_same_service_day?: false
+      }) do
+    start_weekday = start_datetime |> NaiveDateTime.to_date() |> Timex.weekday()
+    end_weekday = end_datetime |> ActivePeriod.naive_datetime_to_service_date() |> Timex.weekday()
+
+    formatted_end_date =
+      end_datetime |> ActivePeriod.naive_datetime_to_service_date() |> format_date
+
+    if {start_weekday, end_weekday} == {6, 7} do
+      "the weekend of #{datetime_to_formatted_date(start_datetime)} - #{formatted_end_date}"
+    else
+      "from #{datetime_to_formatted_date(start_datetime)} - #{formatted_end_date}"
+    end
+  end
+
+  def build_onetime_string(%{
+        start_datetime: start_datetime,
+        end_datetime: end_datetime,
+        start_specifier: :start_of_service,
+        end_specifier: :custom,
+        starts_today?: false,
+        start_and_end_same_service_day?: false,
+        less_than_24_hours_apart?: true
+      }) do
+    "on #{datetime_to_formatted_date(start_datetime)} until #{datetime_to_formatted_time(end_datetime)}"
+  end
+
+  def build_onetime_string(%{
+        start_datetime: start_datetime,
+        end_datetime: end_datetime,
+        start_specifier: :start_of_service,
+        end_specifier: :custom,
+        starts_today?: false,
+        start_and_end_same_service_day?: false
+      }) do
+    "from #{datetime_to_formatted_date(start_datetime)} - #{datetime_to_formatted_date(end_datetime)} at #{datetime_to_formatted_time(end_datetime)}"
   end
 
   def build_onetime_string(_), do: ""
@@ -190,7 +319,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
 
   # date strings for recurring
   def build_date_string(start_datetime, end_datetime, false) do
-    "from #{format_date(start_datetime)} to #{end_date_string(end_datetime, false)}"
+    "from #{datetime_to_formatted_date(start_datetime)} to #{end_date_string(end_datetime, false)}"
   end
 
   def build_date_string(_start_datetime, end_datetime, true) do
@@ -199,7 +328,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
 
   defp end_date_string(nil, false), do: "until further notice"
   defp end_date_string(nil, true), do: "further notice"
-  defp end_date_string(end_datetime, _), do: format_date(end_datetime)
+  defp end_date_string(end_datetime, _), do: datetime_to_formatted_date(end_datetime)
 
   def starts_today?(nil, _), do: false
 
@@ -238,14 +367,21 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
   end
 
   # helpers
-  defp start_and_end_same_day?(nil, _), do: false
-  defp start_and_end_same_day?(_, nil), do: false
+  defp start_and_end_same_service_day?(nil, _), do: false
+  defp start_and_end_same_service_day?(_, nil), do: false
 
-  defp start_and_end_same_day?(start_datetime, end_datetime) do
-    start_ = start_datetime |> ActivePeriod.end_of_service_datetime_naive()
-    end_ = end_datetime |> ActivePeriod.end_of_service_datetime_naive()
+  defp start_and_end_same_service_day?(start_datetime, end_datetime) do
+    start = start_datetime |> ActivePeriod.naive_datetime_to_service_date()
+    end_ = end_datetime |> ActivePeriod.naive_datetime_to_service_date()
 
-    NaiveDateTime.compare(start_, end_) === :eq
+    Date.compare(start, end_) === :eq
+  end
+
+  defp less_than_24_hours_apart?(nil, _), do: false
+  defp less_than_24_hours_apart?(_, nil), do: false
+
+  defp less_than_24_hours_apart?(start_datetime, end_datetime) do
+    NaiveDateTime.diff(end_datetime, start_datetime, :hour) <= 24
   end
 
   defp datetime_to_formatted_time(datetime) do
@@ -256,6 +392,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
     Timex.format!(time, "{h12}:{0m} {AM}")
   end
 
-  defp format_date(datetime),
-    do: Timex.format!(NaiveDateTime.to_date(datetime), "{WDshort}, {Mshort} {0D}")
+  defp datetime_to_formatted_date(datetime) do
+    datetime |> NaiveDateTime.to_date() |> format_date
+  end
+
+  defp format_date(date) do
+    Timex.format!(date, "{WDshort}, {Mshort} {D}")
+  end
 end
