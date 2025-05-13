@@ -272,7 +272,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         start_specifier: :start_of_service,
         end_specifier: :custom,
         starts_today?: false,
-        start_and_end_same_service_day?: false,
         less_than_24_hours_apart?: true
       }) do
     "on #{datetime_to_formatted_date(start_datetime)} until #{datetime_to_formatted_time(end_datetime)}"
@@ -370,6 +369,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
   defp start_and_end_same_service_day?(nil, _), do: false
   defp start_and_end_same_service_day?(_, nil), do: false
 
+  # returns true if start and end are part of the same service day
   defp start_and_end_same_service_day?(start_datetime, end_datetime) do
     start = start_datetime |> ActivePeriod.naive_datetime_to_service_date()
     end_ = end_datetime |> ActivePeriod.naive_datetime_to_service_date()
@@ -377,6 +377,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
     Date.compare(start, end_) === :eq
   end
 
+  # returns true if start and end are 24 hours or less apart,
+  # regardless if they're the same service say or not
   defp less_than_24_hours_apart?(nil, _), do: false
   defp less_than_24_hours_apart?(_, nil), do: false
 
