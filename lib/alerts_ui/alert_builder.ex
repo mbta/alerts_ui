@@ -175,16 +175,23 @@ defmodule AlertsUI.AlertBuilder do
     selected_routes
     |> Enum.flat_map(fn original_route ->
       if Map.get(original_route, :line_id) in ["", nil] do
-        [original_route]
+        []
       else
-        line = LinesRepo.get(original_route.line_id, [])
-
-        # filter out shuttle routes unless they were part of the original selection
-        Enum.filter(line.routes, &(&1.description !== :rail_replacement_bus)) ++
-          [original_route]
-      end
+        original_route.line_id
+       |> LinesRepo.get([])
+       |> filtered_combo_routes()
+      end ++ [original_route]
     end)
     |> Enum.uniq()
+  end
+
+  # excepting green line to keep it from pulling in all green line routes
+  # when any is selected
+  defp filtered_combo_routes(%{id: "line-Green"} = _line), do: []
+
+  defp filtered_combo_routes(line) do
+    # filter out shuttle routes unless they were part of the original selection
+    Enum.filter(line.routes, &(&1.description !== :rail_replacement_bus))
   end
 
   @spec child_stops_with_context([Route.id_t()], String.t(), [Stop.id_t()]) ::

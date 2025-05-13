@@ -237,6 +237,61 @@ defmodule AlertsUI.AlertBuilderTest do
       end
     end
 
+    test "it does not add combo IDs for the green line" do
+      with_mocks([
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _route_id, _opts -> [] end
+         ]},
+        {RoutesRepo, [],
+         [
+           get: fn
+             "Green-D", _opts ->
+               %Route{id: "Green-D", line_id: "line-Green", type: 1, description: :rapid_transit}
+           end
+         ]},
+        {LinesRepo, [],
+         [
+           get: fn
+             "line-Green", _opts ->
+               %Line{
+                 id: "line-Green",
+                 route_ids: ["Green-B", "Green-C", "Green-D"],
+                 routes: [
+                   %Route{id: "Green-B", line_id: "line-Green", type: 1, description: :rapid_transit},
+                   %Route{id: "Green-C", line_id: "line-Green", type: 1, description: :rapid_transit},
+                   %Route{id: "Green-D", line_id: "line-Green", type: 1, description: :rapid_transit},
+                 ]
+               }
+           end
+         ]}
+      ]) do
+
+        alert_data = %{
+          route_type: 1,
+          header_text: "header",
+          effect_name: "Delay",
+          route_ids: ["Green-D"],
+          direction: "default",
+          active_period_start: ~N[2024-04-30 11:54:00],
+          active_period_end_specifier: :until_further_notice,
+          active_period_start_specifier: :custom,
+          cause_detail: ""
+        }
+
+        result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 05:54:00Z])
+
+        assert result.informed_entity == [ %{
+          agency_id: "1",
+          route_id: "Green-D",
+          route_type: 1,
+          activities: [:BOARD, :EXIT, :RIDE]
+        }]
+      end
+    end
+
+
+
     test "it does not filter out shuttle routes if they were part of the original selection" do
       with_mocks([
         {RoutePatternsRepo, [],
