@@ -178,8 +178,8 @@ defmodule AlertsUI.AlertBuilder do
         []
       else
         original_route.line_id
-       |> LinesRepo.get([])
-       |> filtered_combo_routes()
+        |> LinesRepo.get([])
+        |> filtered_combo_routes()
       end ++ [original_route]
     end)
     |> Enum.uniq()

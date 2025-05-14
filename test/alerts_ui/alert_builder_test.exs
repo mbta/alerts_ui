@@ -258,15 +258,29 @@ defmodule AlertsUI.AlertBuilderTest do
                  id: "line-Green",
                  route_ids: ["Green-B", "Green-C", "Green-D"],
                  routes: [
-                   %Route{id: "Green-B", line_id: "line-Green", type: 1, description: :rapid_transit},
-                   %Route{id: "Green-C", line_id: "line-Green", type: 1, description: :rapid_transit},
-                   %Route{id: "Green-D", line_id: "line-Green", type: 1, description: :rapid_transit},
+                   %Route{
+                     id: "Green-B",
+                     line_id: "line-Green",
+                     type: 1,
+                     description: :rapid_transit
+                   },
+                   %Route{
+                     id: "Green-C",
+                     line_id: "line-Green",
+                     type: 1,
+                     description: :rapid_transit
+                   },
+                   %Route{
+                     id: "Green-D",
+                     line_id: "line-Green",
+                     type: 1,
+                     description: :rapid_transit
+                   }
                  ]
                }
            end
          ]}
       ]) do
-
         alert_data = %{
           route_type: 1,
           header_text: "header",
@@ -281,16 +295,16 @@ defmodule AlertsUI.AlertBuilderTest do
 
         result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 05:54:00Z])
 
-        assert result.informed_entity == [ %{
-          agency_id: "1",
-          route_id: "Green-D",
-          route_type: 1,
-          activities: [:BOARD, :EXIT, :RIDE]
-        }]
+        assert result.informed_entity == [
+                 %{
+                   agency_id: "1",
+                   route_id: "Green-D",
+                   route_type: 1,
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 }
+               ]
       end
     end
-
-
 
     test "it does not filter out shuttle routes if they were part of the original selection" do
       with_mocks([
