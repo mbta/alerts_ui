@@ -301,12 +301,13 @@ defmodule AlertsUIWeb.CreateAlertLive do
     {:noreply, assign(socket, assigns)}
   end
 
-  def handle_info(:create_alert, socket) do
+  def handle_info(:show_errors, socket) do
     errors = Map.values(socket.assigns.errors) |> List.flatten()
 
     socket =
       if Enum.empty?(errors) do
-        create_alert(socket)
+        send_update(Submit, id: "submit", show: true)
+        socket
       else
         formatted_errors =
           errors
@@ -323,7 +324,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
     {:noreply, socket}
   end
 
-  defp create_alert(socket) do
+  def handle_info(:create_alert, socket) do
     alert_map =
       socket.assigns.alert_data
       |> AlertBuilder.build_alert(socket.assigns.combination)
@@ -335,26 +336,29 @@ defmodule AlertsUIWeb.CreateAlertLive do
         Alerts.get_by_alert_id(socket.assigns.alert_id)
       end
 
-    alert_map
-    |> Alerts.create_or_update_alert(existing_alert)
-    |> case do
-      {:ok, alert} ->
-        assigns = %{
-          progress: get_step_by_name(socket.assigns.progress.next),
-          alert_data: %{},
-          alert_uuid: alert.id
-        }
+    socket =
+      alert_map
+      |> Alerts.create_or_update_alert(existing_alert)
+      |> case do
+        {:ok, alert} ->
+          assigns = %{
+            progress: get_step_by_name(socket.assigns.progress.next),
+            alert_data: %{},
+            alert_uuid: alert.id
+          }
 
-        assign(socket, assigns)
+          assign(socket, assigns)
 
-      {:error, result} ->
-        errors =
-          result
-          |> Alerts.parse_changeset_errors()
-          |> format_errors(socket.assigns.combination)
+        {:error, result} ->
+          errors =
+            result
+            |> Alerts.parse_changeset_errors()
+            |> format_errors(socket.assigns.combination)
 
-        display_errors(socket, errors)
-    end
+          display_errors(socket, errors)
+      end
+
+    {:noreply, socket}
   end
 
   defp display_errors(socket, errors) do

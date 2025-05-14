@@ -198,8 +198,8 @@ defmodule AlertsUIWeb.SharedComponents do
       bg-primary
       border-primary
       border-2
-      px-1
-      py-3
+      px-3
+      py-2
       rounded-md
       hover:bg-primary-hover
       hover:border-primary-border-hover
@@ -240,8 +240,8 @@ defmodule AlertsUIWeb.SharedComponents do
       border
       border-primary
       border-2
-      px-1
-      py-3
+      px-3
+      py-2
       rounded-md
       hover:bg-secondary-hover
       active:bg-secondary-active
@@ -517,16 +517,25 @@ defmodule AlertsUIWeb.SharedComponents do
           <div class="min-w-[20rem] w-[25%] sm:p-6 lg:py-8">
             <.focus_wrap
               id={"#{@id}-container"}
-              phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
+              phx-window-keydown={
+                JS.push(@cancel_event_name, target: @target_id)
+                |> JS.exec("data-cancel", to: "##{@id}")
+              }
               phx-key="escape"
-              phx-click-away={JS.exec("data-cancel", to: "##{@id}")}
+              phx-click-away={
+                JS.push(@cancel_event_name, target: @target_id)
+                |> JS.exec("data-cancel", to: "##{@id}")
+              }
               class="shadow-zinc-700/10 ring-zinc-700/10 relative hidden rounded-md bg-bg-elevation-4 border-1 border-bg-elevation-6 shadow-lg ring-1 transition
               min-h-[25rem] border border-bg-elevation-6"
             >
               <div class="flex flex-row justify-between px-4 py-4">
                 <h1 class="font-sm text-xl">{@header_text}</h1>
                 <button
-                  phx-click={JS.exec("data-cancel", to: "##{@id}")}
+                  phx-click={
+                    JS.push(@cancel_event_name, target: @target_id)
+                    |> JS.exec("data-cancel", to: "##{@id}")
+                  }
                   type="button"
                   class="opacity-20 hover:opacity-40"
                   aria-label={gettext("close")}
@@ -542,7 +551,6 @@ defmodule AlertsUIWeb.SharedComponents do
               <div class="flex flex-row justify-end px-4 py-4 gap-2">
                 <.button_secondary
                   :if={@cancel_event_name}
-                  class="w-24"
                   type="button"
                   phx-remove={hide_modal(@id)}
                   phx-click={JS.push(@cancel_event_name, target: @target_id) |> JS.exec("phx-remove")}
@@ -551,7 +559,6 @@ defmodule AlertsUIWeb.SharedComponents do
                 </.button_secondary>
                 <.button_primary
                   :if={@accept_event_name}
-                  class="w-24"
                   type="button"
                   phx-remove={hide_modal(@id)}
                   phx-click={JS.push(@accept_event_name, target: @target_id) |> JS.exec("phx-remove")}
@@ -574,7 +581,13 @@ defmodule AlertsUIWeb.SharedComponents do
       to: "##{id}-bg",
       transition: {"transition-all transform ease-out duration-300", "opacity-0", "opacity-100"}
     )
-    |> show("##{id}-container")
+    |> JS.show(
+      to: "##{id}-container",
+      transition:
+        {"transition-all transform ease-out duration-300",
+         "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95",
+         "opacity-100 translate-y-0 sm:scale-100"}
+    )
     |> JS.add_class("overflow-hidden", to: "body")
     |> JS.focus_first(to: "##{id}-content")
   end
@@ -585,31 +598,17 @@ defmodule AlertsUIWeb.SharedComponents do
       to: "##{id}-bg",
       transition: {"transition-all transform ease-in duration-200", "opacity-100", "opacity-0"}
     )
-    |> hide("##{id}-container")
-    |> JS.hide(to: "##{id}", transition: {"block", "block", "hidden"})
-    |> JS.remove_class("overflow-hidden", to: "body")
-    |> JS.pop_focus()
-  end
-
-  def show(js \\ %JS{}, selector) do
-    JS.show(js,
-      to: selector,
-      transition:
-        {"transition-all transform ease-out duration-300",
-         "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95",
-         "opacity-100 translate-y-0 sm:scale-100"}
-    )
-  end
-
-  def hide(js \\ %JS{}, selector) do
-    JS.hide(js,
-      to: selector,
+    |> JS.hide(
+      to: "##{id}-container",
       time: 200,
       transition:
         {"transition-all transform ease-in duration-200",
          "opacity-100 translate-y-0 sm:scale-100",
          "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"}
     )
+    |> JS.hide(to: "##{id}", transition: {"block", "block", "hidden"})
+    |> JS.remove_class("overflow-hidden", to: "body")
+    |> JS.pop_focus()
   end
 
   @doc """
