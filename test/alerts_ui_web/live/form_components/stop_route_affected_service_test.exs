@@ -451,7 +451,11 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         })
 
         view
-        |> element("button#save", "Review and submit")
+        |> element("button#review", "Review and submit")
+        |> render_click()
+
+        view
+        |> element("button", "Submit")
         |> render_click()
 
         assert [%{route_id: "Blue"}, %{route_id: "Bluer"}] =
@@ -526,7 +530,11 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         })
 
         view
-        |> element("button#save", "Review and submit")
+        |> element("button#review", "Review and submit")
+        |> render_click()
+
+        view
+        |> element("button", "Submit")
         |> render_click()
 
         assert [%{route_id: "Bluer"}] = parse_entities_from_alert_created_output(view)
@@ -566,7 +574,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         })
 
         view
-        |> element("button#save", "Review and submit")
+        |> element("button#review", "Review and submit")
         |> render_click()
 
         # Inline

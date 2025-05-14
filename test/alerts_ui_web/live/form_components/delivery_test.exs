@@ -86,7 +86,7 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
     })
 
     view
-    |> element("#save")
+    |> element("button#review", "Review and submit")
     |> render_click()
 
     refute view
