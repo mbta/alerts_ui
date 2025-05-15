@@ -211,12 +211,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
     StopsRepo.by_route_type(route_type, []) |> Enum.sort_by(&String.downcase(&1.name))
   end
 
-  def get_stops(route_ids, route_type, nil) do
-    # used with route filter in SR combination
-    available_stops([0, 1], route_ids, route_type)
-  end
-
   def get_stops(["Green"] = route_ids, _route_type, direction) do
+    # used in non stop-route combinations, green line
     route_ids = Routes.expanding_green_line(route_ids) |> Enum.reverse()
 
     stops =
@@ -235,12 +231,12 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   def get_stops(route_ids, route_type, direction) do
+    # used in non stop-route combinations
+    # and for the route filter in stop-route combination
     direction
     |> directions_from_selection()
     |> available_stops(route_ids, route_type)
   end
-
-  # def get_stops(route_id, route_type, direction \\ nil)
 
   def get_routes_by_stop(stop_ids, 3) do
     Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1, "filter[type]": 3))
