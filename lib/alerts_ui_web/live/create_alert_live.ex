@@ -213,9 +213,9 @@ defmodule AlertsUIWeb.CreateAlertLive do
     |> available_stops(route_ids, route_type)
   end
 
-  def get_stops_for_stop_route(route_type, route_id \\ nil)
+  # def get_stops_for_stop_route(route_id, route_type)
 
-  def get_stops_for_stop_route(3, nil) do
+  def get_stops_for_stop_route(nil, 3) do
     # used for stop-route combination, bus mode.
 
     # direction filtering does nothing if a route id is not
@@ -232,12 +232,12 @@ defmodule AlertsUIWeb.CreateAlertLive do
     |> Enum.sort_by(&String.downcase(&1.name))
   end
 
-  def get_stops_for_stop_route(route_type, nil) do
+  def get_stops_for_stop_route(nil, route_type) do
     # used for stop-route combination, other modes
     StopsRepo.by_route_type(route_type, []) |> Enum.sort_by(&String.downcase(&1.name))
   end
 
-  def get_stops_for_stop_route(route_type, route_id) do
+  def get_stops_for_stop_route(route_id, route_type) do
     # used with route filter in SR combination
     available_stops([0, 1], [route_id], route_type)
   end
