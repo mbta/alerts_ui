@@ -51,9 +51,15 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
   }
 
   describe "build_header_auto_text/1" do
+    test "builds auto text for header" do
+      assert BuildAutoText.build_header_auto_text(%BuildAutoText{}) == ""
+    end
   end
 
   describe "build_description_auto_text/1" do
+    test "builds auto text for description" do
+      assert BuildAutoText.build_description_auto_text(%BuildAutoText{}) == ""
+    end
   end
 
   describe "cause/1" do

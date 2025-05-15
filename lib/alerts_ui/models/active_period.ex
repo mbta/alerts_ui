@@ -159,7 +159,7 @@ defmodule AlertsUI.Models.ActivePeriod do
 
   @spec naive_datetime_to_service_date(NaiveDateTime.t()) :: Date.t()
   def naive_datetime_to_service_date(naive_datetime) do
-    # returns "service date" for datetime- eg 2 am on 1/1/2025 will return 12/31/2024
+    # returns "service date" for naive datetime- eg 2 am on 1/1/2025 will return 12/31/2024
     # frontend only!
     time = NaiveDateTime.to_time(naive_datetime)
     date = NaiveDateTime.to_date(naive_datetime)

@@ -35,7 +35,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
           schedules: [EnhancedSchedule.t()],
           facility: Facility.t() | nil,
           service_types: [integer()],
-          # may need to use `CreateAlertLive.directions_from_selection` to get this
           direction: [integer()],
           severity: integer() | nil,
           cause_detail: String.t(),
@@ -82,12 +81,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
 
   @spec build_header_auto_text(__MODULE__.t()) :: String.t()
   def build_header_auto_text(_auto_text_data) do
-    "description autotext"
+    # stub
+    ""
   end
 
   @spec build_description_auto_text([Stop.t()]) :: String.t()
   def build_description_auto_text(_stops) do
-    "description autotext"
+    # stub
+    ""
   end
 
   # cause
