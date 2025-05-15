@@ -186,10 +186,10 @@ defmodule AlertsUIWeb.CreateAlertLive do
     end)
   end
 
-  @spec get_stops([String.t()], String.t(), integer() | nil) :: list()
-  def get_stops(route_ids, direction, _route_type \\ nil)
+  @spec get_stops([String.t()] | nil, String.t() | nil, integer() | nil) :: list()
+  def get_stops(route_ids, route_type, direction \\ nil)
 
-  def get_stops(["Green"] = route_ids, direction, _route_type) do
+  def get_stops(["Green"] = route_ids, _route_type, direction) do
     route_ids = Routes.expanding_green_line(route_ids) |> Enum.reverse()
 
     stops =
@@ -207,7 +207,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
     end
   end
 
-  def get_stops(route_ids, direction, route_type) do
+  def get_stops(route_ids, route_type, direction) do
     direction
     |> directions_from_selection()
     |> available_stops(route_ids, route_type)

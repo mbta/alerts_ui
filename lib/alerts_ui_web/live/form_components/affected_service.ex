@@ -384,8 +384,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
            available_stops:
              CreateAlertLive.get_stops(
                route_ids,
-               direction,
-               route_type
+               route_type,
+               direction
              )
          }}
       end)
