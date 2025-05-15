@@ -186,8 +186,35 @@ defmodule AlertsUIWeb.CreateAlertLive do
     end)
   end
 
-  @spec get_stops([String.t()] | nil, String.t() | nil, integer() | nil) :: list()
+  @spec get_stops([String.t()] | nil, integer() | nil, String.t() | nil) :: list()
   def get_stops(route_ids, route_type, direction \\ nil)
+
+  def get_stops(nil, 3, nil) do
+    # used for stop-route combination, bus mode.
+
+    # direction filtering does nothing if a route id is not
+    # included with the call. Doing 1 call for every route id
+    # is too many so we have to chunk them up thus.
+    # note- larger chunks take longer. small chunk is good.
+    route_id_lists =
+      RoutesRepo.by_type(3)
+      |> Enum.map(& &1.id)
+      |> Enum.chunk_every(10)
+      |> Enum.map(&Enum.join(&1, ","))
+
+    available_stops([0, 1], route_id_lists, 3)
+    |> Enum.sort_by(&String.downcase(&1.name))
+  end
+
+  def get_stops(nil, route_type, nil) do
+    # used for stop-route combination, other modes
+    StopsRepo.by_route_type(route_type, []) |> Enum.sort_by(&String.downcase(&1.name))
+  end
+
+  def get_stops(route_ids, route_type, nil) do
+    # used with route filter in SR combination
+    available_stops([0, 1], route_ids, route_type)
+  end
 
   def get_stops(["Green"] = route_ids, _route_type, direction) do
     route_ids = Routes.expanding_green_line(route_ids) |> Enum.reverse()
@@ -213,34 +240,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
     |> available_stops(route_ids, route_type)
   end
 
-  # def get_stops_for_stop_route(route_id, route_type)
-
-  def get_stops_for_stop_route(nil, 3) do
-    # used for stop-route combination, bus mode.
-
-    # direction filtering does nothing if a route id is not
-    # included with the call. Doing 1 call for every route id
-    # is too many so we have to chunk them up thus.
-    # note- larger chunks take longer. small chunk is good.
-    route_id_lists =
-      RoutesRepo.by_type(3)
-      |> Enum.map(& &1.id)
-      |> Enum.chunk_every(10)
-      |> Enum.map(&Enum.join(&1, ","))
-
-    available_stops([0, 1], route_id_lists, 3)
-    |> Enum.sort_by(&String.downcase(&1.name))
-  end
-
-  def get_stops_for_stop_route(nil, route_type) do
-    # used for stop-route combination, other modes
-    StopsRepo.by_route_type(route_type, []) |> Enum.sort_by(&String.downcase(&1.name))
-  end
-
-  def get_stops_for_stop_route(route_id, route_type) do
-    # used with route filter in SR combination
-    available_stops([0, 1], [route_id], route_type)
-  end
+  # def get_stops(route_id, route_type, direction \\ nil)
 
   def get_routes_by_stop(stop_ids, 3) do
     Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1, "filter[type]": 3))

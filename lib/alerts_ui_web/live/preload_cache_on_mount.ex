@@ -7,7 +7,7 @@ defmodule AlertsUIWeb.PreloadCacheOnMount do
     if Application.get_env(:alerts_ui, :preload_cache?) do
       # preload api calls into cache to avoid load times
       # if we're in production
-      AlertsUIWeb.CreateAlertLive.get_stops_for_stop_route(nil, 3)
+      AlertsUIWeb.CreateAlertLive.get_stops(nil, 3, nil)
     end
 
     {:cont, socket}
