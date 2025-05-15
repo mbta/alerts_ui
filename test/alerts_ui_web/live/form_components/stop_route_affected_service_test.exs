@@ -105,7 +105,9 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
            by_stop: fn _stop_id, ["filter[type]": 3] -> @routes ++ [@shuttle_route] end,
            by_type: fn 3 -> @routes ++ [@shuttle_route] end
          ]},
-        {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
+        {StopsRepo, [], [
+          by_route: fn _routes, _direction -> [@stop] end,
+          ]}
       ]) do
         {:ok, view, _html} =
           live_isolated_component(
@@ -124,7 +126,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
            by_stop: fn _stop_id, ["filter[type]": 3] -> @routes ++ [@shuttle_route] end,
            by_type: fn 3 -> @routes ++ [@shuttle_route] end
          ]},
-        {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
+        {StopsRepo, [], [by_route: fn _routes, _direction -> [@stop] end,]}
       ]) do
         {:ok, view, _html} =
           live_isolated_component(
