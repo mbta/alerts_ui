@@ -3,7 +3,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
     Durations for auto text.
     All datetimes are naive and in EST.
   """
-  use Timex
   alias AlertsUI.Models.ActivePeriod
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText
 
@@ -253,13 +252,15 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         start_datetime: start_datetime,
         end_datetime: end_datetime
       }) do
-    start_weekday = start_datetime |> NaiveDateTime.to_date() |> Timex.weekday()
-    end_weekday = end_datetime |> ActivePeriod.naive_datetime_to_service_date() |> Timex.weekday()
+    start_weekday = start_datetime |> NaiveDateTime.to_date() |> Calendar.strftime("%A")
+
+    end_weekday =
+      end_datetime |> ActivePeriod.naive_datetime_to_service_date() |> Calendar.strftime("%A")
 
     formatted_end_date =
       end_datetime |> ActivePeriod.naive_datetime_to_service_date() |> format_date
 
-    if {start_weekday, end_weekday} == {6, 7} do
+    if {start_weekday, end_weekday} == {"Saturday", "Sunday"} do
       "the weekend of #{datetime_to_formatted_date(start_datetime)} - #{formatted_end_date}"
     else
       "from #{datetime_to_formatted_date(start_datetime)} - #{formatted_end_date}"
@@ -392,7 +393,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
   end
 
   defp format_time(time) do
-    Timex.format!(time, "{h12}:{0m} {AM}")
+    Calendar.strftime(time, "%-I:%M %p")
   end
 
   defp datetime_to_formatted_date(datetime) do
@@ -400,6 +401,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
   end
 
   defp format_date(date) do
-    Timex.format!(date, "{WDshort}, {Mshort} {D}")
+    Calendar.strftime(date, "%a, %b %-d")
   end
 end
