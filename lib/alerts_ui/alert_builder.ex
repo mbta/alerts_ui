@@ -565,8 +565,9 @@ defmodule AlertsUI.AlertBuilder do
          effect
        ) do
     child_stops_with_context
-    |> Enum.filter(fn {%Stop{parent_id: parent_id}, route_id, _, _} ->
-      on_route?({parent_id, route_id}, "default")
+    |> Enum.filter(fn {%Stop{parent_id: parent_id, id: id}, route_id, _, _} ->
+      id_to_use = if parent_id, do: parent_id, else: id
+      on_route?({id_to_use, route_id}, "default")
     end)
     |> Enum.map(fn {%Stop{id: stop_id}, route_id, _direction_id, _stop_type} ->
       %{

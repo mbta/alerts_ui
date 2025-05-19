@@ -2267,7 +2267,7 @@ defmodule AlertsUI.AlertBuilderTest do
              "line-Boat-F4", _opts ->
                %Line{
                  id: "line-Boat-F4",
-                 route_ids: ["line-Boat-F4"],
+                 route_ids: ["Boat-F4"],
                  routes: [
                    %Route{id: "Boat-F4", line_id: "line-Boat-F4", type: 4}
                  ]
@@ -2284,6 +2284,68 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_id: "Boat-F4",
                    route_type: 4,
                    stop_id: "Boat-Charlestown"
+                 }
+               ]
+      end
+    end
+
+    test "SR informed entity for bus when route patterns have parent stops on them" do
+      # Unlike the above tests, we will have entries in "child stops with context"
+      # but we need to avoid filtering out our stops when we check to see if they're on the route
+      alert_data = %{
+        stop_ids: ["4561"],
+        route_type: 3,
+        route_ids: ["435"],
+        effect_name: "Multi-Route Detour",
+        description_text: "b",
+        header_text: "a",
+        route_types_by_id: %{"435" => 3}
+      }
+
+      parent_stops = [%Stop{id: "4561"}]
+
+      child_stops = []
+
+      with_mocks([
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn route_id, _opts ->
+             [
+               %APIRoutePattern{
+                 direction_id: 0,
+                 stops: parent_stops ++ child_stops,
+                 route_id: route_id
+               }
+             ]
+           end,
+           included_stops_by_route_id: fn _route_id, _direction -> parent_stops ++ child_stops end
+         ]},
+        {StopsRepo, [], [by_route: fn _route_id, _direction -> parent_stops ++ child_stops end]},
+        {RoutesRepo, [],
+         [get: fn "435", _opts -> %Route{id: "435", line_id: "line-435", type: 3} end]},
+        {LinesRepo, [],
+         [
+           get: fn
+             "line-435", _opts ->
+               %Line{
+                 id: "line-435",
+                 route_ids: ["435"],
+                 routes: [
+                   %Route{id: "435", type: 3}
+                 ]
+               }
+           end
+         ]}
+      ]) do
+        result = AlertBuilder.build_alert(alert_data, :SR)
+
+        assert result.informed_entity == [
+                 %{
+                   activities: [:BOARD, :EXIT],
+                   agency_id: "1",
+                   route_id: "435",
+                   route_type: 3,
+                   stop_id: "4561"
                  }
                ]
       end
