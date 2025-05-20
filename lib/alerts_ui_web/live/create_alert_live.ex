@@ -306,7 +306,10 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
     socket =
       if Enum.empty?(errors) do
-        send_update(Submit, id: "submit", show: true)
+        alert_map =
+          AlertBuilder.build_alert(socket.assigns.alert_data, socket.assigns.combination)
+
+        send_update(Submit, id: "submit", show: true, user_selections: socket.assigns.alert_data)
         socket
       else
         formatted_errors =
@@ -325,9 +328,11 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   def handle_info(:create_alert, socket) do
-    alert_map =
-      socket.assigns.alert_data
-      |> AlertBuilder.build_alert(socket.assigns.combination)
+    {:noreply, create_alert(socket)}
+  end
+
+  defp create_alert(socket) do
+    alert_map = AlertBuilder.build_alert(socket.assigns.alert_data, socket.assigns.combination)
 
     existing_alert =
       if is_nil(socket.assigns.alert_id) do
@@ -336,29 +341,26 @@ defmodule AlertsUIWeb.CreateAlertLive do
         Alerts.get_by_alert_id(socket.assigns.alert_id)
       end
 
-    socket =
-      alert_map
-      |> Alerts.create_or_update_alert(existing_alert)
-      |> case do
-        {:ok, alert} ->
-          assigns = %{
-            progress: get_step_by_name(socket.assigns.progress.next),
-            alert_data: %{},
-            alert_uuid: alert.id
-          }
+    alert_map
+    |> Alerts.create_or_update_alert(existing_alert)
+    |> case do
+      {:ok, alert} ->
+        assigns = %{
+          progress: get_step_by_name(socket.assigns.progress.next),
+          alert_data: %{},
+          alert_uuid: alert.id
+        }
 
-          assign(socket, assigns)
+        assign(socket, assigns)
 
-        {:error, result} ->
-          errors =
-            result
-            |> Alerts.parse_changeset_errors()
-            |> format_errors(socket.assigns.combination)
+      {:error, result} ->
+        errors =
+          result
+          |> Alerts.parse_changeset_errors()
+          |> format_errors(socket.assigns.combination)
 
-          display_errors(socket, errors)
-      end
-
-    {:noreply, socket}
+        display_errors(socket, errors)
+    end
   end
 
   defp display_errors(socket, errors) do
