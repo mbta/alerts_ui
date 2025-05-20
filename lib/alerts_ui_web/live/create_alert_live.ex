@@ -332,7 +332,9 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   defp create_alert(socket) do
-    alert_map = AlertBuilder.build_alert(socket.assigns.alert_data, socket.assigns.combination)
+    alert_map =
+      socket.assigns.alert_data
+      |> AlertBuilder.build_alert(socket.assigns.combination)
 
     existing_alert =
       if is_nil(socket.assigns.alert_id) do
