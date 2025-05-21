@@ -5,6 +5,8 @@ defmodule AlertsUIWeb.FormComponents.Submit do
   use AlertsUIWeb, :live_component
   use AlertsUI.Schema
 
+  import AlertsUIWeb.ReviewModal
+
   @impl true
   def handle_event("cancel", _params, socket) do
     {:noreply, push_navigate(socket, to: ~p"/alerts")}
@@ -33,22 +35,12 @@ defmodule AlertsUIWeb.FormComponents.Submit do
   def render(assigns) do
     ~H"""
     <div class="min-w-full flex mt-4 mb-12 border-t border-border-primary" id="submit_view">
-      <%!-- Do not love how show is used twice here. Needs help --%>
-      <.modal
+      <.review_modal
         :if={Map.get(assigns, :show, nil)}
-        id="review-modal"
-        show={@show}
-        class="w-[800px]"
-        inner_class="!p-0"
-        header_text="Create new alert"
         cancel_event_name="cancel_review"
         accept_event_name="save"
-        cancel_button_text="Keep editing"
-        accept_button_text="Submit"
         target_id="#submit_view"
-      >
-        <div>Hello world</div>
-      </.modal>
+      />
       <.button_secondary
         class="mt-8 mr-auto self-center border-none py-2 px-3"
         name="back"
