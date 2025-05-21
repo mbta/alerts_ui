@@ -50,7 +50,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
     # These tests also don't show JS, so I can't check that the modal is actually unhidden
     # only that it is rendered when it wasn't before
     @tag :logged_in_user
-    test "clicking review after filling out form opens the preview modal", %{conn: conn} do
+    test "clicking review after filling out form opens the review modal", %{conn: conn} do
       with_mocks([
         {RoutesRepo, [], [by_type: fn _types -> @routes end]},
         {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
@@ -76,18 +76,18 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
           }
         })
 
-        refute view |> has_element?("#preview-modal-container")
+        refute view |> has_element?("#review-modal-container")
 
         view
         |> element("button#review", "Review and submit")
         |> render_click()
 
-        assert view |> has_element?("#preview-modal-container")
+        assert view |> has_element?("#review-modal-container")
       end
     end
 
     @tag :logged_in_user
-    test "clicking cancel on preview modal just closes the modal", %{conn: conn} do
+    test "clicking cancel on review modal just closes the modal", %{conn: conn} do
       with_mocks([
         {RoutesRepo, [], [by_type: fn _types -> @routes end]},
         {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
@@ -123,7 +123,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
         |> element("button", "Keep editing")
         |> render_click()
 
-        refute view |> has_element?("#preview-modal-container")
+        refute view |> has_element?("#review-modal-container")
       end
     end
 
@@ -162,21 +162,21 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
 
         # --- New stuff ---
         view
-        |> element("#preview-modal-container")
+        |> element("#review-modal-container")
         |> render_keydown()
 
-        refute view |> has_element?("#preview-modal-container")
+        refute view |> has_element?("#review-modal-container")
 
         view
         |> element("button#review", "Review and submit")
         |> render_click()
 
-        assert view |> has_element?("#preview-modal-container")
+        assert view |> has_element?("#review-modal-container")
       end
     end
 
     @tag :logged_in_user
-    test "clicking submit on preview modal sends a :create_alert event", %{conn: conn} do
+    test "clicking submit on review modal sends a :create_alert event", %{conn: conn} do
       with_mocks([
         {RoutesRepo, [],
          [
