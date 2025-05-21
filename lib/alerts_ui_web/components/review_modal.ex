@@ -24,7 +24,6 @@ defmodule AlertsUIWeb.ReviewModal do
     <.modal
       id="review-modal"
       show={true}
-      class="w-[800px]"
       header_text="Create new alert"
       cancel_button_text="Keep editing"
       accept_button_text="Submit"

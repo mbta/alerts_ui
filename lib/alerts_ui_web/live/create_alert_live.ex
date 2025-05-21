@@ -306,10 +306,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
     socket =
       if Enum.empty?(errors) do
-        alert_map =
-          AlertBuilder.build_alert(socket.assigns.alert_data, socket.assigns.combination)
-
-        send_update(Submit, id: "submit", show: true, user_selections: socket.assigns.alert_data)
+        send_update(Submit, id: "submit", show: true)
         socket
       else
         formatted_errors =
