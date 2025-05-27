@@ -52,31 +52,32 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
 
   @uses_indefinite_article [
     "ACCIDENT",
+    "COAST_GUARD_RESTRICTION",
+    "CROSSING_ISSUE",
     "DEMONSTRATION",
     "DISABLED_BUS",
+    "DISABLED_TRAIN",
     "DRAWBRIDGE_BEING_RAISED",
     "FIRE",
     "HAZMAT_CONDITION",
     "HURRICANE",
-    "MEDICAL_EMERGENCY",
-    "PARADE",
-    "SPECIAL_EVENT",
-    "COAST_GUARD_RESTRICTION",
-    "CROSSING_ISSUE",
-    "DISABLED_TRAIN",
     "MECHANICAL_ISSUE",
     "MECHANICAL_PROBLEM",
+    "MEDICAL_EMERGENCY",
+    "PARADE",
     "POWER_PROBLEM",
     "RAIL_DEFECT",
     "SIGNAL_ISSUE",
     "SIGNAL_PROBLEM",
     "SLIPPERY_RAIL",
+    "SPECIAL_EVENT",
     "SPEED_RESTRICTION",
     "SWITCH_ISSUE",
     "SWITCH_PROBLEM",
     "TRACK_PROBLEM",
     "UNRULY_PASSENGER"
   ]
+
   @uses_definite_article ["HOLIDAY"]
 
   @spec build_header_auto_text(__MODULE__.t()) :: String.t()
@@ -125,9 +126,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   # directions
   def direction_name([direction], [route]) do
     if Map.get(route, :direction_names) do
-      route.direction_names[direction]
+      String.downcase(route.direction_names[direction])
     else
-      Map.get(%{0 => "Outbound", 1 => "Inbound"}, direction)
+      Map.get(%{0 => "outbound", 1 => "inbound"}, direction)
     end
   end
 

@@ -146,11 +146,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
     end
 
     test "1 direction, 1 route with direction names" do
-      assert BuildAutoText.direction_name([0], [@route_1]) == "Westbound"
+      assert BuildAutoText.direction_name([0], [@route_1]) == "westbound"
     end
 
     test "1 direction, 1 route with no direction names" do
-      assert BuildAutoText.direction_name([1], [@route_2]) == "Inbound"
+      assert BuildAutoText.direction_name([1], [@route_2]) == "inbound"
     end
   end
 
