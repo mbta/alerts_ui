@@ -27,7 +27,12 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
   @stop %Stop{id: "place-sstat", name: "South Station"}
 
-  @route_pattern %RoutePattern{direction_id: 0, stops: [@stop], route_id: "CR-Worcester"}
+  @route_pattern %RoutePattern{
+    direction_id: 0,
+    stops: [@stop],
+    route_id: "CR-Worcester",
+    id: "CR-Worcester-1"
+  }
 
   describe "create alerts page" do
     @tag :logged_in_user
