@@ -490,9 +490,14 @@ defmodule AlertsUIWeb.SharedComponents do
     default: "",
     doc: "The target to send the events to (eg form component id)"
 
+  attr :class, :string, default: "", doc: "classes to add to the containing div"
+  attr :inner_class, :string, default: "", doc: "classes to add on the inner_block"
+
   attr :id, :string, required: true
   attr :show, :boolean, default: false
   attr :on_cancel, JS, default: %JS{}
+
+  slot :header
   slot :inner_block, required: true
 
   def modal(assigns) do
@@ -514,7 +519,7 @@ defmodule AlertsUIWeb.SharedComponents do
         tabindex="0"
       >
         <div class="flex min-h-full items-center justify-center">
-          <div class="min-w-[20rem] w-[25%] sm:p-6 lg:py-8">
+          <div class={["min-w-[20rem] w-[25%] sm:p-6 lg:py-8", @class]}>
             <.focus_wrap
               id={"#{@id}-container"}
               phx-window-keydown={
@@ -530,7 +535,7 @@ defmodule AlertsUIWeb.SharedComponents do
               min-h-[25rem] border border-bg-elevation-6"
             >
               <div class="flex flex-row justify-between px-4 py-4">
-                <h1 class="font-sm text-xl">{@header_text}</h1>
+                <h1 class="font-sm text-xl">{render_slot(@header) || @header_text}</h1>
                 <button
                   phx-click={
                     JS.push(@cancel_event_name, target: @target_id)
@@ -544,7 +549,7 @@ defmodule AlertsUIWeb.SharedComponents do
                 </button>
               </div>
               <hr class="w-[100%] border-y-1 border-bg-elevation-6" />
-              <div id={"#{@id}-content"} class="px-4 py-4">
+              <div id={"#{@id}-content"} class={["px-4 py-4", @inner_class]}>
                 {render_slot(@inner_block)}
               </div>
               <hr class="w-[100%] border-y-1 border-bg-elevation-6" />
