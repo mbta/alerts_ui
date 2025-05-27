@@ -4,8 +4,9 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
 
   import Mock
   import Phoenix.LiveViewTest
-  alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
+  import Test.Support.Helpers
 
+  alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Stops.Repo, as: StopsRepo
@@ -16,21 +17,6 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
   @routes [@route_one, @route_two]
   @stop %Stop{id: "place-aqucl", name: "Aquarium"}
 
-  def get_to_submission_page(view) do
-    # Use any combo to proceed to next page
-    view
-    |> element("#route_types_form button", "Bus")
-    |> render_click()
-
-    view
-    |> element("#route_types_form button", "Delay")
-    |> render_click()
-
-    view
-    |> element("#route_types_form")
-    |> render_submit()
-  end
-
   describe "save flow" do
     # The save view involves communicating with the LiveView so all tests
     # will need to be e2e
@@ -38,11 +24,8 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
     test "clicking review before filling out form doesn't show modal", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/new")
 
-      get_to_submission_page(view)
-
-      view
-      |> element("button#review")
-      |> render_click()
+      get_to_submission_page(view, "Bus", "Delay")
+      open_review_modal(view)
 
       assert view |> element("#error-flash") |> render() =~ "Select stop(s)"
     end
@@ -57,7 +40,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
 
-        get_to_submission_page(view)
+        get_to_submission_page(view, "Bus", "Delay")
 
         view
         |> element("#service_form")
@@ -78,9 +61,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
 
         refute view |> has_element?("#review-modal-container")
 
-        view
-        |> element("button#review", "Review and submit")
-        |> render_click()
+        open_review_modal(view)
 
         assert view |> has_element?("#review-modal-container")
       end
@@ -95,7 +76,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
         # --- Same as before ---
         {:ok, view, _html} = live(conn, "/alerts/new")
 
-        get_to_submission_page(view)
+        get_to_submission_page(view, "Bus", "Delay")
 
         view
         |> element("#service_form")
@@ -114,9 +95,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
           }
         })
 
-        view
-        |> element("button#review", "Review and submit")
-        |> render_click()
+        open_review_modal(view)
 
         # --- New stuff ---
         view
@@ -137,7 +116,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
         # --- Same as before ---
         {:ok, view, _html} = live(conn, "/alerts/new")
 
-        get_to_submission_page(view)
+        get_to_submission_page(view, "Bus", "Delay")
 
         view
         |> element("#service_form")
@@ -156,9 +135,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
           }
         })
 
-        view
-        |> element("button#review", "Review and submit")
-        |> render_click()
+        open_review_modal(view)
 
         # --- New stuff ---
         view
@@ -193,7 +170,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
         # --- Same as before ---
         {:ok, view, _html} = live(conn, "/alerts/new")
 
-        get_to_submission_page(view)
+        get_to_submission_page(view, "Bus", "Delay")
 
         view
         |> element("#service_form")
@@ -212,9 +189,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
           }
         })
 
-        view
-        |> element("button#review", "Review and submit")
-        |> render_click()
+        open_review_modal(view)
 
         # --- New stuff ---
         view
@@ -231,7 +206,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
     test "back button returns to previous step", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/new")
 
-      get_to_submission_page(view)
+      get_to_submission_page(view, "Bus", "Delay")
 
       view
       |> element("button#back")
@@ -244,7 +219,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
     test "cancel button returns to alerts list page", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/new")
 
-      get_to_submission_page(view)
+      get_to_submission_page(view, "Bus", "Delay")
 
       {:ok, new_view, _} =
         view
