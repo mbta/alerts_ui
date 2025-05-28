@@ -64,7 +64,12 @@
           alert_data={@alert_data}
           editing={@editing}
         />
-        <.live_component module={Submit} id="submit" progress={@progress} />
+        <.live_component
+          module={Submit}
+          id="submit"
+          progress={@progress}
+          alert_data={@alert_data}
+        />
       </div>
       <.live_component
         :if={@progress.name == "success"}
