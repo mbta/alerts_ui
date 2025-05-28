@@ -21,6 +21,7 @@ defmodule AlertsUI.MixProject do
           # Ignoring due to swagger definitions
           AlertsUIWeb.ApiController,
           AlertsUIWeb.PageHTML,
+          AlertsUIWeb.PreloadCacheOnMount,
           AlertsUIWeb.ErrorHTML,
           AlertsUIWeb.CoreComponents,
           AlertsUIWeb.SharedComponents,

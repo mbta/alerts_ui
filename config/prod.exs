@@ -9,6 +9,8 @@ config :alerts_ui, AlertsUIWeb.Endpoint, cache_static_manifest: "priv/static/cac
 
 config :alerts_ui, :redirect_http?, true
 
+config :alerts_ui, :preload_cache?, true
+
 # Do not print debug messages in production
 config :logger, level: :info
 
