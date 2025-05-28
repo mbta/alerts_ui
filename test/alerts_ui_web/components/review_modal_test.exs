@@ -9,6 +9,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
   import Phoenix.LiveViewTest
   import Test.Support.Helpers
 
+  alias MBTAV3API.Facilities.Facility
+  alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Stops.Repo, as: StopsRepo
@@ -18,6 +20,75 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
   @route_two %Route{sort_order: 2, id: "2", name: "route_number_2"}
   @routes [@route_one, @route_two]
   @stop %Stop{id: "place-aqucl", name: "Aquarium"}
+  @facility %Facility{
+    id: "Facility-3",
+    long_name: "Example Facility",
+    stop: %Stop{id: "place-sstat", name: "South Station"}
+  }
+
+  describe "header" do
+    @tag :logged_in_user
+    test "creating new alert", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _types -> @routes end]},
+        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+      ]) do
+        # Bus Delay
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        get_to_submission_page(view, "Bus", "Delay")
+
+        fill_out_required_form_fields(view, %{
+          affected_service: %{route_ids: ["1"], stop_ids: ["place-aqucl"]}
+        })
+
+        open_review_modal(view)
+
+        assert view |> element("#review-modal-container", "Create new alert") |> has_element?
+      end
+    end
+
+    # test "editing alert", %{conn: conn} do
+    # idk
+    # end
+
+    @tag :logged_in_user
+    test "correct mode and effect: Bus Delay", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/new")
+      get_to_submission_page(view, "Bus", "Delay")
+
+      fill_out_required_form_fields(view, %{
+        affected_service: %{route_ids: ["1"], stop_ids: ["place-aqucl"]}
+      })
+
+      open_review_modal(view)
+
+      assert view |> element("#review-modal-container", "Bus • Delay") |> has_element?
+    end
+
+    @tag :logged_in_user
+    test "correct mode and effect: Systemwide Suspension", %{conn: conn} do
+      with_mock(FacilitiesRepo, get_by_type: fn _facility_types, _opts -> [@facility] end) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        get_to_submission_page(view, "Access", "Elevator closure")
+
+        fill_out_form(view, "#service_form", %{
+          access_affected_service: %{
+            facility_id: "Facility-3"
+          }
+        })
+
+        fill_out_form(view, "#details_form", %{
+          alert_details: %{header_text: "hello world"}
+        })
+
+        open_review_modal(view)
+
+        assert view
+               |> element("#review-modal-container", "Access • Elevator Closure")
+               |> has_element?
+      end
+    end
+  end
 
   describe "the affected service paradigms to make sure Routes, Stops, Trips, Direction render correctly" do
     @tag :logged_in_user
