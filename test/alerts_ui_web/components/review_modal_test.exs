@@ -343,7 +343,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         })
 
         # Unsure how long mbta images stay archived, but I'm curious to try it!
-        image_url = "https://cdn.mbta.com/sites/default/files/styles/max_2600x2600/public/media/2025-04/2025-04-24-red-line-may-3-4-weekend-closure.png"
+        image_url =
+          "https://cdn.mbta.com/sites/default/files/styles/max_2600x2600/public/media/2025-04/2025-04-24-red-line-may-3-4-weekend-closure.png"
 
         fill_out_form(view, "#details_form", %{
           alert_details: %{
