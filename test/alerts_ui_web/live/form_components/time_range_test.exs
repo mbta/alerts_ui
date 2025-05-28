@@ -43,12 +43,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       ~U[2024-05-01 13:15:00.00Z] |> DateTime.shift_zone!("America/New_York")
   }
 
-  # @schedule %EnhancedSchedule{
-  #   time_of_last_trip_arrival:
-  #     ~U[2024-05-01 13:15:00.00Z] |> DateTime.shift_zone!("America/New_York"),
-  #   departure_time: ~U[2024-05-01 12:15:00.00Z] |> DateTime.shift_zone!("America/New_York")
-  # }
-
   @schedule_2 %EnhancedSchedule{
     route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
     trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
@@ -653,12 +647,21 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         })
 
         view
-        |> element("button#save", "Review and submit")
+        |> element("button#review", "Review and submit")
+        |> render_click()
+
+        view
+        |> element("button", "Submit")
         |> render_click()
 
         created_alert = parse_alert_created_output(view)
 
-        assert created_alert.active_period_end == ~U[2025-05-07 04:00:00Z]
+        assert created_alert.active_period_end ==
+                 todays_date
+                 |> Date.add(2)
+                 |> DateTime.new!(~T[00:00:00], "America/New_York")
+                 |> DateTime.shift_zone!("Etc/UTC")
+
         assert created_alert.duration_certainty == :KNOWN
       end
     end
