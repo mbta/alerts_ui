@@ -94,34 +94,37 @@ defmodule AlertsUIWeb.ReviewModal do
           </div>
 
           <%!-- Image --%>
-          <div :if={@alert_data.image_url} class="inline-flex pb-4">
-            <img
-              id="alert-image"
-              phx-hook="MeasureImage"
-              src={@alert_data.image_url}
-              alt={@alert_data.image_alternative_text || "No alternative text provided"}
-              class="h-16 pr-2"
-            />
-            <div>
-              <p class="text-text-secondary">
-                {String.split(@alert_data.image_url, "/") |> List.last()}
-                <span :if={Map.get(@alert_data, :image_size, nil)}>
-                  ({@alert_data.image_size["width"]} x {@alert_data.image_size["height"]})
-                </span>
-                <a
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href={@alert_data.image_url}
-                  class="inline-flex align-top text-primary"
-                >
-                  <.icon name="hero-arrow-top-right-on-square" class="h-3 w-3" />
-                </a>
-              </p>
-              <p class="text-text-secondary">
-                Alt text: {@alert_data.image_alternative_text || "No alternative text provided"}
-              </p>
+          <%= if @alert_data.image_url do %>
+            <p class="font-bold">Image</p>
+            <div class="inline-flex pb-4">
+              <img
+                id="alert-image"
+                phx-hook="MeasureImage"
+                src={@alert_data.image_url}
+                alt={@alert_data.image_alternative_text || "No alternative text provided"}
+                class="h-16 pr-2"
+              />
+              <div>
+                <p class="text-text-secondary">
+                  {String.split(@alert_data.image_url, "/") |> List.last()}
+                  <span :if={Map.get(@alert_data, :image_size, nil)}>
+                    ({@alert_data.image_size["width"]} x {@alert_data.image_size["height"]})
+                  </span>
+                  <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={@alert_data.image_url}
+                    class="inline-flex align-top text-primary"
+                  >
+                    <.icon name="hero-arrow-top-right-on-square" class="h-3 w-3" />
+                  </a>
+                </p>
+                <p class="text-text-secondary">
+                  Alt text: {@alert_data.image_alternative_text || "No alternative text provided"}
+                </p>
+              </div>
             </div>
-          </div>
+          <% end %>
 
           <%!-- Middle section --%>
           <div class="grid grid-cols-[110px_auto] gap-x-2">
