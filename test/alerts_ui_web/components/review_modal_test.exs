@@ -307,6 +307,62 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
     end
   end
 
+  describe "image" do
+    @tag :logged_in_user
+    test "by default, no image", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _types -> @routes end]},
+        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+      ]) do
+        # Bus Delay
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        get_to_submission_page(view, "Bus", "Delay")
+
+        fill_out_required_form_fields(view, %{
+          affected_service: %{route_ids: ["1"], stop_ids: ["place-aqucl"]}
+        })
+
+        open_review_modal(view)
+
+        refute view |> element("#alert-image") |> has_element?
+      end
+    end
+
+    @tag :logged_in_user
+    test "when image / alt text are provided", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _types -> @routes end]},
+        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+      ]) do
+        # Bus Delay
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        get_to_submission_page(view, "Bus", "Delay")
+
+        fill_out_required_form_fields(view, %{
+          affected_service: %{route_ids: ["1"], stop_ids: ["place-aqucl"]}
+        })
+
+        # Unsure how long mbta images stay archived, but I'm curious to try it!
+        image_url = "https://cdn.mbta.com/sites/default/files/styles/max_2600x2600/public/media/2025-04/2025-04-24-red-line-may-3-4-weekend-closure.png"
+
+        fill_out_form(view, "#details_form", %{
+          alert_details: %{
+            image_url: image_url,
+            image_alternative_text: "This is the alternative text"
+          }
+        })
+
+        open_review_modal(view)
+
+        assert view |> element("#alert-image") |> has_element?
+
+        # Can't verify the measuring hook because it's JS
+        assert render(view) =~ ~r/#{image_url}/s
+        assert render(view) =~ ~r/Alt text:.*This is the alternative text/s
+      end
+    end
+  end
+
   describe "reminders" do
     @tag :logged_in_user
     test "default", %{conn: conn} do
