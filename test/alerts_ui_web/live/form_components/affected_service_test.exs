@@ -1033,7 +1033,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
             route_type: @route.type,
             activities: [:BOARD],
             stop_id: @stop.id,
-            trip: trip
+            trip: trip,
+            direction_id: nil
           })
 
         insert(
