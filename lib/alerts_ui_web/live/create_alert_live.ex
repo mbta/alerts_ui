@@ -326,12 +326,13 @@ defmodule AlertsUIWeb.CreateAlertLive do
     {:noreply, assign(socket, assigns)}
   end
 
-  def handle_info(:create_alert, socket) do
+  def handle_info(:show_errors, socket) do
     errors = Map.values(socket.assigns.errors) |> List.flatten()
 
     socket =
       if Enum.empty?(errors) do
-        create_alert(socket)
+        send_update(Submit, id: "submit", show: true)
+        socket
       else
         formatted_errors =
           errors
@@ -346,6 +347,10 @@ defmodule AlertsUIWeb.CreateAlertLive do
       end
 
     {:noreply, socket}
+  end
+
+  def handle_info(:create_alert, socket) do
+    {:noreply, create_alert(socket)}
   end
 
   defp create_alert(socket) do

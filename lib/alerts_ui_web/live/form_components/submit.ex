@@ -1,9 +1,11 @@
 defmodule AlertsUIWeb.FormComponents.Submit do
   @moduledoc """
-    Live Component for delivery section of form
+    Live Component for submission section of form.
   """
   use AlertsUIWeb, :live_component
   use AlertsUI.Schema
+
+  import AlertsUIWeb.ReviewModal
 
   @impl true
   def handle_event("cancel", _params, socket) do
@@ -17,9 +19,28 @@ defmodule AlertsUIWeb.FormComponents.Submit do
   end
 
   @impl true
+  def handle_event("review", _params, socket) do
+    # Validating the form is handled in `create_alert_live`
+    send(self(), :show_errors)
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("cancel_review", _params, socket) do
+    # Need to pass `show:false` to unmount the modal
+    {:noreply, socket |> assign(show: false)}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="min-w-full flex mt-4 mb-12 border-t border-border-primary" id="submit_view">
+      <.review_modal
+        :if={Map.get(assigns, :show, nil)}
+        cancel_event_name="cancel_review"
+        accept_event_name="save"
+        target_id="#submit_view"
+      />
       <.button_secondary
         class="mt-8 mr-auto self-center border-none py-2 px-3"
         name="back"
@@ -31,7 +52,7 @@ defmodule AlertsUIWeb.FormComponents.Submit do
         <.icon name="hero-arrow-left-solid" class="h-3 w-3" /> Back
       </.button_secondary>
       <.button_secondary
-        class="mt-8 self-center border-none py-2 px-3"
+        class="mt-8 self-center border-none"
         phx-target={@myself}
         name="cancel"
         phx-click="cancel"
@@ -41,12 +62,12 @@ defmodule AlertsUIWeb.FormComponents.Submit do
         Cancel
       </.button_secondary>
       <.button_primary
-        class="mt-8 ml-2 self-center py-2 px-3"
+        class="mt-8 ml-2 self-center"
         phx-target={@myself}
-        name="save"
-        phx-click="save"
+        name="review"
+        phx-click="review"
         type="button"
-        id="save"
+        id="review"
       >
         Review and submit
       </.button_primary>

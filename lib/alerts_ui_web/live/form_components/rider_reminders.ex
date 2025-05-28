@@ -220,7 +220,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
           <input type="hidden" name="rider _reminders[reminder_drop][]" />
         </div>
         <.button_secondary
-          class="w-32"
+          class="self-start"
           type="button"
           name="rider_reminders[reminder_sort][]"
           value="new"

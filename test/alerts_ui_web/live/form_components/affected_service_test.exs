@@ -841,7 +841,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       })
 
       view
-      |> element("button#save", "Review and submit")
+      |> element("button#review", "Review and submit")
       |> render_click()
 
       # Inline
@@ -969,7 +969,11 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         })
 
         view
-        |> element("button#save", "Review and submit")
+        |> element("button#review", "Review and submit")
+        |> render_click()
+
+        view
+        |> element("button", "Submit")
         |> render_click()
 
         assert [%{trip: %{trip_id: "CR-683322-595"}}, %{trip: %{trip_id: "CR-683322-596"}}] =
