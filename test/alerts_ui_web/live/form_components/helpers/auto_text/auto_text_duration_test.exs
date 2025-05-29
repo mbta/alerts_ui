@@ -54,6 +54,22 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
       assert expected == actual
     end
 
+    test "end is set as custom but is actually end of service" do
+      current_time = ~N[2025-05-08 13:00:00]
+
+      auto_text_data = %BuildAutoText{
+        alert_timing: :"one-time",
+        start_specifier: :now,
+        end_specifier: :custom,
+        start_datetime: ~N[2025-05-08 13:00:00],
+        end_datetime: ~N[2025-05-09 03:00:00]
+      }
+
+      expected = "today"
+      actual = AutoTextDuration.build_duration_text(auto_text_data, current_time)
+      assert expected == actual
+    end
+
     test "start is now and end is custom today" do
       current_time = ~N[2025-05-08 13:00:00]
 
@@ -204,6 +220,22 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
       auto_text_data = %BuildAutoText{
         alert_timing: :"one-time",
         start_specifier: :start_of_service,
+        end_specifier: :until_further_notice,
+        start_datetime: NaiveDateTime.new!(~D[2025-05-14], ActivePeriod.start_of_service_time()),
+        end_datetime: nil
+      }
+
+      expected = "beginning Wed, May 14"
+      actual = AutoTextDuration.build_duration_text(auto_text_data, current_time)
+      assert expected == actual
+    end
+
+    test "start is set as custom time but is actually start of service" do
+      current_time = ~N[2025-05-12 13:00:00]
+
+      auto_text_data = %BuildAutoText{
+        alert_timing: :"one-time",
+        start_specifier: :custom,
         end_specifier: :until_further_notice,
         start_datetime: NaiveDateTime.new!(~D[2025-05-14], ActivePeriod.start_of_service_time()),
         end_datetime: nil
@@ -390,6 +422,28 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
       assert expected == actual
     end
 
+    test "recurring- when start and end are nil" do
+      current_time = ~N[2025-05-08 13:00:00]
+
+      auto_text_data = %BuildAutoText{
+        alert_timing: :recurring,
+        start_specifier: :custom,
+        end_specifier: :custom,
+        start_date: nil,
+        end_date: nil,
+        start_time: nil,
+        end_time: nil,
+        recurrence_days: []
+      }
+
+      expected =
+        " every  "
+
+      actual = AutoTextDuration.build_duration_text(auto_text_data, current_time)
+
+      assert expected == actual
+    end
+
     test "recurring- when start is not today" do
       current_time = ~N[2025-05-08 13:00:00]
 
@@ -435,16 +489,16 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
     end
   end
 
-  describe "starts_today?/1" do
+  describe "happens_today?/1" do
     test "if start time is nil returns false" do
-      assert AutoTextDuration.starts_today?(nil, ~N[2025-05-08 13:00:00]) == false
+      assert AutoTextDuration.happens_today?(nil, ~N[2025-05-08 13:00:00]) == false
     end
 
     test "if start time is today before midnight return true" do
       current_time = ~N[2025-05-08 13:00:00]
       start_datetime = ~N[2025-05-08 23:00:00]
       expected = true
-      actual = AutoTextDuration.starts_today?(start_datetime, current_time)
+      actual = AutoTextDuration.happens_today?(start_datetime, current_time)
       assert expected == actual
     end
 
@@ -452,7 +506,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
       current_time = ~N[2025-05-08 13:00:00]
       start_datetime = ~N[2025-05-09 01:00:00]
       expected = true
-      actual = AutoTextDuration.starts_today?(start_datetime, current_time)
+      actual = AutoTextDuration.happens_today?(start_datetime, current_time)
       assert expected == actual
     end
 
@@ -460,7 +514,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
       current_time = ~N[2025-05-09 01:00:00]
       start_datetime = ~N[2025-05-09 02:00:00]
       expected = true
-      actual = AutoTextDuration.starts_today?(start_datetime, current_time)
+      actual = AutoTextDuration.happens_today?(start_datetime, current_time)
       assert expected == actual
     end
 
@@ -468,7 +522,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
       current_time = ~N[2025-05-08 13:00:00]
       start_datetime = ~N[2025-05-09 05:00:00]
       expected = false
-      actual = AutoTextDuration.starts_today?(start_datetime, current_time)
+      actual = AutoTextDuration.happens_today?(start_datetime, current_time)
       assert expected == actual
     end
 
@@ -476,7 +530,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
       current_time = ~N[2025-05-09 01:00:00]
       start_datetime = ~N[2025-05-09 05:00:00]
       expected = false
-      actual = AutoTextDuration.starts_today?(start_datetime, current_time)
+      actual = AutoTextDuration.happens_today?(start_datetime, current_time)
       assert expected == actual
     end
   end
