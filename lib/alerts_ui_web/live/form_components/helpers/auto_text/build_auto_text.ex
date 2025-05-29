@@ -2,6 +2,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   @moduledoc """
     Constructs auto-text for header and description from affected service.
   """
+  alias AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration
   alias AlertsUIWeb.FormComponents.Helpers.{ContentFormatter, SelectFormatter}
   alias AlertsUI.Models.{EnhancedSchedule, InformedEntity, SeverityLevel}
   alias MBTAV3API.Facilities.Facility
@@ -12,6 +13,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
             effect_name: nil,
             combination: nil,
             routes: [],
+            stops: [],
             schedules: [],
             facility: nil,
             service_types: [],
@@ -34,6 +36,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
           effect_name: String.t() | nil,
           combination: atom(),
           routes: [Route.t()],
+          stops: [Stop.t()],
           schedules: [EnhancedSchedule.t()],
           facility: Facility.t() | nil,
           service_types: [integer()],
@@ -82,21 +85,15 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
 
   @uses_definite_article ["HOLIDAY"]
 
-  @spec build_header_auto_text(__MODULE__.t()) :: String.t()
-  def build_header_auto_text(_auto_text_data) do
-    # stub
-    ""
-  end
-
-  @spec build_description_auto_text([Stop.t()]) :: String.t()
-  def build_description_auto_text(_stops) do
-    # stub
-    ""
+  # duration
+  @spec alert_duration(__MODULE__.t()) :: String.t()
+  def alert_duration(autotext_data) do
+    AutoTextDuration.build_duration_text(autotext_data)
   end
 
   # cause
-  @spec due_to_cause(String.t()) :: String.t()
-  def due_to_cause(cause_detail) do
+  @spec due_to_cause(__MODULE__.t()) :: String.t()
+  def due_to_cause(%{cause_detail: cause_detail}) do
     "due to #{cause(cause_detail)}"
   end
 
@@ -114,24 +111,25 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   def cause(cause_detail), do: format_cause(cause_detail)
 
   # severity
-  @spec severity(integer() | nil) :: String.t()
-  def severity(nil), do: ""
+  @spec severity(__MODULE__.t()) :: String.t()
+  def severity(%{severity: nil}), do: ""
 
-  def severity(severity) do
+  def severity(%{severity: severity}) do
     SeverityLevel.severity_description_by_severity(severity)
   end
 
-  # service type/impacted route_type
-  @spec service_types([integer()]) :: String.t()
+  # impacted modes/ route types
+  @spec impacted_modes(__MODULE__.t()) :: String.t()
 
-  def service_types(route_types) do
-    route_types
+  def impacted_modes(%{service_types: service_types}) do
+    service_types
     |> Enum.map(&format_service_type/1)
     |> join_together
   end
 
   # directions
-  def direction_name([direction], [route]) do
+  @spec direction_name(__MODULE__.t()) :: String.t()
+  def direction_name(%{direction: [direction], routes: [route]}) do
     if Map.get(route, :direction_names) do
       String.downcase(route.direction_names[direction])
     else
@@ -139,41 +137,47 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
     end
   end
 
-  def direction_name(_direction, _routes), do: ""
+  def direction_name(_), do: ""
 
   # stops
-  @spec stop_names([Stop.t()]) :: String.t()
-  def stop_names(stops) do
+  @spec stop_names(__MODULE__.t()) :: String.t()
+  def stop_names(%{stops: stops}) do
     stops
     |> Enum.map(&SelectFormatter.name_for_option/1)
     |> join_together
   end
 
   # stop form (modifies stops)
-  @spec stop_form([Stop.t()]) :: String.t()
-  def stop_form([]), do: ""
-  def stop_form([_stop]), do: "stop is"
-  def stop_form(_stops), do: "stops are"
+  @spec stop_form(__MODULE__.t()) :: String.t()
+  def stop_form(%{stops: []}), do: ""
+  def stop_form(%{stops: [_stop]}), do: "stop is"
+  def stop_form(%{stops: _stops}), do: "stops are"
 
   # stop range (between x and y)
-  @spec stop_range_between([Stop.t()]) :: String.t()
-  def stop_range_between([]), do: ""
-  def stop_range_between([stop]), do: "at " <> SelectFormatter.name_for_option(stop)
+  @spec stop_range_between(__MODULE__.t()) :: String.t()
+  def stop_range_between(%{stops: []}), do: ""
+  def stop_range_between(%{stops: [stop]}), do: "at " <> SelectFormatter.name_for_option(stop)
 
-  def stop_range_between(stops) do
+  def stop_range_between(%{stops: stops}) do
     stop_names = Enum.map(stops, &SelectFormatter.name_for_option/1)
     "between #{List.first(stop_names)} and #{List.last(stop_names)}"
   end
 
   # trips
-  @spec trip_names([EnhancedSchedule.t()], integer()) :: String.t()
-  def trip_names([], _), do: ""
+  @spec trip_names_only(__MODULE__.t()) :: String.t()
+  def trip_names_only(%{schedules: []}), do: ""
 
-  def trip_names(schedules, route_type) do
-    trips_string =
-      schedules
-      |> Enum.map(&SelectFormatter.name_for_option/1)
-      |> join_together
+  def trip_names_only(%{schedules: schedules}) do
+    schedules
+    |> Enum.map(&SelectFormatter.name_for_option/1)
+    |> join_together
+  end
+
+  @spec trip_names(__MODULE__.t()) :: String.t()
+  def trip_names(%{schedules: []}), do: ""
+
+  def trip_names(%{schedules: schedules, route_type: route_type} = autotext_data) do
+    trips_string = trip_names_only(autotext_data)
 
     "#{trip_word(schedules, route_type)} #{trips_string}"
   end
@@ -183,36 +187,36 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   defp trip_word([_schedule], _), do: "trip"
   defp trip_word(_, _), do: "trips"
 
-  @spec trip_form([EnhancedSchedule.t()]) :: String.t()
-  def trip_form([]), do: ""
-  def trip_form([_schedules]), do: "trip is"
-  def trip_form(_schedules), do: "trips are"
+  @spec trip_form(__MODULE__.t()) :: String.t()
+  def trip_form(%{schedules: []}), do: ""
+  def trip_form(%{schedules: [_schedules]}), do: "trip is"
+  def trip_form(%{schedules: [_ | _]}), do: "trips are"
 
   # facilities
-  @spec facility_name(Facility.t()) :: String.t()
-  def facility_name(nil), do: ""
+  @spec facility_name(__MODULE__.t()) :: String.t()
+  def facility_name(%{facility: nil}), do: ""
 
-  def facility_name(facility) do
+  def facility_name(%{facility: facility}) do
     SelectFormatter.name_for_option(facility)
   end
 
   # routes (short)
-  @spec route_names_short([Route.t()], integer()) :: String.t()
-  def route_names_short([], _route_type), do: ""
+  @spec route_names_short(__MODULE__.t()) :: String.t()
+  def route_names_short(%{routes: []}), do: ""
 
-  def route_names_short(routes, route_type) when length(routes) > 2 do
+  def route_names_short(%{routes: routes, route_type: route_type}) when length(routes) > 2 do
     format_service_type(route_type)
   end
 
-  def route_names_short(routes, _route_type) do
-    route_names(routes)
+  def route_names_short(%{routes: _routes} = autotext_data) do
+    route_names(autotext_data)
   end
 
   # routes
-  @spec route_names([Route.t()]) :: String.t()
-  def route_names([]), do: ""
+  @spec route_names(__MODULE__.t()) :: String.t()
+  def route_names(%{routes: []}), do: ""
 
-  def route_names(routes) when length(routes) > 5 do
+  def route_names(%{routes: routes}) when length(routes) > 5 do
     route_names =
       routes
       |> Enum.map(&SelectFormatter.name_for_option/1)
@@ -232,7 +236,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
     end
   end
 
-  def route_names(routes) do
+  def route_names(%{routes: routes}) do
     route_names =
       routes
       |> Enum.map(&SelectFormatter.name_for_option/1)
