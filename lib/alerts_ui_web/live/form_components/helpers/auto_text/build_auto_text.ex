@@ -9,7 +9,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   alias MBTAV3API.Stops.Stop
 
   defstruct route_type: nil,
-            effect_detail: nil,
+            effect_name: nil,
             routes: [],
             schedules: [],
             facility: nil,
@@ -30,7 +30,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
 
   @type t :: %__MODULE__{
           route_type: integer() | nil,
-          effect_detail: String.t() | nil,
+          effect_name: String.t() | nil,
           routes: [Route.t()],
           schedules: [EnhancedSchedule.t()],
           facility: Facility.t() | nil,
