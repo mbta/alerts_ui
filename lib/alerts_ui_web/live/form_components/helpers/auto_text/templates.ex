@@ -172,7 +172,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
       pattern: {2, "Service Change"},
       header_template: "?route_names notice: ?trip_names ?alert_duration ?due_to_cause"
     },
-
     # mode not specified
     %{
       pattern: {"Service Change"},
