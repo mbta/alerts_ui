@@ -446,7 +446,6 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
             "view_banner" => true,
             "banner_sync_toggle" => false,
             "banner_text" => "Well hello there",
-            # No other tests for the app use `accept_banner`, why?
             "accept_banner" => true
           }
         })
