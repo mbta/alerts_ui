@@ -200,20 +200,20 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
     end
   end
 
-  describe "stop_range/1" do
+  describe "stop_range_between/1" do
     test "stops empty" do
-      assert BuildAutoText.stop_range([]) == ""
+      assert BuildAutoText.stop_range_between([]) == ""
     end
 
     test "one stop" do
       expected = "at Lechmere"
-      actual = assert BuildAutoText.stop_range([@stop_1])
+      actual = assert BuildAutoText.stop_range_between([@stop_1])
       assert expected == actual
     end
 
     test "multiple stops" do
       expected = "between Lechmere and Mattapan"
-      actual = BuildAutoText.stop_range([@stop_1, @stop_2, @stop_3, @stop_4])
+      actual = BuildAutoText.stop_range_between([@stop_1, @stop_2, @stop_3, @stop_4])
       assert expected == actual
     end
   end

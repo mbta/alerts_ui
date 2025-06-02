@@ -24,10 +24,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
     end_specifier = change_end_specifier(end_datetime, end_specifier)
 
     starts_today? = happens_today?(start_datetime, current_time)
-    ends_today? = happens_today?(end_datetime, current_time)
 
     within_same_service_day? =
       within_same_service_day?(start_datetime, end_datetime)
+
+    within_same_calendar_day? =
+      within_same_calendar_day?(start_datetime, end_datetime)
 
     build_onetime_string(%{
       start_datetime: start_datetime,
@@ -35,8 +37,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
       start_specifier: start_specifier,
       end_specifier: end_specifier,
       starts_today?: starts_today?,
-      ends_today?: ends_today?,
-      within_same_service_day?: within_same_service_day?
+      within_same_service_day?: within_same_service_day?,
+      within_same_calendar_day?: within_same_calendar_day?
     })
   end
 
@@ -73,7 +75,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
   def build_onetime_string(%{
         start_specifier: :now,
         end_specifier: :end_of_service,
-        ends_today?: true
+        within_same_service_day?: true
       }) do
     "today"
   end
@@ -81,7 +83,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
   def build_onetime_string(%{
         start_specifier: :now,
         end_specifier: :custom,
-        ends_today?: true,
+        within_same_service_day?: true,
         end_datetime: end_datetime
       }) do
     "until #{datetime_to_formatted_time(end_datetime)}"
@@ -90,7 +92,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
   def build_onetime_string(%{
         start_specifier: :now,
         end_specifier: :end_of_service,
-        ends_today?: false,
+        within_same_service_day?: false,
         end_datetime: end_datetime
       }) do
     "through #{datetime_to_formatted_date(end_datetime)}"
@@ -99,7 +101,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
   def build_onetime_string(%{
         start_specifier: :now,
         end_specifier: :custom,
-        ends_today?: false,
+        within_same_service_day?: false,
         end_datetime: end_datetime
       }) do
     "until #{datetime_to_formatted_date(end_datetime)}"
@@ -197,7 +199,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
 
   def build_onetime_string(%{
         start_specifier: :custom,
-        end_specifier: :until_further_notice,
         starts_today?: false,
         within_same_service_day?: false,
         start_datetime: start_datetime
@@ -210,10 +211,23 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         end_specifier: :custom,
         starts_today?: false,
         within_same_service_day?: true,
+        within_same_calendar_day?: true,
         start_datetime: start_datetime,
         end_datetime: end_datetime
       }) do
     "from #{datetime_to_formatted_time(start_datetime)} to #{datetime_to_formatted_time(end_datetime)} on #{datetime_to_formatted_date(start_datetime)}"
+  end
+
+  def build_onetime_string(%{
+        start_specifier: :custom,
+        end_specifier: :custom,
+        starts_today?: false,
+        within_same_service_day?: true,
+        within_same_calendar_day?: false,
+        start_datetime: start_datetime,
+        end_datetime: end_datetime
+      }) do
+    "from #{datetime_to_formatted_date(start_datetime)} at #{datetime_to_formatted_time(start_datetime)} - #{datetime_to_formatted_date(end_datetime)} at #{datetime_to_formatted_time(end_datetime)}"
   end
 
   def build_onetime_string(%{
@@ -384,6 +398,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
     same_date = NaiveDateTime.diff(end_datetime, start_datetime, :hour) <= 24
 
     Date.compare(start, end_) === :eq || (starts_at_sos && same_date)
+  end
+
+  defp within_same_calendar_day?(nil, _), do: false
+  defp within_same_calendar_day?(_, nil), do: false
+
+  defp within_same_calendar_day?(start_datetime, end_datetime) do
+    NaiveDateTime.to_date(start_datetime) == NaiveDateTime.to_date(end_datetime)
   end
 
   # changes start specifier to "start of service" if the time is the at the start of service

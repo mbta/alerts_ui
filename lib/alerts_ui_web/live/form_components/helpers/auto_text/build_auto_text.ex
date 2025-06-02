@@ -156,11 +156,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   def stop_form(_stops), do: "stops are"
 
   # stop range (between x and y)
-  @spec stop_range([Stop.t()]) :: String.t()
-  def stop_range([]), do: ""
-  def stop_range([stop]), do: "at " <> SelectFormatter.name_for_option(stop)
+  @spec stop_range_between([Stop.t()]) :: String.t()
+  def stop_range_between([]), do: ""
+  def stop_range_between([stop]), do: "at " <> SelectFormatter.name_for_option(stop)
 
-  def stop_range(stops) do
+  def stop_range_between(stops) do
     stop_names = Enum.map(stops, &SelectFormatter.name_for_option/1)
     "between #{List.first(stop_names)} and #{List.last(stop_names)}"
   end

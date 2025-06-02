@@ -262,6 +262,22 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
       assert expected == actual
     end
 
+    test "start is custom in future and end is after midnight same service day" do
+      current_time = ~N[2025-05-12 13:00:00]
+
+      auto_text_data = %BuildAutoText{
+        alert_timing: :"one-time",
+        start_specifier: :custom,
+        end_specifier: :custom,
+        start_datetime: ~N[2025-05-14 13:00:00],
+        end_datetime: ~N[2025-05-15 01:00:00]
+      }
+
+      expected = "from Wed, May 14 at 1:00 PM - Thu, May 15 at 1:00 AM"
+      actual = AutoTextDuration.build_duration_text(auto_text_data, current_time)
+      assert expected == actual
+    end
+
     test "start is start of service in future and end is end of service a different day" do
       current_time = ~N[2025-05-12 13:00:00]
 
