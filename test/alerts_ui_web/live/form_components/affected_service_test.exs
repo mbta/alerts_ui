@@ -818,8 +818,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
            by_route_id: fn _route_id, _opts -> [] end
          ]}
       ]) do
-        conn = put_resp_cookie(conn, "show_created_alert", "true")
-
         {:ok, view, _html} = live(conn, "/alerts/new")
 
         get_to_submission_page(view, "Commuter Rail", "Delay")
@@ -858,8 +856,16 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         |> element("button", "Submit")
         |> render_click()
 
+        # query the db
+        flash = assert_redirect view, "/"
+        alert_id = flash["info"]
+        |> String.replace("New alert #", "")
+        |> String.replace(" created", "")
+
+        new_alert = AlertsUI.Alerts.get_by_alert_id(alert_id)
+
         assert [%{trip: %{trip_id: "CR-683322-595"}}, %{trip: %{trip_id: "CR-683322-596"}}] =
-                 parse_entities_from_alert_created_output(view)
+                 Map.get(new_alert, :informed_entity)
       end
     end
   end
