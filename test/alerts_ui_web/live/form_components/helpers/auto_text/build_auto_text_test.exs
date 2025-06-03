@@ -88,14 +88,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
     end
   end
 
-  describe "severity/1" do
+  describe "severity_name/1" do
     test "when severity is nil" do
-      assert BuildAutoText.severity(%{severity: nil}) == ""
+      assert BuildAutoText.severity_name(%{severity: nil}) == ""
     end
 
     test "returns severity description for severity integer" do
       expected = "about 10 minutes"
-      actual = BuildAutoText.severity(%{severity: 3})
+      actual = BuildAutoText.severity_name(%{severity: 3})
       assert expected == actual
     end
   end

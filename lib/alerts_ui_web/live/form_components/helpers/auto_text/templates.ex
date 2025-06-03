@@ -84,7 +84,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     %{
       pattern: {4, "Delay"},
       header_template:
-        "?route_names ?trip_names operation ?severity late ?alert_duration ?due_to_cause"
+        "?route_names ?trip_names operation ?severity_name late ?alert_duration ?due_to_cause"
     },
     # Bus
     %{
@@ -104,7 +104,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     %{
       pattern: {3, "Delay"},
       header_template:
-        "?route_names experiencing ?direction_name delays of ?severity ?due_to_cause"
+        "?route_names experiencing ?direction_name delays of ?severity_name ?due_to_cause"
+    },
+    %{
+      pattern: {3, "Suspension"},
+      header_template: "?route_names ?direction_name suspended ?alert_duration ?due_to_cause"
     },
     %{
       pattern: {3, "Multi-Route Detour"},
@@ -122,10 +126,91 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
       pattern: {3, "Snow Route"},
       header_template: "?route_names snow route in effect ?alert_duration"
     },
+    # subway
+    %{
+      pattern: {1, "Suspension"},
+      header_template:
+        "?route_names|: ?direction_name service is suspended ?alert_duration ?due_to_cause"
+    },
+    %{
+      pattern: {1, "Delay"},
+      header_template: "?route_names|: ?direction_name delays of ?severity_name ?due_to_cause"
+    },
+    %{
+      pattern: {1, "Service Change"},
+      header_template: "?route_names|: ?alert_duration ?due_to_cause"
+    },
+    %{
+      pattern: {1, "Shuttle"},
+      header_template:
+        "?route_names|: Shuttle buses replace ?direction_name service ?alert_duration ?due_to_cause"
+    },
+
+    # Commuter Rail
+    %{
+      pattern: {2, "Delay"},
+      header_template:
+        "?route_names ?trip_names ?trip_form operating ?severity_name behind schedule ?alert_duration ?due_to_cause"
+    },
+    %{
+      pattern: {2, "Shuttle"},
+      header_template:
+        "?route_names ?direction_name ?trip_names will be replaced by a shuttle bus ?alert_duration ?due_to_cause"
+    },
+    %{
+      pattern: {2, "Track Change"},
+      header_template:
+        "Please board ?route_names ?trip_names on opposite track ?alert_duration ?due_to_cause"
+    },
+    %{
+      pattern: {2, "Cancellation"},
+      header_template:
+        "?route_names ?trip_names ?trip_form cancelled ?alert_duration ?due_to_cause"
+    },
+    %{
+      pattern: {2, "Service Change"},
+      header_template: "?route_names notice: ?trip_names ?alert_duration ?due_to_cause"
+    },
+
     # mode not specified
     %{
       pattern: {"Service Change"},
       header_template: "?route_names notice: ?alert_duration ?due_to_cause"
+    },
+    %{
+      pattern: {"Dock Issue"},
+      header_template: "Change at ?stop_names ?alert_duration ?due_to_cause"
+    },
+    %{
+      pattern: {"Shuttle"},
+      header_template:
+        "Shuttle buses replacing ?route_names ?direction_name service ?alert_duration ?due_to_cause"
+    },
+    %{
+      pattern: {"Suspension"},
+      header_template:
+        "?route_names ?direction_name service suspended ?alert_duration ?due_to_cause"
+    },
+    %{
+      pattern: {"Extra Service"},
+      header_template: "Extra service on ?route_names ?alert_duration ?due_to_cause"
+    },
+    %{
+      pattern: {"Station Closure"},
+      header_template: "?stop_names closed ?alert_duration ?due_to_cause"
+    },
+    %{
+      pattern: {"Delay"},
+      header_template:
+        "?route_names ?trip_names experiencing ?direction_name delays of ?severity_name ?alert_duration ?due_to_cause"
+    },
+    %{
+      pattern: {"Schedule Change"},
+      header_template: "Planned schedule change on ?route_names ?alert_duration ?due_to_cause"
+    },
+    %{
+      pattern: {"Station Issue"},
+      header_template: "Change at ?stop_names ?alert_duration ?due_to_cause"
     }
   ]
 
@@ -154,6 +239,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
       end
     end)
     |> String.replace(" |", "")
+    |> String.replace("  ", " ")
   end
 
   defp get_function_result(string, autotext_data) do

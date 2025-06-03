@@ -490,6 +490,27 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       assert expected == actual
     end
 
+    test "Bus suspension" do
+      autotext_data = %{
+        route_type: 3,
+        routes: [@route_1],
+        stops: [@stop_1],
+        effect_name: "Suspension",
+        direction: [1],
+        cause_detail: "PARADE",
+        alert_timing: :"one-time",
+        start_specifier: :now,
+        end_specifier: :custom,
+        start_datetime: ~N[2025-05-08 13:00:00],
+        end_datetime: ~N[2025-05-10 15:00:00]
+      }
+
+      expected = "Route 1 eastbound suspended until Sat, May 10 due to a parade"
+
+      actual = Templates.build_auto_text(autotext_data, :header_template)
+      assert expected == actual
+    end
+
     test "Bus multi-route detour" do
       autotext_data = %{
         route_type: 3,
@@ -566,8 +587,209 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       assert expected == actual
     end
 
+    # subway
+
+    test "Subway suspension" do
+      autotext_data = %{
+        route_type: 1,
+        routes: [@route_1],
+        direction: [0],
+        effect_name: "Suspension",
+        cause_detail: "ICE_IN_HARBOR",
+        alert_timing: :"one-time",
+        start_specifier: :now,
+        end_specifier: :custom,
+        start_datetime: ~N[2025-05-08 13:00:00],
+        end_datetime: ~N[2025-05-10 15:00:00]
+      }
+
+      expected = "Route 1: westbound service is suspended until Sat, May 10 due to ice in harbor"
+
+      actual = Templates.build_auto_text(autotext_data, :header_template)
+      assert expected == actual
+    end
+
+    test "Subway delay" do
+      autotext_data = %{
+        route_type: 1,
+        routes: [@route_1],
+        direction: [0],
+        severity: 3,
+        effect_name: "Delay",
+        cause_detail: "ICE_IN_HARBOR",
+        alert_timing: :"one-time",
+        start_specifier: :now,
+        end_specifier: :custom,
+        start_datetime: ~N[2025-05-08 13:00:00],
+        end_datetime: ~N[2025-05-10 15:00:00]
+      }
+
+      expected = "Route 1: westbound delays of about 10 minutes due to ice in harbor"
+
+      actual = Templates.build_auto_text(autotext_data, :header_template)
+      assert expected == actual
+    end
+
+    test "Subway service change" do
+      autotext_data = %{
+        route_type: 1,
+        routes: [@route_1],
+        direction: [0],
+        severity: 3,
+        effect_name: "Service Change",
+        cause_detail: "ICE_IN_HARBOR",
+        alert_timing: :"one-time",
+        start_specifier: :now,
+        end_specifier: :custom,
+        start_datetime: ~N[2025-05-08 13:00:00],
+        end_datetime: ~N[2025-05-10 15:00:00]
+      }
+
+      expected = "Route 1: until Sat, May 10 due to ice in harbor"
+
+      actual = Templates.build_auto_text(autotext_data, :header_template)
+      assert expected == actual
+    end
+
+    test "Subway shuttle" do
+      autotext_data = %{
+        route_type: 1,
+        routes: [@route_1],
+        direction: [0],
+        severity: 3,
+        effect_name: "Shuttle",
+        cause_detail: "ICE_IN_HARBOR",
+        alert_timing: :"one-time",
+        start_specifier: :now,
+        end_specifier: :custom,
+        start_datetime: ~N[2025-05-08 13:00:00],
+        end_datetime: ~N[2025-05-10 15:00:00]
+      }
+
+      expected =
+        "Route 1: Shuttle buses replace westbound service until Sat, May 10 due to ice in harbor"
+
+      actual = Templates.build_auto_text(autotext_data, :header_template)
+      assert expected == actual
+    end
+
+    # Commuter Rail
+
+    test "CR Delay" do
+      autotext_data = %{
+        route_type: 2,
+        routes: [@route_1],
+        schedules: [@schedule_1],
+        direction: [0],
+        severity: 3,
+        effect_name: "Delay",
+        cause_detail: "HAZMAT_CONDITION",
+        alert_timing: :"one-time",
+        start_specifier: :now,
+        end_specifier: :custom,
+        start_datetime: ~N[2025-05-08 13:00:00],
+        end_datetime: ~N[2025-05-10 15:00:00]
+      }
+
+      expected =
+        "Route 1 train 527 (9:01 AM from South Station) trip is operating about 10 minutes behind schedule until Sat, May 10 due to a hazmat condition"
+
+      actual = Templates.build_auto_text(autotext_data, :header_template)
+      assert expected == actual
+    end
+
+    test "CR Shuttle" do
+      autotext_data = %{
+        route_type: 2,
+        routes: [@route_1],
+        schedules: [@schedule_1],
+        direction: [0],
+        severity: 3,
+        effect_name: "Shuttle",
+        cause_detail: "HAZMAT_CONDITION",
+        alert_timing: :"one-time",
+        start_specifier: :now,
+        end_specifier: :custom,
+        start_datetime: ~N[2025-05-08 13:00:00],
+        end_datetime: ~N[2025-05-10 15:00:00]
+      }
+
+      expected =
+        "Route 1 westbound train 527 (9:01 AM from South Station) will be replaced by a shuttle bus until Sat, May 10 due to a hazmat condition"
+
+      actual = Templates.build_auto_text(autotext_data, :header_template)
+      assert expected == actual
+    end
+
+    test "CR Track Change" do
+      autotext_data = %{
+        route_type: 2,
+        routes: [@route_1],
+        schedules: [@schedule_1],
+        direction: [0],
+        severity: 3,
+        effect_name: "Track Change",
+        cause_detail: "HAZMAT_CONDITION",
+        alert_timing: :"one-time",
+        start_specifier: :now,
+        end_specifier: :custom,
+        start_datetime: ~N[2025-05-08 13:00:00],
+        end_datetime: ~N[2025-05-10 15:00:00]
+      }
+
+      expected =
+        "Please board Route 1 train 527 (9:01 AM from South Station) on opposite track until Sat, May 10 due to a hazmat condition"
+
+      actual = Templates.build_auto_text(autotext_data, :header_template)
+      assert expected == actual
+    end
+
+    test "CR Cancellation" do
+      autotext_data = %{
+        route_type: 2,
+        routes: [@route_1],
+        schedules: [@schedule_1],
+        direction: [0],
+        effect_name: "Cancellation",
+        cause_detail: "HAZMAT_CONDITION",
+        alert_timing: :"one-time",
+        start_specifier: :now,
+        end_specifier: :custom,
+        start_datetime: ~N[2025-05-08 13:00:00],
+        end_datetime: ~N[2025-05-10 15:00:00]
+      }
+
+      expected =
+        "Route 1 train 527 (9:01 AM from South Station) trip is cancelled until Sat, May 10 due to a hazmat condition"
+
+      actual = Templates.build_auto_text(autotext_data, :header_template)
+      assert expected == actual
+    end
+
+    test "CR Service change" do
+      autotext_data = %{
+        route_type: 2,
+        routes: [@route_1],
+        schedules: [@schedule_1],
+        direction: [0],
+        effect_name: "Service Change",
+        cause_detail: "HAZMAT_CONDITION",
+        alert_timing: :"one-time",
+        start_specifier: :now,
+        end_specifier: :custom,
+        start_datetime: ~N[2025-05-08 13:00:00],
+        end_datetime: ~N[2025-05-10 15:00:00]
+      }
+
+      expected =
+        "Route 1 notice: train 527 (9:01 AM from South Station) until Sat, May 10 due to a hazmat condition"
+
+      actual = Templates.build_auto_text(autotext_data, :header_template)
+      assert expected == actual
+    end
+
     # mode not specified
-    test "Service change issue" do
+    test "Service change" do
       autotext_data = %{
         route_type: 3,
         routes: [@route_1],
@@ -582,6 +804,173 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
 
       expected =
         "Route 1 notice: until Sat, May 10 due to a slippery rail"
+
+      actual = Templates.build_auto_text(autotext_data, :header_template)
+      assert expected == actual
+    end
+
+    test "Dock issue" do
+      autotext_data = %{
+        route_type: 3,
+        stops: [@stop_1],
+        effect_name: "Dock Issue",
+        cause_detail: "SLIPPERY_RAIL",
+        alert_timing: :"one-time",
+        start_specifier: :now,
+        end_specifier: :custom,
+        start_datetime: ~N[2025-05-08 13:00:00],
+        end_datetime: ~N[2025-05-10 15:00:00]
+      }
+
+      expected =
+        "Change at Lechmere until Sat, May 10 due to a slippery rail"
+
+      actual = Templates.build_auto_text(autotext_data, :header_template)
+      assert expected == actual
+    end
+
+    test "Shuttle" do
+      autotext_data = %{
+        route_type: 3,
+        routes: [@route_1],
+        direction: [1],
+        effect_name: "Shuttle",
+        cause_detail: "SLIPPERY_RAIL",
+        alert_timing: :"one-time",
+        start_specifier: :now,
+        end_specifier: :custom,
+        start_datetime: ~N[2025-05-08 13:00:00],
+        end_datetime: ~N[2025-05-10 15:00:00]
+      }
+
+      expected =
+        "Shuttle buses replacing Route 1 eastbound service until Sat, May 10 due to a slippery rail"
+
+      actual = Templates.build_auto_text(autotext_data, :header_template)
+      assert expected == actual
+    end
+
+    test "Suspension" do
+      autotext_data = %{
+        route_type: 2,
+        routes: [@route_1],
+        direction: [1],
+        effect_name: "Suspension",
+        cause_detail: "SLIPPERY_RAIL",
+        alert_timing: :"one-time",
+        start_specifier: :now,
+        end_specifier: :custom,
+        start_datetime: ~N[2025-05-08 13:00:00],
+        end_datetime: ~N[2025-05-10 15:00:00]
+      }
+
+      expected =
+        "Route 1 eastbound service suspended until Sat, May 10 due to a slippery rail"
+
+      actual = Templates.build_auto_text(autotext_data, :header_template)
+      assert expected == actual
+    end
+
+    test "Extra service" do
+      autotext_data = %{
+        route_type: 2,
+        routes: [@route_1],
+        effect_name: "Extra Service",
+        cause_detail: "SLIPPERY_RAIL",
+        alert_timing: :"one-time",
+        start_specifier: :now,
+        end_specifier: :custom,
+        start_datetime: ~N[2025-05-08 13:00:00],
+        end_datetime: ~N[2025-05-10 15:00:00]
+      }
+
+      expected =
+        "Extra service on Route 1 until Sat, May 10 due to a slippery rail"
+
+      actual = Templates.build_auto_text(autotext_data, :header_template)
+      assert expected == actual
+    end
+
+    test "Station closure" do
+      autotext_data = %{
+        route_type: 2,
+        stops: [@stop_1],
+        effect_name: "Station Closure",
+        cause_detail: "SLIPPERY_RAIL",
+        alert_timing: :"one-time",
+        start_specifier: :now,
+        end_specifier: :custom,
+        start_datetime: ~N[2025-05-08 13:00:00],
+        end_datetime: ~N[2025-05-10 15:00:00]
+      }
+
+      expected =
+        "Lechmere closed until Sat, May 10 due to a slippery rail"
+
+      actual = Templates.build_auto_text(autotext_data, :header_template)
+      assert expected == actual
+    end
+
+    test "Delay" do
+      # there is no current circustance under which you would see this one
+      autotext_data = %{
+        route_type: 0,
+        routes: [@route_1],
+        schedules: [@schedule_1],
+        stops: [@stop_1],
+        severity: 3,
+        effect_name: "Delay",
+        cause_detail: "SLIPPERY_RAIL",
+        alert_timing: :"one-time",
+        start_specifier: :now,
+        end_specifier: :custom,
+        start_datetime: ~N[2025-05-08 13:00:00],
+        end_datetime: ~N[2025-05-10 15:00:00]
+      }
+
+      expected =
+        "Route 1 trip 527 (9:01 AM from South Station) experiencing delays of about 10 minutes until Sat, May 10 due to a slippery rail"
+
+      actual = Templates.build_auto_text(autotext_data, :header_template)
+      assert expected == actual
+    end
+
+    test "Schedule change" do
+      autotext_data = %{
+        route_type: 2,
+        routes: [@route_1],
+        schedules: [@schedule_1],
+        effect_name: "Schedule Change",
+        cause_detail: "SLIPPERY_RAIL",
+        alert_timing: :"one-time",
+        start_specifier: :now,
+        end_specifier: :custom,
+        start_datetime: ~N[2025-05-08 13:00:00],
+        end_datetime: ~N[2025-05-10 15:00:00]
+      }
+
+      expected =
+        "Planned schedule change on Route 1 until Sat, May 10 due to a slippery rail"
+
+      actual = Templates.build_auto_text(autotext_data, :header_template)
+      assert expected == actual
+    end
+
+    test "Station issue" do
+      autotext_data = %{
+        route_type: 2,
+        stops: [@stop_1],
+        schedules: [@schedule_1],
+        effect_name: "Station Issue",
+        cause_detail: "SLIPPERY_RAIL",
+        alert_timing: :"one-time",
+        start_specifier: :now,
+        end_specifier: :custom,
+        start_datetime: ~N[2025-05-08 13:00:00],
+        end_datetime: ~N[2025-05-10 15:00:00]
+      }
+
+      expected = "Change at Lechmere until Sat, May 10 due to a slippery rail"
 
       actual = Templates.build_auto_text(autotext_data, :header_template)
       assert expected == actual

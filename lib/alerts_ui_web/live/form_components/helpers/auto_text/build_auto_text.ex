@@ -111,10 +111,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   def cause(cause_detail), do: format_cause(cause_detail)
 
   # severity
-  @spec severity(__MODULE__.t()) :: String.t()
-  def severity(%{severity: nil}), do: ""
+  @spec severity_name(__MODULE__.t()) :: String.t()
+  def severity_name(%{severity: nil}), do: ""
 
-  def severity(%{severity: severity}) do
+  def severity_name(%{severity: severity}) do
     SeverityLevel.severity_description_by_severity(severity)
   end
 
