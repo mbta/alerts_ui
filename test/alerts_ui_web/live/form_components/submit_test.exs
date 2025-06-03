@@ -196,7 +196,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
         |> element("button", "Submit")
         |> render_click()
 
-        flash = assert_redirect view, "/"
+        flash = assert_redirect(view, "/")
         assert flash["info"] =~ ~r/New alert #[0-9]+ created/
       end
     end

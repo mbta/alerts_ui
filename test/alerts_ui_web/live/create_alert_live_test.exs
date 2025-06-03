@@ -102,7 +102,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         send(view.pid, {:section_completed, changeset})
         send(view.pid, :create_alert)
 
-        flash = assert_redirect view, "/"
+        flash = assert_redirect(view, "/")
         assert flash["info"] =~ ~r/New alert #[0-9]+ created/
       end
     end
@@ -234,7 +234,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         send(view.pid, {:section_completed, details_changeset})
         send(view.pid, :create_alert)
 
-        flash = assert_redirect view, "/"
+        flash = assert_redirect(view, "/")
         assert flash["info"] =~ ~r/New alert #[0-9]+ created/
       end
     end

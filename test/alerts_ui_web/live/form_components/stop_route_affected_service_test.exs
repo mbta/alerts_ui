@@ -458,10 +458,12 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         |> render_click()
 
         # query the db
-        flash = assert_redirect view, "/"
-        alert_id = flash["info"]
-        |> String.replace("New alert #", "")
-        |> String.replace(" created", "")
+        flash = assert_redirect(view, "/")
+
+        alert_id =
+          flash["info"]
+          |> String.replace("New alert #", "")
+          |> String.replace(" created", "")
 
         new_alert = AlertsUI.Alerts.get_by_alert_id(alert_id)
 
@@ -545,10 +547,12 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         |> render_click()
 
         # query the db
-        flash = assert_redirect view, "/"
-        alert_id = flash["info"]
-        |> String.replace("New alert #", "")
-        |> String.replace(" created", "")
+        flash = assert_redirect(view, "/")
+
+        alert_id =
+          flash["info"]
+          |> String.replace("New alert #", "")
+          |> String.replace(" created", "")
 
         new_alert = AlertsUI.Alerts.get_by_alert_id(alert_id)
 
