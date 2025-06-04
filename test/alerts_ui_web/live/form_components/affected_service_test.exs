@@ -1066,12 +1066,16 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         })
 
         view
-        |> element("button#save", "Review and submit")
+        |> element("button#review", "Review and submit")
+        |> render_click()
+
+        view
+        |> element("button", "Submit")
         |> render_click()
 
         assert [
                  %{
-                   stop_id: "place-acql",
+                   stop_id: "place-crtst",
                    route_id: "CR-Worcester",
                    trip: %{trip_id: "CR-683322-595"}
                  }
