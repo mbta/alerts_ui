@@ -6,7 +6,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
   import LiveIsolatedComponent
   import Mock
   import Phoenix.LiveViewTest
-  import Test.Support.Helpers
+  alias AlertsUI.Alerts
   alias AlertsUI.Models.EnhancedSchedule
   alias AlertsUIWeb.FormComponents.TimeRange
   alias AlertsUIWeb.Step
@@ -601,7 +601,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
             route_type: @route.type,
             activities: [:BOARD],
             stop_id: @stop.id,
-            trip: trip
+            trip: trip,
+            direction_id: 0
           })
 
         insert(
@@ -654,7 +655,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         |> element("button", "Submit")
         |> render_click()
 
-        created_alert = parse_alert_created_output(view)
+        # wait a smidge for the alert to get persisted to the database
+        :timer.sleep(25)
+        created_alert = Alerts.get_by_alert_id("123")
 
         assert created_alert.active_period_end ==
                  todays_date
