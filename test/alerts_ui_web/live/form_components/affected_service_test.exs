@@ -3,6 +3,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
   use AlertsUIWeb.ConnCase
   use AlertsUIWeb, :live_view
 
+  import AlertsUI.Support.Factory
   import LiveIsolatedComponent
   import Mock
   import Phoenix.LiveViewTest
@@ -62,7 +63,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
 
   @stop %Stop{id: "place-sstat", name: "South Station"}
   @stop_2 %Stop{id: "place-crtst", name: "Courthouse"}
-
   @assigns %{
     id: "affected_service",
     progress: %Step{
@@ -756,7 +756,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
            by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end,
            end_of_rating: fn -> DateTime.utc_now() |> DateTime.to_date() |> Date.add(10) end
          ]},
-        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop, @stop_2] end]}
       ]) do
         {:ok, view, _html} =
           live_isolated_component(
@@ -764,22 +764,29 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
             @assigns
             |> Map.merge(%{
               editing: true,
+              route_type: 3,
               alert_data: %{
                 direction: "0",
                 route_type: 2,
-                stop_ids: ["place-sstat"],
+                stop_ids: [@stop.id, @stop_2.id],
                 route_ids: ["CR-Worcester"],
                 trip_ids: ["CR-683322-595"]
               }
             })
           )
 
-        assert view |> render_async() =~ ~s(value=\"CR-Worcester\" checked=\"checked\")
+        view
+        |> element("form")
+        |> render_change(%{
+          "affected_service" => %{"stop_ids" => [@stop_2.id]}
+        })
+
+        assert view |> render_async() =~ ~s(value=\"CR-Worcester\")
 
         assert view |> render_async() =~
                  ~s(<option selected="selected" value="0">Westbound</option>)
 
-        assert view |> render_async() =~ ~s(<option selected="selected" value="place-sstat">)
+        assert view |> render_async() =~ ~s(<option selected="selected" value="place-crtst">)
 
         assert view |> render_async() =~
                  ~s(<option selected="selected" value="CR-683322-595">595)
@@ -977,6 +984,102 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         |> render_click()
 
         assert [%{trip: %{trip_id: "CR-683322-595"}}, %{trip: %{trip_id: "CR-683322-596"}}] =
+                 parse_entities_from_alert_created_output(view)
+      end
+    end
+
+    @tag :logged_in_user
+    test "end-to-end editing", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_stop: fn _stop_id, _ -> [@route] end,
+           by_type: fn _types -> [@route] end,
+           get: fn _, _ -> @route end
+         ]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _route_ids, _opts ->
+             [@schedule, @schedule_2, @schedule_3, @schedule_4]
+           end,
+           end_of_rating: fn -> Date.add(@todays_date, 1) end,
+           trip: fn "CR-683322-595" ->
+             %Trip{id: "CR-683322-595", name: "595", direction_id: 0}
+           end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _route_type -> [@stop, @stop_2] end,
+           by_route: fn _, _ -> [@stop, @stop_2] end,
+           get_parent: fn
+             "place-sstat" -> @stop
+             "place-acql" -> @stop_2
+           end
+         ]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _route_id, _opts -> [] end,
+           included_stops_by_route_id: fn "CR-Worcester", [canonical: true] ->
+             [@stop, @stop_2]
+           end
+         ]}
+      ]) do
+        conn = put_resp_cookie(conn, "show_created_alert", "true")
+        trip = build(:trip_descriptor, %{trip_id: @schedule.trip.id})
+
+        ie =
+          build(:informed_entity, %{
+            route_id: @route.id,
+            route_type: @route.type,
+            activities: [:BOARD],
+            stop_id: @stop.id,
+            trip: trip,
+            direction_id: nil
+          })
+
+        insert(
+          :alert,
+          %{
+            alert_id: "123",
+            header_text: "example header text",
+            informed_entity: [ie],
+            effect: :SIGNIFICANT_DELAYS,
+            effect_detail: "DELAY",
+            original_route_selections: [@route.id],
+            reminder_times: []
+          }
+        )
+
+        {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
+
+        rendered_view = render(view)
+        assert rendered_view =~ ~s(value="CR-Worcester" checked="checked")
+        assert rendered_view =~ ~s(<option selected="selected" value="place-sstat">South Station)
+        assert rendered_view =~ ~s(<option selected="selected" value="CR-683322-595">595)
+
+        view
+        |> element("#service_form")
+        |> render_change(%{
+          "affected_service" => %{
+            "stop_ids" => [@stop_2.id]
+          }
+        })
+
+        view
+        |> element("button#review", "Review and submit")
+        |> render_click()
+
+        view
+        |> element("button", "Submit")
+        |> render_click()
+
+        assert [
+                 %{
+                   stop_id: "place-crtst",
+                   route_id: "CR-Worcester",
+                   trip: %{trip_id: "CR-683322-595"}
+                 }
+               ] =
                  parse_entities_from_alert_created_output(view)
       end
     end
