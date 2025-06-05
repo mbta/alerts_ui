@@ -488,7 +488,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         trip_count: nil,
         direction_count: nil
       },
-      service_effect_template: "?route_names_short schedule change"
+      service_effect_template: "change at ?stop_names"
     }
   ]
 
