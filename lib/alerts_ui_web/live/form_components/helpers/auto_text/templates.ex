@@ -23,66 +23,86 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     # access
     %{
       pattern: {nil, "Bike Issue"},
-      header_template: "?facility_name issue ?alert_duration ?due_to_cause"
+      header_template: "?facility_name issue ?alert_duration ?due_to_cause",
+      service_effect_template: "?stop_names bicycle issue"
     },
     %{
       pattern: {nil, "Escalator Closure"},
-      header_template: "?facility_name unavailable ?alert_duration ?due_to_cause"
+      header_template: "?facility_name unavailable ?alert_duration ?due_to_cause",
+      service_effect_template: "?stop_names escalator unavailable"
     },
     %{
       pattern: {nil, "Parking Closure"},
-      header_template: "?facility_name closed ?alert_duration ?due_to_cause"
+      header_template: "?facility_name closed ?alert_duration ?due_to_cause",
+      service_effect_template: "?stop_names parking closure"
     },
     %{
       pattern: {nil, "Elevator Closure"},
-      header_template: "?facility_name unavailable ?alert_duration ?due_to_cause"
+      header_template: "?facility_name unavailable ?alert_duration ?due_to_cause",
+      service_effect_template: "?stop_names elevator unavailable"
     },
     %{
       pattern: {nil, "Access Issue"},
-      header_template: "?facility_name issue ?alert_duration ?due_to_cause"
+      header_template: "?facility_name issue ?alert_duration ?due_to_cause",
+      service_effect_template: "?stop_names access issue"
     },
     %{
       pattern: {nil, "Facility Issue"},
-      header_template: "?facility_name issue ?alert_duration ?due_to_cause"
+      header_template: "?facility_name issue ?alert_duration ?due_to_cause",
+      service_effect_template: "?stop_names issue"
     },
     %{
       pattern: {nil, "Parking Issue"},
-      header_template: "?facility_name issue ?alert_duration ?due_to_cause"
+      header_template: "?facility_name issue ?alert_duration ?due_to_cause",
+      service_effect_template: "?stop_names parking issue"
     },
 
     # systemwide
     %{
       pattern: {nil, "Service Change"},
-      header_template: "?impacted_modes notice: ?alert_duration ?due_to_cause"
+      header_template: "?impacted_modes notice: ?alert_duration ?due_to_cause",
+      service_effect_template: "?impacted_modes notice"
     },
     %{
       pattern: {nil, "Suspension"},
-      header_template: "?impacted_modes service suspended ?alert_duration ?due_to_cause"
+      header_template: "?impacted_modes service suspended ?alert_duration ?due_to_cause",
+      service_effect_template: "?impacted_modes service suspension"
     },
     %{
       pattern: {nil, "Amber Alert"},
-      header_template: "Amber Alert"
+      header_template: "Amber Alert",
+      service_effect_template: "Amber Alert"
+    },
+    %{
+      pattern: {nil, "Amber Alert"},
+      header_template: "Amber Alert",
+      service_effect_template: "Amber Alert"
     },
     %{
       pattern: {nil, "Policy Change"},
-      header_template: "Policy change affecting ?impacted_modes service"
+      header_template: "Policy change affecting ?impacted_modes service",
+      service_effect_template: "?impacted_modes policy change"
     },
     %{
       pattern: {nil, "Delay"},
       header_template:
-        "?impacted_modes service may experience delays ?alert_duration ?due_to_cause"
+        "?impacted_modes service may experience delays ?alert_duration ?due_to_cause",
+      service_effect_template: "?impacted_modes delays"
     },
     %{
       pattern: {nil, "Summary"},
-      header_template: "?impacted_modes notice ?alert_duration ?due_to_cause"
+      header_template: "?impacted_modes notice ?alert_duration ?due_to_cause",
+      service_effect_template: "?impacted_modes notice"
     },
     %{
       pattern: {nil, "Schedule Change"},
-      header_template: "Planned ?impacted_modes schedule change ?alert_duration ?due_to_cause"
+      header_template: "Planned ?impacted_modes schedule change ?alert_duration ?due_to_cause",
+      service_effect_template: "?impacted_modes schedule change"
     },
     %{
       pattern: {nil, "Extra Service"},
-      header_template: "Extra ?impacted_modes service ?alert_duration ?due_to_cause"
+      header_template: "Extra ?impacted_modes service ?alert_duration ?due_to_cause",
+      service_effect_template: "Extra ?impacted_modes service"
     },
 
     # Ferry
@@ -94,7 +114,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         stop_count: 2,
         trip_count: nil,
         direction_count: nil
-      }
+      },
+      service_effect_template: "?stop_names closed"
     },
     %{
       pattern: {4, "Suspension"},
@@ -104,7 +125,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         stop_count: 0,
         trip_count: nil,
         direction_count: nil
-      }
+      },
+      service_effect_template: "?route_names_short service suspended"
     },
     %{
       pattern: {4, "Cancellation"},
@@ -114,7 +136,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         stop_count: nil,
         trip_count: 2,
         direction_count: 1
-      }
+      },
+      service_effect_template: "?route_names_short trip cancelled"
     },
     %{
       pattern: {4, "Delay"},
@@ -125,7 +148,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         stop_count: 1,
         trip_count: 2,
         direction_count: 1
-      }
+      },
+      service_effect_template: "?route_names_short delay"
     },
 
     # Bus
@@ -137,7 +161,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         stop_count: nil,
         trip_count: 2,
         direction_count: 1
-      }
+      },
+      service_effect_template: "?route_names_short trip cancelled"
     },
     %{
       pattern: {3, "Stop Closure"},
@@ -148,7 +173,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         stop_count: 2,
         trip_count: nil,
         direction_count: nil
-      }
+      },
+      service_effect_template: "?stop_names_short closed"
     },
     %{
       pattern: {3, "Stop Shovelling"},
@@ -159,7 +185,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         stop_count: 0,
         trip_count: nil,
         direction_count: nil
-      }
+      },
+      service_effect_template: "Stops shoveled on ?route_names"
     },
     %{
       pattern: {3, "Delay"},
@@ -170,7 +197,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         stop_count: 0,
         trip_count: nil,
         direction_count: nil
-      }
+      },
+      service_effect_template: "?route_names_short delay"
     },
     %{
       pattern: {3, "Suspension"},
@@ -181,7 +209,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         stop_count: 0,
         trip_count: nil,
         direction_count: nil
-      }
+      },
+      service_effect_template: "Suspension of service on ?route_names"
     },
     %{
       pattern: {3, "Multi-Route Detour"},
@@ -191,7 +220,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         stop_count: 0,
         trip_count: nil,
         direction_count: nil
-      }
+      },
+      service_effect_template: "?route_names_short detour"
     },
     %{
       pattern: {3, "Stop Move"},
@@ -201,7 +231,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         stop_count: 2,
         trip_count: nil,
         direction_count: nil
-      }
+      },
+      service_effect_template: "?stop_names stop moved"
     },
     %{
       pattern: {3, "Detour"},
@@ -211,7 +242,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         stop_count: 0,
         trip_count: nil,
         direction_count: 1
-      }
+      },
+      service_effect_template: "?route_names_short detour"
     },
     %{
       pattern: {3, "Snow Route"},
@@ -221,7 +253,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         stop_count: 0,
         trip_count: nil,
         direction_count: 1
-      }
+      },
+      service_effect_template: "?route_names_short on snow route"
     },
     # header template here duplicated from general one.
     %{
@@ -245,7 +278,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         stop_count: 0,
         trip_count: nil,
         direction_count: nil
-      }
+      },
+      service_effect_template: "Suspension of service on ?route_names_short"
     },
     %{
       pattern: {1, "Delay"},
@@ -255,7 +289,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         stop_count: 2,
         trip_count: 2,
         direction_count: 1
-      }
+      },
+      service_effect_template: "?route_names_short delay"
     },
     %{
       pattern: {1, "Service Change"},
@@ -265,7 +300,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         stop_count: 0,
         trip_count: nil,
         direction_count: 1
-      }
+      },
+      service_effect_template: "?route_names_short notice"
     },
     %{
       pattern: {1, "Shuttle"},
@@ -287,7 +323,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         stop_count: 2,
         trip_count: nil,
         direction_count: 1
-      }
+      },
+      service_effect_template: "?route_names_short shuttle"
     },
 
     # Commuter Rail
@@ -300,7 +337,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         direction_count: 1,
         stop_count: 0,
         trip_count: 2
-      }
+      },
+      service_effect_template: "?route_names_short delay"
     },
     %{
       pattern: {2, "Shuttle"},
@@ -311,7 +349,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         direction_count: nil,
         stop_count: 0,
         trip_count: 2
-      }
+      },
+      service_effect_template: "?route_names_short shuttle"
     },
     %{
       pattern: {2, "Track Change"},
@@ -322,7 +361,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         direction_count: 1,
         stop_count: 2,
         trip_count: 2
-      }
+      },
+      service_effect_template: "?route_names_short track change"
     },
     %{
       pattern: {2, "Cancellation"},
@@ -333,7 +373,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         direction_count: 1,
         stop_count: 0,
         trip_count: 2
-      }
+      },
+      service_effect_template: "?route_names_short train cancelled"
     },
     %{
       pattern: {2, "Service Change"},
@@ -343,7 +384,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         direction_count: 1,
         stop_count: 0,
         trip_count: 2
-      }
+      },
+      service_effect_template: "?route_names_short notice"
     },
     # mode not specified
     %{
@@ -354,7 +396,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         stop_count: 0,
         trip_count: 2,
         direction_count: nil
-      }
+      },
+      service_effect_template: "?route_names_short notice"
     },
     %{
       pattern: {"Dock Issue"},
@@ -364,7 +407,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         stop_count: 2,
         trip_count: nil,
         direction_count: nil
-      }
+      },
+      service_effect_template: "Change at ?stop_names"
     },
     %{
       pattern: {"Shuttle"},
@@ -375,7 +419,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         stop_count: 0,
         trip_count: nil,
         direction_count: nil
-      }
+      },
+      service_effect_template: "?route_names_short shuttle"
     },
     %{
       pattern: {"Suspension"},
@@ -386,7 +431,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         stop_count: 0,
         trip_count: nil,
         direction_count: nil
-      }
+      },
+      service_effect_template: "Suspension of service on ?route_names_short"
     },
     %{
       pattern: {"Extra Service"},
@@ -396,7 +442,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         stop_count: nil,
         trip_count: nil,
         direction_count: nil
-      }
+      },
+      service_effect_template: "Extra ?route_names_short service"
     },
     %{
       pattern: {"Station Closure"},
@@ -406,7 +453,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         stop_count: 2,
         trip_count: nil,
         direction_count: nil
-      }
+      },
+      service_effect_template: "?stop_names closed"
     },
     %{
       pattern: {"Delay"},
@@ -417,7 +465,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         stop_count: 2,
         trip_count: 2,
         direction_count: 1
-      }
+      },
+      service_effect_template: "?route_names_short delay"
     },
     %{
       pattern: {"Schedule Change"},
@@ -427,7 +476,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         stop_count: nil,
         trip_count: nil,
         direction_count: nil
-      }
+      },
+      service_effect_template: "?route_names_short schedule change"
     },
     %{
       pattern: {"Station Issue"},
@@ -437,7 +487,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         stop_count: 2,
         trip_count: nil,
         direction_count: nil
-      }
+      },
+      service_effect_template: "?route_names_short schedule change"
     }
   ]
 
