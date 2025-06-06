@@ -9,7 +9,12 @@ defmodule AlertsUIWeb.ReviewModal do
 
   alias AlertsUI.ActivePeriodBuilder
   alias AlertsUI.Models.SeverityLevel
-  alias AlertsUIWeb.FormComponents.Helpers.{RecurringDurationText, TimeRangeDurationText}
+
+  alias AlertsUIWeb.FormComponents.Helpers.{
+    ContentFormatter,
+    RecurringDurationText,
+    TimeRangeDurationText
+  }
 
   @doc """
   Renders the review modal. The fields passed as props are determined by its 
@@ -23,6 +28,8 @@ defmodule AlertsUIWeb.ReviewModal do
     />
   """
   attr :alert_data, :map, default: %{}, doc: "The user selections that make up alert_data"
+  attr :editing, :boolean, default: false, doc: "Whether the alert is being edited"
+  attr :alert_id, :string, default: nil, doc: "If editing, this is the alert's string id"
   attr :rest, :global, include: ~w(cancel_event_name accept_event_name target_id)
 
   def review_modal(assigns) do
@@ -41,9 +48,16 @@ defmodule AlertsUIWeb.ReviewModal do
     >
       <:header>
         <div>
-          <p class="text-lg/6">Create new alert</p>
+          <%= cond do %>
+            <% @editing == false && @alert_id == nil -> %>
+              <p class="text-lg/6">Create new alert</p>
+            <% @editing == false -> %>
+              <p class="text-lg/6">Alert #{@alert_id}</p>
+            <% @editing == true -> %>
+              <p class="text-lg/6">Edit alert #{@alert_id}</p>
+          <% end %>
           <p class="text-text-secondary text-base/6 font-bold">
-            [Service Type] • {@alert_data.effect_name}
+            {ContentFormatter.service_type_string(@alert_data.route_type, @alert_data.combination)} • {@alert_data.effect_name}
           </p>
         </div>
       </:header>

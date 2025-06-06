@@ -38,6 +38,7 @@ defmodule AlertsUIWeb.FormComponents.Submit do
       <.review_modal
         :if={Map.get(assigns, :show, nil)}
         alert_data={@alert_data}
+        editing={@editing}
         cancel_event_name="cancel_review"
         accept_event_name="save"
         target_id="#submit_view"
