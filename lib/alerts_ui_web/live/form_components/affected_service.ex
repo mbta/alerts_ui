@@ -412,7 +412,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   @impl true
   def render(assigns) do
-    # IO.inspect(assigns)
     route_ids = assigns.form[:route_ids].value || []
     route_search_term = assigns.form[:route_search_term].value
 
