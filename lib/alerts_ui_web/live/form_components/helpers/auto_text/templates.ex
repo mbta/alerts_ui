@@ -246,7 +246,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     # calls the function indicated by the template variable
     # the functions all live in the BuildAutoText module
     # and their names match up with the variable minus the ?
-    function_name = string |> String.replace("?", "") |> String.to_atom()
+    function_name = string |> String.replace("?", "") |> String.to_existing_atom()
     apply(BuildAutoText, function_name, [autotext_data])
   end
 end
