@@ -490,14 +490,9 @@ defmodule AlertsUIWeb.SharedComponents do
     default: "",
     doc: "The target to send the events to (eg form component id)"
 
-  attr :class, :string, default: "", doc: "classes to add to the containing div"
-  attr :inner_class, :string, default: "", doc: "classes to add on the inner_block"
-
   attr :id, :string, required: true
   attr :show, :boolean, default: false
   attr :on_cancel, JS, default: %JS{}
-
-  slot :header
   slot :inner_block, required: true
 
   def modal(assigns) do
@@ -519,7 +514,7 @@ defmodule AlertsUIWeb.SharedComponents do
         tabindex="0"
       >
         <div class="flex min-h-full items-center justify-center">
-          <div class={["min-w-[20rem] w-[25%] sm:p-6 lg:py-8", @class]}>
+          <div class="min-w-[20rem] w-[25%] sm:p-6 lg:py-8">
             <.focus_wrap
               id={"#{@id}-container"}
               phx-window-keydown={
@@ -535,7 +530,7 @@ defmodule AlertsUIWeb.SharedComponents do
               min-h-[25rem] border border-bg-elevation-6"
             >
               <div class="flex flex-row justify-between px-4 py-4">
-                <h1 class="font-sm text-xl">{render_slot(@header) || @header_text}</h1>
+                <h1 class="font-sm text-xl">{@header_text}</h1>
                 <button
                   phx-click={
                     JS.push(@cancel_event_name, target: @target_id)
@@ -549,7 +544,7 @@ defmodule AlertsUIWeb.SharedComponents do
                 </button>
               </div>
               <hr class="w-[100%] border-y-1 border-bg-elevation-6" />
-              <div id={"#{@id}-content"} class={["px-4 py-4", @inner_class]}>
+              <div id={"#{@id}-content"} class="px-4 py-4">
                 {render_slot(@inner_block)}
               </div>
               <hr class="w-[100%] border-y-1 border-bg-elevation-6" />
@@ -1217,7 +1212,6 @@ defmodule AlertsUIWeb.SharedComponents do
       :if={msg = Phoenix.Flash.get(@flash, :error)}
       id={@id}
       phx-click={JS.push("lv:clear-flash", value: %{key: :error}) |> CoreComponents.hide("##{@id}")}
-      phx-hook="AutoDismissFlash"
       role="alert"
       class={[
         "fixed top-2 right-2 w-80 sm:w-96 z-50 rounded-lg p-3 ring-1",
@@ -1225,12 +1219,12 @@ defmodule AlertsUIWeb.SharedComponents do
       ]}
       {@rest}
     >
-      <div :if={@title} class="flex items-center gap-1.5 text-sm font-semibold leading-6">
-        <CoreComponents.icon name="hero-exclamation-circle-mini" class="h-5 w-5" />
+      <p :if={@title} class="flex items-center gap-1.5 text-sm font-semibold leading-6">
+        <div class="hero-exclamation-circle-mini h-4 w-4" />
         {@title}
-      </div>
+      </p>
       <div :for={msg_line <- String.split(msg, ";")}>
-        <li class="ml-2 text-sm leading-6">
+        <li class="mt-2 ml-2 text-sm leading-5">
           {msg_line}
         </li>
       </div>

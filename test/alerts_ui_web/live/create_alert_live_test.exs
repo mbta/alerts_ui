@@ -107,8 +107,9 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         send(view.pid, {:section_completed, changeset})
         send(view.pid, :create_alert)
 
-        flash = assert_redirect(view, "/")
-        assert flash["info"] =~ ~r/New alert #[0-9]+ created/
+        rendered_view = render_async(view)
+
+        assert rendered_view =~ "created successfully"
       end
     end
 
@@ -185,7 +186,6 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
     end
 
     @tag :logged_in_user
-    # How does this differ from "submitting first part of form unhides second part"
     test "submitting the second part of the form saves the alert", %{conn: conn} do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [@route_pattern] end]},
@@ -239,8 +239,8 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         send(view.pid, {:section_completed, details_changeset})
         send(view.pid, :create_alert)
 
-        flash = assert_redirect(view, "/")
-        assert flash["info"] =~ ~r/New alert #[0-9]+ created/
+        success_rendered_view = render(view)
+        assert success_rendered_view =~ ~s(id="success_view")
       end
     end
 

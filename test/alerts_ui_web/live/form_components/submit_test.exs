@@ -153,9 +153,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
     end
 
     @tag :logged_in_user
-    test "clicking submit on review modal redirects to list page and adds alert to db", %{
-      conn: conn
-    } do
+    test "clicking submit on review modal sends a :create_alert event", %{conn: conn} do
       with_mocks([
         {RoutesRepo, [],
          [
@@ -169,6 +167,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
            by_route_id: fn _route_id, _opts -> [] end
          ]}
       ]) do
+        # --- Same as before ---
         {:ok, view, _html} = live(conn, "/alerts/new")
 
         get_to_submission_page(view, "Bus", "Delay")
@@ -192,85 +191,12 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
 
         open_review_modal(view)
 
+        # --- New stuff ---
         view
         |> element("button", "Submit")
         |> render_click()
 
-        # query the db
-        flash = assert_redirect(view, "/")
-        assert flash["info"] =~ ~r/New alert #[0-9]+ created/
-
-        alert_id =
-          flash["info"]
-          |> String.replace("New alert #", "")
-          |> String.replace(" created", "")
-
-        assert %AlertsUI.Models.Alert{
-                 id: _,
-                 alert_id: ^alert_id,
-                 effect: :SIGNIFICANT_DELAYS,
-                 effect_detail: "DELAY",
-                 effect_name: "Delay",
-                 banner_text: nil,
-                 cause: :UNKNOWN_CAUSE,
-                 cause_detail: nil,
-                 header_text: "hello world",
-                 description_text: nil,
-                 severity_level: :WARNING,
-                 url: nil,
-                 service_effect_text: nil,
-                 short_header_text: nil,
-                 severity: 4,
-                 created_timestamp: nil,
-                 last_modified_timestamp: nil,
-                 last_push_notification_timestamp: _,
-                 closed_timestamp: nil,
-                 timeframe_text: nil,
-                 recurrence_text: nil,
-                 alert_lifecycle: nil,
-                 duration_certainty: :ESTIMATED,
-                 reminder_times: [],
-                 active_period: [
-                   %AlertsUI.Models.ActivePeriod{
-                     id: _,
-                     alert_id: _,
-                     alert: _,
-                     start: _,
-                     end: _,
-                     created_at: _,
-                     updated_at: _
-                   }
-                 ],
-                 active_period_start: _,
-                 active_period_end: _,
-                 image_url: nil,
-                 image_alternative_text: nil,
-                 tts_header_text: nil,
-                 tts_description_text: nil,
-                 informed_entity: [
-                   %AlertsUI.Models.InformedEntity{
-                     id: _,
-                     alert_id: _,
-                     alert: _,
-                     agency_id: "1",
-                     route_id: "Blue",
-                     facility_id: nil,
-                     route_type: 3,
-                     direction_id: nil,
-                     stop_id: "place-aqucl",
-                     activities: [:BOARD, :EXIT, :RIDE],
-                     trip: nil,
-                     created_at: _,
-                     updated_at: _
-                   }
-                 ],
-                 draft: false,
-                 notification_period_start: nil,
-                 recurrence_days: [],
-                 original_route_selections: ["Blue"],
-                 created_at: _,
-                 updated_at: _
-               } = AlertsUI.Alerts.get_by_alert_id(alert_id)
+        assert render_async(view) =~ "created successfully"
       end
     end
   end

@@ -7,6 +7,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   import Ecto.Changeset
 
   alias AlertsUI.Models.ActivePeriod
+  alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.CreateAlertLive
 
   alias AlertsUIWeb.FormComponents.Helpers.{
@@ -478,14 +479,15 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         direction_options: direction_options,
         trip_id_options: trip_id_options,
         stop_id_options: stop_id_options,
-        modal_options: modal_options
+        modal_options: modal_options,
+        service_type_name: assigns.route_type |> InformedEntity.route_code_mapping() || nil
       )
 
     ~H"""
     <div class="min-w-[100%] self-start flex flex-col" id="service_view">
       <.h1 class="!mb-0">Create new alert</.h1>
       <.p>
-        {ContentFormatter.service_type_string(@route_type)} • {@effect_name || ""}
+        {ContentFormatter.route_atom_to_string(@service_type_name)} • {@effect_name || ""}
       </.p>
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
         Affected service
