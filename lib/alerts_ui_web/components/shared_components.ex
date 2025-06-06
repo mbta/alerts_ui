@@ -1218,6 +1218,7 @@ defmodule AlertsUIWeb.SharedComponents do
       :if={msg = Phoenix.Flash.get(@flash, :error)}
       id={@id}
       phx-click={JS.push("lv:clear-flash", value: %{key: :error}) |> CoreComponents.hide("##{@id}")}
+      phx-hook="AutoDismissFlash"
       role="alert"
       class={[
         "fixed top-2 right-2 w-80 sm:w-96 z-50 rounded-lg p-3 ring-1",
@@ -1225,12 +1226,12 @@ defmodule AlertsUIWeb.SharedComponents do
       ]}
       {@rest}
     >
-      <p :if={@title} class="flex items-center gap-1.5 text-sm font-semibold leading-6">
-        <div class="hero-exclamation-circle-mini h-4 w-4" />
+      <div :if={@title} class="flex items-center gap-1.5 text-sm font-semibold leading-6">
+        <CoreComponents.icon name="hero-exclamation-circle-mini" class="h-5 w-5" />
         {@title}
-      </p>
+      </div>
       <div :for={msg_line <- String.split(msg, ";")}>
-        <li class="mt-2 ml-2 text-sm leading-5">
+        <li class="ml-2 text-sm leading-6">
           {msg_line}
         </li>
       </div>
