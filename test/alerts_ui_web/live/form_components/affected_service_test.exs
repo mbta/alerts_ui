@@ -61,6 +61,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
   }
 
   @stop %Stop{id: "place-sstat", name: "South Station"}
+  @stop_2 %Stop{id: "place-crtst", name: "Courthouse"}
 
   @assigns %{
     id: "affected_service",
@@ -270,7 +271,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         |> render_change(%{"affected_service" => %{"route_ids" => ["CR-Worcester"]}})
 
         assert view
-               |> element("select#affected_service_trip_ids")
                |> render() =~ "All Trips"
 
         view
@@ -606,6 +606,90 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
 
         refute view
                |> render() =~ ~s(id="affected_service_stop_ids" disabled="disabled")
+      end
+    end
+
+    test "stop element not spuriously disabled if second is selected" do
+      route_2 = %Route{
+        direction_names: %{0 => "Westbound", 1 => "Eastbound"},
+        sort_order: 3,
+        id: "CR-Fairmount",
+        type: 2,
+        name: "Fairmount Line"
+      }
+
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _route_types -> [@route, route_2] end]},
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]},
+        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+      ]) do
+        {:ok, view, _html} =
+          live_isolated_component(AffectedService, %{
+            @assigns
+            | alert_data: %{route_type: 4, effect_name: "Shuttle"}
+          })
+
+        assert render_async(view) =~ ~s(id="affected_service_stop_ids" disabled="disabled")
+        refute render_async(view) =~ "All Stops"
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "affected_service" => %{
+            "route_ids" => [@route.id]
+          }
+        })
+
+        refute render_async(view) =~ ~s(id="affected_service_stop_ids" disabled="disabled")
+        assert view |> render_async() =~ "All Stops"
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "affected_service" => %{
+            "route_ids" => [route_2.id]
+          }
+        })
+
+        refute render_async(view) =~ ~s(id="affected_service_stop_ids" disabled="disabled")
+      end
+    end
+
+    test "bus stop names have direction appended and are ordered by first outbound to last inbound" do
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},
+        {StopsRepo, [],
+         [
+           by_route: fn
+             _route, 0 -> [@stop, @stop_2]
+             _route, 1 -> [@stop_2, @stop]
+           end
+         ]}
+      ]) do
+        {:ok, view, _html} =
+          live_isolated_component(
+            AffectedService,
+            @assigns
+            |> Map.merge(%{
+              route_type: 3,
+              effect_name: "Delay",
+              combination: :RDS,
+              alert_data: %{}
+            })
+          )
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "affected_service" => %{
+            "route_ids" => ["CR-Worcester"]
+          }
+        })
+
+        assert view
+               |> element("select##affected_service_stop_ids")
+               |> render =~
+                 "<option value=\"place-sstat\">South Station (outbound)</option><option value=\"place-crtst\">Courthouse (outbound)</option><option value=\"place-crtst\">Courthouse (inbound)</option><option value=\"place-sstat\">South Station (inbound)</option>"
       end
     end
 

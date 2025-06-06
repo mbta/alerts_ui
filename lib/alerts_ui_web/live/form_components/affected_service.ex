@@ -375,12 +375,15 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   def assign_stops(socket, route_ids, direction, fields) do
     if :stop_ids in fields do
+      route_type = socket.assigns.route_type
+
       assign_async(socket, [:available_stops], fn ->
         {:ok,
          %{
            available_stops:
              CreateAlertLive.get_stops(
                route_ids,
+               route_type,
                direction
              )
          }}

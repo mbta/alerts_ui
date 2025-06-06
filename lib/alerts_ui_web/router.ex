@@ -47,7 +47,11 @@ defmodule AlertsUIWeb.Router do
     get "/", Redirector, to: "/alerts"
 
     live_session :require_authenticated_user,
-      on_mount: [{AlertsUIWeb.UserAuth, :ensure_authenticated}, AlertsUIWeb.PutFlagsInAssignsHook] do
+      on_mount: [
+        {AlertsUIWeb.UserAuth, :ensure_authenticated},
+        AlertsUIWeb.PutFlagsInAssignsHook,
+        AlertsUIWeb.PreloadCacheOnMount
+      ] do
       live("/alerts", ViewAlertsLive)
       live("/alerts/new", CreateAlertLive, :new)
       live("/alerts/edit", CreateAlertLive, :edit)

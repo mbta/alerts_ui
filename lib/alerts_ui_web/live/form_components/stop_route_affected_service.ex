@@ -51,7 +51,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         available_stops: %{},
         available_filter_routes: %{},
         filter_title_value: "All routes",
-        stops_filtered_by_route: []
+        selected_route_id: nil
       })
 
     {:ok, socket}
@@ -79,10 +79,10 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       |> assign(assigns)
       |> assign(form: form)
       |> assign(route_type: route_type)
-      |> assign_async([:available_stops, :available_routes, :available_filter_routes], fn ->
+      |> assign_stops(route_type)
+      |> assign_async([:available_routes, :available_filter_routes], fn ->
         {:ok,
          %{
-           available_stops: CreateAlertLive.get_stops_by_route_type(route_type),
            available_routes:
              CreateAlertLive.get_routes_by_stop(
                Map.get(alert_data, :stop_ids, []),
@@ -128,16 +128,28 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     socket =
       socket
       |> assign(assigns)
-      |> assign_async([:available_stops, :available_filter_routes], fn ->
+      |> assign(service_type_name: route_type |> InformedEntity.route_code_mapping() || nil)
+      |> assign_stops(route_type)
+      |> assign_async([:available_filter_routes], fn ->
         {:ok,
          %{
-           available_stops: CreateAlertLive.get_stops_by_route_type(route_type),
            available_filter_routes: CreateAlertLive.get_routes(route_type)
          }}
       end)
 
     {:ok, socket}
   end
+
+  defp assign_stops(socket, route_type, route_id \\ nil)
+
+  defp assign_stops(%{assigns: %{available_stops: %{}}} = socket, route_type, route_id) do
+    assign_async(socket, :available_stops, fn ->
+      route_ids = if route_id, do: List.wrap(route_id), else: nil
+      {:ok, %{available_stops: CreateAlertLive.get_stops(route_ids, route_type, nil)}}
+    end)
+  end
+
+  defp assign_stops(socket, _route_type, _route_id), do: socket
 
   # On stop select, need to populate and select all of the route_ids
   @impl true
@@ -196,6 +208,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
   @impl true
   def handle_event("accepted_routes_modal", _params, socket) do
+    route_type = socket.assigns.route_type
+
     routes =
       if Helpers.async_available?(socket.assigns, :available_filter_routes) do
         socket.assigns.available_filter_routes.result
@@ -204,27 +218,29 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       end
 
     selected_route_id = socket.assigns.form.params["modal_route_id"]
+    selected_route_id = if selected_route_id in ["", "default"], do: nil, else: selected_route_id
 
     filter_title_value =
-      if selected_route_id in [nil, "", "default"] do
+      if is_nil(selected_route_id) do
         "All routes"
       else
         Enum.find(routes, &(&1.id === selected_route_id)).name
       end
 
-    stops_filtered_by_route =
-      CreateAlertLive.get_stops(
-        [selected_route_id],
-        "default"
+    socket =
+      socket
+      |> assign(
+        filter_title_value: filter_title_value,
+        selected_route_id: selected_route_id
       )
-      |> Enum.map(& &1.id)
+      |> assign_async(:available_stops, fn ->
+        {:ok,
+         %{
+           available_stops: CreateAlertLive.get_stops([selected_route_id], route_type)
+         }}
+      end)
 
-    {:noreply,
-     socket
-     |> assign(
-       stops_filtered_by_route: stops_filtered_by_route,
-       filter_title_value: filter_title_value
-     )}
+    {:noreply, socket}
   end
 
   @impl true
@@ -234,6 +250,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
   @impl true
   def handle_event("clear_filter", %{"filter-id" => "routes-filter-modal"}, socket) do
+    route_type = socket.assigns.route_type
+
     affected_service =
       socket.assigns.form.params
       |> Map.merge(%{"modal_route_id" => ""})
@@ -248,8 +266,17 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       |> Map.put(:action, :validate)
       |> to_form()
 
-    {:noreply,
-     assign(socket, form: form, stops_filtered_by_route: [], filter_title_value: "All routes")}
+    socket =
+      socket
+      |> assign(form: form, filter_title_value: "All routes", selected_route_id: nil)
+      |> assign_async(:available_stops, fn ->
+        {:ok,
+         %{
+           available_stops: CreateAlertLive.get_stops(nil, route_type)
+         }}
+      end)
+
+    {:noreply, socket}
   end
 
   @impl true
@@ -334,15 +361,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
     stop_id_options =
       if Helpers.async_available?(assigns, :available_stops) do
-        options =
-          assigns.available_stops.result
-          |> Enum.filter(
-            &filter_stops_by_stop_ids(
-              &1,
-              assigns.stops_filtered_by_route,
-              stop_ids
-            )
-          )
+        options = assigns.available_stops.result
 
         SelectFormatter.formatted_select_options(%SelectFormatter{
           options: options,
@@ -419,7 +438,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
           filter_field={@form[:stop_search_term]}
           modal_filter_id="routes-filter-modal"
           modal_filter_title={"Filter: #{@filter_title_value}"}
-          modal_filter_active={!Enum.empty?(@stops_filtered_by_route)}
+          modal_filter_active={@selected_route_id}
           options={@stop_id_options}
           class="w-[25%]"
           target_id="#service_form"
@@ -444,14 +463,5 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   @spec disable_routes_input?(map()) :: boolean()
   defp disable_routes_input?(%{form: form}) do
     form[:stop_ids].value in [nil, []]
-  end
-
-  defp filter_stops_by_stop_ids(_stop, [], _selected_stop_ids) do
-    true
-  end
-
-  defp filter_stops_by_stop_ids(stop, stops_filtered_by_route, selected_stop_ids) do
-    # returns true if stop in list is in list from modal filter or has already been selected by the user.
-    stop.id in (stops_filtered_by_route ++ selected_stop_ids)
   end
 end
