@@ -36,7 +36,6 @@ defmodule AlertsUIWeb.CreateAlertLive do
     RouteTypeAndEffect,
     StopRouteAffectedService,
     Submit,
-    SuccessfulSubmission,
     SystemwideAffectedService,
     Timeline,
     TimeRange
@@ -317,7 +316,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
     assigns = %{
       progress: get_step_by_name(socket.assigns.progress.next),
-      alert_data: alert_data,
+      alert_data: Map.merge(alert_data, %{combination: combination}),
       combination: combination,
       selected_schedules: nil,
       errors: %{}
@@ -369,13 +368,17 @@ defmodule AlertsUIWeb.CreateAlertLive do
     |> Alerts.create_or_update_alert(existing_alert)
     |> case do
       {:ok, alert} ->
-        assigns = %{
-          progress: get_step_by_name(socket.assigns.progress.next),
-          alert_data: %{},
-          alert_uuid: alert.id
-        }
+        alert_id =
+          alert.id
+          |> Alerts.get_by_id()
+          |> Map.get(:alert_id)
 
-        assign(socket, assigns)
+        alert_descriptor = if is_nil(socket.assigns.alert_id), do: "New alert #", else: "Alert #"
+        created_or_updated = if is_nil(socket.assigns.alert_id), do: " created", else: " updated"
+
+        socket
+        |> put_flash(:info, alert_descriptor <> alert_id <> created_or_updated)
+        |> redirect(to: "/")
 
       {:error, result} ->
         errors =

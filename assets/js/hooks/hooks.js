@@ -32,4 +32,26 @@ Hooks.SelectAllAdjuster = {
   }
 }
 
+Hooks.MeasureImage = {
+  mounted() {
+    this.el.addEventListener("load", (event) => {
+      const { naturalWidth, naturalHeight, width, height } = this.el;
+      this.pushEventTo("#alert-image", "image-size", {id: "size-of-image", image_size: {width: naturalWidth, height: naturalHeight}})
+    });
+  }
+}
+
+Hooks.AutoDismissFlash = {
+  mounted() {
+    const hideElementAfter = 5000
+    const clearFlashAfter = hideElementAfter + 500
+
+    setTimeout(() => {
+      this.el.style.transition = "opacity 0.5s"
+      this.el.style.opacity = 0
+    }, hideElementAfter)
+    setTimeout(() => this.pushEvent("lv:clear-flash"), clearFlashAfter)
+  }
+}
+
 export default Hooks

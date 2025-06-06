@@ -64,18 +64,16 @@
           alert_data={@alert_data}
           editing={@editing}
         />
-        <.live_component module={Submit} id="submit" progress={@progress} />
+        <.live_component
+          module={Submit}
+          id="submit"
+          progress={@progress}
+          alert_data={@alert_data}
+          editing={@editing}
+          alert_id={@alert_id}
+        />
       </div>
-      <.live_component
-        :if={@progress.name == "success"}
-        module={SuccessfulSubmission}
-        id="successful_submission"
-        progress={@progress}
-        alert_uuid={@alert_uuid}
-        show_created_alert={@show_created_alert}
-      />
     </article>
-    <.flash kind={:info} title="Success!" flash={@flash} id="success-flash" />
     <.form_error_flash title="Please fix these issues:" flash={@flash} id="error-flash" />
   </div>
 </div>

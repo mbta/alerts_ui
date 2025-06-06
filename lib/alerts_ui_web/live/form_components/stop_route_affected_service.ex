@@ -5,7 +5,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   use AlertsUIWeb, :live_component
   use AlertsUI.Schema
   import Ecto.Changeset
-  alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.CreateAlertLive
 
   alias AlertsUIWeb.FormComponents.Helpers.{
@@ -78,7 +77,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     socket =
       socket
       |> assign(assigns)
-      |> assign(service_type_name: route_type |> InformedEntity.route_code_mapping() || nil)
       |> assign(form: form)
       |> assign(route_type: route_type)
       |> assign_stops(route_type)
@@ -399,7 +397,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     <div class="min-w-full flex flex-col" id="stop_route_service_view">
       <.h1 class="!mb-0">Create new alert</.h1>
       <.p>
-        {ContentFormatter.route_atom_to_string(@service_type_name)} • {@effect_name}
+        {ContentFormatter.service_type_string(@route_type)} • {@effect_name}
       </.p>
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
         Affected service
