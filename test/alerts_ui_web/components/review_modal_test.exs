@@ -69,14 +69,16 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
     @tag :logged_in_user
     test "creating new alert", %{conn: conn} do
       with_mocks([
-        {RoutesRepo, [], [
-          by_type: fn _types -> @routes end,
-          get: fn _ -> @route_one end
-        ]},
-        {StopsRepo, [], [
-          by_route: fn _route, _direction -> [@stop] end,
-          get: fn _ -> @stop end
-        ]}
+        {RoutesRepo, [],
+         [
+           by_type: fn _types -> @routes end,
+           get: fn _ -> @route_one end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction -> [@stop] end,
+           get: fn _ -> @stop end
+         ]}
       ]) do
         # Bus Delay
         {:ok, view, _html} = live(conn, "/alerts/new")
@@ -99,14 +101,16 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
     @tag :logged_in_user
     test "correct mode and effect: Bus Delay", %{conn: conn} do
       with_mocks([
-        {RoutesRepo, [], [
-          by_type: fn _types -> @routes end,
-          get: fn _ -> @route_one end
-        ]},
-        {StopsRepo, [], [
-          by_route: fn _route, _direction -> [@stop] end,
-          get: fn _ -> @stop end
-        ]}
+        {RoutesRepo, [],
+         [
+           by_type: fn _types -> @routes end,
+           get: fn _ -> @route_one end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction -> [@stop] end,
+           get: fn _ -> @stop end
+         ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
         get_to_submission_page(view, "Bus", "Delay")
@@ -123,10 +127,10 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
 
     @tag :logged_in_user
     test "correct mode and effect: Systemwide Suspension", %{conn: conn} do
-      with_mock(FacilitiesRepo, [
+      with_mock(FacilitiesRepo,
         get_by_type: fn _facility_types, _opts -> [@facility] end,
         get: fn _ -> @facility end
-      ]) do
+      ) do
         {:ok, view, _html} = live(conn, "/alerts/new")
         get_to_submission_page(view, "Access", "Elevator closure")
 
@@ -200,7 +204,11 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["CR-Worcester"], direction: "1", stop_ids: ["place-aqucl"]}
+          affected_service: %{
+            route_ids: ["CR-Worcester"],
+            direction: "1",
+            stop_ids: ["place-aqucl"]
+          }
         })
 
         open_review_modal(view)
@@ -560,14 +568,16 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
     @tag :logged_in_user
     test "by default, no image", %{conn: conn} do
       with_mocks([
-        {RoutesRepo, [], [
-          by_type: fn _types -> @routes end,
-          get: fn _ -> @route_one end
-        ]},
-        {StopsRepo, [], [
-          by_route: fn _route, _direction -> [@stop] end,
-          get: fn _ -> @stop end
-        ]}
+        {RoutesRepo, [],
+         [
+           by_type: fn _types -> @routes end,
+           get: fn _ -> @route_one end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction -> [@stop] end,
+           get: fn _ -> @stop end
+         ]}
       ]) do
         # Bus Delay
         {:ok, view, _html} = live(conn, "/alerts/new")
@@ -586,14 +596,16 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
     @tag :logged_in_user
     test "when image / alt text are provided", %{conn: conn} do
       with_mocks([
-        {RoutesRepo, [], [
-          by_type: fn _types -> @routes end,
-          get: fn _ -> @route_one end
-        ]},
-        {StopsRepo, [], [
-          by_route: fn _route, _direction -> [@stop] end,
-          get: fn _ -> @stop end
-        ]}
+        {RoutesRepo, [],
+         [
+           by_type: fn _types -> @routes end,
+           get: fn _ -> @route_one end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction -> [@stop] end,
+           get: fn _ -> @stop end
+         ]}
       ]) do
         # Bus Delay
         {:ok, view, _html} = live(conn, "/alerts/new")
