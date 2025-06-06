@@ -32,6 +32,15 @@ Hooks.SelectAllAdjuster = {
   }
 }
 
+Hooks.MeasureImage = {
+  mounted() {
+    this.el.addEventListener("load", (event) => {
+      const { naturalWidth, naturalHeight, width, height } = this.el;
+      this.pushEventTo("#alert-image", "image-size", {id: "size-of-image", image_size: {width: naturalWidth, height: naturalHeight}})
+    });
+  }
+}
+
 Hooks.AutoDismissFlash = {
   mounted() {
     const hideElementAfter = 5000

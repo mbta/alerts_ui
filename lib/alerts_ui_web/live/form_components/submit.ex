@@ -32,6 +32,12 @@ defmodule AlertsUIWeb.FormComponents.Submit do
   end
 
   @impl true
+  def handle_event("image-size", %{"id" => "size-of-image", "image_size" => image_size}, socket) do
+    {:noreply,
+     assign(socket, alert_data: Map.put(socket.assigns.alert_data, :image_size, image_size))}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="min-w-full flex mt-4 mb-12 border-t border-border-primary" id="submit_view">
