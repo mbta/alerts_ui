@@ -41,4 +41,17 @@ Hooks.MeasureImage = {
   }
 }
 
+Hooks.AutoDismissFlash = {
+  mounted() {
+    const hideElementAfter = 5000
+    const clearFlashAfter = hideElementAfter + 500
+
+    setTimeout(() => {
+      this.el.style.transition = "opacity 0.5s"
+      this.el.style.opacity = 0
+    }, hideElementAfter)
+    setTimeout(() => this.pushEvent("lv:clear-flash"), clearFlashAfter)
+  }
+}
+
 export default Hooks

@@ -404,9 +404,6 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
           |> DateTime.to_naive()
           |> NaiveDateTime.truncate(:second)
 
-        # Assumes we're running the test during normal business hours
-        # or at least not past midnight on the current service day
-        # Janky? Yes. It's what I could figure out right now, lol
         tomorrow =
           now
           |> NaiveDateTime.add(1, :day)
@@ -503,7 +500,6 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
             "view_banner" => true,
             "banner_sync_toggle" => false,
             "banner_text" => "Well hello there",
-            # No other tests for the app use `accept_banner`, why?
             "accept_banner" => true
           }
         })
