@@ -69,15 +69,21 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
     @tag :logged_in_user
     test "creating new alert", %{conn: conn} do
       with_mocks([
-        {RoutesRepo, [], [by_type: fn _types -> @routes end]},
-        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+        {RoutesRepo, [], [
+          by_type: fn _types -> @routes end,
+          get: fn _ -> @route_one end
+        ]},
+        {StopsRepo, [], [
+          by_route: fn _route, _direction -> [@stop] end,
+          get: fn _ -> @stop end
+        ]}
       ]) do
         # Bus Delay
         {:ok, view, _html} = live(conn, "/alerts/new")
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["1"], stop_ids: ["place-aqucl"]}
+          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
         open_review_modal(view)
@@ -92,27 +98,41 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
 
     @tag :logged_in_user
     test "correct mode and effect: Bus Delay", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/new")
-      get_to_submission_page(view, "Bus", "Delay")
+      with_mocks([
+        {RoutesRepo, [], [
+          by_type: fn _types -> @routes end,
+          get: fn _ -> @route_one end
+        ]},
+        {StopsRepo, [], [
+          by_route: fn _route, _direction -> [@stop] end,
+          get: fn _ -> @stop end
+        ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        get_to_submission_page(view, "Bus", "Delay")
 
-      fill_out_required_form_fields(view, %{
-        affected_service: %{route_ids: ["1"], stop_ids: ["place-aqucl"]}
-      })
+        fill_out_required_form_fields(view, %{
+          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
+        })
 
-      open_review_modal(view)
+        open_review_modal(view)
 
-      assert view |> element("#review-modal-container", "Bus • Delay") |> has_element?
+        assert view |> element("#review-modal-container", "Bus • Delay") |> has_element?
+      end
     end
 
     @tag :logged_in_user
     test "correct mode and effect: Systemwide Suspension", %{conn: conn} do
-      with_mock(FacilitiesRepo, get_by_type: fn _facility_types, _opts -> [@facility] end) do
+      with_mock(FacilitiesRepo, [
+        get_by_type: fn _facility_types, _opts -> [@facility] end,
+        get: fn _ -> @facility end
+      ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
         get_to_submission_page(view, "Access", "Elevator closure")
 
         fill_out_form(view, "#service_form", %{
           access_affected_service: %{
-            facility_id: "Facility-3"
+            facility_id: "349"
           }
         })
 
@@ -149,7 +169,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["1"], stop_ids: ["place-aqucl"]}
+          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
         open_review_modal(view)
@@ -180,7 +200,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["1"], direction: "1", stop_ids: ["place-aqucl"]}
+          affected_service: %{route_ids: ["CR-Worcester"], direction: "1", stop_ids: ["place-aqucl"]}
         })
 
         open_review_modal(view)
@@ -209,7 +229,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         # Bus Extra Service
         {:ok, view, _html} = live(conn, "/alerts/new")
         get_to_submission_page(view, "Bus", "Extra service")
-        fill_out_required_form_fields(view, %{affected_service: %{route_ids: ["1"]}})
+        fill_out_required_form_fields(view, %{affected_service: %{route_ids: ["CR-Worcester"]}})
         open_review_modal(view)
 
         assert render(view) =~ ~r/Routes:.*Framingham\/Worcester Line/s
@@ -238,7 +258,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         get_to_submission_page(view, "Bus", "Stop closure")
 
         fill_out_required_form_fields(view, %{
-          stop_route_affected_service: %{stop_ids: ["place-aqucl"], route_ids: ["1"]}
+          stop_route_affected_service: %{stop_ids: ["place-aqucl"], route_ids: ["CR-Worcester"]}
         })
 
         open_review_modal(view)
@@ -401,7 +421,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["1"], stop_ids: ["place-aqucl"]}
+          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
         fill_out_form(view, "#time_range_form", %{
@@ -445,7 +465,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["1"], stop_ids: ["place-aqucl"]}
+          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
         fill_out_form(view, "#notification_period_form", %{
@@ -481,7 +501,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["1"], stop_ids: ["place-aqucl"]}
+          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
         open_review_modal(view)
@@ -513,7 +533,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["1"], stop_ids: ["place-aqucl"]}
+          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
         fill_out_form(view, "#details_form", %{
@@ -540,15 +560,21 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
     @tag :logged_in_user
     test "by default, no image", %{conn: conn} do
       with_mocks([
-        {RoutesRepo, [], [by_type: fn _types -> @routes end]},
-        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+        {RoutesRepo, [], [
+          by_type: fn _types -> @routes end,
+          get: fn _ -> @route_one end
+        ]},
+        {StopsRepo, [], [
+          by_route: fn _route, _direction -> [@stop] end,
+          get: fn _ -> @stop end
+        ]}
       ]) do
         # Bus Delay
         {:ok, view, _html} = live(conn, "/alerts/new")
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["1"], stop_ids: ["place-aqucl"]}
+          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
         open_review_modal(view)
@@ -560,15 +586,21 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
     @tag :logged_in_user
     test "when image / alt text are provided", %{conn: conn} do
       with_mocks([
-        {RoutesRepo, [], [by_type: fn _types -> @routes end]},
-        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+        {RoutesRepo, [], [
+          by_type: fn _types -> @routes end,
+          get: fn _ -> @route_one end
+        ]},
+        {StopsRepo, [], [
+          by_route: fn _route, _direction -> [@stop] end,
+          get: fn _ -> @stop end
+        ]}
       ]) do
         # Bus Delay
         {:ok, view, _html} = live(conn, "/alerts/new")
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["1"], stop_ids: ["place-aqucl"]}
+          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
         # Unsure how long mbta images stay archived, but I'm curious to try it!
@@ -613,7 +645,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["1"], stop_ids: ["place-aqucl"]}
+          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
         open_review_modal(view)
@@ -641,7 +673,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["1"], stop_ids: ["place-aqucl"]}
+          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
         now =
@@ -723,7 +755,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["1"], stop_ids: ["place-aqucl"]}
+          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
         open_review_modal(view)
@@ -753,7 +785,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["1"], stop_ids: ["place-aqucl"]}
+          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
         fill_out_form(view, "#delivery_form", %{
@@ -792,7 +824,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["1"], stop_ids: ["place-aqucl"]}
+          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
         fill_out_form(view, "#delivery_form", %{
@@ -830,7 +862,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["1"], stop_ids: ["place-aqucl"]}
+          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
         open_review_modal(view)
@@ -862,7 +894,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["1"], stop_ids: ["place-aqucl"]}
+          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
         open_review_modal(view)
