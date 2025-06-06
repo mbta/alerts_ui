@@ -250,6 +250,17 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
     "#{non_numerical_routes_phrase}#{joiner}#{numerical_routes_phrase}"
   end
 
+  # route form (modifies routes)
+  @spec route_form([Route.t()]) :: String.t()
+  def route_form([]), do: ""
+  def route_form([_route]), do: "route is"
+  def route_form(_routes), do: "routes are"
+
+  @spec route_form_only([Route.t()]) :: String.t()
+  def route_form_only([]), do: ""
+  def route_form_only([_route]), do: "is"
+  def route_form_only(_routes), do: "are"
+
   defp first_letter_numeric?(route_name) do
     route_name
     |> String.first()

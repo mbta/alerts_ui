@@ -425,4 +425,32 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
       assert expected == actual
     end
   end
+
+  describe "route_form/1" do
+    test "routes empty" do
+      assert BuildAutoText.route_form([]) == ""
+    end
+
+    test "one route" do
+      assert BuildAutoText.route_form([@route_1]) == "route is"
+    end
+
+    test "multiple routes" do
+      assert BuildAutoText.route_form([@route_1, @route_2]) == "routes are"
+    end
+  end
+
+  describe "route_form_only/1" do
+    test "routes empty" do
+      assert BuildAutoText.route_form_only([]) == ""
+    end
+
+    test "one route" do
+      assert BuildAutoText.route_form_only([@route_1]) == "is"
+    end
+
+    test "multiple routes" do
+      assert BuildAutoText.route_form_only([@route_1, @route_2]) == "are"
+    end
+  end
 end
