@@ -113,12 +113,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
     notification_period_start = shift_to_naive(alert.notification_period_start)
 
-    notification_specifier =
-      if is_nil(notification_period_start) do
-        :same_as_effect_period
-      else
-        :custom
-      end
+    notification_specifier = get_notification_specifier(notification_period_start)
 
     route_ids = alert.original_route_selections || []
 
@@ -194,6 +189,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       recurrence_days: alert.recurrence_days |> Enum.map(&Atom.to_string/1)
     }
   end
+
+  defp get_notification_specifier(nil), do: :same_as_effect_period
+  defp get_notification_specifier(_notification_period_start), do: :custom
 
   def shift_to_naive(nil), do: nil
 
