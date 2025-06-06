@@ -36,11 +36,6 @@ Hooks.MeasureImage = {
   mounted() {
     this.el.addEventListener("load", (event) => {
       const { naturalWidth, naturalHeight, width, height } = this.el;
-      console.log(`
-        Natural size: ${naturalWidth} x ${naturalHeight} pixels
-        Displayed size: ${width} x ${height} pixels
-      `);
-
       this.pushEventTo("#alert-image", "image-size", {id: "size-of-image", image_size: {width: naturalWidth, height: naturalHeight}})
     });
   }
