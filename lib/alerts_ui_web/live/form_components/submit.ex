@@ -43,8 +43,8 @@ defmodule AlertsUIWeb.FormComponents.Submit do
     <div class="min-w-full flex mt-4 mb-12 border-t border-border-primary" id="submit_view">
       <.review_modal
         :if={Map.get(assigns, :show, nil)}
-        alert_data={@alert_data}
         editing={@editing}
+        alert_data={Map.merge(@alert_data, %{selected_schedules: @selected_schedules})}
         cancel_event_name="cancel_review"
         accept_event_name="save"
         target_id="#submit_view"

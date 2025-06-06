@@ -35,8 +35,16 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
     @tag :logged_in_user
     test "clicking review after filling out form opens the review modal", %{conn: conn} do
       with_mocks([
-        {RoutesRepo, [], [by_type: fn _types -> @routes end]},
-        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+        {RoutesRepo, [],
+         [
+           by_type: fn _types -> @routes end,
+           get: fn _id -> @route_one end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction -> [@stop] end,
+           get: fn _id -> @stop end
+         ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
 
@@ -70,8 +78,16 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
     @tag :logged_in_user
     test "clicking cancel on review modal just closes the modal", %{conn: conn} do
       with_mocks([
-        {RoutesRepo, [], [by_type: fn _types -> @routes end]},
-        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+        {RoutesRepo, [],
+         [
+           by_type: fn _types -> @routes end,
+           get: fn _id -> @route_one end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction -> [@stop] end,
+           get: fn _id -> @stop end
+         ]}
       ]) do
         # --- Same as before ---
         {:ok, view, _html} = live(conn, "/alerts/new")
@@ -110,8 +126,19 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
     @tag :logged_in_user
     test "clicking ESC on preview and opening it again works fine", %{conn: conn} do
       with_mocks([
-        {RoutesRepo, [], [by_type: fn _types -> @routes end]},
-        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+        {RoutesRepo, [],
+         [
+           by_type: fn _types -> @routes end,
+           get: fn
+             "Blue" -> @route_one
+             "Bluer" -> @route_two
+           end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction -> [@stop] end,
+           get: fn _id -> @stop end
+         ]}
       ]) do
         # --- Same as before ---
         {:ok, view, _html} = live(conn, "/alerts/new")
@@ -160,9 +187,14 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
         {RoutesRepo, [],
          [
            by_type: fn _types -> @routes end,
+           get: fn _ -> @route_one end,
            get: fn _, _ -> @route_one end
          ]},
-        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction -> [@stop] end,
+           get: fn _id -> @stop end
+         ]},
         {RoutePatternsRepo, [],
          [
            included_stops_by_route_id: fn _route_id, _direction -> [] end,
