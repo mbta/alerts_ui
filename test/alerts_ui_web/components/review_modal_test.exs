@@ -347,9 +347,6 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
           |> DateTime.to_naive()
           |> NaiveDateTime.truncate(:second)
 
-        # Assumes we're running the test during normal business hours
-        # or at least not past midnight on the current service day
-        # Janky? Yes. It's what I could figure out right now, lol
         tomorrow =
           now
           |> NaiveDateTime.add(1, :day)
