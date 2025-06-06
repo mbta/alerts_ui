@@ -104,7 +104,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     %{
       pattern: {3, "Delay"},
       header_template:
-        "?route_names experiencing ?direction_name delays of ?severity_name ?due_to_cause"
+        "?route_names ?route_form_only experiencing ?direction_name delays of ?severity_name ?due_to_cause"
     },
     %{
       pattern: {3, "Suspension"},
