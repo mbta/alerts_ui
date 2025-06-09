@@ -111,6 +111,12 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   @impl true
+  def handle_event("move_progress", %{"value" => "route_type_and_effect"}, socket) do
+    {:noreply,
+     assign(socket, progress: get_step_by_name("route_type_and_effect"), alert_data: %{})}
+  end
+
+  @impl true
   def handle_event("move_progress", %{"value" => name}, socket) do
     {:noreply, assign(socket, :progress, get_step_by_name(name))}
   end

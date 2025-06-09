@@ -82,7 +82,7 @@ defmodule AlertsUIWeb.ReviewModal do
           </div>
 
           <p class="font-bold">Affected service</p>
-          <div class="pb-4 grid grid-cols-[100px_auto]">
+          <div class="pb-4 grid grid-cols-[110px_auto] gap-x-2">
             <%= if Map.get(@alert_data, :route_ids, []) != [] do %>
               <p>Routes:</p>
               <p :if={@alert_data.route_ids != []}>
