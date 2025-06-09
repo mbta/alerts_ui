@@ -11,202 +11,250 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     # access
     %{
       pattern: {nil, "Bike Issue"},
-      header_template: "?facility_name issue ?alert_duration ?due_to_cause"
+      header_template: "?facility_name issue ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {nil, "Escalator Closure"},
-      header_template: "?facility_name unavailable ?alert_duration ?due_to_cause"
+      header_template: "?facility_name unavailable ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {nil, "Parking Closure"},
-      header_template: "?facility_name closed ?alert_duration ?due_to_cause"
+      header_template: "?facility_name closed ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {nil, "Elevator Closure"},
-      header_template: "?facility_name unavailable ?alert_duration ?due_to_cause"
+      header_template: "?facility_name unavailable ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {nil, "Access Issue"},
-      header_template: "?facility_name issue ?alert_duration ?due_to_cause"
+      header_template: "?facility_name issue ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {nil, "Facility Issue"},
-      header_template: "?facility_name issue ?alert_duration ?due_to_cause"
+      header_template: "?facility_name issue ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {nil, "Parking Issue"},
-      header_template: "?facility_name issue ?alert_duration ?due_to_cause"
+      header_template: "?facility_name issue ?alert_duration ?due_to_cause",
+      description_template: ""
     },
+
     # systemwide
     %{
       pattern: {nil, "Service Change"},
-      header_template: "?impacted_modes notice: ?alert_duration ?due_to_cause"
+      header_template: "?impacted_modes notice: ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {nil, "Suspension"},
-      header_template: "?impacted_modes service suspended ?alert_duration ?due_to_cause"
+      header_template: "?impacted_modes service suspended ?alert_duration ?due_to_cause",
+      description_template: ""
     },
-    %{pattern: {nil, "Amber Alert"}, header_template: "Amber Alert"},
+    %{pattern: {nil, "Amber Alert"}, header_template: "Amber Alert", description_template: ""},
     %{
       pattern: {nil, "Policy Change"},
-      header_template: "Policy change affecting ?impacted_modes service"
+      header_template: "Policy change affecting ?impacted_modes service",
+      description_template: ""
     },
     %{
       pattern: {nil, "Delay"},
       header_template:
-        "?impacted_modes service may experience delays ?alert_duration ?due_to_cause"
+        "?impacted_modes service may experience delays ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {nil, "Summary"},
-      header_template: "?impacted_modes notice ?alert_duration ?due_to_cause"
+      header_template: "?impacted_modes notice ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {nil, "Schedule Change"},
-      header_template: "Planned ?impacted_modes schedule change ?alert_duration ?due_to_cause"
+      header_template: "Planned ?impacted_modes schedule change ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {nil, "Extra Service"},
-      header_template: "Extra ?impacted_modes service ?alert_duration ?due_to_cause"
+      header_template: "Extra ?impacted_modes service ?alert_duration ?due_to_cause",
+      description_template: ""
     },
+
     # Ferry
     %{
       pattern: {4, "Dock Closure"},
-      header_template: "?stop_names closed ?alert_duration ?due_to_cause"
+      header_template: "?stop_names closed ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {4, "Suspension"},
-      header_template: "?route_names service suspended ?alert_duration ?due_to_cause"
+      header_template: "?route_names service suspended ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {4, "Cancellation"},
-      header_template: "?route_names ?trip_names cancelled ?alert_duration ?due_to_cause"
+      header_template: "?route_names ?trip_names cancelled ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {4, "Delay"},
       header_template:
-        "?route_names ?trip_names operating ?severity_name late ?alert_duration ?due_to_cause"
+        "?route_names ?trip_names operating ?severity_name late ?alert_duration ?due_to_cause",
+      description_template: ""
     },
+
     # Bus
     %{
       pattern: {3, "Cancellation"},
-      header_template: "?route_names - ?trip_names_only cancelled ?alert_duration ?due_to_cause"
+      header_template: "?route_names - ?trip_names_only cancelled ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {3, "Stop Closure"},
       header_template:
-        "The following ?stop_form closed ?alert_duration ?due_to_cause|: ?stop_names"
+        "The following ?stop_form closed ?alert_duration ?due_to_cause|: ?stop_names",
+      description_template: ""
     },
     %{
       pattern: {3, "Stop Shovelling"},
       header_template:
-        "?route_names ?direction_name bus stops have been cleared of snow ?alert_duration ?due_to_cause"
+        "?route_names ?direction_name bus stops have been cleared of snow ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {3, "Delay"},
       header_template:
-        "?route_names ?route_form_only experiencing ?direction_name delays of ?severity_name ?due_to_cause"
+        "?route_names ?route_form_only experiencing ?direction_name delays of ?severity_name ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {3, "Suspension"},
       header_template:
-        "?route_names ?direction_name service suspended ?alert_duration ?due_to_cause"
+        "?route_names ?direction_name service suspended ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {3, "Multi-Route Detour"},
-      header_template: "?route_names detoured ?alert_duration ?due_to_cause"
+      header_template: "?route_names detoured ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {3, "Stop Move"},
-      header_template: "?stop_names stop moving ?alert_duration ?due_to_cause"
+      header_template: "?stop_names stop moving ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {3, "Detour"},
-      header_template: "?route_names detoured ?alert_duration ?due_to_cause"
+      header_template: "?route_names detoured ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {3, "Snow Route"},
-      header_template: "?route_names snow route in effect ?alert_duration"
+      header_template: "?route_names snow route in effect ?alert_duration",
+      description_template: ""
     },
+
     # subway
     %{
       pattern: {1, "Suspension"},
       header_template:
-        "?route_names|: ?direction_name service is suspended ?alert_duration ?due_to_cause"
+        "?route_names|: ?direction_name service is suspended ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {1, "Delay"},
-      header_template: "?route_names|: ?direction_name delays of ?severity_name ?due_to_cause"
+      header_template: "?route_names|: ?direction_name delays of ?severity_name ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {1, "Service Change"},
-      header_template: "?route_names|: ?alert_duration ?due_to_cause"
+      header_template: "?route_names|: ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {1, "Shuttle"},
       header_template:
-        "?route_names|: Shuttle buses replace ?direction_name service ?alert_duration ?due_to_cause"
+        "?route_names|: Shuttle buses replace ?direction_name service ?alert_duration ?due_to_cause",
+      description_template: ""
     },
 
     # Commuter Rail
     %{
       pattern: {2, "Delay"},
       header_template:
-        "?route_names ?trip_names ?trip_form operating ?severity_name behind schedule ?alert_duration ?due_to_cause"
+        "?route_names ?trip_names ?trip_form operating ?severity_name behind schedule ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {2, "Shuttle"},
       header_template:
-        "?route_names ?direction_name ?trip_names will be replaced by a shuttle bus ?alert_duration ?due_to_cause"
+        "?route_names ?direction_name ?trip_names will be replaced by a shuttle bus ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {2, "Track Change"},
       header_template:
-        "Please board ?route_names ?trip_names on opposite track ?alert_duration ?due_to_cause"
+        "Please board ?route_names ?trip_names on opposite track ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {2, "Cancellation"},
       header_template:
-        "?route_names ?trip_names ?trip_form cancelled ?alert_duration ?due_to_cause"
+        "?route_names ?trip_names ?trip_form cancelled ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {2, "Service Change"},
-      header_template: "?route_names notice: ?trip_names ?alert_duration ?due_to_cause"
+      header_template: "?route_names notice: ?trip_names ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     # mode not specified
     %{
       pattern: {"Service Change"},
-      header_template: "?route_names notice: ?alert_duration ?due_to_cause"
+      header_template: "?route_names notice: ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {"Dock Issue"},
-      header_template: "Change at ?stop_names ?alert_duration ?due_to_cause"
+      header_template: "Change at ?stop_names ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {"Shuttle"},
       header_template:
-        "Shuttle buses replacing ?route_names ?direction_name service ?alert_duration ?due_to_cause"
+        "Shuttle buses replacing ?route_names ?direction_name service ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {"Suspension"},
       header_template:
-        "?route_names ?direction_name service suspended ?alert_duration ?due_to_cause"
+        "?route_names ?direction_name service suspended ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {"Extra Service"},
-      header_template: "Extra service on ?route_names ?alert_duration ?due_to_cause"
+      header_template: "Extra service on ?route_names ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {"Station Closure"},
-      header_template: "?stop_names closed ?alert_duration ?due_to_cause"
+      header_template: "?stop_names closed ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {"Delay"},
       header_template:
-        "?route_names ?trip_names experiencing ?direction_name delays of ?severity_name ?alert_duration ?due_to_cause"
+        "?route_names ?trip_names experiencing ?direction_name delays of ?severity_name ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {"Schedule Change"},
-      header_template: "Planned schedule change on ?route_names ?alert_duration ?due_to_cause"
+      header_template: "Planned schedule change on ?route_names ?alert_duration ?due_to_cause",
+      description_template: ""
     },
     %{
       pattern: {"Station Issue"},

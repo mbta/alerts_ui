@@ -1,6 +1,6 @@
 defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   @moduledoc """
-    Constructs auto-text for header and description from affected service.
+    Constructs auto-text for header from affected service.
   """
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration
   alias AlertsUIWeb.FormComponents.Helpers.{ContentFormatter, SelectFormatter}
