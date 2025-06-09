@@ -75,7 +75,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     },
     %{
       pattern: {4, "Suspension"},
-      header_template: "?route_names suspended ?alert_duration ?due_to_cause"
+      header_template: "?route_names service suspended ?alert_duration ?due_to_cause"
     },
     %{
       pattern: {4, "Cancellation"},
@@ -84,7 +84,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     %{
       pattern: {4, "Delay"},
       header_template:
-        "?route_names ?trip_names operation ?severity_name late ?alert_duration ?due_to_cause"
+        "?route_names ?trip_names operating ?severity_name late ?alert_duration ?due_to_cause"
     },
     # Bus
     %{
@@ -108,7 +108,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     },
     %{
       pattern: {3, "Suspension"},
-      header_template: "?route_names ?direction_name suspended ?alert_duration ?due_to_cause"
+      header_template:
+        "?route_names ?direction_name service suspended ?alert_duration ?due_to_cause"
     },
     %{
       pattern: {3, "Multi-Route Detour"},

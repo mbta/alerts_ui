@@ -25,6 +25,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
     departure_time: ~U[2024-02-21 14:01:00.00Z]
   }
 
+  # putting these here to prevent a weird test race condition
+  # with string_to_existing_atom
+  :route_names
+  :impacted_modes
+  :stop_form
+  :stop_names
+
   describe "build_auto_text/2" do
     # access
     test "access alert bike issue" do
@@ -355,7 +362,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected =
-        "Route 1 suspended until Sat, May 10 due to an unruly passenger"
+        "Route 1 service suspended until Sat, May 10 due to an unruly passenger"
 
       actual = Templates.build_auto_text(autotext_data, :header_template)
       assert expected == actual
@@ -398,7 +405,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected =
-        "Route 1 trip 527 (9:01 AM from South Station) operation about 10 minutes late until Sat, May 10 due to an unruly passenger"
+        "Route 1 trip 527 (9:01 AM from South Station) operating about 10 minutes late until Sat, May 10 due to an unruly passenger"
 
       actual = Templates.build_auto_text(autotext_data, :header_template)
       assert expected == actual
@@ -505,7 +512,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         end_datetime: ~N[2025-05-10 15:00:00]
       }
 
-      expected = "Route 1 eastbound suspended until Sat, May 10 due to a parade"
+      expected = "Route 1 eastbound service suspended until Sat, May 10 due to a parade"
 
       actual = Templates.build_auto_text(autotext_data, :header_template)
       assert expected == actual
