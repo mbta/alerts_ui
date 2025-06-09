@@ -50,22 +50,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
     long_name: "Charles/MGH Elevator 952 (Alewife platform to lobby)"
   }
 
-  describe "build_header_auto_text/1" do
-    test "builds auto text for header" do
-      assert BuildAutoText.build_header_auto_text(%BuildAutoText{}) == ""
-    end
-  end
-
-  describe "build_description_auto_text/1" do
-    test "builds auto text for description" do
-      assert BuildAutoText.build_description_auto_text(%BuildAutoText{}) == ""
-    end
-  end
-
   describe "due_to_cause/1" do
     test "adds due to in front of causes" do
       expected = "due to a slippery rail"
-      actual = BuildAutoText.due_to_cause("SLIPPERY_RAIL")
+      actual = BuildAutoText.due_to_cause(%{cause_detail: "SLIPPERY_RAIL"})
       assert expected == actual
     end
   end
@@ -100,292 +88,371 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
     end
   end
 
-  describe "severity/1" do
+  describe "severity_name/1" do
     test "when severity is nil" do
-      assert BuildAutoText.severity(nil) == ""
+      assert BuildAutoText.severity_name(%{severity: nil}) == ""
     end
 
     test "returns severity description for severity integer" do
       expected = "about 10 minutes"
-      actual = BuildAutoText.severity(3)
+      actual = BuildAutoText.severity_name(%{severity: 3})
       assert expected == actual
     end
   end
 
-  describe "service_types/1" do
+  describe "impacted_modes/1" do
     test "service types empty" do
-      assert BuildAutoText.service_types([]) == ""
+      assert BuildAutoText.impacted_modes(%{service_types: []}) == ""
     end
 
     test "one service type" do
       expected = "Commuter Rail"
-      actual = BuildAutoText.service_types([2])
+      actual = BuildAutoText.impacted_modes(%{service_types: [2]})
       assert expected == actual
     end
 
     test "two service types" do
       expected = "Ferry and Commuter Rail"
-      actual = BuildAutoText.service_types([4, 2])
+      actual = BuildAutoText.impacted_modes(%{service_types: [4, 2]})
       assert expected == actual
     end
 
     test "more than two service types" do
       expected = "Subway, Bus, Ferry, and Commuter Rail"
-      actual = BuildAutoText.service_types([1, 3, 4, 2])
+      actual = BuildAutoText.impacted_modes(%{service_types: [1, 3, 4, 2]})
       assert expected == actual
     end
   end
 
   describe "direction_name/2" do
     test "routes empty" do
-      assert BuildAutoText.direction_name([0], []) == ""
+      assert BuildAutoText.direction_name(%{direction: [0], routes: []}) == ""
     end
 
     test "directions empty" do
-      assert BuildAutoText.direction_name([], [@route_1]) == ""
+      assert BuildAutoText.direction_name(%{direction: [], routes: [@route_1]}) == ""
     end
 
     test "multiple routes" do
-      assert BuildAutoText.direction_name([0], [@route_1, @route_2]) == ""
+      assert BuildAutoText.direction_name(%{direction: [0], routes: [@route_1, @route_2]}) == ""
     end
 
     test "multiple directions" do
-      assert BuildAutoText.direction_name([0, 1], [@route_1]) == ""
+      assert BuildAutoText.direction_name(%{direction: [0, 1], routes: [@route_1, @route_2]}) ==
+               ""
     end
 
     test "1 direction, 1 route with direction names" do
-      assert BuildAutoText.direction_name([0], [@route_1]) == "westbound"
+      assert BuildAutoText.direction_name(%{direction: [0], routes: [@route_1]}) == "westbound"
     end
 
     test "1 direction, 1 route with no direction names" do
-      assert BuildAutoText.direction_name([1], [@route_2]) == "inbound"
+      assert BuildAutoText.direction_name(%{direction: [1], routes: [@route_2]}) == "inbound"
     end
   end
 
   describe "stop_names/1" do
     test "stops empty" do
-      assert BuildAutoText.stop_names([]) == ""
+      assert BuildAutoText.stop_names(%{stops: []}) == ""
     end
 
     test "one stop" do
       expected = "Lechmere"
-      actual = BuildAutoText.stop_names([@stop_1])
+      actual = BuildAutoText.stop_names(%{stops: [@stop_1]})
       assert expected == actual
     end
 
     test "two stops" do
       expected = "Lechmere and Longwood Medical Area"
-      actual = BuildAutoText.stop_names([@stop_1, @stop_2])
+      actual = BuildAutoText.stop_names(%{stops: [@stop_1, @stop_2]})
       assert expected == actual
     end
 
     test "more than two stops" do
       expected = "Lechmere, Longwood Medical Area, Massachusetts Avenue, and Mattapan"
-      actual = BuildAutoText.stop_names([@stop_1, @stop_2, @stop_3, @stop_4])
+      actual = BuildAutoText.stop_names(%{stops: [@stop_1, @stop_2, @stop_3, @stop_4]})
       assert expected == actual
     end
   end
 
   describe "stop_form/1" do
     test "stops empty" do
-      assert BuildAutoText.stop_form([]) == ""
+      assert BuildAutoText.stop_form(%{stops: []}) == ""
     end
 
     test "one stop" do
-      assert BuildAutoText.stop_form([@stop_1]) == "stop is"
+      assert BuildAutoText.stop_form(%{stops: [@stop_1]}) == "stop is"
     end
 
     test "multiple stops" do
-      assert BuildAutoText.stop_form([@stop_1, @stop_2]) == "stops are"
+      assert BuildAutoText.stop_form(%{stops: [@stop_1, @stop_2]}) == "stops are"
     end
   end
 
   describe "stop_range_between/1" do
     test "stops empty" do
-      assert BuildAutoText.stop_range_between([]) == ""
+      assert BuildAutoText.stop_range_between(%{stops: []}) == ""
     end
 
     test "one stop" do
       expected = "at Lechmere"
-      actual = assert BuildAutoText.stop_range_between([@stop_1])
+      actual = assert BuildAutoText.stop_range_between(%{stops: [@stop_1]})
       assert expected == actual
     end
 
     test "multiple stops" do
       expected = "between Lechmere and Mattapan"
-      actual = BuildAutoText.stop_range_between([@stop_1, @stop_2, @stop_3, @stop_4])
+      actual = BuildAutoText.stop_range_between(%{stops: [@stop_1, @stop_2, @stop_3, @stop_4]})
       assert expected == actual
     end
   end
 
-  describe "trip_names/2" do
+  describe "trip_names_only/1" do
     test "schedules empty" do
-      assert BuildAutoText.trip_names([], 0) == ""
+      autotext_data = %{
+        schedules: []
+      }
+
+      assert BuildAutoText.trip_names_only(autotext_data) == ""
     end
 
     test "one schedule" do
-      expected = "trip 527 (9:01 AM from South Station)"
-      actual = assert BuildAutoText.trip_names([@schedule_1], 3)
-      assert expected == actual
-    end
+      autotext_data = %{
+        schedules: [@schedule_1]
+      }
 
-    test "one schedule when commuter rail" do
-      expected = "train 527 (9:01 AM from South Station)"
-      actual = assert BuildAutoText.trip_names([@schedule_1], 2)
+      expected = "527 (9:01 AM from South Station)"
+      actual = assert BuildAutoText.trip_names_only(autotext_data)
       assert expected == actual
     end
 
     test "two schedules" do
-      expected = "trips 527 (9:01 AM from South Station) and 841 (11:15 AM from Forest Hills)"
-      actual = assert BuildAutoText.trip_names([@schedule_1, @schedule_2], 3)
-      assert expected == actual
-    end
+      autotext_data = %{
+        schedules: [@schedule_1, @schedule_2]
+      }
 
-    test "two schedules when commuter rail" do
-      expected = "trains 527 (9:01 AM from South Station) and 841 (11:15 AM from Forest Hills)"
-      actual = assert BuildAutoText.trip_names([@schedule_1, @schedule_2], 2)
+      expected = "527 (9:01 AM from South Station) and 841 (11:15 AM from Forest Hills)"
+      actual = assert BuildAutoText.trip_names_only(autotext_data)
       assert expected == actual
     end
 
     test "more than two schedules" do
+      autotext_data = %{
+        schedules: [@schedule_1, @schedule_2, @schedule_3]
+      }
+
+      expected =
+        "527 (9:01 AM from South Station), 841 (11:15 AM from Forest Hills), and 839 (11:03 AM from South Station)"
+
+      actual = assert BuildAutoText.trip_names_only(autotext_data)
+      assert expected == actual
+    end
+  end
+
+  describe "trip_names/1" do
+    test "schedules empty" do
+      autotext_data = %{
+        schedules: [],
+        route_type: 0
+      }
+
+      assert BuildAutoText.trip_names(autotext_data) == ""
+    end
+
+    test "one schedule" do
+      autotext_data = %{
+        schedules: [@schedule_1],
+        route_type: 3
+      }
+
+      expected = "trip 527 (9:01 AM from South Station)"
+      actual = assert BuildAutoText.trip_names(autotext_data)
+      assert expected == actual
+    end
+
+    test "one schedule when commuter rail" do
+      autotext_data = %{
+        schedules: [@schedule_1],
+        route_type: 2
+      }
+
+      expected = "train 527 (9:01 AM from South Station)"
+      actual = assert BuildAutoText.trip_names(autotext_data)
+      assert expected == actual
+    end
+
+    test "two schedules" do
+      autotext_data = %{
+        schedules: [@schedule_1, @schedule_2],
+        route_type: 3
+      }
+
+      expected = "trips 527 (9:01 AM from South Station) and 841 (11:15 AM from Forest Hills)"
+      actual = assert BuildAutoText.trip_names(autotext_data)
+      assert expected == actual
+    end
+
+    test "two schedules when commuter rail" do
+      autotext_data = %{
+        schedules: [@schedule_1, @schedule_2],
+        route_type: 2
+      }
+
+      expected = "trains 527 (9:01 AM from South Station) and 841 (11:15 AM from Forest Hills)"
+      actual = assert BuildAutoText.trip_names(autotext_data)
+      assert expected == actual
+    end
+
+    test "more than two schedules" do
+      autotext_data = %{
+        schedules: [@schedule_1, @schedule_2, @schedule_3],
+        route_type: 3
+      }
+
       expected =
         "trips 527 (9:01 AM from South Station), 841 (11:15 AM from Forest Hills), and 839 (11:03 AM from South Station)"
 
-      actual = assert BuildAutoText.trip_names([@schedule_1, @schedule_2, @schedule_3], 3)
+      actual = assert BuildAutoText.trip_names(autotext_data)
       assert expected == actual
     end
   end
 
   describe "trip_form/1" do
     test "trips empty" do
-      assert BuildAutoText.trip_form([]) == ""
+      assert BuildAutoText.trip_form(%{schedules: []}) == ""
     end
 
     test "one trip" do
-      assert BuildAutoText.trip_form([@schedule_1]) == "trip is"
+      assert BuildAutoText.trip_form(%{schedules: [@schedule_1]}) == "trip is"
     end
 
     test "multiple trips" do
-      assert BuildAutoText.trip_form([@schedule_1, @schedule_2]) == "trips are"
+      assert BuildAutoText.trip_form(%{schedules: [@schedule_1, @schedule_2]}) == "trips are"
     end
   end
 
   describe "facility_name/1" do
     test "facility nil" do
-      assert BuildAutoText.facility_name(nil) == ""
+      assert BuildAutoText.facility_name(%{facility: nil}) == ""
     end
 
     test "facility has long name" do
       expected = "Charles/MGH Elevator 952 (Alewife platform to lobby)"
-      actual = BuildAutoText.facility_name(@facility)
+      actual = BuildAutoText.facility_name(%{facility: @facility})
       assert expected == actual
     end
   end
 
   describe "route_names_short/2" do
     test "when routes are empty" do
-      assert BuildAutoText.route_names_short([], 1) == ""
+      assert BuildAutoText.route_names_short(%{routes: [], route_type: 1}) == ""
     end
 
     test "when there is 1 numeric route" do
       expected = "Route 1"
-      actual = BuildAutoText.route_names_short([@route_1], 3)
+      actual = BuildAutoText.route_names_short(%{routes: [@route_1], route_type: 3})
       assert expected == actual
     end
 
     test "when there is 1 non-numeric route" do
       expected = "SL1"
-      actual = BuildAutoText.route_names_short([@route_4], 3)
+      actual = BuildAutoText.route_names_short(%{routes: [@route_4], route_type: 3})
       assert expected == actual
     end
 
     test "when there are 2 numeric routes" do
       expected = "Routes 1 and 22"
-      actual = BuildAutoText.route_names_short([@route_1, @route_2], 3)
+      actual = BuildAutoText.route_names_short(%{routes: [@route_1, @route_2], route_type: 3})
       assert expected == actual
     end
 
     test "when there are 2 non-numeric routes" do
       expected = "SL1 and SL2"
-      actual = BuildAutoText.route_names_short([@route_4, @route_5], 3)
+      actual = BuildAutoText.route_names_short(%{routes: [@route_4, @route_5], route_type: 3})
       assert expected == actual
     end
 
     test "when there is 1 numeric and 1 non-numeric routes" do
       expected = "SL1 and Route 1"
-      actual = BuildAutoText.route_names_short([@route_1, @route_4], 3)
+      actual = BuildAutoText.route_names_short(%{routes: [@route_1, @route_4], route_type: 3})
       assert expected == actual
     end
 
     test "when there are more than 3 routes" do
       expected = "Bus"
-      actual = BuildAutoText.route_names_short([@route_1, @route_4, @route_5], 3)
+
+      actual =
+        BuildAutoText.route_names_short(%{routes: [@route_1, @route_4, @route_5], route_type: 3})
+
       assert expected == actual
     end
   end
 
   describe "route_names/1" do
     test "when routes are empty" do
-      assert BuildAutoText.route_names([]) == ""
+      assert BuildAutoText.route_names(%{routes: []}) == ""
     end
 
     test "when there is 1 numeric route" do
       expected = "Route 1"
-      actual = BuildAutoText.route_names([@route_1])
+      actual = BuildAutoText.route_names(%{routes: [@route_1]})
       assert expected == actual
     end
 
     test "when there are 2 numeric route" do
       expected = "Routes 1 and 22"
-      actual = BuildAutoText.route_names([@route_1, @route_2])
+      actual = BuildAutoText.route_names(%{routes: [@route_1, @route_2]})
       assert expected == actual
     end
 
     test "when there are more than 2 numeric routes" do
       expected = "Routes 1, 22, and 333"
-      actual = BuildAutoText.route_names([@route_1, @route_2, @route_3])
+      actual = BuildAutoText.route_names(%{routes: [@route_1, @route_2, @route_3]})
       assert expected == actual
     end
 
     test "when there is 1 non-numeric route" do
       expected = "SL1"
-      actual = BuildAutoText.route_names([@route_4])
+      actual = BuildAutoText.route_names(%{routes: [@route_4]})
       assert expected == actual
     end
 
     test "when there are 2 non-numeric routes" do
       expected = "SL1 and SL2"
-      actual = BuildAutoText.route_names([@route_4, @route_5])
+      actual = BuildAutoText.route_names(%{routes: [@route_4, @route_5]})
       assert expected == actual
     end
 
     test "when there are more than 2 non-numeric routes" do
       expected = "SL1, SL2, and SLW"
-      actual = BuildAutoText.route_names([@route_4, @route_5, @route_6])
+      actual = BuildAutoText.route_names(%{routes: [@route_4, @route_5, @route_6]})
       assert expected == actual
     end
 
     test "when there is 1 numeric and 1 non-numeric route" do
       expected = "SL1 and Route 1"
-      actual = BuildAutoText.route_names([@route_1, @route_4])
+      actual = BuildAutoText.route_names(%{routes: [@route_1, @route_4]})
       assert expected == actual
     end
 
     test "when there is 1 numeric and 2 non-numeric routes" do
       expected = "SL1 and Routes 1 and 22"
-      actual = BuildAutoText.route_names([@route_1, @route_2, @route_4])
+      actual = BuildAutoText.route_names(%{routes: [@route_1, @route_2, @route_4]})
       assert expected == actual
     end
 
     test "when there are 2 numeric and 2 non-numeric routes" do
       expected = "SL1, SL2 and Routes 1 and 22"
-      actual = BuildAutoText.route_names([@route_1, @route_2, @route_4, @route_5])
+      actual = BuildAutoText.route_names(%{routes: [@route_1, @route_2, @route_4, @route_5]})
       assert expected == actual
     end
 
     test "when there are 2 numeric and 3 non-numeric routes" do
       expected = "SL1, SL2, SLW and Routes 1 and 22"
-      actual = BuildAutoText.route_names([@route_1, @route_2, @route_4, @route_5, @route_6])
+
+      actual =
+        BuildAutoText.route_names(%{routes: [@route_1, @route_2, @route_4, @route_5, @route_6]})
+
       assert expected == actual
     end
 
@@ -393,7 +460,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
       expected = "Route 1 and 5 other routes"
 
       actual =
-        BuildAutoText.route_names([@route_1, @route_2, @route_3, @route_1, @route_2, @route_3])
+        BuildAutoText.route_names(%{
+          routes: [@route_1, @route_2, @route_3, @route_1, @route_2, @route_3]
+        })
 
       assert expected == actual
     end
@@ -402,7 +471,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
       expected = "SL1 and 5 other routes"
 
       actual =
-        BuildAutoText.route_names([@route_4, @route_5, @route_6, @route_4, @route_5, @route_6])
+        BuildAutoText.route_names(%{
+          routes: [@route_4, @route_5, @route_6, @route_4, @route_5, @route_6]
+        })
 
       assert expected == actual
     end
@@ -411,7 +482,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
       expected = "SL1 and 5 other routes"
 
       actual =
-        BuildAutoText.route_names([@route_1, @route_4, @route_5, @route_6, @route_4, @route_5])
+        BuildAutoText.route_names(%{
+          routes: [@route_1, @route_4, @route_5, @route_6, @route_4, @route_5]
+        })
 
       assert expected == actual
     end
@@ -420,7 +493,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
       expected = "SL1 and 5 other routes"
 
       actual =
-        BuildAutoText.route_names([@route_1, @route_2, @route_3, @route_2, @route_3, @route_4])
+        BuildAutoText.route_names(%{
+          routes: [@route_1, @route_2, @route_3, @route_2, @route_3, @route_4]
+        })
 
       assert expected == actual
     end
@@ -428,29 +503,29 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
 
   describe "route_form/1" do
     test "routes empty" do
-      assert BuildAutoText.route_form([]) == ""
+      assert BuildAutoText.route_form(%{routes: []}) == ""
     end
 
     test "one route" do
-      assert BuildAutoText.route_form([@route_1]) == "route is"
+      assert BuildAutoText.route_form(%{routes: [@route_1]}) == "route is"
     end
 
     test "multiple routes" do
-      assert BuildAutoText.route_form([@route_1, @route_2]) == "routes are"
+      assert BuildAutoText.route_form(%{routes: [@route_1, @route_2]}) == "routes are"
     end
   end
 
   describe "route_form_only/1" do
     test "routes empty" do
-      assert BuildAutoText.route_form_only([]) == ""
+      assert BuildAutoText.route_form_only(%{routes: []}) == ""
     end
 
     test "one route" do
-      assert BuildAutoText.route_form_only([@route_1]) == "is"
+      assert BuildAutoText.route_form_only(%{routes: [@route_1]}) == "is"
     end
 
     test "multiple routes" do
-      assert BuildAutoText.route_form_only([@route_1, @route_2]) == "are"
+      assert BuildAutoText.route_form_only(%{routes: [@route_1, @route_2]}) == "are"
     end
   end
 end
