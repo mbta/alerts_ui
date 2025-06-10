@@ -22,6 +22,21 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionTextTest d
 
   @schedule_2 %EnhancedSchedule{
     route: @route_2,
+    trip: %Trip{id: "CR-687395-841", name: "841", direction_id: 1},
+    stop: %Stop{id: "place-forhl", name: "Forest Hills"},
+    arrival_time: nil,
+    departure_time: ~U[2024-02-21 16:15:00.00Z]
+  }
+
+  @schedule_3 %EnhancedSchedule{
+    route: @route_1,
+    trip: %Trip{id: "CR-683300-527", name: "528", direction_id: 0},
+    stop: %Stop{id: "place-sstat", name: "South Station"},
+    departure_time: ~U[2024-02-21 14:01:00.00Z]
+  }
+
+  @schedule_4 %EnhancedSchedule{
+    route: @route_2,
     trip: %Trip{id: "CR-687395-841", name: "841", direction_id: 0},
     stop: %Stop{id: "place-forhl", name: "Forest Hills"},
     arrival_time: nil,
@@ -95,6 +110,36 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionTextTest d
       expected = "Delayed trips:\n527 (9:01 AM from South Station)"
 
       actual = BuildDescriptionText.affected_trips(autotext_data)
+      assert expected == actual
+    end
+
+    test "trips with two routes" do
+      autotext_data = %{
+        routes: [@route_1, @route_2],
+        schedules: [@schedule_1, @schedule_2],
+        effect: "Delay"
+      }
+
+      expected =
+        "Delayed westbound trips on 1:\n527 (9:01 AM from South Station)\n\nDelayed inbound trips on 22:\n841 (11:15 AM from Forest Hills)"
+
+      actual = BuildDescriptionText.affected_trips(autotext_data)
+
+      assert expected == actual
+    end
+
+    test "multiple trips with two routes" do
+      autotext_data = %{
+        routes: [@route_1, @route_2],
+        schedules: [@schedule_1, @schedule_2, @schedule_3, @schedule_4],
+        effect: "Delay"
+      }
+
+      expected =
+        "Delayed westbound trips on 1:\n527 (9:01 AM from South Station)528 (9:01 AM from South Station)\n\nDelayed inbound trips on 22:\n841 (11:15 AM from Forest Hills)\n\nDelayed outbound trips on 22:\n841 (11:15 AM from Forest Hills)"
+
+      actual = BuildDescriptionText.affected_trips(autotext_data)
+
       assert expected == actual
     end
   end
