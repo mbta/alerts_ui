@@ -9,6 +9,7 @@
   <div class="flex flex-col items-center justify-center w-[90%]" id="article-view">
     <article class="flex flex-col items-center justify-center w-[100%]">
       <.live_component
+        :if={@progress.name == "route_type_and_effect"}
         module={RouteTypeAndEffect}
         id="route_type"
         progress={@progress}

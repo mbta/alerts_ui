@@ -135,7 +135,7 @@ defmodule AlertsUIWeb.ReviewModal do
           </div>
 
           <p class="font-bold">Affected service</p>
-          <div id="affected_service_selections" class="pb-4 grid grid-cols-[100px_auto]">
+          <div id="affected_service_selections" class="pb-4 grid grid-cols-[110px_auto]">
             <%= if @routes do %>
               <p>Routes:</p>
               <p>{@routes |> Enum.map(&SelectFormatter.name_for_option(&1)) |> Enum.join(", ")}</p>
