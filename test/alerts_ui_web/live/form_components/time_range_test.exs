@@ -91,7 +91,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
                ~s(phx-feedback-for="time_range[active_period_end_date]" class="min-w-[16rem] max-w-[16rem] hidden")
     end
 
-    test "editing does not check start time" do
+    test "editing keeps correct end time specifier when there is no end time" do
       {:ok, view, _html} =
         live_isolated_component(
           TimeRange,
@@ -114,6 +114,25 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
       refute view
              |> render() =~ "later today"
+    end
+
+    test "editing does not check start time" do
+      {:ok, view, _html} =
+        live_isolated_component(
+          TimeRange,
+          Map.merge(
+            @assigns,
+            %{
+              editing: true,
+              alert_data: %{
+                active_period_start_specifier: "custom",
+                active_period_start: ~N[2024-04-29 10:54:00],
+                active_period_end_specifier: "until_further_notice",
+                active_period_end: ~N[2024-04-30 11:59:00]
+              }
+            }
+          )
+        )
 
       view
       |> element("form")
@@ -177,6 +196,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         )
 
       assert view
+             |> element("#time_range_active_period_start_specifier")
              |> render() =~ "custom"
 
       assert view
