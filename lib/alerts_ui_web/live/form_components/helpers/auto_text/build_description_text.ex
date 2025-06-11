@@ -6,25 +6,43 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionText do
   alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
 
   @spec affected_routes(BuildAutoText.t()) :: String.t()
-  def affected_routes(%{routes: routes, effect: effect, route_type: route_type}) do
+  def affected_routes(%{routes: routes, effect_name: effect, route_type: route_type}) do
     "#{affected_route_term(effect)} #{route_term(route_type)}:\n#{join(routes)}"
   end
 
   @spec affected_stops(BuildAutoText.t()) :: String.t()
-  # TODO inbound/outbound
-  def affected_stops(%{stops: stops, effect: effect, route_type: 3}) do
-    "#{affected_stop_term(effect)} #{stop_term(3)}:\n#{join(stops)}"
+  def affected_stops(%{stops: stops, effect_name: effect, route_type: 3}) do
+    # Bus stops must be sorted by direction. Luckily the stop names
+    # are already marked with the direction.
+    outbound_stops = stops_by_direction(stops, effect, "outbound")
+    inbound_stops = stops_by_direction(stops, effect, "inbound")
+    "#{outbound_stops}\n\n#{inbound_stops}" |> String.trim()
   end
 
-  def affected_stops(%{stops: stops, effect: effect, route_type: route_type}) do
+  def affected_stops(%{stops: stops, effect_name: effect, route_type: route_type}) do
     "#{affected_stop_term(effect)} #{stop_term(route_type)}:\n#{join(stops)}"
   end
 
-  def affected_trips(%{routes: [_route], schedules: schedules, effect: effect}) do
+  defp stops_by_direction(stops, effect, direction) do
+    stops
+    |> Enum.map(& &1.name)
+    |> Enum.filter(&String.contains?(&1, direction))
+    |> Enum.map(&String.replace(&1, " (#{direction})", ""))
+    |> stops_text(direction, effect)
+  end
+
+  defp stops_text([], _, _), do: ""
+
+  defp stops_text(stop_names, direction, effect) do
+    "#{affected_stop_term(effect)} #{direction} stops:\n#{Enum.join(stop_names, "\n")}"
+  end
+
+  @spec affected_trips(BuildAutoText.t()) :: String.t()
+  def affected_trips(%{routes: [_route], schedules: schedules, effect_name: effect}) do
     "#{affected_trip_term(effect)} trips:\n#{join(schedules)}"
   end
 
-  def affected_trips(%{routes: _routes, schedules: schedules, effect: effect}) do
+  def affected_trips(%{routes: _routes, schedules: schedules, effect_name: effect}) do
     Enum.reduce(schedules, %{}, fn schedule, acc ->
       route_name = SelectFormatter.name_for_option(schedule.route)
       trip_name = SelectFormatter.name_for_option(schedule)
@@ -45,6 +63,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionText do
     end)
     |> String.trim()
   end
+
+  @spec affected_direction(BuildAutoText.t()) :: String.t()
+  def affected_direction(%{routes: [_route], direction: [_direction]} = autotext_data) do
+    "Affected direction: #{BuildAutoText.direction_name(autotext_data)}"
+  end
+
+  def affected_direction(_), do: ""
 
   defp route_term(3), do: "routes"
   defp route_term(4), do: "ferries"
