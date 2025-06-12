@@ -37,16 +37,6 @@ defmodule Test.Support.Helpers do
     Path.expand(path, fixture_path)
   end
 
-  def parse_entities_from_alert_created_output(view) do
-    view
-    |> element("#success_view h3")
-    |> render()
-    |> String.replace("<h3 class=\"font-bold mb-2 text-2xl  mr-4\">\n  Alert #", "")
-    |> String.replace(" created successfully\n</h3>", "")
-    |> AlertsUI.Alerts.get_by_alert_id()
-    |> Map.get(:informed_entity)
-  end
-
   # Useful in e2e testing
   def get_to_submission_page(view, mode, effect) do
     # Use any combo to proceed to next page

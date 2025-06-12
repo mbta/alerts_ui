@@ -77,7 +77,33 @@ defmodule AlertsUI.Models.SeverityLevel do
   def severity_description_by_severity(severity) do
     severity_tuples()
     |> Enum.find_value(fn
-      {description, ^severity, _} -> description
+      {severity_description, ^severity, _} -> severity_description
+      _ -> nil
+    end)
+  end
+
+  @doc """
+  Returns severity string given an integer 
+
+  ## Examples
+      iex> AlertsUI.Models.SeverityLevel.severity_string_by_severity(nil)
+      nil
+      iex> AlertsUI.Models.SeverityLevel.severity_string_by_severity(0)
+      nil
+      iex> AlertsUI.Models.SeverityLevel.severity_string_by_severity(1)
+      "(1 - INFO)"
+      iex> AlertsUI.Models.SeverityLevel.severity_string_by_severity(2)
+      nil
+      iex> AlertsUI.Models.SeverityLevel.severity_string_by_severity(3)
+      "(3 - WARNING)"
+      iex> AlertsUI.Models.SeverityLevel.severity_string_by_severity(10)
+      "(10 - SEVERE)"
+  """
+  @spec severity_string_by_severity(integer()) :: String.t() | nil
+  def severity_string_by_severity(severity) do
+    severity_tuples()
+    |> Enum.find_value(fn
+      {_, ^severity, level} -> "(#{severity} - #{Atom.to_string(level)})"
       _ -> nil
     end)
   end

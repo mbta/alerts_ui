@@ -9,6 +9,7 @@
   <div class="flex flex-col items-center justify-center w-[90%]" id="article-view">
     <article class="flex flex-col items-center justify-center w-[100%]">
       <.live_component
+        :if={@progress.name == "route_type_and_effect"}
         module={RouteTypeAndEffect}
         id="route_type"
         progress={@progress}
@@ -64,18 +65,17 @@
           alert_data={@alert_data}
           editing={@editing}
         />
-        <.live_component module={Submit} id="submit" progress={@progress} />
+        <.live_component
+          module={Submit}
+          id="submit"
+          progress={@progress}
+          alert_data={@alert_data}
+          editing={@editing}
+          alert_id={@alert_id}
+          selected_schedules={@selected_schedules}
+        />
       </div>
-      <.live_component
-        :if={@progress.name == "success"}
-        module={SuccessfulSubmission}
-        id="successful_submission"
-        progress={@progress}
-        alert_uuid={@alert_uuid}
-        show_created_alert={@show_created_alert}
-      />
     </article>
-    <.flash kind={:info} title="Success!" flash={@flash} id="success-flash" />
     <.form_error_flash title="Please fix these issues:" flash={@flash} id="error-flash" />
   </div>
 </div>

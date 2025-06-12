@@ -91,6 +91,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.RecurringDurationText do
 
   def weekday_text(nil), do: ""
   def weekday_text([]), do: ""
+
+  def weekday_text([day | _] = weekday_list) when is_atom(day) do
+    weekday_list
+    |> Enum.map(fn day -> Atom.to_string(day) end)
+    |> weekday_text
+  end
+
   def weekday_text([day]), do: String.capitalize(day)
 
   def weekday_text([day_1, day_2]) do
@@ -104,14 +111,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.RecurringDurationText do
   def weekday_text(weekday_list) do
     [hd | tail] =
       weekday_list
-      |> Enum.map(fn weekday ->
-        if is_atom(weekday) do
-          Atom.to_string(weekday)
-        else
-          weekday
-        end
-        |> String.capitalize()
-      end)
+      |> Enum.map(fn weekday -> String.capitalize(weekday) end)
       |> Enum.reverse()
 
     ["and " <> hd | tail]

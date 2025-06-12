@@ -45,6 +45,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
         %__MODULE__{schedules_by_route_name: schedules_by_route_name} = filterable
       )
       when not is_nil(schedules_by_route_name) do
+    # if only 1 route is selected
     if schedules_by_route_name |> Map.keys() |> length() <= 1 do
       options =
         schedules_by_route_name
@@ -53,6 +54,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
 
       Map.put(filterable, :options, options)
       |> formatted_select_options()
+
+      # else multiple routes are selected
     else
       Enum.reduce(schedules_by_route_name, [], fn {route_name, schedules}, acc ->
         acc ++ [{route_name, formatted_select_options(Map.put(filterable, :options, schedules))}]

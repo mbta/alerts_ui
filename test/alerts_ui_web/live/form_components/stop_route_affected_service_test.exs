@@ -5,7 +5,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
   import LiveIsolatedComponent
   import Mock
   import Phoenix.LiveViewTest
-  import Test.Support.Helpers
 
   alias AlertsUIWeb.FormComponents.StopRouteAffectedService
   alias AlertsUIWeb.Step
@@ -450,12 +449,17 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
            get: fn
              "Blue", _ -> @route_one
              "Bluer", _ -> @route_two
+           end,
+           get: fn
+             "Blue" -> @route_one
+             "Bluer" -> @route_two
            end
          ]},
         {StopsRepo, [],
          [
-           by_route_type: fn _route_type, _opts -> [@stop] end,
-           by_route: fn _, _ -> [@stop] end
+           by_route_type: fn _route_type -> [@stop] end,
+           by_route: fn _, _ -> [@stop] end,
+           get: fn _id -> @stop end
          ]},
         {RoutePatternsRepo, [],
          [
@@ -506,8 +510,18 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         |> element("button", "Submit")
         |> render_click()
 
+        # query the db
+        flash = assert_redirect(view, "/")
+
+        alert_id =
+          flash["info"]
+          |> String.replace("New alert #", "")
+          |> String.replace(" created", "")
+
+        new_alert = AlertsUI.Alerts.get_by_alert_id(alert_id)
+
         assert [%{route_id: "Blue"}, %{route_id: "Bluer"}] =
-                 parse_entities_from_alert_created_output(view)
+                 Map.get(new_alert, :informed_entity)
       end
     end
 
@@ -523,12 +537,14 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
            get: fn
              "Blue", _ -> @route_one
              "Bluer", _ -> @route_two
-           end
+           end,
+           get: fn "Bluer" -> @route_two end
          ]},
         {StopsRepo, [],
          [
-           by_route_type: fn _route_type, _opts -> [@stop] end,
-           by_route: fn _, _ -> [@stop] end
+           by_route_type: fn _route_type -> [@stop] end,
+           by_route: fn _, _ -> [@stop] end,
+           get: fn _id -> @stop end
          ]},
         {RoutePatternsRepo, [],
          [
@@ -585,7 +601,17 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         |> element("button", "Submit")
         |> render_click()
 
-        assert [%{route_id: "Bluer"}] = parse_entities_from_alert_created_output(view)
+        # query the db
+        flash = assert_redirect(view, "/")
+
+        alert_id =
+          flash["info"]
+          |> String.replace("New alert #", "")
+          |> String.replace(" created", "")
+
+        new_alert = AlertsUI.Alerts.get_by_alert_id(alert_id)
+
+        assert [%{route_id: "Bluer"}] = Map.get(new_alert, :informed_entity)
       end
     end
 
