@@ -237,6 +237,75 @@ defmodule AlertsUI.AlertBuilderTest do
       end
     end
 
+    test "it does not add combo IDs for the green line" do
+      with_mocks([
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _route_id, _opts -> [] end
+         ]},
+        {RoutesRepo, [],
+         [
+           get: fn
+             "Green-D", _opts ->
+               %Route{id: "Green-D", line_id: "line-Green", type: 1, description: :rapid_transit}
+           end
+         ]},
+        {LinesRepo, [],
+         [
+           get: fn
+             "line-Green", _opts ->
+               %Line{
+                 id: "line-Green",
+                 route_ids: ["Green-B", "Green-C", "Green-D"],
+                 routes: [
+                   %Route{
+                     id: "Green-B",
+                     line_id: "line-Green",
+                     type: 1,
+                     description: :rapid_transit
+                   },
+                   %Route{
+                     id: "Green-C",
+                     line_id: "line-Green",
+                     type: 1,
+                     description: :rapid_transit
+                   },
+                   %Route{
+                     id: "Green-D",
+                     line_id: "line-Green",
+                     type: 1,
+                     description: :rapid_transit
+                   }
+                 ]
+               }
+           end
+         ]}
+      ]) do
+        alert_data = %{
+          route_type: 1,
+          header_text: "header",
+          effect_name: "Delay",
+          route_ids: ["Green-D"],
+          direction: "default",
+          active_period_start: ~N[2024-04-30 11:54:00],
+          active_period_end_specifier: :until_further_notice,
+          active_period_start_specifier: :custom,
+          cause_detail: ""
+        }
+
+        result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 05:54:00Z])
+
+        assert result.informed_entity == [
+                 %{
+                   agency_id: "1",
+                   route_id: "Green-D",
+                   route_type: 1,
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 }
+               ]
+      end
+    end
+
     test "it does not filter out shuttle routes if they were part of the original selection" do
       with_mocks([
         {RoutePatternsRepo, [],
@@ -373,6 +442,63 @@ defmodule AlertsUI.AlertBuilderTest do
       end
     end
 
+    test "bus alerts will retain parents stops if they're on the representative trip" do
+      stops = [
+        %Stop{id: 64, parent_id: "place-nubn"},
+        %Stop{id: 1, parent_id: nil},
+        %Stop{id: 2, parent_id: nil}
+      ]
+
+      with_mocks([
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn route_id, [direction_id: "0", include: "representative_trip.stops"] ->
+             [%APIRoutePattern{direction_id: 0, stops: stops, route_id: route_id}]
+           end
+         ]},
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]}
+      ]) do
+        alert_data = %{
+          route_type: 3,
+          header_text: "x",
+          effect_name: "Delay",
+          stop_ids: ["place-nubn", 1, 2],
+          route_ids: ["87"],
+          trip_ids: nil,
+          direction: "0"
+        }
+
+        result = AlertBuilder.build_alert(alert_data, :RDS)
+
+        assert result.informed_entity == [
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "87",
+                   route_type: 3,
+                   agency_id: "1",
+                   direction_id: 0,
+                   stop_id: 64
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "87",
+                   route_type: 3,
+                   agency_id: "1",
+                   direction_id: 0,
+                   stop_id: 1
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "87",
+                   route_type: 3,
+                   agency_id: "1",
+                   direction_id: 0,
+                   stop_id: 2
+                 }
+               ]
+      end
+    end
+
     test "properly builds RDS all-stops informed entity with 1 route" do
       with_mocks([
         {RoutePatternsRepo, [], by_route_id: fn _route_id, _opts -> [] end},
@@ -485,16 +611,23 @@ defmodule AlertsUI.AlertBuilderTest do
       parent_stops = [%Stop{id: "a"}, %Stop{id: "b"}, %Stop{id: "c"}]
 
       child_stops = [
-        %Stop{id: "1", parent_id: "a", vehicle_type: 3},
-        %Stop{id: "2", parent_id: "b", vehicle_type: 3},
-        %Stop{id: "3", parent_id: "c", vehicle_type: 3}
+        %Stop{id: "1", parent_id: "a"},
+        %Stop{id: "2", parent_id: "b"},
+        %Stop{id: "3", parent_id: "c"}
       ]
 
       with_mocks([
         {RoutePatternsRepo, [],
          [
            by_route_id: fn route_id, _opts ->
-             [%APIRoutePattern{direction_id: 1, stops: child_stops, route_id: route_id}]
+             [
+               %APIRoutePattern{
+                 direction_id: 1,
+                 stops: child_stops,
+                 route_id: route_id,
+                 id: "rp_1"
+               }
+             ]
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
@@ -551,7 +684,14 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [],
          [
            by_route_id: fn route_id, _opts ->
-             [%APIRoutePattern{direction_id: 0, stops: parent_stops, route_id: route_id}]
+             [
+               %APIRoutePattern{
+                 direction_id: 0,
+                 stops: parent_stops,
+                 route_id: route_id,
+                 id: "rp_1"
+               }
+             ]
            end,
            included_stops_by_route_id: fn _route_id, _direction -> parent_stops end
          ]},
@@ -599,19 +739,16 @@ defmodule AlertsUI.AlertBuilderTest do
       child_stops = [
         %Stop{
           id: "WR-0067-01",
-          parent_id: "place-WR-0067",
-          vehicle_type: 2
+          parent_id: "place-WR-0067"
         },
         %Stop{
           id: "WR-0075-01",
-          parent_id: "place-WR-0075",
-          vehicle_type: 2
+          parent_id: "place-WR-0075"
         },
         # Intentional duplicate
         %Stop{
           id: "WR-0075-01",
-          parent_id: "place-WR-0075",
-          vehicle_type: 2
+          parent_id: "place-WR-0075"
         }
       ]
 
@@ -619,7 +756,14 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [],
          [
            by_route_id: fn route_id, _opts ->
-             [%APIRoutePattern{direction_id: 0, stops: child_stops, route_id: route_id}]
+             [
+               %APIRoutePattern{
+                 direction_id: 0,
+                 stops: child_stops,
+                 route_id: route_id,
+                 id: "rp_1"
+               }
+             ]
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
@@ -670,27 +814,36 @@ defmodule AlertsUI.AlertBuilderTest do
       ]
 
       child_stops_0 = [
-        %Stop{id: "alfcl-child", parent_id: "place-alfcl", vehicle_type: 1},
-        %Stop{id: "davis-child-0", parent_id: "place-davis", vehicle_type: 1},
-        %Stop{id: "portr-child-0", parent_id: "place-portr", vehicle_type: 1},
-        %Stop{id: "harsq-child-0", parent_id: "place-harsq", vehicle_type: 1}
+        %Stop{id: "alfcl-child", parent_id: "place-alfcl"},
+        %Stop{id: "davis-child-0", parent_id: "place-davis"},
+        %Stop{id: "portr-child-0", parent_id: "place-portr"},
+        %Stop{id: "harsq-child-0", parent_id: "place-harsq"}
       ]
 
       child_stops_1 = [
-        %Stop{id: "harsq-child-1", parent_id: "place-harsq", vehicle_type: 1},
-        %Stop{id: "portr-child-1", parent_id: "place-portr", vehicle_type: 1},
-        %Stop{id: "davis-child-1", parent_id: "place-davis", vehicle_type: 1},
-        %Stop{id: "alfcl-child", parent_id: "place-alfcl", vehicle_type: 1}
+        %Stop{id: "harsq-child-1", parent_id: "place-harsq"},
+        %Stop{id: "portr-child-1", parent_id: "place-portr"},
+        %Stop{id: "davis-child-1", parent_id: "place-davis"},
+        %Stop{id: "alfcl-child", parent_id: "place-alfcl"}
       ]
 
       with_mocks([
         {RoutePatternsRepo, [],
          [
-           by_route_id: fn "Red",
-                           ["filter[canonical]": true, include: "representative_trip.stops"] ->
+           by_route_id: fn "Red", [include: "representative_trip.stops"] ->
              [
-               %APIRoutePattern{direction_id: 0, stops: child_stops_0, route_id: "Red"},
-               %APIRoutePattern{direction_id: 1, stops: child_stops_1, route_id: "Red"}
+               %APIRoutePattern{
+                 direction_id: 0,
+                 stops: child_stops_0,
+                 route_id: "Red",
+                 id: "Red-1"
+               },
+               %APIRoutePattern{
+                 direction_id: 1,
+                 stops: child_stops_1,
+                 route_id: "Red",
+                 id: "Red-2"
+               }
              ]
            end,
            included_stops_by_route_id: fn _route_id, _direction ->
@@ -775,16 +928,23 @@ defmodule AlertsUI.AlertBuilderTest do
       parent_stops = [%Stop{id: "a"}, %Stop{id: "b"}, %Stop{id: "c"}]
 
       child_stops = [
-        %Stop{id: "1", parent_id: "a", vehicle_type: 3},
-        %Stop{id: "2", parent_id: "b", vehicle_type: 3},
-        %Stop{id: "3", parent_id: "c", vehicle_type: 3}
+        %Stop{id: "1", parent_id: "a"},
+        %Stop{id: "2", parent_id: "b"},
+        %Stop{id: "3", parent_id: "c"}
       ]
 
       with_mocks([
         {RoutePatternsRepo, [],
          [
            by_route_id: fn route_id, _opts ->
-             [%APIRoutePattern{direction_id: 1, stops: child_stops, route_id: route_id}]
+             [
+               %APIRoutePattern{
+                 direction_id: 1,
+                 stops: child_stops,
+                 route_id: route_id,
+                 id: "rp-1"
+               }
+             ]
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
@@ -836,9 +996,9 @@ defmodule AlertsUI.AlertBuilderTest do
       ashmont = %Stop{id: "place-asmnl"}
       braintree = %Stop{id: "place-brntn"}
 
-      jfk_child = %Stop{id: "jfk-child", parent_id: jfk.id, vehicle_type: 1}
-      ashmont_child = %Stop{id: "ashmont-child", parent_id: ashmont.id, vehicle_type: 1}
-      braintree_child = %Stop{id: "braintree-child", parent_id: braintree.id, vehicle_type: 1}
+      jfk_child = %Stop{id: "jfk-child", parent_id: jfk.id}
+      ashmont_child = %Stop{id: "ashmont-child", parent_id: ashmont.id}
+      braintree_child = %Stop{id: "braintree-child", parent_id: braintree.id}
 
       alert_data = %{
         route_type: 1,
@@ -860,22 +1020,26 @@ defmodule AlertsUI.AlertBuilderTest do
                  %APIRoutePattern{
                    direction_id: 0,
                    stops: [jfk_child, ashmont_child],
-                   route_id: "Red"
+                   route_id: "Red",
+                   id: "Red-1"
                  },
                  %APIRoutePattern{
                    direction_id: 1,
                    stops: [ashmont_child, jfk_child],
-                   route_id: "Red"
+                   route_id: "Red",
+                   id: "Red-2"
                  },
                  %APIRoutePattern{
                    direction_id: 0,
                    stops: [jfk_child, braintree_child],
-                   route_id: "Red"
+                   route_id: "Red",
+                   id: "Red-3"
                  },
                  %APIRoutePattern{
                    direction_id: 1,
                    stops: [braintree_child, jfk_child],
-                   route_id: "Red"
+                   route_id: "Red",
+                   id: "Red-4"
                  }
                ]
            end,
@@ -952,9 +1116,9 @@ defmodule AlertsUI.AlertBuilderTest do
       ashmont = %Stop{id: "place-asmnl"}
       braintree = %Stop{id: "place-brntn"}
 
-      jfk_child = %Stop{id: "jfk-child", parent_id: jfk.id, vehicle_type: 1}
-      ashmont_child = %Stop{id: "ashmont-child", parent_id: ashmont.id, vehicle_type: 1}
-      braintree_child = %Stop{id: "braintree-child", parent_id: braintree.id, vehicle_type: 1}
+      jfk_child = %Stop{id: "jfk-child", parent_id: jfk.id}
+      ashmont_child = %Stop{id: "ashmont-child", parent_id: ashmont.id}
+      braintree_child = %Stop{id: "braintree-child", parent_id: braintree.id}
 
       alert_data = %{
         route_type: 1,
@@ -976,22 +1140,26 @@ defmodule AlertsUI.AlertBuilderTest do
                  %APIRoutePattern{
                    direction_id: 0,
                    stops: [jfk_child, ashmont_child],
-                   route_id: "Red"
+                   route_id: "Red",
+                   id: "Red-1"
                  },
                  %APIRoutePattern{
                    direction_id: 1,
                    stops: [ashmont_child, jfk_child],
-                   route_id: "Red"
+                   route_id: "Red",
+                   id: "Red-2"
                  },
                  %APIRoutePattern{
                    direction_id: 0,
                    stops: [jfk_child, braintree_child],
-                   route_id: "Red"
+                   route_id: "Red",
+                   id: "Red-3"
                  },
                  %APIRoutePattern{
                    direction_id: 1,
                    stops: [braintree_child, jfk_child],
-                   route_id: "Red"
+                   route_id: "Red",
+                   id: "Red-4"
                  }
                ]
            end,
@@ -1046,14 +1214,196 @@ defmodule AlertsUI.AlertBuilderTest do
       end
     end
 
+    test "RDS informed entities where JFK is in middle of red line shuttle alert (both directions)" do
+      andrew = %Stop{id: "place-andrw"}
+      jfk = %Stop{id: "place-jfk"}
+      savin_hill = %Stop{id: "place-shmnl"}
+      north_quincy = %Stop{id: "place-nqncy"}
+
+      andrew_child_s = %Stop{id: "andrew-child-s", parent_id: andrew.id, vehicle_type: 1}
+      andrew_child_n = %Stop{id: "andrew-child-n", parent_id: andrew.id, vehicle_type: 1}
+      jfk_child_to_savin_s = %Stop{id: "jfk-child-3", parent_id: jfk.id, vehicle_type: 1}
+      jfk_child_to_savin_n = %Stop{id: "jfk-child-4", parent_id: jfk.id, vehicle_type: 1}
+      savin_child_s = %Stop{id: "savin-child-s", parent_id: savin_hill.id, vehicle_type: 1}
+      savin_child_n = %Stop{id: "savin-child-n", parent_id: savin_hill.id, vehicle_type: 1}
+      jfk_child_to_quincy_s = %Stop{id: "jfk-child-1", parent_id: jfk.id, vehicle_type: 1}
+      jfk_child_to_quincy_n = %Stop{id: "jfk-child-2", parent_id: jfk.id, vehicle_type: 1}
+
+      north_quincy_child_s = %Stop{
+        id: "north_quincy-child-s",
+        parent_id: north_quincy.id,
+        vehicle_type: 1
+      }
+
+      north_quincy_child_n = %Stop{
+        id: "north_quincy-child-n",
+        parent_id: north_quincy.id,
+        vehicle_type: 1
+      }
+
+      alert_data = %{
+        route_type: 1,
+        description_text: "description",
+        header_text: "header",
+        effect_name: "Shuttle",
+        stop_ids: ["place-andrw", "place-jfk", "place-nqncy"],
+        route_ids: ["Red"],
+        trip_ids: nil,
+        direction: "default"
+      }
+
+      with_mocks([
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn
+             "Red", _ ->
+               [
+                 %APIRoutePattern{
+                   id: "Red-3-0",
+                   name: "Alewife - Braintree",
+                   direction_id: 0,
+                   stops: [andrew_child_s, jfk_child_to_quincy_s, north_quincy_child_s],
+                   route_id: "Red",
+                   typicality: 1
+                 },
+                 %APIRoutePattern{
+                   id: "Red-3-1",
+                   name: "Braintree - Alewife",
+                   direction_id: 1,
+                   stops: [north_quincy_child_n, jfk_child_to_quincy_n, andrew_child_n],
+                   route_id: "Red",
+                   typicality: 1
+                 },
+                 %APIRoutePattern{
+                   name: "Alewife - Ashmont",
+                   id: "Red-1-0",
+                   direction_id: 0,
+                   stops: [andrew_child_s, jfk_child_to_savin_s, savin_child_s],
+                   route_id: "Red",
+                   typicality: 3
+                 },
+                 %APIRoutePattern{
+                   name: "Ashmont - Alewife",
+                   id: "Red-1-1",
+                   direction_id: 1,
+                   stops: [savin_child_n, jfk_child_to_savin_n, andrew_child_n],
+                   route_id: "Red",
+                   typicality: 3
+                 },
+                 %APIRoutePattern{
+                   id: "Shuttle-AshmontJFK-0-0",
+                   direction_id: 0,
+                   stops: [%Stop{id: "121"}, %Stop{id: "305"}],
+                   route_id: "Red",
+                   typicality: 5
+                 }
+               ]
+           end,
+           included_stops_by_route_id: fn _route_id, _direction ->
+             [
+               jfk_child_to_savin_s,
+               savin_child_s,
+               jfk_child_to_quincy_s,
+               north_quincy_child_s,
+               andrew_child_s,
+               jfk_child_to_savin_n,
+               savin_child_n,
+               jfk_child_to_quincy_n,
+               north_quincy_child_n,
+               andrew_child_n,
+               savin_child_s,
+               savin_child_n
+             ]
+           end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn
+             "Red", _ -> [jfk, savin_hill, andrew, north_quincy]
+           end
+         ]},
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
+      ]) do
+        result = AlertBuilder.build_alert(alert_data, :RDS)
+
+        assert result.informed_entity ==
+                 [
+                   %{
+                     activities: [:BOARD, :RIDE],
+                     agency_id: "1",
+                     direction_id: 0,
+                     route_id: "Red",
+                     route_type: 1,
+                     stop_id: "andrew-child-s"
+                   },
+                   %{
+                     activities: [:BOARD, :EXIT, :RIDE],
+                     agency_id: "1",
+                     direction_id: 0,
+                     route_id: "Red",
+                     route_type: 1,
+                     stop_id: "jfk-child-1"
+                   },
+                   %{
+                     activities: [:EXIT, :RIDE],
+                     agency_id: "1",
+                     direction_id: 0,
+                     route_id: "Red",
+                     route_type: 1,
+                     stop_id: "north_quincy-child-s"
+                   },
+                   %{
+                     activities: [:BOARD, :RIDE],
+                     agency_id: "1",
+                     direction_id: 1,
+                     route_id: "Red",
+                     route_type: 1,
+                     stop_id: "north_quincy-child-n"
+                   },
+                   %{
+                     activities: [:BOARD, :EXIT, :RIDE],
+                     agency_id: "1",
+                     direction_id: 1,
+                     route_id: "Red",
+                     route_type: 1,
+                     stop_id: "jfk-child-2"
+                   },
+                   %{
+                     activities: [:EXIT, :RIDE],
+                     agency_id: "1",
+                     direction_id: 1,
+                     route_id: "Red",
+                     route_type: 1,
+                     stop_id: "andrew-child-n"
+                   },
+                   %{
+                     agency_id: "1",
+                     route_id: "Red",
+                     route_type: 1,
+                     direction_id: 0,
+                     stop_id: "jfk-child-3",
+                     activities: [:EXIT, :RIDE]
+                   },
+                   %{
+                     agency_id: "1",
+                     route_id: "Red",
+                     route_type: 1,
+                     direction_id: 1,
+                     stop_id: "jfk-child-4",
+                     activities: [:BOARD, :RIDE]
+                   }
+                 ]
+      end
+    end
+
     test "RDS informed entities expanding Green Line routes" do
       hynes = %Stop{id: "place-hymnl"}
       kenmore = %Stop{id: "place-kencl"}
       fenway = %Stop{id: "place-fenwy"}
 
-      hynes_child = %Stop{id: "hynes-child", parent_id: hynes.id, vehicle_type: 1}
-      kenmore_child = %Stop{id: "kenmore-child", parent_id: kenmore.id, vehicle_type: 1}
-      fenway_child = %Stop{id: "fenway-child", parent_id: fenway.id, vehicle_type: 1}
+      hynes_child = %Stop{id: "hynes-child", parent_id: hynes.id}
+      kenmore_child = %Stop{id: "kenmore-child", parent_id: kenmore.id}
+      fenway_child = %Stop{id: "fenway-child", parent_id: fenway.id}
 
       alert_data = %{
         route_type: 1,
@@ -1075,12 +1425,14 @@ defmodule AlertsUI.AlertBuilderTest do
                  %APIRoutePattern{
                    direction_id: 0,
                    stops: [hynes_child, kenmore_child],
-                   route_id: "Green-B"
+                   route_id: "Green-B",
+                   id: "green-b-1"
                  },
                  %APIRoutePattern{
                    direction_id: 1,
                    stops: [kenmore_child, hynes_child],
-                   route_id: "Green-B"
+                   route_id: "Green-B",
+                   id: "green-b-2"
                  }
                ]
 
@@ -1089,12 +1441,14 @@ defmodule AlertsUI.AlertBuilderTest do
                  %APIRoutePattern{
                    direction_id: 0,
                    stops: [kenmore_child, hynes_child],
-                   route_id: "Green-C"
+                   route_id: "Green-C",
+                   id: "green-c-1"
                  },
                  %APIRoutePattern{
                    direction_id: 1,
                    stops: [hynes_child, kenmore_child],
-                   route_id: "Green-C"
+                   route_id: "Green-C",
+                   id: "green-c-2"
                  }
                ]
 
@@ -1103,12 +1457,14 @@ defmodule AlertsUI.AlertBuilderTest do
                  %APIRoutePattern{
                    direction_id: 0,
                    stops: [fenway_child, kenmore_child, hynes_child],
-                   route_id: "Green-D"
+                   route_id: "Green-D",
+                   id: "green-d-1"
                  },
                  %APIRoutePattern{
                    direction_id: 1,
                    stops: [hynes_child, kenmore_child, fenway_child],
-                   route_id: "Green-D"
+                   route_id: "Green-D",
+                   id: "green-d-2"
                  }
                ]
 
@@ -1636,22 +1992,29 @@ defmodule AlertsUI.AlertBuilderTest do
       }
 
       parent_stops = [
-        %Stop{id: "a", vehicle_type: 3},
-        %Stop{id: "b", vehicle_type: 3},
-        %Stop{id: "c", vehicle_type: 3}
+        %Stop{id: "a"},
+        %Stop{id: "b"},
+        %Stop{id: "c"}
       ]
 
       child_stops = [
-        %Stop{id: "1", parent_id: "a", vehicle_type: 3},
-        %Stop{id: "2", parent_id: "b", vehicle_type: 3},
-        %Stop{id: "3", parent_id: "c", vehicle_type: 3}
+        %Stop{id: "1", parent_id: "a"},
+        %Stop{id: "2", parent_id: "b"},
+        %Stop{id: "3", parent_id: "c"}
       ]
 
       with_mocks([
         {RoutePatternsRepo, [],
          [
            by_route_id: fn route_id, _opts ->
-             [%APIRoutePattern{direction_id: 1, stops: child_stops, route_id: route_id}]
+             [
+               %APIRoutePattern{
+                 direction_id: 1,
+                 stops: child_stops,
+                 route_id: route_id,
+                 id: "rp_1"
+               }
+             ]
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
@@ -1744,24 +2107,20 @@ defmodule AlertsUI.AlertBuilderTest do
       child_stops = [
         %Stop{
           id: "FR-0201-01",
-          parent_id: "place-FR-0201",
-          vehicle_type: 2
+          parent_id: "place-FR-0201"
         },
         %Stop{
           id: "FR-0219-01",
-          parent_id: "place-FR-0219",
-          vehicle_type: 2
+          parent_id: "place-FR-0219"
         },
         # Intentional duplicates
         %Stop{
           id: "FR-0201-01",
-          parent_id: "place-FR-0201",
-          vehicle_type: 2
+          parent_id: "place-FR-0201"
         },
         %Stop{
           id: "FR-0219-01",
-          parent_id: "place-FR-0219",
-          vehicle_type: 2
+          parent_id: "place-FR-0219"
         }
       ]
 
@@ -1769,7 +2128,14 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [],
          [
            by_route_id: fn route_id, _opts ->
-             [%APIRoutePattern{direction_id: 0, stops: child_stops, route_id: route_id}]
+             [
+               %APIRoutePattern{
+                 direction_id: 0,
+                 stops: child_stops,
+                 route_id: route_id,
+                 id: "rp-1"
+               }
+             ]
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
@@ -1835,7 +2201,14 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [],
          [
            by_route_id: fn route_id, _opts ->
-             [%APIRoutePattern{direction_id: 0, stops: child_stops, route_id: route_id}]
+             [
+               %APIRoutePattern{
+                 direction_id: 0,
+                 stops: child_stops,
+                 route_id: route_id,
+                 id: "rp_1"
+               }
+             ]
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
@@ -1901,7 +2274,14 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [],
          [
            by_route_id: fn route_id, _opts ->
-             [%APIRoutePattern{direction_id: 0, stops: child_stops, route_id: route_id}]
+             [
+               %APIRoutePattern{
+                 direction_id: 0,
+                 stops: child_stops,
+                 route_id: route_id,
+                 id: "rp_1"
+               }
+             ]
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
@@ -1975,7 +2355,14 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [],
          [
            by_route_id: fn route_id, _opts ->
-             [%APIRoutePattern{direction_id: 0, stops: child_stops, route_id: route_id}]
+             [
+               %APIRoutePattern{
+                 direction_id: 0,
+                 stops: child_stops,
+                 route_id: route_id,
+                 id: "rp_1"
+               }
+             ]
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
@@ -2035,23 +2422,32 @@ defmodule AlertsUI.AlertBuilderTest do
       parent_stops = [%Stop{id: "place-FR-0201"}, %Stop{id: "place-FR-0219"}]
 
       child_stops_0 = [
-        %Stop{id: "FR-0201-01", parent_id: "place-FR-0201", vehicle_type: 2},
-        %Stop{id: "FR-0219-01", parent_id: "place-FR-0219", vehicle_type: 2}
+        %Stop{id: "FR-0201-01", parent_id: "place-FR-0201"},
+        %Stop{id: "FR-0219-01", parent_id: "place-FR-0219"}
       ]
 
       child_stops_1 = [
-        %Stop{id: "FR-0219-02", parent_id: "place-FR-0219", vehicle_type: 2},
-        %Stop{id: "FR-0201-02", parent_id: "place-FR-0201", vehicle_type: 2}
+        %Stop{id: "FR-0219-02", parent_id: "place-FR-0219"},
+        %Stop{id: "FR-0201-02", parent_id: "place-FR-0201"}
       ]
 
       with_mocks([
         {RoutePatternsRepo, [],
          [
-           by_route_id: fn "CR-Fitchburg",
-                           ["filter[canonical]": true, include: "representative_trip.stops"] ->
+           by_route_id: fn "CR-Fitchburg", [include: "representative_trip.stops"] ->
              [
-               %APIRoutePattern{direction_id: 0, stops: child_stops_0, route_id: "CR-Fitchburg"},
-               %APIRoutePattern{direction_id: 1, stops: child_stops_1, route_id: "CR-Fitchburg"}
+               %APIRoutePattern{
+                 direction_id: 0,
+                 stops: child_stops_0,
+                 route_id: "CR-Fitchburg",
+                 id: "CR-Fitchburg-1"
+               },
+               %APIRoutePattern{
+                 direction_id: 1,
+                 stops: child_stops_1,
+                 route_id: "CR-Fitchburg",
+                 id: "CR-Fitchburg-2"
+               }
              ]
            end,
            included_stops_by_route_id: fn _route_id, _direction ->
@@ -2129,7 +2525,14 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [],
          [
            by_route_id: fn route_id, _opts ->
-             [%APIRoutePattern{direction_id: 0, stops: child_stops, route_id: route_id}]
+             [
+               %APIRoutePattern{
+                 direction_id: 0,
+                 stops: child_stops,
+                 route_id: route_id,
+                 id: "rp_1"
+               }
+             ]
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
@@ -2204,7 +2607,14 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [],
          [
            by_route_id: fn route_id, _opts ->
-             [%APIRoutePattern{direction_id: 0, stops: child_stops, route_id: route_id}]
+             [
+               %APIRoutePattern{
+                 direction_id: 0,
+                 stops: child_stops,
+                 route_id: route_id,
+                 id: "rp_1"
+               }
+             ]
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
@@ -2217,7 +2627,7 @@ defmodule AlertsUI.AlertBuilderTest do
              "line-Boat-F4", _opts ->
                %Line{
                  id: "line-Boat-F4",
-                 route_ids: ["line-Boat-F4"],
+                 route_ids: ["Boat-F4"],
                  routes: [
                    %Route{id: "Boat-F4", line_id: "line-Boat-F4", type: 4}
                  ]
@@ -2239,6 +2649,68 @@ defmodule AlertsUI.AlertBuilderTest do
       end
     end
 
+    test "SR informed entity for bus when route patterns have parent stops on them" do
+      # Unlike the above tests, we will have entries in "child stops with context"
+      # but we need to avoid filtering out our stops when we check to see if they're on the route
+      alert_data = %{
+        stop_ids: ["4561"],
+        route_type: 3,
+        route_ids: ["435"],
+        effect_name: "Multi-Route Detour",
+        description_text: "b",
+        header_text: "a",
+        route_types_by_id: %{"435" => 3}
+      }
+
+      parent_stops = [%Stop{id: "4561"}]
+
+      child_stops = []
+
+      with_mocks([
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn route_id, _opts ->
+             [
+               %APIRoutePattern{
+                 direction_id: 0,
+                 stops: parent_stops ++ child_stops,
+                 route_id: route_id
+               }
+             ]
+           end,
+           included_stops_by_route_id: fn _route_id, _direction -> parent_stops ++ child_stops end
+         ]},
+        {StopsRepo, [], [by_route: fn _route_id, _direction -> parent_stops ++ child_stops end]},
+        {RoutesRepo, [],
+         [get: fn "435", _opts -> %Route{id: "435", line_id: "line-435", type: 3} end]},
+        {LinesRepo, [],
+         [
+           get: fn
+             "line-435", _opts ->
+               %Line{
+                 id: "line-435",
+                 route_ids: ["435"],
+                 routes: [
+                   %Route{id: "435", type: 3}
+                 ]
+               }
+           end
+         ]}
+      ]) do
+        result = AlertBuilder.build_alert(alert_data, :SR)
+
+        assert result.informed_entity == [
+                 %{
+                   activities: [:BOARD, :EXIT],
+                   agency_id: "1",
+                   route_id: "435",
+                   route_type: 3,
+                   stop_id: "4561"
+                 }
+               ]
+      end
+    end
+
     test "SR informed entity expanding Green Line routes" do
       alert_data = %{
         route_type: 0,
@@ -2255,16 +2727,23 @@ defmodule AlertsUI.AlertBuilderTest do
       kenmore = %Stop{id: "place-kencl"}
       fenway = %Stop{id: "place-fenwy"}
 
-      hynes_child = %Stop{id: "hynes-child", parent_id: "place-hymnl", vehicle_type: 0}
-      kenmore_child = %Stop{id: "kenmore-child", parent_id: "place-kencl", vehicle_type: 0}
-      fenway_child = %Stop{id: "fenway-child", parent_id: "place-fenwy", vehicle_type: 0}
+      hynes_child = %Stop{id: "hynes-child", parent_id: "place-hymnl"}
+      kenmore_child = %Stop{id: "kenmore-child", parent_id: "place-kencl"}
+      fenway_child = %Stop{id: "fenway-child", parent_id: "place-fenwy"}
       child_stops = [hynes_child, kenmore_child, fenway_child]
 
       with_mocks([
         {RoutePatternsRepo, [],
          [
            by_route_id: fn route_id, _opts ->
-             [%APIRoutePattern{direction_id: 0, stops: child_stops, route_id: route_id}]
+             [
+               %APIRoutePattern{
+                 direction_id: 0,
+                 stops: child_stops,
+                 route_id: route_id,
+                 id: "rp_1"
+               }
+             ]
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
@@ -2355,14 +2834,12 @@ defmodule AlertsUI.AlertBuilderTest do
       child_stops = [
         %Stop{
           id: "PB-0194-S",
-          parent_id: "place-PB-0194",
-          vehicle_type: 2
+          parent_id: "place-PB-0194"
         },
         # Intentional duplicate
         %Stop{
           id: "PB-0194-S",
-          parent_id: "place-PB-0194",
-          vehicle_type: 2
+          parent_id: "place-PB-0194"
         }
       ]
 
@@ -2370,7 +2847,14 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [],
          [
            by_route_id: fn route_id, _opts ->
-             [%APIRoutePattern{direction_id: 0, stops: child_stops, route_id: route_id}]
+             [
+               %APIRoutePattern{
+                 direction_id: 0,
+                 stops: child_stops,
+                 route_id: route_id,
+                 id: "rp_1"
+               }
+             ]
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},

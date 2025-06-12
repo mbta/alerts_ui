@@ -23,7 +23,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       assert AlertData.build_alert_data("1") == %AlertData{
                combination: :ACCESS,
-               direction: nil,
+               direction: "default",
                effect_name: "Access Issue",
                route_type: nil,
                route_ids: [],
@@ -57,7 +57,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       assert AlertData.build_alert_data("1") == %AlertData{
                combination: :RDS,
-               direction: nil,
+               direction: "default",
                effect_name: "Delay",
                facility_id: "",
                route_type: 1,
@@ -87,7 +87,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       assert AlertData.build_alert_data("1") == %AlertData{
                combination: :ACCESS,
-               direction: nil,
+               direction: "default",
                effect_name: "Bike Issue",
                facility_id: "example-facility",
                stop_ids: [],
@@ -137,7 +137,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       assert AlertData.build_alert_data("1") == %AlertData{
                combination: :RDS,
-               direction: nil,
+               direction: "default",
                effect_name: "Delay",
                url: "http://www.example.com",
                image_url: "http://www.example.com/example.jpg",
@@ -264,6 +264,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                route_ids: [],
                stop_ids: [],
                trip_ids: [],
+               direction: "default",
                facility_id: "",
                header_text: "cool header text",
                description_text: "description text",
@@ -294,6 +295,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                route_ids: [],
                stop_ids: [],
                trip_ids: [],
+               direction: "default",
                facility_id: "",
                header_text: "cool header text",
                description_text: "description text",

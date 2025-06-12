@@ -66,7 +66,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         modal_date: today,
         modal_options: service_dates,
         filter_title_value: service_dates |> Enum.map(fn {option, _value} -> option end) |> hd,
-        modal_date_filter: ""
+        modal_date_filter: "",
+        edit_data_has_been_filled: false
       })
 
     {:ok, socket}
@@ -79,8 +80,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
           route_type: route_type,
           editing: true
         } = assigns,
-        socket
+        %{assigns: %{edit_data_has_been_filled: false}} = socket
       ) do
+    # designed to run ONCE when editing, to fill in alert information
     trip_information_by_id =
       if Map.get(alert_data, :trip_information_by_id) do
         alert_data.trip_information_by_id
@@ -123,6 +125,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       |> assign(assigns)
       |> assign(:modal_date, nil)
       |> assign(:form, changeset |> to_form())
+      |> assign(:edit_data_has_been_filled, true)
       |> assign_async([:available_routes], fn ->
         {:ok,
          %{
@@ -375,12 +378,15 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   def assign_stops(socket, route_ids, direction, fields) do
     if :stop_ids in fields do
+      route_type = socket.assigns.route_type
+
       assign_async(socket, [:available_stops], fn ->
         {:ok,
          %{
            available_stops:
              CreateAlertLive.get_stops(
                route_ids,
+               route_type,
                direction
              )
          }}

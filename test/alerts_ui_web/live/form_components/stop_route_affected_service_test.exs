@@ -16,7 +16,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
   alias Phoenix.LiveView.AsyncResult
 
   @assigns %{
-    id: "affected_service",
+    id: "stop_route_affected_service",
     progress: %Step{
       name: "details",
       previous: "route_type_and_effect",
@@ -26,7 +26,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
     route_type: 1,
     alert_data: %{},
     editing: false,
-    effect_name: "Delay"
+    effect_name: "Station Closure"
   }
 
   @route_one %Route{sort_order: 1, id: "Blue", name: "route_number_1"}
@@ -104,7 +104,10 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
            by_stop: fn _stop_id, ["filter[type]": 3] -> @routes ++ [@shuttle_route] end,
            by_type: fn 3 -> @routes ++ [@shuttle_route] end
          ]},
-        {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
+        {StopsRepo, [],
+         [
+           by_route: fn _routes, _direction -> [@stop] end
+         ]}
       ]) do
         {:ok, view, _html} =
           live_isolated_component(
@@ -123,7 +126,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
            by_stop: fn _stop_id, ["filter[type]": 3] -> @routes ++ [@shuttle_route] end,
            by_type: fn 3 -> @routes ++ [@shuttle_route] end
          ]},
-        {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
+        {StopsRepo, [], [by_route: fn _routes, _direction -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
           live_isolated_component(
@@ -146,7 +149,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       with_mocks([
         {RoutesRepo, [],
          [by_stop: fn _stop_id -> @routes end, by_type: fn _types -> @routes end]},
-        {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
+        {StopsRepo, [], [by_route_type: fn _route_type, _ -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
           live_isolated_component(
@@ -184,7 +187,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       with_mocks([
         {RoutesRepo, [],
          [by_stop: fn _stop_id -> @routes end, by_type: fn _types -> @routes end]},
-        {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
+        {StopsRepo, [], [by_route_type: fn _route_type, _ -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
           live_isolated_component(
@@ -222,11 +225,53 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       end
     end
 
+    test "stop order is by name when not filtering and by direction when filtering" do
+      with_mocks([
+        {RoutesRepo, [],
+         [by_stop: fn _route_id -> @routes end, by_type: fn _types -> [@route_one] end]},
+        {StopsRepo, [],
+         [
+           by_route: fn
+             "Blue", 0 -> [@stop, @stop_two]
+             "Blue", 1 -> [@stop_two, @stop]
+           end
+         ]}
+      ]) do
+        {:ok, view, _html} =
+          live_isolated_component(
+            StopRouteAffectedService,
+            %{@assigns | route_type: 3}
+          )
+
+        assert view
+               |> element("select##stop_route_affected_service_stop_ids")
+               |> render_async() =~
+                 "<option value=\"place-aqucl\">Aquarium (inbound)</option><option value=\"place-aqucl\">Aquarium (outbound)</option><option value=\"place-pktrm\">Park Street (inbound)</option><option value=\"place-pktrm\">Park Street (outbound)</option>"
+
+        # Add route filter
+        view
+        |> element("form")
+        |> render_change(%{
+          "stop_route_affected_service" => %{"modal_route_id" => "Blue"}
+        })
+
+        # Submit filter
+        view
+        |> with_target("#stop_route_service_view")
+        |> render_click(:accepted_routes_modal)
+
+        assert view
+               |> element("select##stop_route_affected_service_stop_ids")
+               |> render_async() =~
+                 "><option value=\"place-aqucl\">Aquarium (outbound)</option><option value=\"place-pktrm\">Park Street (outbound)</option><option value=\"place-pktrm\">Park Street (inbound)</option><option value=\"place-aqucl\">Aquarium (inbound)</option>"
+      end
+    end
+
     test "modal search works" do
       with_mocks([
         {RoutesRepo, [],
          [by_stop: fn _route_id -> @routes end, by_type: fn _types -> @routes end]},
-        {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
+        {StopsRepo, [], [by_route_type: fn _route_type, _ -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
           live_isolated_component(
@@ -256,7 +301,10 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
          [by_stop: fn _route_id -> @routes end, by_type: fn _types -> @routes end]},
         {StopsRepo, [],
          [
-           by_route_type: fn _route_type -> [@stop, @stop_two] end,
+           by_route_type: fn
+             _route_type, ["filter[route]": "Blue,Bluer", direction_id: 0] -> [@stop]
+             _route_type, ["filter[route]": "Blue,Bluer", direction_id: 1] -> [@stop_two]
+           end,
            by_route: fn
              "Bluer", _ -> [@stop]
              _, _ -> [@stop, @stop_two]
@@ -266,12 +314,12 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         {:ok, view, _html} =
           live_isolated_component(
             StopRouteAffectedService,
-            @assigns
+            %{@assigns | route_type: 3}
           )
 
         # Set baseline unfiltered
-        assert view |> render_async() =~ ~s(<option value="place-aqucl">)
-        assert view |> render_async() =~ ~s(<option value="place-pktrm">)
+        assert view |> render_async() =~ ~s(<option value="place-aqucl">Aquarium \(outbound\))
+        assert view |> render_async() =~ ~s(<option value="place-pktrm">Park Street \(inbound\))
 
         # Add route filter
         view
@@ -286,7 +334,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         |> render_click(:accepted_routes_modal)
 
         # Verify filtered and filter text updated
-        assert view |> render_async() =~ ~s(<option value="place-aqucl">)
+        assert view |> render_async() =~ ~s(<option value="place-aqucl">Aquarium \(outbound\))
         refute view |> render_async() =~ ~s(<option value="place-pktrm">)
         assert view |> render_async() =~ ~s(Filter: route_number_2)
       end
@@ -298,7 +346,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
          [by_stop: fn _route_id -> @routes end, by_type: fn _types -> @routes end]},
         {StopsRepo, [],
          [
-           by_route_type: fn _route_type -> [@stop, @stop_two] end,
+           by_route_type: fn _route_type, _ -> [@stop, @stop_two] end,
            by_route: fn
              "Bluer", _ -> [@stop]
              _, _ -> [@stop, @stop_two]
@@ -344,7 +392,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       with_mocks([
         {RoutesRepo, [],
          [by_stop: fn _stop_id -> @routes end, by_type: fn _types -> @routes end]},
-        {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
+        {StopsRepo, [], [by_route_type: fn _route_type, _ -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
           live_isolated_component(
@@ -574,7 +622,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
          } do
       with_mocks([
         {RoutesRepo, [], [by_type: fn _types -> @routes end]},
-        {StopsRepo, [], [by_route_type: fn _route_type -> [@stop] end]}
+        {StopsRepo, [], [by_route: fn _route_type, _opts -> [@stop] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
 

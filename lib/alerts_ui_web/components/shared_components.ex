@@ -732,7 +732,6 @@ defmodule AlertsUIWeb.SharedComponents do
           @errors != [] && "border-danger focus:border-danger"
         ]}
         multiple={@multiple}
-        disabled={@disabled}
         phx-hook={if(@hook, do: @hook)}
         {@rest}
       >

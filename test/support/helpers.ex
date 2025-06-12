@@ -72,4 +72,40 @@ defmodule Test.Support.Helpers do
     |> element(form_section)
     |> render_change(params)
   end
+
+  # Useful in e2e testing
+  def get_to_submission_page(view, mode, effect) do
+    # Use any combo to proceed to next page
+    view
+    |> element("#service_type_buttons button", mode)
+    |> render_click()
+
+    view
+    |> element("#effect_buttons button", effect)
+    |> render_click()
+
+    view
+    |> element("#route_types_form")
+    |> render_submit()
+  end
+
+  def open_review_modal(view) do
+    view
+    |> element("button#review", "Review and submit")
+    |> render_click()
+  end
+
+  def fill_out_required_form_fields(view, affected_service) do
+    fill_out_form(view, "#service_form", affected_service)
+
+    fill_out_form(view, "#details_form", %{
+      alert_details: %{header_text: "hello world"}
+    })
+  end
+
+  def fill_out_form(view, form_section, params) do
+    view
+    |> element(form_section)
+    |> render_change(params)
+  end
 end
