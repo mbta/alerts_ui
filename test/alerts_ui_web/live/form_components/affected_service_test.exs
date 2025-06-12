@@ -1030,7 +1030,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
              [@stop, @stop_2]
            end
          ]},
-         {FacilitiesRepo, [],
+        {FacilitiesRepo, [],
          [
            get: fn _facility_id -> @facility end,
            get_by_type: fn _facility_types, _opts -> [@facility] end
