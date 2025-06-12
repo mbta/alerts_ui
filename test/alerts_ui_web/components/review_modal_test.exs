@@ -49,6 +49,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
     long_name: "Alewife Escalator 349 (Platform to Russell Field)",
     stop: %Stop{
       id: "place-alfcl",
+      name: "Aquarium",
       type: "stop"
     },
     latitude: 42.395428,
@@ -258,6 +259,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         {StopsRepo, [],
          [
            by_route_type: fn _rt -> [@stop] end,
+           by_route: fn _route, _direction -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -515,7 +517,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         open_review_modal(view)
 
         assert render(view) =~ ~r/Cause.*None/s
-        assert render(view) =~ ~r/Severity.*Up to 15 minutes.*\(4 - WARNING\)/s
+        assert render(view) =~ ~r/Severity.*About 15 minutes.*\(4 - WARNING\)/s
         assert render(view) =~ ~r/Main message.*hello world/s
         assert render(view) =~ ~r/Supporting information.*None/s
         refute render(view) =~ ~r/URL:/s
@@ -557,7 +559,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         open_review_modal(view)
 
         assert render(view) =~ ~r/Cause.*Accident/s
-        assert render(view) =~ ~r/Severity.*Up to 30 minutes.*\(7 - SEVERE\)/s
+        assert render(view) =~ ~r/Severity.*About 30 minutes.*\(7 - SEVERE\)/s
         assert render(view) =~ ~r/Supporting information.*supporting information/s
         assert render(view) =~ ~r/URL: http:\/\/www.fake.com/s
       end

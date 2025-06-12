@@ -12,6 +12,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
   alias AlertsUI.Models.EnhancedSchedule
   alias AlertsUIWeb.FormComponents.{AffectedService, RouteTypeAndEffect}
   alias AlertsUIWeb.Step
+  alias MBTAV3API.Facilities.Facility
+  alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
@@ -63,6 +65,31 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
 
   @stop %Stop{id: "place-sstat", name: "South Station"}
   @stop_2 %Stop{id: "place-crtst", name: "Courthouse"}
+
+  @facility %Facility{
+    id: "349",
+    type: "ESCALATOR",
+    short_name: "Platform to Russell Field",
+    long_name: "Alewife Escalator 349 (Platform to Russell Field)",
+    stop: %Stop{
+      id: "place-alfcl",
+      name: "Aquarium",
+      type: "stop"
+    },
+    latitude: 42.395428,
+    longitude: -71.142483,
+    properties: [
+      %{name: "direction", value: "up"},
+      %{name: "excludes-stop", value: 141},
+      %{name: "excludes-stop", value: 9_070_061},
+      %{name: "excludes-stop", value: "door-alfcl-alewife"},
+      %{name: "excludes-stop", value: "door-alfcl-busway"},
+      %{name: "excludes-stop", value: "door-alfcl-cambridgepark"},
+      %{name: "excludes-stop", value: "door-alfcl-pathbusway"},
+      %{name: "excludes-stop", value: "door-alfcl-steel"}
+    ]
+  }
+
   @assigns %{
     id: "affected_service",
     progress: %Step{
@@ -970,6 +997,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
          [
            by_stop: fn _stop_id, _ -> [@route] end,
            by_type: fn _types -> [@route] end,
+           get: fn _ -> @route end,
            get: fn _, _ -> @route end
          ]},
         {SchedulesRepo, [],
@@ -988,7 +1016,11 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
            by_route: fn _, _ -> [@stop, @stop_2] end,
            get_parent: fn
              "place-sstat" -> @stop
-             "place-acql" -> @stop_2
+             "place-crtst" -> @stop_2
+           end,
+           get: fn
+             "place-sstat" -> @stop
+             "place-crtst" -> @stop_2
            end
          ]},
         {RoutePatternsRepo, [],
@@ -997,6 +1029,11 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
            included_stops_by_route_id: fn "CR-Worcester", [canonical: true] ->
              [@stop, @stop_2]
            end
+         ]},
+         {FacilitiesRepo, [],
+         [
+           get: fn _facility_id -> @facility end,
+           get_by_type: fn _facility_types, _opts -> [@facility] end
          ]}
       ]) do
         conn = put_resp_cookie(conn, "show_created_alert", "true")
@@ -1021,7 +1058,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
             effect: :SIGNIFICANT_DELAYS,
             effect_detail: "DELAY",
             original_route_selections: [@route.id],
-            reminder_times: []
+            reminder_times: [],
+            severity: 7,
+            cause_detail: "unknown"
           }
         )
 
@@ -1048,14 +1087,17 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         |> element("button", "Submit")
         |> render_click()
 
+        # wait a smidge for the alert to get persisted to the database
+        :timer.sleep(50)
+        alert = AlertsUI.Alerts.get_by_alert_id("123")
+
         assert [
                  %{
                    stop_id: "place-crtst",
                    route_id: "CR-Worcester",
                    trip: %{trip_id: "CR-683322-595"}
                  }
-               ] =
-                 parse_entities_from_alert_created_output(view)
+               ] = Map.get(alert, :informed_entity)
       end
     end
   end
