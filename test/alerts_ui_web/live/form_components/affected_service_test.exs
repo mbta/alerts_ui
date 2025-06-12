@@ -829,17 +829,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
          } do
       {:ok, view, _html} = live(conn, "/alerts/new")
 
-      view
-      |> element("#route_types_form button", "Bus")
-      |> render_click()
-
-      view
-      |> element("#route_types_form button", "Delay")
-      |> render_click()
-
-      view
-      |> element("#route_types_form")
-      |> render_submit()
+      get_to_submission_page(view, "Bus", "Delay")
 
       view
       |> element("#service_form")
@@ -847,9 +837,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         affected_service: %{route_ids: []}
       })
 
-      view
-      |> element("button#review", "Review and submit")
-      |> render_click()
+      open_review_modal(view)
 
       # Inline
       assert has_element?(view, "p.text-text-error", "Select route(s)")
@@ -870,17 +858,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
 
-        view
-        |> element("#route_types_form button", "Commuter Rail")
-        |> render_click()
-
-        view
-        |> element("#route_types_form button", "Delay")
-        |> render_click()
-
-        view
-        |> element("#route_types_form")
-        |> render_submit()
+        get_to_submission_page(view, "Commuter Rail", "Delay")
 
         render_async(view)
 
@@ -935,17 +913,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
 
         {:ok, view, _html} = live(conn, "/alerts/new")
 
-        view
-        |> element("#route_types_form button", "Commuter Rail")
-        |> render_click()
-
-        view
-        |> element("#route_types_form button", "Delay")
-        |> render_click()
-
-        view
-        |> element("#route_types_form")
-        |> render_submit()
+        get_to_submission_page(view, "Commuter Rail", "Delay")
 
         render_async(view)
 
@@ -975,9 +943,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
           alert_details: %{header_text: "hello"}
         })
 
-        view
-        |> element("button#review", "Review and submit")
-        |> render_click()
+        open_review_modal(view)
 
         view
         |> element("button", "Submit")
