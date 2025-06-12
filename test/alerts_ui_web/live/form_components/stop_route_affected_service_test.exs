@@ -401,12 +401,17 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
            get: fn
              "Blue", _ -> @route_one
              "Bluer", _ -> @route_two
+           end,
+           get: fn
+             "Blue" -> @route_one
+             "Bluer" -> @route_two
            end
          ]},
         {StopsRepo, [],
          [
            by_route_type: fn _route_type -> [@stop] end,
-           by_route: fn _, _ -> [@stop] end
+           by_route: fn _, _ -> [@stop] end,
+           get: fn _id -> @stop end
          ]},
         {RoutePatternsRepo, [],
          [
@@ -484,12 +489,14 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
            get: fn
              "Blue", _ -> @route_one
              "Bluer", _ -> @route_two
-           end
+           end,
+           get: fn "Bluer" -> @route_two end
          ]},
         {StopsRepo, [],
          [
            by_route_type: fn _route_type -> [@stop] end,
-           by_route: fn _, _ -> [@stop] end
+           by_route: fn _, _ -> [@stop] end,
+           get: fn _id -> @stop end
          ]},
         {RoutePatternsRepo, [],
          [

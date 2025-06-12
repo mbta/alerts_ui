@@ -13,8 +13,13 @@ defmodule AlertsUIWeb.ReviewModal do
   alias AlertsUIWeb.FormComponents.Helpers.{
     ContentFormatter,
     RecurringDurationText,
+    SelectFormatter,
     TimeRangeDurationText
   }
+
+  alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
+  alias MBTAV3API.Routes.Repo, as: RoutesRepo
+  alias MBTAV3API.Stops.Repo, as: StopsRepo
 
   @doc """
   Renders the review modal. The fields passed as props are determined by its 
@@ -33,7 +38,55 @@ defmodule AlertsUIWeb.ReviewModal do
   attr :rest, :global, include: ~w(cancel_event_name accept_event_name target_id)
 
   def review_modal(assigns) do
-    assigns = assign(assigns, now: DateTime.utc_now())
+    # It'd be better to NOT have to run fetches for this info, given it has been
+    # previously fetched at some point, but that'd require a meaty refactor at this point
+    # so sadly, we must proceed!
+
+    routes =
+      if Map.get(assigns.alert_data, :route_ids) do
+        Enum.map(assigns.alert_data.route_ids, fn id -> RoutesRepo.get(id) end)
+      end
+
+    direction_name =
+      if routes && Map.get(assigns.alert_data, :direction) not in [nil, "default"] do
+        routes
+        |> List.first()
+        |> Map.get(:direction_names)
+        |> Map.get(String.to_integer(assigns.alert_data.direction))
+      end
+
+    stop_names =
+      if Map.get(assigns.alert_data, :stop_ids, []) != [] do
+        Enum.map(assigns.alert_data.stop_ids, fn id ->
+          id |> StopsRepo.get() |> SelectFormatter.name_for_option()
+        end)
+      end
+
+    # Only ferry trips need the route_type to be passed to formatter
+    trip_names =
+      if Map.get(assigns.alert_data, :selected_schedules) do
+        Enum.map(
+          assigns.alert_data.selected_schedules,
+          &SelectFormatter.name_for_option(&1, assigns.alert_data.route_type)
+        )
+      end
+
+    facility_name =
+      if Map.get(assigns.alert_data, :facility_id) do
+        assigns.alert_data.facility_id
+        |> FacilitiesRepo.get()
+        |> SelectFormatter.name_for_option()
+      end
+
+    assigns =
+      assign(assigns,
+        now: DateTime.utc_now(),
+        routes: routes,
+        direction_name: direction_name,
+        stop_names: stop_names,
+        trip_names: trip_names,
+        facility_name: facility_name
+      )
 
     ~H"""
     <.modal
@@ -82,28 +135,26 @@ defmodule AlertsUIWeb.ReviewModal do
           </div>
 
           <p class="font-bold">Affected service</p>
-          <div class="pb-4 grid grid-cols-[110px_auto] gap-x-2">
-            <%= if Map.get(@alert_data, :route_ids, []) != [] do %>
+          <div id="affected_service_selections" class="pb-4 grid grid-cols-[110px_auto]">
+            <%= if @routes do %>
               <p>Routes:</p>
-              <p :if={@alert_data.route_ids != []}>
-                {Enum.join(@alert_data.route_ids, ", ")}
-              </p>
+              <p>{@routes |> Enum.map(&SelectFormatter.name_for_option(&1)) |> Enum.join(", ")}</p>
             <% end %>
-            <%= if Map.get(@alert_data, :direction, "default") != "default" do %>
+            <%= if @direction_name do %>
               <p>Direction:</p>
-              <p>{String.capitalize(@alert_data.direction)}</p>
+              <p>{@direction_name}</p>
             <% end %>
-            <%= if Map.get(@alert_data, :stop_ids, []) != [] do %>
+            <%= if @stop_names do %>
               <p>Stops:</p>
-              <p>{Enum.join(@alert_data.stop_ids, ", ")}</p>
+              <p>{Enum.join(@stop_names, ", ")}</p>
             <% end %>
-            <%= if Map.get(@alert_data, :trip_ids, []) != [] do %>
+            <%= if @trip_names do %>
               <p>Trips:</p>
-              <p>{Enum.join(@alert_data.trip_ids, ", ")}</p>
+              <p>{Enum.join(@trip_names, ", ")}</p>
             <% end %>
-            <%= if Map.get(@alert_data, :facility_id, nil) do %>
+            <%= if @facility_name do %>
               <p>Facility:</p>
-              <p>{@alert_data.facility_id}</p>
+              <p>{@facility_name}</p>
             <% end %>
           </div>
 
