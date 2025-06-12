@@ -23,81 +23,66 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     # access
     %{
       pattern: {nil, "Bike Issue"},
-      header_template: "?facility_name issue ?alert_duration ?due_to_cause",
-      description_template: ""
+      header_template: "?facility_name issue ?alert_duration ?due_to_cause"
     },
     %{
       pattern: {nil, "Escalator Closure"},
-      header_template: "?facility_name unavailable ?alert_duration ?due_to_cause",
-      description_template: ""
+      header_template: "?facility_name unavailable ?alert_duration ?due_to_cause"
     },
     %{
       pattern: {nil, "Parking Closure"},
-      header_template: "?facility_name closed ?alert_duration ?due_to_cause",
-      description_template: ""
+      header_template: "?facility_name closed ?alert_duration ?due_to_cause"
     },
     %{
       pattern: {nil, "Elevator Closure"},
-      header_template: "?facility_name unavailable ?alert_duration ?due_to_cause",
-      description_template: ""
+      header_template: "?facility_name unavailable ?alert_duration ?due_to_cause"
     },
     %{
       pattern: {nil, "Access Issue"},
-      header_template: "?facility_name issue ?alert_duration ?due_to_cause",
-      description_template: ""
+      header_template: "?facility_name issue ?alert_duration ?due_to_cause"
     },
     %{
       pattern: {nil, "Facility Issue"},
-      header_template: "?facility_name issue ?alert_duration ?due_to_cause",
-      description_template: ""
+      header_template: "?facility_name issue ?alert_duration ?due_to_cause"
     },
     %{
       pattern: {nil, "Parking Issue"},
-      header_template: "?facility_name issue ?alert_duration ?due_to_cause",
-      description_template: ""
+      header_template: "?facility_name issue ?alert_duration ?due_to_cause"
     },
 
     # systemwide
     %{
       pattern: {nil, "Service Change"},
-      header_template: "?impacted_modes notice: ?alert_duration ?due_to_cause",
-      description_template: ""
+      header_template: "?impacted_modes notice: ?alert_duration ?due_to_cause"
     },
     %{
       pattern: {nil, "Suspension"},
-      header_template: "?impacted_modes service suspended ?alert_duration ?due_to_cause",
-      description_template: ""
+      header_template: "?impacted_modes service suspended ?alert_duration ?due_to_cause"
     },
     %{
       pattern: {nil, "Amber Alert"},
-      header_template: "Amber Alert",
-      description_template: ""
+      header_template: "Amber Alert"
     },
     %{
       pattern: {nil, "Policy Change"},
-      header_template: "Policy change affecting ?impacted_modes service",
-      description_template: ""
+      header_template: "Policy change affecting ?impacted_modes service"
     },
     %{
       pattern: {nil, "Delay"},
       header_template:
-        "?impacted_modes service may experience delays ?alert_duration ?due_to_cause",
-      description_template: ""
+        "?impacted_modes service may experience delays ?alert_duration ?due_to_cause"
     },
     %{
       pattern: {nil, "Summary"},
-      header_template: "?impacted_modes notice ?alert_duration ?due_to_cause",
-      description_template: ""
+      header_template: "?impacted_modes notice ?alert_duration ?due_to_cause"
     },
     %{
       pattern: {nil, "Schedule Change"},
-      header_template: "Planned ?impacted_modes schedule change ?alert_duration ?due_to_cause",
-      description_template: ""
+      header_template: "Planned ?impacted_modes schedule change ?alert_duration ?due_to_cause"
     },
     %{
       pattern: {nil, "Extra Service"},
-      header_template: "Extra ?impacted_modes service ?alert_duration ?due_to_cause",
-      description_template: ""
+      header_template: "Extra ?impacted_modes service ?alert_duration ?due_to_cause"
     },
 
     # Ferry
