@@ -43,7 +43,13 @@ defmodule AlertsUIWeb.ApiControllerTest do
             effect_detail: "ACCESS_ISSUE",
             informed_entity: [
               %{route_id: "1"}
-            ]
+            ],
+            user: %{
+              email: "some email",
+              first_name: "some first_name",
+              last_name: "some last_name",
+              role: :user
+            }
           })
           |> validate_resp_schema(schema, :AlertResponse)
 

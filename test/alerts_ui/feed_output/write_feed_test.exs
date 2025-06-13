@@ -3,6 +3,13 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
   import AlertsUI.Support.Factory
   alias AlertsUI.FeedOutput.WriteFeed
 
+  @user %{
+    email: "some email",
+    first_name: "some first_name",
+    last_name: "some last_name",
+    role: :user
+  }
+
   describe "write_feed/0" do
     test "it writes" do
       current_time = DateTime.utc_now()
@@ -14,14 +21,16 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
         active_period: [
           build(:active_period, %{start: ~U[2023-10-12 00:01:00Z], end: four_minutes_ago})
         ],
-        closed_timestamp: four_minutes_ago
+        closed_timestamp: four_minutes_ago,
+        user: @user
       )
 
       insert(:alert,
         alert_id: "234abc",
         active_period_start: ~U[2023-10-12 00:01:00Z],
         active_period: [build(:active_period, %{start: ~U[2023-10-12 00:01:00Z], end: nil})],
-        notification_period_start: DateTime.add(current_time, -1, :hour)
+        notification_period_start: DateTime.add(current_time, -1, :hour),
+        user: @user
       )
 
       insert(:alert,
@@ -30,14 +39,16 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
         active_period_end: four_minutes_ago,
         active_period: [
           build(:active_period, %{start: ~U[2023-10-12 00:01:00Z], end: four_minutes_ago})
-        ]
+        ],
+        user: @user
       )
 
       insert(:alert,
         alert_id: "456abc",
         active_period_start: ~U[2023-10-12 00:01:00Z],
         notification_period_start: DateTime.add(current_time, 1, :hour),
-        active_period: [build(:active_period, %{start: ~U[2023-10-12 00:01:00Z], end: nil})]
+        active_period: [build(:active_period, %{start: ~U[2023-10-12 00:01:00Z], end: nil})],
+        user: @user
       )
 
       insert(:alert,
@@ -50,7 +61,8 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
             start: DateTime.add(current_time, -1, :hour),
             end: DateTime.add(current_time, 1, :hour)
           })
-        ]
+        ],
+        user: @user
       )
 
       {:ok, actual} = WriteFeed.write_feed()

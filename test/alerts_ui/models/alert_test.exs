@@ -24,7 +24,13 @@ defmodule AlertsUI.Models.AlertTest do
             end: ~U[2023-10-20 18:45:38Z]
           }
         ],
-        informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}]
+        informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}],
+        user: %{
+          email: "fake@example.com",
+          first_name: "First",
+          last_name: "Last",
+          role: :user
+        }
       }
 
       changeset = Alert.changeset(%Alert{}, params)
@@ -43,7 +49,13 @@ defmodule AlertsUI.Models.AlertTest do
             end: ~U[2023-10-20 18:45:38Z]
           }
         ],
-        informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}]
+        informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}],
+        user: %{
+          email: "fake@example.com",
+          first_name: "First",
+          last_name: "Last",
+          role: :user
+        }
       }
 
       changeset = Alert.changeset(%Alert{}, params)
@@ -61,7 +73,13 @@ defmodule AlertsUI.Models.AlertTest do
             end: ~U[2023-10-20 18:45:38Z]
           }
         ],
-        informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}]
+        informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}],
+        user: %{
+          email: "fake@example.com",
+          first_name: "First",
+          last_name: "Last",
+          role: :user
+        }
       }
 
       changeset = Alert.changeset(%Alert{}, params)
@@ -81,7 +99,13 @@ defmodule AlertsUI.Models.AlertTest do
         ],
         active_period_start: ~U[2023-10-19 18:45:38Z],
         informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}],
-        current_time: ~U[2023-10-18 18:45:38Z]
+        current_time: ~U[2023-10-18 18:45:38Z],
+        user: %{
+          email: "fake@example.com",
+          first_name: "First",
+          last_name: "Last",
+          role: :user
+        }
       }
 
       changeset = Alert.changeset(%Alert{}, params)
@@ -101,7 +125,13 @@ defmodule AlertsUI.Models.AlertTest do
         ],
         active_period_start: ~U[2023-10-19 18:45:38Z],
         informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}],
-        current_time: ~U[2023-10-19 18:45:38.571154Z]
+        current_time: ~U[2023-10-19 18:45:38.571154Z],
+        user: %{
+          email: "fake@example.com",
+          first_name: "First",
+          last_name: "Last",
+          role: :user
+        }
       }
 
       changeset = Alert.changeset(%Alert{}, params)
@@ -121,7 +151,13 @@ defmodule AlertsUI.Models.AlertTest do
         ],
         active_period_start: ~U[2023-10-19 18:45:38Z],
         informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}],
-        current_time: ~U[2023-10-19 19:45:38Z]
+        current_time: ~U[2023-10-19 19:45:38Z],
+        user: %{
+          email: "fake@example.com",
+          first_name: "First",
+          last_name: "Last",
+          role: :user
+        }
       }
 
       changeset = Alert.changeset(%Alert{}, params)

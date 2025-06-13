@@ -1,7 +1,7 @@
 defmodule AlertsUIWeb.AuthControllerTest do
   use AlertsUIWeb.ConnCase
 
-  import AlertsUI.AccountsFixtures
+  import AlertsUI.KeycloakUsersFixtures
 
   alias AlertsUIWeb.User
   alias Ueberauth.Auth

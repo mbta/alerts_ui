@@ -56,7 +56,13 @@ defmodule AlertsUI.Support.Factory do
           end: ~U[2023-10-20 18:45:38Z]
         }
       ],
-      informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}]
+      informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}],
+      user: %{
+        email: "fake@example.com",
+        first_name: "First",
+        last_name: "Last",
+        role: :user
+      }
     }
   end
 

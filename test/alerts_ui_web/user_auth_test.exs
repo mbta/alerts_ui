@@ -2,7 +2,7 @@ defmodule AlertsUIWeb.UserAuthTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase, async: true
 
-  import AlertsUI.AccountsFixtures
+  import AlertsUI.KeycloakUsersFixtures
   import Mock
   import Test.Support.Helpers
 
