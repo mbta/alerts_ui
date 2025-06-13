@@ -70,6 +70,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
     "#{date_string} every #{weekday_string} #{time_string}"
   end
 
+  def build_duration_text(_, _), do: ""
+
   # output string for one-time
   # # start of "now"
   def build_onetime_string(%{

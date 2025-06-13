@@ -7,6 +7,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   import Ecto.Changeset
   alias AlertsUI.Models.{Cause, SeverityLevel}
   alias AlertsUIWeb.FormComponents.Helpers.ErrorFormatter
+  alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}
 
   @primary_key false
   embedded_schema do
@@ -29,15 +30,21 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       SeverityLevel.severity_tuples()
       |> Enum.map(fn {desc, severity, _level} -> {desc, severity} end)
 
-    changeset = changeset(%__MODULE__{}, %{})
+    changeset = changeset(%__MODULE__{}, %{
+      header_text: "",
+      description_text: "",
+      cause_detail: "",
+      url: "",
+      image_url: "",
+      image_alternative_text: "",
+      severity: 4,
+    })
 
     send_changeset(changeset)
 
     socket =
       assign(socket, %{
         form: to_form(changeset),
-        image_size: nil,
-        image_path: nil,
         severity_options: severity_options,
         cause_options: []
       })
@@ -47,24 +54,29 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
 
   @impl true
   def update(%{alert_data: alert_data} = assigns, socket) do
-    cause_options =
-      formatted_causes(
-        Map.get(assigns, :route_type),
-        Map.get(assigns, :combination)
-      )
+    IO.inspect("here")
+   new_data = alert_data
+   |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
+   |> Map.merge(socket.assigns.form.params)
+
+   cause_options =
+    formatted_causes(
+      Map.get(assigns, :route_type),
+      Map.get(assigns, :combination)
+    )
+
+      autotext_data = AlertDataToAutoText.do_it(new_data |> Map.new(fn {k, v} -> {String.to_atom(k), v} end))
 
     changeset =
       %__MODULE__{}
       |> changeset(
-        alert_data
-        |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
-        |> Map.merge(socket.assigns.form.params)
+       new_data |> Map.merge(%{"header_text" => Templates.build_auto_text(autotext_data, :header_template)})
       )
 
     send_changeset(changeset)
 
     form = to_form(changeset)
-    assigns = assigns |> Map.merge(%{form: form, cause_options: cause_options})
+    assigns = assigns |> Map.merge(%{form: form, cause_options: cause_options, autotext_data: autotext_data})
     {:ok, assign(socket, assigns)}
   end
 
@@ -103,9 +115,16 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     image_size = alert_details["image_url"] |> get_image_size()
     image_path = alert_details["image_url"] |> get_image_path()
 
+
+    foo = %{
+      cause_detail: Map.get(alert_details, "cause_detail"),
+      severity: Map.get(alert_details, "severity")}
+
+    autotext_data = AlertDataToAutoText.do_it(socket.assigns.autotext_data |> Map.merge(foo))
+
     changeset =
       %__MODULE__{}
-      |> changeset(alert_details)
+      |> changeset(alert_details|> Map.merge(%{"header_text" => Templates.build_auto_text(autotext_data, :header_template)}))
       |> validate_image_fields(image_size)
 
     send_changeset(changeset)
@@ -115,11 +134,13 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       |> Map.put(:action, :validate)
       |> to_form()
 
+
     {:noreply,
      assign(socket, %{
        form: form,
        image_size: image_size,
-       image_path: image_path
+       image_path: image_path,
+       autotext_data: autotext_data
      })}
   end
 

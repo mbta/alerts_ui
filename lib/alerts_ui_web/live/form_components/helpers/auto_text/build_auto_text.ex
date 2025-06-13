@@ -11,7 +11,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
 
   defstruct route_type: nil,
             effect_name: nil,
-            combination: nil,
             routes: [],
             stops: [],
             schedules: [],
@@ -34,7 +33,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   @type t :: %__MODULE__{
           route_type: integer() | nil,
           effect_name: String.t() | nil,
-          combination: atom(),
           routes: [Route.t()],
           stops: [Stop.t()],
           schedules: [EnhancedSchedule.t()],
