@@ -4,6 +4,8 @@ defmodule AlertsUI.DBUsersFixtures do
   entities via the `AlertsUI.DB.Users` context.
   """
 
+  alias AlertsUI.DB.Users
+
   @doc """
   Generate a user.
   """
@@ -16,7 +18,7 @@ defmodule AlertsUI.DBUsersFixtures do
         last_name: "some last_name",
         role: :user
       })
-      |> AlertsUI.DB.Users.create_user()
+      |> Users.create_user()
 
     user
   end

@@ -1,4 +1,7 @@
 defmodule AlertsUI.DB.User do
+  @moduledoc """
+  The User schema.
+  """
   use AlertsUI.Schema
   import Ecto.Changeset
 
