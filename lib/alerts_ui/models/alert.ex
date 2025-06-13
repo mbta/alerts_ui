@@ -17,6 +17,8 @@ defmodule AlertsUI.Models.Alert do
     SeverityLevel
   }
 
+  alias AlertsUI.DB.User
+
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Stops.Repo, as: StopsRepo
 
@@ -100,7 +102,8 @@ defmodule AlertsUI.Models.Alert do
           tts_description_text: String.t() | nil,
           informed_entity: [InformedEntity.t()],
           notification_period_start: DateTime.t() | nil,
-          original_route_selections: [String.t()] | nil
+          original_route_selections: [String.t()] | nil,
+          user_id: User.id()
         }
 
   @derive {
@@ -137,6 +140,7 @@ defmodule AlertsUI.Models.Alert do
   }
 
   schema "alerts" do
+    belongs_to :user, User
     field :alert_id, :string
     field :effect, Ecto.Enum, values: @effect
     field :effect_detail, :string
@@ -185,6 +189,7 @@ defmodule AlertsUI.Models.Alert do
 
     alert
     |> cast(params, @permitted_fields)
+    |> cast_assoc(:user, required: true, with: &User.changeset/2)
     |> cast_assoc(:active_period, required: false, with: &ActivePeriod.changeset/2)
     |> cast_assoc(:informed_entity, required: true, with: &InformedEntity.changeset/2)
     |> cast_assoc(:reminder_times, required: false, with: &ReminderTime.changeset/2)

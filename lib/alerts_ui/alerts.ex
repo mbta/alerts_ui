@@ -191,7 +191,7 @@ defmodule AlertsUI.Alerts do
         where: is_nil(a.closed_timestamp),
         inner_join: ie in AlertsUI.Models.InformedEntity,
         on: ie.alert_id == a.id,
-        preload: [:active_period, :reminder_times, informed_entity: {ie, :trip}],
+        preload: [:user, :active_period, :reminder_times, informed_entity: {ie, :trip}],
         order_by: [asc: a.alert_id]
       )
     )
@@ -205,7 +205,7 @@ defmodule AlertsUI.Alerts do
         where: not is_nil(a.closed_timestamp) and a.closed_timestamp > from_now(-5, "minute"),
         inner_join: ie in AlertsUI.Models.InformedEntity,
         on: ie.alert_id == a.id,
-        preload: [:active_period, :reminder_times, informed_entity: {ie, :trip}],
+        preload: [:user, :active_period, :reminder_times, informed_entity: {ie, :trip}],
         order_by: [asc: a.alert_id]
       )
     )
@@ -216,7 +216,7 @@ defmodule AlertsUI.Alerts do
     Repo.all(
       from(
         a in Alert,
-        preload: [:active_period, :reminder_times, informed_entity: [:trip]]
+        preload: [:user, :active_period, :reminder_times, informed_entity: [:trip]]
       )
     )
   end
@@ -226,7 +226,7 @@ defmodule AlertsUI.Alerts do
     Repo.get_by(
       from(
         a in Alert,
-        preload: [:active_period, :reminder_times, informed_entity: [:trip]]
+        preload: [:user, :active_period, :reminder_times, informed_entity: [:trip]]
       ),
       alert_id: alert_id
     )
@@ -237,7 +237,7 @@ defmodule AlertsUI.Alerts do
     Repo.get_by(
       from(
         a in Alert,
-        preload: [:active_period, :reminder_times, informed_entity: [:trip]]
+        preload: [:user, :active_period, :reminder_times, informed_entity: [:trip]]
       ),
       id: uuid
     )

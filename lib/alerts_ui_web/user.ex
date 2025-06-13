@@ -6,6 +6,8 @@ defmodule AlertsUIWeb.User do
   defstruct [
     :id,
     :email,
+    :first_name,
+    :last_name,
     role: :user
   ]
 
@@ -15,18 +17,27 @@ defmodule AlertsUIWeb.User do
   @type t :: %__MODULE__{
           id: String.t(),
           email: String.t(),
+          first_name: String.t(),
+          last_name: String.t(),
           role: role()
         }
 
   @doc """
   Create a new User struct.
   """
-  @spec new(id :: id(), email :: String.t()) :: t()
-  @spec new(id :: id(), email :: String.t(), role :: role()) :: t()
-  def new(id, email, role \\ :user) do
+  @spec new(
+          id :: id(),
+          email :: String.t(),
+          first_name :: String.t(),
+          last_name :: String.t(),
+          role :: role()
+        ) :: t()
+  def new(id, email, first_name, last_name, role \\ :user) do
     %__MODULE__{
       id: id,
       email: email,
+      first_name: first_name,
+      last_name: last_name,
       role: role
     }
   end

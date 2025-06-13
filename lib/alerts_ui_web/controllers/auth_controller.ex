@@ -17,7 +17,11 @@ defmodule AlertsUIWeb.AuthController do
           assigns: %{
             ueberauth_auth:
               %{
-                info: %{email: email},
+                info: %{
+                  email: email,
+                  first_name: first_name,
+                  last_name: last_name
+                },
                 extra: %{
                   raw_info: %{
                     claims: %{"sub" => id},
@@ -30,7 +34,7 @@ defmodule AlertsUIWeb.AuthController do
         _params
       ) do
     role = parse_role(userinfo)
-    user = User.new(id, email, role)
+    user = User.new(id, email, first_name, last_name, role)
     {:ok, logout_uri} = logout_uri(auth)
 
     UserAuth.log_in_user(conn, user, logout_uri)
