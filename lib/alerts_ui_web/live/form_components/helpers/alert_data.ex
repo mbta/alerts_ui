@@ -128,7 +128,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       route_type: route_type,
       direction: Alert.get_direction(informed_entities) || "default",
       effect_name: effect_name,
-      facility_id: Alert.gather_facility_ids(informed_entities) |> List.first(""),
+      facility_id: Alert.gather_facility_ids(informed_entities) |> List.first(),
       route_ids: route_ids,
       single_route_id: single_route_id,
       stop_ids: Alert.gather_parent_stop_ids(informed_entities),
