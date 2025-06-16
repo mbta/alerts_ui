@@ -228,9 +228,21 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         socket.assigns.form.params
       end
 
+    changeset = changeset(%__MODULE__{}, form_params)
+
+    changeset
+    |> apply_action(:validate)
+    |> case do
+      {:ok, changes} ->
+        send(self(), {:add_errors, [], __MODULE__})
+        send(self(), {:section_completed, changes})
+
+      {:error, changeset} ->
+        send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
+    end
+
     form =
-      %__MODULE__{}
-      |> changeset(form_params)
+      changeset
       |> to_form()
       |> Map.put(:action, :validate)
 

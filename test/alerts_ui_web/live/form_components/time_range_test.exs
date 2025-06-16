@@ -583,7 +583,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
          [
            by_stop: fn _stop_id, _ -> [@route] end,
            by_type: fn _types -> [@route] end,
-           get: fn _, _ -> @route end
+           get: fn _, _ -> @route end,
+           get: fn _ -> @route end
          ]},
         {SchedulesRepo, [],
          [
@@ -601,7 +602,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
            by_route: fn _, _ -> [@stop] end,
            get_parent: fn
              "place-sstat" -> @stop
-           end
+           end,
+           get: fn _ -> @stop end
          ]},
         {RoutePatternsRepo, [],
          [
@@ -637,7 +639,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
             reminder_times: [],
             active_period: [ap],
             active_period_start: ~U[2024-05-10 14:30:54Z],
-            duration_certainty: :UNKNOWN
+            duration_certainty: :UNKNOWN,
+            severity: 4
           }
         )
 

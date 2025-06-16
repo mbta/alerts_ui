@@ -71,7 +71,6 @@ defmodule Test.Support.Helpers do
     view
     |> element(form_section)
     |> render_change(params)
-
   end
 
   def parse_alert_created_output(view) do

@@ -22,7 +22,7 @@ defmodule AlertsUIWeb.ReviewModal do
   alias MBTAV3API.Stops.Repo, as: StopsRepo
 
   @doc """
-  Renders the review modal. The fields passed as props are determined by its 
+  Renders the review modal. The fields passed as props are determined by its
   parent com
 
   ## Examples
@@ -194,8 +194,8 @@ defmodule AlertsUIWeb.ReviewModal do
           <%!-- Middle section --%>
           <div class="grid grid-cols-[110px_auto] gap-x-2">
             <p class="font-bold pb-1">Cause</p>
-            <%= if @alert_data.cause_detail not in ["", nil] do %>
-              <p class="pb-1">{String.capitalize(@alert_data.cause_detail)}</p>
+            <%= if @alert_data.cause_detail != "" do %>
+              <p class="pb-1">{String.capitalize(Map.get(@alert_data, :cause_detail) || "")}</p>
             <% else %>
               <p class="pb-1 italic">None</p>
             <% end %>
@@ -315,7 +315,7 @@ defmodule AlertsUIWeb.ReviewModal do
           </p>
           <p class="font-bold">Created by</p>
           <p class="pb-3">TO BE DONE</p>
-          <%!-- 
+          <%!--
             The edited items need to be wrapped in a conditional, but let's do that once
             we have a value to match on in the alert_data
           --%>

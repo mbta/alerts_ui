@@ -138,6 +138,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
     "#{trip_name} (#{DateTimeHelpers.friendly_time(departure_time)} from #{stop_name})"
   end
 
+  def name_for_option(nil, nil), do: ""
+
   @spec id_for_option(Stop.t() | Route.t() | EnhancedSchedule.t() | Facility.t()) :: String.t()
   def id_for_option(%Stop{id: id}), do: id
   def id_for_option(%Route{id: id}), do: id
