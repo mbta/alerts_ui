@@ -194,7 +194,7 @@ defmodule AlertsUIWeb.ReviewModal do
           <%!-- Middle section --%>
           <div class="grid grid-cols-[110px_auto] gap-x-2">
             <p class="font-bold pb-1">Cause</p>
-            <%= if @alert_data.cause_detail != "" do %>
+            <%= if @alert_data.cause_detail not in ["", nil] do %>
               <p class="pb-1">{String.capitalize(@alert_data.cause_detail)}</p>
             <% else %>
               <p class="pb-1 italic">None</p>

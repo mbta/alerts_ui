@@ -48,6 +48,7 @@ defmodule AlertsUIWeb.FormComponents.Submit do
         cancel_event_name="cancel_review"
         accept_event_name="save"
         target_id="#submit_view"
+        alert_id={@alert_id}
       />
       <.button_secondary
         class="mt-8 mr-auto self-center border-none py-2 px-3"
