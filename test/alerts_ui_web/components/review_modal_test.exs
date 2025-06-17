@@ -532,7 +532,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
 
         open_review_modal(view)
 
-        assert render(view) =~ ~r/Notification period.*@.*until alert is manually closed/s
+        assert render(view) =~ ~r/Notification period.*@.*until alert is closed/s
       end
     end
   end
