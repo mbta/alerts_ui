@@ -119,12 +119,12 @@ defmodule AlertsUIWeb.ReviewModal do
         <div class="p-4">
           <%!-- Top section --%>
           <p class="font-bold">Main message</p>
-          <p class="pb-4">{@alert_data.header_text}</p>
+          <p class="pb-4 whitespace-pre">{@alert_data.header_text}</p>
 
           <div class="pb-4">
             <p class="font-bold">Supporting information</p>
             <%= if @alert_data.description_text do %>
-              <p>{@alert_data.description_text}</p>
+              <p class="whitespace-pre">{@alert_data.description_text}</p>
             <% else %>
               <p class="italic">None</p>
             <% end %>
@@ -135,7 +135,7 @@ defmodule AlertsUIWeb.ReviewModal do
           </div>
 
           <p class="font-bold">Affected service</p>
-          <div id="affected_service_selections" class="pb-4 grid grid-cols-[110px_auto]">
+          <div id="affected_service_selections" class="pb-4 grid grid-cols-[110px_auto] gap-x-2">
             <%= if @routes do %>
               <p>Routes:</p>
               <p>{@routes |> Enum.map(&SelectFormatter.name_for_option(&1)) |> Enum.join(", ")}</p>
@@ -195,7 +195,7 @@ defmodule AlertsUIWeb.ReviewModal do
           <div class="grid grid-cols-[110px_auto] gap-x-2">
             <p class="font-bold pb-1">Cause</p>
             <%= if @alert_data.cause_detail not in ["", nil] do %>
-              <p class="pb-1">{String.capitalize(@alert_data.cause_detail)}</p>
+              <p class="pb-1">{@alert_data.cause_detail |> String.replace("_", " ") |> String.capitalize}</p>
             <% else %>
               <p class="pb-1 italic">None</p>
             <% end %>
