@@ -1,11 +1,23 @@
 defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
   @moduledoc """
     Text templates for auto-text.
+    Header templates: returns a string with interpolated variables.
     | character is used when a character must be right against a variable.
     eg `?due_to_cause|:` will end up looking like `parade:`
+    Description templates: for vehicle modes, the template stores counts
+    over which text will appear- eg route count: 5 means that routes will
+    appear in the text only if there's over 5 of them. A nil value means
+    the text won't appear at all. Direction and route can check other fields
+    to determine if they appear or not.
   """
 
-  alias AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText
+  alias AlertsUIWeb.FormComponents.Helpers.{
+    AutoText.BuildAutoText,
+    AutoText.BuildDescriptionText,
+    EffectsForRouteTypes
+  }
+
+  @systemwide_effects EffectsForRouteTypes.list_effects(:systemwide)
 
   @templates [
     # access
@@ -37,6 +49,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
       pattern: {nil, "Parking Issue"},
       header_template: "?facility_name issue ?alert_duration ?due_to_cause"
     },
+
     # systemwide
     %{
       pattern: {nil, "Service Change"},
@@ -46,7 +59,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
       pattern: {nil, "Suspension"},
       header_template: "?impacted_modes service suspended ?alert_duration ?due_to_cause"
     },
-    %{pattern: {nil, "Amber Alert"}, header_template: "Amber Alert"},
+    %{
+      pattern: {nil, "Amber Alert"},
+      header_template: "Amber Alert"
+    },
     %{
       pattern: {nil, "Policy Change"},
       header_template: "Policy change affecting ?impacted_modes service"
@@ -68,154 +84,404 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
       pattern: {nil, "Extra Service"},
       header_template: "Extra ?impacted_modes service ?alert_duration ?due_to_cause"
     },
+
     # Ferry
     %{
       pattern: {4, "Dock Closure"},
-      header_template: "?stop_names closed ?alert_duration ?due_to_cause"
+      header_template: "?stop_names closed ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 0,
+        stop_count: 2,
+        trip_count: nil,
+        direction_count: nil
+      }
     },
     %{
       pattern: {4, "Suspension"},
-      header_template: "?route_names service suspended ?alert_duration ?due_to_cause"
+      header_template: "?route_names service suspended ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        stop_count: 0,
+        trip_count: nil,
+        direction_count: nil
+      }
     },
     %{
       pattern: {4, "Cancellation"},
-      header_template: "?route_names ?trip_names cancelled ?alert_duration ?due_to_cause"
+      header_template: "?route_names ?trip_names cancelled ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        stop_count: nil,
+        trip_count: 2,
+        direction_count: 1
+      }
     },
     %{
       pattern: {4, "Delay"},
       header_template:
-        "?route_names ?trip_names operating ?severity_name late ?alert_duration ?due_to_cause"
+        "?route_names ?trip_names operating ?severity_name late ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        stop_count: 1,
+        trip_count: 2,
+        direction_count: 1
+      }
     },
+
     # Bus
     %{
       pattern: {3, "Cancellation"},
-      header_template: "?route_names - ?trip_names_only cancelled ?alert_duration ?due_to_cause"
+      header_template: "?route_names - ?trip_names_only cancelled ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        stop_count: nil,
+        trip_count: 2,
+        direction_count: 1
+      }
     },
     %{
       pattern: {3, "Stop Closure"},
       header_template:
-        "The following ?stop_form closed ?alert_duration ?due_to_cause|: ?stop_names"
+        "The following ?stop_form closed ?alert_duration ?due_to_cause|: ?stop_names",
+      description_template: %{
+        route_count: 0,
+        stop_count: 2,
+        trip_count: nil,
+        direction_count: nil
+      }
     },
     %{
       pattern: {3, "Stop Shovelling"},
       header_template:
-        "?route_names ?direction_name bus stops have been cleared of snow ?alert_duration ?due_to_cause"
+        "?route_names ?direction_name bus stops have been cleared of snow ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        stop_count: 0,
+        trip_count: nil,
+        direction_count: nil
+      }
     },
     %{
       pattern: {3, "Delay"},
       header_template:
-        "?route_names ?route_form_only experiencing ?direction_name delays of ?severity_name ?due_to_cause"
+        "?route_names ?route_form_only experiencing ?direction_name delays of ?severity_name ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        stop_count: 0,
+        trip_count: nil,
+        direction_count: nil
+      }
     },
     %{
       pattern: {3, "Suspension"},
       header_template:
-        "?route_names ?direction_name service suspended ?alert_duration ?due_to_cause"
+        "?route_names ?direction_name service suspended ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        stop_count: 0,
+        trip_count: nil,
+        direction_count: nil
+      }
     },
     %{
       pattern: {3, "Multi-Route Detour"},
-      header_template: "?route_names detoured ?alert_duration ?due_to_cause"
+      header_template: "?route_names detoured ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        stop_count: 0,
+        trip_count: nil,
+        direction_count: nil
+      }
     },
     %{
       pattern: {3, "Stop Move"},
-      header_template: "?stop_names stop moving ?alert_duration ?due_to_cause"
+      header_template: "?stop_names stop moving ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 0,
+        stop_count: 2,
+        trip_count: nil,
+        direction_count: nil
+      }
     },
     %{
       pattern: {3, "Detour"},
-      header_template: "?route_names detoured ?alert_duration ?due_to_cause"
+      header_template: "?route_names detoured ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        stop_count: 0,
+        trip_count: nil,
+        direction_count: 1
+      }
     },
     %{
       pattern: {3, "Snow Route"},
-      header_template: "?route_names snow route in effect ?alert_duration"
+      header_template: "?route_names snow route in effect ?alert_duration",
+      description_template: %{
+        route_count: 5,
+        stop_count: 0,
+        trip_count: nil,
+        direction_count: 1
+      }
     },
+    # header template here duplicated from general one.
+    %{
+      pattern: {3, "Service Change"},
+      header_template: "?route_names notice: ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        stop_count: 0,
+        trip_count: 2,
+        direction_count: 1
+      }
+    },
+
     # subway
     %{
       pattern: {1, "Suspension"},
       header_template:
-        "?route_names|: ?direction_name service is suspended ?alert_duration ?due_to_cause"
+        "?route_names|: ?direction_name service is suspended ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        stop_count: 0,
+        trip_count: nil,
+        direction_count: nil
+      }
     },
     %{
       pattern: {1, "Delay"},
-      header_template: "?route_names|: ?direction_name delays of ?severity_name ?due_to_cause"
+      header_template: "?route_names|: ?direction_name delays of ?severity_name ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        stop_count: 2,
+        trip_count: 2,
+        direction_count: 1
+      }
     },
     %{
       pattern: {1, "Service Change"},
-      header_template: "?route_names|: ?alert_duration ?due_to_cause"
+      header_template: "?route_names|: ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        stop_count: 0,
+        trip_count: nil,
+        direction_count: 1
+      }
     },
     %{
       pattern: {1, "Shuttle"},
       header_template:
-        "?route_names|: Shuttle buses replace ?direction_name service ?alert_duration ?due_to_cause"
+        "?route_names|: Shuttle buses replace ?direction_name service ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        stop_count: 0,
+        trip_count: nil,
+        direction_count: nil
+      }
+    },
+    %{
+      pattern: {1, "Single Tracking"},
+      header_template:
+        "?route_names|: Expect delays of ?severity_name due to trains operating on a single track ?stop_range_between",
+      description_template: %{
+        route_count: 5,
+        stop_count: 2,
+        trip_count: nil,
+        direction_count: 1
+      }
     },
 
     # Commuter Rail
     %{
       pattern: {2, "Delay"},
       header_template:
-        "?route_names ?trip_names ?trip_form operating ?severity_name behind schedule ?alert_duration ?due_to_cause"
+        "?route_names ?trip_names ?trip_form operating ?severity_name behind schedule ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        direction_count: 1,
+        stop_count: 0,
+        trip_count: 2
+      }
     },
     %{
       pattern: {2, "Shuttle"},
       header_template:
-        "?route_names ?direction_name ?trip_names will be replaced by a shuttle bus ?alert_duration ?due_to_cause"
+        "?route_names ?direction_name ?trip_names will be replaced by a shuttle bus ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        direction_count: nil,
+        stop_count: 0,
+        trip_count: 2
+      }
     },
     %{
       pattern: {2, "Track Change"},
       header_template:
-        "Please board ?route_names ?trip_names on opposite track ?alert_duration ?due_to_cause"
+        "Please board ?route_names ?trip_names on opposite track ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        direction_count: 1,
+        stop_count: 2,
+        trip_count: 2
+      }
     },
     %{
       pattern: {2, "Cancellation"},
       header_template:
-        "?route_names ?trip_names ?trip_form cancelled ?alert_duration ?due_to_cause"
+        "?route_names ?trip_names ?trip_form cancelled ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        direction_count: 1,
+        stop_count: 0,
+        trip_count: 2
+      }
     },
     %{
       pattern: {2, "Service Change"},
-      header_template: "?route_names notice: ?trip_names ?alert_duration ?due_to_cause"
+      header_template: "?route_names notice: ?trip_names ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        direction_count: 1,
+        stop_count: 0,
+        trip_count: 2
+      }
     },
-
     # mode not specified
     %{
       pattern: {"Service Change"},
-      header_template: "?route_names notice: ?alert_duration ?due_to_cause"
+      header_template: "?route_names notice: ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        stop_count: 0,
+        trip_count: 2,
+        direction_count: nil
+      }
     },
     %{
       pattern: {"Dock Issue"},
-      header_template: "Change at ?stop_names ?alert_duration ?due_to_cause"
+      header_template: "Change at ?stop_names ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 0,
+        stop_count: 2,
+        trip_count: nil,
+        direction_count: nil
+      }
     },
     %{
       pattern: {"Shuttle"},
       header_template:
-        "Shuttle buses replacing ?route_names ?direction_name service ?alert_duration ?due_to_cause"
+        "Shuttle buses replacing ?route_names ?direction_name service ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        stop_count: 0,
+        trip_count: nil,
+        direction_count: nil
+      }
     },
     %{
       pattern: {"Suspension"},
       header_template:
-        "?route_names ?direction_name service suspended ?alert_duration ?due_to_cause"
+        "?route_names ?direction_name service suspended ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        stop_count: 0,
+        trip_count: nil,
+        direction_count: nil
+      }
     },
     %{
       pattern: {"Extra Service"},
-      header_template: "Extra service on ?route_names ?alert_duration ?due_to_cause"
+      header_template: "Extra service on ?route_names ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        stop_count: nil,
+        trip_count: nil,
+        direction_count: nil
+      }
     },
     %{
       pattern: {"Station Closure"},
-      header_template: "?stop_names closed ?alert_duration ?due_to_cause"
+      header_template: "?stop_names closed ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 0,
+        stop_count: 2,
+        trip_count: nil,
+        direction_count: nil
+      }
     },
     %{
       pattern: {"Delay"},
       header_template:
-        "?route_names ?trip_names experiencing ?direction_name delays of ?severity_name ?alert_duration ?due_to_cause"
+        "?route_names ?trip_names experiencing ?direction_name delays of ?severity_name ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        stop_count: 2,
+        trip_count: 2,
+        direction_count: 1
+      }
     },
     %{
       pattern: {"Schedule Change"},
-      header_template: "Planned schedule change on ?route_names ?alert_duration ?due_to_cause"
+      header_template: "Planned schedule change on ?route_names ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        stop_count: nil,
+        trip_count: nil,
+        direction_count: nil
+      }
     },
     %{
       pattern: {"Station Issue"},
-      header_template: "Change at ?stop_names ?alert_duration ?due_to_cause"
+      header_template: "Change at ?stop_names ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 0,
+        stop_count: 2,
+        trip_count: nil,
+        direction_count: nil
+      }
     }
   ]
 
   @spec build_auto_text(BuildAutoText.t(), atom()) :: String.t()
+  def build_auto_text(
+        %{route_type: nil, effect_name: effect_name},
+        :description_template
+      )
+      when effect_name in @systemwide_effects do
+    ""
+  end
+
+  def build_auto_text(
+        %{route_type: nil, effect_name: _effect_name},
+        :description_template
+      ) do
+    # access
+    ""
+  end
+
+  def build_auto_text(
+        %{route_type: route_type, effect_name: effect_name} = autotext_data,
+        :description_template
+      ) do
+    %{
+      description_template: %{
+        route_count: route_count,
+        trip_count: trip_count,
+        stop_count: stop_count,
+        direction_count: direction_count
+      }
+    } =
+      Enum.find(@templates, fn %{pattern: pattern} ->
+        match?(^pattern, {route_type, effect_name}) || match?(^pattern, {effect_name})
+      end)
+
+    route_text = get_route_text(route_count, autotext_data)
+    direction_text = get_direction_text(direction_count, autotext_data)
+    stop_text = get_stop_text(stop_count, autotext_data)
+    schedule_text = get_trip_text(trip_count, autotext_data)
+
+    "#{route_text}#{direction_text}#{stop_text}#{schedule_text}" |> String.trim()
+  end
+
   def build_auto_text(
         %{route_type: route_type, effect_name: effect_name} = autotext_data,
         template_type
@@ -227,6 +493,42 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
 
     templates[template_type] |> build_template(autotext_data)
   end
+
+  defp get_route_text(route_count, %{schedules: [], routes: routes} = autotext_data)
+       when not is_nil(route_count) and length(routes) > route_count do
+    # do not return route text if there are any trips
+    BuildDescriptionText.affected_routes(autotext_data) <> "\n\n"
+  end
+
+  defp get_route_text(_, _), do: ""
+
+  defp get_direction_text(1, %{direction: [_direction], stops: [], route_type: 3} = autotext_data) do
+    # do not return direction text if there are any stops (bus only)
+    BuildDescriptionText.affected_direction(autotext_data) <> "\n\n"
+  end
+
+  defp get_direction_text(1, %{stops: [_ | _], route_type: 3}), do: ""
+
+  defp get_direction_text(1, %{direction: [_direction], schedules: []} = autotext_data) do
+    # do not return direction text if there are any trips (other modes)
+    BuildDescriptionText.affected_direction(autotext_data) <> "\n\n"
+  end
+
+  defp get_direction_text(_, _), do: ""
+
+  defp get_stop_text(stop_count, %{stops: stops} = autotext_data)
+       when not is_nil(stop_count) and length(stops) > stop_count do
+    BuildDescriptionText.affected_stops(autotext_data) <> "\n\n"
+  end
+
+  defp get_stop_text(_, _), do: ""
+
+  defp get_trip_text(schedule_count, %{schedules: schedules} = autotext_data)
+       when not is_nil(schedule_count) and length(schedules) > schedule_count do
+    BuildDescriptionText.affected_trips(autotext_data) <> "\n\n"
+  end
+
+  defp get_trip_text(_, _), do: ""
 
   defp build_template(template, autotext_data) do
     template

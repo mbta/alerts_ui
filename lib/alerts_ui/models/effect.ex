@@ -140,6 +140,7 @@ defmodule AlertsUI.Models.Effect do
       {"Schedule Change", :MODIFIED_SERVICE, "SCHEDULE_CHANGE"},
       {"Service Change", :UNKNOWN_EFFECT, "SERVICE_CHANGE"},
       {"Shuttle", :DETOUR, "SHUTTLE"},
+      {"Single Tracking", :REDUCED_SERVICE, "SINGLE_TRACKING"},
       {"Snow Route", :DETOUR, "SNOW_ROUTE"},
       {"Station Closure", :NO_SERVICE, "STATION_CLOSURE"},
       {"Station Issue", :UNKNOWN_EFFECT, "STATION_ISSUE"},
