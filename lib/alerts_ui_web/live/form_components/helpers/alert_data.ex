@@ -126,7 +126,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
     %__MODULE__{
       route_type: route_type,
-      direction: Alert.get_direction(informed_entities),
+      direction: Alert.get_direction(informed_entities) || "default",
       effect_name: effect_name,
       facility_id: Alert.gather_facility_ids(informed_entities) |> List.first(),
       route_ids: route_ids,
