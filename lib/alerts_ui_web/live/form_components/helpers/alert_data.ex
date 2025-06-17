@@ -150,9 +150,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     |> Map.merge(active_period_map)
   end
 
-  defp get_notification_specifier(nil), do: :same_as_effect_period
-  defp get_notification_specifier(_notification_period_start), do: :custom
-
   def determine_one_time_active_period(alert) do
     active_period_start = shift_to_naive(alert.active_period_start)
     active_period_end = shift_to_naive(alert.active_period_end)
@@ -192,6 +189,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       recurrence_days: alert.recurrence_days |> Enum.map(&Atom.to_string/1)
     }
   end
+
+  defp get_notification_specifier(nil), do: :same_as_effect_period
+  defp get_notification_specifier(_notification_period_start), do: :custom
 
   def shift_to_naive(nil), do: nil
 

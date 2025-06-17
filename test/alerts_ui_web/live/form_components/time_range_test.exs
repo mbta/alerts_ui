@@ -2,12 +2,21 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
 
+  import AlertsUI.Support.Factory
   import LiveIsolatedComponent
+  import Mock
   import Phoenix.LiveViewTest
+  alias AlertsUI.Alerts
   alias AlertsUI.Models.EnhancedSchedule
   alias AlertsUIWeb.FormComponents.TimeRange
   alias AlertsUIWeb.Step
+  alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
+  alias MBTAV3API.Routes.Repo, as: RoutesRepo
+  alias MBTAV3API.Routes.Route
+  alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
   alias MBTAV3API.Schedules.Trip
+  alias MBTAV3API.Stops.Repo, as: StopsRepo
+  alias MBTAV3API.Stops.Stop
 
   @assigns %{
     id: "time_range",
@@ -23,6 +32,34 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
     editing: false,
     selected_schedules: []
   }
+
+  @schedule %EnhancedSchedule{
+    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
+    stop: %Stop{id: "place-sstat", name: "South Station"},
+    arrival_time: nil,
+    departure_time: DateTime.utc_now() |> DateTime.add(-1, :hour),
+    time_of_last_trip_arrival:
+      ~U[2024-05-01 13:15:00.00Z] |> DateTime.shift_zone!("America/New_York")
+  }
+
+  @schedule_2 %EnhancedSchedule{
+    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
+    stop: %Stop{id: "place-sstat", name: "South Station"},
+    arrival_time: DateTime.utc_now(),
+    departure_time: nil
+  }
+
+  @route %Route{
+    direction_names: %{0 => "Westbound", 1 => "Eastbound"},
+    sort_order: 3,
+    id: "CR-Worcester",
+    type: 2,
+    name: "Framingham/Worcester Line"
+  }
+
+  @stop %Stop{id: "place-sstat", name: "South Station"}
 
   describe "component" do
     test "renders" do
@@ -54,24 +91,60 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
                ~s(phx-feedback-for="time_range[active_period_end_date]" class="min-w-[16rem] max-w-[16rem] hidden")
     end
 
+    test "editing keeps correct end time specifier when there is no end time" do
+      {:ok, view, _html} =
+        live_isolated_component(
+          TimeRange,
+          Map.merge(
+            @assigns,
+            %{
+              editing: true,
+              alert_data: %{
+                active_period_start_specifier: "custom",
+                active_period_start: ~N[2024-04-29 10:54:00],
+                active_period_end_specifier: "until_further_notice",
+                active_period_end: ~N[2024-04-30 11:59:00]
+              }
+            }
+          )
+        )
+
+      assert view
+             |> render() =~ "until alert is manually closed"
+
+      refute view
+             |> render() =~ "later today"
+    end
+
     test "editing does not check start time" do
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns)
+        live_isolated_component(
+          TimeRange,
+          Map.merge(
+            @assigns,
+            %{
+              editing: true,
+              alert_data: %{
+                active_period_start_specifier: "custom",
+                active_period_start: ~N[2024-04-29 10:54:00],
+                active_period_end_specifier: "until_further_notice",
+                active_period_end: ~N[2024-04-30 11:59:00]
+              }
+            }
+          )
+        )
 
-      live_assign(view, %{
-        editing: true,
-        alert_data: %{
-          active_period_start: ~N[2024-04-30 11:54:00],
-          active_period_end_specifier: "custom"
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end_specifier" => "later_today"
         }
       })
 
-      assert view
-             |> render() =~ "custom"
-
       refute_receive {:__live_isolated_component_handle_info_received__, _pid,
                       {:add_errors,
-                       [{:active_period_start_date, {"Effect can't start in the past", []}}],
+                       [{:active_period_start, {"Effect can't start in the past", []}}],
                        AlertsUIWeb.FormComponents.TimeRange}}
     end
 
@@ -98,9 +171,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
     end
 
     test "editing with no errors sends data" do
-      {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns)
-
       start_time =
         DateTime.utc_now()
         |> DateTime.add(1, :hour)
@@ -108,18 +178,43 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         |> DateTime.truncate(:second)
         |> DateTime.to_naive()
 
-      live_assign(view, %{
-        editing: true,
-        alert_data: %{
-          active_period_start: start_time,
-          active_period_start_specifier: "custom",
-          active_period_end_specifier: "until_further_notice",
-          active_period_end: ""
+      {:ok, view, _html} =
+        live_isolated_component(
+          TimeRange,
+          Map.merge(
+            @assigns,
+            %{
+              editing: true,
+              alert_data: %{
+                active_period_start: start_time,
+                active_period_start_specifier: "custom",
+                active_period_end_specifier: "later_today",
+                active_period_end: NaiveDateTime.add(start_time, 1, :hour)
+              }
+            }
+          )
+        )
+
+      assert view
+             |> element("#time_range_active_period_start_specifier")
+             |> render() =~ "custom"
+
+      assert view
+             |> render() =~ "until later today"
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end_specifier" => "until_further_notice"
         }
       })
 
+      refute view
+             |> render() =~ "until later today"
+
       assert view
-             |> render() =~ "custom"
+             |> render() =~ "until alert is manually closed (indefinite)"
 
       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
                       {:add_errors, [], AlertsUIWeb.FormComponents.TimeRange}}
@@ -237,15 +332,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
     end
 
     test "displays error if start after trip end when 'start of service' is selected" do
-      schedule = %EnhancedSchedule{
-        trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
-        time_of_last_trip_arrival:
-          ~U[2024-05-01 13:15:00.00Z] |> DateTime.shift_zone!("America/New_York"),
-        departure_time: ~U[2024-05-01 12:15:00.00Z] |> DateTime.shift_zone!("America/New_York")
-      }
-
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns |> Map.put(:selected_schedules, [schedule]))
+        live_isolated_component(TimeRange, @assigns |> Map.put(:selected_schedules, [@schedule]))
 
       view
       |> element("form")
@@ -275,7 +363,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       {:ok, view, _html} =
         live_isolated_component(
           TimeRange,
-          @assigns |> Map.put(:current_time, ~N[2024-05-01 08:15:00])
+          @assigns
+          |> Map.put(:current_time, ~N[2024-05-01 08:15:00])
+          |> Map.put(:selected_schedules, [@schedule])
         )
 
       view
@@ -479,6 +569,127 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
                          active_period_end_specifier: :custom,
                          active_period_start: ~N[2024-05-01 08:54:00]
                        }}}
+    end
+
+    @tag :logged_in_user
+    test "end-to-end editing", %{conn: conn} do
+      todays_date =
+        DateTime.utc_now()
+        |> DateTime.shift_zone!("America/New_York")
+        |> DateTime.to_date()
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_stop: fn _stop_id, _ -> [@route] end,
+           by_type: fn _types -> [@route] end,
+           get: fn _, _ -> @route end,
+           get: fn _ -> @route end
+         ]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _route_ids, _opts ->
+             [@schedule, @schedule_2]
+           end,
+           end_of_rating: fn -> Date.add(todays_date, 1) end,
+           trip: fn _ ->
+             %Trip{id: "CR-683322-595", name: "595", direction_id: 0}
+           end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _route_type -> [@stop] end,
+           by_route: fn _, _ -> [@stop] end,
+           get_parent: fn
+             "place-sstat" -> @stop
+           end,
+           get: fn _ -> @stop end
+         ]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _route_id, _opts -> [] end,
+           included_stops_by_route_id: fn "CR-Worcester", _ ->
+             [@stop]
+           end
+         ]}
+      ]) do
+        conn = put_resp_cookie(conn, "show_created_alert", "true")
+        trip = build(:trip_descriptor, %{trip_id: @schedule.trip.id})
+        ap = build(:active_period, %{start: ~U[2024-05-10 14:30:54Z]})
+
+        ie =
+          build(:informed_entity, %{
+            route_id: @route.id,
+            route_type: @route.type,
+            activities: [:BOARD],
+            stop_id: @stop.id,
+            trip: trip,
+            direction_id: 0
+          })
+
+        insert(
+          :alert,
+          %{
+            alert_id: "123",
+            header_text: "example header text",
+            informed_entity: [ie],
+            effect: :SIGNIFICANT_DELAYS,
+            effect_detail: "DELAY",
+            original_route_selections: [@route.id],
+            reminder_times: [],
+            active_period: [ap],
+            active_period_start: ~U[2024-05-10 14:30:54Z],
+            duration_certainty: :UNKNOWN,
+            severity: 4
+          }
+        )
+
+        {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
+
+        rendered_view = render(view)
+
+        assert rendered_view =~ ~s(Until further notice)
+
+        view
+        |> element("#time_range_form")
+        |> render_change(%{
+          "time_range" => %{
+            "active_period_end_specifier" => "custom"
+          }
+        })
+
+        view
+        |> element("#time_range_form")
+        |> render_change(%{
+          "time_range" => %{
+            "active_period_end" =>
+              todays_date
+              |> Date.add(2)
+              |> NaiveDateTime.new!(~T[00:00:00])
+              |> NaiveDateTime.to_iso8601()
+          }
+        })
+
+        view
+        |> element("button#review", "Review and submit")
+        |> render_click()
+
+        view
+        |> element("button", "Submit")
+        |> render_click()
+
+        # wait a smidge for the alert to get persisted to the database
+        :timer.sleep(25)
+        created_alert = Alerts.get_by_alert_id("123")
+
+        assert created_alert.active_period_end ==
+                 todays_date
+                 |> Date.add(2)
+                 |> DateTime.new!(~T[00:00:00], "America/New_York")
+                 |> DateTime.shift_zone!("Etc/UTC")
+
+        assert created_alert.duration_certainty == :KNOWN
+      end
     end
   end
 end
