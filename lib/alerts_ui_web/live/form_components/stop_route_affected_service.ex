@@ -192,7 +192,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
     changeset = build_changeset(%__MODULE__{}, affected_service)
 
-    validate_changeset(changeset)
+    validate_changeset(changeset, affected_service, socket.assigns.available_stops)
 
     form =
       changeset
@@ -282,7 +282,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
   @impl true
   def handle_async(:get_available_routes, {:ok, fetched_routes}, socket) do
-    %{available_routes: available_routes} = socket.assigns
+    %{available_stops: available_stops, available_routes: available_routes} = socket.assigns
 
     affected_service =
       socket.assigns.form.params
@@ -290,8 +290,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       |> add_routes_with_types(fetched_routes)
 
     changeset = build_changeset(%__MODULE__{}, affected_service)
-
-    validate_changeset(changeset)
+    validate_changeset(changeset, affected_service, available_stops)
 
     form =
       changeset
@@ -315,27 +314,62 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   end
 
   def add_routes_with_types(affected_service, available_routes) do
-    routes_with_types =
+    routes =
       available_routes
       |> Stream.filter(fn route ->
         !is_nil(affected_service["route_ids"]) && route.id in affected_service["route_ids"]
       end)
       |> Enum.reduce(%{}, fn route, acc ->
-        Map.put(acc, route.id, route.type)
+        Map.put(acc, route.id, route)
       end)
 
-    Map.put(affected_service, "route_types_by_id", routes_with_types)
+    affected_service
+    |> Map.put("routes_by_id", routes)
+    |> Map.put("route_types_by_id", routes |> Enum.map(fn {k, v} -> {k, v.type} end) |> Map.new())
   end
 
   def available_routes(socket), do: Map.get(socket.assigns.available_routes, :result, [])
 
   def build_changeset(changeset, params), do: cast(changeset, params, @fields)
 
-  def validate_changeset(changeset) do
+  def validate_changeset(changeset, affected_service, available_stops) do
     case apply_action(changeset |> validate_required(@required_fields), :validate) do
       {:ok, changeset} ->
+        available_stops =
+          Map.get(available_stops, :result)
+
+        selected_stops =
+          if available_stops do
+            available_stops
+            |> Enum.filter(&(&1.id in affected_service["stop_ids"]))
+          else
+            nil
+          end
+
+        #########
+
+        available_routes =
+          Map.get(affected_service, "routes_by_id")
+
+        selected_routes =
+          if available_routes do
+            available_routes
+            |> Enum.reduce([], fn {route_id, route}, acc ->
+              if route_id in affected_service["route_ids"] do
+                acc ++ List.wrap(route)
+              else
+                acc
+              end
+            end)
+            |> List.flatten()
+          else
+            nil
+          end
+
         send(self(), {:add_errors, [], __MODULE__})
         send(self(), {:section_completed, changeset})
+        send(self(), {:selected_routes, selected_routes})
+        send(self(), {:selected_stops, selected_stops})
 
       {:error, changeset} ->
         send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})

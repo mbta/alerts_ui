@@ -91,6 +91,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
 
   # cause
   @spec due_to_cause(__MODULE__.t()) :: String.t()
+  def due_to_cause(%{cause_detail: ""}), do: ""
+
   def due_to_cause(%{cause_detail: cause_detail}) do
     "due to #{cause(cause_detail)}"
   end

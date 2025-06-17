@@ -222,6 +222,17 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     # If we validate before the apply, the apply will fail. Validate separately
     case apply_action(changeset, :validate) do
       {:ok, changeset} ->
+        available_routes =
+          Map.get(socket.assigns.available_routes, :result)
+
+        selected_routes =
+          if available_routes do
+            available_routes
+            |> Enum.filter(&(&1.id in affected_service["route_ids"]))
+          else
+            nil
+          end
+
         available_schedules =
           Map.get(socket.assigns.available_schedules, :result)
 
@@ -233,8 +244,11 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             nil
           end
 
+        ####
+
         send(self(), {:add_errors, [], __MODULE__})
         send(self(), {:section_completed, changeset})
+        send(self(), {:selected_routes, selected_routes})
         send(self(), {:selected_schedules, selected_schedules})
 
       {:error, changeset} ->

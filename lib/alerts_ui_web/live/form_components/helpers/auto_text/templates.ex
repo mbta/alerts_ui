@@ -542,6 +542,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
       end
     end)
     |> String.replace(" |", "")
+    |> String.replace("    ", " ")
     |> String.replace("  ", " ")
   end
 

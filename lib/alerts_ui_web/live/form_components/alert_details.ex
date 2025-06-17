@@ -30,15 +30,16 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       SeverityLevel.severity_tuples()
       |> Enum.map(fn {desc, severity, _level} -> {desc, severity} end)
 
-    changeset = changeset(%__MODULE__{}, %{
-      header_text: "",
-      description_text: "",
-      cause_detail: "",
-      url: "",
-      image_url: "",
-      image_alternative_text: "",
-      severity: 4,
-    })
+    changeset =
+      changeset(%__MODULE__{}, %{
+        header_text: "",
+        description_text: "",
+        cause_detail: "",
+        url: "",
+        image_url: "",
+        image_alternative_text: "",
+        severity: 4
+      })
 
     send_changeset(changeset)
 
@@ -53,30 +54,57 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   end
 
   @impl true
-  def update(%{alert_data: alert_data} = assigns, socket) do
-    IO.inspect("here")
-   new_data = alert_data
-   |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
-   |> Map.merge(socket.assigns.form.params)
+  def update(
+        %{
+          alert_data: alert_data,
+          selected_facility: selected_facility,
+          selected_schedules: selected_schedules,
+          selected_routes: selected_routes,
+          selected_stops: selected_stops
+        } = assigns,
+        socket
+      ) do
+    new_data =
+      alert_data
+      |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
 
-   cause_options =
-    formatted_causes(
-      Map.get(assigns, :route_type),
-      Map.get(assigns, :combination)
-    )
+    # yoour problem ^^^^
+    cause_options =
+      formatted_causes(
+        Map.get(assigns, :route_type),
+        Map.get(assigns, :combination)
+      )
 
-      autotext_data = AlertDataToAutoText.do_it(new_data |> Map.new(fn {k, v} -> {String.to_atom(k), v} end))
+    autotext_data =
+      AlertDataToAutoText.build_autotext_data(
+        new_data
+        |> Map.new(fn {k, v} -> {String.to_atom(k), v} end)
+        |> Map.merge(%{
+          facility: selected_facility,
+          routes: selected_routes,
+          stops: selected_stops,
+          schedules: selected_schedules
+        })
+      )
 
     changeset =
       %__MODULE__{}
       |> changeset(
-       new_data |> Map.merge(%{"header_text" => Templates.build_auto_text(autotext_data, :header_template)})
+        new_data
+        |> Map.merge(socket.assigns.form.params)
+        |> Map.merge(%{
+          "header_text" => Templates.build_auto_text(autotext_data, :header_template)
+        })
       )
 
     send_changeset(changeset)
 
     form = to_form(changeset)
-    assigns = assigns |> Map.merge(%{form: form, cause_options: cause_options, autotext_data: autotext_data})
+
+    assigns =
+      assigns
+      |> Map.merge(%{form: form, cause_options: cause_options, autotext_data: autotext_data})
+
     {:ok, assign(socket, assigns)}
   end
 
@@ -115,16 +143,22 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     image_size = alert_details["image_url"] |> get_image_size()
     image_path = alert_details["image_url"] |> get_image_path()
 
+    updated_autotext_data =
+      Map.merge(socket.assigns.autotext_data, %{
+        cause_detail: Map.get(alert_details, "cause_detail"),
+        severity: Map.get(alert_details, "severity")
+      })
 
-    foo = %{
-      cause_detail: Map.get(alert_details, "cause_detail"),
-      severity: Map.get(alert_details, "severity")}
-
-    autotext_data = AlertDataToAutoText.do_it(socket.assigns.autotext_data |> Map.merge(foo))
+    autotext_data = AlertDataToAutoText.build_autotext_data(updated_autotext_data)
 
     changeset =
       %__MODULE__{}
-      |> changeset(alert_details|> Map.merge(%{"header_text" => Templates.build_auto_text(autotext_data, :header_template)}))
+      |> changeset(
+        alert_details
+        |> Map.merge(%{
+          "header_text" => Templates.build_auto_text(autotext_data, :header_template)
+        })
+      )
       |> validate_image_fields(image_size)
 
     send_changeset(changeset)
@@ -133,7 +167,6 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       changeset
       |> Map.put(:action, :validate)
       |> to_form()
-
 
     {:noreply,
      assign(socket, %{

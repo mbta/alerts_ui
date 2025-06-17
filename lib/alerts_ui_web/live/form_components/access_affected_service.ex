@@ -144,8 +144,20 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
 
     case apply_action(changeset |> validate_required(@required_fields), :validate) do
       {:ok, changeset} ->
+        %{facilities: available_facilities} =
+          Map.get(socket.assigns.available_facilities, :result, %{facilities: []})
+
+        selected_facility =
+          if available_facilities do
+            available_facilities
+            |> Enum.find(&(&1.id == access_affected_service["facility_id"]))
+          else
+            nil
+          end
+
         send(self(), {:add_errors, [], __MODULE__})
         send(self(), {:section_completed, changeset})
+        send(self(), {:selected_facility, selected_facility})
 
       {:error, changeset} ->
         send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
