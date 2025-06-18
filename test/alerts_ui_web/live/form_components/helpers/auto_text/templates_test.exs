@@ -12,7 +12,16 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
     id: "952",
     type: "ELEVATOR",
     short_name: "Alewife platform to lobby",
-    long_name: "Charles/MGH Elevator 952 (Alewife platform to lobby)"
+    long_name: "Charles/MGH Elevator 952 (Alewife platform to lobby)",
+    properties: [
+      %{
+        name: "alternate-service-text",
+        value: "To access the Bowdoin platform or Bremen St lobby from the Wonderland platform..."
+      },
+      %{name: "excludes-stop", value: 70_047},
+      %{name: "excludes-stop", value: 70_96},
+      %{name: "excludes-stop", value: 70_97}
+    ]
   }
 
   @route_1 %Route{id: "1", name: "1", direction_names: %{0 => "Westbound", 1 => "Eastbound"}}
@@ -1037,6 +1046,21 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       assert Templates.build_auto_text(autotext_data, :description_template) == ""
+    end
+
+    test "access" do
+      autotext_data = %{
+        route_type: nil,
+        effect_name: "Elevator Closure",
+        facility: @facility
+      }
+
+      expected =
+        "To access the Bowdoin platform or Bremen St lobby from the Wonderland platform..."
+
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+
+      assert expected == actual
     end
 
     test "when stuff is empty" do

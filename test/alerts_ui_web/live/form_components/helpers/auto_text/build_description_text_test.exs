@@ -3,6 +3,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionTextTest d
   use AlertsUIWeb.ConnCase
   alias AlertsUI.Models.EnhancedSchedule
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionText
+  alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Stop
@@ -44,6 +45,32 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionTextTest d
     stop: %Stop{id: "place-forhl", name: "Forest Hills"},
     arrival_time: nil,
     departure_time: ~U[2024-02-21 16:15:00.00Z]
+  }
+
+  @facility_with_service_text %Facility{
+    id: "Facility-3",
+    long_name: "Example Facility",
+    stop: %Stop{id: "place-sstat", name: "South Station"},
+    properties: [
+      %{
+        name: "alternate-service-text",
+        value: "To access the Bowdoin platform or Bremen St lobby from the Wonderland platform..."
+      },
+      %{name: "excludes-stop", value: 70_047},
+      %{name: "excludes-stop", value: 70_96},
+      %{name: "excludes-stop", value: 70_97}
+    ]
+  }
+
+  @facility_no_service_text %Facility{
+    id: "Facility-7",
+    long_name: "Example Facility Two",
+    stop: %Stop{id: "place-aqucl", name: "Aquarium"},
+    properties: [
+      %{name: "excludes-stop", value: 70_047},
+      %{name: "excludes-stop", value: 70_96},
+      %{name: "excludes-stop", value: 70_97}
+    ]
   }
 
   describe "affected_routes/1" do
@@ -181,6 +208,49 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionTextTest d
       }
 
       assert BuildDescriptionText.affected_direction(autotext_data) == ""
+    end
+  end
+
+  describe "affected_facility/1" do
+    test "when facility is nil" do
+      assert BuildDescriptionText.affected_facility(%{facility: nil}) == ""
+    end
+
+    test "when facility has no alternate service text" do
+      autotext_data = %{
+        facility: @facility_no_service_text
+      }
+
+      actual = BuildDescriptionText.affected_facility(autotext_data)
+      assert "" == actual
+    end
+
+    test "when facility has alternate service text" do
+      autotext_data = %{
+        facility: @facility_with_service_text
+      }
+
+      expected =
+        "To access the Bowdoin platform or Bremen St lobby from the Wonderland platform..."
+
+      actual = BuildDescriptionText.affected_facility(autotext_data)
+      assert expected == actual
+    end
+
+    test "when there are multiple facilities" do
+      autotext_data = %{
+        facility: [
+          @facility_with_service_text,
+          @facility_no_service_text,
+          @facility_with_service_text
+        ]
+      }
+
+      expected =
+        "To access the Bowdoin platform or Bremen St lobby from the Wonderland platform...\n\nTo access the Bowdoin platform or Bremen St lobby from the Wonderland platform..."
+
+      actual = BuildDescriptionText.affected_facility(autotext_data)
+      assert expected == actual
     end
   end
 end

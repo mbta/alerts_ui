@@ -71,6 +71,23 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionText do
 
   def affected_direction(_), do: ""
 
+  @spec affected_facility(BuildAutoText.t()) :: String.t()
+  def affected_facility(%{facility: nil}), do: ""
+
+  def affected_facility(%{facility: [_ | _] = facilities} = autotext_data) do
+    facilities
+    |> Enum.map(&affected_facility(Map.put(autotext_data, :facility, &1)))
+    |> Enum.reject(&(&1 == ""))
+    |> Enum.join("\n\n")
+  end
+
+  def affected_facility(%{facility: facility}) do
+    facility.properties |> Enum.map_join(&get_service_text(&1))
+  end
+
+  defp get_service_text(%{name: "alternate-service-text", value: service_text}), do: service_text
+  defp get_service_text(_), do: ""
+
   defp route_term(3), do: "routes"
   defp route_term(4), do: "ferries"
   defp route_term(_route_type), do: "lines"

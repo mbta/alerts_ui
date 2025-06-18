@@ -451,11 +451,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
   end
 
   def build_auto_text(
-        %{route_type: nil, effect_name: _effect_name},
+        %{route_type: nil, effect_name: _effect_name} = autotext_data,
         :description_template
       ) do
     # access
-    ""
+    BuildDescriptionText.affected_facility(autotext_data)
   end
 
   def build_auto_text(
