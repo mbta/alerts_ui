@@ -174,7 +174,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         trip_count: nil,
         direction_count: nil
       },
-      service_effect_template: "?stop_names_short closed"
+      service_effect_template: "?stop_names closed"
     },
     %{
       pattern: {3, "Stop Shovelling"},
@@ -265,7 +265,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         stop_count: 0,
         trip_count: 2,
         direction_count: 1
-      }
+      },
+      service_effect_template: "?route_names_short notice"
     },
 
     # subway
@@ -312,7 +313,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         stop_count: 0,
         trip_count: nil,
         direction_count: nil
-      }
+      },
+      service_effect_template: "?route_names_short shuttle"
     },
     %{
       pattern: {1, "Single Tracking"},
@@ -324,7 +326,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         trip_count: nil,
         direction_count: 1
       },
-      service_effect_template: "?route_names_short shuttle"
+      service_effect_template: "Single tracking on ?route_names_short"
     },
 
     # Commuter Rail

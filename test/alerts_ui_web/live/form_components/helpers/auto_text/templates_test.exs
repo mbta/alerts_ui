@@ -53,6 +53,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
   :impacted_modes
   :stop_form
   :stop_names
+  :stop_names_short
   :route_name
 
   describe "build_auto_text/2 (header templates)" do
@@ -860,6 +861,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
 
       actual = Templates.build_auto_text(autotext_data, :header_template)
       assert expected == actual
+
+      expected_service_effect = "Single tracking on Route 1"
+      actual_service_effect = Templates.build_auto_text(autotext_data, :service_effect_template)
+      assert expected_service_effect == actual_service_effect
     end
 
     # Commuter Rail
