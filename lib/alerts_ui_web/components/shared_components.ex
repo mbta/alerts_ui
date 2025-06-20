@@ -1216,7 +1216,6 @@ defmodule AlertsUIWeb.SharedComponents do
     <div
       :if={msg = Phoenix.Flash.get(@flash, :error)}
       id={@id}
-      phx-click={JS.push("lv:clear-flash", value: %{key: :error}) |> CoreComponents.hide("##{@id}")}
       phx-hook="AutoDismissFlash"
       role="alert"
       class={[
@@ -1235,7 +1234,12 @@ defmodule AlertsUIWeb.SharedComponents do
         </li>
       </div>
       <button type="button" class="group absolute top-1 right-1 p-2" aria-label="close">
-        <div class="hero-x-mark-solid h-5 w-5 opacity-40 group-hover:opacity-70" />
+        <div
+          class="hero-x-mark-solid h-5 w-5 opacity-40 group-hover:opacity-70"
+          phx-click={
+            JS.push("lv:clear-flash", value: %{key: :error}) |> CoreComponents.hide("##{@id}")
+          }
+        />
       </button>
     </div>
     """
