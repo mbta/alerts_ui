@@ -18,20 +18,13 @@ defmodule AlertsUI.AlertBuilderTest do
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
 
-  @user %{
-    email: "some email",
-    first_name: "some first_name",
-    last_name: "some last_name",
-    role: :user
-  }
-
   describe "build_alert/1" do
     test "builds alert from map" do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
       ]) do
-        existing_alert = insert(:alert, alert_id: "0", user: @user)
+        existing_alert = insert(:alert, alert_id: "0", user: build(:user))
 
         alert_data = %{
           route_type: 1,
@@ -101,7 +94,7 @@ defmodule AlertsUI.AlertBuilderTest do
                }
 
         result
-        |> Map.put(:user, @user)
+        |> Map.put(:user, build(:user))
         |> Alerts.create_or_update_alert()
 
         [alert_1, alert_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id)
@@ -171,7 +164,7 @@ defmodule AlertsUI.AlertBuilderTest do
            end
          ]}
       ]) do
-        existing_alert = insert(:alert, alert_id: "0", user: @user)
+        existing_alert = insert(:alert, alert_id: "0", user: build(:user))
 
         alert_data = %{
           route_type: 1,
@@ -241,7 +234,7 @@ defmodule AlertsUI.AlertBuilderTest do
                }
 
         result
-        |> Map.put(:user, @user)
+        |> Map.put(:user, build(:user))
         |> Alerts.create_or_update_alert()
 
         [alert_1, alert_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id, :desc)
@@ -352,7 +345,7 @@ defmodule AlertsUI.AlertBuilderTest do
            end
          ]}
       ]) do
-        existing_alert = insert(:alert, alert_id: "0", user: @user)
+        existing_alert = insert(:alert, alert_id: "0", user: build(:user))
 
         alert_data = %{
           route_type: 1,
@@ -385,7 +378,7 @@ defmodule AlertsUI.AlertBuilderTest do
                ]
 
         result
-        |> Map.put(:user, @user)
+        |> Map.put(:user, build(:user))
         |> Alerts.create_or_update_alert()
 
         [alert_1, alert_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id, :desc)
@@ -399,7 +392,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2} end]}
       ]) do
-        existing_alert = insert(:alert, alert_id: "0", user: @user)
+        existing_alert = insert(:alert, alert_id: "0", user: build(:user))
 
         alert_data = %{
           route_type: 2,
@@ -452,7 +445,7 @@ defmodule AlertsUI.AlertBuilderTest do
                }
 
         result
-        |> Map.put(:user, @user)
+        |> Map.put(:user, build(:user))
         |> Alerts.create_or_update_alert()
 
         [alert_1, alert_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id, :desc)

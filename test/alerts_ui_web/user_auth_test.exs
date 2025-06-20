@@ -2,7 +2,7 @@ defmodule AlertsUIWeb.UserAuthTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase, async: true
 
-  import AlertsUI.KeycloakUsersFixtures
+  import AlertsUI.UsersFixtures
   import Mock
   import Test.Support.Helpers
 
@@ -27,7 +27,7 @@ defmodule AlertsUIWeb.UserAuthTest do
       assert session_user = get_session(conn, :user)
       assert session_user == user
 
-      assert get_session(conn, :live_socket_id) == "users_sessions:#{user.id}"
+      assert get_session(conn, :live_socket_id) == "users_sessions:#{user.keycloak_id}"
 
       assert redirected_to(conn) == ~p"/"
     end
@@ -71,7 +71,7 @@ defmodule AlertsUIWeb.UserAuthTest do
     end
 
     test "broadcasts to the given live_socket_id", %{conn: conn, user: user} do
-      live_socket_id = "users_sessions:#{user.id}"
+      live_socket_id = "users_sessions:#{user.keycloak_id}"
       AlertsUIWeb.Endpoint.subscribe(live_socket_id)
 
       conn

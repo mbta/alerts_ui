@@ -7,14 +7,13 @@ defmodule AlertsUI.Models.User do
 
   alias AlertsUI.Models.Alert
 
-  @type id :: String.t()
   @type role :: :user | :admin
 
   @type t :: %__MODULE__{
           # User doesn't have an id until they create an alert
           # and are added to the DB
           id: Ecto.UUID | nil,
-          keycloak_id: id(),
+          keycloak_id: String.t(),
           email: String.t(),
           first_name: String.t(),
           last_name: String.t(),
@@ -44,7 +43,7 @@ defmodule AlertsUI.Models.User do
   Create a new User struct.
   """
   @spec new(
-          keycloak_id :: id(),
+          keycloak_id :: String.t(),
           email :: String.t(),
           first_name :: String.t(),
           last_name :: String.t(),
@@ -67,7 +66,6 @@ defmodule AlertsUI.Models.User do
   iex> AlertsUI.Models.User.keycloak_id(%AlertsUI.Models.User{keycloak_id: "123", email: "user@example.com"})
   "123"
   """
-  @spec keycloak_id(t()) :: id()
+  @spec keycloak_id(t()) :: String.t()
   def keycloak_id(%__MODULE__{keycloak_id: keycloak_id}), do: keycloak_id
-
 end

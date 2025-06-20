@@ -6,6 +6,7 @@ defmodule AlertsUI.Repo.Migrations.CreateUsers do
 
     create table(:users) do
       add :email, :string
+      add :keycloak_id, :string
       add :first_name, :string
       add :last_name, :string
       add :role, :roles

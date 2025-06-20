@@ -9,7 +9,7 @@ defmodule AlertsUIWeb.UserTest do
   describe "new" do
     test "generates a new User struct given an id, email, and role" do
       assert User.new("MOCK-ID", "MOCK-EMAIL", "FIRSTNAME", "LASTNAME", :admin) == %User{
-               id: "MOCK-ID",
+               keycloak_id: "MOCK-ID",
                email: "MOCK-EMAIL",
                first_name: "FIRSTNAME",
                last_name: "LASTNAME",
@@ -19,7 +19,7 @@ defmodule AlertsUIWeb.UserTest do
 
     test "defaults to the user role" do
       assert User.new("MOCK-ID", "MOCK-EMAIL", "FIRSTNAME", "LASTNAME") == %User{
-               id: "MOCK-ID",
+               keycloak_id: "MOCK-ID",
                email: "MOCK-EMAIL",
                first_name: "FIRSTNAME",
                last_name: "LASTNAME",

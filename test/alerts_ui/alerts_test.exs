@@ -9,12 +9,7 @@ defmodule AlertsUI.AlertsTest do
                     |> DateTime.add(-5, :minute)
                     |> DateTime.truncate(:second)
 
-  @user %{
-    email: "some email",
-    first_name: "some first_name",
-    last_name: "some last_name",
-    role: :user
-  }
+  @user build(:user)
 
   describe "create_or_update_alert" do
     test "creates alert from params" do

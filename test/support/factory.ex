@@ -57,12 +57,7 @@ defmodule AlertsUI.Support.Factory do
         }
       ],
       informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}],
-      user: %{
-        email: "fake@example.com",
-        first_name: "First",
-        last_name: "Last",
-        role: :user
-      }
+      user: build(:user)
     }
   end
 
@@ -161,4 +156,14 @@ defmodule AlertsUI.Support.Factory do
           "text" => text
         }
       ])
+
+  def user_factory do
+    %{
+      keycloak_id: "123-456",
+      email: "fake@example.com",
+      first_name: "Firstname",
+      last_name: "Lastname",
+      role: :user
+    }
+  end
 end

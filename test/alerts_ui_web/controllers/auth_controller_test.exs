@@ -1,7 +1,7 @@
 defmodule AlertsUIWeb.AuthControllerTest do
   use AlertsUIWeb.ConnCase
 
-  import AlertsUI.KeycloakUsersFixtures
+  import AlertsUI.UsersFixtures
 
   alias AlertsUI.Models.User
   alias Ueberauth.Auth
@@ -38,7 +38,7 @@ defmodule AlertsUIWeb.AuthControllerTest do
       assert session_user = get_session(conn, :user)
 
       assert %User{
-               id: ^id,
+               keycloak_id: ^id,
                email: ^email,
                role: ^role
              } = session_user

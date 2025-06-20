@@ -1,4 +1,4 @@
-defmodule AlertsUI.DB.Users do
+defmodule AlertsUI.DBContexts.Users do
   @moduledoc """
   The Users context.
   """
@@ -6,7 +6,7 @@ defmodule AlertsUI.DB.Users do
   import Ecto.Query, warn: false
   alias AlertsUI.Repo
 
-  alias AlertsUI.DB.User
+  alias AlertsUI.Models.User
 
   @doc """
   Returns the list of users.
