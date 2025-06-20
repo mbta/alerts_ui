@@ -7,12 +7,13 @@ defmodule AlertsUI.Models.User do
 
   alias AlertsUI.Models.Alert
 
+  @type id :: Ecto.UUID
   @type role :: :user | :admin
 
   @type t :: %__MODULE__{
           # User doesn't have an id until they create an alert
           # and are added to the DB
-          id: Ecto.UUID | nil,
+          id: id() | nil,
           keycloak_id: String.t(),
           email: String.t(),
           first_name: String.t(),
