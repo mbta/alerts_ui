@@ -128,7 +128,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       route_type: route_type,
       direction: Alert.get_direction(informed_entities) || "default",
       effect_name: effect_name,
-      facility_id: Alert.gather_facility_ids(informed_entities) |> List.first(""),
+      facility_id: Alert.gather_facility_ids(informed_entities) |> List.first(),
       route_ids: route_ids,
       single_route_id: single_route_id,
       stop_ids: Alert.gather_parent_stop_ids(informed_entities),
@@ -149,9 +149,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     }
     |> Map.merge(active_period_map)
   end
-
-  defp get_notification_specifier(nil), do: :same_as_effect_period
-  defp get_notification_specifier(_notification_period_start), do: :custom
 
   def determine_one_time_active_period(alert) do
     active_period_start = shift_to_naive(alert.active_period_start)
@@ -192,6 +189,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       recurrence_days: alert.recurrence_days |> Enum.map(&Atom.to_string/1)
     }
   end
+
+  defp get_notification_specifier(nil), do: :same_as_effect_period
+  defp get_notification_specifier(_notification_period_start), do: :custom
 
   def shift_to_naive(nil), do: nil
 

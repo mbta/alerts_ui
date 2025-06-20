@@ -207,6 +207,36 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
     end
   end
 
+  describe "stop_range_at/1" do
+    test "stops empty" do
+      assert BuildAutoText.stop_range_at(%{stops: []}) == ""
+    end
+
+    test "1 stop" do
+      expected = "at Lechmere"
+      actual = BuildAutoText.stop_range_at(%{stops: [@stop_1]})
+      assert expected == actual
+    end
+
+    test "2 stops" do
+      expected = "at Lechmere and Longwood Medical Area"
+      actual = BuildAutoText.stop_range_at(%{stops: [@stop_1, @stop_2]})
+      assert expected == actual
+    end
+
+    test "3 stops" do
+      expected = "at Lechmere, Longwood Medical Area, and Massachusetts Avenue"
+      actual = BuildAutoText.stop_range_at(%{stops: [@stop_1, @stop_2, @stop_3]})
+      assert expected == actual
+    end
+
+    test "4 stops" do
+      expected = "at Lechmere through Mattapan"
+      actual = BuildAutoText.stop_range_at(%{stops: [@stop_1, @stop_2, @stop_3, @stop_4]})
+      assert expected == actual
+    end
+  end
+
   describe "trip_names_only/1" do
     test "schedules empty" do
       autotext_data = %{

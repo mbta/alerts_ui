@@ -5,6 +5,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
   """
   use AlertsUIWeb.ConnCase
 
+  import AlertsUI.Support.Factory
   import Mock
   import Phoenix.LiveViewTest
   import Test.Support.Helpers
@@ -95,9 +96,54 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
       end
     end
 
-    # test "editing alert", %{conn: conn} do
-    # idk
-    # end
+    @tag :logged_in_user
+    test "header when editing", %{conn: conn} do
+      todays_date =
+        DateTime.utc_now()
+        |> DateTime.shift_zone!("America/New_York")
+        |> DateTime.to_date()
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _types -> @routes end,
+           get: fn _id -> @route_one end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction -> [@stop] end,
+           get_parent: fn nil -> nil end
+         ]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _route_ids, _opts ->
+             [@schedule, @schedule_2]
+           end,
+           end_of_rating: fn -> Date.add(todays_date, 1) end
+         ]}
+      ]) do
+        insert(:alert, %{
+          alert_id: "123",
+          effect: :SIGNIFICANT_DELAYS,
+          effect_detail: "DELAY",
+          header_text: "cool header text",
+          severity: 3,
+          severity_level: :WARNING,
+          cause_detail: "PARADE",
+          reminder_times: [],
+          informed_entity: [%{route_type: 3, route_id: "1"}],
+          original_route_selections: ["1", "2", "3"]
+        })
+
+        {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
+
+        # Don't need to make any changes, just proceed with submitting the form
+
+        open_review_modal(view)
+
+        assert render(view) =~ ~r/Edit alert #123/s
+      end
+    end
 
     @tag :logged_in_user
     test "correct mode and effect: Bus Delay", %{conn: conn} do
@@ -401,7 +447,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["1"], stop_ids: ["place-aqucl"]}
+          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
         open_review_modal(view)
@@ -919,6 +965,58 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         assert render(view) =~ ~r/Created by.*TO BE DONE/s
         assert render(view) =~ ~r/Last edited.*TO BE DONE/s
         assert render(view) =~ ~r/Last edited by.*TO BE DONE/s
+      end
+    end
+  end
+
+  describe "real-world bug fixes" do
+    # In this case, seems that cause_detail can be empty in 2 ways; nil and empty string
+    # Better typing would be good, but this is an easy bandaid
+    @tag :logged_in_user
+    test "can submit an edit on an alert without a cause_detail", %{conn: conn} do
+      todays_date =
+        DateTime.utc_now()
+        |> DateTime.shift_zone!("America/New_York")
+        |> DateTime.to_date()
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _types -> @routes end,
+           get: fn _id -> @route_one end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction -> [@stop] end,
+           get_parent: fn nil -> nil end
+         ]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _route_ids, _opts ->
+             [@schedule, @schedule_2]
+           end,
+           end_of_rating: fn -> Date.add(todays_date, 1) end
+         ]}
+      ]) do
+        insert(:alert, %{
+          alert_id: "123",
+          effect: :SIGNIFICANT_DELAYS,
+          effect_detail: "DELAY",
+          header_text: "cool header text",
+          severity: 3,
+          severity_level: :WARNING,
+          cause_detail: "UNKNOWN",
+          reminder_times: [],
+          informed_entity: [%{route_type: 3, route_id: "1", direction_id: 0}],
+          original_route_selections: ["1", "2", "3"]
+        })
+
+        {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
+
+        # Don't need to make any changes, just proceed with submitting the form
+
+        open_review_modal(view)
+        assert render(view) =~ ~r/Edit alert #123/s
       end
     end
   end

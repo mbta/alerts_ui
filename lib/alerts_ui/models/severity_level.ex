@@ -83,7 +83,7 @@ defmodule AlertsUI.Models.SeverityLevel do
   end
 
   @doc """
-  Returns severity string given an integer 
+  Returns severity string given an integer
 
   ## Examples
       iex> AlertsUI.Models.SeverityLevel.severity_string_by_severity(nil)
