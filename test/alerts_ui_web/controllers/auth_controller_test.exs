@@ -3,7 +3,7 @@ defmodule AlertsUIWeb.AuthControllerTest do
 
   import AlertsUI.KeycloakUsersFixtures
 
-  alias AlertsUIWeb.User
+  alias AlertsUI.Models.User
   alias Ueberauth.Auth
   alias Ueberauth.Auth.{Credentials, Extra, Info}
 

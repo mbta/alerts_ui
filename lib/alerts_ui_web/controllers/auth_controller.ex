@@ -6,7 +6,8 @@ defmodule AlertsUIWeb.AuthController do
 
   require Logger
 
-  alias AlertsUIWeb.{User, UserAuth}
+  alias AlertsUI.Models.User
+  alias AlertsUIWeb.UserAuth
   alias Plug.Conn
 
   plug(Ueberauth)

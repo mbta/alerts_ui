@@ -17,7 +17,7 @@ defmodule AlertsUI.Models.Alert do
     SeverityLevel
   }
 
-  alias AlertsUI.DB.User
+  alias AlertsUI.Models.User
 
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Stops.Repo, as: StopsRepo

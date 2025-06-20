@@ -10,7 +10,7 @@ defmodule AlertsUIWeb.UserAuth do
   import Plug.Conn
   import Phoenix.Controller
 
-  alias AlertsUIWeb.User
+  alias AlertsUI.Models.User
   alias Plug.Conn
   alias Oidcc.{ClientContext, Token}
 
@@ -242,7 +242,7 @@ defmodule AlertsUIWeb.UserAuth do
   defp put_current_user_in_session(conn, user) do
     conn
     |> put_session(:user, user)
-    |> put_session(:live_socket_id, "users_sessions:#{User.id(user)}")
+    |> put_session(:live_socket_id, "users_sessions:#{User.keycloak_id(user)}")
   end
 
   defp maybe_store_return_to(%{method: "GET"} = conn) do

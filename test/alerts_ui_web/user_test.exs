@@ -2,9 +2,9 @@ defmodule AlertsUIWeb.UserTest do
   @moduledoc false
   use ExUnit.Case, async: true
 
-  alias AlertsUIWeb.User
+  alias AlertsUI.Models.User
 
-  doctest AlertsUIWeb.User
+  doctest AlertsUI.Models.User
 
   describe "new" do
     test "generates a new User struct given an id, email, and role" do
