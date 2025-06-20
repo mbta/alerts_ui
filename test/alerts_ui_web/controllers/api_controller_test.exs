@@ -4,6 +4,7 @@ defmodule AlertsUIWeb.ApiControllerTest do
 
   import Mock
   import Test.Support.Helpers
+  import AlertsUI.Support.Factory
 
   use PhoenixSwagger.SchemaTest, "priv/static/swagger.json"
 
@@ -44,12 +45,7 @@ defmodule AlertsUIWeb.ApiControllerTest do
             informed_entity: [
               %{route_id: "1"}
             ],
-            user: %{
-              email: "some email",
-              first_name: "some first_name",
-              last_name: "some last_name",
-              role: :user
-            }
+            user: build(:user)
           })
           |> validate_resp_schema(schema, :AlertResponse)
 
