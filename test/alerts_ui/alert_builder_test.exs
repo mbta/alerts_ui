@@ -24,7 +24,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
       ]) do
-        existing_alert = insert(:alert, alert_id: "0", user: build(:user))
+        existing_alert = insert(:alert, alert_id: "0")
 
         alert_data = %{
           route_type: 1,
@@ -164,7 +164,7 @@ defmodule AlertsUI.AlertBuilderTest do
            end
          ]}
       ]) do
-        existing_alert = insert(:alert, alert_id: "0", user: build(:user))
+        existing_alert = insert(:alert, alert_id: "0")
 
         alert_data = %{
           route_type: 1,
@@ -345,7 +345,7 @@ defmodule AlertsUI.AlertBuilderTest do
            end
          ]}
       ]) do
-        existing_alert = insert(:alert, alert_id: "0", user: build(:user))
+        existing_alert = insert(:alert, alert_id: "0")
 
         alert_data = %{
           route_type: 1,
@@ -392,7 +392,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2} end]}
       ]) do
-        existing_alert = insert(:alert, alert_id: "0", user: build(:user))
+        existing_alert = insert(:alert, alert_id: "0")
 
         alert_data = %{
           route_type: 2,
