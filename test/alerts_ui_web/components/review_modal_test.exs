@@ -564,7 +564,10 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
 
         assert render(view) =~ ~r/Cause.*None/s
         assert render(view) =~ ~r/Severity.*About 15 minutes.*\(4 - WARNING\)/s
-        assert render(view) =~ ~r/Main message.*hello world/s
+
+        assert render(view) =~
+                 ~r/Main message.*Framingham\/Worcester Line is experiencing delays of about 15 minutes/s
+
         assert render(view) =~ ~r/Supporting information.*None/s
         refute render(view) =~ ~r/URL:/s
       end
@@ -899,7 +902,9 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
 
         assert render(view) =~ ~r/SMS.*Not selected/s
         assert render(view) =~ ~r/Email.*Not selected/s
-        assert render(view) =~ ~r/Web Banner.*hello world/s
+
+        assert render(view) =~
+                 ~r/Web Banner.*Framingham\/Worcester Line is experiencing delays of about 15 minutes/s
       end
     end
 

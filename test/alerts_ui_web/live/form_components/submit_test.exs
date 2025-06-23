@@ -246,7 +246,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
                  banner_text: nil,
                  cause: :UNKNOWN_CAUSE,
                  cause_detail: nil,
-                 header_text: "hello world",
+                 header_text: "route_number_1 is experiencing delays of about 15 minutes",
                  description_text: nil,
                  severity_level: :WARNING,
                  url: nil,

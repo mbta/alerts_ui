@@ -18,7 +18,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     field :image_url, :string
     field :image_alternative_text, :string
     field :severity, :integer, default: 4
-    field :image_size, :integer, default: 0
+    field :image_size, :map, default: %{}
   end
 
   @required_fields ~w[header_text]a
@@ -39,7 +39,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         url: "",
         image_url: "",
         image_alternative_text: "",
-        severity: 4
+        severity: 4,
+        image_size: %{}
       })
 
     send_changeset(changeset)
@@ -116,7 +117,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           %__MODULE__{}
           |> changeset(socket.assigns.form.params)
           |> validate_required(@required_fields)
-          |> validate_image_fields(Map.get(socket.assigns, :image_size, 0))
+          |> validate_image_fields(Map.get(socket.assigns, :image_size, %{}))
 
         errors =
           case changeset |> apply_action(:validate) do

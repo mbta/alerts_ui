@@ -228,7 +228,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         selected_routes =
           if available_routes do
             available_routes
-            |> Enum.filter(&(&1.id in affected_service["route_ids"]))
+            |> Enum.filter(&(&1.id in (affected_service["route_ids"] || [])))
           else
             nil
           end
