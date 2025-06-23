@@ -18,6 +18,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     field :image_url, :string
     field :image_alternative_text, :string
     field :severity, :integer, default: 4
+    field :image_size, :integer, default: 0
   end
 
   @required_fields ~w[header_text]a
@@ -68,7 +69,6 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       alert_data
       |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
 
-    # yoour problem ^^^^
     cause_options =
       formatted_causes(
         Map.get(assigns, :route_type),
@@ -116,7 +116,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           %__MODULE__{}
           |> changeset(socket.assigns.form.params)
           |> validate_required(@required_fields)
-          |> validate_image_fields(socket.assigns.image_size)
+          |> validate_image_fields(Map.get(socket.assigns, :image_size, 0))
 
         errors =
           case changeset |> apply_action(:validate) do

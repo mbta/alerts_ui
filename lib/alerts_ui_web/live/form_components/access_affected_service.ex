@@ -145,7 +145,8 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     case apply_action(changeset |> validate_required(@required_fields), :validate) do
       {:ok, changeset} ->
         %{facilities: available_facilities} =
-          Map.get(socket.assigns.available_facilities, :result, %{facilities: []})
+          Map.get(socket.assigns.available_facilities, :result, %{facilities: []}) ||
+            %{facilities: []}
 
         selected_facility =
           if available_facilities do

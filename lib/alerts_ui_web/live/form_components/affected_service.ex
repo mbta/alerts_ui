@@ -46,7 +46,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         |> Date.add(x)
       end)
       |> Enum.map(fn date ->
-        {Timex.format!(date, "{WDshort} {Mshort} {0D}"), Date.to_iso8601(date)}
+        {Calendar.strftime(date, "%a %b %_d"), Date.to_iso8601(date)}
       end)
 
     today = hd(service_dates) |> elem(1)
