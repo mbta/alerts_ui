@@ -23,19 +23,28 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
                |> DateTime.shift_zone!("America/New_York")
                |> DateTime.to_date()
 
+  @tomorrows_date Date.add(@todays_date, 1)
+
+  @start_time @tomorrows_date
+              |> NaiveDateTime.new!(~T[06:00:00])
+
+  @end_time @todays_date
+            |> Date.add(2)
+            |> NaiveDateTime.new!(~T[00:00:00])
+
   @schedule %EnhancedSchedule{
     route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
     trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: nil,
-    departure_time: DateTime.new!(@todays_date, ~T[16:30:54Z])
+    departure_time: DateTime.new!(@tomorrows_date, ~T[15:30:54Z])
   }
 
   @schedule_2 %EnhancedSchedule{
     route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
     trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
-    arrival_time: DateTime.new!(@todays_date, ~T[15:30:54Z]),
+    arrival_time: DateTime.new!(@tomorrows_date, ~T[16:30:54Z]),
     departure_time: nil
   }
 
@@ -161,46 +170,6 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
           "affected_service" => %{"trip_ids" => [@schedule.trip.id], "stop_ids" => [@stop.id]}
         })
 
-        # mock timerange selections
-        view
-        |> element("#time_range_form")
-        |> render_change(%{
-          "time_range" => %{
-            "active_period_end_specifier" => "custom"
-          }
-        })
-
-        view
-        |> element("#time_range_form")
-        |> render_change(%{
-          "time_range" => %{
-            "active_period_end" =>
-              @todays_date
-              |> Date.add(2)
-              |> NaiveDateTime.new!(~T[00:00:00])
-              |> NaiveDateTime.to_iso8601()
-          }
-        })
-
-        view
-        |> element("#time_range_form")
-        |> render_change(%{
-          "time_range" => %{
-            "active_period_start_specifier" => "custom"
-          }
-        })
-
-        view
-        |> element("#time_range_form")
-        |> render_change(%{
-          "time_range" => %{
-            "active_period_start" =>
-              @todays_date
-              |> NaiveDateTime.new!(~T[13:00:00])
-              |> NaiveDateTime.to_iso8601()
-          }
-        })
-
         # Mock alert details selections
         view
         |> element("#details_form")
@@ -211,7 +180,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         assert view
                |> element("#alert_details_header_text")
                |> render() =~
-                 "Framingham/Worcester Line train 595 (12:30 PM from South Station) trip is operating about 15 minutes behind schedule from 4:30 PM to 4:30 PM due to ice in harbor"
+                 "Framingham/Worcester Line train 595 (11:30 AM from South Station) trip is operating about 15 minutes behind schedule from 3:30 PM to 5:30 PM on #{Calendar.strftime(@tomorrows_date, "%a, %b %_d")} due to ice in harbor"
       end
     end
 
@@ -246,6 +215,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         |> element("#time_range_form")
         |> render_change(%{
           "time_range" => %{
+            "active_period_start_specifier" => "custom",
             "active_period_end_specifier" => "custom"
           }
         })
@@ -254,11 +224,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         |> element("#time_range_form")
         |> render_change(%{
           "time_range" => %{
-            "active_period_end" =>
-              @todays_date
-              |> Date.add(2)
-              |> NaiveDateTime.new!(~T[00:00:00])
-              |> NaiveDateTime.to_iso8601()
+            "active_period_start" => NaiveDateTime.to_iso8601(@start_time),
+            "active_period_end" => NaiveDateTime.to_iso8601(@end_time)
           }
         })
 
@@ -272,7 +239,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         assert view
                |> element("#alert_details_header_text")
                |> render() =~
-                 "South Station closed until #{Calendar.strftime(@todays_date, "%a, %b %_d")} due to ice in harbor"
+                 "South Station closed from #{Calendar.strftime(@start_time, "%a, %b %_d at %-I:%M %p")} - #{Calendar.strftime(@end_time, "%a, %b %_d at %-I:%M %p")} due to ice in harbor"
 
         assert true
       end
@@ -301,6 +268,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         |> element("#time_range_form")
         |> render_change(%{
           "time_range" => %{
+            "active_period_start_specifier" => "custom",
             "active_period_end_specifier" => "custom"
           }
         })
@@ -309,11 +277,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         |> element("#time_range_form")
         |> render_change(%{
           "time_range" => %{
-            "active_period_end" =>
-              @todays_date
-              |> Date.add(2)
-              |> NaiveDateTime.new!(~T[00:00:00])
-              |> NaiveDateTime.to_iso8601()
+            "active_period_start" => NaiveDateTime.to_iso8601(@start_time),
+            "active_period_end" => NaiveDateTime.to_iso8601(@end_time)
           }
         })
 
@@ -327,7 +292,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         assert view
                |> element("#alert_details_header_text")
                |> render() =~
-                 "Alewife Escalator 349 (Platform to Russell Field) unavailable until #{Calendar.strftime(@todays_date, "%a, %b %_d")} due to ice in harbor<"
+                 "Alewife Escalator 349 (Platform to Russell Field) unavailable from #{Calendar.strftime(@start_time, "%a, %b %_d at %-I:%M %p")} - #{Calendar.strftime(@end_time, "%a, %b %_d at %-I:%M %p")} due to ice in harbor"
 
         assert true
       end
@@ -360,6 +325,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
       |> element("#time_range_form")
       |> render_change(%{
         "time_range" => %{
+          "active_period_start_specifier" => "custom",
           "active_period_end_specifier" => "custom"
         }
       })
@@ -368,11 +334,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
       |> element("#time_range_form")
       |> render_change(%{
         "time_range" => %{
-          "active_period_end" =>
-            @todays_date
-            |> Date.add(2)
-            |> NaiveDateTime.new!(~T[00:00:00])
-            |> NaiveDateTime.to_iso8601()
+          "active_period_start" => NaiveDateTime.to_iso8601(@start_time),
+          "active_period_end" => NaiveDateTime.to_iso8601(@end_time)
         }
       })
 
@@ -386,7 +349,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
       assert view
              |> element("#alert_details_header_text")
              |> render() =~
-               "Subway and Ferry notice until #{Calendar.strftime(@todays_date, "%a, %b %_d")} due to ice in harbor"
+               "Subway and Ferry notice from #{Calendar.strftime(@start_time, "%a, %b %_d at %-I:%M %p")} - #{Calendar.strftime(@end_time, "%a, %b %_d at %-I:%M %p")} due to ice in harbor"
 
       assert true
     end

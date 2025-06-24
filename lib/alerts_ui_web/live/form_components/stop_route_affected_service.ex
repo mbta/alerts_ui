@@ -335,36 +335,12 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   def validate_changeset(changeset, affected_service, available_stops) do
     case apply_action(changeset |> validate_required(@required_fields), :validate) do
       {:ok, changeset} ->
-        available_stops =
-          Map.get(available_stops, :result)
+        # stops and routes here are used in autotext
+        available_stops = Map.get(available_stops, :result)
+        selected_stops = get_selected_stops(available_stops, affected_service["stop_ids"])
 
-        selected_stops =
-          if available_stops do
-            available_stops
-            |> Enum.filter(&(&1.id in (affected_service["stop_ids"] || [])))
-          else
-            nil
-          end
-
-        #########
-
-        available_routes =
-          Map.get(affected_service, "routes_by_id")
-
-        selected_routes =
-          if available_routes do
-            available_routes
-            |> Enum.reduce([], fn {route_id, route}, acc ->
-              if route_id in affected_service["route_ids"] do
-                acc ++ List.wrap(route)
-              else
-                acc
-              end
-            end)
-            |> List.flatten()
-          else
-            nil
-          end
+        available_routes = Map.get(affected_service, "routes_by_id")
+        selected_routes = get_selected_routes(available_routes, affected_service["route_ids"])
 
         send(self(), {:add_errors, [], __MODULE__})
         send(self(), {:section_completed, changeset})
@@ -498,5 +474,27 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   @spec disable_routes_input?(map()) :: boolean()
   defp disable_routes_input?(%{form: form}) do
     form[:stop_ids].value in [nil, []]
+  end
+
+  defp get_selected_stops(nil, _), do: nil
+  defp get_selected_stops(_, nil), do: nil
+
+  defp get_selected_stops(available_stops, stop_ids) do
+    Enum.filter(available_stops, &(&1.id in stop_ids))
+  end
+
+  defp get_selected_routes(nil, _), do: nil
+  defp get_selected_routes(_, nil), do: nil
+
+  defp get_selected_routes(available_routes, route_ids) do
+    available_routes
+    |> Enum.reduce([], fn {route_id, route}, acc ->
+      if route_id in route_ids do
+        acc ++ List.wrap(route)
+      else
+        acc
+      end
+    end)
+    |> List.flatten()
   end
 end
