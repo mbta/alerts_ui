@@ -9,6 +9,8 @@ defmodule AlertsUI.AlertsTest do
                     |> DateTime.add(-5, :minute)
                     |> DateTime.truncate(:second)
 
+  @user build(:user)
+
   describe "create_or_update_alert" do
     test "creates alert from params" do
       new_params =
@@ -38,7 +40,8 @@ defmodule AlertsUI.AlertsTest do
             active_period: [
               build(:active_period),
               %{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:01:00Z]}
-            ]
+            ],
+            user: @user
           }
         )
 
@@ -46,7 +49,8 @@ defmodule AlertsUI.AlertsTest do
         build(:alert_map, %{
           alert_id: "123",
           header_text: "new header text",
-          active_period: [%{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:03:00Z]}]
+          active_period: [%{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:03:00Z]}],
+          user: Map.from_struct(existing_alert.user)
         })
 
       Alerts.create_or_update_alert(new_params, existing_alert)
@@ -63,14 +67,16 @@ defmodule AlertsUI.AlertsTest do
           %{
             alert_id: "123",
             header_text: "old header text",
-            updated_at: @five_minutes_ago
+            updated_at: @five_minutes_ago,
+            user: @user
           }
         )
 
       new_params =
         build(:alert_map, %{
           alert_id: "123",
-          header_text: "new header text"
+          header_text: "new header text",
+          user: Map.from_struct(existing_alert.user)
         })
 
       Alerts.create_or_update_alert(new_params, existing_alert)
@@ -86,14 +92,16 @@ defmodule AlertsUI.AlertsTest do
           %{
             alert_id: "123",
             header_text: "old header text",
-            created_at: @five_minutes_ago
+            created_at: @five_minutes_ago,
+            user: @user
           }
         )
 
       new_params =
         build(:alert_map, %{
           alert_id: "123",
-          header_text: "new header text"
+          header_text: "new header text",
+          user: Map.from_struct(existing_alert.user)
         })
 
       Alerts.create_or_update_alert(new_params, existing_alert)
@@ -112,14 +120,16 @@ defmodule AlertsUI.AlertsTest do
             active_period: [
               build(:active_period),
               %{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:01:00Z]}
-            ]
+            ],
+            user: @user
           }
         )
 
       new_params =
         build(:alert_map, %{
           alert_id: "123",
-          active_period: [%{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:03:00Z]}]
+          active_period: [%{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:03:00Z]}],
+          user: Map.from_struct(existing_alert.user)
         })
 
       assert {:ok, updated_alert} = Alerts.create_or_update_alert(new_params, existing_alert)
@@ -177,7 +187,7 @@ defmodule AlertsUI.AlertsTest do
   describe "parse_changeset_errors/1" do
     test "puts changeset errors in readable format" do
       changeset =
-        Alert.changeset(%Alert{}, %{header_text: "hello", informed_entity: []})
+        Alert.changeset(%Alert{}, %{header_text: "hello", informed_entity: [], user: @user})
 
       result = Alerts.parse_changeset_errors(changeset)
 
@@ -280,7 +290,8 @@ defmodule AlertsUI.AlertsTest do
         active_period: [%{start: ~U[2024-12-11 11:00:00Z], end: ~U[2024-12-11 13:00:00Z]}],
         active_period_start: ~U[2024-12-11 11:00:00Z],
         active_period_end: ~U[2024-12-11 13:00:00Z],
-        duration_certainty: :ESTIMATED
+        duration_certainty: :ESTIMATED,
+        user: @user
       })
 
       [result] = Alerts.list_all_open() |> Alerts.update_end_if_estimated(current_time)
@@ -299,7 +310,8 @@ defmodule AlertsUI.AlertsTest do
         active_period: [%{start: ~U[2024-12-10 23:00:00Z], end: ~U[2024-12-11 05:00:00Z]}],
         active_period_start: ~U[2024-12-10 23:00:00Z],
         active_period_end: ~U[2024-12-11 01:00:00Z],
-        duration_certainty: :ESTIMATED
+        duration_certainty: :ESTIMATED,
+        user: @user
       })
 
       [result] = Alerts.list_all_open() |> Alerts.update_end_if_estimated(current_time)

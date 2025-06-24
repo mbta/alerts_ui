@@ -14,7 +14,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ErrorFormatterTest do
 
     test "puts errors for fields in correct format from changeset" do
       changeset =
-        Alert.changeset(%Alert{}, %{informed_entity: [%{route_id: "1"}]})
+        Alert.changeset(%Alert{}, %{
+          user: %{email: "a", first_name: "b", last_name: "c", role: :user},
+          informed_entity: [%{route_id: "1"}]
+        })
 
       result = ErrorFormatter.parse_field_errors(changeset)
 

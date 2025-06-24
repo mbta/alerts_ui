@@ -359,9 +359,10 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   defp create_alert(socket) do
-    alert_map =
+    alert_data =
       socket.assigns.alert_data
       |> AlertBuilder.build_alert(socket.assigns.combination)
+      |> Map.put(:user, Map.from_struct(socket.assigns.current_user))
 
     existing_alert =
       if is_nil(socket.assigns.alert_id) do
@@ -370,7 +371,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
         Alerts.get_by_alert_id(socket.assigns.alert_id)
       end
 
-    alert_map
+    alert_data
     |> Alerts.create_or_update_alert(existing_alert)
     |> case do
       {:ok, alert} ->
