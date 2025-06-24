@@ -79,7 +79,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     autotext_data =
       AlertDataToAutoText.build_autotext_data(
         new_data
-        |> Map.new(fn {k, v} -> {String.to_atom(k), v} end)
+        |> Map.new(fn {k, v} -> {String.to_existing_atom(k), v} end)
         |> Map.merge(%{
           facility: selected_facility,
           routes: selected_routes,
