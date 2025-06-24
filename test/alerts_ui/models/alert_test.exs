@@ -174,7 +174,11 @@ defmodule AlertsUI.Models.AlertTest do
         ]
       }
 
-      assert Alert.routes_or_facilities_from_entities(alert) == ["28", :USING_WHEELCHAIR, :PARK_CAR]
+      assert Alert.routes_or_facilities_from_entities(alert) == [
+               "28",
+               :USING_WHEELCHAIR,
+               :PARK_CAR
+             ]
     end
 
     test "returns only unique results" do
