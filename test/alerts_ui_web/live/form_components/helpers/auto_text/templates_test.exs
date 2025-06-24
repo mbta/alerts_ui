@@ -12,27 +12,59 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
     id: "952",
     type: "ELEVATOR",
     short_name: "Alewife platform to lobby",
-    long_name: "Charles/MGH Elevator 952 (Alewife platform to lobby)"
+    long_name: "Charles/MGH Elevator 952 (Alewife platform to lobby)",
+    properties: [
+      %{
+        name: "alternate-service-text",
+        value: "To access the Bowdoin platform or Bremen St lobby from the Wonderland platform..."
+      },
+      %{name: "excludes-stop", value: 70_047},
+      %{name: "excludes-stop", value: 70_96},
+      %{name: "excludes-stop", value: 70_97}
+    ]
   }
 
   @route_1 %Route{id: "1", name: "1", direction_names: %{0 => "Westbound", 1 => "Eastbound"}}
+  @route_2 %Route{id: "22", name: "22"}
+
   @stop_1 %Stop{id: "place-lech", name: "Lechmere"}
+  @stop_2 %Stop{id: "place-lngmd", name: "Longwood Medical Area"}
+
+  @stop_1_bus %Stop{id: "place-lech", name: "Lechmere (inbound)"}
+  @stop_2_bus %Stop{id: "place-lngmd", name: "Longwood Medical Area (outbound)"}
 
   @schedule_1 %EnhancedSchedule{
-    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    route: @route_1,
     trip: %Trip{id: "CR-683300-527", name: "527", direction_id: 0},
+    stop: %Stop{id: "place-sstat", name: "South Station"},
+    departure_time: ~U[2024-02-21 14:01:00.00Z]
+  }
+
+  @schedule_2 %EnhancedSchedule{
+    route: @route_2,
+    trip: %Trip{id: "CR-687395-841", name: "841", direction_id: 1},
+    stop: %Stop{id: "place-forhl", name: "Forest Hills"},
+    arrival_time: nil,
+    departure_time: ~U[2024-02-21 16:15:00.00Z]
+  }
+
+  @schedule_3 %EnhancedSchedule{
+    route: @route_1,
+    trip: %Trip{id: "CR-683300-527", name: "528", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     departure_time: ~U[2024-02-21 14:01:00.00Z]
   }
 
   # putting these here to prevent a weird test race condition
   # with string_to_existing_atom
+  :facility_name
   :route_names
   :impacted_modes
   :stop_form
   :stop_names
+  :route_name
 
-  describe "build_auto_text/2" do
+  describe "build_auto_text/2 (header templates)" do
     # access
     test "access alert bike issue" do
       autotext_data = %{
@@ -680,6 +712,28 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       assert expected == actual
     end
 
+    test "Subway single tracking" do
+      autotext_data = %{
+        route_type: 1,
+        routes: [@route_1],
+        stops: [@stop_1, @stop_2],
+        direction: [0],
+        severity: 3,
+        effect_name: "Single Tracking",
+        alert_timing: :"one-time",
+        start_specifier: :now,
+        end_specifier: :custom,
+        start_datetime: ~N[2025-05-08 13:00:00],
+        end_datetime: ~N[2025-05-10 15:00:00]
+      }
+
+      expected =
+        "Route 1: Expect delays of about 10 minutes due to trains operating on a single track between Lechmere and Longwood Medical Area"
+
+      actual = Templates.build_auto_text(autotext_data, :header_template)
+      assert expected == actual
+    end
+
     # Commuter Rail
 
     test "CR Delay" do
@@ -980,6 +1034,575 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       expected = "Change at Lechmere until Sat, May 10 due to a slippery rail"
 
       actual = Templates.build_auto_text(autotext_data, :header_template)
+      assert expected == actual
+    end
+  end
+
+  describe "build_auto_text/2 (description templates)" do
+    test "systemwide" do
+      autotext_data = %{
+        route_type: nil,
+        effect_name: "Policy Change"
+      }
+
+      assert Templates.build_auto_text(autotext_data, :description_template) == ""
+    end
+
+    test "access" do
+      autotext_data = %{
+        route_type: nil,
+        effect_name: "Elevator Closure",
+        facility: @facility
+      }
+
+      expected =
+        "To access the Bowdoin platform or Bremen St lobby from the Wonderland platform..."
+
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+
+      assert expected == actual
+    end
+
+    test "when stuff is empty" do
+      autotext_data = %{
+        route_type: 4,
+        effect_name: "Cancellation",
+        routes: [],
+        schedules: [],
+        stops: [],
+        direction: []
+      }
+
+      assert Templates.build_auto_text(autotext_data, :description_template) == ""
+    end
+
+    # ferry
+    test "ferry cancellation w/ routes" do
+      autotext_data = %{
+        route_type: 4,
+        effect_name: "Cancellation",
+        routes: [@route_1, @route_2, @route_1, @route_2, @route_1, @route_2],
+        schedules: [],
+        stops: [],
+        direction: []
+      }
+
+      expected = "Affected ferries:\n1\n22\n1\n22\n1\n22"
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "ferry cancellation w/ trips" do
+      autotext_data = %{
+        route_type: 4,
+        effect_name: "Cancellation",
+        routes: [@route_1, @route_2, @route_1, @route_2, @route_1, @route_2],
+        schedules: [@schedule_1, @schedule_2, @schedule_3],
+        stops: [],
+        direction: [0]
+      }
+
+      expected =
+        "Cancelled westbound trips on 1:\n527 (9:01 AM from South Station)528 (9:01 AM from South Station)\n\nCancelled inbound trips on 22:\n841 (11:15 AM from Forest Hills)"
+
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "ferry cancellation w/ direction" do
+      autotext_data = %{
+        route_type: 4,
+        effect_name: "Cancellation",
+        routes: [@route_1],
+        schedules: [],
+        stops: [],
+        direction: [0]
+      }
+
+      expected =
+        "Affected direction: westbound"
+
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "ferry delay w/ routes" do
+      autotext_data = %{
+        route_type: 4,
+        effect_name: "Delay",
+        routes: [@route_1, @route_2, @route_1, @route_2, @route_1, @route_2],
+        schedules: [],
+        stops: [],
+        direction: [0]
+      }
+
+      expected = "Affected ferries:\n1\n22\n1\n22\n1\n22"
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "ferry delay w/ trips and stops" do
+      autotext_data = %{
+        route_type: 4,
+        effect_name: "Delay",
+        routes: [@route_1, @route_2, @route_1, @route_2, @route_1, @route_2],
+        schedules: [@schedule_1, @schedule_2, @schedule_3],
+        stops: [@stop_1, @stop_1, @stop_1],
+        direction: [0]
+      }
+
+      expected =
+        "Affected docks:\nLechmere\nLechmere\nLechmere\n\nDelayed westbound trips on 1:\n527 (9:01 AM from South Station)528 (9:01 AM from South Station)\n\nDelayed inbound trips on 22:\n841 (11:15 AM from Forest Hills)"
+
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "ferry dock closure" do
+      autotext_data = %{
+        route_type: 4,
+        effect_name: "Dock Closure",
+        routes: [@route_1],
+        schedules: [],
+        stops: [@stop_1, @stop_1, @stop_1]
+      }
+
+      expected = "Affected ferries:\n1\n\nClosed docks:\nLechmere\nLechmere\nLechmere"
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "ferry suspension" do
+      autotext_data = %{
+        route_type: 4,
+        effect_name: "Suspension",
+        routes: [@route_1, @route_2, @route_1, @route_2, @route_1, @route_2],
+        schedules: [],
+        stops: [@stop_1]
+      }
+
+      expected = "Suspended ferries:\n1\n22\n1\n22\n1\n22\n\nAffected docks:\nLechmere"
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    # bus
+    test "bus delay" do
+      autotext_data = %{
+        route_type: 3,
+        effect_name: "Delay",
+        routes: [@route_1, @route_2, @route_1, @route_2, @route_1, @route_2],
+        schedules: [],
+        stops: [@stop_1_bus],
+        direction: []
+      }
+
+      expected = "Affected routes:\n1\n22\n1\n22\n1\n22\n\nAffected inbound stops:\nLechmere"
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "bus detour" do
+      autotext_data = %{
+        route_type: 3,
+        effect_name: "Detour",
+        routes: [@route_1],
+        schedules: [],
+        stops: [],
+        direction: [0]
+      }
+
+      expected = "Affected direction: westbound"
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "bus multi-route detour" do
+      autotext_data = %{
+        route_type: 3,
+        effect_name: "Multi-Route Detour",
+        routes: [@route_1, @route_2, @route_1, @route_2, @route_1, @route_2],
+        schedules: [],
+        stops: [@stop_1_bus],
+        direction: []
+      }
+
+      expected = "Affected routes:\n1\n22\n1\n22\n1\n22\n\nSkipped inbound stops:\nLechmere"
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "bus service change" do
+      autotext_data = %{
+        route_type: 3,
+        effect_name: "Service Change",
+        routes: [@route_1, @route_2, @route_1, @route_2, @route_1, @route_2],
+        schedules: [],
+        stops: [@stop_1_bus],
+        direction: [1]
+      }
+
+      expected = "Affected routes:\n1\n22\n1\n22\n1\n22\n\nAffected inbound stops:\nLechmere"
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "bus snow route" do
+      autotext_data = %{
+        route_type: 3,
+        effect_name: "Snow Route",
+        routes: [@route_1, @route_2, @route_1, @route_2, @route_1, @route_2],
+        schedules: [],
+        stops: [@stop_1_bus],
+        direction: [1]
+      }
+
+      expected = "Affected routes:\n1\n22\n1\n22\n1\n22\n\nSkipped inbound stops:\nLechmere"
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "bus stop closure" do
+      autotext_data = %{
+        route_type: 3,
+        effect_name: "Stop Closure",
+        routes: [@route_1],
+        schedules: [],
+        stops: [@stop_1_bus, @stop_2_bus, @stop_1_bus],
+        direction: [1]
+      }
+
+      expected =
+        "Affected routes:\n1\n\nClosed outbound stops:\nLongwood Medical Area\n\nClosed inbound stops:\nLechmere\nLechmere"
+
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "bus stop move" do
+      autotext_data = %{
+        route_type: 3,
+        effect_name: "Stop Move",
+        routes: [@route_1],
+        schedules: [],
+        stops: [@stop_1_bus],
+        direction: [1]
+      }
+
+      expected = "Affected routes:\n1"
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "bus stop shovelling" do
+      autotext_data = %{
+        route_type: 3,
+        effect_name: "Stop Shovelling",
+        routes: [@route_1],
+        schedules: [],
+        stops: [@stop_1_bus],
+        direction: [1]
+      }
+
+      expected = "Affected inbound stops:\nLechmere"
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "bus suspension" do
+      autotext_data = %{
+        route_type: 3,
+        effect_name: "Suspension",
+        routes: [@route_1, @route_2, @route_1, @route_2, @route_1, @route_2],
+        schedules: [],
+        stops: [],
+        direction: [1]
+      }
+
+      expected = "Suspended routes:\n1\n22\n1\n22\n1\n22"
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "bus cancellation" do
+      autotext_data = %{
+        route_type: 3,
+        effect_name: "Cancellation",
+        routes: [@route_1],
+        schedules: [@schedule_1, @schedule_2, @schedule_3],
+        stops: [],
+        direction: [1]
+      }
+
+      expected =
+        "Affected direction: eastbound\n\nCancelled trips:\n527 (9:01 AM from South Station)\n841 (11:15 AM from Forest Hills)\n528 (9:01 AM from South Station)"
+
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    # Commuter Rail
+    test "CR cancellation" do
+      autotext_data = %{
+        route_type: 2,
+        effect_name: "Cancellation",
+        routes: [@route_1, @route_2, @route_1, @route_2, @route_1, @route_2],
+        schedules: [@schedule_1, @schedule_2, @schedule_3],
+        stops: [],
+        direction: [1]
+      }
+
+      expected =
+        "Cancelled westbound trips on 1:\n527 (9:01 AM from South Station)528 (9:01 AM from South Station)\n\nCancelled inbound trips on 22:\n841 (11:15 AM from Forest Hills)"
+
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "CR delay" do
+      autotext_data = %{
+        route_type: 2,
+        effect_name: "Delay",
+        routes: [@route_1, @route_2, @route_1, @route_2, @route_1, @route_2],
+        schedules: [],
+        stops: [@stop_1],
+        direction: [0, 1]
+      }
+
+      expected = "Affected lines:\n1\n22\n1\n22\n1\n22\n\nAffected stations:\nLechmere"
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "CR shuttle" do
+      autotext_data = %{
+        route_type: 2,
+        effect_name: "Shuttle",
+        routes: [@route_1, @route_2, @route_1, @route_2, @route_1, @route_2],
+        schedules: [@schedule_1, @schedule_2, @schedule_3],
+        stops: [@stop_1],
+        direction: []
+      }
+
+      expected =
+        "Affected stations:\nLechmere\n\nAffected westbound trips on 1:\n527 (9:01 AM from South Station)528 (9:01 AM from South Station)\n\nAffected inbound trips on 22:\n841 (11:15 AM from Forest Hills)"
+
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "CR track change" do
+      autotext_data = %{
+        route_type: 2,
+        effect_name: "Track Change",
+        routes: [@route_1, @route_2, @route_1, @route_2, @route_1, @route_2],
+        schedules: [@schedule_1, @schedule_2, @schedule_3],
+        stops: [@stop_1, @stop_2],
+        direction: [1]
+      }
+
+      expected =
+        "Affected westbound trips on 1:\n527 (9:01 AM from South Station)528 (9:01 AM from South Station)\n\nAffected inbound trips on 22:\n841 (11:15 AM from Forest Hills)"
+
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    # subway
+
+    test "subway delay" do
+      autotext_data = %{
+        route_type: 1,
+        effect_name: "Delay",
+        routes: [@route_1],
+        schedules: [],
+        stops: [@stop_1, @stop_2, @stop_1],
+        direction: [1]
+      }
+
+      expected =
+        "Affected direction: eastbound\n\nAffected stations:\nLechmere\nLongwood Medical Area\nLechmere"
+
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "subway service change" do
+      autotext_data = %{
+        route_type: 1,
+        effect_name: "Service Change",
+        routes: [@route_1],
+        schedules: [],
+        stops: [@stop_1],
+        direction: [1]
+      }
+
+      expected = "Affected direction: eastbound\n\nAffected stations:\nLechmere"
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "subway shuttle" do
+      autotext_data = %{
+        route_type: 1,
+        effect_name: "Shuttle",
+        routes: [@route_1, @route_2, @route_1, @route_2, @route_1, @route_2],
+        schedules: [],
+        stops: [@stop_1],
+        direction: []
+      }
+
+      expected = "Affected lines:\n1\n22\n1\n22\n1\n22\n\nAffected stations:\nLechmere"
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "subway single tracking" do
+      autotext_data = %{
+        route_type: 1,
+        effect_name: "Single Tracking",
+        routes: [@route_1, @route_2, @route_1, @route_2, @route_1, @route_2],
+        schedules: [],
+        stops: [@stop_1],
+        direction: []
+      }
+
+      expected = "Affected lines:\n1\n22\n1\n22\n1\n22"
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "subway suspension" do
+      autotext_data = %{
+        route_type: 1,
+        effect_name: "Suspension",
+        routes: [@route_1, @route_2, @route_1, @route_2, @route_1, @route_2],
+        schedules: [],
+        stops: [@stop_1],
+        direction: []
+      }
+
+      expected = "Suspended lines:\n1\n22\n1\n22\n1\n22\n\nAffected stations:\nLechmere"
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    # mode not specified
+    test "dock issue" do
+      autotext_data = %{
+        route_type: 4,
+        effect_name: "Dock Issue",
+        routes: [@route_1],
+        schedules: [],
+        stops: [@stop_1, @stop_1, @stop_1]
+      }
+
+      expected = "Affected ferries:\n1\n\nAffected docks:\nLechmere\nLechmere\nLechmere"
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "extra service" do
+      autotext_data = %{
+        route_type: 4,
+        effect_name: "Extra Service",
+        routes: [@route_1, @route_2, @route_1, @route_2, @route_1, @route_2],
+        schedules: [],
+        stops: [@stop_1]
+      }
+
+      expected = "Affected ferries:\n1\n22\n1\n22\n1\n22"
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "schedule change" do
+      autotext_data = %{
+        route_type: 4,
+        effect_name: "Schedule Change",
+        routes: [@route_1, @route_2, @route_1, @route_2, @route_1, @route_2],
+        schedules: [],
+        stops: [@stop_1]
+      }
+
+      expected = "Affected ferries:\n1\n22\n1\n22\n1\n22"
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "service change w/ routes" do
+      autotext_data = %{
+        route_type: 4,
+        effect_name: "Service Change",
+        routes: [@route_1, @route_2, @route_1, @route_2, @route_1, @route_2],
+        schedules: [],
+        stops: [@stop_1]
+      }
+
+      expected = "Affected ferries:\n1\n22\n1\n22\n1\n22\n\nAffected docks:\nLechmere"
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "service change w/ trips and stops" do
+      autotext_data = %{
+        route_type: 4,
+        effect_name: "Service Change",
+        routes: [@route_1, @route_2, @route_1, @route_2, @route_1, @route_2],
+        schedules: [@schedule_1, @schedule_2, @schedule_3],
+        stops: [@stop_1]
+      }
+
+      expected =
+        "Affected docks:\nLechmere\n\nAffected westbound trips on 1:\n527 (9:01 AM from South Station)528 (9:01 AM from South Station)\n\nAffected inbound trips on 22:\n841 (11:15 AM from Forest Hills)"
+
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "shuttle" do
+      autotext_data = %{
+        route_type: 4,
+        effect_name: "Shuttle",
+        routes: [@route_1, @route_2, @route_1, @route_2, @route_1, @route_2],
+        schedules: [],
+        stops: [@stop_1]
+      }
+
+      expected = "Affected ferries:\n1\n22\n1\n22\n1\n22\n\nAffected docks:\nLechmere"
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "station issue" do
+      autotext_data = %{
+        route_type: 2,
+        effect_name: "Station Issue",
+        routes: [@route_1],
+        schedules: [],
+        stops: [@stop_1, @stop_2, @stop_2],
+        direction: []
+      }
+
+      expected =
+        "Affected lines:\n1\n\nAffected stations:\nLechmere\nLongwood Medical Area\nLongwood Medical Area"
+
+      actual = Templates.build_auto_text(autotext_data, :description_template)
+      assert expected == actual
+    end
+
+    test "suspension" do
+      autotext_data = %{
+        route_type: 2,
+        effect_name: "Suspension",
+        routes: [@route_1],
+        schedules: [],
+        stops: [@stop_1, @stop_2, @stop_2],
+        direction: []
+      }
+
+      expected = "Affected stations:\nLechmere\nLongwood Medical Area\nLongwood Medical Area"
+      actual = Templates.build_auto_text(autotext_data, :description_template)
       assert expected == actual
     end
   end

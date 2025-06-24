@@ -9,6 +9,8 @@ defmodule Ueberauth.Strategy.FakeKeycloak do
 
   @mbta_uuid "acad6280-8cb9-4e00-999c-c6d141adf0a6"
   @email "fake@example.com"
+  @first_name "Fake"
+  @last_name "User"
   @roles ["user"]
   @token "fake_access_token"
 
@@ -48,7 +50,9 @@ defmodule Ueberauth.Strategy.FakeKeycloak do
   @impl Strategy
   def info(_conn) do
     %Info{
-      email: @email
+      email: @email,
+      first_name: @first_name,
+      last_name: @last_name
     }
   end
 

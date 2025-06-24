@@ -56,7 +56,8 @@ defmodule AlertsUI.Support.Factory do
           end: ~U[2023-10-20 18:45:38Z]
         }
       ],
-      informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}]
+      informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}],
+      user: build(:user)
     }
   end
 
@@ -155,4 +156,14 @@ defmodule AlertsUI.Support.Factory do
           "text" => text
         }
       ])
+
+  def user_factory do
+    %{
+      keycloak_id: "123-456",
+      email: "fake@example.com",
+      first_name: "Firstname",
+      last_name: "Lastname",
+      role: :user
+    }
+  end
 end

@@ -1,6 +1,6 @@
 defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   @moduledoc """
-    Constructs auto-text for header and description from affected service.
+    Constructs auto-text for header from affected service.
   """
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration
   alias AlertsUIWeb.FormComponents.Helpers.{ContentFormatter, SelectFormatter}
@@ -161,6 +161,19 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   def stop_range_between(%{stops: stops}) do
     stop_names = Enum.map(stops, &SelectFormatter.name_for_option/1)
     "between #{List.first(stop_names)} and #{List.last(stop_names)}"
+  end
+
+  @spec stop_range_at(__MODULE__.t()) :: String.t()
+  def stop_range_at(%{stops: []}), do: ""
+
+  def stop_range_at(%{stops: stops}) when length(stops) > 3 do
+    stop_names = Enum.map(stops, &SelectFormatter.name_for_option/1)
+    "at #{List.first(stop_names)} through #{List.last(stop_names)}"
+  end
+
+  def stop_range_at(%{stops: stops}) do
+    stop_names = Enum.map(stops, &SelectFormatter.name_for_option/1)
+    "at #{join_together(stop_names)}"
   end
 
   # trips

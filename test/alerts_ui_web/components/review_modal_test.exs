@@ -447,7 +447,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["1"], stop_ids: ["place-aqucl"]}
+          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
         open_review_modal(view)
@@ -1007,7 +1007,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
           severity_level: :WARNING,
           cause_detail: "UNKNOWN",
           reminder_times: [],
-          informed_entity: [%{route_type: 3, route_id: "1"}],
+          informed_entity: [%{route_type: 3, route_id: "1", direction_id: 0}],
           original_route_selections: ["1", "2", "3"]
         })
 
@@ -1016,7 +1016,6 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         # Don't need to make any changes, just proceed with submitting the form
 
         open_review_modal(view)
-
         assert render(view) =~ ~r/Edit alert #123/s
       end
     end

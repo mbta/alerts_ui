@@ -72,4 +72,13 @@ defmodule Test.Support.Helpers do
     |> element(form_section)
     |> render_change(params)
   end
+
+  def parse_alert_created_output(view) do
+    view
+    |> element("#success_view h3")
+    |> render()
+    |> String.replace("<h3 class=\"font-bold mb-2 text-2xl  mr-4\">\n  Alert #", "")
+    |> String.replace(" created successfully\n</h3>", "")
+    |> AlertsUI.Alerts.get_by_alert_id()
+  end
 end

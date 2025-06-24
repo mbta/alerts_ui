@@ -22,7 +22,7 @@ defmodule AlertsUIWeb.ReviewModal do
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
 
   @doc """
-  Renders the review modal. The fields passed as props are determined by its 
+  Renders the review modal. The fields passed as props are determined by its
   parent com
 
   ## Examples
@@ -322,7 +322,7 @@ defmodule AlertsUIWeb.ReviewModal do
           </p>
           <p class="font-bold">Created by</p>
           <p class="pb-3">TO BE DONE</p>
-          <%!-- 
+          <%!--
             The edited items need to be wrapped in a conditional, but let's do that once
             we have a value to match on in the alert_data
           --%>
