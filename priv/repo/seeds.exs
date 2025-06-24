@@ -39,7 +39,7 @@ informed_entity_1 =
     route_type: 1,
     direction_id: 3,
     stop_id: "333",
-    activities: [:BOARD, :EXIT],
+    activities: [:PARK_CAR, :STORE_BIKE],
     trip: trip
   })
 
@@ -50,7 +50,7 @@ informed_entity_2 =
     route_type: 2,
     direction_id: 4,
     stop_id: "777",
-    activities: [:PARK_CAR, :STORE_BIKE]
+    activities: [:BOARD, :EXIT]
   })
 
 active_period_1 =

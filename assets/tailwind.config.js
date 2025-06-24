@@ -56,6 +56,7 @@ module.exports = {
         "mbta-green": "#00843d",
         "mbta-blue": "#003da5",
         "mbta-silver": "#6c777e",
+        "mbta-access": "#165C96",
         transparent: "transparent",
         current: "currentColor",
       }
@@ -64,6 +65,7 @@ module.exports = {
       "body": ["Inter UI", "Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
     },
     fontSize: {
+      "xs": ["0.75rem", "0.75rem"],
       "sm": ["0.875rem", "1.25rem"],
       "base": ["1rem", "1.5rem"],
       "lg": ["1.25rem", "1.5rem"],

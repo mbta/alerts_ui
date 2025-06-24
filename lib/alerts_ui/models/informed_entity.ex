@@ -8,11 +8,11 @@ defmodule AlertsUI.Models.InformedEntity do
   alias MBTAV3API.Routes.Route
 
   @facility_activities [
-    :bringing_bike,
-    :park_car,
-    :store_bike,
-    :using_escalator,
-    :using_wheelchair
+    :BRINGING_BIKE,
+    :PARK_CAR,
+    :STORE_BIKE,
+    :USING_ESCALATOR,
+    :USING_WHEELCHAIR
   ]
 
   @all_facility_types [
