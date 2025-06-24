@@ -83,23 +83,27 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         %{assigns: %{edit_data_has_been_filled: false, combination: combination}} = socket
       ) do
     # designed to run ONCE when editing, to fill in alert information
-
+    ServiceEffectCombinations.required_fields(combination)
     # only pull trip information if needed
     trip_information_by_id =
-      cond do
-        "trip_ids" not in ServiceEffectCombinations.required_fields(combination) ->
-          %{}
-
-        Map.get(alert_data, :trip_information_by_id) != nil ->
+      if :trip_ids in ServiceEffectCombinations.required_fields(combination) do
+        if Map.get(alert_data, :trip_information_by_id) do
           alert_data.trip_information_by_id
+        else
+          available_schedules =
+            CreateAlertLive.get_schedules_by_date(
+              alert_data.route_ids,
+              alert_data.direction,
+              nil
+            )
 
-        true ->
-          alert_data.route_ids
-          |> CreateAlertLive.get_schedules_by_date(
-            alert_data.direction,
-            nil
+          trip_information_by_id(
+            available_schedules,
+            Map.get(alert_data, :trip_ids, [])
           )
-          |> trip_information_by_id(Map.get(alert_data, :trip_ids, []))
+        end
+      else
+        %{}
       end
 
     params =
