@@ -232,11 +232,8 @@ defmodule AlertsUI.Models.Alert do
   @spec routes_or_facilities_from_entities(t()) :: [String.t()]
   def routes_or_facilities_from_entities(%__MODULE__{informed_entity: entities}) do
     entities
-    # |> IO.inspect(label: "entities")
     |> Enum.flat_map(&routes_or_facilities/1)
     |> Enum.uniq()
-
-    # |> IO.inspect()
   end
 
   @spec routes_or_facilities(InformedEntity.t()) :: [String.t()]
@@ -249,10 +246,6 @@ defmodule AlertsUI.Models.Alert do
     do: [route_id]
 
   defp routes_or_facilities(_), do: []
-
-  defp combine_bike_activities(:bringing_bike), do: :bike
-  defp combine_bike_activities(:store_bike), do: :bike
-  defp combine_bike_activities(other), do: other
 
   def get_direction([]), do: nil
 

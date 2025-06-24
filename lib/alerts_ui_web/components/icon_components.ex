@@ -113,18 +113,18 @@ defmodule AlertsUIWeb.IconComponents do
 
   def mode_icon(%{type: "Systemwide"} = assigns) do
     ~H"""
-    <span class="whitespace-nowrap align-middle font-bold h-full py-[2.5px] px-[9px] mr-1 rounded-[200px] text-xs text-black bg-text-white">
+    <div class="whitespace-nowrap font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-black bg-text-white">
       {@type}
-    </span>
+    </div>
     """
   end
 
   def mode_icon(%{type: subway_type} = assigns)
       when subway_type in ["Red", "Orange", "Green", "Blue"] do
     ~H"""
-    <span class={"whitespace-nowrap align-middle font-bold h-full py-[2.5px] px-[9px] mr-1 rounded-[200px] text-xs text-white bg-mbta-" <> String.downcase(@type)}>
+    <div class={"whitespace-nowrap font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white bg-mbta-" <> String.downcase(@type)}>
       {@type <> " Line"}
-    </span>
+    </div>
     """
   end
 
@@ -132,33 +132,33 @@ defmodule AlertsUIWeb.IconComponents do
     assigns = assign(assigns, branch_letter: branch_letter)
 
     ~H"""
-    <span class="whitespace-nowrap align-middle font-bold h-full py-[2.5px] px-[9px] mr-1 rounded-[200px] text-xs text-white bg-mbta-green">
+    <div class="whitespace-nowrap font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white bg-mbta-green">
       {"Green Line • " <> @branch_letter}
-    </span>
+    </div>
     """
   end
 
   def mode_icon(%{type: "Mattapan"} = assigns) do
     ~H"""
-    <span class="whitespace-nowrap align-middle font-bold h-full py-[2.5px] px-[9px] mr-1 rounded-[200px] text-xs text-white bg-mbta-red">
+    <div class="whitespace-nowrap font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white bg-mbta-red">
       {@type <> " Trolley"}
-    </span>
+    </div>
     """
   end
 
   def mode_icon(%{type: "CR-" <> _} = assigns) do
     ~H"""
-    <span class="whitespace-nowrap align-middle bg-mbta-commuter-rail font-bold h-full py-[2.5px] px-[9px] mr-1 rounded-[200px] text-xs text-white">
+    <div class="whitespace-nowrap bg-mbta-commuter-rail font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white">
       {fetch_long_name(@type)}
-    </span>
+    </div>
     """
   end
 
   def mode_icon(%{type: "Boat-" <> _} = assigns) do
     ~H"""
-    <span class="whitespace-nowrap align-middle bg-mbta-ferry font-bold h-full py-[2.5px] px-[9px] mr-1 rounded-[200px] text-xs text-white">
+    <div class="whitespace-nowrap bg-mbta-ferry font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white">
       {fetch_long_name(@type)}
-    </span>
+    </div>
     """
   end
 
@@ -166,36 +166,36 @@ defmodule AlertsUIWeb.IconComponents do
   def mode_icon(%{type: route_id} = assigns)
       when route_id in ["741", "742", "743", "751", "749", "746"] do
     ~H"""
-    <span class="whitespace-nowrap align-middle bg-mbta-silver font-bold h-full py-[2.5px] px-[9px] mr-1 rounded-[200px] text-xs text-white">
+    <div class="whitespace-nowrap bg-mbta-silver font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white">
       {fetch_short_name(@type)}
-    </span>
+    </div>
     """
   end
 
   # Access
   def mode_icon(%{type: activity} = assigns) when activity in @facility_activities do
     ~H"""
-    <span class="whitespace-nowrap align-middle bg-mbta-access font-bold h-full py-[2.5px] px-[9px] mr-1 rounded-[200px] text-xs text-white">
+    <div class="whitespace-nowrap bg-mbta-access font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white">
       Facility
-    </span>
+    </div>
     """
   end
 
   # When there are more than 4 routes, surplus routes are listed
   def mode_icon(%{type: number} = assigns) when is_integer(number) do
     ~H"""
-    <span class="whitespace-nowrap align-middle bg-[#343A40] font-bold h-full py-[2.5px] px-[9px] rounded-[200px] text-white text-xs">
+    <div class="whitespace-nowrap bg-[#343A40] font-bold py-[2.5px] px-[9px] rounded-[200px] text-white text-xs">
       {"+" <> Integer.to_string(@type)}
-    </span>
+    </div>
     """
   end
 
   # Bus Route Icon
   def mode_icon(assigns) do
     ~H"""
-    <span class="whitespace-nowrap align-middle bg-mbta-bus font-bold h-full py-[2.5px] px-[9px] mr-1 rounded-[200px] text-black text-xs uppercase">
+    <div class="whitespace-nowrap bg-mbta-bus font-bold h-full py-[2.5px] px-[9px] rounded-[200px] text-black text-xs uppercase">
       {@type}
-    </span>
+    </div>
     """
   end
 

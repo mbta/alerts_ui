@@ -160,7 +160,7 @@ defmodule AlertsUI.Models.AlertTest do
     end
   end
 
-  describe "entities_with_icons" do
+  describe "routes_or_facilities_from_entities" do
     test "returns a list of route IDs or facility activities representing the alert's informed entities" do
       alert = %Alert{
         id: "1",
@@ -174,7 +174,7 @@ defmodule AlertsUI.Models.AlertTest do
         ]
       }
 
-      assert Alert.entities_with_icons(alert) == ["28", "USING_WHEELCHAIR", "PARK_CAR"]
+      assert Alert.routes_or_facilities_from_entities(alert) == ["28", :USING_WHEELCHAIR, :PARK_CAR]
     end
 
     test "returns only unique results" do
@@ -186,7 +186,7 @@ defmodule AlertsUI.Models.AlertTest do
         ]
       }
 
-      assert Alert.entities_with_icons(alert) == ["28"]
+      assert Alert.routes_or_facilities_from_entities(alert) == ["28"]
     end
 
     test "combines bike activities" do
@@ -201,7 +201,7 @@ defmodule AlertsUI.Models.AlertTest do
         ]
       }
 
-      assert Alert.entities_with_icons(alert) == ["bike"]
+      assert Alert.routes_or_facilities_from_entities(alert) == [:BRINGING_BIKE]
     end
 
     test "returns empty list if no informed entity" do
@@ -209,14 +209,15 @@ defmodule AlertsUI.Models.AlertTest do
         id: "1",
         informed_entity: [
           %InformedEntity{
-            facility_id: "772",
+            route_id: nil,
             stop_id: "70511",
-            activities: nil
+            route_type: 3,
+            activities: [:BOARD, :EXIT, :RIDE]
           }
         ]
       }
 
-      assert Alert.entities_with_icons(alert) == []
+      assert Alert.routes_or_facilities_from_entities(alert) == []
     end
   end
 

@@ -665,14 +665,15 @@ defmodule AlertsUIWeb.CoreComponents do
 
   def service_pills(assigns) do
     # Only first four routes/facilities are listed, the rest are in a "+X" pill
-    IO.inspect(assigns.entities)
 
     ~H"""
-    <.mode_icon :if={@entities == []} type="Systemwide" />
-    <%= for entity <- Enum.take(@entities, 3) do %>
-      <.mode_icon type={entity} />
-    <% end %>
-    <%!-- <.mode_icon :if={length(@entities) > 4} type={length(@entities) - 4} /> --%>
+    <div class="flex flex-wrap gap-1">
+      <.mode_icon :if={@entities == []} type="Systemwide" />
+      <%= for entity <- Enum.take(@entities, 4) do %>
+        <.mode_icon type={entity} />
+      <% end %>
+      <.mode_icon :if={length(@entities) > 4} type={length(@entities) - 4} />
+    </div>
     """
   end
 
