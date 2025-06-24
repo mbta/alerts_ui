@@ -57,6 +57,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
   }
 
   @stop %Stop{id: "place-sstat", name: "South Station"}
+  @stop_2 %Stop{id: "place-crtst", name: "Courthouse"}
+  @stop_3 %Stop{id: "place-masta", name: "Massachusetts Avenue"}
 
   @facility %Facility{
     id: "349",
@@ -149,7 +151,14 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
 
         view
         |> element("#service_form")
-        |> render_change(%{"affected_service" => %{"route_ids" => ["CR-Worcester"]}})
+        |> render_change(%{
+          "affected_service" => %{"route_ids" => ["CR-Worcester"], "direction" => "1"}
+        })
+
+        assert view
+               |> element("#alert_details_description_text")
+               |> render() =~
+                 "Affected direction: westbound"
 
         # Mock affected service selections
         view
@@ -181,6 +190,11 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
                |> element("#alert_details_header_text")
                |> render() =~
                  "Framingham/Worcester Line train 595 (11:30 AM from South Station) trip is operating about 15 minutes behind schedule from 3:30 PM to 5:30 PM on #{Calendar.strftime(@tomorrows_date, "%a, %b %_d")} due to ice in harbor"
+
+        assert view
+               |> element("#alert_details_description_text")
+               |> render() =~
+                 "></textarea>"
       end
     end
 
@@ -193,8 +207,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
          [by_stop: fn _route_id -> [@route] end, by_type: fn _types -> [@route] end]},
         {StopsRepo, [],
          [
-           by_route_type: fn _route_type, _ -> [@stop] end,
-           by_route: fn _, _ -> [@stop] end
+           by_route_type: fn _route_type, _ -> [@stop, @stop_2, @stop_3] end,
+           by_route: fn _, _ -> [@stop, @stop_2, @stop_3] end
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
@@ -207,7 +221,10 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         view
         |> element("#service_form")
         |> render_change(%{
-          stop_route_affected_service: %{route_ids: [@route.id], stop_ids: [@stop.id]}
+          stop_route_affected_service: %{
+            route_ids: [@route.id],
+            stop_ids: [@stop.id, @stop_2.id, @stop_3.id]
+          }
         })
 
         # Mock timerange selections
@@ -241,7 +258,10 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
                |> render() =~
                  "South Station closed from #{Calendar.strftime(@start_time, "%a, %b %_d at %-I:%M %p")} - #{Calendar.strftime(@end_time, "%a, %b %_d at %-I:%M %p")} due to ice in harbor"
 
-        assert true
+        assert view
+               |> element("#alert_details_description_text")
+               |> render() =~
+                 "Closed docks:\nCourthouse\nMassachusetts Avenue\nSouth Station"
       end
     end
 
@@ -294,7 +314,9 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
                |> render() =~
                  "Alewife Escalator 349 (Platform to Russell Field) unavailable from #{Calendar.strftime(@start_time, "%a, %b %_d at %-I:%M %p")} - #{Calendar.strftime(@end_time, "%a, %b %_d at %-I:%M %p")} due to ice in harbor"
 
-        assert true
+        assert view
+               |> element("#alert_details_description_text")
+               |> render() =~ ~s(the elevator broke i&amp;#39;m sorry)
       end
     end
 
@@ -351,7 +373,9 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
              |> render() =~
                "Subway and Ferry notice from #{Calendar.strftime(@start_time, "%a, %b %_d at %-I:%M %p")} - #{Calendar.strftime(@end_time, "%a, %b %_d at %-I:%M %p")} due to ice in harbor"
 
-      assert true
+      assert view
+             |> element("#alert_details_description_text")
+             |> render() =~ ~s(></textarea>)
     end
   end
 end

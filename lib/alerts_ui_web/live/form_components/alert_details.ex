@@ -94,7 +94,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         new_data
         |> Map.merge(socket.assigns.form.params)
         |> Map.merge(%{
-          "header_text" => Templates.build_auto_text(autotext_data, :header_template)
+          "header_text" => Templates.build_auto_text(autotext_data, :header_template),
+          "description_text" => Templates.build_auto_text(autotext_data, :description_template)
         })
       )
 
@@ -157,7 +158,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       |> changeset(
         alert_details
         |> Map.merge(%{
-          "header_text" => Templates.build_auto_text(autotext_data, :header_template)
+          "header_text" => Templates.build_auto_text(autotext_data, :header_template),
+          "description_text" => Templates.build_auto_text(autotext_data, :description_template)
         })
       )
       |> validate_image_fields(image_size)
