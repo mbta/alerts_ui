@@ -8,11 +8,14 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   alias AlertsUI.Models.{Cause, SeverityLevel}
   alias AlertsUIWeb.FormComponents.Helpers.ErrorFormatter
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}
+  alias Phoenix.HTML.Form
 
   @primary_key false
   embedded_schema do
     field :header_text, :string
     field :description_text, :string
+    field :header_sync_toggle, :boolean, default: true
+    field :description_sync_toggle, :boolean, default: true
     field :cause_detail, :string, default: ""
     field :url, :string
     field :image_url, :string
@@ -22,7 +25,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   end
 
   @required_fields ~w[header_text]a
-  @fields ~w[description_text cause_detail url image_url image_alternative_text severity]a ++
+  @fields ~w[header_sync_toggle description_sync_toggle description_text cause_detail url image_url image_alternative_text severity]a ++
             @required_fields
 
   @impl true
@@ -67,6 +70,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         } = assigns,
         socket
       ) do
+    form = socket.assigns.form
+
     cause_options =
       formatted_causes(
         Map.get(assigns, :route_type),
@@ -83,6 +88,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           schedules: selected_schedules
         })
       )
+
 
     changeset =
       %__MODULE__{}
@@ -134,6 +140,40 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       end
 
     {:ok, socket}
+  end
+
+  @impl true
+  def handle_event("header_text_change", %{"alert_details" => alert_details}, socket) do
+    # disables sync if user types in header field
+    alert_details = Map.put(alert_details, "header_sync_toggle", false)
+
+    changeset = changeset(%__MODULE__{}, alert_details)
+
+    send_changeset(changeset)
+
+    form =
+      changeset
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    {:noreply, assign(socket, %{form: form})}
+  end
+
+  @impl true
+  def handle_event("description_text_change", %{"alert_details" => alert_details}, socket) do
+    # disables sync if user types in description field
+    alert_details = Map.put(alert_details, "description_sync_toggle", false)
+
+    changeset = changeset(%__MODULE__{}, alert_details)
+
+    send_changeset(changeset)
+
+    form =
+      changeset
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    {:noreply, assign(socket, %{form: form})}
   end
 
   @impl true
@@ -242,11 +282,18 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
               maxlength="255"
               id="header_input"
               class="w-[100%] min-h-[10rem] border-b-0 z-20"
+              phx-change="header_text_change"
+              phx-target={@myself}
               value={@form[:header_text].value}
             />
             <.textarea_counter character_limit={255} field={@form[:header_text]} />
           </div>
           <div class="flex flex-col justify-center ml-4">
+            <.checkbox
+              field={@form[:header_sync_toggle]}
+              class="h-7 w-7 border border-border-primary rounded-sm"
+              check_class="w-[100%] h-[100%] checked:before:hero-arrow-path leading-normal"
+            />
             <.copy_button copy_id="#alert_details_header_text" title="Copy main message to Clipboard" />
           </div>
         </div>
@@ -259,11 +306,18 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
               id="description_input"
               class="w-[100%] min-h-[10rem] border-b-0 z-20"
               maxlength="3000"
+              phx-change="description_text_change"
+              phx-target={@myself}
               value={@form[:description_text].value}
             />
             <.textarea_counter character_limit={3000} field={@form[:description_text]} />
           </div>
           <div class="flex flex-col justify-center ml-4">
+            <.checkbox
+              field={@form[:description_sync_toggle]}
+              class="h-7 w-7 border border-border-primary rounded-sm"
+              check_class="w-[100%] h-[100%] checked:before:hero-arrow-path leading-normal"
+            />
             <.copy_button
               copy_id="#alert_details_description_text"
               title="Copy supporting information to Clipboard"
