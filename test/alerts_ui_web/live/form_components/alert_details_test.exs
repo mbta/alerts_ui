@@ -208,6 +208,93 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
              |> render() =~ expected_string
     end
 
+    test "header does not update automatically if sync button is off", %{
+      conn: conn
+    } do
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
+        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        get_to_submission_page(view, "Commuter Rail", "Suspension")
+
+        render_async(view)
+
+        view
+        |> element("#details_form")
+        |> render_change(%{
+          alert_details: %{header_sync_toggle: false, header_text: "my custom text"}
+        })
+
+        view
+        |> element("#service_form")
+        |> render_change(%{
+          "affected_service" => %{"route_ids" => ["CR-Worcester"]}
+        })
+
+        refute view
+               |> element("#alert_details_header_text")
+               |> render() =~
+                 "Framingham/Worcester Line"
+
+        assert view
+               |> element("#alert_details_header_text")
+               |> render() =~
+                 ">my custom text</textarea>"
+
+        refute view
+               |> element("#alert_details_header_text")
+               |> render() =~
+                 "Framingham/Worcester Line"
+      end
+    end
+
+    @tag :logged_in_user
+    test "description does not update automatically if toggle is off", %{
+      conn: conn
+    } do
+      with_mocks([
+        {RoutesRepo, [],
+         [by_stop: fn _route_id -> [@route] end, by_type: fn _types -> [@route] end]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _route_type, _ -> [@stop, @stop_2, @stop_3] end,
+           by_route: fn _, _ -> [@stop, @stop_2, @stop_3] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        get_to_submission_page(view, "Ferry", "Dock closure")
+
+        render_async(view)
+
+        view
+        |> element("#details_form")
+        |> render_change(%{
+          alert_details: %{description_sync_toggle: false, description_text: "my custom text"}
+        })
+
+        view
+        |> element("#service_form")
+        |> render_change(%{
+          stop_route_affected_service: %{
+            stop_ids: [@stop.id, @stop_2.id, @stop_3.id]
+          }
+        })
+
+        refute view
+               |> element("#alert_details_description_text")
+               |> render() =~
+                 "Closed docks:\nCourthouse\nMassachusetts Avenue\nSouth Station"
+
+        assert view
+               |> element("#alert_details_description_text")
+               |> render() =~
+                 ">my custom text</textarea>"
+      end
+    end
+
     @tag :logged_in_user
     test "affected service autotext works", %{
       conn: conn

@@ -89,7 +89,6 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         })
       )
 
-
     changeset =
       %__MODULE__{}
       |> changeset(
@@ -145,6 +144,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   @impl true
   def handle_event("header_text_change", %{"alert_details" => alert_details}, socket) do
     # disables sync if user types in header field
+    alert_details = Map.merge(socket.assigns.form.params, alert_details)
     alert_details = Map.put(alert_details, "header_sync_toggle", false)
 
     changeset = changeset(%__MODULE__{}, alert_details)
@@ -162,6 +162,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   @impl true
   def handle_event("description_text_change", %{"alert_details" => alert_details}, socket) do
     # disables sync if user types in description field
+    alert_details = Map.merge(socket.assigns.form.params, alert_details)
     alert_details = Map.put(alert_details, "description_sync_toggle", false)
 
     changeset = changeset(%__MODULE__{}, alert_details)
@@ -189,14 +190,26 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
 
     autotext_data = AlertDataToAutoText.build_autotext_data(updated_autotext_data)
 
+    header_text_map =
+      if alert_details["header_sync_toggle"] == true do
+        %{"header_text" => Templates.build_auto_text(autotext_data, :header_template)}
+      else
+        %{}
+      end
+
+    description_text_map =
+      if alert_details["description_sync_toggle"] == true do
+        %{"description_text" => Templates.build_auto_text(autotext_data, :description_template)}
+      else
+        %{}
+      end
+
     changeset =
       %__MODULE__{}
       |> changeset(
         alert_details
-        |> Map.merge(%{
-          "header_text" => Templates.build_auto_text(autotext_data, :header_template),
-          "description_text" => Templates.build_auto_text(autotext_data, :description_template)
-        })
+        |> Map.merge(header_text_map)
+        |> Map.merge(description_text_map)
       )
       |> validate_image_fields(image_size)
 
@@ -289,11 +302,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
             <.textarea_counter character_limit={255} field={@form[:header_text]} />
           </div>
           <div class="flex flex-col justify-center ml-4">
-            <.checkbox
-              field={@form[:header_sync_toggle]}
-              class="h-7 w-7 border border-border-primary rounded-sm"
-              check_class="w-[100%] h-[100%] checked:before:hero-arrow-path leading-normal"
-            />
+            <.sync_toggle field={@form[:header_sync_toggle]} />
             <.copy_button copy_id="#alert_details_header_text" title="Copy main message to Clipboard" />
           </div>
         </div>
@@ -313,11 +322,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
             <.textarea_counter character_limit={3000} field={@form[:description_text]} />
           </div>
           <div class="flex flex-col justify-center ml-4">
-            <.checkbox
-              field={@form[:description_sync_toggle]}
-              class="h-7 w-7 border border-border-primary rounded-sm"
-              check_class="w-[100%] h-[100%] checked:before:hero-arrow-path leading-normal"
-            />
+            <.sync_toggle field={@form[:description_sync_toggle]} />
             <.copy_button
               copy_id="#alert_details_description_text"
               title="Copy supporting information to Clipboard"
