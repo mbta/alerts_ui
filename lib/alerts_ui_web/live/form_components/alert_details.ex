@@ -66,10 +66,6 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         } = assigns,
         socket
       ) do
-    new_data =
-      alert_data
-      |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
-
     cause_options =
       formatted_causes(
         Map.get(assigns, :route_type),
@@ -78,8 +74,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
 
     autotext_data =
       AlertDataToAutoText.build_autotext_data(
-        new_data
-        |> Map.new(fn {k, v} -> {String.to_existing_atom(k), v} end)
+        alert_data
         |> Map.merge(%{
           facility: selected_facility,
           routes: selected_routes,
@@ -91,7 +86,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     changeset =
       %__MODULE__{}
       |> changeset(
-        new_data
+        alert_data
+        |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
         |> Map.merge(socket.assigns.form.params)
         |> Map.merge(%{
           "header_text" => Templates.build_auto_text(autotext_data, :header_template),
