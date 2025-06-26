@@ -4,14 +4,8 @@ defmodule AlertsUIWeb.IconComponentsTest do
   import AlertsUIWeb.IconComponents
   import Phoenix.LiveViewTest
 
-  describe "icon/1" do
+  describe "mode_icon/1" do
     test "generates an svg or a stylized span element for the requested icon type" do
-      assert_rendered(mode_icon(%{type: :bus}), "<svg")
-      assert_rendered(mode_icon(%{type: :subway}), "<svg")
-      assert_rendered(mode_icon(%{type: :commuter_rail}), "<svg")
-      assert_rendered(mode_icon(%{type: :ferry}), "<svg")
-      assert_rendered(mode_icon(%{type: :systemwide}), "<svg")
-      assert_rendered(mode_icon(%{type: :access}), "<svg")
       assert_rendered(mode_icon(%{type: "Systemwide"}), "<div")
       assert_rendered(mode_icon(%{type: "Red"}), "<div")
       assert_rendered(mode_icon(%{type: "Blue"}), "<div")
@@ -30,6 +24,33 @@ defmodule AlertsUIWeb.IconComponentsTest do
       assert render_component(&mode_icon/1, type: "Green-C") =~ "<div"
       assert render_component(&mode_icon/1, type: "Green-D") =~ "<div"
       assert render_component(&mode_icon/1, type: "Green-E") =~ "<div"
+    end
+  end
+
+  describe "circle_icon/1" do
+    test "generates an svg or a stylized span element for the requested icon type" do
+      assert_rendered(circle_icon(%{type: :bus}), "<svg")
+      assert_rendered(circle_icon(%{type: :subway}), "<svg")
+      assert_rendered(circle_icon(%{type: :commuter_rail}), "<svg")
+      assert_rendered(circle_icon(%{type: :ferry}), "<svg")
+      assert_rendered(circle_icon(%{type: :systemwide}), "<svg")
+      assert_rendered(circle_icon(%{type: :access}), "<svg")
+      assert_rendered(circle_icon(%{type: "Red Line"}), "<svg")
+      assert_rendered(circle_icon(%{type: "Blue Line"}), "<svg")
+      assert_rendered(circle_icon(%{type: "Orange Line"}), "<svg")
+      assert_rendered(circle_icon(%{type: "Green Line B"}), "<svg")
+      assert_rendered(circle_icon(%{type: "Green Line C"}), "<svg")
+      assert_rendered(circle_icon(%{type: "Green Line D"}), "<svg")
+      assert_rendered(circle_icon(%{type: "Green Line E"}), "<svg")
+      assert_rendered(circle_icon(%{type: "Green Line"}), "<svg")
+      assert_rendered(circle_icon(%{type: "Mattapan Trolley"}), "<svg")
+      assert_rendered(circle_icon(%{type: "using_escalator"}), "<span")
+      assert_rendered(circle_icon(%{type: "using_wheelchair"}), "<span")
+      assert_rendered(circle_icon(%{type: "park_car"}), "<span")
+      assert_rendered(circle_icon(%{type: "bike"}), "<span")
+      assert_rendered(circle_icon(%{type: "CR-Haverhill"}), "<span")
+      assert_rendered(circle_icon(%{type: "131"}), "<span")
+      assert_rendered(circle_icon(%{type: "Other"}), "<span")
     end
   end
 

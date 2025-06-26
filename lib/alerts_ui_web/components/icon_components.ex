@@ -9,11 +9,11 @@ defmodule AlertsUIWeb.IconComponents do
   @facility_activities AlertsUI.Models.InformedEntity.facility_activities()
 
   @doc """
-  Renders a route or mode icon.
+  Renders a small circle route or mode icon.
   """
   attr :type, :string, required: true
 
-  def mode_icon(%{type: :bus} = assigns) do
+  def circle_icon(%{type: :bus} = assigns) do
     ~H"""
     <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
       <title>
@@ -31,7 +31,7 @@ defmodule AlertsUIWeb.IconComponents do
     """
   end
 
-  def mode_icon(%{type: :subway} = assigns) do
+  def circle_icon(%{type: :subway} = assigns) do
     ~H"""
     <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
       <title>
@@ -47,7 +47,7 @@ defmodule AlertsUIWeb.IconComponents do
     """
   end
 
-  def mode_icon(%{type: :commuter_rail} = assigns) do
+  def circle_icon(%{type: :commuter_rail} = assigns) do
     ~H"""
     <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
       <title>
@@ -62,7 +62,7 @@ defmodule AlertsUIWeb.IconComponents do
     """
   end
 
-  def mode_icon(%{type: :ferry} = assigns) do
+  def circle_icon(%{type: :ferry} = assigns) do
     ~H"""
     <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
       <title>
@@ -77,7 +77,7 @@ defmodule AlertsUIWeb.IconComponents do
     """
   end
 
-  def mode_icon(%{type: :systemwide} = assigns) do
+  def circle_icon(%{type: :systemwide} = assigns) do
     ~H"""
     <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
       <title>
@@ -95,7 +95,7 @@ defmodule AlertsUIWeb.IconComponents do
     """
   end
 
-  def mode_icon(%{type: :access} = assigns) do
+  def circle_icon(%{type: :access} = assigns) do
     ~H"""
     <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
       <title>
@@ -113,112 +113,6 @@ defmodule AlertsUIWeb.IconComponents do
     """
   end
 
-  def mode_icon(%{type: "Systemwide"} = assigns) do
-    ~H"""
-    <div class="whitespace-nowrap font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-black bg-text-white">
-      {@type}
-    </div>
-    """
-  end
-
-  def mode_icon(%{type: subway_type} = assigns)
-      when subway_type in ["Red", "Orange", "Green", "Blue"] do
-    ~H"""
-    <div class={"whitespace-nowrap font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white bg-mbta-" <> String.downcase(@type)}>
-      {@type <> " Line"}
-    </div>
-    """
-  end
-
-  def mode_icon(%{type: "Green-" <> branch_letter} = assigns) do
-    assigns = assign(assigns, branch_letter: branch_letter)
-
-    ~H"""
-    <div class="whitespace-nowrap font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white bg-mbta-green">
-      {"Green Line • " <> @branch_letter}
-    </div>
-    """
-  end
-
-  def mode_icon(%{type: "Mattapan"} = assigns) do
-    ~H"""
-    <div class="whitespace-nowrap font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white bg-mbta-red">
-      {@type <> " Trolley"}
-    </div>
-    """
-  end
-
-  def mode_icon(%{type: "CR-" <> _} = assigns) do
-    ~H"""
-    <div class="whitespace-nowrap bg-mbta-commuter-rail font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white">
-      {fetch_long_name(@type)}
-    </div>
-    """
-  end
-
-  def mode_icon(%{type: "Boat-" <> _} = assigns) do
-    ~H"""
-    <div class="whitespace-nowrap bg-mbta-ferry font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white">
-      {fetch_long_name(@type)}
-    </div>
-    """
-  end
-
-  # Silver Line
-  def mode_icon(%{type: route_id} = assigns)
-      when route_id in ["741", "742", "743", "751", "749", "746"] do
-    ~H"""
-    <div class="whitespace-nowrap bg-mbta-silver font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white">
-      {fetch_short_name(@type)}
-    </div>
-    """
-  end
-
-  # Access
-  def mode_icon(%{type: activity} = assigns) when activity in @facility_activities do
-    ~H"""
-    <div class="whitespace-nowrap bg-mbta-access font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white">
-      Facility
-    </div>
-    """
-  end
-
-  # When there are more than 4 routes, surplus routes are listed
-  def mode_icon(%{type: number} = assigns) when is_integer(number) do
-    ~H"""
-    <div class="whitespace-nowrap bg-[#343A40] font-bold py-[2.5px] px-[9px] rounded-[200px] text-white text-xs">
-      {"+" <> Integer.to_string(@type)}
-    </div>
-    """
-  end
-
-  # Bus Route Icon
-  def mode_icon(assigns) do
-    ~H"""
-    <div class="whitespace-nowrap bg-mbta-bus font-bold h-full py-[2.5px] px-[9px] rounded-[200px] text-black text-xs uppercase">
-      {@type}
-    </div>
-    """
-  end
-
-  defp fetch_long_name(route_id) do
-    route_id
-    |> RoutesRepo.get()
-    |> Map.get(:long_name)
-    |> String.split(" ")
-    |> List.first()
-  end
-
-  defp fetch_short_name(route_id) do
-    route_id
-    |> RoutesRepo.get()
-    |> Map.get(:name)
-    |> String.split(" ")
-    |> List.first()
-  end
-
-  # Not used anywhere right now, but hypothetically useful.
-  # Would like to keep them around in case we ever want to use them
   def circle_icon(%{type: "Red Line"} = assigns) do
     ~H"""
     <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
@@ -340,5 +234,122 @@ defmodule AlertsUIWeb.IconComponents do
       />
     </svg>
     """
+  end
+
+  # Fallback
+  def circle_icon(assigns) do
+    ~H"""
+    <span class="align-middle bg-mbta-bus font-bold h-full py-1 px-2 rounded text-black text-sm uppercase">
+      {@type}
+    </span>
+    """
+  end
+
+  @doc """
+  Renders a large elliptical route or mode pill.
+  """
+
+  def mode_icon(%{type: "Systemwide"} = assigns) do
+    ~H"""
+    <div class="whitespace-nowrap font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-black bg-text-white">
+      {@type}
+    </div>
+    """
+  end
+
+  def mode_icon(%{type: subway_type} = assigns)
+      when subway_type in ["Red", "Orange", "Green", "Blue"] do
+    ~H"""
+    <div class={"whitespace-nowrap font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white bg-mbta-" <> String.downcase(@type)}>
+      {@type <> " Line"}
+    </div>
+    """
+  end
+
+  def mode_icon(%{type: "Green-" <> branch_letter} = assigns) do
+    assigns = assign(assigns, branch_letter: branch_letter)
+
+    ~H"""
+    <div class="whitespace-nowrap font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white bg-mbta-green">
+      {"Green Line • " <> @branch_letter}
+    </div>
+    """
+  end
+
+  def mode_icon(%{type: "Mattapan"} = assigns) do
+    ~H"""
+    <div class="whitespace-nowrap font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white bg-mbta-red">
+      {@type <> " Trolley"}
+    </div>
+    """
+  end
+
+  def mode_icon(%{type: "CR-" <> _} = assigns) do
+    ~H"""
+    <div class="whitespace-nowrap bg-mbta-commuter-rail font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white">
+      {fetch_long_name(@type)}
+    </div>
+    """
+  end
+
+  def mode_icon(%{type: "Boat-" <> _} = assigns) do
+    ~H"""
+    <div class="whitespace-nowrap bg-mbta-ferry font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white">
+      {fetch_long_name(@type)}
+    </div>
+    """
+  end
+
+  # Silver Line
+  def mode_icon(%{type: route_id} = assigns)
+      when route_id in ["741", "742", "743", "751", "749", "746"] do
+    ~H"""
+    <div class="whitespace-nowrap bg-mbta-silver font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white">
+      {fetch_short_name(@type)}
+    </div>
+    """
+  end
+
+  # Access
+  def mode_icon(%{type: activity} = assigns) when activity in @facility_activities do
+    ~H"""
+    <div class="whitespace-nowrap bg-mbta-access font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white">
+      Facility
+    </div>
+    """
+  end
+
+  # When there are more than 4 routes, surplus routes are listed
+  def mode_icon(%{type: number} = assigns) when is_integer(number) do
+    ~H"""
+    <div class="whitespace-nowrap bg-[#343A40] font-bold py-[2.5px] px-[9px] rounded-[200px] text-white text-xs">
+      {"+" <> Integer.to_string(@type)}
+    </div>
+    """
+  end
+
+  # Bus Route Icon
+  def mode_icon(assigns) do
+    ~H"""
+    <div class="whitespace-nowrap bg-mbta-bus font-bold h-full py-[2.5px] px-[9px] rounded-[200px] text-black text-xs uppercase">
+      {@type}
+    </div>
+    """
+  end
+
+  defp fetch_long_name(route_id) do
+    route_id
+    |> RoutesRepo.get()
+    |> Map.get(:long_name)
+    |> String.split(" ")
+    |> List.first()
+  end
+
+  defp fetch_short_name(route_id) do
+    route_id
+    |> RoutesRepo.get()
+    |> Map.get(:name)
+    |> String.split(" ")
+    |> List.first()
   end
 end

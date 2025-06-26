@@ -335,7 +335,7 @@ defmodule AlertsUIWeb.SharedComponents do
     >
       <div class="flex flex-row justify-center align-center">
         <div class={"#{unless @icon, do: "hidden"} mr-3 self-center"}>
-          <.mode_icon type={@icon} />
+          <.circle_icon type={@icon} />
         </div>
         {render_slot(@inner_block)}
       </div>
@@ -437,7 +437,7 @@ defmodule AlertsUIWeb.SharedComponents do
               />
               <div class={["flex flex-row justify-left align-center", @button_class]}>
                 <div :if={@show_icons} class="mr-3 self-center">
-                  <.mode_icon type={if @icon_type, do: @icon_type, else: option_name} />
+                  <.circle_icon type={if @icon_type, do: @icon_type, else: option_name} />
                 </div>
                 {if is_atom(option_name) do
                   ContentFormatter.route_atom_to_string(option_name)
