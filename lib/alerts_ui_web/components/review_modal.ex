@@ -38,9 +38,7 @@ defmodule AlertsUIWeb.ReviewModal do
   attr :rest, :global, include: ~w(cancel_event_name accept_event_name target_id)
 
   def review_modal(assigns) do
-    # It'd be better to NOT have to run fetches for this info, given it has been
-    # previously fetched at some point, but that'd require a meaty refactor at this point
-    # so sadly, we must proceed!
+    # TODO: Selected_routes will soon be in the assigns and keep us from having to make this API call
 
     route_type = assigns.alert_data.route_type
 
