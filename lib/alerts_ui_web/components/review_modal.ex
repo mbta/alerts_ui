@@ -38,7 +38,7 @@ defmodule AlertsUIWeb.ReviewModal do
   attr :rest, :global, include: ~w(cancel_event_name accept_event_name target_id)
 
   def review_modal(assigns) do
-    # TODO: Selected_routes will soon be in the assigns and keep us from having to make this API call
+    # Refactor: Selected_routes will soon be in the assigns and keep us from having to make this API call
 
     route_type = assigns.alert_data.route_type
 
