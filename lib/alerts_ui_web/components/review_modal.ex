@@ -9,6 +9,7 @@ defmodule AlertsUIWeb.ReviewModal do
 
   alias AlertsUI.ActivePeriodBuilder
   alias AlertsUI.Models.SeverityLevel
+  alias AlertsUIWeb.CreateAlertLive
 
   alias AlertsUIWeb.FormComponents.Helpers.{
     ContentFormatter,
@@ -19,7 +20,6 @@ defmodule AlertsUIWeb.ReviewModal do
 
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
-  alias MBTAV3API.Stops.Repo, as: StopsRepo
 
   @doc """
   Renders the review modal. The fields passed as props are determined by its
@@ -38,9 +38,9 @@ defmodule AlertsUIWeb.ReviewModal do
   attr :rest, :global, include: ~w(cancel_event_name accept_event_name target_id)
 
   def review_modal(assigns) do
-    # It'd be better to NOT have to run fetches for this info, given it has been
-    # previously fetched at some point, but that'd require a meaty refactor at this point
-    # so sadly, we must proceed!
+    # Refactor: Selected_routes will soon be in the assigns and keep us from having to make this API call
+
+    route_type = assigns.alert_data.route_type
 
     routes =
       if Map.get(assigns.alert_data, :route_ids) do
@@ -57,9 +57,14 @@ defmodule AlertsUIWeb.ReviewModal do
 
     stop_names =
       if Map.get(assigns.alert_data, :stop_ids, []) != [] do
-        Enum.map(assigns.alert_data.stop_ids, fn id ->
-          id |> StopsRepo.get() |> SelectFormatter.name_for_option()
-        end)
+        CreateAlertLive.get_stops(
+          assigns.alert_data.route_ids,
+          route_type,
+          Map.get(assigns.alert_data, :direction)
+        )
+        |> Enum.filter(fn stop -> stop.id in assigns.alert_data.stop_ids end)
+        |> Enum.map(fn stop -> SelectFormatter.name_for_option(stop) end)
+        |> Enum.uniq()
       end
 
     # Only ferry trips need the route_type to be passed to formatter
@@ -67,7 +72,7 @@ defmodule AlertsUIWeb.ReviewModal do
       if Map.get(assigns.alert_data, :selected_schedules) do
         Enum.map(
           assigns.alert_data.selected_schedules,
-          &SelectFormatter.name_for_option(&1, assigns.alert_data.route_type)
+          &SelectFormatter.name_for_option(&1, route_type)
         )
       end
 
@@ -124,7 +129,7 @@ defmodule AlertsUIWeb.ReviewModal do
           <div class="pb-4">
             <p class="font-bold">Supporting information</p>
             <%= if @alert_data.description_text do %>
-              <p>{@alert_data.description_text}</p>
+              <p class="whitespace-pre">{@alert_data.description_text}</p>
             <% else %>
               <p class="italic">None</p>
             <% end %>
@@ -135,7 +140,7 @@ defmodule AlertsUIWeb.ReviewModal do
           </div>
 
           <p class="font-bold">Affected service</p>
-          <div id="affected_service_selections" class="pb-4 grid grid-cols-[110px_auto]">
+          <div id="affected_service_selections" class="pb-4 grid grid-cols-[110px_auto] gap-x-2">
             <%= if @routes do %>
               <p>Routes:</p>
               <p>{@routes |> Enum.map(&SelectFormatter.name_for_option(&1)) |> Enum.join(", ")}</p>
@@ -194,8 +199,10 @@ defmodule AlertsUIWeb.ReviewModal do
           <%!-- Middle section --%>
           <div class="grid grid-cols-[110px_auto] gap-x-2">
             <p class="font-bold pb-1">Cause</p>
-            <%= if @alert_data.cause_detail != "" do %>
-              <p class="pb-1">{String.capitalize(Map.get(@alert_data, :cause_detail) || "")}</p>
+            <%= if @alert_data.cause_detail not in ["", nil] do %>
+              <p class="pb-1">
+                {@alert_data.cause_detail |> String.replace("_", " ") |> String.capitalize()}
+              </p>
             <% else %>
               <p class="pb-1 italic">None</p>
             <% end %>
@@ -249,12 +256,10 @@ defmodule AlertsUIWeb.ReviewModal do
               <p class="pb-1">Same as effect period</p>
             <% else %>
               <p class="pb-1">
-                {TimeRangeDurationText.one_time_duration_text(%{
-                  "active_period_start" => @alert_data.notification_period_start,
-                  "active_period_end" => nil,
-                  "active_period_start_specifier" => @alert_data.notification_specifier,
-                  "active_period_end_specifier" => :until_further_notice
-                })}
+                {TimeRangeDurationText.get_start_text(
+                  @alert_data.notification_specifier,
+                  @alert_data.notification_period_start
+                ) <> " until alert is closed"}
               </p>
             <% end %>
 

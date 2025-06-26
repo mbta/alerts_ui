@@ -23,6 +23,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationText do
     "#{start_text} until #{end_text} " <> duration
   end
 
+  def get_start_text(start_specifier, start) do
+    start_dt = ensure_naive_datetime_format(start)
+
+    start_text(start_specifier, start_dt)
+  end
+
   defp start_text("now", _start_dt), do: "Now"
 
   defp start_text(_, nil), do: ""
