@@ -4,6 +4,8 @@ defmodule AlertsUIWeb.IconComponents do
   """
   use Phoenix.Component
 
+  alias MBTAV3API.Routes.Repo, as: RoutesRepo
+
   @facility_activities AlertsUI.Models.InformedEntity.facility_activities()
 
   @doc """
@@ -201,7 +203,7 @@ defmodule AlertsUIWeb.IconComponents do
 
   defp fetch_long_name(route_id) do
     route_id
-    |> MBTAV3API.Routes.Repo.get()
+    |> RoutesRepo.get()
     |> Map.get(:long_name)
     |> String.split(" ")
     |> List.first()
@@ -209,7 +211,7 @@ defmodule AlertsUIWeb.IconComponents do
 
   defp fetch_short_name(route_id) do
     route_id
-    |> MBTAV3API.Routes.Repo.get()
+    |> RoutesRepo.get()
     |> Map.get(:name)
     |> String.split(" ")
     |> List.first()
