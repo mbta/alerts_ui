@@ -131,6 +131,77 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
 
   describe "end-to-end auto text" do
     @tag :logged_in_user
+    test "duration works correctly in case where time is start-to-end in future the same day", %{
+      conn: conn
+    } do
+      {:ok, view, _html} = live(conn, "/alerts/new")
+
+      get_to_submission_page(view, "Ferry", "Dock closure")
+
+      render(view)
+
+      # Mock timerange selections
+      view
+      |> element("#time_range_form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_start_specifier" => "start_of_service",
+          "active_period_end_specifier" => "end_of_service"
+        }
+      })
+
+      view
+      |> element("#time_range_form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_start_date" => @tomorrows_date |> Date.to_iso8601(),
+          "active_period_end_date" => @tomorrows_date |> Date.to_iso8601()
+        }
+      })
+
+      assert view
+             |> element("#alert_details_header_text")
+             |> render() =~
+               "on #{Calendar.strftime(@tomorrows_date, "%a, %b %_d")}</textarea>"
+    end
+
+    @tag :logged_in_user
+    test "duration works correctly in case where time is start-to-end in future on different days",
+         %{
+           conn: conn
+         } do
+      {:ok, view, _html} = live(conn, "/alerts/new")
+
+      get_to_submission_page(view, "Ferry", "Dock closure")
+
+      render(view)
+
+      # Mock timerange selections
+      view
+      |> element("#time_range_form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_start_specifier" => "start_of_service",
+          "active_period_end_specifier" => "end_of_service"
+        }
+      })
+
+      view
+      |> element("#time_range_form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_start_date" => @tomorrows_date |> Date.add(1) |> Date.to_iso8601(),
+          "active_period_end_date" => @tomorrows_date |> Date.add(2) |> Date.to_iso8601()
+        }
+      })
+
+      assert view
+             |> element("#alert_details_header_text")
+             |> render() =~
+               "from #{Calendar.strftime(Date.add(@tomorrows_date, 1), "%a, %b %_d")} - #{Calendar.strftime(Date.add(@tomorrows_date, 2), "%a, %b %_d")}"
+    end
+
+    @tag :logged_in_user
     test "affected service autotext works", %{
       conn: conn
     } do

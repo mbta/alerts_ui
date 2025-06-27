@@ -5,6 +5,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText
 
   def build_autotext_data(alert_data) do
+    end_datetime =
+      build_one_time_active_period_end(
+        Map.get(alert_data, :active_period_end),
+        Map.get(alert_data, :active_period_end_specifier),
+        Map.get(alert_data, :alert_timing)
+      )
+
     conversion =
       %{
         route_type: Map.get(alert_data, :route_type),
@@ -20,7 +27,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
         start_specifier: Map.get(alert_data, :active_period_start_specifier),
         end_specifier: Map.get(alert_data, :active_period_end_specifier),
         start_datetime: Map.get(alert_data, :active_period_start),
-        end_datetime: Map.get(alert_data, :active_period_end),
+        end_datetime: end_datetime,
         start_date: Map.get(alert_data, :active_period_start_date),
         end_date: Map.get(alert_data, :active_period_end_date),
         start_time: Map.get(alert_data, :active_period_start_time),
@@ -40,4 +47,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
 
   defp safe_string_to_int(val) when is_binary(val), do: String.to_integer(val)
   defp safe_string_to_int(val), do: val
+
+  defp build_one_time_active_period_end(end_datetime, :end_of_service, :"one-time") do
+    # in the case that "end of service" was selected
+    # shift date to date of actual end-of-service
+    NaiveDateTime.add(end_datetime, 1, :day)
+  end
+
+  defp build_one_time_active_period_end(end_datetime, _, _), do: end_datetime
 end
