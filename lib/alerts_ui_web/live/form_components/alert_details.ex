@@ -53,10 +53,51 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       assign(socket, %{
         form: to_form(changeset),
         severity_options: severity_options,
-        cause_options: []
+        cause_options: [],
+        edit_data_has_been_filled: false
       })
 
     {:ok, socket}
+  end
+
+  @impl true
+  def update(
+        %{
+          alert_data: alert_data,
+          editing: true
+        } = assigns,
+        %{assigns: %{edit_data_has_been_filled: false}} = socket
+      ) do
+    cause_options =
+      formatted_causes(
+        Map.get(assigns, :route_type),
+        Map.get(assigns, :combination)
+      )
+
+    changeset =
+      %__MODULE__{}
+      |> changeset(
+        alert_data
+        |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
+        |> Map.merge(%{"header_sync_toggle" => false, "description_sync_toggle" => false})
+      )
+
+    send_changeset(changeset)
+    form = to_form(changeset)
+
+    image_url = alert_data.image_url || ""
+
+    assigns =
+      assigns
+      |> Map.merge(%{
+        form: form,
+        cause_options: cause_options,
+        edit_data_has_been_filled: true,
+        image_size: get_image_size(image_url),
+        image_path: image_url
+      })
+
+    {:ok, assign(socket, assigns)}
   end
 
   @impl true
@@ -89,15 +130,29 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         })
       )
 
+    header_text =
+      if Form.normalize_value("checkbox", form[:header_sync_toggle].value) do
+        Templates.build_auto_text(autotext_data, :header_template)
+      else
+        alert_data.header_text
+      end
+
+    description_text =
+      if Form.normalize_value("checkbox", form[:description_sync_toggle].value) do
+        Templates.build_auto_text(autotext_data, :description_template)
+      else
+        alert_data.description_text
+      end
+
     changeset =
       %__MODULE__{}
       |> changeset(
         alert_data
         |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
-        |> Map.merge(socket.assigns.form.params)
+        |> Map.merge(form.params)
         |> Map.merge(%{
-          "header_text" => Templates.build_auto_text(autotext_data, :header_template),
-          "description_text" => Templates.build_auto_text(autotext_data, :description_template)
+          "header_text" => header_text,
+          "description_text" => description_text
         })
       )
 
