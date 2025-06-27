@@ -152,13 +152,24 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         view
         |> element("#service_form")
         |> render_change(%{
-          "affected_service" => %{"route_ids" => ["CR-Worcester"], "direction" => "1"}
+          "affected_service" => %{"route_ids" => ["CR-Worcester"], "direction" => "0"}
         })
 
         assert view
                |> element("#alert_details_description_text")
                |> render() =~
                  "Affected direction: westbound"
+
+        view
+        |> element("#service_form")
+        |> render_change(%{
+          "affected_service" => %{"direction" => "1"}
+        })
+
+        assert view
+               |> element("#alert_details_description_text")
+               |> render() =~
+                 "Affected direction: eastbound"
 
         # Mock affected service selections
         view

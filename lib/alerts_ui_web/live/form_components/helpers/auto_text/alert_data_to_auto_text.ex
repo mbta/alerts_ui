@@ -34,7 +34,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
   end
 
   defp get_direction("0"), do: [0]
-  defp get_direction("1"), do: [0]
+  defp get_direction("1"), do: [1]
   defp get_direction("default"), do: [0, 1]
   defp get_direction(direction), do: direction
 
