@@ -70,6 +70,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
     "#{date_string} every #{weekday_string} #{time_string}"
   end
 
+  def build_duration_text(_, _), do: ""
+
   # output string for one-time
   # # start of "now"
   def build_onetime_string(%{
@@ -248,6 +250,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         within_same_service_day?: true,
         start_datetime: start_datetime
       }) do
+    # TODO
     "on #{datetime_to_formatted_date(start_datetime)}"
   end
 
@@ -352,7 +355,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
   def happens_today?(start_datetime, current_time) do
     # returns true if time is before next end of service
     next_end_of_service = ActivePeriod.end_of_service_datetime_naive(current_time)
-    NaiveDateTime.compare(start_datetime, next_end_of_service) in [:lt, :eq]
+    NaiveDateTime.compare(start_datetime, next_end_of_service) in [:lt]
   end
 
   defp build_datetime(nil, _), do: nil

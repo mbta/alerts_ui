@@ -583,6 +583,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
 
   defp get_trip_text(_, _), do: ""
 
+  defp build_template(nil, _), do: ""
+
   defp build_template(template, autotext_data) do
     template
     |> String.replace("|", " |")
@@ -595,7 +597,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
       end
     end)
     |> String.replace(" |", "")
-    |> String.replace("  ", " ")
+    |> String.replace(~r/\s{2,}/, " ")
+    |> String.trim()
   end
 
   defp get_function_result(string, autotext_data) do

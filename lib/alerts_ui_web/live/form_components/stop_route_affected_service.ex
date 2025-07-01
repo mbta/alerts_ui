@@ -192,7 +192,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
     changeset = build_changeset(%__MODULE__{}, affected_service)
 
-    validate_changeset(changeset)
+    validate_changeset(changeset, affected_service, socket.assigns.available_stops)
 
     form =
       changeset
@@ -282,7 +282,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
   @impl true
   def handle_async(:get_available_routes, {:ok, fetched_routes}, socket) do
-    %{available_routes: available_routes} = socket.assigns
+    %{available_stops: available_stops, available_routes: available_routes} = socket.assigns
 
     affected_service =
       socket.assigns.form.params
@@ -290,8 +290,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       |> add_routes_with_types(fetched_routes)
 
     changeset = build_changeset(%__MODULE__{}, affected_service)
-
-    validate_changeset(changeset)
+    validate_changeset(changeset, affected_service, available_stops)
 
     form =
       changeset
@@ -315,27 +314,38 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   end
 
   def add_routes_with_types(affected_service, available_routes) do
-    routes_with_types =
+    routes =
       available_routes
       |> Stream.filter(fn route ->
         !is_nil(affected_service["route_ids"]) && route.id in affected_service["route_ids"]
       end)
       |> Enum.reduce(%{}, fn route, acc ->
-        Map.put(acc, route.id, route.type)
+        Map.put(acc, route.id, route)
       end)
 
-    Map.put(affected_service, "route_types_by_id", routes_with_types)
+    affected_service
+    |> Map.put("routes_by_id", routes)
+    |> Map.put("route_types_by_id", routes |> Enum.map(fn {k, v} -> {k, v.type} end) |> Map.new())
   end
 
   def available_routes(socket), do: Map.get(socket.assigns.available_routes, :result, [])
 
   def build_changeset(changeset, params), do: cast(changeset, params, @fields)
 
-  def validate_changeset(changeset) do
+  def validate_changeset(changeset, affected_service, available_stops) do
     case apply_action(changeset |> validate_required(@required_fields), :validate) do
       {:ok, changeset} ->
+        # stops and routes here are used in autotext
+        available_stops = Map.get(available_stops, :result)
+        selected_stops = get_selected_stops(available_stops, affected_service["stop_ids"])
+
+        available_routes = Map.get(affected_service, "routes_by_id")
+        selected_routes = get_selected_routes(available_routes, affected_service["route_ids"])
+
         send(self(), {:add_errors, [], __MODULE__})
         send(self(), {:section_completed, changeset})
+        send(self(), {:selected_routes, selected_routes})
+        send(self(), {:selected_stops, selected_stops})
 
       {:error, changeset} ->
         send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
@@ -464,5 +474,27 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   @spec disable_routes_input?(map()) :: boolean()
   defp disable_routes_input?(%{form: form}) do
     form[:stop_ids].value in [nil, []]
+  end
+
+  defp get_selected_stops(nil, _), do: nil
+  defp get_selected_stops(_, nil), do: nil
+
+  defp get_selected_stops(available_stops, stop_ids) do
+    Enum.filter(available_stops, &(&1.id in stop_ids))
+  end
+
+  defp get_selected_routes(nil, _), do: nil
+  defp get_selected_routes(_, nil), do: nil
+
+  defp get_selected_routes(available_routes, route_ids) do
+    available_routes
+    |> Enum.reduce([], fn {route_id, route}, acc ->
+      if route_id in route_ids do
+        acc ++ List.wrap(route)
+      else
+        acc
+      end
+    end)
+    |> List.flatten()
   end
 end

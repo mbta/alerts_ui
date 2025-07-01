@@ -46,7 +46,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         |> Date.add(x)
       end)
       |> Enum.map(fn date ->
-        {Timex.format!(date, "{WDshort} {Mshort} {0D}"), Date.to_iso8601(date)}
+        {Calendar.strftime(date, "%a %b %_d"), Date.to_iso8601(date)}
       end)
 
     today = hd(service_dates) |> elem(1)
@@ -228,19 +228,21 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     # If we validate before the apply, the apply will fail. Validate separately
     case apply_action(changeset, :validate) do
       {:ok, changeset} ->
+        # trips and routes here are used in autotext
+        available_routes =
+          Map.get(socket.assigns.available_routes, :result)
+
+        selected_routes = get_selected_routes(available_routes, affected_service["route_ids"])
+
         available_schedules =
           Map.get(socket.assigns.available_schedules, :result)
 
         selected_schedules =
-          if available_schedules do
-            available_schedules
-            |> Enum.filter(&(&1.trip.id in affected_service["trip_ids"]))
-          else
-            nil
-          end
+          get_selected_schedules(available_schedules, affected_service["trip_ids"])
 
         send(self(), {:add_errors, [], __MODULE__})
         send(self(), {:section_completed, changeset})
+        send(self(), {:selected_routes, selected_routes})
         send(self(), {:selected_schedules, selected_schedules})
 
       {:error, changeset} ->
@@ -717,5 +719,21 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       schedule.route.id in (assigns.form[:route_ids].value || [])
     end)
     |> Enum.group_by(&SelectFormatter.name_for_option(&1.route))
+  end
+
+  defp get_selected_schedules(nil, _), do: nil
+  defp get_selected_schedules(_, nil), do: nil
+
+  defp get_selected_schedules(available_schedules, trip_ids) do
+    available_schedules
+    |> Enum.filter(&(&1.trip.id in trip_ids))
+  end
+
+  defp get_selected_routes(nil, _), do: nil
+  defp get_selected_routes(_, nil), do: nil
+
+  defp get_selected_routes(available_routes, route_ids) do
+    available_routes
+    |> Enum.filter(&(&1.id in route_ids))
   end
 end

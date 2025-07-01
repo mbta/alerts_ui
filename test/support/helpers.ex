@@ -61,10 +61,6 @@ defmodule Test.Support.Helpers do
 
   def fill_out_required_form_fields(view, affected_service) do
     fill_out_form(view, "#service_form", affected_service)
-
-    fill_out_form(view, "#details_form", %{
-      alert_details: %{header_text: "hello world"}
-    })
   end
 
   def fill_out_form(view, form_section, params) do
