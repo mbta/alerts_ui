@@ -208,6 +208,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
              |> render() =~ expected_string
     end
 
+    @tag :logged_in_user
     test "header does not update automatically if sync button is off", %{
       conn: conn
     } do

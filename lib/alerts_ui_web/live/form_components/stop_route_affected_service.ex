@@ -52,7 +52,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         available_stops: %{},
         available_filter_routes: %{},
         filter_title_value: "All routes",
-        selected_route_id: nil
+        selected_route_id: nil,
+        edit_data_has_been_filled: false
       })
 
     {:ok, socket}
@@ -62,11 +63,10 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   @impl true
   def update(
         %{alert_data: alert_data, editing: true, route_type: route_type} = assigns,
-        socket
+        %{assigns: %{edit_data_has_been_filled: false}} = socket
       ) do
     changeset = build_changeset(%__MODULE__{}, alert_data)
     changes = apply_action!(changeset, :validate)
-
     send(self(), {:add_errors, [], __MODULE__})
     send(self(), {:section_completed, changes})
 
@@ -81,6 +81,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       |> assign(form: form)
       |> assign(route_type: route_type)
       |> assign_stops(route_type)
+      |> assign(:edit_data_has_been_filled, true)
       |> assign_async([:available_routes, :available_filter_routes], fn ->
         {:ok,
          %{
@@ -92,6 +93,27 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
            available_filter_routes: CreateAlertLive.get_routes(route_type)
          }}
       end)
+
+    {:ok, socket}
+  end
+
+  @impl true
+  def update(
+        %{alert_data: alert_data, editing: true} = assigns,
+        %{assigns: %{available_stops: %{result: result}}} = socket
+      ) do
+    available_stops = result
+    selected_stops = get_selected_stops(available_stops, alert_data.stop_ids)
+
+    # selected_routes = get_selected_routes(available_routes(socket), alert_data.route_ids)
+
+    send(self(), {:add_errors, [], __MODULE__})
+    # send(self(), {:selected_routes, selected_routes})
+    send(self(), {:selected_stops, selected_stops})
+
+    socket =
+      socket
+      |> assign(assigns)
 
     {:ok, socket}
   end
