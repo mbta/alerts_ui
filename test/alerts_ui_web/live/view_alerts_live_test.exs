@@ -3,7 +3,9 @@ defmodule AlertsUIWeb.AlertsLiveTest do
   use AlertsUIWeb.ConnCase
   import Mock
   import Phoenix.LiveViewTest
+  import Mock
   import AlertsUI.Support.Factory
+  alias AlertsUI.Models.ActivePeriod
 
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
 
@@ -17,7 +19,9 @@ defmodule AlertsUIWeb.AlertsLiveTest do
         ],
         header_text: "this is the first alert",
         effect_detail: "DETOUR",
-        original_route_selections: ["1", "2"]
+        original_route_selections: ["1", "2"],
+        active_period_start: ~U[2023-11-12 00:01:00Z],
+        duration_certainty: :UNKNOWN,
       })
 
       insert(:alert, %{
@@ -28,7 +32,9 @@ defmodule AlertsUIWeb.AlertsLiveTest do
         ],
         header_text: "this is the second alert",
         effect_detail: "SUMMARY",
-        original_route_selections: []
+        original_route_selections: [],
+        active_period_start: ~U[2023-11-12 00:01:00Z],
+        duration_certainty: :UNKNOWN,
       })
 
       :ok
@@ -99,6 +105,8 @@ defmodule AlertsUIWeb.AlertsLiveTest do
           build(:active_period, %{start: ~U[2023-11-12 00:01:00Z]}),
           build(:active_period, %{start: ~U[2023-11-13 00:01:00Z]})
         ],
+        active_period_start: ~U[2023-11-12 00:01:00Z],
+        duration_certainty: :UNKNOWN,
         header_text: "here's a subway delay alert",
         effect_detail: "DELAY",
         original_route_selections: ["Orange"]
@@ -117,6 +125,8 @@ defmodule AlertsUIWeb.AlertsLiveTest do
           build(:active_period, %{start: ~U[2023-11-12 00:01:00Z]}),
           build(:active_period, %{start: ~U[2023-11-13 00:01:00Z]})
         ],
+        active_period_start: ~U[2023-11-12 00:01:00Z],
+        duration_certainty: :UNKNOWN,
         header_text: "here's a bus delay alert",
         effect_detail: "DELAY",
         original_route_selections: ["111", "222", "333", "444"]
@@ -139,6 +149,8 @@ defmodule AlertsUIWeb.AlertsLiveTest do
           build(:active_period, %{start: ~U[2023-11-12 00:01:00Z]}),
           build(:active_period, %{start: ~U[2023-11-13 00:01:00Z]})
         ],
+        active_period_start: ~U[2023-11-12 00:01:00Z],
+        duration_certainty: :UNKNOWN,
         header_text: "here's a bus delay alert",
         effect_detail: "DELAY",
         original_route_selections: ["111", "222", "333", "444", "555"]
@@ -169,6 +181,8 @@ defmodule AlertsUIWeb.AlertsLiveTest do
             build(:active_period, %{start: ~U[2023-11-12 00:01:00Z]}),
             build(:active_period, %{start: ~U[2023-11-13 00:01:00Z]})
           ],
+          active_period_start: ~U[2023-11-12 00:01:00Z],
+          duration_certainty: :UNKNOWN,
           header_text: "here's a SL delay alert",
           effect_detail: "DELAY",
           original_route_selections: ["746"]
@@ -189,6 +203,8 @@ defmodule AlertsUIWeb.AlertsLiveTest do
           build(:active_period, %{start: ~U[2023-11-12 00:01:00Z]}),
           build(:active_period, %{start: ~U[2023-11-13 00:01:00Z]})
         ],
+        active_period_start: ~U[2023-11-12 00:01:00Z],
+        duration_certainty: :UNKNOWN,
         header_text: "here's a bike issue alert",
         effect_detail: "BIKE_ISSUE",
         original_route_selections: []
@@ -207,6 +223,8 @@ defmodule AlertsUIWeb.AlertsLiveTest do
           build(:active_period, %{start: ~U[2023-11-12 00:01:00Z]}),
           build(:active_period, %{start: ~U[2023-11-13 00:01:00Z]})
         ],
+        active_period_start: ~U[2023-11-12 00:01:00Z],
+        duration_certainty: :UNKNOWN,
         header_text: "here's a delay alert for all ferries",
         effect_detail: "DELAY",
         original_route_selections: []
@@ -230,6 +248,8 @@ defmodule AlertsUIWeb.AlertsLiveTest do
             build(:active_period, %{start: ~U[2023-11-12 00:01:00Z]}),
             build(:active_period, %{start: ~U[2023-11-13 00:01:00Z]})
           ],
+          active_period_start: ~U[2023-11-12 00:01:00Z],
+          duration_certainty: :UNKNOWN,
           header_text: "here's a CR delay alert",
           effect_detail: "DELAY",
           original_route_selections: ["CR-Framingham"]
@@ -254,6 +274,8 @@ defmodule AlertsUIWeb.AlertsLiveTest do
             build(:active_period, %{start: ~U[2023-11-12 00:01:00Z]}),
             build(:active_period, %{start: ~U[2023-11-13 00:01:00Z]})
           ],
+          active_period_start: ~U[2023-11-12 00:01:00Z],
+          duration_certainty: :UNKNOWN,
           header_text: "here's a CR delay alert",
           effect_detail: "DELAY",
           original_route_selections: ["Boat-F4"]
@@ -266,22 +288,126 @@ defmodule AlertsUIWeb.AlertsLiveTest do
     end
   end
 
-  defp alert_id_filter_params(search_string) do
-    %{
-      "_target" => ["filters", "0", "value"],
-      "filters" => %{
-        "0" => %{"field" => "alert_id", "op" => "ilike_and", "value" => search_string}
-      }
-    }
-  end
+  describe "start and end times" do
+    test "no end time" do
+      alert =
+        build(:alert, %{
+          alert_id: "123",
+          active_period: [
+            build(:active_period, %{start: ~U[2023-10-12 00:01:00Z]})
+          ],
+          duration_certainty: :UNKNOWN
+        })
 
-  defp effect_filter_params(search_string) do
-    %{
-      "_target" => ["filters", "0", "value"],
-      "filters" => %{
-        "0" => %{"field" => "alert_id", "op" => "ilike_and", "value" => ""},
-        "1" => %{"field" => "effect_detail", "value" => search_string}
+      expected = "further notice"
+
+      actual =
+        AlertsUIWeb.ViewAlertsLive.format_end_time(
+          alert.active_period_end,
+          alert.duration_certainty
+        )
+
+      assert expected == actual
+    end
+
+    test "end of later today" do
+      alert =
+        build(:alert, %{
+          alert_id: "123",
+          active_period: [
+            build(:active_period, %{
+              start: ~U[2023-10-12 00:01:00Z],
+              end: ~U[2023-10-13 00:01:00Z]
+            })
+          ],
+          active_period_end: ~U[2023-10-13 00:01:00Z],
+          duration_certainty: :ESTIMATED
+        })
+
+      expected = "later today"
+
+      actual =
+        AlertsUIWeb.ViewAlertsLive.format_end_time(
+          alert.active_period_end,
+          alert.duration_certainty
+        )
+
+      assert expected == actual
+    end
+
+    test "known end where end is end-of-service today" do
+      with_mock(DateTime, [:passthrough], utc_now: fn -> ~U[2025-06-30 17:50:14.844524Z] end) do
+        end_of_service_utc =
+          DateTime.new!(~D[2025-07-01], ActivePeriod.end_of_service_time(), "America/New_York")
+          |> DateTime.shift_zone!("Etc/UTC")
+
+        alert =
+          build(:alert, %{
+            alert_id: "123",
+            active_period: [
+              build(:active_period, %{start: ~U[2023-10-12 00:01:00Z], end: end_of_service_utc})
+            ],
+            active_period_end: end_of_service_utc,
+            duration_certainty: :KNOWN
+          })
+
+        expected = "end of service"
+
+        actual =
+          AlertsUIWeb.ViewAlertsLive.format_end_time(
+            alert.active_period_end,
+            alert.duration_certainty
+          )
+
+        assert expected == actual
+      end
+    end
+
+    test "known end where end is not end of service" do
+      with_mock(DateTime, [:passthrough], utc_now: fn -> ~U[2025-06-30 17:50:14.844524Z] end) do
+        end_of_service_utc =
+          DateTime.new!(~D[2025-07-01], ~T[12:00:00], "America/New_York")
+          |> DateTime.shift_zone!("Etc/UTC")
+
+        alert =
+          build(:alert, %{
+            alert_id: "123",
+            active_period: [
+              build(:active_period, %{start: ~U[2023-10-12 00:01:00Z], end: end_of_service_utc})
+            ],
+            active_period_end: end_of_service_utc,
+            duration_certainty: :KNOWN
+          })
+
+        expected = "Jul 1"
+
+        actual =
+          AlertsUIWeb.ViewAlertsLive.format_end_time(
+            alert.active_period_end,
+            alert.duration_certainty
+          )
+
+        assert expected == actual
+      end
+    end
+
+    defp alert_id_filter_params(search_string) do
+      %{
+        "_target" => ["filters", "0", "value"],
+        "filters" => %{
+          "0" => %{"field" => "alert_id", "op" => "ilike_and", "value" => search_string}
+        }
       }
-    }
+    end
+
+    defp effect_filter_params(search_string) do
+      %{
+        "_target" => ["filters", "0", "value"],
+        "filters" => %{
+          "0" => %{"field" => "alert_id", "op" => "ilike_and", "value" => ""},
+          "1" => %{"field" => "effect_detail", "value" => search_string}
+        }
+      }
+    end
   end
 end

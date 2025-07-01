@@ -4,7 +4,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   """
   use AlertsUIWeb, :live_view
   alias AlertsUI.Alerts
-  alias AlertsUI.Models.Effect
+  alias AlertsUI.Models.{ActivePeriod, Effect}
   alias AlertsUIWeb.DateTimeHelpers
 
   @one_minute_in_ms 60_000
@@ -72,6 +72,51 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   def handle_event("update-filter", params, socket) do
     params = clean_filter_params(params)
     {:noreply, push_patch(socket, to: ~p"/alerts?#{params}")}
+  end
+
+  def format_start_time(start_time_utc) do
+    todays_service_date =
+      DateTime.now!("America/New_York")
+      |> ActivePeriod.datetime_to_service_date()
+
+    most_recent_start_of_service =
+      DateTime.new!(todays_service_date, ActivePeriod.start_of_service_time())
+
+    if DateTime.compare(most_recent_start_of_service, start_time_utc) == :eq do
+      "start of service"
+    else
+      DateTimeHelpers.friendly_date_time(start_time_utc)
+    end
+  end
+
+  def format_end_time(_end_time_utc, :UNKNOWN), do: "further notice"
+
+  def format_end_time(_end_time_utc, :ESTIMATED), do: "later today"
+
+  def format_end_time(end_time_utc, :KNOWN) do
+    if DateTime.compare(
+         ActivePeriod.end_of_service_datetime_utc(DateTime.utc_now()),
+         end_time_utc
+       ) == :eq do
+      "end of service"
+    else
+      DateTimeHelpers.friendly_date_time(end_time_utc)
+    end
+  end
+
+  defp same_date?(nil), do: false
+
+  defp same_date?(end_time_utc) do
+    todays_service_date =
+      DateTime.now!("America/New_York")
+      |> ActivePeriod.datetime_to_service_date()
+
+    end_service_date =
+      end_time_utc
+      |> DateTime.shift_zone!("America/New_York")
+      |> ActivePeriod.datetime_to_service_date()
+
+    Date.compare(todays_service_date, end_service_date) == :eq
   end
 
   defp format_effect_options do
