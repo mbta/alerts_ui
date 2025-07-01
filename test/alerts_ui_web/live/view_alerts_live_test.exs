@@ -17,11 +17,11 @@ defmodule AlertsUIWeb.AlertsLiveTest do
           build(:active_period, %{start: ~U[2023-10-12 00:01:00Z]}),
           build(:active_period, %{start: ~U[2023-10-13 00:01:00Z]})
         ],
+        active_period_start: ~U[2023-10-12 00:01:00Z],
         header_text: "this is the first alert",
         effect_detail: "DETOUR",
         original_route_selections: ["1", "2"],
-        active_period_start: ~U[2023-11-12 00:01:00Z],
-        duration_certainty: :UNKNOWN,
+        duration_certainty: :UNKNOWN
       })
 
       insert(:alert, %{
@@ -30,11 +30,11 @@ defmodule AlertsUIWeb.AlertsLiveTest do
           build(:active_period, %{start: ~U[2023-11-12 00:01:00Z]}),
           build(:active_period, %{start: ~U[2023-11-13 00:01:00Z]})
         ],
+        active_period_start: ~U[2023-11-12 00:01:00Z],
         header_text: "this is the second alert",
         effect_detail: "SUMMARY",
         original_route_selections: [],
-        active_period_start: ~U[2023-11-12 00:01:00Z],
-        duration_certainty: :UNKNOWN,
+        duration_certainty: :UNKNOWN
       })
 
       :ok
@@ -364,22 +364,22 @@ defmodule AlertsUIWeb.AlertsLiveTest do
     end
 
     test "known end where end is not end of service" do
-      with_mock(DateTime, [:passthrough], utc_now: fn -> ~U[2025-06-30 17:50:14.844524Z] end) do
-        end_of_service_utc =
-          DateTime.new!(~D[2025-07-01], ~T[12:00:00], "America/New_York")
+      with_mock(DateTime, [:passthrough], utc_now: fn -> ~U[2025-06-29 17:50:14.844524Z] end) do
+        end_time_utc =
+          DateTime.new!(~D[2025-06-30], ~T[12:00:00], "America/New_York")
           |> DateTime.shift_zone!("Etc/UTC")
 
         alert =
           build(:alert, %{
             alert_id: "123",
             active_period: [
-              build(:active_period, %{start: ~U[2023-10-12 00:01:00Z], end: end_of_service_utc})
+              build(:active_period, %{start: ~U[2023-10-12 00:01:00Z], end: end_time_utc})
             ],
-            active_period_end: end_of_service_utc,
+            active_period_end: end_time_utc,
             duration_certainty: :KNOWN
           })
 
-        expected = "Jul 1"
+        expected = "Jun 30"
 
         actual =
           AlertsUIWeb.ViewAlertsLive.format_end_time(
@@ -390,24 +390,78 @@ defmodule AlertsUIWeb.AlertsLiveTest do
         assert expected == actual
       end
     end
+  end
 
-    defp alert_id_filter_params(search_string) do
-      %{
-        "_target" => ["filters", "0", "value"],
-        "filters" => %{
-          "0" => %{"field" => "alert_id", "op" => "ilike_and", "value" => search_string}
-        }
-      }
-    end
+  test "start is most recent end of service" do
+    with_mock(DateTime, [:passthrough],
+      now!: fn _time_zone -> ~U[2025-06-30 17:50:14.844524Z] end
+    ) do
+      start_of_service_utc =
+        DateTime.new!(~D[2025-06-30], ActivePeriod.start_of_service_time(), "America/New_York")
+        |> DateTime.shift_zone!("Etc/UTC")
 
-    defp effect_filter_params(search_string) do
-      %{
-        "_target" => ["filters", "0", "value"],
-        "filters" => %{
-          "0" => %{"field" => "alert_id", "op" => "ilike_and", "value" => ""},
-          "1" => %{"field" => "effect_detail", "value" => search_string}
-        }
-      }
+      alert =
+        build(:alert, %{
+          alert_id: "123",
+          active_period: [
+            build(:active_period, %{start: start_of_service_utc})
+          ],
+          active_period_start: start_of_service_utc,
+          duration_certainty: :KNOWN
+        })
+
+      expected = "start of service"
+
+      actual =
+        AlertsUIWeb.ViewAlertsLive.format_start_time(alert.active_period_start)
+
+      assert expected == actual
     end
+  end
+
+  test "start is not most recent end of service" do
+    with_mock(DateTime, [:passthrough],
+      now!: fn _time_zone -> ~U[2025-06-30 17:50:14.844524Z] end
+    ) do
+      start__utc =
+        DateTime.new!(~D[2025-06-29], ActivePeriod.start_of_service_time(), "America/New_York")
+        |> DateTime.shift_zone!("Etc/UTC")
+
+      alert =
+        build(:alert, %{
+          alert_id: "123",
+          active_period: [
+            build(:active_period, %{start: start__utc})
+          ],
+          active_period_start: start__utc,
+          duration_certainty: :KNOWN
+        })
+
+      expected = "Jun 29"
+
+      actual =
+        AlertsUIWeb.ViewAlertsLive.format_start_time(alert.active_period_start)
+
+      assert expected == actual
+    end
+  end
+
+  defp alert_id_filter_params(search_string) do
+    %{
+      "_target" => ["filters", "0", "value"],
+      "filters" => %{
+        "0" => %{"field" => "alert_id", "op" => "ilike_and", "value" => search_string}
+      }
+    }
+  end
+
+  defp effect_filter_params(search_string) do
+    %{
+      "_target" => ["filters", "0", "value"],
+      "filters" => %{
+        "0" => %{"field" => "alert_id", "op" => "ilike_and", "value" => ""},
+        "1" => %{"field" => "effect_detail", "value" => search_string}
+      }
+    }
   end
 end
