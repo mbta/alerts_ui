@@ -3,16 +3,24 @@ defmodule AlertsUIWeb.DateTimeHelpers do
   Utility functions for formatting dates and times.
   """
 
+  alias AlertsUI.Models.ActivePeriod
+
   @one_minute_in_seconds 60
   @one_hour_in_seconds @one_minute_in_seconds * 60
 
   @doc """
   Return a human-friendly date-time string relative to "now".
-  Use the time (converted to EST) if today, the month and day if this year, and the month and
+  Use the time (converted to EST) if today (same SERVICE day), the month and day if this year, and the month and
   year if a different year.
 
+  iex> friendly_date_time(~U[2022-01-12 01:01:00.00Z], ~U[2022-01-12 15:02:00.00Z])
+  "Jan 11"
   iex> friendly_date_time(~U[2022-01-12 14:01:00.00Z], ~U[2022-01-12 15:02:00.00Z])
   "9:01 AM"
+  iex> friendly_date_time(~U[2022-01-12 14:01:00.00Z], ~U[2022-01-13 02:02:00.00Z])
+  "9:01 AM"
+  iex> friendly_date_time(~U[2022-01-12 14:01:00.00Z], ~U[2022-01-13 04:02:00.00Z])
+  "Jan 12"
   iex> friendly_date_time(~U[2022-01-07 14:01:00.00Z], ~U[2022-01-12 15:02:00.00Z])
   "Jan 7"
   iex> friendly_date_time(~U[2021-12-07 14:01:00.00Z], ~U[2022-01-12 15:02:00.00Z])
@@ -105,7 +113,22 @@ defmodule AlertsUIWeb.DateTimeHelpers do
   end
 
   @spec date_time_format(DateTime.t(), DateTime.t()) :: String.t()
-  defp date_time_format(dt, now) when dt.day == now.day, do: "%-I:%M %p"
-  defp date_time_format(dt, now) when dt.year == now.year, do: "%b %-d"
-  defp date_time_format(_, _), do: "%b %Y"
+  defp date_time_format(dt, now) do
+    cond do
+      # same service day
+      Date.compare(
+        ActivePeriod.datetime_to_service_date(dt),
+        ActivePeriod.datetime_to_service_date(now)
+      ) == :eq ->
+        "%-I:%M %p"
+
+      # same year
+      dt.year == now.year ->
+        "%b %-d"
+
+      # different year
+      true ->
+        "%b %Y"
+    end
+  end
 end
