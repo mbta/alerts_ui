@@ -67,7 +67,9 @@
           field={:active_period_end}
           directions={{:asc_nulls_first, :desc_nulls_last}}
         >
-          <div class={if same_date?(alert.active_period_end), do: "text-danger"}>
+          <div class={
+            if DateTimeHelpers.same_service_date?(alert.active_period_end), do: "text-danger"
+          }>
             {format_end_time(alert.active_period_end, alert.duration_certainty)}
           </div>
         </:col>

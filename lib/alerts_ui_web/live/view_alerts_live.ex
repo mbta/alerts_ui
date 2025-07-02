@@ -104,21 +104,6 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     end
   end
 
-  defp same_date?(nil), do: false
-
-  defp same_date?(end_time_utc) do
-    todays_service_date =
-      DateTime.now!("America/New_York")
-      |> ActivePeriod.datetime_to_service_date()
-
-    end_service_date =
-      end_time_utc
-      |> DateTime.shift_zone!("America/New_York")
-      |> ActivePeriod.datetime_to_service_date()
-
-    Date.compare(todays_service_date, end_service_date) == :eq
-  end
-
   defp format_effect_options do
     [{"All", ""}]
     |> Enum.concat(

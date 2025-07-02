@@ -13,13 +13,15 @@ defmodule AlertsUIWeb.DateTimeHelpers do
   Use the time (converted to EST) if today (same SERVICE day), the month and day if this year, and the month and
   year if a different year.
 
+  iex> friendly_date_time(~U[2025-07-03 06:02:00.00Z], ~U[2025-07-02 16:21:52.928497Z])
+  "2:02 AM"
   iex> friendly_date_time(~U[2022-01-12 01:01:00.00Z], ~U[2022-01-12 15:02:00.00Z])
   "Jan 11"
   iex> friendly_date_time(~U[2022-01-12 14:01:00.00Z], ~U[2022-01-12 15:02:00.00Z])
   "9:01 AM"
-  iex> friendly_date_time(~U[2022-01-12 14:01:00.00Z], ~U[2022-01-13 02:02:00.00Z])
+  iex> friendly_date_time(~U[2022-01-12 14:01:00.00Z], ~U[2022-01-13 06:02:00.00Z])
   "9:01 AM"
-  iex> friendly_date_time(~U[2022-01-12 14:01:00.00Z], ~U[2022-01-13 04:02:00.00Z])
+  iex> friendly_date_time(~U[2022-01-12 14:01:00.00Z], ~U[2022-01-13 08:02:00.00Z])
   "Jan 12"
   iex> friendly_date_time(~U[2022-01-07 14:01:00.00Z], ~U[2022-01-12 15:02:00.00Z])
   "Jan 7"
@@ -112,14 +114,27 @@ defmodule AlertsUIWeb.DateTimeHelpers do
     round(seconds / 60)
   end
 
+  def same_service_date?(_, _ \\ DateTime.now!("Etc/UTC"))
+
+  def same_service_date?(nil, _), do: false
+
+  def same_service_date?(utc_datetime, now) do
+    first_service_date =
+      utc_datetime
+      |> DateTime.shift_zone!("America/New_York")
+      |> ActivePeriod.datetime_to_service_date()
+
+    second_service_date =
+      now |> DateTime.shift_zone!("America/New_York") |> ActivePeriod.datetime_to_service_date()
+
+    Date.compare(first_service_date, second_service_date) == :eq
+  end
+
   @spec date_time_format(DateTime.t(), DateTime.t()) :: String.t()
   defp date_time_format(dt, now) do
     cond do
       # same service day
-      Date.compare(
-        ActivePeriod.datetime_to_service_date(dt),
-        ActivePeriod.datetime_to_service_date(now)
-      ) == :eq ->
+      same_service_date?(dt, now) ->
         "%-I:%M %p"
 
       # same year
