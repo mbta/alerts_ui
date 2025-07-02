@@ -162,7 +162,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
       assert view
              |> element("#alert_details_header_text")
              |> render() =~
-               "on #{Calendar.strftime(@tomorrows_date, "%a, %b %_d")}</textarea>"
+               "on #{Calendar.strftime(@tomorrows_date, "%a, %b %-d")}</textarea>"
     end
 
     @tag :logged_in_user
@@ -198,7 +198,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
       assert view
              |> element("#alert_details_header_text")
              |> render() =~
-               "from #{Calendar.strftime(Date.add(@tomorrows_date, 1), "%a, %b %_d")} - #{Calendar.strftime(Date.add(@tomorrows_date, 2), "%a, %b %_d")}"
+               "from #{Calendar.strftime(Date.add(@tomorrows_date, 1), "%a, %b %-d")} - #{Calendar.strftime(Date.add(@tomorrows_date, 2), "%a, %b %-d")}"
     end
 
     @tag :logged_in_user
@@ -271,7 +271,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         assert view
                |> element("#alert_details_header_text")
                |> render() =~
-                 "Framingham/Worcester Line train 595 (11:30 AM from South Station) trip is operating about 15 minutes behind schedule from 3:30 PM to 5:30 PM on #{Calendar.strftime(@tomorrows_date, "%a, %b %_d")} due to ice in harbor"
+                 "Framingham/Worcester Line train 595 (11:30 AM from South Station) trip is operating about 15 minutes behind schedule from 3:30 PM to 5:30 PM on #{Calendar.strftime(@tomorrows_date, "%a, %b %-d")} due to ice in harbor"
 
         assert view
                |> element("#alert_details_description_text")
@@ -338,7 +338,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         assert view
                |> element("#alert_details_header_text")
                |> render() =~
-                 "South Station closed from #{Calendar.strftime(@start_time, "%a, %b %_d at %-I:%M %p")} - #{Calendar.strftime(@end_time, "%a, %b %_d at %-I:%M %p")} due to ice in harbor"
+                 "South Station closed from #{Calendar.strftime(@start_time, "%a, %b %-d at %-I:%M %p")} - #{Calendar.strftime(@end_time, "%a, %b %-d at %-I:%M %p")} due to ice in harbor"
 
         assert view
                |> element("#alert_details_description_text")
@@ -394,7 +394,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         assert view
                |> element("#alert_details_header_text")
                |> render() =~
-                 "Alewife Escalator 349 (Platform to Russell Field) unavailable from #{Calendar.strftime(@start_time, "%a, %b %_d at %-I:%M %p")} - #{Calendar.strftime(@end_time, "%a, %b %_d at %-I:%M %p")} due to ice in harbor"
+                 "Alewife Escalator 349 (Platform to Russell Field) unavailable from #{Calendar.strftime(@start_time, "%a, %b %-d at %-I:%M %p")} - #{Calendar.strftime(@end_time, "%a, %b %-d at %-I:%M %p")} due to ice in harbor"
 
         assert view
                |> element("#alert_details_description_text")
@@ -453,7 +453,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
       assert view
              |> element("#alert_details_header_text")
              |> render() =~
-               "Subway and Ferry notice from #{Calendar.strftime(@start_time, "%a, %b %_d at %-I:%M %p")} - #{Calendar.strftime(@end_time, "%a, %b %_d at %-I:%M %p")} due to ice in harbor"
+               "Subway and Ferry notice from #{Calendar.strftime(@start_time, "%a, %b %-d at %-I:%M %p")} - #{Calendar.strftime(@end_time, "%a, %b %-d at %-I:%M %p")} due to ice in harbor"
 
       assert view
              |> element("#alert_details_description_text")
