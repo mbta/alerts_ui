@@ -110,7 +110,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
     end
 
     @tag :logged_in_user
-    test "up to four bus routes can be displayed without collapsing the number", %{conn: conn}  do
+    test "up to four bus routes can be displayed without collapsing the number", %{conn: conn} do
       insert(:alert, %{
         alert_id: "123",
         active_period: [
@@ -132,7 +132,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
     end
 
     @tag :logged_in_user
-    test "five or more routes will be collapsed", %{conn: conn}  do
+    test "five or more routes will be collapsed", %{conn: conn} do
       insert(:alert, %{
         alert_id: "123",
         active_period: [
@@ -155,10 +155,14 @@ defmodule AlertsUIWeb.AlertsLiveTest do
     end
 
     @tag :logged_in_user
-    test "SLW is represented by 1 SL route pill instead of by bus number or multiple pills", %{conn: conn} do
-      with_mock(RoutesRepo, get: fn
-        "746" -> %{name: "SLW"}
-      end) do
+    test "SLW is represented by 1 SL route pill instead of by bus number or multiple pills", %{
+      conn: conn
+    } do
+      with_mock(RoutesRepo,
+        get: fn
+          "746" -> %{name: "SLW"}
+        end
+      ) do
         insert(:alert, %{
           alert_id: "123",
           active_period: [
@@ -178,7 +182,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
     end
 
     @tag :logged_in_user
-    test "elevator, bike, and other facility issues receive the facility pill", %{conn: conn}  do
+    test "elevator, bike, and other facility issues receive the facility pill", %{conn: conn} do
       insert(:alert, %{
         alert_id: "123",
         active_period: [
@@ -194,7 +198,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
 
       assert html =~ "Facility"
     end
-    
+
     @tag :logged_in_user
     test "systemwide alert shows the systemwide pill", %{conn: conn} do
       insert(:alert, %{
@@ -212,12 +216,14 @@ defmodule AlertsUIWeb.AlertsLiveTest do
 
       assert html =~ "Systemwide"
     end
-    
+
     @tag :logged_in_user
     test "commuter rail pill shows proper full name without CR appended", %{conn: conn} do
-      with_mock(RoutesRepo, get: fn
-        "CR-Framingham" -> %{long_name: "Framingham/Worcester"}
-      end) do
+      with_mock(RoutesRepo,
+        get: fn
+          "CR-Framingham" -> %{long_name: "Framingham/Worcester"}
+        end
+      ) do
         insert(:alert, %{
           alert_id: "123",
           active_period: [
@@ -237,9 +243,11 @@ defmodule AlertsUIWeb.AlertsLiveTest do
 
     @tag :logged_in_user
     test "ferry pill shows proper full name", %{conn: conn} do
-      with_mock(RoutesRepo, get: fn
-        "Boat-F4" -> %{long_name: "Charlestown"}
-      end) do
+      with_mock(RoutesRepo,
+        get: fn
+          "Boat-F4" -> %{long_name: "Charlestown"}
+        end
+      ) do
         insert(:alert, %{
           alert_id: "123",
           active_period: [

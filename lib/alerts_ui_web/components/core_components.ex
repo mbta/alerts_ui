@@ -678,7 +678,7 @@ defmodule AlertsUIWeb.CoreComponents do
           <.mode_icon type="Systemwide" />
         <% end %>
       <% end %>
-      <%= for entity <- @entities |> IO.inspect |> Enum.take(4) do %>
+      <%= for entity <- @entities |> Enum.take(4) do %>
         <.mode_icon type={entity} />
       <% end %>
       <.mode_icon :if={length(@entities) > 4} type={length(@entities) - 4} />
