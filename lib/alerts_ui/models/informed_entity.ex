@@ -18,11 +18,11 @@ defmodule AlertsUI.Models.InformedEntity do
   ]
 
   @facility_activities [
-    :BRINGING_BIKE,
-    :PARK_CAR,
-    :STORE_BIKE,
-    :USING_ESCALATOR,
-    :USING_WHEELCHAIR
+    :bringing_bike,
+    :park_car,
+    :store_bike,
+    :using_escalator,
+    :using_wheelchair
   ]
 
   @all_facility_types [

@@ -173,9 +173,9 @@ defmodule AlertsUI.Models.AlertTest do
 
     test "returns direction if only 1 direction found" do
       informed_entity = [
-        %InformedEntity{activities: [:EXIT], route_id: "28", route_type: 3, direction_id: 1},
-        %InformedEntity{activities: [:EXIT], route_id: "29", route_type: 3, direction_id: 1},
-        %InformedEntity{activities: [:EXIT], route_id: "27", route_type: 3}
+        %InformedEntity{activities: [:exit], route_id: "28", route_type: 3, direction_id: 1},
+        %InformedEntity{activities: [:exit], route_id: "29", route_type: 3, direction_id: 1},
+        %InformedEntity{activities: [:exit], route_id: "27", route_type: 3}
       ]
 
       assert Alert.get_direction(informed_entity) == "1"
@@ -183,14 +183,14 @@ defmodule AlertsUI.Models.AlertTest do
 
     test "returns direction if direction is in trip" do
       informed_entity = [
-        %InformedEntity{activities: [:EXIT], route_id: "28", route_type: 3},
+        %InformedEntity{activities: [:exit], route_id: "28", route_type: 3},
         %InformedEntity{
-          activities: [:EXIT],
+          activities: [:exit],
           route_id: "29",
           route_type: 3,
           trip: %TripDescriptor{direction_id: 1}
         },
-        %InformedEntity{activities: [:EXIT], route_id: "27", route_type: 3}
+        %InformedEntity{activities: [:exit], route_id: "27", route_type: 3}
       ]
 
       assert Alert.get_direction(informed_entity) == "1"
@@ -198,8 +198,8 @@ defmodule AlertsUI.Models.AlertTest do
 
     test "returns nil if 2 directions found" do
       informed_entity = [
-        %InformedEntity{activities: [:EXIT], route_id: "28", route_type: 3, direction_id: 0},
-        %InformedEntity{activities: [:EXIT], route_id: "29", route_type: 3, direction_id: 1}
+        %InformedEntity{activities: [:exit], route_id: "28", route_type: 3, direction_id: 0},
+        %InformedEntity{activities: [:exit], route_id: "29", route_type: 3, direction_id: 1}
       ]
 
       assert Alert.get_direction(informed_entity) == nil
@@ -209,12 +209,12 @@ defmodule AlertsUI.Models.AlertTest do
   describe "systemwide?/1" do
     test "true if any informed entity does not specify a route ID" do
       assert Alert.systemwide?(%Alert{
-               informed_entity: [%InformedEntity{activities: [:EXIT], route_type: 3}]
+               informed_entity: [%InformedEntity{activities: [:exit], route_type: 3}]
              })
 
       refute Alert.systemwide?(%Alert{
                informed_entity: [
-                 %InformedEntity{activities: [:EXIT], route_type: 3, route_id: "28"}
+                 %InformedEntity{activities: [:exit], route_type: 3, route_id: "28"}
                ]
              })
     end
@@ -228,9 +228,9 @@ defmodule AlertsUI.Models.AlertTest do
     test "returns 1 if any route types are 0 or 1" do
       alert = %Alert{
         informed_entity: [
-          %InformedEntity{activities: [:EXIT], route_id: "28", route_type: 0, direction_id: 1},
-          %InformedEntity{activities: [:EXIT], route_id: "29", route_type: 1, direction_id: 1},
-          %InformedEntity{activities: [:EXIT], route_id: "27", route_type: 2}
+          %InformedEntity{activities: [:exit], route_id: "28", route_type: 0, direction_id: 1},
+          %InformedEntity{activities: [:exit], route_id: "29", route_type: 1, direction_id: 1},
+          %InformedEntity{activities: [:exit], route_id: "27", route_type: 2}
         ]
       }
 
@@ -240,9 +240,9 @@ defmodule AlertsUI.Models.AlertTest do
     test "returns route type of head if no 0 or 1" do
       alert = %Alert{
         informed_entity: [
-          %InformedEntity{activities: [:EXIT], route_id: "28", route_type: 3, direction_id: 1},
-          %InformedEntity{activities: [:EXIT], route_id: "29", route_type: 3, direction_id: 1},
-          %InformedEntity{activities: [:EXIT], route_id: "27", route_type: 3}
+          %InformedEntity{activities: [:exit], route_id: "28", route_type: 3, direction_id: 1},
+          %InformedEntity{activities: [:exit], route_id: "29", route_type: 3, direction_id: 1},
+          %InformedEntity{activities: [:exit], route_id: "27", route_type: 3}
         ]
       }
 
@@ -252,7 +252,7 @@ defmodule AlertsUI.Models.AlertTest do
     test "accepts an Alert" do
       alert = %Alert{
         informed_entity: [
-          %InformedEntity{activities: [:EXIT], route_id: "27", route_type: 3}
+          %InformedEntity{activities: [:exit], route_id: "27", route_type: 3}
         ]
       }
 
@@ -262,9 +262,9 @@ defmodule AlertsUI.Models.AlertTest do
     test "returns nil for a systemwide alert" do
       alert = %Alert{
         informed_entity: [
-          %InformedEntity{activities: [:EXIT], route_type: 0},
-          %InformedEntity{activities: [:EXIT], route_type: 1},
-          %InformedEntity{activities: [:EXIT], route_type: 2}
+          %InformedEntity{activities: [:exit], route_type: 0},
+          %InformedEntity{activities: [:exit], route_type: 1},
+          %InformedEntity{activities: [:exit], route_type: 2}
         ]
       }
 
@@ -275,14 +275,14 @@ defmodule AlertsUI.Models.AlertTest do
   describe "service_types/1" do
     test "returns service types for a systemwide alert" do
       assert Alert.service_types(%Alert{
-               informed_entity: [%InformedEntity{activities: [:EXIT], route_type: 3}]
+               informed_entity: [%InformedEntity{activities: [:exit], route_type: 3}]
              }) == [3]
     end
 
     test "returns an empty list for non-systemwide alerts" do
       assert Alert.service_types(%Alert{
                informed_entity: [
-                 %InformedEntity{activities: [:EXIT], route_id: "27", route_type: 3}
+                 %InformedEntity{activities: [:exit], route_id: "27", route_type: 3}
                ]
              }) == []
     end
@@ -290,9 +290,9 @@ defmodule AlertsUI.Models.AlertTest do
     test "maps subway route types to only 1" do
       assert Alert.service_types(%Alert{
                informed_entity: [
-                 %InformedEntity{activities: [:EXIT], route_type: 0},
-                 %InformedEntity{activities: [:EXIT], route_type: 1},
-                 %InformedEntity{activities: [:EXIT], route_type: 2}
+                 %InformedEntity{activities: [:exit], route_type: 0},
+                 %InformedEntity{activities: [:exit], route_type: 1},
+                 %InformedEntity{activities: [:exit], route_type: 2}
                ]
              }) == [1, 2]
     end
@@ -305,11 +305,11 @@ defmodule AlertsUI.Models.AlertTest do
   describe "gather_route_ids/1" do
     test "lists route ids from informed entity" do
       informed_entity = [
-        %InformedEntity{activities: [:EXIT], route_id: "27", route_type: 3, direction_id: 1},
-        %InformedEntity{activities: [:EXIT], route_id: "28", route_type: 3, direction_id: 1},
-        %InformedEntity{activities: [:EXIT], route_id: "29", route_type: 3, direction_id: 1},
-        %InformedEntity{activities: [:EXIT], route_id: "29", route_type: 3, direction_id: 1},
-        %InformedEntity{activities: [:EXIT], route_type: 3}
+        %InformedEntity{activities: [:exit], route_id: "27", route_type: 3, direction_id: 1},
+        %InformedEntity{activities: [:exit], route_id: "28", route_type: 3, direction_id: 1},
+        %InformedEntity{activities: [:exit], route_id: "29", route_type: 3, direction_id: 1},
+        %InformedEntity{activities: [:exit], route_id: "29", route_type: 3, direction_id: 1},
+        %InformedEntity{activities: [:exit], route_type: 3}
       ]
 
       assert Alert.gather_route_ids(informed_entity) == ["27", "28", "29"]
@@ -322,15 +322,15 @@ defmodule AlertsUI.Models.AlertTest do
         get_parent: fn _stop -> %{id: "place-aqucl"} end
       ) do
         informed_entity = [
-          %InformedEntity{activities: [:EXIT], route_id: "27", route_type: 3, stop_id: "70043"},
-          %InformedEntity{activities: [:EXIT], route_id: "28", route_type: 3, stop_id: "70044"},
+          %InformedEntity{activities: [:exit], route_id: "27", route_type: 3, stop_id: "70043"},
+          %InformedEntity{activities: [:exit], route_id: "28", route_type: 3, stop_id: "70044"},
           %InformedEntity{
-            activities: [:EXIT],
+            activities: [:exit],
             route_id: "28",
             route_type: 3,
             stop_id: "place-aqucl"
           },
-          %InformedEntity{activities: [:EXIT], route_type: 3}
+          %InformedEntity{activities: [:exit], route_type: 3}
         ]
 
         assert Alert.gather_parent_stop_ids(informed_entity) == ["place-aqucl"]
@@ -341,11 +341,11 @@ defmodule AlertsUI.Models.AlertTest do
   describe "gather_trip_ids/1" do
     test "lists trip ids from informed entity" do
       informed_entity = [
-        %InformedEntity{activities: [:EXIT], route_type: 3, trip: %TripDescriptor{trip_id: "3"}},
-        %InformedEntity{activities: [:EXIT], route_type: 3, trip: %TripDescriptor{trip_id: "2"}},
-        %InformedEntity{activities: [:EXIT], route_type: 3},
-        %InformedEntity{activities: [:EXIT], route_type: 3, trip: %TripDescriptor{trip_id: "1"}},
-        %InformedEntity{activities: [:EXIT], route_type: 3, trip: %TripDescriptor{}}
+        %InformedEntity{activities: [:exit], route_type: 3, trip: %TripDescriptor{trip_id: "3"}},
+        %InformedEntity{activities: [:exit], route_type: 3, trip: %TripDescriptor{trip_id: "2"}},
+        %InformedEntity{activities: [:exit], route_type: 3},
+        %InformedEntity{activities: [:exit], route_type: 3, trip: %TripDescriptor{trip_id: "1"}},
+        %InformedEntity{activities: [:exit], route_type: 3, trip: %TripDescriptor{}}
       ]
 
       assert Alert.gather_trip_ids(informed_entity) == ["3", "2", "1"]

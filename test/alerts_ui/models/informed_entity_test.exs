@@ -29,8 +29,8 @@ defmodule AlertsUI.Models.InformedEntityTest do
 
   describe "facility_activity?/1" do
     test "true if this is activity is considered a facility" do
-      assert InformedEntity.facility_activity?(:PARK_CAR)
-      refute InformedEntity.facility_activity?(:OTHER)
+      assert InformedEntity.facility_activity?(:park_car)
+      refute InformedEntity.facility_activity?(:other)
     end
   end
 end
