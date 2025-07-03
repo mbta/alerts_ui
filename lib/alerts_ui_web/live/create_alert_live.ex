@@ -182,7 +182,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   @spec get_schedules([String.t()], String.t(), Date.t()) :: list()
-  def get_schedules(route_ids, direction, date) do
+  defp get_schedules(route_ids, direction, date) do
     directions = directions_from_selection(direction)
     opts = [stop_sequences: [:first, :last], date: date] |> direction_option(directions)
 

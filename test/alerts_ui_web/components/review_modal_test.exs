@@ -108,7 +108,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
          [
            by_type: fn _types -> @routes end,
            get: fn _id -> @route_one end,
-           all: fn _opts -> [@route] end
+           all: fn _opts -> @routes end
          ]},
         {StopsRepo, [],
          [
@@ -990,7 +990,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
          [
            by_type: fn _types -> @routes end,
            get: fn _id -> @route_one end,
-           all: fn _opts -> [@route] end
+           all: fn _opts -> @routes end
          ]},
         {StopsRepo, [],
          [

@@ -5,14 +5,15 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   use AlertsUIWeb, :live_component
   use AlertsUI.Schema
   import Ecto.Changeset
-  alias AlertsUI.Models.{Cause, SeverityLevel}
+  alias AlertsUIWeb.CreateAlertLive
+  alias AlertsUI.Models.{Cause, EnhancedSchedule, SeverityLevel}
   alias AlertsUIWeb.FormComponents.Helpers.{ErrorFormatter, ServiceEffectCombinations}
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}
   alias Phoenix.HTML.Form
 
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
-  alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
+  alias MBTAV3API.Schedules.Repo, as: Schedules
   alias MBTAV3API.Stops.Api, as: StopsApi
 
   @primary_key false
@@ -90,8 +91,15 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     end
 
     if :trip_ids in required_fields do
+      trip_ids = Enum.join(alert_data.trip_ids, ",")
+
       selected_schedules =
-        Enum.map(alert_data.trip_ids, fn trip_id -> SchedulesRepo.schedule_for_trip(trip_id) end)
+        Schedules.all("filter[stop_sequence]": "first,last", "filter[trip]": trip_ids)
+        |> Enum.map(fn schedule ->
+          map = Map.from_struct(schedule)
+          Kernel.struct(EnhancedSchedule, map)
+        end)
+        |> CreateAlertLive.filter_out_old_trips()
 
       send(self(), {:selected_schedules, selected_schedules})
     end

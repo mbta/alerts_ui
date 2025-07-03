@@ -96,27 +96,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     {:ok, socket}
   end
 
-  @impl true
-  def update(
-        %{alert_data: alert_data, editing: true} = assigns,
-        %{assigns: %{available_stops: %{result: result}}} = socket
-      ) do
-    available_stops = result
-    selected_stops = get_selected_stops(available_stops, alert_data.stop_ids)
-
-    # selected_routes = get_selected_routes(available_routes(socket), alert_data.route_ids)
-
-    send(self(), {:add_errors, [], __MODULE__})
-    # send(self(), {:selected_routes, selected_routes})
-    send(self(), {:selected_stops, selected_stops})
-
-    socket =
-      socket
-      |> assign(assigns)
-
-    {:ok, socket}
-  end
-
   # The form was submitted but submission had an error, so the same component rerenders
   @impl true
   def update(%{submitted: true}, socket) do

@@ -130,6 +130,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       |> assign(:modal_date, nil)
       |> assign(:form, changeset |> to_form())
       |> assign(:edit_data_has_been_filled, true)
+      |> assign(:filter_title_value, "All future trips")
       |> assign_routes(route_types)
       |> assign_stops(route_ids, direction, required_fields)
       |> assign_schedules(route_ids, direction, required_fields)
