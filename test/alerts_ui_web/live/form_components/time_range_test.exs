@@ -583,6 +583,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
          [
            by_stop: fn _stop_id, _ -> [@route] end,
            by_type: fn _types -> [@route] end,
+           all: fn _opts -> [@route] end,
            get: fn _, _ -> @route end,
            get: fn _ -> @route end
          ]},

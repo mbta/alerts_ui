@@ -119,6 +119,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations do
 
   @spec required_fields(service_effect_combination() | nil) :: [atom()]
   def required_fields(nil), do: []
+  def required_fields(:ACCESS), do: ~w[facility_id]a
   def required_fields(:R), do: ~w[route_ids]a
   def required_fields(:SR), do: ~w[route_ids stop_ids]a
   def required_fields(:RDS), do: ~w[route_ids direction stop_ids]a

@@ -6,9 +6,14 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   use AlertsUI.Schema
   import Ecto.Changeset
   alias AlertsUI.Models.{Cause, SeverityLevel}
-  alias AlertsUIWeb.FormComponents.Helpers.ErrorFormatter
+  alias AlertsUIWeb.FormComponents.Helpers.{ErrorFormatter, ServiceEffectCombinations}
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}
   alias Phoenix.HTML.Form
+
+  alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
+  alias MBTAV3API.Routes.Repo, as: RoutesRepo
+  alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
+  alias MBTAV3API.Stops.Api, as: StopsApi
 
   @primary_key false
   embedded_schema do
@@ -62,12 +67,40 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
 
   @impl true
   def update(
+        %{editing: true, combination: combination, alert_data: alert_data} = assigns,
         %{
-          alert_data: alert_data,
-          editing: true
-        } = assigns,
-        %{assigns: %{edit_data_has_been_filled: false}} = socket
+          assigns: %{
+            edit_data_has_been_filled: false
+          }
+        } = socket
       ) do
+    required_fields = ServiceEffectCombinations.required_fields(combination)
+
+    # Fill in needed information for if you hit the toggle button when editing
+    if :route_ids in required_fields do
+      route_ids = Enum.join(alert_data.route_ids, ",")
+      selected_routes = RoutesRepo.all("filter[id]": route_ids)
+      send(self(), {:selected_routes, selected_routes})
+    end
+
+    if :stop_ids in required_fields do
+      stop_ids = Enum.join(alert_data.stop_ids, ",")
+      selected_stops = StopsApi.all("filter[id]": stop_ids)
+      send(self(), {:selected_stops, selected_stops})
+    end
+
+    if :trip_ids in required_fields do
+      selected_schedules =
+        Enum.map(alert_data.trip_ids, fn trip_id -> SchedulesRepo.schedule_for_trip(trip_id) end)
+
+      send(self(), {:selected_schedules, selected_schedules})
+    end
+
+    if :facility_id in required_fields do
+      selected_facility = FacilitiesRepo.get(alert_data.facility_id)
+      send(self(), {:selected_facility, selected_facility})
+    end
+
     cause_options =
       formatted_causes(
         Map.get(assigns, :route_type),
@@ -87,9 +120,10 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
 
     image_url = alert_data.image_url || ""
 
-    assigns =
-      assigns
-      |> Map.merge(%{
+    socket =
+      socket
+      |> assign(assigns)
+      |> assign(%{
         form: form,
         cause_options: cause_options,
         edit_data_has_been_filled: true,
@@ -97,7 +131,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         image_path: image_url
       })
 
-    {:ok, assign(socket, assigns)}
+    {:ok, socket}
   end
 
   @impl true
