@@ -93,7 +93,10 @@ defmodule AlertsUIWeb.CreateAlertLive do
         steps: @steps,
         alert_data: alert_data,
         combination: Map.get(alert_data, :combination),
+        selected_routes: [],
+        selected_stops: [],
         selected_schedules: [],
+        selected_facility: nil,
         available_facilities: [],
         alert_uuid: nil,
         alert_id: alert_id,
@@ -286,8 +289,20 @@ defmodule AlertsUIWeb.CreateAlertLive do
     %{stops: available_stops, facilities: available_facilities}
   end
 
+  def handle_info({:selected_routes, selected_routes}, socket) do
+    {:noreply, assign(socket, selected_routes: selected_routes)}
+  end
+
+  def handle_info({:selected_stops, selected_stops}, socket) do
+    {:noreply, assign(socket, selected_stops: selected_stops)}
+  end
+
   def handle_info({:selected_schedules, selected_schedules}, socket) do
     {:noreply, assign(socket, selected_schedules: selected_schedules)}
+  end
+
+  def handle_info({:selected_facility, selected_facility}, socket) do
+    {:noreply, assign(socket, selected_facility: selected_facility)}
   end
 
   @impl true
@@ -359,9 +374,10 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   defp create_alert(socket) do
-    alert_map =
+    alert_data =
       socket.assigns.alert_data
       |> AlertBuilder.build_alert(socket.assigns.combination)
+      |> Map.put(:user, Map.from_struct(socket.assigns.current_user))
 
     existing_alert =
       if is_nil(socket.assigns.alert_id) do
@@ -370,7 +386,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
         Alerts.get_by_alert_id(socket.assigns.alert_id)
       end
 
-    alert_map
+    alert_data
     |> Alerts.create_or_update_alert(existing_alert)
     |> case do
       {:ok, alert} ->

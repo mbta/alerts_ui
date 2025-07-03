@@ -532,7 +532,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
 
         open_review_modal(view)
 
-        assert render(view) =~ ~r/Notification period.*@.*until alert is manually closed/s
+        assert render(view) =~ ~r/Notification period.*@.*until alert is closed/s
       end
     end
   end
@@ -564,7 +564,10 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
 
         assert render(view) =~ ~r/Cause.*None/s
         assert render(view) =~ ~r/Severity.*About 15 minutes.*\(4 - WARNING\)/s
-        assert render(view) =~ ~r/Main message.*hello world/s
+
+        assert render(view) =~
+                 ~r/Main message.*Framingham\/Worcester Line is experiencing delays of about 15 minutes/s
+
         assert render(view) =~ ~r/Supporting information.*None/s
         refute render(view) =~ ~r/URL:/s
       end
@@ -595,7 +598,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         fill_out_form(view, "#details_form", %{
           alert_details: %{
             header_text: "hello world",
-            cause_detail: "ACCIDENT",
+            cause_detail: "DISABLED_BUS",
             severity: 7,
             description_text: "supporting information",
             url: "http://www.fake.com"
@@ -604,7 +607,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
 
         open_review_modal(view)
 
-        assert render(view) =~ ~r/Cause.*Accident/s
+        assert render(view) =~ ~r/Cause.*Disabled bus/s
         assert render(view) =~ ~r/Severity.*About 30 minutes.*\(7 - SEVERE\)/s
         assert render(view) =~ ~r/Supporting information.*supporting information/s
         assert render(view) =~ ~r/URL: http:\/\/www.fake.com/s
@@ -899,7 +902,9 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
 
         assert render(view) =~ ~r/SMS.*Not selected/s
         assert render(view) =~ ~r/Email.*Not selected/s
-        assert render(view) =~ ~r/Web Banner.*hello world/s
+
+        assert render(view) =~
+                 ~r/Web Banner.*Framingham\/Worcester Line is experiencing delays of about 15 minutes/s
       end
     end
 

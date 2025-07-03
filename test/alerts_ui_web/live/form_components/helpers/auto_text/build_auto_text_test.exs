@@ -51,6 +51,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
   }
 
   describe "due_to_cause/1" do
+    test "when cause is empty string" do
+      assert BuildAutoText.due_to_cause(%{cause_detail: ""}) == ""
+    end
+
     test "adds due to in front of causes" do
       expected = "due to a slippery rail"
       actual = BuildAutoText.due_to_cause(%{cause_detail: "SLIPPERY_RAIL"})

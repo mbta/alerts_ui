@@ -54,7 +54,7 @@ defmodule AlertsUIWeb.ConnCase do
   It returns an updated `conn`.
   """
   def log_in_user(conn) do
-    user = AlertsUI.AccountsFixtures.user_fixture()
+    user = AlertsUI.UsersFixtures.user_fixture()
     log_in_user(conn, user)
   end
 

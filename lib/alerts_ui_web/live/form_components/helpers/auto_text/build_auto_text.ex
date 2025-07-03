@@ -11,7 +11,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
 
   defstruct route_type: nil,
             effect_name: nil,
-            combination: nil,
             routes: [],
             stops: [],
             schedules: [],
@@ -34,7 +33,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   @type t :: %__MODULE__{
           route_type: integer() | nil,
           effect_name: String.t() | nil,
-          combination: atom(),
           routes: [Route.t()],
           stops: [Stop.t()],
           schedules: [EnhancedSchedule.t()],
@@ -93,6 +91,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
 
   # cause
   @spec due_to_cause(__MODULE__.t()) :: String.t()
+  def due_to_cause(%{cause_detail: ""}), do: ""
+
   def due_to_cause(%{cause_detail: cause_detail}) do
     "due to #{cause(cause_detail)}"
   end

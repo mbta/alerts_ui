@@ -76,32 +76,19 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         assert second_rendered_view =~ ~s(class="min-w-full flex flex-col mt-4" id="details_view")
 
         # Submit service section
-        {:ok, service_changeset} =
-          Ecto.Changeset.change(%AffectedService{
-            route_ids: [@route.id],
-            direction: "default",
-            stop_ids: [@stop.id]
-          })
-          |> apply_action(:insert)
+        view
+        |> element("#service_form")
+        |> render_change(%{"affected_service" => %{"route_ids" => ["CR-Worcester"]}})
 
-        send(view.pid, {:section_completed, service_changeset})
+        view
+        |> element("#service_form")
+        |> render_change(%{
+          "affected_service" => %{"stop_ids" => [@stop.id]}
+        })
 
-        {:error, changeset} =
-          Ecto.Changeset.change(%AlertDetails{})
-          |> AlertDetails.changeset(%{header_text: nil})
-          |> validate_required([:header_text])
-          |> apply_action(:validate)
-
-        send(view.pid, {:add_errors, [], AffectedService})
-        send(view.pid, {:section_completed, changeset})
-        send(view.pid, :create_alert)
-        failure_rendered_view = render(view)
-        assert failure_rendered_view =~ "Enter message text"
-
-        {:ok, changeset} =
-          Ecto.Changeset.change(%AlertDetails{})
-          |> AlertDetails.changeset(%{header_text: "cool"})
-          |> apply_action(:validate)
+        # Check header for autotext
+        assert view |> element("#alert_details_header_text") |> render() =~
+                 "Framingham/Worcester Line service suspended"
 
         send(view.pid, {:add_errors, [], AlertDetails})
         send(view.pid, {:section_completed, changeset})

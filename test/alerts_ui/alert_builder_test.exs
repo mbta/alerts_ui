@@ -93,7 +93,10 @@ defmodule AlertsUI.AlertBuilderTest do
                  original_route_selections: ["57"]
                }
 
-        result |> Alerts.create_or_update_alert()
+        result
+        |> Map.put(:user, build(:user))
+        |> Alerts.create_or_update_alert()
+
         [alert_1, alert_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id)
         assert alert_1.alert_id == existing_alert.alert_id
         assert alert_2.alert_id |> String.to_integer() > alert_1.alert_id |> String.to_integer()
@@ -230,7 +233,10 @@ defmodule AlertsUI.AlertBuilderTest do
                  original_route_selections: ["24", "27", "57"]
                }
 
-        result |> Alerts.create_or_update_alert()
+        result
+        |> Map.put(:user, build(:user))
+        |> Alerts.create_or_update_alert()
+
         [alert_1, alert_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id, :desc)
         assert alert_2.alert_id == existing_alert.alert_id
         assert alert_1.alert_id |> String.to_integer() > alert_2.alert_id |> String.to_integer()
@@ -371,7 +377,10 @@ defmodule AlertsUI.AlertBuilderTest do
                  }
                ]
 
-        result |> Alerts.create_or_update_alert()
+        result
+        |> Map.put(:user, build(:user))
+        |> Alerts.create_or_update_alert()
+
         [alert_1, alert_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id, :desc)
         assert alert_2.alert_id == existing_alert.alert_id
         assert alert_1.alert_id |> String.to_integer() > alert_2.alert_id |> String.to_integer()
@@ -435,7 +444,10 @@ defmodule AlertsUI.AlertBuilderTest do
                  original_route_selections: ["CapeFlyer"]
                }
 
-        result |> Alerts.create_or_update_alert()
+        result
+        |> Map.put(:user, build(:user))
+        |> Alerts.create_or_update_alert()
+
         [alert_1, alert_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id, :desc)
         assert alert_1.alert_id |> String.to_integer() > alert_2.alert_id |> String.to_integer()
         assert alert_2.alert_id == existing_alert.alert_id
