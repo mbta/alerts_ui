@@ -90,5 +90,6 @@ Repo.insert!(%Alert{
   image_url: "https://example.com/image1.png",
   image_alternative_text: "an alert image",
   informed_entity: [informed_entity_1, informed_entity_2],
-  reminder_times: [reminder_time]
+  reminder_times: [reminder_time],
+  original_route_selections: []
 })

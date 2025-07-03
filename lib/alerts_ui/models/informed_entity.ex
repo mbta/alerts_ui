@@ -7,6 +7,16 @@ defmodule AlertsUI.Models.InformedEntity do
   alias AlertsUI.Models.{Activity, Alert, TripDescriptor}
   alias MBTAV3API.Routes.Route
 
+  @facility_effects [
+    "ACCESS_ISSUE",
+    "FACILITY_ISSUE",
+    "BIKE_ISSUE",
+    "ELEVATOR_CLOSURE",
+    "ESCALATOR_CLOSURE",
+    "PARKING_CLOSURE",
+    "PARKING_ISSUE"
+  ]
+
   @facility_activities [
     :BRINGING_BIKE,
     :PARK_CAR,
@@ -117,6 +127,9 @@ defmodule AlertsUI.Models.InformedEntity do
   """
   @spec route_type(t()) :: Route.type_int() | nil
   def route_type(%__MODULE__{route_type: route_type}), do: route_type
+
+  @spec facility_effects :: [atom()]
+  def facility_effects, do: @facility_effects
 
   @spec facility_activities :: [atom()]
   def facility_activities, do: @facility_activities

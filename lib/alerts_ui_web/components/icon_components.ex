@@ -6,8 +6,6 @@ defmodule AlertsUIWeb.IconComponents do
 
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
 
-  @facility_activities AlertsUI.Models.InformedEntity.facility_activities()
-
   @doc """
   Renders a small circle route or mode icon.
   """
@@ -311,7 +309,7 @@ defmodule AlertsUIWeb.IconComponents do
   end
 
   # Access
-  def mode_icon(%{type: activity} = assigns) when activity in @facility_activities do
+  def mode_icon(%{type: "Facility"} = assigns) do
     ~H"""
     <div class="whitespace-nowrap bg-mbta-access font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white">
       Facility
@@ -349,7 +347,5 @@ defmodule AlertsUIWeb.IconComponents do
     route_id
     |> RoutesRepo.get()
     |> Map.get(:name)
-    |> String.split(" ")
-    |> List.first()
   end
 end
