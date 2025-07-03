@@ -128,8 +128,12 @@ defmodule AlertsUI.Models.InformedEntity do
   @spec route_type(t()) :: Route.type_int() | nil
   def route_type(%__MODULE__{route_type: route_type}), do: route_type
 
-  @spec facility_effects :: [atom()]
+  @spec facility_effects :: [String.t()]
   def facility_effects, do: @facility_effects
+
+  @spec facility_effect?(String.t()) :: boolean()
+  def facility_effect?(effect) when effect in @facility_effects, do: true
+  def facility_effect?(_), do: false
 
   @spec facility_activities :: [atom()]
   def facility_activities, do: @facility_activities

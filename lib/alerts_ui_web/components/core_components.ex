@@ -672,7 +672,7 @@ defmodule AlertsUIWeb.CoreComponents do
     ~H"""
     <div class="flex flex-wrap gap-1">
       <%= if @entities == [] do %>
-        <%= if @effect in InformedEntity.facility_effects() do %>
+        <%= if InformedEntity.facility_effect?(@effect) do %>
           <.mode_icon type="Facility" />
         <% else %>
           <.mode_icon type="Systemwide" />

@@ -229,24 +229,6 @@ defmodule AlertsUI.Models.Alert do
     |> unique_constraint(:alert_id)
   end
 
-  @spec routes_or_facilities_from_entities(t()) :: [String.t()]
-  def routes_or_facilities_from_entities(%__MODULE__{informed_entity: entities}) do
-    entities
-    |> Enum.flat_map(&routes_or_facilities/1)
-    |> Enum.uniq()
-  end
-
-  @spec routes_or_facilities(InformedEntity.t()) :: [String.t()]
-  defp routes_or_facilities(%InformedEntity{activities: activities, facility_id: facility_id})
-       when not is_nil(facility_id) do
-    Enum.filter(activities, &InformedEntity.facility_activity?/1)
-  end
-
-  defp routes_or_facilities(%InformedEntity{route_id: route_id}) when not is_nil(route_id),
-    do: [route_id]
-
-  defp routes_or_facilities(_), do: []
-
   def get_direction([]), do: nil
 
   def get_direction(informed_entities) do
