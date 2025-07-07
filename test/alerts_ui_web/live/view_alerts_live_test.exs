@@ -266,6 +266,71 @@ defmodule AlertsUIWeb.AlertsLiveTest do
     end
   end
 
+  describe "view alerts page columns" do
+    setup do
+      insert(:alert, %{
+        alert_id: "123",
+        active_period: [
+          build(:active_period, %{start: ~U[2023-10-12 00:01:00Z]}),
+          build(:active_period, %{start: ~U[2023-10-13 00:01:00Z]})
+        ],
+        header_text: "this is the first alert",
+        effect_detail: "DETOUR",
+        original_route_selections: ["1", "2"],
+        closed_timestamp: ~U[2024-10-12 00:01:00Z]
+      })
+
+      insert(:alert, %{
+        alert_id: "234",
+        active_period: [
+          build(:active_period, %{start: ~U[2023-11-12 00:01:00Z]}),
+          build(:active_period, %{start: ~U[2023-11-13 00:01:00Z]})
+        ],
+        header_text: "this is the second alert",
+        effect_detail: "SUMMARY",
+        original_route_selections: [],
+        closed_timestamp: ~U[2024-10-12 00:01:00Z]
+      })
+
+      :ok
+    end
+
+    @tag :logged_in_user
+    test "effect display", %{conn: conn} do
+      {:ok, _view, html} = live(conn, "/alerts")
+      assert html =~ "Detour"
+      assert html =~ "Summary"
+    end
+
+    @tag :logged_in_user
+    test "actions display for closed alerts", %{conn: conn} do
+      {:ok, _view, html} = live(conn, "/alerts")
+
+      refute html =~ ~s(<span class="hero-pencil-solid w-4 h-4"></span>)
+      refute html =~ ~s(<span class="hero-x-mark-solid w-4 h-4"></span>)
+      assert html =~ ~s(<span class="hero-ellipsis-vertical w-4 h-4"></span>)
+    end
+
+    @tag :logged_in_user
+    test "actions display for open alerts", %{conn: conn} do
+      insert(:alert, %{
+        alert_id: "345",
+        active_period: [
+          build(:active_period, %{start: ~U[2023-10-12 00:01:00Z]}),
+          build(:active_period, %{start: ~U[2023-10-13 00:01:00Z]})
+        ],
+        header_text: "this is the third alert",
+        effect_detail: "DETOUR",
+        original_route_selections: ["1", "2"]
+      })
+
+      {:ok, view, html} = live(conn, "/alerts")
+
+      assert html =~ ~s(<span class="hero-pencil-solid w-4 h-4"></span>)
+      assert html =~ ~s(<span class="hero-x-mark-solid w-4 h-4"></span>)
+    end
+  end
+
   defp alert_id_filter_params(search_string) do
     %{
       "_target" => ["filters", "0", "value"],
