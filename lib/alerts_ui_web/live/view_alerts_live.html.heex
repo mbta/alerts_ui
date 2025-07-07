@@ -43,18 +43,21 @@
         <:col :let={alert} label="Service" field={:alert_id} col_style="min-width: 11rem;">
           <.service_pills entities={alert.original_route_selections} effect={alert.effect_detail} />
         </:col>
-        <:col :let={alert} label="Alert ID" field={:integer_alert_id}>{alert.alert_id}</:col>
-        <:col :let={alert} label="Description" field={:header_text} col_style="min-width: 20rem;">
-          {alert.header_text}
+        <:col :let={alert} label="Effect" field={:effect_detail} col_style="min-width: 7.5rem;">
+          {format_effect(alert.effect_detail)}
         </:col>
-        <:col :let={alert} label="Created At" field={:created_at}>
-          {DateTimeHelpers.friendly_date_time(alert.created_at)}
+        <:col :let={alert} label="ID" field={:integer_alert_id} col_style="min-width: 5rem;">
+          {alert.alert_id}
+        </:col>
+        <:col :let={alert} label="Main Message" field={:header_text} col_style="min-width: 20rem;">
+          {alert.header_text}
         </:col>
         <:col
           :let={alert}
           label="Start"
           field={:active_period_start}
           directions={{:asc_nulls_first, :desc_nulls_last}}
+          col_style="min-width: 6.5rem;"
         >
           {DateTimeHelpers.friendly_date_time(alert.active_period_start)}
         </:col>
@@ -63,15 +66,42 @@
           label="End"
           field={:active_period_end}
           directions={{:asc_nulls_first, :desc_nulls_last}}
+          col_style="min-width: 6.5rem;"
         >
           {DateTimeHelpers.friendly_date_time(alert.active_period_end)}
         </:col>
-        <:col :let={alert} label="Closed At" field={:closed_timestamp}>
-          {DateTimeHelpers.friendly_date_time(alert.closed_timestamp)}
-        </:col>
-        <:col :let={alert}>
-          <div class="badge badge-neutral badge-outline">
-            <.link href={~p"/alerts/edit?alert_id=#{alert.alert_id}"}>edit</.link>
+        <:col :let={alert} label="Actions" col_style="min-width: 10rem;">
+          <div class="inline-flex justify-end space-x-2 w-full">
+            <.button_secondary_link
+              :if={!AlertsUIWeb.FormComponents.Helpers.Helpers.alert_is_past(alert)}
+              href={~p"/alerts/edit?alert_id=#{alert.alert_id}"}
+              class="inline-flex rounded-[4px] !px-2 !py-[3px]"
+            >
+              <.icon name="hero-pencil-solid" class="w-4 h-4" />
+            </.button_secondary_link>
+            <.button_secondary_link
+              :if={!AlertsUIWeb.FormComponents.Helpers.Helpers.alert_is_past(alert)}
+              class="inline-flex rounded-[4px] !px-2 !py-[3px]"
+            >
+              <.icon name="hero-x-mark-solid" class="w-4 h-4" />
+            </.button_secondary_link>
+            <.button_menu>
+              <:toggle>
+                <.button_secondary class="inline-flex rounded-[4px] !px-2 !py-[3px]">
+                  <.icon name="hero-ellipsis-vertical" class="w-4 h-4" />
+                </.button_secondary>
+              </:toggle>
+              <:menu>
+                <.link class="inline-flex items-center gap-1 leading-6 w-full autofocus">
+                  <.icon name="hero-square-2-stack-solid" class="w-3 h-3" />
+                  <div>Duplicate</div>
+                </.link>
+                <.link class="inline-flex items-center gap-1 leading-6 w-full whitespace-nowrap">
+                  <.icon name="hero-document-arrow-down-solid" class="w-3 h-3" />
+                  <div>Download history (.csv)</div>
+                </.link>
+              </:menu>
+            </.button_menu>
           </div>
         </:col>
       </Flop.Phoenix.table>

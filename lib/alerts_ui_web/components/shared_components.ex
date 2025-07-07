@@ -218,6 +218,25 @@ defmodule AlertsUIWeb.SharedComponents do
     """
   end
 
+  def secondary_button_classes, do: "
+      text-primary
+      border
+      border-primary
+      px-3
+      py-2
+      rounded-md
+      hover:bg-secondary-hover
+      hover:border-secondary-hover-border
+      hover:text-text-invert
+      active:bg-secondary-active
+      active:border-secondary-active
+      active:text-text-invert
+      focus:border-secondary-focus-border
+      focus:shadow-secondary-focus-shadow
+      disabled:bg-secondary-disabled
+      disabled:border-secondary-disabled
+    "
+
   @doc """
   Renders a medium secondary button.
 
@@ -236,19 +255,7 @@ defmodule AlertsUIWeb.SharedComponents do
     ~H"""
     <button
       class={"
-      text-primary
-      border
-      border-primary
-      border-2
-      px-3
-      py-2
-      rounded-md
-      hover:bg-secondary-hover
-      active:bg-secondary-active
-      active:border-secondary-active
-      focus:border-secondary-focus-border
-      disabled:bg-secondary-disabled
-      disabled:border-secondary-disabled
+      #{secondary_button_classes()}
       #{if @hidden, do: "hidden", else: ""}
       #{@class}
     "}
@@ -256,6 +263,31 @@ defmodule AlertsUIWeb.SharedComponents do
     >
       {render_slot(@inner_block)}
     </button>
+    """
+  end
+
+  @doc """
+  Renders a link that looks like a medium secondary button.
+
+  ##Examples
+    <.button_secondary_link>Button Text</.button_secondary_link>
+  """
+  attr :rest, :global,
+    include:
+      ~w(phx-target phx-click phx-value-effect_name phx-value-route_type name id value disabled)
+
+  attr :class, :string, default: "", doc: "additional classes to add"
+  attr :href, :string, default: nil, doc: "additional link"
+  slot :inner_block, required: true
+
+  def button_secondary_link(assigns) do
+    ~H"""
+    <.link href={@href} class={"
+      #{secondary_button_classes()}
+      #{@class}
+    "} {@rest}>
+      {render_slot(@inner_block)}
+    </.link>
     """
   end
 
@@ -614,6 +646,73 @@ defmodule AlertsUIWeb.SharedComponents do
     |> JS.hide(to: "##{id}", transition: {"block", "block", "hidden"})
     |> JS.remove_class("overflow-hidden", to: "body")
     |> JS.pop_focus()
+  end
+
+  @doc """
+  Renders a button menu.
+
+  ##Examples
+    <.button_menu>
+      <:toggle>
+        <.button_secondary>
+          <.icon name="hero-ellipsis-vertical" />
+        </.button_secondary>
+      </:toggle>
+      <:menu>
+        <.link>
+          <.icon name="hero-square-2-stack-solid"/>
+          <div>First button</div>
+        </.link>
+        <.link>
+          <.icon name="hero-document-arrow-down-solid"/>
+          <div>Second button</div>
+        </.link>
+      </:menu>
+    </.button_menu>
+  """
+  slot :toggle, required: true
+  slot :menu, required: true
+
+  def button_menu(assigns) do
+    ~H"""
+    <div phx-click={JS.show(to: {:inner, ".menu"})} class="relative">
+      {render_slot(@toggle)}
+      <div
+        class="
+          menu
+          hidden
+          absolute
+          top-[34px]
+          right-0
+          z-[100]
+          bg-bg-input-default
+          rounded-[4px]
+          text-white
+          border
+          border-border-primary
+
+          before:content=[' ']
+          before:absolute
+          before:bottom-full
+          before:right-[10px]
+          before:border-8
+          before:border-transparent
+          before:border-b-border-primary
+
+          after:content=[' ']
+          after:absolute
+          after:bottom-full
+          after:right-[12px]
+          after:border-[6px]
+          after:border-transparent
+          after:border-b-bg-input-default
+        "
+        phx-click-away={JS.hide()}
+      >
+        {render_slot(@menu)}
+      </div>
+    </div>
+    """
   end
 
   @doc """
