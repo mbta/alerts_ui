@@ -177,7 +177,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
       service_effect_template: "?stop_names closed"
     },
     %{
-      pattern: {3, "Stop Shovelling"},
+      pattern: {3, "Stop Shoveling"},
       header_template:
         "?route_names ?direction_name bus stops have been cleared of snow ?alert_duration ?due_to_cause",
       description_template: %{

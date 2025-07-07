@@ -577,12 +577,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       assert expected_service_effect == actual_service_effect
     end
 
-    test "Bus stop shovelling" do
+    test "Bus stop shoveling" do
       autotext_data = %{
         route_type: 3,
         routes: [@route_1],
         stops: [@stop_1],
-        effect_name: "Stop Shovelling",
+        effect_name: "Stop Shoveling",
         direction: [0],
         cause_detail: "PARADE",
         alert_timing: :"one-time",
@@ -1493,10 +1493,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       assert expected == actual
     end
 
-    test "bus stop shovelling" do
+    test "bus stop shoveling" do
       autotext_data = %{
         route_type: 3,
-        effect_name: "Stop Shovelling",
+        effect_name: "Stop Shoveling",
         routes: [@route_1],
         schedules: [],
         stops: [@stop_1_bus],

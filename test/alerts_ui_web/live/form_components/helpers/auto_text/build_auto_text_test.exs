@@ -252,7 +252,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
 
     test "one schedule" do
       autotext_data = %{
-        schedules: [@schedule_1]
+        schedules: [@schedule_1],
+        route_type: 4
       }
 
       expected = "527 (9:01 AM from South Station)"
@@ -262,7 +263,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
 
     test "two schedules" do
       autotext_data = %{
-        schedules: [@schedule_1, @schedule_2]
+        schedules: [@schedule_1, @schedule_2],
+        route_type: 4
       }
 
       expected = "527 (9:01 AM from South Station) and 841 (11:15 AM from Forest Hills)"
@@ -272,11 +274,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
 
     test "more than two schedules" do
       autotext_data = %{
-        schedules: [@schedule_1, @schedule_2, @schedule_3]
+        schedules: [@schedule_1, @schedule_2, @schedule_3],
+        route_type: 4
       }
 
       expected =
-        "527 (9:01 AM from South Station), 841 (11:15 AM from Forest Hills), and 839 (11:03 AM from South Station)"
+        "527 (9:01 AM from South Station) and 2 other trips"
 
       actual = assert BuildAutoText.trip_names_only(autotext_data)
       assert expected == actual
@@ -344,7 +347,20 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
       }
 
       expected =
-        "trips 527 (9:01 AM from South Station), 841 (11:15 AM from Forest Hills), and 839 (11:03 AM from South Station)"
+        "trips 527 (9:01 AM from South Station) and 2 other trips"
+
+      actual = assert BuildAutoText.trip_names(autotext_data)
+      assert expected == actual
+    end
+
+    test "more than two schedules when commuter rail" do
+      autotext_data = %{
+        schedules: [@schedule_1, @schedule_2, @schedule_3],
+        route_type: 2
+      }
+
+      expected =
+        "trains 527 (9:01 AM from South Station) and 2 other trains"
 
       actual = assert BuildAutoText.trip_names(autotext_data)
       assert expected == actual
