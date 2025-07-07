@@ -21,7 +21,7 @@ defmodule AlertsUIWeb.CoreComponents do
   alias Phoenix.HTML.{Form, FormField}
   alias Phoenix.LiveView.JS
 
-  alias AlertsUI.Models.InformedEntity
+  alias AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes
 
   @doc """
   Renders flash notices.
@@ -668,7 +668,7 @@ defmodule AlertsUIWeb.CoreComponents do
   Renders a list of pills representing an alert's routes or facililities.
   """
   attr(:entities, :list, required: true)
-  attr(:effect, :string, required: true)
+  attr(:effect_name, :string, required: true)
 
   def service_pills(assigns) do
     # Only first four routes/facilities are listed, the rest are in a "+X" pill
@@ -676,7 +676,7 @@ defmodule AlertsUIWeb.CoreComponents do
     ~H"""
     <div class="flex flex-wrap gap-1">
       <%= if @entities == [] do %>
-        <%= if InformedEntity.facility_effect?(@effect) do %>
+        <%= if @effect_name in EffectsForRouteTypes.list_effects(:access) do %>
           <.mode_icon type="Facility" />
         <% else %>
           <.mode_icon type="Systemwide" />
