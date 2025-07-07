@@ -119,13 +119,9 @@ defmodule AlertsUIWeb.DateTimeHelpers do
   def same_service_date?(nil, _), do: false
 
   def same_service_date?(utc_datetime, now) do
-    first_service_date =
-      utc_datetime
-      |> DateTime.shift_zone!("America/New_York")
-      |> ActivePeriod.datetime_to_service_date()
+    first_service_date = ActivePeriod.datetime_to_service_date(utc_datetime)
 
-    second_service_date =
-      now |> DateTime.shift_zone!("America/New_York") |> ActivePeriod.datetime_to_service_date()
+    second_service_date = ActivePeriod.datetime_to_service_date(now)
 
     Date.compare(first_service_date, second_service_date) == :eq
   end
