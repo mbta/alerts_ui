@@ -116,7 +116,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     changeset = build_changeset(%__MODULE__{}, alert_data)
 
-    send(self(), {:section_completed, changeset})
+    changes = apply_action!(changeset, :validate)
+
+    send(self(), {:section_completed, changes})
 
     route_types = all_route_types(route_type)
 
