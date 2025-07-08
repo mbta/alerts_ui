@@ -251,7 +251,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         within_same_service_day?: true,
         start_datetime: start_datetime
       }) do
-    # TODO
     "on #{datetime_to_formatted_date(start_datetime)}"
   end
 

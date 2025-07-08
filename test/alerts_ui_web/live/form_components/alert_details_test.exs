@@ -278,12 +278,12 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         assert view
                |> element("#alert_details_header_text")
                |> render() =~
-                 "Framingham/Worcester Line train 595 (11:30 AM from South Station) is operating about 15 minutes behind schedule due to ice in harbor."
+                 "Framingham/Worcester Line train 595 (11:30 AM from South Station) is operating about 15 minutes behind schedule at South Station due to ice in harbor."
 
         assert view
                |> element("#alert_details_description_text")
                |> render() =~
-                 "></textarea>"
+                 "Affected stations:\nSouth Station"
       end
     end
 
