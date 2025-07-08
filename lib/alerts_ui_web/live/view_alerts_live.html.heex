@@ -59,7 +59,7 @@
           field={:active_period_start}
           directions={{:asc_nulls_first, :desc_nulls_last}}
         >
-          {DateTimeHelpers.friendly_date_time(alert.active_period_start)}
+          {format_start_time(alert.active_period_start)}
         </:col>
         <:col
           :let={alert}
@@ -67,7 +67,11 @@
           field={:active_period_end}
           directions={{:asc_nulls_first, :desc_nulls_last}}
         >
-          {DateTimeHelpers.friendly_date_time(alert.active_period_end)}
+          <div class={
+            if DateTimeHelpers.same_service_date?(alert.active_period_end), do: "text-danger"
+          }>
+            {format_end_time(alert.active_period_end, alert.duration_certainty)}
+          </div>
         </:col>
         <:col :let={alert} label="Closed At" field={:closed_timestamp}>
           {DateTimeHelpers.friendly_date_time(alert.closed_timestamp)}
