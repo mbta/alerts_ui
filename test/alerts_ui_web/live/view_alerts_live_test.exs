@@ -324,7 +324,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
         original_route_selections: ["1", "2"]
       })
 
-      {:ok, view, html} = live(conn, "/alerts")
+      {:ok, _view, html} = live(conn, "/alerts")
 
       assert html =~ ~s(<span class="hero-pencil-solid w-4 h-4"></span>)
       assert html =~ ~s(<span class="hero-x-mark-solid w-4 h-4"></span>)
