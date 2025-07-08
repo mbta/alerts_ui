@@ -60,8 +60,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     # systemwide
     %{
       pattern: {nil, "Service Change"},
-      header_template: "?impacted_modes notice: ?alert_duration ?due_to_cause",
-      service_effect_template: "?impacted_modes notice"
+      # header_template: "?impacted_modes notice: ?alert_duration ?due_to_cause",
+      header_template: "?impacted_modes service change ?alert_duration ?due_to_cause",
+      # service_effect_template: "?impacted_modes notice"
+      service_effect_template: "?impacted_modes service change"
     },
     %{
       pattern: {nil, "Suspension"},
@@ -119,7 +121,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     },
     %{
       pattern: {4, "Suspension"},
-      header_template: "?route_names service suspended ?alert_duration ?due_to_cause",
+      # header_template: "?route_names service suspended ?alert_duration ?due_to_cause",
+      header_template:
+        "?route_names service suspended ?stop_range_between ?alert_duration ?due_to_cause",
       description_template: %{
         route_count: 5,
         stop_count: 0,
@@ -202,8 +206,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     },
     %{
       pattern: {3, "Suspension"},
+      # "?route_names ?direction_name service suspended ?alert_duration ?due_to_cause",
       header_template:
-        "?route_names ?direction_name service suspended ?alert_duration ?due_to_cause",
+        "?route_names ?direction_name service suspended ?stop_range_between ?alert_duration ?due_to_cause",
       description_template: %{
         route_count: 5,
         stop_count: 0,
@@ -272,8 +277,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     # subway
     %{
       pattern: {1, "Suspension"},
+      # "?route_names|: ?direction_name service is suspended ?alert_duration ?due_to_cause",
       header_template:
-        "?route_names|: ?direction_name service is suspended ?alert_duration ?due_to_cause",
+        "?route_names|: ?direction_name service is suspended ?stop_range_between ?alert_duration ?due_to_cause",
       description_template: %{
         route_count: 5,
         stop_count: 0,
@@ -295,19 +301,22 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     },
     %{
       pattern: {1, "Service Change"},
-      header_template: "?route_names|: ?alert_duration ?due_to_cause",
+      # header_template: "?route_names|: ?alert_duration ?due_to_cause",
+      header_template: "?route_names service change ?alert_duration ?due_to_cause",
       description_template: %{
         route_count: 5,
         stop_count: 0,
         trip_count: nil,
         direction_count: 1
       },
-      service_effect_template: "?route_names_short notice"
+      # service_effect_template: "?route_names_short notice"
+      service_effect_template: "?route_names_short service change"
     },
     %{
       pattern: {1, "Shuttle"},
+      # "?route_names|: Shuttle buses replace ?direction_name service ?alert_duration ?due_to_cause",
       header_template:
-        "?route_names|: Shuttle buses replace ?direction_name service ?alert_duration ?due_to_cause",
+        "?route_names|: Shuttle buses replace ?direction_name service ?stop_range_between ?alert_duration ?due_to_cause",
       description_template: %{
         route_count: 5,
         stop_count: 0,
@@ -332,8 +341,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     # Commuter Rail
     %{
       pattern: {2, "Delay"},
+      # "?route_names ?trip_names ?trip_form operating ?severity_name behind schedule ?alert_duration ?due_to_cause",
       header_template:
-        "?route_names ?trip_names ?trip_form operating ?severity_name behind schedule ?alert_duration ?due_to_cause",
+        "?route_names ?trip_names ?trip_form operating ?severity_name behind schedule ?stop_range_between ?due_to_cause|.",
       description_template: %{
         route_count: 5,
         direction_count: 1,
@@ -344,8 +354,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     },
     %{
       pattern: {2, "Shuttle"},
+      # "?route_names ?direction_name ?trip_names will be replaced by a shuttle bus ?alert_duration ?due_to_cause",
       header_template:
-        "?route_names ?direction_name ?trip_names will be replaced by a shuttle bus ?alert_duration ?due_to_cause",
+        "?route_names ?direction_name ?trip_names will be replaced by a shuttle bus ?stop_range_between ?alert_duration ?due_to_cause",
       description_template: %{
         route_count: 5,
         direction_count: nil,
@@ -356,8 +367,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     },
     %{
       pattern: {2, "Track Change"},
+      # "Please board ?route_names ?trip_names on opposite track ?alert_duration ?due_to_cause",
       header_template:
-        "Please board ?route_names ?trip_names on opposite track ?alert_duration ?due_to_cause",
+        "Please board ?route_names ?trip_names on opposite track ?stop_range_at ?alert_duration ?due_to_cause|.",
       description_template: %{
         route_count: 5,
         direction_count: 1,
@@ -380,42 +392,49 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     },
     %{
       pattern: {2, "Service Change"},
-      header_template: "?route_names notice: ?trip_names ?alert_duration ?due_to_cause",
+      # header_template: "?route_names notice: ?trip_names ?alert_duration ?due_to_cause",
+      header_template: "?route_names ?trip_names service change ?alert_duration ?due_to_cause",
       description_template: %{
         route_count: 5,
         direction_count: 1,
         stop_count: 0,
         trip_count: 2
       },
-      service_effect_template: "?route_names_short notice"
+      # service_effect_template: "?route_names_short notice"
+      service_effect_template: "?route_names_short service change"
     },
     # mode not specified
     %{
       pattern: {"Service Change"},
-      header_template: "?route_names notice: ?alert_duration ?due_to_cause",
+      # header_template: "?route_names notice: ?alert_duration ?due_to_cause",
+      header_template: "?route_names service change ?alert_duration ?due_to_cause",
       description_template: %{
         route_count: 5,
         stop_count: 0,
         trip_count: 2,
         direction_count: nil
       },
-      service_effect_template: "?route_names_short notice"
+      # service_effect_template: "?route_names_short notice"
+      service_effect_template: "?route_names_short service change"
     },
     %{
       pattern: {"Dock Issue"},
-      header_template: "Change at ?stop_names ?alert_duration ?due_to_cause",
+      # header_template: "Change at ?stop_names ?alert_duration ?due_to_cause",
+      header_template: "Dock issue at ?stop_names ?alert_duration ?due_to_cause",
       description_template: %{
         route_count: 0,
         stop_count: 2,
         trip_count: nil,
         direction_count: nil
       },
-      service_effect_template: "Change at ?stop_names"
+      # service_effect_template: "Change at ?stop_names"
+      service_effect_template: "Dock issue at ?stop_names"
     },
     %{
       pattern: {"Shuttle"},
+      # "Shuttle buses replacing ?route_names ?direction_name service ?alert_duration ?due_to_cause",
       header_template:
-        "Shuttle buses replacing ?route_names ?direction_name service ?alert_duration ?due_to_cause",
+        "Shuttle buses replacing ?route_names ?direction_name service ?stop_range_between ?alert_duration ?due_to_cause",
       description_template: %{
         route_count: 5,
         stop_count: 0,
@@ -426,8 +445,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     },
     %{
       pattern: {"Suspension"},
+      # "?route_names ?direction_name service suspended ?alert_duration ?due_to_cause",
       header_template:
-        "?route_names ?direction_name service suspended ?alert_duration ?due_to_cause",
+        "?route_names ?direction_name service suspended ?stop_range_between ?alert_duration ?due_to_cause",
       description_template: %{
         route_count: 5,
         stop_count: 0,
@@ -483,14 +503,16 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     },
     %{
       pattern: {"Station Issue"},
-      header_template: "Change at ?stop_names ?alert_duration ?due_to_cause",
+      # header_template: "Change at ?stop_names ?alert_duration ?due_to_cause",
+      header_template: "Station issue at ?stop_names ?alert_duration ?due_to_cause",
       description_template: %{
         route_count: 0,
         stop_count: 2,
         trip_count: nil,
         direction_count: nil
       },
-      service_effect_template: "change at ?stop_names"
+      # service_effect_template: "change at ?stop_names"
+      service_effect_template: "Station issue at ?stop_names"
     }
   ]
 

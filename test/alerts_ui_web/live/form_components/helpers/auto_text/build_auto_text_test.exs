@@ -173,7 +173,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
     end
 
     test "more than two stops" do
-      expected = "Lechmere, Longwood Medical Area, Massachusetts Avenue, and Mattapan"
+      expected = "4 stops"
       actual = BuildAutoText.stop_names(%{stops: [@stop_1, @stop_2, @stop_3, @stop_4]})
       assert expected == actual
     end

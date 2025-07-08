@@ -278,7 +278,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         assert view
                |> element("#alert_details_header_text")
                |> render() =~
-                 "Framingham/Worcester Line train 595 (11:30 AM from South Station) trip is operating about 15 minutes behind schedule from 3:30 PM to 5:30 PM on #{Calendar.strftime(@tomorrows_date, "%a, %b %-d")} due to ice in harbor"
+                 "Framingham/Worcester Line train 595 (11:30 AM from South Station) trip is operating about 15 minutes behind schedule due to ice in harbor."
 
         assert view
                |> element("#alert_details_description_text")
@@ -345,7 +345,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         assert view
                |> element("#alert_details_header_text")
                |> render() =~
-                 "South Station closed from #{Calendar.strftime(@start_time, "%a, %b %-d at %-I:%M %p")} - #{Calendar.strftime(@end_time, "%a, %b %-d at %-I:%M %p")} due to ice in harbor"
+                 "3 stops closed from #{Calendar.strftime(@start_time, "%a, %b %-d at %-I:%M %p")} - #{Calendar.strftime(@end_time, "%a, %b %-d at %-I:%M %p")} due to ice in harbor"
 
         assert view
                |> element("#alert_details_description_text")

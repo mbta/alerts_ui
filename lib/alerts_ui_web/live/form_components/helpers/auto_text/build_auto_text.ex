@@ -144,7 +144,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   def stop_names(%{stops: stops}) do
     stops
     |> Enum.map(&SelectFormatter.name_for_option/1)
-    |> join_together
+    |> join_stops
   end
 
   # stop form (modifies stops)
@@ -321,12 +321,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   end
 
   def join_stops(stops), do: join_together(stops)
-
-  def join_together_routes(things) do
-    things
-    |> List.replace_at(-1, "and " <> List.last(things))
-    |> Enum.join(", ")
-  end
 
   def join_together(nil), do: ""
   def join_together([]), do: ""
