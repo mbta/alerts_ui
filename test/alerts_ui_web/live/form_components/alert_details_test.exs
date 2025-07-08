@@ -190,15 +190,22 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
       |> element("#time_range_form")
       |> render_change(%{
         "time_range" => %{
-          "active_period_start_date" => @tomorrows_date |> Date.add(1) |> Date.to_iso8601(),
-          "active_period_end_date" => @tomorrows_date |> Date.add(2) |> Date.to_iso8601()
+          "active_period_start_date" => @tomorrows_date |> Date.to_iso8601(),
+          "active_period_end_date" => Date.add(@tomorrows_date, 1) |> Date.to_iso8601()
         }
       })
 
+      # expected outcome is different if the dates are weekends
+      expected_string =
+        if Date.day_of_week(@tomorrows_date) == 6 do
+          "closed the weekend of #{Calendar.strftime(@tomorrows_date, "%a, %b %-d")} - #{Calendar.strftime(Date.add(@tomorrows_date, 1), "%a, %b %-d")}"
+        else
+          "from #{Calendar.strftime(@tomorrows_date, "%a, %b %-d")} - #{Calendar.strftime(Date.add(@tomorrows_date, 1), "%a, %b %-d")}"
+        end
+
       assert view
              |> element("#alert_details_header_text")
-             |> render() =~
-               "from #{Calendar.strftime(Date.add(@tomorrows_date, 1), "%a, %b %-d")} - #{Calendar.strftime(Date.add(@tomorrows_date, 2), "%a, %b %-d")}"
+             |> render() =~ expected_string
     end
 
     @tag :logged_in_user

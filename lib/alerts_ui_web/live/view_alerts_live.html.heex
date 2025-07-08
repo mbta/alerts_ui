@@ -41,7 +41,10 @@
         ]}
       >
         <:col :let={alert} label="Service" field={:alert_id} col_style="min-width: 11rem;">
-          <.service_pills entities={alert.original_route_selections} effect={alert.effect_detail} />
+          <.service_pills
+            entities={alert.original_route_selections}
+            effect_name={alert.effect_name}
+          />
         </:col>
         <:col :let={alert} label="Effect" field={:effect_detail} col_style="min-width: 7.5rem;">
           {format_effect(alert.effect_detail)}
