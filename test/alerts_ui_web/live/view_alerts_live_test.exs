@@ -1,8 +1,11 @@
 defmodule AlertsUIWeb.AlertsLiveTest do
   use ExUnit.Case
   use AlertsUIWeb.ConnCase
+  import Mock
   import Phoenix.LiveViewTest
   import AlertsUI.Support.Factory
+
+  alias MBTAV3API.Routes.Repo, as: RoutesRepo
 
   describe "alerts list page" do
     setup do
@@ -13,7 +16,8 @@ defmodule AlertsUIWeb.AlertsLiveTest do
           build(:active_period, %{start: ~U[2023-10-13 00:01:00Z]})
         ],
         header_text: "this is the first alert",
-        effect_detail: "DETOUR"
+        effect_detail: "DETOUR",
+        original_route_selections: ["1", "2"]
       })
 
       insert(:alert, %{
@@ -23,7 +27,8 @@ defmodule AlertsUIWeb.AlertsLiveTest do
           build(:active_period, %{start: ~U[2023-11-13 00:01:00Z]})
         ],
         header_text: "this is the second alert",
-        effect_detail: "SUMMARY"
+        effect_detail: "SUMMARY",
+        original_route_selections: []
       })
 
       :ok
@@ -82,6 +87,182 @@ defmodule AlertsUIWeb.AlertsLiveTest do
                },
                "reset" => ""
              }) =~ "123"
+    end
+  end
+
+  describe "route pills" do
+    @tag :logged_in_user
+    test "a subway alert shows the correct route pill", %{conn: conn} do
+      insert(:alert, %{
+        alert_id: "123",
+        active_period: [
+          build(:active_period, %{start: ~U[2023-11-12 00:01:00Z]}),
+          build(:active_period, %{start: ~U[2023-11-13 00:01:00Z]})
+        ],
+        header_text: "here's a subway delay alert",
+        effect_detail: "DELAY",
+        original_route_selections: ["Orange"]
+      })
+
+      {:ok, _view, html} = live(conn, "/alerts")
+
+      assert html =~ "Orange Line"
+    end
+
+    @tag :logged_in_user
+    test "up to four bus routes can be displayed without collapsing the number", %{conn: conn} do
+      insert(:alert, %{
+        alert_id: "123",
+        active_period: [
+          build(:active_period, %{start: ~U[2023-11-12 00:01:00Z]}),
+          build(:active_period, %{start: ~U[2023-11-13 00:01:00Z]})
+        ],
+        header_text: "here's a bus delay alert",
+        effect_detail: "DELAY",
+        original_route_selections: ["111", "222", "333", "444"]
+      })
+
+      {:ok, _view, html} = live(conn, "/alerts")
+
+      assert html =~ "111"
+      assert html =~ "222"
+      assert html =~ "333"
+      assert html =~ "444"
+      refute html =~ "+"
+    end
+
+    @tag :logged_in_user
+    test "five or more routes will be collapsed", %{conn: conn} do
+      insert(:alert, %{
+        alert_id: "123",
+        active_period: [
+          build(:active_period, %{start: ~U[2023-11-12 00:01:00Z]}),
+          build(:active_period, %{start: ~U[2023-11-13 00:01:00Z]})
+        ],
+        header_text: "here's a bus delay alert",
+        effect_detail: "DELAY",
+        original_route_selections: ["111", "222", "333", "444", "555"]
+      })
+
+      {:ok, _view, html} = live(conn, "/alerts")
+
+      assert html =~ "111"
+      assert html =~ "222"
+      assert html =~ "333"
+      assert html =~ "444"
+      refute html =~ "555"
+      assert html =~ "+1"
+    end
+
+    @tag :logged_in_user
+    test "SLW is represented by 1 SL route pill instead of by bus number or multiple pills", %{
+      conn: conn
+    } do
+      with_mock(RoutesRepo,
+        get: fn
+          "746" -> %{name: "SLW"}
+        end
+      ) do
+        insert(:alert, %{
+          alert_id: "123",
+          active_period: [
+            build(:active_period, %{start: ~U[2023-11-12 00:01:00Z]}),
+            build(:active_period, %{start: ~U[2023-11-13 00:01:00Z]})
+          ],
+          header_text: "here's a SL delay alert",
+          effect_detail: "DELAY",
+          original_route_selections: ["746"]
+        })
+
+        {:ok, _view, html} = live(conn, "/alerts")
+
+        assert html =~ "SLW"
+        refute html =~ "SL1"
+      end
+    end
+
+    @tag :logged_in_user
+    test "elevator, bike, and other facility issues receive the facility pill", %{conn: conn} do
+      insert(:alert, %{
+        alert_id: "123",
+        active_period: [
+          build(:active_period, %{start: ~U[2023-11-12 00:01:00Z]}),
+          build(:active_period, %{start: ~U[2023-11-13 00:01:00Z]})
+        ],
+        header_text: "here's a bike issue alert",
+        effect_detail: "BIKE_ISSUE",
+        original_route_selections: []
+      })
+
+      {:ok, _view, html} = live(conn, "/alerts")
+
+      assert html =~ "Facility"
+    end
+
+    @tag :logged_in_user
+    test "systemwide alert shows the systemwide pill", %{conn: conn} do
+      insert(:alert, %{
+        alert_id: "123",
+        active_period: [
+          build(:active_period, %{start: ~U[2023-11-12 00:01:00Z]}),
+          build(:active_period, %{start: ~U[2023-11-13 00:01:00Z]})
+        ],
+        header_text: "here's a delay alert for all ferries",
+        effect_detail: "DELAY",
+        original_route_selections: []
+      })
+
+      {:ok, _view, html} = live(conn, "/alerts")
+
+      assert html =~ "Systemwide"
+    end
+
+    @tag :logged_in_user
+    test "commuter rail pill shows proper full name without CR appended", %{conn: conn} do
+      with_mock(RoutesRepo,
+        get: fn
+          "CR-Framingham" -> %{long_name: "Framingham/Worcester"}
+        end
+      ) do
+        insert(:alert, %{
+          alert_id: "123",
+          active_period: [
+            build(:active_period, %{start: ~U[2023-11-12 00:01:00Z]}),
+            build(:active_period, %{start: ~U[2023-11-13 00:01:00Z]})
+          ],
+          header_text: "here's a CR delay alert",
+          effect_detail: "DELAY",
+          original_route_selections: ["CR-Framingham"]
+        })
+
+        {:ok, _view, html} = live(conn, "/alerts")
+
+        assert html =~ "Framingham/Worcester"
+      end
+    end
+
+    @tag :logged_in_user
+    test "ferry pill shows proper full name", %{conn: conn} do
+      with_mock(RoutesRepo,
+        get: fn
+          "Boat-F4" -> %{long_name: "Charlestown"}
+        end
+      ) do
+        insert(:alert, %{
+          alert_id: "123",
+          active_period: [
+            build(:active_period, %{start: ~U[2023-11-12 00:01:00Z]}),
+            build(:active_period, %{start: ~U[2023-11-13 00:01:00Z]})
+          ],
+          header_text: "here's a CR delay alert",
+          effect_detail: "DELAY",
+          original_route_selections: ["Boat-F4"]
+        })
+
+        {:ok, _view, html} = live(conn, "/alerts")
+
+        assert html =~ "Charlestown"
+      end
     end
   end
 

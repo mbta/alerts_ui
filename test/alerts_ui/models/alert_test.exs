@@ -166,66 +166,6 @@ defmodule AlertsUI.Models.AlertTest do
     end
   end
 
-  describe "entities_with_icons" do
-    test "returns a list of route IDs or facility activities representing the alert's informed entities" do
-      alert = %Alert{
-        id: "1",
-        informed_entity: [
-          %InformedEntity{activities: [:board, :exit, :ride], route_id: "28", route_type: 3},
-          %InformedEntity{
-            activities: [:using_wheelchair, :park_car, :board],
-            facility_id: "772",
-            stop_id: "70511"
-          }
-        ]
-      }
-
-      assert Alert.entities_with_icons(alert) == ["28", "using_wheelchair", "park_car"]
-    end
-
-    test "returns only unique results" do
-      alert = %Alert{
-        id: "1",
-        informed_entity: [
-          %InformedEntity{activities: [:board], route_id: "28", route_type: 3},
-          %InformedEntity{activities: [:exit], route_id: "28", route_type: 3}
-        ]
-      }
-
-      assert Alert.entities_with_icons(alert) == ["28"]
-    end
-
-    test "combines bike activities" do
-      alert = %Alert{
-        id: "1",
-        informed_entity: [
-          %InformedEntity{
-            activities: [:bringing_bike, :store_bike],
-            facility_id: "772",
-            stop_id: "70511"
-          }
-        ]
-      }
-
-      assert Alert.entities_with_icons(alert) == ["bike"]
-    end
-
-    test "returns empty list if no informed entity" do
-      alert = %Alert{
-        id: "1",
-        informed_entity: [
-          %InformedEntity{
-            facility_id: "772",
-            stop_id: "70511",
-            activities: nil
-          }
-        ]
-      }
-
-      assert Alert.entities_with_icons(alert) == []
-    end
-  end
-
   describe "get_direction/1" do
     test "returns nil if informed entity is empty list" do
       assert Alert.get_direction([]) == nil

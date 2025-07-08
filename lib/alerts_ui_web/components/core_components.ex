@@ -21,6 +21,8 @@ defmodule AlertsUIWeb.CoreComponents do
   alias Phoenix.HTML.{Form, FormField}
   alias Phoenix.LiveView.JS
 
+  alias AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes
+
   @doc """
   Renders flash notices.
 
@@ -663,19 +665,30 @@ defmodule AlertsUIWeb.CoreComponents do
   end
 
   @doc """
-  Renders a list of icons representing an alert's informed entities.
+  Renders a list of pills representing an alert's routes or facililities.
   """
   attr(:entities, :list, required: true)
+  attr(:effect_name, :string, required: true)
 
-  def informed_entity_icon(assigns) do
+  def service_pills(assigns) do
+    # Only first four routes/facilities are listed, the rest are in a "+X" pill
+
     ~H"""
-    <.mode_icon type={mode_icon_type(@entities)} />
+    <div class="flex flex-wrap gap-1">
+      <%= if @entities == [] do %>
+        <%= if @effect_name in EffectsForRouteTypes.list_effects(:access) do %>
+          <.mode_icon type="Facility" />
+        <% else %>
+          <.mode_icon type="Systemwide" />
+        <% end %>
+      <% end %>
+      <%= for entity <- @entities |> Enum.take(4) do %>
+        <.mode_icon type={entity} />
+      <% end %>
+      <.mode_icon :if={length(@entities) > 4} type={length(@entities) - 4} />
+    </div>
     """
   end
-
-  defp mode_icon_type([_, _ | _]), do: "Multiple"
-  defp mode_icon_type([entity]), do: entity
-  defp mode_icon_type(_), do: "Other"
 
   ## JS Commands
 

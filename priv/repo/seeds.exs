@@ -39,7 +39,7 @@ informed_entity_1 =
     route_type: 1,
     direction_id: 3,
     stop_id: "333",
-    activities: [:BOARD, :EXIT],
+    activities: [:PARK_CAR, :STORE_BIKE],
     trip: trip
   })
 
@@ -50,7 +50,7 @@ informed_entity_2 =
     route_type: 2,
     direction_id: 4,
     stop_id: "777",
-    activities: [:PARK_CAR, :STORE_BIKE]
+    activities: [:BOARD, :EXIT]
   })
 
 active_period_1 =
@@ -90,5 +90,6 @@ Repo.insert!(%Alert{
   image_url: "https://example.com/image1.png",
   image_alternative_text: "an alert image",
   informed_entity: [informed_entity_1, informed_entity_2],
-  reminder_times: [reminder_time]
+  reminder_times: [reminder_time],
+  original_route_selections: []
 })
