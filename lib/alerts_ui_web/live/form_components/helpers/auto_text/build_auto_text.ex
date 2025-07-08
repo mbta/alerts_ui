@@ -202,8 +202,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
 
   @spec trip_form(__MODULE__.t()) :: String.t()
   def trip_form(%{schedules: []}), do: ""
-  def trip_form(%{schedules: [_schedules]}), do: "trip is"
-  def trip_form(%{schedules: [_ | _]}), do: "trips are"
+
+  def trip_form(%{schedules: [_schedule]}), do: "is"
+
+  def trip_form(%{schedules: [_ | _]}), do: "are"
 
   # facilities
   @spec facility_name(__MODULE__.t()) :: String.t()

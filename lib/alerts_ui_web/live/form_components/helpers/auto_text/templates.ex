@@ -341,7 +341,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     # Commuter Rail
     %{
       pattern: {2, "Delay"},
-      # "?route_names ?trip_names ?trip_form operating ?severity_name behind schedule ?alert_duration ?due_to_cause",
       header_template:
         "?route_names ?trip_names ?trip_form operating ?severity_name behind schedule ?stop_range_between ?due_to_cause|.",
       description_template: %{
@@ -354,7 +353,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     },
     %{
       pattern: {2, "Shuttle"},
-      # "?route_names ?direction_name ?trip_names will be replaced by a shuttle bus ?alert_duration ?due_to_cause",
       header_template:
         "?route_names ?direction_name ?trip_names will be replaced by a shuttle bus ?stop_range_between ?alert_duration ?due_to_cause",
       description_template: %{
@@ -367,7 +365,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     },
     %{
       pattern: {2, "Track Change"},
-      # "Please board ?route_names ?trip_names on opposite track ?alert_duration ?due_to_cause",
       header_template:
         "Please board ?route_names ?trip_names on opposite track ?stop_range_at ?alert_duration ?due_to_cause|.",
       description_template: %{
@@ -392,7 +389,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     },
     %{
       pattern: {2, "Service Change"},
-      # header_template: "?route_names notice: ?trip_names ?alert_duration ?due_to_cause",
       header_template: "?route_names ?trip_names service change ?alert_duration ?due_to_cause",
       description_template: %{
         route_count: 5,

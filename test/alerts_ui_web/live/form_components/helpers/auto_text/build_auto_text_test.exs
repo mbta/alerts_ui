@@ -373,11 +373,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
     end
 
     test "one trip" do
-      assert BuildAutoText.trip_form(%{schedules: [@schedule_1]}) == "trip is"
+      assert BuildAutoText.trip_form(%{schedules: [@schedule_1]}) == "is"
     end
 
     test "multiple trips" do
-      assert BuildAutoText.trip_form(%{schedules: [@schedule_1, @schedule_2]}) == "trips are"
+      assert BuildAutoText.trip_form(%{schedules: [@schedule_1, @schedule_2]}) ==
+               "are"
     end
   end
 

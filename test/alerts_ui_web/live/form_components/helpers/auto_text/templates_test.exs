@@ -900,7 +900,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Route 1 train 527 (9:01 AM from South Station) trip is operating about 10 minutes behind schedule at Lechmere due to a hazmat condition."
+        "Route 1 train 527 (9:01 AM from South Station) is operating about 10 minutes behind schedule at Lechmere due to a hazmat condition."
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -982,7 +982,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Route 1 train 527 (9:01 AM from South Station) trip is cancelled until Sat, May 10 due to a hazmat condition"
+        "Route 1 train 527 (9:01 AM from South Station) is cancelled until Sat, May 10 due to a hazmat condition"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
