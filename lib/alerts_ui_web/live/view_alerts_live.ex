@@ -75,12 +75,16 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   end
 
   def format_start_time(start_time_utc) do
-    todays_service_date =
+    current_service_date =
       DateTime.now!("America/New_York")
       |> ActivePeriod.datetime_to_service_date()
 
     most_recent_start_of_service =
-      DateTime.new!(todays_service_date, ActivePeriod.start_of_service_time(), "America/New_York")
+      DateTime.new!(
+        current_service_date,
+        ActivePeriod.start_of_service_time(),
+        "America/New_York"
+      )
 
     if DateTime.compare(most_recent_start_of_service, start_time_utc) == :eq do
       "start of service"
