@@ -66,6 +66,30 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
   :route_name
 
   describe "build_auto_text/2 (header templates)" do
+    test "Properly renders when some parts are empty" do
+      autotext_data = %{
+        route_type: 3,
+        routes: [@route_1],
+        stops: [@stop_1],
+        effect_name: "Stop Closure",
+        cause_detail: "",
+        alert_timing: :"one-time",
+        start_specifier: :now,
+        end_specifier: :later_today,
+        start_datetime: ~N[2025-05-08 13:00:00],
+        end_datetime: ~N[2025-05-08 15:00:00]
+      }
+
+      expected_header = "The following stop is closed: Lechmere"
+
+      actual_header = Templates.build_auto_text(autotext_data, :header_template)
+      assert expected_header == actual_header
+
+      expected_service_effect = "Lechmere closed"
+      actual_service_effect = Templates.build_auto_text(autotext_data, :service_effect_template)
+      assert expected_service_effect == actual_service_effect
+    end
+
     # access
     test "access alert bike issue" do
       autotext_data = %{

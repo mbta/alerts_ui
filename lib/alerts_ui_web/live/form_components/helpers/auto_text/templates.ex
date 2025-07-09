@@ -600,6 +600,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     end)
     |> String.replace(" |", "")
     |> String.replace(~r/\s{2,}/, " ")
+    |> String.replace(" :", ":")
+    |> String.replace(" .", ".")
     |> String.trim()
   end
 
