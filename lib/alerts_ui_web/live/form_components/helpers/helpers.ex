@@ -15,4 +15,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.Helpers do
     |> Enum.reject(fn {_, v} -> v == [] end)
     |> Map.new()
   end
+
+  def alert_is_closed(alert) do
+    !is_nil(alert.closed_timestamp)
+  end
 end

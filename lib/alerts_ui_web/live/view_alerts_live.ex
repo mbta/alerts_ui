@@ -112,13 +112,15 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     [{"All", ""}]
     |> Enum.concat(
       Effect.effect_details()
-      |> Enum.map(
-        &{&1
-         |> String.replace("_", " ")
-         |> String.split()
-         |> Enum.map_join(" ", fn s -> String.capitalize(s) end), &1}
-      )
+      |> Enum.map(&{format_effect(&1), &1})
     )
+  end
+
+  defp format_effect(effect) do
+    effect
+    |> String.replace("_", " ")
+    |> String.split()
+    |> Enum.map_join(" ", fn s -> String.capitalize(s) end)
   end
 
   defp format_service_type_options do
