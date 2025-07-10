@@ -296,6 +296,8 @@ defmodule AlertsUIWeb.AlertsLiveTest do
           build(:active_period, %{start: ~U[2023-10-12 00:01:00Z]}),
           build(:active_period, %{start: ~U[2023-10-13 00:01:00Z]})
         ],
+        active_period_start: ~U[2023-10-12 00:01:00Z],
+        duration_certainty: :UNKNOWN,
         header_text: "this is the first alert",
         effect_detail: "DETOUR",
         original_route_selections: ["1", "2"],
@@ -308,6 +310,8 @@ defmodule AlertsUIWeb.AlertsLiveTest do
           build(:active_period, %{start: ~U[2023-11-12 00:01:00Z]}),
           build(:active_period, %{start: ~U[2023-11-13 00:01:00Z]})
         ],
+        active_period_start: ~U[2023-10-12 00:01:00Z],
+        duration_certainty: :UNKNOWN,
         header_text: "this is the second alert",
         effect_detail: "SUMMARY",
         original_route_selections: [],
@@ -341,6 +345,8 @@ defmodule AlertsUIWeb.AlertsLiveTest do
           build(:active_period, %{start: ~U[2023-10-12 00:01:00Z]}),
           build(:active_period, %{start: ~U[2023-10-13 00:01:00Z]})
         ],
+        active_period_start: ~U[2023-10-12 00:01:00Z],
+        duration_certainty: :UNKNOWN,
         header_text: "this is the third alert",
         effect_detail: "DETOUR",
         original_route_selections: ["1", "2"]
