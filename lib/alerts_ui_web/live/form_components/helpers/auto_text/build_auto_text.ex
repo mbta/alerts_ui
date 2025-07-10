@@ -144,7 +144,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   def stop_names(%{stops: stops}) do
     stops
     |> Enum.map(&SelectFormatter.name_for_option/1)
-    |> join_together
+    |> join_stops
   end
 
   # stop form (modifies stops)
@@ -180,10 +180,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   @spec trip_names_only(__MODULE__.t()) :: String.t()
   def trip_names_only(%{schedules: []}), do: ""
 
-  def trip_names_only(%{schedules: schedules}) do
+  def trip_names_only(%{schedules: schedules, route_type: route_type}) do
     schedules
     |> Enum.map(&SelectFormatter.name_for_option/1)
-    |> join_together
+    |> join_trips(trip_word(schedules, route_type))
   end
 
   @spec trip_names(__MODULE__.t()) :: String.t()
@@ -202,8 +202,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
 
   @spec trip_form(__MODULE__.t()) :: String.t()
   def trip_form(%{schedules: []}), do: ""
-  def trip_form(%{schedules: [_schedules]}), do: "trip is"
-  def trip_form(%{schedules: [_ | _]}), do: "trips are"
+
+  def trip_form(%{schedules: [_schedule]}), do: "is"
+
+  def trip_form(%{schedules: [_ | _]}), do: "are"
 
   # facilities
   @spec facility_name(__MODULE__.t()) :: String.t()
@@ -309,6 +311,19 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   defp route_word(_routes), do: "Routes "
 
   # formatters
+
+  def join_trips([_ | _] = trips, trip_word) when length(trips) > 2 do
+    "#{hd(trips)} and #{length(trips) - 1} other #{trip_word}"
+  end
+
+  def join_trips(trips, _), do: join_together(trips)
+
+  def join_stops([_ | _] = stops) when length(stops) > 2 do
+    "#{length(stops)} stops"
+  end
+
+  def join_stops(stops), do: join_together(stops)
+
   def join_together(nil), do: ""
   def join_together([]), do: ""
 

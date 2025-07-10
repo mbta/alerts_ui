@@ -338,7 +338,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         # stops and routes here are used in autotext
         available_stops = Map.get(available_stops, :result)
         selected_stops = get_selected_stops(available_stops, affected_service["stop_ids"])
-
         available_routes = Map.get(affected_service, "routes_by_id")
         selected_routes = get_selected_routes(available_routes, affected_service["route_ids"])
 

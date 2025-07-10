@@ -97,7 +97,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         within_same_service_day?: false,
         end_datetime: end_datetime
       }) do
-    "through #{datetime_to_formatted_date(end_datetime)}"
+    formatted_end = end_datetime |> ActivePeriod.naive_datetime_to_service_date() |> format_date
+    "through #{formatted_end}"
   end
 
   def build_onetime_string(%{
@@ -250,7 +251,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         within_same_service_day?: true,
         start_datetime: start_datetime
       }) do
-    # TODO
     "on #{datetime_to_formatted_date(start_datetime)}"
   end
 
@@ -430,25 +430,17 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
     end
   end
 
-  # changes end specifier to "end of service" if the time is the at the end of service
-  defp change_end_specifier(nil, end_specifier), do: end_specifier
-  defp change_end_specifier(_, :end_of_service), do: :end_of_service
-
-  defp change_end_specifier(%NaiveDateTime{} = end_datetime, end_specifier) do
-    if NaiveDateTime.to_time(end_datetime) == ActivePeriod.end_of_service_time() do
+  # changes end specifier to "end of service" if specifier is custom and the time is the at the end of service
+  defp change_end_specifier(%NaiveDateTime{} = end_datetime, :custom) do
+    if Time.compare(NaiveDateTime.to_time(end_datetime), ActivePeriod.end_of_service_time()) ==
+         :eq do
       :end_of_service
     else
-      end_specifier
+      :custom
     end
   end
 
-  defp change_end_specifier(%Time{} = end_time, end_specifier) do
-    if end_time == ActivePeriod.end_of_service_time() do
-      :end_of_service
-    else
-      end_specifier
-    end
-  end
+  defp change_end_specifier(_, end_specifier), do: end_specifier
 
   defp datetime_to_formatted_time(datetime) do
     datetime |> NaiveDateTime.to_time() |> format_time

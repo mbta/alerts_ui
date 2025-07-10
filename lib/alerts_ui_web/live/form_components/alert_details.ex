@@ -40,7 +40,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         image_url: "",
         image_alternative_text: "",
         severity: 4,
-        image_size: %{}
+        image_size: %{},
+        autotext_data: %{}
       })
 
     send_changeset(changeset)
@@ -99,11 +100,10 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
 
     form = to_form(changeset)
 
-    assigns =
-      assigns
-      |> Map.merge(%{form: form, cause_options: cause_options, autotext_data: autotext_data})
+    socket =
+      assign(socket, %{form: form, cause_options: cause_options, autotext_data: autotext_data})
 
-    {:ok, assign(socket, assigns)}
+    {:ok, socket}
   end
 
   @impl true

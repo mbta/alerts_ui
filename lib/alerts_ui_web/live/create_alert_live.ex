@@ -340,6 +340,9 @@ defmodule AlertsUIWeb.CreateAlertLive do
       alert_data: Map.merge(alert_data, %{combination: combination}),
       combination: combination,
       selected_schedules: nil,
+      selected_facility: nil,
+      selected_routes: nil,
+      selected_stops: nil,
       errors: %{}
     }
 

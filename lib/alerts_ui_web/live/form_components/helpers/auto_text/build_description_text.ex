@@ -34,7 +34,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionText do
   defp stops_text([], _, _), do: ""
 
   defp stops_text(stop_names, direction, effect) do
-    "#{affected_stop_term(effect)} #{direction} stops:\n#{Enum.join(stop_names, "\n")}"
+    stop_names = stop_names |> Enum.uniq() |> Enum.join("\n")
+    "#{affected_stop_term(effect)} #{direction} stops:\n#{stop_names}"
   end
 
   @spec affected_trips(BuildAutoText.t()) :: String.t()

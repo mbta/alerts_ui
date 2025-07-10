@@ -240,10 +240,14 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         selected_schedules =
           get_selected_schedules(available_schedules, affected_service["trip_ids"])
 
+        available_stops = Map.get(socket.assigns.available_stops, :result)
+        selected_stops = get_selected_stops(available_stops, affected_service["stop_ids"])
+
         send(self(), {:add_errors, [], __MODULE__})
         send(self(), {:section_completed, changeset})
         send(self(), {:selected_routes, selected_routes})
         send(self(), {:selected_schedules, selected_schedules})
+        send(self(), {:selected_stops, selected_stops})
 
       {:error, changeset} ->
         send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
@@ -735,5 +739,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   defp get_selected_routes(available_routes, route_ids) do
     available_routes
     |> Enum.filter(&(&1.id in route_ids))
+  end
+
+  defp get_selected_stops(nil, _), do: nil
+  defp get_selected_stops(_, nil), do: nil
+
+  defp get_selected_stops(available_stops, stop_ids) do
+    Enum.filter(available_stops, &(&1.id in stop_ids))
   end
 end
