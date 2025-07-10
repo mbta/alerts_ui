@@ -97,7 +97,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
         end_datetime: ~N[2025-05-10 03:00:00]
       }
 
-      expected = "through Sat, May 10"
+      expected = "through Fri, May 9"
       actual = AutoTextDuration.build_duration_text(auto_text_data, current_time)
       assert expected == actual
     end
