@@ -196,6 +196,34 @@ defmodule AlertsUIWeb.AlertsLiveTest do
     end
 
     @tag :logged_in_user
+    test "CT2 is represented by proper route pill", %{
+      conn: conn
+    } do
+      with_mock(RoutesRepo,
+        get: fn
+          "708" -> %{name: "CT3"}
+        end
+      ) do
+        insert(:alert, %{
+          alert_id: "123",
+          active_period: [
+            build(:active_period, %{start: ~U[2023-11-12 00:01:00Z]}),
+            build(:active_period, %{start: ~U[2023-11-13 00:01:00Z]})
+          ],
+          active_period_start: ~U[2023-11-12 00:01:00Z],
+          duration_certainty: :UNKNOWN,
+          header_text: "here's a CT3 delay alert",
+          effect_detail: "DELAY",
+          original_route_selections: ["708"]
+        })
+
+        {:ok, _view, html} = live(conn, "/alerts")
+
+        assert html =~ "CT3"
+      end
+    end
+
+    @tag :logged_in_user
     test "elevator, bike, and other facility issues receive the facility pill", %{conn: conn} do
       insert(:alert, %{
         alert_id: "123",
@@ -239,7 +267,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
     test "commuter rail pill shows proper full name without CR appended", %{conn: conn} do
       with_mock(RoutesRepo,
         get: fn
-          "CR-Framingham" -> %{long_name: "Framingham/Worcester"}
+          "CR-NewBedford" -> %{long_name: "Fall River/New Bedford Line"}
         end
       ) do
         insert(:alert, %{
@@ -252,12 +280,12 @@ defmodule AlertsUIWeb.AlertsLiveTest do
           duration_certainty: :UNKNOWN,
           header_text: "here's a CR delay alert",
           effect_detail: "DELAY",
-          original_route_selections: ["CR-Framingham"]
+          original_route_selections: ["CR-NewBedford"]
         })
 
         {:ok, _view, html} = live(conn, "/alerts")
 
-        assert html =~ "Framingham/Worcester"
+        assert html =~ "Fall River/New Bedford"
       end
     end
 
@@ -265,7 +293,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
     test "ferry pill shows proper full name", %{conn: conn} do
       with_mock(RoutesRepo,
         get: fn
-          "Boat-F4" -> %{long_name: "Charlestown"}
+          "Boat-EastBoston" -> %{long_name: "East Boston Ferry"}
         end
       ) do
         insert(:alert, %{
@@ -276,14 +304,14 @@ defmodule AlertsUIWeb.AlertsLiveTest do
           ],
           active_period_start: ~U[2023-11-12 00:01:00Z],
           duration_certainty: :UNKNOWN,
-          header_text: "here's a CR delay alert",
+          header_text: "here's a ferry delay alert",
           effect_detail: "DELAY",
-          original_route_selections: ["Boat-F4"]
+          original_route_selections: ["Boat-EastBoston"]
         })
 
         {:ok, _view, html} = live(conn, "/alerts")
 
-        assert html =~ "Charlestown"
+        assert html =~ "East Boston"
       end
     end
   end
