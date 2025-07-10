@@ -2,12 +2,11 @@ defmodule AlertsUI.UsersTest do
   use AlertsUI.DataCase
 
   alias AlertsUI.DBContexts.Users
+  alias AlertsUI.Models.User
+
+  import AlertsUI.UsersFixtures
 
   describe "users" do
-    alias AlertsUI.Models.User
-
-    import AlertsUI.UsersFixtures
-
     @invalid_attrs %{email: nil, first_name: nil, last_name: nil}
 
     test "list_users/0 returns all users" do
@@ -63,6 +62,17 @@ defmodule AlertsUI.UsersTest do
     test "change_user/1 returns a user changeset" do
       user = create_db_user()
       assert %Ecto.Changeset{} = Users.change_user(user)
+    end
+  end
+
+  describe "get_by_keycloak_id/1" do
+    test "gets user correctly" do
+      user = create_db_user()
+      assert Users.get_by_keycloak_id("123-456").id == user.id
+    end
+
+    test "returns nil if user doesn't exist" do
+      assert "123-456" |> Users.get_by_keycloak_id() |> is_nil
     end
   end
 end

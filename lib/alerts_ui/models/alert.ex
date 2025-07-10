@@ -187,7 +187,6 @@ defmodule AlertsUI.Models.Alert do
   def changeset(%__MODULE__{} = alert, params) do
     alert
     |> cast(params, @permitted_fields)
-    |> cast_assoc(:user, required: true, with: &User.changeset/2)
     |> cast_assoc(:active_period, required: false, with: &ActivePeriod.changeset/2)
     |> cast_assoc(:informed_entity, required: true, with: &InformedEntity.changeset/2)
     |> cast_assoc(:reminder_times, required: false, with: &ReminderTime.changeset/2)

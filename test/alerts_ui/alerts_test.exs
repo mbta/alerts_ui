@@ -21,7 +21,7 @@ defmodule AlertsUI.AlertsTest do
         })
 
       {:ok, new_alert} =
-        Alerts.create_or_update_alert(new_params)
+        Alerts.create_or_update_alert(new_params, build(:user))
 
       assert new_alert.alert_id == "123"
       assert new_alert.header_text == "new header text"
@@ -53,7 +53,7 @@ defmodule AlertsUI.AlertsTest do
           user: Map.from_struct(existing_alert.user)
         })
 
-      Alerts.create_or_update_alert(new_params, existing_alert)
+      Alerts.create_or_update_alert(new_params, build(:user), existing_alert)
       updated_alert = Alerts.get_by_id(existing_alert.id)
       assert updated_alert.alert_id == "123"
       assert updated_alert.header_text == "new header text"
@@ -79,7 +79,7 @@ defmodule AlertsUI.AlertsTest do
           user: Map.from_struct(existing_alert.user)
         })
 
-      Alerts.create_or_update_alert(new_params, existing_alert)
+      Alerts.create_or_update_alert(new_params, build(:user), existing_alert)
       updated_alert = Repo.get_by(Alert, id: existing_alert.id)
 
       assert DateTime.compare(updated_alert.updated_at, @five_minutes_ago) == :gt
@@ -104,7 +104,7 @@ defmodule AlertsUI.AlertsTest do
           user: Map.from_struct(existing_alert.user)
         })
 
-      Alerts.create_or_update_alert(new_params, existing_alert)
+      Alerts.create_or_update_alert(new_params, build(:user), existing_alert)
       updated_alert = Repo.get_by(Alert, id: existing_alert.id)
 
       assert updated_alert.created_at == @five_minutes_ago
@@ -132,7 +132,9 @@ defmodule AlertsUI.AlertsTest do
           user: Map.from_struct(existing_alert.user)
         })
 
-      assert {:ok, updated_alert} = Alerts.create_or_update_alert(new_params, existing_alert)
+      assert {:ok, updated_alert} =
+               Alerts.create_or_update_alert(new_params, build(:user), existing_alert)
+
       assert updated_alert.alert_id == "123"
       assert (updated_alert.active_period |> hd).end == ~U[2023-10-13 00:03:00Z]
     end
@@ -146,7 +148,7 @@ defmodule AlertsUI.AlertsTest do
         })
 
       {:ok, new_alert} =
-        Alerts.create_or_update_alert(new_params)
+        Alerts.create_or_update_alert(new_params, build(:user))
 
       %Alert{alert_id: stored_alert_id} = Repo.get!(Alert, new_alert.id)
 
@@ -164,7 +166,7 @@ defmodule AlertsUI.AlertsTest do
         })
 
       {:ok, new_alert} =
-        Alerts.create_or_update_alert(new_params)
+        Alerts.create_or_update_alert(new_params, build(:user))
 
       assert new_alert.alert_id |> String.to_integer() |> is_integer()
       assert new_alert.header_text == "new header text"
@@ -179,7 +181,7 @@ defmodule AlertsUI.AlertsTest do
           description_text: nil
         })
 
-      {:error, changeset} = Alerts.create_or_update_alert(new_params)
+      {:error, changeset} = Alerts.create_or_update_alert(new_params, build(:user))
       assert changeset.errors == [header_text: {"is required", [validation: :required]}]
     end
   end

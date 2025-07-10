@@ -8,6 +8,16 @@ defmodule AlertsUI.DBContexts.Users do
 
   alias AlertsUI.Models.User
 
+  def create_or_update_user(params, existing_user \\ %User{}) do
+    existing_user
+    |> User.changeset(params)
+    |> PaperTrail.insert_or_update()
+    |> case do
+      {:ok, %{model: user}} -> {:ok, user}
+      {:error, result} -> {:error, result}
+    end
+  end
+
   @doc """
   Returns the list of users.
 
@@ -84,5 +94,15 @@ defmodule AlertsUI.DBContexts.Users do
   """
   def change_user(%User{} = user, attrs \\ %{}) do
     User.changeset(user, attrs)
+  end
+
+  def get_by_keycloak_id(keycloak_id) do
+    users = Repo.all_by(User, keycloak_id: keycloak_id)
+
+    if Enum.empty?(users) do
+      nil
+    else
+      hd(users)
+    end
   end
 end

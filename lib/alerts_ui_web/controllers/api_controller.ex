@@ -7,6 +7,8 @@ defmodule AlertsUIWeb.ApiController do
   use PhoenixSwagger
   alias AlertsUI.AlertFromApi
   alias AlertsUI.Alerts
+  alias AlertsUI.DBContexts.Users
+  alias AlertsUI.Models.User
 
   swagger_path :new do
     post("/api/alerts")
@@ -28,11 +30,16 @@ defmodule AlertsUIWeb.ApiController do
   end
 
   def new(conn, params) do
+    current_user = conn.params["user"]
+    existing_user = Users.get_by_keycloak_id(Map.get(current_user, :keycloak_id, "")) || %User{}
+
+    {:ok, user} = Users.create_or_update_user(current_user, existing_user)
+
     params
     |> Jason.encode!()
     |> Jason.decode!(keys: :atoms)
     |> AlertFromApi.fill_in_alert()
-    |> Alerts.create_or_update_alert()
+    |> Alerts.create_or_update_alert(user)
     |> case do
       {:ok, alert} ->
         alert_uuid = Map.get(alert, :id)
