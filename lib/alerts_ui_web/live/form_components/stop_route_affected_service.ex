@@ -286,7 +286,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
     affected_service =
       socket.assigns.form.params
-      |> Map.merge(%{"route_ids" => Enum.map(fetched_routes, & &1.id)})
+      |> Map.merge(%{"route_ids" => fetched_routes |> Enum.uniq() |> Enum.map(& &1.id)})
       |> add_routes_with_types(fetched_routes)
 
     changeset = build_changeset(%__MODULE__{}, affected_service)
