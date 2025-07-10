@@ -16,7 +16,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.Helpers do
     |> Map.new()
   end
 
-  def alert_is_past(alert) do
+  def alert_is_closed(alert) do
     !is_nil(alert.closed_timestamp)
   end
 end

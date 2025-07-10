@@ -80,14 +80,14 @@
         <:col :let={alert} label="Actions" col_style="min-width: 10rem;">
           <div class="inline-flex justify-end space-x-2 w-full">
             <.button_secondary_link
-              :if={!AlertsUIWeb.FormComponents.Helpers.Helpers.alert_is_past(alert)}
+              :if={!AlertsUIWeb.FormComponents.Helpers.Helpers.alert_is_closed(alert)}
               href={~p"/alerts/edit?alert_id=#{alert.alert_id}"}
               class="inline-flex rounded-[4px] !px-2 !py-[3px]"
             >
               <.icon name="hero-pencil-solid" class="w-4 h-4" />
             </.button_secondary_link>
             <.button_secondary_link
-              :if={!AlertsUIWeb.FormComponents.Helpers.Helpers.alert_is_past(alert)}
+              :if={!AlertsUIWeb.FormComponents.Helpers.Helpers.alert_is_closed(alert)}
               class="inline-flex rounded-[4px] !px-2 !py-[3px]"
             >
               <.icon name="hero-x-mark-solid" class="w-4 h-4" />
