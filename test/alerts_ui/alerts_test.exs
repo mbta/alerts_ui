@@ -2,6 +2,7 @@ defmodule AlertsUI.AlertsTest do
   @moduledoc false
   use AlertsUI.DataCase, async: false
   import AlertsUI.Support.Factory
+  import AlertsUI.UsersFixtures
   alias AlertsUI.Alerts
   alias AlertsUI.Models.{ActivePeriod, Alert}
 
@@ -13,6 +14,8 @@ defmodule AlertsUI.AlertsTest do
 
   describe "create_or_update_alert" do
     test "creates alert from params" do
+      user = create_db_user()
+
       new_params =
         build(:alert_map, %{
           alert_id: "123",
@@ -21,11 +24,12 @@ defmodule AlertsUI.AlertsTest do
         })
 
       {:ok, new_alert} =
-        Alerts.create_or_update_alert(new_params, build(:user))
+        Alerts.create_or_update_alert(new_params, user)
 
       assert new_alert.alert_id == "123"
       assert new_alert.header_text == "new header text"
       assert new_alert.description_text == ""
+      assert new_alert.user_id == user.id
       refute new_alert.created_at == nil
       refute new_alert.updated_at == nil
     end
