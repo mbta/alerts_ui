@@ -7,9 +7,9 @@ defmodule Ueberauth.Strategy.FakeKeycloak do
   alias Ueberauth.Strategy
   alias Ueberauth.Auth.{Credentials, Extra, Info}
 
-  @mbta_uuid "acad6280-8cb9-4e00-999c-c6d141adf0a6"
+  @mbta_uuid "ccad6280-8cb9-4e00-999c-c6d141adf0a6"
   @email "fake@example.com"
-  @first_name "Fake"
+  @first_name "Fake57"
   @last_name "User"
   @roles ["user"]
   @token "fake_access_token"

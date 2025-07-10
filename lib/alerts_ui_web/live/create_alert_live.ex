@@ -79,10 +79,27 @@ defmodule AlertsUIWeb.CreateAlertLive do
   def mount(params, _session, socket) do
     alert_id = Map.get(params, "alert_id")
 
-    alert_data =
-      if is_nil(alert_id),
-        do: %{},
-        else: AlertData.build_alert_data(alert_id) |> Map.from_struct()
+    existing_alert =
+      if is_nil(alert_id) do
+        nil
+      else
+        Alerts.get_by_alert_id(alert_id)
+      end
+
+    created_at = if existing_alert, do: existing_alert.created_at
+
+    created_by =
+      if existing_alert do
+        user =
+          Alerts.get_earliest_version(existing_alert.id)
+          |> Map.get(:item_changes, %{})
+          |> Map.get("user_id", "")
+          |> Users.get_user!()
+
+        "#{Map.get(user, :first_name, "")} #{Map.get(user, :last_name, "")}"
+      end
+
+    alert_data = AlertData.build_alert_data(existing_alert) |> Map.from_struct()
 
     [first_step, second_step | _] = @steps
     editing = socket.assigns.live_action == :edit
@@ -103,7 +120,9 @@ defmodule AlertsUIWeb.CreateAlertLive do
         alert_id: alert_id,
         editing: editing,
         errors: %{},
-        submitted: false
+        submitted: false,
+        created_at: created_at,
+        created_by: created_by
       })
 
     {:ok, socket}
