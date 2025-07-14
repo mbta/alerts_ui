@@ -38,7 +38,7 @@ defmodule AlertsUI.Models.CustomFilters do
       "past" ->
         where(query, [a], not is_nil(a.active_period_end) and a.active_period_end <= ^now)
 
-      _current ->
+      "current" ->
         where(
           query,
           [a],
@@ -46,6 +46,8 @@ defmodule AlertsUI.Models.CustomFilters do
           not (not is_nil(a.active_period_start) and a.active_period_start > ^now) and
             not (not is_nil(a.active_period_end) and a.active_period_end <= ^now)
         )
+
+        _all -> query
     end
   end
 end

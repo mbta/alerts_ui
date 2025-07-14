@@ -29,6 +29,11 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   end
 
   @impl true
+  @spec handle_params(
+          %{optional(:__struct__) => Flop, optional(atom() | binary()) => any()},
+          any(),
+          any()
+        ) :: {:noreply, any()}
   def handle_params(params, _url, socket) do
     with {alerts, meta} <- Alerts.list_all_paginated(params) do
       {:noreply, assign(socket, meta: meta, alerts: alerts, params: params)}
@@ -164,7 +169,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     ]
   end
 
-  defp timeline_options, do: ["current", "future", "past"]
+  defp timeline_options, do: ["current", "future", "past", "all"]
 
   @spec clean_filter_params(map()) :: map()
   defp clean_filter_params(params), do: Map.drop(params, ["_target", "reset"])
