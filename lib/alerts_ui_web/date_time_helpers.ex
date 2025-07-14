@@ -10,7 +10,7 @@ defmodule AlertsUIWeb.DateTimeHelpers do
 
   @doc """
   Return a human-friendly date-time string relative to "now".
-  Use the time (converted to EST) if today (same SERVICE day), the month and day if this year, and the month and
+  Use the time (converted to EST) if today (same SERVICE day), the month and day if this year, and the month, day and
   year if a different year.
 
   iex> friendly_date_time(~U[2025-07-03 06:02:00.00Z], ~U[2025-07-02 16:21:52.928497Z])
@@ -26,9 +26,9 @@ defmodule AlertsUIWeb.DateTimeHelpers do
   iex> friendly_date_time(~U[2022-01-07 14:01:00.00Z], ~U[2022-01-12 15:02:00.00Z])
   "Jan 7"
   iex> friendly_date_time(~U[2021-12-07 14:01:00.00Z], ~U[2022-01-12 15:02:00.00Z])
-  "Dec 2021"
+  "Dec 7, 2021"
   iex> friendly_date_time("2020-01-13T17:32:00Z", ~U[2022-01-12 15:02:00.00Z])
-  "Jan 2020"
+  "Jan 13, 2020"
   iex> friendly_date_time(nil, ~U[2022-01-12 15:02:00.00Z])
   ""
   """
@@ -139,7 +139,7 @@ defmodule AlertsUIWeb.DateTimeHelpers do
 
       # different year
       true ->
-        "%b %Y"
+        "%b %-d, %Y"
     end
   end
 end
