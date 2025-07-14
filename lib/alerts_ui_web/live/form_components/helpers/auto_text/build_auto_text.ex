@@ -150,8 +150,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   # stop form (modifies stops)
   @spec stop_form(__MODULE__.t()) :: String.t()
   def stop_form(%{stops: []}), do: ""
-  def stop_form(%{stops: [_stop]}), do: "stop is"
-  def stop_form(%{stops: _stops}), do: "stops are"
+  def stop_form(%{stops: [_stop]}), do: "is"
+  def stop_form(%{stops: _stops}), do: "are"
+
+  @spec stop_word(__MODULE__.t()) :: String.t()
+  def stop_word(%{stops: []}), do: ""
+  def stop_word(%{stops: [_stop]}), do: "stop"
+  def stop_word(%{stops: _stops}), do: "stops"
 
   # stop range (between x and y)
   @spec stop_range_between(__MODULE__.t()) :: String.t()

@@ -718,7 +718,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         end_datetime: ~N[2025-05-10 15:00:00]
       }
 
-      expected_header = "Lechmere stop moving until Sat, May 10 due to a parade"
+      expected_header = "Lechmere is moving until Sat, May 10 due to a parade"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header

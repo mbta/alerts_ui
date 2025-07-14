@@ -185,11 +185,25 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
     end
 
     test "one stop" do
-      assert BuildAutoText.stop_form(%{stops: [@stop_1]}) == "stop is"
+      assert BuildAutoText.stop_form(%{stops: [@stop_1]}) == "is"
     end
 
     test "multiple stops" do
-      assert BuildAutoText.stop_form(%{stops: [@stop_1, @stop_2]}) == "stops are"
+      assert BuildAutoText.stop_form(%{stops: [@stop_1, @stop_2]}) == "are"
+    end
+  end
+
+  describe "stop_word/1" do
+    test "stops empty" do
+      assert BuildAutoText.stop_form(%{stops: []}) == ""
+    end
+
+    test "one stop" do
+      assert BuildAutoText.stop_word(%{stops: [@stop_1]}) == "stop"
+    end
+
+    test "multiple stops" do
+      assert BuildAutoText.stop_word(%{stops: [@stop_1, @stop_2]}) == "stops"
     end
   end
 
