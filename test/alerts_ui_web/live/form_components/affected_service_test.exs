@@ -377,7 +377,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       today = @todays_date |> Date.to_string()
       today_day_name = Calendar.strftime(@todays_date, "%a %b %0d")
       tomorrow = @todays_date |> Date.add(1) |> Date.to_string()
-      # tomorrow_day_name = Timex.format!(Date.add(@todays_date, 1), "{WDshort} {Mshort} {0D}")
       tomorrow_day_name = Calendar.strftime(Date.add(@todays_date, 1), "%a %b %0d")
 
       with_mock(SchedulesRepo,

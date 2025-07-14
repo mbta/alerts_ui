@@ -82,8 +82,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         |> shifted_active_period_end()
         |> NaiveDateTime.to_date(),
       active_period_start_time_specifier: "start_of_service",
-      active_period_end_time_specifier: "end_of_service",
-      edited: false
+      active_period_end_time_specifier: "end_of_service"
     }
 
     changeset = changeset(%__MODULE__{}, alert_data)
@@ -102,6 +101,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         current_time: current_time,
         edited: false,
         selected_schedules: [],
+        old_selected_schedules: [],
         day_of_week_options: [
           Monday: :monday,
           Tuesday: :tuesday,
@@ -201,8 +201,11 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     trip_departure_time = get_trip_departure_time(selected_schedules)
     trip_arrival_time = get_trip_arrival_time(selected_schedules)
 
+    # only update times if selected schedules has changed (eg someone has just selected a new trip)
+    selected_trips_have_changed? = selected_schedules != socket.assigns.old_selected_schedules
+
     form_params =
-      if trip_departure_time && trip_arrival_time do
+      if trip_departure_time && trip_arrival_time && selected_trips_have_changed? do
         start_params =
           if NaiveDateTime.compare(trip_departure_time, socket.assigns.current_time) == :gt do
             %{
@@ -246,8 +249,16 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       |> to_form()
       |> Map.put(:action, :validate)
 
-    assigns = assigns |> Map.put(:trip_arrival_time, trip_arrival_time) |> Map.put(:form, form)
-    {:ok, assign(socket, assigns)}
+    socket =
+      socket
+      |> assign(assigns)
+      |> assign(%{
+        form: form,
+        trip_arrival_time: trip_arrival_time,
+        old_selected_schedules: selected_schedules
+      })
+
+    {:ok, socket}
   end
 
   @impl true
