@@ -3,6 +3,7 @@ defmodule AlertsUIWeb.DateTimeHelpers do
   Utility functions for formatting dates and times.
   """
 
+  alias AlertsUI.ActivePeriodBuilder
   alias AlertsUI.Models.ActivePeriod
 
   @one_minute_in_seconds 60
@@ -141,5 +142,12 @@ defmodule AlertsUIWeb.DateTimeHelpers do
       true ->
         "%b %Y"
     end
+  end
+
+  @spec is_future_datetime?(DateTime.t(), DateTime.t()) :: boolean()
+  def is_future_datetime?(utc_datetime, now \\ DateTime.now!("Etc/UTC")) do
+    utc_datetime
+    |> ActivePeriodBuilder.naive_eastern_datetime_to_utc()
+    |> DateTime.compare(now) == :gt
   end
 end

@@ -1,4 +1,4 @@
-<div class="my-20">
+<div class="my-20" id="view_alerts_live_view">
   <article>
     <.h1>Alerts</.h1>
 
@@ -29,6 +29,15 @@
       />
     </div>
 
+    <AlertsUIWeb.ReviewModal.review_modal
+      :if={Map.get(assigns, :selected_alert_data, nil)}
+      alert_data={@selected_alert_data}
+      alert_id={@selected_alert_id}
+      cancel_alert={true}
+      cancel_event_name="close_details"
+      target_id="#view_alerts_live_view"
+    />
+
     <div data-theme="winter">
       <Flop.Phoenix.table
         items={@alerts}
@@ -39,6 +48,7 @@
           tbody_tr_attrs: [class: "hover"],
           no_results_content: "No alerts found"
         ]}
+        row_click={&JS.push("open_details", value: %{alert_id: &1.alert_id})}
       >
         <:col :let={alert} label="Service" field={:alert_id} col_style="min-width: 11rem;">
           <.service_pills
@@ -77,7 +87,7 @@
             {format_end_time(alert.active_period_end, alert.duration_certainty)}
           </div>
         </:col>
-        <:col :let={alert} label="Actions" col_style="min-width: 10rem;">
+        <:action :let={alert} label="Actions" col_style="min-width: 10rem;">
           <div class="inline-flex justify-end space-x-2 w-full">
             <.button_secondary_link
               :if={!AlertsUIWeb.FormComponents.Helpers.Helpers.alert_is_closed(alert)}
@@ -110,7 +120,7 @@
               </:menu>
             </.button_menu>
           </div>
-        </:col>
+        </:action>
       </Flop.Phoenix.table>
 
       <Flop.Phoenix.pagination

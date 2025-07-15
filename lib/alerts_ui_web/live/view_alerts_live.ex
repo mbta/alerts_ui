@@ -6,6 +6,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   alias AlertsUI.Alerts
   alias AlertsUI.Models.{ActivePeriod, Effect}
   alias AlertsUIWeb.DateTimeHelpers
+  alias AlertsUIWeb.FormComponents.Helpers.AlertData
 
   @one_minute_in_ms 60_000
 
@@ -72,6 +73,34 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   def handle_event("update-filter", params, socket) do
     params = clean_filter_params(params)
     {:noreply, push_patch(socket, to: ~p"/alerts?#{params}")}
+  end
+
+  @impl true
+  def handle_event("open_details", %{"alert_id" => alert_id}, socket) do
+    alert_data = alert_id |> Integer.to_string() |> AlertData.build_alert_data()
+
+    {:noreply, assign(socket, selected_alert_data: alert_data, selected_alert_id: alert_id)}
+  end
+
+  @impl true
+  def handle_event("close_details", _, socket) do
+    {:noreply, assign(socket, selected_alert_data: nil, selected_alert_id: nil)}
+  end
+
+  @impl true
+  def handle_event("edit_alert", %{"alert_id" => alert_id}, socket) do
+    {:noreply, push_navigate(socket, to: ~p"/alerts/edit?alert_id=#{alert_id}")}
+  end 
+
+  # Just stubbed until we have actions for these
+  @impl true
+  def handle_event("close_alert", _, socket) do
+    {:noreply, assign(socket, selected_alert_data: nil, selected_alert_id: nil)}
+  end
+
+  @impl true
+  def handle_event("duplicate_alert", _, socket) do
+    {:noreply, assign(socket, selected_alert_data: nil, selected_alert_id: nil)}
   end
 
   def format_start_time(start_time_utc) do

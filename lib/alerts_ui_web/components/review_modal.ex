@@ -10,6 +10,7 @@ defmodule AlertsUIWeb.ReviewModal do
   alias AlertsUI.ActivePeriodBuilder
   alias AlertsUI.Models.SeverityLevel
   alias AlertsUIWeb.CreateAlertLive
+  alias AlertsUIWeb.DateTimeHelpers
 
   alias AlertsUIWeb.FormComponents.Helpers.{
     ContentFormatter,
@@ -20,10 +21,10 @@ defmodule AlertsUIWeb.ReviewModal do
 
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
+  alias Phoenix.LiveView.JS
 
   @doc """
-  Renders the review modal. The fields passed as props are determined by its
-  parent com
+  Renders the review modal. The fields passed as props are determined by its parent
 
   ## Examples
     <.review_modal
@@ -33,9 +34,19 @@ defmodule AlertsUIWeb.ReviewModal do
     />
   """
   attr :alert_data, :map, default: %{}, doc: "The user selections that make up alert_data"
+  attr :alert_id, :string, default: nil, doc: "If alert exists, this is the alert's string id"
+
+  attr :cancel_alert, :boolean,
+    default: false,
+    doc: "Whether the cancel alert button should be visible"
+
   attr :editing, :boolean, default: false, doc: "Whether the alert is being edited"
-  attr :alert_id, :string, default: nil, doc: "If editing, this is the alert's string id"
-  attr :rest, :global, include: ~w(cancel_event_name accept_event_name target_id)
+
+  attr :target_id, :string,
+    default: "",
+    doc: "The target to send the events to (eg form component id)"
+
+  attr :rest, :global, include: ~w(cancel_event_name accept_event_name)
 
   def review_modal(assigns) do
     # Refactor: Selected_routes will soon be in the assigns and keep us from having to make this API call
@@ -90,18 +101,20 @@ defmodule AlertsUIWeb.ReviewModal do
         direction_name: direction_name,
         stop_names: stop_names,
         trip_names: trip_names,
-        facility_name: facility_name
+        facility_name: facility_name,
+        id: "review-modal"
       )
 
     ~H"""
     <.modal
-      id="review-modal"
+      id={@id}
       show={true}
       header_text="Create new alert"
       cancel_button_text="Keep editing"
       accept_button_text="Submit"
       class="w-[800px]"
       inner_class="!p-0"
+      target_id={@target_id}
       {@rest}
     >
       <:header>
@@ -110,7 +123,7 @@ defmodule AlertsUIWeb.ReviewModal do
             <% @editing == false && @alert_id == nil -> %>
               <p class="text-lg/6">Create new alert</p>
             <% @editing == false -> %>
-              <p class="text-lg/6">Alert #{@alert_id}</p>
+              <p class="text-lg/6">Alert #{@alert_id} ({get_alert_status_text(@alert_data)})</p>
             <% @editing == true -> %>
               <p class="text-lg/6">Edit alert #{@alert_id}</p>
           <% end %>
@@ -290,21 +303,21 @@ defmodule AlertsUIWeb.ReviewModal do
             <summary class="font-bold pb-4">Preview subheader TBD</summary>
             <div class="ps-4">
               <p class="font-bold">Web Banner</p>
-              <%= if @alert_data.view_banner do %>
+              <%= if Map.get(@alert_data, :view_banner) do %>
                 <p class="pb-6">{@alert_data.banner_text}</p>
               <% else %>
                 <p class="pb-6 italic">Not selected</p>
               <% end %>
 
               <p class="font-bold">SMS</p>
-              <%= if @alert_data.notification_toggle do %>
+              <%= if Map.get(@alert_data, :notification_toggle) do %>
                 <p class="pb-6">To be populated when we build this out later</p>
               <% else %>
                 <p class="pb-6 italic">Not selected</p>
               <% end %>
 
               <p class="font-bold">Email</p>
-              <%= if @alert_data.notification_toggle do %>
+              <%= if Map.get(@alert_data, :notification_toggle) do %>
                 <p class="pb-6">To be populated when we build this out later</p>
               <% else %>
                 <p class="pb-6">To be populated when we build this out later</p>
@@ -328,10 +341,71 @@ defmodule AlertsUIWeb.ReviewModal do
           <p class="pb-3">TO BE DONE</p>
           <p class="font-bold">Last edited by</p>
           <p class="pb-3">TO BE DONE</p>
+
+          <.link class="text-primary">
+            <.icon name="hero-arrow-down-tray" class="h-4 w-4" /> Download history
+          </.link>
         </div>
       </div>
+      <%!-- Only override footer if we're not creating/reviewing edits --%>
+      <:footer :if={@alert_id && !@editing}>
+        <div class="flex flex-row justify-end px-4 py-4 gap-2">
+          <%!-- food for thought: should type=button be here or in the component? --%>
+          <.button_danger
+            :if={get_alert_status(@alert_data) != :past}
+            type="button"
+            phx-remove={hide_modal(@id)}
+            phx-click={JS.push("close_alert", target: @target_id) |> JS.exec("phx-remove")}
+          >
+            {if get_alert_status(@alert_data) == :current, do: "Close alert", else: "Cancel alert"}
+          </.button_danger>
+          <.button_secondary
+            type="button"
+            class="ml-auto"
+            phx-remove={hide_modal(@id)}
+            phx-click={JS.push("duplicate_alert", target: @target_id) |> JS.exec("phx-remove")}
+          >
+            Duplicate
+          </.button_secondary>
+          <%= if get_alert_status(@alert_data) == :past do %>
+            <.button_primary
+              type="button"
+              phx-remove={hide_modal(@id)}
+              phx-click={JS.push("close_details", target: @target_id) |> JS.exec("phx-remove")}
+            >
+              Done
+            </.button_primary>
+          <% else %>
+            <.button_primary
+              type="button"
+              phx-remove={hide_modal(@id)}
+              phx-click={
+                JS.push("edit_alert", value: %{alert_id: @alert_id}, target: @target_id)
+                |> JS.exec("phx-remove")
+              }
+            >
+              Edit this alert
+            </.button_primary>
+          <% end %>
+        </div>
+      </:footer>
     </.modal>
     """
+  end
+
+  defp get_alert_status(%{
+         active_period_start: active_period_start,
+         active_period_end: active_period_end
+       }) do
+    cond do
+      DateTimeHelpers.is_future_datetime?(active_period_start) -> :future
+      !DateTimeHelpers.is_future_datetime?(active_period_end) -> :past
+      true -> :current
+    end
+  end
+
+  defp get_alert_status_text(alert) do
+    alert |> get_alert_status() |> Atom.to_string() |> String.capitalize()
   end
 
   defp sent?(reminder_time, now \\ DateTime.utc_now()) do
