@@ -330,7 +330,7 @@ defmodule AlertsUIWeb.IconComponents do
   def mode_icon(assigns) do
     ~H"""
     <div class="whitespace-nowrap bg-mbta-bus font-bold h-full py-[2.5px] px-[9px] rounded-[200px] text-black text-xs uppercase">
-      {@type}
+      {if @type in ["747", "708"], do: fetch_short_name(@type), else: @type}
     </div>
     """
   end
@@ -340,7 +340,8 @@ defmodule AlertsUIWeb.IconComponents do
     |> RoutesRepo.get()
     |> Map.get(:long_name)
     |> String.split(" ")
-    |> List.first()
+    |> List.delete_at(-1)
+    |> Enum.join(" ")
   end
 
   defp fetch_short_name(route_id) do
