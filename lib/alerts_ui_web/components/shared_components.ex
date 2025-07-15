@@ -176,6 +176,13 @@ defmodule AlertsUIWeb.SharedComponents do
     """
   end
 
+  def base_button_classes, do: "
+    px-3
+    py-2
+    border
+    rounded-md
+  "
+
   @doc """
   Renders a medium primary button.
 
@@ -194,13 +201,10 @@ defmodule AlertsUIWeb.SharedComponents do
     ~H"""
     <button
       class={"
+      #{base_button_classes()}
       text-text-dark
       bg-primary
       border-primary
-      border-2
-      px-3
-      py-2
-      rounded-md
       hover:bg-primary-hover
       hover:border-primary-border-hover
       active:bg-primary-active
@@ -219,23 +223,20 @@ defmodule AlertsUIWeb.SharedComponents do
   end
 
   def secondary_button_classes, do: "
-      text-primary
-      border
-      border-primary
-      px-3
-      py-2
-      rounded-md
-      hover:bg-secondary-hover
-      hover:border-secondary-hover-border
-      hover:text-text-invert
-      active:bg-secondary-active
-      active:border-secondary-active
-      active:text-text-invert
-      focus:border-secondary-focus-border
-      focus:shadow-secondary-focus-shadow
-      disabled:bg-secondary-disabled
-      disabled:border-secondary-disabled
-    "
+    #{base_button_classes()}
+    text-primary
+    border-primary
+    hover:bg-secondary-hover
+    hover:border-secondary-hover-border
+    hover:text-text-invert
+    active:bg-secondary-active
+    active:border-secondary-active
+    active:text-text-invert
+    focus:border-secondary-focus-border
+    focus:shadow-secondary-focus-shadow
+    disabled:bg-secondary-disabled
+    disabled:border-secondary-disabled
+  "
 
   @doc """
   Renders a medium secondary button.
@@ -288,6 +289,45 @@ defmodule AlertsUIWeb.SharedComponents do
     "} {@rest}>
       {render_slot(@inner_block)}
     </.link>
+    """
+  end
+
+  @doc """
+  Renders a medium danger button.
+
+  ##Examples
+    <.button_danger>Button Text</.button_danger>
+  """
+  attr :rest, :global,
+    include:
+      ~w(phx-target phx-click phx-value-effect_name phx-value-route_type name id value disabled)
+
+  attr :class, :string, default: "", doc: "additional classes to add"
+  attr :hidden, :boolean, default: false, doc: "hides component if true"
+  slot :inner_block, required: true
+
+  def button_danger(assigns) do
+    ~H"""
+    <button
+      class={"
+      #{base_button_classes()}
+      text-white
+      bg-danger
+      border-danger
+      hover:bg-primary-hover
+      hover:border-primary-border-hover
+      active:bg-primary-active
+      active:border-primary-active
+      focus:border-primary-active
+      disabled:bg-primary-disabled
+      disabled:border-primary-disabled
+      #{if @hidden, do: "hidden", else: ""}
+      #{@class}
+    "}
+      {@rest}
+    >
+      {render_slot(@inner_block)}
+    </button>
     """
   end
 
