@@ -265,6 +265,7 @@ defmodule AlertsUI.Alerts do
     alert
     |> change(
       closed_timestamp: closed_time,
+      notification_period_end: closed_time,
       duration_certainty: :KNOWN
     )
     |> PaperTrail.update!()
