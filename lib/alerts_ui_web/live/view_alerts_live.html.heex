@@ -3,30 +3,30 @@
     <a href="/alerts/new" class="hover:text-zinc-700">
       Create an Alert
     </a>
-    <.filter_form
-      fields={[
-        alert_id: [label: "ID", op: :ilike_and],
-        effect_detail: [
-          label: "Effect",
-          type: "select",
-          options: format_effect_options(),
-          value: ""
-        ],
-        text_content: [label: "Keyword", op: :ilike_and],
-        service_type: [
-          label: "Service Type",
-          type: "select",
-          options: format_service_type_options()
-        ],
-        timeline: [
-          label: "Timeline",
-          type: "radio_switch",
-          values: timeline_options()
-        ]
-      ]}
-      meta={@meta}
-      id="alert-filter-form"
-    />
+      <.filter_form
+        fields={[
+          alert_id: [label: "ID", op: :ilike_and],
+          effect_detail: [
+            label: "Effect",
+            type: "select",
+            options: format_effect_options(),
+            value: ""
+          ],
+          text_content: [label: "Keyword", op: :ilike_and],
+          service_type: [
+            label: "Service Type",
+            type: "select",
+            options: format_service_type_options()
+          ],
+          timeline: [
+            label: "Timeline",
+            type: "radio_switch",
+            values: timeline_options()
+          ]
+        ]}
+        meta={@meta}
+        id="alert-filter-form"
+      />
   </div>
 
   <AlertsUIWeb.ReviewModal.review_modal
