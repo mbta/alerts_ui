@@ -76,7 +76,8 @@ defmodule AlertsUIWeb.ApiControllerTest do
           |> post("/api/alerts", %{
             header_text: "header",
             description_text: "description",
-            effect_detail: "ACCESS_ISSUE"
+            effect_detail: "ACCESS_ISSUE",
+            user: build(:user)
           })
           |> validate_resp_schema(schema, :AlertError)
 

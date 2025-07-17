@@ -93,9 +93,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  original_route_selections: ["57"]
                }
 
-        result
-        |> Map.put(:user, build(:user))
-        |> Alerts.create_or_update_alert()
+        Alerts.create_or_update_alert(result, build(:user))
 
         [alert_1, alert_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id)
         assert alert_1.alert_id == existing_alert.alert_id
@@ -234,8 +232,7 @@ defmodule AlertsUI.AlertBuilderTest do
                }
 
         result
-        |> Map.put(:user, build(:user))
-        |> Alerts.create_or_update_alert()
+        |> Alerts.create_or_update_alert(build(:user))
 
         [alert_1, alert_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id, :desc)
         assert alert_2.alert_id == existing_alert.alert_id
@@ -378,8 +375,7 @@ defmodule AlertsUI.AlertBuilderTest do
                ]
 
         result
-        |> Map.put(:user, build(:user))
-        |> Alerts.create_or_update_alert()
+        |> Alerts.create_or_update_alert(build(:user))
 
         [alert_1, alert_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id, :desc)
         assert alert_2.alert_id == existing_alert.alert_id
@@ -445,8 +441,7 @@ defmodule AlertsUI.AlertBuilderTest do
                }
 
         result
-        |> Map.put(:user, build(:user))
-        |> Alerts.create_or_update_alert()
+        |> Alerts.create_or_update_alert(build(:user))
 
         [alert_1, alert_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id, :desc)
         assert alert_1.alert_id |> String.to_integer() > alert_2.alert_id |> String.to_integer()

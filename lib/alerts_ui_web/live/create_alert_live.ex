@@ -23,7 +23,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   alias AlertsUI.AlertBuilder
   alias AlertsUI.Alerts
-  alias AlertsUI.Models.{ActivePeriod, Alert, EnhancedSchedule}
+  alias AlertsUI.DBContexts.Users
+  alias AlertsUI.Models.{ActivePeriod, Alert, EnhancedSchedule, User}
   alias AlertsUI.Routes
 
   alias AlertsUIWeb.FormComponents.{
@@ -377,10 +378,15 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   defp create_alert(socket) do
+    current_user = socket.assigns.current_user
+
+    existing_user = Users.get_by_keycloak_id(current_user.keycloak_id) || %User{}
+
+    {:ok, user} = Users.create_or_update_user(Map.from_struct(current_user), existing_user)
+
     alert_data =
       socket.assigns.alert_data
       |> AlertBuilder.build_alert(socket.assigns.combination)
-      |> Map.put(:user, Map.from_struct(socket.assigns.current_user))
 
     existing_alert =
       if is_nil(socket.assigns.alert_id) do
@@ -390,7 +396,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
       end
 
     alert_data
-    |> Alerts.create_or_update_alert(existing_alert)
+    |> Alerts.create_or_update_alert(user, existing_alert)
     |> case do
       {:ok, alert} ->
         alert_id =
