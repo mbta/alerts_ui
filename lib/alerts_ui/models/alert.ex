@@ -140,7 +140,7 @@ defmodule AlertsUI.Models.Alert do
   }
 
   schema "alerts" do
-    belongs_to :user, User, on_replace: :update
+    belongs_to :user, User, on_replace: :nilify
     field :alert_id, :string
     field :effect, Ecto.Enum, values: @effect
     field :effect_detail, :string

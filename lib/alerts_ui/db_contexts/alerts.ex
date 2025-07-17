@@ -4,14 +4,14 @@ defmodule AlertsUI.Alerts do
   """
   import Ecto.Changeset
   import Ecto.Query
-  alias AlertsUI.Models.{ActivePeriod, Alert, User}
+  alias AlertsUI.Models.{ActivePeriod, Alert}
   alias AlertsUI.Repo
   require Logger
 
   def create_or_update_alert(params, user, existing_alert \\ %Alert{}) do
     existing_alert
     |> Alert.changeset(params)
-    |> put_assoc(:user, user, with: &User.changeset/2)
+    |> Ecto.Changeset.put_assoc(:user, user)
     |> PaperTrail.insert_or_update()
     |> case do
       {:ok, %{model: alert}} -> {:ok, alert}
