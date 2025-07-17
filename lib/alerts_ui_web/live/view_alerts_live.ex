@@ -74,6 +74,8 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     {:noreply, push_patch(socket, to: ~p"/alerts?#{params}")}
   end
 
+  def format_start_time(nil), do: "—"
+
   def format_start_time(start_time_utc) do
     current_service_date =
       DateTime.now!("America/New_York")

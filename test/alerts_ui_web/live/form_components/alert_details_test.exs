@@ -6,6 +6,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
   import Mock
   import Phoenix.LiveViewTest
   import Test.Support.Helpers
+  import Floki
 
   alias AlertsUI.Models.EnhancedSchedule
   alias AlertsUIWeb.FormComponents.AlertDetails
@@ -130,6 +131,80 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
   end
 
   describe "end-to-end auto text" do
+    @tag :logged_in_user
+    test "basic test 1: Access + Elevator Closure header template", %{conn: conn} do
+      with_mock(FacilitiesRepo, get_by_type: fn _facility_types, _opts -> [@facility] end) do
+        # Step 1: Go to alert creation page
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        # Step 2: Select Access + Elevator closure (fix: lowercase 'c')
+        get_to_submission_page(view, "Access", "Elevator closure")
+
+        render(view)
+
+        # Step 3: Fill in the required fields (simulate user input)
+        input_data = %{
+          access_affected_service: %{facility_id: "349"},
+          time_range: %{
+            active_period_start_specifier: "custom",
+            active_period_end_specifier: "custom",
+            active_period_start: NaiveDateTime.to_iso8601(@start_time),
+            active_period_end: NaiveDateTime.to_iso8601(@end_time)
+          },
+          alert_details: %{cause_detail: "MAINTENANCE"}
+        }
+        view
+        |> element("#service_form")
+        |> render_change(%{access_affected_service: %{facility_id: "349"}})
+
+        # Step 4: Set the time range (simulate user input)
+        view
+        |> element("#time_range_form")
+        |> render_change(%{"time_range" => %{
+          "active_period_start_specifier" => "custom",
+          "active_period_end_specifier" => "custom"
+        }})
+
+        view
+        |> element("#time_range_form")
+        |> render_change(%{"time_range" => %{
+          "active_period_start" => NaiveDateTime.to_iso8601(@start_time),
+          "active_period_end" => NaiveDateTime.to_iso8601(@end_time)
+        }})
+
+        # Step 5: Set the cause (simulate user input)
+        view
+        |> element("#details_form")
+        |> render_change(%{alert_details: %{cause_detail: "MAINTENANCE"}})
+
+        # Step 6: Extract and print the user-facing header text
+        header_html = view
+          |> element("#alert_details_header_text")
+          |> render()
+
+        [user_text] = Floki.find(header_html, "textarea") |> Floki.text(sep: " ") |> List.wrap()
+
+        IO.puts("\n[Access + Elevator Closure] User-facing header text: \n" <> user_text <> "\n")
+
+        # Step 7: Get expected format from header template CSV
+        {:ok, csv} = File.read("context/Header templates.csv")
+        [_, first_row | _] = String.split(csv, "\n", trim: true)
+        [_mode, _effect, expected_format] = String.split(first_row, ",", parts: 3)
+
+        # Step 8: Write to Excel file
+        {:ok, now} = :calendar.local_time() |> NaiveDateTime.from_erl()
+        timestamp = NaiveDateTime.to_string(now) |> String.replace(~r/[-: ]/, "") |> String.slice(0, 15)
+        filename = "test_results_femi/basic_test_1_" <> timestamp <> ".xlsx"
+        rows = [
+          ["Actual output", "Expected format", "Input Data"],
+          [user_text, expected_format, Jason.encode!(input_data)]
+        ]
+        sheet = %Elixlsx.Sheet{name: "Results", rows: rows}
+        workbook = %Elixlsx.Workbook{ sheets: [sheet] }
+        Elixlsx.write_to(workbook, filename)
+      end
+    end
+
     @tag :logged_in_user
     test "duration works correctly in case where time is start-to-end in future the same day", %{
       conn: conn
