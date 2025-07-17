@@ -252,7 +252,56 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
     end
 
     @tag :logged_in_user
-    test "description does not update automatically if toggle is off", %{
+    test "header updates if sync buttons is turned off and back on", %{
+      conn: conn
+    } do
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
+        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        get_to_submission_page(view, "Commuter Rail", "Suspension")
+
+        render_async(view)
+
+        view
+        |> element("#details_form")
+        |> render_change(%{
+          alert_details: %{header_sync_toggle: false, header_text: "my custom text"}
+        })
+
+        view
+        |> element("#service_form")
+        |> render_change(%{
+          "affected_service" => %{"route_ids" => ["CR-Worcester"]}
+        })
+
+        assert view
+               |> element("#alert_details_header_text")
+               |> render() =~
+                 ">my custom text</textarea>"
+
+        view
+        |> element("#details_form")
+        |> render_change(%{
+          alert_details: %{header_sync_toggle: true}
+        })
+
+        refute view
+               |> element("#alert_details_header_text")
+               |> render() =~
+                 ">my custom text</textarea>"
+
+        assert view
+               |> element("#alert_details_header_text")
+               |> render() =~
+                 "Framingham/Worcester Line"
+      end
+    end
+
+    @tag :logged_in_user
+    test "description does not update automatically if sync button is off", %{
       conn: conn
     } do
       with_mocks([
