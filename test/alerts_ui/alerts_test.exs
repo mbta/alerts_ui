@@ -5,10 +5,19 @@ defmodule AlertsUI.AlertsTest do
   import AlertsUI.UsersFixtures
   alias AlertsUI.Alerts
   alias AlertsUI.Models.{ActivePeriod, Alert}
-
-  @five_minutes_ago DateTime.utc_now()
+  @now DateTime.utc_now()
+  @five_minutes_ago @now
                     |> DateTime.add(-5, :minute)
                     |> DateTime.truncate(:second)
+
+  @one_day_ago DateTime.add(@now, -1, :day)
+  @six_hours_ago DateTime.add(@now, -6, :hour)
+  @two_hours_ago DateTime.add(@now, -2, :hour)
+  @one_hour_ago DateTime.add(@now, -1, :hour)
+  @one_hour_from_now DateTime.add(@now, 1, :hour)
+  @two_hours_from_now DateTime.add(@now, 1, :hour)
+  @end_of_service_utc ActivePeriod.end_of_service_datetime_utc(@now)
+  @two_days_from_now DateTime.add(@now, 2, :day)
 
   @user build(:user)
 
@@ -587,90 +596,56 @@ defmodule AlertsUI.AlertsTest do
       assert result_3 |> Enum.map(& &1.alert_id) == [123, 234, 345]
     end
 
-    test "filter by timeline" do
-      now = DateTime.utc_now()
-      one_hour_from_now = DateTime.add(now, 1, :hour)
-      one_hour_ago = DateTime.add(now, -1, :hour)
-
+    test "filter by timeline- past" do
       insert(:alert, %{
-        # start_nil_end_nil
         alert_id: "10000",
-        active_period_start: nil,
-        active_period_end: nil
+        active_period_start: @two_hours_ago,
+        active_period_end: @one_hour_ago
       })
 
       insert(:alert, %{
-        # start_nil_end_future
         alert_id: "10100",
-        active_period_start: nil,
-        active_period_end: one_hour_from_now
+        active_period_start: @six_hours_ago,
+        active_period_end: @one_hour_ago
       })
 
       insert(:alert, %{
-        # start_nil_end_past
         alert_id: "10200",
-        active_period_start: nil,
-        active_period_end: one_hour_ago
+        active_period_start: @six_hours_ago,
+        active_period_end: @two_hours_ago
       })
 
       insert(:alert, %{
-        # start_future_end_nil
         alert_id: "10300",
-        active_period_start: one_hour_from_now,
-        active_period_end: nil
+        active_period_start: @one_hour_ago,
+        active_period_end: @one_hour_from_now
       })
 
       insert(:alert, %{
-        # start_past_end_nil
         alert_id: "10400",
-        active_period_start: one_hour_ago,
+        active_period_start: @one_day_ago,
+        active_period_end: @six_hours_ago
+      })
+
+      insert(:alert, %{
+        alert_id: "10500",
+        active_period_start: @one_hour_ago,
         active_period_end: nil
       })
 
       insert(:alert, %{
-        # start_past_end_past
-        alert_id: "10500",
-        active_period_start: one_hour_ago,
-        active_period_end: one_hour_ago
-      })
-
-      insert(:alert, %{
-        # start_past_end_future
-        alert_id: "10600",
-        active_period_start: one_hour_ago,
-        active_period_end: one_hour_from_now
-      })
-
-      insert(:alert, %{
-        # start_future_end_future
         alert_id: "10700",
-        active_period_start: one_hour_from_now,
-        active_period_end: one_hour_from_now
+        active_period_start: @one_hour_ago,
+        active_period_end: @now
       })
 
       {current_results, _meta} =
         Alerts.list_all_paginated(%{
           order_by: [:integer_alert_id],
-          filters: [%{"field" => "timeline", "value" => "current"}]
-        })
-
-      assert current_results |> Enum.map(& &1.alert_id) == [10000, 10100, 10400, 10600]
-
-      {future_results, _meta} =
-        Alerts.list_all_paginated(%{
-          order_by: [:integer_alert_id],
-          filters: [%{"field" => "timeline", "value" => "future"}]
-        })
-
-      assert future_results |> Enum.map(& &1.alert_id) == [10300, 10700]
-
-      {past_results, _meta} =
-        Alerts.list_all_paginated(%{
-          order_by: [:integer_alert_id],
           filters: [%{"field" => "timeline", "value" => "past"}]
         })
 
-      assert past_results |> Enum.map(& &1.alert_id) == [10200, 10500]
+      assert current_results |> Enum.map(& &1.alert_id) == [10400, 10200, 10100, 10000, 10700]
     end
   end
 

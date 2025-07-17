@@ -36,14 +36,18 @@ defmodule AlertsUIWeb.ViewAlertsLive do
           any()
         ) :: {:noreply, any()}
   def handle_params(params, _url, socket) do
-    #default to timeline: current if parameters empty
-    params = if params == %{} do
-      %{ "filters" => %{
-        "4" => %{"field" => "timeline", "value" => "current"}
-      }}
-    else
-      params
-    end
+    # default to timeline: current if parameters empty
+    params =
+      if params == %{} do
+        %{
+          "filters" => %{
+            "4" => %{"field" => "timeline", "value" => "current"}
+          }
+        }
+      else
+        params
+      end
+
     with {alerts, meta} <- Alerts.list_all_paginated(params) do
       {:noreply, assign(socket, meta: meta, alerts: alerts, params: params)}
     end

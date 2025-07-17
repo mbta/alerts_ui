@@ -40,9 +40,10 @@ defmodule AlertsUI.Models.CustomFilters do
       "past" ->
         query
         |> where([a], not is_nil(a.active_period_end) and a.active_period_end <= ^now)
-        |> order_by(asc_nulls_first: :active_period_end)
+        |> order_by(asc: :active_period_end, asc: :active_period_start)
 
       "current" ->
+
         query
         |> where(
           [a],
@@ -50,6 +51,9 @@ defmodule AlertsUI.Models.CustomFilters do
           not (not is_nil(a.active_period_start) and a.active_period_start > ^now) and
             not (not is_nil(a.active_period_end) and a.active_period_end <= ^now)
         )
+        # |> order_by([a], fragment(
+        #   "CASE when ? < ? THEN ? DESC ELSE ? ASC", a.active_period_end, ^now, a.active_period_end, a.active_period_end
+        # ))
         |> order_by(desc_nulls_last: :active_period_end)
 
         _all -> order_by(query, asc_nulls_first: :active_period_end)

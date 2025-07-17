@@ -437,7 +437,13 @@ defmodule AlertsUIWeb.CoreComponents do
       value={@value}
       aria-label={@label}
       checked={@checked}
-      class={["join-item btn w-20 border-2 border-primary bg-transparent text-primary", if(@checked, do: "after:bg-primary after:text-bg-primary border-primary !bg-primary !text-bg-primary !border-primary")]}
+      class={[
+        "join-item btn w-20 border-2 border-primary bg-transparent text-primary",
+        if(@checked,
+          do:
+            "after:bg-primary after:text-bg-primary border-primary !bg-primary !text-bg-primary !border-primary"
+        )
+      ]}
     />
     """
   end
@@ -674,7 +680,7 @@ defmodule AlertsUIWeb.CoreComponents do
     # Only first four routes/facilities are listed, the rest are in a "+X" pill
 
     ~H"""
-    <div class="flex flex-wrap gap-1" :if={!is_nil(@entities)}>
+    <div :if={!is_nil(@entities)} class="flex flex-wrap gap-1">
       <%= if @entities == [] do %>
         <%= if @effect_name in EffectsForRouteTypes.list_effects(:access) do %>
           <.mode_icon type="Facility" />
