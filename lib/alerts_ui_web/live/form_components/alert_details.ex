@@ -13,6 +13,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
 
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
+  alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Repo, as: Schedules
   alias MBTAV3API.Stops.Api, as: StopsApi
 
@@ -79,8 +80,12 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
 
     # Fill in needed information for if you hit the toggle button when editing
     if :route_ids in required_fields do
-      route_ids = Enum.join(alert_data.route_ids, ",")
-      selected_routes = RoutesRepo.all("filter[id]": route_ids)
+      joined_route_ids = alert_data.route_ids |> Enum.join(",")
+
+      selected_routes =
+        RoutesRepo.all("filter[id]": joined_route_ids)
+        |> maybe_include_virtual_green_line(alert_data.route_ids)
+
       send(self(), {:selected_routes, selected_routes})
     end
 
@@ -522,4 +527,13 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
 
   defp get_image_path(url) when is_binary(url),
     do: url |> Path.split() |> List.last() |> String.split("?") |> hd
+
+  @spec maybe_include_virtual_green_line([Route.t()], [String.t()]) :: [Route.t()]
+  defp maybe_include_virtual_green_line(routes, route_ids) do
+    if "Green" in route_ids do
+      [RoutesRepo.green_line() | routes]
+    else
+      routes
+    end
+  end
 end
