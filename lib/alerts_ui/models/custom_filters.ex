@@ -3,7 +3,7 @@ defmodule AlertsUI.Models.CustomFilters do
     Home for custom flop fitlers
   """
   import Ecto.Query
-  alias AlertsUI.Models.InformedEntity
+  alias AlertsUI.Models.{ActivePeriod, InformedEntity}
   alias Flop.Filter
 
   def service_type_filter(query, %Filter{value: value}, _opts) do
@@ -30,6 +30,7 @@ defmodule AlertsUI.Models.CustomFilters do
 
   def timeline_filter(query, %Filter{value: value}, _opts) do
     now = DateTime.utc_now()
+    end_of_service = ActivePeriod.end_of_service_datetime_utc(now)
 
     case value do
       "future" ->
@@ -47,14 +48,15 @@ defmodule AlertsUI.Models.CustomFilters do
         query
         |> where(
           [a],
-          # Not future and not past
-          not (not is_nil(a.active_period_start) and a.active_period_start > ^now) and
-            not (not is_nil(a.active_period_end) and a.active_period_end <= ^now)
+          # start is not nil and is in the past, end is either nil or in the future
+          ((not is_nil(a.active_period_start)) and a.active_period_start < ^now) and (is_nil(a.active_period_end) or a.active_period_end > ^now)
         )
         # |> order_by([a], fragment(
-        #   "CASE when ? < ? THEN ? DESC ELSE ? ASC", a.active_period_end, ^now, a.active_period_end, a.active_period_end
+        #   "CASE when ? <= ? THEN
+        #  ? DESC ELSE ? ASC"
+        # , a.active_period_end, ^end_of_service_utc, a.active_period_end, a.active_period_end
         # ))
-        |> order_by(desc_nulls_last: :active_period_end)
+        |> order_by([asc_nulls_last: :active_period_end, asc: :active_period_start])
 
         _all -> order_by(query, asc_nulls_first: :active_period_end)
     end
