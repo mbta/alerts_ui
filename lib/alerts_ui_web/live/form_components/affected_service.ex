@@ -132,12 +132,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       |> assign(:modal_date, nil)
       |> assign(:form, changeset |> to_form())
       |> assign(:edit_data_has_been_filled, true)
-      |> assign_async([:available_routes], fn ->
-        {:ok,
-         %{
-           available_routes: CreateAlertLive.get_routes(route_types)
-         }}
-      end)
+      |> assign(:filter_title_value, "All future trips")
+      |> assign_routes(route_types)
       |> assign_stops(route_ids, direction, required_fields)
       |> assign_schedules(route_ids, direction, required_fields)
 
@@ -198,10 +194,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     # don't re-fetch routes if we already have them- prevents weird unselect render error
     socket =
       if socket.assigns.available_routes === %{} do
-        socket
-        |> assign_async(:available_routes, fn ->
-          {:ok, %{available_routes: CreateAlertLive.get_routes(route_types)}}
-        end)
+        assign_routes(socket, route_types)
       else
         socket
       end
@@ -387,6 +380,15 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   def adjust_select_all(["default" | others]), do: others
   def adjust_select_all(keep_all), do: keep_all
+
+  def assign_routes(socket, route_types) do
+    assign_async(socket, [:available_routes], fn ->
+      {:ok,
+       %{
+         available_routes: CreateAlertLive.get_routes(route_types)
+       }}
+    end)
+  end
 
   def assign_stops(socket, route_ids, direction, fields) do
     if :stop_ids in fields do
