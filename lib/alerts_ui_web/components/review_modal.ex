@@ -398,9 +398,9 @@ defmodule AlertsUIWeb.ReviewModal do
          active_period_end: active_period_end
        }) do
     cond do
-      DateTimeHelpers.is_future_datetime?(active_period_start) -> :future
+      DateTimeHelpers.future_datetime?(active_period_start) -> :future
       active_period_end == nil -> :current
-      !DateTimeHelpers.is_future_datetime?(active_period_end) -> :past
+      !DateTimeHelpers.future_datetime?(active_period_end) -> :past
       true -> :current
     end
   end

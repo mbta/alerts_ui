@@ -144,8 +144,8 @@ defmodule AlertsUIWeb.DateTimeHelpers do
     end
   end
 
-  @spec is_future_datetime?(DateTime.t(), DateTime.t()) :: boolean()
-  def is_future_datetime?(utc_datetime, now \\ DateTime.now!("Etc/UTC")) do
+  @spec future_datetime?(DateTime.t(), DateTime.t()) :: boolean()
+  def future_datetime?(utc_datetime, now \\ DateTime.now!("Etc/UTC")) do
     utc_datetime
     |> ActivePeriodBuilder.naive_eastern_datetime_to_utc()
     |> DateTime.compare(now) == :gt
