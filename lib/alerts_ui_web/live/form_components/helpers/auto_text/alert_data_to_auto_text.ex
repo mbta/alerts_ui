@@ -17,7 +17,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
         route_type: Map.get(alert_data, :route_type),
         effect_name: Map.get(alert_data, :effect_name),
         routes: Map.get(alert_data, :routes, []),
-        stops: Map.get(alert_data, :stops, []),
+        stops: alert_data |> Map.get(:stops) |> dedup_stops,
         schedules: Map.get(alert_data, :schedules, []),
         facility: Map.get(alert_data, :facility),
         service_types: Map.get(alert_data, :service_types),
@@ -55,4 +55,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
   end
 
   defp build_one_time_active_period_end(end_datetime, _, _), do: end_datetime
+
+  defp dedup_stops(stops) when is_list(stops), do: Enum.uniq(stops)
+  defp dedup_stops(_), do: []
 end
