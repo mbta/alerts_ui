@@ -90,7 +90,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   @impl true
   def handle_event("edit_alert", %{"alert_id" => alert_id}, socket) do
     {:noreply, push_navigate(socket, to: ~p"/alerts/edit?alert_id=#{alert_id}")}
-  end 
+  end
 
   # Just stubbed until we have actions for these
   @impl true

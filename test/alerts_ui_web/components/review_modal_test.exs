@@ -7,10 +7,12 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
 
   import AlertsUI.Support.Factory
   import Mock
+  import Phoenix.Component
   import Phoenix.LiveViewTest
   import Test.Support.Helpers
 
   alias AlertsUI.Models.EnhancedSchedule
+  alias AlertsUIWeb.ReviewModal
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
@@ -1023,6 +1025,144 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         open_review_modal(view)
         assert render(view) =~ ~r/Edit alert #123/s
       end
+    end
+  end
+
+  describe "alert details variations" do
+    @days_ago DateTime.utc_now()
+              |> DateTime.add(-5, :day)
+              |> DateTime.to_naive()
+              |> NaiveDateTime.truncate(:second)
+
+    @yesterday DateTime.utc_now()
+               |> DateTime.add(-1, :day)
+               |> DateTime.to_naive()
+               |> NaiveDateTime.truncate(:second)
+
+    @tomorrow DateTime.utc_now()
+              |> DateTime.add(1, :day)
+              |> DateTime.to_naive()
+              |> NaiveDateTime.truncate(:second)
+
+    @days_ahead DateTime.utc_now()
+                |> DateTime.add(5, :day)
+                |> DateTime.to_naive()
+                |> NaiveDateTime.truncate(:second)
+
+    @alert_data %{
+      route_type: 2,
+      effect_name: "Cancellation",
+      route_ids: ["CR-Fitchburg"],
+      trip_ids: ["HaverhillRestoredWKDY-744203-1418"],
+      header_text:
+        "Fitchburg Line train 1418 (11:01 AM from Littleton/Route 495) trip is cancelled until 1:01 PM",
+      description_text: nil,
+      combination: :RDT,
+      alert_timing: :"one-time",
+      active_period_start: nil,
+      active_period_end: nil,
+      active_period_end_specifier: "custom",
+      active_period_start_specifier: "custom",
+      cause_detail: nil,
+      url: nil,
+      image_url: nil,
+      notification_specifier: :same_as_effect_period,
+      severity: 4,
+      reminder_times: []
+    }
+
+    @assigns %{
+      alert_id: 123,
+      editing: false,
+      target_id: "#view_alerts_live_view",
+      cancel_alert: true,
+      cancel_event_name: "close_details",
+      alert_data: @alert_data
+    }
+
+    test "current version" do
+      assigns = %{
+        @assigns
+        | alert_data: %{
+            @alert_data
+            | active_period_start: @yesterday,
+              active_period_end: @tomorrow
+          }
+      }
+
+      rendered_modal =
+        rendered_to_string(~H"""
+        <ReviewModal.review_modal
+          alert_id={@alert_id}
+          cancel_event_name={@cancel_event_name}
+          editing={@editing}
+          target_id={@target_id}
+          cancel_alert={@cancel_alert}
+          alert_data={@alert_data}
+        />
+        """)
+
+      assert rendered_modal =~ "Alert #123 (Current)"
+      assert rendered_modal =~ "Close alert"
+      assert rendered_modal =~ "Duplicate"
+      assert rendered_modal =~ "Edit this alert"
+    end
+
+    test "past version" do
+      assigns = %{
+        @assigns
+        | alert_data: %{
+            @alert_data
+            | active_period_start: @days_ago,
+              active_period_end: @yesterday
+          }
+      }
+
+      rendered_modal =
+        rendered_to_string(~H"""
+        <ReviewModal.review_modal
+          alert_id={@alert_id}
+          cancel_event_name={@cancel_event_name}
+          editing={@editing}
+          target_id={@target_id}
+          cancel_alert={@cancel_alert}
+          alert_data={@alert_data}
+        />
+        """)
+
+      assert rendered_modal =~ "Alert #123 (Past)"
+      refute rendered_modal =~ "Close alert"
+      refute rendered_modal =~ "Cancel alert"
+      assert rendered_modal =~ "Duplicate"
+      assert rendered_modal =~ "Done"
+    end
+
+    test "future version" do
+      assigns = %{
+        @assigns
+        | alert_data: %{
+            @alert_data
+            | active_period_start: @tomorrow,
+              active_period_end: @days_ahead
+          }
+      }
+
+      rendered_modal =
+        rendered_to_string(~H"""
+        <ReviewModal.review_modal
+          alert_id={@alert_id}
+          cancel_event_name={@cancel_event_name}
+          editing={@editing}
+          target_id={@target_id}
+          cancel_alert={@cancel_alert}
+          alert_data={@alert_data}
+        />
+        """)
+
+      assert rendered_modal =~ "Alert #123 (Future)"
+      assert rendered_modal =~ "Cancel alert"
+      assert rendered_modal =~ "Duplicate"
+      assert rendered_modal =~ "Edit this alert"
     end
   end
 end
