@@ -7,7 +7,7 @@ defmodule AlertsUI.AlertBuilder do
   """
 
   alias AlertsUI.{ActivePeriodBuilder, Activities}
-  alias AlertsUI.Models.{Cause, Effect, RoutePattern, SeverityLevel}
+  alias AlertsUI.Models.{ActivePeriod, Cause, Effect, RoutePattern, SeverityLevel}
   alias AlertsUI.Routes
   alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
   alias MBTAV3API.Facilities.Facility
@@ -136,6 +136,13 @@ defmodule AlertsUI.AlertBuilder do
         |> ActivePeriodBuilder.naive_eastern_datetime_to_utc()
       end
 
+    notification_period_end =
+      if Map.get(alert_data, :active_period_end_specifier) === :later_today do
+        ActivePeriod.end_of_service_datetime_utc(current_time)
+      else
+        Map.get(active_period_map, :active_period_end)
+      end
+
     %{
       header_text: Map.get(alert_data, :header_text),
       description_text: Map.get(alert_data, :description_text),
@@ -156,6 +163,7 @@ defmodule AlertsUI.AlertBuilder do
         |> Enum.uniq(),
       original_route_selections: original_route_selections,
       notification_period_start: notification_period_start,
+      notification_period_end: notification_period_end,
       severity: severity,
       severity_level: SeverityLevel.severity_level_by_severity(severity),
       reminder_times: reminder_times,
