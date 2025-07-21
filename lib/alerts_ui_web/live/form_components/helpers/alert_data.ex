@@ -62,7 +62,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           banner_text: String.t() | nil,
           combination: atom(),
           alert_timing: atom(),
-          active_period_start: NaiveDateTime.t() | nil,
+          active_period_start: NaiveDateTime.t(),
           active_period_start_date: Date.t() | nil,
           active_period_start_time: Time.t() | nil,
           active_period_start_specifier: String.t() | nil,
