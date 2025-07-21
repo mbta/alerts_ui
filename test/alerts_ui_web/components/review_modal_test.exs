@@ -6,6 +6,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
   use AlertsUIWeb.ConnCase
 
   import AlertsUI.Support.Factory
+  import AlertsUI.UsersFixtures
   import Mock
   import Phoenix.Component
   import Phoenix.LiveViewTest
@@ -15,6 +16,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
   alias AlertsUIWeb.ReviewModal
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
+  alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
@@ -139,8 +141,6 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         })
 
         {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
-
-        # Don't need to make any changes, just proceed with submitting the form
 
         open_review_modal(view)
 
@@ -970,9 +970,90 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         today = Date.utc_today()
 
         assert render(view) =~ ~r/Created.*#{today}/s
-        assert render(view) =~ ~r/Created by.*TO BE DONE/s
-        assert render(view) =~ ~r/Last edited.*TO BE DONE/s
-        assert render(view) =~ ~r/Last edited by.*TO BE DONE/s
+        assert render(view) =~ ~r/Created by.*Firstname Lastname/s
+      end
+    end
+
+    test "creation metadata sidebar when editing", %{
+      conn: conn
+    } do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _types -> @routes end,
+           get: fn _ -> @route_one end,
+           get: fn _, _ -> @route_one end,
+           all: fn _ -> @routes end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction -> [@stop] end,
+           get: fn _id -> @stop end,
+           get_parent: fn _id -> @stop end
+         ]},
+        {RoutePatternsRepo, [],
+         [
+           included_stops_by_route_id: fn _route_id, _direction -> [] end,
+           by_route_id: fn _route_id, _opts -> [] end
+         ]}
+      ]) do
+        # create an alert
+        user = user_fixture(:user, %{first_name: "original", last_name: "user"})
+        conn = AlertsUIWeb.ConnCase.log_in_user(conn, user)
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        get_to_submission_page(view, "Bus", "Delay")
+
+        view
+        |> element("#service_form")
+        |> render_change(%{
+          affected_service: %{
+            route_ids: [@route_one.id],
+            stop_ids: [@stop.id]
+          }
+        })
+
+        open_review_modal(view)
+
+        view
+        |> element("button", "Submit")
+        |> render_click()
+
+        :timer.sleep(50)
+        flash = assert_redirect(view, "/")
+
+        alert_id =
+          flash["info"]
+          |> String.replace("New alert #", "")
+          |> String.replace(" created", "")
+
+        # edit it with a different user
+        user = user_fixture(:user, %{first_name: "second", last_name: "seconduser"})
+        conn = AlertsUIWeb.ConnCase.log_in_user(conn, user)
+
+        today = Date.utc_today()
+
+        {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=#{alert_id}")
+
+        open_review_modal(view)
+        assert render(view) =~ ~r/Created.*#{today}/s
+        assert render(view) =~ ~r/Last edited.*#{today}/s
+
+        assert render(view) =~ ~r/Created by.*original user/s
+        assert render(view) =~ ~r/Last edited by.*second seconduser/s
+
+        # edit it a second time to check that the created_by name remains correct
+        user = user_fixture(:user, %{first_name: "final", last_name: "finaluser"})
+        conn = AlertsUIWeb.ConnCase.log_in_user(conn, user)
+
+        {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=#{alert_id}")
+
+        open_review_modal(view)
+        assert render(view) =~ ~r/Created.*#{today}/s
+        assert render(view) =~ ~r/Last edited.*#{today}/s
+
+        assert render(view) =~ ~r/Created by.*original user/s
+        assert render(view) =~ ~r/Last edited by.*final finaluser/s
       end
     end
   end

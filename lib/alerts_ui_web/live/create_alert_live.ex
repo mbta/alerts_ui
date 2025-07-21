@@ -89,7 +89,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
     created_at = if existing_alert, do: existing_alert.created_at
 
     created_by =
-      if existing_alert do
+      with false <- is_nil(existing_alert),
+           false <- is_nil(Alerts.get_earliest_version(existing_alert.id)) do
         user =
           Alerts.get_earliest_version(existing_alert.id)
           |> Map.get(:item_changes, %{})
@@ -99,7 +100,10 @@ defmodule AlertsUIWeb.CreateAlertLive do
         "#{Map.get(user, :first_name, "")} #{Map.get(user, :last_name, "")}"
       end
 
-    alert_data = AlertData.build_alert_data(existing_alert) |> Map.from_struct()
+    alert_data =
+      if existing_alert,
+        do: AlertData.build_alert_data(existing_alert) |> Map.from_struct(),
+        else: %{}
 
     [first_step, second_step | _] = @steps
     editing = socket.assigns.live_action == :edit

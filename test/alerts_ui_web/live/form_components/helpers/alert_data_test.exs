@@ -485,13 +485,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
           recurrence_days: [:thursday, :friday, :saturday]
         })
 
-<<<<<<< HEAD
-      alert = AlertData.build_alert_data("1")
-      assert alert.alert_timing == :recurring
-=======
       alert = AlertData.build_alert_data(alert)
-      assert alert.alert_timing == "recurring"
->>>>>>> b4d1a9ee (first pass)
+      assert alert.alert_timing == :recurring
       assert alert.recurrence_days == ["thursday", "friday", "saturday"]
       assert alert.active_period_start_specifier == "custom"
       assert alert.active_period_end_specifier == "custom"
@@ -534,13 +529,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
           recurrence_days: ["thursday", "saturday"]
         })
 
-<<<<<<< HEAD
-      alert = AlertData.build_alert_data("1")
-      assert alert.alert_timing == :recurring
-=======
       alert = AlertData.build_alert_data(alert)
-      assert alert.alert_timing == "recurring"
->>>>>>> b4d1a9ee (first pass)
+      assert alert.alert_timing == :recurring
       assert alert.recurrence_days == ["thursday", "saturday"]
       assert alert.active_period_start_specifier == "custom"
       assert alert.active_period_end_specifier == "until_further_notice"

@@ -77,7 +77,8 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   @impl true
   def handle_event("open_details", %{"alert_id" => alert_id}, socket) do
-    alert_data = alert_id |> Integer.to_string() |> AlertData.build_alert_data()
+    alert_data =
+      alert_id |> Integer.to_string() |> Alerts.get_by_alert_id() |> AlertData.build_alert_data()
 
     {:noreply, assign(socket, selected_alert_data: alert_data, selected_alert_id: alert_id)}
   end

@@ -83,7 +83,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           recurrence_days: [atom()] | nil
         }
 
-  @spec build_alert_data(nil | String.t()) :: t()
+  @spec build_alert_data(nil | Alert.t()) :: t()
   def build_alert_data(nil), do: %__MODULE__{}
 
   def build_alert_data(alert) do

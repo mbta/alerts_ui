@@ -41,10 +41,11 @@ defmodule AlertsUIWeb.ReviewModal do
     doc: "Whether the cancel alert button should be visible"
 
   attr :editing, :boolean, default: false, doc: "Whether the alert is being edited"
+
   attr :target_id, :string,
     default: "",
     doc: "The target to send the events to (eg form component id)"
-  attr :alert_id, :string, default: nil, doc: "If editing, this is the alert's string id"
+
   attr :current_user, :map, default: %{}, doc: "Current user, for first and last name"
   attr :created_at, :string, doc: "UTC timestamp alert was created at"
   attr :created_by, :string, doc: "Name of person who originally created this alert"
@@ -358,7 +359,6 @@ defmodule AlertsUIWeb.ReviewModal do
           <.link class="text-primary">
             <.icon name="hero-arrow-down-tray" class="h-4 w-4" /> Download history
           </.link>
-
         </div>
       </div>
       <%!-- Only override footer if we're not creating/reviewing edits --%>
