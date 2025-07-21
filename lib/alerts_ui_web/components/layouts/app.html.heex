@@ -24,17 +24,15 @@
           method="delete"
           class="text-sm leading-6 text-primary hover:text-zinc-700 whitespace-nowrap"
         >
-          <.icon name="hero-arrow-right-on-rectangle" />
-          Logout
+          <.icon name="hero-arrow-right-on-rectangle" /> Logout
         </.link>
       <% else %>
-          <.link
-            href={~p"/auth/keycloak"}
-            class="text-sm leading-6 text-primary hover:text-zinc-700 whitespace-nowrap"
-          >
-            <.icon name="hero-arrow-left-on-rectangle" />
-            Login
-          </.link>
+        <.link
+          href={~p"/auth/keycloak"}
+          class="text-sm leading-6 text-primary hover:text-zinc-700 whitespace-nowrap"
+        >
+          <.icon name="hero-arrow-left-on-rectangle" /> Login
+        </.link>
       <% end %>
     </div>
   </div>
