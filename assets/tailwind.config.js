@@ -17,6 +17,7 @@ module.exports = {
         primary: "#8ecdff",
         secondary: "#171f26",
         success: "#a7ffeb",
+        warning: "#ffc107",
         danger: "#dc3545",
         "primary-hover": "#85c0ee",
         "primary-border-hover": "8ac6f6",
