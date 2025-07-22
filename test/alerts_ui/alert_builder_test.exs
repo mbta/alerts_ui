@@ -81,6 +81,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  banner_text: "important banner text",
                  last_push_notification_timestamp: ~U[2024-04-30 15:54:00Z],
                  notification_period_start: ~U[2024-04-30 05:54:00Z],
+                 notification_period_end: nil,
                  severity: 3,
                  severity_level: :WARNING,
                  reminder_times: [
@@ -93,13 +94,63 @@ defmodule AlertsUI.AlertBuilderTest do
                  original_route_selections: ["57"]
                }
 
-        result
-        |> Map.put(:user, build(:user))
-        |> Alerts.create_or_update_alert()
+        Alerts.create_or_update_alert(result, build(:user))
 
         [alert_1, alert_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id)
         assert alert_1.alert_id == existing_alert.alert_id
         assert alert_2.alert_id |> String.to_integer() > alert_1.alert_id |> String.to_integer()
+      end
+    end
+
+    test "notification period end is same as alert end if specifier is custom" do
+      with_mocks([
+        {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
+      ]) do
+        alert_data = %{
+          route_type: 1,
+          header_text: "hello",
+          effect_name: "Delay",
+          route_ids: ["57"],
+          active_period_start: ~N[2024-04-30 11:54:00],
+          active_period_end: ~N[2024-05-01 11:54:00],
+          alert_timing: :"one-time",
+          active_period_end_specifier: :custom,
+          active_period_start_specifier: :custom,
+          cause_detail: "DISABLED_TRAIN",
+          notification_period_start: ~N[2024-04-30 05:52:00],
+          notification_specifier: :now,
+          severity: 3
+        }
+
+        result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 05:54:00Z])
+        assert result.notification_period_end == ~U[2024-05-01 15:54:00Z]
+      end
+    end
+
+    test "notification period end is end of service today if end specifier is later today" do
+      with_mocks([
+        {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
+      ]) do
+        alert_data = %{
+          route_type: 1,
+          header_text: "hello",
+          effect_name: "Delay",
+          route_ids: ["57"],
+          active_period_start: ~N[2024-04-30 11:54:00],
+          active_period_end: ~N[2024-04-30 13:54:00],
+          alert_timing: :"one-time",
+          active_period_end_specifier: :later_today,
+          active_period_start_specifier: :custom,
+          cause_detail: "DISABLED_TRAIN",
+          notification_period_start: ~N[2024-04-30 05:52:00],
+          notification_specifier: :now,
+          severity: 3
+        }
+
+        result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 11:54:00Z])
+        assert result.notification_period_end == ~U[2024-05-01 07:00:00Z]
       end
     end
 
@@ -225,6 +276,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  cause: :UNKNOWN_CAUSE,
                  last_push_notification_timestamp: nil,
                  notification_period_start: nil,
+                 notification_period_end: nil,
                  severity: nil,
                  severity_level: nil,
                  reminder_times: [],
@@ -234,8 +286,7 @@ defmodule AlertsUI.AlertBuilderTest do
                }
 
         result
-        |> Map.put(:user, build(:user))
-        |> Alerts.create_or_update_alert()
+        |> Alerts.create_or_update_alert(build(:user))
 
         [alert_1, alert_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id, :desc)
         assert alert_2.alert_id == existing_alert.alert_id
@@ -378,8 +429,7 @@ defmodule AlertsUI.AlertBuilderTest do
                ]
 
         result
-        |> Map.put(:user, build(:user))
-        |> Alerts.create_or_update_alert()
+        |> Alerts.create_or_update_alert(build(:user))
 
         [alert_1, alert_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id, :desc)
         assert alert_2.alert_id == existing_alert.alert_id
@@ -436,6 +486,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  banner_text: nil,
                  last_push_notification_timestamp: nil,
                  notification_period_start: ~U[2024-04-30 15:54:00Z],
+                 notification_period_end: nil,
                  severity: nil,
                  severity_level: nil,
                  reminder_times: [],
@@ -445,8 +496,7 @@ defmodule AlertsUI.AlertBuilderTest do
                }
 
         result
-        |> Map.put(:user, build(:user))
-        |> Alerts.create_or_update_alert()
+        |> Alerts.create_or_update_alert(build(:user))
 
         [alert_1, alert_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id, :desc)
         assert alert_1.alert_id |> String.to_integer() > alert_2.alert_id |> String.to_integer()

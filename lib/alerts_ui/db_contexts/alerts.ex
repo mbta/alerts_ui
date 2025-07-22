@@ -8,9 +8,10 @@ defmodule AlertsUI.Alerts do
   alias AlertsUI.Repo
   require Logger
 
-  def create_or_update_alert(params, existing_alert \\ %Alert{}) do
+  def create_or_update_alert(params, user, existing_alert \\ %Alert{}) do
     existing_alert
     |> Alert.changeset(params)
+    |> Ecto.Changeset.put_assoc(:user, user)
     |> PaperTrail.insert_or_update()
     |> case do
       {:ok, %{model: alert}} -> {:ok, alert}
@@ -265,6 +266,7 @@ defmodule AlertsUI.Alerts do
     alert
     |> change(
       closed_timestamp: closed_time,
+      notification_period_end: closed_time,
       duration_certainty: :KNOWN
     )
     |> PaperTrail.update!()

@@ -375,9 +375,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
 
     test "Filter title updates if a different weekday is selected" do
       today = @todays_date |> Date.to_string()
-      today_day_name = Timex.format!(@todays_date, "{WDshort} {Mshort} {0D}")
+      today_day_name = Calendar.strftime(@todays_date, "%a %b %0d")
       tomorrow = @todays_date |> Date.add(1) |> Date.to_string()
-      tomorrow_day_name = Timex.format!(Date.add(@todays_date, 1), "{WDshort} {Mshort} {0D}")
+      tomorrow_day_name = Calendar.strftime(Date.add(@todays_date, 1), "%a %b %0d")
 
       with_mock(SchedulesRepo,
         by_route_ids: fn
@@ -979,7 +979,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         new_alert = AlertsUI.Alerts.get_by_alert_id(alert_id)
 
         assert [%{trip: %{trip_id: "CR-683322-595"}}, %{trip: %{trip_id: "CR-683322-596"}}] =
-                 Map.get(new_alert, :informed_entity)
+                 Map.get(new_alert, :informed_entity) |> Enum.sort_by(& &1.trip.trip_id)
       end
     end
 
@@ -990,6 +990,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
          [
            by_stop: fn _stop_id, _ -> [@route] end,
            by_type: fn _types -> [@route] end,
+           all: fn _opts -> [@route] end,
            get: fn _ -> @route end,
            get: fn _, _ -> @route end
          ]},
@@ -998,6 +999,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
            by_route_ids: fn _route_ids, _opts ->
              [@schedule, @schedule_2, @schedule_3, @schedule_4]
            end,
+           all: fn _opts -> [@schedule, @schedule_2] end,
            end_of_rating: fn -> Date.add(@todays_date, 1) end,
            trip: fn "CR-683322-595" ->
              %Trip{id: "CR-683322-595", name: "595", direction_id: 0}
@@ -1059,7 +1061,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
 
         {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
 
-        rendered_view = render(view)
+        rendered_view = render_async(view)
+
         assert rendered_view =~ ~s(value="CR-Worcester" checked="checked")
         assert rendered_view =~ ~s(<option selected="selected" value="place-sstat">South Station)
         assert rendered_view =~ ~s(<option selected="selected" value="CR-683322-595">595)

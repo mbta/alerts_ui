@@ -2,12 +2,11 @@ defmodule AlertsUI.UsersTest do
   use AlertsUI.DataCase
 
   alias AlertsUI.DBContexts.Users
+  alias AlertsUI.Models.User
+
+  import AlertsUI.UsersFixtures
 
   describe "users" do
-    alias AlertsUI.Models.User
-
-    import AlertsUI.UsersFixtures
-
     @invalid_attrs %{email: nil, first_name: nil, last_name: nil}
 
     test "list_users/0 returns all users" do
@@ -18,6 +17,32 @@ defmodule AlertsUI.UsersTest do
     test "get_user!/1 returns the user with given id" do
       user = create_db_user()
       assert Users.get_user!(user.id) == user
+    end
+
+    test "create_or_update_user/2 with valid data creates a user" do
+      valid_attrs = %{
+        email: "some email",
+        first_name: "some first_name",
+        last_name: "some last_name",
+        role: :user
+      }
+
+      assert {:ok, %User{} = user} = Users.create_or_update_user(valid_attrs)
+      assert user.email == "some email"
+      assert user.first_name == "some first_name"
+      assert user.last_name == "some last_name"
+    end
+
+    test "create_or_update_user/2 with valid data and existing user updates a user" do
+      user = create_db_user()
+      assert user.role == :user
+
+      valid_attrs = %{
+        role: :admin
+      }
+
+      assert {:ok, %User{} = updated_user} = Users.create_or_update_user(valid_attrs, user)
+      assert updated_user.role == :admin
     end
 
     test "create_user/1 with valid data creates a user" do
@@ -63,6 +88,17 @@ defmodule AlertsUI.UsersTest do
     test "change_user/1 returns a user changeset" do
       user = create_db_user()
       assert %Ecto.Changeset{} = Users.change_user(user)
+    end
+  end
+
+  describe "get_by_keycloak_id/1" do
+    test "gets user correctly" do
+      user = create_db_user()
+      assert Users.get_by_keycloak_id("123-456").id == user.id
+    end
+
+    test "returns nil if user doesn't exist" do
+      assert "123-456" |> Users.get_by_keycloak_id() |> is_nil
     end
   end
 end

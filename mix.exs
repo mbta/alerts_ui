@@ -73,8 +73,9 @@ defmodule AlertsUI.MixProject do
     [
       {:credo, "~> 1.7.1", only: [:dev, :test]},
       {:dialyxir, "~> 1.4.1", only: [:dev, :test], runtime: false},
-      {:ecto_psql_extras, "~> 0.6", only: :dev},
-      {:ecto_sql, "~> 3.10"},
+      {:ecto, "~> 3.13.2"},
+      {:ecto_psql_extras, "~> 0.8.8", only: :dev},
+      {:ecto_sql, "~> 3.13.2"},
       {:ehmon, github: "mbta/ehmon", only: :prod},
       {:esbuild, "~> 0.7", runtime: Mix.env() == :dev},
       {:ex_aws, "~> 2.0"},

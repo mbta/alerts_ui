@@ -5,14 +5,24 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   use AlertsUIWeb, :live_component
   use AlertsUI.Schema
   import Ecto.Changeset
-  alias AlertsUI.Models.{Cause, SeverityLevel}
-  alias AlertsUIWeb.FormComponents.Helpers.ErrorFormatter
+  alias AlertsUIWeb.CreateAlertLive
+  alias AlertsUI.Models.{Cause, EnhancedSchedule, SeverityLevel}
+  alias AlertsUIWeb.FormComponents.Helpers.{ErrorFormatter, ServiceEffectCombinations}
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}
+  alias Phoenix.HTML.Form
+
+  alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
+  alias MBTAV3API.Routes.Repo, as: RoutesRepo
+  alias MBTAV3API.Routes.Route
+  alias MBTAV3API.Schedules.Repo, as: Schedules
+  alias MBTAV3API.Stops.Api, as: StopsApi
 
   @primary_key false
   embedded_schema do
     field :header_text, :string
     field :description_text, :string
+    field :header_sync_toggle, :boolean, default: true
+    field :description_sync_toggle, :boolean, default: true
     field :cause_detail, :string, default: ""
     field :url, :string
     field :image_url, :string
@@ -22,7 +32,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   end
 
   @required_fields ~w[header_text]a
-  @fields ~w[description_text cause_detail url image_url image_alternative_text severity]a ++
+  @fields ~w[header_sync_toggle description_sync_toggle description_text cause_detail url image_url image_alternative_text severity]a ++
             @required_fields
 
   @impl true
@@ -50,7 +60,88 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       assign(socket, %{
         form: to_form(changeset),
         severity_options: severity_options,
-        cause_options: []
+        cause_options: [],
+        edit_data_has_been_filled: false
+      })
+
+    {:ok, socket}
+  end
+
+  @impl true
+  def update(
+        %{editing: true, combination: combination, alert_data: alert_data} = assigns,
+        %{
+          assigns: %{
+            edit_data_has_been_filled: false
+          }
+        } = socket
+      ) do
+    required_fields = ServiceEffectCombinations.required_fields(combination)
+
+    # Fill in needed information for if you hit the toggle button when editing
+    if :route_ids in required_fields do
+      joined_route_ids = alert_data.route_ids |> Enum.join(",")
+
+      selected_routes =
+        RoutesRepo.all("filter[id]": joined_route_ids)
+        |> maybe_include_virtual_green_line(alert_data.route_ids)
+
+      send(self(), {:selected_routes, selected_routes})
+    end
+
+    if :stop_ids in required_fields do
+      stop_ids = Enum.join(alert_data.stop_ids, ",")
+      selected_stops = StopsApi.all("filter[id]": stop_ids)
+      send(self(), {:selected_stops, selected_stops})
+    end
+
+    if :trip_ids in required_fields do
+      trip_ids = Enum.join(alert_data.trip_ids, ",")
+
+      selected_schedules =
+        Schedules.all("filter[stop_sequence]": "first,last", "filter[trip]": trip_ids)
+        |> Enum.map(fn schedule ->
+          map = Map.from_struct(schedule)
+          Kernel.struct(EnhancedSchedule, map)
+        end)
+        |> CreateAlertLive.filter_out_old_trips()
+
+      send(self(), {:selected_schedules, selected_schedules})
+    end
+
+    if :facility_id in required_fields do
+      selected_facility = FacilitiesRepo.get(alert_data.facility_id)
+      send(self(), {:selected_facility, selected_facility})
+    end
+
+    cause_options =
+      formatted_causes(
+        Map.get(assigns, :route_type),
+        Map.get(assigns, :combination)
+      )
+
+    changeset =
+      %__MODULE__{}
+      |> changeset(
+        alert_data
+        |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
+        |> Map.merge(%{"header_sync_toggle" => false, "description_sync_toggle" => false})
+      )
+
+    send_changeset(changeset)
+    form = to_form(changeset)
+
+    image_url = alert_data.image_url || ""
+
+    socket =
+      socket
+      |> assign(assigns)
+      |> assign(%{
+        form: form,
+        cause_options: cause_options,
+        edit_data_has_been_filled: true,
+        image_size: get_image_size(image_url),
+        image_path: image_url
       })
 
     {:ok, socket}
@@ -67,6 +158,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         } = assigns,
         socket
       ) do
+    form = socket.assigns.form
+
     cause_options =
       formatted_causes(
         Map.get(assigns, :route_type),
@@ -84,15 +177,29 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         })
       )
 
+    header_text =
+      if Form.normalize_value("checkbox", form[:header_sync_toggle].value) do
+        Templates.build_auto_text(autotext_data, :header_template)
+      else
+        alert_data.header_text
+      end
+
+    description_text =
+      if Form.normalize_value("checkbox", form[:description_sync_toggle].value) do
+        Templates.build_auto_text(autotext_data, :description_template)
+      else
+        alert_data.description_text
+      end
+
     changeset =
       %__MODULE__{}
       |> changeset(
         alert_data
         |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
-        |> Map.merge(socket.assigns.form.params)
+        |> Map.merge(form.params)
         |> Map.merge(%{
-          "header_text" => Templates.build_auto_text(autotext_data, :header_template),
-          "description_text" => Templates.build_auto_text(autotext_data, :description_template)
+          "header_text" => header_text,
+          "description_text" => description_text
         })
       )
 
@@ -137,6 +244,42 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   end
 
   @impl true
+  def handle_event("header_text_change", %{"alert_details" => alert_details}, socket) do
+    # disables sync if user types in header field
+    alert_details = Map.merge(socket.assigns.form.params, alert_details)
+    alert_details = Map.put(alert_details, "header_sync_toggle", false)
+
+    changeset = changeset(%__MODULE__{}, alert_details)
+
+    send_changeset(changeset)
+
+    form =
+      changeset
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    {:noreply, assign(socket, %{form: form})}
+  end
+
+  @impl true
+  def handle_event("description_text_change", %{"alert_details" => alert_details}, socket) do
+    # disables sync if user types in description field
+    alert_details = Map.merge(socket.assigns.form.params, alert_details)
+    alert_details = Map.put(alert_details, "description_sync_toggle", false)
+
+    changeset = changeset(%__MODULE__{}, alert_details)
+
+    send_changeset(changeset)
+
+    form =
+      changeset
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    {:noreply, assign(socket, %{form: form})}
+  end
+
+  @impl true
   def handle_event("validate", %{"alert_details" => alert_details}, socket) do
     image_size = alert_details["image_url"] |> get_image_size()
     image_path = alert_details["image_url"] |> get_image_path()
@@ -149,14 +292,26 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
 
     autotext_data = AlertDataToAutoText.build_autotext_data(updated_autotext_data)
 
+    header_text_map =
+      if alert_details["header_sync_toggle"] == true do
+        %{"header_text" => Templates.build_auto_text(autotext_data, :header_template)}
+      else
+        %{}
+      end
+
+    description_text_map =
+      if alert_details["description_sync_toggle"] == true do
+        %{"description_text" => Templates.build_auto_text(autotext_data, :description_template)}
+      else
+        %{}
+      end
+
     changeset =
       %__MODULE__{}
       |> changeset(
         alert_details
-        |> Map.merge(%{
-          "header_text" => Templates.build_auto_text(autotext_data, :header_template),
-          "description_text" => Templates.build_auto_text(autotext_data, :description_template)
-        })
+        |> Map.merge(header_text_map)
+        |> Map.merge(description_text_map)
       )
       |> validate_image_fields(image_size)
 
@@ -242,11 +397,14 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
               maxlength="255"
               id="header_input"
               class="w-[100%] min-h-[10rem] border-b-0 z-20"
+              phx-change="header_text_change"
+              phx-target={@myself}
               value={@form[:header_text].value}
             />
             <.textarea_counter character_limit={255} field={@form[:header_text]} />
           </div>
           <div class="flex flex-col justify-center ml-4">
+            <.sync_toggle field={@form[:header_sync_toggle]} />
             <.copy_button copy_id="#alert_details_header_text" title="Copy main message to Clipboard" />
           </div>
         </div>
@@ -259,11 +417,14 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
               id="description_input"
               class="w-[100%] min-h-[10rem] border-b-0 z-20"
               maxlength="3000"
+              phx-change="description_text_change"
+              phx-target={@myself}
               value={@form[:description_text].value}
             />
             <.textarea_counter character_limit={3000} field={@form[:description_text]} />
           </div>
           <div class="flex flex-col justify-center ml-4">
+            <.sync_toggle field={@form[:description_sync_toggle]} />
             <.copy_button
               copy_id="#alert_details_description_text"
               title="Copy supporting information to Clipboard"
@@ -366,4 +527,13 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
 
   defp get_image_path(url) when is_binary(url),
     do: url |> Path.split() |> List.last() |> String.split("?") |> hd
+
+  @spec maybe_include_virtual_green_line([Route.t()], [String.t()]) :: [Route.t()]
+  defp maybe_include_virtual_green_line(routes, route_ids) do
+    if "Green" in route_ids do
+      [RoutesRepo.green_line() | routes]
+    else
+      routes
+    end
+  end
 end

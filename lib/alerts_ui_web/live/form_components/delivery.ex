@@ -210,11 +210,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
             </div>
 
             <div class="flex flex-col justify-center ml-4">
-              <.checkbox
-                field={@form[:banner_sync_toggle]}
-                class="h-7 w-7 border border-border-primary rounded-sm"
-                check_class="w-[100%] h-[100%] checked:before:hero-arrow-path leading-normal"
-              />
+              <.sync_toggle field={@form[:banner_sync_toggle]} />
               <.copy_button copy_id="#delivery_banner_text" title="Copy banner text to Clipboard" />
             </div>
           </div>

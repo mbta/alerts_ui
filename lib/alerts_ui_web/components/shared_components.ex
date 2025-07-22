@@ -1275,6 +1275,62 @@ defmodule AlertsUIWeb.SharedComponents do
   end
 
   @doc """
+  Renders a sync toggle input.
+
+  ## Examples
+
+      <.sync_toggle field={@form[:fieldname]} />
+  """
+  attr :id, :any, default: nil
+  attr :value, :any
+  attr :hidden, :boolean, default: false
+  attr :class, :string, default: "", doc: "additional classes to add to container div"
+  attr :label, :string, default: nil
+
+  attr :field, FormField,
+    doc: "a form field struct retrieved from the form, for example: @form[:email]"
+
+  attr :errors, :list, default: []
+  attr :checked, :boolean, doc: "the checked flag for checkbox inputs"
+
+  attr :rest, :global, include: ~w(phx-debounce disabled)
+
+  def sync_toggle(%{field: %FormField{} = field} = assigns) do
+    assigns =
+      assigns
+      |> assign(id: assigns.id || field.id)
+      |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
+      |> assign(:name, field.name)
+      |> assign_new(:checked, fn -> Form.normalize_value("checkbox", field.value) end)
+
+    ~H"""
+    <div>
+      <.label :if={@label} for={@id}>{@label}</.label>
+      <div phx-feedback-for={@name} class={@class}>
+        <input type="hidden" name={@name} value="false" />
+        <input
+          type="checkbox"
+          id={@id}
+          name={@name}
+          value="true"
+          checked={@checked}
+          class={[
+            "[appearance:none] hover:bg-primary-hover w-7 h-7 border border-border-primary rounded-sm
+            rounded-sm bg-bg-input-default font-bold leading-none flex items-center justify-center text-text-primary",
+            "before:hero-arrow-path",
+            "checked:bg-primary checked:before:content-[''] checked:text-bg-primary",
+            @class,
+            if(length(@errors) > 0, do: "border border-1 border-danger focus:border-danger")
+          ]}
+          {@rest}
+        />
+        <.input_error :for={msg <- @errors}>{msg}</.input_error>
+      </div>
+    </div>
+    """
+  end
+
+  @doc """
   Renders a date/time input.
 
   You can use this as a date or a time input by passing those as the type.

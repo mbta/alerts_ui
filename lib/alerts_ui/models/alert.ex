@@ -56,6 +56,7 @@ defmodule AlertsUI.Models.Alert do
   active_period_start
   active_period_end
   notification_period_start
+  notification_period_end
   recurrence_days
   original_route_selections)a
 
@@ -102,6 +103,7 @@ defmodule AlertsUI.Models.Alert do
           tts_description_text: String.t() | nil,
           informed_entity: [InformedEntity.t()],
           notification_period_start: DateTime.t() | nil,
+          notification_period_end: DateTime.t() | nil,
           original_route_selections: [String.t()] | nil,
           user_id: User.id()
         }
@@ -140,7 +142,7 @@ defmodule AlertsUI.Models.Alert do
   }
 
   schema "alerts" do
-    belongs_to :user, User, on_replace: :update
+    belongs_to :user, User, on_replace: :nilify
     field :alert_id, :string
     field :effect, Ecto.Enum, values: @effect
     field :effect_detail, :string
@@ -174,6 +176,7 @@ defmodule AlertsUI.Models.Alert do
     has_many :informed_entity, InformedEntity, on_replace: :nilify
     field :draft, :boolean, default: false
     field :notification_period_start, :utc_datetime
+    field :notification_period_end, :utc_datetime
 
     field :recurrence_days, {:array, Ecto.Enum},
       values: ~w[sunday monday tuesday wednesday thursday friday saturday]a
@@ -187,7 +190,6 @@ defmodule AlertsUI.Models.Alert do
   def changeset(%__MODULE__{} = alert, params) do
     alert
     |> cast(params, @permitted_fields)
-    |> cast_assoc(:user, required: true, with: &User.changeset/2)
     |> cast_assoc(:active_period, required: false, with: &ActivePeriod.changeset/2)
     |> cast_assoc(:informed_entity, required: true, with: &InformedEntity.changeset/2)
     |> cast_assoc(:reminder_times, required: false, with: &ReminderTime.changeset/2)

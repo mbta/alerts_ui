@@ -87,6 +87,7 @@ Repo.insert!(%Alert{
   alert_lifecycle: :NEW,
   duration_certainty: :UNKNOWN,
   active_period: [active_period_1, active_period_2],
+  active_period_start: active_period_1.start,
   image_url: "https://example.com/image1.png",
   image_alternative_text: "an alert image",
   informed_entity: [informed_entity_1, informed_entity_2],

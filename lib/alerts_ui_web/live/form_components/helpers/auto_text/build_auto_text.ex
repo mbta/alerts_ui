@@ -150,8 +150,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   # stop form (modifies stops)
   @spec stop_form(__MODULE__.t()) :: String.t()
   def stop_form(%{stops: []}), do: ""
-  def stop_form(%{stops: [_stop]}), do: "stop is"
-  def stop_form(%{stops: _stops}), do: "stops are"
+  def stop_form(%{stops: [_stop]}), do: "is"
+  def stop_form(%{stops: _stops}), do: "are"
+
+  @spec stop_word(__MODULE__.t()) :: String.t()
+  def stop_word(%{stops: []}), do: ""
+  def stop_word(%{stops: [_stop]}), do: "stop"
+  def stop_word(%{stops: _stops}), do: "stops"
 
   # stop range (between x and y)
   @spec stop_range_between(__MODULE__.t()) :: String.t()
@@ -269,16 +274,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
     "#{non_numerical_routes_phrase}#{joiner}#{numerical_routes_phrase}"
   end
 
+  def route_word([_route]), do: "route"
+  def route_word(_routes), do: "routes"
+
   # route form (modifies routes)
   @spec route_form(__MODULE__.t()) :: String.t()
   def route_form(%{routes: []}), do: ""
-  def route_form(%{routes: [_route]}), do: "route is"
-  def route_form(_), do: "routes are"
-
-  @spec route_form_only(__MODULE__.t()) :: String.t()
-  def route_form_only(%{routes: []}), do: ""
-  def route_form_only(%{routes: [_route]}), do: "is"
-  def route_form_only(_), do: "are"
+  def route_form(%{routes: [_route]}), do: "is"
+  def route_form(_), do: "are"
 
   defp first_letter_numeric?(route_name) do
     route_name
@@ -297,7 +300,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   defp numerical_routes_phrase(nil), do: ""
 
   defp numerical_routes_phrase(numerical_routes) do
-    "#{route_word(numerical_routes)}#{numerical_routes |> join_together}"
+    "#{numerical_routes |> route_word() |> String.capitalize()} #{numerical_routes |> join_together}"
   end
 
   defp non_numerical_routes_phrase(nil, _), do: ""
@@ -306,9 +309,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   defp non_numerical_routes_phrase(routes, _numerical_routes) do
     Enum.join(routes, ", ")
   end
-
-  defp route_word([_route]), do: "Route "
-  defp route_word(_routes), do: "Routes "
 
   # formatters
 
