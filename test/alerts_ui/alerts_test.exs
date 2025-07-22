@@ -4,7 +4,7 @@ defmodule AlertsUI.AlertsTest do
   import AlertsUI.Support.Factory
   import AlertsUI.UsersFixtures
   alias AlertsUI.Alerts
-  alias AlertsUI.Models.{ActivePeriod, Alert}
+  alias AlertsUI.Models.Alert
   @now DateTime.utc_now()
   @five_minutes_ago @now
                     |> DateTime.add(-5, :minute)
@@ -786,8 +786,8 @@ defmodule AlertsUI.AlertsTest do
 
       insert(:alert, %{
         alert_id: "10500",
-        active_period_start: @one_day_from_now,
-        notification_period_start: @one_day_from_now,
+        active_period_start: @two_days_from_now,
+        notification_period_start: @two_days_from_now,
         active_period_end: nil,
         notification_period_end: nil,
         duration_certainty: :UNKNOWN
@@ -795,7 +795,8 @@ defmodule AlertsUI.AlertsTest do
 
       insert(:alert, %{
         alert_id: "10600",
-        active_period_start: @one_hour_ago,
+        active_period_start: @one_hour_from_now,
+        notification_period_start: @one_hour_from_now,
         active_period_end: nil,
         notification_period_end: nil,
         duration_certainty: :UNKNOWN
@@ -804,19 +805,33 @@ defmodule AlertsUI.AlertsTest do
       {current_results, _meta} =
         Alerts.list_all_paginated(%{
           order_by: [:integer_alert_id],
-          filters: [%{"field" => "timeline", "value" => "current"}]
+          filters: [%{"field" => "timeline", "value" => "future"}]
         })
 
       assert current_results |> Enum.map(& &1.alert_id) == [
                10200,
                10400,
-               10500,
                10300,
-               10800,
-               10700,
-               10600
+               10600,
+               10500
              ]
     end
+  end
+
+  test "filter by timeline- all" do
+    {current_results, _meta} =
+      Alerts.list_all_paginated(%{
+        order_by: [:integer_alert_id],
+        filters: [%{"field" => "timeline", "value" => "all"}]
+      })
+
+    assert current_results |> Enum.map(& &1.alert_id) == [
+             10200,
+             10400,
+             10300,
+             10600,
+             10500
+           ]
   end
 
   describe "filter_on_notification_period_start/2" do

@@ -34,8 +34,16 @@ defmodule AlertsUI.Models.CustomFilters do
     case value do
       "future" ->
         query
-        |> where([a], not is_nil(a.active_period_start) and a.active_period_start > ^now)
-        |> order_by(asc_nulls_last: :notification_period_end, asc: :duration_certainty, asc: :active_period_start)
+        |> where(
+          [a],
+          not is_nil(a.notification_period_start) and a.notification_period_start > ^now
+        )
+        |> order_by(
+          asc_nulls_last: :notification_period_end,
+          asc_nulls_last: :active_period_end,
+          asc: :duration_certainty,
+          asc: :active_period_start
+        )
 
       "past" ->
         query
@@ -49,7 +57,12 @@ defmodule AlertsUI.Models.CustomFilters do
           not is_nil(a.active_period_start) and a.active_period_start < ^now and
             (is_nil(a.active_period_end) or a.active_period_end > ^now)
         )
-        |> order_by(asc_nulls_last: :notification_period_end, asc: :duration_certainty, asc: :active_period_start)
+        |> order_by(
+          asc_nulls_last: :notification_period_end,
+          asc_nulls_last: :active_period_end,
+          asc: :duration_certainty,
+          asc: :active_period_start
+        )
 
       _all ->
         order_by(query, asc_nulls_first: :active_period_end)
