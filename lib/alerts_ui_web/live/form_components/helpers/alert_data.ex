@@ -62,7 +62,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           banner_text: String.t() | nil,
           combination: atom(),
           alert_timing: atom(),
-          active_period_start: NaiveDateTime.t() | nil,
+          active_period_start: NaiveDateTime.t(),
           active_period_start_date: Date.t() | nil,
           active_period_start_time: Time.t() | nil,
           active_period_start_specifier: String.t() | nil,
@@ -161,7 +161,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       )
 
     %{
-      alert_timing: "one-time",
+      alert_timing: :"one-time",
       active_period_start: active_period_start,
       active_period_end: active_period_end(active_period_end, end_specifier),
       active_period_end_date: end_date(active_period_end, end_specifier),
@@ -177,7 +177,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     end_specifier = if alert.active_period_end, do: "custom", else: "until_further_notice"
 
     %{
-      alert_timing: "recurring",
+      alert_timing: :recurring,
       active_period_start_time_specifier: determine_start_specifier(start_datetime),
       active_period_end_time_specifier: determine_end_specifier(end_datetime, :KNOWN),
       active_period_start_specifier: "custom",

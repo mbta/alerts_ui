@@ -571,6 +571,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   slot :header
   slot :inner_block, required: true
+  slot :footer
 
   def modal(assigns) do
     ~H"""
@@ -625,24 +626,32 @@ defmodule AlertsUIWeb.SharedComponents do
                 {render_slot(@inner_block)}
               </div>
               <hr class="w-[100%] border-y-1 border-bg-elevation-6" />
-              <div class="flex flex-row justify-end px-4 py-4 gap-2">
-                <.button_secondary
-                  :if={@cancel_event_name}
-                  type="button"
-                  phx-remove={hide_modal(@id)}
-                  phx-click={JS.push(@cancel_event_name, target: @target_id) |> JS.exec("phx-remove")}
-                >
-                  {@cancel_button_text}
-                </.button_secondary>
-                <.button_primary
-                  :if={@accept_event_name}
-                  type="button"
-                  phx-remove={hide_modal(@id)}
-                  phx-click={JS.push(@accept_event_name, target: @target_id) |> JS.exec("phx-remove")}
-                >
-                  {@accept_button_text}
-                </.button_primary>
-              </div>
+              <%= if render_slot(@footer) do %>
+                {render_slot(@footer)}
+              <% else %>
+                <div class="flex flex-row justify-end px-4 py-4 gap-2">
+                  <.button_secondary
+                    :if={@cancel_event_name}
+                    type="button"
+                    phx-remove={hide_modal(@id)}
+                    phx-click={
+                      JS.push(@cancel_event_name, target: @target_id) |> JS.exec("phx-remove")
+                    }
+                  >
+                    {@cancel_button_text}
+                  </.button_secondary>
+                  <.button_primary
+                    :if={@accept_event_name}
+                    type="button"
+                    phx-remove={hide_modal(@id)}
+                    phx-click={
+                      JS.push(@accept_event_name, target: @target_id) |> JS.exec("phx-remove")
+                    }
+                  >
+                    {@accept_button_text}
+                  </.button_primary>
+                </div>
+              <% end %>
             </.focus_wrap>
           </div>
         </div>
