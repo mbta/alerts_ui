@@ -30,13 +30,12 @@ defmodule AlertsUI.Models.CustomFilters do
 
   def timeline_filter(query, %Filter{value: value}, _opts) do
     now = DateTime.utc_now()
-    end_of_service = ActivePeriod.end_of_service_datetime_utc(now)
 
     case value do
       "future" ->
         query
         |> where([a], not is_nil(a.active_period_start) and a.active_period_start > ^now)
-        |> order_by(desc_nulls_last: :active_period_end)
+        |> order_by(asc_nulls_last: :notification_period_end, asc: :duration_certainty, asc: :active_period_start)
 
       "past" ->
         query
@@ -44,21 +43,16 @@ defmodule AlertsUI.Models.CustomFilters do
         |> order_by(asc: :active_period_end, asc: :active_period_start)
 
       "current" ->
-
         query
         |> where(
           [a],
-          # start is not nil and is in the past, end is either nil or in the future
-          ((not is_nil(a.active_period_start)) and a.active_period_start < ^now) and (is_nil(a.active_period_end) or a.active_period_end > ^now)
+          not is_nil(a.active_period_start) and a.active_period_start < ^now and
+            (is_nil(a.active_period_end) or a.active_period_end > ^now)
         )
-        # |> order_by([a], fragment(
-        #   "CASE when ? <= ? THEN
-        #  ? DESC ELSE ? ASC"
-        # , a.active_period_end, ^end_of_service_utc, a.active_period_end, a.active_period_end
-        # ))
-        |> order_by([asc_nulls_last: :active_period_end, asc: :active_period_start])
+        |> order_by(asc_nulls_last: :notification_period_end, asc: :duration_certainty, asc: :active_period_start)
 
-        _all -> order_by(query, asc_nulls_first: :active_period_end)
+      _all ->
+        order_by(query, asc_nulls_first: :active_period_end)
     end
   end
 end
