@@ -1061,6 +1061,10 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
       alert_timing: :"one-time",
       active_period_start: nil,
       active_period_end: nil,
+      active_period_start_date: nil,
+      active_period_start_time: nil,
+      active_period_end_date: nil,
+      active_period_end_time: nil,
       active_period_end_specifier: "custom",
       active_period_start_specifier: "custom",
       cause_detail: nil,
@@ -1068,7 +1072,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
       image_url: nil,
       notification_specifier: :same_as_effect_period,
       severity: 4,
-      reminder_times: []
+      reminder_times: [],
+      recurrence_days: []
     }
 
     @assigns %{
@@ -1163,6 +1168,64 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
       assert rendered_modal =~ "Cancel alert"
       assert rendered_modal =~ "Duplicate"
       assert rendered_modal =~ "Edit this alert"
+    end
+
+    test "recurring with end date" do
+      assigns = %{
+        @assigns
+        | alert_data: %{
+            @alert_data
+            | active_period_start_date: NaiveDateTime.to_date(@yesterday),
+              active_period_start_time: NaiveDateTime.to_time(@yesterday),
+              active_period_end_date: NaiveDateTime.to_date(@tomorrow),
+              active_period_end_time: NaiveDateTime.to_time(@tomorrow),
+              alert_timing: :recurring,
+              recurrence_days: ["wednesday"]
+          }
+      }
+
+      rendered_modal =
+        rendered_to_string(~H"""
+        <ReviewModal.review_modal
+          alert_id={@alert_id}
+          cancel_event_name={@cancel_event_name}
+          editing={@editing}
+          target_id={@target_id}
+          cancel_alert={@cancel_alert}
+          alert_data={@alert_data}
+        />
+        """)
+
+      assert rendered_modal =~ "Alert #123 (Current)"
+    end
+
+    test "recurring without end date" do
+      assigns = %{
+        @assigns
+        | alert_data: %{
+            @alert_data
+            | active_period_start_date: NaiveDateTime.to_date(@yesterday),
+              active_period_start_time: NaiveDateTime.to_time(@yesterday),
+              active_period_end_date: nil,
+              active_period_end_time: NaiveDateTime.to_time(@tomorrow),
+              alert_timing: :recurring,
+              recurrence_days: ["wednesday"]
+          }
+      }
+
+      rendered_modal =
+        rendered_to_string(~H"""
+        <ReviewModal.review_modal
+          alert_id={@alert_id}
+          cancel_event_name={@cancel_event_name}
+          editing={@editing}
+          target_id={@target_id}
+          cancel_alert={@cancel_alert}
+          alert_data={@alert_data}
+        />
+        """)
+
+      assert rendered_modal =~ "Alert #123 (Current)"
     end
   end
 end

@@ -394,6 +394,28 @@ defmodule AlertsUIWeb.ReviewModal do
   end
 
   defp get_alert_status(%{
+         alert_timing: :recurring,
+         active_period_start_date: active_period_start_date,
+         active_period_start_time: active_period_start_time,
+         active_period_end_date: active_period_end_date,
+         active_period_end_time: active_period_end_time
+       }) do
+    active_period_start = NaiveDateTime.new!(active_period_start_date, active_period_start_time)
+
+    active_period_end =
+      if active_period_end_date do
+        NaiveDateTime.new!(active_period_end_date, active_period_end_time)
+      else
+        nil
+      end
+
+    get_alert_status(%{
+      active_period_start: active_period_start,
+      active_period_end: active_period_end
+    })
+  end
+
+  defp get_alert_status(%{
          active_period_start: active_period_start,
          active_period_end: active_period_end
        }) do
