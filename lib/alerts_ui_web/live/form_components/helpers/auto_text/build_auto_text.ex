@@ -186,9 +186,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   def trip_names_only(%{schedules: []}), do: ""
 
   def trip_names_only(%{schedules: schedules, route_type: route_type}) do
+    trip_word = maybe_pluralize(trip_word(route_type), length(schedules) > 1)
+
     schedules
     |> Enum.map(&SelectFormatter.name_for_option/1)
-    |> join_trips(trip_word(schedules, route_type))
+    |> join_trips(trip_word)
   end
 
   @spec trip_names(__MODULE__.t()) :: String.t()
@@ -196,14 +198,15 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
 
   def trip_names(%{schedules: schedules, route_type: route_type} = autotext_data) do
     trips_string = trip_names_only(autotext_data)
+    trip_word = route_type |> trip_word() |> maybe_pluralize(length(schedules) == 2)
 
-    "#{trip_word(schedules, route_type)} #{trips_string}"
+    trip_word = if route_type == 2, do: String.capitalize(trip_word), else: trip_word
+
+    "#{trip_word} #{trips_string}"
   end
 
-  defp trip_word([_schedule], 2), do: "train"
-  defp trip_word(_, 2), do: "trains"
-  defp trip_word([_schedule], _), do: "trip"
-  defp trip_word(_, _), do: "trips"
+  defp trip_word(2), do: "train"
+  defp trip_word(_), do: "trip"
 
   @spec trip_form(__MODULE__.t()) :: String.t()
   def trip_form(%{schedules: []}), do: ""
@@ -340,6 +343,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
     |> List.replace_at(-1, "and " <> List.last(things))
     |> Enum.join(", ")
   end
+
+  # add "s" to word if second argument evaluates to true
+  defp maybe_pluralize(word, true), do: word <> "s"
+  defp maybe_pluralize(word, false), do: word
 
   defp format_cause(cause_detail) do
     cause_detail |> String.replace("_", " ") |> String.downcase()
