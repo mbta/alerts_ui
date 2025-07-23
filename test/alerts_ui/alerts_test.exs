@@ -599,43 +599,43 @@ defmodule AlertsUI.AlertsTest do
 
     test "filter by timeline- past" do
       insert(:alert, %{
-        alert_id: "10_000",
+        alert_id: "10000",
         active_period_start: @two_hours_ago,
         active_period_end: @one_hour_ago
       })
 
       insert(:alert, %{
-        alert_id: "10_100",
+        alert_id: "10100",
         active_period_start: @six_hours_ago,
         active_period_end: @one_hour_ago
       })
 
       insert(:alert, %{
-        alert_id: "10_200",
+        alert_id: "10200",
         active_period_start: @six_hours_ago,
         active_period_end: @two_hours_ago
       })
 
       insert(:alert, %{
-        alert_id: "10_300",
+        alert_id: "10300",
         active_period_start: @one_hour_ago,
         active_period_end: @one_hour_from_now
       })
 
       insert(:alert, %{
-        alert_id: "10_400",
+        alert_id: "10400",
         active_period_start: @one_day_ago,
         active_period_end: @six_hours_ago
       })
 
       insert(:alert, %{
-        alert_id: "10_500",
+        alert_id: "10500",
         active_period_start: @one_hour_ago,
         active_period_end: nil
       })
 
       insert(:alert, %{
-        alert_id: "10_700",
+        alert_id: "10700",
         active_period_start: @one_hour_ago,
         active_period_end: @now
       })
@@ -657,72 +657,80 @@ defmodule AlertsUI.AlertsTest do
 
     test "filter by timeline- current" do
       insert(:alert, %{
-        alert_id: "10_000",
-        active_period_start: @two_hours_ago,
+        alert_id: "10000",
+        notification_period_start: @two_hours_ago,
         active_period_end: @one_hour_ago,
         notification_period_end: @one_hour_ago,
         duration_certainty: :KNOWN
       })
 
       insert(:alert, %{
-        alert_id: "10_100",
-        active_period_start: @two_hours_ago,
+        alert_id: "10100",
+        notification_period_start: @two_hours_ago,
         active_period_end: @now,
         notification_period_end: @now,
         duration_certainty: :KNOWN
       })
 
       insert(:alert, %{
-        alert_id: "10_200",
-        active_period_start: @two_hours_ago,
+        alert_id: "10200",
+        notification_period_start: @two_hours_ago,
         active_period_end: @two_hours_from_now,
         notification_period_end: @two_hours_from_now,
         duration_certainty: :KNOWN
       })
 
       insert(:alert, %{
-        alert_id: "10_300",
-        active_period_start: @one_hour_ago,
+        alert_id: "10300",
+        notification_period_start: @one_hour_ago,
         active_period_end: @two_hours_from_now,
         notification_period_end: @end_of_service_utc,
         duration_certainty: :ESTIMATED
       })
 
       insert(:alert, %{
-        alert_id: "10_400",
-        active_period_start: @two_hours_ago,
+        alert_id: "10400",
+        notification_period_start: @two_hours_ago,
         active_period_end: @end_of_service_utc,
         notification_period_end: @end_of_service_utc,
         duration_certainty: :KNOWN
       })
 
       insert(:alert, %{
-        alert_id: "10_500",
-        active_period_start: @one_hour_ago,
+        alert_id: "10500",
+        notification_period_start: @one_hour_ago,
         active_period_end: @end_of_service_utc,
         notification_period_end: @end_of_service_utc,
         duration_certainty: :KNOWN
       })
 
       insert(:alert, %{
-        alert_id: "10_600",
-        active_period_start: @one_hour_ago,
+        alert_id: "10600",
+        notification_period_start: @one_hour_ago,
         active_period_end: nil,
         notification_period_end: nil,
         duration_certainty: :UNKNOWN
       })
 
       insert(:alert, %{
-        alert_id: "10_700",
-        active_period_start: @two_hours_ago,
+        alert_id: "10700",
+        notification_period_start: @two_hours_ago,
         active_period_end: nil,
         notification_period_end: nil,
         duration_certainty: :UNKNOWN
       })
 
       insert(:alert, %{
-        alert_id: "10_800",
-        active_period_start: @two_hours_ago,
+        alert_id: "10800",
+        notification_period_start: @now,
+        active_period_end: @two_days_from_now,
+        notification_period_end: @two_days_from_now,
+        duration_certainty: :KNOWN
+      })
+
+      insert(:alert, %{
+        alert_id: "10900",
+        notification_period_start: @one_hour_from_now,
         active_period_end: @two_days_from_now,
         notification_period_end: @two_days_from_now,
         duration_certainty: :KNOWN
@@ -747,7 +755,7 @@ defmodule AlertsUI.AlertsTest do
 
     test "filter by timeline- future" do
       insert(:alert, %{
-        alert_id: "10_000",
+        alert_id: "10000",
         active_period_start: @two_hours_ago,
         notification_period_start: @two_hours_ago,
         active_period_end: @one_hour_ago,
@@ -756,7 +764,7 @@ defmodule AlertsUI.AlertsTest do
       })
 
       insert(:alert, %{
-        alert_id: "10_100",
+        alert_id: "10100",
         active_period_start: @now,
         notification_period_start: @now,
         active_period_end: @two_hours_from_now,
@@ -765,7 +773,7 @@ defmodule AlertsUI.AlertsTest do
       })
 
       insert(:alert, %{
-        alert_id: "10_200",
+        alert_id: "10200",
         active_period_start: @two_hours_ago,
         notification_period_start: @one_hour_from_now,
         active_period_end: @two_hours_from_now,
@@ -774,7 +782,7 @@ defmodule AlertsUI.AlertsTest do
       })
 
       insert(:alert, %{
-        alert_id: "10_300",
+        alert_id: "10300",
         active_period_start: @one_hour_from_now,
         notification_period_start: @one_hour_from_now,
         active_period_end: @two_hours_from_now,
@@ -783,7 +791,7 @@ defmodule AlertsUI.AlertsTest do
       })
 
       insert(:alert, %{
-        alert_id: "10_400",
+        alert_id: "10400",
         active_period_start: @one_hour_from_now,
         notification_period_start: @one_hour_from_now,
         active_period_end: @end_of_service_utc,
@@ -792,7 +800,7 @@ defmodule AlertsUI.AlertsTest do
       })
 
       insert(:alert, %{
-        alert_id: "10_500",
+        alert_id: "10500",
         active_period_start: @two_days_from_now,
         notification_period_start: @two_days_from_now,
         active_period_end: nil,
@@ -801,7 +809,7 @@ defmodule AlertsUI.AlertsTest do
       })
 
       insert(:alert, %{
-        alert_id: "10_600",
+        alert_id: "10600",
         active_period_start: @one_hour_from_now,
         notification_period_start: @one_hour_from_now,
         active_period_end: nil,
@@ -810,7 +818,7 @@ defmodule AlertsUI.AlertsTest do
       })
 
       insert(:alert, %{
-        alert_id: "10_700",
+        alert_id: "10700",
         active_period_start: @two_days_from_now,
         notification_period_start: @two_days_from_now,
         active_period_end: @two_days_from_now,
@@ -837,7 +845,7 @@ defmodule AlertsUI.AlertsTest do
 
   test "filter by timeline- all" do
     insert(:alert, %{
-      alert_id: "10_000",
+      alert_id: "10000",
       active_period_start: @six_hours_ago,
       notification_period_start: @six_hours_ago,
       active_period_end: nil,
@@ -846,7 +854,7 @@ defmodule AlertsUI.AlertsTest do
     })
 
     insert(:alert, %{
-      alert_id: "10_100",
+      alert_id: "10100",
       active_period_start: @one_day_ago,
       notification_period_start: @one_day_ago,
       active_period_end: nil,
@@ -855,7 +863,7 @@ defmodule AlertsUI.AlertsTest do
     })
 
     insert(:alert, %{
-      alert_id: "10_300",
+      alert_id: "10300",
       active_period_start: @six_hours_ago,
       notification_period_start: @six_hours_ago,
       active_period_end: @one_hour_from_now,
@@ -864,7 +872,7 @@ defmodule AlertsUI.AlertsTest do
     })
 
     insert(:alert, %{
-      alert_id: "10_400",
+      alert_id: "10400",
       active_period_start: @one_hour_from_now,
       notification_period_start: @one_hour_from_now,
       active_period_end: @two_hours_from_now,
@@ -873,7 +881,7 @@ defmodule AlertsUI.AlertsTest do
     })
 
     insert(:alert, %{
-      alert_id: "10_500",
+      alert_id: "10500",
       active_period_start: @two_hours_ago,
       notification_period_start: @two_hours_ago,
       active_period_end: @two_hours_from_now,
@@ -882,7 +890,7 @@ defmodule AlertsUI.AlertsTest do
     })
 
     insert(:alert, %{
-      alert_id: "10_600",
+      alert_id: "10600",
       active_period_start: @one_day_ago,
       notification_period_start: @one_day_ago,
       active_period_end: @end_of_service_utc,
@@ -891,7 +899,7 @@ defmodule AlertsUI.AlertsTest do
     })
 
     insert(:alert, %{
-      alert_id: "10_700",
+      alert_id: "10700",
       active_period_start: @one_day_ago,
       notification_period_start: @one_day_ago,
       active_period_end: @six_hours_ago,
@@ -900,7 +908,7 @@ defmodule AlertsUI.AlertsTest do
     })
 
     insert(:alert, %{
-      alert_id: "10_800",
+      alert_id: "10800",
       active_period_start: @one_day_from_now,
       notification_period_start: @one_day_from_now,
       active_period_end: @two_days_from_now,

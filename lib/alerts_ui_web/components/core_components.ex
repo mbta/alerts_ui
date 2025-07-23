@@ -680,7 +680,7 @@ defmodule AlertsUIWeb.CoreComponents do
     # Only first four routes/facilities are listed, the rest are in a "+X" pill
 
     ~H"""
-    <div :if={!is_nil(@entities)} class="flex flex-wrap gap-1">
+    <div class="flex flex-wrap gap-1">
       <%= if @entities == [] do %>
         <%= if @effect_name in EffectsForRouteTypes.list_effects(:access) do %>
           <.mode_icon type="Facility" />

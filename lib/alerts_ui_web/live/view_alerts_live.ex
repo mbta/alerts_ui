@@ -13,7 +13,6 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   @impl true
   def mount(params, _session, socket) do
     Process.send_after(self(), :update, @one_minute_in_ms)
-    # filters[4][field]=timeline&filters[4][value]=current
 
     with {alerts, meta} <- Alerts.list_all_paginated(params) do
       {:ok, assign(socket, page_title: "View Alerts", meta: meta, alerts: alerts, params: params)}
@@ -30,11 +29,6 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   end
 
   @impl true
-  @spec handle_params(
-          %{optional(:__struct__) => Flop, optional(atom() | binary()) => any()},
-          any(),
-          any()
-        ) :: {:noreply, any()}
   def handle_params(params, _url, socket) do
     # default to timeline: current if parameters empty
     params =

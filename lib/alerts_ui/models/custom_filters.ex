@@ -41,7 +41,7 @@ defmodule AlertsUI.Models.CustomFilters do
       asc_nulls_last: :notification_period_end,
       asc: :duration_certainty,
       asc_nulls_last: :active_period_end,
-      asc: :active_period_start
+      asc: :notification_period_start
     )
   end
 
@@ -53,7 +53,7 @@ defmodule AlertsUI.Models.CustomFilters do
     |> order_by(
       desc: :notification_period_end,
       desc: :active_period_end,
-      desc: :active_period_start
+      desc: :notification_period_start
     )
   end
 
@@ -63,14 +63,14 @@ defmodule AlertsUI.Models.CustomFilters do
     query
     |> where(
       [a],
-      not is_nil(a.active_period_start) and a.active_period_start < ^now and
+      not is_nil(a.notification_period_start) and a.notification_period_start <= ^now and
         (is_nil(a.active_period_end) or a.active_period_end > ^now)
     )
     |> order_by(
       asc_nulls_last: :notification_period_end,
       asc: :duration_certainty,
       asc_nulls_last: :active_period_end,
-      asc: :active_period_start
+      asc: :notification_period_start
     )
   end
 
@@ -79,7 +79,7 @@ defmodule AlertsUI.Models.CustomFilters do
       desc: :notification_period_end,
       desc: :duration_certainty,
       desc: :active_period_end,
-      desc: :active_period_start
+      desc: :notification_period_start
     )
   end
 end
