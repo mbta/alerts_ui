@@ -249,7 +249,10 @@ defmodule AlertsUIWeb.IconComponents do
 
   def mode_icon(%{type: "Systemwide"} = assigns) do
     ~H"""
-    <div class="whitespace-nowrap font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-black bg-text-white">
+    <div
+      title={@type}
+      class="truncate font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-black bg-text-white"
+    >
       {@type}
     </div>
     """
@@ -258,7 +261,10 @@ defmodule AlertsUIWeb.IconComponents do
   def mode_icon(%{type: subway_type} = assigns)
       when subway_type in ["Red", "Orange", "Green", "Blue"] do
     ~H"""
-    <div class={"whitespace-nowrap font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white bg-mbta-" <> String.downcase(@type)}>
+    <div
+      title={@type <> " Line"}
+      class={"truncate font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white bg-mbta-" <> String.downcase(@type)}
+    >
       {@type <> " Line"}
     </div>
     """
@@ -268,7 +274,10 @@ defmodule AlertsUIWeb.IconComponents do
     assigns = assign(assigns, branch_letter: branch_letter)
 
     ~H"""
-    <div class="whitespace-nowrap font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white bg-mbta-green">
+    <div
+      title={"Green Line • " <> @branch_letter}
+      class="truncate font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white bg-mbta-green"
+    >
       {"Green Line • " <> @branch_letter}
     </div>
     """
@@ -276,24 +285,37 @@ defmodule AlertsUIWeb.IconComponents do
 
   def mode_icon(%{type: "Mattapan"} = assigns) do
     ~H"""
-    <div class="whitespace-nowrap font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white bg-mbta-red">
+    <div
+      title={@type <> " Trolley"}
+      class="truncate font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white bg-mbta-red"
+    >
       {@type <> " Trolley"}
     </div>
     """
   end
 
   def mode_icon(%{type: "CR-" <> _} = assigns) do
+    assigns = assign(assigns, name: fetch_long_name(assigns.type))
+
     ~H"""
-    <div class="whitespace-nowrap bg-mbta-commuter-rail font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white">
-      {fetch_long_name(@type)}
+    <div
+      title={@name}
+      class="truncate bg-mbta-commuter-rail font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white"
+    >
+      {@name}
     </div>
     """
   end
 
   def mode_icon(%{type: "Boat-" <> _} = assigns) do
+    assigns = assign(assigns, name: fetch_long_name(assigns.type))
+
     ~H"""
-    <div class="whitespace-nowrap bg-mbta-ferry font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white">
-      {fetch_long_name(@type)}
+    <div
+      title={@name}
+      class="truncate bg-mbta-ferry font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white"
+    >
+      {@name}
     </div>
     """
   end
@@ -301,9 +323,14 @@ defmodule AlertsUIWeb.IconComponents do
   # Silver Line
   def mode_icon(%{type: route_id} = assigns)
       when route_id in ["741", "742", "743", "751", "749", "746"] do
+    assigns = assign(assigns, name: fetch_short_name(route_id))
+
     ~H"""
-    <div class="whitespace-nowrap bg-mbta-silver font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white">
-      {fetch_short_name(@type)}
+    <div
+      title={@name}
+      class="truncate bg-mbta-silver font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white"
+    >
+      {@name}
     </div>
     """
   end
@@ -311,7 +338,10 @@ defmodule AlertsUIWeb.IconComponents do
   # Access
   def mode_icon(%{type: "Facility"} = assigns) do
     ~H"""
-    <div class="whitespace-nowrap bg-mbta-access font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white">
+    <div
+      title="Facility"
+      class="truncate bg-mbta-access font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white"
+    >
       Facility
     </div>
     """
@@ -320,7 +350,7 @@ defmodule AlertsUIWeb.IconComponents do
   # When there are more than 4 routes, surplus routes are listed
   def mode_icon(%{type: number} = assigns) when is_integer(number) do
     ~H"""
-    <div class="whitespace-nowrap bg-[#343A40] font-bold py-[2.5px] px-[9px] rounded-[200px] text-white text-xs">
+    <div class="truncate bg-[#343A40] font-bold py-[2.5px] px-[9px] rounded-[200px] text-white text-xs">
       {"+" <> Integer.to_string(@type)}
     </div>
     """
@@ -328,9 +358,15 @@ defmodule AlertsUIWeb.IconComponents do
 
   # Bus Route Icon
   def mode_icon(assigns) do
+    name = if @type in ["747", "708"], do: fetch_short_name(assigns.type), else: assigns.type
+    assigns = assign(assigns, name: name)
+
     ~H"""
-    <div class="whitespace-nowrap bg-mbta-bus font-bold h-full py-[2.5px] px-[9px] rounded-[200px] text-black text-xs uppercase">
-      {if @type in ["747", "708"], do: fetch_short_name(@type), else: @type}
+    <div
+      title={@name}
+      class="truncate bg-mbta-bus font-bold h-full py-[2.5px] px-[9px] rounded-[200px] text-black text-xs uppercase"
+    >
+      {@name}
     </div>
     """
   end
@@ -339,9 +375,6 @@ defmodule AlertsUIWeb.IconComponents do
     route_id
     |> RoutesRepo.get()
     |> Map.get(:long_name)
-    |> String.split(" ")
-    |> List.delete_at(-1)
-    |> Enum.join(" ")
   end
 
   defp fetch_short_name(route_id) do

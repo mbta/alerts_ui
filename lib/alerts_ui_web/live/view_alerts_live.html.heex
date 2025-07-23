@@ -44,25 +44,25 @@
         meta={@meta}
         on_sort={JS.push("sort-alerts")}
         opts={[
-          table_attrs: [class: "table"],
+          table_attrs: [class: "table table-fixed"],
           tbody_tr_attrs: [class: "hover"],
           no_results_content: "No alerts found"
         ]}
         row_click={&JS.push("open_details", value: %{alert_id: &1.alert_id})}
       >
-        <:col :let={alert} label="Service" field={:alert_id} col_style="min-width: 11rem;">
+        <:col :let={alert} label="Service" field={:alert_id} col_style="width: 12.6%;">
           <.service_pills
             entities={alert.original_route_selections}
             effect_name={alert.effect_name}
           />
         </:col>
-        <:col :let={alert} label="Effect" field={:effect_detail} col_style="min-width: 7.5rem;">
+        <:col :let={alert} label="Effect" field={:effect_detail} col_style="width: 8.6%;">
           {format_effect(alert.effect_detail)}
         </:col>
-        <:col :let={alert} label="ID" field={:integer_alert_id} col_style="min-width: 5rem;">
+        <:col :let={alert} label="ID" field={:integer_alert_id} col_style="width: 5.7%;">
           {alert.alert_id}
         </:col>
-        <:col :let={alert} label="Main Message" field={:header_text} col_style="min-width: 20rem;">
+        <:col :let={alert} label="Main Message" field={:header_text}>
           {alert.header_text}
         </:col>
         <:col
@@ -70,7 +70,7 @@
           label="Start"
           field={:active_period_start}
           directions={{:asc_nulls_first, :desc_nulls_last}}
-          col_style="min-width: 6.5rem;"
+          col_style="width: 7.5%;"
         >
           {format_start_time(alert.active_period_start)}
         </:col>
@@ -79,7 +79,7 @@
           label="End"
           field={:active_period_end}
           directions={{:asc_nulls_first, :desc_nulls_last}}
-          col_style="min-width: 6.5rem;"
+          col_style="width: 7.5%;"
         >
           <div class={
             if DateTimeHelpers.same_service_date?(alert.active_period_end), do: "text-danger"
@@ -87,7 +87,7 @@
             {format_end_time(alert.active_period_end, alert.duration_certainty)}
           </div>
         </:col>
-        <:action :let={alert} label="Actions" col_style="min-width: 10rem;">
+        <:action :let={alert} label="Actions" col_style="width: 150px">
           <div class="inline-flex justify-end space-x-2 w-full">
             <.button_secondary_link
               :if={!AlertsUIWeb.FormComponents.Helpers.Helpers.alert_is_closed(alert)}
