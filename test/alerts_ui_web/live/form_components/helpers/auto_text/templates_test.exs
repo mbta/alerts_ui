@@ -1638,7 +1638,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected =
-        "Affected direction: eastbound\n\nAffected stations:\nLechmere\nLongwood Medical Area\nLechmere"
+        "Affected stations:\nLechmere\nLongwood Medical Area\nLechmere"
 
       actual = Templates.build_auto_text(autotext_data, :description_template)
       assert expected == actual
@@ -1684,7 +1684,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         direction: []
       }
 
-      expected = "Affected lines:\n1\n22\n1\n22\n1\n22"
+      expected = "Affected lines:\n1\n22\n1\n22\n1\n22\n\nAffected stations:\nLechmere"
       actual = Templates.build_auto_text(autotext_data, :description_template)
       assert expected == actual
     end
