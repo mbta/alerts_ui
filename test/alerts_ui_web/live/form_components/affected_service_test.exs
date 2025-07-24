@@ -979,7 +979,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         new_alert = AlertsUI.Alerts.get_by_alert_id(alert_id)
 
         assert [%{trip: %{trip_id: "CR-683322-595"}}, %{trip: %{trip_id: "CR-683322-596"}}] =
-                 Map.get(new_alert, :informed_entity)
+                 Map.get(new_alert, :informed_entity) |> Enum.sort_by(& &1.trip.trip_id)
       end
     end
 

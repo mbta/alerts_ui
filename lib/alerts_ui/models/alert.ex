@@ -56,6 +56,7 @@ defmodule AlertsUI.Models.Alert do
   active_period_start
   active_period_end
   notification_period_start
+  notification_period_end
   recurrence_days
   original_route_selections)a
 
@@ -102,6 +103,7 @@ defmodule AlertsUI.Models.Alert do
           tts_description_text: String.t() | nil,
           informed_entity: [InformedEntity.t()],
           notification_period_start: DateTime.t() | nil,
+          notification_period_end: DateTime.t() | nil,
           original_route_selections: [String.t()] | nil,
           user_id: User.id()
         }
@@ -174,6 +176,7 @@ defmodule AlertsUI.Models.Alert do
     has_many :informed_entity, InformedEntity, on_replace: :nilify
     field :draft, :boolean, default: false
     field :notification_period_start, :utc_datetime
+    field :notification_period_end, :utc_datetime
 
     field :recurrence_days, {:array, Ecto.Enum},
       values: ~w[sunday monday tuesday wednesday thursday friday saturday]a

@@ -257,18 +257,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
       },
       service_effect_template: "?route_names_short on snow route"
     },
-    # header template here duplicated from general one.
-    %{
-      pattern: {3, "Service Change"},
-      header_template: "?route_names notice: ?alert_duration ?due_to_cause",
-      description_template: %{
-        route_count: 5,
-        stop_count: 0,
-        trip_count: 2,
-        direction_count: 1
-      },
-      service_effect_template: "?route_names_short notice"
-    },
 
     # subway
     %{

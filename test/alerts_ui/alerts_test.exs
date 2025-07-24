@@ -799,6 +799,7 @@ defmodule AlertsUI.AlertsTest do
 
       result = Alerts.get_by_alert_id("123") |> Alerts.close(current_time)
       assert result.closed_timestamp == current_time
+      assert result.notification_period_end == current_time
       assert result.duration_certainty == :KNOWN
     end
   end

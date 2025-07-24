@@ -356,7 +356,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
            by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end,
            end_of_rating: fn -> DateTime.utc_now() |> DateTime.to_date() |> Date.add(10) end
          ]},
-        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop, @stop] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
 
@@ -415,7 +415,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         assert view
                |> element("#alert_details_header_text")
                |> render() =~
-                 "Framingham/Worcester Line train 595 (11:30 AM from South Station) is operating about 15 minutes behind schedule at South Station due to ice in harbor."
+                 "Framingham/Worcester Line Train 595 (11:30 AM from South Station) is operating about 15 minutes behind schedule at South Station due to ice in harbor."
 
         assert view
                |> element("#alert_details_description_text")

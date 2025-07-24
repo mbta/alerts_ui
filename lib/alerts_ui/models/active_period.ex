@@ -139,6 +139,8 @@ defmodule AlertsUI.Models.ActivePeriod do
   @spec end_of_service_datetime_utc(DateTime.t(), Time.t()) ::
           DateTime.t()
   def end_of_service_datetime_utc(start_time, end_of_service_time \\ @end_of_service) do
+    start_time = DateTime.shift_zone!(start_time, "America/New_York")
+
     NaiveDateTime.new!(end_of_service_date(start_time, end_of_service_time), end_of_service_time)
     |> DateTime.from_naive!("America/New_York")
     |> DateTime.shift_zone!("Etc/UTC")

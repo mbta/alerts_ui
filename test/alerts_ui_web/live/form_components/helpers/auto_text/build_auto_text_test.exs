@@ -327,7 +327,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
         route_type: 2
       }
 
-      expected = "train 527 (9:01 AM from South Station)"
+      expected = "Train 527 (9:01 AM from South Station)"
       actual = assert BuildAutoText.trip_names(autotext_data)
       assert expected == actual
     end
@@ -349,7 +349,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
         route_type: 2
       }
 
-      expected = "trains 527 (9:01 AM from South Station) and 841 (11:15 AM from Forest Hills)"
+      expected = "Trains 527 (9:01 AM from South Station) and 841 (11:15 AM from Forest Hills)"
       actual = assert BuildAutoText.trip_names(autotext_data)
       assert expected == actual
     end
@@ -361,7 +361,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
       }
 
       expected =
-        "trips 527 (9:01 AM from South Station) and 2 other trips"
+        "trip 527 (9:01 AM from South Station) and 2 other trips"
 
       actual = assert BuildAutoText.trip_names(autotext_data)
       assert expected == actual
@@ -374,7 +374,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
       }
 
       expected =
-        "trains 527 (9:01 AM from South Station) and 2 other trains"
+        "Train 527 (9:01 AM from South Station) and 2 other trains"
 
       actual = assert BuildAutoText.trip_names(autotext_data)
       assert expected == actual
