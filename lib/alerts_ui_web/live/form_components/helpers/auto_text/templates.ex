@@ -146,7 +146,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         "?route_names ?trip_names operating ?severity_name late ?alert_duration ?due_to_cause",
       description_template: %{
         route_count: 5,
-        stop_count: 1,
+        stop_count: 0,
         trip_count: 2,
         direction_count: 1
       },
@@ -276,9 +276,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
       header_template: "?route_names|: ?direction_name delays of ?severity_name ?due_to_cause",
       description_template: %{
         route_count: 5,
-        stop_count: 2,
-        trip_count: 2,
-        direction_count: 1
+        stop_count: 0,
+        trip_count: nil,
+        direction_count: nil
       },
       service_effect_template: "?route_names_short delay"
     },
@@ -311,7 +311,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         "?route_names|: Expect delays of ?severity_name due to trains operating on a single track ?stop_range_between",
       description_template: %{
         route_count: 5,
-        stop_count: 2,
+        stop_count: 0,
         trip_count: nil,
         direction_count: 1
       },
@@ -362,7 +362,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
       description_template: %{
         route_count: 5,
         direction_count: 1,
-        stop_count: 0,
+        stop_count: nil,
         trip_count: 2
       },
       service_effect_template: "?route_names_short train cancelled"
@@ -387,7 +387,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         route_count: 5,
         stop_count: 0,
         trip_count: 2,
-        direction_count: nil
+        direction_count: 1
       },
       service_effect_template: "?route_names_short service change"
     },
