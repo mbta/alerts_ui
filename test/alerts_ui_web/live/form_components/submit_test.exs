@@ -333,7 +333,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
         |> render_click()
         |> follow_redirect(conn)
 
-      assert has_element?(new_view, "article #alert-filter-form")
+      assert has_element?(new_view, "#alert-filter-form")
     end
   end
 end
