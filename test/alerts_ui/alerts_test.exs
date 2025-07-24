@@ -722,7 +722,7 @@ defmodule AlertsUI.AlertsTest do
 
       insert(:alert, %{
         alert_id: "10800",
-        notification_period_start: @now,
+        active_period_start: @now,
         active_period_end: @two_days_from_now,
         notification_period_end: @two_days_from_now,
         duration_certainty: :KNOWN

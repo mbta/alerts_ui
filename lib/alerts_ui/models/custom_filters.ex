@@ -31,17 +31,23 @@ defmodule AlertsUI.Models.CustomFilters do
   @spec timeline_filter(any(), Flop.Filter.t(), any()) :: Ecto.Query.t()
   def timeline_filter(query, %Filter{value: "future"}, _opts) do
     now = DateTime.utc_now()
-
+    # use active_period_start as a backup when notification_start is blank
     query
     |> where(
       [a],
       not is_nil(a.notification_period_start) and a.notification_period_start > ^now
     )
+    |> or_where(
+      [a],
+      is_nil(a.notification_period_start) and
+        (not is_nil(a.active_period_start) and a.active_period_start > ^now)
+    )
     |> order_by(
       asc_nulls_last: :notification_period_end,
       asc: :duration_certainty,
       asc_nulls_last: :active_period_end,
-      asc: :notification_period_start
+      asc: :notification_period_start,
+      asc: :active_period_start
     )
   end
 
@@ -53,24 +59,34 @@ defmodule AlertsUI.Models.CustomFilters do
     |> order_by(
       desc: :notification_period_end,
       desc: :active_period_end,
-      desc: :notification_period_start
+      desc: :notification_period_start,
+      desc: :active_period_start
     )
   end
 
   def timeline_filter(query, %Filter{value: "current"}, _opts) do
     now = DateTime.utc_now()
-
+    # use active_period_start as a backup when notification_start is blank
     query
     |> where(
       [a],
-      not is_nil(a.notification_period_start) and a.notification_period_start <= ^now and
-        (is_nil(a.active_period_end) or a.active_period_end > ^now)
+      not is_nil(a.notification_period_start) and a.notification_period_start <= ^now
+    )
+    |> or_where(
+      [a],
+      is_nil(a.notification_period_start) and
+        (not is_nil(a.active_period_start) and a.active_period_start <= ^now)
+    )
+    |> where(
+      [a],
+      is_nil(a.active_period_end) or a.active_period_end > ^now
     )
     |> order_by(
       asc_nulls_last: :notification_period_end,
       asc: :duration_certainty,
       asc_nulls_last: :active_period_end,
-      asc: :notification_period_start
+      asc: :notification_period_start,
+      asc: :active_period_start
     )
   end
 
@@ -79,6 +95,7 @@ defmodule AlertsUI.Models.CustomFilters do
       desc: :notification_period_end,
       desc: :duration_certainty,
       desc: :active_period_end,
+      desc: :notification_period_start,
       desc: :notification_period_start
     )
   end
