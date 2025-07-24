@@ -971,6 +971,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
 
         assert render(view) =~ ~r/Created.*#{today}/s
         assert render(view) =~ ~r/Created by.*Firstname Lastname/s
+        refute render(view) =~ ~r/Last edited/s
+        refute render(view) =~ ~r/Last edited by/s
       end
     end
 
