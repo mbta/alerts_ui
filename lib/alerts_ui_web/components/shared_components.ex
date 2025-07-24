@@ -563,6 +563,7 @@ defmodule AlertsUIWeb.SharedComponents do
     doc: "The target to send the events to (eg form component id)"
 
   attr :class, :string, default: "", doc: "classes to add to the containing div"
+  attr :outer_class, :string, default: "", doc: "classes to add to the outer containing div"
   attr :inner_class, :string, default: "", doc: "classes to add on the inner_block"
 
   attr :id, :string, required: true
@@ -591,7 +592,7 @@ defmodule AlertsUIWeb.SharedComponents do
         aria-modal="true"
         tabindex="0"
       >
-        <div class="flex min-h-full items-center justify-center">
+        <div class={["flex min-h-full items-center justify-center", @outer_class]}>
           <div class={["min-w-[20rem] w-[25%] sm:p-6 lg:py-8", @class]}>
             <.focus_wrap
               id={"#{@id}-container"}
@@ -604,8 +605,8 @@ defmodule AlertsUIWeb.SharedComponents do
                 JS.push(@cancel_event_name, target: @target_id)
                 |> JS.exec("data-cancel", to: "##{@id}")
               }
-              class="shadow-zinc-700/10 ring-zinc-700/10 relative hidden rounded-md bg-bg-elevation-4 border-1 border-bg-elevation-6 shadow-lg ring-1 transition
-              min-h-[25rem] border border-bg-elevation-6"
+              class="!flex flex-col max-h-full shadow-zinc-700/10 ring-zinc-700/10 relative hidden rounded-md bg-bg-elevation-4
+              border-bg-elevation-6 shadow-lg ring-1 transition border"
             >
               <div class="flex flex-row justify-between px-4 py-4">
                 <h1 class="font-sm text-xl">{render_slot(@header) || @header_text}</h1>
@@ -692,7 +693,7 @@ defmodule AlertsUIWeb.SharedComponents do
          "opacity-100 translate-y-0 sm:scale-100",
          "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"}
     )
-    |> JS.hide(to: "##{id}", transition: {"block", "block", "hidden"})
+    |> JS.hide(to: "##{id}", transition: {"flex", "flex", "hidden"})
     |> JS.remove_class("overflow-hidden", to: "body")
     |> JS.pop_focus()
   end

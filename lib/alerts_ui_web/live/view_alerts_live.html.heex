@@ -45,7 +45,7 @@
       on_sort={JS.push("sort-alerts")}
       opts={[
         table_attrs: [class: "table table-fixed"],
-        tbody_tr_attrs: [class: "hover"],
+        tbody_tr_attrs: [class: "hover cursor-pointer"],
         no_results_content: "No alerts found"
       ]}
       row_click={&JS.push("open_details", value: %{alert_id: &1.alert_id})}
