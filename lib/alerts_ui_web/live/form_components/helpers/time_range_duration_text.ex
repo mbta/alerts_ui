@@ -5,22 +5,37 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationText do
   use Timex
 
   def one_time_duration_text(params) do
+    start_text = one_time_duration_start_phrase(params)
+    end_text = one_time_duration_end_phrase(params)
+    duration = one_time_duration_end_phrase(params)
+
+    "#{start_text} #{end_text} #{duration}"
+  end
+
+  def one_time_duration_start_phrase(params) do
     start_dt = ensure_naive_datetime_format(params["active_period_start"])
-    end_dt = ensure_naive_datetime_format(params["active_period_end"])
 
     start_text =
       start_text(params["active_period_start_specifier"], start_dt)
 
-    end_text = end_text(params["active_period_end_specifier"], end_dt)
+    "#{start_text} until"
+  end
 
-    duration =
-      duration(
-        params["active_period_end_specifier"],
-        start_dt,
-        end_dt
-      )
+  def one_time_duration_end_phrase(params) do
+    end_dt = ensure_naive_datetime_format(params["active_period_end"])
 
-    "#{start_text} until #{end_text} " <> duration
+    end_text(params["active_period_end_specifier"], end_dt)
+  end
+
+  def one_time_duration_phrase(params) do
+    start_dt = ensure_naive_datetime_format(params["active_period_start"])
+    end_dt = ensure_naive_datetime_format(params["active_period_end"])
+
+    duration(
+      params["active_period_end_specifier"],
+      start_dt,
+      end_dt
+    )
   end
 
   def get_start_text(start_specifier, start) do
