@@ -10,6 +10,36 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       assert AlertData.build_alert_data(nil) == %AlertData{}
     end
 
+    test "works if given alert instead of alert id" do
+      alert =
+        insert(:alert, %{
+          alert_id: "1",
+          effect: :ACCESSIBILITY_ISSUE,
+          effect_detail: "ACCESS_ISSUE",
+          header_text: "cool header text",
+          description_text: "description text",
+          informed_entity: [],
+          original_route_selections: []
+        })
+
+      assert AlertData.build_alert_data(alert) == %AlertData{
+               combination: :ACCESS,
+               direction: "default",
+               effect_name: "Access Issue",
+               route_type: nil,
+               route_ids: [],
+               stop_ids: [],
+               trip_ids: [],
+               facility_id: nil,
+               header_text: "cool header text",
+               description_text: "description text",
+               service_types: [],
+               reminder_times: [~N[2024-09-24 20:01:00]],
+               notification_specifier: :same_as_effect_period,
+               alert_timing: :"one-time"
+             }
+    end
+
     test "works if informed entities empty" do
       insert(:alert, %{
         alert_id: "1",

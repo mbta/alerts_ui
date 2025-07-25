@@ -2,6 +2,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   @moduledoc """
   Builds alert data from existing alert
   Used to populate form when editing an alert
+  Can take an Alert struct or an alert_id
   """
   alias AlertsUI.Alerts
   alias AlertsUI.Models.{ActivePeriod, Alert, Effect}
@@ -84,11 +85,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           recurrence_days: [atom()] | nil
         }
 
-  @spec build_alert_data(nil | String.t()) :: t()
+  @spec build_alert_data(nil | String.t() | Alert.t()) :: t()
   def build_alert_data(nil), do: %__MODULE__{}
 
-  def build_alert_data(alert_id) do
-    alert = Alerts.get_by_alert_id(alert_id)
+  def build_alert_data(alert_id) when is_binary(alert_id) do
+    alert_id |> Alerts.get_by_alert_id() |> build_alert_data
+  end
+
+  def build_alert_data(alert) do
     effect_map = Effect.effect_map_by_detail(alert.effect_detail)
     informed_entities = alert.informed_entity
     route_type = Alert.get_route_type(alert)
