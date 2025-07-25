@@ -242,20 +242,20 @@ defmodule AlertsUIWeb.ReviewModal do
                 <p>
                   {TimeRangeDurationText.one_time_duration_start_phrase(%{
                     "active_period_start" => @alert_data.active_period_start,
-                    "active_period_start_specifier" => @alert_data.active_period_start_specifier,
+                    "active_period_start_specifier" => @alert_data.active_period_start_specifier
                   })}
                 </p>
                 <p>
                   {TimeRangeDurationText.one_time_duration_end_phrase(%{
                     "active_period_end" => @alert_data.active_period_end,
-                    "active_period_end_specifier" => @alert_data.active_period_end_specifier,
+                    "active_period_end_specifier" => @alert_data.active_period_end_specifier
                   })}
                 </p>
                 <p>
                   {TimeRangeDurationText.one_time_duration_phrase(%{
                     "active_period_start" => @alert_data.active_period_start,
                     "active_period_end" => @alert_data.active_period_end,
-                    "active_period_end_specifier" => @alert_data.active_period_end_specifier,
+                    "active_period_end_specifier" => @alert_data.active_period_end_specifier
                   })}
                 </p>
               </div>
