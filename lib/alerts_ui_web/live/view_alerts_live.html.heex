@@ -38,6 +38,25 @@
     target_id="#view_alerts_live_view"
   />
 
+      <Flop.Phoenix.pagination
+      meta={@meta}
+      on_paginate={JS.push("paginate-alerts")}
+      opts={[
+        page_links: {:ellipsis, 3},
+        wrapper_attrs: [class: "my-6 flex flex-row justify-center not-prose"],
+        disabled_class: "join-item btn btn-disabled",
+        pagination_link_attrs: [class: "join-item btn"],
+        current_link_attrs: [class: "join-item btn btn-active"],
+        next_link_content: "»",
+        next_link_attrs: [class: "join-item btn btn-outline order-last ml-4"],
+        previous_link_content: "«",
+        previous_link_attrs: [class: "join-item btn btn-outline mr-4"],
+        pagination_list_attrs: [class: "join"],
+        ellipsis_attrs: [class: "join-item btn btn-disabled"]
+      ]}
+    />
+    <span>{@total_records} 🦕🌵</span>
+
   <div data-theme="winter">
     <Flop.Phoenix.table
       items={@alerts}
@@ -52,7 +71,7 @@
     >
       <:col :let={alert} label="Service" field={:alert_id} col_style="width: 12.6%;">
         <.service_pills
-          entities={alert.original_route_selections}
+          entities={alert.original_route_selections || []}
           effect_name={alert.effect_name}
         />
       </:col>
@@ -122,22 +141,4 @@
         </div>
       </:action>
     </Flop.Phoenix.table>
-    <Flop.Phoenix.pagination
-      meta={@meta}
-      on_paginate={JS.push("paginate-alerts")}
-      opts={[
-        page_links: {:ellipsis, 3},
-        wrapper_attrs: [class: "my-6 flex flex-row justify-center not-prose"],
-        disabled_class: "join-item btn btn-disabled",
-        pagination_link_attrs: [class: "join-item btn"],
-        current_link_attrs: [class: "join-item btn btn-active"],
-        next_link_content: "»",
-        next_link_attrs: [class: "join-item btn btn-outline order-last ml-4"],
-        previous_link_content: "«",
-        previous_link_attrs: [class: "join-item btn btn-outline mr-4"],
-        pagination_list_attrs: [class: "join"],
-        ellipsis_attrs: [class: "join-item btn btn-disabled"]
-      ]}
-    />
-  </div>
 </div>
