@@ -286,7 +286,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Ferry and Commuter Rail service change until Sat, May 10 due to a slippery rail"
+        "Ferry and Commuter Rail service change until Sat, May 10 at 3:00 PM due to a slippery rail"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -310,7 +310,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Ferry and Commuter Rail service suspended until Sat, May 10 due to a slippery rail"
+        "Ferry and Commuter Rail service suspended until Sat, May 10 at 3:00 PM due to a slippery rail"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -369,7 +369,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Ferry and Commuter Rail service may experience delays until Sat, May 10 due to a slippery rail"
+        "Ferry and Commuter Rail service may experience delays until Sat, May 10 at 3:00 PM due to a slippery rail"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -393,7 +393,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Ferry and Commuter Rail notice until Sat, May 10 due to a slippery rail"
+        "Ferry and Commuter Rail notice until Sat, May 10 at 3:00 PM due to a slippery rail"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -417,7 +417,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Planned Ferry and Commuter Rail schedule change until Sat, May 10 due to a slippery rail"
+        "Planned Ferry and Commuter Rail schedule change until Sat, May 10 at 3:00 PM due to a slippery rail"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -441,7 +441,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Extra Ferry and Commuter Rail service until Sat, May 10 due to a slippery rail"
+        "Extra Ferry and Commuter Rail service until Sat, May 10 at 3:00 PM due to a slippery rail"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -466,7 +466,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Lechmere closed until Sat, May 10 due to an unruly passenger"
+        "Lechmere closed until Sat, May 10 at 3:00 PM due to an unruly passenger"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -491,7 +491,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Route 1 service suspended at Lechmere until Sat, May 10 due to an unruly passenger"
+        "Route 1 service suspended at Lechmere until Sat, May 10 at 3:00 PM due to an unruly passenger"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -516,7 +516,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Route 1 trip 527 (9:01 AM from South Station) cancelled until Sat, May 10 due to an unruly passenger"
+        "Route 1 trip 527 (9:01 AM from South Station) cancelled until Sat, May 10 at 3:00 PM due to an unruly passenger"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -542,7 +542,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Route 1 trip 527 (9:01 AM from South Station) operating about 10 minutes late until Sat, May 10 due to an unruly passenger"
+        "Route 1 trip 527 (9:01 AM from South Station) operating about 10 minutes late until Sat, May 10 at 3:00 PM due to an unruly passenger"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -568,7 +568,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Route 1 - 527 (9:01 AM from South Station) cancelled until Sat, May 10 due to a parade"
+        "Route 1 - 527 (9:01 AM from South Station) cancelled until Sat, May 10 at 3:00 PM due to a parade"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -592,7 +592,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         end_datetime: ~N[2025-05-10 15:00:00]
       }
 
-      expected_header = "The following stop is closed until Sat, May 10 due to a parade: Lechmere"
+      expected_header =
+        "The following stop is closed until Sat, May 10 at 3:00 PM due to a parade: Lechmere"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -618,7 +619,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Route 1 westbound bus stops have been cleared of snow until Sat, May 10 due to a parade"
+        "Route 1 westbound bus stops have been cleared of snow until Sat, May 10 at 3:00 PM due to a parade"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -671,7 +672,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Route 1 eastbound service suspended at Lechmere until Sat, May 10 due to a parade"
+        "Route 1 eastbound service suspended at Lechmere until Sat, May 10 at 3:00 PM due to a parade"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -695,7 +696,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         end_datetime: ~N[2025-05-10 15:00:00]
       }
 
-      expected_header = "Route 1 detoured until Sat, May 10 due to a parade"
+      expected_header = "Route 1 detoured until Sat, May 10 at 3:00 PM due to a parade"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -718,7 +719,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         end_datetime: ~N[2025-05-10 15:00:00]
       }
 
-      expected_header = "Lechmere is moving until Sat, May 10 due to a parade"
+      expected_header = "Lechmere is moving until Sat, May 10 at 3:00 PM due to a parade"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -741,7 +742,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         end_datetime: ~N[2025-05-10 15:00:00]
       }
 
-      expected_header = "Route 1 detoured until Sat, May 10 due to a parade"
+      expected_header = "Route 1 detoured until Sat, May 10 at 3:00 PM due to a parade"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -763,7 +764,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         end_datetime: ~N[2025-05-10 15:00:00]
       }
 
-      expected_header = "Route 1 snow route in effect until Sat, May 10"
+      expected_header = "Route 1 snow route in effect until Sat, May 10 at 3:00 PM"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -791,7 +792,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Route 1: westbound service is suspended at Lechmere until Sat, May 10 due to ice in harbor"
+        "Route 1: westbound service is suspended at Lechmere until Sat, May 10 at 3:00 PM due to ice in harbor"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -841,7 +842,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         end_datetime: ~N[2025-05-10 15:00:00]
       }
 
-      expected_header = "Route 1 service change until Sat, May 10 due to ice in harbor"
+      expected_header = "Route 1 service change until Sat, May 10 at 3:00 PM due to ice in harbor"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -868,7 +869,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Route 1: Shuttle buses replace westbound service at Lechmere until Sat, May 10 due to ice in harbor"
+        "Route 1: Shuttle buses replace westbound service at Lechmere until Sat, May 10 at 3:00 PM due to ice in harbor"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -952,7 +953,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Route 1 westbound Train 527 (9:01 AM from South Station) will be replaced by a shuttle bus at Lechmere until Sat, May 10 due to a hazmat condition"
+        "Route 1 westbound Train 527 (9:01 AM from South Station) will be replaced by a shuttle bus at Lechmere until Sat, May 10 at 3:00 PM due to a hazmat condition"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -980,7 +981,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Please board Route 1 Train 527 (9:01 AM from South Station) on opposite track at Lechmere until Sat, May 10 due to a hazmat condition."
+        "Please board Route 1 Train 527 (9:01 AM from South Station) on opposite track at Lechmere until Sat, May 10 at 3:00 PM due to a hazmat condition."
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -1006,7 +1007,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Route 1 Train 527 (9:01 AM from South Station) is cancelled until Sat, May 10 due to a hazmat condition"
+        "Route 1 Train 527 (9:01 AM from South Station) is cancelled until Sat, May 10 at 3:00 PM due to a hazmat condition"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -1032,7 +1033,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Route 1 Train 527 (9:01 AM from South Station) service change until Sat, May 10 due to a hazmat condition"
+        "Route 1 Train 527 (9:01 AM from South Station) service change until Sat, May 10 at 3:00 PM due to a hazmat condition"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -1057,7 +1058,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Route 1 service change until Sat, May 10 due to a slippery rail"
+        "Route 1 service change until Sat, May 10 at 3:00 PM due to a slippery rail"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -1081,7 +1082,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Dock issue at Lechmere until Sat, May 10 due to a slippery rail"
+        "Dock issue at Lechmere until Sat, May 10 at 3:00 PM due to a slippery rail"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -1107,7 +1108,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Shuttle buses replacing Route 1 eastbound service at Lechmere until Sat, May 10 due to a slippery rail"
+        "Shuttle buses replacing Route 1 eastbound service at Lechmere until Sat, May 10 at 3:00 PM due to a slippery rail"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -1133,7 +1134,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Route 1 eastbound service suspended at Lechmere until Sat, May 10 due to a slippery rail"
+        "Route 1 eastbound service suspended at Lechmere until Sat, May 10 at 3:00 PM due to a slippery rail"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -1157,7 +1158,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Extra service on Route 1 until Sat, May 10 due to a slippery rail"
+        "Extra service on Route 1 until Sat, May 10 at 3:00 PM due to a slippery rail"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -1181,7 +1182,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Lechmere closed until Sat, May 10 due to a slippery rail"
+        "Lechmere closed until Sat, May 10 at 3:00 PM due to a slippery rail"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -1209,7 +1210,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Route 1 trip 527 (9:01 AM from South Station) experiencing delays of about 10 minutes until Sat, May 10 due to a slippery rail"
+        "Route 1 trip 527 (9:01 AM from South Station) experiencing delays of about 10 minutes until Sat, May 10 at 3:00 PM due to a slippery rail"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -1234,7 +1235,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Planned schedule change on Route 1 until Sat, May 10 due to a slippery rail"
+        "Planned schedule change on Route 1 until Sat, May 10 at 3:00 PM due to a slippery rail"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -1259,7 +1260,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         end_datetime: ~N[2025-05-10 15:00:00]
       }
 
-      expected_header = "Station issue at Lechmere until Sat, May 10 due to a slippery rail"
+      expected_header =
+        "Station issue at Lechmere until Sat, May 10 at 3:00 PM due to a slippery rail"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
