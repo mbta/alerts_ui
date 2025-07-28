@@ -134,11 +134,11 @@ defmodule AlertsUIWeb.AlertsLiveTest do
 
       {:ok, _view, html} = live(conn, "/alerts")
 
-      assert html =~ "111"
-      assert html =~ "222"
-      assert html =~ "333"
-      assert html =~ "444"
-      refute html =~ "+"
+      assert html =~ ~r/<div title="111".+?>.*111.*<\/div>/s
+      assert html =~ ~r/<div title="222".+?>.*222.*<\/div>/s
+      assert html =~ ~r/<div title="333".+?>.*333.*<\/div>/s
+      assert html =~ ~r/<div title="444".+?>.*444.*<\/div>/s
+      refute html =~ ~r/<div .+?>.*\+.*<\/div>/s
     end
 
     @tag :logged_in_user
@@ -158,12 +158,12 @@ defmodule AlertsUIWeb.AlertsLiveTest do
 
       {:ok, _view, html} = live(conn, "/alerts")
 
-      assert html =~ "111"
-      assert html =~ "222"
-      assert html =~ "333"
-      assert html =~ "444"
-      refute html =~ "555"
-      assert html =~ "+1"
+      assert html =~ ~r/<div title="111".+?>.*111.*<\/div>/s
+      assert html =~ ~r/<div title="222".+?>.*222.*<\/div>/s
+      assert html =~ ~r/<div title="333".+?>.*333.*<\/div>/s
+      assert html =~ ~r/<div title="444".+?>.*444.*<\/div>/s
+      refute html =~ ~r/<div title="555".+?>.*555.*<\/div>/s
+      assert html =~ ~r/<div .+?>.*\+1.*<\/div>/s
     end
 
     @tag :logged_in_user
