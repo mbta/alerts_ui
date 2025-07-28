@@ -310,7 +310,7 @@ defmodule AlertsUIWeb.IconComponents do
     """
   end
 
-  # Silver Line
+  # Silver Line: distinct from other buses because of pill color
   def mode_icon(%{type: route_id} = assigns)
       when route_id in ["741", "742", "743", "751", "749", "746"] do
     assigns = assign(assigns, name: fetch_short_name(route_id))
@@ -336,6 +336,8 @@ defmodule AlertsUIWeb.IconComponents do
 
   # Bus Route Icon
   def mode_icon(assigns) do
+    # Could simplify all buses to use short name, but doing this keeps down
+    # API calls and the need to mock more in tests
     name =
       if assigns.type in ["747", "708"], do: fetch_short_name(assigns.type), else: assigns.type
 
