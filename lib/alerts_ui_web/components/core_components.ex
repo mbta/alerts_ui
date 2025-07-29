@@ -681,17 +681,17 @@ defmodule AlertsUIWeb.CoreComponents do
 
     ~H"""
     <div class="flex flex-wrap gap-1">
-      <%= if @entities in [[], nil] do %>
+      <%= if @entities == [] do %>
         <%= if @effect_name in EffectsForRouteTypes.list_effects(:access) do %>
           <.mode_icon type="Facility" />
         <% else %>
           <.mode_icon type="Systemwide" />
         <% end %>
       <% end %>
-      <%= for entity <- @entities |> Enum.take(4) do %>
+      <%= for entity <- (@entities || []) |> Enum.take(4) do %>
         <.mode_icon type={entity} />
       <% end %>
-      <.mode_icon :if={length(@entities) > 4} type={length(@entities) - 4} />
+      <.mode_icon :if={length(@entities || []) > 4} type={length(@entities) - 4} />
     </div>
     """
   end
