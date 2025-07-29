@@ -438,7 +438,7 @@ defmodule AlertsUIWeb.CoreComponents do
       aria-label={@label}
       checked={@checked}
       class={[
-        "join-item btn w-16 border border-primary bg-transparent text-primary font-medium",
+        "join-item btn !h-10 !min-h-0 border border-primary bg-transparent text-base text-primary font-medium px-3",
         if(@checked,
           do:
             "after:bg-primary after:text-bg-primary border-primary !bg-primary !text-bg-primary !border-primary"
