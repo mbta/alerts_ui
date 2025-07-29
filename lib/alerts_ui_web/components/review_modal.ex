@@ -115,8 +115,9 @@ defmodule AlertsUIWeb.ReviewModal do
       header_text="Create new alert"
       cancel_button_text="Keep editing"
       accept_button_text="Submit"
-      class="w-[800px]"
-      inner_class="!p-0"
+      class="flex flex-col h-full justify-center w-[800px]"
+      outer_class="!h-full"
+      inner_class="!p-0 shrink grow overflow-auto"
       target_id={@target_id}
       {@rest}
     >
