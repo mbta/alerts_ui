@@ -7,7 +7,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationText do
   def one_time_duration_text(params) do
     start_text = one_time_duration_start_phrase(params)
     end_text = one_time_duration_end_phrase(params)
-    duration = one_time_duration_end_phrase(params)
+    duration = one_time_duration_phrase(params)
 
     "#{start_text} #{end_text} #{duration}"
   end
