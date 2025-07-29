@@ -681,7 +681,7 @@ defmodule AlertsUIWeb.CoreComponents do
 
     ~H"""
     <div class="flex flex-wrap gap-1">
-      <%= if @entities == [] do %>
+      <%= if @entities in [[], nil] do %>
         <%= if @effect_name in EffectsForRouteTypes.list_effects(:access) do %>
           <.mode_icon type="Facility" />
         <% else %>
