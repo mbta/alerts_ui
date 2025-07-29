@@ -159,6 +159,8 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     )
   end
 
+  defp format_effect(nil), do: ""
+
   defp format_effect(effect) do
     effect
     |> String.replace("_", " ")
