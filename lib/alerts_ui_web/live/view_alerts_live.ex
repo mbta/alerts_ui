@@ -127,7 +127,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
         "America/New_York"
       )
 
-    if DateTime.compare(most_recent_start_of_service, start_time_utc) == :eq do
+    if start_time_utc && DateTime.compare(most_recent_start_of_service, start_time_utc) == :eq do
       "start of service"
     else
       DateTimeHelpers.friendly_date_time(start_time_utc)
@@ -149,6 +149,8 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     end
   end
 
+  def format_end_time(_, _), do: ""
+
   defp format_effect_options do
     [{"All", ""}]
     |> Enum.concat(
@@ -156,6 +158,8 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       |> Enum.map(&{format_effect(&1), &1})
     )
   end
+
+  defp format_effect(nil), do: ""
 
   defp format_effect(effect) do
     effect
