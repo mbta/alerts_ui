@@ -244,53 +244,53 @@ defmodule AlertsUIWeb.IconComponents do
   end
 
   @doc """
+  Renders a large elliptical pill by text and background color
+  """
+  attr :text, :string, required: true, doc: "The text for the pill"
+  attr :class, :string, required: true, doc: "Color styles for the pill"
+
+  def base_pill(assigns) do
+    ~H"""
+    <div
+      title={@text}
+      class={"truncate font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white " <> @class}
+    >
+      {@text}
+    </div>
+    """
+  end
+
+  @doc """
   Renders a large elliptical route or mode pill.
   """
+  attr :type, :string, required: true
 
   def mode_icon(%{type: "Systemwide"} = assigns) do
     ~H"""
-    <div
-      title={@type}
-      class="truncate font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-black bg-text-white"
-    >
-      {@type}
-    </div>
+    <.base_pill text="Systemwide" class="!text-black bg-text-white" />
     """
   end
 
   def mode_icon(%{type: subway_type} = assigns)
       when subway_type in ["Red", "Orange", "Green", "Blue"] do
     ~H"""
-    <div
-      title={@type <> " Line"}
-      class={"truncate font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white bg-mbta-" <> String.downcase(@type)}
-    >
-      {@type <> " Line"}
-    </div>
+    <.base_pill text={@type <> " Line"} class={"bg-mbta-" <> String.downcase(@type)} />
     """
   end
 
-  def mode_icon(%{type: "Green-" <> branch_letter} = assigns) do
-    assigns = assign(assigns, branch_letter: branch_letter)
+  def mode_icon(%{type: "Green-" <> _branch_letter} = assigns) do
+    assigns = assign(assigns, name: fetch_long_name(assigns.type))
 
     ~H"""
-    <div
-      title={"Green Line • " <> @branch_letter}
-      class="truncate font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white bg-mbta-green"
-    >
-      {"Green Line • " <> @branch_letter}
-    </div>
+    <.base_pill text={@name} class="bg-mbta-green" />
     """
   end
 
   def mode_icon(%{type: "Mattapan"} = assigns) do
+    assigns = assign(assigns, name: fetch_long_name(assigns.type))
+
     ~H"""
-    <div
-      title={@type <> " Trolley"}
-      class="truncate font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white bg-mbta-red"
-    >
-      {@type <> " Trolley"}
-    </div>
+    <.base_pill text={@name} class="bg-mbta-red" />
     """
   end
 
@@ -298,12 +298,7 @@ defmodule AlertsUIWeb.IconComponents do
     assigns = assign(assigns, name: fetch_long_name(assigns.type))
 
     ~H"""
-    <div
-      title={@name}
-      class="truncate bg-mbta-commuter-rail font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white"
-    >
-      {@name}
-    </div>
+    <.base_pill text={@name} class="bg-mbta-commuter-rail" />
     """
   end
 
@@ -311,65 +306,45 @@ defmodule AlertsUIWeb.IconComponents do
     assigns = assign(assigns, name: fetch_long_name(assigns.type))
 
     ~H"""
-    <div
-      title={@name}
-      class="truncate bg-mbta-ferry font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white"
-    >
-      {@name}
-    </div>
+    <.base_pill text={@name} class="bg-mbta-ferry" />
     """
   end
 
-  # Silver Line
+  # Silver Line: distinct from other buses because of pill color
   def mode_icon(%{type: route_id} = assigns)
       when route_id in ["741", "742", "743", "751", "749", "746"] do
     assigns = assign(assigns, name: fetch_short_name(route_id))
 
     ~H"""
-    <div
-      title={@name}
-      class="truncate bg-mbta-silver font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white"
-    >
-      {@name}
-    </div>
+    <.base_pill text={@name} class="bg-mbta-silver" />
     """
   end
 
   # Access
   def mode_icon(%{type: "Facility"} = assigns) do
     ~H"""
-    <div
-      title="Facility"
-      class="truncate bg-mbta-access font-bold py-[2.5px] px-[9px] rounded-[200px] text-xs text-white"
-    >
-      Facility
-    </div>
+    <.base_pill text="Facility" class="bg-mbta-access" />
     """
   end
 
   # When there are more than 4 routes, surplus routes are listed
   def mode_icon(%{type: number} = assigns) when is_integer(number) do
     ~H"""
-    <div class="truncate bg-[#343A40] font-bold py-[2.5px] px-[9px] rounded-[200px] text-white text-xs">
-      {"+" <> Integer.to_string(@type)}
-    </div>
+    <.base_pill text={"+" <> Integer.to_string(@type)} class="bg-[#343A40]" />
     """
   end
 
   # Bus Route Icon
   def mode_icon(assigns) do
+    # Could simplify all buses to use short name, but doing this keeps down
+    # API calls and the need to mock more in tests
     name =
       if assigns.type in ["747", "708"], do: fetch_short_name(assigns.type), else: assigns.type
 
     assigns = assign(assigns, name: name)
 
     ~H"""
-    <div
-      title={@name}
-      class="truncate bg-mbta-bus font-bold h-full py-[2.5px] px-[9px] rounded-[200px] text-black text-xs uppercase"
-    >
-      {@name}
-    </div>
+    <.base_pill text={@name} class="!text-black bg-mbta-bus" />
     """
   end
 

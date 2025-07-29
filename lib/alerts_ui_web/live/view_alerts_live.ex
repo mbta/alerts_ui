@@ -8,11 +8,11 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   alias AlertsUIWeb.DateTimeHelpers
   alias AlertsUIWeb.FormComponents.Helpers.AlertData
 
-  @one_minute_in_ms 60_000
+  @ten_seconds_in_ms 10_000
 
   @impl true
   def mount(params, _session, socket) do
-    Process.send_after(self(), :update, @one_minute_in_ms)
+    Process.send_after(self(), :update, @ten_seconds_in_ms)
 
     with {alerts, meta} <- Alerts.list_all_paginated(params) do
       {:ok, assign(socket, page_title: "View Alerts", meta: meta, alerts: alerts, params: params)}
@@ -21,7 +21,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   @impl true
   def handle_info(:update, socket) do
-    Process.send_after(self(), :update, @one_minute_in_ms)
+    Process.send_after(self(), :update, @ten_seconds_in_ms)
 
     with {alerts, meta} <- Alerts.list_all_paginated(socket.assigns.params) do
       {:noreply, assign(socket, meta: meta, alerts: alerts)}

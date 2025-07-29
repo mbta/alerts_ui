@@ -46,7 +46,10 @@ defmodule AlertsUIWeb.ReviewModal do
     default: "",
     doc: "The target to send the events to (eg form component id)"
 
-  attr :rest, :global, include: ~w(cancel_event_name accept_event_name)
+  attr :current_user, :map, default: %{}, doc: "Current user, for first and last name"
+  attr :created_at, :string, doc: "UTC timestamp alert was created at"
+  attr :created_by, :string, doc: "Name of person who originally created this alert"
+  attr :rest, :global, include: ~w(cancel_event_name accept_event_name target_id)
 
   def review_modal(assigns) do
     # Refactor: Selected_routes will soon be in the assigns and keep us from having to make this API call
@@ -329,19 +332,30 @@ defmodule AlertsUIWeb.ReviewModal do
         <%!-- Sidebar --%>
         <div class="w-[222px] shrink-0 p-4 bg-bg-elevation-5">
           <p class="font-bold">Created</p>
-          <p class="pb-3">
+          <p :if={!@editing} class="pb-3">
             {Calendar.strftime(DateTime.shift_zone!(@now, "America/New_York"), "%Y-%m-%d")}
           </p>
+          <p :if={@editing} class="pb-3">
+            {Calendar.strftime(DateTime.shift_zone!(@created_at, "America/New_York"), "%Y-%m-%d")}
+          </p>
+
           <p class="font-bold">Created by</p>
-          <p class="pb-3">TO BE DONE</p>
+          <p :if={!@editing} class="pb-3">
+            {Map.get(@current_user, :first_name, "")} {Map.get(@current_user, :last_name, "")}
+          </p>
+          <p :if={@editing} class="pb-3">{@created_by}</p>
           <%!--
             The edited items need to be wrapped in a conditional, but let's do that once
             we have a value to match on in the alert_data
           --%>
-          <p class="font-bold">Last edited</p>
-          <p class="pb-3">TO BE DONE</p>
-          <p class="font-bold">Last edited by</p>
-          <p class="pb-3">TO BE DONE</p>
+          <p :if={@editing} class="font-bold">Last edited</p>
+          <p :if={@editing} class="pb-3">
+            {Calendar.strftime(DateTime.shift_zone!(@now, "America/New_York"), "%Y-%m-%d")}
+          </p>
+          <p :if={@editing} class="font-bold">Last edited by</p>
+          <p :if={@editing} class="pb-3">
+            {Map.get(@current_user, :first_name, "")} {Map.get(@current_user, :last_name, "")}
+          </p>
 
           <.link class="text-primary">
             <.icon name="hero-arrow-down-tray" class="h-4 w-4" /> Download history

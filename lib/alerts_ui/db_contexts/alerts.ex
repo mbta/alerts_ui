@@ -244,6 +244,16 @@ defmodule AlertsUI.Alerts do
     )
   end
 
+  @spec get_earliest_version(String.t()) :: PaperTrail.Version.t()
+  def get_earliest_version(alert_uuid) do
+    from(
+      version in PaperTrail.Version,
+      where: version.item_id == ^alert_uuid and version.event == "insert",
+      order_by: [asc: version.inserted_at]
+    )
+    |> Repo.one()
+  end
+
   @spec list_all_paginated(map()) :: {[any()], Flop.Meta.t()}
   def list_all_paginated(params) do
     opts = [for: Alert, page_size: 50]
