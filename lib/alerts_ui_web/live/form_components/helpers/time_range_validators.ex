@@ -201,6 +201,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
     end
   end
 
+  defp validate_start_date_matches_weekday(_, _, _), do: []
+
   @spec validate_required_fields(Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
   def validate_required_fields(changeset, params) do
     required_fields_by_specifier(params["alert_timing"], changeset, params)

@@ -113,7 +113,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
         end_datetime: ~N[2025-05-10 15:00:00]
       }
 
-      expected = "until Sat, May 10"
+      expected = "until Sat, May 10 at 3:00 PM"
       actual = AutoTextDuration.build_duration_text(auto_text_data, current_time)
       assert expected == actual
     end
@@ -177,7 +177,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
         end_datetime: ~N[2025-05-10 03:00:00]
       }
 
-      expected = "from 2:00 PM through Fri, May 9"
+      expected = "from 2:00 PM today through Fri, May 9"
       actual = AutoTextDuration.build_duration_text(auto_text_data, current_time)
       assert expected == actual
     end
@@ -273,7 +273,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
         end_datetime: ~N[2025-05-15 01:00:00]
       }
 
-      expected = "from Wed, May 14 at 1:00 PM - Thu, May 15 at 1:00 AM"
+      expected = "from Wed, May 14 at 1:00 PM to Thu, May 15 at 1:00 AM"
       actual = AutoTextDuration.build_duration_text(auto_text_data, current_time)
       assert expected == actual
     end
@@ -289,7 +289,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
         end_datetime: NaiveDateTime.new!(~D[2025-05-16], ActivePeriod.end_of_service_time())
       }
 
-      expected = "from Wed, May 14 - Thu, May 15"
+      expected = "from Wed, May 14 through Thu, May 15"
       actual = AutoTextDuration.build_duration_text(auto_text_data, current_time)
       assert expected == actual
     end
@@ -305,7 +305,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
         end_datetime: NaiveDateTime.new!(~D[2025-05-12], ActivePeriod.end_of_service_time())
       }
 
-      expected = "the weekend of Sat, May 10 - Sun, May 11"
+      expected = "the weekend of Sat, May 10 and Sun, May 11"
       actual = AutoTextDuration.build_duration_text(auto_text_data, current_time)
       assert expected == actual
     end
@@ -321,7 +321,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
         end_datetime: ~N[2025-05-14 15:00:00]
       }
 
-      expected = "from Tue, May 13 at 1:00 PM - Wed, May 14 at 3:00 PM"
+      expected = "from Tue, May 13 at 1:00 PM to Wed, May 14 at 3:00 PM"
       actual = AutoTextDuration.build_duration_text(auto_text_data, current_time)
       assert expected == actual
     end
@@ -337,7 +337,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
         end_datetime: ~N[2025-05-14 15:00:00]
       }
 
-      expected = "from Tue, May 13 at 1:00 PM - Wed, May 14 at 3:00 PM"
+      expected = "from Tue, May 13 at 1:00 PM to Wed, May 14 at 3:00 PM"
       actual = AutoTextDuration.build_duration_text(auto_text_data, current_time)
       assert expected == actual
     end
@@ -353,7 +353,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
         end_datetime: ~N[2025-05-14 15:00:00]
       }
 
-      expected = "from Tue, May 13 - Wed, May 14 at 3:00 PM"
+      expected = "from Tue, May 13 to Wed, May 14 at 3:00 PM"
       actual = AutoTextDuration.build_duration_text(auto_text_data, current_time)
       assert expected == actual
     end
@@ -369,7 +369,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
         end_datetime: NaiveDateTime.new!(~D[2025-05-15], ActivePeriod.start_of_service_time())
       }
 
-      expected = "from Tue, May 13 at 3:00 PM - Wed, May 14"
+      expected = "from Tue, May 13 at 3:00 PM through Wed, May 14"
       actual = AutoTextDuration.build_duration_text(auto_text_data, current_time)
       assert expected == actual
     end
@@ -443,8 +443,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
 
       auto_text_data = %BuildAutoText{
         alert_timing: :recurring,
-        start_specifier: :custom,
-        end_specifier: :custom,
+        start_time_specifier: :custom,
+        end_time_specifier: :custom,
         start_date: nil,
         end_date: nil,
         start_time: nil,
@@ -465,8 +465,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
 
       auto_text_data = %BuildAutoText{
         alert_timing: :recurring,
-        start_specifier: :custom,
-        end_specifier: :custom,
+        start_time_specifier: :custom,
+        end_time_specifier: :custom,
         start_date: ~D[2025-05-09],
         end_date: ~D[2025-05-29],
         start_time: ~T[12:00:00],
@@ -487,8 +487,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
 
       auto_text_data = %BuildAutoText{
         alert_timing: :recurring,
-        start_specifier: :custom,
-        end_specifier: :custom,
+        start_time_specifier: :custom,
+        end_time_specifier: :custom,
         start_date: ~D[2025-05-09],
         end_date: ~D[2025-05-29],
         start_time: ~T[02:00:00],
@@ -571,7 +571,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
     test "does not start today but no end datetime" do
       start_datetime = ~N[2025-05-09 15:00:00]
       end_datetime = nil
-      expected = "from Fri, May 9 to until further notice"
+      expected = "from Fri, May 9 until further notice"
       actual = AutoTextDuration.build_date_string(start_datetime, end_datetime, false)
       assert expected == actual
     end

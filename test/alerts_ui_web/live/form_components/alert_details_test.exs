@@ -200,7 +200,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         if Date.day_of_week(@tomorrows_date) == 6 do
           "closed the weekend of #{Calendar.strftime(@tomorrows_date, "%a, %b %-d")} - #{Calendar.strftime(Date.add(@tomorrows_date, 1), "%a, %b %-d")}"
         else
-          "from #{Calendar.strftime(@tomorrows_date, "%a, %b %-d")} - #{Calendar.strftime(Date.add(@tomorrows_date, 1), "%a, %b %-d")}"
+          "from #{Calendar.strftime(@tomorrows_date, "%a, %b %-d")} through #{Calendar.strftime(Date.add(@tomorrows_date, 1), "%a, %b %-d")}"
         end
 
       assert view
@@ -482,7 +482,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         assert view
                |> element("#alert_details_header_text")
                |> render() =~
-                 "3 stops closed from #{Calendar.strftime(@start_time, "%a, %b %-d at %-I:%M %p")} - #{Calendar.strftime(@end_time, "%a, %b %-d at %-I:%M %p")} due to ice in harbor"
+                 "3 stops closed from #{Calendar.strftime(@start_time, "%a, %b %-d at %-I:%M %p")} to #{Calendar.strftime(@end_time, "%a, %b %-d at %-I:%M %p")} due to ice in harbor"
 
         assert view
                |> element("#alert_details_description_text")
@@ -538,7 +538,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         assert view
                |> element("#alert_details_header_text")
                |> render() =~
-                 "Alewife Escalator 349 (Platform to Russell Field) unavailable from #{Calendar.strftime(@start_time, "%a, %b %-d at %-I:%M %p")} - #{Calendar.strftime(@end_time, "%a, %b %-d at %-I:%M %p")} due to ice in harbor"
+                 "Alewife Escalator 349 (Platform to Russell Field) unavailable from #{Calendar.strftime(@start_time, "%a, %b %-d at %-I:%M %p")} to #{Calendar.strftime(@end_time, "%a, %b %-d at %-I:%M %p")} due to ice in harbor"
 
         assert view
                |> element("#alert_details_description_text")
@@ -597,7 +597,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
       assert view
              |> element("#alert_details_header_text")
              |> render() =~
-               "Subway and Ferry notice from #{Calendar.strftime(@start_time, "%a, %b %-d at %-I:%M %p")} - #{Calendar.strftime(@end_time, "%a, %b %-d at %-I:%M %p")} due to ice in harbor"
+               "Subway and Ferry notice from #{Calendar.strftime(@start_time, "%a, %b %-d at %-I:%M %p")} to #{Calendar.strftime(@end_time, "%a, %b %-d at %-I:%M %p")} due to ice in harbor"
 
       assert view
              |> element("#alert_details_description_text")
