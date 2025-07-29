@@ -11,18 +11,22 @@ defmodule AlertsUIWeb.IconComponentsTest do
     test "generates an svg or a stylized span element for the requested icon type" do
       with_mock(RoutesRepo,
         get: fn
+          "Green-B" -> %{long_name: "Green Line B"}
+          "Green-C" -> %{long_name: "Green Line C"}
+          "Green-D" -> %{long_name: "Green Line D"}
+          "Green-E" -> %{long_name: "Green Line E"}
+          "Mattapan" -> %{long_name: "Mattapan Trolley"}
           "CR-Haverhill" -> %{long_name: "Haverhill Line"}
           "Boat-F4" -> %{long_name: "Charlestown Ferry"}
           "746" -> %{name: "SLW"}
         end
       ) do
-        assert_rendered(mode_icon(%{type: "Systemwide"}), "<div")
-        assert_rendered(mode_icon(%{type: "Red"}), "<div")
-        assert_rendered(mode_icon(%{type: "Blue"}), "<div")
-        assert_rendered(mode_icon(%{type: "Orange"}), "<div")
-        assert_rendered(mode_icon(%{type: "Green"}), "<div")
-        assert_rendered(mode_icon(%{type: "Mattapan"}), "<div")
-
+        assert render_component(&mode_icon/1, type: "Systemwide") =~ "<div"
+        assert render_component(&mode_icon/1, type: "Red") =~ "<div"
+        assert render_component(&mode_icon/1, type: "Blue") =~ "<div"
+        assert render_component(&mode_icon/1, type: "Orange") =~ "<div"
+        assert render_component(&mode_icon/1, type: "Green") =~ "<div"
+        assert render_component(&mode_icon/1, type: "Mattapan") =~ "<div"
         assert render_component(&mode_icon/1, type: "Green-B") =~ "<div"
         assert render_component(&mode_icon/1, type: "Green-C") =~ "<div"
         assert render_component(&mode_icon/1, type: "Green-D") =~ "<div"
