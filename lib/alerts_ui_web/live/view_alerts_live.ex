@@ -30,6 +30,18 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   @impl true
   def handle_params(params, _url, socket) do
+    # default to timeline: current if parameters empty
+    params =
+      if params == %{} do
+        %{
+          "filters" => %{
+            "4" => %{"field" => "timeline", "value" => "current"}
+          }
+        }
+      else
+        params
+      end
+
     with {alerts, meta} <- Alerts.list_all_paginated(params) do
       {:noreply, assign(socket, meta: meta, alerts: alerts, params: params)}
     end
@@ -164,7 +176,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     ]
   end
 
-  defp timeline_options, do: ["current", "future", "past"]
+  defp timeline_options, do: ["current", "future", "past", "all"]
 
   @spec clean_filter_params(map()) :: map()
   defp clean_filter_params(params), do: Map.drop(params, ["_target", "reset"])

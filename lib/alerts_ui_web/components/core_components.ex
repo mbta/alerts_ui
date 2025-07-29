@@ -173,7 +173,7 @@ defmodule AlertsUIWeb.CoreComponents do
       phx-submit={@on_change}
       class="form-control gap-4"
     >
-      <div class="flex flex-row gap-2">
+      <div class="flex flex-row gap-2 justify-end">
         <Flop.Phoenix.filter_fields :let={i} form={@form} fields={@fields}>
           <%= if i.type == "radio_switch" do %>
             <.radio_switch name={i.field.name} label={i.label} selected={i.field.value} {i.rest} />
@@ -402,7 +402,7 @@ defmodule AlertsUIWeb.CoreComponents do
 
   def radio_switch(assigns) do
     ~H"""
-    <fieldset>
+    <fieldset class="mx-24">
       <.label for={@name}>{@label}</.label>
       <div class="join">
         <.radio_switch_input
@@ -437,7 +437,13 @@ defmodule AlertsUIWeb.CoreComponents do
       value={@value}
       aria-label={@label}
       checked={@checked}
-      class="join-item btn checked:bg-none w-20"
+      class={[
+        "join-item btn w-16 border border-primary bg-transparent text-primary font-medium",
+        if(@checked,
+          do:
+            "after:bg-primary after:text-bg-primary border-primary !bg-primary !text-bg-primary !border-primary"
+        )
+      ]}
     />
     """
   end
