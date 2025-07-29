@@ -14,6 +14,7 @@ defmodule AlertsUIWeb.ReviewModal do
 
   alias AlertsUIWeb.FormComponents.Helpers.{
     ContentFormatter,
+    Helpers,
     RecurringDurationText,
     SelectFormatter,
     TimeRangeDurationText
@@ -263,22 +264,37 @@ defmodule AlertsUIWeb.ReviewModal do
                 </p>
               </div>
             <% else %>
-              <p class="pb-1">
-                {RecurringDurationText.recurring_duration_text(
-                  assign(assigns,
-                    form: %{
+              <div class="pb-1">
+                <p>
+                  {RecurringDurationText.recurring_duration_date_range(%{
+                    "active_period_start_date" => @alert_data.active_period_start_date,
+                    "active_period_end_date" => @alert_data.active_period_end_date,
+                    "active_period_end_specifier" => @alert_data.active_period_end_specifier
+                  })}
+                </p>
+                <p>
+                  {RecurringDurationText.recurring_duration_recurrence_days(%{
+                    "recurrence_days" => @alert_data.recurrence_days
+                  })
+                  |> Helpers.upcase_first_letter()}
+                </p>
+                <p>
+                  {RecurringDurationText.recurring_duration_time_range(
+                    assign(assigns,
                       params: %{
                         "active_period_start_time" => @alert_data.active_period_start_time,
-                        "active_period_end_time" => @alert_data.active_period_end_time,
-                        "active_period_start_date" => @alert_data.active_period_start_date,
-                        "active_period_end_date" => @alert_data.active_period_end_date,
-                        "recurrence_days" => @alert_data.recurrence_days,
-                        "active_period_end_specifier" => @alert_data.active_period_end_specifier
+                        "active_period_end_time" => @alert_data.active_period_end_time
                       }
-                    }
-                  )
-                )}
-              </p>
+                    )
+                  )}
+                </p>
+                <p>
+                  {RecurringDurationText.recurring_duration_only(%{
+                    "active_period_start_time" => @alert_data.active_period_start_time,
+                    "active_period_end_time" => @alert_data.active_period_end_time
+                  })}
+                </p>
+              </div>
             <% end %>
 
             <p class="font-bold pb-1">Notification period</p>

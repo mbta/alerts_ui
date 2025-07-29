@@ -19,4 +19,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.Helpers do
   def alert_is_closed(alert) do
     !is_nil(alert.closed_timestamp)
   end
+
+  def upcase_first_letter(string) do
+    {first_letter, rest} = String.next_grapheme(string)
+
+    String.upcase(first_letter) <> rest
+  end
 end
