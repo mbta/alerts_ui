@@ -22,8 +22,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   @impl true
   def handle_info(:update, socket) do
     Process.send_after(self(), :update, @ten_seconds_in_ms)
-
-    with {alerts, meta} <- Alerts.list_all_paginated(socket.assigns.params) do
+    with {alerts, meta} <- Alerts.list_all_paginated(socket.assigns.meta.flop) do
       {:noreply, assign(socket, meta: meta, alerts: alerts)}
     end
   end
