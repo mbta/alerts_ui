@@ -118,7 +118,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
       assert expected == actual
     end
 
-    test "start is custom in past and end is in future" do
+    test "start is custom in past and end is end of service in future" do
       current_time = ~N[2025-05-08 13:00:00]
 
       auto_text_data = %BuildAutoText{
@@ -126,10 +126,42 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
         start_specifier: :custom,
         end_specifier: :end_of_service,
         start_datetime: ~N[2025-05-07 14:00:00],
-        end_datetime: ~N[2025-05-09 03:00:00]
+        end_datetime: ~N[2025-05-10 03:00:00]
       }
 
       expected = "through Fri, May 9"
+      actual = AutoTextDuration.build_duration_text(auto_text_data, current_time)
+      assert expected == actual
+    end
+
+    test "start is custom in past and end is custom a different day" do
+      current_time = ~N[2025-05-08 13:00:00]
+
+      auto_text_data = %BuildAutoText{
+        alert_timing: :"one-time",
+        start_specifier: :custom,
+        end_specifier: :custom,
+        start_datetime: ~N[2025-05-07 14:00:00],
+        end_datetime: ~N[2025-05-09 13:00:00]
+      }
+
+      expected = "until Fri, May 9 at 1:00 PM"
+      actual = AutoTextDuration.build_duration_text(auto_text_data, current_time)
+      assert expected == actual
+    end
+
+    test "start is custom on previous day and end is end of service today" do
+      current_time = ~N[2025-05-13 13:00:00]
+
+      auto_text_data = %BuildAutoText{
+        alert_timing: :"one-time",
+        start_specifier: :custom,
+        end_specifier: :end_of_service,
+        start_datetime: ~N[2025-05-10 13:00:00],
+        end_datetime: NaiveDateTime.new!(~D[2025-05-14], ActivePeriod.end_of_service_time())
+      }
+
+      expected = "today"
       actual = AutoTextDuration.build_duration_text(auto_text_data, current_time)
       assert expected == actual
     end
@@ -226,6 +258,70 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
       }
 
       expected = "from 2:00 PM today to Sat, May 10 at 4:00 PM"
+      actual = AutoTextDuration.build_duration_text(auto_text_data, current_time)
+      assert expected == actual
+    end
+
+    test "start is start of service on previous day and end is custom not today" do
+      current_time = ~N[2025-05-12 13:00:00]
+
+      auto_text_data = %BuildAutoText{
+        alert_timing: :"one-time",
+        start_specifier: :start_of_service,
+        end_specifier: :custom,
+        start_datetime: NaiveDateTime.new!(~D[2025-05-10], ActivePeriod.start_of_service_time()),
+        end_datetime: ~N[2025-05-13 13:00:00]
+      }
+
+      expected = "until Tue, May 13 at 1:00 PM"
+      actual = AutoTextDuration.build_duration_text(auto_text_data, current_time)
+      assert expected == actual
+    end
+
+    test "start is start of service on previous day and end is custom today" do
+      current_time = ~N[2025-05-13 13:00:00]
+
+      auto_text_data = %BuildAutoText{
+        alert_timing: :"one-time",
+        start_specifier: :start_of_service,
+        end_specifier: :custom,
+        start_datetime: NaiveDateTime.new!(~D[2025-05-10], ActivePeriod.start_of_service_time()),
+        end_datetime: ~N[2025-05-13 14:00:00]
+      }
+
+      expected = "until 2:00 PM"
+      actual = AutoTextDuration.build_duration_text(auto_text_data, current_time)
+      assert expected == actual
+    end
+
+    test "start is start of service on previous day and end is end of service today" do
+      current_time = ~N[2025-05-13 13:00:00]
+
+      auto_text_data = %BuildAutoText{
+        alert_timing: :"one-time",
+        start_specifier: :start_of_service,
+        end_specifier: :end_of_service,
+        start_datetime: NaiveDateTime.new!(~D[2025-05-10], ActivePeriod.start_of_service_time()),
+        end_datetime: NaiveDateTime.new!(~D[2025-05-14], ActivePeriod.end_of_service_time())
+      }
+
+      expected = "today"
+      actual = AutoTextDuration.build_duration_text(auto_text_data, current_time)
+      assert expected == actual
+    end
+
+    test "start is start of service on previous day and end is end of service in future" do
+      current_time = ~N[2025-05-13 13:00:00]
+
+      auto_text_data = %BuildAutoText{
+        alert_timing: :"one-time",
+        start_specifier: :start_of_service,
+        end_specifier: :end_of_service,
+        start_datetime: NaiveDateTime.new!(~D[2025-05-10], ActivePeriod.start_of_service_time()),
+        end_datetime: NaiveDateTime.new!(~D[2025-05-15], ActivePeriod.end_of_service_time())
+      }
+
+      expected = "through Wed, May 14"
       actual = AutoTextDuration.build_duration_text(auto_text_data, current_time)
       assert expected == actual
     end
@@ -521,16 +617,16 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
     end
   end
 
-  describe "happens_today?/1" do
+  describe "starts_today?/1" do
     test "if start time is nil returns false" do
-      assert AutoTextDuration.happens_today?(nil, ~N[2025-05-08 13:00:00]) == false
+      assert AutoTextDuration.starts_today?(nil, ~N[2025-05-08 13:00:00]) == false
     end
 
     test "if start time is today before midnight return true" do
       current_time = ~N[2025-05-08 13:00:00]
       start_datetime = ~N[2025-05-08 23:00:00]
       expected = true
-      actual = AutoTextDuration.happens_today?(start_datetime, current_time)
+      actual = AutoTextDuration.starts_today?(start_datetime, current_time)
       assert expected == actual
     end
 
@@ -538,7 +634,23 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
       current_time = ~N[2025-05-08 13:00:00]
       start_datetime = ~N[2025-05-09 01:00:00]
       expected = true
-      actual = AutoTextDuration.happens_today?(start_datetime, current_time)
+      actual = AutoTextDuration.starts_today?(start_datetime, current_time)
+      assert expected == actual
+    end
+
+    test "if start time is at start of service return true" do
+      current_time = ~N[2025-05-08 13:00:00]
+      start_datetime = ~N[2025-05-08 03:00:00]
+      expected = true
+      actual = AutoTextDuration.starts_today?(start_datetime, current_time)
+      assert expected == actual
+    end
+
+    test "if start time is at end of service return false" do
+      current_time = ~N[2025-05-08 13:00:00]
+      start_datetime = ~N[2025-05-09 03:00:00]
+      expected = false
+      actual = AutoTextDuration.starts_today?(start_datetime, current_time)
       assert expected == actual
     end
 
@@ -546,7 +658,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
       current_time = ~N[2025-05-09 01:00:00]
       start_datetime = ~N[2025-05-09 02:00:00]
       expected = true
-      actual = AutoTextDuration.happens_today?(start_datetime, current_time)
+      actual = AutoTextDuration.starts_today?(start_datetime, current_time)
       assert expected == actual
     end
 
@@ -554,7 +666,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
       current_time = ~N[2025-05-08 13:00:00]
       start_datetime = ~N[2025-05-09 05:00:00]
       expected = false
-      actual = AutoTextDuration.happens_today?(start_datetime, current_time)
+      actual = AutoTextDuration.starts_today?(start_datetime, current_time)
       assert expected == actual
     end
 
@@ -562,7 +674,53 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
       current_time = ~N[2025-05-09 01:00:00]
       start_datetime = ~N[2025-05-09 05:00:00]
       expected = false
-      actual = AutoTextDuration.happens_today?(start_datetime, current_time)
+      actual = AutoTextDuration.starts_today?(start_datetime, current_time)
+      assert expected == actual
+    end
+  end
+
+  describe "ends_today?/1" do
+    test "if start time is nil returns false" do
+      assert AutoTextDuration.ends_today?(nil, ~N[2025-05-08 13:00:00]) == false
+    end
+
+    test "if start time is today before midnight return true" do
+      current_time = ~N[2025-05-08 13:00:00]
+      start_datetime = ~N[2025-05-08 23:00:00]
+      expected = true
+      actual = AutoTextDuration.ends_today?(start_datetime, current_time)
+      assert expected == actual
+    end
+
+    test "if start time is at start of service return false" do
+      current_time = ~N[2025-05-08 13:00:00]
+      start_datetime = ~N[2025-05-08 03:00:00]
+      expected = false
+      actual = AutoTextDuration.ends_today?(start_datetime, current_time)
+      assert expected == actual
+    end
+
+    test "if start time is at end of service return true" do
+      current_time = ~N[2025-05-08 13:00:00]
+      start_datetime = ~N[2025-05-09 03:00:00]
+      expected = true
+      actual = AutoTextDuration.ends_today?(start_datetime, current_time)
+      assert expected == actual
+    end
+
+    test "if start time is next day after end of service return false" do
+      current_time = ~N[2025-05-08 13:00:00]
+      start_datetime = ~N[2025-05-09 05:00:00]
+      expected = false
+      actual = AutoTextDuration.ends_today?(start_datetime, current_time)
+      assert expected == actual
+    end
+
+    test "if both times are after midnight but start is after EOS return false" do
+      current_time = ~N[2025-05-09 01:00:00]
+      start_datetime = ~N[2025-05-09 05:00:00]
+      expected = false
+      actual = AutoTextDuration.ends_today?(start_datetime, current_time)
       assert expected == actual
     end
   end
