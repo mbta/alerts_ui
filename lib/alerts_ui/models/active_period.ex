@@ -109,6 +109,22 @@ defmodule AlertsUI.Models.ActivePeriod do
     )
   end
 
+  @spec start_of_current_service_day(NaiveDateTime.t(), Time.t()) :: NaiveDateTime.t()
+  def start_of_current_service_day(start_datetime, start_of_service_time \\ @start_of_service) do
+    # takes naive, returns naive. Use in frontend only.
+    start_time = NaiveDateTime.to_time(start_datetime)
+    start_date = NaiveDateTime.to_date(start_datetime)
+
+    new_date =
+      if Time.before?(start_time, start_of_service_time) do
+        Date.add(start_date, -1)
+      else
+        start_date
+      end
+
+    NaiveDateTime.new!(new_date, start_of_service_time)
+  end
+
   @spec end_of_service_date(NaiveDateTime.t() | DateTime.t(), Time.t()) :: Date.t()
   def end_of_service_date(start_time, end_of_service_time \\ @end_of_service)
 
