@@ -180,6 +180,22 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     ]
   end
 
+  defp carat_icon(:left) do
+    assigns = %{}
+
+    ~H"""
+    <.icon name="hero-chevron-left-solid" class="h-4 w-4" />
+    """
+  end
+
+  defp carat_icon(:right) do
+    assigns = %{}
+
+    ~H"""
+    <.icon name="hero-chevron-right-solid" class="h-4 w-4" />
+    """
+  end
+
   defp timeline_options, do: ["current", "future", "past", "all"]
 
   @spec clean_filter_params(map()) :: map()

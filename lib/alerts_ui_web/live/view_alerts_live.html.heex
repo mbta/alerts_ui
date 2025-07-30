@@ -35,27 +35,27 @@
           page_links: {:ellipsis, 3},
           wrapper_attrs: [class: "flex flex-row justify-center"],
           disabled_class:
-            "join-item btn disabled w-16 border-2 border-primary bg-transparent text-text-disabled border-border-disabled",
+            "join-item btn disabled w-12 border-2 border-primary bg-transparent text-text-disabled border-border-disabled",
           pagination_link_attrs: [
-            class: "rounded-none btn w-16 border-2 border-primary bg-transparent text-primary"
+            class: "rounded-none btn w-12 border-2 border-primary bg-transparent text-primary"
           ],
           current_link_attrs: [
             class:
-              "rounded-none btn btn-active w-16 border-2 border-primary bg-transparent text-primary"
+              "rounded-none btn btn-active w-12 border-2 border-primary bg-transparent text-primary"
           ],
-          next_link_content: "›",
+          next_link_content: carat_icon(:right),
           next_link_attrs: [
             class:
-              "border-l-0 rounded-l-sm btn btn-outline order-last w-16 border-2 border-primary bg-transparent text-primary"
+              "border-l-0 rounded-l-sm btn btn-outline order-last w-12 border-2 border-primary bg-transparent text-primary"
           ],
-          previous_link_content: "‹",
+          previous_link_content: carat_icon(:left),
           previous_link_attrs: [
             class:
-              "border-r-0 rounded-r-sm btn btn-outline w-16 border-2 border-primary bg-transparent text-primary"
+              "border-r-0 rounded-r-sm btn btn-outline w-12 border-2 border-primary bg-transparent text-primary"
           ],
           pagination_list_attrs: [class: "join"],
           ellipsis_attrs: [
-            class: "rounded-none btn w-16 border-2 border-primary bg-transparent text-primary"
+            class: "rounded-none btn w-12 border-2 border-primary bg-transparent text-primary"
           ]
         ]}
       />
