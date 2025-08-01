@@ -5,6 +5,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   Can take an Alert struct or an alert_id
   """
   alias AlertsUI.Alerts
+  alias AlertsUI.DBContexts.Users
   alias AlertsUI.Models.{ActivePeriod, Alert, Effect}
 
   alias AlertsUIWeb.FormComponents.Helpers.{
@@ -15,6 +16,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   alias MBTAV3API.Routes.Route
 
   defstruct [
+    :created_at,
+    :created_by,
+    :last_edited_at,
+    :last_edited_by,
     :route_type,
     :effect_name,
     :direction,
@@ -51,6 +56,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   ]
 
   @type t :: %__MODULE__{
+          created_at: DateTime.t(),
+          created_by: String.t(),
+          last_edited_at: DateTime.t(),
+          last_edited_by: String.t(),
           route_type: Route.type_int(),
           direction: String.t(),
           facility_id: String.t(),
@@ -93,6 +102,29 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   end
 
   def build_alert_data(alert) do
+    created_at = alert.created_at
+
+    created_by =
+      with false <- is_nil(alert),
+           earliest_version <- Alerts.get_earliest_version(alert.id),
+           false <- is_nil(earliest_version) do
+        earliest_version
+        |> Map.get(:item_changes, %{})
+        |> Map.get("user_id", "")
+        |> Users.get_user!()
+      else
+        _ -> nil
+      end
+
+    last_edited_at = if alert.updated_at != alert.created_at, do: alert.updated_at
+
+    last_edited_by =
+      if last_edited_at do
+        alert
+        |> Map.get(:user_id, "")
+        |> Users.get_user!()
+      end
+
     effect_map = Effect.effect_map_by_detail(alert.effect_detail)
     informed_entities = alert.informed_entity
     route_type = Alert.get_route_type(alert)
@@ -129,6 +161,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       end
 
     %__MODULE__{
+      created_at: created_at,
+      created_by: created_by,
+      last_edited_at: last_edited_at,
+      last_edited_by: last_edited_by,
       route_type: route_type,
       direction: Alert.get_direction(informed_entities) || "default",
       effect_name: effect_name,

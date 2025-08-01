@@ -50,8 +50,6 @@ defmodule AlertsUIWeb.FormComponents.Submit do
         target_id="#submit_view"
         alert_id={@alert_id}
         current_user={@current_user}
-        created_at={@created_at}
-        created_by={@created_by}
       />
       <.button_secondary
         class="mt-8 mr-auto self-center border-none py-2 px-3"
