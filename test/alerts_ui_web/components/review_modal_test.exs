@@ -12,6 +12,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
   import Phoenix.LiveViewTest
   import Test.Support.Helpers
 
+  alias AlertsUI.Alerts
+  alias AlertsUI.ActivePeriodBuilder
   alias AlertsUI.Models.EnhancedSchedule
   alias AlertsUIWeb.ReviewModal
   alias MBTAV3API.Facilities.Facility
@@ -127,18 +129,22 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
            end_of_rating: fn -> Date.add(todays_date, 1) end
          ]}
       ]) do
-        insert(:alert, %{
-          alert_id: "123",
-          effect: :SIGNIFICANT_DELAYS,
-          effect_detail: "DELAY",
-          header_text: "cool header text",
-          severity: 3,
-          severity_level: :WARNING,
-          cause_detail: "PARADE",
-          reminder_times: [],
-          informed_entity: [%{route_type: 3, route_id: "1"}],
-          original_route_selections: ["1", "2", "3"]
-        })
+        alert_params =
+          build(:alert_map, %{
+            alert_id: "123",
+            effect: :SIGNIFICANT_DELAYS,
+            effect_detail: "DELAY",
+            header_text: "cool header text",
+            severity: 3,
+            severity_level: :WARNING,
+            cause_detail: "PARADE",
+            reminder_times: [],
+            informed_entity: [%{route_type: 3, route_id: "1"}],
+            original_route_selections: ["1", "2", "3"]
+          })
+
+        {:ok, _} =
+          Alerts.create_or_update_alert(alert_params, build(:user))
 
         {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
 
@@ -1090,18 +1096,22 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
            end_of_rating: fn -> Date.add(todays_date, 1) end
          ]}
       ]) do
-        insert(:alert, %{
-          alert_id: "123",
-          effect: :SIGNIFICANT_DELAYS,
-          effect_detail: "DELAY",
-          header_text: "cool header text",
-          severity: 3,
-          severity_level: :WARNING,
-          cause_detail: "UNKNOWN",
-          reminder_times: [],
-          informed_entity: [%{route_type: 3, route_id: "1", direction_id: 0}],
-          original_route_selections: ["1", "2", "3"]
-        })
+        alert_params =
+          build(:alert_map, %{
+            alert_id: "123",
+            effect: :SIGNIFICANT_DELAYS,
+            effect_detail: "DELAY",
+            header_text: "cool header text",
+            severity: 3,
+            severity_level: :WARNING,
+            cause_detail: "UNKNOWN",
+            reminder_times: [],
+            informed_entity: [%{route_type: 3, route_id: "1", direction_id: 0}],
+            original_route_selections: ["1", "2", "3"]
+          })
+
+        {:ok, _} =
+          Alerts.create_or_update_alert(alert_params, build(:user))
 
         {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
 
@@ -1158,7 +1168,9 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
       notification_specifier: :same_as_effect_period,
       severity: 4,
       reminder_times: [],
-      recurrence_days: []
+      recurrence_days: [],
+      created_at: ActivePeriodBuilder.naive_eastern_datetime_to_utc(@yesterday),
+      created_by: %{first_name: "First", last_name: "Last"}
     }
 
     @assigns %{

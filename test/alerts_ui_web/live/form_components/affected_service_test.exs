@@ -9,6 +9,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
   import Phoenix.LiveViewTest
   import Test.Support.Helpers
 
+  alias AlertsUI.Alerts
   alias AlertsUI.Models.EnhancedSchedule
   alias AlertsUIWeb.FormComponents.{AffectedService, RouteTypeAndEffect}
   alias AlertsUIWeb.Step
@@ -1040,24 +1041,28 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
             route_type: @route.type,
             activities: [:BOARD],
             stop_id: @stop.id,
-            trip: trip,
+            trip: Map.from_struct(trip),
             direction_id: nil
           })
 
-        insert(
-          :alert,
-          %{
-            alert_id: "123",
-            header_text: "example header text",
-            informed_entity: [ie],
-            effect: :SIGNIFICANT_DELAYS,
-            effect_detail: "DELAY",
-            original_route_selections: [@route.id],
-            reminder_times: [],
-            severity: 7,
-            cause_detail: "unknown"
-          }
-        )
+        alert_params =
+          build(
+            :alert_map,
+            %{
+              alert_id: "123",
+              header_text: "example header text",
+              informed_entity: [Map.from_struct(ie)],
+              effect: :SIGNIFICANT_DELAYS,
+              effect_detail: "DELAY",
+              original_route_selections: [@route.id],
+              reminder_times: [],
+              severity: 7,
+              cause_detail: "unknown",
+              user: build(:user)
+            }
+          )
+
+        {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
 
         {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
 
