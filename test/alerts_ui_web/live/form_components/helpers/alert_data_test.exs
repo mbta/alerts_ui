@@ -2,6 +2,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
   import AlertsUI.Support.Factory
+
+  alias AlertsUI.Alerts
   alias AlertsUI.Models.ActivePeriod
   alias AlertsUIWeb.FormComponents.Helpers.AlertData
 
@@ -549,6 +551,61 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       assert alert.active_period_end_time == ~T[03:00:00]
       assert alert.active_period_start_date == ~D[2024-05-02]
       assert alert.active_period_end_date == nil
+    end
+
+    test "returns correct creation info and edited info" do
+      user = build(:user)
+
+      seconduser =
+        build(:user, %{
+          role: :user,
+          email: "secondfake@example.com",
+          last_name: "Secondlast",
+          first_name: "Secondfirst",
+          keycloak_id: "456-789"
+        })
+
+      original_alert_map =
+        build(
+          :alert_map,
+          %{
+            alert_id: "123",
+            header_text: "old header text",
+            user: user
+          }
+        )
+
+      new_params =
+        build(:alert_map, %{
+          alert_id: "123",
+          header_text: "new header text",
+          active_period: [%{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:03:00Z]}],
+          user: seconduser
+        })
+
+      Alerts.create_or_update_alert(original_alert_map, user)
+
+      existing_alert = Alerts.get_by_alert_id("123")
+
+      # wait a full 2s so created_at != updated_at
+      :timer.sleep(2000)
+
+      Alerts.create_or_update_alert(new_params, seconduser, existing_alert)
+
+      alert = AlertData.build_alert_data("123")
+      assert DateTime.to_date(alert.created_at) == Date.utc_today()
+
+      assert ^user =
+               Map.take(alert.created_by, [:role, :email, :last_name, :first_name, :keycloak_id])
+
+      assert ^seconduser =
+               Map.take(alert.last_edited_by, [
+                 :role,
+                 :email,
+                 :last_name,
+                 :first_name,
+                 :keycloak_id
+               ])
     end
   end
 
