@@ -7,38 +7,62 @@ defmodule AlertsUIWeb.FormComponents.Helpers.RecurringDurationText do
 
   def recurring_duration_text(assigns) do
     params = assigns.form.params
-    start_time = params["active_period_start_time"] |> ensure_time_format()
-    end_time = params["active_period_end_time"] |> ensure_time_format()
 
+    time_range_text = assigns |> assign(params: params) |> recurring_duration_time_range()
+    duration_text = recurring_duration_only(params)
+    recurrence_day_text = recurring_duration_recurrence_days(params)
+    date_range_text = recurring_duration_date_range(params)
+
+    assigns =
+      assign(assigns,
+        time_range_text: time_range_text,
+        duration_text: duration_text,
+        recurrence_day_text: recurrence_day_text,
+        date_range_text: date_range_text
+      )
+
+    ~H"""
+    {@time_range_text}{" #{@duration_text} #{@recurrence_day_text} from #{@date_range_text}"}
+    """
+  end
+
+  def recurring_duration_date_range(params) do
     start_date = params["active_period_start_date"] |> ensure_date_format()
     end_date = params["active_period_end_date"] |> ensure_date_format()
-
-    start_time_text = time_text(start_time)
-    end_time_text = time_text(end_time)
-
-    duration_text = duration(start_time, end_time)
-
-    plus_one = plus_one?(start_time, end_time)
-
-    weekday_text = weekday_text(params["recurrence_days"])
 
     start_date_text = date_text(start_date, nil)
     end_date_text = date_text(end_date, params["active_period_end_specifier"])
 
+    start_date_text <> " until " <> end_date_text
+  end
+
+  def recurring_duration_recurrence_days(params) do
+    weekday_text = weekday_text(params["recurrence_days"])
+
+    "every " <> weekday_text
+  end
+
+  def recurring_duration_time_range(%{params: params} = assigns) do
+    start_time = params["active_period_start_time"] |> ensure_time_format()
+    end_time = params["active_period_end_time"] |> ensure_time_format()
+
     assigns =
       assign(assigns,
-        start_time_text: start_time_text,
-        end_time_text: end_time_text,
-        plus_one: plus_one,
-        duration_text: duration_text,
-        weekday_text: weekday_text,
-        start_date_text: start_date_text,
-        end_date_text: end_date_text
+        start_time_text: time_text(start_time),
+        end_time_text: time_text(end_time),
+        plus_one: plus_one?(start_time, end_time)
       )
 
     ~H"""
-    {"#{@start_time_text} – #{@end_time_text}"}<sup :if={@plus_one}>+1</sup>{" #{@duration_text} every #{@weekday_text} from #{@start_date_text} until #{@end_date_text}"}
+    {"#{@start_time_text} – #{@end_time_text}"}<sup :if={@plus_one}>+1</sup>
     """
+  end
+
+  def recurring_duration_only(params) do
+    start_time = params["active_period_start_time"] |> ensure_time_format()
+    end_time = params["active_period_end_time"] |> ensure_time_format()
+
+    duration(start_time, end_time)
   end
 
   def time_text(nil), do: ""
