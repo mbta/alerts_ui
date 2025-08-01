@@ -26,6 +26,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
         cause_detail: Map.get(alert_data, :cause_detail),
         start_specifier: Map.get(alert_data, :active_period_start_specifier),
         end_specifier: Map.get(alert_data, :active_period_end_specifier),
+        start_time_specifier: Map.get(alert_data, :active_period_start_time_specifier),
+        end_time_specifier: Map.get(alert_data, :active_period_end_time_specifier),
         start_datetime: Map.get(alert_data, :active_period_start),
         end_datetime: end_datetime,
         start_date: Map.get(alert_data, :active_period_start_date),

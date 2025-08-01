@@ -507,7 +507,9 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         open_review_modal(view)
 
         assert render(view) =~ ~r/Timing.*Recurring/s
-        assert render(view) =~ ~r/Effect period.*every Saturday.*until alert is manually closed/s
+
+        assert render(view) =~
+                 ~r/Effect period.*Sat Jun 08, 2999 until alert is manually closed.*Every Saturday/s
       end
     end
 
