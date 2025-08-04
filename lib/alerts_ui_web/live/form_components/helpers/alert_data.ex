@@ -6,7 +6,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   """
   alias AlertsUI.Alerts
   alias AlertsUI.DBContexts.Users
-  alias AlertsUI.Models.{ActivePeriod, Alert, Effect}
+  alias AlertsUI.Models.{ActivePeriod, Alert, Effect, User}
 
   alias AlertsUIWeb.FormComponents.Helpers.{
     EffectsForRouteTypes,
@@ -57,9 +57,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
   @type t :: %__MODULE__{
           created_at: DateTime.t(),
-          created_by: String.t(),
+          created_by: User.t(),
           last_edited_at: DateTime.t(),
-          last_edited_by: String.t(),
+          last_edited_by: User.t(),
           route_type: Route.type_int(),
           direction: String.t(),
           facility_id: String.t(),
@@ -94,7 +94,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           recurrence_days: [atom()] | nil
         }
 
-  @spec build_alert_data(nil | String.t() | Alert.t()) :: t()
+  @spec build_alert_data(String.t() | Alert.t() | nil) :: t()
   def build_alert_data(nil), do: %__MODULE__{}
 
   def build_alert_data(alert_id) when is_binary(alert_id) do
