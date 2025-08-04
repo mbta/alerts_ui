@@ -142,7 +142,33 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
         ])
       )
 
-    {:ok, assign(socket, assigns)}
+    # we need to revalidate here so we can apply/clear new errors
+    # based on validating against new timerange information
+    changeset =
+      changeset(%__MODULE__{}, socket.assigns.form.params)
+      |> TimeRangeValidators.validate_notification(
+        assigns.time_range,
+        socket.assigns.current_time
+      )
+
+    changeset
+    |> apply_action(:validate)
+    |> case do
+      {:ok, changes} ->
+        send(self(), {:add_errors, [], __MODULE__})
+        send(self(), {:section_completed, changes})
+
+      {:error, changeset} ->
+        send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
+    end
+
+    form =
+      changeset
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    socket = socket |> assign(assigns) |> assign(form: form)
+    {:ok, socket}
   end
 
   @impl true
