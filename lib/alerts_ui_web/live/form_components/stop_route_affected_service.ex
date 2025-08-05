@@ -64,16 +64,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         %{alert_data: alert_data, editing: true, route_type: route_type} = assigns,
         socket
       ) do
-    # necessary to form informed entities correctly upon persisting
-    alert_data =
-      alert_data
-      |> Map.put_new(
-        :route_types_by_id,
-        alert_data.route_ids
-        |> Enum.map(fn route_id -> {route_id, alert_data.route_type} end)
-        |> Map.new()
-      )
-
     changeset = build_changeset(%__MODULE__{}, alert_data)
     changes = apply_action!(changeset, :validate)
 
