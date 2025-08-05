@@ -198,6 +198,23 @@ defmodule AlertsUI.Models.ActivePeriodTest do
     end
   end
 
+  describe "start_of_current_service_day/2" do
+    test "returns start of service previous date if time after midnight
+    but before end of service" do
+      start_datetime = ~N[2025-07-30 01:00:00]
+      expected = ~N[2025-07-29 03:00:00]
+      actual = ActivePeriod.start_of_current_service_day(start_datetime)
+      assert expected == actual
+    end
+
+    test "returns start of service current date if time after end of service" do
+      start_datetime = ~N[2025-07-30 04:00:00]
+      expected = ~N[2025-07-30 03:00:00]
+      actual = ActivePeriod.start_of_current_service_day(start_datetime)
+      assert expected == actual
+    end
+  end
+
   describe "end_of_service_datetime_naive/1" do
     test "adds 1 to date if time is after service start" do
       start_time = NaiveDateTime.new!(~D[2023-10-10], ~T[04:00:00])

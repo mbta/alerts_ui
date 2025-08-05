@@ -82,66 +82,82 @@ defmodule AlertsUI.Models.ActivePeriod do
   def end_of_service_time, do: @end_of_service
 
   @spec next_start_of_service_date(NaiveDateTime.t() | DateTime.t(), Time.t()) :: Date.t()
-  def next_start_of_service_date(start_time, start_of_service_time \\ @start_of_service)
+  def next_start_of_service_date(time, start_of_service_time \\ @start_of_service)
 
-  def next_start_of_service_date(%NaiveDateTime{} = start_time, start_of_service_time) do
+  def next_start_of_service_date(%NaiveDateTime{} = time, start_of_service_time) do
     # Always assume naive dates are America/New York
-    start_time
+    time
     |> DateTime.from_naive!("America/New_York")
     |> next_start_of_service_date(start_of_service_time)
   end
 
-  def next_start_of_service_date(%DateTime{} = start_datetime, start_of_service_time) do
+  def next_start_of_service_date(%DateTime{} = datetime, start_of_service_time) do
     # Gives back the date of the next start of service given a datetime.
     # Checks if start time is after 3:00am (Eastern). If true, end date is the next day. If false, end date is same day.
-    if Time.after?(DateTime.to_time(start_datetime), start_of_service_time) do
-      Date.add(DateTime.to_date(start_datetime), 1)
+    if Time.after?(DateTime.to_time(datetime), start_of_service_time) do
+      Date.add(DateTime.to_date(datetime), 1)
     else
-      DateTime.to_date(start_datetime)
+      DateTime.to_date(datetime)
     end
   end
 
   @spec next_start_of_service_datetime(NaiveDateTime.t() | DateTime.t(), Time.t()) :: DateTime.t()
-  def next_start_of_service_datetime(start_datetime, start_of_service_time \\ @start_of_service) do
+  def next_start_of_service_datetime(datetime, start_of_service_time \\ @start_of_service) do
     DateTime.new!(
-      next_start_of_service_date(start_datetime, start_of_service_time),
+      next_start_of_service_date(datetime, start_of_service_time),
       start_of_service_time
     )
   end
 
-  @spec end_of_service_date(NaiveDateTime.t() | DateTime.t(), Time.t()) :: Date.t()
-  def end_of_service_date(start_time, end_of_service_time \\ @end_of_service)
+  @spec start_of_current_service_day(NaiveDateTime.t(), Time.t()) :: NaiveDateTime.t()
+  def start_of_current_service_day(datetime, start_of_service_time \\ @start_of_service) do
+    # takes naive, returns naive. Use in frontend only.
+    time = NaiveDateTime.to_time(datetime)
+    date = NaiveDateTime.to_date(datetime)
 
-  def end_of_service_date(%NaiveDateTime{} = start_time, end_of_service_time) do
+    new_date =
+      if Time.before?(time, start_of_service_time) do
+        Date.add(date, -1)
+      else
+        date
+      end
+
+    NaiveDateTime.new!(new_date, start_of_service_time)
+  end
+
+  @spec end_of_service_date(NaiveDateTime.t() | DateTime.t(), Time.t()) :: Date.t()
+  def end_of_service_date(time, end_of_service_time \\ @end_of_service)
+
+  def end_of_service_date(%NaiveDateTime{} = time, end_of_service_time) do
     # Always assume naive dates are America/New York
-    start_time
+    time
     |> DateTime.from_naive!("America/New_York")
     |> end_of_service_date(end_of_service_time)
   end
 
-  def end_of_service_date(%DateTime{} = start_time, end_of_service_time) do
+  def end_of_service_date(%DateTime{} = time, end_of_service_time) do
     # Returns the date of the the next instance of the "end of service" (eg 3:00 AM) given a datetime.
     # Checks if start time is after 3:00am (Eastern). If true, end date is the next day. If false, end date is same day.
-    if Time.after?(DateTime.to_time(start_time), end_of_service_time) do
-      Date.add(DateTime.to_date(start_time), 1)
+    if Time.after?(DateTime.to_time(time), end_of_service_time) do
+      Date.add(DateTime.to_date(time), 1)
     else
-      DateTime.to_date(start_time)
+      DateTime.to_date(time)
     end
   end
 
   @spec end_of_service_datetime_naive(NaiveDateTime.t(), Time.t()) ::
           NaiveDateTime.t()
-  def end_of_service_datetime_naive(start_time, end_of_service_time \\ @end_of_service) do
+  def end_of_service_datetime_naive(time, end_of_service_time \\ @end_of_service) do
     # for use in front end only
-    NaiveDateTime.new!(end_of_service_date(start_time, end_of_service_time), end_of_service_time)
+    NaiveDateTime.new!(end_of_service_date(time, end_of_service_time), end_of_service_time)
   end
 
   @spec end_of_service_datetime_utc(DateTime.t(), Time.t()) ::
           DateTime.t()
-  def end_of_service_datetime_utc(start_time, end_of_service_time \\ @end_of_service) do
-    start_time = DateTime.shift_zone!(start_time, "America/New_York")
+  def end_of_service_datetime_utc(time, end_of_service_time \\ @end_of_service) do
+    time = DateTime.shift_zone!(time, "America/New_York")
 
-    NaiveDateTime.new!(end_of_service_date(start_time, end_of_service_time), end_of_service_time)
+    NaiveDateTime.new!(end_of_service_date(time, end_of_service_time), end_of_service_time)
     |> DateTime.from_naive!("America/New_York")
     |> DateTime.shift_zone!("Etc/UTC")
   end
