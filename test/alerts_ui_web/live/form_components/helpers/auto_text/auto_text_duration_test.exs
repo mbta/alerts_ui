@@ -150,6 +150,22 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
       assert expected == actual
     end
 
+    test "start is custom in past and end is custom today" do
+      current_time = ~N[2025-05-09 12:00:00]
+
+      auto_text_data = %BuildAutoText{
+        alert_timing: :"one-time",
+        start_specifier: :custom,
+        end_specifier: :custom,
+        start_datetime: ~N[2025-05-07 14:00:00],
+        end_datetime: ~N[2025-05-09 13:00:00]
+      }
+
+      expected = "until 1:00 PM"
+      actual = AutoTextDuration.build_duration_text(auto_text_data, current_time)
+      assert expected == actual
+    end
+
     test "start is custom on previous day and end is end of service today" do
       current_time = ~N[2025-05-13 13:00:00]
 
@@ -725,12 +741,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
     end
   end
 
-  describe "happens_before_today?/2" do
+  describe "starts_before_today?/2" do
     test "start is same service day as now" do
       current_time = ~N[2025-05-09 01:00:00]
       start_datetime = ~N[2025-05-08 04:00:00]
       expected = false
-      actual = AutoTextDuration.happens_before_today?(start_datetime, current_time)
+      actual = AutoTextDuration.starts_before_today?(start_datetime, current_time)
       assert expected == actual
     end
 
@@ -738,7 +754,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
       current_time = ~N[2025-05-09 01:00:00]
       start_datetime = ~N[2025-05-08 02:00:00]
       expected = true
-      actual = AutoTextDuration.happens_before_today?(start_datetime, current_time)
+      actual = AutoTextDuration.starts_before_today?(start_datetime, current_time)
       assert expected == actual
     end
 
@@ -746,7 +762,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
       current_time = ~N[2025-05-09 01:00:00]
       start_datetime = ~N[2025-05-09 02:00:00]
       expected = false
-      actual = AutoTextDuration.happens_before_today?(start_datetime, current_time)
+      actual = AutoTextDuration.starts_before_today?(start_datetime, current_time)
       assert expected == actual
     end
   end

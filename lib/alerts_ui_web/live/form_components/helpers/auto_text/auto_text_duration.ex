@@ -24,7 +24,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
     end_specifier = change_end_specifier(end_datetime, end_specifier)
 
     starts_today? = starts_today?(start_datetime, current_time)
-    starts_before_today? = happens_before_today?(start_datetime, current_time)
+    starts_before_today? = starts_before_today?(start_datetime, current_time)
 
     ends_today? = ends_today?(end_datetime, current_time)
 
@@ -133,7 +133,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         start_specifier: :custom,
         end_specifier: :custom,
         starts_before_today?: true,
-        within_same_service_day?: false,
         ends_today?: false,
         end_datetime: end_datetime
       }) do
@@ -142,9 +141,18 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
 
   def build_onetime_string(%{
         start_specifier: :custom,
+        end_specifier: :custom,
+        starts_before_today?: true,
+        ends_today?: true,
+        end_datetime: end_datetime
+      }) do
+    "until #{datetime_to_formatted_time(end_datetime)}"
+  end
+
+  def build_onetime_string(%{
+        start_specifier: :custom,
         end_specifier: :end_of_service,
         starts_before_today?: true,
-        within_same_service_day?: false,
         ends_today?: true
       }) do
     "today"
@@ -288,7 +296,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         start_specifier: :start_of_service,
         end_specifier: :custom,
         starts_before_today?: true,
-        within_same_service_day?: false,
         ends_today?: false,
         end_datetime: end_datetime
       }) do
@@ -299,7 +306,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         start_specifier: :start_of_service,
         end_specifier: :custom,
         starts_before_today?: true,
-        within_same_service_day?: false,
         ends_today?: true,
         end_datetime: end_datetime
       }) do
@@ -320,7 +326,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         start_specifier: :start_of_service,
         end_specifier: :end_of_service,
         starts_before_today?: true,
-        within_same_service_day?: false,
         ends_today?: false,
         end_datetime: end_datetime
       }) do
@@ -442,9 +447,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
     # returns true if time is before next end of service
     # and at or after previous beginning of service
     next_end_of_service = ActivePeriod.end_of_service_datetime_naive(current_time)
-    previous_end_of_service = ActivePeriod.start_of_current_service_day(current_time)
+    previous_beginning_of_service = ActivePeriod.start_of_current_service_day(current_time)
     before_eos = NaiveDateTime.compare(start_datetime, next_end_of_service) in [:lt]
-    after_bos = NaiveDateTime.compare(start_datetime, previous_end_of_service) in [:gt, :eq]
+    after_bos = NaiveDateTime.compare(start_datetime, previous_beginning_of_service) in [:gt, :eq]
 
     before_eos and after_bos
   end
@@ -455,21 +460,21 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
     # returns true if time is at or before next end of service
     # and after previous beginning of service
     next_end_of_service = ActivePeriod.end_of_service_datetime_naive(current_time)
-    previous_end_of_service = ActivePeriod.start_of_current_service_day(current_time)
+    previous_beginning_of_service = ActivePeriod.start_of_current_service_day(current_time)
     before_eos = NaiveDateTime.compare(end_datetime, next_end_of_service) in [:lt, :eq]
-    after_bos = NaiveDateTime.compare(end_datetime, previous_end_of_service) in [:gt]
+    after_bos = NaiveDateTime.compare(end_datetime, previous_beginning_of_service) in [:gt]
 
     before_eos and after_bos
   end
 
-  def happens_before_today?(nil, _), do: false
+  def starts_before_today?(nil, _), do: false
 
-  def happens_before_today?(start_datetime, current_time) do
-    happens_today? = starts_today?(start_datetime, current_time)
+  def starts_before_today?(start_datetime, current_time) do
+    starts_today? = starts_today?(start_datetime, current_time)
 
-    happens_in_past? = NaiveDateTime.compare(start_datetime, current_time) == :lt
+    starts_in_past? = NaiveDateTime.compare(start_datetime, current_time) == :lt
 
-    happens_in_past? && !happens_today?
+    starts_in_past? && !starts_today?
   end
 
   defp build_datetime(nil, _), do: nil
