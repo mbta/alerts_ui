@@ -80,12 +80,15 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
 
     lasts_a_single_day? = within_same_service_day?(start_datetime, end_datetime)
 
+    starts_today? =
+      starts_today?(start_datetime, current_time) or
+        starts_before_today?(start_datetime, current_time)
+
+    ends_today? = starts_today?(end_datetime, current_time)
+
     duration_data = %{
       is_trip_combination?: combination in [:RDT, :RDTS],
-      starts_today?:
-        starts_today?(start_datetime, current_time) or
-          starts_before_today?(start_datetime, current_time),
-      ends_today?: starts_today?(end_datetime, current_time),
+      starts_today?: starts_today?,
       start_time: start_time,
       end_time: end_time,
       start_time_specifier: change_start_specifier(start_time, start_time_specifier),
@@ -94,7 +97,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
       end_datetime: build_datetime(end_date, end_time)
     }
 
-    if lasts_a_single_day? do
+    # if the alert lasts a single day or ends today, it is treated like a one-time alert.
+    if lasts_a_single_day? or ends_today? do
       auto_text_data
       |> Map.merge(%{
         alert_timing: :"one-time",
@@ -564,13 +568,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
   def build_date_string(%{start_datetime: nil}), do: ""
 
   def build_date_string(%{
-        ends_today?: true,
-        is_trip_combination?: true
-      }) do
-    "today"
-  end
-
-  def build_date_string(%{
         start_datetime: start_datetime,
         end_datetime: nil,
         starts_today?: false,
@@ -585,6 +582,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         is_trip_combination?: true
       }) do
     "until further notice"
+  end
+
+  def build_date_string(%{
+        start_datetime: start_datetime,
+        end_datetime: nil,
+        starts_today?: false
+      }) do
+    "starting #{datetime_to_formatted_date(start_datetime)} #{end_date_string_word(nil)} #{end_date_string(nil)}"
   end
 
   def build_date_string(%{

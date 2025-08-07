@@ -732,6 +732,31 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
       assert expected == actual
     end
 
+    test "recurring- when start is in past and end today" do
+      current_time = ~N[2025-05-07 13:00:00]
+
+      auto_text_data = %BuildAutoText{
+        alert_timing: :recurring,
+        route_type: 4,
+        effect_name: "Delay",
+        schedules: [@schedule_1],
+        start_time_specifier: :custom,
+        end_time_specifier: :custom,
+        start_date: ~D[2025-05-05],
+        end_date: ~D[2025-05-07],
+        start_time: ~T[12:00:00],
+        end_time: ~T[15:00:00],
+        recurrence_days: [:friday]
+      }
+
+      expected =
+        "today"
+
+      actual = AutoTextDuration.build_duration_text(auto_text_data, current_time)
+
+      assert expected == actual
+    end
+
     test "recurring- when start is not today" do
       current_time = ~N[2025-05-08 13:00:00]
 
@@ -918,20 +943,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
              }) == ""
     end
 
-    test "trip specific starts in past ends today" do
-      expected = "today"
-
-      actual =
-        AutoTextDuration.build_date_string(%{
-          start_datetime: ~N[2025-05-17 15:00:00],
-          end_datetime: ~N[2025-05-19 15:00:00],
-          ends_today?: true,
-          is_trip_combination?: true
-        })
-
-      assert expected == actual
-    end
-
     test "trip specific not today no end date" do
       expected = "starting Sun, May 18"
 
@@ -974,7 +985,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
     end
 
     test "does not start today but no end datetime" do
-      expected = "from Fri, May 9 until further notice"
+      expected = "starting Fri, May 9 until further notice"
 
       actual =
         AutoTextDuration.build_date_string(%{
