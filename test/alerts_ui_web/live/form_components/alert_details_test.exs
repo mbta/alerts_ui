@@ -198,7 +198,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
       # expected outcome is different if the dates are weekends
       expected_string =
         if Date.day_of_week(@tomorrows_date) == 6 do
-          "closed the weekend of #{Calendar.strftime(@tomorrows_date, "%a, %b %-d")} - #{Calendar.strftime(Date.add(@tomorrows_date, 1), "%a, %b %-d")}"
+          "closed the weekend of #{Calendar.strftime(@tomorrows_date, "%a, %b %-d")} and #{Calendar.strftime(Date.add(@tomorrows_date, 1), "%a, %b %-d")}"
         else
           "from #{Calendar.strftime(@tomorrows_date, "%a, %b %-d")} through #{Calendar.strftime(Date.add(@tomorrows_date, 1), "%a, %b %-d")}"
         end
