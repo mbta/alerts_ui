@@ -40,6 +40,36 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
              }
     end
 
+    test "correctly fills in route_types_by_id for stop-route" do
+      insert(:alert, %{
+        alert_id: "1",
+        effect: :NO_SERVICE,
+        effect_detail: "DOCK_CLOSURE",
+        header_text: "cool header text",
+        description_text: "description text",
+        informed_entity: [%{route_type: 4, route_id: "1", direction_id: 0, stop_id: "2"}],
+        original_route_selections: ["1"]
+      })
+
+      assert AlertData.build_alert_data("1") == %AlertData{
+               combination: :SR,
+               effect_name: "Dock Closure",
+               direction: "0",
+               route_type: 4,
+               route_types_by_id: %{"1" => 4},
+               route_ids: ["1"],
+               stop_ids: ["2"],
+               trip_ids: [],
+               facility_id: nil,
+               header_text: "cool header text",
+               description_text: "description text",
+               service_types: [],
+               reminder_times: [~N[2024-09-24 20:01:00]],
+               notification_specifier: :same_as_effect_period,
+               alert_timing: :"one-time"
+             }
+    end
+
     test "works if informed entities empty" do
       insert(:alert, %{
         alert_id: "1",

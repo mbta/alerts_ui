@@ -47,7 +47,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :notification_period_start,
     :notification_specifier,
     :severity,
-    :reminder_times
+    :reminder_times,
+    :route_types_by_id
   ]
 
   @type t :: %__MODULE__{
@@ -82,7 +83,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           notification_period_start: NaiveDateTime.t() | nil,
           severity: integer() | nil,
           reminder_times: [NaiveDateTime.t()] | nil,
-          recurrence_days: [atom()] | nil
+          recurrence_days: [atom()] | nil,
+          route_types_by_id: map() | nil
         }
 
   @spec build_alert_data(nil | String.t() | Alert.t()) :: t()
@@ -128,6 +130,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
         nil
       end
 
+    route_types_by_id = route_types_by_id(combination, route_type, route_ids)
+
     %__MODULE__{
       route_type: route_type,
       direction: Alert.get_direction(informed_entities) || "default",
@@ -149,7 +153,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       notification_period_start: notification_period_start,
       notification_specifier: notification_specifier,
       severity: alert.severity,
-      reminder_times: reminder_times
+      reminder_times: reminder_times,
+      route_types_by_id: route_types_by_id
     }
     |> Map.merge(active_period_map)
   end
@@ -236,4 +241,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       "custom"
     end
   end
+
+  defp route_types_by_id(:SR, route_type, route_ids) do
+    # necessary to form informed entities correctly upon persisting
+    route_ids
+    |> Enum.map(fn route_id -> {route_id, route_type} end)
+    |> Map.new()
+  end
+
+  defp route_types_by_id(_, _, _), do: nil
 end
