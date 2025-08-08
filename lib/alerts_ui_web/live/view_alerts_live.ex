@@ -88,10 +88,15 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   end
 
   @impl true
-  def handle_event("open_details", %{"alert_id" => alert_id}, socket) do
+  def handle_event("open_details", %{"alert_id" => alert_id}, socket) when is_integer(alert_id) do
     alert_data = alert_id |> Integer.to_string() |> AlertData.build_alert_data()
 
     {:noreply, assign(socket, selected_alert_data: alert_data, selected_alert_id: alert_id)}
+  end
+
+  @impl true
+  def handle_event("open_details", %{"alert_id" => _alert_id}, socket) do
+    {:noreply, socket}
   end
 
   @impl true

@@ -16,97 +16,103 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   alias MBTAV3API.Routes.Route
 
   defstruct [
+    :active_period_end,
+    :active_period_end_date,
+    :active_period_end_specifier,
+    :active_period_end_time,
+    :active_period_end_time_specifier,
+
+    :active_period_start,
+    :active_period_start_date,
+    :active_period_start_specifier,
+    :active_period_start_time,
+    :active_period_start_time_specifier,
+    
+    :alert_timing,
+    :banner_text,
+    :cause_detail,
+    :combination,
     :created_at,
     :created_by,
+    :description_text,
+    :direction,
+    :effect_name,
+    :facility_id,
+    :header_text,
+    :image_alternative_text,
+    :image_url,
     :last_edited_at,
     :last_edited_by,
-    :route_type,
-    :effect_name,
-    :direction,
-    :facility_id,
+    :notification_period_start,
+    :notification_specifier,
+    :recurrence_days,
+    :reminder_times,
     :route_ids,
+    :route_type,
+    :service_types,
+    :severity,
     :single_route_id,
     :stop_ids,
     :trip_ids,
-    :header_text,
-    :description_text,
-    :banner_text,
-    :combination,
-    :alert_timing,
-    :active_period_start,
-    :active_period_end,
-    :active_period_start_date,
-    :active_period_end_date,
-    :active_period_start_time,
-    :active_period_end_time,
-    :active_period_end_time_specifier,
-    :active_period_start_time_specifier,
-    :active_period_end_specifier,
-    :active_period_start_specifier,
-    :recurrence_days,
-    :service_types,
-    :cause_detail,
-    :url,
-    :image_url,
-    :image_alternative_text,
-    :notification_period_start,
-    :notification_specifier,
-    :severity,
-    :reminder_times
+    :url
   ]
 
   @type t :: %__MODULE__{
-          created_at: DateTime.t(),
-          created_by: User.t(),
-          last_edited_at: DateTime.t(),
-          last_edited_by: User.t(),
-          route_type: Route.type_int(),
-          direction: String.t(),
-          facility_id: String.t(),
-          route_ids: [String.t()],
-          single_route_id: String.t(),
-          stop_ids: [String.t()],
-          trip_ids: [String.t()],
-          header_text: String.t(),
-          description_text: String.t(),
-          banner_text: String.t() | nil,
-          combination: atom(),
-          alert_timing: atom(),
-          active_period_start: NaiveDateTime.t(),
-          active_period_start_date: Date.t() | nil,
-          active_period_start_time: Time.t() | nil,
-          active_period_start_specifier: String.t() | nil,
-          active_period_start_time_specifier: String.t() | nil,
           active_period_end: NaiveDateTime.t() | nil,
           active_period_end_date: Date.t() | nil,
+          active_period_end_specifier: String.t() | nil,
           active_period_end_time: Time.t() | nil,
-          active_period_end_specifier: String.t(),
           active_period_end_time_specifier: String.t() | nil,
-          recurrence_days: [String.t()] | nil,
-          service_types: [Route.type_int()],
-          cause_detail: String.t(),
-          url: String.t() | nil,
-          image_url: String.t() | nil,
+          active_period_start: NaiveDateTime.t() | nil,
+          active_period_start_date: Date.t() | nil,
+          active_period_start_specifier: String.t() | nil,
+          active_period_start_time: Time.t() | nil,
+          active_period_start_time_specifier: String.t() | nil,
+          alert_timing: atom() | nil,
+          banner_text: String.t() | nil,
+          cause_detail: String.t() | nil,
+          combination: atom() | nil,
+          created_at: DateTime.t() | nil,
+          created_by: User.t() | nil,
+          description_text: String.t() | nil,
+          direction: String.t() | nil,
+          effect_name: String.t() | nil,
+          facility_id: String.t() | nil,
+          header_text: String.t() | nil,
           image_alternative_text: String.t() | nil,
+          image_url: String.t() | nil,
+          last_edited_at: DateTime.t() | nil,
+          last_edited_by: User.t() | nil,
           notification_period_start: NaiveDateTime.t() | nil,
-          severity: integer() | nil,
+          notification_specifier: atom() | nil,
+          recurrence_days: [atom()] | nil,
           reminder_times: [NaiveDateTime.t()] | nil,
-          recurrence_days: [atom()] | nil
+          route_ids: [String.t()] | nil,
+          route_type: Route.type_int() | nil,
+          service_types: [Route.type_int()] | nil,
+          severity: integer() | nil,
+          single_route_id: String.t() | nil,
+          stop_ids: [String.t()] | nil,
+          trip_ids: [String.t()] | nil,
+          url: String.t() | nil,
         }
 
   @spec build_alert_data(String.t() | Alert.t() | nil) :: t()
-  def build_alert_data(nil), do: %__MODULE__{}
-
   def build_alert_data(alert_id) when is_binary(alert_id) do
-    alert_id |> Alerts.get_by_alert_id() |> build_alert_data
+    alert = alert_id |> Alerts.get_by_alert_id()
+
+    if Map.get(alert, :id) == nil do
+      build_alert_data(nil)
+    else
+      build_alert_data(alert)
+    end
   end
 
-  def build_alert_data(alert) do
+  def build_alert_data(%AlertsUI.Models.Alert{} = alert) do
     created_at = alert.created_at
 
     created_by =
-      with false <- is_nil(alert),
-           earliest_version <- Alerts.get_earliest_version(alert.id),
+      with earliest_version <- Alerts.get_earliest_version(alert.id),
            false <- is_nil(earliest_version) do
         earliest_version
         |> Map.get(:item_changes, %{})
@@ -154,34 +160,36 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       end
 
     %__MODULE__{
+      banner_text: alert.banner_text,
+      cause_detail: alert.cause_detail,
+      combination: combination,
       created_at: created_at,
       created_by: created_by,
+      description_text: alert.description_text,
+      direction: Alert.get_direction(informed_entities) || "default",
+      facility_id: Alert.gather_facility_ids(informed_entities) |> List.first(),
+      effect_name: effect_name,
+      header_text: alert.header_text,
+      image_alternative_text: alert.image_alternative_text,
+      image_url: alert.image_url,
       last_edited_at: last_edited_at,
       last_edited_by: last_edited_by,
+      notification_period_start: notification_period_start,
+      notification_specifier: notification_specifier,
+      reminder_times: reminder_times,
       route_type: route_type,
-      direction: Alert.get_direction(informed_entities) || "default",
-      effect_name: effect_name,
-      facility_id: Alert.gather_facility_ids(informed_entities) |> List.first(),
       route_ids: route_ids,
+      severity: alert.severity,
+      service_types: Alert.service_types(alert),
       single_route_id: single_route_id,
       stop_ids: Alert.gather_parent_stop_ids(informed_entities),
       trip_ids: Alert.gather_trip_ids(informed_entities),
-      header_text: alert.header_text,
-      description_text: alert.description_text,
-      combination: combination,
-      service_types: Alert.service_types(alert),
-      cause_detail: alert.cause_detail,
       url: alert.url,
-      image_url: alert.image_url,
-      image_alternative_text: alert.image_alternative_text,
-      banner_text: alert.banner_text,
-      notification_period_start: notification_period_start,
-      notification_specifier: notification_specifier,
-      severity: alert.severity,
-      reminder_times: reminder_times
     }
     |> Map.merge(active_period_map)
   end
+
+  def build_alert_data(_), do: %__MODULE__{}
 
   def get_edited_by_info(alert) when alert.updated_at != alert.created_at do
     last_edited_by =
