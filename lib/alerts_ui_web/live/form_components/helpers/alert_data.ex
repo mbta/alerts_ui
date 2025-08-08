@@ -21,13 +21,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :active_period_end_specifier,
     :active_period_end_time,
     :active_period_end_time_specifier,
-
     :active_period_start,
     :active_period_start_date,
     :active_period_start_specifier,
     :active_period_start_time,
     :active_period_start_time_specifier,
-    
     :alert_timing,
     :banner_text,
     :cause_detail,
