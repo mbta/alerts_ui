@@ -80,7 +80,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
 
     lasts_a_single_day? = within_same_service_day?(start_datetime, end_datetime)
 
-    starts_today? =
+    starts_today_or_earlier? =
       starts_today?(start_datetime, current_time) or
         starts_before_today?(start_datetime, current_time)
 
@@ -88,7 +88,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
 
     duration_data = %{
       is_trip_combination?: combination in [:RDT, :RDTS],
-      starts_today?: starts_today?,
+      starts_today_or_earlier?: starts_today_or_earlier?,
       start_time: start_time,
       end_time: end_time,
       start_time_specifier: change_start_specifier(start_time, start_time_specifier),
@@ -148,10 +148,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
   def build_onetime_string(%{
         is_trip_combination?: true,
         starts_before_today?: true,
-        ends_today?: true,
-        end_datetime: end_datetime
-      })
-      when not is_nil(end_datetime) do
+        ends_today?: true
+      }) do
     "today"
   end
 
@@ -570,7 +568,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
   def build_date_string(%{
         start_datetime: start_datetime,
         end_datetime: nil,
-        starts_today?: false,
+        starts_today_or_earlier?: false,
         is_trip_combination?: true
       }) do
     "starting #{datetime_to_formatted_date(start_datetime)}"
@@ -578,7 +576,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
 
   def build_date_string(%{
         end_datetime: nil,
-        starts_today?: true,
+        starts_today_or_earlier?: true,
         is_trip_combination?: true
       }) do
     "until further notice"
@@ -587,7 +585,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
   def build_date_string(%{
         start_datetime: start_datetime,
         end_datetime: nil,
-        starts_today?: false
+        starts_today_or_earlier?: false
       }) do
     "starting #{datetime_to_formatted_date(start_datetime)} #{end_date_string_word(nil)} #{end_date_string(nil)}"
   end
@@ -595,14 +593,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
   def build_date_string(%{
         start_datetime: start_datetime,
         end_datetime: end_datetime,
-        starts_today?: false
+        starts_today_or_earlier?: false
       }) do
     "from #{datetime_to_formatted_date(start_datetime)} #{end_date_string_word(end_datetime)} #{end_date_string(end_datetime)}"
   end
 
   def build_date_string(%{
         end_datetime: end_datetime,
-        starts_today?: true
+        starts_today_or_earlier?: true
       }) do
     "until #{end_date_string(end_datetime)}"
   end

@@ -950,7 +950,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
         AutoTextDuration.build_date_string(%{
           start_datetime: ~N[2025-05-18 15:00:00],
           end_datetime: nil,
-          starts_today?: false,
+          starts_today_or_earlier?: false,
           is_trip_combination?: true
         })
 
@@ -964,7 +964,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
         AutoTextDuration.build_date_string(%{
           start_datetime: ~N[2025-05-18 15:00:00],
           end_datetime: nil,
-          starts_today?: true,
+          starts_today_or_earlier?: true,
           is_trip_combination?: true
         })
 
@@ -978,7 +978,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
         assert AutoTextDuration.build_date_string(%{
                  start_datetime: ~N[2025-05-18 15:00:00],
                  end_datetime: nil,
-                 starts_today?: true
+                 starts_today_or_earlier?: true
                })
 
       assert expected == actual
@@ -991,7 +991,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
         AutoTextDuration.build_date_string(%{
           start_datetime: ~N[2025-05-09 15:00:00],
           end_datetime: nil,
-          starts_today?: false
+          starts_today_or_earlier?: false
         })
 
       assert expected == actual
@@ -1004,7 +1004,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
         assert AutoTextDuration.build_date_string(%{
                  start_datetime: ~N[2025-05-08 15:00:00],
                  end_datetime: ~N[2025-05-18 16:00:00],
-                 starts_today?: true
+                 starts_today_or_earlier?: true
                })
 
       assert expected == actual
@@ -1017,7 +1017,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
         assert AutoTextDuration.build_date_string(%{
                  start_datetime: ~N[2025-05-09 15:00:00],
                  end_datetime: ~N[2025-05-18 16:00:00],
-                 starts_today?: false
+                 starts_today_or_earlier?: false
                })
 
       assert expected == actual
