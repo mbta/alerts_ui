@@ -625,26 +625,29 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
             route_type: @route.type,
             activities: [:BOARD],
             stop_id: @stop.id,
-            trip: trip,
+            trip: Map.from_struct(trip),
             direction_id: 0
           })
 
-        insert(
-          :alert,
-          %{
-            alert_id: "123",
-            header_text: "example header text",
-            informed_entity: [ie],
-            effect: :SIGNIFICANT_DELAYS,
-            effect_detail: "DELAY",
-            original_route_selections: [@route.id],
-            reminder_times: [],
-            active_period: [ap],
-            active_period_start: ~U[2024-05-10 14:30:54Z],
-            duration_certainty: :UNKNOWN,
-            severity: 4
-          }
-        )
+        alert_params =
+          build(
+            :alert_map,
+            %{
+              alert_id: "123",
+              header_text: "example header text",
+              informed_entity: [Map.from_struct(ie)],
+              effect: :SIGNIFICANT_DELAYS,
+              effect_detail: "DELAY",
+              original_route_selections: [@route.id],
+              reminder_times: [],
+              active_period: [Map.from_struct(ap)],
+              active_period_start: ~U[2024-05-10 14:30:54Z],
+              duration_certainty: :UNKNOWN,
+              severity: 4
+            }
+          )
+
+        {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
 
         {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
 

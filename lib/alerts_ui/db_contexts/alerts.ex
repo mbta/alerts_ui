@@ -244,7 +244,7 @@ defmodule AlertsUI.Alerts do
     )
   end
 
-  @spec get_earliest_version(String.t()) :: PaperTrail.Version.t()
+  @spec get_earliest_version(String.t()) :: PaperTrail.Version.t() | nil
   def get_earliest_version(alert_uuid) do
     from(
       version in PaperTrail.Version,

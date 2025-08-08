@@ -48,8 +48,6 @@ defmodule AlertsUIWeb.ReviewModal do
     doc: "The target to send the events to (eg form component id)"
 
   attr :current_user, :map, default: %{}, doc: "Current user, for first and last name"
-  attr :created_at, :string, doc: "UTC timestamp alert was created at"
-  attr :created_by, :string, doc: "Name of person who originally created this alert"
   attr :rest, :global, include: ~w(cancel_event_name accept_event_name target_id)
 
   def review_modal(assigns) do
@@ -106,7 +104,11 @@ defmodule AlertsUIWeb.ReviewModal do
         stop_names: stop_names,
         trip_names: trip_names,
         facility_name: facility_name,
-        id: "review-modal"
+        id: "review-modal",
+        created_at: Map.get(assigns.alert_data, :created_at),
+        created_by: Map.get(assigns.alert_data, :created_by),
+        last_edited_at: Map.get(assigns.alert_data, :last_edited_at),
+        last_edited_by: Map.get(assigns.alert_data, :last_edited_by)
       )
 
     ~H"""
@@ -361,30 +363,47 @@ defmodule AlertsUIWeb.ReviewModal do
         <%!-- Sidebar --%>
         <div class="w-[222px] shrink-0 p-4 bg-bg-elevation-5">
           <p class="font-bold">Created</p>
-          <p :if={!@editing} class="pb-3">
-            {Calendar.strftime(DateTime.shift_zone!(@now, "America/New_York"), "%Y-%m-%d")}
-          </p>
-          <p :if={@editing} class="pb-3">
-            {Calendar.strftime(DateTime.shift_zone!(@created_at, "America/New_York"), "%Y-%m-%d")}
-          </p>
+          <%= if @editing == false && @alert_id == nil do %>
+            <p class="pb-3">
+              {Calendar.strftime(DateTime.shift_zone!(@now, "America/New_York"), "%Y-%m-%d")}
+            </p>
+          <% else %>
+            <p class="pb-3">
+              {Calendar.strftime(DateTime.shift_zone!(@created_at, "America/New_York"), "%Y-%m-%d")}
+            </p>
+          <% end %>
 
           <p class="font-bold">Created by</p>
-          <p :if={!@editing} class="pb-3">
-            {Map.get(@current_user, :first_name, "")} {Map.get(@current_user, :last_name, "")}
-          </p>
-          <p :if={@editing} class="pb-3">{@created_by}</p>
-          <%!--
-            The edited items need to be wrapped in a conditional, but let's do that once
-            we have a value to match on in the alert_data
-          --%>
-          <p :if={@editing} class="font-bold">Last edited</p>
-          <p :if={@editing} class="pb-3">
-            {Calendar.strftime(DateTime.shift_zone!(@now, "America/New_York"), "%Y-%m-%d")}
-          </p>
-          <p :if={@editing} class="font-bold">Last edited by</p>
-          <p :if={@editing} class="pb-3">
-            {Map.get(@current_user, :first_name, "")} {Map.get(@current_user, :last_name, "")}
-          </p>
+          <%= if @editing == false && @alert_id == nil do %>
+            <p class="pb-3">
+              {Map.get(@current_user, :first_name, "")} {Map.get(@current_user, :last_name, "")}
+            </p>
+          <% else %>
+            <p class="pb-3">
+              {Map.get(@created_by, :first_name, "")} {Map.get(@created_by, :last_name, "")}
+            </p>
+          <% end %>
+
+          <%= if @last_edited_at || @editing do %>
+            <p class="font-bold">Last edited</p>
+            <p :if={@editing} class="pb-3">
+              {Calendar.strftime(DateTime.shift_zone!(@now, "America/New_York"), "%Y-%m-%d")}
+            </p>
+            <p :if={!@editing} class="pb-3">
+              {Calendar.strftime(
+                DateTime.shift_zone!(@last_edited_at, "America/New_York"),
+                "%Y-%m-%d"
+              )}
+            </p>
+
+            <p class="font-bold">Last edited by</p>
+            <p :if={@editing} class="pb-3">
+              {Map.get(@current_user, :first_name, "")} {Map.get(@current_user, :last_name, "")}
+            </p>
+            <p :if={!@editing} class="pb-3">
+              {Map.get(@last_edited_by, :first_name, "")} {Map.get(@last_edited_by, :last_name, "")}
+            </p>
+          <% end %>
 
           <.link class="text-primary">
             <.icon name="hero-arrow-down-tray" class="h-4 w-4" /> Download history
