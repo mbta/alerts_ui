@@ -557,6 +557,8 @@ defmodule AlertsUIWeb.SharedComponents do
   attr :cancel_button_text, :string, default: "Cancel"
   attr :cancel_event_name, :string, default: nil
   attr :accept_event_name, :string, default: nil
+  attr :accept_button_classes, :string, default: "", doc: "classes to add to accept button"
+  attr :cancel_button_classes, :string, default: "", doc: "classes to add to cancel button"
 
   attr :target_id, :string,
     default: "",
@@ -569,6 +571,8 @@ defmodule AlertsUIWeb.SharedComponents do
   attr :id, :string, required: true
   attr :show, :boolean, default: false
   attr :on_cancel, JS, default: %JS{}
+
+  attr :value, :string, default: "", doc: "data to pass to event handler on accept"
 
   slot :header
   slot :inner_block, required: true
@@ -634,6 +638,7 @@ defmodule AlertsUIWeb.SharedComponents do
                   <.button_secondary
                     :if={@cancel_event_name}
                     type="button"
+                    class={@cancel_button_classes}
                     phx-remove={hide_modal(@id)}
                     phx-click={
                       JS.push(@cancel_event_name, target: @target_id) |> JS.exec("phx-remove")
@@ -644,10 +649,12 @@ defmodule AlertsUIWeb.SharedComponents do
                   <.button_primary
                     :if={@accept_event_name}
                     type="button"
+                    class={@accept_button_classes}
                     phx-remove={hide_modal(@id)}
                     phx-click={
                       JS.push(@accept_event_name, target: @target_id) |> JS.exec("phx-remove")
                     }
+                    value={@value}
                   >
                     {@accept_button_text}
                   </.button_primary>
