@@ -27,6 +27,40 @@
       meta={@meta}
       id="alert-filter-form"
     />
+    <div class="mt-4 flex flex-col items-center">
+      <Flop.Phoenix.pagination
+        meta={@meta}
+        on_paginate={JS.push("paginate-alerts")}
+        opts={[
+          page_links: {:ellipsis, 3},
+          wrapper_attrs: [class: "flex flex-row justify-center"],
+          pagination_link_attrs: [
+            class:
+              "rounded-none btn w-[2.5rem] text-md border-2 border-primary bg-transparent text-primary"
+          ],
+          current_link_attrs: [
+            class:
+              "rounded-none btn w-[2.5rem] text-md border-2 border-primary bg-transparent text-primary"
+          ],
+          next_link_content: carat_icon(:right),
+          next_link_attrs: [
+            class:
+              "border-l-0 rounded-l-none btn order-last w-[2.5rem] text-md border-2 border-primary bg-transparent text-primary"
+          ],
+          previous_link_content: carat_icon(:left),
+          previous_link_attrs: [
+            class:
+              "border-r-0 rounded-r-none btn w-[2.5rem] text-md border-2 border-primary bg-transparent text-primary"
+          ],
+          pagination_list_attrs: [class: "join"],
+          ellipsis_attrs: [
+            class:
+              "rounded-none btn w-[2.5rem] text-md border-2 border-primary bg-transparent text-primary"
+          ]
+        ]}
+      />
+      <span class="mt-2">Total records: {@meta.total_count}</span>
+    </div>
   </div>
 
   <AlertsUIWeb.ReviewModal.review_modal
@@ -37,7 +71,6 @@
     cancel_event_name="close_details"
     target_id="#view_alerts_live_view"
   />
-
   <div data-theme="winter">
     <Flop.Phoenix.table
       items={@alerts}
@@ -122,22 +155,5 @@
         </div>
       </:action>
     </Flop.Phoenix.table>
-    <Flop.Phoenix.pagination
-      meta={@meta}
-      on_paginate={JS.push("paginate-alerts")}
-      opts={[
-        page_links: {:ellipsis, 3},
-        wrapper_attrs: [class: "my-6 flex flex-row justify-center not-prose"],
-        disabled_class: "join-item btn btn-disabled",
-        pagination_link_attrs: [class: "join-item btn"],
-        current_link_attrs: [class: "join-item btn btn-active"],
-        next_link_content: "»",
-        next_link_attrs: [class: "join-item btn btn-outline order-last ml-4"],
-        previous_link_content: "«",
-        previous_link_attrs: [class: "join-item btn btn-outline mr-4"],
-        pagination_list_attrs: [class: "join"],
-        ellipsis_attrs: [class: "join-item btn btn-disabled"]
-      ]}
-    />
   </div>
 </div>

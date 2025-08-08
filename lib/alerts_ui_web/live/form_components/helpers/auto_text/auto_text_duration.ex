@@ -23,7 +23,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
     start_specifier = change_start_specifier(start_datetime, start_specifier)
     end_specifier = change_end_specifier(end_datetime, end_specifier)
 
-    starts_today? = happens_today?(start_datetime, current_time)
+    starts_today? = starts_today?(start_datetime, current_time)
+    starts_before_today? = starts_before_today?(start_datetime, current_time)
+
+    ends_today? = ends_today?(end_datetime, current_time)
 
     within_same_service_day? =
       within_same_service_day?(start_datetime, end_datetime)
@@ -37,6 +40,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
       start_specifier: start_specifier,
       end_specifier: end_specifier,
       starts_today?: starts_today?,
+      starts_before_today?: starts_before_today?,
+      ends_today?: ends_today?,
       within_same_service_day?: within_same_service_day?,
       within_same_calendar_day?: within_same_calendar_day?
     })
@@ -62,7 +67,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
     start_datetime = build_datetime(start_date, start_time)
     end_datetime = build_datetime(end_date, end_time)
 
-    starts_today? = happens_today?(start_datetime, current_time)
+    starts_today? = starts_today?(start_datetime, current_time)
     date_string = build_date_string(start_datetime, end_datetime, starts_today?)
     weekday_string = build_weekday_string(recurrence_days)
 
@@ -110,6 +115,47 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         end_datetime: end_datetime
       }) do
     "until #{datetime_to_formatted_date(end_datetime)} at #{datetime_to_formatted_time(end_datetime)}"
+  end
+
+  # # start of "custom" on past day
+  def build_onetime_string(%{
+        start_specifier: :custom,
+        end_specifier: :end_of_service,
+        starts_before_today?: true,
+        ends_today?: false,
+        end_datetime: end_datetime
+      }) do
+    formatted_end = end_datetime |> ActivePeriod.naive_datetime_to_service_date() |> format_date
+    "through #{formatted_end}"
+  end
+
+  def build_onetime_string(%{
+        start_specifier: :custom,
+        end_specifier: :custom,
+        starts_before_today?: true,
+        ends_today?: false,
+        end_datetime: end_datetime
+      }) do
+    "until #{datetime_to_formatted_date(end_datetime)} at #{datetime_to_formatted_time(end_datetime)}"
+  end
+
+  def build_onetime_string(%{
+        start_specifier: :custom,
+        end_specifier: :custom,
+        starts_before_today?: true,
+        ends_today?: true,
+        end_datetime: end_datetime
+      }) do
+    "until #{datetime_to_formatted_time(end_datetime)}"
+  end
+
+  def build_onetime_string(%{
+        start_specifier: :custom,
+        end_specifier: :end_of_service,
+        starts_before_today?: true,
+        ends_today?: true
+      }) do
+    "today"
   end
 
   # # start of "custom" today
@@ -245,6 +291,48 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
     "on #{datetime_to_formatted_date(start_datetime)} starting at #{datetime_to_formatted_time(start_datetime)}"
   end
 
+  # # start of "start of service" on past day
+  def build_onetime_string(%{
+        start_specifier: :start_of_service,
+        end_specifier: :custom,
+        starts_before_today?: true,
+        ends_today?: false,
+        end_datetime: end_datetime
+      }) do
+    "until #{datetime_to_formatted_date(end_datetime)} at #{datetime_to_formatted_time(end_datetime)}"
+  end
+
+  def build_onetime_string(%{
+        start_specifier: :start_of_service,
+        end_specifier: :custom,
+        starts_before_today?: true,
+        ends_today?: true,
+        end_datetime: end_datetime
+      }) do
+    "until #{datetime_to_formatted_time(end_datetime)}"
+  end
+
+  def build_onetime_string(%{
+        start_specifier: :start_of_service,
+        end_specifier: :end_of_service,
+        starts_before_today?: true,
+        within_same_service_day?: false,
+        ends_today?: true
+      }) do
+    "today"
+  end
+
+  def build_onetime_string(%{
+        start_specifier: :start_of_service,
+        end_specifier: :end_of_service,
+        starts_before_today?: true,
+        ends_today?: false,
+        end_datetime: end_datetime
+      }) do
+    formatted_end = end_datetime |> ActivePeriod.naive_datetime_to_service_date() |> format_date
+    "through #{formatted_end}"
+  end
+
   # # start of "start of service" in future
   def build_onetime_string(%{
         start_specifier: :start_of_service,
@@ -353,12 +441,40 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
   defp end_date_string(nil), do: "further notice"
   defp end_date_string(end_datetime), do: datetime_to_formatted_date(end_datetime)
 
-  def happens_today?(nil, _), do: false
+  def starts_today?(nil, _), do: false
 
-  def happens_today?(start_datetime, current_time) do
+  def starts_today?(start_datetime, current_time) do
     # returns true if time is before next end of service
+    # and at or after previous beginning of service
     next_end_of_service = ActivePeriod.end_of_service_datetime_naive(current_time)
-    NaiveDateTime.compare(start_datetime, next_end_of_service) in [:lt]
+    previous_beginning_of_service = ActivePeriod.start_of_current_service_day(current_time)
+    before_eos = NaiveDateTime.compare(start_datetime, next_end_of_service) in [:lt]
+    after_bos = NaiveDateTime.compare(start_datetime, previous_beginning_of_service) in [:gt, :eq]
+
+    before_eos and after_bos
+  end
+
+  def ends_today?(nil, _), do: false
+
+  def ends_today?(end_datetime, current_time) do
+    # returns true if time is at or before next end of service
+    # and after previous beginning of service
+    next_end_of_service = ActivePeriod.end_of_service_datetime_naive(current_time)
+    previous_beginning_of_service = ActivePeriod.start_of_current_service_day(current_time)
+    before_eos = NaiveDateTime.compare(end_datetime, next_end_of_service) in [:lt, :eq]
+    after_bos = NaiveDateTime.compare(end_datetime, previous_beginning_of_service) in [:gt]
+
+    before_eos and after_bos
+  end
+
+  def starts_before_today?(nil, _), do: false
+
+  def starts_before_today?(start_datetime, current_time) do
+    starts_today? = starts_today?(start_datetime, current_time)
+
+    starts_in_past? = NaiveDateTime.compare(start_datetime, current_time) == :lt
+
+    starts_in_past? && !starts_today?
   end
 
   defp build_datetime(nil, _), do: nil

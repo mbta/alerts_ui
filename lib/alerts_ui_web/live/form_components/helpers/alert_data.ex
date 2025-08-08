@@ -49,6 +49,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :reminder_times,
     :route_ids,
     :route_type,
+    :route_types_by_id,
     :service_types,
     :severity,
     :single_route_id,
@@ -89,12 +90,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           reminder_times: [NaiveDateTime.t()] | nil,
           route_ids: [String.t()] | nil,
           route_type: Route.type_int() | nil,
+          route_types_by_id: map() | nil,
           service_types: [Route.type_int()] | nil,
           severity: integer() | nil,
           single_route_id: String.t() | nil,
           stop_ids: [String.t()] | nil,
           trip_ids: [String.t()] | nil,
-          url: String.t() | nil,
+          url: String.t() | nil
         }
 
   @spec build_alert_data(String.t() | Alert.t() | nil) :: t()
@@ -159,6 +161,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
         nil
       end
 
+    route_types_by_id = route_types_by_id(combination, route_type, route_ids)
+
     %__MODULE__{
       banner_text: alert.banner_text,
       cause_detail: alert.cause_detail,
@@ -177,14 +181,15 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       notification_period_start: notification_period_start,
       notification_specifier: notification_specifier,
       reminder_times: reminder_times,
-      route_type: route_type,
       route_ids: route_ids,
+      route_type: route_type,
+      route_types_by_id: route_types_by_id,
       severity: alert.severity,
       service_types: Alert.service_types(alert),
       single_route_id: single_route_id,
       stop_ids: Alert.gather_parent_stop_ids(informed_entities),
       trip_ids: Alert.gather_trip_ids(informed_entities),
-      url: alert.url,
+      url: alert.url
     }
     |> Map.merge(active_period_map)
   end
@@ -284,4 +289,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       "custom"
     end
   end
+
+  defp route_types_by_id(:SR, route_type, route_ids) do
+    # necessary to form informed entities correctly upon persisting
+    route_ids
+    |> Enum.map(fn route_id -> {route_id, route_type} end)
+    |> Map.new()
+  end
+
+  defp route_types_by_id(_, _, _), do: nil
 end

@@ -29,13 +29,14 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
     effect_name: "Station Closure"
   }
 
-  @route_one %Route{sort_order: 1, id: "Blue", name: "route_number_1"}
-  @route_two %Route{sort_order: 2, id: "Bluer", name: "route_number_2"}
+  @route_one %Route{sort_order: 1, id: "Blue", name: "route_number_1", type: 3}
+  @route_two %Route{sort_order: 2, id: "Bluer", name: "route_number_2", type: 3}
   @shuttle_route %Route{
     sort_order: 3,
     id: "shuttle",
     name: "Shuttle Route",
-    description: :rail_replacement_bus
+    description: :rail_replacement_bus,
+    type: 3
   }
   @routes [@route_one, @route_two]
   @stop %Stop{id: "place-aqucl", name: "Aquarium"}
@@ -453,13 +454,15 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
            get: fn
              "Blue" -> @route_one
              "Bluer" -> @route_two
-           end
+           end,
+           all: fn _ -> [] end
          ]},
         {StopsRepo, [],
          [
            by_route_type: fn _route_type -> [@stop] end,
            by_route: fn _, _ -> [@stop] end,
-           get: fn _id -> @stop end
+           get: fn _id -> @stop end,
+           get_parent: fn _id -> nil end
          ]},
         {RoutePatternsRepo, [],
          [
@@ -520,8 +523,32 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
 
         new_alert = AlertsUI.Alerts.get_by_alert_id(alert_id)
 
-        assert [%{route_id: "Blue"}, %{route_id: "Bluer"}] =
+        assert [%{route_id: "Blue", route_type: 3}, %{route_id: "Bluer", route_type: 3}] =
                  Map.get(new_alert, :informed_entity)
+
+        {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=#{alert_id}")
+
+        view
+        |> element("#time_range_form")
+        |> render_change(%{
+          "time_range" => %{
+            "active_period_start" => "2024-05-01T10:16:00"
+          }
+        })
+
+        view
+        |> element("button#review", "Review and submit")
+        |> render_click()
+
+        view
+        |> element("button", "Submit")
+        |> render_click()
+
+        :timer.sleep(50)
+        edited_alert = AlertsUI.Alerts.get_by_alert_id(alert_id)
+
+        assert [%{route_id: "Blue", route_type: 3}, %{route_id: "Bluer", route_type: 3}] =
+                 Map.get(edited_alert, :informed_entity)
       end
     end
 
