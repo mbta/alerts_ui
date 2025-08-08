@@ -170,14 +170,23 @@
             id={"close-alert-modal-#{alert.alert_id}"}
             header_text="Modal header"
             cancel_event_name="cancelled_close_modal"
-            accept_event_name="accepted_close_modal"
+            accept_event_name="close_alert"
             cancel_button_text="Keep Active"
             accept_button_text="Close now"
             target_id="#view_alerts_live_view"
             class="text-text-primary"
             cancel_button_classes="border-0"
-            accept_button_classes="!bg-danger text-white !border-danger !hover:bg-primary-hover !hover:border-primary-border-hover !active:bg-primary-active !active:border-primary-active !focus:border-primary-active"
-            value={alert.id}
+            accept_button_classes="
+                  text-white
+                  bg-danger
+                  border-danger
+                  hover:bg-primary-hover
+                  hover:border-primary-border-hover
+                  active:bg-primary-active
+                  active:border-primary-active
+                  focus:border-primary-active
+                  "
+            value={alert.alert_id}
           >
             Are you sure you want to close alert {alert.alert_id}?
           </.modal>

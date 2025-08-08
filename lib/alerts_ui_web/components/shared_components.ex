@@ -646,7 +646,7 @@ defmodule AlertsUIWeb.SharedComponents do
                   >
                     {@cancel_button_text}
                   </.button_secondary>
-                  <.button_primary
+                  <.button_danger
                     :if={@accept_event_name}
                     type="button"
                     class={@accept_button_classes}
@@ -657,7 +657,7 @@ defmodule AlertsUIWeb.SharedComponents do
                     value={@value}
                   >
                     {@accept_button_text}
-                  </.button_primary>
+                  </.button_danger>
                 </div>
               <% end %>
             </.focus_wrap>

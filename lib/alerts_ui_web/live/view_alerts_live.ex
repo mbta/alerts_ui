@@ -143,12 +143,6 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   end
 
   @impl true
-  def handle_event("accepted_close_modal", %{"value" => alert_uuid}, socket) do
-    alert_uuid |> Alerts.get_by_id() |> Alerts.close()
-    {:noreply, socket}
-  end
-
-  @impl true
   def handle_event("cancelled_close_modal", _params, socket) do
     {:noreply, socket}
   end
@@ -158,11 +152,13 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     {:noreply, push_navigate(socket, to: ~p"/alerts/edit?alert_id=#{alert_id}")}
   end
 
-  # Just stubbed until we have actions for these
   @impl true
-  def handle_event("close_alert", _, socket) do
-    {:noreply, assign(socket, selected_alert_data: nil, selected_alert_id: nil)}
+  def handle_event("close_alert", %{"value" => alert_id}, socket) do
+    alert_id |> Alerts.get_by_alert_id() |> Alerts.close()
+    {:noreply, socket}
   end
+
+  # Just stubbed until we have actions for these
 
   @impl true
   def handle_event("duplicate_alert", _, socket) do

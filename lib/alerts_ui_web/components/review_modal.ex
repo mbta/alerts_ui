@@ -418,7 +418,9 @@ defmodule AlertsUIWeb.ReviewModal do
             :if={get_alert_status(@alert_data) != :past}
             type="button"
             phx-remove={hide_modal(@id)}
-            phx-click={JS.push("close_alert", target: @target_id) |> JS.exec("phx-remove")}
+            phx-click={
+              JS.push("close_alert", target: @target_id, value: @alert_id) |> JS.exec("phx-remove")
+            }
           >
             {if get_alert_status(@alert_data) == :current, do: "Close alert", else: "Cancel alert"}
           </.button_danger>
