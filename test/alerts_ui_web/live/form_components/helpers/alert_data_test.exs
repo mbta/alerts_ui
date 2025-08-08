@@ -53,7 +53,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         original_route_selections: ["1"]
       })
 
-      assert AlertData.build_alert_data("1") == %AlertData{
+      assert %AlertData{
                combination: :SR,
                effect_name: "Dock Closure",
                direction: "0",
@@ -69,7 +69,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                reminder_times: [~N[2024-09-24 20:01:00]],
                notification_specifier: :same_as_effect_period,
                alert_timing: :"one-time"
-             }
+             } = AlertData.build_alert_data("1")
     end
 
     test "works if informed entities empty" do
