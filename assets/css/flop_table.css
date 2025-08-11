@@ -1,0 +1,6 @@
+#alert-table {
+  th[aria-sort="descending"],
+  th[aria-sort="ascending"] {
+    color: #8ecdff;
+  }
+}
