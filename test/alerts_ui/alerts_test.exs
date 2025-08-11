@@ -15,7 +15,7 @@ defmodule AlertsUI.AlertsTest do
   @two_hours_ago DateTime.add(@now, -2, :hour)
   @one_hour_ago DateTime.add(@now, -1, :hour)
   @one_hour_from_now DateTime.add(@now, 1, :hour)
-  @two_hours_from_now DateTime.add(@now, 1, :hour)
+  @two_hours_from_now DateTime.add(@now, 2, :hour)
   @end_of_service_utc ActivePeriod.end_of_service_datetime_utc(@now)
   @one_day_from_now DateTime.add(@now, 1, :day)
   @two_days_from_now DateTime.add(@now, 2, :day)
@@ -558,8 +558,8 @@ defmodule AlertsUI.AlertsTest do
 
       {result, _meta} =
         Alerts.list_all_paginated(%Flop{
-          order_by: [:active_period_start, :created_at, :integer_alert_id],
-          order_directions: [:asc, :desc, :desc]
+          order_by: [:active_period_start, :integer_alert_id],
+          order_directions: [:asc, :desc]
         })
 
       assert result |> Enum.map(& &1.alert_id) == [123, 345, 234, 012]
@@ -647,11 +647,11 @@ defmodule AlertsUI.AlertsTest do
         })
 
       assert current_results |> Enum.map(& &1.alert_id) == [
-               10_700,
                10_000,
                10_100,
                10_200,
-               10_400
+               10_400,
+               10_700
              ]
     end
 
@@ -744,12 +744,12 @@ defmodule AlertsUI.AlertsTest do
 
       assert current_results |> Enum.map(& &1.alert_id) == [
                10_200,
+               10_300,
                10_400,
                10_500,
-               10_300,
-               10_800,
+               10_600,
                10_700,
-               10_600
+               10_800
              ]
     end
 
@@ -834,11 +834,11 @@ defmodule AlertsUI.AlertsTest do
 
       assert current_results |> Enum.map(& &1.alert_id) == [
                10_200,
-               10_400,
                10_300,
-               10_700,
+               10_400,
+               10_500,
                10_600,
-               10_500
+               10_700
              ]
     end
   end
@@ -925,12 +925,12 @@ defmodule AlertsUI.AlertsTest do
     assert current_results |> Enum.map(& &1.alert_id) == [
              10_000,
              10_100,
-             10_800,
+             10_300,
+             10_400,
              10_500,
              10_600,
-             10_400,
-             10_300,
-             10_700
+             10_700,
+             10_800
            ]
   end
 
