@@ -112,11 +112,14 @@ defmodule AlertsUI.Models.Alert do
     Flop.Schema,
     filterable: [:alert_id, :effect_detail, :text_content, :service_type, :timeline],
     sortable: [
+      # service,
+      :effect_detail,
       :integer_alert_id,
-      :created_at,
       :active_period_start,
       :active_period_end,
-      :closed_timestamp
+      :duration_certainty,
+      :notification_period_end,
+      :notification_period_start
     ],
     adapter_opts: [
       alias_fields: [:integer_alert_id],
@@ -134,11 +137,7 @@ defmodule AlertsUI.Models.Alert do
           operators: [:==]
         ]
       ]
-    ],
-    default_order: %{
-      order_by: [:created_at, :integer_alert_id, :active_period_start, :active_period_end],
-      order_directions: [:desc_nulls_last, :desc_nulls_last, :desc_nulls_last, :desc_nulls_last]
-    }
+    ]
   }
 
   schema "alerts" do

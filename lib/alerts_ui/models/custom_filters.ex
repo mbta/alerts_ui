@@ -42,13 +42,6 @@ defmodule AlertsUI.Models.CustomFilters do
       is_nil(a.notification_period_start) and
         (not is_nil(a.active_period_start) and a.active_period_start > ^now)
     )
-    |> order_by(
-      asc_nulls_last: :notification_period_end,
-      asc: :duration_certainty,
-      asc_nulls_last: :active_period_end,
-      asc: :notification_period_start,
-      asc: :active_period_start
-    )
   end
 
   def timeline_filter(query, %Filter{value: "past"}, _opts) do
@@ -56,12 +49,6 @@ defmodule AlertsUI.Models.CustomFilters do
 
     query
     |> where([a], not is_nil(a.active_period_end) and a.active_period_end <= ^now)
-    |> order_by(
-      desc: :notification_period_end,
-      desc: :active_period_end,
-      desc: :notification_period_start,
-      desc: :active_period_start
-    )
   end
 
   def timeline_filter(query, %Filter{value: "current"}, _opts) do
@@ -81,22 +68,7 @@ defmodule AlertsUI.Models.CustomFilters do
       [a],
       is_nil(a.active_period_end) or a.active_period_end > ^now
     )
-    |> order_by(
-      asc_nulls_last: :notification_period_end,
-      asc: :duration_certainty,
-      asc_nulls_last: :active_period_end,
-      asc: :notification_period_start,
-      asc: :active_period_start
-    )
   end
 
-  def timeline_filter(query, %Filter{value: _value}, _opts) do
-    order_by(query,
-      desc: :notification_period_end,
-      desc: :duration_certainty,
-      desc: :active_period_end,
-      desc: :notification_period_start,
-      desc: :notification_period_start
-    )
-  end
+  def timeline_filter(query, %Filter{value: _value}, _opts), do: query
 end
