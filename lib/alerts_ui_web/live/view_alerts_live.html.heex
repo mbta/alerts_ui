@@ -144,6 +144,7 @@
           </.button_secondary_link>
           <.button_secondary_link
             :if={!AlertsUIWeb.FormComponents.Helpers.Helpers.alert_is_closed(alert)}
+            id={"close-button-#{alert.alert_id}"}
             class="inline-flex rounded-[4px] !px-2 !py-[3px]"
             phx-click={show_modal("close-alert-modal-#{alert.alert_id}")}
           >

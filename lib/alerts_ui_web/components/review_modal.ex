@@ -417,6 +417,7 @@ defmodule AlertsUIWeb.ReviewModal do
           <.button_danger
             :if={get_alert_status(@alert_data) != :past}
             type="button"
+            id="review-modal-close-alert"
             phx-remove={hide_modal(@id)}
             phx-click={
               JS.push("close_alert", target: @target_id, value: %{"value" => @alert_id})
