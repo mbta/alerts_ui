@@ -984,7 +984,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
       assert expected == actual
     end
 
-    test "does not start today but no end datetime" do
+    test "start in future but no end datetime" do
       expected = "starting Fri, May 9 until further notice"
 
       actual =
@@ -1010,7 +1010,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
       assert expected == actual
     end
 
-    test "does not start today and has end datetime" do
+    test "starts in future and has end datetime" do
       expected = "from Fri, May 9 to Sun, May 18"
 
       actual =
