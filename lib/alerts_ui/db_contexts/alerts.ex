@@ -222,7 +222,13 @@ defmodule AlertsUI.Alerts do
     )
   end
 
-  @spec get_by_alert_id(String.t()) :: Alert.t()
+  @spec get_by_alert_id(String.t() | integer()) :: Alert.t()
+  def get_by_alert_id(alert_id) when is_integer(alert_id) do
+    alert_id
+    |> Integer.to_string()
+    |> get_by_alert_id
+  end
+
   def get_by_alert_id(alert_id) do
     Repo.get_by(
       from(
@@ -273,15 +279,6 @@ defmodule AlertsUI.Alerts do
   @spec close(Alert.t()) :: any()
   def close(alert, closed_time \\ DateTime.utc_now()) do
     closed_time = DateTime.truncate(closed_time, :second)
-
-    # update end of all active periods to current time
-    alert
-    |> ActivePeriod.get_all_active_periods_for_alert()
-    |> Enum.each(fn ap ->
-      ap
-      |> change(%{end: closed_time})
-      |> PaperTrail.update!()
-    end)
 
     alert
     |> change(

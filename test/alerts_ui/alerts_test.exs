@@ -1065,8 +1065,7 @@ defmodule AlertsUI.AlertsTest do
 
       result = Alerts.get_by_alert_id("123")
 
-      end_times = result.active_period |> Enum.map(& &1.end)
-      assert Enum.all?(end_times, &(&1 == current_time))
+      assert result.active_period_end == current_time
       assert result.closed_timestamp == current_time
       assert result.notification_period_end == current_time
       assert result.duration_certainty == :KNOWN

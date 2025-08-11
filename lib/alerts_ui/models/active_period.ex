@@ -6,8 +6,6 @@ defmodule AlertsUI.Models.ActivePeriod do
   use AlertsUI.Schema
   import Ecto.Changeset
   alias AlertsUI.Models.Alert
-  alias AlertsUI.Repo
-  import Ecto.Query
 
   @start_of_service ~T[03:00:00]
   @end_of_service ~T[03:00:00]
@@ -34,15 +32,6 @@ defmodule AlertsUI.Models.ActivePeriod do
       {_, _} ->
         cast(active_period, params, [:start, :end])
     end
-  end
-
-  @spec get_all_active_periods_for_alert(Alert.t()) :: [t()]
-  def get_all_active_periods_for_alert(alert) do
-    from(
-      ap in AlertsUI.Models.ActivePeriod,
-      where: ap.alert_id == ^alert.id
-    )
-    |> Repo.all()
   end
 
   @spec start_time_of_first_active_period([t()]) :: DateTime.t() | nil
