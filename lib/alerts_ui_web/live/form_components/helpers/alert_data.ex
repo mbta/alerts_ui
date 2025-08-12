@@ -116,7 +116,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
            false <- is_nil(earliest_version) do
         earliest_version
         |> Map.get(:item_changes, %{})
-        |> Map.get("user_id", "")
+        |> Map.get("user_id")
         |> Users.get_user!()
       else
         _ -> nil
