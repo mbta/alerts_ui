@@ -141,7 +141,7 @@ defmodule AlertsUIWeb.ReviewModal do
       </:header>
       <div class="flex text-sm/2">
         <%!-- Main lefthand content --%>
-        <div class="p-4">
+        <div class="p-4 grow">
           <%!-- Top section --%>
           <p class="font-bold">Main message</p>
           <p class="pb-4">{@alert_data.header_text}</p>
@@ -289,8 +289,6 @@ defmodule AlertsUIWeb.ReviewModal do
                       }
                     )
                   )}
-                </p>
-                <p>
                   {RecurringDurationText.recurring_duration_only(%{
                     "active_period_start_time" => @alert_data.active_period_start_time,
                     "active_period_end_time" => @alert_data.active_period_end_time
