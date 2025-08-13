@@ -207,7 +207,10 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   def get_stops_for_stop_route(route_ids, 3) do
     # stop route with route ids (filtered), bus
-    available_stops_for_bus_stop_route(route_ids)
+    route_ids
+    |> Enum.join(",")
+    |> List.wrap()
+    |> available_stops_for_bus_stop_route()
   end
 
   def get_stops_for_stop_route(route_ids, route_type) do
