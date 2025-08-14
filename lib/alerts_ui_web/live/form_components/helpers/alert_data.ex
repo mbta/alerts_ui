@@ -123,14 +123,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       end
 
     last_edited_by = alert.user
+
     last_edited_at =
       with last_version <- Alerts.get_latest_version(alert.id),
            false <- is_nil(last_version) do
         Map.get(last_version, :inserted_at)
       else
-        _-> nil
+        _ -> nil
       end
-
 
     effect_map = Effect.effect_map_by_detail(alert.effect_detail)
     informed_entities = alert.informed_entity
