@@ -500,6 +500,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
   def build_onetime_string(_), do: ""
 
   @spec build_time_string(map()) :: String.t()
+
   def build_time_string(%{
         is_trip_combination?: true
       }),
@@ -521,26 +522,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
   end
 
   def build_time_string(%{
-        start_time: nil,
-        start_time_specifier: :custom,
-        end_time_specifier: :end_of_service
-      }),
-      do: "to end of service"
-
-  def build_time_string(%{
         start_time: start_time,
         start_time_specifier: :custom,
         end_time_specifier: :end_of_service
-      }) do
+      })
+      when not is_nil(start_time) do
     "from #{format_time(start_time)} to end of service"
   end
-
-  def build_time_string(%{
-        start_time: nil,
-        start_time_specifier: :custom,
-        end_time_specifier: :custom
-      }),
-      do: ""
 
   def build_time_string(%{
         end_time: nil,
@@ -554,7 +542,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         end_time: end_time,
         start_time_specifier: :custom,
         end_time_specifier: :custom
-      }) do
+      })
+      when not is_nil(start_time) do
     "from #{format_time(start_time)} to #{format_time(end_time)}"
   end
 

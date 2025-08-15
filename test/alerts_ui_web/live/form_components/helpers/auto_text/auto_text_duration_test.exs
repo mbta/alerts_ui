@@ -1124,8 +1124,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
       assert expected == actual
     end
 
-    test "to end of service when start is nil" do
-      expected = "to end of service"
+    test "when start is nil" do
+      expected = ""
 
       actual =
         AutoTextDuration.build_time_string(%{
