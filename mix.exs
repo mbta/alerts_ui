@@ -142,7 +142,7 @@ defmodule AlertsUI.MixProject do
       check: [
         "compile --force --all-warnings --warnings-as-errors",
         "format",
-        "credo",
+        "credo --strict",
         "sobelow",
         "dialyzer"
       ]
