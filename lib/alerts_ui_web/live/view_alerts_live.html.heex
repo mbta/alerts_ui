@@ -77,9 +77,12 @@
       meta={@meta}
       on_sort={JS.push("sort-alerts")}
       opts={[
+        no_results_content: "No alerts found",
+        symbol_asc: sort_icon(:asc),
+        symbol_desc: sort_icon(:desc),
+        symbol_unsorted: sort_icon(nil),
         table_attrs: [class: "table table-fixed"],
-        tbody_tr_attrs: [class: "hover cursor-pointer"],
-        no_results_content: "No alerts found"
+        tbody_tr_attrs: [class: "hover cursor-pointer"]
       ]}
       row_click={&JS.push("open_details", value: %{alert_id: &1.alert_id})}
     >
@@ -92,7 +95,13 @@
       <:col :let={alert} label="Effect" field={:effect_detail} col_style="width: 8.6%;">
         {format_effect(alert.effect_detail)}
       </:col>
-      <:col :let={alert} label="ID" field={:integer_alert_id} col_style="width: 5.7%;">
+      <:col
+        :let={alert}
+        label="ID"
+        field={:integer_alert_id}
+        col_style="width: 5.7%;"
+        tbody_td_attrs={[class: "alert-id-cell"]}
+      >
         {alert.alert_id}
       </:col>
       <:col :let={alert} label="Main Message" field={:header_text}>
@@ -110,7 +119,11 @@
       <:col
         :let={alert}
         label="End"
-        field={:active_period_end}
+        field={
+          if timeline_filter_past?(@params),
+            do: :active_period_end,
+            else: :notification_period_end
+        }
         directions={{:asc_nulls_first, :desc_nulls_last}}
         col_style="width: 7.5%;"
       >
