@@ -826,6 +826,16 @@ defmodule AlertsUI.AlertsTest do
         duration_certainty: :KNOWN
       })
 
+      insert(:alert, %{
+        alert_id: "10800",
+        active_period_start: @two_days_from_now,
+        notification_period_start: @two_days_from_now,
+        active_period_end: @two_days_from_now,
+        notification_period_end: @two_days_from_now,
+        duration_certainty: :KNOWN,
+        closed_timestamp: @now
+      })
+
       {current_results, _meta} =
         Alerts.list_all_paginated(%{
           order_by: [:integer_alert_id],
