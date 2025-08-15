@@ -232,7 +232,13 @@ defmodule AlertsUIWeb.ViewAlertsLive do
        ) == :eq do
       "end of service"
     else
-      DateTimeHelpers.friendly_date_time(end_time_utc)
+      # shows service date
+      adjusted_end_date = ActivePeriod.datetime_to_service_date(end_time_utc)
+
+      adjusted_end_datetime =
+        DateTime.new!(adjusted_end_date, DateTime.to_time(end_time_utc), "Etc/UTC")
+
+      DateTimeHelpers.friendly_date_time(adjusted_end_datetime)
     end
   end
 

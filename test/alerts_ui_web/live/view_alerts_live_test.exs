@@ -669,7 +669,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
     test "known end where end is not end of service" do
       with_mock(DateTime, [:passthrough], utc_now: fn -> ~U[2025-06-29 17:50:14.844524Z] end) do
         end_time_utc =
-          DateTime.new!(~D[2025-06-30], ~T[12:00:00], "America/New_York")
+          DateTime.new!(~D[2025-06-30], ~T[02:00:00], "America/New_York")
           |> DateTime.shift_zone!("Etc/UTC")
 
         alert =
@@ -682,7 +682,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
             duration_certainty: :KNOWN
           })
 
-        expected = "Jun 30"
+        expected = "Jun 29"
 
         actual =
           AlertsUIWeb.ViewAlertsLive.format_end_time(
