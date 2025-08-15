@@ -45,6 +45,8 @@ defmodule AlertsUI.DBContexts.Users do
       ** (Ecto.NoResultsError)
 
   """
+  @spec get_user!(String.t() | nil) :: map() | User.t()
+  def get_user!(nil), do: %{}
   def get_user!(id), do: Repo.get!(User, id)
 
   @doc """
