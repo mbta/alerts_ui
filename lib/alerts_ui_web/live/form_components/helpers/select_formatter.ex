@@ -24,6 +24,22 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
           schedules_by_route_name: %{} | nil
         }
 
+  def foo_formatted_select_options(%__MODULE__{
+        options: options,
+        route_type: route_type,
+        search_term: search_term,
+        values_to_keep: values_to_keep
+      })
+      when not is_nil(options) do
+    options
+    |> Enum.uniq()
+    |> Enum.sort_by(&sort_order/1)
+    |> Enum.map(fn object ->
+      {name_for_option(object, route_type), foo_id_for_option(object)}
+    end)
+    |> apply_search(search_term, values_to_keep)
+  end
+
   @spec formatted_select_options(t()) :: keyword(String.t())
   def formatted_select_options(%__MODULE__{
         options: options,
@@ -139,6 +155,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   end
 
   def name_for_option(nil, nil), do: ""
+
+  @spec foo_id_for_option(Stop.t()) :: String.t()
+  def foo_id_for_option(%Stop{name: name, id: id}), do: "#{name}|#{id}"
 
   @spec id_for_option(Stop.t() | Route.t() | EnhancedSchedule.t() | Facility.t()) :: String.t()
   def id_for_option(%Stop{id: id}), do: id
