@@ -18,6 +18,7 @@ defmodule AlertsUIWeb.IconComponentsTest do
           "Mattapan" -> %{long_name: "Mattapan Trolley"}
           "CR-Haverhill" -> %{long_name: "Haverhill Line"}
           "Boat-F4" -> %{long_name: "Charlestown Ferry"}
+          "131" -> %{name: "131"}
           "746" -> %{name: "SLW"}
         end
       ) do
