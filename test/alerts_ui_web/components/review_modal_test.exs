@@ -434,6 +434,28 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         refute render(view) =~ "Trips:"
       end
     end
+
+    @tag :logged_in_user
+    test "Systemwide", %{conn: conn} do
+      # Systemwide delay
+      {:ok, view, _html} = live(conn, "/alerts/new")
+      get_to_submission_page(view, "Systemwide", "Delay")
+
+      fill_out_form(view, "#systemwide-affected-service-form", %{
+        systemwide_affected_service: %{service_types: [3, 2, 4, 1]}
+      })
+
+      open_browser(view)
+
+      open_review_modal(view)
+
+      refute render(view) =~ "Facility:"
+      refute render(view) =~ "Routes:"
+      refute render(view) =~ "Stops:"
+      refute render(view) =~ "Direction:"
+      refute render(view) =~ "Trips:"
+      assert render(view) =~ ~r/Modes:.*Bus, Commuter Rail, Ferry, Subway/s
+    end
   end
 
   describe "timeframe fields" do
