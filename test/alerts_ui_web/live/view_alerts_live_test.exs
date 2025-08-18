@@ -54,8 +54,10 @@ defmodule AlertsUIWeb.AlertsLiveTest do
 
     @tag :logged_in_user
     test "connected mount displays a list of alerts when logged in", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/alerts")
-      assert html =~ ~r/Alerts/
+      with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
+        {:ok, _view, html} = live(conn, "/alerts")
+        assert html =~ ~r/Alerts/
+      end
     end
 
     test "redirects the user when not logged in", %{conn: conn} do
@@ -64,8 +66,10 @@ defmodule AlertsUIWeb.AlertsLiveTest do
 
     @tag :logged_in_user
     test "sorting click event", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts")
-      assert view |> render_click("sort-alerts", %{"order" => "active_period_start"}) =~ "123"
+      with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
+        {:ok, view, _html} = live(conn, "/alerts")
+        assert view |> render_click("sort-alerts", %{"order" => "active_period_start"}) =~ "123"
+      end
     end
 
     # I'm not sure why these tests weren't failing sooner?
@@ -323,51 +327,55 @@ defmodule AlertsUIWeb.AlertsLiveTest do
 
     @tag :logged_in_user
     test "up to four bus routes can be displayed without collapsing the number", %{conn: conn} do
-      insert(:alert, %{
-        alert_id: "123",
-        active_period: [
-          build(:active_period, %{start: ~U[2023-11-12 00:01:00Z]}),
-          build(:active_period, %{start: ~U[2023-11-13 00:01:00Z]})
-        ],
-        active_period_start: ~U[2023-11-12 00:01:00Z],
-        duration_certainty: :UNKNOWN,
-        header_text: "here's a bus delay alert",
-        effect_detail: "DELAY",
-        original_route_selections: ["111", "222", "333", "444"]
-      })
+      with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
+        insert(:alert, %{
+          alert_id: "123",
+          active_period: [
+            build(:active_period, %{start: ~U[2023-11-12 00:01:00Z]}),
+            build(:active_period, %{start: ~U[2023-11-13 00:01:00Z]})
+          ],
+          active_period_start: ~U[2023-11-12 00:01:00Z],
+          duration_certainty: :UNKNOWN,
+          header_text: "here's a bus delay alert",
+          effect_detail: "DELAY",
+          original_route_selections: ["111", "222", "333", "444"]
+        })
 
-      {:ok, _view, html} = live(conn, "/alerts")
+        {:ok, _view, html} = live(conn, "/alerts")
 
-      assert html =~ ~r/<div title="111".+?>.*111.*<\/div>/s
-      assert html =~ ~r/<div title="222".+?>.*222.*<\/div>/s
-      assert html =~ ~r/<div title="333".+?>.*333.*<\/div>/s
-      assert html =~ ~r/<div title="444".+?>.*444.*<\/div>/s
-      refute html =~ ~r/<div .+?>.*\+.*<\/div>/s
+        assert html =~ ~r/<div title="111".+?>.*111.*<\/div>/s
+        assert html =~ ~r/<div title="222".+?>.*222.*<\/div>/s
+        assert html =~ ~r/<div title="333".+?>.*333.*<\/div>/s
+        assert html =~ ~r/<div title="444".+?>.*444.*<\/div>/s
+        refute html =~ ~r/<div .+?>.*\+.*<\/div>/s
+      end
     end
 
     @tag :logged_in_user
     test "five or more routes will be collapsed", %{conn: conn} do
-      insert(:alert, %{
-        alert_id: "123",
-        active_period: [
-          build(:active_period, %{start: ~U[2023-11-12 00:01:00Z]}),
-          build(:active_period, %{start: ~U[2023-11-13 00:01:00Z]})
-        ],
-        active_period_start: ~U[2023-11-12 00:01:00Z],
-        duration_certainty: :UNKNOWN,
-        header_text: "here's a bus delay alert",
-        effect_detail: "DELAY",
-        original_route_selections: ["111", "222", "333", "444", "555"]
-      })
+      with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
+        insert(:alert, %{
+          alert_id: "123",
+          active_period: [
+            build(:active_period, %{start: ~U[2023-11-12 00:01:00Z]}),
+            build(:active_period, %{start: ~U[2023-11-13 00:01:00Z]})
+          ],
+          active_period_start: ~U[2023-11-12 00:01:00Z],
+          duration_certainty: :UNKNOWN,
+          header_text: "here's a bus delay alert",
+          effect_detail: "DELAY",
+          original_route_selections: ["111", "222", "333", "444", "555"]
+        })
 
-      {:ok, _view, html} = live(conn, "/alerts")
+        {:ok, _view, html} = live(conn, "/alerts")
 
-      assert html =~ ~r/<div title="111".+?>.*111.*<\/div>/s
-      assert html =~ ~r/<div title="222".+?>.*222.*<\/div>/s
-      assert html =~ ~r/<div title="333".+?>.*333.*<\/div>/s
-      assert html =~ ~r/<div title="444".+?>.*444.*<\/div>/s
-      refute html =~ ~r/<div title="555".+?>.*555.*<\/div>/s
-      assert html =~ ~r/<div .+?>.*\+1.*<\/div>/s
+        assert html =~ ~r/<div title="111".+?>.*111.*<\/div>/s
+        assert html =~ ~r/<div title="222".+?>.*222.*<\/div>/s
+        assert html =~ ~r/<div title="333".+?>.*333.*<\/div>/s
+        assert html =~ ~r/<div title="444".+?>.*444.*<\/div>/s
+        refute html =~ ~r/<div title="555".+?>.*555.*<\/div>/s
+        assert html =~ ~r/<div .+?>.*\+1.*<\/div>/s
+      end
     end
 
     @tag :logged_in_user
@@ -555,39 +563,45 @@ defmodule AlertsUIWeb.AlertsLiveTest do
 
     @tag :logged_in_user
     test "effect display", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/alerts")
-      assert html =~ "Detour"
-      assert html =~ "Summary"
+      with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
+        {:ok, _view, html} = live(conn, "/alerts")
+        assert html =~ "Detour"
+        assert html =~ "Summary"
+      end
     end
 
     @tag :logged_in_user
     test "actions display for closed alerts", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/alerts")
+      with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
+        {:ok, _view, html} = live(conn, "/alerts")
 
-      refute html =~ ~s(<span class="hero-pencil-solid w-4 h-4"></span>)
-      refute html =~ ~s(<span class="hero-x-mark-solid w-4 h-4"></span>)
-      assert html =~ ~s(<span class="hero-ellipsis-vertical w-4 h-4"></span>)
+        refute html =~ ~s(<span class="hero-pencil-solid w-4 h-4"></span>)
+        refute html =~ ~s(<span class="hero-x-mark-solid w-4 h-4"></span>)
+        assert html =~ ~s(<span class="hero-ellipsis-vertical w-4 h-4"></span>)
+      end
     end
 
     @tag :logged_in_user
     test "actions display for open alerts", %{conn: conn} do
-      insert(:alert, %{
-        alert_id: "345",
-        active_period: [
-          build(:active_period, %{start: ~U[2023-10-12 00:01:00Z]}),
-          build(:active_period, %{start: ~U[2023-10-13 00:01:00Z]})
-        ],
-        active_period_start: ~U[2023-10-12 00:01:00Z],
-        duration_certainty: :UNKNOWN,
-        header_text: "this is the third alert",
-        effect_detail: "DETOUR",
-        original_route_selections: ["1", "2"]
-      })
+      with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
+        insert(:alert, %{
+          alert_id: "345",
+          active_period: [
+            build(:active_period, %{start: ~U[2023-10-12 00:01:00Z]}),
+            build(:active_period, %{start: ~U[2023-10-13 00:01:00Z]})
+          ],
+          active_period_start: ~U[2023-10-12 00:01:00Z],
+          duration_certainty: :UNKNOWN,
+          header_text: "this is the third alert",
+          effect_detail: "DETOUR",
+          original_route_selections: ["1", "2"]
+        })
 
-      {:ok, _view, html} = live(conn, "/alerts")
+        {:ok, _view, html} = live(conn, "/alerts")
 
-      assert html =~ ~s(<span class="hero-pencil-solid w-4 h-4"></span>)
-      assert html =~ ~s(<span class="hero-x-mark-solid w-4 h-4"></span>)
+        assert html =~ ~s(<span class="hero-pencil-solid w-4 h-4"></span>)
+        assert html =~ ~s(<span class="hero-x-mark-solid w-4 h-4"></span>)
+      end
     end
   end
 
