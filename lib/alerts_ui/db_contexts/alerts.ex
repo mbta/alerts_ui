@@ -276,7 +276,7 @@ defmodule AlertsUI.Alerts do
     end
   end
 
-  @spec close(Alert.t()) :: struct()
+  @spec close(Alert.t()) :: Alert.t()
   def close(alert, closed_time \\ DateTime.utc_now()) do
     closed_time = DateTime.truncate(closed_time, :second)
 

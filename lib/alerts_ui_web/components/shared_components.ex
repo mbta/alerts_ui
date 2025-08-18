@@ -634,7 +634,7 @@ defmodule AlertsUIWeb.SharedComponents do
               <%= if render_slot(@footer) do %>
                 {render_slot(@footer)}
               <% else %>
-                <div class="flex flex-row justify-end px-4 py-4 gap-2">
+                <div class="flex flex-row justify-end px-3 py-3 gap-2">
                   <.button_secondary
                     :if={@cancel_event_name}
                     type="button"
