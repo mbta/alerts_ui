@@ -1044,8 +1044,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         conn = AlertsUIWeb.ConnCase.log_in_user(conn, user)
 
         today =
-          DateTime.utc_now()
-          |> DateTime.shift_zone!("America/New_York")
+          DateTime.now!("America/New_York")
           |> Calendar.strftime("%a %m/%d/%Y, %I:%M %p")
 
         {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=#{alert_id}")
