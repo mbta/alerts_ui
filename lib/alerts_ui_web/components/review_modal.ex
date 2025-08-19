@@ -161,7 +161,7 @@ defmodule AlertsUIWeb.ReviewModal do
 
           <p class="font-bold">Affected service</p>
           <div id="affected_service_selections" class="pb-4 grid grid-cols-[110px_auto] gap-x-2">
-            <%= if @routes do %>
+            <%= if @routes && @routes != [] do %>
               <p>Routes:</p>
               <p>{@routes |> Enum.map(&SelectFormatter.name_for_option(&1)) |> Enum.join(", ")}</p>
             <% end %>
@@ -180,6 +180,14 @@ defmodule AlertsUIWeb.ReviewModal do
             <%= if @facility_name do %>
               <p>Facility:</p>
               <p>{@facility_name}</p>
+            <% end %>
+            <%= if ContentFormatter.service_type_string(@alert_data.route_type, @alert_data.combination) == "Systemwide" do %>
+              <p>Modes:</p>
+              <p>
+                {@alert_data.service_types
+                |> Enum.map(&ContentFormatter.service_type_string/1)
+                |> Enum.join(", ")}
+              </p>
             <% end %>
           </div>
 
