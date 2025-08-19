@@ -606,27 +606,29 @@ defmodule AlertsUIWeb.AlertsLiveTest do
 
     @tag :logged_in_user
     test "clicking close alert closes the alert", %{conn: conn} do
-      insert(:alert, %{
-        alert_id: "345",
-        active_period: [
-          build(:active_period, %{start: ~U[2023-10-12 00:01:00Z]}),
-          build(:active_period, %{start: ~U[2023-10-13 00:01:00Z]})
-        ],
-        active_period_start: ~U[2023-10-12 00:01:00Z],
-        duration_certainty: :UNKNOWN,
-        header_text: "this is the third alert",
-        effect_detail: "DETOUR",
-        original_route_selections: ["1", "2"]
-      })
+      with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
+        insert(:alert, %{
+          alert_id: "345",
+          active_period: [
+            build(:active_period, %{start: ~U[2023-10-12 00:01:00Z]}),
+            build(:active_period, %{start: ~U[2023-10-13 00:01:00Z]})
+          ],
+          active_period_start: ~U[2023-10-12 00:01:00Z],
+          duration_certainty: :UNKNOWN,
+          header_text: "this is the third alert",
+          effect_detail: "DETOUR",
+          original_route_selections: ["1", "2"]
+        })
 
-      {:ok, view, _html} = live(conn, "/alerts")
+        {:ok, view, _html} = live(conn, "/alerts")
 
-      view
-      |> element("#close-alert-modal-345 button", "Close now")
-      |> render_click()
+        view
+        |> element("#close-alert-modal-345 button", "Close now")
+        |> render_click()
 
-      :timer.sleep(5)
-      assert Alerts.get_by_alert_id("345").closed_timestamp !== nil
+        :timer.sleep(5)
+        assert Alerts.get_by_alert_id("345").closed_timestamp !== nil
+      end
     end
   end
 

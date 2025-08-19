@@ -617,9 +617,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       existing_alert = Alerts.get_by_alert_id("123")
 
-      # wait a full 2s so created_at != updated_at
-      :timer.sleep(2000)
-
       Alerts.create_or_update_alert(new_params, seconduser, existing_alert)
 
       alert = AlertData.build_alert_data("123")

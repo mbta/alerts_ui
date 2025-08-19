@@ -141,7 +141,7 @@ defmodule AlertsUIWeb.ReviewModal do
       </:header>
       <div class="flex text-sm/2">
         <%!-- Main lefthand content --%>
-        <div class="p-4">
+        <div class="p-4 grow">
           <%!-- Top section --%>
           <p class="font-bold">Main message</p>
           <p class="pb-4">{@alert_data.header_text}</p>
@@ -297,8 +297,6 @@ defmodule AlertsUIWeb.ReviewModal do
                       }
                     )
                   )}
-                </p>
-                <p>
                   {RecurringDurationText.recurring_duration_only(%{
                     "active_period_start_time" => @alert_data.active_period_start_time,
                     "active_period_end_time" => @alert_data.active_period_end_time
@@ -369,15 +367,21 @@ defmodule AlertsUIWeb.ReviewModal do
           </details>
         </div>
         <%!-- Sidebar --%>
-        <div class="w-[222px] shrink-0 p-4 bg-bg-elevation-5">
+        <div class="w-[236px] shrink-0 p-4 bg-bg-elevation-5">
           <p class="font-bold">Created</p>
           <%= if @editing == false && @alert_id == nil do %>
             <p class="pb-3">
-              {Calendar.strftime(DateTime.shift_zone!(@now, "America/New_York"), "%Y-%m-%d")}
+              {Calendar.strftime(
+                DateTime.shift_zone!(@now, "America/New_York"),
+                "%a %m/%d/%Y, %I:%M %p"
+              )}
             </p>
           <% else %>
             <p class="pb-3">
-              {Calendar.strftime(DateTime.shift_zone!(@created_at, "America/New_York"), "%Y-%m-%d")}
+              {Calendar.strftime(
+                DateTime.shift_zone!(@created_at, "America/New_York"),
+                "%a %m/%d/%Y, %I:%M %p"
+              )}
             </p>
           <% end %>
 
@@ -395,12 +399,15 @@ defmodule AlertsUIWeb.ReviewModal do
           <%= if @last_edited_at || @editing do %>
             <p class="font-bold">Last edited</p>
             <p :if={@editing} class="pb-3">
-              {Calendar.strftime(DateTime.shift_zone!(@now, "America/New_York"), "%Y-%m-%d")}
+              {Calendar.strftime(
+                DateTime.shift_zone!(@now, "America/New_York"),
+                "%a %m/%d/%Y, %I:%M %p"
+              )}
             </p>
             <p :if={!@editing} class="pb-3">
               {Calendar.strftime(
                 DateTime.shift_zone!(@last_edited_at, "America/New_York"),
-                "%Y-%m-%d"
+                "%a %m/%d/%Y, %I:%M %p"
               )}
             </p>
 

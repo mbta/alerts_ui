@@ -90,9 +90,9 @@ defmodule AlertsUI.Alerts do
 
     alert
     |> Alert.changeset(params)
-    |> PaperTrail.update()
+    |> Repo.update()
     |> case do
-      {:ok, %{model: alert}} -> alert
+      {:ok, %Alert{} = alert} -> alert
       {:error, result} -> result
     end
   end
@@ -254,8 +254,18 @@ defmodule AlertsUI.Alerts do
   def get_earliest_version(alert_uuid) do
     from(
       version in PaperTrail.Version,
-      where: version.item_id == ^alert_uuid and version.event == "insert",
-      order_by: [asc: version.inserted_at]
+      where: version.item_id == ^alert_uuid and version.event == "insert"
+    )
+    |> Repo.one()
+  end
+
+  @spec get_latest_version(String.t()) :: PaperTrail.Version.t() | nil
+  def get_latest_version(alert_uuid) do
+    from(
+      version in PaperTrail.Version,
+      where: version.item_id == ^alert_uuid,
+      order_by: [desc: :inserted_at],
+      limit: 1
     )
     |> Repo.one()
   end

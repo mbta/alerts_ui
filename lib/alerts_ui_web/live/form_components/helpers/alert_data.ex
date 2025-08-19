@@ -122,7 +122,15 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
         _ -> nil
       end
 
-    {last_edited_at, last_edited_by} = get_edited_by_info(alert)
+    last_edited_by = alert.user
+
+    last_edited_at =
+      with last_version <- Alerts.get_latest_version(alert.id),
+           false <- is_nil(last_version) do
+        Map.get(last_version, :inserted_at)
+      else
+        _ -> nil
+      end
 
     effect_map = Effect.effect_map_by_detail(alert.effect_detail)
     informed_entities = alert.informed_entity
@@ -193,17 +201,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   end
 
   def build_alert_data(_), do: %__MODULE__{}
-
-  def get_edited_by_info(alert) when alert.updated_at != alert.created_at do
-    last_edited_by =
-      alert
-      |> Map.get(:user_id, "")
-      |> Users.get_user!()
-
-    {alert.updated_at, last_edited_by}
-  end
-
-  def get_edited_by_info(_), do: {nil, nil}
 
   def determine_one_time_active_period(alert) do
     active_period_start = shift_to_naive(alert.active_period_start)

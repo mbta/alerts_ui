@@ -445,8 +445,6 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         systemwide_affected_service: %{service_types: [3, 2, 4, 1]}
       })
 
-      open_browser(view)
-
       open_review_modal(view)
 
       refute render(view) =~ "Facility:"
@@ -997,7 +995,9 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
 
         open_review_modal(view)
 
-        today = Date.utc_today()
+        today =
+          DateTime.now!("America/New_York")
+          |> Calendar.strftime("%a %m/%d/%Y, %I:%M %p")
 
         assert render(view) =~ ~r/Created.*#{today}/s
         assert render(view) =~ ~r/Created by.*Firstname Lastname/s
@@ -1063,7 +1063,9 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         user = user_fixture(:user, %{first_name: "second", last_name: "seconduser"})
         conn = AlertsUIWeb.ConnCase.log_in_user(conn, user)
 
-        today = Date.utc_today()
+        today =
+          DateTime.now!("America/New_York")
+          |> Calendar.strftime("%a %m/%d/%Y, %I:%M %p")
 
         {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=#{alert_id}")
 
