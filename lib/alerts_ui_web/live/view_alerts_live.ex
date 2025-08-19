@@ -30,19 +30,36 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   @impl true
   def handle_params(params, _url, socket) do
-    # default to timeline: current if parameters empty
+    # default to timeline: current if params don't contain timeline filter
     params =
-      if params == %{} do
-        %{
-          "filters" => %{
-            "4" => %{"field" => "timeline", "value" => "current"}
+      cond do
+        params["filters"]["4"] ->
+          params
+
+        params["filters"] ->
+          %{
+            "filters" =>
+              Map.put(params["filters"], "4", %{"field" => "timeline", "value" => "current"})
           }
-        }
-      else
-        params
+
+        true ->
+          %{"filters" => %{"4" => %{"field" => "timeline", "value" => "current"}}}
       end
 
-    with {alerts, meta} <- Alerts.list_all_paginated(params) do
+    default_order_fields = lookup_end_time_order_fields_by_params(params)
+    default_order_directions = lookup_end_time_order_directions_by_params(params)
+
+    filters =
+      params["filters"]
+      |> Map.values()
+
+    flop =
+      socket.assigns.meta.flop
+      |> Map.put(:order_by, default_order_fields)
+      |> Map.put(:order_directions, default_order_directions)
+      |> Map.put(:filters, filters)
+
+    with {alerts, meta} <- Alerts.list_all_paginated(flop) do
       {:noreply, assign(socket, meta: meta, alerts: alerts, params: params)}
     end
   end
@@ -57,6 +74,27 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   end
 
   @impl true
+  # Custom sort for the End column, given complicated sort expectations there
+  def handle_event("sort-alerts", %{"order" => order}, socket)
+      when order == "active_period_end" do
+    flop = socket.assigns.meta.flop
+
+    order_fields = lookup_end_time_order_fields_by_params(socket.assigns.params)
+
+    new_order_directions =
+      flop.order_directions
+      |> Enum.map(&reverse_order_direction(&1))
+
+    flop =
+      flop
+      |> Map.put(:order_by, order_fields)
+      |> Map.put(:order_directions, new_order_directions)
+
+    with {alerts, meta} <- Alerts.list_all_paginated(flop) do
+      {:noreply, assign(socket, meta: meta, alerts: alerts)}
+    end
+  end
+
   def handle_event("sort-alerts", %{"order" => order}, socket) do
     flop = Flop.push_order(socket.assigns.meta.flop, order)
 
@@ -105,20 +143,73 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   end
 
   @impl true
+  def handle_event("cancelled_close_modal", _params, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event("edit_alert", %{"alert_id" => alert_id}, socket) do
     {:noreply, push_navigate(socket, to: ~p"/alerts/edit?alert_id=#{alert_id}")}
   end
 
-  # Just stubbed until we have actions for these
   @impl true
-  def handle_event("close_alert", _, socket) do
-    {:noreply, assign(socket, selected_alert_data: nil, selected_alert_id: nil)}
+  def handle_event("close_alert", %{"value" => alert_id}, socket) do
+    alert_id |> Alerts.get_by_alert_id() |> Alerts.close()
+    # refresh view so alert is displayed in correct timeline category
+    Process.send(self(), :update, [])
+    {:noreply, socket}
   end
+
+  # Just stubbed until we have actions for these
 
   @impl true
   def handle_event("duplicate_alert", _, socket) do
     {:noreply, assign(socket, selected_alert_data: nil, selected_alert_id: nil)}
   end
+
+  def lookup_end_time_order_fields_by_params(%{
+        "filters" => %{"4" => %{"field" => "timeline", "value" => "past"}}
+      }),
+      do: [
+        :active_period_end,
+        :active_period_start
+      ]
+
+  def lookup_end_time_order_fields_by_params(_),
+    do: [
+      :notification_period_end,
+      :active_period_end,
+      :duration_certainty,
+      :notification_period_start,
+      :active_period_start
+    ]
+
+  def lookup_end_time_order_directions_by_params(%{
+        "filters" => %{"4" => %{"field" => "timeline", "value" => "current"}}
+      }),
+      do: [:asc_nulls_last, :asc, :asc_nulls_last, :asc, :asc]
+
+  def lookup_end_time_order_directions_by_params(%{
+        "filters" => %{"4" => %{"field" => "timeline", "value" => "future"}}
+      }),
+      do: [:asc_nulls_last, :asc, :asc_nulls_last, :asc, :asc]
+
+  def lookup_end_time_order_directions_by_params(%{
+        "filters" => %{"4" => %{"field" => "timeline", "value" => "past"}}
+      }),
+      do: [:desc, :desc]
+
+  def lookup_end_time_order_directions_by_params(%{
+        "filters" => %{"4" => %{"field" => "timeline", "value" => _}}
+      }),
+      do: [:desc_nulls_first, :desc, :desc_nulls_first, :desc, :desc]
+
+  def reverse_order_direction(:asc), do: :desc
+  def reverse_order_direction(:desc), do: :asc
+  def reverse_order_direction(:asc_nulls_last), do: :desc_nulls_first
+  def reverse_order_direction(:desc_nulls_last), do: :asc_nulls_first
+  def reverse_order_direction(:asc_nulls_first), do: :desc_nulls_last
+  def reverse_order_direction(:desc_nulls_first), do: :asc_nulls_last
 
   def format_start_time(start_time_utc) do
     current_service_date =
@@ -150,7 +241,13 @@ defmodule AlertsUIWeb.ViewAlertsLive do
        ) == :eq do
       "end of service"
     else
-      DateTimeHelpers.friendly_date_time(end_time_utc)
+      # shows service date
+      adjusted_end_date = ActivePeriod.datetime_to_service_date(end_time_utc)
+
+      adjusted_end_datetime =
+        DateTime.new!(adjusted_end_date, DateTime.to_time(end_time_utc), "Etc/UTC")
+
+      DateTimeHelpers.friendly_date_time(adjusted_end_datetime)
     end
   end
 
@@ -223,8 +320,37 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     """
   end
 
+  defp sort_icon(:asc) do
+    assigns = %{}
+
+    ~H"""
+    <.icon name="hero-arrow-up" class="ml-1 h-4 w-4" />
+    """
+  end
+
+  defp sort_icon(:desc) do
+    assigns = %{}
+
+    ~H"""
+    <.icon name="hero-arrow-down" class="ml-1 h-4 w-4" />
+    """
+  end
+
+  defp sort_icon(nil) do
+    assigns = %{}
+
+    ~H"""
+    <.icon name="hero-arrows-up-down" class="ml-1 h-4 w-4" />
+    """
+  end
+
   defp timeline_options, do: ["current", "future", "past", "all"]
 
   @spec clean_filter_params(map()) :: map()
   defp clean_filter_params(params), do: Map.drop(params, ["_target", "reset"])
+
+  def timeline_filter_past?(%{
+        "filters" => %{"4" => %{"field" => "timeline", "value" => timeline_filter}}
+      }),
+      do: timeline_filter == "past"
 end

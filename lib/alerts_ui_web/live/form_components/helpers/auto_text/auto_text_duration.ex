@@ -5,6 +5,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
   """
   alias AlertsUI.Models.ActivePeriod
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText
+  alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
 
   @spec build_duration_text(BuildAutoText.t()) :: String.t()
   def build_duration_text(autotext_data, current_time \\ current_time_naive())
@@ -16,10 +17,15 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
           start_specifier: start_specifier,
           end_specifier: end_specifier,
           start_datetime: start_datetime,
-          end_datetime: end_datetime
+          end_datetime: end_datetime,
+          route_type: route_type,
+          effect_name: effect_name
         },
         current_time
       ) do
+    combination = ServiceEffectCombinations.get_combination(route_type, effect_name)
+    is_trip_combination? = combination in [:RDT, :RDTS]
+
     start_specifier = change_start_specifier(start_datetime, start_specifier)
     end_specifier = change_end_specifier(end_datetime, end_specifier)
 
@@ -43,7 +49,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
       starts_before_today?: starts_before_today?,
       ends_today?: ends_today?,
       within_same_service_day?: within_same_service_day?,
-      within_same_calendar_day?: within_same_calendar_day?
+      within_same_calendar_day?: within_same_calendar_day?,
+      is_trip_combination?: is_trip_combination?
     })
   end
 
@@ -57,29 +64,120 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
           end_date: end_date,
           start_time: start_time,
           end_time: end_time,
-          recurrence_days: recurrence_days
-        },
+          recurrence_days: recurrence_days,
+          route_type: route_type,
+          effect_name: effect_name
+        } = auto_text_data,
         current_time
       ) do
+    combination = ServiceEffectCombinations.get_combination(route_type, effect_name)
+
     start_time_specifier = change_start_specifier(start_time, start_time_specifier)
     end_time_specifier = change_end_specifier(end_time, end_time_specifier)
 
     start_datetime = build_datetime(start_date, start_time)
     end_datetime = build_datetime(end_date, end_time)
 
-    starts_today? = starts_today?(start_datetime, current_time)
-    date_string = build_date_string(start_datetime, end_datetime, starts_today?)
-    weekday_string = build_weekday_string(recurrence_days)
+    lasts_a_single_day? = within_same_service_day?(start_datetime, end_datetime)
 
-    time_string =
-      build_time_string(start_time, end_time, start_time_specifier, end_time_specifier)
+    starts_today_or_earlier? =
+      starts_today?(start_datetime, current_time) or
+        starts_before_today?(start_datetime, current_time)
 
-    "#{date_string} every #{weekday_string} #{time_string}"
+    ends_today? = starts_today?(end_datetime, current_time)
+
+    duration_data = %{
+      is_trip_combination?: combination in [:RDT, :RDTS],
+      starts_today_or_earlier?: starts_today_or_earlier?,
+      start_time: start_time,
+      end_time: end_time,
+      start_time_specifier: change_start_specifier(start_time, start_time_specifier),
+      end_time_specifier: change_end_specifier(end_time, end_time_specifier),
+      start_datetime: build_datetime(start_date, start_time),
+      end_datetime: build_datetime(end_date, end_time)
+    }
+
+    # if the alert lasts a single day or ends today, it is treated like a one-time alert.
+    if lasts_a_single_day? or ends_today? do
+      auto_text_data
+      |> Map.merge(%{
+        alert_timing: :"one-time",
+        start_datetime: start_datetime,
+        end_datetime: end_datetime
+      })
+      |> build_duration_text(current_time)
+    else
+      date_string = build_date_string(duration_data)
+      weekday_string = build_weekday_string(recurrence_days)
+
+      time_string =
+        build_time_string(duration_data)
+
+      "#{date_string} every #{weekday_string} #{time_string}"
+    end
   end
 
   def build_duration_text(_, _), do: ""
 
   # output string for one-time
+
+  # # trip specific
+
+  def build_onetime_string(%{
+        is_trip_combination?: true,
+        starts_today?: false,
+        starts_before_today?: false,
+        within_same_service_day?: false,
+        start_datetime: start_datetime,
+        end_datetime: end_datetime
+      })
+      when not is_nil(end_datetime) do
+    "from #{datetime_to_formatted_date(start_datetime)} through #{datetime_to_formatted_date(end_datetime)}"
+  end
+
+  def build_onetime_string(%{
+        is_trip_combination?: true,
+        starts_today?: false,
+        starts_before_today?: false,
+        within_same_service_day?: true,
+        start_datetime: start_datetime
+      }) do
+    "on #{datetime_to_formatted_date(start_datetime)}"
+  end
+
+  def build_onetime_string(%{
+        is_trip_combination?: true,
+        starts_before_today?: true,
+        ends_today?: true
+      }) do
+    "today"
+  end
+
+  def build_onetime_string(%{
+        is_trip_combination?: true,
+        within_same_service_day?: false,
+        end_datetime: end_datetime
+      })
+      when not is_nil(end_datetime) do
+    "today through #{datetime_to_formatted_date(end_datetime)}"
+  end
+
+  def build_onetime_string(%{
+        is_trip_combination?: true,
+        within_same_service_day?: true,
+        starts_today?: true,
+        end_datetime: end_datetime
+      })
+      when not is_nil(end_datetime) do
+    "today"
+  end
+
+  def build_onetime_string(%{
+        is_trip_combination?: true
+      }) do
+    ""
+  end
+
   # # start of "now"
   def build_onetime_string(%{
         start_specifier: :now,
@@ -401,38 +499,98 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
 
   def build_onetime_string(_), do: ""
 
-  # time strings for recurring
-  @spec build_time_string(Time.t() | nil, Time.t() | nil, atom(), atom()) :: String.t()
-  def build_time_string(_, nil, :start_of_service, :custom), do: "from start of service"
+  @spec build_time_string(map()) :: String.t()
 
-  def build_time_string(_, end_time, :start_of_service, :custom) do
+  def build_time_string(%{
+        is_trip_combination?: true
+      }),
+      do: ""
+
+  def build_time_string(%{
+        end_time: nil,
+        start_time_specifier: :start_of_service,
+        end_time_specifier: :custom
+      }),
+      do: "from start of service"
+
+  def build_time_string(%{
+        end_time: end_time,
+        start_time_specifier: :start_of_service,
+        end_time_specifier: :custom
+      }) do
     "from start of service to #{format_time(end_time)}"
   end
 
-  def build_time_string(nil, _, :custom, :end_of_service), do: "to end of service"
-
-  def build_time_string(start_time, _, :custom, :end_of_service) do
+  def build_time_string(%{
+        start_time: start_time,
+        start_time_specifier: :custom,
+        end_time_specifier: :end_of_service
+      })
+      when not is_nil(start_time) do
     "from #{format_time(start_time)} to end of service"
   end
 
-  def build_time_string(nil, _, :custom, :custom), do: ""
-  def build_time_string(_, nil, :custom, :custom), do: ""
+  def build_time_string(%{
+        end_time: nil,
+        start_time_specifier: :custom,
+        end_time_specifier: :custom
+      }),
+      do: ""
 
-  def build_time_string(start_time, end_time, :custom, :custom) do
+  def build_time_string(%{
+        start_time: start_time,
+        end_time: end_time,
+        start_time_specifier: :custom,
+        end_time_specifier: :custom
+      })
+      when not is_nil(start_time) do
     "from #{format_time(start_time)} to #{format_time(end_time)}"
   end
 
-  def build_time_string(_, _, _, _), do: ""
+  def build_time_string(_), do: ""
 
   # date strings for recurring
-  @spec build_date_string(NaiveDateTime.t() | nil, NaiveDateTime.t() | nil, boolean) :: String.t()
-  def build_date_string(nil, _, _), do: ""
 
-  def build_date_string(start_datetime, end_datetime, false) do
+  @spec build_date_string(map()) :: String.t()
+  def build_date_string(%{start_datetime: nil}), do: ""
+
+  def build_date_string(%{
+        start_datetime: start_datetime,
+        end_datetime: nil,
+        starts_today_or_earlier?: false,
+        is_trip_combination?: true
+      }) do
+    "starting #{datetime_to_formatted_date(start_datetime)}"
+  end
+
+  def build_date_string(%{
+        end_datetime: nil,
+        starts_today_or_earlier?: true,
+        is_trip_combination?: true
+      }) do
+    "until further notice"
+  end
+
+  def build_date_string(%{
+        start_datetime: start_datetime,
+        end_datetime: nil,
+        starts_today_or_earlier?: false
+      }) do
+    "starting #{datetime_to_formatted_date(start_datetime)} #{end_date_string_word(nil)} #{end_date_string(nil)}"
+  end
+
+  def build_date_string(%{
+        start_datetime: start_datetime,
+        end_datetime: end_datetime,
+        starts_today_or_earlier?: false
+      }) do
     "from #{datetime_to_formatted_date(start_datetime)} #{end_date_string_word(end_datetime)} #{end_date_string(end_datetime)}"
   end
 
-  def build_date_string(_start_datetime, end_datetime, true) do
+  def build_date_string(%{
+        end_datetime: end_datetime,
+        starts_today_or_earlier?: true
+      }) do
     "until #{end_date_string(end_datetime)}"
   end
 
@@ -498,12 +656,15 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
   end
 
   def build_weekday_string(recurrence_days) do
-    recurrence_days
-    |> Enum.map(fn weekday ->
-      Atom.to_string(weekday)
-      |> String.capitalize()
-    end)
-    |> BuildAutoText.join_together()
+    days_string =
+      recurrence_days
+      |> Enum.map(fn weekday ->
+        Atom.to_string(weekday)
+        |> String.capitalize()
+      end)
+      |> BuildAutoText.join_together()
+
+    "#{days_string}"
   end
 
   # helpers

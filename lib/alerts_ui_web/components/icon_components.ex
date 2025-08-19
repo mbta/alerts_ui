@@ -336,15 +336,8 @@ defmodule AlertsUIWeb.IconComponents do
 
   # Bus Route Icon
   def mode_icon(assigns) do
-    # Could simplify all buses to use short name, but doing this keeps down
-    # API calls and the need to mock more in tests
-    name =
-      if assigns.type in ["747", "708"], do: fetch_short_name(assigns.type), else: assigns.type
-
-    assigns = assign(assigns, name: name)
-
     ~H"""
-    <.base_pill text={@name} class="!text-black bg-mbta-bus" />
+    <.base_pill text={fetch_short_name(@type)} class="!text-black bg-mbta-bus" />
     """
   end
 

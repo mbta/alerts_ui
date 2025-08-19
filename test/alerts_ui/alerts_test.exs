@@ -15,7 +15,7 @@ defmodule AlertsUI.AlertsTest do
   @two_hours_ago DateTime.add(@now, -2, :hour)
   @one_hour_ago DateTime.add(@now, -1, :hour)
   @one_hour_from_now DateTime.add(@now, 1, :hour)
-  @two_hours_from_now DateTime.add(@now, 1, :hour)
+  @two_hours_from_now DateTime.add(@now, 2, :hour)
   @end_of_service_utc ActivePeriod.end_of_service_datetime_utc(@now)
   @one_day_from_now DateTime.add(@now, 1, :day)
   @two_days_from_now DateTime.add(@now, 2, :day)
@@ -558,8 +558,8 @@ defmodule AlertsUI.AlertsTest do
 
       {result, _meta} =
         Alerts.list_all_paginated(%Flop{
-          order_by: [:active_period_start, :created_at, :integer_alert_id],
-          order_directions: [:asc, :desc, :desc]
+          order_by: [:active_period_start, :integer_alert_id],
+          order_directions: [:asc, :desc]
         })
 
       assert result |> Enum.map(& &1.alert_id) == [123, 345, 234, 012]
@@ -647,11 +647,11 @@ defmodule AlertsUI.AlertsTest do
         })
 
       assert current_results |> Enum.map(& &1.alert_id) == [
-               10_700,
                10_000,
                10_100,
                10_200,
-               10_400
+               10_400,
+               10_700
              ]
     end
 
@@ -744,12 +744,12 @@ defmodule AlertsUI.AlertsTest do
 
       assert current_results |> Enum.map(& &1.alert_id) == [
                10_200,
+               10_300,
                10_400,
                10_500,
-               10_300,
-               10_800,
+               10_600,
                10_700,
-               10_600
+               10_800
              ]
     end
 
@@ -826,6 +826,16 @@ defmodule AlertsUI.AlertsTest do
         duration_certainty: :KNOWN
       })
 
+      insert(:alert, %{
+        alert_id: "10800",
+        active_period_start: @two_days_from_now,
+        notification_period_start: @two_days_from_now,
+        active_period_end: @two_days_from_now,
+        notification_period_end: @two_days_from_now,
+        duration_certainty: :KNOWN,
+        closed_timestamp: @now
+      })
+
       {current_results, _meta} =
         Alerts.list_all_paginated(%{
           order_by: [:integer_alert_id],
@@ -834,11 +844,11 @@ defmodule AlertsUI.AlertsTest do
 
       assert current_results |> Enum.map(& &1.alert_id) == [
                10_200,
-               10_400,
                10_300,
-               10_700,
+               10_400,
+               10_500,
                10_600,
-               10_500
+               10_700
              ]
     end
   end
@@ -925,12 +935,12 @@ defmodule AlertsUI.AlertsTest do
     assert current_results |> Enum.map(& &1.alert_id) == [
              10_000,
              10_100,
-             10_800,
+             10_300,
+             10_400,
              10_500,
              10_600,
-             10_400,
-             10_300,
-             10_700
+             10_700,
+             10_800
            ]
   end
 
@@ -1050,14 +1060,22 @@ defmodule AlertsUI.AlertsTest do
 
   describe "close/2" do
     test "closes alert" do
-      current_time = ~U[2024-06-05 00:00:00Z]
+      current_time = ~U[2024-06-04 00:01:11Z]
 
       insert(:alert, %{
         alert_id: "123",
-        duration_certainty: :ESTIMATED
+        duration_certainty: :ESTIMATED,
+        active_period: [
+          build(:active_period, %{start: ~U[2024-06-01 00:00:00Z], end: ~U[2024-06-02 00:00:00Z]}),
+          build(:active_period, %{start: ~U[2024-06-03 00:00:00Z], end: ~U[2024-06-04 04:00:00Z]})
+        ]
       })
 
-      result = Alerts.get_by_alert_id("123") |> Alerts.close(current_time)
+      Alerts.get_by_alert_id("123") |> Alerts.close(current_time)
+
+      result = Alerts.get_by_alert_id("123")
+
+      assert result.active_period_end == current_time
       assert result.closed_timestamp == current_time
       assert result.notification_period_end == current_time
       assert result.duration_certainty == :KNOWN

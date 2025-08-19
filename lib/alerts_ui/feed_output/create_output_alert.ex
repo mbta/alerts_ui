@@ -42,9 +42,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
           reminder_times:
             alert.reminder_times |> Enum.map(& &1.reminder_time) |> build_reminder_times(),
           active_period:
-            alert.active_period
-            |> Enum.filter(&end_is_in_future(&1.end, current_time))
-            |> build_one_time_active_periods,
+            build_active_period(alert.active_period, current_time, alert.closed_timestamp),
           image: alert.image_url |> build_translated_image,
           image_alternative_text: alert.image_alternative_text |> build_translated_string,
           tts_header_text: alert.tts_header_text |> build_translated_string,
@@ -62,6 +60,14 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
       timestamp: DateTime.utc_now() |> DateTime.to_unix()
     }
   end
+
+  def build_active_period(active_period, current_time, nil) do
+    active_period
+    |> Enum.filter(&end_is_in_future(&1.end, current_time))
+    |> build_one_time_active_periods
+  end
+
+  def build_active_period(_active_period, _current_time, _closed_timestamp), do: []
 
   def build_one_time_active_periods(nil), do: nil
 
