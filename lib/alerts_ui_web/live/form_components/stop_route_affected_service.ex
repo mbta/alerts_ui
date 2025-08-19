@@ -146,7 +146,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   defp assign_stops(%{assigns: %{available_stops: %{}}} = socket, route_type, route_id) do
     assign_async(socket, :available_stops, fn ->
       route_ids = if route_id, do: List.wrap(route_id), else: nil
-      {:ok, %{available_stops: CreateAlertLive.get_stops(route_ids, route_type, nil)}}
+      {:ok, %{available_stops: CreateAlertLive.get_stops_for_stop_route(route_ids, route_type)}}
     end)
   end
 
@@ -237,7 +237,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       |> assign_async(:available_stops, fn ->
         {:ok,
          %{
-           available_stops: CreateAlertLive.get_stops([selected_route_id], route_type)
+           available_stops:
+             CreateAlertLive.get_stops_for_stop_route([selected_route_id], route_type)
          }}
       end)
 
@@ -273,7 +274,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       |> assign_async(:available_stops, fn ->
         {:ok,
          %{
-           available_stops: CreateAlertLive.get_stops(nil, route_type)
+           available_stops: CreateAlertLive.get_stops_for_stop_route(nil, route_type)
          }}
       end)
 

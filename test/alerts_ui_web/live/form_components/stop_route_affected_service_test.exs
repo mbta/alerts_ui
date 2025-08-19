@@ -41,6 +41,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
   @routes [@route_one, @route_two]
   @stop %Stop{id: "place-aqucl", name: "Aquarium"}
   @stop_two %Stop{id: "place-pktrm", name: "Park Street"}
+  @stop_two_but_different %Stop{id: "place-pktrm-inbound", name: "Park Street"}
 
   describe "component" do
     test "renders" do
@@ -234,7 +235,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
          [
            by_route: fn
              "Blue", 0 -> [@stop, @stop_two]
-             "Blue", 1 -> [@stop_two, @stop]
+             "Blue", 1 -> [@stop, @stop_two_but_different]
            end
          ]}
       ]) do
@@ -247,7 +248,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         assert view
                |> element("select##stop_route_affected_service_stop_ids")
                |> render_async() =~
-                 "<option value=\"place-aqucl\">Aquarium (inbound)</option><option value=\"place-aqucl\">Aquarium (outbound)</option><option value=\"place-pktrm\">Park Street (inbound)</option><option value=\"place-pktrm\">Park Street (outbound)</option>"
+                 "<option value=\"place-aqucl\">Aquarium</option><option value=\"place-pktrm-inbound\">Park Street (inbound)</option><option value=\"place-pktrm\">Park Street (outbound)</option>"
 
         # Add route filter
         view
@@ -264,7 +265,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         assert view
                |> element("select##stop_route_affected_service_stop_ids")
                |> render_async() =~
-                 "><option value=\"place-aqucl\">Aquarium (outbound)</option><option value=\"place-pktrm\">Park Street (outbound)</option><option value=\"place-pktrm\">Park Street (inbound)</option><option value=\"place-aqucl\">Aquarium (inbound)</option>"
+                 "<option value=\"place-pktrm-inbound\">Park Street (inbound)</option><option value=\"place-aqucl\">Aquarium</option><option value=\"place-pktrm\">Park Street (outbound)</option>"
       end
     end
 
@@ -308,7 +309,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
            end,
            by_route: fn
              "Bluer", _ -> [@stop]
-             _, _ -> [@stop, @stop_two]
+             _, 0 -> [@stop]
+             _, 1 -> [@stop, @stop_two]
            end
          ]}
       ]) do
@@ -319,7 +321,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
           )
 
         # Set baseline unfiltered
-        assert view |> render_async() =~ ~s(<option value="place-aqucl">Aquarium \(outbound\))
+        assert view |> render_async() =~ ~s(<option value="place-aqucl">Aquarium)
+        refute view |> render_async() =~ ~s(<option value="place-aqucl">Aquarium \(outbound\))
         assert view |> render_async() =~ ~s(<option value="place-pktrm">Park Street \(inbound\))
 
         # Add route filter
@@ -335,7 +338,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         |> render_click(:accepted_routes_modal)
 
         # Verify filtered and filter text updated
-        assert view |> render_async() =~ ~s(<option value="place-aqucl">Aquarium \(outbound\))
+        assert view |> render_async() =~ ~s(<option value="place-aqucl">Aquarium)
         refute view |> render_async() =~ ~s(<option value="place-pktrm">)
         assert view |> render_async() =~ ~s(Filter: route_number_2)
       end

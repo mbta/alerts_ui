@@ -202,6 +202,22 @@ defmodule AlertsUIWeb.CreateAlertLive do
     end)
   end
 
+  # stop route with no route ids (unfiltered)
+  def get_stops_for_stop_route(nil, route_type), do: get_stops(nil, route_type)
+
+  def get_stops_for_stop_route(route_ids, 3) do
+    # stop route with route ids (filtered), bus
+    route_ids
+    |> Enum.join(",")
+    |> List.wrap()
+    |> available_stops_for_bus_stop_route()
+  end
+
+  def get_stops_for_stop_route(route_ids, route_type) do
+    # stop route with route ids (filtered), other types
+    available_stops([0, 1], route_ids, route_type)
+  end
+
   @spec get_stops([String.t()] | nil, integer() | nil, String.t() | nil) :: list()
   def get_stops(route_ids, route_type, direction \\ nil)
 
@@ -212,13 +228,11 @@ defmodule AlertsUIWeb.CreateAlertLive do
     # included with the call. Doing 1 call for every route id
     # is too many so we have to chunk them up thus.
     # note- larger chunks take longer. small chunk is good.
-    route_id_lists =
-      RoutesRepo.by_type(3)
-      |> Enum.map(& &1.id)
-      |> Enum.chunk_every(10)
-      |> Enum.map(&Enum.join(&1, ","))
-
-    available_stops([0, 1], route_id_lists, 3)
+    RoutesRepo.by_type(3)
+    |> Enum.map(& &1.id)
+    |> Enum.chunk_every(10)
+    |> Enum.map(&Enum.join(&1, ","))
+    |> available_stops_for_bus_stop_route()
     |> Enum.sort_by(&String.downcase(&1.name))
   end
 
@@ -247,8 +261,6 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   def get_stops(route_ids, route_type, direction) do
-    # used in non stop-route combinations
-    # and for the route filter in stop-route combination
     direction
     |> directions_from_selection()
     |> available_stops(route_ids, route_type)
@@ -489,8 +501,27 @@ defmodule AlertsUIWeb.CreateAlertLive do
   def green_line_route?(%Route{id: "Green-E"}), do: true
   def green_line_route?(_), do: false
 
-  @spec available_stops([integer()], [String.t()], integer()) :: [Stop.t()]
+  @spec available_stops_for_bus_stop_route([String.t()]) :: [Stop.t()]
+  defp available_stops_for_bus_stop_route(route_id_lists) do
+    outbound =
+      route_id_lists
+      |> Enum.map(&StopsRepo.by_route(&1, 0))
+      |> List.flatten()
 
+    inbound =
+      route_id_lists
+      |> Enum.map(&StopsRepo.by_route(&1, 1))
+      |> List.flatten()
+
+    both = MapSet.intersection(MapSet.new(outbound), MapSet.new(inbound)) |> MapSet.to_list()
+
+    outbound = (outbound -- both) |> map_direction_names_to_stops(0)
+    inbound = (inbound -- both) |> map_direction_names_to_stops(1)
+
+    (inbound ++ both ++ outbound) |> List.flatten()
+  end
+
+  @spec available_stops([integer()], [String.t()], integer()) :: [Stop.t()]
   defp available_stops(direction_array, route_ids, route_type) do
     route_ids
     |> Enum.flat_map(fn route ->
