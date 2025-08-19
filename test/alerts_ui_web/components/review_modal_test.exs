@@ -976,8 +976,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         open_review_modal(view)
 
         today =
-          DateTime.utc_now()
-          |> DateTime.shift_zone!("America/New_York")
+          DateTime.now!("America/New_York")
           |> Calendar.strftime("%a %m/%d/%Y, %I:%M %p")
 
         assert render(view) =~ ~r/Created.*#{today}/s
