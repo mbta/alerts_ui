@@ -604,7 +604,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
       end
     end
 
-  @tag :logged_in_user
+    @tag :logged_in_user
     test "clicking close alert closes the alert", %{conn: conn} do
       with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
         insert(:alert, %{
