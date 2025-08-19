@@ -222,7 +222,13 @@ defmodule AlertsUI.Alerts do
     )
   end
 
-  @spec get_by_alert_id(String.t()) :: Alert.t()
+  @spec get_by_alert_id(String.t() | integer()) :: Alert.t()
+  def get_by_alert_id(alert_id) when is_integer(alert_id) do
+    alert_id
+    |> Integer.to_string()
+    |> get_by_alert_id
+  end
+
   def get_by_alert_id(alert_id) do
     Repo.get_by(
       from(
@@ -270,11 +276,13 @@ defmodule AlertsUI.Alerts do
     end
   end
 
+  @spec close(Alert.t()) :: Alert.t()
   def close(alert, closed_time \\ DateTime.utc_now()) do
     closed_time = DateTime.truncate(closed_time, :second)
 
     alert
     |> change(
+      active_period_end: closed_time,
       closed_timestamp: closed_time,
       notification_period_end: closed_time,
       duration_certainty: :KNOWN

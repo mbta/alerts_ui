@@ -76,7 +76,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
           "On weekdays, from Sep 25th through mid-Oct, between 8am & 4pm, Lowell Ln passengers may experience delays of 5-10 minutes both ways due to t",
         severity: 3,
         last_push_notification_timestamp: ~U[2023-09-21 14:18:54Z],
-        closed_timestamp: ~U[2023-09-22 14:18:54Z],
+        closed_timestamp: nil,
         duration_certainty: :KNOWN,
         active_period: [
           build(:active_period, %{start: active_period_start, end: active_period_end})
@@ -142,7 +142,6 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
                  },
                  severity: 3,
                  last_push_notification_timestamp: 1_695_305_934,
-                 closed_timestamp: 1_695_392_334,
                  timeframe_text: %{
                    translation: [
                      %{
@@ -237,6 +236,46 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
                    %{end: 1_695_478_854, start: 1_695_427_254},
                    %{start: 1_695_513_654, end: 1_695_513_654}
                  ],
+                 informed_entity: [%{route_id: "1", trip: %{trip_id: "1"}, activities: []}]
+               }
+             } = actual
+
+      assert within_two_seconds(
+               actual.alert.created_timestamp,
+               DateTime.utc_now() |> DateTime.to_unix()
+             )
+
+      assert within_two_seconds(
+               actual.alert.last_modified_timestamp,
+               DateTime.utc_now() |> DateTime.to_unix()
+             )
+    end
+
+    test "removes active periods if it's closed" do
+      insert(:alert, %{
+        alert_id: "524486",
+        active_period: [
+          build(:active_period, %{start: ~U[2023-09-22 00:00:54Z], end: ~U[2023-09-22 14:20:54Z]}),
+          build(:active_period, %{start: ~U[2023-09-23 00:00:54Z], end: ~U[2023-09-23 14:20:54Z]}),
+          build(:active_period, %{start: ~U[2023-09-24 00:00:54Z], end: ~U[2023-09-24 00:00:54Z]})
+        ],
+        active_period_start: ~U[2023-09-22 00:00:54Z],
+        active_period_end: ~U[2023-09-21 00:00:54Z],
+        closed_timestamp: ~U[2023-09-21 00:00:54Z]
+      })
+
+      existing_alert = Alerts.get_by_alert_id("524486")
+      actual = CreateOutputAlert.build_alert(existing_alert, ~U[2023-09-23 00:04:54Z])
+
+      assert %{
+               id: "524486",
+               alert: %{
+                 header_text: %{translation: [%{text: "a", language: "en"}]},
+                 description_text: %{translation: [%{text: "b", language: "en"}]},
+                 alert_lifecycle: :ONGOING,
+                 reminder_times: [1_727_222_460],
+                 active_period: [],
+                 closed_timestamp: 1_695_254_454,
                  informed_entity: [%{route_id: "1", trip: %{trip_id: "1"}, activities: []}]
                }
              } = actual

@@ -144,7 +144,9 @@
           </.button_secondary_link>
           <.button_secondary_link
             :if={!AlertsUIWeb.FormComponents.Helpers.Helpers.alert_is_closed(alert)}
+            id={"close-button-#{alert.alert_id}"}
             class="inline-flex rounded-[4px] !px-2 !py-[3px]"
+            phx-click={show_modal("close-alert-modal-#{alert.alert_id}")}
           >
             <.icon name="hero-x-mark-solid" class="w-4 h-4" />
           </.button_secondary_link>
@@ -165,6 +167,32 @@
               </.link>
             </:menu>
           </.button_menu>
+          <.modal
+            id={"close-alert-modal-#{alert.alert_id}"}
+            header_text="Close alert"
+            cancel_event_name="cancelled_close_modal"
+            accept_event_name="close_alert"
+            cancel_button_text="Keep Active"
+            accept_button_text="Close now"
+            target_id="#view_alerts_live_view"
+            class="text-text-primary min-w-[26rem]"
+            inner_class="text-base font-light min-h-[72px]"
+            cancel_button_classes="border-0 text-base"
+            accept_button_classes="
+                  !text-white
+                  !bg-danger
+                  !border-danger
+                  hover:!bg-primary-hover
+                  hover:!border-primary-border-hover
+                  active:!bg-primary-active
+                  active:!border-primary-active
+                  focus:!border-primary-active
+                  text-base
+                  "
+            value={alert.alert_id}
+          >
+            Are you sure you want to close alert #{alert.alert_id}?
+          </.modal>
         </div>
       </:action>
     </Flop.Phoenix.table>

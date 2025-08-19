@@ -42,13 +42,18 @@ defmodule AlertsUI.Models.CustomFilters do
       is_nil(a.notification_period_start) and
         (not is_nil(a.active_period_start) and a.active_period_start > ^now)
     )
+    |> where(
+      [a],
+      is_nil(a.closed_timestamp)
+    )
   end
 
   def timeline_filter(query, %Filter{value: "past"}, _opts) do
     now = DateTime.utc_now()
 
     query
-    |> where([a], not is_nil(a.active_period_end) and a.active_period_end <= ^now)
+    |> where([a], not is_nil(a.notification_period_end) and a.notification_period_end <= ^now)
+    |> or_where([a], not is_nil(a.active_period_end) and a.active_period_end <= ^now)
   end
 
   def timeline_filter(query, %Filter{value: "current"}, _opts) do

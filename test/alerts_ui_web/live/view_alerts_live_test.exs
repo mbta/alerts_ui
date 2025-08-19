@@ -4,9 +4,9 @@ defmodule AlertsUIWeb.AlertsLiveTest do
   import Mock
   import Phoenix.LiveViewTest
   import Mock
-  import AlertsUI.Support.Factory
   alias AlertsUI.Models.ActivePeriod
-
+  import AlertsUI.Support.Factory
+  alias AlertsUI.Alerts
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
 
   @now DateTime.utc_now()
@@ -602,6 +602,31 @@ defmodule AlertsUIWeb.AlertsLiveTest do
         assert html =~ ~s(<span class="hero-pencil-solid w-4 h-4"></span>)
         assert html =~ ~s(<span class="hero-x-mark-solid w-4 h-4"></span>)
       end
+    end
+
+    @tag :logged_in_user
+    test "clicking close alert closes the alert", %{conn: conn} do
+      insert(:alert, %{
+        alert_id: "345",
+        active_period: [
+          build(:active_period, %{start: ~U[2023-10-12 00:01:00Z]}),
+          build(:active_period, %{start: ~U[2023-10-13 00:01:00Z]})
+        ],
+        active_period_start: ~U[2023-10-12 00:01:00Z],
+        duration_certainty: :UNKNOWN,
+        header_text: "this is the third alert",
+        effect_detail: "DETOUR",
+        original_route_selections: ["1", "2"]
+      })
+
+      {:ok, view, _html} = live(conn, "/alerts")
+
+      view
+      |> element("#close-alert-modal-345 button", "Close now")
+      |> render_click()
+
+      :timer.sleep(5)
+      assert Alerts.get_by_alert_id("345").closed_timestamp !== nil
     end
   end
 
