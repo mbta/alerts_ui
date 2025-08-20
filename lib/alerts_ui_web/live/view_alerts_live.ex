@@ -261,6 +261,14 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     )
   end
 
+  def danger_text(active_period_end, closed_timestamp) do
+    if DateTimeHelpers.will_be_ending_today?(active_period_end, closed_timestamp) do
+      "text-danger"
+    else
+      ""
+    end
+  end
+
   defp format_effect(nil), do: ""
 
   defp format_effect(effect) do

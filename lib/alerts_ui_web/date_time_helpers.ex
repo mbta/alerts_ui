@@ -115,6 +115,35 @@ defmodule AlertsUIWeb.DateTimeHelpers do
     round(seconds / 60)
   end
 
+  @doc """
+  Returns true if alert end is in today's service day and alert is not closed
+
+  iex> will_be_ending_today?(DateTime.add(DateTime.now!("America/New_York"), 1, :hour), nil)
+  true
+
+  iex> will_be_ending_today?(DateTime.add(DateTime.now!("America/New_York"), 2, :day), nil)
+  false
+
+  iex> will_be_ending_today?(~U[2025-08-21 06:00:00Z], ~U[2025-08-21 06:00:00Z])
+  false
+
+  """
+  @spec will_be_ending_today?(DateTime.t(), DateTime.t() | nil) :: boolean()
+  def will_be_ending_today?(end_datetime, nil), do: same_service_date?(end_datetime)
+  def will_be_ending_today?(_end_datetime, _closed_timestamp), do: false
+
+  @doc """
+  Returns whether 2 datetimes are in the same service date
+  Second argument defaults to now
+
+  iex> same_service_date?(nil, ~U[2025-08-20 11:00:00Z])
+  false
+  iex> same_service_date?(~U[2025-08-20 11:00:00Z], ~U[2025-08-21 06:00:00Z])
+  true
+  iex> same_service_date?(~U[2025-08-20 11:00:00Z], ~U[2025-08-21 08:00:00Z])
+  false
+  """
+  @spec same_service_date?(DateTime.t() | nil, DateTime.t()) :: boolean()
   def same_service_date?(_, _ \\ DateTime.now!("Etc/UTC"))
 
   def same_service_date?(nil, _), do: false

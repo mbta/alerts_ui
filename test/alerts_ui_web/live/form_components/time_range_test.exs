@@ -684,7 +684,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         |> render_click()
 
         # wait a smidge for the alert to get persisted to the database
-        :timer.sleep(25)
+        :timer.sleep(100)
         created_alert = Alerts.get_by_alert_id("123")
 
         assert created_alert.active_period_end ==
