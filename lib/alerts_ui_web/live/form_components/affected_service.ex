@@ -29,14 +29,14 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     field :trip_search_term, :string
     field :stop_ids, {:array, :string}
     field :stop_names, {:array, :string}
-    field :stop_ids_and_names, {:array, :string}
+    field :stop_names_and_ids, {:array, :string}
     field :stop_search_term, :string
     field :trip_information_by_id, {:map, :map}
     field :modal_date, :string
     field :modal_date_search_term, :string
   end
 
-  @fields ~w[route_ids direction trip_ids stop_ids stop_names stop_ids_and_names trip_information_by_id route_search_term trip_search_term stop_search_term single_route_id modal_date modal_date_search_term]a
+  @fields ~w[route_ids direction trip_ids stop_ids stop_names stop_names_and_ids trip_information_by_id route_search_term trip_search_term stop_search_term single_route_id modal_date modal_date_search_term]a
 
   @impl true
   def mount(socket) do
@@ -607,7 +607,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
           <.filtered_select
             :if={show_stops_input?(assigns)}
             label={if show_trips_input?(assigns), do: "Stops", else: nil}
-            field={@form[:stop_ids_and_names]}
+            field={@form[:stop_names_and_ids]}
             filter_field={@form[:stop_search_term]}
             options={@stop_id_options}
             loading={Map.get(@available_stops, :loading, true)}
@@ -702,10 +702,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   # Each of these are only used once in the validation flow... what exactly should we do here?
   defp populate_default_stops(affected_service) do
-    if Map.get(affected_service, "stop_ids_and_names") in [nil, "default", ["default"]] do
+    if Map.get(affected_service, "stop_names_and_ids") in [nil, "default", ["default"]] do
       Map.put(
         affected_service,
-        "stop_ids_and_names",
+        "stop_names_and_ids",
         []
       )
     else
@@ -725,9 +725,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     end
   end
 
-  defp foo_stops(%{"stop_ids_and_names" => stop_ids_and_names} = affected_service) do
+  defp foo_stops(%{"stop_names_and_ids" => stop_names_and_ids} = affected_service) do
     foo =
-      Enum.reduce(stop_ids_and_names, %{"stop_names" => [], "stop_ids" => []}, fn foo, acc ->
+      Enum.reduce(stop_names_and_ids, %{"stop_names" => [], "stop_ids" => []}, fn foo, acc ->
         [stop_name, stop_id] = String.split(foo, "|")
         stop_names = [stop_name | acc["stop_names"]]
         stop_ids = [stop_id | acc["stop_ids"]]
@@ -736,10 +736,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       end)
 
     Map.merge(affected_service, foo)
-    # if Map.get(affected_service, "stop_ids_and_names") in [nil, "default", ["default"]] do
+    # if Map.get(affected_service, "stop_names_and_ids") in [nil, "default", ["default"]] do
     #   Map.put(
     #     affected_service,
-    #     "stop_ids_and_names",
+    #     "stop_names_and_ids",
     #     []
     #   )
     # else

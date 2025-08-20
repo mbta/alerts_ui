@@ -30,6 +30,7 @@ defmodule AlertsUI.AlertBuilder do
           direction: String.t(),
           route_ids: [Route.id_t()],
           stop_ids: [Stop.id_t()],
+          stop_names_and_ids: [String.t()],
           child_stops_with_context: [stop_with_context_t()] | [],
           trip_ids: [String.t()],
           service_types: [Route.type_int()],
@@ -84,6 +85,7 @@ defmodule AlertsUI.AlertBuilder do
       |> Enum.map(&%{reminder_time: ActivePeriodBuilder.naive_eastern_datetime_to_utc(&1)})
 
     original_route_selections = Map.get(alert_data, :route_ids, [])
+    original_stop_selections = Map.get(alert_data, :stop_names_and_ids, [])
 
     routes =
       original_route_selections
@@ -162,6 +164,7 @@ defmodule AlertsUI.AlertBuilder do
         build_informed_entities(combination, alert_data, effect_name)
         |> Enum.uniq(),
       original_route_selections: original_route_selections,
+      original_stop_selections: original_stop_selections,
       notification_period_start: notification_period_start,
       notification_period_end: notification_period_end,
       severity: severity,
