@@ -149,7 +149,7 @@ defmodule AlertsUIWeb.ReviewModal do
           <div class="pb-4">
             <p class="font-bold">Supporting information</p>
             <%= if @alert_data.description_text do %>
-              <p class="whitespace-pre">{@alert_data.description_text}</p>
+              <p class="whitespace-pre-line">{@alert_data.description_text}</p>
             <% else %>
               <p class="italic">None</p>
             <% end %>
