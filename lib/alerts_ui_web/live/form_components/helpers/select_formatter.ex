@@ -24,41 +24,37 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
           schedules_by_route_name: %{} | nil
         }
 
-  def foo_formatted_select_options(%__MODULE__{
-        options: options,
-        route_type: route_type,
-        search_term: search_term,
-        values_to_keep: values_to_keep
-      })
-      when not is_nil(options) do
-    options
-    |> Enum.uniq()
-    |> Enum.sort_by(&sort_order/1)
-    |> Enum.map(fn object ->
-      {name_for_option(object, route_type), foo_id_for_option(object)}
-    end)
-    |> apply_search(search_term, values_to_keep)
-  end
+  @doc """
+  Returns a keyword list of names and objects given a list of structs.
+  If the second arg is true and the structs are stops the values will
+  be a combo of names and ids (used in affected_service only).
+  Also filters out results based on a search term.
+  """
+  @spec formatted_select_options(t(), boolean()) :: keyword(String.t())
+  def formatted_select_options(select_data, split_stops? \\ false)
 
-  @spec formatted_select_options(t()) :: keyword(String.t())
-  def formatted_select_options(%__MODULE__{
-        options: options,
-        route_type: route_type,
-        search_term: search_term,
-        values_to_keep: values_to_keep
-      })
+  def formatted_select_options(
+        %__MODULE__{
+          options: options,
+          route_type: route_type,
+          search_term: search_term,
+          values_to_keep: values_to_keep
+        },
+        split_stops?
+      )
       when not is_nil(options) do
     options
     |> Enum.uniq()
     |> Enum.sort_by(&sort_order/1)
     |> Enum.map(fn object ->
-      {name_for_option(object, route_type), id_for_option(object)}
+      {name_for_option(object, route_type), id_for_option(object, split_stops?)}
     end)
     |> apply_search(search_term, values_to_keep)
   end
 
   def formatted_select_options(
-        %__MODULE__{schedules_by_route_name: schedules_by_route_name} = filterable
+        %__MODULE__{schedules_by_route_name: schedules_by_route_name} = filterable,
+        _foo
       )
       when not is_nil(schedules_by_route_name) do
     # if only 1 route is selected
@@ -156,14 +152,17 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
 
   def name_for_option(nil, nil), do: ""
 
-  @spec foo_id_for_option(Stop.t()) :: String.t()
-  def foo_id_for_option(%Stop{name: name, id: id}), do: "#{name}|#{id}"
-
-  @spec id_for_option(Stop.t() | Route.t() | EnhancedSchedule.t() | Facility.t()) :: String.t()
-  def id_for_option(%Stop{id: id}), do: id
-  def id_for_option(%Route{id: id}), do: id
-  def id_for_option(%Facility{id: id}), do: id
-  def id_for_option(%EnhancedSchedule{trip: %Trip{id: id}}), do: id
+  @doc """
+  If first arg is a stop struct and the second arg is true, return a combo of stop name and id
+  Otherwise this returns the IDs
+  """
+  @spec id_for_option(Stop.t() | Route.t() | EnhancedSchedule.t() | Facility.t(), boolean()) ::
+          String.t()
+  def id_for_option(%Stop{name: name, id: id}, true), do: "#{name}|#{id}"
+  def id_for_option(%Stop{id: id}, false), do: id
+  def id_for_option(%Route{id: id}, _), do: id
+  def id_for_option(%Facility{id: id}, _), do: id
+  def id_for_option(%EnhancedSchedule{trip: %Trip{id: id}}, _), do: id
 
   @spec formatted_direction_options([String.t()] | nil, map()) :: keyword(String.t())
   def formatted_direction_options([route_id], direction_names_map) do

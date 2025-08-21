@@ -210,7 +210,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
         |> render_change(%{
           affected_service: %{
             route_ids: ["Blue"],
-            stop_ids: ["place-aqucl"]
+            stop_names_and_ids: ["Aquarium|place-aqucl"]
           }
         })
 

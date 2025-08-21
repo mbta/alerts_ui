@@ -217,7 +217,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       |> Helpers.filter_empty_list_fields()
       |> populate_default_stops()
       |> populate_default_trips()
-      |> foo_stops
+      |> split_stop_names_and_ids
 
     changeset = validate(affected_service, socket.assigns)
 
@@ -478,12 +478,15 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     stop_search_term = assigns.form[:stop_search_term].value
 
     stop_id_options =
-      SelectFormatter.foo_formatted_select_options(%SelectFormatter{
-        options: Map.get(assigns.available_stops, :result, []) || [],
-        search_term: stop_search_term,
-        route_type: assigns.route_type,
-        values_to_keep: stop_ids
-      })
+      SelectFormatter.formatted_select_options(
+        %SelectFormatter{
+          options: Map.get(assigns.available_stops, :result, []) || [],
+          search_term: stop_search_term,
+          route_type: assigns.route_type,
+          values_to_keep: stop_ids
+        },
+        true
+      )
 
     modal_options =
       filter_modal_options(
@@ -725,26 +728,18 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     end
   end
 
-  defp foo_stops(%{"stop_names_and_ids" => stop_names_and_ids} = affected_service) do
-    foo =
-      Enum.reduce(stop_names_and_ids, %{"stop_names" => [], "stop_ids" => []}, fn foo, acc ->
-        [stop_name, stop_id] = String.split(foo, "|")
+  defp split_stop_names_and_ids(%{"stop_names_and_ids" => stop_names_and_ids} = affected_service) do
+    split_names_and_ids =
+      Enum.reduce(stop_names_and_ids, %{"stop_names" => [], "stop_ids" => []}, fn name_and_id,
+                                                                                  acc ->
+        [stop_name, stop_id] = String.split(name_and_id, "|")
         stop_names = [stop_name | acc["stop_names"]]
         stop_ids = [stop_id | acc["stop_ids"]]
 
         %{"stop_names" => stop_names, "stop_ids" => stop_ids}
       end)
 
-    Map.merge(affected_service, foo)
-    # if Map.get(affected_service, "stop_names_and_ids") in [nil, "default", ["default"]] do
-    #   Map.put(
-    #     affected_service,
-    #     "stop_names_and_ids",
-    #     []
-    #   )
-    # else
-    #   affected_service
-    # end
+    Map.merge(affected_service, split_names_and_ids)
   end
 
   defp get_schedules_by_route_type(assigns) do
