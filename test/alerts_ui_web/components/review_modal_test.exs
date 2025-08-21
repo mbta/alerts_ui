@@ -997,7 +997,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
 
         today =
           DateTime.now!("America/New_York")
-          |> Calendar.strftime("%a %m/%d/%Y, %I:%M %p")
+          |> Calendar.strftime("%a %m/%d/%Y")
 
         assert render(view) =~ ~r/Created.*#{today}/s
         assert render(view) =~ ~r/Created by.*Firstname Lastname/s
@@ -1063,15 +1063,15 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         user = user_fixture(:user, %{first_name: "second", last_name: "seconduser"})
         conn = AlertsUIWeb.ConnCase.log_in_user(conn, user)
 
-        today =
+        no_timestamp_today =
           DateTime.now!("America/New_York")
-          |> Calendar.strftime("%a %m/%d/%Y, %I:%M %p")
+          |> Calendar.strftime("%a %m/%d/%Y")
 
         {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=#{alert_id}")
 
         open_review_modal(view)
-        assert render(view) =~ ~r/Created.*#{today}/s
-        assert render(view) =~ ~r/Last edited.*#{today}/s
+        assert render(view) =~ ~r/Created.*#{no_timestamp_today}/s
+        assert render(view) =~ ~r/Last edited.*#{no_timestamp_today}/s
 
         assert render(view) =~ ~r/Created by.*original user/s
         assert render(view) =~ ~r/Last edited by.*second seconduser/s
@@ -1082,9 +1082,13 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
 
         {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=#{alert_id}")
 
+        timestamp_today =
+          DateTime.now!("America/New_York")
+          |> Calendar.strftime("%a %m/%d/%Y, %-I:%M %p")
+
         open_review_modal(view)
-        assert render(view) =~ ~r/Created.*#{today}/s
-        assert render(view) =~ ~r/Last edited.*#{today}/s
+        assert render(view) =~ ~r/Created.*#{timestamp_today}/s
+        assert render(view) =~ ~r/Last edited.*#{no_timestamp_today}/s
 
         assert render(view) =~ ~r/Created by.*original user/s
         assert render(view) =~ ~r/Last edited by.*final finaluser/s
