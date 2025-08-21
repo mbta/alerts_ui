@@ -307,45 +307,61 @@ defmodule AlertsUIWeb.AlertsLiveTest do
     test "reversing the sort for end time maintains proper order", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts")
 
-      assert element(view, "th[aria-sort='ascending'] span.order-direction") |> render() =~ "hero-arrow-up"
+      assert element(view, "th[aria-sort='ascending'] span.order-direction") |> render() =~
+               "hero-arrow-up"
 
-      html = view
-      |> element("a", "End")
-      |> render_click()
+      html =
+        view
+        |> element("a", "End")
+        |> render_click()
 
-      assert element(view, "th[aria-sort='descending'] span.order-direction") |> render() =~ "hero-arrow-down"
+      assert element(view, "th[aria-sort='descending'] span.order-direction") |> render() =~
+               "hero-arrow-down"
+
       assert get_alert_id_order(html) == ["10000", "10100", "10900", "10600", "10500", "10300"]
 
-      html = view
-      |> element("a", "End")
-      |> render_click()
+      html =
+        view
+        |> element("a", "End")
+        |> render_click()
 
-      assert element(view, "th[aria-sort='ascending'] span.order-direction") |> render() =~ "hero-arrow-up"
+      assert element(view, "th[aria-sort='ascending'] span.order-direction") |> render() =~
+               "hero-arrow-up"
+
       assert get_alert_id_order(html) == ["10300", "10500", "10600", "10900", "10100", "10000"]
     end
 
     @tag :logged_in_user
-    test "sorting by other fields and then sorting by end time maintains proper order", %{conn: conn} do
+    test "sorting by other fields and then sorting by end time maintains proper order", %{
+      conn: conn
+    } do
       {:ok, view, _html} = live(conn, "/alerts")
 
-      html = view
-      |> element("a", "ID")
-      |> render_click()
+      html =
+        view
+        |> element("a", "ID")
+        |> render_click()
 
       refute get_alert_id_order(html) == ["10300", "10500", "10600", "10900", "10100", "10000"]
 
-      html = view
-      |> element("a", "End")
-      |> render_click()
+      html =
+        view
+        |> element("a", "End")
+        |> render_click()
 
-      assert element(view, "th[aria-sort='ascending'] span.order-direction") |> render() =~ "hero-arrow-up"
+      assert element(view, "th[aria-sort='ascending'] span.order-direction") |> render() =~
+               "hero-arrow-up"
+
       assert get_alert_id_order(html) == ["10300", "10500", "10600", "10900", "10100", "10000"]
 
-      html = view
-      |> element("a", "End")
-      |> render_click()
+      html =
+        view
+        |> element("a", "End")
+        |> render_click()
 
-      assert element(view, "th[aria-sort='descending'] span.order-direction") |> render() =~ "hero-arrow-down"
+      assert element(view, "th[aria-sort='descending'] span.order-direction") |> render() =~
+               "hero-arrow-down"
+
       assert get_alert_id_order(html) == ["10000", "10100", "10900", "10600", "10500", "10300"]
     end
   end

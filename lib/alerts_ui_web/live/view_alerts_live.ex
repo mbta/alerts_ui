@@ -86,12 +86,13 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     # If the existing flop metadata has notification_period_end,
     # then the directions need reversing. Otherwise, use default directions
 
-    new_order_directions = if hd(flop.order_by) == :notification_period_end do
-      flop.order_directions
-      |> Enum.map(&reverse_order_direction(&1))
-    else
-      lookup_end_time_order_directions_by_params(socket.assigns.params)
-    end
+    new_order_directions =
+      if hd(flop.order_by) == :notification_period_end do
+        flop.order_directions
+        |> Enum.map(&reverse_order_direction(&1))
+      else
+        lookup_end_time_order_directions_by_params(socket.assigns.params)
+      end
 
     order_fields = lookup_end_time_order_fields_by_params(socket.assigns.params)
 
