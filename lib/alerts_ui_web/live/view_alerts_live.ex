@@ -80,7 +80,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     flop = socket.assigns.meta.flop
 
     # Need to mimic Flop.push_order in a custom way because push_order
-    # updates the ordered fields AND direction, but takes too many liberties. 
+    # updates the ordered fields AND direction, but takes too many liberties.
     # (e.g. defaults to asc, keeps the other sort fields, etc.)
 
     # If the existing flop metadata has notification_period_end,
