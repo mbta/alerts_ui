@@ -322,7 +322,7 @@ defmodule AlertsUIWeb.ReviewModal do
               <div class="pb-4">
                 <%= for reminder <- Enum.sort(@alert_data.reminder_times) do %>
                   <p>
-                    {Calendar.strftime(reminder, "%a %m/%d/%Y %I:%M %p")}
+                    {Calendar.strftime(reminder, "%a %m/%d/%Y %-I:%M %p")}
                     <span :if={sent?(reminder)} class="text-text-secondary">
                       <.icon name="hero-check-circle-solid text-mbta-green" class="h-4 w-4" /> Sent
                     </span>
@@ -367,20 +367,20 @@ defmodule AlertsUIWeb.ReviewModal do
           </details>
         </div>
         <%!-- Sidebar --%>
-        <div class="w-[236px] shrink-0 p-4 bg-bg-elevation-5">
+        <div class="min-w-[222px] shrink-0 p-4 bg-bg-elevation-5">
           <p class="font-bold">Created</p>
           <%= if @editing == false && @alert_id == nil do %>
-            <p class="pb-3">
+            <p class="pb-3 whitespace-nowrap">
               {Calendar.strftime(
                 DateTime.shift_zone!(@now, "America/New_York"),
-                "%a %m/%d/%Y, %I:%M %p"
+                "%a %m/%d/%Y"
               )}
             </p>
           <% else %>
-            <p class="pb-3">
+            <p class="pb-3 whitespace-nowrap">
               {Calendar.strftime(
                 DateTime.shift_zone!(@created_at, "America/New_York"),
-                "%a %m/%d/%Y, %I:%M %p"
+                "%a %m/%d/%Y, %-I:%M %p"
               )}
             </p>
           <% end %>
@@ -398,16 +398,16 @@ defmodule AlertsUIWeb.ReviewModal do
 
           <%= if @last_edited_at || @editing do %>
             <p class="font-bold">Last edited</p>
-            <p :if={@editing} class="pb-3">
+            <p :if={@editing} class="pb-3 whitespace-nowrap">
               {Calendar.strftime(
                 DateTime.shift_zone!(@now, "America/New_York"),
-                "%a %m/%d/%Y, %I:%M %p"
+                "%a %m/%d/%Y"
               )}
             </p>
-            <p :if={!@editing} class="pb-3">
+            <p :if={!@editing} class="pb-3 whitespace-nowrap">
               {Calendar.strftime(
                 DateTime.shift_zone!(@last_edited_at, "America/New_York"),
-                "%a %m/%d/%Y, %I:%M %p"
+                "%a %m/%d/%Y, %-I:%M %p"
               )}
             </p>
 
