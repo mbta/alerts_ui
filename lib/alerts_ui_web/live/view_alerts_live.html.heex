@@ -128,7 +128,10 @@
         col_style="width: 7.5%;"
       >
         <div class={
-          if DateTimeHelpers.same_service_date?(alert.active_period_end), do: "text-danger"
+          danger_text(
+            alert.active_period_end,
+            alert.closed_timestamp
+          )
         }>
           {format_end_time(alert.active_period_end, alert.duration_certainty)}
         </div>
