@@ -103,7 +103,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     alert_data: %{route_ids: ["CR-Worcester"]},
     combination: :RDTS,
     editing: false,
-    effect_name: "Delay"
+    effect_name: "Delay",
+    show_stop_ids: false
   }
 
   @todays_date DateTime.utc_now()

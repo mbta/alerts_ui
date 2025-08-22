@@ -26,7 +26,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
     route_type: 1,
     alert_data: %{},
     editing: false,
-    effect_name: "Station Closure"
+    effect_name: "Station Closure",
+    show_stop_ids: false
   }
 
   @route_one %Route{sort_order: 1, id: "Blue", name: "route_number_1", type: 3}
