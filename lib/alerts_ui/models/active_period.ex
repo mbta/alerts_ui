@@ -179,7 +179,11 @@ defmodule AlertsUI.Models.ActivePeriod do
     end
   end
 
-  @spec datetime_to_service_date(DateTime.t()) :: Date.t()
+  @spec datetime_to_service_date(DateTime.t() | NaiveDateTime.t()) :: Date.t()
+  def datetime_to_service_date(%NaiveDateTime{} = naive_datetime) do
+    naive_datetime |> DateTime.from_naive!("America/New_York") |> datetime_to_service_date
+  end
+
   def datetime_to_service_date(datetime) do
     # returns "service date" for datetime- eg 2 am on 1/1/2025 will return 12/31/2024
     # 3am will return the date before - eg 3 am on 1/1/2025 will return  12/31/2024
@@ -191,20 +195,6 @@ defmodule AlertsUI.Models.ActivePeriod do
 
     if Time.after?(time, ~T[00:00:00]) and
          Time.before?(time, Time.add(@end_of_service, 1, :minute)) do
-      Date.add(date, -1)
-    else
-      date
-    end
-  end
-
-  @spec naive_datetime_to_service_date(NaiveDateTime.t()) :: Date.t()
-  def naive_datetime_to_service_date(naive_datetime) do
-    # returns "service date" for naive datetime- eg 2 am on 1/1/2025 will return 12/31/2024
-    # frontend only!
-    time = NaiveDateTime.to_time(naive_datetime)
-    date = NaiveDateTime.to_date(naive_datetime)
-
-    if Time.after?(time, ~T[00:00:00]) and Time.compare(time, @end_of_service) in [:lt, :eq] do
       Date.add(date, -1)
     else
       date

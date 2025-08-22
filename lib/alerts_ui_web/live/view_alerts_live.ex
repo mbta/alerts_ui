@@ -217,7 +217,13 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     if start_time_utc && DateTime.compare(most_recent_start_of_service, start_time_utc) == :eq do
       "start of service"
     else
-      DateTimeHelpers.friendly_date_time(start_time_utc, :start)
+      adjusted_start_time = DateTime.shift_zone!(start_time_utc, "America/New_York")
+      adjusted_dt_date = ActivePeriod.datetime_to_service_date_exclusive(adjusted_start_time)
+
+      adjusted_dt =
+        DateTime.new!(adjusted_dt_date, DateTime.to_time(adjusted_start_time), "America/New_York")
+
+      DateTimeHelpers.friendly_date_time(adjusted_dt)
     end
   end
 
@@ -232,7 +238,13 @@ defmodule AlertsUIWeb.ViewAlertsLive do
        ) == :eq do
       "end of service"
     else
-      DateTimeHelpers.friendly_date_time(end_time_utc, :end)
+      adjusted_end_time = DateTime.shift_zone!(end_time_utc, "America/New_York")
+      adjusted_dt_date = ActivePeriod.datetime_to_service_date_exclusive(adjusted_end_time)
+
+      adjusted_dt =
+        DateTime.new!(adjusted_dt_date, DateTime.to_time(adjusted_end_time), "America/New_York")
+
+      DateTimeHelpers.friendly_date_time(adjusted_dt)
     end
   end
 
