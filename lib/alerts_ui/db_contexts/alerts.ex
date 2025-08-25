@@ -4,7 +4,7 @@ defmodule AlertsUI.Alerts do
   """
   import Ecto.Changeset
   import Ecto.Query
-  alias AlertsUI.Models.{ActivePeriod, Alert}
+  alias AlertsUI.Models.Alert
   alias AlertsUI.Repo
   require Logger
 
@@ -68,19 +68,22 @@ defmodule AlertsUI.Alerts do
   end
 
   defp update_alert_end(
-         %Alert{active_period: [active_period], duration_certainty: :ESTIMATED} = alert,
+         %Alert{
+           active_period: [active_period],
+           duration_certainty: :ESTIMATED,
+           notification_period_end: notification_period_end
+         } = alert,
          true,
          current_time
        ) do
-    end_of_service = ActivePeriod.end_of_service_datetime_utc(active_period.start)
-
+    # notification period end is set to the current day's EOS when the alert is made
     two_hours_from_now = DateTime.add(current_time, 2, :hour)
 
     new_end_time =
-      if DateTime.compare(end_of_service, two_hours_from_now) in [:eq, :gt] do
+      if DateTime.compare(notification_period_end, two_hours_from_now) in [:eq, :gt] do
         two_hours_from_now
       else
-        end_of_service
+        notification_period_end
       end
 
     params = %{

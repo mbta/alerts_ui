@@ -2,6 +2,7 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
   use AlertsUI.DataCase, async: true
   import AlertsUI.Support.Factory
   alias AlertsUI.FeedOutput.WriteFeed
+  alias AlertsUI.Models.ActivePeriod
 
   describe "write_feed/0" do
     test "it writes" do
@@ -49,6 +50,7 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
         active_period_start: DateTime.add(current_time, -1, :hour),
         active_period_end: DateTime.add(current_time, 1, :hour),
         duration_certainty: :ESTIMATED,
+        notification_period_end: ActivePeriod.end_of_service_datetime_utc(current_time),
         active_period: [
           build(:active_period, %{
             start: DateTime.add(current_time, -1, :hour),
