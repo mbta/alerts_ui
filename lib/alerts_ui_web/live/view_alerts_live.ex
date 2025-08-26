@@ -7,6 +7,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   alias AlertsUI.Models.{ActivePeriod, Effect}
   alias AlertsUIWeb.DateTimeHelpers
   alias AlertsUIWeb.FormComponents.Helpers.AlertData
+  alias AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText
   alias AlertsUIWeb.SharedComponents
 
   @ten_seconds_in_ms 10_000

@@ -30,7 +30,7 @@
   </div>
 
   <div class="flex items-center bg-bg-secondary p-2 text-sm border-t border-border-primary justify-center">
-    <span class="w-[100px] mr-auto">{@meta.total_count} alerts</span>
+    <span class="w-[100px] mr-auto">{@meta.total_count} {BuildAutoText.maybe_pluralize("alert", @meta.total_count != 1)}</span>
     <Flop.Phoenix.pagination
       meta={@meta}
       on_paginate={JS.push("paginate-alerts")}
