@@ -180,7 +180,25 @@ defmodule AlertsUIWeb.SharedComponents do
     px-3
     py-2
     border
-    rounded-md
+    rounded
+    flex
+    w-fit
+    h-fit
+    items-center
+  "
+
+  def primary_button_classes, do: "
+    #{base_button_classes()}
+      text-text-dark
+      bg-primary
+      border-primary
+      hover:bg-primary-hover
+      hover:border-primary-border-hover
+      active:bg-primary-active
+      active:border-primary-active
+      focus:border-primary-active
+      disabled:bg-primary-disabled
+      disabled:border-primary-disabled
   "
 
   @doc """
@@ -201,17 +219,7 @@ defmodule AlertsUIWeb.SharedComponents do
     ~H"""
     <button
       class={"
-      #{base_button_classes()}
-      text-text-dark
-      bg-primary
-      border-primary
-      hover:bg-primary-hover
-      hover:border-primary-border-hover
-      active:bg-primary-active
-      active:border-primary-active
-      focus:border-primary-active
-      disabled:bg-primary-disabled
-      disabled:border-primary-disabled
+      #{primary_button_classes()}
       #{if @hidden, do: "hidden", else: ""}
       #{@class}
     "}
@@ -222,10 +230,36 @@ defmodule AlertsUIWeb.SharedComponents do
     """
   end
 
+  @doc """
+  Renders a link that looks like a medium primary button.
+
+  ##Examples
+    <.button_primary_link>Button Text</.button_primary_link>
+  """
+  attr :rest, :global,
+    include:
+      ~w(phx-target phx-click phx-value-effect_name phx-value-route_type name id value disabled)
+
+  attr :class, :string, default: "", doc: "additional classes to add"
+  attr :href, :string, default: nil, doc: "additional link"
+  slot :inner_block, required: true
+
+  def button_primary_link(assigns) do
+    ~H"""
+    <.link href={@href} class={"
+      #{primary_button_classes()}
+      #{@class}
+    "} {@rest}>
+      {render_slot(@inner_block)}
+    </.link>
+    """
+  end
+
   def secondary_button_classes, do: "
     #{base_button_classes()}
     text-primary
     border-primary
+    bg-transparent
     hover:bg-secondary-hover
     hover:border-secondary-hover-border
     hover:text-text-invert
@@ -431,7 +465,7 @@ defmodule AlertsUIWeb.SharedComponents do
   def copy_button(assigns) do
     ~H"""
     <button
-      class="h-7 w-7 mt-4 border border-border-primary bg-bg-input-default active:bg-menu-active rounded-sm hover:bg-primary-hover"
+      class="h-7 w-7 mt-4 border border-border-primary bg-bg-input-default active:bg-menu-active rounded hover:bg-primary-hover"
       phx-click={JS.dispatch("phx:copy", to: @copy_id)}
       title={@title}
       type="button"
@@ -585,7 +619,7 @@ defmodule AlertsUIWeb.SharedComponents do
       phx-mounted={@show && show_modal(@id)}
       phx-remove={hide_modal(@id)}
       data-cancel={JS.exec(@on_cancel, "phx-remove")}
-      class="relative z-50 hidden"
+      class="relative z-50 hidden !ml-0"
     >
       <div id={"#{@id}-bg"} class="bg-black/90 fixed inset-0 transition-opacity" aria-hidden="true" />
       <div
@@ -743,7 +777,7 @@ defmodule AlertsUIWeb.SharedComponents do
           right-0
           z-[100]
           bg-bg-input-default
-          rounded-[4px]
+          rounded
           text-white
           border
           border-border-primary
@@ -1270,7 +1304,7 @@ defmodule AlertsUIWeb.SharedComponents do
           checked={@checked}
           class={[
             "[appearance:none] hover:bg-primary-hover w-4 h-4 checked:bg-primary checked:before:content-['']
-            rounded-sm bg-bg-input-default checked:before:content-['✓'] font-bold leading-none",
+            rounded bg-bg-input-default checked:before:content-['✓'] font-bold leading-none",
             @check_class,
             if(length(@errors) > 0, do: "border border-1 border-danger focus:border-danger")
           ]}
@@ -1323,8 +1357,8 @@ defmodule AlertsUIWeb.SharedComponents do
           value="true"
           checked={@checked}
           class={[
-            "[appearance:none] hover:bg-primary-hover w-7 h-7 border border-border-primary rounded-sm
-            rounded-sm bg-bg-input-default font-bold leading-none flex items-center justify-center text-text-primary",
+            "[appearance:none] hover:bg-primary-hover w-7 h-7 border border-border-primary rounded
+            bg-bg-input-default font-bold leading-none flex items-center justify-center text-text-primary",
             "before:hero-arrow-path",
             "checked:bg-primary checked:before:content-[''] checked:text-bg-primary",
             @class,
