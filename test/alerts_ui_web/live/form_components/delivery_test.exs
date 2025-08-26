@@ -92,4 +92,22 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
     refute view
            |> render() =~ ~s(Check box to show you understand)
   end
+
+  test "renders correctly while editing" do
+    alert_data = %{
+      banner_text: "my banner text"
+    }
+
+    assigns = @assigns |> Map.merge(%{alert_data: alert_data, editing: true})
+
+    {:ok, view, _html} = live_isolated_component(Delivery, assigns)
+
+    assert view
+           |> element("div#banner_div")
+           |> render() =~ ~s(id=\"banner-container\">)
+
+    assert view
+           |> element("div#banner_div")
+           |> render() =~ ~s(my banner text)
+  end
 end

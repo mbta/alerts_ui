@@ -50,7 +50,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
       |> Map.merge(banner_text_map)
 
     data =
-      if Map.get(form.params, :banner_text) do
+      if Map.get(form.params, "banner_text") do
         Map.put(data, "view_banner", true)
       else
         data
