@@ -1,4 +1,4 @@
-<div id="view_alerts_live_view" class="mt-10 mx-6 pb-10">
+<div id="view_alerts_live_view" class="h-[calc(100vh-120px)] mt-10 mx-6 flex flex-col">
   <div class="flex">
     <.button_primary_link href="/alerts/new" class="whitespace-nowrap">
       <.icon name="hero-plus" /> Create an Alert
@@ -30,7 +30,9 @@
   </div>
 
   <div class="flex items-center bg-bg-secondary p-2 text-sm border-t border-border-primary justify-center">
-    <span class="w-[100px] mr-auto">{@meta.total_count} {BuildAutoText.maybe_pluralize("alert", @meta.total_count != 1)}</span>
+    <span class="w-[100px] mr-auto">
+      {@meta.total_count} {BuildAutoText.maybe_pluralize("alert", @meta.total_count != 1)}
+    </span>
     <Flop.Phoenix.pagination
       meta={@meta}
       on_paginate={JS.push("paginate-alerts")}
@@ -80,7 +82,8 @@
     cancel_event_name="close_details"
     target_id="#view_alerts_live_view"
   />
-  <div>
+
+  <div class="min-h-0 shrink overflow-y-auto">
     <Flop.Phoenix.table
       items={@alerts}
       meta={@meta}
@@ -95,7 +98,7 @@
         tbody_tr_attrs: [
           class: "hover:bg-bg-elevation-3 cursor-pointer odd:bg-bg-secondary border-none"
         ],
-        thead_th_attrs: [class: "px-2 leading-[1.5]"],
+        thead_th_attrs: [class: "bg-bg-primary sticky top-0 z-10 px-2 leading-[1.5]"],
         thead_tr_attrs: [class: "text-base text-text-primary border-none"]
       ]}
       row_click={&JS.push("open_details", value: %{alert_id: &1.alert_id})}
