@@ -114,9 +114,9 @@
         directions={{:asc_nulls_first, :desc_nulls_last}}
         col_style="width: 7.5%;"
       >
-      <div title={format_timestamp(alert.active_period_start)}>
-        {format_start_time(alert.active_period_start)}
-      </div>
+        <div title={format_timestamp(alert.active_period_start)}>
+          {format_start_time(alert.active_period_start)}
+        </div>
       </:col>
       <:col
         :let={alert}
@@ -129,14 +129,15 @@
         directions={{:asc_nulls_first, :desc_nulls_last}}
         col_style="width: 7.5%;"
       >
-      <div
-        title={format_timestamp(alert.active_period_end)}
-        class={
-          danger_text(
-            alert.active_period_end,
-            alert.closed_timestamp
-          )
-        }>
+        <div
+          title={format_timestamp(alert.active_period_end)}
+          class={
+            danger_text(
+              alert.active_period_end,
+              alert.closed_timestamp
+            )
+          }
+        >
           {format_end_time(alert.active_period_end, alert.duration_certainty)}
         </div>
       </:col>

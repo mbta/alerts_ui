@@ -655,9 +655,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
 
       expected_timestamp = nil
 
-      actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(
-        alert.active_period_end
-      )
+      actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_end)
 
       assert expected_timestamp == actual_timestamp
     end
@@ -688,9 +686,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
 
       expected_timestamp = "Oct 13 2023, 12:01 AM"
 
-      actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(
-        alert.active_period_end
-      )
+      actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_end)
 
       assert expected_timestamp == actual_timestamp
     end
@@ -723,9 +719,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
 
         expected_timestamp = "Jul 01 2025, 07:00 AM"
 
-        actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(
-          alert.active_period_end
-        )
+        actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_end)
 
         assert expected_timestamp == actual_timestamp
       end
@@ -759,9 +753,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
 
         expected_timestamp = "Jun 30 2025, 06:00 AM"
 
-        actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(
-          alert.active_period_end
-        )
+        actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_end)
 
         assert expected_timestamp == actual_timestamp
       end
@@ -795,9 +787,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
 
       expected_timestamp = "Jun 30 2025, 07:00 AM"
 
-      actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(
-        alert.active_period_start
-      )
+      actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_start)
 
       assert expected_timestamp == actual_timestamp
     end
@@ -830,9 +820,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
 
       expected_timestamp = "Jun 29 2025, 07:00 AM"
 
-      actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(
-        alert.active_period_start
-      )
+      actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_start)
 
       assert expected_timestamp == actual_timestamp
     end
