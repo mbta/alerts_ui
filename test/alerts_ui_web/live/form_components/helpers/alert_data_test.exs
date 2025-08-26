@@ -394,6 +394,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         informed_entity: [],
         active_period_start: ~U[2024-05-02 16:09:34.007545Z],
         active_period_end: ~U[2024-05-02 18:09:34.007545Z],
+        notification_period_end: ~U[2024-05-03 06:00:00Z],
         active_period: [
           %{start: ~U[2024-05-02 16:09:34.007545Z], end: ~U[2024-05-02 18:09:34.007545Z]}
         ],
@@ -403,7 +404,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       result = AlertData.build_alert_data("1")
       assert result.active_period_end_specifier == "later_today"
-      assert result.active_period_end == local_naive_from_utc(~U[2024-05-02 18:09:34Z])
+      assert result.active_period_end == ~N[2024-05-03 02:00:00]
+      assert result.active_period_end_date == ~D[2024-05-02]
     end
 
     test "handles known duration at an end-of-service-time" do
