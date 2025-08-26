@@ -262,7 +262,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
     test "default timeline filter is current, with end date asc", %{conn: conn} do
       {:ok, _view, html} = live(conn, "/alerts")
 
-      assert ["10300", "10500", "10600", "10900", "10100", "10000"] = get_alert_id_order(html)
+      assert get_alert_id_order(html) == ["10300", "10500", "10600", "10900", "10100", "10000"]
     end
 
     @tag :logged_in_user
@@ -270,21 +270,21 @@ defmodule AlertsUIWeb.AlertsLiveTest do
       {:ok, _view, html} =
         live(conn, "/alerts?filters[4][field]=timeline&filters[4][value]=future")
 
-      assert ["10400", "10200", "11000", "11400", "10800", "11100"] = get_alert_id_order(html)
+      assert get_alert_id_order(html) == ["10400", "10200", "11000", "11400", "10800", "11100"]
     end
 
     @tag :logged_in_user
     test "clicking past timeline filter renders end date desc", %{conn: conn} do
       {:ok, _view, html} = live(conn, "/alerts?filters[4][field]=timeline&filters[4][value]=past")
 
-      assert ["10700", "11300", "11200"] = get_alert_id_order(html)
+      assert get_alert_id_order(html) == ["10700", "11300", "11200"]
     end
 
     @tag :logged_in_user
     test "clicking all timeline filter renders end date desc", %{conn: conn} do
       {:ok, _view, html} = live(conn, "/alerts?filters[4][field]=timeline&filters[4][value]=all")
 
-      assert [
+      assert get_alert_id_order(html) == [
                "11100",
                "10000",
                "10100",
@@ -300,7 +300,69 @@ defmodule AlertsUIWeb.AlertsLiveTest do
                "10700",
                "11300",
                "11200"
-             ] = get_alert_id_order(html)
+             ]
+    end
+
+    @tag :logged_in_user
+    test "reversing the sort for end time maintains proper order", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts")
+
+      assert element(view, "th[aria-sort='ascending'] span.order-direction") |> render() =~
+               "hero-arrow-up"
+
+      html =
+        view
+        |> element("a", "End")
+        |> render_click()
+
+      assert element(view, "th[aria-sort='descending'] span.order-direction") |> render() =~
+               "hero-arrow-down"
+
+      assert get_alert_id_order(html) == ["10000", "10100", "10900", "10600", "10500", "10300"]
+
+      html =
+        view
+        |> element("a", "End")
+        |> render_click()
+
+      assert element(view, "th[aria-sort='ascending'] span.order-direction") |> render() =~
+               "hero-arrow-up"
+
+      assert get_alert_id_order(html) == ["10300", "10500", "10600", "10900", "10100", "10000"]
+    end
+
+    @tag :logged_in_user
+    test "sorting by other fields and then sorting by end time maintains proper order", %{
+      conn: conn
+    } do
+      {:ok, view, _html} = live(conn, "/alerts")
+
+      html =
+        view
+        |> element("a", "ID")
+        |> render_click()
+
+      refute get_alert_id_order(html) == ["10300", "10500", "10600", "10900", "10100", "10000"]
+
+      html =
+        view
+        |> element("a", "End")
+        |> render_click()
+
+      assert element(view, "th[aria-sort='ascending'] span.order-direction") |> render() =~
+               "hero-arrow-up"
+
+      assert get_alert_id_order(html) == ["10300", "10500", "10600", "10900", "10100", "10000"]
+
+      html =
+        view
+        |> element("a", "End")
+        |> render_click()
+
+      assert element(view, "th[aria-sort='descending'] span.order-direction") |> render() =~
+               "hero-arrow-down"
+
+      assert get_alert_id_order(html) == ["10000", "10100", "10900", "10600", "10500", "10300"]
     end
   end
 

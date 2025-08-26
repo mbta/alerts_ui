@@ -76,14 +76,25 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   @impl true
   # Custom sort for the End column, given complicated sort expectations there
   def handle_event("sort-alerts", %{"order" => order}, socket)
-      when order == "active_period_end" do
+      when order == "notification_period_end" do
     flop = socket.assigns.meta.flop
 
-    order_fields = lookup_end_time_order_fields_by_params(socket.assigns.params)
+    # Need to mimic Flop.push_order in a custom way because push_order
+    # updates the ordered fields AND direction, but takes too many liberties.
+    # (e.g. defaults to asc, keeps the other sort fields, etc.)
+
+    # If the existing flop metadata has notification_period_end,
+    # then the directions need reversing. Otherwise, use default directions
 
     new_order_directions =
-      flop.order_directions
-      |> Enum.map(&reverse_order_direction(&1))
+      if hd(flop.order_by) == :notification_period_end do
+        flop.order_directions
+        |> Enum.map(&reverse_order_direction(&1))
+      else
+        lookup_end_time_order_directions_by_params(socket.assigns.params)
+      end
+
+    order_fields = lookup_end_time_order_fields_by_params(socket.assigns.params)
 
     flop =
       flop
