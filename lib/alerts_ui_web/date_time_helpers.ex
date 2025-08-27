@@ -34,7 +34,8 @@ defmodule AlertsUIWeb.DateTimeHelpers do
   ""
   """
   @spec friendly_date_time(DateTime.t() | String.t() | nil) :: String.t()
-  @spec friendly_date_time(DateTime.t() | String.t() | nil, DateTime.t()) :: String.t()
+  @spec friendly_date_time(DateTime.t() | String.t() | nil, DateTime.t()) ::
+          String.t()
   def friendly_date_time(dt, now \\ DateTime.now!("America/New_York"))
 
   def friendly_date_time(nil, _now), do: ""
@@ -45,8 +46,10 @@ defmodule AlertsUIWeb.DateTimeHelpers do
   end
 
   def friendly_date_time(%DateTime{} = dt, now) do
+    dt = DateTime.shift_zone!(dt, "America/New_York")
     format = date_time_format(dt, now)
-    Calendar.strftime(DateTime.shift_zone!(dt, "America/New_York"), format)
+
+    Calendar.strftime(dt, format)
   end
 
   @doc """

@@ -202,7 +202,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         within_same_service_day?: false,
         end_datetime: end_datetime
       }) do
-    formatted_end = end_datetime |> ActivePeriod.naive_datetime_to_service_date() |> format_date
+    formatted_end = end_datetime |> ActivePeriod.datetime_to_service_date() |> format_date
     "through #{formatted_end}"
   end
 
@@ -223,7 +223,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         ends_today?: false,
         end_datetime: end_datetime
       }) do
-    formatted_end = end_datetime |> ActivePeriod.naive_datetime_to_service_date() |> format_date
+    formatted_end = end_datetime |> ActivePeriod.datetime_to_service_date() |> format_date
     "through #{formatted_end}"
   end
 
@@ -293,7 +293,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         within_same_service_day?: false,
         end_datetime: end_datetime
       }) do
-    formatted_end = end_datetime |> ActivePeriod.naive_datetime_to_service_date() |> format_date
+    formatted_end = end_datetime |> ActivePeriod.datetime_to_service_date() |> format_date
     "from #{datetime_to_formatted_time(start_datetime)} today through #{formatted_end}"
   end
 
@@ -341,7 +341,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         end_datetime: end_datetime
       }) do
     formatted_end_date =
-      end_datetime |> ActivePeriod.naive_datetime_to_service_date() |> format_date
+      end_datetime |> ActivePeriod.datetime_to_service_date() |> format_date
 
     "from #{datetime_to_formatted_date(start_datetime)} at #{datetime_to_formatted_time(start_datetime)} through #{formatted_end_date}"
   end
@@ -427,7 +427,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         ends_today?: false,
         end_datetime: end_datetime
       }) do
-    formatted_end = end_datetime |> ActivePeriod.naive_datetime_to_service_date() |> format_date
+    formatted_end = end_datetime |> ActivePeriod.datetime_to_service_date() |> format_date
     "through #{formatted_end}"
   end
 
@@ -463,10 +463,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
     start_weekday = start_datetime |> NaiveDateTime.to_date() |> Calendar.strftime("%A")
 
     end_weekday =
-      end_datetime |> ActivePeriod.naive_datetime_to_service_date() |> Calendar.strftime("%A")
+      end_datetime |> ActivePeriod.datetime_to_service_date() |> Calendar.strftime("%A")
 
     formatted_end_date =
-      end_datetime |> ActivePeriod.naive_datetime_to_service_date() |> format_date
+      end_datetime |> ActivePeriod.datetime_to_service_date() |> format_date
 
     if {start_weekday, end_weekday} == {"Saturday", "Sunday"} do
       "the weekend of #{datetime_to_formatted_date(start_datetime)} and #{formatted_end_date}"
@@ -673,8 +673,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
 
   # returns true if start and end are part of the same service day
   defp within_same_service_day?(start_datetime, end_datetime) do
-    start = start_datetime |> ActivePeriod.naive_datetime_to_service_date()
-    end_ = end_datetime |> ActivePeriod.naive_datetime_to_service_date()
+    start = start_datetime |> ActivePeriod.datetime_to_service_date()
+    end_ = end_datetime |> ActivePeriod.datetime_to_service_date()
 
     # special case where start is at start of service
     starts_at_sos = NaiveDateTime.to_time(start_datetime) == ActivePeriod.start_of_service_time()

@@ -251,6 +251,23 @@ defmodule AlertsUI.Models.ActivePeriodTest do
     end
   end
 
+  describe "datetime_to_service_date_exclusive/1" do
+    test "when time is after midnight and before end of service" do
+      start_datetime = DateTime.new!(~D[2025-01-01], ~T[02:00:00], "America/New_York")
+      assert ~D[2024-12-31] == ActivePeriod.datetime_to_service_date_exclusive(start_datetime)
+    end
+
+    test "when time is after start of service" do
+      start_datetime = DateTime.new!(~D[2025-01-01], ~T[08:00:00], "America/New_York")
+      assert ~D[2025-01-01] == ActivePeriod.datetime_to_service_date_exclusive(start_datetime)
+    end
+
+    test "when time is start of service" do
+      start_datetime = DateTime.new!(~D[2025-01-01], ~T[03:00:00], "America/New_York")
+      assert ~D[2025-01-01] == ActivePeriod.datetime_to_service_date_exclusive(start_datetime)
+    end
+  end
+
   describe "datetime_to_service_date/1" do
     test "when time is after midnight and before end of service" do
       start_datetime = DateTime.new!(~D[2025-01-01], ~T[02:00:00], "America/New_York")
@@ -261,22 +278,27 @@ defmodule AlertsUI.Models.ActivePeriodTest do
       start_datetime = DateTime.new!(~D[2025-01-01], ~T[08:00:00], "America/New_York")
       assert ~D[2025-01-01] == ActivePeriod.datetime_to_service_date(start_datetime)
     end
+
+    test "when time is end of service" do
+      start_datetime = DateTime.new!(~D[2025-01-01], ~T[03:00:00], "America/New_York")
+      assert ~D[2024-12-31] == ActivePeriod.datetime_to_service_date(start_datetime)
+    end
   end
 
-  describe "naive datetime_to_service_date/1" do
+  describe "datetime_to_service_date/1 when naive" do
     test "when time is after midnight and before end of service" do
       start_datetime = NaiveDateTime.new!(~D[2025-01-01], ~T[02:00:00])
-      assert ~D[2024-12-31] == ActivePeriod.naive_datetime_to_service_date(start_datetime)
+      assert ~D[2024-12-31] == ActivePeriod.datetime_to_service_date(start_datetime)
     end
 
     test "when time is after midnight and right at end of service" do
       start_datetime = NaiveDateTime.new!(~D[2025-01-01], ~T[03:00:00])
-      assert ~D[2024-12-31] == ActivePeriod.naive_datetime_to_service_date(start_datetime)
+      assert ~D[2024-12-31] == ActivePeriod.datetime_to_service_date(start_datetime)
     end
 
     test "when time is after start of service" do
       start_datetime = NaiveDateTime.new!(~D[2025-01-01], ~T[08:00:00])
-      assert ~D[2025-01-01] == ActivePeriod.naive_datetime_to_service_date(start_datetime)
+      assert ~D[2025-01-01] == ActivePeriod.datetime_to_service_date(start_datetime)
     end
   end
 end
