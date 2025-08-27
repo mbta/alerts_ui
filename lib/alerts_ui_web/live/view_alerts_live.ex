@@ -262,6 +262,8 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   def format_end_time(_, _), do: ""
 
+  defp adjusted_date_time(nil), do: ""
+
   defp adjusted_date_time(utc_time) do
     adjusted_time = DateTime.shift_zone!(utc_time, "America/New_York")
     adjusted_dt_date = ActivePeriod.datetime_to_service_date_exclusive(adjusted_time)
