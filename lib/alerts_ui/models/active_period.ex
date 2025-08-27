@@ -172,7 +172,7 @@ defmodule AlertsUI.Models.ActivePeriod do
     date = DateTime.to_date(datetime)
 
     if Time.after?(time, ~T[00:00:00]) and
-         Time.before?(time, @start_of_service) do
+         Time.before?(time, @end_of_service) do
       Date.add(date, -1)
     else
       date

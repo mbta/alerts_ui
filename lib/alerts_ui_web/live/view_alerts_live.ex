@@ -217,11 +217,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     if start_time_utc && DateTime.compare(most_recent_start_of_service, start_time_utc) == :eq do
       "start of service"
     else
-      adjusted_start_time = DateTime.shift_zone!(start_time_utc, "America/New_York")
-      adjusted_dt_date = ActivePeriod.datetime_to_service_date_exclusive(adjusted_start_time)
-
-      adjusted_dt =
-        DateTime.new!(adjusted_dt_date, DateTime.to_time(adjusted_start_time), "America/New_York")
+      adjusted_dt = adjusted_date_time(start_time_utc)
 
       DateTimeHelpers.friendly_date_time(adjusted_dt)
     end
@@ -238,17 +234,20 @@ defmodule AlertsUIWeb.ViewAlertsLive do
        ) == :eq do
       "end of service"
     else
-      adjusted_end_time = DateTime.shift_zone!(end_time_utc, "America/New_York")
-      adjusted_dt_date = ActivePeriod.datetime_to_service_date_exclusive(adjusted_end_time)
-
-      adjusted_dt =
-        DateTime.new!(adjusted_dt_date, DateTime.to_time(adjusted_end_time), "America/New_York")
+      adjusted_dt = adjusted_date_time(end_time_utc)
 
       DateTimeHelpers.friendly_date_time(adjusted_dt)
     end
   end
 
   def format_end_time(_, _), do: ""
+
+  defp adjusted_date_time(utc_time) do
+    adjusted_time = DateTime.shift_zone!(utc_time, "America/New_York")
+    adjusted_dt_date = ActivePeriod.datetime_to_service_date_exclusive(adjusted_time)
+
+    DateTime.new!(adjusted_dt_date, DateTime.to_time(adjusted_time), "America/New_York")
+  end
 
   defp format_effect_options do
     [{"All", ""}]
