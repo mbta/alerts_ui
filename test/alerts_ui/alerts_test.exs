@@ -319,7 +319,7 @@ defmodule AlertsUI.AlertsTest do
       assert result.active_period_end == ~U[2024-12-11 14:00:00Z]
     end
 
-    test "update end to end of service if eos (notification period end) is less than 2 hours from now" do
+    test "update end to notification_period_end if the notification_period_end is less than 2 hours from now" do
       current_time = ~U[2024-12-11 06:30:00Z]
 
       insert(:alert, %{
