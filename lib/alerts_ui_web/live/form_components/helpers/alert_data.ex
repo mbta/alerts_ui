@@ -204,7 +204,15 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
   def determine_one_time_active_period(alert) do
     active_period_start = shift_to_naive(alert.active_period_start)
-    active_period_end = shift_to_naive(alert.active_period_end)
+
+    # use notification_period_end for "later today" alerts because
+    # their active period ends are only 2 hours out.
+    active_period_end =
+      if alert.duration_certainty == :ESTIMATED do
+        shift_to_naive(alert.notification_period_end)
+      else
+        shift_to_naive(alert.active_period_end)
+      end
 
     end_specifier =
       determine_end_specifier(
