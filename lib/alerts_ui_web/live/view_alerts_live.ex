@@ -211,11 +211,9 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   def reverse_order_direction(:asc_nulls_first), do: :desc_nulls_last
   def reverse_order_direction(:desc_nulls_first), do: :asc_nulls_last
 
-  def format_timestamp(%DateTime{} = timestamp) do
-    Calendar.strftime(timestamp, "%b %d %Y, %I:%M %p")
+  def format_timestamp(timestamp) do
+    DateTimeHelpers.timestamp_date_time(timestamp)
   end
-
-  def format_timestamp(nil), do: nil
 
   def format_start_time(start_time_utc) do
     current_service_date =

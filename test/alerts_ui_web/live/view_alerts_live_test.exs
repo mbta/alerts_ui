@@ -684,7 +684,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
 
       assert expected == actual
 
-      expected_timestamp = "Oct 13 2023, 12:01 AM"
+      expected_timestamp = "Oct 12 2023, 08:01 PM"
 
       actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_end)
 
@@ -717,7 +717,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
 
         assert expected == actual
 
-        expected_timestamp = "Jul 01 2025, 07:00 AM"
+        expected_timestamp = "Jul 01 2025, 03:00 AM"
 
         actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_end)
 
@@ -751,7 +751,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
 
         assert expected == actual
 
-        expected_timestamp = "Jun 30 2025, 06:00 AM"
+        expected_timestamp = "Jun 30 2025, 02:00 AM"
 
         actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_end)
 
@@ -785,7 +785,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
 
       assert expected == actual
 
-      expected_timestamp = "Jun 30 2025, 07:00 AM"
+      expected_timestamp = "Jun 30 2025, 03:00 AM"
 
       actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_start)
 
@@ -818,7 +818,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
 
       assert expected == actual
 
-      expected_timestamp = "Jun 29 2025, 07:00 AM"
+      expected_timestamp = "Jun 29 2025, 03:00 AM"
 
       actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_start)
 

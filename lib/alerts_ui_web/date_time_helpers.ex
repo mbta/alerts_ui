@@ -95,6 +95,23 @@ defmodule AlertsUIWeb.DateTimeHelpers do
     do: "#{floor(time_in_secs / @one_minute_in_seconds)} minutes"
 
   @doc """
+  Put a UTC timestamp in local time and display the month/day/year with hh:mm AM/PM.
+
+  iex> timestamp_date_time(~U[2022-01-07 14:01:00.00Z])
+  "Jan 07 2022, 09:01 AM"
+  iex> timestamp_date_time(nil)
+  nil
+  """
+  @spec timestamp_date_time(DateTime.t() | nil) :: String.t()
+  def timestamp_date_time(%DateTime{} = utc_timestamp) do
+    utc_timestamp
+    |> DateTime.shift_zone!("America/New_York")
+    |> Calendar.strftime("%b %d %Y, %I:%M %p")
+  end
+
+  def timestamp_date_time(nil), do: nil
+
+  @doc """
   Change seconds into minutes, rounded to an integer
 
   iex> seconds_to_minutes(nil)
