@@ -11,7 +11,8 @@ defmodule AlertsUIWeb.FormComponents.Timeline do
 
     ~H"""
     <div class="flex flex-row justify-start mb-14 bg-sky-200 py-2 px-4 min-w-full">
-      <.h2 class="lg:mx-6 py-3 text-text-dark">Creating New Alert</.h2>
+      <.h2 :if={!@editing} class="lg:mx-6 py-3 text-text-dark">Creating New Alert</.h2>
+      <.h2 :if={@editing} class="lg:mx-6 py-3 text-text-dark">Editing Alert #{@alert_id}</.h2>
       <div :for={step <- @steps} class="lg:mx-6 mx-2 self-center min-w-[12rem]">
         {step_buttons(assigns, step)}
       </div>

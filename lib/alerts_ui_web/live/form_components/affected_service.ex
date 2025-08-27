@@ -500,7 +500,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     ~H"""
     <div class="min-w-[100%] self-start flex flex-col" id="service_view">
-      <.h1 class="!mb-0">Create new alert</.h1>
+      <.h1 :if={!@editing} class="!mb-0">Create new alert</.h1>
+      <.h1 :if={@editing} class="!mb-0">Edit alert</.h1>
       <.p>
         {ContentFormatter.service_type_string(@route_type)} • {@effect_name || ""}
       </.p>
