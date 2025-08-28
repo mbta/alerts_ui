@@ -1,8 +1,8 @@
-<div id="view_alerts_live_view">
-  <div data-theme="winter">
-    <a href="/alerts/new" class="hover:text-zinc-700">
-      Create an Alert
-    </a>
+<div id="view_alerts_live_view" class="h-[calc(100vh-120px)] mt-10 mx-6 flex flex-col">
+  <div class="flex">
+    <.button_primary_link href="/alerts/new" class="whitespace-nowrap">
+      <.icon name="hero-plus" /> Create an Alert
+    </.button_primary_link>
     <.filter_form
       fields={[
         alert_id: [label: "ID", op: :ilike_and],
@@ -27,40 +27,51 @@
       meta={@meta}
       id="alert-filter-form"
     />
-    <div class="mt-4 flex flex-col items-center">
-      <Flop.Phoenix.pagination
-        meta={@meta}
-        on_paginate={JS.push("paginate-alerts")}
-        opts={[
-          page_links: {:ellipsis, 3},
-          wrapper_attrs: [class: "flex flex-row justify-center"],
-          pagination_link_attrs: [
-            class:
-              "rounded-none btn w-[2.5rem] text-md border-2 border-primary bg-transparent text-primary"
-          ],
-          current_link_attrs: [
-            class:
-              "rounded-none btn w-[2.5rem] text-md border-2 border-primary bg-transparent text-primary"
-          ],
-          next_link_content: carat_icon(:right),
-          next_link_attrs: [
-            class:
-              "border-l-0 rounded-l-none btn order-last w-[2.5rem] text-md border-2 border-primary bg-transparent text-primary"
-          ],
-          previous_link_content: carat_icon(:left),
-          previous_link_attrs: [
-            class:
-              "border-r-0 rounded-r-none btn w-[2.5rem] text-md border-2 border-primary bg-transparent text-primary"
-          ],
-          pagination_list_attrs: [class: "join"],
-          ellipsis_attrs: [
-            class:
-              "rounded-none btn w-[2.5rem] text-md border-2 border-primary bg-transparent text-primary"
-          ]
-        ]}
-      />
-      <span class="mt-2">Total records: {@meta.total_count}</span>
-    </div>
+  </div>
+
+  <div class="flex items-center bg-bg-secondary p-2 text-sm border-t border-border-primary justify-center">
+    <span class="w-[100px] mr-auto">
+      {@meta.total_count} {BuildAutoText.maybe_pluralize("alert", @meta.total_count != 1)}
+    </span>
+    <Flop.Phoenix.pagination
+      meta={@meta}
+      on_paginate={JS.push("paginate-alerts")}
+      opts={[
+        disabled_class:
+          "border-secondary-disabled text-secondary-disabled cursor-not-allowed
+                        hover:bg-transparent hover:text-secondary-disabled hover:border-secondary-disabled
+                        active:bg-transparent active:text-secondary-disabled active:border-secondary-disabled",
+        page_links: {:ellipsis, 3},
+        wrapper_attrs: [class: "flex flex-row justify-center mr-auto"],
+        pagination_link_attrs: [
+          class:
+            "rounded-none btn h-auto min-h-fit #{SharedComponents.secondary_button_classes()} !py-1 !px-2 leading-[1.5] font-normal"
+        ],
+        current_link_attrs: [
+          class:
+            "rounded-none btn h-auto min-h-fit #{SharedComponents.secondary_button_classes()} !py-1 !px-2 leading-[1.5] font-normal
+            !bg-primary text-text-invert"
+        ],
+        next_link_content: carat_icon(:right),
+        next_link_attrs: [
+          class: "border-l-0 rounded-l-none
+            btn !h-auto min-h-fit #{SharedComponents.secondary_button_classes()} !py-1 !px-[6px] leading-[1.5]
+            order-last"
+        ],
+        previous_link_content: carat_icon(:left),
+        previous_link_attrs: [
+          class:
+            "border-r-0 rounded-r-none
+            btn !h-auto min-h-fit #{SharedComponents.secondary_button_classes()} !py-1 !px-[6px] leading-[1.5]"
+        ],
+        pagination_list_attrs: [class: "join"],
+        ellipsis_attrs: [
+          class:
+            "rounded-none btn h-auto min-h-fit #{SharedComponents.secondary_button_classes()} !py-1 !px-2 leading-[1.5] font-normal"
+        ]
+      ]}
+    />
+    <span class="w-[100px]" />
   </div>
 
   <AlertsUIWeb.ReviewModal.review_modal
@@ -71,7 +82,8 @@
     cancel_event_name="close_details"
     target_id="#view_alerts_live_view"
   />
-  <div data-theme="winter">
+
+  <div class="min-h-0 shrink overflow-y-auto">
     <Flop.Phoenix.table
       items={@alerts}
       meta={@meta}
@@ -81,8 +93,13 @@
         symbol_asc: sort_icon(:asc),
         symbol_desc: sort_icon(:desc),
         symbol_unsorted: sort_icon(nil),
-        table_attrs: [class: "table table-fixed"],
-        tbody_tr_attrs: [class: "hover cursor-pointer"]
+        table_attrs: [class: "table table-fixed min-w-[870px]"],
+        tbody_td_attrs: [class: "px-2 py-1 leading-[1.5]"],
+        tbody_tr_attrs: [
+          class: "hover:bg-bg-elevation-3 cursor-pointer odd:bg-bg-secondary border-none"
+        ],
+        thead_th_attrs: [class: "bg-bg-primary sticky top-0 z-10 px-2 leading-[1.5]"],
+        thead_tr_attrs: [class: "text-base text-text-primary border-none"]
       ]}
       row_click={&JS.push("open_details", value: %{alert_id: &1.alert_id})}
     >
@@ -100,7 +117,7 @@
         label="ID"
         field={:integer_alert_id}
         col_style="width: 5.7%;"
-        tbody_td_attrs={[class: "alert-id-cell"]}
+        tbody_td_attrs={[class: "p-1 alert-id-cell"]}
       >
         {alert.alert_id}
       </:col>
@@ -136,26 +153,26 @@
           {format_end_time(alert.active_period_end, alert.duration_certainty)}
         </div>
       </:col>
-      <:action :let={alert} label="Actions" col_style="width: 150px">
+      <:action :let={alert} label="Actions" col_style="width: 128px">
         <div class="inline-flex justify-end space-x-2 w-full">
           <.button_secondary_link
             :if={!AlertsUIWeb.FormComponents.Helpers.Helpers.alert_is_closed(alert)}
             href={~p"/alerts/edit?alert_id=#{alert.alert_id}"}
-            class="inline-flex rounded-[4px] !px-2 !py-[3px]"
+            class="inline-flex rounded !px-2 !py-[3px]"
           >
             <.icon name="hero-pencil-solid" class="w-4 h-4" />
           </.button_secondary_link>
           <.button_secondary_link
             :if={!AlertsUIWeb.FormComponents.Helpers.Helpers.alert_is_closed(alert)}
             id={"close-button-#{alert.alert_id}"}
-            class="inline-flex rounded-[4px] !px-2 !py-[3px]"
+            class="inline-flex rounded !px-2 !py-[3px]"
             phx-click={show_modal("close-alert-modal-#{alert.alert_id}")}
           >
             <.icon name="hero-x-mark-solid" class="w-4 h-4" />
           </.button_secondary_link>
           <.button_menu>
             <:toggle>
-              <.button_secondary class="inline-flex rounded-[4px] !px-2 !py-[3px]">
+              <.button_secondary class="inline-flex rounded !px-2 !py-[3px]">
                 <.icon name="hero-ellipsis-vertical" class="w-4 h-4" />
               </.button_secondary>
             </:toggle>

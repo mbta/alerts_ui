@@ -508,13 +508,13 @@ defmodule AlertsUIWeb.AlertsLiveTest do
         active_period_start: ~U[2023-11-12 00:01:00Z],
         duration_certainty: :UNKNOWN,
         header_text: "here's a bike issue alert",
-        effect_detail: "BIKE_ISSUE",
+        effect_name: "Bike Issue",
         original_route_selections: []
       })
 
       {:ok, _view, html} = live(conn, "/alerts")
 
-      assert html =~ "Facility"
+      assert html =~ ~r/title="Facility"/s
     end
 
     @tag :logged_in_user

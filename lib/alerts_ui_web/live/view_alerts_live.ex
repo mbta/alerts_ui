@@ -7,6 +7,8 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   alias AlertsUI.Models.{ActivePeriod, Effect}
   alias AlertsUIWeb.DateTimeHelpers
   alias AlertsUIWeb.FormComponents.Helpers.AlertData
+  alias AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText
+  alias AlertsUIWeb.SharedComponents
 
   @ten_seconds_in_ms 10_000
 
@@ -350,7 +352,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     assigns = %{}
 
     ~H"""
-    <.icon name="hero-arrow-up" class="ml-1 h-4 w-4" />
+    <.icon name="hero-arrow-up" class="mx-1 h-4 w-4" />
     """
   end
 
@@ -358,7 +360,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     assigns = %{}
 
     ~H"""
-    <.icon name="hero-arrow-down" class="ml-1 h-4 w-4" />
+    <.icon name="hero-arrow-down" class="mx-1 h-4 w-4" />
     """
   end
 
@@ -366,7 +368,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     assigns = %{}
 
     ~H"""
-    <.icon name="hero-arrows-up-down" class="ml-1 h-4 w-4" />
+    <.icon name="hero-arrows-up-down" class="mx-1 h-4 w-4" />
     """
   end
 

@@ -349,8 +349,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   end
 
   # add "s" to word if second argument evaluates to true
-  defp maybe_pluralize(word, true), do: word <> "s"
-  defp maybe_pluralize(word, false), do: word
+  def maybe_pluralize(word, true), do: word <> "s"
+  def maybe_pluralize(word, false), do: word
 
   defp format_cause(cause_detail) do
     cause_detail |> String.replace("_", " ") |> String.downcase()
