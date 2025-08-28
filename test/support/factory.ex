@@ -41,7 +41,9 @@ defmodule AlertsUI.Support.Factory do
         build(:active_period)
       ],
       informed_entity: [build(:informed_entity_with_trip)],
-      reminder_times: [build(:reminder_time)]
+      reminder_times: [build(:reminder_time)],
+      active_period_start: ~U[2023-10-12 00:01:00Z],
+      notification_period_start: ~U[2023-10-12 00:01:00Z]
     }
   end
 
@@ -56,6 +58,8 @@ defmodule AlertsUI.Support.Factory do
           end: ~U[2023-10-20 18:45:38Z]
         }
       ],
+      active_period_start: ~U[2023-10-20 00:01:00Z],
+      notification_period_start: ~U[2023-10-12 00:01:00Z],
       informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}],
       user: build(:user)
     }
