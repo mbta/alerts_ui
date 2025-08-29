@@ -180,7 +180,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionTextTest d
       }
 
       expected =
-        "Delayed westbound trips on 1:\n527 (9:01 AM from South Station)528 (9:01 AM from South Station)\n\nDelayed inbound trips on 22:\n841 (11:15 AM from Forest Hills)\n\nDelayed outbound trips on 22:\n841 (11:15 AM from Forest Hills)"
+        "Delayed westbound trips on 1:\n527 (9:01 AM from South Station)\n528 (9:01 AM from South Station)\n\nDelayed inbound trips on 22:\n841 (11:15 AM from Forest Hills)\n\nDelayed outbound trips on 22:\n841 (11:15 AM from Forest Hills)"
 
       actual = BuildDescriptionText.affected_trips(autotext_data)
 
