@@ -37,7 +37,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
     route: @route_1,
     trip: %Trip{id: "CR-683300-527", name: "527", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
-    departure_time: ~U[2024-02-21 14:01:00.00Z]
+    departure_time: ~U[2024-02-21 14:01:00.00Z],
+    last_stop_name: "Forest Hills"
   }
 
   @schedule_2 %EnhancedSchedule{
@@ -481,6 +482,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         route_type: 4,
         routes: [@route_1],
         stops: [@stop_1],
+        schedules: [],
         effect_name: "Suspension",
         cause_detail: "UNRULY_PASSENGER",
         alert_timing: :"one-time",
@@ -516,7 +518,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Route 1 trip 527 (9:01 AM from South Station) cancelled today through Sat, May 10 due to an unruly passenger"
+        "Route 1 trip 9:01 AM from South Station to Forest Hills cancelled today through Sat, May 10 due to an unruly passenger"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -542,7 +544,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Route 1 trip 527 (9:01 AM from South Station) operating about 10 minutes late today through Sat, May 10 due to an unruly passenger"
+        "Route 1 trip 9:01 AM from South Station to Forest Hills operating about 10 minutes late today through Sat, May 10 due to an unruly passenger"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -608,6 +610,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         route_type: 3,
         routes: [@route_1],
         stops: [@stop_1],
+        schedules: [],
         effect_name: "Stop Shoveling",
         direction: [0],
         cause_detail: "PARADE",
@@ -634,6 +637,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         route_type: 3,
         routes: [@route_1],
         stops: [@stop_1],
+        schedules: [],
         effect_name: "Delay",
         severity: 3,
         direction: [1],
@@ -661,6 +665,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         route_type: 3,
         routes: [@route_1],
         stops: [@stop_1],
+        schedules: [],
         effect_name: "Suspension",
         direction: [1],
         cause_detail: "PARADE",
@@ -687,6 +692,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         route_type: 3,
         routes: [@route_1],
         stops: [@stop_1],
+        schedules: [],
         effect_name: "Multi-Route Detour",
         cause_detail: "PARADE",
         alert_timing: :"one-time",
@@ -733,6 +739,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       autotext_data = %{
         route_type: 3,
         routes: [@route_1],
+        schedules: [],
         effect_name: "Detour",
         cause_detail: "PARADE",
         alert_timing: :"one-time",
@@ -756,6 +763,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       autotext_data = %{
         route_type: 3,
         routes: [@route_1],
+        schedules: [],
         effect_name: "Snow Route",
         alert_timing: :"one-time",
         start_specifier: :now,
@@ -781,6 +789,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         route_type: 1,
         routes: [@route_1],
         stops: [@stop_1],
+        schedules: [],
         direction: [0],
         effect_name: "Suspension",
         cause_detail: "ICE_IN_HARBOR",
@@ -806,6 +815,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       autotext_data = %{
         route_type: 1,
         routes: [@route_1],
+        schedules: [],
         direction: [0],
         severity: 3,
         effect_name: "Delay",
@@ -831,6 +841,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       autotext_data = %{
         route_type: 1,
         routes: [@route_1],
+        schedules: [],
         direction: [0],
         severity: 3,
         effect_name: "Service Change",
@@ -857,6 +868,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         route_type: 1,
         routes: [@route_1],
         stops: [@stop_1],
+        schedules: [],
         direction: [0],
         severity: 3,
         effect_name: "Shuttle",
@@ -884,6 +896,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         route_type: 1,
         routes: [@route_1],
         stops: [@stop_1, @stop_2],
+        schedules: [],
         direction: [0],
         severity: 3,
         effect_name: "Single Tracking",
@@ -1048,6 +1061,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       autotext_data = %{
         route_type: 3,
         routes: [@route_1],
+        schedules: [],
         effect_name: "Service Change",
         cause_detail: "SLIPPERY_RAIL",
         alert_timing: :"one-time",
@@ -1097,6 +1111,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         route_type: 4,
         routes: [@route_1],
         stops: [@stop_1],
+        schedules: [],
         direction: [1],
         effect_name: "Shuttle",
         cause_detail: "SLIPPERY_RAIL",
@@ -1123,6 +1138,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         route_type: 2,
         routes: [@route_1],
         stops: [@stop_1],
+        schedules: [],
         direction: [1],
         effect_name: "Suspension",
         cause_detail: "SLIPPERY_RAIL",
@@ -1148,6 +1164,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       autotext_data = %{
         route_type: 2,
         routes: [@route_1],
+        schedules: [],
         effect_name: "Extra Service",
         cause_detail: "SLIPPERY_RAIL",
         alert_timing: :"one-time",

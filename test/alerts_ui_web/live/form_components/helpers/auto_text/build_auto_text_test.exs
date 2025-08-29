@@ -25,7 +25,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
     route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
     trip: %Trip{id: "CR-683300-527", name: "527", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
-    departure_time: ~U[2024-02-21 14:01:00.00Z]
+    departure_time: ~U[2024-02-21 14:01:00.00Z],
+    last_stop_name: "Forest Hills"
   }
 
   @schedule_2 %EnhancedSchedule{
@@ -33,14 +34,16 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
     trip: %Trip{id: "CR-687395-841", name: "841", direction_id: 0},
     stop: %Stop{id: "place-forhl", name: "Forest Hills"},
     arrival_time: nil,
-    departure_time: ~U[2024-02-21 16:15:00.00Z]
+    departure_time: ~U[2024-02-21 16:15:00.00Z],
+    last_stop_name: "South Station"
   }
 
   @schedule_3 %EnhancedSchedule{
     route: %Route{id: "CR-Providence", type: 2, name: "Providence/Stoughton Line"},
     trip: %Trip{id: "CR-687393-839", name: "839", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
-    departure_time: ~U[2024-02-21 16:03:00.00Z]
+    departure_time: ~U[2024-02-21 16:03:00.00Z],
+    last_stop_name: "Forest Hills"
   }
 
   @facility %Facility{
@@ -270,7 +273,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
         route_type: 4
       }
 
-      expected = "527 (9:01 AM from South Station)"
+      expected = "9:01 AM from South Station to Forest Hills"
       actual = assert BuildAutoText.trip_names_only(autotext_data)
       assert expected == actual
     end
@@ -281,7 +284,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
         route_type: 4
       }
 
-      expected = "527 (9:01 AM from South Station) and 841 (11:15 AM from Forest Hills)"
+      expected =
+        "9:01 AM from South Station to Forest Hills and 11:15 AM from Forest Hills to South Station"
+
       actual = assert BuildAutoText.trip_names_only(autotext_data)
       assert expected == actual
     end
@@ -293,7 +298,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
       }
 
       expected =
-        "527 (9:01 AM from South Station) and 2 other trips"
+        "9:01 AM from South Station to Forest Hills and 2 other trips"
 
       actual = assert BuildAutoText.trip_names_only(autotext_data)
       assert expected == actual
@@ -415,31 +420,58 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
 
     test "when there is 1 numeric route" do
       expected = "Route 1"
-      actual = BuildAutoText.route_names_short(%{routes: [@route_1], route_type: 3})
+
+      actual =
+        BuildAutoText.route_names_short(%{routes: [@route_1], schedules: [], route_type: 3})
+
       assert expected == actual
     end
 
     test "when there is 1 non-numeric route" do
       expected = "SL1"
-      actual = BuildAutoText.route_names_short(%{routes: [@route_4], route_type: 3})
+
+      actual =
+        BuildAutoText.route_names_short(%{routes: [@route_4], schedules: [], route_type: 3})
+
       assert expected == actual
     end
 
     test "when there are 2 numeric routes" do
       expected = "Routes 1 and 22"
-      actual = BuildAutoText.route_names_short(%{routes: [@route_1, @route_2], route_type: 3})
+
+      actual =
+        BuildAutoText.route_names_short(%{
+          routes: [@route_1, @route_2],
+          schedules: [],
+          route_type: 3
+        })
+
       assert expected == actual
     end
 
     test "when there are 2 non-numeric routes" do
       expected = "SL1 and SL2"
-      actual = BuildAutoText.route_names_short(%{routes: [@route_4, @route_5], route_type: 3})
+
+      actual =
+        BuildAutoText.route_names_short(%{
+          routes: [@route_4, @route_5],
+          schedules: [],
+          route_type: 3
+        })
+
       assert expected == actual
     end
 
     test "when there is 1 numeric and 1 non-numeric routes" do
       expected = "SL1 and Route 1"
-      actual = BuildAutoText.route_names_short(%{routes: [@route_1, @route_4], route_type: 3})
+
+      actual =
+        BuildAutoText.route_names_short(%{
+          routes: [@route_1, @route_4],
+          schedules: [],
+          route_type: 3
+        })
+
       assert expected == actual
     end
 
@@ -460,55 +492,61 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
 
     test "when there is 1 numeric route" do
       expected = "Route 1"
-      actual = BuildAutoText.route_names(%{routes: [@route_1]})
+      actual = BuildAutoText.route_names(%{routes: [@route_1], schedules: []})
       assert expected == actual
     end
 
     test "when there are 2 numeric route" do
       expected = "Routes 1 and 22"
-      actual = BuildAutoText.route_names(%{routes: [@route_1, @route_2]})
+      actual = BuildAutoText.route_names(%{routes: [@route_1, @route_2], schedules: []})
       assert expected == actual
     end
 
     test "when there are more than 2 numeric routes" do
       expected = "Routes 1, 22, and 333"
-      actual = BuildAutoText.route_names(%{routes: [@route_1, @route_2, @route_3]})
+      actual = BuildAutoText.route_names(%{routes: [@route_1, @route_2, @route_3], schedules: []})
       assert expected == actual
     end
 
     test "when there is 1 non-numeric route" do
       expected = "SL1"
-      actual = BuildAutoText.route_names(%{routes: [@route_4]})
+      actual = BuildAutoText.route_names(%{routes: [@route_4], schedules: []})
       assert expected == actual
     end
 
     test "when there are 2 non-numeric routes" do
       expected = "SL1 and SL2"
-      actual = BuildAutoText.route_names(%{routes: [@route_4, @route_5]})
+      actual = BuildAutoText.route_names(%{routes: [@route_4, @route_5], schedules: []})
       assert expected == actual
     end
 
     test "when there are more than 2 non-numeric routes" do
       expected = "SL1, SL2, and SLW"
-      actual = BuildAutoText.route_names(%{routes: [@route_4, @route_5, @route_6]})
+      actual = BuildAutoText.route_names(%{routes: [@route_4, @route_5, @route_6], schedules: []})
       assert expected == actual
     end
 
     test "when there is 1 numeric and 1 non-numeric route" do
       expected = "SL1 and Route 1"
-      actual = BuildAutoText.route_names(%{routes: [@route_1, @route_4]})
+      actual = BuildAutoText.route_names(%{routes: [@route_1, @route_4], schedules: []})
       assert expected == actual
     end
 
     test "when there is 1 numeric and 2 non-numeric routes" do
       expected = "SL1 and Routes 1 and 22"
-      actual = BuildAutoText.route_names(%{routes: [@route_1, @route_2, @route_4]})
+      actual = BuildAutoText.route_names(%{routes: [@route_1, @route_2, @route_4], schedules: []})
       assert expected == actual
     end
 
     test "when there are 2 numeric and 2 non-numeric routes" do
       expected = "SL1, SL2 and Routes 1 and 22"
-      actual = BuildAutoText.route_names(%{routes: [@route_1, @route_2, @route_4, @route_5]})
+
+      actual =
+        BuildAutoText.route_names(%{
+          routes: [@route_1, @route_2, @route_4, @route_5],
+          schedules: []
+        })
+
       assert expected == actual
     end
 
@@ -516,7 +554,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
       expected = "SL1, SL2, SLW and Routes 1 and 22"
 
       actual =
-        BuildAutoText.route_names(%{routes: [@route_1, @route_2, @route_4, @route_5, @route_6]})
+        BuildAutoText.route_names(%{
+          routes: [@route_1, @route_2, @route_4, @route_5, @route_6],
+          schedules: []
+        })
 
       assert expected == actual
     end
@@ -526,7 +567,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
 
       actual =
         BuildAutoText.route_names(%{
-          routes: [@route_1, @route_2, @route_3, @route_1, @route_2, @route_3]
+          routes: [@route_1, @route_2, @route_3, @route_1, @route_2, @route_3],
+          schedules: []
         })
 
       assert expected == actual
@@ -537,7 +579,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
 
       actual =
         BuildAutoText.route_names(%{
-          routes: [@route_4, @route_5, @route_6, @route_4, @route_5, @route_6]
+          routes: [@route_4, @route_5, @route_6, @route_4, @route_5, @route_6],
+          schedules: []
         })
 
       assert expected == actual
@@ -548,7 +591,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
 
       actual =
         BuildAutoText.route_names(%{
-          routes: [@route_1, @route_4, @route_5, @route_6, @route_4, @route_5]
+          routes: [@route_1, @route_4, @route_5, @route_6, @route_4, @route_5],
+          schedules: []
         })
 
       assert expected == actual
@@ -559,9 +603,17 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
 
       actual =
         BuildAutoText.route_names(%{
-          routes: [@route_1, @route_2, @route_3, @route_2, @route_3, @route_4]
+          routes: [@route_1, @route_2, @route_3, @route_2, @route_3, @route_4],
+          schedules: []
         })
 
+      assert expected == actual
+    end
+
+    test "when there is a route not associated with a given schedule" do
+      expected = "Framingham/Worcester Line"
+      route_2 = %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"}
+      actual = BuildAutoText.route_names(%{routes: [@route_1, route_2], schedules: [@schedule_1]})
       assert expected == actual
     end
   end
