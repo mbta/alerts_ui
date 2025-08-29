@@ -1098,4 +1098,23 @@ defmodule AlertsUI.AlertsTest do
       refute Alerts.publishable?("123")
     end
   end
+
+  describe "delete/1" do
+    test "deletes alert" do
+      insert(:alert, %{
+        alert_id: "123",
+        duration_certainty: :ESTIMATED,
+        active_period: [
+          build(:active_period, %{start: ~U[2024-06-01 00:00:00Z], end: ~U[2024-06-02 00:00:00Z]}),
+          build(:active_period, %{start: ~U[2024-06-03 00:00:00Z], end: ~U[2024-06-04 04:00:00Z]})
+        ]
+      })
+
+      assert Alerts.get_by_alert_id("123")
+
+      Alerts.delete("123")
+
+      refute Alerts.get_by_alert_id("123")
+    end
+  end
 end
