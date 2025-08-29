@@ -324,6 +324,6 @@ defmodule AlertsUI.Alerts do
   def delete(alert_id) do
     Alert
     |> Repo.get_by!(alert_id: alert_id)
-    |> Repo.delete
+    |> Repo.delete()
   end
 end

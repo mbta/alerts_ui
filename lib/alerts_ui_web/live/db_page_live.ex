@@ -39,7 +39,6 @@ defmodule AlertsUIWeb.DBPageLive do
 
   @impl true
   def handle_event("cancelled_delete_modal", _, socket) do
-    
     {:noreply, socket}
   end
 end
