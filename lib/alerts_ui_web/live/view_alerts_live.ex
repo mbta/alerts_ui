@@ -269,11 +269,16 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   defp adjusted_date_time(nil), do: nil
 
-  defp adjusted_date_time(utc_time) do
-    adjusted_time = DateTime.shift_zone!(utc_time, "America/New_York")
-    adjusted_dt_date = ActivePeriod.datetime_to_service_date_exclusive(adjusted_time)
+  defp adjusted_date_time(utc_datetime) do
+    adjusted_datetime = DateTime.shift_zone!(utc_datetime, "America/New_York")
 
-    DateTime.new!(adjusted_dt_date, DateTime.to_time(adjusted_time), "America/New_York")
+    if DateTimeHelpers.same_service_date?(utc_datetime) do
+      adjusted_datetime
+    else
+      adjusted_dt_date = ActivePeriod.datetime_to_service_date_exclusive(adjusted_datetime)
+
+      DateTime.new!(adjusted_dt_date, DateTime.to_time(adjusted_datetime), "America/New_York")
+    end
   end
 
   defp format_effect_options do
