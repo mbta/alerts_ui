@@ -12,9 +12,11 @@ defmodule AlertsUIWeb.DBPageLive do
   def mount(params, _session, socket) do
     Process.send_after(self(), :update, @ten_seconds_in_ms)
 
-    with alerts <- Alerts.list_all() do
-      alerts = alerts |> Enum.sort_by(&(&1.alert_id |> Integer.parse() |> elem(0)))
-      {:ok, assign(socket, page_title: "Alerts DB Table", alerts: alerts, params: params)}
+    with {alerts, meta} <- Alerts.list_all_paginated(params) do
+      alerts = alerts |> Enum.sort_by(& &1.alert_id)
+
+      {:ok,
+       assign(socket, page_title: "Alerts DB Table", meta: meta, alerts: alerts, params: params)}
     end
   end
 
@@ -22,9 +24,9 @@ defmodule AlertsUIWeb.DBPageLive do
   def handle_info(:update, socket) do
     Process.send_after(self(), :update, @ten_seconds_in_ms)
 
-    with alerts <- Alerts.list_all() do
-      alerts = alerts |> Enum.sort_by(&(&1.alert_id |> Integer.parse() |> elem(0)))
-      {:noreply, assign(socket, alerts: alerts)}
+    with {alerts, meta} <- Alerts.list_all_paginated(socket.assigns.meta.flop) do
+      alerts = alerts |> Enum.sort_by(& &1.alert_id)
+      {:noreply, assign(socket, meta: meta, alerts: alerts)}
     end
   end
 
@@ -40,5 +42,14 @@ defmodule AlertsUIWeb.DBPageLive do
   @impl true
   def handle_event("cancelled_delete_modal", _, socket) do
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("paginate-alerts", %{"page" => page}, socket) do
+    flop = Flop.set_page(socket.assigns.meta.flop, page)
+
+    with {alerts, meta} <- Alerts.list_all_paginated(flop) do
+      {:noreply, assign(socket, meta: meta, alerts: alerts)}
+    end
   end
 end

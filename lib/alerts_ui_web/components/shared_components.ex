@@ -1490,4 +1490,92 @@ defmodule AlertsUIWeb.SharedComponents do
     </div>
     """
   end
+
+  @doc """
+  Renders a pagination component.
+
+  ## Examples
+      <.pagination meta={@meta} />
+  """
+  attr :rest, :global, include: ~w(meta)
+
+  def pagination(assigns) do
+    ~H"""
+    <Flop.Phoenix.pagination
+      on_paginate={JS.push("paginate-alerts")}
+      opts={[
+        disabled_class:
+          "border-secondary-disabled text-secondary-disabled cursor-not-allowed
+                        hover:bg-transparent hover:text-secondary-disabled hover:border-secondary-disabled
+                        active:bg-transparent active:text-secondary-disabled active:border-secondary-disabled",
+        page_links: {:ellipsis, 3},
+        wrapper_attrs: [class: "flex flex-row justify-center mr-auto"],
+        pagination_link_attrs: [
+          class:
+            "rounded-none btn h-auto min-h-fit #{secondary_button_classes()} !py-1 !px-2 leading-[1.5] font-normal"
+        ],
+        current_link_attrs: [
+          class:
+            "rounded-none btn h-auto min-h-fit #{secondary_button_classes()} !py-1 !px-2 leading-[1.5] font-normal
+            !bg-primary text-text-invert"
+        ],
+        next_link_content: carat_icon(:right),
+        next_link_attrs: [
+          class: "border-l-0 rounded-l-none
+            btn !h-auto min-h-fit #{secondary_button_classes()} !py-1 !px-[6px] leading-[1.5]
+            order-last"
+        ],
+        previous_link_content: carat_icon(:left),
+        previous_link_attrs: [
+          class: "border-r-0 rounded-r-none
+            btn !h-auto min-h-fit #{secondary_button_classes()} !py-1 !px-[6px] leading-[1.5]"
+        ],
+        pagination_list_attrs: [class: "join"],
+        ellipsis_attrs: [
+          class:
+            "rounded-none btn h-auto min-h-fit #{secondary_button_classes()} !py-1 !px-2 leading-[1.5] font-normal"
+        ]
+      ]}
+      {@rest}
+    />
+    """
+  end
+
+  defp carat_icon(:left) do
+    assigns = %{}
+
+    ~H"""
+    <span class="h-4 w-4">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="2"
+        stroke="currentColor"
+        class="w-4 h-4"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+      </svg>
+    </span>
+    """
+  end
+
+  defp carat_icon(:right) do
+    assigns = %{}
+
+    ~H"""
+    <span class="h-4 w-4">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="2"
+        stroke="currentColor"
+        class="w-4 h-4"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+      </svg>
+    </span>
+    """
+  end
 end
