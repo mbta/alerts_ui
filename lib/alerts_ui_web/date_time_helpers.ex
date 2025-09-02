@@ -101,7 +101,7 @@ defmodule AlertsUIWeb.DateTimeHelpers do
   Put a UTC timestamp in local time and display the month/day/year with hh:mm AM/PM.
 
   iex> timestamp_date_time(~U[2022-01-07 14:01:00.00Z])
-  "Jan 7 2022, 9:01 AM"
+  "Jan 7, 2022, 9:01 AM"
   iex> timestamp_date_time(nil)
   nil
   """
@@ -109,7 +109,7 @@ defmodule AlertsUIWeb.DateTimeHelpers do
   def timestamp_date_time(%DateTime{} = utc_timestamp) do
     utc_timestamp
     |> DateTime.shift_zone!("America/New_York")
-    |> Calendar.strftime("%b %-d %Y, %-I:%M %p")
+    |> Calendar.strftime("%b %-d, %Y, %-I:%M %p")
   end
 
   def timestamp_date_time(nil), do: nil
