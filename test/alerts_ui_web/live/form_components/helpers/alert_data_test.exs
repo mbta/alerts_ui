@@ -37,7 +37,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                description_text: "description text",
                service_types: [],
                reminder_times: [~N[2024-09-24 20:01:00]],
-               notification_specifier: :same_as_effect_period,
+               notification_specifier: :custom,
                alert_timing: :"one-time"
              } = AlertData.build_alert_data(alert)
     end
@@ -67,7 +67,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                description_text: "description text",
                service_types: [],
                reminder_times: [~N[2024-09-24 20:01:00]],
-               notification_specifier: :same_as_effect_period,
+               notification_specifier: :custom,
                alert_timing: :"one-time"
              } = AlertData.build_alert_data("1")
     end
@@ -96,7 +96,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                description_text: "description text",
                service_types: [],
                reminder_times: [~N[2024-09-24 20:01:00]],
-               notification_specifier: :same_as_effect_period,
+               notification_specifier: :custom,
                alert_timing: :"one-time"
              } = AlertData.build_alert_data("1")
     end
@@ -130,7 +130,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                description_text: "description text",
                service_types: [],
                reminder_times: [~N[2024-09-24 20:01:00]],
-               notification_specifier: :same_as_effect_period,
+               notification_specifier: :custom,
                alert_timing: :"one-time"
              } = AlertData.build_alert_data("1")
     end
@@ -160,7 +160,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                description_text: "description text",
                reminder_times: [~N[2024-09-24 20:01:00]],
                alert_timing: :"one-time",
-               notification_specifier: :same_as_effect_period
+               notification_specifier: :custom
              } = AlertData.build_alert_data("1")
     end
 
@@ -331,7 +331,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                header_text: "cool header text",
                description_text: "description text",
                reminder_times: [~N[2024-09-24 20:01:00]],
-               notification_specifier: :same_as_effect_period,
+               notification_specifier: :custom,
                alert_timing: :"one-time"
              } = AlertData.build_alert_data("1")
     end
@@ -363,7 +363,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                description_text: "description text",
                reminder_times: [~N[2024-09-24 20:01:00]],
                alert_timing: :"one-time",
-               notification_specifier: :same_as_effect_period
+               notification_specifier: :custom
              } = AlertData.build_alert_data("1")
     end
 
