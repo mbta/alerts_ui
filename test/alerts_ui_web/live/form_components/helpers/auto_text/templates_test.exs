@@ -1337,7 +1337,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected =
-        "Cancelled westbound trips on 1:\n527 (9:01 AM from South Station)528 (9:01 AM from South Station)\n\nCancelled inbound trips on 22:\n841 (11:15 AM from Forest Hills)"
+        "Cancelled westbound trips on 1:\n527 (9:01 AM from South Station)\n528 (9:01 AM from South Station)\n\nCancelled inbound trips on 22:\n841 (11:15 AM from Forest Hills)"
 
       actual = Templates.build_auto_text(autotext_data, :description_template)
       assert expected == actual
@@ -1386,7 +1386,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected =
-        "Affected docks:\nLechmere\nLechmere\nLechmere\n\nDelayed westbound trips on 1:\n527 (9:01 AM from South Station)528 (9:01 AM from South Station)\n\nDelayed inbound trips on 22:\n841 (11:15 AM from Forest Hills)"
+        "Affected docks:\nLechmere\nLechmere\nLechmere\n\nDelayed westbound trips on 1:\n527 (9:01 AM from South Station)\n528 (9:01 AM from South Station)\n\nDelayed inbound trips on 22:\n841 (11:15 AM from Forest Hills)"
 
       actual = Templates.build_auto_text(autotext_data, :description_template)
       assert expected == actual
@@ -1572,7 +1572,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected =
-        "Cancelled westbound trips on 1:\n527 (9:01 AM from South Station)528 (9:01 AM from South Station)\n\nCancelled inbound trips on 22:\n841 (11:15 AM from Forest Hills)"
+        "Cancelled westbound trips on 1:\n527 (9:01 AM from South Station)\n528 (9:01 AM from South Station)\n\nCancelled inbound trips on 22:\n841 (11:15 AM from Forest Hills)"
 
       actual = Templates.build_auto_text(autotext_data, :description_template)
       assert expected == actual
@@ -1604,7 +1604,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected =
-        "Affected stations:\nLechmere\n\nAffected westbound trips on 1:\n527 (9:01 AM from South Station)528 (9:01 AM from South Station)\n\nAffected inbound trips on 22:\n841 (11:15 AM from Forest Hills)"
+        "Affected stations:\nLechmere\n\nAffected westbound trips on 1:\n527 (9:01 AM from South Station)\n528 (9:01 AM from South Station)\n\nAffected inbound trips on 22:\n841 (11:15 AM from Forest Hills)"
 
       actual = Templates.build_auto_text(autotext_data, :description_template)
       assert expected == actual
@@ -1621,7 +1621,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected =
-        "Affected westbound trips on 1:\n527 (9:01 AM from South Station)528 (9:01 AM from South Station)\n\nAffected inbound trips on 22:\n841 (11:15 AM from Forest Hills)"
+        "Affected westbound trips on 1:\n527 (9:01 AM from South Station)\n528 (9:01 AM from South Station)\n\nAffected inbound trips on 22:\n841 (11:15 AM from Forest Hills)"
 
       actual = Templates.build_auto_text(autotext_data, :description_template)
       assert expected == actual
@@ -1773,7 +1773,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected =
-        "Affected docks:\nLechmere\n\nAffected westbound trips on 1:\n527 (9:01 AM from South Station)528 (9:01 AM from South Station)\n\nAffected inbound trips on 22:\n841 (11:15 AM from Forest Hills)"
+        "Affected docks:\nLechmere\n\nAffected westbound trips on 1:\n527 (9:01 AM from South Station)\n528 (9:01 AM from South Station)\n\nAffected inbound trips on 22:\n841 (11:15 AM from Forest Hills)"
 
       actual = Templates.build_auto_text(autotext_data, :description_template)
       assert expected == actual

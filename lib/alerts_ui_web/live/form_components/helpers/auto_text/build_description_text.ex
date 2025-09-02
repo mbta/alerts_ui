@@ -56,7 +56,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionText do
           acc[{route_name, direction_name}] <> "#{trip_name}\n"
         )
       else
-        Map.put(acc, {route_name, direction_name}, trip_name)
+        Map.put(acc, {route_name, direction_name}, "#{trip_name}\n")
       end
     end)
     |> Enum.map_join("\n\n", fn {{route_name, direction_name}, trips} ->
