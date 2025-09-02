@@ -622,6 +622,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
           />
         </div>
       </.form>
+      <p :if={@show_stop_ids}>
+        Selected stop ids: {(@form[:stop_ids].value || []) |> Enum.join(", ")}
+      </p>
       <hr class="mt-4" />
     </div>
     """
