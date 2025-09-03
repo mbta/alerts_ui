@@ -39,23 +39,23 @@ defmodule AlertsUIWeb.FormComponents.Helpers.DateTimeFormatters do
   @spec friendly_date_time(DateTime.t() | String.t() | nil, :start | :end) :: String.t()
   @spec friendly_date_time(DateTime.t() | String.t() | nil, :start | :end, DateTime.t()) ::
           String.t()
-  def friendly_date_time(dt, foo, now \\ DateTime.now!("America/New_York"))
+  def friendly_date_time(dt, start_or_end, now \\ DateTime.now!("America/New_York"))
 
   def friendly_date_time(nil, _, _now), do: ""
 
-  def friendly_date_time(dt, foo, now) when is_binary(dt) do
+  def friendly_date_time(dt, start_or_end, now) when is_binary(dt) do
     {:ok, dt, 0} = DateTime.from_iso8601(dt)
-    friendly_date_time(dt, foo, now)
+    friendly_date_time(dt, start_or_end, now)
   end
 
-  def friendly_date_time(%DateTime{} = dt, foo, now) do
+  def friendly_date_time(%DateTime{} = dt, start_or_end, now) do
     dt = DateTime.shift_zone!(dt, "America/New_York")
     # get format using un-shifted date
-    format = date_time_format(dt, foo, now)
+    format = date_time_format(dt, start_or_end, now)
 
     # shift to service date
     new_date =
-      if foo == :start do
+      if start_or_end == :start do
         ActivePeriod.datetime_to_service_date_exclusive(dt)
       else
         ActivePeriod.datetime_to_service_date(dt)
@@ -149,10 +149,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.DateTimeFormatters do
   end
 
   @spec date_time_format(DateTime.t(), :start | :end, DateTime.t()) :: String.t()
-  defp date_time_format(dt, foo, now) do
+  defp date_time_format(dt, start_or_end, now) do
     cond do
       # same service day
-      same_service_date?(dt, foo, now) ->
+      same_service_date?(dt, start_or_end, now) ->
         "%-I:%M %p"
 
       # same year
