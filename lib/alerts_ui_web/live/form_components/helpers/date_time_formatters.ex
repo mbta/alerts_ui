@@ -21,6 +21,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.DateTimeFormatters do
   "9:01 AM"
   iex> friendly_date_time(~U[2022-01-12 14:01:00.00Z], :start, ~U[2022-01-13 06:02:00.00Z])
   "9:01 AM"
+  iex> friendly_date_time(~U[2022-01-12 08:00:00.00Z], :end, ~U[2022-01-11 12:02:00.00Z])
+  "3:00 AM"
+  iex> friendly_date_time(~U[2022-01-12 08:00:00.00Z], :start, ~U[2022-01-11 12:02:00.00Z])
+  "Jan 12"
   iex> friendly_date_time(~U[2022-01-12 14:01:00.00Z], :start, ~U[2022-01-13 08:02:00.00Z])
   "Jan 12"
   iex> friendly_date_time(~U[2022-01-07 14:01:00.00Z], :start, ~U[2022-01-12 15:02:00.00Z])
