@@ -7,11 +7,6 @@ defmodule AlertsUI.Repo.Migrations.BackfillAlertFields do
       UPDATE alerts SET active_period_start = '01-01-2023' WHERE active_period_start IS NULL 
     ")
 
-    # sync any missing `notification_period_start` with `active_period_start`
-    execute("
-      UPDATE alerts SET notification_period_start = active_period_start WHERE notification_period_start IS NULL 
-    ")
-
     # make `active_period_start` non-nullable
     execute("ALTER TABLE alerts ALTER COLUMN active_period_start SET NOT NULL")
 
