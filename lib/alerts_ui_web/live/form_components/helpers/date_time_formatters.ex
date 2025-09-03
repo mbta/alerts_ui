@@ -13,42 +13,52 @@ defmodule AlertsUIWeb.FormComponents.Helpers.DateTimeFormatters do
   Use the time (converted to EST) if today (same SERVICE day), the month and day if this year, and the month, day and
   year if a different year.
 
-  iex> friendly_date_time(~U[2025-07-03 06:02:00.00Z], ~U[2025-07-02 16:21:52.928497Z])
+  iex> friendly_date_time(~U[2025-07-03 06:02:00.00Z], :start, ~U[2025-07-02 16:21:52.928497Z])
   "2:02 AM"
-  iex> friendly_date_time(~U[2022-01-12 01:01:00.00Z], ~U[2022-01-12 15:02:00.00Z])
+  iex> friendly_date_time(~U[2022-01-12 01:01:00.00Z], :start, ~U[2022-01-12 15:02:00.00Z])
   "Jan 11"
-  iex> friendly_date_time(~U[2022-01-12 14:01:00.00Z], ~U[2022-01-12 15:02:00.00Z])
+  iex> friendly_date_time(~U[2022-01-12 14:01:00.00Z], :start, ~U[2022-01-12 15:02:00.00Z])
   "9:01 AM"
-  iex> friendly_date_time(~U[2022-01-12 14:01:00.00Z], ~U[2022-01-13 06:02:00.00Z])
+  iex> friendly_date_time(~U[2022-01-12 14:01:00.00Z], :start, ~U[2022-01-13 06:02:00.00Z])
   "9:01 AM"
-  iex> friendly_date_time(~U[2022-01-12 14:01:00.00Z], ~U[2022-01-13 08:02:00.00Z])
+  iex> friendly_date_time(~U[2022-01-12 14:01:00.00Z], :start, ~U[2022-01-13 08:02:00.00Z])
   "Jan 12"
-  iex> friendly_date_time(~U[2022-01-07 14:01:00.00Z], ~U[2022-01-12 15:02:00.00Z])
+  iex> friendly_date_time(~U[2022-01-07 14:01:00.00Z], :start, ~U[2022-01-12 15:02:00.00Z])
   "Jan 7"
-  iex> friendly_date_time(~U[2021-12-07 14:01:00.00Z], ~U[2022-01-12 15:02:00.00Z])
+  iex> friendly_date_time(~U[2021-12-07 14:01:00.00Z], :start, ~U[2022-01-12 15:02:00.00Z])
   "Dec 7, 2021"
-  iex> friendly_date_time("2020-01-13T17:32:00Z", ~U[2022-01-12 15:02:00.00Z])
+  iex> friendly_date_time("2020-01-13T17:32:00Z", :start, ~U[2022-01-12 15:02:00.00Z])
   "Jan 13, 2020"
-  iex> friendly_date_time(nil, ~U[2022-01-12 15:02:00.00Z])
+  iex> friendly_date_time(nil, :start, ~U[2022-01-12 15:02:00.00Z])
   ""
   """
-  @spec friendly_date_time(DateTime.t() | String.t() | nil) :: String.t()
-  @spec friendly_date_time(DateTime.t() | String.t() | nil, DateTime.t()) ::
+  @spec friendly_date_time(DateTime.t() | String.t() | nil, :start | :end) :: String.t()
+  @spec friendly_date_time(DateTime.t() | String.t() | nil, :start | :end, DateTime.t()) ::
           String.t()
-  def friendly_date_time(dt, now \\ DateTime.now!("America/New_York"))
+  def friendly_date_time(dt, foo, now \\ DateTime.now!("America/New_York"))
 
-  def friendly_date_time(nil, _now), do: ""
+  def friendly_date_time(nil, _, _now), do: ""
 
-  def friendly_date_time(dt, now) when is_binary(dt) do
+  def friendly_date_time(dt, foo, now) when is_binary(dt) do
     {:ok, dt, 0} = DateTime.from_iso8601(dt)
-    friendly_date_time(dt, now)
+    friendly_date_time(dt, foo, now)
   end
 
-  def friendly_date_time(%DateTime{} = dt, now) do
+  def friendly_date_time(%DateTime{} = dt, foo, now) do
     dt = DateTime.shift_zone!(dt, "America/New_York")
-    format = date_time_format(dt, now)
+    # get format using un-shifted date
+    format = date_time_format(dt, foo, now)
 
-    Calendar.strftime(dt, format)
+    # shift to service date
+    new_date =
+      if foo == :start do
+        ActivePeriod.datetime_to_service_date_exclusive(dt)
+      else
+        ActivePeriod.datetime_to_service_date(dt)
+      end
+
+    service_shifted_dt = DateTime.new!(new_date, DateTime.to_time(dt), "America/New_York")
+    Calendar.strftime(service_shifted_dt, format)
   end
 
   @doc """
@@ -134,11 +144,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.DateTimeFormatters do
     round(seconds / 60)
   end
 
-  @spec date_time_format(DateTime.t(), DateTime.t()) :: String.t()
-  defp date_time_format(dt, now) do
+  @spec date_time_format(DateTime.t(), :start | :end, DateTime.t()) :: String.t()
+  defp date_time_format(dt, foo, now) do
     cond do
       # same service day
-      DateTimeHelpers.same_service_date?(dt, now) ->
+      same_service_date?(dt, foo, now) ->
         "%-I:%M %p"
 
       # same year

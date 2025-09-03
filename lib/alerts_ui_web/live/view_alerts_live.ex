@@ -243,8 +243,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       "start of service"
     else
       adjusted_dt = adjusted_date_time(start_time_utc)
-
-      DateTimeFormatters.friendly_date_time(adjusted_dt)
+      DateTimeHelpers.friendly_date_time(start_time_utc, :start)
     end
   end
 
@@ -260,26 +259,11 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       "end of service"
     else
       adjusted_dt = adjusted_date_time(end_time_utc)
-
-      DateTimeFormatters.friendly_date_time(adjusted_dt)
+      DateTimeHelpers.friendly_date_time(end_time_utc, :end)
     end
   end
 
   def format_end_time(_, _), do: ""
-
-  defp adjusted_date_time(nil), do: nil
-
-  defp adjusted_date_time(utc_datetime) do
-    adjusted_datetime = DateTime.shift_zone!(utc_datetime, "America/New_York")
-
-    if DateTimeHelpers.same_service_date?(utc_datetime) do
-      adjusted_datetime
-    else
-      adjusted_dt_date = ActivePeriod.datetime_to_service_date_exclusive(adjusted_datetime)
-
-      DateTime.new!(adjusted_dt_date, DateTime.to_time(adjusted_datetime), "America/New_York")
-    end
-  end
 
   defp format_effect_options do
     [{"All", ""}]
