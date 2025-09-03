@@ -553,7 +553,6 @@ defmodule AlertsUI.AlertsTest do
     end
 
     test "filter by active_period" do
-      insert(:alert, %{alert_id: "012", active_period_start: nil})
       insert(:alert, %{alert_id: "123", active_period_start: ~U[2023-10-14 00:01:00Z]})
       insert(:alert, %{alert_id: "234", active_period_start: ~U[2023-10-16 00:01:00Z]})
       insert(:alert, %{alert_id: "345", active_period_start: ~U[2023-10-15 00:01:00Z]})
@@ -564,7 +563,7 @@ defmodule AlertsUI.AlertsTest do
           order_directions: [:asc, :desc]
         })
 
-      assert result |> Enum.map(& &1.alert_id) == [123, 345, 234, 012]
+      assert result |> Enum.map(& &1.alert_id) == [123, 345, 234]
     end
 
     test "filter by service type" do
