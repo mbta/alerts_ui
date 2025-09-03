@@ -56,6 +56,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
     flop =
       socket.assigns.meta.flop
+      |> Flop.set_page(params["page"] || "1")
       |> Map.put(:order_by, default_order_fields)
       |> Map.put(:order_directions, default_order_directions)
       |> Map.put(:filters, filters)
