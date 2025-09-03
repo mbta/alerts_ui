@@ -29,6 +29,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   If the second arg is true and the structs are stops the values will
   be a combo of names and ids (used in affected_service only).
   Also filters out results based on a search term.
+
+  The split_stops? option will return ids for stops as "stop_name|stop_id". This preserves the direction
+  information in the name for use by the autotext generator in alert_details. This defaults to false.
   """
   @spec formatted_select_options(t(), boolean()) :: keyword(String.t())
   def formatted_select_options(select_data, split_stops? \\ false)
@@ -54,7 +57,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
 
   def formatted_select_options(
         %__MODULE__{schedules_by_route_name: schedules_by_route_name} = filterable,
-        _foo
+        _
       )
       when not is_nil(schedules_by_route_name) do
     # if only 1 route is selected

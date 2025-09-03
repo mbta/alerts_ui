@@ -68,17 +68,7 @@ defmodule AlertsUIWeb.ReviewModal do
         |> Map.get(String.to_integer(assigns.alert_data.direction))
       end
 
-    stop_names =
-      if Map.get(assigns.alert_data, :stop_ids, []) != [] do
-        CreateAlertLive.get_stops(
-          assigns.alert_data.route_ids,
-          route_type,
-          Map.get(assigns.alert_data, :direction)
-        )
-        |> Enum.filter(fn stop -> stop.id in assigns.alert_data.stop_ids end)
-        |> Enum.map(fn stop -> SelectFormatter.name_for_option(stop) end)
-        |> Enum.uniq()
-      end
+    stop_names = get_stop_names(assigns.alert_data)
 
     # Only ferry trips need the route_type to be passed to formatter
     trip_names =
@@ -517,4 +507,21 @@ defmodule AlertsUIWeb.ReviewModal do
     reminder_time = ActivePeriodBuilder.naive_eastern_datetime_to_utc(reminder_time)
     DateTime.compare(now, reminder_time) in [:eq, :gt]
   end
+
+  defp get_stop_names(%{stop_names: [_ | _] = stop_names}) do
+    stop_names
+  end
+
+  defp get_stop_names(%{stop_ids: [_ | _] = stop_ids} = alert_data) do
+    CreateAlertLive.get_stops(
+      alert_data.route_ids,
+      alert_data.route_type,
+      Map.get(alert_data, :direction)
+    )
+    |> Enum.filter(fn stop -> stop.id in stop_ids end)
+    |> Enum.map(fn stop -> SelectFormatter.name_for_option(stop) end)
+    |> Enum.uniq()
+  end
+
+  defp get_stop_names(_alert_data), do: nil
 end
