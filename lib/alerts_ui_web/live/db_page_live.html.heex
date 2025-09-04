@@ -33,12 +33,12 @@
           <td class="border p-3">{active_period_end}</td>
           <td class="border p-3">{duration_certainty}</td>
           <td class="border p-3">
-            <button
-              class="btn !min-h-[24px] h-auto"
+            <.button_danger
+              class="btn !min-h-[24px] h-auto font-normal"
               phx-click={show_modal("delete-alert-modal-#{alert_id}")}
             >
               Delete
-            </button>
+            </.button_danger>
             <.modal
               id={"delete-alert-modal-#{alert_id}"}
               header_text="Delete alert"
@@ -63,7 +63,7 @@
                     "
               value={alert_id}
             >
-              Are you sure you want to close alert #{alert_id}?
+              Are you sure you want to permanently delete #{alert_id}?
             </.modal>
           </td>
         </tr>
