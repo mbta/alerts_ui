@@ -1503,41 +1503,45 @@ defmodule AlertsUIWeb.SharedComponents do
     ~H"""
     <Flop.Phoenix.pagination
       on_paginate={JS.push("paginate-alerts")}
-      opts={[
-        disabled_class:
-          "border-secondary-disabled text-secondary-disabled cursor-not-allowed
-                        hover:bg-transparent hover:text-secondary-disabled hover:border-secondary-disabled
-                        active:bg-transparent active:text-secondary-disabled active:border-secondary-disabled",
-        page_links: {:ellipsis, 3},
-        wrapper_attrs: [class: "flex flex-row justify-center mr-auto"],
-        pagination_link_attrs: [
-          class:
-            "rounded-none btn h-auto min-h-fit #{secondary_button_classes()} !py-1 !px-2 leading-[1.5] font-normal"
-        ],
-        current_link_attrs: [
-          class:
-            "rounded-none btn h-auto min-h-fit #{secondary_button_classes()} !py-1 !px-2 leading-[1.5] font-normal
-            !bg-primary text-text-invert"
-        ],
-        next_link_content: carat_icon(:right),
-        next_link_attrs: [
-          class: "border-l-0 rounded-l-none
-            btn !h-auto min-h-fit #{secondary_button_classes()} !py-1 !px-[6px] leading-[1.5]
-            order-last"
-        ],
-        previous_link_content: carat_icon(:left),
-        previous_link_attrs: [
-          class: "border-r-0 rounded-r-none
-            btn !h-auto min-h-fit #{secondary_button_classes()} !py-1 !px-[6px] leading-[1.5]"
-        ],
-        pagination_list_attrs: [class: "join"],
-        ellipsis_attrs: [
-          class:
-            "rounded-none btn h-auto min-h-fit #{secondary_button_classes()} !py-1 !px-2 leading-[1.5] font-normal"
-        ]
+      disabled_link_attrs={[
+        class: "border-secondary-disabled text-secondary-disabled cursor-not-allowed
+          hover:bg-transparent hover:text-secondary-disabled hover:border-secondary-disabled
+          active:bg-transparent active:text-secondary-disabled active:border-secondary-disabled"
       ]}
+      page_links={3}
+      class="flex flex-row justify-center mr-auto"
+      page_link_attrs={[
+        class:
+          "rounded-none btn h-auto min-h-fit #{secondary_button_classes()} !py-1 !px-2 leading-[1.5] font-normal"
+      ]}
+      current_page_link_attrs={[
+        class:
+          "rounded-none btn h-auto min-h-fit #{secondary_button_classes()} !py-1 !px-2 leading-[1.5] font-normal !bg-primary text-text-invert"
+      ]}
+      page_list_attrs={[class: "join"]}
       {@rest}
-    />
+    >
+      <:previous attrs={[
+        class:
+          "border-r-0 rounded-r-none btn !h-auto min-h-fit #{secondary_button_classes()} !py-1 !px-[6px] leading-[1.5]"
+      ]}>
+        {carat_icon(:left)}
+      </:previous>
+      <:ellipsis>
+        <span
+          class="rounded-none btn h-auto min-h-fit #{SharedComponents.secondary_button_classes()} !py-1 !px-2 leading-[1.5] font-normal"
+          aria-hidden="true"
+        >
+          &hellip;
+        </span>
+      </:ellipsis>
+      <:next attrs={[
+        class:
+          "border-l-0 rounded-l-none btn !h-auto min-h-fit #{secondary_button_classes()} !py-1 !px-[6px] leading-[1.5] order-last"
+      ]}>
+        {carat_icon(:right)}
+      </:next>
+    </Flop.Phoenix.pagination>
     """
   end
 

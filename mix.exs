@@ -88,7 +88,7 @@ defmodule AlertsUI.MixProject do
       {:gettext, "~> 0.20"},
       {:finch, "~> 0.13"},
       {:floki, ">= 0.30.0", only: :test},
-      {:flop_phoenix, "~> 0.23"},
+      {:flop_phoenix, "~> 0.25.3"},
       {:hackney, "1.20.1"},
       {:jason, "~> 1.2"},
       {:laboratory, github: "paulswartz/laboratory", ref: "cookie_opts"},

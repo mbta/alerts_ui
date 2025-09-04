@@ -714,6 +714,12 @@ defmodule AlertsUIWeb.AlertsLiveTest do
         )
 
       assert expected == actual
+
+      expected_timestamp = nil
+
+      actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_end)
+
+      assert expected_timestamp == actual_timestamp
     end
 
     test "end of later today" do
@@ -739,6 +745,12 @@ defmodule AlertsUIWeb.AlertsLiveTest do
         )
 
       assert expected == actual
+
+      expected_timestamp = "Oct 12, 2023, 8:01 PM"
+
+      actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_end)
+
+      assert expected_timestamp == actual_timestamp
     end
 
     test "known end where end is end-of-service today" do
@@ -766,6 +778,12 @@ defmodule AlertsUIWeb.AlertsLiveTest do
           )
 
         assert expected == actual
+
+        expected_timestamp = "Jul 1, 2025, 3:00 AM"
+
+        actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_end)
+
+        assert expected_timestamp == actual_timestamp
       end
     end
 
@@ -794,6 +812,12 @@ defmodule AlertsUIWeb.AlertsLiveTest do
           )
 
         assert expected == actual
+
+        expected_timestamp = "Jun 30, 2025, 2:00 AM"
+
+        actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_end)
+
+        assert expected_timestamp == actual_timestamp
       end
     end
   end
@@ -822,6 +846,12 @@ defmodule AlertsUIWeb.AlertsLiveTest do
         AlertsUIWeb.ViewAlertsLive.format_start_time(alert.active_period_start)
 
       assert expected == actual
+
+      expected_timestamp = "Jun 30, 2025, 3:00 AM"
+
+      actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_start)
+
+      assert expected_timestamp == actual_timestamp
     end
   end
 
@@ -829,7 +859,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
     with_mock(DateTime, [:passthrough],
       now!: fn _time_zone -> ~U[2025-06-30 17:50:14.844524Z] end
     ) do
-      start__utc =
+      start_utc =
         DateTime.new!(~D[2025-06-29], ActivePeriod.start_of_service_time(), "America/New_York")
         |> DateTime.shift_zone!("Etc/UTC")
 
@@ -837,9 +867,9 @@ defmodule AlertsUIWeb.AlertsLiveTest do
         build(:alert, %{
           alert_id: "123",
           active_period: [
-            build(:active_period, %{start: start__utc})
+            build(:active_period, %{start: start_utc})
           ],
-          active_period_start: start__utc,
+          active_period_start: start_utc,
           duration_certainty: :KNOWN
         })
 
@@ -849,6 +879,12 @@ defmodule AlertsUIWeb.AlertsLiveTest do
         AlertsUIWeb.ViewAlertsLive.format_start_time(alert.active_period_start)
 
       assert expected == actual
+
+      expected_timestamp = "Jun 29, 2025, 3:00 AM"
+
+      actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_start)
+
+      assert expected_timestamp == actual_timestamp
     end
   end
 

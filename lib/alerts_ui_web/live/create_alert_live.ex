@@ -507,11 +507,13 @@ defmodule AlertsUIWeb.CreateAlertLive do
       route_id_lists
       |> Enum.map(&StopsRepo.by_route(&1, 0))
       |> List.flatten()
+      |> Enum.uniq()
 
     inbound =
       route_id_lists
       |> Enum.map(&StopsRepo.by_route(&1, 1))
       |> List.flatten()
+      |> Enum.uniq()
 
     both = MapSet.intersection(MapSet.new(outbound), MapSet.new(inbound)) |> MapSet.to_list()
 

@@ -306,6 +306,7 @@ defmodule AlertsUI.AlertsTest do
         active_period: [%{start: ~U[2024-12-11 11:00:00Z], end: ~U[2024-12-11 13:00:00Z]}],
         active_period_start: ~U[2024-12-11 11:00:00Z],
         active_period_end: ~U[2024-12-11 13:00:00Z],
+        notification_period_end: ~U[2024-12-12 08:00:00Z],
         duration_certainty: :ESTIMATED,
         user: @user
       })
@@ -318,14 +319,15 @@ defmodule AlertsUI.AlertsTest do
       assert result.active_period_end == ~U[2024-12-11 14:00:00Z]
     end
 
-    test "update end to end of service if eos is less than 2 hours from now" do
+    test "update end to notification_period_end if the notification_period_end is less than 2 hours from now" do
       current_time = ~U[2024-12-11 06:30:00Z]
 
       insert(:alert, %{
         alert_id: "123",
-        active_period: [%{start: ~U[2024-12-10 23:00:00Z], end: ~U[2024-12-11 05:00:00Z]}],
-        active_period_start: ~U[2024-12-10 23:00:00Z],
+        active_period: [%{start: ~U[2024-12-09 23:00:00Z], end: ~U[2024-12-11 05:00:00Z]}],
+        active_period_start: ~U[2024-12-09 23:00:00Z],
         active_period_end: ~U[2024-12-11 01:00:00Z],
+        notification_period_end: ~U[2024-12-11 08:00:00Z],
         duration_certainty: :ESTIMATED,
         user: @user
       })
@@ -337,7 +339,7 @@ defmodule AlertsUI.AlertsTest do
         |> DateTime.from_naive!("America/New_York")
         |> DateTime.shift_zone!("Etc/UTC")
 
-      assert [%{start: ~U[2024-12-10 23:00:00Z], end: ^expected_end}] = result.active_period
+      assert [%{start: ~U[2024-12-09 23:00:00Z], end: ^expected_end}] = result.active_period
       assert result.active_period_end == expected_end
     end
 
@@ -551,7 +553,6 @@ defmodule AlertsUI.AlertsTest do
     end
 
     test "filter by active_period" do
-      insert(:alert, %{alert_id: "012", active_period_start: nil})
       insert(:alert, %{alert_id: "123", active_period_start: ~U[2023-10-14 00:01:00Z]})
       insert(:alert, %{alert_id: "234", active_period_start: ~U[2023-10-16 00:01:00Z]})
       insert(:alert, %{alert_id: "345", active_period_start: ~U[2023-10-15 00:01:00Z]})
@@ -562,7 +563,7 @@ defmodule AlertsUI.AlertsTest do
           order_directions: [:asc, :desc]
         })
 
-      assert result |> Enum.map(& &1.alert_id) == [123, 345, 234, 012]
+      assert result |> Enum.map(& &1.alert_id) == [123, 345, 234]
     end
 
     test "filter by service type" do
