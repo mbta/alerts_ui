@@ -393,9 +393,20 @@ defmodule AlertsUIWeb.AlertsLiveTest do
     @tag :logged_in_user
     test "it paginates records", %{conn: conn} do
       {:ok, _view, html} = live(conn, "/alerts?filters[4][field]=timeline&filters[4][value]=past")
-
       assert Repo.aggregate(Alert, :count) == 100
       assert get_alert_id_order(html) == Enum.map((1..50), fn i -> "#{i}" end)
+    end
+
+    @tag :logged_in_user
+    test "pagination is navigable", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts?filters[4][field]=timeline&filters[4][value]=past")
+
+      html =
+        view
+        |> element("a[aria-label='Go to page 2']", "2")
+        |> render_click()
+
+      assert get_alert_id_order(html) == Enum.map((51..90), fn i -> "#{i}" end)
     end
   end
 
