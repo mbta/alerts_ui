@@ -28,6 +28,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :active_period_start_time_specifier,
     :alert_timing,
     :banner_text,
+    :banner_sync_toggle,
     :cause_detail,
     :combination,
     :created_at,
@@ -171,6 +172,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
     %__MODULE__{
       banner_text: alert.banner_text,
+      banner_sync_toggle: get_banner_sync_toggle(alert.banner_text),
       cause_detail: alert.cause_detail,
       combination: combination,
       created_at: created_at,
@@ -301,4 +303,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   end
 
   defp route_types_by_id(_, _, _), do: nil
+
+  defp get_banner_sync_toggle(nil), do: true
+  defp get_banner_sync_toggle(_banner_text), do: false
 end
