@@ -6,6 +6,7 @@ defmodule AlertsUI.Alerts do
   import Ecto.Query
   alias AlertsUI.Models.Alert
   alias AlertsUI.Repo
+  alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
   require Logger
 
   def create_or_update_alert(params, user, existing_alert \\ %Alert{}) do
@@ -61,7 +62,7 @@ defmodule AlertsUI.Alerts do
   def update_end_if_estimated(alerts, current_time \\ DateTime.utc_now()) do
     alerts
     |> Enum.map(fn alert ->
-      start_is_past = time_is_past(current_time, alert.active_period_start)
+      start_is_past = DateTimeHelpers.time_is_past?(alert.active_period_start, current_time)
 
       update_alert_end(alert, start_is_past, current_time)
     end)
@@ -108,7 +109,7 @@ defmodule AlertsUI.Alerts do
 
     alerts
     |> Enum.map(fn alert ->
-      end_is_past = time_is_past(current_time, alert.active_period_end)
+      end_is_past = DateTimeHelpers.time_is_past?(alert.active_period_end, current_time)
 
       if end_is_past do
         close(alert)
@@ -117,11 +118,6 @@ defmodule AlertsUI.Alerts do
       end
     end)
   end
-
-  defp time_is_past(_current_time, nil), do: false
-
-  defp time_is_past(current_time, end_time),
-    do: DateTime.compare(current_time, end_time) in [:eq, :gt]
 
   @spec update_recurring_active_periods(Alert.t(), DateTime.t()) ::
           {:ok, Alert.t()} | {:error, binary()}
