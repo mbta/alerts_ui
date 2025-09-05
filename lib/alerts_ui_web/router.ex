@@ -56,9 +56,11 @@ defmodule AlertsUIWeb.Router do
       live("/alerts/new", CreateAlertLive, :new)
       live("/alerts/edit", CreateAlertLive, :edit)
 
-      # Hidden pages
+      # "Hidden" pages, except still accessible without the feature flag
+      # (Will need to fix before launch)
       live("/components", ComponentsLive)
       live("/validate", ValidateLive)
+      live("/db", DBPageLive)
     end
   end
 

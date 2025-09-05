@@ -1,0 +1,73 @@
+<div id="db_page_live_view" class="p-16">
+  <.h1>DB</.h1>
+
+  <.pagination meta={@meta} />
+
+  <table>
+    <thead>
+      <tr>
+        <th class="border p-3">Alert ID</th>
+        <th class="border p-3">Notification period start</th>
+        <th class="border p-3">Notification period end</th>
+        <th class="border p-3">Active period start</th>
+        <th class="border p-3">Active period end</th>
+        <th class="border p-3">Duration certainty</th>
+        <th class="border p-3"></th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <%= for %{
+        alert_id: alert_id,
+        notification_period_start: notification_period_start,
+        notification_period_end: notification_period_end,
+        active_period_start: active_period_start,
+        active_period_end: active_period_end,
+        duration_certainty: duration_certainty
+      } <- @alerts do %>
+        <tr>
+          <td class="border p-3">{alert_id}</td>
+          <td class="border p-3">{notification_period_start}</td>
+          <td class="border p-3">{notification_period_end}</td>
+          <td class="border p-3">{active_period_start}</td>
+          <td class="border p-3">{active_period_end}</td>
+          <td class="border p-3">{duration_certainty}</td>
+          <td class="border p-3">
+            <.button_danger
+              class="btn !min-h-[24px] h-auto font-normal"
+              phx-click={show_modal("delete-alert-modal-#{alert_id}")}
+            >
+              Delete
+            </.button_danger>
+            <.modal
+              id={"delete-alert-modal-#{alert_id}"}
+              header_text="Delete alert"
+              cancel_event_name="cancelled_delete_modal"
+              accept_event_name="delete_alert"
+              cancel_button_text="Nevermind"
+              accept_button_text="Delete"
+              target_id="#db_page_live_view"
+              class="text-text-primary min-w-[26rem]"
+              inner_class="text-base font-light min-h-[72px]"
+              cancel_button_classes="border-0 text-base"
+              accept_button_classes="
+                    !text-white
+                    !bg-danger
+                    !border-danger
+                    hover:!bg-primary-hover
+                    hover:!border-primary-border-hover
+                    active:!bg-primary-active
+                    active:!border-primary-active
+                    focus:!border-primary-active
+                    text-base
+                    "
+              value={alert_id}
+            >
+              Are you sure you want to permanently delete #{alert_id}?
+            </.modal>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

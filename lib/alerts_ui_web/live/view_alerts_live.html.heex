@@ -33,47 +33,7 @@
     <span class="w-[100px] mr-auto">
       {@meta.total_count} {BuildAutoText.maybe_pluralize("alert", @meta.total_count != 1)}
     </span>
-    <Flop.Phoenix.pagination
-      meta={@meta}
-      on_paginate={JS.push("paginate-alerts")}
-      disabled_link_attrs={[
-        class: "border-secondary-disabled text-secondary-disabled cursor-not-allowed
-          hover:bg-transparent hover:text-secondary-disabled hover:border-secondary-disabled
-          active:bg-transparent active:text-secondary-disabled active:border-secondary-disabled"
-      ]}
-      page_links={3}
-      class="flex flex-row justify-center mr-auto"
-      page_link_attrs={[
-        class:
-          "rounded-none btn h-auto min-h-fit #{SharedComponents.secondary_button_classes()} !py-1 !px-2 leading-[1.5] font-normal"
-      ]}
-      current_page_link_attrs={[
-        class:
-          "rounded-none btn h-auto min-h-fit #{SharedComponents.secondary_button_classes()} !py-1 !px-2 leading-[1.5] font-normal !bg-primary text-text-invert"
-      ]}
-      page_list_attrs={[class: "join"]}
-    >
-      <:previous attrs={[
-        class:
-          "border-r-0 rounded-r-none btn !h-auto min-h-fit #{SharedComponents.secondary_button_classes()} !py-1 !px-[6px] leading-[1.5]"
-      ]}>
-        {carat_icon(:left)}
-      </:previous>
-      <:ellipsis>
-        <span
-          class="rounded-none btn h-auto min-h-fit #{SharedComponents.secondary_button_classes()} !py-1 !px-2 leading-[1.5] font-normal"
-          aria-hidden="true"
-        >
-          &hellip;
-        </span>
-      </:ellipsis>
-      <:next attrs={[
-        class:
-          "border-l-0 rounded-l-none btn !h-auto min-h-fit #{SharedComponents.secondary_button_classes()} !py-1 !px-[6px] leading-[1.5] order-last"
-      ]}>
-        {carat_icon(:right)}
-      </:next>
-    </Flop.Phoenix.pagination>
+    <.pagination meta={@meta} />
     <span class="w-[100px]" />
   </div>
 
