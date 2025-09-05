@@ -403,7 +403,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
 
       html =
         view
-        |> element("a[aria-label='Go to page 2']", "2")
+        |> element("button[aria-label='Go to page 2']", "2")
         |> render_click()
 
       assert get_alert_id_order(html) == Enum.map(51..90, fn i -> "#{i}" end)
@@ -414,7 +414,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
       {:ok, view, _html} = live(conn, "/alerts?filters[4][field]=timeline&filters[4][value]=past")
 
       view
-      |> element("a[aria-label='Go to page 2']", "2")
+      |> element("button[aria-label='Go to page 2']", "2")
       |> render_click()
 
       html =
