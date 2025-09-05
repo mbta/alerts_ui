@@ -7,8 +7,8 @@ defmodule AlertsUIWeb.AlertsLiveTest do
   import Phoenix.LiveViewTest
 
   alias AlertsUI.Alerts
-  alias AlertsUI.Models.Alert
   alias AlertsUI.Models.ActivePeriod
+  alias AlertsUI.Models.Alert
   alias AlertsUI.Repo
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
 
