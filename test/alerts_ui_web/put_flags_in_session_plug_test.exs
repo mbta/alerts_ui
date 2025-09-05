@@ -1,12 +1,11 @@
 defmodule AlertsUIWeb.PutFlagsInSessionPlugTest do
   use AlertsUIWeb.ConnCase
-  use Plug.Test
 
   describe "Put Flags in Session Plug" do
     test "flag is false if it has not been set", %{conn: conn} do
       conn =
         conn
-        |> Plug.Test.init_test_session(%{})
+        |> init_test_session(%{})
         |> fetch_session()
         |> bypass_through(AlertsUIWeb.Router, :get_flags)
         |> get("/")
@@ -19,7 +18,7 @@ defmodule AlertsUIWeb.PutFlagsInSessionPlugTest do
       conn =
         conn
         |> put_resp_cookie("test_flag", "true")
-        |> Plug.Test.init_test_session(%{})
+        |> init_test_session(%{})
         |> fetch_session()
         |> bypass_through(AlertsUIWeb.Router, :get_flags)
         |> get("/")
