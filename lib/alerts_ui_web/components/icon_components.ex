@@ -342,18 +342,16 @@ defmodule AlertsUIWeb.IconComponents do
   end
 
   defp fetch_long_name(route_id) do
-    with route <- RoutesRepo.get(route_id) do
-      Map.get(route, :long_name)
-    else
-      _ -> route_id
+    case RoutesRepo.get(route_id) do
+      nil -> route_id
+      route -> Map.get(route, :long_name)
     end
   end
 
   defp fetch_short_name(route_id) do
-    with route <- RoutesRepo.get(route_id) do
-      Map.get(route, :name)
-    else
-      _ -> route_id
+    case RoutesRepo.get(route_id) do
+      nil -> route_id
+      route -> Map.get(route, :name)
     end
   end
 end
