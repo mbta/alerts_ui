@@ -383,7 +383,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
       # current
       Enum.each(1..10, fn i ->
         insert(:alert, %{
-          alert_id: "#{i}",
+          alert_id: "#{90 + i}",
           active_period_start: ~U[2023-01-01 00:01:00Z],
           active_period: [build(:active_period, %{start: ~U[2023-01-01 00:01:00Z]})]
         })
@@ -394,7 +394,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
     test "it paginates records", %{conn: conn} do
       {:ok, _view, html} = live(conn, "/alerts?filters[4][field]=timeline&filters[4][value]=past")
       assert Repo.aggregate(Alert, :count) == 100
-      assert get_alert_id_order(html) == Enum.map((1..50), fn i -> "#{i}" end)
+      assert get_alert_id_order(html) == Enum.map(1..50, fn i -> "#{i}" end)
     end
 
     @tag :logged_in_user
@@ -406,7 +406,23 @@ defmodule AlertsUIWeb.AlertsLiveTest do
         |> element("a[aria-label='Go to page 2']", "2")
         |> render_click()
 
-      assert get_alert_id_order(html) == Enum.map((51..90), fn i -> "#{i}" end)
+      assert get_alert_id_order(html) == Enum.map(51..90, fn i -> "#{i}" end)
+    end
+
+    @tag :logged_in_user
+    test "timeline navigation from paginated results returns to page 1", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts?filters[4][field]=timeline&filters[4][value]=past")
+
+      view
+      |> element("a[aria-label='Go to page 2']", "2")
+      |> render_click()
+
+      html =
+        view
+        |> form("#alert-filter-form", filters: %{"4" => %{"value" => "current"}})
+        |> render_change()
+
+      assert get_alert_id_order(html) == Enum.map(91..100, fn i -> "#{i}" end)
     end
   end
 
