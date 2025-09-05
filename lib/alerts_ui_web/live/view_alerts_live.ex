@@ -30,27 +30,18 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   @impl true
   def handle_params(params, _url, socket) do
-    # default to timeline: current if params don't contain timeline filter
+    # default to timeline: current if params have no values
+    # (eg no user input has occured and we're probably in a fresh reload)
 
-    # TODO default to current if ALL values are empty
-    params = if params |> Map.get("filters", []) |> Enum.map(fn {_k,v} -> Map.get(v, "value", "") end) |> Enum.all?(& &1 == "") do
-      %{"filters" => %{"3" => %{"field" => "timeline", "value" => "current"}}}
-    else
-      params
-    end
-      # params = cond do
-      #   params["filters"]["3"] ->
-      #     params
-
-      #   params["filters"] ->
-      #     %{
-      #       "filters" =>
-      #         Map.put(params["filters"], "3", %{"field" => "timeline", "value" => "current"})
-      #     }
-
-      #   true ->
-      #     %{"filters" => %{"3" => %{"field" => "timeline", "value" => "current"}}}
-      # end
+    params =
+      if params
+         |> Map.get("filters", [])
+         |> Enum.map(fn {_k, v} -> Map.get(v, "value", "") end)
+         |> Enum.all?(&(&1 == "")) do
+        %{"filters" => %{"3" => %{"field" => "timeline", "value" => "current"}}}
+      else
+        params
+      end
 
     default_order_fields = lookup_end_time_order_fields_by_params(params)
     default_order_directions = lookup_end_time_order_directions_by_params(params)

@@ -135,7 +135,7 @@ defmodule AlertsUI.Models.Alert do
         ],
         alert_id: [
           filter: {CustomFilters, :alert_id_filter, []},
-          ecto_type: :integer,
+          ecto_type: :string,
           operators: [:==]
         ],
         timeline: [

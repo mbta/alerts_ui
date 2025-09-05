@@ -173,11 +173,11 @@ defmodule AlertsUIWeb.CoreComponents do
       phx-submit={@on_change}
       class="form-control gap-4"
     >
-      <div class="ml-2 flex flex-row gap-4 justify-end">
+      <div class="mr-8 flex flex-row gap-4 items-center">
         <Flop.Phoenix.filter_fields :let={i} form={@form} fields={@fields}>
           <%= case i.type do %>
             <% "radio_switch" -> %>
-              <.radio_switch name={i.field.name} label={i.label} selected={i.field.value} {i.rest} />
+              <.radio_switch name={i.field.name} selected={i.field.value} {i.rest} />
             <% "text_input" -> %>
               <AlertsUIWeb.SharedComponents.text_input
                 field={i.field}
@@ -194,14 +194,6 @@ defmodule AlertsUIWeb.CoreComponents do
     </.form>
     """
   end
-
-  # <%= case @event do  %>
-  # <% %{type: :research_status_changed, data: status_change} -> %>
-  #    stuff
-
-  # <% %{type: :labeling, data: %{comment: comment, user: user}} = event -> %>
-  #      stuff
-  # <% end %>
 
   @doc """
   Renders a form that with a single search field.
@@ -412,14 +404,12 @@ defmodule AlertsUIWeb.CoreComponents do
       <.radio_switch name="group-name" values=["one", "two", "three"] selected={"two"} />
   """
   attr :name, :string, required: true
-  attr :label, :string, default: nil
   attr :values, :list, required: true
   attr :selected, :any
 
   def radio_switch(assigns) do
     ~H"""
-    <fieldset class="mx-24">
-      <.label for={@name}>{@label}</.label>
+    <fieldset class="mx-12">
       <div class="join">
         <.radio_switch_input
           :for={value <- @values}

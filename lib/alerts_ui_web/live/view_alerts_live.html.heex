@@ -1,11 +1,10 @@
 <div id="view_alerts_live_view" class="h-[calc(100vh-120px)] mt-10 mx-6 flex flex-col">
-  <div class="flex">
+  <div class="flex justify-between">
     <.button_primary_link href="/alerts/new" class="whitespace-nowrap">
       <.icon name="hero-plus" /> Create an Alert
     </.button_primary_link>
     <.filter_form
       fields={[
-
         effect_detail: [
           label: "Effect",
           type: "select",
@@ -19,11 +18,17 @@
           options: format_service_type_options()
         ],
         timeline: [
-          label: "Timeline",
+          label: "",
           type: "radio_switch",
           values: timeline_options()
         ],
-      alert_id: [placeholder: "Search alerts", type: "text_input"]
+        alert_id: [
+          placeholder: "⌕ Search alerts",
+          type: "text_input",
+          maxlength: 6,
+          label: "",
+          class: "h-8"
+        ]
       ]}
       meta={@meta}
       id="alert-filter-form"

@@ -271,21 +271,21 @@ defmodule AlertsUIWeb.AlertsLiveTest do
     @tag :logged_in_user
     test "clicking future timeline filter renders end date asc", %{conn: conn} do
       {:ok, _view, html} =
-        live(conn, "/alerts?filters[4][field]=timeline&filters[4][value]=future")
+        live(conn, "/alerts?filters[3][field]=timeline&filters[3][value]=future")
 
       assert get_alert_id_order(html) == ["10400", "10200", "11000", "11400", "10800", "11100"]
     end
 
     @tag :logged_in_user
     test "clicking past timeline filter renders end date desc", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/alerts?filters[4][field]=timeline&filters[4][value]=past")
+      {:ok, _view, html} = live(conn, "/alerts?filters[3][field]=timeline&filters[3][value]=past")
 
       assert get_alert_id_order(html) == ["10700", "11300", "11200"]
     end
 
     @tag :logged_in_user
     test "clicking all timeline filter renders end date desc", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/alerts?filters[4][field]=timeline&filters[4][value]=all")
+      {:ok, _view, html} = live(conn, "/alerts?filters[3][field]=timeline&filters[3][value]=all")
 
       assert get_alert_id_order(html) == [
                "11100",
