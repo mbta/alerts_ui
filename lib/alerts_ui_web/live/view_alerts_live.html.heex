@@ -5,14 +5,14 @@
     </.button_primary_link>
     <.filter_form
       fields={[
-        alert_id: [label: "ID", op: :ilike_and],
+
         effect_detail: [
           label: "Effect",
           type: "select",
           options: format_effect_options(),
           value: ""
         ],
-        text_content: [label: "Keyword", op: :ilike_and],
+        text_content: [label: "Keyword", op: :like_and],
         service_type: [
           label: "Service Type",
           type: "select",
@@ -22,7 +22,8 @@
           label: "Timeline",
           type: "radio_switch",
           values: timeline_options()
-        ]
+        ],
+      alert_id: [placeholder: "Search alerts", type: "text_input"]
       ]}
       meta={@meta}
       id="alert-filter-form"

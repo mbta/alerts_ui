@@ -28,7 +28,14 @@ defmodule AlertsUI.Models.CustomFilters do
     end
   end
 
-  @spec timeline_filter(any(), Flop.Filter.t(), any()) :: Ecto.Query.t()
+  @spec alert_id_filter(Ecto.Query.t(), Flop.Filter.t(), list()) :: Ecto.Query.t()
+  def alert_id_filter(query, %Filter{value: value}, _opts) do
+    value = "#{value}%"
+    query
+    |> where([a], ilike(a.alert_id, ^value))
+  end
+
+  @spec timeline_filter(Ecto.Query.t(), Flop.Filter.t(), any()) :: Ecto.Query.t()
   def timeline_filter(query, %Filter{value: "future"}, _opts) do
     now = DateTime.utc_now()
     # use active_period_start as a backup when notification_start is blank

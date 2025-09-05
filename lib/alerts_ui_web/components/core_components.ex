@@ -173,12 +173,20 @@ defmodule AlertsUIWeb.CoreComponents do
       phx-submit={@on_change}
       class="form-control gap-4"
     >
-      <div class="flex flex-row gap-2 justify-end">
+      <div class="ml-2 flex flex-row gap-4 justify-end">
         <Flop.Phoenix.filter_fields :let={i} form={@form} fields={@fields}>
-          <%= if i.type == "radio_switch" do %>
-            <.radio_switch name={i.field.name} label={i.label} selected={i.field.value} {i.rest} />
-          <% else %>
-            <.input field={i.field} label={i.label} type={i.type} phx-debounce={120} {i.rest} />
+          <%= case i.type do %>
+            <% "radio_switch" -> %>
+              <.radio_switch name={i.field.name} label={i.label} selected={i.field.value} {i.rest} />
+            <% "text_input" -> %>
+              <AlertsUIWeb.SharedComponents.text_input
+                field={i.field}
+                label={i.label}
+                phx-debounce={120}
+                {i.rest}
+              />
+            <% _ -> %>
+              <.input field={i.field} label={i.label} type={i.type} phx-debounce={120} {i.rest} />
           <% end %>
         </Flop.Phoenix.filter_fields>
       </div>
@@ -186,6 +194,14 @@ defmodule AlertsUIWeb.CoreComponents do
     </.form>
     """
   end
+
+  # <%= case @event do  %>
+  # <% %{type: :research_status_changed, data: status_change} -> %>
+  #    stuff
+
+  # <% %{type: :labeling, data: %{comment: comment, user: user}} = event -> %>
+  #      stuff
+  # <% end %>
 
   @doc """
   Renders a form that with a single search field.

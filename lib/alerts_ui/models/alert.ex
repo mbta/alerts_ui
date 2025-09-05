@@ -133,6 +133,11 @@ defmodule AlertsUI.Models.Alert do
           operators: [:==],
           bindings: [:informed_entity]
         ],
+        alert_id: [
+          filter: {CustomFilters, :alert_id_filter, []},
+          ecto_type: :integer,
+          operators: [:==]
+        ],
         timeline: [
           filter: {CustomFilters, :timeline_filter, []},
           ecto_type: :string,
