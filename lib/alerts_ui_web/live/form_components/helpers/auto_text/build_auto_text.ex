@@ -193,7 +193,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
     trip_word = maybe_pluralize(trip_word(route_type), length(schedules) > 1)
 
     schedules
-    |> Enum.map(&SelectFormatter.name_for_option/1)
+    |> Enum.map(&SelectFormatter.name_for_option(&1, route_type))
     |> join_trips(trip_word)
   end
 
@@ -243,7 +243,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   @spec route_names(__MODULE__.t()) :: String.t()
   def route_names(%{routes: []}), do: ""
 
-  def route_names(%{routes: routes}) when length(routes) > 5 do
+  def route_names(%{routes: routes, schedules: []}) when length(routes) > 5 do
     route_names =
       routes
       |> Enum.map(&SelectFormatter.name_for_option/1)
@@ -263,7 +263,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
     end
   end
 
-  def route_names(%{routes: routes}) do
+  def route_names(%{routes: routes, schedules: []}) do
     route_names =
       routes
       |> Enum.map(&SelectFormatter.name_for_option/1)
@@ -279,6 +279,15 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
 
     joiner = route_joiner(numerical_routes, non_numerical_routes)
     "#{non_numerical_routes_phrase}#{joiner}#{numerical_routes_phrase}"
+  end
+
+  def route_names(%{routes: routes, schedules: schedules} = autotext) do
+    # if there are schedules selected, only include the routes which are associated
+    # with the selected schedules
+    route_ids_from_schedules = Enum.map(schedules, & &1.route.id)
+    filtered_routes = Enum.filter(routes, &(&1.id in route_ids_from_schedules))
+
+    autotext |> Map.merge(%{routes: filtered_routes, schedules: []}) |> route_names()
   end
 
   def route_word([_route]), do: "route"
