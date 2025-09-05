@@ -1,12 +1,15 @@
 defmodule AlertsUIWeb.AlertsLiveTest do
   use ExUnit.Case
   use AlertsUIWeb.ConnCase
+
+  import AlertsUI.Support.Factory
   import Mock
   import Phoenix.LiveViewTest
-  import Mock
-  alias AlertsUI.Models.ActivePeriod
-  import AlertsUI.Support.Factory
+
   alias AlertsUI.Alerts
+  alias AlertsUI.Models.ActivePeriod
+  alias AlertsUI.Models.Alert
+  alias AlertsUI.Repo
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
 
   @now DateTime.utc_now()
@@ -363,6 +366,63 @@ defmodule AlertsUIWeb.AlertsLiveTest do
                "hero-arrow-down"
 
       assert get_alert_id_order(html) == ["10000", "10100", "10900", "10600", "10500", "10300"]
+    end
+  end
+
+  describe "alerts list pagination" do
+    setup do
+      # past
+      Enum.each(1..90, fn i ->
+        insert(:alert, %{
+          alert_id: "#{i}",
+          active_period_start: ~U[2023-01-01 00:01:00Z],
+          active_period_end: ~U[2023-01-01 01:01:00Z]
+        })
+      end)
+
+      # current
+      Enum.each(1..10, fn i ->
+        insert(:alert, %{
+          alert_id: "#{90 + i}",
+          active_period_start: ~U[2023-01-01 00:01:00Z],
+          active_period: [build(:active_period, %{start: ~U[2023-01-01 00:01:00Z]})]
+        })
+      end)
+    end
+
+    @tag :logged_in_user
+    test "it paginates records", %{conn: conn} do
+      {:ok, _view, html} = live(conn, "/alerts?filters[4][field]=timeline&filters[4][value]=past")
+      assert Repo.aggregate(Alert, :count) == 100
+      assert get_alert_id_order(html) == Enum.map(1..50, fn i -> "#{i}" end)
+    end
+
+    @tag :logged_in_user
+    test "pagination is navigable", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts?filters[4][field]=timeline&filters[4][value]=past")
+
+      html =
+        view
+        |> element("button[aria-label='Go to page 2']", "2")
+        |> render_click()
+
+      assert get_alert_id_order(html) == Enum.map(51..90, fn i -> "#{i}" end)
+    end
+
+    @tag :logged_in_user
+    test "timeline navigation from paginated results returns to page 1", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts?filters[4][field]=timeline&filters[4][value]=past")
+
+      view
+      |> element("button[aria-label='Go to page 2']", "2")
+      |> render_click()
+
+      html =
+        view
+        |> form("#alert-filter-form", filters: %{"4" => %{"value" => "current"}})
+        |> render_change()
+
+      assert get_alert_id_order(html) == Enum.map(91..100, fn i -> "#{i}" end)
     end
   end
 
