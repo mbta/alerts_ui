@@ -342,14 +342,18 @@ defmodule AlertsUIWeb.IconComponents do
   end
 
   defp fetch_long_name(route_id) do
-    route_id
-    |> RoutesRepo.get()
-    |> Map.get(:long_name)
+    with route = RoutesRepo.get(route_id) do
+      Map.get(route, :long_name)
+    else
+      route_id
+    end
   end
 
   defp fetch_short_name(route_id) do
-    route_id
-    |> RoutesRepo.get()
-    |> Map.get(:name)
+    with route = RoutesRepo.get(route_id) do
+      Map.get(route, :name)
+    else
+      route_id
+    end
   end
 end
