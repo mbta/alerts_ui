@@ -402,7 +402,10 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         view
         |> element("#service_form")
         |> render_change(%{
-          "affected_service" => %{"trip_ids" => [@schedule.trip.id], "stop_ids" => [@stop.id]}
+          "affected_service" => %{
+            "trip_ids" => [@schedule.trip.id],
+            "stop_names_and_ids" => ["#{@stop.name}|#{@stop.id}"]
+          }
         })
 
         # Mock alert details selections

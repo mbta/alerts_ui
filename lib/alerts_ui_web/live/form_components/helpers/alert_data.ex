@@ -52,6 +52,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :severity,
     :single_route_id,
     :stop_ids,
+    :stop_names_and_ids,
     :trip_ids,
     :url
   ]
@@ -93,6 +94,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           severity: integer() | nil,
           single_route_id: String.t() | nil,
           stop_ids: [String.t()] | nil,
+          stop_names_and_ids: [String.t()] | nil,
           trip_ids: [String.t()] | nil,
           url: String.t() | nil
         }
@@ -194,6 +196,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       service_types: Alert.service_types(alert),
       single_route_id: single_route_id,
       stop_ids: Alert.gather_parent_stop_ids(informed_entities),
+      stop_names_and_ids: alert.original_stop_selections,
       trip_ids: Alert.gather_trip_ids(informed_entities),
       url: alert.url
     }

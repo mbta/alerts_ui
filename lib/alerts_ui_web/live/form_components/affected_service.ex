@@ -28,13 +28,15 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     field :trip_ids, {:array, :string}
     field :trip_search_term, :string
     field :stop_ids, {:array, :string}
+    field :stop_names, {:array, :string}
+    field :stop_names_and_ids, {:array, :string}
     field :stop_search_term, :string
     field :trip_information_by_id, {:map, :map}
     field :modal_date, :string
     field :modal_date_search_term, :string
   end
 
-  @fields ~w[route_ids direction trip_ids stop_ids trip_information_by_id route_search_term trip_search_term stop_search_term single_route_id modal_date modal_date_search_term]a
+  @fields ~w[route_ids direction trip_ids stop_ids stop_names stop_names_and_ids trip_information_by_id route_search_term trip_search_term stop_search_term single_route_id modal_date modal_date_search_term]a
 
   @impl true
   def mount(socket) do
@@ -215,6 +217,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       |> Helpers.filter_empty_list_fields()
       |> populate_default_stops()
       |> populate_default_trips()
+      |> split_stop_names_and_ids
 
     changeset = validate(affected_service, socket.assigns)
 
@@ -234,7 +237,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
           get_selected_schedules(available_schedules, affected_service["trip_ids"])
 
         available_stops = Map.get(socket.assigns.available_stops, :result)
-        selected_stops = get_selected_stops(available_stops, affected_service["stop_ids"])
+        selected_stops = get_selected_stops(available_stops, affected_service["stop_names"])
 
         send(self(), {:add_errors, [], __MODULE__})
         send(self(), {:section_completed, changeset})
@@ -475,12 +478,15 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     stop_search_term = assigns.form[:stop_search_term].value
 
     stop_id_options =
-      SelectFormatter.formatted_select_options(%SelectFormatter{
-        options: Map.get(assigns.available_stops, :result, []) || [],
-        search_term: stop_search_term,
-        route_type: assigns.route_type,
-        values_to_keep: stop_ids
-      })
+      SelectFormatter.formatted_select_options(
+        %SelectFormatter{
+          options: Map.get(assigns.available_stops, :result, []) || [],
+          search_term: stop_search_term,
+          route_type: assigns.route_type,
+          values_to_keep: stop_ids
+        },
+        true
+      )
 
     modal_options =
       filter_modal_options(
@@ -604,7 +610,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
           <.filtered_select
             :if={show_stops_input?(assigns)}
             label={if show_trips_input?(assigns), do: "Stops", else: nil}
-            field={@form[:stop_ids]}
+            field={@form[:stop_names_and_ids]}
             filter_field={@form[:stop_search_term]}
             options={@stop_id_options}
             loading={Map.get(@available_stops, :loading, true)}
@@ -699,10 +705,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   # Each of these are only used once in the validation flow... what exactly should we do here?
   defp populate_default_stops(affected_service) do
-    if Map.get(affected_service, "stop_ids") in [nil, "default", ["default"]] do
+    if Map.get(affected_service, "stop_names_and_ids") in [nil, "default", ["default"]] do
       Map.put(
         affected_service,
-        "stop_ids",
+        "stop_names_and_ids",
         []
       )
     else
@@ -720,6 +726,20 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     else
       affected_service
     end
+  end
+
+  defp split_stop_names_and_ids(%{"stop_names_and_ids" => stop_names_and_ids} = affected_service) do
+    split_names_and_ids =
+      Enum.reduce(stop_names_and_ids, %{"stop_names" => [], "stop_ids" => []}, fn name_and_id,
+                                                                                  acc ->
+        [stop_name, stop_id] = String.split(name_and_id, "|")
+        stop_names = [stop_name | acc["stop_names"]]
+        stop_ids = [stop_id | acc["stop_ids"]]
+
+        %{"stop_names" => stop_names, "stop_ids" => stop_ids}
+      end)
+
+    Map.merge(affected_service, split_names_and_ids)
   end
 
   defp get_schedules_by_route_type(assigns) do
@@ -750,7 +770,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   defp get_selected_stops(nil, _), do: nil
   defp get_selected_stops(_, nil), do: nil
 
-  defp get_selected_stops(available_stops, stop_ids) do
-    Enum.filter(available_stops, &(&1.id in stop_ids))
+  defp get_selected_stops(available_stops, stop_names) do
+    Enum.filter(available_stops, &(&1.name in stop_names))
   end
 end

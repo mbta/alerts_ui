@@ -42,6 +42,23 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
                {"alice", "101"}
              ]
     end
+
+    test "values will be combo of stop names and ids if second argument is true" do
+      options = [
+        %Stop{id: "202", name: "joe"},
+        %Stop{id: "303", name: "bob"},
+        %Stop{id: "303", name: "bob"},
+        %Stop{id: "101", name: "alice"}
+      ]
+
+      results = SelectFormatter.formatted_select_options(%SelectFormatter{options: options}, true)
+
+      assert results == [
+               {"joe", "joe|202"},
+               {"bob", "bob|303"},
+               {"alice", "alice|101"}
+             ]
+    end
   end
 
   describe "formatted_select_options/2" do

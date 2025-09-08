@@ -160,7 +160,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         |> render_change(%{"affected_service" => %{"route_ids" => ["Green"]}})
 
         assert view |> render_async() =~
-                 ~s(<option value=\"stop_1\">Stop 1</option><option value=\"stop_2\">Stop 2</option>)
+                 ~s(<option value="Stop 1|stop_1">Stop 1</option><option value="Stop 2|stop_2">Stop 2</option>)
       end
     end
 
@@ -623,7 +623,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
           )
 
         assert view
-               |> render() =~ ~s(id="affected_service_stop_ids" disabled="disabled")
+               |> render() =~ ~s(id="affected_service_stop_names_and_ids" disabled="disabled")
 
         view
         |> element("form")
@@ -634,7 +634,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         })
 
         refute view
-               |> render() =~ ~s(id="affected_service_stop_ids" disabled="disabled")
+               |> render() =~ ~s(id="affected_service_stop_names_and_ids" disabled="disabled")
       end
     end
 
@@ -658,7 +658,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
             | alert_data: %{route_type: 4, effect_name: "Shuttle"}
           })
 
-        assert render_async(view) =~ ~s(id="affected_service_stop_ids" disabled="disabled")
+        assert render_async(view) =~
+                 ~s(id="affected_service_stop_names_and_ids" disabled="disabled")
+
         refute render_async(view) =~ "All Stops"
 
         view
@@ -669,7 +671,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
           }
         })
 
-        refute render_async(view) =~ ~s(id="affected_service_stop_ids" disabled="disabled")
+        refute render_async(view) =~
+                 ~s(id="affected_service_stop_names_and_ids" disabled="disabled")
+
         assert view |> render_async() =~ "All Stops"
 
         view
@@ -680,7 +684,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
           }
         })
 
-        refute render_async(view) =~ ~s(id="affected_service_stop_ids" disabled="disabled")
+        refute render_async(view) =~
+                 ~s(id="affected_service_stop_names_and_ids" disabled="disabled")
       end
     end
 
@@ -716,9 +721,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         })
 
         assert view
-               |> element("select##affected_service_stop_ids")
+               |> element("select##affected_service_stop_names_and_ids")
                |> render =~
-                 "<option value=\"place-sstat\">South Station (outbound)</option><option value=\"place-crtst\">Courthouse (outbound)</option><option value=\"place-crtst\">Courthouse (inbound)</option><option value=\"place-sstat\">South Station (inbound)</option>"
+                 "<option value=\"South Station (outbound)|place-sstat\">South Station (outbound)</option><option value=\"Courthouse (outbound)|place-crtst\">Courthouse (outbound)</option><option value=\"Courthouse (inbound)|place-crtst\">Courthouse (inbound)</option><option value=\"South Station (inbound)|place-sstat\">South Station (inbound)</option>"
       end
     end
 
@@ -762,7 +767,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         assert view |> render_async() =~
                  ~s(<option value="CR-683322-595">595)
 
-        assert view |> render_async() =~ ~s(<option value="place-sstat">)
+        assert view |> render_async() =~ ~s(<option value="South Station|place-sstat">)
 
         view
         |> element("form")
@@ -773,7 +778,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         refute view |> render_async() =~
                  ~s(<option value="CR-683322-595">595)
 
-        refute view |> render_async() =~ ~s(<option value="place-sstat">)
+        refute view |> render_async() =~ ~s(<option value="South Station|place-sstat">)
       end
     end
 
@@ -796,7 +801,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
               alert_data: %{
                 direction: "0",
                 route_type: 2,
-                stop_ids: ["place-sstat"],
+                stop_names_and_ids: ["South Station|place-sstat"],
                 route_ids: ["CR-Worcester"],
                 trip_ids: ["CR-683322-595"]
               }
@@ -808,7 +813,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         assert view |> render_async() =~
                  ~s(<option selected="selected" value="0">Westbound</option>)
 
-        assert view |> render_async() =~ ~s(<option selected="selected" value="place-sstat">)
+        assert view |> render_async() =~
+                 ~s(<option selected="selected" value="South Station|place-sstat">)
 
         assert view |> render_async() =~
                  ~s(<option selected="selected" value="CR-683322-595">595)
@@ -1056,6 +1062,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
               effect: :SIGNIFICANT_DELAYS,
               effect_detail: "DELAY",
               original_route_selections: [@route.id],
+              original_stop_selections: ["#{@stop.name}|#{@stop.id}"],
               reminder_times: [],
               severity: 7,
               cause_detail: "unknown",
@@ -1070,14 +1077,17 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         rendered_view = render_async(view)
 
         assert rendered_view =~ ~s(value="CR-Worcester" checked="checked")
-        assert rendered_view =~ ~s(<option selected="selected" value="place-sstat">South Station)
+
+        assert rendered_view =~
+                 ~s(<option selected="selected" value="South Station|place-sstat">South Station)
+
         assert rendered_view =~ ~s(<option selected="selected" value="CR-683322-595">595)
 
         view
         |> element("#service_form")
         |> render_change(%{
           "affected_service" => %{
-            "stop_ids" => [@stop_2.id]
+            "stop_names_and_ids" => ["#{@stop_2.name}|#{@stop_2.id}"]
           }
         })
 

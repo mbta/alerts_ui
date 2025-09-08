@@ -58,7 +58,8 @@ defmodule AlertsUI.Models.Alert do
   notification_period_start
   notification_period_end
   recurrence_days
-  original_route_selections)a
+  original_route_selections
+  original_stop_selections)a
 
   @cause Cause.causes()
   @effect Effect.effects()
@@ -105,6 +106,7 @@ defmodule AlertsUI.Models.Alert do
           notification_period_start: DateTime.t() | nil,
           notification_period_end: DateTime.t() | nil,
           original_route_selections: [String.t()] | nil,
+          original_stop_selections: [String.t()] | nil,
           user_id: User.id()
         }
 
@@ -181,6 +183,7 @@ defmodule AlertsUI.Models.Alert do
       values: ~w[sunday monday tuesday wednesday thursday friday saturday]a
 
     field :original_route_selections, {:array, :string}
+    field :original_stop_selections, {:array, :string}
 
     timestamps()
   end

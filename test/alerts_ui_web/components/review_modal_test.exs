@@ -229,7 +229,10 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
+          affected_service: %{
+            route_ids: ["CR-Worcester"],
+            stop_names_and_ids: ["Aquarium|place-aqucl"]
+          }
         })
 
         open_review_modal(view)
@@ -263,7 +266,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
           affected_service: %{
             route_ids: ["CR-Worcester"],
             direction: "1",
-            stop_ids: ["place-aqucl"]
+            stop_names_and_ids: ["Aquarium|place-aqucl"]
           }
         })
 
@@ -394,7 +397,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
             route_ids: ["CR-Worcester"],
             direction: "1",
             trip_ids: ["CR-683322-595"],
-            stop_ids: ["place-aqucl"]
+            stop_names_and_ids: ["Aquarium|place-aqucl"]
           }
         })
 
