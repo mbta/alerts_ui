@@ -147,18 +147,12 @@ Enum.each(1..20, fn i ->
   })
 end)
 
-# current alerts with closed notifications
+# current alerts with one active period that has a nil end
 Enum.each(1..20, fn i ->
   active_period_1 =
     Repo.insert!(%ActivePeriod{
       start: ~U[2023-10-12 00:01:00Z],
-      end: ~U[2023-10-12 00:02:00Z]
-    })
-
-  active_period_2 =
-    Repo.insert!(%ActivePeriod{
-      start: ~U[2023-10-12 00:03:00Z],
-      end: ~U[2023-10-12 00:04:00Z]
+      end: nil
     })
 
   Repo.insert!(%Alert{
@@ -180,7 +174,7 @@ Enum.each(1..20, fn i ->
     recurrence_text: "weekdays",
     alert_lifecycle: :NEW,
     duration_certainty: :UNKNOWN,
-    active_period: [active_period_1, active_period_2],
+    active_period: [active_period_1],
     active_period_start: active_period_1.start,
     active_period_end: nil,
     image_url: "https://example.com/image1.png",
@@ -189,7 +183,7 @@ Enum.each(1..20, fn i ->
     reminder_times: [reminder_time],
     original_route_selections: [],
     notification_period_start: ~U[2023-10-12 00:04:00Z],
-    notification_period_end: ~U[2023-10-13 00:04:00Z]
+    notification_period_end: nil
   })
 end)
 
@@ -210,10 +204,11 @@ Enum.each(1..20, fn i ->
     severity: 3,
     last_push_notification_timestamp: ~U[2023-10-12 00:03:00Z],
     closed_timestamp: ~U[2023-10-13 00:03:00Z],
+    active_period_end: ~U[2023-10-13 00:03:00Z],
     timeframe_text: "ongoing",
     recurrence_text: "weekdays",
     alert_lifecycle: :NEW,
-    duration_certainty: :UNKNOWN,
+    duration_certainty: :KNOWN,
     active_period: [],
     active_period_start: ~U[2023-10-12 00:03:00Z],
     image_url: "https://example.com/image1.png",
@@ -221,7 +216,6 @@ Enum.each(1..20, fn i ->
     informed_entity: [informed_entity_1, informed_entity_2],
     reminder_times: [reminder_time],
     original_route_selections: [],
-    active_period_end: nil,
     notification_period_end: nil
   })
 end)
