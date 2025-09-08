@@ -78,7 +78,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
 
   describe "filtering" do
     @tag :logged_in_user
-    test "alert_id filter change", %{conn: conn} do
+    test "alert id filter change", %{conn: conn} do
       insert(:alert, %{
         alert_id: "899",
         original_route_selections: ["Orange"]
@@ -96,7 +96,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
       {:ok, _view, html} =
         live(
           conn,
-          "/alerts?filters[3][field]=timeline&filters[3][value]=all&filters[4][field]=alert_id&filters[4][value]=8"
+          "/alerts?filters[3][field]=timeline&filters[3][value]=all&filters[4][field]=multi_column_search&filters[4][value]=8"
         )
 
       assert html =~ "899"
@@ -105,7 +105,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
       {:ok, _view, html} =
         live(
           conn,
-          "/alerts?filters[3][field]=timeline&filters[3][value]=all&filters[4][field]=alert_id&filters[4][value]=9"
+          "/alerts?filters[3][field]=timeline&filters[3][value]=all&filters[4][field]=multi_column_search&filters[4][value]=9"
         )
 
       refute html =~ "899"
@@ -939,25 +939,6 @@ defmodule AlertsUIWeb.AlertsLiveTest do
       assert expected_timestamp == actual_timestamp
     end
   end
-
-  # defp alert_id_filter_params(search_string) do
-  #   %{
-  #     "_target" => ["filters", "0", "value"],
-  #     "filters" => %{
-  #       "0" => %{"field" => "alert_id", "op" => "ilike_and", "value" => search_string}
-  #     }
-  #   }
-  # end
-
-  # defp effect_filter_params(search_string) do
-  #   %{
-  #     "_target" => ["filters", "0", "value"],
-  #     "filters" => %{
-  #       "0" => %{"field" => "alert_id", "op" => "ilike_and", "value" => ""},
-  #       "1" => %{"field" => "effect_detail", "value" => search_string}
-  #     }
-  #   }
-  # end
 
   # Takes html of alert list page, parses the html, returns order of alert ids
   defp get_alert_id_order(html) do

@@ -112,7 +112,14 @@ defmodule AlertsUI.Models.Alert do
 
   @derive {
     Flop.Schema,
-    filterable: [:alert_id, :effect_detail, :text_content, :service_type, :timeline],
+    filterable: [
+      :alert_id,
+      :effect_detail,
+      :text_content,
+      :service_type,
+      :timeline,
+      :multi_column_search
+    ],
     sortable: [
       # service,
       :effect_detail,
@@ -133,8 +140,8 @@ defmodule AlertsUI.Models.Alert do
           operators: [:==],
           bindings: [:informed_entity]
         ],
-        alert_id: [
-          filter: {CustomFilters, :alert_id_filter, []},
+        multi_column_search: [
+          filter: {CustomFilters, :multi_column_search_filter, []},
           ecto_type: :string,
           operators: [:==]
         ],

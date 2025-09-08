@@ -28,8 +28,8 @@ defmodule AlertsUI.Models.CustomFilters do
     end
   end
 
-  @spec alert_id_filter(Ecto.Query.t(), Flop.Filter.t(), list()) :: Ecto.Query.t()
-  def alert_id_filter(query, %Filter{value: value}, _opts) do
+  @spec multi_column_search_filter(Ecto.Query.t(), Flop.Filter.t(), list()) :: Ecto.Query.t()
+  def multi_column_search_filter(query, %Filter{value: value}, _opts) do
     value = "#{value}%"
     where(query, [a], ilike(a.alert_id, ^value))
   end
