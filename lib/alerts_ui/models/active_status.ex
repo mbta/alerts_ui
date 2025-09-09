@@ -8,7 +8,7 @@ defmodule AlertsUI.Models.ActiveStatus do
 
   @type status :: :published_current | :published_upcoming | :future | :past
 
-  @spec get_alert_status(Alert) :: status
+  @spec get_alert_status(Alert.t()) :: status()
   def get_alert_status(alert) do
     nps = Map.get(alert, :notification_period_start)
     npe = Map.get(alert, :notification_period_end)
