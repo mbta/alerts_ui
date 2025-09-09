@@ -3,6 +3,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.DateTimeFormatters do
   Utility functions for formatting dates and times.
   """
 
+  alias AlertsUI.Models.ActivePeriod
   alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
 
   @one_minute_in_seconds 60
@@ -12,6 +13,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.DateTimeFormatters do
   Return a human-friendly date-time string relative to "now".
   Use the time (converted to EST) if today (same SERVICE day), the month and day if this year, and the month, day and
   year if a different year.
+
+  Pass `:start` as the second argument if it's a start time, and `:end` if it's an end time. The difference is that
+  `:start` does not count the next instance of 3AM (EOS) as the same service day, but `:end` does.
 
   iex> friendly_date_time(~U[2025-07-03 06:02:00.00Z], :start, ~U[2025-07-02 16:21:52.928497Z])
   "2:02 AM"
@@ -152,7 +156,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.DateTimeFormatters do
   defp date_time_format(dt, start_or_end, now) do
     cond do
       # same service day
-      same_service_date?(dt, start_or_end, now) ->
+      DateTimeHelpers.same_service_date?(dt, start_or_end, now) ->
         "%-I:%M %p"
 
       # same year

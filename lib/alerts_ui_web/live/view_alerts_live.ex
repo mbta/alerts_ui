@@ -242,8 +242,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     if start_time_utc && DateTime.compare(most_recent_start_of_service, start_time_utc) == :eq do
       "start of service"
     else
-      adjusted_dt = adjusted_date_time(start_time_utc)
-      DateTimeHelpers.friendly_date_time(start_time_utc, :start)
+      DateTimeFormatters.friendly_date_time(start_time_utc, :start)
     end
   end
 
@@ -258,8 +257,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
        ) == :eq do
       "end of service"
     else
-      adjusted_dt = adjusted_date_time(end_time_utc)
-      DateTimeHelpers.friendly_date_time(end_time_utc, :end)
+      DateTimeFormatters.friendly_date_time(end_time_utc, :end)
     end
   end
 
