@@ -6,6 +6,8 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
   use AlertsUI.Schema
   import Ecto.Changeset
 
+  alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
+
   @primary_key false
   embedded_schema do
     embeds_many :reminder_times, ReminderTimes, on_replace: :delete do
@@ -19,7 +21,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
 
   @impl true
   def mount(socket) do
-    current_time = current_time()
+    current_time = DateTimeHelpers.current_time()
     form = %__MODULE__{} |> changeset(%{}) |> to_form()
 
     {:ok,
@@ -254,10 +256,6 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
 
     {key, {new_value, []}}
   end
-
-  defp current_time,
-    do:
-      DateTime.now!("America/New_York") |> DateTime.to_naive() |> NaiveDateTime.truncate(:second)
 
   defp naive_datetime_to_iso8601(nil), do: ""
 

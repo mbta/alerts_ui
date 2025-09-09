@@ -5,7 +5,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
   use AlertsUIWeb, :live_component
   use AlertsUI.Schema
   import Ecto.Changeset
-  alias AlertsUIWeb.FormComponents.Helpers.ErrorFormatter
+  alias AlertsUIWeb.FormComponents.Helpers.{DateTimeHelpers, ErrorFormatter}
   alias Phoenix.HTML.Form
 
   @primary_key false
@@ -24,7 +24,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
   def mount(socket) do
     form =
       %__MODULE__{}
-      |> changeset(%{"last_push_notification_timestamp" => current_time()})
+      |> changeset(%{"last_push_notification_timestamp" => DateTimeHelpers.current_time()})
       |> to_form()
 
     socket = assign(socket, %{form: form})
@@ -115,7 +115,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
     if Form.normalize_value("checkbox", delivery["notification_toggle"]) == false do
       Map.put(delivery, "last_push_notification_timestamp", nil)
     else
-      Map.put(delivery, "last_push_notification_timestamp", current_time())
+      Map.put(delivery, "last_push_notification_timestamp", DateTimeHelpers.current_time())
     end
     |> validate(socket)
   end
@@ -230,8 +230,4 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
     </div>
     """
   end
-
-  def current_time,
-    do:
-      DateTime.now!("America/New_York") |> DateTime.to_naive() |> NaiveDateTime.truncate(:second)
 end

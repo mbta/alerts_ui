@@ -10,7 +10,7 @@ defmodule AlertsUIWeb.ReviewModal do
   alias AlertsUI.ActivePeriodBuilder
   alias AlertsUI.Models.SeverityLevel
   alias AlertsUIWeb.CreateAlertLive
-  alias AlertsUIWeb.DateTimeHelpers
+  alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
 
   alias AlertsUIWeb.FormComponents.Helpers.{
     ContentFormatter,

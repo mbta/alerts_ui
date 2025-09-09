@@ -5,8 +5,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   use AlertsUIWeb, :live_view
   alias AlertsUI.Alerts
   alias AlertsUI.Models.{ActivePeriod, Effect}
-  alias AlertsUIWeb.DateTimeHelpers
-  alias AlertsUIWeb.FormComponents.Helpers.AlertData
+  alias AlertsUIWeb.FormComponents.Helpers.{AlertData, DateTimeFormatters, DateTimeHelpers}
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText
 
   @ten_seconds_in_ms 10_000
@@ -225,7 +224,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   def reverse_order_direction(:desc_nulls_first), do: :asc_nulls_last
 
   def format_timestamp(timestamp) do
-    DateTimeHelpers.timestamp_date_time(timestamp)
+    DateTimeFormatters.timestamp_date_time(timestamp)
   end
 
   def format_start_time(start_time_utc) do
@@ -245,7 +244,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     else
       adjusted_dt = adjusted_date_time(start_time_utc)
 
-      DateTimeHelpers.friendly_date_time(adjusted_dt)
+      DateTimeFormatters.friendly_date_time(adjusted_dt)
     end
   end
 
@@ -262,7 +261,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     else
       adjusted_dt = adjusted_date_time(end_time_utc)
 
-      DateTimeHelpers.friendly_date_time(adjusted_dt)
+      DateTimeFormatters.friendly_date_time(adjusted_dt)
     end
   end
 

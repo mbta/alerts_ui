@@ -9,6 +9,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
   alias AlertsUI.Models.ActivePeriod
 
   alias AlertsUIWeb.FormComponents.Helpers.{
+    DateTimeHelpers,
     ErrorFormatter,
     TimeRangeValidators
   }
@@ -34,7 +35,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
 
   @impl true
   def mount(socket) do
-    current_time = current_time()
+    current_time = DateTimeHelpers.current_time()
 
     alert_data = %{
       notification_period_start_date: current_time |> naive_datetime_to_iso_date
@@ -99,7 +100,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
 
   @impl true
   def update(%{submitted: true}, socket) do
-    current_time = current_time()
+    current_time = DateTimeHelpers.current_time()
 
     changeset =
       %__MODULE__{}
@@ -333,10 +334,6 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
     </div>
     """
   end
-
-  defp current_time,
-    do:
-      DateTime.now!("America/New_York") |> DateTime.to_naive() |> NaiveDateTime.truncate(:second)
 
   def naive_datetime_to_iso_date(%NaiveDateTime{} = datetime),
     do: datetime |> NaiveDateTime.to_date() |> Date.to_iso8601()

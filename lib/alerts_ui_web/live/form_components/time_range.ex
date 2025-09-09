@@ -9,6 +9,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   alias AlertsUI.Models.ActivePeriod
 
   alias AlertsUIWeb.FormComponents.Helpers.{
+    DateTimeHelpers,
     ErrorFormatter,
     RecurringDurationText,
     TimeRangeDurationText,
@@ -62,7 +63,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   @impl true
   def mount(socket) do
-    current_time = current_time()
+    current_time = DateTimeHelpers.current_time()
 
     alert_data = %{
       alert_timing: "one-time",
@@ -263,7 +264,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   @impl true
   def update(%{submitted: true}, socket) do
-    current_time = current_time()
+    current_time = DateTimeHelpers.current_time()
 
     form_params = socket.assigns.form.params
 
@@ -790,10 +791,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     />
     """
   end
-
-  defp current_time,
-    do:
-      DateTime.now!("America/New_York") |> DateTime.to_naive() |> NaiveDateTime.truncate(:second)
 
   defp next_start_of_service_date(current_time) do
     ActivePeriod.next_start_of_service_date(current_time)

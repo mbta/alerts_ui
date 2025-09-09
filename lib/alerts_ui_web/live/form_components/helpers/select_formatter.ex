@@ -4,7 +4,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   """
 
   alias AlertsUI.Models.EnhancedSchedule
-  alias AlertsUIWeb.DateTimeHelpers
+  alias AlertsUIWeb.FormComponents.Helpers.DateTimeFormatters
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Trip
@@ -127,7 +127,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
         },
         4
       ) do
-    "#{DateTimeHelpers.friendly_time(departure_time)} from #{stop_name} to #{last_stop_name}"
+    "#{DateTimeFormatters.friendly_time(departure_time)} from #{stop_name} to #{last_stop_name}"
   end
 
   def name_for_option(
@@ -139,7 +139,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
         },
         _route_type
       ) do
-    "#{trip_name} (#{DateTimeHelpers.friendly_time(departure_time)} from #{stop_name}) #{trip_id}"
+    "#{trip_name} (#{DateTimeFormatters.friendly_time(departure_time)} from #{stop_name}) #{trip_id}"
   end
 
   def name_for_option(
@@ -150,7 +150,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
         },
         _route_type
       ) do
-    "#{trip_name} (#{DateTimeHelpers.friendly_time(departure_time)} from #{stop_name})"
+    "#{trip_name} (#{DateTimeFormatters.friendly_time(departure_time)} from #{stop_name})"
   end
 
   def name_for_option(nil, nil), do: ""
