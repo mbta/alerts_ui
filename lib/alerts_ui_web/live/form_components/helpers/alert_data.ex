@@ -43,6 +43,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :last_edited_at,
     :last_edited_by,
     :notification_period_start,
+    :notification_period_end,
     :notification_specifier,
     :recurrence_days,
     :reminder_times,
@@ -85,6 +86,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           last_edited_at: DateTime.t() | nil,
           last_edited_by: User.t() | nil,
           notification_period_start: NaiveDateTime.t() | nil,
+          notification_period_end: NaiveDateTime.t() | nil,
           notification_specifier: atom() | nil,
           recurrence_days: [atom()] | nil,
           reminder_times: [NaiveDateTime.t()] | nil,
@@ -157,8 +159,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
     reminder_times = Enum.map(alert.reminder_times, &shift_to_naive(&1.reminder_time))
 
+    active_period_start = shift_to_naive(alert.active_period_start)
+    active_period_end = shift_to_naive(alert.active_period_end)
     notification_period_start = shift_to_naive(alert.notification_period_start)
-
+    notification_period_end = shift_to_naive(alert.notification_period_end)
     notification_specifier = get_notification_specifier(notification_period_start)
 
     route_ids = alert.original_route_selections || []
@@ -173,6 +177,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     route_types_by_id = route_types_by_id(combination, route_type, route_ids)
 
     %__MODULE__{
+      active_period_start: active_period_start,
+      active_period_end: active_period_end,
       banner_text: alert.banner_text,
       banner_sync_toggle: get_banner_sync_toggle(alert.banner_text),
       cause_detail: alert.cause_detail,
@@ -189,6 +195,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       last_edited_at: last_edited_at,
       last_edited_by: last_edited_by,
       notification_period_start: notification_period_start,
+      notification_period_end: notification_period_end,
       notification_specifier: notification_specifier,
       reminder_times: reminder_times,
       route_ids: route_ids,
@@ -228,7 +235,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     %{
       alert_timing: :"one-time",
       active_period_start: active_period_start,
-      active_period_end: active_period_end(active_period_end, end_specifier),
+      active_period_end: active_period_end,
       active_period_end_date: end_date(active_period_end, end_specifier),
       active_period_start_date: start_date(active_period_start),
       active_period_start_specifier: determine_start_specifier(active_period_start),
@@ -271,10 +278,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   def end_date(ap_end, "end_of_service"), do: ap_end |> NaiveDateTime.to_date() |> Date.add(-1)
   def end_date(ap_end, "later_today"), do: ap_end |> NaiveDateTime.to_date() |> Date.add(-1)
   def end_date(ap_end, _), do: ap_end |> NaiveDateTime.to_date()
-
-  def active_period_end(nil, _), do: nil
-  def active_period_end(ap_end, "end_of_service"), do: ap_end |> NaiveDateTime.add(-1, :day)
-  def active_period_end(ap_end, _), do: ap_end
 
   def determine_start_specifier(nil), do: nil
 

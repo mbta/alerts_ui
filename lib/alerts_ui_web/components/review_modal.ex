@@ -8,9 +8,8 @@ defmodule AlertsUIWeb.ReviewModal do
   import AlertsUIWeb.SharedComponents
 
   alias AlertsUI.ActivePeriodBuilder
-  alias AlertsUI.Models.SeverityLevel
+  alias AlertsUI.Models.{ActiveStatus, SeverityLevel}
   alias AlertsUIWeb.CreateAlertLive
-  alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
 
   alias AlertsUIWeb.FormComponents.Helpers.{
     ContentFormatter,
@@ -120,7 +119,7 @@ defmodule AlertsUIWeb.ReviewModal do
             <% @editing == false && @alert_id == nil -> %>
               <p class="text-lg/6">Create new alert</p>
             <% @editing == false -> %>
-              <p class="text-lg/6">Alert #{@alert_id} ({get_alert_status_text(@alert_data)})</p>
+              <p class="text-lg/6">Alert #{@alert_id} ({format_alert_status_text(@alert_data)})</p>
             <% @editing == true -> %>
               <p class="text-lg/6">Edit alert #{@alert_id}</p>
           <% end %>
@@ -420,7 +419,7 @@ defmodule AlertsUIWeb.ReviewModal do
         <div class="flex flex-row justify-end px-4 py-4 gap-2">
           <%!-- food for thought: should type=button be here or in the component? --%>
           <.button_danger
-            :if={get_alert_status(@alert_data) != :past}
+            :if={ActiveStatus.get_alert_status(@alert_data) != :past}
             type="button"
             id="review-modal-close-alert"
             phx-remove={hide_modal(@id)}
@@ -429,7 +428,12 @@ defmodule AlertsUIWeb.ReviewModal do
               |> JS.exec("phx-remove")
             }
           >
-            {if get_alert_status(@alert_data) == :current, do: "Close alert", else: "Cancel alert"}
+            {if ActiveStatus.get_alert_status(@alert_data) in [
+                  :published_current,
+                  :published_upcoming
+                ],
+                do: "Close alert",
+                else: "Cancel alert"}
           </.button_danger>
           <.button_secondary
             type="button"
@@ -439,7 +443,7 @@ defmodule AlertsUIWeb.ReviewModal do
           >
             Duplicate
           </.button_secondary>
-          <%= if get_alert_status(@alert_data) == :past do %>
+          <%= if ActiveStatus.get_alert_status(@alert_data) == :past do %>
             <.button_primary
               type="button"
               phx-remove={hide_modal(@id)}
@@ -465,42 +469,13 @@ defmodule AlertsUIWeb.ReviewModal do
     """
   end
 
-  defp get_alert_status(%{
-         alert_timing: :recurring,
-         active_period_start_date: active_period_start_date,
-         active_period_start_time: active_period_start_time,
-         active_period_end_date: active_period_end_date,
-         active_period_end_time: active_period_end_time
-       }) do
-    active_period_start = NaiveDateTime.new!(active_period_start_date, active_period_start_time)
-
-    active_period_end =
-      if active_period_end_date do
-        NaiveDateTime.new!(active_period_end_date, active_period_end_time)
-      else
-        nil
-      end
-
-    get_alert_status(%{
-      active_period_start: active_period_start,
-      active_period_end: active_period_end
-    })
-  end
-
-  defp get_alert_status(%{
-         active_period_start: active_period_start,
-         active_period_end: active_period_end
-       }) do
-    cond do
-      DateTimeHelpers.future_datetime?(active_period_start) -> :future
-      active_period_end == nil -> :current
-      !DateTimeHelpers.future_datetime?(active_period_end) -> :past
-      true -> :current
-    end
-  end
-
-  defp get_alert_status_text(alert) do
-    alert |> get_alert_status() |> Atom.to_string() |> String.capitalize()
+  defp format_alert_status_text(alert) do
+    alert
+    |> ActiveStatus.get_alert_status()
+    |> Atom.to_string()
+    |> String.replace("_", " ")
+    |> String.split()
+    |> Enum.map_join(" / ", &String.capitalize/1)
   end
 
   defp sent?(reminder_time, now \\ DateTime.utc_now()) do
