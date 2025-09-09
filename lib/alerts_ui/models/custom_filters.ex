@@ -35,12 +35,9 @@ defmodule AlertsUI.Models.CustomFilters do
     query
     |> where(
       [a],
-      not is_nil(a.notification_period_start) and a.notification_period_start > ^now
-    )
-    |> or_where(
-      [a],
-      is_nil(a.notification_period_start) and
-        (not is_nil(a.active_period_start) and a.active_period_start > ^now)
+      (not is_nil(a.notification_period_start) and a.notification_period_start > ^now) or
+        (is_nil(a.notification_period_start) and
+           (not is_nil(a.active_period_start) and a.active_period_start > ^now))
     )
     |> where(
       [a],
@@ -52,8 +49,11 @@ defmodule AlertsUI.Models.CustomFilters do
     now = DateTime.utc_now()
 
     query
-    |> where([a], not is_nil(a.notification_period_end) and a.notification_period_end <= ^now)
-    |> or_where([a], not is_nil(a.active_period_end) and a.active_period_end <= ^now)
+    |> where(
+      [a],
+      (not is_nil(a.notification_period_end) and a.notification_period_end <= ^now) or
+        (not is_nil(a.active_period_end) and a.active_period_end <= ^now)
+    )
   end
 
   def timeline_filter(query, %Filter{value: "current"}, _opts) do
@@ -62,12 +62,9 @@ defmodule AlertsUI.Models.CustomFilters do
     query
     |> where(
       [a],
-      not is_nil(a.notification_period_start) and a.notification_period_start <= ^now
-    )
-    |> or_where(
-      [a],
-      is_nil(a.notification_period_start) and
-        (not is_nil(a.active_period_start) and a.active_period_start <= ^now)
+      (not is_nil(a.notification_period_start) and a.notification_period_start <= ^now) or
+        (is_nil(a.notification_period_start) and
+           (not is_nil(a.active_period_start) and a.active_period_start <= ^now))
     )
     |> where(
       [a],
@@ -75,5 +72,7 @@ defmodule AlertsUI.Models.CustomFilters do
     )
   end
 
-  def timeline_filter(query, %Filter{value: _value}, _opts), do: query
+  def timeline_filter(query, %Filter{value: _value}, _opts) do
+    query
+  end
 end
