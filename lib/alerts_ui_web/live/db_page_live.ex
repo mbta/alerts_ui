@@ -13,7 +13,6 @@ defmodule AlertsUIWeb.DBPageLive do
     Process.send_after(self(), :update, @ten_seconds_in_ms)
 
     with {alerts, meta} <- Alerts.list_all_paginated_by_creation_date(params) do
-
       {:ok,
        assign(socket, page_title: "Alerts DB Table", meta: meta, alerts: alerts, params: params)}
     end
