@@ -12,8 +12,7 @@ defmodule AlertsUIWeb.DBPageLive do
   def mount(params, _session, socket) do
     Process.send_after(self(), :update, @ten_seconds_in_ms)
 
-    with {alerts, meta} <- Alerts.list_all_paginated(params) do
-      alerts = alerts |> Enum.sort_by(& &1.alert_id)
+    with {alerts, meta} <- Alerts.list_all_paginated_by_creation_date(params) do
 
       {:ok,
        assign(socket, page_title: "Alerts DB Table", meta: meta, alerts: alerts, params: params)}
@@ -24,8 +23,7 @@ defmodule AlertsUIWeb.DBPageLive do
   def handle_info(:update, socket) do
     Process.send_after(self(), :update, @ten_seconds_in_ms)
 
-    with {alerts, meta} <- Alerts.list_all_paginated(socket.assigns.meta.flop) do
-      alerts = alerts |> Enum.sort_by(& &1.alert_id)
+    with {alerts, meta} <- Alerts.list_all_paginated_by_creation_date(socket.assigns.meta.flop) do
       {:noreply, assign(socket, meta: meta, alerts: alerts)}
     end
   end
@@ -34,7 +32,6 @@ defmodule AlertsUIWeb.DBPageLive do
   def handle_event("delete_alert", %{"value" => alert_id}, socket) do
     Alerts.delete(alert_id)
 
-    # refresh view?
     Process.send(self(), :update, [])
     {:noreply, socket}
   end
@@ -48,7 +45,7 @@ defmodule AlertsUIWeb.DBPageLive do
   def handle_event("paginate-alerts", %{"page" => page}, socket) do
     flop = Flop.set_page(socket.assigns.meta.flop, page)
 
-    with {alerts, meta} <- Alerts.list_all_paginated(flop) do
+    with {alerts, meta} <- Alerts.list_all_paginated_by_creation_date(flop) do
       {:noreply, assign(socket, meta: meta, alerts: alerts)}
     end
   end

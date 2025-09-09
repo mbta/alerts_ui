@@ -274,6 +274,22 @@ defmodule AlertsUI.Alerts do
   end
 
   @spec list_all_paginated(map()) :: {[any()], Flop.Meta.t()}
+  def list_all_paginated_by_creation_date(params) do
+    opts = [for: Alert, page_size: 50]
+
+    with {:ok, flop} <- Flop.validate(params, opts) do
+      Alert
+      |> order_by([a], asc: a.created_at)
+      |> Flop.with_named_bindings(flop, &join_informed_entity/2, opts)
+      |> preload(informed_entity: [:trip])
+      |> select_merge([a], %{
+        alert_id: a.alert_id |> type(:integer) |> selected_as(:integer_alert_id)
+      })
+      |> Flop.run(flop, opts)
+    end
+  end
+
+  @spec list_all_paginated(map()) :: {[any()], Flop.Meta.t()}
   def list_all_paginated(params) do
     opts = [for: Alert, page_size: 50]
 
