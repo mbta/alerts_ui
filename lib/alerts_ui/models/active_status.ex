@@ -22,19 +22,19 @@ defmodule AlertsUI.Models.ActiveStatus do
         :past
 
       # If end of notification period is over, alert is past
-      !is_nil(npe) && DTHelpers.time_is_past?(npe) ->
+      DTHelpers.time_is_past?(npe) ->
         :past
 
       # If end of active period is over, alert is past
-      !is_nil(ape) && DTHelpers.time_is_past?(ape) ->
+      DTHelpers.time_is_past?(ape) ->
         :past
 
       # If effect start has already begun (but alert isn't closed), alert is happening
-      !is_nil(aps) && DTHelpers.time_is_past?(aps) ->
+      DTHelpers.time_is_past?(aps) ->
         :published_current
 
       # If notification period has started but active period hasn't, alert is published / upcoming
-      !is_nil(nps && aps) && DTHelpers.time_is_past?(nps) && DTHelpers.time_is_in_future?(aps) ->
+      DTHelpers.time_is_past?(nps) && DTHelpers.time_is_in_future?(aps) ->
         :published_upcoming
 
       true ->
