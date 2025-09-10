@@ -1525,7 +1525,7 @@ defmodule AlertsUIWeb.SharedComponents do
         class:
           "border-r-0 rounded-r-none btn !h-auto min-h-fit #{secondary_button_classes()} !py-1 !px-[6px] leading-[1.5]"
       ]}>
-        {carat_icon(:left)}
+        <.caret_icon direction={:left} />
       </:previous>
       <:ellipsis>
         <span
@@ -1539,17 +1539,24 @@ defmodule AlertsUIWeb.SharedComponents do
         class:
           "border-l-0 rounded-l-none btn !h-auto min-h-fit #{secondary_button_classes()} !py-1 !px-[6px] leading-[1.5] order-last"
       ]}>
-        {carat_icon(:right)}
+        <.caret_icon direction={:right} />
       </:next>
     </Flop.Phoenix.pagination>
     """
   end
 
-  defp carat_icon(:left) do
-    assigns = %{}
+  @doc """
+  Renders a caret_icon component.
 
+  ## Examples
+      <.caret_icon direction={:left} class={@class} />
+  """
+  attr :direction, :atom, doc: "atom for direction of caret"
+  attr :class, :string, default: "", doc: "classes to add to the containing div"
+
+  def caret_icon(%{direction: :left} = assigns) do
     ~H"""
-    <span class="h-4 w-4">
+    <span class={"#{@class} w-4 h-4"}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
@@ -1564,11 +1571,9 @@ defmodule AlertsUIWeb.SharedComponents do
     """
   end
 
-  defp carat_icon(:right) do
-    assigns = %{}
-
+  def caret_icon(%{direction: :right} = assigns) do
     ~H"""
-    <span class="h-4 w-4">
+    <span class={"#{@class} w-4 h-4"}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"

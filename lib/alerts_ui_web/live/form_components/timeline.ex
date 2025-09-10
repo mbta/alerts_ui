@@ -10,10 +10,11 @@ defmodule AlertsUIWeb.FormComponents.Timeline do
     assigns = assign(assigns, :previous_steps, previous_steps(assigns.progress, assigns.steps))
 
     ~H"""
-    <div class="flex flex-row justify-start mb-14 bg-sky-200 py-2 px-4 min-w-full">
-      <.h2 :if={!@editing} class="lg:mx-6 py-3 text-text-dark">Creating New Alert</.h2>
-      <.h2 :if={@editing} class="lg:mx-6 py-3 text-text-dark">Editing Alert #{@alert_id}</.h2>
-      <div :for={step <- @steps} class="lg:mx-6 mx-2 self-center min-w-[12rem]">
+    <div class="flex flex-row items-center mb-14 bg-bg-elevation-3 border-b border-border-primary px-4 min-w-full">
+      <.h3 :if={!@editing} class="lg:mx-6 mt-2 text-text-primary">Creating New Alert</.h3>
+      <.h3 :if={@editing} class="lg:mx-6 mt-2 text-text-primary">Editing Alert #{@alert_id}</.h3>
+      <div :for={{step, i} <- Enum.with_index(@steps)} class="flex items-center">
+        <.caret_icon :if={i > 0} direction={:right} class="mx-2 text-text-secondary" />
         {step_buttons(assigns, step)}
       </div>
     </div>
@@ -21,19 +22,24 @@ defmodule AlertsUIWeb.FormComponents.Timeline do
   end
 
   def step_buttons(assigns, step) do
-    button_class = if assigns.progress.name == step.name, do: "btn-primary", else: "btn-default"
-    assigns = assign(assigns, %{step: step, button_class: button_class})
+    clickable_class =
+      if step.name in assigns.previous_steps, do: "text-text-primary", else: "text-text-secondary"
+
+    selected_class =
+      if assigns.progress.name == step.name, do: "text-base font-medium", else: "text-sm"
+
+    assigns = assign(assigns, %{step: step, class: "#{clickable_class} #{selected_class}"})
 
     ~H"""
     <button
       disabled={disable_button(@step.name, @previous_steps, @editing)}
       type="button"
       phx-click="move_progress"
-      class={"btn #{@button_class} rounded-full min-w-full font-extrabold"}
+      class={"#{@class}"}
       value={@step.name}
       id={@step.name}
     >
-      {@step.label} ►
+      {@step.label}
     </button>
     """
   end

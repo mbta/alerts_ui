@@ -1051,7 +1051,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         open_review_modal(view)
 
         view
-        |> element("button", "Submit")
+        |> element("#review-modal-container button", "Submit")
         |> render_click()
 
         :timer.sleep(50)
