@@ -43,10 +43,15 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionText do
     "#{affected_trip_term(effect)} trips:\n#{join(schedules)}"
   end
 
-  def affected_trips(%{routes: _routes, schedules: schedules, effect_name: effect}) do
+  def affected_trips(%{
+        routes: _routes,
+        schedules: schedules,
+        effect_name: effect,
+        route_type: route_type
+      }) do
     Enum.reduce(schedules, %{}, fn schedule, acc ->
       route_name = SelectFormatter.name_for_option(schedule.route)
-      trip_name = SelectFormatter.name_for_option(schedule)
+      trip_name = SelectFormatter.name_for_option(schedule, route_type)
       direction_name = trip_direction_name(schedule.trip, schedule.route)
 
       if Map.has_key?(acc, {route_name, direction_name}) do
