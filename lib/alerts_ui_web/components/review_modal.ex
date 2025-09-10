@@ -375,12 +375,12 @@ defmodule AlertsUIWeb.ReviewModal do
           <% end %>
 
           <p class="font-bold">Created by</p>
-          <%= if @editing == false && @alert_id == nil do %>
+          <%= if @editing == false && @alert_id == nil && @current_user do %>
             <p class="pb-3">
               {Map.get(@current_user, :first_name, "")} {Map.get(@current_user, :last_name, "")}
             </p>
           <% else %>
-            <p class="pb-3">
+            <p :if={@created_by} class="pb-3">
               {Map.get(@created_by, :first_name, "")} {Map.get(@created_by, :last_name, "")}
             </p>
           <% end %>
@@ -401,10 +401,10 @@ defmodule AlertsUIWeb.ReviewModal do
             </p>
 
             <p class="font-bold">Last edited by</p>
-            <p :if={@editing} class="pb-3">
+            <p :if={@editing && @current_user} class="pb-3">
               {Map.get(@current_user, :first_name, "")} {Map.get(@current_user, :last_name, "")}
             </p>
-            <p :if={!@editing} class="pb-3">
+            <p :if={!@editing && @last_edited_by} class="pb-3">
               {Map.get(@last_edited_by, :first_name, "")} {Map.get(@last_edited_by, :last_name, "")}
             </p>
           <% end %>
