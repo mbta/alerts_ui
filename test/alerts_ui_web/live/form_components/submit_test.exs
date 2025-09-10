@@ -225,7 +225,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
         open_review_modal(view)
 
         view
-        |> element("#review-modal-container button", "Submit")
+        |> element("button", "Submit")
         |> render_click()
 
         # query the db

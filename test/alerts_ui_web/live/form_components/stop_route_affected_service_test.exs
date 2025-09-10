@@ -514,7 +514,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         |> render_click()
 
         view
-        |> element("#review-modal-container button", "Submit")
+        |> element("button", "Submit")
         |> render_click()
 
         # query the db
@@ -545,7 +545,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         |> render_click()
 
         view
-        |> element("#review-modal-container button", "Submit")
+        |> element("button", "Submit")
         |> render_click()
 
         :timer.sleep(50)
@@ -629,7 +629,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         |> render_click()
 
         view
-        |> element("#review-modal-container button", "Submit")
+        |> element("button", "Submit")
         |> render_click()
 
         # query the db

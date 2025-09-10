@@ -973,7 +973,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         open_review_modal(view)
 
         view
-        |> element("#review-modal-container button", "Submit")
+        |> element("button", "Submit")
         |> render_click()
 
         # query the db
@@ -1096,7 +1096,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         |> render_click()
 
         view
-        |> element("#review-modal-container button", "Submit")
+        |> element("button", "Submit")
         |> render_click()
 
         # wait a smidge for the alert to get persisted to the database
