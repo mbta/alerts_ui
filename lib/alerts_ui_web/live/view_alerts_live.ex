@@ -260,12 +260,28 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   def format_end_time(_, _), do: ""
 
-  defp format_effect_options do
+  def format_effect_options do
     [{"All", ""}]
     |> Enum.concat(
       Effect.effect_details()
       |> Enum.map(&{format_effect(&1), &1})
     )
+  end
+
+  def format_routes_options do
+    [
+      {"All", ""},
+      {"Option", "1"},
+      {"Option", "2"},
+      {"Option", "3"},
+      {"Option", "4"},
+      {"Option", "5"},
+      {"Option", "6"},
+      {"Option", "7"},
+      {"Option", "8"},
+      {"Option", "9"},
+      {"Option", "10"}
+    ]
   end
 
   def danger_text(active_period_end, closed_timestamp) do
@@ -276,16 +292,16 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     end
   end
 
-  defp format_effect(nil), do: ""
+  def format_effect(nil), do: ""
 
-  defp format_effect(effect) do
+  def format_effect(effect) do
     effect
     |> String.replace("_", " ")
     |> String.split()
     |> Enum.map_join(" ", fn s -> String.capitalize(s) end)
   end
 
-  defp format_service_type_options do
+  def format_service_type_options do
     [
       {"All", ""},
       {"Light Rail", 0},

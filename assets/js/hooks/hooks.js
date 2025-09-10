@@ -1,4 +1,4 @@
-let Hooks = {}
+let Hooks = {};
 
 // This hook is put on a few <select> elements that mustn't allow
 // "All XYZ" to be selected at the same time that individual items
@@ -14,44 +14,48 @@ Hooks.SelectAllAdjuster = {
     // from the LiveView component risks drift / errors. I'll just have
     // to make sure the tests are good, I suppose!
     const selectorIDLookup = {
-      "affected_service_trip_ids": "trip_ids",
-      "affected_service_stop_ids": "stop_ids"
-    }
+      affected_service_trip_ids: "trip_ids",
+      affected_service_stop_ids: "stop_ids",
+      affected_service_stop_names_and_ids: "stop_names_and_ids",
+    };
 
-    this.handleEvent("adjustSelections", payload => {
-      const options = Array.from(this.el.options)
-      const payloadKey = selectorIDLookup[this.el.id]
-      const newSelections = payload[payloadKey]
+    this.handleEvent("adjustSelections", (payload) => {
+      const options = Array.from(this.el.options);
+      const payloadKey = selectorIDLookup[this.el.id];
+      const newSelections = payload[payloadKey];
 
       // If newSelections is 0, then only default is selected. Otherwise, the opposite
       if (newSelections.length != 0) {
-        const defaultIndex = options.findIndex(opt => opt.value == "default")
-        options[defaultIndex].selected = false
+        const defaultIndex = options.findIndex((opt) => opt.value == "default");
+        options[defaultIndex].selected = false;
       }
-    })
-  }
-}
+    });
+  },
+};
 
 Hooks.MeasureImage = {
   mounted() {
     this.el.addEventListener("load", (event) => {
       const { naturalWidth, naturalHeight, width, height } = this.el;
-      this.pushEventTo("#alert-image", "image-size", {id: "size-of-image", image_size: {width: naturalWidth, height: naturalHeight}})
+      this.pushEventTo("#alert-image", "image-size", {
+        id: "size-of-image",
+        image_size: { width: naturalWidth, height: naturalHeight },
+      });
     });
-  }
-}
+  },
+};
 
 Hooks.AutoDismissFlash = {
   mounted() {
-    const hideElementAfter = 5000
-    const clearFlashAfter = hideElementAfter + 500
+    const hideElementAfter = 5000;
+    const clearFlashAfter = hideElementAfter + 500;
 
     setTimeout(() => {
-      this.el.style.transition = "opacity 0.5s"
-      this.el.style.opacity = 0
-    }, hideElementAfter)
-    setTimeout(() => this.pushEvent("lv:clear-flash"), clearFlashAfter)
-  }
-}
+      this.el.style.transition = "opacity 0.5s";
+      this.el.style.opacity = 0;
+    }, hideElementAfter);
+    setTimeout(() => this.pushEvent("lv:clear-flash"), clearFlashAfter);
+  },
+};
 
-export default Hooks
+export default Hooks;

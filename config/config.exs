@@ -67,7 +67,7 @@ config :mbta_v3_api, api_version: "2021-01-09"
 
 # Configure tailwind (the version is required)
 config :tailwind,
-  version: "3.3.2",
+  version: "3.4.17",
   default: [
     args: ~w(
       --config=tailwind.config.js

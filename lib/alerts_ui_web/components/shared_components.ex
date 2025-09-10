@@ -740,6 +740,114 @@ defmodule AlertsUIWeb.SharedComponents do
   end
 
   @doc """
+  Show a filter modal
+
+  ##Examples
+
+    <.filter_modal/>
+  """
+
+  attr :id, :string, default: "filter-modal"
+  attr :button_label, :string, default: "Filter"
+  attr :header_text, :string, default: "Filters"
+  attr :form, Form, required: true
+
+  def filter_modal(assigns) do
+    ~H"""
+    <.modal
+      id={@id}
+      header_text={@header_text}
+      cancel_event_name="cancelled_modal"
+      accept_event_name="accept_filter_modal"
+      cancel_button_text="Reset"
+      accept_button_text="Apply"
+    >
+      <.filter_modal_group
+        title="Service Types"
+        selected={true}
+        field={@form[:filtered_service_types]}
+        filter_field={@form[:filtered_service_types_filter]}
+        options={AlertsUIWeb.ViewAlertsLive.format_service_type_options()}
+      />
+      <.filter_modal_group
+        title="Routes"
+        field={@form[:filtered_routes]}
+        filter_field={@form[:filtered_routes_filter]}
+        options={AlertsUIWeb.ViewAlertsLive.format_routes_options()}
+      />
+      <.filter_modal_group
+        title="Effects"
+        field={@form[:filtered_effects]}
+        filter_field={@form[:filtered_effects_filter]}
+        options={AlertsUIWeb.ViewAlertsLive.format_effect_options()}
+      />
+    </.modal>
+    <.button_primary phx-click={show_modal(@id)} class="mb-8 w-[8rem]" type="button">
+      {@button_label}
+    </.button_primary>
+    """
+  end
+
+  @doc """
+  A Group of Filter Options for the Modal
+
+  ##Examples
+    <.filter_modal_group title="Service Types" selected={true} options={
+      AlertsUIWeb.ViewAlertsLive.format_service_type_options()
+    }/>
+    <.filter_modal_group title="Routes" options={
+      AlertsUIWeb.ViewAlertsLive.format_routes_options()
+    }/>
+    <.filter_modal_group title="Effects" options={
+      AlertsUIWeb.ViewAlertsLive.format_effect_options()
+    }/>
+  """
+
+  attr :container_class, :string, default: ""
+  attr :title, :string, default: "Title"
+  attr :content, :string, default: "Content"
+  attr :name, :string, default: "my-accordion"
+  attr :selected, :boolean, default: false
+  attr :options, :list, required: true
+
+  attr :field, FormField,
+    required: true,
+    doc: "a form field struct retrieved from the form, for example: @form[:email]"
+
+  attr :filter_field, FormField,
+    required: true,
+    doc:
+      "a form field struct for the filter retrieved from the form, for example: @form[:filtered_select_filter]"
+
+  def filter_modal_group(assigns) do
+    ~H"""
+    <div class={[
+      "collapse group rounded-none border-bg-elevation-6 border-b-[1px] first:border-t-0 last:border-b-0 has-[.trigger:checked]:border-b-0",
+      @container_class
+    ]}>
+      <input type="radio" class="trigger" name={"#{@name}-section"} checked={@selected} />
+      <div class="collapse-title min-h-0 flex flex-row items-center justify-between p-1">
+        <h3 class="font-semibold">{@title}</h3>
+        <AlertsUIWeb.CoreComponents.icon
+          name="hero-chevron-right"
+          class="h-4 w-4 group-has-[.trigger:checked]:rotate-90"
+        />
+      </div>
+      <div class="collapse-content text-base !p-0">
+        <.filtered_select
+          class="h-[20rem]"
+          select_class="px-[0px]"
+          select_container_class="border-0 px-2"
+          field={@field}
+          filter_field={@filter_field}
+          options={@options}
+        />
+      </div>
+    </div>
+    """
+  end
+
+  @doc """
   Renders a button menu.
 
   ##Examples
@@ -969,6 +1077,10 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :select_class, :string, default: "", doc: "additional classes to add to select component"
 
+  attr :select_container_class, :string,
+    default: "",
+    doc: "additional classes to add to container of the select and search-text inputs"
+
   attr :loading, :boolean, default: false, doc: "in loading state if true"
 
   attr :multiple, :boolean, default: true
@@ -1056,6 +1168,7 @@ defmodule AlertsUIWeb.SharedComponents do
           border-bg-elevation-6 ring-0 ring-border-focus
           focus:ring-1 focus:border-border-focus
           focus-within:ring-1 focus-within:border-border-focus",
+          @select_container_class,
           @errors != [] && "border-danger focus:border-danger",
           if(@disabled, do: "bg-bg-elevation-3", else: "bg-bg-elevation-5")
         ]}
@@ -1063,8 +1176,9 @@ defmodule AlertsUIWeb.SharedComponents do
       >
         <.text_input
           class="min-w-full py-[.6rem] mb-0 border-0 ring-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-b-none"
+          icon="hero-magnifying-glass-mini"
           field={@filter_field}
-          placeholder={if @disabled, do: nil, else: "⌕ Search..."}
+          placeholder={if @disabled, do: nil, else: "Search..."}
           disabled={@disabled}
           phx-debounce="250"
           {@rest}
@@ -1134,13 +1248,15 @@ defmodule AlertsUIWeb.SharedComponents do
   """
   attr :label, :string, default: nil
   attr :class, :any, default: "", doc: "additional classes to add"
+  attr :icon, :string, default: nil, doc: "name of an optional icon to display"
 
   attr :field, FormField,
     required: true,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
-  attr :rest, :global,
-    include: ~w(disabled phx-debounce maxlength minlength placeholder spellcheck)
+  attr :disabled, :boolean, default: false, doc: "whether the element is disabled"
+
+  attr :rest, :global, include: ~w(phx-debounce maxlength minlength placeholder spellcheck)
 
   def text_input(%{field: %FormField{} = field} = assigns) do
     assigns =
@@ -1151,8 +1267,13 @@ defmodule AlertsUIWeb.SharedComponents do
       |> assign_new(:value, fn -> field.value end)
 
     ~H"""
-    <div phx-feedback-for={@name}>
+    <div phx-feedback-for={@name} class="relative flex flex-row items-center">
       <.label :if={not is_nil(@label)} for={@id}>{@label}</.label>
+      <AlertsUIWeb.CoreComponents.icon
+        :if={@icon && !@disabled}
+        name={@icon}
+        class="absolute ms-1 w-4 h-4"
+      />
       <input
         type="text"
         id={@id}
@@ -1163,9 +1284,11 @@ defmodule AlertsUIWeb.SharedComponents do
             rounded text-text-primary disabled:text-text-secondary
             disabled:bg-bg-elevation-3 ring-0  focus:ring-0 ring-border-focus
             focus:border-border-focus",
+          @icon && "ps-8",
           @class,
           @errors != [] && "border-danger focus:border-danger"
         ]}
+        disabled={@disabled}
         {@rest}
       />
       <.input_error :for={msg <- @errors}>{msg}</.input_error>
