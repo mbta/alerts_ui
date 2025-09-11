@@ -86,7 +86,7 @@ defmodule AlertsUI.MixProject do
       {:ex_json_schema, "~> 0.5"},
       {:ex_machina, "~> 2.8.0", only: :test},
       {:exprotobuf, "~> 1.2.17"},
-      {:gen_stage, "~> 1.2.1"},
+      {:gen_stage, "~> 1.3.2"},
       {:gettext, "~> 0.20"},
       {:finch, "~> 0.13"},
       {:floki, ">= 0.30.0", only: :test},
