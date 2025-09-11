@@ -30,20 +30,17 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   @impl true
   def handle_params(params, _url, socket) do
-    # default to timeline: current if params don't contain timeline filter
+    # default to timeline: current if params have no values
+    # (eg no user input has occured and we're probably in a fresh reload)
+
     params =
-      cond do
-        params["filters"]["4"] ->
-          params
-
-        params["filters"] ->
-          %{
-            "filters" =>
-              Map.put(params["filters"], "4", %{"field" => "timeline", "value" => "current"})
-          }
-
-        true ->
-          %{"filters" => %{"4" => %{"field" => "timeline", "value" => "current"}}}
+      if params
+         |> Map.get("filters", [])
+         |> Enum.map(fn {_k, v} -> Map.get(v, "value", "") end)
+         |> Enum.all?(&(&1 == "")) do
+        %{"filters" => %{"3" => %{"field" => "timeline", "value" => "current"}}}
+      else
+        params
       end
 
     default_order_fields = lookup_end_time_order_fields_by_params(params)
@@ -180,7 +177,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   end
 
   def lookup_end_time_order_fields_by_params(%{
-        "filters" => %{"4" => %{"field" => "timeline", "value" => "past"}}
+        "filters" => %{"3" => %{"field" => "timeline", "value" => "past"}}
       }),
       do: [
         :active_period_end,
@@ -197,22 +194,22 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     ]
 
   def lookup_end_time_order_directions_by_params(%{
-        "filters" => %{"4" => %{"field" => "timeline", "value" => "current"}}
+        "filters" => %{"3" => %{"field" => "timeline", "value" => "current"}}
       }),
       do: [:asc_nulls_last, :asc, :asc_nulls_last, :asc, :asc]
 
   def lookup_end_time_order_directions_by_params(%{
-        "filters" => %{"4" => %{"field" => "timeline", "value" => "future"}}
+        "filters" => %{"3" => %{"field" => "timeline", "value" => "future"}}
       }),
       do: [:asc_nulls_last, :asc, :asc_nulls_last, :asc, :asc]
 
   def lookup_end_time_order_directions_by_params(%{
-        "filters" => %{"4" => %{"field" => "timeline", "value" => "past"}}
+        "filters" => %{"3" => %{"field" => "timeline", "value" => "past"}}
       }),
       do: [:desc, :desc]
 
   def lookup_end_time_order_directions_by_params(%{
-        "filters" => %{"4" => %{"field" => "timeline", "value" => _}}
+        "filters" => %{"3" => %{"field" => "timeline", "value" => _}}
       }),
       do: [:desc_nulls_first, :desc, :desc_nulls_first, :desc, :desc]
 
@@ -330,7 +327,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   defp clean_filter_params(params), do: Map.drop(params, ["_target", "reset"])
 
   def timeline_filter_past?(%{
-        "filters" => %{"4" => %{"field" => "timeline", "value" => timeline_filter}}
+        "filters" => %{"3" => %{"field" => "timeline", "value" => timeline_filter}}
       }),
       do: timeline_filter == "past"
 end

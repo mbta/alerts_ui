@@ -74,51 +74,43 @@ defmodule AlertsUIWeb.AlertsLiveTest do
         assert view |> render_click("sort-alerts", %{"order" => "active_period_start"}) =~ "123"
       end
     end
+  end
 
-    # I'm not sure why these tests weren't failing sooner?
-    # This doesn't seem to work in main anyway.
-    # Uncomment when we do the filtering work
+  describe "filtering" do
+    @tag :logged_in_user
+    test "alert id filter change", %{conn: conn} do
+      insert(:alert, %{
+        alert_id: "899",
+        original_route_selections: ["Orange"]
+      })
 
-    # @tag :logged_in_user
-    # test "alert_id filter change", %{conn: conn} do
-    #   {:ok, view, html} = live(conn, "/alerts")
+      insert(:alert, %{
+        alert_id: "999",
+        original_route_selections: ["Orange"]
+      })
 
-    #   assert html =~ "123"
-    #   assert render_change(view, "update-filter", alert_id_filter_params("")) =~ "123"
-    #   assert render_change(view, "update-filter", alert_id_filter_params("123")) =~ "123"
-    #   refute render_change(view, "update-filter", alert_id_filter_params("124")) =~ "123"
-    # end
+      {:ok, _view, html} = live(conn, "/alerts?filters[3][field]=timeline&filters[3][value]=all")
+      assert html =~ "899"
+      assert html =~ "999"
 
-    # @tag :logged_in_user
-    # test "effect filter change", %{conn: conn} do
-    #   {:ok, view, html} = live(conn, "/alerts")
+      {:ok, _view, html} =
+        live(
+          conn,
+          "/alerts?filters[3][field]=timeline&filters[3][value]=all&filters[4][field]=multi_column_search&filters[4][value]=8"
+        )
 
-    #   open_browser(view)
+      assert html =~ "899"
+      refute html =~ "999"
 
-    #   assert html =~ "123"
-    #   assert render_change(view, "update-filter", effect_filter_params("")) =~ "123"
-    #   assert render_change(view, "update-filter", effect_filter_params("")) =~ "234"
-    #   refute render_change(view, "update-filter", effect_filter_params("SUMMARY")) =~ "123"
-    #   assert render_change(view, "update-filter", effect_filter_params("SUMMARY")) =~ "234"
-    #   refute render_change(view, "update-filter", effect_filter_params("DETOUR")) =~ "234"
-    #   assert render_change(view, "update-filter", effect_filter_params("DETOUR")) =~ "123"
-    # end
+      {:ok, _view, html} =
+        live(
+          conn,
+          "/alerts?filters[3][field]=timeline&filters[3][value]=all&filters[4][field]=multi_column_search&filters[4][value]=9"
+        )
 
-    # @tag :logged_in_user
-    # test "filter reset", %{conn: conn} do
-    #   {:ok, view, _html} = live(conn, "/alerts")
-
-    #   assert render_change(view, "update-filter", alert_id_filter_params("")) =~ "123"
-    #   refute render_change(view, "update-filter", alert_id_filter_params("124")) =~ "123"
-
-    #   assert render_change(view, "update-filter", %{
-    #            "filters" => %{
-    #              "0" => %{"field" => "alert_id", "op" => "ilike_and", "value" => "124"},
-    #              "1" => %{"field" => "effect_detail", "value" => ""}
-    #            },
-    #            "reset" => ""
-    #          }) =~ "123"
-    # end
+      refute html =~ "899"
+      assert html =~ "999"
+    end
   end
 
   describe "alerts list timeline filtering and sorting" do
@@ -337,21 +329,21 @@ defmodule AlertsUIWeb.AlertsLiveTest do
     @tag :logged_in_user
     test "future timeline filter renders end date asc", %{conn: conn} do
       {:ok, _view, html} =
-        live(conn, "/alerts?filters[4][field]=timeline&filters[4][value]=future")
+        live(conn, "/alerts?filters[3][field]=timeline&filters[3][value]=future")
 
       assert get_alert_id_order(html) == ["10400", "10200", "11000", "11400", "10800", "11100"]
     end
 
     @tag :logged_in_user
     test "past timeline filter renders end date desc", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/alerts?filters[4][field]=timeline&filters[4][value]=past")
+      {:ok, _view, html} = live(conn, "/alerts?filters[3][field]=timeline&filters[3][value]=past")
 
       assert get_alert_id_order(html) == ["11600", "11500", "10700", "11300", "11700", "11200"]
     end
 
     @tag :logged_in_user
     test "all timeline filter renders end date desc", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/alerts?filters[4][field]=timeline&filters[4][value]=all")
+      {:ok, _view, html} = live(conn, "/alerts?filters[3][field]=timeline&filters[3][value]=all")
 
       assert get_alert_id_order(html) == [
               "11100",
@@ -461,14 +453,14 @@ defmodule AlertsUIWeb.AlertsLiveTest do
 
     @tag :logged_in_user
     test "it paginates records", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/alerts?filters[4][field]=timeline&filters[4][value]=past")
+      {:ok, _view, html} = live(conn, "/alerts?filters[3][field]=timeline&filters[3][value]=past")
       assert Repo.aggregate(Alert, :count) == 100
       assert get_alert_id_order(html) == Enum.map(1..50, fn i -> "#{i}" end)
     end
 
     @tag :logged_in_user
     test "pagination is navigable", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts?filters[4][field]=timeline&filters[4][value]=past")
+      {:ok, view, _html} = live(conn, "/alerts?filters[3][field]=timeline&filters[3][value]=past")
 
       html =
         view
@@ -480,7 +472,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
 
     @tag :logged_in_user
     test "timeline navigation from paginated results returns to page 1", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts?filters[4][field]=timeline&filters[4][value]=past")
+      {:ok, view, _html} = live(conn, "/alerts?filters[3][field]=timeline&filters[3][value]=past")
 
       view
       |> element("button[aria-label='Go to page 2']", "2")
@@ -488,7 +480,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
 
       html =
         view
-        |> form("#alert-filter-form", filters: %{"4" => %{"value" => "current"}})
+        |> form("#alert-filter-form", filters: %{"3" => %{"value" => "current"}})
         |> render_change()
 
       assert get_alert_id_order(html) == Enum.map(91..100, fn i -> "#{i}" end)
@@ -1016,25 +1008,6 @@ defmodule AlertsUIWeb.AlertsLiveTest do
       assert expected_timestamp == actual_timestamp
     end
   end
-
-  # defp alert_id_filter_params(search_string) do
-  #   %{
-  #     "_target" => ["filters", "0", "value"],
-  #     "filters" => %{
-  #       "0" => %{"field" => "alert_id", "op" => "ilike_and", "value" => search_string}
-  #     }
-  #   }
-  # end
-
-  # defp effect_filter_params(search_string) do
-  #   %{
-  #     "_target" => ["filters", "0", "value"],
-  #     "filters" => %{
-  #       "0" => %{"field" => "alert_id", "op" => "ilike_and", "value" => ""},
-  #       "1" => %{"field" => "effect_detail", "value" => search_string}
-  #     }
-  #   }
-  # end
 
   # Takes html of alert list page, parses the html, returns order of alert ids
   defp get_alert_id_order(html) do

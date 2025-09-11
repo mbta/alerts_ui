@@ -1,27 +1,32 @@
 <div id="view_alerts_live_view" class="h-[calc(100vh-120px)] mt-10 mx-6 flex flex-col">
-  <div class="flex">
+  <div class="flex justify-between">
     <.button_primary_link href="/alerts/new" class="whitespace-nowrap">
       <.icon name="hero-plus" /> Create an Alert
     </.button_primary_link>
     <.filter_form
       fields={[
-        alert_id: [label: "ID", op: :ilike_and],
         effect_detail: [
           label: "Effect",
           type: "select",
           options: format_effect_options(),
           value: ""
         ],
-        text_content: [label: "Keyword", op: :ilike_and],
+        text_content: [label: "Keyword", op: :like_and],
         service_type: [
           label: "Service Type",
           type: "select",
           options: format_service_type_options()
         ],
         timeline: [
-          label: "Timeline",
+          label: "",
           type: "radio_switch",
           values: timeline_options()
+        ],
+        multi_column_search: [
+          placeholder: "⌕ Search alerts",
+          type: "text_input",
+          label: "",
+          class: "h-8"
         ]
       ]}
       meta={@meta}
