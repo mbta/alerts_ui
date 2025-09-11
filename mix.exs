@@ -113,7 +113,7 @@ defmodule AlertsUI.MixProject do
       {:postgrex, ">= 0.0.0"},
       {:req, "~> 0.5.0"},
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
-      {:stream_data, "~> 1.1.1", only: :test},
+      {:stream_data, "~> 1.2.0", only: :test},
       {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
