@@ -345,4 +345,12 @@ defmodule AlertsUI.Alerts do
     |> Repo.get_by!(alert_id: alert_id)
     |> Repo.delete()
   end
+
+  def foo(bar) do
+    from(a in Alert,
+      select: a.alert_id,
+      where: fragment("to_tsvector('english', header_text) @@ to_tsquery('english', ?)", ^bar)
+    )
+    |> Repo.all()
+  end
 end

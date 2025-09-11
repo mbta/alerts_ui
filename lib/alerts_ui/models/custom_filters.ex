@@ -32,8 +32,22 @@ defmodule AlertsUI.Models.CustomFilters do
   def multi_column_search_filter(query, %Filter{value: value}, _opts) do
     alert_id_search_value = "#{String.replace(value, ~r/\D/, "")}%"
 
+    alert_id_search_value =
+      if alert_id_search_value == "%" do
+        ""
+      else
+        alert_id_search_value
+      end
+
+
+    text_search_value = String.replace(value, "/", " ")
+
     query
-    |> where([a], ilike(a.alert_id, ^alert_id_search_value))
+    |> where(
+      [a],
+      fragment("header_text_index_col @@ websearch_to_tsquery('english', ?)", ^text_search_value) or
+        ilike(a.alert_id, ^alert_id_search_value)
+    )
   end
 
   @spec timeline_filter(Ecto.Query.t(), Flop.Filter.t(), any()) :: Ecto.Query.t()
