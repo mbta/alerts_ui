@@ -51,6 +51,7 @@ defmodule AlertsUI.Models.CustomFilters do
     query
     |> where(
       [a],
+      not is_nil(a.closed_timestamp) or
       (not is_nil(a.notification_period_end) and a.notification_period_end <= ^now) or
         (not is_nil(a.active_period_end) and a.active_period_end <= ^now)
     )
@@ -69,6 +70,10 @@ defmodule AlertsUI.Models.CustomFilters do
     |> where(
       [a],
       is_nil(a.active_period_end) or a.active_period_end > ^now
+    )
+    |> where(
+      [a],
+      is_nil(a.closed_timestamp)
     )
   end
 
