@@ -346,25 +346,25 @@ defmodule AlertsUIWeb.AlertsLiveTest do
       {:ok, _view, html} = live(conn, "/alerts?filters[3][field]=timeline&filters[3][value]=all")
 
       assert get_alert_id_order(html) == [
-              "11100",
-              "10000",
-              "10100",
-              "10800",
-              "10900",
-              "11600",
-              "11400",
-              "11000",
-              "10600",
-              "10200",
-              "10500",
-              "10400",
-              "10300",
-              "11500",
-              "10700",
-              "11300",
-              "11700",
-              "11200"
-            ]
+               "11100",
+               "10000",
+               "10100",
+               "10800",
+               "10900",
+               "11600",
+               "11400",
+               "11000",
+               "10600",
+               "10200",
+               "10500",
+               "10400",
+               "10300",
+               "11500",
+               "10700",
+               "11300",
+               "11700",
+               "11200"
+             ]
     end
 
     @tag :logged_in_user
@@ -756,7 +756,8 @@ defmodule AlertsUIWeb.AlertsLiveTest do
     @tag :logged_in_user
     test "actions display for closed alerts", %{conn: conn} do
       with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
-        {:ok, _view, html} = live(conn, "/alerts?filters[4][field]=timeline&filters[4][value]=past")
+        {:ok, _view, html} =
+          live(conn, "/alerts?filters[4][field]=timeline&filters[4][value]=past")
 
         refute html =~ ~s(<span class="hero-pencil-solid w-4 h-4"></span>)
         refute html =~ ~s(<span class="hero-x-mark-solid w-4 h-4"></span>)
