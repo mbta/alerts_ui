@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.AlertsLiveTest do
+defmodule AlertsUIWeb.ViewAlertsLiveTest do
   use ExUnit.Case
   use AlertsUIWeb.ConnCase
 
