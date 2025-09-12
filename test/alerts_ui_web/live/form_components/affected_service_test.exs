@@ -1,6 +1,6 @@
 defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
   @moduledoc false
-  use AlertsUIWeb.ConnCase
+  use AlertsUIWeb.ConnCase, async: false
   use AlertsUIWeb, :live_view
 
   import AlertsUI.Support.Factory
