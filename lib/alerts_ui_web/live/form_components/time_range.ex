@@ -73,9 +73,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       active_period_start_specifier: "now",
       active_period_end_specifier: "later_today",
       recurrence_days: [],
-      active_period_end:
-        ActivePeriod.end_of_service_datetime_naive(current_time)
-        |> naive_datetime_to_iso8601,
       active_period_end_time: ActivePeriod.end_of_service_time(),
       active_period_end_date:
         current_time
