@@ -3,7 +3,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
   A majority of this suite are e2e tests to verify various user
   input produces a proper review modal
   """
-  use AlertsUIWeb.ConnCase
+  use AlertsUIWeb.ConnCase, async: false
 
   import AlertsUI.Support.Factory
   import AlertsUI.UsersFixtures
