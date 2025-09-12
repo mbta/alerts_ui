@@ -91,7 +91,7 @@ defmodule AlertsUI.MixProject do
       {:finch, "~> 0.13"},
       {:floki, ">= 0.30.0", only: :test},
       {:flop_phoenix, "~> 0.25.3"},
-      {:hackney, "1.20.1"},
+      {:hackney, "1.25.0"},
       {:jason, "~> 1.2"},
       {:laboratory, github: "paulswartz/laboratory", ref: "cookie_opts"},
       {:live_isolated_component, "~> 0.9", only: :test},
