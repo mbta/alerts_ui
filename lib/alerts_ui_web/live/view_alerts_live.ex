@@ -189,8 +189,8 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       :notification_period_end,
       :active_period_end,
       :duration_certainty,
-      :notification_period_start,
-      :active_period_start
+      :active_period_start,
+      :notification_period_start
     ]
 
   def lookup_end_time_order_directions_by_params(%{
