@@ -161,7 +161,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionTextTest d
       autotext_data = %{
         routes: [@route_1, @route_2],
         schedules: [@schedule_1, @schedule_2],
-        effect_name: "Delay"
+        effect_name: "Delay",
+        route_type: 2
       }
 
       expected =
@@ -176,7 +177,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionTextTest d
       autotext_data = %{
         routes: [@route_1, @route_2],
         schedules: [@schedule_1, @schedule_2, @schedule_3, @schedule_4],
-        effect_name: "Delay"
+        effect_name: "Delay",
+        route_type: 2
       }
 
       expected =
