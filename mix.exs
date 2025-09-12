@@ -79,7 +79,7 @@ defmodule AlertsUI.MixProject do
       {:ecto_psql_extras, "~> 0.8.8", only: :dev},
       {:ecto_sql, "~> 3.13.2"},
       {:ehmon, github: "mbta/ehmon", only: :prod},
-      {:esbuild, "~> 0.7", runtime: Mix.env() == :dev},
+      {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
       {:ex_aws, "~> 2.0"},
       {:ex_aws_rds, "~> 2.0"},
       {:ex_aws_s3, "~> 2.0"},
