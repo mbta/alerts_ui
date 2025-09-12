@@ -209,7 +209,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       do: [:desc, :desc]
 
   def lookup_end_time_order_directions_by_params(%{
-        "filters" => %{"3" => _}
+        "filters" => %{"3" => %{"field" => "timeline", "value" => _}}
       }),
       do: [:desc_nulls_first, :desc, :desc_nulls_first, :desc, :desc]
 
@@ -327,9 +327,9 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   defp clean_filter_params(params), do: Map.drop(params, ["_target", "reset"])
 
   def timeline_filter_past?(%{
-        "filters" => %{"3" => %{"field" => "timeline", "value" => timeline_filter}}
+        "filters" => %{"3" => %{"field" => "timeline", "value" => "past"}}
       }),
-      do: timeline_filter == "past"
+      do: true
 
   def timeline_filter_past?(_), do: false
 end
