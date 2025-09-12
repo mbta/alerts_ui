@@ -757,7 +757,7 @@ defmodule AlertsUIWeb.AlertsLiveTest do
     test "actions display for closed alerts", %{conn: conn} do
       with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
         {:ok, _view, html} =
-          live(conn, "/alerts?filters[4][field]=timeline&filters[4][value]=past")
+          live(conn, "/alerts?filters[3][field]=timeline&filters[3][value]=past")
 
         refute html =~ ~s(<span class="hero-pencil-solid w-4 h-4"></span>)
         refute html =~ ~s(<span class="hero-x-mark-solid w-4 h-4"></span>)
