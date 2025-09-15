@@ -236,6 +236,13 @@ defmodule AlertsUIWeb.CreateAlertLive do
     |> Enum.sort_by(&String.downcase(&1.name))
   end
 
+  def get_stops(nil, 1, nil) do
+    # used for stop-route combination, subway (also gets light rail)
+    (StopsRepo.by_route_type(0, []) ++ StopsRepo.by_route_type(1, []))
+    |> Enum.sort_by(&String.downcase(&1.name))
+    |> Enum.uniq()
+  end
+
   def get_stops(nil, route_type, nil) do
     # used for stop-route combination, other modes
     StopsRepo.by_route_type(route_type, []) |> Enum.sort_by(&String.downcase(&1.name))
