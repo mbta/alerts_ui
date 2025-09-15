@@ -87,9 +87,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationText do
     "(max #{duration_text(start_dt, end_dt)})"
   end
 
-  defp duration(:end_of_service, start_dt, end_dt),
-    do: duration("end_of_service", start_dt, end_dt)
-
   defp duration(_, start_dt, end_dt) do
     "(#{duration_text(start_dt, end_dt)})"
   end

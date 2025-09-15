@@ -11,14 +11,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
   def validate_relationships(changeset, "one-time", time_range) do
     naive_start = ensure_naive_datetime_format(time_range["active_period_start"])
 
-    end_shift =
-      if time_range["active_period_end_specifier"] == "end_of_service",
-        do: 1,
-        else: 0
-
     validate_change(changeset, :active_period_end, fn :active_period_end, active_period_end ->
       validate_active_period_end(
-        active_period_end |> NaiveDateTime.add(end_shift, :day),
+        active_period_end,
         naive_start,
         time_range["active_period_end_specifier"]
       )
