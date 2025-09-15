@@ -112,7 +112,6 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
       }
       id="route_view"
     >
-      <.h1 class="mb-8">Create new alert</.h1>
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
         Alert type
       </.h5>

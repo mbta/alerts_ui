@@ -10,7 +10,7 @@ defmodule AlertsUIWeb.FormComponents.Timeline do
     assigns = assign(assigns, :previous_steps, previous_steps(assigns.progress, assigns.steps))
 
     ~H"""
-    <div class="flex flex-row items-center mb-14 bg-bg-elevation-3 border-b border-border-primary px-4 min-w-full">
+    <div class="flex flex-row items-center mb-12 bg-bg-elevation-3 border-b border-border-primary px-4 min-w-full">
       <.h3 :if={!@editing} class="lg:mx-6 mt-2 text-text-primary">Creating New Alert</.h3>
       <.h3 :if={@editing} class="lg:mx-6 mt-2 text-text-primary">Editing Alert #{@alert_id}</.h3>
       <div :for={{step, i} <- Enum.with_index(@steps)} class="flex items-center">

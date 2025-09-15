@@ -406,11 +406,9 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
     ~H"""
     <div class="min-w-full flex flex-col" id="stop_route_service_view">
-      <.h1 :if={!@editing} class="!mb-0">Create new alert</.h1>
-      <.h1 :if={@editing} class="!mb-0">Edit alert</.h1>
-      <.p>
+      <.h1>
         {ContentFormatter.service_type_string(@route_type)} • {@effect_name}
-      </.p>
+      </.h1>
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
         Affected service
       </.h5>
