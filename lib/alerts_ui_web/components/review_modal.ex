@@ -134,7 +134,7 @@ defmodule AlertsUIWeb.ReviewModal do
         <div class="p-4 grow">
           <%!-- Top section --%>
           <p class="font-bold">Main message</p>
-          <p class="pb-4">{@alert_data.header_text}</p>
+          <p class="pb-4 max-w-[28rem]">{@alert_data.header_text}</p>
 
           <div class="pb-4">
             <p class="font-bold">Supporting information</p>
