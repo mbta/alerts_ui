@@ -78,7 +78,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
   describe "filtering" do
     @tag :logged_in_user
-    test "alert id filter change", %{conn: conn} do
+    test "multi-column filter change with alert id", %{conn: conn} do
       insert(:alert, %{
         alert_id: "899",
         original_route_selections: ["Orange"]
@@ -96,7 +96,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       {:ok, _view, html} =
         live(
           conn,
-          "/alerts?filters[3][field]=timeline&filters[3][value]=all&filters[4][field]=multi_column_search&filters[4][value]=8"
+          "/alerts?filters[3][field]=timeline&filters[3][value]=all&filters[4][field]=multi_column_search&filters[4][value]=899"
         )
 
       assert html =~ "899"
@@ -105,7 +105,44 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       {:ok, _view, html} =
         live(
           conn,
-          "/alerts?filters[3][field]=timeline&filters[3][value]=all&filters[4][field]=multi_column_search&filters[4][value]=9"
+          "/alerts?filters[3][field]=timeline&filters[3][value]=all&filters[4][field]=multi_column_search&filters[4][value]=999"
+        )
+
+      refute html =~ "899"
+      assert html =~ "999"
+    end
+
+    @tag :logged_in_user
+    test "multi-column filter change with header text", %{conn: conn} do
+      insert(:alert, %{
+        alert_id: "899",
+        original_route_selections: ["Orange"],
+        header_text: "problem with Framingham/Worcester line today"
+      })
+
+      insert(:alert, %{
+        alert_id: "999",
+        original_route_selections: ["Orange"],
+        header_text: "problem with Franklin/Foxboro line today"
+      })
+
+      {:ok, _view, html} = live(conn, "/alerts?filters[3][field]=timeline&filters[3][value]=all")
+      assert html =~ "899"
+      assert html =~ "999"
+
+      {:ok, _view, html} =
+        live(
+          conn,
+          "/alerts?filters[3][field]=timeline&filters[3][value]=all&filters[4][field]=multi_column_search&filters[4][value]=framingham line"
+        )
+
+      assert html =~ "899"
+      refute html =~ "999"
+
+      {:ok, _view, html} =
+        live(
+          conn,
+          "/alerts?filters[3][field]=timeline&filters[3][value]=all&filters[4][field]=multi_column_search&filters[4][value]=foxboro line"
         )
 
       refute html =~ "899"

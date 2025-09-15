@@ -182,7 +182,7 @@ defmodule AlertsUIWeb.CoreComponents do
               <AlertsUIWeb.SharedComponents.text_input
                 field={i.field}
                 label={i.label}
-                phx-debounce={120}
+                phx-debounce={750}
                 {i.rest}
               />
             <% _ -> %>

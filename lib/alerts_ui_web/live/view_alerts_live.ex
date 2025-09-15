@@ -345,7 +345,9 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   defp clean_filter_params(params), do: Map.drop(params, ["_target", "reset"])
 
   def timeline_filter_past?(%{
-        "filters" => %{"3" => %{"field" => "timeline", "value" => timeline_filter}}
+        "filters" => %{"3" => %{"field" => "timeline", "value" => "past"}}
       }),
-      do: timeline_filter == "past"
+      do: true
+
+  def timeline_filter_past?(_), do: false
 end

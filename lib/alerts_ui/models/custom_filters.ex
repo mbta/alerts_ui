@@ -30,10 +30,15 @@ defmodule AlertsUI.Models.CustomFilters do
 
   @spec multi_column_search_filter(Ecto.Query.t(), Flop.Filter.t(), list()) :: Ecto.Query.t()
   def multi_column_search_filter(query, %Filter{value: value}, _opts) do
-    alert_id_search_value = "#{String.replace(value, ~r/\D/, "")}%"
+    # replace slashes so we can search for commuter rail lines better
+    text_search_value = String.replace(value, "/", " ")
 
     query
-    |> where([a], ilike(a.alert_id, ^alert_id_search_value))
+    |> where(
+      [a],
+      fragment("header_text_index_col @@ websearch_to_tsquery('english', ?)", ^text_search_value) or
+        ilike(a.alert_id, ^value)
+    )
   end
 
   @spec timeline_filter(Ecto.Query.t(), Flop.Filter.t(), any()) :: Ecto.Query.t()
