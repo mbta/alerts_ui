@@ -277,9 +277,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
 
     ~H"""
     <div class="min-w-full flex flex-col" id="access_service_view">
-      <.h1 :if={!@editing} class="!mb-0">Create new alert</.h1>
-      <.h1 :if={@editing} class="!mb-0">Edit alert</.h1>
-      <.p>Access • {@effect_name}</.p>
+      <.h1>Access • {@effect_name}</.h1>
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
         Affected service
       </.h5>
