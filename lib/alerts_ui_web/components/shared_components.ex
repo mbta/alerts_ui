@@ -1272,7 +1272,7 @@ defmodule AlertsUIWeb.SharedComponents do
       <AlertsUIWeb.CoreComponents.icon
         :if={@icon && !@disabled}
         name={@icon}
-        class="absolute ms-1 w-4 h-4"
+        class="absolute ms-1 w-4 h-4 text-text-disabled"
       />
       <input
         type="text"
