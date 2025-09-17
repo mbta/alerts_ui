@@ -150,7 +150,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
     end
   end
 
-  describe "alerts list sorting" do
+  describe "alerts list timeline filtering and sorting" do
     setup do
       insert(:alert, %{
         alert_id: "10000",
@@ -287,6 +287,72 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         duration_certainty: :KNOWN
       })
 
+      # current closed
+      insert(:alert, %{
+        alert_id: "11500",
+        active_period_start: @six_hours_ago,
+        notification_period_start: @six_hours_ago,
+        active_period_end: @one_hour_from_now,
+        notification_period_end: @one_hour_from_now,
+        duration_certainty: :KNOWN,
+        closed_timestamp: @two_hours_ago
+      })
+
+      # future closed
+      insert(:alert, %{
+        alert_id: "11600",
+        active_period_start: @two_hours_from_now,
+        notification_period_start: @two_hours_from_now,
+        active_period_end: @end_of_service_utc,
+        notification_period_end: @end_of_service_utc,
+        duration_certainty: :KNOWN,
+        closed_timestamp: @two_hours_ago
+      })
+
+      # past closed
+      insert(:alert, %{
+        alert_id: "11700",
+        active_period_start: @two_days_ago,
+        notification_period_start: @two_days_ago,
+        active_period_end: @one_day_ago,
+        notification_period_end: @one_day_ago,
+        duration_certainty: :KNOWN,
+        closed_timestamp: @two_hours_ago
+      })
+
+      # current draft
+      insert(:alert, %{
+        alert_id: "11800",
+        active_period_start: @six_hours_ago,
+        notification_period_start: @six_hours_ago,
+        active_period_end: @one_hour_from_now,
+        notification_period_end: @one_hour_from_now,
+        duration_certainty: :KNOWN,
+        draft: true
+      })
+
+      # future draft
+      insert(:alert, %{
+        alert_id: "11900",
+        active_period_start: @two_hours_from_now,
+        notification_period_start: @two_hours_from_now,
+        active_period_end: @end_of_service_utc,
+        notification_period_end: @end_of_service_utc,
+        duration_certainty: :KNOWN,
+        draft: true
+      })
+
+      # past draft
+      insert(:alert, %{
+        alert_id: "12000",
+        active_period_start: @two_days_ago,
+        notification_period_start: @two_days_ago,
+        active_period_end: @one_day_ago,
+        notification_period_end: @one_day_ago,
+        duration_certainty: :KNOWN,
+        draft: true
+      })
+
       :ok
     end
 
@@ -298,7 +364,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
     end
 
     @tag :logged_in_user
-    test "clicking future timeline filter renders end date asc", %{conn: conn} do
+    test "future timeline filter renders end date asc", %{conn: conn} do
       {:ok, _view, html} =
         live(conn, "/alerts?filters[3][field]=timeline&filters[3][value]=future")
 
@@ -306,14 +372,14 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
     end
 
     @tag :logged_in_user
-    test "clicking past timeline filter renders end date desc", %{conn: conn} do
+    test "past timeline filter renders end date desc", %{conn: conn} do
       {:ok, _view, html} = live(conn, "/alerts?filters[3][field]=timeline&filters[3][value]=past")
 
-      assert get_alert_id_order(html) == ["10700", "11300", "11200"]
+      assert get_alert_id_order(html) == ["11600", "11500", "10700", "11300", "11700", "11200"]
     end
 
     @tag :logged_in_user
-    test "clicking all timeline filter renders end date desc", %{conn: conn} do
+    test "all timeline filter renders end date desc", %{conn: conn} do
       {:ok, _view, html} = live(conn, "/alerts?filters[3][field]=timeline&filters[3][value]=all")
 
       assert get_alert_id_order(html) == [
@@ -322,6 +388,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
                "10100",
                "10800",
                "10900",
+               "11600",
                "11400",
                "11000",
                "10600",
@@ -329,8 +396,10 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
                "10500",
                "10400",
                "10300",
+               "11500",
                "10700",
                "11300",
+               "11700",
                "11200"
              ]
     end
@@ -724,7 +793,8 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
     @tag :logged_in_user
     test "actions display for closed alerts", %{conn: conn} do
       with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
-        {:ok, _view, html} = live(conn, "/alerts")
+        {:ok, _view, html} =
+          live(conn, "/alerts?filters[3][field]=timeline&filters[3][value]=past")
 
         refute html =~ ~s(<span class="hero-pencil-solid w-4 h-4"></span>)
         refute html =~ ~s(<span class="hero-x-mark-solid w-4 h-4"></span>)

@@ -16,9 +16,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.Helpers do
     |> Map.new()
   end
 
-  def alert_is_closed(alert) do
-    !is_nil(alert.closed_timestamp)
-  end
+  def alert_is_closed(%{closed_timestamp: nil}), do: false
+  def alert_is_closed(%{closed_timestamp: _}), do: true
+  def alert_is_closed(_), do: false
 
   def upcase_first_letter(string) do
     {first_letter, rest} = String.next_grapheme(string)

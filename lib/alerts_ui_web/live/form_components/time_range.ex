@@ -79,8 +79,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       active_period_end_time: ActivePeriod.end_of_service_time(),
       active_period_end_date:
         current_time
-        |> ActivePeriod.end_of_service_datetime_naive()
-        |> shifted_active_period_end()
+        |> ActivePeriod.start_of_current_service_day()
         |> NaiveDateTime.to_date(),
       active_period_start_time_specifier: "start_of_service",
       active_period_end_time_specifier: "end_of_service"
@@ -523,7 +522,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     case time_range["active_period_end_specifier"] do
       "custom" ->
         if previous_state !== "custom" do
-          shifted_active_period_end(current_time)
+          current_time
+          |> ActivePeriod.end_of_service_datetime_naive()
           |> NaiveDateTime.to_date()
         else
           time_range["active_period_end_date"]
@@ -542,19 +542,26 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       "later_today" ->
         current_time
         |> ActivePeriod.end_of_service_datetime_naive()
+        |> naive_datetime_to_iso8601()
 
       "end_of_service" ->
         cond do
           previous_state !== "end_of_service" ->
-            shifted_active_period_end(current_time) |> naive_datetime_to_iso8601()
+            current_time
+            |> ActivePeriod.end_of_service_datetime_naive()
+            |> naive_datetime_to_iso8601()
 
           time_range["active_period_end_date"] in ["", nil] ->
             ""
 
           true ->
+            # The provided end date should always result in the end of service for that day
+            # (ie the next morning)
             time_range["active_period_end_date"]
             |> Date.from_iso8601!()
+            |> Date.add(1)
             |> NaiveDateTime.new!(ActivePeriod.end_of_service_time())
+            |> naive_datetime_to_iso8601()
         end
 
       "until_further_notice" ->
@@ -824,12 +831,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       name = value |> Atom.to_string() |> String.replace("_", " ") |> String.capitalize()
       {name, value}
     end)
-  end
-
-  defp shifted_active_period_end(datetime) do
-    datetime
-    |> ActivePeriod.end_of_service_datetime_naive()
-    |> NaiveDateTime.add(-1, :day)
   end
 
   defp utc_datetime_to_naive(nil), do: nil

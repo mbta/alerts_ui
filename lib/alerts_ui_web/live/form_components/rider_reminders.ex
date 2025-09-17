@@ -45,15 +45,10 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
       end
 
     effect_end =
-      cond do
-        Map.get(alert_data, :active_period_end) in ["", nil] ->
-          ~N[9999-12-31 23:59:59]
-
-        Map.get(alert_data, :active_period_end_specifier) in [:end_of_service, "end_of_service"] ->
-          NaiveDateTime.add(alert_data.active_period_end, 1, :day)
-
-        true ->
-          alert_data.active_period_end
+      if Map.get(alert_data, :active_period_end) in ["", nil] do
+        ~N[9999-12-31 23:59:59]
+      else
+        alert_data.active_period_end
       end
 
     processed_reminder_times =

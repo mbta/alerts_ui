@@ -50,12 +50,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
   defp safe_string_to_int(val) when is_binary(val), do: String.to_integer(val)
   defp safe_string_to_int(val), do: val
 
-  defp build_one_time_active_period_end(end_datetime, :end_of_service, :"one-time") do
-    # in the case that "end of service" was selected
-    # shift date to date of actual end-of-service
-    NaiveDateTime.add(end_datetime, 1, :day)
-  end
-
   defp build_one_time_active_period_end(end_datetime, _, _), do: end_datetime
 
   defp dedup_stops(stops) when is_list(stops), do: Enum.uniq(stops)

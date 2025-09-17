@@ -1198,6 +1198,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
       cause_detail: nil,
       url: nil,
       image_url: nil,
+      notification_period_start: nil,
       notification_specifier: :same_as_effect_period,
       severity: 4,
       reminder_times: [],
@@ -1215,7 +1216,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
       alert_data: @alert_data
     }
 
-    test "current version" do
+    test "published / current version" do
       assigns = %{
         @assigns
         | alert_data: %{
@@ -1237,7 +1238,36 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         />
         """)
 
-      assert rendered_modal =~ "Alert #123 (Current)"
+      assert rendered_modal =~ "Alert #123 (Published / Current)"
+      assert rendered_modal =~ "Close alert"
+      assert rendered_modal =~ "Duplicate"
+      assert rendered_modal =~ "Edit this alert"
+    end
+
+    test "published / future version" do
+      assigns = %{
+        @assigns
+        | alert_data: %{
+            @alert_data
+            | active_period_start: @tomorrow,
+              active_period_end: @days_ahead,
+              notification_period_start: @yesterday
+          }
+      }
+
+      rendered_modal =
+        rendered_to_string(~H"""
+        <ReviewModal.review_modal
+          alert_id={@alert_id}
+          cancel_event_name={@cancel_event_name}
+          editing={@editing}
+          target_id={@target_id}
+          cancel_alert={@cancel_alert}
+          alert_data={@alert_data}
+        />
+        """)
+
+      assert rendered_modal =~ "Alert #123 (Published / Upcoming)"
       assert rendered_modal =~ "Close alert"
       assert rendered_modal =~ "Duplicate"
       assert rendered_modal =~ "Edit this alert"
@@ -1305,7 +1335,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         @assigns
         | alert_data: %{
             @alert_data
-            | active_period_start_date: NaiveDateTime.to_date(@yesterday),
+            | active_period_start: @yesterday,
+              active_period_start_date: NaiveDateTime.to_date(@yesterday),
               active_period_start_time: NaiveDateTime.to_time(@yesterday),
               active_period_end_date: NaiveDateTime.to_date(@tomorrow),
               active_period_end_time: NaiveDateTime.to_time(@tomorrow),
@@ -1326,7 +1357,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         />
         """)
 
-      assert rendered_modal =~ "Alert #123 (Current)"
+      assert rendered_modal =~ "Alert #123 (Published / Current)"
     end
 
     test "recurring without end date" do
@@ -1334,7 +1365,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         @assigns
         | alert_data: %{
             @alert_data
-            | active_period_start_date: NaiveDateTime.to_date(@yesterday),
+            | active_period_start: @yesterday,
+              active_period_start_date: NaiveDateTime.to_date(@yesterday),
               active_period_start_time: NaiveDateTime.to_time(@yesterday),
               active_period_end_date: nil,
               active_period_end_time: NaiveDateTime.to_time(@tomorrow),
@@ -1355,7 +1387,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         />
         """)
 
-      assert rendered_modal =~ "Alert #123 (Current)"
+      assert rendered_modal =~ "Alert #123 (Published / Current)"
     end
   end
 end

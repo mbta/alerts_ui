@@ -61,7 +61,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationTextTest do
         "active_period_start_specifier" => "start_of_service",
         "active_period_start" => ~N[2024-11-28 01:00:01],
         "active_period_end_specifier" => "end_of_service",
-        "active_period_end" => ~N[2024-11-27 03:00:03]
+        "active_period_end" => ~N[2024-11-28 03:00:03]
       }
 
       expected = "Thu Nov 28, 2024 @ 1:00 AM until Thu Nov 28, 2024 @ 3:00 AM (2 hours)"
@@ -74,7 +74,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationTextTest do
         "active_period_start_specifier" => "custom",
         "active_period_start" => ~N[2024-11-28 01:00:00],
         "active_period_end_specifier" => "end_of_service",
-        "active_period_end" => ~N[2024-11-27 03:00:00]
+        "active_period_end" => ~N[2024-11-28 03:00:00]
       }
 
       expected = "Thu Nov 28, 2024 @ 1:00 AM until Thu Nov 28, 2024 @ 3:00 AM (2 hours)"

@@ -140,7 +140,7 @@ defmodule AlertsUI.ActivePeriodBuilderTest do
       assert result.duration_certainty == :ESTIMATED
     end
 
-    test "builds active period with end value end_of_service with properly shifted date" do
+    test "builds active period with end value end_of_service" do
       alert_data =
         %{
           active_period_start: ~N[2024-04-30 11:54:00],
@@ -155,12 +155,12 @@ defmodule AlertsUI.ActivePeriodBuilderTest do
       assert result.active_period == [
                %{
                  start: ~U[2024-04-30 15:54:00Z],
-                 end: DateTime.new!(~D[2024-05-02], @end_of_service_utc)
+                 end: DateTime.new!(~D[2024-05-01], @end_of_service_utc)
                }
              ]
 
       assert result.active_period_start == ~U[2024-04-30 15:54:00Z]
-      assert result.active_period_end == DateTime.new!(~D[2024-05-02], @end_of_service_utc)
+      assert result.active_period_end == DateTime.new!(~D[2024-05-01], @end_of_service_utc)
       assert result.duration_certainty == :KNOWN
     end
   end

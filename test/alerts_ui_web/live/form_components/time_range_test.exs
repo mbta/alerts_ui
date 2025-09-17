@@ -6,6 +6,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
   import LiveIsolatedComponent
   import Mock
   import Phoenix.LiveViewTest
+  import Test.Support.Helpers
   alias AlertsUI.Alerts
   alias AlertsUI.Models.EnhancedSchedule
   alias AlertsUIWeb.FormComponents.TimeRange
@@ -570,9 +571,11 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
                          active_period_start: ~N[2024-05-01 08:54:00]
                        }}}
     end
+  end
 
+  describe "end-to-end" do
     @tag :logged_in_user
-    test "end-to-end editing", %{conn: conn} do
+    test "editing", %{conn: conn} do
       todays_date =
         DateTime.utc_now()
         |> DateTime.shift_zone!("America/New_York")
@@ -694,6 +697,47 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
                  |> DateTime.shift_zone!("Etc/UTC")
 
         assert created_alert.duration_certainty == :KNOWN
+      end
+    end
+
+    @tag :logged_in_user
+    test "setting effect to end of service outputs an expected duration text", %{conn: conn} do
+      todays_date =
+        DateTime.utc_now()
+        |> DateTime.shift_zone!("America/New_York")
+        |> DateTime.to_date()
+
+      # Effect starts first thing tomorrow
+      tomorrows_date = Date.add(todays_date, 1)
+      # Effect ends at end of service same day, which is morning of next day
+      next_day_date = Date.add(todays_date, 2)
+
+      with_mocks([]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        get_to_submission_page(view, "Bus", "Delay")
+
+        view
+        |> element("#time_range_form")
+        |> render_change(%{
+          "time_range" => %{
+            "active_period_start_specifier" => "start_of_service",
+            "active_period_end_specifier" => "end_of_service"
+          }
+        })
+
+        html =
+          view
+          |> element("#time_range_form")
+          |> render_change(%{
+            "time_range" => %{
+              "active_period_start_date" => tomorrows_date,
+              "active_period_end_date" => tomorrows_date
+            }
+          })
+
+        assert html =~
+                 "Effect duration: #{Calendar.strftime(tomorrows_date, "%a %b %-d, %Y")} @ 3:00 AM until #{Calendar.strftime(next_day_date, "%a %b %-d, %Y")} @ 3:00 AM (1 day)"
       end
     end
   end
