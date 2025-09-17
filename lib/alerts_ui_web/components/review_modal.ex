@@ -7,8 +7,8 @@ defmodule AlertsUIWeb.ReviewModal do
   import AlertsUIWeb.CoreComponents
   import AlertsUIWeb.SharedComponents
 
-  alias AlertsUI.ActivePeriodBuilder
-  alias AlertsUI.Models.{ActiveStatus, SeverityLevel}
+  alias AlertsUI.{ActivePeriodBuilder, ActiveStatus}
+  alias AlertsUI.Models.SeverityLevel
   alias AlertsUIWeb.CreateAlertLive
 
   alias AlertsUIWeb.FormComponents.Helpers.{

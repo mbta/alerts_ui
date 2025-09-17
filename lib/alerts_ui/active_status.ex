@@ -1,4 +1,4 @@
-defmodule AlertsUI.Models.ActiveStatus do
+defmodule AlertsUI.ActiveStatus do
   @moduledoc """
     Current / Future / Past state of an Alert
   """
