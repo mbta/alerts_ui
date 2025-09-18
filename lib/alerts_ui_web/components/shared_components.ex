@@ -1632,7 +1632,7 @@ defmodule AlertsUIWeb.SharedComponents do
           active:bg-transparent active:text-secondary-disabled active:border-secondary-disabled"
       ]}
       page_links={3}
-      class="flex flex-row justify-center mr-auto has-[.ellipsis]:w-[370px]"
+      class="flex flex-row justify-center has-[.ellipsis]:w-[370px]"
       page_link_attrs={[
         class:
           "rounded-none btn h-auto min-h-fit #{secondary_button_classes()} !py-1 !px-2 leading-[1.5] font-normal"
@@ -1647,7 +1647,7 @@ defmodule AlertsUIWeb.SharedComponents do
       {@rest}
     >
       <:previous attrs={[
-        class: "text-primary flex items-center mr-auto !py-1 !px-[6px] leading-[1.5] w-[80px]"
+        class: "text-primary flex items-center mr-auto !py-1 !px-[6px] leading-[1.5]"
       ]}>
         <.caret_icon direction={:left} />
         <span class="text-xs font-normal">Previous</span>
@@ -1661,8 +1661,7 @@ defmodule AlertsUIWeb.SharedComponents do
         </span>
       </:ellipsis>
       <:next attrs={[
-        class:
-          "text-primary flex items-center ml-auto !py-1 !px-[6px] leading-[1.5] order-last w-[80px]"
+        class: "text-primary flex items-center ml-auto !py-1 !px-[6px] leading-[1.5] order-last"
       ]}>
         <span class="text-xs font-normal">Next</span>
         <.caret_icon direction={:right} />
