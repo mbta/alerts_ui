@@ -140,6 +140,30 @@ defmodule AlertsUI.ActivePeriodBuilderTest do
       assert result.duration_certainty == :ESTIMATED
     end
 
+    test "builds active period with end value later_today when start time is before current time" do
+      alert_data =
+        %{
+          active_period_start: ~N[2024-04-30 07:54:00],
+          active_period_end: NaiveDateTime.new!(~D[2024-04-30], @end_of_service_eastern),
+          active_period_end_specifier: :later_today,
+          active_period_start_specifier: :custom
+        }
+
+      result =
+        ActivePeriodBuilder.build_one_time_active_period(alert_data, ~U[2024-04-30 17:54:00Z])
+
+      assert result.active_period == [
+               %{
+                 start: ~U[2024-04-30 11:54:00Z],
+                 end: ~U[2024-04-30 19:54:00Z]
+               }
+             ]
+
+      assert result.active_period_start == ~U[2024-04-30 11:54:00Z]
+      assert result.active_period_end == ~U[2024-04-30 19:54:00Z]
+      assert result.duration_certainty == :ESTIMATED
+    end
+
     test "builds active period with end value end_of_service" do
       alert_data =
         %{

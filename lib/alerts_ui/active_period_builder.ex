@@ -49,7 +49,12 @@ defmodule AlertsUI.ActivePeriodBuilder do
       build_one_time_active_period_start(naive_start, active_period_start_specifier, current_time)
 
     utc_end =
-      build_one_time_active_period_end(naive_end, active_period_end_specifier, naive_start)
+      build_one_time_active_period_end(
+        naive_end,
+        active_period_end_specifier,
+        naive_start,
+        current_time
+      )
 
     %{
       active_period_start: utc_start,
@@ -141,13 +146,22 @@ defmodule AlertsUI.ActivePeriodBuilder do
     naive_start |> naive_eastern_datetime_to_utc
   end
 
-  defp build_one_time_active_period_end(nil, _, _), do: nil
+  defp build_one_time_active_period_end(nil, _, _, _), do: nil
 
-  defp build_one_time_active_period_end(_naive_end, :later_today, naive_start) do
-    NaiveDateTime.add(naive_start, 2, :hour) |> naive_eastern_datetime_to_utc
+  defp build_one_time_active_period_end(_naive_end, :later_today, naive_start, current_time) do
+    # if start time is BEFORE current time, use current time + 2 hours
+    # else if start time is AFTER current time, use start time + 2 hours
+    # this ensures "later today" is always in the future.
+    utc_start = naive_eastern_datetime_to_utc(naive_start)
+
+    if DateTime.compare(utc_start, current_time) == :lt do
+      DateTime.add(current_time, 2, :hour)
+    else
+      DateTime.add(utc_start, 2, :hour)
+    end
   end
 
-  defp build_one_time_active_period_end(naive_end, _, _) do
+  defp build_one_time_active_period_end(naive_end, _, _, _) do
     naive_eastern_datetime_to_utc(naive_end)
   end
 
