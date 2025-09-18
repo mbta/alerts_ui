@@ -11,8 +11,15 @@ defmodule AlertsUIWeb.FormComponents.Timeline do
 
     ~H"""
     <div class="flex flex-row items-center mb-12 bg-bg-elevation-3 border-b border-border-primary px-4 min-w-full">
-      <.h3 :if={!@editing} class="lg:mx-6 mt-2 text-text-primary">Creating New Alert</.h3>
-      <.h3 :if={@editing} class="lg:mx-6 mt-2 text-text-primary">Editing Alert #{@alert_id}</.h3>
+      <.h3 :if={@form_type == :creating} class="lg:mx-6 mt-2 text-text-primary">
+        Creating New Alert
+      </.h3>
+      <.h3 :if={@form_type == :editing} class="lg:mx-6 mt-2 text-text-primary">
+        Editing Alert #{@alert_id}
+      </.h3>
+      <.h3 :if={@form_type == :duplicating} class="lg:mx-6 mt-2 text-text-primary">
+        Duplicating Alert #{@alert_id}
+      </.h3>
       <div :for={{step, i} <- Enum.with_index(@steps)} class="flex items-center">
         <.caret_icon :if={i > 0} direction={:right} class="mx-2 text-text-secondary" />
         {step_buttons(assigns, step)}
@@ -32,7 +39,7 @@ defmodule AlertsUIWeb.FormComponents.Timeline do
 
     ~H"""
     <button
-      disabled={disable_button(@step.name, @previous_steps, @editing)}
+      disabled={disable_button(@step.name, @previous_steps, @form_type != :creating)}
       type="button"
       phx-click="move_progress"
       class={"#{@class}"}

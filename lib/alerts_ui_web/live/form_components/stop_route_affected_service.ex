@@ -61,9 +61,10 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   # Occurs when alert is being edited
   @impl true
   def update(
-        %{alert_data: alert_data, editing: true, route_type: route_type} = assigns,
+        %{alert_data: alert_data, form_type: form_type, route_type: route_type} = assigns,
         socket
-      ) do
+      )
+      when form_type in [:editing, :duplicating] do
     changeset = build_changeset(%__MODULE__{}, alert_data)
     changes = apply_action!(changeset, :validate)
 

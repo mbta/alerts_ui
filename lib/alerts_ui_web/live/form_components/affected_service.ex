@@ -80,10 +80,11 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         %{
           alert_data: alert_data,
           route_type: route_type,
-          editing: true
+          form_type: form_type
         } = assigns,
         %{assigns: %{edit_data_has_been_filled: false, combination: combination}} = socket
-      ) do
+      )
+      when form_type in [:editing, :duplicating] do
     # designed to run ONCE when editing, to fill in alert information
     ServiceEffectCombinations.required_fields(combination)
     # only pull trip information if needed

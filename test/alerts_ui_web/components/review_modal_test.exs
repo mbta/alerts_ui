@@ -1209,7 +1209,6 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
 
     @assigns %{
       alert_id: 123,
-      editing: false,
       target_id: "#view_alerts_live_view",
       cancel_alert: true,
       cancel_event_name: "close_details",
@@ -1231,7 +1230,6 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         <ReviewModal.review_modal
           alert_id={@alert_id}
           cancel_event_name={@cancel_event_name}
-          editing={@editing}
           target_id={@target_id}
           cancel_alert={@cancel_alert}
           alert_data={@alert_data}
@@ -1260,7 +1258,6 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         <ReviewModal.review_modal
           alert_id={@alert_id}
           cancel_event_name={@cancel_event_name}
-          editing={@editing}
           target_id={@target_id}
           cancel_alert={@cancel_alert}
           alert_data={@alert_data}
@@ -1288,7 +1285,6 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         <ReviewModal.review_modal
           alert_id={@alert_id}
           cancel_event_name={@cancel_event_name}
-          editing={@editing}
           target_id={@target_id}
           cancel_alert={@cancel_alert}
           alert_data={@alert_data}
@@ -1317,7 +1313,6 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         <ReviewModal.review_modal
           alert_id={@alert_id}
           cancel_event_name={@cancel_event_name}
-          editing={@editing}
           target_id={@target_id}
           cancel_alert={@cancel_alert}
           alert_data={@alert_data}
@@ -1350,7 +1345,6 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         <ReviewModal.review_modal
           alert_id={@alert_id}
           cancel_event_name={@cancel_event_name}
-          editing={@editing}
           target_id={@target_id}
           cancel_alert={@cancel_alert}
           alert_data={@alert_data}
@@ -1380,7 +1374,6 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         <ReviewModal.review_modal
           alert_id={@alert_id}
           cancel_event_name={@cancel_event_name}
-          editing={@editing}
           target_id={@target_id}
           cancel_alert={@cancel_alert}
           alert_data={@alert_data}

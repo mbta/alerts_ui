@@ -21,7 +21,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriodTest do
     },
     current_time: ~U[2024-04-30 15:54:00Z],
     edited: false,
-    editing: false
+    form_type: :creating
   }
 
   describe "component" do
@@ -66,7 +66,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriodTest do
         live_isolated_component(NotificationPeriod, @assigns)
 
       live_assign(view, %{
-        editing: true,
+        form_type: :editing,
         alert_data: %{
           notification_period_start: ~N[2024-04-30 11:54:00],
           notification_specifier: "custom"

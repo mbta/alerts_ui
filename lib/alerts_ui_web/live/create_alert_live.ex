@@ -92,12 +92,18 @@ defmodule AlertsUIWeb.CreateAlertLive do
         else: %{}
 
     [first_step, second_step | _] = @steps
-    editing = socket.assigns.live_action == :edit
+
+    form_type =
+      case socket.assigns.live_action do
+        :edit -> :editing
+        :duplicate -> :duplicating
+        _ -> :creating
+      end
 
     socket =
       assign(socket, %{
         page_title: "Create an Alert",
-        progress: if(editing, do: second_step, else: first_step),
+        progress: if(form_type == :creating, do: first_step, else: second_step),
         steps: @steps,
         alert_data: alert_data,
         combination: Map.get(alert_data, :combination),
@@ -108,7 +114,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
         available_facilities: [],
         alert_uuid: nil,
         alert_id: alert_id,
-        editing: editing,
+        form_type: form_type,
         errors: %{},
         submitted: false
       })

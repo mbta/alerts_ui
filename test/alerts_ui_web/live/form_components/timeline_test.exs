@@ -25,7 +25,7 @@ defmodule AlertsUIWeb.FormComponents.TimelineTest do
     id: "timeline",
     steps: @steps,
     progress: hd(@steps),
-    editing: false
+    form_type: :creating
   }
 
   describe "previous_steps/3" do

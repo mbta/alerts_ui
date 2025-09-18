@@ -25,7 +25,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
     },
     route_type: 1,
     alert_data: %{},
-    editing: false,
+    form_type: :creating,
     effect_name: "Station Closure",
     show_stop_ids: false
   }
@@ -404,7 +404,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
             StopRouteAffectedService,
             @assigns
             |> Map.merge(%{
-              editing: true,
+              form_type: :editing,
               effect_name: "DELAY",
               alert_data: %{
                 stop_ids: ["place-aqucl"],

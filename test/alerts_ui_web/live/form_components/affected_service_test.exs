@@ -102,7 +102,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     route_type: 2,
     alert_data: %{route_ids: ["CR-Worcester"]},
     combination: :RDTS,
-    editing: false,
+    form_type: :creating,
     effect_name: "Delay",
     show_stop_ids: false
   }
@@ -797,7 +797,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
             AffectedService,
             @assigns
             |> Map.merge(%{
-              editing: true,
+              form_type: :editing,
               alert_data: %{
                 direction: "0",
                 route_type: 2,

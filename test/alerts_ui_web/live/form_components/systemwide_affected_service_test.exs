@@ -20,7 +20,7 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedServiceTest do
     },
     alert_data: %{route_type: nil, effect_name: "Suspension"},
     effect_name: "Suspension",
-    editing: false
+    form_type: :creating
   }
 
   describe "component" do
@@ -59,7 +59,7 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedServiceTest do
 
     test "renders while editing an existing alerts" do
       alert_data = Map.put(@assigns.alert_data, :service_types, [1])
-      assigns = %{@assigns | alert_data: alert_data, editing: true}
+      assigns = %{@assigns | alert_data: alert_data, form_type: :editing}
 
       {:ok, view, _html} = live_isolated_component(SystemwideAffectedService, assigns)
 

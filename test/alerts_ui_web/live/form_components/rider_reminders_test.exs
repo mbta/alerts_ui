@@ -16,7 +16,7 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
       label: "Rider Reminders"
     },
     alert_data: %{},
-    editing: false,
+    form_type: :creating,
     edited: false
   }
 
@@ -224,7 +224,7 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
         RiderReminders,
         @assigns
         |> Map.merge(%{
-          editing: true,
+          form_type: :editing,
           alert_data: %{
             reminder_times: [~N[2024-04-30 11:54:00], ~N[2024-04-30 12:54:00]],
             active_period_start: ~N[2024-04-30 11:45:00]

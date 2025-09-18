@@ -69,13 +69,14 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
 
   @impl true
   def update(
-        %{editing: true, combination: combination, alert_data: alert_data} = assigns,
+        %{form_type: form_type, combination: combination, alert_data: alert_data} = assigns,
         %{
           assigns: %{
             edit_data_has_been_filled: false
           }
         } = socket
-      ) do
+      )
+      when form_type in [:editing, :duplicating] do
     required_fields = ServiceEffectCombinations.required_fields(combination)
 
     # Fill in needed information for if you hit the toggle button when editing

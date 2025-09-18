@@ -98,7 +98,7 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
       banner_text: "my banner text"
     }
 
-    assigns = @assigns |> Map.merge(%{alert_data: alert_data, editing: true})
+    assigns = @assigns |> Map.merge(%{alert_data: alert_data, form_type: :editing})
 
     {:ok, view, _html} = live_isolated_component(Delivery, assigns)
 
