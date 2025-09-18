@@ -6,7 +6,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   """
   alias AlertsUI.Alerts
   alias AlertsUI.DBContexts.Users
-  alias AlertsUI.Models.{ActivePeriod, Alert, Effect, User}
+  alias AlertsUI.Models.{ActivePeriod, Alert, Effect}
 
   alias AlertsUIWeb.FormComponents.Helpers.{
     EffectsForRouteTypes,
@@ -75,7 +75,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           cause_detail: String.t() | nil,
           combination: atom() | nil,
           created_at: DateTime.t() | nil,
-          created_by: User.t() | nil,
+          created_by: String.t() | nil,
           description_text: String.t() | nil,
           direction: String.t() | nil,
           effect_name: String.t() | nil,
@@ -84,7 +84,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           image_alternative_text: String.t() | nil,
           image_url: String.t() | nil,
           last_edited_at: DateTime.t() | nil,
-          last_edited_by: User.t() | nil,
+          last_edited_by: String.t() | nil,
           notification_period_start: NaiveDateTime.t() | nil,
           notification_period_end: NaiveDateTime.t() | nil,
           notification_specifier: atom() | nil,
@@ -116,18 +116,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   def build_alert_data(%AlertsUI.Models.Alert{} = alert) do
     created_at = alert.created_at
 
-    created_by =
-      with earliest_version <- Alerts.get_earliest_version(alert.id),
-           false <- is_nil(earliest_version) do
-        earliest_version
-        |> Map.get(:item_changes, %{})
-        |> Map.get("user_id")
-        |> Users.get_user!()
-      else
-        _ -> nil
-      end
+    created_by = alert.id |> Alerts.get_earliest_version() |> get_originator_string()
 
-    last_edited_by = alert.user
+    last_edited_by = alert.id |> Alerts.get_latest_version() |> get_originator_string()
 
     last_edited_at =
       with last_version <- Alerts.get_latest_version(alert.id),
@@ -312,4 +303,20 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
   defp get_banner_sync_toggle(nil), do: true
   defp get_banner_sync_toggle(_banner_text), do: false
+
+  @spec get_originator_string(PaperTrail.Version | nil) :: String.t()
+  defp get_originator_string(nil), do: ""
+
+  defp get_originator_string(version) do
+    # returns user's name linked to the PaperTrail version if available
+    # otherwise returns the origin string from the version
+    originator_id = Map.get(version, :originator_id)
+
+    if originator_id do
+      user = Users.get_user!(originator_id)
+      "#{Map.get(user, :first_name, "")} #{Map.get(user, :last_name, "")}"
+    else
+      Map.get(version, :origin, "")
+    end
+  end
 end
