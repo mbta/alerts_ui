@@ -40,7 +40,9 @@ defmodule AlertsUIWeb.ReviewModal do
     default: false,
     doc: "Whether the cancel alert button should be visible"
 
-  attr :editing, :boolean, default: false, doc: "Whether the alert is being edited"
+  attr :form_type, :atom,
+    default: nil,
+    doc: "Whether the alert is being created, edited, or duplicated"
 
   attr :target_id, :string,
     default: "",
@@ -116,12 +118,14 @@ defmodule AlertsUIWeb.ReviewModal do
       <:header>
         <div>
           <%= cond do %>
-            <% @editing == false && @alert_id == nil -> %>
+            <% @form_type == :creating -> %>
               <p class="text-lg/6">Create new alert</p>
-            <% @editing == false -> %>
-              <p class="text-lg/6">Alert #{@alert_id} ({format_alert_status_text(@alert_data)})</p>
-            <% @editing == true -> %>
+            <% @form_type == :duplicating -> %>
+              <p class="text-lg/6">Duplicate alert #{@alert_id}</p>
+            <% @form_type == :editing -> %>
               <p class="text-lg/6">Edit alert #{@alert_id}</p>
+            <% true -> %>
+              <p class="text-lg/6">Alert #{@alert_id} ({format_alert_status_text(@alert_data)})</p>
           <% end %>
           <p class="text-lg/6 font-bold">
             {ContentFormatter.service_type_string(@alert_data.route_type, @alert_data.combination)} • {@alert_data.effect_name}
@@ -358,7 +362,7 @@ defmodule AlertsUIWeb.ReviewModal do
         <%!-- Sidebar --%>
         <div class="min-w-[222px] shrink-0 p-4 bg-bg-elevation-5">
           <p class="font-bold">Created</p>
-          <%= if @editing == false && @alert_id == nil do %>
+          <%= if @form_type == :creating do %>
             <p class="pb-3 whitespace-nowrap">
               {Calendar.strftime(
                 DateTime.shift_zone!(@now, "America/New_York"),
@@ -375,7 +379,7 @@ defmodule AlertsUIWeb.ReviewModal do
           <% end %>
 
           <p class="font-bold">Created by</p>
-          <%= if @editing == false && @alert_id == nil && @current_user do %>
+          <%= if @form_type ==  :creating && @current_user do %>
             <p class="pb-3">
               {Map.get(@current_user, :first_name, "")} {Map.get(@current_user, :last_name, "")}
             </p>
@@ -385,15 +389,15 @@ defmodule AlertsUIWeb.ReviewModal do
             </p>
           <% end %>
 
-          <%= if @last_edited_at || @editing do %>
+          <%= if @last_edited_at || @form_type == :editing do %>
             <p class="font-bold">Last edited</p>
-            <p :if={@editing} class="pb-3 whitespace-nowrap">
+            <p :if={@form_type == :editing} class="pb-3 whitespace-nowrap">
               {Calendar.strftime(
                 DateTime.shift_zone!(@now, "America/New_York"),
                 "%a %m/%d/%Y"
               )}
             </p>
-            <p :if={!@editing} class="pb-3 whitespace-nowrap">
+            <p :if={@form_type != :editing} class="pb-3 whitespace-nowrap">
               {Calendar.strftime(
                 DateTime.shift_zone!(@last_edited_at, "America/New_York"),
                 "%a %m/%d/%Y, %-I:%M %p"
@@ -401,10 +405,10 @@ defmodule AlertsUIWeb.ReviewModal do
             </p>
 
             <p class="font-bold">Last edited by</p>
-            <p :if={@editing && @current_user} class="pb-3">
+            <p :if={@form_type == :editing && @current_user} class="pb-3">
               {Map.get(@current_user, :first_name, "")} {Map.get(@current_user, :last_name, "")}
             </p>
-            <p :if={!@editing && @last_edited_by} class="pb-3">
+            <p :if={@form_type != :editing && @last_edited_by} class="pb-3">
               {Map.get(@last_edited_by, :first_name, "")} {Map.get(@last_edited_by, :last_name, "")}
             </p>
           <% end %>
@@ -415,7 +419,7 @@ defmodule AlertsUIWeb.ReviewModal do
         </div>
       </div>
       <%!-- Only override footer if we're not creating/reviewing edits --%>
-      <:footer :if={@alert_id && !@editing}>
+      <:footer :if={!@form_type}>
         <div class="flex flex-row justify-end px-4 py-4 gap-2">
           <%!-- food for thought: should type=button be here or in the component? --%>
           <.button_danger

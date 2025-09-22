@@ -4,7 +4,7 @@
     id="timeline"
     progress={@progress}
     steps={@steps}
-    editing={@editing}
+    form_type={@form_type}
     alert_id={@alert_id}
   />
   <div class="flex flex-col items-center justify-center w-[90%]" id="article-view">
@@ -26,7 +26,7 @@
           route_type={route_type(@alert_data)}
           effect_name={effect_name(@alert_data)}
           available_facilities={@available_facilities}
-          editing={@editing}
+          form_type={@form_type}
           submitted={@submitted}
           show_stop_ids={@show_stop_ids}
         />
@@ -35,7 +35,7 @@
           id="time_range"
           progress={@progress}
           alert_data={@alert_data}
-          editing={@editing}
+          form_type={@form_type}
           selected_schedules={@selected_schedules}
         />
         <.live_component
@@ -43,7 +43,7 @@
           id="notification_period"
           progress={@progress}
           alert_data={@alert_data}
-          editing={@editing}
+          form_type={@form_type}
         />
         <.live_component
           module={AlertDetails}
@@ -56,7 +56,7 @@
           selected_routes={@selected_routes}
           selected_stops={@selected_stops}
           selected_schedules={@selected_schedules}
-          editing={@editing}
+          form_type={@form_type}
         />
         <.live_component
           module={Delivery}
@@ -70,14 +70,14 @@
           id="rider_reminders"
           progress={@progress}
           alert_data={@alert_data}
-          editing={@editing}
+          form_type={@form_type}
         />
         <.live_component
           module={Submit}
           id="submit"
           progress={@progress}
           alert_data={@alert_data}
-          editing={@editing}
+          form_type={@form_type}
           alert_id={@alert_id}
           selected_schedules={@selected_schedules}
           current_user={@current_user}

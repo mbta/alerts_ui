@@ -54,7 +54,8 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
   end
 
   @impl true
-  def update(%{editing: true, alert_data: alert_data} = assigns, socket) do
+  def update(%{form_type: form_type, alert_data: alert_data} = assigns, socket)
+      when form_type in [:editing, :duplicating] do
     assigns =
       if socket.assigns.edited === false do
         alert_data =
@@ -108,7 +109,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
       |> TimeRangeValidators.validate_notification(
         socket.assigns.time_range,
         current_time,
-        socket.assigns.editing
+        socket.assigns.form_type != :creating
       )
       |> TimeRangeValidators.validate_required_notification_fields(socket.assigns.form.params)
 

@@ -30,7 +30,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
     alert_data: %{trip_ids: ["CR-683322-595"]},
     current_time: ~N[2024-04-30 15:54:00],
     edited: false,
-    editing: false,
+    form_type: :creating,
     selected_schedules: []
   }
 
@@ -99,7 +99,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
           Map.merge(
             @assigns,
             %{
-              editing: true,
+              form_type: :editing,
               alert_data: %{
                 active_period_start_specifier: "custom",
                 active_period_start: ~N[2024-04-29 10:54:00],
@@ -124,7 +124,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
           Map.merge(
             @assigns,
             %{
-              editing: true,
+              form_type: :editing,
               alert_data: %{
                 active_period_start_specifier: "custom",
                 active_period_start: ~N[2024-04-29 10:54:00],
@@ -154,7 +154,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         live_isolated_component(TimeRange, @assigns)
 
       live_assign(view, %{
-        editing: true,
+        form_type: :editing,
         alert_data: %{
           active_period_start: ~N[2024-04-30 11:54:00],
           active_period_end: ~N[2024-04-30 10:54:00],
@@ -185,7 +185,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
           Map.merge(
             @assigns,
             %{
-              editing: true,
+              form_type: :editing,
               alert_data: %{
                 active_period_start: start_time,
                 active_period_start_specifier: "custom",

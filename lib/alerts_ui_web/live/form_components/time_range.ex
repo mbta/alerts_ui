@@ -118,10 +118,11 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   @impl true
   def update(
-        %{alert_data: alert_data, editing: true} =
+        %{alert_data: alert_data, form_type: form_type} =
           assigns,
         %{assigns: %{edited: false}} = socket
-      ) do
+      )
+      when form_type in [:editing, :duplicating] do
     alert_data =
       alert_data
       |> Enum.filter(fn {_k, v} -> !is_nil(v) end)
@@ -290,7 +291,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       |> TimeRangeValidators.validate_start_is_after_now(
         current_time,
         form_params,
-        socket.assigns.editing
+        socket.assigns.form_type == :editing
       )
 
     errors =
@@ -414,7 +415,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         |> TimeRangeValidators.validate_start_is_after_now(
           socket.assigns.current_time,
           time_range,
-          socket.assigns.editing
+          socket.assigns.form_type == :editing
         )
         |> TimeRangeValidators.validate_start_is_before_trip(
           Map.get(socket.assigns, :trip_arrival_time)

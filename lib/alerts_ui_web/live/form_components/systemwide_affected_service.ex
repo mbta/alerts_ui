@@ -36,7 +36,8 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
   end
 
   @impl true
-  def update(%{alert_data: alert_data, editing: true} = assigns, socket) do
+  def update(%{alert_data: alert_data, form_type: form_type} = assigns, socket)
+      when form_type in [:editing, :duplicating] do
     incoming_alert_data = %{
       service_types: Map.get(alert_data, :service_types, [])
     }

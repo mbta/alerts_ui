@@ -53,7 +53,8 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
   end
 
   @impl true
-  def update(%{alert_data: alert_data, editing: true} = assigns, socket) do
+  def update(%{alert_data: alert_data, form_type: form_type} = assigns, socket)
+      when form_type in [:editing, :duplicating] do
     effect_name = Map.get(alert_data, :effect_name) || socket.assigns.effect_name
 
     facility_types =

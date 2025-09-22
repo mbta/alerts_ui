@@ -24,7 +24,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
       label: "Alert Details"
     },
     alert_data: %{route_type: nil, effect_name: "Bike Issue"},
-    editing: false
+    form_type: :creating
   }
 
   @facility %Facility{
@@ -208,7 +208,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
           effect_name: "Bike Issue"
         }
 
-        assigns = @assigns |> Map.merge(%{alert_data: alert_data, editing: true})
+        assigns = @assigns |> Map.merge(%{alert_data: alert_data, form_type: :editing})
 
         {:ok, view, _html} = live_isolated_component(AccessAffectedService, assigns)
 
