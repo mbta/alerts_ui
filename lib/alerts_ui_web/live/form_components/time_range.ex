@@ -698,7 +698,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         field={@form[:active_period_end]}
         min={naive_datetime_to_iso8601(@form[:active_period_start].value)}
         max="9999-12-31T23:59"
-        value={naive_datetime_to_iso8601(@form[:active_period_end].value)}
+        value={naive_datetime_to_iso8601(if @form[:active_period_end_specifier].value === :until_further_notice, do: "", else: @form[:active_period_end].value)}
         class={"min-w-[16rem] max-w-[16rem] " <> (if @form[:active_period_end_specifier].value === :custom, do: "", else: "hidden")}
         phx-debounce={120}
       />
