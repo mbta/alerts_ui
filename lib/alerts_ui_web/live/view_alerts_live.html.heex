@@ -151,7 +151,10 @@
               </.button_secondary>
             </:toggle>
             <:menu>
-              <.link class="inline-flex items-center gap-1 leading-6 w-full autofocus">
+              <.link
+                href={~p"/alerts/duplicate?alert_id=#{alert.alert_id}"}
+                class="inline-flex items-center gap-1 leading-6 w-full autofocus"
+              >
                 <.icon name="hero-square-2-stack-solid" class="w-3 h-3" />
                 <div>Duplicate</div>
               </.link>

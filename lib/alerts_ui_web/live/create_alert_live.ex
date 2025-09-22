@@ -412,6 +412,9 @@ defmodule AlertsUIWeb.CreateAlertLive do
   defp create_alert(socket) do
     current_user = socket.assigns.current_user
 
+    form_type =
+      socket.assigns.form_type
+
     existing_user = Users.get_by_keycloak_id(current_user.keycloak_id) || %User{}
 
     {:ok, user} = Users.create_or_update_user(Map.from_struct(current_user), existing_user)
@@ -421,7 +424,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
       |> AlertBuilder.build_alert(socket.assigns.combination)
 
     existing_alert =
-      if is_nil(socket.assigns.alert_id) do
+      if is_nil(socket.assigns.alert_id) || form_type == :duplicating do
         %Alert{}
       else
         Alerts.get_by_alert_id(socket.assigns.alert_id)
@@ -437,7 +440,13 @@ defmodule AlertsUIWeb.CreateAlertLive do
           |> Map.get(:alert_id)
 
         alert_descriptor = if is_nil(socket.assigns.alert_id), do: "New alert #", else: "Alert #"
-        created_or_updated = if is_nil(socket.assigns.alert_id), do: " created", else: " updated"
+
+        created_or_updated =
+          cond do
+            is_nil(socket.assigns.alert_id) -> " created"
+            form_type == :duplicating -> " duplicated from #" <> socket.assigns.alert_id
+            true -> " updated"
+          end
 
         socket
         |> put_flash(:info, alert_descriptor <> alert_id <> created_or_updated)

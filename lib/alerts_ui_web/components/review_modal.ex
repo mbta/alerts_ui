@@ -443,7 +443,10 @@ defmodule AlertsUIWeb.ReviewModal do
             type="button"
             class="ml-auto"
             phx-remove={hide_modal(@id)}
-            phx-click={JS.push("duplicate_alert", target: @target_id) |> JS.exec("phx-remove")}
+            phx-click={
+              JS.push("duplicate_alert", value: %{alert_id: @alert_id}, target: @target_id)
+              |> JS.exec("phx-remove")
+            }
           >
             Duplicate
           </.button_secondary>
