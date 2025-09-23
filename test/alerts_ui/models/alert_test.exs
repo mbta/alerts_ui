@@ -135,6 +135,35 @@ defmodule AlertsUI.Models.AlertTest do
 
       refute changed?(changeset, :created_at)
     end
+
+    test "alert with unknown duration and nil active_period_end is valid" do
+      changeset =
+        %Alert{
+          alert_id: "123",
+          header_text: "old",
+          created_at: @five_minutes_ago,
+          informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}],
+          duration_certainty: :UNKNOWN
+        }
+        |> Alert.changeset(%{})
+
+      assert changeset.valid?
+    end
+
+    test "alert with unknown duration and active_period_end is invalid" do
+      changeset =
+        %Alert{
+          alert_id: "123",
+          header_text: "old",
+          created_at: @five_minutes_ago,
+          active_period_end: @five_minutes_ago,
+          informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}],
+          duration_certainty: :UNKNOWN
+        }
+        |> Alert.changeset(%{})
+
+      refute changeset.valid?
+    end
   end
 
   describe "draft_changeset/2" do

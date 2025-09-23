@@ -223,6 +223,7 @@ defmodule AlertsUI.Models.Alert do
           ]
       end
     end)
+    |> validate_timestamps()
     |> validate_inclusion(:effect, @effect)
     |> validate_inclusion(:cause, @cause)
     |> validate_inclusion(:severity_level, @severity_level)
@@ -352,4 +353,16 @@ defmodule AlertsUI.Models.Alert do
   @spec simple_subway_type(Route.type_int()) :: Route.type_int()
   defp simple_subway_type(0), do: 1
   defp simple_subway_type(route_type), do: route_type
+
+  @spec validate_timestamps(Ecto.Changeset.t()) :: Ecto.Changeset.t()
+  defp validate_timestamps(changeset) do
+    active_period_end = get_field(changeset, :active_period_end)
+    duration_certainty = get_field(changeset, :duration_certainty)
+
+    if duration_certainty == :UNKNOWN && active_period_end do
+      add_error(changeset, :active_period_end, "Alerts of unknown duration can't have end times")
+    else
+      changeset
+    end
+  end
 end
