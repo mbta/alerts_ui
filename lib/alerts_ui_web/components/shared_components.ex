@@ -1632,7 +1632,7 @@ defmodule AlertsUIWeb.SharedComponents do
           active:bg-transparent active:text-secondary-disabled active:border-secondary-disabled"
       ]}
       page_links={3}
-      class="flex flex-row justify-center mr-auto"
+      class="flex flex-row justify-center has-[.ellipsis]:w-[370px]"
       page_link_attrs={[
         class:
           "rounded-none btn h-auto min-h-fit #{secondary_button_classes()} !py-1 !px-2 leading-[1.5] font-normal"
@@ -1641,27 +1641,29 @@ defmodule AlertsUIWeb.SharedComponents do
         class:
           "rounded-none btn h-auto min-h-fit #{secondary_button_classes()} !py-1 !px-2 leading-[1.5] font-normal !bg-primary text-text-invert"
       ]}
-      page_list_attrs={[class: "join"]}
+      page_list_attrs={[
+        class: "join mx-3 [&>:first-child>button]:rounded-s-sm [&>:last-child>button]:rounded-e-sm"
+      ]}
       {@rest}
     >
       <:previous attrs={[
-        class:
-          "border-r-0 rounded-r-none btn !h-auto min-h-fit #{secondary_button_classes()} !py-1 !px-[6px] leading-[1.5]"
+        class: "text-primary flex items-center mr-auto !py-1 !px-[6px] leading-[1.5]"
       ]}>
         <.caret_icon direction={:left} />
+        <span class="text-xs font-normal">Previous</span>
       </:previous>
       <:ellipsis>
         <span
-          class="rounded-none btn h-auto min-h-fit #{SharedComponents.secondary_button_classes()} !py-1 !px-2 leading-[1.5] font-normal"
+          class="ellipsis pointer-events-none text-primary-disabled border-primary-disabled bg-transparent rounded-none btn h-auto min-h-fit !py-1 !px-2 leading-[1.5] font-normal"
           aria-hidden="true"
         >
           &hellip;
         </span>
       </:ellipsis>
       <:next attrs={[
-        class:
-          "border-l-0 rounded-l-none btn !h-auto min-h-fit #{secondary_button_classes()} !py-1 !px-[6px] leading-[1.5] order-last"
+        class: "text-primary flex items-center ml-auto !py-1 !px-[6px] leading-[1.5] order-last"
       ]}>
+        <span class="text-xs font-normal">Next</span>
         <.caret_icon direction={:right} />
       </:next>
     </Flop.Phoenix.pagination>
