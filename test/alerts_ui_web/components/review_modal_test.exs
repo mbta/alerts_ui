@@ -26,6 +26,10 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
 
+  @tomorrow_datetime DateTime.utc_now()
+                     |> DateTime.shift_zone!("America/New_York")
+                     |> DateTime.add(1, :day)
+
   @route_one %Route{
     sort_order: 1,
     id: "CR-Worcester",
@@ -151,6 +155,59 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         open_review_modal(view)
 
         assert render(view) =~ ~r/Edit alert #123/s
+      end
+    end
+
+    @tag :logged_in_user
+    test "header when duplicating", %{conn: conn} do
+      todays_date =
+        DateTime.utc_now()
+        |> DateTime.shift_zone!("America/New_York")
+        |> DateTime.to_date()
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _types -> @routes end,
+           get: fn _id -> @route_one end,
+           all: fn _opts -> @routes end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction -> [@stop] end,
+           get_parent: fn nil -> nil end
+         ]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _route_ids, _opts ->
+             [@schedule, @schedule_2]
+           end,
+           end_of_rating: fn -> Date.add(todays_date, 7) end
+         ]}
+      ]) do
+        alert_params =
+          build(:alert_map, %{
+            active_period_start: @tomorrow_datetime,
+            alert_id: "123",
+            effect: :SIGNIFICANT_DELAYS,
+            effect_detail: "DELAY",
+            header_text: "cool header text",
+            severity: 3,
+            severity_level: :WARNING,
+            cause_detail: "PARADE",
+            reminder_times: [],
+            informed_entity: [%{route_type: 3, route_id: "1"}],
+            original_route_selections: ["1", "2", "3"]
+          })
+
+        {:ok, _} =
+          Alerts.create_or_update_alert(alert_params, build(:user))
+
+        {:ok, view, _html} = live(conn, "/alerts/duplicate?alert_id=123")
+
+        open_review_modal(view)
+
+        assert render(view) =~ ~r/Duplicate alert #123/s
       end
     end
 

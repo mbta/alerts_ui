@@ -131,6 +131,7 @@
         <div class="inline-flex justify-end space-x-2 w-full">
           <.button_secondary_link
             :if={!AlertsUIWeb.FormComponents.Helpers.Helpers.alert_is_closed(alert)}
+            id={"edit-button-#{alert.alert_id}"}
             href={~p"/alerts/edit?alert_id=#{alert.alert_id}"}
             class="inline-flex rounded !px-2 !py-[3px]"
           >
@@ -152,6 +153,7 @@
             </:toggle>
             <:menu>
               <.link
+                id={"duplicate-button-#{alert.alert_id}"}
                 href={~p"/alerts/duplicate?alert_id=#{alert.alert_id}"}
                 class="inline-flex items-center gap-1 leading-6 w-full autofocus"
               >

@@ -227,6 +227,143 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
                        }}}
     end
 
+    test "duplicating keeps correct end time specifier when there is no end time" do
+      {:ok, view, _html} =
+        live_isolated_component(
+          TimeRange,
+          Map.merge(
+            @assigns,
+            %{
+              form_type: :duplicating,
+              alert_data: %{
+                active_period_start_specifier: "custom",
+                active_period_start: ~N[2024-04-29 10:54:00],
+                active_period_end_specifier: "until_further_notice",
+                active_period_end: ~N[2024-04-30 11:59:00]
+              }
+            }
+          )
+        )
+
+      assert view
+             |> render() =~ "until alert is manually closed"
+
+      refute view
+             |> render() =~ "later today"
+    end
+
+    test "duplicating DOES check start time" do
+      {:ok, view, _html} =
+        live_isolated_component(
+          TimeRange,
+          Map.merge(
+            @assigns,
+            %{
+              form_type: :duplicating,
+              alert_data: %{
+                active_period_start_specifier: "custom",
+                active_period_start: ~N[2024-04-29 10:54:00],
+                active_period_end_specifier: "until_further_notice",
+                active_period_end: ~N[2024-04-30 11:59:00]
+              }
+            }
+          )
+        )
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end_specifier" => "later_today"
+        }
+      })
+
+      assert_receive {:__live_isolated_component_handle_info_received__, _pid,
+                      {:add_errors,
+                       [{:active_period_start, {"Effect can't start in the past", []}}],
+                       AlertsUIWeb.FormComponents.TimeRange}}
+    end
+
+    test "duplicating with error field sends error" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
+      live_assign(view, %{
+        form_type: :duplicating,
+        alert_data: %{
+          active_period_start: ~N[2024-04-30 11:54:00],
+          active_period_end: ~N[2024-04-30 10:54:00],
+          active_period_end_specifier: "custom"
+        }
+      })
+
+      assert view
+             |> render() =~ "custom"
+
+      assert_receive {:__live_isolated_component_handle_info_received__, _pid,
+                      {:add_errors,
+                       [
+                         {:active_period_end, {"Effect must end after 04/30/2024, 11:54 AM", []}},
+                         {:active_period_start_date, {"Effect can't start in the past", []}}
+                       ], AlertsUIWeb.FormComponents.TimeRange}}
+    end
+
+    test "duplicating with no errors sends data" do
+      start_time =
+        DateTime.utc_now()
+        |> DateTime.add(1, :hour)
+        |> DateTime.shift_zone!("America/New_York")
+        |> DateTime.truncate(:second)
+        |> DateTime.to_naive()
+
+      {:ok, view, _html} =
+        live_isolated_component(
+          TimeRange,
+          Map.merge(
+            @assigns,
+            %{
+              form_type: :duplicating,
+              alert_data: %{
+                active_period_start: start_time,
+                active_period_start_specifier: "custom",
+                active_period_end_specifier: "later_today",
+                active_period_end: NaiveDateTime.add(start_time, 1, :hour)
+              }
+            }
+          )
+        )
+
+      assert view
+             |> element("#time_range_active_period_start_specifier")
+             |> render() =~ "custom"
+
+      assert view
+             |> render() =~ "until later today"
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end_specifier" => "until_further_notice"
+        }
+      })
+
+      refute view
+             |> render() =~ "until later today"
+
+      assert view
+             |> render() =~ "until alert is manually closed (indefinite)"
+
+      assert_receive {:__live_isolated_component_handle_info_received__, _pid,
+                      {:add_errors, [], AlertsUIWeb.FormComponents.TimeRange}}
+
+      assert_receive {:__live_isolated_component_handle_info_received__, _pid,
+                      {:section_completed,
+                       %TimeRange{
+                         active_period_start: ^start_time
+                       }}}
+    end
+
     test "displays error if start invalid" do
       {:ok, view, _html} =
         live_isolated_component(TimeRange, @assigns)
