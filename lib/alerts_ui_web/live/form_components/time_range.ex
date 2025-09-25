@@ -87,9 +87,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
     changeset = changeset(%__MODULE__{}, alert_data)
 
-    changes =
-      changeset
-      |> apply_action!(:validate)
+    changes = apply_action!(changeset, :validate)
 
     send(self(), {:section_completed, changes})
 
@@ -127,19 +125,33 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       alert_data
       |> Enum.filter(fn {_k, v} -> !is_nil(v) end)
       |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
-
-    assigns =
-      assigns
-      |> Map.put(:alert_data, Map.merge(socket.assigns.form.params, alert_data))
+      |> (&Map.merge(socket.assigns.form.params, &1)).()
 
     changeset =
       %__MODULE__{}
-      |> changeset(assigns.alert_data)
-      |> TimeRangeValidators.validate_required_fields(assigns.alert_data)
+      |> changeset(alert_data)
+      |> TimeRangeValidators.validate_required_fields(alert_data)
       |> TimeRangeValidators.validate_relationships(
-        assigns.alert_data["alert_timing"],
-        assigns.alert_data
+        alert_data["alert_timing"],
+        alert_data
       )
+
+    changeset =
+      if form_type == :duplicating do
+        current_time = DateTimeHelpers.current_time()
+
+        changeset
+        |> TimeRangeValidators.validate_start_is_before_trip(
+          Map.get(socket.assigns, :trip_arrival_time)
+        )
+        |> TimeRangeValidators.validate_start_is_after_now(
+          current_time,
+          socket.assigns.form.params,
+          false
+        )
+      else
+        changeset
+      end
 
     changeset
     |> apply_action(:validate)
@@ -157,7 +169,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       |> to_form()
       |> Map.put(:action, :validate)
 
-    assigns = assigns |> Map.merge(%{form: form, edited: true})
+    assigns = Map.merge(assigns, %{form: form, edited: true, alert_data: alert_data})
 
     {:ok, assign(socket, assigns)}
   end
