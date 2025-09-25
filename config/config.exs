@@ -140,6 +140,7 @@ config :paper_trail,
   repo: AlertsUI.Repo,
   item_type: Ecto.UUID,
   originator_type: Ecto.UUID,
+  originator: [name: :user, model: AlertsUI.Models.User],
   originator_relationship_options: [references: :uuid]
 
 # Import environment specific config. This must remain at the bottom

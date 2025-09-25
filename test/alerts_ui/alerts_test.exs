@@ -1063,6 +1063,8 @@ defmodule AlertsUI.AlertsTest do
     test "closes alert" do
       current_time = ~U[2024-06-04 00:01:11Z]
 
+      user = build(:user)
+
       insert(:alert, %{
         alert_id: "123",
         duration_certainty: :ESTIMATED,
@@ -1072,7 +1074,7 @@ defmodule AlertsUI.AlertsTest do
         ]
       })
 
-      Alerts.get_by_alert_id("123") |> Alerts.close(current_time)
+      Alerts.get_by_alert_id("123") |> Alerts.close(user, current_time)
 
       result = Alerts.get_by_alert_id("123")
 

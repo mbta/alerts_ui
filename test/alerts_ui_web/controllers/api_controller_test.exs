@@ -46,7 +46,7 @@ defmodule AlertsUIWeb.ApiControllerTest do
             informed_entity: [
               %{route_id: "1"}
             ],
-            user: build(:user)
+            user: build(:user_map)
           })
           |> validate_resp_schema(schema, :AlertResponse)
 
@@ -78,7 +78,7 @@ defmodule AlertsUIWeb.ApiControllerTest do
             header_text: "header",
             description_text: "description",
             effect_detail: "ACCESS_ISSUE",
-            user: build(:user)
+            user: build(:user_map)
           })
           |> validate_resp_schema(schema, :AlertError)
 

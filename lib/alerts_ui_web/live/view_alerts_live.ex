@@ -163,7 +163,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   @impl true
   def handle_event("close_alert", %{"value" => alert_id}, socket) do
-    alert_id |> Alerts.get_by_alert_id() |> Alerts.close()
+    alert_id |> Alerts.get_by_alert_id() |> Alerts.close(socket.assigns.current_user)
     # refresh view so alert is displayed in correct timeline category
     Process.send(self(), :update, [])
     {:noreply, socket}

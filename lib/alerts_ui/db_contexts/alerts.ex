@@ -4,25 +4,20 @@ defmodule AlertsUI.Alerts do
   """
   import Ecto.Changeset
   import Ecto.Query
-  alias AlertsUI.Models.Alert
+  alias AlertsUI.Models.{Alert, User}
   alias AlertsUI.Repo
   require Logger
 
-  def create_or_update_alert(params, user, existing_alert \\ %Alert{}) do
+  @spec create_or_update_alert(map(), User.t(), any()) :: {:ok | :error, any()}
+  def create_or_update_alert(params, %User{} = user, %Alert{} = existing_alert \\ %Alert{}) do
     existing_alert
     |> Alert.changeset(params)
     |> Ecto.Changeset.put_assoc(:user, user)
-    |> PaperTrail.insert_or_update()
+    |> PaperTrail.insert_or_update(user: user, origin: "user")
     |> case do
       {:ok, %{model: alert}} -> {:ok, alert}
       {:error, result} -> {:error, result}
     end
-  end
-
-  def create_draft_alert(params) do
-    %Alert{}
-    |> Alert.draft_changeset(params)
-    |> PaperTrail.insert()
   end
 
   @spec parse_changeset_errors(Ecto.Changeset.t()) :: %{optional(atom()) => list()}
@@ -111,7 +106,7 @@ defmodule AlertsUI.Alerts do
       end_is_past = time_is_past(current_time, alert.active_period_end)
 
       if end_is_past do
-        close(alert)
+        close(alert, "(Closed automatically)")
       else
         alert
       end
@@ -161,7 +156,7 @@ defmodule AlertsUI.Alerts do
       alert
       |> Ecto.build_assoc(:active_period)
       |> cast(active_period_params, [:start, :end])
-      |> PaperTrail.insert()
+      |> PaperTrail.insert(origin: "(Updated automatically)")
       |> case do
         {:ok, %{model: alert}} -> {:ok, alert}
         {:error, result} -> {:error, result}
@@ -266,10 +261,9 @@ defmodule AlertsUI.Alerts do
   def get_latest_version(alert_uuid) do
     from(
       version in PaperTrail.Version,
-      where: version.item_id == ^alert_uuid,
-      order_by: [desc: :inserted_at],
-      limit: 1
+      where: version.item_id == ^alert_uuid
     )
+    |> last(:inserted_at)
     |> Repo.one()
   end
 
@@ -305,8 +299,8 @@ defmodule AlertsUI.Alerts do
     end
   end
 
-  @spec close(Alert.t()) :: Alert.t()
-  def close(alert, closed_time \\ DateTime.utc_now()) do
+  @spec close(Alert.t(), User.t() | String.t(), DateTime.t()) :: Alert.t()
+  def close(alert, origin, closed_time \\ DateTime.utc_now()) do
     closed_time = DateTime.truncate(closed_time, :second)
 
     alert
@@ -316,7 +310,15 @@ defmodule AlertsUI.Alerts do
       notification_period_end: closed_time,
       duration_certainty: :KNOWN
     )
-    |> PaperTrail.update!()
+    |> update_papertrail(origin)
+  end
+
+  defp update_papertrail(alert, %User{} = user) do
+    PaperTrail.update!(alert, originator: user, origin: "user")
+  end
+
+  defp update_papertrail(alert, origin) when is_binary(origin) do
+    PaperTrail.update!(alert, origin: origin)
   end
 
   defp join_informed_entity(query, _opts) do

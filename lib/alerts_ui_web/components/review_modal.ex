@@ -385,7 +385,7 @@ defmodule AlertsUIWeb.ReviewModal do
             </p>
           <% else %>
             <p :if={@created_by} class="pb-3">
-              {Map.get(@created_by, :first_name, "")} {Map.get(@created_by, :last_name, "")}
+              {@created_by}
             </p>
           <% end %>
 
@@ -409,7 +409,7 @@ defmodule AlertsUIWeb.ReviewModal do
               {Map.get(@current_user, :first_name, "")} {Map.get(@current_user, :last_name, "")}
             </p>
             <p :if={@form_type != :editing && @last_edited_by} class="pb-3">
-              {Map.get(@last_edited_by, :first_name, "")} {Map.get(@last_edited_by, :last_name, "")}
+              {@last_edited_by}
             </p>
           <% end %>
 

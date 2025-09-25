@@ -8,7 +8,8 @@ defmodule AlertsUI.Support.Factory do
     ExtendedTime,
     InformedEntity,
     ReminderTime,
-    TripDescriptor
+    TripDescriptor,
+    User
   }
 
   def extended_time_factory, do: %ExtendedTime{relative_day: 1, time: ~T[12:12:12]}
@@ -159,7 +160,7 @@ defmodule AlertsUI.Support.Factory do
         }
       ])
 
-  def user_factory do
+  def user_map_factory do
     %{
       keycloak_id: "123-456",
       email: "fake@example.com",
@@ -167,5 +168,9 @@ defmodule AlertsUI.Support.Factory do
       last_name: "Lastname",
       role: :user
     }
+  end
+
+  def user_factory do
+    struct(User, user_map_factory())
   end
 end

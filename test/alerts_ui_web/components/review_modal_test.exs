@@ -1204,7 +1204,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
       reminder_times: [],
       recurrence_days: [],
       created_at: ActivePeriodBuilder.naive_eastern_datetime_to_utc(@yesterday),
-      created_by: %{first_name: "First", last_name: "Last"}
+      created_by: "First Last"
     }
 
     @assigns %{
