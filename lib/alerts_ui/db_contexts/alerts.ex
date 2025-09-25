@@ -8,7 +8,8 @@ defmodule AlertsUI.Alerts do
   alias AlertsUI.Repo
   require Logger
 
-  def create_or_update_alert(params, user, existing_alert \\ %Alert{}) do
+  @spec create_or_update_alert(map(), User.t(), any()) :: {:ok | :error, any()}
+  def create_or_update_alert(params, %User{} = user, %Alert{} = existing_alert \\ %Alert{}) do
     existing_alert
     |> Alert.changeset(params)
     |> Ecto.Changeset.put_assoc(:user, user)
