@@ -436,17 +436,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
           |> Alerts.get_by_id()
           |> Map.get(:alert_id)
 
-        alert_descriptor = if is_nil(socket.assigns.alert_id), do: "New alert #", else: "Alert #"
-
-        created_or_updated =
-          cond do
-            is_nil(socket.assigns.alert_id) -> " created"
-            form_type == :duplicating -> " duplicated from #" <> socket.assigns.alert_id
-            true -> " updated"
-          end
-
         socket
-        |> put_flash(:info, alert_descriptor <> alert_id <> created_or_updated)
+        |> put_flash(:info, flash_text(socket.assigns.alert_id, alert_id, form_type))
         |> redirect(to: "/")
 
       {:error, result} ->
@@ -458,6 +449,13 @@ defmodule AlertsUIWeb.CreateAlertLive do
         display_errors(socket, errors)
     end
   end
+
+  defp flash_text(nil, alert_id, _form_type), do: "New alert ##{alert_id} created"
+
+  defp flash_text(assigns_alert_id, alert_id, :duplicating),
+    do: "Alert ##{alert_id} duplicated from ##{assigns_alert_id}"
+
+  defp flash_text(_assigns_alert_id, alert_id, _form_type), do: "Alert ##{alert_id} updated"
 
   defp display_errors(socket, errors) do
     [
