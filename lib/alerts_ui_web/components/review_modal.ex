@@ -3,6 +3,7 @@ defmodule AlertsUIWeb.ReviewModal do
   Component for the review modal with alert details and delivery preview
   """
   use Phoenix.Component
+  use AlertsUIWeb, :verified_routes
 
   import AlertsUIWeb.CoreComponents
   import AlertsUIWeb.SharedComponents
@@ -413,8 +414,13 @@ defmodule AlertsUIWeb.ReviewModal do
             </p>
           <% end %>
 
-          <.link class="text-primary">
-            <.icon name="hero-arrow-down-tray" class="h-4 w-4" /> Download history
+          <.link
+            :if={@alert_id}
+            class="text-primary"
+            href={~p"/download_history?alert_id=#{@alert_id}"}
+            target="_blank"
+          >
+            <.icon name="hero-document-arrow-down-solid" class="w-4 h-4" /> Download history (.csv)
           </.link>
         </div>
       </div>

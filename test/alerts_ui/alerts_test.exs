@@ -1042,6 +1042,52 @@ defmodule AlertsUI.AlertsTest do
     end
   end
 
+  describe "get_alert_id_by_uuid/1" do
+    test "returns alert with matching alert_id" do
+      uuid = Ecto.UUID.generate()
+
+      expected_alert =
+        insert(:alert, %{id: uuid, header_text: "this is the right alert", alert_id: "123"})
+
+      assert Alerts.get_uuid_by_alert_id("123") == uuid
+    end
+  end
+
+  describe "get_all_versions/1" do
+    test "returns all versions with the earliest first" do
+      user = build(:user)
+
+      original_alert_map =
+        build(
+          :alert_map,
+          %{
+            alert_id: "123",
+            header_text: "old header text",
+            user: user
+          }
+        )
+
+      new_params =
+        build(:alert_map, %{
+          alert_id: "123",
+          header_text: "new header text",
+          active_period: [%{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:03:00Z]}],
+          user: user
+        })
+
+      Alerts.create_or_update_alert(original_alert_map, user)
+
+      existing_alert = Alerts.get_by_alert_id("123")
+
+      Alerts.create_or_update_alert(new_params, user, existing_alert)
+
+      alert = Alerts.get_by_alert_id("123")
+      [version_1, version_2] = Alerts.get_all_versions(alert.id)
+      assert version_1.item_changes["header_text"] == "old header text"
+      assert version_2.item_changes["header_text"] == "new header text"
+    end
+  end
+
   describe "draft?/1" do
     test "returns false if alert draft is false" do
       insert(:alert, %{alert_id: "123", draft: false})

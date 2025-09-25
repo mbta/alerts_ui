@@ -248,6 +248,17 @@ defmodule AlertsUI.Alerts do
     )
   end
 
+  @spec get_by_id(String.t()) :: Ecto.UUID
+  def get_uuid_by_alert_id(alert_id) do
+    from(
+      a in Alert,
+      where: a.alert_id == ^alert_id,
+      select: a.id,
+      limit: 1
+    )
+    |> Repo.one()
+  end
+
   @spec get_earliest_version(String.t()) :: PaperTrail.Version.t() | nil
   def get_earliest_version(alert_uuid) do
     from(
@@ -265,6 +276,16 @@ defmodule AlertsUI.Alerts do
     )
     |> last(:inserted_at)
     |> Repo.one()
+  end
+
+  @spec get_all_versions(String.t()) :: PaperTrail.Version.t()
+  def get_all_versions(alert_uuid) do
+    from(
+      version in PaperTrail.Version,
+      where: version.item_id == ^alert_uuid,
+      order_by: [asc: :inserted_at]
+    )
+    |> Repo.all()
   end
 
   @spec list_all_paginated(map()) :: {[any()], Flop.Meta.t()}
