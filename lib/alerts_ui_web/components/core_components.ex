@@ -145,17 +145,15 @@ defmodule AlertsUIWeb.CoreComponents do
   end
 
   @doc """
-  Renders a form that filters the specified fields using Flop meta data.
+  Renders a form that filters alerts by the fields we want available
 
   ## Examples
 
       <.filter_form
-        fields={[:name, :email]}
         meta={@meta}
         id="user-filter-form"
       />
   """
-  attr :fields, :list, required: true
   attr :meta, Flop.Meta, required: true
   attr :id, :string, default: nil
   attr :on_change, :string, default: "update-filter"
@@ -173,24 +171,27 @@ defmodule AlertsUIWeb.CoreComponents do
       phx-submit={@on_change}
       class="form-control gap-4"
     >
-      <div class="mr-8 flex flex-row gap-4 items-center">
-        <Flop.Phoenix.filter_fields :let={i} form={@form} fields={@fields}>
-          <%= case i.type do %>
-            <% "radio_switch" -> %>
-              <.radio_switch name={i.field.name} selected={i.field.value} {i.rest} />
-            <% "text_input" -> %>
-              <AlertsUIWeb.SharedComponents.text_input
-                field={i.field}
-                label={i.label}
-                phx-debounce={750}
-                {i.rest}
-              />
-            <% _ -> %>
-              <.input field={i.field} label={i.label} type={i.type} phx-debounce={120} {i.rest} />
-          <% end %>
-        </Flop.Phoenix.filter_fields>
+      <div class="mr-8 mb-4 flex flex-row gap-4 items-center">
+        <AlertsUIWeb.SharedComponents.filter_modal form={@form} />
+        <input type="hidden" name="filters[3][field]" value="timeline" />
+        <.radio_switch
+          name="filters[3][value]"
+          class="!mx-0"
+          selected={Map.get(Enum.at(@form.source.flop.filters || [], 3) || %{}, :value)}
+          default="current"
+          values={AlertsUIWeb.ViewAlertsLive.timeline_options()}
+        />
+        <input type="hidden" name="filters[4][field]" value="multi_column_search" />
+        <AlertsUIWeb.SharedComponents.text_input
+          field={@form[:"filters[4][value]"]}
+          value={Map.get(Enum.at(@form.source.flop.filters || [], 4) || %{}, :value)}
+          phx-debounce={750}
+          placeholder="Search alerts"
+          icon="hero-magnifying-glass-mini"
+          class="h-8"
+        />
+        <button class="btn btn-outline basis-8 self-center px-8" name="reset">reset</button>
       </div>
-      <button class="btn btn-outline basis-8 self-center px-8" name="reset">reset</button>
     </.form>
     """
   end
@@ -404,19 +405,21 @@ defmodule AlertsUIWeb.CoreComponents do
       <.radio_switch name="group-name" values=["one", "two", "three"] selected={"two"} />
   """
   attr :name, :string, required: true
+  attr :class, :string
   attr :values, :list, required: true
   attr :selected, :any
+  attr :default, :any, default: "current"
 
   def radio_switch(assigns) do
     ~H"""
-    <fieldset class="mx-12">
+    <fieldset class={["mx-12", @class]}>
       <div class="join">
         <.radio_switch_input
           :for={value <- @values}
           name={@name}
           value={value}
           label={String.capitalize(value)}
-          checked={value == @selected}
+          checked={value == @selected || (@selected == nil && value == @default)}
         />
       </div>
     </fieldset>

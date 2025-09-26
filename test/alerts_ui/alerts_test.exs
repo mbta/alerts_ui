@@ -1,5 +1,6 @@
 defmodule AlertsUI.AlertsTest do
   @moduledoc false
+  alias AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes
   use AlertsUI.DataCase, async: false
   import AlertsUI.Support.Factory
   import AlertsUI.UsersFixtures
@@ -567,16 +568,22 @@ defmodule AlertsUI.AlertsTest do
     end
 
     test "filter by service type" do
+      [access_effect_name | _] = EffectsForRouteTypes.list_effects(:access)
       ie_1 = build(:informed_entity, %{route_type: 1, activities: [:BOARD]})
       ie_2 = build(:informed_entity, %{route_type: nil, activities: [:STORE_BIKE]})
       insert(:alert, %{alert_id: "123", informed_entity: [ie_1]})
-      insert(:alert, %{alert_id: "234", informed_entity: [ie_2]})
-      insert(:alert, %{alert_id: "345", informed_entity: [ie_1, ie_2]})
+      insert(:alert, %{alert_id: "234", informed_entity: [ie_2], effect_name: access_effect_name})
+
+      insert(:alert, %{
+        alert_id: "345",
+        informed_entity: [ie_1, ie_2],
+        effect_name: access_effect_name
+      })
 
       {result_1, _meta} =
         Alerts.list_all_paginated(%{
           order_by: [:integer_alert_id],
-          filters: [%{"field" => "service_type", "value" => "1"}]
+          filters: [%{"field" => "service_type", "value" => ["1"]}]
         })
 
       assert result_1 |> Enum.map(& &1.alert_id) == [123, 345]
@@ -584,7 +591,7 @@ defmodule AlertsUI.AlertsTest do
       {result_2, _meta} =
         Alerts.list_all_paginated(%{
           order_by: [:integer_alert_id],
-          filters: [%{"field" => "service_type", "value" => "access"}]
+          filters: [%{"field" => "service_type", "value" => ["access"]}]
         })
 
       assert result_2 |> Enum.map(& &1.alert_id) == [234, 345]

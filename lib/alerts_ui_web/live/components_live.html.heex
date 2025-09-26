@@ -109,8 +109,13 @@
 
   <.h2>Filter Modal</.h2>
 
-  <.form for={@form} class="form-control gap-4">
-    <.filter_modal id="filter-options-modal" form={@form} />
+  <.form for={@flop_form} class="form-control">
+    <.filter_modal
+      id="filter-options-modal"
+      form={@flop_form}
+      accept_event_name="ignore"
+      cancel_event_name="ignore"
+    />
   </.form>
 
   <.h2>Buttons</.h2>
@@ -162,8 +167,8 @@
     <.modal
       id="filter-modal"
       header_text="Filter by word length"
-      cancel_event_name="cancelled_modal"
-      accept_event_name="accepted_filter_modal"
+      cancel_event_name="ignore"
+      accept_event_name="ignore"
       accept_button_text="Apply"
     >
       <.filtered_select

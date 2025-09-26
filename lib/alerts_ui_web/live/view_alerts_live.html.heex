@@ -3,36 +3,7 @@
     <.button_primary_link href="/alerts/new" class="whitespace-nowrap">
       <.icon name="hero-plus" /> Create an Alert
     </.button_primary_link>
-    <.filter_form
-      fields={[
-        effect_detail: [
-          label: "Effect",
-          type: "select",
-          options: format_effect_options(),
-          value: ""
-        ],
-        text_content: [label: "Keyword", op: :like_and],
-        service_type: [
-          label: "Service Type",
-          type: "select",
-          options: format_service_type_options()
-        ],
-        timeline: [
-          label: "",
-          type: "radio_switch",
-          values: timeline_options()
-        ],
-        multi_column_search: [
-          placeholder: "Search alerts",
-          icon: "hero-magnifying-glass-mini",
-          type: "text_input",
-          label: "",
-          class: "h-8"
-        ]
-      ]}
-      meta={@meta}
-      id="alert-filter-form"
-    />
+    <.filter_form meta={@meta} id="alert-filter-form" />
   </div>
 
   <div class="flex items-center bg-bg-secondary p-2 text-sm border-t border-border-primary justify-between">

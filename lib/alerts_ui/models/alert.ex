@@ -120,6 +120,8 @@ defmodule AlertsUI.Models.Alert do
       :alert_id,
       :effect_detail,
       :text_content,
+      :effects,
+      :routes,
       :service_type,
       :timeline,
       :multi_column_search
@@ -138,19 +140,29 @@ defmodule AlertsUI.Models.Alert do
       alias_fields: [:integer_alert_id],
       compound_fields: [text_content: [:header_text, :description_text]],
       custom_fields: [
-        service_type: [
-          filter: {CustomFilters, :service_type_filter, []},
-          ecto_type: :string,
-          operators: [:==],
-          bindings: [:informed_entity]
-        ],
-        multi_column_search: [
-          filter: {CustomFilters, :multi_column_search_filter, []},
+        effects: [
+          filter: {CustomFilters, :effects_filter, []},
           ecto_type: :string,
           operators: [:==]
         ],
+        routes: [
+          filter: {CustomFilters, :routes_filter, []},
+          ecto_type: :string,
+          operators: [:==]
+        ],
+        service_type: [
+          filter: {CustomFilters, :service_type_filter, []},
+          bindings: [:informed_entity],
+          operators: [:==],
+          ecto_type: {:array, :string}
+        ],
         timeline: [
           filter: {CustomFilters, :timeline_filter, []},
+          ecto_type: :string,
+          operators: [:==]
+        ],
+        multi_column_search: [
+          filter: {CustomFilters, :multi_column_search_filter, []},
           ecto_type: :string,
           operators: [:==]
         ]

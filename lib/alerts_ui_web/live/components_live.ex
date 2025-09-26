@@ -51,8 +51,27 @@ defmodule AlertsUIWeb.ComponentsLive do
       |> NaiveDateTime.truncate(:second)
       |> NaiveDateTime.to_iso8601()
 
+    {_alerts, meta} =
+      AlertsUI.Alerts.list_all_paginated(%{
+        order_by: [],
+        filters: [
+          %{"field" => "effects", "value" => ""},
+          %{"field" => "routes", "value" => ""},
+          %{"field" => "service_type", "value" => ""},
+          %{"field" => "timeline", "value" => "current"},
+          %{"field" => "multi_column_search", "value" => ""}
+        ]
+      })
+
+    flop_form = Phoenix.Component.to_form(meta)
+
     {:ok,
-     assign(socket, %{form: form, current_time: current_time, modal_filter_value: "default"})}
+     assign(socket, %{
+       form: form,
+       current_time: current_time,
+       modal_filter_value: "default",
+       flop_form: flop_form
+     })}
   end
 
   @impl true

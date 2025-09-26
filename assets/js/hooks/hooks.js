@@ -64,4 +64,48 @@ Hooks.ScrollToTop = {
   },
 };
 
+Hooks.FilterSelect = {
+  mounted() {
+    this.el.addEventListener("input", (e) => {
+      const value = e.target.value.toLowerCase();
+      if (e.target.tagName === "SELECT") return;
+      this.el.querySelectorAll("option").forEach((o) => {
+        o.classList.toggle(
+          "hidden",
+          !(value === "" || o.innerText.toLowerCase().startsWith(value))
+        );
+      });
+    });
+  },
+};
+
+Hooks.FilterCount = {
+  mounted() {
+    this.el.addEventListener("change", this.refresh.bind(this));
+    this.refresh();
+  },
+
+  updated() {
+    this.refresh();
+  },
+
+  refresh() {
+    const count = `(${this.recount()})`;
+    this.el.querySelectorAll("h1").forEach((h1) => {
+      h1.setAttribute("data-count", count);
+    });
+    this.el.querySelectorAll("[data-count]").forEach((el) => {
+      el.setAttribute("data-count", count);
+    });
+  },
+
+  recount() {
+    let count = 0;
+    this.el.querySelectorAll("select").forEach((e) => {
+      count += e.selectedOptions.length;
+    });
+    return count;
+  },
+};
+
 export default Hooks;

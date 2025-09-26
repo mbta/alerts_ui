@@ -8,11 +8,32 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   alias AlertsUIWeb.FormComponents.Helpers.{AlertData, DateTimeFormatters, DateTimeHelpers}
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText
 
+  require Logger
+
   @ten_seconds_in_ms 10_000
 
   @impl true
   def mount(params, _session, socket) do
     Process.send_after(self(), :update, @ten_seconds_in_ms)
+
+    params =
+      if params
+         |> Map.get("filters", [])
+         |> Enum.map(fn {_k, v} -> Map.get(v, "value", "") end)
+         |> Enum.all?(&(&1 == "")) do
+        %{
+          "filters" => %{
+            "0" => %{"field" => "effects", "value" => ""},
+            "1" => %{"field" => "routes", "value" => ""},
+            "2" => %{"field" => "service_type", "value" => ""},
+            "3" => %{"field" => "timeline", "value" => "current"},
+            "4" => %{"field" => "multi_column_search", "value" => ""}
+          }
+        }
+      else
+        params
+      end
+      |> remove_empty_filters
 
     with {alerts, meta} <- Alerts.list_all_paginated(params) do
       {:ok, assign(socket, page_title: "View Alerts", meta: meta, alerts: alerts, params: params)}
@@ -23,7 +44,11 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   def handle_info(:update, socket) do
     Process.send_after(self(), :update, @ten_seconds_in_ms)
 
-    with {alerts, meta} <- Alerts.list_all_paginated(socket.assigns.meta.flop) do
+    flop =
+      socket.assigns.meta.flop
+      |> remove_empty_filters
+
+    with {alerts, meta} <- Alerts.list_all_paginated(flop) do
       {:noreply, assign(socket, meta: meta, alerts: alerts)}
     end
   end
@@ -38,7 +63,15 @@ defmodule AlertsUIWeb.ViewAlertsLive do
          |> Map.get("filters", [])
          |> Enum.map(fn {_k, v} -> Map.get(v, "value", "") end)
          |> Enum.all?(&(&1 == "")) do
-        %{"filters" => %{"3" => %{"field" => "timeline", "value" => "current"}}}
+        %{
+          "filters" => %{
+            "0" => %{"field" => "effects", "value" => ""},
+            "1" => %{"field" => "routes", "value" => ""},
+            "2" => %{"field" => "service_type", "value" => ""},
+            "3" => %{"field" => "timeline", "value" => "current"},
+            "4" => %{"field" => "multi_column_search", "value" => ""}
+          }
+        }
       else
         params
       end
@@ -56,6 +89,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       |> Map.put(:order_by, default_order_fields)
       |> Map.put(:order_directions, default_order_directions)
       |> Map.put(:filters, filters)
+      |> remove_empty_filters
 
     with {alerts, meta} <- Alerts.list_all_paginated(flop) do
       {:noreply, assign(socket, meta: meta, alerts: alerts, params: params)}
@@ -64,7 +98,9 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   @impl true
   def handle_event("paginate-alerts", %{"page" => page}, socket) do
-    flop = Flop.set_page(socket.assigns.meta.flop, page)
+    flop =
+      Flop.set_page(socket.assigns.meta.flop, page)
+      |> remove_empty_filters
 
     with {alerts, meta} <- Alerts.list_all_paginated(flop) do
       {:noreply, assign(socket, meta: meta, alerts: alerts)}
@@ -98,6 +134,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       flop
       |> Map.put(:order_by, order_fields)
       |> Map.put(:order_directions, new_order_directions)
+      |> remove_empty_filters
 
     with {alerts, meta} <- Alerts.list_all_paginated(flop) do
       {:noreply, assign(socket, meta: meta, alerts: alerts)}
@@ -112,7 +149,9 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       |> Enum.map(&if &1 == :desc, do: :desc_nulls_last, else: &1)
       |> Enum.map(&if &1 == :asc, do: :asc_nulls_first, else: &1)
 
-    flop = Map.put(flop, :order_directions, new_order_directions)
+    flop =
+      Map.put(flop, :order_directions, new_order_directions)
+      |> remove_empty_filters
 
     with {alerts, meta} <- Alerts.list_all_paginated(flop) do
       {:noreply, assign(socket, meta: meta, alerts: alerts)}
@@ -130,7 +169,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   end
 
   def handle_event("update-filter", params, socket) do
-    params = clean_filter_params(params)
+    params = clean_filter_params(params) |> Map.take(["filters"])
     {:noreply, push_patch(socket, to: ~p"/alerts?#{params}")}
   end
 
@@ -149,6 +188,11 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   @impl true
   def handle_event("close_details", _, socket) do
     {:noreply, assign(socket, selected_alert_data: nil, selected_alert_id: nil)}
+  end
+
+  @impl true
+  def handle_event("ignore", _params, socket) do
+    {:noreply, socket}
   end
 
   @impl true
@@ -350,7 +394,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     """
   end
 
-  defp timeline_options, do: ["current", "future", "past", "all"]
+  def timeline_options, do: ["current", "future", "past", "all"]
 
   @spec clean_filter_params(map()) :: map()
   defp clean_filter_params(params), do: Map.drop(params, ["_target", "reset"])
@@ -361,4 +405,29 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       do: true
 
   def timeline_filter_past?(_), do: false
+
+  def remove_empty_filters(%{"filters" => filters} = flop) do
+    %{flop | "filters" => Enum.map(filters, &remove_empty_filter/1)}
+  end
+
+  def remove_empty_filters(%{filters: filters} = flop) do
+    %{flop | filters: Enum.map(filters, &remove_empty_filter/1)}
+  end
+
+  def remove_empty_filter({_index, %{} = filter}) do
+    remove_empty_filter(filter)
+  end
+
+  def remove_empty_filter(%{} = filter) do
+    value = Map.get(filter, "value")
+
+    value =
+      case value do
+        [] -> nil
+        [""] -> nil
+        _ -> value
+      end
+
+    Map.put(filter, "value", value)
+  end
 end

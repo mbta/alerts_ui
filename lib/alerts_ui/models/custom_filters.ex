@@ -3,29 +3,33 @@ defmodule AlertsUI.Models.CustomFilters do
     Home for custom flop fitlers
   """
   import Ecto.Query
-  alias AlertsUI.Models.InformedEntity
+  alias AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes
   alias Flop.Filter
 
-  def service_type_filter(query, %Filter{value: value}, _opts) do
-    facility_activities =
-      InformedEntity.facility_activities()
-      |> Enum.map(&Atom.to_string(&1))
-      |> Enum.map(&String.upcase(&1))
+  def service_type_filter(query, %Filter{value: values}, _opts) when is_list(values) do
+    access_effect_names = EffectsForRouteTypes.list_effects(:access)
+    direct_routes = values |> Enum.filter(fn x -> Integer.parse(x) != :error end)
+    access_routes = values |> Enum.filter(fn x -> Integer.parse(x) == :error end)
 
-    if value == "access" do
-      query
-      |> where(
-        [a, informed_entity: ie],
-        fragment(
-          ~s(\(?\) && \(?\)),
-          ie.activities,
-          ^facility_activities
-        )
-      )
-    else
-      query
-      |> where([a, informed_entity: ie], ie.route_type == ^value)
-    end
+    query
+    |> distinct(true)
+    |> where(
+      [a, informed_entity: ie],
+      ie.route_type in ^direct_routes or
+        ("access" in ^access_routes and a.effect_name in ^access_effect_names)
+    )
+  end
+
+  def service_type_filter(query, %Filter{value: value} = filter, opts) do
+    service_type_filter(query, %{filter | value: [value]}, opts)
+  end
+
+  def effects_filter(query, _filter, _opts) do
+    query
+  end
+
+  def routes_filter(query, _filter, _opts) do
+    query
   end
 
   @spec multi_column_search_filter(Ecto.Query.t(), Flop.Filter.t(), list()) :: Ecto.Query.t()
