@@ -1,26 +1,41 @@
 defmodule AlertsUIWeb.DownloadHistoryControllerTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase, async: false
+  import AlertsUI.Support.Factory
 
-  import Test.Support.Helpers
-
-  alias Oidcc.{ClientContext, Token}
+  alias AlertsUI.Alerts
   alias Plug.Conn
 
   describe "GET /download_history" do
-    setup do
-      reassign_env(:ueberauth_oidcc, :providers, %{
-        keycloak: %{
-          client_id: "FAKE_KEYCLOAK_CLIENT_ID",
-          client_secret: "FAKE_KEYCLOAK_CLIENT_SECRET"
-        }
-      })
+    @tag :logged_in_user
+    test "when authorized, returns 200 with file", %{conn: conn} do
+      user =
+        insert(:user, %{
+          first_name: "Herbert",
+          last_name: "Pocket"
+        })
+
+      Alerts.create_or_update_alert(
+        build(
+          :alert_map,
+          %{alert_id: "1234567", duration_certainty: :KNOWN}
+        ),
+        user
+      )
+
+      conn =
+        conn
+        |> Conn.put_req_header("authorization", "Bearer FAKE_TOKEN")
+        |> get("/download_history?alert_id=1234567")
+
+      assert conn.status == 200
+      assert conn.resp_body =~ "1234567"
     end
 
     test "when unauthenticated, redirects", %{
       conn: conn
     } do
-      conn = get(conn, "/download_history?1")
+      conn = get(conn, "/download_history?alert_id=1")
       assert response(conn, 302) =~ ~s(You are being <a href=\"/auth/keycloak\">redirected</a>.)
     end
   end

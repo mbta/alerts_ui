@@ -8,7 +8,7 @@ defmodule AlertsUI.AlertHistory do
   alias AlertsUI.Alerts
   alias AlertsUI.Models.SeverityLevel
 
-  @keys [
+  @history_keys [
     :alert_id,
     :version,
     :created_datetime,
@@ -44,7 +44,7 @@ defmodule AlertsUI.AlertHistory do
     :reminders
   ]
 
-  defstruct @keys
+  defstruct @history_keys
 
   @type t :: %__MODULE__{
           alert_id: String.t(),
@@ -98,7 +98,7 @@ defmodule AlertsUI.AlertHistory do
   @spec build_history({map(), integer()}) :: struct()
   def build_history({alert_map, index}) do
     recurring? = recurring?(alert_map.recurrence_days)
-    # TODO check recurrence end time
+
     %__MODULE__{
       alert_id: alert_map.alert_id,
       version: index + 1,
@@ -115,12 +115,14 @@ defmodule AlertsUI.AlertHistory do
       effect_start: format_datetime(alert_map.active_period_start, @without_seconds),
       effect_end: effect_end(alert_map.duration_certainty, alert_map.active_period_end),
       recurrence_days:
-        (alert_map.recurrence_days || []) |> Enum.map_join(", ", &String.capitalize/1),
+        (alert_map.recurrence_days || []) |> Enum.map_join("|", &String.capitalize/1),
       recurrence_start_time: get_recurrence_time(recurring?, alert_map.active_period_start),
-      recurrence_end_time: get_recurrence_time(recurring?, alert_map.active_period_end),
+      recurrence_end_time: nil,
       notification_start: format_datetime(alert_map.notification_period_start, @without_seconds),
       notification_end: format_datetime(alert_map.notification_period_end, @without_seconds),
       duration_certainty: alert_map.duration_certainty,
+      cause: alert_map.cause,
+      cause_detail: alert_map.cause_detail,
       severity_code: alert_map.severity,
       severity_level: alert_map.severity_level,
       severity_name: SeverityLevel.severity_description_by_severity(alert_map.severity),
@@ -145,7 +147,7 @@ defmodule AlertsUI.AlertHistory do
       |> Enum.map(fn history ->
         history = Map.from_struct(history)
 
-        Enum.map(@keys, fn key ->
+        Enum.map(@history_keys, fn key ->
           {key, history[key]}
         end)
         |> Keyword.values()
@@ -156,7 +158,7 @@ defmodule AlertsUI.AlertHistory do
   end
 
   defp build_headers do
-    @keys
+    @history_keys
     |> Enum.map_join(",", fn key ->
       key |> Atom.to_string() |> String.capitalize() |> String.replace("_", " ")
     end)
@@ -178,7 +180,7 @@ defmodule AlertsUI.AlertHistory do
     end)
     |> Enum.reverse()
     |> tl
-    |> Enum.map(&Map.new(&1, fn {k, v} -> {String.to_atom(k), v} end))
+    |> Enum.map(&Map.new(&1, fn {k, v} -> {String.to_existing_atom(k), v} end))
   end
 
   defp effect_end("ESTIMATED", _), do: "later today"

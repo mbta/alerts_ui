@@ -279,7 +279,9 @@ defmodule AlertsUI.Alerts do
     |> Repo.one()
   end
 
-  @spec get_all_versions(String.t()) :: PaperTrail.Version.t()
+  @spec get_all_versions(String.t() | nil) :: PaperTrail.Version.t()
+  def get_all_versions(nil), do: []
+
   def get_all_versions(alert_uuid) do
     from(
       version in PaperTrail.Version,
@@ -294,7 +296,7 @@ defmodule AlertsUI.Alerts do
 
   def get_originator_string(version) do
     # returns user's name linked to the PaperTrail version if available
-    # otherwise returns the origin string from the version
+    # otherwise returns the origin string from the version if available
 
     originator_id =
       Map.get(version, :originator_id) ||

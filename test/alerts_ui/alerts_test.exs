@@ -1046,10 +1046,13 @@ defmodule AlertsUI.AlertsTest do
     test "returns alert with matching alert_id" do
       uuid = Ecto.UUID.generate()
 
-      expected_alert =
-        insert(:alert, %{id: uuid, header_text: "this is the right alert", alert_id: "123"})
+      insert(:alert, %{id: uuid, header_text: "this is the right alert", alert_id: "123"})
 
       assert Alerts.get_uuid_by_alert_id("123") == uuid
+    end
+
+    test "returns nil if alert not found" do
+      assert Alerts.get_uuid_by_alert_id("123") == nil
     end
   end
 
