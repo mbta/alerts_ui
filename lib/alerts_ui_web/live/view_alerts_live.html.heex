@@ -43,15 +43,6 @@
     <span class="w-[100px]" />
   </div>
 
-  <AlertsUIWeb.ReviewModal.review_modal
-    :if={Map.get(assigns, :selected_alert_data, nil)}
-    alert_data={@selected_alert_data}
-    alert_id={@selected_alert_id}
-    cancel_alert={true}
-    cancel_event_name="close_details"
-    target_id="#view_alerts_live_view"
-  />
-
   <div class="min-h-0 shrink overflow-y-auto">
     <Flop.Phoenix.table
       items={@alerts}
@@ -196,4 +187,13 @@
       </:action>
     </Flop.Phoenix.table>
   </div>
+
+  <AlertsUIWeb.ReviewModal.review_modal
+    :if={Map.get(assigns, :selected_alert_data, nil)}
+    alert_data={@selected_alert_data}
+    alert_id={@selected_alert_id}
+    cancel_alert={true}
+    cancel_event_name="close_details"
+    target_id="#view_alerts_live_view"
+  />
 </div>
