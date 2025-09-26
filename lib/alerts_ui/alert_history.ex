@@ -82,8 +82,8 @@ defmodule AlertsUI.AlertHistory do
           reminders: String.t() | nil
         }
 
-  @with_seconds "%Y-%m-%dT%H:%M:%S"
-  @without_seconds "%Y-%m-%dT%H:%M"
+  @with_seconds "%M:%S"
+  @without_seconds "%M"
 
   @spec alert_history(String.t()) :: [t()]
   def alert_history(alert_id) do
@@ -104,7 +104,7 @@ defmodule AlertsUI.AlertHistory do
       version: index + 1,
       created_datetime: format_datetime(alert_map.created_at, @with_seconds),
       closed: closed?(alert_map.closed_timestamp),
-      last_modified_by: nil,
+      last_modified_by: Alerts.get_originator_string(alert_map),
       last_modified_datetime: format_datetime(alert_map.updated_at, @with_seconds),
       service_type: nil,
       effect_name: alert_map.effect_name,
@@ -113,7 +113,7 @@ defmodule AlertsUI.AlertHistory do
       affected_entities: nil,
       recurrence: recurring?,
       effect_start: format_datetime(alert_map.active_period_start, @without_seconds),
-      effect_end: format_datetime(alert_map.active_period_end, @without_seconds),
+      effect_end: effect_end(alert_map.duration_certainty, alert_map.active_period_end),
       recurrence_days:
         (alert_map.recurrence_days || []) |> Enum.map_join(", ", &String.capitalize/1),
       recurrence_start_time: get_recurrence_time(recurring?, alert_map.active_period_start),
@@ -123,14 +123,14 @@ defmodule AlertsUI.AlertHistory do
       duration_certainty: alert_map.duration_certainty,
       severity_code: alert_map.severity,
       severity_level: alert_map.severity_level,
-      severity_name: SeverityLevel.severity_level_by_severity(alert_map.severity),
+      severity_name: SeverityLevel.severity_description_by_severity(alert_map.severity),
       main_message: alert_map.header_text,
       supporting_information: alert_map.description_text || "",
       url: alert_map.url || "",
       image_url: alert_map.image_url || "",
-      image_alternative_text: alert_map.image_alternative_text,
+      image_alternative_text: alert_map.image_alternative_text || "",
       set_as_website_banner: !is_nil(alert_map.banner_text),
-      website_banner_text: alert_map.banner_text,
+      website_banner_text: alert_map.banner_text || "",
       reminders: nil
     }
   end
@@ -177,6 +177,13 @@ defmodule AlertsUI.AlertHistory do
     |> Enum.map(&Map.new(&1, fn {k, v} -> {String.to_atom(k), v} end))
   end
 
+  defp effect_end("ESTIMATED", _), do: "later today"
+  defp effect_end("UNKNOWN", _), do: "further notice"
+
+  defp effect_end("KNOWN", active_period_end) do
+    format_datetime(active_period_end, @without_seconds)
+  end
+
   defp closed?(nil), do: false
   defp closed?(_), do: true
 
@@ -184,7 +191,7 @@ defmodule AlertsUI.AlertHistory do
   defp recurring?(_), do: false
 
   def get_recurrence_time(true, datetime) do
-    format_time(datetime, @without_seconds)
+    format_time(datetime, "%-H:" <> @without_seconds)
   end
 
   def get_recurrence_time(false, _), do: ""
@@ -196,7 +203,7 @@ defmodule AlertsUI.AlertHistory do
 
     utc_datetime
     |> DateTime.shift_zone!("America/New_York")
-    |> Calendar.strftime(format)
+    |> Calendar.strftime("%Y-%m-%dT%H:" <> format)
   end
 
   defp format_time(datetime_string, format) do

@@ -420,7 +420,7 @@ defmodule AlertsUIWeb.ReviewModal do
             href={~p"/download_history?alert_id=#{@alert_id}"}
             target="_blank"
           >
-            <.icon name="hero-document-arrow-down-solid" class="w-4 h-4" /> Download history (.csv)
+            <.icon name="hero-document-arrow-down-solid" class="w-4 h-4" /> Download history
           </.link>
         </div>
       </div>

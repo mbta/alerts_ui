@@ -4,6 +4,7 @@ defmodule AlertsUI.Alerts do
   """
   import Ecto.Changeset
   import Ecto.Query
+  alias AlertsUI.DBContexts.Users
   alias AlertsUI.Models.{Alert, User}
   alias AlertsUI.Repo
   require Logger
@@ -286,6 +287,22 @@ defmodule AlertsUI.Alerts do
       order_by: [asc: :inserted_at]
     )
     |> Repo.all()
+  end
+
+  @spec get_originator_string(PaperTrail.Version | map() | nil) :: String.t()
+  def get_originator_string(nil), do: ""
+
+  def get_originator_string(version) do
+    # returns user's name linked to the PaperTrail version if available
+    # otherwise returns the origin string from the version
+    originator_id = Map.get(version, :originator_id) || Map.get(version, :user_id)
+
+    if originator_id do
+      user = Users.get_user!(originator_id)
+      "#{Map.get(user, :first_name, "")} #{Map.get(user, :last_name, "")}"
+    else
+      Map.get(version, :origin, "")
+    end
   end
 
   @spec list_all_paginated(map()) :: {[any()], Flop.Meta.t()}
