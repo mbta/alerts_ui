@@ -295,7 +295,10 @@ defmodule AlertsUI.Alerts do
   def get_originator_string(version) do
     # returns user's name linked to the PaperTrail version if available
     # otherwise returns the origin string from the version
-    originator_id = Map.get(version, :originator_id) || Map.get(version, :user_id)
+
+    originator_id =
+      Map.get(version, :originator_id) ||
+        version |> Map.get(:item_changes, %{}) |> Map.get("user_id")
 
     if originator_id do
       user = Users.get_user!(originator_id)

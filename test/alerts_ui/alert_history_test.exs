@@ -65,14 +65,11 @@ defmodule AlertsUIWeb.AlertHistoryTest do
 
       Alerts.create_or_update_alert(original_alert_map, user)
 
-      :timer.sleep(1000)
-      alert = Alerts.get_by_alert_id("123")
-      Alerts.create_or_update_alert(new_params_one, user, alert)
+      Alerts.create_or_update_alert(new_params_one, user, Alerts.get_by_alert_id("123"))
 
-      # Alerts.close(Alerts.get_by_alert_id("123"), "closed")
+      Alerts.close(Alerts.get_by_alert_id("123"), "closed", ~U[2025-09-26 16:14:00Z])
 
-      # [result_1, result_2, result_3] = AlertHistory.alert_history("123")
-      [result_1, result_2] = AlertHistory.alert_history("123")
+      [result_1, result_2, result_3] = AlertHistory.alert_history("123")
 
       assert %{
                alert_id: "123",
@@ -137,6 +134,38 @@ defmodule AlertsUIWeb.AlertHistoryTest do
                website_banner_text: "the banner text",
                reminders: nil
              } = result_2
+
+      assert %{
+               alert_id: "123",
+               version: 3,
+               closed: true,
+               last_modified_by: "closed",
+               service_type: nil,
+               effect_name: "Snow Route",
+               effect: "DETOUR",
+               effect_detail: "SNOW_ROUTE",
+               affected_entities: nil,
+               recurrence: true,
+               effect_start: "2025-09-25T08:11",
+               effect_end: "2025-09-26T12:14",
+               recurrence_days: "Thursday, Friday",
+               recurrence_start_time: "8:11",
+               recurrence_end_time: "12:14",
+               notification_start: "2025-09-25T07:11",
+               notification_end: "2025-09-26T12:14",
+               duration_certainty: "KNOWN",
+               severity_code: 1,
+               severity_level: "INFO",
+               severity_name: "information",
+               main_message: "old header text",
+               supporting_information: "its snowing",
+               url: "http://example.com",
+               image_url: "http://example.com/image.jpg",
+               image_alternative_text: "example image",
+               set_as_website_banner: true,
+               website_banner_text: "the banner text",
+               reminders: nil
+             } = result_3
     end
   end
 end

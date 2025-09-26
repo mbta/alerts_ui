@@ -98,7 +98,7 @@ defmodule AlertsUI.AlertHistory do
   @spec build_history({map(), integer()}) :: struct()
   def build_history({alert_map, index}) do
     recurring? = recurring?(alert_map.recurrence_days)
-
+    # TODO check recurrence end time
     %__MODULE__{
       alert_id: alert_map.alert_id,
       version: index + 1,
@@ -165,10 +165,14 @@ defmodule AlertsUI.AlertHistory do
   @spec build_alert_maps(PaperTrail.Version.t()) :: [map()]
   defp build_alert_maps(versions) do
     # takes in a list of versions
+    # pares those down to the changes and the origin information
     # returns a list of alert maps with atom keys
     # starting with the oldest and ending with the newest
+
     versions
-    |> Enum.map(& &1.item_changes)
+    |> Enum.map(
+      &Map.merge(&1.item_changes, %{"originator_id" => &1.originator_id, "origin" => &1.origin})
+    )
     |> Enum.reduce([%{}], fn version, acc ->
       [Map.merge(hd(acc), version) | acc]
     end)
