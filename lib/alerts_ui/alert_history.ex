@@ -90,7 +90,7 @@ defmodule AlertsUI.AlertHistory do
     alert_id
     |> Alerts.get_uuid_by_alert_id()
     |> Alerts.get_all_versions()
-    |> build_alert_maps()
+    |> build_alert_maps(alert_id)
     |> Enum.with_index()
     |> Enum.map(&build_history(&1))
   end
@@ -164,16 +164,20 @@ defmodule AlertsUI.AlertHistory do
     end)
   end
 
-  @spec build_alert_maps(PaperTrail.Version.t()) :: [map()]
-  defp build_alert_maps(versions) do
+  @spec build_alert_maps(PaperTrail.Version.t(), String.t()) :: [map()]
+  defp build_alert_maps(versions, alert_id) do
     # takes in a list of versions
-    # pares those down to the changes and the origin information
+    # pares those down to the changes, alert_id, and the origin information
     # returns a list of alert maps with atom keys
     # starting with the oldest and ending with the newest
 
     versions
     |> Enum.map(
-      &Map.merge(&1.item_changes, %{"originator_id" => &1.originator_id, "origin" => &1.origin})
+      &Map.merge(&1.item_changes, %{
+        "originator_id" => &1.originator_id,
+        "origin" => &1.origin,
+        "alert_id" => alert_id
+      })
     )
     |> Enum.reduce([%{}], fn version, acc ->
       [Map.merge(hd(acc), version) | acc]
@@ -196,11 +200,11 @@ defmodule AlertsUI.AlertHistory do
   defp recurring?([_ | _]), do: true
   defp recurring?(_), do: false
 
-  def get_recurrence_time(true, datetime) do
+  defp get_recurrence_time(true, datetime) do
     format_time(datetime, "%-H:" <> @without_seconds)
   end
 
-  def get_recurrence_time(false, _), do: ""
+  defp get_recurrence_time(false, _), do: ""
 
   defp format_datetime(nil, _format), do: ""
 
