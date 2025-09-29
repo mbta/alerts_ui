@@ -274,21 +274,33 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       today = @todays_date |> Date.to_string()
       tomorrow = Date.add(@todays_date, 1)
 
-      with_mock(SchedulesRepo,
-        by_route_ids: fn
-          # ISO date used when date is selected
-          ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^today] ->
-            [@schedule, @schedule_2]
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _types -> [@route] end,
+           get: fn _id -> @route end
+         ]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn
+             # ISO date used when date is selected
+             ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^today] ->
+               [@schedule, @schedule_2]
 
-          # Date struct used in all trips- consider refactoring for consistency
-          ["CR-Worcester"], [stop_sequences: [:first, :last], date: @todays_date] ->
-            [@schedule, @schedule_2]
+             # Date struct used in all trips- consider refactoring for consistency
+             ["CR-Worcester"], [stop_sequences: [:first, :last], date: @todays_date] ->
+               [@schedule, @schedule_2]
 
-          ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^tomorrow] ->
-            [@schedule_3, @schedule_4]
-        end,
-        end_of_rating: fn -> Date.add(@todays_date, 1) end
-      ) do
+             ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^tomorrow] ->
+               [@schedule_3, @schedule_4]
+           end,
+           end_of_rating: fn -> Date.add(@todays_date, 1) end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction -> [@stop] end
+         ]}
+      ]) do
         {:ok, view, _html} =
           live_isolated_component(AffectedService, %{
             @assigns
