@@ -198,8 +198,10 @@ defmodule AlertsUIWeb.ReviewModal do
               <div>
                 <p class="text-text-secondary">
                   {String.split(@alert_data.image_url, "/") |> List.last()}
-                  <span :if={Map.get(@alert_data, :image_size, nil)}>
-                    ({@alert_data.image_size["width"]} x {@alert_data.image_size["height"]})
+                  <span :if={Map.get(@alert_data, :image_preview_size, nil)}>
+                    ({@alert_data.image_preview_size["width"]} x {@alert_data.image_preview_size[
+                      "height"
+                    ]})
                   </span>
                   <a
                     target="_blank"

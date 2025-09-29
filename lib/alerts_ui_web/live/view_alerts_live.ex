@@ -176,6 +176,19 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     {:noreply, assign(socket, selected_alert_data: nil, selected_alert_id: nil)}
   end
 
+  @impl true
+  def handle_event(
+        "image-preview-size",
+        %{"id" => "size-of-image", "image_preview_size" => image_preview_size},
+        socket
+      ) do
+    {:noreply,
+     assign(socket,
+       selected_alert_data:
+         Map.put(socket.assigns.selected_alert_data, :image_preview_size, image_preview_size)
+     )}
+  end
+
   def lookup_end_time_order_fields_by_params(%{
         "filters" => %{"3" => %{"field" => "timeline", "value" => "past"}}
       }),
