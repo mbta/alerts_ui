@@ -717,7 +717,6 @@ defmodule AlertsUIWeb.SharedComponents do
          "opacity-100 translate-y-0 sm:scale-100"}
     )
     |> JS.add_class("overflow-hidden", to: "body")
-    |> JS.focus_first(to: "##{id}-content")
   end
 
   def hide_modal(js \\ %JS{}, id) do
