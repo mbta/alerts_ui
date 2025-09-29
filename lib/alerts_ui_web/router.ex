@@ -55,6 +55,7 @@ defmodule AlertsUIWeb.Router do
       live("/alerts", ViewAlertsLive)
       live("/alerts/new", CreateAlertLive, :new)
       live("/alerts/edit", CreateAlertLive, :edit)
+      live("/alerts/duplicate", CreateAlertLive, :duplicate)
 
       # "Hidden" pages, except still accessible without the feature flag
       # (Will need to fix before launch)

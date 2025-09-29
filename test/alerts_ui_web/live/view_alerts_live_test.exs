@@ -851,6 +851,58 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         assert Alerts.get_by_alert_id("345").closed_timestamp !== nil
       end
     end
+
+    @tag :logged_in_user
+    test "clicking edit alert opens editing workflow", %{conn: conn} do
+      with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
+        insert(:alert, %{
+          alert_id: "345",
+          active_period: [
+            build(:active_period, %{start: ~U[2023-10-12 00:01:00Z]}),
+            build(:active_period, %{start: ~U[2023-10-13 00:01:00Z]})
+          ],
+          active_period_start: ~U[2023-10-12 00:01:00Z],
+          duration_certainty: :UNKNOWN,
+          header_text: "this is the third alert",
+          effect_detail: "DETOUR",
+          original_route_selections: ["1", "2"]
+        })
+
+        {:ok, view, _html} = live(conn, "/alerts")
+
+        view
+        |> element("#edit-button-345")
+        |> render_click()
+
+        assert_redirect(view, "/alerts/edit?alert_id=345")
+      end
+    end
+
+    @tag :logged_in_user
+    test "clicking duplicate alert opens duplicating workflow", %{conn: conn} do
+      with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
+        insert(:alert, %{
+          alert_id: "345",
+          active_period: [
+            build(:active_period, %{start: ~U[2023-10-12 00:01:00Z]}),
+            build(:active_period, %{start: ~U[2023-10-13 00:01:00Z]})
+          ],
+          active_period_start: ~U[2023-10-12 00:01:00Z],
+          duration_certainty: :UNKNOWN,
+          header_text: "this is the third alert",
+          effect_detail: "DETOUR",
+          original_route_selections: ["1", "2"]
+        })
+
+        {:ok, view, _html} = live(conn, "/alerts")
+
+        view
+        |> element("#duplicate-button-345")
+        |> render_click()
+
+        assert_redirect(view, "/alerts/duplicate?alert_id=345")
+      end
+    end
   end
 
   describe "start and end times" do

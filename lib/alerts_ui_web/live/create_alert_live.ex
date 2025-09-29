@@ -392,9 +392,6 @@ defmodule AlertsUIWeb.CreateAlertLive do
       else
         formatted_errors =
           errors
-          |> Enum.filter(fn {title, {_, _}} ->
-            title not in [:active_period_start_date, :active_period_end_date]
-          end)
           |> Enum.map(fn {_title, {message, _error}} -> "#{message}" end)
           |> Enum.uniq()
           |> Enum.join(";")
@@ -412,6 +409,9 @@ defmodule AlertsUIWeb.CreateAlertLive do
   defp create_alert(socket) do
     current_user = socket.assigns.current_user
 
+    form_type =
+      socket.assigns.form_type
+
     existing_user = Users.get_by_keycloak_id(current_user.keycloak_id) || %User{}
 
     {:ok, user} = Users.create_or_update_user(Map.from_struct(current_user), existing_user)
@@ -421,7 +421,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
       |> AlertBuilder.build_alert(socket.assigns.combination)
 
     existing_alert =
-      if is_nil(socket.assigns.alert_id) do
+      if is_nil(socket.assigns.alert_id) || form_type == :duplicating do
         %Alert{}
       else
         Alerts.get_by_alert_id(socket.assigns.alert_id)
@@ -436,11 +436,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
           |> Alerts.get_by_id()
           |> Map.get(:alert_id)
 
-        alert_descriptor = if is_nil(socket.assigns.alert_id), do: "New alert #", else: "Alert #"
-        created_or_updated = if is_nil(socket.assigns.alert_id), do: " created", else: " updated"
-
         socket
-        |> put_flash(:info, alert_descriptor <> alert_id <> created_or_updated)
+        |> put_flash(:info, flash_text(socket.assigns.alert_id, alert_id, form_type))
         |> redirect(to: "/")
 
       {:error, result} ->
@@ -452,6 +449,13 @@ defmodule AlertsUIWeb.CreateAlertLive do
         display_errors(socket, errors)
     end
   end
+
+  defp flash_text(nil, alert_id, _form_type), do: "New alert ##{alert_id} created"
+
+  defp flash_text(assigns_alert_id, alert_id, :duplicating),
+    do: "Alert ##{alert_id} duplicated from ##{assigns_alert_id}"
+
+  defp flash_text(_assigns_alert_id, alert_id, _form_type), do: "Alert ##{alert_id} updated"
 
   defp display_errors(socket, errors) do
     [

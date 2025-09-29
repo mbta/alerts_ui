@@ -292,6 +292,20 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
   def validate_start_is_after_now(
         changeset,
         current_time,
+        %{"alert_timing" => :"one-time"} = time_range,
+        editing
+      ) do
+    validate_start_is_after_now(
+      changeset,
+      current_time,
+      %{time_range | "alert_timing" => "one-time"},
+      editing
+    )
+  end
+
+  def validate_start_is_after_now(
+        changeset,
+        current_time,
         %{"alert_timing" => "one-time"} = time_range,
         _editing
       ) do
