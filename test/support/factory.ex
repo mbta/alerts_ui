@@ -49,9 +49,6 @@ defmodule AlertsUI.Support.Factory do
 
   def alert_map_factory do
     %{
-      alert_id: "123",
-      header_text: "a",
-      description_text: "b",
       active_period: [
         %{
           start: ~U[2023-10-20 16:15:00Z],
@@ -59,7 +56,11 @@ defmodule AlertsUI.Support.Factory do
         }
       ],
       active_period_start: ~U[2023-10-20 00:01:00Z],
+      alert_id: "123",
+      description_text: "b",
+      header_text: "a",
       informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}],
+      severity: 3,
       user: build(:user)
     }
   end
