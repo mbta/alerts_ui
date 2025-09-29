@@ -49,7 +49,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationText do
   defp start_text(_, nil), do: ""
 
   defp start_text(_specifier, start_dt) do
-    Timex.format!(start_dt, "{WDshort} {Mshort} {0D}, {YYYY} @ {h12}:{0m} {AM}")
+    Calendar.strftime(start_dt, "%a %b %-d, %Y @ %-I:%M %p")
   end
 
   defp end_text(:until_further_notice, end_dt), do: end_text("until_further_notice", end_dt)
@@ -69,7 +69,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationText do
   defp end_text(_, nil), do: ""
 
   defp end_text(_, end_dt) do
-    Timex.format!(end_dt, "{WDshort} {Mshort} {0D}, {YYYY} @ {h12}:{0m} {AM}")
+    Calendar.strftime(end_dt, "%a %b %-d, %Y @ %-I:%M %p")
   end
 
   defp duration(:until_further_notice, _, _), do: "(indefinite)"
