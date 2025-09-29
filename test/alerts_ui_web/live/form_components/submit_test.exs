@@ -297,7 +297,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
                    }
                  ],
                  draft: false,
-                 notification_period_start: nil,
+                 notification_period_start: _,
                  recurrence_days: [],
                  original_route_selections: ["Blue"],
                  created_at: _,

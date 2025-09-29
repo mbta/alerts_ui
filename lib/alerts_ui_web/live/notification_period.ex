@@ -25,7 +25,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
   embedded_schema do
     field :notification_specifier, Ecto.Enum,
       values: @notification_values,
-      default: :same_as_effect_period
+      default: :now
 
     field :notification_period_start, :naive_datetime
     field :notification_period_start_date, :date
