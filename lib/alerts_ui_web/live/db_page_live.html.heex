@@ -1,6 +1,8 @@
 <div id="db_page_live_view" class="p-16">
   <.h1>DB</.h1>
-
+  <.button_primary class="my-8 !bg-danger text-white" phx-click="erase_db">
+    🤠 Truncate DB (dangerous) 🤠
+  </.button_primary>
   <.pagination meta={@meta} />
 
   <table>

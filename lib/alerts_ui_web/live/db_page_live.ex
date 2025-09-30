@@ -5,6 +5,7 @@ defmodule AlertsUIWeb.DBPageLive do
 
   use AlertsUIWeb, :live_view
   alias AlertsUI.Alerts
+  alias Ecto.Adapters.SQL
 
   @ten_seconds_in_ms 10_000
 
@@ -25,6 +26,12 @@ defmodule AlertsUIWeb.DBPageLive do
     with {alerts, meta} <- Alerts.list_all_paginated_by_creation_date(socket.assigns.meta.flop) do
       {:noreply, assign(socket, meta: meta, alerts: alerts)}
     end
+  end
+
+  @impl true
+  def handle_event("erase_db", _params, socket) do
+    SQL.query(AlertsUI.Repo, "TRUNCATE alerts CASCADE;", [], timeout: :infinity)
+    {:noreply, socket}
   end
 
   @impl true
