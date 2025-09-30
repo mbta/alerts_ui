@@ -59,6 +59,13 @@ defmodule AlertsUIWeb.AuthController do
     UserAuth.log_out_user(conn)
   end
 
+  @spec request(Conn.t(), map()) :: Conn.t()
+  def request(conn, _params) do
+    conn
+    |> redirect("/not-found")
+    |> halt()
+  end
+
   # Parse the user's role from the access token provided by Keycloak
   @spec parse_role(map()) :: User.role()
   defp parse_role(%{"resource_access" => %{"alerts-ui" => %{"roles" => roles}}}),
