@@ -751,7 +751,9 @@ defmodule AlertsUI.AlertBuilder do
       (stop.child_ids -- excluded_stops_from_facility_properties(properties)) |> Enum.uniq()
 
     routes_from_children =
-      Enum.flat_map(child_stop_ids, &RoutesRepo.by_stop/1)
+      child_stop_ids
+      |> Enum.flat_map(&RoutesRepo.by_stop/1)
+      |> Enum.filter(&(&1.description !== :rail_replacement_bus))
 
     # use route_ids from parent stop if none are associated with children
     route_ids =
