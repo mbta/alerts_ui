@@ -208,7 +208,8 @@ defmodule AlertsUI.Models.Alert do
     |> cast_assoc(:informed_entity, required: true, with: &InformedEntity.changeset/2)
     |> cast_assoc(:reminder_times, required: false, with: &ReminderTime.changeset/2)
     |> validate_change(:recurrence_days, fn :recurrence_days, recurrence_days ->
-      active_period_start = Map.get(params, :active_period_start)
+      active_period_start =
+        Map.get(params, :active_period_start) |> DateTime.shift_zone!("America/New_York")
 
       cond do
         Enum.empty?(recurrence_days) ->
