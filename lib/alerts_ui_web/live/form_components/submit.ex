@@ -32,9 +32,15 @@ defmodule AlertsUIWeb.FormComponents.Submit do
   end
 
   @impl true
-  def handle_event("image-size", %{"id" => "size-of-image", "image_size" => image_size}, socket) do
+  def handle_event(
+        "image-preview-size",
+        %{"id" => "size-of-image", "image_preview_size" => image_preview_size},
+        socket
+      ) do
     {:noreply,
-     assign(socket, alert_data: Map.put(socket.assigns.alert_data, :image_size, image_size))}
+     assign(socket,
+       alert_data: Map.put(socket.assigns.alert_data, :image_preview_size, image_preview_size)
+     )}
   end
 
   @impl true
