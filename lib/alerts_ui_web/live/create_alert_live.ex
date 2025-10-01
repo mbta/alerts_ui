@@ -111,7 +111,6 @@ defmodule AlertsUIWeb.CreateAlertLive do
         selected_stops: [],
         selected_schedules: [],
         selected_facility: nil,
-        available_facilities: [],
         alert_uuid: nil,
         alert_id: alert_id,
         form_type: form_type,

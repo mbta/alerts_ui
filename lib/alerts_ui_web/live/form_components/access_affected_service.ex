@@ -30,15 +30,6 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
   def mount(socket) do
     changeset = build_changeset(%__MODULE__{}, %{})
 
-    {_result, error_changeset} =
-      apply_action(
-        changeset
-        |> validate_required(@required_fields),
-        :validate
-      )
-
-    send(self(), {:add_errors, ErrorFormatter.parse_field_errors(error_changeset), __MODULE__})
-
     {:ok,
      assign(socket, %{
        form: to_form(changeset),
@@ -86,9 +77,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
         facility_types: facility_types,
         effect_name: effect_name
       )
-      |> assign_async([:available_facilities], fn ->
-        {:ok, %{available_facilities: CreateAlertLive.get_facilities(facility_types)}}
-      end)
+      |> assign_facilities(facility_types)
 
     {:ok, socket}
   end
@@ -128,12 +117,23 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
       socket
       |> assign(assigns)
       |> assign(effect_name: effect_name, facility_types: facility_types)
-      |> assign_async([:available_facilities], fn ->
-        {:ok, %{available_facilities: CreateAlertLive.get_facilities(facility_types)}}
-      end)
+      |> assign_facilities(facility_types)
 
     {:ok, socket}
   end
+
+  # Only assign facilities if that map is empty! Otherwise, we've already assigned them
+  defp assign_facilities(
+         %{assigns: %{available_facilities: available_facilities}} = socket,
+         facility_types
+       )
+       when available_facilities == %{} do
+    assign_async(socket, :available_facilities, fn ->
+      {:ok, %{available_facilities: CreateAlertLive.get_facilities(facility_types)}}
+    end)
+  end
+
+  defp assign_facilities(socket, _facility_types), do: socket
 
   @impl true
   def handle_event(
@@ -150,12 +150,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             %{facilities: []}
 
         selected_facility =
-          if available_facilities do
-            available_facilities
-            |> Enum.find(&(&1.id == access_affected_service["facility_id"]))
-          else
-            nil
-          end
+          Enum.find(available_facilities, &(&1.id == access_affected_service["facility_id"]))
 
         send(self(), {:add_errors, [], __MODULE__})
         send(self(), {:section_completed, changeset})
@@ -171,7 +166,12 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
       |> Map.put(:action, :validate)
       |> to_form()
 
-    {:noreply, assign(socket, %{form: form})}
+    {:noreply, assign(socket, form: form)}
+  end
+
+  @impl true
+  def handle_event("validate", _, socket) do
+    {:noreply, socket}
   end
 
   @impl true
@@ -225,26 +225,20 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
 
   @impl true
   def render(assigns) do
-    params = assigns.form.params
-
-    stops =
-      if Helpers.async_available?(assigns, :available_facilities) do
-        assigns.available_facilities.result.stops
-      else
-        []
-      end
-
+    # Stop filter
     stop_search_term = assigns.form[:stop_search_term].value
-
     stop_id = assigns.form[:stop_id].value || ""
 
-    stop_id_options =
+    stops = Map.get(assigns.available_facilities, :result) || %{}
+
+    modal_stop_id_options =
       SelectFormatter.formatted_select_options(%SelectFormatter{
-        options: stops,
+        options: Map.get(stops, :stops) || [],
         search_term: stop_search_term,
         values_to_keep: stop_id |> List.wrap()
       })
 
+    # Facility selector
     facility_search_term = assigns.form[:facility_search_term].value
     facility_id = assigns.form[:facility_id].value || ""
 
@@ -256,7 +250,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             &filter_facility_by_stop_ids(
               &1,
               assigns.stop_id_filter_value,
-              params["facility_id"]
+              facility_id
             )
           )
 
@@ -272,7 +266,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
 
     assigns =
       assign(assigns,
-        stop_id_options: stop_id_options,
+        modal_stop_id_options: modal_stop_id_options,
         facility_id_options: facility_id_options
       )
 
@@ -302,26 +296,26 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
               label="Stops"
               field={@form[:stop_id]}
               filter_field={@form[:stop_search_term]}
-              options={@stop_id_options}
+              options={@modal_stop_id_options}
               loading={@available_facilities.loading}
-              no_results={Enum.empty?(@stop_id_options)}
+              no_results={Enum.empty?(@modal_stop_id_options)}
               prompt="All Stops"
               multiple={false}
               class="h-[32rem]"
             />
           </.modal>
           <.filtered_select
-            label="Facilities"
+            class="w-[25%] h-[32rem]"
             field={@form[:facility_id]}
             filter_field={@form[:facility_search_term]}
+            label="Facilities"
+            loading={Map.get(@available_facilities, :loading, true)}
+            modal_filter_active={filter_active?(@stop_id_filter_value)}
             modal_filter_id="stops-filter-modal"
             modal_filter_title={"Filter: #{@filter_title_value}"}
-            modal_filter_active={filter_active?(@stop_id_filter_value)}
-            options={@facility_id_options}
-            loading={@available_facilities.loading}
-            no_results={Enum.empty?(@facility_id_options)}
-            class="w-[25%] h-[32rem]"
             multiple={false}
+            no_results={Enum.empty?(@facility_id_options)}
+            options={@facility_id_options}
             target_id="#service_form"
           />
         </fieldset>
