@@ -156,9 +156,9 @@ defmodule AlertsUI.Alerts do
       alert
       |> Ecto.build_assoc(:active_period)
       |> cast(active_period_params, [:start, :end])
-      |> PaperTrail.insert(origin: "(Updated automatically)")
+      |> Repo.insert()
       |> case do
-        {:ok, %{model: alert}} -> {:ok, alert}
+        {:ok, active_period} -> {:ok, active_period}
         {:error, result} -> {:error, result}
       end
     end)
