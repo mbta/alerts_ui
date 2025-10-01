@@ -114,6 +114,50 @@ defmodule AlertsUI.Models.AlertTest do
       assert changeset.valid?
     end
 
+    test "create with improper recurrence days is not valid" do
+      params = %{
+        alert_id: "123",
+        header_text: "a",
+        description_text: "b",
+        active_period: [
+          %{
+            start: ~U[2025-10-01 01:00:38Z],
+            end: ~U[2025-10-01 05:45:38Z]
+          }
+        ],
+        active_period_start: ~U[2025-10-01 01:00:38Z],
+        recurrence_days: ["friday"],
+        informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}],
+        current_time: ~U[2023-10-19 18:45:38.571154Z],
+        user: build(:user)
+      }
+
+      changeset = Alert.changeset(%Alert{}, params)
+      refute changeset.valid?
+    end
+
+    test "create with correct recurrence days is valid" do
+      params = %{
+        alert_id: "123",
+        header_text: "a",
+        description_text: "b",
+        active_period: [
+          %{
+            start: ~U[2025-10-01 01:00:38Z],
+            end: ~U[2025-10-01 05:45:38Z]
+          }
+        ],
+        active_period_start: ~U[2025-10-01 01:00:38Z],
+        recurrence_days: ["tuesday"],
+        informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}],
+        current_time: ~U[2023-10-19 18:45:38.571154Z],
+        user: build(:user)
+      }
+
+      changeset = Alert.changeset(%Alert{}, params)
+      assert changeset.valid?
+    end
+
     test "alert without header and description is not valid" do
       changeset = Alert.changeset(%Alert{}, %{header_text: "a", url: "example.com"})
       refute changeset.valid?
