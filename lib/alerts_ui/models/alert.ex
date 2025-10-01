@@ -152,19 +152,19 @@ defmodule AlertsUI.Models.Alert do
       custom_fields: [
         effects: [
           filter: {CustomFilters, :effects_filter, []},
-          ecto_type: :string,
+          ecto_type: {:array, :string},
           operators: [:==]
         ],
         routes: [
           filter: {CustomFilters, :routes_filter, []},
-          ecto_type: :string,
+          ecto_type: {:array, :string},
           operators: [:==]
         ],
         service_type: [
           filter: {CustomFilters, :service_type_filter, []},
           bindings: [:informed_entity],
-          operators: [:==],
-          ecto_type: {:array, :string}
+          ecto_type: {:array, :string},
+          operators: [:==]
         ],
         timeline: [
           filter: {CustomFilters, :timeline_filter, []},

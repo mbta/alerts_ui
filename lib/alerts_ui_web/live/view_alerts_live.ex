@@ -169,7 +169,10 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   end
 
   def handle_event("update-filter", params, socket) do
-    params = clean_filter_params(params) |> Map.take(["filters"])
+    params =
+      clean_filter_params(params)
+      |> Map.take(["filters"])
+
     {:noreply, push_patch(socket, to: ~p"/alerts?#{params}")}
   end
 
@@ -320,8 +323,8 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   def format_effect_options do
     [{"All", ""}]
     |> Enum.concat(
-      Effect.effect_details()
-      |> Enum.map(&{format_effect(&1), &1})
+      Effect.effects_tuples()
+      |> Enum.map(fn {name, _, value} -> {name, value} end)
     )
   end
 
