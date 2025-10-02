@@ -300,7 +300,8 @@ defmodule AlertsUI.Alerts do
 
     originator_id =
       Map.get(version, :originator_id) ||
-        version |> Map.get(:item_changes, %{}) |> Map.get("user_id")
+        version |> Map.get(:item_changes, %{}) |> Map.get("user_id") ||
+        version |> Map.get("user_id")
 
     if originator_id do
       user = Users.get_user!(originator_id)
