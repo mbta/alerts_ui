@@ -193,12 +193,13 @@ defmodule AlertsUIWeb.SharedComponents do
       bg-primary
       border-primary
       hover:bg-primary-hover
-      hover:border-primary-border-hover
+      hover:border-primary-hover
       active:bg-primary-active
       active:border-primary-active
       focus:border-primary-active
       disabled:bg-primary-disabled
       disabled:border-primary-disabled
+      disabled:text-text-primary-disabled
   "
 
   @doc """
@@ -268,7 +269,7 @@ defmodule AlertsUIWeb.SharedComponents do
     active:text-text-invert
     focus:border-secondary-focus-border
     focus:shadow-secondary-focus-shadow
-    disabled:bg-secondary-disabled
+    disabled:text-secondary-disabled
     disabled:border-secondary-disabled
   "
 
@@ -345,16 +346,17 @@ defmodule AlertsUIWeb.SharedComponents do
     <button
       class={"
       #{base_button_classes()}
-      text-white
+      text-text-primary
       bg-danger
       border-danger
       hover:bg-primary-hover
       hover:border-primary-border-hover
-      active:bg-primary-active
-      active:border-primary-active
+      active:bg-danger-active
+      active:border-danger-active
       focus:border-primary-active
-      disabled:bg-primary-disabled
-      disabled:border-primary-disabled
+      disabled:bg-danger-disabled
+      disabled:border-danger-disabled
+      disabled:text-text-danger-disabled
       #{if @hidden, do: "hidden", else: ""}
       #{@class}
     "}
@@ -380,12 +382,18 @@ defmodule AlertsUIWeb.SharedComponents do
         px-4
         py-3
         rounded
+        active:bg-toggle-active
+        active:border-toggle-active
+        active:text-text-primary
+        disabled:bg-border-primary
+        disabled:border-border-primary
+        disabled:text-text-toggle-disabled
         focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25)]",
       toggled_on: "bg-menu-active
-        text-text-invert
+        border-border-primary
+        text-text-dark
         hover:bg-primary-hover
-        focus:bg-primary-hover
-        active:bg-primary-active"
+        focus:bg-primary-hover"
     ] ++ toggled_off_classes(use_outline_buttons)
   end
 
@@ -393,7 +401,6 @@ defmodule AlertsUIWeb.SharedComponents do
     [toggled_off: "text-primary
     border-primary
     hover:bg-secondary-hover
-    active:border-secondary-active
     focus:border-secondary-focus-border
     focus:border-4
     focus:py-2"]
@@ -401,10 +408,10 @@ defmodule AlertsUIWeb.SharedComponents do
 
   defp toggled_off_classes(false) do
     [toggled_off: "bg-bg-input-default
-    border-bg-elevation-6
+    border-border-primary
+    text-text-primary
     hover:bg-secondary-hover
-    focus:bg-secondary-hover
-    active:bg-secondary-active"]
+    focus:bg-secondary-hover"]
   end
 
   @doc """
