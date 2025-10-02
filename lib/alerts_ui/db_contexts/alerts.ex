@@ -297,11 +297,7 @@ defmodule AlertsUI.Alerts do
   def get_originator_string(version) do
     # returns user's name linked to the PaperTrail version if available
     # otherwise returns the origin string from the version if available
-
-    originator_id =
-      Map.get(version, :originator_id) ||
-        version |> Map.get(:item_changes, %{}) |> Map.get("user_id") ||
-        version |> Map.get("user_id")
+    originator_id = get_originator_id(version)
 
     if originator_id do
       user = Users.get_user!(originator_id)
@@ -310,6 +306,11 @@ defmodule AlertsUI.Alerts do
       Map.get(version, :origin, "")
     end
   end
+
+  defp get_originator_id(%{originator_id: user_id}), do: user_id
+  # these two below are for alerts made before 9/17/2025. May be removed when no longer relevant.
+  defp get_originator_id(%{item_changes: %{"user_id" => user_id}}), do: user_id
+  defp get_originator_id(%{user_id: user_id}), do: user_id
 
   @spec list_all_paginated(map()) :: {[any()], Flop.Meta.t()}
   def list_all_paginated_by_creation_date(params) do
