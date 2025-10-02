@@ -297,6 +297,7 @@ defmodule AlertsUI.Alerts do
   def get_originator_string(version) do
     # returns user's name linked to the PaperTrail version if available
     # otherwise returns the origin string from the version if available
+    Logger.info("version_info: #{inspect(version)}")
     originator_id = get_originator_id(version)
 
     if originator_id do
