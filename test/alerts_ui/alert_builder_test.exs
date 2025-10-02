@@ -92,7 +92,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  current_time: ~U[2024-04-30 05:54:00Z],
                  recurrence_days: nil,
                  original_route_selections: ["57"],
-                 original_stop_selections: []
+                 original_stop_selections: [],
+                 primary_service_type: "1"
                }
 
         Alerts.create_or_update_alert(result, build(:user))
@@ -284,7 +285,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  current_time: ~U[2024-04-30 05:54:00Z],
                  recurrence_days: nil,
                  original_route_selections: ["24", "27", "57"],
-                 original_stop_selections: []
+                 original_stop_selections: [],
+                 primary_service_type: "1"
                }
 
         result
@@ -495,7 +497,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  current_time: ~U[2024-04-30 05:54:00Z],
                  recurrence_days: nil,
                  original_route_selections: ["CapeFlyer"],
-                 original_stop_selections: []
+                 original_stop_selections: [],
+                 primary_service_type: "2"
                }
 
         result

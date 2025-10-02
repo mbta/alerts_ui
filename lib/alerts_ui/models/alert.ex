@@ -59,7 +59,8 @@ defmodule AlertsUI.Models.Alert do
   notification_period_end
   recurrence_days
   original_route_selections
-  original_stop_selections)a
+  original_stop_selections
+  primary_service_type)a
 
   @cause Cause.causes()
   @effect Effect.effects()
@@ -107,7 +108,10 @@ defmodule AlertsUI.Models.Alert do
           notification_period_end: DateTime.t() | nil,
           original_route_selections: [String.t()] | nil,
           original_stop_selections: [String.t()] | nil,
-          user_id: User.id()
+          user_id: User.id(),
+          # primary service type is the selected route type from the form
+          # can be string of a number 0-4, "access", or "systemwide"
+          primary_service_type: String.t()
         }
 
   @derive {
@@ -190,6 +194,7 @@ defmodule AlertsUI.Models.Alert do
     field :draft, :boolean, default: false
     field :notification_period_start, :utc_datetime
     field :notification_period_end, :utc_datetime
+    field :primary_service_type, :string
 
     field :recurrence_days, {:array, Ecto.Enum},
       values: ~w[sunday monday tuesday wednesday thursday friday saturday]a

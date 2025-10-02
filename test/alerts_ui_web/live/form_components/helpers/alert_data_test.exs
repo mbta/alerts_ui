@@ -21,6 +21,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
           header_text: "cool header text",
           description_text: "description text",
           informed_entity: [],
+          primary_service_type: "access",
           original_route_selections: []
         })
 
@@ -50,6 +51,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         header_text: "cool header text",
         description_text: "description text",
         informed_entity: [%{route_type: 4, route_id: "1", direction_id: 0, stop_id: "2"}],
+        primary_service_type: "4",
         original_route_selections: ["1"]
       })
 
@@ -80,6 +82,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         header_text: "cool header text",
         description_text: "description text",
         informed_entity: [],
+        primary_service_type: "access",
         original_route_selections: []
       })
 
@@ -114,6 +117,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
           %{route_type: 1, route_id: "3", stop_id: "a3", direction_id: 1},
           %{route_type: 1, route_id: "4", trip: build(:trip_descriptor, %{trip_id: "b1"})}
         ],
+        primary_service_type: "1",
         original_route_selections: ["1", "2", "3", "4"]
       })
 
@@ -144,7 +148,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         description_text: "description text",
         informed_entity: [
           %{facility_id: "example-facility"}
-        ]
+        ],
+        primary_service_type: "access"
       })
 
       assert %AlertData{
@@ -194,6 +199,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
           %{route_type: 3, route_id: "3", stop_id: "a3"},
           %{route_type: 3, route_id: "4", trip: build(:trip_descriptor, %{trip_id: "b1"})}
         ],
+        primary_service_type: "3",
         original_route_selections: ["1", "2", "3", "4"]
       })
 
@@ -245,7 +251,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         original_route_selections: ["1"],
         informed_entity: [
           %{route_type: 3, route_id: "1"}
-        ]
+        ],
+        primary_service_type: "3"
       })
 
       result = AlertData.build_alert_data("1")
@@ -270,7 +277,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         original_route_selections: ["1"],
         informed_entity: [
           %{route_type: 3, route_id: "1"}
-        ]
+        ],
+        primary_service_type: "access"
       })
 
       result = AlertData.build_alert_data("1")
@@ -316,7 +324,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         description_text: "description text",
         informed_entity: [
           %{route_type: 3}
-        ]
+        ],
+        primary_service_type: "systemwide"
       })
 
       assert %AlertData{
@@ -347,7 +356,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
           %{route_type: 0},
           %{route_type: 1},
           %{route_type: 3}
-        ]
+        ],
+        primary_service_type: "systemwide"
       })
 
       assert %AlertData{
@@ -375,6 +385,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         header_text: "cool header text",
         description_text: "description text",
         informed_entity: [],
+        primary_service_type: "access",
         active_period_start: ~U[2024-05-02 16:09:34.007545Z],
         active_period_end: nil,
         active_period: [%{start: ~U[2024-05-02 16:09:34.007545Z], end: nil}],
@@ -392,6 +403,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         header_text: "cool header text",
         description_text: "description text",
         informed_entity: [],
+        primary_service_type: "access",
         active_period_start: ~U[2024-05-02 16:09:34.007545Z],
         active_period_end: ~U[2024-05-02 18:09:34.007545Z],
         notification_period_end: ~U[2024-05-03 06:00:00Z],
@@ -416,6 +428,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         header_text: "cool header text",
         description_text: "description text",
         informed_entity: [],
+        primary_service_type: "access",
         active_period_start: ~U[2024-05-02 16:09:34.007545Z],
         active_period_end:
           utc_datetime_from_local(~D[2024-05-03], ActivePeriod.end_of_service_time()),
@@ -442,6 +455,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         header_text: "cool header text",
         description_text: "description text",
         informed_entity: [],
+        primary_service_type: "access",
         active_period_start: ~U[2024-05-02 16:09:34.007545Z],
         active_period_end: ~U[2024-05-02 17:09:34.007545Z],
         active_period: [
@@ -466,6 +480,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         header_text: "cool header text",
         description_text: "description text",
         informed_entity: [],
+        primary_service_type: nil,
         active_period_start:
           utc_datetime_from_local(~D[2024-05-02], ActivePeriod.start_of_service_time()),
         active_period_end: ~U[2024-05-02 16:09:34.007545Z],
@@ -489,6 +504,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         header_text: "cool header text",
         description_text: "description text",
         informed_entity: [],
+        primary_service_type: nil,
         active_period_start: ~U[2024-05-02 16:09:34.007545Z],
         active_period_end: ~U[2024-05-02 17:09:34.007545Z],
         active_period: [
@@ -511,6 +527,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         header_text: "cool header text",
         description_text: "description text",
         informed_entity: [],
+        primary_service_type: nil,
         active_period_start: ~U[2024-05-02 16:09:34.007545Z],
         active_period_end: ~U[2024-05-04 17:09:34.007545Z],
         active_period: [
@@ -550,6 +567,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         header_text: "cool header text",
         description_text: "description text",
         informed_entity: [],
+        primary_service_type: nil,
         active_period_start: ~U[2024-05-02 16:09:34.007545Z],
         active_period_end: nil,
         active_period: [

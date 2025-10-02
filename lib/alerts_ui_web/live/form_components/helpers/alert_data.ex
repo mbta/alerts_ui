@@ -7,10 +7,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   alias AlertsUI.Alerts
   alias AlertsUI.Models.{ActivePeriod, Alert, Effect}
 
-  alias AlertsUIWeb.FormComponents.Helpers.{
-    EffectsForRouteTypes,
-    ServiceEffectCombinations
-  }
+  alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
 
   alias MBTAV3API.Routes.Route
 
@@ -127,14 +124,15 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
         _ -> nil
       end
 
+    primary_service_type = Map.get(alert, :primary_service_type)
+
     effect_map = Effect.effect_map_by_detail(alert.effect_detail)
     informed_entities = alert.informed_entity
-    route_type = Alert.get_route_type(alert)
+    route_type = get_route_type(primary_service_type)
     effect_name = alert.effect_name || Map.get(effect_map, :effect_name)
 
     combination =
-      if is_nil(route_type) and
-           effect_name in EffectsForRouteTypes.list_effects(:access) do
+      if primary_service_type == "access" do
         :ACCESS
       else
         ServiceEffectCombinations.get_combination(route_type, effect_name)
@@ -290,6 +288,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       "custom"
     end
   end
+
+  defp get_route_type(nil), do: nil
+  defp get_route_type("access"), do: nil
+  defp get_route_type("systemwide"), do: nil
+  defp get_route_type(route_type), do: String.to_integer(route_type)
 
   defp route_types_by_id(:SR, route_type, route_ids) do
     # necessary to form informed entities correctly upon persisting

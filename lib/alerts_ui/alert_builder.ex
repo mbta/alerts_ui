@@ -26,6 +26,7 @@ defmodule AlertsUI.AlertBuilder do
 
   @type alert_data_t :: %{
           route_type: Route.type_int() | nil,
+          combination: atom(),
           facility_id: String.t(),
           direction: String.t(),
           route_ids: [Route.id_t()],
@@ -171,7 +172,8 @@ defmodule AlertsUI.AlertBuilder do
       severity_level: SeverityLevel.severity_level_by_severity(severity),
       reminder_times: reminder_times,
       current_time: current_time,
-      recurrence_days: Map.get(alert_data, :recurrence_days)
+      recurrence_days: Map.get(alert_data, :recurrence_days),
+      primary_service_type: primary_service_type(route_type, Map.get(alert_data, :combination))
     }
     |> Map.merge(active_period_map)
   end
@@ -823,6 +825,10 @@ defmodule AlertsUI.AlertBuilder do
       route_types_by_id[route_id]
     end
   end
+
+  defp primary_service_type(nil, nil), do: "systemwide"
+  defp primary_service_type(nil, :ACCESS), do: "access"
+  defp primary_service_type(route_type, _combination), do: Integer.to_string(route_type)
 
   @spec excluded_stops_from_facility_properties([map()]) :: [String.t()]
   defp excluded_stops_from_facility_properties(properties) do

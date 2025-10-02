@@ -63,6 +63,7 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
           effect_detail: "DELAY",
           informed_entity: [%{activities: [:BOARD, :EXIT, :RIDE], route_type: 3, route_id: "1"}],
           original_route_selections: ["1"],
+          primary_service_type: "3",
           recurrence_days: []
         })
 
@@ -191,7 +192,8 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
           effect: :SIGNIFICANT_DELAYS,
           effect_detail: "DELAY",
           informed_entity: [%{route_type: 3, route_id: "1"}],
-          original_route_selections: ["1"]
+          original_route_selections: ["1"],
+          primary_service_type: "3"
         })
 
       {:ok, _} =
