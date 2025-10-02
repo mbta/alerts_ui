@@ -45,6 +45,7 @@ defmodule AlertsUIWeb.Router do
     pipe_through [:redirect_prod_http, :browser, :require_authenticated_user]
 
     get "/", Redirector, to: "/alerts"
+    get "/download_history", DownloadHistoryController, :export
 
     live_session :require_authenticated_user,
       on_mount: [

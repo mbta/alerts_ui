@@ -1,0 +1,15 @@
+defmodule AlertsUIWeb.DownloadHistoryController do
+  @moduledoc """
+  """
+  use AlertsUIWeb, :controller
+  alias AlertsUI.AlertHistory
+
+  def export(conn, %{"alert_id" => alert_id}) do
+    file = alert_id |> AlertHistory.alert_history() |> AlertHistory.build_history_csv()
+    formatted_date = Calendar.strftime(DateTime.now!("America/New_York"), "%Y_%m_%d")
+
+    send_download(conn, {:binary, file},
+      filename: "Alert_#{alert_id}_History_#{formatted_date}.csv"
+    )
+  end
+end

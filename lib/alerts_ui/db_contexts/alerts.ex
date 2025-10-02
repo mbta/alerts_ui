@@ -4,6 +4,7 @@ defmodule AlertsUI.Alerts do
   """
   import Ecto.Changeset
   import Ecto.Query
+  alias AlertsUI.DBContexts.Users
   alias AlertsUI.Models.{Alert, User}
   alias AlertsUI.Repo
   require Logger
@@ -248,6 +249,17 @@ defmodule AlertsUI.Alerts do
     )
   end
 
+  @spec get_by_id(String.t()) :: Ecto.UUID
+  def get_uuid_by_alert_id(alert_id) do
+    from(
+      a in Alert,
+      where: a.alert_id == ^alert_id,
+      select: a.id,
+      limit: 1
+    )
+    |> Repo.one()
+  end
+
   @spec get_earliest_version(String.t()) :: PaperTrail.Version.t() | nil
   def get_earliest_version(alert_uuid) do
     from(
@@ -266,6 +278,39 @@ defmodule AlertsUI.Alerts do
     |> last(:inserted_at)
     |> Repo.one()
   end
+
+  @spec get_all_versions(String.t() | nil) :: PaperTrail.Version.t()
+  def get_all_versions(nil), do: []
+
+  def get_all_versions(alert_uuid) do
+    from(
+      version in PaperTrail.Version,
+      where: version.item_id == ^alert_uuid,
+      order_by: [asc: :inserted_at]
+    )
+    |> Repo.all()
+  end
+
+  @spec get_originator_string(PaperTrail.Version | map() | nil) :: String.t()
+  def get_originator_string(nil), do: ""
+
+  def get_originator_string(version) do
+    # returns user's name linked to the PaperTrail version if available
+    # otherwise returns the origin string from the version if available
+    originator_id = get_originator_id(version)
+
+    if originator_id do
+      user = Users.get_user!(originator_id)
+      "#{Map.get(user, :first_name, "")} #{Map.get(user, :last_name, "")}"
+    else
+      Map.get(version, :origin, "")
+    end
+  end
+
+  defp get_originator_id(%{originator_id: user_id}), do: user_id
+  # these two below are for alerts made before 9/17/2025. May be removed when no longer relevant.
+  defp get_originator_id(%{item_changes: %{"user_id" => user_id}}), do: user_id
+  defp get_originator_id(%{user_id: user_id}), do: user_id
 
   @spec list_all_paginated(map()) :: {[any()], Flop.Meta.t()}
   def list_all_paginated_by_creation_date(params) do
