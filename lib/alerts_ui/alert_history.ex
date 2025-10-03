@@ -106,7 +106,7 @@ defmodule AlertsUI.AlertHistory do
       closed: closed?(alert_map.closed_timestamp),
       last_modified_by: Alerts.get_originator_string(alert_map),
       last_modified_datetime: format_datetime(alert_map.updated_at, @with_seconds),
-      service_type: nil,
+      service_type: alert_map.primary_service_type,
       effect_name: alert_map.effect_name,
       effect: alert_map.effect,
       effect_detail: alert_map.effect_detail,

@@ -1078,7 +1078,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
               reminder_times: [],
               severity: 7,
               cause_detail: "unknown",
-              user: build(:user)
+              user: build(:user),
+              primary_service_type: Integer.to_string(@route.type)
             }
           )
 
