@@ -62,7 +62,7 @@ defmodule AlertsUIWeb.AuthController do
   @spec request(Conn.t(), map()) :: Conn.t()
   def request(conn, _params) do
     conn
-    |> redirect("/not-found")
+    |> redirect(to: "/not-found")
     |> halt()
   end
 
