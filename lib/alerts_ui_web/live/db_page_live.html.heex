@@ -13,6 +13,7 @@
         <th class="border p-3">Active period end</th>
         <th class="border p-3">Closed time</th>
         <th class="border p-3">Duration certainty</th>
+        <th class="border p-3">Primary service type</th>
         <th class="border p-3">Is draft</th>
         <th class="border p-3"></th>
       </tr>
@@ -27,6 +28,7 @@
         active_period_end: active_period_end,
         closed_timestamp: closed_timestamp,
         duration_certainty: duration_certainty,
+        primary_service_type: primary_service_type,
         draft: draft
       } <- @alerts do %>
         <tr>
@@ -37,6 +39,7 @@
           <td class="border p-3">{active_period_end}</td>
           <td class="border p-3">{closed_timestamp}</td>
           <td class="border p-3">{duration_certainty}</td>
+          <td class="border p-3">{primary_service_type}</td>
           <td class="border p-3">{if draft, do: draft, else: ""}</td>
           <td class="border p-3">
             <.button_danger
