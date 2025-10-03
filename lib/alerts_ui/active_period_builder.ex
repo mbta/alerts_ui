@@ -19,7 +19,8 @@ defmodule AlertsUI.ActivePeriodBuilder do
           active_period: [any()],
           active_period_start: DateTime.t(),
           active_period_end: DateTime.t() | nil,
-          duration_certainty: atom()
+          duration_certainty: atom(),
+          recurrence_times: [Time.t()]
         }
 
   @spec build_one_time_active_period(
@@ -102,12 +103,12 @@ defmodule AlertsUI.ActivePeriodBuilder do
           start:
             date
             |> DateTime.new!(start_time, "America/New_York")
-            |> Timex.Timezone.convert("Etc/UTC"),
+            |> DateTime.shift_zone!("Etc/UTC"),
           end:
             date
             |> Date.add(next_day_modifier)
             |> DateTime.new!(end_time, "America/New_York")
-            |> Timex.Timezone.convert("Etc/UTC")
+            |> DateTime.shift_zone!("Etc/UTC")
         }
       end)
 
@@ -129,6 +130,10 @@ defmodule AlertsUI.ActivePeriodBuilder do
       active_period_start: hd(active_periods).start,
       active_period_end: active_period_end,
       active_period: active_periods,
+      recurrence_times: [
+        DateTime.to_time(hd(active_periods).start),
+        DateTime.to_time(List.last(active_periods).end)
+      ],
       duration_certainty: duration_certainty
     }
   end
