@@ -20,6 +20,8 @@ defmodule AlertsUI.MixProject do
           AlertsUI.DataCase,
           # Ignoring due to swagger definitions
           AlertsUIWeb.ApiController,
+          AlertsUIWeb.ComponentsLive,
+          AlertsUIWeb.DBPageLive,
           AlertsUIWeb.PageHTML,
           AlertsUIWeb.PreloadCacheOnMount,
           AlertsUIWeb.ErrorHTML,
@@ -96,6 +98,7 @@ defmodule AlertsUI.MixProject do
       {:map_diff, "~> 1.3.4"},
       {:mbta_v3_api, git: "https://github.com/mbta/mbta_v3_api.git", branch: "mss-more-files"},
       {:mock, "~> 0.3.8", only: :test},
+      {:nimble_csv, "~> 1.3.0"},
       {:oban, "~> 2.16"},
       {:paper_trail, "~> 1.0.0"},
       {:phoenix, "~> 1.7.7"},

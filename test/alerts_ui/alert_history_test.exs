@@ -128,7 +128,7 @@ defmodule AlertsUIWeb.AlertHistoryTest do
                recurrence: true,
                effect_start: "2025-09-25T08:11",
                effect_end: "2025-09-26T13:11",
-               recurrence_days: "Thursday|Friday",
+               recurrence_days: "Thursday,Friday",
                recurrence_start_time: "8:11",
                recurrence_end_time: nil,
                notification_start: "2025-09-25T07:11",
@@ -209,9 +209,38 @@ defmodule AlertsUIWeb.AlertHistoryTest do
 
       Alerts.close(Alerts.get_by_alert_id("123"), "closed", ~U[2025-09-26 16:14:00Z])
 
-      result = "123" |> AlertHistory.alert_history() |> AlertHistory.build_history_csv()
+      [headers, v1, v2, v3] =  "123" |> AlertHistory.alert_history() |> AlertHistory.build_history_csv()
 
-      assert result =~ "123"
+#       [
+#   ["Alert id", "Version", "Created datetime", "Closed", "Last modified by",
+#    "Last modified datetime", "Service type", "Effect name", "Effect",
+#    "Effect detail", "Affected entities", "Recurrence", "Effect start",
+#    "Effect end", "Recurrence start time", "Recurrence end time",
+#    "Recurrence days", "Notification start", "Notification end",
+#    "Duration certainty", "Cause", "Cause detail", "Severity code",
+#    "Severity level", "Severity name", "Main message", "Supporting information",
+#    "Url", "Image url", "Image alternative text", "Set as website banner",
+#    "Website banner text", "Reminders"],
+#   ["123", 1, "2025-10-06T13:33:45", "false", "Herbert Pocket",
+#    "2025-10-06T13:33:45", "1", "Snow Route", "DETOUR", "SNOW_ROUTE", "nil",
+#    "false", "2025-09-25T08:11", "later today", "", "nil", "", "",
+#    "2025-09-25T13:11", "ESTIMATED", "nil", "nil", 1, "INFO", "information",
+#    "old header text", "its snowing", "", "", "", "false", "", "nil"],
+#   ["123", 2, "2025-10-06T13:33:45", "false", "Herbert Pocket",
+#    "2025-10-06T13:33:45", "1", "Snow Route", "DETOUR", "SNOW_ROUTE", "nil",
+#    "true", "2025-09-25T08:11", "2025-09-26T13:11", "8:11", "nil",
+#    "Thursday,Friday", "2025-09-25T07:11", "2025-09-25T13:11", "KNOWN",
+#    "WEATHER", "SNOW", 1, "INFO", "information", "old header text",
+#    "its snowing", "http://example.com", "http://example.com/image.jpg",
+#    "example image", "true", "the banner text", "nil"],
+#   ["123", 3, "2025-10-06T13:33:45", "true", "closed", "2025-10-06T13:33:45",
+#    "1", "Snow Route", "DETOUR", "SNOW_ROUTE", "nil", "true", "2025-09-25T08:11",
+#    "2025-09-26T12:14", "8:11", "nil", "Thursday,Friday", "2025-09-25T07:11",
+#    "2025-09-26T12:14", "KNOWN", "WEATHER", "SNOW", 1, "INFO", "information",
+#    "old header text", "its snowing", "http://example.com",
+#    "http://example.com/image.jpg", "example image", "true", "the banner text",
+#    "nil"]
+# ]
     end
   end
 end
