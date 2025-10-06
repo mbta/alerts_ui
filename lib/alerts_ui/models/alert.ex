@@ -67,7 +67,6 @@ defmodule AlertsUI.Models.Alert do
   recurrence_days
   original_route_selections
   original_stop_selections
-  original_stop_selections
   primary_service_type
   recurrence_times)a
 
@@ -222,7 +221,6 @@ defmodule AlertsUI.Models.Alert do
 
     field :original_route_selections, {:array, :string}
     field :original_stop_selections, {:array, :string}
-    #
     field :recurrence_times, {:array, :time}
 
     timestamps()

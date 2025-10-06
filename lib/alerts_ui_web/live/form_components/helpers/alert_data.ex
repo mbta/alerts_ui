@@ -239,18 +239,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
     [recurrence_start, recurrence_end] =
       if recurrence_times do
-        offset_seconds =
-          Timex.Timezone.get("America/New_York").offset_utc +
-            Timex.Timezone.get("America/New_York").offset_std
+        timezone = Timex.Timezone.get("America/New_York")
+        offset_seconds = timezone.offset_utc + timezone.offset_std
 
-        recurrence_times
-        |> String.split(",")
-        |> Enum.map(fn time_string ->
-          time_string
-          |> Time.from_iso8601!()
-          |> Time.add(offset_seconds)
-        end)
+        Enum.map(recurrence_times, fn time -> Time.add(time, offset_seconds) end)
       else
+        # for compatibility with older alerts
         [start_datetime |> NaiveDateTime.to_time(), end_datetime |> NaiveDateTime.to_time()]
       end
 
