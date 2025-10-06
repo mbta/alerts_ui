@@ -106,7 +106,7 @@ defmodule AlertsUI.AlertHistory do
       closed: closed?(alert_map.closed_timestamp),
       last_modified_by: Alerts.get_originator_string(alert_map),
       last_modified_datetime: format_datetime(alert_map.updated_at, @with_seconds),
-      service_type: Map.get(alert_map, :primary_service_type, ""),
+      service_type: Map.get(alert_map, :primary_service_type),
       effect_name: alert_map.effect_name,
       effect: alert_map.effect,
       effect_detail: alert_map.effect_detail,
@@ -137,7 +137,7 @@ defmodule AlertsUI.AlertHistory do
     }
   end
 
-  @spec build_history_csv([t()]) :: iodata()
+  @spec build_history_csv([t()]) :: [list()]
   def build_history_csv(history_list) do
     # build keyword list to maintain order of keys
     headers = build_headers()
@@ -154,13 +154,14 @@ defmodule AlertsUI.AlertHistory do
         |> Enum.map(&convert_atoms/1)
       end)
 
-      [headers | values]
+    [headers | values]
   end
 
+  defp convert_atoms(nil), do: ""
   defp convert_atoms(item) when is_atom(item), do: Atom.to_string(item)
   defp convert_atoms(item), do: item
 
-  defp build_headers do
+  def build_headers do
     @history_keys
     |> Enum.map(fn key ->
       key |> Atom.to_string() |> String.capitalize() |> String.replace("_", " ")
