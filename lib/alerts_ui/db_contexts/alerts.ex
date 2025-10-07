@@ -307,10 +307,11 @@ defmodule AlertsUI.Alerts do
     end
   end
 
-  defp get_originator_id(%{originator_id: user_id}), do: user_id
+  defp get_originator_id(%{originator_id: user_id}) when not is_nil(user_id), do: user_id
   # these two below are for alerts made before 9/17/2025. May be removed when no longer relevant.
-  defp get_originator_id(%{item_changes: %{"user_id" => user_id}}), do: user_id
-  defp get_originator_id(%{user_id: user_id}), do: user_id
+  defp get_originator_id(%{item_changes: %{"user_id" => user_id}, origin: "user"}), do: user_id
+  defp get_originator_id(%{user_id: user_id, origin: "user"}), do: user_id
+  defp get_originator_id(_), do: nil
 
   @spec list_all_paginated(map()) :: {[any()], Flop.Meta.t()}
   def list_all_paginated_by_creation_date(params) do
