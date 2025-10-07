@@ -3037,7 +3037,7 @@ defmodule AlertsUI.AlertBuilderTest do
     end
   end
 
-  test "builds facility informed entities" do
+  test "builds facility informed entities and filters out shuttle routes" do
     alert_data = %{
       route_type: nil,
       effect_name: "Elevator Closure",
@@ -3092,10 +3092,16 @@ defmodule AlertsUI.AlertBuilderTest do
       type: 1
     }
 
+    shuttle_route = %Route{
+      id: "Shuttle-BraintreeSouthStationExpress",
+      type: 3,
+      description: :rail_replacement_bus
+    }
+
     with_mocks([
       {FacilitiesRepo, [], [get: fn _facility_id -> facility end]},
       {StopsRepo, [], [get!: fn _stop_id -> stop end]},
-      {RoutesRepo, [], [by_stop: fn _stop_id -> [route] end]}
+      {RoutesRepo, [], [by_stop: fn _stop_id -> [route, shuttle_route] end]}
     ]) do
       result = AlertBuilder.build_alert(alert_data, :ACCESS)
 
