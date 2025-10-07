@@ -3034,7 +3034,7 @@ defmodule AlertsUI.AlertBuilderTest do
     end
   end
 
-  test "builds facility informed entities" do
+  test "builds facility informed entities and filters out shuttle routes" do
     alert_data = %{
       route_type: nil,
       effect_name: "Elevator Closure",
