@@ -22,7 +22,7 @@ defmodule AlertsUI.AlertBuilderTest do
     test "builds alert from map" do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
-        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1, name: route_id} end]}
       ]) do
         existing_alert = insert(:alert, alert_id: "0")
 
@@ -91,7 +91,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  ],
                  current_time: ~U[2024-04-30 05:54:00Z],
                  recurrence_days: nil,
-                 original_route_selections: ["57"],
+                 original_route_selections: ["57|57"],
                  original_stop_selections: [],
                  primary_service_type: "1"
                }
@@ -166,23 +166,24 @@ defmodule AlertsUI.AlertBuilderTest do
          [
            get: fn
              "24", _opts ->
-               %Route{id: "24", line_id: "line-24", type: 1, description: :rapid_transit}
+               %Route{id: "24", line_id: "line-24", type: 1, description: :rapid_transit, name: "24"}
 
              "27", _opts ->
-               %Route{id: "27", line_id: "line-27", type: 1, description: :rapid_transit}
+               %Route{id: "27", line_id: "line-27", type: 1, description: :rapid_transit, name: "27"}
 
              "57", _opts ->
-               %Route{id: "57", line_id: "", type: 1, description: :rapid_transit}
+               %Route{id: "57", line_id: "", type: 1, description: :rapid_transit, name: "57"}
 
              "2427", _opts ->
-               %Route{id: "2427", line_id: nil, type: 0, description: :rapid_transit}
+               %Route{id: "2427", line_id: nil, type: 0, description: :rapid_transit, name: "2427"}
 
              "Shuttle_JFKPark", _opts ->
                %Route{
                  id: "Shuttle_JFKPark",
                  line_id: nil,
                  type: 3,
-                 description: :rail_replacement_bus
+                 description: :rail_replacement_bus,
+                 name: "cool shuttle"
                }
            end
          ]},
@@ -284,7 +285,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  reminder_times: [],
                  current_time: ~U[2024-04-30 05:54:00Z],
                  recurrence_days: nil,
-                 original_route_selections: ["24", "27", "57"],
+                 original_route_selections: ["24|24", "27|27", "57|57"],
                  original_stop_selections: [],
                  primary_service_type: "1"
                }
@@ -444,7 +445,7 @@ defmodule AlertsUI.AlertBuilderTest do
     test "uses the correct agency ID for the CapeFLYER" do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
-        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2} end]}
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2, name: "CapeFLYER"} end]}
       ]) do
         existing_alert = insert(:alert, alert_id: "0")
 
@@ -496,7 +497,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  reminder_times: [],
                  current_time: ~U[2024-04-30 05:54:00Z],
                  recurrence_days: nil,
-                 original_route_selections: ["CapeFlyer"],
+                 original_route_selections: ["CapeFLYER|CapeFlyer"],
                  original_stop_selections: [],
                  primary_service_type: "2"
                }

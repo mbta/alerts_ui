@@ -9,7 +9,7 @@ defmodule AlertsUI.AlertBuilder do
   alias AlertsUI.{ActivePeriodBuilder, Activities}
   alias AlertsUI.Models.{ActivePeriod, Cause, Effect, RoutePattern, SeverityLevel}
   alias AlertsUI.Routes
-  alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
+  alias AlertsUIWeb.FormComponents.Helpers.{SelectFormatter, ServiceEffectCombinations}
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.Lines.Repo, as: LinesRepo
@@ -88,14 +88,22 @@ defmodule AlertsUI.AlertBuilder do
     original_route_selections = Map.get(alert_data, :route_ids, [])
     original_stop_selections = Map.get(alert_data, :stop_names_and_ids, [])
 
-    routes =
-      original_route_selections
+    pre_combo_routes =
+      Map.get(alert_data, :route_ids, [])
       |> Enum.filter(&(&1 !== "default"))
       |> Enum.uniq()
       |> Routes.expanding_green_line()
       |> Enum.map(&(RoutesRepo.get(&1, include: "line") || %{}))
+
+    routes = pre_combo_routes
       |> Enum.reject(&(&1 == %{}))
       |> add_combo_routes()
+
+    original_route_selections = Enum.map(original_route_selections, fn route_id ->
+      routes = pre_combo_routes ++ [%{id: "Green", name: "Green Line"}]
+      matching_route = Enum.find(routes, %{}, fn route -> Map.get(route, :id, "") == route_id end)
+      "#{SelectFormatter.name_for_option(matching_route)}|#{route_id}"
+    end)
 
     route_ids = Enum.map(routes, & &1.id)
     child_stops_with_context = child_stops_with_context(routes, direction_id, stop_ids)

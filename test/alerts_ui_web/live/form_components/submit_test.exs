@@ -299,7 +299,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
                  draft: false,
                  notification_period_start: _,
                  recurrence_days: [],
-                 original_route_selections: ["Blue"],
+                 original_route_selections: ["route_number_1|Blue"],
                  created_at: _,
                  updated_at: _
                } = AlertsUI.Alerts.get_by_alert_id(alert_id)

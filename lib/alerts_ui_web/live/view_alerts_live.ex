@@ -4,7 +4,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   """
   use AlertsUIWeb, :live_view
   alias AlertsUI.Alerts
-  alias AlertsUI.Models.{ActivePeriod, Effect}
+  alias AlertsUI.Models.{ActivePeriod, Alert, Effect}
   alias AlertsUIWeb.FormComponents.Helpers.{AlertData, DateTimeFormatters, DateTimeHelpers}
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText
 

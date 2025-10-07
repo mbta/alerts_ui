@@ -356,6 +356,26 @@ defmodule AlertsUI.Models.Alert do
     |> Enum.uniq()
   end
 
+    def get_original_names(nil), do: []
+  def get_original_names(names_and_ids) do
+    Enum.map(names_and_ids, fn name_and_id ->
+    name_and_id |> String.split("|") |> get_name
+    end)
+  end
+
+   def get_original_ids(nil), do: []
+  def get_original_ids(names_and_ids) do
+    Enum.map(names_and_ids, fn name_and_id ->
+    name_and_id |> String.split("|") |> get_id
+    end)
+  end
+
+  defp get_name([name, _id]), do: name
+  defp get_name(_), do: ""
+
+  defp get_id([id]), do: id
+  defp get_id([_name, id]), do: id
+
   @spec simple_subway_type(Route.type_int()) :: Route.type_int()
   defp simple_subway_type(0), do: 1
   defp simple_subway_type(route_type), do: route_type
