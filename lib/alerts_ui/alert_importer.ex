@@ -1,3 +1,5 @@
+NimbleCSV.define(IBIAlertParser)
+
 defmodule AlertsUI.AlertImporter do
   @moduledoc """
   Import alerts from an external source, e.g., IBI.
@@ -9,7 +11,7 @@ defmodule AlertsUI.AlertImporter do
     Repo.transaction(fn ->
       path
       |> File.stream!()
-      |> CSV.decode()
+      |> IBIAlertParser.parse_stream()
       |> Stream.map(fn row -> row_to_changeset(row) end)
       |> Stream.chunk_every(chunk_size())
       |> Stream.each(fn chunk ->
@@ -17,7 +19,7 @@ defmodule AlertsUI.AlertImporter do
           PaperTrail.Multi.insert(multi, changeset)
         end)
         |> Multi.run()
-      end) 
+      end)
     end)
   end
 
