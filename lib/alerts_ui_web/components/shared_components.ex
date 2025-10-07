@@ -374,6 +374,7 @@ defmodule AlertsUIWeb.SharedComponents do
           ...
         ]
   def toggle_button_classes(false) do
+    # without outline
     [
       base_toggle_classes: "
         active:bg-border-primary
@@ -384,7 +385,7 @@ defmodule AlertsUIWeb.SharedComponents do
         hover:!text-text-primary
         disabled:bg-border-primary
         disabled:border-border-primary
-        disabled:text-text-toggle-disabled" <> base_toggle_classes(),
+        disabled:text-text-toggle-disabled" <> shared_base_toggle_classes(),
       toggled_off: "bg-bg-input-default
         border-border-primary
         text-text-primary",
@@ -395,6 +396,7 @@ defmodule AlertsUIWeb.SharedComponents do
   end
 
   def toggle_button_classes(true) do
+    # with outline
     [
       base_toggle_classes: "
       hover:bg-secondary-hover
@@ -402,7 +404,7 @@ defmodule AlertsUIWeb.SharedComponents do
       hover:text-text-invert
       disabled:text-secondary-disabled
       disabled:border-secondary-disabled
-        " <> base_toggle_classes(),
+        " <> shared_base_toggle_classes(),
       toggled_off: "text-primary
         border-primary
         bg-transparent",
@@ -412,7 +414,7 @@ defmodule AlertsUIWeb.SharedComponents do
     ]
   end
 
-  defp base_toggle_classes do
+  defp shared_base_toggle_classes do
     "font-medium
         border-[1px]
         mb-1
