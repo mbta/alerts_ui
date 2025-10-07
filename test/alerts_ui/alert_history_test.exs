@@ -26,7 +26,7 @@ defmodule AlertsUIWeb.AlertHistoryTest do
 
   @second_alert_params %{
     alert_id: "123",
-    header_text: "old header text",
+    header_text: "new header text",
     description_text: "its snowing",
     effect_name: "Snow Route",
     effect: :DETOUR,
@@ -128,7 +128,7 @@ defmodule AlertsUIWeb.AlertHistoryTest do
                recurrence: true,
                effect_start: "2025-09-25T08:11",
                effect_end: "2025-09-26T13:11",
-               recurrence_days: "Thursday|Friday",
+               recurrence_days: "Thursday,Friday",
                recurrence_start_time: "8:11",
                recurrence_end_time: nil,
                notification_start: "2025-09-25T07:11",
@@ -139,7 +139,7 @@ defmodule AlertsUIWeb.AlertHistoryTest do
                severity_code: 1,
                severity_level: "INFO",
                severity_name: "information",
-               main_message: "old header text",
+               main_message: "new header text",
                supporting_information: "its snowing",
                url: "http://example.com",
                image_url: "http://example.com/image.jpg",
@@ -162,7 +162,7 @@ defmodule AlertsUIWeb.AlertHistoryTest do
                recurrence: true,
                effect_start: "2025-09-25T08:11",
                effect_end: "2025-09-26T12:14",
-               recurrence_days: "Thursday|Friday",
+               recurrence_days: "Thursday,Friday",
                recurrence_start_time: "8:11",
                recurrence_end_time: nil,
                notification_start: "2025-09-25T07:11",
@@ -173,7 +173,7 @@ defmodule AlertsUIWeb.AlertHistoryTest do
                severity_code: 1,
                severity_level: "INFO",
                severity_name: "information",
-               main_message: "old header text",
+               main_message: "new header text",
                supporting_information: "its snowing",
                url: "http://example.com",
                image_url: "http://example.com/image.jpg",
@@ -207,11 +207,20 @@ defmodule AlertsUIWeb.AlertHistoryTest do
         Alerts.get_by_alert_id("123")
       )
 
-      Alerts.close(Alerts.get_by_alert_id("123"), "closed", ~U[2025-09-26 16:14:00Z])
+      Alerts.close(Alerts.get_by_alert_id("123"), "closed", ~U[2025-09-27 16:33:00Z])
 
-      result = "123" |> AlertHistory.alert_history() |> AlertHistory.build_history_csv()
+      [headers, v1, v2, v3] =
+        "123" |> AlertHistory.alert_history() |> AlertHistory.build_history_csv()
 
-      assert result =~ "123"
+      assert headers == AlertHistory.build_headers()
+
+      MapSet.subset?(MapSet.new(v1), MapSet.new(["123", "1", "old header text", "ESTIMATED"]))
+      MapSet.subset?(MapSet.new(v2), MapSet.new(["123", "2", "new header text", "KNOWN"]))
+
+      MapSet.subset?(
+        MapSet.new(v3),
+        MapSet.new(["123", "3", "new header text", "KNOWN", "2025-09-27T12:33"])
+      )
     end
   end
 end
