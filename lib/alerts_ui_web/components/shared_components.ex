@@ -193,12 +193,13 @@ defmodule AlertsUIWeb.SharedComponents do
       bg-primary
       border-primary
       hover:bg-primary-hover
-      hover:border-primary-border-hover
+      hover:border-primary-hover
       active:bg-primary-active
       active:border-primary-active
       focus:border-primary-active
       disabled:bg-primary-disabled
       disabled:border-primary-disabled
+      disabled:text-text-primary-disabled
   "
 
   @doc """
@@ -268,7 +269,7 @@ defmodule AlertsUIWeb.SharedComponents do
     active:text-text-invert
     focus:border-secondary-focus-border
     focus:shadow-secondary-focus-shadow
-    disabled:bg-secondary-disabled
+    disabled:text-secondary-disabled
     disabled:border-secondary-disabled
   "
 
@@ -345,16 +346,17 @@ defmodule AlertsUIWeb.SharedComponents do
     <button
       class={"
       #{base_button_classes()}
-      text-white
+      text-text-primary
       bg-danger
       border-danger
       hover:bg-primary-hover
       hover:border-primary-border-hover
-      active:bg-primary-active
-      active:border-primary-active
+      active:bg-danger-active
+      active:border-danger-active
       focus:border-primary-active
-      disabled:bg-primary-disabled
-      disabled:border-primary-disabled
+      disabled:bg-danger-disabled
+      disabled:border-danger-disabled
+      disabled:text-text-danger-disabled
       #{if @hidden, do: "hidden", else: ""}
       #{@class}
     "}
@@ -371,40 +373,57 @@ defmodule AlertsUIWeb.SharedComponents do
           | {:toggled_on, String.t()},
           ...
         ]
-  def toggle_button_classes(use_outline_buttons) do
+  def toggle_button_classes(false) do
+    # without outline
     [
-      base_toggle_classes: "font-medium
+      base_toggle_classes: "
+        active:bg-border-primary
+        active:border-border-primary
+        active:text-text-primary
+        hover:bg-toggle-active
+        hover:border-toggle-active
+        hover:!text-text-primary
+        disabled:bg-border-primary
+        disabled:border-border-primary
+        disabled:text-text-toggle-disabled" <> shared_base_toggle_classes(),
+      toggled_off: "bg-bg-input-default
+        border-border-primary
+        text-text-primary",
+      toggled_on: "
+        bg-menu-active
+        !text-text-invert"
+    ]
+  end
+
+  def toggle_button_classes(true) do
+    # with outline
+    [
+      base_toggle_classes: "
+      hover:bg-secondary-hover
+      hover:border-secondary-hover-border
+      hover:text-text-invert
+      disabled:text-secondary-disabled
+      disabled:border-secondary-disabled
+        " <> shared_base_toggle_classes(),
+      toggled_off: "text-primary
+        border-primary
+        bg-transparent",
+      toggled_on: "bg-secondary-active
+      border-secondary-active
+      text-text-invert"
+    ]
+  end
+
+  defp shared_base_toggle_classes do
+    "font-medium
         border-[1px]
         mb-1
         text-base
         px-4
         py-3
         rounded
-        focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25)]",
-      toggled_on: "bg-menu-active
-        text-text-invert
-        hover:bg-primary-hover
-        focus:bg-primary-hover
-        active:bg-primary-active"
-    ] ++ toggled_off_classes(use_outline_buttons)
-  end
-
-  defp toggled_off_classes(true) do
-    [toggled_off: "text-primary
-    border-primary
-    hover:bg-secondary-hover
-    active:border-secondary-active
-    focus:border-secondary-focus-border
-    focus:border-4
-    focus:py-2"]
-  end
-
-  defp toggled_off_classes(false) do
-    [toggled_off: "bg-bg-input-default
-    border-bg-elevation-6
-    hover:bg-secondary-hover
-    focus:bg-secondary-hover
-    active:bg-secondary-active"]
+        focus:border-secondary-focus-border
+        focus:shadow-secondary-focus-shadow"
   end
 
   @doc """

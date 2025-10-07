@@ -22,6 +22,10 @@
     <.color_block name="bg-elevation-5" class="bg-bg-elevation-5" />
     <.color_block name="bg-elevation-6" class="bg-bg-elevation-6" />
     <.color_block name="bg-input-default" class="bg-bg-input-default" />
+    <.color_block name="danger-active" class="bg-danger-active" />
+    <.color_block name="danger-hover" class="bg-danger-hover" />
+    <.color_block name="danger-disabled" class="bg-danger-disabled" />
+    <.color_block name="toggle-active" class="bg-toggle-active" />
   </div>
 
   <.h3>Border Colors</.h3>
@@ -42,6 +46,9 @@
   <div class="inline-grid gap-4 grid-flow-col">
     <.color_block name="text-primary" class="bg-text-primary" />
     <.color_block name="text-secondary" class="bg-text-secondary" />
+    <.color_block name="text-primary-disabled" class="bg-text-primary-disabled" />
+    <.color_block name="text-danger-disabled" class="bg-text-danger-disabled" />
+    <.color_block name="text-toggle-disabled" class="bg-text-toggle-disabled" />
     <.color_block name="text-disabled" class="bg-text-disabled" />
     <.color_block name="text-link-outline" class="bg-text-link-outline" />
     <.color_block name="text-error" class="bg-text-error" />
@@ -110,11 +117,19 @@
 
   <div class="inline-grid gap-4 grid-cols-1 mb-8">
     <.button_primary>Primary Button</.button_primary>
+    <.button_primary disabled={true}>Primary Button (disabled)</.button_primary>
     <.button_secondary>Secondary Button</.button_secondary>
+    <.button_secondary disabled={true}>Secondary Button (disabled)</.button_secondary>
     <.button_danger>Danger Button</.button_danger>
+    <.button_danger disabled={true}>Danger Button (disabled)</.button_danger>
     <.button_toggle>Toggle Button (active)</.button_toggle>
-    <.button_toggle icon="Red Line">Toggle Button with Icon</.button_toggle>
+    <.button_toggle use_outline_buttons={true}>Toggle Button (w/outline, active)</.button_toggle>
     <.button_toggle active={false}>Toggle Button (inactive)</.button_toggle>
+    <.button_toggle use_outline_buttons={true} active={false}>
+      Toggle Button (w/outline, inactive)
+    </.button_toggle>
+    <.button_toggle icon="Red Line">Toggle Button with Icon</.button_toggle>
+    <.button_toggle disabled={true}>Toggle Button (disabled)</.button_toggle>
     <br />
   </div>
 
