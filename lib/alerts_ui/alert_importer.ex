@@ -7,6 +7,7 @@ defmodule AlertsUI.AlertImporter do
 
   @default_chunk_size 1000
 
+  @spec import_csv_file(String.t(), [chunk_size: integer()]) :: {:ok, map()} | Ecto.Multi.failure()
   def import_csv_file(path, options \\ []) do
     Repo.transaction(fn ->
       path
@@ -18,7 +19,7 @@ defmodule AlertsUI.AlertImporter do
         Enum.reduce(chunk, Multi.new(), fn changeset, multi ->
           PaperTrail.Multi.insert(multi, changeset)
         end)
-        |> Multi.run()
+        |> Repo.transaction()
       end)
     end)
   end
