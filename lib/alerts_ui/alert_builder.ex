@@ -95,20 +95,17 @@ defmodule AlertsUI.AlertBuilder do
       |> Routes.expanding_green_line()
       |> Enum.map(&(RoutesRepo.get(&1, include: "line") || %{}))
 
+    original_route_selections =
+      Enum.map(original_route_selections, fn route_id ->
+        matching_route = get_matching_route(route_id, pre_combo_routes)
+
+        "#{SelectFormatter.name_for_option(matching_route)}|#{route_id}"
+      end)
+
     routes =
       pre_combo_routes
       |> Enum.reject(&(&1 == %{}))
       |> add_combo_routes()
-
-    original_route_selections =
-      Enum.map(original_route_selections, fn route_id ->
-        routes = pre_combo_routes ++ [%{id: "Green", name: "Green Line"}]
-
-        matching_route =
-          Enum.find(routes, %{}, fn route -> Map.get(route, :id, "") == route_id end)
-
-        "#{SelectFormatter.name_for_option(matching_route)}|#{route_id}"
-      end)
 
     route_ids = Enum.map(routes, & &1.id)
     child_stops_with_context = child_stops_with_context(routes, direction_id, stop_ids)
@@ -839,6 +836,12 @@ defmodule AlertsUI.AlertBuilder do
     else
       route_types_by_id[route_id]
     end
+  end
+
+  defp get_matching_route("Green", _), do: RoutesRepo.green_line()
+
+  defp get_matching_route(route_id, routes) do
+    Enum.find(routes, %{}, fn route -> Map.get(route, :id, "") == route_id end)
   end
 
   defp primary_service_type(nil, nil), do: "systemwide"

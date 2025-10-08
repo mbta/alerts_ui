@@ -18,6 +18,15 @@ defmodule AlertsUI.AlertBuilderTest do
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
 
+  @green_line_virtual_route %Route{
+    id: "Green",
+    name: "Green Line",
+    long_name: "Green Line",
+    direction_names: %{0 => "Westbound", 1 => "Eastbound"},
+    type: 0,
+    description: :rapid_transit
+  }
+
   describe "build_alert/1" do
     test "builds alert from map" do
       with_mocks([
@@ -1573,7 +1582,11 @@ defmodule AlertsUI.AlertBuilderTest do
              "Green-E", _ -> []
            end
          ]},
-        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
+        {RoutesRepo, [],
+         [
+           get: fn route_id, _opts -> %Route{id: route_id, type: 1} end,
+           green_line: fn -> @green_line_virtual_route end
+         ]}
       ]) do
         result = AlertBuilder.build_alert(alert_data, :RDS)
 
@@ -1697,7 +1710,11 @@ defmodule AlertsUI.AlertBuilderTest do
     test "properly builds R informed entity" do
       with_mocks([
         {RoutePatternsRepo, [], by_route_id: fn _route_id, _opts -> [] end},
-        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]}
+        {RoutesRepo, [],
+         [
+           get: fn route_id, _opts -> %Route{id: route_id, type: 3} end,
+           green_line: fn -> @green_line_virtual_route end
+         ]}
       ]) do
         alert_data = %{
           route_type: 3,
@@ -1730,7 +1747,11 @@ defmodule AlertsUI.AlertBuilderTest do
     test "R informed entities expanding Green Line routes" do
       with_mocks([
         {RoutePatternsRepo, [], by_route_id: fn _route_id, _opts -> [] end},
-        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
+        {RoutesRepo, [],
+         [
+           get: fn route_id, _opts -> %Route{id: route_id, type: 1} end,
+           green_line: fn -> @green_line_virtual_route end
+         ]}
       ]) do
         alert_data = %{
           route_type: 1,
@@ -1781,7 +1802,11 @@ defmodule AlertsUI.AlertBuilderTest do
     test "properly builds R informed entity with direction" do
       with_mocks([
         {RoutePatternsRepo, [], by_route_id: fn _route_id, _opts -> [] end},
-        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]}
+        {RoutesRepo, [],
+         [
+           get: fn route_id, _opts -> %Route{id: route_id, type: 3} end,
+           green_line: fn -> @green_line_virtual_route end
+         ]}
       ]) do
         alert_data = %{
           route_type: 3,
@@ -1816,7 +1841,11 @@ defmodule AlertsUI.AlertBuilderTest do
     test "R informed entities with direction expanding Green Line routes" do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
-        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
+        {RoutesRepo, [],
+         [
+           get: fn route_id, _opts -> %Route{id: route_id, type: 1} end,
+           green_line: fn -> @green_line_virtual_route end
+         ]}
       ]) do
         alert_data = %{
           route_type: 1,
@@ -2771,7 +2800,10 @@ defmodule AlertsUI.AlertBuilderTest do
          ]},
         {StopsRepo, [], [by_route: fn _route_id, _direction -> parent_stops ++ child_stops end]},
         {RoutesRepo, [],
-         [get: fn "435", _opts -> %Route{id: "435", line_id: "line-435", type: 3} end]},
+         [
+           get: fn "435", _opts -> %Route{id: "435", line_id: "line-435", type: 3} end,
+           green_line: fn -> @green_line_virtual_route end
+         ]},
         {LinesRepo, [],
          [
            get: fn
@@ -2849,7 +2881,11 @@ defmodule AlertsUI.AlertBuilderTest do
              "Green-E", 1 -> []
            end
          ]},
-        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 0} end]}
+        {RoutesRepo, [],
+         [
+           get: fn route_id, _opts -> %Route{id: route_id, type: 0} end,
+           green_line: fn -> @green_line_virtual_route end
+         ]}
       ]) do
         result = AlertBuilder.build_alert(alert_data, :SR)
 
