@@ -14,8 +14,10 @@ defmodule AlertsUI.IBIAlertImporter do
     - Parse the stream of lines as CSV
     - Chunk the rows into manageable batches to mitigate N+1 overhead on query and commit
     - For each chunk:
-        - Find and index any existing alerts for this chunk by `alert_id`
-        - Create a `Multi` consisting of the insert and update operations for this chunk
+        - Find all versions of existing alerts by `alert_id`
+        - Index those versions by a tuple of `{alert_id, version_no}`
+        - Create a `Multi` for the chunk
+        - For every row in the chunk, check for an existing alert in the index. If present, attach an update to the multi; otherwise attach an insert
         - Commit the multi
   
   The entire operation is wrapped in a transaction, so input files will succeed or fail
@@ -33,10 +35,14 @@ defmodule AlertsUI.IBIAlertImporter do
 
         existing_alerts_index = Repo.all(
           from i in IBIAlert, where: i.alert_id in ^alert_ids
-        ) |> Map.new(fn alert -> {alert.alert_id, alert} end)
+        ) |> Map.new(fn alert ->
+          {{alert.alert_id, alert.version_no}, alert}
+        end)
 
         Enum.reduce(chunk, Multi.new(), fn row, multi ->
-          case existing_alerts_index[row_to_alert_id(row)] do
+          versioned_id = {row_to_alert_id(row), row_to_version_no(row)}
+
+          case existing_alerts_index[versioned_id] do
             nil ->
               changeset = %IBIAlert.changeset(%IBIAlert{}, params)
               PaperTrail.Multi.insert(multi, changeset)
@@ -60,6 +66,8 @@ defmodule AlertsUI.IBIAlertImporter do
   end
 
   def row_to_alert_id(row), do: row[1]
+
+  def row_to_version_no(row), do: row[2]
 
   def row_to_params(row = []) do
     row
