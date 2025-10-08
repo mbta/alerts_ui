@@ -22,7 +22,8 @@ defmodule AlertsUI.AlertBuilderTest do
     test "builds alert from map" do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
-        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1, name: route_id} end]}
+        {RoutesRepo, [],
+         [get: fn route_id, _opts -> %Route{id: route_id, type: 1, name: route_id} end]}
       ]) do
         existing_alert = insert(:alert, alert_id: "0")
 
@@ -166,16 +167,34 @@ defmodule AlertsUI.AlertBuilderTest do
          [
            get: fn
              "24", _opts ->
-               %Route{id: "24", line_id: "line-24", type: 1, description: :rapid_transit, name: "24"}
+               %Route{
+                 id: "24",
+                 line_id: "line-24",
+                 type: 1,
+                 description: :rapid_transit,
+                 name: "24"
+               }
 
              "27", _opts ->
-               %Route{id: "27", line_id: "line-27", type: 1, description: :rapid_transit, name: "27"}
+               %Route{
+                 id: "27",
+                 line_id: "line-27",
+                 type: 1,
+                 description: :rapid_transit,
+                 name: "27"
+               }
 
              "57", _opts ->
                %Route{id: "57", line_id: "", type: 1, description: :rapid_transit, name: "57"}
 
              "2427", _opts ->
-               %Route{id: "2427", line_id: nil, type: 0, description: :rapid_transit, name: "2427"}
+               %Route{
+                 id: "2427",
+                 line_id: nil,
+                 type: 0,
+                 description: :rapid_transit,
+                 name: "2427"
+               }
 
              "Shuttle_JFKPark", _opts ->
                %Route{
@@ -445,7 +464,8 @@ defmodule AlertsUI.AlertBuilderTest do
     test "uses the correct agency ID for the CapeFLYER" do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
-        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2, name: "CapeFLYER"} end]}
+        {RoutesRepo, [],
+         [get: fn route_id, _opts -> %Route{id: route_id, type: 2, name: "CapeFLYER"} end]}
       ]) do
         existing_alert = insert(:alert, alert_id: "0")
 

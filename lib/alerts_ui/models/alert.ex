@@ -1,6 +1,13 @@
 defmodule AlertsUI.Models.Alert do
   @moduledoc """
     Models an alert
+
+    Notes on some fields:
+    several fields are meant to store information about the things that were originally selected on the form, for
+    use when editing/duplicating alerts, building alert history, and anywhere else convenient. The fields named
+    original_<something>_selection are used for this purpose. They consist of an array of strings, which are pipe-
+    delineated- "name|id". This module contains funcions for splitting those apart and returning just the names or ids.
+    Primary service type is the selected route type from the form and can be string of a number 0-4, "access", or "systemwide"
   """
   use AlertsUI.Schema
   import Ecto.Changeset
@@ -109,8 +116,6 @@ defmodule AlertsUI.Models.Alert do
           original_route_selections: [String.t()] | nil,
           original_stop_selections: [String.t()] | nil,
           user_id: User.id(),
-          # primary service type is the selected route type from the form
-          # can be string of a number 0-4, "access", or "systemwide"
           primary_service_type: String.t()
         }
 
@@ -356,17 +361,19 @@ defmodule AlertsUI.Models.Alert do
     |> Enum.uniq()
   end
 
-    def get_original_names(nil), do: []
+  def get_original_names(nil), do: []
+
   def get_original_names(names_and_ids) do
     Enum.map(names_and_ids, fn name_and_id ->
-    name_and_id |> String.split("|") |> get_name
+      name_and_id |> String.split("|") |> get_name
     end)
   end
 
-   def get_original_ids(nil), do: []
+  def get_original_ids(nil), do: []
+
   def get_original_ids(names_and_ids) do
     Enum.map(names_and_ids, fn name_and_id ->
-    name_and_id |> String.split("|") |> get_id
+      name_and_id |> String.split("|") |> get_id
     end)
   end
 

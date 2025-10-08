@@ -95,15 +95,20 @@ defmodule AlertsUI.AlertBuilder do
       |> Routes.expanding_green_line()
       |> Enum.map(&(RoutesRepo.get(&1, include: "line") || %{}))
 
-    routes = pre_combo_routes
+    routes =
+      pre_combo_routes
       |> Enum.reject(&(&1 == %{}))
       |> add_combo_routes()
 
-    original_route_selections = Enum.map(original_route_selections, fn route_id ->
-      routes = pre_combo_routes ++ [%{id: "Green", name: "Green Line"}]
-      matching_route = Enum.find(routes, %{}, fn route -> Map.get(route, :id, "") == route_id end)
-      "#{SelectFormatter.name_for_option(matching_route)}|#{route_id}"
-    end)
+    original_route_selections =
+      Enum.map(original_route_selections, fn route_id ->
+        routes = pre_combo_routes ++ [%{id: "Green", name: "Green Line"}]
+
+        matching_route =
+          Enum.find(routes, %{}, fn route -> Map.get(route, :id, "") == route_id end)
+
+        "#{SelectFormatter.name_for_option(matching_route)}|#{route_id}"
+      end)
 
     route_ids = Enum.map(routes, & &1.id)
     child_stops_with_context = child_stops_with_context(routes, direction_id, stop_ids)
