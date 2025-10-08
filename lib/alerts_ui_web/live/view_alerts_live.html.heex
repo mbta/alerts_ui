@@ -14,7 +14,12 @@
     <span class="w-[100px]" />
   </div>
 
-  <div class="min-h-0 shrink overflow-y-auto" phx-hook="ScrollToTop" id="alerts-table-container">
+  <div
+    class="min-h-0 shrink overflow-y-auto"
+    phx-hook="ScrollToTop"
+    data-showing-alert-id={Map.get(assigns, :selected_alert_id, "")}
+    id="alerts-table-container"
+  >
     <Flop.Phoenix.table
       items={@alerts}
       meta={@meta}
