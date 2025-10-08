@@ -442,10 +442,27 @@ defmodule AlertsUIWeb.CoreComponents do
       aria-label={@label}
       checked={@checked}
       class={[
-        "join-item rounded btn !h-[38px] !min-h-0 border border-primary bg-transparent text-base text-primary font-medium px-3",
+        "join-item
+        rounded btn
+        !h-[38px]
+        text-primary
+        font-medium
+        px-3
+        text-primary
+        text-base
+        border-primary
+        bg-transparent
+        hover:bg-secondary-hover
+        hover:border-secondary-hover-border
+        hover:text-text-invert
+        focus:border-secondary-focus-border
+        focus:shadow-secondary-focus-shadow
+        disabled:text-secondary-disabled
+        disabled:border-secondary-disabled",
         if(@checked,
-          do:
-            "after:bg-primary after:text-bg-primary border-primary !bg-primary !text-bg-primary !border-primary"
+          do: "after:bg-secondary-active after:text-text-invert     !bg-secondary-active
+    !border-secondary-active
+    !text-text-invert"
         )
       ]}
     />
