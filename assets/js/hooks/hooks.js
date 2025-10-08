@@ -58,4 +58,10 @@ Hooks.AutoDismissFlash = {
   },
 };
 
+Hooks.ScrollToTop = {
+  updated() {
+    setTimeout(() => this.el.scrollTo({ top: 0, behavior: "smooth" }), 0);
+  },
+};
+
 export default Hooks;
