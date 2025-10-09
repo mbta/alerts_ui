@@ -26,6 +26,11 @@ defmodule AlertsUI.Repo.Migrations.CreateIBIAlerts do
     url
     details
     affent_list
+    informed_route_id
+    informed_direction_id
+    informed_trip_id
+    informed_stop_id
+    informed_facility_id
     gui_mode_name
     is_closed
     send_to_govd
