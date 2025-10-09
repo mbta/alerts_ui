@@ -11,9 +11,9 @@ defmodule AlertsUI.DBContexts.Users do
   def create_or_update_user(params, existing_user \\ %User{}) do
     existing_user
     |> User.changeset(params)
-    |> PaperTrail.insert_or_update()
+    |> Repo.insert_or_update()
     |> case do
-      {:ok, %{model: user}} -> {:ok, user}
+      {:ok, user} -> {:ok, user}
       {:error, result} -> {:error, result}
     end
   end
