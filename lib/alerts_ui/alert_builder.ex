@@ -34,6 +34,7 @@ defmodule AlertsUI.AlertBuilder do
           stop_names_and_ids: [String.t()],
           child_stops_with_context: [stop_with_context_t()] | [],
           trip_ids: [String.t()],
+          trip_information_by_id: [map()],
           service_types: [Route.type_int()],
           alert_timing: atom(),
           active_period_end_specifier: atom() | nil,
@@ -87,6 +88,9 @@ defmodule AlertsUI.AlertBuilder do
 
     original_route_selections = Map.get(alert_data, :route_ids, [])
     original_stop_selections = Map.get(alert_data, :stop_names_and_ids, [])
+    original_trip_selections = (Map.get(alert_data, :trip_information_by_id, %{}) || %{}) |> Enum.map(fn {id, trip} ->
+      "#{Map.get(trip, :name, "")}|#{id}"
+    end)
 
     pre_combo_routes =
       original_route_selections
@@ -186,6 +190,7 @@ defmodule AlertsUI.AlertBuilder do
       reminder_times: reminder_times,
       current_time: current_time,
       recurrence_days: Map.get(alert_data, :recurrence_days),
+      original_trip_selections: original_trip_selections,
       primary_service_type: primary_service_type(route_type, Map.get(alert_data, :combination))
     }
     |> Map.merge(active_period_map)

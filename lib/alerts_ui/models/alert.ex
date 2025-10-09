@@ -67,6 +67,7 @@ defmodule AlertsUI.Models.Alert do
   recurrence_days
   original_route_selections
   original_stop_selections
+  original_trip_selections
   primary_service_type
   recurrence_times)a
 
@@ -116,6 +117,7 @@ defmodule AlertsUI.Models.Alert do
           notification_period_end: DateTime.t() | nil,
           original_route_selections: [String.t()] | nil,
           original_stop_selections: [String.t()] | nil,
+          original_trip_selections: [String.t()] | nil,
           user_id: User.id(),
           primary_service_type: String.t(),
           recurrence_days: [String.t()],
@@ -222,6 +224,7 @@ defmodule AlertsUI.Models.Alert do
     field :original_route_selections, {:array, :string}
     field :original_stop_selections, {:array, :string}
     field :recurrence_times, {:array, :time}
+    field :original_trip_selections, {:array, :string}
 
     timestamps()
   end

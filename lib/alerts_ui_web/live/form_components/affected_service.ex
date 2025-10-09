@@ -663,7 +663,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     |> Enum.reduce(%{}, fn schedule, acc ->
       Map.put(acc, schedule.trip.id, %{
         direction_id: schedule.trip.direction_id,
-        route_id: schedule.route.id
+        route_id: schedule.route.id,
+        trip_name: SelectFormatter.name_for_option(schedule, nil)
       })
     end)
   end
