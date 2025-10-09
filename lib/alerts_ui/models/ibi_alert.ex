@@ -50,25 +50,9 @@ defmodule AlertsUI.Models.IBIAlert do
     timestamps()
   end
 
+  def fields, do: @fields
+
   def changeset(%__MODULE__{} = imported_ibi_alert, params) do
     Ecto.Changeset.cast(imported_ibi_alert, params, @fields)
-  end
-
-  def row_to_changeset(row = [], existing = %{}) do
-    alert = existing[row_to_alert_id(row)] || %__MODULE__{}
-    changeset(alert, row_to_params(row))
-  end
-
-  def row_to_alert_id(row), do: row[1]
-
-  def row_to_params(row = []) do
-    row
-    |> Enum.with_index()
-    |> Enum.reduce(%{}, fn {value, index}, params ->
-      case @fields[index] do
-        nil -> raise "no field name at index #{index}"
-        field_name -> Map.put(params, %{field_name => value})
-      end
-    end)
   end
 end

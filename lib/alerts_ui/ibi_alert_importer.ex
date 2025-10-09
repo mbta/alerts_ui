@@ -1,10 +1,14 @@
 NimbleCSV.define(IBIAlertImportParser, [])
+
 defmodule AlertsUI.IBIAlertImporter do
   @moduledoc """
   Import alerts from the IBI CSV export.
   """
+  import Ecto.Query
 
-  alias AlertsUI.Models.IBIAlert, as: IBIAlert
+  alias Ecto.Multi
+  alias AlertsUI.Repo
+  alias AlertsUI.Models.IBIAlert
 
   @default_chunk_size 1000
 
@@ -44,15 +48,16 @@ defmodule AlertsUI.IBIAlertImporter do
 
           case existing_alerts_index[versioned_id] do
             nil ->
-              changeset = %IBIAlert.changeset(%IBIAlert{}, params)
-              PaperTrail.Multi.insert(multi, changeset)
+              changeset = IBIAlert.changeset(%IBIAlert{}, row_to_params(row))
+              Multi.insert(multi, versioned_id, changeset)
             alert ->
-              changeset = %IBIAlert.changeset(alert, params)
-              PaperTrail.Multi.update(multi, changeset)
+              changeset = IBIAlert.changeset(alert, row_to_params(row))
+              Multi.update(multi, versioned_id, changeset)
           end
         end)
         |> Repo.transact()
       end)
+      |> Stream.run()
     end)
   end
 
@@ -60,22 +65,17 @@ defmodule AlertsUI.IBIAlertImporter do
     Keyword.get(options, :chunk_size, @default_chunk_size)
   end
 
-  defp row_to_changeset(row, existing_alert_index) do
-    alert = existing_alert_index[row_to_alert_id(row)] || %IBIAlert{}
-    IBIAlert.changeset(alert, row_to_params(row))
-  end
+  defp row_to_alert_id(row), do: Enum.at(row, 1)
 
-  def row_to_alert_id(row), do: row[1]
+  defp row_to_version_no(row), do: Enum.at(row, 2)
 
-  def row_to_version_no(row), do: row[2]
-
-  def row_to_params(row = []) do
+  defp row_to_params(row) do
     row
     |> Enum.with_index()
     |> Enum.reduce(%{}, fn {value, index}, params ->
-      case @fields[index] do
+      case Enum.at(IBIAlert.fields(), index) do
         nil -> raise "no field name at index #{index}"
-        field_name -> Map.put(params, %{field_name => value})
+        field_name -> Map.put(params, field_name, value)
       end
     end)
   end
