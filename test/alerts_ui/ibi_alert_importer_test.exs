@@ -10,14 +10,14 @@ defmodule AlertsUI.IBIAlertImporterTest do
   @import_fixture_path "./test/support/fixtures/ibi_alert_importer/import.csv"
   @update_fixture_path "./test/support/fixtures/ibi_alert_importer/update.csv"
 
-  describe "import_csv_file/2" do
-    setup do
-      # This fixture contains a header and 10 rows to import, assiging them 
-      # alert_ids 1..10
-      IBIAlertImporter.import_csv_file(@import_fixture_path)
-      :ok
-    end
+  setup_all do
+    # This fixture contains a header and 10 rows to import, assiging them
+    # alert_ids 1..10
+    IBIAlertImporter.ingest_csv_file(@import_fixture_path)
+    :ok
+  end
 
+  describe "ingest_csv_file/2" do
     test "it creates IBI alerts from the import file, ignoring headers" do
       assert Repo.aggregate(IBIAlert, :count) == 10
       assert Repo.aggregate(from(i in IBIAlert, where: i.alert_id == "alert_id"), :count) == 0
@@ -27,7 +27,7 @@ defmodule AlertsUI.IBIAlertImporterTest do
       # This fixture again contains a header and 10 rows, this time in two batches:
       # - ids 6-10, version 1 again, which will trigger an update; alert_time_type will be set to "updated"
       # - ids 6-10, version 2, which will insert 5 new records
-      IBIAlertImporter.import_csv_file(@update_fixture_path)
+      IBIAlertImporter.ingest_csv_file(@update_fixture_path)
       assert Repo.aggregate(IBIAlert, :count) == 15
       assert Repo.aggregate(from(i in IBIAlert, where: i.alert_time_type == "updated"), :count) == 5
       assert Repo.aggregate(from(i in IBIAlert, where: i.alert_id == "10"), :count) == 2
@@ -38,5 +38,8 @@ defmodule AlertsUI.IBIAlertImporterTest do
       assert id_ten_version_one.alert_time_type == "updated"
       assert id_ten_version_two.alert_time_type == "One-time"
     end
+  end
+
+  describe "convert_alert/2" do
   end
 end

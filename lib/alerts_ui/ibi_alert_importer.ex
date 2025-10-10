@@ -27,8 +27,8 @@ defmodule AlertsUI.IBIAlertImporter do
   The entire operation is wrapped in a transaction, so input files will succeed or fail
   but never a mix of both.
   """
-  @spec import_csv_file(String.t(), chunk_size: integer()) :: {:ok, map()} | Ecto.Multi.failure()
-  def import_csv_file(path, options \\ []) do
+  @spec ingest_csv_file(String.t(), chunk_size: integer()) :: {:ok, map()} | Ecto.Multi.failure()
+  def ingest_csv_file(path, options \\ []) do
     Repo.transact(
       fn ->
         path
