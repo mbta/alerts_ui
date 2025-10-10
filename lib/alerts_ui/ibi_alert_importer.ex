@@ -45,16 +45,20 @@ defmodule AlertsUI.IBIAlertImporter do
             end)
 
           Enum.reduce(chunk, Multi.new(), fn row, multi ->
-            versioned_id = {row_to_alert_id(row), row_to_version_no(row)}
+            if Enum.at(row, 0) == "alert_version_id" do
+              multi
+            else
+              versioned_id = {row_to_alert_id(row), row_to_version_no(row)}
 
-            case existing_alerts_index[versioned_id] do
-              nil ->
-                changeset = IBIAlert.changeset(%IBIAlert{}, row_to_params(row))
-                Multi.insert(multi, versioned_id, changeset)
+              case existing_alerts_index[versioned_id] do
+                nil ->
+                  changeset = IBIAlert.changeset(%IBIAlert{}, row_to_params(row))
+                  Multi.insert(multi, versioned_id, changeset)
 
-              alert ->
-                changeset = IBIAlert.changeset(alert, row_to_params(row))
-                Multi.update(multi, versioned_id, changeset)
+                alert ->
+                  changeset = IBIAlert.changeset(alert, row_to_params(row))
+                  Multi.update(multi, versioned_id, changeset)
+              end
             end
           end)
           |> Repo.transact()
