@@ -50,6 +50,7 @@ defmodule AlertsUI.Repo.Migrations.CreateIBIAlerts do
       Enum.each(@migration_fields, fn field -> add field, :text end)
       timestamps()
     end
+
     create unique_index(:ibi_alerts, [:alert_id, :version_no])
   end
 end

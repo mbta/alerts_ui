@@ -23,42 +23,48 @@ defmodule AlertsUI.IBIAlertImporter do
         - Create a `Multi` for the chunk
         - For every row in the chunk, check for an existing alert in the index. If present, attach an update to the multi; otherwise attach an insert
         - Commit the multi
-  
+
   The entire operation is wrapped in a transaction, so input files will succeed or fail
-  but never a mix of both. 
+  but never a mix of both.
   """
-  @spec import_csv_file(String.t(), [chunk_size: integer()]) :: {:ok, map()} | Ecto.Multi.failure()
+  @spec import_csv_file(String.t(), chunk_size: integer()) :: {:ok, map()} | Ecto.Multi.failure()
   def import_csv_file(path, options \\ []) do
-    Repo.transact(fn ->
-      path
-      |> File.stream!()
-      |> IBIAlertImportParser.parse_stream()
-      |> Stream.chunk_every(chunk_size(options))
-      |> Stream.each(fn chunk ->
-        alert_ids = Enum.map(chunk, fn row -> row_to_alert_id(row) end)
+    Repo.transact(
+      fn ->
+        path
+        |> File.stream!()
+        |> IBIAlertImportParser.parse_stream()
+        |> Stream.chunk_every(chunk_size(options))
+        |> Stream.each(fn chunk ->
+          alert_ids = Enum.map(chunk, fn row -> row_to_alert_id(row) end)
 
-        existing_alerts_index = Repo.all(
-          from i in IBIAlert, where: i.alert_id in ^alert_ids
-        ) |> Map.new(fn alert ->
-          {{alert.alert_id, alert.version_no}, alert}
+          existing_alerts_index =
+            Repo.all(from i in IBIAlert, where: i.alert_id in ^alert_ids)
+            |> Map.new(fn alert ->
+              {{alert.alert_id, alert.version_no}, alert}
+            end)
+
+          Enum.reduce(chunk, Multi.new(), fn row, multi ->
+            versioned_id = {row_to_alert_id(row), row_to_version_no(row)}
+
+            case existing_alerts_index[versioned_id] do
+              nil ->
+                changeset = IBIAlert.changeset(%IBIAlert{}, row_to_params(row))
+                Multi.insert(multi, versioned_id, changeset)
+
+              alert ->
+                changeset = IBIAlert.changeset(alert, row_to_params(row))
+                Multi.update(multi, versioned_id, changeset)
+            end
+          end)
+          |> Repo.transact()
         end)
+        |> Stream.run()
 
-        Enum.reduce(chunk, Multi.new(), fn row, multi ->
-          versioned_id = {row_to_alert_id(row), row_to_version_no(row)}
-
-          case existing_alerts_index[versioned_id] do
-            nil ->
-              changeset = IBIAlert.changeset(%IBIAlert{}, row_to_params(row))
-              Multi.insert(multi, versioned_id, changeset)
-            alert ->
-              changeset = IBIAlert.changeset(alert, row_to_params(row))
-              Multi.update(multi, versioned_id, changeset)
-          end
-        end)
-        |> Repo.transact()
-      end)
-      |> Stream.run()
-    end)
+        {:ok, true}
+      end,
+      timeout: :infinity
+    )
   end
 
   defp chunk_size(options) do
