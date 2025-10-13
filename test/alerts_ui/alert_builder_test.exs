@@ -175,6 +175,33 @@ defmodule AlertsUI.AlertBuilderTest do
       end
     end
 
+    test "notification period end can be set directly in alert data" do
+      with_mocks([
+        {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
+      ]) do
+        alert_data = %{
+          route_type: 1,
+          header_text: "hello",
+          effect_name: "Delay",
+          route_ids: ["57"],
+          active_period_start: ~N[2024-04-30 11:54:00],
+          active_period_end: ~N[2024-04-30 13:54:00],
+          alert_timing: :"one-time",
+          active_period_end_specifier: :later_today,
+          active_period_start_specifier: :custom,
+          cause_detail: "DISABLED_TRAIN",
+          notification_period_start: ~N[2024-04-30 05:52:00],
+          notification_period_end: ~N[2025-10-13 17:00:00],
+          severity: 3
+        }
+
+        result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 11:54:00Z])
+        assert result.notification_period_end == ~N[2025-10-13 17:00:00]
+      end
+    end
+
+
     test "it correctly adds combo ids" do
       with_mocks([
         {RoutePatternsRepo, [],

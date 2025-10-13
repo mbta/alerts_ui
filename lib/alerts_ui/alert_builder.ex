@@ -56,6 +56,7 @@ defmodule AlertsUI.AlertBuilder do
           banner_text: String.t() | nil,
           last_push_notification_timestamp: NaiveDateTime.t() | nil,
           notification_period_start: NaiveDateTime.t() | nil,
+          notification_period_end: NaiveDateTime.t() | nil,
           notification_specifier: atom() | nil,
           severity: integer(),
           reminder_times: [NaiveDateTime.t()] | nil,
@@ -187,10 +188,13 @@ defmodule AlertsUI.AlertBuilder do
       end
 
     notification_period_end =
-      if Map.get(alert_data, :active_period_end_specifier) === :later_today do
-        ActivePeriod.end_of_service_datetime_utc(current_time)
-      else
-        Map.get(active_period_map, :active_period_end)
+      cond do
+        Map.get(alert_data, :notification_period_end) ->
+          Map.get(alert_data, :notification_period_end)
+        Map.get(alert_data, :active_period_end_specifier) === :later_today ->
+          ActivePeriod.end_of_service_datetime_utc(current_time)
+        true ->
+          Map.get(active_period_map, :active_period_end)
       end
 
     recurrence_days = Map.get(alert_data, :recurrence_days)
