@@ -163,13 +163,7 @@ defmodule AlertsUIWeb.CoreComponents do
     assigns = assign(assigns, :form, Phoenix.Component.to_form(meta))
 
     ~H"""
-    <.form
-      for={@form}
-      id={@id}
-      phx-target={@target}
-      phx-change={@on_change}
-      phx-submit={@on_change}
-    >
+    <.form for={@form} id={@id} phx-target={@target} phx-change={@on_change} phx-submit={@on_change}>
       <div class="mb-4 ml-2 flex flex-row gap-2 items-center">
         <AlertsUIWeb.SharedComponents.filter_modal form={@form} />
         <input type="hidden" name="filters[3][field]" value="timeline" />
@@ -189,7 +183,9 @@ defmodule AlertsUIWeb.CoreComponents do
           icon="hero-magnifying-glass-mini"
           class="h-[38px]"
         />
-        <AlertsUIWeb.SharedComponents.button_secondary class="btn-outline" name="reset">Reset</AlertsUIWeb.SharedComponents.button_secondary>
+        <AlertsUIWeb.SharedComponents.button_secondary class="btn-outline" name="reset">
+          Reset
+        </AlertsUIWeb.SharedComponents.button_secondary>
       </div>
     </.form>
     """

@@ -824,11 +824,12 @@ defmodule AlertsUIWeb.SharedComponents do
       <button
         data-count=""
         phx-click={show_modal(@id)}
-        class="flex items-center leading-tight min-h-[1.3rem] text-right text-primary after:content-[attr(data-count)] after:pl-1",
+        class="flex items-center leading-tight min-h-[1.3rem] text-right text-primary after:content-[attr(data-count)] after:pl-1"
+        ,
         type="button"
       >
         <span class={[
-          "hero-funnel-mini w-4 h-4 mr-1 bg-primary",
+          "hero-funnel-mini w-4 h-4 mr-1 bg-primary"
         ]} />
         {@button_label}
       </button>
@@ -1276,8 +1277,8 @@ defmodule AlertsUIWeb.SharedComponents do
           disabled={@disabled}
           loading={@loading}
           class="m-0 h-full"
-          select_class={"min-w-full pt-0 mt-0 [scrollbar-width:thin] overflow-auto
-            border-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-t-none [appearance:none] max-w-[100%] h-full"}
+          select_class="min-w-full pt-0 mt-0 [scrollbar-width:thin] overflow-auto
+            border-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-t-none [appearance:none] max-w-[100%] h-full"
           {@rest}
         />
       </div>

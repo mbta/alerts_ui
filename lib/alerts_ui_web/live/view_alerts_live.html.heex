@@ -1,7 +1,9 @@
 <div id="view_alerts_live_view" class="mt-10 mx-6 flex flex-col overflow-x-hidden">
   <div class="flex justify-between">
     <.button_primary_link href="/alerts/new" class="whitespace-nowrap">
-      <.icon name="hero-plus" class="w-6 h-6 mr-1"/><span class="font-medium">Create new alert</span>
+      <.icon name="hero-plus" class="w-6 h-6 mr-1" /><span class="font-medium">
+        Create new alert
+      </span>
     </.button_primary_link>
     <.filter_form meta={@meta} id="alert-filter-form" />
   </div>
@@ -13,7 +15,6 @@
     <.pagination meta={@meta} />
     <span class="w-[100px]" />
   </div>
-
 
   <div
     class="min-h-0 shrink overflow-y-auto overflow-x-hidden"
