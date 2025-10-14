@@ -670,8 +670,8 @@ defmodule AlertsUIWeb.SharedComponents do
               class="!flex flex-col max-h-full shadow-zinc-700/10 ring-zinc-700/10 relative hidden rounded-md bg-bg-elevation-4
               border-bg-elevation-6 shadow-lg ring-1 transition border"
             >
-              <div class="flex flex-row justify-between px-4 py-4">
-                <h1 class={["font-sm text-xl", @header_class]}>
+              <div class="flex flex-row items-center justify-between py-3 pr-3 pl-4">
+                <h1 class={["text-xl", @header_class]}>
                   {render_slot(@header) || @header_text}
                 </h1>
                 <button
@@ -775,19 +775,20 @@ defmodule AlertsUIWeb.SharedComponents do
   """
 
   attr :id, :string, default: "alerts-filter-modal"
-  attr :button_label, :string, default: "Filter Alerts"
-  attr :header_text, :string, default: "Alert Filters"
+  attr :button_label, :string, default: "Filters"
+  attr :header_text, :string, default: "Filters"
   attr :form, Form, required: true
   attr :accept_event_name, :string, default: "update-filter"
   attr :cancel_event_name, :string, default: "ignore"
 
   def filter_modal(assigns) do
     ~H"""
+    <%!-- id: "filter-modal-Alert Filter" --%>
     <span phx-hook="FilterCount" id={"filter-modal-#{@header_text}"}>
       <.modal
         id={@id}
         header_text={@header_text}
-        header_class="after:px-2 after:content-[attr(data-count)]"
+        header_class="after:content-[attr(data-count)]"
         cancel_event_name={@cancel_event_name}
         accept_event_name={@accept_event_name}
         cancel_button_text="Close"
@@ -894,19 +895,17 @@ defmodule AlertsUIWeb.SharedComponents do
       />
       <label
         for={"#{@label}-id"}
-        class="collapse-label min-h-0 flex flex-row items-center justify-between p-1"
+        class="collapse-label min-h-0 flex flex-row items-center justify-between p-2 leading-[20px]"
       >
-        <h3 class="font-semibold">{@label}</h3>
+        <h3 class="font-medium">{@label}</h3>
         <AlertsUIWeb.CoreComponents.icon
           name="hero-chevron-right"
-          class="h-4 w-4 group-has-[.trigger:checked]:rotate-90"
+          class="text-primary h-4 w-4 group-has-[.trigger:checked]:rotate-90"
         />
       </label>
       <div class="collapse-content text-base !p-0">
         <.filtered_select
           class="h-[20rem]"
-          select_class="px-[0px]"
-          select_container_class="border-0 px-2"
           field={@form[:"#{@field_name}[value]"]}
           filter_field={@form[:"#{@field_name}[_filter]"]}
           options={@options}
@@ -1147,12 +1146,6 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :class, :string, default: "", doc: "additional classes to add"
 
-  attr :select_class, :string, default: "", doc: "additional classes to add to select component"
-
-  attr :select_container_class, :string,
-    default: "",
-    doc: "additional classes to add to container of the select and search-text inputs"
-
   attr :loading, :boolean, default: false, doc: "in loading state if true"
 
   attr :multiple, :boolean, default: true
@@ -1249,7 +1242,6 @@ defmodule AlertsUIWeb.SharedComponents do
           border-bg-elevation-6 ring-0 ring-border-focus
           focus:ring-1 focus:border-border-focus
           focus-within:ring-1 focus-within:border-border-focus",
-          @select_container_class,
           @errors != [] && "border-danger focus:border-danger",
           if(@disabled, do: "bg-bg-elevation-3", else: "bg-bg-elevation-5")
         ]}
@@ -1285,7 +1277,7 @@ defmodule AlertsUIWeb.SharedComponents do
           loading={@loading}
           class="m-0 h-full"
           select_class={"min-w-full pt-0 mt-0 [scrollbar-width:thin] overflow-auto
-            border-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-t-none [appearance:none] max-w-[100%] h-full " <> @select_class}
+            border-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-t-none [appearance:none] max-w-[100%] h-full"}
           {@rest}
         />
       </div>
