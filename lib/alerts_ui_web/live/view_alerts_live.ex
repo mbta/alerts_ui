@@ -366,7 +366,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       {"Commuter Rail", 2},
       {"Bus", 3},
       {"Ferry", 4},
-      {"Access", :access}
+      {"Facility", :access}
     ]
   end
 

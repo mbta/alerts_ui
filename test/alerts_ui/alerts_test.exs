@@ -568,7 +568,7 @@ defmodule AlertsUI.AlertsTest do
     end
 
     test "filter by service type" do
-      [access_effect_name | _] = EffectsForRouteTypes.list_effects(:access)
+      [access_effect_name | _] = EffectsForRouteTypes.list_effects(:facility)
       ie_1 = build(:informed_entity, %{route_type: 1, activities: [:BOARD]})
       ie_2 = build(:informed_entity, %{route_type: nil, activities: [:STORE_BIKE]})
       insert(:alert, %{alert_id: "123", informed_entity: [ie_1]})

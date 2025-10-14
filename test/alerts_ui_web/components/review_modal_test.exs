@@ -245,7 +245,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         get: fn _ -> @facility end
       ) do
         {:ok, view, _html} = live(conn, "/alerts/new")
-        get_to_submission_page(view, "Access", "Elevator closure")
+        get_to_submission_page(view, "Facility", "Elevator closure")
 
         fill_out_form(view, "#service_form", %{
           access_affected_service: %{
@@ -260,7 +260,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         open_review_modal(view)
 
         assert view
-               |> element("#review-modal-container", "Access • Elevator Closure")
+               |> element("#review-modal-container", "Facility • Elevator Closure")
                |> has_element?
       end
     end
@@ -481,7 +481,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
       ]) do
         # Access Elevator Closure
         {:ok, view, _html} = live(conn, "/alerts/new")
-        get_to_submission_page(view, "Access", "Elevator closure")
+        get_to_submission_page(view, "Facility", "Elevator closure")
 
         fill_out_required_form_fields(view, %{access_affected_service: %{facility_id: "349"}})
 

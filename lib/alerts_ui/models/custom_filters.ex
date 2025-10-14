@@ -7,7 +7,7 @@ defmodule AlertsUI.Models.CustomFilters do
   alias Flop.Filter
 
   def service_type_filter(query, %Filter{value: values}, _opts) when is_list(values) do
-    access_effect_names = EffectsForRouteTypes.list_effects(:access)
+    access_effect_names = EffectsForRouteTypes.list_effects(:facility)
     direct_routes = values |> Enum.filter(fn x -> Integer.parse(x) != :error end)
     access_routes = values |> Enum.filter(fn x -> Integer.parse(x) == :error end)
 

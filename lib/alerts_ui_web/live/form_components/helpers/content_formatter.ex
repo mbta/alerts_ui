@@ -33,7 +33,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ContentFormatter do
           ServiceEffectCombinations.service_effect_combination() | nil
         ) :: String.t()
   def service_type_string(route_type, combination \\ nil)
-  def service_type_string(_route_type, :ACCESS), do: "Access"
+  def service_type_string(_route_type, :ACCESS), do: "Facility"
 
   def service_type_string(nil, nil), do: "Systemwide"
 
