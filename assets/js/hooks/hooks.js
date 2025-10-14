@@ -60,7 +60,12 @@ Hooks.AutoDismissFlash = {
 
 Hooks.ScrollToTop = {
   updated() {
-    setTimeout(() => this.el.scrollTo({ top: 0, behavior: "smooth" }), 0);
+    const openingAlert = !!this.el.dataset.showingAlertId;
+    const closingAlert = this.showingAlert && !openingAlert;
+    if (!(openingAlert || closingAlert)) {
+      setTimeout(() => this.el.scrollTo({ top: 0, behavior: "smooth" }), 0);
+    }
+    this.showingAlert = openingAlert;
   },
 };
 
