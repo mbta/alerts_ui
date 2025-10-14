@@ -400,7 +400,7 @@ defmodule AlertsUIWeb.CoreComponents do
       <.radio_switch name="group-name" values=["one", "two", "three"] selected={"two"} />
   """
   attr :name, :string, required: true
-  attr :class, :string
+  attr :class, :string, default: ""
   attr :values, :list, required: true
   attr :selected, :any
   attr :default, :any, default: "current"

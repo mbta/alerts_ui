@@ -30,7 +30,9 @@ defmodule AlertsUIWeb.FormComponents.Timeline do
 
   def step_buttons(assigns, step) do
     clickable_class =
-      if step.name in assigns.previous_steps, do: "text-text-primary", else: "text-text-secondary"
+      if step.name in assigns.previous_steps,
+        do: "text-text-primary  hover:underline",
+        else: "text-text-secondary"
 
     selected_class =
       if assigns.progress.name == step.name, do: "text-base font-medium", else: "text-sm"
