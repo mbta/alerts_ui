@@ -89,12 +89,15 @@ defmodule AlertsUI.AlertBuilder do
     original_stop_selections = Map.get(alert_data, :stop_names_and_ids, [])
 
     pre_combo_routes =
-      Map.get(alert_data, :route_ids, [])
+      original_route_selections
       |> Enum.filter(&(&1 !== "default"))
       |> Enum.uniq()
       |> Routes.expanding_green_line()
       |> Enum.map(&(RoutesRepo.get(&1, include: "line") || %{}))
 
+    # the original route selections are meant to reflect the routes that the user
+    # selected from the form, so we create them here before combo routes are
+    # added to our list of routes
     original_route_selections =
       Enum.map(original_route_selections, fn route_id ->
         matching_route = get_matching_route(route_id, pre_combo_routes)
