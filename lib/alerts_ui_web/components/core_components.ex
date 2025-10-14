@@ -169,9 +169,8 @@ defmodule AlertsUIWeb.CoreComponents do
       phx-target={@target}
       phx-change={@on_change}
       phx-submit={@on_change}
-      class="form-control gap-4"
     >
-      <div class="mr-8 mb-4 flex flex-row gap-4 items-center">
+      <div class="mb-4 ml-2 flex flex-row gap-2 items-center">
         <AlertsUIWeb.SharedComponents.filter_modal form={@form} />
         <input type="hidden" name="filters[3][field]" value="timeline" />
         <.radio_switch
@@ -188,9 +187,9 @@ defmodule AlertsUIWeb.CoreComponents do
           phx-debounce={750}
           placeholder="Search alerts"
           icon="hero-magnifying-glass-mini"
-          class="h-8"
+          class="h-[38px]"
         />
-        <button class="btn btn-outline basis-8 self-center px-8" name="reset">reset</button>
+        <AlertsUIWeb.SharedComponents.button_secondary class="btn-outline" name="reset">Reset</AlertsUIWeb.SharedComponents.button_secondary>
       </div>
     </.form>
     """
@@ -447,7 +446,7 @@ defmodule AlertsUIWeb.CoreComponents do
       aria-label={@label}
       checked={@checked}
       class={[
-        "join-item btn !h-10 !min-h-0 border border-primary bg-transparent text-base text-primary font-medium px-3",
+        "join-item rounded btn !h-[38px] !min-h-0 border border-primary bg-transparent text-base text-primary font-medium px-3",
         if(@checked,
           do:
             "after:bg-primary after:text-bg-primary border-primary !bg-primary !text-bg-primary !border-primary"

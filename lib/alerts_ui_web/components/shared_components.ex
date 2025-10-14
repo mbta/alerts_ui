@@ -178,7 +178,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   def base_button_classes, do: "
     px-3
-    py-2
+    py-1.5
     border
     rounded
     flex
@@ -820,14 +820,17 @@ defmodule AlertsUIWeb.SharedComponents do
           selected={Map.get(Enum.at(@form.source.flop.filters || [], 0) || %{}, :value)}
         />
       </.modal>
-      <.button_primary
+      <button
         data-count=""
         phx-click={show_modal(@id)}
-        class="w-[8rem] after:content-[attr(data-count)] after:pl-1"
+        class="flex items-center leading-tight min-h-[1.3rem] text-right text-primary after:content-[attr(data-count)] after:pl-1",
         type="button"
       >
+        <span class={[
+          "hero-funnel-mini w-4 h-4 mr-1 bg-primary",
+        ]} />
         {@button_label}
-      </.button_primary>
+      </button>
     </span>
     """
   end
@@ -1352,7 +1355,7 @@ defmodule AlertsUIWeb.SharedComponents do
       <AlertsUIWeb.CoreComponents.icon
         :if={@icon && !@disabled}
         name={@icon}
-        class="absolute ms-1 w-4 h-4 text-text-disabled"
+        class="absolute ms-3 w-4 h-4 text-text-disabled"
       />
       <input
         type="text"

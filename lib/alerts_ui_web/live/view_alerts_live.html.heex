@@ -1,7 +1,7 @@
-<div id="view_alerts_live_view" class="h-[calc(100vh-120px)] mt-10 mx-6 flex flex-col">
+<div id="view_alerts_live_view" class="mt-10 mx-6 flex flex-col overflow-x-hidden">
   <div class="flex justify-between">
     <.button_primary_link href="/alerts/new" class="whitespace-nowrap">
-      <.icon name="hero-plus" /> Create an Alert
+      <.icon name="hero-plus" class="w-6 h-6 mr-1"/><span class="font-medium">Create new alert</span>
     </.button_primary_link>
     <.filter_form meta={@meta} id="alert-filter-form" />
   </div>
@@ -14,7 +14,7 @@
     <span class="w-[100px]" />
   </div>
 
-  <div class="min-h-0 shrink overflow-y-auto" phx-hook="ScrollToTop" id="alerts-table-container">
+  <div class="min-h-0 overflow-y-auto overflow-x-hidden" phx-hook="ScrollToTop" id="alerts-table-container">
     <Flop.Phoenix.table
       items={@alerts}
       meta={@meta}
