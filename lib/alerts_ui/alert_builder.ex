@@ -73,14 +73,22 @@ defmodule AlertsUI.AlertBuilder do
           map()
   def build_alert(alert_data, combination, current_time \\ DateTime.utc_now()) do
     effect_name = Map.get(alert_data, :effect_name)
-    effect_map = Effect.effect_map_by_name(effect_name)
+    {effect, effect_detail} =
+      case {Map.get(alert_data, :effect), Map.get(alert_data, :effect_detail)} do
+        {nil, _} ->
+          effect_map = Effect.effect_map_by_name(effect_name)
+          {Map.get(effect_map, :effect), Map.get(effect_map, :effect_detail)}
+        {effect, effect_detail} ->
+          {effect, effect_detail}
+      end
+
     stop_ids = Map.get(alert_data, :stop_ids)
     direction_id = Map.get(alert_data, :direction)
     service_types = Map.get(alert_data, :service_types, []) |> expand_subway_service_types()
 
     route_type = Map.get(alert_data, :route_type)
     cause_detail = Map.get(alert_data, :cause_detail, "")
-    cause = Cause.get_by_mode_and_detail(route_type, cause_detail)
+    cause = Map.get(alert_data, :cause, Cause.get_by_mode_and_detail(route_type, cause_detail))
 
     severity = Map.get(alert_data, :severity)
 
@@ -210,8 +218,8 @@ defmodule AlertsUI.AlertBuilder do
       image_alternative_text: Map.get(alert_data, :image_alternative_text),
       cause: cause,
       cause_detail: cause_detail,
-      effect: Map.get(effect_map, :effect),
-      effect_detail: Map.get(effect_map, :effect_detail),
+      effect: effect,
+      effect_detail: effect_detail,
       effect_name: effect_name,
       last_push_notification_timestamp:
         Map.get(alert_data, :last_push_notification_timestamp)
