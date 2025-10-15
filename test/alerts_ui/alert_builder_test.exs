@@ -103,6 +103,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  recurrence_days: nil,
                  original_route_selections: ["57|57"],
                  original_stop_selections: [],
+                 original_trip_selections: [],
                  primary_service_type: "1"
                }
 
@@ -314,6 +315,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  current_time: ~U[2024-04-30 05:54:00Z],
                  recurrence_days: nil,
                  original_route_selections: ["24|24", "27|27", "57|57"],
+                 original_trip_selections: [],
                  original_stop_selections: [],
                  primary_service_type: "1"
                }
@@ -528,6 +530,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  recurrence_days: nil,
                  original_route_selections: ["CapeFLYER|CapeFlyer"],
                  original_stop_selections: [],
+                 original_trip_selections: [],
                  primary_service_type: "2"
                }
 

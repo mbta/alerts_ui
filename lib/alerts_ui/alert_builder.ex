@@ -88,9 +88,12 @@ defmodule AlertsUI.AlertBuilder do
 
     original_route_selections = Map.get(alert_data, :route_ids, [])
     original_stop_selections = Map.get(alert_data, :stop_names_and_ids, [])
-    original_trip_selections = (Map.get(alert_data, :trip_information_by_id, %{}) || %{}) |> Enum.map(fn {id, trip} ->
-      "#{Map.get(trip, :name, "")}|#{id}"
-    end)
+
+    original_trip_selections =
+      (Map.get(alert_data, :trip_information_by_id, %{}) || %{})
+      |> Enum.map(fn {id, trip} ->
+        "#{Map.get(trip, :trip_name, "")}|#{id}"
+      end)
 
     pre_combo_routes =
       original_route_selections

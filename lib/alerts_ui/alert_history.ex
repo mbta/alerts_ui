@@ -99,12 +99,6 @@ defmodule AlertsUI.AlertHistory do
   def build_history({alert_map, index}) do
     recurring? = recurring?(alert_map.recurrence_days)
 
-    route_names =
-      alert_map.original_route_selections |> Alert.get_original_names() |> Enum.join(", ")
-
-    stop_names =
-      alert_map.original_stop_selections |> Alert.get_original_names() |> Enum.join(", ")
-
     %__MODULE__{
       alert_id: alert_map.alert_id,
       version: index + 1,
@@ -116,7 +110,7 @@ defmodule AlertsUI.AlertHistory do
       effect_name: alert_map.effect_name,
       effect: alert_map.effect,
       effect_detail: alert_map.effect_detail,
-      affected_entities: Enum.join([route_names, stop_names], ";"),
+      affected_entities: build_affected_entities(alert_map),
       recurrence: recurring?,
       effect_start: format_datetime(alert_map.active_period_start, @without_seconds),
       effect_end: effect_end(alert_map.duration_certainty, alert_map.active_period_end),
@@ -141,6 +135,29 @@ defmodule AlertsUI.AlertHistory do
       website_banner_text: alert_map.banner_text || "",
       reminders: nil
     }
+  end
+
+  defp build_affected_entities(alert_map) do
+    route_names = build_entity(alert_map.original_route_selections, "Routes")
+
+    stop_names = build_entity(alert_map.original_stop_selections, "Stops")
+
+    trip_names = build_entity(alert_map.original_trip_selections, "Trips")
+
+    [route_names, stop_names, trip_names]
+    |> Enum.join("; ")
+    |> String.trim_trailing("; ")
+  end
+
+  defp build_entity([], _title), do: ""
+  defp build_entity(nil, _title), do: ""
+
+  defp build_entity(selections, title) do
+    title <>
+      ": " <>
+      (selections
+       |> Alert.get_original_names()
+       |> Enum.join(", "))
   end
 
   @spec build_history_csv([t()]) :: [list()]
