@@ -106,6 +106,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  original_route_selections: ["57|57"],
                  original_stop_selections: [],
                  original_trip_selections: [],
+                 original_facility_selections: [],
+                 original_direction_selections: [],
                  primary_service_type: "1"
                }
 
@@ -319,8 +321,9 @@ defmodule AlertsUI.AlertBuilderTest do
                  original_route_selections: ["24|24", "27|27", "57|57"],
                  original_trip_selections: [],
                  original_stop_selections: [],
-                 primary_service_type: "1",
-                 service_effect_text: nil
+                 original_facility_selections: [],
+                 service_effect_text: nil,
+                 primary_service_type: "1"
                }
 
         result
@@ -535,6 +538,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  original_route_selections: ["CapeFLYER|CapeFlyer"],
                  original_stop_selections: [],
                  original_trip_selections: [],
+                 original_facility_selections: [],
+                 original_direction_selections: [],
                  primary_service_type: "2"
                }
 

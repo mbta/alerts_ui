@@ -95,6 +95,17 @@ defmodule AlertsUI.AlertBuilder do
         "#{Map.get(trip, :trip_name, "")}|#{id}"
       end)
 
+    facility_id = Map.get(alert_data, :facility_id)
+
+    original_facility_selections =
+      if Map.get(alert_data, :facility_id) do
+        [facility_id]
+        |> Enum.map(&FacilitiesRepo.get/1)
+        |> Enum.map(&"#{SelectFormatter.name_for_option(&1)}|#{&1.id}")
+      else
+        []
+      end
+
     pre_combo_routes =
       original_route_selections
       |> Enum.filter(&(&1 !== "default"))
@@ -106,7 +117,8 @@ defmodule AlertsUI.AlertBuilder do
     # selected from the form, so we create them here before combo routes are
     # added to our list of routes
     original_route_selections =
-      Enum.map(original_route_selections, fn route_id ->
+      Map.get(alert_data, :route_ids, [])
+      |> Enum.map(fn route_id ->
         matching_route = get_matching_route(route_id, pre_combo_routes)
 
         "#{SelectFormatter.name_for_option(matching_route)}|#{route_id}"
@@ -187,6 +199,7 @@ defmodule AlertsUI.AlertBuilder do
         |> Enum.uniq(),
       original_route_selections: original_route_selections,
       original_stop_selections: original_stop_selections,
+      original_facility_selections: original_facility_selections,
       notification_period_start: notification_period_start,
       notification_period_end: notification_period_end,
       severity: severity,
