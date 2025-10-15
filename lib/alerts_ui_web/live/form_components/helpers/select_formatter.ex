@@ -153,7 +153,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
     "#{trip_name} (#{DateTimeFormatters.friendly_time(departure_time)} from #{stop_name})"
   end
 
-  def name_for_option(nil, nil), do: ""
+  def name_for_option(_, nil), do: ""
 
   @doc """
   If first arg is a stop struct and the second arg is true, return a combo of stop name and id

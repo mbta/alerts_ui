@@ -25,7 +25,7 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
   @route_one %Route{
     sort_order: 1,
     id: "1",
-    name: "1",
+    name: "bus route 1",
     direction_names: %{0 => "Outbound", 1 => "Inbound"}
   }
   @route_two %Route{sort_order: 2, id: "2", name: "2"}
@@ -62,7 +62,7 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
           effect: :SIGNIFICANT_DELAYS,
           effect_detail: "DELAY",
           informed_entity: [%{activities: [:BOARD, :EXIT, :RIDE], route_type: 3, route_id: "1"}],
-          original_route_selections: ["1"],
+          original_route_selections: ["bus route 1|1"],
           primary_service_type: "3",
           recurrence_days: []
         })
@@ -116,7 +116,7 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
                    trip: nil
                  }
                ],
-               original_route_selections: ["1"],
+               original_route_selections: ["bus route 1|1"],
                original_stop_selections: nil,
                recurrence_days: [],
                recurrence_text: nil,
@@ -152,7 +152,7 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
                    trip: nil
                  }
                ],
-               original_route_selections: ["1"],
+               original_route_selections: ["bus route 1|1"],
                original_stop_selections: nil,
                recurrence_days: [],
                recurrence_text: nil,
@@ -192,7 +192,7 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
           effect: :SIGNIFICANT_DELAYS,
           effect_detail: "DELAY",
           informed_entity: [%{route_type: 3, route_id: "1"}],
-          original_route_selections: ["1"],
+          original_route_selections: ["bus route 1|1"],
           primary_service_type: "3"
         })
 
@@ -259,7 +259,7 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
                ],
                last_modified_timestamp: nil,
                notification_period_start: nil,
-               original_route_selections: ["1"],
+               original_route_selections: ["bus route 1|1"],
                recurrence_days: [],
                recurrence_text: nil,
                reminder_times: [],

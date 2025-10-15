@@ -153,7 +153,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     notification_period_end = shift_to_naive(alert.notification_period_end)
     notification_specifier = get_notification_specifier(notification_period_start)
 
-    route_ids = alert.original_route_selections || []
+    route_ids = Alert.get_original_ids(alert.original_route_selections || [])
 
     single_route_id =
       if effect_name == "Detour" and length(route_ids) === 1 do

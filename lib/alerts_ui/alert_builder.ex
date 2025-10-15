@@ -9,7 +9,7 @@ defmodule AlertsUI.AlertBuilder do
   alias AlertsUI.{ActivePeriodBuilder, Activities}
   alias AlertsUI.Models.{ActivePeriod, Cause, Effect, RoutePattern, SeverityLevel}
   alias AlertsUI.Routes
-  alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
+  alias AlertsUIWeb.FormComponents.Helpers.{SelectFormatter, ServiceEffectCombinations}
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.Lines.Repo, as: LinesRepo
@@ -88,12 +88,25 @@ defmodule AlertsUI.AlertBuilder do
     original_route_selections = Map.get(alert_data, :route_ids, [])
     original_stop_selections = Map.get(alert_data, :stop_names_and_ids, [])
 
-    routes =
+    pre_combo_routes =
       original_route_selections
       |> Enum.filter(&(&1 !== "default"))
       |> Enum.uniq()
       |> Routes.expanding_green_line()
       |> Enum.map(&(RoutesRepo.get(&1, include: "line") || %{}))
+
+    # the original route selections are meant to reflect the routes that the user
+    # selected from the form, so we create them here before combo routes are
+    # added to our list of routes
+    original_route_selections =
+      Enum.map(original_route_selections, fn route_id ->
+        matching_route = get_matching_route(route_id, pre_combo_routes)
+
+        "#{SelectFormatter.name_for_option(matching_route)}|#{route_id}"
+      end)
+
+    routes =
+      pre_combo_routes
       |> Enum.reject(&(&1 == %{}))
       |> add_combo_routes()
 
@@ -826,6 +839,12 @@ defmodule AlertsUI.AlertBuilder do
     else
       route_types_by_id[route_id]
     end
+  end
+
+  defp get_matching_route("Green", _), do: RoutesRepo.green_line()
+
+  defp get_matching_route(route_id, routes) do
+    Enum.find(routes, %{}, fn route -> Map.get(route, :id, "") == route_id end)
   end
 
   defp primary_service_type(nil, nil), do: "systemwide"
