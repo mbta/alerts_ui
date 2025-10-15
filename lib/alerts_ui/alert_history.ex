@@ -100,10 +100,10 @@ defmodule AlertsUI.AlertHistory do
     recurring? = recurring?(alert_map.recurrence_days)
 
     route_names =
-      alert_map.original_route_selections |> Alert.get_original_names() |> Enum.join(",")
+      alert_map.original_route_selections |> Alert.get_original_names() |> Enum.join(", ")
 
     stop_names =
-      alert_map.original_stop_selections |> Alert.get_original_names() |> Enum.join(",")
+      alert_map.original_stop_selections |> Alert.get_original_names() |> Enum.join(", ")
 
     %__MODULE__{
       alert_id: alert_map.alert_id,
