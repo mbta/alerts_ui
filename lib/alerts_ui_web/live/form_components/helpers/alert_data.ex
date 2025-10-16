@@ -112,9 +112,17 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   def build_alert_data(%AlertsUI.Models.Alert{} = alert) do
     created_at = alert.created_at
 
-    created_by = alert.id |> Alerts.get_earliest_version() |> Alerts.get_originator_string()
+    created_by =
+      alert.id
+      |> Alerts.get_earliest_version()
+      |> Alerts.get_originator_string()
+      |> originator_fallback()
 
-    last_edited_by = alert.id |> Alerts.get_latest_version() |> Alerts.get_originator_string()
+    last_edited_by =
+      alert.id
+      |> Alerts.get_latest_version()
+      |> Alerts.get_originator_string()
+      |> originator_fallback()
 
     last_edited_at =
       with last_version <- Alerts.get_latest_version(alert.id),
@@ -317,4 +325,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
   defp get_banner_sync_toggle(nil), do: true
   defp get_banner_sync_toggle(_banner_text), do: false
+
+  defp originator_fallback(""), do: "Legacy User 2"
+  defp originator_fallback(nil), do: "Legacy User"
+  defp originator_fallback(user_name), do: user_name
 end
