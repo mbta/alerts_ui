@@ -26,6 +26,7 @@ defmodule AlertsUI.AlertBuilder do
   @green_line_branch_ids Routes.green_line_branch_ids()
 
   @type alert_data_t :: %{
+          alert_id: String.t() | nil,
           route_type: Route.type_int() | nil,
           combination: atom(),
           facility_id: String.t(),
@@ -46,8 +47,11 @@ defmodule AlertsUI.AlertBuilder do
           active_period_end_date: Date.t() | nil,
           active_period_start_time: Time.t() | nil,
           active_period_end_time: Time.t() | nil,
-          recurrence_days: atom() | nil,
-          cause_detail: String.t(),
+          cause: String.t() | nil,
+          cause_detail: String.t() | nil,
+          effect: String.t() | nil,
+          effect_name: String.t() | nil,
+          effect_detail: String.t() | nil,
           url: String.t() | nil,
           image_url: String.t() | nil,
           image_alternative_text: String.t() | nil,
