@@ -117,10 +117,13 @@ defmodule AlertsUI.AlertBuilder do
     # selected from the form, so we create them here before combo routes are
     # added to our list of routes
 
-    original_direction_selections = get_direction_name(selected_routes, pre_combo_routes, direction_id)
+    original_direction_selections = [
+      direction_name(selected_routes, pre_combo_routes, direction_id) <>
+        "|" <> (direction_id || "")
+    ]
 
     original_route_selections =
-      original_route_selections
+      selected_routes
       |> Enum.map(fn route_id ->
         matching_route = get_matching_route(route_id, pre_combo_routes)
 
@@ -888,28 +891,20 @@ defmodule AlertsUI.AlertBuilder do
   defp maybe_integer_to_string(value) when is_integer(value), do: Integer.to_string(value)
   defp maybe_integer_to_string(value), do: value
 
-  defp direction_name("default", _), do: "Both"
+  defp direction_name(_, _, "default"), do: "Both"
 
-  defp direction_name([route_id], routes, direction_id) do
+  defp direction_name([route_id], routes, direction_id) when is_binary(direction_id) do
     matching_route = get_matching_route(route_id, routes)
-     Map.get(matching_route, :direction_names) |> foo(direction_id)
+    direction_map = Map.get(matching_route, :direction_names, %{0 => "Outbound", 1 => "Inbound"})
+    direction_map[String.to_integer(direction_id)]
   end
 
-  defp direction_name([_ | _], _, direction_id) do
-    foo(nil, direction_id)
-  end
+  defp direction_name(_, _, nil), do: ""
 
-    defp foo([direction_0, direction_1], direction_id) do
-        %{
-      "0" => direction_0,
-      "1" => direction_1
-    }[direction_id]
-  end
-
-  defp foo(_, direction_id) do
-        %{
+  defp direction_name(_, _, direction_id) do
+    Map.get(%{
       "0" => "Outbound",
       "1" => "Inbound"
-    }[direction_id]
+    }, direction_id, "")
   end
 end

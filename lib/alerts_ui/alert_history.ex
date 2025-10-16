@@ -98,7 +98,6 @@ defmodule AlertsUI.AlertHistory do
   @spec build_history({map(), integer()}) :: struct()
   def build_history({alert_map, index}) do
     recurring? = recurring?(alert_map.recurrence_days)
-
     %__MODULE__{
       alert_id: alert_map.alert_id,
       version: index + 1,
