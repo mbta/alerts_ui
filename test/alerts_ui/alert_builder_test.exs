@@ -41,6 +41,7 @@ defmodule AlertsUI.AlertBuilderTest do
           description_text: "ok",
           header_text: "hello",
           banner_text: "important banner text",
+          service_effect_text: nil,
           effect_name: "Delay",
           route_ids: ["57"],
           direction: "default",
@@ -70,6 +71,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  effect_name: "Delay",
                  description_text: "ok",
                  header_text: "hello",
+                 service_effect_text: nil,
                  informed_entity: [
                    %{
                      route_type: 1,
@@ -315,7 +317,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  recurrence_days: nil,
                  original_route_selections: ["24|24", "27|27", "57|57"],
                  original_stop_selections: [],
-                 primary_service_type: "1"
+                 primary_service_type: "1",
+                 service_effect_text: nil
                }
 
         result
@@ -498,6 +501,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  effect: :SIGNIFICANT_DELAYS,
                  effect_name: "Delay",
                  description_text: "ok",
+                 service_effect_text: nil,
                  header_text: "hello",
                  informed_entity: [
                    %{

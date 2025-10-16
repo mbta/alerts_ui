@@ -263,7 +263,7 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
                recurrence_days: [],
                recurrence_text: nil,
                reminder_times: [],
-               service_effect_text: nil,
+               service_effect_text: "bus route 1 delay",
                severity: 3,
                severity_level: :WARNING,
                short_header_text: nil,

@@ -162,6 +162,7 @@ defmodule AlertsUI.AlertBuilder do
     %{
       header_text: Map.get(alert_data, :header_text),
       description_text: Map.get(alert_data, :description_text),
+      service_effect_text: Map.get(alert_data, :service_effect_text),
       banner_text: Map.get(alert_data, :banner_text),
       url: Map.get(alert_data, :url),
       image_url: Map.get(alert_data, :image_url),
