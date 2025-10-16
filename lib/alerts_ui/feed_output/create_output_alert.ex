@@ -15,8 +15,8 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
         %{
           effect: alert.effect,
           effect_detail: alert.effect_detail,
-          cause: alert.cause,
-          cause_detail: alert.cause_detail,
+          cause: alert.cause || :UNKNOWN_CAUSE,
+          cause_detail: alert.cause_detail || "UNKNOWN_CAUSE",
           header_text: alert.header_text |> build_translated_string,
           description_text: alert.description_text |> build_translated_string,
           banner_text: alert.banner_text |> build_translated_string,

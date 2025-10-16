@@ -17,7 +17,9 @@ defmodule AlertsUI.FeedOutput.CreateStandardAlertTest do
                  active_period: [%{start: 1_697_068_860, end: 1_697_155_260}],
                  description_text: %{translation: [%{text: "b", language: "en"}]},
                  header_text: %{translation: [%{text: "hi mom", language: "en"}]},
-                 informed_entity: [%{route_id: "1", trip: %{trip_id: "1"}}]
+                 informed_entity: [%{route_id: "1", trip: %{trip_id: "1"}}],
+                 cause: :UNKNOWN_CAUSE,
+                 cause_detail: "UNKNOWN_CAUSE"
                }
              }
     end
