@@ -71,6 +71,41 @@ defmodule AlertsUI.IBIAlertImporter do
     )
   end
 
+  def ibi_alert_to_am_alert_data(ibi_alert) do
+    [
+      :route_type,
+      :route_ids,
+      :stop_ids,
+      :stop_names_and_ids,
+      :direction_id,
+      :service_types,
+      :reminder_times,
+      :alert_timing,
+      :active_period_start,
+      :active_period_end,
+      :active_period_start_date,
+      :active_period_start_time,
+      :active_period_end_date,
+      :active_period_end_time,
+      :recurrence_days,
+      :notification_period_start,
+      :notification_period_end,
+      :header_text,
+      :description_text,
+      :banner_text,
+      :url,
+      :cause,
+      :cause_detail,
+      :effect,
+      :effect_detail,
+      :effect_name,
+      :combination,
+      :severity
+    ] |> Enum.reduce(%{}, fn key, alert_data ->
+      Map.put(alert_data, from_ibi(ibi_alert, key))
+    end)
+  end
+
   defp chunk_size(options) do
     Keyword.get(options, :chunk_size, @default_chunk_size)
   end
@@ -89,4 +124,6 @@ defmodule AlertsUI.IBIAlertImporter do
       end
     end)
   end
+
+  defp from_ibi(_ibi_alert, _key) do: nil
 end
