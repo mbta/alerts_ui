@@ -71,8 +71,10 @@ defmodule AlertsUI.IBIAlertImporter do
     )
   end
 
-  def ibi_alert_to_am_alert_data(ibi_alert) do
+  def ibi_alert_to_alert_data(ibi_alert) do
+    # alert data fields
     [
+      :alert_id,
       :route_type,
       :route_ids,
       :stop_ids,
@@ -99,10 +101,13 @@ defmodule AlertsUI.IBIAlertImporter do
       :effect,
       :effect_detail,
       :effect_name,
-      :combination,
       :severity
     ] |> Enum.reduce(%{}, fn key, alert_data ->
-      Map.put(alert_data, from_ibi(ibi_alert, key))
+      try do
+        Map.put(alert_data, key, from_ibi(ibi_alert, key))
+      rescue
+        e -> IO.puts("alert #{ibi_alert.alert_id} / #{key}: #{e.message}") && raise(e)
+      end
     end)
   end
 
@@ -125,5 +130,161 @@ defmodule AlertsUI.IBIAlertImporter do
     end)
   end
 
-  defp from_ibi(_ibi_alert, _key) do: nil
+  def from_ibi(ibi_alert, :route_type) do
+    case ibi_alert.gui_mode_name do
+      "Systemwide" -> nil
+      "Access" -> :ACCESS
+      "Elev/Esc" -> :ACCESS
+      "Subway" -> 1
+      "Commuter Rail" -> 2
+      "Bus" -> 3
+      "Boat" -> 4
+    end
+  end
+
+  def from_ibi(ibi_alert, :route_ids) do
+    split_combined_ids(ibi_alert.informed_route_id)
+  end
+
+  def from_ibi(ibi_alert, :stop_ids) do
+    split_combined_ids(ibi_alert.informed_stop_id)
+  end
+
+  def from_ibi(ibi_alert, :trip_ids) do
+    split_combined_ids(ibi_alert.informed_trip_id)
+  end
+
+  def from_ibi(ibi_alert, :direction_id) do
+    ibi_alert.informed_direction_id
+  end
+
+  def from_ibi(ibi_alert, :facility_id), do: ibi_alert.facility_id
+
+  def from_ibi(ibi_alert, :service_types), do: [from_ibi(ibi_alert, :route_type)]
+
+  def from_ibi(ibi_alert, :reminder_times) do
+    if ibi_alert.reminders do
+      ibi_alert.reminders
+      |> String.replace("send bulletin", "")
+      |> String.replace("send tweet", "")
+      |> String.replace(~r/\s/, "")
+      |> String.split(";")
+      |> Enum.map(fn timestamp -> ndt_from_ibi_reminder_string(timestamp) end)
+    else
+      []
+    end
+  end
+
+  def from_ibi(ibi_alert, :alert_timing) do
+    case ibi_alert.alert_time_type do
+      "Recurring" -> :recurring
+      _ -> :one_time
+    end
+  end
+
+  def from_ibi(ibi_alert, :active_period_start) do
+    if ibi_alert.effect_start do
+      ndt_from_ibi_string(ibi_alert.effect_start)
+    end
+  end
+
+  def from_ibi(ibi_alert, :active_period_end) do
+    if ibi_alert.effect_end do
+      ndt_from_ibi_string(ibi_alert.effect_end)
+    end
+  end
+
+  def from_ibi(ibi_alert, :active_period_start_time) do
+    if ibi_alert.recurrence_start_time do
+      ndt_from_ibi_string(ibi_alert.recurrence_start_time) |> NaiveDateTime.to_time()
+    end
+  end
+
+  def from_ibi(ibi_alert, :active_period_end_time) do
+    if ibi_alert.recurrence_end_time do
+      ndt_from_ibi_string(ibi_alert.recurrence_end_time) |> NaiveDateTime.to_time()
+    end
+  end
+
+  def from_ibi(ibi_alert, :active_period_start_date) do
+    if ibi_alert.recurrence_start do
+      ndt_from_ibi_string(ibi_alert.recurrence_start) |> NaiveDateTime.to_date()
+    end
+  end
+
+  def from_ibi(ibi_alert, :active_period_end_date) do
+    if ibi_alert.recurrence_end do
+      ndt_from_ibi_string(ibi_alert.recurrence_end) |> NaiveDateTime.to_date()
+    end
+  end
+
+  def from_ibi(ibi_alert, :recurrence_days) do
+    if ibi_alert.recurrence_days do
+      ibi_alert.recurrence_days
+      |> String.downcase()
+      |> String.replace(~r/\s/, "")
+      |> String.split(",")
+      |> Enum.map(fn day -> :"#{day}" end)
+    end
+  end
+
+  def from_ibi(ibi_alert, :notification_period_start) do
+    if ibi_alert.notif_start do
+      ndt_from_ibi_string(ibi_alert.notif_start)
+    end
+  end
+
+  def from_ibi(ibi_alert, :notification_period_end) do
+    if ibi_alert.notif_end do
+      ndt_from_ibi_string(ibi_alert.notif_end)
+    end
+  end
+
+  def from_ibi(ibi_alert, :header_text), do: ibi_alert.header
+
+  def from_ibi(ibi_alert, :description_text), do: ibi_alert.details
+
+  def from_ibi(ibi_alert, :severity) do
+    case ibi_alert.severity_name do
+      "Information" -> 1
+      "information" -> 1
+      "up to 10 minutes" -> 3
+      "up to 15 minutes" -> 4
+      "up to 20 minutes" -> 5
+      "up to 25 minutes" -> 6
+      "up to 30 minutes" -> 7
+      "more than 30 minutes" -> 8
+      "more than an hour" -> 9
+      "High priority (deliver to T-Alert subscribers immediately)" -> 10
+      "Minor" -> 1
+      "Moderate" -> 5
+      "Severe" -> 10
+      unknown -> raise "unknown severity for alert #{ibi_alert.alert_id}: #{unknown}"
+    end
+  end
+
+  def from_ibi(ibi_alert, key), do: Map.get(ibi_alert, key)
+
+  defp split_combined_ids(nil) , do: []
+  defp split_combined_ids(combined_ids) do
+    combined_ids
+    |> String.replace("_", "")
+    |> String.replace(~r/\s/, "")
+    |> String.split(",")
+  end
+
+  def ndt_from_ibi_string(timestamp) do
+    if timestamp =~ ~r/\// do
+      Timex.parse!(timestamp, "{M}/{D}/{YYYY} {h12}:{m}:{s} {AM}")
+    else
+      Timex.parse!(timestamp, "{h24}:{m}:{s}")
+    end
+  end
+
+  def ndt_from_ibi_reminder_string(timestamp) do
+    timestamp
+    |> String.replace("T", " ")
+    |> String.replace(~r/$/, ":00")
+    |> NaiveDateTime.from_iso8601!()
+  end
 end
