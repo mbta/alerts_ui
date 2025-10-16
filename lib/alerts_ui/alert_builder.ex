@@ -86,7 +86,7 @@ defmodule AlertsUI.AlertBuilder do
       Map.get(alert_data, :reminder_times, [])
       |> Enum.map(&%{reminder_time: ActivePeriodBuilder.naive_eastern_datetime_to_utc(&1)})
 
-    original_route_selections = Map.get(alert_data, :route_ids, [])
+    selected_routes = Map.get(alert_data, :route_ids, [])
     original_stop_selections = Map.get(alert_data, :stop_names_and_ids, [])
 
     original_trip_selections =
@@ -107,17 +107,20 @@ defmodule AlertsUI.AlertBuilder do
       end
 
     pre_combo_routes =
-      original_route_selections
+      selected_routes
       |> Enum.filter(&(&1 !== "default"))
       |> Enum.uniq()
       |> Routes.expanding_green_line()
       |> Enum.map(&(RoutesRepo.get(&1, include: "line") || %{}))
 
-    # the original route selections are meant to reflect the routes that the user
+    # the original route and direction selections are meant to reflect the routes that the user
     # selected from the form, so we create them here before combo routes are
     # added to our list of routes
+
+    original_direction_selections = get_direction_name(selected_routes, pre_combo_routes, direction_id)
+
     original_route_selections =
-      Map.get(alert_data, :route_ids, [])
+      original_route_selections
       |> Enum.map(fn route_id ->
         matching_route = get_matching_route(route_id, pre_combo_routes)
 
@@ -198,6 +201,7 @@ defmodule AlertsUI.AlertBuilder do
         build_informed_entities(combination, alert_data, effect_name)
         |> Enum.uniq(),
       original_route_selections: original_route_selections,
+      original_direction_selections: original_direction_selections,
       original_stop_selections: original_stop_selections,
       original_facility_selections: original_facility_selections,
       notification_period_start: notification_period_start,
@@ -883,4 +887,29 @@ defmodule AlertsUI.AlertBuilder do
   @spec maybe_integer_to_string(integer() | String.t()) :: String.t()
   defp maybe_integer_to_string(value) when is_integer(value), do: Integer.to_string(value)
   defp maybe_integer_to_string(value), do: value
+
+  defp direction_name("default", _), do: "Both"
+
+  defp direction_name([route_id], routes, direction_id) do
+    matching_route = get_matching_route(route_id, routes)
+     Map.get(matching_route, :direction_names) |> foo(direction_id)
+  end
+
+  defp direction_name([_ | _], _, direction_id) do
+    foo(nil, direction_id)
+  end
+
+    defp foo([direction_0, direction_1], direction_id) do
+        %{
+      "0" => direction_0,
+      "1" => direction_1
+    }[direction_id]
+  end
+
+  defp foo(_, direction_id) do
+        %{
+      "0" => "Outbound",
+      "1" => "Inbound"
+    }[direction_id]
+  end
 end

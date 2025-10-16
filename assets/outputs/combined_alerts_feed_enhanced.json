@@ -1,6 +1,6 @@
 {
   "header": {
-    "timestamp": 1760966161,
+    "timestamp": 1760966221,
     "gtfs_realtime_version": "2.0",
     "incrementality": "FULL_DATASET"
   },
@@ -11645,7 +11645,7 @@
       "alert": {
         "active_period": [
           {
-            "end": 1760973323,
+            "end": 1760973382,
             "start": 1760953080
           }
         ],
@@ -11711,7 +11711,7 @@
       "alert": {
         "active_period": [
           {
-            "end": 1760973323,
+            "end": 1760973382,
             "start": 1760954700
           }
         ],
@@ -11777,7 +11777,7 @@
       "alert": {
         "active_period": [
           {
-            "end": 1760973323,
+            "end": 1760973382,
             "start": 1760958720
           }
         ],
@@ -11843,7 +11843,7 @@
       "alert": {
         "active_period": [
           {
-            "end": 1760973323,
+            "end": 1760973382,
             "start": 1760959320
           }
         ],
@@ -11921,7 +11921,7 @@
       "alert": {
         "active_period": [
           {
-            "end": 1760973323,
+            "end": 1760973382,
             "start": 1760959500
           }
         ],
@@ -12468,7 +12468,7 @@
       "alert": {
         "active_period": [
           {
-            "end": 1760973323,
+            "end": 1760973382,
             "start": 1760962380
           }
         ],
@@ -12534,7 +12534,7 @@
       "alert": {
         "active_period": [
           {
-            "end": 1760973323,
+            "end": 1760973382,
             "start": 1760962800
           }
         ],
@@ -12600,7 +12600,7 @@
       "alert": {
         "active_period": [
           {
-            "end": 1760973323,
+            "end": 1760973382,
             "start": 1760962860
           }
         ],
@@ -12666,7 +12666,7 @@
       "alert": {
         "active_period": [
           {
-            "end": 1760973323,
+            "end": 1760973382,
             "start": 1760962860
           }
         ],
@@ -12932,7 +12932,7 @@
       "alert": {
         "active_period": [
           {
-            "end": 1760973323,
+            "end": 1760973382,
             "start": 1760962920
           }
         ],
@@ -12998,7 +12998,7 @@
       "alert": {
         "active_period": [
           {
-            "end": 1760973323,
+            "end": 1760973382,
             "start": 1760963340
           }
         ],
@@ -13064,7 +13064,7 @@
       "alert": {
         "active_period": [
           {
-            "end": 1760973323,
+            "end": 1760973382,
             "start": 1760963400
           }
         ],
@@ -13130,7 +13130,7 @@
       "alert": {
         "active_period": [
           {
-            "end": 1760973323,
+            "end": 1760973382,
             "start": 1760963700
           }
         ],
@@ -14278,6 +14278,238 @@
         }
       },
       "id": "673288"
+    },
+    {
+      "alert": {
+        "active_period": [
+          {
+            "end": 1760972340,
+            "start": 1760966100
+          }
+        ],
+        "alert_lifecycle": "NEW",
+        "cause": "UNKNOWN_CAUSE",
+        "cause_detail": "UNKNOWN_CAUSE",
+        "created_timestamp": 1760966175,
+        "description_text": {
+          "translation": [
+            {
+              "language": "en",
+              "text": "Affected direction: Inbound\r\n\nAffected stops:\r\nWest Concord\r\nConcord\r\nLincoln\r\nSilver Hill\r\nKendal Green\r\nBrandeis/Roberts\r\nWaltham\r\nWaverley\r\nBelmont\r\nPorter\r\nNorth Station"
+            }
+          ]
+        },
+        "duration_certainty": "KNOWN",
+        "effect": "OTHER_EFFECT",
+        "effect_detail": "DELAY",
+        "header_text": {
+          "translation": [
+            {
+              "language": "en",
+              "text": "Fitchburg Line Train 414 (8:20 am from Wachusett) is operating 5-15 minutes behind schedule between West Concord and North Station."
+            }
+          ]
+        },
+        "informed_entity": [
+          {
+            "activities": [
+              "BOARD",
+              "EXIT",
+              "RIDE"
+            ],
+            "agency_id": "1",
+            "route_id": "CR-Fitchburg",
+            "route_type": 2,
+            "stop_id": "BNT-0000",
+            "trip": {
+              "direction_id": 1,
+              "route_id": "CR-Fitchburg",
+              "trip_id": "HaverhillRestoredWKDY-744243-414"
+            }
+          },
+          {
+            "activities": [
+              "BOARD",
+              "EXIT",
+              "RIDE"
+            ],
+            "agency_id": "1",
+            "route_id": "CR-Fitchburg",
+            "route_type": 2,
+            "stop_id": "FR-0034-02",
+            "trip": {
+              "direction_id": 1,
+              "route_id": "CR-Fitchburg",
+              "trip_id": "HaverhillRestoredWKDY-744243-414"
+            }
+          },
+          {
+            "activities": [
+              "BOARD",
+              "EXIT",
+              "RIDE"
+            ],
+            "agency_id": "1",
+            "route_id": "CR-Fitchburg",
+            "route_type": 2,
+            "stop_id": "FR-0064-02",
+            "trip": {
+              "direction_id": 1,
+              "route_id": "CR-Fitchburg",
+              "trip_id": "HaverhillRestoredWKDY-744243-414"
+            }
+          },
+          {
+            "activities": [
+              "BOARD",
+              "EXIT",
+              "RIDE"
+            ],
+            "agency_id": "1",
+            "route_id": "CR-Fitchburg",
+            "route_type": 2,
+            "stop_id": "FR-0074-02",
+            "trip": {
+              "direction_id": 1,
+              "route_id": "CR-Fitchburg",
+              "trip_id": "HaverhillRestoredWKDY-744243-414"
+            }
+          },
+          {
+            "activities": [
+              "BOARD",
+              "EXIT",
+              "RIDE"
+            ],
+            "agency_id": "1",
+            "route_id": "CR-Fitchburg",
+            "route_type": 2,
+            "stop_id": "FR-0098-S",
+            "trip": {
+              "direction_id": 1,
+              "route_id": "CR-Fitchburg",
+              "trip_id": "HaverhillRestoredWKDY-744243-414"
+            }
+          },
+          {
+            "activities": [
+              "BOARD",
+              "EXIT",
+              "RIDE"
+            ],
+            "agency_id": "1",
+            "route_id": "CR-Fitchburg",
+            "route_type": 2,
+            "stop_id": "FR-0115-02",
+            "trip": {
+              "direction_id": 1,
+              "route_id": "CR-Fitchburg",
+              "trip_id": "HaverhillRestoredWKDY-744243-414"
+            }
+          },
+          {
+            "activities": [
+              "BOARD",
+              "EXIT",
+              "RIDE"
+            ],
+            "agency_id": "1",
+            "route_id": "CR-Fitchburg",
+            "route_type": 2,
+            "stop_id": "FR-0132-02",
+            "trip": {
+              "direction_id": 1,
+              "route_id": "CR-Fitchburg",
+              "trip_id": "HaverhillRestoredWKDY-744243-414"
+            }
+          },
+          {
+            "activities": [
+              "BOARD",
+              "EXIT",
+              "RIDE"
+            ],
+            "agency_id": "1",
+            "route_id": "CR-Fitchburg",
+            "route_type": 2,
+            "stop_id": "FR-0147-02",
+            "trip": {
+              "direction_id": 1,
+              "route_id": "CR-Fitchburg",
+              "trip_id": "HaverhillRestoredWKDY-744243-414"
+            }
+          },
+          {
+            "activities": [
+              "BOARD",
+              "EXIT",
+              "RIDE"
+            ],
+            "agency_id": "1",
+            "route_id": "CR-Fitchburg",
+            "route_type": 2,
+            "stop_id": "FR-0167-02",
+            "trip": {
+              "direction_id": 1,
+              "route_id": "CR-Fitchburg",
+              "trip_id": "HaverhillRestoredWKDY-744243-414"
+            }
+          },
+          {
+            "activities": [
+              "BOARD",
+              "EXIT",
+              "RIDE"
+            ],
+            "agency_id": "1",
+            "route_id": "CR-Fitchburg",
+            "route_type": 2,
+            "stop_id": "FR-0201-02",
+            "trip": {
+              "direction_id": 1,
+              "route_id": "CR-Fitchburg",
+              "trip_id": "HaverhillRestoredWKDY-744243-414"
+            }
+          },
+          {
+            "activities": [
+              "BOARD",
+              "EXIT",
+              "RIDE"
+            ],
+            "agency_id": "1",
+            "route_id": "CR-Fitchburg",
+            "route_type": 2,
+            "stop_id": "FR-0219-02",
+            "trip": {
+              "direction_id": 1,
+              "route_id": "CR-Fitchburg",
+              "trip_id": "HaverhillRestoredWKDY-744243-414"
+            }
+          }
+        ],
+        "last_modified_timestamp": 1760966175,
+        "last_push_notification_timestamp": 1760966175,
+        "service_effect_text": {
+          "translation": [
+            {
+              "language": "en",
+              "text": "Fitchburg Line delay"
+            }
+          ]
+        },
+        "severity": 4,
+        "severity_level": "WARNING",
+        "short_header_text": {
+          "translation": [
+            {
+              "language": "en",
+              "text": "Fitchburg Line Train 414 (8:20 am from Wachusett) is operating 5-15 minutes behind schedule between West Concord and North Station."
+            }
+          ]
+        }
+      },
+      "id": "673289"
     }
   ]
 }
