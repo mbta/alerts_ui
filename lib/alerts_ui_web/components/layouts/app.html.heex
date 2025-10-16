@@ -1,48 +1,48 @@
-<header class="bg-secondary">
-  <div class="flex items-center justify-between py-4 text-sm">
-    <div class="flex items-center gap-4 mx-4">
-      <.h1 class="!mb-0"><a href="/">Alerts Manager</a></.h1>
-      <div class="text-text-dark font-bold text-[21px]/[21px] px-[14px] py-[7.5px] bg-warning rounded-sm group">
-        <span class="bg-warning group-hover:hidden">TEST</span>
-        <span class="hidden group-hover:inline mx-[14.5px]">🚌</span>
+<div class="h-screen flex flex-col overflow-y-hidden">
+  <header class="bg-secondary">
+    <div class="flex items-center justify-between py-4 text-sm">
+      <div class="flex items-center gap-4 mx-4">
+        <.h1 class="!mb-0"><a href="/">Alerts Manager</a></.h1>
+        <div class="text-text-dark font-bold text-[21px]/[21px] px-[14px] py-[7.5px] bg-warning rounded-sm group">
+          <span class="bg-warning group-hover:hidden">TEST</span>
+          <span class="hidden group-hover:inline mx-[14.5px]">🚌</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-4 leading-6 mx-4">
+        <a :if={@show_alerts_table} href="/db" class="hover:text-zinc-700">
+          Alerts DB Table
+        </a>
+        <a :if={@show_components_page} href="/components" class="hover:text-zinc-700">
+          Components
+        </a>
+        <a :if={@show_validate_page} href="/validate" class="hover:text-zinc-700">
+          Validate Feeds
+        </a>
+        <%= if @current_user do %>
+          <div class="whitespace-nowrap">
+            <.icon name="hero-user-solid" />
+            {@current_user.email}
+          </div>
+          <.link
+            href={~p"/auth/keycloak/logout"}
+            method="delete"
+            class="text-sm leading-6 text-primary hover:text-zinc-700 whitespace-nowrap"
+          >
+            <.icon name="hero-arrow-right-on-rectangle" /> Logout
+          </.link>
+        <% else %>
+          <.link
+            href={~p"/auth/keycloak"}
+            class="text-sm leading-6 text-primary hover:text-zinc-700 whitespace-nowrap"
+          >
+            <.icon name="hero-arrow-left-on-rectangle" /> Login
+          </.link>
+        <% end %>
       </div>
     </div>
-    <div class="flex items-center gap-4 leading-6 mx-4">
-      <a :if={@show_alerts_table} href="/db" class="hover:text-zinc-700">
-        Alerts DB Table
-      </a>
-      <a :if={@show_components_page} href="/components" class="hover:text-zinc-700">
-        Components
-      </a>
-      <a :if={@show_validate_page} href="/validate" class="hover:text-zinc-700">
-        Validate Feeds
-      </a>
-      <%= if @current_user do %>
-        <div class="whitespace-nowrap">
-          <.icon name="hero-user-solid" />
-          {@current_user.email}
-        </div>
-        <.link
-          href={~p"/auth/keycloak/logout"}
-          method="delete"
-          class="text-sm leading-6 text-primary hover:text-zinc-700 whitespace-nowrap"
-        >
-          <.icon name="hero-arrow-right-on-rectangle" /> Logout
-        </.link>
-      <% else %>
-        <.link
-          href={~p"/auth/keycloak"}
-          class="text-sm leading-6 text-primary hover:text-zinc-700 whitespace-nowrap"
-        >
-          <.icon name="hero-arrow-left-on-rectangle" /> Login
-        </.link>
-      <% end %>
-    </div>
-  </div>
-</header>
-<main>
-  <div class="mx-auto max-w-full">
+  </header>
+  <main class="min-h-0 flex-auto overflow-auto">
     <.flash_group flash={@flash} />
     {@inner_content}
-  </div>
-</main>
+  </main>
+</div>
