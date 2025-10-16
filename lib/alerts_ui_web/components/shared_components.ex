@@ -783,7 +783,6 @@ defmodule AlertsUIWeb.SharedComponents do
 
   def filter_modal(assigns) do
     ~H"""
-    <%!-- id: "filter-modal-Alert Filter" --%>
     <span phx-hook="FilterCount" id={"filter-modal-#{@header_text}"}>
       <.modal
         id={@id}
