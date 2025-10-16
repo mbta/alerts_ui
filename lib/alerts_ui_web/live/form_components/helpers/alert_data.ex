@@ -235,6 +235,18 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     start_datetime = hd(active_period).start |> shift_to_naive
     end_datetime = hd(active_period).end |> shift_to_naive
     end_specifier = if alert.active_period_end, do: "custom", else: "until_further_notice"
+    recurrence_times = Map.get(alert, :recurrence_times, nil)
+
+    [recurrence_start, recurrence_end] =
+      if recurrence_times do
+        timezone = Timex.Timezone.get("America/New_York")
+        offset_seconds = timezone.offset_utc + timezone.offset_std
+
+        Enum.map(recurrence_times, fn time -> Time.add(time, offset_seconds) end)
+      else
+        # for compatibility with older alerts
+        [start_datetime |> NaiveDateTime.to_time(), end_datetime |> NaiveDateTime.to_time()]
+      end
 
     %{
       alert_timing: :recurring,
@@ -242,8 +254,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       active_period_end_time_specifier: determine_end_specifier(end_datetime, :KNOWN),
       active_period_start_specifier: "custom",
       active_period_end_specifier: end_specifier,
-      active_period_start_time: start_datetime |> NaiveDateTime.to_time(),
-      active_period_end_time: end_datetime |> NaiveDateTime.to_time(),
+      active_period_start_time: recurrence_start,
+      active_period_end_time: recurrence_end,
       active_period_start_date: start_datetime |> start_date,
       active_period_end_date: alert.active_period_end |> end_date(end_specifier),
       recurrence_days: alert.recurrence_days |> Enum.map(&Atom.to_string/1)

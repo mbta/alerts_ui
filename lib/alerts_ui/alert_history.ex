@@ -122,8 +122,8 @@ defmodule AlertsUI.AlertHistory do
       effect_end: effect_end(alert_map.duration_certainty, alert_map.active_period_end),
       recurrence_days:
         (alert_map.recurrence_days || []) |> Enum.map_join(",", &String.capitalize/1),
-      recurrence_start_time: get_recurrence_time(recurring?, alert_map.active_period_start),
-      recurrence_end_time: nil,
+      recurrence_start_time: get_recurrence_time(recurring?, :start, alert_map.recurrence_times),
+      recurrence_end_time: get_recurrence_time(recurring?, :end, alert_map.recurrence_times),
       notification_start: format_datetime(alert_map.notification_period_start, @without_seconds),
       notification_end: format_datetime(alert_map.notification_period_end, @without_seconds),
       duration_certainty: alert_map.duration_certainty,
@@ -210,11 +210,11 @@ defmodule AlertsUI.AlertHistory do
   defp recurring?([_ | _]), do: true
   defp recurring?(_), do: false
 
-  defp get_recurrence_time(true, datetime) do
-    format_time(datetime, "%-H:" <> @without_seconds)
-  end
+  defp get_recurrence_time(true, :start, [start_time, _]), do: format_time(start_time)
 
-  defp get_recurrence_time(false, _), do: ""
+  defp get_recurrence_time(true, :end, [_, end_time]), do: format_time(end_time)
+
+  defp get_recurrence_time(_, _, _), do: ""
 
   defp format_datetime(nil, _format), do: ""
 
@@ -226,12 +226,13 @@ defmodule AlertsUI.AlertHistory do
     |> Calendar.strftime("%Y-%m-%dT%H:" <> format)
   end
 
-  defp format_time(datetime_string, format) do
-    {:ok, utc_datetime, _} = DateTime.from_iso8601(datetime_string)
+  defp format_time(time_string) do
+    timezone = Timex.Timezone.get("America/New_York")
+    timezone_offset_seconds = timezone.offset_utc + timezone.offset_std
 
-    utc_datetime
-    |> DateTime.shift_zone!("America/New_York")
-    |> DateTime.to_time()
-    |> Calendar.strftime(format)
+    time_string
+    |> Time.from_iso8601!()
+    |> Time.add(timezone_offset_seconds)
+    |> Calendar.strftime("%-H:" <> @without_seconds)
   end
 end
