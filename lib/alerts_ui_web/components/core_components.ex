@@ -181,7 +181,7 @@ defmodule AlertsUIWeb.CoreComponents do
           phx-debounce={750}
           placeholder="Search alerts"
           icon="hero-magnifying-glass-mini"
-          class="h-[38px]"
+          class="h-[2.375rem]"
         />
         <AlertsUIWeb.SharedComponents.button_secondary class="btn-outline" name="reset">
           Reset
