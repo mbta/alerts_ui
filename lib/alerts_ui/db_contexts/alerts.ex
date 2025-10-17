@@ -291,7 +291,7 @@ defmodule AlertsUI.Alerts do
     |> Repo.all()
   end
 
-  @spec get_originator_string(PaperTrail.Version | map() | nil) :: String.t()
+  @spec get_originator_string(PaperTrail.Version | map() | nil) :: String.t() | nil
   def get_originator_string(nil), do: ""
 
   def get_originator_string(version) do

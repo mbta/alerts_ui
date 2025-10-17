@@ -326,7 +326,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   defp get_banner_sync_toggle(nil), do: true
   defp get_banner_sync_toggle(_banner_text), do: false
 
-  defp originator_fallback(""), do: "Legacy User 2"
   defp originator_fallback(nil), do: "Legacy User"
   defp originator_fallback(user_name), do: user_name
 end
