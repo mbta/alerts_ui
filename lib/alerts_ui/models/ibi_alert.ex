@@ -47,6 +47,7 @@ defmodule AlertsUI.Models.IBIAlert do
 
   schema "ibi_alerts" do
     Enum.each(@fields, fn field_name -> field field_name, :string end)
+    field :integer_version_no, :integer
     timestamps()
   end
 

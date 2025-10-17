@@ -71,6 +71,48 @@ defmodule AlertsUI.IBIAlertImporter do
     )
   end
 
+  def convert_ibi_alerts(options \\ []) do
+    Repo.transact(
+      fn ->
+        LatestIBIAlerts
+        |> Repo.stream()
+        |> Stream.chunk_every(chunk_size(options))
+        |> Stream.each(fn chunk ->
+          alert_ids = Enum.map(chunk, fn latest -> latest.alert_id end)
+
+          all_versions_index =
+            Repo.all(from i in IBIAlert, where: i.alert_id in ^alert_ids)
+            |> Enum.group_by(fn version -> version.alert_id end)
+
+          Enum.each(chunk, fn latest_version ->
+            [insert | updates]  =
+              all_versions_index
+              |> Map.get(latest_version.alert_id)
+              |> Enum.sort_by(fn version -> version.integer_version_no end)
+
+            alert = insert
+                    |> ibi_alert_to_changeset()
+                    |> PaperTrail.insert!()
+
+            Enum.each(updates, fn update ->
+              update
+              |> ibi_alert_to_changeset()
+              |> Ecto.Changeset.cast(%{id: alert.id}, [:id])
+              |> PaperTrail.update!()
+            end)
+          end)
+        end)
+        |> Stream.run()
+
+        {:ok, true}
+      end,
+      timeout: :infinity
+    )
+  end
+
+  def ibi_alert_to_changeset(ibi_alert) do
+  end
+
   def ibi_alert_to_alert_data(ibi_alert) do
     # alert data fields
     [
