@@ -138,11 +138,11 @@ defmodule AlertsUI.AlertHistory do
   end
 
   defp build_affected_entities(alert_map) do
-    route_names = build_entity(alert_map.original_route_selections, "Routes")
+    route_names = build_entity(Map.get(alert_map, :original_route_selections), "Routes")
 
-    stop_names = build_entity(alert_map.original_stop_selections, "Stops")
+    stop_names = build_entity(Map.get(alert_map, :original_stop_selections), "Stops")
 
-    trip_names = build_entity(alert_map.original_trip_selections, "Trips")
+    trip_names = build_entity(Map.get(alert_map, :original_trip_selections), "Trips")
 
     [route_names, stop_names, trip_names]
     |> Enum.join("; ")
