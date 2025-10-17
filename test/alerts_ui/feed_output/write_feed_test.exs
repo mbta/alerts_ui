@@ -1,10 +1,25 @@
 defmodule AlertsUI.FeedOutput.WriteFeedTest do
   use AlertsUI.DataCase, async: true
   import AlertsUI.Support.Factory
+  import Test.Support.Helpers
   alias AlertsUI.FeedOutput.WriteFeed
   alias AlertsUI.Models.ActivePeriod
 
   describe "write_feed/0" do
+    setup do
+      reassign_env(:alerts_ui, :get_http_fn, fn _ ->
+        %{status: 200, body: Jason.encode!(%{"entity" => []})}
+      end)
+
+      reassign_env(:alerts_ui, :get_obj_fn, fn _, _ ->
+        %{status_code: 200, body: Jason.encode!(%{"entity" => []})}
+      end)
+
+      reassign_env(:alerts_ui, :make_request_fn, fn _ ->
+        %{status_code: 200, body: Jason.encode!(%{"entity" => []})}
+      end)
+    end
+
     test "it writes" do
       current_time = DateTime.utc_now()
       four_minutes_ago = current_time |> DateTime.add(-4, :minute)

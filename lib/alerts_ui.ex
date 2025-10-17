@@ -10,4 +10,8 @@ defmodule AlertsUI do
   def config(key) do
     Application.fetch_env!(:alerts_ui, key)
   end
+
+  def config(key, default) do
+    Application.get_env(:alerts_ui, key, default)
+  end
 end

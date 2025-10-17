@@ -5,15 +5,13 @@ defmodule AlertsUIWeb.ValidateLive do
   use AlertsUIWeb, :live_view
 
   alias AlertsUI.FeedOutput.CompareFeed
-  alias ExAws.S3
-
-  @enhanced_json_filename AlertsUI.config(:enhanced_json_output_filename)
+  alias AlertsUI.FeedReader
 
   def mount(_params, _session, socket) do
-    {:ok, ibi_json} = ibi_json()
+    {:ok, ibi_json} = FeedReader.ibi_json()
     {:ok, ibi_data} = Jason.decode(ibi_json)
 
-    {:ok, dev_orange_json} = dev_orange_json()
+    {:ok, dev_orange_json} = FeedReader.dev_orange_json()
     {:ok, dev_orange_data} = Jason.decode(dev_orange_json)
 
     {:ok,
@@ -60,51 +58,6 @@ defmodule AlertsUIWeb.ValidateLive do
   end
 
   def pretty_print(obj), do: inspect(obj, pretty: true)
-
-  defp ibi_json do
-    get_ibi_feed()
-    |> parse_ibi_response()
-  end
-
-  defp get_ibi_feed do
-    get_http_fn = Application.get_env(:alerts_ui, :get_http_fn, &Req.get!/1)
-
-    get_http_fn.(
-      url: alert_api_url(),
-      headers: %{"accept-encoding" => "gzip"},
-      decode_body: false
-    )
-  end
-
-  defp alert_api_url, do: "http://s3.amazonaws.com/mbta-realtime-test/alerts_enhanced.json"
-
-  defp parse_ibi_response(%{status: 200, body: json_body}),
-    do: {:ok, convert_newlines(json_body)}
-
-  defp parse_ibi_response(_), do: :error
-
-  defp convert_newlines(text), do: String.replace(text, "\r\n", "\n")
-
-  defp dev_orange_json do
-    make_request_fn = Application.get_env(:alerts_ui, :make_request_fn, &ExAws.request!/1)
-
-    dev_orange_feed()
-    |> make_request_fn.()
-    |> parse_s3_response()
-  end
-
-  defp dev_orange_feed do
-    get_obj_fn = Application.get_env(:alerts_ui, :get_obj_fn, &S3.get_object/2)
-
-    get_obj_fn.(s3_bucket_name(), s3_file_path())
-  end
-
-  defp s3_bucket_name, do: System.get_env("S3_BUCKET_NAME", "")
-
-  defp s3_file_path, do: "#{System.get_env("S3_BUCKET_PREFIX", "")}/#{@enhanced_json_filename}"
-
-  defp parse_s3_response(%{body: json_body, status_code: 200}), do: {:ok, json_body}
-  defp parse_s3_response(_), do: :error
 
   defp find_alert(json, id) do
     json

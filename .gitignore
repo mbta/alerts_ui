@@ -44,7 +44,9 @@ npm-debug.log
 .envrc
 
 # Ignore generated feed files
+assets/outputs/alerts_manager_feed*.json
+assets/outputs/alerts_manager_feed*.pb
 assets/outputs/alerts_feed*.json
-assets/outputs/alerts_feed.pb
+assets/outputs/alerts_feed*.pb
 
 .DS_Store

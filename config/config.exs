@@ -12,9 +12,18 @@ config :alerts_ui,
   ecto_repos: [AlertsUI.Repo],
   aws_rds_mod: ExAws.RDS,
   gtfs_proto_filename: "./assets/outputs/gtfs-realtime.proto",
-  standard_json_output_filename: "alerts_feed.json",
-  enhanced_json_output_filename: "alerts_feed_enhanced.json",
-  protobuf_output_filename: "alerts_feed.pb",
+  standard_json_output_filename: "alerts_manager_feed.json",
+  enhanced_json_output_filename: "alerts_manager_feed_enhanced.json",
+  protobuf_output_filename: "alerts_manager_feed.pb",
+  combined_enhanced_json_output_filename: "alerts_feed_enhanced.json",
+  combined_protobuf_output_filename: "alerts_feed.pb",
+  s3_bucket_name: System.get_env("S3_BUCKET_NAME", ""),
+  s3_bucket_prefix: System.get_env("S3_BUCKET_PREFIX", ""),
+  alert_api_url:
+    System.get_env(
+      "ALERT_API_URL",
+      "http://s3.amazonaws.com/mbta-realtime-test/alerts_enhanced.json"
+    ),
   skip_migrations: true
 
 config :alerts_ui, :phoenix_swagger,

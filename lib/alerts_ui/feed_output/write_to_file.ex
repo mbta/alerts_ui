@@ -14,6 +14,7 @@ defmodule AlertsUI.FeedOutput.WriteToS3 do
   """
   @behaviour AlertsUI.FeedOutput.WriteFile
 
+  @spec write(String.t(), String.t()) :: :ok | {:error, any()}
   def write(filename, content) do
     case ExAws.S3.put_object(get_bucket_name(), get_file_path(filename), content,
            content_type: "application/json"
@@ -40,6 +41,7 @@ defmodule AlertsUI.FeedOutput.WriteLocal do
   @behaviour AlertsUI.FeedOutput.WriteFile
 
   # sobelow_skip ["Traversal.FileModule"]
+  @spec write(String.t(), String.t()) :: :ok | {:error, any()}
   def write(filename, content) do
     path = "./assets/outputs/" <> filename
     File.write(path, content)
@@ -52,6 +54,7 @@ defmodule AlertsUI.FeedOutput.WriteNowhere do
   """
   @behaviour AlertsUI.FeedOutput.WriteFile
 
+  @spec write(String.t(), String.t()) :: :ok | {:error, any()}
   def write(_filename, _content) do
     :ok
   end
