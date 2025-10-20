@@ -45,6 +45,10 @@ defmodule AlertsUIWeb.AlertHistoryTest do
     notification_period_end: ~U[2025-09-25 17:11:00Z],
     original_stop_selections: ["Wonderland|place-wondl", "Revere Beach|place-rbmnl"],
     original_route_selections: ["Blue Line|Blue"],
+    original_trip_selections: [
+      "2061 (10:58 AM from East Taunton)|Sept8Read-767871-2061",
+      "1976 (11:43 AM from Fall River Depot)|Sept8Read-767952-1976"
+    ],
     duration_certainty: :KNOWN,
     cause: :WEATHER,
     cause_detail: "SNOW",
@@ -95,7 +99,7 @@ defmodule AlertsUIWeb.AlertHistoryTest do
                effect_name: "Snow Route",
                effect: "DETOUR",
                effect_detail: "SNOW_ROUTE",
-               affected_entities: "Red Line;Alewife, Davis",
+               affected_entities: "Routes: Red Line; Stops: Alewife, Davis",
                recurrence: false,
                effect_start: "2025-09-25T08:11",
                effect_end: "later today",
@@ -129,7 +133,8 @@ defmodule AlertsUIWeb.AlertHistoryTest do
                effect_name: "Snow Route",
                effect: "DETOUR",
                effect_detail: "SNOW_ROUTE",
-               affected_entities: "Blue Line;Wonderland, Revere Beach",
+               affected_entities:
+                 "Routes: Blue Line; Stops: Wonderland, Revere Beach; Trips: 2061 (10:58 AM from East Taunton), 1976 (11:43 AM from Fall River Depot)",
                recurrence: true,
                effect_start: "2025-09-25T08:11",
                effect_end: "2025-09-26T13:11",
@@ -163,7 +168,8 @@ defmodule AlertsUIWeb.AlertHistoryTest do
                effect_name: "Snow Route",
                effect: "DETOUR",
                effect_detail: "SNOW_ROUTE",
-               affected_entities: "Blue Line;Wonderland, Revere Beach",
+               affected_entities:
+                 "Routes: Blue Line; Stops: Wonderland, Revere Beach; Trips: 2061 (10:58 AM from East Taunton), 1976 (11:43 AM from Fall River Depot)",
                recurrence: true,
                effect_start: "2025-09-25T08:11",
                effect_end: "2025-09-26T12:14",
