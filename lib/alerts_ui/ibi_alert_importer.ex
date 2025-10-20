@@ -305,6 +305,25 @@ defmodule AlertsUI.IBIAlertImporter do
     end
   end
 
+  def from_ibi(ibi_alert, :combination) do
+    cond do
+      ibi_alert.informed_route_id && ibi_alert.informed_direction_id && ibi_alert.informed_trip_id && ibi_alert.informed_stop_id ->
+        :RDTS
+      ibi_alert.informed_route_id && ibi_alert.informed_direction_id && ibi_alert.informed_trip_id  ->
+        :RDT
+      ibi_alert.informed_route_id && ibi_alert.informed_direction_id && ibi_alert.informed_stop_id  ->
+        :RDS
+      ibi_alert.informed_route_id && ibi_alert.informed_stop_id ->
+        :SR
+      ibi_alert.informed_route_id ->
+        :R
+      ibi_alert.facility_id ->
+        :ACCESS
+      true ->
+        nil
+    end
+  end
+
   def from_ibi(ibi_alert, key), do: Map.get(ibi_alert, key)
 
   defp split_combined_ids(nil) , do: []
