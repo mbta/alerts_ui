@@ -902,9 +902,13 @@ defmodule AlertsUI.AlertBuilder do
   defp direction_name(_, _, nil), do: ""
 
   defp direction_name(_, _, direction_id) do
-    Map.get(%{
-      "0" => "Outbound",
-      "1" => "Inbound"
-    }, direction_id, "")
+    Map.get(
+      %{
+        "0" => "Outbound",
+        "1" => "Inbound"
+      },
+      direction_id,
+      ""
+    )
   end
 end
