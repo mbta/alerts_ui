@@ -501,7 +501,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
       with_mock(FacilitiesRepo, get_by_type: fn _facility_types, _opts -> [@facility] end) do
         {:ok, view, _html} = live(conn, "/alerts/new")
 
-        get_to_submission_page(view, "Access", "Elevator closure")
+        get_to_submission_page(view, "Facility", "Elevator closure")
 
         render_async(view)
 

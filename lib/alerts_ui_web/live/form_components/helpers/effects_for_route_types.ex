@@ -76,7 +76,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes do
       "Suspension"
     ]
 
-  def list_effects(:access),
+  def list_effects(:facility),
     do: [
       "Elevator Closure",
       "Parking Closure",

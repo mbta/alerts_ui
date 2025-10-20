@@ -47,7 +47,7 @@ defmodule AlertsUIWeb.IconComponentsTest do
       assert_rendered(circle_icon(%{type: :commuter_rail}), "<svg")
       assert_rendered(circle_icon(%{type: :ferry}), "<svg")
       assert_rendered(circle_icon(%{type: :systemwide}), "<svg")
-      assert_rendered(circle_icon(%{type: :access}), "<svg")
+      assert_rendered(circle_icon(%{type: :facility}), "<svg")
       assert_rendered(circle_icon(%{type: "Red Line"}), "<svg")
       assert_rendered(circle_icon(%{type: "Blue Line"}), "<svg")
       assert_rendered(circle_icon(%{type: "Orange Line"}), "<svg")

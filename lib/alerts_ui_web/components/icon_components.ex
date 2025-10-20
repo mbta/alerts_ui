@@ -93,7 +93,7 @@ defmodule AlertsUIWeb.IconComponents do
     """
   end
 
-  def circle_icon(%{type: :access} = assigns) do
+  def circle_icon(%{type: :facility} = assigns) do
     ~H"""
     <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
       <title>

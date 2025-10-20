@@ -13,7 +13,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
     :subway,
     :commuter_rail,
     :ferry,
-    :access,
+    :facility,
     :systemwide
   ]
 
