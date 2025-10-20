@@ -250,7 +250,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
                  description_text: nil,
                  severity_level: :WARNING,
                  url: nil,
-                 service_effect_text: nil,
+                 service_effect_text: "route_number_1 delay",
                  short_header_text: nil,
                  severity: 4,
                  created_timestamp: nil,

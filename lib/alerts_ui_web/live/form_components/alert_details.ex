@@ -21,6 +21,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   embedded_schema do
     field :header_text, :string
     field :description_text, :string
+    field :service_effect_text, :string
     field :header_sync_toggle, :boolean, default: true
     field :description_sync_toggle, :boolean, default: true
     field :cause_detail, :string, default: ""
@@ -32,7 +33,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   end
 
   @required_fields ~w[header_text]a
-  @fields ~w[header_sync_toggle description_sync_toggle description_text cause_detail url image_url image_alternative_text severity]a ++
+  @fields ~w[header_sync_toggle description_sync_toggle description_text cause_detail url image_url image_alternative_text severity service_effect_text]a ++
             @required_fields
 
   @impl true
@@ -192,6 +193,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         alert_data.description_text
       end
 
+    service_effect_text = Templates.build_auto_text(autotext_data, :service_effect_template)
+
     changeset =
       %__MODULE__{}
       |> changeset(
@@ -200,7 +203,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         |> Map.merge(form.params)
         |> Map.merge(%{
           "header_text" => header_text,
-          "description_text" => description_text
+          "description_text" => description_text,
+          "service_effect_text" => service_effect_text
         })
       )
 
