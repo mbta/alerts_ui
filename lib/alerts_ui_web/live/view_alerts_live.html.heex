@@ -1,7 +1,10 @@
-<div id="view_alerts_live_view" class="h-[calc(100vh-120px)] mt-10 mx-6 flex flex-col">
+<div id="view_alerts_live_view" class="h-[calc(100%-2.5rem)] mt-10 mx-6 flex flex-col">
   <div class="flex justify-between">
     <.button_primary_link href="/alerts/new" class="whitespace-nowrap">
-      <.icon name="hero-plus" /> Create an Alert
+      <.icon name="hero-plus" class="w-6 h-6 mr-1" />
+      <span class="font-medium">
+        Create new alert
+      </span>
     </.button_primary_link>
     <.filter_form meta={@meta} id="alert-filter-form" />
   </div>
@@ -15,7 +18,7 @@
   </div>
 
   <div
-    class="min-h-0 shrink overflow-y-auto"
+    class="min-h-0 shrink overflow-y-auto overflow-x-hidden"
     phx-hook="ScrollToTop"
     data-showing-alert-id={Map.get(assigns, :selected_alert_id, "")}
     id="alerts-table-container"
@@ -80,7 +83,8 @@
             else: :notification_period_end
         }
         directions={{:asc_nulls_first, :desc_nulls_last}}
-        col_style="width: 7.5%;"
+        col_style="width: 11%;"
+        tbody_td_attrs={[class: "p-1 whitespace-nowrap"]}
       >
         <div
           title={format_timestamp(alert.active_period_end)}
