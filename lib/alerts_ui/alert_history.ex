@@ -153,7 +153,7 @@ defmodule AlertsUI.AlertHistory do
 
     [facility_names, route_names, stop_names, direction_names, trip_names]
     |> Enum.join("; ")
-    |> String.replace("; ; ", "")
+    |> String.replace("; ; ", "; ")
     |> String.trim("; ")
   end
 
@@ -172,10 +172,6 @@ defmodule AlertsUI.AlertHistory do
 
   defp build_direction([direction_name]) do
     "Direction: #{direction_name}"
-  end
-
-  defp build_direction([_ | _]) do
-    "Direction: Both"
   end
 
   defp build_direction(_), do: ""

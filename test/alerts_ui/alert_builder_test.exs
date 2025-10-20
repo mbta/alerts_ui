@@ -108,7 +108,6 @@ defmodule AlertsUI.AlertBuilderTest do
                  original_stop_selections: [],
                  original_trip_selections: [],
                  original_facility_selections: [],
-                 original_direction_selections: [],
                  primary_service_type: "1",
                  original_direction_selections: ["Inbound|1"]
                }
@@ -543,7 +542,6 @@ defmodule AlertsUI.AlertBuilderTest do
                  original_stop_selections: [],
                  original_trip_selections: [],
                  original_facility_selections: [],
-                 original_direction_selections: [],
                  primary_service_type: "2"
                }
 
