@@ -143,7 +143,8 @@ defmodule AlertsUI.IBIAlertImporter do
       :effect,
       :effect_detail,
       :effect_name,
-      :severity
+      :severity,
+      :combination
     ] |> Enum.reduce(%{}, fn key, alert_data ->
       try do
         Map.put(alert_data, key, from_ibi(ibi_alert, key))
@@ -209,9 +210,10 @@ defmodule AlertsUI.IBIAlertImporter do
       ibi_alert.reminders
       |> String.replace("send bulletin", "")
       |> String.replace("send tweet", "")
+      |> String.replace("and tweet", "")
       |> String.replace(~r/\s/, "")
       |> String.split(";")
-      |> Enum.map(fn timestamp -> ndt_from_ibi_reminder_string(timestamp) end)
+      |> Enum.map(fn timestamp -> ndt_from_ibi_reminder_format(timestamp) end)
     else
       []
     end
@@ -317,7 +319,7 @@ defmodule AlertsUI.IBIAlertImporter do
         :SR
       ibi_alert.informed_route_id ->
         :R
-      ibi_alert.facility_id ->
+      ibi_alert.informed_facility_id ->
         :ACCESS
       true ->
         nil
@@ -342,10 +344,11 @@ defmodule AlertsUI.IBIAlertImporter do
     end
   end
 
-  def ndt_from_ibi_reminder_string(timestamp) do
+  def ndt_from_ibi_reminder_format(timestamp) do
     timestamp
     |> String.replace("T", " ")
-    |> String.replace(~r/$/, ":00")
+    |> String.replace(~r/\:[0-9]*\.[0-9]*$/, "")
+    |> Kernel.<>(":00")
     |> NaiveDateTime.from_iso8601!()
   end
 end
