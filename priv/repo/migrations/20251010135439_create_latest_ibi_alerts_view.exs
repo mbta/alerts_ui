@@ -22,6 +22,7 @@ defmodule AlertsUI.Repo.Migrations.CreateLatestIBIAlertsView do
         ) versions ON
         versions.version_alert_id = ibi_alerts.alert_id AND
         versions.version = ibi_alerts.integer_version_no
+        WHERE ibi_alerts.alert_time_type != 'Template'
     ")
   end
 
