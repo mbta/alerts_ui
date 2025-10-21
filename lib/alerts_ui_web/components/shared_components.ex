@@ -349,8 +349,8 @@ defmodule AlertsUIWeb.SharedComponents do
       text-text-primary
       bg-danger
       border-danger
-      hover:bg-primary-hover
-      hover:border-primary-border-hover
+      hover:bg-danger-hover
+      hover:border-danger-hover
       active:bg-danger-active
       active:border-danger-active
       focus:border-primary-active
@@ -404,6 +404,7 @@ defmodule AlertsUIWeb.SharedComponents do
       hover:text-text-invert
       disabled:text-secondary-disabled
       disabled:border-secondary-disabled
+      cursor-pointer
         " <> shared_base_toggle_classes(),
       toggled_off: "text-primary
         border-primary
