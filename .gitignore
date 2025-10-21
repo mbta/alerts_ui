@@ -42,6 +42,7 @@ npm-debug.log
 
 .env
 .envrc
+.iex.exs
 
 # Ignore generated feed files
 assets/outputs/alerts_manager_feed*.json
