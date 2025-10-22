@@ -140,13 +140,21 @@ defmodule AlertsUI.AlertHistory do
   defp build_affected_entities(alert_map) do
     route_names = build_entity(Map.get(alert_map, :original_route_selections), "Routes")
 
+    direction_names =
+      Map.get(alert_map, :original_direction_selections)
+      |> Alert.get_original_names()
+      |> build_direction
+
     stop_names = build_entity(Map.get(alert_map, :original_stop_selections), "Stops")
 
     trip_names = build_entity(Map.get(alert_map, :original_trip_selections), "Trips")
 
-    [route_names, stop_names, trip_names]
+    facility_names = build_entity(Map.get(alert_map, :original_facility_selections), "Facilities")
+
+    [facility_names, route_names, stop_names, direction_names, trip_names]
     |> Enum.join("; ")
-    |> String.trim_trailing("; ")
+    |> String.replace("; ; ", "; ")
+    |> String.trim("; ")
   end
 
   defp build_entity([], _title), do: ""
@@ -159,6 +167,14 @@ defmodule AlertsUI.AlertHistory do
        |> Alert.get_original_names()
        |> Enum.join(", "))
   end
+
+  defp build_direction([""]), do: ""
+
+  defp build_direction([direction_name]) do
+    "Direction: #{direction_name}"
+  end
+
+  defp build_direction(_), do: ""
 
   @spec build_history_csv([t()]) :: [list()]
   def build_history_csv(history_list) do

@@ -44,7 +44,7 @@ defmodule AlertsUI.AlertBuilderTest do
           service_effect_text: nil,
           effect_name: "Delay",
           route_ids: ["57"],
-          direction: "default",
+          direction: "1",
           active_period_start: ~N[2024-04-30 11:54:00],
           alert_timing: :"one-time",
           active_period_end_specifier: :until_further_notice,
@@ -77,7 +77,8 @@ defmodule AlertsUI.AlertBuilderTest do
                      route_type: 1,
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
-                     agency_id: "1"
+                     agency_id: "1",
+                     direction_id: 1
                    }
                  ],
                  effect_detail: "DELAY",
@@ -106,7 +107,9 @@ defmodule AlertsUI.AlertBuilderTest do
                  original_route_selections: ["57|57"],
                  original_stop_selections: [],
                  original_trip_selections: [],
-                 primary_service_type: "1"
+                 original_facility_selections: [],
+                 primary_service_type: "1",
+                 original_direction_selections: ["Inbound|1"]
                }
 
         Alerts.create_or_update_alert(result, build(:user))
@@ -319,8 +322,10 @@ defmodule AlertsUI.AlertBuilderTest do
                  original_route_selections: ["24|24", "27|27", "57|57"],
                  original_trip_selections: [],
                  original_stop_selections: [],
-                 primary_service_type: "1",
-                 service_effect_text: nil
+                 original_facility_selections: [],
+                 original_direction_selections: ["Both|default"],
+                 service_effect_text: nil,
+                 primary_service_type: "1"
                }
 
         result
@@ -533,8 +538,10 @@ defmodule AlertsUI.AlertBuilderTest do
                  current_time: ~U[2024-04-30 05:54:00Z],
                  recurrence_days: nil,
                  original_route_selections: ["CapeFLYER|CapeFlyer"],
+                 original_direction_selections: ["Both|default"],
                  original_stop_selections: [],
                  original_trip_selections: [],
+                 original_facility_selections: [],
                  primary_service_type: "2"
                }
 
