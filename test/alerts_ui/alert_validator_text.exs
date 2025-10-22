@@ -1,0 +1,139 @@
+defmodule AlertsUIWeb.AlertValidatorTest do
+  @moduledoc false
+  use AlertsUIWeb.ConnCase
+  import AlertsUI.Support.Factory
+  import Mock
+
+  alias AlertsUI.AlertValidator
+  alias MBTAV3API.Facilities.Facility
+  alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
+  alias MBTAV3API.Routes.Repo, as: RoutesRepo
+  alias MBTAV3API.Routes.Route
+  alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
+  alias MBTAV3API.Schedules.Trip
+  alias MBTAV3API.Stops.Repo, as: StopsRepo
+  alias MBTAV3API.Stops.Stop
+
+  describe("validate_alerts/1") do
+    test "finds alerts with routes no longer in api" do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           all: fn ["filter[id]": _], [base_url: _, api_key: _] ->
+             [%Route{id: "1", type: 3}, %Route{id: "2", type: 3}]
+           end
+         ]}
+      ]) do
+        insert(:alert, %{
+          alert_id: "456",
+          informed_entity: [%{route_type: 3, route_id: "1"}, %{route_type: 3, route_id: "2"}]
+        })
+
+        insert(:alert, %{
+          alert_id: "234",
+          closed_timestamp: ~U[2023-10-14 00:01:00Z],
+          informed_entity: [%{route_type: 3, route_id: "1"}]
+        })
+
+        insert(:alert, %{
+          alert_id: "123",
+          informed_entity: [
+            %{route_type: 3, route_id: "1"},
+            %{route_type: 3, route_id: "2"},
+            %{route_type: 3, route_id: "3"}
+          ]
+        })
+
+        assert AlertValidator.validate_alerts() == ["123"]
+      end
+    end
+
+    test "finds alerts with stops no longer in api" do
+      with_mocks([
+        {StopsRepo, [],
+         [
+           all: fn ["filter[id]": _], [base_url: _, api_key: _] ->
+             [%Stop{id: "1"}, %Stop{id: "2"}]
+           end
+         ]}
+      ]) do
+        insert(:alert, %{alert_id: "456", informed_entity: [%{stop_id: "1"}, %{stop_id: "2"}]})
+
+        insert(:alert, %{
+          alert_id: "234",
+          closed_timestamp: ~U[2023-10-14 00:01:00Z],
+          informed_entity: [%{stop_id: "1"}]
+        })
+
+        insert(:alert, %{
+          alert_id: "123",
+          informed_entity: [%{stop_id: "1"}, %{stop_id: "2"}, %{stop_id: "3"}]
+        })
+
+        assert AlertValidator.validate_alerts() == ["123"]
+      end
+    end
+
+    test "finds alerts with trips no longer in api" do
+      with_mocks([
+        {SchedulesRepo, [],
+         [
+           trips_by_ids: fn _, [], [base_url: _, api_key: _] ->
+             [%Trip{id: "1"}, %Trip{id: "2"}]
+           end
+         ]}
+      ]) do
+        insert(:alert, %{
+          alert_id: "456",
+          informed_entity: [%{trip: %{trip_id: "1"}}, %{trip: %{trip_id: "2"}}]
+        })
+
+        insert(:alert, %{
+          alert_id: "234",
+          closed_timestamp: ~U[2023-10-14 00:01:00Z],
+          informed_entity: [%{trip: %{trip_id: "1"}}]
+        })
+
+        insert(:alert, %{
+          alert_id: "123",
+          informed_entity: [
+            %{trip: %{trip_id: "1"}},
+            %{trip: %{trip_id: "2"}},
+            %{trip: %{trip_id: "3"}}
+          ]
+        })
+
+        assert AlertValidator.validate_alerts() == ["123"]
+      end
+    end
+
+    test "finds alerts with facilities no longer in api" do
+      with_mocks([
+        {FacilitiesRepo, [],
+         [
+           all: fn ["filter[id]": _], [base_url: _, api_key: _] ->
+             [%Facility{id: "1"}, %Facility{id: "2"}]
+           end
+         ]}
+      ]) do
+        insert(:alert, %{
+          alert_id: "456",
+          informed_entity: [%{facility_id: "1"}, %{facility_id: "2"}]
+        })
+
+        insert(:alert, %{
+          alert_id: "234",
+          closed_timestamp: ~U[2023-10-14 00:01:00Z],
+          informed_entity: [%{facility_id: "1"}]
+        })
+
+        insert(:alert, %{
+          alert_id: "123",
+          informed_entity: [%{facility_id: "1"}, %{facility_id: "2"}, %{facility_id: "3"}]
+        })
+
+        assert AlertValidator.validate_alerts() == ["123"]
+      end
+    end
+  end
+end

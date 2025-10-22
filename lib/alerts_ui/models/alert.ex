@@ -353,7 +353,14 @@ defmodule AlertsUI.Models.Alert do
   def gather_facility_ids(informed_entities) do
     informed_entities
     |> Enum.map(&Map.get(&1, :facility_id))
-    |> Enum.filter(&(!is_nil(&1)))
+    |> Enum.reject(&is_nil/1)
+    |> Enum.uniq()
+  end
+
+  def gather_stop_ids(informed_entities) do
+    informed_entities
+    |> Enum.map(&Map.get(&1, :stop_id))
+    |> Enum.reject(&is_nil/1)
     |> Enum.uniq()
   end
 
@@ -364,7 +371,7 @@ defmodule AlertsUI.Models.Alert do
       parent_stop = StopsRepo.get_parent(ie_stop_id) || %{}
       Map.get(parent_stop, :id) || ie_stop_id
     end)
-    |> Enum.filter(&(!is_nil(&1)))
+    |> Enum.reject(&is_nil/1)
     |> Enum.uniq()
   end
 
@@ -376,7 +383,7 @@ defmodule AlertsUI.Models.Alert do
         trip -> Map.get(trip, :trip_id)
       end
     end)
-    |> Enum.filter(&(!is_nil(&1)))
+    |> Enum.reject(&is_nil/1)
     |> Enum.uniq()
   end
 

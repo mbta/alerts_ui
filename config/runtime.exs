@@ -25,16 +25,13 @@ cond do
     config :alerts_ui, AlertsUI.Repo, url: System.fetch_env!("DATABASE_URL_TEST")
 
     config :alerts_ui,
-      alert_api_url: System.get_env("ALERT_API_URL")
+      api_url: "https://api-dev.mbtace.com/"
 
     config :mbta_v3_api,
       base_url: "https://api-dev.mbtace.com/",
       api_key: ""
 
   config_env() == :prod ->
-    config :alerts_ui,
-      alert_api_url: System.get_env("ALERT_API_URL")
-
     # The secret key base is used to sign/encrypt cookies and other secrets.
     # A default value is used in config/dev.exs and config/test.exs but you
     # want to use a different value for prod and you most likely don't want
@@ -115,7 +112,8 @@ cond do
     config :alerts_ui, AlertsUI.Repo, url: System.fetch_env!("DATABASE_URL")
 
     config :alerts_ui,
-      alert_api_url: System.get_env("ALERT_API_URL")
+      api_url: String.replace_trailing(System.fetch_env!("API_URL"), "/", ""),
+      api_key: System.fetch_env!("API_KEY")
 
     config :mbta_v3_api,
       base_url: String.replace_trailing(System.fetch_env!("API_URL"), "/", ""),
