@@ -244,11 +244,12 @@ defmodule AlertsUI.Models.Alert do
   end
 
   @spec changeset(any(), map()) :: Ecto.Changeset.t()
-  def changeset(%__MODULE__{} = alert, params) do
+  def changeset(%__MODULE__{} = alert, params), do: open_changeset(alert, params)
+
+  @spec minimal_changeset(__MODULE__.t(), map()) :: Ecto.Changeset.t()
+  def minimal_changeset(%__MODULE__{} = alert, params) do
     alert
     |> cast(params, @permitted_fields)
-    |> cast_assoc(:active_period, required: false, with: &ActivePeriod.changeset/2)
-    |> cast_assoc(:informed_entity, required: true, with: &InformedEntity.changeset/2)
     |> cast_assoc(:reminder_times, required: false, with: &ReminderTime.changeset/2)
     |> validate_change(:recurrence_days, fn :recurrence_days, recurrence_days ->
       active_period_start =
@@ -274,9 +275,24 @@ defmodule AlertsUI.Models.Alert do
     |> validate_inclusion(:alert_lifecycle, @alert_lifecycle)
     |> validate_inclusion(:duration_certainty, @duration_certainty)
     |> validate_required([:header_text], message: "is required")
+    |> unique_constraint(:alert_id)
+  end
+
+  @spec open_changeset(__MODULE__.t() | Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
+  def open_changeset(alert, params \\ %{})
+
+  def open_changeset(%__MODULE__{} = alert, params) do
+    alert
+    |> minimal_changeset(params)
+    |> open_changeset(params)
+  end
+
+  def open_changeset(%Ecto.Changeset{} = alert_changeset, _params) do
+    alert_changeset
+    |> cast_assoc(:active_period, required: false, with: &ActivePeriod.changeset/2)
+    |> cast_assoc(:informed_entity, required: true, with: &InformedEntity.changeset/2)
     |> validate_length(:informed_entity, min: 1)
     |> validate_length(:active_period, min: 1)
-    |> unique_constraint(:alert_id)
   end
 
   @spec draft_changeset(any(), map()) :: Ecto.Changeset.t()
