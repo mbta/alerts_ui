@@ -176,8 +176,8 @@ defmodule AlertsUI.IBIAlertImporter do
   def from_ibi(ibi_alert, :route_type) do
     case ibi_alert.gui_mode_name do
       "Systemwide" -> nil
-      "Access" -> :ACCESS
-      "Elev/Esc" -> :ACCESS
+      "Access" -> 0
+      "Elev/Esc" -> 0
       "Subway" -> 1
       "Commuter Rail" -> 2
       "Bus" -> 3
