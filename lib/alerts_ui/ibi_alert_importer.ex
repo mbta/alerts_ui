@@ -7,7 +7,9 @@ defmodule AlertsUI.IBIAlertImporter do
   import Ecto.Query
 
   alias Ecto.Multi
+  alias AlertsUI.AlertBuilder
   alias AlertsUI.Repo
+  alias AlertsUI.Models.Alert
   alias AlertsUI.Models.IBIAlert
 
   @default_chunk_size 1000
@@ -110,7 +112,14 @@ defmodule AlertsUI.IBIAlertImporter do
     )
   end
 
-  def ibi_alert_to_changeset(ibi_alert) do
+  def ibi_alert_to_changeset(ibi_alert, existing_am_alert \\ %Alert{}) do
+    params =
+      ibi_alert
+      |> ibi_alert_to_alert_data()
+      |> AlertBuilder.build_alert(from_ibi(ibi_alert, :combination)) # probably need to supply current time here?
+      |> Map.put(:alert_id, ibi_alert.alert_id)
+
+    Alert.minimal_changeset(existing_am_alert, params)
   end
 
   def ibi_alert_to_alert_data(ibi_alert) do
@@ -201,7 +210,7 @@ defmodule AlertsUI.IBIAlertImporter do
     ibi_alert.informed_direction_id
   end
 
-  def from_ibi(ibi_alert, :facility_id), do: ibi_alert.facility_id
+  def from_ibi(ibi_alert, :facility_id), do: ibi_alert.informed_facility_id
 
   def from_ibi(ibi_alert, :service_types), do: [from_ibi(ibi_alert, :route_type)]
 
@@ -268,6 +277,7 @@ defmodule AlertsUI.IBIAlertImporter do
       |> String.downcase()
       |> String.replace(~r/\s/, "")
       |> String.split(",")
+      |> Enum.filter(fn day_string -> day_string != "" end)
       |> Enum.map(fn day -> :"#{day}" end)
     end
   end
@@ -336,7 +346,7 @@ defmodule AlertsUI.IBIAlertImporter do
     |> String.split(",")
   end
 
-  def ndt_from_ibi_string(timestamp) do
+  defp ndt_from_ibi_string(timestamp) do
     if timestamp =~ ~r/\// do
       Timex.parse!(timestamp, "{M}/{D}/{YYYY} {h12}:{m}:{s} {AM}")
     else
@@ -344,7 +354,7 @@ defmodule AlertsUI.IBIAlertImporter do
     end
   end
 
-  def ndt_from_ibi_reminder_format(timestamp) do
+  defp ndt_from_ibi_reminder_format(timestamp) do
     timestamp
     |> String.replace("T", " ")
     |> String.replace(~r/\:[0-9]*\.[0-9]*$/, "")
