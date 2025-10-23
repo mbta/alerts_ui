@@ -36,7 +36,14 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       |> remove_empty_filters
 
     with {alerts, meta} <- Alerts.list_all_paginated(params) do
-      {:ok, assign(socket, page_title: "View Alerts", meta: meta, alerts: alerts, params: params)}
+      {:ok,
+       assign(socket,
+         page_title: "View Alerts",
+         meta: meta,
+         alerts: alerts,
+         params: params,
+         scroll_to_top: false
+       )}
     end
   end
 
@@ -103,7 +110,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       |> remove_empty_filters
 
     with {alerts, meta} <- Alerts.list_all_paginated(flop) do
-      {:noreply, assign(socket, meta: meta, alerts: alerts)}
+      {:noreply, assign(socket, meta: meta, alerts: alerts, scroll_to_top: true)}
     end
   end
 
@@ -137,7 +144,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       |> remove_empty_filters
 
     with {alerts, meta} <- Alerts.list_all_paginated(flop) do
-      {:noreply, assign(socket, meta: meta, alerts: alerts)}
+      {:noreply, assign(socket, meta: meta, alerts: alerts, scroll_to_top: true)}
     end
   end
 
@@ -154,7 +161,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       |> remove_empty_filters
 
     with {alerts, meta} <- Alerts.list_all_paginated(flop) do
-      {:noreply, assign(socket, meta: meta, alerts: alerts)}
+      {:noreply, assign(socket, meta: meta, alerts: alerts, scroll_to_top: true)}
     end
   end
 
@@ -165,6 +172,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       |> clean_filter_params()
       |> Map.replace("filters", %{})
 
+    socket = assign(socket, scroll_to_top: true)
     {:noreply, push_patch(socket, to: ~p"/alerts?#{params}")}
   end
 
@@ -173,6 +181,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       clean_filter_params(params)
       |> Map.take(["filters"])
 
+    socket = assign(socket, scroll_to_top: true)
     {:noreply, push_patch(socket, to: ~p"/alerts?#{params}")}
   end
 
@@ -180,36 +189,44 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   def handle_event("open_details", %{"alert_id" => alert_id}, socket) when is_integer(alert_id) do
     alert_data = alert_id |> Integer.to_string() |> AlertData.build_alert_data()
 
-    {:noreply, assign(socket, selected_alert_data: alert_data, selected_alert_id: alert_id)}
+    {:noreply,
+     assign(socket,
+       selected_alert_data: alert_data,
+       selected_alert_id: alert_id,
+       scroll_to_top: false
+     )}
   end
 
   @impl true
   def handle_event("open_details", %{"alert_id" => _alert_id}, socket) do
-    {:noreply, socket}
+    {:noreply, assign(socket, scroll_to_top: false)}
   end
 
   @impl true
   def handle_event("close_details", _, socket) do
-    {:noreply, assign(socket, selected_alert_data: nil, selected_alert_id: nil)}
+    {:noreply,
+     assign(socket, selected_alert_data: nil, selected_alert_id: nil, scroll_to_top: false)}
   end
 
   @impl true
   def handle_event("ignore", _params, socket) do
-    {:noreply, socket}
+    {:noreply, assign(socket, scroll_to_top: false)}
   end
 
   @impl true
   def handle_event("cancelled_close_modal", _params, socket) do
-    {:noreply, socket}
+    {:noreply, assign(socket, scroll_to_top: false)}
   end
 
   @impl true
   def handle_event("edit_alert", %{"alert_id" => alert_id}, socket) do
+    socket = assign(socket, scroll_to_top: false)
     {:noreply, push_navigate(socket, to: ~p"/alerts/edit?alert_id=#{alert_id}")}
   end
 
   @impl true
   def handle_event("duplicate_alert", %{"alert_id" => alert_id}, socket) do
+    socket = assign(socket, scroll_to_top: true)
     {:noreply, push_navigate(socket, to: ~p"/alerts/duplicate?alert_id=#{alert_id}")}
   end
 
@@ -218,6 +235,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     alert_id |> Alerts.get_by_alert_id() |> Alerts.close(socket.assigns.current_user)
     # refresh view so alert is displayed in correct timeline category
     Process.send(self(), :update, [])
+    socket = assign(socket, scroll_to_top: false)
     {:noreply, socket}
   end
 
@@ -229,6 +247,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       ) do
     {:noreply,
      assign(socket,
+       scroll_to_top: false,
        selected_alert_data:
          Map.put(socket.assigns.selected_alert_data, :image_preview_size, image_preview_size)
      )}
