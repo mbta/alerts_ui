@@ -133,7 +133,7 @@ defmodule AlertsUI.AlertHistory do
       image_alternative_text: alert_map.image_alternative_text || "",
       set_as_website_banner: !is_nil(alert_map.banner_text),
       website_banner_text: alert_map.banner_text || "",
-      reminders: nil
+      reminders: Map.get(alert_map, :plaintext_reminder_selections) || ""
     }
   end
 

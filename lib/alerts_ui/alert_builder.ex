@@ -86,6 +86,10 @@ defmodule AlertsUI.AlertBuilder do
       Map.get(alert_data, :reminder_times, [])
       |> Enum.map(&%{reminder_time: ActivePeriodBuilder.naive_eastern_datetime_to_utc(&1)})
 
+    plaintext_reminder_selections =
+      Map.get(alert_data, :reminder_times, [])
+      |> Enum.map_join(", ", &Calendar.strftime(&1, "%Y-%m-%dT%H:%M:%S"))
+
     selected_routes = Map.get(alert_data, :route_ids, [])
     original_stop_selections = Map.get(alert_data, :stop_names_and_ids, [])
 
@@ -212,6 +216,7 @@ defmodule AlertsUI.AlertBuilder do
       severity: severity,
       severity_level: SeverityLevel.severity_level_by_severity(severity),
       reminder_times: reminder_times,
+      plaintext_reminder_selections: plaintext_reminder_selections,
       current_time: current_time,
       recurrence_days: Map.get(alert_data, :recurrence_days),
       original_trip_selections: original_trip_selections,

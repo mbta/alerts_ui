@@ -59,7 +59,8 @@ defmodule AlertsUIWeb.AlertHistoryTest do
     url: "http://example.com",
     image_url: "http://example.com/image.jpg",
     image_alternative_text: "example image",
-    banner_text: "the banner text"
+    banner_text: "the banner text",
+    plaintext_reminder_selections: "2024-04-30T12:04:00, 2024-04-30T12:14:00, 2024-04-30T12:24:00"
   }
 
   describe "alert_history/1" do
@@ -123,7 +124,7 @@ defmodule AlertsUIWeb.AlertHistoryTest do
                image_alternative_text: "",
                set_as_website_banner: false,
                website_banner_text: "",
-               reminders: nil
+               reminders: ""
              } = result_1
 
       assert %{
@@ -158,7 +159,7 @@ defmodule AlertsUIWeb.AlertHistoryTest do
                image_alternative_text: "example image",
                set_as_website_banner: true,
                website_banner_text: "the banner text",
-               reminders: nil
+               reminders: "2024-04-30T12:04:00, 2024-04-30T12:14:00, 2024-04-30T12:24:00"
              } = result_2
 
       assert %{
@@ -193,7 +194,7 @@ defmodule AlertsUIWeb.AlertHistoryTest do
                image_alternative_text: "example image",
                set_as_website_banner: true,
                website_banner_text: "the banner text",
-               reminders: nil
+               reminders: "2024-04-30T12:04:00, 2024-04-30T12:14:00, 2024-04-30T12:24:00"
              } = result_3
     end
   end
