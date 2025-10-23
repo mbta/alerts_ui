@@ -86,9 +86,9 @@ defmodule AlertsUI.IBIAlertImporterTest do
       assert from_ibi(ibi_alert, :trip_ids) == ["CR-Fitchburg-Test-Trip"]
     end
 
-    test ":direction_id", %{ibi_alert: ibi_alert} do
+    test ":direction", %{ibi_alert: ibi_alert} do
       assert ibi_alert.informed_direction_id == "1"
-      assert from_ibi(ibi_alert, :direction_id) == "1"
+      assert from_ibi(ibi_alert, :direction) == "1"
     end
 
     test ":facility_id", %{ibi_alert: ibi_alert} do

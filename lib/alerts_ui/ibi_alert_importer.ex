@@ -130,7 +130,7 @@ defmodule AlertsUI.IBIAlertImporter do
       :route_ids,
       :stop_ids,
       :stop_names_and_ids,
-      :direction_id,
+      :direction,
       :service_types,
       :reminder_times,
       :alert_timing,
@@ -206,7 +206,7 @@ defmodule AlertsUI.IBIAlertImporter do
     split_combined_ids(ibi_alert.informed_trip_id)
   end
 
-  def from_ibi(ibi_alert, :direction_id) do
+  def from_ibi(ibi_alert, :direction) do
     ibi_alert.informed_direction_id
   end
 
