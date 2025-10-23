@@ -285,7 +285,17 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   def end_date(nil, _), do: nil
   def end_date(ap_end, "end_of_service"), do: ap_end |> NaiveDateTime.to_date() |> Date.add(-1)
   def end_date(ap_end, "later_today"), do: ap_end |> NaiveDateTime.to_date() |> Date.add(-1)
-  def end_date(ap_end, _), do: ap_end |> NaiveDateTime.to_date()
+
+  def end_date(ap_end, _) do
+    end_time = NaiveDateTime.to_time(ap_end)
+    end_date = NaiveDateTime.to_date(ap_end)
+
+    if Time.compare(end_time, ActivePeriod.end_of_service_time()) in [:lt, :eq] do
+      Date.add(end_date, -1)
+    else
+      end_date
+    end
+  end
 
   def determine_start_specifier(nil), do: nil
 
