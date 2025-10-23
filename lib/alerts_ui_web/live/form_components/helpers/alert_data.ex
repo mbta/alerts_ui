@@ -265,7 +265,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       active_period_start_time: recurrence_start,
       active_period_end_time: recurrence_end,
       active_period_start_date: start_datetime |> start_date,
-      active_period_end_date: alert.active_period_end |> end_date(end_specifier),
+      active_period_end_date:
+        alert.active_period_end |> shift_to_naive |> end_date(end_specifier),
       recurrence_days: alert.recurrence_days |> Enum.map(&Atom.to_string/1)
     }
   end
