@@ -436,8 +436,8 @@ defmodule AlertsUIWeb.ReviewModal do
             id="review-modal-close-alert"
             phx-remove={hide_modal(@id)}
             phx-click={
-              JS.push("close_alert", target: @target_id, value: %{"value" => @alert_id})
-              |> JS.exec("phx-remove")
+              demote_modal(@id)
+              |> show_modal("close-alert-nested-modal-#{@alert_id}")
             }
           >
             {if ActiveStatus.get_alert_status(@alert_data) in [
@@ -480,6 +480,11 @@ defmodule AlertsUIWeb.ReviewModal do
           <% end %>
         </div>
       </:footer>
+      <AlertsUIWeb.ReviewModal.confirm_close_modal
+        id="close-alert-nested-modal"
+        alert_id={@alert_id}
+        on_accept={hide_modal(@id)}
+      />
     </.modal>
     """
   end
@@ -514,4 +519,48 @@ defmodule AlertsUIWeb.ReviewModal do
   end
 
   defp get_stop_names(_alert_data), do: nil
+
+  attr :id, :string,
+    default: "close-alert-modal",
+    doc: "The ID of the modal element. Will have the alert_id appended to it."
+
+  attr :alert_id, :integer, required: true, doc: "The id of the alert we're dealing with"
+
+  attr :target_id, :string,
+    default: "",
+    doc: "The ID of the element that should receive this modal's events"
+
+  attr :rest, :global, include: ~w(on_cancel on_accept)
+
+  def confirm_close_modal(assigns) do
+    ~H"""
+    <.modal
+      id={"#{@id}-#{@alert_id}"}
+      header_text="Close alert"
+      cancel_event_name="cancelled_close_modal"
+      accept_event_name="close_alert"
+      cancel_button_text="Keep Active"
+      accept_button_text="Close now"
+      target_id="#view_alerts_live_view"
+      class="text-text-primary min-w-[26rem]"
+      inner_class="text-base font-light min-h-[72px]"
+      cancel_button_classes="border-0 text-base"
+      accept_button_classes="
+              !text-white
+              !bg-danger
+              !border-danger
+              hover:!bg-primary-hover
+              hover:!border-primary-border-hover
+              active:!bg-primary-active
+              active:!border-primary-active
+              focus:!border-primary-active
+              text-base
+              "
+      value={@alert_id}
+      {@rest}
+    >
+      Are you sure you want to close alert #{@alert_id}?
+    </.modal>
+    """
+  end
 end

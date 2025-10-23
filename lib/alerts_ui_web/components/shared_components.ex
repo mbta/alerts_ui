@@ -629,6 +629,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :id, :string, required: true
   attr :show, :boolean, default: false
+  attr :on_accept, JS, default: %JS{}
   attr :on_cancel, JS, default: %JS{}
 
   attr :value, :string, default: "", doc: "data to pass to event handler on accept"
@@ -643,6 +644,7 @@ defmodule AlertsUIWeb.SharedComponents do
       id={@id}
       phx-mounted={@show && show_modal(@id)}
       phx-remove={hide_modal(@id)}
+      data-accept={JS.exec(@on_accept, "phx-remove")}
       data-cancel={JS.exec(@on_cancel, "phx-remove")}
       class="relative z-50 hidden !ml-0"
     >
@@ -703,6 +705,7 @@ defmodule AlertsUIWeb.SharedComponents do
                     phx-remove={hide_modal(@id)}
                     phx-click={
                       JS.push(@cancel_event_name, target: @target_id)
+                      |> JS.exec("data-cancel", to: "##{@id}")
                       |> JS.exec("phx-remove")
                     }
                   >
@@ -715,6 +718,7 @@ defmodule AlertsUIWeb.SharedComponents do
                     phx-remove={hide_modal(@id)}
                     phx-click={
                       JS.push(@accept_event_name, target: @target_id)
+                      |> JS.exec("data-accept", to: "##{@id}")
                       |> JS.exec("phx-remove")
                     }
                     value={@value}
@@ -765,6 +769,12 @@ defmodule AlertsUIWeb.SharedComponents do
     |> JS.hide(to: "##{id}", transition: {"flex", "flex", "hidden"})
     |> JS.remove_class("overflow-hidden", to: "body")
     |> JS.pop_focus()
+  end
+
+  def demote_modal(js \\ %JS{}, id) do
+    js
+    |> JS.remove_class("z-50", to: "##{id}")
+    |> JS.add_class("z-[49]", to: "##{id}")
   end
 
   @doc """

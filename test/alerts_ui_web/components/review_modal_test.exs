@@ -1294,7 +1294,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         """)
 
       assert rendered_modal =~ "Alert #123 (Published / Current)"
-      assert rendered_modal =~ "Close alert"
+      assert rendered_modal =~ ~r"<button[^>]*?>\s*?Close alert"s
       assert rendered_modal =~ "Duplicate"
       assert rendered_modal =~ "Edit this alert"
     end
@@ -1322,7 +1322,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         """)
 
       assert rendered_modal =~ "Alert #123 (Published / Upcoming)"
-      assert rendered_modal =~ "Close alert"
+      assert rendered_modal =~ ~r"<button[^>]*?>\s*?Close alert"s
       assert rendered_modal =~ "Duplicate"
       assert rendered_modal =~ "Edit this alert"
     end
@@ -1349,8 +1349,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         """)
 
       assert rendered_modal =~ "Alert #123 (Past)"
-      refute rendered_modal =~ "Close alert"
-      refute rendered_modal =~ "Cancel alert"
+      refute rendered_modal =~ ~r"<button[^>]*?>\s*?Close alert"s
+      refute rendered_modal =~ ~r"<button[^>]*?>\s*?Cancel alert"s
       assert rendered_modal =~ "Duplicate"
       assert rendered_modal =~ "Done"
     end
