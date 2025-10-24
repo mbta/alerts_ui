@@ -30,17 +30,10 @@ defmodule AlertsUI.DelayedJob do
   """
   @impl Oban.Worker
   def perform(%{args: args} = job, opts \\ []) do
-    Logger.debug("DelayedJob: Starting delay at #{inspect(DateTime.now!("Etc/UTC"))}")
-    %{"delay" => delay, "module" => module_name} = args
+    %{"args" => job_args, "delay" => delay, "module" => module_name} = args
     module = Module.safe_concat([module_name])
     Process.sleep(delay)
-
-    Logger.debug(
-      "DelayedJob: Running #{module_name}.perform at #{inspect(DateTime.now!("Etc/UTC"))}"
-    )
-
-    downstream_args = Map.get(args, "args", %{})
-    job = Map.put(job, "args", downstream_args)
+    job = Map.put(job, "args", job_args)
     module.perform(job, opts)
   end
 end
