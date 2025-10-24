@@ -4,6 +4,8 @@ defmodule AlertsUI.IBIAlertImporter do
   @moduledoc """
   Import alerts from the IBI CSV export.
   """
+  require Logger
+
   import Ecto.Query
 
   alias Ecto.Multi
@@ -112,14 +114,22 @@ defmodule AlertsUI.IBIAlertImporter do
     )
   end
 
-  def ibi_alert_to_changeset(ibi_alert, existing_am_alert \\ %Alert{}) do
+  def ibi_alert_to_changeset(ibi_alert, am_alert \\ %Alert{}, options \\ [])
+
+  def ibi_alert_to_changeset(ibi_alert, am_alert, [open: true] = options) do
+    ibi_alert
+    |> ibi_alert_to_changeset(am_alert, Keyword.put(options, :open, false))
+    |> Alert.open_changeset(%{})
+  end
+
+  def ibi_alert_to_changeset(ibi_alert, am_alert, _options) do
     params =
       ibi_alert
       |> ibi_alert_to_alert_data()
       |> AlertBuilder.build_alert(from_ibi(ibi_alert, :combination)) # probably need to supply current time here?
       |> Map.put(:alert_id, ibi_alert.alert_id)
 
-    Alert.minimal_changeset(existing_am_alert, params)
+    Alert.minimal_changeset(am_alert, params)
   end
 
   def ibi_alert_to_alert_data(ibi_alert) do
@@ -158,7 +168,7 @@ defmodule AlertsUI.IBIAlertImporter do
       try do
         Map.put(alert_data, key, from_ibi(ibi_alert, key))
       rescue
-        e -> IO.puts("alert #{ibi_alert.alert_id} / #{key}: #{e.message}") && raise(e)
+        e -> Logger.error("alert #{ibi_alert.alert_id} / #{key}: #{e.message}") && raise(e)
       end
     end)
   end
