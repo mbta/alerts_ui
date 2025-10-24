@@ -7,6 +7,7 @@ defmodule AlertsUI.AlertHistory do
 
   alias AlertsUI.Alerts
   alias AlertsUI.Models.{Alert, SeverityLevel}
+  alias AlertsUIWeb.FormComponents.Helpers.ContentFormatter
 
   @history_keys [
     :alert_id,
@@ -107,7 +108,7 @@ defmodule AlertsUI.AlertHistory do
       closed: closed?(alert_map.closed_timestamp),
       last_modified_by: Alerts.get_originator_string(alert_map),
       last_modified_datetime: format_datetime(alert_map.updated_at, @with_seconds),
-      service_type: Map.get(alert_map, :primary_service_type),
+      service_type: get_service_type(Map.get(alert_map, :primary_service_type)),
       effect_name: alert_map.effect_name,
       effect: alert_map.effect,
       effect_detail: alert_map.effect_detail,
@@ -249,6 +250,21 @@ defmodule AlertsUI.AlertHistory do
   defp get_recurrence_time(true, :end, [_, end_time]), do: format_time(end_time)
 
   defp get_recurrence_time(_, _, _), do: ""
+
+  defp get_service_type(nil), do: ""
+  defp get_service_type("access"), do: "Facility"
+  defp get_service_type("systemwide"), do: "Systemwide"
+
+  defp get_service_type(service_type) do
+    service_type_integer = Integer.parse(service_type)
+
+    if service_type_integer == :error do
+      ""
+    else
+      {service_type_integer, _remainder} = service_type_integer
+      ContentFormatter.service_type_string(service_type_integer)
+    end
+  end
 
   defp format_datetime(nil, _format), do: ""
 
