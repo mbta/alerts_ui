@@ -1,10 +1,10 @@
-defmodule AlertsUIWeb.AlertValidatorTest do
+defmodule AlertsUI.AlertValidation.AlertValidatorTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
   import AlertsUI.Support.Factory
   import Mock
 
-  alias AlertsUI.AlertValidator
+  alias AlertsUI.AlertValidation.AlertValidator
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.Routes.Repo, as: RoutesRepo

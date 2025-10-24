@@ -1,4 +1,4 @@
-defmodule AlertsUI.AlertValidator do
+defmodule AlertsUI.AlertValidation.AlertValidator do
   @moduledoc """
     Checks open alerts that have duration certainties of KNOWN or UNKNOWN against
     provided API url. If they have any routes, trips, stops, or facilities no
