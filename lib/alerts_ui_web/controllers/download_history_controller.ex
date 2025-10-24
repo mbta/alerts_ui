@@ -12,7 +12,7 @@ defmodule AlertsUIWeb.DownloadHistoryController do
       |> AlertHistory.build_history_csv()
       |> CSV.dump_to_iodata()
 
-    formatted_date = Calendar.strftime(DateTime.now!("America/New_York"), "%Y_%m_%d")
+    formatted_date = Calendar.strftime(DateTime.now!("America/New_York"), "%Y-%m-%d")
 
     send_download(conn, {:binary, file},
       filename: "Alert_#{alert_id}_History_#{formatted_date}.csv"

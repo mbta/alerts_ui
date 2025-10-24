@@ -8,6 +8,8 @@ defmodule AlertsUI.Models.Alert do
     original_<something>_selection are used for this purpose. They consist of an array of strings, which are pipe-
     delineated- "name|id". This module contains funcions for splitting those apart and returning just the names or ids.
     Primary service type is the selected route type from the form and can be string of a number 0-4, "access", or "systemwide"
+    plaintext_reminder_selections is just a string of datetimes in EST. It's meant to be used for version history purposes and nothing else.
+    It is not used for the form.
   """
   use AlertsUI.Schema
   import Ecto.Changeset
@@ -71,6 +73,7 @@ defmodule AlertsUI.Models.Alert do
   original_trip_selections
   original_direction_selections
   original_facility_selections
+  plaintext_reminder_selections
   primary_service_type)a
 
   @cause Cause.causes()
@@ -122,6 +125,7 @@ defmodule AlertsUI.Models.Alert do
           original_trip_selections: [String.t()] | nil,
           original_direction_selections: [String.t()] | nil,
           original_facility_selections: [String.t()] | nil,
+          plaintext_reminder_selections: String.t() | nil,
           user_id: User.id(),
           primary_service_type: String.t(),
           recurrence_days: [String.t()],
@@ -220,6 +224,7 @@ defmodule AlertsUI.Models.Alert do
     field :draft, :boolean, default: false
     field :notification_period_start, :utc_datetime
     field :notification_period_end, :utc_datetime
+    field :plaintext_reminder_selections, :string
     field :primary_service_type, :string
 
     field :recurrence_days, {:array, Ecto.Enum},

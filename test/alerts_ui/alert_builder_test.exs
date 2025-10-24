@@ -102,6 +102,8 @@ defmodule AlertsUI.AlertBuilderTest do
                    %{reminder_time: ~U[2024-04-30 16:14:00Z]},
                    %{reminder_time: ~U[2024-04-30 16:24:00Z]}
                  ],
+                 plaintext_reminder_selections:
+                   "2024-04-30T12:04:00, 2024-04-30T12:14:00, 2024-04-30T12:24:00",
                  current_time: ~U[2024-04-30 05:54:00Z],
                  recurrence_days: nil,
                  original_route_selections: ["57|57"],
@@ -317,6 +319,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  severity: nil,
                  severity_level: nil,
                  reminder_times: [],
+                 plaintext_reminder_selections: "",
                  current_time: ~U[2024-04-30 05:54:00Z],
                  recurrence_days: nil,
                  original_route_selections: ["24|24", "27|27", "57|57"],
@@ -535,6 +538,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  severity: nil,
                  severity_level: nil,
                  reminder_times: [],
+                 plaintext_reminder_selections: "",
                  current_time: ~U[2024-04-30 05:54:00Z],
                  recurrence_days: nil,
                  original_route_selections: ["CapeFLYER|CapeFlyer"],
