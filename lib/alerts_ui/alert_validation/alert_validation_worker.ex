@@ -21,5 +21,8 @@ defmodule AlertsUI.AlertValidation.AlertValidationWorker do
   defp log_results([]), do: :ok
 
   defp log_results(invalid_alert_ids),
-    do: Logger.info("#{__MODULE__}: Invalid alerts ids found: #{Enum.join(invalid_alert_ids, ", ")}")
+    do:
+      Logger.info(
+        "#{__MODULE__}: Invalid alerts ids found: #{Enum.join(invalid_alert_ids, ", ")}"
+      )
 end
