@@ -94,8 +94,19 @@ config :alerts_ui, Oban,
     {Oban.Plugins.Cron,
      crontab: [
        # Write GTFS feeds every minute
-       {"*/1 * * * *", AlertsUI.FeedWriter,
-        max_attempts: 1, unique: [period: 30, states: [:available, :scheduled, :executing]]},
+       {
+         "*/1 * * * *",
+         AlertsUI.FeedWriter,
+         max_attempts: 1, unique: [period: 30, states: [:available, :scheduled, :executing]]
+       },
+       # Write GTFS feeds every minute, offset by 30s
+       {
+         "*/1 * * * *",
+         AlertsUI.DelayedJob,
+         args: %{delay: 30_000, module: AlertsUI.FeedWriter},
+         max_attempts: 1,
+         unique: [period: 30, states: [:available, :scheduled, :executing]]
+       },
        # Validate alerts against production every hour
        {"0 * * * *", AlertsUI.AlertValidation.AlertValidationWorker},
        # Update recurring alerts every day at 3:01 am
