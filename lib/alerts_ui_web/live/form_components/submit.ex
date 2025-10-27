@@ -58,7 +58,8 @@ defmodule AlertsUIWeb.FormComponents.Submit do
         current_user={@current_user}
       />
       <.button_secondary
-        class="mt-8 mr-auto self-center border-none py-2 px-3"
+        :if={Map.get(assigns, :back, true)}
+        class="mt-8 self-center border-none py-2 px-3"
         name="back"
         phx-click="move_progress"
         value="route_type_and_effect"
@@ -67,6 +68,7 @@ defmodule AlertsUIWeb.FormComponents.Submit do
       >
         <.icon name="hero-arrow-left-solid" class="h-3 w-3" /> Back
       </.button_secondary>
+      <div class="flex flex-1">&nbsp;</div>
       <.button_secondary
         class="mt-8 self-center border-none"
         phx-target={@myself}

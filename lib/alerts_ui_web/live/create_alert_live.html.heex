@@ -74,6 +74,7 @@
         <.live_component
           module={Submit}
           id="submit"
+          back={@form_type == :creating}
           progress={@progress}
           alert_data={@alert_data}
           form_type={@form_type}
