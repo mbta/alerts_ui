@@ -14,11 +14,12 @@ defmodule AlertsUI.Models.AlertTest do
                     |> DateTime.truncate(:second)
 
   describe "changeset/2" do
-    test "create with header, description, and informed_entity is valid" do
+    test "create with header, description, active_period_start and informed_entity is valid" do
       params = %{
         alert_id: "123",
         header_text: "a",
         description_text: "b",
+        active_period_start: ~U[2023-10-20 16:15:00Z],
         active_period: [
           %{
             start: ~U[2023-10-20 16:15:00Z],
@@ -39,6 +40,7 @@ defmodule AlertsUI.Models.AlertTest do
         header_text: "a",
         description_text: "b",
         effect: :COOL_BEAN,
+        active_period_start: ~U[2023-10-20 16:15:00Z],
         active_period: [
           %{
             start: ~U[2023-10-20 16:15:00Z],
@@ -58,6 +60,7 @@ defmodule AlertsUI.Models.AlertTest do
         alert_id: "123",
         header_text: "a",
         description_text: "b",
+        active_period_start: ~U[2023-10-20 14:45:38Z],
         active_period: [
           %{
             start: "not valid",
@@ -159,7 +162,7 @@ defmodule AlertsUI.Models.AlertTest do
     end
 
     test "alert without header and description is not valid" do
-      changeset = Alert.changeset(%Alert{}, %{header_text: "a", url: "example.com"})
+      changeset = Alert.changeset(%Alert{}, %{header_text: "a", url: "example.com", active_period_start: @five_minutes_ago})
       refute changeset.valid?
     end
 
@@ -167,6 +170,7 @@ defmodule AlertsUI.Models.AlertTest do
       existing_alert = %Alert{
         alert_id: "123",
         header_text: "old",
+        active_period_start: @five_minutes_ago,
         created_at: @five_minutes_ago
       }
 
@@ -186,6 +190,7 @@ defmodule AlertsUI.Models.AlertTest do
           alert_id: "123",
           header_text: "old",
           created_at: @five_minutes_ago,
+          active_period_start: @five_minutes_ago,
           informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}],
           duration_certainty: :UNKNOWN
         }
@@ -200,6 +205,7 @@ defmodule AlertsUI.Models.AlertTest do
           alert_id: "123",
           header_text: "old",
           created_at: @five_minutes_ago,
+          active_period_start: @five_minutes_ago,
           active_period_end: @five_minutes_ago,
           informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}],
           duration_certainty: :UNKNOWN
