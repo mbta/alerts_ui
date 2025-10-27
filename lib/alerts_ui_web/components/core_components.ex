@@ -445,6 +445,7 @@ defmodule AlertsUIWeb.CoreComponents do
         "join-item
         rounded btn
         !h-[38px]
+        !min-h-0
         text-primary
         font-medium
         px-3
@@ -460,9 +461,7 @@ defmodule AlertsUIWeb.CoreComponents do
         disabled:text-secondary-disabled
         disabled:border-secondary-disabled",
         if(@checked,
-          do: "after:bg-secondary-active after:text-text-invert     !bg-secondary-active
-    !border-secondary-active
-    !text-text-invert"
+          do: "after:bg-primary after:text-text-invert !bg-primary !border-primary !text-text-invert"
         )
       ]}
     />
