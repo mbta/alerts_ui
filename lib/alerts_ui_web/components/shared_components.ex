@@ -959,6 +959,8 @@ defmodule AlertsUIWeb.SharedComponents do
         phx-hook="DropdownPosition"
         class="
           menu
+          p-0
+          py-2
           hidden
           absolute
           top-[34px]
