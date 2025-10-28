@@ -28,13 +28,13 @@ Hooks.DropdownPosition = {
     // Size of toggle button, provided container, dropdown
     const toggleRect = toggle.getBoundingClientRect();
     const containerHeight = menu.dataset.containerId
-      ? document.getElementById(menu.dataset.containerId).getBoundingClientRect()
+      ? document.getElementById(menu.dataset.containerId).getBoundingClientRect().bottom
       // fallback to viewport edge if container not provided
       : window.innerHeight;
     const dropdownSpaceNeeded =  menu.getBoundingClientRect().bottom - toggleRect.top  
     
     // Space between the toggle button and edge of the container (aka room for the dropdown)
-    const spaceBelow = containerHeight.bottom - toggleRect.bottom;
+    const spaceBelow = containerHeight - toggleRect.bottom;
     
     const shouldDropUp = spaceBelow < dropdownSpaceNeeded
 
