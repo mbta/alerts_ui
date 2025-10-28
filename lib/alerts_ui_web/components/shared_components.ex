@@ -932,7 +932,7 @@ defmodule AlertsUIWeb.SharedComponents do
   Renders a button menu.
 
   ##Examples
-    <.button_menu>
+    <.button_menu id="button-menu">
       <:toggle>
         <.button_secondary>
           <.icon name="hero-ellipsis-vertical" />
@@ -950,16 +950,27 @@ defmodule AlertsUIWeb.SharedComponents do
       </:menu>
     </.button_menu>
   """
+  attr :id, :string, required: true
+  attr :container_id, :string, default: nil
+
   slot :toggle, required: true
   slot :menu, required: true
 
   def button_menu(assigns) do
     ~H"""
     <div phx-click={JS.show(to: {:inner, ".menu"})} class="relative">
-      {render_slot(@toggle)}
+      <div id={"#{@id}-toggle"}>
+        {render_slot(@toggle)}
+      </div>
       <div
+        id={"#{@id}"}
+        data-toggle-id={"#{@id}-toggle"}
+        data-container-id={@container_id}
+        phx-hook="DropdownPosition"
         class="
           menu
+          p-0
+          py-2
           hidden
           absolute
           top-[34px]

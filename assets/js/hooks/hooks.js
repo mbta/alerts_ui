@@ -1,5 +1,68 @@
 let Hooks = {};
 
+Hooks.DropdownPosition = {
+  // The dropdown doesn't have a size (height/width) until the first time
+  // we show it. So running `getBoundingClientRect` before then fails.
+  // We use a MutationObserver to watch for the moment it first receives a style
+  // because then we can determine its size and reposition it.
+  mounted() {
+    this.positionDropdown = this.positionDropdown.bind(this);
+
+    this.observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === "style") {
+          if (this.el.style.display === "block") {
+            this.positionDropdown();
+          }
+        }
+      });
+    });
+
+    this.observer.observe(this.el, { attributes: true });
+  },
+
+  positionDropdown() {
+    const menu = this.el;
+    const toggle = document.getElementById(menu.dataset.toggleId);
+
+    // Size of toggle button, provided container, dropdown
+    const toggleRect = toggle.getBoundingClientRect();
+    const containerHeight = menu.dataset.containerId
+      ? document.getElementById(menu.dataset.containerId).getBoundingClientRect().bottom
+      // fallback to viewport edge if container not provided
+      : window.innerHeight;
+    const dropdownSpaceNeeded =  menu.getBoundingClientRect().bottom - toggleRect.top  
+    
+    // Space between the toggle button and edge of the container (aka room for the dropdown)
+    const spaceBelow = containerHeight - toggleRect.bottom;
+    
+    const shouldDropUp = spaceBelow < dropdownSpaceNeeded
+
+    if (shouldDropUp) {
+      menu.classList.add(
+        "bottom-[34px]",
+        "before:top-full",
+        "before:border-t-border-primary",
+        "after:top-full",
+        "after:border-t-bg-input-default",
+      );
+      menu.classList.remove(
+        "top-[34px]",
+        "before:bottom-full",
+        "before:border-b-border-primary",
+        "after:bottom-full",
+        "after:border-b-bg-input-default"
+      );
+    }
+  },
+
+  destroyed() {
+    if (this.observer) {
+      this.observer.disconnect();
+    }
+  }
+}
+
 // This hook is put on a few <select> elements that mustn't allow
 // "All XYZ" to be selected at the same time that individual items
 // are selected. So, when the form change handler executes the "validate"
