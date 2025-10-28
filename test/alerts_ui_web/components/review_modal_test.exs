@@ -698,10 +698,12 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
 
         open_review_modal(view)
 
-        assert render(view) =~ ~r/Cause.*Disabled bus/s
-        assert render(view) =~ ~r/Severity.*About 30 minutes.*\(7 - SEVERE\)/s
-        assert render(view) =~ ~r/Supporting information.*supporting information/s
-        assert render(view) =~ ~r[URL</p>\s*<p>http:\/\/www.fake.com]s
+        assert render(view) =~ ~r{Cause.*Disabled bus}s
+        assert render(view) =~ ~r{Severity.*About 30 minutes.*\(7 - SEVERE\)}s
+        assert render(view) =~ ~r{Supporting information.*supporting information}s
+
+        assert render(view) =~
+                 ~r{URL</p>\s*<p[^>]*><a[^>]*href="http://www.fake.com"[^>]*>\s*http:\/\/www.fake.com}s
       end
     end
   end

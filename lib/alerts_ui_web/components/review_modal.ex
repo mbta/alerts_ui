@@ -152,7 +152,17 @@ defmodule AlertsUIWeb.ReviewModal do
 
             <span :if={@alert_data.url} class="block pb-4">
               <p class="font-bold">URL</p>
-              <p>{@alert_data.url}</p>
+              <p>
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href={@alert_data.url}
+                  class="inline-flex flex-row items-center text-primary hover:text-primary-hover hover:underline"
+                >
+                  {@alert_data.url}
+                  <.icon name="hero-arrow-top-right-on-square" class="h-3 w-3 mx-[0.25rem]" />
+                </a>
+              </p>
             </span>
 
             <span :if={Map.get(@alert_data, :banner_text)} class="block pb-4">
@@ -196,35 +206,33 @@ defmodule AlertsUIWeb.ReviewModal do
           <%!-- Image --%>
           <%= if @alert_data.image_url do %>
             <p class="font-bold">Image</p>
-            <div class="inline-flex pb-4">
-              <img
-                id="alert-image"
-                phx-hook="MeasureImage"
-                src={@alert_data.image_url}
-                alt={@alert_data.image_alternative_text || "No alternative text provided"}
-                class="h-16 pr-2"
-              />
-              <div>
-                <p class="text-text-secondary">
+            <div class="pb-4">
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href={@alert_data.image_url}
+                class="align-top text-primary hover:text-primary-hover hover:underline"
+              >
+                <img
+                  id="alert-image"
+                  phx-hook="MeasureImage"
+                  src={@alert_data.image_url}
+                  alt={@alert_data.image_alternative_text || "No alternative text provided"}
+                  class="h-16 pr-2"
+                />
+                <p>
                   {String.split(@alert_data.image_url, "/") |> List.last()}
                   <span :if={Map.get(@alert_data, :image_preview_size, nil)}>
                     ({@alert_data.image_preview_size["width"]} x {@alert_data.image_preview_size[
                       "height"
                     ]})
                   </span>
-                  <a
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href={@alert_data.image_url}
-                    class="inline-flex align-top text-primary"
-                  >
-                    <.icon name="hero-arrow-top-right-on-square" class="h-3 w-3" />
-                  </a>
+                  <.icon name="hero-arrow-top-right-on-square" class="h-3 w-3" />
                 </p>
-                <p class="text-text-secondary">
-                  Alt text: {@alert_data.image_alternative_text || "No alternative text provided"}
-                </p>
-              </div>
+              </a>
+              <p class="">
+                Alt text: {@alert_data.image_alternative_text || "No alternative text provided"}
+              </p>
             </div>
           <% end %>
 
