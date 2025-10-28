@@ -140,16 +140,24 @@ defmodule AlertsUIWeb.ReviewModal do
           <p class="font-bold">Main message</p>
           <p class="pb-4 max-w-[28rem] whitespace-pre-line break-words">{@alert_data.header_text}</p>
 
-          <div class="pb-4">
-            <p class="font-bold">Supporting information</p>
-            <%= if @alert_data.description_text do %>
-              <p class="whitespace-pre-line">{@alert_data.description_text}</p>
-            <% else %>
-              <p class="italic">None</p>
-            <% end %>
+          <div>
+            <span class="block pb-4">
+              <p class="font-bold">Supporting information</p>
+              <%= if @alert_data.description_text do %>
+                <p class="whitespace-pre-line">{@alert_data.description_text}</p>
+              <% else %>
+                <p class="italic">None</p>
+              <% end %>
+            </span>
 
-            <span :if={@alert_data.url} class="text-text-secondary">
-              URL: {@alert_data.url}
+            <span :if={@alert_data.url} class="block pb-4">
+              <p class="font-bold">URL</p>
+              <p>{@alert_data.url}</p>
+            </span>
+
+            <span :if={Map.get(@alert_data, :banner_text)} class="block pb-4">
+              <p class="font-bold">Web Banner Text</p>
+              <p>{@alert_data.banner_text}</p>
             </span>
           </div>
 
@@ -333,34 +341,6 @@ defmodule AlertsUIWeb.ReviewModal do
               <p class="pb-4 italic">None</p>
             <% end %>
           </div>
-
-          <%!-- Bottom section --%>
-          <hr class="border-border-primary pb-4" />
-          <details>
-            <summary class="font-bold pb-4">Preview subheader TBD</summary>
-            <div class="ps-4">
-              <p class="font-bold">Web Banner</p>
-              <%= if Map.get(@alert_data, :view_banner) do %>
-                <p class="pb-6">{@alert_data.banner_text}</p>
-              <% else %>
-                <p class="pb-6 italic">Not selected</p>
-              <% end %>
-
-              <p class="font-bold">SMS</p>
-              <%= if Map.get(@alert_data, :notification_toggle) do %>
-                <p class="pb-6">To be populated when we build this out later</p>
-              <% else %>
-                <p class="pb-6 italic">Not selected</p>
-              <% end %>
-
-              <p class="font-bold">Email</p>
-              <%= if Map.get(@alert_data, :notification_toggle) do %>
-                <p class="pb-6">To be populated when we build this out later</p>
-              <% else %>
-                <p class="pb-6">To be populated when we build this out later</p>
-              <% end %>
-            </div>
-          </details>
         </div>
         <%!-- Sidebar --%>
         <div class="min-w-[222px] shrink-0 p-4 bg-bg-elevation-5">
