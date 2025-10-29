@@ -15,7 +15,11 @@ defmodule AlertsUI.DelayedJob do
          {
            "*/1 * * * *",
            AlertsUI.DelayedJob,
-           args: %{delay: 30_000, module: AlertsUI.FeedWriter},
+           args: %{
+             delay: 30_000,
+             module: AlertsUI.FeedWriter,
+             args: %{filename: "example.json"}
+           },
            max_attempts: 1,
            unique: [period: 30, states: [:available, :scheduled, :executing]]
          },
@@ -24,16 +28,19 @@ defmodule AlertsUI.DelayedJob do
     ]
 
   Arguments
-    delay: Amount to delay in milliseconds
-    module: The job module that would normally be the second arg in the tuple
-    args: The args for the job
+    delay: [Required] Amount of time to wait (milliseconds)
+    module: [Required] The job module that should be invoked after the delay
+    args: The args for the job itself
   """
   @impl Oban.Worker
   def perform(%{args: args} = job, opts \\ []) do
-    %{"args" => job_args, "delay" => delay, "module" => module_name} = args
-    module = Module.safe_concat([module_name])
+    %{"delay" => delay, "module" => module_name} = args
+    Logger.info("Delaying job #{module_name} by #{delay}ms")
     Process.sleep(delay)
-    job = Map.put(job, "args", job_args)
+    module = Module.safe_concat([module_name])
+    job = Map.put(job, "args", Map.get(args, "args", nil))
     module.perform(job, opts)
+  rescue
+    e -> Logger.warning("Error delaying job. args=#{inspect(args)}: #{e}")
   end
 end
