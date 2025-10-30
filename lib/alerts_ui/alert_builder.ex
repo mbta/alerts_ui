@@ -124,6 +124,7 @@ defmodule AlertsUI.AlertBuilder do
         []
       end
 
+    # API calls here  
     pre_combo_routes =
       selected_routes
       |> Enum.filter(&(&1 !== "default"))

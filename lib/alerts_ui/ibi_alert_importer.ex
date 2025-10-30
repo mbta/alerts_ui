@@ -13,6 +13,7 @@ defmodule AlertsUI.IBIAlertImporter do
   alias AlertsUI.Repo
   alias AlertsUI.Models.Alert
   alias AlertsUI.Models.IBIAlert
+  alias AlertsUI.Models.LatestIBIAlert
 
   @default_chunk_size 1000
 
@@ -78,7 +79,7 @@ defmodule AlertsUI.IBIAlertImporter do
   def convert_ibi_alerts(options \\ []) do
     Repo.transact(
       fn ->
-        LatestIBIAlerts
+        LatestIBIAlert
         |> Repo.stream()
         |> Stream.chunk_every(chunk_size(options))
         |> Stream.each(fn chunk ->
@@ -89,19 +90,20 @@ defmodule AlertsUI.IBIAlertImporter do
             |> Enum.group_by(fn version -> version.alert_id end)
 
           Enum.each(chunk, fn latest_version ->
+            currently_open = latest_version.is_closed == "False"
+
             [insert | updates]  =
               all_versions_index
               |> Map.get(latest_version.alert_id)
               |> Enum.sort_by(fn version -> version.integer_version_no end)
 
             alert = insert
-                    |> ibi_alert_to_changeset()
+                    |> ibi_alert_to_changeset(%Alert{}, open: currently_open && latest_version.version_no == insert.version_no)
                     |> PaperTrail.insert!()
 
             Enum.each(updates, fn update ->
               update
-              |> ibi_alert_to_changeset()
-              |> Ecto.Changeset.cast(%{id: alert.id}, [:id])
+              |> ibi_alert_to_changeset(alert, open: currently_open && latest_version == update)
               |> PaperTrail.update!()
             end)
           end)
@@ -246,9 +248,9 @@ defmodule AlertsUI.IBIAlertImporter do
   end
 
   def from_ibi(ibi_alert, :active_period_start) do
-    if ibi_alert.effect_start do
-      ndt_from_ibi_string(ibi_alert.effect_start)
-    end
+    # this field must be populated so no `if` here (and all IBI alerts that
+    # lack `effect_start` have `notif_start`)
+    ndt_from_ibi_string(ibi_alert.effect_start || ibi_alert.notif_start)
   end
 
   def from_ibi(ibi_alert, :active_period_end) do
