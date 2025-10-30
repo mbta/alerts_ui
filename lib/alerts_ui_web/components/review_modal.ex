@@ -406,7 +406,7 @@ defmodule AlertsUIWeb.ReviewModal do
 
           <.link
             :if={@alert_id}
-            class="text-primary hover:text-primary-hover"
+            class="text-primary hover:text-primary-hover hover:underline"
             href={~p"/download_history?alert_id=#{@alert_id}"}
             target="_blank"
           >

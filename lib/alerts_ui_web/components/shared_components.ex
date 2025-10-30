@@ -834,12 +834,11 @@ defmodule AlertsUIWeb.SharedComponents do
       <button
         data-count=""
         phx-click={show_modal(@id)}
-        class="flex items-center leading-tight min-h-[1.3rem] text-right text-primary after:content-[attr(data-count)] after:pl-1"
-        ,
+        class="flex items-center leading-tight min-h-[1.3rem] text-right text-primary hover:underline hover:text-primary-hover after:content-[attr(data-count)] after:pl-1"
         type="button"
       >
         <span class={[
-          "hero-funnel-mini w-4 h-4 mr-1 bg-primary"
+          "hero-funnel-mini w-4 h-4 mr-1"
         ]} />
         {@button_label}
       </button>
