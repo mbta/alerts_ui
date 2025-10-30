@@ -160,7 +160,6 @@ defmodule AlertsUIWeb.ReviewModal do
                   class="inline-flex flex-row items-center text-primary hover:text-primary-hover hover:underline"
                 >
                   {@alert_data.url}
-                  <.icon name="hero-arrow-top-right-on-square" class="h-3 w-3 mx-[0.25rem]" />
                 </a>
               </p>
             </span>
@@ -206,19 +205,19 @@ defmodule AlertsUIWeb.ReviewModal do
           <%!-- Image --%>
           <%= if @alert_data.image_url do %>
             <p class="font-bold">Image</p>
-            <div class="pb-4">
+            <div class="pb-4 flex flex-col">
               <a
                 target="_blank"
                 rel="noopener noreferrer"
                 href={@alert_data.image_url}
-                class="align-top text-primary hover:text-primary-hover hover:underline"
+                class="flex flex-col align-start text-primary hover:text-primary-hover hover:underline"
               >
                 <img
                   id="alert-image"
                   phx-hook="MeasureImage"
                   src={@alert_data.image_url}
                   alt={@alert_data.image_alternative_text || "No alternative text provided"}
-                  class="h-16 pr-2"
+                  class="max-h-40 self-start pr-2 object-contain"
                 />
                 <p>
                   {String.split(@alert_data.image_url, "/") |> List.last()}
@@ -230,7 +229,7 @@ defmodule AlertsUIWeb.ReviewModal do
                   <.icon name="hero-arrow-top-right-on-square" class="h-3 w-3" />
                 </p>
               </a>
-              <p class="">
+              <p class="text-text-secondary">
                 Alt text: {@alert_data.image_alternative_text || "No alternative text provided"}
               </p>
             </div>
