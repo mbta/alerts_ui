@@ -80,12 +80,16 @@ Hooks.SelectAllAdjuster = {
       affected_service_trip_ids: "trip_ids",
       affected_service_stop_ids: "stop_ids",
       affected_service_stop_names_and_ids: "stop_names_and_ids",
+      view_alerts_live_service_type: "service_type",
+      view_alerts_live_routes: "routes",
+      view_alerts_live_effects: "effects"
     };
 
     this.handleEvent("adjustSelections", (payload) => {
       const options = Array.from(this.el.options);
       const payloadKey = selectorIDLookup[this.el.id];
-      const newSelections = payload[payloadKey];
+      // If "default" hasn't already been filtered out, do so
+      const newSelections = payload[payloadKey].filter(item => item != "default");
 
       // If newSelections is 0, then only default is selected. Otherwise, the opposite
       if (newSelections.length != 0) {
@@ -141,35 +145,6 @@ Hooks.FilterSelect = {
         );
       });
     });
-  },
-};
-
-Hooks.FilterCount = {
-  mounted() {
-    this.el.addEventListener("change", this.refresh.bind(this));
-    this.refresh();
-  },
-
-  updated() {
-    this.refresh();
-  },
-
-  refresh() {
-    const count = `(${this.recount()})`;
-    this.el.querySelectorAll("h1").forEach((h1) => {
-      h1.setAttribute("data-count", count);
-    });
-    this.el.querySelectorAll("[data-count]").forEach((el) => {
-      el.setAttribute("data-count", count);
-    });
-  },
-
-  recount() {
-    let count = 0;
-    this.el.querySelectorAll("select").forEach((e) => {
-      count += e.selectedOptions.length;
-    });
-    return count;
   },
 };
 

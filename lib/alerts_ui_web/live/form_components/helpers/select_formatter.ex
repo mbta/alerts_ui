@@ -99,6 +99,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   def sort_order(%EnhancedSchedule{}), do: nil
   def sort_order(%Facility{}), do: nil
   def sort_order(%Route{sort_order: sort_order}), do: sort_order
+  # todo: check, does this have consequences?
+  def sort_order(_), do: nil
 
   @spec name_for_option(
           Stop.t() | Route.t() | Facility.t() | EnhancedSchedule.t(),
@@ -153,6 +155,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
     "#{trip_name} (#{DateTimeFormatters.friendly_time(departure_time)} from #{stop_name})"
   end
 
+  def name_for_option({name, _value}, nil), do: name
+
   def name_for_option(_, nil), do: ""
 
   @doc """
@@ -166,6 +170,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   def id_for_option(%Route{id: id}, _), do: id
   def id_for_option(%Facility{id: id}, _), do: id
   def id_for_option(%EnhancedSchedule{trip: %Trip{id: id}}, _), do: id
+  def id_for_option(option, _), do: option |> elem(1) |> to_string()
 
   @spec formatted_direction_options([String.t()] | nil, map()) :: keyword(String.t())
   def formatted_direction_options([route_id], direction_names_map) do

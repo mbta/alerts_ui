@@ -145,53 +145,6 @@ defmodule AlertsUIWeb.CoreComponents do
   end
 
   @doc """
-  Renders a form that filters alerts by the fields we want available
-
-  ## Examples
-
-      <.filter_form
-        meta={@meta}
-        id="user-filter-form"
-      />
-  """
-  attr :meta, Flop.Meta, required: true
-  attr :id, :string, default: nil
-  attr :on_change, :string, default: "update-filter"
-  attr :target, :string, default: nil
-
-  def filter_form(%{meta: meta} = assigns) do
-    assigns = assign(assigns, :form, Phoenix.Component.to_form(meta))
-
-    ~H"""
-    <.form for={@form} id={@id} phx-target={@target} phx-change={@on_change} phx-submit={@on_change}>
-      <div class="mb-4 ml-2 flex flex-row gap-2 items-center">
-        <AlertsUIWeb.SharedComponents.filter_modal form={@form} />
-        <input type="hidden" name="filters[3][field]" value="timeline" />
-        <.radio_switch
-          name="filters[3][value]"
-          class="!mx-0"
-          selected={Map.get(Enum.at(@form.source.flop.filters || [], 3) || %{}, :value)}
-          default="current"
-          values={AlertsUIWeb.ViewAlertsLive.timeline_options()}
-        />
-        <input type="hidden" name="filters[4][field]" value="multi_column_search" />
-        <AlertsUIWeb.SharedComponents.text_input
-          field={@form[:"filters[4][value]"]}
-          value={Map.get(Enum.at(@form.source.flop.filters || [], 4) || %{}, :value)}
-          phx-debounce={750}
-          placeholder="Search alerts"
-          icon="hero-magnifying-glass-mini"
-          class="h-[2.375rem]"
-        />
-        <AlertsUIWeb.SharedComponents.button_secondary class="btn-outline" name="reset">
-          Reset
-        </AlertsUIWeb.SharedComponents.button_secondary>
-      </div>
-    </.form>
-    """
-  end
-
-  @doc """
   Renders a form that with a single search field.
 
   ## Examples
@@ -404,6 +357,7 @@ defmodule AlertsUIWeb.CoreComponents do
   attr :values, :list, required: true
   attr :selected, :any
   attr :default, :any, default: "current"
+  attr :on_change, :string, default: ""
 
   def radio_switch(assigns) do
     ~H"""
@@ -414,7 +368,8 @@ defmodule AlertsUIWeb.CoreComponents do
           name={@name}
           value={value}
           label={String.capitalize(value)}
-          checked={value == @selected || (@selected == nil && value == @default)}
+          checked={value == @selected.value || (!@selected.value && value == @default)}
+          on_change={@on_change}
         />
       </div>
     </fieldset>
@@ -432,6 +387,7 @@ defmodule AlertsUIWeb.CoreComponents do
   attr :value, :any, required: true
   attr :label, :string, default: nil
   attr :checked, :boolean
+  attr :on_change, :string, default: ""
 
   def radio_switch_input(assigns) do
     ~H"""
@@ -464,6 +420,7 @@ defmodule AlertsUIWeb.CoreComponents do
           do: "after:bg-primary after:text-text-invert !bg-primary !border-primary !text-text-invert"
         )
       ]}
+      phx-click={@on_change}
     />
     """
   end
