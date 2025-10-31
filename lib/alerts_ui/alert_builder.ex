@@ -77,6 +77,9 @@ defmodule AlertsUI.AlertBuilder do
           map()
   def build_alert(alert_data, combination, current_time \\ DateTime.utc_now()) do
     effect_name = Map.get(alert_data, :effect_name)
+
+    # if `effect` is specified in `alert_data`, we bypass the call to `effect_map_by_name/1`
+    # and pass along `effect_detail` as given
     {effect, effect_detail} =
       case {Map.get(alert_data, :effect), Map.get(alert_data, :effect_detail)} do
         {nil, _} ->
@@ -123,34 +126,26 @@ defmodule AlertsUI.AlertBuilder do
       else
         []
       end
-
-    # API calls here  
-    pre_combo_routes =
-      selected_routes
-      |> Enum.filter(&(&1 !== "default"))
-      |> Enum.uniq()
-      |> Routes.expanding_green_line()
-      |> Enum.map(&(RoutesRepo.get(&1, include: "line") || %{}))
-
     # the original route and direction selections are meant to reflect the routes that the user
     # selected from the form, so we create them here before combo routes are
     # added to our list of routes
 
     original_direction_selections = [
-      direction_name(selected_routes, pre_combo_routes, direction_id) <>
+      direction_name(selected_routes, pre_combo_routes(selected_routes), direction_id) <>
         "|" <> (direction_id || "")
     ]
 
     original_route_selections =
       selected_routes
       |> Enum.map(fn route_id ->
-        matching_route = get_matching_route(route_id, pre_combo_routes)
+        matching_route = get_matching_route(route_id, pre_combo_routes(selected_routes))
 
         "#{SelectFormatter.name_for_option(matching_route)}|#{route_id}"
       end)
 
     routes =
-      pre_combo_routes
+      selected_routes
+      |> pre_combo_routes()
       |> Enum.reject(&(&1 == %{}))
       |> add_combo_routes()
 
@@ -941,5 +936,13 @@ defmodule AlertsUI.AlertBuilder do
       direction_id,
       ""
     )
+  end
+
+  defp pre_combo_routes(selected_routes) do
+    selected_routes
+    |> Enum.filter(&(&1 !== "default"))
+    |> Enum.uniq()
+    |> Routes.expanding_green_line()
+    |> Enum.map(&(RoutesRepo.get(&1, include: "line") || %{}))
   end
 end
