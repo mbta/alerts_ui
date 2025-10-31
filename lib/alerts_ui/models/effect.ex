@@ -79,7 +79,9 @@ defmodule AlertsUI.Models.Effect do
           effect: effect,
           effect_detail: effect_detail
         })
-      _ -> %{}
+
+      _ ->
+        %{}
     end
   end
 

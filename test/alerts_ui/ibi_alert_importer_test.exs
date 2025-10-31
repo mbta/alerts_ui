@@ -17,9 +17,10 @@ defmodule AlertsUI.IBIAlertImporterTest do
     # This fixture contains a header and 10 rows to import, assiging them
     # alert_ids 1..10
     ingest_csv_file(@import_fixture_path)
+
     %{
-      ibi_alert:  Repo.one(from i in IBIAlert, where: i.alert_id == "1"),
-      recurring_alert:  Repo.one(from i in IBIAlert, where: i.alert_id == "2"),
+      ibi_alert: Repo.one(from i in IBIAlert, where: i.alert_id == "1"),
+      recurring_alert: Repo.one(from i in IBIAlert, where: i.alert_id == "2")
     }
   end
 
@@ -35,7 +36,10 @@ defmodule AlertsUI.IBIAlertImporterTest do
       # - ids 6-10, version 2, which will insert 5 new records
       ingest_csv_file(@update_fixture_path)
       assert Repo.aggregate(IBIAlert, :count) == 15
-      assert Repo.aggregate(from(i in IBIAlert, where: i.alert_time_type == "updated"), :count) == 5
+
+      assert Repo.aggregate(from(i in IBIAlert, where: i.alert_time_type == "updated"), :count) ==
+               5
+
       assert Repo.aggregate(from(i in IBIAlert, where: i.alert_id == "10"), :count) == 2
 
       id_ten_version_one = Repo.get_by(IBIAlert, alert_id: "10", version_no: "1")
@@ -47,7 +51,9 @@ defmodule AlertsUI.IBIAlertImporterTest do
   end
 
   describe "ibi_alert_to_changeset/2" do
-    test "given a sample IBI alert it produces a valid minimal Alert changeset", %{ibi_alert: ibi_alert} do
+    test "given a sample IBI alert it produces a valid minimal Alert changeset", %{
+      ibi_alert: ibi_alert
+    } do
       changeset = %Ecto.Changeset{} = ibi_alert_to_changeset(ibi_alert, %Alert{})
       assert changeset.data.__struct__ == Alert
       assert changeset.valid?
@@ -62,7 +68,9 @@ defmodule AlertsUI.IBIAlertImporterTest do
   end
 
   describe "ibi_alert_to_alert_data/1" do
-    test "given a valid IBI alert it produces alert data consumable by AlertBuilder", %{ibi_alert: ibi_alert} do
+    test "given a valid IBI alert it produces alert data consumable by AlertBuilder", %{
+      ibi_alert: ibi_alert
+    } do
       alert_params =
         ibi_alert
         |> ibi_alert_to_alert_data()
@@ -108,8 +116,13 @@ defmodule AlertsUI.IBIAlertImporterTest do
     end
 
     test ":reminder_times", %{ibi_alert: ibi_alert} do
-      assert ibi_alert.reminders == "2025-10-22T11:40:00.123 send bulletin; 2025-10-22T11:45 send tweet"
-      assert from_ibi(ibi_alert, :reminder_times) ==  [~N[2025-10-22 11:40:00], ~N[2025-10-22 11:45:00]]
+      assert ibi_alert.reminders ==
+               "2025-10-22T11:40:00.123 send bulletin; 2025-10-22T11:45 send tweet"
+
+      assert from_ibi(ibi_alert, :reminder_times) == [
+               ~N[2025-10-22 11:40:00],
+               ~N[2025-10-22 11:45:00]
+             ]
     end
 
     test ":alert_timing", %{ibi_alert: ibi_alert, recurring_alert: recurring_alert} do
@@ -165,8 +178,11 @@ defmodule AlertsUI.IBIAlertImporterTest do
     end
 
     test ":header_text", %{ibi_alert: ibi_alert} do
-      assert ibi_alert.header == "Fitchburg/South Acton Line Train 2415 (11:30 pm from North Station) cancelled"
-      assert from_ibi(ibi_alert, :header_text) == "Fitchburg/South Acton Line Train 2415 (11:30 pm from North Station) cancelled"
+      assert ibi_alert.header ==
+               "Fitchburg/South Acton Line Train 2415 (11:30 pm from North Station) cancelled"
+
+      assert from_ibi(ibi_alert, :header_text) ==
+               "Fitchburg/South Acton Line Train 2415 (11:30 pm from North Station) cancelled"
     end
 
     test ":description_text", %{ibi_alert: ibi_alert} do

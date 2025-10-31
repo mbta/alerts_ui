@@ -2488,7 +2488,6 @@ defmodule AlertsUI.AlertBuilderTest do
       ]) do
         result = AlertBuilder.build_alert(alert_data, :RDTS)
 
-
         assert result.informed_entity == [
                  %{
                    activities: [:BOARD],
@@ -3332,5 +3331,40 @@ defmodule AlertsUI.AlertBuilderTest do
     result = AlertBuilder.build_alert(alert_data, :RDS)
 
     assert result.informed_entity == []
+  end
+
+  test "informed entity is nil if :no_informed_entity is set" do
+    alert_data = %{
+      route_type: nil,
+      effect_name: "Delay",
+      header_text: "test header",
+      description_text: "test description",
+      route_ids: []
+    }
+
+    result =
+      AlertBuilder.build_alert(alert_data, :RDS, ~U[2024-04-30 05:54:00Z],
+        no_informed_entity: true
+      )
+
+    assert result.informed_entity == nil
+  end
+
+  test "active_period_start is passed unchanged if :no_active_periods is set" do
+    start_time = ~U[2024-04-30 05:54:00Z]
+    current_time = ~U[2025-04-30 05:54:00Z]
+
+    alert_data = %{
+      active_period_start: start_time,
+      route_type: nil,
+      effect_name: "Delay",
+      header_text: "test header",
+      description_text: "test description",
+      route_ids: []
+    }
+
+    result = AlertBuilder.build_alert(alert_data, :RDS, current_time, no_active_periods: true)
+    assert result.active_period_start == start_time
+    refute Map.get(result, :active_periods)
   end
 end

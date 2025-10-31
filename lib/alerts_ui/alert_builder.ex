@@ -93,6 +93,7 @@ defmodule AlertsUI.AlertBuilder do
         {nil, _} ->
           effect_map = Effect.effect_map_by_name(effect_name)
           {Map.get(effect_map, :effect), Map.get(effect_map, :effect_detail)}
+
         {effect, effect_detail} ->
           {effect, effect_detail}
       end
@@ -131,7 +132,9 @@ defmodule AlertsUI.AlertBuilder do
 
     original_facility_selections =
       case Map.get(alert_data, :facility_id) do
-        nil -> []
+        nil ->
+          []
+
         facility_id ->
           [facility_id]
           |> Enum.map(&FacilitiesRepo.get/1)
@@ -141,25 +144,29 @@ defmodule AlertsUI.AlertBuilder do
     # ACTIVE PERIODS
 
     active_period_map =
-      if Map.get(alert_data, :alert_timing) === :recurring do
-        ActivePeriodBuilder.build_recurring_active_period(%{
-          active_period_start_time: Map.get(alert_data, :active_period_start_time),
-          active_period_end_time: Map.get(alert_data, :active_period_end_time),
-          active_period_start_date: Map.get(alert_data, :active_period_start_date),
-          active_period_end_date: Map.get(alert_data, :active_period_end_date),
-          active_period_end_specifier: Map.get(alert_data, :active_period_end_specifier),
-          recurrence_days: Map.get(alert_data, :recurrence_days)
-        })
+      if Keyword.get(options, :no_active_periods) do
+        Map.take(alert_data, [:active_period_start])
       else
-        ActivePeriodBuilder.build_one_time_active_period(
-          %{
-            active_period_start: Map.get(alert_data, :active_period_start),
-            active_period_end: Map.get(alert_data, :active_period_end),
+        if Map.get(alert_data, :alert_timing) === :recurring do
+          ActivePeriodBuilder.build_recurring_active_period(%{
+            active_period_start_time: Map.get(alert_data, :active_period_start_time),
+            active_period_end_time: Map.get(alert_data, :active_period_end_time),
+            active_period_start_date: Map.get(alert_data, :active_period_start_date),
+            active_period_end_date: Map.get(alert_data, :active_period_end_date),
             active_period_end_specifier: Map.get(alert_data, :active_period_end_specifier),
-            active_period_start_specifier: Map.get(alert_data, :active_period_start_specifier)
-          },
-          current_time
-        )
+            recurrence_days: Map.get(alert_data, :recurrence_days)
+          })
+        else
+          ActivePeriodBuilder.build_one_time_active_period(
+            %{
+              active_period_start: Map.get(alert_data, :active_period_start),
+              active_period_end: Map.get(alert_data, :active_period_end),
+              active_period_end_specifier: Map.get(alert_data, :active_period_end_specifier),
+              active_period_start_specifier: Map.get(alert_data, :active_period_start_specifier)
+            },
+            current_time
+          )
+        end
       end
 
     notification_period_start =
@@ -178,8 +185,10 @@ defmodule AlertsUI.AlertBuilder do
       cond do
         Map.get(alert_data, :notification_period_end) ->
           Map.get(alert_data, :notification_period_end)
+
         Map.get(alert_data, :active_period_end_specifier) === :later_today ->
           ActivePeriod.end_of_service_datetime_utc(current_time)
+
         true ->
           Map.get(active_period_map, :active_period_end)
       end
@@ -189,34 +198,39 @@ defmodule AlertsUI.AlertBuilder do
     
     # INFORMED ENTITIES
 
-    service_types = Map.get(alert_data, :service_types, []) |> expand_subway_service_types()
-    routes =
-      selected_routes
-      |> pre_combo_routes()
-      |> Enum.reject(&(&1 == %{}))
-      |> add_combo_routes()
-
-    route_ids = Enum.map(routes, & &1.id)
-
-    child_stops_with_context = child_stops_with_context(
-      routes,
-      direction_id,
-      Map.get(alert_data, :stop_ids)
-    )
-
-    alert_data = Map.merge(
-      alert_data,
-      %{
-        service_types: service_types,
-        route_ids: route_ids,
-        child_stops_with_context: child_stops_with_context
-      }
-    )
-
     informed_entity =
-      combination
-      |> build_informed_entities(alert_data, effect_name)
-      |> Enum.uniq()
+      unless Keyword.get(options, :no_informed_entity) do
+        service_types = Map.get(alert_data, :service_types, []) |> expand_subway_service_types()
+
+        routes =
+          selected_routes
+          |> pre_combo_routes()
+          |> Enum.reject(&(&1 == %{}))
+          |> add_combo_routes()
+
+        route_ids = Enum.map(routes, & &1.id)
+
+        child_stops_with_context =
+          child_stops_with_context(
+            routes,
+            direction_id,
+            Map.get(alert_data, :stop_ids)
+          )
+
+        alert_data =
+          Map.merge(
+            alert_data,
+            %{
+              service_types: service_types,
+              route_ids: route_ids,
+              child_stops_with_context: child_stops_with_context
+            }
+          )
+
+        combination
+        |> build_informed_entities(alert_data, effect_name)
+        |> Enum.uniq()
+      end
 
     # EVERYTHING ELSE
 
@@ -238,6 +252,8 @@ defmodule AlertsUI.AlertBuilder do
 
     primary_service_type =
       primary_service_type(route_type, Map.get(alert_data, :combination))
+
+    # CHANGESET PARAMS
 
     %{
       header_text: Map.get(alert_data, :header_text),

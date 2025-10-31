@@ -34,8 +34,12 @@ defmodule AlertsUI.ActivePeriodBuilder do
         ) :: active_period_data_t() | %{}
 
   def build_one_time_active_period(%{active_period_start: nil}, _), do: %{}
-  def build_one_time_active_period(%{active_period_end_specifier: nil} = params, _), do: %{active_period_start: Map.get(params, :active_period_start)}
-  def build_one_time_active_period(%{active_period_start_specifier: nil} = params, _), do: %{active_period_start: Map.get(params, :active_period_start)}
+
+  def build_one_time_active_period(%{active_period_end_specifier: nil} = params, _),
+    do: %{active_period_start: Map.get(params, :active_period_start)}
+
+  def build_one_time_active_period(%{active_period_start_specifier: nil} = params, _),
+    do: %{active_period_start: Map.get(params, :active_period_start)}
 
   def build_one_time_active_period(
         %{

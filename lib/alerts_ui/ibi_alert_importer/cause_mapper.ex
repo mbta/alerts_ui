@@ -15,9 +15,8 @@ defmodule AlertsUI.IBIAlertImporter.CauseMapper do
 
   def cause_name_to_am_detail(mode, name) do
     case Map.get(@aliases, {mode, name}) do
-      nil -> name |> String.replace(~r/\s/, "_") |> String.upcase
+      nil -> name |> String.replace(~r/\s/, "_") |> String.upcase()
       am_detail -> am_detail
     end
   end
 end
-

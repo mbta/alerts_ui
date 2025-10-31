@@ -208,9 +208,9 @@ defmodule AlertsUI.AlertsTest do
       result = Alerts.parse_changeset_errors(changeset)
 
       assert result == %{
-        informed_entity: ["should have at least 1 item(s)", "can't be blank"],
-        active_period_start: ["is required"]
-      }
+               informed_entity: ["should have at least 1 item(s)", "can't be blank"],
+               active_period_start: ["is required"]
+             }
     end
   end
 

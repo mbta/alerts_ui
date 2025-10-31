@@ -162,7 +162,13 @@ defmodule AlertsUI.Models.AlertTest do
     end
 
     test "alert without header and description is not valid" do
-      changeset = Alert.changeset(%Alert{}, %{header_text: "a", url: "example.com", active_period_start: @five_minutes_ago})
+      changeset =
+        Alert.changeset(%Alert{}, %{
+          header_text: "a",
+          url: "example.com",
+          active_period_start: @five_minutes_ago
+        })
+
       refute changeset.valid?
     end
 

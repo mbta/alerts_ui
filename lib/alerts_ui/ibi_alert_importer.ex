@@ -92,14 +92,17 @@ defmodule AlertsUI.IBIAlertImporter do
           Enum.each(chunk, fn latest_version ->
             currently_open = latest_version.is_closed == "False"
 
-            [insert | updates]  =
+            [insert | updates] =
               all_versions_index
               |> Map.get(latest_version.alert_id)
               |> Enum.sort_by(fn version -> version.integer_version_no end)
 
-            alert = insert
-                    |> ibi_alert_to_changeset(%Alert{}, open: currently_open && latest_version.version_no == insert.version_no)
-                    |> PaperTrail.insert!()
+            alert =
+              insert
+              |> ibi_alert_to_changeset(%Alert{},
+                open: currently_open && latest_version.version_no == insert.version_no
+              )
+              |> PaperTrail.insert!()
 
             Enum.each(updates, fn update ->
               update
@@ -128,7 +131,8 @@ defmodule AlertsUI.IBIAlertImporter do
     params =
       ibi_alert
       |> ibi_alert_to_alert_data()
-      |> AlertBuilder.build_alert(from_ibi(ibi_alert, :combination)) # probably need to supply current time here?
+      # probably need to supply current time here?
+      |> AlertBuilder.build_alert(from_ibi(ibi_alert, :combination))
       |> Map.put(:alert_id, ibi_alert.alert_id)
 
     Alert.minimal_changeset(am_alert, params)
@@ -166,7 +170,8 @@ defmodule AlertsUI.IBIAlertImporter do
       :effect_name,
       :severity,
       :combination
-    ] |> Enum.reduce(%{}, fn key, alert_data ->
+    ]
+    |> Enum.reduce(%{}, fn key, alert_data ->
       try do
         Map.put(alert_data, key, from_ibi(ibi_alert, key))
       rescue
@@ -331,18 +336,25 @@ defmodule AlertsUI.IBIAlertImporter do
 
   def from_ibi(ibi_alert, :combination) do
     cond do
-      ibi_alert.informed_route_id && ibi_alert.informed_direction_id && ibi_alert.informed_trip_id && ibi_alert.informed_stop_id ->
+      ibi_alert.informed_route_id && ibi_alert.informed_direction_id && ibi_alert.informed_trip_id &&
+          ibi_alert.informed_stop_id ->
         :RDTS
-      ibi_alert.informed_route_id && ibi_alert.informed_direction_id && ibi_alert.informed_trip_id  ->
+
+      ibi_alert.informed_route_id && ibi_alert.informed_direction_id && ibi_alert.informed_trip_id ->
         :RDT
-      ibi_alert.informed_route_id && ibi_alert.informed_direction_id && ibi_alert.informed_stop_id  ->
+
+      ibi_alert.informed_route_id && ibi_alert.informed_direction_id && ibi_alert.informed_stop_id ->
         :RDS
+
       ibi_alert.informed_route_id && ibi_alert.informed_stop_id ->
         :SR
+
       ibi_alert.informed_route_id ->
         :R
+
       ibi_alert.informed_facility_id ->
         :ACCESS
+
       true ->
         nil
     end
@@ -350,7 +362,8 @@ defmodule AlertsUI.IBIAlertImporter do
 
   def from_ibi(ibi_alert, key), do: Map.get(ibi_alert, key)
 
-  defp split_combined_ids(nil) , do: []
+  defp split_combined_ids(nil), do: []
+
   defp split_combined_ids(combined_ids) do
     combined_ids
     |> String.replace("_", "")
