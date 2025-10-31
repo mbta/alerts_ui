@@ -133,7 +133,7 @@ defmodule AlertsUIWeb.ReviewModal do
           </p>
         </div>
       </:header>
-      <div class="flex text-sm/2">
+      <div class="grid grid-cols-review-modal text-sm/2">
         <%!-- Main lefthand content --%>
         <div class="p-4 grow">
           <%!-- Top section --%>
@@ -151,17 +151,15 @@ defmodule AlertsUIWeb.ReviewModal do
             </span>
 
             <span :if={@alert_data.url} class="block pb-4">
-              <p class="font-bold">URL</p>
-              <p>
-                <a
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href={@alert_data.url}
-                  class="inline-flex flex-row items-center text-primary hover:text-primary-hover hover:underline"
-                >
-                  {@alert_data.url}
-                </a>
-              </p>
+              <p class="font-bold url_label">URL</p>
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href={@alert_data.url}
+                class="break-all text-primary hover:text-primary-hover hover:underline"
+              >
+                {@alert_data.url}
+              </a>
             </span>
 
             <span :if={Map.get(@alert_data, :banner_text)} class="block pb-4">
@@ -219,14 +217,14 @@ defmodule AlertsUIWeb.ReviewModal do
                   alt={@alert_data.image_alternative_text || "No alternative text provided"}
                   class="max-h-40 self-start pr-2 object-contain"
                 />
-                <p>
+                <p class="break-all">
                   {String.split(@alert_data.image_url, "/") |> List.last()}
                   <span :if={Map.get(@alert_data, :image_preview_size, nil)}>
                     ({@alert_data.image_preview_size["width"]} x {@alert_data.image_preview_size[
                       "height"
                     ]})
                   </span>
-                  <.icon name="hero-arrow-top-right-on-square" class="h-3 w-3" />
+                  <.icon name="hero-arrow-top-right-on-square" class="h-4 w-4" />
                 </p>
               </a>
               <p class="text-text-secondary">

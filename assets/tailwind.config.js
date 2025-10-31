@@ -83,7 +83,14 @@ module.exports = {
       "2xl": ["1.75rem", "2.1rem"],
       "3xl": ["2rem", "2.4rem"],
       "4xl": ["2.5rem", "3rem"],
-    }
+    },
+    gridTemplateColumns: {
+      1: "1fr",
+      3: "repeat(3, 1fr)",
+      4: "repeat(4, 1fr)",
+      6: "repeat(6, 1fr)",
+      "review-modal": "1fr 13.875rem",
+    },
   },
   daisyui: {
     logs: false,
