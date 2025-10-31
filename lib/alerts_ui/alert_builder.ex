@@ -68,13 +68,13 @@ defmodule AlertsUI.AlertBuilder do
         }
   @type direction_t :: 0 | 1
   @type stop_with_context_t :: {Stop.t(), Route.id_t(), direction_t(), RoutePattern.stop_type()}
+  @type alert_changeset_params :: map()
 
   @spec build_alert(
           alert_data_t(),
           ServiceEffectCombinations.service_effect_combination(),
           DateTime.t()
-        ) ::
-          map()
+        ) :: alert_changeset_params
   def build_alert(alert_data, combination, current_time \\ DateTime.utc_now()) do
     # CAUSE/EFFECTS
 
