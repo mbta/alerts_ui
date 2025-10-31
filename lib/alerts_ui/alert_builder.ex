@@ -73,9 +73,10 @@ defmodule AlertsUI.AlertBuilder do
   @spec build_alert(
           alert_data_t(),
           ServiceEffectCombinations.service_effect_combination(),
-          DateTime.t()
+          DateTime.t(),
+          keyword()
         ) :: alert_changeset_params
-  def build_alert(alert_data, combination, current_time \\ DateTime.utc_now()) do
+  def build_alert(alert_data, combination, current_time \\ DateTime.utc_now(), options \\ []) do
     # CAUSE/EFFECTS
 
     # cause
