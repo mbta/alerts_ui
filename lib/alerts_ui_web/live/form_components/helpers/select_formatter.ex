@@ -99,7 +99,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   def sort_order(%EnhancedSchedule{}), do: nil
   def sort_order(%Facility{}), do: nil
   def sort_order(%Route{sort_order: sort_order}), do: sort_order
-  # todo: check, does this have consequences?
   def sort_order(_), do: nil
 
   @spec name_for_option(

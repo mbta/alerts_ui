@@ -5,8 +5,10 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   use AlertsUIWeb, :live_view
   use AlertsUI.Schema
 
+  import AlertsUIWeb.FilterForm
+
   alias AlertsUI.Alerts
-  alias AlertsUI.Models.{ActivePeriod, Alert, Effect}
+  alias AlertsUI.Models.{ActivePeriod, Alert}
   alias AlertsUIWeb.FormComponents.Helpers.{AlertData, DateTimeFormatters, DateTimeHelpers}
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText
 
@@ -28,7 +30,10 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   @ten_seconds_in_ms 10_000
   @fields ~w[timeline multi_column_search service_type service_type_search_term routes routes_search_term effects effects_search_term]a
-  @filter_fields ["service_type", "routes", "effects", "multi_column_search", "timeline"]
+
+  @modal_filter_fields ["service_type", "routes", "effects"]
+  @other_filter_fields ["multi_column_search", "timeline"]
+  @filter_fields @modal_filter_fields ++ @other_filter_fields
 
   @impl true
   def mount(params, _session, socket) do
@@ -44,8 +49,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       {:ok,
        assign(socket,
          alerts: alerts,
-         filter_count:
-           filters |> Map.drop(["timeline", "multi_column_search"]) |> Map.keys() |> length(),
+         filter_count: get_filter_count(filters),
          form: form,
          meta: meta,
          page_title: "View Alerts",
@@ -67,9 +71,9 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   @impl true
   def handle_params(params, _url, socket) do
     # default to timeline: current if params have no values
-    # (eg no user input has occured and we're probably in a fresh reload)
+    # (eg no user input has occurred and we're probably in a fresh reload)
 
-    # process the params to construct the filters in the format Flop needs
+    # Process the params to construct the filters in the format Flop needs
     flop_filters =
       params
       |> Map.get("filter", [])
@@ -86,8 +90,6 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
     flop_filters = if timefield, do: flop_filters, else: flop_filters ++ [timefield]
 
-    # fix these
-    IO.inspect(timefield, label: "timefield")
     default_order_fields = lookup_end_time_order_fields_by_params(timefield)
     default_order_directions = lookup_end_time_order_directions_by_params(timefield)
 
@@ -171,22 +173,22 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     end
   end
 
-  # Drop any changes made while the modal was open
-  # todo: simplify all this code into reusable functions
+  ### Filter handlers section ###
+
+  # Drop any changes made while the modal was open. Revert to existing params
   @impl true
-  def handle_event("close_filter_modal", _params, socket) do
+  def handle_event("cancel_filter_modal", _params, socket) do
+    filters = Map.get(socket.assigns.params, "filter", %{"timeline" => "current"})
+
     form =
-      cast(
-        %__MODULE__{},
-        Map.get(socket.assigns.params, "filter", %{"timeline" => "current"}),
-        @fields
-      )
+      cast(%__MODULE__{}, filters, @fields)
       |> to_form(action: :validate)
 
     socket = assign(socket, form: form, scroll_to_top: false)
     {:noreply, socket}
   end
 
+  # On filter change, update the form and validate
   @impl true
   def handle_event("edit_filter", %{"view_alerts_live" => filter_selections}, socket) do
     params = clean_filter_params(filter_selections)
@@ -210,8 +212,9 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     {:noreply, socket}
   end
 
+  # On reset filter, if filter id is provided, then reset just that field
   @impl true
-  def handle_event("clear_filter", %{"filter-id" => filter_id}, socket) do
+  def handle_event("reset_filter", %{"filter-id" => filter_id}, socket) do
     filters =
       socket.assigns.params
       |> Map.get("filter", %{"timeline" => "current"})
@@ -225,12 +228,13 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     {:noreply, socket}
   end
 
+  # On reset filter, if filter id not provided, reset all fields in the modal
   @impl true
   def handle_event("reset_filter", _params, socket) do
     reset_filters =
       socket.assigns.params
       |> Map.get("filter", %{"timeline" => "current"})
-      |> Map.take(["timeline"])
+      |> Map.take(@other_filter_fields)
 
     form =
       cast(%__MODULE__{}, reset_filters, @fields)
@@ -240,12 +244,14 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     {:noreply, socket}
   end
 
+  # Handle clicking the "Reset" button
   @impl true
   def handle_event("apply_filter", %{"reset" => ""}, socket) do
     socket = assign(socket, scroll_to_top: true)
     {:noreply, push_patch(socket, to: ~p"/alerts")}
   end
 
+  # Handle submitting the modal filter or using the search bar
   def handle_event("apply_filter", %{"view_alerts_live" => filter_selections}, socket) do
     # Keep the other existing filters
     filters =
@@ -258,22 +264,22 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
     params = %{"filter" => filters}
 
-    # todo: filter_count: params |> Map.keys() |> length() is repeated, so make it a function
     socket =
       assign(socket,
         scroll_to_top: true,
-        filter_count:
-          filters |> Map.drop(["timeline", "multi_column_search"]) |> Map.keys() |> length()
+        filter_count: get_filter_count(filters)
       )
 
     {:noreply, push_patch(socket, to: ~p"/alerts?#{params}")}
   end
 
+  # Fallback handler
   def handle_event("apply_filter", _params, socket) do
     socket = assign(socket, scroll_to_top: false)
     {:noreply, socket}
   end
 
+  # Handle submitting a timeline filter change
   def handle_event("update_timeline_filter", %{"value" => value}, socket) do
     filters =
       socket.assigns.params
@@ -284,6 +290,10 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     socket = assign(socket, scroll_to_top: true)
     {:noreply, push_patch(socket, to: ~p"/alerts?#{params}")}
   end
+
+  ### END Filter handlers section ###
+
+  ### View Alerts handlers section ###
 
   @impl true
   def handle_event("open_details", %{"alert_id" => alert_id}, socket) when is_integer(alert_id) do
@@ -348,6 +358,10 @@ defmodule AlertsUIWeb.ViewAlertsLive do
      )}
   end
 
+  ### END View Alerts handlers section ###
+
+  ### Helpers section ###
+
   def lookup_end_time_order_fields_by_params(%{"field" => "timeline", "value" => "past"}),
     do: [
       :active_period_end,
@@ -381,6 +395,26 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   def reverse_order_direction(:desc_nulls_last), do: :asc_nulls_first
   def reverse_order_direction(:asc_nulls_first), do: :desc_nulls_last
   def reverse_order_direction(:desc_nulls_first), do: :asc_nulls_last
+
+  @spec clean_filter_params(map()) :: map()
+  defp clean_filter_params(params) do
+    nonempty_params = Map.filter(params, fn {k, v} -> v != "" || k == "multi_column_search" end)
+    %{"filter" => nonempty_params}
+  end
+
+  @spec remove_unused_params(map()) :: map()
+  defp remove_unused_params(params) do
+    Map.filter(params, fn {k, v} -> k in @filter_fields && v != ["default"] end)
+  end
+
+  @spec get_filter_count(map()) :: integer
+  defp get_filter_count(filters) do
+    filters |> Map.drop(@other_filter_fields) |> Map.keys() |> length()
+  end
+
+  ### END Helpers section ###
+
+  ### Frontend styling functions ###
 
   def format_timestamp(timestamp) do
     DateTimeFormatters.timestamp_date_time(timestamp)
@@ -424,26 +458,6 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   def format_end_time(_, _), do: ""
 
-  def format_effect_options do
-    Effect.effects_tuples()
-    |> Enum.map(fn {name, _, value} -> {name, value} end)
-  end
-
-  def format_routes_options do
-    [
-      {"Option", "1"},
-      {"Option", "2"},
-      {"Option", "3"},
-      {"Option", "4"},
-      {"Option", "5"},
-      {"Option", "6"},
-      {"Option", "7"},
-      {"Option", "8"},
-      {"Option", "9"},
-      {"Option", "10"}
-    ]
-  end
-
   def danger_text(active_period_end, closed_timestamp) do
     if DateTimeHelpers.will_be_ending_today?(active_period_end, closed_timestamp) do
       "text-danger"
@@ -460,17 +474,6 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     |> String.replace("_", " ")
     |> String.split()
     |> Enum.map_join(" ", fn s -> String.capitalize(s) end)
-  end
-
-  def format_service_type_options do
-    [
-      {"Bus", 3},
-      {"Subway", :subway},
-      {"Commuter Rail", 2},
-      {"Ferry", 4},
-      {"Facility", :access},
-      {"Systemwide", :systemwide}
-    ]
   end
 
   defp sort_icon(:asc) do
@@ -497,20 +500,6 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     """
   end
 
-  @spec timeline_options() :: [<<_::24, _::_*8>>, ...]
-  def timeline_options, do: ["current", "future", "past", "all"]
-
-  @spec clean_filter_params(map()) :: map()
-  defp clean_filter_params(params) do
-    nonempty_params = Map.filter(params, fn {k, v} -> v != "" || k == "multi_column_search" end)
-    %{"filter" => nonempty_params}
-  end
-
-  @spec remove_unused_params(map()) :: map()
-  defp remove_unused_params(params) do
-    Map.filter(params, fn {k, v} -> k in @filter_fields && v != ["default"] end)
-  end
-
   @spec timeline_filter_past?(any()) :: boolean()
   def timeline_filter_past?(%{
         "filters" => %{"3" => %{"field" => "timeline", "value" => "past"}}
@@ -518,4 +507,6 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       do: true
 
   def timeline_filter_past?(_), do: false
+
+  ### END Frontend styling section ###
 end

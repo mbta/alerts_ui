@@ -6,6 +6,7 @@ defmodule AlertsUIWeb.ComponentsLive do
   use AlertsUI.Schema
 
   import Ecto.Changeset
+  import AlertsUIWeb.FilterForm
 
   @primary_key false
   embedded_schema do
