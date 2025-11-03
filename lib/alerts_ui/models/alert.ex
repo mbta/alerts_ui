@@ -215,8 +215,8 @@ defmodule AlertsUI.Models.Alert do
     field :recurrence_text, :string
     field :alert_lifecycle, Ecto.Enum, values: @alert_lifecycle
     field :duration_certainty, Ecto.Enum, values: @duration_certainty
-    has_many :reminder_times, ReminderTime, on_replace: :delete
-    has_many :active_period, ActivePeriod, on_replace: :delete
+    has_many :reminder_times, ReminderTime, on_replace: :delete_if_exists
+    has_many :active_period, ActivePeriod, on_replace: :delete_if_exists
     field :active_period_start, :utc_datetime
     field :active_period_end, :utc_datetime
     field :image_url, :string
@@ -248,26 +248,7 @@ defmodule AlertsUI.Models.Alert do
     alert
     |> cast(params, @permitted_fields)
     |> cast_assoc(:reminder_times, required: false, with: &ReminderTime.changeset/2)
-    |> validate_change(:recurrence_days, fn :recurrence_days, recurrence_days ->
-      active_period_start =
-        case Map.get(params, :active_period_start) do
-          %NaiveDateTime{} = naive -> DateTime.from_naive!(naive, "America/New_York")
-          %DateTime{} = dt -> DateTime.shift_zone!(dt, "America/New_York")
-        end
-
-      cond do
-        Enum.empty?(recurrence_days) ->
-          []
-
-        Timex.weekday(active_period_start) in Enum.map(recurrence_days, &Timex.day_to_num/1) ->
-          []
-
-        true ->
-          [
-            recurrence_days: {"Alert start day must match a selected day of the week.", []}
-          ]
-      end
-    end)
+    |> validate_recurrence_days(options)
     |> validate_timestamps()
     |> validate_inclusion(:effect, @effect)
     |> validate_inclusion(:cause, @cause)
@@ -443,6 +424,36 @@ defmodule AlertsUI.Models.Alert do
       add_error(changeset, :active_period_end, "Alerts of unknown duration can't have end times")
     else
       changeset
+    end
+  end
+
+  defp validate_recurrence_days(changeset, options) do
+    if Keyword.get(options, :no_recurrence_validation) do
+      changeset
+    else
+      active_period_start =
+        case get_field(changeset, :active_period_start) do
+          %NaiveDateTime{} = naive -> DateTime.from_naive!(naive, "America/New_York")
+          %DateTime{} = dt -> DateTime.shift_zone!(dt, "America/New_York")
+          _ -> raise ArgumentError, "invalid active_period_start"
+        end
+
+      recurrence_days = get_field(changeset, :recurrence_days, [])
+
+      cond do
+        Enum.empty?(recurrence_days) ->
+          changeset
+
+        Timex.weekday(active_period_start) in Enum.map(recurrence_days, &Timex.day_to_num/1) ->
+          changeset
+
+        true ->
+          add_error(
+            changeset,
+            :recurrence_days,
+            "Alert start day must match a selected day of the week"
+          )
+      end
     end
   end
 
