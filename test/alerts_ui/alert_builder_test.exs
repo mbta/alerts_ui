@@ -3347,7 +3347,7 @@ defmodule AlertsUI.AlertBuilderTest do
         no_informed_entity: true
       )
 
-    assert result.informed_entity == nil
+    assert result.informed_entity == []
   end
 
   test "active_period_start is passed unchanged if :no_active_periods is set" do
