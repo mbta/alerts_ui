@@ -560,6 +560,41 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       assert alert.active_period_end_date == ~D[2024-05-04]
     end
 
+    test "handles recurring alert with end time after midnight" do
+      insert(:alert, %{
+        alert_id: "1",
+        effect: :ACCESSIBILITY_ISSUE,
+        effect_detail: "ACCESS_ISSUE",
+        header_text: "cool header text",
+        description_text: "description text",
+        informed_entity: [],
+        primary_service_type: nil,
+        active_period_start: ~U[2024-05-02 16:09:34.007545Z],
+        active_period_end: ~U[2024-05-05 06:09:34.007545Z],
+        active_period: [
+          %{
+            start: ~U[2024-05-02 16:09:34.007545Z],
+            end: ~U[2024-05-03 06:09:34.007545Z]
+          },
+          %{
+            start: ~U[2024-05-03 16:09:34.007545Z],
+            end: ~U[2024-05-04 06:09:34.007545Z]
+          },
+          %{
+            start: ~U[2024-05-04 16:09:34.007545Z],
+            end: ~U[2024-05-05 06:09:34.007545Z]
+          }
+        ],
+        duration_certainty: :KNOWN,
+        recurrence_days: [:thursday, :friday, :saturday],
+        recurrence_times: [~T[16:09:34], ~T[06:09:34]]
+      })
+
+      alert = AlertData.build_alert_data("1")
+      assert alert.alert_timing == :recurring
+      assert alert.active_period_end_date == ~D[2024-05-04]
+    end
+
     test "handles recurring alert with no set end" do
       insert(:alert, %{
         alert_id: "1",

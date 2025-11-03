@@ -140,16 +140,34 @@ defmodule AlertsUIWeb.ReviewModal do
           <p class="font-bold">Main message</p>
           <p class="pb-4 max-w-[28rem] whitespace-pre-line break-words">{@alert_data.header_text}</p>
 
-          <div class="pb-4">
-            <p class="font-bold">Supporting information</p>
-            <%= if @alert_data.description_text do %>
-              <p class="whitespace-pre-line">{@alert_data.description_text}</p>
-            <% else %>
-              <p class="italic">None</p>
-            <% end %>
+          <div>
+            <span class="block pb-4">
+              <p class="font-bold">Supporting information</p>
+              <%= if @alert_data.description_text do %>
+                <p class="whitespace-pre-line">{@alert_data.description_text}</p>
+              <% else %>
+                <p class="italic">None</p>
+              <% end %>
+            </span>
 
-            <span :if={@alert_data.url} class="text-text-secondary">
-              URL: {@alert_data.url}
+            <span :if={@alert_data.url} class="block pb-4">
+              <p class="font-bold">URL</p>
+              <p>
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href={@alert_data.url}
+                  class="inline-flex flex-row items-center text-primary hover:text-primary-hover hover:underline"
+                >
+                  {@alert_data.url}
+                  <.icon name="hero-arrow-top-right-on-square" class="h-3 w-3 mx-[0.25rem]" />
+                </a>
+              </p>
+            </span>
+
+            <span :if={Map.get(@alert_data, :banner_text)} class="block pb-4">
+              <p class="font-bold">Web Banner Text</p>
+              <p>{@alert_data.banner_text}</p>
             </span>
           </div>
 
@@ -188,35 +206,33 @@ defmodule AlertsUIWeb.ReviewModal do
           <%!-- Image --%>
           <%= if @alert_data.image_url do %>
             <p class="font-bold">Image</p>
-            <div class="inline-flex pb-4">
-              <img
-                id="alert-image"
-                phx-hook="MeasureImage"
-                src={@alert_data.image_url}
-                alt={@alert_data.image_alternative_text || "No alternative text provided"}
-                class="h-16 pr-2"
-              />
-              <div>
-                <p class="text-text-secondary">
+            <div class="pb-4">
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href={@alert_data.image_url}
+                class="align-top text-primary hover:text-primary-hover hover:underline"
+              >
+                <img
+                  id="alert-image"
+                  phx-hook="MeasureImage"
+                  src={@alert_data.image_url}
+                  alt={@alert_data.image_alternative_text || "No alternative text provided"}
+                  class="h-16 pr-2"
+                />
+                <p>
                   {String.split(@alert_data.image_url, "/") |> List.last()}
                   <span :if={Map.get(@alert_data, :image_preview_size, nil)}>
                     ({@alert_data.image_preview_size["width"]} x {@alert_data.image_preview_size[
                       "height"
                     ]})
                   </span>
-                  <a
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href={@alert_data.image_url}
-                    class="inline-flex align-top text-primary"
-                  >
-                    <.icon name="hero-arrow-top-right-on-square" class="h-3 w-3" />
-                  </a>
+                  <.icon name="hero-arrow-top-right-on-square" class="h-3 w-3" />
                 </p>
-                <p class="text-text-secondary">
-                  Alt text: {@alert_data.image_alternative_text || "No alternative text provided"}
-                </p>
-              </div>
+              </a>
+              <p class="">
+                Alt text: {@alert_data.image_alternative_text || "No alternative text provided"}
+              </p>
             </div>
           <% end %>
 
@@ -333,34 +349,6 @@ defmodule AlertsUIWeb.ReviewModal do
               <p class="pb-4 italic">None</p>
             <% end %>
           </div>
-
-          <%!-- Bottom section --%>
-          <hr class="border-border-primary pb-4" />
-          <details>
-            <summary class="font-bold pb-4">Preview subheader TBD</summary>
-            <div class="ps-4">
-              <p class="font-bold">Web Banner</p>
-              <%= if Map.get(@alert_data, :view_banner) do %>
-                <p class="pb-6">{@alert_data.banner_text}</p>
-              <% else %>
-                <p class="pb-6 italic">Not selected</p>
-              <% end %>
-
-              <p class="font-bold">SMS</p>
-              <%= if Map.get(@alert_data, :notification_toggle) do %>
-                <p class="pb-6">To be populated when we build this out later</p>
-              <% else %>
-                <p class="pb-6 italic">Not selected</p>
-              <% end %>
-
-              <p class="font-bold">Email</p>
-              <%= if Map.get(@alert_data, :notification_toggle) do %>
-                <p class="pb-6">To be populated when we build this out later</p>
-              <% else %>
-                <p class="pb-6">To be populated when we build this out later</p>
-              <% end %>
-            </div>
-          </details>
         </div>
         <%!-- Sidebar --%>
         <div class="min-w-[222px] shrink-0 p-4 bg-bg-elevation-5">
@@ -418,7 +406,7 @@ defmodule AlertsUIWeb.ReviewModal do
 
           <.link
             :if={@alert_id}
-            class="text-primary hover:text-primary-hover"
+            class="text-primary hover:text-primary-hover hover:underline"
             href={~p"/download_history?alert_id=#{@alert_id}"}
             target="_blank"
           >

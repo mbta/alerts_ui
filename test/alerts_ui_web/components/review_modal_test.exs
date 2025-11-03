@@ -660,7 +660,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
                  ~r/Main message.*Framingham\/Worcester Line is experiencing delays of about 15 minutes/s
 
         assert render(view) =~ ~r/Supporting information.*None/s
-        refute render(view) =~ ~r/URL:/s
+        refute render(view) =~ ~r/>URL</s
       end
     end
 
@@ -698,10 +698,12 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
 
         open_review_modal(view)
 
-        assert render(view) =~ ~r/Cause.*Disabled bus/s
-        assert render(view) =~ ~r/Severity.*About 30 minutes.*\(7 - SEVERE\)/s
-        assert render(view) =~ ~r/Supporting information.*supporting information/s
-        assert render(view) =~ ~r/URL: http:\/\/www.fake.com/s
+        assert render(view) =~ ~r{Cause.*Disabled bus}s
+        assert render(view) =~ ~r{Severity.*About 30 minutes.*\(7 - SEVERE\)}s
+        assert render(view) =~ ~r{Supporting information.*supporting information}s
+
+        assert render(view) =~
+                 ~r{URL</p>\s*<p[^>]*><a[^>]*href="http://www.fake.com"[^>]*>\s*http:\/\/www.fake.com}s
       end
     end
   end
@@ -914,9 +916,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
 
         open_review_modal(view)
 
-        assert render(view) =~ ~r/SMS.*To be populated when we build this out later/s
-        assert render(view) =~ ~r/Email.*To be populated when we build this out later/s
-        assert render(view) =~ ~r/Web Banner.*Not selected/s
+        refute render(view) =~ ~r[Web Banner Text</p>\s*<p.*Not selected]s
       end
     end
 
@@ -953,9 +953,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
 
         open_review_modal(view)
 
-        assert render(view) =~ ~r/SMS.*To be populated when we build this out later/s
-        assert render(view) =~ ~r/Email.*To be populated when we build this out later/s
-        assert render(view) =~ ~r/Web Banner.*Well hello there/s
+        assert render(view) =~ ~r[Web Banner Text</p>\s*<p.*Well hello there]s
       end
     end
 
@@ -991,11 +989,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
 
         open_review_modal(view)
 
-        assert render(view) =~ ~r/SMS.*Not selected/s
-        assert render(view) =~ ~r/Email.*Not selected/s
-
         assert render(view) =~
-                 ~r/Web Banner.*Framingham\/Worcester Line is experiencing delays of about 15 minutes/s
+                 ~r[Web Banner Text</p>\s*<p.*Framingham/Worcester Line is experiencing delays of about 15 minutes]s
       end
     end
 
@@ -1023,9 +1018,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
 
         open_review_modal(view)
 
-        assert render(view) =~ ~r/SMS.*Not selected/s
-        assert render(view) =~ ~r/Email.*Not selected/s
-        assert render(view) =~ ~r/Web Banner.*Not selected/s
+        refute render(view) =~ ~r[Web Banner Text</p>\s*<p.*Not selected]s
       end
     end
   end
