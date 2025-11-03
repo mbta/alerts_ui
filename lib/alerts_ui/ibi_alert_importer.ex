@@ -148,6 +148,7 @@ defmodule AlertsUI.IBIAlertImporter do
       :route_type,
       :route_ids,
       :stop_ids,
+      :trip_ids,
       :stop_names_and_ids,
       :facility_id,
       :direction,
