@@ -177,19 +177,19 @@ defmodule AlertsUIWeb.ReviewModal do
               <p>Routes:</p>
               <p>{@routes |> Enum.map(&SelectFormatter.name_for_option(&1)) |> Enum.join(", ")}</p>
             <% end %>
-            <%= if @direction_name do %>
+            <%= if @direction_name && @direction_name != [] do %>
               <p>Direction:</p>
               <p>{@direction_name}</p>
             <% end %>
-            <%= if @stop_names do %>
+            <%= if @stop_names && @stop_names != [] do %>
               <p>Stops:</p>
               <p>{Enum.join(@stop_names, ", ")}</p>
             <% end %>
-            <%= if @trip_names do %>
+            <%= if @trip_names && @trip_names != [] do %>
               <p>Trips:</p>
               <p>{Enum.join(@trip_names, ", ")}</p>
             <% end %>
-            <%= if @facility_name do %>
+            <%= if @facility_name && @direction_name != [] do %>
               <p>Facility:</p>
               <p>{@facility_name}</p>
             <% end %>
