@@ -79,7 +79,7 @@ defmodule AlertsUI.IBIAlertImporter do
   def convert_ibi_alerts(options \\ []) do
     Repo.transact(
       fn ->
-        LatestIBIAlert
+        (from i in LatestIBIAlert, order_by: fragment("RANDOM()"))
         |> Repo.stream()
         |> Stream.chunk_every(chunk_size(options))
         |> Stream.each(fn chunk ->
@@ -90,23 +90,33 @@ defmodule AlertsUI.IBIAlertImporter do
             |> Enum.group_by(fn version -> version.alert_id end)
 
           Enum.each(chunk, fn latest_version ->
-            currently_open = latest_version.is_closed == "False"
+            currently_open = (latest_version.is_closed == "False")
 
             [insert | updates] =
               all_versions_index
               |> Map.get(latest_version.alert_id)
               |> Enum.sort_by(fn version -> version.integer_version_no end)
 
+            latest_version = insert.version_no == latest_version.version_no
+            insert_open = currently_open && (insert.version_no == latest_version.version_no)
+
             alert =
               insert
-              |> ibi_alert_to_changeset(%Alert{},
-                open: currently_open && latest_version.version_no == insert.version_no
+              |> ibi_alert_to_changeset(
+                %Alert{},
+                no_active_periods: !insert_open,
+                no_informed_entities: !insert_open
               )
               |> PaperTrail.insert!()
 
             Enum.each(updates, fn update ->
+              update_open = currently_open && (update.version_no == latest_version.version_no)
               update
-              |> ibi_alert_to_changeset(alert, open: currently_open && latest_version == update)
+              |> ibi_alert_to_changeset(
+                alert,
+                no_active_periods: !update_open,
+                no_informed_entities: !update_open
+              )
               |> PaperTrail.update!()
             end)
           end)
@@ -119,23 +129,14 @@ defmodule AlertsUI.IBIAlertImporter do
     )
   end
 
-  def ibi_alert_to_changeset(ibi_alert, am_alert \\ %Alert{}, options \\ [])
-
-  def ibi_alert_to_changeset(ibi_alert, am_alert, [open: true] = options) do
-    ibi_alert
-    |> ibi_alert_to_changeset(am_alert, Keyword.put(options, :open, false))
-    |> Alert.open_changeset(%{})
-  end
-
-  def ibi_alert_to_changeset(ibi_alert, am_alert, _options) do
+  def ibi_alert_to_changeset(ibi_alert, am_alert, options \\ []) do
     params =
       ibi_alert
       |> ibi_alert_to_alert_data()
-      # probably need to supply current time here?
-      |> AlertBuilder.build_alert(from_ibi(ibi_alert, :combination))
+      |> AlertBuilder.build_alert(from_ibi(ibi_alert, :combination), DateTime.utc_now(), options)
       |> Map.put(:alert_id, ibi_alert.alert_id)
 
-    Alert.minimal_changeset(am_alert, params)
+    Alert.changeset(am_alert, params, options)
   end
 
   def ibi_alert_to_alert_data(ibi_alert) do
@@ -169,7 +170,11 @@ defmodule AlertsUI.IBIAlertImporter do
       :effect_detail,
       :effect_name,
       :severity,
-      :combination
+      :combination,
+      :original_direction_selections,
+      :original_route_selections,
+      :original_trip_selections,
+      :original_facility_selections
     ]
     |> Enum.reduce(%{}, fn key, alert_data ->
       try do
@@ -360,6 +365,11 @@ defmodule AlertsUI.IBIAlertImporter do
     end
   end
 
+  def from_ibi(ibi_alert, :original_direction_selections), do: [from_ibi(ibi_alert, :direction)]
+  def from_ibi(ibi_alert, :original_route_selections), do: from_ibi(ibi_alert, :route_ids)
+  def from_ibi(ibi_alert, :original_trip_selections), do: from_ibi(ibi_alert, :trip_ids)
+  def from_ibi(ibi_alert, :original_facility_selections), do: [from_ibi(ibi_alert, :facility_id)]
+
   def from_ibi(ibi_alert, key), do: Map.get(ibi_alert, key)
 
   defp split_combined_ids(nil), do: []
@@ -371,7 +381,7 @@ defmodule AlertsUI.IBIAlertImporter do
     |> String.split(",")
   end
 
-  defp ndt_from_ibi_string(timestamp) do
+  def ndt_from_ibi_string(timestamp) do
     if timestamp =~ ~r/\// do
       Timex.parse!(timestamp, "{M}/{D}/{YYYY} {h12}:{m}:{s} {AM}")
     else
@@ -379,7 +389,7 @@ defmodule AlertsUI.IBIAlertImporter do
     end
   end
 
-  defp ndt_from_ibi_reminder_format(timestamp) do
+  def ndt_from_ibi_reminder_format(timestamp) do
     timestamp
     |> String.replace("T", " ")
     |> String.replace(~r/\:[0-9]*\.[0-9]*$/, "")

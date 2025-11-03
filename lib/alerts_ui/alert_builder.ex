@@ -79,12 +79,9 @@ defmodule AlertsUI.AlertBuilder do
   def build_alert(alert_data, combination, current_time \\ DateTime.utc_now(), options \\ []) do
     # CAUSE/EFFECTS
 
-    # cause
     route_type = Map.get(alert_data, :route_type)
     cause_detail = Map.get(alert_data, :cause_detail, "")
     cause = Map.get(alert_data, :cause, Cause.get_by_mode_and_detail(route_type, cause_detail))
-
-    # effect
     effect_name = Map.get(alert_data, :effect_name)
     # if `effect` is specified in `alert_data`, we bypass the call to `effect_map_by_name/1`
     # and pass along `effect_detail` as given
@@ -109,12 +106,13 @@ defmodule AlertsUI.AlertBuilder do
     # selected from the form, so we create them here before combo routes are
     # added to our list of routes
 
-    original_direction_selections = [
+    original_direction_selections =
+      Map.get(alert_data, :original_direction_selections) || [
       direction_name(selected_routes, pre_combo_routes(selected_routes), direction_id) <>
         "|" <> (direction_id || "")
     ]
 
-    original_route_selections =
+    original_route_selections = Map.get(alert_data, :original_route_selections) ||
       selected_routes
       |> Enum.map(fn route_id ->
         matching_route = get_matching_route(route_id, pre_combo_routes(selected_routes))
@@ -124,13 +122,13 @@ defmodule AlertsUI.AlertBuilder do
 
     original_stop_selections = Map.get(alert_data, :stop_names_and_ids, [])
 
-    original_trip_selections =
+    original_trip_selections = Map.get(alert_data, :original_trip_selections) ||
       (Map.get(alert_data, :trip_information_by_id, %{}) || %{})
       |> Enum.map(fn {id, trip} ->
         "#{Map.get(trip, :trip_name, "")}|#{id}"
       end)
 
-    original_facility_selections =
+    original_facility_selections = Map.get(alert_data, :original_facility_selections) ||
       case Map.get(alert_data, :facility_id) do
         nil ->
           []
@@ -199,7 +197,7 @@ defmodule AlertsUI.AlertBuilder do
     # INFORMED ENTITIES
 
     informed_entity =
-      unless Keyword.get(options, :no_informed_entity) do
+      unless Keyword.get(options, :no_informed_entities) do
         service_types = Map.get(alert_data, :service_types, []) |> expand_subway_service_types()
 
         routes =
