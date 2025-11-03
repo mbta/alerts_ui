@@ -79,7 +79,7 @@ defmodule AlertsUI.IBIAlertImporter do
   def convert_ibi_alerts(options \\ []) do
     Repo.transact(
       fn ->
-        (from i in LatestIBIAlert, order_by: fragment("RANDOM()"))
+        (from i in LatestIBIAlert, where: i.is_closed == "True", order_by: fragment("RANDOM()"))
         |> Repo.stream()
         |> Stream.chunk_every(chunk_size(options))
         |> Stream.each(fn chunk ->
@@ -99,6 +99,7 @@ defmodule AlertsUI.IBIAlertImporter do
 
             insert_open = currently_open && (insert.version_no == latest_version.version_no)
 
+            # TODO: logic to check for existing alerts and update instead of insert
             alert =
               insert
               |> ibi_alert_to_changeset(
