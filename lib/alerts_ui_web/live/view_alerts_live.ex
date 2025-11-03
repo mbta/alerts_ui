@@ -87,7 +87,11 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
     timefield = Enum.find(flop_filters, fn %{"field" => k, "value" => _v} -> k == "timeline" end)
 
-    flop_filters = if timefield, do: flop_filters, else: flop_filters ++ [%{"field" => "timeline", "value" => "current"}]
+    flop_filters =
+      if timefield,
+        do: flop_filters,
+        else: flop_filters ++ [%{"field" => "timeline", "value" => "current"}]
+
     params = if timefield, do: params, else: Map.put(params, "timeline", "current")
     timefield = if timefield, do: timefield["value"], else: "current"
 

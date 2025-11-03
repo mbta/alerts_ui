@@ -97,13 +97,11 @@ defmodule AlertsUIWeb.FilterForm do
           filter_field={@form[:service_type_search_term]}
           label="Service Types"
           options={
-            SelectFormatter.formatted_select_options(
-              %SelectFormatter{
-                options: format_service_type_options(),
-                search_term: assigns.form[:service_type_search_term].value,
-                values_to_keep: List.wrap(assigns.form[:service_type].value)
-              }
-            )
+            SelectFormatter.formatted_select_options(%SelectFormatter{
+              options: format_service_type_options(),
+              search_term: assigns.form[:service_type_search_term].value,
+              values_to_keep: List.wrap(assigns.form[:service_type].value)
+            })
           }
         />
         <.filter_modal_group
@@ -111,13 +109,11 @@ defmodule AlertsUIWeb.FilterForm do
           filter_field={@form[:routes_search_term]}
           label="Routes"
           options={
-            SelectFormatter.formatted_select_options(
-              %SelectFormatter{
-                options: format_routes_options(),
-                search_term: assigns.form[:routes_search_term].value,
-                values_to_keep: List.wrap(assigns.form[:routes].value)
-              }
-            )
+            SelectFormatter.formatted_select_options(%SelectFormatter{
+              options: format_routes_options(),
+              search_term: assigns.form[:routes_search_term].value,
+              values_to_keep: List.wrap(assigns.form[:routes].value)
+            })
           }
         />
         <.filter_modal_group
@@ -125,13 +121,11 @@ defmodule AlertsUIWeb.FilterForm do
           filter_field={@form[:effects_search_term]}
           label="Effects"
           options={
-            SelectFormatter.formatted_select_options(
-              %SelectFormatter{
-                options: format_effect_options(),
-                search_term: assigns.form[:effects_search_term].value,
-                values_to_keep: List.wrap(assigns.form[:effects].value)
-              }
-            )
+            SelectFormatter.formatted_select_options(%SelectFormatter{
+              options: format_effect_options(),
+              search_term: assigns.form[:effects_search_term].value,
+              values_to_keep: List.wrap(assigns.form[:effects].value)
+            })
           }
         />
         <:footer>
