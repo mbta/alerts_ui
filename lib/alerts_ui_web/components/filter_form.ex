@@ -36,7 +36,7 @@ defmodule AlertsUIWeb.FilterForm do
         <.radio_switch
           name="timeline"
           class="!mx-0"
-          selected={@form[:timeline]}
+          selected={@form[:timeline].value}
           default="current"
           values={timeline_options()}
           on_change="update_timeline_filter"

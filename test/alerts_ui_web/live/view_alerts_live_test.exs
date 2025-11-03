@@ -89,14 +89,14 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         original_route_selections: ["Orange"]
       })
 
-      {:ok, _view, html} = live(conn, "/alerts?filters[3][field]=timeline&filters[3][value]=all")
+      {:ok, _view, html} = live(conn, "/alerts?filter[timeline]=all")
       assert html =~ "899"
       assert html =~ "999"
 
       {:ok, _view, html} =
         live(
           conn,
-          "/alerts?filters[3][field]=timeline&filters[3][value]=all&filters[4][field]=multi_column_search&filters[4][value]=899"
+          "/alerts?filter[timeline]=all&filter[multi_column_search]=899"
         )
 
       assert html =~ "899"
@@ -105,7 +105,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       {:ok, _view, html} =
         live(
           conn,
-          "/alerts?filters[3][field]=timeline&filters[3][value]=all&filters[4][field]=multi_column_search&filters[4][value]=999"
+          "/alerts?filter[timeline]all&filter[multi_column_search]=999"
         )
 
       refute html =~ "899"
@@ -126,14 +126,14 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         header_text: "problem with Franklin/Foxboro line today"
       })
 
-      {:ok, _view, html} = live(conn, "/alerts?filters[3][field]=timeline&filters[3][value]=all")
+      {:ok, _view, html} = live(conn, "/alerts?filter[timeline]=all")
       assert html =~ "899"
       assert html =~ "999"
 
       {:ok, _view, html} =
         live(
           conn,
-          "/alerts?filters[3][field]=timeline&filters[3][value]=all&filters[4][field]=multi_column_search&filters[4][value]=framingham line"
+          "/alerts?filter[timeline]=all&filter[multi_column_search]=framingham line"
         )
 
       assert html =~ "899"
@@ -142,7 +142,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       {:ok, _view, html} =
         live(
           conn,
-          "/alerts?filters[3][field]=timeline&filters[3][value]=all&filters[4][field]=multi_column_search&filters[4][value]=foxboro line"
+          "/alerts?filter[timeline]=all&filter[multi_column_search]=foxboro line"
         )
 
       refute html =~ "899"
@@ -366,21 +366,21 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
     @tag :logged_in_user
     test "future timeline filter renders end date asc", %{conn: conn} do
       {:ok, _view, html} =
-        live(conn, "/alerts?filters[3][field]=timeline&filters[3][value]=future")
+        live(conn, "/alerts?filter[timeline]=future")
 
       assert get_alert_id_order(html) == ["10400", "10200", "11000", "11400", "10800", "11100"]
     end
 
     @tag :logged_in_user
     test "past timeline filter renders end date desc", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/alerts?filters[3][field]=timeline&filters[3][value]=past")
+      {:ok, _view, html} = live(conn, "/alerts?filter[timeline]=past")
 
       assert get_alert_id_order(html) == ["11600", "11500", "10700", "11300", "11700", "11200"]
     end
 
     @tag :logged_in_user
     test "all timeline filter renders end date desc", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/alerts?filters[3][field]=timeline&filters[3][value]=all")
+      {:ok, _view, html} = live(conn, "/alerts?filter[timeline]=all")
 
       assert get_alert_id_order(html) == [
                "11100",
@@ -490,14 +490,14 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
     @tag :logged_in_user
     test "it paginates records", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/alerts?filters[3][field]=timeline&filters[3][value]=past")
+      {:ok, _view, html} = live(conn, "/alerts?filter[timeline]=past")
       assert Repo.aggregate(Alert, :count) == 100
       assert get_alert_id_order(html) == Enum.map(1..50, fn i -> "#{i}" end)
     end
 
     @tag :logged_in_user
     test "pagination is navigable", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts?filters[3][field]=timeline&filters[3][value]=past")
+      {:ok, view, _html} = live(conn, "/alerts?filter[timeline]=past")
 
       html =
         view
@@ -509,16 +509,15 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
     @tag :logged_in_user
     test "timeline navigation from paginated results returns to page 1", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts?filters[3][field]=timeline&filters[3][value]=past")
+      {:ok, view, _html} = live(conn, "/alerts?filter[timeline]=past")
 
       view
       |> element("button[aria-label='Go to page 2']", "2")
       |> render_click()
 
-      html =
-        view
-        |> form("#alert-filter-form", filters: %{"3" => %{"value" => "current"}})
-        |> render_change()
+      html = view
+      |> element("input[aria-label='Current']")
+      |> render_click()
 
       assert get_alert_id_order(html) == Enum.map(91..100, fn i -> "#{i}" end)
     end
@@ -794,7 +793,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
     test "actions display for closed alerts", %{conn: conn} do
       with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
         {:ok, _view, html} =
-          live(conn, "/alerts?filters[3][field]=timeline&filters[3][value]=past")
+          live(conn, "/alerts?filter[timeline]=past")
 
         refute html =~ ~s(<span class="hero-pencil-solid w-4 h-4"></span>)
         refute html =~ ~s(<span class="hero-x-mark-solid w-4 h-4"></span>)

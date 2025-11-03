@@ -86,9 +86,10 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       end)
 
     timefield = Enum.find(flop_filters, fn %{"field" => k, "value" => _v} -> k == "timeline" end)
-    timefield = if timefield, do: timefield, else: %{"field" => "timeline", "value" => "current"}
 
-    flop_filters = if timefield, do: flop_filters, else: flop_filters ++ [timefield]
+    flop_filters = if timefield, do: flop_filters, else: flop_filters ++ [%{"field" => "timeline", "value" => "current"}]
+    params = if timefield, do: params, else: Map.put(params, "timeline", "current")
+    timefield = if timefield, do: timefield["value"], else: "current"
 
     default_order_fields = lookup_end_time_order_fields_by_params(timefield)
     default_order_directions = lookup_end_time_order_directions_by_params(timefield)
@@ -134,8 +135,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     # If the existing flop metadata has notification_period_end,
     # then the directions need reversing. Otherwise, use default directions
 
-    timefield =
-      Enum.find(socket.assigns.params, fn %{"field" => k, "value" => _v} -> k == "timeline" end)
+    timefield = socket.assigns.form.params["timeline"]
 
     new_order_directions =
       if hd(flop.order_by) == :notification_period_end do
@@ -240,7 +240,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       cast(%__MODULE__{}, reset_filters, @fields)
       |> to_form(action: :validate)
 
-    socket = assign(socket, form: form, scroll_to_top: false)
+    socket = assign(socket, filter_count: 0, form: form, scroll_to_top: false)
     {:noreply, socket}
   end
 
@@ -362,7 +362,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   ### Helpers section ###
 
-  def lookup_end_time_order_fields_by_params(%{"field" => "timeline", "value" => "past"}),
+  def lookup_end_time_order_fields_by_params("past"),
     do: [
       :active_period_end,
       :active_period_start
@@ -377,16 +377,16 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       :notification_period_start
     ]
 
-  def lookup_end_time_order_directions_by_params(%{"field" => "timeline", "value" => "current"}),
+  def lookup_end_time_order_directions_by_params("current"),
     do: [:asc_nulls_last, :asc, :asc_nulls_last, :asc, :asc]
 
-  def lookup_end_time_order_directions_by_params(%{"field" => "timeline", "value" => "future"}),
+  def lookup_end_time_order_directions_by_params("future"),
     do: [:asc_nulls_last, :asc, :asc_nulls_last, :asc, :asc]
 
-  def lookup_end_time_order_directions_by_params(%{"field" => "timeline", "value" => "past"}),
+  def lookup_end_time_order_directions_by_params("past"),
     do: [:desc, :desc]
 
-  def lookup_end_time_order_directions_by_params(%{"field" => "timeline", "value" => _}),
+  def lookup_end_time_order_directions_by_params(_),
     do: [:desc_nulls_first, :desc, :desc_nulls_first, :desc, :desc]
 
   def reverse_order_direction(:asc), do: :desc

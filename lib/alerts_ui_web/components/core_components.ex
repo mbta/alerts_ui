@@ -368,7 +368,7 @@ defmodule AlertsUIWeb.CoreComponents do
           name={@name}
           value={value}
           label={String.capitalize(value)}
-          checked={value == @selected.value || (!@selected.value && value == @default)}
+          checked={value == @selected || (!@selected && value == @default)}
           on_change={@on_change}
         />
       </div>
