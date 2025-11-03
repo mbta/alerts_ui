@@ -438,7 +438,7 @@ defmodule AlertsUI.Models.Alert do
           _ -> raise ArgumentError, "invalid active_period_start"
         end
 
-      recurrence_days = get_field(changeset, :recurrence_days, [])
+      recurrence_days = get_field(changeset, :recurrence_days) || []
 
       cond do
         Enum.empty?(recurrence_days) ->
