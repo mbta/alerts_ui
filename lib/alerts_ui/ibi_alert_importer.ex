@@ -370,10 +370,16 @@ defmodule AlertsUI.IBIAlertImporter do
     end
   end
 
-  def from_ibi(ibi_alert, :original_direction_selections), do: [from_ibi(ibi_alert, :direction)]
+  def from_ibi(ibi_alert, :original_direction_selections) do
+    Enum.filter([from_ibi(ibi_alert, :direction)], & &1)
+  end
+
+  def from_ibi(ibi_alert, :original_facility_selections) do
+    Enum.filter([from_ibi(ibi_alert, :facility_id)], & &1)
+  end
+
   def from_ibi(ibi_alert, :original_route_selections), do: from_ibi(ibi_alert, :route_ids)
   def from_ibi(ibi_alert, :original_trip_selections), do: from_ibi(ibi_alert, :trip_ids)
-  def from_ibi(ibi_alert, :original_facility_selections), do: [from_ibi(ibi_alert, :facility_id)]
 
   def from_ibi(ibi_alert, key), do: Map.get(ibi_alert, key)
 
