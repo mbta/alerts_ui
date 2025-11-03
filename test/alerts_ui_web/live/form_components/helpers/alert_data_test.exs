@@ -546,7 +546,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         ],
         duration_certainty: :KNOWN,
         recurrence_days: [:thursday, :friday, :saturday],
-        recurrence_times: [~T[16:09:34], ~T[17:09:34]]
+        recurrence_times: [~T[12:09:34], ~T[13:09:34]]
       })
 
       alert = AlertData.build_alert_data("1")

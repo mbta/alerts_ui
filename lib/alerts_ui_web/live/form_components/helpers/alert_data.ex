@@ -243,18 +243,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     start_datetime = hd(active_period).start |> shift_to_naive
     end_datetime = hd(active_period).end |> shift_to_naive
     end_specifier = if alert.active_period_end, do: "custom", else: "until_further_notice"
-    recurrence_times = Map.get(alert, :recurrence_times, nil)
 
     [recurrence_start, recurrence_end] =
-      if recurrence_times do
-        timezone = Timex.Timezone.get("America/New_York")
-        offset_seconds = timezone.offset_utc + timezone.offset_std
-
-        Enum.map(recurrence_times, fn time -> Time.add(time, offset_seconds) end)
-      else
-        # for compatibility with older alerts
+      Map.get(alert, :recurrence_times) ||
         [start_datetime |> NaiveDateTime.to_time(), end_datetime |> NaiveDateTime.to_time()]
-      end
 
     %{
       alert_timing: :recurring,
