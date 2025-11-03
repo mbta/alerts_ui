@@ -51,18 +51,21 @@ defmodule AlertsUI.IBIAlertImporterTest do
   end
 
   describe "ibi_alert_to_changeset/2" do
-    test "given a sample IBI alert it produces a valid minimal Alert changeset", %{
+    test "active period and informed entity can be disabled via options", %{
       ibi_alert: ibi_alert
     } do
-      changeset = %Ecto.Changeset{} = ibi_alert_to_changeset(ibi_alert, %Alert{})
+      changeset = %Ecto.Changeset{} = ibi_alert_to_changeset(ibi_alert, %Alert{}, no_active_periods: true, no_informed_entity: true)
       assert changeset.data.__struct__ == Alert
       assert changeset.valid?
     end
 
-    test "open: true results in full validation", %{ibi_alert: ibi_alert} do
-      changeset = %Ecto.Changeset{} = ibi_alert_to_changeset(ibi_alert, %Alert{}, open: true)
+    test "active periods and informed entity are required with no options", %{
+      ibi_alert: ibi_alert
+    } do
+      changeset = %Ecto.Changeset{} = ibi_alert_to_changeset(ibi_alert, %Alert{})
       assert changeset.data.__struct__ == Alert
       assert Keyword.get(changeset.errors, :informed_entity)
+      assert Keyword.get(changeset.errors, :active_periods)
       refute changeset.valid?
     end
   end

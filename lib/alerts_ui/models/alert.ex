@@ -243,17 +243,17 @@ defmodule AlertsUI.Models.Alert do
     timestamps()
   end
 
-  @spec changeset(any(), map()) :: Ecto.Changeset.t()
-  def changeset(%__MODULE__{} = alert, params), do: open_changeset(alert, params)
-
-  @spec minimal_changeset(__MODULE__.t(), map()) :: Ecto.Changeset.t()
-  def minimal_changeset(%__MODULE__{} = alert, params) do
+  @spec changeset(any(), map(), keyword()) :: Ecto.Changeset.t()
+  def changeset(%__MODULE__{} = alert, params, options \\ []) do
     alert
     |> cast(params, @permitted_fields)
     |> cast_assoc(:reminder_times, required: false, with: &ReminderTime.changeset/2)
     |> validate_change(:recurrence_days, fn :recurrence_days, recurrence_days ->
       active_period_start =
-        Map.get(params, :active_period_start) |> DateTime.shift_zone!("America/New_York")
+        case Map.get(params, :active_period_start) do
+          %NaiveDateTime{} = naive -> DateTime.from_naive!(naive, "America/New_York")
+          %DateTime{} = dt -> DateTime.shift_zone!(dt, "America/New_York")
+        end
 
       cond do
         Enum.empty?(recurrence_days) ->
@@ -275,24 +275,9 @@ defmodule AlertsUI.Models.Alert do
     |> validate_inclusion(:alert_lifecycle, @alert_lifecycle)
     |> validate_inclusion(:duration_certainty, @duration_certainty)
     |> validate_required([:active_period_start, :header_text], message: "is required")
+    |> cast_and_validate_active_periods(options)
+    |> cast_and_validate_informed_entities(options)
     |> unique_constraint(:alert_id)
-  end
-
-  @spec open_changeset(__MODULE__.t() | Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
-  def open_changeset(alert, params \\ %{})
-
-  def open_changeset(%__MODULE__{} = alert, params) do
-    alert
-    |> minimal_changeset(params)
-    |> open_changeset(params)
-  end
-
-  def open_changeset(%Ecto.Changeset{} = alert_changeset, _params) do
-    alert_changeset
-    |> cast_assoc(:active_period, required: false, with: &ActivePeriod.changeset/2)
-    |> cast_assoc(:informed_entity, required: true, with: &InformedEntity.changeset/2)
-    |> validate_length(:informed_entity, min: 1)
-    |> validate_length(:active_period, min: 1)
   end
 
   @spec draft_changeset(any(), map()) :: Ecto.Changeset.t()
@@ -458,6 +443,26 @@ defmodule AlertsUI.Models.Alert do
       add_error(changeset, :active_period_end, "Alerts of unknown duration can't have end times")
     else
       changeset
+    end
+  end
+
+  defp cast_and_validate_active_periods(changeset, options) do
+    if Keyword.get(options, :no_active_periods) do
+      changeset
+    else
+      changeset
+      |> cast_assoc(:active_period, required: false, with: &ActivePeriod.changeset/2)
+      |> validate_length(:active_period, min: 1)
+    end
+  end
+
+  defp cast_and_validate_informed_entities(changeset, options) do
+    if Keyword.get(options, :no_informed_entities) do
+      changeset
+    else
+      changeset
+      |> cast_assoc(:informed_entity, required: true, with: &InformedEntity.changeset/2)
+      |> validate_length(:informed_entity, min: 1)
     end
   end
 end
