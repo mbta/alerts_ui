@@ -196,7 +196,7 @@ defmodule AlertsUI.Models.AlertTest do
           alert_id: "123",
           header_text: "old",
           created_at: @five_minutes_ago,
-          active_period_start: @five_minutes_ago,
+          active_period_start: ~U[2025-11-03 10:04:00Z],
           informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}],
           duration_certainty: :UNKNOWN
         }

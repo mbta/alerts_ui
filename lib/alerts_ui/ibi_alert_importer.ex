@@ -97,7 +97,6 @@ defmodule AlertsUI.IBIAlertImporter do
               |> Map.get(latest_version.alert_id)
               |> Enum.sort_by(fn version -> version.integer_version_no end)
 
-            latest_version = insert.version_no == latest_version.version_no
             insert_open = currently_open && (insert.version_no == latest_version.version_no)
 
             alert =
@@ -107,7 +106,8 @@ defmodule AlertsUI.IBIAlertImporter do
                 no_active_periods: !insert_open,
                 no_informed_entities: !insert_open
               )
-              |> PaperTrail.insert!()
+              |> PaperTrail.insert!(returning: true)
+              |> Repo.preload([:informed_entity, :active_period])
 
             Enum.each(updates, fn update ->
               update_open = currently_open && (update.version_no == latest_version.version_no)
@@ -130,6 +130,8 @@ defmodule AlertsUI.IBIAlertImporter do
   end
 
   def ibi_alert_to_changeset(ibi_alert, am_alert, options \\ []) do
+    options = Keyword.put(options, :no_recurrence_days_validation, true)
+
     params =
       ibi_alert
       |> ibi_alert_to_alert_data()
@@ -147,6 +149,7 @@ defmodule AlertsUI.IBIAlertImporter do
       :route_ids,
       :stop_ids,
       :stop_names_and_ids,
+      :facility_id,
       :direction,
       :service_types,
       :reminder_times,

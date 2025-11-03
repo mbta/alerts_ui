@@ -428,7 +428,7 @@ defmodule AlertsUI.Models.Alert do
   end
 
   defp validate_recurrence_days(changeset, options) do
-    if Keyword.get(options, :no_recurrence_validation) do
+    if Keyword.get(options, :no_recurrence_days_validation) do
       changeset
     else
       active_period_start =
@@ -462,7 +462,7 @@ defmodule AlertsUI.Models.Alert do
       changeset
     else
       changeset
-      |> cast_assoc(:active_period, required: true, with: &ActivePeriod.changeset/2)
+      |> cast_assoc(:active_period, required: false, with: &ActivePeriod.changeset/2)
       |> validate_length(:active_period, min: 1)
     end
   end
