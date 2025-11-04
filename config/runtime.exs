@@ -87,6 +87,10 @@ cond do
           {&:ssl_verify_hostname.verify_fun/3, [check_hostname: String.to_charlist(hostname)]}
       ]
 
+    config :alerts_ui,
+      base_url: String.replace_trailing(System.get_env("API_URL"), "/", ""),
+      api_key: System.get_env("API_KEY")
+
     config :mbta_v3_api,
       base_url: String.replace_trailing(System.fetch_env!("API_URL"), "/", ""),
       api_key: System.fetch_env!("API_KEY")
@@ -112,7 +116,7 @@ cond do
     config :alerts_ui, AlertsUI.Repo, url: System.fetch_env!("DATABASE_URL")
 
     config :alerts_ui,
-      api_url: String.replace_trailing(System.fetch_env!("API_URL"), "/", ""),
+      base_url: String.replace_trailing(System.fetch_env!("API_URL"), "/", ""),
       api_key: System.fetch_env!("API_KEY")
 
     config :mbta_v3_api,

@@ -5,24 +5,25 @@ defmodule AlertsUI.AlertValidation.AlertValidationWorker do
   use Oban.Worker
 
   require Logger
+  require Ecto.Query
 
   alias AlertsUI.AlertValidation.AlertValidator
 
   @impl Oban.Worker
   def perform(_job) do
-    base_url = Application.get_env(:alerts_ui, :api_url)
-    api_key = Application.get_env(:alerts_ui, :api_key)
+    base_url = AlertsUI.config(:base_url)
+    api_key = AlertsUI.config(:api_key)
 
     AlertValidator.validate_alerts(base_url, api_key)
     |> log_results()
   end
 
   @spec log_results({integer(), {:ok, binary()}} | {integer(), {:error, String.t()}}) :: :ok
-  defp log_results([]), do: :ok
+  defp log_results([]), do: Logger.info("#{__MODULE__}: No invalid alert ids found")
 
   defp log_results(invalid_alert_ids),
     do:
       Logger.info(
-        "#{__MODULE__}: Invalid alerts ids found: #{Enum.join(invalid_alert_ids, ", ")}"
+        "#{__MODULE__}: Found invalid alerts ids: #{Enum.join(invalid_alert_ids, ", ")}"
       )
 end
