@@ -5,7 +5,6 @@ defmodule AlertsUI.Models.CustomFilters do
   import Ecto.Query
   alias Flop.Filter
 
-  # todo: why do we need to use distinct for this filter but not timeline?
   def service_type_filter(query, %Filter{value: ["default"]}, _opts) do
     query |> distinct(true)
   end
