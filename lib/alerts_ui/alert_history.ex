@@ -249,17 +249,15 @@ defmodule AlertsUI.AlertHistory do
   defp recurring?([_ | _]), do: true
   defp recurring?(_), do: false
 
-  defp get_recurrence_times([start_time, end_time]) do
-    [format_time(start_time), format_time(end_time)]
-  end
-
   defp get_recurrence_days([_ | _] = recurrence_days) do
     recurrence_days |> Enum.map_join(",", &String.capitalize/1)
   end
 
   defp get_recurrence_days(_), do: ""
 
-  defp get_recurrence_time(true, :start, [start_time, _]), do: format_time(start_time)
+  defp get_recurrence_times([start_time, end_time]) do
+    [format_time(start_time), format_time(end_time)]
+  end
 
   defp get_recurrence_times(_), do: ["", ""]
 
