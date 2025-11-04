@@ -89,6 +89,33 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobufTest do
       assert actual_ie.agency_id == @entity_selector.agency_id
     end
 
+    test "builds alert from string keys" do
+      string_keys = Map.Helpers.stringify_keys(@alert)
+      alert_1 = CreateGtfsProtobuf.build_alert(@alert) |> Map.from_struct()
+      alert_2 = CreateGtfsProtobuf.build_alert(string_keys) |> Map.from_struct()
+      assert alert_1 == alert_2
+    end
+
+    test "builds alert with string enum values" do
+      alert = %{@alert | cause: "DEMONSTRATION", effect: "DETOUR", severity_level: "SEVERE"}
+      actual_alert = CreateGtfsProtobuf.build_alert(alert) |> Map.from_struct()
+      assert actual_alert.cause == :DEMONSTRATION
+      assert actual_alert.effect == :DETOUR
+      assert actual_alert.severity_level == :SEVERE
+    end
+
+    test "builds alert with existing translated strings" do
+      alert = %{
+        @alert
+        | cause_detail: %{"translation" => [%{text: "lol", language: "en-US"}]},
+          effect_detail: %{translation: [%{text: "haha", language: "en-US"}]}
+      }
+
+      actual_alert = CreateGtfsProtobuf.build_alert(alert) |> Map.from_struct()
+      assert [%{text: "lol"}] = actual_alert.cause_detail.translation
+      assert [%{text: "haha"}] = actual_alert.effect_detail.translation
+    end
+
     test "does not include extraneous field" do
       extended_alert = Map.put(@alert, :severity, 1)
       actual_alert = CreateGtfsProtobuf.build_alert(extended_alert) |> Map.from_struct()

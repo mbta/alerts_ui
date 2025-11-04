@@ -7,23 +7,27 @@ defmodule AlertsUI.FeedReader do
 
   @doc """
   Fetch the IBI Alerts Feed as JSON
+
+  ibi_json(:enhanced) -> IBI's enhanced feed (default)
+  ibi_json(:standard) -> IBI's standard production feed (no dev version)
   """
-  def ibi_json do
-    get_ibi_feed()
+  def ibi_json(flavor \\ :enhanced) do
+    get_ibi_feed(flavor)
     |> parse_response()
   end
 
-  defp get_ibi_feed do
+  defp get_ibi_feed(flavor) do
     get_http_fn = AlertsUI.config(:get_http_fn, &Req.get!/1)
 
     get_http_fn.(
-      url: alert_api_url(),
+      url: ibi_alerts_api_url(flavor),
       headers: %{"accept-encoding" => "gzip"},
       decode_body: false
     )
   end
 
-  defp alert_api_url, do: AlertsUI.config(:alert_api_url)
+  defp ibi_alerts_api_url(:enhanced), do: AlertsUI.config(:ibi_enhanced_alerts_api_url)
+  defp ibi_alerts_api_url(:standard), do: AlertsUI.config(:ibi_standard_alerts_api_url)
 
   defp convert_newlines(text), do: String.replace(text, "\r\n", "\n")
 
