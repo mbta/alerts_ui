@@ -29,14 +29,15 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: nil,
-    departure_time: DateTime.utc_now() |> DateTime.add(-1, :hour)
+    departure_time:
+      DateTime.utc_now() |> DateTime.shift_zone!("America/New_York") |> DateTime.add(-1, :hour)
   }
 
   @schedule_2 %EnhancedSchedule{
     route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
     trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
-    arrival_time: DateTime.utc_now(),
+    arrival_time: DateTime.utc_now() |> DateTime.shift_zone!("America/New_York"),
     departure_time: nil
   }
 
@@ -44,15 +45,16 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
     trip: %Trip{id: "CR-683322-596", name: "596", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
-    arrival_time: DateTime.utc_now(),
-    departure_time: DateTime.utc_now() |> DateTime.add(-1, :hour)
+    arrival_time: DateTime.utc_now() |> DateTime.shift_zone!("America/New_York"),
+    departure_time:
+      DateTime.utc_now() |> DateTime.shift_zone!("America/New_York") |> DateTime.add(-1, :hour)
   }
 
   @schedule_4 %EnhancedSchedule{
     route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
     trip: %Trip{id: "CR-683322-596", name: "596", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
-    arrival_time: DateTime.utc_now(),
+    arrival_time: DateTime.utc_now() |> DateTime.shift_zone!("America/New_York"),
     departure_time: nil
   }
 
@@ -800,7 +802,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         {SchedulesRepo, [],
          [
            by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end,
-           end_of_rating: fn -> DateTime.utc_now() |> DateTime.to_date() |> Date.add(10) end
+           end_of_rating: fn ->
+             DateTime.utc_now()
+             |> DateTime.shift_zone!("America/New_York")
+             |> DateTime.to_date()
+             |> Date.add(10)
+           end
          ]},
         {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
       ]) do
