@@ -9,6 +9,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
 
   alias AlertsUI.Models.EnhancedSchedule
   alias AlertsUIWeb.FormComponents.AlertDetails
+  alias AlertsUIWeb.FormComponents.Helpers.DateTimeFormatters
   alias AlertsUIWeb.Step
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
@@ -37,14 +38,19 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
     trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: nil,
-    departure_time: DateTime.new!(@tomorrows_date, ~T[15:30:54Z])
+    departure_time:
+      DateTime.utc_now() |> DateTime.shift_zone!("America/New_York") |> DateTime.add(1, :day)
   }
 
   @schedule_2 %EnhancedSchedule{
     route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
     trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
-    arrival_time: DateTime.new!(@tomorrows_date, ~T[16:30:54Z]),
+    arrival_time:
+      DateTime.utc_now()
+      |> DateTime.shift_zone!("America/New_York")
+      |> DateTime.add(1, :day)
+      |> DateTime.add(1, :hour),
     departure_time: nil
   }
 
@@ -354,7 +360,12 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         {SchedulesRepo, [],
          [
            by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end,
-           end_of_rating: fn -> DateTime.utc_now() |> DateTime.to_date() |> Date.add(10) end
+           end_of_rating: fn ->
+             DateTime.utc_now()
+             |> DateTime.shift_zone!("America/New_York")
+             |> DateTime.to_date()
+             |> Date.add(10)
+           end
          ]},
         {StopsRepo, [], [by_route: fn _route, _direction -> [@stop, @stop] end]}
       ]) do
@@ -418,7 +429,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         assert view
                |> element("#alert_details_header_text")
                |> render() =~
-                 "Framingham/Worcester Line Train 595 (11:30 AM from South Station) is operating about 15 minutes behind schedule at South Station due to ice in harbor."
+                 "Framingham/Worcester Line Train 595 (#{DateTimeFormatters.friendly_time(@schedule.departure_time)} from South Station) is operating about 15 minutes behind schedule at South Station due to ice in harbor."
 
         assert view
                |> element("#alert_details_description_text")
