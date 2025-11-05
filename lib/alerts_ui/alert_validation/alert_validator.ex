@@ -18,7 +18,6 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
         base_url \\ Application.get_env(:alerts_ui, :base_url),
         api_key \\ Application.get_env(:alerts_ui, :api_key)
       ) do
-    Logger.warning("base url: " <> (base_url || "it's nil"))
     api_opts = [base_url: base_url, api_key: api_key]
 
     Alerts.list_all_open()
@@ -71,7 +70,9 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
   defp facilities_ok?([], _), do: true
 
   defp facilities_ok?(facility_ids, api_opts) do
-    found_facilities = facility_ids |> Enum.map(&FacilitiesRepo.get(&1)) |> Enum.reject(&is_nil/1)
+    found_facilities =
+      facility_ids |> Enum.map(&FacilitiesRepo.get(&1, [], api_opts)) |> Enum.reject(&is_nil/1)
+
     length(found_facilities) == length(facility_ids)
   end
 end
