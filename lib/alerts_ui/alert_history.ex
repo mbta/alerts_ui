@@ -118,15 +118,14 @@ defmodule AlertsUI.AlertHistory do
       recurrence: recurring?,
       effect_start: format_datetime(alert_map.active_period_start, @without_seconds),
       effect_end: effect_end(alert_map.duration_certainty, alert_map.active_period_end),
-      recurrence_days:
-        (alert_map.recurrence_days || []) |> Enum.map_join(",", &String.capitalize/1),
+      recurrence_days: get_recurrence_days(alert_map.recurrence_days),
       recurrence_start_time: recurrence_start_time,
       recurrence_end_time: recurrence_end_time,
       notification_start: format_datetime(alert_map.notification_period_start, @without_seconds),
       notification_end: format_datetime(alert_map.notification_period_end, @without_seconds),
       duration_certainty: alert_map.duration_certainty,
-      cause: alert_map.cause,
-      cause_detail: alert_map.cause_detail,
+      cause: alert_map.cause || "UNKNOWN_CAUSE",
+      cause_detail: alert_map.cause_detail || "UNKNOWN_CAUSE",
       severity_code: alert_map.severity,
       severity_level: alert_map.severity_level,
       severity_name: SeverityLevel.severity_description_by_severity(alert_map.severity),
@@ -223,7 +222,10 @@ defmodule AlertsUI.AlertHistory do
       &Map.merge(&1.item_changes, %{
         "originator_id" => &1.originator_id,
         "origin" => &1.origin,
-        "alert_id" => alert_id
+        "alert_id" => alert_id,
+        # actual updated_at timestamp is not stored in version
+        # so use version inserted_at timestamp instead
+        "updated_at" => &1.inserted_at
       })
     )
     |> Enum.reduce([%{}], fn version, acc ->
@@ -246,6 +248,12 @@ defmodule AlertsUI.AlertHistory do
 
   defp recurring?([_ | _]), do: true
   defp recurring?(_), do: false
+
+  defp get_recurrence_days([_ | _] = recurrence_days) do
+    recurrence_days |> Enum.map_join(",", &String.capitalize/1)
+  end
+
+  defp get_recurrence_days(_), do: ""
 
   defp get_recurrence_times([start_time, end_time]) do
     [format_time(start_time), format_time(end_time)]
@@ -270,9 +278,12 @@ defmodule AlertsUI.AlertHistory do
 
   defp format_datetime(nil, _format), do: ""
 
-  defp format_datetime(datetime_string, format) do
+  defp format_datetime(datetime_string, format) when is_binary(datetime_string) do
     {:ok, utc_datetime, _} = DateTime.from_iso8601(datetime_string)
+    format_datetime(utc_datetime, format)
+  end
 
+  defp format_datetime(%DateTime{} = utc_datetime, format) do
     utc_datetime
     |> DateTime.shift_zone!("America/New_York")
     |> Calendar.strftime("%Y-%m-%dT%H:" <> format)

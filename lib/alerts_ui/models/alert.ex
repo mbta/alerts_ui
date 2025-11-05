@@ -418,7 +418,8 @@ defmodule AlertsUI.Models.Alert do
   end
 
   defp get_name([name, _id]), do: name
-  defp get_name(_), do: ""
+  # backwards compatibility for older alerts
+  defp get_name([name]), do: name
 
   defp get_id([id]), do: id
   defp get_id([_name, id]), do: id

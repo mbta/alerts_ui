@@ -83,12 +83,15 @@ defmodule AlertsUIWeb.AlertHistoryTest do
         user
       )
 
+      :timer.sleep(1000)
+
       Alerts.create_or_update_alert(
         build(:alert_map, @second_alert_params),
         user,
         Alerts.get_by_alert_id("123")
       )
 
+      :timer.sleep(1000)
       Alerts.close(Alerts.get_by_alert_id("123"), "closed", ~U[2025-09-26 16:14:00Z])
 
       [result_1, result_2, result_3] = AlertHistory.alert_history("123")
@@ -112,8 +115,8 @@ defmodule AlertsUIWeb.AlertHistoryTest do
                notification_start: "",
                notification_end: "2025-09-25T13:11",
                duration_certainty: "ESTIMATED",
-               cause: nil,
-               cause_detail: nil,
+               cause: "UNKNOWN_CAUSE",
+               cause_detail: "UNKNOWN_CAUSE",
                severity_code: 1,
                severity_level: "INFO",
                severity_name: "information",
@@ -196,6 +199,14 @@ defmodule AlertsUIWeb.AlertHistoryTest do
                website_banner_text: "the banner text",
                reminders: "2024-04-30T12:04:00, 2024-04-30T12:14:00, 2024-04-30T12:24:00"
              } = result_3
+
+      {:ok, last_modified_datetime_1, _} =
+        DateTime.from_iso8601(result_1.last_modified_datetime <> "Z")
+
+      {:ok, last_modified_datetime_2, _} =
+        DateTime.from_iso8601(result_2.last_modified_datetime <> "Z")
+
+      assert DateTime.compare(last_modified_datetime_2, last_modified_datetime_1) == :gt
     end
   end
 
