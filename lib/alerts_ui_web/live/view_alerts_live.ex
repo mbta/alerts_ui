@@ -244,14 +244,14 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       cast(%__MODULE__{}, reset_filters, @fields)
       |> to_form(action: :validate)
 
-    socket = assign(socket, filter_count: 0, form: form, scroll_to_top: false)
+    socket = assign(socket, form: form, scroll_to_top: false)
     {:noreply, socket}
   end
 
   # Handle clicking the "Reset" button
   @impl true
   def handle_event("apply_filter", %{"reset" => ""}, socket) do
-    socket = assign(socket, scroll_to_top: true)
+    socket = assign(socket, filter_count: 0, scroll_to_top: true)
     {:noreply, push_patch(socket, to: ~p"/alerts")}
   end
 
