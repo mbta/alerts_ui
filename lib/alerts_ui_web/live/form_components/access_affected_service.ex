@@ -259,7 +259,6 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
           search_term: facility_search_term,
           values_to_keep: List.wrap(facility_id)
         })
-        |> Enum.map(fn {name, id} -> {String.slice(name, 0..80), id} end)
       else
         []
       end
