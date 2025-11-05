@@ -537,8 +537,8 @@ defmodule AlertsUIWeb.ReviewModal do
               !text-white
               !bg-danger
               !border-danger
-              hover:!bg-primary-hover
-              hover:!border-primary-border-hover
+              hover:!bg-danger-hover
+              hover:!border-danger-hover
               active:!bg-primary-active
               active:!border-primary-active
               focus:!border-primary-active
