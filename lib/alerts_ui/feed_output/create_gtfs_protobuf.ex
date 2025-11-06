@@ -43,6 +43,7 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobuf do
 
   def build_alert(alert) do
     alert
+    |> Map.Helpers.atomize_keys()
     |> Map.replace_lazy(:active_period, &Enum.map(&1, fn ap -> build_time_range(ap) end))
     |> Map.replace_lazy(:informed_entity, &Enum.map(&1, fn ie -> build_entity_selector(ie) end))
     |> Map.replace_lazy(:url, &build_translated_string/1)
@@ -54,6 +55,9 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobuf do
     |> Map.replace_lazy(:image_alternative_text, &build_translated_string/1)
     |> Map.replace_lazy(:cause_detail, &string_to_translated_string/1)
     |> Map.replace_lazy(:effect_detail, &string_to_translated_string/1)
+    |> Map.replace_lazy(:cause, &enumify_value/1)
+    |> Map.replace_lazy(:effect, &enumify_value/1)
+    |> Map.replace_lazy(:severity_level, &enumify_value/1)
     |> Alert.new()
   end
 
@@ -71,6 +75,16 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobuf do
   def build_time_range(time_range) do
     time_range
     |> TimeRange.new()
+  end
+
+  defp string_to_translated_string(%{translation: [_]} = input) do
+    input |> build_translated_string()
+  end
+
+  defp string_to_translated_string(%{"translation" => [_]} = input) do
+    input
+    |> Map.Helpers.atomize_keys()
+    |> build_translated_string()
   end
 
   defp string_to_translated_string(input_string) do
@@ -101,5 +115,12 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobuf do
       &Enum.map(&1, fn localization -> TranslatedImage.LocalizedImage.new(localization) end)
     )
     |> TranslatedImage.new()
+  end
+
+  def enumify_value(value) when is_atom(value), do: value
+  def enumify_value(value) when is_number(value), do: value
+
+  def enumify_value(value) do
+    String.to_existing_atom(value)
   end
 end

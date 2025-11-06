@@ -475,7 +475,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         []
       end
 
-    stop_ids = assigns.form[:stop_ids].value || []
+    stop_names_and_ids = assigns.form[:stop_names_and_ids].value || []
     stop_search_term = assigns.form[:stop_search_term].value
 
     stop_id_options =
@@ -484,7 +484,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
           options: Map.get(assigns.available_stops, :result, []) || [],
           search_term: stop_search_term,
           route_type: assigns.route_type,
-          values_to_keep: stop_ids
+          values_to_keep: stop_names_and_ids
         },
         true
       )

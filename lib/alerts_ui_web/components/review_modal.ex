@@ -133,7 +133,7 @@ defmodule AlertsUIWeb.ReviewModal do
           </p>
         </div>
       </:header>
-      <div class="flex text-sm/2">
+      <div class="grid grid-cols-review-modal text-sm/2">
         <%!-- Main lefthand content --%>
         <div class="p-4 grow">
           <%!-- Top section --%>
@@ -151,18 +151,15 @@ defmodule AlertsUIWeb.ReviewModal do
             </span>
 
             <span :if={@alert_data.url} class="block pb-4">
-              <p class="font-bold">URL</p>
-              <p>
-                <a
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href={@alert_data.url}
-                  class="inline-flex flex-row items-center text-primary hover:text-primary-hover hover:underline"
-                >
-                  {@alert_data.url}
-                  <.icon name="hero-arrow-top-right-on-square" class="h-3 w-3 mx-[0.25rem]" />
-                </a>
-              </p>
+              <p class="font-bold url_label">URL</p>
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href={@alert_data.url}
+                class="break-all text-primary hover:text-primary-hover hover:underline"
+              >
+                {@alert_data.url}
+              </a>
             </span>
 
             <span :if={Map.get(@alert_data, :banner_text)} class="block pb-4">
@@ -177,19 +174,19 @@ defmodule AlertsUIWeb.ReviewModal do
               <p>Routes:</p>
               <p>{@routes |> Enum.map(&SelectFormatter.name_for_option(&1)) |> Enum.join(", ")}</p>
             <% end %>
-            <%= if @direction_name do %>
+            <%= if @direction_name && @direction_name != [] do %>
               <p>Direction:</p>
               <p>{@direction_name}</p>
             <% end %>
-            <%= if @stop_names do %>
+            <%= if @stop_names && @stop_names != [] do %>
               <p>Stops:</p>
               <p>{Enum.join(@stop_names, ", ")}</p>
             <% end %>
-            <%= if @trip_names do %>
+            <%= if @trip_names && @trip_names != [] do %>
               <p>Trips:</p>
               <p>{Enum.join(@trip_names, ", ")}</p>
             <% end %>
-            <%= if @facility_name do %>
+            <%= if @facility_name && @direction_name != [] do %>
               <p>Facility:</p>
               <p>{@facility_name}</p>
             <% end %>
@@ -206,31 +203,31 @@ defmodule AlertsUIWeb.ReviewModal do
           <%!-- Image --%>
           <%= if @alert_data.image_url do %>
             <p class="font-bold">Image</p>
-            <div class="pb-4">
+            <div class="pb-4 flex flex-col">
               <a
                 target="_blank"
                 rel="noopener noreferrer"
                 href={@alert_data.image_url}
-                class="align-top text-primary hover:text-primary-hover hover:underline"
+                class="flex flex-col align-start text-primary hover:text-primary-hover hover:underline"
               >
                 <img
                   id="alert-image"
                   phx-hook="MeasureImage"
                   src={@alert_data.image_url}
                   alt={@alert_data.image_alternative_text || "No alternative text provided"}
-                  class="h-16 pr-2"
+                  class="max-h-40 self-start pr-2 object-contain"
                 />
-                <p>
+                <p class="break-all">
                   {String.split(@alert_data.image_url, "/") |> List.last()}
                   <span :if={Map.get(@alert_data, :image_preview_size, nil)}>
                     ({@alert_data.image_preview_size["width"]} x {@alert_data.image_preview_size[
                       "height"
                     ]})
                   </span>
-                  <.icon name="hero-arrow-top-right-on-square" class="h-3 w-3" />
+                  <.icon name="hero-arrow-top-right-on-square" class="h-4 w-4" />
                 </p>
               </a>
-              <p class="">
+              <p class="text-text-secondary">
                 Alt text: {@alert_data.image_alternative_text || "No alternative text provided"}
               </p>
             </div>
@@ -537,8 +534,8 @@ defmodule AlertsUIWeb.ReviewModal do
               !text-white
               !bg-danger
               !border-danger
-              hover:!bg-primary-hover
-              hover:!border-primary-border-hover
+              hover:!bg-danger-hover
+              hover:!border-danger-hover
               active:!bg-primary-active
               active:!border-primary-active
               focus:!border-primary-active

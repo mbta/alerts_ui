@@ -99,7 +99,9 @@ defmodule AlertsUI.AlertHistory do
   @spec build_history({map(), integer()}) :: struct()
   def build_history({alert_map, index}) do
     recurring? = recurring?(alert_map.recurrence_days)
-    recurrence_times = Map.get(alert_map, :recurrence_times)
+
+    [recurrence_start_time, recurrence_end_time] =
+      get_recurrence_times(Map.get(alert_map, :recurrence_times))
 
     %__MODULE__{
       alert_id: alert_map.alert_id,
@@ -116,15 +118,14 @@ defmodule AlertsUI.AlertHistory do
       recurrence: recurring?,
       effect_start: format_datetime(alert_map.active_period_start, @without_seconds),
       effect_end: effect_end(alert_map.duration_certainty, alert_map.active_period_end),
-      recurrence_days:
-        (alert_map.recurrence_days || []) |> Enum.map_join(",", &String.capitalize/1),
-      recurrence_start_time: get_recurrence_time(recurring?, :start, recurrence_times),
-      recurrence_end_time: get_recurrence_time(recurring?, :end, recurrence_times),
+      recurrence_days: get_recurrence_days(alert_map.recurrence_days),
+      recurrence_start_time: recurrence_start_time,
+      recurrence_end_time: recurrence_end_time,
       notification_start: format_datetime(alert_map.notification_period_start, @without_seconds),
       notification_end: format_datetime(alert_map.notification_period_end, @without_seconds),
       duration_certainty: alert_map.duration_certainty,
-      cause: alert_map.cause,
-      cause_detail: alert_map.cause_detail,
+      cause: alert_map.cause || "UNKNOWN_CAUSE",
+      cause_detail: alert_map.cause_detail || "UNKNOWN_CAUSE",
       severity_code: alert_map.severity,
       severity_level: alert_map.severity_level,
       severity_name: SeverityLevel.severity_description_by_severity(alert_map.severity),
@@ -221,7 +222,10 @@ defmodule AlertsUI.AlertHistory do
       &Map.merge(&1.item_changes, %{
         "originator_id" => &1.originator_id,
         "origin" => &1.origin,
-        "alert_id" => alert_id
+        "alert_id" => alert_id,
+        # actual updated_at timestamp is not stored in version
+        # so use version inserted_at timestamp instead
+        "updated_at" => &1.inserted_at
       })
     )
     |> Enum.reduce([%{}], fn version, acc ->
@@ -245,11 +249,17 @@ defmodule AlertsUI.AlertHistory do
   defp recurring?([_ | _]), do: true
   defp recurring?(_), do: false
 
-  defp get_recurrence_time(true, :start, [start_time, _]), do: format_time(start_time)
+  defp get_recurrence_days([_ | _] = recurrence_days) do
+    recurrence_days |> Enum.map_join(",", &String.capitalize/1)
+  end
 
-  defp get_recurrence_time(true, :end, [_, end_time]), do: format_time(end_time)
+  defp get_recurrence_days(_), do: ""
 
-  defp get_recurrence_time(_, _, _), do: ""
+  defp get_recurrence_times([start_time, end_time]) do
+    [format_time(start_time), format_time(end_time)]
+  end
+
+  defp get_recurrence_times(_), do: ["", ""]
 
   defp get_service_type(nil), do: ""
   defp get_service_type("access"), do: "Facility"
@@ -268,21 +278,20 @@ defmodule AlertsUI.AlertHistory do
 
   defp format_datetime(nil, _format), do: ""
 
-  defp format_datetime(datetime_string, format) do
+  defp format_datetime(datetime_string, format) when is_binary(datetime_string) do
     {:ok, utc_datetime, _} = DateTime.from_iso8601(datetime_string)
+    format_datetime(utc_datetime, format)
+  end
 
+  defp format_datetime(%DateTime{} = utc_datetime, format) do
     utc_datetime
     |> DateTime.shift_zone!("America/New_York")
     |> Calendar.strftime("%Y-%m-%dT%H:" <> format)
   end
 
   defp format_time(time_string) do
-    timezone = Timex.Timezone.get("America/New_York")
-    timezone_offset_seconds = timezone.offset_utc + timezone.offset_std
-
     time_string
     |> Time.from_iso8601!()
-    |> Time.add(timezone_offset_seconds)
     |> Calendar.strftime("%-H:" <> @without_seconds)
   end
 end

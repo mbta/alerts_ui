@@ -386,7 +386,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
           route_type: assigns.route_type,
           values_to_keep: stop_ids
         })
-        |> Enum.map(fn {name, id} -> {String.slice(name, 0..80), id} end)
       else
         []
       end

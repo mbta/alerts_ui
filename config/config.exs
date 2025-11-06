@@ -19,10 +19,15 @@ config :alerts_ui,
   combined_protobuf_output_filename: "alerts_feed.pb",
   s3_bucket_name: System.get_env("S3_BUCKET_NAME", ""),
   s3_bucket_prefix: System.get_env("S3_BUCKET_PREFIX", ""),
-  alert_api_url:
+  ibi_enhanced_alerts_api_url:
     System.get_env(
-      "ALERT_API_URL",
+      "IBI_ENHANCED_ALERTS_API_URL",
       "http://s3.amazonaws.com/mbta-realtime-test/alerts_enhanced.json"
+    ),
+  ibi_standard_alerts_api_url:
+    System.get_env(
+      "IBI_STANDARD_ALERTS_API_URL",
+      "https://cdn.mbta.com/realtime/Alerts.json"
     ),
   skip_migrations: true
 

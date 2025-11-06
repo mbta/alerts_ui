@@ -130,10 +130,8 @@ defmodule AlertsUI.ActivePeriodBuilder do
       active_period_start: hd(active_periods).start,
       active_period_end: active_period_end,
       active_period: active_periods,
-      recurrence_times: [
-        DateTime.to_time(hd(active_periods).start),
-        DateTime.to_time(List.last(active_periods).end)
-      ],
+      # recurrence times are stored in eastern time, NOT shifted to UTC
+      recurrence_times: [start_time, end_time],
       duration_certainty: duration_certainty
     }
   end
