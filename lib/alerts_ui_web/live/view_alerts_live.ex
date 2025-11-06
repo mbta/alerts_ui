@@ -258,7 +258,9 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       }),
       do: [
         :active_period_end,
-        :active_period_start
+        :active_period_start,
+        # As a final deterministic deciding factor, just in case.
+        :integer_alert_id
       ]
 
   def lookup_end_time_order_fields_by_params(_),
@@ -267,28 +269,30 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       :active_period_end,
       :duration_certainty,
       :active_period_start,
-      :notification_period_start
+      :notification_period_start,
+      # As a final deterministic deciding factor, just in case.
+      :integer_alert_id
     ]
 
   def lookup_end_time_order_directions_by_params(%{
         "filters" => %{"3" => %{"field" => "timeline", "value" => "current"}}
       }),
-      do: [:asc_nulls_last, :asc, :asc_nulls_last, :asc, :asc]
+      do: [:asc_nulls_last, :asc, :asc_nulls_last, :asc, :asc, :asc]
 
   def lookup_end_time_order_directions_by_params(%{
         "filters" => %{"3" => %{"field" => "timeline", "value" => "future"}}
       }),
-      do: [:asc_nulls_last, :asc, :asc_nulls_last, :asc, :asc]
+      do: [:asc_nulls_last, :asc, :asc_nulls_last, :asc, :asc, :asc]
 
   def lookup_end_time_order_directions_by_params(%{
         "filters" => %{"3" => %{"field" => "timeline", "value" => "past"}}
       }),
-      do: [:desc, :desc]
+      do: [:desc, :desc, :asc]
 
   def lookup_end_time_order_directions_by_params(%{
         "filters" => %{"3" => %{"field" => "timeline", "value" => _}}
       }),
-      do: [:desc_nulls_first, :desc, :desc_nulls_first, :desc, :desc]
+      do: [:desc_nulls_first, :desc, :desc_nulls_first, :desc, :desc, :asc]
 
   def reverse_order_direction(:asc), do: :desc
   def reverse_order_direction(:desc), do: :asc
