@@ -76,6 +76,7 @@ defmodule AlertsUIWeb.ApiControllerTest do
           |> Conn.put_req_header("authorization", "Bearer FAKE_TOKEN")
           |> post("/api/alerts", %{
             header_text: "header",
+            active_period_start: "2023-01-01 00:00:00",
             description_text: "description",
             effect_detail: "ACCESS_ISSUE",
             user: build(:user_map)

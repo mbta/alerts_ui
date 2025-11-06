@@ -59,13 +59,12 @@ defmodule AlertsUI.IBIAlertImporterTest do
       assert changeset.valid?
     end
 
-    test "active periods and informed entity are required with no options", %{
+    test "informed entity is required with no options", %{
       ibi_alert: ibi_alert
     } do
       changeset = %Ecto.Changeset{} = ibi_alert_to_changeset(ibi_alert, %Alert{})
       assert changeset.data.__struct__ == Alert
       assert Keyword.get(changeset.errors, :informed_entity)
-      assert Keyword.get(changeset.errors, :active_period)
       refute changeset.valid?
     end
   end

@@ -435,12 +435,15 @@ defmodule AlertsUI.Models.Alert do
         case get_field(changeset, :active_period_start) do
           %NaiveDateTime{} = naive -> DateTime.from_naive!(naive, "America/New_York")
           %DateTime{} = dt -> DateTime.shift_zone!(dt, "America/New_York")
-          _ -> raise ArgumentError, "invalid active_period_start"
+          nil -> nil
         end
 
       recurrence_days = get_field(changeset, :recurrence_days) || []
 
       cond do
+        is_nil(active_period_start) ->
+          changeset
+
         Enum.empty?(recurrence_days) ->
           changeset
 
