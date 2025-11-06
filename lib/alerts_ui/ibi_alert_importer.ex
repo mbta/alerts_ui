@@ -76,10 +76,35 @@ defmodule AlertsUI.IBIAlertImporter do
     )
   end
 
+  @doc """
+  Convert the now-imported IBI alerts to Alerts Manager alerts. Note that you'll
+  want to perform any fixes to the underlying data (malformed timestamps, I'm looking
+  at you) before this. As follows:
+    - Stream `LatestIBIAlert` (closed alerts only for now, though we preserve the logic
+      for dealing with open alerts)
+    - Chunk for efficiency
+    - For each chunk, pull the alert ids, and then load all alerts with those ids
+      from the underlying `IBIAlert` schema (i.e., pulling all versions for all alerts
+      in the chunk)
+    - We don't worry here about updating/reimporting here, instead assuming that if
+      the need arises to reimport, the user will purge the existing alerts first (if
+      not, the alert id will be rejected as non-unique and the transaction will fail)
+    - We _do_ allow for the possibility of importing open alerts, even though we
+      aren't now. The difference is that when an alert is open, (i.e., when the latest
+      IBI version has `is_closed` == `False`) the most recent version of that alert
+      will have informed entities and active periods built for it
+  """
+  @spec convert_ibi_alerts(keyword()) :: {:ok, true}
   def convert_ibi_alerts(options \\ []) do
+    query = if Keyword.get(options, :import_open_alerts) do
+      LatestIBIAlert
+    else
+      from i in LatestIBIAlert, where: i.is_closed == "True"
+    end
+
     Repo.transact(
       fn ->
-        (from i in LatestIBIAlert, where: i.is_closed == "True", order_by: fragment("RANDOM()"))
+        query
         |> Repo.stream()
         |> Stream.chunk_every(chunk_size(options))
         |> Stream.each(fn chunk ->
@@ -99,7 +124,6 @@ defmodule AlertsUI.IBIAlertImporter do
 
             insert_open = currently_open && (insert.version_no == latest_version.version_no)
 
-            # TODO: logic to check for existing alerts and update instead of insert
             alert =
               insert
               |> ibi_alert_to_changeset(
@@ -130,6 +154,7 @@ defmodule AlertsUI.IBIAlertImporter do
     )
   end
 
+  @spec ibi_alert_to_changeset(%IBIAlert{}, %Alert{}, keyword()) :: %Ecto.Changeset{}
   def ibi_alert_to_changeset(ibi_alert, am_alert, options \\ []) do
     options = Keyword.put(options, :no_recurrence_days_validation, true)
 
@@ -142,6 +167,7 @@ defmodule AlertsUI.IBIAlertImporter do
     Alert.changeset(am_alert, params, options)
   end
 
+  @spec ibi_alert_to_alert_data(%IBIAlert{}) :: map()
   def ibi_alert_to_alert_data(ibi_alert) do
     # alert data fields
     [
@@ -185,7 +211,9 @@ defmodule AlertsUI.IBIAlertImporter do
       try do
         Map.put(alert_data, key, from_ibi(ibi_alert, key))
       rescue
-        e -> Logger.error("alert #{ibi_alert.alert_id} / #{key}: #{e.message}") && raise(e)
+        e ->
+          Logger.error("alert #{ibi_alert.alert_id} / #{key}: #{e.message}")
+          raise e
       end
     end)
   end
@@ -209,6 +237,7 @@ defmodule AlertsUI.IBIAlertImporter do
     end)
   end
 
+  @spec from_ibi(%IBIAlert{}, atom()) :: any()
   def from_ibi(ibi_alert, :route_type) do
     case ibi_alert.gui_mode_name do
       "Systemwide" -> nil
