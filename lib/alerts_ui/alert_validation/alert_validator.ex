@@ -14,6 +14,15 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   require Logger
 
+    @type invalid_alert_t :: %{
+      alert_id: String.t(),
+      route_ids: [String.t()],
+      stop_ids: [String.t()],
+      trip_ids: [String.t()],
+      facility_ids: [String.t()]
+    }
+
+  @spec validate_alerts(String.t(), String.t()) :: invalid_alert_t()
   def validate_alerts(
         base_url \\ Application.get_env(:alerts_ui, :base_url),
         api_key \\ Application.get_env(:alerts_ui, :api_key)
@@ -33,46 +42,76 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
       }
     end)
     |> Enum.reduce([], fn alert_map, acc ->
-      routes_ok? = routes_ok?(alert_map.route_ids, api_opts)
-      stops_ok? = stops_ok?(alert_map.stop_ids, api_opts)
-      trips_ok? = trips_ok?(alert_map.trip_ids, api_opts)
-      facilities_ok? = facilities_ok?(alert_map.facility_ids, api_opts)
+      invalid_routes = invalid_routes(alert_map.route_ids, api_opts)
+      invalid_stops = invalid_stops(alert_map.stop_ids, api_opts)
+      invalid_trips = invalid_trips(alert_map.trip_ids, api_opts)
+      invalid_facilities = invalid_facilities(alert_map.facility_ids, api_opts)
 
-      if Enum.all?([routes_ok?, stops_ok?, trips_ok?, facilities_ok?]) do
+
+      if Enum.all?([invalid_routes, invalid_stops, invalid_trips, invalid_facilities], & Enum.empty?/1) do
         acc
       else
-        [alert_map.alert_id | acc]
+        entity_results = %{
+          alert_id: alert_map.alert_id,
+          invalid_routes: invalid_routes,
+          invalid_stops: invalid_stops,
+          invalid_trips: invalid_trips,
+          invalid_facilities: invalid_facilities
+        }
+        [entity_results | acc]
       end
     end)
   end
 
-  defp routes_ok?([], _), do: true
+  @spec format_invalid_alerts([invalid_alert_t()]) :: String.t()
+  #use to format a list of invalid alert structs for logging purposes
+  def format_invalid_alerts(invalid_alerts) do
+    invalid_alert_info = Enum.map(invalid_alerts, fn invalid_alert ->
+        entity_results =  [
+        format_entity_strings(invalid_alert.route_ids, "Routes"),
+        format_entity_strings(invalid_alert.stop_ids, "Stops"),
+        format_entity_strings(invalid_alert.trip_ids, "Trips"),
+        format_entity_strings(invalid_alert.facility_ids, "Facilities")]
+        |> Enum.reject(& is_nil/1)
 
-  defp routes_ok?(route_ids, api_opts) do
-    found_routes = RoutesRepo.all(["filter[id]": Enum.join(route_ids, ",")], api_opts)
-    length(found_routes) == length(route_ids)
+        "Alert#{invalid_alert.alert_id}:\n" <> Enum.join(entity_results, "\n")
+    end)
+
+    "The following alerts have entities that no longer exist in GTFS:\n" <> Enum.join(invalid_alert_info, "\n\n")
   end
 
-  defp stops_ok?([], _), do: true
+  defp invalid_routes([], _), do: []
 
-  defp stops_ok?(stop_ids, api_opts) do
-    found_stops = StopsRepo.all(["filter[id]": Enum.join(stop_ids, ",")], api_opts)
-    length(found_stops) == length(stop_ids)
+  defp invalid_routes(route_ids, api_opts) do
+    found_route_ids = RoutesRepo.all(["filter[id]": Enum.join(route_ids, ",")], Keyword.put(api_opts, :reject_hidden, false)) |> Enum.map(& &1.id)
+    route_ids -- found_route_ids
   end
 
-  defp trips_ok?([], _), do: true
+  defp invalid_stops([], _), do: []
 
-  defp trips_ok?(trip_ids, api_opts) do
-    found_trips = SchedulesRepo.trips_by_ids(trip_ids, [], api_opts)
-    length(found_trips) == length(trip_ids)
+  defp invalid_stops(stop_ids, api_opts) do
+    found_stop_ids = StopsRepo.all(["filter[id]": Enum.join(stop_ids, ",")], api_opts) |> Enum.map(& &1.id)
+    stop_ids -- found_stop_ids
   end
 
-  defp facilities_ok?([], _), do: true
+  defp invalid_trips([], _), do: []
 
-  defp facilities_ok?(facility_ids, api_opts) do
-    found_facilities =
-      facility_ids |> Enum.map(&FacilitiesRepo.get(&1, [], api_opts)) |> Enum.reject(&is_nil/1)
+  defp invalid_trips(trip_ids, api_opts) do
+    found_trip_ids = SchedulesRepo.trips_by_ids(trip_ids, [], api_opts) |> Enum.map(& &1.id)
+    trip_ids -- found_trip_ids
+  end
 
-    length(found_facilities) == length(facility_ids)
+  defp invalid_facilities([], _), do: []
+
+  defp invalid_facilities(facility_ids, api_opts) do
+    found_facility_ids =
+      facility_ids |> Enum.map(&FacilitiesRepo.get(&1, [], api_opts)) |> Enum.reject(&is_nil/1) |> Enum.map(& &1.id)
+
+    facility_ids -- found_facility_ids
+  end
+
+  defp format_entity_strings([], _), do: nil
+  defp format_entity_strings(items, category) do
+    "#{category}: #{Enum.join(items, ", ")}"
   end
 end

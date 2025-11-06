@@ -19,7 +19,7 @@ defmodule AlertsUI.AlertValidation.AlertValidatorTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           all: fn ["filter[id]": _], [base_url: _, api_key: _] ->
+           all: fn ["filter[id]": _], [reject_hidden: false, base_url: _, api_key: _] ->
              [%Route{id: "1", type: 3}, %Route{id: "2", type: 3}]
            end
          ]}
@@ -44,7 +44,7 @@ defmodule AlertsUI.AlertValidation.AlertValidatorTest do
           ]
         })
 
-        assert AlertValidator.validate_alerts() == ["123"]
+        assert AlertValidator.validate_alerts() == [%{alert_id: "123", invalid_facilities: [], invalid_routes: ["3"], invalid_stops: [], invalid_trips: []}]
       end
     end
 
@@ -70,7 +70,7 @@ defmodule AlertsUI.AlertValidation.AlertValidatorTest do
           informed_entity: [%{stop_id: "1"}, %{stop_id: "2"}, %{stop_id: "3"}]
         })
 
-        assert AlertValidator.validate_alerts() == ["123"]
+        assert AlertValidator.validate_alerts() == [%{alert_id: "123", invalid_facilities: [], invalid_routes: [], invalid_stops: ["3"], invalid_trips: []}]
       end
     end
 
@@ -103,7 +103,7 @@ defmodule AlertsUI.AlertValidation.AlertValidatorTest do
           ]
         })
 
-        assert AlertValidator.validate_alerts() == ["123"]
+        assert AlertValidator.validate_alerts() == [%{alert_id: "123", invalid_facilities: [], invalid_routes: [], invalid_stops: [], invalid_trips: ["3"]}]
       end
     end
 
@@ -134,8 +134,10 @@ defmodule AlertsUI.AlertValidation.AlertValidatorTest do
           informed_entity: [%{facility_id: "1"}, %{facility_id: "2"}, %{facility_id: "3"}]
         })
 
-        assert AlertValidator.validate_alerts() == ["123"]
+        assert AlertValidator.validate_alerts() == [%{alert_id: "123", invalid_facilities: ["3"], invalid_routes: [], invalid_stops: [], invalid_trips: []}]
       end
     end
   end
+
+  describe "format invalid alerts"
 end
