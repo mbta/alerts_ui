@@ -168,12 +168,12 @@ defmodule AlertsUI.Models.Alert do
         ],
         routes: [
           filter: {CustomFilters, :routes_filter, []},
+          bindings: [:informed_entity],
           ecto_type: {:array, :string},
           operators: [:==]
         ],
         service_type: [
           filter: {CustomFilters, :service_type_filter, []},
-          bindings: [:informed_entity],
           ecto_type: {:array, :string},
           operators: [:==]
         ],
@@ -417,12 +417,13 @@ defmodule AlertsUI.Models.Alert do
     end)
   end
 
-  defp get_name([name, _id]), do: name
+  def get_name([name, _id]), do: name
   # backwards compatibility for older alerts
-  defp get_name([name]), do: name
+  def get_name([name]), do: name
+  def get_name(_), do: nil
 
-  defp get_id([id]), do: id
-  defp get_id([_name, id]), do: id
+  def get_id([id]), do: id
+  def get_id([_name, id]), do: id
 
   @spec simple_subway_type(Route.type_int()) :: Route.type_int()
   defp simple_subway_type(0), do: 1

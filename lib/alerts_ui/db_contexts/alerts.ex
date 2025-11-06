@@ -7,6 +7,7 @@ defmodule AlertsUI.Alerts do
   alias AlertsUI.DBContexts.Users
   alias AlertsUI.Models.{Alert, User}
   alias AlertsUI.Repo
+  alias AlertsUI.Routes
   require Logger
 
   @spec create_or_update_alert(map(), User.t(), any()) :: {:ok | :error, any()}
@@ -392,5 +393,57 @@ defmodule AlertsUI.Alerts do
     Alert
     |> Repo.get_by!(alert_id: alert_id)
     |> Repo.delete()
+  end
+
+  # Function to retrieve all routes from the DB grouped by mode.
+
+  # Joins Alerts and Informed Entities, and selects on:
+  #   - original_route_selections (from Alerts)
+  #   - route_type (from IE)
+  #   - route_id (from IE)
+
+  # Uses the IE fields to determine the route_type of each route in
+  # original_route_selections so that we can group the route filters list by mode
+  @spec get_routes_grouped_by_mode() :: [String.t()]
+  def get_routes_grouped_by_mode() do
+    Repo.all(
+      from(a in Alert,
+        where: a.original_route_selections != [],
+        inner_join: ie in AlertsUI.Models.InformedEntity,
+        on: ie.alert_id == a.id,
+        order_by: [desc: fragment("CAST(? AS integer)", a.alert_id)],
+        select: {a.original_route_selections, ie.route_type, ie.route_id}
+      )
+    )
+    |> Enum.uniq()
+    |> Enum.map(fn {routes_list, route_type, route_id} ->
+      route_id = simplify_route_id(route_id)
+
+      # use the route_id to look up the route name from the routes list
+      route_name_and_id =
+        Enum.find(routes_list, fn name_and_id ->
+          just_id = name_and_id |> String.split("|") |> Alert.get_id() |> simplify_route_id()
+
+          just_id == route_id
+        end)
+
+      if route_name_and_id do
+        route_name =
+          route_name_and_id
+          |> String.split("|")
+          |> Alert.get_name()
+
+        {route_name, route_type, route_id}
+      else
+        nil
+      end
+    end)
+    |> Enum.uniq()
+    |> Enum.filter(fn x -> x != nil end)
+    |> Enum.group_by(&elem(&1, 1))
+  end
+
+  defp simplify_route_id(id) do
+    if id in Routes.green_line_branch_ids(), do: "Green", else: id
   end
 end

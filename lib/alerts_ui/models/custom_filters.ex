@@ -30,8 +30,8 @@ defmodule AlertsUI.Models.CustomFilters do
     effects_filter(query, %{filter | value: [value]}, opts)
   end
 
-  def routes_filter(query, _filter, _opts) do
-    query
+  def routes_filter(query, %Filter{value: value}, _opts) when is_list(value) do
+    query |> distinct(true) |> where([a, informed_entity: ie], ie.route_id in ^value)
   end
 
   @spec multi_column_search_filter(Ecto.Query.t(), Flop.Filter.t(), list()) :: Ecto.Query.t()
