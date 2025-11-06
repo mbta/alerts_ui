@@ -14,15 +14,15 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   require Logger
 
-    @type invalid_alert_t :: %{
-      alert_id: String.t(),
-      route_ids: [String.t()],
-      stop_ids: [String.t()],
-      trip_ids: [String.t()],
-      facility_ids: [String.t()]
-    }
+  @type invalid_alert_t :: %{
+          alert_id: String.t(),
+          invalid_routes: [String.t()],
+          invalid_stops: [String.t()],
+          invalid_trips: [String.t()],
+          invalid_facilities: [String.t()]
+        }
 
-  @spec validate_alerts(String.t(), String.t()) :: invalid_alert_t()
+  @spec validate_alerts(String.t(), String.t()) :: [invalid_alert_t()]
   def validate_alerts(
         base_url \\ Application.get_env(:alerts_ui, :base_url),
         api_key \\ Application.get_env(:alerts_ui, :api_key)
@@ -47,8 +47,10 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
       invalid_trips = invalid_trips(alert_map.trip_ids, api_opts)
       invalid_facilities = invalid_facilities(alert_map.facility_ids, api_opts)
 
-
-      if Enum.all?([invalid_routes, invalid_stops, invalid_trips, invalid_facilities], & Enum.empty?/1) do
+      if Enum.all?(
+           [invalid_routes, invalid_stops, invalid_trips, invalid_facilities],
+           &Enum.empty?/1
+         ) do
         acc
       else
         entity_results = %{
@@ -58,39 +60,54 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
           invalid_trips: invalid_trips,
           invalid_facilities: invalid_facilities
         }
+
         [entity_results | acc]
       end
     end)
   end
 
   @spec format_invalid_alerts([invalid_alert_t()]) :: String.t()
-  #use to format a list of invalid alert structs for logging purposes
+  # use to format a list of invalid alert structs for logging purposes
+  def format_invalid_alerts([]), do: "No invalid alerts found"
+
   def format_invalid_alerts(invalid_alerts) do
-    invalid_alert_info = Enum.map(invalid_alerts, fn invalid_alert ->
-        entity_results =  [
-        format_entity_strings(invalid_alert.route_ids, "Routes"),
-        format_entity_strings(invalid_alert.stop_ids, "Stops"),
-        format_entity_strings(invalid_alert.trip_ids, "Trips"),
-        format_entity_strings(invalid_alert.facility_ids, "Facilities")]
-        |> Enum.reject(& is_nil/1)
+    invalid_alert_info =
+      Enum.map(invalid_alerts, fn invalid_alert ->
+        entity_results =
+          [
+            format_entity_strings(invalid_alert.invalid_routes, "Routes"),
+            format_entity_strings(invalid_alert.invalid_stops, "Stops"),
+            format_entity_strings(invalid_alert.invalid_trips, "Trips"),
+            format_entity_strings(invalid_alert.invalid_facilities, "Facilities")
+          ]
+          |> Enum.reject(&is_nil/1)
 
-        "Alert#{invalid_alert.alert_id}:\n" <> Enum.join(entity_results, "\n")
-    end)
+        "Alert #{invalid_alert.alert_id}:\n" <> Enum.join(entity_results, "\n")
+      end)
 
-    "The following alerts have entities that no longer exist in GTFS:\n" <> Enum.join(invalid_alert_info, "\n\n")
+    "The following alerts have entities that no longer exist in GTFS:\n" <>
+      Enum.join(invalid_alert_info, "\n\n")
   end
 
   defp invalid_routes([], _), do: []
 
   defp invalid_routes(route_ids, api_opts) do
-    found_route_ids = RoutesRepo.all(["filter[id]": Enum.join(route_ids, ",")], Keyword.put(api_opts, :reject_hidden, false)) |> Enum.map(& &1.id)
+    found_route_ids =
+      RoutesRepo.all(
+        ["filter[id]": Enum.join(route_ids, ",")],
+        Keyword.put(api_opts, :reject_hidden, false)
+      )
+      |> Enum.map(& &1.id)
+
     route_ids -- found_route_ids
   end
 
   defp invalid_stops([], _), do: []
 
   defp invalid_stops(stop_ids, api_opts) do
-    found_stop_ids = StopsRepo.all(["filter[id]": Enum.join(stop_ids, ",")], api_opts) |> Enum.map(& &1.id)
+    found_stop_ids =
+      StopsRepo.all(["filter[id]": Enum.join(stop_ids, ",")], api_opts) |> Enum.map(& &1.id)
+
     stop_ids -- found_stop_ids
   end
 
@@ -105,12 +122,16 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
 
   defp invalid_facilities(facility_ids, api_opts) do
     found_facility_ids =
-      facility_ids |> Enum.map(&FacilitiesRepo.get(&1, [], api_opts)) |> Enum.reject(&is_nil/1) |> Enum.map(& &1.id)
+      facility_ids
+      |> Enum.map(&FacilitiesRepo.get(&1, [], api_opts))
+      |> Enum.reject(&is_nil/1)
+      |> Enum.map(& &1.id)
 
     facility_ids -- found_facility_ids
   end
 
   defp format_entity_strings([], _), do: nil
+
   defp format_entity_strings(items, category) do
     "#{category}: #{Enum.join(items, ", ")}"
   end
