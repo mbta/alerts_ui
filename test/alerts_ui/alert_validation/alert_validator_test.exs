@@ -112,9 +112,9 @@ defmodule AlertsUI.AlertValidation.AlertValidatorTest do
         {FacilitiesRepo, [],
          [
            get: fn
-            ("1", [], [base_url: _, api_key: _]) -> %Facility{id: "1"}
-            ("2", [], [base_url: _, api_key: _]) -> %Facility{id: "2"}
-            ("3", [], [base_url: _, api_key: _]) -> nil
+             "1", [], [base_url: _, api_key: _] -> %Facility{id: "1"}
+             "2", [], [base_url: _, api_key: _] -> %Facility{id: "2"}
+             "3", [], [base_url: _, api_key: _] -> nil
            end
          ]}
       ]) do
