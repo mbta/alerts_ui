@@ -159,6 +159,7 @@ defmodule AlertsUIWeb.ReviewModal do
                 class="break-all text-primary hover:text-primary-hover hover:underline"
               >
                 {@alert_data.url}
+                <.icon name="hero-arrow-top-right-on-square" class="h-4 w-4" />
               </a>
             </span>
 
