@@ -25,7 +25,8 @@ cond do
     config :alerts_ui, AlertsUI.Repo, url: System.fetch_env!("DATABASE_URL_TEST")
 
     config :alerts_ui,
-      api_url: "https://api-dev.mbtace.com/"
+      api_url: "https://api-dev.mbtace.com/",
+      api_key: ""
 
     config :mbta_v3_api,
       base_url: "https://api-dev.mbtace.com/",
@@ -88,7 +89,7 @@ cond do
       ]
 
     config :alerts_ui,
-      base_url: String.replace_trailing(System.get_env("API_URL"), "/", ""),
+      api_url: String.replace_trailing(System.get_env("API_URL"), "/", ""),
       api_key: System.get_env("API_KEY")
 
     config :mbta_v3_api,
@@ -116,7 +117,7 @@ cond do
     config :alerts_ui, AlertsUI.Repo, url: System.fetch_env!("DATABASE_URL")
 
     config :alerts_ui,
-      base_url: String.replace_trailing(System.fetch_env!("API_URL"), "/", ""),
+      api_url: String.replace_trailing(System.fetch_env!("API_URL"), "/", ""),
       api_key: System.fetch_env!("API_KEY")
 
     config :mbta_v3_api,

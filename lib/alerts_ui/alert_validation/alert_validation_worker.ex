@@ -11,7 +11,7 @@ defmodule AlertsUI.AlertValidation.AlertValidationWorker do
 
   @impl Oban.Worker
   def perform(_job) do
-    base_url = AlertsUI.config(:base_url)
+    base_url = AlertsUI.config(:api_url)
     api_key = AlertsUI.config(:api_key)
 
     AlertValidator.validate_alerts(base_url, api_key)

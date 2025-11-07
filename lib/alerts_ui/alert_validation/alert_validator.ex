@@ -24,7 +24,7 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
 
   @spec validate_alerts(String.t(), String.t()) :: [invalid_alert_t()]
   def validate_alerts(
-        base_url \\ Application.get_env(:alerts_ui, :base_url),
+        base_url \\ Application.get_env(:alerts_ui, :api_url),
         api_key \\ Application.get_env(:alerts_ui, :api_key)
       ) do
     api_opts = [base_url: base_url, api_key: api_key]
