@@ -182,7 +182,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     # we want to reset some parameters and clear out
     # the old start information IF the user had a schedule selected
     # then selected All Trips. Don't run if All Trips is already selected.
-    if socket.assigns.selected_schedules === [] do
+    if socket.assigns.old_selected_schedules === [] do
       {:ok, assign(socket, assigns)}
     else
       new_params = %{
@@ -201,7 +201,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         |> to_form()
         |> Map.put(:action, :validate)
 
-      {:ok, assign(socket, %{form: form, trip_arrival_time: nil})}
+      {:ok, assign(socket, %{form: form, trip_arrival_time: nil, old_selected_schedules: []})}
     end
   end
 
