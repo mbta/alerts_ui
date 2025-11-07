@@ -17,6 +17,17 @@ defmodule AlertsUI.IBIAlertImporter do
 
   @default_chunk_size 1000
 
+  def import_ibi_alerts(path) do
+    Repo.transact(
+      fn ->
+        ingest_csv_file(path)
+        fix_invalid_timestamps()
+        convert_ibi_alerts()
+        {:ok, true}
+      end, timeout: :infinity
+    )
+  end
+
   @doc """
   Import a CSV file according to the format given by `IBIAlert.columns/0` as follows:
     - Stream a local file from `path`
@@ -74,6 +85,34 @@ defmodule AlertsUI.IBIAlertImporter do
       end,
       timeout: :infinity
     )
+  end
+
+  @doc """
+  Fix recurrence start and end times with hours >24 by wrapping them around.
+  """
+  def fix_invalid_timestamps() do
+    Repo.transact(fn ->
+      # fix DST-adjacent timestamps
+      Repo.update_all(
+        (from i in IBIAlert, where: like(i.notif_start, "11/5/2017 1:05%")),
+        set: [notif_start: "11/5/2017 2:05:00 AM", effect_start: "11/5/2017 2:05:00 AM"]
+      )
+
+      # fix >24 clock timestamps
+      Enum.each((24..47), fn digit ->
+        Ecto.Adapters.SQL.query!(
+          Repo,
+          "update ibi_alerts set recurrence_start_time = regexp_replace(recurrence_start_time, '^#{digit}', '#{rem(digit, 24) |> Integer.to_string() |> String.pad_leading(2, "0")}') where recurrence_start_time like '#{digit}%'"
+        )
+
+        Ecto.Adapters.SQL.query!(
+          Repo,
+          "update ibi_alerts set recurrence_end_time = regexp_replace(recurrence_end_time, '^#{digit}', '#{rem(digit, 24) |> Integer.to_string() |> String.pad_leading(2, "0")}') where recurrence_end_time like '#{digit}%'"
+        )
+      end)
+
+      {:ok, true}
+    end, timeout: :infinity)
   end
 
   @doc """
