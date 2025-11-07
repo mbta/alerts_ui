@@ -17,7 +17,7 @@ defmodule AlertsUI.FeedOutput.WriteToS3 do
   @spec write(String.t(), String.t()) :: :ok | {:error, any()}
   def write(filename, content) do
     case ExAws.S3.put_object(get_bucket_name(), get_file_path(filename), content,
-           content_type: "application/json"
+           content_type: get_content_type(filename)
          )
          |> ExAws.request() do
       {:ok, _term} -> :ok
@@ -31,6 +31,14 @@ defmodule AlertsUI.FeedOutput.WriteToS3 do
 
   defp get_file_path(filename) do
     "#{System.get_env("S3_BUCKET_PREFIX", "")}/#{filename}"
+  end
+
+  defp get_content_type(filename) do
+    if String.ends_with?(filename, ".pb") do
+      "application/x-protobuf"
+    else
+      "application/json"
+    end
   end
 end
 
