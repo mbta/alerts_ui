@@ -54,7 +54,13 @@ defmodule AlertsUI.IBIAlertImporterTest do
     test "active period and informed entity can be disabled via options", %{
       ibi_alert: ibi_alert
     } do
-      changeset = %Ecto.Changeset{} = ibi_alert_to_changeset(ibi_alert, %Alert{}, no_active_periods: true, no_informed_entities: true)
+      changeset =
+        %Ecto.Changeset{} =
+        ibi_alert_to_changeset(ibi_alert, %Alert{},
+          no_active_periods: true,
+          no_informed_entities: true
+        )
+
       assert changeset.data.__struct__ == Alert
       assert changeset.valid?
     end

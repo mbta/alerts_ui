@@ -24,7 +24,8 @@ defmodule AlertsUI.IBIAlertImporter do
         fix_invalid_timestamps()
         convert_ibi_alerts()
         {:ok, true}
-      end, timeout: :infinity
+      end,
+      timeout: :infinity
     )
   end
 
@@ -91,28 +92,31 @@ defmodule AlertsUI.IBIAlertImporter do
   Fix recurrence start and end times with hours >24 by wrapping them around.
   """
   def fix_invalid_timestamps() do
-    Repo.transact(fn ->
-      # fix DST-adjacent timestamps
-      Repo.update_all(
-        (from i in IBIAlert, where: like(i.notif_start, "11/5/2017 1:05%")),
-        set: [notif_start: "11/5/2017 2:05:00 AM", effect_start: "11/5/2017 2:05:00 AM"]
-      )
-
-      # fix >24 clock timestamps
-      Enum.each((24..47), fn digit ->
-        Ecto.Adapters.SQL.query!(
-          Repo,
-          "update ibi_alerts set recurrence_start_time = regexp_replace(recurrence_start_time, '^#{digit}', '#{rem(digit, 24) |> Integer.to_string() |> String.pad_leading(2, "0")}') where recurrence_start_time like '#{digit}%'"
+    Repo.transact(
+      fn ->
+        # fix DST-adjacent timestamps
+        Repo.update_all(
+          from(i in IBIAlert, where: like(i.notif_start, "11/5/2017 1:05%")),
+          set: [notif_start: "11/5/2017 2:05:00 AM", effect_start: "11/5/2017 2:05:00 AM"]
         )
 
-        Ecto.Adapters.SQL.query!(
-          Repo,
-          "update ibi_alerts set recurrence_end_time = regexp_replace(recurrence_end_time, '^#{digit}', '#{rem(digit, 24) |> Integer.to_string() |> String.pad_leading(2, "0")}') where recurrence_end_time like '#{digit}%'"
-        )
-      end)
+        # fix >24 clock timestamps
+        Enum.each(24..47, fn digit ->
+          Ecto.Adapters.SQL.query!(
+            Repo,
+            "update ibi_alerts set recurrence_start_time = regexp_replace(recurrence_start_time, '^#{digit}', '#{rem(digit, 24) |> Integer.to_string() |> String.pad_leading(2, "0")}') where recurrence_start_time like '#{digit}%'"
+          )
 
-      {:ok, true}
-    end, timeout: :infinity)
+          Ecto.Adapters.SQL.query!(
+            Repo,
+            "update ibi_alerts set recurrence_end_time = regexp_replace(recurrence_end_time, '^#{digit}', '#{rem(digit, 24) |> Integer.to_string() |> String.pad_leading(2, "0")}') where recurrence_end_time like '#{digit}%'"
+          )
+        end)
+
+        {:ok, true}
+      end,
+      timeout: :infinity
+    )
   end
 
   @doc """
@@ -135,11 +139,12 @@ defmodule AlertsUI.IBIAlertImporter do
   """
   @spec convert_ibi_alerts(keyword()) :: {:ok, true}
   def convert_ibi_alerts(options \\ []) do
-    query = if Keyword.get(options, :import_open_alerts) do
-      LatestIBIAlert
-    else
-      from i in LatestIBIAlert, where: i.is_closed == "True"
-    end
+    query =
+      if Keyword.get(options, :import_open_alerts) do
+        LatestIBIAlert
+      else
+        from i in LatestIBIAlert, where: i.is_closed == "True"
+      end
 
     Repo.transact(
       fn ->
@@ -154,14 +159,14 @@ defmodule AlertsUI.IBIAlertImporter do
             |> Enum.group_by(fn version -> version.alert_id end)
 
           Enum.each(chunk, fn latest_version ->
-            currently_open = (latest_version.is_closed == "False")
+            currently_open = latest_version.is_closed == "False"
 
             [insert | updates] =
               all_versions_index
               |> Map.get(latest_version.alert_id)
               |> Enum.sort_by(fn version -> version.integer_version_no end)
 
-            insert_open = currently_open && (insert.version_no == latest_version.version_no)
+            insert_open = currently_open && insert.version_no == latest_version.version_no
 
             alert =
               insert
@@ -174,7 +179,8 @@ defmodule AlertsUI.IBIAlertImporter do
               |> Repo.preload([:informed_entity, :active_period])
 
             Enum.each(updates, fn update ->
-              update_open = currently_open && (update.version_no == latest_version.version_no)
+              update_open = currently_open && update.version_no == latest_version.version_no
+
               update
               |> ibi_alert_to_changeset(
                 alert,

@@ -107,37 +107,41 @@ defmodule AlertsUI.AlertBuilder do
     # added to our list of routes
 
     original_direction_selections =
-      Map.get(alert_data, :original_direction_selections) || [
-      direction_name(selected_routes, pre_combo_routes(selected_routes), direction_id) <>
-        "|" <> (direction_id || "")
-    ]
+      Map.get(alert_data, :original_direction_selections) ||
+        [
+          direction_name(selected_routes, pre_combo_routes(selected_routes), direction_id) <>
+            "|" <> (direction_id || "")
+        ]
 
-    original_route_selections = Map.get(alert_data, :original_route_selections) ||
-      selected_routes
-      |> Enum.map(fn route_id ->
-        matching_route = get_matching_route(route_id, pre_combo_routes(selected_routes))
+    original_route_selections =
+      Map.get(alert_data, :original_route_selections) ||
+        selected_routes
+        |> Enum.map(fn route_id ->
+          matching_route = get_matching_route(route_id, pre_combo_routes(selected_routes))
 
-        "#{SelectFormatter.name_for_option(matching_route)}|#{route_id}"
-      end)
+          "#{SelectFormatter.name_for_option(matching_route)}|#{route_id}"
+        end)
 
     original_stop_selections = Map.get(alert_data, :stop_names_and_ids, [])
 
-    original_trip_selections = Map.get(alert_data, :original_trip_selections) ||
-      (Map.get(alert_data, :trip_information_by_id, %{}) || %{})
-      |> Enum.map(fn {id, trip} ->
-        "#{Map.get(trip, :trip_name, "")}|#{id}"
-      end)
+    original_trip_selections =
+      Map.get(alert_data, :original_trip_selections) ||
+        (Map.get(alert_data, :trip_information_by_id, %{}) || %{})
+        |> Enum.map(fn {id, trip} ->
+          "#{Map.get(trip, :trip_name, "")}|#{id}"
+        end)
 
-    original_facility_selections = Map.get(alert_data, :original_facility_selections) ||
-      case Map.get(alert_data, :facility_id) do
-        nil ->
-          []
+    original_facility_selections =
+      Map.get(alert_data, :original_facility_selections) ||
+        case Map.get(alert_data, :facility_id) do
+          nil ->
+            []
 
-        facility_id ->
-          [facility_id]
-          |> Enum.map(&FacilitiesRepo.get/1)
-          |> Enum.map(&"#{SelectFormatter.name_for_option(&1)}|#{&1.id}")
-      end
+          facility_id ->
+            [facility_id]
+            |> Enum.map(&FacilitiesRepo.get/1)
+            |> Enum.map(&"#{SelectFormatter.name_for_option(&1)}|#{&1.id}")
+        end
 
     # ACTIVE PERIODS
 
