@@ -406,7 +406,7 @@ defmodule AlertsUI.Alerts do
   # Uses the IE fields to determine the route_type of each route in
   # original_route_selections so that we can group the route filters list by mode
   @spec get_routes_grouped_by_mode() :: map()
-  def get_routes_grouped_by_mode() do
+  def get_routes_grouped_by_mode do
     Repo.all(
       from(a in Alert,
         where: a.original_route_selections != [],
