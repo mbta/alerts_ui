@@ -273,8 +273,9 @@ defmodule AlertsUIWeb.FilterForm do
     # Within each group, sort alphanumerically
     |> Enum.map(fn route_sub_list ->
       route_sub_list
-      |> Enum.map(fn route -> build_route_option(route) end)
+      |> Enum.map(fn route -> parse_route_name(route) end)
       |> Enum.sort(&comparator/2)
+      |> Enum.map(&build_route_option/1)
     end)
     |> List.flatten()
   end
@@ -284,12 +285,17 @@ defmodule AlertsUIWeb.FilterForm do
   defp comparator(_, {b, _}) when is_integer(b), do: true
   defp comparator({a, _}, {b, _}), do: a <= b
 
-  defp build_route_option({route_name, _route_type, route_id}) do
+  # Turns strings into sortable integers, if relevant
+  defp parse_route_name({route_name, _route_type, route_id}) do
     case Integer.parse(route_name) do
       :error -> {route_name, route_id}
       result -> {elem(result, 0), route_id}
     end
   end
+
+  # Stringify the route again, so the SelectFormatter works properly
+  defp build_route_option({route_name, route_id}) when is_integer(route_name), do: {Integer.to_string(route_name), route_id}
+  defp build_route_option(route), do: route
 
   def format_service_type_options do
     [
