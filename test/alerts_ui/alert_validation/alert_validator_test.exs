@@ -44,15 +44,16 @@ defmodule AlertsUI.AlertValidation.AlertValidatorTest do
           ]
         })
 
-        assert AlertValidator.validate_alerts() == [
-                 %{
-                   alert_id: "123",
-                   invalid_facilities: [],
-                   invalid_routes: ["3"],
-                   invalid_stops: [],
-                   invalid_trips: []
-                 }
-               ]
+        assert AlertValidator.validate_alerts() ==
+                 [
+                   %{
+                     alert_id: "123",
+                     invalid_facilities: [],
+                     invalid_routes: ["3"],
+                     invalid_stops: [],
+                     invalid_trips: []
+                   }
+                 ]
       end
     end
 
@@ -78,15 +79,16 @@ defmodule AlertsUI.AlertValidation.AlertValidatorTest do
           informed_entity: [%{stop_id: "1"}, %{stop_id: "2"}, %{stop_id: "3"}]
         })
 
-        assert AlertValidator.validate_alerts() == [
-                 %{
-                   alert_id: "123",
-                   invalid_facilities: [],
-                   invalid_routes: [],
-                   invalid_stops: ["3"],
-                   invalid_trips: []
-                 }
-               ]
+        assert AlertValidator.validate_alerts() ==
+                 [
+                   %{
+                     alert_id: "123",
+                     invalid_facilities: [],
+                     invalid_routes: [],
+                     invalid_stops: ["3"],
+                     invalid_trips: []
+                   }
+                 ]
       end
     end
 
