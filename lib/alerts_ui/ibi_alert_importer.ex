@@ -8,12 +8,12 @@ defmodule AlertsUI.IBIAlertImporter do
 
   import Ecto.Query
 
-  alias Ecto.Multi
   alias AlertsUI.AlertBuilder
-  alias AlertsUI.Repo
   alias AlertsUI.Models.Alert
   alias AlertsUI.Models.IBIAlert
   alias AlertsUI.Models.LatestIBIAlert
+  alias AlertsUI.Repo
+  alias Ecto.Multi
 
   @default_chunk_size 1000
 
@@ -91,7 +91,7 @@ defmodule AlertsUI.IBIAlertImporter do
   @doc """
   Fix recurrence start and end times with hours >24 by wrapping them around.
   """
-  def fix_invalid_timestamps() do
+  def fix_invalid_timestamps do
     Repo.transact(
       fn ->
         # fix DST-adjacent timestamps

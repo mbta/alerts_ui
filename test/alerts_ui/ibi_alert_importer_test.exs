@@ -6,9 +6,9 @@ defmodule AlertsUI.IBIAlertImporterTest do
   import AlertsUI.IBIAlertImporter
 
   alias AlertsUI.AlertBuilder
-  alias AlertsUI.Repo
   alias AlertsUI.Models.Alert
   alias AlertsUI.Models.IBIAlert
+  alias AlertsUI.Repo
 
   @import_fixture_path "./test/support/fixtures/ibi_alert_importer/import.csv"
   @update_fixture_path "./test/support/fixtures/ibi_alert_importer/update.csv"
