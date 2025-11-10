@@ -778,156 +778,6 @@ defmodule AlertsUIWeb.SharedComponents do
   end
 
   @doc """
-  Show the alerts filter modal
-
-  ##Examples
-
-    <.filter_modal/>
-  """
-
-  attr :id, :string, default: "alerts-filter-modal"
-  attr :button_label, :string, default: "Filters"
-  attr :header_text, :string, default: "Filters"
-  attr :form, Form, required: true
-  attr :accept_event_name, :string, default: "update-filter"
-  attr :cancel_event_name, :string, default: "ignore"
-
-  def filter_modal(assigns) do
-    ~H"""
-    <span phx-hook="FilterCount" id={"filter-modal-#{@header_text}"}>
-      <.modal
-        id={@id}
-        header_text={@header_text}
-        header_class="after:content-[attr(data-count)]"
-        cancel_event_name={@cancel_event_name}
-        accept_event_name={@accept_event_name}
-        cancel_button_text="Close"
-        accept_button_text="Apply"
-        button_type="submit"
-      >
-        <.filter_modal_group
-          label="Service Types"
-          open={true}
-          form={@form}
-          field="service_type"
-          field_name="filters[2]"
-          options={AlertsUIWeb.ViewAlertsLive.format_service_type_options()}
-          selected={Map.get(Enum.at(@form.source.flop.filters || [], 2) || %{}, :value)}
-        />
-        <.filter_modal_group
-          label="Routes"
-          form={@form}
-          field="routes"
-          field_name="filters[1]"
-          options={AlertsUIWeb.ViewAlertsLive.format_routes_options()}
-          selected={Map.get(Enum.at(@form.source.flop.filters || [], 1) || %{}, :value)}
-        />
-        <.filter_modal_group
-          label="Effects"
-          form={@form}
-          field="effects"
-          field_name="filters[0]"
-          options={AlertsUIWeb.ViewAlertsLive.format_effect_options()}
-          selected={Map.get(Enum.at(@form.source.flop.filters || [], 0) || %{}, :value)}
-        />
-      </.modal>
-      <button
-        data-count=""
-        phx-click={show_modal(@id)}
-        class="flex items-center leading-tight min-h-[1.3rem] text-right text-primary hover:underline hover:text-primary-hover after:content-[attr(data-count)] after:pl-1"
-        type="button"
-      >
-        <span class={[
-          "hero-funnel-mini w-4 h-4 mr-1"
-        ]} />
-        {@button_label}
-      </button>
-    </span>
-    """
-  end
-
-  @doc """
-  A Group of Filter Options for the Modal
-
-  ##Examples
-      <.filter_modal_group
-        label="Service Types"
-        open={true}
-        form={@form}
-        field="service_type"
-        field_name="filters[2]"
-        options={AlertsUIWeb.ViewAlertsLive.format_service_type_options()}
-        selected={Map.get(Enum.at(@form.source.flop.filters || [], 2) || %{}, :value)}
-      />
-      <.filter_modal_group
-        label="Routes"
-        form={@form}
-        field="routes"
-        field_name="filters[1]"
-        options={AlertsUIWeb.ViewAlertsLive.format_routes_options()}
-        selected={Map.get(Enum.at(@form.source.flop.filters || [], 1) || %{}, :value)}
-      />
-      <.filter_modal_group
-        label="Effects"
-        form={@form}
-        field="effects"
-        field_name="filters[0]"
-        options={AlertsUIWeb.ViewAlertsLive.format_effect_options()}
-        selected={Map.get(Enum.at(@form.source.flop.filters || [], 0) || %{}, :value)}
-      />
-  """
-
-  attr :container_class, :string, default: ""
-  attr :label, :string, default: "Title"
-  attr :content, :string, default: "Content"
-  attr :field, :string, required: true
-  attr :name, :string, default: "my-accordion"
-  attr :open, :boolean, default: false
-  attr :options, :list, required: true
-  attr :form, Form, required: true
-  attr :field_name, :string, required: true
-  attr :selected, :list, default: []
-
-  def filter_modal_group(assigns) do
-    ~H"""
-    <div class={[
-      "collapse group rounded-none border-bg-elevation-6 border-b-[1px] first:border-t-0 last:border-b-0 has-[.trigger:checked]:border-b-0",
-      @container_class
-    ]}>
-      <input type="hidden" phx-change="ignore" name={"#{@field_name}[field]"} value={@field} />
-      <input
-        id={"#{@label}-id"}
-        phx-change="ignore"
-        type="radio"
-        class="trigger absolute hidden"
-        name={"#{@name}-section"}
-        checked={@open}
-      />
-      <label
-        for={"#{@label}-id"}
-        class="collapse-label min-h-0 flex flex-row items-center justify-between p-2 leading-[20px]"
-      >
-        <h3 class="font-medium">{@label}</h3>
-        <AlertsUIWeb.CoreComponents.icon
-          name="hero-chevron-right"
-          class="text-primary h-4 w-4 group-has-[.trigger:checked]:rotate-90"
-        />
-      </label>
-      <div class="collapse-content text-base !p-0">
-        <.filtered_select
-          class="h-[20rem]"
-          field={@form[:"#{@field_name}[value]"]}
-          filter_field={@form[:"#{@field_name}[_filter]"]}
-          options={@options}
-          selected={@selected}
-          on_change="ignore"
-        />
-      </div>
-    </div>
-    """
-  end
-
-  @doc """
   Renders a button menu.
 
   ##Examples
@@ -1175,8 +1025,6 @@ defmodule AlertsUIWeb.SharedComponents do
     required: true,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
-  attr :selected, :list, default: []
-
   attr :filter_field, FormField,
     required: true,
     doc:
@@ -1208,8 +1056,6 @@ defmodule AlertsUIWeb.SharedComponents do
     default: "",
     doc: "The target to send the events to (eg form component id)"
 
-  attr :on_change, :string, default: ""
-
   attr :rest, :global, include: ~w(disabled phx-debounce hook)
 
   def filtered_select(
@@ -1222,12 +1068,7 @@ defmodule AlertsUIWeb.SharedComponents do
       |> assign_new(:filter_value, fn -> String.downcase(filter_field.value || "") end)
 
     ~H"""
-    <div
-      {@rest}
-      class={["flex flex-col justify-start", @class]}
-      id={"#{@field.id}_selector"}
-      phx-hook="FilterSelect"
-    >
+    <div {@rest} class={["flex flex-col justify-start", @class]} id={"#{@field.id}_selector"}>
       <div :if={@modal_filter_id || @label} class="flex flex-row justify-between">
         <.label for={@id} class={if @disabled, do: "text-text-disabled"}>
           {@label}
@@ -1282,10 +1123,8 @@ defmodule AlertsUIWeb.SharedComponents do
           multiple={@multiple}
           size="2"
           options={if @loading, do: [], else: @options}
-          selected={@selected}
           field={@field}
           no_results={@no_results}
-          phx-change={@on_change}
           prompt={
             cond do
               @disabled -> nil
@@ -1352,7 +1191,8 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :disabled, :boolean, default: false, doc: "whether the element is disabled"
 
-  attr :rest, :global, include: ~w(value phx-debounce maxlength minlength placeholder spellcheck)
+  attr :rest, :global,
+    include: ~w(value phx-debounce maxlength minlength placeholder spellcheck phx-change)
 
   def text_input(%{field: %FormField{} = field} = assigns) do
     assigns =

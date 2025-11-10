@@ -110,12 +110,7 @@
   <.h2>Filter Modal</.h2>
 
   <.form for={@flop_form} class="form-control">
-    <.filter_modal
-      id="filter-options-modal"
-      form={@flop_form}
-      accept_event_name="ignore"
-      cancel_event_name="ignore"
-    />
+    <.filter_modal form={@flop_form} filter_count={2} />
   </.form>
 
   <.h2>Buttons</.h2>

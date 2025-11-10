@@ -1,27 +1,25 @@
 defmodule AlertsUI.Models.CustomFilters do
   @moduledoc """
-    Home for custom flop fitlers
+  Home for custom flop filters
   """
   import Ecto.Query
-  alias AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes
   alias Flop.Filter
 
+  def service_type_filter(query, %Filter{value: ["default"]}, _opts) do
+    query |> distinct(true)
+  end
+
   def service_type_filter(query, %Filter{value: values}, _opts) when is_list(values) do
-    access_effect_names = EffectsForRouteTypes.list_effects(:facility)
-    direct_routes = values |> Enum.filter(fn x -> Integer.parse(x) != :error end)
-    access_routes = values |> Enum.filter(fn x -> Integer.parse(x) == :error end)
+    service_types =
+      if "subway" in values do
+        values ++ ["0", "1"]
+      else
+        values
+      end
 
     query
     |> distinct(true)
-    |> where(
-      [a, informed_entity: ie],
-      ie.route_type in ^direct_routes or
-        ("access" in ^access_routes and a.effect_name in ^access_effect_names)
-    )
-  end
-
-  def service_type_filter(query, %Filter{value: value} = filter, opts) do
-    service_type_filter(query, %{filter | value: [value]}, opts)
+    |> where([a], a.primary_service_type in ^service_types)
   end
 
   def effects_filter(query, %Filter{value: value}, _opts) when is_list(value) do
