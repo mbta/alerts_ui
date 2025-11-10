@@ -427,36 +427,34 @@ defmodule AlertsUI.Models.Alert do
     end
   end
 
+  defp validate_recurrence_days(changeset, [no_recurrence_days_validation: true]), do: changeset
+
   defp validate_recurrence_days(changeset, options) do
-    if Keyword.get(options, :no_recurrence_days_validation) do
-      changeset
-    else
-      active_period_start =
-        case get_field(changeset, :active_period_start) do
-          %NaiveDateTime{} = naive -> DateTime.from_naive!(naive, "America/New_York")
-          %DateTime{} = dt -> DateTime.shift_zone!(dt, "America/New_York")
-          nil -> nil
-        end
-
-      recurrence_days = get_field(changeset, :recurrence_days) || []
-
-      cond do
-        is_nil(active_period_start) ->
-          changeset
-
-        Enum.empty?(recurrence_days) ->
-          changeset
-
-        Timex.weekday(active_period_start) in Enum.map(recurrence_days, &Timex.day_to_num/1) ->
-          changeset
-
-        true ->
-          add_error(
-            changeset,
-            :recurrence_days,
-            "Alert start day must match a selected day of the week"
-          )
+    active_period_start =
+      case get_field(changeset, :active_period_start) do
+        %NaiveDateTime{} = naive -> DateTime.from_naive!(naive, "America/New_York")
+        %DateTime{} = dt -> DateTime.shift_zone!(dt, "America/New_York")
+        nil -> nil
       end
+
+    recurrence_days = get_field(changeset, :recurrence_days) || []
+
+    cond do
+      is_nil(active_period_start) ->
+        changeset
+
+      Enum.empty?(recurrence_days) ->
+        changeset
+
+      Timex.weekday(active_period_start) in Enum.map(recurrence_days, &Timex.day_to_num/1) ->
+        changeset
+
+      true ->
+        add_error(
+          changeset,
+          :recurrence_days,
+          "Alert start day must match a selected day of the week"
+        )
     end
   end
 
