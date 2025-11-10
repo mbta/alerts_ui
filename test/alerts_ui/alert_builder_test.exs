@@ -314,7 +314,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  cause_detail: "",
                  cause: :UNKNOWN_CAUSE,
                  last_push_notification_timestamp: nil,
-                 notification_period_start: nil,
+                 notification_period_start: ~U[2024-04-30 15:54:00Z],
                  notification_period_end: nil,
                  severity: nil,
                  severity_level: nil,
