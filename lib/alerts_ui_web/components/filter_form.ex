@@ -293,7 +293,9 @@ defmodule AlertsUIWeb.FilterForm do
   end
 
   # Stringify the route again, so the SelectFormatter works properly
-  defp build_route_option({route_name, route_id}) when is_integer(route_name), do: {Integer.to_string(route_name), route_id}
+  defp build_route_option({route_name, route_id}) when is_integer(route_name),
+    do: {Integer.to_string(route_name), route_id}
+
   defp build_route_option(route), do: route
 
   def format_service_type_options do
