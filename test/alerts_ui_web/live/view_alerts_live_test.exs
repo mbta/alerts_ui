@@ -148,6 +148,86 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       refute html =~ "899"
       assert html =~ "999"
     end
+
+    @tag :logged_in_user
+    test "route filter contains options directly from the db, sorted", %{conn: conn} do
+      # Alert with the new route format
+      insert(:alert, %{
+        alert_id: "899",
+        original_route_selections: ["Red Line|Red", "62|62", "67|67", "76|76", "350|350", "CT3|708"],
+        informed_entity: [
+          build(:informed_entity, %{route_id: "Red", route_type: 1}),
+          build(:informed_entity, %{route_id: "62", route_type: 3}),
+          build(:informed_entity, %{route_id: "67", route_type: 3}),
+          build(:informed_entity, %{route_id: "76", route_type: 3}),
+          build(:informed_entity, %{route_id: "350", route_type: 3}),
+          build(:informed_entity, %{route_id: "708", route_type: 3})
+        ]
+      })
+      # Alert in the old format
+      insert(:alert, %{
+        alert_id: "999",
+        original_route_selections: ["CR-Fitchburg"],
+        informed_entity: [
+          build(:informed_entity, %{route_id: "CR-Fitchburg", route_type: 2})
+        ]
+      })
+
+      {:ok, _view, html} = live(conn, "/alerts")
+
+      {:ok, document} = Floki.parse_document(html)
+
+      {_, _, children_nodes} = Floki.get_by_id(document, "view_alerts_live_routes")
+
+      assert [
+              {"option", [{"value", "default"}, {"selected", "selected"}],
+              ["\n      All\n    "]},
+              {"option", [{"value", "708"}], ["CT3"]},
+              {"option", [{"value", "62"}], ["62"]},
+              {"option", [{"value", "67"}], ["67"]},
+              {"option", [{"value", "76"}], ["76"]},
+              {"option", [{"value", "350"}], ["350"]},
+              {"option", [{"value", "Red"}], ["Red Line"]},
+              {"option", [{"value", "CR-Fitchburg"}], ["CR-Fitchburg"]}
+            ] = children_nodes
+    end
+
+    @tag :logged_in_user
+    test "filtering by route uses OR", %{conn: conn} do
+      # Alert with the new route format
+      insert(:alert, %{
+        alert_id: "899",
+        original_route_selections: ["Red Line|Red", "62|62", "67|67", "76|76", "350|350", "CT3|708"],
+        informed_entity: [
+          build(:informed_entity, %{route_id: "Red", route_type: 1}),
+          build(:informed_entity, %{route_id: "62", route_type: 3}),
+          build(:informed_entity, %{route_id: "67", route_type: 3}),
+          build(:informed_entity, %{route_id: "76", route_type: 3}),
+          build(:informed_entity, %{route_id: "350", route_type: 3}),
+          build(:informed_entity, %{route_id: "708", route_type: 3})
+        ]
+      })
+      # Alert in the old format
+      insert(:alert, %{
+        alert_id: "999",
+        original_route_selections: ["CR-Fitchburg"],
+        informed_entity: [
+          build(:informed_entity, %{route_id: "CR-Fitchburg", route_type: 2})
+        ]
+      })
+
+      {:ok, view, html} = live(conn, "/alerts?filter[routes][]=708")
+      assert html =~ "899"
+      refute html =~ "999"
+
+      {:ok, _view, html} = live(conn, "/alerts?filter[routes][]=CR-Fitchburg")
+      refute html =~ "899"
+      assert html =~ "999"
+
+      {:ok, _view, html} = live(conn, "/alerts?filter[routes][]=Red&filter[routes][]=CR-Fitchburg")
+      assert html =~ "899"
+      assert html =~ "999"
+    end
   end
 
   describe "alerts list timeline filtering and sorting" do

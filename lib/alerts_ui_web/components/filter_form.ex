@@ -267,9 +267,8 @@ defmodule AlertsUIWeb.FilterForm do
     grouped_routes = Alerts.get_routes_grouped_by_mode()
 
     # Properly organizing by mode: Bus, Subway, CR, Ferry
-    ([grouped_routes[3]] ++ [grouped_routes[1]] ++ [grouped_routes[2]] ++ [grouped_routes[4]])
+    ([Map.get(grouped_routes, 3, [])] ++ [Map.get(grouped_routes, 1, [])] ++ [Map.get(grouped_routes, 2, [])] ++ [Map.get(grouped_routes, 4, [])])
     # Within each group, sort alphanumerically
-    |> IO.inspect()
     |> Enum.map(fn route_sub_list ->
       route_sub_list
       |> Enum.map(fn route -> build_route_option(route) end)
@@ -278,10 +277,10 @@ defmodule AlertsUIWeb.FilterForm do
     |> List.flatten()
   end
 
-  defp comparator(a, b) when is_integer(a) and is_integer(b), do: a <= b
-  defp comparator(a, _) when is_integer(a), do: false
-  defp comparator(_, b) when is_integer(b), do: true
-  defp comparator(a, b), do: a <= b
+  defp comparator({a, _}, {b, _}) when is_integer(a) and is_integer(b), do: a <= b
+  defp comparator({a, _}, _) when is_integer(a), do: false
+  defp comparator(_, {b, _}) when is_integer(b), do: true
+  defp comparator({a, _}, {b, _}), do: a <= b
 
   defp build_route_option({route_name, _route_type, route_id}) do
     case Integer.parse(route_name) do
