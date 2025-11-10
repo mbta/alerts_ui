@@ -258,7 +258,7 @@ defmodule AlertsUI.IBIAlertImporter do
       rescue
         e ->
           Logger.error("alert #{ibi_alert.alert_id} / #{key}: #{e.message}")
-          reraise e
+          reraise e, __STACKTRACE__
       end
     end)
   end
