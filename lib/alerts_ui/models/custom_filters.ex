@@ -6,7 +6,7 @@ defmodule AlertsUI.Models.CustomFilters do
   alias Flop.Filter
 
   def service_type_filter(query, %Filter{value: ["default"]}, _opts) do
-    query |> distinct(true)
+    query
   end
 
   def service_type_filter(query, %Filter{value: values}, _opts) when is_list(values) do
@@ -17,9 +17,7 @@ defmodule AlertsUI.Models.CustomFilters do
         values
       end
 
-    query
-    |> distinct(true)
-    |> where([a], a.primary_service_type in ^service_types)
+    query |> where([a], a.primary_service_type in ^service_types)
   end
 
   def effects_filter(query, %Filter{value: value}, _opts) when is_list(value) do
@@ -31,7 +29,7 @@ defmodule AlertsUI.Models.CustomFilters do
   end
 
   def routes_filter(query, %Filter{value: value}, _opts) when is_list(value) do
-    query |> distinct(true) |> where([a, informed_entity: ie], ie.route_id in ^value)
+    query |> where([a, informed_entity: ie], ie.route_id in ^value)
   end
 
   @spec multi_column_search_filter(Ecto.Query.t(), Flop.Filter.t(), list()) :: Ecto.Query.t()

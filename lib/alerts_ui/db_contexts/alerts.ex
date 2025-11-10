@@ -342,6 +342,7 @@ defmodule AlertsUI.Alerts do
       |> select_merge([a], %{
         alert_id: a.alert_id |> type(:integer) |> selected_as(:integer_alert_id)
       })
+      |> distinct(true)
       |> Flop.run(flop, opts)
     end
   end
