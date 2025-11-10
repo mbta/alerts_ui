@@ -199,7 +199,7 @@ defmodule AlertsUI.IBIAlertImporter do
     )
   end
 
-  @spec ibi_alert_to_changeset(%IBIAlert{}, %Alert{}, keyword()) :: %Ecto.Changeset{}
+  @spec ibi_alert_to_changeset(IBIAlert.t(), Alert.t(), keyword()) :: Ecto.Changeset.t()
   def ibi_alert_to_changeset(ibi_alert, am_alert, options \\ []) do
     options = Keyword.put(options, :no_recurrence_days_validation, true)
 
@@ -212,7 +212,7 @@ defmodule AlertsUI.IBIAlertImporter do
     Alert.changeset(am_alert, params, options)
   end
 
-  @spec ibi_alert_to_alert_data(%IBIAlert{}) :: map()
+  @spec ibi_alert_to_alert_data(IBIAlert.t()) :: map()
   def ibi_alert_to_alert_data(ibi_alert) do
     # alert data fields
     [
@@ -258,7 +258,7 @@ defmodule AlertsUI.IBIAlertImporter do
       rescue
         e ->
           Logger.error("alert #{ibi_alert.alert_id} / #{key}: #{e.message}")
-          raise e
+          reraise e
       end
     end)
   end
@@ -282,7 +282,7 @@ defmodule AlertsUI.IBIAlertImporter do
     end)
   end
 
-  @spec from_ibi(%IBIAlert{}, atom()) :: any()
+  @spec from_ibi(IBIAlert.t(), atom()) :: any()
   def from_ibi(ibi_alert, :route_type) do
     case ibi_alert.gui_mode_name do
       "Systemwide" -> nil

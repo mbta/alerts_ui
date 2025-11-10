@@ -1,4 +1,8 @@
 defmodule AlertsUI.Models.IBIAlert do
+  @moduledoc """
+  A single export from IBI, corresponding to an alert or alert revision.
+  """
+
   use AlertsUI.Schema
 
   @fields ~w[

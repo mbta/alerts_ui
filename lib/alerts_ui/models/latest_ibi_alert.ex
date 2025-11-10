@@ -1,4 +1,8 @@
 defmodule AlertsUI.Models.LatestIBIAlert do
+  @moduledoc """
+  A view representing the latest version of each alert.
+  """
+
   use AlertsUI.Schema
 
   schema "latest_ibi_alerts" do
