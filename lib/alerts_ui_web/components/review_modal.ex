@@ -159,6 +159,7 @@ defmodule AlertsUIWeb.ReviewModal do
                 class="break-all text-primary hover:text-primary-hover hover:underline"
               >
                 {@alert_data.url}
+                <.icon name="hero-arrow-top-right-on-square" class="h-4 w-4" />
               </a>
             </span>
 
@@ -203,30 +204,28 @@ defmodule AlertsUIWeb.ReviewModal do
           <%!-- Image --%>
           <%= if @alert_data.image_url do %>
             <p class="font-bold">Image</p>
-            <div class="pb-4 flex flex-col">
+            <div class="pb-4">
               <a
                 target="_blank"
                 rel="noopener noreferrer"
                 href={@alert_data.image_url}
-                class="flex flex-col align-start text-primary hover:text-primary-hover hover:underline"
+                class="align-start text-primary hover:text-primary-hover hover:underline"
               >
                 <img
                   id="alert-image"
                   phx-hook="MeasureImage"
                   src={@alert_data.image_url}
                   alt={@alert_data.image_alternative_text || "No alternative text provided"}
-                  class="max-h-40 self-start pr-2 object-contain"
+                  class="max-h-40 self-start pr-2 object-contain block"
                 />
-                <p class="break-all">
-                  {String.split(@alert_data.image_url, "/") |> List.last()}
-                  <span :if={Map.get(@alert_data, :image_preview_size, nil)}>
-                    ({@alert_data.image_preview_size["width"]} x {@alert_data.image_preview_size[
-                      "height"
-                    ]})
-                  </span>
-                  <.icon name="hero-arrow-top-right-on-square" class="h-4 w-4" />
-                </p>
+                {String.split(@alert_data.image_url, "/") |> List.last()}
+                <.icon name="hero-arrow-top-right-on-square" class="h-4 w-4" />
               </a>
+              <span :if={Map.get(@alert_data, :image_preview_size, nil)} class="text-text-secondary">
+                ({@alert_data.image_preview_size["width"]} x {@alert_data.image_preview_size[
+                  "height"
+                ]})
+              </span>
               <p class="text-text-secondary">
                 Alt text: {@alert_data.image_alternative_text || "No alternative text provided"}
               </p>

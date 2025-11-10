@@ -69,6 +69,7 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobuf do
 
   def build_trip_descriptor(trip) do
     trip
+    |> Map.replace_lazy(:schedule_relationship, &enumify_value/1)
     |> TripDescriptor.new()
   end
 

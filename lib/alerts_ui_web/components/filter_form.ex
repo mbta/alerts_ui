@@ -148,7 +148,6 @@ defmodule AlertsUIWeb.FilterForm do
         </:footer>
       </.modal>
       <button
-        data-count=""
         phx-click={show_modal("alerts-filter-modal")}
         class="flex items-center leading-tight min-h-[1.3rem] text-right text-primary hover:underline hover:text-primary-hover"
         type="button"
