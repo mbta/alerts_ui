@@ -87,6 +87,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       when form_type in [:editing, :duplicating] do
     # designed to run ONCE when editing, to fill in alert information
     ServiceEffectCombinations.required_fields(combination)
+
     # only pull trip information if needed
     trip_information_by_id =
       if :trip_ids in ServiceEffectCombinations.required_fields(combination) do

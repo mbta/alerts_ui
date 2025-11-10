@@ -1,4 +1,4 @@
-defmodule AletrsUIWeb.Components.ReviewModalTest do
+defmodule AlertsUIWeb.Components.ReviewModalTest do
   @moduledoc """
   A majority of this suite are e2e tests to verify various user
   input produces a proper review modal
@@ -7,6 +7,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
 
   import AlertsUI.Support.Factory
   import AlertsUI.UsersFixtures
+  import LiveIsolatedComponent
   import Mock
   import Phoenix.Component
   import Phoenix.LiveViewTest
@@ -25,6 +26,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
   alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
+  alias Phoenix.LiveView.AsyncResult
 
   @tomorrow_datetime DateTime.utc_now()
                      |> DateTime.shift_zone!("America/New_York")
@@ -84,7 +86,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         {RoutesRepo, [],
          [
            by_type: fn _types -> @routes end,
-           get: fn _ -> @route_one end
+           get: fn _ -> @route_one end,
+           get: fn _, _ -> @route_one end
          ]},
         {StopsRepo, [],
          [
@@ -118,6 +121,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
          [
            by_type: fn _types -> @routes end,
            get: fn _id -> @route_one end,
+           get: fn _id, _opts -> @route_one end,
            all: fn _opts -> @routes end
          ]},
         {StopsRepo, [],
@@ -170,6 +174,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
          [
            by_type: fn _types -> @routes end,
            get: fn _id -> @route_one end,
+           get: fn _id, _opts -> @route_one end,
            all: fn _opts -> @routes end
          ]},
         {StopsRepo, [],
@@ -217,7 +222,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         {RoutesRepo, [],
          [
            by_type: fn _types -> @routes end,
-           get: fn _ -> @route_one end
+           get: fn _ -> @route_one end,
+           get: fn _, _ -> @route_one end
          ]},
         {StopsRepo, [],
          [
@@ -273,7 +279,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         {RoutesRepo, [],
          [
            by_type: fn _types -> @routes end,
-           get: fn _id -> @route_one end
+           get: fn _id -> @route_one end,
+           get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
@@ -297,7 +304,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         assert render(view) =~ ~r/Routes:.*Framingham\/Worcester Line/s
         assert render(view) =~ ~r/Stops:.*Aquarium/s
         refute render(view) =~ "Trips:"
-        refute render(view) =~ "Direction:"
+        assert render(view) =~ ~r/Direction:.*Both/s
       end
     end
 
@@ -307,7 +314,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         {RoutesRepo, [],
          [
            by_type: fn _types -> @routes end,
-           get: fn _id -> @route_one end
+           get: fn _id -> @route_one end,
+           get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
@@ -342,7 +350,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         {RoutesRepo, [],
          [
            by_type: fn _types -> @routes end,
-           get: fn _id -> @route_one end
+           get: fn _id -> @route_one end,
+           get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
@@ -358,7 +367,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
 
         assert render(view) =~ ~r/Routes:.*Framingham\/Worcester Line/s
         refute render(view) =~ "Stops:"
-        refute render(view) =~ "Direction:"
+        assert render(view) =~ ~r/Direction:.*Both/s
         refute render(view) =~ "Trips:"
       end
     end
@@ -369,7 +378,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         {RoutesRepo, [],
          [
            by_type: fn _types -> @routes end,
-           get: fn _id -> @route_one end
+           get: fn _id -> @route_one end,
+           get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
@@ -401,7 +411,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         {RoutesRepo, [],
          [
            by_type: fn _types -> @routes end,
-           get: fn _id -> @route_one end
+           get: fn _id -> @route_one end,
+           get: fn _id, _opts -> @route_one end
          ]},
         {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]}
       ]) do
@@ -435,9 +446,13 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         {RoutesRepo, [],
          [
            by_type: fn _types -> @routes end,
-           get: fn _id -> @route_one end
+           get: fn _id -> @route_one end,
+           get: fn _id, _opts -> @route_one end
          ]},
-        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end
+         ]},
         {StopsRepo, [],
          [
            # by_route_type: fn _rt -> [@stop] end,
@@ -448,6 +463,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         # CR Delay
         {:ok, view, _html} = live(conn, "/alerts/new")
         get_to_submission_page(view, "Commuter Rail", "Delay")
+        render_async(view)
 
         fill_out_required_form_fields(view, %{
           affected_service: %{
@@ -523,7 +539,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         {RoutesRepo, [],
          [
            by_type: fn _types -> @routes end,
-           get: fn _id -> @route_one end
+           get: fn _id -> @route_one end,
+           get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
@@ -553,7 +570,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         {RoutesRepo, [],
          [
            by_type: fn _types -> @routes end,
-           get: fn _id -> @route_one end
+           get: fn _id -> @route_one end,
+           get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
@@ -599,7 +617,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         {RoutesRepo, [],
          [
            by_type: fn _types -> @routes end,
-           get: fn _id -> @route_one end
+           get: fn _id -> @route_one end,
+           get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
@@ -635,7 +654,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         {RoutesRepo, [],
          [
            by_type: fn _types -> @routes end,
-           get: fn _id -> @route_one end
+           get: fn _id -> @route_one end,
+           get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
@@ -670,7 +690,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         {RoutesRepo, [],
          [
            by_type: fn _types -> @routes end,
-           get: fn _id -> @route_one end
+           get: fn _id -> @route_one end,
+           get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
@@ -716,7 +737,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         {RoutesRepo, [],
          [
            by_type: fn _types -> @routes end,
-           get: fn _ -> @route_one end
+           get: fn _ -> @route_one end,
+           get: fn _, _ -> @route_one end
          ]},
         {StopsRepo, [],
          [
@@ -744,7 +766,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         {RoutesRepo, [],
          [
            by_type: fn _types -> @routes end,
-           get: fn _ -> @route_one end
+           get: fn _ -> @route_one end,
+           get: fn _, _ -> @route_one end
          ]},
         {StopsRepo, [],
          [
@@ -789,7 +812,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         {RoutesRepo, [],
          [
            by_type: fn _types -> @routes end,
-           get: fn _id -> @route_one end
+           get: fn _id -> @route_one end,
+           get: fn _, _ -> @route_one end
          ]},
         {StopsRepo, [],
          [
@@ -817,7 +841,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         {RoutesRepo, [],
          [
            by_type: fn _types -> @routes end,
-           get: fn _id -> @route_one end
+           get: fn _id -> @route_one end,
+           get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
@@ -899,7 +924,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         {RoutesRepo, [],
          [
            by_type: fn _types -> @routes end,
-           get: fn _id -> @route_one end
+           get: fn _id -> @route_one end,
+           get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
@@ -927,7 +953,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         {RoutesRepo, [],
          [
            by_type: fn _types -> @routes end,
-           get: fn _id -> @route_one end
+           get: fn _id -> @route_one end,
+           get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
@@ -964,7 +991,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         {RoutesRepo, [],
          [
            by_type: fn _types -> @routes end,
-           get: fn _id -> @route_one end
+           get: fn _id -> @route_one end,
+           get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
@@ -1001,7 +1029,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         {RoutesRepo, [],
          [
            by_type: fn _types -> @routes end,
-           get: fn _id -> @route_one end
+           get: fn _id -> @route_one end,
+           get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
@@ -1031,7 +1060,8 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
         {RoutesRepo, [],
          [
            by_type: fn _types -> @routes end,
-           get: fn _id -> @route_one end
+           get: fn _id -> @route_one end,
+           get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
@@ -1165,6 +1195,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
          [
            by_type: fn _types -> @routes end,
            get: fn _id -> @route_one end,
+           get: fn _id, _opts -> @route_one end,
            all: fn _opts -> @routes end
          ]},
         {StopsRepo, [],

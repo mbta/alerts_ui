@@ -42,6 +42,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :notification_period_start,
     :notification_period_end,
     :notification_specifier,
+    :original_route_selections,
+    :original_stop_selections,
+    :original_trip_selections,
+    :original_direction_selections,
+    :original_facility_selections,
     :recurrence_days,
     :reminder_times,
     :route_ids,
@@ -86,6 +91,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           notification_period_start: NaiveDateTime.t() | nil,
           notification_period_end: NaiveDateTime.t() | nil,
           notification_specifier: atom() | nil,
+          original_route_selections: [String.t()] | nil,
+          original_stop_selections: [String.t()] | nil,
+          original_trip_selections: [String.t()] | nil,
+          original_direction_selections: [String.t()] | nil,
+          original_facility_selections: [String.t()] | nil,
           recurrence_days: [atom()] | nil,
           reminder_times: [NaiveDateTime.t()] | nil,
           route_ids: [String.t()] | nil,
@@ -123,7 +133,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       :image_url,
       :severity,
       :url,
-      :last_push_notification_timestamp
+      :last_push_notification_timestamp,
+      :original_route_selections,
+      :original_trip_selections,
+      :original_stop_selections,
+      :original_direction_selections,
+      :original_facility_selections
     ]
 
     Enum.reduce(direct_from_alert_keys, %__MODULE__{}, fn key, params ->

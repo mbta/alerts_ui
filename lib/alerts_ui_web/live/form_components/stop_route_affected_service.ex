@@ -24,11 +24,12 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     field :modal_route_id, :string
     field :modal_route_search_term, :string
     field :stop_ids, {:array, :string}
+    field :stop_names_and_ids, {:array, :string}
     field :stop_search_term, :string
     field :route_types_by_id, {:map, :integer}
   end
 
-  @fields ~w[route_ids stop_ids route_types_by_id route_search_term stop_search_term modal_route_id modal_route_search_term]a
+  @fields ~w[route_ids stop_ids stop_names_and_ids route_types_by_id route_search_term stop_search_term modal_route_id modal_route_search_term]a
   @required_fields ~w[route_ids stop_ids]a
 
   @impl true
@@ -169,17 +170,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         },
         socket
       ) do
-    changeset = build_changeset(%__MODULE__{}, affected_service)
-
-    form =
-      changeset
-      |> Map.put(:action, :validate)
-      |> to_form()
-
-    route_type = socket.assigns.route_type
-
     # Get the currently selected stop ids
-    stop_ids = form[:stop_ids].value
+    stop_ids = affected_service["stop_ids"]
 
     # Then get the full stop data. That could be in available_stops OR be previously saved in selected_stops
     # (in the case that the list has been filtered, the stop details won't be in available_stops)
@@ -188,6 +180,24 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         socket.assigns.available_stops.result ++ socket.assigns.selected_stops,
         fn stop -> stop.id in stop_ids end
       )
+
+    # Generate stop_names_and_ids
+    stop_names_and_ids =
+      selected_stops
+      |> Enum.map(&"#{&1.name}|#{&1.id}")
+
+    affected_service =
+      affected_service
+      |> Map.merge(%{"stop_names_and_ids" => stop_names_and_ids})
+
+    changeset = build_changeset(%__MODULE__{}, affected_service)
+
+    form =
+      changeset
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    route_type = socket.assigns.route_type
 
     socket =
       socket
@@ -201,10 +211,32 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     {:noreply, socket}
   end
 
+  require IEx
+
   # On route select, don't need to do anything but save the change
   @impl true
   def handle_event("validate", %{"stop_route_affected_service" => affected_service}, socket) do
-    affected_service = add_routes_with_types(affected_service, available_routes(socket))
+    # Get the currently selected stop ids
+    stop_ids = Map.get(affected_service, "stop_ids", [])
+
+    # Then get the full stop data. That could be in available_stops OR be previously saved in selected_stops
+    # (in the case that the list has been filtered, the stop details won't be in available_stops)
+    selected_stops =
+      (socket.assigns.available_stops.result || []) ++ (socket.assigns.selected_stops || [])
+
+    selected_stops =
+      selected_stops
+      |> Enum.filter(&(Map.get(&1, :id, nil) in stop_ids))
+
+    # Generate stop_names_and_ids
+    stop_names_and_ids =
+      selected_stops
+      |> Enum.map(&"#{&1.name}|#{&1.id}")
+
+    affected_service =
+      affected_service
+      |> Map.merge(%{"stop_names_and_ids" => stop_names_and_ids})
+      |> add_routes_with_types(available_routes(socket))
 
     changeset = build_changeset(%__MODULE__{}, affected_service)
 

@@ -189,7 +189,7 @@ defmodule AlertsUI.AlertBuilder do
     }
   end
 
-  defp original_selections(alert_data) do
+  def original_selections(alert_data) do
     # used to generate original_direction_selections, original_route_selection, routes, etc.
     selected_routes = Map.get(alert_data, :route_ids, [])
     # direction_id needed for original_direction_selections, child_stops_with_context

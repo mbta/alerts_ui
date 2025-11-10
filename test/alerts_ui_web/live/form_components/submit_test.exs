@@ -38,7 +38,8 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
         {RoutesRepo, [],
          [
            by_type: fn _types -> @routes end,
-           get: fn _id -> @route_one end
+           get: fn _id -> @route_one end,
+           get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
@@ -81,7 +82,8 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
         {RoutesRepo, [],
          [
            by_type: fn _types -> @routes end,
-           get: fn _id -> @route_one end
+           get: fn _id -> @route_one end,
+           get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
@@ -132,6 +134,10 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
            get: fn
              "Blue" -> @route_one
              "Bluer" -> @route_two
+           end,
+           get: fn
+             "Blue", _ -> @route_one
+             "Bluer", _ -> @route_two
            end
          ]},
         {StopsRepo, [],
