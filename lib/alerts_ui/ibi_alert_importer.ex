@@ -13,6 +13,7 @@ defmodule AlertsUI.IBIAlertImporter do
   alias AlertsUI.Models.IBIAlert
   alias AlertsUI.Models.LatestIBIAlert
   alias AlertsUI.Repo
+  alias Ecto.Adapters.SQL
   alias Ecto.Multi
 
   @default_chunk_size 1000
@@ -102,12 +103,12 @@ defmodule AlertsUI.IBIAlertImporter do
 
         # fix >24 clock timestamps
         Enum.each(24..47, fn digit ->
-          Ecto.Adapters.SQL.query!(
+          SQL.query!(
             Repo,
             "update ibi_alerts set recurrence_start_time = regexp_replace(recurrence_start_time, '^#{digit}', '#{rem(digit, 24) |> Integer.to_string() |> String.pad_leading(2, "0")}') where recurrence_start_time like '#{digit}%'"
           )
 
-          Ecto.Adapters.SQL.query!(
+          SQL.query!(
             Repo,
             "update ibi_alerts set recurrence_end_time = regexp_replace(recurrence_end_time, '^#{digit}', '#{rem(digit, 24) |> Integer.to_string() |> String.pad_leading(2, "0")}') where recurrence_end_time like '#{digit}%'"
           )
