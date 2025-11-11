@@ -1,10 +1,11 @@
-defmodule AlertsUI.AlertBuilder do
-  @moduledoc """
+defmodule AlertsUI.AlertBuilder do @moduledoc """
     Builds an alert from form data
 
     All incoming times are naive datetimes created in the eastern timezone
     and need to be converted to UTC datetimes
   """
+
+  require IEx
 
   alias AlertsUI.{ActivePeriodBuilder, Activities}
   alias AlertsUI.Helpers.Recurrence
@@ -77,8 +78,76 @@ defmodule AlertsUI.AlertBuilder do
           keyword()
         ) :: alert_changeset_params
   def build_alert(alert_data, combination, current_time \\ DateTime.utc_now(), options \\ []) do
-    # CAUSE/EFFECTS
+    direct_from_alert_data = [
+      :header_text,
+      :description_text,
+      :service_effect_text,
+      :banner_text,
+      :url,
+      :image_url,
+      :image_alternative_text,
+      :recurrence_days,
+      :severity
+    ]
 
+    alert_data
+    |> Map.take(direct_from_alert_data)
+    |> Map.merge(%{current_time: current_time})
+    |> Map.merge(last_push_notification_timestamp(alert_data))
+    |> Map.merge(severity_level(alert_data))
+    |> Map.merge(reminder_times(alert_data))
+    |> Map.merge(plaintext_reminder_selections(alert_data))
+    |> Map.merge(primary_service_type(alert_data))
+    |> Map.merge(cause_and_effect(alert_data))
+    |> Map.merge(original_selections(alert_data))
+    |> Map.merge(active_periods(alert_data, current_time, options))
+    |> Map.merge(notification_periods(alert_data, options))
+    |> Map.merge(informed_entity(alert_data, combination, options))
+  end
+
+  defp primary_service_type(alert_data) do
+    %{
+      primary_service_type: primary_service_type(
+        Map.get(alert_data, :route_type), Map.get(alert_data, :combination)
+      )
+    }
+  end
+
+  defp last_push_notification_timestamp(alert_data) do
+    last_push_notification_timestamp =
+      alert_data
+      |> Map.get(:last_push_notification_timestamp)
+      |> ActivePeriodBuilder.naive_eastern_datetime_to_utc()
+
+    %{last_push_notification_timestamp: last_push_notification_timestamp}
+  end
+
+  defp severity_level(alert_data) do
+    severity_level =
+      alert_data
+      |> Map.get(:severity)
+      |> SeverityLevel.severity_level_by_severity()
+
+    %{severity_level: severity_level}
+  end
+
+  defp reminder_times(alert_data) do
+    reminder_times =
+      Map.get(alert_data, :reminder_times, [])
+      |> Enum.map(&%{reminder_time: ActivePeriodBuilder.naive_eastern_datetime_to_utc(&1)})
+
+    %{reminder_times: reminder_times}
+  end
+
+  defp plaintext_reminder_selections(alert_data) do
+    plaintext_reminder_selections =
+      Map.get(alert_data, :reminder_times, [])
+      |> Enum.map_join(", ", &Calendar.strftime(&1, "%Y-%m-%dT%H:%M:%S"))
+
+    %{plaintext_reminder_selections: plaintext_reminder_selections}
+  end
+
+  defp cause_and_effect(alert_data) do
     route_type = Map.get(alert_data, :route_type)
     cause_detail = Map.get(alert_data, :cause_detail, "")
     cause = Map.get(alert_data, :cause, Cause.get_by_mode_and_detail(route_type, cause_detail))
@@ -95,10 +164,18 @@ defmodule AlertsUI.AlertBuilder do
           {effect, effect_detail}
       end
 
-    # ORIGINAL SELECTIONS
+    %{
+      cause: cause,
+      cause_detail: cause_detail,
+      effect: effect,
+      effect_detail: effect_detail,
+      effect_name: effect_name
+    }
+  end
 
+  defp original_selections(alert_data) do
     # used to generate original_direction_selections, original_route_selection, routes, etc.
-    selected_routes = Map.get(alert_data, :route_ids, [])
+    selected_routes = Map.get(alert_data, :oute_ids, [])
     # direction_id needed for original_direction_selections, child_stops_with_context
     direction_id = Map.get(alert_data, :direction)
 
@@ -118,7 +195,6 @@ defmodule AlertsUI.AlertBuilder do
         selected_routes
         |> Enum.map(fn route_id ->
           matching_route = get_matching_route(route_id, pre_combo_routes(selected_routes))
-
           "#{SelectFormatter.name_for_option(matching_route)}|#{route_id}"
         end)
 
@@ -143,34 +219,43 @@ defmodule AlertsUI.AlertBuilder do
             |> Enum.map(&"#{SelectFormatter.name_for_option(&1)}|#{&1.id}")
         end
 
-    # ACTIVE PERIODS
+    %{
+      original_direction_selections: original_direction_selections,
+      original_route_selections: original_route_selections,
+      original_stop_selections: original_stop_selections,
+      original_trip_selections: original_trip_selections,
+      original_facility_selections: original_facility_selections
+    }
+  end
 
-    active_period_map =
-      if Keyword.get(options, :no_active_periods) do
-        Map.take(alert_data, [:active_period_start])
-      else
-        if Map.get(alert_data, :alert_timing) === :recurring do
-          ActivePeriodBuilder.build_recurring_active_period(%{
-            active_period_start_time: Map.get(alert_data, :active_period_start_time),
-            active_period_end_time: Map.get(alert_data, :active_period_end_time),
-            active_period_start_date: Map.get(alert_data, :active_period_start_date),
-            active_period_end_date: Map.get(alert_data, :active_period_end_date),
-            active_period_end_specifier: Map.get(alert_data, :active_period_end_specifier),
-            recurrence_days: Map.get(alert_data, :recurrence_days)
-          })
-        else
-          ActivePeriodBuilder.build_one_time_active_period(
-            %{
-              active_period_start: Map.get(alert_data, :active_period_start),
-              active_period_end: Map.get(alert_data, :active_period_end),
-              active_period_end_specifier: Map.get(alert_data, :active_period_end_specifier),
-              active_period_start_specifier: Map.get(alert_data, :active_period_start_specifier)
-            },
-            current_time
-          )
-        end
-      end
+  defp active_periods(alert_data, _current_time, [no_active_periods: true]) do
+    Map.take(alert_data, [:active_period_start])
+  end
 
+  defp active_periods(alert_data, current_time, _options) do
+    if Map.get(alert_data, :alert_timing) === :recurring do
+      ActivePeriodBuilder.build_recurring_active_period(%{
+        active_period_start_time: Map.get(alert_data, :active_period_start_time),
+        active_period_end_time: Map.get(alert_data, :active_period_end_time),
+        active_period_start_date: Map.get(alert_data, :active_period_start_date),
+        active_period_end_date: Map.get(alert_data, :active_period_end_date),
+        active_period_end_specifier: Map.get(alert_data, :active_period_end_specifier),
+        recurrence_days: Map.get(alert_data, :recurrence_days)
+      })
+    else
+      ActivePeriodBuilder.build_one_time_active_period(
+        %{
+          active_period_start: Map.get(alert_data, :active_period_start),
+          active_period_end: Map.get(alert_data, :active_period_end),
+          active_period_end_specifier: Map.get(alert_data, :active_period_end_specifier),
+          active_period_start_specifier: Map.get(alert_data, :active_period_start_specifier)
+        },
+        current_time
+      )
+    end
+  end
+
+  defp notification_periods(alert_data, current_time) do
     notification_period_start =
       if Map.get(alert_data, :notification_specifier) === :now do
         current_time
@@ -192,7 +277,7 @@ defmodule AlertsUI.AlertBuilder do
           ActivePeriod.end_of_service_datetime_utc(current_time)
 
         true ->
-          Map.get(active_period_map, :active_period_end)
+          Map.get(alert_data, :active_period_end)
       end
 
     recurrence_days = Map.get(alert_data, :recurrence_days)
@@ -258,24 +343,6 @@ defmodule AlertsUI.AlertBuilder do
     # CHANGESET PARAMS
 
     %{
-      header_text: Map.get(alert_data, :header_text),
-      description_text: Map.get(alert_data, :description_text),
-      service_effect_text: Map.get(alert_data, :service_effect_text),
-      banner_text: Map.get(alert_data, :banner_text),
-      url: Map.get(alert_data, :url),
-      image_url: Map.get(alert_data, :image_url),
-      image_alternative_text: Map.get(alert_data, :image_alternative_text),
-      cause: cause,
-      cause_detail: cause_detail,
-      effect: effect,
-      effect_detail: effect_detail,
-      effect_name: effect_name,
-      last_push_notification_timestamp: last_push_notification_timestamp,
-      informed_entity: informed_entity,
-      original_route_selections: original_route_selections,
-      original_direction_selections: original_direction_selections,
-      original_stop_selections: original_stop_selections,
-      original_facility_selections: original_facility_selections,
       notification_period_start: notification_period_start,
       notification_period_end: notification_period_end,
       severity: severity,
@@ -288,7 +355,44 @@ defmodule AlertsUI.AlertBuilder do
       original_trip_selections: original_trip_selections,
       primary_service_type: primary_service_type
     }
-    |> Map.merge(active_period_map)
+  end
+
+  defp informed_entity(_alert_data, _combination, [no_informed_entities: true]), do: nil
+  defp informed_entity(alert_data, combination, _options) do
+    service_types = Map.get(alert_data, :service_types, []) |> expand_subway_service_types()
+
+    routes =
+      alert_data
+      |> Map.get(:route_ids, [])
+      |> pre_combo_routes()
+      |> Enum.reject(&(&1 == %{}))
+      |> add_combo_routes()
+
+    route_ids = Enum.map(routes, & &1.id)
+
+    child_stops_with_context =
+      child_stops_with_context(
+        routes,
+        Map.get(alert_data, :direction),
+        Map.get(alert_data, :stop_ids)
+      )
+
+    entity_data = Map.merge(alert_data, %{
+      child_stops_with_context: child_stops_with_context,
+      routes_ids: route_ids
+    })
+
+    informed_entities =
+      combination
+      |> build_informed_entities(entity_data, Map.get(alert_data, :effect_name))
+      |> Enum.uniq()
+
+    %{
+      informed_entity: informed_entities,
+      service_types: service_types,
+      route_ids: route_ids,
+      child_stops_with_context: child_stops_with_context
+    }
   end
 
   @spec add_combo_routes([Route.id_t()]) :: [Route.t()]
