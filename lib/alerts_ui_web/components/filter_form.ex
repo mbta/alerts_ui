@@ -289,7 +289,7 @@ defmodule AlertsUIWeb.FilterForm do
   defp parse_route_name({route_name, _route_type, route_id}) do
     case Integer.parse(route_name) do
       :error -> {route_name, route_id}
-      result -> {elem(result, 0), route_id}
+      {result, _rest} -> {result, route_id}
     end
   end
 
