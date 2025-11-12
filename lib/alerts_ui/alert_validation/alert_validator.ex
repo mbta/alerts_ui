@@ -82,11 +82,11 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
           ]
           |> Enum.reject(&is_nil/1)
 
-        "Alert #{invalid_alert.alert_id}:\n" <> Enum.join(entity_results, "\n")
+        "Alert #{invalid_alert.alert_id}:|" <> Enum.join(entity_results, "|")
       end)
 
-    "The following alerts have entities that no longer exist in GTFS:\n" <>
-      Enum.join(invalid_alert_info, "\n\n")
+    "The following alerts have entities that no longer exist in GTFS:|" <>
+      Enum.join(invalid_alert_info, "||")
   end
 
   defp invalid_routes([], _), do: []
