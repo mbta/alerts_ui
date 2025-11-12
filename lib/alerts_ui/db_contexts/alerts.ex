@@ -412,7 +412,6 @@ defmodule AlertsUI.Alerts do
         where: a.original_route_selections != [],
         inner_join: ie in AlertsUI.Models.InformedEntity,
         on: ie.alert_id == a.id,
-        order_by: [desc: fragment("CAST(? AS integer)", a.alert_id)],
         select: {a.original_route_selections, ie.route_type, ie.route_id}
       )
     )
