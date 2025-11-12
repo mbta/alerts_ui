@@ -258,7 +258,7 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
                  }
                ],
                last_modified_timestamp: nil,
-               notification_period_start: nil,
+               notification_period_start: _,
                original_route_selections: ["bus route 1|1"],
                recurrence_days: [],
                recurrence_text: nil,

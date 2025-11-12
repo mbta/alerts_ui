@@ -177,8 +177,12 @@ defmodule AlertsUI.AlertBuilder do
       if Map.get(alert_data, :notification_specifier) === :now do
         current_time
       else
-        Map.get(alert_data, :notification_period_start)
-        |> ActivePeriodBuilder.naive_eastern_datetime_to_utc()
+        # if notification period has not been set, use active_period_start
+        if Map.get(alert_data, :notification_period_start) do
+          ActivePeriodBuilder.naive_eastern_datetime_to_utc(alert_data.notification_period_start)
+        else
+          Map.get(active_period_map, :active_period_start)
+        end
       end
 
     notification_period_end =
