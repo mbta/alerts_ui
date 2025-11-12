@@ -428,7 +428,7 @@ defmodule AlertsUI.Alerts do
     # Use the route_id to look up the route name from the routes list
     route_name_and_id =
       Enum.find(routes_list_from_alert, fn name_and_id ->
-        just_id = name_and_id |> String.split("|") |> Alert.get_id() |> simplify_route_id()
+        just_id = name_and_id |> Alert.get_route_id() |> simplify_route_id()
 
         just_id == route_id
       end)
@@ -436,10 +436,7 @@ defmodule AlertsUI.Alerts do
     # IEs created from combo routes will not be found in the routes list
     # so this conditional is needed to just skip over those combo route IEs
     if route_name_and_id do
-      route_name =
-        route_name_and_id
-        |> String.split("|")
-        |> Alert.get_name()
+      route_name = Alert.get_route_name(route_name_and_id)
 
       # Associate the proper route_name and the proper route_type; pass along route_id for later
       {route_name, route_type_from_ie, route_id}
