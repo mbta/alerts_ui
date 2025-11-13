@@ -104,6 +104,117 @@ defmodule AlertsUI.IBIAlertImporter do
           set: [notif_start: "11/5/2017 2:05:00 AM", effect_start: "11/5/2017 2:05:00 AM"]
         )
 
+        Repo.update_all(
+          from(i in IBIAlert, where: like(i.notif_end, "3/9/2014 2:30%")),
+          set: [notif_end: "3/9/2014 3:30:00 AM", effect_end: "3/9/2014 3:30:00 AM"]
+        )
+
+        Repo.update_all(
+          from(i in IBIAlert, where: like(i.notif_end, "3/8/2015 2:30%")),
+          set: [notif_end: "3/8/2015 3:30:00 AM", effect_end: "3/8/2015 3:30:00 AM"]
+        )
+
+        Repo.update_all(
+          from(i in IBIAlert, where: like(i.notif_end, "11/1/2015 1:39%")),
+          set: [notif_end: "11/1/2015 2:39:00 AM", effect_end: "11/1/2015 2:39:00 AM"]
+        )
+
+        Repo.update_all(
+          from(i in IBIAlert, where: like(i.notif_end, "3/13/2016 2:30%")),
+          set: [notif_end: "3/13/2016 3:30:00 AM", effect_end: "3/13/2016 3:30:00 AM"]
+        )
+
+        Repo.update_all(
+          from(i in IBIAlert, where: like(i.notif_end, "3/11/2018 2:30%")),
+          set: [notif_end: "3/11/2018 3:30:00 AM", effect_end: "3/11/2018 3:30:00 AM"]
+        )
+
+        Repo.update_all(
+          from(i in IBIAlert, where: like(i.notif_end, "3/10/2019 2:30%")),
+          set: [notif_end: "3/10/2019 3:30:00 AM", effect_end: "3/10/2019 3:30:00 AM"]
+        )
+
+        Repo.update_all(
+          from(i in IBIAlert, where: like(i.notif_end, "3/8/2020 2:30%")),
+          set: [notif_end: "3/8/2020 3:30:00 AM", effect_end: "3/8/2020 3:30:00 AM"]
+        )
+
+        Repo.update_all(
+          from(i in IBIAlert, where: like(i.notif_end, "3/14/2021 2:30%")),
+          set: [notif_end: "3/14/2021 3:30:00 AM", effect_end: "3/14/2021 3:30:00 AM"]
+        )
+
+        Repo.update_all(
+          from(i in IBIAlert, where: like(i.notif_end, "3/13/2022 2:30%")),
+          set: [notif_end: "3/13/2022 3:30:00 AM", effect_end: "3/13/2022 3:30:00 AM"]
+        )
+
+        Repo.update_all(
+          from(i in IBIAlert, where: like(i.notif_end, "3/12/2023 2:30%")),
+          set: [notif_end: "3/12/2023 3:30:00 AM", effect_end: "3/12/2023 3:30:00 AM"]
+        )
+
+        Repo.update_all(
+          from(i in IBIAlert, where: like(i.notif_end, "3/10/2024 2:30%")),
+          set: [notif_end: "3/10/2024 3:30:00 AM", effect_end: "3/10/2024 3:30:00 AM"]
+        )
+
+        Repo.update_all(
+          from(i in IBIAlert, where: like(i.notif_end, "3/9/2025 2:59%")),
+          set: [notif_end: "3/9/2025 3:59:00 AM", effect_end: "3/9/2025 3:59:00 AM"]
+        )
+
+        Repo.update_all(
+          from(i in IBIAlert, where: like(i.notif_end, "11/2/2014 1:19%")),
+          set: [notif_end: "11/2/2014 2:19:00 AM", effect_end: "11/2/2014 2:19:00 AM"]
+        )
+
+        Repo.update_all(
+          from(i in IBIAlert, where: like(i.notif_end, "11/6/2022 1:40%")),
+          set: [notif_end: "11/6/2022 2:40:00 AM", effect_end: "11/6/2022 2:40:00 AM"]
+        )
+
+        Repo.update_all(
+          from(i in IBIAlert, where: like(i.notif_end, "11/7/2021 1:07%")),
+          set: [notif_end: "11/7/2021 2:07:00 AM", effect_end: "11/7/2021 2:07:00 AM"]
+        )
+
+        Repo.update_all(
+          from(i in IBIAlert, where: like(i.notif_end, "11/3/2024 1:07%")),
+          set: [notif_end: "11/3/2024 2:07:00 AM", effect_end: "11/3/2024 2:07:00 AM"]
+        )
+
+        Repo.update_all(
+          from(i in IBIAlert, where: like(i.notif_end, "11/3/2024 1:07%")),
+          set: [notif_end: "11/3/2024 2:07:00 AM", effect_end: "11/3/2024 2:07:00 AM"]
+        )
+
+        Repo.update_all(
+          from(i in IBIAlert, where: like(i.notif_end, "11/1/2020 1:15%")),
+          set: [notif_end: "11/1/2020 2:15:00 AM", effect_end: "11/1/2020 2:15:00 AM"]
+        )
+
+        # years set to 8888/9999
+        SQL.query!(
+          Repo,
+          "update ibi_alerts set notif_end = replace(notif_end, '8888', '1900') where notif_end like '%8888%'"
+        )
+
+        SQL.query!(
+          Repo,
+          "update ibi_alerts set effect_end = replace(effect_end, '8888', '1900') where effect_end like '%8888%'"
+        )
+
+        SQL.query!(
+          Repo,
+          "update ibi_alerts set notif_end = replace(notif_end, '9999', '1901') where notif_end like '%9999%'"
+        )
+
+        SQL.query!(
+          Repo,
+          "update ibi_alerts set effect_end = replace(effect_end, '9999', '1901') where effect_end like '%9999%'"
+        )
+
         # fix >24 clock timestamps
         Enum.each(24..47, fn digit ->
           SQL.query!(
