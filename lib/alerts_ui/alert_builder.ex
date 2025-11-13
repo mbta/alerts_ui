@@ -102,7 +102,7 @@ defmodule AlertsUI.AlertBuilder do @moduledoc """
     |> Map.merge(cause_and_effect(alert_data))
     |> Map.merge(original_selections(alert_data))
     |> Map.merge(active_periods(alert_data, current_time, options))
-    |> Map.merge(notification_periods(alert_data, options))
+    |> Map.merge(notification_periods(alert_data, current_time))
     |> Map.merge(informed_entity(alert_data, combination, options))
   end
 
