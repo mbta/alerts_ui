@@ -200,7 +200,6 @@ defmodule AlertsUI.IBIAlertImporter do
     )
   end
 
-  @spec ibi_alert_to_changeset(IBIAlert.t(), Alert.t(), keyword()) :: Ecto.Changeset.t()
   def ibi_alert_to_changeset(ibi_alert, am_alert, options \\ []) do
     options = Keyword.put(options, :no_recurrence_days_validation, true)
 
