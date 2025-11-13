@@ -78,7 +78,7 @@ defmodule AlertsUI.AlertBuilder do @moduledoc """
           keyword()
         ) :: alert_changeset_params
   def build_alert(alert_data, combination, current_time \\ DateTime.utc_now(), options \\ []) do
-    direct_from_alert_data = [
+    direct_from_alert_data_keys = [
       :header_text,
       :description_text,
       :service_effect_text,
@@ -90,8 +90,9 @@ defmodule AlertsUI.AlertBuilder do @moduledoc """
       :severity
     ]
 
-    alert_data
-    |> Map.take(direct_from_alert_data)
+    Enum.reduce(direct_from_alert_data_keys, %{}, fn key, params ->
+      Map.put(params, key, Map.get(alert_data, key, nil))
+    end)
     |> Map.merge(%{current_time: current_time})
     |> Map.merge(last_push_notification_timestamp(alert_data))
     |> Map.merge(severity_level(alert_data))
@@ -272,12 +273,14 @@ defmodule AlertsUI.AlertBuilder do @moduledoc """
       cond do
         Map.get(alert_data, :notification_period_end) ->
           Map.get(alert_data, :notification_period_end)
+          |> ActivePeriodBuilder.naive_eastern_datetime_to_utc()
 
         Map.get(alert_data, :active_period_end_specifier) === :later_today ->
           ActivePeriod.end_of_service_datetime_utc(current_time)
 
         true ->
           Map.get(alert_data, :active_period_end)
+          |> ActivePeriodBuilder.naive_eastern_datetime_to_utc()
       end
 
     recurrence_days = Map.get(alert_data, :recurrence_days)
@@ -379,7 +382,8 @@ defmodule AlertsUI.AlertBuilder do @moduledoc """
 
     entity_data = Map.merge(alert_data, %{
       child_stops_with_context: child_stops_with_context,
-      routes_ids: route_ids
+      routes_ids: route_ids,
+      service_types: service_types
     })
 
     informed_entities =
