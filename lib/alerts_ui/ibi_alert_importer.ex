@@ -1,3 +1,5 @@
+# credo:disable-for-this-file
+
 NimbleCSV.define(AlertsUI.IBIAlertImportParser, [])
 
 defmodule AlertsUI.IBIAlertImporter do
