@@ -258,7 +258,7 @@ defmodule AlertsUIWeb.FilterForm do
 
   def format_effect_options do
     Effect.effects_tuples()
-    |> Enum.map(fn {name, _, value} -> {name, value} end)
+    |> Enum.map(fn {name, _, _} -> {name, name} end)
   end
 
   def format_routes_options do
