@@ -265,7 +265,7 @@ defmodule AlertsUI.AlertBuilder do @moduledoc """
         if Map.get(alert_data, :notification_period_start) do
           ActivePeriodBuilder.naive_eastern_datetime_to_utc(alert_data.notification_period_start)
         else
-          Map.get(active_period_map, :active_period_start)
+          Map.get(alert_data, :active_period_start)
         end
       end
 
