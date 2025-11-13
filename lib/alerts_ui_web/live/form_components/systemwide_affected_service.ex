@@ -42,14 +42,22 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
       service_types: Map.get(alert_data, :service_types, [])
     }
 
-    form =
+    changeset =
       %__MODULE__{}
       |> changeset(incoming_alert_data)
-      |> to_form()
+
+    case apply_action(changeset, :insert) do
+      {:ok, changeset} ->
+        send(self(), {:add_errors, [], __MODULE__})
+        send(self(), {:section_completed, changeset})
+
+      {:error, changeset} ->
+        send(self(), {:add_errors, changeset.errors, __MODULE__})
+    end
 
     assigns =
       incoming_alert_data
-      |> Map.put(:form, form)
+      |> Map.put(:form, changeset |> to_form())
       |> Map.merge(assigns)
 
     {:ok, assign(socket, assigns)}
