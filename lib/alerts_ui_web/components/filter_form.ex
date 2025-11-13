@@ -11,6 +11,7 @@ defmodule AlertsUIWeb.FilterForm do
   import AlertsUIWeb.CoreComponents
   import AlertsUIWeb.SharedComponents
 
+  alias AlertsUI.Alerts
   alias AlertsUI.Models.Effect
   alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
   alias Phoenix.HTML.{Form, FormField}
@@ -262,19 +263,43 @@ defmodule AlertsUIWeb.FilterForm do
   end
 
   def format_routes_options do
+    grouped_routes = Alerts.get_routes_grouped_by_mode()
+
+    # Properly organizing by mode: Bus, Subway, CR, Ferry
     [
-      {"Option", "1"},
-      {"Option", "2"},
-      {"Option", "3"},
-      {"Option", "4"},
-      {"Option", "5"},
-      {"Option", "6"},
-      {"Option", "7"},
-      {"Option", "8"},
-      {"Option", "9"},
-      {"Option", "10"}
+      Map.get(grouped_routes, 3, []),
+      Map.get(grouped_routes, 1, []),
+      Map.get(grouped_routes, 2, []),
+      Map.get(grouped_routes, 4, [])
     ]
+    # Within each group, sort alphanumerically
+    |> Enum.map(fn route_sub_list ->
+      route_sub_list
+      |> Enum.map(fn route -> parse_route_name(route) end)
+      |> Enum.sort(&comparator/2)
+      |> Enum.map(&build_route_option/1)
+    end)
+    |> List.flatten()
   end
+
+  defp comparator({a, _}, {b, _}) when is_integer(a) and is_integer(b), do: a <= b
+  defp comparator({a, _}, _) when is_integer(a), do: false
+  defp comparator(_, {b, _}) when is_integer(b), do: true
+  defp comparator({a, _}, {b, _}), do: a <= b
+
+  # Turns strings into sortable integers, if relevant
+  defp parse_route_name({route_name, _route_type, route_id}) do
+    case Integer.parse(route_name) do
+      :error -> {route_name, route_id}
+      {result, _rest} -> {result, route_id}
+    end
+  end
+
+  # Stringify the route again, so the SelectFormatter works properly
+  defp build_route_option({route_name, route_id}) when is_integer(route_name),
+    do: {Integer.to_string(route_name), route_id}
+
+  defp build_route_option(route), do: route
 
   def format_service_type_options do
     [

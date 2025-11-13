@@ -168,12 +168,12 @@ defmodule AlertsUI.Models.Alert do
         ],
         routes: [
           filter: {CustomFilters, :routes_filter, []},
+          bindings: [:informed_entity],
           ecto_type: {:array, :string},
           operators: [:==]
         ],
         service_type: [
           filter: {CustomFilters, :service_type_filter, []},
-          bindings: [:informed_entity],
           ecto_type: {:array, :string},
           operators: [:==]
         ],
@@ -404,25 +404,30 @@ defmodule AlertsUI.Models.Alert do
   def get_original_names(nil), do: []
 
   def get_original_names(names_and_ids) do
-    Enum.map(names_and_ids, fn name_and_id ->
-      name_and_id |> String.split("|") |> get_name
-    end)
+    Enum.map(names_and_ids, &get_route_name/1)
   end
 
   def get_original_ids(nil), do: []
 
   def get_original_ids(names_and_ids) do
-    Enum.map(names_and_ids, fn name_and_id ->
-      name_and_id |> String.split("|") |> get_id
-    end)
+    Enum.map(names_and_ids, &get_route_id/1)
   end
 
-  defp get_name([name, _id]), do: name
-  # backwards compatibility for older alerts
-  defp get_name([name]), do: name
+  def get_route_name(name_and_id) do
+    name_and_id |> String.split("|") |> name()
+  end
 
-  defp get_id([id]), do: id
-  defp get_id([_name, id]), do: id
+  def get_route_id(name_and_id) do
+    name_and_id |> String.split("|") |> id()
+  end
+
+  defp name([name, _id]), do: name
+  # backwards compatibility for older alerts
+  defp name([name]), do: name
+  defp name(_), do: nil
+
+  defp id([id]), do: id
+  defp id([_name, id]), do: id
 
   @spec simple_subway_type(Route.type_int()) :: Route.type_int()
   defp simple_subway_type(0), do: 1
