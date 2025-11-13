@@ -1,4 +1,4 @@
-NimbleCSV.define(IBIAlertImportParser, [])
+NimbleCSV.define(AlertsUI.IBIAlertImportParser, [])
 
 defmodule AlertsUI.IBIAlertImporter do
   @moduledoc """
@@ -9,6 +9,7 @@ defmodule AlertsUI.IBIAlertImporter do
   import Ecto.Query
 
   alias AlertsUI.AlertBuilder
+  alias AlertsUI.IBIAlertImportParser
   alias AlertsUI.Models.Alert
   alias AlertsUI.Models.IBIAlert
   alias AlertsUI.Models.LatestIBIAlert
