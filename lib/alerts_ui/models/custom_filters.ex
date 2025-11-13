@@ -29,7 +29,23 @@ defmodule AlertsUI.Models.CustomFilters do
   end
 
   def routes_filter(query, %Filter{value: value}, _opts) when is_list(value) do
-    query |> where([a, informed_entity: ie], ie.route_id in ^value)
+    value =
+      if "Green" in value do
+        value ++ ["Green-B", "Green-C", "Green-D", "Green-E"]
+      else
+        value
+      end
+
+    regex_pattern = Enum.join(value, "|")
+
+    query
+    |> where(
+      [a],
+      fragment(
+        "EXISTS (SELECT 1 FROM unnest(original_route_selections) AS route WHERE route ~* ?)",
+        ^regex_pattern
+      )
+    )
   end
 
   @spec multi_column_search_filter(Ecto.Query.t(), Flop.Filter.t(), list()) :: Ecto.Query.t()

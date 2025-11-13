@@ -204,7 +204,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
     test "filtering by route uses OR", %{conn: conn} do
       # Alert with the new route format
       insert(:alert, %{
-        alert_id: "899",
+        alert_id: "899999",
         original_route_selections: [
           "Red Line|Red",
           "62|62",
@@ -225,26 +225,78 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
       # Alert in the old format
       insert(:alert, %{
-        alert_id: "999",
+        alert_id: "999999",
         original_route_selections: ["CR-Fitchburg"],
         informed_entity: [
           build(:informed_entity, %{route_id: "CR-Fitchburg", route_type: 2})
         ]
       })
 
-      {:ok, view, html} = live(conn, "/alerts?filter[routes][]=708")
-      assert html =~ "899"
-      refute html =~ "999"
+      {:ok, _view, html} = live(conn, "/alerts?filter[routes][]=708")
+      assert html =~ "899999"
+      refute html =~ "999999"
 
       {:ok, _view, html} = live(conn, "/alerts?filter[routes][]=CR-Fitchburg")
-      refute html =~ "899"
-      assert html =~ "999"
+      refute html =~ "899999"
+      assert html =~ "999999"
 
       {:ok, _view, html} =
         live(conn, "/alerts?filter[routes][]=Red&filter[routes][]=CR-Fitchburg")
 
-      assert html =~ "899"
-      assert html =~ "999"
+      assert html =~ "899999"
+      assert html =~ "999999"
+    end
+
+    @tag :logged_in_user
+    test "filtering by route handles Green Line", %{conn: conn} do
+      insert(:alert, %{
+        alert_id: "799999",
+        original_route_selections: [
+          "Green Line|Green",
+          "Red Line|Red"
+        ],
+        informed_entity: [
+          build(:informed_entity, %{route_id: "Red", route_type: 1}),
+          build(:informed_entity, %{route_id: "Green", route_type: 1}),
+          # Toss in Green-B just to prove that this field is not getting queried
+          build(:informed_entity, %{route_id: "Green-B", route_type: 1})
+        ]
+      })
+
+      insert(:alert, %{
+        alert_id: "899999",
+        original_route_selections: [
+          "Green Line|Green",
+        ],
+        informed_entity: [
+          build(:informed_entity, %{route_id: "Green", route_type: 1})
+        ]
+      })
+
+      insert(:alert, %{
+        alert_id: "999999",
+        original_route_selections: [
+          "Green Line B|Green-B",
+        ],
+        informed_entity: [
+          build(:informed_entity, %{route_id: "Green-B", route_type: 1})
+        ]
+      })
+
+      {:ok, _view, html} = live(conn, "/alerts?filter[routes][]=Green")
+      assert html =~ "799999"
+      assert html =~ "899999"
+      assert html =~ "999999"
+
+      {:ok, _view, html} = live(conn, "/alerts?filter[routes][]=Green-B")
+      refute html =~ "799999"
+      refute html =~ "899999"
+      assert html =~ "999999"
+
+      {:ok, _view, html} = live(conn, "/alerts?filter[routes][]=Green-C")
+      refute html =~ "799999"
+      refute html =~ "899999"
+      refute html =~ "999999"
     end
   end
 
