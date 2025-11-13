@@ -113,7 +113,7 @@ config :alerts_ui, Oban,
          unique: [period: 30, states: [:available, :scheduled, :executing]]
        },
        # Validate alerts against production every hour
-       {"0 * * * *", AlertsUI.AlertValidation.AlertValidationWorker},
+       {"*/15 * * * *", AlertsUI.AlertValidation.AlertValidationWorker},
        # Update recurring alerts every day at 3:01 am
        {"1 3 * * *", AlertsUI.RecurringAlertUpdater}
      ]}
