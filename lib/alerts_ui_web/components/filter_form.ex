@@ -266,10 +266,12 @@ defmodule AlertsUIWeb.FilterForm do
     grouped_routes = Alerts.get_routes_grouped_by_mode()
 
     # Properly organizing by mode: Bus, Subway, CR, Ferry
-    [Map.get(grouped_routes, 3, []),
-     Map.get(grouped_routes, 1, []),
-     Map.get(grouped_routes, 2, []),
-     Map.get(grouped_routes, 4, [])]
+    [
+      Map.get(grouped_routes, 3, []),
+      Map.get(grouped_routes, 1, []),
+      Map.get(grouped_routes, 2, []),
+      Map.get(grouped_routes, 4, [])
+    ]
     # Within each group, sort alphanumerically
     |> Enum.map(fn route_sub_list ->
       route_sub_list

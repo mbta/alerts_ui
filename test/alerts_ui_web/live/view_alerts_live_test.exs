@@ -266,7 +266,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       insert(:alert, %{
         alert_id: "899999",
         original_route_selections: [
-          "Green Line|Green",
+          "Green Line|Green"
         ],
         informed_entity: [
           build(:informed_entity, %{route_id: "Green", route_type: 1})
@@ -276,7 +276,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       insert(:alert, %{
         alert_id: "999999",
         original_route_selections: [
-          "Green Line B|Green-B",
+          "Green Line B|Green-B"
         ],
         informed_entity: [
           build(:informed_entity, %{route_id: "Green-B", route_type: 1})
