@@ -197,7 +197,7 @@ defmodule AlertsUI.AlertBuilderTest do
         }
 
         result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 11:54:00Z])
-        assert result.notification_period_end == ~N[2025-10-13 17:00:00]
+        assert result.notification_period_end == ~U[2025-10-13 21:00:00Z]
       end
     end
 
