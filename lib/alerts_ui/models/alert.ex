@@ -429,7 +429,7 @@ defmodule AlertsUI.Models.Alert do
 
   defp validate_recurrence_days(changeset, [no_recurrence_days_validation: true]), do: changeset
 
-  defp validate_recurrence_days(changeset, options) do
+  defp validate_recurrence_days(changeset, _options) do
     active_period_start =
       case get_field(changeset, :active_period_start) do
         %NaiveDateTime{} = naive -> DateTime.from_naive!(naive, "America/New_York")

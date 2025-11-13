@@ -176,7 +176,7 @@ defmodule AlertsUI.AlertBuilder do @moduledoc """
 
   defp original_selections(alert_data) do
     # used to generate original_direction_selections, original_route_selection, routes, etc.
-    selected_routes = Map.get(alert_data, :oute_ids, [])
+    selected_routes = Map.get(alert_data, :route_ids, [])
     # direction_id needed for original_direction_selections, child_stops_with_context
     direction_id = Map.get(alert_data, :direction)
 
@@ -266,6 +266,7 @@ defmodule AlertsUI.AlertBuilder do @moduledoc """
           ActivePeriodBuilder.naive_eastern_datetime_to_utc(alert_data.notification_period_start)
         else
           Map.get(alert_data, :active_period_start)
+          |> ActivePeriodBuilder.naive_eastern_datetime_to_utc()
         end
       end
 
@@ -382,7 +383,7 @@ defmodule AlertsUI.AlertBuilder do @moduledoc """
 
     entity_data = Map.merge(alert_data, %{
       child_stops_with_context: child_stops_with_context,
-      routes_ids: route_ids,
+      route_ids: route_ids,
       service_types: service_types
     })
 
@@ -391,12 +392,7 @@ defmodule AlertsUI.AlertBuilder do @moduledoc """
       |> build_informed_entities(entity_data, Map.get(alert_data, :effect_name))
       |> Enum.uniq()
 
-    %{
-      informed_entity: informed_entities,
-      service_types: service_types,
-      route_ids: route_ids,
-      child_stops_with_context: child_stops_with_context
-    }
+    %{informed_entity: informed_entities}
   end
 
   @spec add_combo_routes([Route.id_t()]) :: [Route.t()]
