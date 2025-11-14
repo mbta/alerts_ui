@@ -321,7 +321,7 @@ defmodule AlertsUI.IBIAlertImporter do
       ibi_alert
       |> ibi_alert_to_alert_data()
       |> AlertBuilder.build_alert(from_ibi(ibi_alert, :combination), DateTime.utc_now(), options)
-      |> Map.put(:alert_id, ibi_alert.alert_id)
+      |> add_alert_id_and_closed_timestamp_to_params(ibi_alert)
 
     Alert.changeset(am_alert, params, options)
   end
@@ -594,5 +594,20 @@ defmodule AlertsUI.IBIAlertImporter do
     |> String.replace(~r/\:[0-9]*\.[0-9]*$/, "")
     |> Kernel.<>(":00")
     |> NaiveDateTime.from_iso8601!()
+  end
+
+  def add_alert_id_and_closed_timestamp_to_params(params, ibi_alert) do
+    new_params =
+      if ibi_alert.is_closed == "True" do
+        closed_timestamp =
+          from_ibi(ibi_alert, :active_period_end) ||
+          from_ibi(ibi_alert, :notification_period_end)
+
+        %{alert_id: ibi_alert.alert_id, closed_timestamp: closed_timestamp}
+      else
+        %{alert_id: ibi_alert.alert_id}
+      end
+
+    Map.merge(params, new_params)
   end
 end
