@@ -2636,8 +2636,8 @@ defmodule AlertsUI.AlertBuilderTest do
         description_text: "ok",
         header_text: "hello",
         effect_name: "Delay",
-        route_ids: ["56", "57", "58"],
-        route_types_by_id: %{"56" => 1, "57" => 3, "58" => 1},
+        route_ids: ["56", "57", "58", "Red"],
+        route_types_by_id: %{"56" => 3, "57" => 3, "58" => 3, "Red" => 1},
         stop_ids: ["a", "b"],
         direction: "default"
       }
@@ -2681,14 +2681,14 @@ defmodule AlertsUI.AlertBuilderTest do
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "56",
-                   route_type: 1,
+                   route_type: 3,
                    agency_id: "1",
                    stop_id: "child-a"
                  },
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "56",
-                   route_type: 1,
+                   route_type: 3,
                    agency_id: "1",
                    stop_id: "child-b"
                  },
@@ -2709,13 +2709,27 @@ defmodule AlertsUI.AlertBuilderTest do
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "58",
-                   route_type: 1,
+                   route_type: 3,
                    agency_id: "1",
                    stop_id: "child-a"
                  },
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "58",
+                   route_type: 3,
+                   agency_id: "1",
+                   stop_id: "child-b"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "Red",
+                   route_type: 1,
+                   agency_id: "1",
+                   stop_id: "child-a"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "Red",
                    route_type: 1,
                    agency_id: "1",
                    stop_id: "child-b"
