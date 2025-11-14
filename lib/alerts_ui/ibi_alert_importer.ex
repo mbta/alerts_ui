@@ -19,7 +19,7 @@ defmodule AlertsUI.IBIAlertImporter do
   alias Ecto.Adapters.SQL
   alias Ecto.Multi
 
-  @default_chunk_size 1000
+  @default_chunk_size 100
 
   def import_ibi_alerts(path) do
     Repo.transact(
@@ -38,12 +38,6 @@ defmodule AlertsUI.IBIAlertImporter do
     - Stream a local file from `path`
     - Parse the stream of lines as CSV
     - Chunk the rows into manageable batches to mitigate N+1 overhead on query and commit
-    - For each chunk:
-        - Find all versions of existing alerts by `alert_id`
-        - Index those versions by a tuple of `{alert_id, version_no}`
-        - Create a `Multi` for the chunk
-        - For every row in the chunk, check for an existing alert in the index. If present, attach an update to the multi; otherwise attach an insert
-        - Commit the multi
 
   The entire operation is wrapped in a transaction, so input files will succeed or fail
   but never a mix of both.
@@ -57,29 +51,14 @@ defmodule AlertsUI.IBIAlertImporter do
         |> IBIAlertImportParser.parse_stream()
         |> Stream.chunk_every(chunk_size(options))
         |> Stream.each(fn chunk ->
-          alert_ids = Enum.map(chunk, fn row -> row_to_alert_id(row) end)
-
-          existing_alerts_index =
-            Repo.all(from i in IBIAlert, where: i.alert_id in ^alert_ids)
-            |> Map.new(fn alert ->
-              {{alert.alert_id, alert.version_no}, alert}
-            end)
-
           Enum.reduce(chunk, Multi.new(), fn row, multi ->
             if Enum.at(row, 0) == "alert_version_id" do
+              # skip the header
               multi
             else
               versioned_id = {row_to_alert_id(row), row_to_version_no(row)}
-
-              case existing_alerts_index[versioned_id] do
-                nil ->
-                  changeset = IBIAlert.changeset(%IBIAlert{}, row_to_params(row))
-                  Multi.insert(multi, versioned_id, changeset)
-
-                alert ->
-                  changeset = IBIAlert.changeset(alert, row_to_params(row))
-                  Multi.update(multi, versioned_id, changeset)
-              end
+              changeset = IBIAlert.changeset(%IBIAlert{}, row_to_params(row))
+              Multi.insert(multi, versioned_id, changeset)
             end
           end)
           |> Repo.transact()
@@ -192,6 +171,11 @@ defmodule AlertsUI.IBIAlertImporter do
         Repo.update_all(
           from(i in IBIAlert, where: like(i.notif_end, "11/1/2020 1:15%")),
           set: [notif_end: "11/1/2020 2:15:00 AM", effect_end: "11/1/2020 2:15:00 AM"]
+        )
+
+        Repo.update_all(
+          from(i in IBIAlert, where: like(i.notif_end, "3/12/2017 2:30%")),
+          set: [notif_end: "3/12/2017 3:30:00 AM", effect_end: "3/12/2017 3:30:00 AM"]
         )
 
         # years set to 8888/9999
