@@ -62,6 +62,15 @@ defmodule AlertsUIWeb.ReviewModal do
         Enum.map(assigns.alert_data.route_ids, fn id -> RoutesRepo.get(id) end)
       end
 
+    route_names =
+      if is_list(routes) do
+        routes
+        |> Enum.map(&SelectFormatter.name_for_option(&1))
+        |> join_present(", ")
+      else
+        ""
+      end
+
     direction_name =
       if routes && Map.get(assigns.alert_data, :direction) not in [nil, "default"] do
         routes
@@ -70,7 +79,9 @@ defmodule AlertsUIWeb.ReviewModal do
         |> Map.get(String.to_integer(assigns.alert_data.direction))
       end
 
-    stop_names = get_stop_names(assigns.alert_data)
+    stop_names =
+      get_stop_names(assigns.alert_data)
+      |> join_present(", ")
 
     # Only ferry trips need the route_type to be passed to formatter
     trip_names =
@@ -79,6 +90,7 @@ defmodule AlertsUIWeb.ReviewModal do
           assigns.alert_data.selected_schedules,
           &SelectFormatter.name_for_option(&1, route_type)
         )
+        |> join_present(", ")
       end
 
     facility_name =
@@ -91,7 +103,7 @@ defmodule AlertsUIWeb.ReviewModal do
     assigns =
       assign(assigns,
         now: DateTime.utc_now(),
-        routes: routes,
+        route_names: route_names,
         direction_name: direction_name,
         stop_names: stop_names,
         trip_names: trip_names,
@@ -171,23 +183,23 @@ defmodule AlertsUIWeb.ReviewModal do
 
           <p class="font-bold">Affected service</p>
           <div id="affected_service_selections" class="pb-4 grid grid-cols-[110px_auto] gap-x-2">
-            <%= if @routes && @routes != [] do %>
+            <%= if @route_names && @route_names != "" do %>
               <p>Routes:</p>
-              <p>{@routes |> Enum.map(&SelectFormatter.name_for_option(&1)) |> Enum.join(", ")}</p>
+              <p>{@route_names}</p>
             <% end %>
-            <%= if @direction_name && @direction_name != [] do %>
+            <%= if @direction_name && @direction_name != "" do %>
               <p>Direction:</p>
               <p>{@direction_name}</p>
             <% end %>
-            <%= if @stop_names && @stop_names != [] do %>
+            <%= if @stop_names && @stop_names != "" do %>
               <p>Stops:</p>
-              <p>{Enum.join(@stop_names, ", ")}</p>
+              <p>{@stop_names}</p>
             <% end %>
-            <%= if @trip_names && @trip_names != [] do %>
+            <%= if @trip_names && @trip_names != "" do %>
               <p>Trips:</p>
-              <p>{Enum.join(@trip_names, ", ")}</p>
+              <p>{@trip_names}</p>
             <% end %>
-            <%= if @facility_name && @direction_name != [] do %>
+            <%= if @facility_name && @facility_name != "" do %>
               <p>Facility:</p>
               <p>{@facility_name}</p>
             <% end %>
@@ -472,6 +484,14 @@ defmodule AlertsUIWeb.ReviewModal do
     </.modal>
     """
   end
+
+  defp join_present(list, separator) when is_list(list) do
+    list
+    |> Enum.filter(&(&1 != nil && String.trim(&1) != ""))
+    |> Enum.join(separator)
+  end
+
+  defp join_present(not_list, _separator), do: not_list
 
   defp format_alert_status_text(alert) do
     alert
