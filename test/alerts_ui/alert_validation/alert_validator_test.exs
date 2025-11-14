@@ -275,7 +275,7 @@ defmodule AlertsUI.AlertValidation.AlertValidatorTest do
         result = AlertValidator.validate_alerts() |> AlertValidator.format_invalid_alerts()
 
         assert result ==
-                 "The following alerts have entities that no longer exist in GTFS:\nAlert 456:\nFacilities: 2\n\nAlert 345:\nTrips: 2\n\nAlert 234:\nStops: 2\n\nAlert 123:\nRoutes: 2"
+                 "The following alerts have entities that no longer exist in GTFS:|Alert 456:|Facilities: 2||Alert 345:|Trips: 2||Alert 234:|Stops: 2||Alert 123:|Routes: 2"
       end
     end
   end
