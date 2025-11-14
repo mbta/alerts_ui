@@ -36,14 +36,18 @@ defmodule AlertsUI.Models.CustomFilters do
         value
       end
 
-    regex_pattern = Enum.join(value, "|")
-
     query
     |> where(
       [a],
       fragment(
-        "EXISTS (SELECT 1 FROM unnest(original_route_selections) AS route WHERE route ~* ?)",
-        ^regex_pattern
+        "EXISTS (
+          SELECT 1
+          FROM unnest(original_route_selections) AS route
+          WHERE split_part(route, '|' , 2) = ANY(?)
+          OR route = ANY(?)
+        )",
+        ^value,
+        ^value
       )
     )
   end

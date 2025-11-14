@@ -245,6 +245,11 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
       assert html =~ "899999"
       assert html =~ "999999"
+
+      # No substring matching on bus routes!
+      {:ok, _view, html} = live(conn, "/alerts?filter[routes][]=6")
+      refute html =~ "899999"
+      refute html =~ "999999"
     end
 
     @tag :logged_in_user
