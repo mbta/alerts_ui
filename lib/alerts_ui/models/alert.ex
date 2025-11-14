@@ -442,23 +442,11 @@ defmodule AlertsUI.Models.Alert do
 
       recurrence_days = get_field(changeset, :recurrence_days) || []
 
-      cond do
-        is_nil(active_period_start) ->
-          changeset
-
-        Enum.empty?(recurrence_days) ->
-          changeset
-
-        Timex.weekday(active_period_start) in Enum.map(recurrence_days, &Timex.day_to_num/1) ->
-          changeset
-
-        true ->
-          add_error(
-            changeset,
-            :recurrence_days,
-            "Alert start day must match a selected day of the week"
-          )
-      end
+      active_period_recurrence_is_valid_if_present(
+        changeset,
+        active_period_start,
+        recurrence_days
+      )
     end
   end
 
@@ -479,6 +467,25 @@ defmodule AlertsUI.Models.Alert do
       changeset
       |> cast_assoc(:informed_entity, required: true, with: &InformedEntity.changeset/2)
       |> validate_length(:informed_entity, min: 1)
+    end
+  end
+
+  defp active_period_recurrence_is_valid_if_present(changeset, nil, _), do: changeset
+  defp active_period_recurrence_is_valid_if_present(changeset, _, []), do: changeset
+  defp active_period_recurrence_is_valid_if_present(
+    changeset,
+    active_period_start,
+    recurrence_days
+  ) do
+
+    if Timex.weekday(active_period_start) in Enum.map(recurrence_days, &Timex.day_to_num/1) do
+      changeset
+    else
+      add_error(
+        changeset,
+        :recurrence_days,
+        "Alert start day must match a selected day of the week"
+      )
     end
   end
 end
