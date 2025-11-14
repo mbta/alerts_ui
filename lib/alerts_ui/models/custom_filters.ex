@@ -21,7 +21,7 @@ defmodule AlertsUI.Models.CustomFilters do
   end
 
   def effects_filter(query, %Filter{value: value}, _opts) when is_list(value) do
-    query |> where([a], a.effect_detail in ^value)
+    query |> where([a], a.effect_name in ^value)
   end
 
   def effects_filter(query, %Filter{value: value} = filter, opts) do
