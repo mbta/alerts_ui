@@ -417,6 +417,7 @@ defmodule AlertsUI.Alerts do
     )
     |> Enum.uniq()
     |> Enum.map(&map_route_to_route_type/1)
+    |> Enum.uniq()
     |> Enum.filter(fn x -> x != nil end)
     |> Enum.group_by(&elem(&1, 1))
   end
