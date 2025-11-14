@@ -585,7 +585,7 @@ defmodule AlertsUI.IBIAlertImporter do
       if ibi_alert.is_closed == "True" do
         closed_timestamp =
           from_ibi(ibi_alert, :active_period_end) ||
-          from_ibi(ibi_alert, :notification_period_end)
+            from_ibi(ibi_alert, :notification_period_end)
 
         %{alert_id: ibi_alert.alert_id, closed_timestamp: closed_timestamp}
       else
