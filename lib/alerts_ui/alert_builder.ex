@@ -1,4 +1,5 @@
-defmodule AlertsUI.AlertBuilder do @moduledoc """
+defmodule AlertsUI.AlertBuilder do
+  @moduledoc """
     Builds an alert from form data
 
     All incoming times are naive datetimes created in the eastern timezone
@@ -106,9 +107,11 @@ defmodule AlertsUI.AlertBuilder do @moduledoc """
 
   defp primary_service_type(alert_data) do
     %{
-      primary_service_type: primary_service_type(
-        Map.get(alert_data, :route_type), Map.get(alert_data, :combination)
-      )
+      primary_service_type:
+        primary_service_type(
+          Map.get(alert_data, :route_type),
+          Map.get(alert_data, :combination)
+        )
     }
   end
 
@@ -381,11 +384,12 @@ defmodule AlertsUI.AlertBuilder do @moduledoc """
           Map.get(alert_data, :stop_ids)
         )
 
-      entity_data = Map.merge(alert_data, %{
-        child_stops_with_context: child_stops_with_context,
-        route_ids: route_ids,
-        service_types: service_types
-      })
+      entity_data =
+        Map.merge(alert_data, %{
+          child_stops_with_context: child_stops_with_context,
+          route_ids: route_ids,
+          service_types: service_types
+        })
 
       informed_entities =
         combination

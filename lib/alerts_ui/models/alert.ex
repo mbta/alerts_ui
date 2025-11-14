@@ -427,7 +427,7 @@ defmodule AlertsUI.Models.Alert do
     end
   end
 
-  defp validate_recurrence_days(changeset, [no_recurrence_days_validation: true]), do: changeset
+  defp validate_recurrence_days(changeset, no_recurrence_days_validation: true), do: changeset
 
   defp validate_recurrence_days(changeset, options) do
     if Keyword.get(options, :no_recurrence_days_validation) do
@@ -472,12 +472,12 @@ defmodule AlertsUI.Models.Alert do
 
   defp active_period_recurrence_is_valid_if_present(changeset, nil, _), do: changeset
   defp active_period_recurrence_is_valid_if_present(changeset, _, []), do: changeset
-  defp active_period_recurrence_is_valid_if_present(
-    changeset,
-    active_period_start,
-    recurrence_days
-  ) do
 
+  defp active_period_recurrence_is_valid_if_present(
+         changeset,
+         active_period_start,
+         recurrence_days
+       ) do
     if Timex.weekday(active_period_start) in Enum.map(recurrence_days, &Timex.day_to_num/1) do
       changeset
     else
