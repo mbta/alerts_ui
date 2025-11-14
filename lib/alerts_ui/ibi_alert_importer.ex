@@ -493,7 +493,7 @@ defmodule AlertsUI.IBIAlertImporter do
       |> String.replace(~r/\s/, "")
       |> String.split(",")
       |> Enum.filter(fn day_string -> day_string != "" end)
-      |> Enum.map(fn day -> :"#{day}" end)
+      |> Enum.map(fn day -> String.to_existing_atom(day) end)
     end
   end
 
