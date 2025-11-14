@@ -14,7 +14,13 @@ defmodule AlertsUIWeb.DBPageLive do
 
     with {alerts, meta} <- Alerts.list_all_paginated_by_creation_date(params) do
       {:ok,
-       assign(socket, page_title: "Alerts DB Table", meta: meta, alerts: alerts, params: params)}
+       assign(socket,
+         page_title: "Alerts DB Table",
+         meta: meta,
+         alerts: alerts,
+         params: params,
+         show_informed_entity: false
+       )}
     end
   end
 
@@ -47,5 +53,10 @@ defmodule AlertsUIWeb.DBPageLive do
     with {alerts, meta} <- Alerts.list_all_paginated_by_creation_date(flop) do
       {:noreply, assign(socket, meta: meta, alerts: alerts)}
     end
+  end
+
+  @impl true
+  def handle_event("toggle_informed_entity", _, socket) do
+    {:noreply, assign(socket, show_informed_entity: !socket.assigns.show_informed_entity)}
   end
 end
