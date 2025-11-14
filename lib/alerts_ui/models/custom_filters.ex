@@ -6,7 +6,7 @@ defmodule AlertsUI.Models.CustomFilters do
   alias Flop.Filter
 
   def service_type_filter(query, %Filter{value: ["default"]}, _opts) do
-    query |> distinct(true)
+    query
   end
 
   def service_type_filter(query, %Filter{value: values}, _opts) when is_list(values) do
@@ -17,9 +17,7 @@ defmodule AlertsUI.Models.CustomFilters do
         values
       end
 
-    query
-    |> distinct(true)
-    |> where([a], a.primary_service_type in ^service_types)
+    query |> where([a], a.primary_service_type in ^service_types)
   end
 
   def effects_filter(query, %Filter{value: value}, _opts) when is_list(value) do
@@ -30,8 +28,24 @@ defmodule AlertsUI.Models.CustomFilters do
     effects_filter(query, %{filter | value: [value]}, opts)
   end
 
-  def routes_filter(query, _filter, _opts) do
+  def routes_filter(query, %Filter{value: value}, _opts) when is_list(value) do
+    value =
+      if "Green" in value do
+        value ++ ["Green-B", "Green-C", "Green-D", "Green-E"]
+      else
+        value
+      end
+
+    regex_pattern = Enum.join(value, "|")
+
     query
+    |> where(
+      [a],
+      fragment(
+        "EXISTS (SELECT 1 FROM unnest(original_route_selections) AS route WHERE route ~* ?)",
+        ^regex_pattern
+      )
+    )
   end
 
   @spec multi_column_search_filter(Ecto.Query.t(), Flop.Filter.t(), list()) :: Ecto.Query.t()
