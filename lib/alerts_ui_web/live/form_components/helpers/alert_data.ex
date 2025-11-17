@@ -149,10 +149,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       end
 
     active_period_map =
-      if match?([_active_period], alert.active_period) do
-        determine_one_time_active_period(alert)
-      else
-        determine_recurring_active_period(alert)
+      case alert.active_period do
+        [] -> %{}
+        [_active_period] -> determine_one_time_active_period(alert)
+        _ -> determine_recurring_active_period(alert)
       end
 
     reminder_times = Enum.map(alert.reminder_times, &shift_to_naive(&1.reminder_time))
