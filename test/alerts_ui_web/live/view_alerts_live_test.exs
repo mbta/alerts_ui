@@ -298,6 +298,27 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       refute html =~ "899999"
       refute html =~ "999999"
     end
+
+    @tag :logged_in_user
+    test "filter by effect works", %{conn: conn} do
+      insert(:alert, %{
+        alert_id: "799999",
+        effect_name: "Multi-Route Detour"
+      })
+
+      insert(:alert, %{
+        alert_id: "899999",
+        effect_name: "Detour"
+      })
+
+      {:ok, _view, html} = live(conn, "/alerts?filter[effects][]=Multi-Route+Detour")
+      assert html =~ "799999"
+      refute html =~ "899999"
+
+      {:ok, _view, html} = live(conn, "/alerts?filter[effects][]=Detour")
+      refute html =~ "799999"
+      assert html =~ "899999"
+    end
   end
 
   describe "alerts list timeline filtering and sorting" do

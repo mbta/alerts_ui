@@ -598,17 +598,17 @@ defmodule AlertsUI.AlertsTest do
     end
 
     test "filter by effects" do
-      [detail1, detail2, detail3 | _] =
-        Effect.effects_tuples() |> Enum.map(fn {_n, _e, detail} -> detail end)
+      [name1, name2, name3 | _] =
+        Effect.effects_tuples() |> Enum.map(fn {name, _e, _d} -> name end)
 
-      insert(:alert, %{alert_id: "123", effect_detail: detail1})
-      insert(:alert, %{alert_id: "234", effect_detail: detail2})
-      insert(:alert, %{alert_id: "345", effect_detail: detail3})
+      insert(:alert, %{alert_id: "123", effect_name: name1})
+      insert(:alert, %{alert_id: "234", effect_name: name2})
+      insert(:alert, %{alert_id: "345", effect_name: name3})
 
       {result_1, _meta} =
         Alerts.list_all_paginated(%{
           order_by: [:integer_alert_id],
-          filters: [%{"field" => "effects", "value" => [detail1, detail3]}]
+          filters: [%{"field" => "effects", "value" => [name1, name3]}]
         })
 
       assert result_1 |> Enum.map(& &1.alert_id) == [123, 345]
@@ -616,7 +616,7 @@ defmodule AlertsUI.AlertsTest do
       {result_2, _meta} =
         Alerts.list_all_paginated(%{
           order_by: [:integer_alert_id],
-          filters: [%{"field" => "effects", "value" => [detail2]}]
+          filters: [%{"field" => "effects", "value" => [name2]}]
         })
 
       assert result_2 |> Enum.map(& &1.alert_id) == [234]
