@@ -36,7 +36,7 @@ defmodule AlertsUI.Models.LastGTFSValidation do
     end
   end
 
-  @spec get_most_recent_validation() :: DateTime.t()
+  @spec get_most_recent_validation() :: DateTime.t() | nil
   def get_most_recent_validation do
     result = __MODULE__ |> last(:datetime_of_last_validation) |> Repo.one()
 

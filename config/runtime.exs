@@ -25,8 +25,10 @@ cond do
     config :alerts_ui, AlertsUI.Repo, url: System.fetch_env!("DATABASE_URL_TEST")
 
     config :alerts_ui,
-      api_url: "https://api-dev.mbtace.com/",
-      api_key: ""
+      api_url: "https://api-dev.mbtace.com",
+      api_key: "",
+      dev_api_url: "https://api-dev.mbtace.com",
+      dev_api_key: ""
 
     config :mbta_v3_api,
       base_url: "https://api-dev.mbtace.com/",
@@ -117,8 +119,12 @@ cond do
     config :alerts_ui, AlertsUI.Repo, url: System.fetch_env!("DATABASE_URL")
 
     config :alerts_ui,
+      # the main API key for your environment
       api_url: String.replace_trailing(System.fetch_env!("API_URL"), "/", ""),
-      api_key: System.fetch_env!("API_KEY")
+      api_key: System.fetch_env!("API_KEY"),
+      # below are used only for GTFS validation
+      dev_api_url: String.replace_trailing(System.fetch_env!("DEV_API_URL"), "/", ""),
+      dev_api_key: System.fetch_env!("DEV_API_KEY")
 
     config :mbta_v3_api,
       base_url: String.replace_trailing(System.fetch_env!("API_URL"), "/", ""),

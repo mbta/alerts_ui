@@ -1,0 +1,49 @@
+defmodule AlertsUI.AlertValidation.AlertValidationUpcomingWorker do
+  @moduledoc """
+  Oban worker that checks the informed entities of open alerts for validity
+  against the dev API when there's a new build.
+  We store the last time we ran the check in LastGTFSValidation. We then
+  compare that time to the time listed on the API's status page.
+  If the API has been updated since we last ran the check, we
+  run it and make a record of the time.
+  """
+  use Oban.Worker
+
+  require Logger
+  require Ecto.Query
+
+  alias AlertsUI.AlertValidation.AlertValidator
+  alias AlertsUI.Models.LastGTFSValidation
+
+  @impl Oban.Worker
+  def perform(_job) do
+    base_url = AlertsUI.config(:dev_api_url)
+    api_key = AlertsUI.config(:dev_api_key)
+
+    stored_time = LastGTFSValidation.get_most_recent_validation()
+
+    with {:ok, response} <- Req.get(base_url <> "/status"),
+         body when not is_nil(body) <- Map.get(response, :body),
+         status when not is_nil(status) <-
+           get_in(body, ["data", "attributes", "route", "last_updated"]),
+         {:ok, api_last_updated_time, 0} <- DateTime.from_iso8601(status),
+         true <- do_we_need_to_run_this(api_last_updated_time, stored_time) do
+      Logger.info("New GTFS detected in dev. Updating stored time and validating alerts.")
+      LastGTFSValidation.store_last_gtfs_validation(DateTime.utc_now())
+
+      AlertValidator.validate_alerts(base_url, api_key)
+      |> AlertValidator.format_invalid_alerts("upcoming")
+      |> Logger.info()
+    else
+      {:error, _exception} -> Logger.info("error in processing upcoming GTFS validation")
+      _ -> :ok
+    end
+  end
+
+  @spec do_we_need_to_run_this(DateTime.t() | nil, DateTime.t() | nil) :: boolean()
+  def do_we_need_to_run_this(%DateTime{} = last_updated_time, %DateTime{} = stored_time) do
+    DateTime.compare(last_updated_time, stored_time) == :gt
+  end
+
+  def do_we_need_to_run_this(_, _), do: true
+end
