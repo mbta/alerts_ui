@@ -7,6 +7,7 @@ defmodule AlertsUI.AlertBuilder do
   """
 
   alias AlertsUI.{ActivePeriodBuilder, Activities}
+  alias AlertsUI.Helpers.Recurrence
   alias AlertsUI.Models.{ActivePeriod, Cause, Effect, RoutePattern, SeverityLevel}
   alias AlertsUI.Routes
   alias AlertsUIWeb.FormComponents.Helpers.{SelectFormatter, ServiceEffectCombinations}
@@ -192,6 +193,9 @@ defmodule AlertsUI.AlertBuilder do
         Map.get(active_period_map, :active_period_end)
       end
 
+    recurrence_days = Map.get(alert_data, :recurrence_days)
+    recurrence_text = Recurrence.recurrence_text_from_days(recurrence_days)
+
     %{
       header_text: Map.get(alert_data, :header_text),
       description_text: Map.get(alert_data, :description_text),
@@ -222,7 +226,8 @@ defmodule AlertsUI.AlertBuilder do
       reminder_times: reminder_times,
       plaintext_reminder_selections: plaintext_reminder_selections,
       current_time: current_time,
-      recurrence_days: Map.get(alert_data, :recurrence_days),
+      recurrence_days: recurrence_days,
+      recurrence_text: recurrence_text,
       original_trip_selections: original_trip_selections,
       primary_service_type: primary_service_type(route_type, Map.get(alert_data, :combination))
     }
