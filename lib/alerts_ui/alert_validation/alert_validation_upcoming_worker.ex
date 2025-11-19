@@ -27,7 +27,7 @@ defmodule AlertsUI.AlertValidation.AlertValidationUpcomingWorker do
          status when not is_nil(status) <-
            get_in(body, ["data", "attributes", "route", "last_updated"]),
          {:ok, api_last_updated_time, 0} <- DateTime.from_iso8601(status),
-         true <- do_we_need_to_run_this(api_last_updated_time, stored_time) do
+         true <- last_updated_time_after_stored_time?(api_last_updated_time, stored_time) do
       Logger.info("New GTFS detected in dev. Updating stored time and validating alerts.")
       LastGTFSValidation.store_last_gtfs_validation(DateTime.utc_now())
 
@@ -35,15 +35,30 @@ defmodule AlertsUI.AlertValidation.AlertValidationUpcomingWorker do
       |> AlertValidator.format_invalid_alerts("upcoming")
       |> Logger.info()
     else
-      {:error, _exception} -> Logger.info("error in processing upcoming GTFS validation")
-      _ -> :ok
+      {:error, error} when is_atom(error) ->
+        Logger.error("error in processing upcoming GTFS validation: #{error}")
+
+      {:error, exception} ->
+        Logger.error(
+          "error in processing upcoming GTFS validation: " <> Exception.message(exception)
+        )
+
+      false ->
+        Logger.info("Did not run upcoming GTFS validation")
+
+      _ ->
+        Logger.warning("Issue with upcoming GTFS validation")
     end
   end
 
-  @spec do_we_need_to_run_this(DateTime.t() | nil, DateTime.t() | nil) :: boolean()
-  def do_we_need_to_run_this(%DateTime{} = last_updated_time, %DateTime{} = stored_time) do
+  @spec last_updated_time_after_stored_time?(DateTime.t() | nil, DateTime.t() | nil) ::
+          boolean()
+  def last_updated_time_after_stored_time?(
+        %DateTime{} = last_updated_time,
+        %DateTime{} = stored_time
+      ) do
     DateTime.compare(last_updated_time, stored_time) == :gt
   end
 
-  def do_we_need_to_run_this(_, _), do: true
+  def last_updated_time_after_stored_time?(_, _), do: true
 end

@@ -97,23 +97,40 @@ defmodule AlertsUI.AlertValidation.AlertValidationUpcomingWorkerTest do
     end
   end
 
-  describe "do_we_need_to_run_this/2" do
+  describe "last_updated_time_after_stored_time?/2" do
     test "stored time is nil" do
-      result = AlertValidationUpcomingWorker.do_we_need_to_run_this(DateTime.utc_now(), nil)
+      result =
+        AlertValidationUpcomingWorker.last_updated_time_after_stored_time?(
+          DateTime.utc_now(),
+          nil
+        )
+
       assert result == true
     end
 
     test "incoming time is after stored time" do
       incoming_time = ~U[2025-11-10 14:45:54Z]
       stored_time = ~U[2025-11-01 14:45:54Z]
-      result = AlertValidationUpcomingWorker.do_we_need_to_run_this(incoming_time, stored_time)
+
+      result =
+        AlertValidationUpcomingWorker.last_updated_time_after_stored_time?(
+          incoming_time,
+          stored_time
+        )
+
       assert result == true
     end
 
     test "incoming time is before stored time" do
       incoming_time = ~U[2025-11-01 14:45:54Z]
       stored_time = ~U[2025-11-10 14:45:54Z]
-      result = AlertValidationUpcomingWorker.do_we_need_to_run_this(incoming_time, stored_time)
+
+      result =
+        AlertValidationUpcomingWorker.last_updated_time_after_stored_time?(
+          incoming_time,
+          stored_time
+        )
+
       assert result == false
     end
   end
