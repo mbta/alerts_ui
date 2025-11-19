@@ -553,6 +553,24 @@ defmodule AlertsUI.IBIAlertImporter do
   def from_ibi(ibi_alert, :original_route_selections), do: from_ibi(ibi_alert, :route_ids)
   def from_ibi(ibi_alert, :original_trip_selections), do: from_ibi(ibi_alert, :trip_ids)
 
+  def from_ibi(ibi_alert, :effect_name) do
+    mappings = %{
+      "Accessibility" => "Access Issue",
+      "Cancelled Trip" => "Cancellation",
+      "Dropped Trip" => "Cancellation",
+      "Impacted Service" => "Service Change",
+      "No Service" => "Service Change",
+      "Other (Dock)" => "Service Change",
+      "Other (Service)" => "Service Change",
+      "Other (Station)" => "Service Change",
+      "Other (Stop)" => "Service Change",
+      "Out of Service" => "Access Issue",
+      "Shuttle Bus" => "Shuttle Bus"
+    }
+
+    Map.get(mappings, ibi_alert.effect_name, ibi_alert.effect_name)
+  end
+
   def from_ibi(ibi_alert, key), do: Map.get(ibi_alert, key)
 
   defp split_combined_ids(nil), do: []
