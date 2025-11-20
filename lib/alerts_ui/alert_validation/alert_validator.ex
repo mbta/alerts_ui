@@ -88,6 +88,7 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
 
     "The following alerts have entities that no longer exist in GTFS:|" <>
       Enum.join(invalid_alert_info, "||")
+
     "The following alerts have entities that no longer exist in #{error_message_word} GTFS:|" <>
       Enum.join(invalid_alert_info, "||")
   end
