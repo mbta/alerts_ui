@@ -19,7 +19,7 @@ defmodule AlertsUI.IBIAlertImporter do
   alias Ecto.Adapters.SQL
   alias Ecto.Multi
 
-  @default_chunk_size 100
+  @default_chunk_size 1000
 
   def import_ibi_alerts(path) do
     Repo.transact(
