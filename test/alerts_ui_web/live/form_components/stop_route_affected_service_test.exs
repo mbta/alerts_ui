@@ -345,6 +345,53 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       end
     end
 
+    test "selections are preserved after route filter applied" do
+      with_mocks([
+        {RoutesRepo, [],
+         [by_stop: fn _route_id -> @routes end, by_type: fn _types -> @routes end]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn
+             _route_type, ["filter[route]": "Blue,Bluer", direction_id: 0] -> [@stop]
+             _route_type, ["filter[route]": "Blue,Bluer", direction_id: 1] -> [@stop_two]
+           end,
+           by_route: fn
+             "Bluer", _ -> [@stop]
+             _, 0 -> [@stop]
+             _, 1 -> [@stop, @stop_two]
+           end
+         ]}
+      ]) do
+        {:ok, view, _html} =
+          live_isolated_component(
+            StopRouteAffectedService,
+            %{@assigns | route_type: 3}
+          )
+
+        # Select Park Street
+        view
+        |> element("form")
+        |> render_change(%{
+          "stop_route_affected_service" => %{"stop_ids" => ["place-pktrm"]}
+        })
+
+        # Add route filter that would ordinarily filter out Park St
+        view
+        |> element("form")
+        |> render_change(%{
+          "stop_route_affected_service" => %{"modal_route_id" => "Bluer"}
+        })
+
+        # Submit filter
+        view
+        |> with_target("#stop_route_service_view")
+        |> render_click(:accepted_routes_modal)
+
+        # Verify Park St still present
+        assert view |> render_async() =~ ~s(<option value="place-pktrm">)
+      end
+    end
+
     test "clear route filter for stops works" do
       with_mocks([
         {RoutesRepo, [],
