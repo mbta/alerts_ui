@@ -78,7 +78,8 @@ defmodule AlertsUI.Models.Alert do
   original_direction_selections
   original_facility_selections
   plaintext_reminder_selections
-  primary_service_type)a
+  primary_service_type
+  legacy)a
 
   @cause Cause.causes()
   @effect Effect.effects()
@@ -134,7 +135,8 @@ defmodule AlertsUI.Models.Alert do
           primary_service_type: String.t(),
           recurrence_days: [String.t()],
           recurrence_start_time: Time.t(),
-          recurrence_end_time: Time.t()
+          recurrence_end_time: Time.t(),
+          legacy: boolean()
         }
 
   @derive {
@@ -231,6 +233,7 @@ defmodule AlertsUI.Models.Alert do
     field :notification_period_end, :utc_datetime
     field :plaintext_reminder_selections, :string
     field :primary_service_type, :string
+    field :legacy, :boolean
 
     field :recurrence_days, {:array, Ecto.Enum},
       values: ~w[sunday monday tuesday wednesday thursday friday saturday]a

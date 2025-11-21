@@ -1,6 +1,5 @@
 defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   require IEx
-
   @moduledoc """
   Builds alert data from existing alert
   Used to populate form when editing an alert
@@ -178,8 +177,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           |> Effect.effect_map_by_detail()
           |> Map.get(:effect_name)
 
-        effect_name ->
-          effect_name
+        effect_name -> effect_name
       end
 
     primary_service_type = Map.get(alert, :primary_service_type)
