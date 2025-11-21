@@ -60,9 +60,9 @@ defmodule AlertsUI.IBIAlertImporterTest do
       ibi_alert: ibi_alert
     } do
       assert _alert_params =
-        ibi_alert
-        |> ibi_alert_to_alert_data()
-        |> AlertBuilder.build_alert(from_ibi(ibi_alert, :combination))
+               ibi_alert
+               |> ibi_alert_to_alert_data()
+               |> AlertBuilder.build_alert(from_ibi(ibi_alert, :combination))
     end
   end
 

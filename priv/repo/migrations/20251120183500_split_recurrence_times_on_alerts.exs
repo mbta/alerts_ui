@@ -11,7 +11,7 @@ defmodule AlertsUI.Repo.Migrations.SplitRecurrenceTimesOnAlerts do
     UPDATE alerts SET recurrence_start_time = recurrence_times[1], recurrence_end_time = recurrence_times[2];
     """
 
-    alter table(:alerts), do: remove :recurrence_times
+    alter table(:alerts), do: remove(:recurrence_times)
   end
 
   def down do

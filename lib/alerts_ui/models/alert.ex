@@ -134,7 +134,7 @@ defmodule AlertsUI.Models.Alert do
           primary_service_type: String.t(),
           recurrence_days: [String.t()],
           recurrence_start_time: Time.t(),
-          recurrence_end_time: Time.t(),
+          recurrence_end_time: Time.t()
         }
 
   @derive {
