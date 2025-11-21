@@ -4,6 +4,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   Used to populate form when editing an alert
   Can take an Alert struct or an alert_id
   """
+
   alias AlertsUI.Alerts
   alias AlertsUI.Models.{ActivePeriod, Alert, Effect}
 
@@ -248,8 +249,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     end_specifier = if alert.active_period_end, do: "custom", else: "until_further_notice"
 
     [recurrence_start, recurrence_end] =
-      Map.get(alert, :recurrence_times) ||
-        [start_datetime |> NaiveDateTime.to_time(), end_datetime |> NaiveDateTime.to_time()]
+      [
+        Map.get(alert, :recurrence_start_time) || NaiveDateTime.to_time(start_datetime),
+        Map.get(alert, :recurrence_end_time) || NaiveDateTime.to_time(end_datetime)
+      ]
 
     %{
       alert_timing: :recurring,

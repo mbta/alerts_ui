@@ -20,7 +20,8 @@ defmodule AlertsUI.ActivePeriodBuilder do
           active_period_start: DateTime.t(),
           active_period_end: DateTime.t() | nil,
           duration_certainty: atom(),
-          recurrence_times: [Time.t()]
+          recurrence_start_time: Time.t(),
+          recurrence_end_time: Time.t()
         }
 
   @spec build_one_time_active_period(
@@ -135,7 +136,8 @@ defmodule AlertsUI.ActivePeriodBuilder do
       active_period_end: active_period_end,
       active_period: active_periods,
       # recurrence times are stored in eastern time, NOT shifted to UTC
-      recurrence_times: [start_time, end_time],
+      recurrence_start_time: start_time,
+      recurrence_end_time: end_time,
       duration_certainty: duration_certainty
     }
   end

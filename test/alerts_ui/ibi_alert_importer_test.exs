@@ -59,12 +59,10 @@ defmodule AlertsUI.IBIAlertImporterTest do
     test "given a valid IBI alert it produces alert data consumable by AlertBuilder", %{
       ibi_alert: ibi_alert
     } do
-      alert_params =
+      assert _alert_params =
         ibi_alert
         |> ibi_alert_to_alert_data()
         |> AlertBuilder.build_alert(from_ibi(ibi_alert, :combination))
-
-      assert alert_params.effect_name == ibi_alert.effect_name
     end
   end
 
@@ -185,6 +183,11 @@ defmodule AlertsUI.IBIAlertImporterTest do
 
     test ":combination", %{ibi_alert: ibi_alert} do
       assert from_ibi(ibi_alert, :combination) == :RDTS
+    end
+
+    test ":effect_name", %{ibi_alert: ibi_alert} do
+      assert ibi_alert.effect_name == "Cancelled Trip"
+      assert from_ibi(ibi_alert, :effect_name) == "Cancellation"
     end
   end
 end

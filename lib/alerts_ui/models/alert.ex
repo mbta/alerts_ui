@@ -70,7 +70,8 @@ defmodule AlertsUI.Models.Alert do
   notification_period_start
   notification_period_end
   recurrence_days
-  recurrence_times
+  recurrence_start_time
+  recurrence_end_time
   original_route_selections
   original_stop_selections
   original_trip_selections
@@ -132,7 +133,8 @@ defmodule AlertsUI.Models.Alert do
           user_id: User.id(),
           primary_service_type: String.t(),
           recurrence_days: [String.t()],
-          recurrence_times: [Time.t()] | nil
+          recurrence_start_time: Time.t(),
+          recurrence_end_time: Time.t(),
         }
 
   @derive {
@@ -233,7 +235,8 @@ defmodule AlertsUI.Models.Alert do
     field :recurrence_days, {:array, Ecto.Enum},
       values: ~w[sunday monday tuesday wednesday thursday friday saturday]a
 
-    field :recurrence_times, {:array, :time}
+    field :recurrence_start_time, :time
+    field :recurrence_end_time, :time
     field :original_route_selections, {:array, :string}
     field :original_stop_selections, {:array, :string}
     field :original_trip_selections, {:array, :string}
