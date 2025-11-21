@@ -50,6 +50,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         form: to_form(changeset),
         available_routes: %{},
         available_stops: %{},
+        selected_stops: [],
         available_filter_routes: %{},
         filter_title_value: "All routes",
         selected_route_id: nil
@@ -177,14 +178,23 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
     route_type = socket.assigns.route_type
 
+    # Get the currently selected stop ids
+    stop_ids = form[:stop_ids].value
+
+    # Then get the full stop data. That could be in available_stops OR be previously saved in selected_stops
+    # (in the case that the list has been filtered, the stop details won't be in available_stops)
+    selected_stops =
+      Enum.filter(
+        socket.assigns.available_stops.result ++ socket.assigns.selected_stops,
+        fn stop -> stop.id in stop_ids end
+      )
+
     socket =
       socket
+      |> assign(:selected_stops, selected_stops)
       |> assign(:available_routes, AsyncResult.loading())
       |> start_async(:get_available_routes, fn ->
-        CreateAlertLive.get_routes_by_stop(
-          Map.get(affected_service, "stop_ids", []),
-          route_type
-        )
+        CreateAlertLive.get_routes_by_stop(stop_ids, route_type)
       end)
       |> assign(form: form)
 
@@ -372,13 +382,30 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         values_to_keep: modal_route_id |> List.wrap()
       })
 
+    # I think the problem here is that we're filtering out the selected options from available_stops
+    # so the old values are not even around to keep selected
+    # But the "get the stops" logic is so fiddly that we should keep that as-is, and just, like, add the already selected stops
+
     # Stop selector
     stop_search_term = assigns.form[:stop_search_term].value
     stop_ids = assigns.form[:stop_ids].value || []
 
+    # Yeah this is weird. Basically, available_stops might be filtered down by route and sorted by stop order,
+    # so we have to carefully preserve already selected stops.
     stop_id_options =
       if Helpers.async_available?(assigns, :available_stops) do
-        options = assigns.available_stops.result
+        # Available stops will only include the stops visible with the given route filter
+        available_stops = assigns.available_stops.result
+
+        # And now just a list of stop ids
+        available_stop_ids = Enum.map(available_stops, fn stop -> stop.id end)
+
+        # Get all the stops that were selected but are no longer included in `available_stops`
+        # Then append them to the top of the list
+        previously_selected_stops =
+          Enum.filter(assigns.selected_stops, fn stop -> stop.id not in available_stop_ids end)
+
+        options = previously_selected_stops ++ available_stops
 
         SelectFormatter.formatted_select_options(%SelectFormatter{
           options: options,
