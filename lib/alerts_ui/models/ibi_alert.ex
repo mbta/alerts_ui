@@ -14,6 +14,7 @@ defmodule AlertsUI.Models.IBIAlert do
           effect_name: String.t(),
           cause_name: String.t(),
           severity_name: String.t(),
+          created_dt: String.t(),
           effect_start: String.t(),
           effect_end: String.t(),
           recurrence_days: String.t(),
@@ -59,6 +60,7 @@ defmodule AlertsUI.Models.IBIAlert do
     effect_name
     cause_name
     severity_name
+    created_dt
     effect_start
     effect_end
     recurrence_days

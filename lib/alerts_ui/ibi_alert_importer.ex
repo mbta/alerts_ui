@@ -46,27 +46,25 @@ defmodule AlertsUI.IBIAlertImporter do
   """
   @spec ingest_csv_file(String.t(), chunk_size: integer()) :: {:ok, map()} | Ecto.Multi.failure()
   def ingest_csv_file(path, options \\ []) do
+    fields =
+      path
+      |> File.open!(fn f -> IO.read(f, :line) end)
+      |> IBIAlertImportParser.parse_string(skip_headers: false)
+      |> List.flatten()
+      |> field_map_from_headers()
+
     Repo.transact(
       fn ->
         path
         |> File.stream!()
-        |> IBIAlertImportParser.parse_stream(skip_headers: false)
-        |> Stream.with_index()
+        |> IBIAlertImportParser.parse_stream()
         |> Stream.chunk_every(chunk_size(options))
         |> Stream.each(fn chunk ->
-          Enum.reduce(chunk, {nil, Multi.new()}, fn {row, index}, {fields, multi} ->
-            if index == 0 do
-              {
-                field_map_from_headers(row),
-                multi
-              }
-            else
-              versioned_id = {row_to_alert_id(row, fields), row_to_version_no(row, fields)}
-              changeset = IBIAlert.changeset(%IBIAlert{}, row_to_params(row, fields))
-              {fields, Multi.insert(multi, versioned_id, changeset)}
-            end
+          Enum.reduce(chunk, Multi.new(), fn row, multi ->
+            versioned_id = {row_to_alert_id(row, fields), row_to_version_no(row, fields)}
+            changeset = IBIAlert.changeset(%IBIAlert{}, row_to_params(row, fields))
+            Multi.insert(multi, versioned_id, changeset)
           end)
-          |> elem(1)
           |> Repo.transact()
         end)
         |> Stream.run()
