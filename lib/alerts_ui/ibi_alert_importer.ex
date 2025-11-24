@@ -8,6 +8,8 @@ defmodule AlertsUI.IBIAlertImporter do
   """
   require Logger
 
+  require IEx
+
   import Ecto.Query
 
   alias AlertsUI.AlertBuilder
@@ -48,19 +50,23 @@ defmodule AlertsUI.IBIAlertImporter do
       fn ->
         path
         |> File.stream!()
-        |> IBIAlertImportParser.parse_stream()
+        |> IBIAlertImportParser.parse_stream(skip_headers: false)
+        |> Stream.with_index()
         |> Stream.chunk_every(chunk_size(options))
         |> Stream.each(fn chunk ->
-          Enum.reduce(chunk, Multi.new(), fn row, multi ->
-            if Enum.at(row, 0) == "alert_version_id" do
-              # skip the header
-              multi
+          Enum.reduce(chunk, {nil, Multi.new()}, fn {row, index}, {fields, multi} ->
+            if index == 0 do
+              {
+                field_map_from_headers(row),
+                multi
+              }
             else
-              versioned_id = {row_to_alert_id(row), row_to_version_no(row)}
-              changeset = IBIAlert.changeset(%IBIAlert{}, row_to_params(row))
-              Multi.insert(multi, versioned_id, changeset)
+              versioned_id = {row_to_alert_id(row, fields), row_to_version_no(row, fields)}
+              changeset = IBIAlert.changeset(%IBIAlert{}, row_to_params(row, fields))
+              {fields, Multi.insert(multi, versioned_id, changeset)}
             end
           end)
+          |> elem(1)
           |> Repo.transact()
         end)
         |> Stream.run()
@@ -355,6 +361,7 @@ defmodule AlertsUI.IBIAlertImporter do
         Map.put(alert_data, key, from_ibi(ibi_alert, key))
       rescue
         e ->
+          IEx.pry
           Logger.error("alert #{ibi_alert.alert_id} / #{key}: #{e.message}")
           reraise e, __STACKTRACE__
       end
@@ -365,15 +372,32 @@ defmodule AlertsUI.IBIAlertImporter do
     Keyword.get(options, :chunk_size, @default_chunk_size)
   end
 
-  defp row_to_alert_id(row), do: Enum.at(row, 1)
+  defp field_map_from_headers(headers) do
+    # a map keyed by row index, because that's what we use the most
+    headers
+    |> Enum.with_index()
+    |> Enum.map(&{elem(&1, 1), elem(&1, 0)})
+    |> Enum.into(%{})
+  end
 
-  defp row_to_version_no(row), do: Enum.at(row, 2)
+  defp field_map_to_row_index(fields, name) do
+    # reverse it to get a row index from a field name
+    Enum.find(fields, &(elem(&1, 1) == name)) |> elem(0)
+  end
 
-  defp row_to_params(row) do
+  defp row_to_alert_id(row, fields) do
+    Enum.at(row, field_map_to_row_index(fields, "alert_id"))
+  end
+
+  defp row_to_version_no(row, fields) do
+    Enum.at(row, field_map_to_row_index(fields, "version_no"))
+  end
+
+  defp row_to_params(row, fields) do
     row
     |> Enum.with_index()
     |> Enum.reduce(%{}, fn {value, index}, params ->
-      case Enum.at(IBIAlert.fields(), index) do
+      case Map.get(fields, index) do
         nil -> raise "no field name at index #{index}"
         field_name -> Map.put(params, field_name, value)
       end
