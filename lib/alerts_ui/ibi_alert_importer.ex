@@ -88,6 +88,11 @@ defmodule AlertsUI.IBIAlertImporter do
         )
 
         Repo.update_all(
+          from(i in IBIAlert, where: like(i.notif_start, "11/2/2025 1:11%")),
+          set: [notif_start: "11/2/2025 2:11:00 AM", effect_start: "11/2/2025 2:11:00 AM"]
+        )
+
+        Repo.update_all(
           from(i in IBIAlert, where: like(i.notif_end, "3/9/2014 2:30%")),
           set: [notif_end: "3/9/2014 3:30:00 AM", effect_end: "3/9/2014 3:30:00 AM"]
         )
