@@ -1014,17 +1014,24 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
           duration_certainty: :UNKNOWN,
           header_text: "this is the third alert",
           effect_detail: "DETOUR",
-          original_route_selections: ["1", "2"]
+          original_route_selections: ["1", "2"],
+          last_push_notification_timestamp: nil
         })
 
         {:ok, view, _html} = live(conn, "/alerts")
+
+        view
+        |> element("#all-clear-checkbox-345")
+        |> render_click()
 
         view
         |> element("#close-alert-modal-345 button", "Close now")
         |> render_click()
 
         :timer.sleep(5)
-        assert Alerts.get_by_alert_id("345").closed_timestamp !== nil
+        result = Alerts.get_by_alert_id("345")
+        assert result.closed_timestamp !== nil
+        assert result.last_push_notification_timestamp !== nil
       end
     end
 

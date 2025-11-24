@@ -309,7 +309,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
        selected_alert_data: alert_data,
        selected_alert_id: alert_id,
        scroll_to_top: false,
-       send_all_clear?: (not is_nil(alert_data.last_push_notification_timestamp))
+       send_all_clear?: not is_nil(alert_data.last_push_notification_timestamp)
      )}
   end
 
