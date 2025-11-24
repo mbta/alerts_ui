@@ -193,6 +193,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
     trip_word = maybe_pluralize(trip_word(route_type), length(schedules) > 1)
 
     schedules
+    |> Enum.map(fn schedule -> Map.put(schedule, :use_trip_id_in_name?, false) end)
     |> Enum.map(&SelectFormatter.name_for_option(&1, route_type))
     |> join_trips(trip_word)
   end
