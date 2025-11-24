@@ -62,6 +62,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :last_push_notification_timestamp
   ]
 
+  @type reminder_time_t :: %{
+          id: String.t(),
+          time: NaiveDateTime.t()
+        }
   @type t :: %__MODULE__{
           active_period_end: NaiveDateTime.t() | nil,
           active_period_end_date: Date.t() | nil,
@@ -97,7 +101,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           original_direction_selections: [String.t()] | nil,
           original_facility_selections: [String.t()] | nil,
           recurrence_days: [atom()] | nil,
-          reminder_times: [NaiveDateTime.t()] | nil,
+          reminder_times: [reminder_time_t()] | nil,
           route_ids: [String.t()] | nil,
           route_type: Route.type_int() | nil,
           route_types_by_id: map() | nil,
@@ -233,7 +237,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
   defp reminder_times(alert) do
     %{
-      reminder_times: Enum.map(alert.reminder_times, &shift_to_naive(&1.reminder_time))
+      reminder_times:
+        Enum.map(alert.reminder_times, fn time ->
+          %{
+            id: time.id,
+            time: shift_to_naive(time.reminder_time)
+          }
+        end)
+        |> Enum.sort_by(& &1.time)
     }
   end
 

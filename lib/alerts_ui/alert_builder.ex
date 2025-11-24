@@ -159,7 +159,9 @@ defmodule AlertsUI.AlertBuilder do
   defp reminder_times(alert_data) do
     reminder_times =
       Map.get(alert_data, :reminder_times, [])
-      |> Enum.map(&%{reminder_time: ActivePeriodBuilder.naive_eastern_datetime_to_utc(&1)})
+      |> Enum.map(
+        &%{id: &1.id, reminder_time: ActivePeriodBuilder.naive_eastern_datetime_to_utc(&1.time)}
+      )
 
     %{reminder_times: reminder_times}
   end
@@ -167,7 +169,7 @@ defmodule AlertsUI.AlertBuilder do
   defp plaintext_reminder_selections(alert_data) do
     plaintext_reminder_selections =
       Map.get(alert_data, :reminder_times, [])
-      |> Enum.map_join(", ", &Calendar.strftime(&1, "%Y-%m-%dT%H:%M:%S"))
+      |> Enum.map_join(", ", &Calendar.strftime(&1.time, "%Y-%m-%dT%H:%M:%S"))
 
     %{plaintext_reminder_selections: plaintext_reminder_selections}
   end

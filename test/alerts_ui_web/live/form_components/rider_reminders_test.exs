@@ -226,7 +226,10 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
         |> Map.merge(%{
           form_type: :editing,
           alert_data: %{
-            reminder_times: [~N[2024-04-30 11:54:00], ~N[2024-04-30 12:54:00]],
+            reminder_times: [
+              %{id: "1", time: ~N[2024-04-30 11:54:00]},
+              %{id: "2", time: ~N[2024-04-30 12:54:00]}
+            ],
             active_period_start: ~N[2024-04-30 11:45:00]
           }
         })

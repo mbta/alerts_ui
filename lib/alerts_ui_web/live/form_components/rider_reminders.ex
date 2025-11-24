@@ -6,7 +6,9 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
   use AlertsUI.Schema
   import Ecto.Changeset
 
+  alias AlertsUI.Helpers.ReminderTimes
   alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
+  alias Phoenix.HTML.FormField
 
   @primary_key false
   embedded_schema do
@@ -17,7 +19,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
     end
   end
 
-  @reminder_time_fields ~w[reminder_time min_time max_time]a
+  @reminder_time_fields ~w[id reminder_time min_time max_time]a
 
   @impl true
   def mount(socket) do
@@ -55,10 +57,11 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
     processed_reminder_times =
       (Map.get(alert_data, :reminder_times, []) || [])
       |> Enum.with_index(fn element, index -> {element, Integer.to_string(index)} end)
-      |> Enum.reduce(%{}, fn {element, index}, acc ->
+      |> Enum.reduce(%{}, fn {%{id: id, time: time}, index}, acc ->
         Map.put(acc, index, %{
           "_persistent_id" => index,
-          "reminder_time" => NaiveDateTime.to_iso8601(element),
+          "id" => id,
+          "reminder_time" => time && NaiveDateTime.to_iso8601(time),
           "min_time" => notification_start |> naive_datetime_to_iso8601(),
           "max_time" => effect_end |> naive_datetime_to_iso8601()
         })
@@ -96,13 +99,22 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
   end
 
   def reminder_changeset(reminder_time, params, _cardinality) do
+    existing_record = String.trim(params["id"] || "") != ""
+
     cast(reminder_time, params, @reminder_time_fields)
-    |> validate_required(:reminder_time, message: "Enter a valid date and time")
+    |> validate_change(:reminder_time, fn :reminder_time, reminder_time ->
+      if existing_record || not is_nil(reminder_time) do
+        []
+      else
+        [message: "Enter a valid date and time"]
+      end
+    end)
     |> validate_change(:reminder_time, fn :reminder_time, reminder_time ->
       {status, min_time} =
         params["min_time"] |> String.pad_trailing(19, ":00") |> NaiveDateTime.from_iso8601()
 
-      if status == :ok and NaiveDateTime.diff(min_time, reminder_time, :minute) > 1 do
+      if status == :ok and NaiveDateTime.diff(min_time, reminder_time, :minute) > 1 and
+           not existing_record do
         [
           reminder_time:
             "Reminder time must be after notification period starts (#{min_time |> formatted_datetime})"
@@ -132,7 +144,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
       {:ok, changes} ->
         clean_reminder_times =
           changes.reminder_times
-          |> Enum.map(& &1.reminder_time)
+          |> Enum.map(&%{id: &1.id, time: &1.reminder_time})
 
         changes =
           changes
@@ -168,7 +180,11 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
   @impl true
   def render(assigns) do
     active_period_end = Map.get(assigns.alert_data, :active_period_end)
-    assigns = Map.put(assigns, :active_period_end, naive_datetime_to_iso8601(active_period_end))
+
+    assigns =
+      assign(assigns, %{
+        active_period_end: naive_datetime_to_iso8601(active_period_end)
+      })
 
     ~H"""
     <div class="min-w-full flex flex-col mt-8" id="rider_reminder_view">
@@ -179,46 +195,28 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
         for={@form}
         phx-target={@myself}
         phx-change="validate"
-        class="form-control gap-12 flex flex-col-reverse"
+        class="form-control flex flex-col"
         id="rider_reminder_form"
       >
         <div class="max-w-[20%]">
           <.inputs_for :let={rt} field={@form[:reminder_times]}>
-            <div class="flex flex-row w-[50%] mb-4" id={"reminder-time-component-#{rt.index}"}>
-              <input type="hidden" name="rider_reminders[reminder_sort][]" value={rt.index} />
-              <.datetime
-                label="Reminder date and time"
-                min={@notification_start |> naive_datetime_to_iso8601()}
-                max={@effect_end |> naive_datetime_to_iso8601()}
+            <div class="flex flex-row mb-4" id={"reminder-time-component-#{rt.index}"}>
+              <.reminder_input
+                editable={ReminderTimes.editable?(rt[:id].value, rt[:reminder_time].value)}
+                active_period_end={@active_period_end}
+                current_time={@current_time}
+                effect_end={@effect_end}
                 field={rt[:reminder_time]}
-                value={rt[:reminder_time].value}
+                id={rt[:id].value}
+                index={rt.index}
+                notification_start={@notification_start}
               />
-              <input
-                type="hidden"
-                name={"rider_reminders[reminder_times][#{rt.index}][min_time]"}
-                value={@current_time}
-              />
-              <input
-                type="hidden"
-                name={"rider_reminders[reminder_times][#{rt.index}][max_time]"}
-                value={@active_period_end}
-              />
-              <button
-                class="ml-2 flex max-h-[3.2rem] items-end"
-                type="button"
-                name="rider_reminders[reminder_drop][]"
-                value={rt.index}
-                phx-click={JS.dispatch("change")}
-              >
-                <.icon name="hero-x-mark" class="w-6 h-6 relative top-2" />
-              </button>
             </div>
           </.inputs_for>
-
           <input type="hidden" name="rider _reminders[reminder_drop][]" />
         </div>
         <.button_secondary
-          class="self-start"
+          class="self-start my-4"
           type="button"
           name="rider_reminders[reminder_sort][]"
           value="new"
@@ -228,6 +226,60 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
         </.button_secondary>
       </.form>
     </div>
+    """
+  end
+
+  attr :field, FormField, required: true
+  attr :index, :any
+  attr :id, :string
+  attr :editable, :any, default: true
+  attr :active_period_end, DateTime
+  attr :notification_start, DateTime
+  attr :current_time, DateTime
+  attr :effect_end, DateTime
+
+  def reminder_input(assigns) do
+    ~H"""
+    <input type="hidden" name="rider_reminders[reminder_sort][]" value={@index} />
+    <input
+      type="hidden"
+      name={"rider_reminders[reminder_times][#{@index}][min_time]"}
+      value={@current_time}
+    />
+    <input
+      type="hidden"
+      name={"rider_reminders[reminder_times][#{@index}][max_time]"}
+      value={@active_period_end}
+    />
+    <input type="hidden" name={"rider_reminders[reminder_times][#{@index}][id]"} value={@id} />
+    <input
+      :if={!@editable}
+      type="hidden"
+      name={"rider_reminders[reminder_times][#{@index}][reminder_time]"}
+      value={@field.value}
+    />
+    <.datetime
+      label="Reminder date and time"
+      min={@notification_start |> naive_datetime_to_iso8601()}
+      max={@effect_end |> naive_datetime_to_iso8601()}
+      field={@field}
+      value={@field.value}
+      disabled={!@editable}
+    >
+      <button
+        :if={@editable}
+        class="flex max-h-[3.2rem] items-center"
+        type="button"
+        name="rider_reminders[reminder_drop][]"
+        value={@index}
+        phx-click={JS.dispatch("change")}
+      >
+        <.icon name="hero-x-mark" class="w-6 h-6" />
+      </button>
+      <span :if={!@editable} class="flex flex-row text-sm items-center">
+        <.icon name="hero-check-circle-solid" class="w-6 h-6 text-mbta-green mr-1" /> Sent
+      </span>
+    </.datetime>
     """
   end
 

@@ -473,7 +473,9 @@ defmodule AlertsUI.IBIAlertImporter do
       |> String.replace("and tweet", "")
       |> String.replace(~r/\s/, "")
       |> String.split(";")
-      |> Enum.map(fn timestamp -> ndt_from_ibi_reminder_format(timestamp) end)
+      |> Enum.map(fn timestamp ->
+        %{id: nil, time: ndt_from_ibi_reminder_format(timestamp)}
+      end)
     else
       []
     end

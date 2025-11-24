@@ -107,6 +107,13 @@ defmodule AlertsUIWeb.CreateAlertLive do
       creating: "Create"
     }
 
+    alert_data =
+      if form_type == :duplicating do
+        Map.put(alert_data, :reminder_times, [])
+      else
+        alert_data
+      end
+
     socket =
       assign(socket, %{
         page_title: "#{form_type_to_title[form_type]} an Alert",

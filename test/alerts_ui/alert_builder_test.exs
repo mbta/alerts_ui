@@ -58,9 +58,9 @@ defmodule AlertsUI.AlertBuilderTest do
           notification_specifier: :now,
           severity: 3,
           reminder_times: [
-            ~N[2024-04-30 12:04:00],
-            ~N[2024-04-30 12:14:00],
-            ~N[2024-04-30 12:24:00]
+            %{id: "1234", time: ~N[2024-04-30 12:04:00]},
+            %{id: "1235", time: ~N[2024-04-30 12:14:00]},
+            %{id: "1236", time: ~N[2024-04-30 12:24:00]}
           ]
         }
 
@@ -98,9 +98,9 @@ defmodule AlertsUI.AlertBuilderTest do
                  severity: 3,
                  severity_level: :WARNING,
                  reminder_times: [
-                   %{reminder_time: ~U[2024-04-30 16:04:00Z]},
-                   %{reminder_time: ~U[2024-04-30 16:14:00Z]},
-                   %{reminder_time: ~U[2024-04-30 16:24:00Z]}
+                   %{id: "1234", reminder_time: ~U[2024-04-30 16:04:00Z]},
+                   %{id: "1235", reminder_time: ~U[2024-04-30 16:14:00Z]},
+                   %{id: "1236", reminder_time: ~U[2024-04-30 16:24:00Z]}
                  ],
                  plaintext_reminder_selections:
                    "2024-04-30T12:04:00, 2024-04-30T12:14:00, 2024-04-30T12:24:00",
