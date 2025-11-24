@@ -352,7 +352,8 @@ defmodule AlertsUI.IBIAlertImporter do
       :original_direction_selections,
       :original_route_selections,
       :original_trip_selections,
-      :original_facility_selections
+      :original_facility_selections,
+      :created_timestamp
     ]
     |> Enum.reduce(%{}, fn key, alert_data ->
       try do
@@ -593,6 +594,10 @@ defmodule AlertsUI.IBIAlertImporter do
     Map.get(mappings, ibi_alert.effect_name, ibi_alert.effect_name)
   end
 
+  def from_ibi(ibi_alert, :created_timestamp) do
+    ndt_from_ibi_string(ibi_alert.created_dt)
+  end
+
   def from_ibi(ibi_alert, key), do: Map.get(ibi_alert, key)
 
   defp split_combined_ids(nil), do: []
@@ -621,20 +626,23 @@ defmodule AlertsUI.IBIAlertImporter do
   end
 
   def add_importer_params(params, ibi_alert) do
-    new_params =
-      if ibi_alert.is_closed == "True" do
-        closed_timestamp =
-          from_ibi(ibi_alert, :active_period_end) ||
-            from_ibi(ibi_alert, :notification_period_end)
+    created_timestamp = from_ibi(ibi_alert, :created_timestamp)
 
-        %{
-          alert_id: ibi_alert.alert_id,
-          closed_timestamp: closed_timestamp,
-          legacy: true
-        }
+    closed_timestamp =
+      if ibi_alert.is_closed == "True" do
+        from_ibi(ibi_alert, :active_period_end) ||
+          from_ibi(ibi_alert, :notification_period_end)
       else
-        %{alert_id: ibi_alert.alert_id, legacy: true}
+        nil
       end
+
+    new_params =
+      %{
+        alert_id: ibi_alert.alert_id,
+        closed_timestamp: closed_timestamp,
+        created_timestamp: created_timestamp,
+        legacy: true
+      }
 
     Map.merge(params, new_params)
   end
