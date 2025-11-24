@@ -1141,7 +1141,45 @@ defmodule AlertsUI.AlertsTest do
   end
 
   describe "close/2" do
-    test "closes alert" do
+    test "closes alert and updates LPNT if duration certainty is UNKNOWN" do
+      current_time = ~U[2024-06-04 00:01:11Z]
+
+      insert(:alert, %{
+        alert_id: "123",
+        duration_certainty: :UNKNOWN,
+        last_push_notification_timestamp: ~U[2024-06-02 00:00:00Z],
+        active_period: [
+          build(:active_period, %{start: ~U[2024-06-01 00:00:00Z], end: ~U[2024-06-02 00:00:00Z]}),
+          build(:active_period, %{start: ~U[2024-06-03 00:00:00Z], end: ~U[2024-06-04 04:00:00Z]})
+        ]
+      })
+
+      Alerts.get_by_alert_id("123") |> Alerts.close(current_time)
+      result = Alerts.get_by_alert_id("123")
+      assert result.last_push_notification_timestamp == current_time
+    end
+
+    test "closes alert and does not update LPNT if duration certainty is KNOWN" do
+      current_time = ~U[2024-06-04 00:01:11Z]
+
+      insert(:alert, %{
+        alert_id: "123",
+        duration_certainty: :KNOWN,
+        last_push_notification_timestamp: ~U[2024-06-02 00:00:00Z],
+        active_period: [
+          build(:active_period, %{start: ~U[2024-06-01 00:00:00Z], end: ~U[2024-06-02 00:00:00Z]}),
+          build(:active_period, %{start: ~U[2024-06-03 00:00:00Z], end: ~U[2024-06-04 04:00:00Z]})
+        ]
+      })
+
+      Alerts.get_by_alert_id("123") |> Alerts.close(current_time)
+      result = Alerts.get_by_alert_id("123")
+      assert result.last_push_notification_timestamp == ~U[2024-06-02 00:00:00Z]
+    end
+  end
+
+  describe "close/4" do
+    test "closes alert when send_all_clear? is false" do
       current_time = ~U[2024-06-04 00:01:11Z]
 
       user = build(:user)
@@ -1149,20 +1187,40 @@ defmodule AlertsUI.AlertsTest do
       insert(:alert, %{
         alert_id: "123",
         duration_certainty: :ESTIMATED,
+        last_push_notification_timestamp: ~U[2024-06-02 00:00:00Z],
         active_period: [
           build(:active_period, %{start: ~U[2024-06-01 00:00:00Z], end: ~U[2024-06-02 00:00:00Z]}),
           build(:active_period, %{start: ~U[2024-06-03 00:00:00Z], end: ~U[2024-06-04 04:00:00Z]})
         ]
       })
 
-      Alerts.get_by_alert_id("123") |> Alerts.close(user, current_time)
+      Alerts.get_by_alert_id("123") |> Alerts.close(user, false, current_time)
 
       result = Alerts.get_by_alert_id("123")
 
       assert result.active_period_end == current_time
       assert result.closed_timestamp == current_time
       assert result.notification_period_end == current_time
+      assert result.last_push_notification_timestamp == ~U[2024-06-02 00:00:00Z]
       assert result.duration_certainty == :KNOWN
+    end
+
+    test "closes alert when send_all_clear? is true" do
+      current_time = ~U[2024-06-04 00:01:11Z]
+
+      insert(:alert, %{
+        alert_id: "123",
+        duration_certainty: :ESTIMATED,
+        last_push_notification_timestamp: ~U[2024-06-02 00:00:00Z],
+        active_period: [
+          build(:active_period, %{start: ~U[2024-06-01 00:00:00Z], end: ~U[2024-06-02 00:00:00Z]}),
+          build(:active_period, %{start: ~U[2024-06-03 00:00:00Z], end: ~U[2024-06-04 04:00:00Z]})
+        ]
+      })
+
+      Alerts.get_by_alert_id("123") |> Alerts.close(build(:user), true, current_time)
+      result = Alerts.get_by_alert_id("123")
+      assert result.last_push_notification_timestamp == current_time
     end
   end
 

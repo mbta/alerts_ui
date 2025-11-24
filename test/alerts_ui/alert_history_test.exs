@@ -92,7 +92,7 @@ defmodule AlertsUIWeb.AlertHistoryTest do
       )
 
       :timer.sleep(1000)
-      Alerts.close(Alerts.get_by_alert_id("123"), "closed", ~U[2025-09-26 16:14:00Z])
+      Alerts.close(Alerts.get_by_alert_id("123"), "closed", false, ~U[2025-09-26 16:14:00Z])
 
       [result_1, result_2, result_3] = AlertHistory.alert_history("123")
 
@@ -232,7 +232,7 @@ defmodule AlertsUIWeb.AlertHistoryTest do
         Alerts.get_by_alert_id("123")
       )
 
-      Alerts.close(Alerts.get_by_alert_id("123"), "closed", ~U[2025-09-27 16:33:00Z])
+      Alerts.close(Alerts.get_by_alert_id("123"), "closed", false, ~U[2025-09-27 16:33:00Z])
 
       [headers, v1, v2, v3] =
         "123" |> AlertHistory.alert_history() |> AlertHistory.build_history_csv()

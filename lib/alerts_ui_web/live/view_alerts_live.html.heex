@@ -113,7 +113,12 @@
             :if={!AlertsUIWeb.FormComponents.Helpers.Helpers.alert_is_closed(alert)}
             id={"close-button-#{alert.alert_id}"}
             class="inline-flex rounded !px-2 !py-[3px]"
-            phx-click={show_modal("close-alert-modal-#{alert.alert_id}")}
+            phx-click={
+              JS.push("opening_close_modal",
+                value: %{send_all_clear?: !is_nil(alert.last_push_notification_timestamp)}
+              )
+              |> show_modal("close-alert-modal-#{alert.alert_id}")
+            }
           >
             <.icon name="hero-x-mark-solid" class="w-4 h-4" />
           </.button_secondary_link>
@@ -142,7 +147,10 @@
               </.link>
             </:menu>
           </.button_menu>
-          <AlertsUIWeb.ReviewModal.confirm_close_modal alert_id={alert.alert_id} />
+          <AlertsUIWeb.ReviewModal.confirm_close_modal
+            alert_id={alert.alert_id}
+            send_all_clear?={@send_all_clear?}
+          />
         </div>
       </:action>
     </Flop.Phoenix.table>
@@ -152,6 +160,7 @@
     :if={Map.get(assigns, :selected_alert_data, nil)}
     alert_data={@selected_alert_data}
     alert_id={@selected_alert_id}
+    send_all_clear?={@send_all_clear?}
     cancel_alert={true}
     cancel_event_name="close_details"
     target_id="#view_alerts_live_view"

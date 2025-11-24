@@ -52,7 +52,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :stop_ids,
     :stop_names_and_ids,
     :trip_ids,
-    :url
+    :url,
+    :last_push_notification_timestamp
   ]
 
   @type t :: %__MODULE__{
@@ -95,7 +96,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           stop_ids: [String.t()] | nil,
           stop_names_and_ids: [String.t()] | nil,
           trip_ids: [String.t()] | nil,
-          url: String.t() | nil
+          url: String.t() | nil,
+          last_push_notification_timestamp: DateTime.t() | nil
         }
 
   @spec build_alert_data(String.t() | Alert.t() | nil) :: t()
@@ -203,7 +205,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       stop_ids: Alert.gather_parent_stop_ids(informed_entities),
       stop_names_and_ids: alert.original_stop_selections,
       trip_ids: Alert.gather_trip_ids(informed_entities),
-      url: alert.url
+      url: alert.url,
+      last_push_notification_timestamp: alert.last_push_notification_timestamp
     }
     |> Map.merge(active_period_map)
   end

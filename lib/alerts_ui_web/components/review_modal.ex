@@ -37,6 +37,10 @@ defmodule AlertsUIWeb.ReviewModal do
   attr :alert_data, :map, default: %{}, doc: "The user selections that make up alert_data"
   attr :alert_id, :string, default: nil, doc: "If alert exists, this is the alert's string id"
 
+  attr :send_all_clear?, :boolean,
+    default: false,
+    doc: "Whether the 'all clear' checkbox on the close modal is checked"
+
   attr :cancel_alert, :boolean,
     default: false,
     doc: "Whether the cancel alert button should be visible"
@@ -479,6 +483,7 @@ defmodule AlertsUIWeb.ReviewModal do
       <AlertsUIWeb.ReviewModal.confirm_close_modal
         id="close-alert-nested-modal"
         alert_id={@alert_id}
+        send_all_clear?={@send_all_clear?}
         on_accept={hide_modal(@id)}
       />
     </.modal>
@@ -530,6 +535,10 @@ defmodule AlertsUIWeb.ReviewModal do
 
   attr :alert_id, :integer, required: true, doc: "The id of the alert we're dealing with"
 
+  attr :send_all_clear?, :boolean,
+    default: false,
+    doc: "Whether the 'all clear' checkbox on the close modal is checked"
+
   attr :target_id, :string,
     default: "",
     doc: "The ID of the element that should receive this modal's events"
@@ -546,7 +555,7 @@ defmodule AlertsUIWeb.ReviewModal do
       cancel_button_text="Keep Active"
       accept_button_text="Close now"
       target_id="#view_alerts_live_view"
-      class="text-text-primary min-w-[26rem]"
+      class="text-text-primary min-w-[30rem]"
       inner_class="text-base font-light min-h-[72px]"
       cancel_button_classes="border-0 text-base"
       accept_button_classes="
@@ -563,7 +572,28 @@ defmodule AlertsUIWeb.ReviewModal do
       value={@alert_id}
       {@rest}
     >
-      Are you sure you want to close alert #{@alert_id}?
+      <p class="leading-tight mt-2 mb-8 min-h-[1.3rem]">
+        Are you sure you want to close alert #{@alert_id}?
+      </p>
+      <div class="flex row">
+        <div class="h-5 w-5 mr-4 border border-border-primary rounded">
+          <input type="hidden" name="all-clear-checkbox" value="false" />
+          <input
+            type="checkbox"
+            id={"all-clear-checkboxl#{@alert_id}"}
+            name="all-clear-checkbox"
+            value="true"
+            phx-click="all_clear_checkbox"
+            checked={@send_all_clear?}
+            class="[appearance:none] hover:bg-primary-hover rounded bg-bg-input-default w-[100%] h-[100%]
+             checked:bg-primary checked:before:content-['✓'] before:absolute before:inline before:translate-y-[-4px] before:translate-x-[2px]"
+            ,
+          />
+        </div>
+        <AlertsUIWeb.SharedComponents.label for="all-clear-checkbox">
+          Send "all clear" message to alert subscribers
+        </AlertsUIWeb.SharedComponents.label>
+      </div>
     </.modal>
     """
   end
