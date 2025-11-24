@@ -108,7 +108,7 @@ defmodule AlertsUI.Alerts do
       end_is_past = time_is_past(current_time, alert.active_period_end)
 
       if end_is_past do
-        close(alert)
+        close_automatically(alert)
       else
         alert
       end
@@ -347,11 +347,10 @@ defmodule AlertsUI.Alerts do
     end
   end
 
-  # use close/2 for any alert that's closed by the system
+  # use close_automatically for any alert that's closed by the system
   # it sets defaults for origin and last_push_notification_timestamp
-  @spec close(Alert.t(), DateTime.t()) :: Alert.t()
-  @spec close(AlertsUI.Models.Alert.t()) :: AlertsUI.Models.Alert.t()
-  def close(alert, closed_time \\ DateTime.utc_now()) do
+  @spec close_automatically(Alert.t(), DateTime.t()) :: Alert.t()
+  def close_automatically(alert, closed_time \\ DateTime.utc_now()) do
     send_all_clear? = alert.duration_certainty in [:ESTIMATED, :UNKNOWN]
     close(alert, "(Closed automatically)", send_all_clear?, closed_time)
   end

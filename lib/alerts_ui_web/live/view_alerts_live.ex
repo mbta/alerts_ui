@@ -353,8 +353,6 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   @impl true
   def handle_event("close_alert", %{"value" => alert_id}, socket) do
-    # socket.assigns.send_all_clear? |> IO.inspect(label: :ALL_CLEAR?)
-
     alert_id
     |> Alerts.get_by_alert_id()
     |> Alerts.close(socket.assigns.current_user, socket.assigns.send_all_clear?)
@@ -379,10 +377,10 @@ defmodule AlertsUIWeb.ViewAlertsLive do
      )}
   end
 
-  # @impl true
-  # def handle_event("opening_close_modal", %{"send_all_clear?" => send_all_clear?}, socket) do
-  #   {:noreply, assign(socket, send_all_clear?: send_all_clear?)}
-  # end
+  @impl true
+  def handle_event("opening_close_modal", %{"send_all_clear?" => send_all_clear?}, socket) do
+    {:noreply, assign(socket, send_all_clear?: send_all_clear?)}
+  end
 
   ### END View Alerts handlers section ###
 

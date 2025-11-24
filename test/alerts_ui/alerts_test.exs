@@ -1140,7 +1140,7 @@ defmodule AlertsUI.AlertsTest do
     end
   end
 
-  describe "close/2" do
+  describe "close_automatically/2" do
     test "closes alert and updates LPNT if duration certainty is UNKNOWN" do
       current_time = ~U[2024-06-04 00:01:11Z]
 
@@ -1154,7 +1154,7 @@ defmodule AlertsUI.AlertsTest do
         ]
       })
 
-      Alerts.get_by_alert_id("123") |> Alerts.close(current_time)
+      Alerts.get_by_alert_id("123") |> Alerts.close_automatically(current_time)
       result = Alerts.get_by_alert_id("123")
       assert result.last_push_notification_timestamp == current_time
     end
@@ -1172,7 +1172,7 @@ defmodule AlertsUI.AlertsTest do
         ]
       })
 
-      Alerts.get_by_alert_id("123") |> Alerts.close(current_time)
+      Alerts.get_by_alert_id("123") |> Alerts.close_automatically(current_time)
       result = Alerts.get_by_alert_id("123")
       assert result.last_push_notification_timestamp == ~U[2024-06-02 00:00:00Z]
     end
