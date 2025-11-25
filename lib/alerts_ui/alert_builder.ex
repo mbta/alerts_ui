@@ -86,7 +86,11 @@ defmodule AlertsUI.AlertBuilder do
       :image_url,
       :image_alternative_text,
       :recurrence_days,
-      :severity
+      :severity,
+      :legacy,
+      :last_modified_timestamp,
+      :created_timestamp,
+      :closed_timestamp
     ]
 
     Enum.reduce(direct_from_alert_data_keys, %{}, fn key, params ->
@@ -105,6 +109,15 @@ defmodule AlertsUI.AlertBuilder do
     |> Map.merge(informed_entity(alert_data, combination, options))
   end
 
+  defp last_push_notification_timestamp(alert_data) do
+    last_push_notification_timestamp =
+      alert_data
+      |> Map.get(:last_push_notification_timestamp)
+      |> ActivePeriodBuilder.naive_eastern_datetime_to_utc()
+
+    %{last_push_notification_timestamp: last_push_notification_timestamp}
+  end
+
   defp primary_service_type(alert_data) do
     %{
       primary_service_type:
@@ -113,15 +126,6 @@ defmodule AlertsUI.AlertBuilder do
           Map.get(alert_data, :combination)
         )
     }
-  end
-
-  defp last_push_notification_timestamp(alert_data) do
-    last_push_notification_timestamp =
-      alert_data
-      |> Map.get(:last_push_notification_timestamp)
-      |> ActivePeriodBuilder.naive_eastern_datetime_to_utc()
-
-    %{last_push_notification_timestamp: last_push_notification_timestamp}
   end
 
   defp severity_level(alert_data) do

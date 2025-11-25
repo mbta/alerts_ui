@@ -314,7 +314,7 @@ defmodule AlertsUI.IBIAlertImporter do
       ibi_alert
       |> ibi_alert_to_alert_data()
       |> AlertBuilder.build_alert(from_ibi(ibi_alert, :combination), DateTime.utc_now(), options)
-      |> add_importer_params(ibi_alert)
+      |> Map.merge(%{alert_id: ibi_alert.alert_id, legacy: true})
 
     Alert.changeset(am_alert, params, options)
   end
@@ -360,7 +360,10 @@ defmodule AlertsUI.IBIAlertImporter do
       :original_route_selections,
       :original_trip_selections,
       :original_facility_selections,
-      :created_timestamp
+      :created_timestamp,
+      :closed_timestamp,
+      :last_modified_timestamp,
+      :legacy
     ]
     |> Enum.reduce(%{}, fn key, alert_data ->
       try do
@@ -627,6 +630,19 @@ defmodule AlertsUI.IBIAlertImporter do
     ndt_from_ibi_string(ibi_alert.created_dt)
   end
 
+  def from_ibi(ibi_alert, :closed_timestamp) do
+    if ibi_alert.is_closed == "True" do
+      from_ibi(ibi_alert, :active_period_end) ||
+        from_ibi(ibi_alert, :notification_period_end)
+    else
+      nil
+    end
+  end
+
+  def from_ibi(ibi_alert, :last_modified_timestamp) do
+    ndt_from_ibi_string(ibi_alert.last_modified_dt)
+  end
+
   def from_ibi(ibi_alert, key), do: Map.get(ibi_alert, key)
 
   defp split_combined_ids(nil), do: []
@@ -654,27 +670,5 @@ defmodule AlertsUI.IBIAlertImporter do
     |> String.replace(~r/\:[0-9]*\.[0-9]*$/, "")
     |> Kernel.<>(":00")
     |> NaiveDateTime.from_iso8601!()
-  end
-
-  defp add_importer_params(params, ibi_alert) do
-    created_timestamp = from_ibi(ibi_alert, :created_timestamp)
-
-    closed_timestamp =
-      if ibi_alert.is_closed == "True" do
-        from_ibi(ibi_alert, :active_period_end) ||
-          from_ibi(ibi_alert, :notification_period_end)
-      else
-        nil
-      end
-
-    new_params =
-      %{
-        alert_id: ibi_alert.alert_id,
-        closed_timestamp: closed_timestamp,
-        created_timestamp: created_timestamp,
-        legacy: true
-      }
-
-    Map.merge(params, new_params)
   end
 end

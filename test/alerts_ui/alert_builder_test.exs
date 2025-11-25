@@ -112,7 +112,11 @@ defmodule AlertsUI.AlertBuilderTest do
                  original_trip_selections: [],
                  original_facility_selections: [],
                  primary_service_type: "1",
-                 original_direction_selections: ["Inbound|1"]
+                 original_direction_selections: ["Inbound|1"],
+                 closed_timestamp: nil,
+                 created_timestamp: nil,
+                 last_modified_timestamp: nil,
+                 legacy: nil
                }
 
         Alerts.create_or_update_alert(result, build(:user))
@@ -387,7 +391,11 @@ defmodule AlertsUI.AlertBuilderTest do
                  original_facility_selections: [],
                  original_direction_selections: ["Both|default"],
                  service_effect_text: nil,
-                 primary_service_type: "1"
+                 primary_service_type: "1",
+                 closed_timestamp: nil,
+                 created_timestamp: nil,
+                 last_modified_timestamp: nil,
+                 legacy: nil
                }
 
         result
@@ -606,7 +614,11 @@ defmodule AlertsUI.AlertBuilderTest do
                  original_stop_selections: [],
                  original_trip_selections: [],
                  original_facility_selections: [],
-                 primary_service_type: "2"
+                 primary_service_type: "2",
+                 closed_timestamp: nil,
+                 created_timestamp: nil,
+                 last_modified_timestamp: nil,
+                 legacy: nil
                }
 
         result
