@@ -480,7 +480,10 @@ defmodule AlertsUI.IBIAlertImporter do
           |> ndt_from_ibi_string()
           |> NaiveDateTime.to_date()
 
-        time = ndt_from_ibi_string(ibi_alert.recurrence_start_time)
+        time =
+          (ibi_alert.recurrence_start_time || ibi_alert.recurrence_start)
+          |> ndt_from_ibi_string()
+          |> NaiveDateTime.to_time()
 
         NaiveDateTime.new!(date, time)
     end
@@ -497,7 +500,10 @@ defmodule AlertsUI.IBIAlertImporter do
           |> ndt_from_ibi_string()
           |> NaiveDateTime.to_date()
 
-        time = ndt_from_ibi_string(ibi_alert.recurrence_end_time)
+        time =
+          (ibi_alert.recurrence_end_time || ibi_alert.recurrence_end)
+          |> ndt_from_ibi_string()
+          |> NaiveDateTime.to_time()
 
         NaiveDateTime.new!(date, time)
     end
