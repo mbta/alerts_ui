@@ -382,10 +382,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         values_to_keep: modal_route_id |> List.wrap()
       })
 
-    # I think the problem here is that we're filtering out the selected options from available_stops
-    # so the old values are not even around to keep selected
-    # But the "get the stops" logic is so fiddly that we should keep that as-is, and just, like, add the already selected stops
-
     # Stop selector
     stop_search_term = assigns.form[:stop_search_term].value
     stop_ids = assigns.form[:stop_ids].value || []
