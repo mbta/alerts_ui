@@ -409,7 +409,7 @@ defmodule AlertsUI.Alerts do
   def get_routes_grouped_by_mode do
     Repo.all(
       from(a in Alert,
-        where: a.original_route_selections != [],
+        where: a.original_route_selections != [] and (a.draft == false or is_nil(a.draft)),
         inner_join: ie in AlertsUI.Models.InformedEntity,
         on: ie.alert_id == a.id,
         select: {a.original_route_selections, ie.route_type, ie.route_id}
