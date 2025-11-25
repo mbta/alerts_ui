@@ -341,6 +341,8 @@ defmodule AlertsUI.IBIAlertImporter do
       :active_period_end_date,
       :active_period_end_time,
       :recurrence_days,
+      :recurrence_start_time,
+      :recurrence_end_time,
       :notification_period_start,
       :notification_period_end,
       :header_text,
@@ -465,12 +467,34 @@ defmodule AlertsUI.IBIAlertImporter do
   def from_ibi(ibi_alert, :active_period_start) do
     # this field must be populated so no `if` here (and all IBI alerts that
     # lack `effect_start` have `notif_start`)
-    ndt_from_ibi_string(ibi_alert.effect_start || ibi_alert.notif_start)
+    case from_ibi(ibi_alert, :alert_timing) do
+      :one_time ->
+        ndt_from_ibi_string(ibi_alert.effect_start || ibi_alert.notif_start)
+      :recurring ->
+        date =
+          ibi_alert.recurrence_start
+          |> ndt_from_ibi_string()
+          |> NaiveDateTime.to_date()
+
+        time = ndt_from_ibi_string(ibi_alert.recurrence_start_time)
+
+        NaiveDateTime.new!(date, time)
+    end
   end
 
   def from_ibi(ibi_alert, :active_period_end) do
-    if ibi_alert.effect_end do
-      ndt_from_ibi_string(ibi_alert.effect_end)
+    case from_ibi(ibi_alert, :alert_timing) do
+      :one_time ->
+        ndt_from_ibi_string(ibi_alert.effect_end || ibi_alert.notif_end)
+      :recurring ->
+        date =
+          ibi_alert.recurrence_end
+          |> ndt_from_ibi_string()
+          |> NaiveDateTime.to_date()
+
+        time = ndt_from_ibi_string(ibi_alert.recurrence_end_time)
+
+        NaiveDateTime.new!(date, time)
     end
   end
 
@@ -614,7 +638,9 @@ defmodule AlertsUI.IBIAlertImporter do
     |> String.split(",")
   end
 
-  def ndt_from_ibi_string(timestamp) do
+  defp ndt_from_ibi_string(nil), do: nil
+
+  defp ndt_from_ibi_string(timestamp) do
     if timestamp =~ ~r/\// do
       Timex.parse!(timestamp, "{M}/{D}/{YYYY} {h12}:{m}:{s} {AM}")
     else
@@ -622,7 +648,7 @@ defmodule AlertsUI.IBIAlertImporter do
     end
   end
 
-  def ndt_from_ibi_reminder_format(timestamp) do
+  defp ndt_from_ibi_reminder_format(timestamp) do
     timestamp
     |> String.replace("T", " ")
     |> String.replace(~r/\:[0-9]*\.[0-9]*$/, "")
@@ -630,7 +656,7 @@ defmodule AlertsUI.IBIAlertImporter do
     |> NaiveDateTime.from_iso8601!()
   end
 
-  def add_importer_params(params, ibi_alert) do
+  defp add_importer_params(params, ibi_alert) do
     created_timestamp = from_ibi(ibi_alert, :created_timestamp)
 
     closed_timestamp =
