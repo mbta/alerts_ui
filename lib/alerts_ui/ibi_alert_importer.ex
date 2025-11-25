@@ -370,7 +370,7 @@ defmodule AlertsUI.IBIAlertImporter do
         Map.put(alert_data, key, from_ibi(ibi_alert, key))
       rescue
         e ->
-          IEx.pry
+          IEx.pry()
           Logger.error("alert #{ibi_alert.alert_id} / #{key}: #{e.message}")
           reraise e, __STACKTRACE__
       end
@@ -473,6 +473,7 @@ defmodule AlertsUI.IBIAlertImporter do
     case from_ibi(ibi_alert, :alert_timing) do
       :one_time ->
         ndt_from_ibi_string(ibi_alert.effect_start || ibi_alert.notif_start)
+
       :recurring ->
         date =
           ibi_alert.recurrence_start
@@ -489,6 +490,7 @@ defmodule AlertsUI.IBIAlertImporter do
     case from_ibi(ibi_alert, :alert_timing) do
       :one_time ->
         ndt_from_ibi_string(ibi_alert.effect_end || ibi_alert.notif_end)
+
       :recurring ->
         date =
           ibi_alert.recurrence_end
