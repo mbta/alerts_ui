@@ -162,13 +162,13 @@ defmodule AlertsUIWeb.ReviewModal do
               <% end %>
             </span>
 
-            <span :if={@alert_data.url} class="block pb-4">
+            <span :if={@alert_data.url} class="block pb-4 break-all">
               <p class="font-bold url_label">URL</p>
               <a
                 target="_blank"
                 rel="noopener noreferrer"
                 href={@alert_data.url}
-                class="break-all text-primary hover:text-primary-hover hover:underline"
+                class="text-primary hover:text-primary-hover hover:underline"
               >
                 {@alert_data.url}
                 <.icon name="hero-arrow-top-right-on-square" class="h-4 w-4" />
@@ -216,7 +216,7 @@ defmodule AlertsUIWeb.ReviewModal do
           <%!-- Image --%>
           <%= if @alert_data.image_url do %>
             <p class="font-bold">Image</p>
-            <div class="pb-4">
+            <div class="pb-4 break-all">
               <a
                 target="_blank"
                 rel="noopener noreferrer"
