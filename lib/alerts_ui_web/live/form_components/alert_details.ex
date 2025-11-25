@@ -36,6 +36,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   @fields ~w[header_sync_toggle description_sync_toggle description_text cause_detail url image_url image_alternative_text severity service_effect_text]a ++
             @required_fields
 
+  @cdn_host "cdn.mbta.com"
+
   @impl true
   def mount(socket) do
     severity_options =
@@ -401,7 +403,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
               phx-debounce={120}
               maxlength="255"
               id="header_input"
-              class="w-[100%] min-h-[10rem] border-b-0 z-20"
+              class="w-[100%] min-h-[10rem] border-b-0 z-20 mt-3"
               phx-change="header_text_change"
               phx-target={@myself}
               value={@form[:header_text].value}
@@ -420,7 +422,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
               label="Supporting information"
               phx-debounce={120}
               id="description_input"
-              class="w-[100%] min-h-[10rem] border-b-0 z-20"
+              class="w-[100%] min-h-[10rem] border-b-0 z-20 mt-3"
               maxlength="3000"
               phx-change="description_text_change"
               phx-target={@myself}
@@ -441,7 +443,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           label="URL"
           phx-debounce={120}
           id="url_input"
-          class="w-[50%]"
+          class="w-[50%] mx-3"
         />
         <div id="image-preview-div">
           <.text_input
@@ -449,12 +451,15 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
             label="Image URL"
             phx-debounce={500}
             id="image_url_input"
-            class={["min-w-[50%]", if(@form[:image_url].value not in ["", nil], do: "border-b-0")]}
+            class={[
+              "min-w-[50%] mx-3",
+              if(@form[:image_url].value not in ["", nil], do: "border-b-0")
+            ]}
           />
           <div
             :if={@form[:image_url].value not in ["", nil]}
             id="image-information"
-            class="flex flex-row w-[50%] text-sm text-text-secondary bg-bg-elevation-3 p-4 rounded-b border border-bg-elevation-6 border-t-0 -mt-4"
+            class="flex flex-row w-[50%] text-sm text-text-secondary bg-bg-elevation-3 p-4 rounded-b border border-bg-elevation-6 border-t-0 mt-4"
           >
             <img
               src={@form[:image_url].value}
@@ -471,7 +476,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           label="Image alt text"
           phx-debounce={120}
           id="image_alt_text_input"
-          class="w-[50%]"
+          class="w-[50%] mx-3"
           spellcheck="true"
         />
       </.form>
@@ -514,8 +519,14 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     !is_nil(uri.scheme) && !is_nil(uri.host) && uri.host =~ "."
   end
 
+  defp image_from_correct_host?(url) do
+    uri = URI.parse(url)
+    uri.host == @cdn_host
+  end
+
   defp get_image_size(url) do
     with true <- url_valid?(url),
+         true <- image_from_correct_host?(url),
          {:ok,
           %{headers: %{"content-type" => content_type, "content-length" => [content_length]}}} <-
            Req.head(url),
