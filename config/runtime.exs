@@ -90,11 +90,11 @@ cond do
 
     config :alerts_ui,
       api_url: String.replace_trailing(System.get_env("API_URL"), "/", ""),
-      api_key: System.get_env("API_KEY")
+      api_key: System.get_env("DEV_API_KEY")
 
     config :mbta_v3_api,
       base_url: String.replace_trailing(System.fetch_env!("API_URL"), "/", ""),
-      api_key: System.fetch_env!("API_KEY")
+      api_key: System.fetch_env!("DEV_API_KEY")
 
     if keycloak_issuer = System.get_env("KEYCLOAK_ISSUER") do
       keycloak_base_opts = [
