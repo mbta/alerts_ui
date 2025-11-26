@@ -660,6 +660,8 @@ defmodule AlertsUI.IBIAlertImporter do
     |> String.split(",")
   end
 
+  defp ndt_from_ibi_string(nil), do: nil
+
   defp ndt_from_ibi_string(timestamp) do
     if timestamp =~ ~r/\// do
       Timex.parse!(timestamp, "{M}/{D}/{YYYY} {h12}:{m}:{s} {AM}")
