@@ -19,6 +19,7 @@ defmodule AlertsUI.Repo.Migrations.CreateIBIAlerts do
     notif_start
     notif_end
     last_modified_by
+    created_dt
     last_modified_dt
     header
     send_via_paess
