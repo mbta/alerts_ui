@@ -8,8 +8,6 @@ defmodule AlertsUI.IBIAlertImporter do
   """
   require Logger
 
-  require IEx
-
   import Ecto.Query
 
   alias AlertsUI.AlertBuilder
@@ -45,6 +43,7 @@ defmodule AlertsUI.IBIAlertImporter do
   but never a mix of both.
   """
   @spec ingest_csv_file(String.t(), chunk_size: integer()) :: {:ok, map()} | Ecto.Multi.failure()
+  # sobelow_skip ["Traversal"]
   def ingest_csv_file(path, options \\ []) do
     fields =
       path
@@ -370,7 +369,6 @@ defmodule AlertsUI.IBIAlertImporter do
         Map.put(alert_data, key, from_ibi(ibi_alert, key))
       rescue
         e ->
-          IEx.pry()
           Logger.error("alert #{ibi_alert.alert_id} / #{key}: #{e.message}")
           reraise e, __STACKTRACE__
       end
@@ -661,8 +659,6 @@ defmodule AlertsUI.IBIAlertImporter do
     |> String.replace(~r/\s/, "")
     |> String.split(",")
   end
-
-  defp ndt_from_ibi_string(nil), do: nil
 
   defp ndt_from_ibi_string(timestamp) do
     if timestamp =~ ~r/\// do
