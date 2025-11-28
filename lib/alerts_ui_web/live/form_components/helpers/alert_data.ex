@@ -224,7 +224,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
     period_map =
       case alert.active_period do
-        [] -> %{}
+        [] -> determine_empty_active_period(alert)
         [_active_period] -> determine_one_time_active_period(alert)
         _ -> determine_recurring_active_period(alert)
       end
@@ -309,6 +309,16 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
         alert.active_period_end |> shift_to_naive |> end_date(end_specifier),
       recurrence_days: alert.recurrence_days |> Enum.map(&Atom.to_string/1)
     }
+  end
+
+  def determine_empty_active_period(alert) do
+    alert_timing = if alert.recurrence_days do
+      :recurring
+    else
+      :one_time
+    end
+
+    %{alert_timing: alert_timing}
   end
 
   defp get_notification_specifier(nil), do: :same_as_effect_period
