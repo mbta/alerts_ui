@@ -97,6 +97,7 @@ defmodule AlertsUI.AlertBuilder do
       Map.put(params, key, Map.get(alert_data, key, nil))
     end)
     |> Map.merge(%{current_time: current_time})
+    |> Map.merge(recurrence_text(alert_data))
     |> Map.merge(last_push_notification_timestamp(alert_data))
     |> Map.merge(severity_level(alert_data))
     |> Map.merge(reminder_times(alert_data))
@@ -107,6 +108,15 @@ defmodule AlertsUI.AlertBuilder do
     |> Map.merge(active_periods(alert_data, current_time, options))
     |> Map.merge(notification_periods(alert_data, current_time))
     |> Map.merge(informed_entity(alert_data, combination, options))
+  end
+
+  defp recurrence_text(alert_data) do
+    recurrence_text =
+      alert_data
+      |> Map.get(:recurrence_days)
+      |> Recurrence.recurrence_text_from_days()
+
+    %{recurrence_text: recurrence_text}
   end
 
   defp last_push_notification_timestamp(alert_data) do
@@ -298,80 +308,9 @@ defmodule AlertsUI.AlertBuilder do
           |> ActivePeriodBuilder.naive_eastern_datetime_to_utc()
       end
 
-    recurrence_days = Map.get(alert_data, :recurrence_days)
-    recurrence_text = Recurrence.recurrence_text_from_days(recurrence_days)
-    
-    # INFORMED ENTITIES
-
-    informed_entity =
-      unless Keyword.get(options, :no_informed_entities) do
-        service_types = Map.get(alert_data, :service_types, []) |> expand_subway_service_types()
-
-        routes =
-          selected_routes
-          |> pre_combo_routes()
-          |> Enum.reject(&(&1 == %{}))
-          |> add_combo_routes()
-
-        route_ids = Enum.map(routes, & &1.id)
-
-        child_stops_with_context =
-          child_stops_with_context(
-            routes,
-            direction_id,
-            Map.get(alert_data, :stop_ids)
-          )
-
-        alert_data =
-          Map.merge(
-            alert_data,
-            %{
-              service_types: service_types,
-              route_ids: route_ids,
-              child_stops_with_context: child_stops_with_context
-            }
-          )
-
-        combination
-        |> build_informed_entities(alert_data, effect_name)
-        |> Enum.uniq()
-      end
-
-    # EVERYTHING ELSE
-
-    last_push_notification_timestamp =
-      alert_data
-      |> Map.get(:last_push_notification_timestamp)
-      |> ActivePeriodBuilder.naive_eastern_datetime_to_utc()
-
-    severity = Map.get(alert_data, :severity)
-    severity_level = SeverityLevel.severity_level_by_severity(severity)
-
-    reminder_times =
-      Map.get(alert_data, :reminder_times, [])
-      |> Enum.map(&%{reminder_time: ActivePeriodBuilder.naive_eastern_datetime_to_utc(&1)})
-
-    plaintext_reminder_selections =
-      Map.get(alert_data, :reminder_times, [])
-      |> Enum.map_join(", ", &Calendar.strftime(&1, "%Y-%m-%dT%H:%M:%S"))
-
-    primary_service_type =
-      primary_service_type(route_type, Map.get(alert_data, :combination))
-
-    # CHANGESET PARAMS
-
     %{
       notification_period_start: notification_period_start,
-      notification_period_end: notification_period_end,
-      severity: severity,
-      severity_level: severity_level,
-      reminder_times: reminder_times,
-      plaintext_reminder_selections: plaintext_reminder_selections,
-      current_time: current_time,
-      recurrence_days: recurrence_days,
-      recurrence_text: recurrence_text,
-      original_trip_selections: original_trip_selections,
-      primary_service_type: primary_service_type
+      notification_period_end: notification_period_end
     }
   end
 
