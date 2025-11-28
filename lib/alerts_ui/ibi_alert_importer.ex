@@ -186,7 +186,7 @@ defmodule AlertsUI.IBIAlertImporter do
           set: [notif_end: "3/12/2017 3:30:00 AM", effect_end: "3/12/2017 3:30:00 AM"]
         )
 
-        # years set to 8888/9999
+        # years set to 8888/9999/10000
         SQL.query!(
           Repo,
           "update ibi_alerts set notif_end = replace(notif_end, '8888', '1900') where notif_end like '%8888%'"
@@ -207,16 +207,32 @@ defmodule AlertsUI.IBIAlertImporter do
           "update ibi_alerts set effect_end = replace(effect_end, '9999', '1901') where effect_end like '%9999%'"
         )
 
+        SQL.query!(
+          Repo,
+          "update ibi_alerts set recurrence_end = replace(recurrence_end, '9999', '1901') where recurrence_end like '%9999%'"
+        )
+
+        SQL.query!(
+          Repo,
+          "update ibi_alerts set recurrence_end = replace(recurrence_end, '10000', '1902') where recurrence_end like '%10000%'"
+        )
+
         # fix >24 clock timestamps
         Enum.each(24..47, fn digit ->
           SQL.query!(
             Repo,
-            "update ibi_alerts set recurrence_start_time = regexp_replace(recurrence_start_time, '^#{digit}', '#{rem(digit, 24) |> Integer.to_string() |> String.pad_leading(2, "0")}') where recurrence_start_time like '#{digit}%'"
+            "update ibi_alerts
+              set recurrence_start_time = regexp_replace(recurrence_start_time, '^#{digit}', '#{rem(digit, 24) |> Integer.to_string() |> String.pad_leading(2, "0")}'),
+              recurrence_start = to_char(recurrence_start::date + interval '1 days', 'FMMM/FMDD/YYYY 12:00:00 AM')
+              where recurrence_start_time like '#{digit}%'"
           )
 
           SQL.query!(
             Repo,
-            "update ibi_alerts set recurrence_end_time = regexp_replace(recurrence_end_time, '^#{digit}', '#{rem(digit, 24) |> Integer.to_string() |> String.pad_leading(2, "0")}') where recurrence_end_time like '#{digit}%'"
+            "update ibi_alerts
+              set recurrence_end_time = regexp_replace(recurrence_end_time, '^#{digit}', '#{rem(digit, 24) |> Integer.to_string() |> String.pad_leading(2, "0")}'),
+              recurrence_end = to_char(recurrence_end::date + interval '1 days', 'FMMM/FMDD/YYYY 12:00:00 AM')
+              where recurrence_end_time like '#{digit}%'"
           )
         end)
 
@@ -660,9 +676,9 @@ defmodule AlertsUI.IBIAlertImporter do
     |> String.split(",")
   end
 
-  defp ndt_from_ibi_string(nil), do: nil
+  def ndt_from_ibi_string(nil), do: nil
 
-  defp ndt_from_ibi_string(timestamp) do
+  def ndt_from_ibi_string(timestamp) do
     if timestamp =~ ~r/\// do
       Timex.parse!(timestamp, "{M}/{D}/{YYYY} {h12}:{m}:{s} {AM}")
     else
@@ -670,7 +686,7 @@ defmodule AlertsUI.IBIAlertImporter do
     end
   end
 
-  defp ndt_from_ibi_reminder_format(timestamp) do
+  def ndt_from_ibi_reminder_format(timestamp) do
     timestamp
     |> String.replace("T", " ")
     |> String.replace(~r/\:[0-9]*\.[0-9]*$/, "")
