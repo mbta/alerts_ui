@@ -1,6 +1,4 @@
 defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
-  require IEx
-
   @moduledoc """
   Builds alert data from existing alert
   Used to populate form when editing an alert
