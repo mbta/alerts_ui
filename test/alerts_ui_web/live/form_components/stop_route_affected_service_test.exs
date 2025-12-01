@@ -348,7 +348,11 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
     test "selections are preserved after route filter applied" do
       with_mocks([
         {RoutesRepo, [],
-         [by_stop: fn _route_id -> @routes end, by_type: fn _types -> @routes end]},
+         [
+           by_stop: fn _route_id -> @routes end,
+           by_stop: fn _, _ -> @routes end,
+           by_type: fn _types -> @routes end
+         ]},
         {StopsRepo, [],
          [
            by_route_type: fn
@@ -372,6 +376,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         view
         |> element("form")
         |> render_change(%{
+          "_target" => ["stop_route_affected_service", "stop_ids"],
           "stop_route_affected_service" => %{"stop_ids" => ["place-pktrm"]}
         })
 
@@ -387,8 +392,19 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         |> with_target("#stop_route_service_view")
         |> render_click(:accepted_routes_modal)
 
-        # Verify Park St still present
-        assert view |> render_async() =~ ~s(<option value="place-pktrm">)
+        # Verify Park St still present, and top of list
+        {:ok, document} =
+          view
+          |> render_async()
+          |> Floki.parse_document()
+
+        {_, _, children_nodes} = Floki.get_by_id(document, "stop_route_affected_service_stop_ids")
+
+        assert [
+                 {"option", [{"selected", "selected"}, {"value", "place-pktrm"}],
+                  ["Park Street (inbound)"]},
+                 {"option", [{"value", "place-aqucl"}], ["Aquarium"]}
+               ] = children_nodes
       end
     end
 
