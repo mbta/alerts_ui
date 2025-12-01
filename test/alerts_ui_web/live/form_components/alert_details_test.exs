@@ -115,23 +115,127 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
 
   describe "image url" do
     test "only shows preview if image has been entered" do
-      {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
+      with_mock(Req,
+        head: fn "https://cdn.mbta.com/image.jpg" ->
+          {:ok,
+           %Req.Response{
+             status: 200,
+             headers: %{
+               "content-length" => ["304839"],
+               "content-type" => ["image/png"]
+             },
+             body: ""
+           }}
+        end
+      ) do
+        {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
 
-      refute view
-             |> element("div#image-preview-div")
-             |> render() =~ ~s(div id=\"image-information\")
+        refute view
+               |> element("div#image-preview-div")
+               |> render() =~ ~s(div id=\"image-information\")
 
-      view
-      |> element("form")
-      |> render_change(%{
-        "alert_details" => %{
-          "image_url" => "https://example.com/image.jpg"
-        }
-      })
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_details" => %{
+            "image_url" => "https://cdn.mbta.com/image.jpg"
+          }
+        })
 
-      assert view
-             |> element("div#image-preview-div")
-             |> render() =~ ~s(div id=\"image-information\")
+        refute view
+               |> render() =~ ~s(Enter a valid image URL)
+
+        assert view
+               |> element("div#image-preview-div")
+               |> render() =~ ~s(div id=\"image-information\")
+      end
+    end
+
+    test "shows error if image is not from our CDN" do
+      with_mock(Req,
+        head: fn "https://cdn.mbta.com/image.jpg" ->
+          {:ok,
+           %Req.Response{
+             status: 200,
+             headers: %{
+               "content-length" => ["304839"],
+               "content-type" => ["image/png"]
+             },
+             body: ""
+           }}
+        end
+      ) do
+        {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_details" => %{
+            "image_url" => "https://example.com/image.jpg"
+          }
+        })
+
+        assert view
+               |> render() =~ ~s(Enter a valid image URL)
+      end
+    end
+
+    test "shows error if image has wrong content type" do
+      with_mock(Req,
+        head: fn "https://cdn.mbta.com/image.pdf" ->
+          {:ok,
+           %Req.Response{
+             status: 200,
+             headers: %{
+               "content-length" => ["304839"],
+               "content-type" => ["application/pdf"]
+             },
+             body: ""
+           }}
+        end
+      ) do
+        {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_details" => %{
+            "image_url" => "https://cdn.mbta.com/image.pdf"
+          }
+        })
+
+        assert view
+               |> render() =~ ~s(Enter a valid image URL)
+      end
+    end
+
+    test "shows error if image has no size" do
+      with_mock(Req,
+        head: fn "https://cdn.mbta.com/image.jpg" ->
+          {:ok,
+           %Req.Response{
+             status: 200,
+             headers: %{
+               "content-length" => [""],
+               "content-type" => ["image/png"]
+             },
+             body: ""
+           }}
+        end
+      ) do
+        {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_details" => %{
+            "image_url" => "https://cdn.mbta.com/image.jpg"
+          }
+        })
+
+        assert view
+               |> render() =~ ~s(Enter a valid image URL)
+      end
     end
   end
 
