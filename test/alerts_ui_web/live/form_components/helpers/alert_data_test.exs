@@ -702,7 +702,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       existing_alert = Alerts.get_by_alert_id("123")
 
       :timer.sleep(1000)
-      Alerts.close(existing_alert, "closed automatically")
+      Alerts.close(existing_alert, "closed automatically", false)
 
       alert = AlertData.build_alert_data("123")
 

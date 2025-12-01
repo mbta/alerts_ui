@@ -108,7 +108,7 @@ defmodule AlertsUI.Alerts do
       end_is_past = time_is_past(current_time, alert.active_period_end)
 
       if end_is_past do
-        close(alert, "(Closed automatically)")
+        close_automatically(alert)
       else
         alert
       end
@@ -347,15 +347,27 @@ defmodule AlertsUI.Alerts do
     end
   end
 
-  @spec close(Alert.t(), User.t() | String.t(), DateTime.t()) :: Alert.t()
-  def close(alert, origin, closed_time \\ DateTime.utc_now()) do
+  # use close_automatically for any alert that's closed by the system
+  # it sets defaults for origin and last_push_notification_timestamp
+  @spec close_automatically(Alert.t(), DateTime.t()) :: Alert.t()
+  def close_automatically(alert, closed_time \\ DateTime.utc_now()) do
+    send_all_clear? = alert.duration_certainty in [:ESTIMATED, :UNKNOWN]
+    close(alert, "(Closed automatically)", send_all_clear?, closed_time)
+  end
+
+  @spec close(Alert.t(), User.t() | String.t(), boolean(), DateTime.t()) :: Alert.t()
+  def close(alert, origin, send_all_clear?, closed_time \\ DateTime.utc_now()) do
     closed_time = DateTime.truncate(closed_time, :second)
+
+    last_push_notification_timestamp =
+      if send_all_clear?, do: closed_time, else: alert.last_push_notification_timestamp
 
     alert
     |> change(
       active_period_end: closed_time,
       closed_timestamp: closed_time,
       notification_period_end: closed_time,
+      last_push_notification_timestamp: last_push_notification_timestamp,
       duration_certainty: :KNOWN
     )
     |> update_papertrail(origin)

@@ -54,7 +54,8 @@ defmodule AlertsUIWeb.ViewAlertsLive do
          meta: meta,
          page_title: "View Alerts",
          params: params,
-         scroll_to_top: false
+         scroll_to_top: false,
+         send_all_clear?: false
        )}
     end
   end
@@ -307,7 +308,8 @@ defmodule AlertsUIWeb.ViewAlertsLive do
      assign(socket,
        selected_alert_data: alert_data,
        selected_alert_id: alert_id,
-       scroll_to_top: false
+       scroll_to_top: false,
+       send_all_clear?: not is_nil(alert_data.last_push_notification_timestamp)
      )}
   end
 
@@ -323,8 +325,18 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   end
 
   @impl true
+  def handle_event("all_clear_checkbox", %{"value" => send_all_clear?}, socket) do
+    {:noreply, assign(socket, send_all_clear?: send_all_clear?)}
+  end
+
+  @impl true
+  def handle_event("all_clear_checkbox", %{}, socket) do
+    {:noreply, assign(socket, send_all_clear?: false)}
+  end
+
+  @impl true
   def handle_event("cancelled_close_modal", _params, socket) do
-    {:noreply, assign(socket, scroll_to_top: false)}
+    {:noreply, assign(socket, scroll_to_top: false, send_all_clear?: false)}
   end
 
   @impl true
@@ -341,7 +353,10 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   @impl true
   def handle_event("close_alert", %{"value" => alert_id}, socket) do
-    alert_id |> Alerts.get_by_alert_id() |> Alerts.close(socket.assigns.current_user)
+    alert_id
+    |> Alerts.get_by_alert_id()
+    |> Alerts.close(socket.assigns.current_user, socket.assigns.send_all_clear?)
+
     # refresh view so alert is displayed in correct timeline category
     Process.send(self(), :update, [])
     socket = assign(socket, scroll_to_top: false)
@@ -360,6 +375,11 @@ defmodule AlertsUIWeb.ViewAlertsLive do
        selected_alert_data:
          Map.put(socket.assigns.selected_alert_data, :image_preview_size, image_preview_size)
      )}
+  end
+
+  @impl true
+  def handle_event("opening_close_modal", %{"send_all_clear?" => send_all_clear?}, socket) do
+    {:noreply, assign(socket, send_all_clear?: send_all_clear?)}
   end
 
   ### END View Alerts handlers section ###
