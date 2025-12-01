@@ -107,7 +107,7 @@ defmodule AlertsUI.Models.Alert do
           effect_name: String.t() | nil,
           header_text: String.t(),
           id: Ecto.UUID,
-          informed_entity: [InformedEntity.t()],
+          informed_entity: [InformedEntity.t()] | nil,
           image_url: String.t() | nil,
           image_alternative_text: String.t() | nil,
           last_modified_timestamp: DateTime.t() | nil,
@@ -333,7 +333,9 @@ defmodule AlertsUI.Models.Alert do
     end
   end
 
-  @spec service_types(t()) :: [Route.type_int()]
+  @spec service_types(any()) :: [Route.type_int()]
+  def service_types(%__MODULE__{informed_entity: nil}), do: []
+  def service_types(%__MODULE__{informed_entity: []}), do: []
   def service_types(%__MODULE__{informed_entity: informed_entities} = alert) do
     if systemwide?(alert) do
       informed_entities
