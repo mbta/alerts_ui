@@ -264,7 +264,7 @@ defmodule AlertsUI.Models.Alert do
     |> validate_required([:active_period_start, :header_text], message: "is required")
     |> cast_and_validate_active_periods(options)
     |> cast_and_validate_informed_entities(options)
-    |> unique_constraint(:alert_id)
+    |> unique_constraint(:alert_id, name: :alerts_alert_id_index)
   end
 
   @spec draft_changeset(any(), map()) :: Ecto.Changeset.t()
@@ -280,7 +280,7 @@ defmodule AlertsUI.Models.Alert do
     |> validate_inclusion(:severity_level, @severity_level)
     |> validate_inclusion(:alert_lifecycle, @alert_lifecycle)
     |> validate_inclusion(:duration_certainty, @duration_certainty)
-    |> unique_constraint(:alert_id)
+    |> unique_constraint(:alert_id, name: :alerts_alert_id_index)
   end
 
   def get_direction([]), do: nil
