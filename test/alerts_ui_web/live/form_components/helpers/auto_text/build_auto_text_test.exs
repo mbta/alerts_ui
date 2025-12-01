@@ -26,7 +26,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
     trip: %Trip{id: "CR-683300-527", name: "527", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     departure_time: ~U[2024-02-21 14:01:00.00Z],
-    last_stop_name: "Forest Hills"
+    last_stop_name: "Forest Hills",
+    use_trip_id_in_name?: true
   }
 
   @schedule_2 %EnhancedSchedule{
