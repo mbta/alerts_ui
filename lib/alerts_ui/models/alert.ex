@@ -336,6 +336,7 @@ defmodule AlertsUI.Models.Alert do
   @spec service_types(any()) :: [Route.type_int()]
   def service_types(%__MODULE__{informed_entity: nil}), do: []
   def service_types(%__MODULE__{informed_entity: []}), do: []
+
   def service_types(%__MODULE__{informed_entity: informed_entities} = alert) do
     if systemwide?(alert) do
       informed_entities

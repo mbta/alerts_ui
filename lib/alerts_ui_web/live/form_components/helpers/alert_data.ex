@@ -312,11 +312,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   end
 
   def determine_empty_active_period(alert) do
-    alert_timing = if alert.recurrence_days do
-      :recurring
-    else
-      :one_time
-    end
+    alert_timing =
+      if alert.recurrence_days do
+        :recurring
+      else
+        :one_time
+      end
 
     %{alert_timing: alert_timing}
   end
