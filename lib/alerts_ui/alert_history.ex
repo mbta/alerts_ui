@@ -101,7 +101,7 @@ defmodule AlertsUI.AlertHistory do
     recurring? = recurring?(alert_map.recurrence_days)
 
     [recurrence_start_time, recurrence_end_time] =
-      get_recurrence_times(Map.get(alert_map, :recurrence_times))
+      get_recurrence_times(alert_map)
 
     %__MODULE__{
       alert_id: alert_map.alert_id,
@@ -255,11 +255,21 @@ defmodule AlertsUI.AlertHistory do
 
   defp get_recurrence_days(_), do: ""
 
-  defp get_recurrence_times([start_time, end_time]) do
-    [format_time(start_time), format_time(end_time)]
-  end
+  defp get_recurrence_times(alert_map) do
+    recurrence_start_time =
+      case Map.get(alert_map, :recurrence_start_time) do
+        nil -> ""
+        start_time -> format_time(start_time)
+      end
 
-  defp get_recurrence_times(_), do: ["", ""]
+    recurrence_end_time =
+      case Map.get(alert_map, :recurrence_end_time) do
+        nil -> ""
+        end_time -> format_time(end_time)
+      end
+
+    [recurrence_start_time, recurrence_end_time]
+  end
 
   defp get_service_type(nil), do: ""
   defp get_service_type("access"), do: "Facility"

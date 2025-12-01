@@ -16,6 +16,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ErrorFormatterTest do
       changeset =
         Alert.changeset(%Alert{}, %{
           user: %{email: "a", first_name: "b", last_name: "c", role: :user},
+          active_period_start: DateTime.utc_now(),
           informed_entity: [%{route_id: "1"}]
         })
 

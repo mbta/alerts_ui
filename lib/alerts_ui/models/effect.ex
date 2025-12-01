@@ -67,16 +67,22 @@ defmodule AlertsUI.Models.Effect do
   def effect_map_by_name(nil), do: %{}
 
   def effect_map_by_name(search_name) do
-    {effect_name, effect, effect_detail} =
+    matching_tuple =
       effects_tuples()
       |> Enum.filter(fn {name, _e, _d} -> name == search_name end)
-      |> hd
+      |> Enum.at(0)
 
-    struct(EffectMapping, %{
-      effect_name: effect_name,
-      effect: effect,
-      effect_detail: effect_detail
-    })
+    case matching_tuple do
+      {effect_name, effect, effect_detail} ->
+        struct(EffectMapping, %{
+          effect_name: effect_name,
+          effect: effect,
+          effect_detail: effect_detail
+        })
+
+      _ ->
+        %{}
+    end
   end
 
   @spec effect_map_by_detail(String.t() | nil) :: struct() | map() | nil

@@ -70,14 +70,16 @@ defmodule AlertsUI.Models.Alert do
   notification_period_start
   notification_period_end
   recurrence_days
-  recurrence_times
+  recurrence_start_time
+  recurrence_end_time
   original_route_selections
   original_stop_selections
   original_trip_selections
   original_direction_selections
   original_facility_selections
   plaintext_reminder_selections
-  primary_service_type)a
+  primary_service_type
+  legacy)a
 
   @cause Cause.causes()
   @effect Effect.effects()
@@ -86,41 +88,31 @@ defmodule AlertsUI.Models.Alert do
   @duration_certainty DurationCertainty.duration_certainties()
 
   @type t :: %__MODULE__{
-          id: Ecto.UUID,
-          created_at: DateTime.t(),
-          updated_at: DateTime.t(),
-          alert_id: String.t(),
-          banner_text: String.t() | nil,
-          effect: atom() | nil,
-          effect_detail: String.t() | nil,
-          effect_name: String.t() | nil,
-          cause: atom() | nil,
-          cause_detail: String.t() | nil,
-          draft: boolean(),
-          header_text: String.t(),
-          description_text: String.t(),
-          severity_level: atom() | nil,
-          url: String.t() | nil,
-          service_effect_text: String.t() | nil,
-          short_header_text: String.t() | nil,
-          severity: integer() | nil,
-          created_timestamp: DateTime.t() | nil,
-          last_modified_timestamp: DateTime.t() | nil,
-          last_push_notification_timestamp: DateTime.t() | nil,
-          closed_timestamp: DateTime.t() | nil,
-          timeframe_text: String.t() | nil,
-          recurrence_text: String.t() | nil,
-          alert_lifecycle: atom() | nil,
-          duration_certainty: atom() | nil,
-          reminder_times: [ReminderTime.t()] | nil,
           active_period: [ActivePeriod.t()] | nil,
           active_period_start: DateTime.t() | nil,
           active_period_end: DateTime.t() | nil,
+          alert_id: String.t(),
+          alert_lifecycle: atom() | nil,
+          banner_text: String.t() | nil,
+          cause: atom() | nil,
+          cause_detail: String.t() | nil,
+          closed_timestamp: DateTime.t() | nil,
+          created_at: DateTime.t(),
+          created_timestamp: DateTime.t() | nil,
+          description_text: String.t(),
+          draft: boolean(),
+          duration_certainty: atom() | nil,
+          effect: atom() | nil,
+          effect_detail: String.t() | nil,
+          effect_name: String.t() | nil,
+          header_text: String.t(),
+          id: Ecto.UUID,
+          informed_entity: [InformedEntity.t()] | nil,
           image_url: String.t() | nil,
           image_alternative_text: String.t() | nil,
-          tts_header_text: String.t() | nil,
-          tts_description_text: String.t() | nil,
-          informed_entity: [InformedEntity.t()],
+          last_modified_timestamp: DateTime.t() | nil,
+          last_push_notification_timestamp: DateTime.t() | nil,
+          legacy: boolean(),
           notification_period_start: DateTime.t() | nil,
           notification_period_end: DateTime.t() | nil,
           original_route_selections: [String.t()] | nil,
@@ -129,10 +121,22 @@ defmodule AlertsUI.Models.Alert do
           original_direction_selections: [String.t()] | nil,
           original_facility_selections: [String.t()] | nil,
           plaintext_reminder_selections: String.t() | nil,
-          user_id: User.id(),
           primary_service_type: String.t(),
+          recurrence_text: String.t() | nil,
           recurrence_days: [String.t()],
-          recurrence_times: [Time.t()] | nil
+          recurrence_start_time: Time.t(),
+          recurrence_end_time: Time.t(),
+          reminder_times: [ReminderTime.t()] | nil,
+          service_effect_text: String.t() | nil,
+          severity: integer() | nil,
+          severity_level: atom() | nil,
+          short_header_text: String.t() | nil,
+          timeframe_text: String.t() | nil,
+          tts_header_text: String.t() | nil,
+          tts_description_text: String.t() | nil,
+          updated_at: DateTime.t(),
+          url: String.t() | nil,
+          user_id: User.id()
         }
 
   @derive {
@@ -215,8 +219,8 @@ defmodule AlertsUI.Models.Alert do
     field :recurrence_text, :string
     field :alert_lifecycle, Ecto.Enum, values: @alert_lifecycle
     field :duration_certainty, Ecto.Enum, values: @duration_certainty
-    has_many :reminder_times, ReminderTime, on_replace: :delete
-    has_many :active_period, ActivePeriod, on_replace: :delete
+    has_many :reminder_times, ReminderTime, on_replace: :delete_if_exists
+    has_many :active_period, ActivePeriod, on_replace: :delete_if_exists
     field :active_period_start, :utc_datetime
     field :active_period_end, :utc_datetime
     field :image_url, :string
@@ -229,11 +233,13 @@ defmodule AlertsUI.Models.Alert do
     field :notification_period_end, :utc_datetime
     field :plaintext_reminder_selections, :string
     field :primary_service_type, :string
+    field :legacy, :boolean
 
     field :recurrence_days, {:array, Ecto.Enum},
       values: ~w[sunday monday tuesday wednesday thursday friday saturday]a
 
-    field :recurrence_times, {:array, :time}
+    field :recurrence_start_time, :time
+    field :recurrence_end_time, :time
     field :original_route_selections, {:array, :string}
     field :original_stop_selections, {:array, :string}
     field :original_trip_selections, {:array, :string}
@@ -243,39 +249,21 @@ defmodule AlertsUI.Models.Alert do
     timestamps()
   end
 
-  @spec changeset(any(), map()) :: Ecto.Changeset.t()
-  def changeset(%__MODULE__{} = alert, params) do
+  @spec changeset(any(), map(), keyword()) :: Ecto.Changeset.t()
+  def changeset(%__MODULE__{} = alert, params, options \\ []) do
     alert
     |> cast(params, @permitted_fields)
-    |> cast_assoc(:active_period, required: false, with: &ActivePeriod.changeset/2)
-    |> cast_assoc(:informed_entity, required: true, with: &InformedEntity.changeset/2)
     |> cast_assoc(:reminder_times, required: false, with: &ReminderTime.changeset/2)
-    |> validate_change(:recurrence_days, fn :recurrence_days, recurrence_days ->
-      active_period_start =
-        Map.get(params, :active_period_start) |> DateTime.shift_zone!("America/New_York")
-
-      cond do
-        Enum.empty?(recurrence_days) ->
-          []
-
-        Timex.weekday(active_period_start) in Enum.map(recurrence_days, &Timex.day_to_num/1) ->
-          []
-
-        true ->
-          [
-            recurrence_days: {"Alert start day must match a selected day of the week.", []}
-          ]
-      end
-    end)
+    |> validate_recurrence_days(options)
     |> validate_timestamps()
     |> validate_inclusion(:effect, @effect)
     |> validate_inclusion(:cause, @cause)
     |> validate_inclusion(:severity_level, @severity_level)
     |> validate_inclusion(:alert_lifecycle, @alert_lifecycle)
     |> validate_inclusion(:duration_certainty, @duration_certainty)
-    |> validate_required([:header_text], message: "is required")
-    |> validate_length(:informed_entity, min: 1)
-    |> validate_length(:active_period, min: 1)
+    |> validate_required([:active_period_start, :header_text], message: "is required")
+    |> cast_and_validate_active_periods(options)
+    |> cast_and_validate_informed_entities(options)
     |> unique_constraint(:alert_id)
   end
 
@@ -345,7 +333,10 @@ defmodule AlertsUI.Models.Alert do
     end
   end
 
-  @spec service_types(t()) :: [Route.type_int()]
+  @spec service_types(any()) :: [Route.type_int()]
+  def service_types(%__MODULE__{informed_entity: nil}), do: []
+  def service_types(%__MODULE__{informed_entity: []}), do: []
+
   def service_types(%__MODULE__{informed_entity: informed_entities} = alert) do
     if systemwide?(alert) do
       informed_entities
@@ -442,6 +433,68 @@ defmodule AlertsUI.Models.Alert do
       add_error(changeset, :active_period_end, "Alerts of unknown duration can't have end times")
     else
       changeset
+    end
+  end
+
+  defp validate_recurrence_days(changeset, no_recurrence_days_validation: true), do: changeset
+
+  defp validate_recurrence_days(changeset, options) do
+    if Keyword.get(options, :no_recurrence_days_validation) do
+      changeset
+    else
+      active_period_start =
+        case get_field(changeset, :active_period_start) do
+          %NaiveDateTime{} = naive -> DateTime.from_naive!(naive, "America/New_York")
+          %DateTime{} = dt -> DateTime.shift_zone!(dt, "America/New_York")
+          nil -> nil
+        end
+
+      recurrence_days = get_field(changeset, :recurrence_days) || []
+
+      active_period_recurrence_is_valid_if_present(
+        changeset,
+        active_period_start,
+        recurrence_days
+      )
+    end
+  end
+
+  defp cast_and_validate_active_periods(changeset, options) do
+    if Keyword.get(options, :no_active_periods) do
+      changeset
+    else
+      changeset
+      |> cast_assoc(:active_period, required: false, with: &ActivePeriod.changeset/2)
+      |> validate_length(:active_period, min: 1)
+    end
+  end
+
+  defp cast_and_validate_informed_entities(changeset, options) do
+    if Keyword.get(options, :no_informed_entities) do
+      changeset
+    else
+      changeset
+      |> cast_assoc(:informed_entity, required: true, with: &InformedEntity.changeset/2)
+      |> validate_length(:informed_entity, min: 1)
+    end
+  end
+
+  defp active_period_recurrence_is_valid_if_present(changeset, nil, _), do: changeset
+  defp active_period_recurrence_is_valid_if_present(changeset, _, []), do: changeset
+
+  defp active_period_recurrence_is_valid_if_present(
+         changeset,
+         active_period_start,
+         recurrence_days
+       ) do
+    if Timex.weekday(active_period_start) in Enum.map(recurrence_days, &Timex.day_to_num/1) do
+      changeset
+    else
+      add_error(
+        changeset,
+        :recurrence_days,
+        "Alert start day must match a selected day of the week"
+      )
     end
   end
 end

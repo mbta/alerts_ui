@@ -112,7 +112,11 @@ defmodule AlertsUI.AlertBuilderTest do
                  original_trip_selections: [],
                  original_facility_selections: [],
                  primary_service_type: "1",
-                 original_direction_selections: ["Inbound|1"]
+                 original_direction_selections: ["Inbound|1"],
+                 closed_timestamp: nil,
+                 created_timestamp: nil,
+                 last_modified_timestamp: nil,
+                 legacy: nil
                }
 
         Alerts.create_or_update_alert(result, build(:user))
@@ -172,6 +176,63 @@ defmodule AlertsUI.AlertBuilderTest do
 
         result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 11:54:00Z])
         assert result.notification_period_end == ~U[2024-05-01 07:00:00Z]
+      end
+    end
+
+    test "notification period end can be set directly in alert data" do
+      with_mocks([
+        {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
+      ]) do
+        alert_data = %{
+          route_type: 1,
+          header_text: "hello",
+          effect_name: "Delay",
+          route_ids: ["57"],
+          active_period_start: ~N[2024-04-30 11:54:00],
+          active_period_end: ~N[2024-04-30 13:54:00],
+          alert_timing: :"one-time",
+          active_period_end_specifier: :later_today,
+          active_period_start_specifier: :custom,
+          cause_detail: "DISABLED_TRAIN",
+          notification_period_start: ~N[2024-04-30 05:52:00],
+          notification_period_end: ~N[2025-10-13 17:00:00],
+          severity: 3
+        }
+
+        result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 11:54:00Z])
+        assert result.notification_period_end == ~U[2025-10-13 21:00:00Z]
+      end
+    end
+
+    test "cause/effect fields can be set directly in alert data" do
+      with_mocks([
+        {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
+      ]) do
+        alert_data = %{
+          route_type: 1,
+          header_text: "hello",
+          cause_detail: "DISABLED_TRAIN",
+          cause: "TECHNICAL_PROBLEM",
+          effect_name: "Delay",
+          effect: "MODIFIED_SERVICE",
+          effect_detail: "the trains are running slow",
+          route_ids: ["57"],
+          active_period_start: ~N[2024-04-30 11:54:00],
+          active_period_end: ~N[2024-04-30 13:54:00],
+          alert_timing: :"one-time",
+          active_period_end_specifier: :later_today,
+          active_period_start_specifier: :custom,
+          notification_period_start: ~N[2024-04-30 05:52:00],
+          notification_period_end: ~N[2025-10-13 17:00:00],
+          severity: 3
+        }
+
+        result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 11:54:00Z])
+        assert result.cause == "TECHNICAL_PROBLEM"
+        assert result.effect == "MODIFIED_SERVICE"
+        assert result.effect_detail == "the trains are running slow"
       end
     end
 
@@ -330,7 +391,11 @@ defmodule AlertsUI.AlertBuilderTest do
                  original_facility_selections: [],
                  original_direction_selections: ["Both|default"],
                  service_effect_text: nil,
-                 primary_service_type: "1"
+                 primary_service_type: "1",
+                 closed_timestamp: nil,
+                 created_timestamp: nil,
+                 last_modified_timestamp: nil,
+                 legacy: nil
                }
 
         result
@@ -549,7 +614,11 @@ defmodule AlertsUI.AlertBuilderTest do
                  original_stop_selections: [],
                  original_trip_selections: [],
                  original_facility_selections: [],
-                 primary_service_type: "2"
+                 primary_service_type: "2",
+                 closed_timestamp: nil,
+                 created_timestamp: nil,
+                 last_modified_timestamp: nil,
+                 legacy: nil
                }
 
         result
@@ -3274,5 +3343,40 @@ defmodule AlertsUI.AlertBuilderTest do
     result = AlertBuilder.build_alert(alert_data, :RDS)
 
     assert result.informed_entity == []
+  end
+
+  test "informed entity is nil if :no_informed_entity is set" do
+    alert_data = %{
+      route_type: nil,
+      effect_name: "Delay",
+      header_text: "test header",
+      description_text: "test description",
+      route_ids: []
+    }
+
+    result =
+      AlertBuilder.build_alert(alert_data, :RDS, ~U[2024-04-30 05:54:00Z],
+        no_informed_entity: true
+      )
+
+    assert result.informed_entity == []
+  end
+
+  test "active_period_start is passed unchanged if :no_active_periods is set" do
+    start_time = ~U[2024-04-30 05:54:00Z]
+    current_time = ~U[2025-04-30 05:54:00Z]
+
+    alert_data = %{
+      active_period_start: start_time,
+      route_type: nil,
+      effect_name: "Delay",
+      header_text: "test header",
+      description_text: "test description",
+      route_ids: []
+    }
+
+    result = AlertBuilder.build_alert(alert_data, :RDS, current_time, no_active_periods: true)
+    assert result.active_period_start == start_time
+    refute Map.get(result, :active_periods)
   end
 end

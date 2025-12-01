@@ -4,6 +4,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   Used to populate form when editing an alert
   Can take an Alert struct or an alert_id
   """
+
   alias AlertsUI.Alerts
   alias AlertsUI.Models.{ActivePeriod, Alert, Effect}
 
@@ -112,8 +113,34 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   end
 
   def build_alert_data(%AlertsUI.Models.Alert{} = alert) do
-    created_at = alert.created_at
+    direct_from_alert_keys = [
+      :created_at,
+      :banner_text,
+      :cause_detail,
+      :description_text,
+      :header_text,
+      :image_alternative_text,
+      :image_url,
+      :severity,
+      :url,
+      :last_push_notification_timestamp
+    ]
 
+    Enum.reduce(direct_from_alert_keys, %__MODULE__{}, fn key, params ->
+      Map.put(params, key, Map.get(alert, key))
+    end)
+    |> Map.merge(create_and_edit_metadata(alert))
+    |> Map.merge(effect_name_combination_and_informed_entities(alert))
+    |> Map.merge(active_period_map(alert))
+    |> Map.merge(reminder_times(alert))
+    |> Map.merge(notification_period(alert))
+    |> Map.merge(service_types(alert))
+    |> Map.merge(banner_sync_toggle(alert))
+  end
+
+  def build_alert_data(_), do: %__MODULE__{}
+
+  defp create_and_edit_metadata(alert) do
     created_by =
       alert.id
       |> Alerts.get_earliest_version()
@@ -134,12 +161,27 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
         _ -> nil
       end
 
-    primary_service_type = Map.get(alert, :primary_service_type)
+    %{
+      created_by: created_by,
+      last_edited_by: last_edited_by,
+      last_edited_at: last_edited_at
+    }
+  end
 
-    effect_map = Effect.effect_map_by_detail(alert.effect_detail)
-    informed_entities = alert.informed_entity
+  defp effect_name_combination_and_informed_entities(alert) do
+    effect_name =
+      case Map.get(alert, :effect_name) do
+        nil ->
+          alert.effect_detail
+          |> Effect.effect_map_by_detail()
+          |> Map.get(:effect_name)
+
+        effect_name ->
+          effect_name
+      end
+
+    primary_service_type = Map.get(alert, :primary_service_type)
     route_type = get_route_type(primary_service_type)
-    effect_name = alert.effect_name || Map.get(effect_map, :effect_name)
 
     combination =
       if primary_service_type == "access" do
@@ -148,70 +190,71 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
         ServiceEffectCombinations.get_combination(route_type, effect_name)
       end
 
-    active_period_map =
-      if match?([_active_period], alert.active_period) do
-        determine_one_time_active_period(alert)
-      else
-        determine_recurring_active_period(alert)
-      end
-
-    reminder_times = Enum.map(alert.reminder_times, &shift_to_naive(&1.reminder_time))
-
-    active_period_start = shift_to_naive(alert.active_period_start)
-    active_period_end = shift_to_naive(alert.active_period_end)
-    notification_period_start = shift_to_naive(alert.notification_period_start)
-    notification_period_end = shift_to_naive(alert.notification_period_end)
-    notification_specifier = get_notification_specifier(notification_period_start)
-
     route_ids = Alert.get_original_ids(alert.original_route_selections || [])
 
     single_route_id =
-      if effect_name == "Detour" and length(route_ids) === 1 do
+      if alert.effect_name == "Detour" and length(route_ids) === 1 do
         hd(route_ids)
       else
         nil
       end
 
-    route_types_by_id = route_types_by_id(combination, route_type, route_ids)
+    route_type = get_route_type(Map.get(alert, :primary_service_type))
 
-    %__MODULE__{
-      active_period_start: active_period_start,
-      active_period_end: active_period_end,
-      banner_text: alert.banner_text,
-      banner_sync_toggle: get_banner_sync_toggle(alert.banner_text),
-      cause_detail: alert.cause_detail,
+    %{
       combination: combination,
-      created_at: created_at,
-      created_by: created_by,
-      description_text: alert.description_text,
-      direction: Alert.get_direction(informed_entities) || "default",
-      facility_id: Alert.gather_facility_ids(informed_entities) |> List.first(),
       effect_name: effect_name,
-      header_text: alert.header_text,
-      image_alternative_text: alert.image_alternative_text,
-      image_url: alert.image_url,
-      last_edited_at: last_edited_at,
-      last_edited_by: last_edited_by,
-      notification_period_start: notification_period_start,
-      notification_period_end: notification_period_end,
-      notification_specifier: notification_specifier,
-      reminder_times: reminder_times,
+      direction: Alert.get_direction(alert.informed_entity) || "default",
+      facility_id: Alert.gather_facility_ids(alert.informed_entity) |> List.first(),
       route_ids: route_ids,
       route_type: route_type,
-      route_types_by_id: route_types_by_id,
-      severity: alert.severity,
-      service_types: Alert.service_types(alert),
+      route_types_by_id: route_types_by_id(combination, route_type, route_ids),
       single_route_id: single_route_id,
-      stop_ids: Alert.gather_parent_stop_ids(informed_entities),
+      stop_ids: Alert.gather_parent_stop_ids(alert.informed_entity),
       stop_names_and_ids: alert.original_stop_selections,
-      trip_ids: Alert.gather_trip_ids(informed_entities),
-      url: alert.url,
-      last_push_notification_timestamp: alert.last_push_notification_timestamp
+      trip_ids: Alert.gather_trip_ids(alert.informed_entity)
     }
-    |> Map.merge(active_period_map)
   end
 
-  def build_alert_data(_), do: %__MODULE__{}
+  defp active_period_map(alert) do
+    base_map = %{
+      active_period_start: shift_to_naive(alert.active_period_start),
+      active_period_end: shift_to_naive(alert.active_period_end)
+    }
+
+    period_map =
+      case alert.active_period do
+        [] -> determine_empty_active_period(alert)
+        [_active_period] -> determine_one_time_active_period(alert)
+        _ -> determine_recurring_active_period(alert)
+      end
+
+    Map.merge(base_map, period_map)
+  end
+
+  defp reminder_times(alert) do
+    %{
+      reminder_times: Enum.map(alert.reminder_times, &shift_to_naive(&1.reminder_time))
+    }
+  end
+
+  defp notification_period(alert) do
+    notification_period_start = shift_to_naive(alert.notification_period_start)
+    notification_period_end = shift_to_naive(alert.notification_period_end)
+    notification_specifier = get_notification_specifier(notification_period_start)
+
+    %{
+      notification_period_start: notification_period_start,
+      notification_period_end: notification_period_end,
+      notification_specifier: notification_specifier
+    }
+  end
+
+  defp service_types(alert), do: %{service_types: Alert.service_types(alert)}
+
+  defp banner_sync_toggle(alert) do
+    %{banner_sync_toggle: is_nil(alert.banner_text)}
+  end
 
   def determine_one_time_active_period(alert) do
     active_period_start = shift_to_naive(alert.active_period_start)
@@ -248,8 +291,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     end_specifier = if alert.active_period_end, do: "custom", else: "until_further_notice"
 
     [recurrence_start, recurrence_end] =
-      Map.get(alert, :recurrence_times) ||
-        [start_datetime |> NaiveDateTime.to_time(), end_datetime |> NaiveDateTime.to_time()]
+      [
+        Map.get(alert, :recurrence_start_time) || NaiveDateTime.to_time(start_datetime),
+        Map.get(alert, :recurrence_end_time) || NaiveDateTime.to_time(end_datetime)
+      ]
 
     %{
       alert_timing: :recurring,
@@ -264,6 +309,17 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
         alert.active_period_end |> shift_to_naive |> end_date(end_specifier),
       recurrence_days: alert.recurrence_days |> Enum.map(&Atom.to_string/1)
     }
+  end
+
+  def determine_empty_active_period(alert) do
+    alert_timing =
+      if alert.recurrence_days do
+        :recurring
+      else
+        :one_time
+      end
+
+    %{alert_timing: alert_timing}
   end
 
   defp get_notification_specifier(nil), do: :same_as_effect_period
@@ -328,9 +384,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   end
 
   defp route_types_by_id(_, _, _), do: nil
-
-  defp get_banner_sync_toggle(nil), do: true
-  defp get_banner_sync_toggle(_banner_text), do: false
 
   defp originator_fallback(nil), do: "Legacy User"
   defp originator_fallback(user_name), do: user_name
