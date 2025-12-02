@@ -3,18 +3,20 @@ defmodule AlertsUI.IBIImportWorker do
   Kick off an IBI import.
   """
 
-  use Oban.Worker
+  use Oban.Worker, unique: true
 
   require Logger
 
   alias AlertsUI.IBIAlertImporter
   alias Ecto.UUID
 
-  @default_chunk_size 1000
   @bucket "mbta-alerts-ui-data-upload"
   @filename "ibi-alerts-source.csv"
 	@directory System.tmp_dir!()
 	@local_path "#{@directory}/#{@filename}"
+
+  def bucket, do: @bucket
+  def filename, do: @filename
 
   @impl Oban.Worker
   def perform(_job, _options \\ []) do
@@ -25,10 +27,10 @@ defmodule AlertsUI.IBIImportWorker do
 		case File.stat(@local_path) do
       {:error, :enoent} ->
         Logger.info("[import #{import_id}] downloading source file to #{@local_path}")
-        ExAws.download_file(@bucket, @filename, @local_path) |> ExAws.request!()
+        ExAws.S3.download_file(@bucket, @filename, @local_path) |> ExAws.request!()
       {:error, error} ->
         Logger.error("[import #{import_id}] uh oh: #{error}")
-        raise error, __STACKTRACE__
+        raise "#{error}"
       {:ok, _} ->
         Logger.info("[import #{import_id}] source file exists at #{@local_path}")
     end
