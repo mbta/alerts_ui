@@ -327,7 +327,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
   defp filter_active?(filter_value) when filter_value in ["", nil, "default"], do: false
   defp filter_active?(_), do: true
 
-  defp filter_facility_by_stop_ids(facility, stop_id_filter_value, facility_id) do
+  defp filter_facility_by_stop_ids(facility, stop_id_filter_value, selected_facility_id) do
     # returns true if facility in list if it belongs to a selected stop or has already been selected by the user.
     equals_stop_id =
       if stop_id_filter_value === "default" do
@@ -336,7 +336,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
         facility.stop.id === stop_id_filter_value
       end
 
-    equals_stop_id or facility.id == facility_id
+    equals_stop_id or facility.id == selected_facility_id
   end
 
   defp string_to_formatted_atom(string) do
