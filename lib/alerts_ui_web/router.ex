@@ -63,6 +63,7 @@ defmodule AlertsUIWeb.Router do
       live("/components", ComponentsLive)
       live("/validate", ValidateLive)
       live("/db", DBPageLive)
+      live("/import", IBIImporterLive)
     end
   end
 
