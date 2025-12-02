@@ -4,28 +4,48 @@ defmodule AlertsUIWeb.IBIImporterLive do
   """
   use AlertsUIWeb, :live_view
 
-  @bucket "mbta-alerts-ui-data-upload"
+  alias AlertsUI.IBIImportWorker
 
   @impl true
-  def mount(params, _session, socket) do
-    {:ok, assign(socket, upload_url: generate_upload_url, params: params)}
+  def mount(_params, _session, socket) do
+    {:ok, socket}
   end
 
+  @impl true
+  def handle_event("put", _params, socket) do
+    {:noreply, assign(socket, put: generate_put_url())}
+  end
+
+  @impl true
+  def handle_event("get", _params, socket) do
+    {:noreply, assign(socket, get: generate_get_url())}
+  end
+
+  @impl true
   def handle_event("import", _params, socket) do
+    id = Ecto.UUID.generate()
+    case IBIImportWorker.new(%{id: id}) |> Oban.insert do
+      {:ok, _job} -> {:noreply, assign(socket, import_id: id)}
+      _ -> nil
+    end
   end
 
-  def generate_upload_url(filename) do
+  def generate_put_url() do
     with config <- ExAws.Config.new(:s3),
-         {:ok, url} <- ExAws.presigned_url(config, :put, @bucket, filename) do
+         bucket <- IBIImportWorker.bucket(),
+         filename <- IBIImportWorker.filename(),
+         {:ok, url} <- ExAws.S3.presigned_url(config, :put, bucket, filename) do
       url
     else
       {:error, message} -> raise message
     end
   end
 
-  def generate_download_url(filename) do
+  def generate_get_url() do
     with config <- ExAws.Config.new(:s3),
-         {:ok, url} <- ExAws.presigned_url(config, :get, @bucket, filename) do
+         bucket <- IBIImportWorker.bucket(),
+         filename <- IBIImportWorker.filename(),
+         {:ok, url} <- ExAws.S3.presigned_url(config, :get, bucket, filename) do
       url
     else
       {:error, message} -> raise message
