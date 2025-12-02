@@ -24,13 +24,14 @@ defmodule AlertsUIWeb.IBIImporterLive do
   @impl true
   def handle_event("import", _params, socket) do
     id = Ecto.UUID.generate()
-    case IBIImportWorker.new(%{id: id}) |> Oban.insert do
+
+    case IBIImportWorker.new(%{id: id}) |> Oban.insert() do
       {:ok, _job} -> {:noreply, assign(socket, import_id: id)}
       _ -> nil
     end
   end
 
-  def generate_put_url() do
+  def generate_put_url do
     with config <- ExAws.Config.new(:s3),
          bucket <- IBIImportWorker.bucket(),
          filename <- IBIImportWorker.filename(),
@@ -41,7 +42,7 @@ defmodule AlertsUIWeb.IBIImporterLive do
     end
   end
 
-  def generate_get_url() do
+  def generate_get_url do
     with config <- ExAws.Config.new(:s3),
          bucket <- IBIImportWorker.bucket(),
          filename <- IBIImportWorker.filename(),
