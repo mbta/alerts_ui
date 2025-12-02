@@ -1,14 +1,48 @@
 <div id="importer-delivery">
-  <h2>Generate an upload URL</h2>
-  Generates a URL you can use to upload the legacy alerts file:
-  <span id="importer-delivery-upload-url"></span>
+  <div id="upload">
+    <h2 class="font-medium text-2xl">Generate an upload URL</h2>
+    <p>
+      Generates a URL you can use to upload the source file (use HTTP PUT):
+    </p>
+    <p>
+      <.button phx-click="put">Make upload URL</.button>
+    </p>
+    <div id="importer-delivery-put-url">
+      <pre>
+        <%= Map.get(assigns, :put, "") %>
+      </pre>
+    </div>
+  </div>
 
-  <h2>Generate a download URL</h2>
-  Generates a URL you can use to download the legacy alerts file in
-  case of debug: <span id="importer-delivery-download-url"></span>
+  <div id="download">
+    <h2 class="font-medium text-2xl">Generate a download URL</h2>
+    <p>
+      Generates a URL you can use to download the source file in case that's helpful:
+    </p>
+    <p>
+      <.button phx-click="get">Make download URL</.button>
+    </p>
+    <div id="importer-delivery-get-url">
+      <pre>
+        <a href={Map.get(assigns, :get, "")}>
+          {Map.get(assigns, :get, "")}
+        </a>
+      </pre>
+    </div>
+  </div>
 
-  <h2>Start an import</h2>
-  Kick off an import run:
-
-  <.button phx-click="import">Import</.button>
+  <div id="import">
+    <h2 class="font-medium text-2xl">Start an import</h2>
+    <p>
+      Kick off an import run (import id will appear if successful so you can search the logs):
+    </p>
+    <p>
+      <.button phx-click="import">Import</.button>
+    </p>
+    <div id="importer-delivery-import">
+      <pre>
+        <%= Map.get(assigns, :import_id, "") %>
+      </pre>
+    </div>
+  </div>
 </div>
