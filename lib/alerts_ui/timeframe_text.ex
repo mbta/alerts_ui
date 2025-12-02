@@ -9,13 +9,15 @@ defmodule AlertsUI.TimeframeText do
 
   defp starts_later_today_ends_same_calendar_day, do: "Later today"
   defp starts_later_today_ends_next_calendar_day, do: "Starting later today"
-  defp starts_tomorrow, do: "Tomorrow"
+  defp starts_tomorrow, do: "Starting tomorrow"
   defp starts_tomorrow_ends_this_week(end_day_name), do: "Tomorrow through #{end_day_name}"
 
   defp starts_this_week_ends_next_week(start_day_name, end_day_name),
     do: "#{start_day_name} through #{end_day_name}"
 
   defp starts_this_week(start_day_name), do: "Starting #{start_day_name}"
+  defp starts_this_week_and_is_weekend, do: "this weekend"
+  defp starts_this_week_ends_same_day(start_day_name), do: start_day_name
   defp distant_date_ends_same_day(start_date), do: start_date
   defp distant_date(start_date, end_date), do: "#{start_date}-#{end_date}"
 
@@ -79,24 +81,36 @@ defmodule AlertsUI.TimeframeText do
     end
   end
 
-  defp starts_2_to_6_days_from_now(start_date, {end_datetime, _, _} = end_time_tuple) do
+  defp starts_2_to_6_days_from_now(start_date, {end_datetime, end_date, _} = end_time_tuple) do
+    ends_same_day = end_date == start_date
     ends_2_to_6_days_from_start = between_two_and_six_days(start_date, end_datetime)
+    start_day_name = get_day_name(start_date)
+    end_day_name = get_day_name_for_end(end_time_tuple)
 
-    if ends_2_to_6_days_from_start do
-      starts_this_week_ends_next_week(
-        get_day_name(start_date),
-        get_day_name_for_end(end_time_tuple)
-      )
-    else
-      starts_this_week(get_day_name(start_date))
+    is_weekend =
+      ["Saturday", "Sunday"] == [start_day_name, end_day_name] and
+        Date.diff(get_service_date(end_time_tuple), start_date) == 1
+
+    cond do
+      ends_same_day ->
+        starts_this_week_ends_same_day(start_day_name)
+
+      is_weekend ->
+        starts_this_week_and_is_weekend()
+
+      ends_2_to_6_days_from_start ->
+        starts_this_week_ends_next_week(start_day_name, end_day_name)
+
+      true ->
+        starts_this_week(start_day_name)
     end
   end
 
   defp starts_more_than_six_days_from_now(
          start_date,
-         {_, end_date, _} = end_date_tuple
+         end_date_tuple
        ) do
-    if end_date == start_date do
+    if get_service_date(end_date_tuple) == start_date do
       distant_date_ends_same_day(get_human_readable_start_date(start_date))
     else
       distant_date(
@@ -135,15 +149,17 @@ defmodule AlertsUI.TimeframeText do
     DateTime.compare(end_datetime, six_days_from_start) in [:gt, :eq]
   end
 
-  defp get_day_name_for_end({_, end_date, end_time}) do
-    # moves end day up 1 day if end time is before start of service
+  defp get_day_name_for_end(end_time_tuple) do
+    end_time_tuple |> get_service_date |> get_day_name
+  end
 
+  defp get_service_date({_, end_date, end_time}) do
+    # moves end day up 1 day if end time is before start of service
     if Time.compare(end_time, ActivePeriod.start_of_service_time()) in [:lt, :eq] do
       Date.add(end_date, -1)
     else
       end_date
     end
-    |> get_day_name
   end
 
   defp get_day_name(date) do
