@@ -26,7 +26,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
           short_header_text: alert.short_header_text |> build_translated_string,
           severity: alert.severity,
           created_timestamp: alert.created_at |> date_time_to_unix(),
-          last_modified_timestamp: alert.updated_at |> date_time_to_unix(),
+          last_modified_timestamp: alert.last_modified_timestamp |> date_time_to_unix(),
           last_push_notification_timestamp:
             alert.last_push_notification_timestamp |> date_time_to_unix(),
           closed_timestamp: alert.closed_timestamp |> date_time_to_unix(),

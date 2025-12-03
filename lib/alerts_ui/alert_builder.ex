@@ -88,7 +88,6 @@ defmodule AlertsUI.AlertBuilder do
       :recurrence_days,
       :severity,
       :legacy,
-      :last_modified_timestamp,
       :created_timestamp,
       :closed_timestamp
     ]
@@ -108,6 +107,7 @@ defmodule AlertsUI.AlertBuilder do
     |> Map.merge(active_periods(alert_data, current_time, options))
     |> Map.merge(notification_periods(alert_data, current_time))
     |> Map.merge(informed_entity(alert_data, combination, options))
+    |> Map.merge(last_modified_timestamp(alert_data, current_time))
   end
 
   defp recurrence_text(alert_data) do
@@ -117,6 +117,15 @@ defmodule AlertsUI.AlertBuilder do
       |> Recurrence.recurrence_text_from_days()
 
     %{recurrence_text: recurrence_text}
+  end
+
+  defp last_modified_timestamp(%{last_modified_timestamp: last_modified_timestamp}, _)
+       when not is_nil(last_modified_timestamp) do
+    %{last_modified_timestamp: last_modified_timestamp}
+  end
+
+  defp last_modified_timestamp(_alert_data, current_time) do
+    %{last_modified_timestamp: current_time}
   end
 
   defp last_push_notification_timestamp(alert_data) do

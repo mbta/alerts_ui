@@ -30,6 +30,7 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
         active_period: [
           build(:active_period, %{start: ~U[2023-10-12 00:01:00Z], end: four_minutes_ago})
         ],
+        last_modified_timestamp: four_minutes_ago,
         closed_timestamp: four_minutes_ago,
         user: build(:user)
       )
@@ -39,6 +40,7 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
         active_period_start: ~U[2023-10-12 00:01:00Z],
         active_period: [build(:active_period, %{start: ~U[2023-10-12 00:01:00Z], end: nil})],
         notification_period_start: DateTime.add(current_time, -1, :hour),
+        last_modified_timestamp: current_time,
         user: build(:user)
       )
 
@@ -49,6 +51,7 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
         active_period: [
           build(:active_period, %{start: ~U[2023-10-12 00:01:00Z], end: four_minutes_ago})
         ],
+        last_modified_timestamp: four_minutes_ago,
         user: build(:user)
       )
 
@@ -99,7 +102,7 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
 
       assert within_two_seconds(
                alert_1["alert"]["last_modified_timestamp"],
-               current_time |> DateTime.to_unix()
+               four_minutes_ago |> DateTime.to_unix()
              )
 
       assert within_two_seconds(
@@ -155,7 +158,7 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
 
       assert within_two_seconds(
                alert_3["alert"]["last_modified_timestamp"],
-               current_time |> DateTime.to_unix()
+               four_minutes_ago |> DateTime.to_unix()
              )
 
       assert within_two_seconds(

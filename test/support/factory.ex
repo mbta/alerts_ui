@@ -44,6 +44,7 @@ defmodule AlertsUI.Support.Factory do
       informed_entity: [build(:informed_entity_with_trip)],
       reminder_times: [build(:reminder_time)],
       active_period_start: ~U[2023-10-12 00:01:00Z],
+      last_modified_timestamp: ~U[2023-10-12 00:01:00Z],
       primary_service_type: "1"
     }
   end

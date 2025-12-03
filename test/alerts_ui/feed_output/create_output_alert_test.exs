@@ -76,6 +76,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
           "On weekdays, from Sep 25th through mid-Oct, between 8am & 4pm, Lowell Ln passengers may experience delays of 5-10 minutes both ways due to t",
         severity: 3,
         last_push_notification_timestamp: ~U[2023-09-21 14:18:54Z],
+        last_modified_timestamp: ~U[2023-09-21 14:18:54Z],
         closed_timestamp: nil,
         duration_certainty: :KNOWN,
         active_period: [
@@ -142,6 +143,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
                  },
                  severity: 3,
                  last_push_notification_timestamp: 1_695_305_934,
+                 last_modified_timestamp: 1_695_305_934,
                  timeframe_text: %{
                    translation: [
                      %{
@@ -203,11 +205,6 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
                actual.alert.created_timestamp,
                DateTime.utc_now() |> DateTime.to_unix()
              )
-
-      assert within_two_seconds(
-               actual.alert.last_modified_timestamp,
-               DateTime.utc_now() |> DateTime.to_unix()
-             )
     end
 
     test "filters out old recurring alerts" do
@@ -219,7 +216,8 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
           build(:active_period, %{start: ~U[2023-09-24 00:00:54Z], end: ~U[2023-09-24 00:00:54Z]})
         ],
         active_period_start: ~U[2023-09-22 00:00:54Z],
-        active_period_end: ~U[2023-09-22 00:00:54Z]
+        active_period_end: ~U[2023-09-22 00:00:54Z],
+        last_modified_timestamp: ~U[2023-09-22 00:00:54Z]
       })
 
       existing_alert = Alerts.get_by_alert_id("524486")
@@ -236,17 +234,13 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
                    %{end: 1_695_478_854, start: 1_695_427_254},
                    %{start: 1_695_513_654, end: 1_695_513_654}
                  ],
+                 last_modified_timestamp: 1_695_340_854,
                  informed_entity: [%{route_id: "1", trip: %{trip_id: "1"}, activities: []}]
                }
              } = actual
 
       assert within_two_seconds(
                actual.alert.created_timestamp,
-               DateTime.utc_now() |> DateTime.to_unix()
-             )
-
-      assert within_two_seconds(
-               actual.alert.last_modified_timestamp,
                DateTime.utc_now() |> DateTime.to_unix()
              )
     end
@@ -261,6 +255,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
         ],
         active_period_start: ~U[2023-09-22 00:00:54Z],
         active_period_end: ~U[2023-09-21 00:00:54Z],
+        last_modified_timestamp: ~U[2023-09-21 00:00:54Z],
         closed_timestamp: ~U[2023-09-21 00:00:54Z]
       })
 
@@ -276,17 +271,13 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
                  reminder_times: [1_727_222_460],
                  active_period: [],
                  closed_timestamp: 1_695_254_454,
+                 last_modified_timestamp: 1_695_254_454,
                  informed_entity: [%{route_id: "1", trip: %{trip_id: "1"}, activities: []}]
                }
              } = actual
 
       assert within_two_seconds(
                actual.alert.created_timestamp,
-               DateTime.utc_now() |> DateTime.to_unix()
-             )
-
-      assert within_two_seconds(
-               actual.alert.last_modified_timestamp,
                DateTime.utc_now() |> DateTime.to_unix()
              )
     end

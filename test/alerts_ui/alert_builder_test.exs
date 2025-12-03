@@ -115,7 +115,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  original_direction_selections: ["Inbound|1"],
                  closed_timestamp: nil,
                  created_timestamp: nil,
-                 last_modified_timestamp: nil,
+                 last_modified_timestamp: ~U[2024-04-30 05:54:00Z],
                  legacy: nil
                }
 
@@ -394,7 +394,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  primary_service_type: "1",
                  closed_timestamp: nil,
                  created_timestamp: nil,
-                 last_modified_timestamp: nil,
+                 last_modified_timestamp: ~U[2024-04-30 05:54:00Z],
                  legacy: nil
                }
 
@@ -617,7 +617,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  primary_service_type: "2",
                  closed_timestamp: nil,
                  created_timestamp: nil,
-                 last_modified_timestamp: nil,
+                 last_modified_timestamp: ~U[2024-04-30 05:54:00Z],
                  legacy: nil
                }
 
