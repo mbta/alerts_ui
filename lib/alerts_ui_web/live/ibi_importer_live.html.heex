@@ -9,7 +9,7 @@
     </p>
     <div id="importer-delivery-put-url">
       <pre>
-        <%= Map.get(assigns, :put, "") %>
+        {Map.get(assigns, :put, "")}
       </pre>
     </div>
   </div>
@@ -41,8 +41,11 @@
     </p>
     <div id="importer-delivery-import">
       <pre>
-        <%= Map.get(assigns, :import_id, "") %>
+        {Map.get(assigns, :import_id, "")}
       </pre>
+    </div>
+    <div id="importer-delivery-error">
+      {Map.get(assigns, :import_error, "")}
     </div>
   </div>
 </div>

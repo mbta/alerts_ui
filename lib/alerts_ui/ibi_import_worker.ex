@@ -19,12 +19,19 @@ defmodule AlertsUI.IBIImportWorker do
 
   @impl Oban.Worker
   def perform(%Oban.Job{args: %{"id" => id}}, _options \\ []) do
-    Logger.info("[import #{id}] starting")
+    Logger.info("[import #{id}] worker called")
 
     case File.stat(@local_path) do
       {:error, :enoent} ->
         Logger.info("[import #{id}] downloading source file to #{@local_path}")
-        ExAws.S3.download_file(@bucket, @filename, @local_path) |> ExAws.request!()
+
+        try do
+          ExAws.S3.download_file(@bucket, @filename, @local_path) |> ExAws.request!()
+        rescue
+          e ->
+            Logger.error("[import #{id}] download failed: #{inspect(e)}")
+            reraise e, __STACKTRACE__
+        end
 
       {:error, error} ->
         Logger.error("[import #{id}] uh oh: #{error}")
@@ -34,7 +41,8 @@ defmodule AlertsUI.IBIImportWorker do
         Logger.info("[import #{id}] source file exists at #{@local_path}")
     end
 
-    IBIAlertImporter.import_ibi_alerts!(@local_path)
-    Logger.info("[import #{id}] finished")
+    Logger.info("[import #{id}] calling importer")
+    IBIAlertImporter.import_ibi_alerts!(@local_path, id)
+    Logger.info("[import #{id}] worker finished")
   end
 end

@@ -5,6 +5,9 @@ defmodule AlertsUIWeb.IBIImporterLive do
   use AlertsUIWeb, :live_view
 
   alias AlertsUI.IBIImportWorker
+  alias Ecto.Changeset
+
+  require Logger
 
   @impl true
   def mount(_params, _session, socket) do
@@ -26,8 +29,19 @@ defmodule AlertsUIWeb.IBIImporterLive do
     id = Ecto.UUID.generate()
 
     case IBIImportWorker.new(%{id: id}) |> Oban.insert() do
-      {:ok, _job} -> {:noreply, assign(socket, import_id: id)}
-      _ -> nil
+      {:ok, _job} ->
+        Logger.info("[import #{id}] job queued")
+        {:noreply, assign(socket, import_id: id)}
+
+      {:error, %Changeset{} = error_changeset} ->
+        error_string = inspect(error_changeset.errors)
+        Logger.error("[import #{id}] invalid job: #{error_string}")
+        {:noreply, assign(socket, import_error: error_string)}
+
+      {:error, error} ->
+        error_string = inspect(error)
+        Logger.error("[import #{id}] other error: #{error_string}")
+        {:noreply, assign(socket, import_error: error_string)}
     end
   end
 
