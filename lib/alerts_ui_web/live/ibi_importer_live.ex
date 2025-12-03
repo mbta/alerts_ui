@@ -32,10 +32,12 @@ defmodule AlertsUIWeb.IBIImporterLive do
       {:ok, _job} ->
         Logger.info("[import #{id}] job queued")
         {:noreply, assign(socket, import_id: id)}
+
       {:error, %Changeset{} = error_changeset} ->
         error_string = inspect(error_changeset.errors)
         Logger.error("[import #{id}] invalid job: #{error_string}")
         {:noreply, assign(socket, import_error: error_string)}
+
       {:error, error} ->
         error_string = inspect(error)
         Logger.error("[import #{id}] other error: #{error_string}")
