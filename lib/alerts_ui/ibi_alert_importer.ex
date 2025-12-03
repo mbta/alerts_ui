@@ -21,13 +21,17 @@ defmodule AlertsUI.IBIAlertImporter do
 
   @default_chunk_size 1000
 
-  def import_ibi_alerts!(path) do
+  def import_ibi_alerts!(path, import_id) do
     Repo.transact(
       fn ->
+        Logger.info("[import #{import_id}] ingesting source file")
         ingest_csv_file(path)
+        Logger.info("[import #{import_id}] fixing timestamps")
         fix_invalid_timestamps()
+        Logger.info("[import #{import_id}] converting legacy alerts")
         convert_ibi_alerts()
         {:ok, true}
+        Logger.info("[import #{import_id}] done")
       end,
       timeout: :infinity
     )

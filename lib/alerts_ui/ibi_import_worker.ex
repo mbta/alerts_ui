@@ -19,7 +19,7 @@ defmodule AlertsUI.IBIImportWorker do
 
   @impl Oban.Worker
   def perform(%Oban.Job{args: %{"id" => id}}, _options \\ []) do
-    Logger.info("[import #{id}] starting")
+    Logger.info("[import #{id}] worker called")
 
     case File.stat(@local_path) do
       {:error, :enoent} ->
@@ -34,7 +34,8 @@ defmodule AlertsUI.IBIImportWorker do
         Logger.info("[import #{id}] source file exists at #{@local_path}")
     end
 
-    IBIAlertImporter.import_ibi_alerts!(@local_path)
-    Logger.info("[import #{id}] finished")
+    Logger.info("[import #{id}] calling importer")
+    IBIAlertImporter.import_ibi_alerts!(@local_path, id)
+    Logger.info("[import #{id}] worker finished")
   end
 end
