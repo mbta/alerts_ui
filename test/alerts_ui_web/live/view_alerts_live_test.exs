@@ -1021,7 +1021,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         {:ok, view, _html} = live(conn, "/alerts")
 
         view
-        |> element("#all-clear-checkbox-345")
+        |> element("#all-clear-checkbox-close-alert-modal-345")
         |> render_click()
 
         view

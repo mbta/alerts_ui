@@ -580,7 +580,7 @@ defmodule AlertsUIWeb.ReviewModal do
           <input type="hidden" name="all-clear-checkbox" value="false" />
           <input
             type="checkbox"
-            id={"all-clear-checkbox-#{@alert_id}"}
+            id={"all-clear-checkbox-#{@id}-#{@alert_id}"}
             name="all-clear-checkbox"
             value="true"
             phx-click="all_clear_checkbox"
