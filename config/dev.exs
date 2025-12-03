@@ -72,3 +72,12 @@ config :ueberauth, Ueberauth,
   providers: [
     keycloak: {Ueberauth.Strategy.FakeKeycloak, [issuer: :keycloak_issuer]}
   ]
+
+# set defaults for minio in local dev
+config :ex_aws,
+  access_key_id: "minioadmin",
+  secret_access_key: "minioadmin",
+  region: "local",
+  debug_requests: true
+
+config :ex_aws, :s3, scheme: "http://", host: "localhost", port: 9000, region: "local"

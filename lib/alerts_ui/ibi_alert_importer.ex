@@ -21,7 +21,7 @@ defmodule AlertsUI.IBIAlertImporter do
 
   @default_chunk_size 1000
 
-  def import_ibi_alerts(path) do
+  def import_ibi_alerts!(path) do
     Repo.transact(
       fn ->
         ingest_csv_file(path)
