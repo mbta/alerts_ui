@@ -566,18 +566,16 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         |> naive_datetime_to_iso8601()
 
       "end_of_service" ->
-        cond do
-          time_range["active_period_end_date"] in ["", nil] ->
-            ""
-
-          true ->
-            # The provided end date should always result in the end of service for that day
-            # (ie the next morning)
-            time_range["active_period_end_date"]
-            |> Date.from_iso8601!()
-            |> Date.add(1)
-            |> NaiveDateTime.new!(ActivePeriod.end_of_service_time())
-            |> naive_datetime_to_iso8601()
+        if time_range["active_period_end_date"] in ["", nil] do
+          ""
+        else
+          # The provided end date should always result in the end of service for that day
+          # (ie the next morning)
+          time_range["active_period_end_date"]
+          |> Date.from_iso8601!()
+          |> Date.add(1)
+          |> NaiveDateTime.new!(ActivePeriod.end_of_service_time())
+          |> naive_datetime_to_iso8601()
         end
 
       "until_further_notice" ->
