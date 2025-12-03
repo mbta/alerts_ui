@@ -82,7 +82,7 @@ defmodule AlertsUI.TimeframeTextTest do
       start = utc_datetime_from_local(~D[2024-02-26], ~T[00:00:00])
       ending = utc_datetime_from_local(~D[2024-02-26], ~T[01:00:00])
 
-      assert TimeframeText.timeframe_text(start, ending, now) == "Tomorrow"
+      assert TimeframeText.timeframe_text(start, ending, now) == "Starting tomorrow"
     end
 
     test "Starts tomorrow, ends same calendar day (between End of Service and Start of Service)" do
@@ -90,7 +90,7 @@ defmodule AlertsUI.TimeframeTextTest do
       start = utc_datetime_from_local(~D[2024-02-26], ~T[00:00:00])
       ending = utc_datetime_from_local(~D[2024-02-26], ~T[03:00:00])
 
-      assert TimeframeText.timeframe_text(start, ending, now) == "Tomorrow"
+      assert TimeframeText.timeframe_text(start, ending, now) == "Starting tomorrow"
     end
 
     test "Starts tomorrow, ends same calendar day (after Start of Service)" do
@@ -98,7 +98,7 @@ defmodule AlertsUI.TimeframeTextTest do
       start = utc_datetime_from_local(~D[2024-02-26], ~T[00:00:00])
       ending = utc_datetime_from_local(~D[2024-02-26], ~T[05:00:00])
 
-      assert TimeframeText.timeframe_text(start, ending, now) == "Tomorrow"
+      assert TimeframeText.timeframe_text(start, ending, now) == "Starting tomorrow"
     end
 
     test "Starts tomorrow, ends 2-6 calendar days later" do
@@ -107,7 +107,7 @@ defmodule AlertsUI.TimeframeTextTest do
       start = utc_datetime_from_local(~D[2024-02-26], ~T[00:00:00])
       ending = utc_datetime_from_local(~D[2024-02-27], ~T[01:00:00])
 
-      assert TimeframeText.timeframe_text(start, ending, now) == "Tomorrow"
+      assert TimeframeText.timeframe_text(start, ending, now) == "Starting tomorrow"
     end
 
     test "Starts now (before End of Service), ends same calendar day" do
@@ -179,7 +179,7 @@ defmodule AlertsUI.TimeframeTextTest do
       start = utc_datetime_from_local(~D[2024-02-27], ~T[01:00:00])
       ending = utc_datetime_from_local(~D[2024-02-27], ActivePeriod.end_of_service_time())
 
-      assert TimeframeText.timeframe_text(start, ending, now) == "Tomorrow"
+      assert TimeframeText.timeframe_text(start, ending, now) == "Starting tomorrow"
     end
 
     test "Starts tomorrow (at End of Service), ends 2-6 calendar days later (at Start of Service)" do
@@ -215,6 +215,22 @@ defmodule AlertsUI.TimeframeTextTest do
       assert TimeframeText.timeframe_text(start, ending, now) == "Friday through Sunday"
     end
 
+    test "Starts 2-6 calendar days in the future, ends next day, is a weekend" do
+      now = utc_datetime_from_local(~D[2024-02-28], ~T[22:00:00])
+      start = utc_datetime_from_local(~D[2024-03-02], ~T[10:00:00])
+      ending = utc_datetime_from_local(~D[2024-03-03], ~T[10:00:00])
+
+      assert TimeframeText.timeframe_text(start, ending, now) == "this weekend"
+    end
+
+    test "Starts 2-6 calendar days in the future at start of service, ends next day at end of service, is a weekend" do
+      now = utc_datetime_from_local(~D[2024-02-28], ~T[03:00:00])
+      start = utc_datetime_from_local(~D[2024-03-02], ~T[10:00:00])
+      ending = utc_datetime_from_local(~D[2024-03-04], ~T[03:00:00])
+
+      assert TimeframeText.timeframe_text(start, ending, now) == "this weekend"
+    end
+
     test "Starts 2-6 calendar days in the future, ends >6 calendar days later" do
       now = utc_datetime_from_local(~D[2024-02-26], ~T[22:00:00])
       start = utc_datetime_from_local(~D[2024-03-01], ~T[10:00:00])
@@ -223,10 +239,26 @@ defmodule AlertsUI.TimeframeTextTest do
       assert TimeframeText.timeframe_text(start, ending, now) == "Starting Friday"
     end
 
+    test "Starts 2-6 calendar days in the future, ends same day" do
+      now = utc_datetime_from_local(~D[2024-02-26], ~T[22:00:00])
+      start = utc_datetime_from_local(~D[2024-03-01], ~T[10:00:00])
+      ending = utc_datetime_from_local(~D[2024-03-01], ~T[11:00:00])
+
+      assert TimeframeText.timeframe_text(start, ending, now) == "Friday"
+    end
+
     test "Starts >6 calendar days, ends same calendar day" do
       now = utc_datetime_from_local(~D[2024-02-26], ~T[22:00:00])
       start = utc_datetime_from_local(~D[2024-03-22], ~T[06:00:00])
       ending = utc_datetime_from_local(~D[2024-03-22], ~T[19:00:00])
+
+      assert TimeframeText.timeframe_text(start, ending, now) == "March 22"
+    end
+
+    test "Starts >6 calendar days, ends same calendar day when end is end of service" do
+      now = utc_datetime_from_local(~D[2024-02-26], ~T[22:00:00])
+      start = utc_datetime_from_local(~D[2024-03-22], ~T[06:00:00])
+      ending = utc_datetime_from_local(~D[2024-03-23], ~T[03:00:00])
 
       assert TimeframeText.timeframe_text(start, ending, now) == "March 22"
     end
