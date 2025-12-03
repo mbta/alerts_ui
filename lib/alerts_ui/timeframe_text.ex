@@ -87,7 +87,7 @@ defmodule AlertsUI.TimeframeText do
     start_day_name = get_day_name(start_date)
     end_day_name = get_day_name_for_end(end_time_tuple)
 
-    is_weekend =
+    is_this_weekend =
       ["Saturday", "Sunday"] == [start_day_name, end_day_name] and
         Date.diff(get_service_date(end_time_tuple), start_date) == 1
 
@@ -95,7 +95,7 @@ defmodule AlertsUI.TimeframeText do
       ends_same_day ->
         starts_this_week_ends_same_day(start_day_name)
 
-      is_weekend ->
+      is_this_weekend ->
         starts_this_week_and_is_weekend()
 
       ends_2_to_6_days_from_start ->
