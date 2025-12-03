@@ -559,8 +559,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   end
 
   defp set_end_datetime(time_range, current_time, previous_state) do
-    IO.inspect(time_range, label: "time_range")
-
     case time_range["active_period_end_specifier"] do
       "later_today" ->
         current_time
@@ -573,7 +571,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
             ""
 
           true ->
-            IO.inspect("here!")
             # The provided end date should always result in the end of service for that day
             # (ie the next morning)
             time_range["active_period_end_date"]
