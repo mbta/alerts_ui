@@ -117,6 +117,38 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
              |> render() =~ "later today"
     end
 
+    test "editing custom fields to start/end of service correctly validates" do
+      {:ok, view, _html} =
+        live_isolated_component(
+          TimeRange,
+          Map.merge(
+            @assigns,
+            %{
+              form_type: :editing,
+              alert_data: %{
+                active_period_start_specifier: "custom",
+                active_period_start: ~N[2040-04-29 10:54:00],
+                active_period_start_date: ~D[2040-04-29],
+                active_period_end_specifier: "custom",
+                active_period_end: ~N[2040-04-30 15:59:00],
+                active_period_end_date: ~D[2040-04-30]
+              }
+            }
+          )
+        )
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end_specifier" => "end_of_service"
+        }
+      })
+
+      refute view
+             |> render() =~ "Effect must end after"
+    end
+
     test "editing does not check start time" do
       {:ok, view, _html} =
         live_isolated_component(
