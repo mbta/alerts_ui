@@ -66,11 +66,12 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
     end)
   end
 
-  @spec format_invalid_alerts([invalid_alert_t()]) :: String.t()
+  @spec format_invalid_alerts([invalid_alert_t()], String.t()) :: String.t()
   # use to format a list of invalid alert structs for logging purposes
-  def format_invalid_alerts([]), do: "No invalid alerts found"
+  def format_invalid_alerts(invalid_alerts, error_message_word \\ "")
+  def format_invalid_alerts([], _), do: "No invalid alerts found"
 
-  def format_invalid_alerts(invalid_alerts) do
+  def format_invalid_alerts(invalid_alerts, error_message_word) do
     invalid_alert_info =
       Enum.map(invalid_alerts, fn invalid_alert ->
         entity_results =
@@ -86,6 +87,9 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
       end)
 
     "The following alerts have entities that no longer exist in GTFS:|" <>
+      Enum.join(invalid_alert_info, "||")
+
+    "The following alerts have entities that no longer exist in #{error_message_word} GTFS:|" <>
       Enum.join(invalid_alert_info, "||")
   end
 

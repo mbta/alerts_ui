@@ -112,10 +112,16 @@ config :alerts_ui, Oban,
          max_attempts: 1,
          unique: [period: 30, states: [:available, :scheduled, :executing]]
        },
-       # Validate alerts against production every day at 6:00am
-       {"0 6 * * *", AlertsUI.AlertValidation.AlertValidationWorker},
        # Update recurring alerts every day at 3:01 am
-       {"1 3 * * *", AlertsUI.RecurringAlertUpdater}
+       {"1 3 * * *", AlertsUI.RecurringAlertUpdater},
+       # Validate alerts against production every day at 4:00 am
+       {"0 4 * * *", AlertsUI.AlertValidation.AlertValidationDailyWorker},
+       # Check if we need to validate alerts against dev every minute
+       {
+         "*/1 * * * *",
+         AlertsUI.AlertValidation.AlertValidationUpcomingWorker,
+         max_attempts: 1
+       }
      ]}
   ],
   queues: [default: 10]

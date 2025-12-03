@@ -7,3 +7,6 @@ export DATABASE_URL_TEST=postgresql://__username__:password@localhost:5432/alert
 export SENTRY_DSN=
 export SENTRY_ENV=local
 export SECRET_KEY_BASE=
+# used in GTFS validation
+export DEV_API_URL=https://api-dev.mbtace.com/
+export DEV_API_KEY=<Enter your dev API Key here>

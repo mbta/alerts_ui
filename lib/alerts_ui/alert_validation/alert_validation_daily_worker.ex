@@ -1,6 +1,7 @@
-defmodule AlertsUI.AlertValidation.AlertValidationWorker do
+defmodule AlertsUI.AlertValidation.AlertValidationDailyWorker do
   @moduledoc """
-  Oban worker that checks the informed entities of open alerts for validity, against the production API.
+  Oban worker that checks the informed entities of open alerts for validity
+  once a day, against the production API.
   """
   use Oban.Worker
 
@@ -15,7 +16,7 @@ defmodule AlertsUI.AlertValidation.AlertValidationWorker do
     api_key = AlertsUI.config(:api_key)
 
     AlertValidator.validate_alerts(base_url, api_key)
-    |> AlertValidator.format_invalid_alerts()
+    |> AlertValidator.format_invalid_alerts("current")
     |> Logger.info()
   end
 end
