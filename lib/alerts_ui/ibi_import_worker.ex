@@ -24,7 +24,14 @@ defmodule AlertsUI.IBIImportWorker do
     case File.stat(@local_path) do
       {:error, :enoent} ->
         Logger.info("[import #{id}] downloading source file to #{@local_path}")
-        ExAws.S3.download_file(@bucket, @filename, @local_path) |> ExAws.request!()
+
+        try do
+          ExAws.S3.download_file(@bucket, @filename, @local_path) |> ExAws.request!()
+        rescue
+          e ->
+            Logger.error("[import #{id}] download failed: #{inspect(e)}")
+            reraise e, __STACKTRACE__
+        end
 
       {:error, error} ->
         Logger.error("[import #{id}] uh oh: #{error}")
