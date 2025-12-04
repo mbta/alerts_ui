@@ -81,8 +81,8 @@ defmodule AlertsUI.TimeframeText do
     end
   end
 
-  defp starts_2_to_6_days_from_now(start_date, {end_datetime, end_date, _} = end_time_tuple) do
-    ends_same_day = end_date == start_date
+  defp starts_2_to_6_days_from_now(start_date, {end_datetime, _, _} = end_time_tuple) do
+    ends_same_day = get_service_date(end_time_tuple) == start_date
     ends_2_to_6_days_from_start = between_two_and_six_days(start_date, end_datetime)
     start_day_name = get_day_name(start_date)
     end_day_name = get_day_name_for_end(end_time_tuple)
