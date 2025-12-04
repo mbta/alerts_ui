@@ -1,5 +1,6 @@
 defmodule AlertsUIWeb.Router do
   use AlertsUIWeb, :router
+  import Oban.Web.Router
   import AlertsUIWeb.UserAuth
 
   @redirect_http Application.compile_env(:alerts_ui, :redirect_http?)
@@ -46,6 +47,7 @@ defmodule AlertsUIWeb.Router do
 
     get "/", Redirector, to: "/alerts"
     get "/download_history", DownloadHistoryController, :export
+    oban_dashboard("/oban")
 
     live_session :require_authenticated_user,
       on_mount: [
