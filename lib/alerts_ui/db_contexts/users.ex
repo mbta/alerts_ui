@@ -107,4 +107,10 @@ defmodule AlertsUI.DBContexts.Users do
       hd(users)
     end
   end
+
+  def create_or_update_user_from_session(current_user) do
+    existing_user = get_by_keycloak_id(current_user.keycloak_id) || %User{}
+    {:ok, user} = create_or_update_user(Map.from_struct(current_user), existing_user)
+    user
+  end
 end
