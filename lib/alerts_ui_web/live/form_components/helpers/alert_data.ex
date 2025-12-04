@@ -28,7 +28,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :banner_sync_toggle,
     :cause_detail,
     :combination,
-    :created_at,
+    :created_timestamp,
     :created_by,
     :description_text,
     :direction,
@@ -72,7 +72,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           banner_text: String.t() | nil,
           cause_detail: String.t() | nil,
           combination: atom() | nil,
-          created_at: DateTime.t() | nil,
+          created_timestamp: DateTime.t() | nil,
           created_by: String.t() | nil,
           description_text: String.t() | nil,
           direction: String.t() | nil,
@@ -114,7 +114,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
   def build_alert_data(%AlertsUI.Models.Alert{} = alert) do
     direct_from_alert_keys = [
-      :created_at,
+      :created_timestamp,
       :banner_text,
       :cause_detail,
       :description_text,

@@ -98,7 +98,7 @@ defmodule AlertsUI.Models.Alert do
           cause_detail: String.t() | nil,
           closed_timestamp: DateTime.t() | nil,
           created_at: DateTime.t(),
-          created_timestamp: DateTime.t() | nil,
+          created_timestamp: DateTime.t(),
           description_text: String.t(),
           draft: boolean(),
           duration_certainty: atom() | nil,
