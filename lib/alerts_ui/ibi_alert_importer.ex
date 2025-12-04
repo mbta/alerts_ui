@@ -30,8 +30,8 @@ defmodule AlertsUI.IBIAlertImporter do
         fix_invalid_timestamps()
         Logger.info("[import #{import_id}] converting legacy alerts")
         convert_ibi_alerts()
-        {:ok, true}
         Logger.info("[import #{import_id}] done")
+        {:ok, true}
       end,
       timeout: :infinity
     )
