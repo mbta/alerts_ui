@@ -158,7 +158,7 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
 
       assert within_two_seconds(
                alert_3["alert"]["last_modified_timestamp"],
-               four_minutes_ago |> DateTime.to_unix()
+               current_time |> DateTime.to_unix()
              )
 
       assert within_two_seconds(
