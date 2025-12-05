@@ -29,7 +29,8 @@ config :alerts_ui,
       "IBI_STANDARD_ALERTS_API_URL",
       "https://cdn.mbta.com/realtime/Alerts.json"
     ),
-  skip_migrations: true
+  skip_migrations: true,
+  environment_name: System.get_env("SENTRY_ENV", "local")
 
 config :alerts_ui, :phoenix_swagger,
   swagger_files: %{
