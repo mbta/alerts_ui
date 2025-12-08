@@ -153,18 +153,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       |> Alerts.get_originator_string()
       |> originator_fallback()
 
-    last_edited_at =
-      with last_version <- Alerts.get_latest_version(alert.id),
-           false <- is_nil(last_version) do
-        Map.get(last_version, :inserted_at)
-      else
-        _ -> nil
-      end
-
     %{
       created_by: created_by,
       last_edited_by: last_edited_by,
-      last_edited_at: last_edited_at
+      last_edited_at: alert.last_modified_timestamp
     }
   end
 
