@@ -1407,6 +1407,30 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       assert rendered_modal =~ "Edit this alert"
     end
 
+    test "when end is before beginning (alert has been closed before it started)" do
+      assigns = %{
+        @assigns
+        | alert_data: %{
+            @alert_data
+            | active_period_start: @tomorrow,
+              active_period_end: @yesterday
+          }
+      }
+
+      rendered_modal =
+        rendered_to_string(~H"""
+        <ReviewModal.review_modal
+          alert_id={@alert_id}
+          cancel_event_name={@cancel_event_name}
+          target_id={@target_id}
+          cancel_alert={@cancel_alert}
+          alert_data={@alert_data}
+        />
+        """)
+
+      assert rendered_modal =~ "(closed before effect start)"
+    end
+
     test "recurring with end date" do
       assigns = %{
         @assigns

@@ -276,58 +276,64 @@ defmodule AlertsUIWeb.ReviewModal do
             </p>
 
             <p class="font-bold pb-1">Effect period</p>
-            <%= if @alert_data.alert_timing == :"one-time" do %>
-              <div class="pb-1">
-                <p>
-                  {TimeRangeDurationText.one_time_duration_start_phrase(%{
-                    "active_period_start" => @alert_data.active_period_start,
-                    "active_period_start_specifier" => @alert_data.active_period_start_specifier
-                  })}
-                </p>
-                <p>
-                  {TimeRangeDurationText.one_time_duration_end_phrase(%{
-                    "active_period_end" => @alert_data.active_period_end,
-                    "active_period_end_specifier" => @alert_data.active_period_end_specifier
-                  })}
-                </p>
-                <p>
-                  {TimeRangeDurationText.one_time_duration_phrase(%{
-                    "active_period_start" => @alert_data.active_period_start,
-                    "active_period_end" => @alert_data.active_period_end,
-                    "active_period_end_specifier" => @alert_data.active_period_end_specifier
-                  })}
-                </p>
-              </div>
-            <% else %>
-              <div class="pb-1">
-                <p>
-                  {RecurringDurationText.recurring_duration_date_range(%{
-                    "active_period_start_date" => @alert_data.active_period_start_date,
-                    "active_period_end_date" => @alert_data.active_period_end_date,
-                    "active_period_end_specifier" => @alert_data.active_period_end_specifier
-                  })}
-                </p>
-                <p>
-                  {RecurringDurationText.recurring_duration_recurrence_days(%{
-                    "recurrence_days" => @alert_data.recurrence_days
-                  })
-                  |> Helpers.upcase_first_letter()}
-                </p>
-                <p>
-                  {RecurringDurationText.recurring_duration_time_range(
-                    assign(assigns,
-                      params: %{
-                        "active_period_start_time" => @alert_data.active_period_start_time,
-                        "active_period_end_time" => @alert_data.active_period_end_time
-                      }
-                    )
-                  )}
-                  {RecurringDurationText.recurring_duration_only(%{
-                    "active_period_start_time" => @alert_data.active_period_start_time,
-                    "active_period_end_time" => @alert_data.active_period_end_time
-                  })}
-                </p>
-              </div>
+
+            <%= cond do %>
+              <% safe_datetime_compare(@alert_data.active_period_start, @alert_data.active_period_end) == :gt -> %>
+                <div class="pb-1">
+                  <p>(closed before effect start)</p>
+                </div>
+              <% @alert_data.alert_timing == :"one-time" -> %>
+                <div class="pb-1">
+                  <p>
+                    {TimeRangeDurationText.one_time_duration_start_phrase(%{
+                      "active_period_start" => @alert_data.active_period_start,
+                      "active_period_start_specifier" => @alert_data.active_period_start_specifier
+                    })}
+                  </p>
+                  <p>
+                    {TimeRangeDurationText.one_time_duration_end_phrase(%{
+                      "active_period_end" => @alert_data.active_period_end,
+                      "active_period_end_specifier" => @alert_data.active_period_end_specifier
+                    })}
+                  </p>
+                  <p>
+                    {TimeRangeDurationText.one_time_duration_phrase(%{
+                      "active_period_start" => @alert_data.active_period_start,
+                      "active_period_end" => @alert_data.active_period_end,
+                      "active_period_end_specifier" => @alert_data.active_period_end_specifier
+                    })}
+                  </p>
+                </div>
+              <% true -> %>
+                <div class="pb-1">
+                  <p>
+                    {RecurringDurationText.recurring_duration_date_range(%{
+                      "active_period_start_date" => @alert_data.active_period_start_date,
+                      "active_period_end_date" => @alert_data.active_period_end_date,
+                      "active_period_end_specifier" => @alert_data.active_period_end_specifier
+                    })}
+                  </p>
+                  <p>
+                    {RecurringDurationText.recurring_duration_recurrence_days(%{
+                      "recurrence_days" => @alert_data.recurrence_days
+                    })
+                    |> Helpers.upcase_first_letter()}
+                  </p>
+                  <p>
+                    {RecurringDurationText.recurring_duration_time_range(
+                      assign(assigns,
+                        params: %{
+                          "active_period_start_time" => @alert_data.active_period_start_time,
+                          "active_period_end_time" => @alert_data.active_period_end_time
+                        }
+                      )
+                    )}
+                    {RecurringDurationText.recurring_duration_only(%{
+                      "active_period_start_time" => @alert_data.active_period_start_time,
+                      "active_period_end_time" => @alert_data.active_period_end_time
+                    })}
+                  </p>
+                </div>
             <% end %>
 
             <p class="font-bold pb-1">Notification period</p>
@@ -490,6 +496,12 @@ defmodule AlertsUIWeb.ReviewModal do
     </.modal>
     """
   end
+
+  defp safe_datetime_compare(%NaiveDateTime{} = start_datetime, %NaiveDateTime{} = end_datetime) do
+    NaiveDateTime.compare(start_datetime, end_datetime)
+  end
+
+  defp safe_datetime_compare(_, _), do: nil
 
   defp join_present(list, separator) when is_list(list) do
     list
