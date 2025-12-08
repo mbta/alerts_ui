@@ -278,7 +278,8 @@ defmodule AlertsUIWeb.ReviewModal do
             <p class="font-bold pb-1">Effect period</p>
 
             <%= cond do %>
-              <% safe_datetime_compare(@alert_data.active_period_start, @alert_data.active_period_end) == :gt -> %>
+              <% safe_datetime_compare(@alert_data.active_period_start, @alert_data.active_period_end) == :gt and
+              safe_datetime_compare(naive_now(), @alert_data.active_period_end) == :gt -> %>
                 <div class="pb-1">
                   <p>(closed before effect start)</p>
                 </div>
@@ -502,6 +503,10 @@ defmodule AlertsUIWeb.ReviewModal do
   end
 
   defp safe_datetime_compare(_, _), do: nil
+
+  defp naive_now do
+    DateTime.utc_now() |> DateTime.shift_zone!("America/New_York") |> DateTime.to_naive()
+  end
 
   defp join_present(list, separator) when is_list(list) do
     list

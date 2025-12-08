@@ -1407,7 +1407,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       assert rendered_modal =~ "Edit this alert"
     end
 
-    test "when end is before beginning (alert has been closed before it started)" do
+    test "when end is before beginning and before now (alert has been closed before it started)" do
       assigns = %{
         @assigns
         | alert_data: %{
