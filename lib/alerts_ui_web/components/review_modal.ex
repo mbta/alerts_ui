@@ -155,7 +155,9 @@ defmodule AlertsUIWeb.ReviewModal do
         <div class="p-4 grow">
           <%!-- Top section --%>
           <p class="font-bold">Main message</p>
-          {text_to_html(@alert_data.header_text, attributes: [class: "pb-4 max-w-[28rem] whitespace-pre-line break-words"])}
+          {text_to_html(@alert_data.header_text,
+            attributes: [class: "pb-4 max-w-[28rem] whitespace-pre-line break-words"]
+          )}
           <div>
             <span class="block pb-4">
               <p class="font-bold">Supporting information</p>

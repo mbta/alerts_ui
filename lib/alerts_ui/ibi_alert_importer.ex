@@ -636,7 +636,8 @@ defmodule AlertsUI.IBIAlertImporter do
   def from_ibi(ibi_alert, :original_trip_selections), do: from_ibi(ibi_alert, :trip_ids)
 
   def from_ibi(ibi_alert, :cause) do
-    case from_ibi(ibi_alert, :route_type) |> Cause.get_by_mode_and_detail(from_ibi(ibi_alert, :cause_detail)) do
+    case from_ibi(ibi_alert, :route_type)
+         |> Cause.get_by_mode_and_detail(from_ibi(ibi_alert, :cause_detail)) do
       nil ->
         case ibi_alert.cause_name do
           "Amtrak" -> :OTHER_CAUSE
@@ -666,7 +667,8 @@ defmodule AlertsUI.IBIAlertImporter do
           "wire problem" -> :TECHNICAL_PROBLEM
         end
 
-      cause_from_existing_enums -> cause_from_existing_enums
+      cause_from_existing_enums ->
+        cause_from_existing_enums
     end
   end
 
