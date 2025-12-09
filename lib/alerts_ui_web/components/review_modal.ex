@@ -7,6 +7,7 @@ defmodule AlertsUIWeb.ReviewModal do
 
   import AlertsUIWeb.CoreComponents
   import AlertsUIWeb.SharedComponents
+  import PhoenixHTMLHelpers.Format, only: [text_to_html: 2]
 
   alias AlertsUI.{ActivePeriodBuilder, ActiveStatus}
   alias AlertsUI.Models.{Alert, SeverityLevel}
@@ -154,13 +155,12 @@ defmodule AlertsUIWeb.ReviewModal do
         <div class="p-4 grow">
           <%!-- Top section --%>
           <p class="font-bold">Main message</p>
-          <p class="pb-4 max-w-[28rem] whitespace-pre-line break-words">{@alert_data.header_text}</p>
-
+          {text_to_html(@alert_data.header_text, attributes: [class: "pb-4 max-w-[28rem] whitespace-pre-line break-words"])}
           <div>
             <span class="block pb-4">
               <p class="font-bold">Supporting information</p>
               <%= if @alert_data.description_text do %>
-                <p class="whitespace-pre-line">{@alert_data.description_text}</p>
+                {text_to_html(@alert_data.header_text, attributes: [class: "whitespace-pre-line"])}
               <% else %>
                 <p class="italic">None</p>
               <% end %>
