@@ -374,6 +374,7 @@ defmodule AlertsUI.Alerts do
   end
 
   defp update_papertrail(alert, %User{} = user) do
+    user = Users.create_or_update_user_from_session(user)
     PaperTrail.update!(alert, originator: user, origin: "user")
   end
 

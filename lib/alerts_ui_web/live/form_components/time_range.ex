@@ -472,10 +472,18 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         |> naive_datetime_to_iso8601()
 
       "custom" ->
-        if previous_state !== "custom" do
-          current_time |> naive_datetime_to_iso8601()
-        else
-          time_range["active_period_start"]
+        cond do
+          previous_state == "now" ->
+            current_time |> naive_datetime_to_iso8601()
+
+          previous_state == "start_of_service" ->
+            time_range["active_period_start_date"]
+            |> Date.from_iso8601!()
+            |> NaiveDateTime.new!(ActivePeriod.start_of_service_time())
+            |> naive_datetime_to_iso8601()
+
+          true ->
+            time_range["active_period_start"]
         end
     end
   end
@@ -558,23 +566,16 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         |> naive_datetime_to_iso8601()
 
       "end_of_service" ->
-        cond do
-          previous_state !== "end_of_service" ->
-            current_time
-            |> ActivePeriod.end_of_service_datetime_naive()
-            |> naive_datetime_to_iso8601()
-
-          time_range["active_period_end_date"] in ["", nil] ->
-            ""
-
-          true ->
-            # The provided end date should always result in the end of service for that day
-            # (ie the next morning)
-            time_range["active_period_end_date"]
-            |> Date.from_iso8601!()
-            |> Date.add(1)
-            |> NaiveDateTime.new!(ActivePeriod.end_of_service_time())
-            |> naive_datetime_to_iso8601()
+        if time_range["active_period_end_date"] in ["", nil] do
+          ""
+        else
+          # The provided end date should always result in the end of service for that day
+          # (ie the next morning)
+          time_range["active_period_end_date"]
+          |> Date.from_iso8601!()
+          |> Date.add(1)
+          |> NaiveDateTime.new!(ActivePeriod.end_of_service_time())
+          |> naive_datetime_to_iso8601()
         end
 
       "until_further_notice" ->
@@ -582,7 +583,12 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
       "custom" ->
         if previous_state !== "custom" do
-          current_time |> naive_datetime_to_iso8601()
+          # Custom is the only datetime, so it's always going to be a little weird going from
+          # date to a datetime. So let's set time to just before midnight
+          time_range["active_period_end_date"]
+          |> Date.from_iso8601!()
+          |> NaiveDateTime.new!(~T[23:59:00])
+          |> naive_datetime_to_iso8601()
         else
           time_range["active_period_end"]
         end

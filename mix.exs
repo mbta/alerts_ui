@@ -101,6 +101,7 @@ defmodule AlertsUI.MixProject do
       {:mock, "~> 0.3.8", only: :test},
       {:nimble_csv, "~> 1.3.0"},
       {:oban, "~> 2.16"},
+      {:oban_web, "~> 2.11"},
       {:paper_trail, "~> 1.0.0"},
       {:phoenix, "~> 1.7.7"},
       {:phoenix_ecto, "~> 4.5"},
