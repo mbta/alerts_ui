@@ -67,6 +67,11 @@ module.exports = {
         "mbta-blue": "#003da5",
         "mbta-silver": "#6c777e",
         "mbta-access": "#165C96",
+        "local": "#52bbc5",
+        "dev-green": "#00843d",
+        "dev-orange": "#ed8b00",
+        "staging": "#80276c",
+        "production": "#ffc72c",
         transparent: "transparent",
         current: "currentColor",
       }

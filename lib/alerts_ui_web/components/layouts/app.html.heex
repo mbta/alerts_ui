@@ -3,8 +3,14 @@
     <div class="flex items-center justify-between py-4 text-sm">
       <div class="flex items-center gap-4 mx-4">
         <img class="h-12" src={"/images/logos/logo-#{@environment}.svg"} />
-
         <.h1 class="!mb-0"><a href="/">Alerts Manager </a></.h1>
+        <div
+          :if={@environment != "production"}
+          title={@environment}
+          class={"text-center font-bold min-w-[6rem] mt-[.5rem] min-h-2 py-1 px-2 rounded-md bg-#{@environment}"}
+        >
+          {@environment}
+        </div>
       </div>
       <div class="flex items-center gap-4 leading-6 mx-4">
         <a
