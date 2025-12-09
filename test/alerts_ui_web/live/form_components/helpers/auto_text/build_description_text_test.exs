@@ -21,7 +21,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionTextTest d
     route: @route_1,
     trip: %Trip{id: "CR-683300-527", name: "527", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
-    departure_time: ~U[2024-02-21 14:01:00.00Z]
+    departure_time: ~U[2024-02-21 14:01:00.00Z],
+    use_trip_id_in_name?: true
   }
 
   @schedule_2 %EnhancedSchedule{
@@ -29,7 +30,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionTextTest d
     trip: %Trip{id: "CR-687395-841", name: "841", direction_id: 1},
     stop: %Stop{id: "place-forhl", name: "Forest Hills"},
     arrival_time: nil,
-    departure_time: ~U[2024-02-21 16:15:00.00Z]
+    departure_time: ~U[2024-02-21 16:15:00.00Z],
+    use_trip_id_in_name?: true
   }
 
   @schedule_3 %EnhancedSchedule{
@@ -148,7 +150,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionTextTest d
       autotext_data = %{
         routes: [@route_1],
         schedules: [@schedule_1],
-        effect_name: "Delay"
+        effect_name: "Delay",
+        route_type: 2
       }
 
       expected = "Delayed trips:\n527 (9:01 AM from South Station)"
