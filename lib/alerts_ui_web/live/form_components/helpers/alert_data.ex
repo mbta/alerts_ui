@@ -331,7 +331,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       if alert.recurrence_days do
         :recurring
       else
-        :one_time
+        :"one-time"
       end
 
     %{alert_timing: alert_timing}
