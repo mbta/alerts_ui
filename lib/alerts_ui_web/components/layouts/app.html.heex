@@ -6,7 +6,6 @@
         <.h1 class="!mb-0"><a href="/">Alerts Manager </a></.h1>
         <div
           :if={@environment != "production"}
-          title={@environment}
           class={"text-center font-bold min-w-[6rem] mt-[.5rem] min-h-2 py-1 px-2 rounded-md bg-#{@environment}"}
         >
           {@environment}
