@@ -296,14 +296,15 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     shifted_active_period_start = shift_to_naive(alert.active_period_start)
     shifted_active_period_end = shift_to_naive(alert.active_period_end)
 
-    [start_datetime, end_datetime] = if active_period && !Enum.empty?(active_period) do
-      [
-        List.first(active_period).start |> shift_to_naive(),
-        List.last(active_period).end |> shift_to_naive()
-      ]
-    else
-      [shifted_active_period_start, shifted_active_period_end]
-    end
+    [start_datetime, end_datetime] =
+      if active_period && !Enum.empty?(active_period) do
+        [
+          List.first(active_period).start |> shift_to_naive(),
+          List.last(active_period).end |> shift_to_naive()
+        ]
+      else
+        [shifted_active_period_start, shifted_active_period_end]
+      end
 
     end_specifier = if alert.active_period_end, do: "custom", else: "until_further_notice"
 
