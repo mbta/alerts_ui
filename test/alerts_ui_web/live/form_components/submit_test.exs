@@ -12,8 +12,8 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
 
-  @route_one %Route{sort_order: 1, id: "Blue", name: "route_number_1"}
-  @route_two %Route{sort_order: 2, id: "Bluer", name: "route_number_2"}
+  @route_one %Route{sort_order: 1, id: "Blue", name: "route_number_1", type: 3}
+  @route_two %Route{sort_order: 2, id: "Bluer", name: "route_number_2", type: 3}
   @routes [@route_one, @route_two]
   @stop %Stop{id: "place-aqucl", name: "Aquarium"}
 

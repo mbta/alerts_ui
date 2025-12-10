@@ -25,6 +25,7 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
   @route_one %Route{
     sort_order: 1,
     id: "1",
+    type: 3,
     name: "bus route 1",
     direction_names: %{0 => "Outbound", 1 => "Inbound"}
   }

@@ -112,11 +112,23 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       end
 
     params =
-      socket.assigns.form.params |> Map.new(fn {k, v} -> {String.to_existing_atom(k), v} end)
+      socket.assigns.form.params |> Map.Helpers.atomize_keys()
 
     alert_data =
       Map.put(alert_data, :trip_information_by_id, trip_information_by_id)
       |> Map.put(:modal_date, nil)
+      |> Map.merge(params)
+
+    route_types_by_id =
+      get_routes_with_types(
+        alert_data.route_ids,
+        available_routes(socket.assigns)
+      )
+
+    alert_data =
+      Map.put(alert_data, :trip_information_by_id, trip_information_by_id)
+      |> Map.put(:modal_date, nil)
+      |> Map.put(:route_types_by_id, route_types_by_id)
       |> Map.merge(params)
 
     changeset = build_changeset(%__MODULE__{}, alert_data)
@@ -315,7 +327,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     affected_service =
       socket.assigns.form.params
       |> Map.merge(%{"modal_date" => socket.assigns.today})
-      |> add_routes_with_types(available_routes(socket.assigns))
 
     default_filter_title =
       socket.assigns.service_dates |> Enum.map(fn {option, _value} -> option end) |> hd
@@ -348,7 +359,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   end
 
   def validate(affected_service, assigns) do
-    affected_service = add_routes_with_types(affected_service, available_routes(assigns))
+    route_types_by_id =
+      get_routes_with_types(affected_service["route_ids"], available_routes(assigns))
 
     trip_information_by_id =
       if Helpers.async_available?(assigns, :available_schedules) do
@@ -360,7 +372,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         %{}
       end
 
-    affected_service = Map.put(affected_service, "trip_information_by_id", trip_information_by_id)
+    affected_service =
+      affected_service
+      |> Map.put("trip_information_by_id", trip_information_by_id)
+      |> Map.put("route_types_by_id", route_types_by_id)
 
     build_changeset(%__MODULE__{}, affected_service)
   end
@@ -708,21 +723,22 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   defp all_route_types(4), do: [4]
   defp all_route_types(_), do: []
 
-  def add_routes_with_types(affected_service, available_routes) do
-    routes =
-      available_routes
-      |> Stream.filter(fn route ->
-        !is_nil(affected_service["route_ids"]) && route.id in affected_service["route_ids"]
-      end)
-      |> Enum.reduce(%{}, fn route, acc ->
-        Map.put(acc, route.id, route)
-      end)
+  def get_routes_with_types(_route_ids, nil), do: %{}
 
-    affected_service
-    |> Map.put("routes_by_id", routes)
-    |> Map.put("route_types_by_id", routes |> Enum.map(fn {k, v} -> {k, v.type} end) |> Map.new())
+  def get_routes_with_types(route_ids, available_routes) do
+    available_routes
+    |> Stream.filter(fn route ->
+      !is_nil(route_ids) && route.id in route_ids
+    end)
+    |> Enum.reduce(%{}, fn route, acc ->
+      Map.put(acc, route.id, route)
+    end)
+    |> Enum.map(fn {k, v} -> {k, v.type} end)
+    |> Map.new()
   end
 
+  @spec available_routes(atom() | %{:available_routes => map(), optional(any()) => any()}) ::
+          any()
   def available_routes(assigns), do: Map.get(assigns.available_routes, :result, [])
 
   # Each of these are only used once in the validation flow... what exactly should we do here?

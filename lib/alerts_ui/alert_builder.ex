@@ -643,8 +643,9 @@ defmodule AlertsUI.AlertBuilder do
          :R,
          %{
            route_ids: route_ids,
+           direction: direction,
            route_type: route_type,
-           direction: direction
+           route_types_by_id: route_types_by_id
          },
          effect
        ) do
@@ -654,7 +655,7 @@ defmodule AlertsUI.AlertBuilder do
       &(%{
           activities: Activities.for_effect(effect),
           route_id: &1,
-          route_type: route_type,
+          route_type: route_type(route_types_by_id, &1, route_type),
           agency_id: Routes.agency_id(&1)
         }
         |> maybe_add_direction(direction))
@@ -671,6 +672,7 @@ defmodule AlertsUI.AlertBuilder do
          %{
            child_stops_with_context: [],
            route_ids: route_ids,
+           route_types_by_id: route_types_by_id,
            route_type: route_type,
            direction: direction,
            stop_ids: stop_ids
@@ -683,7 +685,7 @@ defmodule AlertsUI.AlertBuilder do
       %{
         activities: Activities.for_effect(effect),
         route_id: route_id,
-        route_type: route_type,
+        route_type: route_type(route_types_by_id, route_id, route_type),
         agency_id: Routes.agency_id(route_id),
         stop_id: stop_id
       }
@@ -696,6 +698,7 @@ defmodule AlertsUI.AlertBuilder do
          :RDS,
          %{
            child_stops_with_context: [_ | _] = child_stops_with_context,
+           route_types_by_id: route_types_by_id,
            route_type: route_type
          },
          effect
@@ -706,7 +709,7 @@ defmodule AlertsUI.AlertBuilder do
         activities: Activities.for_effect(effect, stop_type),
         direction_id: direction_id,
         route_id: route_id,
-        route_type: route_type,
+        route_type: route_type(route_types_by_id, route_id, route_type),
         agency_id: Routes.agency_id(route_id),
         stop_id: stop_id
       }
@@ -838,7 +841,8 @@ defmodule AlertsUI.AlertBuilder do
          :SR,
          %{
            child_stops_with_context: [_ | _] = child_stops_with_context,
-           route_types_by_id: route_types_by_id
+           route_types_by_id: route_types_by_id,
+           route_type: route_type
          },
          effect
        ) do
@@ -851,7 +855,7 @@ defmodule AlertsUI.AlertBuilder do
       %{
         activities: Activities.for_effect(effect),
         route_id: route_id,
-        route_type: route_type(route_types_by_id, route_id),
+        route_type: route_type(route_types_by_id, route_id, route_type),
         agency_id: Routes.agency_id(route_id),
         stop_id: stop_id
       }
@@ -865,6 +869,7 @@ defmodule AlertsUI.AlertBuilder do
            stop_ids: stop_ids,
            route_ids: route_ids,
            route_types_by_id: route_types_by_id,
+           route_type: route_type,
            child_stops_with_context: []
          },
          effect
@@ -878,7 +883,7 @@ defmodule AlertsUI.AlertBuilder do
       %{
         activities: Activities.for_effect(effect),
         route_id: route_id,
-        route_type: route_type(route_types_by_id, route_id),
+        route_type: route_type(route_types_by_id, route_id, route_type),
         agency_id: Routes.agency_id(route_id),
         stop_id: stop_id
       }
@@ -1004,13 +1009,18 @@ defmodule AlertsUI.AlertBuilder do
     end
   end
 
-  @spec route_type(%{String.t() => Route.type_int()}, Route.id_t()) :: Route.type_int()
+  @spec route_type(%{String.t() => Route.type_int()} | nil, Route.id_t(), Route.id_t()) ::
+          Route.type_int()
 
-  defp route_type(route_types_by_id, route_id) do
+  defp route_type(nil, _, primary_route_type), do: primary_route_type
+
+  defp route_type(route_types_by_id, route_id, primary_route_type) do
     if route_id in @green_line_branch_ids do
       route_types_by_id[route_id] || route_types_by_id["Green"]
     else
-      route_types_by_id[route_id]
+      # if for any reason we don't have the route type in the map
+      # use the primary route type. This will cover eg combo routes
+      Map.get(route_types_by_id, route_id, primary_route_type)
     end
   end
 
