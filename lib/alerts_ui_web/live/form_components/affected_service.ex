@@ -34,9 +34,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     field :trip_information_by_id, {:map, :map}
     field :modal_date, :string
     field :modal_date_search_term, :string
+    field :route_types_by_id, {:map, :integer}
   end
 
-  @fields ~w[route_ids direction trip_ids stop_ids stop_names stop_names_and_ids trip_information_by_id route_search_term trip_search_term stop_search_term single_route_id modal_date modal_date_search_term]a
+  @fields ~w[route_ids route_types_by_id direction trip_ids stop_ids stop_names stop_names_and_ids trip_information_by_id route_search_term trip_search_term stop_search_term single_route_id modal_date modal_date_search_term]a
 
   @impl true
   def mount(socket) do
@@ -314,6 +315,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     affected_service =
       socket.assigns.form.params
       |> Map.merge(%{"modal_date" => socket.assigns.today})
+      |> add_routes_with_types(available_routes(socket.assigns))
 
     default_filter_title =
       socket.assigns.service_dates |> Enum.map(fn {option, _value} -> option end) |> hd
@@ -346,6 +348,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   end
 
   def validate(affected_service, assigns) do
+    affected_service = add_routes_with_types(affected_service, available_routes(assigns))
+
     trip_information_by_id =
       if Helpers.async_available?(assigns, :available_schedules) do
         trip_information_by_id(
@@ -703,6 +707,23 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   defp all_route_types(3), do: [3]
   defp all_route_types(4), do: [4]
   defp all_route_types(_), do: []
+
+  def add_routes_with_types(affected_service, available_routes) do
+    routes =
+      available_routes
+      |> Stream.filter(fn route ->
+        !is_nil(affected_service["route_ids"]) && route.id in affected_service["route_ids"]
+      end)
+      |> Enum.reduce(%{}, fn route, acc ->
+        Map.put(acc, route.id, route)
+      end)
+
+    affected_service
+    |> Map.put("routes_by_id", routes)
+    |> Map.put("route_types_by_id", routes |> Enum.map(fn {k, v} -> {k, v.type} end) |> Map.new())
+  end
+
+  def available_routes(assigns), do: Map.get(assigns.available_routes, :result, [])
 
   # Each of these are only used once in the validation flow... what exactly should we do here?
   defp populate_default_stops(affected_service) do
