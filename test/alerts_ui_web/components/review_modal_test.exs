@@ -1254,7 +1254,7 @@ defmodule AletrsUIWeb.Components.ReviewModalTest do
       severity: 4,
       reminder_times: [],
       recurrence_days: [],
-      created_at: ActivePeriodBuilder.naive_eastern_datetime_to_utc(@yesterday),
+      created_timestamp: ActivePeriodBuilder.naive_eastern_datetime_to_utc(@yesterday),
       created_by: "First Last"
     }
 

@@ -253,7 +253,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
                  service_effect_text: "route_number_1 delay",
                  short_header_text: nil,
                  severity: 4,
-                 created_timestamp: nil,
+                 created_timestamp: _,
                  last_modified_timestamp: nil,
                  last_push_notification_timestamp: _,
                  closed_timestamp: nil,
