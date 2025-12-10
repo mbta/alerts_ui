@@ -39,6 +39,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
   def update(%{alert_data: alert_data} = assigns, socket) do
     notification_start =
       cond do
+        Map.get(alert_data, :notification_specifier) == :now -> DateTime.now!("America/New_York")
         Map.get(alert_data, :notification_period_start) -> alert_data.notification_period_start
         Map.get(alert_data, :active_period_start) -> alert_data.active_period_start
         true -> nil
