@@ -701,6 +701,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
           "alert_timing" => "recurring"
         }
       })
+
       open_browser(view)
 
       view
@@ -718,7 +719,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       |> render_change(%{
         "time_range" => %{
           "active_period_start_date" => "2024-12-03",
-          "active_period_end_date" => "2024-12-17",
+          "active_period_end_date" => "2024-12-17"
         }
       })
 
@@ -727,7 +728,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
                       {:section_completed,
                        %TimeRange{
-                         active_period_end: ~N[2024-12-18 03:00:00],
+                         active_period_end: ~N[2024-12-18 03:00:00]
                        }}}
     end
 
@@ -742,6 +743,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
           "alert_timing" => "recurring"
         }
       })
+
       open_browser(view)
 
       view
@@ -758,7 +760,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       |> element("form")
       |> render_change(%{
         "time_range" => %{
-          "active_period_start_date" => "2024-12-03",
+          "active_period_start_date" => "2024-12-03"
           # "active_period_end_date" => "2024-12-17",
         }
       })
@@ -768,7 +770,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
                       {:section_completed,
                        %TimeRange{
-                         active_period_end: nil,
+                         active_period_end: nil
                        }}}
     end
 
