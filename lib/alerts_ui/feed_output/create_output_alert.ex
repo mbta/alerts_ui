@@ -132,7 +132,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
     %{
       translation: [
         %{
-          text: input_string,
+          text: input_string |> String.replace(~r/(\r?\n)/, "\r\n"),
           language: "en"
         }
       ]

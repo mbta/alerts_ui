@@ -69,7 +69,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
         header_text:
           "On weekdays, through October, between 8:00 am and 4:00 pm, Lowell Line passengers may experience delays of 5-10 minutes in both directions due to tie replacement work between Lowell and Wilmington. ",
         description_text:
-          "Affected trips:\r\n307 (7:40 am from North Station)\r\n308 (8:05 am from Lowell)\r\n309 (8:25 am from North Station)\r\n310 (8:50 am from Lowell)\r\n311 (9:10 am from North Station)\r\n312 (9:30 am from Lowell)\r\n313 (10:10 am from North Station)\r\n314 (10:12 am from Lowell)\r\n315 (11:10 am from North Station)\r\n316 (11:12 am from Lowell)\r\n317 (12:10 pm from North Station)\r\n318 (12:12 pm from Lowell)\r\n319 (1:10 pm from North Station)\r\n320 (1:12 pm from Lowell)\r\n321 (2:10 pm from North Station)\r\n322 (2:12 pm from Lowell)\r\n323 (3:10 pm from North Station)\r\n324 (3:12 pm from Lowell)",
+          "Affected trips:\r\n\n307 (7:40 am from North Station)\n308 (8:05 am from Lowell)\n309 (8:25 am from North Station)\n310 (8:50 am from Lowell)\n311 (9:10 am from North Station)\n312 (9:30 am from Lowell)\n313 (10:10 am from North Station)\n314 (10:12 am from Lowell)\n315 (11:10 am from North Station)\n316 (11:12 am from Lowell)\n317 (12:10 pm from North Station)\n318 (12:12 pm from Lowell)\n319 (1:10 pm from North Station)\n320 (1:12 pm from Lowell)\n321 (2:10 pm from North Station)\n322 (2:12 pm from Lowell)\n323 (3:10 pm from North Station)\n324 (3:12 pm from Lowell)",
         severity_level: :WARNING,
         service_effect_text: "Lowell Line delay",
         short_header_text:
@@ -118,7 +118,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
                    translation: [
                      %{
                        text:
-                         "Affected trips:\r\n307 (7:40 am from North Station)\r\n308 (8:05 am from Lowell)\r\n309 (8:25 am from North Station)\r\n310 (8:50 am from Lowell)\r\n311 (9:10 am from North Station)\r\n312 (9:30 am from Lowell)\r\n313 (10:10 am from North Station)\r\n314 (10:12 am from Lowell)\r\n315 (11:10 am from North Station)\r\n316 (11:12 am from Lowell)\r\n317 (12:10 pm from North Station)\r\n318 (12:12 pm from Lowell)\r\n319 (1:10 pm from North Station)\r\n320 (1:12 pm from Lowell)\r\n321 (2:10 pm from North Station)\r\n322 (2:12 pm from Lowell)\r\n323 (3:10 pm from North Station)\r\n324 (3:12 pm from Lowell)",
+                         "Affected trips:\r\n\r\n307 (7:40 am from North Station)\r\n308 (8:05 am from Lowell)\r\n309 (8:25 am from North Station)\r\n310 (8:50 am from Lowell)\r\n311 (9:10 am from North Station)\r\n312 (9:30 am from Lowell)\r\n313 (10:10 am from North Station)\r\n314 (10:12 am from Lowell)\r\n315 (11:10 am from North Station)\r\n316 (11:12 am from Lowell)\r\n317 (12:10 pm from North Station)\r\n318 (12:12 pm from Lowell)\r\n319 (1:10 pm from North Station)\r\n320 (1:12 pm from Lowell)\r\n321 (2:10 pm from North Station)\r\n322 (2:12 pm from Lowell)\r\n323 (3:10 pm from North Station)\r\n324 (3:12 pm from Lowell)",
                        language: "en"
                      }
                    ]
