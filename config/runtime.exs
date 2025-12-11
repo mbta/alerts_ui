@@ -122,7 +122,17 @@ cond do
 
       config :ueberauth_oidcc,
         issuers: [
-          %{name: :keycloak_issuer, issuer: keycloak_issuer}
+          %{
+            name: :keycloak_issuer,
+            issuer: keycloak_issuer,
+            provider_configuration_opts: %{
+              quirks: %{
+                document_overrides: %{
+                  "request_object_signing_alg_values_supported" => []
+                }
+              }
+            }
+          }
         ],
         providers: [
           keycloak: keycloak_base_opts,
