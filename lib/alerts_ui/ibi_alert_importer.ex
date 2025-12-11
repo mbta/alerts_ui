@@ -383,7 +383,9 @@ defmodule AlertsUI.IBIAlertImporter do
       :created_timestamp,
       :closed_timestamp,
       :last_modified_timestamp,
-      :legacy
+      :legacy,
+      :image_url,
+      :image_alternative_text
     ]
     |> Enum.reduce(%{}, fn key, alert_data ->
       try do
@@ -714,6 +716,10 @@ defmodule AlertsUI.IBIAlertImporter do
   def from_ibi(ibi_alert, :last_modified_timestamp) do
     ndt_from_ibi_string(ibi_alert.last_modified_dt)
   end
+
+  def from_ibi(ibi_alert, :image_url), do: ibi_alert.alert_image_url
+
+  def from_ibi(ibi_alert, :image_alternative_text), do: ibi_alert.alert_image_description
 
   def from_ibi(ibi_alert, key), do: Map.get(ibi_alert, key)
 
