@@ -378,7 +378,7 @@ defmodule AlertsUI.AlertBuilder do
       else
         original_route.line_id
         |> LinesRepo.get([])
-        |> filtered_combo_routes()
+        |> filtered_combo_routes(original_route.id)
       end ++ [original_route]
     end)
     |> Enum.uniq()
@@ -386,9 +386,18 @@ defmodule AlertsUI.AlertBuilder do
 
   # excepting green line to keep it from pulling in all green line routes
   # when any is selected
-  defp filtered_combo_routes(%{id: "line-Green"} = _line), do: []
+  defp filtered_combo_routes(%{id: "line-Green"}, _), do: []
 
-  defp filtered_combo_routes(line) do
+  # only pull in SLW when any other silver line route is selected
+  defp filtered_combo_routes(%{id: "line-SLWaterfront"} = line, "746"), do: line.routes
+
+  defp filtered_combo_routes(%{id: "line-SLWaterfront"} = line, original_route_id) do
+    Enum.filter(line.routes, fn route ->
+      route.id in ["746", original_route_id]
+    end)
+  end
+
+  defp filtered_combo_routes(line, _) do
     # filter out shuttle routes unless they were part of the original selection
     Enum.filter(line.routes, &(&1.description !== :rail_replacement_bus))
   end
