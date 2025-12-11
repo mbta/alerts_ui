@@ -7,8 +7,10 @@ defmodule AlertsUIWeb.ReviewModal do
 
   import AlertsUIWeb.CoreComponents
   import AlertsUIWeb.SharedComponents
+  import PhoenixHTMLHelpers.Format, only: [text_to_html: 2]
 
-  alias AlertsUI.{ActivePeriodBuilder, ActiveStatus}
+  alias AlertsUI.ActiveStatus
+  alias AlertsUI.Helpers.ReminderTimes
   alias AlertsUI.Models.{Alert, SeverityLevel}
 
   alias AlertsUIWeb.FormComponents.Helpers.{
@@ -154,13 +156,16 @@ defmodule AlertsUIWeb.ReviewModal do
         <div class="p-4 grow">
           <%!-- Top section --%>
           <p class="font-bold">Main message</p>
-          <p class="pb-4 max-w-[28rem] whitespace-pre-line break-words">{@alert_data.header_text}</p>
-
+          {text_to_html(@alert_data.header_text,
+            attributes: [class: "pb-4 max-w-[28rem] whitespace-pre-line break-words"]
+          )}
           <div>
             <span class="block pb-4">
               <p class="font-bold">Supporting information</p>
               <%= if @alert_data.description_text do %>
-                <p class="whitespace-pre-line">{@alert_data.description_text}</p>
+                {text_to_html(@alert_data.description_text,
+                  attributes: [class: "whitespace-pre-line"]
+                )}
               <% else %>
                 <p class="italic">None</p>
               <% end %>
@@ -340,14 +345,14 @@ defmodule AlertsUIWeb.ReviewModal do
             <p class="font-bold pb-1">Reminders</p>
             <%= if @alert_data.reminder_times != [] do %>
               <div class="pb-4">
-                <%= for reminder <- Enum.sort(@alert_data.reminder_times) do %>
+                <%= for reminder <- Enum.sort_by(@alert_data.reminder_times, &(&1.time)) do %>
                   <p>
-                    {Calendar.strftime(reminder, "%a %m/%d/%Y %-I:%M %p")}
-                    <span :if={sent?(reminder)} class="text-text-secondary">
+                    {Calendar.strftime(reminder.time, "%a %m/%d/%Y %-I:%M %p")}
+                    <span :if={ReminderTimes.sent?(reminder.time)} class="text-text-secondary">
                       <.icon name="hero-check-circle-solid text-mbta-green" class="h-4 w-4" /> Sent
                     </span>
 
-                    <span :if={!sent?(reminder)} class="text-text-secondary">
+                    <span :if={!ReminderTimes.sent?(reminder.time)} class="text-text-secondary">
                       <.icon name="hero-clock" class="h-4 w-4" /> Scheduled
                     </span>
                   </p>
@@ -499,11 +504,6 @@ defmodule AlertsUIWeb.ReviewModal do
     |> String.replace("_", " ")
     |> String.split()
     |> Enum.map_join(" / ", &String.capitalize/1)
-  end
-
-  defp sent?(reminder_time, now \\ DateTime.utc_now()) do
-    reminder_time = ActivePeriodBuilder.naive_eastern_datetime_to_utc(reminder_time)
-    DateTime.compare(now, reminder_time) in [:eq, :gt]
   end
 
   attr :id, :string,

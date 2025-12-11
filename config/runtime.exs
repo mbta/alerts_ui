@@ -36,6 +36,7 @@ cond do
     config :alerts_ui, AlertsUI.Repo, url: System.fetch_env!("DATABASE_URL_TEST")
 
     config :alerts_ui,
+      environment_name: System.get_env("SENTRY_ENV", "local"),
       api_url: "https://api-dev.mbtace.com",
       api_key: "",
       dev_api_url: "https://api-dev.mbtace.com",
@@ -102,6 +103,7 @@ cond do
       ]
 
     config :alerts_ui,
+      environment_name: System.get_env("SENTRY_ENV", "local"),
       api_url: String.replace_trailing(System.get_env("API_URL"), "/", ""),
       api_key: get_api_key.(),
       # below are used only for GTFS validation
@@ -120,7 +122,17 @@ cond do
 
       config :ueberauth_oidcc,
         issuers: [
-          %{name: :keycloak_issuer, issuer: keycloak_issuer}
+          %{
+            name: :keycloak_issuer,
+            issuer: keycloak_issuer,
+            provider_configuration_opts: %{
+              quirks: %{
+                document_overrides: %{
+                  "request_object_signing_alg_values_supported" => []
+                }
+              }
+            }
+          }
         ],
         providers: [
           keycloak: keycloak_base_opts,
@@ -133,6 +145,7 @@ cond do
     config :alerts_ui, AlertsUI.Repo, url: System.fetch_env!("DATABASE_URL")
 
     config :alerts_ui,
+      environment_name: System.get_env("SENTRY_ENV", "local"),
       # the main API key for your environment
       api_url: String.replace_trailing(System.fetch_env!("API_URL"), "/", ""),
       api_key: System.fetch_env!("API_KEY"),

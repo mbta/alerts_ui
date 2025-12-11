@@ -116,8 +116,8 @@ defmodule AlertsUI.IBIAlertImporterTest do
                "2025-10-22T11:40:00.123 send bulletin; 2025-10-22T11:45 send tweet"
 
       assert from_ibi(ibi_alert, :reminder_times) == [
-               ~N[2025-10-22 11:40:00],
-               ~N[2025-10-22 11:45:00]
+               %{id: nil, time: ~N[2025-10-22 11:40:00]},
+               %{id: nil, time: ~N[2025-10-22 11:45:00]}
              ]
     end
 

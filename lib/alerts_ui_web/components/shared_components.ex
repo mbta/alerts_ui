@@ -1463,7 +1463,10 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :hidden, :boolean, default: false, doc: "hides component if true"
 
+  attr :disabled, :boolean, default: false, doc: "disallows editing if true"
+
   attr :rest, :global, include: ~w(disabled phx-debounce step)
+  slot :inner_block
 
   def datetime(%{field: %FormField{} = field} = assigns) do
     assigns =
@@ -1479,22 +1482,26 @@ defmodule AlertsUIWeb.SharedComponents do
       id={"#{@id}-root-element"}
     >
       <.label for={@id} class="block">{@label}</.label>
-      <input
-        id={@id}
-        name={@name}
-        min={@min}
-        max={@max}
-        value={Form.normalize_value("datetime-local", @value)}
-        class={[
-          "bg-bg-elevation-5 border border-border-primary pl-3 py-1.5 min-w-[99%] p-0
-            rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto
-            disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
-            focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25)",
-          @errors != [] && "border-danger focus:border-danger"
-        ]}
-        type={@type}
-        {@rest}
-      />
+      <span class="block flex flex-row">
+        <input
+          id={@id}
+          name={@name}
+          min={@min}
+          max={@max}
+          disabled={@disabled}
+          value={Form.normalize_value("datetime-local", @value)}
+          class={[
+            "bg-bg-elevation-5 border border-border-primary px-3 py-1.5 p-0
+              rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto
+              disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
+              focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) appearance-auto dark:text-white dark:[color-scheme:dark]",
+            @errors != [] && "border-danger focus:border-danger"
+          ]}
+          type={@type}
+          {@rest}
+        />
+        <span class="flex flex-row ml-2">{render_slot(@inner_block)}</span>
+      </span>
 
       <.input_error :for={msg <- @errors}>{msg}</.input_error>
     </div>

@@ -4,12 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content={get_csrf_token()} />
-    <.live_title prefix="AlertsUI · ">
-      {assigns[:page_title] || "AlertsUI"}
+    <.live_title suffix=" - Alerts Manager">
+      {assigns[:page_title]}
     </.live_title>
     <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
     <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
     </script>
+    <link rel="icon" href={"/images/icons/favicon-#{@environment}.ico"} />
   </head>
   <body class="bg-bg-primary font-body font-normal text-base text-text-primary">
     {@inner_content}
