@@ -101,9 +101,22 @@ defmodule AlertsUIWeb.CreateAlertLive do
         _ -> :creating
       end
 
+    form_type_to_title = %{
+      editing: "Edit",
+      duplicating: "Duplicate",
+      creating: "Create"
+    }
+
+    alert_data =
+      if form_type == :duplicating do
+        Map.put(alert_data, :reminder_times, [])
+      else
+        alert_data
+      end
+
     socket =
       assign(socket, %{
-        page_title: "Create an Alert",
+        page_title: "#{form_type_to_title[form_type]} an Alert",
         progress: if(form_type == :creating, do: first_step, else: second_step),
         steps: @steps,
         alert_data: alert_data,

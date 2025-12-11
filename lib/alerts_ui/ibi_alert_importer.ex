@@ -13,6 +13,7 @@ defmodule AlertsUI.IBIAlertImporter do
   alias AlertsUI.AlertBuilder
   alias AlertsUI.IBIAlertImportParser
   alias AlertsUI.Models.Alert
+  alias AlertsUI.Models.Cause
   alias AlertsUI.Models.IBIAlert
   alias AlertsUI.Models.LatestIBIAlert
   alias AlertsUI.Repo
@@ -472,7 +473,9 @@ defmodule AlertsUI.IBIAlertImporter do
       |> String.replace("and tweet", "")
       |> String.replace(~r/\s/, "")
       |> String.split(";")
-      |> Enum.map(fn timestamp -> ndt_from_ibi_reminder_format(timestamp) end)
+      |> Enum.map(fn timestamp ->
+        %{id: nil, time: ndt_from_ibi_reminder_format(timestamp)}
+      end)
     else
       []
     end
@@ -633,6 +636,49 @@ defmodule AlertsUI.IBIAlertImporter do
 
   def from_ibi(ibi_alert, :original_route_selections), do: from_ibi(ibi_alert, :route_ids)
   def from_ibi(ibi_alert, :original_trip_selections), do: from_ibi(ibi_alert, :trip_ids)
+
+  def from_ibi(ibi_alert, :cause) do
+    case from_ibi(ibi_alert, :route_type)
+         |> Cause.get_by_mode_and_detail(from_ibi(ibi_alert, :cause_detail)) do
+      nil ->
+        case ibi_alert.cause_name do
+          "Amtrak" -> :OTHER_CAUSE
+          "an earlier mechanical problem" -> :TECHNICAL_PROBLEM
+          "an earlier signal problem" -> :TECHNICAL_PROBLEM
+          "autos impeding service" -> :OTHER_CAUSE
+          "congestion" -> :OTHER_CAUSE
+          "crossing malfunction" -> :TECHNICAL_PROBLEM
+          "construction" -> :CONSTRUCTION
+          "disabled train" -> :TECHNICAL_PROBLEM
+          "electrical work" -> :MAINTENANCE
+          "fire" -> :TECHNICAL_PROBLEM
+          "holiday" -> :HOLIDAY
+          "ice in harbour" -> :OTHER_CAUSE
+          "maintenance" -> :MAINTENANCE
+          "mechanical failure" -> :TECHNICAL_PROBLEM
+          "mechanical problem" -> :TECHNICAL_PROBLEM
+          "police action" -> :POLICE_ACTIVITY
+          "residual delay" -> :OTHER_CAUSE
+          "signal failure" -> :TECHNICAL_PROBLEM
+          "signal problem" -> :TECHNICAL_PROBLEM
+          "single tracking" -> :OTHER_CAUSE
+          "switch problem" -> :TECHNICAL_PROBLEM
+          "technical problem" -> :TECHNICAL_PROBLEM
+          "tie replacement" -> :MAINTENANCE
+          "track problem" -> :TECHNICAL_PROBLEM
+          "wire problem" -> :TECHNICAL_PROBLEM
+        end
+
+      cause_from_existing_enums ->
+        cause_from_existing_enums
+    end
+  end
+
+  def from_ibi(ibi_alert, :cause_detail) do
+    (Map.get(ibi_alert, :cause_name) || "")
+    |> String.replace(~r/\s+/, "_")
+    |> String.upcase()
+  end
 
   def from_ibi(ibi_alert, :effect_name) do
     mappings = %{

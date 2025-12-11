@@ -367,6 +367,7 @@ defmodule AlertsUI.Alerts do
       active_period_end: closed_time,
       closed_timestamp: closed_time,
       notification_period_end: closed_time,
+      last_modified_timestamp: closed_time,
       last_push_notification_timestamp: last_push_notification_timestamp,
       duration_certainty: :KNOWN
     )

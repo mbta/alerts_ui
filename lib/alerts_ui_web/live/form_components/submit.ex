@@ -50,7 +50,11 @@ defmodule AlertsUIWeb.FormComponents.Submit do
       <.review_modal
         :if={Map.get(assigns, :show, nil)}
         form_type={@form_type}
-        alert_data={Map.merge(@alert_data, %{selected_schedules: @selected_schedules})}
+        alert_data={
+          @alert_data
+          |> Map.merge(%{selected_schedules: @selected_schedules})
+          |> Map.merge(AlertsUI.AlertBuilder.original_selections(@alert_data))
+        }
         cancel_event_name="cancel_review"
         accept_event_name="save"
         target_id="#submit_view"

@@ -143,7 +143,8 @@ Enum.each(1..20, fn i ->
     reminder_times: [reminder_time],
     original_route_selections: [],
     notification_period_start: ~U[2023-10-12 00:04:00Z],
-    notification_period_end: nil
+    notification_period_end: nil,
+    last_modified_timestamp: ~U[2023-10-12 00:03:00Z]
   })
 end)
 

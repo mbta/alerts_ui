@@ -7,10 +7,11 @@ defmodule AlertsUIWeb.ReviewModal do
 
   import AlertsUIWeb.CoreComponents
   import AlertsUIWeb.SharedComponents
+  import PhoenixHTMLHelpers.Format, only: [text_to_html: 2]
 
-  alias AlertsUI.{ActivePeriodBuilder, ActiveStatus}
-  alias AlertsUI.Models.SeverityLevel
-  alias AlertsUIWeb.CreateAlertLive
+  alias AlertsUI.ActiveStatus
+  alias AlertsUI.Helpers.ReminderTimes
+  alias AlertsUI.Models.{Alert, SeverityLevel}
 
   alias AlertsUIWeb.FormComponents.Helpers.{
     ContentFormatter,
@@ -20,8 +21,6 @@ defmodule AlertsUIWeb.ReviewModal do
     TimeRangeDurationText
   }
 
-  alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
-  alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias Phoenix.LiveView.JS
 
   @doc """
@@ -57,61 +56,64 @@ defmodule AlertsUIWeb.ReviewModal do
   attr :rest, :global, include: ~w(cancel_event_name accept_event_name target_id)
 
   def review_modal(assigns) do
-    # Refactor: Selected_routes will soon be in the assigns and keep us from having to make this API call
-
-    route_type = assigns.alert_data.route_type
-
-    routes =
-      if Map.get(assigns.alert_data, :route_ids) do
-        Enum.map(assigns.alert_data.route_ids, fn id -> RoutesRepo.get(id) end)
-      end
-
     route_names =
-      if is_list(routes) do
-        routes
-        |> Enum.map(&SelectFormatter.name_for_option(&1))
-        |> join_present(", ")
-      else
-        ""
-      end
-
-    direction_name =
-      if routes && Map.get(assigns.alert_data, :direction) not in [nil, "default"] do
-        routes
-        |> List.first()
-        |> Map.get(:direction_names)
-        |> Map.get(String.to_integer(assigns.alert_data.direction))
-      end
-
-    stop_names =
-      get_stop_names(assigns.alert_data)
+      assigns.alert_data
+      |> Map.get(:original_route_selections, [])
+      |> Alert.get_original_names()
       |> join_present(", ")
 
-    # Only ferry trips need the route_type to be passed to formatter
+    direction_names =
+      assigns.alert_data
+      |> Map.get(:original_direction_selections, [])
+      |> Alert.get_original_names()
+      |> join_present(", ")
+
+    stop_names =
+      assigns.alert_data
+      |> Map.get(:original_stop_selections, [])
+      |> Alert.get_original_names()
+      |> join_present(", ")
+
     trip_names =
-      if Map.get(assigns.alert_data, :selected_schedules) do
-        Enum.map(
-          assigns.alert_data.selected_schedules,
-          &SelectFormatter.name_for_option(&1, route_type)
-        )
+      assigns.alert_data
+      |> Map.get(:original_trip_selections, [])
+      |> Alert.get_original_names()
+      |> join_present(", ")
+
+    trip_names =
+      if trip_names == "" do
+        assigns.alert_data
+        |> Map.get(:selected_schedules, [])
+        |> Kernel.||([])
+        |> Enum.map(fn s ->
+          SelectFormatter.name_for_option(s)
+        end)
         |> join_present(", ")
+      else
+        trip_names
       end
 
-    facility_name =
-      if Map.get(assigns.alert_data, :facility_id) do
-        assigns.alert_data.facility_id
-        |> FacilitiesRepo.get()
-        |> SelectFormatter.name_for_option()
-      end
+    facility_names =
+      assigns.alert_data
+      |> Map.get(:original_facility_selections, [])
+      |> Alert.get_original_names()
+      |> join_present(", ")
+
+    mode_names =
+      assigns.alert_data
+      |> Map.get(:service_types, %{})
+      |> Enum.map(&ContentFormatter.service_type_string/1)
+      |> join_present(", ")
 
     assigns =
       assign(assigns,
         now: DateTime.utc_now(),
         route_names: route_names,
-        direction_name: direction_name,
+        direction_names: direction_names,
         stop_names: stop_names,
         trip_names: trip_names,
-        facility_name: facility_name,
+        facility_names: facility_names,
+        mode_names: mode_names,
         id: "review-modal",
         created_timestamp: Map.get(assigns.alert_data, :created_timestamp),
         created_by: Map.get(assigns.alert_data, :created_by),
@@ -154,13 +156,16 @@ defmodule AlertsUIWeb.ReviewModal do
         <div class="p-4 grow">
           <%!-- Top section --%>
           <p class="font-bold">Main message</p>
-          <p class="pb-4 max-w-[28rem] whitespace-pre-line break-words">{@alert_data.header_text}</p>
-
+          {text_to_html(@alert_data.header_text,
+            attributes: [class: "pb-4 max-w-[28rem] whitespace-pre-line break-words"]
+          )}
           <div>
             <span class="block pb-4">
               <p class="font-bold">Supporting information</p>
               <%= if @alert_data.description_text do %>
-                <p class="whitespace-pre-line">{@alert_data.description_text}</p>
+                {text_to_html(@alert_data.description_text,
+                  attributes: [class: "whitespace-pre-line"]
+                )}
               <% else %>
                 <p class="italic">None</p>
               <% end %>
@@ -191,9 +196,9 @@ defmodule AlertsUIWeb.ReviewModal do
               <p>Routes:</p>
               <p>{@route_names}</p>
             <% end %>
-            <%= if @direction_name && @direction_name != "" do %>
+            <%= if @direction_names && @direction_names != "" do %>
               <p>Direction:</p>
-              <p>{@direction_name}</p>
+              <p>{@direction_names}</p>
             <% end %>
             <%= if @stop_names && @stop_names != "" do %>
               <p>Stops:</p>
@@ -203,17 +208,13 @@ defmodule AlertsUIWeb.ReviewModal do
               <p>Trips:</p>
               <p>{@trip_names}</p>
             <% end %>
-            <%= if @facility_name && @facility_name != "" do %>
+            <%= if @facility_names && @facility_names != "" do %>
               <p>Facility:</p>
-              <p>{@facility_name}</p>
+              <p>{@facility_names}</p>
             <% end %>
             <%= if ContentFormatter.service_type_string(@alert_data.route_type, @alert_data.combination) == "Systemwide" do %>
               <p>Modes:</p>
-              <p>
-                {@alert_data.service_types
-                |> Enum.map(&ContentFormatter.service_type_string/1)
-                |> Enum.join(", ")}
-              </p>
+              <p>{@mode_names}</p>
             <% end %>
           </div>
 
@@ -344,14 +345,14 @@ defmodule AlertsUIWeb.ReviewModal do
             <p class="font-bold pb-1">Reminders</p>
             <%= if @alert_data.reminder_times != [] do %>
               <div class="pb-4">
-                <%= for reminder <- Enum.sort(@alert_data.reminder_times) do %>
+                <%= for reminder <- Enum.sort_by(@alert_data.reminder_times, &(&1.time)) do %>
                   <p>
-                    {Calendar.strftime(reminder, "%a %m/%d/%Y %-I:%M %p")}
-                    <span :if={sent?(reminder)} class="text-text-secondary">
+                    {Calendar.strftime(reminder.time, "%a %m/%d/%Y %-I:%M %p")}
+                    <span :if={ReminderTimes.sent?(reminder.time)} class="text-text-secondary">
                       <.icon name="hero-check-circle-solid text-mbta-green" class="h-4 w-4" /> Sent
                     </span>
 
-                    <span :if={!sent?(reminder)} class="text-text-secondary">
+                    <span :if={!ReminderTimes.sent?(reminder.time)} class="text-text-secondary">
                       <.icon name="hero-clock" class="h-4 w-4" /> Scheduled
                     </span>
                   </p>
@@ -496,8 +497,6 @@ defmodule AlertsUIWeb.ReviewModal do
     |> Enum.join(separator)
   end
 
-  defp join_present(not_list, _separator), do: not_list
-
   defp format_alert_status_text(alert) do
     alert
     |> ActiveStatus.get_alert_status()
@@ -506,28 +505,6 @@ defmodule AlertsUIWeb.ReviewModal do
     |> String.split()
     |> Enum.map_join(" / ", &String.capitalize/1)
   end
-
-  defp sent?(reminder_time, now \\ DateTime.utc_now()) do
-    reminder_time = ActivePeriodBuilder.naive_eastern_datetime_to_utc(reminder_time)
-    DateTime.compare(now, reminder_time) in [:eq, :gt]
-  end
-
-  defp get_stop_names(%{stop_names: [_ | _] = stop_names}) do
-    stop_names
-  end
-
-  defp get_stop_names(%{stop_ids: [_ | _] = stop_ids} = alert_data) do
-    CreateAlertLive.get_stops(
-      alert_data.route_ids,
-      alert_data.route_type,
-      Map.get(alert_data, :direction)
-    )
-    |> Enum.filter(fn stop -> stop.id in stop_ids end)
-    |> Enum.map(fn stop -> SelectFormatter.name_for_option(stop) end)
-    |> Enum.uniq()
-  end
-
-  defp get_stop_names(_alert_data), do: nil
 
   attr :id, :string,
     default: "close-alert-modal",

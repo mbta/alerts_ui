@@ -25,6 +25,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
           original_route_selections: []
         })
 
+      reminder_time_id = hd(alert.reminder_times).id
+
       assert %AlertData{
                combination: :ACCESS,
                direction: "default",
@@ -37,23 +39,26 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                header_text: "cool header text",
                description_text: "description text",
                service_types: [],
-               reminder_times: [~N[2024-09-24 20:01:00]],
+               reminder_times: [%{id: ^reminder_time_id, time: ~N[2024-09-24 20:01:00]}],
                notification_specifier: :same_as_effect_period,
                alert_timing: :"one-time"
              } = AlertData.build_alert_data(alert)
     end
 
     test "correctly fills in route_types_by_id for stop-route" do
-      insert(:alert, %{
-        alert_id: "1",
-        effect: :NO_SERVICE,
-        effect_detail: "DOCK_CLOSURE",
-        header_text: "cool header text",
-        description_text: "description text",
-        informed_entity: [%{route_type: 4, route_id: "1", direction_id: 0, stop_id: "2"}],
-        primary_service_type: "4",
-        original_route_selections: ["1"]
-      })
+      alert =
+        insert(:alert, %{
+          alert_id: "1",
+          effect: :NO_SERVICE,
+          effect_detail: "DOCK_CLOSURE",
+          header_text: "cool header text",
+          description_text: "description text",
+          informed_entity: [%{route_type: 4, route_id: "1", direction_id: 0, stop_id: "2"}],
+          primary_service_type: "4",
+          original_route_selections: ["1"]
+        })
+
+      reminder_time_id = hd(alert.reminder_times).id
 
       assert %AlertData{
                combination: :SR,
@@ -68,23 +73,26 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                header_text: "cool header text",
                description_text: "description text",
                service_types: [],
-               reminder_times: [~N[2024-09-24 20:01:00]],
+               reminder_times: [%{id: ^reminder_time_id, time: ~N[2024-09-24 20:01:00]}],
                notification_specifier: :same_as_effect_period,
                alert_timing: :"one-time"
              } = AlertData.build_alert_data("1")
     end
 
     test "works if informed entities empty" do
-      insert(:alert, %{
-        alert_id: "1",
-        effect: :ACCESSIBILITY_ISSUE,
-        effect_detail: "ACCESS_ISSUE",
-        header_text: "cool header text",
-        description_text: "description text",
-        informed_entity: [],
-        primary_service_type: "access",
-        original_route_selections: []
-      })
+      alert =
+        insert(:alert, %{
+          alert_id: "1",
+          effect: :ACCESSIBILITY_ISSUE,
+          effect_detail: "ACCESS_ISSUE",
+          header_text: "cool header text",
+          description_text: "description text",
+          informed_entity: [],
+          primary_service_type: "access",
+          original_route_selections: []
+        })
+
+      reminder_id = hd(alert.reminder_times).id
 
       assert %AlertData{
                combination: :ACCESS,
@@ -98,28 +106,31 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                header_text: "cool header text",
                description_text: "description text",
                service_types: [],
-               reminder_times: [~N[2024-09-24 20:01:00]],
+               reminder_times: [%{id: ^reminder_id, time: ~N[2024-09-24 20:01:00]}],
                notification_specifier: :same_as_effect_period,
                alert_timing: :"one-time"
              } = AlertData.build_alert_data("1")
     end
 
     test "handles directions correctly" do
-      insert(:alert, %{
-        alert_id: "1",
-        effect: :SIGNIFICANT_DELAYS,
-        effect_detail: "DELAY",
-        header_text: "cool header text",
-        description_text: "description text",
-        informed_entity: [
-          %{route_type: 1, route_id: "1", direction_id: 0},
-          %{route_type: 1, route_id: "2", stop_id: "a2", direction_id: 0},
-          %{route_type: 1, route_id: "3", stop_id: "a3", direction_id: 1},
-          %{route_type: 1, route_id: "4", trip: build(:trip_descriptor, %{trip_id: "b1"})}
-        ],
-        primary_service_type: "1",
-        original_route_selections: ["1", "2", "3", "4"]
-      })
+      alert =
+        insert(:alert, %{
+          alert_id: "1",
+          effect: :SIGNIFICANT_DELAYS,
+          effect_detail: "DELAY",
+          header_text: "cool header text",
+          description_text: "description text",
+          informed_entity: [
+            %{route_type: 1, route_id: "1", direction_id: 0},
+            %{route_type: 1, route_id: "2", stop_id: "a2", direction_id: 0},
+            %{route_type: 1, route_id: "3", stop_id: "a3", direction_id: 1},
+            %{route_type: 1, route_id: "4", trip: build(:trip_descriptor, %{trip_id: "b1"})}
+          ],
+          primary_service_type: "1",
+          original_route_selections: ["1", "2", "3", "4"]
+        })
+
+      reminder_time_id = hd(alert.reminder_times).id
 
       assert %AlertData{
                combination: :RDS,
@@ -133,24 +144,27 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                header_text: "cool header text",
                description_text: "description text",
                service_types: [],
-               reminder_times: [~N[2024-09-24 20:01:00]],
+               reminder_times: [%{id: ^reminder_time_id, time: ~N[2024-09-24 20:01:00]}],
                notification_specifier: :same_as_effect_period,
                alert_timing: :"one-time"
              } = AlertData.build_alert_data("1")
     end
 
     test "gets facility id correctly" do
-      insert(:alert, %{
-        alert_id: "1",
-        effect: :OTHER_EFFECT,
-        effect_detail: "BIKE_ISSUE",
-        header_text: "cool header text",
-        description_text: "description text",
-        informed_entity: [
-          %{facility_id: "example-facility"}
-        ],
-        primary_service_type: "access"
-      })
+      alert =
+        insert(:alert, %{
+          alert_id: "1",
+          effect: :OTHER_EFFECT,
+          effect_detail: "BIKE_ISSUE",
+          header_text: "cool header text",
+          description_text: "description text",
+          informed_entity: [
+            %{facility_id: "example-facility"}
+          ],
+          primary_service_type: "access"
+        })
+
+      reminder_id = hd(alert.reminder_times).id
 
       assert %AlertData{
                combination: :ACCESS,
@@ -163,45 +177,48 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                service_types: [nil],
                header_text: "cool header text",
                description_text: "description text",
-               reminder_times: [~N[2024-09-24 20:01:00]],
+               reminder_times: [%{id: ^reminder_id, time: ~N[2024-09-24 20:01:00]}],
                alert_timing: :"one-time",
                notification_specifier: :same_as_effect_period
              } = AlertData.build_alert_data("1")
     end
 
     test "builds alert data from alert" do
-      insert(:alert, %{
-        alert_id: "1",
-        effect: :SIGNIFICANT_DELAYS,
-        effect_detail: "DELAY",
-        header_text: "cool header text",
-        description_text: "description text",
-        url: "http://www.example.com",
-        image_url: "http://www.example.com/example.jpg",
-        image_alternative_text: "An example image",
-        active_period_start: ~U[2024-05-02 16:09:34.007545Z],
-        active_period_end: ~U[2024-05-04 01:09:34.007545Z],
-        active_period: [
-          %{start: ~U[2024-05-02 16:09:34.007545Z], end: ~U[2024-05-04 01:09:34.007545Z]}
-        ],
-        notification_period_start: ~U[2024-05-02 16:09:34.007545Z],
-        duration_certainty: :KNOWN,
-        cause_detail: "HAZMAT_CONDITION",
-        severity: 3,
-        severity_level: :WARNING,
-        reminder_times: [
-          build(:reminder_time, %{reminder_time: ~U[2024-05-02 16:10:34.007545Z]}),
-          build(:reminder_time, %{reminder_time: ~U[2024-05-02 16:11:34.007545Z]})
-        ],
-        informed_entity: [
-          %{route_type: 3, route_id: "1"},
-          %{route_type: 3, route_id: "2", stop_id: "a2"},
-          %{route_type: 3, route_id: "3", stop_id: "a3"},
-          %{route_type: 3, route_id: "4", trip: build(:trip_descriptor, %{trip_id: "b1"})}
-        ],
-        primary_service_type: "3",
-        original_route_selections: ["1", "2", "3", "4"]
-      })
+      alert =
+        insert(:alert, %{
+          alert_id: "1",
+          effect: :SIGNIFICANT_DELAYS,
+          effect_detail: "DELAY",
+          header_text: "cool header text",
+          description_text: "description text",
+          url: "http://www.example.com",
+          image_url: "http://www.example.com/example.jpg",
+          image_alternative_text: "An example image",
+          active_period_start: ~U[2024-05-02 16:09:34.007545Z],
+          active_period_end: ~U[2024-05-04 01:09:34.007545Z],
+          active_period: [
+            %{start: ~U[2024-05-02 16:09:34.007545Z], end: ~U[2024-05-04 01:09:34.007545Z]}
+          ],
+          notification_period_start: ~U[2024-05-02 16:09:34.007545Z],
+          duration_certainty: :KNOWN,
+          cause_detail: "HAZMAT_CONDITION",
+          severity: 3,
+          severity_level: :WARNING,
+          reminder_times: [
+            build(:reminder_time, %{reminder_time: ~U[2024-05-02 16:10:34.007545Z]}),
+            build(:reminder_time, %{reminder_time: ~U[2024-05-02 16:11:34.007545Z]})
+          ],
+          informed_entity: [
+            %{route_type: 3, route_id: "1"},
+            %{route_type: 3, route_id: "2", stop_id: "a2"},
+            %{route_type: 3, route_id: "3", stop_id: "a3"},
+            %{route_type: 3, route_id: "4", trip: build(:trip_descriptor, %{trip_id: "b1"})}
+          ],
+          primary_service_type: "3",
+          original_route_selections: ["1", "2", "3", "4"]
+        })
+
+      [%{id: reminder_time_id1}, %{id: reminder_time_id2}] = alert.reminder_times
 
       assert %AlertData{
                combination: :RDS,
@@ -228,7 +245,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                service_types: [],
                cause_detail: "HAZMAT_CONDITION",
                severity: 3,
-               reminder_times: [~N[2024-05-02 12:10:34], ~N[2024-05-02 12:11:34]],
+               reminder_times: [
+                 %{id: ^reminder_time_id1, time: ~N[2024-05-02 12:10:34]},
+                 %{id: ^reminder_time_id2, time: ~N[2024-05-02 12:11:34]}
+               ],
                alert_timing: :"one-time"
              } = AlertData.build_alert_data("1")
     end
@@ -316,17 +336,20 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
     end
 
     test "builds data for a systemwide alert" do
-      insert(:alert, %{
-        alert_id: "1",
-        effect: :SIGNIFICANT_DELAYS,
-        effect_detail: "DELAY",
-        header_text: "cool header text",
-        description_text: "description text",
-        informed_entity: [
-          %{route_type: 3}
-        ],
-        primary_service_type: "systemwide"
-      })
+      alert =
+        insert(:alert, %{
+          alert_id: "1",
+          effect: :SIGNIFICANT_DELAYS,
+          effect_detail: "DELAY",
+          header_text: "cool header text",
+          description_text: "description text",
+          informed_entity: [
+            %{route_type: 3}
+          ],
+          primary_service_type: "systemwide"
+        })
+
+      reminder_time_id = hd(alert.reminder_times).id
 
       assert %AlertData{
                combination: nil,
@@ -339,26 +362,29 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                facility_id: nil,
                header_text: "cool header text",
                description_text: "description text",
-               reminder_times: [~N[2024-09-24 20:01:00]],
+               reminder_times: [%{id: ^reminder_time_id, time: ~N[2024-09-24 20:01:00]}],
                notification_specifier: :same_as_effect_period,
                alert_timing: :"one-time"
              } = AlertData.build_alert_data("1")
     end
 
     test "builds data for a systemwide alert affecting the subway" do
-      insert(:alert, %{
-        alert_id: "1",
-        effect: :SIGNIFICANT_DELAYS,
-        effect_detail: "DELAY",
-        header_text: "cool header text",
-        description_text: "description text",
-        informed_entity: [
-          %{route_type: 0},
-          %{route_type: 1},
-          %{route_type: 3}
-        ],
-        primary_service_type: "systemwide"
-      })
+      alert =
+        insert(:alert, %{
+          alert_id: "1",
+          effect: :SIGNIFICANT_DELAYS,
+          effect_detail: "DELAY",
+          header_text: "cool header text",
+          description_text: "description text",
+          informed_entity: [
+            %{route_type: 0},
+            %{route_type: 1},
+            %{route_type: 3}
+          ],
+          primary_service_type: "systemwide"
+        })
+
+      reminder_time_id = hd(alert.reminder_times).id
 
       assert %AlertData{
                combination: nil,
@@ -371,7 +397,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                facility_id: nil,
                header_text: "cool header text",
                description_text: "description text",
-               reminder_times: [~N[2024-09-24 20:01:00]],
+               reminder_times: [%{id: ^reminder_time_id, time: ~N[2024-09-24 20:01:00]}],
                alert_timing: :"one-time",
                notification_specifier: :same_as_effect_period
              } = AlertData.build_alert_data("1")

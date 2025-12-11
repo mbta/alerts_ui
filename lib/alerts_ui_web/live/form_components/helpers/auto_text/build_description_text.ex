@@ -7,7 +7,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionText do
 
   @spec affected_routes(BuildAutoText.t()) :: String.t()
   def affected_routes(%{routes: routes, effect_name: effect, route_type: route_type}) do
-    "#{affected_route_term(effect)} #{route_term(route_type)}:\n#{join(routes)}"
+    "#{affected_route_term(effect)} #{route_term(route_type)}:\n#{join(routes, route_type)}"
   end
 
   @spec affected_stops(BuildAutoText.t()) :: String.t()
@@ -20,7 +20,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionText do
   end
 
   def affected_stops(%{stops: stops, effect_name: effect, route_type: route_type}) do
-    "#{affected_stop_term(effect)} #{stop_term(route_type)}:\n#{join(stops)}"
+    "#{affected_stop_term(effect)} #{stop_term(route_type)}:\n#{join(stops, route_type)}"
   end
 
   defp stops_by_direction(stops, effect, direction) do
@@ -39,8 +39,16 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionText do
   end
 
   @spec affected_trips(BuildAutoText.t()) :: String.t()
-  def affected_trips(%{routes: [_route], schedules: schedules, effect_name: effect}) do
-    "#{affected_trip_term(effect)} trips:\n#{join(schedules)}"
+  def affected_trips(%{
+        routes: [_route],
+        schedules: schedules,
+        effect_name: effect,
+        route_type: route_type
+      }) do
+    schedules =
+      Enum.map(schedules, fn schedule -> Map.put(schedule, :use_trip_id_in_name?, false) end)
+
+    "#{affected_trip_term(effect)} trips:\n#{join(schedules, route_type)}"
   end
 
   def affected_trips(%{
@@ -51,7 +59,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionText do
       }) do
     Enum.reduce(schedules, %{}, fn schedule, acc ->
       route_name = SelectFormatter.name_for_option(schedule.route)
-      trip_name = SelectFormatter.name_for_option(schedule, route_type)
+
+      trip_name =
+        schedule
+        |> Map.put(:use_trip_id_in_name?, false)
+        |> SelectFormatter.name_for_option(route_type)
+
       direction_name = trip_direction_name(schedule.trip, schedule.route)
 
       if Map.has_key?(acc, {route_name, direction_name}) do
@@ -122,8 +135,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionText do
   defp affected_route_term("Suspension"), do: "Suspended"
   defp affected_route_term(_effect), do: "Affected"
 
-  defp join(list) do
-    Enum.map_join(list, "\n", &SelectFormatter.name_for_option/1)
+  defp join(list, route_type) do
+    Enum.map_join(list, "\n", &SelectFormatter.name_for_option(&1, route_type))
   end
 
   defp trip_direction_name(trip, route) do
