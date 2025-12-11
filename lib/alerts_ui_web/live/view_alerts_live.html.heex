@@ -49,8 +49,8 @@
           effect_name={alert.effect_name}
         />
       </:col>
-      <:col :let={alert} label="Effect" field={:effect_detail} col_style="width: 8.6%;">
-        {format_effect(alert.effect_detail)}
+      <:col :let={alert} label="Effect" field={:effect_name} col_style="width: 8.6%;">
+        {alert.effect_name}
       </:col>
       <:col
         :let={alert}
