@@ -232,7 +232,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   end
 
   defp active_period_map(alert) do
-    if alert.recurrence_days do
+    if alert.recurrence_days && !Enum.empty?(alert.recurrence_days) do
       determine_recurring_active_period(alert)
     else
       determine_one_time_active_period(alert)
