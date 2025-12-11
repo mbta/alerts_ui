@@ -232,19 +232,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   end
 
   defp active_period_map(alert) do
-    base_map = %{
-      active_period_start: shift_to_naive(alert.active_period_start),
-      active_period_end: shift_to_naive(alert.active_period_end)
-    }
-
-    period_map =
-      case alert.active_period do
-        [] -> determine_empty_active_period(alert)
-        [_active_period] -> determine_one_time_active_period(alert)
-        _ -> determine_recurring_active_period(alert)
-      end
-
-    Map.merge(base_map, period_map)
+    if alert.recurrence_days && !Enum.empty?(alert.recurrence_days) do
+      determine_recurring_active_period(alert)
+    else
+      determine_one_time_active_period(alert)
+    end
   end
 
   defp reminder_times(alert) do
@@ -272,11 +264,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   end
 
   def determine_one_time_active_period(alert) do
-    active_period_start = shift_to_naive(alert.active_period_start)
+    shifted_active_period_start = shift_to_naive(alert.active_period_start)
 
     # use notification_period_end for "later today" alerts because
     # their active period ends are only 2 hours out.
-    active_period_end =
+    shifted_active_period_end =
       if alert.duration_certainty == :ESTIMATED do
         shift_to_naive(alert.notification_period_end)
       else
@@ -285,27 +277,38 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
     end_specifier =
       determine_end_specifier(
-        active_period_end,
+        shifted_active_period_end,
         alert.duration_certainty
       )
 
     %{
       alert_timing: :"one-time",
-      active_period_start: active_period_start,
-      active_period_end: active_period_end,
-      active_period_end_date: end_date(active_period_end, end_specifier),
-      active_period_start_date: start_date(active_period_start),
-      active_period_start_specifier: determine_start_specifier(active_period_start),
+      active_period_start: shifted_active_period_start,
+      active_period_end: shifted_active_period_end,
+      active_period_end_date: end_date(shifted_active_period_end, end_specifier),
+      active_period_start_date: start_date(shifted_active_period_start),
+      active_period_start_specifier: determine_start_specifier(shifted_active_period_start),
       active_period_end_specifier: end_specifier
     }
   end
 
   def determine_recurring_active_period(%{active_period: active_period} = alert) do
-    start_datetime = hd(active_period).start |> shift_to_naive
-    end_datetime = hd(active_period).end |> shift_to_naive
+    shifted_active_period_start = shift_to_naive(alert.active_period_start)
+    shifted_active_period_end = shift_to_naive(alert.active_period_end)
+
+    [start_datetime, end_datetime] =
+      if active_period && !Enum.empty?(active_period) do
+        [
+          List.first(active_period).start |> shift_to_naive(),
+          List.last(active_period).end |> shift_to_naive()
+        ]
+      else
+        [shifted_active_period_start, shifted_active_period_end]
+      end
+
     end_specifier = if alert.active_period_end, do: "custom", else: "until_further_notice"
 
-    [recurrence_start, recurrence_end] =
+    [recurrence_start_time, recurrence_end_time] =
       [
         Map.get(alert, :recurrence_start_time) || NaiveDateTime.to_time(start_datetime),
         Map.get(alert, :recurrence_end_time) || NaiveDateTime.to_time(end_datetime)
@@ -313,28 +316,19 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
     %{
       alert_timing: :recurring,
+      active_period_start: shifted_active_period_start,
+      active_period_end: shifted_active_period_end,
       active_period_start_time_specifier: determine_start_specifier(start_datetime),
       active_period_end_time_specifier: determine_end_specifier(end_datetime, :KNOWN),
       active_period_start_specifier: "custom",
       active_period_end_specifier: end_specifier,
-      active_period_start_time: recurrence_start,
-      active_period_end_time: recurrence_end,
+      active_period_start_time: recurrence_start_time,
+      active_period_end_time: recurrence_end_time,
       active_period_start_date: start_datetime |> start_date,
       active_period_end_date:
         alert.active_period_end |> shift_to_naive |> end_date(end_specifier),
       recurrence_days: alert.recurrence_days |> Enum.map(&Atom.to_string/1)
     }
-  end
-
-  def determine_empty_active_period(alert) do
-    alert_timing =
-      if alert.recurrence_days do
-        :recurring
-      else
-        :one_time
-      end
-
-    %{alert_timing: alert_timing}
   end
 
   defp get_notification_specifier(nil), do: :same_as_effect_period
