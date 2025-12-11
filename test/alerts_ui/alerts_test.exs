@@ -1153,14 +1153,30 @@ defmodule AlertsUI.AlertsTest do
         duration_certainty: :UNKNOWN,
         last_push_notification_timestamp: ~U[2024-06-02 00:00:00Z],
         active_period: [
-          build(:active_period, %{start: ~U[2024-06-01 00:00:00Z], end: ~U[2024-06-02 00:00:00Z]}),
-          build(:active_period, %{start: ~U[2024-06-03 00:00:00Z], end: ~U[2024-06-04 04:00:00Z]})
+          build(:active_period, %{start: ~U[2024-06-02 00:00:00Z]})
         ]
       })
 
       Alerts.get_by_alert_id("123") |> Alerts.close_automatically(current_time)
       result = Alerts.get_by_alert_id("123")
       assert result.last_push_notification_timestamp == current_time
+    end
+
+    test "closes alert and does not update LPNT if duration certainty is ESTIMATED" do
+      current_time = ~U[2024-06-04 00:01:11Z]
+
+      insert(:alert, %{
+        alert_id: "123",
+        duration_certainty: :ESTIMATED,
+        last_push_notification_timestamp: ~U[2024-06-03 00:00:00Z],
+        active_period: [
+          build(:active_period, %{start: ~U[2024-06-03 00:00:00Z], end: ~U[2024-06-03 00:02:00Z]})
+        ]
+      })
+
+      Alerts.get_by_alert_id("123") |> Alerts.close_automatically(current_time)
+      result = Alerts.get_by_alert_id("123")
+      assert result.last_push_notification_timestamp == ~U[2024-06-03 00:00:00Z]
     end
 
     test "closes alert and does not update LPNT if duration certainty is KNOWN" do
