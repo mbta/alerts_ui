@@ -260,7 +260,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
                  short_header_text: nil,
                  severity: 4,
                  created_timestamp: nil,
-                 last_modified_timestamp: nil,
+                 last_modified_timestamp: _,
                  last_push_notification_timestamp: _,
                  closed_timestamp: nil,
                  timeframe_text: nil,
