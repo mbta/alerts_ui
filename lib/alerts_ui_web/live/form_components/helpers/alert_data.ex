@@ -302,7 +302,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
   def determine_recurring_active_period(%{active_period: active_period} = alert) do
     start_datetime = hd(active_period).start |> shift_to_naive
-    end_datetime = hd(active_period).end |> shift_to_naive
+    end_datetime = List.last(active_period).end |> shift_to_naive
     end_specifier = if alert.active_period_end, do: "custom", else: "until_further_notice"
 
     [recurrence_start, recurrence_end] =
