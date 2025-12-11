@@ -44,7 +44,6 @@ defmodule AlertsUI.AlertBuilderTest do
           service_effect_text: nil,
           effect_name: "Delay",
           route_ids: ["57"],
-          route_types_by_id: %{"57" => 1},
           direction: "1",
           active_period_start: ~N[2024-04-30 11:54:00],
           alert_timing: :"one-time",
@@ -325,7 +324,6 @@ defmodule AlertsUI.AlertBuilderTest do
           header_text: "hello",
           effect_name: "Delay",
           route_ids: ["24", "27", "57"],
-          route_types_by_id: %{"57" => 1, "24" => 1, "27" => 1},
           direction: "default",
           active_period_start: ~N[2024-04-30 11:54:00],
           active_period_end_specifier: :until_further_notice,
@@ -419,7 +417,7 @@ defmodule AlertsUI.AlertBuilderTest do
          [
            get: fn
              "Green-D", _opts ->
-               %Route{id: "Green-D", line_id: "line-Green", type: 1, description: :rapid_transit}
+               %Route{id: "Green-D", line_id: "line-Green", type: 0, description: :rapid_transit}
            end
          ]},
         {LinesRepo, [],
@@ -458,7 +456,6 @@ defmodule AlertsUI.AlertBuilderTest do
           header_text: "header",
           effect_name: "Delay",
           route_ids: ["Green-D"],
-          route_types_by_id: %{"Green" => 0, "Green-D" => 0},
           direction: "default",
           active_period_start: ~N[2024-04-30 11:54:00],
           active_period_end_specifier: :until_further_notice,
@@ -520,7 +517,6 @@ defmodule AlertsUI.AlertBuilderTest do
           header_text: "hello",
           effect_name: "Delay",
           route_ids: ["24", "Shuttle_JFKPark"],
-          route_types_by_id: %{"24" => 1, "Shuttle_JFKPark" => 3},
           direction: "default",
           active_period_start: ~N[2024-04-30 11:54:00],
           active_period_end_specifier: :until_further_notice,
@@ -568,7 +564,6 @@ defmodule AlertsUI.AlertBuilderTest do
           header_text: "hello",
           effect_name: "Delay",
           route_ids: ["CapeFlyer"],
-          route_types_by_id: %{"CapeFlyer" => 2},
           direction: "default",
           active_period_start: ~N[2024-04-30 11:54:00],
           active_period_end_specifier: :until_further_notice,
@@ -657,7 +652,6 @@ defmodule AlertsUI.AlertBuilderTest do
           effect_name: "Delay",
           stop_ids: ["place-nubn", 1, 2],
           route_ids: ["87"],
-          route_types_by_id: %{"87" => 3},
           trip_ids: nil,
           direction: "0"
         }
@@ -705,7 +699,6 @@ defmodule AlertsUI.AlertBuilderTest do
           effect_name: "Delay",
           stop_ids: [],
           route_ids: ["57"],
-          route_types_by_id: %{"57" => 3},
           trip_ids: nil,
           direction: "default"
         }
@@ -738,7 +731,6 @@ defmodule AlertsUI.AlertBuilderTest do
           effect_name: "Delay",
           stop_ids: [],
           route_ids: ["57", "58"],
-          route_types_by_id: %{"57" => 3, "58" => 3},
           trip_ids: nil,
           direction: "default"
         }
@@ -774,7 +766,6 @@ defmodule AlertsUI.AlertBuilderTest do
           effect_name: "Delay",
           stop_ids: [],
           route_ids: ["57"],
-          route_types_by_id: %{"57" => 3},
           trip_ids: nil,
           direction: "1"
         }
@@ -801,7 +792,6 @@ defmodule AlertsUI.AlertBuilderTest do
         effect_name: "Shuttle",
         stop_ids: ["a", "b", "c"],
         route_ids: ["57"],
-        route_types_by_id: %{"57" => 3},
         trip_ids: nil,
         direction: "1"
       }
@@ -869,7 +859,6 @@ defmodule AlertsUI.AlertBuilderTest do
         stop_ids: ["1", "2"],
         route_type: 3,
         route_ids: ["1"],
-        route_types_by_id: %{"1" => 3},
         effect_name: "Detour",
         trip_ids: [],
         trip_information_by_id: %{},
@@ -925,7 +914,6 @@ defmodule AlertsUI.AlertBuilderTest do
         route_type: 2,
         effect_name: "Track Change",
         route_ids: ["CR-Haverhill"],
-        route_types_by_id: %{"CR-Haverhill" => 2},
         direction: "0",
         trip_ids: [],
         trip_information_by_id: %{},
@@ -998,7 +986,6 @@ defmodule AlertsUI.AlertBuilderTest do
         route_type: 1,
         effect_name: "Shuttle",
         route_ids: ["Red"],
-        route_types_by_id: %{"Red" => 1},
         direction: "default",
         stop_ids: ["place-alfcl", "place-davis", "place-portr"],
         trip_ids: [],
@@ -1122,7 +1109,6 @@ defmodule AlertsUI.AlertBuilderTest do
         effect_name: "Delay",
         stop_ids: ["a", "b"],
         route_ids: ["57", "58"],
-        route_types_by_id: %{"57" => 3, "58" => 3},
         trip_ids: nil,
         direction: "1"
       }
@@ -1209,7 +1195,6 @@ defmodule AlertsUI.AlertBuilderTest do
         effect_name: "Shuttle",
         stop_ids: ["place-jfk", "place-asmnl", "place-brntn"],
         route_ids: ["Red"],
-        route_types_by_id: %{"Red" => 1},
         trip_ids: nil,
         direction: "default"
       }
@@ -1330,7 +1315,6 @@ defmodule AlertsUI.AlertBuilderTest do
         effect_name: "Shuttle",
         stop_ids: ["place-jfk", "place-asmnl"],
         route_ids: ["Red"],
-        route_types_by_id: %{"Red" => 1},
         trip_ids: nil,
         direction: "default"
       }
@@ -1452,7 +1436,6 @@ defmodule AlertsUI.AlertBuilderTest do
         effect_name: "Shuttle",
         stop_ids: ["place-andrw", "place-jfk", "place-nqncy"],
         route_ids: ["Red"],
-        route_types_by_id: %{"Red" => 1},
         trip_ids: nil,
         direction: "default"
       }
@@ -1616,7 +1599,6 @@ defmodule AlertsUI.AlertBuilderTest do
         header_text: "hello",
         effect_name: "Delay",
         stop_ids: ["place-hymnl", "place-kencl", "place-fenwy"],
-        route_types_by_id: %{"Green" => 0},
         route_ids: ["Green"],
         trip_ids: nil,
         direction: "default"
@@ -1692,7 +1674,7 @@ defmodule AlertsUI.AlertBuilderTest do
          ]},
         {RoutesRepo, [],
          [
-           get: fn route_id, _opts -> %Route{id: route_id, type: 1} end,
+           get: fn route_id, _opts -> %Route{id: route_id, type: 0} end,
            green_line: fn -> @green_line_virtual_route end
          ]}
       ]) do
@@ -1830,7 +1812,6 @@ defmodule AlertsUI.AlertBuilderTest do
           header_text: "hello",
           effect_name: "Delay",
           route_ids: ["57", "58"],
-          route_types_by_id: %{"57" => 3, "58" => 3},
           direction: "default"
         }
 
@@ -1858,7 +1839,10 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [], by_route_id: fn _route_id, _opts -> [] end},
         {RoutesRepo, [],
          [
-           get: fn route_id, _opts -> %Route{id: route_id, type: 1} end,
+           get: fn
+             "Red", _opts -> %Route{id: "Red", type: 1}
+             route_id, _opts -> %Route{id: route_id, type: 0}
+           end,
            green_line: fn -> @green_line_virtual_route end
          ]}
       ]) do
@@ -1868,7 +1852,6 @@ defmodule AlertsUI.AlertBuilderTest do
           header_text: "hello",
           effect_name: "Delay",
           route_ids: ["Red", "Green", "Green-D"],
-          route_types_by_id: %{"Red" => 1, "Green" => 0, "Green-D" => 0},
           direction: "default"
         }
 
@@ -1924,7 +1907,6 @@ defmodule AlertsUI.AlertBuilderTest do
           header_text: "hello",
           effect_name: "Delay",
           route_ids: ["57", "58"],
-          route_types_by_id: %{"57" => 3, "58" => 3},
           direction: "1"
         }
 
@@ -1954,7 +1936,10 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
         {RoutesRepo, [],
          [
-           get: fn route_id, _opts -> %Route{id: route_id, type: 1} end,
+           get: fn
+             "Red", _opts -> %Route{id: "Red", type: 1}
+             route_id, _opts -> %Route{id: route_id, type: 0}
+           end,
            green_line: fn -> @green_line_virtual_route end
          ]}
       ]) do
@@ -1964,7 +1949,6 @@ defmodule AlertsUI.AlertBuilderTest do
           header_text: "hello",
           effect_name: "Delay",
           route_ids: ["Red", "Green", "Green-D"],
-          route_types_by_id: %{"Red" => 1, "Green" => 0, "Green-D" => 0},
           direction: "1"
         }
 
@@ -2133,7 +2117,6 @@ defmodule AlertsUI.AlertBuilderTest do
           header_text: "hello",
           effect_name: "Delay",
           route_ids: ["57"],
-          route_types_by_id: %{"57" => 3},
           trip_ids: [],
           direction: "default"
         }
@@ -2216,7 +2199,6 @@ defmodule AlertsUI.AlertBuilderTest do
         header_text: "hello",
         effect_name: "Delay",
         route_ids: ["57"],
-        route_types_by_id: %{"57" => 3},
         trip_ids: [],
         trip_information_by_id: %{},
         stop_ids: ["a", "b", "c"],
@@ -2295,7 +2277,6 @@ defmodule AlertsUI.AlertBuilderTest do
           header_text: "hello",
           effect_name: "Delay",
           route_ids: ["57", "58"],
-          route_types_by_id: %{"57" => 3, "58" => 3},
           trip_ids: [],
           stop_ids: [],
           direction: "default"
@@ -2734,7 +2715,6 @@ defmodule AlertsUI.AlertBuilderTest do
         header_text: "hello",
         effect_name: "Delay",
         route_ids: ["56", "57", "58", "Red"],
-        route_types_by_id: %{"56" => 3, "57" => 3, "58" => 3, "Red" => 1},
         stop_ids: ["a", "b"],
         direction: "default"
       }
@@ -2770,7 +2750,13 @@ defmodule AlertsUI.AlertBuilderTest do
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
         {StopsRepo, [], [by_route: fn _route_id, _direction -> parent_stops ++ child_stops end]},
-        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
+        {RoutesRepo, [],
+         [
+           get: fn
+             "Red", _opts -> %Route{id: "Red", type: 1}
+             route_id, _opts -> %Route{id: route_id, type: 3}
+           end
+         ]}
       ]) do
         result = AlertBuilder.build_alert(alert_data, :SR)
 
@@ -2842,8 +2828,7 @@ defmodule AlertsUI.AlertBuilderTest do
         route_ids: ["Boat-F4"],
         effect_name: "Dock Closure",
         description_text: "b",
-        header_text: "a",
-        route_types_by_id: %{"Boat-F4" => 4}
+        header_text: "a"
       }
 
       parent_stops = [%Stop{id: "Boat-Charlestown"}]
@@ -2905,8 +2890,7 @@ defmodule AlertsUI.AlertBuilderTest do
         route_ids: ["435"],
         effect_name: "Multi-Route Detour",
         description_text: "b",
-        header_text: "a",
-        route_types_by_id: %{"435" => 3}
+        header_text: "a"
       }
 
       parent_stops = [%Stop{id: "4561"}]
@@ -2968,7 +2952,6 @@ defmodule AlertsUI.AlertBuilderTest do
         header_text: "hello",
         effect_name: "Delay",
         route_ids: ["Green", "Green-D"],
-        route_types_by_id: %{"Green" => 0, "Green-D" => 0},
         stop_ids: ["place-hymnl", "place-kencl", "place-fenwy"],
         direction: "default"
       }
@@ -3079,8 +3062,7 @@ defmodule AlertsUI.AlertBuilderTest do
         stop_ids: ["place-PB-0194"],
         effect_name: "Station Issue",
         header_text: "Test 10",
-        description_text: "Test 10",
-        route_types_by_id: %{"CR-Kingston" => 2}
+        description_text: "Test 10"
       }
 
       parent_stops = [%Stop{id: "place-PB-0194"}]

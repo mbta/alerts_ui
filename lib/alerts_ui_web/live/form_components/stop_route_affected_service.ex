@@ -26,10 +26,9 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     field :stop_ids, {:array, :string}
     field :stop_names_and_ids, {:array, :string}
     field :stop_search_term, :string
-    field :route_types_by_id, {:map, :integer}
   end
 
-  @fields ~w[route_ids stop_ids stop_names_and_ids route_types_by_id route_search_term stop_search_term modal_route_id modal_route_search_term]a
+  @fields ~w[route_ids stop_ids stop_names_and_ids route_search_term stop_search_term modal_route_id modal_route_search_term]a
   @required_fields ~w[route_ids stop_ids]a
 
   @impl true
@@ -372,9 +371,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         Map.put(acc, route.id, route)
       end)
 
-    affected_service
-    |> Map.put("routes_by_id", routes)
-    |> Map.put("route_types_by_id", routes |> Enum.map(fn {k, v} -> {k, v.type} end) |> Map.new())
+    Map.put(affected_service, "routes_by_id", routes)
   end
 
   def available_routes(socket), do: Map.get(socket.assigns.available_routes, :result, [])

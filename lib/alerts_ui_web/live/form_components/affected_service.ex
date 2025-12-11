@@ -34,10 +34,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     field :trip_information_by_id, {:map, :map}
     field :modal_date, :string
     field :modal_date_search_term, :string
-    field :route_types_by_id, {:map, :integer}
   end
 
-  @fields ~w[route_ids route_types_by_id direction trip_ids stop_ids stop_names stop_names_and_ids trip_information_by_id route_search_term trip_search_term stop_search_term single_route_id modal_date modal_date_search_term]a
+  @fields ~w[route_ids direction trip_ids stop_ids stop_names stop_names_and_ids trip_information_by_id route_search_term trip_search_term stop_search_term single_route_id modal_date modal_date_search_term]a
 
   @impl true
   def mount(socket) do
@@ -112,23 +111,11 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       end
 
     params =
-      socket.assigns.form.params |> Map.Helpers.atomize_keys()
+      socket.assigns.form.params |> Map.new(fn {k, v} -> {String.to_existing_atom(k), v} end)
 
     alert_data =
       Map.put(alert_data, :trip_information_by_id, trip_information_by_id)
       |> Map.put(:modal_date, nil)
-      |> Map.merge(params)
-
-    route_types_by_id =
-      get_routes_with_types(
-        alert_data.route_ids,
-        available_routes(socket.assigns)
-      )
-
-    alert_data =
-      Map.put(alert_data, :trip_information_by_id, trip_information_by_id)
-      |> Map.put(:modal_date, nil)
-      |> Map.put(:route_types_by_id, route_types_by_id)
       |> Map.merge(params)
 
     changeset = build_changeset(%__MODULE__{}, alert_data)
@@ -359,9 +346,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   end
 
   def validate(affected_service, assigns) do
-    route_types_by_id =
-      get_routes_with_types(affected_service["route_ids"], available_routes(assigns))
-
     trip_information_by_id =
       if Helpers.async_available?(assigns, :available_schedules) do
         trip_information_by_id(
@@ -372,10 +356,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         %{}
       end
 
-    affected_service =
-      affected_service
-      |> Map.put("trip_information_by_id", trip_information_by_id)
-      |> Map.put("route_types_by_id", route_types_by_id)
+    affected_service = Map.put(affected_service, "trip_information_by_id", trip_information_by_id)
 
     build_changeset(%__MODULE__{}, affected_service)
   end
@@ -722,24 +703,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   defp all_route_types(3), do: [3]
   defp all_route_types(4), do: [4]
   defp all_route_types(_), do: []
-
-  def get_routes_with_types(_route_ids, nil), do: %{}
-
-  def get_routes_with_types(route_ids, available_routes) do
-    available_routes
-    |> Stream.filter(fn route ->
-      !is_nil(route_ids) && route.id in route_ids
-    end)
-    |> Enum.reduce(%{}, fn route, acc ->
-      Map.put(acc, route.id, route)
-    end)
-    |> Enum.map(fn {k, v} -> {k, v.type} end)
-    |> Map.new()
-  end
-
-  @spec available_routes(atom() | %{:available_routes => map(), optional(any()) => any()}) ::
-          any()
-  def available_routes(assigns), do: Map.get(assigns.available_routes, :result, [])
 
   # Each of these are only used once in the validation flow... what exactly should we do here?
   defp populate_default_stops(affected_service) do
