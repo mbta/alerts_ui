@@ -476,7 +476,7 @@ defmodule AlertsUI.IBIAlertImporter do
       |> String.replace(~r/\s/, "")
       |> String.split(";")
       |> Enum.map(fn timestamp ->
-        %{id: nil, time: ndt_from_ibi_reminder_format(timestamp)}
+        %{id: nil, time: utc_from_ibi_reminder_format(timestamp)}
       end)
     else
       []
@@ -495,17 +495,17 @@ defmodule AlertsUI.IBIAlertImporter do
     # lack `effect_start` have `notif_start`)
     case from_ibi(ibi_alert, :alert_timing) do
       :one_time ->
-        ndt_from_ibi_string(ibi_alert.effect_start || ibi_alert.notif_start)
+        utc_from_ibi_string(ibi_alert.effect_start || ibi_alert.notif_start)
 
       :recurring ->
         date =
           ibi_alert.recurrence_start
-          |> ndt_from_ibi_string()
+          |> utc_from_ibi_string()
           |> NaiveDateTime.to_date()
 
         time =
           (ibi_alert.recurrence_start_time || ibi_alert.recurrence_start)
-          |> ndt_from_ibi_string()
+          |> utc_from_ibi_string()
           |> NaiveDateTime.to_time()
 
         NaiveDateTime.new!(date, time)
@@ -515,17 +515,17 @@ defmodule AlertsUI.IBIAlertImporter do
   def from_ibi(ibi_alert, :active_period_end) do
     case from_ibi(ibi_alert, :alert_timing) do
       :one_time ->
-        ndt_from_ibi_string(ibi_alert.effect_end || ibi_alert.notif_end)
+        utc_from_ibi_string(ibi_alert.effect_end || ibi_alert.notif_end)
 
       :recurring ->
         date =
           ibi_alert.recurrence_end
-          |> ndt_from_ibi_string()
+          |> utc_from_ibi_string()
           |> NaiveDateTime.to_date()
 
         time =
           (ibi_alert.recurrence_end_time || ibi_alert.recurrence_end)
-          |> ndt_from_ibi_string()
+          |> utc_from_ibi_string()
           |> NaiveDateTime.to_time()
 
         NaiveDateTime.new!(date, time)
@@ -534,25 +534,25 @@ defmodule AlertsUI.IBIAlertImporter do
 
   def from_ibi(ibi_alert, :active_period_start_time) do
     if ibi_alert.recurrence_start_time do
-      ndt_from_ibi_string(ibi_alert.recurrence_start_time) |> NaiveDateTime.to_time()
+      utc_from_ibi_string(ibi_alert.recurrence_start_time) |> NaiveDateTime.to_time()
     end
   end
 
   def from_ibi(ibi_alert, :active_period_end_time) do
     if ibi_alert.recurrence_end_time do
-      ndt_from_ibi_string(ibi_alert.recurrence_end_time) |> NaiveDateTime.to_time()
+      utc_from_ibi_string(ibi_alert.recurrence_end_time) |> NaiveDateTime.to_time()
     end
   end
 
   def from_ibi(ibi_alert, :active_period_start_date) do
     if ibi_alert.recurrence_start do
-      ndt_from_ibi_string(ibi_alert.recurrence_start) |> NaiveDateTime.to_date()
+      utc_from_ibi_string(ibi_alert.recurrence_start) |> NaiveDateTime.to_date()
     end
   end
 
   def from_ibi(ibi_alert, :active_period_end_date) do
     if ibi_alert.recurrence_end do
-      ndt_from_ibi_string(ibi_alert.recurrence_end) |> NaiveDateTime.to_date()
+      utc_from_ibi_string(ibi_alert.recurrence_end) |> NaiveDateTime.to_date()
     end
   end
 
@@ -569,13 +569,13 @@ defmodule AlertsUI.IBIAlertImporter do
 
   def from_ibi(ibi_alert, :notification_period_start) do
     if ibi_alert.notif_start do
-      ndt_from_ibi_string(ibi_alert.notif_start)
+      utc_from_ibi_string(ibi_alert.notif_start)
     end
   end
 
   def from_ibi(ibi_alert, :notification_period_end) do
     if ibi_alert.notif_end do
-      ndt_from_ibi_string(ibi_alert.notif_end)
+      utc_from_ibi_string(ibi_alert.notif_end)
     end
   end
 
@@ -701,7 +701,7 @@ defmodule AlertsUI.IBIAlertImporter do
   end
 
   def from_ibi(ibi_alert, :created_timestamp) do
-    ndt_from_ibi_string(ibi_alert.created_dt)
+    utc_from_ibi_string(ibi_alert.created_dt)
   end
 
   def from_ibi(ibi_alert, :closed_timestamp) do
@@ -714,7 +714,7 @@ defmodule AlertsUI.IBIAlertImporter do
   end
 
   def from_ibi(ibi_alert, :last_modified_timestamp) do
-    ndt_from_ibi_string(ibi_alert.last_modified_dt)
+    utc_from_ibi_string(ibi_alert.last_modified_dt)
   end
 
   def from_ibi(ibi_alert, :image_url), do: ibi_alert.alert_image_url
@@ -732,21 +732,25 @@ defmodule AlertsUI.IBIAlertImporter do
     |> String.split(",")
   end
 
-  def ndt_from_ibi_string(nil), do: nil
+  def utc_from_ibi_string(nil), do: nil
 
-  def ndt_from_ibi_string(timestamp) do
+  def utc_from_ibi_string(timestamp) do
     if timestamp =~ ~r/\// do
       Timex.parse!(timestamp, "{M}/{D}/{YYYY} {h12}:{m}:{s} {AM}")
     else
       Timex.parse!(timestamp, "{h24}:{m}:{s}")
     end
+    |> DateTime.from_naive!("America/New_York")
+    |> DateTime.shift_zone!("Etc/UTC")
   end
 
-  def ndt_from_ibi_reminder_format(timestamp) do
+  def utc_from_ibi_reminder_format(timestamp) do
     timestamp
     |> String.replace("T", " ")
     |> String.replace(~r/\:[0-9]*\.[0-9]*$/, "")
     |> Kernel.<>(":00")
     |> NaiveDateTime.from_iso8601!()
+    |> DateTime.from_naive!("America/New_York")
+    |> DateTime.shift_zone!("Etc/UTC")
   end
 end
