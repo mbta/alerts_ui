@@ -16,6 +16,7 @@ defmodule AlertsUI.IBIAlertImporter do
   alias AlertsUI.Models.Cause
   alias AlertsUI.Models.IBIAlert
   alias AlertsUI.Models.LatestIBIAlert
+  alias AlertsUI.Models.ReminderTime
   alias AlertsUI.Repo
   alias Ecto.Adapters.SQL
   alias Ecto.Multi
@@ -317,6 +318,15 @@ defmodule AlertsUI.IBIAlertImporter do
               )
               |> PaperTrail.update!(origin: update.last_modified_by)
             end)
+
+            # add deduplicated reminders
+            all_versions_index
+            |> Map.get(alert.alert_id)
+            |> Enum.map(fn ibi_alert -> extract_reminders(ibi_alert) end)
+            |> List.flatten()
+            |> Enum.uniq()
+            |> Enum.map(fn params -> ReminderTime.changeset(%ReminderTime{}, params) end)
+            |> Enum.each(fn changeset -> Repo.insert!(changeset) end)
           end)
         end)
         |> Stream.run()
@@ -352,7 +362,6 @@ defmodule AlertsUI.IBIAlertImporter do
       :facility_id,
       :direction,
       :service_types,
-      :reminder_times,
       :alert_timing,
       :active_period_start,
       :active_period_end,
@@ -466,22 +475,6 @@ defmodule AlertsUI.IBIAlertImporter do
   def from_ibi(ibi_alert, :facility_id), do: ibi_alert.informed_facility_id
 
   def from_ibi(ibi_alert, :service_types), do: [from_ibi(ibi_alert, :route_type)]
-
-  def from_ibi(ibi_alert, :reminder_times) do
-    if ibi_alert.reminders do
-      ibi_alert.reminders
-      |> String.replace("send bulletin", "")
-      |> String.replace("send tweet", "")
-      |> String.replace("and tweet", "")
-      |> String.replace(~r/\s/, "")
-      |> String.split(";")
-      |> Enum.map(fn timestamp ->
-        %{id: nil, time: utc_from_ibi_reminder_format(timestamp)}
-      end)
-    else
-      []
-    end
-  end
 
   def from_ibi(ibi_alert, :alert_timing) do
     case ibi_alert.alert_time_type do
@@ -752,5 +745,21 @@ defmodule AlertsUI.IBIAlertImporter do
     |> NaiveDateTime.from_iso8601!()
     |> DateTime.from_naive!("America/New_York")
     |> DateTime.shift_zone!("Etc/UTC")
+  end
+
+  def extract_reminders(ibi_alert) do
+    if ibi_alert.reminders do
+      ibi_alert.reminders
+      |> String.replace("send bulletin", "")
+      |> String.replace("send tweet", "")
+      |> String.replace("and tweet", "")
+      |> String.replace(~r/\s/, "")
+      |> String.split(";")
+      |> Enum.map(fn timestamp ->
+        %{id: nil, time: utc_from_ibi_reminder_format(timestamp)}
+      end)
+    else
+      []
+    end
   end
 end
