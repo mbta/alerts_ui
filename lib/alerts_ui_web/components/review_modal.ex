@@ -157,15 +157,13 @@ defmodule AlertsUIWeb.ReviewModal do
           <%!-- Top section --%>
           <p class="font-bold">Main message</p>
           {text_to_html(@alert_data.header_text,
-            attributes: [class: "pb-4 max-w-[28rem] whitespace-pre-line break-words"]
+            attributes: [class: "pb-4 max-w-[28rem] break-words"]
           )}
           <div>
             <span class="block pb-4">
               <p class="font-bold">Supporting information</p>
               <%= if @alert_data.description_text do %>
-                {text_to_html(@alert_data.description_text,
-                  attributes: [class: "whitespace-pre-line"]
-                )}
+                {text_to_html(@alert_data.description_text)}
               <% else %>
                 <p class="italic">None</p>
               <% end %>
