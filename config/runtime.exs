@@ -125,13 +125,6 @@ cond do
           %{
             name: :keycloak_issuer,
             issuer: keycloak_issuer,
-            provider_configuration_opts: %{
-              quirks: %{
-                document_overrides: %{
-                  "request_object_signing_alg_values_supported" => []
-                }
-              }
-            }
           }
         ],
         providers: [
