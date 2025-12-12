@@ -7,7 +7,7 @@ defmodule AlertsUIWeb.ReviewModal do
 
   import AlertsUIWeb.CoreComponents
   import AlertsUIWeb.SharedComponents
-  import PhoenixHTMLHelpers.Format, only: [text_to_html: 2]
+  import PhoenixHTMLHelpers.Format, only: [text_to_html: 1, text_to_html: 2]
 
   alias AlertsUI.ActiveStatus
   alias AlertsUI.Helpers.ReminderTimes
