@@ -106,6 +106,16 @@ cond do
       environment_name: System.get_env("SENTRY_ENV", "local"),
       api_url: String.replace_trailing(System.get_env("API_URL"), "/", ""),
       api_key: get_api_key.(),
+      ibi_enhanced_alerts_api_url:
+        System.get_env(
+          "IBI_ENHANCED_ALERTS_API_URL",
+          "http://s3.amazonaws.com/mbta-realtime-test/alerts_enhanced.json"
+        ),
+      ibi_standard_alerts_api_url:
+        System.get_env(
+          "IBI_STANDARD_ALERTS_API_URL",
+          "https://cdn.mbta.com/realtime/Alerts.json"
+        ),
       # below are used only for GTFS validation
       dev_api_url: String.replace_trailing(System.fetch_env!("DEV_API_URL"), "/", ""),
       dev_api_key: System.fetch_env!("DEV_API_KEY")
@@ -124,7 +134,7 @@ cond do
         issuers: [
           %{
             name: :keycloak_issuer,
-            issuer: keycloak_issuer,
+            issuer: keycloak_issuer
           }
         ],
         providers: [
