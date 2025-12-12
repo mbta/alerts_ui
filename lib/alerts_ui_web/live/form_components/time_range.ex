@@ -342,6 +342,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     |> utc_datetime_to_naive()
   end
 
+  # REFACTOR OPPORTUNITY! The "validate" and its many handlers could be tidier
   @impl true
   def handle_event(
         "validate",
@@ -358,49 +359,61 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     time_range =
       case time_range["alert_timing"] do
         "one-time" ->
-          start_datetime =
-            set_start_datetime(
+          start_datetime_string =
+            get_onetime_start_datetime(
               time_range,
               current_time,
               form_params["active_period_start_specifier"]
             )
 
-          end_datetime =
-            set_end_datetime(
+          end_datetime_string =
+            get_onetime_end_datetime(
               time_range,
               current_time,
               form_params["active_period_end_specifier"]
             )
 
+          start_date =
+            start_datetime_string
+            |> string_to_datetime_helper
+            |> get_onetime_start_date
+
+          end_date =
+            end_datetime_string
+            |> string_to_datetime_helper
+            |> get_onetime_end_date
+
           Map.merge(time_range, %{
-            "active_period_start" => start_datetime,
-            "active_period_end" => end_datetime
+            "active_period_start" => start_datetime_string,
+            "active_period_end" => end_datetime_string,
+            "active_period_start_date" => start_date,
+            "active_period_end_date" => end_date
           })
 
         "recurring" ->
           start_time =
-            set_start_time(
+            get_recurring_start_time(
               time_range,
               current_time,
               form_params["active_period_start_time_specifier"]
             )
 
           end_time =
-            set_end_time(
+            get_recurring_end_time(
               time_range,
               current_time,
               form_params["active_period_end_time_specifier"]
             )
 
           start_date =
-            set_start_date(
+            get_recurring_start_date(
               time_range,
               current_time,
               form_params["active_period_start_specifier"]
             )
 
           end_date =
-            set_end_date(
+            get_recurring_end_date(
               time_range,
               current_time,
               form_params["active_period_end_specifier"]
@@ -470,7 +483,10 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     {:noreply, assign(socket, %{form: form})}
   end
 
-  defp set_start_datetime(time_range, current_time, previous_state) do
+  # --- START One-time date/time/datetime getters ---
+
+  # The DateTime getters execute directly on the time_range from the form
+  defp get_onetime_start_datetime(time_range, current_time, previous_state) do
     case time_range["active_period_start_specifier"] do
       "now" ->
         current_time |> naive_datetime_to_iso8601()
@@ -502,76 +518,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     end
   end
 
-  defp set_start_time(time_range, current_time, previous_state) do
-    case time_range["active_period_start_time_specifier"] do
-      :start_of_service ->
-        ActivePeriod.start_of_service_time()
-
-      "start_of_service" ->
-        ActivePeriod.start_of_service_time()
-
-      "custom" ->
-        if previous_state !== "custom" do
-          current_time |> NaiveDateTime.to_time() |> time_to_iso8601()
-        else
-          time_range["active_period_start_time"]
-        end
-    end
-  end
-
-  defp set_end_time(time_range, current_time, previous_state) do
-    case time_range["active_period_end_time_specifier"] do
-      :end_of_service ->
-        ActivePeriod.end_of_service_time()
-
-      "end_of_service" ->
-        ActivePeriod.end_of_service_time()
-
-      "custom" ->
-        if previous_state !== "custom" do
-          current_time |> NaiveDateTime.to_time() |> time_to_iso8601()
-        else
-          time_range["active_period_end_time"]
-        end
-    end
-  end
-
-  defp set_start_date(time_range, current_time, previous_state) do
-    case time_range["active_period_start_specifier"] do
-      "now" ->
-        current_time |> NaiveDateTime.to_date()
-
-      "custom" ->
-        if previous_state !== "custom" do
-          current_time |> NaiveDateTime.to_date()
-        else
-          time_range["active_period_start_date"]
-        end
-
-      _ ->
-        time_range["active_period_start_date"]
-    end
-  end
-
-  defp set_end_date(time_range, current_time, previous_state) do
-    case time_range["active_period_end_specifier"] do
-      "custom" ->
-        if previous_state !== "custom" do
-          current_time
-          |> NaiveDateTime.to_date()
-        else
-          time_range["active_period_end_date"]
-        end
-
-      "until_further_notice" ->
-        ""
-
-      _ ->
-        time_range["active_period_end_date"]
-    end
-  end
-
-  defp set_end_datetime(time_range, current_time, previous_state) do
+  defp get_onetime_end_datetime(time_range, current_time, previous_state) do
     case time_range["active_period_end_specifier"] do
       "later_today" ->
         current_time
@@ -595,25 +542,115 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         ""
 
       "custom" ->
-        if previous_state !== "custom" do
-          # Custom is the only datetime, so it's always going to be a little weird going from
-          # date to a datetime. So let's set time to just before midnight
-          time_range["active_period_end_date"]
-          |> Date.from_iso8601!()
-          |> NaiveDateTime.new!(~T[23:59:00])
-          |> naive_datetime_to_iso8601()
-        else
-          time_range["active_period_end"]
+        cond do
+          previous_state == "until_further_notice" ->
+            current_time |> naive_datetime_to_iso8601()
+
+          previous_state !== "custom" ->
+            time_range["active_period_end_date"]
+            |> Date.from_iso8601!()
+            |> NaiveDateTime.new!(~T[23:59:00])
+            |> naive_datetime_to_iso8601()
+
+          true ->
+            time_range["active_period_end"]
         end
     end
   end
 
-  defp string_to_date_helper(date) when is_binary(date), do: Date.from_iso8601!(date)
-  defp string_to_date_helper(date), do: date
+  # The Date / Time getters execute on the output from the DateTime getters
+  defp get_onetime_start_date(nil), do: ""
+  defp get_onetime_start_date(start_datetime), do: NaiveDateTime.to_date(start_datetime)
 
-  defp string_to_time_helper(time) when is_binary(time), do: Time.from_iso8601!(time <> ":00")
-  defp string_to_time_helper(time), do: time
+  defp get_onetime_end_date(nil), do: ""
 
+  defp get_onetime_end_date(end_datetime) do
+    end_date = NaiveDateTime.to_date(end_datetime)
+
+    end_time = NaiveDateTime.to_time(end_datetime)
+
+    if Time.compare(end_time, ActivePeriod.start_of_service_time()) == :eq do
+      Date.add(end_date, -1)
+    else
+      end_date
+    end
+  end
+
+  # --- END One-time date/time/datetime getters ---
+
+  # --- START Recurring date/time/datetime getters ---
+
+  # The Time / Date getters execute directly on the time_range from the form
+  defp get_recurring_start_time(time_range, current_time, previous_state) do
+    case time_range["active_period_start_time_specifier"] do
+      :start_of_service ->
+        ActivePeriod.start_of_service_time()
+
+      "start_of_service" ->
+        ActivePeriod.start_of_service_time()
+
+      "custom" ->
+        if previous_state !== "custom" do
+          current_time |> NaiveDateTime.to_time() |> time_to_iso8601()
+        else
+          time_range["active_period_start_time"]
+        end
+    end
+  end
+
+  defp get_recurring_end_time(time_range, current_time, previous_state) do
+    case time_range["active_period_end_time_specifier"] do
+      :end_of_service ->
+        ActivePeriod.end_of_service_time()
+
+      "end_of_service" ->
+        ActivePeriod.end_of_service_time()
+
+      "custom" ->
+        if previous_state !== "custom" do
+          current_time |> NaiveDateTime.to_time() |> time_to_iso8601()
+        else
+          time_range["active_period_end_time"]
+        end
+    end
+  end
+
+  defp get_recurring_start_date(time_range, current_time, previous_state) do
+    case time_range["active_period_start_specifier"] do
+      "now" ->
+        current_time |> NaiveDateTime.to_date()
+
+      "custom" ->
+        if previous_state !== "custom" do
+          current_time |> NaiveDateTime.to_date()
+        else
+          time_range["active_period_start_date"]
+        end
+
+      _ ->
+        time_range["active_period_start_date"]
+    end
+  end
+
+  defp get_recurring_end_date(time_range, current_time, previous_state) do
+    case time_range["active_period_end_specifier"] do
+      "custom" ->
+        if previous_state !== "custom" do
+          current_time
+          |> NaiveDateTime.to_date()
+        else
+          time_range["active_period_end_date"]
+        end
+
+      "until_further_notice" ->
+        ""
+
+      _ ->
+        time_range["active_period_end_date"]
+    end
+  end
+
+  # The DateTime getters execute on output from the Date / Time getters
   defp get_recurring_start_datetime(start_date, start_time) do
     start_date
     |> string_to_date_helper()
@@ -634,6 +671,36 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       |> string_to_date_helper()
       |> DateTime.new!(end_time, "America/New_York")
       |> DateTime.add(1, :day)
+    end
+  end
+
+  # --- END Recurring date/time/datetime getters ---
+
+  # Date/time/datetime conversion helpers for the the date/time/datetime getters
+
+  defp string_to_date_helper(date) when is_binary(date), do: Date.from_iso8601!(date)
+  defp string_to_date_helper(date), do: date
+
+  defp string_to_time_helper(time) when is_binary(time), do: Time.from_iso8601!(time <> ":00")
+  defp string_to_time_helper(time), do: time
+
+  defp string_to_datetime_helper(datetime) do
+    # At this stage, we see string dates in the following formats:
+    # 2025-12-13T03:00
+    # 2025-12-13T03:00:00
+    # s # an invalid entry
+    case NaiveDateTime.from_iso8601(datetime <> ":00") do
+      {:ok, start_datetime} ->
+        start_datetime
+
+      {:error, _} ->
+        {validity, start_datetime} = NaiveDateTime.from_iso8601(datetime)
+
+        if validity == :ok do
+          start_datetime
+        else
+          nil
+        end
     end
   end
 

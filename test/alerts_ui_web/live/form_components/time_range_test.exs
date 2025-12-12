@@ -396,6 +396,68 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
                        }}}
     end
 
+    test "switching between start specifiers retains old date" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_start_specifier" => "custom"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_start" => ~N[2025-03-28 03:00:00]
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_start_specifier" => "start_of_service"
+        }
+      })
+
+      assert render(view) =~ ~s(value=\"2025-03-28\")
+    end
+
+    test "switching between end specifiers retains old date" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end_specifier" => "custom"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end" => ~N[2025-03-28 03:00:00]
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end_specifier" => "end_of_service"
+        }
+      })
+
+      assert render(view) =~ ~s(value=\"2025-03-27\")
+    end
+
     test "displays error if start invalid" do
       {:ok, view, _html} =
         live_isolated_component(TimeRange, @assigns)
@@ -755,7 +817,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       |> render_change(%{
         "time_range" => %{
           "active_period_start_date" => "2024-12-03"
-          # "active_period_end_date" => "2024-12-17",
         }
       })
 
