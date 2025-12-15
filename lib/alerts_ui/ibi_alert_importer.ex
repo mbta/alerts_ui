@@ -6,6 +6,8 @@ defmodule AlertsUI.IBIAlertImporter do
   @moduledoc """
   Import alerts from the IBI CSV export.
   """
+  @dialyzer {:nowarn_function, convert_ibi_alerts: 1}
+
   require Logger
 
   import Ecto.Query
