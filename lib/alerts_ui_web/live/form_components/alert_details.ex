@@ -453,7 +453,9 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
             id="image_url_input"
             class={[
               "min-w-[50%]",
-              if(@form[:image_url].value not in ["", nil] && is_number(@image_size), do: "border-b-0 rounded-none rounded-t")
+              if(@form[:image_url].value not in ["", nil] && is_number(@image_size),
+                do: "border-b-0 rounded-none rounded-t"
+              )
             ]}
           />
           <div
