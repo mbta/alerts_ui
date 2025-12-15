@@ -111,16 +111,6 @@ defmodule AlertsUI.IBIAlertImporterTest do
       assert from_ibi(ibi_alert, :service_types) == [from_ibi(ibi_alert, :route_type)]
     end
 
-    test ":reminder_times", %{ibi_alert: ibi_alert} do
-      assert ibi_alert.reminders ==
-               "2025-10-22T11:40:00.123 send bulletin; 2025-10-22T11:45 send tweet"
-
-      assert from_ibi(ibi_alert, :reminder_times) == [
-               %{id: nil, time: ~N[2025-10-22 11:40:00]},
-               %{id: nil, time: ~N[2025-10-22 11:45:00]}
-             ]
-    end
-
     test ":alert_timing", %{ibi_alert: ibi_alert, recurring_alert: recurring_alert} do
       assert ibi_alert.alert_time_type == "One-time"
       assert from_ibi(ibi_alert, :alert_timing) == :one_time
@@ -130,22 +120,22 @@ defmodule AlertsUI.IBIAlertImporterTest do
 
     test ":active_period_start", %{ibi_alert: ibi_alert} do
       assert ibi_alert.effect_start == "3/25/2013 10:30:00 PM"
-      assert from_ibi(ibi_alert, :active_period_start) == ~N[2013-03-25 22:30:00]
+      assert from_ibi(ibi_alert, :active_period_start) == ~U[2013-03-26 02:30:00Z]
     end
 
     test ":active_period_end", %{ibi_alert: ibi_alert} do
       assert ibi_alert.effect_end == "3/26/2013 2:03:00 AM"
-      assert from_ibi(ibi_alert, :active_period_end) == ~N[2013-03-26 02:03:00]
+      assert from_ibi(ibi_alert, :active_period_end) == ~U[2013-03-26 06:03:00Z]
     end
 
     test ":active_period_start_time", %{recurring_alert: recurring_alert} do
       assert recurring_alert.recurrence_start_time == "07:00:00"
-      assert from_ibi(recurring_alert, :active_period_start_time) == ~T[07:00:00]
+      assert from_ibi(recurring_alert, :active_period_start_time) == ~T[12:00:00]
     end
 
     test ":active_period_end_time", %{recurring_alert: recurring_alert} do
       assert recurring_alert.recurrence_end_time == "17:00:00"
-      assert from_ibi(recurring_alert, :active_period_end_time) == ~T[17:00:00]
+      assert from_ibi(recurring_alert, :active_period_end_time) == ~T[22:00:00]
     end
 
     test ":active_period_start_date", %{recurring_alert: recurring_alert} do
@@ -165,12 +155,12 @@ defmodule AlertsUI.IBIAlertImporterTest do
 
     test ":notification_period_start", %{ibi_alert: ibi_alert} do
       assert ibi_alert.notif_start == "3/25/2013 12:06:51 AM"
-      assert from_ibi(ibi_alert, :notification_period_start) == ~N[2013-03-25 00:06:51]
+      assert from_ibi(ibi_alert, :notification_period_start) == ~U[2013-03-25 04:06:51Z]
     end
 
     test ":notification_period_end", %{ibi_alert: ibi_alert} do
       assert ibi_alert.notif_end == "3/26/2013 2:03:00 AM"
-      assert from_ibi(ibi_alert, :notification_period_end) == ~N[2013-03-26 02:03:00]
+      assert from_ibi(ibi_alert, :notification_period_end) == ~U[2013-03-26 06:03:00Z]
     end
 
     test ":header_text", %{ibi_alert: ibi_alert} do

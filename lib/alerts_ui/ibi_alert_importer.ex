@@ -731,7 +731,12 @@ defmodule AlertsUI.IBIAlertImporter do
     if timestamp =~ ~r/\// do
       Timex.parse!(timestamp, "{M}/{D}/{YYYY} {h12}:{m}:{s} {AM}")
     else
-      Timex.parse!(timestamp, "{h24}:{m}:{s}")
+      time =
+        timestamp
+        |> Timex.parse!("{h24}:{m}:{s}")
+        |> NaiveDateTime.to_time()
+
+      NaiveDateTime.new!(Date.utc_today(), time)
     end
     |> DateTime.from_naive!("America/New_York")
     |> DateTime.shift_zone!("Etc/UTC")
