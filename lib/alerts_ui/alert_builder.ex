@@ -64,7 +64,8 @@ defmodule AlertsUI.AlertBuilder do
           notification_specifier: atom() | nil,
           severity: integer(),
           reminder_times: [NaiveDateTime.t()] | nil,
-          recurrence_days: [atom()] | nil
+          recurrence_days: [atom()] | nil,
+          route_types_by_id: %{String.t() => Route.type_int()}
         }
   @type direction_t :: 0 | 1
   @type stop_with_context_t :: {Stop.t(), Route.id_t(), direction_t(), RoutePattern.stop_type()}
@@ -341,6 +342,12 @@ defmodule AlertsUI.AlertBuilder do
 
       route_ids = Enum.map(routes, & &1.id)
 
+      route_types_by_id =
+        routes
+        |> Enum.reduce(%{}, fn route, acc ->
+          Map.put(acc, route.id, route.type)
+        end)
+
       child_stops_with_context =
         child_stops_with_context(
           routes,
@@ -352,7 +359,8 @@ defmodule AlertsUI.AlertBuilder do
         Map.merge(alert_data, %{
           child_stops_with_context: child_stops_with_context,
           route_ids: route_ids,
-          service_types: service_types
+          service_types: service_types,
+          route_types_by_id: route_types_by_id
         })
 
       informed_entities =
@@ -652,8 +660,9 @@ defmodule AlertsUI.AlertBuilder do
          :R,
          %{
            route_ids: route_ids,
+           direction: direction,
            route_type: route_type,
-           direction: direction
+           route_types_by_id: route_types_by_id
          },
          effect
        ) do
@@ -663,7 +672,7 @@ defmodule AlertsUI.AlertBuilder do
       &(%{
           activities: Activities.for_effect(effect),
           route_id: &1,
-          route_type: route_type,
+          route_type: route_type(route_types_by_id, &1, route_type),
           agency_id: Routes.agency_id(&1)
         }
         |> maybe_add_direction(direction))
@@ -680,6 +689,7 @@ defmodule AlertsUI.AlertBuilder do
          %{
            child_stops_with_context: [],
            route_ids: route_ids,
+           route_types_by_id: route_types_by_id,
            route_type: route_type,
            direction: direction,
            stop_ids: stop_ids
@@ -692,7 +702,7 @@ defmodule AlertsUI.AlertBuilder do
       %{
         activities: Activities.for_effect(effect),
         route_id: route_id,
-        route_type: route_type,
+        route_type: route_type(route_types_by_id, route_id, route_type),
         agency_id: Routes.agency_id(route_id),
         stop_id: stop_id
       }
@@ -705,6 +715,7 @@ defmodule AlertsUI.AlertBuilder do
          :RDS,
          %{
            child_stops_with_context: [_ | _] = child_stops_with_context,
+           route_types_by_id: route_types_by_id,
            route_type: route_type
          },
          effect
@@ -715,7 +726,7 @@ defmodule AlertsUI.AlertBuilder do
         activities: Activities.for_effect(effect, stop_type),
         direction_id: direction_id,
         route_id: route_id,
-        route_type: route_type,
+        route_type: route_type(route_types_by_id, route_id, route_type),
         agency_id: Routes.agency_id(route_id),
         stop_id: stop_id
       }
@@ -847,7 +858,8 @@ defmodule AlertsUI.AlertBuilder do
          :SR,
          %{
            child_stops_with_context: [_ | _] = child_stops_with_context,
-           route_types_by_id: route_types_by_id
+           route_types_by_id: route_types_by_id,
+           route_type: route_type
          },
          effect
        ) do
@@ -860,7 +872,7 @@ defmodule AlertsUI.AlertBuilder do
       %{
         activities: Activities.for_effect(effect),
         route_id: route_id,
-        route_type: route_type(route_types_by_id, route_id),
+        route_type: route_type(route_types_by_id, route_id, route_type),
         agency_id: Routes.agency_id(route_id),
         stop_id: stop_id
       }
@@ -874,6 +886,7 @@ defmodule AlertsUI.AlertBuilder do
            stop_ids: stop_ids,
            route_ids: route_ids,
            route_types_by_id: route_types_by_id,
+           route_type: route_type,
            child_stops_with_context: []
          },
          effect
@@ -887,7 +900,7 @@ defmodule AlertsUI.AlertBuilder do
       %{
         activities: Activities.for_effect(effect),
         route_id: route_id,
-        route_type: route_type(route_types_by_id, route_id),
+        route_type: route_type(route_types_by_id, route_id, route_type),
         agency_id: Routes.agency_id(route_id),
         stop_id: stop_id
       }
@@ -1013,13 +1026,16 @@ defmodule AlertsUI.AlertBuilder do
     end
   end
 
-  @spec route_type(%{String.t() => Route.type_int()}, Route.id_t()) :: Route.type_int()
+  @spec route_type(%{String.t() => Route.type_int()}, Route.id_t(), Route.id_t()) ::
+          Route.type_int()
 
-  defp route_type(route_types_by_id, route_id) do
+  defp route_type(route_types_by_id, route_id, primary_route_type) do
     if route_id in @green_line_branch_ids do
       route_types_by_id[route_id] || route_types_by_id["Green"]
     else
-      route_types_by_id[route_id]
+      # if for any reason we don't have the route type in the map
+      # use the primary route type. This will cover eg combo routes
+      Map.get(route_types_by_id, route_id, primary_route_type)
     end
   end
 
