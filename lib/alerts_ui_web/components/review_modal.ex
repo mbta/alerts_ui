@@ -115,7 +115,7 @@ defmodule AlertsUIWeb.ReviewModal do
         facility_names: facility_names,
         mode_names: mode_names,
         id: "review-modal",
-        created_at: Map.get(assigns.alert_data, :created_at),
+        created_timestamp: Map.get(assigns.alert_data, :created_timestamp),
         created_by: Map.get(assigns.alert_data, :created_by),
         last_edited_at: Map.get(assigns.alert_data, :last_edited_at),
         last_edited_by: Map.get(assigns.alert_data, :last_edited_by)
@@ -376,7 +376,7 @@ defmodule AlertsUIWeb.ReviewModal do
           <% else %>
             <p class="pb-3 whitespace-nowrap">
               {Calendar.strftime(
-                DateTime.shift_zone!(@created_at, "America/New_York"),
+                DateTime.shift_zone!(@created_timestamp, "America/New_York"),
                 "%a %m/%d/%Y, %-I:%M %p"
               )}
             </p>

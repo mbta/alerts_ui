@@ -705,7 +705,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       alert = AlertData.build_alert_data("123")
 
-      assert DateTime.to_date(alert.created_at) == Date.utc_today()
+      assert DateTime.to_date(alert.created_timestamp) == Date.utc_today()
 
       assert "#{user.first_name} #{user.last_name}" == alert.created_by
 
@@ -734,7 +734,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       alert = AlertData.build_alert_data("123")
 
-      assert DateTime.to_date(alert.created_at) == Date.utc_today()
+      assert DateTime.to_date(alert.created_timestamp) == Date.utc_today()
 
       assert "#{user.first_name} #{user.last_name}" == alert.created_by
 
