@@ -103,7 +103,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
           trip_information_by_id(
             available_schedules,
-            Map.get(alert_data, :trip_ids, [])
+            Map.get(alert_data, :trip_ids, []),
+            route_type
           )
         end
       else
@@ -350,7 +351,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       if Helpers.async_available?(assigns, :available_schedules) do
         trip_information_by_id(
           assigns.available_schedules.result,
-          Map.get(affected_service, "trip_ids", [])
+          Map.get(affected_service, "trip_ids", []),
+          assigns.route_type
         )
       else
         %{}
@@ -658,14 +660,14 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     end)
   end
 
-  def trip_information_by_id(available_schedules, trip_ids) do
+  def trip_information_by_id(available_schedules, trip_ids, route_type) do
     available_schedules
     |> Stream.filter(fn schedule -> schedule.trip.id in trip_ids end)
     |> Enum.reduce(%{}, fn schedule, acc ->
       Map.put(acc, schedule.trip.id, %{
         direction_id: schedule.trip.direction_id,
         route_id: schedule.route.id,
-        trip_name: SelectFormatter.name_for_option(schedule, nil)
+        trip_name: SelectFormatter.name_for_option(schedule, route_type)
       })
     end)
   end

@@ -86,7 +86,7 @@ defmodule AlertsUIWeb.ReviewModal do
         |> Map.get(:selected_schedules, [])
         |> Kernel.||([])
         |> Enum.map(fn s ->
-          SelectFormatter.name_for_option(s)
+          SelectFormatter.name_for_option(s, assigns.alert_data.route_type)
         end)
         |> join_present(", ")
       else

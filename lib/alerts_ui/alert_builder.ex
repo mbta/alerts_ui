@@ -228,12 +228,18 @@ defmodule AlertsUI.AlertBuilder do
 
     original_stop_selections = Map.get(alert_data, :stop_names_and_ids, [])
 
+    trip_selections_from_trip_info =
+      (Map.get(alert_data, :trip_information_by_id, %{}) || %{})
+      |> Enum.map(fn {id, trip} ->
+        "#{Map.get(trip, :trip_name, "")}|#{id}"
+      end)
+
     original_trip_selections =
-      Map.get(alert_data, :original_trip_selections) ||
-        (Map.get(alert_data, :trip_information_by_id, %{}) || %{})
-        |> Enum.map(fn {id, trip} ->
-          "#{Map.get(trip, :trip_name, "")}|#{id}"
-        end)
+      if trip_selections_from_trip_info in [[], nil] do
+        Map.get(alert_data, :original_trip_selections, [])
+      else
+        trip_selections_from_trip_info
+      end
 
     original_facility_selections =
       Map.get(alert_data, :original_facility_selections) ||
