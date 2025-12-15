@@ -1203,30 +1203,32 @@ defmodule AlertsUIWeb.SharedComponents do
       |> assign_new(:value, fn -> field.value end)
 
     ~H"""
-    <div phx-feedback-for={@name} class="relative flex flex-row items-center">
+    <div phx-feedback-for={@name} class="relative flex flex-col">
       <.label :if={not is_nil(@label)} for={@id}>{@label}</.label>
-      <AlertsUIWeb.CoreComponents.icon
-        :if={@icon && !@disabled}
-        name={@icon}
-        class="absolute ms-3 w-4 h-4 text-text-disabled"
-      />
-      <input
-        type="text"
-        id={@id}
-        name={@name}
-        value={@value}
-        class={[
-          "bg-bg-input-default border border-bg-elevation-6 pl-2
-            rounded text-text-primary disabled:text-text-secondary
-            disabled:bg-bg-elevation-3 ring-0  focus:ring-0 ring-border-focus
-            focus:border-border-focus",
-          @icon && "ps-8",
-          @class,
-          @errors != [] && "border-danger focus:border-danger"
-        ]}
-        disabled={@disabled}
-        {@rest}
-      />
+      <div class="flex flex-row items-center">
+        <AlertsUIWeb.CoreComponents.icon
+          :if={@icon && !@disabled}
+          name={@icon}
+          class="absolute ms-3 w-4 h-4 text-text-disabled"
+        />
+        <input
+          type="text"
+          id={@id}
+          name={@name}
+          value={@value}
+          class={[
+            "bg-bg-input-default border border-bg-elevation-6 pl-1
+              rounded text-text-primary disabled:text-text-secondary
+              disabled:bg-bg-elevation-3 ring-0  focus:ring-0 ring-border-focus
+              focus:border-border-focus",
+            @icon && "ps-8",
+            @class,
+            @errors != [] && "border-danger focus:border-danger"
+          ]}
+          disabled={@disabled}
+          {@rest}
+        />
+      </div>
       <.input_error :for={msg <- @errors}>{msg}</.input_error>
     </div>
     """
