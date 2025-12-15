@@ -445,7 +445,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           id="url_input"
           class="w-[50%]"
         />
-        <div id="image-preview-div">
+        <div id="image-preview-div" class="min">
           <.text_input
             field={@form[:image_url]}
             label="Image URL"

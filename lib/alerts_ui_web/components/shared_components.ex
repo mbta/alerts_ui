@@ -1110,7 +1110,7 @@ defmodule AlertsUIWeb.SharedComponents do
         {@rest}
       >
         <.text_input
-          class="min-w-full py-[.6rem] mb-0 border-0 ring-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-b-none"
+          class="grow py-[.6rem] mb-0 border-0 ring-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-b-none"
           icon="hero-magnifying-glass-mini"
           field={@filter_field}
           placeholder={if @disabled, do: nil, else: "Search..."}
@@ -1209,7 +1209,7 @@ defmodule AlertsUIWeb.SharedComponents do
         <AlertsUIWeb.CoreComponents.icon
           :if={@icon && !@disabled}
           name={@icon}
-          class="absolute ms-3 w-4 h-4 text-text-disabled"
+          class="shrink-0 w-4 h-4 text-text-disabled ml-2 mr-1"
         />
         <input
           type="text"
