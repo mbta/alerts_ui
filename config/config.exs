@@ -146,8 +146,7 @@ config :ueberauth, Ueberauth,
         issuer: :keycloak_issuer,
         userinfo: true,
         uid_field: "preferred_username",
-        scopes: ~w(openid email roles),
-        preferred_auth_methods: ~w(client_secret_post)a
+        scopes: ~w(openid email roles)
       ]
     }
   ]

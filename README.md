@@ -46,3 +46,17 @@ To start your Phoenix server:
 Now you can visit [`localhost:4010`](http://localhost:4010) from your browser.
 
 Swagger docs for the API enpoints can be found at `/api/swagger`.
+
+## Our Environments
+
+- dev-green
+  - sandbox environment, anything can be deployed here
+  - pointed toward: keycloak dev, API dev
+- dev-orange
+  - main is automatically pushed here
+  - currently used for test alerts and QA
+  - pointed toward: keycloak dev, API dev
+- staging
+  - deployment to this env is currently only manual
+  - supposed to be as production-like as possible
+  - pointed toward: keycloak staging, API prod
