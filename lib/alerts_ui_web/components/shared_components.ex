@@ -1491,7 +1491,7 @@ defmodule AlertsUIWeb.SharedComponents do
           disabled={@disabled}
           value={Form.normalize_value("datetime-local", @value)}
           class={[
-            "bg-bg-elevation-5 border border-border-primary px-3 py-1.5 p-0
+            "bg-bg-elevation-5 border border-border-primary px-3 py-1.5 p-0 min-w-full
               rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto
               disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
               focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) appearance-auto dark:text-white dark:[color-scheme:dark]",
