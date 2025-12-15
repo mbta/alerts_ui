@@ -316,8 +316,6 @@ defmodule AlertsUI.AlertBuilderTest do
            end
          ]}
       ]) do
-        existing_alert = insert(:alert, alert_id: "0")
-
         alert_data = %{
           route_type: 1,
           description_text: "ok",
@@ -397,13 +395,133 @@ defmodule AlertsUI.AlertBuilderTest do
                  last_modified_timestamp: ~U[2024-04-30 05:54:00Z],
                  legacy: nil
                }
+      end
+    end
 
-        result
-        |> Alerts.create_or_update_alert(build(:user))
+    test "it correctly adds combo ids for silver line alerts" do
+      with_mocks([
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _route_id, _opts -> [] end
+         ]},
+        {RoutesRepo, [],
+         [
+           get: fn
+             "741", _opts ->
+               %Route{
+                 id: "741",
+                 line_id: "line-SLWaterfront",
+                 type: 3,
+                 description: :rapid_transit,
+                 name: "SL2"
+               }
 
-        [alert_1, alert_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id, :desc)
-        assert alert_2.alert_id == existing_alert.alert_id
-        assert alert_1.alert_id |> String.to_integer() > alert_2.alert_id |> String.to_integer()
+             "746", _opts ->
+               %Route{
+                 id: "746",
+                 line_id: "line-SLWaterfront",
+                 type: 3,
+                 description: :rapid_transit,
+                 name: "SLW"
+               }
+           end
+         ]},
+        {LinesRepo, [],
+         [
+           get: fn
+             "line-SLWaterfront", _opts ->
+               %Line{
+                 id: "line-SLWaterfront",
+                 route_ids: ["741", "742", "743", "746"],
+                 routes: [
+                   %Route{
+                     id: "741",
+                     line_id: "line-SLWaterfront",
+                     type: 3,
+                     description: :rapid_transit
+                   },
+                   %Route{
+                     id: "742",
+                     line_id: "line-SLWaterfront",
+                     type: 3,
+                     description: :rapid_transit
+                   },
+                   %Route{
+                     id: "743",
+                     line_id: "line-SLWaterfront",
+                     type: 3,
+                     description: :rapid_transit
+                   },
+                   %Route{
+                     id: "746",
+                     line_id: "line-SLWaterfront",
+                     type: 3,
+                     description: :rapid_transit
+                   }
+                 ]
+               }
+           end
+         ]}
+      ]) do
+        alert_data = %{
+          route_type: 3,
+          description_text: "ok",
+          header_text: "hello",
+          effect_name: "Delay",
+          direction: "default",
+          active_period_start: ~N[2024-04-30 11:54:00],
+          active_period_end_specifier: :until_further_notice,
+          active_period_start_specifier: :custom,
+          cause_detail: ""
+        }
+
+        alert_data_1 = Map.put(alert_data, :route_ids, ["741"])
+        alert_data_2 = Map.put(alert_data, :route_ids, ["746"])
+
+        result_1 = AlertBuilder.build_alert(alert_data_1, :R, ~U[2024-04-30 05:54:00Z])
+        result_2 = AlertBuilder.build_alert(alert_data_2, :R, ~U[2024-04-30 05:54:00Z])
+
+        assert result_1.informed_entity == [
+                 %{
+                   agency_id: "1",
+                   route_id: "741",
+                   route_type: 3,
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "746",
+                   route_type: 3,
+                   agency_id: "1"
+                 }
+               ]
+
+        assert result_2.informed_entity == [
+                 %{
+                   agency_id: "1",
+                   route_id: "741",
+                   route_type: 3,
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 },
+                 %{
+                   agency_id: "1",
+                   route_id: "742",
+                   route_type: 3,
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 },
+                 %{
+                   agency_id: "1",
+                   route_id: "743",
+                   route_type: 3,
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "746",
+                   route_type: 3,
+                   agency_id: "1"
+                 }
+               ]
       end
     end
 
