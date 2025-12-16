@@ -76,7 +76,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       recurrence_days: [],
       active_period_end:
         ActivePeriod.end_of_service_datetime_naive(current_time)
-        |> naive_datetime_to_iso8601,
+        |> DateTimeHelpers.naive_datetime_to_iso8601,
       active_period_end_time: ActivePeriod.end_of_service_time(),
       active_period_end_date:
         current_time
@@ -376,13 +376,13 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
           start_date =
             start_datetime_string
-            |> string_to_datetime_helper
-            |> get_onetime_start_date
+            |> TimeRangeGetters.string_to_datetime_helper
+            |> TimeRangeGetters.get_onetime_start_date
 
           end_date =
             end_datetime_string
-            |> string_to_datetime_helper
-            |> get_onetime_end_date
+            |> TimeRangeGetters.string_to_datetime_helper
+            |> TimeRangeGetters.get_onetime_end_date
 
           Map.merge(time_range, %{
             "active_period_start" => start_datetime_string,
@@ -564,9 +564,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       />
       <.datetime
         field={@form[:active_period_start]}
-        min={naive_datetime_to_iso8601(@current_time)}
+        min={DateTimeHelpers.naive_datetime_to_iso8601(@current_time)}
         max="9999-12-31T23:59"
-        value={naive_datetime_to_iso8601(@form[:active_period_start].value)}
+        value={DateTimeHelpers.naive_datetime_to_iso8601(@form[:active_period_start].value)}
         class={"min-w-[16rem] max-w-[16rem] " <> (if @form[:active_period_start_specifier].value === :custom, do: "", else: "hidden")}
         phx-debounce={120}
       />
@@ -600,10 +600,10 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       />
       <.datetime
         field={@form[:active_period_end]}
-        min={naive_datetime_to_iso8601(@form[:active_period_start].value)}
+        min={DateTimeHelpers.naive_datetime_to_iso8601(@form[:active_period_start].value)}
         max="9999-12-31T23:59"
         value={
-          naive_datetime_to_iso8601(
+          DateTimeHelpers.naive_datetime_to_iso8601(
             if @form[:active_period_end_specifier].value === :until_further_notice,
               do: "",
               else: @form[:active_period_end].value
@@ -632,7 +632,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
             label="Effect start time"
             type="time"
             field={@form[:active_period_start_time]}
-            value={time_to_iso8601(@form[:active_period_start_time].value)}
+            value={DateTimeHelpers.time_to_iso8601(@form[:active_period_start_time].value)}
             class={"min-w-[16rem] max-w-[16rem] h-10 " <> (if @form[:active_period_start_time_specifier].value === :custom, do: "", else: "hidden")}
             phx-debounce={120}
           />
@@ -650,7 +650,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
             label="Effect end time"
             type="time"
             field={@form[:active_period_end_time]}
-            value={time_to_iso8601(@form[:active_period_end_time].value)}
+            value={DateTimeHelpers.time_to_iso8601(@form[:active_period_end_time].value)}
             class={"min-w-[16rem] max-w-[16rem] h-10 " <> (if @form[:active_period_end_time_specifier].value === :custom, do: "", else: "hidden")}
             phx-debounce={120}
           />
@@ -719,23 +719,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     do: datetime |> NaiveDateTime.to_date() |> Date.to_iso8601()
 
   def naive_datetime_to_iso_date(_), do: ""
-
-  defp naive_datetime_to_iso8601(%NaiveDateTime{} = datetime),
-    do:
-      datetime
-      |> NaiveDateTime.truncate(:second)
-      |> NaiveDateTime.to_iso8601()
-      |> String.slice(0..-4//1)
-
-  defp naive_datetime_to_iso8601(_), do: ""
-
-  defp time_to_iso8601(%Time{} = time) do
-    time
-    |> Time.to_iso8601()
-    |> String.slice(0..-4//1)
-  end
-
-  defp time_to_iso8601(_), do: ""
 
   defp values_to_options(values) do
     Enum.map(values, fn value ->

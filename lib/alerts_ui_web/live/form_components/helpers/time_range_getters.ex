@@ -2,12 +2,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeGetters do
   @moduledoc """
     Helpers for fetching the proper date/time/datetimes from the time_range form
   """
+  alias AlertsUI.Models.ActivePeriod
+  alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
 
   # The DateTime getters execute directly on the time_range from the form
   def get_onetime_start_datetime(time_range, current_time, previous_state) do
     case time_range["active_period_start_specifier"] do
       "now" ->
-        current_time |> naive_datetime_to_iso8601()
+        current_time |> DateTimeHelpers.naive_datetime_to_iso8601()
 
       "start_of_service" ->
         {validity, date} = Date.from_iso8601(time_range["active_period_start_date"])
@@ -17,18 +19,18 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeGetters do
         else
           current_time
         end
-        |> naive_datetime_to_iso8601()
+        |> DateTimeHelpers.naive_datetime_to_iso8601()
 
       "custom" ->
         cond do
           previous_state == "now" ->
-            current_time |> naive_datetime_to_iso8601()
+            current_time |> DateTimeHelpers.naive_datetime_to_iso8601()
 
           previous_state == "start_of_service" ->
             time_range["active_period_start_date"]
             |> Date.from_iso8601!()
             |> NaiveDateTime.new!(ActivePeriod.start_of_service_time())
-            |> naive_datetime_to_iso8601()
+            |> DateTimeHelpers.naive_datetime_to_iso8601()
 
           true ->
             time_range["active_period_start"]
@@ -41,7 +43,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeGetters do
       "later_today" ->
         current_time
         |> ActivePeriod.end_of_service_datetime_naive()
-        |> naive_datetime_to_iso8601()
+        |> DateTimeHelpers.naive_datetime_to_iso8601()
 
       "end_of_service" ->
         if time_range["active_period_end_date"] in ["", nil] do
@@ -53,7 +55,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeGetters do
           |> Date.from_iso8601!()
           |> Date.add(1)
           |> NaiveDateTime.new!(ActivePeriod.end_of_service_time())
-          |> naive_datetime_to_iso8601()
+          |> DateTimeHelpers.naive_datetime_to_iso8601()
         end
 
       "until_further_notice" ->
@@ -62,13 +64,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeGetters do
       "custom" ->
         cond do
           previous_state == "until_further_notice" ->
-            current_time |> naive_datetime_to_iso8601()
+            current_time |> DateTimeHelpers.naive_datetime_to_iso8601()
 
           previous_state !== "custom" ->
             time_range["active_period_end_date"]
             |> Date.from_iso8601!()
             |> NaiveDateTime.new!(~T[23:59:00])
-            |> naive_datetime_to_iso8601()
+            |> DateTimeHelpers.naive_datetime_to_iso8601()
 
           true ->
             time_range["active_period_end"]
@@ -105,7 +107,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeGetters do
 
       "custom" ->
         if previous_state !== "custom" do
-          current_time |> NaiveDateTime.to_time() |> time_to_iso8601()
+          current_time |> NaiveDateTime.to_time() |> DateTimeHelpers.time_to_iso8601()
         else
           time_range["active_period_start_time"]
         end
@@ -122,7 +124,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeGetters do
 
       "custom" ->
         if previous_state !== "custom" do
-          current_time |> NaiveDateTime.to_time() |> time_to_iso8601()
+          current_time |> NaiveDateTime.to_time() |> DateTimeHelpers.time_to_iso8601()
         else
           time_range["active_period_end_time"]
         end
@@ -195,7 +197,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeGetters do
   defp string_to_time_helper(time) when is_binary(time), do: Time.from_iso8601!(time <> ":00")
   defp string_to_time_helper(time), do: time
 
-  defp string_to_datetime_helper(datetime) do
+  def string_to_datetime_helper(datetime) do
     # At this stage, we see string dates in the following formats:
     # 2025-12-13T03:00
     # 2025-12-13T03:00:00
@@ -214,10 +216,4 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeGetters do
         end
     end
   end
-
-  defp string_to_date_helper(date) when is_binary(date), do: Date.from_iso8601!(date)
-  defp string_to_date_helper(date), do: date
-
-  defp string_to_time_helper(time) when is_binary(time), do: Time.from_iso8601!(time <> ":00")
-  defp string_to_time_helper(time), do: time
 end
