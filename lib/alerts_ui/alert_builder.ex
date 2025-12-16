@@ -300,10 +300,11 @@ defmodule AlertsUI.AlertBuilder do
       else
         # if notification period has not been set, use active_period_start
         if Map.get(alert_data, :notification_period_start) do
-          ActivePeriodBuilder.naive_eastern_datetime_to_utc(alert_data.notification_period_start)
+          Map.get(alert_data, :notification_period_start)
+          |> ensure_utc()
         else
           Map.get(alert_data, :active_period_start)
-          |> ActivePeriodBuilder.naive_eastern_datetime_to_utc()
+          |> ensure_utc()
         end
       end
 
@@ -311,14 +312,14 @@ defmodule AlertsUI.AlertBuilder do
       cond do
         Map.get(alert_data, :notification_period_end) ->
           Map.get(alert_data, :notification_period_end)
-          |> ActivePeriodBuilder.naive_eastern_datetime_to_utc()
+          |> ensure_utc()
 
         Map.get(alert_data, :active_period_end_specifier) === :later_today ->
           ActivePeriod.end_of_service_datetime_utc(current_time)
 
         true ->
           Map.get(alert_data, :active_period_end)
-          |> ActivePeriodBuilder.naive_eastern_datetime_to_utc()
+          |> ensure_utc()
       end
 
     %{
@@ -1087,5 +1088,17 @@ defmodule AlertsUI.AlertBuilder do
     |> Enum.uniq()
     |> Routes.expanding_green_line()
     |> Enum.map(&(RoutesRepo.get(&1, include: "line") || %{}))
+  end
+
+  defp ensure_utc(%NaiveDateTime{} = timestamp) do
+    ActivePeriodBuilder.naive_eastern_datetime_to_utc(timestamp)
+  end
+
+  defp ensure_utc(%DateTime{} = timestamp) do
+    if timestamp.time_zone == "Etc/UTC" do
+      timestamp
+    else
+      DateTime.shift_zone!(timestamp, "Etc/UTC")
+    end
   end
 end
