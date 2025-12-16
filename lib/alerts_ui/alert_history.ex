@@ -211,11 +211,14 @@ defmodule AlertsUI.AlertHistory do
   end
 
   @spec build_alert_maps(PaperTrail.Version.t(), String.t()) :: [map()]
+  # sobelow_skip ["DOS.StringToAtom"]
   defp build_alert_maps(versions, alert_id) do
     # takes in a list of versions
     # pares those down to the changes, alert_id, and the origin information
     # returns a list of alert maps with atom keys
     # starting with the oldest and ending with the newest
+    # skips sobelow warning because old keys may not be created atoms
+    # and this is not user input- it comes straight from the DB
 
     versions
     |> Enum.map(
@@ -233,7 +236,7 @@ defmodule AlertsUI.AlertHistory do
     end)
     |> Enum.reverse()
     |> tl
-    |> Enum.map(&Map.new(&1, fn {k, v} -> {String.to_existing_atom(k), v} end))
+    |> Enum.map(&Map.new(&1, fn {k, v} -> {String.to_atom(k), v} end))
   end
 
   defp effect_end("ESTIMATED", _), do: "later today"

@@ -7,7 +7,7 @@ defmodule AlertsUIWeb.ReviewModal do
 
   import AlertsUIWeb.CoreComponents
   import AlertsUIWeb.SharedComponents
-  import PhoenixHTMLHelpers.Format, only: [text_to_html: 2]
+  import PhoenixHTMLHelpers.Format, only: [text_to_html: 1, text_to_html: 2]
 
   alias AlertsUI.ActiveStatus
   alias AlertsUI.Helpers.ReminderTimes
@@ -115,7 +115,7 @@ defmodule AlertsUIWeb.ReviewModal do
         facility_names: facility_names,
         mode_names: mode_names,
         id: "review-modal",
-        created_at: Map.get(assigns.alert_data, :created_at),
+        created_timestamp: Map.get(assigns.alert_data, :created_timestamp),
         created_by: Map.get(assigns.alert_data, :created_by),
         last_edited_at: Map.get(assigns.alert_data, :last_edited_at),
         last_edited_by: Map.get(assigns.alert_data, :last_edited_by)
@@ -157,15 +157,13 @@ defmodule AlertsUIWeb.ReviewModal do
           <%!-- Top section --%>
           <p class="font-bold">Main message</p>
           {text_to_html(@alert_data.header_text,
-            attributes: [class: "pb-4 max-w-[28rem] whitespace-pre-line break-words"]
+            attributes: [class: "pb-4 max-w-[28rem] break-words"]
           )}
           <div>
             <span class="block pb-4">
               <p class="font-bold">Supporting information</p>
               <%= if @alert_data.description_text do %>
-                {text_to_html(@alert_data.description_text,
-                  attributes: [class: "whitespace-pre-line"]
-                )}
+                {text_to_html(@alert_data.description_text)}
               <% else %>
                 <p class="italic">None</p>
               <% end %>
@@ -276,59 +274,7 @@ defmodule AlertsUIWeb.ReviewModal do
             </p>
 
             <p class="font-bold pb-1">Effect period</p>
-            <%= if @alert_data.alert_timing == :"one-time" do %>
-              <div class="pb-1">
-                <p>
-                  {TimeRangeDurationText.one_time_duration_start_phrase(%{
-                    "active_period_start" => @alert_data.active_period_start,
-                    "active_period_start_specifier" => @alert_data.active_period_start_specifier
-                  })}
-                </p>
-                <p>
-                  {TimeRangeDurationText.one_time_duration_end_phrase(%{
-                    "active_period_end" => @alert_data.active_period_end,
-                    "active_period_end_specifier" => @alert_data.active_period_end_specifier
-                  })}
-                </p>
-                <p>
-                  {TimeRangeDurationText.one_time_duration_phrase(%{
-                    "active_period_start" => @alert_data.active_period_start,
-                    "active_period_end" => @alert_data.active_period_end,
-                    "active_period_end_specifier" => @alert_data.active_period_end_specifier
-                  })}
-                </p>
-              </div>
-            <% else %>
-              <div class="pb-1">
-                <p>
-                  {RecurringDurationText.recurring_duration_date_range(%{
-                    "active_period_start_date" => @alert_data.active_period_start_date,
-                    "active_period_end_date" => @alert_data.active_period_end_date,
-                    "active_period_end_specifier" => @alert_data.active_period_end_specifier
-                  })}
-                </p>
-                <p>
-                  {RecurringDurationText.recurring_duration_recurrence_days(%{
-                    "recurrence_days" => @alert_data.recurrence_days
-                  })
-                  |> Helpers.upcase_first_letter()}
-                </p>
-                <p>
-                  {RecurringDurationText.recurring_duration_time_range(
-                    assign(assigns,
-                      params: %{
-                        "active_period_start_time" => @alert_data.active_period_start_time,
-                        "active_period_end_time" => @alert_data.active_period_end_time
-                      }
-                    )
-                  )}
-                  {RecurringDurationText.recurring_duration_only(%{
-                    "active_period_start_time" => @alert_data.active_period_start_time,
-                    "active_period_end_time" => @alert_data.active_period_end_time
-                  })}
-                </p>
-              </div>
-            <% end %>
+            <.effect_end_text alert_data={@alert_data} />
 
             <p class="font-bold pb-1">Notification period</p>
             <%= if Map.get(@alert_data, :notification_specifier, :same_as_effect_period) === :same_as_effect_period do %>
@@ -376,7 +322,7 @@ defmodule AlertsUIWeb.ReviewModal do
           <% else %>
             <p class="pb-3 whitespace-nowrap">
               {Calendar.strftime(
-                DateTime.shift_zone!(@created_at, "America/New_York"),
+                DateTime.shift_zone!(@created_timestamp, "America/New_York"),
                 "%a %m/%d/%Y, %-I:%M %p"
               )}
             </p>
@@ -491,6 +437,16 @@ defmodule AlertsUIWeb.ReviewModal do
     """
   end
 
+  defp safe_datetime_compare(%NaiveDateTime{} = start_datetime, %NaiveDateTime{} = end_datetime) do
+    NaiveDateTime.compare(start_datetime, end_datetime)
+  end
+
+  defp safe_datetime_compare(_, _), do: nil
+
+  defp naive_now do
+    DateTime.utc_now() |> DateTime.shift_zone!("America/New_York") |> DateTime.to_naive()
+  end
+
   defp join_present(list, separator) when is_list(list) do
     list
     |> Enum.filter(&(&1 != nil && String.trim(&1) != ""))
@@ -504,6 +460,81 @@ defmodule AlertsUIWeb.ReviewModal do
     |> String.replace("_", " ")
     |> String.split()
     |> Enum.map_join(" / ", &String.capitalize/1)
+  end
+
+  attr :alert_data, :map
+
+  def effect_end_text(assigns) do
+    cond do
+      safe_datetime_compare(
+        assigns.alert_data.active_period_start,
+        assigns.alert_data.active_period_end
+      ) == :gt and
+          safe_datetime_compare(naive_now(), assigns.alert_data.active_period_end) == :gt ->
+        ~H"""
+        <div class="pb-1">
+          <p>(closed before effect start)</p>
+        </div>
+        """
+
+      assigns.alert_data.alert_timing == :"one-time" ->
+        ~H"""
+        <div class="pb-1">
+          <p>
+            {TimeRangeDurationText.one_time_duration_start_phrase(%{
+              "active_period_start" => @alert_data.active_period_start,
+              "active_period_start_specifier" => @alert_data.active_period_start_specifier
+            })}
+          </p>
+          <p>
+            {TimeRangeDurationText.one_time_duration_end_phrase(%{
+              "active_period_end" => @alert_data.active_period_end,
+              "active_period_end_specifier" => @alert_data.active_period_end_specifier
+            })}
+          </p>
+          <p>
+            {TimeRangeDurationText.one_time_duration_phrase(%{
+              "active_period_start" => @alert_data.active_period_start,
+              "active_period_end" => @alert_data.active_period_end,
+              "active_period_end_specifier" => @alert_data.active_period_end_specifier
+            })}
+          </p>
+        </div>
+        """
+
+      true ->
+        ~H"""
+        <div class="pb-1">
+          <p>
+            {RecurringDurationText.recurring_duration_date_range(%{
+              "active_period_start_date" => @alert_data.active_period_start_date,
+              "active_period_end_date" => @alert_data.active_period_end_date,
+              "active_period_end_specifier" => @alert_data.active_period_end_specifier
+            })}
+          </p>
+          <p>
+            {RecurringDurationText.recurring_duration_recurrence_days(%{
+              "recurrence_days" => @alert_data.recurrence_days
+            })
+            |> Helpers.upcase_first_letter()}
+          </p>
+          <p>
+            {RecurringDurationText.recurring_duration_time_range(
+              assign(assigns,
+                params: %{
+                  "active_period_start_time" => @alert_data.active_period_start_time,
+                  "active_period_end_time" => @alert_data.active_period_end_time
+                }
+              )
+            )}
+            {RecurringDurationText.recurring_duration_only(%{
+              "active_period_start_time" => @alert_data.active_period_start_time,
+              "active_period_end_time" => @alert_data.active_period_end_time
+            })}
+          </p>
+        </div>
+        """
+    end
   end
 
   attr :id, :string,

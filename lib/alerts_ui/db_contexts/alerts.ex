@@ -351,7 +351,7 @@ defmodule AlertsUI.Alerts do
   # it sets defaults for origin and last_push_notification_timestamp
   @spec close_automatically(Alert.t(), DateTime.t()) :: Alert.t()
   def close_automatically(alert, closed_time \\ DateTime.utc_now()) do
-    send_all_clear? = alert.duration_certainty in [:ESTIMATED, :UNKNOWN]
+    send_all_clear? = alert.duration_certainty == :UNKNOWN
     close(alert, "(Closed automatically)", send_all_clear?, closed_time)
   end
 

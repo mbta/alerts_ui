@@ -112,10 +112,10 @@ config :alerts_ui, Oban,
          max_attempts: 1,
          unique: [period: 30, states: [:available, :scheduled, :executing]]
        },
-       # Update recurring alerts every day at 3:01 am
-       {"1 3 * * *", AlertsUI.RecurringAlertUpdater},
-       # Validate alerts against production every day at 4:00 am
-       {"0 4 * * *", AlertsUI.AlertValidation.AlertValidationDailyWorker},
+       # Update recurring alerts every day at 3:01 am EST
+       {"1 8 * * *", AlertsUI.RecurringAlertUpdater},
+       # Validate alerts against production every day at 4:00 am EST
+       {"0 9 * * *", AlertsUI.AlertValidation.AlertValidationDailyWorker},
        # Check if we need to validate alerts against dev every minute
        {
          "*/1 * * * *",
@@ -146,8 +146,7 @@ config :ueberauth, Ueberauth,
         issuer: :keycloak_issuer,
         userinfo: true,
         uid_field: "preferred_username",
-        scopes: ~w(openid email roles),
-        preferred_auth_methods: ~w(client_secret_post)a
+        scopes: ~w(openid email roles)
       ]
     }
   ]

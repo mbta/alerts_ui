@@ -704,6 +704,35 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     end
   end
 
+  defp string_to_date_helper(date) when is_binary(date), do: Date.from_iso8601!(date)
+  defp string_to_date_helper(date), do: date
+
+  defp string_to_time_helper(time) when is_binary(time), do: Time.from_iso8601!(time <> ":00")
+  defp string_to_time_helper(time), do: time
+
+  defp get_recurring_start_datetime(start_date, start_time) do
+    start_date
+    |> string_to_date_helper()
+    |> DateTime.new!(string_to_time_helper(start_time), "America/New_York")
+  end
+
+  defp get_recurring_end_datetime("", _), do: ""
+
+  defp get_recurring_end_datetime(end_date, end_time) do
+    end_time = string_to_time_helper(end_time)
+
+    if Time.compare(end_time, ActivePeriod.start_of_service_time()) == :lt do
+      end_date
+      |> string_to_date_helper()
+      |> DateTime.new!(end_time, "America/New_York")
+    else
+      end_date
+      |> string_to_date_helper()
+      |> DateTime.new!(end_time, "America/New_York")
+      |> DateTime.add(1, :day)
+    end
+  end
+
   defp changeset(changeset, params) do
     custom_errors = [
       active_period_start: "Enter a valid datetime",

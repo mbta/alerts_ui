@@ -25,6 +25,7 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
   @route_one %Route{
     sort_order: 1,
     id: "1",
+    type: 3,
     name: "bus route 1",
     direction_names: %{0 => "Outbound", 1 => "Inbound"}
   }
@@ -95,7 +96,7 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
                cause: nil,
                cause_detail: nil,
                closed_timestamp: nil,
-               created_timestamp: nil,
+               created_timestamp: _,
                description_text: "b",
                draft: false,
                duration_certainty: :KNOWN,
@@ -132,7 +133,7 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
                cause: nil,
                cause_detail: nil,
                closed_timestamp: nil,
-               created_timestamp: nil,
+               created_timestamp: _,
                description_text: "b",
                draft: false,
                duration_certainty: :KNOWN,
@@ -235,7 +236,7 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
                cause: nil,
                cause_detail: nil,
                closed_timestamp: nil,
-               created_timestamp: nil,
+               created_timestamp: _,
                description_text: "b",
                draft: false,
                duration_certainty: :KNOWN,

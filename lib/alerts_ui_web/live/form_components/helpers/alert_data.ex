@@ -28,7 +28,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :banner_sync_toggle,
     :cause_detail,
     :combination,
-    :created_at,
+    :created_timestamp,
     :created_by,
     :description_text,
     :direction,
@@ -51,7 +51,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :reminder_times,
     :route_ids,
     :route_type,
-    :route_types_by_id,
     :service_types,
     :severity,
     :single_route_id,
@@ -81,7 +80,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           banner_text: String.t() | nil,
           cause_detail: String.t() | nil,
           combination: atom() | nil,
-          created_at: DateTime.t() | nil,
+          created_timestamp: DateTime.t() | nil,
           created_by: String.t() | nil,
           description_text: String.t() | nil,
           direction: String.t() | nil,
@@ -104,7 +103,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           reminder_times: [reminder_time_t()] | nil,
           route_ids: [String.t()] | nil,
           route_type: Route.type_int() | nil,
-          route_types_by_id: map() | nil,
           service_types: [Route.type_int()] | nil,
           severity: integer() | nil,
           single_route_id: String.t() | nil,
@@ -128,7 +126,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
   def build_alert_data(%AlertsUI.Models.Alert{} = alert) do
     direct_from_alert_keys = [
-      :created_at,
+      :created_timestamp,
       :banner_text,
       :cause_detail,
       :description_text,
@@ -219,7 +217,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       facility_id: Alert.gather_facility_ids(alert.informed_entity) |> List.first(),
       route_ids: route_ids,
       route_type: route_type,
-      route_types_by_id: route_types_by_id(combination, route_type, route_ids),
       single_route_id: single_route_id,
       stop_ids: Alert.gather_parent_stop_ids(alert.informed_entity),
       stop_names_and_ids: alert.original_stop_selections,
@@ -387,15 +384,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   defp get_route_type("access"), do: nil
   defp get_route_type("systemwide"), do: nil
   defp get_route_type(route_type), do: String.to_integer(route_type)
-
-  defp route_types_by_id(:SR, route_type, route_ids) do
-    # necessary to form informed entities correctly upon persisting
-    route_ids
-    |> Enum.map(fn route_id -> {route_id, route_type} end)
-    |> Map.new()
-  end
-
-  defp route_types_by_id(_, _, _), do: nil
 
   defp originator_fallback(nil), do: "Legacy User"
   defp originator_fallback(user_name), do: user_name

@@ -102,7 +102,7 @@ defmodule AlertsUI.MixProject do
       {:nimble_csv, "~> 1.3.0"},
       {:oban, "~> 2.16"},
       {:oban_web, "~> 2.11"},
-      {:paper_trail, "~> 1.0.0"},
+      {:paper_trail, "~> 1.1.2"},
       {:phoenix, "~> 1.7.7"},
       {:phoenix_ecto, "~> 4.5"},
       {:phoenix_html, "~> 4.1"},
