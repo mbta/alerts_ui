@@ -465,75 +465,73 @@ defmodule AlertsUIWeb.ReviewModal do
   attr :alert_data, :map
 
   def effect_end_text(assigns) do
-    cond do
+    closed_before_start? =
       safe_datetime_compare(
         assigns.alert_data.active_period_start,
         assigns.alert_data.active_period_end
       ) == :gt and
-          safe_datetime_compare(naive_now(), assigns.alert_data.active_period_end) == :gt ->
-        ~H"""
-        <div class="pb-1">
-          <p>(closed before effect start)</p>
-        </div>
-        """
+        safe_datetime_compare(naive_now(), assigns.alert_data.active_period_end) == :gt
 
-      assigns.alert_data.alert_timing == :"one-time" ->
-        ~H"""
-        <div class="pb-1">
-          <p>
-            {TimeRangeDurationText.one_time_duration_start_phrase(%{
-              "active_period_start" => @alert_data.active_period_start,
-              "active_period_start_specifier" => @alert_data.active_period_start_specifier
-            })}
-          </p>
-          <p>
-            {TimeRangeDurationText.one_time_duration_end_phrase(%{
-              "active_period_end" => @alert_data.active_period_end,
-              "active_period_end_specifier" => @alert_data.active_period_end_specifier
-            })}
-          </p>
-          <p>
-            {TimeRangeDurationText.one_time_duration_phrase(%{
-              "active_period_start" => @alert_data.active_period_start,
-              "active_period_end" => @alert_data.active_period_end,
-              "active_period_end_specifier" => @alert_data.active_period_end_specifier
-            })}
-          </p>
-        </div>
-        """
+    assigns = assign(assigns, :closed_before_start?, closed_before_start?)
 
-      true ->
-        ~H"""
-        <div class="pb-1">
-          <p>
-            {RecurringDurationText.recurring_duration_date_range(%{
-              "active_period_start_date" => @alert_data.active_period_start_date,
-              "active_period_end_date" => @alert_data.active_period_end_date,
-              "active_period_end_specifier" => @alert_data.active_period_end_specifier
-            })}
-          </p>
-          <p>
-            {RecurringDurationText.recurring_duration_recurrence_days(%{
-              "recurrence_days" => @alert_data.recurrence_days
-            })
-            |> Helpers.upcase_first_letter()}
-          </p>
-          <p>
-            {RecurringDurationText.recurring_duration_time_range(
-              assign(assigns,
-                params: %{
-                  "active_period_start_time" => @alert_data.active_period_start_time,
-                  "active_period_end_time" => @alert_data.active_period_end_time
-                }
-              )
-            )}
-            {RecurringDurationText.recurring_duration_only(%{
-              "active_period_start_time" => @alert_data.active_period_start_time,
-              "active_period_end_time" => @alert_data.active_period_end_time
-            })}
-          </p>
-        </div>
-        """
+    if assigns.alert_data.alert_timing == :"one-time" do
+      ~H"""
+      <div class="pb-1">
+        <p>
+          {TimeRangeDurationText.one_time_duration_start_phrase(%{
+            "active_period_start" => @alert_data.active_period_start,
+            "active_period_start_specifier" => @alert_data.active_period_start_specifier
+          })}
+        </p>
+        <p>
+          {TimeRangeDurationText.one_time_duration_end_phrase(%{
+            "active_period_end" => @alert_data.active_period_end,
+            "active_period_end_specifier" => @alert_data.active_period_end_specifier
+          })}
+        </p>
+        <p :if={!@closed_before_start?}>
+          {TimeRangeDurationText.one_time_duration_phrase(%{
+            "active_period_start" => @alert_data.active_period_start,
+            "active_period_end" => @alert_data.active_period_end,
+            "active_period_end_specifier" => @alert_data.active_period_end_specifier
+          })}
+        </p>
+        <p :if={@closed_before_start?}>(closed before effect start)</p>
+      </div>
+      """
+    else
+      ~H"""
+      <div class="pb-1">
+        <p>
+          {RecurringDurationText.recurring_duration_date_range(%{
+            "active_period_start_date" => @alert_data.active_period_start_date,
+            "active_period_end_date" => @alert_data.active_period_end_date,
+            "active_period_end_specifier" => @alert_data.active_period_end_specifier
+          })}
+        </p>
+        <p>
+          {RecurringDurationText.recurring_duration_recurrence_days(%{
+            "recurrence_days" => @alert_data.recurrence_days
+          })
+          |> Helpers.upcase_first_letter()}
+        </p>
+        <p :if={!@closed_before_start?}>
+          {RecurringDurationText.recurring_duration_time_range(
+            assign(assigns,
+              params: %{
+                "active_period_start_time" => @alert_data.active_period_start_time,
+                "active_period_end_time" => @alert_data.active_period_end_time
+              }
+            )
+          )}
+          {RecurringDurationText.recurring_duration_only(%{
+            "active_period_start_time" => @alert_data.active_period_start_time,
+            "active_period_end_time" => @alert_data.active_period_end_time
+          })}
+        </p>
+        <p :if={@closed_before_start?}>(closed before effect start)</p>
+      </div>
+      """
     end
   end
 
