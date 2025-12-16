@@ -15,6 +15,7 @@ defmodule AlertsUI.Repo.Migrations.CreateLatestIBIAlertsView do
     ")
 
     execute(LatestIBIAlert.create_view_sql())
+  end
 
   def down do
     execute("ALTER TABLE ibi_alerts DROP COLUMN integer_version_no CASCADE")
