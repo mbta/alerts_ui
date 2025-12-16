@@ -690,6 +690,82 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       refute view |> render() =~ ~s(Alert start day must match a selected day of the week.)
     end
 
+    test "if recurring, active_period_end should be the last active period end" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "alert_timing" => "recurring"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_start_specifier" => :custom,
+          "active_period_end_specifier" => :custom,
+          "recurrence_days" => ["tuesday"]
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_start_date" => "2024-12-03",
+          "active_period_end_date" => "2024-12-17"
+        }
+      })
+
+      assert_receive {:__live_isolated_component_handle_info_received__, _pid,
+                      {:section_completed,
+                       %TimeRange{
+                         active_period_end: ~N[2024-12-18 03:00:00]
+                       }}}
+    end
+
+    test "if recurring and no end time, active_period_end should reflect that" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "alert_timing" => "recurring"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_start_specifier" => :custom,
+          "active_period_end_specifier" => nil,
+          "recurrence_days" => ["tuesday"]
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_start_date" => "2024-12-03"
+          # "active_period_end_date" => "2024-12-17",
+        }
+      })
+
+      assert_receive {:__live_isolated_component_handle_info_received__, _pid,
+                      {:section_completed,
+                       %TimeRange{
+                         active_period_end: nil
+                       }}}
+    end
+
     test "does not show reccurrence error if no weekdays selected" do
       {:ok, view, _html} =
         live_isolated_component(TimeRange, @assigns)

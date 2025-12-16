@@ -406,11 +406,25 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
               form_params["active_period_end_specifier"]
             )
 
+          start_datetime =
+            get_recurring_start_datetime(
+              start_date,
+              start_time
+            )
+
+          end_datetime =
+            get_recurring_end_datetime(
+              end_date,
+              end_time
+            )
+
           Map.merge(time_range, %{
             "active_period_start_time" => start_time,
             "active_period_end_time" => end_time,
             "active_period_start_date" => start_date,
-            "active_period_end_date" => end_date
+            "active_period_end_date" => end_date,
+            "active_period_start" => start_datetime,
+            "active_period_end" => end_datetime
           })
       end
 
@@ -544,7 +558,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       "custom" ->
         if previous_state !== "custom" do
           current_time
-          |> ActivePeriod.end_of_service_datetime_naive()
           |> NaiveDateTime.to_date()
         else
           time_range["active_period_end_date"]
@@ -595,6 +608,35 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     end
   end
 
+  defp string_to_date_helper(date) when is_binary(date), do: Date.from_iso8601!(date)
+  defp string_to_date_helper(date), do: date
+
+  defp string_to_time_helper(time) when is_binary(time), do: Time.from_iso8601!(time <> ":00")
+  defp string_to_time_helper(time), do: time
+
+  defp get_recurring_start_datetime(start_date, start_time) do
+    start_date
+    |> string_to_date_helper()
+    |> DateTime.new!(string_to_time_helper(start_time), "America/New_York")
+  end
+
+  defp get_recurring_end_datetime("", _), do: ""
+
+  defp get_recurring_end_datetime(end_date, end_time) do
+    end_time = string_to_time_helper(end_time)
+
+    if Time.compare(end_time, ActivePeriod.start_of_service_time()) == :lt do
+      end_date
+      |> string_to_date_helper()
+      |> DateTime.new!(end_time, "America/New_York")
+    else
+      end_date
+      |> string_to_date_helper()
+      |> DateTime.new!(end_time, "America/New_York")
+      |> DateTime.add(1, :day)
+    end
+  end
+
   defp changeset(changeset, params) do
     custom_errors = [
       active_period_start: "Enter a valid datetime",
@@ -609,14 +651,11 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   @impl true
   def render(assigns) do
-    one_time_duration_text = TimeRangeDurationText.one_time_duration_text(assigns.form.params)
-
     assigns =
       assign(assigns,
         start_values: @start_values,
         end_values: @end_values,
-        alert_timing_values: @alert_timing_values,
-        one_time_duration_text: one_time_duration_text
+        alert_timing_values: @alert_timing_values
       )
 
     ~H"""
@@ -646,7 +685,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           :if={@form[:alert_timing].value in [:"one-time", "one-time"] and Enum.empty?(@form.errors)}
           class="text-text-secondary"
         >
-          Effect duration: {@one_time_duration_text}
+          Effect duration: {TimeRangeDurationText.one_time_duration_text(@form.params)}
         </div>
         {recurring_alert_component(assigns)}
         <div
