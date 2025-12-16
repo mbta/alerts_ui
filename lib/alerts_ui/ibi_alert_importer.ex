@@ -21,6 +21,7 @@ defmodule AlertsUI.IBIAlertImporter do
   alias AlertsUI.Models.ReminderTime
   alias AlertsUI.Repo
   alias Ecto.Adapters.SQL
+  alias Ecto.Changeset
   alias Ecto.Multi
 
   @default_chunk_size 1000
@@ -99,28 +100,28 @@ defmodule AlertsUI.IBIAlertImporter do
         ]
 
         ambiguous_windows = [
-           "3/9/2014 2%AM",
-           "3/8/2015 2%AM",
-           "3/13/2016 2%AM",
-           "3/12/2017 2%AM",
-           "3/11/2018 2%AM",
-           "3/10/2019 2%AM",
-           "3/8/2020 2%AM",
-           "3/14/2021 2%AM",
-           "3/13/2022 2%AM",
-           "3/12/2023 2%AM",
-           "3/10/2024 2%AM",
-           "3/9/2025 2%AM",
-           "11/2/2014 1%AM",
-           "11/1/2015 1%AM",
-           "11/6/2016 1%AM",
-           "11/5/2017 1%AM",
-           "11/1/2020 1%AM",
-           "11/7/2021 1%AM",
-           "11/6/2022 1%AM",
-           "11/5/2023 1%AM",
-           "11/3/2024 1%AM",
-           "11/2/2025 1%AM",
+          "3/9/2014 2%AM",
+          "3/8/2015 2%AM",
+          "3/13/2016 2%AM",
+          "3/12/2017 2%AM",
+          "3/11/2018 2%AM",
+          "3/10/2019 2%AM",
+          "3/8/2020 2%AM",
+          "3/14/2021 2%AM",
+          "3/13/2022 2%AM",
+          "3/12/2023 2%AM",
+          "3/10/2024 2%AM",
+          "3/9/2025 2%AM",
+          "11/2/2014 1%AM",
+          "11/1/2015 1%AM",
+          "11/6/2016 1%AM",
+          "11/5/2017 1%AM",
+          "11/1/2020 1%AM",
+          "11/7/2021 1%AM",
+          "11/6/2022 1%AM",
+          "11/5/2023 1%AM",
+          "11/3/2024 1%AM",
+          "11/2/2025 1%AM"
         ]
 
         for field <- fields, window <- ambiguous_windows do
@@ -215,7 +216,7 @@ defmodule AlertsUI.IBIAlertImporter do
       Keyword.get(
         options,
         :query,
-        (from i in LatestIBIAlert, where: i.is_closed == "True")
+        from(i in LatestIBIAlert, where: i.is_closed == "True")
       )
 
     Repo.transact(
@@ -265,10 +266,10 @@ defmodule AlertsUI.IBIAlertImporter do
             # add deduplicated reminders
             all_versions_index
             |> Map.get(alert.alert_id)
-            |> Enum.map(fn ibi_alert -> extract_reminders(ibi_alert) end)
+            |> Enum.map(fn ibi_alert -> extract_reminders(ibi_alert, alert) end)
             |> List.flatten()
             |> Enum.uniq()
-            |> Enum.map(fn params -> ReminderTime.changeset(%ReminderTime{}, params) end)
+            |> Enum.map(fn params -> Changeset.cast(%ReminderTime{}, params, Map.keys(params)) end)
             |> Enum.each(fn changeset -> Repo.insert!(changeset) end)
           end)
         end)
@@ -695,7 +696,7 @@ defmodule AlertsUI.IBIAlertImporter do
     |> DateTime.shift_zone!("Etc/UTC")
   end
 
-  def extract_reminders(ibi_alert) do
+  def extract_reminders(ibi_alert, alert) do
     if ibi_alert.reminders do
       ibi_alert.reminders
       |> String.replace("send bulletin", "")
@@ -704,7 +705,7 @@ defmodule AlertsUI.IBIAlertImporter do
       |> String.replace(~r/\s/, "")
       |> String.split(";")
       |> Enum.map(fn timestamp ->
-        %{id: nil, time: utc_from_ibi_reminder_format(timestamp)}
+        %{id: nil, alert_id: alert.id, reminder_time: utc_from_ibi_reminder_format(timestamp)}
       end)
     else
       []
