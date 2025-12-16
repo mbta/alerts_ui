@@ -49,6 +49,8 @@ defmodule AlertsUI.Models.IBIAlert do
           send_bulletin_on_create: String.t() | nil,
           tts_header_text: String.t() | nil,
           tts_description_text: String.t() | nil,
+          alert_image_url: String.t() | nil,
+          alert_image_description: String.t() | nil,
           integer_version_no: integer()
         }
 
@@ -95,6 +97,8 @@ defmodule AlertsUI.Models.IBIAlert do
     send_bulletin_on_create
     tts_header_text
     tts_description_text
+    alert_image_url
+    alert_image_description
   ]a
 
   schema "ibi_alerts" do
