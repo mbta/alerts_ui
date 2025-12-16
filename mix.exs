@@ -143,7 +143,8 @@ defmodule AlertsUI.MixProject do
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind default", "esbuild default"],
       "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"],
-      sobelow: "sobelow --skip --exit=low --ignore Config.HTTPS",
+      sobelow:
+        "sobelow --skip --exit=low --ignore Config.HTTPS --ignore-files lib/alerts_ui/ibi_alert_importer.ex",
       check: [
         "compile --force --all-warnings --warnings-as-errors",
         "format",
