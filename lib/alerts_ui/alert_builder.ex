@@ -301,10 +301,17 @@ defmodule AlertsUI.AlertBuilder do
         # if notification period has not been set, use active_period_start
         if Map.get(alert_data, :notification_period_start) do
           Map.get(alert_data, :notification_period_start)
+<<<<<<< HEAD
           |> ensure_utc_or_nil()
         else
           Map.get(alert_data, :active_period_start)
           |> ensure_utc_or_nil()
+=======
+          |> ensure_utc()
+        else
+          Map.get(alert_data, :active_period_start)
+          |> ensure_utc()
+>>>>>>> 4d9bc00 (fix DST-adjacent windows, alert builder can accept both UTC and naive timestamps)
         end
       end
 
@@ -312,14 +319,22 @@ defmodule AlertsUI.AlertBuilder do
       cond do
         Map.get(alert_data, :notification_period_end) ->
           Map.get(alert_data, :notification_period_end)
+<<<<<<< HEAD
           |> ensure_utc_or_nil()
+=======
+          |> ensure_utc()
+>>>>>>> 4d9bc00 (fix DST-adjacent windows, alert builder can accept both UTC and naive timestamps)
 
         Map.get(alert_data, :active_period_end_specifier) === :later_today ->
           ActivePeriod.end_of_service_datetime_utc(current_time)
 
         true ->
           Map.get(alert_data, :active_period_end)
+<<<<<<< HEAD
           |> ensure_utc_or_nil()
+=======
+          |> ensure_utc()
+>>>>>>> 4d9bc00 (fix DST-adjacent windows, alert builder can accept both UTC and naive timestamps)
       end
 
     %{
@@ -1090,17 +1105,28 @@ defmodule AlertsUI.AlertBuilder do
     |> Enum.map(&(RoutesRepo.get(&1, include: "line") || %{}))
   end
 
+<<<<<<< HEAD
   defp ensure_utc_or_nil(%NaiveDateTime{} = timestamp) do
     ActivePeriodBuilder.naive_eastern_datetime_to_utc(timestamp)
   end
 
   defp ensure_utc_or_nil(%DateTime{} = timestamp) do
+=======
+  defp ensure_utc(%NaiveDateTime{} = timestamp) do
+    ActivePeriodBuilder.naive_eastern_datetime_to_utc(timestamp)
+  end
+
+  defp ensure_utc(%DateTime{} = timestamp) do
+>>>>>>> 4d9bc00 (fix DST-adjacent windows, alert builder can accept both UTC and naive timestamps)
     if timestamp.time_zone == "Etc/UTC" do
       timestamp
     else
       DateTime.shift_zone!(timestamp, "Etc/UTC")
     end
   end
+<<<<<<< HEAD
 
   defp ensure_utc_or_nil(nil), do: nil
+=======
+>>>>>>> 4d9bc00 (fix DST-adjacent windows, alert builder can accept both UTC and naive timestamps)
 end
