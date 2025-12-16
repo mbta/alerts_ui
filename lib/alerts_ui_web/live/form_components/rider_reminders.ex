@@ -32,7 +32,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
        current_time: current_time,
        edited: false,
        notification_start: "",
-       effect_end: ""
+       notification_end: ""
      )}
   end
 
@@ -47,11 +47,15 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
         true -> nil
       end
 
-    effect_end =
-      if Map.get(alert_data, :active_period_end) in ["", nil] do
-        ~N[9999-12-31 23:59:59]
+    notification_end =
+      if Map.get(alert_data, :notification_period_end) in ["", nil] do
+        if Map.get(alert_data, :active_period_end) in ["", nil] do
+          ~N[9999-12-31 23:59:59]
+        else
+          Map.get(alert_data, :active_period_end)
+        end
       else
-        alert_data.active_period_end
+        alert_data.notification_period_end
       end
 
     processed_reminder_times =
@@ -63,7 +67,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
           "id" => id,
           "reminder_time" => time && NaiveDateTime.to_iso8601(time),
           "min_time" => notification_start |> naive_datetime_to_iso8601(),
-          "max_time" => effect_end |> naive_datetime_to_iso8601()
+          "max_time" => notification_end |> naive_datetime_to_iso8601()
         })
       end)
 
@@ -83,7 +87,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
       assigns
       |> Map.merge(%{form: form, edited: true})
       |> Map.put(:notification_start, notification_start)
-      |> Map.put(:effect_end, effect_end)
+      |> Map.put(:notification_end, notification_end)
 
     {:ok, assign(socket, assigns)}
   end
@@ -205,11 +209,11 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
                 editable={ReminderTimes.editable?(rt[:id].value, rt[:reminder_time].value)}
                 active_period_end={@active_period_end}
                 current_time={@current_time}
-                effect_end={@effect_end}
                 field={rt[:reminder_time]}
                 id={rt[:id].value}
                 index={rt.index}
                 notification_start={@notification_start}
+                notification_end={@notification_end}
               />
             </div>
           </.inputs_for>
@@ -235,8 +239,8 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
   attr :editable, :any, default: true
   attr :active_period_end, DateTime
   attr :notification_start, DateTime
+  attr :notification_end, DateTime
   attr :current_time, DateTime
-  attr :effect_end, DateTime
 
   def reminder_input(assigns) do
     ~H"""
@@ -261,7 +265,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
     <.datetime
       label="Reminder date and time"
       min={@notification_start |> naive_datetime_to_iso8601()}
-      max={@effect_end |> naive_datetime_to_iso8601()}
+      max={@notification_end |> naive_datetime_to_iso8601()}
       field={@field}
       value={@field.value}
       disabled={!@editable}
