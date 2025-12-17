@@ -201,19 +201,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeGetters do
     # At this stage, we see string dates in the following formats:
     # 2025-12-13T03:00
     # 2025-12-13T03:00:00
-    # s # an invalid entry
-    case NaiveDateTime.from_iso8601(datetime <> ":00") do
-      {:ok, start_datetime} ->
-        start_datetime
-
-      {:error, _} ->
-        {validity, start_datetime} = NaiveDateTime.from_iso8601(datetime)
-
-        if validity == :ok do
-          start_datetime
-        else
-          nil
-        end
+    # s (an invalid entry)
+    case NaiveDateTime.from_iso8601(datetime <> ":00:00" |> String.slice(0..18)) do
+      {:ok, start_datetime} -> start_datetime
+      {:error, _} -> nil
     end
   end
 end
