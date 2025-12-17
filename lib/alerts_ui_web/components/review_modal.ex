@@ -7,7 +7,7 @@ defmodule AlertsUIWeb.ReviewModal do
 
   import AlertsUIWeb.CoreComponents
   import AlertsUIWeb.SharedComponents
-  import PhoenixHTMLHelpers.Format, only: [text_to_html: 1, text_to_html: 2]
+  import PhoenixHTMLHelpers.Format, only: [text_to_html: 2]
 
   alias AlertsUI.ActiveStatus
   alias AlertsUI.Helpers.ReminderTimes
@@ -163,7 +163,9 @@ defmodule AlertsUIWeb.ReviewModal do
             <span class="block pb-4">
               <p class="font-bold">Supporting information</p>
               <%= if @alert_data.description_text do %>
-                {text_to_html(@alert_data.description_text)}
+                {text_to_html(@alert_data.description_text,
+                  attributes: [class: "pb-4 last-of-type:pb-0"]
+                )}
               <% else %>
                 <p class="italic">None</p>
               <% end %>
