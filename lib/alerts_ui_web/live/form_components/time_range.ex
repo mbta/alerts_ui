@@ -76,7 +76,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       recurrence_days: [],
       active_period_end:
         ActivePeriod.end_of_service_datetime_naive(current_time)
-        |> DateTimeHelpers.naive_datetime_to_iso8601,
+        |> DateTimeHelpers.naive_datetime_to_iso8601(),
       active_period_end_time: ActivePeriod.end_of_service_time(),
       active_period_end_date:
         current_time
@@ -376,13 +376,13 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
           start_date =
             start_datetime_string
-            |> TimeRangeGetters.string_to_datetime_helper
-            |> TimeRangeGetters.get_onetime_start_date
+            |> TimeRangeGetters.string_to_datetime_helper()
+            |> TimeRangeGetters.get_onetime_start_date()
 
           end_date =
             end_datetime_string
-            |> TimeRangeGetters.string_to_datetime_helper
-            |> TimeRangeGetters.get_onetime_end_date
+            |> TimeRangeGetters.string_to_datetime_helper()
+            |> TimeRangeGetters.get_onetime_end_date()
 
           Map.merge(time_range, %{
             "active_period_start" => start_datetime_string,
