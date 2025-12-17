@@ -112,4 +112,21 @@ defmodule AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers do
 
   def time_is_in_future?(time, current_time),
     do: NaiveDateTime.compare(current_time, time) in [:lt]
+
+  def naive_datetime_to_iso8601(%NaiveDateTime{} = datetime),
+    do:
+      datetime
+      |> NaiveDateTime.truncate(:second)
+      |> NaiveDateTime.to_iso8601()
+      |> String.slice(0..-4//1)
+
+  def naive_datetime_to_iso8601(_), do: ""
+
+  def time_to_iso8601(%Time{} = time) do
+    time
+    |> Time.to_iso8601()
+    |> String.slice(0..-4//1)
+  end
+
+  def time_to_iso8601(_), do: ""
 end
