@@ -241,7 +241,7 @@ defmodule AlertsUIWeb.ReviewModal do
                   "height"
                 ]})
               </span>
-              <p class="text-text-secondary">
+              <p class="text-text-secondary break-normal">
                 Alt text: {@alert_data.image_alternative_text || "No alternative text provided"}
               </p>
             </div>

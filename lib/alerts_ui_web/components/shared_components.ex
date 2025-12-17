@@ -1110,7 +1110,7 @@ defmodule AlertsUIWeb.SharedComponents do
         {@rest}
       >
         <.text_input
-          class="min-w-full py-[.6rem] mb-0 border-0 ring-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-b-none"
+          class="grow py-[.6rem] mb-0 border-0 ring-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-b-none"
           icon="hero-magnifying-glass-mini"
           field={@filter_field}
           placeholder={if @disabled, do: nil, else: "Search..."}
@@ -1203,30 +1203,32 @@ defmodule AlertsUIWeb.SharedComponents do
       |> assign_new(:value, fn -> field.value end)
 
     ~H"""
-    <div phx-feedback-for={@name} class="relative flex flex-row items-center">
+    <div phx-feedback-for={@name} class="relative flex flex-col">
       <.label :if={not is_nil(@label)} for={@id}>{@label}</.label>
-      <AlertsUIWeb.CoreComponents.icon
-        :if={@icon && !@disabled}
-        name={@icon}
-        class="absolute ms-3 w-4 h-4 text-text-disabled"
-      />
-      <input
-        type="text"
-        id={@id}
-        name={@name}
-        value={@value}
-        class={[
-          "bg-bg-input-default border border-bg-elevation-6 pl-2
-            rounded text-text-primary disabled:text-text-secondary
-            disabled:bg-bg-elevation-3 ring-0  focus:ring-0 ring-border-focus
-            focus:border-border-focus",
-          @icon && "ps-8",
-          @class,
-          @errors != [] && "border-danger focus:border-danger"
-        ]}
-        disabled={@disabled}
-        {@rest}
-      />
+      <div class="flex flex-row items-center">
+        <AlertsUIWeb.CoreComponents.icon
+          :if={@icon && !@disabled}
+          name={@icon}
+          class="shrink-0 w-4 h-4 text-text-disabled ml-2 mr-1"
+        />
+        <input
+          type="text"
+          id={@id}
+          name={@name}
+          value={@value}
+          class={[
+            "bg-bg-input-default border border-bg-elevation-6 pl-1
+              rounded text-text-primary disabled:text-text-secondary
+              disabled:bg-bg-elevation-3 ring-0  focus:ring-0 ring-border-focus
+              focus:border-border-focus",
+            @icon && "ps-8",
+            @class,
+            @errors != [] && "border-danger focus:border-danger"
+          ]}
+          disabled={@disabled}
+          {@rest}
+        />
+      </div>
       <.input_error :for={msg <- @errors}>{msg}</.input_error>
     </div>
     """
@@ -1491,7 +1493,7 @@ defmodule AlertsUIWeb.SharedComponents do
           disabled={@disabled}
           value={Form.normalize_value("datetime-local", @value)}
           class={[
-            "bg-bg-elevation-5 border border-border-primary px-3 py-1.5 p-0
+            "bg-bg-elevation-5 border border-border-primary px-3 py-1.5 p-0 min-w-full
               rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto
               disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
               focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) appearance-auto dark:text-white dark:[color-scheme:dark]",

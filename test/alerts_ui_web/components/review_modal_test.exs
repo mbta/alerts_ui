@@ -7,7 +7,6 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
 
   import AlertsUI.Support.Factory
   import AlertsUI.UsersFixtures
-  import LiveIsolatedComponent
   import Mock
   import Phoenix.Component
   import Phoenix.LiveViewTest
@@ -26,7 +25,6 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
   alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
-  alias Phoenix.LiveView.AsyncResult
 
   @tomorrow_datetime DateTime.utc_now()
                      |> DateTime.shift_zone!("America/New_York")
