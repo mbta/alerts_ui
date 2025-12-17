@@ -443,10 +443,6 @@ defmodule AlertsUIWeb.ReviewModal do
 
   defp safe_datetime_compare(_, _), do: nil
 
-  defp naive_now do
-    DateTime.utc_now() |> DateTime.shift_zone!("America/New_York") |> DateTime.to_naive()
-  end
-
   defp join_present(list, separator) when is_list(list) do
     list
     |> Enum.filter(&(&1 != nil && String.trim(&1) != ""))
@@ -469,8 +465,7 @@ defmodule AlertsUIWeb.ReviewModal do
       safe_datetime_compare(
         assigns.alert_data.active_period_start,
         assigns.alert_data.active_period_end
-      ) == :gt and
-        safe_datetime_compare(naive_now(), assigns.alert_data.active_period_end) == :gt
+      ) == :gt
 
     assigns = assign(assigns, :closed_before_start?, closed_before_start?)
 
