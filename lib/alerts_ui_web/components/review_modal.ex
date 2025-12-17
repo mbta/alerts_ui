@@ -282,7 +282,10 @@ defmodule AlertsUIWeb.ReviewModal do
             <% else %>
               <p class="pb-1">
                 {TimeRangeDurationText.get_start_text(@alert_data.notification_period_start) <>
-                TimeRangeDurationText.notification_period_end_text(end_is_in_past?(assigns.alert_data.notification_period_end))}
+                  TimeRangeDurationText.notification_period_end_text(
+                    end_is_in_past?(assigns.alert_data.notification_period_end),
+                    assigns.alert_data.notification_period_end
+                  )}
               </p>
             <% end %>
 
@@ -441,12 +444,11 @@ defmodule AlertsUIWeb.ReviewModal do
 
   defp safe_datetime_compare(_, _), do: nil
 
-  defp naive_now do
-    DateTime.utc_now() |> DateTime.shift_zone!("America/New_York") |> DateTime.to_naive()
-  end
-
   defp end_is_in_past?(end_datetime) do
-    safe_datetime_compare(naive_now(), end_datetime) == :gt
+    naive_now =
+      DateTime.utc_now() |> DateTime.shift_zone!("America/New_York") |> DateTime.to_naive()
+
+    safe_datetime_compare(naive_now, end_datetime) == :gt
   end
 
   defp join_present(list, separator) when is_list(list) do
@@ -472,7 +474,6 @@ defmodule AlertsUIWeb.ReviewModal do
         assigns.alert_data.active_period_start,
         assigns.alert_data.active_period_end
       ) == :gt
-
 
     assigns = assign(assigns, :closed_before_start?, closed_before_start?)
 
