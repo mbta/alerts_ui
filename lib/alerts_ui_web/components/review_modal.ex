@@ -281,10 +281,8 @@ defmodule AlertsUIWeb.ReviewModal do
               <p class="pb-1">Same as effect period</p>
             <% else %>
               <p class="pb-1">
-                {TimeRangeDurationText.get_start_text(
-                  @alert_data.notification_specifier,
-                  @alert_data.notification_period_start
-                ) <> " until alert is closed"}
+                {TimeRangeDurationText.get_start_text(@alert_data.notification_period_start) <>
+                  " until alert is closed"}
               </p>
             <% end %>
 
