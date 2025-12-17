@@ -388,7 +388,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   def lookup_end_time_order_fields_by_params("past"),
     do: [
-      :active_period_end,
+      :notification_period_en,
       :active_period_start,
       # As a final deterministic deciding factor, just in case.
       :integer_alert_id
