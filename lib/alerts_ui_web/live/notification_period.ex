@@ -149,7 +149,6 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
 
     # we need to revalidate here so we can apply/clear new errors
     # based on validating against new timerange information
-
     changeset =
       changeset(%__MODULE__{}, socket.assigns.form.params)
       |> TimeRangeValidators.validate_notification(

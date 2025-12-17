@@ -281,11 +281,18 @@ defmodule AlertsUIWeb.ReviewModal do
               <p class="pb-1">Same as effect period</p>
             <% else %>
               <p class="pb-1">
-                {TimeRangeDurationText.get_start_text(@alert_data.notification_period_start) <>
-                  TimeRangeDurationText.notification_period_end_text(
-                    end_is_in_past?(assigns.alert_data.notification_period_end),
-                    assigns.alert_data.notification_period_end
-                  )}
+                {notification_period_end =
+                  Map.get(@alert_data, :notification_period_end) || @alert_data.active_period_end
+
+                start_text =
+                  TimeRangeDurationText.get_start_text(@alert_data.notification_period_start)
+
+                end_text =
+                  notification_period_end
+                  |> end_is_in_past?()
+                  |> TimeRangeDurationText.notification_period_end_text(notification_period_end)
+
+                start_text <> " until " <> end_text}
               </p>
             <% end %>
 

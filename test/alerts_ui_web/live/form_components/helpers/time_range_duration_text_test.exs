@@ -82,4 +82,18 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationTextTest do
       assert expected == actual
     end
   end
+
+  describe "notification_period_end_text/2" do
+    test "if end is in past" do
+      expected = "Wed Nov 27, 2024 @ 9:00 AM"
+      actual = TimeRangeDurationText.notification_period_end_text(true, ~N[2024-11-27 09:00:00])
+      assert expected == actual
+    end
+
+    test "if end is not in past" do
+      expected = "alert is closed"
+      actual = TimeRangeDurationText.notification_period_end_text(false, ~N[2024-11-27 09:00:00])
+      assert expected == actual
+    end
+  end
 end
