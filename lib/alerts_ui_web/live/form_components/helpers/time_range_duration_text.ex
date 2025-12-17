@@ -49,6 +49,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationText do
     Calendar.strftime(start_dt, "%a %b %-d, %Y @ %-I:%M %p")
   end
 
+  def notification_period_end_text(true = _end_in_past?, notification_period_end), do: end_text(nil, notification_period_end)
+  def notification_period_end_text(false = _end_in_past?, _), do: " until alert is closed"
+
   defp end_text(:until_further_notice, end_dt), do: end_text("until_further_notice", end_dt)
 
   defp end_text("until_further_notice", _end_dt) do
