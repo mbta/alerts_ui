@@ -526,8 +526,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
          ]},
         {StopsRepo, [],
          [
-           by_route_type: fn _route_type -> [@stop] end,
-           by_route: fn _, _ -> [@stop] end,
+           by_route_type: fn _route_type -> [@stop, @stop_two] end,
+           by_route: fn _, _ -> [@stop, @stop_two] end,
            get: fn _id -> @stop end,
            get_parent: fn _id -> nil end
          ]},
@@ -566,6 +566,14 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         assert view |> render_async() =~ ~s(<option selected="selected" value="Blue">)
         assert view |> render_async() =~ ~s(<option selected="selected" value="Bluer">)
 
+        # Simulate separately selecting a second stop
+        view
+        |> element("#service_form")
+        |> render_change(%{
+          _target: ["stop_route_affected_service", "stop_ids"],
+          stop_route_affected_service: %{stop_ids: ["place-aqucl", "place-pktrm"]}
+        })
+
         view
         |> element("#details_form")
         |> render_change(%{
@@ -575,6 +583,9 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         view
         |> element("button#review", "Review and submit")
         |> render_click()
+
+        assert view |> element("#affected_service_selections") |> render_async() =~
+                 ~s(<p>Stops:</p><p>Aquarium, Park Street</p>)
 
         view
         |> element("#review-modal-container button", "Submit")
@@ -590,7 +601,12 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
 
         new_alert = AlertsUI.Alerts.get_by_alert_id(alert_id)
 
-        assert [%{route_id: "Blue", route_type: 3}, %{route_id: "Bluer", route_type: 3}] =
+        assert [
+                 %{route_id: "Blue", route_type: 3, stop_id: "place-aqucl"},
+                 %{route_id: "Bluer", route_type: 3, stop_id: "place-aqucl"},
+                 %{route_id: "Blue", route_type: 3, stop_id: "place-pktrm"},
+                 %{route_id: "Bluer", route_type: 3, stop_id: "place-pktrm"}
+               ] =
                  Map.get(new_alert, :informed_entity)
 
         {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=#{alert_id}")
@@ -614,7 +630,12 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         :timer.sleep(50)
         edited_alert = AlertsUI.Alerts.get_by_alert_id(alert_id)
 
-        assert [%{route_id: "Blue", route_type: 3}, %{route_id: "Bluer", route_type: 3}] =
+        assert [
+                 %{route_id: "Blue", route_type: 3, stop_id: "place-aqucl"},
+                 %{route_id: "Bluer", route_type: 3, stop_id: "place-aqucl"},
+                 %{route_id: "Blue", route_type: 3, stop_id: "place-pktrm"},
+                 %{route_id: "Bluer", route_type: 3, stop_id: "place-pktrm"}
+               ] =
                  Map.get(edited_alert, :informed_entity)
       end
     end
