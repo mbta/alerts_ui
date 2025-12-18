@@ -4,8 +4,8 @@ defmodule AlertsUI.Repo.Migrations.CycleImporterView1217 do
   alias AlertsUI.Models.LatestIBIAlert
 
   def up do
-    execute(LatestIBIAlert.drop_view_sql()) 
-    execute(LatestIBIAlert.create_view_sql()) 
+    execute(LatestIBIAlert.drop_view_sql())
+    execute(LatestIBIAlert.create_view_sql())
   end
 
   def down, do: nil

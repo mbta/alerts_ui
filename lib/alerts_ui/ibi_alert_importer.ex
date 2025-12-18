@@ -543,14 +543,17 @@ defmodule AlertsUI.IBIAlertImporter do
 
   def from_ibi(ibi_alert, :combination) do
     cond do
-      ibi_alert.informed_route_list && ibi_alert.informed_direction_list && ibi_alert.informed_trip_list &&
+      ibi_alert.informed_route_list && ibi_alert.informed_direction_list &&
+        ibi_alert.informed_trip_list &&
           ibi_alert.informed_stop_list ->
         :RDTS
 
-      ibi_alert.informed_route_list && ibi_alert.informed_direction_list && ibi_alert.informed_trip_list ->
+      ibi_alert.informed_route_list && ibi_alert.informed_direction_list &&
+          ibi_alert.informed_trip_list ->
         :RDT
 
-      ibi_alert.informed_route_list && ibi_alert.informed_direction_list && ibi_alert.informed_stop_list ->
+      ibi_alert.informed_route_list && ibi_alert.informed_direction_list &&
+          ibi_alert.informed_stop_list ->
         :RDS
 
       ibi_alert.informed_route_list && ibi_alert.informed_stop_list ->
