@@ -6,6 +6,8 @@ defmodule AlertsUI.IBIAlertImporter do
   @moduledoc """
   Import alerts from the IBI CSV export.
   """
+  @dialyzer {:nowarn_function, convert_ibi_alerts: 1}
+
   require Logger
 
   import Ecto.Query
@@ -16,8 +18,10 @@ defmodule AlertsUI.IBIAlertImporter do
   alias AlertsUI.Models.Cause
   alias AlertsUI.Models.IBIAlert
   alias AlertsUI.Models.LatestIBIAlert
+  alias AlertsUI.Models.ReminderTime
   alias AlertsUI.Repo
   alias Ecto.Adapters.SQL
+  alias Ecto.Changeset
   alias Ecto.Multi
 
   @default_chunk_size 1000
@@ -86,110 +90,43 @@ defmodule AlertsUI.IBIAlertImporter do
     Repo.transact(
       fn ->
         # fix DST-adjacent timestamps
-        Repo.update_all(
-          from(i in IBIAlert, where: like(i.notif_start, "11/5/2017 1:05%")),
-          set: [notif_start: "11/5/2017 2:05:00 AM", effect_start: "11/5/2017 2:05:00 AM"]
-        )
+        fields = [
+          "created_dt",
+          "last_modified_dt",
+          "notif_start",
+          "notif_end",
+          "effect_start",
+          "effect_end"
+        ]
 
-        Repo.update_all(
-          from(i in IBIAlert, where: like(i.notif_start, "11/2/2025 1:11%")),
-          set: [notif_start: "11/2/2025 2:11:00 AM", effect_start: "11/2/2025 2:11:00 AM"]
-        )
+        ambiguous_windows = [
+          "3/9/2014 2%AM",
+          "3/8/2015 2%AM",
+          "3/13/2016 2%AM",
+          "3/12/2017 2%AM",
+          "3/11/2018 2%AM",
+          "3/10/2019 2%AM",
+          "3/8/2020 2%AM",
+          "3/14/2021 2%AM",
+          "3/13/2022 2%AM",
+          "3/12/2023 2%AM",
+          "3/10/2024 2%AM",
+          "3/9/2025 2%AM",
+          "11/2/2014 1%AM",
+          "11/1/2015 1%AM",
+          "11/6/2016 1%AM",
+          "11/5/2017 1%AM",
+          "11/1/2020 1%AM",
+          "11/7/2021 1%AM",
+          "11/6/2022 1%AM",
+          "11/5/2023 1%AM",
+          "11/3/2024 1%AM",
+          "11/2/2025 1%AM"
+        ]
 
-        Repo.update_all(
-          from(i in IBIAlert, where: like(i.notif_end, "3/9/2014 2:30%")),
-          set: [notif_end: "3/9/2014 3:30:00 AM", effect_end: "3/9/2014 3:30:00 AM"]
-        )
-
-        Repo.update_all(
-          from(i in IBIAlert, where: like(i.notif_end, "3/8/2015 2:30%")),
-          set: [notif_end: "3/8/2015 3:30:00 AM", effect_end: "3/8/2015 3:30:00 AM"]
-        )
-
-        Repo.update_all(
-          from(i in IBIAlert, where: like(i.notif_end, "11/1/2015 1:39%")),
-          set: [notif_end: "11/1/2015 2:39:00 AM", effect_end: "11/1/2015 2:39:00 AM"]
-        )
-
-        Repo.update_all(
-          from(i in IBIAlert, where: like(i.notif_end, "3/13/2016 2:30%")),
-          set: [notif_end: "3/13/2016 3:30:00 AM", effect_end: "3/13/2016 3:30:00 AM"]
-        )
-
-        Repo.update_all(
-          from(i in IBIAlert, where: like(i.notif_end, "3/11/2018 2:30%")),
-          set: [notif_end: "3/11/2018 3:30:00 AM", effect_end: "3/11/2018 3:30:00 AM"]
-        )
-
-        Repo.update_all(
-          from(i in IBIAlert, where: like(i.notif_end, "3/10/2019 2:30%")),
-          set: [notif_end: "3/10/2019 3:30:00 AM", effect_end: "3/10/2019 3:30:00 AM"]
-        )
-
-        Repo.update_all(
-          from(i in IBIAlert, where: like(i.notif_end, "3/8/2020 2:30%")),
-          set: [notif_end: "3/8/2020 3:30:00 AM", effect_end: "3/8/2020 3:30:00 AM"]
-        )
-
-        Repo.update_all(
-          from(i in IBIAlert, where: like(i.notif_end, "3/14/2021 2:30%")),
-          set: [notif_end: "3/14/2021 3:30:00 AM", effect_end: "3/14/2021 3:30:00 AM"]
-        )
-
-        Repo.update_all(
-          from(i in IBIAlert, where: like(i.notif_end, "3/13/2022 2:30%")),
-          set: [notif_end: "3/13/2022 3:30:00 AM", effect_end: "3/13/2022 3:30:00 AM"]
-        )
-
-        Repo.update_all(
-          from(i in IBIAlert, where: like(i.notif_end, "3/12/2023 2:30%")),
-          set: [notif_end: "3/12/2023 3:30:00 AM", effect_end: "3/12/2023 3:30:00 AM"]
-        )
-
-        Repo.update_all(
-          from(i in IBIAlert, where: like(i.notif_end, "3/10/2024 2:30%")),
-          set: [notif_end: "3/10/2024 3:30:00 AM", effect_end: "3/10/2024 3:30:00 AM"]
-        )
-
-        Repo.update_all(
-          from(i in IBIAlert, where: like(i.notif_end, "3/9/2025 2:59%")),
-          set: [notif_end: "3/9/2025 3:59:00 AM", effect_end: "3/9/2025 3:59:00 AM"]
-        )
-
-        Repo.update_all(
-          from(i in IBIAlert, where: like(i.notif_end, "11/2/2014 1:19%")),
-          set: [notif_end: "11/2/2014 2:19:00 AM", effect_end: "11/2/2014 2:19:00 AM"]
-        )
-
-        Repo.update_all(
-          from(i in IBIAlert, where: like(i.notif_end, "11/6/2022 1:40%")),
-          set: [notif_end: "11/6/2022 2:40:00 AM", effect_end: "11/6/2022 2:40:00 AM"]
-        )
-
-        Repo.update_all(
-          from(i in IBIAlert, where: like(i.notif_end, "11/7/2021 1:07%")),
-          set: [notif_end: "11/7/2021 2:07:00 AM", effect_end: "11/7/2021 2:07:00 AM"]
-        )
-
-        Repo.update_all(
-          from(i in IBIAlert, where: like(i.notif_end, "11/3/2024 1:07%")),
-          set: [notif_end: "11/3/2024 2:07:00 AM", effect_end: "11/3/2024 2:07:00 AM"]
-        )
-
-        Repo.update_all(
-          from(i in IBIAlert, where: like(i.notif_end, "11/3/2024 1:07%")),
-          set: [notif_end: "11/3/2024 2:07:00 AM", effect_end: "11/3/2024 2:07:00 AM"]
-        )
-
-        Repo.update_all(
-          from(i in IBIAlert, where: like(i.notif_end, "11/1/2020 1:15%")),
-          set: [notif_end: "11/1/2020 2:15:00 AM", effect_end: "11/1/2020 2:15:00 AM"]
-        )
-
-        Repo.update_all(
-          from(i in IBIAlert, where: like(i.notif_end, "3/12/2017 2:30%")),
-          set: [notif_end: "3/12/2017 3:30:00 AM", effect_end: "3/12/2017 3:30:00 AM"]
-        )
+        for field <- fields, window <- ambiguous_windows do
+          SQL.query!(Repo, bump_timestamp_sql(field, window))
+        end
 
         # years set to 8888/9999/10000
         SQL.query!(
@@ -247,6 +184,14 @@ defmodule AlertsUI.IBIAlertImporter do
     )
   end
 
+  def bump_timestamp_sql(field, pattern) do
+    """
+    update ibi_alerts
+      set #{field} = to_char(#{field}::timestamp + interval '1 hour', 'FMMM/FMDD/YYYY FMHH:MI:SS PM')
+      where #{field} like '#{pattern}';
+    """
+  end
+
   @doc """
   Convert the now-imported IBI alerts to Alerts Manager alerts. Note that you'll
   want to perform any fixes to the underlying data (malformed timestamps, I'm looking
@@ -268,11 +213,11 @@ defmodule AlertsUI.IBIAlertImporter do
   @spec convert_ibi_alerts(keyword()) :: {:ok, true}
   def convert_ibi_alerts(options \\ []) do
     query =
-      if Keyword.get(options, :import_open_alerts) do
-        LatestIBIAlert
-      else
-        from i in LatestIBIAlert, where: i.is_closed == "True"
-      end
+      Keyword.get(
+        options,
+        :query,
+        from(i in LatestIBIAlert, where: i.is_closed == "True")
+      )
 
     Repo.transact(
       fn ->
@@ -317,6 +262,15 @@ defmodule AlertsUI.IBIAlertImporter do
               )
               |> PaperTrail.update!(origin: update.last_modified_by)
             end)
+
+            # add deduplicated reminders
+            all_versions_index
+            |> Map.get(alert.alert_id)
+            |> Enum.map(fn ibi_alert -> extract_reminders(ibi_alert, alert) end)
+            |> List.flatten()
+            |> Enum.uniq()
+            |> Enum.map(fn params -> Changeset.cast(%ReminderTime{}, params, Map.keys(params)) end)
+            |> Enum.each(fn changeset -> Repo.insert!(changeset) end)
           end)
         end)
         |> Stream.run()
@@ -352,7 +306,6 @@ defmodule AlertsUI.IBIAlertImporter do
       :facility_id,
       :direction,
       :service_types,
-      :reminder_times,
       :alert_timing,
       :active_period_start,
       :active_period_end,
@@ -467,22 +420,6 @@ defmodule AlertsUI.IBIAlertImporter do
 
   def from_ibi(ibi_alert, :service_types), do: [from_ibi(ibi_alert, :route_type)]
 
-  def from_ibi(ibi_alert, :reminder_times) do
-    if ibi_alert.reminders do
-      ibi_alert.reminders
-      |> String.replace("send bulletin", "")
-      |> String.replace("send tweet", "")
-      |> String.replace("and tweet", "")
-      |> String.replace(~r/\s/, "")
-      |> String.split(";")
-      |> Enum.map(fn timestamp ->
-        %{id: nil, time: ndt_from_ibi_reminder_format(timestamp)}
-      end)
-    else
-      []
-    end
-  end
-
   def from_ibi(ibi_alert, :alert_timing) do
     case ibi_alert.alert_time_type do
       "Recurring" -> :recurring
@@ -495,17 +432,17 @@ defmodule AlertsUI.IBIAlertImporter do
     # lack `effect_start` have `notif_start`)
     case from_ibi(ibi_alert, :alert_timing) do
       :one_time ->
-        ndt_from_ibi_string(ibi_alert.effect_start || ibi_alert.notif_start)
+        utc_from_ibi_string(ibi_alert.effect_start || ibi_alert.notif_start)
 
       :recurring ->
         date =
           ibi_alert.recurrence_start
-          |> ndt_from_ibi_string()
+          |> utc_from_ibi_string()
           |> NaiveDateTime.to_date()
 
         time =
           (ibi_alert.recurrence_start_time || ibi_alert.recurrence_start)
-          |> ndt_from_ibi_string()
+          |> utc_from_ibi_string()
           |> NaiveDateTime.to_time()
 
         NaiveDateTime.new!(date, time)
@@ -515,17 +452,17 @@ defmodule AlertsUI.IBIAlertImporter do
   def from_ibi(ibi_alert, :active_period_end) do
     case from_ibi(ibi_alert, :alert_timing) do
       :one_time ->
-        ndt_from_ibi_string(ibi_alert.effect_end || ibi_alert.notif_end)
+        utc_from_ibi_string(ibi_alert.effect_end || ibi_alert.notif_end)
 
       :recurring ->
         date =
           ibi_alert.recurrence_end
-          |> ndt_from_ibi_string()
+          |> utc_from_ibi_string()
           |> NaiveDateTime.to_date()
 
         time =
           (ibi_alert.recurrence_end_time || ibi_alert.recurrence_end)
-          |> ndt_from_ibi_string()
+          |> utc_from_ibi_string()
           |> NaiveDateTime.to_time()
 
         NaiveDateTime.new!(date, time)
@@ -534,25 +471,25 @@ defmodule AlertsUI.IBIAlertImporter do
 
   def from_ibi(ibi_alert, :active_period_start_time) do
     if ibi_alert.recurrence_start_time do
-      ndt_from_ibi_string(ibi_alert.recurrence_start_time) |> NaiveDateTime.to_time()
+      utc_from_ibi_string(ibi_alert.recurrence_start_time) |> NaiveDateTime.to_time()
     end
   end
 
   def from_ibi(ibi_alert, :active_period_end_time) do
     if ibi_alert.recurrence_end_time do
-      ndt_from_ibi_string(ibi_alert.recurrence_end_time) |> NaiveDateTime.to_time()
+      utc_from_ibi_string(ibi_alert.recurrence_end_time) |> NaiveDateTime.to_time()
     end
   end
 
   def from_ibi(ibi_alert, :active_period_start_date) do
     if ibi_alert.recurrence_start do
-      ndt_from_ibi_string(ibi_alert.recurrence_start) |> NaiveDateTime.to_date()
+      utc_from_ibi_string(ibi_alert.recurrence_start) |> NaiveDateTime.to_date()
     end
   end
 
   def from_ibi(ibi_alert, :active_period_end_date) do
     if ibi_alert.recurrence_end do
-      ndt_from_ibi_string(ibi_alert.recurrence_end) |> NaiveDateTime.to_date()
+      utc_from_ibi_string(ibi_alert.recurrence_end) |> NaiveDateTime.to_date()
     end
   end
 
@@ -569,13 +506,13 @@ defmodule AlertsUI.IBIAlertImporter do
 
   def from_ibi(ibi_alert, :notification_period_start) do
     if ibi_alert.notif_start do
-      ndt_from_ibi_string(ibi_alert.notif_start)
+      utc_from_ibi_string(ibi_alert.notif_start)
     end
   end
 
   def from_ibi(ibi_alert, :notification_period_end) do
     if ibi_alert.notif_end do
-      ndt_from_ibi_string(ibi_alert.notif_end)
+      utc_from_ibi_string(ibi_alert.notif_end)
     end
   end
 
@@ -701,7 +638,7 @@ defmodule AlertsUI.IBIAlertImporter do
   end
 
   def from_ibi(ibi_alert, :created_timestamp) do
-    ndt_from_ibi_string(ibi_alert.created_dt)
+    utc_from_ibi_string(ibi_alert.created_dt)
   end
 
   def from_ibi(ibi_alert, :closed_timestamp) do
@@ -714,7 +651,7 @@ defmodule AlertsUI.IBIAlertImporter do
   end
 
   def from_ibi(ibi_alert, :last_modified_timestamp) do
-    ndt_from_ibi_string(ibi_alert.last_modified_dt)
+    utc_from_ibi_string(ibi_alert.last_modified_dt)
   end
 
   def from_ibi(ibi_alert, :image_url), do: ibi_alert.alert_image_url
@@ -732,21 +669,46 @@ defmodule AlertsUI.IBIAlertImporter do
     |> String.split(",")
   end
 
-  def ndt_from_ibi_string(nil), do: nil
+  def utc_from_ibi_string(nil), do: nil
 
-  def ndt_from_ibi_string(timestamp) do
+  def utc_from_ibi_string(timestamp) do
     if timestamp =~ ~r/\// do
       Timex.parse!(timestamp, "{M}/{D}/{YYYY} {h12}:{m}:{s} {AM}")
     else
-      Timex.parse!(timestamp, "{h24}:{m}:{s}")
+      time =
+        timestamp
+        |> Timex.parse!("{h24}:{m}:{s}")
+        |> NaiveDateTime.to_time()
+
+      NaiveDateTime.new!(Date.utc_today(), time)
     end
+    |> DateTime.from_naive!("America/New_York")
+    |> DateTime.shift_zone!("Etc/UTC")
   end
 
-  def ndt_from_ibi_reminder_format(timestamp) do
+  def utc_from_ibi_reminder_format(timestamp) do
     timestamp
     |> String.replace("T", " ")
     |> String.replace(~r/\:[0-9]*\.[0-9]*$/, "")
     |> Kernel.<>(":00")
     |> NaiveDateTime.from_iso8601!()
+    |> DateTime.from_naive!("America/New_York")
+    |> DateTime.shift_zone!("Etc/UTC")
+  end
+
+  def extract_reminders(ibi_alert, alert) do
+    if ibi_alert.reminders do
+      ibi_alert.reminders
+      |> String.replace("send bulletin", "")
+      |> String.replace("send tweet", "")
+      |> String.replace("and tweet", "")
+      |> String.replace(~r/\s/, "")
+      |> String.split(";")
+      |> Enum.map(fn timestamp ->
+        %{id: nil, alert_id: alert.id, reminder_time: utc_from_ibi_reminder_format(timestamp)}
+      end)
+    else
+      []
+    end
   end
 end
