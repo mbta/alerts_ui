@@ -401,22 +401,24 @@ defmodule AlertsUI.IBIAlertImporter do
   end
 
   def from_ibi(ibi_alert, :route_ids) do
-    split_combined_entities(ibi_alert.informed_route_list)
+    from_ibi(ibi_alert, :original_route_selections)
   end
 
   def from_ibi(ibi_alert, :stop_ids) do
-    split_combined_entities(ibi_alert.informed_stop_list)
+    from_ibi(ibi_alert, :original_stop_selections)
   end
 
   def from_ibi(ibi_alert, :trip_ids) do
-    split_combined_entities(ibi_alert.informed_trip_list)
+    from_ibi(ibi_alert, :original_trip_selections)
   end
 
   def from_ibi(ibi_alert, :direction) do
-    ibi_alert.informed_direction_list
+    from_ibi(ibi_alert, :original_direction_selections) |> Enum.at(0)
   end
 
-  def from_ibi(ibi_alert, :facility_id), do: ibi_alert.informed_facility_list
+  def from_ibi(ibi_alert, :facility_id) do
+    from_ibi(ibi_alert, :original_facility_selections) |> Enum.at(0)
+  end
 
   def from_ibi(ibi_alert, :service_types), do: [from_ibi(ibi_alert, :route_type)]
 
@@ -566,16 +568,24 @@ defmodule AlertsUI.IBIAlertImporter do
   end
 
   def from_ibi(ibi_alert, :original_direction_selections) do
-    Enum.filter([from_ibi(ibi_alert, :direction)], & &1)
+    split_combined_entities(ibi_alert.informed_direction_list)
   end
 
   def from_ibi(ibi_alert, :original_facility_selections) do
-    Enum.filter([from_ibi(ibi_alert, :facility_id)], & &1)
+    split_combined_entities(ibi_alert.informed_facility_list)
   end
 
-  def from_ibi(ibi_alert, :original_route_selections), do: from_ibi(ibi_alert, :route_ids)
-  def from_ibi(ibi_alert, :original_trip_selections), do: from_ibi(ibi_alert, :trip_ids)
-  def from_ibi(ibi_alert, :stop_names_and_ids), do: from_ibi(ibi_alert, :stop_ids)
+  def from_ibi(ibi_alert, :original_route_selections) do
+    split_combined_entities(ibi_alert.informed_route_list)
+  end
+
+  def from_ibi(ibi_alert, :original_trip_selections) do
+    split_combined_entities(ibi_alert.informed_trip_list)
+  end
+
+  def from_ibi(ibi_alert, :stop_names_and_ids) do
+    split_combined_entities(ibi_alert.informed_stop_list)
+  end
 
   def from_ibi(ibi_alert, :cause) do
     case from_ibi(ibi_alert, :route_type)
