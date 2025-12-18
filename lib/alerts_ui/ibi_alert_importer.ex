@@ -662,11 +662,16 @@ defmodule AlertsUI.IBIAlertImporter do
 
   defp split_combined_entities(nil), do: []
 
-  defp split_combined_entities(combined_ids) do
-    combined_ids
+  defp split_combined_entities(combined_entities) do
+    combined_entities
     |> String.replace("_", "")
-    |> String.replace(~r/\s/, "")
     |> String.split(";")
+    |> Enum.map(fn combined ->
+      combined
+      |> String.split("|")
+      |> Enum.reverse()
+      |> Enum.join("|")
+    end)
   end
 
   def utc_from_ibi_string(nil), do: nil
