@@ -237,10 +237,11 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
           Map.get(socket.assigns.available_schedules, :result)
 
         selected_schedules =
-          get_selected_schedules(available_schedules, affected_service["trip_ids"])
+          get_selected_schedules(available_schedules, changeset.trip_ids)
 
         available_stops = Map.get(socket.assigns.available_stops, :result)
         selected_stops = get_selected_stops(available_stops, affected_service["stop_names"])
+
         send(self(), {:add_errors, [], __MODULE__})
         send(self(), {:section_completed, changeset})
         send(self(), {:selected_routes, selected_routes})

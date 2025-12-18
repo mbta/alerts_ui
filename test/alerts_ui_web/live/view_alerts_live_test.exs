@@ -1195,9 +1195,16 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
     end
 
     test "known end where end is not end of service" do
-      with_mock(DateTime, [:passthrough], utc_now: fn -> ~U[2025-06-29 17:50:14.844524Z] end) do
+      %{year: this_year} = DateTime.now!("America/New_York")
+      date = ~U[2025-06-29 17:50:14.844524Z] |> Map.put(:year, this_year)
+
+      with_mock(DateTime, [:passthrough], utc_now: fn -> date end) do
         end_time_utc =
-          DateTime.new!(~D[2025-06-30], ~T[02:00:00], "America/New_York")
+          DateTime.new!(
+            ~D[2025-06-30] |> Map.put(:year, this_year),
+            ~T[02:00:00],
+            "America/New_York"
+          )
           |> DateTime.shift_zone!("Etc/UTC")
 
         alert =
@@ -1210,7 +1217,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
             duration_certainty: :KNOWN
           })
 
-        expected = "Jun 29, 2025"
+        expected = "Jun 29"
 
         actual =
           AlertsUIWeb.ViewAlertsLive.format_end_time(
@@ -1220,7 +1227,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
         assert expected == actual
 
-        expected_timestamp = "Jun 30, 2025, 2:00 AM"
+        expected_timestamp = "Jun 30, #{this_year}, 2:00 AM"
 
         actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_end)
 
