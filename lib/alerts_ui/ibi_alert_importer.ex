@@ -405,7 +405,7 @@ defmodule AlertsUI.IBIAlertImporter do
   end
 
   def from_ibi(ibi_alert, :stop_ids) do
-    from_ibi(ibi_alert, :original_stop_selections)
+    from_ibi(ibi_alert, :stop_names_and_ids)
   end
 
   def from_ibi(ibi_alert, :trip_ids) do
