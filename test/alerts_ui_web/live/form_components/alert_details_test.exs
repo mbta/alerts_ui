@@ -506,7 +506,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         |> element("#service_form")
         |> render_change(%{
           "affected_service" => %{
-            "modal_date" => nil
+            "modal_date" => nil,
+            "direction" => "0"
           }
         })
 
