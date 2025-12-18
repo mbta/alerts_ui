@@ -211,47 +211,66 @@ defmodule AlertsUI.AlertBuilder do
     # selected from the form, so we create them here before combo routes are
     # added to our list of routes
 
+    user_selected_directions =
+      [
+        direction_name(selected_routes, pre_combo_routes(selected_routes), direction_id) <>
+          "|" <> (direction_id || "")
+      ]
+
     original_direction_selections =
-      Map.get(alert_data, :original_direction_selections) ||
-        [
-          direction_name(selected_routes, pre_combo_routes(selected_routes), direction_id) <>
-            "|" <> (direction_id || "")
-        ]
+      if user_selected_directions in [[], nil] do
+        Map.get(alert_data, :original_direction_selections)
+      else
+        user_selected_directions
+      end
+
+    user_selected_routes =
+      selected_routes
+      |> Enum.map(fn route_id ->
+        matching_route = get_matching_route(route_id, pre_combo_routes(selected_routes))
+        "#{SelectFormatter.name_for_option(matching_route)}|#{route_id}"
+      end)
 
     original_route_selections =
-      Map.get(alert_data, :original_route_selections) ||
-        selected_routes
-        |> Enum.map(fn route_id ->
-          matching_route = get_matching_route(route_id, pre_combo_routes(selected_routes))
-          "#{SelectFormatter.name_for_option(matching_route)}|#{route_id}"
-        end)
+      get_original_selection(
+        user_selected_routes,
+        Map.get(alert_data, :original_route_selections)
+      )
 
     original_stop_selections = Map.get(alert_data, :stop_names_and_ids, [])
 
-    trip_selections_from_trip_info =
+    user_selected_trips =
       (Map.get(alert_data, :trip_information_by_id, %{}) || %{})
       |> Enum.map(fn {id, trip} ->
         "#{Map.get(trip, :trip_name, "")}|#{id}"
       end)
 
     original_trip_selections =
-      if trip_selections_from_trip_info in [[], nil] do
+      get_original_selection(
+        user_selected_trips,
         Map.get(alert_data, :original_trip_selections, [])
-      else
-        trip_selections_from_trip_info
+      )
+
+    user_selected_facilities =
+      case Map.get(alert_data, :facility_id) do
+        nil ->
+          []
+
+        facility_id ->
+          [facility_id]
+          |> Enum.map(&FacilitiesRepo.get/1)
+          |> Enum.map(fn
+            nil -> nil
+            facility -> "#{SelectFormatter.name_for_option(facility)}|#{facility.id}"
+          end)
+          |> Enum.reject(&is_nil/1)
       end
 
     original_facility_selections =
-      Map.get(alert_data, :original_facility_selections) ||
-        case Map.get(alert_data, :facility_id) do
-          nil ->
-            []
-
-          facility_id ->
-            [facility_id]
-            |> Enum.map(&FacilitiesRepo.get/1)
-            |> Enum.map(&"#{SelectFormatter.name_for_option(&1)}|#{&1.id}")
-        end
+      get_original_selection(
+        user_selected_facilities,
+        Map.get(alert_data, :original_facility_selections, [])
+      )
 
     %{
       original_direction_selections: original_direction_selections,
@@ -261,6 +280,9 @@ defmodule AlertsUI.AlertBuilder do
       original_facility_selections: original_facility_selections
     }
   end
+
+  defp get_original_selection([], original_selection), do: original_selection
+  defp get_original_selection(user_selected, _), do: user_selected
 
   defp active_periods(alert_data, current_time, options) do
     if Keyword.get(options, :no_active_periods) do

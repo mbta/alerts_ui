@@ -127,6 +127,60 @@ defmodule AlertsUI.AlertBuilderTest do
       end
     end
 
+    test "builds alert from map when editing" do
+      with_mocks([
+        {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
+        {RoutesRepo, [],
+         [get: fn route_id, _opts -> %Route{id: route_id, type: 1, name: route_id} end]}
+      ]) do
+        alert_data = %{
+          route_type: 1,
+          description_text: "ok",
+          header_text: "hello",
+          banner_text: "important banner text",
+          service_effect_text: nil,
+          effect_name: "Delay",
+          route_ids: ["57"],
+          original_route_selections: ["old bus route|27"],
+          original_stop_selections: ["old stop|place-0"],
+          stop_names_and_ids: ["new stop|place-1"],
+          trip_information_by_id: %{
+            "trip-1": %Trip{id: "trip-1", name: "new trip", direction_id: 1}
+          },
+          trip_ids: ["trip-1"],
+          original_trip_selections: ["old trip|trip-0"],
+          direction: "1",
+          original_direction_selections: ["northbound|0"],
+          active_period_start: ~N[2024-04-30 11:54:00],
+          alert_timing: :"one-time",
+          active_period_end_specifier: :until_further_notice,
+          active_period_start_specifier: :custom,
+          cause_detail: "DISABLED_TRAIN",
+          url: "http://www.example.com",
+          image_url: "http://www.example.com/example.jpg",
+          image_alternative_text: "an example image",
+          last_push_notification_timestamp: ~N[2024-04-30 11:54:00],
+          notification_period_start: ~N[2024-04-30 05:52:00],
+          notification_specifier: :now,
+          severity: 3,
+          reminder_times: [
+            %{id: "1234", time: ~N[2024-04-30 12:04:00]},
+            %{id: "1235", time: ~N[2024-04-30 12:14:00]},
+            %{id: "1236", time: ~N[2024-04-30 12:24:00]}
+          ]
+        }
+
+        result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 05:54:00Z])
+
+        assert %{
+                 original_route_selections: ["57|57"],
+                 original_stop_selections: ["new stop|place-1"],
+                 original_trip_selections: ["|trip-1"],
+                 original_facility_selections: []
+               } = result
+      end
+    end
+
     test "notification period end is same as alert end if specifier is custom" do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
