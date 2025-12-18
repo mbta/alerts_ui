@@ -575,6 +575,7 @@ defmodule AlertsUI.IBIAlertImporter do
 
   def from_ibi(ibi_alert, :original_route_selections), do: from_ibi(ibi_alert, :route_ids)
   def from_ibi(ibi_alert, :original_trip_selections), do: from_ibi(ibi_alert, :trip_ids)
+  def from_ibi(ibi_alert, :stop_names_and_ids), do: from_ibi(ibi_alert, :stop_ids)
 
   def from_ibi(ibi_alert, :cause) do
     case from_ibi(ibi_alert, :route_type)
