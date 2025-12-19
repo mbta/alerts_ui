@@ -312,7 +312,7 @@ defmodule AlertsUIWeb.ReviewModal do
         <%!-- Sidebar --%>
         <div class="min-w-[222px] shrink-0 p-4 bg-bg-elevation-5">
           <p class="font-bold">Created</p>
-          <%= if @form_type == :creating do %>
+          <%= if @form_type in [:creating, :duplicating] do %>
             <p class="pb-3 whitespace-nowrap">
               {Calendar.strftime(
                 DateTime.shift_zone!(@now, "America/New_York"),
@@ -329,7 +329,7 @@ defmodule AlertsUIWeb.ReviewModal do
           <% end %>
 
           <p class="font-bold">Created by</p>
-          <%= if @form_type ==  :creating && @current_user do %>
+          <%= if @form_type in  [:creating, :duplicating] && @current_user do %>
             <p class="pb-3">
               {Map.get(@current_user, :first_name, "")} {Map.get(@current_user, :last_name, "")}
             </p>
@@ -339,7 +339,7 @@ defmodule AlertsUIWeb.ReviewModal do
             </p>
           <% end %>
 
-          <%= if @last_edited_at || @form_type == :editing do %>
+          <%= if @last_edited_at && @form_type not in [:creating, :duplicating] do %>
             <p class="font-bold">Last edited</p>
             <p :if={@form_type == :editing} class="pb-3 whitespace-nowrap">
               {Calendar.strftime(

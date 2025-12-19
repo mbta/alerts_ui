@@ -69,11 +69,15 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
         })
 
       {:ok, _} =
-        Alerts.create_or_update_alert(alert_params, build(:user))
+        Alerts.create_or_update_alert(
+          alert_params,
+          build(:user, first_name: "Original", last_name: "Creator")
+        )
 
       {:ok, view, _html} = live(conn, "/alerts/duplicate?alert_id=123")
 
       open_review_modal(view)
+      refute render(view) =~ ~r/Created by.*\s* Original Creator/
 
       view
       |> element("#review-modal-container button", "Submit")
