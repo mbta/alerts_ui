@@ -152,7 +152,6 @@ defmodule AlertsUI.Models.Effect do
       {"Station Issue", :UNKNOWN_EFFECT, "STATION_ISSUE"},
       {"Stop Closure", :NO_SERVICE, "STOP_CLOSURE"},
       {"Stop Move", :STOP_MOVED, "STOP_MOVE"},
-      {"Stop Shoveling", :OTHER_EFFECT, "STOP_SHOVELING"},
       {"Summary", :OTHER_EFFECT, "SUMMARY"},
       {"Suspension", :DETOUR, "SUSPENSION"},
       {"Track Change", :OTHER_EFFECT, "TRACK_CHANGE"}

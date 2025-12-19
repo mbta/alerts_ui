@@ -178,18 +178,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
       service_effect_template: "?stop_names closed"
     },
     %{
-      pattern: {3, "Stop Shoveling"},
-      header_template:
-        "?route_names ?direction_name bus stops have been cleared of snow ?alert_duration ?due_to_cause",
-      description_template: %{
-        route_count: 5,
-        stop_count: 0,
-        trip_count: nil,
-        direction_count: nil
-      },
-      service_effect_template: "Stops shoveled on ?route_names"
-    },
-    %{
       pattern: {3, "Delay"},
       header_template:
         "?route_names ?route_form experiencing ?direction_name delays of ?severity_name ?due_to_cause",

@@ -607,33 +607,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       assert expected_service_effect == actual_service_effect
     end
 
-    test "Bus stop shoveling" do
-      autotext_data = %{
-        route_type: 3,
-        routes: [@route_1],
-        stops: [@stop_1],
-        schedules: [],
-        effect_name: "Stop Shoveling",
-        direction: [0],
-        cause_detail: "PARADE",
-        alert_timing: :"one-time",
-        start_specifier: :now,
-        end_specifier: :custom,
-        start_datetime: ~N[2025-05-08 13:00:00],
-        end_datetime: ~N[2025-05-10 15:00:00]
-      }
-
-      expected_header =
-        "Route 1 westbound bus stops have been cleared of snow until Sat, May 10 at 3:00 PM due to a parade"
-
-      actual_header = Templates.build_auto_text(autotext_data, :header_template)
-      assert expected_header == actual_header
-
-      expected_service_effect = "Stops shoveled on Route 1"
-      actual_service_effect = Templates.build_auto_text(autotext_data, :service_effect_template)
-      assert expected_service_effect == actual_service_effect
-    end
-
     test "Bus delay" do
       autotext_data = %{
         route_type: 3,
@@ -1528,21 +1501,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected = "Affected routes:\n1"
-      actual = Templates.build_auto_text(autotext_data, :description_template)
-      assert expected == actual
-    end
-
-    test "bus stop shoveling" do
-      autotext_data = %{
-        route_type: 3,
-        effect_name: "Stop Shoveling",
-        routes: [@route_1],
-        schedules: [],
-        stops: [@stop_1_bus],
-        direction: [1]
-      }
-
-      expected = "Affected inbound stops:\nLechmere"
       actual = Templates.build_auto_text(autotext_data, :description_template)
       assert expected == actual
     end

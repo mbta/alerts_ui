@@ -59,7 +59,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes do
       "Snow Route",
       "Stop Closure",
       "Stop Move",
-      "Stop Shoveling",
       "Suspension"
     ]
 

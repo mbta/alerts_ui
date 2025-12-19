@@ -93,7 +93,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations do
         "Detour",
         "Service Change",
         "Snow Route",
-        "Stop Shoveling",
         "Suspension"
       ] ->
         :RDS
