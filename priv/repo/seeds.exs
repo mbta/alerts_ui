@@ -71,8 +71,9 @@ Enum.each(1..20, fn i ->
 
   Repo.insert!(%Alert{
     alert_id: "1#{i}",
+    primary_service_type: "1",
     effect: :NO_SERVICE,
-    effect_detail: "Current #{i}",
+    effect_detail: "DELAY",
     cause: :UNKNOWN_CAUSE,
     cause_detail: "UNKNOWN_CAUSE",
     header_text: "Test Alert",
@@ -86,6 +87,7 @@ Enum.each(1..20, fn i ->
     closed_timestamp: ~U[2023-10-13 00:03:00Z],
     timeframe_text: "ongoing",
     recurrence_text: nil,
+    recurrence_days: [:monday],
     alert_lifecycle: :NEW,
     duration_certainty: :UNKNOWN,
     active_period: [active_period_1, active_period_2],
@@ -117,8 +119,9 @@ Enum.each(1..20, fn i ->
 
   Repo.insert!(%Alert{
     alert_id: "2#{i}",
+    primary_service_type: "1",
     effect: :NO_SERVICE,
-    effect_detail: "Current w/ open notification #{i}",
+    effect_detail: "SUMMARY",
     cause: :UNKNOWN_CAUSE,
     cause_detail: "UNKNOWN_CAUSE",
     header_text: "Test Alert",
@@ -132,6 +135,7 @@ Enum.each(1..20, fn i ->
     closed_timestamp: ~U[2023-10-13 00:03:00Z],
     timeframe_text: "ongoing",
     recurrence_text: nil,
+    recurrence_days: [:monday],
     alert_lifecycle: :NEW,
     duration_certainty: :UNKNOWN,
     active_period: [active_period_1, active_period_2],
@@ -158,8 +162,9 @@ Enum.each(1..20, fn i ->
 
   Repo.insert!(%Alert{
     alert_id: "3#{i}",
+    primary_service_type: "1",
     effect: :NO_SERVICE,
-    effect_detail: "Current w/ closed notification #{i}",
+    effect_detail: "DETOUR",
     cause: :UNKNOWN_CAUSE,
     cause_detail: "UNKNOWN_CAUSE",
     header_text: "Test Alert",
@@ -173,6 +178,7 @@ Enum.each(1..20, fn i ->
     closed_timestamp: ~U[2023-10-13 00:03:00Z],
     timeframe_text: "ongoing",
     recurrence_text: nil,
+    recurrence_days: [:monday],
     alert_lifecycle: :NEW,
     duration_certainty: :UNKNOWN,
     active_period: [active_period_1],
@@ -192,8 +198,9 @@ end)
 Enum.each(1..20, fn i ->
   Repo.insert!(%Alert{
     alert_id: "4#{i}",
+    primary_service_type: "1",
     effect: :NO_SERVICE,
-    effect_detail: "Past #{i}",
+    effect_detail: "SUSPENSION",
     cause: :UNKNOWN_CAUSE,
     cause_detail: "UNKNOWN_CAUSE",
     header_text: "Test Alert",
@@ -208,6 +215,7 @@ Enum.each(1..20, fn i ->
     active_period_end: ~U[2023-10-13 00:03:00Z],
     timeframe_text: "ongoing",
     recurrence_text: nil,
+    recurrence_days: [:monday],
     alert_lifecycle: :NEW,
     duration_certainty: :KNOWN,
     active_period: [],
