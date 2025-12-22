@@ -70,7 +70,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   def h1(assigns) do
     ~H"""
-    <h1 class={"font-medium mb-4 text-4xl #{if @hidden, do: "hidden", else: ""} #{@class}"}>
+    <h1 class={"mb-4 font-bold text-lg lg:font-medium lg:text-4xl #{if @hidden, do: "hidden", else: ""} #{@class}"}>
       {render_slot(@inner_block)}
     </h1>
     """
@@ -90,7 +90,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   def h2(assigns) do
     ~H"""
-    <h2 class={"font-medium mb-4 text-3xl #{if @hidden, do: "hidden", else: ""} #{@class}"}>
+    <h2 class={"mb-4 font-bold lg:font-medium lg:text-3xl #{if @hidden, do: "hidden", else: ""} #{@class}"}>
       {render_slot(@inner_block)}
     </h2>
     """
@@ -110,7 +110,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   def h3(assigns) do
     ~H"""
-    <h3 class={"font-bold mb-2 text-2xl #{if @hidden, do: "hidden", else: ""} #{@class}"}>
+    <h3 class={"font-bold mb-2 lg:text-2xl #{if @hidden, do: "hidden", else: ""} #{@class}"}>
       {render_slot(@inner_block)}
     </h3>
     """
@@ -130,7 +130,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   def h4(assigns) do
     ~H"""
-    <h4 class={"font-medium mb-2 text-xl #{if @hidden, do: "hidden", else: ""} #{@class}"}>
+    <h4 class={"font-medium mb-2 lg:text-xl #{if @hidden, do: "hidden", else: ""} #{@class}"}>
       {render_slot(@inner_block)}
     </h4>
     """
@@ -150,7 +150,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   def h5(assigns) do
     ~H"""
-    <h5 class={"font-medium mb-1 text-lg #{if @hidden, do: "hidden", else: ""} #{@class}"}>
+    <h5 class={"mb-1 font-normal text-sm uppercase lg:text-base #{if @hidden, do: "hidden", else: ""} #{@class}"}>
       {render_slot(@inner_block)}
     </h5>
     """
@@ -170,7 +170,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   def h6(assigns) do
     ~H"""
-    <h6 class={"font-medium mb-1 text-base #{if @hidden, do: "hidden", else: ""} #{@class}"}>
+    <h6 class={"mb-1 font-normal italic text-base #{if @hidden, do: "hidden", else: ""} #{@class}"}>
       {render_slot(@inner_block)}
     </h6>
     """
