@@ -48,4 +48,14 @@
       {Map.get(assigns, :import_error, "")}
     </div>
   </div>
+
+  <div id="wipe">
+    <h2 class="font-medium text-2xl">Clear database</h2>
+    <p>
+      Wipe all alerts and IBI imports from this database:
+    </p>
+    <p>
+      <.button class="bg-red-400" phx-click="wipe">DESTROY</.button>
+    </p>
+  </div>
 </div>

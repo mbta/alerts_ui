@@ -5,6 +5,8 @@ defmodule AlertsUIWeb.IBIImporterLive do
   use AlertsUIWeb, :live_view
 
   alias AlertsUI.IBIImportWorker
+  alias AlertsUI.Repo
+  alias Ecto.Adapters.SQL
   alias Ecto.Changeset
 
   require Logger
@@ -43,6 +45,14 @@ defmodule AlertsUIWeb.IBIImporterLive do
         Logger.error("[import #{id}] other error: #{error_string}")
         {:noreply, assign(socket, import_error: error_string)}
     end
+  end
+
+  @impl true
+  def handle_event("wipe", _params, socket) do
+    Logger.warning("WIPING ALERTS!")
+    SQL.query!(Repo, "TRUNCATE ibi_alerts")
+    SQL.query!(Repo, "TRUNCATE alerts CASCADE")
+    {:noreply, socket}
   end
 
   def generate_put_url do
