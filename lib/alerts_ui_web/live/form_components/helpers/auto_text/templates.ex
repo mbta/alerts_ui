@@ -178,18 +178,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
       service_effect_template: "?stop_names closed"
     },
     %{
-      pattern: {3, "Stop Shoveling"},
-      header_template:
-        "?route_names ?direction_name bus stops have been cleared of snow ?alert_duration ?due_to_cause",
-      description_template: %{
-        route_count: 5,
-        stop_count: 0,
-        trip_count: nil,
-        direction_count: nil
-      },
-      service_effect_template: "Stops shoveled on ?route_names"
-    },
-    %{
       pattern: {3, "Delay"},
       header_template:
         "?route_names ?route_form experiencing ?direction_name delays of ?severity_name ?due_to_cause",
@@ -308,7 +296,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     %{
       pattern: {1, "Single Tracking"},
       header_template:
-        "?route_names|: Expect delays of ?severity_name due to trains operating on a single track ?stop_range_between",
+        "?route_names|: Trains in both directions are operating on a single track  ?stop_range_between|. Riders may experience longer wait times.",
       description_template: %{
         route_count: 5,
         stop_count: 0,
@@ -481,6 +469,18 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         direction_count: nil
       },
       service_effect_template: "Station issue at ?stop_names"
+    },
+    %{
+      pattern: {"Station Bypass"},
+      header_template:
+        "?route_names ?direction_name ?trip_names will not stop at ?stop_names ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        stop_count: 0,
+        trip_count: 2,
+        direction_count: 1
+      },
+      service_effect_template: "?stop_names bypassed"
     }
   ]
 

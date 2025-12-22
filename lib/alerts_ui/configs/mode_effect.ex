@@ -9,6 +9,8 @@ defmodule AlertsUI.Configs.ModeEffect do
       "Schedule Change" => %{combination: :R},
       "Service Change" => %{combination: :RDS},
       "Shuttle" => %{combination: :RDS},
+      "Single Tracking" => %{combination: :RDS},
+      "Station Bypass" => %{combination: :RDS},
       "Station Closure" => %{combination: :SR},
       "Station Issue" => %{combination: :SR},
       "Suspension" => %{combination: :RDS}
@@ -20,6 +22,7 @@ defmodule AlertsUI.Configs.ModeEffect do
       "Schedule Change" => %{combination: :R},
       "Service Change" => %{combination: :RDTS},
       "Shuttle" => %{combination: :RDTS},
+      "Station Bypass" => %{combination: :RDTS},
       "Station Closure" => %{combination: :SR},
       "Station Issue" => %{combination: :SR},
       "Suspension" => %{combination: :RDS},
