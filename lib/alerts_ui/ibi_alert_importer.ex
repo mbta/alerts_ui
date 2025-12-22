@@ -401,22 +401,24 @@ defmodule AlertsUI.IBIAlertImporter do
   end
 
   def from_ibi(ibi_alert, :route_ids) do
-    split_combined_ids(ibi_alert.informed_route_id)
+    from_ibi(ibi_alert, :original_route_selections)
   end
 
   def from_ibi(ibi_alert, :stop_ids) do
-    split_combined_ids(ibi_alert.informed_stop_id)
+    from_ibi(ibi_alert, :stop_names_and_ids)
   end
 
   def from_ibi(ibi_alert, :trip_ids) do
-    split_combined_ids(ibi_alert.informed_trip_id)
+    from_ibi(ibi_alert, :original_trip_selections)
   end
 
   def from_ibi(ibi_alert, :direction) do
-    ibi_alert.informed_direction_id
+    from_ibi(ibi_alert, :original_direction_selections) |> Enum.at(0)
   end
 
-  def from_ibi(ibi_alert, :facility_id), do: ibi_alert.informed_facility_id
+  def from_ibi(ibi_alert, :facility_id) do
+    from_ibi(ibi_alert, :original_facility_selections) |> Enum.at(0)
+  end
 
   def from_ibi(ibi_alert, :service_types), do: [from_ibi(ibi_alert, :route_type)]
 
@@ -541,23 +543,26 @@ defmodule AlertsUI.IBIAlertImporter do
 
   def from_ibi(ibi_alert, :combination) do
     cond do
-      ibi_alert.informed_route_id && ibi_alert.informed_direction_id && ibi_alert.informed_trip_id &&
-          ibi_alert.informed_stop_id ->
+      ibi_alert.informed_route_list && ibi_alert.informed_direction_list &&
+        ibi_alert.informed_trip_list &&
+          ibi_alert.informed_stop_list ->
         :RDTS
 
-      ibi_alert.informed_route_id && ibi_alert.informed_direction_id && ibi_alert.informed_trip_id ->
+      ibi_alert.informed_route_list && ibi_alert.informed_direction_list &&
+          ibi_alert.informed_trip_list ->
         :RDT
 
-      ibi_alert.informed_route_id && ibi_alert.informed_direction_id && ibi_alert.informed_stop_id ->
+      ibi_alert.informed_route_list && ibi_alert.informed_direction_list &&
+          ibi_alert.informed_stop_list ->
         :RDS
 
-      ibi_alert.informed_route_id && ibi_alert.informed_stop_id ->
+      ibi_alert.informed_route_list && ibi_alert.informed_stop_list ->
         :SR
 
-      ibi_alert.informed_route_id ->
+      ibi_alert.informed_route_list ->
         :R
 
-      ibi_alert.informed_facility_id ->
+      ibi_alert.informed_facility_list ->
         :ACCESS
 
       true ->
@@ -566,15 +571,24 @@ defmodule AlertsUI.IBIAlertImporter do
   end
 
   def from_ibi(ibi_alert, :original_direction_selections) do
-    Enum.filter([from_ibi(ibi_alert, :direction)], & &1)
+    split_combined_entities(ibi_alert.informed_direction_list)
   end
 
   def from_ibi(ibi_alert, :original_facility_selections) do
-    Enum.filter([from_ibi(ibi_alert, :facility_id)], & &1)
+    split_combined_entities(ibi_alert.informed_facility_list)
   end
 
-  def from_ibi(ibi_alert, :original_route_selections), do: from_ibi(ibi_alert, :route_ids)
-  def from_ibi(ibi_alert, :original_trip_selections), do: from_ibi(ibi_alert, :trip_ids)
+  def from_ibi(ibi_alert, :original_route_selections) do
+    split_combined_entities(ibi_alert.informed_route_list)
+  end
+
+  def from_ibi(ibi_alert, :original_trip_selections) do
+    split_combined_entities(ibi_alert.informed_trip_list)
+  end
+
+  def from_ibi(ibi_alert, :stop_names_and_ids) do
+    split_combined_entities(ibi_alert.informed_stop_list)
+  end
 
   def from_ibi(ibi_alert, :cause) do
     case from_ibi(ibi_alert, :route_type)
@@ -660,13 +674,18 @@ defmodule AlertsUI.IBIAlertImporter do
 
   def from_ibi(ibi_alert, key), do: Map.get(ibi_alert, key)
 
-  defp split_combined_ids(nil), do: []
+  defp split_combined_entities(nil), do: []
 
-  defp split_combined_ids(combined_ids) do
-    combined_ids
+  defp split_combined_entities(combined_entities) do
+    combined_entities
     |> String.replace("_", "")
-    |> String.replace(~r/\s/, "")
-    |> String.split(",")
+    |> String.split(";")
+    |> Enum.map(fn combined ->
+      combined
+      |> String.split("|")
+      |> Enum.reverse()
+      |> Enum.join("|")
+    end)
   end
 
   def utc_from_ibi_string(nil), do: nil

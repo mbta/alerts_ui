@@ -32,11 +32,11 @@ defmodule AlertsUI.Models.IBIAlert do
           url: String.t() | nil,
           details: String.t() | nil,
           affent_list: String.t() | nil,
-          informed_route_id: String.t() | nil,
-          informed_direction_id: String.t() | nil,
-          informed_trip_id: String.t() | nil,
-          informed_stop_id: String.t() | nil,
-          informed_facility_id: String.t() | nil,
+          informed_route_list: String.t() | nil,
+          informed_direction_list: String.t() | nil,
+          informed_trip_list: String.t() | nil,
+          informed_stop_list: String.t() | nil,
+          informed_facility_list: String.t() | nil,
           gui_mode_name: String.t() | nil,
           is_closed: String.t() | nil,
           send_to_govd: String.t() | nil,
@@ -80,11 +80,11 @@ defmodule AlertsUI.Models.IBIAlert do
     url
     details
     affent_list
-    informed_route_id
-    informed_direction_id
-    informed_trip_id
-    informed_stop_id
-    informed_facility_id
+    informed_route_list
+    informed_direction_list
+    informed_trip_list
+    informed_stop_list
+    informed_facility_list
     gui_mode_name
     is_closed
     send_to_govd
