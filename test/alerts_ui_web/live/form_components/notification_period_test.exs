@@ -4,6 +4,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriodTest do
 
   import LiveIsolatedComponent
   import Phoenix.LiveViewTest
+  import Mock
   alias AlertsUIWeb.FormComponents.NotificationPeriod
   alias AlertsUIWeb.Step
 
@@ -143,6 +144,21 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriodTest do
       })
 
       assert render(view) =~ ~s(Notification period must start on or before 05/01/2024, 10:54 AM)
+    end
+
+    test "notification period start is current time by default" do
+      with_mock(AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers,
+        current_time: fn -> ~N[2024-04-30 15:54:00Z] end
+      ) do
+        {:ok, _view, _html} =
+          live_isolated_component(NotificationPeriod, @assigns)
+
+        assert_receive {:__live_isolated_component_handle_info_received__, _pid,
+                        {:section_completed,
+                         %NotificationPeriod{
+                           notification_period_start: ~N[2024-04-30 15:54:00]
+                         }}}
+      end
     end
 
     test "it sends section_completed if no error in changeset" do

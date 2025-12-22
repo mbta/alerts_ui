@@ -16,7 +16,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationText do
     start_dt = ensure_naive_datetime_format(params["active_period_start"])
 
     start_text =
-      start_text(params["active_period_start_specifier"], start_dt)
+      start_text(start_dt)
 
     "#{start_text} until"
   end
@@ -38,19 +38,25 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationText do
     )
   end
 
-  def get_start_text(start_specifier, start) do
+  def get_start_text(start) do
     start_dt = ensure_naive_datetime_format(start)
-
-    start_text(start_specifier, start_dt)
+    start_text(start_dt)
   end
 
-  defp start_text("now", _start_dt), do: "Now"
+  defp start_text(nil), do: ""
 
-  defp start_text(_, nil), do: ""
-
-  defp start_text(_specifier, start_dt) do
+  defp start_text(start_dt) do
     Calendar.strftime(start_dt, "%a %b %-d, %Y @ %-I:%M %p")
   end
+
+  def notification_period_end_text(
+        true = _end_in_past?,
+        %NaiveDateTime{} = notification_period_end
+      ) do
+    end_text(nil, notification_period_end)
+  end
+
+  def notification_period_end_text(_, _), do: "alert is closed"
 
   defp end_text(:until_further_notice, end_dt), do: end_text("until_further_notice", end_dt)
 

@@ -37,9 +37,11 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
   def mount(socket) do
     current_time = DateTimeHelpers.current_time()
 
-    alert_data = %{
-      notification_period_start_date: current_time |> naive_datetime_to_iso_date
-    }
+    alert_data =
+      %{
+        notification_period_start_date: current_time |> naive_datetime_to_iso_date
+      }
+      |> Map.put_new(:notification_period_start, current_time)
 
     form = changeset(%__MODULE__{}, alert_data) |> to_form
 
@@ -61,7 +63,8 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
         alert_data =
           alert_data
           |> Enum.filter(fn {_k, v} -> !is_nil(v) end)
-          |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
+          |> Map.Helpers.stringify_keys()
+          |> Map.new()
 
         Map.merge(socket.assigns.form.params, alert_data)
 
