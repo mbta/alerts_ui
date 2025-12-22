@@ -35,18 +35,18 @@ defmodule AlertsUI.TimeframeText do
     {_, end_date, _} = end_time_tuple = to_local_with_date(end_datetime)
 
     cond do
-      DateTime.compare(start_datetime, current_datetime) == :gt and
-          Date.compare(start_date, current_date) == :eq ->
-        starts_later_today(current_date, end_date)
-
-      start_date == Date.add(current_date, 1) ->
-        starts_tomorrow(current_date, start_date, end_time_tuple)
+      more_than_six_days(current_datetime, start_datetime) ->
+        starts_more_than_six_days_from_now(start_date, end_time_tuple)
 
       between_two_and_six_days(current_date, start_datetime) ->
         starts_2_to_6_days_from_now(start_date, end_time_tuple)
 
-      more_than_six_days(current_datetime, start_datetime) ->
-        starts_more_than_six_days_from_now(start_date, end_time_tuple)
+      start_date == Date.add(current_date, 1) ->
+        starts_tomorrow(current_date, start_date, end_time_tuple)
+
+      DateTime.compare(start_datetime, current_datetime) == :gt and
+          Date.compare(start_date, current_date) == :eq ->
+        starts_later_today(current_date, end_date)
 
       true ->
         nil

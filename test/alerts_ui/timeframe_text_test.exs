@@ -264,8 +264,8 @@ defmodule AlertsUI.TimeframeTextTest do
     end
 
     test "Starts >6 calendar days, ends same calendar day when end is end of service" do
-      now = utc_datetime_from_local(~D[2024-02-26], ~T[22:00:00])
-      start = utc_datetime_from_local(~D[2024-03-22], ~T[06:00:00])
+      now = utc_datetime_from_local(~D[2024-03-15], ~T[22:00:00])
+      start = utc_datetime_from_local(~D[2024-03-22], ~T[03:00:00])
       ending = utc_datetime_from_local(~D[2024-03-23], ~T[03:00:00])
 
       assert TimeframeText.timeframe_text(start, ending, now) == "March 22"
