@@ -48,9 +48,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations do
       :SR
       iex> ServiceEffectCombinations.get_combination(:ferry, "Extra Service")
       :R
-      iex> ServiceEffectCombinations.get_combination(:access, "Elevator Closure")
-      :ACCESS
-      iex> ServiceEffectCombinations.get_combination(:facility, "Access Issue")
+      iex> ServiceEffectCombinations.get_combination(:facility, "Elevator Closure")
       :ACCESS
       iex> ServiceEffectCombinations.get_combination(1, "Station Closure")
       :SR
@@ -76,8 +74,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations do
     do: nil
 
   def get_combination(:light_rail, effect_name), do: get_combination(:subway, effect_name)
-
-  def get_combination(:facility, effect_name), do: get_combination(:access, effect_name)
 
   def get_combination(service_type, effect_name) do
     get_in(ModeEffect.mode_effect(), [service_type, effect_name, :combination])

@@ -66,7 +66,7 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
 
     send(
       view.pid,
-      {:step_completed, %RouteTypeAndEffect{route_type: "bus", effect_name: "Detour"}}
+      {:step_completed, %RouteTypeAndEffect{route_type: 3, effect_name: "Detour"}}
     )
 
     view

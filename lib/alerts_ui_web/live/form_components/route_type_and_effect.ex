@@ -5,6 +5,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   use AlertsUIWeb, :live_component
   use AlertsUI.Schema
   import Ecto.Changeset
+  alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.FormComponents.Helpers.{ContentFormatter, EffectsForRouteTypes}
 
   @route_types [
@@ -18,7 +19,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
 
   @primary_key false
   embedded_schema do
-    field :route_type, :string
+    field :route_type, :integer
     field :effect_name, :string
   end
 
@@ -81,7 +82,11 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
 
     changeset_params = %{
       effect_name: selected_effect,
-      route_type: socket.assigns.selected_route_type || ""
+      route_type:
+        InformedEntity.route_type_mapping(
+          (socket.assigns.selected_route_type || "")
+          |> String.to_existing_atom()
+        )
     }
 
     changeset(%__MODULE__{}, changeset_params)
@@ -97,7 +102,6 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   end
 
   @impl true
-  @spec render(any()) :: Phoenix.LiveView.Rendered.t()
   def render(assigns) do
     ~H"""
     <div

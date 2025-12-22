@@ -24,7 +24,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
   alias AlertsUI.AlertBuilder
   alias AlertsUI.Alerts
   alias AlertsUI.DBContexts.Users
-  alias AlertsUI.Models.{ActivePeriod, Alert, EnhancedSchedule, InformedEntity}
+  alias AlertsUI.Models.{ActivePeriod, Alert, EnhancedSchedule}
   alias AlertsUI.Routes
 
   alias AlertsUIWeb.FormComponents.{
@@ -44,6 +44,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   alias AlertsUIWeb.FormComponents.Helpers.{
     AlertData,
+    EffectsForRouteTypes,
     ErrorFormatter,
     GreenLine,
     SelectFormatter,
@@ -372,21 +373,21 @@ defmodule AlertsUIWeb.CreateAlertLive do
   @impl true
   def handle_info({:step_completed, changes}, socket) do
     alert_data = Map.merge(socket.assigns.alert_data, changes |> Map.from_struct())
+    route_type = Map.get(alert_data, :route_type)
     effect_name = Map.get(alert_data, :effect_name)
 
-    route_type_string = Map.get(alert_data, :route_type)
-
-    route_type_name =
-      if route_type_string, do: String.to_existing_atom(route_type_string), else: nil
-
-    combination = route_type_name |> ServiceEffectCombinations.get_combination(effect_name)
-    route_type = route_type_name |> InformedEntity.route_type_mapping()
+    combination =
+      if is_nil(route_type) and
+           effect_name in EffectsForRouteTypes.list_effects(:facility) do
+        :ACCESS
+      else
+        ServiceEffectCombinations.get_combination(route_type, effect_name)
+      end
 
     assigns = %{
       progress: get_step_by_name(socket.assigns.progress.next),
-      alert_data: Map.merge(alert_data, %{combination: combination, route_type: route_type}),
+      alert_data: Map.merge(alert_data, %{combination: combination}),
       combination: combination,
-      route_type: route_type,
       selected_schedules: nil,
       selected_facility: nil,
       selected_routes: nil,

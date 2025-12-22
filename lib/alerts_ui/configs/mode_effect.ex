@@ -49,7 +49,7 @@ defmodule AlertsUI.Configs.ModeEffect do
       "Shuttle" => %{combination: :RDS},
       "Suspension" => %{combination: :RDS}
     },
-    access: %{
+    facility: %{
       "Elevator Closure" => %{combination: :ACCESS},
       "Parking Closure" => %{combination: :ACCESS},
       "Access Issue" => %{combination: :ACCESS},
