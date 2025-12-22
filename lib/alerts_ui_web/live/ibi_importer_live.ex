@@ -49,7 +49,7 @@ defmodule AlertsUIWeb.IBIImporterLive do
 
   @impl true
   def handle_event("wipe", _params, socket) do
-    Logger.warn("WIPING ALERTS!")
+    Logger.warning("WIPING ALERTS!")
     SQL.query!(Repo, "TRUNCATE ibi_alerts")
     SQL.query!(Repo, "TRUNCATE alerts CASCADE")
     {:noreply, socket}
