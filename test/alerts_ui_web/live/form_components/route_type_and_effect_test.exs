@@ -41,7 +41,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffectTest do
       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
                       {:step_completed,
                        %RouteTypeAndEffect{
-                         route_type: 3,
+                         route_type: "bus",
                          effect_name: "Detour"
                        }}}
     end

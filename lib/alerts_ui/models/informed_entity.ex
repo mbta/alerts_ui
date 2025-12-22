@@ -52,6 +52,7 @@ defmodule AlertsUI.Models.InformedEntity do
           trip: TripDescriptor.t() | nil
         }
 
+  @type mode_atom_t() :: :light_rail | :subway | :commuter_rail | :bus | :ferry | :access
   schema "informed_entities" do
     belongs_to :alert, Alert
     field :agency_id, :string
@@ -148,7 +149,7 @@ defmodule AlertsUI.Models.InformedEntity do
       iex> InformedEntity.route_type_mapping(:light_rail)
       0
   """
-  @spec route_type_mapping(atom()) :: Route.type_int() | nil
+  @spec route_type_mapping(mode_atom_t()) :: Route.type_int() | nil
   def route_type_mapping(:light_rail), do: 0
   def route_type_mapping(:subway), do: 1
   def route_type_mapping(:commuter_rail), do: 2

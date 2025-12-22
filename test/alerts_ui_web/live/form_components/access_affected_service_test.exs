@@ -229,7 +229,8 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
 
         send(
           view.pid,
-          {:step_completed, %RouteTypeAndEffect{route_type: nil, effect_name: "Parking Issue"}}
+          {:step_completed,
+           %RouteTypeAndEffect{route_type: "facility", effect_name: "Parking Issue"}}
         )
 
         refute view

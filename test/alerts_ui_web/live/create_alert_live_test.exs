@@ -65,7 +65,10 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         refute first_rendered_view =~ ~s(class="min-w-full flex flex-col mt-4" id="details_view")
 
         {:ok, changeset} =
-          Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 2, effect_name: "Suspension"})
+          Ecto.Changeset.change(%RouteTypeAndEffect{
+            route_type: "commuter_rail",
+            effect_name: "Suspension"
+          })
           |> apply_action(:insert)
 
         send(view.pid, {:step_completed, changeset})
@@ -90,8 +93,6 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         assert view |> element("#alert_details_header_text") |> render() =~
                  "Framingham/Worcester Line service suspended"
 
-        send(view.pid, {:add_errors, [], AlertDetails})
-        send(view.pid, {:section_completed, changeset})
         send(view.pid, :create_alert)
 
         flash = assert_redirect(view, "/")
@@ -109,7 +110,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
         {:ok, changeset} =
           Ecto.Changeset.change(%RouteTypeAndEffect{
-            route_type: nil,
+            route_type: "facility",
             effect_name: "Parking Issue"
           })
           |> apply_action(:insert)
@@ -146,7 +147,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         {:ok, view, _html} = live(conn, "/alerts/new")
 
         {:ok, changeset} =
-          Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 3, effect_name: "Stop Move"})
+          Ecto.Changeset.change(%RouteTypeAndEffect{route_type: "bus", effect_name: "Stop Move"})
           |> apply_action(:insert)
 
         send(view.pid, {:step_completed, changeset})
@@ -162,7 +163,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         {:ok, view, _html} = live(conn, "/alerts/new")
 
         {:ok, changeset} =
-          Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 3, effect_name: "Detour"})
+          Ecto.Changeset.change(%RouteTypeAndEffect{route_type: "bus", effect_name: "Detour"})
           |> apply_action(:insert)
 
         send(view.pid, {:step_completed, changeset})
@@ -185,7 +186,10 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
         # Submit the first part
         {:ok, changeset} =
-          Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 2, effect_name: "Suspension"})
+          Ecto.Changeset.change(%RouteTypeAndEffect{
+            route_type: "commuter_rail",
+            effect_name: "Suspension"
+          })
           |> apply_action(:insert)
 
         send(view.pid, {:step_completed, changeset})
@@ -237,7 +241,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
       {:ok, view, _html} = live(conn, "/alerts/new")
 
       {:ok, changeset} =
-        Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 3, effect_name: "Detour"})
+        Ecto.Changeset.change(%RouteTypeAndEffect{route_type: "bus", effect_name: "Detour"})
         |> apply_action(:insert)
 
       send(view.pid, {:step_completed, changeset})
@@ -263,7 +267,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         {:ok, view, _html} = live(conn, "/alerts/new")
 
         {:ok, changeset} =
-          Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 3, effect_name: "Detour"})
+          Ecto.Changeset.change(%RouteTypeAndEffect{route_type: "bus", effect_name: "Detour"})
           |> apply_action(:insert)
 
         send(view.pid, {:step_completed, changeset})
@@ -295,7 +299,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
         {:ok, changeset} =
           Ecto.Changeset.change(%RouteTypeAndEffect{
-            route_type: nil,
+            route_type: "facility",
             effect_name: "Elevator Closure"
           })
           |> apply_action(:insert)
