@@ -87,13 +87,6 @@ defmodule AlertsUIWeb.CreateAlertLive do
         Alerts.get_by_alert_id(alert_id)
       end
 
-    alert_data =
-      if existing_alert,
-        do: AlertData.build_alert_data(existing_alert) |> Map.from_struct(),
-        else: %{}
-
-    [first_step, second_step | _] = @steps
-
     form_type =
       case socket.assigns.live_action do
         :edit -> :editing
@@ -106,6 +99,13 @@ defmodule AlertsUIWeb.CreateAlertLive do
       duplicating: "Duplicate",
       creating: "Create"
     }
+
+    alert_data =
+      if existing_alert,
+        do: AlertData.build_alert_data(existing_alert, form_type) |> Map.from_struct(),
+        else: %{}
+
+    [first_step, second_step | _] = @steps
 
     alert_data =
       if form_type == :duplicating do

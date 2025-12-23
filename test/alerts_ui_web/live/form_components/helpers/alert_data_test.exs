@@ -633,6 +633,52 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       assert alert.active_period_end_date == nil
     end
 
+    test "returns no creation or editing info if duplicated" do
+      user = insert(:user)
+
+      seconduser =
+        insert(:user, %{
+          role: :user,
+          email: "secondfake@example.com",
+          last_name: "Secondlast",
+          first_name: "Secondfirst",
+          keycloak_id: "456-789"
+        })
+
+      original_alert_map =
+        build(
+          :alert_map,
+          %{
+            alert_id: "123",
+            header_text: "old header text",
+            user: user
+          }
+        )
+
+      new_params =
+        build(:alert_map, %{
+          alert_id: "123",
+          header_text: "new header text",
+          active_period: [%{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:03:00Z]}],
+          user: seconduser
+        })
+
+      Alerts.create_or_update_alert(original_alert_map, user)
+
+      existing_alert = Alerts.get_by_alert_id("123")
+      :timer.sleep(1000)
+      Alerts.create_or_update_alert(new_params, seconduser, existing_alert)
+
+      alert = AlertData.build_alert_data("123", :duplicating)
+
+      assert alert.created_timestamp == nil
+
+      assert alert.created_by == nil
+
+      assert alert.last_edited_by == nil
+      assert alert.last_edited_at == nil
+    end
+
     test "returns correct creation info and edited info if edited by user" do
       user = insert(:user)
 

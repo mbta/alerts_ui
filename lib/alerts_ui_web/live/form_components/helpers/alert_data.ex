@@ -113,20 +113,22 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           last_push_notification_timestamp: DateTime.t() | nil
         }
 
-  @spec build_alert_data(String.t() | Alert.t() | nil) :: t()
-  def build_alert_data(alert_id) when is_binary(alert_id) do
+  @spec build_alert_data(String.t() | Alert.t() | nil, :creating | :duplicating | :editing | nil) ::
+          t()
+  def build_alert_data(alert, form_type \\ nil)
+
+  def build_alert_data(alert_id, form_type) when is_binary(alert_id) do
     alert = alert_id |> Alerts.get_by_alert_id()
 
     if Map.get(alert, :id) == nil do
       build_alert_data(nil)
     else
-      build_alert_data(alert)
+      build_alert_data(alert, form_type)
     end
   end
 
-  def build_alert_data(%AlertsUI.Models.Alert{} = alert) do
+  def build_alert_data(%AlertsUI.Models.Alert{} = alert, form_type) do
     direct_from_alert_keys = [
-      :created_timestamp,
       :banner_text,
       :cause_detail,
       :description_text,
@@ -146,7 +148,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     Enum.reduce(direct_from_alert_keys, %__MODULE__{}, fn key, params ->
       Map.put(params, key, Map.get(alert, key))
     end)
-    |> Map.merge(create_and_edit_metadata(alert))
+    |> Map.merge(create_and_edit_metadata(alert, form_type))
     |> Map.merge(effect_name_combination_and_informed_entities(alert))
     |> Map.merge(active_period_map(alert))
     |> Map.merge(reminder_times(alert))
@@ -155,9 +157,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     |> Map.merge(banner_sync_toggle(alert))
   end
 
-  def build_alert_data(_), do: %__MODULE__{}
+  def build_alert_data(_, _), do: %__MODULE__{}
 
-  defp create_and_edit_metadata(alert) do
+  # if the alert is being duplicated, don't include any of the original metadata
+  defp create_and_edit_metadata(_alert, :duplicating), do: %{}
+
+  defp create_and_edit_metadata(alert, _form_type) do
     created_by =
       alert.id
       |> Alerts.get_earliest_version()
@@ -171,6 +176,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       |> originator_fallback()
 
     %{
+      created_timestamp: alert.created_timestamp,
       created_by: created_by,
       last_edited_by: last_edited_by,
       last_edited_at: alert.last_modified_timestamp
