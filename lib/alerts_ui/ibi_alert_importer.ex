@@ -33,6 +33,8 @@ defmodule AlertsUI.IBIAlertImporter do
         ingest_csv_file(path)
         Logger.info("[import #{import_id}] fixing timestamps")
         fix_invalid_timestamps()
+        # running this twice for alert 515100, why that works who knows, who cares
+        fix_invalid_timestamps()
         Logger.info("[import #{import_id}] converting legacy alerts")
         convert_ibi_alerts()
         Logger.info("[import #{import_id}] done")
