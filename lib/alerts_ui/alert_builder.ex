@@ -65,7 +65,8 @@ defmodule AlertsUI.AlertBuilder do
           severity: integer(),
           reminder_times: [NaiveDateTime.t()] | nil,
           recurrence_days: [atom()] | nil,
-          route_types_by_id: %{String.t() => Route.type_int()}
+          route_types_by_id: %{String.t() => Route.type_int()},
+          legacy: boolean() | nil
         }
   @type direction_t :: 0 | 1
   @type stop_with_context_t :: {Stop.t(), Route.id_t(), direction_t(), RoutePattern.stop_type()}

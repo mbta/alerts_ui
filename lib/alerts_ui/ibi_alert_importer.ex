@@ -293,7 +293,7 @@ defmodule AlertsUI.IBIAlertImporter do
       ibi_alert
       |> ibi_alert_to_alert_data()
       |> AlertBuilder.build_alert(from_ibi(ibi_alert, :combination), DateTime.utc_now(), options)
-      |> Map.merge(%{alert_id: ibi_alert.alert_id, legacy: true})
+      |> Map.merge(%{alert_id: ibi_alert.alert_id})
 
     Alert.changeset(am_alert, params, options)
   end
@@ -676,6 +676,8 @@ defmodule AlertsUI.IBIAlertImporter do
   def from_ibi(ibi_alert, :image_url), do: ibi_alert.alert_image_url
 
   def from_ibi(ibi_alert, :image_alternative_text), do: ibi_alert.alert_image_description
+
+  def from_ibi(_ibi_alert, :legacy), do: true
 
   def from_ibi(ibi_alert, key), do: Map.get(ibi_alert, key)
 
