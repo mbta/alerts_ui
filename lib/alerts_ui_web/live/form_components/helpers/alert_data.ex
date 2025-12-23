@@ -152,7 +152,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     |> Map.merge(effect_name_combination_and_informed_entities(alert))
     |> Map.merge(active_period_map(alert))
     |> Map.merge(reminder_times(alert))
-    |> Map.merge(notification_period(alert))
+    |> Map.merge(notification_period(alert, form_type))
     |> Map.merge(service_types(alert))
     |> Map.merge(banner_sync_toggle(alert))
   end
@@ -251,7 +251,17 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     }
   end
 
-  defp notification_period(alert) do
+  defp notification_period(alert, :duplicating) do
+    notification_period_start = shift_to_naive(alert.notification_period_start)
+    notification_specifier = get_notification_specifier(notification_period_start)
+
+    %{
+      notification_period_start: notification_period_start,
+      notification_specifier: notification_specifier
+    }
+  end
+
+  defp notification_period(alert, _form_type) do
     notification_period_start = shift_to_naive(alert.notification_period_start)
     notification_period_end = shift_to_naive(alert.notification_period_end)
     notification_specifier = get_notification_specifier(notification_period_start)

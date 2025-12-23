@@ -410,6 +410,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       assert result.active_period_end_specifier == "later_today"
       assert result.active_period_end == ~N[2024-05-03 02:00:00]
       assert result.active_period_end_date == ~D[2024-05-02]
+      assert result.notification_period_end == ~N[2024-05-03 02:00:00]
     end
 
     test "handles known duration at an end-of-service-time" do
@@ -631,6 +632,30 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       assert alert.active_period_end_time == ~T[03:00:00]
       assert alert.active_period_start_date == ~D[2024-05-02]
       assert alert.active_period_end_date == nil
+    end
+
+    test "sets notification_period_end to nil if duplicating" do
+      insert(:alert, %{
+        alert_id: "1",
+        effect: :ACCESSIBILITY_ISSUE,
+        effect_detail: "ACCESS_ISSUE",
+        header_text: "cool header text",
+        description_text: "description text",
+        informed_entity: [],
+        primary_service_type: "access",
+        active_period_start: ~U[2024-05-02 16:09:34.007545Z],
+        active_period_end: ~U[2024-05-02 18:09:34.007545Z],
+        notification_period_end: ~U[2024-05-03 06:00:00Z],
+        active_period: [
+          %{start: ~U[2024-05-02 16:09:34.007545Z], end: ~U[2024-05-02 18:09:34.007545Z]}
+        ],
+        duration_certainty: :ESTIMATED,
+        reminder_times: []
+      })
+
+      result = AlertData.build_alert_data("1", :duplicating)
+
+      assert result.notification_period_end == nil
     end
 
     test "returns no creation or editing info if duplicated" do
