@@ -282,7 +282,10 @@ defmodule AlertsUI.IBIAlertImporter do
   end
 
   def ibi_alert_to_changeset(ibi_alert, am_alert, options \\ []) do
-    options = Keyword.put(options, :no_recurrence_days_validation, true)
+    options =
+      options
+      |> Keyword.put(:no_recurrence_days_validation, true)
+      |> Keyword.put(:no_original_selections, true)
 
     params =
       ibi_alert

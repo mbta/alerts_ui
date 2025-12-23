@@ -104,7 +104,7 @@ defmodule AlertsUI.AlertBuilder do
     |> Map.merge(plaintext_reminder_selections(alert_data))
     |> Map.merge(primary_service_type(alert_data))
     |> Map.merge(cause_and_effect(alert_data))
-    |> Map.merge(original_selections(alert_data))
+    |> Map.merge(original_selections(alert_data, options))
     |> Map.merge(active_periods(alert_data, current_time, options))
     |> Map.merge(notification_periods(alert_data, current_time))
     |> Map.merge(informed_entity(alert_data, combination, options))
@@ -201,7 +201,30 @@ defmodule AlertsUI.AlertBuilder do
     }
   end
 
-  def original_selections(alert_data) do
+  def original_selections(alert_data, options \\ []) do
+    if Keyword.get(options, :no_original_selections) do
+      original_selections_from_import(alert_data)
+    else
+      original_selections_from_form(alert_data)
+    end
+  end
+
+  defp original_selections_from_import(alert_data) do
+    alert_data
+    |> Map.put(
+      :original_stop_selections,
+      Map.get(alert_data, :stop_names_and_ids)
+    )
+    |> Map.take([
+      :original_direction_selections,
+      :original_route_selections,
+      :original_stop_selections,
+      :original_trip_selections,
+      :original_facility_selections
+    ])
+  end
+
+  defp original_selections_from_form(alert_data) do
     # used to generate original_direction_selections, original_route_selection, routes, etc.
     selected_routes = Map.get(alert_data, :route_ids, [])
     # direction_id needed for original_direction_selections, child_stops_with_context
