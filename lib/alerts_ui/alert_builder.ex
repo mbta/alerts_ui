@@ -215,15 +215,13 @@ defmodule AlertsUI.AlertBuilder do
       :original_stop_selections,
       Map.get(alert_data, :stop_names_and_ids)
     )
-    |> Map.take(
-      [
-        :original_direction_selections,
-        :original_route_selections,
-        :original_stop_selections,
-        :original_trip_selections,
-        :original_facility_selections
-      ]
-    )
+    |> Map.take([
+      :original_direction_selections,
+      :original_route_selections,
+      :original_stop_selections,
+      :original_trip_selections,
+      :original_facility_selections
+    ])
   end
 
   defp original_selections_from_form(alert_data) do
