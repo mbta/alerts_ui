@@ -282,20 +282,22 @@ defmodule AlertsUIWeb.ReviewModal do
             <%= if Map.get(@alert_data, :notification_specifier, :same_as_effect_period) === :same_as_effect_period do %>
               <p class="pb-1">Same as effect period</p>
             <% else %>
-              <p class="pb-1">
-                {notification_period_end =
-                  Map.get(@alert_data, :notification_period_end) || @alert_data.active_period_end
+              <div class="pb-1">
+                <p>
+                  {start_text =
+                    TimeRangeDurationText.get_start_text(@alert_data.notification_period_start)
 
-                start_text =
-                  TimeRangeDurationText.get_start_text(@alert_data.notification_period_start)
+                  start_text <> " until "}
+                </p>
+                <p>
+                  {notification_period_end =
+                    Map.get(@alert_data, :notification_period_end) || @alert_data.active_period_end
 
-                end_text =
                   notification_period_end
                   |> end_is_in_past?()
-                  |> TimeRangeDurationText.notification_period_end_text(notification_period_end)
-
-                start_text <> " until " <> end_text}
-              </p>
+                  |> TimeRangeDurationText.notification_period_end_text(notification_period_end)}
+                </p>
+              </div>
             <% end %>
 
             <p class="font-bold pb-1">Reminders</p>
