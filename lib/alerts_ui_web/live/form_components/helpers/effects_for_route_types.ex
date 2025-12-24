@@ -2,8 +2,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes do
   @moduledoc """
   associates route types with their subset of effects
   """
+  alias AlertsUI.Configs.ModeEffect
   alias AlertsUI.Models.Effect
 
+  @type route_type_names_t() :: :bus | :commuter_rail | :facility | :ferry | :subway | :systemwide
+  @spec list_effects(route_type_names_t() | nil) ::
+          [String.t()]
   @doc """
   Returns lists of effect names
   ## Examples
@@ -22,80 +26,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes do
   """
   def list_effects(nil), do: Effect.effect_names()
 
-  def list_effects(:subway),
-    do: [
-      "Delay",
-      "Extra Service",
-      "Schedule Change",
-      "Service Change",
-      "Shuttle",
-      "Station Closure",
-      "Station Issue",
-      "Suspension"
-    ]
-
-  def list_effects(:commuter_rail),
-    do: [
-      "Cancellation",
-      "Delay",
-      "Extra Service",
-      "Schedule Change",
-      "Service Change",
-      "Shuttle",
-      "Station Closure",
-      "Station Issue",
-      "Suspension",
-      "Track Change"
-    ]
-
-  def list_effects(:bus),
-    do: [
-      "Delay",
-      "Detour",
-      "Extra Service",
-      "Multi-Route Detour",
-      "Schedule Change",
-      "Service Change",
-      "Snow Route",
-      "Stop Closure",
-      "Stop Move",
-      "Stop Shoveling",
-      "Suspension"
-    ]
-
-  def list_effects(:ferry),
-    do: [
-      "Cancellation",
-      "Delay",
-      "Dock Closure",
-      "Dock Issue",
-      "Extra Service",
-      "Schedule Change",
-      "Service Change",
-      "Shuttle",
-      "Suspension"
-    ]
-
-  def list_effects(:facility),
-    do: [
-      "Elevator Closure",
-      "Parking Closure",
-      "Access Issue",
-      "Bike Issue",
-      "Escalator Closure",
-      "Parking Issue",
-      "Facility Issue"
-    ]
-
-  def list_effects(:systemwide),
-    do: [
-      "Amber Alert",
-      "Delay",
-      "Extra Service",
-      "Policy Change",
-      "Schedule Change",
-      "Service Change",
-      "Summary",
-      "Suspension"
-    ]
+  def list_effects(route_type_name) do
+    ModeEffect.mode_effect()[route_type_name] |> Map.keys()
+  end
 end
