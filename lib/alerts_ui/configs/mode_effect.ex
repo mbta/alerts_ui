@@ -26,7 +26,6 @@ defmodule AlertsUI.Configs.ModeEffect do
       "Track Change" => %{combination: :RDTS}
     },
     bus: %{
-      "Cancellation" => %{combination: :RDS},
       "Delay" => %{combination: :RDS},
       "Detour" => %{combination: :RDS},
       "Extra Service" => %{combination: :R},
@@ -50,13 +49,13 @@ defmodule AlertsUI.Configs.ModeEffect do
       "Suspension" => %{combination: :RDS}
     },
     facility: %{
-      "Elevator Closure" => %{combination: :ACCESS},
-      "Parking Closure" => %{combination: :ACCESS},
       "Access Issue" => %{combination: :ACCESS},
       "Bike Issue" => %{combination: :ACCESS},
+      "Elevator Closure" => %{combination: :ACCESS},
       "Escalator Closure" => %{combination: :ACCESS},
-      "Parking Issue" => %{combination: :ACCESS},
-      "Facility Issue" => %{combination: :ACCESS}
+      "Facility Issue" => %{combination: :ACCESS},
+      "Parking Closure" => %{combination: :ACCESS},
+      "Parking Issue" => %{combination: :ACCESS}
     },
     systemwide: %{
       "Amber Alert" => %{combination: nil},
