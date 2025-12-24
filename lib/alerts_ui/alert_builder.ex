@@ -362,7 +362,7 @@ defmodule AlertsUI.AlertBuilder do
 
     notification_period_end =
       cond do
-        Map.get(alert_data, :notification_period_end) ->
+        Map.get(alert_data, :notification_period_end) && Map.get(alert_data, :legacy) ->
           Map.get(alert_data, :notification_period_end)
           |> ensure_utc_or_nil()
 
