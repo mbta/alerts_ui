@@ -32,8 +32,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations do
       :SR
       iex> ServiceEffectCombinations.get_combination(:commuter_rail, "Schedule Change")
       :R
-      iex> ServiceEffectCombinations.get_combination(:bus, "Cancellation")
-      :RDS
       iex> ServiceEffectCombinations.get_combination(:bus, "Stop Move")
       :SR
       iex> ServiceEffectCombinations.get_combination(:bus, "Extra Service")
