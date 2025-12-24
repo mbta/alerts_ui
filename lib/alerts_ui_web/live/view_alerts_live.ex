@@ -130,7 +130,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   @impl true
   # Custom sort for the End column, given complicated sort expectations there
   def handle_event("sort-alerts", %{"order" => order}, socket)
-      when order == "notification_period_end" do
+      when order in ["notification_period_end", "active_period_end"] do
     flop = socket.assigns.meta.flop
 
     # Need to mimic Flop.push_order in a custom way because push_order
@@ -143,7 +143,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     timefield = socket.assigns.form.params["timeline"]
 
     new_order_directions =
-      if hd(flop.order_by) == :notification_period_end do
+      if hd(flop.order_by) in [:notification_period_end, :active_period_end] do
         flop.order_directions
         |> Enum.map(&reverse_order_direction(&1))
       else
@@ -530,7 +530,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   @spec timeline_filter_past?(any()) :: boolean()
   def timeline_filter_past?(%{
-        "filters" => %{"3" => %{"field" => "timeline", "value" => "past"}}
+        "filter" => %{"timeline" => "past"}
       }),
       do: true
 

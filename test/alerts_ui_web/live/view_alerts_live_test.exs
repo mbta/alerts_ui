@@ -548,10 +548,23 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
     end
 
     @tag :logged_in_user
-    test "past timeline filter renders end date desc", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/alerts?filter[timeline]=past")
+    test "past timeline filter renders end date desc, and reversing sort works", %{conn: conn} do
+      {:ok, view, html} = live(conn, "/alerts?filter[timeline]=past")
+
+      assert element(view, "th[aria-sort='descending'] span.order-direction") |> render() =~
+               "hero-arrow-down"
 
       assert get_alert_id_order(html) == ["11600", "11500", "10700", "11300", "11700", "11200"]
+
+      html =
+        view
+        |> element("a", "End")
+        |> render_click()
+
+      assert element(view, "th[aria-sort='ascending'] span.order-direction") |> render() =~
+               "hero-arrow-up"
+
+      assert get_alert_id_order(html) == ["11200", "11700", "11300", "10700", "11500", "11600"]
     end
 
     @tag :logged_in_user
