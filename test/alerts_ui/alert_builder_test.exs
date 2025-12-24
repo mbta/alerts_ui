@@ -278,7 +278,7 @@ defmodule AlertsUI.AlertBuilderTest do
           cause_detail: "DISABLED_TRAIN",
           notification_period_start: ~N[2024-04-30 05:52:00],
           notification_period_end: ~N[2025-10-13 17:00:00],
-          severity: 3,
+          severity: 3
         }
 
         result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 11:54:00Z])
