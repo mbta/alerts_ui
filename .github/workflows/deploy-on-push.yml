@@ -19,4 +19,9 @@ jobs:
         with:
           environment: dev-orange
         secrets: inherit
+    call-deploy-staging:
+        uses: ./.github/workflows/deploy-dev.yml
+        with:
+          environment: staging
+        secrets: inherit
 
