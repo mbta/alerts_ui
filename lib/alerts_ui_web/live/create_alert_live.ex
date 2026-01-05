@@ -44,6 +44,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   alias AlertsUIWeb.FormComponents.Helpers.{
     AlertData,
+    DefaultSeverity,
     EffectsForRouteTypes,
     ErrorFormatter,
     GreenLine,
@@ -376,17 +377,21 @@ defmodule AlertsUIWeb.CreateAlertLive do
     route_type = Map.get(alert_data, :route_type)
     effect_name = Map.get(alert_data, :effect_name)
 
-    combination =
+    {combination, default_severity} =
       if is_nil(route_type) and
            effect_name in EffectsForRouteTypes.list_effects(:facility) do
-        :ACCESS
+        combination = :ACCESS
+        default_severity = DefaultSeverity.get_default_severity(:facility, effect_name)
+        {combination, default_severity}
       else
-        ServiceEffectCombinations.get_combination(route_type, effect_name)
+        combination = ServiceEffectCombinations.get_combination(route_type, effect_name)
+        default_severity = DefaultSeverity.get_default_severity(route_type, effect_name)
+        {combination, default_severity}
       end
 
     assigns = %{
       progress: get_step_by_name(socket.assigns.progress.next),
-      alert_data: Map.merge(alert_data, %{combination: combination}),
+      alert_data: Map.merge(alert_data, %{combination: combination, severity: default_severity}),
       combination: combination,
       selected_schedules: nil,
       selected_facility: nil,

@@ -92,6 +92,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
       label: "Alert Details"
     },
     route_type: 4,
+    effect_name: "Delay",
     combination: :RDT,
     alert_data: %{},
     selected_facility: nil,
@@ -110,6 +111,30 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
 
       assert view
              |> render() =~ ~s(fog)
+    end
+  end
+
+  describe "severity" do
+    test "gets default severity correctly" do
+      {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
+
+      assert view
+             |> render() =~ ~s(about 10 minutes)
+    end
+
+    test "allows severity to be set by user" do
+      {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_details" => %{
+          "severity" => 7
+        }
+      })
+
+      assert view
+             |> render() =~ ~s(about 30 minutes)
     end
   end
 
@@ -528,7 +553,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         view
         |> element("#details_form")
         |> render_change(%{
-          alert_details: %{cause_detail: "ICE_IN_HARBOR"}
+          alert_details: %{cause_detail: "ICE_IN_HARBOR", severity: 4}
         })
 
         assert view
