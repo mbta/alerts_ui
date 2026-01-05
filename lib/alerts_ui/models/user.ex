@@ -8,7 +8,7 @@ defmodule AlertsUI.Models.User do
   alias AlertsUI.Models.Alert
 
   @type id :: Ecto.UUID
-  @type role :: :user | :admin
+  @type role :: :viewer | :author | :developer
 
   @type t :: %__MODULE__{
           # User doesn't have an id until they create an alert
@@ -18,7 +18,7 @@ defmodule AlertsUI.Models.User do
           email: String.t(),
           first_name: String.t(),
           last_name: String.t(),
-          role: role()
+          roles: [role()]
         }
 
   schema "users" do
@@ -26,7 +26,7 @@ defmodule AlertsUI.Models.User do
     field :keycloak_id, :string
     field :first_name, :string
     field :last_name, :string
-    field :role, Ecto.Enum, values: [:user, :admin]
+    field :roles, {:array, Ecto.Enum}, virtual: true, values: [:viewer, :author, :developer]
     has_many :alerts, Alert
 
     timestamps()
@@ -35,8 +35,8 @@ defmodule AlertsUI.Models.User do
   @doc false
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:email, :keycloak_id, :first_name, :last_name, :role])
-    |> validate_required([:email, :first_name, :last_name, :role])
+    |> cast(attrs, [:email, :keycloak_id, :first_name, :last_name])
+    |> validate_required([:email, :first_name, :last_name])
     |> unique_constraint(:email)
   end
 
@@ -48,16 +48,16 @@ defmodule AlertsUI.Models.User do
           email :: String.t(),
           first_name :: String.t(),
           last_name :: String.t(),
-          role :: role()
+          roles :: [role()]
         ) :: t()
-  def new(keycloak_id, email, first_name, last_name, role \\ :user) do
+  def new(keycloak_id, email, first_name, last_name, roles \\ [:viewer]) do
     %__MODULE__{
       id: nil,
       keycloak_id: keycloak_id,
       email: email,
       first_name: first_name,
       last_name: last_name,
-      role: role
+      roles: roles
     }
   end
 
