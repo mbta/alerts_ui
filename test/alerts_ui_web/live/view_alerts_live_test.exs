@@ -1210,7 +1210,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
             duration_certainty: :KNOWN
           })
 
-        expected = "Jun 29"
+        expected = "Jun 29, 2025"
 
         actual =
           AlertsUIWeb.ViewAlertsLive.format_end_time(
