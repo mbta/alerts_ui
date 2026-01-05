@@ -1,6 +1,6 @@
 <div id="view_alerts_live_view" class="h-[calc(100%-4rem)] mt-10 mb-6 mx-6 flex flex-col">
   <div class="flex justify-between">
-    <.button_primary_link href="/alerts/new" class="whitespace-nowrap">
+    <.button_primary_link :if={Helpers.is_author?(@current_user)} href="/alerts/new" class="whitespace-nowrap">
       <.icon name="hero-plus" class="w-6 h-6 mr-1" />
       <span class="font-medium">
         Create new alert
@@ -102,7 +102,7 @@
       <:action :let={alert} label="Actions" col_style="width: 128px">
         <div class="inline-flex justify-end space-x-2 w-full">
           <.button_secondary_link
-            :if={!AlertsUIWeb.FormComponents.Helpers.Helpers.alert_is_closed(alert)}
+            :if={!AlertsUIWeb.FormComponents.Helpers.Helpers.alert_is_closed(alert) && Helpers.is_author?(@current_user)}
             id={"edit-button-#{alert.alert_id}"}
             href={~p"/alerts/edit?alert_id=#{alert.alert_id}"}
             class="inline-flex rounded !px-2 !py-[3px]"
@@ -110,7 +110,7 @@
             <.icon name="hero-pencil-solid" class="w-4 h-4" />
           </.button_secondary_link>
           <.button_secondary_link
-            :if={!AlertsUIWeb.FormComponents.Helpers.Helpers.alert_is_closed(alert)}
+            :if={!AlertsUIWeb.FormComponents.Helpers.Helpers.alert_is_closed(alert) && Helpers.is_author?(@current_user)}
             id={"close-button-#{alert.alert_id}"}
             class="inline-flex rounded !px-2 !py-[3px]"
             phx-click={
@@ -130,6 +130,7 @@
             </:toggle>
             <:menu>
               <.link
+                :if={Helpers.is_author?(@current_user)}
                 id={"duplicate-button-#{alert.alert_id}"}
                 href={~p"/alerts/duplicate?alert_id=#{alert.alert_id}"}
                 class="inline-flex items-center gap-1 leading-6 w-full px-2 autofocus hover:bg-bg-elevation-4"
@@ -164,5 +165,6 @@
     cancel_alert={true}
     cancel_event_name="close_details"
     target_id="#view_alerts_live_view"
+    current_user={@current_user}
   />
 </div>

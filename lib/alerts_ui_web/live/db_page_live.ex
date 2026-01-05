@@ -5,6 +5,7 @@ defmodule AlertsUIWeb.DBPageLive do
 
   use AlertsUIWeb, :live_view
   alias AlertsUI.Alerts
+  alias AlertsUIWeb.Helpers
 
   @ten_seconds_in_ms 10_000
 

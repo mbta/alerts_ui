@@ -19,7 +19,7 @@
         <th class="border p-3">Primary service type</th>
         <th :if={@show_informed_entity} class="border p-3">Informed entity</th>
         <th class="border p-3">Is draft</th>
-        <th class="border p-3"></th>
+        <th :if={Helpers.is_author?(@current_user)} class="border p-3"></th>
       </tr>
     </thead>
 
@@ -49,7 +49,7 @@
             {inspect(informed_entity, pretty: true)}
           </td>
           <td class="border p-3">{if draft, do: draft, else: ""}</td>
-          <td class="border p-3">
+          <td :if={Helpers.is_author?(@current_user)} class="border p-3">
             <.button_danger
               class="btn !min-h-[24px] h-auto font-normal"
               phx-click={show_modal("delete-alert-modal-#{alert_id}")}

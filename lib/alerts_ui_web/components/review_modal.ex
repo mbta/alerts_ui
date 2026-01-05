@@ -15,11 +15,12 @@ defmodule AlertsUIWeb.ReviewModal do
 
   alias AlertsUIWeb.FormComponents.Helpers.{
     ContentFormatter,
-    Helpers,
     RecurringDurationText,
     SelectFormatter,
     TimeRangeDurationText
   }
+  alias AlertsUIWeb.FormComponents.Helpers.Helpers, as: FormHelpers
+  alias AlertsUIWeb.Helpers
 
   alias Phoenix.LiveView.JS
 
@@ -389,6 +390,7 @@ defmodule AlertsUIWeb.ReviewModal do
       <:footer :if={!@form_type}>
         <div class="flex flex-row justify-end px-4 py-4 gap-2">
           <%!-- food for thought: should type=button be here or in the component? --%>
+          <%= if Helpers.is_author?(@current_user) do %>
           <.button_danger
             :if={ActiveStatus.get_alert_status(@alert_data) != :past}
             type="button"
@@ -436,6 +438,7 @@ defmodule AlertsUIWeb.ReviewModal do
             >
               Edit this alert
             </.button_primary>
+          <% end %>
           <% end %>
         </div>
       </:footer>
@@ -527,7 +530,7 @@ defmodule AlertsUIWeb.ReviewModal do
           {RecurringDurationText.recurring_duration_recurrence_days(%{
             "recurrence_days" => @alert_data.recurrence_days
           })
-          |> Helpers.upcase_first_letter()}
+          |> FormHelpers.upcase_first_letter()}
         </p>
         <p :if={!@closed_before_start?}>
           {RecurringDurationText.recurring_duration_time_range(
