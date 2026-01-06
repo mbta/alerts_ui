@@ -430,6 +430,9 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         send(view.pid, {:selected_schedules, [@schedule]})
 
         open_review_modal(view)
+        # This pops up because phoenix doesn't know we set the trip_ids,
+        # But we clearly do, as the assertion below attests.
+        dismiss_prediction_warning(view)
 
         assert render(view) =~ ~r/Routes:.*Framingham\/Worcester Line/s
         assert render(view) =~ ~r/Direction:.*Inbound/s

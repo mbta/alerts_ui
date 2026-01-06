@@ -59,6 +59,12 @@ defmodule Test.Support.Helpers do
     |> render_click()
   end
 
+  def dismiss_prediction_warning(view) do
+    view
+    |> element("button", "Yes, continue")
+    |> render_click()
+  end
+
   def fill_out_required_form_fields(view, affected_service) do
     fill_out_form(view, "#service_form", affected_service)
   end
