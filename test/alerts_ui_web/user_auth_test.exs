@@ -5,6 +5,8 @@ defmodule AlertsUIWeb.UserAuthTest do
   import AlertsUI.UsersFixtures
   import Mock
   import Test.Support.Helpers
+  import Phoenix.LiveViewTest
+  import AlertsUI.Support.Factory
 
   alias AlertsUIWeb.UserAuth
   alias Oidcc.{ClientContext, Token}
@@ -292,6 +294,54 @@ defmodule AlertsUIWeb.UserAuthTest do
 
         refute conn.status
       end
+    end
+  end
+
+  describe "routes that require :author role" do
+    @tag :logged_in_user
+    test "author users can access the alert creation flow", %{conn: conn} do
+      {:ok, _view, html} = live(conn, "/alerts/new")
+      assert html =~ "Creating New Alert"
+    end
+
+    @tag :logged_in_viewer
+    test "non-author users cannot access alert creation flow", %{conn: conn} do
+      {:error,
+       {:redirect,
+        %{to: "/", flash: %{"error" => "You don't have permission to access that page"}}}} =
+        live(conn, "/alerts/new")
+    end
+
+    @tag :logged_in_user
+    test "author users can access alert editing flow", %{conn: conn} do
+      insert(:alert, alert_id: "1")
+      {:ok, _view, html} = live(conn, "/alerts/edit?alert_id=1")
+      assert html =~ "Editing Alert"
+    end
+
+    @tag :logged_in_viewer
+    test "non-author users cannot access alert editing flow", %{conn: conn} do
+      {:error,
+       {:redirect,
+        %{to: "/", flash: %{"error" => "You don't have permission to access that page"}}}} =
+        live(conn, "/alerts/edit?alert_id=1")
+    end
+  end
+
+  describe "routes that require :developer role" do
+    @tag :logged_in_developer
+    test "developer users can see the database view", %{conn: conn} do
+      {:ok, _view, html} = live(conn, "/db")
+      # a button that only exists on the db view
+      assert html =~ "Show informed entity"
+    end
+
+    @tag :logged_in_viewer
+    test "non-developer users cannot see the database view", %{conn: conn} do
+      {:error,
+       {:redirect,
+        %{to: "/", flash: %{"error" => "You don't have permission to access that page"}}}} =
+        live(conn, "/db")
     end
   end
 end

@@ -30,7 +30,7 @@ defmodule AlertsUI.UsersFixtures do
   eg user_fixture(:user, %{first_name: "Dr", last_name: "Acula"})
   """
   def user_fixture(
-        roles \\ [:viewer, :author],
+        roles \\ [:viewer, :author, :developer],
         %{first_name: first_name, last_name: last_name} \\ %{
           first_name: "Firstname",
           last_name: "Lastname"
