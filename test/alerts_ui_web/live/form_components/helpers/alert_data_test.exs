@@ -82,7 +82,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       alert =
         insert(:alert, %{
           alert_id: "1",
-          effect: :SIGNIFICANT_DELAYS,
+          effect: :OTHER_EFFECT,
           effect_detail: "DELAY",
           header_text: "cool header text",
           description_text: "description text",
@@ -153,7 +153,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       alert =
         insert(:alert, %{
           alert_id: "1",
-          effect: :SIGNIFICANT_DELAYS,
+          effect: :OTHER_EFFECT,
           effect_detail: "DELAY",
           header_text: "cool header text",
           description_text: "description text",
@@ -274,7 +274,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
     test "gets route ids from original_route_selections field" do
       insert(:alert, %{
         alert_id: "1",
-        effect: :SIGNIFICANT_DELAYS,
+        effect: :OTHER_EFFECT,
         effect_detail: "DELAY",
         header_text: "cool header text",
         description_text: "description text",
@@ -305,7 +305,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       alert =
         insert(:alert, %{
           alert_id: "1",
-          effect: :SIGNIFICANT_DELAYS,
+          effect: :OTHER_EFFECT,
           effect_detail: "DELAY",
           header_text: "cool header text",
           description_text: "description text",
@@ -338,7 +338,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       alert =
         insert(:alert, %{
           alert_id: "1",
-          effect: :SIGNIFICANT_DELAYS,
+          effect: :OTHER_EFFECT,
           effect_detail: "DELAY",
           header_text: "cool header text",
           description_text: "description text",

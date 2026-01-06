@@ -67,7 +67,7 @@ defmodule AlertsUI.AlertBuilderTest do
         result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 05:54:00Z])
 
         assert result == %{
-                 effect: :SIGNIFICANT_DELAYS,
+                 effect: :OTHER_EFFECT,
                  effect_name: "Delay",
                  description_text: "ok",
                  header_text: "hello",
@@ -413,7 +413,7 @@ defmodule AlertsUI.AlertBuilderTest do
         result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 05:54:00Z])
 
         assert result == %{
-                 effect: :SIGNIFICANT_DELAYS,
+                 effect: :OTHER_EFFECT,
                  description_text: "ok",
                  header_text: "hello",
                  url: nil,
@@ -774,7 +774,7 @@ defmodule AlertsUI.AlertBuilderTest do
         result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 05:54:00Z])
 
         assert result == %{
-                 effect: :SIGNIFICANT_DELAYS,
+                 effect: :OTHER_EFFECT,
                  effect_name: "Delay",
                  description_text: "ok",
                  service_effect_text: nil,

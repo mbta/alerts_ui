@@ -138,7 +138,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         alert_params =
           build(:alert_map, %{
             alert_id: "123",
-            effect: :SIGNIFICANT_DELAYS,
+            effect: :OTHER_EFFECT,
             effect_detail: "DELAY",
             header_text: "cool header text",
             severity: 3,
@@ -192,7 +192,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
           build(:alert_map, %{
             active_period_start: @tomorrow_datetime,
             alert_id: "123",
-            effect: :SIGNIFICANT_DELAYS,
+            effect: :OTHER_EFFECT,
             effect_detail: "DELAY",
             header_text: "cool header text",
             severity: 3,
@@ -1212,7 +1212,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         alert_params =
           build(:alert_map, %{
             alert_id: "123",
-            effect: :SIGNIFICANT_DELAYS,
+            effect: :OTHER_EFFECT,
             effect_detail: "DELAY",
             header_text: "cool header text",
             severity: 3,
