@@ -342,7 +342,7 @@ defmodule AlertsUI.Models.Alert do
   end
 
   def service_types(%__MODULE__{informed_entity: []} = alert) do
-    if alert.legacy? do
+    if alert.legacy do
       alert.original_mode_selections
     else
       []

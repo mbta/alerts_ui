@@ -338,6 +338,7 @@ defmodule AlertsUI.IBIAlertImporter do
       :original_route_selections,
       :original_trip_selections,
       :original_facility_selections,
+      :original_mode_selections,
       :created_timestamp,
       :closed_timestamp,
       :last_modified_timestamp,
@@ -394,15 +395,7 @@ defmodule AlertsUI.IBIAlertImporter do
 
   @spec from_ibi(IBIAlert.t(), atom()) :: any()
   def from_ibi(ibi_alert, :route_type) do
-    case ibi_alert.gui_mode_name do
-      "Systemwide" -> nil
-      "Access" -> nil
-      "Elev/Esc" -> nil
-      "Subway" -> 1
-      "Commuter Rail" -> 2
-      "Bus" -> 3
-      "Boat" -> 4
-    end
+    gui_mode_name_to_route_type_int(ibi_alert.gui_mode_name)
   end
 
   def from_ibi(ibi_alert, :route_ids) do
@@ -591,6 +584,21 @@ defmodule AlertsUI.IBIAlertImporter do
     split_combined_entities(ibi_alert.informed_trip_list)
   end
 
+  def from_ibi(ibi_alert, :original_mode_selections) do
+    case ibi_alert.gui_mode_name do
+      'Systemwide' ->
+        ibi_alert.affent_list
+        |> String.replace("MBTA;", "")
+        |> String.split(",")
+        |> Enum.map(fn affent ->
+          String.trim_leading(affent)
+          |> gui_mode_name_to_route_type_int()
+        end)
+        |> Enum.filter(fn route_type -> !!route_type end)
+      _ -> []
+    end
+  end
+
   def from_ibi(ibi_alert, :stop_names_and_ids) do
     split_combined_entities(ibi_alert.informed_stop_list)
   end
@@ -735,6 +743,19 @@ defmodule AlertsUI.IBIAlertImporter do
       end)
     else
       []
+    end
+  end
+
+  def gui_mode_name_to_route_type_int(name) do
+    case name do
+      "Systemwide" -> nil
+      "Access" -> nil
+      "Elev/Esc" -> nil
+      "Subway" -> 1
+      "Commuter Rail" -> 2
+      "Bus" -> 3
+      "Boat" -> 4
+      _ -> nil
     end
   end
 end
