@@ -267,11 +267,16 @@ defmodule AlertsUI.IBIAlertImporter do
 
             # fix mod selections for systemwide alerts
             if latest_version.gui_mode_name == "Systemwide" do
-              final_mode_selections =
+              final_mode_source =
                 [insert | updates]
                 |> Enum.reverse()
                 |> Enum.find(& &1.affent_list)
-                |> from_ibi(:original_mode_selections)
+
+              final_mode_selection = if final_mode_source do
+                from_ibi(final_mode_source, :original_mode_selections)
+              else
+                [1, 2, 3, 4]
+              end
 
               from(
                 a in Alert,
