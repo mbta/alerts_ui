@@ -274,9 +274,11 @@ defmodule AlertsUI.IBIAlertImporter do
                 |> from_ibi(:original_mode_selections)
 
               from(
-                a in Alert, where: a.alert_id == ^latest_version.alert_id,
+                a in Alert,
+                where: a.alert_id == ^latest_version.alert_id,
                 update: [set: [original_mode_selections: ^final_mode_selections]]
-              ) |> Repo.update_all([])
+              )
+              |> Repo.update_all([])
             end
 
             # add deduplicated reminders
@@ -613,7 +615,9 @@ defmodule AlertsUI.IBIAlertImporter do
         else
           [1, 2, 3, 4]
         end
-      _ -> []
+
+      _ ->
+        []
     end
   end
 
