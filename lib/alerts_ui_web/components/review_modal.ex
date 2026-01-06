@@ -19,6 +19,7 @@ defmodule AlertsUIWeb.ReviewModal do
     SelectFormatter,
     TimeRangeDurationText
   }
+
   alias AlertsUIWeb.FormComponents.Helpers.Helpers, as: FormHelpers
   alias AlertsUIWeb.Helpers
 
@@ -390,55 +391,55 @@ defmodule AlertsUIWeb.ReviewModal do
       <:footer :if={!@form_type}>
         <div class="flex flex-row justify-end px-4 py-4 gap-2">
           <%!-- food for thought: should type=button be here or in the component? --%>
-          <%= if Helpers.is_author?(@current_user) do %>
-          <.button_danger
-            :if={ActiveStatus.get_alert_status(@alert_data) != :past}
-            type="button"
-            id="review-modal-close-alert"
-            phx-remove={hide_modal(@id)}
-            phx-click={
-              demote_modal(@id)
-              |> show_modal("close-alert-nested-modal-#{@alert_id}")
-            }
-          >
-            {if ActiveStatus.get_alert_status(@alert_data) in [
-                  :published_current,
-                  :published_upcoming
-                ],
-                do: "Close alert",
-                else: "Cancel alert"}
-          </.button_danger>
-          <.button_secondary
-            type="button"
-            class="ml-auto"
-            phx-remove={hide_modal(@id)}
-            phx-click={
-              JS.push("duplicate_alert", value: %{alert_id: @alert_id}, target: @target_id)
-              |> JS.exec("phx-remove")
-            }
-          >
-            Duplicate
-          </.button_secondary>
-          <%= if ActiveStatus.get_alert_status(@alert_data) == :past do %>
-            <.button_primary
+          <%= if Helpers.author?(@current_user) do %>
+            <.button_danger
+              :if={ActiveStatus.get_alert_status(@alert_data) != :past}
               type="button"
-              phx-remove={hide_modal(@id)}
-              phx-click={JS.push("close_details", target: @target_id) |> JS.exec("phx-remove")}
-            >
-              Done
-            </.button_primary>
-          <% else %>
-            <.button_primary
-              type="button"
+              id="review-modal-close-alert"
               phx-remove={hide_modal(@id)}
               phx-click={
-                JS.push("edit_alert", value: %{alert_id: @alert_id}, target: @target_id)
+                demote_modal(@id)
+                |> show_modal("close-alert-nested-modal-#{@alert_id}")
+              }
+            >
+              {if ActiveStatus.get_alert_status(@alert_data) in [
+                    :published_current,
+                    :published_upcoming
+                  ],
+                  do: "Close alert",
+                  else: "Cancel alert"}
+            </.button_danger>
+            <.button_secondary
+              type="button"
+              class="ml-auto"
+              phx-remove={hide_modal(@id)}
+              phx-click={
+                JS.push("duplicate_alert", value: %{alert_id: @alert_id}, target: @target_id)
                 |> JS.exec("phx-remove")
               }
             >
-              Edit this alert
-            </.button_primary>
-          <% end %>
+              Duplicate
+            </.button_secondary>
+            <%= if ActiveStatus.get_alert_status(@alert_data) == :past do %>
+              <.button_primary
+                type="button"
+                phx-remove={hide_modal(@id)}
+                phx-click={JS.push("close_details", target: @target_id) |> JS.exec("phx-remove")}
+              >
+                Done
+              </.button_primary>
+            <% else %>
+              <.button_primary
+                type="button"
+                phx-remove={hide_modal(@id)}
+                phx-click={
+                  JS.push("edit_alert", value: %{alert_id: @alert_id}, target: @target_id)
+                  |> JS.exec("phx-remove")
+                }
+              >
+                Edit this alert
+              </.button_primary>
+            <% end %>
           <% end %>
         </div>
       </:footer>

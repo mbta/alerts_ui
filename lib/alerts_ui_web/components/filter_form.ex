@@ -31,7 +31,13 @@ defmodule AlertsUIWeb.FilterForm do
 
   def filter_form(assigns) do
     ~H"""
-    <.form for={@form} id="alert-filter-form" phx-submit="apply_filter" phx-change="edit_filter" class="ml-auto">
+    <.form
+      for={@form}
+      id="alert-filter-form"
+      phx-submit="apply_filter"
+      phx-change="edit_filter"
+      class="ml-auto"
+    >
       <div class="mb-4 ml-2 flex flex-row gap-2 items-center">
         <.filter_modal form={@form} filter_count={@filter_count} />
         <.radio_switch

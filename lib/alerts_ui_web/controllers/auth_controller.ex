@@ -68,8 +68,9 @@ defmodule AlertsUIWeb.AuthController do
 
   # Parse the user's roles from the access token provided by Keycloak
   @spec parse_role(map()) :: [User.role()]
-  defp parse_role(%{"resource_access" => %{"alerts-ui" => %{"roles" => roles}}}) when is_list(roles),
-    do: roles |> Enum.map(&String.to_existing_atom/1)
+  defp parse_role(%{"resource_access" => %{"alerts-ui" => %{"roles" => roles}}})
+       when is_list(roles),
+       do: roles |> Enum.map(&String.to_existing_atom/1)
 
   defp parse_role(_), do: [:viewer]
 
