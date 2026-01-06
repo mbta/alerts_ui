@@ -98,12 +98,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationText do
   end
 
   defp duration_text(start_dt, end_dt) do
-    if NaiveDateTime.compare(start_dt, end_dt) === :lt do
+    if NaiveDateTime.diff(end_dt, start_dt, :second) > 60 do
       Interval.new(from: Timex.set(start_dt, second: 0), until: Timex.set(end_dt, second: 0))
       |> Interval.duration(:duration)
       |> Timex.format_duration(:humanized)
     else
-      ""
+      "0 minutes"
     end
   end
 

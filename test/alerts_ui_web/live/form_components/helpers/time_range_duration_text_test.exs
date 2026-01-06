@@ -17,6 +17,19 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationTextTest do
       assert expected == actual
     end
 
+    test "start and end less than 1 minute apart (eg the alert was closed immediately)" do
+      params = %{
+        "active_period_start_specifier" => "custom",
+        "active_period_start" => ~N[2024-11-27 13:00:00],
+        "active_period_end_specifier" => "custom",
+        "active_period_end" => ~N[2024-11-27 13:00:45]
+      }
+
+      expected = "Wed Nov 27, 2024 @ 1:00 PM until Wed Nov 27, 2024 @ 1:00 PM (0 minutes)"
+      actual = TimeRangeDurationText.one_time_duration_text(params)
+      assert expected == actual
+    end
+
     test "start and end 1 service day apart" do
       params = %{
         "active_period_start_specifier" => "start_of_service",
