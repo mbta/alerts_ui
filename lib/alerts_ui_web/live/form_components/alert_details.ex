@@ -53,7 +53,6 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       changeset(%__MODULE__{}, %{
         header_text: "",
         description_text: "",
-        cause_detail: "",
         url: "",
         image_url: "",
         image_alternative_text: "",
