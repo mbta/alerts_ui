@@ -121,7 +121,7 @@ defmodule AlertsUI.Models.Alert do
           original_trip_selections: [String.t()] | nil,
           original_direction_selections: [String.t()] | nil,
           original_facility_selections: [String.t()] | nil,
-          original_mode_selections: [String.t()] | nil,
+          original_mode_selections: [integer()] | nil,
           plaintext_reminder_selections: String.t() | nil,
           primary_service_type: String.t(),
           recurrence_text: String.t() | nil,
@@ -247,7 +247,7 @@ defmodule AlertsUI.Models.Alert do
     field :original_trip_selections, {:array, :string}
     field :original_direction_selections, {:array, :string}
     field :original_facility_selections, {:array, :string}
-    field :original_mode_selections, {:array, :string}
+    field :original_mode_selections, {:array, :integer}
 
     timestamps()
   end

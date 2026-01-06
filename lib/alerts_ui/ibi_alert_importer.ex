@@ -265,6 +265,20 @@ defmodule AlertsUI.IBIAlertImporter do
               |> PaperTrail.update!(origin: update.last_modified_by)
             end)
 
+            # fix mod selections for systemwide alerts
+            if latest_version.gui_mode_name == "Systemwide" do
+              final_mode_selections =
+                [insert | updates]
+                |> Enum.reverse()
+                |> Enum.find(& &1.affent_list)
+                |> from_ibi(:original_mode_selections)
+
+              from(
+                a in Alert, where: a.alert_id == ^latest_version.alert_id,
+                update: [set: [original_mode_selections: ^final_mode_selections]]
+              ) |> Repo.update_all([])
+            end
+
             # add deduplicated reminders
             all_versions_index
             |> Map.get(alert.alert_id)
@@ -586,15 +600,19 @@ defmodule AlertsUI.IBIAlertImporter do
 
   def from_ibi(ibi_alert, :original_mode_selections) do
     case ibi_alert.gui_mode_name do
-      'Systemwide' ->
-        ibi_alert.affent_list
-        |> String.replace("MBTA;", "")
-        |> String.split(",")
-        |> Enum.map(fn affent ->
-          String.trim_leading(affent)
-          |> gui_mode_name_to_route_type_int()
-        end)
-        |> Enum.filter(fn route_type -> !!route_type end)
+      "Systemwide" ->
+        if ibi_alert.affent_list do
+          ibi_alert.affent_list
+          |> String.replace("MBTA;", "")
+          |> String.split(",")
+          |> Enum.map(fn affent ->
+            String.trim_leading(affent)
+            |> gui_mode_name_to_route_type_int()
+          end)
+          |> Enum.filter(fn route_type -> !!route_type end)
+        else
+          [1, 2, 3, 4]
+        end
       _ -> []
     end
   end
