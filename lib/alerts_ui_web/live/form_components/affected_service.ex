@@ -237,7 +237,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
           Map.get(socket.assigns.available_schedules, :result)
 
         selected_schedules =
-          get_selected_schedules(available_schedules, affected_service["trip_ids"])
+          get_selected_schedules(available_schedules, changeset.trip_ids)
 
         available_stops = Map.get(socket.assigns.available_stops, :result)
         selected_stops = get_selected_stops(available_stops, affected_service["stop_names"])
@@ -352,13 +352,18 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         trip_information_by_id(
           assigns.available_schedules.result,
           Map.get(affected_service, "trip_ids", []),
-          assigns.route_type
+          assigns.route_type,
+          affected_service["direction"]
         )
       else
         %{}
       end
 
-    affected_service = Map.put(affected_service, "trip_information_by_id", trip_information_by_id)
+    affected_service =
+      Map.merge(affected_service, %{
+        "trip_information_by_id" => trip_information_by_id,
+        "trip_ids" => Map.keys(trip_information_by_id)
+      })
 
     build_changeset(%__MODULE__{}, affected_service)
   end
@@ -660,9 +665,17 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     end)
   end
 
-  def trip_information_by_id(available_schedules, trip_ids, route_type) do
+  def trip_information_by_id(available_schedules, trip_ids, route_type, direction \\ "default") do
     available_schedules
     |> Stream.filter(fn schedule -> schedule.trip.id in trip_ids end)
+    |> Stream.filter(fn schedule ->
+      direction in [
+        nil,
+        "default",
+        schedule.trip.direction_id,
+        schedule.trip.direction_id |> Integer.to_string()
+      ]
+    end)
     |> Enum.reduce(%{}, fn schedule, acc ->
       Map.put(acc, schedule.trip.id, %{
         direction_id: schedule.trip.direction_id,
