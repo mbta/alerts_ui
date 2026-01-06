@@ -272,7 +272,7 @@ defmodule AlertsUI.IBIAlertImporter do
                 |> Enum.reverse()
                 |> Enum.find(& &1.affent_list)
 
-              final_mode_selection = if final_mode_source do
+              final_mode_selections = if final_mode_source do
                 from_ibi(final_mode_source, :original_mode_selections)
               else
                 [1, 2, 3, 4]
