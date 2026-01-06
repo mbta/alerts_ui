@@ -17,7 +17,7 @@ defmodule AlertsUI.UsersFixtures do
         email: unique_user_email(),
         first_name: "some first_name",
         last_name: "some last_name",
-        role: :user
+        roles: [:viewer]
       })
       |> Users.create_user()
 
@@ -26,17 +26,17 @@ defmodule AlertsUI.UsersFixtures do
 
   @doc """
   Creates a User
-  If you want to pass in a different name, you also have to pass in a role
+  If you want to pass in a different name, you also have to pass in roles
   eg user_fixture(:user, %{first_name: "Dr", last_name: "Acula"})
   """
   def user_fixture(
-        role \\ :user,
+        roles \\ [:viewer, :author],
         %{first_name: first_name, last_name: last_name} \\ %{
           first_name: "Firstname",
           last_name: "Lastname"
         }
       ) do
-    User.new(unique_user_id(), unique_user_email(), first_name, last_name, role)
+    User.new(unique_user_id(), unique_user_email(), first_name, last_name, roles)
   end
 
   defp unique_user_id, do: Ecto.UUID.generate()

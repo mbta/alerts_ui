@@ -663,7 +663,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       seconduser =
         insert(:user, %{
-          role: :user,
+          roles: [:viewer],
           email: "secondfake@example.com",
           last_name: "Secondlast",
           first_name: "Secondfirst",
@@ -709,7 +709,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       seconduser =
         insert(:user, %{
-          role: :user,
+          roles: [:viewer],
           email: "secondfake@example.com",
           last_name: "Secondlast",
           first_name: "Secondfirst",

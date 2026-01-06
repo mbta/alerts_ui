@@ -37,10 +37,10 @@ defmodule AlertsUIWeb.ConnCase do
     conn = Phoenix.ConnTest.build_conn()
 
     conn =
-      if tags[:logged_in_user] do
-        log_in_user(conn)
-      else
-        conn
+      cond do
+        tags[:logged_in_user] -> log_in_user(conn)
+        tags[:logged_in_developer] -> log_in_developer(conn)
+        true -> conn
       end
 
     {:ok, conn: conn}
@@ -63,6 +63,16 @@ defmodule AlertsUIWeb.ConnCase do
     |> Phoenix.ConnTest.init_test_session(%{})
     |> Plug.Conn.put_session(:user, user)
     |> Plug.Conn.put_session(:logout_uri, logout_uri())
+  end
+
+  def log_in_viewer(conn) do
+    user = AlertsUI.UsersFixtures.user_fixture([:viewer])
+    log_in_user(conn, user)
+  end
+
+  def log_in_developer(conn) do
+    user = AlertsUI.UsersFixtures.user_fixture([:viewer, :developer])
+    log_in_user(conn, user)
   end
 
   def logout_uri, do: "http://oidc.example/end_session_uri"
