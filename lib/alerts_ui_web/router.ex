@@ -94,6 +94,8 @@ defmodule AlertsUIWeb.Router do
     # Authenticated pages
     pipe_through [:redirect_prod_http, :browser, :require_authenticated_user, :require_developer]
 
+    get("/_version", VersionController, :index)
+
     live_session :require_developer,
       on_mount: [
         {AlertsUIWeb.UserAuth, :ensure_authenticated},
@@ -131,7 +133,6 @@ defmodule AlertsUIWeb.Router do
 
   scope "/", AlertsUIWeb do
     get("/_health", HealthController, :index)
-    get("/_version", VersionController, :index)
   end
 
   # Other scopes may use custom stacks.
