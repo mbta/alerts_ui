@@ -303,7 +303,7 @@ defmodule AlertsUIWeb.ReviewModal do
             <p class="font-bold pb-1">Reminders</p>
             <%= if @alert_data.reminder_times != [] do %>
               <div class="pb-4">
-                <%= for reminder <- Enum.sort_by(@alert_data.reminder_times, &(&1.time)) do %>
+                <%= for reminder <- Enum.sort_by(@alert_data.reminder_times, &(&1.time), NaiveDateTime) do %>
                   <p>
                     {Calendar.strftime(reminder.time, "%a %m/%d/%Y %-I:%M %p")}
                     <span :if={ReminderTimes.sent?(reminder.time)} class="text-text-secondary">
