@@ -1078,7 +1078,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
               alert_id: "123",
               header_text: "example header text",
               informed_entity: [Map.from_struct(ie)],
-              effect: :SIGNIFICANT_DELAYS,
+              effect: :OTHER_EFFECT,
               effect_detail: "DELAY",
               original_route_selections: [@route.id],
               original_stop_selections: ["#{@stop.name}|#{@stop.id}"],

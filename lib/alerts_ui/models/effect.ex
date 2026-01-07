@@ -131,7 +131,7 @@ defmodule AlertsUI.Models.Effect do
       {"Amber Alert", :UNKNOWN_EFFECT, "AMBER_ALERT"},
       {"Bike Issue", :OTHER_EFFECT, "BIKE_ISSUE"},
       {"Cancellation", :NO_SERVICE, "CANCELLATION"},
-      {"Delay", :SIGNIFICANT_DELAYS, "DELAY"},
+      {"Delay", :OTHER_EFFECT, "DELAY"},
       {"Detour", :DETOUR, "DETOUR"},
       {"Dock Closure", :NO_SERVICE, "DOCK_CLOSURE"},
       {"Dock Issue", :UNKNOWN_EFFECT, "DOCK_ISSUE"},
@@ -155,7 +155,7 @@ defmodule AlertsUI.Models.Effect do
       {"Stop Move", :STOP_MOVED, "STOP_MOVE"},
       {"Stop Shoveling", :OTHER_EFFECT, "STOP_SHOVELING"},
       {"Summary", :OTHER_EFFECT, "SUMMARY"},
-      {"Suspension", :DETOUR, "SUSPENSION"},
+      {"Suspension", :REDUCED_SERVICE, "SUSPENSION"},
       {"Track Change", :OTHER_EFFECT, "TRACK_CHANGE"}
     ]
   end
