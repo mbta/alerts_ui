@@ -276,7 +276,7 @@ defmodule AlertsUIWeb.ReviewModal do
             </p>
 
             <p class="font-bold pb-1">Effect period</p>
-            <.effect_end_text alert_data={@alert_data} />
+            <.effect_range_text alert_data={@alert_data} />
 
             <p class="font-bold pb-1">Notification period</p>
             <%= if Map.get(@alert_data, :notification_specifier, :same_as_effect_period) === :same_as_effect_period do %>
@@ -479,7 +479,7 @@ defmodule AlertsUIWeb.ReviewModal do
 
   attr :alert_data, :map
 
-  def effect_end_text(assigns) do
+  def effect_range_text(assigns) do
     closed_before_start? =
       safe_datetime_compare(
         assigns.alert_data.active_period_start,
