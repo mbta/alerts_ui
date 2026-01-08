@@ -23,7 +23,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations do
       iex> ServiceEffectCombinations.get_combination(:subway, "Extra Service")
       :R
       iex> ServiceEffectCombinations.get_combination(:commuter_rail, "Suspension")
-      :RDS
+      :RDTS
       iex> ServiceEffectCombinations.get_combination(:commuter_rail, "Delay")
       :RDTS
       iex> ServiceEffectCombinations.get_combination(:commuter_rail, "Cancellation")
@@ -37,7 +37,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations do
       iex> ServiceEffectCombinations.get_combination(:bus, "Extra Service")
       :R
       iex> ServiceEffectCombinations.get_combination(:ferry, "Shuttle")
-      :RDS
+      :RDTS
       iex> ServiceEffectCombinations.get_combination(:ferry, "Delay")
       :RDTS
       iex> ServiceEffectCombinations.get_combination(:ferry, "Cancellation")
