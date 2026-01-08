@@ -34,7 +34,9 @@ defmodule AlertsUIWeb.AuthController do
         } = conn,
         _params
       ) do
-    roles = parse_role(userinfo)
+    roles = userinfo
+    |> IO.inspect()
+    |> parse_role()
     user = User.new(id, email, first_name, last_name, roles)
     |> IO.inspect(label: "User from Keycloak")
     {:ok, logout_uri} = logout_uri(auth)
