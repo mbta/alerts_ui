@@ -305,6 +305,35 @@ defmodule AlertsUI.IBIAlertImporter do
     )
   end
 
+  @parent_child_stop_csv_path "./priv/importer/child-parent stop mapping.csv"
+  def build_parent_child_stop_mapping() do
+    csv_header_map =
+      @parent_child_stop_csv_path
+      |> File.open!(fn f -> IO.read(f, :line) end)
+      |> IBIAlertImportParser.parse_string(skip_headers: false)
+      |> List.first()
+      |> Enum.with_index()
+      |> Enum.into(%{})
+
+    stop_id_index = Map.get(csv_header_map, "stop_id")
+    parent_station_id_index = Map.get(csv_header_map, "parent_station")
+    parent_station_name_index = Map.get(csv_header_map, "parent_station_name")
+
+    @parent_child_stop_csv_path
+    |> File.read!()
+    |> IBIAlertImportParser.parse_string()
+    |> Enum.map(fn row ->
+      {
+        Enum.at(row, stop_id_index),
+        {
+          Enum.at(row, parent_station_id_index),
+          Enum.at(row, parent_station_name_index)
+        }
+      }
+    end)
+    |> Enum.into(%{})
+  end
+
   def ibi_alert_to_changeset(ibi_alert, am_alert, options \\ []) do
     options =
       options

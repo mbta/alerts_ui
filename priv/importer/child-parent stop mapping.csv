@@ -1,0 +1,637 @@
+stop_id,stop_name,stop_desc,parent_station,parent_station_name,platform_code,platform_name,location_type,vehicle_type
+CM-0493-S,Wareham Village,Wareham Village - CapeFLYER - Track 1 (All Trains),place-CM-0493,Wareham Village,1,Track 1 (All Trains),0,2
+CM-0547-S,Buzzards Bay,Buzzards Bay - CapeFLYER - Track 1 (All Trains),place-CM-0547,Buzzards Bay,1,Track 1 (All Trains),0,2
+CM-0564-S,Bourne,Bourne - CapeFLYER - Track 1 (All Trains),place-CM-0564,Bourne,1,Track 1 (All Trains),0,2
+CM-0790-S,Hyannis,Hyannis - CapeFLYER - Track 1 (All Trains),place-CM-0790,Hyannis,1,Track 1 (All Trains),0,2
+DB-0095,Readville,Readville - Commuter Rail,place-DB-0095,Readville,,Commuter Rail,0,2
+FB-0095-04,Readville,Readville - Commuter Rail - Track 4,place-DB-0095,Readville,4,Track 4,0,2
+FB-0095-05,Readville,Readville - Commuter Rail - Track 5,place-DB-0095,Readville,5,Track 5,0,2
+NEC-2192-02,Readville,Readville - Commuter Rail - Track 2,place-DB-0095,Readville,2,Track 2,0,2
+NEC-2192-03,Readville,Readville - Commuter Rail - Track 3,place-DB-0095,Readville,3,Track 3,0,2
+DB-2205,Fairmount,Fairmount - Commuter Rail,place-DB-2205,Fairmount,,Commuter Rail,0,2
+DB-2205-01,Fairmount,Fairmount - Commuter Rail - Track 1 (Outbound),place-DB-2205,Fairmount,1,Track 1 (Outbound),0,2
+DB-2205-02,Fairmount,Fairmount - Commuter Rail - Track 2 (South Station),place-DB-2205,Fairmount,2,Track 2 (South Station),0,2
+DB-2222,Blue Hill Avenue,Blue Hill Avenue - Commuter Rail,place-DB-2222,Blue Hill Avenue,,Commuter Rail,0,2
+DB-2222-01,Blue Hill Avenue,Blue Hill Avenue - Commuter Rail - Track 1 (Outbound),place-DB-2222,Blue Hill Avenue,1,Track 1 (Outbound),0,2
+DB-2222-02,Blue Hill Avenue,Blue Hill Avenue - Commuter Rail - Track 2 (South Station),place-DB-2222,Blue Hill Avenue,2,Track 2 (South Station),0,2
+DB-2230,Morton Street,Morton Street - Commuter Rail,place-DB-2230,Morton Street,,Commuter Rail,0,2
+DB-2230-01,Morton Street,Morton Street - Commuter Rail - Track 1 (Outbound),place-DB-2230,Morton Street,1,Track 1 (Outbound),0,2
+DB-2230-02,Morton Street,Morton Street - Commuter Rail - Track 2 (South Station),place-DB-2230,Morton Street,2,Track 2 (South Station),0,2
+DB-2240,Talbot Avenue,Talbot Avenue - Commuter Rail,place-DB-2240,Talbot Avenue,,Commuter Rail,0,2
+DB-2240-01,Talbot Avenue,Talbot Avenue - Commuter Rail - Track 1 (Outbound),place-DB-2240,Talbot Avenue,1,Track 1 (Outbound),0,2
+DB-2240-02,Talbot Avenue,Talbot Avenue - Commuter Rail - Track 2 (South Station),place-DB-2240,Talbot Avenue,2,Track 2 (South Station),0,2
+DB-2249,Four Corners/Geneva,Four Corners/Geneva - Commuter Rail,place-DB-2249,Four Corners/Geneva,,Commuter Rail,0,2
+DB-2249-01,Four Corners/Geneva,Four Corners/Geneva - Commuter Rail - Track 1 (Outbound),place-DB-2249,Four Corners/Geneva,1,Track 1 (Outbound),0,2
+DB-2249-02,Four Corners/Geneva,Four Corners/Geneva - Commuter Rail - Track 2 (South Station),place-DB-2249,Four Corners/Geneva,2,Track 2 (South Station),0,2
+DB-2258,Uphams Corner,Uphams Corner - Commuter Rail,place-DB-2258,Uphams Corner,,Commuter Rail,0,2
+DB-2258-01,Uphams Corner,Uphams Corner - Commuter Rail - Track 1 (Outbound),place-DB-2258,Uphams Corner,1,Track 1 (Outbound),0,2
+DB-2258-02,Uphams Corner,Uphams Corner - Commuter Rail - Track 2 (South Station),place-DB-2258,Uphams Corner,2,Track 2 (South Station),0,2
+DB-2265,Newmarket,Newmarket - Commuter Rail,place-DB-2265,Newmarket,,Commuter Rail,0,2
+DB-2265-01,Newmarket,Newmarket - Commuter Rail - Track 1 (Outbound),place-DB-2265,Newmarket,1,Track 1 (Outbound),0,2
+DB-2265-02,Newmarket,Newmarket - Commuter Rail - Track 2 (South Station),place-DB-2265,Newmarket,2,Track 2 (South Station),0,2
+ER-0099,River Works,River Works (GE Employees only) - Commuter Rail,place-ER-0099,River Works,,Commuter Rail,0,2
+ER-0099-01,River Works,River Works (GE Employees only) - Commuter Rail - Track 1 (Outbound),place-ER-0099,River Works,1,Track 1 (Outbound),0,2
+ER-0099-02,River Works,River Works (GE Employees only) - Commuter Rail - Track 2 (Boston),place-ER-0099,River Works,2,Track 2 (Boston),0,2
+ER-0115,Lynn,Lynn - Commuter Rail,place-ER-0115,Lynn,,Commuter Rail,0,2
+ER-0115-01,Lynn,Lynn - Commuter Rail - Track 1 (Outbound),place-ER-0115,Lynn,1,Track 1 (Outbound),0,2
+ER-0115-02,Lynn,Lynn - Commuter Rail - Track 2 (Boston),place-ER-0115,Lynn,2,Track 2 (Boston),0,2
+ER-0117-01,Lynn Interim,Lynn Interim - Commuter Rail - Track 1 (Outbound),place-ER-0117,Lynn Interim,1,Track 1 (Outbound),0,2
+ER-0117-02,Lynn Interim,Lynn Interim - Commuter Rail - Track 2 (Boston),place-ER-0117,Lynn Interim,2,Track 2 (Boston),0,2
+ER-0128,Swampscott,Swampscott - Commuter Rail,place-ER-0128,Swampscott,,Commuter Rail,0,2
+ER-0128-01,Swampscott,Swampscott - Commuter Rail - Track 1 (Outbound),place-ER-0128,Swampscott,1,Track 1 (Outbound),0,2
+ER-0128-02,Swampscott,Swampscott - Commuter Rail - Track 2 (Boston),place-ER-0128,Swampscott,2,Track 2 (Boston),0,2
+ER-0168-S,Salem,Salem - Commuter Rail - Track 1 (All Trains),place-ER-0168,Salem,1,Track 1 (All Trains),0,2
+ER-0183,Beverly,Beverly - Commuter Rail,place-ER-0183,Beverly,,Commuter Rail,0,2
+ER-0183-01,Beverly,Beverly - Commuter Rail - Track 1 (Outbound),place-ER-0183,Beverly,1,Track 1 (Outbound),0,2
+ER-0183-02,Beverly,Beverly - Commuter Rail - Track 2 (Boston),place-ER-0183,Beverly,2,Track 2 (Boston),0,2
+ER-0208,North Beverly,North Beverly - Commuter Rail,place-ER-0208,North Beverly,,Commuter Rail,0,2
+ER-0208-01,North Beverly,North Beverly - Commuter Rail - Track 1 (Outbound),place-ER-0208,North Beverly,1,Track 1 (Outbound),0,2
+ER-0208-02,North Beverly,North Beverly - Commuter Rail - Track 2 (Boston),place-ER-0208,North Beverly,2,Track 2 (Boston),0,2
+ER-0227-S,Hamilton/Wenham,Hamilton/Wenham - Commuter Rail - Track 1 (All Trains),place-ER-0227,Hamilton/Wenham,1,Track 1 (All Trains),0,2
+ER-0276-S,Ipswich,Ipswich - Commuter Rail - Track 1 (All Trains),place-ER-0276,Ipswich,1,Track 1 (All Trains),0,2
+ER-0312-S,Rowley,Rowley - Commuter Rail - Track 1 (All Trains),place-ER-0312,Rowley,1,Track 1 (All Trains),0,2
+ER-0362,Newburyport,Newburyport - Commuter Rail,place-ER-0362,Newburyport,,Commuter Rail,0,2
+ER-0362-01,Newburyport,Newburyport - Commuter Rail - Track 1,place-ER-0362,Newburyport,1,Track 1,0,2
+ER-0362-02,Newburyport,Newburyport - Commuter Rail - Track 2,place-ER-0362,Newburyport,2,Track 2,0,2
+FB-0109,Endicott,Endicott - Commuter Rail,place-FB-0109,Endicott,,Commuter Rail,0,2
+FB-0109-01,Endicott,Endicott - Commuter Rail - Track 1 (Outbound),place-FB-0109,Endicott,1,Track 1 (Outbound),0,2
+FB-0109-02,Endicott,Endicott - Commuter Rail - Track 2 (Boston),place-FB-0109,Endicott,2,Track 2 (Boston),0,2
+FB-0118,Dedham Corporate Center,Dedham Corporate Center - Commuter Rail,place-FB-0118,Dedham Corporate Center,,Commuter Rail,0,2
+FB-0118-01,Dedham Corporate Center,Dedham Corporate Center - Commuter Rail - Track 1 (Outbound),place-FB-0118,Dedham Corporate Center,1,Track 1 (Outbound),0,2
+FB-0118-02,Dedham Corporate Center,Dedham Corporate Center - Commuter Rail - Track 2 (Boston),place-FB-0118,Dedham Corporate Center,2,Track 2 (Boston),0,2
+FB-0125,Islington,Islington - Commuter Rail,place-FB-0125,Islington,,Commuter Rail,0,2
+FB-0125-01,Islington,Islington - Commuter Rail - Track 1 (Outbound),place-FB-0125,Islington,1,Track 1 (Outbound),0,2
+FB-0125-02,Islington,Islington - Commuter Rail - Track 2 (Boston),place-FB-0125,Islington,2,Track 2 (Boston),0,2
+FB-0143,Norwood Depot,Norwood Depot - Commuter Rail,place-FB-0143,Norwood Depot,,Commuter Rail,0,2
+FB-0143-01,Norwood Depot,Norwood Depot - Commuter Rail - Track 1 (Outbound),place-FB-0143,Norwood Depot,1,Track 1 (Outbound),0,2
+FB-0143-02,Norwood Depot,Norwood Depot - Commuter Rail - Track 2 (Boston),place-FB-0143,Norwood Depot,2,Track 2 (Boston),0,2
+FB-0148,Norwood Central,Norwood Central - Commuter Rail,place-FB-0148,Norwood Central,,Commuter Rail,0,2
+FB-0148-01,Norwood Central,Norwood Central - Commuter Rail - Track 1 (Outbound),place-FB-0148,Norwood Central,1,Track 1 (Outbound),0,2
+FB-0148-02,Norwood Central,Norwood Central - Commuter Rail - Track 2 (Boston),place-FB-0148,Norwood Central,2,Track 2 (Boston),0,2
+FB-0166-S,Windsor Gardens,Windsor Gardens - Commuter Rail - Track 1 (All Trains),place-FB-0166,Windsor Gardens,1,Track 1 (All Trains),0,2
+FB-0177-S,Plimptonville,Plimptonville - Commuter Rail - Track 1 (All Trains),place-FB-0177,Plimptonville,1,Track 1 (All Trains),0,2
+FB-0191-S,Walpole,Walpole - Commuter Rail - Track 1 (All Trains),place-FB-0191,Walpole,1,Track 1 (All Trains),0,2
+FB-0230-S,Norfolk,Norfolk - Commuter Rail - Track 1 (All Trains),place-FB-0230,Norfolk,1,Track 1 (All Trains),0,2
+FB-0275-S,Franklin,Franklin - Commuter Rail - Track 1 (All Trains),place-FB-0275,Franklin,1,Track 1 (All Trains),0,2
+FB-0303-S,Forge Park/495,Forge Park/495 - Commuter Rail - Track 1 (All Trains),place-FB-0303,Forge Park/495,1,Track 1 (All Trains),0,2
+FR-0064,Belmont,Belmont - Commuter Rail,place-FR-0064,Belmont,,Commuter Rail,0,2
+FR-0064-01,Belmont,Belmont - Commuter Rail - Track 1 (Outbound),place-FR-0064,Belmont,1,Track 1 (Outbound),0,2
+FR-0064-02,Belmont,Belmont - Commuter Rail - Track 2 (Boston),place-FR-0064,Belmont,2,Track 2 (Boston),0,2
+FR-0074,Waverley,Waverley - Commuter Rail,place-FR-0074,Waverley,,Commuter Rail,0,2
+FR-0074-01,Waverley,Waverley - Commuter Rail - Track 1 (Outbound),place-FR-0074,Waverley,1,Track 1 (Outbound),0,2
+FR-0074-02,Waverley,Waverley - Commuter Rail - Track 2 (Boston),place-FR-0074,Waverley,2,Track 2 (Boston),0,2
+FR-0098,Waltham,Waltham - Commuter Rail,place-FR-0098,Waltham,,Commuter Rail,0,2
+FR-0098-01,Waltham,Waltham - Commuter Rail - Track 1 (Outbound),place-FR-0098,Waltham,1,Track 1 (Outbound),0,2
+FR-0098-S,Waltham,Waltham - Commuter Rail - Track 2 (Boston),place-FR-0098,Waltham,2,Track 2 (Boston),0,2
+FR-0115,Brandeis/Roberts,Brandeis/Roberts - Commuter Rail,place-FR-0115,Brandeis/Roberts,,Commuter Rail,0,2
+FR-0115-01,Brandeis/Roberts,Brandeis/Roberts - Commuter Rail - Track 1 (Outbound),place-FR-0115,Brandeis/Roberts,1,Track 1 (Outbound),0,2
+FR-0115-02,Brandeis/Roberts,Brandeis/Roberts - Commuter Rail - Track 2 (Boston),place-FR-0115,Brandeis/Roberts,2,Track 2 (Boston),0,2
+FR-0132,Kendal Green,Kendal Green - Commuter Rail,place-FR-0132,Kendal Green,,Commuter Rail,0,2
+FR-0132-01,Kendal Green,Kendal Green - Commuter Rail - Track 1,place-FR-0132,Kendal Green,1,Track 1,0,2
+FR-0132-02,Kendal Green,Kendal Green - Commuter Rail - Track 2,place-FR-0132,Kendal Green,2,Track 2,0,2
+FR-0137,Hastings,Hastings - Commuter Rail,place-FR-0137,Hastings,,Commuter Rail,0,2
+FR-0137-01,Hastings,Hastings - Commuter Rail - Track 1,place-FR-0137,Hastings,1,Track 1,0,2
+FR-0137-02,Hastings,Hastings - Commuter Rail - Track 2,place-FR-0137,Hastings,2,Track 2,0,2
+FR-0147,Silver Hill,Silver Hill - Commuter Rail,place-FR-0147,Silver Hill,,Commuter Rail,0,2
+FR-0147-01,Silver Hill,Silver Hill - Commuter Rail - Track 1,place-FR-0147,Silver Hill,1,Track 1,0,2
+FR-0147-02,Silver Hill,Silver Hill - Commuter Rail - Track 2,place-FR-0147,Silver Hill,2,Track 2,0,2
+FR-0167,Lincoln,Lincoln - Commuter Rail,place-FR-0167,Lincoln,,Commuter Rail,0,2
+FR-0167-01,Lincoln,Lincoln - Commuter Rail - Track 1 (Outbound),place-FR-0167,Lincoln,1,Track 1 (Outbound),0,2
+FR-0167-02,Lincoln,Lincoln - Commuter Rail - Track 2 (Boston),place-FR-0167,Lincoln,2,Track 2 (Boston),0,2
+FR-0201,Concord,Concord - Commuter Rail,place-FR-0201,Concord,,Commuter Rail,0,2
+FR-0201-01,Concord,Concord - Commuter Rail - Track 1 (Outbound),place-FR-0201,Concord,1,Track 1 (Outbound),0,2
+FR-0201-02,Concord,Concord - Commuter Rail - Track 2 (Boston),place-FR-0201,Concord,2,Track 2 (Boston),0,2
+FR-0219,West Concord,West Concord - Commuter Rail,place-FR-0219,West Concord,,Commuter Rail,0,2
+FR-0219-01,West Concord,West Concord - Commuter Rail - Track 1 (Outbound),place-FR-0219,West Concord,1,Track 1 (Outbound),0,2
+FR-0219-02,West Concord,West Concord - Commuter Rail - Track 2 (Boston),place-FR-0219,West Concord,2,Track 2 (Boston),0,2
+FR-0253,South Acton,South Acton - Commuter Rail,place-FR-0253,South Acton,,Commuter Rail,0,2
+FR-0253-01,South Acton,South Acton - Commuter Rail - Track 1 (Outbound),place-FR-0253,South Acton,1,Track 1 (Outbound),0,2
+FR-0253-02,South Acton,South Acton - Commuter Rail - Track 2 (Boston),place-FR-0253,South Acton,2,Track 2 (Boston),0,2
+FR-0301,Littleton/Route 495,Littleton/Route 495 - Commuter Rail,place-FR-0301,Littleton/Route 495,,Commuter Rail,0,2
+FR-0301-01,Littleton/Route 495,Littleton/Route 495 - Commuter Rail - Track 1 (Outbound),place-FR-0301,Littleton/Route 495,1,Track 1 (Outbound),0,2
+FR-0301-02,Littleton/Route 495,Littleton/Route 495 - Commuter Rail - Track 2 (Boston),place-FR-0301,Littleton/Route 495,2,Track 2 (Boston),0,2
+FR-0361,Ayer,Ayer - Commuter Rail,place-FR-0361,Ayer,,Commuter Rail,0,2
+FR-0361-01,Ayer,Ayer - Commuter Rail - Track 1,place-FR-0361,Ayer,1,Track 1,0,2
+FR-0361-02,Ayer,Ayer - Commuter Rail - Track 2,place-FR-0361,Ayer,2,Track 2,0,2
+FR-0394,Shirley,Shirley - Commuter Rail,place-FR-0394,Shirley,,Commuter Rail,0,2
+FR-0394-01,Shirley,Shirley - Commuter Rail - Track 1,place-FR-0394,Shirley,1,Track 1,0,2
+FR-0394-02,Shirley,Shirley - Commuter Rail - Track 2,place-FR-0394,Shirley,2,Track 2,0,2
+FR-0451,North Leominster,North Leominster - Commuter Rail,place-FR-0451,North Leominster,,Commuter Rail,0,2
+FR-0451-01,North Leominster,North Leominster - Commuter Rail - Track 1 (Outbound),place-FR-0451,North Leominster,1,Track 1 (Outbound),0,2
+FR-0451-02,North Leominster,North Leominster - Commuter Rail - Track 2 (Boston),place-FR-0451,North Leominster,2,Track 2 (Boston),0,2
+FR-0494-CS,Fitchburg,Fitchburg - Commuter Rail - Track 3 (All Trains),place-FR-0494,Fitchburg,3,Track 3 (All Trains),0,2
+FR-3338-CS,Wachusett,Wachusett - Commuter Rail - Track 3 (All Trains),place-FR-3338,Wachusett,3,Track 3 (All Trains),0,2
+FRS-0054-S,Freetown,Freetown - Commuter Rail - Track 1 (All Trains),place-FRS-0054,Freetown,1,Track 1 (All Trains),0,2
+FRS-0109-S,Fall River Depot,Fall River Depot - Commuter Rail - Track 1 (All Trains),place-FRS-0109,Fall River Depot,1,Track 1 (All Trains),0,2
+FS-0049-S,Foxboro,Foxboro - Commuter Rail - Track 1 (All Trains),place-FS-0049,Foxboro,1,Track 1 (All Trains),0,2
+GB-0198,Montserrat,Montserrat - Commuter Rail,place-GB-0198,Montserrat,,Commuter Rail,0,2
+GB-0198-01,Montserrat,Montserrat - Commuter Rail - Track 1 (Outbound),place-GB-0198,Montserrat,1,Track 1 (Outbound),0,2
+GB-0198-02,Montserrat,Montserrat - Commuter Rail - Track 2 (Boston),place-GB-0198,Montserrat,2,Track 2 (Boston),0,2
+GB-0222,Prides Crossing,Prides Crossing - Commuter Rail,place-GB-0222,Prides Crossing,,Commuter Rail,0,2
+GB-0222-01,Prides Crossing,Prides Crossing - Commuter Rail - Track 1,place-GB-0222,Prides Crossing,1,Track 1,0,2
+GB-0222-02,Prides Crossing,Prides Crossing - Commuter Rail - Track 2,place-GB-0222,Prides Crossing,2,Track 2,0,2
+GB-0229,Beverly Farms,Beverly Farms - Commuter Rail,place-GB-0229,Beverly Farms,,Commuter Rail,0,2
+GB-0229-01,Beverly Farms,Beverly Farms - Commuter Rail - Track 1 (Outbound),place-GB-0229,Beverly Farms,1,Track 1 (Outbound),0,2
+GB-0229-02,Beverly Farms,Beverly Farms - Commuter Rail - Track 2 (Boston),place-GB-0229,Beverly Farms,2,Track 2 (Boston),0,2
+GB-0254,Manchester,Manchester - Commuter Rail,place-GB-0254,Manchester,,Commuter Rail,0,2
+GB-0254-01,Manchester,Manchester - Commuter Rail - Track 1 (Outbound),place-GB-0254,Manchester,1,Track 1 (Outbound),0,2
+GB-0254-02,Manchester,Manchester - Commuter Rail - Track 2 (Boston),place-GB-0254,Manchester,2,Track 2 (Boston),0,2
+GB-0296,West Gloucester,West Gloucester - Commuter Rail,place-GB-0296,West Gloucester,,Commuter Rail,0,2
+GB-0296-01,West Gloucester,West Gloucester - Commuter Rail - Track 1 (Outbound),place-GB-0296,West Gloucester,1,Track 1 (Outbound),0,2
+GB-0296-02,West Gloucester,West Gloucester - Commuter Rail - Track 2 (Boston),place-GB-0296,West Gloucester,2,Track 2 (Boston),0,2
+GB-0316-S,Gloucester,Gloucester - Commuter Rail - Track 1 (All Trains),place-GB-0316,Gloucester,1,Track 1 (All Trains),0,2
+GB-0353-S,Rockport,Rockport - Commuter Rail - Track 1 (All Trains),place-GB-0353,Rockport,1,Track 1 (All Trains),0,2
+GRB-0118-S,Weymouth Landing/East Braintree,Weymouth Landing/East Braintree - Commuter Rail - Track 1 (All Trains),place-GRB-0118,Weymouth Landing/East Braintree,1,Track 1 (All Trains),0,2
+GRB-0146-S,East Weymouth,East Weymouth - Commuter Rail - Track 1 (All Trains),place-GRB-0146,East Weymouth,1,Track 1 (All Trains),0,2
+GRB-0162-S,West Hingham,West Hingham - Commuter Rail - Track 1 (All Trains),place-GRB-0162,West Hingham,1,Track 1 (All Trains),0,2
+GRB-0183-S,Nantasket Junction,Nantasket Junction - Commuter Rail - Track 1 (All Trains),place-GRB-0183,Nantasket Junction,1,Track 1 (All Trains),0,2
+GRB-0199-S,Cohasset,Cohasset - Commuter Rail - Track 1 (All Trains),place-GRB-0199,Cohasset,1,Track 1 (All Trains),0,2
+GRB-0233-S,North Scituate,North Scituate - Commuter Rail - Track 1 (All Trains),place-GRB-0233,North Scituate,1,Track 1 (All Trains),0,2
+GRB-0276-S,Greenbush,Greenbush - Commuter Rail - Track 1 (All Trains),place-GRB-0276,Greenbush,1,Track 1 (All Trains),0,2
+KB-0351-S,Kingston,Kingston - Commuter Rail - Track 1 (All Trains),place-KB-0351,Kingston,1,Track 1 (All Trains),0,2
+MBS-0350-S,Middleborough,Middleborough - Commuter Rail - Track 1 (All trains),place-MBS-0350,Middleborough,1,Track 1 (All Trains),0,2
+MM-0150-S,Holbrook/Randolph,Holbrook/Randolph - Commuter Rail - Track 1 (All Trains),place-MM-0150,Holbrook/Randolph,1,Track 1 (All Trains),0,2
+MM-0186,Montello,Montello - Commuter Rail,place-MM-0186,Montello,,Commuter Rail,0,2
+MM-0186-CS,Montello,Montello - Commuter Rail - Track 2,place-MM-0186,Montello,2,Track 2,0,2
+MM-0186-S,Montello,Montello - Commuter Rail - Track 1,place-MM-0186,Montello,1,Track 1,0,2
+MM-0200,Brockton,Brockton - Commuter Rail,place-MM-0200,Brockton,,Commuter Rail,0,2
+MM-0200-CS,Brockton,Brockton - Commuter Rail - Track 2,place-MM-0200,Brockton,2,Track 2,0,2
+MM-0200-S,Brockton,Brockton - Commuter Rail - Track 1,place-MM-0200,Brockton,1,Track 1,0,2
+MM-0219-S,Campello,Campello - Commuter Rail - Track 1 (All Trains),place-MM-0219,Campello,1,Track 1 (All Trains),0,2
+MM-0277-S,Bridgewater,Bridgewater - Commuter Rail - Track 1 (All Trains),place-MM-0277,Bridgewater,1,Track 1 (All Trains),0,2
+MM-0356-S,Lakeville,Lakeville - Commuter Rail - Track 1 (All Trains),place-MM-0356,Lakeville,1,Track 1 (All Trains),0,2
+NB-0064-S,Roslindale Village,Roslindale Village - Commuter Rail - Track 1 (All Trains),place-NB-0064,Roslindale Village,1,Track 1 (All Trains),0,2
+NB-0072-S,Bellevue,Bellevue - Commuter Rail - Track 1 (All Trains),place-NB-0072,Bellevue,1,Track 1 (All Trains),0,2
+NB-0076-S,Highland,Highland - Commuter Rail - Track 1 (All Trains),place-NB-0076,Highland,1,Track 1 (All Trains),0,2
+NB-0080-S,West Roxbury,West Roxbury - Commuter Rail - Track 1 (All Trains),place-NB-0080,West Roxbury,1,Track 1 (All Trains),0,2
+NB-0109-S,Hersey,Hersey - Commuter Rail - Track 1 (All Trains),place-NB-0109,Hersey,1,Track 1 (All Trains),0,2
+NB-0120-S,Needham Junction,Needham Junction - Commuter Rail - Track 1 (All Trains),place-NB-0120,Needham Junction,1,Track 1 (All Trains),0,2
+NB-0127-S,Needham Center,Needham Center - Commuter Rail - Track 1 (All Trains),place-NB-0127,Needham Center,1,Track 1 (All Trains),0,2
+NB-0137-S,Needham Heights,Needham Heights - Commuter Rail - Track 1 (All Trains),place-NB-0137,Needham Heights,1,Track 1 (All Trains),0,2
+NBM-0374,East Taunton,East Taunton - Commuter Rail,place-NBM-0374,East Taunton,,Commuter Rail,0,2
+NBM-0374-01,East Taunton,East Taunton - Commuter Rail - Track 1,place-NBM-0374,East Taunton,1,Track 1,0,2
+NBM-0374-02,East Taunton,East Taunton - Commuter Rail - Track 2,place-NBM-0374,East Taunton,2,Track 2,0,2
+NBM-0523-S,Church Street,Church Street - Commuter Rail - Track 1 (All Trains),place-NBM-0523,Church Street,1,Track 1 (All Trains),0,2
+NBM-0546-S,New Bedford,New Bedford - Commuter Rail - Track 1 (All Trains),place-NBM-0546,New Bedford,1,Track 1 (All Trains),0,2
+NEC-1659-03,Wickford Junction,Wickford Junction - Commuter Rail - Track 3 (All Trains),place-NEC-1659,Wickford Junction,3,Track 3 (All Trains),0,2
+NEC-1768-03,TF Green Airport,TF Green Airport - Commuter Rail - Track 3 (All Trains),place-NEC-1768,TF Green Airport,3,Track 3 (All Trains),0,2
+NEC-1851,Providence,Providence - Commuter Rail,place-NEC-1851,Providence,,Commuter Rail,0,2
+NEC-1851-01,Providence,Providence - Commuter Rail - Track 1,place-NEC-1851,Providence,1,Track 1,0,2
+NEC-1851-02,Providence,Providence - Commuter Rail - Track 2,place-NEC-1851,Providence,2,Track 2,0,2
+NEC-1851-03,Providence,Providence - Commuter Rail - Track 3,place-NEC-1851,Providence,3,Track 3,0,2
+NEC-1851-05,Providence,Providence - Commuter Rail - Track 5,place-NEC-1851,Providence,5,Track 5,0,2
+NEC-1891,Pawtucket/Central Falls,Pawtucket/Central Falls - Commuter Rail,place-NEC-1891,Pawtucket/Central Falls,,Commuter Rail,0,2
+NEC-1891-01,Pawtucket/Central Falls,Pawtucket/Central Falls - Commuter Rail - Track 1 (Outbound),place-NEC-1891,Pawtucket/Central Falls,1,Track 1 (Outbound),0,2
+NEC-1891-02,Pawtucket/Central Falls,Pawtucket/Central Falls - Commuter Rail - Track 2 (Boston),place-NEC-1891,Pawtucket/Central Falls,2,Track 2 (Boston),0,2
+NEC-1919,South Attleboro,South Attleboro - Commuter Rail,place-NEC-1919,South Attleboro,,Commuter Rail,0,2
+NEC-1919-01,South Attleboro,South Attleboro - Commuter Rail - Track 1 (Outbound),place-NEC-1919,South Attleboro,1,Track 1 (Outbound),0,2
+NEC-1919-02,South Attleboro,South Attleboro - Commuter Rail - Track 2 (Boston),place-NEC-1919,South Attleboro,2,Track 2 (Boston),0,2
+NEC-1969,Attleboro,Attleboro - Commuter Rail,place-NEC-1969,Attleboro,,Commuter Rail,0,2
+NEC-1969-03,Attleboro,Attleboro - Commuter Rail - Track 3 (Outbound),place-NEC-1969,Attleboro,3,Track 3 (Outbound),0,2
+NEC-1969-04,Attleboro,Attleboro - Commuter Rail - Track 4 (Boston),place-NEC-1969,Attleboro,4,Track 4 (Boston),0,2
+NEC-2040,Mansfield,Mansfield - Commuter Rail,place-NEC-2040,Mansfield,,Commuter Rail,0,2
+NEC-2040-01,Mansfield,Mansfield - Commuter Rail - Track 1 (Outbound),place-NEC-2040,Mansfield,1,Track 1 (Outbound),0,2
+NEC-2040-02,Mansfield,Mansfield - Commuter Rail - Track 2 (Boston),place-NEC-2040,Mansfield,2,Track 2 (Boston),0,2
+NEC-2108,Sharon,Sharon - Commuter Rail,place-NEC-2108,Sharon,,Commuter Rail,0,2
+NEC-2108-01,Sharon,Sharon - Commuter Rail - Track 1 (Outbound),place-NEC-2108,Sharon,1,Track 1 (Outbound),0,2
+NEC-2108-02,Sharon,Sharon - Commuter Rail - Track 2 (Boston),place-NEC-2108,Sharon,2,Track 2 (Boston),0,2
+NEC-2139,Canton Junction,Canton Junction - Commuter Rail,place-NEC-2139,Canton Junction,,Commuter Rail,0,2
+NEC-2139-01,Canton Junction,Canton Junction - Commuter Rail - Track 1,place-NEC-2139,Canton Junction,1,Track 1,0,2
+NEC-2139-02,Canton Junction,Canton Junction - Commuter Rail - Track 2,place-NEC-2139,Canton Junction,2,Track 2,0,2
+SB-0150-04,Canton Junction,Canton Junction - Commuter Rail - Track 4,place-NEC-2139,Canton Junction,4,Track 4,0,2
+SB-0150-06,Canton Junction,Canton Junction - Commuter Rail - Track 6,place-NEC-2139,Canton Junction,6,Track 6,0,2
+NEC-2173,Route 128,Route 128 - Commuter Rail,place-NEC-2173,Route 128,,Commuter Rail,0,2
+NEC-2173-01,Route 128,Route 128 - Commuter Rail - Track 1 (Outbound),place-NEC-2173,Route 128,1,Track 1 (Outbound),0,2
+NEC-2173-02,Route 128,Route 128 - Commuter Rail - Track 2 (Boston),place-NEC-2173,Route 128,2,Track 2 (Boston),0,2
+NEC-2203,Hyde Park,Hyde Park - Commuter Rail,place-NEC-2203,Hyde Park,,Commuter Rail,0,2
+NEC-2203-02,Hyde Park,Hyde Park - Commuter Rail - Track 2 (South Station),place-NEC-2203,Hyde Park,2,Track 2 (South Station),0,2
+NEC-2203-03,Hyde Park,Hyde Park - Commuter Rail - Track 3 (Outbound),place-NEC-2203,Hyde Park,3,Track 3 (Outbound),0,2
+NHRML-0055,West Medford,West Medford - Commuter Rail,place-NHRML-0055,West Medford,,Commuter Rail,0,2
+NHRML-0055-01,West Medford,West Medford - Commuter Rail - Track 1 (Outbound),place-NHRML-0055,West Medford,1,Track 1 (Outbound),0,2
+NHRML-0055-02,West Medford,West Medford - Commuter Rail - Track 2 (Boston),place-NHRML-0055,West Medford,2,Track 2 (Boston),0,2
+NHRML-0073,Wedgemere,Wedgemere - Commuter Rail,place-NHRML-0073,Wedgemere,,Commuter Rail,0,2
+NHRML-0073-01,Wedgemere,Wedgemere - Commuter Rail - Track 1 (Outbound),place-NHRML-0073,Wedgemere,1,Track 1 (Outbound),0,2
+NHRML-0073-02,Wedgemere,Wedgemere - Commuter Rail - Track 2 (Boston),place-NHRML-0073,Wedgemere,2,Track 2 (Boston),0,2
+NHRML-0078,Winchester Center,Winchester Center - Commuter Rail,place-NHRML-0078,Winchester Center,,Commuter Rail,0,2
+NHRML-0078-01,Winchester Center,Winchester Center - Commuter Rail - Track 1 (Outbound),place-NHRML-0078,Winchester Center,1,Track 1 (Outbound),0,2
+NHRML-0078-02,Winchester Center,Winchester Center - Commuter Rail - Track 2 (Boston),place-NHRML-0078,Winchester Center,2,Track 2 (Boston),0,2
+NHRML-0116,Mishawum,Mishawum - Commuter Rail,place-NHRML-0116,Mishawum,,Commuter Rail,0,2
+NHRML-0116-01,Mishawum,Mishawum - Commuter Rail - Track 1 (Outbound),place-NHRML-0116,Mishawum,1,Track 1 (Outbound),0,2
+NHRML-0116-02,Mishawum,Mishawum - Commuter Rail - Track 2 (Boston),place-NHRML-0116,Mishawum,2,Track 2 (Boston),0,2
+NHRML-0127,Anderson/Woburn,Anderson/Woburn - Commuter Rail,place-NHRML-0127,Anderson/Woburn,,Commuter Rail,0,2
+NHRML-0127-01,Anderson/Woburn,Anderson/Woburn - Commuter Rail - Track 1 (Outbound),place-NHRML-0127,Anderson/Woburn,1,Track 1 (Outbound),0,2
+NHRML-0127-02,Anderson/Woburn,Anderson/Woburn - Commuter Rail - Track 2 (Boston),place-NHRML-0127,Anderson/Woburn,2,Track 2 (Boston),0,2
+NHRML-0152,Wilmington,Wilmington - Commuter Rail,place-NHRML-0152,Wilmington,,Commuter Rail,0,2
+NHRML-0152-01,Wilmington,Wilmington - Commuter Rail - Track 1 (Outbound),place-NHRML-0152,Wilmington,1,Track 1 (Outbound),0,2
+NHRML-0152-02,Wilmington,Wilmington - Commuter Rail - Track 2 (Boston),place-NHRML-0152,Wilmington,2,Track 2 (Boston),0,2
+NHRML-0218,North Billerica,North Billerica - Commuter Rail,place-NHRML-0218,North Billerica,,Commuter Rail,0,2
+NHRML-0218-01,North Billerica,North Billerica - Commuter Rail - Track 1 (Outbound),place-NHRML-0218,North Billerica,1,Track 1 (Outbound),0,2
+NHRML-0218-02,North Billerica,North Billerica - Commuter Rail - Track 2 (Boston),place-NHRML-0218,North Billerica,2,Track 2 (Boston),0,2
+NHRML-0254,Lowell,Lowell - Commuter Rail,place-NHRML-0254,Lowell,,Commuter Rail,0,2
+NHRML-0254-03,Lowell,Lowell - Commuter Rail - Track 3,place-NHRML-0254,Lowell,3,Track 3,0,2
+NHRML-0254-04,Lowell,Lowell - Commuter Rail - Track 4,place-NHRML-0254,Lowell,4,Track 4,0,2
+PB-0158-S,South Weymouth,South Weymouth - Commuter Rail - Track 1 (All Trains),place-PB-0158,South Weymouth,1,Track 1 (All Trains),0,2
+PB-0194-S,Abington,Abington - Commuter Rail - Track 1 (All Trains),place-PB-0194,Abington,1,Track 1 (All Trains),0,2
+PB-0212-S,Whitman,Whitman - Commuter Rail - Track 1 (All Trains),place-PB-0212,Whitman,1,Track 1 (All Trains),0,2
+PB-0245-S,Hanson,Hanson - Commuter Rail - Track 1 (All Trains),place-PB-0245,Hanson,1,Track 1 (All Trains),0,2
+PB-0281,Halifax,Halifax - Commuter Rail,place-PB-0281,Halifax,,Commuter Rail,0,2
+PB-0281-CS,Halifax,Halifax - Commuter Rail - Track 2,place-PB-0281,Halifax,2,Track 2,0,2
+PB-0281-S,Halifax,Halifax - Commuter Rail - Track 1 (All Trains),place-PB-0281,Halifax,1,Track 1 (All Trains),0,2
+PB-0356-S,Plymouth,Plymouth - Commuter Rail - Track 1 (All Trains),place-PB-0356,Plymouth,1,Track 1 (All Trains),0,2
+SB-0156-S,Canton Center,Canton Center - Commuter Rail - Track 1 (All Trains),place-SB-0156,Canton Center,1,Track 1 (All Trains),0,2
+SB-0189-S,Stoughton,Stoughton - Commuter Rail - Track 1 (All Trains),place-SB-0189,Stoughton,1,Track 1 (All Trains),0,2
+WML-0025,Lansdowne,Lansdowne - Commuter Rail,place-WML-0025,Lansdowne,,Commuter Rail,0,2
+WML-0025-05,Lansdowne,Lansdowne - Commuter Rail - Track 5,place-WML-0025,Lansdowne,5,Track 5,0,2
+WML-0025-07,Lansdowne,Lansdowne - Commuter Rail - Track 7,place-WML-0025,Lansdowne,7,Track 7,0,2
+WML-0035,Boston Landing,Boston Landing - Commuter Rail,place-WML-0035,Boston Landing,,Commuter Rail,0,2
+WML-0035-01,Boston Landing,Boston Landing - Commuter Rail - Track 1 (Outbound),place-WML-0035,Boston Landing,1,Track 1 (Outbound),0,2
+WML-0035-02,Boston Landing,Boston Landing - Commuter Rail - Track 2 (South Station),place-WML-0035,Boston Landing,2,Track 2 (South Station),0,2
+WML-0081-02,Newtonville,Newtonville - Commuter Rail - Track 2 (All Trains),place-WML-0081,Newtonville,2,Commuter Rail - Track 2 (All Trains),0,2
+WML-0091-02,West Newton,West Newton - Commuter Rail - Track 2 (All Trains),place-WML-0091,West Newton,2,Commuter Rail - Track 2 (All Trains),0,2
+WML-0102-02,Auburndale,Auburndale - Commuter Rail - Track 2 (All Trains),place-WML-0102,Auburndale,2,Commuter Rail - Track 2 (All Trains),0,2
+WML-0125,Wellesley Farms,Wellesley Farms - Commuter Rail,place-WML-0125,Wellesley Farms,,Commuter Rail,0,2
+WML-0125-01,Wellesley Farms,Wellesley Farms - Commuter Rail - Track 1,place-WML-0125,Wellesley Farms,1,Track 1,0,2
+WML-0125-02,Wellesley Farms,Wellesley Farms - Commuter Rail - Track 2,place-WML-0125,Wellesley Farms,2,Track 2,0,2
+WML-0135,Wellesley Hills,Wellesley Hills - Commuter Rail,place-WML-0135,Wellesley Hills,,Commuter Rail,0,2
+WML-0135-01,Wellesley Hills,Wellesley Hills - Commuter Rail - Track 1,place-WML-0135,Wellesley Hills,1,Track 1,0,2
+WML-0135-02,Wellesley Hills,Wellesley Hills - Commuter Rail - Track 2,place-WML-0135,Wellesley Hills,2,Track 2,0,2
+WML-0147,Wellesley Square,Wellesley Square - Commuter Rail,place-WML-0147,Wellesley Square,,Commuter Rail,0,2
+WML-0147-01,Wellesley Square,Wellesley Square - Commuter Rail - Track 1,place-WML-0147,Wellesley Square,1,Track 1,0,2
+WML-0147-02,Wellesley Square,Wellesley Square - Commuter Rail - Track 2,place-WML-0147,Wellesley Square,2,Track 2,0,2
+WML-0177,Natick Center,Natick Center - Commuter Rail,place-WML-0177,Natick Center,,Commuter Rail,0,2
+WML-0177-01,Natick Center,Natick Center - Commuter Rail - Track 1,place-WML-0177,Natick Center,1,Track 1,0,2
+WML-0177-02,Natick Center,Natick Center - Commuter Rail - Track 2,place-WML-0177,Natick Center,2,Track 2,0,2
+WML-0199,West Natick,West Natick - Commuter Rail,place-WML-0199,West Natick,,Commuter Rail,0,2
+WML-0199-01,West Natick,West Natick - Commuter Rail - Track 1,place-WML-0199,West Natick,1,Track 1,0,2
+WML-0199-02,West Natick,West Natick - Commuter Rail - Track 2,place-WML-0199,West Natick,2,Track 2,0,2
+WML-0214,Framingham,Framingham - Commuter Rail,place-WML-0214,Framingham,,Commuter Rail,0,2
+WML-0214-01,Framingham,Framingham - Commuter Rail - Track 1,place-WML-0214,Framingham,1,Track 1,0,2
+WML-0214-02,Framingham,Framingham - Commuter Rail - Track 2,place-WML-0214,Framingham,2,Track 2,0,2
+WML-0252,Ashland,Ashland - Commuter Rail,place-WML-0252,Ashland,,Commuter Rail,0,2
+WML-0252-01,Ashland,Ashland - Commuter Rail - Track 1 (Outbound),place-WML-0252,Ashland,1,Track 1 (Outbound),0,2
+WML-0252-02,Ashland,Ashland - Commuter Rail - Track 2 (Boston),place-WML-0252,Ashland,2,Track 2 (Boston),0,2
+WML-0274,Southborough,Southborough - Commuter Rail,place-WML-0274,Southborough,,Commuter Rail,0,2
+WML-0274-01,Southborough,Southborough - Commuter Rail - Track 1 (Outbound),place-WML-0274,Southborough,1,Track 1 (Outbound),0,2
+WML-0274-02,Southborough,Southborough - Commuter Rail - Track 2 (Boston),place-WML-0274,Southborough,2,Track 2 (Boston),0,2
+WML-0340,Westborough,Westborough - Commuter Rail,place-WML-0340,Westborough,,Commuter Rail,0,2
+WML-0340-01,Westborough,Westborough - Commuter Rail - Track 1 (Outbound),place-WML-0340,Westborough,1,Track 1 (Outbound),0,2
+WML-0340-02,Westborough,Westborough - Commuter Rail - Track 2 (Boston),place-WML-0340,Westborough,2,Track 2 (Boston),0,2
+WML-0364,Grafton,Grafton - Commuter Rail,place-WML-0364,Grafton,,Commuter Rail,0,2
+WML-0364-01,Grafton,Grafton - Commuter Rail - Track 1 (Outbound),place-WML-0364,Grafton,1,Track 1 (Outbound),0,2
+WML-0364-02,Grafton,Grafton - Commuter Rail - Track 2 (Boston),place-WML-0364,Grafton,2,Track 2 (Boston),0,2
+WML-0442-CS,Worcester,Worcester - Commuter Rail - Track 1 (All Trains),place-WML-0442,Worcester,1,Track 1 (All Trains),0,2
+WR-0062,Wyoming Hill,Wyoming Hill - Commuter Rail,place-WR-0062,Wyoming Hill,,Commuter Rail,0,2
+WR-0062-01,Wyoming Hill,Wyoming Hill - Commuter Rail - Track 1 (Outbound),place-WR-0062,Wyoming Hill,1,Track 1 (Outbound),0,2
+WR-0062-02,Wyoming Hill,Wyoming Hill - Commuter Rail - Track 2 (Boston),place-WR-0062,Wyoming Hill,2,Track 2 (Boston),0,2
+WR-0067,Melrose/Cedar Park,Melrose/Cedar Park - Commuter Rail,place-WR-0067,Melrose/Cedar Park,,Commuter Rail,0,2
+WR-0067-01,Melrose/Cedar Park,Melrose/Cedar Park - Commuter Rail - Track 1 (Outbound),place-WR-0067,Melrose/Cedar Park,1,Track 1 (Outbound),0,2
+WR-0067-02,Melrose/Cedar Park,Melrose/Cedar Park - Commuter Rail - Track 2 (Boston),place-WR-0067,Melrose/Cedar Park,2,Track 2 (Boston),0,2
+WR-0075,Melrose Highlands,Melrose Highlands - Commuter Rail,place-WR-0075,Melrose Highlands,,Commuter Rail,0,2
+WR-0075-01,Melrose Highlands,Melrose Highlands - Commuter Rail - Track 1 (Outbound),place-WR-0075,Melrose Highlands,1,Track 1 (Outbound),0,2
+WR-0075-02,Melrose Highlands,Melrose Highlands - Commuter Rail - Track 2 (Boston),place-WR-0075,Melrose Highlands,2,Track 2 (Boston),0,2
+WR-0085,Greenwood,Greenwood - Commuter Rail,place-WR-0085,Greenwood,,Commuter Rail,0,2
+WR-0085-01,Greenwood,Greenwood - Commuter Rail - Track 1 (Outbound),place-WR-0085,Greenwood,1,Track 1 (Outbound),0,2
+WR-0085-02,Greenwood,Greenwood - Commuter Rail - Track 2 (Boston),place-WR-0085,Greenwood,2,Track 2 (Boston),0,2
+WR-0099,Wakefield,Wakefield - Commuter Rail,place-WR-0099,Wakefield,,Commuter Rail,0,2
+WR-0099-01,Wakefield,Wakefield - Commuter Rail - Track 1 (Outbound),place-WR-0099,Wakefield,1,Track 1 (Outbound),0,2
+WR-0099-02,Wakefield,Wakefield - Commuter Rail - Track 2 (Boston),place-WR-0099,Wakefield,2,Track 2 (Boston),0,2
+WR-0120-S,Reading,Reading - Commuter Rail - Track 1 (All Trains),place-WR-0120,Reading,1,Track 1 (All Trains),0,2
+WR-0163-S,North Wilmington,North Wilmington - Commuter Rail - Track 1 (All Trains),place-WR-0163,North Wilmington,1,Track 1 (All Trains),0,2
+WR-0205-02,Ballardvale,Ballardvale - Commuter Rail - Track 2 (All Trains),place-WR-0205,Ballardvale,2,Track 2 (All Trains),0,2
+WR-0228-02,Andover,Andover - Commuter Rail - Track 2 (All Trains),place-WR-0228,Andover,2,Track 2 (All Trains),0,2
+WR-0264-01,Lawrence,Lawrence - Commuter Rail - Track 1 (All Trains),place-WR-0264,Lawrence,1,Track 1 (All Trains),0,2
+WR-0264-02,Lawrence,Lawrence - Commuter Rail - Track 2 (All Trains),place-WR-0264,Lawrence,2,Track 2 (All Trains),0,2
+WR-0325,Bradford,Bradford - Commuter Rail,place-WR-0325,Bradford,,Commuter Rail,0,2
+WR-0325-01,Bradford,Bradford - Commuter Rail - Track 1 (Outbound),place-WR-0325,Bradford,1,Track 1 (Outbound),0,2
+WR-0325-02,Bradford,Bradford - Commuter Rail - Track 2 (Boston),place-WR-0325,Bradford,2,Track 2 (Boston),0,2
+WR-0329,Haverhill,Haverhill - Commuter Rail,place-WR-0329,Haverhill,,Commuter Rail,0,2
+WR-0329-01,Haverhill,Haverhill - Commuter Rail - Track 1,place-WR-0329,Haverhill,1,Track 1,0,2
+WR-0329-02,Haverhill,Haverhill - Commuter Rail - Track 2 (Boston),place-WR-0329,Haverhill,2,Track 2 (Boston),0,2
+70061,Alewife,Alewife - Red Line,place-alfcl,Alewife,,Red Line,0,1
+Alewife-01,Alewife,Alewife - Red Line - Track 1,place-alfcl,Alewife,1,Track 1,0,1
+Alewife-02,Alewife,Alewife - Red Line - Track 2,place-alfcl,Alewife,2,Track 2,0,1
+70126,Allston Street,Allston Street - Green Line - Park Street & North,place-alsgr,Allston Street,,Park Street & North,0,0
+70127,Allston Street,Allston Street - Green Line - (B) Boston College,place-alsgr,Allston Street,,Boston College,0,0
+170140,Amory Street,Amory Street - Green Line - Park Street & North,place-amory,Amory Street,,Park Street & North,0,0
+170141,Amory Street,Amory Street - Green Line - (B) Boston College,place-amory,Amory Street,,Boston College,0,0
+70083,Andrew,Andrew - Red Line - Ashmont/Braintree,place-andrw,Andrew,1,Ashmont/Braintree,0,1
+70084,Andrew,Andrew - Red Line - Alewife,place-andrw,Andrew,2,Alewife,0,1
+70047,Airport,Airport - Blue Line - Bowdoin,place-aport,Airport,,Bowdoin,0,1
+70048,Airport,Airport - Blue Line - Wonderland,place-aport,Airport,,Wonderland,0,1
+70043,Aquarium,Aquarium - Blue Line - Bowdoin,place-aqucl,Aquarium,1,Bowdoin,0,1
+70044,Aquarium,Aquarium - Blue Line - Wonderland,place-aqucl,Aquarium,2,Wonderland,0,1
+70156,Arlington,Arlington - Green Line - Park Street & North,place-armnl,Arlington,,Park Street & North,0,0
+70157,Arlington,Arlington - Green Line - Copley & West,place-armnl,Arlington,,Copley & West,0,0
+70093,Ashmont,Ashmont - Red Line - Exit Only,place-asmnl,Ashmont,,Exit Only,0,1
+70094,Ashmont,Ashmont - Red Line - Alewife,place-asmnl,Ashmont,,Alewife,0,1
+70261,Ashmont,Ashmont - Mattapan Trolley,place-asmnl,Ashmont,,Mattapan Trolley,0,0
+70278,Assembly,Assembly - Orange Line - Forest Hills,place-astao,Assembly,,Forest Hills,0,1
+70279,Assembly,Assembly - Orange Line - Oak Grove,place-astao,Assembly,,Oak Grove,0,1
+170136,Babcock Street,Babcock Street - Green Line - Park Street & North,place-babck,Babcock Street,,Park Street & North,0,0
+170137,Babcock Street,Babcock Street - Green Line - (B) Boston College,place-babck,Babcock Street,,Boston College,0,0
+70509,Ball Square,Ball Square - Green Line - (E) Medford/Tufts,place-balsq,Ball Square,,Medford/Tufts,0,0
+70510,Ball Square,Ball Square - Green Line - Copley & West,place-balsq,Ball Square,,Copley & West,0,0
+70014,Back Bay,Back Bay - Orange Line - Forest Hills,place-bbsta,Back Bay,,Forest Hills,0,1
+70015,Back Bay,Back Bay - Orange Line - Oak Grove,place-bbsta,Back Bay,,Oak Grove,0,1
+NEC-2276,Back Bay,Back Bay - Commuter Rail,place-bbsta,Back Bay,,Commuter Rail,0,2
+NEC-2276-01,Back Bay,Back Bay - Commuter Rail - Track 1,place-bbsta,Back Bay,1,Commuter Rail - Track 1,0,2
+NEC-2276-02,Back Bay,Back Bay - Commuter Rail - Track 2,place-bbsta,Back Bay,2,Commuter Rail - Track 2,0,2
+NEC-2276-03,Back Bay,Back Bay - Commuter Rail - Track 3,place-bbsta,Back Bay,3,Commuter Rail - Track 3,0,2
+WML-0012-05,Back Bay,Back Bay - Commuter Rail - Track 5,place-bbsta,Back Bay,5,Commuter Rail - Track 5,0,2
+WML-0012-07,Back Bay,Back Bay - Commuter Rail - Track 7,place-bbsta,Back Bay,7,Commuter Rail - Track 7,0,2
+70257,Back of the Hill,Back of the Hill - Green Line - (E) Heath Street,place-bckhl,Back of the Hill,,Heath Street,0,0
+70258,Back of the Hill,Back of the Hill - Green Line - Park Street & North,place-bckhl,Back of the Hill,,Park Street & North,0,0
+70176,Beaconsfield,Beaconsfield - Green Line - Park Street & North,place-bcnfd,Beaconsfield,,Park Street & North,0,0
+70177,Beaconsfield,Beaconsfield - Green Line - (D) Riverside,place-bcnfd,Beaconsfield,,Riverside,0,0
+70229,Washington Square,Washington Square - Green Line - (C) Cleveland Circle,place-bcnwa,Washington Square,,Cleveland Circle,0,0
+70230,Washington Square,Washington Square - Green Line - Park Street & North,place-bcnwa,Washington Square,,Park Street & North,0,0
+70148,Blandford Street,Blandford Street - Green Line - Park Street & North,place-bland,Blandford Street,,Park Street & North,0,0
+70149,Blandford Street,Blandford Street - Green Line - (B) Boston College,place-bland,Blandford Street,,Boston College,0,0
+70055,Beachmont,Beachmont - Blue Line - Bowdoin,place-bmmnl,Beachmont,1,Bowdoin,0,1
+70056,Beachmont,Beachmont - Blue Line - Wonderland,place-bmmnl,Beachmont,2,Wonderland,0,1
+70225,Brandon Hall,Brandon Hall - Green Line - (C) Cleveland Circle,place-bndhl,Brandon Hall,,Cleveland Circle,0,0
+70226,Brandon Hall,Brandon Hall - Green Line - Park Street & North,place-bndhl,Brandon Hall,,Park Street & North,0,0
+70038,Bowdoin,Bowdoin - Blue Line - Wonderland,place-bomnl,Bowdoin,,Wonderland,0,1
+70838,Bowdoin,Bowdoin - Blue Line - Exit Only,place-bomnl,Bowdoin,,Exit Only,0,1
+70158,Boylston,Boylston - Green Line - Park Street & North,place-boyls,Boylston,,Park Street & North,0,0
+70159,Boylston,Boylston - Green Line - Copley & West,place-boyls,Boylston,,Copley & West,0,0
+70081,Broadway,Broadway - Red Line - Ashmont/Braintree,place-brdwy,Broadway,,Ashmont/Braintree,0,1
+70082,Broadway,Broadway - Red Line - Alewife,place-brdwy,Broadway,,Alewife,0,1
+70134,Packard's Corner,Packard's Corner - Green Line - Park Street & North,place-brico,Packard's Corner,,Park Street & North,0,0
+70135,Packard's Corner,Packard's Corner - Green Line - (B) Boston College,place-brico,Packard's Corner,,Boston College,0,0
+70178,Brookline Hills,Brookline Hills - Green Line - Park Street & North,place-brkhl,Brookline Hills,,Park Street & North,0,0
+70179,Brookline Hills,Brookline Hills - Green Line - (D) Riverside,place-brkhl,Brookline Hills,,Riverside,0,0
+70249,Brigham Circle,Brigham Circle - Green Line - (E) Heath Street,place-brmnl,Brigham Circle,,Heath Street,0,0
+70250,Brigham Circle,Brigham Circle - Green Line - Park Street & North,place-brmnl,Brigham Circle,,Park Street & North,0,0
+70105,Braintree,Braintree - Red Line,place-brntn,Braintree,,Red Line,0,1
+Braintree-01,Braintree,Braintree - Red Line - Track 1,place-brntn,Braintree,1,Track 1,0,1
+Braintree-02,Braintree,Braintree - Red Line - Track 2,place-brntn,Braintree,2,Track 2,0,1
+MM-0109,Braintree,Braintree - Commuter Rail,place-brntn,Braintree,,Commuter Rail,0,2
+MM-0109-CS,Braintree,Braintree - Commuter Rail - Track 2,place-brntn,Braintree,2,Commuter Rail - Track 2,0,2
+MM-0109-S,Braintree,Braintree - Commuter Rail - Track 1,place-brntn,Braintree,1,Commuter Rail - Track 1,0,2
+70144,Boston University Central,Boston University Central - Green Line - Park Street & North,place-bucen,Boston University Central,,Park Street & North,0,0
+70145,Boston University Central,Boston University Central - Green Line - (B) Boston College,place-bucen,Boston University Central,,Boston College,0,0
+70146,Boston University East,Boston University East - Green Line - Park Street & North,place-buest,Boston University East,,Park Street & North,0,0
+70147,Boston University East,Boston University East - Green Line - (B) Boston College,place-buest,Boston University East,,Boston College,0,0
+70265,Butler,Butler - Mattapan Trolley - Mattapan,place-butlr,Butler,,Mattapan,0,0
+70266,Butler,Butler - Mattapan Trolley - Ashmont,place-butlr,Butler,,Ashmont,0,0
+70180,Brookline Village,Brookline Village - Green Line - Park Street & North,place-bvmnl,Brookline Village,,Park Street & North,0,0
+70181,Brookline Village,Brookline Village - Green Line - (D) Riverside,place-bvmnl,Brookline Village,,Riverside,0,0
+70273,Capen Street,Capen Street - Mattapan Trolley - Mattapan,place-capst,Capen Street,,Mattapan,0,0
+70274,Capen Street,Capen Street - Mattapan Trolley - Ashmont,place-capst,Capen Street,,Ashmont,0,0
+70028,Community College,Community College - Orange Line - Forest Hills,place-ccmnl,Community College,,Forest Hills,0,1
+70029,Community College,Community College - Orange Line - Oak Grove,place-ccmnl,Community College,,Oak Grove,0,1
+70263,Cedar Grove,Cedar Grove - Mattapan Trolley - Mattapan,place-cedgr,Cedar Grove,,Mattapan,0,0
+70264,Cedar Grove,Cedar Grove - Mattapan Trolley - Ashmont,place-cedgr,Cedar Grove,,Ashmont,0,0
+70269,Central Avenue,Central Avenue - Mattapan Trolley - Mattapan,place-cenav,Central Avenue,,Mattapan,0,0
+70270,Central Avenue,Central Avenue - Mattapan Trolley - Ashmont,place-cenav,Central Avenue,,Ashmont,0,0
+ER-0042,Chelsea,Chelsea - Commuter Rail,place-chels,Chelsea,,Commuter Rail,0,2
+ER-0042-01,Chelsea,Chelsea - Commuter Rail - Track 1 (Outbound),place-chels,Chelsea,1,Track 1 (Outbound),0,2
+ER-0042-02,Chelsea,Chelsea - Commuter Rail - Track 2 (Boston),place-chels,Chelsea,2,Track 2 (Boston),0,2
+70172,Chestnut Hill,Chestnut Hill - Green Line - Park Street & North,place-chhil,Chestnut Hill,,Park Street & North,0,0
+70173,Chestnut Hill,Chestnut Hill - Green Line - (D) Riverside,place-chhil,Chestnut Hill,,Riverside,0,0
+70112,Chestnut Hill Avenue,Chestnut Hill Avenue - Green Line - Park Street & North,place-chill,Chestnut Hill Avenue,,Park Street & North,0,0
+70113,Chestnut Hill Avenue,Chestnut Hill Avenue - Green Line - (B) Boston College,place-chill,Chestnut Hill Avenue,,Boston College,0,0
+70073,Charles/MGH,Charles/MGH - Red Line - Ashmont/Braintree,place-chmnl,Charles/MGH,,Ashmont/Braintree,0,1
+70074,Charles/MGH,Charles/MGH - Red Line - Alewife,place-chmnl,Charles/MGH,,Alewife,0,1
+70018,Chinatown,Chinatown - Orange Line - Forest Hills,place-chncl,Chinatown,,Forest Hills,0,1
+70019,Chinatown,Chinatown - Orange Line - Oak Grove,place-chncl,Chinatown,,Oak Grove,0,1
+70114,Chiswick Road,Chiswick Road - Green Line - Park Street & North,place-chswk,Chiswick Road,,Park Street & North,0,0
+70115,Chiswick Road,Chiswick Road - Green Line - (B) Boston College,place-chswk,Chiswick Road,,Boston College,0,0
+70237,Cleveland Circle,Cleveland Circle - Green Line - Exit Only,place-clmnl,Cleveland Circle,,Exit Only,0,0
+70238,Cleveland Circle,Cleveland Circle - Green Line - Park Street & North,place-clmnl,Cleveland Circle,,Park Street & North,0,0
+70069,Central,Central - Red Line - Ashmont/Braintree,place-cntsq,Central,,Ashmont/Braintree,0,1
+70070,Central,Central - Red Line - Alewife,place-cntsq,Central,,Alewife,0,1
+70154,Copley,Copley - Green Line - Park Street & North,place-coecl,Copley,,Park Street & North,0,0
+70155,Copley,"Copley - Green Line - Kenmore & West, (E) Heath Street",place-coecl,Copley,,"Kenmore & West, Heath Street",0,0
+70219,Coolidge Corner,Coolidge Corner - Green Line - (C) Cleveland Circle,place-cool,Coolidge Corner,,Cleveland Circle,0,0
+70220,Coolidge Corner,Coolidge Corner - Green Line - Park Street & North,place-cool,Coolidge Corner,,Park Street & North,0,0
+70063,Davis,Davis - Red Line - Ashmont/Braintree,place-davis,Davis,,Ashmont/Braintree,0,1
+70064,Davis,Davis - Red Line - Alewife,place-davis,Davis,,Alewife,0,1
+70233,Dean Road,Dean Road - Green Line - (C) Cleveland Circle,place-denrd,Dean Road,,Cleveland Circle,0,0
+70234,Dean Road,Dean Road - Green Line - Park Street & North,place-denrd,Dean Road,,Park Street & North,0,0
+70020,Downtown Crossing,Downtown Crossing - Orange Line - Forest Hills,place-dwnxg,Downtown Crossing,,Forest Hills,0,1
+70021,Downtown Crossing,Downtown Crossing - Orange Line - Oak Grove,place-dwnxg,Downtown Crossing,,Oak Grove,0,1
+70077,Downtown Crossing,Downtown Crossing - Red Line - Ashmont/Braintree,place-dwnxg,Downtown Crossing,,Ashmont/Braintree,0,1
+70078,Downtown Crossing,Downtown Crossing - Red Line - Alewife,place-dwnxg,Downtown Crossing,,Alewife,0,1
+70166,Eliot,Eliot - Green Line - Park Street & North,place-eliot,Eliot,,Park Street & North,0,0
+70167,Eliot,Eliot - Green Line - (D) Riverside,place-eliot,Eliot,,Riverside,0,0
+70235,Englewood Avenue,Englewood Avenue - Green Line - (C) Cleveland Circle,place-engav,Englewood Avenue,,Cleveland Circle,0,0
+70236,Englewood Avenue,Englewood Avenue - Green Line - Park Street & North,place-engav,Englewood Avenue,,Park Street & North,0,0
+70513,East Somerville,East Somerville - Green Line - (E) Medford/Tufts,place-esomr,East Somerville,,Medford/Tufts,0,0
+70514,East Somerville,East Somerville - Green Line - Copley & West,place-esomr,East Somerville,,Copley & West,0,0
+70227,Fairbanks Street,Fairbanks Street - Green Line - (C) Cleveland Circle,place-fbkst,Fairbanks Street,,Cleveland Circle,0,0
+70228,Fairbanks Street,Fairbanks Street - Green Line - Park Street & North,place-fbkst,Fairbanks Street,,Park Street & North,0,0
+70251,Fenwood Road,Fenwood Road - Green Line - (E) Heath Street,place-fenwd,Fenwood Road,,Heath Street,0,0
+70252,Fenwood Road,Fenwood Road - Green Line - Park Street & North,place-fenwd,Fenwood Road,,Park Street & North,0,0
+70186,Fenway,Fenway - Green Line - Park Street & North,place-fenwy,Fenway,,Park Street & North,0,0
+70187,Fenway,Fenway - Green Line - (D) Riverside,place-fenwy,Fenway,,Riverside,0,0
+70089,Fields Corner,Fields Corner - Red Line - Ashmont,place-fldcr,Fields Corner,,Ashmont,0,1
+70090,Fields Corner,Fields Corner - Red Line - Alewife,place-fldcr,Fields Corner,,Alewife,0,1
+70001,Forest Hills,Forest Hills - Orange Line,place-forhl,Forest Hills,,Orange Line,0,1
+Forest Hills-01,Forest Hills,Forest Hills - Orange Line - Track 1,place-forhl,Forest Hills,1,Track 1,0,1
+Forest Hills-02,Forest Hills,Forest Hills - Orange Line - Track 2,place-forhl,Forest Hills,2,Track 2,0,1
+NEC-2237,Forest Hills,Forest Hills - Commuter Rail,place-forhl,Forest Hills,,Commuter Rail,0,2
+NEC-2237-03,Forest Hills,Forest Hills - Commuter Rail - Track 3,place-forhl,Forest Hills,3,Commuter Rail - Track 3,0,2
+NEC-2237-05,Forest Hills,Forest Hills - Commuter Rail - Track 5,place-forhl,Forest Hills,5,Commuter Rail - Track 5,0,2
+70505,Gilman Square,Gilman Square - Green Line - (E) Medford/Tufts,place-gilmn,Gilman Square,,Medford/Tufts,0,0
+70506,Gilman Square,Gilman Square - Green Line - Copley & West,place-gilmn,Gilman Square,,Copley & West,0,0
+70039,Government Center,Government Center - Blue Line - Bowdoin,place-gover,Government Center,,Bowdoin,0,1
+70040,Government Center,Government Center - Blue Line - Wonderland,place-gover,Government Center,,Wonderland,0,1
+70201,Government Center,Government Center - Green Line - North Station & North,place-gover,Government Center,,North Station & North,0,0
+70202,Government Center,Government Center - Green Line - Copley & West,place-gover,Government Center,,Copley & West,0,0
+Government Center-Brattle,Government Center,Government Center - Green Line - Loop Platform,place-gover,Government Center,,Loop Platform,0,0
+70128,Griggs Street,Griggs Street - Green Line - Park Street & North,place-grigg,Griggs Street,,Park Street & North,0,0
+70129,Griggs Street,Griggs Street - Green Line - (B) Boston College,place-grigg,Griggs Street,,Boston College,0,0
+70002,Green Street,Green Street - Orange Line - Forest Hills,place-grnst,Green Street,,Forest Hills,0,1
+70003,Green Street,Green Street - Orange Line - Oak Grove,place-grnst,Green Street,,Oak Grove,0,1
+70024,Haymarket,Haymarket - Orange Line - Forest Hills,place-haecl,Haymarket,,Forest Hills,0,1
+70025,Haymarket,Haymarket - Orange Line - Oak Grove,place-haecl,Haymarket,,Oak Grove,0,1
+70203,Haymarket,Haymarket - Green Line - North Station & North,place-haecl,Haymarket,,North Station & North,0,0
+70204,Haymarket,Haymarket - Green Line - Copley & West,place-haecl,Haymarket,,Copley & West,0,0
+70067,Harvard,Harvard - Red Line - Ashmont/Braintree,place-harsq,Harvard,,Ashmont/Braintree,0,1
+70068,Harvard,Harvard - Red Line - Alewife,place-harsq,Harvard,,Alewife,0,1
+70130,Harvard Avenue,Harvard Avenue - Green Line - Park Street & North,place-harvd,Harvard Avenue,,Park Street & North,0,0
+70131,Harvard Avenue,Harvard Avenue - Green Line - (B) Boston College,place-harvd,Harvard Avenue,,Boston College,0,0
+70260,Heath Street,Heath Street - Green Line,place-hsmnl,Heath Street,,Green Line,0,0
+70213,Hawes Street,Hawes Street - Green Line - (C) Cleveland Circle,place-hwsst,Hawes Street,,Cleveland Circle,0,0
+70214,Hawes Street,Hawes Street - Green Line - Park Street & North,place-hwsst,Hawes Street,,Park Street & North,0,0
+70152,Hynes Convention Center,Hynes Convention Center - Green Line - Park Street & North,place-hymnl,Hynes Convention Center,,Park Street & North,0,0
+70153,Hynes Convention Center,Hynes Convention Center - Green Line - Kenmore & West,place-hymnl,Hynes Convention Center,,Kenmore & West,0,0
+70006,Jackson Square,Jackson Square - Orange Line - Forest Hills,place-jaksn,Jackson Square,,Forest Hills,0,1
+70007,Jackson Square,Jackson Square - Orange Line - Oak Grove,place-jaksn,Jackson Square,,Oak Grove,0,1
+70085,JFK/UMass,JFK/UMass - Red Line - Ashmont,place-jfk,JFK/UMass,,Ashmont,0,1
+70086,JFK/UMass,JFK/UMass - Red Line - Alewife (from Ashmont),place-jfk,JFK/UMass,,Alewife (from Ashmont),0,1
+70095,JFK/UMass,JFK/UMass - Red Line - Braintree,place-jfk,JFK/UMass,,Braintree,0,1
+70096,JFK/UMass,JFK/UMass - Red Line - Alewife (from Braintree),place-jfk,JFK/UMass,,Alewife (from Braintree),0,1
+MM-0023-S,JFK/UMass,JFK/UMass - Commuter Rail - Track 1 (All Trains),place-jfk,JFK/UMass,1,Track 1 (All Trains),0,2
+70150,Kenmore,Kenmore - Green Line - Park Street & North,place-kencl,Kenmore,,Park Street & North,0,0
+70151,Kenmore,"Kenmore - Green Line - (C) Cleveland Circle, (D) Riverside",place-kencl,Kenmore,,"Cleveland Circle, Riverside",0,0
+71150,Kenmore,Kenmore - Green Line - Park Street & North,place-kencl,Kenmore,,Park Street & North,0,0
+71151,Kenmore,Kenmore - Green Line - (B) Boston College,place-kencl,Kenmore,,Boston College,0,0
+70071,Kendall/MIT,Kendall/MIT - Red Line - Ashmont/Braintree,place-knncl,Kendall/MIT,,Ashmont/Braintree,0,1
+70072,Kendall/MIT,Kendall/MIT - Red Line - Alewife,place-knncl,Kendall/MIT,,Alewife,0,1
+70215,Kent Street,Kent Street - Green Line - (C) Cleveland Circle,place-kntst,Kent Street,,Cleveland Circle,0,0
+70216,Kent Street,Kent Street - Green Line - Park Street & North,place-kntst,Kent Street,,Park Street & North,0,0
+70106,Boston College,Boston College - Green Line - Park Street & North,place-lake,Boston College,,Park Street & North,0,0
+70107,Boston College,Boston College - Green Line - Exit Only,place-lake,Boston College,,Exit Only,0,0
+70501,Lechmere,"Lechmere - Green Line - (D) Union Square, (E) Medford/Tufts",place-lech,Lechmere,,"Union Square, Medford/Tufts",0,0
+70502,Lechmere,Lechmere - Green Line - Copley & West,place-lech,Lechmere,,Copley & West,0,0
+70247,Longwood Medical Area,Longwood Medical Area - Green Line - (E) Heath Street,place-lngmd,Longwood Medical Area,,Heath Street,0,0
+70248,Longwood Medical Area,Longwood Medical Area - Green Line - Park Street & North,place-lngmd,Longwood Medical Area,,Park Street & North,0,0
+70182,Longwood,Longwood - Green Line - Park Street & North,place-longw,Longwood,,Park Street & North,0,0
+70183,Longwood,Longwood - Green Line - (D) Riverside,place-longw,Longwood,,Riverside,0,0
+70012,Massachusetts Avenue,Massachusetts Avenue - Orange Line - Forest Hills,place-masta,Massachusetts Avenue,,Forest Hills,0,1
+70013,Massachusetts Avenue,Massachusetts Avenue - Orange Line - Oak Grove,place-masta,Massachusetts Avenue,,Oak Grove,0,1
+70275,Mattapan,Mattapan - Mattapan Trolley - Exit Only,place-matt,Mattapan,,Exit Only,0,0
+70276,Mattapan,Mattapan - Mattapan Trolley - Ashmont,place-matt,Mattapan,,Ashmont,0,0
+70511,Medford/Tufts,Medford/Tufts - Green Line - (E) Medford/Tufts,place-mdftf,Medford/Tufts,,Medford/Tufts,0,0
+70512,Medford/Tufts,Medford/Tufts - Green Line - Copley & West,place-mdftf,Medford/Tufts,,Copley & West,0,0
+70245,Museum of Fine Arts,Museum of Fine Arts - Green Line - (E) Heath Street,place-mfa,Museum of Fine Arts,,Heath Street,0,0
+70246,Museum of Fine Arts,Museum of Fine Arts - Green Line - Park Street & North,place-mfa,Museum of Fine Arts,,Park Street & North,0,0
+70507,Magoun Square,Magoun Square - Green Line - (E) Medford/Tufts,place-mgngl,Magoun Square,,Medford/Tufts,0,0
+70508,Magoun Square,Magoun Square - Green Line - Copley & West,place-mgngl,Magoun Square,,Copley & West,0,0
+70267,Milton,Milton - Mattapan Trolley - Mattapan,place-miltt,Milton,,Mattapan,0,0
+70268,Milton,Milton - Mattapan Trolley - Ashmont,place-miltt,Milton,,Ashmont,0,0
+70253,Mission Park,Mission Park - Green Line - (E) Heath Street,place-mispk,Mission Park,,Heath Street,0,0
+70254,Mission Park,Mission Park - Green Line - Park Street & North,place-mispk,Mission Park,,Park Street & North,0,0
+70034,Malden Center,Malden Center - Orange Line - Forest Hills,place-mlmnl,Malden Center,,Forest Hills,0,1
+70035,Malden Center,Malden Center - Orange Line - Oak Grove,place-mlmnl,Malden Center,,Oak Grove,0,1
+WR-0045-S,Malden Center,Malden Center - Commuter Rail - Track 1 (All Trains),place-mlmnl,Malden Center,1,Track 1 (All Trains),0,2
+70045,Maverick,Maverick - Blue Line - Bowdoin,place-mvbcl,Maverick,,Bowdoin,0,1
+70046,Maverick,Maverick - Blue Line - Wonderland,place-mvbcl,Maverick,,Wonderland,0,1
+70168,Newton Highlands,Newton Highlands - Green Line - Park Street & North,place-newtn,Newton Highlands,,Park Street & North,0,0
+70169,Newton Highlands,Newton Highlands - Green Line - (D) Riverside,place-newtn,Newton Highlands,,Riverside,0,0
+70170,Newton Centre,Newton Centre - Green Line - Park Street & North,place-newto,Newton Centre,,Park Street & North,0,0
+70171,Newton Centre,Newton Centre - Green Line - (D) Riverside,place-newto,Newton Centre,,Riverside,0,0
+70026,North Station,North Station - Orange Line - Forest Hills,place-north,North Station,,Forest Hills,0,1
+70027,North Station,North Station - Orange Line - Oak Grove,place-north,North Station,,Oak Grove,0,1
+70205,North Station,North Station - Green Line - Lechmere & North,place-north,North Station,,Lechmere & North,0,0
+70206,North Station,North Station - Green Line - Copley & West,place-north,North Station,,Copley & West,0,0
+BNT-0000,North Station,North Station - Commuter Rail,place-north,North Station,,Commuter Rail,0,2
+BNT-0000-01,North Station,North Station - Commuter Rail - Track 1,place-north,North Station,1,Commuter Rail - Track 1,0,2
+BNT-0000-02,North Station,North Station - Commuter Rail - Track 2,place-north,North Station,2,Commuter Rail - Track 2,0,2
+BNT-0000-03,North Station,North Station - Commuter Rail - Track 3,place-north,North Station,3,Commuter Rail - Track 3,0,2
+BNT-0000-04,North Station,North Station - Commuter Rail - Track 4,place-north,North Station,4,Commuter Rail - Track 4,0,2
+BNT-0000-05,North Station,North Station - Commuter Rail - Track 5,place-north,North Station,5,Commuter Rail - Track 5,0,2
+BNT-0000-06,North Station,North Station - Commuter Rail - Track 6,place-north,North Station,6,Commuter Rail - Track 6,0,2
+BNT-0000-07,North Station,North Station - Commuter Rail - Track 7,place-north,North Station,7,Commuter Rail - Track 7,0,2
+BNT-0000-08,North Station,North Station - Commuter Rail - Track 8,place-north,North Station,8,Commuter Rail - Track 8,0,2
+BNT-0000-09,North Station,North Station - Commuter Rail - Track 9,place-north,North Station,9,Commuter Rail - Track 9,0,2
+BNT-0000-10,North Station,North Station - Commuter Rail - Track 10,place-north,North Station,10,Commuter Rail - Track 10,0,2
+70097,North Quincy,North Quincy - Red Line - Braintree,place-nqncy,North Quincy,2,Braintree,0,1
+70098,North Quincy,North Quincy - Red Line - Alewife,place-nqncy,North Quincy,1,Alewife,0,1
+70243,Northeastern University,Northeastern University - Green Line - (E) Heath Street,place-nuniv,Northeastern University,,Heath Street,0,0
+70244,Northeastern University,Northeastern University - Green Line - Park Street & North,place-nuniv,Northeastern University,,Park Street & North,0,0
+70036,Oak Grove,Oak Grove - Orange Line,place-ogmnl,Oak Grove,,Orange Line,0,1
+Oak Grove-01,Oak Grove,Oak Grove - Orange Line - Track 1,place-ogmnl,Oak Grove,1,Track 1,0,1
+Oak Grove-02,Oak Grove,Oak Grove - Orange Line - Track 2,place-ogmnl,Oak Grove,2,Track 2,0,1
+WR-0053-S,Oak Grove,Oak Grove - Commuter Rail - Track 1 (All Trains),place-ogmnl,Oak Grove,1,Commuter Rail - Track 1 (All Trains),0,2
+70051,Orient Heights,Orient Heights - Blue Line - Bowdoin,place-orhte,Orient Heights,,Bowdoin,0,1
+70052,Orient Heights,Orient Heights - Blue Line - Wonderland,place-orhte,Orient Heights,,Wonderland,0,1
+70075,Park Street,Park Street - Red Line - Ashmont/Braintree,place-pktrm,Park Street,,Ashmont/Braintree,0,1
+70076,Park Street,Park Street - Red Line - Alewife,place-pktrm,Park Street,,Alewife,0,1
+70196,Park Street,Park Street - Green Line - (B) Boston College,place-pktrm,Park Street,B,Boston College,0,0
+70197,Park Street,Park Street - Green Line - (C) Cleveland Circle,place-pktrm,Park Street,C,Cleveland Circle,0,0
+70198,Park Street,Park Street - Green Line - (D) Riverside,place-pktrm,Park Street,D,Riverside,0,0
+70199,Park Street,Park Street - Green Line - (E) Heath Street,place-pktrm,Park Street,E,Heath Street,0,0
+70200,Park Street,Park Street - Green Line - Government Center & North,place-pktrm,Park Street,,Government Center & North,0,0
+71199,Park Street,Park Street - Green Line - Drop-off Only,place-pktrm,Park Street,,Drop-off Only,0,0
+70065,Porter,Porter - Red Line - Ashmont/Braintree,place-portr,Porter,,Ashmont/Braintree,0,1
+70066,Porter,Porter - Red Line - Alewife,place-portr,Porter,,Alewife,0,1
+FR-0034,Porter,Porter - Commuter Rail,place-portr,Porter,,Commuter Rail,0,2
+FR-0034-01,Porter,Porter - Commuter Rail - Track 1 (Outbound),place-portr,Porter,1,Commuter Rail - Track 1 (Outbound),0,2
+FR-0034-02,Porter,Porter - Commuter Rail - Track 2 (Boston),place-portr,Porter,2,Commuter Rail - Track 2 (Boston),0,2
+70239,Prudential,Prudential - Green Line - (E) Heath Street,place-prmnl,Prudential,,Heath Street,0,0
+70240,Prudential,Prudential - Green Line - Park Street & North,place-prmnl,Prudential,,Park Street & North,0,0
+70103,Quincy Adams,Quincy Adams - Red Line - Braintree,place-qamnl,Quincy Adams,,Braintree,0,1
+70104,Quincy Adams,Quincy Adams - Red Line - Alewife,place-qamnl,Quincy Adams,,Alewife,0,1
+70101,Quincy Center,Quincy Center - Red Line - Braintree,place-qnctr,Quincy Center,2,Braintree,0,1
+70102,Quincy Center,Quincy Center - Red Line - Alewife,place-qnctr,Quincy Center,1,Alewife,0,1
+MM-0079-S,Quincy Center,Quincy Center - Commuter Rail - Track 1 (All Trains),place-qnctr,Quincy Center,1,Track 1 (All Trains),0,2
+70057,Revere Beach,Revere Beach - Blue Line - Bowdoin,place-rbmnl,Revere Beach,1,Bowdoin,0,1
+70058,Revere Beach,Revere Beach - Blue Line - Wonderland,place-rbmnl,Revere Beach,2,Wonderland,0,1
+70008,Roxbury Crossing,Roxbury Crossing - Orange Line - Forest Hills,place-rcmnl,Roxbury Crossing,,Forest Hills,0,1
+70009,Roxbury Crossing,Roxbury Crossing - Orange Line - Oak Grove,place-rcmnl,Roxbury Crossing,,Oak Grove,0,1
+70160,Riverside,Riverside - Green Line - Park Street & North,place-river,Riverside,,Park Street & North,0,0
+70161,Riverside,Riverside - Green Line - Park Street & North,place-river,Riverside,,Park Street & North,0,0
+70174,Reservoir,Reservoir - Green Line - Park Street & North,place-rsmnl,Reservoir,,Park Street & North,0,0
+70175,Reservoir,Reservoir - Green Line - (D) Riverside,place-rsmnl,Reservoir,,Riverside,0,0
+70010,Ruggles,Ruggles - Orange Line - Forest Hills,place-rugg,Ruggles,,Forest Hills,0,1
+70011,Ruggles,Ruggles - Orange Line - Oak Grove,place-rugg,Ruggles,,Oak Grove,0,1
+NEC-2265,Ruggles,Ruggles - Commuter Rail,place-rugg,Ruggles,,Commuter Rail,0,2
+NEC-2265-01,Ruggles,Ruggles - Commuter Rail - Track 1,place-rugg,Ruggles,1,Commuter Rail - Track 1,0,2
+NEC-2265-02,Ruggles,Ruggles - Commuter Rail - Track 2,place-rugg,Ruggles,2,Commuter Rail - Track 2,0,2
+NEC-2265-03,Ruggles,Ruggles - Commuter Rail - Track 3,place-rugg,Ruggles,3,Commuter Rail - Track 3,0,2
+70255,Riverway,Riverway - Green Line - (E) Heath Street,place-rvrwy,Riverway,,Heath Street,0,0
+70256,Riverway,Riverway - Green Line - Park Street & North,place-rvrwy,Riverway,,Park Street & North,0,0
+70004,Stony Brook,Stony Brook - Orange Line - Forest Hills,place-sbmnl,Stony Brook,,Forest Hills,0,1
+70005,Stony Brook,Stony Brook - Orange Line - Oak Grove,place-sbmnl,Stony Brook,,Oak Grove,0,1
+70053,Suffolk Downs,Suffolk Downs - Blue Line - Bowdoin,place-sdmnl,Suffolk Downs,1,Bowdoin,0,1
+70054,Suffolk Downs,Suffolk Downs - Blue Line - Wonderland,place-sdmnl,Suffolk Downs,2,Wonderland,0,1
+70087,Savin Hill,Savin Hill - Red Line - Ashmont,place-shmnl,Savin Hill,,Ashmont,0,1
+70088,Savin Hill,Savin Hill - Red Line - Alewife,place-shmnl,Savin Hill,,Alewife,0,1
+70211,Saint Mary's Street,Saint Mary's Street - Green Line - (C) Cleveland Circle,place-smary,Saint Mary's Street,,Cleveland Circle,0,0
+70212,Saint Mary's Street,Saint Mary's Street - Green Line - Park Street & North,place-smary,Saint Mary's Street,,Park Street & North,0,0
+70091,Shawmut,Shawmut - Red Line - Ashmont,place-smmnl,Shawmut,,Ashmont,0,1
+70092,Shawmut,Shawmut - Red Line - Alewife,place-smmnl,Shawmut,,Alewife,0,1
+70110,South Street,South Street - Green Line - Park Street & North,place-sougr,South Street,,Park Street & North,0,0
+70111,South Street,South Street - Green Line - (B) Boston College,place-sougr,South Street,,Boston College,0,0
+70207,Science Park/West End,Science Park/West End - Green Line - Lechmere & North,place-spmnl,Science Park/West End,,Lechmere & North,0,0
+70208,Science Park/West End,Science Park/West End - Green Line - Copley & West,place-spmnl,Science Park/West End,,Copley & West,0,0
+70079,South Station,South Station - Red Line - Ashmont/Braintree,place-sstat,South Station,,Ashmont/Braintree,0,1
+70080,South Station,South Station - Red Line - Alewife,place-sstat,South Station,,Alewife,0,1
+NEC-2287,South Station,South Station - Commuter Rail,place-sstat,South Station,,Commuter Rail,0,2
+NEC-2287-01,South Station,South Station - Commuter Rail - Track 1,place-sstat,South Station,1,Commuter Rail - Track 1,0,2
+NEC-2287-02,South Station,South Station - Commuter Rail - Track 2,place-sstat,South Station,2,Commuter Rail - Track 2,0,2
+NEC-2287-03,South Station,South Station - Commuter Rail - Track 3,place-sstat,South Station,3,Commuter Rail - Track 3,0,2
+NEC-2287-04,South Station,South Station - Commuter Rail - Track 4,place-sstat,South Station,4,Commuter Rail - Track 4,0,2
+NEC-2287-05,South Station,South Station - Commuter Rail - Track 5,place-sstat,South Station,5,Commuter Rail - Track 5,0,2
+NEC-2287-06,South Station,South Station - Commuter Rail - Track 6,place-sstat,South Station,6,Commuter Rail - Track 6,0,2
+NEC-2287-07,South Station,South Station - Commuter Rail - Track 7,place-sstat,South Station,7,Commuter Rail - Track 7,0,2
+NEC-2287-08,South Station,South Station - Commuter Rail - Track 8,place-sstat,South Station,8,Commuter Rail - Track 8,0,2
+NEC-2287-09,South Station,South Station - Commuter Rail - Track 9,place-sstat,South Station,9,Commuter Rail - Track 9,0,2
+NEC-2287-10,South Station,South Station - Commuter Rail - Track 10,place-sstat,South Station,10,Commuter Rail - Track 10,0,2
+NEC-2287-11,South Station,South Station - Commuter Rail - Track 11,place-sstat,South Station,11,Commuter Rail - Track 11,0,2
+NEC-2287-12,South Station,South Station - Commuter Rail - Track 12,place-sstat,South Station,12,Commuter Rail - Track 12,0,2
+NEC-2287-13,South Station,South Station - Commuter Rail - Track 13,place-sstat,South Station,13,Commuter Rail - Track 13,0,2
+70022,State,State - Orange Line - Forest Hills,place-state,State,,Forest Hills,0,1
+70023,State,State - Orange Line - Oak Grove,place-state,State,,Oak Grove,0,1
+70041,State,State - Blue Line - Bowdoin,place-state,State,,Bowdoin,0,1
+70042,State,State - Blue Line - Wonderland,place-state,State,,Wonderland,0,1
+70116,Sutherland Road,Sutherland Road - Green Line - Park Street & North,place-sthld,Sutherland Road,,Park Street & North,0,0
+70117,Sutherland Road,Sutherland Road - Green Line - (B) Boston College,place-sthld,Sutherland Road,,Boston College,0,0
+70217,Saint Paul Street,Saint Paul Street - Green Line - (C) Cleveland Circle,place-stpul,Saint Paul Street,,Cleveland Circle,0,0
+70218,Saint Paul Street,Saint Paul Street - Green Line - Park Street & North,place-stpul,Saint Paul Street,,Park Street & North,0,0
+70030,Sullivan Square,Sullivan Square - Orange Line - Forest Hills,place-sull,Sullivan Square,1,Forest Hills,0,1
+70031,Sullivan Square,Sullivan Square - Orange Line - Oak Grove,place-sull,Sullivan Square,2,Oak Grove,0,1
+70223,Summit Avenue,Summit Avenue - Green Line - (C) Cleveland Circle,place-sumav,Summit Avenue,,Cleveland Circle,0,0
+70224,Summit Avenue,Summit Avenue - Green Line - Park Street & North,place-sumav,Summit Avenue,,Park Street & North,0,0
+70241,Symphony,Symphony - Green Line - (E) Heath Street,place-symcl,Symphony,,Heath Street,0,0
+70242,Symphony,Symphony - Green Line - Park Street & North,place-symcl,Symphony,,Park Street & North,0,0
+70231,Tappan Street,Tappan Street - Green Line - (C) Cleveland Circle,place-tapst,Tappan Street,,Cleveland Circle,0,0
+70232,Tappan Street,Tappan Street - Green Line - Park Street & North,place-tapst,Tappan Street,,Park Street & North,0,0
+70016,Tufts Medical Center,Tufts Medical Center - Orange Line - Forest Hills,place-tumnl,Tufts Medical Center,,Forest Hills,0,1
+70017,Tufts Medical Center,Tufts Medical Center - Orange Line - Oak Grove,place-tumnl,Tufts Medical Center,,Oak Grove,0,1
+70503,Union Square,Union Square - Green Line - Copley & West,place-unsqu,Union Square,,Copley & West,0,0
+70504,Union Square,Union Square - Green Line - Copley & West,place-unsqu,Union Square,,Copley & West,0,0
+Union Square-01,Union Square,Union Square - Green Line - Track 1,place-unsqu,Union Square,1,Track 1,0,0
+Union Square-02,Union Square,Union Square - Green Line - Track 2,place-unsqu,Union Square,2,Track 2,0,0
+70271,Valley Road,Valley Road - Mattapan Trolley - Mattapan,place-valrd,Valley Road,,Mattapan,0,0
+70272,Valley Road,Valley Road - Mattapan Trolley - Ashmont,place-valrd,Valley Road,,Ashmont,0,0
+70164,Waban,Waban - Green Line - Park Street & North,place-waban,Waban,,Park Street & North,0,0
+70165,Waban,Waban - Green Line - (D) Riverside,place-waban,Waban,,Riverside,0,0
+70120,Washington Street,Washington Street - Green Line - Park Street & North,place-wascm,Washington Street,,Park Street & North,0,0
+70121,Washington Street,Washington Street - Green Line - (B) Boston College,place-wascm,Washington Street,,Boston College,0,0
+70032,Wellington,Wellington - Orange Line - Forest Hills,place-welln,Wellington,1,Forest Hills,0,1
+70033,Wellington,Wellington - Orange Line - Oak Grove,place-welln,Wellington,2,Oak Grove,0,1
+70049,Wood Island,Wood Island - Blue Line - Bowdoin,place-wimnl,Wood Island,1,Bowdoin,0,1
+70050,Wood Island,Wood Island - Blue Line - Wonderland,place-wimnl,Wood Island,2,Wonderland,0,1
+70099,Wollaston,Wollaston - Red Line - Braintree,place-wlsta,Wollaston,,Braintree,0,1
+70100,Wollaston,Wollaston - Red Line - Alewife,place-wlsta,Wollaston,,Alewife,0,1
+70059,Wonderland,Wonderland - Blue Line - Bowdoin,place-wondl,Wonderland,1,Bowdoin,0,1
+70060,Wonderland,Wonderland - Blue Line - Exit Only,place-wondl,Wonderland,2,Exit Only,0,1
+70162,Woodland,Woodland - Green Line - Park Street & North,place-woodl,Woodland,,Park Street & North,0,0
+70163,Woodland,Woodland - Green Line - (D) Riverside,place-woodl,Woodland,,Riverside,0,0
+70124,Warren Street,Warren Street - Green Line - Park Street & North,place-wrnst,Warren Street,,Park Street & North,0,0
+70125,Warren Street,Warren Street - Green Line - (B) Boston College,place-wrnst,Warren Street,,Boston College,0,0
