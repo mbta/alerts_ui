@@ -7,7 +7,12 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   import Ecto.Changeset
   alias AlertsUIWeb.CreateAlertLive
   alias AlertsUI.Models.{Cause, EnhancedSchedule, SeverityLevel}
-  alias AlertsUIWeb.FormComponents.Helpers.{ErrorFormatter, ServiceEffectCombinations}
+
+  alias AlertsUIWeb.FormComponents.Helpers.{
+    ErrorFormatter,
+    ServiceEffectCombinations
+  }
+
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}
   alias Phoenix.HTML.Form
 
@@ -52,7 +57,6 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         url: "",
         image_url: "",
         image_alternative_text: "",
-        severity: 4,
         image_size: %{},
         autotext_data: %{}
       })
