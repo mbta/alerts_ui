@@ -62,7 +62,6 @@ defmodule AlertsUIWeb.UserAuth do
 
     conn
     |> renew_session()
-    |> put_flash(:info, "You have been signed out.")
     |> redirect(redirect_to)
   end
 
