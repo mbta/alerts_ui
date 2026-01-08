@@ -265,6 +265,28 @@ defmodule AlertsUI.IBIAlertImporter do
               |> PaperTrail.update!(origin: update.last_modified_by)
             end)
 
+            # fix mode selections for systemwide alerts
+            if latest_version.gui_mode_name == "Systemwide" do
+              final_mode_source =
+                [insert | updates]
+                |> Enum.reverse()
+                |> Enum.find(& &1.affent_list)
+
+              final_mode_selections =
+                if final_mode_source do
+                  from_ibi(final_mode_source, :original_mode_selections)
+                else
+                  [1, 2, 3, 4]
+                end
+
+              from(
+                a in Alert,
+                where: a.alert_id == ^latest_version.alert_id,
+                update: [set: [original_mode_selections: ^final_mode_selections]]
+              )
+              |> Repo.update_all([])
+            end
+
             # add deduplicated reminders
             all_versions_index
             |> Map.get(alert.alert_id)
@@ -338,6 +360,7 @@ defmodule AlertsUI.IBIAlertImporter do
       :original_route_selections,
       :original_trip_selections,
       :original_facility_selections,
+      :original_mode_selections,
       :created_timestamp,
       :closed_timestamp,
       :last_modified_timestamp,
@@ -394,15 +417,7 @@ defmodule AlertsUI.IBIAlertImporter do
 
   @spec from_ibi(IBIAlert.t(), atom()) :: any()
   def from_ibi(ibi_alert, :route_type) do
-    case ibi_alert.gui_mode_name do
-      "Systemwide" -> nil
-      "Access" -> nil
-      "Elev/Esc" -> nil
-      "Subway" -> 1
-      "Commuter Rail" -> 2
-      "Bus" -> 3
-      "Boat" -> 4
-    end
+    gui_mode_name_to_route_type_int(ibi_alert.gui_mode_name)
   end
 
   def from_ibi(ibi_alert, :route_ids) do
@@ -611,6 +626,27 @@ defmodule AlertsUI.IBIAlertImporter do
     split_combined_entities(ibi_alert.informed_trip_list)
   end
 
+  def from_ibi(ibi_alert, :original_mode_selections) do
+    case ibi_alert.gui_mode_name do
+      "Systemwide" ->
+        if ibi_alert.affent_list do
+          ibi_alert.affent_list
+          |> String.replace("MBTA;", "")
+          |> String.split(",")
+          |> Enum.map(fn affent ->
+            String.trim_leading(affent)
+            |> gui_mode_name_to_route_type_int()
+          end)
+          |> Enum.filter(fn route_type -> !!route_type end)
+        else
+          [1, 2, 3, 4]
+        end
+
+      _ ->
+        []
+    end
+  end
+
   def from_ibi(ibi_alert, :stop_names_and_ids) do
     split_combined_entities(ibi_alert.informed_stop_list)
   end
@@ -755,6 +791,19 @@ defmodule AlertsUI.IBIAlertImporter do
       end)
     else
       []
+    end
+  end
+
+  def gui_mode_name_to_route_type_int(name) do
+    case name do
+      "Systemwide" -> nil
+      "Access" -> nil
+      "Elev/Esc" -> nil
+      "Subway" -> 1
+      "Commuter Rail" -> 2
+      "Bus" -> 3
+      "Boat" -> 4
+      _ -> nil
     end
   end
 end

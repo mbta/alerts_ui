@@ -220,7 +220,8 @@ defmodule AlertsUI.AlertBuilder do
       :original_route_selections,
       :original_stop_selections,
       :original_trip_selections,
-      :original_facility_selections
+      :original_facility_selections,
+      :original_mode_selections
     ])
   end
 
@@ -295,12 +296,15 @@ defmodule AlertsUI.AlertBuilder do
         Map.get(alert_data, :original_facility_selections, [])
       )
 
+    original_mode_selections = Map.get(alert_data, :service_types, [])
+
     %{
       original_direction_selections: original_direction_selections,
       original_route_selections: original_route_selections,
       original_stop_selections: original_stop_selections,
       original_trip_selections: original_trip_selections,
-      original_facility_selections: original_facility_selections
+      original_facility_selections: original_facility_selections,
+      original_mode_selections: original_mode_selections
     }
   end
 
