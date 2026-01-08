@@ -602,7 +602,7 @@ defmodule AlertsUI.IBIAlertImporter do
     ibi_alert.informed_route_list
     |> split_combined_entities()
     |> Enum.filter(fn name_and_id ->
-      id = String.split(name_and_id, "|") |> List.last
+      id = String.split(name_and_id, "|") |> List.last()
       !Enum.member?(@combo_route_ids, id)
     end)
   end
