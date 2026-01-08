@@ -583,8 +583,28 @@ defmodule AlertsUI.IBIAlertImporter do
     split_combined_entities(ibi_alert.informed_facility_list)
   end
 
+  @combo_route_ids [
+    "602",
+    "627",
+    "725",
+    "746",
+    "2427",
+    "3233",
+    "3738",
+    "4050",
+    "8993",
+    "116117",
+    "214216",
+    "441442"
+  ]
+
   def from_ibi(ibi_alert, :original_route_selections) do
-    split_combined_entities(ibi_alert.informed_route_list)
+    ibi_alert.informed_route_list
+    |> split_combined_entities()
+    |> Enum.filter(fn name_and_id ->
+      id = String.split(name_and_id, "|") |> List.last()
+      !Enum.member?(@combo_route_ids, id)
+    end)
   end
 
   def from_ibi(ibi_alert, :original_trip_selections) do
