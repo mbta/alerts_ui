@@ -34,6 +34,7 @@ defmodule AlertsUIWeb.AuthController do
         } = conn,
         _params
       ) do
+    IO.inspect(auth, label: "full auth")
     roles = userinfo
     |> IO.inspect()
     |> parse_role()
