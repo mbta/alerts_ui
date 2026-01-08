@@ -265,7 +265,7 @@ defmodule AlertsUI.IBIAlertImporter do
               |> PaperTrail.update!(origin: update.last_modified_by)
             end)
 
-            # fix mod selections for systemwide alerts
+            # fix mode selections for systemwide alerts
             if latest_version.gui_mode_name == "Systemwide" do
               final_mode_source =
                 [insert | updates]
