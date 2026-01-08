@@ -286,6 +286,80 @@ defmodule AlertsUI.AlertBuilderTest do
       end
     end
 
+    test "notification period end is properly set for a recurring alert with no end (regression test)" do
+      with_mocks([
+        {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
+      ]) do
+        alert_data = %{
+          route_type: 1,
+          header_text: "hello",
+          effect_name: "Delay",
+          route_ids: ["57"],
+          active_period_start_time: ~T[11:54:00],
+          active_period_end_time: ~T[13:54:00],
+          active_period_start_date: ~D[2024-04-30],
+          active_period_end_date: nil,
+          alert_timing: :recurring,
+          recurrence_days: [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday"
+          ],
+          active_period_end_specifier: :until_further_notice,
+          active_period_start_specifier: :custom,
+          cause_detail: "DISABLED_TRAIN",
+          notification_period_start: ~N[2024-04-30 05:52:00],
+          notification_period_end: nil,
+          severity: 3
+        }
+
+        result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 11:54:00Z])
+        assert result.notification_period_end == nil
+      end
+    end
+
+    test "notification period end is properly set for a recurring alert with end date (regression test)" do
+      with_mocks([
+        {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
+      ]) do
+        alert_data = %{
+          route_type: 1,
+          header_text: "hello",
+          effect_name: "Delay",
+          route_ids: ["57"],
+          active_period_start_time: ~T[11:54:00],
+          active_period_end_time: ~T[13:54:00],
+          active_period_start_date: ~D[2024-04-30],
+          active_period_end_date: ~D[2024-06-30],
+          alert_timing: :recurring,
+          recurrence_days: [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday"
+          ],
+          active_period_end_specifier: :custom,
+          active_period_start_specifier: :custom,
+          cause_detail: "DISABLED_TRAIN",
+          notification_period_start: ~N[2024-04-30 05:52:00],
+          notification_period_end: nil,
+          severity: 3
+        }
+
+        result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 11:54:00Z])
+        assert result.notification_period_end == ~U[2024-06-30 17:54:00Z]
+      end
+    end
+
     test "cause/effect fields can be set directly in alert data" do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
