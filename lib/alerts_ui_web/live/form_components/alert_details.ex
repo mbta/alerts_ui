@@ -513,7 +513,12 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       |> Cause.cause_map_by_mode()
       |> Map.keys()
       |> Enum.map(fn cause_detail ->
-        display_name = cause_detail |> String.replace("_", " ") |> String.downcase()
+        display_name =
+          cause_detail
+          |> String.replace("_", " ")
+          |> String.downcase()
+          |> String.replace("amtrak", "Amtrak")
+
         {display_name, cause_detail}
       end)
 
