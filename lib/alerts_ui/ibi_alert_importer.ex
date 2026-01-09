@@ -617,10 +617,17 @@ defmodule AlertsUI.IBIAlertImporter do
   def from_ibi(ibi_alert, :original_route_selections) do
     ibi_alert.informed_route_list
     |> split_combined_entities()
-    |> Enum.filter(fn name_and_id ->
-      [_name, id] = String.split(name_and_id, "|")
-      !Enum.member?(@combo_route_ids, id)
+    |> Enum.map(fn name_and_id ->
+      [name, id] = String.split(name_and_id, "|")
+
+      cond do
+        Enum.member?(@combo_route_ids, id) -> nil
+        name == "Green Line" -> "Green|Green Line"
+        true -> name_and_id
+      end
     end)
+    |> Enum.filter(&(!!&1))
+    |> Enum.uniq()
   end
 
   def from_ibi(ibi_alert, :original_trip_selections) do
