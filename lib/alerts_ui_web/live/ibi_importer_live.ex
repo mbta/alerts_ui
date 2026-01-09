@@ -4,7 +4,7 @@ defmodule AlertsUIWeb.IBIImporterLive do
   """
   use AlertsUIWeb, :live_view
 
-  alias AlertsUI.IBIImportWorker
+  alias AlertsUI.IBIAlertImporter.IBIImportWorker
   alias AlertsUI.Repo
   alias Ecto.Adapters.SQL
   alias Ecto.Changeset

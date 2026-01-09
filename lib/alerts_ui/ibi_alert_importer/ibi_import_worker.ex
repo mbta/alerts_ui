@@ -1,4 +1,4 @@
-defmodule AlertsUI.IBIImportWorker do
+defmodule AlertsUI.IBIAlertImporter.IBIImportWorker do
   @moduledoc """
   Kick off an IBI import.
   """
