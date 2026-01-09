@@ -659,6 +659,7 @@ defmodule AlertsUI.IBIAlertImporter do
         parent_id -> "#{name}|#{parent_id}"
       end
     end)
+    |> Enum.uniq_by(&(String.split(&1, "|") |> List.last()))
   end
 
   def from_ibi(ibi_alert, :cause) do
