@@ -25,7 +25,7 @@ defmodule AlertsUI.Configs.ModeEffect do
       "Station Bypass" => %{combination: :RDTS, default_severity: 7},
       "Station Closure" => %{combination: :SR, default_severity: 7},
       "Station Issue" => %{combination: :SR, default_severity: 1},
-      "Suspension" => %{combination: :RDS, default_severity: 7},
+      "Suspension" => %{combination: :RDTS, default_severity: 7},
       "Track Change" => %{combination: :RDTS, default_severity: 7}
     },
     bus: %{
@@ -48,8 +48,8 @@ defmodule AlertsUI.Configs.ModeEffect do
       "Extra Service" => %{combination: :R, default_severity: 3},
       "Schedule Change" => %{combination: :R, default_severity: 3},
       "Service Change" => %{combination: :RDTS, default_severity: 3},
-      "Shuttle" => %{combination: :RDS, default_severity: 7},
-      "Suspension" => %{combination: :RDS, default_severity: 7}
+      "Shuttle" => %{combination: :RDTS, default_severity: 7},
+      "Suspension" => %{combination: :RDTS, default_severity: 7}
     },
     facility: %{
       "Access Issue" => %{combination: :ACCESS, default_severity: 3},

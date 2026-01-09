@@ -120,14 +120,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     %{
       pattern: {4, "Suspension"},
       header_template:
-        "?route_names service suspended ?stop_range_between ?alert_duration ?due_to_cause",
+        "?route_names ?direction_name ?trip_names|: service suspended ?stop_range_between ?alert_duration ?due_to_cause",
       description_template: %{
         route_count: 5,
         stop_count: 0,
-        trip_count: nil,
+        trip_count: 2,
         direction_count: nil
       },
-      service_effect_template: "?route_names_short service suspended"
+      service_effect_template: "Suspension of service on ?route_names_short"
     },
     %{
       pattern: {4, "Cancellation"},
@@ -366,6 +366,18 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
       },
       service_effect_template: "?route_names_short service change"
     },
+    %{
+      pattern: {2, "Suspension"},
+      header_template:
+        "?route_names ?direction_name service suspended ?stop_range_between ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        stop_count: 0,
+        trip_count: 2,
+        direction_count: nil
+      },
+      service_effect_template: "Suspension of service on ?route_names_short"
+    },
 
     # mode not specified
     %{
@@ -401,18 +413,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         direction_count: nil
       },
       service_effect_template: "?route_names_short shuttle"
-    },
-    %{
-      pattern: {"Suspension"},
-      header_template:
-        "?route_names ?direction_name service suspended ?stop_range_between ?alert_duration ?due_to_cause",
-      description_template: %{
-        route_count: 5,
-        stop_count: 0,
-        trip_count: nil,
-        direction_count: nil
-      },
-      service_effect_template: "Suspension of service on ?route_names_short"
     },
     %{
       pattern: {"Extra Service"},

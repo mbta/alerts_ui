@@ -484,7 +484,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         route_type: 4,
         routes: [@route_1],
         stops: [@stop_1],
-        schedules: [],
+        direction: [1],
+        schedules: [@schedule_1],
         effect_name: "Suspension",
         cause_detail: "UNRULY_PASSENGER",
         alert_timing: :"one-time",
@@ -495,12 +496,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Route 1 service suspended at Lechmere until Sat, May 10 at 3:00 PM due to an unruly passenger"
+        "Route 1 eastbound trip 9:01 AM from South Station to Forest Hills: service suspended at Lechmere today through Sat, May 10 due to an unruly passenger"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
 
-      expected_service_effect = "Route 1 service suspended"
+      expected_service_effect = "Suspension of service on Route 1"
       actual_service_effect = Templates.build_auto_text(autotext_data, :service_effect_template)
       assert expected_service_effect == actual_service_effect
     end
@@ -1098,7 +1099,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Shuttle buses replacing Route 1 eastbound service at Lechmere until Sat, May 10 at 3:00 PM due to a slippery rail"
+        "Shuttle buses replacing Route 1 eastbound service at Lechmere today through Sat, May 10 due to a slippery rail"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -1125,7 +1126,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Route 1 eastbound service suspended at Lechmere until Sat, May 10 at 3:00 PM due to a slippery rail"
+        "Route 1 eastbound service suspended at Lechmere today through Sat, May 10 due to a slippery rail"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
