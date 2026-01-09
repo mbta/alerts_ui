@@ -100,6 +100,7 @@ defmodule AlertsUI.Models.Cause do
           "POLICE_ACTIVITY" => :POLICE_ACTIVITY,
           "POWER_PROBLEM" => :TECHNICAL_PROBLEM,
           "SIGNAL_PROBLEM" => :TECHNICAL_PROBLEM,
+          "SINGLE_TRACKING" => :MAINTENANCE,
           "SNOW" => :WEATHER,
           "SPECIAL_EVENT" => :OTHER_CAUSE,
           "SWITCH_PROBLEM" => :TECHNICAL_PROBLEM,

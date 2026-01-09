@@ -156,6 +156,31 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
     end
   end
 
+  describe "cause detail" do
+    test "gets default cause detail correctly" do
+      assigns = Map.merge(@assigns, %{route_type: 1, effect_name: "Single Tracking"})
+      {:ok, view, _html} = live_isolated_component(AlertDetails, assigns)
+
+      assert view
+             |> render() =~ ~s(single tracking)
+    end
+
+    test "allows severity to be set by user" do
+      {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_details" => %{
+          "cause_detail" => "FOG"
+        }
+      })
+
+      assert view
+             |> render() =~ ~s(fog)
+    end
+  end
+
   describe "image url" do
     test "only shows preview if image has been entered" do
       with_mock(Req,
