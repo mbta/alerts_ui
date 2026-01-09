@@ -56,9 +56,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
     dedup_stops(stops)
   end
 
-  defp get_stops(%{facility: facility}) when not is_nil(facility) do
-    # gets stop from facility when there is a facility in the alert.
-    [Map.get(facility, :stop)]
+  defp get_stops(%{facility: %{stop: stop}}) when not is_nil(stop) do
+    # gets stop from facility when there is a facility with a stop in the alert.
+    [stop]
   end
 
   defp get_stops(_), do: nil
