@@ -1,4 +1,5 @@
 defmodule AlertsUI.IBIAlertImporter.ParentChildStopMapping do
+  @moduledoc false
   @mapping %{
     "stop_id" => "parent_station",
     "CM-0493-S" => "place-CM-0493",

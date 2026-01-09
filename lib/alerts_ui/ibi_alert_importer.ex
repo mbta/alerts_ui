@@ -653,6 +653,7 @@ defmodule AlertsUI.IBIAlertImporter do
     |> split_combined_entities()
     |> Enum.map(fn name_and_id ->
       [name, id] = String.split(name_and_id, "|")
+
       case ParentChildStopMapping.get_parent_by_child(id) do
         nil -> name_and_id
         parent_id -> "#{name}|#{parent_id}"
