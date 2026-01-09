@@ -14,6 +14,7 @@ defmodule AlertsUI.IBIAlertImporter do
 
   alias AlertsUI.AlertBuilder
   alias AlertsUI.IBIAlertImportParser
+  alias AlertsUI.IBIAlertImporter.ParentChildStopMapping
   alias AlertsUI.Models.Alert
   alias AlertsUI.Models.Cause
   alias AlertsUI.Models.IBIAlert
@@ -303,35 +304,6 @@ defmodule AlertsUI.IBIAlertImporter do
       end,
       timeout: :infinity
     )
-  end
-
-  @parent_child_stop_csv_path "./priv/importer/child-parent stop mapping.csv"
-  def build_parent_child_stop_mapping() do
-    csv_header_map =
-      @parent_child_stop_csv_path
-      |> File.open!(fn f -> IO.read(f, :line) end)
-      |> IBIAlertImportParser.parse_string(skip_headers: false)
-      |> List.first()
-      |> Enum.with_index()
-      |> Enum.into(%{})
-
-    stop_id_index = Map.get(csv_header_map, "stop_id")
-    parent_station_id_index = Map.get(csv_header_map, "parent_station")
-    parent_station_name_index = Map.get(csv_header_map, "parent_station_name")
-
-    @parent_child_stop_csv_path
-    |> File.read!()
-    |> IBIAlertImportParser.parse_string()
-    |> Enum.map(fn row ->
-      {
-        Enum.at(row, stop_id_index),
-        {
-          Enum.at(row, parent_station_id_index),
-          Enum.at(row, parent_station_name_index)
-        }
-      }
-    end)
-    |> Enum.into(%{})
   end
 
   def ibi_alert_to_changeset(ibi_alert, am_alert, options \\ []) do
@@ -646,7 +618,7 @@ defmodule AlertsUI.IBIAlertImporter do
     ibi_alert.informed_route_list
     |> split_combined_entities()
     |> Enum.filter(fn name_and_id ->
-      id = String.split(name_and_id, "|") |> List.last()
+      [_name, id] = String.split(name_and_id, "|")
       !Enum.member?(@combo_route_ids, id)
     end)
   end
@@ -677,7 +649,15 @@ defmodule AlertsUI.IBIAlertImporter do
   end
 
   def from_ibi(ibi_alert, :stop_names_and_ids) do
-    split_combined_entities(ibi_alert.informed_stop_list)
+    ibi_alert.informed_stop_list
+    |> split_combined_entities()
+    |> Enum.map(fn name_and_id ->
+      [name, id] = String.split(name_and_id, "|")
+      case ParentChildStopMapping.get_parent_by_child(id) do
+        nil -> name_and_id
+        parent_id -> "#{name}|#{parent_id}"
+      end
+    end)
   end
 
   def from_ibi(ibi_alert, :cause) do
