@@ -118,13 +118,13 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :SR,
         default_cause: nil,
         default_severity: 1,
-        prediction_suppression_warning: true
+        prediction_suppression_warning: false
       },
       "Suspension" => %{
         combination: :RDTS,
         default_cause: nil,
         default_severity: 7,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: true
       },
       "Track Change" => %{
         combination: :RDTS,

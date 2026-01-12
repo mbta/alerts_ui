@@ -48,7 +48,7 @@ defmodule AlertsUIWeb.PredictionSuppressionWarningModal do
     >
       <:header>
         <.warning_icon class="inline text-warning" stroke="#2b3741" fill="currentColor" />
-        Warning: Predictions Will Be Suppressed
+        Warning: Predictions will be suppressed
       </:header>
       {warning_message(@alert_data, @selected_routes)}
     </.modal>
