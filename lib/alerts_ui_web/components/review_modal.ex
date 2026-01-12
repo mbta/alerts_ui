@@ -99,9 +99,10 @@ defmodule AlertsUIWeb.ReviewModal do
       |> Alert.get_original_names()
       |> join_present(", ")
 
+    modes = Map.get(assigns.alert_data, :service_types, %{}) || %{}
+
     mode_names =
-      assigns.alert_data
-      |> Map.get(:service_types, %{})
+      modes
       |> Enum.map(&ContentFormatter.service_type_string/1)
       |> join_present(", ")
 
