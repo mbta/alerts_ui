@@ -622,7 +622,7 @@ defmodule AlertsUI.IBIAlertImporter do
 
       cond do
         Enum.member?(@combo_route_ids, id) -> nil
-        name == "Green Line" -> "Green|Green Line"
+        name == "Green Line" -> "Green Line|Green"
         true -> name_and_id
       end
     end)
