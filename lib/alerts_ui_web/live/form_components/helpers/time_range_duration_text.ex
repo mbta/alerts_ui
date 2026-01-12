@@ -123,5 +123,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationText do
     end
   end
 
+  defp ensure_naive_datetime_format(%DateTime{} = datetime), do: DateTime.to_naive(datetime)
   defp ensure_naive_datetime_format(%NaiveDateTime{} = datetime), do: datetime
 end
