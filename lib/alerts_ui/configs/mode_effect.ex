@@ -28,7 +28,7 @@ defmodule AlertsUI.Configs.ModeEffect do
       "Service Change" => %{
         combination: :RDS,
         default_cause: nil,
-        default_severity: 7,
+        default_severity: 3,
         end_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
