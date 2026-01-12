@@ -8,7 +8,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   alias AlertsUI.Alerts
   alias AlertsUI.Models.{ActivePeriod, Alert, Effect}
 
-  alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
+  alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
 
   alias MBTAV3API.Routes.Route
 
@@ -58,7 +58,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :stop_names_and_ids,
     :trip_ids,
     :url,
-    :last_push_notification_timestamp
+    :last_push_notification_timestamp,
+    :send_push_notification_on_edit
   ]
 
   @type reminder_time_t :: %{
@@ -110,7 +111,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           stop_names_and_ids: [String.t()] | nil,
           trip_ids: [String.t()] | nil,
           url: String.t() | nil,
-          last_push_notification_timestamp: DateTime.t() | nil
+          last_push_notification_timestamp: DateTime.t() | nil,
+          send_push_notification_on_edit: boolean()
         }
 
   @spec build_alert_data(String.t() | Alert.t() | nil, :creating | :duplicating | :editing | nil) ::
@@ -202,7 +204,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       if primary_service_type == "access" do
         :ACCESS
       else
-        ServiceEffectCombinations.get_combination(route_type, effect_name)
+        GetKeyForModeEffect.get_value_of_key(:combination, route_type, effect_name)
       end
 
     route_ids = Alert.get_original_ids(alert.original_route_selections || [])
@@ -214,7 +216,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
         nil
       end
 
-    route_type = get_route_type(Map.get(alert, :primary_service_type))
+    send_push_notification_on_edit =
+      GetKeyForModeEffect.get_value_of_key(
+        :send_push_notification_on_edit,
+        route_type || primary_service_type,
+        effect_name
+      )
 
     %{
       combination: combination,
@@ -226,7 +233,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       single_route_id: single_route_id,
       stop_ids: Alert.gather_parent_stop_ids(alert.informed_entity),
       stop_names_and_ids: alert.original_stop_selections,
-      trip_ids: Alert.gather_trip_ids(alert.informed_entity)
+      trip_ids: Alert.gather_trip_ids(alert.informed_entity),
+      send_push_notification_on_edit: send_push_notification_on_edit
     }
   end
 

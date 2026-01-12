@@ -5,7 +5,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
   """
   alias AlertsUI.Models.ActivePeriod
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText
-  alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
+  alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
 
   @spec build_duration_text(BuildAutoText.t()) :: String.t()
   def build_duration_text(autotext_data, current_time \\ current_time_naive())
@@ -23,7 +23,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         },
         current_time
       ) do
-    combination = ServiceEffectCombinations.get_combination(route_type, effect_name)
+    combination = GetKeyForModeEffect.get_value_of_key(:combination, route_type, effect_name)
     is_trip_combination? = combination in [:RDT, :RDTS]
 
     start_specifier = change_start_specifier(start_datetime, start_specifier)
@@ -70,7 +70,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         } = auto_text_data,
         current_time
       ) do
-    combination = ServiceEffectCombinations.get_combination(route_type, effect_name)
+    combination = GetKeyForModeEffect.get_value_of_key(:combination, route_type, effect_name)
 
     start_time_specifier = change_start_specifier(start_time, start_time_specifier)
     end_time_specifier = change_end_specifier(end_time, end_time_specifier)
