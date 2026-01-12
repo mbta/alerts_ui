@@ -171,7 +171,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       ) do
     # Get the currently selected stop ids
     stop_ids =
-      affected_service["stop_ids"]
+      affected_service["stop_ids"] || []
 
     # Then get the full stop data. That could be in available_stops OR be previously saved in selected_stops
     # (in the case that the list has been filtered, the stop details won't be in available_stops)
