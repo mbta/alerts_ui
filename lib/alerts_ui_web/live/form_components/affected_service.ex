@@ -116,8 +116,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     alert_data =
       Map.put(alert_data, :trip_information_by_id, trip_information_by_id)
-      |> Map.put(:modal_date, nil)
       |> Map.merge(params)
+      |> Map.put(:modal_date, nil)
 
     changeset = build_changeset(%__MODULE__{}, alert_data)
 
