@@ -182,7 +182,7 @@ defmodule AlertsUIWeb.SharedComponents do
     border
     rounded
     flex
-    w-fit
+    md:w-fit
     h-fit
     items-center
   "
@@ -646,19 +646,19 @@ defmodule AlertsUIWeb.SharedComponents do
       phx-remove={hide_modal(@id)}
       data-accept={JS.exec(@on_accept, "phx-remove")}
       data-cancel={JS.exec(@on_cancel, "phx-remove")}
-      class="relative z-50 hidden !ml-0"
+      class="fixed inset-0 z-50 hidden"
     >
       <div id={"#{@id}-bg"} class="bg-black/90 fixed inset-0 transition-opacity" aria-hidden="true" />
       <div
-        class="fixed inset-0 overflow-y-auto"
+        class="absolute inset-2 flex place-content-center place-items-center"
         aria-labelledby={"#{@id}-title"}
         aria-describedby={"#{@id}-description"}
         role="dialog"
         aria-modal="true"
         tabindex="0"
       >
-        <div class={["flex min-h-full items-center justify-center", @outer_class]}>
-          <div class={["min-w-[20rem] w-[25%] sm:p-6 lg:py-8", @class]}>
+        <div class={["contents", @outer_class]}>
+          <div class={["contents", @class]}>
             <.focus_wrap
               id={"#{@id}-container"}
               phx-window-keydown={
@@ -670,11 +670,11 @@ defmodule AlertsUIWeb.SharedComponents do
                 JS.push(@cancel_event_name, target: @target_id)
                 |> JS.exec("data-cancel", to: "##{@id}")
               }
-              class="!flex flex-col max-h-full shadow-zinc-700/10 ring-zinc-700/10 relative hidden rounded-md bg-bg-elevation-4
+              class="max-h-dvh w-full md:w-auto md:max-w-2xl !flex flex-col justify-stretch content-stretch shadow-zinc-700/10 ring-zinc-700/10 hidden rounded-md bg-bg-elevation-4
               border-bg-elevation-6 shadow-lg ring-1 transition border"
             >
-              <div class="flex flex-row items-center justify-between py-3 pr-3 pl-4">
-                <h1 class={["text-xl", @header_class]}>
+              <div class="flex-none flex flex-row items-center justify-between py-3 pr-3 pl-4">
+                <h1 class={["md:text-xl", @header_class]}>
                   {render_slot(@header) || @header_text}
                 </h1>
                 <button
@@ -689,15 +689,13 @@ defmodule AlertsUIWeb.SharedComponents do
                   <AlertsUIWeb.CoreComponents.icon name="hero-x-mark-solid" class="h-8 w-8" />
                 </button>
               </div>
-              <hr class="w-[100%] border-y-1 border-bg-elevation-6" />
-              <div id={"#{@id}-content"} class={["px-4 py-4", @inner_class]}>
+              <div id={"#{@id}-content"} class={["p-4 w-full overflow-auto flex-1 border-y border-bg-elevation-6", @inner_class]}>
                 {render_slot(@inner_block)}
               </div>
-              <hr class="w-[100%] border-y-1 border-bg-elevation-6" />
               <%= if render_slot(@footer) do %>
                 {render_slot(@footer)}
               <% else %>
-                <div class="flex flex-row justify-end px-3 py-3 gap-2">
+                <div class="flex-none flex flex-col md:flex-row md:justify-end px-3 py-3 gap-2">
                   <.button_secondary
                     :if={@cancel_event_name}
                     type="button"
@@ -1205,11 +1203,11 @@ defmodule AlertsUIWeb.SharedComponents do
     ~H"""
     <div phx-feedback-for={@name} class="relative flex flex-col">
       <.label :if={not is_nil(@label)} for={@id}>{@label}</.label>
-      <div class="flex flex-row items-center">
+      <div class="">
         <AlertsUIWeb.CoreComponents.icon
           :if={@icon && !@disabled}
           name={@icon}
-          class="absolute w-4 h-4 text-text-disabled ml-2 mr-1"
+          class="w-4 h-4 text-text-disabled absolute inset-y-2.5 inset-x-4"
         />
         <input
           type="text"
@@ -1221,7 +1219,7 @@ defmodule AlertsUIWeb.SharedComponents do
               rounded text-text-primary disabled:text-text-secondary
               disabled:bg-bg-elevation-3 ring-0  focus:ring-0 ring-border-focus
               focus:border-border-focus",
-            @icon && "ps-8",
+            @icon && "ps-10",
             @class,
             @errors != [] && "border-danger focus:border-danger"
           ]}
@@ -1592,10 +1590,11 @@ defmodule AlertsUIWeb.SharedComponents do
       {@rest}
     >
       <:previous attrs={[
-        class: "text-primary flex items-center mr-auto !py-1 !px-[6px] leading-[1.5]"
+        class: "text-primary flex items-center mr-auto !py-1 !px-[6px] leading-[1.5]",
+        "aria-labelledby": "paginate-previous"
       ]}>
         <.caret_icon direction={:left} />
-        <span class="text-xs font-normal">Previous</span>
+        <span id="paginate-previous" class="text-xs hidden lg:flex-inline font-normal">Previous</span>
       </:previous>
       <:ellipsis>
         <span
@@ -1606,9 +1605,10 @@ defmodule AlertsUIWeb.SharedComponents do
         </span>
       </:ellipsis>
       <:next attrs={[
-        class: "text-primary flex items-center ml-auto !py-1 !px-[6px] leading-[1.5] order-last"
+        class: "text-primary flex items-center ml-auto !py-1 !px-[6px] leading-[1.5] order-last",
+        "aria-labelledby": "paginate-next"
       ]}>
-        <span class="text-xs font-normal">Next</span>
+        <span id="paginate-next" class="text-xs hidden lg:flex-inline font-normal">Next</span>
         <.caret_icon direction={:right} />
       </:next>
     </Flop.Phoenix.pagination>
