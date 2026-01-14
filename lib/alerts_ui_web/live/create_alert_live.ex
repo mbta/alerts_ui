@@ -129,7 +129,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
         alert_id: alert_id,
         form_type: form_type,
         errors: %{},
-        submitted: false
+        submitted: false,
+        bad_ids: []
       })
 
     {:ok, socket}
@@ -366,7 +367,6 @@ defmodule AlertsUIWeb.CreateAlertLive do
       %{
         alert_data: Map.merge(socket.assigns.alert_data, changeset |> Map.from_struct())
       }
-
     {:noreply, assign(socket, assigns)}
   end
 

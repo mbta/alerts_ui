@@ -11,6 +11,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   alias AlertsUIWeb.FormComponents.Helpers.{
     ContentFormatter,
+    EntityValidator,
     ErrorFormatter,
     Helpers,
     SelectFormatter,
@@ -178,6 +179,30 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         socket
       ) do
     route_types = all_route_types(route_type)
+
+    #### GTFS STUFF
+    required_fields =
+      assigns.combination
+      |> ServiceEffectCombinations.required_fields()
+      |> Enum.reject(&(&1 == :direction))
+
+    mapping = %{
+      route_ids: :available_routes,
+      trip_ids: :available_schedules,
+      stop_ids: :available_stops
+    }
+
+    bad_ids =
+      Enum.map(required_fields, fn field ->
+        {field, EntityValidator.get_bad_ids(alert_data[field], socket.assigns[mapping[field]])}
+      end)
+
+      all_ids_in = Enum.all?(bad_ids, fn {_k, v} -> is_list(v) end) &&
+        Enum.any?(bad_ids, fn {_k, v} -> !Enum.empty?(v) end)
+
+    ####
+
+    IO.inspect(alert_data.stop_ids, label: :after)
 
     # make sure initial errors get sent up to create_alert_live even if no events fire
     # For other form components, this is done in the mount, but we can't do that here
