@@ -32,7 +32,7 @@ defmodule AlertsUIWeb.FilterForm do
   def filter_form(assigns) do
     ~H"""
     <.form for={@form} id="alert-filter-form" phx-submit="apply_filter" phx-change="edit_filter">
-      <div class="mb-4 ml-2 flex flex-row gap-2 items-center">
+      <div class="flex flex-col gap-4 mb-4 md:flex-row md:items-center md:justify-evenly">
         <.filter_modal form={@form} filter_count={@filter_count} />
         <.radio_switch
           name="timeline"
@@ -47,7 +47,7 @@ defmodule AlertsUIWeb.FilterForm do
           phx-debounce={750}
           placeholder="Search alerts"
           icon="hero-magnifying-glass-mini"
-          class="h-[2.375rem]"
+          class="h-[2.375rem] w-full"
           phx-change="apply_filter"
         />
         <.button_secondary class="btn-outline" name="reset">
