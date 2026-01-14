@@ -247,7 +247,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
             time: shift_to_naive(time.reminder_time)
           }
         end)
-        |> Enum.sort_by(& &1.time)
+        |> Enum.sort_by(& &1.time, NaiveDateTime)
     }
   end
 
