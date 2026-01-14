@@ -251,7 +251,7 @@ defmodule AlertsUI.IBIAlertImporter do
                 no_active_periods: !insert_open,
                 no_informed_entities: !insert_open
               )
-              |> PaperTrail.insert!(origin: insert.last_modified_by, returning: true)
+              |> PaperTrail.insert!(origin: insert.last_modified_by, returning: true, meta: %{version: insert.integer_version_no})
               |> Repo.preload([:informed_entity, :active_period])
 
             Enum.each(updates, fn update ->
@@ -263,7 +263,7 @@ defmodule AlertsUI.IBIAlertImporter do
                 no_active_periods: !update_open,
                 no_informed_entities: !update_open
               )
-              |> PaperTrail.update!(origin: update.last_modified_by)
+              |> PaperTrail.update!(origin: update.last_modified_by, meta: %{version: update.integer_version_no})
             end)
 
             # fix mode selections for systemwide alerts
