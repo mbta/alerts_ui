@@ -274,9 +274,13 @@ defmodule AlertsUI.Alerts do
   def get_latest_version(alert_uuid) do
     from(
       version in PaperTrail.Version,
-      where: version.item_id == ^alert_uuid
+      where: version.item_id == ^alert_uuid,
+      order_by: [
+        desc: :inserted_at,
+        desc: fragment("meta->'version'")
+      ],
+      limit: 1
     )
-    |> last(:inserted_at)
     |> Repo.one()
   end
 
