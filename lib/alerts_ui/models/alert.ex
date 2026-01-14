@@ -404,24 +404,42 @@ defmodule AlertsUI.Models.Alert do
     |> Enum.uniq()
   end
 
+  @spec get_original_names([String.t()] | nil) :: [String.t()]
   def get_original_names(nil), do: []
 
   def get_original_names(names_and_ids) do
     Enum.map(names_and_ids, &get_route_name/1)
   end
 
+  @spec get_original_ids([String.t()] | nil) :: [String.t()]
   def get_original_ids(nil), do: []
 
   def get_original_ids(names_and_ids) do
     Enum.map(names_and_ids, &get_route_id/1)
   end
 
+  @spec get_original_route_names_and_ids([String.t()] | nil) :: [{String.t(), String.t()}]
+
+  def get_original_route_names_and_ids(nil), do: []
+
+  def get_original_names_and_ids(names_and_ids) do
+    Enum.map(names_and_ids || [], &get_route_name_and_id/1)
+  end
+
+  @spec get_route_name(String.t()) :: String.t()
   def get_route_name(name_and_id) do
     name_and_id |> String.split("|") |> name()
   end
 
+  @spec get_route_id(String.t()) :: String.t()
   def get_route_id(name_and_id) do
     name_and_id |> String.split("|") |> id()
+  end
+
+  @spec get_route_name_and_id(String.t()) :: {String.t(), String.t()}
+  def get_route_name_and_id(name_and_id) do
+    pair = name_and_id |> String.split("|")
+    {pair |> name(), pair |> id()}
   end
 
   defp name([name, _id]), do: name

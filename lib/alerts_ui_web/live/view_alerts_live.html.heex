@@ -47,7 +47,7 @@
     >
       <:col :let={alert} label="Service" field={:alert_id} col_style="">
         <.service_pills
-          entities={Alert.get_original_ids(alert.original_route_selections)}
+          entities={Alert.get_original_names_and_ids(alert.original_route_selections)}
           effect_name={alert.effect_name}
         />
       </:col>
