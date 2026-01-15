@@ -211,6 +211,46 @@ defmodule AlertsUIWeb.AlertHistoryTest do
     end
   end
 
+  describe "build_history/1" do
+    test "it can handle a minimal map without error" do
+      assert AlertHistory.build_history({%{}, 1}) == %AlertHistory{
+               alert_id: nil,
+               version: 2,
+               created_datetime: "",
+               closed: false,
+               last_modified_by: "",
+               last_modified_datetime: "",
+               service_type: "",
+               effect_name: nil,
+               effect: nil,
+               effect_detail: nil,
+               affected_entities: "",
+               recurrence: false,
+               effect_start: "",
+               effect_end: "further notice",
+               recurrence_days: "",
+               recurrence_start_time: "",
+               recurrence_end_time: "",
+               notification_start: "",
+               notification_end: "",
+               duration_certainty: nil,
+               cause: "UNKNOWN_CAUSE",
+               cause_detail: "UNKNOWN_CAUSE",
+               severity_code: nil,
+               severity_level: nil,
+               severity_name: nil,
+               main_message: nil,
+               supporting_information: "",
+               url: "",
+               image_url: "",
+               image_alternative_text: "",
+               set_as_website_banner: false,
+               website_banner_text: "",
+               reminders: ""
+             }
+    end
+  end
+
   describe "build_history_csv/1" do
     test "returns correct csv" do
       user =
