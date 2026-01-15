@@ -962,7 +962,7 @@ defmodule AlertsUIWeb.SharedComponents do
         id={@id}
         disabled={@disabled}
         class={[
-          "bg-bg-elevation-5 border border-bg-elevation-6 px-3 mb-2 min-w-[100%] p-0 [color-scheme:light]
+          "bg-bg-elevation-5 border border-bg-elevation-6 px-3 mb-2 max-w-full min-w-full p-0 [color-scheme:light]
             rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto
             disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
             focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) h-10 [&_*]:pb-[.40rem] [&_*]:whitespace-pre-wrap [&_*]:truncate",
@@ -1217,7 +1217,7 @@ defmodule AlertsUIWeb.SharedComponents do
           class={[
             "bg-bg-input-default border border-bg-elevation-6 pl-1
               rounded text-text-primary disabled:text-text-secondary
-              disabled:bg-bg-elevation-3 ring-0  focus:ring-0 ring-border-focus
+              disabled:bg-bg-elevation-3 ring-0 min-w-full focus:ring-0 ring-border-focus
               focus:border-border-focus",
             @icon && "ps-10",
             @class,
@@ -1308,7 +1308,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
     ~H"""
     <div class={[
-      "flex flex-row justify-end min-w-[100%] text-sm text-text-secondary bg-bg-elevation-3 px-2 pt-4 rounded-b border border-bg-elevation-6 border-t-0 -mt-2",
+      "flex flex-row justify-end min-w-full text-sm text-text-secondary bg-bg-elevation-3 px-2 pt-4 rounded-b border border-bg-elevation-6 border-t-0 -mt-2",
       if(@error_length > 0, do: "border-danger"),
       if(String.length(@value || "") == @character_limit, do: "text-danger ")
     ]}>

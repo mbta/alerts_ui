@@ -514,7 +514,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       )
 
     ~H"""
-    <div class="min-w-[100%] self-start flex flex-col" id="service_view">
+    <div class="min-w-full self-start flex flex-col" id="service_view">
       <.h1>
         {ContentFormatter.service_type_string(@route_type)} • {@effect_name || ""}
       </.h1>
@@ -525,10 +525,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         for={@form}
         phx-target={@myself}
         phx-change="validate"
-        class={["form-control flex flex-row mb-4", @route_type !== 2 && "min-h-[32rem]"]}
+        class={["form-control flex flex-row flex-wrap mb-4", @route_type !== 2 && "min-h-[32rem]"]}
         id="service_form"
       >
-        <div class="w-[25%] mr-8">
+        <div class="mb-4 md:mb-0 w-full md:w-[25%] md:mr-8">
           <.filtered_select
             :if={@route_type === 3}
             label={if @route_type in [0, 1, 2], do: "Lines", else: "Routes"}
@@ -547,7 +547,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             options={@route_id_options}
             icon_type={icon_type(@route_type)}
             class="flex-col"
-            button_class="min-w-[100%]"
+            button_class="min-w-full"
             show_icons={true}
           />
         </div>
@@ -571,7 +571,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             multiple={false}
           />
         </.modal>
-        <div :if={show_trips_input?(assigns)} class="flex flex-col justify-start w-[25%] mr-8">
+        <div :if={show_trips_input?(assigns)} class="flex flex-col justify-start md:w-[25%] md:mr-8">
           <.select
             :if={show_directions_input?(assigns)}
             label={
@@ -599,13 +599,13 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             no_results={
               Enum.empty?(@trip_id_options) && !disable_trip_input?(@form[:route_ids].value)
             }
-            class="min-w-[100%] h-full"
+            class="min-w-full h-full"
             disabled={disable_trip_input?(@form[:route_ids].value)}
             prompt={if disable_trip_input?(@form[:route_ids].value), do: nil, else: "All Trips"}
             hook="SelectAllAdjuster"
           />
         </div>
-        <div class="flex flex-col justify-start w-[25%]">
+        <div class="flex flex-col justify-start w-full md:w-[25%]">
           <.select
             :if={show_directions_input?(assigns) && !show_trips_input?(assigns)}
             label={if show_stops_input?(assigns), do: "Stops", else: "Direction"}
@@ -624,7 +624,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             no_results={
               Enum.empty?(@stop_id_options) && !disable_stop_input?(@form[:route_ids].value)
             }
-            class="min-w-[100%] h-full"
+            class="min-w-full h-full"
             disabled={disable_stop_input?(@form[:route_ids].value)}
             prompt={
               if disable_stop_input?(@form[:route_ids].value),
