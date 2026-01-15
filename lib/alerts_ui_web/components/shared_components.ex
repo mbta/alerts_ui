@@ -689,7 +689,13 @@ defmodule AlertsUIWeb.SharedComponents do
                   <AlertsUIWeb.CoreComponents.icon name="hero-x-mark-solid" class="h-8 w-8" />
                 </button>
               </div>
-              <div id={"#{@id}-content"} class={["p-4 w-full overflow-auto flex-1 border-y border-bg-elevation-6", @inner_class]}>
+              <div
+                id={"#{@id}-content"}
+                class={[
+                  "p-4 w-full overflow-auto flex-1 border-y border-bg-elevation-6",
+                  @inner_class
+                ]}
+              >
                 {render_slot(@inner_block)}
               </div>
               <%= if render_slot(@footer) do %>
