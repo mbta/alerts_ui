@@ -130,7 +130,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
         form_type: form_type,
         errors: %{},
         submitted: false,
-        bad_ids: []
+        bad_ids: %{},
+        bad_id_text: []
       })
 
     {:ok, socket}
@@ -150,6 +151,16 @@ defmodule AlertsUIWeb.CreateAlertLive do
   @impl true
   def handle_event("move_progress", %{"value" => name}, socket) do
     {:noreply, assign(socket, :progress, get_step_by_name(name))}
+  end
+
+  @impl true
+  def handle_event("accepted_gtfs_modal", _params, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("cancelled_gtfs_modal", _params, socket) do
+    {:noreply, socket |> redirect(to: "/")}
   end
 
   def get_routes(route_types) do
@@ -355,6 +366,22 @@ defmodule AlertsUIWeb.CreateAlertLive do
     {:noreply, assign(socket, selected_facility: selected_facility)}
   end
 
+  def handle_info({:got_bad_ids, bad_ids}, socket) do
+    bad_id_text =
+      bad_ids
+      |> Enum.reject(fn {_k, v} -> v in [nil, []] end)
+      |> Enum.map(fn {k, v} ->
+        "#{String.replace(Atom.to_string(k), "_id", "")}: #{Enum.join(v, ", ")}"
+      end)
+
+    socket =
+      socket
+      |> assign(bad_id_text: bad_id_text, bad_ids: bad_ids)
+      |> push_event("show-gtfs-modal", %{id: "gtfs-warning-modal"})
+
+    {:noreply, socket}
+  end
+
   @impl true
   def handle_info({:add_errors, errors, name}, socket) do
     updated_errors = socket.assigns.errors |> Map.put(name, errors)
@@ -367,6 +394,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
       %{
         alert_data: Map.merge(socket.assigns.alert_data, changeset |> Map.from_struct())
       }
+
     {:noreply, assign(socket, assigns)}
   end
 
@@ -440,8 +468,21 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
     user = Users.create_or_update_user_from_session(socket.assigns.current_user)
 
+    required_fields =
+      ServiceEffectCombinations.required_fields(socket.assigns.combination)
+      |> Enum.reject(&(&1 == :direction))
+
     alert_data =
       socket.assigns.alert_data
+
+    alert_data =
+      alert_data
+      |> Map.merge(
+        Enum.map(required_fields, fn field ->
+          {field, alert_data[field] -- Map.get(socket.assigns.bad_ids, field, [])}
+        end)
+        |> Enum.into(%{})
+      )
       |> AlertBuilder.build_alert(socket.assigns.combination)
 
     existing_alert =

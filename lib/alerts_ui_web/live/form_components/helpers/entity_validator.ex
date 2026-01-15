@@ -1,11 +1,18 @@
 defmodule AlertsUIWeb.FormComponents.Helpers.EntityValidator do
   @moduledoc """
+    Takes in an id or list of ids, and an AsyncResult containing
+    a list of entities in the result. Returns list of IDs not found
+    in the result.
   """
 
-  # TODO special case for trips/schedules?
-  def get_bad_ids([_ | _] = ids, %{ok?: true, result: available_entities})
-      when not is_nil(available_entities) do
-    available_ids = Enum.map(available_entities, & &1.id)
+  @spec get_bad_ids(list(), map()) :: list() | nil
+  def get_bad_ids(id, available_entities) when is_binary(id) do
+    get_bad_ids(List.wrap(id), available_entities)
+  end
+
+  def get_bad_ids(ids, %{ok?: true, result: available_entities})
+      when not is_nil(available_entities) and is_list(ids) do
+    available_ids = Enum.map(available_entities, &get_entity_id/1)
 
     Enum.reduce(ids, [], fn id, acc ->
       if id in available_ids do
@@ -16,16 +23,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.EntityValidator do
     end)
   end
 
-  def get_bad_ids(id, %{ok?: true, result: available_entities})
-      when not is_nil(available_entities) do
-    available_ids = Enum.map(available_entities, & &1.id)
-
-    if id in available_ids do
-      [id]
-    else
-      []
-    end
-  end
-
   def get_bad_ids(_, _), do: nil
+
+  def get_entity_id(%{trip: %{id: id}}), do: id
+
+  def get_entity_id(%{id: id}), do: id
 end
