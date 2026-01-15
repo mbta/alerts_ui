@@ -2,6 +2,13 @@ defmodule AlertsUI.Configs.ModeEffect do
   @moduledoc """
   Config for mode-effect combinations and their various properties
   """
+  @type t :: %{
+          combination: atom(),
+          default_cause: String.t() | nil,
+          default_severity: integer(),
+          send_push_notification_on_edit: boolean(),
+          prediction_suppression_warning: boolean()
+        }
   @mode_effect %{
     subway: %{
       "Delay" => %{
@@ -402,5 +409,6 @@ defmodule AlertsUI.Configs.ModeEffect do
     }
   }
 
+  @spec mode_effect() :: %{atom => %{String.t() => __MODULE__.t()}}
   def mode_effect, do: @mode_effect
 end
