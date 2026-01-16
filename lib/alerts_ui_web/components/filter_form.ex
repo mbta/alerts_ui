@@ -268,7 +268,7 @@ defmodule AlertsUIWeb.FilterForm do
     # Properly organizing by mode: Bus, Subway, CR, Ferry
     [
       Map.get(grouped_routes, 3, []),
-      Map.get(grouped_routes, 1, []),
+      Map.get(grouped_routes, 1, []) ++ Map.get(grouped_routes, 0, []),
       Map.get(grouped_routes, 2, []),
       Map.get(grouped_routes, 4, [])
     ]

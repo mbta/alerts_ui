@@ -7,7 +7,7 @@ defmodule AlertsUI.Alerts do
   alias AlertsUI.DBContexts.Users
   alias AlertsUI.Models.{Alert, User}
   alias AlertsUI.Repo
-  alias AlertsUI.Routes
+  alias MBTAV3API.Routes.Repo, as: RoutesRepo
   require Logger
 
   @spec create_or_update_alert(map(), User.t(), any()) :: {:ok | :error, any()}
@@ -425,44 +425,11 @@ defmodule AlertsUI.Alerts do
   # original_route_selections so that we can group the route filters list by mode
   @spec get_routes_grouped_by_mode() :: map()
   def get_routes_grouped_by_mode do
-    Repo.all(
-      from(a in Alert,
-        where: a.original_route_selections != [] and (a.draft == false or is_nil(a.draft)),
-        inner_join: ie in AlertsUI.Models.InformedEntity,
-        on: ie.alert_id == a.id,
-        select: {a.original_route_selections, ie.route_type, ie.route_id}
-      )
-    )
-    |> Enum.uniq()
-    |> Enum.map(&map_route_to_route_type/1)
+    RoutesRepo.all()
+    |> Enum.map(&{&1.name, &1.type, &1.id})
+    |> Enum.concat([{"Green Line", 0, "Green"}])
     |> Enum.uniq()
     |> Enum.filter(fn x -> x != nil end)
     |> Enum.group_by(&elem(&1, 1))
-  end
-
-  defp map_route_to_route_type({routes_list_from_alert, route_type_from_ie, route_id_from_ie}) do
-    # Use the route_id to look up the route name from the routes list
-    route_name_and_id =
-      Enum.find(routes_list_from_alert, fn name_and_id ->
-        just_id = name_and_id |> Alert.get_route_id() |> simplify_route_id()
-
-        just_id == route_id_from_ie || just_id == simplify_route_id(route_id_from_ie)
-      end)
-
-    # IEs created from combo routes will not be found in the routes list
-    # so this conditional is needed to just skip over those combo route IEs
-    if route_name_and_id do
-      route_name = Alert.get_route_name(route_name_and_id)
-      route_id = Alert.get_route_id(route_name_and_id)
-
-      # Associate the proper route_name and the proper route_type; pass along route_id for later
-      {route_name, route_type_from_ie, route_id}
-    else
-      nil
-    end
-  end
-
-  defp simplify_route_id(id) do
-    if id in Routes.green_line_branch_ids(), do: "Green", else: id
   end
 end

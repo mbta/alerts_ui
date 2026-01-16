@@ -46,6 +46,7 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
          by_type: fn _types -> @routes end,
          get: fn _id -> @route_one end,
          get: fn _id, _opts -> @route_one end,
+         all: fn -> @routes end,
          all: fn _opts -> @routes end
        ]},
       {StopsRepo, [],
@@ -180,6 +181,7 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
          by_type: fn _types -> @routes end,
          get: fn _id -> @route_one end,
          get: fn _id, _opts -> @route_one end,
+         all: fn -> @routes end,
          all: fn _opts -> @routes end
        ]},
       {StopsRepo, [],

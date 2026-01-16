@@ -155,6 +155,24 @@ defmodule AlertsUI.Support.Factory do
   def last_modified(alert_entity_data, unix_time),
     do: put_in(alert_entity_data, ["alert", "last_modified_timestamp"], unix_time)
 
+  def route_factory(%{} = route_data) do
+    %{
+      id: "",
+      type: 0,
+      name: "",
+      long_name: "",
+      color: "",
+      sort_order: 99_999,
+      direction_names: %{0 => "Outbound", 1 => "Inbound"},
+      direction_destinations: :unknown,
+      description: :unknown,
+      fare_class: :unknown_fare,
+      custom_route?: false,
+      line_id: ""
+    }
+    |> Map.merge(route_data)
+  end
+
   def with_header_text(alert_entity_data, text),
     do:
       put_in(alert_entity_data, ["alert", "header_text", "translation"], [
