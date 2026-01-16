@@ -129,8 +129,6 @@ defmodule AlertsUIWeb.ReviewModal do
       header_text="Create new alert"
       cancel_button_text="Keep editing"
       accept_button_text="Submit"
-      class=""
-      outer_class=""
       inner_class="!p-0"
       target_id={@target_id}
       {@rest}
