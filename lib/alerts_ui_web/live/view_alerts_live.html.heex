@@ -1,6 +1,6 @@
-<div id="view_alerts_live_view" class="h-[calc(100%-4rem)] mt-10 mb-6 mx-6 flex flex-col">
-  <div class="flex justify-between">
-    <.button_primary_link href="/alerts/new" class="whitespace-nowrap">
+<div id="view_alerts_live_view" class="p-4 lg:mt-10 lg:mb-6">
+  <div class="flex flex-col gap-4 lg:flex-row lg:justify-between">
+    <.button_primary_link href="/alerts/new" class="w-full justify-center lg:w-auto">
       <.icon name="hero-plus" class="w-6 h-6 mr-1" />
       <span class="font-medium">
         Create new alert
@@ -9,16 +9,16 @@
     <.filter_form form={@form} filter_count={@filter_count} />
   </div>
 
-  <div class="flex items-center bg-bg-secondary p-2 text-sm border-t border-border-primary justify-between">
-    <span class="w-[100px]">
+  <div class="sticky top-0 z-10 flex items-center bg-bg-secondary p-2 text-sm border-t border-border-primary justify-between">
+    <span class="w-24">
       {@meta.total_count} {BuildAutoText.maybe_pluralize("alert", @meta.total_count != 1)}
     </span>
     <.pagination meta={@meta} />
-    <span class="w-[100px]" />
+    <span class="w-24" />
   </div>
 
   <div
-    class="h-full shrink overflow-y-auto overflow-x-hidden"
+    class="overflow-x-auto lg:overflow-visible"
     phx-hook="ScrollToTop"
     data-scroll-to-top={inspect(@scroll_to_top)}
     data-showing-alert-id={Map.get(assigns, :selected_alert_id, "")}
@@ -33,30 +33,32 @@
         symbol_asc: sort_icon(:asc),
         symbol_desc: sort_icon(:desc),
         symbol_unsorted: sort_icon(nil),
-        table_attrs: [class: "table table-fixed min-w-[870px]"],
+        table_attrs: [class: "table table-auto"],
         tbody_td_attrs: [class: "px-2 py-1 leading-[1.5] break-words"],
         tbody_tr_attrs: [
           class: "hover:bg-bg-elevation-3 cursor-pointer odd:bg-bg-secondary border-none"
         ],
-        thead_th_attrs: [class: "bg-bg-primary sticky top-0 z-10 px-2 leading-[1.5]"],
-        thead_tr_attrs: [class: "text-base text-text-primary border-none"]
+        thead_th_attrs: [class: "bg-bg-primary px-2 leading-[1.5]"],
+        thead_tr_attrs: [
+          class: "lg:sticky lg:top-0 lg:z-20 text-base text-text-primary border-none"
+        ]
       ]}
       row_click={&JS.push("open_details", value: %{alert_id: &1.alert_id})}
     >
-      <:col :let={alert} label="Service" field={:alert_id} col_style="width: 12.6%;">
+      <:col :let={alert} label="Service" field={:alert_id} col_style="">
         <.service_pills
           entities={Alert.get_original_ids(alert.original_route_selections)}
           effect_name={alert.effect_name}
         />
       </:col>
-      <:col :let={alert} label="Effect" field={:effect_name} col_style="width: 8.6%;">
+      <:col :let={alert} label="Effect" field={:effect_name} col_style="">
         {alert.effect_name}
       </:col>
       <:col
         :let={alert}
         label="ID"
         field={:integer_alert_id}
-        col_style="width: 5.7%;"
+        col_style=""
         tbody_td_attrs={[class: "p-1 alert-id-cell"]}
       >
         {alert.alert_id}
@@ -69,7 +71,7 @@
         label="Start"
         field={:active_period_start}
         directions={{:asc_nulls_first, :desc_nulls_last}}
-        col_style="width: 7.5%;"
+        col_style=""
       >
         <div title={format_timestamp(alert.active_period_start)}>
           {format_start_time(alert.active_period_start)}
@@ -84,7 +86,7 @@
             else: :notification_period_end
         }
         directions={{:asc_nulls_first, :desc_nulls_last}}
-        col_style="width: 11%;"
+        col_style=""
         tbody_td_attrs={[class: "p-1 whitespace-nowrap"]}
       >
         <div
@@ -99,7 +101,7 @@
           {format_end_time(alert.active_period_end, alert.duration_certainty)}
         </div>
       </:col>
-      <:action :let={alert} label="Actions" col_style="width: 128px">
+      <:action :let={alert} label="Actions" col_style="">
         <div class="inline-flex justify-end space-x-2 w-full">
           <.button_secondary_link
             :if={!AlertsUIWeb.FormComponents.Helpers.Helpers.alert_is_closed(alert)}

@@ -272,14 +272,14 @@
       min={@current_time}
       value={@current_time}
       label="Datetime"
-      class="min-w-[16rem] max-w-[16rem]"
+      class="md:min-w-64 md:max-w-64"
     />
     <.datetime
       field={@form[:datetime_disabled]}
       min={@current_time}
       value={@current_time}
       label="Disabled Datetime"
-      class="min-w-[16rem] max-w-[16rem]"
+      class="md:min-w-64 md:max-w-64"
       disabled={true}
     />
     <.checkbox label="Checkbox" field={@form[:checkbox]} />

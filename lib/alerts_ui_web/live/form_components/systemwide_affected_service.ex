@@ -104,7 +104,7 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedService do
             options={service_type_options()}
             show_icons={true}
             class="flex-col"
-            button_class="min-w-[100%]"
+            button_class="min-w-full"
           />
         </fieldset>
       </.form>

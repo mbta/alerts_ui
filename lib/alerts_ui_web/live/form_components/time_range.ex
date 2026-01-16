@@ -524,7 +524,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           label="Alert timing"
           field={@form[:alert_timing]}
           options={values_to_options(@alert_timing_values)}
-          class="min-w-[16rem] max-w-[16rem]"
+          class="md:min-w-64 md:max-w-64"
           phx-debounce={120}
         />
         {one_time_alert_component(assigns)}
@@ -553,13 +553,13 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     ~H"""
     <div
       :if={@form[:alert_timing].value in [:"one-time", "one-time"]}
-      class="flex flex-row gap-8 mt-8"
+      class="flex flex-col md:flex-row md:gap-8 md:mt-8"
     >
       <.select
         label="Effect period"
         field={@form[:active_period_start_specifier]}
         options={values_to_options(@start_values)}
-        class="min-w-[16rem] max-w-[16rem]"
+        class="md:min-w-64 md:max-w-64"
         phx-debounce={120}
       />
       <.datetime
@@ -567,7 +567,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         min={DateTimeHelpers.naive_datetime_to_iso8601(@current_time)}
         max="9999-12-31T23:59"
         value={DateTimeHelpers.naive_datetime_to_iso8601(@form[:active_period_start].value)}
-        class={"min-w-[16rem] max-w-[16rem] " <> (if @form[:active_period_start_specifier].value === :custom, do: "", else: "hidden")}
+        class={"md:min-w-64 md:max-w-64 " <> (if @form[:active_period_start_specifier].value === :custom, do: "", else: "hidden")}
         phx-debounce={120}
       />
       <.datetime
@@ -578,14 +578,14 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           [naive_datetime_to_iso_date(@form[:active_period_end].value), "9999-12-31"] |> Enum.max()
         }
         value={@form[:active_period_start_date].value}
-        class={"min-w-[16rem] max-w-[16rem] " <> (if @form[:active_period_start_specifier].value === :start_of_service, do: "", else: "hidden")}
+        class={"md:min-w-64 md:max-w-64 " <> (if @form[:active_period_start_specifier].value === :start_of_service, do: "", else: "hidden")}
         phx-debounce={120}
       />
-      <p class="pt-[2.5rem]">to</p>
+      <p class="pt-5 md:pt-10">to</p>
       <.select
         field={@form[:active_period_end_specifier]}
         options={values_to_options(@end_values)}
-        class="min-w-[16rem] max-w-[16rem]"
+        class="md:min-w-64 md:max-w-64"
         select_class="mt-[28.8px]"
         phx-debounce={120}
       />
@@ -595,7 +595,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         min={@form[:active_period_start].value |> naive_datetime_to_iso_date}
         max="9999-12-31"
         value={@form[:active_period_end_date].value}
-        class={"min-w-[16rem] max-w-[16rem] " <> (if @form[:active_period_end_specifier].value === :end_of_service, do: "", else: "hidden")}
+        class={"md:min-w-64 md:max-w-64 " <> (if @form[:active_period_end_specifier].value === :end_of_service, do: "", else: "hidden")}
         phx-debounce={120}
       />
       <.datetime
@@ -609,7 +609,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
               else: @form[:active_period_end].value
           )
         }
-        class={"min-w-[16rem] max-w-[16rem] " <> (if @form[:active_period_end_specifier].value === :custom, do: "", else: "hidden")}
+        class={"md:min-w-64 md:max-w-64 " <> (if @form[:active_period_end_specifier].value === :custom, do: "", else: "hidden")}
         phx-debounce={120}
       />
     </div>
@@ -625,7 +625,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
             label="Effect start"
             field={@form[:active_period_start_time_specifier]}
             options={values_to_options([:start_of_service, :custom])}
-            class="min-w-[16rem] max-w-[16rem]"
+            class="md:min-w-64 md:max-w-64"
             phx-debounce={120}
           />
           <.datetime
@@ -633,17 +633,17 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
             type="time"
             field={@form[:active_period_start_time]}
             value={DateTimeHelpers.time_to_iso8601(@form[:active_period_start_time].value)}
-            class={"min-w-[16rem] max-w-[16rem] h-10 " <> (if @form[:active_period_start_time_specifier].value === :custom, do: "", else: "hidden")}
+            class={"md:min-w-64 md:max-w-64 h-10 " <> (if @form[:active_period_start_time_specifier].value === :custom, do: "", else: "hidden")}
             phx-debounce={120}
           />
         </div>
-        <p class="pt-[2rem]">to</p>
+        <p class="md:pt-[2rem]">to</p>
         <div class="flex flex-row gap-8">
           <.select
             label="Effect end"
             field={@form[:active_period_end_time_specifier]}
             options={values_to_options([:end_of_service, :custom])}
-            class="min-w-[16rem] max-w-[16rem]"
+            class="md:min-w-64 md:max-w-64"
             phx-debounce={120}
           />
           <.datetime
@@ -651,7 +651,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
             type="time"
             field={@form[:active_period_end_time]}
             value={DateTimeHelpers.time_to_iso8601(@form[:active_period_end_time].value)}
-            class={"min-w-[16rem] max-w-[16rem] h-10 " <> (if @form[:active_period_end_time_specifier].value === :custom, do: "", else: "hidden")}
+            class={"md:min-w-64 md:max-w-64 h-10 " <> (if @form[:active_period_end_time_specifier].value === :custom, do: "", else: "hidden")}
             phx-debounce={120}
           />
         </div>
@@ -663,7 +663,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
             label="Recurring alert start"
             field={@form[:active_period_start_specifier]}
             options={values_to_options([:now, :custom])}
-            class="min-w-[16rem] max-w-[16rem]"
+            class="md:min-w-64 md:max-w-64"
             phx-debounce={120}
           />
           <.datetime
@@ -672,17 +672,17 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
             max="9999-12-31"
             field={@form[:active_period_start_date]}
             value={@form[:active_period_start_date].value}
-            class={"min-w-[16rem] max-w-[16rem] h-10 " <> (if @form[:active_period_start_specifier].value === :custom, do: "", else: "hidden")}
+            class={"md:min-w-64 md:max-w-64 h-10 " <> (if @form[:active_period_start_specifier].value === :custom, do: "", else: "hidden")}
             phx-debounce={120}
           />
         </div>
-        <p class="pt-[2rem]">to</p>
+        <p class="md:pt-[2rem]">to</p>
         <div class="flex flex-row gap-8">
           <.select
             label="Recurring alert end"
             field={@form[:active_period_end_specifier]}
             options={[{"When alert is closed", :until_further_notice}, {"Custom", :custom}]}
-            class="min-w-[16rem] max-w-[16rem]"
+            class="md:min-w-64 md:max-w-64"
             phx-debounce={120}
           />
           <.datetime
@@ -691,7 +691,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
             max="9999-12-31"
             field={@form[:active_period_end_date]}
             value={@form[:active_period_end_date].value}
-            class={"min-w-[16rem] max-w-[16rem] h-10 " <> (if @form[:active_period_end_specifier].value === :custom, do: "", else: "hidden")}
+            class={"md:min-w-64 md:max-w-64 h-10 " <> (if @form[:active_period_end_specifier].value === :custom, do: "", else: "hidden")}
             phx-debounce={120}
           />
         </div>

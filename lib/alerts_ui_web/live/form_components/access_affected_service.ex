@@ -304,7 +304,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             />
           </.modal>
           <.filtered_select
-            class="w-[25%] h-[32rem]"
+            class="md:w-[25%] h-[32rem]"
             field={@form[:facility_id]}
             filter_field={@form[:facility_search_term]}
             label="Facilities"
