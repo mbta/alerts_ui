@@ -525,7 +525,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         for={@form}
         phx-target={@myself}
         phx-change="validate"
-        class={["form-control flex flex-row flex-wrap mb-4", @route_type !== 2 && "min-h-[38rem] md:min-h-[32rem]"]}
+        class={[
+          "form-control flex flex-row flex-wrap mb-4",
+          @route_type !== 2 && "min-h-[38rem] md:min-h-[32rem]"
+        ]}
         id="service_form"
       >
         <div class="mb-4 md:mb-0 w-full md:w-[25%] md:mr-8">
