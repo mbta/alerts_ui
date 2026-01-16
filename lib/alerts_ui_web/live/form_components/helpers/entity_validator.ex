@@ -5,12 +5,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.EntityValidator do
     in the result.
   """
 
-  @spec get_bad_ids(list(), map()) :: list() | nil
-  def get_bad_ids(id, available_entities) when is_binary(id) do
-    get_bad_ids(List.wrap(id), available_entities)
+  @spec get_obsolete_ids(list(), map()) :: list() | nil
+  def get_obsolete_ids(id, available_entities) when is_binary(id) do
+    get_obsolete_ids(List.wrap(id), available_entities)
   end
 
-  def get_bad_ids(ids, %{ok?: true, result: available_entities})
+  def get_obsolete_ids(ids, %{ok?: true, result: available_entities})
       when not is_nil(available_entities) and is_list(ids) do
     available_ids = Enum.map(available_entities, &get_entity_id/1)
 
@@ -23,7 +23,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.EntityValidator do
     end)
   end
 
-  def get_bad_ids(_, _), do: nil
+  def get_obsolete_ids(_, _), do: nil
 
   def get_entity_id(%{trip: %{id: id}}), do: id
 

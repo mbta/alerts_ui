@@ -130,8 +130,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
         form_type: form_type,
         errors: %{},
         submitted: false,
-        bad_ids: %{},
-        bad_id_text: []
+        obsolete_ids: %{},
+        obsolete_id_text: []
       })
 
     {:ok, socket}
@@ -366,9 +366,9 @@ defmodule AlertsUIWeb.CreateAlertLive do
     {:noreply, assign(socket, selected_facility: selected_facility)}
   end
 
-  def handle_info({:got_bad_ids, bad_ids}, socket) do
-    bad_id_text =
-      bad_ids
+  def handle_info({:got_obsolete_ids, obsolete_ids}, socket) do
+    obsolete_id_text =
+      obsolete_ids
       |> Enum.reject(fn {_k, v} -> v in [nil, []] end)
       |> Enum.map(fn {k, v} ->
         "#{String.replace(Atom.to_string(k), "_id", "")}: #{Enum.join(v, ", ")}"
@@ -376,7 +376,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
     socket =
       socket
-      |> assign(bad_id_text: bad_id_text, bad_ids: bad_ids)
+      |> assign(obsolete_id_text: obsolete_id_text, obsolete_ids: obsolete_ids)
       |> push_event("show-gtfs-modal", %{id: "gtfs-warning-modal"})
 
     {:noreply, socket}
@@ -468,21 +468,21 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
     user = Users.create_or_update_user_from_session(socket.assigns.current_user)
 
-    required_fields =
-      ServiceEffectCombinations.required_fields(socket.assigns.combination)
-      |> Enum.reject(&(&1 == :direction))
-
     alert_data =
       socket.assigns.alert_data
 
+    # remove obsolete ids from required fields
+    ids_with_obsolete_entities_removed =
+      ServiceEffectCombinations.required_fields(socket.assigns.combination)
+      |> Enum.reject(&(&1 == :direction))
+      |> Enum.map(fn field ->
+        {field, alert_data[field] -- Map.get(socket.assigns.obsolete_ids, field, [])}
+      end)
+      |> Enum.into(%{})
+
     alert_data =
       alert_data
-      |> Map.merge(
-        Enum.map(required_fields, fn field ->
-          {field, alert_data[field] -- Map.get(socket.assigns.bad_ids, field, [])}
-        end)
-        |> Enum.into(%{})
-      )
+      |> Map.merge(ids_with_obsolete_entities_removed)
       |> AlertBuilder.build_alert(socket.assigns.combination)
 
     existing_alert =

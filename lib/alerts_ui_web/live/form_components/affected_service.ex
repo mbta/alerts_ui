@@ -437,9 +437,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   @impl true
   def handle_async(async_key, {:ok, result}, socket) do
-    # reassign socket first
+    # assign result to socket first
     socket = assign(socket, async_key, AsyncResult.ok(socket.assigns[async_key], result))
 
+    # then check if all our required fields have arrived
     required_fields =
       socket.assigns.combination
       |> ServiceEffectCombinations.required_fields()
@@ -451,21 +452,23 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       stop_ids: :available_stops
     }
 
-    bad_ids =
+    obsolete_ids =
       Enum.map(required_fields, fn field ->
         {field,
-         EntityValidator.get_bad_ids(
+         EntityValidator.get_obsolete_ids(
            socket.assigns.alert_data[field],
            socket.assigns[mapping[field]]
          )}
       end)
 
-    all_ids_in =
-      Enum.all?(bad_ids, fn {_k, v} -> is_list(v) end) &&
-        Enum.any?(bad_ids, fn {_k, v} -> !Enum.empty?(v) end)
+    found_obsolete_ids =
+      Enum.all?(obsolete_ids, fn {_k, v} -> is_list(v) end) &&
+        Enum.any?(obsolete_ids, fn {_k, v} -> !Enum.empty?(v) end)
 
-    if all_ids_in do
-      send(self(), {:got_bad_ids, bad_ids})
+    # if all our fields have been returned and there are obsolete ids
+    # send result to parent
+    if found_obsolete_ids do
+      send(self(), {:got_obsolete_ids, obsolete_ids})
     end
 
     ####
