@@ -87,8 +87,8 @@ defmodule AlertsUIWeb.CoreComponents do
       id="client-error"
       kind={:error}
       title="We can't find the internet"
-      phx-disconnected={show(".phx-client-error #client-error")}
-      phx-connected={hide("#client-error")}
+      phx-disconnected={show(".phx-client-error #client-error") |> JS.remove_attribute("hidden")}
+      phx-connected={hide("#client-error") |> JS.set_attribute({"hidden", ""})}
       hidden
     >
       Attempting to reconnect <.icon name="hero-arrow-path" class="ml-1 h-3 w-3 animate-spin" />
@@ -98,8 +98,8 @@ defmodule AlertsUIWeb.CoreComponents do
       id="server-error"
       kind={:error}
       title="Something went wrong!"
-      phx-disconnected={show(".phx-server-error #server-error")}
-      phx-connected={hide("#server-error")}
+      phx-disconnected={show(".phx-server-error #server-error") |> JS.remove_attribute("hidden")}
+      phx-connected={hide("#server-error") |> JS.set_attribute({"hidden", ""})}
       hidden
     >
       Hang in there while we get back on track
