@@ -614,6 +614,13 @@ defmodule AlertsUI.IBIAlertImporter do
     "441442"
   ]
 
+  @color_lines [
+    "Blue Line",
+    "Green Line",
+    "Orange Line",
+    "Red Line"
+  ]
+
   def from_ibi(ibi_alert, :original_route_selections) do
     ibi_alert.informed_route_list
     |> split_combined_entities()
@@ -622,7 +629,7 @@ defmodule AlertsUI.IBIAlertImporter do
 
       cond do
         Enum.member?(@combo_route_ids, id) -> nil
-        name == "Green Line" -> "Green Line|Green"
+        Enum.member?(@color_lines, name) -> "#{name}|#{String.replace(name, " Line", "")}"
         true -> name_and_id
       end
     end)
