@@ -1,7 +1,13 @@
-defmodule AlertsUI.Configs.ModeEffect do
-  @moduledoc """
-  Config for mode-effect combinations and their various properties
-  """
+defmodule AlertsUI.Models.ModeEffectStruct do
+  @moduledoc "Describe a map of all aspects of an effect"
+  defstruct [
+    :combination,
+    :default_cause,
+    :default_severity,
+    :send_push_notification_on_edit,
+    :prediction_suppression_warning
+  ]
+
   @type t :: %{
           combination: atom(),
           default_cause: String.t() | nil,
@@ -9,72 +15,81 @@ defmodule AlertsUI.Configs.ModeEffect do
           send_push_notification_on_edit: boolean(),
           prediction_suppression_warning: boolean()
         }
+end
+
+defmodule AlertsUI.Configs.ModeEffect do
+  @moduledoc """
+  Config for mode-effect combinations and their various properties
+  """
+
+  alias AlertsUI.Models.ModeEffectStruct
+
   @mode_effect %{
     subway: %{
-      "Delay" => %{
+      "Delay" => %ModeEffectStruct{
         combination: :RDS,
         default_cause: nil,
         default_severity: 3,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Extra Service" => %{
+      "Extra Service" => %ModeEffectStruct{
         combination: :R,
         default_cause: nil,
         default_severity: 3,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Schedule Change" => %{
+      "Schedule Change" => %ModeEffectStruct{
         combination: :R,
         default_cause: nil,
         default_severity: 3,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Service Change" => %{
+      "Service Change" => %ModeEffectStruct{
         combination: :RDS,
         default_cause: nil,
         default_severity: 3,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Shuttle" => %{
+      "Shuttle" => %ModeEffectStruct{
         combination: :RDS,
         default_cause: nil,
         default_severity: 7,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: true
       },
-      "Single Tracking" => %{
+      "Single Tracking" => %ModeEffectStruct{
         combination: :RDS,
         default_cause: "SINGLE_TRACKING",
         default_severity: 1,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Station Bypass" => %{
+      "Station Bypass" => %ModeEffectStruct{
         combination: :RDS,
         default_cause: nil,
         default_severity: 7,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Station Closure" => %{
+      "Station Closure" => %ModeEffectStruct{
         combination: :SR,
         default_cause: nil,
         default_severity: 7,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Station Issue" => %{
+      "Station Issue" => %ModeEffectStruct{
         combination: :SR,
         default_cause: nil,
         default_severity: 1,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Suspension" => %{
+      "Suspension" => %ModeEffectStruct{
         combination: :RDS,
         default_cause: nil,
         default_severity: 7,
@@ -83,77 +98,77 @@ defmodule AlertsUI.Configs.ModeEffect do
       }
     },
     commuter_rail: %{
-      "Cancellation" => %{
+      "Cancellation" => %ModeEffectStruct{
         combination: :RDT,
         default_cause: nil,
         default_severity: 5,
         send_push_notification_on_edit: true,
         prediction_suppression_warning: true
       },
-      "Delay" => %{
+      "Delay" => %ModeEffectStruct{
         combination: :RDTS,
         default_cause: nil,
         default_severity: 3,
         send_push_notification_on_edit: true,
         prediction_suppression_warning: false
       },
-      "Extra Service" => %{
+      "Extra Service" => %ModeEffectStruct{
         combination: :R,
         default_cause: nil,
         default_severity: 3,
         send_push_notification_on_edit: true,
         prediction_suppression_warning: false
       },
-      "Schedule Change" => %{
+      "Schedule Change" => %ModeEffectStruct{
         combination: :R,
         default_cause: nil,
         default_severity: 3,
         send_push_notification_on_edit: true,
         prediction_suppression_warning: false
       },
-      "Service Change" => %{
+      "Service Change" => %ModeEffectStruct{
         combination: :RDTS,
         default_cause: nil,
         default_severity: 3,
         send_push_notification_on_edit: true,
         prediction_suppression_warning: false
       },
-      "Shuttle" => %{
+      "Shuttle" => %ModeEffectStruct{
         combination: :RDTS,
         default_cause: nil,
         default_severity: 7,
         send_push_notification_on_edit: true,
         prediction_suppression_warning: true
       },
-      "Station Bypass" => %{
+      "Station Bypass" => %ModeEffectStruct{
         combination: :RDTS,
         default_cause: nil,
         default_severity: 7,
         send_push_notification_on_edit: true,
         prediction_suppression_warning: false
       },
-      "Station Closure" => %{
+      "Station Closure" => %ModeEffectStruct{
         combination: :SR,
         default_cause: nil,
         default_severity: 7,
         send_push_notification_on_edit: true,
         prediction_suppression_warning: false
       },
-      "Station Issue" => %{
+      "Station Issue" => %ModeEffectStruct{
         combination: :SR,
         default_cause: nil,
         default_severity: 1,
         send_push_notification_on_edit: true,
         prediction_suppression_warning: false
       },
-      "Suspension" => %{
+      "Suspension" => %ModeEffectStruct{
         combination: :RDTS,
         default_cause: nil,
         default_severity: 7,
         send_push_notification_on_edit: true,
         prediction_suppression_warning: true
       },
-      "Track Change" => %{
+      "Track Change" => %ModeEffectStruct{
         combination: :RDTS,
         default_cause: nil,
         default_severity: 7,
@@ -162,70 +177,70 @@ defmodule AlertsUI.Configs.ModeEffect do
       }
     },
     bus: %{
-      "Delay" => %{
+      "Delay" => %ModeEffectStruct{
         combination: :RDS,
         default_cause: nil,
         default_severity: 4,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Detour" => %{
+      "Detour" => %ModeEffectStruct{
         combination: :RDS,
         default_cause: nil,
         default_severity: 7,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Extra Service" => %{
+      "Extra Service" => %ModeEffectStruct{
         combination: :R,
         default_cause: nil,
         default_severity: 3,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Multi-Route Detour" => %{
+      "Multi-Route Detour" => %ModeEffectStruct{
         combination: :SR,
         default_cause: nil,
         default_severity: 7,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Schedule Change" => %{
+      "Schedule Change" => %ModeEffectStruct{
         combination: :R,
         default_cause: nil,
         default_severity: 3,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Service Change" => %{
+      "Service Change" => %ModeEffectStruct{
         combination: :RDS,
         default_cause: nil,
         default_severity: 3,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Snow Route" => %{
+      "Snow Route" => %ModeEffectStruct{
         combination: :RDS,
         default_cause: nil,
         default_severity: 5,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Stop Closure" => %{
+      "Stop Closure" => %ModeEffectStruct{
         combination: :SR,
         default_cause: nil,
         default_severity: 5,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Stop Move" => %{
+      "Stop Move" => %ModeEffectStruct{
         combination: :SR,
         default_cause: nil,
         default_severity: 1,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Suspension" => %{
+      "Suspension" => %ModeEffectStruct{
         combination: :RDS,
         default_cause: nil,
         default_severity: 7,
@@ -234,63 +249,63 @@ defmodule AlertsUI.Configs.ModeEffect do
       }
     },
     ferry: %{
-      "Cancellation" => %{
+      "Cancellation" => %ModeEffectStruct{
         combination: :RDT,
         default_cause: nil,
         default_severity: 5,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: true
       },
-      "Delay" => %{
+      "Delay" => %ModeEffectStruct{
         combination: :RDTS,
         default_cause: nil,
         default_severity: 3,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Dock Closure" => %{
+      "Dock Closure" => %ModeEffectStruct{
         combination: :SR,
         default_cause: nil,
         default_severity: 5,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Dock Issue" => %{
+      "Dock Issue" => %ModeEffectStruct{
         combination: :SR,
         default_cause: nil,
         default_severity: 1,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Extra Service" => %{
+      "Extra Service" => %ModeEffectStruct{
         combination: :R,
         default_cause: nil,
         default_severity: 3,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Schedule Change" => %{
+      "Schedule Change" => %ModeEffectStruct{
         combination: :R,
         default_cause: nil,
         default_severity: 3,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Service Change" => %{
+      "Service Change" => %ModeEffectStruct{
         combination: :RDTS,
         default_cause: nil,
         default_severity: 3,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Shuttle" => %{
+      "Shuttle" => %ModeEffectStruct{
         combination: :RDTS,
         default_cause: nil,
         default_severity: 7,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: true
       },
-      "Suspension" => %{
+      "Suspension" => %ModeEffectStruct{
         combination: :RDTS,
         default_cause: nil,
         default_severity: 7,
@@ -299,49 +314,49 @@ defmodule AlertsUI.Configs.ModeEffect do
       }
     },
     facility: %{
-      "Access Issue" => %{
+      "Access Issue" => %ModeEffectStruct{
         combination: :ACCESS,
         default_cause: nil,
         default_severity: 3,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Bike Issue" => %{
+      "Bike Issue" => %ModeEffectStruct{
         combination: :ACCESS,
         default_cause: nil,
         default_severity: 3,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Elevator Closure" => %{
+      "Elevator Closure" => %ModeEffectStruct{
         combination: :ACCESS,
         default_cause: nil,
         default_severity: 3,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Escalator Closure" => %{
+      "Escalator Closure" => %ModeEffectStruct{
         combination: :ACCESS,
         default_cause: nil,
         default_severity: 3,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Facility Issue" => %{
+      "Facility Issue" => %ModeEffectStruct{
         combination: :ACCESS,
         default_cause: nil,
         default_severity: 3,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Parking Closure" => %{
+      "Parking Closure" => %ModeEffectStruct{
         combination: :ACCESS,
         default_cause: nil,
         default_severity: 3,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Parking Issue" => %{
+      "Parking Issue" => %ModeEffectStruct{
         combination: :ACCESS,
         default_cause: nil,
         default_severity: 3,
@@ -350,56 +365,56 @@ defmodule AlertsUI.Configs.ModeEffect do
       }
     },
     systemwide: %{
-      "Amber Alert" => %{
+      "Amber Alert" => %ModeEffectStruct{
         combination: nil,
         default_cause: nil,
         default_severity: 3,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Delay" => %{
+      "Delay" => %ModeEffectStruct{
         combination: nil,
         default_cause: nil,
         default_severity: 5,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Extra Service" => %{
+      "Extra Service" => %ModeEffectStruct{
         combination: nil,
         default_cause: nil,
         default_severity: 3,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Policy Change" => %{
+      "Policy Change" => %ModeEffectStruct{
         combination: nil,
         default_cause: nil,
         default_severity: 3,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Schedule Change" => %{
+      "Schedule Change" => %ModeEffectStruct{
         combination: nil,
         default_cause: nil,
         default_severity: 3,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Service Change" => %{
+      "Service Change" => %ModeEffectStruct{
         combination: nil,
         default_cause: nil,
         default_severity: 7,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Summary" => %{
+      "Summary" => %ModeEffectStruct{
         combination: nil,
         default_cause: nil,
         default_severity: 1,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
-      "Suspension" => %{
+      "Suspension" => %ModeEffectStruct{
         combination: nil,
         default_cause: nil,
         default_severity: 7,
@@ -409,6 +424,6 @@ defmodule AlertsUI.Configs.ModeEffect do
     }
   }
 
-  @spec mode_effect() :: %{atom => %{String.t() => __MODULE__.t()}}
+  @spec mode_effect() :: %{atom => %{String.t() => ModeEffectStruct.t()}}
   def mode_effect, do: @mode_effect
 end

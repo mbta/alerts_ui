@@ -42,6 +42,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect do
     do: get_value_of_key(key, :systemwide, effect_name)
 
   def get_value_of_key(key, service_type, effect_name) do
-    get_in(ModeEffect.mode_effect(), [service_type, effect_name, key])
+    get_in(ModeEffect.mode_effect(), [service_type, effect_name, Access.key!(key)])
   end
 end
