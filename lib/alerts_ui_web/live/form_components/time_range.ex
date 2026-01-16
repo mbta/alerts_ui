@@ -208,12 +208,12 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   @impl true
   def update(
-        %{selected_schedules: selected_schedules} = assigns,
+        %{alert_data: alert_data, selected_schedules: selected_schedules} = assigns,
         socket
       )
       when not is_nil(selected_schedules) do
     trip_departure_time = get_trip_departure_time(selected_schedules)
-    trip_arrival_time = get_trip_arrival_time(selected_schedules)
+    trip_arrival_time = get_trip_arrival_time(alert_data, selected_schedules)
 
     # only update times if selected schedules has changed (eg someone has just selected a new trip)
     selected_trips_have_changed? = selected_schedules != socket.assigns.old_selected_schedules
@@ -336,7 +336,9 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     |> utc_datetime_to_naive()
   end
 
-  defp get_trip_arrival_time(selected_schedules) do
+  defp get_trip_arrival_time(%{modal_date: "default"}, _), do: nil
+
+  defp get_trip_arrival_time(_, selected_schedules) do
     selected_schedules
     |> Enum.map(& &1.time_of_last_trip_arrival)
     |> Enum.max(DateTime, fn -> nil end)
