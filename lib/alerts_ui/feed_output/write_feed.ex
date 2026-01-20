@@ -6,11 +6,14 @@ defmodule AlertsUI.FeedOutput.WriteFeed do
   @enhanced_json_output_filename AlertsUI.config(:enhanced_json_output_filename)
   @protobuf_output_filename AlertsUI.config(:protobuf_output_filename)
   @combined_enhanced_json_output_filename AlertsUI.config(:combined_enhanced_json_output_filename)
+  @combined_enhanced_sita_json_output_filename AlertsUI.config(
+                                                 :combined_enhanced_sita_json_output_filename
+                                               )
   @combined_protobuf_output_filename AlertsUI.config(:combined_protobuf_output_filename)
   @write_module AlertsUI.config(:file_write_module)
 
   alias AlertsUI.Alerts
-  alias AlertsUI.FeedOutput.{CreateGtfsJson, CreateGtfsProtobuf, CreateOutputAlert}
+  alias AlertsUI.FeedOutput.{CreateGtfsJson, CreateGtfsProtobuf, CreateOutputAlert, Filters}
   alias AlertsUI.FeedReader
 
   @spec write_feed() :: {:ok, binary()} | {:error, String.t()}
@@ -27,6 +30,7 @@ defmodule AlertsUI.FeedOutput.WriteFeed do
            {:ok, _} <- write(:enhanced, enhanced_alerts),
            {:ok, _} <- write(:protobuf, open_alerts),
            {:ok, _} <- write(:combined_enhanced, enhanced_alerts ++ ibi_enhanced_alerts),
+           {:ok, _} <- write(:combined_enhanced_sita, enhanced_alerts ++ ibi_enhanced_alerts),
            {:ok, _} <- write(:combined_protobuf, open_alerts ++ ibi_standard_alerts) do
         {:ok, enhanced_alerts_json |> Jason.decode!()}
       else
@@ -65,29 +69,36 @@ defmodule AlertsUI.FeedOutput.WriteFeed do
   end
 
   @spec write(atom(), list(any())) :: {:ok | :error, String.t()}
-  defp write(flavor, alerts)
+  def write(flavor, alerts)
 
-  defp write(:standard, alerts),
+  def write(:standard, alerts),
     do:
       CreateGtfsJson.output_standard_json(alerts)
       |> write_data(@standard_json_output_filename)
 
-  defp write(:enhanced, alerts),
+  def write(:enhanced, alerts),
     do:
       CreateGtfsJson.output_enhanced_json(alerts)
       |> write_data(@enhanced_json_output_filename)
 
-  defp write(:protobuf, alerts),
+  def write(:protobuf, alerts),
     do:
       CreateGtfsProtobuf.output_protobuf(alerts)
       |> write_data(@protobuf_output_filename)
 
-  defp write(:combined_enhanced, alerts),
+  def write(:combined_enhanced, alerts),
     do:
       CreateGtfsJson.output_enhanced_json(alerts)
       |> write_data(@combined_enhanced_json_output_filename)
 
-  defp write(:combined_protobuf, alerts),
+  def write(:combined_enhanced_sita, alerts),
+    do:
+      alerts
+      |> Filters.filter_sita_alerts()
+      |> CreateGtfsJson.output_enhanced_json()
+      |> write_data(@combined_enhanced_sita_json_output_filename)
+
+  def write(:combined_protobuf, alerts),
     do:
       CreateGtfsProtobuf.output_protobuf(alerts)
       |> write_data(@combined_protobuf_output_filename)
