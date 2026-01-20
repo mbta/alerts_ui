@@ -11,8 +11,8 @@ defmodule AlertsUIWeb.UserAuth do
   import Phoenix.Controller
 
   alias AlertsUI.Models.User
-  alias Plug.Conn
   alias Oidcc.{ClientContext, Token}
+  alias Plug.Conn
 
   @doc """
   Logs the user in.

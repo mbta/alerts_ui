@@ -12,6 +12,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
   alias MBTAV3API.Routes.Route
 
+  # credo:disable-for-this-file
   defstruct [
     :active_period_end,
     :active_period_end_date,

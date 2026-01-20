@@ -5,8 +5,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   use AlertsUIWeb, :live_component
   use AlertsUI.Schema
   import Ecto.Changeset
-  alias AlertsUIWeb.CreateAlertLive
   alias AlertsUI.Models.{Cause, EnhancedSchedule, SeverityLevel}
+  alias AlertsUIWeb.CreateAlertLive
 
   alias AlertsUIWeb.FormComponents.Helpers.{
     ErrorFormatter,

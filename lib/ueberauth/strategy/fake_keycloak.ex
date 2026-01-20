@@ -4,8 +4,8 @@ defmodule Ueberauth.Strategy.FakeKeycloak do
   """
   use Ueberauth.Strategy, ignores_csrf_attack: true
 
-  alias Ueberauth.Strategy
   alias Ueberauth.Auth.{Credentials, Extra, Info}
+  alias Ueberauth.Strategy
 
   @mbta_uuid "acad6280-8cb9-4e00-999c-c6d141adf0a6"
   @email "fake@example.com"
