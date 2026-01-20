@@ -633,7 +633,6 @@ defmodule AlertsUIWeb.SharedComponents do
   attr :on_cancel, JS, default: %JS{}
 
   attr :value, :string, default: "", doc: "data to pass to event handler on accept"
-  attr :rest, :global, include: ~w(data-show)
 
   slot :header
   slot :inner_block, required: true
