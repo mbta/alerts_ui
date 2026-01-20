@@ -10,9 +10,9 @@ defmodule AlertsUIWeb.PredictionSuppressionWarningModal do
   import AlertsUIWeb.SharedComponents
   import AlertsUIWeb.IconComponents
 
-  alias AlertsUI.Configs.ModeEffect
   alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.Formatting
+  alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
 
   @doc """
   Renders the warning modal
@@ -74,8 +74,7 @@ defmodule AlertsUIWeb.PredictionSuppressionWarningModal do
   def predictable_alert?(%{route_type: route_type, effect_name: effect_name}) do
     mode_name = InformedEntity.route_code_mapping(route_type)
 
-    ModeEffect.mode_effect()
-    |> get_in([mode_name, effect_name, :prediction_suppression_warning])
+    GetKeyForModeEffect.get_value_of_key(:prediction_suppression_warning, mode_name, effect_name)
   end
 
   defp missing_information?(%{combination: :RDTS} = alert_data) do

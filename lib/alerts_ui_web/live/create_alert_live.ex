@@ -44,13 +44,11 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   alias AlertsUIWeb.FormComponents.Helpers.{
     AlertData,
-    DefaultCause,
-    DefaultSeverity,
     EffectsForRouteTypes,
     ErrorFormatter,
+    GetKeyForModeEffect,
     GreenLine,
-    SelectFormatter,
-    ServiceEffectCombinations
+    SelectFormatter
   }
 
   alias AlertsUIWeb.Step
@@ -378,18 +376,21 @@ defmodule AlertsUIWeb.CreateAlertLive do
     route_type = Map.get(alert_data, :route_type)
     effect_name = Map.get(alert_data, :effect_name)
 
-    {combination, default_severity, default_cause} =
+    route_type =
       if is_nil(route_type) and
            effect_name in EffectsForRouteTypes.list_effects(:facility) do
-        default_severity = DefaultSeverity.get_default_severity(:facility, effect_name)
-        default_cause = DefaultCause.get_default_cause(:facility, effect_name)
-        {:ACCESS, default_severity, default_cause}
+        :facility
       else
-        combination = ServiceEffectCombinations.get_combination(route_type, effect_name)
-        default_severity = DefaultSeverity.get_default_severity(route_type, effect_name)
-        default_cause = DefaultCause.get_default_cause(route_type, effect_name)
-        {combination, default_severity, default_cause}
+        route_type
       end
+
+    combination = GetKeyForModeEffect.get_value_of_key(:combination, route_type, effect_name)
+
+    default_severity =
+      GetKeyForModeEffect.get_value_of_key(:default_severity, route_type, effect_name)
+
+    default_cause =
+      GetKeyForModeEffect.get_value_of_key(:default_cause, route_type, effect_name)
 
     assigns = %{
       progress: get_step_by_name(socket.assigns.progress.next),
