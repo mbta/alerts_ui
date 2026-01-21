@@ -145,7 +145,7 @@ defmodule AlertsUI.AlertHistory do
   end
 
   defp created_datetime(map) do
-    format_datetime(Map.get(map, :created_at), @with_seconds)
+    format_datetime(Map.get(map, :created_timestamp), @with_seconds)
   end
 
   defp closed(map) do
@@ -157,7 +157,7 @@ defmodule AlertsUI.AlertHistory do
   end
 
   defp last_modified_datetime(map) do
-    format_datetime(Map.get(map, :updated_at), @with_seconds)
+    format_datetime(Map.get(map, :last_modified_dt), @with_seconds)
   end
 
   defp service_type(map) do
@@ -337,7 +337,7 @@ defmodule AlertsUI.AlertHistory do
 
   @spec build_alert_maps(PaperTrail.Version.t(), String.t()) :: [map()]
   # sobelow_skip ["DOS.StringToAtom"]
-  defp build_alert_maps(versions, alert_id) do
+  def build_alert_maps(versions, alert_id) do
     # takes in a list of versions
     # pares those down to the changes, alert_id, and the origin information
     # returns a list of alert maps with atom keys
