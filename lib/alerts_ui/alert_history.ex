@@ -337,7 +337,7 @@ defmodule AlertsUI.AlertHistory do
 
   @spec build_alert_maps(PaperTrail.Version.t(), String.t()) :: [map()]
   # sobelow_skip ["DOS.StringToAtom"]
-  def build_alert_maps(versions, alert_id) do
+  defp build_alert_maps(versions, alert_id) do
     # takes in a list of versions
     # pares those down to the changes, alert_id, and the origin information
     # returns a list of alert maps with atom keys
