@@ -48,7 +48,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
     ErrorFormatter,
     GetKeyForModeEffect,
     GreenLine,
-    SelectFormatter
+    SelectFormatter,
+    ServiceEffectCombinations
   }
 
   alias AlertsUIWeb.Step
@@ -369,9 +370,10 @@ defmodule AlertsUIWeb.CreateAlertLive do
   def handle_info({:got_obsolete_ids, obsolete_ids}, socket) do
     obsolete_id_text =
       obsolete_ids
-      |> Enum.reject(fn {_k, v} -> v in [nil, []] end)
-      |> Enum.map(fn {k, v} ->
-        "#{String.replace(Atom.to_string(k), "_id", "")}: #{Enum.join(v, ", ")}"
+      |> Enum.reject(fn {_k, value} -> value in [nil, []] end)
+      |> Enum.map(fn {key, value} ->
+        title = key |> Atom.to_string() |> String.replace("_id", "") |> String.capitalize()
+        "#{title}: #{Enum.join(value, ", ")}"
       end)
 
     socket =

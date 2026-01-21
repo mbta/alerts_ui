@@ -460,6 +460,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
            socket.assigns[mapping[field]]
          )}
       end)
+      |> Enum.into(%{})
 
     found_obsolete_ids =
       Enum.all?(obsolete_ids, fn {_k, v} -> is_list(v) end) &&
