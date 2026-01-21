@@ -245,12 +245,7 @@ defmodule AlertsUIWeb.FilterForm do
         />
       </label>
       <div class="collapse-content text-base !p-0">
-        <.filtered_select
-          class="h-[20rem]"
-          field={@field}
-          prompt="All"
-          {@rest}
-        />
+        <.filtered_select class="h-[20rem]" field={@field} prompt="All" {@rest} />
       </div>
     </div>
     """
