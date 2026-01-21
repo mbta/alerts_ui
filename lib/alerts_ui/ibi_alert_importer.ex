@@ -36,6 +36,8 @@ defmodule AlertsUI.IBIAlertImporter do
         fix_invalid_timestamps()
         # running this twice for alert 515100, why that works who knows, who cares
         fix_invalid_timestamps()
+        Logger.info("[import #{import_id}] fixing missing entities")
+        fix_missing_entities()
         Logger.info("[import #{import_id}] converting legacy alerts")
         convert_ibi_alerts()
         Logger.info("[import #{import_id}] done")
@@ -193,6 +195,43 @@ defmodule AlertsUI.IBIAlertImporter do
       set #{field} = to_char(#{field}::timestamp + interval '1 hour', 'FMMM/FMDD/YYYY FMHH:MI:SS PM')
       where #{field} like '#{pattern}';
     """
+  end
+
+  def fix_missing_entities() do
+    Repo.transact(
+      fn ->
+        SQL.query!(
+          Repo,
+          "update ibi_alerts
+            set informed_route_list = 'Orange|Orange Line', informed_direction_list = '1|Northbound', informed_stop_list = 'place-welln|Wellington Station - Outbound;place-mlmnl|Malden Station - Outbound;place-ogmnl|Oak Grove Station - Orange Line' where id = '#{latest_ibi_version_id("4090")}'"
+        )
+
+        SQL.query!(
+          Repo,
+          "update ibi_alerts
+            set informed_route_list = 'Red|Red Line' where id = '#{latest_ibi_version_id("148584")}'"
+        )
+
+        SQL.query!(
+          Repo,
+          "update ibi_alerts
+            set informed_route_list = 'Green-D|Green Line D Branch' where id = '#{latest_ibi_version_id("371153")}'"
+        )
+
+        SQL.query!(
+          Repo,
+          "update ibi_alerts
+            set informed_route_list = '47|47', informed_stop_list = '1123|Green St @ Magazine St' where id = '#{latest_ibi_version_id("630418")}'"
+        )
+
+        {:ok, true}
+      end,
+      timeout: :infinity
+    )
+  end
+
+  def latest_ibi_version_id(alert_id) do
+    Repo.get_by(LatestIBIAlert, alert_id: alert_id).id
   end
 
   @doc """
@@ -621,6 +660,13 @@ defmodule AlertsUI.IBIAlertImporter do
     "441442"
   ]
 
+  @color_lines [
+    "Blue Line",
+    "Green Line",
+    "Orange Line",
+    "Red Line"
+  ]
+
   def from_ibi(ibi_alert, :original_route_selections) do
     ibi_alert.informed_route_list
     |> split_combined_entities()
@@ -629,7 +675,7 @@ defmodule AlertsUI.IBIAlertImporter do
 
       cond do
         Enum.member?(@combo_route_ids, id) -> nil
-        name == "Green Line" -> "Green Line|Green"
+        Enum.member?(@color_lines, name) -> "#{name}|#{String.replace(name, " Line", "")}"
         true -> name_and_id
       end
     end)
