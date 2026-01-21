@@ -276,8 +276,8 @@ defmodule AlertsUI.Alerts do
       version in PaperTrail.Version,
       where: version.item_id == ^alert_uuid,
       order_by: [
-        desc: :inserted_at,
-        desc: fragment("meta->'version'")
+        desc: fragment("meta->'version'"),
+        desc: :inserted_at
       ],
       limit: 1
     )
@@ -291,7 +291,10 @@ defmodule AlertsUI.Alerts do
     from(
       version in PaperTrail.Version,
       where: version.item_id == ^alert_uuid,
-      order_by: [asc: :inserted_at]
+      order_by: [
+        asc: fragment("meta->'version'"),
+        asc: :inserted_at
+      ]
     )
     |> Repo.all()
   end
