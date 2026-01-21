@@ -976,7 +976,7 @@ defmodule AlertsUIWeb.SharedComponents do
           @errors != [] && "border-danger focus:border-danger"
         ]}
         multiple={@multiple}
-        phx-hook={if(@hook, do: @hook)}
+        phx-hook="Selector"
         {@rest}
       >
         <option

@@ -248,7 +248,6 @@ defmodule AlertsUIWeb.FilterForm do
         <.filtered_select
           class="h-[20rem]"
           field={@field}
-          hook="SelectAllAdjuster"
           prompt="All"
           {@rest}
         />

@@ -605,7 +605,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             class="min-w-full h-full"
             disabled={disable_trip_input?(@form[:route_ids].value)}
             prompt={if disable_trip_input?(@form[:route_ids].value), do: nil, else: "All Trips"}
-            hook="SelectAllAdjuster"
           />
         </div>
         <div class="flex flex-col justify-start w-full md:w-[25%]">
@@ -634,7 +633,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
                 do: nil,
                 else: "All Stops"
             }
-            hook="SelectAllAdjuster"
           />
         </div>
       </.form>
