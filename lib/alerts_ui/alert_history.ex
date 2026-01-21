@@ -157,7 +157,7 @@ defmodule AlertsUI.AlertHistory do
   end
 
   defp last_modified_datetime(map) do
-    format_datetime(Map.get(map, :last_modified_dt), @with_seconds)
+    format_datetime(Map.get(map, :last_modified_timestamp), @with_seconds)
   end
 
   defp service_type(map) do
