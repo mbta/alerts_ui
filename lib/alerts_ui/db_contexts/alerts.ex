@@ -385,11 +385,6 @@ defmodule AlertsUI.Alerts do
     PaperTrail.update!(alert, origin: origin)
   end
 
-  defp join_informed_entity(query, _opts) do
-    query
-    |> join(:inner, [a], ie in assoc(a, :informed_entity), as: :informed_entity)
-  end
-
   @spec publishable?(String.t() | Alert.t()) :: boolean()
   def publishable?(alert_or_alert_id), do: !draft?(alert_or_alert_id)
 
