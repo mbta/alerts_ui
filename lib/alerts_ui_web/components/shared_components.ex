@@ -646,6 +646,7 @@ defmodule AlertsUIWeb.SharedComponents do
       phx-remove={hide_modal(@id)}
       data-accept={JS.exec(@on_accept, "phx-remove")}
       data-cancel={JS.exec(@on_cancel, "phx-remove")}
+      data-show={show_modal(@id)}
       class="fixed inset-0 z-50 hidden"
     >
       <div id={"#{@id}-bg"} class="bg-black/90 fixed inset-0 transition-opacity" aria-hidden="true" />

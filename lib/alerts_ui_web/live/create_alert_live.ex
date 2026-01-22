@@ -48,7 +48,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
     ErrorFormatter,
     GetKeyForModeEffect,
     GreenLine,
-    SelectFormatter
+    SelectFormatter,
+    ServiceEffectCombinations
   }
 
   alias AlertsUIWeb.Step
@@ -129,7 +130,9 @@ defmodule AlertsUIWeb.CreateAlertLive do
         alert_id: alert_id,
         form_type: form_type,
         errors: %{},
-        submitted: false
+        submitted: false,
+        obsolete_ids: %{},
+        obsolete_id_text: []
       })
 
     {:ok, socket}
@@ -149,6 +152,16 @@ defmodule AlertsUIWeb.CreateAlertLive do
   @impl true
   def handle_event("move_progress", %{"value" => name}, socket) do
     {:noreply, assign(socket, :progress, get_step_by_name(name))}
+  end
+
+  @impl true
+  def handle_event("accepted_gtfs_modal", _params, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("cancelled_gtfs_modal", _params, socket) do
+    {:noreply, socket |> redirect(to: "/")}
   end
 
   def get_routes(route_types) do
@@ -354,6 +367,23 @@ defmodule AlertsUIWeb.CreateAlertLive do
     {:noreply, assign(socket, selected_facility: selected_facility)}
   end
 
+  def handle_info({:got_obsolete_ids, obsolete_ids}, socket) do
+    obsolete_id_text =
+      obsolete_ids
+      |> Enum.reject(fn {_k, value} -> value in [nil, []] end)
+      |> Enum.map(fn {key, value} ->
+        title = key |> Atom.to_string() |> String.replace("_id", "") |> String.capitalize()
+        "#{title}: #{Enum.join(value, ", ")}"
+      end)
+
+    socket =
+      socket
+      |> assign(obsolete_id_text: obsolete_id_text, obsolete_ids: obsolete_ids)
+      |> push_event("show-gtfs-modal", %{id: "gtfs-warning-modal"})
+
+    {:noreply, socket}
+  end
+
   @impl true
   def handle_info({:add_errors, errors, name}, socket) do
     updated_errors = socket.assigns.errors |> Map.put(name, errors)
@@ -442,6 +472,19 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
     alert_data =
       socket.assigns.alert_data
+
+    # remove obsolete ids from required fields
+    ids_with_obsolete_entities_removed =
+      ServiceEffectCombinations.required_fields(socket.assigns.combination)
+      |> Enum.reject(&(&1 == :direction))
+      |> Enum.map(fn field ->
+        {field, alert_data[field] -- Map.get(socket.assigns.obsolete_ids, field, [])}
+      end)
+      |> Enum.into(%{})
+
+    alert_data =
+      alert_data
+      |> Map.merge(ids_with_obsolete_entities_removed)
       |> AlertBuilder.build_alert(socket.assigns.combination)
 
     existing_alert =

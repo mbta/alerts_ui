@@ -47,3 +47,10 @@ window.addEventListener("phx:copy", (event) => {
     navigator.clipboard.writeText(text)
   }
 })
+
+window.addEventListener("phx:show-gtfs-modal", (e) => {
+  let el = document.getElementById(e.detail.id)
+  if (el) {
+    liveSocket.execJS(el, el.getAttribute("data-show"))
+  }
+})

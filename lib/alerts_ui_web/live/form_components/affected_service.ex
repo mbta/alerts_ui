@@ -11,6 +11,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   alias AlertsUIWeb.FormComponents.Helpers.{
     ContentFormatter,
+    EntityValidator,
     ErrorFormatter,
     Helpers,
     SelectFormatter,
@@ -18,7 +19,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   }
 
   alias MBTAV3API.Routes.Route
-
+  alias Phoenix.LiveView.AsyncResult
   @primary_key false
   embedded_schema do
     field :route_ids, {:array, :string}
@@ -71,6 +72,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         modal_date_filter: "",
         edit_data_has_been_filled: false
       })
+      |> assign(:available_routes, AsyncResult.loading())
+      |> assign(:available_stops, AsyncResult.loading())
+      |> assign(:available_schedules, AsyncResult.loading())
 
     {:ok, socket}
   end
@@ -198,7 +202,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     # don't re-fetch routes if we already have them- prevents weird unselect render error
     socket =
-      if socket.assigns.available_routes === %{} do
+      if socket.assigns.available_routes.result in [%{}, nil] do
         assign_routes(socket, route_types)
       else
         socket
@@ -394,11 +398,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   def adjust_select_all(keep_all), do: keep_all
 
   def assign_routes(socket, route_types) do
-    assign_async(socket, [:available_routes], fn ->
-      {:ok,
-       %{
-         available_routes: CreateAlertLive.get_routes(route_types)
-       }}
+    start_async(socket, :available_routes, fn ->
+      CreateAlertLive.get_routes(route_types)
     end)
   end
 
@@ -406,16 +407,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     if :stop_ids in fields do
       route_type = socket.assigns.route_type
 
-      assign_async(socket, [:available_stops], fn ->
-        {:ok,
-         %{
-           available_stops:
-             CreateAlertLive.get_stops(
-               route_ids,
-               route_type,
-               direction
-             )
-         }}
+      start_async(socket, :available_stops, fn ->
+        CreateAlertLive.get_stops(
+          route_ids,
+          route_type,
+          direction
+        )
       end)
     else
       socket
@@ -426,20 +423,63 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     if :trip_ids in fields do
       service_date = socket.assigns.modal_date
 
-      assign_async(socket, [:available_schedules], fn ->
-        {:ok,
-         %{
-           available_schedules:
-             CreateAlertLive.get_schedules_by_date(
-               route_ids,
-               direction,
-               service_date
-             )
-         }}
+      start_async(socket, :available_schedules, fn ->
+        CreateAlertLive.get_schedules_by_date(
+          route_ids,
+          direction,
+          service_date
+        )
       end)
     else
       socket
     end
+  end
+
+  @impl true
+  def handle_async(async_key, {:ok, result}, socket) do
+    # assign result to socket first
+    socket = assign(socket, async_key, AsyncResult.ok(socket.assigns[async_key], result))
+
+    # then check if all our required fields have arrived
+    required_fields =
+      socket.assigns.combination
+      |> ServiceEffectCombinations.required_fields()
+      |> Enum.reject(&(&1 == :direction))
+
+    mapping = %{
+      route_ids: :available_routes,
+      trip_ids: :available_schedules,
+      stop_ids: :available_stops
+    }
+
+    obsolete_ids =
+      Enum.map(required_fields, fn field ->
+        {field,
+         EntityValidator.get_obsolete_ids(
+           socket.assigns.alert_data[field],
+           socket.assigns[mapping[field]]
+         )}
+      end)
+      |> Enum.into(%{})
+
+    found_obsolete_ids =
+      Enum.all?(obsolete_ids, fn {_k, v} -> is_list(v) end) &&
+        Enum.any?(obsolete_ids, fn {_k, v} -> !Enum.empty?(v) end)
+
+    # if all our fields have been returned and there are obsolete ids
+    # send result to parent
+    if found_obsolete_ids do
+      send(self(), {:got_obsolete_ids, obsolete_ids})
+    end
+
+    ####
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_async(async_key, {:exit, reason}, socket) do
+    {:noreply,
+     assign(socket, :async_key, AsyncResult.failed(socket.assigns[async_key], {:exit, reason}))}
   end
 
   @impl true
