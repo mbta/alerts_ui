@@ -24,7 +24,8 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
   def mount(socket) do
     form =
       %__MODULE__{}
-      |> changeset(%{"last_push_notification_timestamp" => DateTimeHelpers.current_time()})
+      |> changeset(%{})
+      # |> changeset(%{"last_push_notification_timestamp" => DateTimeHelpers.current_time()})
       |> to_form()
 
     socket = assign(socket, %{form: form})
@@ -48,6 +49,13 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
       |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
       |> Map.merge(form.params)
       |> Map.merge(banner_text_map)
+
+    data =
+      if is_nil(data["last_push_notification_timestamp"]) do
+        Map.put(data, "last_push_notification_timestamp", DateTimeHelpers.current_time())
+      else
+        data
+      end
 
     data =
       if Map.get(form.params, "banner_text") do
