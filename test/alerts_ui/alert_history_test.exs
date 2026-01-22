@@ -16,6 +16,8 @@ defmodule AlertsUIWeb.AlertHistoryTest do
       %{start: ~U[2025-09-25 12:11:00Z], end: ~U[2025-09-25 17:11:00Z]}
     ],
     recurrence_days: [],
+    created_timestamp: ~U[2025-09-25 12:11:00Z],
+    last_modified_timestamp: ~U[2025-09-25 12:11:00Z],
     active_period_start: ~U[2025-09-25 12:11:00Z],
     active_period_end: ~U[2025-09-25 17:11:00Z],
     notification_period_end: ~U[2025-09-25 17:11:00Z],
@@ -39,6 +41,7 @@ defmodule AlertsUIWeb.AlertHistoryTest do
       %{start: ~U[2025-09-26 12:11:00Z], end: ~U[2025-09-26 17:11:00Z]}
     ],
     recurrence_days: ["thursday", "friday"],
+    last_modified_timestamp: ~U[2025-09-26 12:11:00Z],
     active_period_start: ~U[2025-09-25 12:11:00Z],
     active_period_end: ~U[2025-09-26 17:11:00Z],
     recurrence_start_time: ~T[08:11:00],
@@ -84,15 +87,12 @@ defmodule AlertsUIWeb.AlertHistoryTest do
         user
       )
 
-      :timer.sleep(1000)
-
       Alerts.create_or_update_alert(
         build(:alert_map, @second_alert_params),
         user,
         Alerts.get_by_alert_id("123")
       )
 
-      :timer.sleep(1000)
       Alerts.close(Alerts.get_by_alert_id("123"), "closed", false, ~U[2025-09-26 16:14:00Z])
 
       [result_1, result_2, result_3] = AlertHistory.alert_history("123")
