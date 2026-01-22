@@ -5,13 +5,12 @@
         <a href="/"><img class="h-12" src={"/images/logos/logo-#{@environment}.svg"} /></a>
         <.h1 class="!mb-0"><a href="/">Alerts Manager </a></.h1>
         <div
-          :if={@environment != "production"}
+          :if={@environment != "prod"}
           class={"text-center font-bold py-1 px-4 rounded-md bg-#{%{
             "local" => "mbta-the-ride",
             "dev-green" => "mbta-green",
             "dev-orange" => "mbta-orange",
-            "staging" => "mbta-commuter-rail",
-            "production" => "mbta-bus"
+            "staging" => "mbta-commuter-rail"
           }[@environment]}"}
         >
           {@environment}
