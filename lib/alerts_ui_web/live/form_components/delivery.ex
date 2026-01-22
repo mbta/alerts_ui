@@ -25,7 +25,6 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
     form =
       %__MODULE__{}
       |> changeset(%{})
-      # |> changeset(%{"last_push_notification_timestamp" => DateTimeHelpers.current_time()})
       |> to_form()
 
     socket = assign(socket, %{form: form})

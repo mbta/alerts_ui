@@ -64,6 +64,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
       actual = BuildAutoText.due_to_cause(%{cause_detail: "SLIPPERY_RAIL"})
       assert expected == actual
     end
+
+    test "capitalizes Amtrake" do
+      expected = "due to Amtrak train traffic"
+      actual = BuildAutoText.due_to_cause(%{cause_detail: "AMTRAK_TRAIN_TRAFFIC"})
+      assert expected == actual
+    end
   end
 
   describe "cause/1" do

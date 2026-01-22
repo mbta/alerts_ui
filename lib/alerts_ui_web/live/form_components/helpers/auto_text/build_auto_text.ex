@@ -98,7 +98,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   def due_to_cause(%{cause_detail: ""}), do: ""
 
   def due_to_cause(%{cause_detail: cause_detail}) do
-    "due to #{cause(cause_detail)}"
+    "due to #{cause(cause_detail)}" |> String.replace("amtrak", "Amtrak")
   end
 
   @spec cause(String.t()) :: String.t()
