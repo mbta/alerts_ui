@@ -125,8 +125,8 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
         <div class="w-4 mr-4 w-full text-center md:text-left">
           <.body>Service Type</.body>
         </div>
-        <div id="service_type_buttons" class="flex flex-row mb-8 justify-center md:justify-start">
-          <div class="grid sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6 gap-2">
+        <div id="service_type_buttons" class="mb-8">
+          <div class="flex flex-wrap justify-center md:justify-normal gap-2">
             <div :for={route_type <- @route_types}>
               {route_type_buttons(assigns, route_type)}
             </div>
@@ -139,11 +139,11 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
             Effect
           </.body>
         </div>
-        <div id="effect_buttons" class="flex flex-row justify-center md:justify-start">
+        <div id="effect_buttons">
           <p class="text-bg-elevation-6 mb-[18rem]" hidden={!is_nil(@selected_route_type)}>
             Select a service type to see possible effects.
           </p>
-          <div class="grid sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6 gap-2">
+          <div class="flex flex-wrap justify-center md:justify-normal gap-2">
             <div :for={effect <- @effects} class={if is_nil(@selected_route_type), do: "hidden"}>
               {effect_buttons(assigns, effect)}
             </div>
