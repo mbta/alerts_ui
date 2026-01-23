@@ -29,3 +29,4 @@ jobs:
     uses: ./.github/workflows/deploy-base.yml
     with:
       environment: ${{ github.event.inputs.env || inputs.environment }}
+    secrets: inherit
