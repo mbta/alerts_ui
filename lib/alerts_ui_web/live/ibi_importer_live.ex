@@ -4,6 +4,9 @@ defmodule AlertsUIWeb.IBIImporterLive do
   """
   use AlertsUIWeb, :live_view
 
+  import Ecto.Query
+
+  alias AlertsUI.Models.Alert
   alias AlertsUI.IBIAlertImporter.IBIImportWorker
   alias AlertsUI.Repo
   alias Ecto.Adapters.SQL
@@ -49,9 +52,9 @@ defmodule AlertsUIWeb.IBIImporterLive do
 
   @impl true
   def handle_event("wipe", _params, socket) do
-    Logger.warning("WIPING ALERTS!")
+    Logger.warning("WIPING IMPORTED ALERTS!")
     SQL.query!(Repo, "TRUNCATE ibi_alerts")
-    SQL.query!(Repo, "TRUNCATE alerts CASCADE")
+    from(a in Alert, where: a.legacy == true) |> Repo.delete_all(timeout: :infinity)
     {:noreply, socket}
   end
 
