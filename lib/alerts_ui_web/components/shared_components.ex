@@ -545,7 +545,7 @@ defmodule AlertsUIWeb.SharedComponents do
     >
       <.label for={@id} class={"text-base #{if is_nil(@label), do: "hidden"}"}>{@label}</.label>
 
-      <div class={["flex gap-2 w-[100%]", if(@column, do: "flex-col", else: "flex-row")]}>
+      <div class={["flex gap-2 w-full", if(@column, do: "flex-col", else: "flex-col md:flex-row")]}>
         <div :for={{option_name, id} <- @options} class={["flex-1", @button_class]}>
           <.label for={id}>
             <div class={[

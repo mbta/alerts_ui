@@ -621,8 +621,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   defp recurring_alert_component(assigns) do
     ~H"""
     <div :if={@form[:alert_timing].value === :recurring} class="flex flex-col gap-8 my-8">
-      <div class="flex flex-row gap-8 my-4">
-        <div class="flex flex-row gap-8">
+      <div class="flex flex-col md:flex-row gap-8 md:my-4">
+        <div class="flex flex-col md:flex-row gap-4 md:gap-8">
           <.select
             label="Effect start"
             field={@form[:active_period_start_time_specifier]}
@@ -640,7 +640,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           />
         </div>
         <p class="md:pt-[2rem]">to</p>
-        <div class="flex flex-row gap-8">
+        <div class="flex flex-col md:flex-row gap-8">
           <.select
             label="Effect end"
             field={@form[:active_period_end_time_specifier]}
@@ -659,8 +659,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         </div>
       </div>
 
-      <div class="flex flex-row gap-8 my-4">
-        <div class="flex flex-row gap-8">
+      <div class="flex flex-col md:flex-row gap-8 md:my-4">
+        <div class="flex flex-col md:flex-row gap-8">
           <.select
             label="Recurring alert start"
             field={@form[:active_period_start_specifier]}
@@ -679,7 +679,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           />
         </div>
         <p class="md:pt-[2rem]">to</p>
-        <div class="flex flex-row gap-8">
+        <div class="flex flex-col md:flex-row gap-8">
           <.select
             label="Recurring alert end"
             field={@form[:active_period_end_specifier]}
@@ -703,7 +703,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       :if={@form[:alert_timing].value === :recurring}
       field={@form[:recurrence_days]}
       options={@day_of_week_options}
-      class="max-w-[50%]"
+      class="md:max-w-[50%]"
       button_class="justify-center"
       column={false}
       use_outline_buttons={true}
