@@ -321,15 +321,13 @@ defmodule AlertsUI.Alerts do
   defp get_originator_id(%{user_id: user_id, origin: "user"}), do: user_id
   defp get_originator_id(_), do: nil
 
-  @spec list_all_paginated(map()) :: {[any()], Flop.Meta.t()}
+  @spec list_all_paginated_by_creation_date(map()) :: {[any()], Flop.Meta.t()}
   def list_all_paginated_by_creation_date(params) do
     opts = [for: Alert, page_size: 50]
 
     with {:ok, flop} <- Flop.validate(params, opts) do
       Alert
       |> order_by([a], asc: a.created_at)
-      |> Flop.with_named_bindings(flop, &join_informed_entity/2, opts)
-      |> preload(informed_entity: [:trip])
       |> select_merge([a], %{
         alert_id: a.alert_id |> type(:integer) |> selected_as(:integer_alert_id)
       })
@@ -344,12 +342,9 @@ defmodule AlertsUI.Alerts do
     with {:ok, flop} <- Flop.validate(params, opts) do
       Alert
       |> where([a], a.draft == false or is_nil(a.draft))
-      |> Flop.with_named_bindings(flop, &join_informed_entity/2, opts)
-      |> preload(informed_entity: [:trip])
       |> select_merge([a], %{
         alert_id: a.alert_id |> type(:integer) |> selected_as(:integer_alert_id)
       })
-      |> distinct(true)
       |> Flop.run(flop, opts)
     end
   end
@@ -388,11 +383,6 @@ defmodule AlertsUI.Alerts do
 
   defp update_papertrail(alert, origin) when is_binary(origin) do
     PaperTrail.update!(alert, origin: origin)
-  end
-
-  defp join_informed_entity(query, _opts) do
-    query
-    |> join(:inner, [a], ie in assoc(a, :informed_entity), as: :informed_entity)
   end
 
   @spec publishable?(String.t() | Alert.t()) :: boolean()
