@@ -328,9 +328,6 @@ defmodule AlertsUI.Alerts do
     with {:ok, flop} <- Flop.validate(params, opts) do
       Alert
       |> order_by([a], asc: a.created_at)
-      |> select_merge([a], %{
-        alert_id: a.alert_id |> type(:integer) |> selected_as(:integer_alert_id)
-      })
       |> Flop.run(flop, opts)
     end
   end
@@ -342,9 +339,6 @@ defmodule AlertsUI.Alerts do
     with {:ok, flop} <- Flop.validate(params, opts) do
       Alert
       |> where([a], a.draft == false or is_nil(a.draft))
-      |> select_merge([a], %{
-        alert_id: a.alert_id |> type(:integer) |> selected_as(:integer_alert_id)
-      })
       |> Flop.run(flop, opts)
     end
   end

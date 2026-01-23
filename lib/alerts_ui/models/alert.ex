@@ -93,6 +93,7 @@ defmodule AlertsUI.Models.Alert do
           active_period_start: DateTime.t() | nil,
           active_period_end: DateTime.t() | nil,
           alert_id: String.t(),
+          integer_alert_id: integer(),
           alert_lifecycle: atom() | nil,
           banner_text: String.t() | nil,
           cause: atom() | nil,
@@ -164,7 +165,6 @@ defmodule AlertsUI.Models.Alert do
       :notification_period_start
     ],
     adapter_opts: [
-      alias_fields: [:integer_alert_id],
       compound_fields: [text_content: [:header_text, :description_text]],
       custom_fields: [
         effects: [
@@ -200,6 +200,7 @@ defmodule AlertsUI.Models.Alert do
   schema "alerts" do
     belongs_to :user, User, on_replace: :nilify
     field :alert_id, :string
+    field :integer_alert_id, :integer
     field :effect, Ecto.Enum, values: @effect
     field :effect_detail, :string
     field :effect_name, :string
