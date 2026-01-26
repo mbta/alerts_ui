@@ -2,6 +2,7 @@ defmodule AlertsUIWeb.Router do
   use AlertsUIWeb, :router
   import Oban.Web.Router
   import AlertsUIWeb.UserAuth
+  import AlertsUIWeb.PutEnvironmentInAssigns
 
   @redirect_http Application.compile_env(:alerts_ui, :redirect_http?)
 
@@ -22,6 +23,7 @@ defmodule AlertsUIWeb.Router do
     plug :fetch_live_flash
     plug :put_root_layout, html: {AlertsUIWeb.Layouts, :root}
     plug :protect_from_forgery
+    plug :put_environment_in_assigns
 
     plug :put_secure_browser_headers, %{
       "strict-transport-security" => "max-age=31536000",
@@ -39,6 +41,8 @@ defmodule AlertsUIWeb.Router do
   scope "/", AlertsUIWeb do
     # Unauthenticated pages
     pipe_through [:redirect_prod_http, :browser]
+
+    get("/help", PageController, :help)
   end
 
   scope "/", AlertsUIWeb do
