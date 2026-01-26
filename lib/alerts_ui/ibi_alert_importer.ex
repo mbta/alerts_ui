@@ -383,6 +383,7 @@ defmodule AlertsUI.IBIAlertImporter do
       :alert_timing,
       :active_period_start,
       :active_period_end,
+      :active_period_end_specifier,
       :active_period_start_date,
       :active_period_start_time,
       :active_period_end_date,
@@ -521,7 +522,12 @@ defmodule AlertsUI.IBIAlertImporter do
   def from_ibi(ibi_alert, :active_period_end) do
     case from_ibi(ibi_alert, :alert_timing) do
       :one_time ->
-        utc_from_ibi_string(ibi_alert.effect_end || ibi_alert.notif_end)
+        timestamp =
+          utc_from_ibi_string(ibi_alert.effect_end || ibi_alert.notif_end)
+
+        if !Enum.member?([1900, 1901], Map.get(timestamp, :year)) do
+          timestamp
+        end
 
       :recurring ->
         date =
@@ -535,6 +541,23 @@ defmodule AlertsUI.IBIAlertImporter do
           |> NaiveDateTime.to_time()
 
         NaiveDateTime.new!(date, time)
+    end
+  end
+
+  def from_ibi(ibi_alert, :active_period_end_specifier) do
+    base_timestamp = ibi_alert.effect_end || ibi_alert.notif_end
+
+    if base_timestamp do
+      year =
+        base_timestamp
+        |> utc_from_ibi_string()
+        |> Map.get(:year)
+
+      case year do
+        1900 -> :later_today
+        1901 -> :until_further_notice
+        _ -> nil
+      end
     end
   end
 
@@ -581,7 +604,11 @@ defmodule AlertsUI.IBIAlertImporter do
 
   def from_ibi(ibi_alert, :notification_period_end) do
     if ibi_alert.notif_end do
-      utc_from_ibi_string(ibi_alert.notif_end)
+      timestamp = utc_from_ibi_string(ibi_alert.notif_end)
+
+      if !Enum.member?([1900, 1901], Map.get(timestamp, :year)) do
+        timestamp
+      end
     end
   end
 
