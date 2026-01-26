@@ -330,6 +330,7 @@ defmodule AlertsUI.AlertBuilder do
         [
           :active_period_start,
           :active_period_end,
+          :active_period_end_specifier,
           :recurrence_start_time,
           :recurrence_end_time,
           :recurrence_days
