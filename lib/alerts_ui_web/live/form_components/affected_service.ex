@@ -70,7 +70,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         modal_options: service_dates,
         filter_title_value: service_dates |> Enum.map(fn {option, _value} -> option end) |> hd,
         modal_date_filter: "",
-        edit_data_has_been_filled: false
+        edit_data_has_been_filled: false,
+        obsolete_ids: %{}
       })
       |> assign(:available_routes, AsyncResult.loading())
       |> assign(:available_stops, AsyncResult.loading())
@@ -436,6 +437,13 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   end
 
   @impl true
+  def handle_async(async_key, {:ok, result}, %{assigns: %{form_type: :creating}} = socket) do
+    # if creating, just assign the result to the socket
+    socket = assign(socket, async_key, AsyncResult.ok(socket.assigns[async_key], result))
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_async(async_key, {:ok, result}, socket) do
     # assign result to socket first
     socket = assign(socket, async_key, AsyncResult.ok(socket.assigns[async_key], result))
@@ -467,19 +475,20 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         Enum.any?(obsolete_ids, fn {_k, v} -> !Enum.empty?(v) end)
 
     # if all our fields have been returned and there are obsolete ids
+    # and we have not yet assigned any obsolete ids
     # send result to parent
-    if found_obsolete_ids do
+    if found_obsolete_ids && Enum.empty?(socket.assigns.obsolete_ids) do
       send(self(), {:got_obsolete_ids, obsolete_ids})
+      {:noreply, assign(socket, :obsolete_ids, obsolete_ids)}
+    else
+      {:noreply, socket}
     end
-
-    ####
-    {:noreply, socket}
   end
 
   @impl true
   def handle_async(async_key, {:exit, reason}, socket) do
     {:noreply,
-     assign(socket, :async_key, AsyncResult.failed(socket.assigns[async_key], {:exit, reason}))}
+     assign(socket, async_key, AsyncResult.failed(socket.assigns[async_key], {:exit, reason}))}
   end
 
   @impl true

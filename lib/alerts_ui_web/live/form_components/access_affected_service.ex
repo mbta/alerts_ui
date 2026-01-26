@@ -11,7 +11,15 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
 
   alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.CreateAlertLive
-  alias AlertsUIWeb.FormComponents.Helpers.{ErrorFormatter, Helpers, SelectFormatter}
+
+  alias AlertsUIWeb.FormComponents.Helpers.{
+    EntityValidator,
+    ErrorFormatter,
+    Helpers,
+    SelectFormatter
+  }
+
+  alias Phoenix.LiveView.AsyncResult
 
   @primary_key false
   embedded_schema do
@@ -30,17 +38,21 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
   def mount(socket) do
     changeset = build_changeset(%__MODULE__{}, %{})
 
-    {:ok,
-     assign(socket, %{
-       form: to_form(changeset),
-       facility_types: [],
-       available_facilities: %{},
-       stop_id_filter_value: "default",
-       filter_title_value: "All stops",
-       alert_data: %{
-         facility_id: ""
-       }
-     })}
+    socket =
+      socket
+      |> assign(%{
+        form: to_form(changeset),
+        facility_types: [],
+        stop_id_filter_value: "default",
+        filter_title_value: "All stops",
+        obsolete_ids: %{},
+        alert_data: %{
+          facility_id: ""
+        }
+      })
+      |> assign(:available_facilities, AsyncResult.loading())
+
+    {:ok, socket}
   end
 
   @impl true
@@ -52,8 +64,6 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
       effect_name
       |> string_to_formatted_atom
       |> InformedEntity.facility_effect_to_types()
-
-    send(self(), {:add_errors, [], __MODULE__})
 
     alert_data =
       if is_struct(alert_data) do
@@ -86,8 +96,8 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
   def update(%{submitted: true}, socket) do
     changeset =
       %__MODULE__{}
-      |> build_changeset(socket.assigns.form.params)
-      |> validate_required(@required_fields)
+      |> build_changeset(%{})
+      |> validate_required([:facility_id])
 
     errors =
       case changeset |> apply_action(:validate) do
@@ -113,6 +123,20 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
       |> string_to_formatted_atom
       |> InformedEntity.facility_effect_to_types()
 
+    changeset = build_changeset(%__MODULE__{}, Map.merge(alert_data, socket.assigns))
+
+    case apply_action(
+           changeset
+           |> validate_required([:facility_id]),
+           :validate
+         ) do
+      {:ok, _changeset} ->
+        send(self(), {:add_errors, [], __MODULE__})
+
+      {:error, changeset} ->
+        send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
+    end
+
     socket =
       socket
       |> assign(assigns)
@@ -124,16 +148,96 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
 
   # Only assign facilities if that map is empty! Otherwise, we've already assigned them
   defp assign_facilities(
-         %{assigns: %{available_facilities: available_facilities}} = socket,
+         %{assigns: %{available_facilities: %AsyncResult{result: nil}}} = socket,
          facility_types
-       )
-       when available_facilities == %{} do
-    assign_async(socket, :available_facilities, fn ->
-      {:ok, %{available_facilities: CreateAlertLive.get_facilities(facility_types)}}
+       ) do
+    start_async(socket, :available_facilities, fn ->
+      CreateAlertLive.get_facilities(facility_types)
     end)
   end
 
   defp assign_facilities(socket, _facility_types), do: socket
+
+  @impl true
+  def handle_async(
+        :available_facilities,
+        {:ok, result},
+        %{assigns: %{form_type: :creating}} = socket
+      ) do
+    # if creating, just assign the result to the socket
+    socket =
+      assign(
+        socket,
+        :available_facilities,
+        AsyncResult.ok(socket.assigns.available_facilities, result)
+      )
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_async(:available_facilities, {:ok, result}, socket) do
+    # assign result to socket first
+    socket =
+      assign(
+        socket,
+        :available_facilities,
+        AsyncResult.ok(socket.assigns.available_facilities, result)
+      )
+
+    obsolete_ids =
+      EntityValidator.get_obsolete_ids(
+        Map.get(socket.assigns.alert_data, :facility_id),
+        socket.assigns.available_facilities
+      )
+
+    found_obsolete_ids =
+      is_list(obsolete_ids) && !Enum.empty?(obsolete_ids)
+
+    # if all our fields have been returned and there are obsolete ids
+    # and we have not assigned obsolete ids before
+    # send result to parent and assign errors
+    if found_obsolete_ids && Enum.empty?(socket.assigns.obsolete_ids) do
+      new_facility_id =
+        if Map.get(socket.assigns.alert_data, :facility_id) in obsolete_ids do
+          nil
+        else
+          Map.get(socket.assigns.alert_data, :facility_id)
+        end
+
+      new_alert_data = Map.put(socket.assigns.alert_data, :facility_id, new_facility_id)
+
+      changeset =
+        %__MODULE__{}
+        |> build_changeset(new_alert_data)
+        |> validate_required(@required_fields)
+
+      case changeset |> apply_action(:validate) do
+        {:ok, _changeset} ->
+          []
+
+        {:error, changeset} ->
+          send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
+          send(self(), {:section_completed, changeset})
+      end
+
+      send(self(), {:got_obsolete_ids, %{facility_ids: obsolete_ids}})
+
+      {:noreply, assign(socket, %{alert_data: new_alert_data, obsolete_ids: obsolete_ids})}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_async(:available_facilities, {:exit, reason}, socket) do
+    {:noreply,
+     assign(
+       socket,
+       :available_facilities,
+       AsyncResult.failed(socket.assigns.available_facilities, {:exit, reason})
+     )}
+  end
 
   @impl true
   def handle_event(

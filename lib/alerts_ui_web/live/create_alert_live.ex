@@ -372,7 +372,13 @@ defmodule AlertsUIWeb.CreateAlertLive do
       obsolete_ids
       |> Enum.reject(fn {_k, value} -> value in [nil, []] end)
       |> Enum.map(fn {key, value} ->
-        title = key |> Atom.to_string() |> String.replace("_id", "") |> String.capitalize()
+        title =
+          key
+          |> Atom.to_string()
+          |> String.replace("_id", "")
+          |> String.replace("ys", "ies")
+          |> String.capitalize()
+
         "#{title}: #{Enum.join(value, ", ")}"
       end)
 
@@ -475,12 +481,18 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
     # remove obsolete ids from required fields
     ids_with_obsolete_entities_removed =
-      ServiceEffectCombinations.required_fields(socket.assigns.combination)
-      |> Enum.reject(&(&1 == :direction))
-      |> Enum.map(fn field ->
-        {field, alert_data[field] -- Map.get(socket.assigns.obsolete_ids, field, [])}
-      end)
-      |> Enum.into(%{})
+      if socket.assigns.combination == :ACCESS do
+        # ids have already been removed from facility alerts
+        %{}
+      else
+        ServiceEffectCombinations.required_fields(socket.assigns.combination)
+        |> Enum.reject(&(&1 == :direction))
+        |> Enum.map(fn field ->
+          obsolete_ids = Map.get(socket.assigns.obsolete_ids, field, [])
+          {field, alert_data[field] -- obsolete_ids}
+        end)
+        |> Enum.into(%{})
+      end
 
     alert_data =
       alert_data

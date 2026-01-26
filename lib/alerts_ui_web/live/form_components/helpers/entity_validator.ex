@@ -5,7 +5,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.EntityValidator do
     in the result.
   """
 
-  @spec get_obsolete_ids(list(), map()) :: list() | nil
+  @spec get_obsolete_ids(list() | nil, map()) :: list() | nil
+  def get_obsolete_ids(nil, _available_entities) do
+    []
+  end
+
   def get_obsolete_ids(id, available_entities) when is_binary(id) do
     get_obsolete_ids(List.wrap(id), available_entities)
   end
@@ -26,6 +30,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.EntityValidator do
   def get_obsolete_ids(_, _), do: nil
 
   def get_entity_id(%{trip: %{id: id}}), do: id
+
+  # access alerts come in this format
+  def get_entity_id({_key, entities}), do: Enum.map(entities, &get_entity_id/1)
 
   def get_entity_id(%{id: id}), do: id
 end
