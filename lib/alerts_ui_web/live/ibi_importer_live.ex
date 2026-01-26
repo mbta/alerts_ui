@@ -6,8 +6,8 @@ defmodule AlertsUIWeb.IBIImporterLive do
 
   import Ecto.Query
 
-  alias AlertsUI.Models.Alert
   alias AlertsUI.IBIAlertImporter.IBIImportWorker
+  alias AlertsUI.Models.Alert
   alias AlertsUI.Repo
   alias Ecto.Adapters.SQL
   alias Ecto.Changeset
