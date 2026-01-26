@@ -1099,7 +1099,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Shuttle buses replacing Route 1 eastbound service at Lechmere today through Sat, May 10 due to a slippery rail"
+        "Route 1 eastbound will be replaced by shuttle buses at Lechmere today through Sat, May 10 due to a slippery rail"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -1114,7 +1114,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         route_type: 2,
         routes: [@route_1],
         stops: [@stop_1],
-        schedules: [],
+        schedules: [@schedule_1],
         direction: [1],
         effect_name: "Suspension",
         cause_detail: "SLIPPERY_RAIL",
@@ -1126,7 +1126,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Route 1 eastbound service suspended at Lechmere today through Sat, May 10 due to a slippery rail"
+        "Route 1 eastbound Train 527 (9:01 AM from South Station): service suspended at Lechmere today through Sat, May 10 due to a slippery rail"
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header

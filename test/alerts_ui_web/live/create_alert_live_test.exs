@@ -88,7 +88,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
         # Check header for autotext
         assert view |> element("#alert_details_header_text") |> render() =~
-                 "Framingham/Worcester Line service suspended"
+                 "Framingham/Worcester Line: service suspended"
 
         send(view.pid, {:add_errors, [], AlertDetails})
         send(view.pid, {:section_completed, changeset})
