@@ -204,7 +204,10 @@ defmodule AlertsUI.AlertHistory do
   end
 
   defp notification_end(map) do
-    format_datetime(Map.get(map, :notification_period_end), @without_seconds)
+    effect_end(
+      Map.get(map, :notification_duration_certainty) || "UNKNOWN",
+      Map.get(map, :notification_period_end)
+    )
   end
 
   defp duration_certainty(map) do
