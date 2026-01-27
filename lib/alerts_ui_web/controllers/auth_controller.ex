@@ -34,12 +34,8 @@ defmodule AlertsUIWeb.AuthController do
         } = conn,
         _params
       ) do
-    IO.inspect(auth, label: "full auth", limit: :infinity)
-    roles = userinfo
-    |> IO.inspect()
-    |> parse_role()
+    roles = parse_role(userinfo)
     user = User.new(id, email, first_name, last_name, roles)
-    |> IO.inspect(label: "User from Keycloak")
     {:ok, logout_uri} = logout_uri(auth)
 
     UserAuth.log_in_user(conn, user, logout_uri)
