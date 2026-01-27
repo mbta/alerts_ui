@@ -4,8 +4,6 @@ defmodule AlertsUIWeb.IconComponents do
   """
   use Phoenix.Component
 
-  alias MBTAV3API.Routes.Repo, as: RoutesRepo
-
   @doc """
   Renders a small circle route or mode icon.
   """
@@ -264,6 +262,7 @@ defmodule AlertsUIWeb.IconComponents do
   Renders a large elliptical route or mode pill.
   """
   attr :type, :string, required: true
+  attr :name, :string, default: nil
 
   def mode_icon(%{type: "Systemwide"} = assigns) do
     ~H"""
@@ -279,32 +278,24 @@ defmodule AlertsUIWeb.IconComponents do
   end
 
   def mode_icon(%{type: "Green-" <> _branch_letter} = assigns) do
-    assigns = assign(assigns, name: fetch_long_name(assigns.type))
-
     ~H"""
     <.base_pill text={@name} class="bg-mbta-green" />
     """
   end
 
   def mode_icon(%{type: "Mattapan"} = assigns) do
-    assigns = assign(assigns, name: fetch_long_name(assigns.type))
-
     ~H"""
     <.base_pill text={@name} class="bg-mbta-red" />
     """
   end
 
   def mode_icon(%{type: "CR-" <> _} = assigns) do
-    assigns = assign(assigns, name: fetch_long_name(assigns.type))
-
     ~H"""
     <.base_pill text={@name} class="bg-mbta-commuter-rail" />
     """
   end
 
   def mode_icon(%{type: "Boat-" <> _} = assigns) do
-    assigns = assign(assigns, name: fetch_long_name(assigns.type))
-
     ~H"""
     <.base_pill text={@name} class="bg-mbta-ferry" />
     """
@@ -313,8 +304,6 @@ defmodule AlertsUIWeb.IconComponents do
   # Silver Line: distinct from other buses because of pill color
   def mode_icon(%{type: route_id} = assigns)
       when route_id in ["741", "742", "743", "751", "749", "746"] do
-    assigns = assign(assigns, name: fetch_short_name(route_id))
-
     ~H"""
     <.base_pill text={@name} class="bg-mbta-silver" />
     """
@@ -337,21 +326,31 @@ defmodule AlertsUIWeb.IconComponents do
   # Bus Route Icon
   def mode_icon(assigns) do
     ~H"""
-    <.base_pill text={fetch_short_name(@type)} class="!text-black bg-mbta-bus" />
+    <.base_pill text={@name} class="!text-black bg-mbta-bus" />
     """
   end
 
-  defp fetch_long_name(route_id) do
-    case RoutesRepo.get(route_id) do
-      nil -> route_id
-      route -> Map.get(route, :long_name)
-    end
-  end
+  # Warning Icon
+  attr :stroke, :string, default: "currentColor"
+  attr :fill, :string, default: "currentColor"
+  attr :class, :string, default: ""
 
-  defp fetch_short_name(route_id) do
-    case RoutesRepo.get(route_id) do
-      nil -> route_id
-      route -> Map.get(route, :name)
-    end
+  def warning_icon(assigns) do
+    ~H"""
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      stroke-width="1.5"
+      stroke={@stroke}
+      fill={@fill}
+      class={"size-6 #{@class}"}
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"
+      />
+    </svg>
+    """
   end
 end

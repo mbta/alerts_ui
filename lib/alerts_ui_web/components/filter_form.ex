@@ -38,7 +38,7 @@ defmodule AlertsUIWeb.FilterForm do
       phx-change="edit_filter"
       class="ml-auto"
     >
-      <div class="mb-4 ml-2 flex flex-row gap-2 items-center">
+      <div class="flex flex-col gap-4 mb-4 md:flex-row md:items-center md:justify-evenly">
         <.filter_modal form={@form} filter_count={@filter_count} />
         <.radio_switch
           name="timeline"
@@ -53,7 +53,7 @@ defmodule AlertsUIWeb.FilterForm do
           phx-debounce={750}
           placeholder="Search alerts"
           icon="hero-magnifying-glass-mini"
-          class="h-[2.375rem]"
+          class="h-[2.375rem] w-full"
           phx-change="apply_filter"
         />
         <.button_secondary class="btn-outline" name="reset">
@@ -251,13 +251,7 @@ defmodule AlertsUIWeb.FilterForm do
         />
       </label>
       <div class="collapse-content text-base !p-0">
-        <.filtered_select
-          class="h-[20rem]"
-          field={@field}
-          hook="SelectAllAdjuster"
-          prompt="All"
-          {@rest}
-        />
+        <.filtered_select class="h-[20rem]" field={@field} prompt="All" {@rest} />
       </div>
     </div>
     """
@@ -274,7 +268,7 @@ defmodule AlertsUIWeb.FilterForm do
     # Properly organizing by mode: Bus, Subway, CR, Ferry
     [
       Map.get(grouped_routes, 3, []),
-      Map.get(grouped_routes, 1, []),
+      Map.get(grouped_routes, 1, []) ++ Map.get(grouped_routes, 0, []),
       Map.get(grouped_routes, 2, []),
       Map.get(grouped_routes, 4, [])
     ]

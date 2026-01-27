@@ -101,9 +101,10 @@ defmodule AlertsUIWeb.ReviewModal do
       |> Alert.get_original_names()
       |> join_present(", ")
 
+    modes = Map.get(assigns.alert_data, :service_types, %{}) || %{}
+
     mode_names =
-      assigns.alert_data
-      |> Map.get(:service_types, %{})
+      modes
       |> Enum.map(&ContentFormatter.service_type_string/1)
       |> join_present(", ")
 
@@ -130,9 +131,7 @@ defmodule AlertsUIWeb.ReviewModal do
       header_text="Create new alert"
       cancel_button_text="Keep editing"
       accept_button_text="Submit"
-      class="flex flex-col h-full justify-center w-[800px]"
-      outer_class="!h-full"
-      inner_class="!p-0 shrink grow overflow-auto"
+      inner_class="!p-0"
       target_id={@target_id}
       {@rest}
     >
@@ -140,22 +139,22 @@ defmodule AlertsUIWeb.ReviewModal do
         <div>
           <%= cond do %>
             <% @form_type == :creating -> %>
-              <p class="text-lg/6">Create new alert</p>
+              <p class="md:text-lg/6">Create new alert</p>
             <% @form_type == :duplicating -> %>
-              <p class="text-lg/6">Duplicate alert #{@alert_id}</p>
+              <p class="md:text-lg/6">Duplicate alert #{@alert_id}</p>
             <% @form_type == :editing -> %>
-              <p class="text-lg/6">Edit alert #{@alert_id}</p>
+              <p class="md:text-lg/6">Edit alert #{@alert_id}</p>
             <% true -> %>
-              <p class="text-lg/6">Alert #{@alert_id} ({format_alert_status_text(@alert_data)})</p>
+              <p class="md:text-lg/6">Alert #{@alert_id} ({format_alert_status_text(@alert_data)})</p>
           <% end %>
-          <p class="text-lg/6 font-bold">
+          <p class="md:text-lg/6 font-bold">
             {ContentFormatter.service_type_string(@alert_data.route_type, @alert_data.combination)} • {@alert_data.effect_name}
           </p>
         </div>
       </:header>
-      <div class="grid grid-cols-review-modal text-sm/2">
+      <div class="grid-cols-review-modal md:grid text-sm/2">
         <%!-- Main lefthand content --%>
-        <div class="p-4 grow">
+        <div class="p-4 md:grow">
           <%!-- Top section --%>
           <p class="font-bold">Main message</p>
           {text_to_html(@alert_data.header_text,
@@ -278,7 +277,7 @@ defmodule AlertsUIWeb.ReviewModal do
             </p>
 
             <p class="font-bold pb-1">Effect period</p>
-            <.effect_end_text alert_data={@alert_data} />
+            <.effect_range_text alert_data={@alert_data} />
 
             <p class="font-bold pb-1">Notification period</p>
             <%= if Map.get(@alert_data, :notification_specifier, :same_as_effect_period) === :same_as_effect_period do %>
@@ -305,7 +304,7 @@ defmodule AlertsUIWeb.ReviewModal do
             <p class="font-bold pb-1">Reminders</p>
             <%= if @alert_data.reminder_times != [] do %>
               <div class="pb-4">
-                <%= for reminder <- Enum.sort_by(@alert_data.reminder_times, &(&1.time)) do %>
+                <%= for reminder <- Enum.sort_by(@alert_data.reminder_times, &(&1.time), NaiveDateTime) do %>
                   <p>
                     {Calendar.strftime(reminder.time, "%a %m/%d/%Y %-I:%M %p")}
                     <span :if={ReminderTimes.sent?(reminder.time)} class="text-text-secondary">
@@ -324,7 +323,7 @@ defmodule AlertsUIWeb.ReviewModal do
           </div>
         </div>
         <%!-- Sidebar --%>
-        <div class="min-w-[222px] shrink-0 p-4 bg-bg-elevation-5">
+        <div class="md:min-w-[222px] md:shrink-0 p-4 bg-bg-elevation-5">
           <p class="font-bold">Created</p>
           <%= if @form_type in [:creating, :duplicating] do %>
             <p class="pb-3 whitespace-nowrap">
@@ -389,7 +388,7 @@ defmodule AlertsUIWeb.ReviewModal do
       </div>
       <%!-- Only override footer if we're not creating/reviewing edits --%>
       <:footer :if={!@form_type}>
-        <div class="flex flex-row justify-end px-4 py-4 gap-2">
+        <div class="flex flex-none flex-col justify-items-stretch md:flex-row md:justify-end px-4 py-4 gap-2">
           <%!-- food for thought: should type=button be here or in the component? --%>
           <%= if Helpers.author?(@current_user) do %>
             <.button_danger
@@ -411,7 +410,7 @@ defmodule AlertsUIWeb.ReviewModal do
             </.button_danger>
             <.button_secondary
               type="button"
-              class="ml-auto"
+              class="md:ml-auto"
               phx-remove={hide_modal(@id)}
               phx-click={
                 JS.push("duplicate_alert", value: %{alert_id: @alert_id}, target: @target_id)
@@ -483,7 +482,7 @@ defmodule AlertsUIWeb.ReviewModal do
 
   attr :alert_data, :map
 
-  def effect_end_text(assigns) do
+  def effect_range_text(assigns) do
     closed_before_start? =
       safe_datetime_compare(
         assigns.alert_data.active_period_start,
@@ -579,8 +578,8 @@ defmodule AlertsUIWeb.ReviewModal do
       cancel_button_text="Keep Active"
       accept_button_text="Close now"
       target_id="#view_alerts_live_view"
-      class="text-text-primary min-w-[30rem]"
-      inner_class="text-base font-light min-h-[72px]"
+      class="text-text-primary"
+      inner_class="text-base font-light"
       cancel_button_classes="border-0 text-base"
       accept_button_classes="
               !text-white

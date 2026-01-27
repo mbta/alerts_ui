@@ -11,6 +11,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   alias AlertsUIWeb.FormComponents.Helpers.{
     ContentFormatter,
+    EntityValidator,
     ErrorFormatter,
     Helpers,
     SelectFormatter,
@@ -18,7 +19,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   }
 
   alias MBTAV3API.Routes.Route
-
+  alias Phoenix.LiveView.AsyncResult
   @primary_key false
   embedded_schema do
     field :route_ids, {:array, :string}
@@ -71,6 +72,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         modal_date_filter: "",
         edit_data_has_been_filled: false
       })
+      |> assign(:available_routes, AsyncResult.loading())
+      |> assign(:available_stops, AsyncResult.loading())
+      |> assign(:available_schedules, AsyncResult.loading())
 
     {:ok, socket}
   end
@@ -116,8 +120,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     alert_data =
       Map.put(alert_data, :trip_information_by_id, trip_information_by_id)
-      |> Map.put(:modal_date, nil)
       |> Map.merge(params)
+      |> Map.put(:modal_date, nil)
 
     changeset = build_changeset(%__MODULE__{}, alert_data)
 
@@ -198,7 +202,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     # don't re-fetch routes if we already have them- prevents weird unselect render error
     socket =
-      if socket.assigns.available_routes === %{} do
+      if socket.assigns.available_routes.result in [%{}, nil] do
         assign_routes(socket, route_types)
       else
         socket
@@ -394,11 +398,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   def adjust_select_all(keep_all), do: keep_all
 
   def assign_routes(socket, route_types) do
-    assign_async(socket, [:available_routes], fn ->
-      {:ok,
-       %{
-         available_routes: CreateAlertLive.get_routes(route_types)
-       }}
+    start_async(socket, :available_routes, fn ->
+      CreateAlertLive.get_routes(route_types)
     end)
   end
 
@@ -406,16 +407,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     if :stop_ids in fields do
       route_type = socket.assigns.route_type
 
-      assign_async(socket, [:available_stops], fn ->
-        {:ok,
-         %{
-           available_stops:
-             CreateAlertLive.get_stops(
-               route_ids,
-               route_type,
-               direction
-             )
-         }}
+      start_async(socket, :available_stops, fn ->
+        CreateAlertLive.get_stops(
+          route_ids,
+          route_type,
+          direction
+        )
       end)
     else
       socket
@@ -426,20 +423,63 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     if :trip_ids in fields do
       service_date = socket.assigns.modal_date
 
-      assign_async(socket, [:available_schedules], fn ->
-        {:ok,
-         %{
-           available_schedules:
-             CreateAlertLive.get_schedules_by_date(
-               route_ids,
-               direction,
-               service_date
-             )
-         }}
+      start_async(socket, :available_schedules, fn ->
+        CreateAlertLive.get_schedules_by_date(
+          route_ids,
+          direction,
+          service_date
+        )
       end)
     else
       socket
     end
+  end
+
+  @impl true
+  def handle_async(async_key, {:ok, result}, socket) do
+    # assign result to socket first
+    socket = assign(socket, async_key, AsyncResult.ok(socket.assigns[async_key], result))
+
+    # then check if all our required fields have arrived
+    required_fields =
+      socket.assigns.combination
+      |> ServiceEffectCombinations.required_fields()
+      |> Enum.reject(&(&1 == :direction))
+
+    mapping = %{
+      route_ids: :available_routes,
+      trip_ids: :available_schedules,
+      stop_ids: :available_stops
+    }
+
+    obsolete_ids =
+      Enum.map(required_fields, fn field ->
+        {field,
+         EntityValidator.get_obsolete_ids(
+           socket.assigns.alert_data[field],
+           socket.assigns[mapping[field]]
+         )}
+      end)
+      |> Enum.into(%{})
+
+    found_obsolete_ids =
+      Enum.all?(obsolete_ids, fn {_k, v} -> is_list(v) end) &&
+        Enum.any?(obsolete_ids, fn {_k, v} -> !Enum.empty?(v) end)
+
+    # if all our fields have been returned and there are obsolete ids
+    # send result to parent
+    if found_obsolete_ids do
+      send(self(), {:got_obsolete_ids, obsolete_ids})
+    end
+
+    ####
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_async(async_key, {:exit, reason}, socket) do
+    {:noreply,
+     assign(socket, :async_key, AsyncResult.failed(socket.assigns[async_key], {:exit, reason}))}
   end
 
   @impl true
@@ -514,7 +554,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       )
 
     ~H"""
-    <div class="min-w-[100%] self-start flex flex-col" id="service_view">
+    <div class="min-w-full self-start flex flex-col" id="service_view">
       <.h1>
         {ContentFormatter.service_type_string(@route_type)} • {@effect_name || ""}
       </.h1>
@@ -525,10 +565,13 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         for={@form}
         phx-target={@myself}
         phx-change="validate"
-        class={["form-control flex flex-row mb-4", @route_type !== 2 && "min-h-[32rem]"]}
+        class={[
+          "form-control flex flex-row flex-wrap mb-4",
+          @route_type !== 2 && "min-h-[38rem] md:min-h-[32rem]"
+        ]}
         id="service_form"
       >
-        <div class="w-[25%] mr-8">
+        <div class="mb-4 md:mb-0 w-full md:w-[25%] md:mr-8">
           <.filtered_select
             :if={@route_type === 3}
             label={if @route_type in [0, 1, 2], do: "Lines", else: "Routes"}
@@ -547,7 +590,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             options={@route_id_options}
             icon_type={icon_type(@route_type)}
             class="flex-col"
-            button_class="min-w-[100%]"
+            button_class="min-w-full"
             show_icons={true}
           />
         </div>
@@ -571,7 +614,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             multiple={false}
           />
         </.modal>
-        <div :if={show_trips_input?(assigns)} class="flex flex-col justify-start w-[25%] mr-8">
+        <div :if={show_trips_input?(assigns)} class="flex flex-col justify-start md:w-[25%] md:mr-8">
           <.select
             :if={show_directions_input?(assigns)}
             label={
@@ -599,13 +642,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             no_results={
               Enum.empty?(@trip_id_options) && !disable_trip_input?(@form[:route_ids].value)
             }
-            class="min-w-[100%] h-full"
+            class="min-w-full h-full"
             disabled={disable_trip_input?(@form[:route_ids].value)}
             prompt={if disable_trip_input?(@form[:route_ids].value), do: nil, else: "All Trips"}
-            hook="SelectAllAdjuster"
           />
         </div>
-        <div class="flex flex-col justify-start w-[25%]">
+        <div class="flex flex-col justify-start w-full md:w-[25%]">
           <.select
             :if={show_directions_input?(assigns) && !show_trips_input?(assigns)}
             label={if show_stops_input?(assigns), do: "Stops", else: "Direction"}
@@ -624,14 +666,13 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             no_results={
               Enum.empty?(@stop_id_options) && !disable_stop_input?(@form[:route_ids].value)
             }
-            class="min-w-[100%] h-full"
+            class="min-w-full h-full"
             disabled={disable_stop_input?(@form[:route_ids].value)}
             prompt={
               if disable_stop_input?(@form[:route_ids].value),
                 do: nil,
                 else: "All Stops"
             }
-            hook="SelectAllAdjuster"
           />
         </div>
       </.form>

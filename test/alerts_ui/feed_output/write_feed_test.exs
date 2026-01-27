@@ -2,7 +2,8 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
   use AlertsUI.DataCase, async: true
   import AlertsUI.Support.Factory
   import Test.Support.Helpers
-  alias AlertsUI.FeedOutput.WriteFeed
+  alias AlertsUI.Alerts
+  alias AlertsUI.FeedOutput.{CreateOutputAlert, WriteFeed}
   alias AlertsUI.Models.ActivePeriod
 
   describe "write_feed/0" do
@@ -188,6 +189,75 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
                "incrementality" => "FULL_DATASET",
                "timestamp" => _
              } = actual["header"]
+    end
+
+    test "SITA gets special filtering" do
+      insert(:alert,
+        alert_id: "890abc",
+        effect_detail: "SHUTTLE",
+        informed_entity: [
+          %{
+            route_type: 2,
+            stop_id: "FB-0148-02",
+            activities: [
+              "BOARD",
+              "EXIT",
+              "RIDE"
+            ],
+            agency_id: "1",
+            route_id: "CR-Franklin",
+            trip: %{
+              route_id: "CR-Franklin",
+              direction_id: 1,
+              trip_id: "BasewUpdatedWalpoleTurns-788924-1756"
+            }
+          },
+          %{
+            route_type: 2,
+            stop_id: "FB-0148-05",
+            activities: [
+              "BOARD",
+              "EXIT",
+              "RIDE"
+            ],
+            agency_id: "1",
+            route_id: "CR-Franklin",
+            trip: %{
+              route_id: "CR-Franklin",
+              direction_id: 1,
+              trip_id: "BasewUpdatedWalpoleTurns-788924-1756"
+            }
+          }
+        ]
+      )
+
+      alerts =
+        Alerts.list_all_open()
+        |> Enum.map(&CreateOutputAlert.build_alert/1)
+
+      {:ok, output} = WriteFeed.write(:combined_enhanced_sita, alerts)
+
+      assert %{
+               "entity" => [
+                 %{
+                   "alert" => %{
+                     "informed_entity" => [
+                       %{
+                         "route_type" => 2,
+                         "agency_id" => "1",
+                         "route_id" => "CR-Franklin",
+                         "trip" => %{
+                           "route_id" => "CR-Franklin",
+                           "direction_id" => 1,
+                           "trip_id" => "BasewUpdatedWalpoleTurns-788924-1756"
+                         }
+                       }
+                     ]
+                   },
+                   "id" => "890abc"
+                 }
+               ]
+             } = Jason.decode!(output)
     end
   end
 

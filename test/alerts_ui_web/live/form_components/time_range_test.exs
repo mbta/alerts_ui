@@ -76,7 +76,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
       assert view
              |> render() =~
-               ~s(phx-feedback-for="time_range[active_period_end_date]" class="min-w-[16rem] max-w-[16rem] hidden")
+               ~s(phx-feedback-for="time_range[active_period_end_date]" class="md:min-w-64 md:max-w-64 hidden")
 
       view
       |> element("form")
@@ -89,7 +89,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
       refute view
              |> render() =~
-               ~s(phx-feedback-for="time_range[active_period_end_date]" class="min-w-[16rem] max-w-[16rem] hidden")
+               ~s(phx-feedback-for="time_range[active_period_end_date]" class="md:min-w-64 md:max-w-64 hidden")
     end
 
     test "editing keeps correct end time specifier when there is no end time" do
@@ -945,7 +945,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
               alert_id: "123",
               header_text: "example header text",
               informed_entity: [Map.from_struct(ie)],
-              effect: :SIGNIFICANT_DELAYS,
+              effect: :OTHER_EFFECT,
               effect_detail: "DELAY",
               original_route_selections: [@route.id],
               reminder_times: [],

@@ -171,7 +171,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       ) do
     # Get the currently selected stop ids
     stop_ids =
-      affected_service["stop_ids"]
+      affected_service["stop_ids"] || []
 
     # Then get the full stop data. That could be in available_stops OR be previously saved in selected_stops
     # (in the case that the list has been filtered, the stop details won't be in available_stops)
@@ -475,7 +475,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         for={@form}
         phx-target={@myself}
         phx-change="validate"
-        class="form-control flex flex-row gap-x-8 mb-4 h-[32rem]"
+        class="form-control md:flex md:flex-row gap-x-8 mb-4 h-[32rem]"
         id="service_form"
       >
         <.modal
@@ -500,7 +500,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         </.modal>
 
         <.filtered_select
-          class="w-[25%]"
+          class="md:w-[25%]"
           field={@form[:stop_ids]}
           filter_field={@form[:stop_search_term]}
           label="Stops"
@@ -521,7 +521,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
           no_results={Enum.empty?(@route_id_options) && !disable_routes_input?(assigns)}
           disabled={disable_routes_input?(assigns)}
           options={@route_id_options}
-          class="w-[25%]"
+          class="md:w-[25%]"
         />
       </.form>
       <p :if={@show_stop_ids}>

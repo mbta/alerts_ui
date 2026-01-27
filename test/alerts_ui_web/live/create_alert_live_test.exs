@@ -185,7 +185,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
         # Submit the first part
         {:ok, changeset} =
-          Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 2, effect_name: "Suspension"})
+          Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 2, effect_name: "Extra Service"})
           |> apply_action(:insert)
 
         send(view.pid, {:step_completed, changeset})

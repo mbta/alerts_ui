@@ -1,17 +1,16 @@
-<div class="h-screen flex flex-col overflow-y-hidden">
+<div class="flex flex-col">
   <header class="bg-secondary">
     <div class="flex items-center justify-between py-4 text-sm">
       <div class="flex items-center gap-4 mx-4">
         <a href="/"><img class="h-12" src={"/images/logos/logo-#{@environment}.svg"} /></a>
         <.h1 class="!mb-0"><a href="/">Alerts Manager </a></.h1>
         <div
-          :if={@environment != "production"}
-          class={"text-center font-bold min-w-[6rem] mt-[.5rem] min-h-2 py-1 px-2 rounded-md bg-#{%{
+          :if={@environment != "prod"}
+          class={"text-center font-bold py-1 px-4 rounded-md bg-#{%{
             "local" => "mbta-the-ride",
             "dev-green" => "mbta-green",
             "dev-orange" => "mbta-orange",
-            "staging" => "mbta-commuter-rail",
-            "production" => "mbta-bus"
+            "staging" => "mbta-commuter-rail"
           }[@environment]}"}
         >
           {@environment}
@@ -40,7 +39,7 @@
           Validate Feeds
         </a>
         <%= if @current_user do %>
-          <div class="whitespace-nowrap">
+          <div class="whitespace-nowrap hidden lg:block">
             <.icon name="hero-user-solid" />
             {@current_user.email}
           </div>
@@ -62,7 +61,7 @@
       </div>
     </div>
   </header>
-  <main class="min-h-0 flex-auto overflow-auto">
+  <main class="flex-auto">
     <.flash_group flash={@flash} />
     {@inner_content}
   </main>

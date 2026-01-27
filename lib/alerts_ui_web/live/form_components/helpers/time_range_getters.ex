@@ -197,6 +197,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeGetters do
   defp string_to_time_helper(time) when is_binary(time), do: Time.from_iso8601!(time <> ":00")
   defp string_to_time_helper(time), do: time
 
+  def string_to_datetime_helper(%DateTime{} = datetime),
+    do: DateTime.to_naive(datetime)
+
+  def string_to_datetime_helper(%NaiveDateTime{} = datetime), do: datetime
+
   def string_to_datetime_helper(datetime) do
     # At this stage, we see string dates in the following formats:
     # 2025-12-13T03:00

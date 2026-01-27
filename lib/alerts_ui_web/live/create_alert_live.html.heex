@@ -79,9 +79,32 @@
           alert_data={@alert_data}
           form_type={@form_type}
           alert_id={@alert_id}
+          selected_routes={@selected_routes}
           selected_schedules={@selected_schedules}
           current_user={@current_user}
         />
+        <.modal
+          id="gtfs-warning-modal"
+          class="flex flex-col h-full justify-center w-[600px]"
+          header_text=""
+          accept_button_text="Continue"
+          cancel_button_text="Cancel"
+          cancel_event_name="cancelled_gtfs_modal"
+          accept_event_name="accepted_gtfs_modal"
+        >
+          <:header>
+            <.warning_icon class="inline text-warning" stroke="#2b3741" fill="currentColor" />
+            Warning: Outdated entities will be omitted
+          </:header>
+          This alert includes 1+ affected entities that no longer exist in GTFS or are no longer
+          associated to the original selections. These entities will be omitted and will not be
+          published in this alert. <br />
+          <br />
+          <div :for={text_line <- @obsolete_id_text}>
+            {text_line}
+            <br /> <br />
+          </div>
+        </.modal>
       </div>
     </article>
     <.form_error_flash title="Please fix these issues:" flash={@flash} id="error-flash" />

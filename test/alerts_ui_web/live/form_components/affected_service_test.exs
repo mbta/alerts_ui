@@ -1078,7 +1078,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
               alert_id: "123",
               header_text: "example header text",
               informed_entity: [Map.from_struct(ie)],
-              effect: :SIGNIFICANT_DELAYS,
+              effect: :OTHER_EFFECT,
               effect_detail: "DELAY",
               original_route_selections: [@route.id],
               original_stop_selections: ["#{@stop.name}|#{@stop.id}"],
@@ -1130,6 +1130,84 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
                    trip: %{trip_id: "CR-683322-595"}
                  }
                ] = Map.get(alert, :informed_entity)
+      end
+    end
+
+    @tag :logged_in_user
+    test "user can select 'All future trips', a trip, and then effect start far from now", %{
+      conn: conn
+    } do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_stop: fn _stop_id, _ -> [@route] end,
+           by_type: fn _types -> [@route] end,
+           get: fn _, _ -> @route end,
+           get: fn _ -> @route end
+         ]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _route_ids, _opts ->
+             [@schedule, @schedule_2, @schedule_3, @schedule_4]
+           end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _route_type -> [@stop] end,
+           by_route: fn _, _ -> [@stop] end
+         ]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _route_id, _opts -> [] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        get_to_submission_page(view, "Commuter Rail", "Cancellation")
+
+        render_async(view)
+
+        # Mock selecting Framingham line
+        view
+        |> element("#service_form")
+        |> render_change(%{
+          affected_service: %{route_ids: ["CR-Worcester"]}
+        })
+
+        # Mock user selecting "All future trips"
+        view
+        |> element("#service_form")
+        |> render_change(%{
+          affected_service: %{modal_date: "default"}
+        })
+
+        # Mock user selecting 2 trips
+        view
+        |> element("#service_form")
+        |> render_change(%{
+          "affected_service" => %{"trip_ids" => ["CR-683322-595", "CR-683322-596"]}
+        })
+
+        # Selecting dates in distant future
+        view
+        |> element("#time_range_form")
+        |> render_change(%{
+          "time_range" => %{
+            "active_period_start_specifier" => "custom",
+            "active_period_end_specifier" => "custom"
+          }
+        })
+
+        view
+        |> element("#time_range_form")
+        |> render_change(%{
+          "time_range" => %{
+            "active_period_start" => ~N[2045-03-28 03:00:00],
+            "active_period_end" => ~N[2045-03-31 19:00:00]
+          }
+        })
+
+        refute render(view) =~ ~s(Effect must start before)
       end
     end
   end

@@ -11,8 +11,8 @@ defmodule AlertsUIWeb.UserAuth do
   import Phoenix.Controller
 
   alias AlertsUI.Models.User
-  alias Plug.Conn
   alias Oidcc.{ClientContext, Token}
+  alias Plug.Conn
 
   @doc """
   Logs the user in.
@@ -62,7 +62,6 @@ defmodule AlertsUIWeb.UserAuth do
 
     conn
     |> renew_session()
-    |> put_flash(:info, "You have been signed out.")
     |> redirect(redirect_to)
   end
 

@@ -406,6 +406,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
     datetime |> String.pad_trailing(19, ":00") |> NaiveDateTime.from_iso8601!()
   end
 
+  defp ensure_naive_datetime_format(%DateTime{} = datetime), do: DateTime.to_naive(datetime)
+
   defp ensure_naive_datetime_format(%NaiveDateTime{} = datetime), do: datetime
 
   defp ensure_time_format(%Time{} = time), do: time

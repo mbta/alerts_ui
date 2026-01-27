@@ -63,13 +63,17 @@ Hooks.DropdownPosition = {
   }
 }
 
-// This hook is put on a few <select> elements that mustn't allow
-// "All XYZ" to be selected at the same time that individual items
-// are selected. So, when the form change handler executes the "validate"
-// check, we clean the selected data to deselect the default "All XYZ"
+// This hook covers 2 behaviors on <select> elements.
+// 
+// 1. Some select elements that mustn't allow "All XYZ" to be selected
+// at the same time that individual items are selected. 
+// So, when the form change handler executes the "validate" check,
+// we clean the selected data to deselect the default "All XYZ"
 // value and then push that change to the client via a push_event to
 // this hook. It's certainly janky and could do with a better idea!
-Hooks.SelectAllAdjuster = {
+// 
+// 2. When a select element takes focus, the viewport should not scroll
+Hooks.Selector = {
   mounted() {
     // I struggled to figure out how do I match the <select> element
     // that needs updated selections to the correct field in the payload.
@@ -88,14 +92,23 @@ Hooks.SelectAllAdjuster = {
     this.handleEvent("adjustSelections", (payload) => {
       const options = Array.from(this.el.options);
       const payloadKey = selectorIDLookup[this.el.id];
-      // If "default" hasn't already been filtered out, do so
-      const newSelections = payload[payloadKey].filter(item => item != "default");
 
-      // If newSelections is 0, then only default is selected. Otherwise, the opposite
-      if (newSelections.length != 0) {
-        const defaultIndex = options.findIndex((opt) => opt.value == "default");
-        options[defaultIndex].selected = false;
+      // Only apply to a subset of selectors found in the lookup table
+      if (payloadKey) {
+        // If "default" hasn't already been filtered out, do so
+        const newSelections = payload[payloadKey].filter(item => item != "default");
+
+        // If newSelections is 0, then only default is selected. Otherwise, the opposite
+        if (newSelections.length != 0) {
+          const defaultIndex = options.findIndex((opt) => opt.value == "default");
+          options[defaultIndex].selected = false;
+        }
       }
+    });
+
+    // Prevents scroll on select
+    this.el.addEventListener('pointerdown', () => {
+      this.el.focus({ preventScroll: true });
     });
   },
 };

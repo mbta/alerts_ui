@@ -23,7 +23,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLine do
   end
 
   def next_stop_or_branch(stop_tree, stop_id, merging_in_branches, splitting_off_branches)
-      when length(splitting_off_branches) > 0 do
+      when is_list(splitting_off_branches) and splitting_off_branches != [] do
     {splitting_off_branch, remaining_splitting_off_branches} =
       List.pop_at(splitting_off_branches, -1)
 
@@ -48,7 +48,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLine do
     merging_branch = merging_branch(stop_id, new_merging_in_branches)
 
     cond do
-      length(merging_branch) > 0 ->
+      is_list(merging_branch) && merging_branch != [] ->
         remaining_merging_in_branches = Enum.filter(merging_in_branches, &(&1 !== merging_branch))
         [starting_id | non_starting_stops] = merging_branch
 
@@ -63,10 +63,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLine do
           )
         ]
 
-      length(next_ids) > 0 ->
+      is_list(next_ids) && next_ids != [] ->
         [next_id, new_splitting_off_branches] = next_primary_and_branches(stop_tree, next_ids)
 
-        if length(new_splitting_off_branches) > 0 do
+        if is_list(new_splitting_off_branches) && new_splitting_off_branches != [] do
           [
             stop_id,
             [],
@@ -115,7 +115,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GreenLine do
     stops = [stop_id | stops]
     next_stop_ids = next_stop_ids(stop_tree, stop_id)
 
-    if length(next_stop_ids) > 0 do
+    if is_list(next_stop_ids) && next_stop_ids != [] do
       next_stop_ids |> Enum.flat_map(fn s_id -> stops_to_terminus(stop_tree, s_id, stops) end)
     else
       stops

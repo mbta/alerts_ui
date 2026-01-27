@@ -83,18 +83,18 @@ defmodule AlertsUI.IBIAlertImporterTest do
     end
 
     test ":route_ids", %{ibi_alert: ibi_alert} do
-      assert ibi_alert.informed_route_list == "CR-Fitchburg"
-      assert from_ibi(ibi_alert, :route_ids) == ["CR-Fitchburg"]
+      assert ibi_alert.informed_route_list == "1|CR-Fitchburg"
+      assert from_ibi(ibi_alert, :route_ids) == ["CR-Fitchburg|1"]
     end
 
     test ":stop_ids", %{ibi_alert: ibi_alert} do
-      assert ibi_alert.informed_stop_list == "CR-Fitchburg-Test-Stop"
-      assert from_ibi(ibi_alert, :stop_ids) == ["CR-Fitchburg-Test-Stop"]
+      assert ibi_alert.informed_stop_list == "1|CR-Fitchburg-Test-Stop"
+      assert from_ibi(ibi_alert, :stop_ids) == ["CR-Fitchburg-Test-Stop|1"]
     end
 
     test ":trip_ids", %{ibi_alert: ibi_alert} do
-      assert ibi_alert.informed_trip_list == "CR-Fitchburg-Test-Trip"
-      assert from_ibi(ibi_alert, :trip_ids) == ["CR-Fitchburg-Test-Trip"]
+      assert ibi_alert.informed_trip_list == "1|CR-Fitchburg-Test-Trip"
+      assert from_ibi(ibi_alert, :trip_ids) == ["CR-Fitchburg-Test-Trip|1"]
     end
 
     test ":direction", %{ibi_alert: ibi_alert} do
@@ -103,8 +103,8 @@ defmodule AlertsUI.IBIAlertImporterTest do
     end
 
     test ":facility_id", %{ibi_alert: ibi_alert} do
-      assert ibi_alert.informed_facility_list == "CR-Fitchburg-Test-Facility"
-      assert from_ibi(ibi_alert, :facility_id) == "CR-Fitchburg-Test-Facility"
+      assert ibi_alert.informed_facility_list == "1|CR-Fitchburg-Test-Facility"
+      assert from_ibi(ibi_alert, :facility_id) == "CR-Fitchburg-Test-Facility|1"
     end
 
     test ":service_types", %{ibi_alert: ibi_alert} do

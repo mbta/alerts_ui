@@ -14,6 +14,7 @@ defmodule AlertsUI.IBIAlertImporter do
 
   alias AlertsUI.AlertBuilder
   alias AlertsUI.IBIAlertImportParser
+  alias AlertsUI.IBIAlertImporter.ParentChildStopMapping
   alias AlertsUI.Models.Alert
   alias AlertsUI.Models.Cause
   alias AlertsUI.Models.IBIAlert
@@ -35,6 +36,8 @@ defmodule AlertsUI.IBIAlertImporter do
         fix_invalid_timestamps()
         # running this twice for alert 515100, why that works who knows, who cares
         fix_invalid_timestamps()
+        Logger.info("[import #{import_id}] fixing missing entities")
+        fix_missing_entities()
         Logger.info("[import #{import_id}] converting legacy alerts")
         convert_ibi_alerts()
         Logger.info("[import #{import_id}] done")
@@ -194,6 +197,43 @@ defmodule AlertsUI.IBIAlertImporter do
     """
   end
 
+  def fix_missing_entities() do
+    Repo.transact(
+      fn ->
+        SQL.query!(
+          Repo,
+          "update ibi_alerts
+            set informed_route_list = 'Orange|Orange Line', informed_direction_list = '1|Northbound', informed_stop_list = 'place-welln|Wellington Station - Outbound;place-mlmnl|Malden Station - Outbound;place-ogmnl|Oak Grove Station - Orange Line' where id = '#{latest_ibi_version_id("4090")}'"
+        )
+
+        SQL.query!(
+          Repo,
+          "update ibi_alerts
+            set informed_route_list = 'Red|Red Line' where id = '#{latest_ibi_version_id("148584")}'"
+        )
+
+        SQL.query!(
+          Repo,
+          "update ibi_alerts
+            set informed_route_list = 'Green-D|Green Line D Branch' where id = '#{latest_ibi_version_id("371153")}'"
+        )
+
+        SQL.query!(
+          Repo,
+          "update ibi_alerts
+            set informed_route_list = '47|47', informed_stop_list = '1123|Green St @ Magazine St' where id = '#{latest_ibi_version_id("630418")}'"
+        )
+
+        {:ok, true}
+      end,
+      timeout: :infinity
+    )
+  end
+
+  def latest_ibi_version_id(alert_id) do
+    Repo.get_by(LatestIBIAlert, alert_id: alert_id).id
+  end
+
   @doc """
   Convert the now-imported IBI alerts to Alerts Manager alerts. Note that you'll
   want to perform any fixes to the underlying data (malformed timestamps, I'm looking
@@ -250,7 +290,11 @@ defmodule AlertsUI.IBIAlertImporter do
                 no_active_periods: !insert_open,
                 no_informed_entities: !insert_open
               )
-              |> PaperTrail.insert!(origin: insert.last_modified_by, returning: true)
+              |> PaperTrail.insert!(
+                origin: insert.last_modified_by,
+                returning: true,
+                meta: %{version: insert.integer_version_no}
+              )
               |> Repo.preload([:informed_entity, :active_period])
 
             Enum.each(updates, fn update ->
@@ -262,8 +306,33 @@ defmodule AlertsUI.IBIAlertImporter do
                 no_active_periods: !update_open,
                 no_informed_entities: !update_open
               )
-              |> PaperTrail.update!(origin: update.last_modified_by)
+              |> PaperTrail.update!(
+                origin: update.last_modified_by,
+                meta: %{version: update.integer_version_no}
+              )
             end)
+
+            # fix mode selections for systemwide alerts
+            if latest_version.gui_mode_name == "Systemwide" do
+              final_mode_source =
+                [insert | updates]
+                |> Enum.reverse()
+                |> Enum.find(& &1.affent_list)
+
+              final_mode_selections =
+                if final_mode_source do
+                  from_ibi(final_mode_source, :original_mode_selections)
+                else
+                  [1, 2, 3, 4]
+                end
+
+              from(
+                a in Alert,
+                where: a.alert_id == ^latest_version.alert_id,
+                update: [set: [original_mode_selections: ^final_mode_selections]]
+              )
+              |> Repo.update_all([])
+            end
 
             # add deduplicated reminders
             all_versions_index
@@ -338,6 +407,7 @@ defmodule AlertsUI.IBIAlertImporter do
       :original_route_selections,
       :original_trip_selections,
       :original_facility_selections,
+      :original_mode_selections,
       :created_timestamp,
       :closed_timestamp,
       :last_modified_timestamp,
@@ -394,15 +464,7 @@ defmodule AlertsUI.IBIAlertImporter do
 
   @spec from_ibi(IBIAlert.t(), atom()) :: any()
   def from_ibi(ibi_alert, :route_type) do
-    case ibi_alert.gui_mode_name do
-      "Systemwide" -> nil
-      "Access" -> nil
-      "Elev/Esc" -> nil
-      "Subway" -> 1
-      "Commuter Rail" -> 2
-      "Bus" -> 3
-      "Boat" -> 4
-    end
+    gui_mode_name_to_route_type_int(ibi_alert.gui_mode_name)
   end
 
   def from_ibi(ibi_alert, :route_ids) do
@@ -583,16 +645,81 @@ defmodule AlertsUI.IBIAlertImporter do
     split_combined_entities(ibi_alert.informed_facility_list)
   end
 
+  @combo_route_ids [
+    "602",
+    "627",
+    "725",
+    "746",
+    "2427",
+    "3233",
+    "3738",
+    "4050",
+    "8993",
+    "116117",
+    "214216",
+    "441442"
+  ]
+
+  @color_lines [
+    "Blue Line",
+    "Green Line",
+    "Orange Line",
+    "Red Line"
+  ]
+
   def from_ibi(ibi_alert, :original_route_selections) do
-    split_combined_entities(ibi_alert.informed_route_list)
+    ibi_alert.informed_route_list
+    |> split_combined_entities()
+    |> Enum.map(fn name_and_id ->
+      [name, id] = String.split(name_and_id, "|")
+
+      cond do
+        Enum.member?(@combo_route_ids, id) -> nil
+        Enum.member?(@color_lines, name) -> "#{name}|#{String.replace(name, " Line", "")}"
+        true -> name_and_id
+      end
+    end)
+    |> Enum.filter(&(!!&1))
+    |> Enum.uniq()
   end
 
   def from_ibi(ibi_alert, :original_trip_selections) do
     split_combined_entities(ibi_alert.informed_trip_list)
   end
 
+  def from_ibi(ibi_alert, :original_mode_selections) do
+    case ibi_alert.gui_mode_name do
+      "Systemwide" ->
+        if ibi_alert.affent_list do
+          ibi_alert.affent_list
+          |> String.replace("MBTA;", "")
+          |> String.split(",")
+          |> Enum.map(fn affent ->
+            String.trim_leading(affent)
+            |> gui_mode_name_to_route_type_int()
+          end)
+          |> Enum.filter(fn route_type -> !!route_type end)
+        else
+          [1, 2, 3, 4]
+        end
+
+      _ ->
+        []
+    end
+  end
+
   def from_ibi(ibi_alert, :stop_names_and_ids) do
-    split_combined_entities(ibi_alert.informed_stop_list)
+    ibi_alert.informed_stop_list
+    |> split_combined_entities()
+    |> Enum.map(fn name_and_id ->
+      [name, id] = String.split(name_and_id, "|")
+
+      case ParentChildStopMapping.get_parent_by_child(id) do
+        nil -> name_and_id
+        parent_id -> "#{name}|#{parent_id}"
+      end
+    end)
+    |> Enum.uniq_by(&(String.split(&1, "|") |> List.last()))
   end
 
   def from_ibi(ibi_alert, :cause) do
@@ -735,6 +862,19 @@ defmodule AlertsUI.IBIAlertImporter do
       end)
     else
       []
+    end
+  end
+
+  def gui_mode_name_to_route_type_int(name) do
+    case name do
+      "Systemwide" -> nil
+      "Access" -> nil
+      "Elev/Esc" -> nil
+      "Subway" -> 1
+      "Commuter Rail" -> 2
+      "Bus" -> 3
+      "Boat" -> 4
+      _ -> nil
     end
   end
 end

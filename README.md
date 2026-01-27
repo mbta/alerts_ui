@@ -57,6 +57,10 @@ Swagger docs for the API enpoints can be found at `/api/swagger`.
   - currently used for test alerts and QA
   - pointed toward: keycloak dev, API dev
 - staging
-  - deployment to this env is currently only manual
+  - main is automatically pushed here
   - supposed to be as production-like as possible
   - pointed toward: keycloak staging, API prod
+- prod
+  - deployment strategy TBD
+  - this is production
+  - pointed toward: keycloak prod, API prod

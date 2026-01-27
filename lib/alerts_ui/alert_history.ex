@@ -98,47 +98,172 @@ defmodule AlertsUI.AlertHistory do
 
   @spec build_history({map(), integer()}) :: struct()
   def build_history({alert_map, index}) do
-    recurring? = recurring?(alert_map.recurrence_days)
-
     [recurrence_start_time, recurrence_end_time] =
       get_recurrence_times(alert_map)
 
     %__MODULE__{
-      alert_id: alert_map.alert_id,
+      alert_id: alert_map |> alert_id(),
       version: index + 1,
-      created_datetime: format_datetime(alert_map.created_at, @with_seconds),
-      closed: closed?(alert_map.closed_timestamp),
-      last_modified_by: Alerts.get_originator_string(alert_map),
-      last_modified_datetime: format_datetime(alert_map.updated_at, @with_seconds),
-      service_type: get_service_type(Map.get(alert_map, :primary_service_type)),
-      effect_name: alert_map.effect_name,
-      effect: alert_map.effect,
-      effect_detail: alert_map.effect_detail,
-      affected_entities: build_affected_entities(alert_map),
-      recurrence: recurring?,
-      effect_start: format_datetime(alert_map.active_period_start, @without_seconds),
-      effect_end: effect_end(alert_map.duration_certainty, alert_map.active_period_end),
-      recurrence_days: get_recurrence_days(alert_map.recurrence_days),
+      created_datetime: alert_map |> created_datetime(),
+      closed: alert_map |> closed(),
+      last_modified_by: alert_map |> last_modified_by(),
+      last_modified_datetime: alert_map |> last_modified_datetime(),
+      service_type: alert_map |> service_type(),
+      effect_name: alert_map |> effect_name(),
+      effect: alert_map |> effect(),
+      effect_detail: alert_map |> effect_detail(),
+      affected_entities: alert_map |> affected_entities(),
+      recurrence: alert_map |> recurrence(),
+      effect_start: alert_map |> effect_start(),
+      effect_end: alert_map |> effect_end(),
+      recurrence_days: alert_map |> recurrence_days(),
       recurrence_start_time: recurrence_start_time,
       recurrence_end_time: recurrence_end_time,
-      notification_start: format_datetime(alert_map.notification_period_start, @without_seconds),
-      notification_end: format_datetime(alert_map.notification_period_end, @without_seconds),
-      duration_certainty: alert_map.duration_certainty,
-      cause: alert_map.cause || "UNKNOWN_CAUSE",
-      cause_detail: alert_map.cause_detail || "UNKNOWN_CAUSE",
-      severity_code: alert_map.severity,
-      severity_level: alert_map.severity_level,
-      severity_name: SeverityLevel.severity_description_by_severity(alert_map.severity),
-      main_message: alert_map.header_text,
-      supporting_information: alert_map.description_text || "",
-      url: alert_map.url || "",
-      image_url: alert_map.image_url || "",
-      image_alternative_text: alert_map.image_alternative_text || "",
-      set_as_website_banner: !is_nil(alert_map.banner_text),
-      website_banner_text: alert_map.banner_text || "",
-      reminders: Map.get(alert_map, :plaintext_reminder_selections) || ""
+      notification_start: alert_map |> notification_start(),
+      notification_end: alert_map |> notification_end(),
+      duration_certainty: alert_map |> duration_certainty(),
+      cause: alert_map |> cause(),
+      cause_detail: alert_map |> cause_detail(),
+      severity_code: alert_map |> severity_code(),
+      severity_level: alert_map |> severity_level(),
+      severity_name: alert_map |> severity_name(),
+      main_message: alert_map |> main_message(),
+      supporting_information: alert_map |> supporting_information(),
+      url: alert_map |> url(),
+      image_url: alert_map |> image_url(),
+      image_alternative_text: alert_map |> image_alternative_text(),
+      set_as_website_banner: alert_map |> set_as_website_banner(),
+      website_banner_text: alert_map |> website_banner_text(),
+      reminders: alert_map |> reminders()
     }
   end
+
+  # build_history helpers
+
+  defp alert_id(map) do
+    Map.get(map, :alert_id)
+  end
+
+  defp created_datetime(map) do
+    format_datetime(Map.get(map, :created_timestamp), @with_seconds)
+  end
+
+  defp closed(map) do
+    closed?(Map.get(map, :closed_timestamp))
+  end
+
+  defp last_modified_by(map) do
+    Alerts.get_originator_string(map)
+  end
+
+  defp last_modified_datetime(map) do
+    format_datetime(Map.get(map, :last_modified_timestamp), @with_seconds)
+  end
+
+  defp service_type(map) do
+    get_service_type(Map.get(map, :primary_service_type))
+  end
+
+  defp effect_name(map) do
+    Map.get(map, :effect_name)
+  end
+
+  defp effect(map) do
+    Map.get(map, :effect)
+  end
+
+  defp effect_detail(map) do
+    Map.get(map, :effect_detail)
+  end
+
+  defp affected_entities(map) do
+    build_affected_entities(map)
+  end
+
+  defp recurrence(map) do
+    recurring?(Map.get(map, :recurrence_days))
+  end
+
+  defp effect_start(map) do
+    format_datetime(Map.get(map, :active_period_start), @without_seconds)
+  end
+
+  defp effect_end(map) do
+    effect_end(
+      Map.get(map, :duration_certainty) || "UNKNOWN",
+      Map.get(map, :active_period_end)
+    )
+  end
+
+  defp recurrence_days(map) do
+    get_recurrence_days(Map.get(map, :recurrence_days))
+  end
+
+  defp notification_start(map) do
+    format_datetime(Map.get(map, :notification_period_start), @without_seconds)
+  end
+
+  defp notification_end(map) do
+    format_datetime(Map.get(map, :notification_period_end), @without_seconds)
+  end
+
+  defp duration_certainty(map) do
+    Map.get(map, :duration_certainty)
+  end
+
+  defp cause(map) do
+    Map.get(map, :cause) || "UNKNOWN_CAUSE"
+  end
+
+  defp cause_detail(map) do
+    Map.get(map, :cause_detail) || "UNKNOWN_CAUSE"
+  end
+
+  defp severity_code(map) do
+    Map.get(map, :severity)
+  end
+
+  defp severity_level(map) do
+    Map.get(map, :severity_level)
+  end
+
+  defp severity_name(map) do
+    SeverityLevel.severity_description_by_severity(Map.get(map, :severity))
+  end
+
+  defp main_message(map) do
+    Map.get(map, :header_text)
+  end
+
+  defp supporting_information(map) do
+    Map.get(map, :description_text) || ""
+  end
+
+  defp url(map) do
+    Map.get(map, :url) || ""
+  end
+
+  defp image_url(map) do
+    Map.get(map, :image_url) || ""
+  end
+
+  defp image_alternative_text(map) do
+    Map.get(map, :image_alternative_text) || ""
+  end
+
+  defp set_as_website_banner(map) do
+    !is_nil(Map.get(map, :banner_text))
+  end
+
+  defp website_banner_text(map) do
+    Map.get(map, :banner_text) || ""
+  end
+
+  defp reminders(map) do
+    Map.get(map, :plaintext_reminder_selections) || ""
+  end
+
+  # end build_history helpers
 
   defp build_affected_entities(alert_map) do
     route_names = build_entity(Map.get(alert_map, :original_route_selections), "Routes")

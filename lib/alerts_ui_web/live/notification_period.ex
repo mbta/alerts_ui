@@ -273,12 +273,12 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
         class="form-control gap-4"
         id="notification_period_form"
       >
-        <div id="scheduled-selector-div" class="flex flex-row gap-8 my-8">
+        <div id="scheduled-selector-div" class="flex flex-col md:flex-row gap-8 my-8">
           <.select
             label="Notification period"
             field={@form[:notification_specifier]}
             options={values_to_options(@notification_values)}
-            class="min-w-[16rem] h-10"
+            class="md:w-[16rem] h-10"
             phx-debounce={120}
           />
           <.datetime
@@ -292,7 +292,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
               |> Enum.max()
             }
             value={@form[:notification_period_start_date].value}
-            class="min-w-[16rem] max-w-[16rem] h-10"
+            class="md:min-w-64 md:max-w-64 h-10"
             phx-debounce={120}
           />
           <.datetime
@@ -305,7 +305,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
               |> Enum.max()
             }
             value={@form[:notification_period_start].value |> naive_datetime_to_iso8601}
-            class="min-w-[16rem] max-w-[16rem] h-10"
+            class="md:min-w-64 md:max-w-64 h-10"
             phx-debounce={120}
           />
           <div
@@ -315,7 +315,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
                 "same_as_effect_period"
               ]
             }
-            class="flex flex-row"
+            class="flex flex-col md:flex-row"
           >
             <p class="pt-[2rem] mr-[2rem]">
               to

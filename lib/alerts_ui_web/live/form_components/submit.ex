@@ -5,7 +5,8 @@ defmodule AlertsUIWeb.FormComponents.Submit do
   use AlertsUIWeb, :live_component
   use AlertsUI.Schema
 
-  import AlertsUIWeb.ReviewModal
+  alias AlertsUIWeb.PredictionSuppressionWarningModal
+  alias AlertsUIWeb.ReviewModal
 
   @impl true
   def handle_event("cancel", _params, socket) do
@@ -19,10 +20,26 @@ defmodule AlertsUIWeb.FormComponents.Submit do
   end
 
   @impl true
+  def handle_event("check_predictions", params, socket) do
+    %{assigns: %{alert_data: alert_data}} = socket
+
+    if PredictionSuppressionWarningModal.show_warning?(alert_data) do
+      {:noreply, socket |> assign(check_predictions: true)}
+    else
+      handle_event("review", params, socket)
+    end
+  end
+
+  @impl true
+  def handle_event("dismiss_prediction_warning", _params, socket) do
+    {:noreply, socket |> assign(check_predictions: false)}
+  end
+
+  @impl true
   def handle_event("review", _params, socket) do
     # Validating the form is handled in `create_alert_live`
     send(self(), :show_errors)
-    {:noreply, socket}
+    {:noreply, socket |> assign(check_predictions: false)}
   end
 
   @impl true
@@ -47,7 +64,16 @@ defmodule AlertsUIWeb.FormComponents.Submit do
   def render(assigns) do
     ~H"""
     <div class="min-w-full flex mt-4 mb-12 border-t border-border-primary" id="submit_view">
-      <.review_modal
+      <PredictionSuppressionWarningModal.prediction_suppression_warning_modal
+        :if={Map.get(assigns, :check_predictions, nil)}
+        id="check_predictions_modal"
+        alert_data={@alert_data}
+        cancel_event_name="dismiss_prediction_warning"
+        accept_event_name="review"
+        target_id="#submit_view"
+        selected_routes={@selected_routes}
+      />
+      <ReviewModal.review_modal
         :if={Map.get(assigns, :show, nil)}
         form_type={@form_type}
         alert_data={
@@ -87,7 +113,7 @@ defmodule AlertsUIWeb.FormComponents.Submit do
         class="mt-8 ml-2 self-center"
         phx-target={@myself}
         name="review"
-        phx-click="review"
+        phx-click="check_predictions"
         type="button"
         id="review"
       >

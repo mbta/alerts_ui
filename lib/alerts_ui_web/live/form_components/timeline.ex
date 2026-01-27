@@ -10,19 +10,21 @@ defmodule AlertsUIWeb.FormComponents.Timeline do
     assigns = assign(assigns, :previous_steps, previous_steps(assigns.progress, assigns.steps))
 
     ~H"""
-    <div class="flex flex-row items-center mb-12 bg-bg-elevation-3 border-b border-border-primary px-4 min-w-full">
-      <.h3 :if={@form_type == :creating} class="lg:mx-6 mt-2 text-text-primary">
+    <div class="flex flex-wrap md:flex-nowrap flex-row items-center mb-12 bg-bg-elevation-3 border-b border-border-primary px-4 min-w-full">
+      <.h3 :if={@form_type == :creating} class="w-full md:w-auto lg:mx-6 mt-2 text-text-primary">
         Creating New Alert
       </.h3>
-      <.h3 :if={@form_type == :editing} class="lg:mx-6 mt-2 text-text-primary">
+      <.h3 :if={@form_type == :editing} class="w-full md:w-auto lg:mx-6 mt-2 text-text-primary">
         Editing Alert #{@alert_id}
       </.h3>
-      <.h3 :if={@form_type == :duplicating} class="lg:mx-6 mt-2 text-text-primary">
+      <.h3 :if={@form_type == :duplicating} class="w-full md:w-auto lg:mx-6 mt-2 text-text-primary">
         Duplicating Alert #{@alert_id}
       </.h3>
-      <div :for={{step, i} <- Enum.with_index(@steps)} class="flex items-center">
-        <.caret_icon :if={i > 0} direction={:right} class="mx-2 text-text-secondary" />
-        {step_buttons(assigns, step)}
+      <div class="flex items-center">
+        <div :for={{step, i} <- Enum.with_index(@steps)} class="flex items-center">
+          <.caret_icon :if={i > 0} direction={:right} class="mx-2 text-text-secondary" />
+          {step_buttons(assigns, step)}
+        </div>
       </div>
     </div>
     """

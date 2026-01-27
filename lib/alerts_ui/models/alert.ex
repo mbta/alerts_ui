@@ -77,6 +77,7 @@ defmodule AlertsUI.Models.Alert do
   original_trip_selections
   original_direction_selections
   original_facility_selections
+  original_mode_selections
   plaintext_reminder_selections
   primary_service_type
   legacy)a
@@ -120,6 +121,7 @@ defmodule AlertsUI.Models.Alert do
           original_trip_selections: [String.t()] | nil,
           original_direction_selections: [String.t()] | nil,
           original_facility_selections: [String.t()] | nil,
+          original_mode_selections: [integer()] | nil,
           plaintext_reminder_selections: String.t() | nil,
           primary_service_type: String.t(),
           recurrence_text: String.t() | nil,
@@ -245,6 +247,7 @@ defmodule AlertsUI.Models.Alert do
     field :original_trip_selections, {:array, :string}
     field :original_direction_selections, {:array, :string}
     field :original_facility_selections, {:array, :string}
+    field :original_mode_selections, {:array, :integer}
 
     timestamps()
   end
@@ -334,8 +337,17 @@ defmodule AlertsUI.Models.Alert do
   end
 
   @spec service_types(any()) :: [Route.type_int()]
-  def service_types(%__MODULE__{informed_entity: nil}), do: []
-  def service_types(%__MODULE__{informed_entity: []}), do: []
+  def service_types(%__MODULE__{informed_entity: nil}) do
+    raise "this should never happen, does it?"
+  end
+
+  def service_types(%__MODULE__{informed_entity: []} = alert) do
+    if alert.legacy do
+      alert.original_mode_selections
+    else
+      []
+    end
+  end
 
   def service_types(%__MODULE__{informed_entity: informed_entities} = alert) do
     if systemwide?(alert) do
@@ -392,24 +404,42 @@ defmodule AlertsUI.Models.Alert do
     |> Enum.uniq()
   end
 
+  @spec get_original_names([String.t()] | nil) :: [String.t()]
   def get_original_names(nil), do: []
 
   def get_original_names(names_and_ids) do
     Enum.map(names_and_ids, &get_route_name/1)
   end
 
+  @spec get_original_ids([String.t()] | nil) :: [String.t()]
   def get_original_ids(nil), do: []
 
   def get_original_ids(names_and_ids) do
     Enum.map(names_and_ids, &get_route_id/1)
   end
 
+  @spec get_original_route_names_and_ids([String.t()] | nil) :: [{String.t(), String.t()}]
+
+  def get_original_route_names_and_ids(nil), do: []
+
+  def get_original_names_and_ids(names_and_ids) do
+    Enum.map(names_and_ids || [], &get_route_name_and_id/1)
+  end
+
+  @spec get_route_name(String.t()) :: String.t()
   def get_route_name(name_and_id) do
     name_and_id |> String.split("|") |> name()
   end
 
+  @spec get_route_id(String.t()) :: String.t()
   def get_route_id(name_and_id) do
     name_and_id |> String.split("|") |> id()
+  end
+
+  @spec get_route_name_and_id(String.t()) :: {String.t(), String.t()}
+  def get_route_name_and_id(name_and_id) do
+    pair = name_and_id |> String.split("|")
+    {pair |> name(), pair |> id()}
   end
 
   defp name([name, _id]), do: name

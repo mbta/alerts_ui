@@ -70,7 +70,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   def h1(assigns) do
     ~H"""
-    <h1 class={"font-medium mb-4 text-4xl #{if @hidden, do: "hidden", else: ""} #{@class}"}>
+    <h1 class={"mb-4 font-bold text-lg lg:font-medium lg:text-4xl #{if @hidden, do: "hidden", else: ""} #{@class}"}>
       {render_slot(@inner_block)}
     </h1>
     """
@@ -90,7 +90,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   def h2(assigns) do
     ~H"""
-    <h2 class={"font-medium mb-4 text-3xl #{if @hidden, do: "hidden", else: ""} #{@class}"}>
+    <h2 class={"mb-4 font-bold lg:font-medium lg:text-3xl #{if @hidden, do: "hidden", else: ""} #{@class}"}>
       {render_slot(@inner_block)}
     </h2>
     """
@@ -110,7 +110,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   def h3(assigns) do
     ~H"""
-    <h3 class={"font-bold mb-2 text-2xl #{if @hidden, do: "hidden", else: ""} #{@class}"}>
+    <h3 class={"font-bold mb-2 lg:text-2xl #{if @hidden, do: "hidden", else: ""} #{@class}"}>
       {render_slot(@inner_block)}
     </h3>
     """
@@ -130,7 +130,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   def h4(assigns) do
     ~H"""
-    <h4 class={"font-medium mb-2 text-xl #{if @hidden, do: "hidden", else: ""} #{@class}"}>
+    <h4 class={"font-medium mb-2 lg:text-xl #{if @hidden, do: "hidden", else: ""} #{@class}"}>
       {render_slot(@inner_block)}
     </h4>
     """
@@ -150,7 +150,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   def h5(assigns) do
     ~H"""
-    <h5 class={"font-medium mb-1 text-lg #{if @hidden, do: "hidden", else: ""} #{@class}"}>
+    <h5 class={"mb-1 font-normal text-sm uppercase lg:text-base #{if @hidden, do: "hidden", else: ""} #{@class}"}>
       {render_slot(@inner_block)}
     </h5>
     """
@@ -170,7 +170,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   def h6(assigns) do
     ~H"""
-    <h6 class={"font-medium mb-1 text-base #{if @hidden, do: "hidden", else: ""} #{@class}"}>
+    <h6 class={"mb-1 font-normal italic text-base #{if @hidden, do: "hidden", else: ""} #{@class}"}>
       {render_slot(@inner_block)}
     </h6>
     """
@@ -182,7 +182,7 @@ defmodule AlertsUIWeb.SharedComponents do
     border
     rounded
     flex
-    w-fit
+    md:w-fit
     h-fit
     items-center
   "
@@ -545,7 +545,7 @@ defmodule AlertsUIWeb.SharedComponents do
     >
       <.label for={@id} class={"text-base #{if is_nil(@label), do: "hidden"}"}>{@label}</.label>
 
-      <div class={["flex gap-2 w-[100%]", if(@column, do: "flex-col", else: "flex-row")]}>
+      <div class={["flex gap-2 w-full", if(@column, do: "flex-col", else: "flex-col md:flex-row")]}>
         <div :for={{option_name, id} <- @options} class={["flex-1", @button_class]}>
           <.label for={id}>
             <div class={[
@@ -646,19 +646,20 @@ defmodule AlertsUIWeb.SharedComponents do
       phx-remove={hide_modal(@id)}
       data-accept={JS.exec(@on_accept, "phx-remove")}
       data-cancel={JS.exec(@on_cancel, "phx-remove")}
-      class="relative z-50 hidden !ml-0"
+      data-show={show_modal(@id)}
+      class="fixed inset-0 z-50 hidden"
     >
       <div id={"#{@id}-bg"} class="bg-black/90 fixed inset-0 transition-opacity" aria-hidden="true" />
       <div
-        class="fixed inset-0 overflow-y-auto"
+        class="absolute inset-2 flex place-content-center place-items-center"
         aria-labelledby={"#{@id}-title"}
         aria-describedby={"#{@id}-description"}
         role="dialog"
         aria-modal="true"
         tabindex="0"
       >
-        <div class={["flex min-h-full items-center justify-center", @outer_class]}>
-          <div class={["min-w-[20rem] w-[25%] sm:p-6 lg:py-8", @class]}>
+        <div class={["contents", @outer_class]}>
+          <div class={["contents", @class]}>
             <.focus_wrap
               id={"#{@id}-container"}
               phx-window-keydown={
@@ -670,11 +671,11 @@ defmodule AlertsUIWeb.SharedComponents do
                 JS.push(@cancel_event_name, target: @target_id)
                 |> JS.exec("data-cancel", to: "##{@id}")
               }
-              class="!flex flex-col max-h-full shadow-zinc-700/10 ring-zinc-700/10 relative hidden rounded-md bg-bg-elevation-4
+              class="max-h-dvh w-full md:w-auto md:max-w-2xl !flex flex-col justify-stretch content-stretch shadow-zinc-700/10 ring-zinc-700/10 hidden rounded-md bg-bg-elevation-4
               border-bg-elevation-6 shadow-lg ring-1 transition border"
             >
-              <div class="flex flex-row items-center justify-between py-3 pr-3 pl-4">
-                <h1 class={["text-xl", @header_class]}>
+              <div class="flex-none flex flex-row items-center justify-between py-3 pr-3 pl-4">
+                <h1 class={["md:text-xl", @header_class]}>
                   {render_slot(@header) || @header_text}
                 </h1>
                 <button
@@ -689,15 +690,19 @@ defmodule AlertsUIWeb.SharedComponents do
                   <AlertsUIWeb.CoreComponents.icon name="hero-x-mark-solid" class="h-8 w-8" />
                 </button>
               </div>
-              <hr class="w-[100%] border-y-1 border-bg-elevation-6" />
-              <div id={"#{@id}-content"} class={["px-4 py-4", @inner_class]}>
+              <div
+                id={"#{@id}-content"}
+                class={[
+                  "p-4 w-full overflow-auto flex-1 border-y border-bg-elevation-6",
+                  @inner_class
+                ]}
+              >
                 {render_slot(@inner_block)}
               </div>
-              <hr class="w-[100%] border-y-1 border-bg-elevation-6" />
               <%= if render_slot(@footer) do %>
                 {render_slot(@footer)}
               <% else %>
-                <div class="flex flex-row justify-end px-3 py-3 gap-2">
+                <div class="flex-none flex flex-col md:flex-row md:justify-end px-3 py-3 gap-2">
                   <.button_secondary
                     :if={@cancel_event_name}
                     type="button"
@@ -964,7 +969,7 @@ defmodule AlertsUIWeb.SharedComponents do
         id={@id}
         disabled={@disabled}
         class={[
-          "bg-bg-elevation-5 border border-bg-elevation-6 px-3 mb-2 min-w-[100%] p-0 [color-scheme:light]
+          "bg-bg-elevation-5 border border-bg-elevation-6 px-3 mb-2 max-w-full min-w-full p-0 [color-scheme:light]
             rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto
             disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
             focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) h-10 [&_*]:pb-[.40rem] [&_*]:whitespace-pre-wrap [&_*]:truncate",
@@ -972,7 +977,7 @@ defmodule AlertsUIWeb.SharedComponents do
           @errors != [] && "border-danger focus:border-danger"
         ]}
         multiple={@multiple}
-        phx-hook={if(@hook, do: @hook)}
+        phx-hook="Selector"
         {@rest}
       >
         <option
@@ -1205,11 +1210,11 @@ defmodule AlertsUIWeb.SharedComponents do
     ~H"""
     <div phx-feedback-for={@name} class="relative flex flex-col">
       <.label :if={not is_nil(@label)} for={@id}>{@label}</.label>
-      <div class="flex flex-row items-center">
+      <div class="">
         <AlertsUIWeb.CoreComponents.icon
           :if={@icon && !@disabled}
           name={@icon}
-          class="absolute w-4 h-4 text-text-disabled ml-2 mr-1"
+          class="w-4 h-4 text-text-disabled absolute inset-y-2.5 inset-x-4"
         />
         <input
           type="text"
@@ -1219,9 +1224,9 @@ defmodule AlertsUIWeb.SharedComponents do
           class={[
             "bg-bg-input-default border border-bg-elevation-6 pl-1
               rounded text-text-primary disabled:text-text-secondary
-              disabled:bg-bg-elevation-3 ring-0  focus:ring-0 ring-border-focus
+              disabled:bg-bg-elevation-3 ring-0 min-w-full focus:ring-0 ring-border-focus
               focus:border-border-focus",
-            @icon && "ps-8",
+            @icon && "ps-10",
             @class,
             @errors != [] && "border-danger focus:border-danger"
           ]}
@@ -1310,7 +1315,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
     ~H"""
     <div class={[
-      "flex flex-row justify-end min-w-[100%] text-sm text-text-secondary bg-bg-elevation-3 px-2 pt-4 rounded-b border border-bg-elevation-6 border-t-0 -mt-2",
+      "flex flex-row justify-end min-w-full text-sm text-text-secondary bg-bg-elevation-3 px-2 pt-4 rounded-b border border-bg-elevation-6 border-t-0 -mt-2",
       if(@error_length > 0, do: "border-danger"),
       if(String.length(@value || "") == @character_limit, do: "text-danger ")
     ]}>
@@ -1592,10 +1597,11 @@ defmodule AlertsUIWeb.SharedComponents do
       {@rest}
     >
       <:previous attrs={[
-        class: "text-primary flex items-center mr-auto !py-1 !px-[6px] leading-[1.5]"
+        class: "text-primary flex items-center mr-auto !py-1 !px-[6px] leading-[1.5]",
+        "aria-labelledby": "paginate-previous"
       ]}>
         <.caret_icon direction={:left} />
-        <span class="text-xs font-normal">Previous</span>
+        <span id="paginate-previous" class="text-xs hidden lg:flex-inline font-normal">Previous</span>
       </:previous>
       <:ellipsis>
         <span
@@ -1606,9 +1612,10 @@ defmodule AlertsUIWeb.SharedComponents do
         </span>
       </:ellipsis>
       <:next attrs={[
-        class: "text-primary flex items-center ml-auto !py-1 !px-[6px] leading-[1.5] order-last"
+        class: "text-primary flex items-center ml-auto !py-1 !px-[6px] leading-[1.5] order-last",
+        "aria-labelledby": "paginate-next"
       ]}>
-        <span class="text-xs font-normal">Next</span>
+        <span id="paginate-next" class="text-xs hidden lg:flex-inline font-normal">Next</span>
         <.caret_icon direction={:right} />
       </:next>
     </Flop.Phoenix.pagination>

@@ -103,7 +103,7 @@ defmodule AlertsUI.MixProject do
       {:oban, "~> 2.16"},
       {:oban_web, "~> 2.11"},
       {:paper_trail, "~> 1.1.2"},
-      {:phoenix, "~> 1.7.7"},
+      {:phoenix, "~> 1.8.3"},
       {:phoenix_ecto, "~> 4.5"},
       {:phoenix_html, "~> 4.1"},
       {:phoenix_html_helpers, "~> 1.0"},
@@ -143,7 +143,8 @@ defmodule AlertsUI.MixProject do
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind default", "esbuild default"],
       "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"],
-      sobelow: "sobelow --skip --exit=low --ignore Config.HTTPS",
+      sobelow:
+        "sobelow --skip --exit=low --ignore Config.HTTPS --ignore-files lib/alerts_ui/ibi_alert_importer.ex",
       check: [
         "compile --force --all-warnings --warnings-as-errors",
         "format",

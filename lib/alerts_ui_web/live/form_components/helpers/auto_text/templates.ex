@@ -120,14 +120,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     %{
       pattern: {4, "Suspension"},
       header_template:
-        "?route_names service suspended ?stop_range_between ?alert_duration ?due_to_cause",
+        "?route_names ?direction_name ?trip_names|: service suspended ?stop_range_between ?alert_duration ?due_to_cause",
       description_template: %{
         route_count: 5,
         stop_count: 0,
-        trip_count: nil,
+        trip_count: 2,
         direction_count: nil
       },
-      service_effect_template: "?route_names_short service suspended"
+      service_effect_template: "Suspension of service on ?route_names_short"
     },
     %{
       pattern: {4, "Cancellation"},
@@ -176,18 +176,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         direction_count: nil
       },
       service_effect_template: "?stop_names closed"
-    },
-    %{
-      pattern: {3, "Stop Shoveling"},
-      header_template:
-        "?route_names ?direction_name bus stops have been cleared of snow ?alert_duration ?due_to_cause",
-      description_template: %{
-        route_count: 5,
-        stop_count: 0,
-        trip_count: nil,
-        direction_count: nil
-      },
-      service_effect_template: "Stops shoveled on ?route_names"
     },
     %{
       pattern: {3, "Delay"},
@@ -308,7 +296,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     %{
       pattern: {1, "Single Tracking"},
       header_template:
-        "?route_names|: Expect delays of ?severity_name due to trains operating on a single track ?stop_range_between",
+        "?route_names|: Trains in both directions are operating on a single track  ?stop_range_between|. Riders may experience longer wait times.",
       description_template: %{
         route_count: 5,
         stop_count: 0,
@@ -378,6 +366,18 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
       },
       service_effect_template: "?route_names_short service change"
     },
+    %{
+      pattern: {2, "Suspension"},
+      header_template:
+        "?route_names ?direction_name service suspended ?stop_range_between ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        stop_count: 0,
+        trip_count: 2,
+        direction_count: nil
+      },
+      service_effect_template: "Suspension of service on ?route_names_short"
+    },
 
     # mode not specified
     %{
@@ -413,18 +413,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         direction_count: nil
       },
       service_effect_template: "?route_names_short shuttle"
-    },
-    %{
-      pattern: {"Suspension"},
-      header_template:
-        "?route_names ?direction_name service suspended ?stop_range_between ?alert_duration ?due_to_cause",
-      description_template: %{
-        route_count: 5,
-        stop_count: 0,
-        trip_count: nil,
-        direction_count: nil
-      },
-      service_effect_template: "Suspension of service on ?route_names_short"
     },
     %{
       pattern: {"Extra Service"},
@@ -481,6 +469,18 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         direction_count: nil
       },
       service_effect_template: "Station issue at ?stop_names"
+    },
+    %{
+      pattern: {"Station Bypass"},
+      header_template:
+        "?route_names ?direction_name ?trip_names will not stop at ?stop_names ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        stop_count: 0,
+        trip_count: 2,
+        direction_count: 1
+      },
+      service_effect_template: "?stop_names bypassed"
     }
   ]
 

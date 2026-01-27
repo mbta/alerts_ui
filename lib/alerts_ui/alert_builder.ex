@@ -106,8 +106,7 @@ defmodule AlertsUI.AlertBuilder do
     |> Map.merge(primary_service_type(alert_data))
     |> Map.merge(cause_and_effect(alert_data))
     |> Map.merge(original_selections(alert_data, options))
-    |> Map.merge(active_periods(alert_data, current_time, options))
-    |> Map.merge(notification_periods(alert_data, current_time))
+    |> Map.merge(time_periods(alert_data, current_time, options))
     |> Map.merge(informed_entity(alert_data, combination, options))
     |> Map.merge(last_modified_timestamp(alert_data, current_time))
   end
@@ -221,7 +220,8 @@ defmodule AlertsUI.AlertBuilder do
       :original_route_selections,
       :original_stop_selections,
       :original_trip_selections,
-      :original_facility_selections
+      :original_facility_selections,
+      :original_mode_selections
     ])
   end
 
@@ -296,17 +296,32 @@ defmodule AlertsUI.AlertBuilder do
         Map.get(alert_data, :original_facility_selections, [])
       )
 
+    original_mode_selections = Map.get(alert_data, :service_types, [])
+
     %{
       original_direction_selections: original_direction_selections,
       original_route_selections: original_route_selections,
       original_stop_selections: original_stop_selections,
       original_trip_selections: original_trip_selections,
-      original_facility_selections: original_facility_selections
+      original_facility_selections: original_facility_selections,
+      original_mode_selections: original_mode_selections
     }
   end
 
   defp get_original_selection([], original_selection), do: original_selection
   defp get_original_selection(user_selected, _), do: user_selected
+
+  defp time_periods(alert_data, current_time, options) do
+    active_period_map = active_periods(alert_data, current_time, options)
+    # Notification period calculations are dependent on the processed active period values
+    # especially for recurring alerts.
+    # (In build_recurring_active_period, active_period_end is discarded if the alert is :until_further_notice
+    # If we use alert_data here instead of the updated active_period_map, it will wrongfully set
+    # a notification_period_end in this case, when it should actually be nil for :until_further_notice.)
+    Map.merge(alert_data, active_period_map)
+    |> notification_periods(current_time)
+    |> Map.merge(active_period_map)
+  end
 
   defp active_periods(alert_data, current_time, options) do
     if Keyword.get(options, :no_active_periods) do

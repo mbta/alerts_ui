@@ -246,7 +246,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
         assert %AlertsUI.Models.Alert{
                  id: _,
                  alert_id: ^alert_id,
-                 effect: :SIGNIFICANT_DELAYS,
+                 effect: :OTHER_EFFECT,
                  effect_detail: "DELAY",
                  effect_name: "Delay",
                  banner_text: nil,

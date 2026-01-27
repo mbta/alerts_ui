@@ -57,7 +57,10 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
     @tag :logged_in_user
     test "connected mount displays a list of alerts when logged in", %{conn: conn} do
-      with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
+      with_mock(RoutesRepo, [],
+        all: fn -> [] end,
+        get: fn route_id -> %{name: route_id} end
+      ) do
         {:ok, _view, html} = live(conn, "/alerts")
         assert html =~ ~r/Alerts/
       end
@@ -69,7 +72,10 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
     @tag :logged_in_user
     test "sorting click event", %{conn: conn} do
-      with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
+      with_mock(RoutesRepo, [],
+        all: fn -> [] end,
+        get: fn route_id -> %{name: route_id} end
+      ) do
         {:ok, view, _html} = live(conn, "/alerts")
         assert view |> render_click("sort-alerts", %{"order" => "active_period_start"}) =~ "123"
       end
@@ -166,54 +172,41 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
     end
 
     @tag :logged_in_user
-    test "route filter contains options directly from the db, sorted", %{conn: conn} do
-      # Alert with the new route format
-      insert(:alert, %{
-        alert_id: "899",
-        original_route_selections: [
-          "Red Line|Red",
-          "62|62",
-          "67|67",
-          "76|76",
-          "350|350",
-          "CT3|708"
-        ],
-        informed_entity: [
-          build(:informed_entity, %{route_id: "Red", route_type: 1}),
-          build(:informed_entity, %{route_id: "62", route_type: 3}),
-          build(:informed_entity, %{route_id: "67", route_type: 3}),
-          build(:informed_entity, %{route_id: "76", route_type: 3}),
-          build(:informed_entity, %{route_id: "350", route_type: 3}),
-          build(:informed_entity, %{route_id: "708", route_type: 3})
-        ]
-      })
+    test "route filter gets optiopns from the API, sorted  (+ 'Green Line')", %{conn: conn} do
+      with_mock(RoutesRepo,
+        all: fn ->
+          [
+            build(:route, %{type: 1, name: "Red Line", id: "Red"}),
+            build(:route, %{type: 3, name: "62", id: "62"}),
+            build(:route, %{type: 3, name: "67", id: "67"}),
+            build(:route, %{type: 3, name: "76", id: "76"}),
+            build(:route, %{type: 2, name: "Fitchburg Line", id: "CR-Fitchburg"}),
+            build(:route, %{type: 0, name: "Green Line-C", id: "Green-C"}),
+            build(:route, %{type: 3, name: "350", id: "350"}),
+            build(:route, %{type: 3, name: "CT3", id: "708"})
+          ]
+        end
+      ) do
+        {:ok, _view, html} = live(conn, "/alerts")
 
-      # Alert in the old format
-      insert(:alert, %{
-        alert_id: "999",
-        original_route_selections: ["CR-Fitchburg"],
-        informed_entity: [
-          build(:informed_entity, %{route_id: "CR-Fitchburg", route_type: 2})
-        ]
-      })
+        {:ok, document} = Floki.parse_document(html)
 
-      {:ok, _view, html} = live(conn, "/alerts")
+        {_, _, children_nodes} = Floki.get_by_id(document, "view_alerts_live_routes")
 
-      {:ok, document} = Floki.parse_document(html)
-
-      {_, _, children_nodes} = Floki.get_by_id(document, "view_alerts_live_routes")
-
-      assert [
-               {"option", [{"value", "default"}, {"selected", "selected"}],
-                ["\n      All\n    "]},
-               {"option", [{"value", "708"}], ["CT3"]},
-               {"option", [{"value", "62"}], ["62"]},
-               {"option", [{"value", "67"}], ["67"]},
-               {"option", [{"value", "76"}], ["76"]},
-               {"option", [{"value", "350"}], ["350"]},
-               {"option", [{"value", "Red"}], ["Red Line"]},
-               {"option", [{"value", "CR-Fitchburg"}], ["CR-Fitchburg"]}
-             ] = children_nodes
+        assert [
+                 {"option", [{"value", "default"}, {"selected", "selected"}],
+                  ["\n      All\n    "]},
+                 {"option", [{"value", "708"}], ["CT3"]},
+                 {"option", [{"value", "62"}], ["62"]},
+                 {"option", [{"value", "67"}], ["67"]},
+                 {"option", [{"value", "76"}], ["76"]},
+                 {"option", [{"value", "350"}], ["350"]},
+                 {"option", [{"value", "Green"}], ["Green Line"]},
+                 {"option", [{"value", "Green-C"}], ["Green Line-C"]},
+                 {"option", [{"value", "Red"}], ["Red Line"]},
+                 {"option", [{"value", "CR-Fitchburg"}], ["Fitchburg Line"]}
+               ] = children_nodes
+      end
     end
 
     @tag :logged_in_user
@@ -752,7 +745,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
     @tag :logged_in_user
     test "up to four bus routes can be displayed without collapsing the number", %{conn: conn} do
-      with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
+      with_mock(RoutesRepo, [], all: fn -> [] end) do
         insert(:alert, %{
           alert_id: "123",
           active_period: [
@@ -763,22 +756,22 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
           duration_certainty: :UNKNOWN,
           header_text: "here's a bus delay alert",
           effect_detail: "DELAY",
-          original_route_selections: ["111", "222", "333", "444"]
+          original_route_selections: ["aa|111", "bb|222", "cc|333", "dd|444"]
         })
 
         {:ok, _view, html} = live(conn, "/alerts")
 
-        assert html =~ ~r/<div title="111".+?>.*111.*<\/div>/s
-        assert html =~ ~r/<div title="222".+?>.*222.*<\/div>/s
-        assert html =~ ~r/<div title="333".+?>.*333.*<\/div>/s
-        assert html =~ ~r/<div title="444".+?>.*444.*<\/div>/s
+        assert html =~ ~r/<div title="aa".+?>.*aa.*<\/div>/s
+        assert html =~ ~r/<div title="bb".+?>.*bb.*<\/div>/s
+        assert html =~ ~r/<div title="cc".+?>.*cc.*<\/div>/s
+        assert html =~ ~r/<div title="dd".+?>.*dd.*<\/div>/s
         refute html =~ ~r/<div .+?>.*\+.*<\/div>/s
       end
     end
 
     @tag :logged_in_user
     test "five or more routes will be collapsed", %{conn: conn} do
-      with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
+      with_mock(RoutesRepo, [], all: fn -> [] end) do
         insert(:alert, %{
           alert_id: "123",
           active_period: [
@@ -789,17 +782,17 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
           duration_certainty: :UNKNOWN,
           header_text: "here's a bus delay alert",
           effect_detail: "DELAY",
-          original_route_selections: ["111", "222", "333", "444", "555"]
+          original_route_selections: ["aa|111", "bb|222", "cc|333", "dd|444", "ee|555"]
         })
 
         {:ok, _view, html} = live(conn, "/alerts")
 
-        assert html =~ ~r/<div title="111".+?>.*111.*<\/div>/s
-        assert html =~ ~r/<div title="222".+?>.*222.*<\/div>/s
-        assert html =~ ~r/<div title="333".+?>.*333.*<\/div>/s
-        assert html =~ ~r/<div title="444".+?>.*444.*<\/div>/s
-        refute html =~ ~r/<div title="555".+?>.*555.*<\/div>/s
-        assert html =~ ~r/<div .+?>.*\+1.*<\/div>/s
+        assert html =~ ~r/<div title="aa".+?>.*aa.*<\/div>/s
+        assert html =~ ~r/<div title="bb".+?>.*bb.*<\/div>/s
+        assert html =~ ~r/<div title="cc".+?>.*cc.*<\/div>/s
+        assert html =~ ~r/<div title="dd".+?>.*dd.*<\/div>/s
+        refute html =~ ~r/<div title="ee".+?>.*ee.*<\/div>/s
+        assert html =~ ~r/<div title="\+1".+?>.*\+1.*<\/div>/s
       end
     end
 
@@ -807,11 +800,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
     test "SLW is represented by 1 SL route pill instead of by bus number or multiple pills", %{
       conn: conn
     } do
-      with_mock(RoutesRepo,
-        get: fn
-          "746" -> %{name: "SLW"}
-        end
-      ) do
+      with_mock(RoutesRepo, [], all: fn -> [] end) do
         insert(:alert, %{
           alert_id: "123",
           active_period: [
@@ -822,7 +811,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
           duration_certainty: :UNKNOWN,
           header_text: "here's a SL delay alert",
           effect_detail: "DELAY",
-          original_route_selections: ["746"]
+          original_route_selections: ["SLW|746"]
         })
 
         {:ok, _view, html} = live(conn, "/alerts")
@@ -836,11 +825,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
     test "CT2 is represented by proper route pill", %{
       conn: conn
     } do
-      with_mock(RoutesRepo,
-        get: fn
-          "708" -> %{name: "CT3"}
-        end
-      ) do
+      with_mock(RoutesRepo, [], all: fn -> [] end) do
         insert(:alert, %{
           alert_id: "123",
           active_period: [
@@ -851,7 +836,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
           duration_certainty: :UNKNOWN,
           header_text: "here's a CT3 delay alert",
           effect_detail: "DELAY",
-          original_route_selections: ["708"]
+          original_route_selections: ["CT3|708"]
         })
 
         {:ok, _view, html} = live(conn, "/alerts")
@@ -902,11 +887,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
     @tag :logged_in_user
     test "commuter rail pill shows proper full name without CR appended", %{conn: conn} do
-      with_mock(RoutesRepo,
-        get: fn
-          "CR-NewBedford" -> %{long_name: "Fall River/New Bedford Line"}
-        end
-      ) do
+      with_mock(RoutesRepo, [], all: fn -> [] end) do
         insert(:alert, %{
           alert_id: "123",
           active_period: [
@@ -917,7 +898,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
           duration_certainty: :UNKNOWN,
           header_text: "here's a CR delay alert",
           effect_detail: "DELAY",
-          original_route_selections: ["CR-NewBedford"]
+          original_route_selections: ["Fall River/New Bedford Line|CR-NewBedford"]
         })
 
         {:ok, _view, html} = live(conn, "/alerts")
@@ -928,11 +909,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
     @tag :logged_in_user
     test "ferry pill shows proper full name", %{conn: conn} do
-      with_mock(RoutesRepo,
-        get: fn
-          "Boat-EastBoston" -> %{long_name: "East Boston Ferry"}
-        end
-      ) do
+      with_mock(RoutesRepo, [], all: fn -> [] end) do
         insert(:alert, %{
           alert_id: "123",
           active_period: [
@@ -943,7 +920,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
           duration_certainty: :UNKNOWN,
           header_text: "here's a ferry delay alert",
           effect_detail: "DELAY",
-          original_route_selections: ["Boat-EastBoston"]
+          original_route_selections: ["East Boston Ferry|Boat-EastBoston"]
         })
 
         {:ok, _view, html} = live(conn, "/alerts")
@@ -988,7 +965,10 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
     @tag :logged_in_user
     test "effect display", %{conn: conn} do
-      with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
+      with_mock(RoutesRepo, [],
+        all: fn -> [] end,
+        get: fn route_id -> %{name: route_id} end
+      ) do
         {:ok, _view, html} = live(conn, "/alerts")
         assert html =~ "Detour"
         assert html =~ "Summary"
@@ -997,7 +977,10 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
     @tag :logged_in_user
     test "actions display for closed alerts", %{conn: conn} do
-      with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
+      with_mock(RoutesRepo, [],
+        all: fn -> [] end,
+        get: fn route_id -> %{name: route_id} end
+      ) do
         {:ok, view, html} =
           live(conn, "/alerts?filter[timeline]=past")
 
@@ -1010,7 +993,10 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
     @tag :logged_in_user
     test "actions display for open alerts", %{conn: conn} do
-      with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
+      with_mock(RoutesRepo, [],
+        all: fn -> [] end,
+        get: fn route_id -> %{name: route_id} end
+      ) do
         insert(:alert, %{
           alert_id: "345",
           active_period: [
@@ -1073,7 +1059,10 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
     @tag :logged_in_user
     test "clicking close alert closes the alert", %{conn: conn} do
-      with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
+      with_mock(RoutesRepo, [],
+        all: fn -> [] end,
+        get: fn route_id -> %{name: route_id} end
+      ) do
         insert(:alert, %{
           alert_id: "345",
           active_period: [
@@ -1107,7 +1096,10 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
     @tag :logged_in_user
     test "clicking edit alert opens editing workflow", %{conn: conn} do
-      with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
+      with_mock(RoutesRepo, [],
+        all: fn -> [] end,
+        get: fn route_id -> %{name: route_id} end
+      ) do
         insert(:alert, %{
           alert_id: "345",
           active_period: [
@@ -1133,7 +1125,10 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
     @tag :logged_in_user
     test "clicking duplicate alert opens duplicating workflow", %{conn: conn} do
-      with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
+      with_mock(RoutesRepo, [],
+        all: fn -> [] end,
+        get: fn route_id -> %{name: route_id} end
+      ) do
         insert(:alert, %{
           alert_id: "345",
           active_period: [
@@ -1218,7 +1213,9 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
     end
 
     test "known end where end is end-of-service today" do
-      with_mock(DateTime, [:passthrough], utc_now: fn -> ~U[2025-06-30 17:50:14.844524Z] end) do
+      with_mocks([
+        {DateTime, [:passthrough], [utc_now: fn -> ~U[2025-06-30 17:50:14.844524Z] end]}
+      ]) do
         end_of_service_utc =
           DateTime.new!(~D[2025-07-01], ActivePeriod.end_of_service_time(), "America/New_York")
           |> DateTime.shift_zone!("Etc/UTC")
@@ -1255,7 +1252,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       %{year: this_year} = DateTime.now!("America/New_York")
       date = ~U[2025-06-29 17:50:14.844524Z] |> Map.put(:year, this_year)
 
-      with_mock(DateTime, [:passthrough], utc_now: fn -> date end) do
+      with_mocks([{DateTime, [:passthrough], [utc_now: fn -> date end]}]) do
         end_time_utc =
           DateTime.new!(
             ~D[2025-06-30] |> Map.put(:year, this_year),
@@ -1294,9 +1291,12 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
   end
 
   test "start is most recent end of service" do
-    with_mock(DateTime, [:passthrough],
-      now!: fn _time_zone -> ~U[2025-06-30 17:50:14.844524Z] end
-    ) do
+    with_mocks([
+      {DateTime, [:passthrough],
+       [
+         now!: fn _time_zone -> ~U[2025-06-30 17:50:14.844524Z] end
+       ]}
+    ]) do
       start_of_service_utc =
         DateTime.new!(~D[2025-06-30], ActivePeriod.start_of_service_time(), "America/New_York")
         |> DateTime.shift_zone!("Etc/UTC")
@@ -1327,9 +1327,12 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
   end
 
   test "start is not most recent end of service" do
-    with_mock(DateTime, [:passthrough],
-      now!: fn _time_zone -> ~U[2025-06-30 17:50:14.844524Z] end
-    ) do
+    with_mocks([
+      {DateTime, [:passthrough],
+       [
+         now!: fn _time_zone -> ~U[2025-06-30 17:50:14.844524Z] end
+       ]}
+    ]) do
       start_utc =
         DateTime.new!(~D[2025-06-29], ActivePeriod.start_of_service_time(), "America/New_York")
         |> DateTime.shift_zone!("Etc/UTC")

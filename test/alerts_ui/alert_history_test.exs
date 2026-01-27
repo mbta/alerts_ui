@@ -16,6 +16,8 @@ defmodule AlertsUIWeb.AlertHistoryTest do
       %{start: ~U[2025-09-25 12:11:00Z], end: ~U[2025-09-25 17:11:00Z]}
     ],
     recurrence_days: [],
+    created_timestamp: ~U[2025-09-25 12:11:00Z],
+    last_modified_timestamp: ~U[2025-09-25 12:11:00Z],
     active_period_start: ~U[2025-09-25 12:11:00Z],
     active_period_end: ~U[2025-09-25 17:11:00Z],
     notification_period_end: ~U[2025-09-25 17:11:00Z],
@@ -39,6 +41,7 @@ defmodule AlertsUIWeb.AlertHistoryTest do
       %{start: ~U[2025-09-26 12:11:00Z], end: ~U[2025-09-26 17:11:00Z]}
     ],
     recurrence_days: ["thursday", "friday"],
+    last_modified_timestamp: ~U[2025-09-26 12:11:00Z],
     active_period_start: ~U[2025-09-25 12:11:00Z],
     active_period_end: ~U[2025-09-26 17:11:00Z],
     recurrence_start_time: ~T[08:11:00],
@@ -84,15 +87,12 @@ defmodule AlertsUIWeb.AlertHistoryTest do
         user
       )
 
-      :timer.sleep(1000)
-
       Alerts.create_or_update_alert(
         build(:alert_map, @second_alert_params),
         user,
         Alerts.get_by_alert_id("123")
       )
 
-      :timer.sleep(1000)
       Alerts.close(Alerts.get_by_alert_id("123"), "closed", false, ~U[2025-09-26 16:14:00Z])
 
       [result_1, result_2, result_3] = AlertHistory.alert_history("123")
@@ -208,6 +208,46 @@ defmodule AlertsUIWeb.AlertHistoryTest do
         DateTime.from_iso8601(result_2.last_modified_datetime <> "Z")
 
       assert DateTime.compare(last_modified_datetime_2, last_modified_datetime_1) == :gt
+    end
+  end
+
+  describe "build_history/1" do
+    test "it can handle a minimal map without error" do
+      assert AlertHistory.build_history({%{}, 1}) == %AlertHistory{
+               alert_id: nil,
+               version: 2,
+               created_datetime: "",
+               closed: false,
+               last_modified_by: "",
+               last_modified_datetime: "",
+               service_type: "",
+               effect_name: nil,
+               effect: nil,
+               effect_detail: nil,
+               affected_entities: "",
+               recurrence: false,
+               effect_start: "",
+               effect_end: "further notice",
+               recurrence_days: "",
+               recurrence_start_time: "",
+               recurrence_end_time: "",
+               notification_start: "",
+               notification_end: "",
+               duration_certainty: nil,
+               cause: "UNKNOWN_CAUSE",
+               cause_detail: "UNKNOWN_CAUSE",
+               severity_code: nil,
+               severity_level: nil,
+               severity_name: nil,
+               main_message: nil,
+               supporting_information: "",
+               url: "",
+               image_url: "",
+               image_alternative_text: "",
+               set_as_website_banner: false,
+               website_banner_text: "",
+               reminders: ""
+             }
     end
   end
 

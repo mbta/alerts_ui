@@ -92,6 +92,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
       label: "Alert Details"
     },
     route_type: 4,
+    effect_name: "Delay",
     combination: :RDT,
     alert_data: %{},
     selected_facility: nil,
@@ -107,6 +108,73 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
 
     test "gets causes correctly" do
       {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
+
+      assert view
+             |> render() =~ ~s(fog)
+    end
+
+    test "capitalizes Amtrak in causes" do
+      {:ok, view, _html} = live_isolated_component(AlertDetails, %{@assigns | route_type: 2})
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_details" => %{
+          "cause_detail" => "AMTRAK_TRAIN_TRAFFIC"
+        }
+      })
+
+      refute view
+             |> render() =~ ~s(amtrak)
+
+      assert view
+             |> render() =~ ~s(Amtrak)
+    end
+  end
+
+  describe "severity" do
+    test "gets default severity correctly" do
+      {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
+
+      assert view
+             |> render() =~ ~s(about 10 minutes)
+    end
+
+    test "allows severity to be set by user" do
+      {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_details" => %{
+          "severity" => 7
+        }
+      })
+
+      assert view
+             |> render() =~ ~s(about 30 minutes)
+    end
+  end
+
+  describe "cause detail" do
+    test "gets default cause detail correctly" do
+      assigns = Map.merge(@assigns, %{route_type: 1, effect_name: "Single Tracking"})
+      {:ok, view, _html} = live_isolated_component(AlertDetails, assigns)
+
+      assert view
+             |> render() =~ ~s(single tracking)
+    end
+
+    test "allows severity to be set by user" do
+      {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_details" => %{
+          "cause_detail" => "FOG"
+        }
+      })
 
       assert view
              |> render() =~ ~s(fog)
@@ -528,7 +596,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         view
         |> element("#details_form")
         |> render_change(%{
-          alert_details: %{cause_detail: "ICE_IN_HARBOR"}
+          alert_details: %{cause_detail: "ICE_IN_HARBOR", severity: 4}
         })
 
         assert view

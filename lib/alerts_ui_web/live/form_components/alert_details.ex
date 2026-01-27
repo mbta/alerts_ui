@@ -5,9 +5,14 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   use AlertsUIWeb, :live_component
   use AlertsUI.Schema
   import Ecto.Changeset
-  alias AlertsUIWeb.CreateAlertLive
   alias AlertsUI.Models.{Cause, EnhancedSchedule, SeverityLevel}
-  alias AlertsUIWeb.FormComponents.Helpers.{ErrorFormatter, ServiceEffectCombinations}
+  alias AlertsUIWeb.CreateAlertLive
+
+  alias AlertsUIWeb.FormComponents.Helpers.{
+    ErrorFormatter,
+    ServiceEffectCombinations
+  }
+
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}
   alias Phoenix.HTML.Form
 
@@ -48,11 +53,9 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       changeset(%__MODULE__{}, %{
         header_text: "",
         description_text: "",
-        cause_detail: "",
         url: "",
         image_url: "",
         image_alternative_text: "",
-        severity: 4,
         image_size: %{},
         autotext_data: %{}
       })
@@ -379,24 +382,24 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         class="form-control gap-4"
         id="details_form"
       >
-        <div class="flex flex-row">
+        <div class="flex flex-col md:flex-row">
           <.select
             label="Cause"
             field={@form[:cause_detail]}
             options={@cause_options}
-            class="max-w-[16rem] mr-8"
+            class="md:min-w-64 md:max-w-64 md:mr-8"
             id="cause_input"
           />
           <.select
             label="Severity"
             field={@form[:severity]}
             options={@severity_options}
-            class="max-w-[16rem]"
+            class="md:max-w-64"
             id="severity_input"
           />
         </div>
         <div class="flex flex-row">
-          <div class="flex flex-col w-[50%]">
+          <div class="flex flex-col md:w-[50%]">
             <.textarea
               field={@form[:header_text]}
               label="Main message"
@@ -416,7 +419,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           </div>
         </div>
         <div class="flex flex-row">
-          <div class="flex flex-col w-[50%]">
+          <div class="flex flex-col md:w-[50%]">
             <.textarea
               field={@form[:description_text]}
               label="Supporting information"
@@ -443,7 +446,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           label="URL"
           phx-debounce={120}
           id="url_input"
-          class="w-[50%]"
+          class="md:min-w-[50%]"
         />
         <div id="image-preview-div">
           <.text_input
@@ -452,7 +455,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
             phx-debounce={500}
             id="image_url_input"
             class={[
-              "min-w-[50%]",
+              "md:min-w-[50%]",
               if(@form[:image_url].value not in ["", nil] && is_number(@image_size),
                 do: "border-b-0 rounded-none rounded-t"
               )
@@ -461,7 +464,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           <div
             :if={@form[:image_url].value not in ["", nil] && is_number(@image_size)}
             id="image-information"
-            class="flex flex-row w-[50%] text-sm text-text-secondary bg-bg-elevation-3 p-4 rounded-b border border-bg-elevation-6 border-t-0"
+            class="flex flex-row md:min-w-[50%] text-sm text-text-secondary bg-bg-elevation-3 p-4 rounded-b border border-bg-elevation-6 border-t-0"
           >
             <img
               src={@form[:image_url].value}
@@ -478,7 +481,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           label="Image alt text"
           phx-debounce={120}
           id="image_alt_text_input"
-          class="w-[50%]"
+          class="md:min-w-[50%]"
           spellcheck="true"
         />
       </.form>
@@ -509,7 +512,12 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       |> Cause.cause_map_by_mode()
       |> Map.keys()
       |> Enum.map(fn cause_detail ->
-        display_name = cause_detail |> String.replace("_", " ") |> String.downcase()
+        display_name =
+          cause_detail
+          |> String.replace("_", " ")
+          |> String.downcase()
+          |> String.replace("amtrak", "Amtrak")
+
         {display_name, cause_detail}
       end)
 
