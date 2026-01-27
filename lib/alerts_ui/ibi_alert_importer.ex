@@ -381,9 +381,10 @@ defmodule AlertsUI.IBIAlertImporter do
       :direction,
       :service_types,
       :alert_timing,
+      :duration_certainty,
+      :notification_duration_certainty,
       :active_period_start,
       :active_period_end,
-      :active_period_end_specifier,
       :active_period_start_date,
       :active_period_start_time,
       :active_period_end_date,
@@ -520,32 +521,33 @@ defmodule AlertsUI.IBIAlertImporter do
   end
 
   def from_ibi(ibi_alert, :active_period_end) do
-    case from_ibi(ibi_alert, :alert_timing) do
-      :one_time ->
-        timestamp =
+    if from_ibi(ibi_alert, :duration_certainty) == :KNOWN do
+      case from_ibi(ibi_alert, :alert_timing) do
+        :one_time ->
           utc_from_ibi_string(ibi_alert.effect_end || ibi_alert.notif_end)
 
-        if !Enum.member?([1900, 1901], Map.get(timestamp, :year)) do
-          timestamp
-        end
+        :recurring ->
+          date =
+            ibi_alert.recurrence_end
+            |> utc_from_ibi_string()
+            |> NaiveDateTime.to_date()
 
-      :recurring ->
-        date =
-          ibi_alert.recurrence_end
-          |> utc_from_ibi_string()
-          |> NaiveDateTime.to_date()
+          time =
+            (ibi_alert.recurrence_end_time || ibi_alert.recurrence_end)
+            |> utc_from_ibi_string()
+            |> NaiveDateTime.to_time()
 
-        time =
-          (ibi_alert.recurrence_end_time || ibi_alert.recurrence_end)
-          |> utc_from_ibi_string()
-          |> NaiveDateTime.to_time()
-
-        NaiveDateTime.new!(date, time)
+          NaiveDateTime.new!(date, time)
+      end
     end
   end
 
-  def from_ibi(ibi_alert, :active_period_end_specifier) do
-    base_timestamp = ibi_alert.effect_end || ibi_alert.notif_end
+  def from_ibi(ibi_alert, :duration_certainty) do
+    base_timestamp = if from_ibi(ibi_alert, :alert_timing) == :recurring do
+      ibi_alert.recurrence_end || ibi_alert.recurrence_time
+    else
+      ibi_alert.effect_end || ibi_alert.notif_end
+    end
 
     if base_timestamp do
       year =
@@ -554,10 +556,29 @@ defmodule AlertsUI.IBIAlertImporter do
         |> Map.get(:year)
 
       case year do
-        1900 -> :later_today
-        1901 -> :until_further_notice
-        _ -> nil
+        1900 -> :ESTIMATED
+        1901 -> :UNKNOWN
+        _ -> :KNOWN
       end
+    else
+      :UNKNOWN
+    end
+  end
+
+  def from_ibi(ibi_alert, :notification_duration_certainty) do
+    if ibi_alert.notif_end do
+      year =
+        ibi_alert.notif_end
+        |> utc_from_ibi_string()
+        |> Map.get(:year)
+
+      case year do
+        1900 -> :ESTIMATED
+        1901 -> :UNKNOWN
+        _ -> :KNOWN
+      end
+    else
+      :UNKNOWN
     end
   end
 
