@@ -72,6 +72,7 @@
         field={:active_period_start}
         directions={{:asc_nulls_first, :desc_nulls_last}}
         col_style=""
+        tbody_td_attrs={[class: "p-1 whitespace-nowrap"]}
       >
         <div title={format_timestamp(alert.active_period_start)}>
           {format_start_time(alert.active_period_start)}
