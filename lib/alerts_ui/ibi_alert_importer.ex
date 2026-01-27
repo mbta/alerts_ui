@@ -543,11 +543,12 @@ defmodule AlertsUI.IBIAlertImporter do
   end
 
   def from_ibi(ibi_alert, :duration_certainty) do
-    base_timestamp = if from_ibi(ibi_alert, :alert_timing) == :recurring do
-      ibi_alert.recurrence_end || ibi_alert.recurrence_time
-    else
-      ibi_alert.effect_end || ibi_alert.notif_end
-    end
+    base_timestamp =
+      if from_ibi(ibi_alert, :alert_timing) == :recurring do
+        ibi_alert.recurrence_end || ibi_alert.recurrence_time
+      else
+        ibi_alert.effect_end || ibi_alert.notif_end
+      end
 
     if base_timestamp do
       year =
