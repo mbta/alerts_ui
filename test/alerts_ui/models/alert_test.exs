@@ -397,14 +397,20 @@ defmodule AlertsUI.Models.AlertTest do
         %InformedEntity{activities: [:exit], route_type: 3}
       ]
 
-      assert Alert.gather_route_ids(build(:alert, informed_entity: informed_entity)) == ["27", "28", "29"]
+      assert Alert.gather_route_ids(build(:alert, informed_entity: informed_entity)) == [
+               "27",
+               "28",
+               "29"
+             ]
     end
 
     test "lists unique route ids from original selection for legacy alert" do
-      alert = build(
-        :alert,
-        legacy: true, original_route_selections: ["foo|1", "bar|2", "dup|1"]
-      )
+      alert =
+        build(
+          :alert,
+          legacy: true,
+          original_route_selections: ["foo|1", "bar|2", "dup|1"]
+        )
 
       assert Alert.gather_route_ids(alert) == ["1", "2"]
     end
@@ -427,7 +433,9 @@ defmodule AlertsUI.Models.AlertTest do
           %InformedEntity{activities: [:exit], route_type: 3}
         ]
 
-        assert Alert.gather_parent_stop_ids(build(:alert, informed_entity: informed_entity)) == ["place-aqucl"]
+        assert Alert.gather_parent_stop_ids(build(:alert, informed_entity: informed_entity)) == [
+                 "place-aqucl"
+               ]
       end
     end
 
@@ -435,10 +443,12 @@ defmodule AlertsUI.Models.AlertTest do
       with_mock(StopsRepo,
         get_parent: fn _stop -> %{id: "foo-bar"} end
       ) do
-        alert = build(
-          :alert,
-          legacy: true, original_stop_selections: ["foo|1", "bar|2", "dup|1"]
-        )
+        alert =
+          build(
+            :alert,
+            legacy: true,
+            original_stop_selections: ["foo|1", "bar|2", "dup|1"]
+          )
 
         assert Alert.gather_parent_stop_ids(alert) == ["foo-bar"]
       end
@@ -455,14 +465,20 @@ defmodule AlertsUI.Models.AlertTest do
         %InformedEntity{activities: [:exit], route_type: 3, trip: %TripDescriptor{}}
       ]
 
-      assert Alert.gather_trip_ids(build(:alert, informed_entity: informed_entity)) == ["3", "2", "1"]
+      assert Alert.gather_trip_ids(build(:alert, informed_entity: informed_entity)) == [
+               "3",
+               "2",
+               "1"
+             ]
     end
 
     test "lists unique trip ids from original selection for legacy alert" do
-      alert = build(
-        :alert,
-        legacy: true, original_trip_selections: ["foo|1", "bar|2", "dup|1"]
-      )
+      alert =
+        build(
+          :alert,
+          legacy: true,
+          original_trip_selections: ["foo|1", "bar|2", "dup|1"]
+        )
 
       assert Alert.gather_trip_ids(alert) == ["1", "2"]
     end

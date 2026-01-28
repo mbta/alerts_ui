@@ -421,19 +421,19 @@ defmodule AlertsUI.Models.Alert do
 
   defp gather_route_ids_from_original_selections(alert) do
     alert.original_route_selections
-    |> Enum.map(& get_route_id(&1))
+    |> Enum.map(&get_route_id(&1))
     |> Enum.uniq()
   end
 
   defp gather_facility_ids_from_original_selections(alert) do
     alert.original_facility_selections
-    |> Enum.map(& get_route_id(&1))
+    |> Enum.map(&get_route_id(&1))
     |> Enum.uniq()
   end
 
   defp gather_stop_ids_from_original_selections(alert) do
     alert.original_stop_selections
-    |> Enum.map(& get_route_id(&1))
+    |> Enum.map(&get_route_id(&1))
     |> Enum.uniq()
   end
 
@@ -449,7 +449,7 @@ defmodule AlertsUI.Models.Alert do
 
   defp gather_trip_ids_from_original_selections(alert) do
     alert.original_trip_selections
-    |> Enum.map(& get_route_id(&1))
+    |> Enum.map(&get_route_id(&1))
     |> Enum.uniq()
   end
 
