@@ -651,7 +651,7 @@ defmodule AlertsUIWeb.SharedComponents do
     >
       <div id={"#{@id}-bg"} class="bg-black/90 fixed inset-0 transition-opacity" aria-hidden="true" />
       <div
-        class="absolute inset-2 flex place-content-center place-items-center"
+        class="absolute inset-0 flex place-content-center place-items-center"
         aria-labelledby={"#{@id}-title"}
         aria-describedby={"#{@id}-description"}
         role="dialog"
@@ -671,7 +671,7 @@ defmodule AlertsUIWeb.SharedComponents do
                 JS.push(@cancel_event_name, target: @target_id)
                 |> JS.exec("data-cancel", to: "##{@id}")
               }
-              class="max-h-dvh w-full md:w-auto md:max-w-2xl !flex flex-col justify-stretch content-stretch shadow-zinc-700/10 ring-zinc-700/10 hidden rounded-md bg-bg-elevation-4
+              class="max-h-dvh w-full md:max-h-[calc(100dvh-3rem)] md:w-auto md:max-w-2xl !flex flex-col justify-stretch content-stretch shadow-zinc-700/10 ring-zinc-700/10 hidden md:rounded-md bg-bg-elevation-4
               border-bg-elevation-6 shadow-lg ring-1 transition border"
             >
               <div class="flex-none flex flex-row items-center justify-between py-3 pr-3 pl-4">
