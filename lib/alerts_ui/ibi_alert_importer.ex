@@ -859,7 +859,7 @@ defmodule AlertsUI.IBIAlertImporter do
   def from_ibi(ibi_alert, :reminder_times) do
     ibi_alert
     |> extract_reminders()
-    |> Enum.map(& naive_from_ibi_reminder_format(&1))
+    |> Enum.map(& %{time: naive_from_ibi_reminder_format(&1)})
   end
 
   def from_ibi(ibi_alert, key), do: Map.get(ibi_alert, key)
