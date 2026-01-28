@@ -176,6 +176,9 @@ config :paper_trail,
   originator: [name: :user, model: AlertsUI.Models.User],
   originator_relationship_options: [references: :uuid]
 
+# Include referrer in Logster request log
+config :logster, :allowed_headers, ["referer"]
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

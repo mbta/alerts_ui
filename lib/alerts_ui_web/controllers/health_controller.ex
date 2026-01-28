@@ -6,6 +6,8 @@ defmodule AlertsUIWeb.HealthController do
   use AlertsUIWeb, :controller
   alias AlertsUI.Repo
 
+  plug(Logster.Plugs.ChangeLogLevel, to: :debug)
+
   def index(conn, _params) do
     Repo.query!("SELECT 1")
     send_resp(conn, :ok, "Ok")
