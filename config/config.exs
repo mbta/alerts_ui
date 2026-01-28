@@ -139,6 +139,13 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+# 12 hours in seconds
+max_session_time = 12 * 60 * 60
+
+config :alerts_ui, AlertsUIWeb.UserAuth,
+  max_session_time: 120,
+  idle_time: 30 * 60
+
 config :ueberauth, Ueberauth,
   providers: [
     keycloak: {
@@ -147,7 +154,9 @@ config :ueberauth, Ueberauth,
         issuer: :keycloak_issuer,
         userinfo: true,
         uid_field: "preferred_username",
-        scopes: ~w(openid email roles)
+        scopes: ~w(openid email roles),
+        authorization_params: %{max_age: "#{max_session_time}"},
+        authorization_params_passthrough: ~w"prompt login_hint"
       ]
     }
   ]

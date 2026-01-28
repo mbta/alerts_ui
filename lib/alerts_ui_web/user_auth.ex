@@ -26,14 +26,18 @@ defmodule AlertsUIWeb.UserAuth do
   disconnected on log out. The line can be safely removed
   if you are not using LiveView.
   """
-  @spec log_in_user(Conn.t(), User.t(), String.t()) :: Conn.t()
-  def log_in_user(conn, user, logout_uri) do
+  # todo fix any
+  @spec log_in_user(Conn.t(), User.t(), String.t(), any()) :: Conn.t()
+  def log_in_user(conn, user, logout_uri, auth_time) do
     user_return_to = get_session(conn, :user_return_to)
+
+    IO.inspect("user got logged in")
 
     conn
     |> renew_session()
     |> put_current_user_in_session(user)
     |> put_session(:logout_uri, logout_uri)
+    |> put_session(:last_auth_time, auth_time)
     |> redirect(to: user_return_to || signed_in_path(conn))
   end
 
@@ -145,6 +149,14 @@ defmodule AlertsUIWeb.UserAuth do
     end
   end
 
+  def max_session_time do
+    Application.get_env(:alerts_ui, __MODULE__)[:max_session_time]
+  end
+
+  def idle_time do
+    Application.get_env(:alerts_ui, __MODULE__)[:idle_time]
+  end
+
   @doc """
   Plug used for routes that require the user to be authenticated.
 
@@ -152,8 +164,29 @@ defmodule AlertsUIWeb.UserAuth do
   they use the application at all, here would be a good place.
   """
   def require_authenticated_user(conn, _opts) do
-    if conn.assigns[:current_user] do
-      conn
+    last_auth_time = get_session(conn, :last_auth_time)
+    IO.inspect(last_auth_time, label: "last authorized")
+
+    if conn.assigns[:current_user] && last_auth_time do
+      now = System.system_time(:second)
+      last_active = get_session(conn, :last_active, now)
+
+      # last_auth_time is when the user entered their password at the SSO provider
+      auth_time_expires = last_auth_time + max_session_time()
+      IO.inspect(auth_time_expires, label: "to expire at")
+      IO.inspect(now, label: "now is")
+      # last_active is time of last request
+      idle_time_expires = last_active + idle_time()
+      # did either timeout expire?
+      if min(auth_time_expires, idle_time_expires) < now do
+        conn
+        |> maybe_store_return_to()
+        |> redirect(to: ~p"/auth/keycloak")
+        |> halt()
+      else
+        conn
+        |> put_session(:last_active, now)
+      end
     else
       conn
       |> maybe_store_return_to()

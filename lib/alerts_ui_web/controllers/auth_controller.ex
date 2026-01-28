@@ -25,7 +25,7 @@ defmodule AlertsUIWeb.AuthController do
                 },
                 extra: %{
                   raw_info: %{
-                    claims: %{"sub" => id},
+                    claims: %{"sub" => id, "auth_time" => auth_time},
                     userinfo: userinfo
                   }
                 }
@@ -34,11 +34,18 @@ defmodule AlertsUIWeb.AuthController do
         } = conn,
         _params
       ) do
+    # auth_time = time of authentication
+    # the instructions suggest using the guardian "verify_claims" function
+    # what is the alternative for plug.session?
+
+    # And separately, we should be refreshing the Guardian token when
+    # the user interacts with the app
+    # and if the token is old (determined by IAT) then the user has been idling too long
     roles = parse_role(userinfo)
     user = User.new(id, email, first_name, last_name, roles)
     {:ok, logout_uri} = logout_uri(auth)
 
-    UserAuth.log_in_user(conn, user, logout_uri)
+    UserAuth.log_in_user(conn, user, logout_uri, auth_time)
   end
 
   def callback(%{assigns: %{ueberauth_failure: failure}} = conn, _params) do
@@ -72,6 +79,7 @@ defmodule AlertsUIWeb.AuthController do
        when is_list(roles),
        do: roles |> Enum.map(&String.to_existing_atom/1)
 
+      #  TODO: reject non-viewers
   defp parse_role(_), do: [:viewer]
 
   @spec logout_uri(map()) :: {:ok, String.t()}
