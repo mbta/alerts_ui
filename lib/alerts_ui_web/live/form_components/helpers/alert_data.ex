@@ -227,14 +227,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     %{
       combination: combination,
       effect_name: effect_name,
-      direction: Alert.get_direction(alert.informed_entity) || "default",
-      facility_id: Alert.gather_facility_ids(alert.informed_entity) |> List.first(),
+      direction: Alert.get_direction(alert) || "default",
+      facility_id: Alert.gather_facility_ids(alert) |> List.first(),
       route_ids: route_ids,
       route_type: route_type,
       single_route_id: single_route_id,
-      stop_ids: Alert.gather_parent_stop_ids(alert.informed_entity),
+      stop_ids: Alert.gather_parent_stop_ids(alert),
       stop_names_and_ids: alert.original_stop_selections,
-      trip_ids: Alert.gather_trip_ids(alert.informed_entity),
+      trip_ids: Alert.gather_trip_ids(alert),
       send_push_notification_on_edit: send_push_notification_on_edit
     }
   end
