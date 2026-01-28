@@ -38,21 +38,18 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
   def mount(socket) do
     changeset = build_changeset(%__MODULE__{}, %{})
 
-    socket =
-      socket
-      |> assign(%{
-        form: to_form(changeset),
-        facility_types: [],
-        stop_id_filter_value: "default",
-        filter_title_value: "All stops",
-        obsolete_ids: %{},
-        alert_data: %{
-          facility_id: ""
-        }
-      })
-      |> assign(:available_facilities, AsyncResult.loading())
-
-    {:ok, socket}
+    {:ok,
+     assign(socket, %{
+       form: to_form(changeset),
+       facility_types: [],
+       stop_id_filter_value: "default",
+       filter_title_value: "All stops",
+       obsolete_ids: %{},
+       alert_data: %{
+         facility_id: ""
+       },
+       available_facilities: AsyncResult.loading()
+     })}
   end
 
   @impl true
@@ -188,7 +185,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     obsolete_ids =
       EntityValidator.get_obsolete_ids(
         Map.get(socket.assigns.alert_data, :facility_id),
-        socket.assigns.available_facilities
+        filter_stops_from_result(socket.assigns.available_facilities)
       )
 
     found_obsolete_ids =
@@ -238,6 +235,12 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
        AsyncResult.failed(socket.assigns.available_facilities, {:exit, reason})
      )}
   end
+
+  defp filter_stops_from_result(%{ok?: true, result: %{facilities: facilities, stops: _stops}}) do
+    %{ok?: true, result: facilities}
+  end
+
+  defp filter_stops_from_result(available_facilities), do: available_facilities
 
   @impl true
   def handle_event(

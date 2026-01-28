@@ -31,8 +31,5 @@ defmodule AlertsUIWeb.FormComponents.Helpers.EntityValidator do
 
   def get_entity_id(%{trip: %{id: id}}), do: id
 
-  # access alerts come in this format
-  def get_entity_id({_key, entities}), do: Enum.map(entities, &get_entity_id/1)
-
   def get_entity_id(%{id: id}), do: id
 end
