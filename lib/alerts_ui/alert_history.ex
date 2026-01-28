@@ -204,7 +204,19 @@ defmodule AlertsUI.AlertHistory do
   end
 
   defp notification_end(map) do
-    format_datetime(Map.get(map, :notification_period_end), @without_seconds)
+    case Map.get(map, :notification_duration_certainty) do
+      nil ->
+        format_datetime(
+          Map.get(map, :notification_period_end),
+          @without_seconds
+        )
+
+      certainty ->
+        effect_end(
+          certainty,
+          Map.get(map, :notification_period_end)
+        )
+    end
   end
 
   defp duration_certainty(map) do

@@ -330,12 +330,12 @@ defmodule AlertsUI.AlertBuilder do
         [
           :active_period_start,
           :active_period_end,
+          :duration_certainty,
           :recurrence_start_time,
           :recurrence_end_time,
           :recurrence_days
         ]
       )
-      |> Map.put(:duration_certainty, :KNOWN)
     else
       if Map.get(alert_data, :alert_timing) === :recurring do
         ActivePeriodBuilder.build_recurring_active_period(%{
@@ -391,7 +391,8 @@ defmodule AlertsUI.AlertBuilder do
 
     %{
       notification_period_start: notification_period_start,
-      notification_period_end: notification_period_end
+      notification_period_end: notification_period_end,
+      notification_duration_certainty: Map.get(alert_data, :notification_duration_certainty)
     }
   end
 

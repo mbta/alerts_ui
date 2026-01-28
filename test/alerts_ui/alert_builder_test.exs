@@ -117,7 +117,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  closed_timestamp: nil,
                  created_timestamp: nil,
                  last_modified_timestamp: ~U[2024-04-30 05:54:00Z],
-                 legacy: nil
+                 legacy: nil,
+                 notification_duration_certainty: nil
                }
 
         Alerts.create_or_update_alert(result, build(:user))
@@ -550,7 +551,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  closed_timestamp: nil,
                  created_timestamp: nil,
                  last_modified_timestamp: ~U[2024-04-30 05:54:00Z],
-                 legacy: nil
+                 legacy: nil,
+                 notification_duration_certainty: nil
                }
       end
     end
@@ -894,7 +896,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  closed_timestamp: nil,
                  created_timestamp: nil,
                  last_modified_timestamp: ~U[2024-04-30 05:54:00Z],
-                 legacy: nil
+                 legacy: nil,
+                 notification_duration_certainty: nil
                }
 
         result

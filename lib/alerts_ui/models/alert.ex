@@ -61,6 +61,7 @@ defmodule AlertsUI.Models.Alert do
   recurrence_text
   alert_lifecycle
   duration_certainty
+  notification_duration_certainty
   tts_header_text
   tts_description_text
   image_url
@@ -103,6 +104,7 @@ defmodule AlertsUI.Models.Alert do
           description_text: String.t(),
           draft: boolean(),
           duration_certainty: atom() | nil,
+          notification_duration_certainty: atom() | nil,
           effect: atom() | nil,
           effect_detail: String.t() | nil,
           effect_name: String.t() | nil,
@@ -221,6 +223,7 @@ defmodule AlertsUI.Models.Alert do
     field :recurrence_text, :string
     field :alert_lifecycle, Ecto.Enum, values: @alert_lifecycle
     field :duration_certainty, Ecto.Enum, values: @duration_certainty
+    field :notification_duration_certainty, Ecto.Enum, values: @duration_certainty
     has_many :reminder_times, ReminderTime, on_replace: :delete_if_exists
     has_many :active_period, ActivePeriod, on_replace: :delete_if_exists
     field :active_period_start, :utc_datetime
