@@ -337,7 +337,7 @@ defmodule AlertsUI.IBIAlertImporter do
             # add deduplicated reminders
             all_versions_index
             |> Map.get(alert.alert_id)
-            |> Enum.map(fn ibi_alert -> extract_reminders(ibi_alert, alert) end)
+            |> Enum.map(fn ibi_alert -> extract_and_cast_reminders(ibi_alert, alert) end)
             |> List.flatten()
             |> Enum.uniq()
             |> Enum.map(fn params -> Changeset.cast(%ReminderTime{}, params, Map.keys(params)) end)
@@ -415,7 +415,8 @@ defmodule AlertsUI.IBIAlertImporter do
       :last_modified_timestamp,
       :legacy,
       :image_url,
-      :image_alternative_text
+      :image_alternative_text,
+      :reminder_times
     ]
     |> Enum.reduce(%{}, fn key, alert_data ->
       try do
@@ -855,6 +856,12 @@ defmodule AlertsUI.IBIAlertImporter do
 
   def from_ibi(_ibi_alert, :legacy), do: true
 
+  def from_ibi(ibi_alert, :reminder_times) do
+    ibi_alert
+    |> extract_reminders()
+    |> Enum.map(& naive_from_ibi_reminder_format(&1))
+  end
+
   def from_ibi(ibi_alert, key), do: Map.get(ibi_alert, key)
 
   defp split_combined_entities(nil), do: []
@@ -888,17 +895,21 @@ defmodule AlertsUI.IBIAlertImporter do
     |> DateTime.shift_zone!("Etc/UTC")
   end
 
-  def utc_from_ibi_reminder_format(timestamp) do
+  def naive_from_ibi_reminder_format(timestamp) do
     timestamp
     |> String.replace("T", " ")
     |> String.replace(~r/\:[0-9]*\.[0-9]*$/, "")
     |> Kernel.<>(":00")
     |> NaiveDateTime.from_iso8601!()
+  end
+
+  def utc_from_ibi_reminder_format(timestamp) do
+    naive_from_ibi_reminder_format(timestamp)
     |> DateTime.from_naive!("America/New_York")
     |> DateTime.shift_zone!("Etc/UTC")
   end
 
-  def extract_reminders(ibi_alert, alert) do
+  def extract_reminders(ibi_alert) do
     if ibi_alert.reminders do
       ibi_alert.reminders
       |> String.replace("send bulletin", "")
@@ -906,12 +917,17 @@ defmodule AlertsUI.IBIAlertImporter do
       |> String.replace("and tweet", "")
       |> String.replace(~r/\s/, "")
       |> String.split(";")
-      |> Enum.map(fn timestamp ->
-        %{id: nil, alert_id: alert.id, reminder_time: utc_from_ibi_reminder_format(timestamp)}
-      end)
     else
       []
     end
+  end
+
+  def extract_and_cast_reminders(ibi_alert, alert) do
+    ibi_alert
+    |> extract_reminders()
+    |> Enum.map(fn timestamp ->
+      %{id: nil, alert_id: alert.id, reminder_time: utc_from_ibi_reminder_format(timestamp)}
+    end)
   end
 
   def gui_mode_name_to_route_type_int(name) do
