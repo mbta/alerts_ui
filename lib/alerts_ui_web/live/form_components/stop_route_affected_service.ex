@@ -212,8 +212,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     {:noreply, socket}
   end
 
-  require IEx
-
   # On route select, don't need to do anything but save the change
   @impl true
   def handle_event("validate", %{"stop_route_affected_service" => affected_service}, socket) do
