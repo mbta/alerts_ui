@@ -143,7 +143,7 @@ config :phoenix, :json_library, Jason
 max_session_time = 12 * 60 * 60
 
 config :alerts_ui, AlertsUIWeb.UserAuth,
-  max_session_time: 120,
+  max_session_time: max_session_time,
   idle_time: 30 * 60
 
 config :ueberauth, Ueberauth,

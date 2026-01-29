@@ -1,5 +1,41 @@
 let Hooks = {};
 
+Hooks.ActivityTracker = {
+  throttled: false,
+  // 30s throttle
+  delay: 30 * 1000,
+
+  pushActivity() {
+    if (!this.throttled) {
+      this.pushEventTo("#" + this.el.id, "activity");
+      this.throttled = true;
+
+      setTimeout(() => {
+        this.throttled = false;
+      }, this.delay);
+    }
+  },
+
+  mounted() {
+    this.pushActivity = this.pushActivity.bind(this);
+
+    this.pushActivity();
+    window.addEventListener("mousemove", this.pushActivity);
+    window.addEventListener("scroll", this.pushActivity);
+    window.addEventListener("keydown", this.pushActivity);
+    window.addEventListener("resize", this.pushActivity);
+  },
+
+  destroyed() {
+    this.pushActivity = this.pushActivity.bind(this);
+
+    window.removeEventListener("mousemove", this.pushActivity);
+    window.removeEventListener("scroll", this.pushActivity);
+    window.removeEventListener("keydown", this.pushActivity);
+    window.removeEventListener("resize", this.pushActivity);
+  }
+}
+
 Hooks.DropdownPosition = {
   // The dropdown doesn't have a size (height/width) until the first time
   // we show it. So running `getBoundingClientRect` before then fails.

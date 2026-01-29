@@ -41,6 +41,7 @@ defmodule AlertsUIWeb.AuthController do
     # And separately, we should be refreshing the Guardian token when
     # the user interacts with the app
     # and if the token is old (determined by IAT) then the user has been idling too long
+    IO.inspect("running the callback")
     roles = parse_role(userinfo)
     user = User.new(id, email, first_name, last_name, roles)
     {:ok, logout_uri} = logout_uri(auth)
@@ -68,6 +69,7 @@ defmodule AlertsUIWeb.AuthController do
 
   @spec request(Conn.t(), map()) :: Conn.t()
   def request(conn, _params) do
+    IO.inspect("in AuthController request")
     conn
     |> redirect(to: "/not-found")
     |> halt()

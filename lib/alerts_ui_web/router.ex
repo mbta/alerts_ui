@@ -116,15 +116,18 @@ defmodule AlertsUIWeb.Router do
 
   ## Authentication routes
 
-  scope "/auth", AlertsUIWeb do
-    pipe_through [:redirect_prod_http, :browser, :redirect_if_user_is_authenticated]
+  # when / why is this used?
+  # scope "/auth", AlertsUIWeb do
+  #   pipe_through [:redirect_prod_http, :browser]
 
-    get "/:provider", AuthController, :request
-  end
+  #   get "/:provider", AuthController, :request
+  # end
 
   scope "/auth", AlertsUIWeb do
     pipe_through [:redirect_prod_http, :browser]
 
+    # is this right?
+    get "/:provider", AuthController, :request
     get "/:provider/callback", AuthController, :callback
     delete "/keycloak/logout", AuthController, :logout
   end
