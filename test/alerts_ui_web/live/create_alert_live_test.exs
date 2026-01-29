@@ -6,7 +6,15 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
   import Ecto.Changeset
   import Mock
   alias AlertsUIWeb.CreateAlertLive
-  alias AlertsUIWeb.FormComponents.{AffectedService, AlertDetails, RouteTypeAndEffect, TimeRange}
+
+  alias AlertsUIWeb.FormComponents.{
+    AccessAffectedService,
+    AffectedService,
+    AlertDetails,
+    RouteTypeAndEffect,
+    TimeRange
+  }
+
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
@@ -279,19 +287,26 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
     end
 
     @tag :logged_in_user
-    test "displays a list of facilities", %{conn: conn} do
+    test "displays a list of facilities and successfully saves facility alert", %{conn: conn} do
       :ELEVATOR_CLOSURE
-
-      facilities = [
-        %Facility{id: "1", long_name: "real big elevator", stop: %Stop{id: 2, name: "stop"}}
-      ]
+      child_stop = %Stop{id: "3", name: "baby stop"}
+      stop = %Stop{id: "2", name: "stop", child_ids: [child_stop.id]}
+      facility = %Facility{id: "1", long_name: "real big elevator", stop: stop}
+      facilities = [facility]
 
       with_mocks([
-        {RoutePatternsRepo, [], [included_stops_by_route_id: fn _route_id, _direction -> [] end]},
-        {FacilitiesRepo, [], get_by_type: fn _types, _opts -> facilities end}
+        {RoutesRepo, [], by_stop: fn _stop_id -> [%Route{id: "Blue", name: "blue route"}] end},
+        {FacilitiesRepo, [],
+         [get_by_type: fn _types, _opts -> facilities end, get: fn _id -> facility end]},
+        {StopsRepo, [],
+         get!: fn
+           "2" -> stop
+           "3" -> child_stop
+         end}
       ]) do
         conn = log_in_user(conn)
         {:ok, view, _html} = live(conn, "/alerts/new")
+        F
 
         {:ok, changeset} =
           Ecto.Changeset.change(%RouteTypeAndEffect{
@@ -307,6 +322,17 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         assert view
                |> element("#service_form")
                |> render_async() =~ "real big elevator"
+
+        {:ok, access_changeset} =
+          Ecto.Changeset.change(%AccessAffectedService{
+            facility_id: "1"
+          })
+          |> apply_action(:insert)
+
+        send(view.pid, {:section_completed, access_changeset})
+        send(view.pid, :create_alert)
+        flash = assert_redirect(view, "/")
+        assert flash["info"] =~ ~r/New alert #[0-9]+ created/
       end
     end
   end
