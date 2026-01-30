@@ -116,13 +116,6 @@ defmodule AlertsUIWeb.Router do
 
   ## Authentication routes
 
-  # when / why is this used?
-  # scope "/auth", AlertsUIWeb do
-  #   pipe_through [:redirect_prod_http, :browser]
-
-  #   get "/:provider", AuthController, :request
-  # end
-
   scope "/auth", AlertsUIWeb do
     pipe_through [:redirect_prod_http, :browser]
 
@@ -130,6 +123,8 @@ defmodule AlertsUIWeb.Router do
     get "/:provider", AuthController, :request
     get "/:provider/callback", AuthController, :callback
     delete "/keycloak/logout", AuthController, :logout
+    # Is this... ok? Can't use delete method in activity_tracker handle_event
+    get "/keycloak/logout", AuthController, :logout
   end
 
   ## Health check

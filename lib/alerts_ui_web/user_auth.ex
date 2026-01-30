@@ -31,8 +31,6 @@ defmodule AlertsUIWeb.UserAuth do
   def log_in_user(conn, user, logout_uri, auth_time) do
     user_return_to = get_session(conn, :user_return_to)
 
-    IO.inspect(auth_time, label: "user got logged in at")
-
     conn
     |> renew_session()
     |> put_current_user_in_session(user)
@@ -115,8 +113,10 @@ defmodule AlertsUIWeb.UserAuth do
   end
 
   def on_mount(:ensure_authenticated, _params, session, socket) do
-    IO.inspect("ensuring authenticated")
-    socket = mount_current_user(socket, session)
+    socket =
+      socket
+      |> mount_current_user(session)
+      |> mount_auth_times(session)
 
     if socket.assigns.current_user do
       {:cont, socket}
@@ -137,21 +137,6 @@ defmodule AlertsUIWeb.UserAuth do
     end
   end
 
-  @doc """
-  Plug used for routes that require the user to not be authenticated.
-  """
-  # I don't think... this is ever the case anymore. All routes require authentication now.
-  # def redirect_if_user_is_authenticated(conn, _opts) do
-  #   if conn.assigns[:current_user] do
-  #     IO.inspect("in redirect if user is authenticated")
-  #     conn
-  #     |> redirect(to: signed_in_path(conn))
-  #     |> halt()
-  #   else
-  #     conn
-  #   end
-  # end
-
   def max_session_time do
     Application.get_env(:alerts_ui, __MODULE__)[:max_session_time]
   end
@@ -167,7 +152,6 @@ defmodule AlertsUIWeb.UserAuth do
   they use the application at all, here would be a good place.
   """
   def require_authenticated_user(conn, _opts) do
-    IO.inspect("requiring that the user be authorized")
     last_auth_time = get_session(conn, :last_auth_time)
 
     if conn.assigns[:current_user] && last_auth_time do
@@ -176,21 +160,16 @@ defmodule AlertsUIWeb.UserAuth do
 
       # last_auth_time is when the user entered their password at the SSO provider
       auth_time_expires = last_auth_time + max_session_time()
-      IO.inspect(now, label: "now is")
       # last_active is time of last request
       idle_time_expires = last_active + idle_time()
-      IO.inspect(idle_time_expires, label: "idle time expires")
       # did either timeout expire?
       if min(auth_time_expires, idle_time_expires) < now do
-        IO.inspect("expired, have them login again")
         conn
         |> maybe_store_return_to()
-        |> redirect(to: ~p"/auth/keycloak")
+        |> log_out_user()
         |> halt()
       else
-        IO.inspect(now, label: "not expired, update last active to now")
-        conn
-        |> put_session(:last_active, now)
+        put_session(conn, :last_active, now)
       end
     else
       conn
@@ -282,6 +261,16 @@ defmodule AlertsUIWeb.UserAuth do
     else
       {nil, conn}
     end
+  end
+
+  defp mount_auth_times(socket, session) do
+    socket
+    |> Phoenix.Component.assign_new(:last_auth_time, fn ->
+      session["last_auth_time"]
+    end)
+    |> Phoenix.Component.assign_new(:last_active, fn ->
+      session["last_active"]
+    end)
   end
 
   defp mount_current_user(socket, session) do

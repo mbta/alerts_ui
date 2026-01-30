@@ -1,6 +1,8 @@
 defmodule AlertsUIWeb.ActivityTracker do
   use AlertsUIWeb, :live_component
 
+  alias AlertsUIWeb.UserAuth
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -11,12 +13,18 @@ defmodule AlertsUIWeb.ActivityTracker do
   # should we receive socket here or conn?
   @impl true
   def handle_event("activity", _params, socket) do
-    IO.inspect(socket, limit: :infinity)
-    # basically, idle time to be checked here instead?
-    # if idle expires at time < now, then we should redirect and handle expiration
-    # otherwise, update latest tracked time
+    now = System.system_time(:second)
 
+    auth_time_expires = socket.assigns.last_auth_time + UserAuth.max_session_time()
+    idle_time_expires = socket.assigns.last_active + UserAuth.idle_time()
 
-    {:noreply, socket}
+    new_socket =
+      if min(auth_time_expires, idle_time_expires) < now do
+        redirect(socket, to: ~p"/auth/keycloak/logout")
+      else
+        assign(socket, last_active: now)
+      end
+
+    {:noreply, new_socket}
   end
 end
