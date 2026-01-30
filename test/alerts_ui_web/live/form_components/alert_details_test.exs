@@ -130,6 +130,24 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
       assert view
              |> render() =~ ~s(Amtrak)
     end
+
+    test "capitalizes Coast Guard in causes" do
+      {:ok, view, _html} = live_isolated_component(AlertDetails, %{@assigns | route_type: 4})
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_details" => %{
+          "cause_detail" => "COAST_GUARD_RESTRICTION"
+        }
+      })
+
+      refute view
+             |> render() =~ ~s(coast guard)
+
+      assert view
+             |> render() =~ ~s(Coast Guard)
+    end
   end
 
   describe "severity" do
