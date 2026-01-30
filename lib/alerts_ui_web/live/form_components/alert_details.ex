@@ -517,6 +517,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           |> String.replace("_", " ")
           |> String.downcase()
           |> String.replace("amtrak", "Amtrak")
+          |> String.replace("coast guard", "Coast Guard")
 
         {display_name, cause_detail}
       end)
