@@ -10,6 +10,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
   alias AlertsUIWeb.FormComponents.Helpers.{
     ContentFormatter,
+    EntityValidator,
     ErrorFormatter,
     Helpers,
     SelectFormatter
@@ -48,12 +49,13 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       socket
       |> assign(%{
         form: to_form(changeset),
-        available_routes: %{},
-        available_stops: %{},
+        available_routes: AsyncResult.loading(),
+        available_stops: AsyncResult.loading(),
         selected_stops: [],
         available_filter_routes: %{},
         filter_title_value: "All routes",
-        selected_route_id: nil
+        selected_route_id: nil,
+        obsolete_ids: %{}
       })
 
     {:ok, socket}
@@ -83,14 +85,15 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       |> assign(form: form)
       |> assign(route_type: route_type)
       |> assign_stops(route_type)
-      |> assign_async([:available_routes, :available_filter_routes], fn ->
+      |> start_async(:available_routes, fn ->
+        CreateAlertLive.get_routes_by_stop(
+          Map.get(alert_data, :stop_ids, []),
+          route_type
+        )
+      end)
+      |> assign_async(:available_filter_routes, fn ->
         {:ok,
          %{
-           available_routes:
-             CreateAlertLive.get_routes_by_stop(
-               Map.get(alert_data, :stop_ids, []),
-               route_type
-             ),
            available_filter_routes: CreateAlertLive.get_routes(route_type)
          }}
       end)
@@ -146,14 +149,13 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   defp assign_stops(socket, route_type, route_id \\ nil)
 
   defp assign_stops(
-         %{assigns: %{available_stops: available_stops}} = socket,
+         %{assigns: %{available_stops: %AsyncResult{loading: true}}} = socket,
          route_type,
          route_id
-       )
-       when available_stops == %{} do
-    assign_async(socket, :available_stops, fn ->
+       ) do
+    start_async(socket, :available_stops, fn ->
       route_ids = if route_id, do: List.wrap(route_id), else: nil
-      {:ok, %{available_stops: CreateAlertLive.get_stops_for_stop_route(route_ids, route_type)}}
+      CreateAlertLive.get_stops_for_stop_route(route_ids, route_type)
     end)
   end
 
@@ -204,7 +206,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       socket
       |> assign(:selected_stops, selected_stops)
       |> assign(:available_routes, AsyncResult.loading())
-      |> start_async(:get_available_routes, fn ->
+      |> start_async(:get_available_routes_on_validate, fn ->
         CreateAlertLive.get_routes_by_stop(stop_ids, route_type)
       end)
       |> assign(form: form)
@@ -329,8 +331,9 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   end
 
   @impl true
-  def handle_async(:get_available_routes, {:ok, fetched_routes}, socket) do
+  def handle_async(:get_available_routes_on_validate, {:ok, fetched_routes}, socket) do
     %{available_stops: available_stops, available_routes: available_routes} = socket.assigns
+    # called when a stop is selected
 
     affected_service =
       socket.assigns.form.params
@@ -354,11 +357,53 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   end
 
   @impl true
-  def handle_async(:get_available_routes, {:exit, reason}, socket) do
-    %{available_routes: available_routes} = socket.assigns
+  def handle_async(async_key, {:ok, result}, %{assigns: %{form_type: :creating}} = socket) do
+    # called on initial form entry when creating
+    socket = assign(socket, async_key, AsyncResult.ok(socket.assigns[async_key], result))
+    {:noreply, socket}
+  end
 
+  @impl true
+  def handle_async(async_key, {:ok, result}, socket) do
+    # called on initial form entry when editing/duplicating and checks for invalid stops/routes
+
+    # assign result to socket first
+    socket = assign(socket, async_key, AsyncResult.ok(socket.assigns[async_key], result))
+
+    field_mapping = %{
+      route_ids: :available_routes,
+      stop_ids: :available_stops
+    }
+
+    obsolete_ids =
+      Enum.map(Map.keys(field_mapping), fn field ->
+        {field,
+         EntityValidator.get_obsolete_ids(
+           socket.assigns.alert_data[field],
+           socket.assigns[field_mapping[field]]
+         )}
+      end)
+      |> Enum.into(%{})
+
+    found_obsolete_ids =
+      Enum.all?(obsolete_ids, fn {_k, v} -> is_list(v) end) &&
+        Enum.any?(obsolete_ids, fn {_k, v} -> !Enum.empty?(v) end)
+
+    # if all our fields have been returned and there are obsolete ids
+    # and we have not yet assigned any obsolete ids
+    # send result to parent
+    if found_obsolete_ids && Enum.empty?(socket.assigns.obsolete_ids) do
+      send(self(), {:got_obsolete_ids, obsolete_ids})
+      {:noreply, assign(socket, :obsolete_ids, obsolete_ids)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_async(async_key, {:exit, reason}, socket) do
     {:noreply,
-     assign(socket, :available_routes, AsyncResult.failed(available_routes, {:exit, reason}))}
+     assign(socket, async_key, AsyncResult.failed(socket.assigns[async_key], {:exit, reason}))}
   end
 
   def add_routes_with_types(affected_service, available_routes) do
@@ -374,7 +419,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     Map.put(affected_service, "routes_by_id", routes)
   end
 
-  def available_routes(socket), do: Map.get(socket.assigns.available_routes, :result, [])
+  def available_routes(socket), do: Map.get(socket.assigns.available_routes, :result, []) || []
 
   def build_changeset(changeset, params), do: cast(changeset, params, @fields)
 
