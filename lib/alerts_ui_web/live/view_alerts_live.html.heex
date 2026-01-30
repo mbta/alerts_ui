@@ -1,4 +1,4 @@
-<div id="view_alerts_live_view" class="p-4 lg:mt-10 lg:mb-6">
+<div id="view_alerts_live_view" class="p-4 md:flex md:flex-col md:mt-10 md:mb-6 md:h-[calc(100%-1.5rem)] md:overflow-hidden">
   <div class="flex flex-col gap-4 lg:flex-row lg:justify-between">
     <.button_primary_link href="/alerts/new" class="w-full justify-center lg:w-auto">
       <.icon name="hero-plus" class="w-6 h-6 mr-1" />
@@ -18,7 +18,7 @@
   </div>
 
   <div
-    class="overflow-x-auto lg:overflow-visible"
+    class="overflow-x-auto md:h-full md:overflow-auto"
     phx-hook="ScrollToTop"
     data-scroll-to-top={inspect(@scroll_to_top)}
     data-showing-alert-id={Map.get(assigns, :selected_alert_id, "")}
