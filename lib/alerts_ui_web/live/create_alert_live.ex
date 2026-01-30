@@ -420,6 +420,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
         route_type
       end
 
+    # any values put in alert data put here will be read in upon creation but not edit (since this step is only reached
+    # when going to the second page). this makes it a good place to read default values from our config.
     combination = GetKeyForModeEffect.get_value_of_key(:combination, route_type, effect_name)
 
     default_severity =
@@ -428,13 +430,21 @@ defmodule AlertsUIWeb.CreateAlertLive do
     default_cause =
       GetKeyForModeEffect.get_value_of_key(:default_cause, route_type, effect_name)
 
+    notification_toggle =
+      GetKeyForModeEffect.get_value_of_key(
+        :send_push_notification_on_create,
+        route_type,
+        effect_name
+      )
+
     assigns = %{
       progress: get_step_by_name(socket.assigns.progress.next),
       alert_data:
         Map.merge(alert_data, %{
           combination: combination,
           severity: default_severity,
-          cause_detail: default_cause
+          cause_detail: default_cause,
+          notification_toggle: notification_toggle
         }),
       combination: combination,
       selected_schedules: nil,
