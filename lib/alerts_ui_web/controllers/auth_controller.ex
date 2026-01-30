@@ -34,13 +34,6 @@ defmodule AlertsUIWeb.AuthController do
         } = conn,
         _params
       ) do
-    # auth_time = time of authentication
-    # the instructions suggest using the guardian "verify_claims" function
-    # what is the alternative for plug.session?
-
-    # And separately, we should be refreshing the Guardian token when
-    # the user interacts with the app
-    # and if the token is old (determined by IAT) then the user has been idling too long
     roles = parse_role(userinfo)
     user = User.new(id, email, first_name, last_name, roles)
     {:ok, logout_uri} = logout_uri(auth)
