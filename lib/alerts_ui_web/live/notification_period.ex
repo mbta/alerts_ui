@@ -66,9 +66,9 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
           |> Map.Helpers.stringify_keys()
           |> Map.new()
 
-        Map.merge(socket.assigns.form.params, alert_data)
-
-        Map.merge(assigns, %{edited: true, alert_data: alert_data})
+        form_params = Map.merge(socket.assigns.form.params, alert_data)
+        form = Map.put(socket.assigns.form, :params, form_params)
+        Map.merge(assigns, %{edited: true, alert_data: alert_data, form: form})
       else
         assigns
       end
