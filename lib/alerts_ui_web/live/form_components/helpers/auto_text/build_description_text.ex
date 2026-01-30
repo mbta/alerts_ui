@@ -26,7 +26,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionText do
   defp stops_by_direction(stops, effect, direction) do
     stops
     |> Enum.map(& &1.name)
-    |> Enum.filter(&String.contains?(&1, direction))
+    |> Enum.filter(&(String.contains?(&1, direction) || not (&1 =~ ~r/\(.*?\)/)))
     |> Enum.map(&String.replace(&1, " (#{direction})", ""))
     |> stops_text(direction, effect)
   end

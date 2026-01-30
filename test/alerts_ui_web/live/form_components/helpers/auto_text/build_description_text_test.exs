@@ -13,6 +13,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionTextTest d
 
   @stop_1_bus %Stop{id: "place-lech", name: "Lechmere (inbound)"}
   @stop_2_bus %Stop{id: "place-lngmd", name: "Longwood Medical Area (outbound)"}
+  @stop_3_bus %Stop{id: "730", name: "Franklin St @ Sydney St"}
 
   @route_1 %Route{id: "1", name: "1", direction_names: %{0 => "Westbound", 1 => "Eastbound"}}
   @route_2 %Route{id: "22", name: "22"}
@@ -139,6 +140,20 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionTextTest d
 
       expected =
         "Affected outbound stops:\nLongwood Medical Area\n\nAffected inbound stops:\nLechmere"
+
+      actual = BuildDescriptionText.affected_stops(autotext_data)
+      assert expected == actual
+    end
+
+    test "three stops bus delay, one stop goes both directions" do
+      autotext_data = %{
+        stops: [@stop_1_bus, @stop_2_bus, @stop_3_bus],
+        effect_name: "Delay",
+        route_type: 3
+      }
+
+      expected =
+        "Affected outbound stops:\nLongwood Medical Area\nFranklin St @ Sydney St\n\nAffected inbound stops:\nLechmere\nFranklin St @ Sydney St"
 
       actual = BuildDescriptionText.affected_stops(autotext_data)
       assert expected == actual
