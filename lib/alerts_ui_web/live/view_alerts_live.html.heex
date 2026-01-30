@@ -9,7 +9,7 @@
     <.filter_form form={@form} filter_count={@filter_count} />
   </div>
 
-  <div class="sticky top-0 z-10 flex items-center bg-bg-secondary p-2 text-sm border-t border-border-primary justify-between">
+  <div class="sticky top-0 z-20 flex items-center bg-bg-secondary p-2 text-sm border-t border-border-primary justify-between">
     <span class="w-24">
       {@meta.total_count} {BuildAutoText.maybe_pluralize("alert", @meta.total_count != 1)}
     </span>
@@ -40,7 +40,7 @@
         ],
         thead_th_attrs: [class: "bg-bg-primary px-2 leading-[1.5]"],
         thead_tr_attrs: [
-          class: "lg:sticky lg:top-0 lg:z-20 text-base text-text-primary border-none"
+          class: "md:sticky md:top-0 z-10 text-base text-text-primary border-none"
         ]
       ]}
       row_click={&JS.push("open_details", value: %{alert_id: &1.alert_id})}
