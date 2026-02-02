@@ -302,7 +302,7 @@ defmodule AlertsUI.IBIAlertImporter do
 
               update
               |> ibi_alert_to_changeset(
-                alert,
+                Repo.reload!(alert),
                 no_active_periods: !update_open,
                 no_informed_entities: !update_open
               )
@@ -544,26 +544,30 @@ defmodule AlertsUI.IBIAlertImporter do
   end
 
   def from_ibi(ibi_alert, :duration_certainty) do
-    base_timestamp =
-      if from_ibi(ibi_alert, :alert_timing) == :recurring do
-        ibi_alert.recurrence_end || ibi_alert.recurrence_end_time
-      else
-        ibi_alert.effect_end || ibi_alert.notif_end
-      end
-
-    if base_timestamp do
-      year =
-        base_timestamp
-        |> utc_from_ibi_string()
-        |> Map.get(:year)
-
-      case year do
-        1900 -> :ESTIMATED
-        1901 -> :UNKNOWN
-        _ -> :KNOWN
-      end
+    if ibi_alert.is_closed == 'True' do
+      :KNOWN
     else
-      :UNKNOWN
+      base_timestamp =
+        if from_ibi(ibi_alert, :alert_timing) == :recurring do
+          ibi_alert.recurrence_end || ibi_alert.recurrence_end_time
+        else
+          ibi_alert.effect_end || ibi_alert.notif_end
+        end
+
+      if base_timestamp do
+        year =
+          base_timestamp
+          |> utc_from_ibi_string()
+          |> Map.get(:year)
+
+        case year do
+          1900 -> :ESTIMATED
+          1901 -> :UNKNOWN
+          _ -> :KNOWN
+        end
+      else
+        :UNKNOWN
+      end
     end
   end
 
