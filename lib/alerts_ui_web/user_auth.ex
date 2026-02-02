@@ -26,8 +26,7 @@ defmodule AlertsUIWeb.UserAuth do
   disconnected on log out. The line can be safely removed
   if you are not using LiveView.
   """
-  # todo fix any
-  @spec log_in_user(Conn.t(), User.t(), String.t(), any()) :: Conn.t()
+  @spec log_in_user(Conn.t(), User.t(), String.t(), number()) :: Conn.t()
   def log_in_user(conn, user, logout_uri, auth_time) do
     user_return_to = get_session(conn, :user_return_to)
 

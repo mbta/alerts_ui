@@ -10,7 +10,6 @@ defmodule AlertsUIWeb.ActivityTracker do
     """
   end
 
-  # should we receive socket here or conn?
   @impl true
   def handle_event("activity", _params, socket) do
     now = System.system_time(:second)
