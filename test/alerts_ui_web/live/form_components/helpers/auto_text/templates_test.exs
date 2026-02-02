@@ -455,6 +455,34 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
     end
 
     # ferry
+    test "Ferry dock bypass" do
+      autotext_data = %{
+        route_type: 4,
+        routes: [@route_1],
+        stops: [@stop_1, @stop_2],
+        schedules: [@schedule_1, @schedule_2, @schedule_3],
+        direction: [0],
+        severity: 3,
+        effect_name: "Dock Bypass",
+        alert_timing: :"one-time",
+        start_specifier: :now,
+        end_specifier: :custom,
+        cause_detail: "ICE_IN_HARBOR",
+        start_datetime: ~N[2025-05-08 13:00:00],
+        end_datetime: ~N[2025-05-10 15:00:00]
+      }
+
+      expected =
+        "Route 1 westbound trip 9:01 AM from South Station to Forest Hills and 2 other trips will not stop at Lechmere and Longwood Medical Area today through Sat, May 10 due to ice in harbor"
+
+      actual = Templates.build_auto_text(autotext_data, :header_template)
+      assert expected == actual
+
+      expected_service_effect = "Lechmere and Longwood Medical Area bypassed"
+      actual_service_effect = Templates.build_auto_text(autotext_data, :service_effect_template)
+      assert expected_service_effect == actual_service_effect
+    end
+
     test "Ferry dock closure" do
       autotext_data = %{
         route_type: 4,

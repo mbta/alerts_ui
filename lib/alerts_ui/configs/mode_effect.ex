@@ -298,6 +298,13 @@ defmodule AlertsUI.Configs.ModeEffect do
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
+      "Dock Bypass" => %ModeEffectStruct{
+        combination: :RDTS,
+        default_cause: nil,
+        default_severity: 7,
+        send_push_notification_on_edit: true,
+        prediction_suppression_warning: false
+      },
       "Dock Closure" => %ModeEffectStruct{
         combination: :SR,
         default_cause: nil,
