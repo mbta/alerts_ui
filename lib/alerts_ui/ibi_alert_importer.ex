@@ -183,6 +183,16 @@ defmodule AlertsUI.IBIAlertImporter do
           )
         end)
 
+        SQL.query!(
+          Repo,
+          "update ibi_alerts set notif_end = last_modified_dt where alert_id = '1214' and version_no = '1';"
+        )
+
+        SQL.query!(
+          Repo,
+          "update ibi_alerts set effect_end = notif_end where alert_id in ('2636', '2638', '2641', '2642', '1214', '1303', '1139')'"
+        )
+
         {:ok, true}
       end,
       timeout: :infinity
@@ -544,7 +554,7 @@ defmodule AlertsUI.IBIAlertImporter do
   end
 
   def from_ibi(ibi_alert, :duration_certainty) do
-    if ibi_alert.is_closed == 'True' do
+    if ibi_alert.is_closed == ~c"True" do
       :KNOWN
     else
       base_timestamp =
