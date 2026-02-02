@@ -2,9 +2,13 @@
 
 ## Logging In
 
-- Confirm you're logged out, and cannot access the site
+The steps in this section only apply to non-local environments. In local
+development you will be logged automatically (see README.md).
+
+- Log out of the site
+- Confirm you're logged out by trying to access the site; you should see the MBTA login screen
 - Log in
-- Confirm that you're taken to the alerts list view
+- Confirm that you're taken to the alerts list view at `/alerts`
 
 ## Alerts List View
 
