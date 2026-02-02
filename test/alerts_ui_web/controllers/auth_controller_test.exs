@@ -98,7 +98,8 @@ defmodule AlertsUIWeb.AuthControllerTest do
       extra: %Extra{
         raw_info: %{
           claims: %{
-            "sub" => id
+            "sub" => id,
+            "auth_time" => System.system_time(:second)
           },
           opts: %{
             module: __MODULE__.FakeOidcc,

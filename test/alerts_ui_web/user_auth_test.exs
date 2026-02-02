@@ -13,6 +13,8 @@ defmodule AlertsUIWeb.UserAuthTest do
   alias Phoenix.LiveView
   alias Plug.Conn
 
+  @now System.system_time(:second)
+
   setup %{conn: conn} do
     conn =
       conn
@@ -22,9 +24,9 @@ defmodule AlertsUIWeb.UserAuthTest do
     %{user: user_fixture(), conn: conn}
   end
 
-  describe "log_in_user/3" do
+  describe "log_in_user/4" do
     test "stores the user in the session", %{conn: conn, user: user} do
-      conn = UserAuth.log_in_user(conn, user, logout_uri())
+      conn = UserAuth.log_in_user(conn, user, logout_uri(), @now)
 
       assert session_user = get_session(conn, :user)
       assert session_user == user
@@ -35,16 +37,23 @@ defmodule AlertsUIWeb.UserAuthTest do
     end
 
     test "stores the logout URI in the session", %{conn: conn, user: user} do
-      conn = UserAuth.log_in_user(conn, user, logout_uri())
+      conn = UserAuth.log_in_user(conn, user, logout_uri(), @now)
 
       assert is_binary(get_session(conn, :logout_uri))
+    end
+
+    test "stores the auth time in the session", %{conn: conn, user: user} do
+      last_auth_time = @now
+      conn = UserAuth.log_in_user(conn, user, logout_uri(), last_auth_time)
+
+      assert ^last_auth_time = get_session(conn, :last_auth_time)
     end
 
     test "clears everything previously stored in the session", %{conn: conn, user: user} do
       conn =
         conn
         |> put_session(:to_be_removed, "value")
-        |> UserAuth.log_in_user(user, logout_uri())
+        |> UserAuth.log_in_user(user, logout_uri(), @now)
 
       refute get_session(conn, :to_be_removed)
     end
@@ -53,7 +62,7 @@ defmodule AlertsUIWeb.UserAuthTest do
       conn =
         conn
         |> put_session(:user_return_to, "/hello")
-        |> UserAuth.log_in_user(user, logout_uri())
+        |> UserAuth.log_in_user(user, logout_uri(), @now)
 
       assert redirected_to(conn) == "/hello"
       refute get_session(conn, :user_return_to)
@@ -230,7 +239,12 @@ defmodule AlertsUIWeb.UserAuthTest do
     end
 
     test "does not redirect if user is authenticated", %{conn: conn, user: user} do
-      conn = conn |> assign(:current_user, user) |> UserAuth.require_authenticated_user([])
+      conn =
+        conn
+        |> assign(:current_user, user)
+        |> put_session(:last_auth_time, @now)
+        |> UserAuth.require_authenticated_user([])
+
       refute conn.halted
       refute conn.status
     end

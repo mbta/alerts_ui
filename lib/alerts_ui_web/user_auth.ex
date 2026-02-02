@@ -137,6 +137,19 @@ defmodule AlertsUIWeb.UserAuth do
     end
   end
 
+  @doc """
+  Plug used for routes that require the user to not be authenticated.
+  """
+  def redirect_if_user_is_authenticated(conn, _opts) do
+    if conn.assigns[:current_user] do
+      conn
+      |> redirect(to: signed_in_path(conn))
+      |> halt()
+    else
+      conn
+    end
+  end
+
   def max_session_time do
     Application.get_env(:alerts_ui, __MODULE__)[:max_session_time]
   end
