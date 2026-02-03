@@ -35,8 +35,8 @@ jobs:
       - uses: mbta/actions/deploy-ecs@v2
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          ecs-cluster: alerts-ui
-          ecs-service: alerts-ui-${{ env.TARGET }}
+          ecs-cluster: alerts-manager
+          ecs-service: alerts-manager-${{ env.TARGET }}
           docker-tag: ${{ steps.build-push.outputs.docker-tag }}
       - uses: mbta/actions/notify-slack-deploy@v1
         if: ${{ !cancelled() }}
