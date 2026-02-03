@@ -273,7 +273,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
         class="form-control gap-4"
         id="notification_period_form"
       >
-        <div id="scheduled-selector-div" class="flex flex-col md:flex-row gap-8 my-8">
+        <div id="scheduled-selector-div" class="flex flex-col md:flex-row md:flex-wrap gap-8 my-8">
           <.select
             label="Notification period"
             field={@form[:notification_specifier]}

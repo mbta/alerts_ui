@@ -557,7 +557,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     ~H"""
     <div
       :if={@form[:alert_timing].value in [:"one-time", "one-time"]}
-      class="flex flex-col md:flex-row md:gap-8 md:mt-8"
+      class="flex flex-col md:flex-row md:flex-wrap md:gap-8 md:mt-8"
     >
       <.select
         label="Effect period"
