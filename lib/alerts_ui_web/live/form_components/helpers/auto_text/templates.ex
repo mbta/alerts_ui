@@ -334,7 +334,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     %{
       pattern: {2, "Shuttle"},
       header_template:
-        "?route_names ?direction_name ?trip_names will be replaced by a shuttle bus ?stop_range_between ?alert_duration ?due_to_cause",
+        "?route_names ?direction_name ?trip_names will be replaced by a shuttle bus ?stop_range_between ?alert_duration ?due_to_cause|.",
       description_template: %{
         route_count: 5,
         direction_count: nil,
@@ -358,7 +358,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     %{
       pattern: {2, "Cancellation"},
       header_template:
-        "?route_names ?trip_names ?trip_form cancelled ?alert_duration ?due_to_cause",
+        "?route_names ?trip_names ?trip_form cancelled ?alert_duration ?due_to_cause|.",
       description_template: %{
         route_count: 5,
         direction_count: 1,
@@ -369,7 +369,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     },
     %{
       pattern: {2, "Service Change"},
-      header_template: "?route_names ?trip_names service change ?alert_duration ?due_to_cause",
+      header_template: "?route_names ?trip_names service change ?alert_duration ?due_to_cause|.",
       description_template: %{
         route_count: 5,
         direction_count: 1,
@@ -381,7 +381,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     %{
       pattern: {2, "Suspension"},
       header_template:
-        "?route_names ?direction_name ?trip_names|: service suspended ?stop_range_between ?alert_duration ?due_to_cause",
+        "?route_names ?direction_name ?trip_names|: service suspended ?stop_range_between ?alert_duration ?due_to_cause|.",
       description_template: %{
         route_count: 5,
         stop_count: 0,
@@ -394,7 +394,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     # mode not specified
     %{
       pattern: {"Service Change"},
-      header_template: "?route_names service change ?alert_duration ?due_to_cause",
+      header_template: "?route_names service change ?alert_duration ?due_to_cause|.",
       description_template: %{
         route_count: 5,
         stop_count: 0,
@@ -428,7 +428,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     },
     %{
       pattern: {"Extra Service"},
-      header_template: "Extra service on ?route_names ?alert_duration ?due_to_cause",
+      header_template: "Extra service on ?route_names ?alert_duration ?due_to_cause|.",
       description_template: %{
         route_count: 5,
         stop_count: nil,
@@ -439,7 +439,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     },
     %{
       pattern: {"Station Closure"},
-      header_template: "?stop_names closed ?alert_duration ?due_to_cause",
+      header_template: "?stop_names closed ?alert_duration ?due_to_cause|.",
       description_template: %{
         route_count: 0,
         stop_count: 2,
@@ -462,7 +462,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     },
     %{
       pattern: {"Schedule Change"},
-      header_template: "Planned schedule change on ?route_names ?alert_duration ?due_to_cause",
+      header_template: "Planned schedule change on ?route_names ?alert_duration ?due_to_cause|.",
       description_template: %{
         route_count: 5,
         stop_count: nil,
@@ -473,7 +473,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     },
     %{
       pattern: {"Station Issue"},
-      header_template: "Station issue at ?stop_names ?alert_duration ?due_to_cause",
+      header_template: "Station issue at ?stop_names ?alert_duration ?due_to_cause|.",
       description_template: %{
         route_count: 0,
         stop_count: 2,
@@ -485,7 +485,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     %{
       pattern: {"Station Bypass"},
       header_template:
-        "?route_names ?direction_name ?trip_names will not stop at ?stop_names ?alert_duration ?due_to_cause",
+        "?route_names ?direction_name ?trip_names will not stop at ?stop_names ?alert_duration ?due_to_cause|.",
       description_template: %{
         route_count: 5,
         stop_count: 0,
