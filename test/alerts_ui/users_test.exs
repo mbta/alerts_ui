@@ -6,6 +6,12 @@ defmodule AlertsUI.UsersTest do
 
   import AlertsUI.UsersFixtures
 
+  setup do
+    # Forces the module (and its atoms) to be loaded
+    AlertsUI.Models.User
+    :ok
+  end
+
   describe "users" do
     @invalid_attrs %{email: nil, first_name: nil, last_name: nil}
 
@@ -19,12 +25,12 @@ defmodule AlertsUI.UsersTest do
       assert Users.get_user!(user.id) == user
     end
 
-    test "create_or_update_user/2 with valid data creates a user" do
+    test "create_or_update_user/2 with valid data creates a user; roles is a virtual field" do
       valid_attrs = %{
         email: "some email",
         first_name: "some first_name",
         last_name: "some last_name",
-        role: :user
+        roles: [:viewer]
       }
 
       assert {:ok, %User{} = user} = Users.create_or_update_user(valid_attrs)
@@ -35,14 +41,13 @@ defmodule AlertsUI.UsersTest do
 
     test "create_or_update_user/2 with valid data and existing user updates a user" do
       user = create_db_user()
-      assert user.role == :user
 
       valid_attrs = %{
-        role: :admin
+        first_name: "updated first name"
       }
 
       assert {:ok, %User{} = updated_user} = Users.create_or_update_user(valid_attrs, user)
-      assert updated_user.role == :admin
+      assert updated_user.first_name == "updated first name"
     end
 
     test "create_user/1 with valid data creates a user" do
@@ -50,7 +55,7 @@ defmodule AlertsUI.UsersTest do
         email: "some email",
         first_name: "some first_name",
         last_name: "some last_name",
-        role: :user
+        roles: [:viewer]
       }
 
       assert {:ok, %User{} = user} = Users.create_user(valid_attrs)
@@ -70,7 +75,7 @@ defmodule AlertsUI.UsersTest do
         email: "some updated email",
         first_name: "some updated first_name",
         last_name: "some updated last_name",
-        role: :admin
+        roles: [:viewer, :author]
       }
 
       assert {:ok, %User{} = user} = Users.update_user(user, update_attrs)

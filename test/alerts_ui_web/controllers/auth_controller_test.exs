@@ -20,7 +20,9 @@ defmodule AlertsUIWeb.AuthControllerTest do
 
   describe "GET /auth/:provider/callback" do
     setup %{conn: conn} do
-      user = user_fixture()
+      # Building a user with string roles to mimic the type coming from Keycloak
+      # Conversion to atoms happens during authentication in our app
+      user = user_fixture(["viewer", "author"])
 
       {:ok, conn: conn, user: user}
     end
@@ -28,7 +30,6 @@ defmodule AlertsUIWeb.AuthControllerTest do
     test "given an ueberauth auth, stores the user in the session", %{conn: conn, user: user} do
       id = user.id
       email = user.email
-      role = user.role
 
       conn =
         conn
@@ -40,7 +41,7 @@ defmodule AlertsUIWeb.AuthControllerTest do
       assert %User{
                keycloak_id: ^id,
                email: ^email,
-               role: ^role
+               roles: [:viewer, :author]
              } = session_user
     end
 
@@ -75,7 +76,7 @@ defmodule AlertsUIWeb.AuthControllerTest do
 
   @spec auth_for(User.t()) :: Auth.t()
   @spec auth_for(User.id(), String.t(), String.t() | nil) :: Auth.t()
-  defp auth_for(%User{id: id, email: email, role: role}), do: auth_for(id, email, [role])
+  defp auth_for(%User{id: id, email: email, roles: roles}), do: auth_for(id, email, roles)
 
   defp auth_for(id, email, roles) do
     %Auth{

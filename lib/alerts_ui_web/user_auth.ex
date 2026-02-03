@@ -162,6 +162,20 @@ defmodule AlertsUIWeb.UserAuth do
     end
   end
 
+  def require_roles(conn, opts) do
+    required_roles = Keyword.get(opts, :required_roles, [])
+    user = conn.assigns[:current_user]
+
+    if user && Enum.all?(required_roles, fn x -> x in user.roles end) do
+      conn
+    else
+      conn
+      |> put_flash(:error, "You don't have permission to access that page")
+      |> redirect(to: "/")
+      |> halt()
+    end
+  end
+
   @doc """
   Plug used for API routes that require the user to be authenticated.
   """

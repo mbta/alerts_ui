@@ -37,10 +37,11 @@ defmodule AlertsUIWeb.ConnCase do
     conn = Phoenix.ConnTest.build_conn()
 
     conn =
-      if tags[:logged_in_user] do
-        log_in_user(conn)
-      else
-        conn
+      cond do
+        tags[:logged_in_user] -> log_in_user(conn)
+        tags[:logged_in_developer] -> log_in_user(conn, [:viewer, :developer])
+        tags[:logged_in_viewer] -> log_in_user(conn, [:viewer])
+        true -> conn
       end
 
     {:ok, conn: conn}
@@ -55,6 +56,11 @@ defmodule AlertsUIWeb.ConnCase do
   """
   def log_in_user(conn) do
     user = AlertsUI.UsersFixtures.user_fixture()
+    log_in_user(conn, user)
+  end
+
+  def log_in_user(conn, roles) when is_list(roles) do
+    user = AlertsUI.UsersFixtures.user_fixture(roles)
     log_in_user(conn, user)
   end
 

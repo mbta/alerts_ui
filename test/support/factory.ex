@@ -188,7 +188,7 @@ defmodule AlertsUI.Support.Factory do
       email: "fake@example.com",
       first_name: "Firstname",
       last_name: "Lastname",
-      role: :user
+      roles: [:viewer, :author]
     }
   end
 

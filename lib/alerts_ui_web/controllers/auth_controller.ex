@@ -34,8 +34,8 @@ defmodule AlertsUIWeb.AuthController do
         } = conn,
         _params
       ) do
-    role = parse_role(userinfo)
-    user = User.new(id, email, first_name, last_name, role)
+    roles = parse_role(userinfo)
+    user = User.new(id, email, first_name, last_name, roles)
     {:ok, logout_uri} = logout_uri(auth)
 
     UserAuth.log_in_user(conn, user, logout_uri)
@@ -66,21 +66,13 @@ defmodule AlertsUIWeb.AuthController do
     |> halt()
   end
 
-  # Parse the user's role from the access token provided by Keycloak
-  @spec parse_role(map()) :: User.role()
-  defp parse_role(%{"resource_access" => %{"alerts-ui" => %{"roles" => roles}}}),
-    do: highest_role(roles)
+  # Parse the user's roles from the access token provided by Keycloak
+  @spec parse_role(map()) :: [User.role()]
+  defp parse_role(%{"resource_access" => %{"alerts-ui" => %{"roles" => roles}}})
+       when is_list(roles),
+       do: roles |> Enum.map(&String.to_existing_atom/1)
 
-  defp parse_role(_), do: :user
-
-  @spec highest_role([String.t()]) :: User.role()
-  defp highest_role(roles) when is_list(roles) do
-    if Enum.member?(roles, "admin") do
-      :admin
-    else
-      :user
-    end
-  end
+  defp parse_role(_), do: [:viewer]
 
   @spec logout_uri(map()) :: {:ok, String.t()}
   defp logout_uri(%Ueberauth.Auth{strategy: Ueberauth.Strategy.FakeKeycloak}) do

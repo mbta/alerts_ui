@@ -1091,6 +1091,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       end
     end
 
+    @tag :logged_in_user
     test "creation metadata sidebar when editing", %{
       conn: conn
     } do
@@ -1115,7 +1116,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # create an alert
-        user = user_fixture(:user, %{first_name: "original", last_name: "user"})
+        user = user_fixture([:viewer, :author], %{first_name: "original", last_name: "user"})
         conn = AlertsUIWeb.ConnCase.log_in_user(conn, user)
         {:ok, view, _html} = live(conn, "/alerts/new")
 
@@ -1145,7 +1146,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
           |> String.replace(" created", "")
 
         # edit it with a different user
-        user = user_fixture(:user, %{first_name: "second", last_name: "seconduser"})
+        user = user_fixture([:viewer, :author], %{first_name: "second", last_name: "seconduser"})
         conn = AlertsUIWeb.ConnCase.log_in_user(conn, user)
 
         no_timestamp_today =
@@ -1162,7 +1163,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         assert render(view) =~ ~r/Last edited by.*second seconduser/s
 
         # edit it a second time to check that the created_by name remains correct
-        user = user_fixture(:user, %{first_name: "final", last_name: "finaluser"})
+        user = user_fixture([:viewer, :author], %{first_name: "final", last_name: "finaluser"})
         conn = AlertsUIWeb.ConnCase.log_in_user(conn, user)
 
         {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=#{alert_id}")
@@ -1316,6 +1317,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
           target_id={@target_id}
           cancel_alert={@cancel_alert}
           alert_data={@alert_data}
+          current_user={build(:user)}
         />
         """)
 
@@ -1344,6 +1346,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
           target_id={@target_id}
           cancel_alert={@cancel_alert}
           alert_data={@alert_data}
+          current_user={build(:user)}
         />
         """)
 
@@ -1371,6 +1374,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
           target_id={@target_id}
           cancel_alert={@cancel_alert}
           alert_data={@alert_data}
+          current_user={build(:user)}
         />
         """)
 
@@ -1399,6 +1403,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
           target_id={@target_id}
           cancel_alert={@cancel_alert}
           alert_data={@alert_data}
+          current_user={build(:user)}
         />
         """)
 

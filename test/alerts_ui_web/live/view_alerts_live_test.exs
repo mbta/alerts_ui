@@ -80,6 +80,28 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         assert view |> render_click("sort-alerts", %{"order" => "active_period_start"}) =~ "123"
       end
     end
+
+    @tag :logged_in_user
+    test "create button exists for authors", %{conn: conn} do
+      with_mock(RoutesRepo, [],
+        all: fn -> [] end,
+        get: fn route_id -> %{name: route_id} end
+      ) do
+        {:ok, view, _html} = live(conn, "/alerts")
+        assert view |> has_element?("span", "Create new alert")
+      end
+    end
+
+    @tag :logged_in_viewer
+    test "create button doesn't exists for non-authors", %{conn: conn} do
+      with_mock(RoutesRepo, [],
+        all: fn -> [] end,
+        get: fn route_id -> %{name: route_id} end
+      ) do
+        {:ok, view, _html} = live(conn, "/alerts")
+        refute view |> has_element?("span", "Create new alert")
+      end
+    end
   end
 
   describe "filtering" do
@@ -965,12 +987,13 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         all: fn -> [] end,
         get: fn route_id -> %{name: route_id} end
       ) do
-        {:ok, _view, html} =
+        {:ok, view, html} =
           live(conn, "/alerts?filter[timeline]=past")
 
         refute html =~ ~s(<span class="hero-pencil-solid w-4 h-4"></span>)
         refute html =~ ~s(<span class="hero-x-mark-solid w-4 h-4"></span>)
         assert html =~ ~s(<span class="hero-ellipsis-vertical w-4 h-4"></span>)
+        assert view |> has_element?("#duplicate-button-123")
       end
     end
 
@@ -993,10 +1016,56 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
           original_route_selections: ["1", "2"]
         })
 
-        {:ok, _view, html} = live(conn, "/alerts")
+        {:ok, view, html} = live(conn, "/alerts")
 
         assert html =~ ~s(<span class="hero-pencil-solid w-4 h-4"></span>)
         assert html =~ ~s(<span class="hero-x-mark-solid w-4 h-4"></span>)
+        assert view |> has_element?("#duplicate-button-345")
+      end
+    end
+
+    @tag :logged_in_viewer
+    test "view-only actions display for closed alerts", %{conn: conn} do
+      with_mock(RoutesRepo, [],
+        all: fn -> [] end,
+        get: fn route_id -> %{name: route_id} end
+      ) do
+        {:ok, view, html} =
+          live(conn, "/alerts?filter[timeline]=past")
+
+        refute html =~ ~s(<span class="hero-pencil-solid w-4 h-4"></span>)
+        refute html =~ ~s(<span class="hero-x-mark-solid w-4 h-4"></span>)
+        assert html =~ ~s(<span class="hero-ellipsis-vertical w-4 h-4"></span>)
+        refute view |> has_element?("#duplicate-button-123")
+        assert view |> has_element?("#download-history-button-123")
+      end
+    end
+
+    @tag :logged_in_viewer
+    test "view-only actions display for open alerts", %{conn: conn} do
+      with_mock(RoutesRepo, [],
+        all: fn -> [] end,
+        get: fn route_id -> %{name: route_id} end
+      ) do
+        insert(:alert, %{
+          alert_id: "345",
+          active_period: [
+            build(:active_period, %{start: ~U[2023-10-12 00:01:00Z]}),
+            build(:active_period, %{start: ~U[2023-10-13 00:01:00Z]})
+          ],
+          active_period_start: ~U[2023-10-12 00:01:00Z],
+          duration_certainty: :UNKNOWN,
+          header_text: "this is the third alert",
+          effect_detail: "DETOUR",
+          original_route_selections: ["1", "2"]
+        })
+
+        {:ok, view, html} = live(conn, "/alerts")
+
+        refute html =~ ~s(<span class="hero-pencil-solid w-4 h-4"></span>)
+        refute html =~ ~s(<span class="hero-x-mark-solid w-4 h-4"></span>)
+        refute view |> has_element?("#duplicate-button-345")
+        assert view |> has_element?("#download-history-button-345")
       end
     end
 

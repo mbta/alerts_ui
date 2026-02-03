@@ -11,7 +11,7 @@ defmodule Ueberauth.Strategy.FakeKeycloak do
   @email "fake@example.com"
   @first_name "Fake"
   @last_name "User"
-  @roles ["user"]
+  @roles ["viewer", "author", "developer"]
   @token "fake_access_token"
 
   @impl Strategy

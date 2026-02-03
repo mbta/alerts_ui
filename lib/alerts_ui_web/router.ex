@@ -38,6 +38,15 @@ defmodule AlertsUIWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :require_author do
+    plug :require_roles, required_roles: [:author]
+  end
+
+  pipeline :require_developer do
+    plug :require_roles, required_roles: [:developer]
+  end
+
+  # So far, no unauth views. All endpoints require the user to be in keycloak
   scope "/", AlertsUIWeb do
     # Unauthenticated pages
     pipe_through [:redirect_prod_http, :browser]
@@ -45,6 +54,7 @@ defmodule AlertsUIWeb.Router do
     get("/help", PageController, :help)
   end
 
+  # Viewers
   scope "/", AlertsUIWeb do
     # Authenticated pages
     pipe_through [:redirect_prod_http, :browser, :require_authenticated_user]
@@ -61,13 +71,42 @@ defmodule AlertsUIWeb.Router do
         AlertsUIWeb.PreloadCacheOnMount
       ] do
       live("/alerts", ViewAlertsLive)
+      live("/components", ComponentsLive)
+    end
+  end
+
+  # Authors
+  scope "/", AlertsUIWeb do
+    # Authenticated pages
+    pipe_through [:redirect_prod_http, :browser, :require_authenticated_user, :require_author]
+
+    live_session :require_author,
+      on_mount: [
+        {AlertsUIWeb.UserAuth, :ensure_authenticated},
+        AlertsUIWeb.PutFlagsInAssignsHook,
+        AlertsUIWeb.PutEnvironmentInAssigns,
+        AlertsUIWeb.PreloadCacheOnMount
+      ] do
       live("/alerts/new", CreateAlertLive, :new)
       live("/alerts/edit", CreateAlertLive, :edit)
       live("/alerts/duplicate", CreateAlertLive, :duplicate)
+    end
+  end
 
-      # "Hidden" pages, except still accessible without the feature flag
-      # (Will need to fix before launch)
-      live("/components", ComponentsLive)
+  # Developers
+  scope "/", AlertsUIWeb do
+    # Authenticated pages
+    pipe_through [:redirect_prod_http, :browser, :require_authenticated_user, :require_developer]
+
+    get("/_version", VersionController, :index)
+
+    live_session :require_developer,
+      on_mount: [
+        {AlertsUIWeb.UserAuth, :ensure_authenticated},
+        AlertsUIWeb.PutFlagsInAssignsHook,
+        AlertsUIWeb.PutEnvironmentInAssigns,
+        AlertsUIWeb.PreloadCacheOnMount
+      ] do
       live("/validate", ValidateLive)
       live("/db", DBPageLive)
       live("/import", IBIImporterLive)
@@ -75,7 +114,7 @@ defmodule AlertsUIWeb.Router do
   end
 
   scope "/_flags", Laboratory do
-    pipe_through(:browser)
+    pipe_through [:browser, :require_developer]
     forward "/", Router
   end
 
@@ -98,7 +137,6 @@ defmodule AlertsUIWeb.Router do
 
   scope "/", AlertsUIWeb do
     get("/_health", HealthController, :index)
-    get("/_version", VersionController, :index)
   end
 
   # Other scopes may use custom stacks.
@@ -117,7 +155,7 @@ defmodule AlertsUIWeb.Router do
     import Phoenix.LiveDashboard.Router
 
     scope "/dev" do
-      pipe_through [:redirect_prod_http, :browser]
+      pipe_through [:redirect_prod_http, :browser, :require_developer]
 
       live_dashboard "/dashboard", metrics: AlertsUIWeb.Telemetry
     end

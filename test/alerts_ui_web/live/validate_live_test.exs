@@ -19,13 +19,13 @@ defmodule AlertsUIWeb.ValidateLiveTest do
       end)
     end
 
-    @tag :logged_in_user
+    @tag :logged_in_developer
     test "connected mount displays a list of alerts when logged in", %{conn: conn} do
       {:ok, _view, html} = live(conn, "/validate")
       assert html =~ ~r/Validate Alert Feeds/
     end
 
-    @tag :logged_in_user
+    @tag :logged_in_developer
     test "handles a search for an IBI alert ID", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/validate")
 
@@ -35,7 +35,7 @@ defmodule AlertsUIWeb.ValidateLiveTest do
       assert render_change(view, "search", %{"ibi_alert_id" => "1"})
     end
 
-    @tag :logged_in_user
+    @tag :logged_in_developer
     test "handles a search for a dev-orange alert ID", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/validate")
 
