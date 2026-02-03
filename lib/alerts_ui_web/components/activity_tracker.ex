@@ -1,4 +1,7 @@
 defmodule AlertsUIWeb.ActivityTracker do
+  @moduledoc """
+  Component tracks user movement in the app to decide when to expire their session based on idleness
+  """
   use AlertsUIWeb, :live_component
 
   alias AlertsUIWeb.UserAuth

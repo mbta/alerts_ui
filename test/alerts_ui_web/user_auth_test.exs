@@ -192,11 +192,13 @@ defmodule AlertsUIWeb.UserAuthTest do
 
   describe "redirect_if_user_is_authenticated/2" do
     test "redirects if user is authenticated", %{conn: conn, user: user} do
-      conn = conn
+      conn =
+        conn
         |> assign(:current_user, user)
         |> put_session(:last_auth_time, @now)
         |> put_session(:last_active, @now)
         |> UserAuth.redirect_if_user_is_authenticated([])
+
       assert conn.halted
       assert redirected_to(conn) == ~p"/"
     end

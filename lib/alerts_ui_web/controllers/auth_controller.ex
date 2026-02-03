@@ -72,7 +72,6 @@ defmodule AlertsUIWeb.AuthController do
        when is_list(roles),
        do: roles |> Enum.map(&String.to_existing_atom/1)
 
-  #  TODO: reject non-viewers
   defp parse_role(_), do: [:viewer]
 
   @spec logout_uri(map()) :: {:ok, String.t()}
