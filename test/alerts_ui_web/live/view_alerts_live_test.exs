@@ -83,7 +83,10 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
     @tag :logged_in_user
     test "create button exists for authors", %{conn: conn} do
-      with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
+      with_mock(RoutesRepo, [],
+        all: fn -> [] end,
+        get: fn route_id -> %{name: route_id} end
+      ) do
         {:ok, view, _html} = live(conn, "/alerts")
         assert view |> has_element?("span", "Create new alert")
       end
@@ -91,7 +94,10 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
     @tag :logged_in_viewer
     test "create button doesn't exists for non-authors", %{conn: conn} do
-      with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
+      with_mock(RoutesRepo, [],
+        all: fn -> [] end,
+        get: fn route_id -> %{name: route_id} end
+      ) do
         {:ok, view, _html} = live(conn, "/alerts")
         refute view |> has_element?("span", "Create new alert")
       end
@@ -1020,7 +1026,10 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
     @tag :logged_in_viewer
     test "view-only actions display for closed alerts", %{conn: conn} do
-      with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
+      with_mock(RoutesRepo, [],
+        all: fn -> [] end,
+        get: fn route_id -> %{name: route_id} end
+      ) do
         {:ok, view, html} =
           live(conn, "/alerts?filter[timeline]=past")
 
@@ -1034,7 +1043,10 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
     @tag :logged_in_viewer
     test "view-only actions display for open alerts", %{conn: conn} do
-      with_mock(RoutesRepo, get: fn route_id -> %{name: route_id} end) do
+      with_mock(RoutesRepo, [],
+        all: fn -> [] end,
+        get: fn route_id -> %{name: route_id} end
+      ) do
         insert(:alert, %{
           alert_id: "345",
           active_period: [
