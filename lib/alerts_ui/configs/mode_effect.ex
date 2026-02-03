@@ -4,6 +4,7 @@ defmodule AlertsUI.Models.ModeEffectStruct do
     :combination,
     :default_cause,
     :default_severity,
+    :send_push_notification_on_create,
     :send_push_notification_on_edit,
     :prediction_suppression_warning
   ]
@@ -12,6 +13,7 @@ defmodule AlertsUI.Models.ModeEffectStruct do
           combination: atom(),
           default_cause: String.t() | nil,
           default_severity: integer(),
+          send_push_notification_on_create: boolean(),
           send_push_notification_on_edit: boolean(),
           prediction_suppression_warning: boolean()
         }
@@ -30,6 +32,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :RDS,
         default_cause: nil,
         default_severity: 3,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -37,6 +40,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :R,
         default_cause: nil,
         default_severity: 3,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -44,6 +48,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :R,
         default_cause: nil,
         default_severity: 3,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -51,6 +56,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :RDS,
         default_cause: nil,
         default_severity: 3,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -58,6 +64,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :RDS,
         default_cause: nil,
         default_severity: 7,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: true
       },
@@ -65,6 +72,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :RDS,
         default_cause: "SINGLE_TRACKING",
         default_severity: 1,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -72,6 +80,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :RDS,
         default_cause: nil,
         default_severity: 7,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -79,6 +88,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :SR,
         default_cause: nil,
         default_severity: 7,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -86,6 +96,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :SR,
         default_cause: nil,
         default_severity: 1,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -93,6 +104,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :RDS,
         default_cause: nil,
         default_severity: 7,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: true
       }
@@ -102,6 +114,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :RDT,
         default_cause: nil,
         default_severity: 5,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
         prediction_suppression_warning: true
       },
@@ -109,6 +122,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :RDTS,
         default_cause: nil,
         default_severity: 3,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
         prediction_suppression_warning: false
       },
@@ -116,6 +130,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :R,
         default_cause: nil,
         default_severity: 3,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
         prediction_suppression_warning: false
       },
@@ -123,6 +138,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :R,
         default_cause: nil,
         default_severity: 3,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
         prediction_suppression_warning: false
       },
@@ -130,6 +146,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :RDTS,
         default_cause: nil,
         default_severity: 3,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
         prediction_suppression_warning: false
       },
@@ -137,6 +154,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :RDTS,
         default_cause: nil,
         default_severity: 7,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
         prediction_suppression_warning: true
       },
@@ -144,6 +162,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :RDTS,
         default_cause: nil,
         default_severity: 7,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
         prediction_suppression_warning: false
       },
@@ -151,6 +170,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :SR,
         default_cause: nil,
         default_severity: 7,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
         prediction_suppression_warning: false
       },
@@ -158,6 +178,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :SR,
         default_cause: nil,
         default_severity: 1,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
         prediction_suppression_warning: false
       },
@@ -165,6 +186,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :RDTS,
         default_cause: nil,
         default_severity: 7,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
         prediction_suppression_warning: true
       },
@@ -172,6 +194,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :RDTS,
         default_cause: nil,
         default_severity: 7,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
         prediction_suppression_warning: false
       }
@@ -181,6 +204,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :RDS,
         default_cause: nil,
         default_severity: 4,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -188,6 +212,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :RDS,
         default_cause: nil,
         default_severity: 7,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -195,6 +220,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :R,
         default_cause: nil,
         default_severity: 3,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -202,6 +228,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :SR,
         default_cause: nil,
         default_severity: 7,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -209,6 +236,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :R,
         default_cause: nil,
         default_severity: 3,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -216,6 +244,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :RDS,
         default_cause: nil,
         default_severity: 3,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -223,6 +252,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :RDS,
         default_cause: nil,
         default_severity: 5,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -230,6 +260,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :SR,
         default_cause: nil,
         default_severity: 5,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -237,6 +268,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :SR,
         default_cause: nil,
         default_severity: 1,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -244,6 +276,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :RDS,
         default_cause: nil,
         default_severity: 7,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: true
       }
@@ -253,6 +286,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :RDT,
         default_cause: nil,
         default_severity: 5,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: true
       },
@@ -260,13 +294,22 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :RDTS,
         default_cause: nil,
         default_severity: 3,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
+        prediction_suppression_warning: false
+      },
+      "Dock Bypass" => %ModeEffectStruct{
+        combination: :RDTS,
+        default_cause: nil,
+        default_severity: 7,
+        send_push_notification_on_edit: true,
         prediction_suppression_warning: false
       },
       "Dock Closure" => %ModeEffectStruct{
         combination: :SR,
         default_cause: nil,
         default_severity: 5,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -274,6 +317,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :SR,
         default_cause: nil,
         default_severity: 1,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -281,6 +325,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :R,
         default_cause: nil,
         default_severity: 3,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -288,6 +333,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :R,
         default_cause: nil,
         default_severity: 3,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -295,6 +341,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :RDTS,
         default_cause: nil,
         default_severity: 3,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -302,6 +349,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :RDTS,
         default_cause: nil,
         default_severity: 7,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: true
       },
@@ -309,6 +357,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :RDTS,
         default_cause: nil,
         default_severity: 7,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: true
       }
@@ -318,6 +367,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :ACCESS,
         default_cause: nil,
         default_severity: 3,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -325,6 +375,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :ACCESS,
         default_cause: nil,
         default_severity: 3,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -332,6 +383,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :ACCESS,
         default_cause: nil,
         default_severity: 3,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -339,6 +391,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :ACCESS,
         default_cause: nil,
         default_severity: 3,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -346,6 +399,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :ACCESS,
         default_cause: nil,
         default_severity: 3,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -353,6 +407,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :ACCESS,
         default_cause: nil,
         default_severity: 3,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -360,6 +415,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :ACCESS,
         default_cause: nil,
         default_severity: 3,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       }
@@ -369,6 +425,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: nil,
         default_cause: nil,
         default_severity: 3,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -376,6 +433,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: nil,
         default_cause: nil,
         default_severity: 5,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -383,6 +441,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: nil,
         default_cause: nil,
         default_severity: 3,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -390,6 +449,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: nil,
         default_cause: nil,
         default_severity: 3,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -397,6 +457,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: nil,
         default_cause: nil,
         default_severity: 3,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -404,6 +465,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: nil,
         default_cause: nil,
         default_severity: 7,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -411,6 +473,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: nil,
         default_cause: nil,
         default_severity: 1,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
@@ -418,6 +481,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: nil,
         default_cause: nil,
         default_severity: 7,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       }

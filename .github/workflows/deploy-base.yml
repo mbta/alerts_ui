@@ -1,0 +1,46 @@
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+    secrets:
+      AWS_ROLE_ARN:
+        required: true
+      DOCKER_REPO:
+        required: true
+      SLACK_WEBHOOK:
+        required: true
+
+
+jobs:
+  deploy:
+    name: Deploy Alerts Manager to ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    environment: ${{ inputs.environment }}
+    concurrency: ${{ inputs.environment }}
+    env:
+      TARGET: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: mbta/actions/build-push-ecr@v2
+        id: build-push
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          docker-repo: ${{ secrets.DOCKER_REPO }}
+          docker-additional-args: "--build-arg GIT_SHA=${{github.sha}}"
+      - uses: mbta/actions/deploy-ecs@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          ecs-cluster: alerts-ui
+          ecs-service: alerts-ui-${{ env.TARGET }}
+          docker-tag: ${{ steps.build-push.outputs.docker-tag }}
+      - uses: mbta/actions/notify-slack-deploy@v1
+        if: ${{ !cancelled() }}
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+          job-status: ${{ job.status }}
+          custom-message: "(${{ env.TARGET }})"

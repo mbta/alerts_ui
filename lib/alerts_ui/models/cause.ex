@@ -131,7 +131,8 @@ defmodule AlertsUI.Models.Cause do
           "TIE_REPLACEMENT" => :MAINTENANCE,
           "TRACK_WORK" => :CONSTRUCTION,
           "TRAIN_TRAFFIC" => :OTHER_CAUSE,
-          "UNRULY_PASSENGER" => :POLICE_ACTIVITY
+          "UNRULY_PASSENGER" => :POLICE_ACTIVITY,
+          "WEATHER" => :WEATHER
         }
 
       3 ->

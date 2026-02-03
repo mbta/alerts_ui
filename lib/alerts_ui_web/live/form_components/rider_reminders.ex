@@ -47,16 +47,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
         true -> nil
       end
 
-    notification_end =
-      if Map.get(alert_data, :notification_period_end) in ["", nil] do
-        if Map.get(alert_data, :active_period_end) in ["", nil] do
-          ~N[9999-12-31 23:59:59]
-        else
-          Map.get(alert_data, :active_period_end)
-        end
-      else
-        alert_data.notification_period_end
-      end
+    notification_end = calculate_notification_end(alert_data)
 
     processed_reminder_times =
       (Map.get(alert_data, :reminder_times, []) || [])
@@ -100,6 +91,20 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
       drop_param: :reminder_drop,
       with: &reminder_changeset/3
     )
+  end
+
+  defp calculate_notification_end(%{} = alert_data) do
+    unbounded = Map.get(alert_data, :active_period_end_specifier) == :until_further_notice
+    unspecified_notification_end = Map.get(alert_data, :notification_period_end) in ["", nil]
+    unspecified_active_end = Map.get(alert_data, :active_period_end) in ["", nil]
+    forever = ~N[9999-12-31 23:59:59]
+
+    cond do
+      unbounded -> forever
+      unspecified_notification_end && unspecified_active_end -> forever
+      unspecified_notification_end -> Map.get(alert_data, :active_period_end)
+      true -> alert_data.notification_period_end
+    end
   end
 
   def reminder_changeset(reminder_time, params, _cardinality) do
@@ -183,13 +188,6 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
 
   @impl true
   def render(assigns) do
-    active_period_end = Map.get(assigns.alert_data, :active_period_end)
-
-    assigns =
-      assign(assigns, %{
-        active_period_end: naive_datetime_to_iso8601(active_period_end)
-      })
-
     ~H"""
     <div class="min-w-full flex flex-col mt-8" id="rider_reminder_view">
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
@@ -207,7 +205,6 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
             <div class="flex flex-row mb-4" id={"reminder-time-component-#{rt.index}"}>
               <.reminder_input
                 editable={ReminderTimes.editable?(rt[:id].value, rt[:reminder_time].value)}
-                active_period_end={@active_period_end}
                 current_time={@current_time}
                 field={rt[:reminder_time]}
                 id={rt[:id].value}
@@ -237,7 +234,6 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
   attr :index, :any
   attr :id, :string
   attr :editable, :any, default: true
-  attr :active_period_end, DateTime
   attr :notification_start, DateTime
   attr :notification_end, DateTime
   attr :current_time, DateTime
@@ -253,7 +249,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
     <input
       type="hidden"
       name={"rider_reminders[reminder_times][#{@index}][max_time]"}
-      value={@active_period_end}
+      value={@notification_end |> naive_datetime_to_iso8601()}
     />
     <input type="hidden" name={"rider_reminders[reminder_times][#{@index}][id]"} value={@id} />
     <input

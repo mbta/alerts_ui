@@ -38,26 +38,31 @@
         >
           Validate Feeds
         </a>
-        <%= if @current_user do %>
-          <div class="whitespace-nowrap hidden lg:block">
-            <.icon name="hero-user-solid" />
-            {@current_user.email}
-          </div>
-          <.link
-            href={~p"/auth/keycloak/logout"}
-            method="delete"
-            class="text-sm leading-6 text-primary hover:underline hover:text-primary-hover whitespace-nowrap"
-          >
-            <.icon name="hero-arrow-right-on-rectangle" /> Logout
-          </.link>
-        <% else %>
-          <.link
-            href={~p"/auth/keycloak"}
-            class="text-sm leading-6 text-primary hover:underline hover:text-primary-hover whitespace-nowrap"
-          >
-            <.icon name="hero-arrow-left-on-rectangle" /> Login
-          </.link>
-        <% end %>
+        <div :if={@current_user} class="whitespace-nowrap hidden lg:block">
+          <.icon name="hero-user-solid" />
+          {@current_user.email}
+        </div>
+        <.link
+          href={~p"/help"}
+          class="text-sm leading-6 text-primary hover:underline hover:text-primary-hover whitespace-nowrap"
+        >
+          <.icon name="hero-question-mark-circle" class="mx-1" />Help
+        </.link>
+        <.link
+          :if={@current_user}
+          href={~p"/auth/keycloak/logout"}
+          method="delete"
+          class="text-sm leading-6 text-primary hover:underline hover:text-primary-hover whitespace-nowrap"
+        >
+          <.icon name="hero-arrow-right-on-rectangle" class="mx-1" />Logout
+        </.link>
+        <.link
+          :if={!@current_user}
+          href={~p"/auth/keycloak"}
+          class="text-sm leading-6 text-primary hover:underline hover:text-primary-hover whitespace-nowrap"
+        >
+          <.icon name="hero-arrow-left-on-rectangle" class="mx-1" />Login
+        </.link>
       </div>
     </div>
   </header>

@@ -61,6 +61,7 @@ defmodule AlertsUI.Models.Alert do
   recurrence_text
   alert_lifecycle
   duration_certainty
+  notification_duration_certainty
   tts_header_text
   tts_description_text
   image_url
@@ -103,6 +104,7 @@ defmodule AlertsUI.Models.Alert do
           description_text: String.t(),
           draft: boolean(),
           duration_certainty: atom() | nil,
+          notification_duration_certainty: atom() | nil,
           effect: atom() | nil,
           effect_detail: String.t() | nil,
           effect_name: String.t() | nil,
@@ -221,6 +223,7 @@ defmodule AlertsUI.Models.Alert do
     field :recurrence_text, :string
     field :alert_lifecycle, Ecto.Enum, values: @alert_lifecycle
     field :duration_certainty, Ecto.Enum, values: @duration_certainty
+    field :notification_duration_certainty, Ecto.Enum, values: @duration_certainty
     has_many :reminder_times, ReminderTime, on_replace: :delete_if_exists
     has_many :active_period, ActivePeriod, on_replace: :delete_if_exists
     field :active_period_start, :utc_datetime
@@ -286,9 +289,25 @@ defmodule AlertsUI.Models.Alert do
     |> unique_constraint(:alert_id, name: :alerts_alert_id_index)
   end
 
-  def get_direction([]), do: nil
+  def get_direction(%__MODULE__{} = alert) do
+    if alert.legacy do
+      get_direction_from_original_selections(alert)
+    else
+      get_direction_from_informed_entities(alert.informed_entity)
+    end
+  end
 
-  def get_direction(informed_entities) do
+  defp get_direction_from_original_selections(alert) do
+    case alert.original_direction_selections do
+      [] -> nil
+      [direction] -> get_route_id(direction)
+      [direction | _] -> get_route_id(direction)
+    end
+  end
+
+  defp get_direction_from_informed_entities([]), do: nil
+
+  defp get_direction_from_informed_entities(informed_entities) do
     directions_list =
       informed_entities
       |> Enum.map(fn ie ->
@@ -360,28 +379,102 @@ defmodule AlertsUI.Models.Alert do
     end
   end
 
-  def gather_route_ids(informed_entities) do
+  def gather_route_ids(%__MODULE__{} = alert) do
+    if alert.legacy do
+      gather_route_ids_from_original_selections(alert)
+    else
+      gather_route_ids_from_informed_entities(alert.informed_entity)
+    end
+  end
+
+  def gather_facility_ids(%__MODULE__{} = alert) do
+    if alert.legacy do
+      gather_facility_ids_from_original_selections(alert)
+    else
+      gather_facility_ids_from_informed_entities(alert.informed_entity)
+    end
+  end
+
+  def gather_stop_ids(%__MODULE__{} = alert) do
+    if alert.legacy do
+      gather_stop_ids_from_original_selections(alert)
+    else
+      gather_stop_ids_from_informed_entities(alert.informed_entity)
+    end
+  end
+
+  def gather_parent_stop_ids(%__MODULE__{} = alert) do
+    if alert.legacy do
+      gather_parent_stop_ids_from_original_selections(alert)
+    else
+      gather_parent_stop_ids_from_informed_entities(alert.informed_entity)
+    end
+  end
+
+  def gather_trip_ids(%__MODULE__{} = alert) do
+    if alert.legacy do
+      gather_trip_ids_from_original_selections(alert)
+    else
+      gather_trip_ids_from_informed_entities(alert.informed_entity)
+    end
+  end
+
+  defp gather_route_ids_from_original_selections(alert) do
+    alert.original_route_selections
+    |> Enum.map(&get_route_id(&1))
+    |> Enum.uniq()
+  end
+
+  defp gather_facility_ids_from_original_selections(alert) do
+    alert.original_facility_selections
+    |> Enum.map(&get_route_id(&1))
+    |> Enum.uniq()
+  end
+
+  defp gather_stop_ids_from_original_selections(alert) do
+    alert.original_stop_selections
+    |> Enum.map(&get_route_id(&1))
+    |> Enum.uniq()
+  end
+
+  defp gather_parent_stop_ids_from_original_selections(alert) do
+    alert
+    |> gather_stop_ids_from_original_selections()
+    |> Enum.map(fn stop_id ->
+      parent_stop = StopsRepo.get_parent(stop_id) || %{}
+      Map.get(parent_stop, :id) || stop_id
+    end)
+    |> Enum.uniq()
+  end
+
+  defp gather_trip_ids_from_original_selections(alert) do
+    alert.original_trip_selections
+    |> Enum.map(&get_route_id(&1))
+    |> Enum.uniq()
+  end
+
+  defp gather_route_ids_from_informed_entities(informed_entities) do
     informed_entities
     |> Enum.map(&Map.get(&1, :route_id))
     |> Enum.filter(&(!is_nil(&1)))
     |> Enum.uniq()
   end
 
-  def gather_facility_ids(informed_entities) do
+  defp gather_facility_ids_from_informed_entities(informed_entities) do
     informed_entities
     |> Enum.map(&Map.get(&1, :facility_id))
     |> Enum.reject(&is_nil/1)
     |> Enum.uniq()
   end
 
-  def gather_stop_ids(informed_entities) do
+  defp gather_stop_ids_from_informed_entities(informed_entities) do
     informed_entities
     |> Enum.map(&Map.get(&1, :stop_id))
     |> Enum.reject(&is_nil/1)
     |> Enum.uniq()
   end
 
-  def gather_parent_stop_ids(informed_entities) do
+  defp gather_parent_stop_ids_from_informed_entities(informed_entities) do
     informed_entities
     |> Enum.map(fn ie ->
       ie_stop_id = Map.get(ie, :stop_id)
@@ -392,7 +485,7 @@ defmodule AlertsUI.Models.Alert do
     |> Enum.uniq()
   end
 
-  def gather_trip_ids(informed_entities) do
+  def gather_trip_ids_from_informed_entities(informed_entities) do
     informed_entities
     |> Enum.map(fn ie ->
       case Map.get(ie, :trip) do

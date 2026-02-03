@@ -133,6 +133,7 @@ defmodule AlertsUI.Models.Effect do
       {"Cancellation", :NO_SERVICE, "CANCELLATION"},
       {"Delay", :OTHER_EFFECT, "DELAY"},
       {"Detour", :DETOUR, "DETOUR"},
+      {"Dock Bypass", :NO_SERVICE, "DOCK_CLOSURE"},
       {"Dock Closure", :NO_SERVICE, "DOCK_CLOSURE"},
       {"Dock Issue", :UNKNOWN_EFFECT, "DOCK_ISSUE"},
       {"Elevator Closure", :ACCESSIBILITY_ISSUE, "ELEVATOR_CLOSURE"},

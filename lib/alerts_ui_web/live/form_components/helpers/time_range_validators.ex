@@ -377,12 +377,17 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
   defp start_error(true, "recurring", _),
     do: [active_period_start_date: "Effect can't start in the past"]
 
-  def validate_start_is_before_trip(changeset, nil), do: changeset
+  @spec validate_start_is_before_trip(Ecto.Changeset.t(), NaiveDateTime.t() | nil, boolean) ::
+          Ecto.Changeset.t()
+  def validate_start_is_before_trip(changeset, trip_arrival_time, perform_validation \\ true)
 
-  def validate_start_is_before_trip(changeset, trip_arrival_time) do
+  def validate_start_is_before_trip(changeset, nil, _), do: changeset
+
+  def validate_start_is_before_trip(changeset, trip_arrival_time, perform_validation) do
     changeset
     |> validate_change(:active_period_start, fn :active_period_start, active_period_start ->
-      if !is_nil(trip_arrival_time) and
+      if perform_validation and
+           !is_nil(trip_arrival_time) and
            NaiveDateTime.diff(active_period_start, trip_arrival_time, :minute) > 60 do
         [
           active_period_start:

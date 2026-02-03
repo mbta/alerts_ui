@@ -116,7 +116,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       send(self(), {:selected_schedules, selected_schedules})
     end
 
-    if :facility_id in required_fields do
+    if :facility_id in required_fields && !is_nil(alert_data.facility_id) do
       selected_facility = FacilitiesRepo.get(alert_data.facility_id)
       send(self(), {:selected_facility, selected_facility})
     end
@@ -517,6 +517,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           |> String.replace("_", " ")
           |> String.downcase()
           |> String.replace("amtrak", "Amtrak")
+          |> String.replace("coast guard", "Coast Guard")
 
         {display_name, cause_detail}
       end)

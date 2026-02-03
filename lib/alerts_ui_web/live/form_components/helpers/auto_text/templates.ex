@@ -107,6 +107,18 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
 
     # Ferry
     %{
+      pattern: {4, "Dock Bypass"},
+      header_template:
+        "?route_names ?direction_name ?trip_names will not stop at ?stop_names ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        stop_count: 0,
+        trip_count: 2,
+        direction_count: 1
+      },
+      service_effect_template: "?stop_names bypassed"
+    },
+    %{
       pattern: {4, "Dock Closure"},
       header_template: "?stop_names closed ?alert_duration ?due_to_cause",
       description_template: %{
@@ -151,6 +163,18 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         direction_count: 1
       },
       service_effect_template: "?route_names_short delay"
+    },
+    %{
+      pattern: {4, "Shuttle"},
+      header_template:
+        "?route_names ?direction_name ?trip_names will be replaced by shuttle buses ?stop_range_between ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        direction_count: nil,
+        stop_count: 0,
+        trip_count: 2
+      },
+      service_effect_template: "?route_names_short shuttle"
     },
 
     # Bus
@@ -369,7 +393,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     %{
       pattern: {2, "Suspension"},
       header_template:
-        "?route_names ?direction_name service suspended ?stop_range_between ?alert_duration ?due_to_cause",
+        "?route_names ?direction_name ?trip_names|: service suspended ?stop_range_between ?alert_duration ?due_to_cause",
       description_template: %{
         route_count: 5,
         stop_count: 0,

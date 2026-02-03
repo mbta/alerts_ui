@@ -1,9 +1,5 @@
 name: Deploy to Dev
 
-permissions:
-  id-token: write
-  contents: read
-
 on:
   workflow_call:
     inputs:
@@ -18,30 +14,19 @@ on:
         required: true
 
 jobs:
-  deploy:
-    name: Deploy
+  fail_if_prod:
+    name: "Fail if production environment"
+    if: ${{ github.event.inputs.env || inputs.environment == 'production' }}
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.env || inputs.environment }}
-    concurrency: ${{ github.event.inputs.env || inputs.environment  }}
-    env:
-      TARGET: ${{ github.event.inputs.env || inputs.environment }}
     steps:
-      - uses: actions/checkout@v2
-      - uses: mbta/actions/build-push-ecr@v2
-        id: build-push
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          docker-repo: ${{ secrets.DOCKER_REPO }}
-          docker-additional-args: "--build-arg GIT_SHA=${{github.sha}}"
-      - uses: mbta/actions/deploy-ecs@v2
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          ecs-cluster: alerts-ui
-          ecs-service: alerts-ui-${{ env.TARGET }}
-          docker-tag: ${{ steps.build-push.outputs.docker-tag }}
-      - uses: mbta/actions/notify-slack-deploy@v1
-        if: ${{ !cancelled() }}
-        with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
-          job-status: ${{ job.status }}
-          custom-message: "(${{ env.TARGET }})"
+      - run: |
+          echo "Failing intentionally. Please use the production deployment workflow."
+          exit 1
+        shell: bash
+  deploy:
+    if: ${{ github.event.inputs.env || inputs.environment != 'production' }}
+    name: "Deploy Alerts Manager dev"
+    uses: ./.github/workflows/deploy-base.yml
+    with:
+      environment: ${{ github.event.inputs.env || inputs.environment }}
+    secrets: inherit

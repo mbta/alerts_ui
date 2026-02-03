@@ -1,0 +1,15 @@
+name: Deploy to Prod
+
+on:
+  release:
+    types:
+      - released
+
+
+jobs:
+  deploy:
+    name: "Deploy Alerts Manager production"
+    uses: ./.github/workflows/deploy-base.yml
+    with:
+      environment: prod
+    secrets: inherit

@@ -14,6 +14,7 @@ defmodule AlertsUI.Activities do
   def for_effect("Cancellation", _), do: [:BOARD, :EXIT, :RIDE]
   def for_effect("Delay", _), do: [:BOARD, :EXIT, :RIDE]
   def for_effect("Detour", _), do: [:BOARD, :EXIT]
+  def for_effect("Dock Bypass", _), do: [:BOARD, :EXIT]
   def for_effect("Dock Closure", _), do: [:BOARD, :EXIT]
   def for_effect("Dock Issue", _), do: [:BOARD]
   def for_effect("Elevator Closure", _), do: [:USING_WHEELCHAIR]

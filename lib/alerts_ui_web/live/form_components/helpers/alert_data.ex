@@ -60,7 +60,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :trip_ids,
     :url,
     :last_push_notification_timestamp,
-    :send_push_notification_on_edit
+    :notification_toggle
   ]
 
   @type reminder_time_t :: %{
@@ -112,8 +112,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           stop_names_and_ids: [String.t()] | nil,
           trip_ids: [String.t()] | nil,
           url: String.t() | nil,
-          last_push_notification_timestamp: DateTime.t() | nil,
-          send_push_notification_on_edit: boolean()
+          last_push_notification_timestamp: NaiveDateTime.t() | nil,
+          notification_toggle: boolean()
         }
 
   @spec build_alert_data(String.t() | Alert.t() | nil, :creating | :duplicating | :editing | nil) ::
@@ -227,15 +227,15 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     %{
       combination: combination,
       effect_name: effect_name,
-      direction: Alert.get_direction(alert.informed_entity) || "default",
-      facility_id: Alert.gather_facility_ids(alert.informed_entity) |> List.first(),
+      direction: Alert.get_direction(alert) || "default",
+      facility_id: Alert.gather_facility_ids(alert) |> List.first(),
       route_ids: route_ids,
       route_type: route_type,
       single_route_id: single_route_id,
-      stop_ids: Alert.gather_parent_stop_ids(alert.informed_entity),
+      stop_ids: Alert.gather_parent_stop_ids(alert),
       stop_names_and_ids: alert.original_stop_selections,
-      trip_ids: Alert.gather_trip_ids(alert.informed_entity),
-      send_push_notification_on_edit: send_push_notification_on_edit
+      trip_ids: Alert.gather_trip_ids(alert),
+      notification_toggle: send_push_notification_on_edit
     }
   end
 

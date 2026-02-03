@@ -5,7 +5,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.EntityValidator do
     in the result.
   """
 
-  @spec get_obsolete_ids(list(), map()) :: list() | nil
+  @spec get_obsolete_ids(list() | nil, map()) :: list() | nil
+  def get_obsolete_ids(nil, _available_entities) do
+    []
+  end
+
   def get_obsolete_ids(id, available_entities) when is_binary(id) do
     get_obsolete_ids(List.wrap(id), available_entities)
   end

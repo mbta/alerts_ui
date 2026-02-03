@@ -31,14 +31,12 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
 
     Alerts.list_all_open()
     |> Enum.map(fn alert ->
-      informed_entities = alert.informed_entity
-
       %{
         alert_id: alert.alert_id,
-        route_ids: Alert.gather_route_ids(informed_entities),
-        stop_ids: Alert.gather_stop_ids(informed_entities),
-        trip_ids: Alert.gather_trip_ids(informed_entities),
-        facility_ids: Alert.gather_facility_ids(informed_entities)
+        route_ids: Alert.gather_route_ids(alert),
+        stop_ids: Alert.gather_stop_ids(alert),
+        trip_ids: Alert.gather_trip_ids(alert),
+        facility_ids: Alert.gather_facility_ids(alert)
       }
     end)
     |> Enum.reduce([], fn alert_map, acc ->

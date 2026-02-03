@@ -299,7 +299,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         form_params
       )
       |> TimeRangeValidators.validate_start_is_before_trip(
-        Map.get(socket.assigns, :trip_arrival_time)
+        Map.get(socket.assigns, :trip_arrival_time),
+        socket.assigns.form_type != :editing
       )
       |> TimeRangeValidators.validate_start_is_after_now(
         current_time,
@@ -460,7 +461,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           socket.assigns.form_type == :editing
         )
         |> TimeRangeValidators.validate_start_is_before_trip(
-          Map.get(socket.assigns, :trip_arrival_time)
+          Map.get(socket.assigns, :trip_arrival_time),
+          socket.assigns.form_type != :editing
         )
         |> TimeRangeValidators.validate_required_fields(time_range)
       else

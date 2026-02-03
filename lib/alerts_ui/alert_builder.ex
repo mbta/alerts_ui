@@ -158,13 +158,17 @@ defmodule AlertsUI.AlertBuilder do
   end
 
   defp reminder_times(alert_data) do
-    reminder_times =
-      Map.get(alert_data, :reminder_times, [])
-      |> Enum.map(
-        &%{id: &1.id, reminder_time: ActivePeriodBuilder.naive_eastern_datetime_to_utc(&1.time)}
-      )
+    if Map.get(alert_data, :legacy) do
+      %{}
+    else
+      reminder_times =
+        Map.get(alert_data, :reminder_times, [])
+        |> Enum.map(
+          &%{id: &1.id, reminder_time: ActivePeriodBuilder.naive_eastern_datetime_to_utc(&1.time)}
+        )
 
-    %{reminder_times: reminder_times}
+      %{reminder_times: reminder_times}
+    end
   end
 
   defp plaintext_reminder_selections(alert_data) do
@@ -330,12 +334,12 @@ defmodule AlertsUI.AlertBuilder do
         [
           :active_period_start,
           :active_period_end,
+          :duration_certainty,
           :recurrence_start_time,
           :recurrence_end_time,
           :recurrence_days
         ]
       )
-      |> Map.put(:duration_certainty, :KNOWN)
     else
       if Map.get(alert_data, :alert_timing) === :recurring do
         ActivePeriodBuilder.build_recurring_active_period(%{
@@ -391,7 +395,8 @@ defmodule AlertsUI.AlertBuilder do
 
     %{
       notification_period_start: notification_period_start,
-      notification_period_end: notification_period_end
+      notification_period_end: notification_period_end,
+      notification_duration_certainty: Map.get(alert_data, :notification_duration_certainty)
     }
   end
 

@@ -183,6 +183,16 @@ defmodule AlertsUI.IBIAlertImporter do
           )
         end)
 
+        SQL.query!(
+          Repo,
+          "update ibi_alerts set notif_end = last_modified_dt where alert_id = '1214' and version_no = '1';"
+        )
+
+        SQL.query!(
+          Repo,
+          "update ibi_alerts set effect_end = notif_end where alert_id in ('2636', '2638', '2641', '2642', '1214', '1303', '1139')'"
+        )
+
         {:ok, true}
       end,
       timeout: :infinity
@@ -302,7 +312,7 @@ defmodule AlertsUI.IBIAlertImporter do
 
               update
               |> ibi_alert_to_changeset(
-                alert,
+                Repo.reload!(alert),
                 no_active_periods: !update_open,
                 no_informed_entities: !update_open
               )
@@ -337,7 +347,7 @@ defmodule AlertsUI.IBIAlertImporter do
             # add deduplicated reminders
             all_versions_index
             |> Map.get(alert.alert_id)
-            |> Enum.map(fn ibi_alert -> extract_reminders(ibi_alert, alert) end)
+            |> Enum.map(fn ibi_alert -> extract_and_cast_reminders(ibi_alert, alert) end)
             |> List.flatten()
             |> Enum.uniq()
             |> Enum.map(fn params -> Changeset.cast(%ReminderTime{}, params, Map.keys(params)) end)
@@ -381,6 +391,8 @@ defmodule AlertsUI.IBIAlertImporter do
       :direction,
       :service_types,
       :alert_timing,
+      :duration_certainty,
+      :notification_duration_certainty,
       :active_period_start,
       :active_period_end,
       :active_period_start_date,
@@ -413,7 +425,8 @@ defmodule AlertsUI.IBIAlertImporter do
       :last_modified_timestamp,
       :legacy,
       :image_url,
-      :image_alternative_text
+      :image_alternative_text,
+      :reminder_times
     ]
     |> Enum.reduce(%{}, fn key, alert_data ->
       try do
@@ -519,22 +532,69 @@ defmodule AlertsUI.IBIAlertImporter do
   end
 
   def from_ibi(ibi_alert, :active_period_end) do
-    case from_ibi(ibi_alert, :alert_timing) do
-      :one_time ->
-        utc_from_ibi_string(ibi_alert.effect_end || ibi_alert.notif_end)
+    if from_ibi(ibi_alert, :duration_certainty) == :KNOWN do
+      case from_ibi(ibi_alert, :alert_timing) do
+        :one_time ->
+          utc_from_ibi_string(ibi_alert.effect_end || ibi_alert.notif_end)
 
-      :recurring ->
-        date =
-          ibi_alert.recurrence_end
+        :recurring ->
+          date =
+            ibi_alert.recurrence_end
+            |> utc_from_ibi_string()
+            |> NaiveDateTime.to_date()
+
+          time =
+            (ibi_alert.recurrence_end_time || ibi_alert.recurrence_end)
+            |> utc_from_ibi_string()
+            |> NaiveDateTime.to_time()
+
+          NaiveDateTime.new!(date, time)
+      end
+    end
+  end
+
+  def from_ibi(ibi_alert, :duration_certainty) do
+    if ibi_alert.is_closed == ~c"True" do
+      :KNOWN
+    else
+      base_timestamp =
+        if from_ibi(ibi_alert, :alert_timing) == :recurring do
+          ibi_alert.recurrence_end || ibi_alert.recurrence_end_time
+        else
+          ibi_alert.effect_end || ibi_alert.notif_end
+        end
+
+      if base_timestamp do
+        year =
+          base_timestamp
           |> utc_from_ibi_string()
-          |> NaiveDateTime.to_date()
+          |> Map.get(:year)
 
-        time =
-          (ibi_alert.recurrence_end_time || ibi_alert.recurrence_end)
-          |> utc_from_ibi_string()
-          |> NaiveDateTime.to_time()
+        case year do
+          1900 -> :ESTIMATED
+          1901 -> :UNKNOWN
+          _ -> :KNOWN
+        end
+      else
+        :UNKNOWN
+      end
+    end
+  end
 
-        NaiveDateTime.new!(date, time)
+  def from_ibi(ibi_alert, :notification_duration_certainty) do
+    if ibi_alert.notif_end do
+      year =
+        ibi_alert.notif_end
+        |> utc_from_ibi_string()
+        |> Map.get(:year)
+
+      case year do
+        1900 -> :ESTIMATED
+        1901 -> :UNKNOWN
+        _ -> :KNOWN
+      end
+    else
+      :UNKNOWN
     end
   end
 
@@ -581,7 +641,11 @@ defmodule AlertsUI.IBIAlertImporter do
 
   def from_ibi(ibi_alert, :notification_period_end) do
     if ibi_alert.notif_end do
-      utc_from_ibi_string(ibi_alert.notif_end)
+      timestamp = utc_from_ibi_string(ibi_alert.notif_end)
+
+      if !Enum.member?([1900, 1901], Map.get(timestamp, :year)) do
+        timestamp
+      end
     end
   end
 
@@ -806,6 +870,12 @@ defmodule AlertsUI.IBIAlertImporter do
 
   def from_ibi(_ibi_alert, :legacy), do: true
 
+  def from_ibi(ibi_alert, :reminder_times) do
+    ibi_alert
+    |> extract_reminders()
+    |> Enum.map(&%{time: naive_from_ibi_reminder_format(&1)})
+  end
+
   def from_ibi(ibi_alert, key), do: Map.get(ibi_alert, key)
 
   defp split_combined_entities(nil), do: []
@@ -839,17 +909,21 @@ defmodule AlertsUI.IBIAlertImporter do
     |> DateTime.shift_zone!("Etc/UTC")
   end
 
-  def utc_from_ibi_reminder_format(timestamp) do
+  def naive_from_ibi_reminder_format(timestamp) do
     timestamp
     |> String.replace("T", " ")
     |> String.replace(~r/\:[0-9]*\.[0-9]*$/, "")
     |> Kernel.<>(":00")
     |> NaiveDateTime.from_iso8601!()
+  end
+
+  def utc_from_ibi_reminder_format(timestamp) do
+    naive_from_ibi_reminder_format(timestamp)
     |> DateTime.from_naive!("America/New_York")
     |> DateTime.shift_zone!("Etc/UTC")
   end
 
-  def extract_reminders(ibi_alert, alert) do
+  def extract_reminders(ibi_alert) do
     if ibi_alert.reminders do
       ibi_alert.reminders
       |> String.replace("send bulletin", "")
@@ -857,12 +931,17 @@ defmodule AlertsUI.IBIAlertImporter do
       |> String.replace("and tweet", "")
       |> String.replace(~r/\s/, "")
       |> String.split(";")
-      |> Enum.map(fn timestamp ->
-        %{id: nil, alert_id: alert.id, reminder_time: utc_from_ibi_reminder_format(timestamp)}
-      end)
     else
       []
     end
+  end
+
+  def extract_and_cast_reminders(ibi_alert, alert) do
+    ibi_alert
+    |> extract_reminders()
+    |> Enum.map(fn timestamp ->
+      %{id: nil, alert_id: alert.id, reminder_time: utc_from_ibi_reminder_format(timestamp)}
+    end)
   end
 
   def gui_mode_name_to_route_type_int(name) do
