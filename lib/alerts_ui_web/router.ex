@@ -131,8 +131,6 @@ defmodule AlertsUIWeb.Router do
 
     get "/:provider/callback", AuthController, :callback
     delete "/keycloak/logout", AuthController, :logout
-    # Is this... ok? Can't use delete method in activity_tracker handle_event
-    get "/keycloak/logout", AuthController, :logout
   end
 
   ## Health check
