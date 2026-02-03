@@ -1,4 +1,4 @@
-<div id="view_alerts_live_view" class="p-4 lg:mt-10 lg:mb-6">
+<div id="view_alerts_live_view" class="p-4 md:flex md:flex-col md:h-full md:overflow-hidden">
   <div class="flex flex-col gap-4 lg:flex-row lg:justify-between">
     <.button_primary_link
       :if={Helpers.author?(@current_user)}
@@ -13,7 +13,7 @@
     <.filter_form form={@form} filter_count={@filter_count} />
   </div>
 
-  <div class="sticky top-0 z-10 flex items-center bg-bg-secondary p-2 text-sm border-t border-border-primary justify-between">
+  <div class="sticky top-0 z-20 flex items-center bg-bg-secondary p-2 text-sm border-t border-border-primary justify-between">
     <span class="w-24">
       {@meta.total_count} {BuildAutoText.maybe_pluralize("alert", @meta.total_count != 1)}
     </span>
@@ -22,7 +22,7 @@
   </div>
 
   <div
-    class="overflow-x-auto lg:overflow-visible"
+    class="overflow-x-auto md:h-full md:overflow-auto"
     phx-hook="ScrollToTop"
     data-scroll-to-top={inspect(@scroll_to_top)}
     data-showing-alert-id={Map.get(assigns, :selected_alert_id, "")}
@@ -44,7 +44,7 @@
         ],
         thead_th_attrs: [class: "bg-bg-primary px-2 leading-[1.5]"],
         thead_tr_attrs: [
-          class: "lg:sticky lg:top-0 lg:z-20 text-base text-text-primary border-none"
+          class: "md:sticky md:top-0 z-10 text-base text-text-primary border-none"
         ]
       ]}
       row_click={&JS.push("open_details", value: %{alert_id: &1.alert_id})}
