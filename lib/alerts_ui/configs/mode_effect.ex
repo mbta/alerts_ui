@@ -1,12 +1,21 @@
 defmodule AlertsUI.Models.ModeEffectStruct do
-  @moduledoc "Describe a map of all aspects of an effect"
+  @moduledoc "Describe a map of all aspects of an effect.
+  Values either have a default or are required."
+
+  @enforce_keys [
+    :combination,
+    :default_cause,
+    :default_severity,
+    :send_push_notification_on_edit,
+    :prediction_suppression_warning
+  ]
   defstruct [
     :combination,
     :default_cause,
     :default_severity,
-    :send_push_notification_on_create,
     :send_push_notification_on_edit,
-    :prediction_suppression_warning
+    :prediction_suppression_warning,
+    send_push_notification_on_create: true
   ]
 
   @type t :: %{
@@ -302,6 +311,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :RDTS,
         default_cause: nil,
         default_severity: 7,
+        send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
         prediction_suppression_warning: false
       },
