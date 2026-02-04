@@ -36,7 +36,7 @@ defmodule AlertsUIWeb.FilterForm do
       id="alert-filter-form"
       phx-submit="apply_filter"
       phx-change="edit_filter"
-      class="ml-auto"
+      class="md:ml-auto"
     >
       <div class="flex flex-col gap-4 mb-4 md:flex-row md:items-center md:justify-evenly">
         <.filter_modal form={@form} filter_count={@filter_count} />
