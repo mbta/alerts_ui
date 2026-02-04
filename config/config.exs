@@ -140,13 +140,11 @@ config :logger, :console,
 config :phoenix, :json_library, Jason
 
 # 12 hours in seconds
-# 12 * 60 * 60
-max_session_time = 30
+max_session_time = 12 * 60 * 60
 
 config :alerts_ui, AlertsUIWeb.UserAuth,
   max_session_time: max_session_time,
-  # * 60
-  idle_time: 15
+  idle_time: 30 * 60
 
 config :ueberauth, Ueberauth,
   providers: [
