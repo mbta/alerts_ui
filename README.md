@@ -51,16 +51,18 @@ Swagger docs for the API enpoints can be found at `/api/swagger`.
 
 - dev-green
   - sandbox environment, anything can be deployed here
+  - main is automatically pushed here
   - pointed toward: keycloak dev, API dev
 - dev-orange
-  - main is automatically pushed here
   - currently used for test alerts and QA
+  - main is automatically pushed here
   - pointed toward: keycloak dev, API dev
 - staging
-  - main is automatically pushed here
   - supposed to be as production-like as possible
+  - main is automatically pushed here
   - pointed toward: keycloak staging, API prod
 - prod
-  - deployment strategy TBD
   - this is production
+  - deployed automatically when a release is created and approved via [GitHub's release page](https://github.com/mbta/alerts_ui/releases).
+  - If you need to roll back you can create a release for a previous tag
   - pointed toward: keycloak prod, API prod
