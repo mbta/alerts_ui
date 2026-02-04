@@ -185,6 +185,11 @@ defmodule AlertsUIWeb.UserAuth do
 
   def auth_expired?(last_auth_map, now \\ System.system_time(:second))
 
+  # Default to auth is expired if last_auth_time or last_active not available
+  def auth_expired?(%{last_auth_time: nil, last_active: _}, _), do: true
+
+  def auth_expired?(%{last_auth_time: _, last_active: nil}, _), do: true
+
   def auth_expired?(%{last_auth_time: last_auth_time, last_active: last_active}, now) do
     # last_auth_time is when the user entered their password at the SSO provider
     auth_time_expires = last_auth_time + max_session_time()
