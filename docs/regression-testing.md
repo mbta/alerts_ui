@@ -94,9 +94,9 @@ The available selections in this section depend on the service type:
 ##### Bus
 
 - Routes: a scrolling multiselect populated on load. Selecting a route should populate the available stops and directions. Selecting
-  multiple routes should disable the stop and direction selects. 
+  multiple routes should disable the stop and direction selects.
 - Directions: A select directly under the "Stops" header, populated with "Both Directions", (default) "Inbound", and "Outbound" when active.
-- Stops: A searchable multiselect of available stops. Verify stops can be filtered by name. 
+- Stops: A searchable multiselect of available stops. Verify stops can be filtered by name.
 
 ##### Subway
 
@@ -112,7 +112,7 @@ The available selections in this section depend on the service type:
     - Blue Line
 - Directions: A select directly under the "Stops" header. When the Red or Orange Line is selected, the directions will be "Both Directions",
   "Northbound" and "Southbound". When the Blue Line or a Green Line is selected, the directions will be "Both Directions", "Eastbound" and "Westbound."
-- Stops: A searchable multiselect of available stops. Verify stops can be filtered by name. 
+- Stops: A searchable multiselect of available stops. Verify stops can be filtered by name.
 
 ##### Commuter Rail:
 
@@ -134,7 +134,7 @@ The available selections in this section depend on the service type:
     - Foxboro Event Service
 - Directions: A select directly under the "Trips" header. When the Red or Orange Line is selected, the directions will be "Both Directions",
   "Northbound" and "Southbound". When the Blue Line or a Green Line is selected, the directions will be "Both Directions", "Eastbound" and "Westbound."
-- Trips: A searchable multiselect of available trips. Verify trips can be filtered by name. 
+- Trips: A searchable multiselect of available trips. Verify trips can be filtered by name.
 - Trip date filter: Above the direction select should be a link that opens a modal to filter by day. The default should be to show only the current day's trips.  Verify trips can be filtered by day.
 
 ##### Ferry:
@@ -149,7 +149,7 @@ The available selections in this section depend on the service type:
     - Winthrop Ferry
     - Quincy Ferry
 - Directions: A select directly under the "Trips" header. When active, the available selections should be "Both Directions", "Outbound" and "Inbound".
-- Trips: A searchable multiselect of available trips. Verify trips can be filtered by name. 
+- Trips: A searchable multiselect of available trips. Verify trips can be filtered by name.
 - Trip date filter: Above the direction select should be a link that opens a modal to filter by day. The default should be to show only the current day's trips.  Verify trips can be filtered by day.
 
 ##### Facility
@@ -165,7 +165,7 @@ The available selections in this section depend on the service type:
     - Ferry
     - Subway
 
-#### Timeframe 
+#### Timeframe
 
 Available alert timings should be "One-time" and "Recurring," with "One-time" the default.
 
@@ -180,22 +180,34 @@ Available alert timings should be "One-time" and "Recurring," with "One-time" th
 - Selecting "Custom" should add a datetime picker with today's date at 11:59 PM
 - Entering a date in the past should result in a validation error; past dates should not be selectable in the date picker
 
-Test form elements for notification period once:
+##### Recurring alert
+
+Under Alert timing, select "Recurring".
+
+- You should now see four selects, with the following labels and options. The first option should be selected by default in all four. There should be
+a validation message for recurring alert start, warning that the start cannot
+be in the past.
+    - **Effect start**: Start of service, Custom
+    - **Effect end**: End of service, Custom
+    - **Recurring alert start**: Now, Custom
+    - **Recurring alert end**: When alert is closed, Custom
+- There should also be a row of buttons with one button for each day of the week. With
+no days selected, there should be a validation warning that you must select at least one day.
+- You must select at least the day of the week corresponding to the effect start. If you select a different day, you should see a validation error.
+
+The notification period section is the same for both kinds of alert:
 - Notification period should default to "Now" to "When alert is closed"
 - Selecting "Same as effect period" should make the notification end input disappear
 - Selecting "Start of service" should add a date picker for the start with today's date with a validation error that the date can't be in the past, and "When alert is closed" for the end
 - Selecting "Custom" should add a datetime picker for the start with the current date and time, and "When alert is closed" for the end
 - Entering a date in the past should result in a validation error; past dates should not be selectable in the date picker
 
-##### Recurring alerts
-
-Coming soon!
 
 #### Alert details
 
 Cause, severity and main message:
 - Verify that the available causes match the selected alert type. These options will be all lowercase
-except for proper names. 
+except for proper names.
 - Verify the severity select is populated with the standard values. The default severity should be "about 15 minutes".
 - You should be able to select a cause and a (different) severity
 - The main message text area should show a running character count in the bottom right hand corner with a maximum of 255
@@ -203,7 +215,7 @@ except for proper names.
   alert, selecting "electrical work" and "about 25 minutes" should result in an autotext of "experiencing delays of about 25 minutes due to electrical work"
 - Before you edit the autotext, the reload button to the right should be highlighted. Edit the autotext. The reload button
   should no longer be highlighted, indicating the text has changed. Clicking the reload button should restore the autotext.
-- Clicking the copy button under the reload button should copy the autotext to your operating system clipboard. 
+- Clicking the copy button under the reload button should copy the autotext to your operating system clipboard.
 - Main message is required; trying to submit an otherwise-valid alert with a blank main message should result in a validation error.
 
 Supporting information:
@@ -211,7 +223,7 @@ Supporting information:
   corner with a maximum of 3000.
 - When the text area is blank, the reload button to the right should be highlighted. Enter some text. The reload button
   should no longer be highlighted, indicating the text has changed. Clicking the reload button should clear the text area.
-- Clicking the copy button under the reload button should copy the supporting information text to your operating system clipboard. 
+- Clicking the copy button under the reload button should copy the supporting information text to your operating system clipboard.
 - Supporting information is optional; no error should appear if it is not present.
 
 URL and image:
@@ -244,24 +256,21 @@ Test banner text element:
 
 ### Editing Alerts
 
-Only open alerts can be edited:
-
-- In the alerts list view, navigate to a past alert. The only action icon should be the vertical three dots. Opening it should reveal a menu with "Duplicate" and "Download History."
+- Only open alerts can be edited. In the alerts list view, navigate to a past alert. The only action icon should be the vertical three dots. Opening it should reveal a menu with "Duplicate" and "Download History."
 - Navigate to open alerts. Open alerts should have three available actions: a pencil to edit the alert, an X to close the alert, and the vertical three buttons as above.
-
-Click on an open alert to open the alert details modal. There should be three buttons across the bottom: "Close alert", (in red), "Duplicate", and "Edit this alert" (default). 
-
+- Click on an open alert to open the alert details modal. There should be three buttons across the bottom: "Close alert", (in red), "Duplicate", and "Edit this alert" (default).
 - Click "Edit this alert".
 - You should be taken to the Alert Details form for this alert, i.e., you cannot edit an alert's service type or effect. The form should behave as described above, only filled with the values provided when it was created.
 - Update fields as you see fit, then repeat the "Review and submission" steps above to confirm your changes.
 
+## Closing alerts
+
+- In the alerts list view, find an to open alert. Click the X to close it.
+- A "Close alert" modal should open, asking you to confirm that you want to delete the alert, with a checkbox labeled "Send \"all clear\" message to alert subscribers".
+- If the alert has a `last_push_notification_timestamp` set, this checkbox will be enabled by default. If the timestamp is nil, it will be unchecked by default.
 
 
-- Click the pencil icon on an open alert to edit it. Any open alert will do, including the ones you just
-made. You should be taken directly to the alert details screen, i.e., you should not be able to change the service type or effect.
-Update one or more values in the form, submit it, then view the alert again to confirm your changes are present.
-
-## Duplicating an Alert
+## Duplicating an alert
 
 - In the alerts list view, locate the one-time alert you just made, (or one of them) click the menu button with the three vertical dots on the right, and select "Duplicate" from the menu that opens. As when editing, you should be taken directly to the alerts detail form. Confirm your prior selections are present.
 - Return to the alerts list view. Locate the recurring alert you just made (or one of them) and repeat the steps above.
@@ -269,7 +278,7 @@ Update one or more values in the form, submit it, then view the alert again to c
 - Locate and duplicate alert 4. Confirm that you get a modal warning about routes and stops
 missing from GTFS. Confirming the modal should allow you to proceed to the form.
 
-## Downloading an Alert History
+## Downloading an alert history
 
 - Download the alert history from a recent alert created in Alerts manager.
 - Download the alert history from a legacy alert imported from IBI.
