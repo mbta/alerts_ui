@@ -9,6 +9,7 @@ defmodule AlertsUI.FeedOutput.WriteFeed do
   @combined_enhanced_sita_json_output_filename AlertsUI.config(
                                                  :combined_enhanced_sita_json_output_filename
                                                )
+  @combined_standard_json_output_filename AlertsUI.config(:combined_standard_json_output_filename)
   @combined_protobuf_output_filename AlertsUI.config(:combined_protobuf_output_filename)
   @write_module AlertsUI.config(:file_write_module)
 
@@ -31,6 +32,7 @@ defmodule AlertsUI.FeedOutput.WriteFeed do
            {:ok, _} <- write(:protobuf, open_alerts),
            {:ok, _} <- write(:combined_enhanced, enhanced_alerts ++ ibi_enhanced_alerts),
            {:ok, _} <- write(:combined_enhanced_sita, enhanced_alerts ++ ibi_enhanced_alerts),
+           {:ok, _} <- write(:combined_standard, open_alerts ++ ibi_standard_alerts),
            {:ok, _} <- write(:combined_protobuf, open_alerts ++ ibi_standard_alerts) do
         {:ok, enhanced_alerts_json |> Jason.decode!()}
       else
@@ -97,6 +99,11 @@ defmodule AlertsUI.FeedOutput.WriteFeed do
       |> Filters.filter_sita_alerts()
       |> CreateGtfsJson.output_enhanced_json()
       |> write_data(@combined_enhanced_sita_json_output_filename)
+
+  def write(:combined_standard, alerts),
+    do:
+      CreateGtfsJson.output_standard_json(alerts)
+      |> write_data(@combined_standard_json_output_filename)
 
   def write(:combined_protobuf, alerts),
     do:
