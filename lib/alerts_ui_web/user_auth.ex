@@ -71,7 +71,13 @@ defmodule AlertsUIWeb.UserAuth do
   """
   def fetch_current_user(conn, _opts) do
     {user, conn} = ensure_session_user(conn)
-    assign(conn, :current_user, user)
+    last_auth_time = get_session(conn, :last_auth_time, nil)
+    last_active = get_session(conn, :last_active, nil)
+
+    conn
+    |> assign(:current_user, user)
+    |> assign(:last_auth_time, last_auth_time)
+    |> assign(:last_active, last_active)
   end
 
   @doc """
