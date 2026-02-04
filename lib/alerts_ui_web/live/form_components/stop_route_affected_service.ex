@@ -2,6 +2,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   @moduledoc """
     Live Component for affected service section of form with stop-route combination
   """
+  alias AlertsUIWeb.FormComponents.AffectedService
   use AlertsUIWeb, :live_component
   use AlertsUI.Schema
   import Ecto.Changeset
@@ -487,6 +488,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         []
       end
 
+    stop_selections = AffectedService.extract_selections(assigns.form, stop_id_options)
+
     # Impacted routes selector
     route_search_term = assigns.form[:route_search_term].value
     route_ids = assigns.form[:route_ids].value || []
@@ -503,7 +506,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       assign(assigns,
         route_id_options: route_id_options,
         stop_id_options: stop_id_options,
-        modal_route_id_options: modal_route_id_options
+        modal_route_id_options: modal_route_id_options,
+        stop_selections: stop_selections
       )
 
     ~H"""
@@ -546,6 +550,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
           class="md:w-[25%]"
           field={@form[:stop_ids]}
           filter_field={@form[:stop_search_term]}
+          selected={@stop_selections}
           label="Stops"
           loading={Map.get(@available_stops, :loading, true)}
           modal_filter_active={@selected_route_id}

@@ -920,7 +920,7 @@ defmodule AlertsUIWeb.SharedComponents do
     doc: "The target to send the events to (eg form component id)"
 
   attr :hook, :string, default: nil, doc: "a JS hook to be attached to the element"
-  attr :selected, :list, default: []
+  attr :selected, :list, default: nil
 
   attr :rest, :global, include: ~w(disabled size phx-debounce)
 
@@ -930,7 +930,7 @@ defmodule AlertsUIWeb.SharedComponents do
       |> assign(field: nil, id: field.id)
       |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
       |> assign_new(:name, fn -> if assigns.multiple, do: field.name <> "[]", else: field.name end)
-      |> assign_new(:value, fn -> field.value || assigns.selected end)
+      |> assign_new(:value, fn -> assigns.selected || field.value || [] end)
 
     ~H"""
     <div phx-feedback-for={@name} class={["#{@class}", @hidden && "hidden"]}>
@@ -1061,6 +1061,10 @@ defmodule AlertsUIWeb.SharedComponents do
     default: "",
     doc: "The target to send the events to (eg form component id)"
 
+  attr :selected, :list,
+    default: nil,
+    doc: "a separate list of selected items that overrides the field's value"
+
   attr :rest, :global, include: ~w(disabled phx-debounce hook)
 
   def filtered_select(
@@ -1143,6 +1147,7 @@ defmodule AlertsUIWeb.SharedComponents do
           class="m-0 h-full"
           select_class="min-w-full pt-0 mt-0 [scrollbar-width:thin] overflow-auto
             border-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-t-none [appearance:none] max-w-[100%] h-full"
+          selected={@selected}
           {@rest}
         />
       </div>

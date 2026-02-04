@@ -395,6 +395,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         })
 
         open_review_modal(view)
+        open_browser(view)
 
         assert render(view) =~ ~r/Routes:.*Framingham\/Worcester Line/s
         assert render(view) =~ ~r/Stops:.*Aquarium/s

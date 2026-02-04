@@ -741,6 +741,43 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       end
     end
 
+    test "stops are preselected even when duplicating an event with old info" do
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},
+        {StopsRepo, [], [by_route: fn _rt, _dir -> [@stop, @stop_2] end]}
+      ]) do
+        {:ok, view, _html} =
+          live_isolated_component(
+            AffectedService,
+            Map.merge(@assigns, %{
+              route_type: 3,
+              form_type: :duplicating,
+              effect_name: "Delay",
+              combination: :RDS,
+              edit_data_has_been_filled: false,
+              alert_data: %{
+                direction: "0",
+                stop_names_and_ids: ["Courthouse (leftward)|place-crtst"],
+                route_ids: ["CR-Worcester"]
+              }
+            })
+          )
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "affected_service" => %{
+            "route_ids" => ["CR-Worcester"]
+          }
+        })
+
+        assert view
+               |> element("select##affected_service_stop_names_and_ids")
+               |> render =~
+                 "<option value=\"South Station (outbound)|place-sstat\">South Station (outbound)</option><option selected=\"selected\" value=\"Courthouse (outbound)|place-crtst\">Courthouse (outbound)</option>"
+      end
+    end
+
     test "disables stop selection if multiple routes selected" do
       stops = [%Stop{id: "1", name: "cool stop name"}]
 

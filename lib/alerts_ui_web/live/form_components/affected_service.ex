@@ -6,7 +6,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   use AlertsUI.Schema
   import Ecto.Changeset
 
-  alias AlertsUI.Models.ActivePeriod
+  alias AlertsUI.Models.{ActivePeriod, Alert}
   alias AlertsUIWeb.CreateAlertLive
 
   alias AlertsUIWeb.FormComponents.Helpers.{
@@ -546,6 +546,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         true
       )
 
+    stop_selections =
+      extract_selections(assigns.form, stop_id_options)
+
     modal_options =
       filter_modal_options(
         assigns.modal_options,
@@ -559,7 +562,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         direction_options: direction_options,
         trip_id_options: trip_id_options,
         stop_id_options: stop_id_options,
-        modal_options: modal_options
+        modal_options: modal_options,
+        stop_selections: stop_selections
       )
 
     ~H"""
@@ -669,6 +673,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             :if={show_stops_input?(assigns)}
             label={if show_trips_input?(assigns), do: "Stops", else: nil}
             field={@form[:stop_names_and_ids]}
+            selected={@stop_selections}
             filter_field={@form[:stop_search_term]}
             options={@stop_id_options}
             loading={Map.get(@available_stops, :loading, true)}
@@ -691,6 +696,40 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       <hr class="mt-4" />
     </div>
     """
+  end
+
+  def extract_selections(form, stop_id_options) do
+    cond do
+      form[:stop_names_and_ids].value != [] and
+          form[:stop_names_and_ids].value != nil ->
+        extract_field_selections(form[:stop_names_and_ids], stop_id_options)
+
+      form[:stop_ids].value != [] and form[:stop_ids].value != nil ->
+        extract_field_selections(form[:stop_ids], stop_id_options)
+
+      true ->
+        []
+    end
+  end
+
+  def extract_field_selections(%{value: nil}, _options), do: []
+
+  def extract_field_selections(%{value: values}, options) do
+    values
+    |> Enum.map(&generate_selection_for_one_value(&1, options))
+    |> Enum.concat()
+    |> Enum.map(&elem(&1, 1))
+  end
+
+  defp generate_selection_for_one_value(name_and_id, options) do
+    id = Alert.get_route_id(name_and_id)
+    matches = options |> Enum.filter(&(elem(&1, 1) == name_and_id))
+
+    if matches != [] do
+      matches
+    else
+      options |> Enum.filter(&(Alert.get_route_id(elem(&1, 1)) == id))
+    end
   end
 
   defp date_filter_active?(filter_value, today) when filter_value == today, do: false
