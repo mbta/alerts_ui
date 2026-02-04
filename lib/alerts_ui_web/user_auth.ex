@@ -217,6 +217,18 @@ defmodule AlertsUIWeb.UserAuth do
     end
   end
 
+  def require_viewer_role(conn, _opts) do
+    user = conn.assigns[:current_user]
+
+    if user && :viewer in user.roles do
+      conn
+    else
+      conn
+      |> redirect(to: "/unauthorized")
+      |> halt()
+    end
+  end
+
   @doc """
   Plug used for API routes that require the user to be authenticated.
   """
