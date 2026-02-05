@@ -248,7 +248,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
 
         assert view
                |> element("select##stop_route_affected_service_stop_ids")
-               |> render_async() =~ ~r/value="place-aqucl".*value="place-pktrm-inbound".*value="place-pktrm"/
+               |> render_async() =~
+                 ~r/value="place-aqucl".*value="place-pktrm-inbound".*value="place-pktrm"/
 
         # Add route filter
         view
@@ -264,7 +265,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
 
         assert view
                |> element("select##stop_route_affected_service_stop_ids")
-               |> render_async() =~ ~r/value="place-pktrm-inbound".*value="place-aqucl".*value="place-pktrm"/
+               |> render_async() =~
+                 ~r/value="place-pktrm-inbound".*value="place-aqucl".*value="place-pktrm"/
       end
     end
 
@@ -399,9 +401,21 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         {_, _, children_nodes} = Floki.get_by_id(document, "stop_route_affected_service_stop_ids")
 
         assert [
-                 {"option", [{"id", "Park Street (inbound)"}, {"phx-hook", "Tippy"}, {"data-tippy-content", "Stop ID place-pktrm"}, {"selected", "selected"}, {"value", "place-pktrm"}],
-                  ["Park Street (inbound)"]},
-                 {"option", [{"id", "Aquarium"}, {"phx-hook", "Tippy"}, {"data-tippy-content", "Stop ID place-aqucl"}, {"value", "place-aqucl"}], ["Aquarium"]}
+                 {"option",
+                  [
+                    {"id", "Park Street (inbound)"},
+                    {"phx-hook", "Tippy"},
+                    {"data-tippy-content", "Stop ID place-pktrm"},
+                    {"selected", "selected"},
+                    {"value", "place-pktrm"}
+                  ], ["Park Street (inbound)"]},
+                 {"option",
+                  [
+                    {"id", "Aquarium"},
+                    {"phx-hook", "Tippy"},
+                    {"data-tippy-content", "Stop ID place-aqucl"},
+                    {"value", "place-aqucl"}
+                  ], ["Aquarium"]}
                ] = children_nodes
       end
     end

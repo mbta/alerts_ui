@@ -37,9 +37,27 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
       results = SelectFormatter.formatted_select_options(%SelectFormatter{options: options})
 
       assert results == [
-               [id: "joe", key: "joe", value: "202", "phx-hook": "Tippy", "data-tippy-content": "Stop ID 202"],
-               [id: "bob", key: "bob", value: "303", "phx-hook": "Tippy", "data-tippy-content": "Stop ID 303"],
-               [id: "alice", key: "alice", value: "101", "phx-hook": "Tippy", "data-tippy-content": "Stop ID 101"],
+               [
+                 id: "joe",
+                 key: "joe",
+                 value: "202",
+                 "phx-hook": "Tippy",
+                 "data-tippy-content": "Stop ID 202"
+               ],
+               [
+                 id: "bob",
+                 key: "bob",
+                 value: "303",
+                 "phx-hook": "Tippy",
+                 "data-tippy-content": "Stop ID 303"
+               ],
+               [
+                 id: "alice",
+                 key: "alice",
+                 value: "101",
+                 "phx-hook": "Tippy",
+                 "data-tippy-content": "Stop ID 101"
+               ]
              ]
     end
 
@@ -53,11 +71,28 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
 
       results = SelectFormatter.formatted_select_options(%SelectFormatter{options: options}, true)
 
-
       assert results == [
-               [id: "joe", key: "joe", value: "joe|202", "phx-hook": "Tippy", "data-tippy-content": "Stop ID 202"],
-               [id: "bob", key: "bob", value: "bob|303", "phx-hook": "Tippy", "data-tippy-content": "Stop ID 303"],
-               [id: "alice", key: "alice", value: "alice|101", "phx-hook": "Tippy", "data-tippy-content": "Stop ID 101"],
+               [
+                 id: "joe",
+                 key: "joe",
+                 value: "joe|202",
+                 "phx-hook": "Tippy",
+                 "data-tippy-content": "Stop ID 202"
+               ],
+               [
+                 id: "bob",
+                 key: "bob",
+                 value: "bob|303",
+                 "phx-hook": "Tippy",
+                 "data-tippy-content": "Stop ID 303"
+               ],
+               [
+                 id: "alice",
+                 key: "alice",
+                 value: "alice|101",
+                 "phx-hook": "Tippy",
+                 "data-tippy-content": "Stop ID 101"
+               ]
              ]
     end
   end
@@ -107,7 +142,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
         })
 
       assert results == [
-               [key: "Ashmont/Braintree platform to lobby", value: "951"],
+               [key: "Ashmont/Braintree platform to lobby", value: "951"]
              ]
     end
   end
@@ -164,7 +199,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
 
       assert results == [
                [key: "527 (9:01 AM from South Station) CR-683300-527", value: "CR-683300-527"],
-               [key: "527 (9:01 AM from South Station) CR-683300-special", value: "CR-683300-special"],
+               [
+                 key: "527 (9:01 AM from South Station) CR-683300-special",
+                 value: "CR-683300-special"
+               ],
                [key: "595 (9:15 AM from South Station)", value: "CR-683322-595"],
                [key: "594 (9:45 AM from Framingham)", value: "CR-683321-594"],
                [key: "529 (10:01 AM from South Station)", value: "CR-683302-529"]
@@ -202,11 +240,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
         })
 
       assert results == [
-        [
-          key: "10:01 AM from Long Wharf (South) to Charlestown Navy Yard",
-          value: "Boat-F4-1430-Long-B-01-Weekday-Fall-24"
-        ]
-      ]
+               [
+                 key: "10:01 AM from Long Wharf (South) to Charlestown Navy Yard",
+                 value: "Boat-F4-1430-Long-B-01-Weekday-Fall-24"
+               ]
+             ]
     end
 
     test "it properly formats nested trips" do
