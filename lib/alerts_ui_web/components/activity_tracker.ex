@@ -18,7 +18,7 @@ defmodule AlertsUIWeb.ActivityTracker do
     now = System.system_time(:second)
 
     new_socket =
-      if UserAuth.auth_expired!(socket.assigns, now) do
+      if UserAuth.auth_expired?(socket.assigns, now) do
         redirect(socket, to: ~p"/auth/keycloak?prompt=login")
       else
         assign(socket, last_active: now)

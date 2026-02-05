@@ -54,7 +54,6 @@ defmodule AlertsUIWeb.Router do
     # Unauthenticated pages
     pipe_through [:redirect_prod_http, :browser]
 
-    get("/help", PageController, :help)
     get("/unauthorized", UnauthorizedController, :index)
   end
 
@@ -76,6 +75,7 @@ defmodule AlertsUIWeb.Router do
       ] do
       live("/alerts", ViewAlertsLive)
       live("/components", ComponentsLive)
+      live("/help", HelpPageLive)
     end
   end
 

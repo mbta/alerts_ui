@@ -71,7 +71,13 @@ defmodule AlertsUIWeb.UserAuth do
   """
   def fetch_current_user(conn, _opts) do
     {user, conn} = ensure_session_user(conn)
-    assign(conn, :current_user, user)
+    last_auth_time = get_session(conn, :last_auth_time, nil)
+    last_active = get_session(conn, :last_active, nil)
+
+    conn
+    |> assign(:current_user, user)
+    |> assign(:last_auth_time, last_auth_time)
+    |> assign(:last_active, last_active)
   end
 
   @doc """
@@ -140,7 +146,7 @@ defmodule AlertsUIWeb.UserAuth do
   Plug used for routes that require the user to not be authenticated.
   """
   def redirect_if_user_is_authenticated(conn, _opts) do
-    if conn.assigns[:current_user] && !auth_expired!(conn) do
+    if conn.assigns[:current_user] && !auth_expired?(conn) do
       conn
       |> redirect(to: signed_in_path(conn))
       |> halt()
@@ -167,7 +173,7 @@ defmodule AlertsUIWeb.UserAuth do
     if conn.assigns[:current_user] do
       now = System.system_time(:second)
 
-      if auth_expired!(conn, now) do
+      if auth_expired?(conn, now) do
         conn
         |> maybe_store_return_to()
         |> redirect(to: ~p"/auth/keycloak?prompt=login")
@@ -183,9 +189,10 @@ defmodule AlertsUIWeb.UserAuth do
     end
   end
 
-  def auth_expired!(last_auth_map, now \\ System.system_time(:second))
+  def auth_expired?(last_auth_map, now \\ System.system_time(:second))
 
-  def auth_expired!(%{last_auth_time: last_auth_time, last_active: last_active}, now) do
+  def auth_expired?(%{last_auth_time: last_auth_time, last_active: last_active}, now)
+      when is_integer(last_auth_time) and is_integer(last_active) do
     # last_auth_time is when the user entered their password at the SSO provider
     auth_time_expires = last_auth_time + max_session_time()
 
@@ -196,12 +203,15 @@ defmodule AlertsUIWeb.UserAuth do
     min(auth_time_expires, idle_time_expires) < now
   end
 
-  def auth_expired!(conn, now) do
+  def auth_expired?(%Plug.Conn{} = conn, now) do
     last_auth_time = get_session(conn, :last_auth_time)
     last_active = get_session(conn, :last_active, now)
 
-    auth_expired!(%{last_auth_time: last_auth_time, last_active: last_active})
+    auth_expired?(%{last_auth_time: last_auth_time, last_active: last_active})
   end
+
+  # Default to auth is expired if last_auth_time or last_active not available
+  def auth_expired?(_, _), do: true
 
   def require_roles(conn, opts) do
     required_roles = Keyword.get(opts, :required_roles, [])
