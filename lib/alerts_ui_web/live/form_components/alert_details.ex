@@ -464,14 +464,14 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           <div
             :if={@form[:image_url].value not in ["", nil] && is_number(@image_size)}
             id="image-information"
-            class="flex flex-row md:w-[50%] text-sm text-text-secondary bg-bg-elevation-3 p-4 rounded-b border border-bg-elevation-6 border-t-0"
+            class="flex flex-col md:flex-row md:w-[50%] text-sm text-text-secondary bg-bg-elevation-3 p-4 rounded-b border border-bg-elevation-6 border-t-0"
           >
             <img
               src={@form[:image_url].value}
-              class={["max-h-[8rem] mt-4", if(@form[:image_url].value in ["", nil], do: "hidden")]}
+              class={["md:max-h-[8rem] mt-4", if(@form[:image_url].value in ["", nil], do: "hidden")]}
             />
-            <div class="flex flex-col justify-center ml-4">
-              <p :if={@image_path}>{@image_path}</p>
+            <div class="flex flex-col justify-center mt-4 md:mt-0 md:ml-4">
+              <p :if={@image_path} class="break-all">{@image_path}</p>
               <p :if={@image_size}>{"#{@image_size} mB"}</p>
             </div>
           </div>
