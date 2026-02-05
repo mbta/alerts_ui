@@ -39,6 +39,7 @@ defmodule AlertsUIWeb.ConnCase do
     conn =
       cond do
         tags[:logged_in_user] -> log_in_user(conn)
+        tags[:logged_in_user_no_roles] -> log_in_user(conn, [])
         tags[:logged_in_developer] -> log_in_user(conn, [:viewer, :developer])
         tags[:logged_in_viewer] -> log_in_user(conn, [:viewer])
         true -> conn
