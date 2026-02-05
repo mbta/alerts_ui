@@ -26,7 +26,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
              ]
     end
 
-    test "it keeps original order for stops" do
+    test "stops have original order, tooltips" do
       options = [
         %Stop{id: "202", name: "joe"},
         %Stop{id: "303", name: "bob"},
@@ -37,9 +37,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
       results = SelectFormatter.formatted_select_options(%SelectFormatter{options: options})
 
       assert results == [
-               [key: "joe", value: "202"],
-               [key: "bob", value: "303"],
-               [key: "alice", value: "101"]
+               [id: "joe", key: "joe", value: "202", "phx-hook": "Tippy", "data-tippy-content": "Stop ID 202"],
+               [id: "bob", key: "bob", value: "303", "phx-hook": "Tippy", "data-tippy-content": "Stop ID 303"],
+               [id: "alice", key: "alice", value: "101", "phx-hook": "Tippy", "data-tippy-content": "Stop ID 101"],
              ]
     end
 
@@ -53,10 +53,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
 
       results = SelectFormatter.formatted_select_options(%SelectFormatter{options: options}, true)
 
+
       assert results == [
-               [key: "joe", value: "joe|202"],
-               [key: "bob", value: "bob|303"],
-               [key: "alice", value: "alice|101"]
+               [id: "joe", key: "joe", value: "joe|202", "phx-hook": "Tippy", "data-tippy-content": "Stop ID 202"],
+               [id: "bob", key: "bob", value: "bob|303", "phx-hook": "Tippy", "data-tippy-content": "Stop ID 303"],
+               [id: "alice", key: "alice", value: "alice|101", "phx-hook": "Tippy", "data-tippy-content": "Stop ID 101"],
              ]
     end
   end

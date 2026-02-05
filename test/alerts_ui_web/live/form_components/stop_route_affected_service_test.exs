@@ -160,7 +160,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
             @assigns
           )
 
-        assert view |> render_async() =~ ~s(<option value="place-aqucl">)
+        assert view |> render_async() =~ ~s(value="place-aqucl">)
 
         view
         |> element("form")
@@ -169,9 +169,9 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
           "stop_route_affected_service" => %{"stop_ids" => ["place-aqucl"]}
         })
 
-        assert view |> render_async() =~ ~s(<option selected="selected" value="place-aqucl">)
-        assert view |> render_async() =~ ~s(<option selected="selected" value="Blue">)
-        assert view |> render_async() =~ ~s(<option selected="selected" value="Bluer">)
+        assert view |> render_async() =~ ~s(selected="selected" value="place-aqucl">)
+        assert view |> render_async() =~ ~s(selected="selected" value="Blue">)
+        assert view |> render_async() =~ ~s(selected="selected" value="Bluer">)
 
         view
         |> element("form")
@@ -198,7 +198,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
             @assigns
           )
 
-        assert view |> render_async() =~ ~s(<option value="place-aqucl">)
+        assert view |> render_async() =~ ~s(value="place-aqucl">)
 
         view
         |> element("form")
@@ -221,7 +221,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         })
 
         # Search doesn't affect the things selected
-        assert view |> render_async() =~ ~s(<option selected="selected" value="place-aqucl">)
+        assert view |> render_async() =~ ~s(selected="selected" value="place-aqucl">)
 
         refute view |> element("#stop_route_affected_service_route_ids") |> render_async() =~
                  ~s(<option selected="selected" value="Blue">)
@@ -248,8 +248,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
 
         assert view
                |> element("select##stop_route_affected_service_stop_ids")
-               |> render_async() =~
-                 "<option value=\"place-aqucl\">Aquarium</option><option value=\"place-pktrm-inbound\">Park Street (inbound)</option><option value=\"place-pktrm\">Park Street (outbound)</option>"
+               |> render_async() =~ ~r/value="place-aqucl".*value="place-pktrm-inbound".*value="place-pktrm"/
 
         # Add route filter
         view
@@ -265,8 +264,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
 
         assert view
                |> element("select##stop_route_affected_service_stop_ids")
-               |> render_async() =~
-                 "<option value=\"place-pktrm-inbound\">Park Street (inbound)</option><option value=\"place-aqucl\">Aquarium</option><option value=\"place-pktrm\">Park Street (outbound)</option>"
+               |> render_async() =~ ~r/value="place-pktrm-inbound".*value="place-aqucl".*value="place-pktrm"/
       end
     end
 
@@ -322,9 +320,9 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
           )
 
         # Set baseline unfiltered
-        assert view |> render_async() =~ ~s(<option value="place-aqucl">Aquarium)
-        refute view |> render_async() =~ ~s(<option value="place-aqucl">Aquarium \(outbound\))
-        assert view |> render_async() =~ ~s(<option value="place-pktrm">Park Street \(inbound\))
+        assert view |> render_async() =~ ~s(value="place-aqucl">Aquarium)
+        refute view |> render_async() =~ ~s(value="place-aqucl">Aquarium \(outbound\))
+        assert view |> render_async() =~ ~s(value="place-pktrm">Park Street \(inbound\))
 
         # Add route filter
         view
@@ -339,8 +337,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         |> render_click(:accepted_routes_modal)
 
         # Verify filtered and filter text updated
-        assert view |> render_async() =~ ~s(<option value="place-aqucl">Aquarium)
-        refute view |> render_async() =~ ~s(<option value="place-pktrm">)
+        assert view |> render_async() =~ ~s(value="place-aqucl">Aquarium)
+        refute view |> render_async() =~ ~s(value="place-pktrm">)
         assert view |> render_async() =~ ~s(Filter: route_number_2)
       end
     end
@@ -401,9 +399,9 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         {_, _, children_nodes} = Floki.get_by_id(document, "stop_route_affected_service_stop_ids")
 
         assert [
-                 {"option", [{"selected", "selected"}, {"value", "place-pktrm"}],
+                 {"option", [{"id", "Park Street (inbound)"}, {"phx-hook", "Tippy"}, {"data-tippy-content", "Stop ID place-pktrm"}, {"selected", "selected"}, {"value", "place-pktrm"}],
                   ["Park Street (inbound)"]},
-                 {"option", [{"value", "place-aqucl"}], ["Aquarium"]}
+                 {"option", [{"id", "Aquarium"}, {"phx-hook", "Tippy"}, {"data-tippy-content", "Stop ID place-aqucl"}, {"value", "place-aqucl"}], ["Aquarium"]}
                ] = children_nodes
       end
     end
@@ -445,8 +443,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         |> render_click(:clear_filter, %{"filter-id" => "routes-filter-modal"})
 
         # Verify unfiltered
-        assert render(view) =~ ~s(<option value="place-aqucl">)
-        assert render(view) =~ ~s(<option value="place-pktrm">)
+        assert render(view) =~ ~s(value="place-aqucl">)
+        assert render(view) =~ ~s(value="place-pktrm">)
         # Verify text changed
         assert render(view) =~ ~s(Filter: All routes)
         # Verify modal is cleared
@@ -477,8 +475,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
             })
           )
 
-        assert view |> render_async() =~ ~s(<option selected="selected" value="place-aqucl">)
-        assert view |> render_async() =~ ~s(<option selected="selected" value="Blue">)
+        assert view |> render_async() =~ ~s(selected="selected" value="place-aqucl">)
+        assert view |> render_async() =~ ~s(selected="selected" value="Blue">)
       end
     end
 
