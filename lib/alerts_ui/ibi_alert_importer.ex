@@ -190,7 +190,7 @@ defmodule AlertsUI.IBIAlertImporter do
 
         SQL.query!(
           Repo,
-          "update ibi_alerts set effect_end = notif_end where alert_id in ('2636', '2638', '2641', '2642', '1214', '1303', '1139')'"
+          "update ibi_alerts set effect_end = notif_end where alert_id in ('2636', '2638', '2641', '2642', '1214', '1303', '1139');"
         )
 
         {:ok, true}
