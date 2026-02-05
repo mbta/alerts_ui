@@ -93,8 +93,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   def apply_search(options, search_term, values_to_keep) do
     search_term = String.downcase(search_term || "")
 
-    Enum.filter(options, fn [key: option, id: value] ->
-      (option || "")
+    Enum.filter(options, fn option ->
+      value = Keyword.get(option, :value, "")
+
+      value
+      |> String.replace("|", " ")
       |> String.downcase()
       |> String.contains?(search_term) || value in values_to_keep
     end)
