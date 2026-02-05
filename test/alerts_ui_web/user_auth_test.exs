@@ -417,4 +417,11 @@ defmodule AlertsUIWeb.UserAuthTest do
         live(conn, "/db")
     end
   end
+
+  describe "cannot visit any part of the app without :viewer role" do
+    @tag :logged_in_user_no_roles
+    test "user with no roles cannot access the app", %{conn: conn} do
+      {:error, {:redirect, %{to: "/unauthorized"}}} = live(conn, "/")
+    end
+  end
 end

@@ -38,6 +38,10 @@ defmodule AlertsUIWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :require_viewer do
+    plug :require_viewer_role
+  end
+
   pipeline :require_author do
     plug :require_roles, required_roles: [:author]
   end
@@ -46,16 +50,17 @@ defmodule AlertsUIWeb.Router do
     plug :require_roles, required_roles: [:developer]
   end
 
-  # So far, no unauth views. All endpoints require the user to be in keycloak
   scope "/", AlertsUIWeb do
     # Unauthenticated pages
     pipe_through [:redirect_prod_http, :browser]
+
+    get("/unauthorized", UnauthorizedController, :index)
   end
 
   # Viewers
   scope "/", AlertsUIWeb do
     # Authenticated pages
-    pipe_through [:redirect_prod_http, :browser, :require_authenticated_user]
+    pipe_through [:redirect_prod_http, :browser, :require_authenticated_user, :require_viewer]
 
     get "/", Redirector, to: "/alerts"
     get "/download_history", DownloadHistoryController, :export
@@ -77,7 +82,13 @@ defmodule AlertsUIWeb.Router do
   # Authors
   scope "/", AlertsUIWeb do
     # Authenticated pages
-    pipe_through [:redirect_prod_http, :browser, :require_authenticated_user, :require_author]
+    pipe_through [
+      :redirect_prod_http,
+      :browser,
+      :require_authenticated_user,
+      :require_viewer,
+      :require_author
+    ]
 
     live_session :require_author,
       on_mount: [
@@ -95,7 +106,13 @@ defmodule AlertsUIWeb.Router do
   # Developers
   scope "/", AlertsUIWeb do
     # Authenticated pages
-    pipe_through [:redirect_prod_http, :browser, :require_authenticated_user, :require_developer]
+    pipe_through [
+      :redirect_prod_http,
+      :browser,
+      :require_authenticated_user,
+      :require_viewer,
+      :require_developer
+    ]
 
     get("/_version", VersionController, :index)
 
@@ -113,7 +130,7 @@ defmodule AlertsUIWeb.Router do
   end
 
   scope "/_flags", Laboratory do
-    pipe_through [:browser, :require_developer]
+    pipe_through [:browser, :require_authenticated_user, :require_developer]
     forward "/", Router
   end
 
@@ -154,7 +171,12 @@ defmodule AlertsUIWeb.Router do
     import Phoenix.LiveDashboard.Router
 
     scope "/dev" do
-      pipe_through [:redirect_prod_http, :browser, :require_developer]
+      pipe_through [
+        :redirect_prod_http,
+        :browser,
+        :require_authenticated_user,
+        :require_developer
+      ]
 
       live_dashboard "/dashboard", metrics: AlertsUIWeb.Telemetry
     end

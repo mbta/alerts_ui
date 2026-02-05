@@ -72,7 +72,7 @@ defmodule AlertsUIWeb.AuthController do
        when is_list(roles),
        do: roles |> Enum.map(&String.to_existing_atom/1)
 
-  defp parse_role(_), do: [:viewer]
+  defp parse_role(_), do: []
 
   @spec logout_uri(map()) :: {:ok, String.t()}
   defp logout_uri(%Ueberauth.Auth{strategy: Ueberauth.Strategy.FakeKeycloak}) do
