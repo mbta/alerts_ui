@@ -50,8 +50,6 @@ defmodule AlertsUIWeb.Router do
   scope "/", AlertsUIWeb do
     # Unauthenticated pages
     pipe_through [:redirect_prod_http, :browser]
-
-    get("/help", PageController, :help)
   end
 
   # Viewers
@@ -72,6 +70,7 @@ defmodule AlertsUIWeb.Router do
       ] do
       live("/alerts", ViewAlertsLive)
       live("/components", ComponentsLive)
+      live("/help", HelpPageLive)
     end
   end
 
