@@ -165,7 +165,7 @@ defmodule AlertsUIWeb.UserAuthTest do
   end
 
   describe "on_mount: :redirect_if_user_is_authenticated" do
-    test "redirects if there is an authenticated  user ", %{conn: conn, user: user} do
+    test "redirects if there is an authenticated, unexpired user ", %{conn: conn, user: user} do
       session = conn |> put_session(:user, user) |> get_session()
 
       assert {:halt, _updated_socket} =
@@ -191,7 +191,7 @@ defmodule AlertsUIWeb.UserAuthTest do
   end
 
   describe "redirect_if_user_is_authenticated/2" do
-    test "redirects if user is authenticated", %{conn: conn, user: user} do
+    test "redirects if user is authenticated and unexpired", %{conn: conn, user: user} do
       conn =
         conn
         |> assign(:current_user, user)
@@ -204,7 +204,36 @@ defmodule AlertsUIWeb.UserAuthTest do
     end
 
     test "does not redirect if user is not authenticated", %{conn: conn} do
-      conn = UserAuth.redirect_if_user_is_authenticated(conn, [])
+      conn =
+        conn
+        |> put_session(:last_auth_time, @now)
+        |> put_session(:last_active, @now)
+        |> UserAuth.redirect_if_user_is_authenticated([])
+
+      refute conn.halted
+      refute conn.status
+    end
+
+    test "does not redirect if user's auth is expired", %{conn: conn, user: user} do
+      conn =
+        conn
+        |> assign(:current_user, user)
+        |> put_session(:last_auth_time, UserAuth.max_session_time() - 1)
+        |> put_session(:last_active, @now)
+        |> UserAuth.redirect_if_user_is_authenticated([])
+
+      refute conn.halted
+      refute conn.status
+    end
+
+    test "does not redirect if user has been idle", %{conn: conn, user: user} do
+      conn =
+        conn
+        |> assign(:current_user, user)
+        |> put_session(:last_auth_time, @now)
+        |> put_session(:last_active, UserAuth.idle_time() - 1)
+        |> UserAuth.redirect_if_user_is_authenticated([])
+
       refute conn.halted
       refute conn.status
     end
@@ -244,7 +273,7 @@ defmodule AlertsUIWeb.UserAuthTest do
       refute get_session(halted_conn, :user_return_to)
     end
 
-    test "does not redirect if user is authenticated", %{conn: conn, user: user} do
+    test "does not redirect if user is authenticated and unexpired", %{conn: conn, user: user} do
       conn =
         conn
         |> assign(:current_user, user)
@@ -253,6 +282,30 @@ defmodule AlertsUIWeb.UserAuthTest do
 
       refute conn.halted
       refute conn.status
+    end
+
+    test "redirects if user auth is expired", %{conn: conn, user: user} do
+      conn =
+        conn
+        |> assign(:current_user, user)
+        |> put_session(:last_auth_time, UserAuth.max_session_time() - 1)
+        |> UserAuth.require_authenticated_user([])
+
+      assert conn.halted
+
+      assert redirected_to(conn) == ~p"/auth/keycloak?prompt=login"
+    end
+
+    test "redirects if user has been idle", %{conn: conn, user: user} do
+      conn =
+        conn
+        |> assign(:current_user, user)
+        |> put_session(:last_active, UserAuth.idle_time() - 1)
+        |> UserAuth.require_authenticated_user([])
+
+      assert conn.halted
+
+      assert redirected_to(conn) == ~p"/auth/keycloak?prompt=login"
     end
   end
 
