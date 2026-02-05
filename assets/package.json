@@ -11,5 +11,9 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "tippy": "^0.0.0",
+    "tippy.js": "^6.3.7"
+  }
 }

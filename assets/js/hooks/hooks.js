@@ -1,3 +1,5 @@
+import tippy from "tippy.js";
+
 let Hooks = {};
 
 Hooks.ActivityTracker = {
@@ -67,11 +69,11 @@ Hooks.DropdownPosition = {
       ? document.getElementById(menu.dataset.containerId).getBoundingClientRect().bottom
       // fallback to viewport edge if container not provided
       : window.innerHeight;
-    const dropdownSpaceNeeded =  menu.getBoundingClientRect().bottom - toggleRect.top  
-    
+    const dropdownSpaceNeeded =  menu.getBoundingClientRect().bottom - toggleRect.top
+
     // Space between the toggle button and edge of the container (aka room for the dropdown)
     const spaceBelow = containerHeight - toggleRect.bottom;
-    
+
     const shouldDropUp = spaceBelow < dropdownSpaceNeeded
 
     if (shouldDropUp) {
@@ -100,14 +102,14 @@ Hooks.DropdownPosition = {
 }
 
 // This hook covers 2 behaviors on <select> elements.
-// 
+//
 // 1. Some select elements that mustn't allow "All XYZ" to be selected
-// at the same time that individual items are selected. 
+// at the same time that individual items are selected.
 // So, when the form change handler executes the "validate" check,
 // we clean the selected data to deselect the default "All XYZ"
 // value and then push that change to the client via a push_event to
 // this hook. It's certainly janky and could do with a better idea!
-// 
+//
 // 2. When a select element takes focus, the viewport should not scroll
 Hooks.Selector = {
   mounted() {
@@ -195,6 +197,32 @@ Hooks.FilterSelect = {
       });
     });
   },
+};
+
+Hooks.Tippy = {
+	mounted() {
+		this.instance = tippy(this.el);
+	},
+	updated() {
+		this.instance.setProps(
+			Object.fromEntries(
+				Object.entries(this.el.dataset)
+					.filter(([k]) => k.startsWith("tippy"))
+					.map(([k, v]) => [
+						this.tippyPropName(k),
+						v
+					])
+			)
+		);
+	},
+	destroyed() {
+		this.instance.destroy();
+	},
+
+	tippyPropName(k) {
+		const strippedName = k.replace("tippy", "");
+		return strippedName.charAt(0).toLowerCase() + strippedName.slice(1);
+	},
 };
 
 export default Hooks;

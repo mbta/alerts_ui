@@ -50,7 +50,15 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
     |> Enum.uniq()
     |> Enum.sort_by(&sort_order/1)
     |> Enum.map(fn object ->
-      {name_for_option(object, route_type), id_for_option(object, split_stops?)}
+      id = id_for_option(object, false)
+
+      [
+        id: id,
+        key: name_for_option(object, route_type),
+        value: id_for_option(object, split_stops?),
+        "phx-hook": "Tippy",
+        "data-tippy-content": id
+      ]
     end)
     |> apply_search(search_term, values_to_keep)
   end
@@ -85,7 +93,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   def apply_search(options, search_term, values_to_keep) do
     search_term = String.downcase(search_term || "")
 
-    Enum.filter(options, fn {option, value} ->
+    Enum.filter(options, fn [key: option, id: value] ->
       (option || "")
       |> String.downcase()
       |> String.contains?(search_term) || value in values_to_keep
