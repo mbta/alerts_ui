@@ -20,9 +20,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
       results = SelectFormatter.formatted_select_options(%SelectFormatter{options: options})
 
       assert results == [
-               {"alice", "101"},
-               {"joe", "202"},
-               {"bob", "303"}
+               [key: "alice", value: "101"],
+               [key: "joe", value: "202"],
+               [key: "bob", value: "303"]
              ]
     end
 
@@ -37,9 +37,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
       results = SelectFormatter.formatted_select_options(%SelectFormatter{options: options})
 
       assert results == [
-               {"joe", "202"},
-               {"bob", "303"},
-               {"alice", "101"}
+               [key: "joe", value: "202"],
+               [key: "bob", value: "303"],
+               [key: "alice", value: "101"]
              ]
     end
 
@@ -54,15 +54,15 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
       results = SelectFormatter.formatted_select_options(%SelectFormatter{options: options}, true)
 
       assert results == [
-               {"joe", "joe|202"},
-               {"bob", "bob|303"},
-               {"alice", "alice|101"}
+               [key: "joe", value: "joe|202"],
+               [key: "bob", value: "bob|303"],
+               [key: "alice", value: "alice|101"]
              ]
     end
   end
 
   describe "formatted_select_options/2" do
-    test "it returns properly filtered options" do
+    test "it returns properly filtered options by name and value" do
       options = [
         %Facility{
           id: "952",
@@ -95,8 +95,18 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
         })
 
       assert results == [
-               {"Ashmont/Braintree platform to lobby", "951"},
-               {"Ashmont/Braintree platform to Massachusetts Avenue", "861"}
+               [key: "Ashmont/Braintree platform to lobby", value: "951"],
+               [key: "Ashmont/Braintree platform to Massachusetts Avenue", value: "861"]
+             ]
+
+      results =
+        SelectFormatter.formatted_select_options(%SelectFormatter{
+          options: options,
+          search_term: "951"
+        })
+
+      assert results == [
+               [key: "Ashmont/Braintree platform to lobby", value: "951"],
              ]
     end
   end
@@ -152,11 +162,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
         })
 
       assert results == [
-               {"527 (9:01 AM from South Station) CR-683300-527", "CR-683300-527"},
-               {"527 (9:01 AM from South Station) CR-683300-special", "CR-683300-special"},
-               {"595 (9:15 AM from South Station)", "CR-683322-595"},
-               {"594 (9:45 AM from Framingham)", "CR-683321-594"},
-               {"529 (10:01 AM from South Station)", "CR-683302-529"}
+               [key: "527 (9:01 AM from South Station) CR-683300-527", value: "CR-683300-527"],
+               [key: "527 (9:01 AM from South Station) CR-683300-special", value: "CR-683300-special"],
+               [key: "595 (9:15 AM from South Station)", value: "CR-683322-595"],
+               [key: "594 (9:45 AM from Framingham)", value: "CR-683321-594"],
+               [key: "529 (10:01 AM from South Station)", value: "CR-683302-529"]
              ]
     end
 
@@ -191,9 +201,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
         })
 
       assert results == [
-               {"10:01 AM from Long Wharf (South) to Charlestown Navy Yard",
-                "Boat-F4-1430-Long-B-01-Weekday-Fall-24"}
-             ]
+        [
+          key: "10:01 AM from Long Wharf (South) to Charlestown Navy Yard",
+          value: "Boat-F4-1430-Long-B-01-Weekday-Fall-24"
+        ]
+      ]
     end
 
     test "it properly formats nested trips" do
@@ -241,13 +253,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
       assert results == [
                {"Framingham/Worcester line",
                 [
-                  {"527 (9:01 AM from South Station)", "CR-683300-527"},
-                  {"595 (9:15 AM from Framingham)", "CR-683322-595"}
+                  [key: "527 (9:01 AM from South Station)", value: "CR-683300-527"],
+                  [key: "595 (9:15 AM from Framingham)", value: "CR-683322-595"]
                 ]},
                {"Providence/Stoughton Line",
                 [
-                  {"839 (11:03 AM from South Station)", "CR-687393-839"},
-                  {"841 (11:15 AM from Forest Hills)", "CR-687395-841"}
+                  [key: "839 (11:03 AM from South Station)", value: "CR-687393-839"],
+                  [key: "841 (11:15 AM from Forest Hills)", value: "CR-687395-841"]
                 ]}
              ]
     end
@@ -299,7 +311,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
                {"Framingham/Worcester line", []},
                {"Providence/Stoughton Line",
                 [
-                  {"841 (11:15 AM from Forest Hills)", "CR-687395-841"}
+                  [key: "841 (11:15 AM from Forest Hills)", value: "CR-687395-841"]
                 ]}
              ]
     end
