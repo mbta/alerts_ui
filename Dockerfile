@@ -44,6 +44,7 @@ COPY --from=assets-builder /root/priv/static ./priv/static
 COPY --from=assets-builder /root/assets/node_modules ./assets/node_modules
 
 RUN mix compile
+RUN mix sentry.package_source_code
 RUN mix assets.deploy
 RUN mix release
 
