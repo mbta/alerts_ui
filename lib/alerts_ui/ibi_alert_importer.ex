@@ -38,8 +38,16 @@ defmodule AlertsUI.IBIAlertImporter do
         fix_invalid_timestamps()
         Logger.info("[import #{import_id}] fixing missing entities")
         fix_missing_entities()
+      end,
+      timeout: :infinity
+    )
+
+    # Need to close out the first transaction here so the IBI alerts table
+    # will be available for all threads
+
+    Repo.transact(fn ->
         Logger.info("[import #{import_id}] converting legacy alerts")
-        convert_ibi_alerts()
+        parallel_convert_alerts()
         Logger.info("[import #{import_id}] done")
         {:ok, true}
       end,
@@ -242,6 +250,29 @@ defmodule AlertsUI.IBIAlertImporter do
 
   def latest_ibi_version_id(alert_id) do
     Repo.get_by(LatestIBIAlert, alert_id: alert_id).id
+  end
+
+  def parallel_convert_alerts() do
+    (1..70)
+    |> Enum.map(& {((&1 - 1) * 10000), (&1 * 10000 -1)})
+    |> Enum.chunk_every(7)
+    |> Enum.each(fn batch ->
+      tasks = Enum.map(batch, fn {lower, upper} ->
+        Logger.info("[import] BATCH: #{lower} to #{upper}")
+        Task.async(fn ->
+          convert_ibi_alerts(
+            query: from(
+              i in LatestIBIAlert,
+              where: i.is_closed == "True" and
+              fragment("alert_id::integer") >= ^lower and
+              fragment("alert_id::integer") <= ^upper
+            )
+          )
+        end)
+      end)
+
+      Enum.each(tasks, & Task.await(&1, :infinity))
+    end)
   end
 
   @doc """
