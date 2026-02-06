@@ -13,7 +13,6 @@ defmodule AlertsUI.AlertBuilder do
   alias AlertsUIWeb.FormComponents.Helpers.{SelectFormatter, ServiceEffectCombinations}
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
-  alias MBTAV3API.Lines.Repo, as: LinesRepo
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatterns
   alias MBTAV3API.RoutePatterns.RoutePattern, as: APIRoutePattern
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
@@ -406,14 +405,16 @@ defmodule AlertsUI.AlertBuilder do
       %{informed_entity: nil}
     else
       service_types = Map.get(alert_data, :service_types, []) |> expand_subway_service_types()
+      direction = Map.get(alert_data, :direction)
 
       routes =
         alert_data
         |> Map.get(:route_ids, [])
         |> pre_combo_routes()
         |> Enum.reject(&(&1 == %{}))
-        |> add_combo_routes()
+        |> add_combo_routes(direction)
 
+      # get route patterns
       route_ids = Enum.map(routes, & &1.id)
 
       route_types_by_id =
@@ -425,7 +426,7 @@ defmodule AlertsUI.AlertBuilder do
       child_stops_with_context =
         child_stops_with_context(
           routes,
-          Map.get(alert_data, :direction),
+          direction,
           Map.get(alert_data, :stop_ids)
         )
 
@@ -446,43 +447,39 @@ defmodule AlertsUI.AlertBuilder do
     end
   end
 
-  @spec add_combo_routes([Route.id_t()]) :: [Route.t()]
+  @spec add_combo_routes([Route.t()], String.t()) :: [Route.t()]
 
-  defp add_combo_routes(selected_routes) do
-    # For every route, get its line (if present) and make an API call to to
-    # the line route to get any associated combo routes it has
-    # We want to include combo routes with the informed entity
-    # unless they're shuttle routes.
-    selected_routes
-    |> Enum.flat_map(fn original_route ->
-      if Map.get(original_route, :line_id) in ["", nil] do
-        []
-      else
-        original_route.line_id
-        |> LinesRepo.get([])
-        |> filtered_combo_routes(original_route.id)
-      end ++ [original_route]
-    end)
-    |> Enum.uniq()
+  defp add_combo_routes(selected_routes, direction) do
+    # For every route,  and make an API call to
+    # get its route pattern, which gets included
+    # with a "listed route" value of "false".
+    # these are our combo routes
+
+    combo_routes =
+      selected_routes
+      |> Enum.flat_map(fn original_route ->
+        original_route.id
+        |> get_route_patterns(direction, original_route.type)
+        |> Enum.filter(&(&1.listed_route == false))
+        |> Enum.map(& &1.route_id)
+        |> Enum.reject(&is_nil/1)
+        |> add_special_combo_routes(original_route.id)
+      end)
+      |> Enum.uniq()
+      |> Enum.map(&RoutesRepo.get(&1, []))
+      # filter out shuttle routes
+      |> Enum.filter(&(&1.description !== :rail_replacement_bus))
+
+    selected_routes ++ combo_routes
   end
 
-  # excepting green line to keep it from pulling in all green line routes
-  # when any is selected
-  defp filtered_combo_routes(%{id: "line-Green"}, _), do: []
-
-  # only pull in SLW when any other silver line route is selected
-  defp filtered_combo_routes(%{id: "line-SLWaterfront"} = line, "746"), do: line.routes
-
-  defp filtered_combo_routes(%{id: "line-SLWaterfront"} = line, original_route_id) do
-    Enum.filter(line.routes, fn route ->
-      route.id in ["746", original_route_id]
-    end)
+  def add_special_combo_routes(route_ids, "746") do
+    # adds other SL routes if SLW is selected
+    route_ids
+    |> Enum.concat(["741", "742", "743"])
   end
 
-  defp filtered_combo_routes(line, _) do
-    # filter out shuttle routes unless they were part of the original selection
-    Enum.filter(line.routes, &(&1.description !== :rail_replacement_bus))
-  end
+  def add_special_combo_routes(route_ids, _), do: route_ids
 
   @spec child_stops_with_context([Route.id_t()], String.t(), [Stop.id_t()]) ::
           [
@@ -585,7 +582,6 @@ defmodule AlertsUI.AlertBuilder do
     # multiple branches and thus multiple patterns (eg red line)
     # Uses 1 route pattern if only one has all the stops on it,
     # otherwise uses all of them.
-
     route_pattern_match =
       route_patterns
       |> Enum.filter(fn route_pattern ->
@@ -606,9 +602,8 @@ defmodule AlertsUI.AlertBuilder do
 
   @spec get_route_patterns(Route.id_t(), String.t(), integer()) :: [APIRoutePattern.t()]
   defp get_route_patterns(route_id, direction, 3) do
-    # busses do not have canonical route patterns
     opts =
-      [include: "representative_trip.stops"]
+      [include: "representative_trip.stops,route"]
       |> route_pattern_direction_opts(direction)
 
     RoutePatterns.by_route_id(route_id, opts)
@@ -616,7 +611,7 @@ defmodule AlertsUI.AlertBuilder do
 
   defp get_route_patterns(route_id, direction, _route_type) do
     opts =
-      [include: "representative_trip.stops"]
+      [include: "representative_trip.stops,route"]
       |> route_pattern_direction_opts(direction)
 
     route_id
@@ -1160,7 +1155,7 @@ defmodule AlertsUI.AlertBuilder do
     |> Enum.filter(&(&1 !== "default"))
     |> Enum.uniq()
     |> Routes.expanding_green_line()
-    |> Enum.map(&(RoutesRepo.get(&1, include: "line") || %{}))
+    |> Enum.map(&(RoutesRepo.get(&1, []) || %{}))
   end
 
   defp ensure_utc_or_nil(%NaiveDateTime{} = timestamp) do
