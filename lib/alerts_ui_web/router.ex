@@ -130,7 +130,7 @@ defmodule AlertsUIWeb.Router do
   end
 
   scope "/_flags", Laboratory do
-    pipe_through [:browser, :require_authenticated_user, :require_developer]
+    pipe_through [:browser, :require_authenticated_user]
     forward "/", Router
   end
 
