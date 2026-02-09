@@ -39,6 +39,7 @@ defmodule AlertsUIWeb.ConnCase do
     conn =
       cond do
         tags[:logged_in_user] -> log_in_user(conn)
+        tags[:logged_in_user_no_roles] -> log_in_user(conn, [])
         tags[:logged_in_developer] -> log_in_user(conn, [:viewer, :developer])
         tags[:logged_in_viewer] -> log_in_user(conn, [:viewer])
         true -> conn
@@ -65,9 +66,12 @@ defmodule AlertsUIWeb.ConnCase do
   end
 
   def log_in_user(conn, user) do
+    auth_time = System.system_time(:second)
+
     conn
     |> Phoenix.ConnTest.init_test_session(%{})
     |> Plug.Conn.put_session(:user, user)
+    |> Plug.Conn.put_session(:last_auth_time, auth_time)
     |> Plug.Conn.put_session(:logout_uri, logout_uri())
   end
 

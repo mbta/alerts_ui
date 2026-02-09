@@ -25,7 +25,7 @@ defmodule AlertsUIWeb.AuthController do
                 },
                 extra: %{
                   raw_info: %{
-                    claims: %{"sub" => id},
+                    claims: %{"sub" => id, "auth_time" => auth_time},
                     userinfo: userinfo
                   }
                 }
@@ -38,7 +38,7 @@ defmodule AlertsUIWeb.AuthController do
     user = User.new(id, email, first_name, last_name, roles)
     {:ok, logout_uri} = logout_uri(auth)
 
-    UserAuth.log_in_user(conn, user, logout_uri)
+    UserAuth.log_in_user(conn, user, logout_uri, auth_time)
   end
 
   def callback(%{assigns: %{ueberauth_failure: failure}} = conn, _params) do
@@ -72,7 +72,7 @@ defmodule AlertsUIWeb.AuthController do
        when is_list(roles),
        do: roles |> Enum.map(&String.to_existing_atom/1)
 
-  defp parse_role(_), do: [:viewer]
+  defp parse_role(_), do: []
 
   @spec logout_uri(map()) :: {:ok, String.t()}
   defp logout_uri(%Ueberauth.Auth{strategy: Ueberauth.Strategy.FakeKeycloak}) do

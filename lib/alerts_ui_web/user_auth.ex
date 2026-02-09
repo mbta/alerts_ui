@@ -26,14 +26,15 @@ defmodule AlertsUIWeb.UserAuth do
   disconnected on log out. The line can be safely removed
   if you are not using LiveView.
   """
-  @spec log_in_user(Conn.t(), User.t(), String.t()) :: Conn.t()
-  def log_in_user(conn, user, logout_uri) do
+  @spec log_in_user(Conn.t(), User.t(), String.t(), number()) :: Conn.t()
+  def log_in_user(conn, user, logout_uri, auth_time) do
     user_return_to = get_session(conn, :user_return_to)
 
     conn
     |> renew_session()
     |> put_current_user_in_session(user)
     |> put_session(:logout_uri, logout_uri)
+    |> put_session(:last_auth_time, auth_time)
     |> redirect(to: user_return_to || signed_in_path(conn))
   end
 
@@ -70,7 +71,13 @@ defmodule AlertsUIWeb.UserAuth do
   """
   def fetch_current_user(conn, _opts) do
     {user, conn} = ensure_session_user(conn)
-    assign(conn, :current_user, user)
+    last_auth_time = get_session(conn, :last_auth_time, nil)
+    last_active = get_session(conn, :last_active, nil)
+
+    conn
+    |> assign(:current_user, user)
+    |> assign(:last_auth_time, last_auth_time)
+    |> assign(:last_active, last_active)
   end
 
   @doc """
@@ -111,7 +118,10 @@ defmodule AlertsUIWeb.UserAuth do
   end
 
   def on_mount(:ensure_authenticated, _params, session, socket) do
-    socket = mount_current_user(socket, session)
+    socket =
+      socket
+      |> mount_current_user(session)
+      |> mount_auth_times(session)
 
     if socket.assigns.current_user do
       {:cont, socket}
@@ -136,13 +146,21 @@ defmodule AlertsUIWeb.UserAuth do
   Plug used for routes that require the user to not be authenticated.
   """
   def redirect_if_user_is_authenticated(conn, _opts) do
-    if conn.assigns[:current_user] do
+    if conn.assigns[:current_user] && !auth_expired?(conn) do
       conn
       |> redirect(to: signed_in_path(conn))
       |> halt()
     else
       conn
     end
+  end
+
+  def max_session_time do
+    Application.get_env(:alerts_ui, __MODULE__)[:max_session_time]
+  end
+
+  def idle_time do
+    Application.get_env(:alerts_ui, __MODULE__)[:idle_time]
   end
 
   @doc """
@@ -153,7 +171,16 @@ defmodule AlertsUIWeb.UserAuth do
   """
   def require_authenticated_user(conn, _opts) do
     if conn.assigns[:current_user] do
-      conn
+      now = System.system_time(:second)
+
+      if auth_expired?(conn, now) do
+        conn
+        |> maybe_store_return_to()
+        |> redirect(to: ~p"/auth/keycloak?prompt=login")
+        |> halt()
+      else
+        put_session(conn, :last_active, now)
+      end
     else
       conn
       |> maybe_store_return_to()
@@ -161,6 +188,30 @@ defmodule AlertsUIWeb.UserAuth do
       |> halt()
     end
   end
+
+  def auth_expired?(last_auth_map, now \\ System.system_time(:second))
+
+  def auth_expired?(%{last_auth_time: last_auth_time, last_active: last_active}, now)
+      when is_integer(last_auth_time) and is_integer(last_active) do
+    # last_auth_time is when the user entered their password at the SSO provider
+    auth_time_expires = last_auth_time + max_session_time()
+
+    # last_active is time of last request
+    idle_time_expires = last_active + idle_time()
+
+    # did either timeout expire?
+    min(auth_time_expires, idle_time_expires) < now
+  end
+
+  def auth_expired?(%Plug.Conn{} = conn, now) do
+    last_auth_time = get_session(conn, :last_auth_time)
+    last_active = get_session(conn, :last_active, now)
+
+    auth_expired?(%{last_auth_time: last_auth_time, last_active: last_active})
+  end
+
+  # Default to auth is expired if last_auth_time or last_active not available
+  def auth_expired?(_, _), do: true
 
   def require_roles(conn, opts) do
     required_roles = Keyword.get(opts, :required_roles, [])
@@ -172,6 +223,18 @@ defmodule AlertsUIWeb.UserAuth do
       conn
       |> put_flash(:error, "You don't have permission to access that page")
       |> redirect(to: "/")
+      |> halt()
+    end
+  end
+
+  def require_viewer_role(conn, _opts) do
+    user = conn.assigns[:current_user]
+
+    if user && :viewer in user.roles do
+      conn
+    else
+      conn
+      |> redirect(to: "/unauthorized")
       |> halt()
     end
   end
@@ -244,6 +307,16 @@ defmodule AlertsUIWeb.UserAuth do
     else
       {nil, conn}
     end
+  end
+
+  defp mount_auth_times(socket, session) do
+    socket
+    |> Phoenix.Component.assign_new(:last_auth_time, fn ->
+      session["last_auth_time"]
+    end)
+    |> Phoenix.Component.assign_new(:last_active, fn ->
+      session["last_active"]
+    end)
   end
 
   defp mount_current_user(socket, session) do

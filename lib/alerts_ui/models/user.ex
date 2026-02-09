@@ -50,7 +50,7 @@ defmodule AlertsUI.Models.User do
           last_name :: String.t(),
           roles :: [role()]
         ) :: t()
-  def new(keycloak_id, email, first_name, last_name, roles \\ [:viewer]) do
+  def new(keycloak_id, email, first_name, last_name, roles \\ []) do
     %__MODULE__{
       id: nil,
       keycloak_id: keycloak_id,

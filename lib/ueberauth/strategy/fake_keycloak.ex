@@ -62,7 +62,8 @@ defmodule Ueberauth.Strategy.FakeKeycloak do
       raw_info: %{
         claims: %{
           "exp" => expires_at(conn),
-          "sub" => @mbta_uuid
+          "sub" => @mbta_uuid,
+          "auth_time" => System.system_time(:second)
         },
         opts: %{
           client_id: "fake_client",

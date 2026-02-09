@@ -67,6 +67,12 @@
     </div>
   </header>
   <main class="md:overflow-auto">
+    <.live_component
+      module={AlertsUIWeb.ActivityTracker}
+      id="activity_tracker"
+      last_auth_time={@last_auth_time}
+      last_active={@last_active}
+    />
     <.flash_group flash={@flash} />
     {@inner_content}
   </main>
