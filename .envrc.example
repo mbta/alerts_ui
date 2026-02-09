@@ -12,3 +12,10 @@ export SECRET_KEY_BASE=
 # used in GTFS validation
 export DEV_API_URL=https://api-dev.mbtace.com/
 export DEV_API_KEY=<Enter your dev API Key here>
+# if these are wrong 3 times, you'll get locked out, so make sure they're right
+# or leave blank to skip it
+export TRAPEZE_SFTP_HOST=mbtaftp.mbta.com
+export TRAPEZE_SFTP_PORT=10022
+export TRAPEZE_SFTP_USER=
+export TRAPEZE_SFTP_PASSWORD=
+export TRAPEZE_SFTP_FILENAME=/MBTAEAMTEST/T-Alert/file.txt
