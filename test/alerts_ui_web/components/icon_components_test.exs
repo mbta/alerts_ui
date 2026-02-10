@@ -15,7 +15,7 @@ defmodule AlertsUIWeb.IconComponentsTest do
           "Green-C" -> %{long_name: "Green Line C"}
           "Green-D" -> %{long_name: "Green Line D"}
           "Green-E" -> %{long_name: "Green Line E"}
-          "Mattapan" -> %{long_name: "Mattapan Trolley"}
+          "Mattapan" -> %{long_name: "Mattapan Whatever"}
           "CR-Haverhill" -> %{long_name: "Haverhill Line"}
           "Boat-F4" -> %{long_name: "Charlestown Ferry"}
           "131" -> %{name: "131"}
@@ -56,7 +56,7 @@ defmodule AlertsUIWeb.IconComponentsTest do
       assert_rendered(circle_icon(%{type: "Green Line D"}), "<svg")
       assert_rendered(circle_icon(%{type: "Green Line E"}), "<svg")
       assert_rendered(circle_icon(%{type: "Green Line"}), "<svg")
-      assert_rendered(circle_icon(%{type: "Mattapan Trolley"}), "<svg")
+      assert_rendered(circle_icon(%{type: "Mattapan Whatever Else"}), "<svg")
       assert_rendered(circle_icon(%{type: "using_escalator"}), "<span")
       assert_rendered(circle_icon(%{type: "using_wheelchair"}), "<span")
       assert_rendered(circle_icon(%{type: "park_car"}), "<span")
