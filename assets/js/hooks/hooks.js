@@ -197,22 +197,4 @@ Hooks.FilterSelect = {
   },
 };
 
-// TODO: What all should we track in FS?
-// Right now, I've just got page nav
-Hooks.FullStory = {
-  mounted() {
-    // Track initial page view
-    this.trackPageView()
-
-    // Listen for LiveView navigation events
-    window.addEventListener("phx:page-loading-stop", () => {
-      this.trackPageView()
-    })
-  },
-
-  trackPageView() {
-    FullStory.setPage(window.location.pathname)
-  }
-}
-
 export default Hooks;

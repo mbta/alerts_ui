@@ -4,13 +4,6 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content={get_csrf_token()} />
-    <%= if @conn.assigns[:current_user] do %>
-      <meta name="userEmail" content={@current_user.email} />
-      <meta name="userName" content={"#{@current_user.first_name} #{@current_user.last_name}"} />
-    <% end %>
-    <%= if @conn.assigns[:full_story_org_id] do %>
-      <meta name="fullStoryOrgId" content={@full_story_org_id} />
-    <% end %>
     <.live_title suffix=" - Alerts Manager">
       {assigns[:page_title]}
     </.live_title>
@@ -20,7 +13,6 @@
     <link rel="icon" href={"/images/icons/favicon-#{@environment}.ico"} />
   </head>
   <body class="min-h-dvh bg-bg-primary font-body font-normal text-base text-text-primary">
-    <div id="fullstory-tracker" phx-hook="FullStory" style="display: none;"></div>
     {@inner_content}
   </body>
 </html>
