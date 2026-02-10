@@ -736,7 +736,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
 
         assert view
                |> element("select##affected_service_stop_names_and_ids")
-               |> render =~ ~r/value="South Station (outbound)|place-sstat">South Station \(outbound\).*value="Courthouse (outbound)|place-crtst">Courthouse \(outbound\).*value="Courthouse (inbound)|place-crtst">Courthouse \(inbound\).*value="South Station (inbound)|place-sstat">South Station \(inbound\)/
+               |> render =~
+                 ~r/value="South Station (outbound)|place-sstat">South Station \(outbound\).*value="Courthouse (outbound)|place-crtst">Courthouse \(outbound\).*value="Courthouse (inbound)|place-crtst">Courthouse \(inbound\).*value="South Station (inbound)|place-sstat">South Station \(inbound\)/
       end
     end
 
