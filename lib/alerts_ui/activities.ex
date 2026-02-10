@@ -40,7 +40,6 @@ defmodule AlertsUI.Activities do
   def for_effect("Station Issue", _), do: [:BOARD]
   def for_effect("Stop Closure", _), do: [:BOARD, :EXIT]
   def for_effect("Stop Move", _), do: [:BOARD]
-  def for_effect("Stop Shoveling", _), do: [:BOARD, :RIDE]
   def for_effect("Suspension", :first), do: [:BOARD, :RIDE]
   def for_effect("Suspension", :last), do: [:EXIT, :RIDE]
   def for_effect("Suspension", _), do: [:BOARD, :EXIT, :RIDE]
