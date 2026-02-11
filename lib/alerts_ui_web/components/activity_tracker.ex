@@ -16,10 +16,11 @@ defmodule AlertsUIWeb.ActivityTracker do
   @impl true
   def handle_event("activity", _params, socket) do
     now = System.system_time(:second)
+    email = socket.assigns.current_user.email
 
     new_socket =
       if UserAuth.auth_expired?(socket.assigns, now) do
-        redirect(socket, to: ~p"/auth/keycloak?prompt=login")
+        redirect(socket, to: ~p"/auth/keycloak?prompt=login&login_hint=#{email}")
       else
         assign(socket, last_active: now)
       end

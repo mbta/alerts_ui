@@ -170,13 +170,16 @@ defmodule AlertsUIWeb.UserAuth do
   they use the application at all, here would be a good place.
   """
   def require_authenticated_user(conn, _opts) do
-    if conn.assigns[:current_user] do
+    current_user = conn.assigns[:current_user]
+
+    if current_user do
+      email = current_user.email
       now = System.system_time(:second)
 
       if auth_expired?(conn, now) do
         conn
         |> maybe_store_return_to()
-        |> redirect(to: ~p"/auth/keycloak?prompt=login")
+        |> redirect(to: ~p"/auth/keycloak?prompt=login&login_hint=#{email}")
         |> halt()
       else
         put_session(conn, :last_active, now)
