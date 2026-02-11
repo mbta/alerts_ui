@@ -217,28 +217,28 @@ defmodule AlertsUIWeb.IconComponents do
     """
   end
 
-  def circle_icon(%{type: "Mattapan Trolley"} = assigns) do
-    ~H"""
-    <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
-      <title>
-        mattapan line
-      </title>
-      <path fill="#da291c" d="m24 0a24 24 0 1 0 24 24 24 24 0 0 0 -24-24" />
-      <path
-        fill="#fff"
-        d="m19.25944 13.86377 4.84277 14.23923h.05762l4.582-14.23926h6.40917v20.706h-4.26265v-14.67374h-.05762l-5.0752 14.67382h-3.50879l-5.07519-14.52882h-.05855v14.5288h-4.2627v-20.706z"
-      />
-    </svg>
-    """
-  end
-
   # Fallback
   def circle_icon(assigns) do
-    ~H"""
-    <span class="align-middle bg-mbta-bus font-bold h-full py-1 px-2 rounded text-black text-sm uppercase">
-      {@type}
-    </span>
-    """
+    if is_binary(assigns.type) && assigns.type =~ ~r/^Mattapan/ do
+      ~H"""
+      <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
+        <title>
+          mattapan line
+        </title>
+        <path fill="#da291c" d="m24 0a24 24 0 1 0 24 24 24 24 0 0 0 -24-24" />
+        <path
+          fill="#fff"
+          d="m19.25944 13.86377 4.84277 14.23923h.05762l4.582-14.23926h6.40917v20.706h-4.26265v-14.67374h-.05762l-5.0752 14.67382h-3.50879l-5.07519-14.52882h-.05855v14.5288h-4.2627v-20.706z"
+        />
+      </svg>
+      """
+    else
+      ~H"""
+      <span class="align-middle bg-mbta-bus font-bold h-full py-1 px-2 rounded text-black text-sm uppercase">
+        {@type}
+      </span>
+      """
+    end
   end
 
   @doc """
