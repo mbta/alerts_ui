@@ -368,10 +368,22 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   def handle_info({:got_obsolete_ids, obsolete_ids}, socket) do
+    alert_data = socket.assigns.alert_data
+
     obsolete_id_text =
       obsolete_ids
-      |> Enum.reject(fn {_k, value} -> value in [nil, []] end)
       |> Enum.map(fn {key, value} ->
+        name_part= key |> Atom.to_string() |> String.split("_") |> hd
+        original_field = Map.get(alert_data, String.to_existing_atom("original_#{name_part}_selections"))
+
+         original_names_map =  (original_field || [])
+          |> Enum.map(fn name_and_id ->
+            [name, id] = String.split(name_and_id, "|")
+
+            {id, (if name == "", do: id, else: name)}
+          end)
+          |> Enum.into(%{})
+
         title =
           key
           |> Atom.to_string()
@@ -379,8 +391,14 @@ defmodule AlertsUIWeb.CreateAlertLive do
           |> String.replace("ys", "ies")
           |> String.capitalize()
 
-        "#{title}: #{Enum.join(value, ", ")}"
+        names =
+          Enum.map_join(value, ", ", fn obsolete_id ->
+            Map.get(original_names_map, obsolete_id, obsolete_id)
+          end)
+        {title, names}
       end)
+      |> Enum.reject(fn {_title, names} -> names == "" end)
+      |> Enum.map(fn {title, names} -> "#{title}: #{names}" end)
 
     socket =
       socket
