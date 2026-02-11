@@ -718,17 +718,17 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     values
     |> Enum.map(&generate_selection_for_one_value(&1, options))
     |> Enum.concat()
-    |> Enum.map(& Keyword.get(&1, :value))
+    |> Enum.map(&Keyword.get(&1, :value))
   end
 
-  defp generate_selection_for_one_value(name_and_id, options) do
+  def generate_selection_for_one_value(name_and_id, options) do
     id = Alert.get_route_id(name_and_id)
-    matches = options |> Enum.filter(& Keyword.get(&1, :value) == name_and_id)
+    matches = options |> Enum.filter(&(Keyword.get(&1, :value) == name_and_id))
 
     if matches != [] do
       matches
     else
-      options |> Enum.filter(& Alert.get_route_id(Keyword.get(&1, :value) == id))
+      options |> Enum.filter(&(Alert.get_route_id(Keyword.get(&1, :value)) == id))
     end
   end
 
