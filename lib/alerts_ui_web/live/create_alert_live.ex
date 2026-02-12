@@ -367,34 +367,45 @@ defmodule AlertsUIWeb.CreateAlertLive do
     {:noreply, assign(socket, selected_facility: selected_facility)}
   end
 
-  def handle_info({:got_obsolete_ids, obsolete_ids}, socket) do
+  def handle_info({:got_obsolete_ids, obsolete_ids_map}, socket) do
     alert_data = socket.assigns.alert_data
 
+    # builds a list of the text to go in the obsolete ids modal
     obsolete_id_text =
-      obsolete_ids
-      |> Enum.map(fn {key, value} ->
-        name_part= key |> Atom.to_string() |> String.split("_") |> hd
-        original_field = Map.get(alert_data, String.to_existing_atom("original_#{name_part}_selections"))
+      obsolete_ids_map
+      # for every field (route, stop, etc in the obsolete ids map)
+      |> Enum.map(fn {field_name, obsolete_ids} ->
+        # build name of corresponding "original selections" field
+        name_part = field_name |> Atom.to_string() |> String.split("_") |> hd
 
-         original_names_map =  (original_field || [])
+        original_field =
+          Map.get(alert_data, String.to_existing_atom("original_#{name_part}_selections"))
+
+        # build map of original selected ids -> names
+        original_names_map =
+          (original_field || [])
           |> Enum.map(fn name_and_id ->
             [name, id] = String.split(name_and_id, "|")
 
-            {id, (if name == "", do: id, else: name)}
+            {id, if(name == "", do: id, else: name)}
           end)
           |> Enum.into(%{})
 
+        # build text title
         title =
-          key
+          field_name
           |> Atom.to_string()
           |> String.replace("_id", "")
           |> String.replace("ys", "ies")
           |> String.capitalize()
 
+        # step through obsolete ids and gets names if available
+        # the ID is used as a fallback
         names =
-          Enum.map_join(value, ", ", fn obsolete_id ->
+          Enum.map_join(obsolete_ids, ", ", fn obsolete_id ->
             Map.get(original_names_map, obsolete_id, obsolete_id)
           end)
+
         {title, names}
       end)
       |> Enum.reject(fn {_title, names} -> names == "" end)
@@ -402,7 +413,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
     socket =
       socket
-      |> assign(obsolete_id_text: obsolete_id_text, obsolete_ids: obsolete_ids)
+      |> assign(obsolete_id_text: obsolete_id_text, obsolete_ids: obsolete_ids_map)
       |> push_event("show-gtfs-modal", %{id: "gtfs-warning-modal"})
 
     {:noreply, socket}
