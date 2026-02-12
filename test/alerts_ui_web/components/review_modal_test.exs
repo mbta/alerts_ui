@@ -146,7 +146,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
             cause_detail: "PARADE",
             reminder_times: [],
             informed_entity: [%{route_type: 3, route_id: "1"}],
-            original_route_selections: ["1", "2", "3"]
+            original_route_selections: ["|1", "|2", "|3"]
           })
 
         {:ok, _} =
@@ -200,7 +200,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
             cause_detail: "PARADE",
             reminder_times: [],
             informed_entity: [%{route_type: 3, route_id: "1"}],
-            original_route_selections: ["1", "2", "3"]
+            original_route_selections: ["|1", "|2", "|3"]
           })
 
         {:ok, _} =
@@ -1224,7 +1224,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
             cause_detail: "UNKNOWN",
             reminder_times: [],
             informed_entity: [%{route_type: 3, route_id: "1", direction_id: 0}],
-            original_route_selections: ["1", "2", "3"]
+            original_route_selections: ["|1", "|2", "|3"]
           })
 
         {:ok, _} =
