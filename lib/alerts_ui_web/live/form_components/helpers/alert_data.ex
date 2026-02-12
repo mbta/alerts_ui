@@ -152,7 +152,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       Map.put(params, key, Map.get(alert, key))
     end)
     |> Map.merge(create_and_edit_metadata(alert, form_type))
-    |> Map.merge(effect_name_combination_and_informed_entities(alert))
+    |> Map.merge(effect_name_combination_and_informed_entities(alert, form_type))
     |> Map.merge(active_period_map(alert))
     |> Map.merge(reminder_times(alert))
     |> Map.merge(notification_period(alert, form_type))
@@ -186,7 +186,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     }
   end
 
-  defp effect_name_combination_and_informed_entities(alert) do
+  defp effect_name_combination_and_informed_entities(alert, form_type) do
     effect_name =
       case Map.get(alert, :effect_name) do
         nil ->
@@ -217,9 +217,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
         nil
       end
 
-    send_push_notification_on_edit =
+    notifcation_key =
+      if form_type == :editing,
+        do: :send_push_notification_on_edit,
+        else: :send_push_notification_on_create
+
+    send_push_notification? =
       GetKeyForModeEffect.get_value_of_key(
-        :send_push_notification_on_edit,
+        notifcation_key,
         route_type || primary_service_type,
         effect_name
       )
@@ -235,7 +240,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       stop_ids: Alert.gather_parent_stop_ids(alert),
       stop_names_and_ids: alert.original_stop_selections,
       trip_ids: Alert.gather_trip_ids(alert),
-      notification_toggle: send_push_notification_on_edit
+      notification_toggle: send_push_notification?
     }
   end
 
