@@ -2,9 +2,9 @@ import { getMetaContent } from "./utils";
 import { FullStory, init as initFullStory } from "@fullstory/browser";
 
 // FullStory
+const fullStoryOrgId = getMetaContent("fullStoryOrgId");
+const userEmail = getMetaContent("userEmail");
 if (fullStoryOrgId !== null && userEmail !== null) {
-  const fullStoryOrgId = getMetaContent("fullStoryOrgId");
-  
   initFullStory({ orgId: fullStoryOrgId });
   FullStory("setIdentity", {
     uid: userEmail,

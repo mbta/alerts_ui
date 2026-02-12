@@ -1,3 +1,5 @@
+import { FullStory, isInitialized } from '@fullstory/browser';
+
 let Hooks = {};
 
 Hooks.ActivityTracker = {
@@ -211,7 +213,15 @@ Hooks.FullStory = {
   },
 
   trackPageView() {
-    FullStory.setPage(window.location.pathname)
+    if (isInitialized()) {
+      FullStory('setProperties', {
+        type: 'page',
+        properties: {
+          path: window.location.pathname
+        }
+      })
+    }
+    
   }
 }
 
