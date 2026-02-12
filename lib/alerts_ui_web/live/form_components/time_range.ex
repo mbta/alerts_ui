@@ -220,7 +220,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     selected_trips_have_changed? = selected_schedules != socket.assigns.old_selected_schedules
 
     form_params =
-      if trip_departure_time && trip_arrival_time && selected_trips_have_changed? && form_type != :editing do
+      if trip_departure_time && trip_arrival_time && selected_trips_have_changed? &&
+           form_type != :editing do
         start_params =
           if NaiveDateTime.compare(trip_departure_time, socket.assigns.current_time) == :gt do
             %{
