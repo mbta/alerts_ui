@@ -47,12 +47,27 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
       )
       when not is_nil(options) do
     options
-    |> Enum.uniq()
     |> Enum.sort_by(&sort_order/1)
     |> Enum.map(fn object ->
-      {name_for_option(object, route_type), id_for_option(object, split_stops?)}
+      key = name_for_option(object, route_type)
+
+      if tooltip_id?(object) do
+        [
+          id: key,
+          key: key,
+          value: id_for_option(object, split_stops?),
+          "phx-hook": "Tippy",
+          "data-tippy-content": tooltip_content(object)
+        ]
+      else
+        [
+          key: name_for_option(object, route_type),
+          value: id_for_option(object, split_stops?)
+        ]
+      end
     end)
     |> apply_search(search_term, values_to_keep)
+    |> Enum.uniq()
   end
 
   def formatted_select_options(
@@ -85,8 +100,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   def apply_search(options, search_term, values_to_keep) do
     search_term = String.downcase(search_term || "")
 
-    Enum.filter(options, fn {option, value} ->
-      (option || "")
+    Enum.filter(options, fn option ->
+      key = Keyword.get(option, :key)
+      value = Keyword.get(option, :value, "")
+
+      Enum.join([key, value], " ")
+      |> String.replace("|", " ")
       |> String.downcase()
       |> String.contains?(search_term) || value in values_to_keep
     end)
@@ -195,4 +214,22 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   end
 
   def formatted_direction_options(_, _), do: []
+
+  defp tooltip_id?(object) do
+    case object do
+      %Stop{} -> true
+      _ -> false
+    end
+  end
+
+  defp tooltip_content(object) do
+    type =
+      object
+      |> Map.get(:__struct__, "")
+      |> Atom.to_string()
+      |> String.split(".")
+      |> List.last()
+
+    "#{type} ID #{id_for_option(object, false)}"
+  end
 end

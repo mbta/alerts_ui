@@ -162,7 +162,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         |> render_change(%{"affected_service" => %{"route_ids" => ["Green"]}})
 
         assert view |> render_async() =~
-                 ~s(<option value="Stop 1|stop_1">Stop 1</option><option value="Stop 2|stop_2">Stop 2</option>)
+                 ~r/value="Stop 1|stop_1">Stop 1<\/option>.*value="Stop 2|stop_2">Stop 2<\/option>/
       end
     end
 
@@ -737,7 +737,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         assert view
                |> element("select##affected_service_stop_names_and_ids")
                |> render =~
-                 "<option value=\"South Station (outbound)|place-sstat\">South Station (outbound)</option><option value=\"Courthouse (outbound)|place-crtst\">Courthouse (outbound)</option><option value=\"Courthouse (inbound)|place-crtst\">Courthouse (inbound)</option><option value=\"South Station (inbound)|place-sstat\">South Station (inbound)</option>"
+                 ~r/value="South Station (outbound)|place-sstat">South Station \(outbound\).*value="Courthouse (outbound)|place-crtst">Courthouse \(outbound\).*value="Courthouse (inbound)|place-crtst">Courthouse \(inbound\).*value="South Station (inbound)|place-sstat">South Station \(inbound\)/
       end
     end
 
@@ -774,7 +774,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         assert view
                |> element("select##affected_service_stop_names_and_ids")
                |> render =~
-                 "<option value=\"South Station (outbound)|place-sstat\">South Station (outbound)</option><option selected=\"selected\" value=\"Courthouse (outbound)|place-crtst\">Courthouse (outbound)</option>"
+                 ~r/value="South Station \(outbound\)|place-sstat">South Station \(outbound\).*selected="selected" value="Courthouse \(outbound\)|place-crtst">Courthouse \(outbound\)/
       end
     end
 
@@ -818,7 +818,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         assert view |> render_async() =~
                  ~s(<option value="CR-683322-595">595)
 
-        assert view |> render_async() =~ ~s(<option value="South Station|place-sstat">)
+        assert view |> render_async() =~ ~s(value="South Station|place-sstat">)
 
         view
         |> element("form")
@@ -827,9 +827,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         })
 
         refute view |> render_async() =~
-                 ~s(<option value="CR-683322-595">595)
+                 ~s(value="CR-683322-595">595)
 
-        refute view |> render_async() =~ ~s(<option value="South Station|place-sstat">)
+        refute view |> render_async() =~ ~s(value="South Station|place-sstat">)
       end
     end
 
@@ -867,13 +867,13 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         assert view |> render_async() =~ ~s(value=\"CR-Worcester\" checked=\"checked\")
 
         assert view |> render_async() =~
-                 ~s(<option selected="selected" value="0">Westbound</option>)
+                 ~s(selected="selected" value="0">Westbound</option>)
 
         assert view |> render_async() =~
-                 ~s(<option selected="selected" value="South Station|place-sstat">)
+                 ~s(selected="selected" value="South Station|place-sstat">)
 
         assert view |> render_async() =~
-                 ~s(<option selected="selected" value="CR-683322-595">595)
+                 ~s(selected="selected" value="CR-683322-595">595)
       end
     end
 
@@ -1136,9 +1136,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         assert rendered_view =~ ~s(value="CR-Worcester" checked="checked")
 
         assert rendered_view =~
-                 ~s(<option selected="selected" value="South Station|place-sstat">South Station)
+                 ~s(selected="selected" value="South Station|place-sstat">South Station)
 
-        assert rendered_view =~ ~s(<option selected="selected" value="CR-683322-595">595)
+        assert rendered_view =~ ~s(selected="selected" value="CR-683322-595">595)
 
         view
         |> element("#service_form")

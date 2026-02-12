@@ -102,13 +102,13 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         selected_schedules: [],
         old_selected_schedules: [],
         day_of_week_options: [
-          Monday: :monday,
-          Tuesday: :tuesday,
-          Wednesday: :wednesday,
-          Thursday: :thursday,
-          Friday: :friday,
-          Saturday: :saturday,
-          Sunday: :sunday
+          [key: :Monday, value: :monday],
+          [key: :Tuesday, value: :tuesday],
+          [key: :Wednesday, value: :wednesday],
+          [key: :Thursday, value: :thursday],
+          [key: :Friday, value: :friday],
+          [key: :Saturday, value: :saturday],
+          [key: :Sunday, value: :sunday]
         ]
       })
 
