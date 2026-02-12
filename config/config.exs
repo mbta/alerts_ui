@@ -145,7 +145,8 @@ max_session_time = 12 * 60 * 60
 
 config :alerts_ui, AlertsUIWeb.UserAuth,
   max_session_time: max_session_time,
-  idle_time: 30 * 60
+  # 3 hours in seconds
+  idle_time: 3 * 60 * 60
 
 config :ueberauth, Ueberauth,
   providers: [
