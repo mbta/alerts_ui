@@ -384,21 +384,25 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
   def validate_start_is_before_trip(changeset, nil, _), do: changeset
 
   def validate_start_is_before_trip(changeset, trip_arrival_time, perform_validation) do
-    changeset
-    |> validate_change(:active_period_start, fn :active_period_start, active_period_start ->
-      if perform_validation and
-           !is_nil(trip_arrival_time) and
-           NaiveDateTime.diff(active_period_start, trip_arrival_time, :minute) > 60 do
-        [
-          active_period_start:
-            "Effect must start before #{formatted_datetime(trip_arrival_time |> NaiveDateTime.add(1, :hour))}",
-          active_period_start_date:
-            "Effect must start before #{formatted_datetime(trip_arrival_time |> NaiveDateTime.add(1, :hour))}"
-        ]
-      else
-        []
-      end
-    end)
+    if get_field(changeset, :alert_timing) == :recurring do
+      changeset
+    else
+      changeset
+      |> validate_change(:active_period_start, fn :active_period_start, active_period_start ->
+        if perform_validation and
+             !is_nil(trip_arrival_time) and
+             NaiveDateTime.diff(active_period_start, trip_arrival_time, :minute) > 60 do
+          [
+            active_period_start:
+              "Effect must start before #{formatted_datetime(trip_arrival_time |> NaiveDateTime.add(1, :hour))}",
+            active_period_start_date:
+              "Effect must start before #{formatted_datetime(trip_arrival_time |> NaiveDateTime.add(1, :hour))}"
+          ]
+        else
+          []
+        end
+      end)
+    end
   end
 
   defp formatted_datetime(datetime, format_string \\ "{0M}/{0D}/{YYYY}, {0h12}:{0m} {AM}"),
