@@ -214,12 +214,14 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       when not is_nil(selected_schedules) do
     trip_departure_time = get_trip_departure_time(selected_schedules)
     trip_arrival_time = get_trip_arrival_time(alert_data, selected_schedules)
+    form_type = Map.get(socket.assigns, :form_type)
 
     # only update times if selected schedules has changed (eg someone has just selected a new trip)
     selected_trips_have_changed? = selected_schedules != socket.assigns.old_selected_schedules
 
     form_params =
-      if trip_departure_time && trip_arrival_time && selected_trips_have_changed? do
+      if trip_departure_time && trip_arrival_time && selected_trips_have_changed? &&
+           form_type != :editing do
         start_params =
           if NaiveDateTime.compare(trip_departure_time, socket.assigns.current_time) == :gt do
             %{
@@ -239,7 +241,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         }
 
         new_params = Map.merge(start_params, end_params)
-
         Map.merge(socket.assigns.form.params, new_params)
       else
         socket.assigns.form.params
