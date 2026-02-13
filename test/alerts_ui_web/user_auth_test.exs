@@ -293,7 +293,7 @@ defmodule AlertsUIWeb.UserAuthTest do
 
       assert conn.halted
 
-      assert redirected_to(conn) == ~p"/auth/keycloak?prompt=login"
+      assert redirected_to(conn) == ~p"/auth/keycloak?prompt=login&login_hint=#{user.email}"
     end
 
     test "redirects if user has been idle", %{conn: conn, user: user} do
@@ -305,7 +305,7 @@ defmodule AlertsUIWeb.UserAuthTest do
 
       assert conn.halted
 
-      assert redirected_to(conn) == ~p"/auth/keycloak?prompt=login"
+      assert redirected_to(conn) == ~p"/auth/keycloak?prompt=login&login_hint=#{user.email}"
     end
   end
 
