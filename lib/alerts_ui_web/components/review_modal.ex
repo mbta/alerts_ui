@@ -95,6 +95,11 @@ defmodule AlertsUIWeb.ReviewModal do
         trip_names
       end
 
+    reminder_times =
+      assigns.alert_data
+      |> Map.get(:reminder_times, [])
+      |> Enum.filter(&(!!&1.time))
+
     facility_names =
       assigns.alert_data
       |> Map.get(:original_facility_selections, [])
@@ -121,7 +126,8 @@ defmodule AlertsUIWeb.ReviewModal do
         created_timestamp: Map.get(assigns.alert_data, :created_timestamp),
         created_by: Map.get(assigns.alert_data, :created_by),
         last_edited_at: Map.get(assigns.alert_data, :last_edited_at),
-        last_edited_by: Map.get(assigns.alert_data, :last_edited_by)
+        last_edited_by: Map.get(assigns.alert_data, :last_edited_by),
+        reminder_times: reminder_times
       )
 
     ~H"""
@@ -302,9 +308,9 @@ defmodule AlertsUIWeb.ReviewModal do
             <% end %>
 
             <p class="font-bold pb-1">Reminders</p>
-            <%= if @alert_data.reminder_times != [] do %>
+            <%= if @reminder_times != [] do %>
               <div class="pb-4">
-                <%= for reminder <- Enum.sort_by(@alert_data.reminder_times, &(&1.time), NaiveDateTime) do %>
+                <%= for reminder <- Enum.sort_by(@reminder_times, &(&1.time), NaiveDateTime) do %>
                   <p>
                     {Calendar.strftime(reminder.time, "%a %m/%d/%Y %-I:%M %p")}
                     <span :if={ReminderTimes.sent?(reminder.time)} class="text-text-secondary">
