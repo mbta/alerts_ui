@@ -1,4 +1,4 @@
-defmodule AlertsUI.DelayedJob do
+defmodule AlertsUI.Jobs.DelayedJob do
   @moduledoc """
   Oban worker that runs a job after a delay
   """
@@ -7,7 +7,7 @@ defmodule AlertsUI.DelayedJob do
   require Logger
 
   @doc """
-  Example: 
+  Example:
   config :alerts_ui, Oban,
     plugins: [
       {Oban.Plugins.Cron,
@@ -17,7 +17,7 @@ defmodule AlertsUI.DelayedJob do
            AlertsUI.DelayedJob,
            args: %{
              delay: 30_000,
-             module: AlertsUI.FeedWriter,
+             module: AlertsUI.Jobs.FeedWriter,
              args: %{filename: "example.json"}
            },
            max_attempts: 1,

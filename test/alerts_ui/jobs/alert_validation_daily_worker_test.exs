@@ -1,7 +1,7 @@
-defmodule AlertsUI.AlertValidation.AlertValidationDailyWorkerTest do
+defmodule AlertsUI.Jobs.AlertValidationDailyWorkerTest do
   use AlertsUI.DataCase, async: false
 
-  alias AlertsUI.AlertValidation.AlertValidationDailyWorker
+  alias AlertsUI.Jobs.AlertValidationDailyWorker
   alias Oban.Job
 
   describe "perform" do

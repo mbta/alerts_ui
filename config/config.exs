@@ -103,25 +103,25 @@ config :alerts_ui, Oban,
        # Write GTFS feeds every minute
        {
          "*/1 * * * *",
-         AlertsUI.FeedWriter,
+         AlertsUI.Jobs.FeedWriter,
          max_attempts: 1, unique: [period: 30, states: [:available, :scheduled, :executing]]
        },
        # Write GTFS feeds every minute, offset by 30s
        {
          "*/1 * * * *",
-         AlertsUI.DelayedJob,
-         args: %{delay: 30_000, module: AlertsUI.FeedWriter},
+         AlertsUI.Jobs.DelayedJob,
+         args: %{delay: 30_000, module: AlertsUI.Jobs.FeedWriter},
          max_attempts: 1,
          unique: [period: 30, states: [:available, :scheduled, :executing]]
        },
        # Update recurring alerts every day at 3:01 am EST
-       {"1 8 * * *", AlertsUI.RecurringAlertUpdater},
+       {"1 8 * * *", AlertsUI.Jobs.RecurringAlertUpdater},
        # Validate alerts against production every day at 4:00 am EST
-       {"0 9 * * *", AlertsUI.AlertValidation.AlertValidationDailyWorker},
+       {"0 9 * * *", AlertsUI.Jobs.AlertValidationDailyWorker},
        # Check if we need to validate alerts against dev every minute
        {
          "*/1 * * * *",
-         AlertsUI.AlertValidation.AlertValidationUpcomingWorker,
+         AlertsUI.Jobs.AlertValidationUpcomingWorker,
          max_attempts: 1
        }
      ]}

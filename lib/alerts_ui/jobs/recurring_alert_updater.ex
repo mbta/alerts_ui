@@ -1,4 +1,4 @@
-defmodule AlertsUI.RecurringAlertUpdater do
+defmodule AlertsUI.Jobs.RecurringAlertUpdater do
   @moduledoc """
   Oban worker that periodically adds new active periods to recurring alerts
   with no end.

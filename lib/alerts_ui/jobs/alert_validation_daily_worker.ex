@@ -1,4 +1,4 @@
-defmodule AlertsUI.AlertValidation.AlertValidationDailyWorker do
+defmodule AlertsUI.Jobs.AlertValidationDailyWorker do
   @moduledoc """
   Oban worker that checks the informed entities of open alerts for validity
   once a day, against the production API.
