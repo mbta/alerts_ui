@@ -42,21 +42,24 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
                  key: "joe",
                  value: "202",
                  "phx-hook": "Tippy",
-                 "data-tippy-content": "Stop ID 202"
+                 "data-tippy-content": "Stop ID 202",
+                 "data-tippy-delay": "[1000, 200]"
                ],
                [
                  id: "bob",
                  key: "bob",
                  value: "303",
                  "phx-hook": "Tippy",
-                 "data-tippy-content": "Stop ID 303"
+                 "data-tippy-content": "Stop ID 303",
+                 "data-tippy-delay": "[1000, 200]"
                ],
                [
                  id: "alice",
                  key: "alice",
                  value: "101",
                  "phx-hook": "Tippy",
-                 "data-tippy-content": "Stop ID 101"
+                 "data-tippy-content": "Stop ID 101",
+                 "data-tippy-delay": "[1000, 200]"
                ]
              ]
     end
@@ -77,21 +80,24 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
                  key: "joe",
                  value: "joe|202",
                  "phx-hook": "Tippy",
-                 "data-tippy-content": "Stop ID 202"
+                 "data-tippy-content": "Stop ID 202",
+                 "data-tippy-delay": "[1000, 200]"
                ],
                [
                  id: "bob",
                  key: "bob",
                  value: "bob|303",
                  "phx-hook": "Tippy",
-                 "data-tippy-content": "Stop ID 303"
+                 "data-tippy-content": "Stop ID 303",
+                 "data-tippy-delay": "[1000, 200]"
                ],
                [
                  id: "alice",
                  key: "alice",
                  value: "alice|101",
                  "phx-hook": "Tippy",
-                 "data-tippy-content": "Stop ID 101"
+                 "data-tippy-content": "Stop ID 101",
+                 "data-tippy-delay": "[1000, 200]"
                ]
              ]
     end
