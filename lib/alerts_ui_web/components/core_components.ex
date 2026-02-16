@@ -733,9 +733,9 @@ defmodule AlertsUIWeb.CoreComponents do
       messages =
         message
         |> String.split(";")
-        |> Enum.map(& "<li class=\"ml-2 text-sm leading-6\">#{&1}</li>")
+        |> Enum.map(&"<li class=\"ml-2 text-sm leading-6\">#{&1}</li>")
 
-      ["<ul class=\"list-disc\">"] ++ messages ++ ["</ul>"] |> HTML.raw()
+      (["<ul class=\"list-disc\">"] ++ messages ++ ["</ul>"]) |> HTML.raw()
     else
       message
     end
