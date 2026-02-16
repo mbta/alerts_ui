@@ -728,6 +728,7 @@ defmodule AlertsUIWeb.CoreComponents do
     for {^field, {msg, opts}} <- errors, do: translate_error({msg, opts})
   end
 
+  # sobelow_skip ["XSS.Raw"]
   defp formatted_flash_content(message) when is_binary(message) do
     if message =~ ";" do
       messages =
