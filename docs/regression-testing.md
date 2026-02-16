@@ -21,7 +21,7 @@ end time.
 - Use the pagination links to go to the last page, and to return.
 - Click "Filters" to open the filter modal. Ensure that all three sections
 of the modal are populated with options. Select a combination, say, "Subway"
-/ "Kingston Line" / "Station Issue" and confirm that results are filtered.
+/ "Red Line" / "Station Issue" and confirm that results are filtered.
 - Click through the timeline, selecting Current, Future, Past and All
 alerts, and confirm the table responds as it should. Past and All tabs should
 also be sorted by end time, but descending.
