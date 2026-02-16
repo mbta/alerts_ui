@@ -241,7 +241,7 @@ Test banner text element:
 
 #### Rider remindres
 
-- Clicking the "Add reminder" button should add a datetime input element, with an X button to close it out
+- Clicking the "Add reminder" button should add a datetime input element, with an X button to remove it.
 - You should be able to type a date and time into the reminder input
 - Clicking calendar icon should open a date picker
 - If you've already entered a time, changing the date with the picker should not reset it
