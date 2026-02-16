@@ -787,7 +787,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         # Flash
         flash_text =
           view
-          |> element("#error-flash")
+          |> element("#flash")
           |> render()
 
         assert flash_text =~ "Select stop(s)" && flash_text =~ "Select route(s)"

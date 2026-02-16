@@ -928,7 +928,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
 
       # Flash
       assert view
-             |> element("#error-flash li", "Select route(s)")
+             |> element("#flash")
              |> render() =~ "Select route(s)"
     end
 
