@@ -15,7 +15,7 @@ the application. (Maybe we revisit this when we have tooling for setting user ro
 
 ## Alerts list view
 
-- The alerts list view (`/alerts`) should open on on the Current
+- The alerts list view (`/alerts`) should open on the Current
 tab of the timeline, with no filters selected, ordered by ascending
 end time.
 - Use the pagination links to go to the last page, and to return.
