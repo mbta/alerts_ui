@@ -54,7 +54,7 @@ defmodule AlertsUIWeb.IBIImporterLive do
   def handle_event("wipe", _params, socket) do
     Logger.warning("WIPING IMPORTED ALERTS!")
     SQL.query!(Repo, "TRUNCATE ibi_alerts")
-    from(a in Alert, where: a.legacy == true) |> Repo.delete_all(timeout: :infinity)
+    from(a in Alert, where: a.source == :IBI) |> Repo.delete_all(timeout: :infinity)
     {:noreply, socket}
   end
 

@@ -47,7 +47,7 @@ defmodule AlertsUI.IBIAlertImporter do
 
     Repo.transact(
       fn ->
-        Logger.info("[import #{import_id}] converting legacy alerts")
+        Logger.info("[import #{import_id}] converting IBI alerts")
         parallel_convert_alerts()
         Logger.info("[import #{import_id}] done")
         {:ok, true}
@@ -459,7 +459,7 @@ defmodule AlertsUI.IBIAlertImporter do
       :created_timestamp,
       :closed_timestamp,
       :last_modified_timestamp,
-      :legacy,
+      :source,
       :image_url,
       :image_alternative_text,
       :reminder_times
@@ -904,7 +904,7 @@ defmodule AlertsUI.IBIAlertImporter do
 
   def from_ibi(ibi_alert, :image_alternative_text), do: ibi_alert.alert_image_description
 
-  def from_ibi(_ibi_alert, :legacy), do: true
+  def from_ibi(_ibi_alert, :source), do: :IBI
 
   def from_ibi(ibi_alert, :reminder_times) do
     ibi_alert

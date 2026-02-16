@@ -26,7 +26,8 @@ defmodule AlertsUI.Models.Alert do
     Effect,
     InformedEntity,
     ReminderTime,
-    SeverityLevel
+    SeverityLevel,
+    Source
   }
 
   alias AlertsUI.Models.User
@@ -81,13 +82,14 @@ defmodule AlertsUI.Models.Alert do
   original_mode_selections
   plaintext_reminder_selections
   primary_service_type
-  legacy)a
+  source)a
 
   @cause Cause.causes()
   @effect Effect.effects()
   @severity_level SeverityLevel.severity_levels()
   @alert_lifecycle AlertLifecycle.alert_lifecycles()
   @duration_certainty DurationCertainty.duration_certainties()
+  @sources Source.sources()
 
   @type t :: %__MODULE__{
           active_period: [ActivePeriod.t()] | nil,
@@ -115,7 +117,6 @@ defmodule AlertsUI.Models.Alert do
           image_alternative_text: String.t() | nil,
           last_modified_timestamp: DateTime.t() | nil,
           last_push_notification_timestamp: DateTime.t() | nil,
-          legacy: boolean(),
           notification_period_start: DateTime.t() | nil,
           notification_period_end: DateTime.t() | nil,
           original_route_selections: [String.t()] | nil,
@@ -135,6 +136,7 @@ defmodule AlertsUI.Models.Alert do
           severity: integer() | nil,
           severity_level: atom() | nil,
           short_header_text: String.t() | nil,
+          source: atom() | nil,
           timeframe_text: String.t() | nil,
           tts_header_text: String.t() | nil,
           tts_description_text: String.t() | nil,
@@ -238,7 +240,7 @@ defmodule AlertsUI.Models.Alert do
     field :notification_period_end, :utc_datetime
     field :plaintext_reminder_selections, :string
     field :primary_service_type, :string
-    field :legacy, :boolean
+    field :source, Ecto.Enum, values: @sources, default: :ALERTS_MANAGER
 
     field :recurrence_days, {:array, Ecto.Enum},
       values: ~w[sunday monday tuesday wednesday thursday friday saturday]a
@@ -259,6 +261,7 @@ defmodule AlertsUI.Models.Alert do
   def changeset(%__MODULE__{} = alert, params, options \\ []) do
     alert
     |> cast(params, @permitted_fields)
+    |> enforce_defaults(source: :ALERTS_MANAGER)
     |> cast_assoc(:reminder_times, required: false, with: &ReminderTime.changeset/2)
     |> validate_recurrence_days(options)
     |> validate_timestamps()
@@ -271,6 +274,17 @@ defmodule AlertsUI.Models.Alert do
     |> cast_and_validate_active_periods(options)
     |> cast_and_validate_informed_entities(options)
     |> unique_constraint(:alert_id, name: :alerts_alert_id_index)
+  end
+
+  defp enforce_defaults(starting_changeset, fields_with_defaults) do
+    fields_with_defaults
+    |> Enum.reduce(starting_changeset, fn {key, default}, changeset ->
+      case get_change(changeset, key) do
+        "" -> put_change(changeset, key, default)
+        nil -> put_change(changeset, key, default)
+        _ -> changeset
+      end
+    end)
   end
 
   @spec draft_changeset(any(), map()) :: Ecto.Changeset.t()
@@ -290,7 +304,7 @@ defmodule AlertsUI.Models.Alert do
   end
 
   def get_direction(%__MODULE__{} = alert) do
-    if alert.legacy do
+    if alert.source == :IBI do
       get_direction_from_original_selections(alert)
     else
       get_direction_from_informed_entities(alert.informed_entity)
@@ -361,7 +375,7 @@ defmodule AlertsUI.Models.Alert do
   end
 
   def service_types(%__MODULE__{informed_entity: []} = alert) do
-    if alert.legacy do
+    if alert.source == :IBI do
       alert.original_mode_selections
     else
       []
@@ -380,7 +394,7 @@ defmodule AlertsUI.Models.Alert do
   end
 
   def gather_route_ids(%__MODULE__{} = alert) do
-    if alert.legacy do
+    if alert.source == :IBI do
       gather_route_ids_from_original_selections(alert)
     else
       gather_route_ids_from_informed_entities(alert.informed_entity)
@@ -388,7 +402,7 @@ defmodule AlertsUI.Models.Alert do
   end
 
   def gather_facility_ids(%__MODULE__{} = alert) do
-    if alert.legacy do
+    if alert.source == :IBI do
       gather_facility_ids_from_original_selections(alert)
     else
       gather_facility_ids_from_informed_entities(alert.informed_entity)
@@ -396,7 +410,7 @@ defmodule AlertsUI.Models.Alert do
   end
 
   def gather_stop_ids(%__MODULE__{} = alert) do
-    if alert.legacy do
+    if alert.source == :IBI do
       gather_stop_ids_from_original_selections(alert)
     else
       gather_stop_ids_from_informed_entities(alert.informed_entity)
@@ -404,7 +418,7 @@ defmodule AlertsUI.Models.Alert do
   end
 
   def gather_parent_stop_ids(%__MODULE__{} = alert) do
-    if alert.legacy do
+    if alert.source == :IBI do
       gather_parent_stop_ids_from_original_selections(alert)
     else
       gather_parent_stop_ids_from_informed_entities(alert.informed_entity)
@@ -412,7 +426,7 @@ defmodule AlertsUI.Models.Alert do
   end
 
   def gather_trip_ids(%__MODULE__{} = alert) do
-    if alert.legacy do
+    if alert.source == :IBI do
       gather_trip_ids_from_original_selections(alert)
     else
       gather_trip_ids_from_informed_entities(alert.informed_entity)

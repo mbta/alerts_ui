@@ -66,7 +66,7 @@ defmodule AlertsUI.AlertBuilder do
           reminder_times: [NaiveDateTime.t()] | nil,
           recurrence_days: [atom()] | nil,
           route_types_by_id: %{String.t() => Route.type_int()},
-          legacy: boolean() | nil
+          source: atom() | nil
         }
   @type direction_t :: 0 | 1
   @type stop_with_context_t :: {Stop.t(), Route.id_t(), direction_t(), RoutePattern.stop_type()}
@@ -89,7 +89,7 @@ defmodule AlertsUI.AlertBuilder do
       :image_alternative_text,
       :recurrence_days,
       :severity,
-      :legacy,
+      :source,
       :created_timestamp,
       :closed_timestamp
     ]
@@ -158,7 +158,7 @@ defmodule AlertsUI.AlertBuilder do
   end
 
   defp reminder_times(alert_data) do
-    if Map.get(alert_data, :legacy) do
+    if Map.get(alert_data, :source) == :IBI do
       %{}
     else
       reminder_times =
@@ -382,7 +382,7 @@ defmodule AlertsUI.AlertBuilder do
 
     notification_period_end =
       cond do
-        Map.get(alert_data, :notification_period_end) && Map.get(alert_data, :legacy) ->
+        Map.get(alert_data, :notification_period_end) && Map.get(alert_data, :source) == :IBI ->
           Map.get(alert_data, :notification_period_end)
           |> ensure_utc_or_nil()
 

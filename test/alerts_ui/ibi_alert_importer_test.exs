@@ -31,14 +31,14 @@ defmodule AlertsUI.IBIAlertImporterTest do
   end
 
   describe "ibi_alert_to_changeset/2" do
-    test "sets legacy = true", %{
+    test "sets source = \"ibi\"", %{
       ibi_alert: ibi_alert
     } do
       changeset =
         %Ecto.Changeset{} =
         ibi_alert_to_changeset(ibi_alert, %Alert{})
 
-      assert get_field(changeset, :legacy) == true
+      assert get_field(changeset, :source) == :IBI
     end
 
     test "active period and informed entity can be disabled via options", %{
