@@ -78,6 +78,7 @@ defmodule AlertsUI.IBIAlertImporter do
     Repo.transact(
       fn ->
         SQL.query!(Repo, "truncate ibi_alerts")
+
         path
         |> File.stream!()
         |> IBIAlertImportParser.parse_stream()
@@ -316,9 +317,8 @@ defmodule AlertsUI.IBIAlertImporter do
         |> Stream.each(fn chunk ->
           alert_ids = Enum.map(chunk, fn latest -> latest.alert_id end)
 
-          existing_alert_ids = Repo.all(
-            from a in Alert, where: a.alert_id in ^alert_ids, select: a.alert_id
-          )
+          existing_alert_ids =
+            Repo.all(from a in Alert, where: a.alert_id in ^alert_ids, select: a.alert_id)
 
           all_versions_index =
             Repo.all(from i in IBIAlert, where: i.alert_id in ^alert_ids)
@@ -392,7 +392,9 @@ defmodule AlertsUI.IBIAlertImporter do
               |> Enum.map(fn ibi_alert -> extract_and_cast_reminders(ibi_alert, alert) end)
               |> List.flatten()
               |> Enum.uniq()
-              |> Enum.map(fn params -> Changeset.cast(%ReminderTime{}, params, Map.keys(params)) end)
+              |> Enum.map(fn params ->
+                Changeset.cast(%ReminderTime{}, params, Map.keys(params))
+              end)
               |> Enum.each(fn changeset -> Repo.insert!(changeset) end)
             end
           end)

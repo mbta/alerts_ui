@@ -110,8 +110,12 @@ defmodule AlertsUI.IBIAlertImporterTest do
     end
 
     test ":trip_ids", %{ibi_alert: ibi_alert} do
-      assert ibi_alert.informed_trip_list == "CR-Fitchburg-CR-Sunday-2415|2415 (11:30 pm from North Station)"
-      assert from_ibi(ibi_alert, :trip_ids) == ["2415 (11:30 pm from North Station)|CR-Fitchburg-CR-Sunday-2415"]
+      assert ibi_alert.informed_trip_list ==
+               "CR-Fitchburg-CR-Sunday-2415|2415 (11:30 pm from North Station)"
+
+      assert from_ibi(ibi_alert, :trip_ids) == [
+               "2415 (11:30 pm from North Station)|CR-Fitchburg-CR-Sunday-2415"
+             ]
     end
 
     test ":direction", %{ibi_alert: ibi_alert} do
