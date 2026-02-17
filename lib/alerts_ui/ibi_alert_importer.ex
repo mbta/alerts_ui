@@ -77,6 +77,7 @@ defmodule AlertsUI.IBIAlertImporter do
 
     Repo.transact(
       fn ->
+        SQL.query!(Repo, "truncate ibi_alerts")
         path
         |> File.stream!()
         |> IBIAlertImportParser.parse_stream()
