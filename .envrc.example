@@ -1,6 +1,6 @@
 export IBI_ENHANCED_ALERTS_API_URL=http://s3.amazonaws.com/mbta-realtime-test/alerts_enhanced.json
 export IBI_STANDARD_ALERTS_API_URL=http://s3.amazonaws.com/mbta-realtime-test/alerts_pb.json
-export S3_BUCKET_NAME=https://mbta-alerts-ui.s3.amazonaws.com/
+export S3_BUCKET_NAME="mbta-alerts-ui"
 export S3_BUCKET_PREFIX="dev-orange"
 export API_KEY=<Enter your dev API Key here>
 export API_URL=https://api-dev.mbtace.com/

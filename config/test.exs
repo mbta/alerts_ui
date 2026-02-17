@@ -28,6 +28,9 @@ config :phoenix, :plug_init_mode, :runtime
 # function for writing feed output files
 config :alerts_ui, file_write_module: AlertsUI.FeedOutput.WriteNowhere
 
+# function for reading feed output files
+config :alerts_ui, file_read_module: AlertsUI.FeedOutput.ReadNowhere
+
 config :ueberauth, Ueberauth,
   providers: [
     keycloak: {Ueberauth.Strategy.FakeKeycloak, [issuer: :keycloak_issuer]}

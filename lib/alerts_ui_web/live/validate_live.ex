@@ -11,8 +11,8 @@ defmodule AlertsUIWeb.ValidateLive do
     {:ok, ibi_json} = FeedReader.ibi_json()
     {:ok, ibi_data} = Jason.decode(ibi_json)
 
-    {:ok, dev_orange_json} = FeedReader.dev_orange_json()
-    {:ok, dev_orange_data} = Jason.decode(dev_orange_json)
+    {:ok, alerts_manager_json} = FeedReader.alerts_manager_json()
+    {:ok, dev_orange_data} = Jason.decode(alerts_manager_json)
 
     {:ok,
      assign(socket,
@@ -21,7 +21,7 @@ defmodule AlertsUIWeb.ValidateLive do
        ibi_data: ibi_data,
        ibi_alert_data: nil,
        ibi_alert_id: "",
-       dev_orange_json: dev_orange_json,
+       alerts_manager_json: alerts_manager_json,
        dev_orange_data: dev_orange_data,
        dev_orange_alert_data: nil,
        dev_orange_alert_id: "",
