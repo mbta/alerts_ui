@@ -563,6 +563,45 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       assert render(view) =~ ~s(Effect must start before 05/01/2024, 10:15 AM)
     end
 
+    test "no error if start after trip end when start changes on recurring alert" do
+      schedule = %EnhancedSchedule{
+        trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
+        arrival_time: nil,
+        time_of_last_trip_arrival:
+          ~U[2024-05-01 13:15:00.00Z] |> DateTime.shift_zone!("America/New_York"),
+        departure_time: ~U[2024-05-01 12:15:00.00Z] |> DateTime.shift_zone!("America/New_York")
+      }
+
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns |> Map.put(:selected_schedules, [schedule]))
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "alert_timing" => "recurring"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_start_specifier" => "custom"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_start" => "2024-05-01T10:16:00"
+        }
+      })
+
+      refute render(view) =~ ~s(Effect must start before 05/01/2024, 10:15 AM)
+    end
+
     test "displays error if start after trip end when 'start of service' is selected" do
       {:ok, view, _html} =
         live_isolated_component(TimeRange, @assigns |> Map.put(:selected_schedules, [@schedule]))
@@ -662,6 +701,51 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
       assert render(view) =~ ~s(value=\"now\")
       assert render(view) =~ ~s(value=\"2024-05-01T10:15\")
+    end
+
+    test "start and end time not updated if trip changes and departure before current time but form is in editing mode" do
+      schedule = %EnhancedSchedule{
+        trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
+        arrival_time: nil,
+        time_of_last_trip_arrival:
+          ~U[2024-05-01 13:15:00.00Z] |> DateTime.shift_zone!("America/New_York"),
+        departure_time: ~U[2024-05-01 12:15:00.00Z] |> DateTime.shift_zone!("America/New_York")
+      }
+
+      assigns =
+        @assigns
+        |> Map.put(:current_time, ~N[2024-05-01 08:15:00])
+        |> Map.put(:form_type, :editing)
+
+      {:ok, view, _html} =
+        live_isolated_component(
+          TimeRange,
+          assigns
+        )
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end_specifier" => "custom",
+          "active_period_start_specifier" => "custom"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end" => "2024-05-01T11:54:00",
+          "active_period_start" => "2024-05-01T10:16:00"
+        }
+      })
+
+      live_assign(view, :selected_schedules, [schedule])
+
+      assert render(view) =~ ~s(value=\"custom\")
+      assert render(view) =~ ~s(value=\"2024-05-01T11:54\")
+      assert render(view) =~ ~s(value=\"2024-05-01T10:16\")
     end
 
     test "doesn't display error if start within 1 hour of trip end" do

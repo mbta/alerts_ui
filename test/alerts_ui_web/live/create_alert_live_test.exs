@@ -5,6 +5,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
   import AlertsUI.Support.Factory
   import Ecto.Changeset
   import Mock
+  alias AlertsUI.Alerts
   alias AlertsUIWeb.CreateAlertLive
 
   alias AlertsUIWeb.FormComponents.{
@@ -333,6 +334,64 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         send(view.pid, :create_alert)
         flash = assert_redirect(view, "/")
         assert flash["info"] =~ ~r/New alert #[0-9]+ created/
+      end
+    end
+  end
+
+  describe "obsolete ids modal" do
+    @tag :logged_in_user
+    test "displays modal with obsolete ids", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _types -> [@route] end,
+           get: fn _id -> @route end,
+           get: fn _id, _opts -> @route end,
+           all: fn _opts -> [@route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction -> [@stop] end,
+           get_parent: fn
+             "place-sstat" -> @stop
+             "obsolete_stop" -> %Stop{id: "obsolete_stop", name: "spurious stop"}
+           end
+         ]}
+      ]) do
+        alert_params =
+          build(:alert_map, %{
+            alert_id: "123",
+            effect: :OTHER_EFFECT,
+            effect_detail: "DELAY",
+            header_text: "cool header text",
+            severity: 3,
+            severity_level: :WARNING,
+            cause_detail: "UNKNOWN",
+            reminder_times: [],
+            informed_entity: [
+              %{route_type: 3, route_id: "CR-Worcester", direction_id: 0, stop_id: "place-sstat"},
+              %{
+                route_type: 3,
+                route_id: "CR-Worcester",
+                direction_id: 0,
+                stop_id: "obsolete_stop"
+              }
+            ],
+            original_route_selections: [
+              "Framingham/Worcester Line|CR-Worcester",
+              "spurious route|sp_rt"
+            ],
+            original_stop_selections: ["South Station|place-sstat", "spurious stop|obsolete_stop"]
+          })
+
+        {:ok, _} =
+          Alerts.create_or_update_alert(alert_params, build(:user))
+
+        {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
+
+        rendered_view = render_async(view)
+        assert rendered_view =~ "spurious route"
+        assert rendered_view =~ "spurious stop"
       end
     end
   end

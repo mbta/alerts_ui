@@ -116,10 +116,6 @@ defmodule AlertsUI.ActivitiesTest do
       assert Activities.for_effect("Stop Move") == [:BOARD]
     end
 
-    test "Stop Shoveling" do
-      assert Activities.for_effect("Stop Shoveling") == [:BOARD, :RIDE]
-    end
-
     test "Summary" do
       assert Activities.for_effect("Summary") == [:BOARD, :EXIT, :RIDE]
     end

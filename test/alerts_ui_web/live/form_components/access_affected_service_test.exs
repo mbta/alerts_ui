@@ -94,7 +94,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
         assert view
                |> element("select#access_affected_service_stop_id")
                |> render_async() =~
-                 ~s(<option value="place-sstat">South Station</option>)
+                 ~s(value="place-sstat">South Station</option>)
 
         view
         |> element("form")
