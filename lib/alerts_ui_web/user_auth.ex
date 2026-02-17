@@ -170,6 +170,7 @@ defmodule AlertsUIWeb.UserAuth do
   they use the application at all, here would be a good place.
   """
   def require_authenticated_user(conn, _opts) do
+    Logger.info("Verifying user is authenticated. Conn: #{inspect(conn)}")
     current_user = conn.assigns[:current_user]
 
     if current_user do

@@ -34,6 +34,7 @@ defmodule AlertsUIWeb.AuthController do
         } = conn,
         _params
       ) do
+    Logger.info("Ueberauth received: #{auth}")
     roles = parse_role(userinfo)
     user = User.new(id, email, first_name, last_name, roles)
     {:ok, logout_uri} = logout_uri(auth)
