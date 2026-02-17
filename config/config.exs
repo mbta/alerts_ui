@@ -199,20 +199,6 @@ config :paper_trail,
 # Include referrer in Logster request log
 config :logster, :allowed_headers, ["referer"]
 
-config :sentry,
-  dsn:
-    System.get_env(
-      "SENTRY_DSN",
-      ""
-    ),
-  environment_name:
-    System.get_env(
-      "SENTRY_ENV",
-      "local"
-    ),
-  enable_source_code_context: true,
-  root_source_code_paths: [File.cwd!()]
-
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

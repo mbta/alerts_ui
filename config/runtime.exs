@@ -52,6 +52,13 @@ cond do
     # want to use a different value for prod and you most likely don't want
     # to check this value into version control, so we use an environment
     # variable instead.
+
+    config :sentry,
+      dsn: System.fetch_env!("SENTRY_DSN"),
+      environment_name: System.get_env("SENTRY_ENV", "local"),
+      enable_source_code_context: true,
+      root_source_code_paths: [File.cwd!()]
+
     secret_key_base =
       System.get_env("SECRET_KEY_BASE") ||
         raise """
@@ -161,6 +168,10 @@ cond do
       # below are used only for GTFS validation
       dev_api_url: String.replace_trailing(System.fetch_env!("DEV_API_URL"), "/", ""),
       dev_api_key: System.fetch_env!("DEV_API_KEY")
+
+    config :sentry,
+      # Prevents sentry reporting in local environments
+      dsn: nil
 
     config :mbta_v3_api,
       base_url: String.replace_trailing(System.fetch_env!("API_URL"), "/", ""),

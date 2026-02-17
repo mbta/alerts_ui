@@ -87,14 +87,6 @@ defmodule AlertsUIWeb.ComponentsLive do
 
   @impl true
   def handle_event("accepted_modal", _params, socket) do
-    try do
-      a = 1 / 0
-      IO.puts(a)
-    rescue
-      my_exception ->
-        Sentry.capture_exception(my_exception, stacktrace: __STACKTRACE__)
-    end
-
     {:noreply, socket}
   end
 
