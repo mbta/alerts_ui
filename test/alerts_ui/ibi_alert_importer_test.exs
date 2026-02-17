@@ -37,6 +37,14 @@ defmodule AlertsUI.IBIAlertImporterTest do
       convert_ibi_alerts()
       assert Repo.aggregate(Alert, :count) == 2
     end
+
+    test "it imports alerts incrementally" do
+      convert_ibi_alerts()
+      Repo.one(from a in Alert, where: a.alert_id == "2") |> Repo.delete()
+      assert Repo.aggregate(Alert, :count) == 1
+      convert_ibi_alerts()
+      assert Repo.aggregate(Alert, :count) == 2
+    end
   end
 
   describe "ibi_alert_to_changeset/2" do
