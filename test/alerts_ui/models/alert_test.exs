@@ -404,11 +404,11 @@ defmodule AlertsUI.Models.AlertTest do
              ]
     end
 
-    test "lists unique route ids from original selection for legacy alert" do
+    test "lists unique route ids from original selection for IBI alert" do
       alert =
         build(
           :alert,
-          legacy: true,
+          source: :IBI,
           original_route_selections: ["foo|1", "bar|2", "dup|1"]
         )
 
@@ -439,14 +439,14 @@ defmodule AlertsUI.Models.AlertTest do
       end
     end
 
-    test "lists unique parent stop ids from original selection for legacy alert" do
+    test "lists unique parent stop ids from original selection for IBI alert" do
       with_mock(StopsRepo,
         get_parent: fn _stop -> %{id: "foo-bar"} end
       ) do
         alert =
           build(
             :alert,
-            legacy: true,
+            source: :IBI,
             original_stop_selections: ["foo|1", "bar|2", "dup|1"]
           )
 
@@ -472,11 +472,11 @@ defmodule AlertsUI.Models.AlertTest do
              ]
     end
 
-    test "lists unique trip ids from original selection for legacy alert" do
+    test "lists unique trip ids from original selection for IBI alert" do
       alert =
         build(
           :alert,
-          legacy: true,
+          source: :IBI,
           original_trip_selections: ["foo|1", "bar|2", "dup|1"]
         )
 

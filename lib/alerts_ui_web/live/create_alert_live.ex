@@ -588,6 +588,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
     |> clear_flash
     |> push_event("scroll_to_top", %{})
     |> put_flash(:error, errors)
+    |> put_flash(:title, "Please fix the following errors:")
   end
 
   @spec directions_from_selection(String.t() | nil) :: [Trip.direction_id_t()]

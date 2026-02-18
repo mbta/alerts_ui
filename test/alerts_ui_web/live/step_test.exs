@@ -45,7 +45,7 @@ defmodule AlertsUIWeb.StepTest do
         # Run validation
         open_review_modal(view)
 
-        assert view |> element("#error-flash") |> render() =~ "Select route(s)"
+        assert view |> element("#flash") |> render() =~ "Select route(s)"
       end
     end
   end

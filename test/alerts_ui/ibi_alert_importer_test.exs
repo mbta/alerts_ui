@@ -8,6 +8,7 @@ defmodule AlertsUI.IBIAlertImporterTest do
   alias AlertsUI.AlertBuilder
   alias AlertsUI.Models.Alert
   alias AlertsUI.Models.IBIAlert
+  alias AlertsUI.Models.LatestIBIAlert
   alias AlertsUI.Repo
 
   @import_fixture_path "./test/support/fixtures/ibi_alert_importer/import.csv"
@@ -18,27 +19,43 @@ defmodule AlertsUI.IBIAlertImporterTest do
     ingest_csv_file(@import_fixture_path)
 
     %{
-      ibi_alert: Repo.one(from i in IBIAlert, where: i.alert_id == "1"),
-      recurring_alert: Repo.one(from i in IBIAlert, where: i.alert_id == "2")
+      ibi_alert: Repo.one(from i in LatestIBIAlert, where: i.alert_id == "1"),
+      recurring_alert: Repo.one(from i in LatestIBIAlert, where: i.alert_id == "2")
     }
   end
 
-  describe "ingest_csv_file/2" do
+  describe "ingest_csv_file/1" do
     test "it creates IBI alerts from the import file, ignoring headers" do
-      assert Repo.aggregate(IBIAlert, :count) == 10
+      assert Repo.aggregate(IBIAlert, :count) == 19
       assert Repo.aggregate(from(i in IBIAlert, where: i.alert_id == "alert_id"), :count) == 0
     end
   end
 
+  describe "convert_ibi_alerts/1" do
+    test "it imports alerts" do
+      assert Repo.aggregate(Alert, :count) == 0
+      convert_ibi_alerts()
+      assert Repo.aggregate(Alert, :count) == 2
+    end
+
+    test "it imports alerts incrementally" do
+      convert_ibi_alerts()
+      Repo.one(from a in Alert, where: a.alert_id == "2") |> Repo.delete()
+      assert Repo.aggregate(Alert, :count) == 1
+      convert_ibi_alerts()
+      assert Repo.aggregate(Alert, :count) == 2
+    end
+  end
+
   describe "ibi_alert_to_changeset/2" do
-    test "sets legacy = true", %{
+    test "sets source = \"ibi\"", %{
       ibi_alert: ibi_alert
     } do
       changeset =
         %Ecto.Changeset{} =
         ibi_alert_to_changeset(ibi_alert, %Alert{})
 
-      assert get_field(changeset, :legacy) == true
+      assert get_field(changeset, :source) == :IBI
     end
 
     test "active period and informed entity can be disabled via options", %{
@@ -83,8 +100,8 @@ defmodule AlertsUI.IBIAlertImporterTest do
     end
 
     test ":route_ids", %{ibi_alert: ibi_alert} do
-      assert ibi_alert.informed_route_list == "1|CR-Fitchburg"
-      assert from_ibi(ibi_alert, :route_ids) == ["CR-Fitchburg|1"]
+      assert ibi_alert.informed_route_list == "CR-Fitchburg|Fitchburg/South Acton Line"
+      assert from_ibi(ibi_alert, :route_ids) == ["Fitchburg/South Acton Line|CR-Fitchburg"]
     end
 
     test ":stop_ids", %{ibi_alert: ibi_alert} do
@@ -93,8 +110,12 @@ defmodule AlertsUI.IBIAlertImporterTest do
     end
 
     test ":trip_ids", %{ibi_alert: ibi_alert} do
-      assert ibi_alert.informed_trip_list == "1|CR-Fitchburg-Test-Trip"
-      assert from_ibi(ibi_alert, :trip_ids) == ["CR-Fitchburg-Test-Trip|1"]
+      assert ibi_alert.informed_trip_list ==
+               "CR-Fitchburg-CR-Sunday-2415|2415 (11:30 pm from North Station)"
+
+      assert from_ibi(ibi_alert, :trip_ids) == [
+               "2415 (11:30 pm from North Station)|CR-Fitchburg-CR-Sunday-2415"
+             ]
     end
 
     test ":direction", %{ibi_alert: ibi_alert} do
@@ -103,8 +124,8 @@ defmodule AlertsUI.IBIAlertImporterTest do
     end
 
     test ":facility_id", %{ibi_alert: ibi_alert} do
-      assert ibi_alert.informed_facility_list == "1|CR-Fitchburg-Test-Facility"
-      assert from_ibi(ibi_alert, :facility_id) == "CR-Fitchburg-Test-Facility|1"
+      assert ibi_alert.informed_facility_list == "1|My Elevator"
+      assert from_ibi(ibi_alert, :facility_id) == "My Elevator|1"
     end
 
     test ":service_types", %{ibi_alert: ibi_alert} do

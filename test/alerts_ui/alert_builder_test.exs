@@ -117,7 +117,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  closed_timestamp: nil,
                  created_timestamp: nil,
                  last_modified_timestamp: ~U[2024-04-30 05:54:00Z],
-                 legacy: nil,
+                 source: nil,
                  notification_duration_certainty: nil
                }
 
@@ -235,7 +235,7 @@ defmodule AlertsUI.AlertBuilderTest do
       end
     end
 
-    test "notification period end can be set directly in alert data for legacy alerts" do
+    test "notification period end can be set directly in alert data for IBI alerts" do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
@@ -254,7 +254,7 @@ defmodule AlertsUI.AlertBuilderTest do
           notification_period_start: ~N[2024-04-30 05:52:00],
           notification_period_end: ~N[2025-10-13 17:00:00],
           severity: 3,
-          legacy: true
+          source: :IBI
         }
 
         result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 11:54:00Z])
@@ -262,7 +262,7 @@ defmodule AlertsUI.AlertBuilderTest do
       end
     end
 
-    test "notification period end to be recalculated in alert_data for non-legacy alerts" do
+    test "notification period end to be recalculated in alert_data for non-IBI alerts" do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
@@ -551,7 +551,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  closed_timestamp: nil,
                  created_timestamp: nil,
                  last_modified_timestamp: ~U[2024-04-30 05:54:00Z],
-                 legacy: nil,
+                 source: nil,
                  notification_duration_certainty: nil
                }
       end
@@ -896,7 +896,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  closed_timestamp: nil,
                  created_timestamp: nil,
                  last_modified_timestamp: ~U[2024-04-30 05:54:00Z],
-                 legacy: nil,
+                 source: nil,
                  notification_duration_certainty: nil
                }
 
