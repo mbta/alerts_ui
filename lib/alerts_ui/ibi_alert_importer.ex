@@ -77,6 +77,8 @@ defmodule AlertsUI.IBIAlertImporter do
 
     Repo.transact(
       fn ->
+        SQL.query!(Repo, "truncate ibi_alerts")
+
         path
         |> File.stream!()
         |> IBIAlertImportParser.parse_stream()
@@ -315,79 +317,86 @@ defmodule AlertsUI.IBIAlertImporter do
         |> Stream.each(fn chunk ->
           alert_ids = Enum.map(chunk, fn latest -> latest.alert_id end)
 
+          existing_alert_ids =
+            Repo.all(from a in Alert, where: a.alert_id in ^alert_ids, select: a.alert_id)
+
           all_versions_index =
             Repo.all(from i in IBIAlert, where: i.alert_id in ^alert_ids)
             |> Enum.group_by(fn version -> version.alert_id end)
 
           Enum.each(chunk, fn latest_version ->
-            currently_open = latest_version.is_closed == "False"
+            unless Enum.member?(existing_alert_ids, latest_version.alert_id) do
+              currently_open = latest_version.is_closed == "False"
 
-            [insert | updates] =
+              [insert | updates] =
+                all_versions_index
+                |> Map.get(latest_version.alert_id)
+                |> Enum.sort_by(fn version -> version.integer_version_no end)
+
+              insert_open = currently_open && insert.version_no == latest_version.version_no
+
+              alert =
+                insert
+                |> ibi_alert_to_changeset(
+                  %Alert{},
+                  no_active_periods: !insert_open,
+                  no_informed_entities: !insert_open
+                )
+                |> PaperTrail.insert!(
+                  origin: insert.last_modified_by,
+                  returning: true,
+                  meta: %{version: insert.integer_version_no}
+                )
+                |> Repo.preload([:informed_entity, :active_period])
+
+              Enum.each(updates, fn update ->
+                update_open = currently_open && update.version_no == latest_version.version_no
+
+                update
+                |> ibi_alert_to_changeset(
+                  Repo.reload!(alert),
+                  no_active_periods: !update_open,
+                  no_informed_entities: !update_open
+                )
+                |> PaperTrail.update!(
+                  origin: update.last_modified_by,
+                  meta: %{version: update.integer_version_no}
+                )
+              end)
+
+              # fix mode selections for systemwide alerts
+              if latest_version.gui_mode_name == "Systemwide" do
+                final_mode_source =
+                  [insert | updates]
+                  |> Enum.reverse()
+                  |> Enum.find(& &1.affent_list)
+
+                final_mode_selections =
+                  if final_mode_source do
+                    from_ibi(final_mode_source, :original_mode_selections)
+                  else
+                    [1, 2, 3, 4]
+                  end
+
+                from(
+                  a in Alert,
+                  where: a.alert_id == ^latest_version.alert_id,
+                  update: [set: [original_mode_selections: ^final_mode_selections]]
+                )
+                |> Repo.update_all([])
+              end
+
+              # add deduplicated reminders
               all_versions_index
-              |> Map.get(latest_version.alert_id)
-              |> Enum.sort_by(fn version -> version.integer_version_no end)
-
-            insert_open = currently_open && insert.version_no == latest_version.version_no
-
-            alert =
-              insert
-              |> ibi_alert_to_changeset(
-                %Alert{},
-                no_active_periods: !insert_open,
-                no_informed_entities: !insert_open
-              )
-              |> PaperTrail.insert!(
-                origin: insert.last_modified_by,
-                returning: true,
-                meta: %{version: insert.integer_version_no}
-              )
-              |> Repo.preload([:informed_entity, :active_period])
-
-            Enum.each(updates, fn update ->
-              update_open = currently_open && update.version_no == latest_version.version_no
-
-              update
-              |> ibi_alert_to_changeset(
-                Repo.reload!(alert),
-                no_active_periods: !update_open,
-                no_informed_entities: !update_open
-              )
-              |> PaperTrail.update!(
-                origin: update.last_modified_by,
-                meta: %{version: update.integer_version_no}
-              )
-            end)
-
-            # fix mode selections for systemwide alerts
-            if latest_version.gui_mode_name == "Systemwide" do
-              final_mode_source =
-                [insert | updates]
-                |> Enum.reverse()
-                |> Enum.find(& &1.affent_list)
-
-              final_mode_selections =
-                if final_mode_source do
-                  from_ibi(final_mode_source, :original_mode_selections)
-                else
-                  [1, 2, 3, 4]
-                end
-
-              from(
-                a in Alert,
-                where: a.alert_id == ^latest_version.alert_id,
-                update: [set: [original_mode_selections: ^final_mode_selections]]
-              )
-              |> Repo.update_all([])
+              |> Map.get(alert.alert_id)
+              |> Enum.map(fn ibi_alert -> extract_and_cast_reminders(ibi_alert, alert) end)
+              |> List.flatten()
+              |> Enum.uniq()
+              |> Enum.map(fn params ->
+                Changeset.cast(%ReminderTime{}, params, Map.keys(params))
+              end)
+              |> Enum.each(fn changeset -> Repo.insert!(changeset) end)
             end
-
-            # add deduplicated reminders
-            all_versions_index
-            |> Map.get(alert.alert_id)
-            |> Enum.map(fn ibi_alert -> extract_and_cast_reminders(ibi_alert, alert) end)
-            |> List.flatten()
-            |> Enum.uniq()
-            |> Enum.map(fn params -> Changeset.cast(%ReminderTime{}, params, Map.keys(params)) end)
-            |> Enum.each(fn changeset -> Repo.insert!(changeset) end)
           end)
         end)
         |> Stream.run()
