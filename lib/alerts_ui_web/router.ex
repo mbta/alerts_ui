@@ -70,7 +70,7 @@ defmodule AlertsUIWeb.Router do
       on_mount: [
         {AlertsUIWeb.UserAuth, :ensure_authenticated},
         AlertsUIWeb.PutFlagsInAssignsHook,
-        AlertsUIWeb.PutMetadataInAssigns,
+        AlertsUIWeb.PutEnvironmentInAssigns,
         AlertsUIWeb.PreloadCacheOnMount
       ] do
       live("/alerts", ViewAlertsLive)
