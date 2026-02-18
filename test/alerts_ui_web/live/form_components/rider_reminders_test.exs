@@ -26,7 +26,7 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
     end
   end
 
-  test "reminder picker appears when Add Reminder is pressed" do
+  test "reminder picker appears with error message when Add Reminder is pressed" do
     {:ok, view, _html} =
       live_isolated_component(
         RiderReminders,
@@ -42,8 +42,9 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
       "rider_reminders" => %{"reminder_sort" => ["new"]}
     })
 
-    assert view
-           |> render() =~ ~s(id="reminder-time-component-0")
+    rendered = render(view)
+    assert rendered =~ ~s(id="reminder-time-component-0")
+    assert rendered =~ ~s(Select reminder time)
   end
 
   test "reminder picker disappears when X is pressed" do
