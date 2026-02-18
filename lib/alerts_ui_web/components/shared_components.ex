@@ -1521,55 +1521,6 @@ defmodule AlertsUIWeb.SharedComponents do
   end
 
   @doc """
-  Renders form error flash notices.
-  Takes in a title and a flash map with a semicolon-separated list of errors, eg:
-  %{
-  "error" => "Select direction; Enter message text; Select stop(s);  Select route(s)"
-  }
-
-  ## Examples
-      <.form_error_flash title="Error Title" flash={@flash} />
-  """
-  attr :id, :string, default: "flash", doc: "the optional id of flash container"
-  attr :flash, :map, default: %{}, doc: "the map of flash messages to display"
-  attr :title, :string, default: nil
-  attr :rest, :global, doc: "the arbitrary HTML attributes to add to the flash container"
-
-  def form_error_flash(assigns) do
-    ~H"""
-    <div
-      :if={msg = Phoenix.Flash.get(@flash, :error)}
-      id={@id}
-      phx-hook="AutoDismissFlash"
-      role="alert"
-      class={[
-        "fixed top-2 right-2 w-80 sm:w-96 z-50 rounded-lg p-3 ring-1",
-        "bg-rose-50 text-rose-900 shadow-md ring-rose-500 fill-rose-900"
-      ]}
-      {@rest}
-    >
-      <div :if={@title} class="flex items-center gap-1.5 text-sm font-semibold leading-6">
-        <CoreComponents.icon name="hero-exclamation-circle-mini" class="h-5 w-5" />
-        {@title}
-      </div>
-      <div :for={msg_line <- String.split(msg, ";")}>
-        <li class="ml-2 text-sm leading-6">
-          {msg_line}
-        </li>
-      </div>
-      <button type="button" class="group absolute top-1 right-1 p-2" aria-label="close">
-        <div
-          class="hero-x-mark-solid h-5 w-5 opacity-40 group-hover:opacity-70"
-          phx-click={
-            JS.push("lv:clear-flash", value: %{key: :error}) |> CoreComponents.hide("##{@id}")
-          }
-        />
-      </button>
-    </div>
-    """
-  end
-
-  @doc """
   Renders a pagination component.
 
   ## Examples

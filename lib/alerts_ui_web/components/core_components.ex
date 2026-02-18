@@ -18,6 +18,8 @@ defmodule AlertsUIWeb.CoreComponents do
 
   import AlertsUIWeb.{Gettext, IconComponents}
 
+  alias Phoenix.Flash
+  alias Phoenix.HTML
   alias Phoenix.HTML.{Form, FormField}
   alias Phoenix.LiveView.JS
 
@@ -58,7 +60,7 @@ defmodule AlertsUIWeb.CoreComponents do
         <.icon :if={@kind == :error} name="hero-exclamation-circle-mini" class="h-4 w-4" />
         {@title}
       </p>
-      <p class="mt-2 text-sm leading-5">{msg}</p>
+      <p class="mt-2 text-sm leading-5">{formatted_flash_content(msg)}</p>
       <button
         phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
         type="button"
@@ -82,8 +84,8 @@ defmodule AlertsUIWeb.CoreComponents do
 
   def flash_group(assigns) do
     ~H"""
-    <.flash kind={:info} title="Success" flash={@flash} />
-    <.flash kind={:error} title="Error!" flash={@flash} />
+    <.flash kind={:info} title={Flash.get(@flash, :title) || "Success"} flash={@flash} />
+    <.flash kind={:error} title={Flash.get(@flash, :title) || "Error!"} flash={@flash} />
     <.flash
       id="client-error"
       kind={:error}
@@ -725,4 +727,20 @@ defmodule AlertsUIWeb.CoreComponents do
   def translate_errors(errors, field) when is_list(errors) do
     for {^field, {msg, opts}} <- errors, do: translate_error({msg, opts})
   end
+
+  # sobelow_skip ["XSS.Raw"]
+  defp formatted_flash_content(message) when is_binary(message) do
+    if message =~ ";" do
+      messages =
+        message
+        |> String.split(";")
+        |> Enum.map(&"<li class=\"ml-2 text-sm leading-6\">#{&1}</li>")
+
+      (["<ul class=\"list-disc\">"] ++ messages ++ ["</ul>"]) |> HTML.raw()
+    else
+      message
+    end
+  end
+
+  defp formatted_flash_content(message), do: message
 end

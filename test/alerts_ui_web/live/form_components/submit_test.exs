@@ -27,7 +27,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
       get_to_submission_page(view, "Bus", "Delay")
       open_review_modal(view)
 
-      assert view |> element("#error-flash") |> render() =~ "Select stop(s)"
+      assert view |> element("#flash") |> render() =~ "Select stop(s)"
     end
 
     # These tests also don't show JS, so I can't check that the modal is actually unhidden
