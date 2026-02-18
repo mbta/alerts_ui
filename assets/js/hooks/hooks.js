@@ -1,4 +1,3 @@
-import { FullStory, isInitialized } from '@fullstory/browser';
 import tippy from "tippy.js";
 
 let Hooks = {};
@@ -200,31 +199,6 @@ Hooks.FilterSelect = {
   },
 };
 
-// TODO: What all should we track in FS?
-// Right now, I've just got page nav
-Hooks.FullStory = {
-  mounted() {
-    // Track initial page view
-    this.trackPageView()
-
-    // Listen for LiveView navigation events
-    window.addEventListener("phx:page-loading-stop", () => {
-      this.trackPageView()
-    })
-  },
-
-  trackPageView() {
-    if (isInitialized()) {
-      FullStory('setProperties', {
-        type: 'page',
-        properties: {
-          path: window.location.pathname
-        }
-      })
-    }
-    
-  }
-}
 Hooks.Tippy = {
   mounted() {
     this.instance = tippy(this.el);
