@@ -100,10 +100,14 @@
           associated to the original selections. These entities will be omitted and will not be
           published in this alert. <br />
           <br />
-          <div :for={text_line <- @obsolete_id_text}>
-            {text_line}
-            <br /> <br />
-          </div>
+          <ul class="list-disc ml-8">
+            <div :for={{title, names} <- @obsolete_id_text}>
+              <li class="font-semibold">{title}:</li>
+              <ul class="list-[circle] ml-8">
+                <li :for={name <- names}>{name}</li>
+              </ul>
+            </div>
+          </ul>
         </.modal>
       </div>
     </article>
