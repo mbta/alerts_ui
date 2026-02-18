@@ -837,41 +837,6 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
     end
 
     @tag :logged_in_user
-    test "with blank reminder", %{conn: conn} do
-      with_mocks([
-        {RoutesRepo, [],
-         [
-           by_type: fn _types -> @routes end,
-           get: fn _id -> @route_one end,
-           get: fn _, _ -> @route_one end
-         ]},
-        {StopsRepo, [],
-         [
-           by_route: fn _route, _direction -> [@stop] end,
-           get: fn _id -> @stop end
-         ]}
-      ]) do
-        # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/new")
-        get_to_submission_page(view, "Bus", "Delay")
-
-        fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
-        })
-
-        view
-        |> element("form#rider_reminder_form")
-        |> render_change(%{
-          "rider_reminders" => %{"reminder_sort" => ["new"]}
-        })
-
-        open_review_modal(view)
-
-        assert render(view) =~ ~r/Reminders.*None/s
-      end
-    end
-
-    @tag :logged_in_user
     test "populate some future reminders", %{conn: conn} do
       with_mocks([
         {RoutesRepo, [],

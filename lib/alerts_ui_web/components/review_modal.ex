@@ -98,7 +98,6 @@ defmodule AlertsUIWeb.ReviewModal do
     reminder_times =
       assigns.alert_data
       |> Map.get(:reminder_times, [])
-      |> Enum.filter(&(!!&1.time))
 
     facility_names =
       assigns.alert_data
