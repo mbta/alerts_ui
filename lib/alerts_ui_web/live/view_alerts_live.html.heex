@@ -37,7 +37,7 @@
         symbol_asc: sort_icon(:asc),
         symbol_desc: sort_icon(:desc),
         symbol_unsorted: sort_icon(nil),
-        table_attrs: [class: "table table-fixed"],
+        table_attrs: [class: "table table-fixed min-w-[54rem]"],
         tbody_td_attrs: [class: "px-2 py-1 leading-[1.5] break-words"],
         tbody_tr_attrs: [
           class: "hover:bg-bg-elevation-3 cursor-pointer odd:bg-bg-secondary border-none"
@@ -49,20 +49,20 @@
       ]}
       row_click={&JS.push("open_details", value: %{alert_id: &1.alert_id})}
     >
-      <:col :let={alert} label="Service" field={:alert_id} col_style="width: 12.6%;">
+      <:col :let={alert} label="Service" field={:alert_id} col_style="width: 11%;">
         <.service_pills
           entities={Alert.get_original_names_and_ids(alert.original_route_selections)}
           effect_name={alert.effect_name}
         />
       </:col>
-      <:col :let={alert} label="Effect" field={:effect_name} col_style="width: 8.6%;">
+      <:col :let={alert} label="Effect" field={:effect_name} col_style="width: 10%;">
         {alert.effect_name}
       </:col>
       <:col
         :let={alert}
         label="ID"
         field={:integer_alert_id}
-        col_style="width: 5.7%;"
+        col_style="width: 5rem;"
         tbody_td_attrs={[class: "p-1 alert-id-cell"]}
       >
         {alert.alert_id}
@@ -75,7 +75,7 @@
         label="Start"
         field={:active_period_start}
         directions={{:asc_nulls_first, :desc_nulls_last}}
-        col_style="width: 7.5%;"
+        col_style="width: 6rem;"
         tbody_td_attrs={[class: "p-1 whitespace-nowrap"]}
       >
         <div title={format_timestamp(alert.active_period_start)}>
@@ -91,7 +91,7 @@
             else: :notification_period_end
         }
         directions={{:asc_nulls_first, :desc_nulls_last}}
-        col_style="width: 11%;"
+        col_style="width: 7rem;"
         tbody_td_attrs={[class: "p-1 whitespace-nowrap"]}
       >
         <div
@@ -106,7 +106,7 @@
           {format_end_time(alert.active_period_end, alert.duration_certainty)}
         </div>
       </:col>
-      <:action :let={alert} label="Actions" col_style="width: 128px;">
+      <:action :let={alert} label="Actions" col_style="width: 8rem;">
         <div class="inline-flex justify-end space-x-2 w-full">
           <.button_secondary_link
             :if={
