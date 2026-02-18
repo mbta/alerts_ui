@@ -27,8 +27,7 @@ defmodule AlertsUIWeb.Router do
 
     plug :put_secure_browser_headers, %{
       "strict-transport-security" => "max-age=31536000",
-      "content-security-policy" =>
-        "
+      "content-security-policy" => "
         default-src 'self';
         img-src 'self' https://rs.fullstory.com cdn.mbta.com data:;
         style-src 'self' 'unsafe-inline';
