@@ -111,7 +111,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
     existing_record = String.trim(params["id"] || "") != ""
 
     cast(reminder_time, params, @reminder_time_fields)
-    |> validate_required(:reminder_time, message: "Enter a valid date and time")
+    |> validate_required(:reminder_time, message: "Select reminder time")
     |> validate_change(:reminder_time, fn :reminder_time, reminder_time ->
       {status, min_time} =
         params["min_time"] |> String.pad_trailing(19, ":00") |> NaiveDateTime.from_iso8601()
