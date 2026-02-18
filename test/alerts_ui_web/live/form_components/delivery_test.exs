@@ -4,10 +4,15 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
   use AlertsUIWeb, :live_view
 
   import LiveIsolatedComponent
+  import Mock
   import Phoenix.LiveViewTest
+  import Test.Support.Helpers
 
   alias AlertsUIWeb.FormComponents.{Delivery, RouteTypeAndEffect}
   alias AlertsUIWeb.Step
+  alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
+  alias MBTAV3API.Routes.Repo, as: RoutesRepo
+  alias MBTAV3API.Routes.Route
 
   @assigns %{
     id: "delivery",
@@ -19,6 +24,14 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
     },
     route_type: 1,
     alert_data: %{}
+  }
+
+  @route %Route{
+    direction_names: %{0 => "Westbound", 1 => "Eastbound"},
+    sort_order: 3,
+    id: "Red",
+    type: 1,
+    name: "Red Line"
   }
 
   describe "component" do
@@ -109,5 +122,102 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
     assert view
            |> element("div#banner_div")
            |> render() =~ ~s(my banner text)
+  end
+
+  describe "end-to-end" do
+    @tag :logged_in_user
+    test "last push notification timestamp gets filled in by default",
+         %{
+           conn: conn
+         } do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _types -> [@route] end,
+           get: fn _, _ -> @route end
+         ]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _route_id, _opts -> [] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        get_to_submission_page(view, "Subway", "Extra service")
+        render_async(view)
+
+        # Mock selecting Red line
+        view
+        |> element("#service_form")
+        |> render_change(%{
+          affected_service: %{route_ids: ["Red"]}
+        })
+
+        view
+        |> element("button#review", "Review and submit")
+        |> render_click()
+
+        view
+        |> element("#review-modal-container button", "Submit")
+        |> render_click()
+
+        # wait a smidge for the alert to get persisted to the database
+        :timer.sleep(50)
+        alert = AlertsUI.Alerts.list_all() |> hd
+        assert %DateTime{} = alert.last_push_notification_timestamp
+      end
+    end
+
+    @tag :logged_in_user
+    test "Unselecting notification toggle results in no last push notification timestamp",
+         %{
+           conn: conn
+         } do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _types -> [@route] end,
+           get: fn _, _ -> @route end
+         ]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _route_id, _opts -> [] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        get_to_submission_page(view, "Subway", "Extra service")
+        render_async(view)
+
+        # Mock selecting Red line
+        view
+        |> element("#service_form")
+        |> render_change(%{
+          affected_service: %{route_ids: ["Red"]}
+        })
+
+        # unselect notification toggle
+        view
+        |> element("#notification-toggle")
+        |> render_change(%{
+          "delivery" => %{
+            "notification_toggle" => "false"
+          }
+        })
+
+        view
+        |> element("button#review", "Review and submit")
+        |> render_click()
+
+        view
+        |> element("#review-modal-container button", "Submit")
+        |> render_click()
+
+        # wait a smidge for the alert to get persisted to the database
+        :timer.sleep(50)
+        alert = AlertsUI.Alerts.list_all() |> hd
+        assert alert.last_push_notification_timestamp == nil
+      end
+    end
   end
 end
