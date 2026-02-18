@@ -4,7 +4,7 @@ import { FullStory, init as initFullStory } from "@fullstory/browser";
 // FullStory
 const fullStoryOrgId = getMetaContent("fullStoryOrgId");
 const userEmail = getMetaContent("userEmail");
-if (fullStoryOrgId !== null && userEmail !== null) {
+if (fullStoryOrgId !== null && userEmail !== null && userName != null) {
   initFullStory({ orgId: fullStoryOrgId });
   FullStory("setIdentity", {
     uid: userEmail,
