@@ -27,13 +27,7 @@ defmodule AlertsUIWeb.Router do
 
     plug :put_secure_browser_headers, %{
       "strict-transport-security" => "max-age=31536000",
-      "content-security-policy" => "
-        default-src 'self';
-        img-src 'self' https://rs.fullstory.com cdn.mbta.com data:;
-        style-src 'self' 'unsafe-inline';
-        script-src 'self' https://edge.fullstory.com https://rs.fullstory.com 'unsafe-inline';
-        connect-src 'self' https://edge.fullstory.com https://rs.fullstory.com 'unsafe-inline';
-        "
+      "content-security-policy" => "default-src 'self'; img-src 'self' https://rs.fullstory.com cdn.mbta.com data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://edge.fullstory.com https://rs.fullstory.com 'unsafe-inline'; connect-src 'self' https://edge.fullstory.com https://rs.fullstory.com 'unsafe-inline';"
     }
 
     plug :fetch_current_user
