@@ -22,5 +22,4 @@ config :ehmon, :report_mf, {:ehmon, :info_report}
 # function for writing feed output files
 config :alerts_ui,
   file_write_module: AlertsUI.FeedOutput.WriteToS3,
-  file_read_module: AlertsUI.FeedOutput.ReadFromS3,
   skip_migrations: false

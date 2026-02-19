@@ -29,7 +29,7 @@ config :alerts_ui,
   ibi_standard_alerts_api_url:
     System.get_env(
       "IBI_STANDARD_ALERTS_API_URL",
-      "https://cdn.mbta.com/realtime/Alerts.json"
+      "http://s3.amazonaws.com/mbta-realtime-test/alerts_pb.json"
     ),
   skip_migrations: true
 

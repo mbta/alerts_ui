@@ -1,17 +1,20 @@
 defmodule AlertsUI.FeedReader do
   @moduledoc """
-  Contains the logic for loading IBI and dev_orange Alerts feeds in one place
+  Contains the logic for loading feeds from S3 buckets
   """
-
-  @read_module AlertsUI.config(:file_read_module)
 
   @doc """
-  Fetch the IBI Alerts Feed as JSON
+  Fetch an Alerts Feed as JSON
 
-  ibi_json(:enhanced) -> IBI's enhanced feed (default)
-  ibi_json(:standard) -> IBI's standard production feed (no dev version)
+  alerts_json(:ibi_enhanced_alerts) -> IBI's enhanced feed
+  alerts_json(:ibi_standard_alerts) -> IBI's standard production feed
+
+  alerts_json(:enhanced_json) -> Our enhanced feed
+  alerts_json(:enhanced_sita_json) -> Our enhanced modified SITA feed
+  alerts_json(:standard_json) -> Our standard feed
+  alerts_json(:standard_protobuf) -> Our protobuf feed (ok, this one isn't JSON.)
   """
-  def ibi_json(flavor \\ :enhanced) do
+  def alerts_json(flavor) do
     get_feed(flavor)
     |> parse_response()
   end
@@ -26,31 +29,20 @@ defmodule AlertsUI.FeedReader do
     )
   end
 
-  defp alerts_api_url(:enhanced), do: AlertsUI.config(:ibi_enhanced_alerts_api_url)
-  defp alerts_api_url(:standard), do: AlertsUI.config(:ibi_standard_alerts_api_url)
+  defp alerts_api_url(:ibi_enhanced_alerts), do: AlertsUI.config(:ibi_enhanced_alerts_api_url)
+  defp alerts_api_url(:ibi_standard_alerts), do: AlertsUI.config(:ibi_standard_alerts_api_url)
 
-  defp convert_newlines(text), do: String.replace(text, "\r\n", "\n")
+  defp alerts_api_url(:enhanced_json), do: build_s3_path() <> "alerts_feed_enhanced.json"
 
-  @doc """
-  Fetch the Dev Orange feed from S3
-  """
-  def alerts_manager_json(flavor \\ :enhanced_json) do
-    @read_module.read(flavor)
+  defp alerts_api_url(:enhanced_sita_json),
+    do: build_s3_path() <> "alerts_feed_enhanced_SITA.json"
+
+  defp alerts_api_url(:standard_json), do: build_s3_path() <> "alerts_feed.json"
+  defp alerts_api_url(:standard_protobuf), do: build_s3_path() <> "alerts_feed.pb"
+
+  defp build_s3_path do
+    "https://#{System.get_env("S3_BUCKET_NAME", "")}.s3.amazonaws.com/#{System.get_env("S3_BUCKET_PREFIX", "")}/"
   end
-
-  # def alerts_manager_json(flavor \\ :enhanced_json) do
-  #   make_request_fn = AlertsUI.config(:make_request_fn, &ExAws.request!/1)
-
-  #   alerts_manager_feed(flavor)
-  #   |> make_request_fn.()
-  #   |> parse_response()
-  # end
-
-  # defp alerts_manager_feed(flavor) do
-  #   get_obj_fn = AlertsUI.config(:get_obj_fn, &S3.get_object/2)
-
-  #   get_obj_fn.(s3_bucket_name(), s3_file_path(flavor))
-  # end
 
   defp parse_response(%{status: 200, body: json_body}),
     do: {:ok, convert_newlines(json_body)}
@@ -60,4 +52,6 @@ defmodule AlertsUI.FeedReader do
 
   defp parse_response(_),
     do: :error
+
+  defp convert_newlines(text), do: String.replace(text, "\r\n", "\n")
 end
