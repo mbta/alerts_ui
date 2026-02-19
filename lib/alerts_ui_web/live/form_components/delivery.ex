@@ -50,7 +50,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
       |> Map.merge(banner_text_map)
 
     data =
-      if is_nil(data["last_push_notification_timestamp"]) do
+      if is_nil(data["last_push_notification_timestamp"]) && data["notification_toggle"] == true do
         Map.put(data, "last_push_notification_timestamp", DateTimeHelpers.current_time())
       else
         data
