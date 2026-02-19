@@ -209,12 +209,15 @@ Hooks.FullStory = {
 
     // Listen for LiveView navigation events
     window.addEventListener("phx:page-loading-stop", () => {
+      console.log("page load ended")
       this.trackPageView()
     })
   },
 
   trackPageView() {
+    console.log("tracking page view")
     if (isInitialized()) {
+      console.log("setting page in fullstory")
       FullStory('setProperties', {
         type: 'page',
         properties: {

@@ -6,6 +6,7 @@ const fullStoryOrgId = getMetaContent("fullStoryOrgId");
 const userEmail = getMetaContent("userEmail");
 const userName = getMetaContent("userName");
 if (fullStoryOrgId !== null && userEmail !== null && userName != null) {
+  console.log("Initializing Fullstory")
   initFullStory({ orgId: fullStoryOrgId });
   FullStory("setIdentity", {
     uid: userEmail,
