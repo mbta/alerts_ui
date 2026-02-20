@@ -62,7 +62,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
           base_attrs,
           [
             "phx-hook": "Tippy",
-            "phx-update": "ignore",
             "data-tippy-content": tooltip_content(object),
             "data-tippy-delay": "[1000, 200]"
           ]
@@ -236,9 +235,5 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
       |> List.last()
 
     "#{type} ID #{id_for_option(object, false)}"
-  end
-
-  defp unique_id_suffix() do
-    :crypto.strong_rand_bytes(8) |> Base.encode64()
   end
 end
