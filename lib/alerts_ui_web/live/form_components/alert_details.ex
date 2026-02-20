@@ -411,12 +411,18 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
               phx-target={@myself}
               value={@form[:header_text].value}
             />
-            <.textarea_counter character_limit={255} field={@form[:header_text]} />
+            <.textarea_footer
+              character_limit={255}
+              copy_id="#alert_details_header_text"
+              copy_title="Copy main message to Clipboard"
+              field={@form[:header_text]}
+            />
           </div>
-          <div class="flex flex-col justify-center ml-4">
-            <.sync_toggle field={@form[:header_sync_toggle]} />
-            <.copy_button copy_id="#alert_details_header_text" title="Copy main message to Clipboard" />
-          </div>
+          <.checkbox
+            class="mt-2 md:ml-4 md:mt-8"
+            field={@form[:header_sync_toggle]}
+            label="Auto refresh"
+          />
         </div>
         <div class="flex flex-row">
           <div class="flex flex-col md:w-[50%]">
@@ -431,15 +437,18 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
               phx-target={@myself}
               value={@form[:description_text].value}
             />
-            <.textarea_counter character_limit={3000} field={@form[:description_text]} />
-          </div>
-          <div class="flex flex-col justify-center ml-4">
-            <.sync_toggle field={@form[:description_sync_toggle]} />
-            <.copy_button
+            <.textarea_footer
+              character_limit={3000}
               copy_id="#alert_details_description_text"
-              title="Copy supporting information to Clipboard"
+              copy_title="Copy supporting information to Clipboard"
+              field={@form[:description_text]}
             />
           </div>
+          <.checkbox
+            class="mt-2 md:ml-4 md:mt-8"
+            field={@form[:description_sync_toggle]}
+            label="Auto refresh"
+          />
         </div>
         <.text_input
           field={@form[:url]}
