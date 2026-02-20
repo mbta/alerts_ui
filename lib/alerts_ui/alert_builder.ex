@@ -450,10 +450,10 @@ defmodule AlertsUI.AlertBuilder do
   @spec add_combo_routes([Route.t()], String.t()) :: [Route.t()]
 
   defp add_combo_routes(selected_routes, direction) do
-    # For every route,  and make an API call to
-    # get its route pattern, which gets included
+    # For every route, make an API call to
+    # get its route pattern, which gets `included`
     # with a "listed route" value of "false".
-    # these are our combo routes
+    # These are our combo routes
 
     combo_routes =
       selected_routes
