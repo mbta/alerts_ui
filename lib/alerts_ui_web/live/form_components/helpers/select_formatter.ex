@@ -57,11 +57,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
           key: key,
           value: id_for_option(object, split_stops?),
           "phx-hook": "Tippy",
+          "phx-update": "ignore",
           "data-tippy-content": tooltip_content(object),
           "data-tippy-delay": "[1000, 200]"
         ]
       else
         [
+          id: "#{key}-#{unique_id_suffix()}",
           key: name_for_option(object, route_type),
           value: id_for_option(object, split_stops?)
         ]
