@@ -2,7 +2,7 @@ defmodule AlertsUIWeb.Router do
   use AlertsUIWeb, :router
   import Oban.Web.Router
   import AlertsUIWeb.UserAuth
-  import AlertsUIWeb.PutEnvironmentInAssigns
+  import AlertsUIWeb.PutMetadataInAssigns
 
   @redirect_http Application.compile_env(:alerts_ui, :redirect_http?)
 
@@ -23,7 +23,7 @@ defmodule AlertsUIWeb.Router do
     plug :fetch_live_flash
     plug :put_root_layout, html: {AlertsUIWeb.Layouts, :root}
     plug :protect_from_forgery
-    plug :put_environment_in_assigns
+    plug :put_metadata_in_assigns
 
     plug :put_secure_browser_headers, %{
       "strict-transport-security" => "max-age=31536000",
@@ -94,7 +94,7 @@ defmodule AlertsUIWeb.Router do
       on_mount: [
         {AlertsUIWeb.UserAuth, :ensure_authenticated},
         AlertsUIWeb.PutFlagsInAssignsHook,
-        AlertsUIWeb.PutEnvironmentInAssigns,
+        AlertsUIWeb.PutMetadataInAssigns,
         AlertsUIWeb.PreloadCacheOnMount
       ] do
       live("/alerts/new", CreateAlertLive, :new)
@@ -120,7 +120,7 @@ defmodule AlertsUIWeb.Router do
       on_mount: [
         {AlertsUIWeb.UserAuth, :ensure_authenticated},
         AlertsUIWeb.PutFlagsInAssignsHook,
-        AlertsUIWeb.PutEnvironmentInAssigns,
+        AlertsUIWeb.PutMetadataInAssigns,
         AlertsUIWeb.PreloadCacheOnMount
       ] do
       live("/validate", ValidateLive)
