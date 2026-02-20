@@ -7,10 +7,15 @@ defmodule AlertsUIWeb.PutMetadataInAssigns do
     environment = AlertsUI.config(:environment_name)
     full_story_org_id = Application.get_env(:alerts_ui, :full_story_org_id)
 
-    %{conn | assigns: conn.assigns |> Map.merge(%{
-      environment: environment,
-      full_story_org_id: full_story_org_id
-    })}
+    %{
+      conn
+      | assigns:
+          conn.assigns
+          |> Map.merge(%{
+            environment: environment,
+            full_story_org_id: full_story_org_id
+          })
+    }
   end
 
   def on_mount(:default, _params, _session, socket) do
