@@ -11,7 +11,7 @@ defmodule AlertsUIWeb.FormComponents.Timeline do
 
     ~H"""
     <div class="flex flex-wrap md:flex-nowrap flex-row items-center mb-12 bg-bg-elevation-3 border-b border-border-primary px-4 min-w-full">
-      <.h3 :if={@form_type == :creating} class="w-full md:w-auto md:mx-6 mt-2 text-text-primary">
+      <.h3 class="w-full md:w-auto md:mx-6 mt-2 text-text-primary">
         <span :if={@form_type == :creating}>Creating New Alert</span>
         <span :if={@form_type == :editing}>Editing Alert #{@alert_id}</span>
         <span :if={@form_type == :duplicating}>Duplicating Alert #{@alert_id}</span>
