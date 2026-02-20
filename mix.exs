@@ -115,6 +115,7 @@ defmodule AlertsUI.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:postgrex, ">= 0.0.0"},
       {:req, "~> 0.5.0"},
+      {:sentry, "~> 11.0"},
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
       {:stream_data, "~> 1.2.0", only: :test},
       {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},

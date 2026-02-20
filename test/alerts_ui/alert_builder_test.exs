@@ -7,8 +7,6 @@ defmodule AlertsUI.AlertBuilderTest do
   alias AlertsUI.Alerts
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
-  alias MBTAV3API.Lines.Line
-  alias MBTAV3API.Lines.Repo, as: LinesRepo
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
   alias MBTAV3API.RoutePatterns.RoutePattern, as: APIRoutePattern
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
@@ -397,7 +395,43 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [],
          [
-           by_route_id: fn _route_id, _opts -> [] end
+           by_route_id: fn
+             "24", [include: "representative_trip.stops,route"] ->
+               [
+                 %APIRoutePattern{
+                   id: "1",
+                   direction_id: 0,
+                   stops: [],
+                   route_id: "2427",
+                   listed_route: false
+                 }
+               ]
+
+             "27", [include: "representative_trip.stops,route"] ->
+               [
+                 %APIRoutePattern{
+                   id: "2",
+                   direction_id: 0,
+                   stops: [],
+                   route_id: "2427",
+                   listed_route: false
+                 }
+               ]
+
+             "57", [include: "representative_trip.stops,route"] ->
+               [
+                 %APIRoutePattern{
+                   id: "3",
+                   direction_id: 0,
+                   stops: [],
+                   route_id: "123",
+                   listed_route: true
+                 }
+               ]
+
+             "2427", [include: "representative_trip.stops,route"] ->
+               [%APIRoutePattern{id: "4", direction_id: 0, stops: [], route_id: nil}]
+           end
          ]},
         {RoutesRepo, [],
          [
@@ -427,48 +461,9 @@ defmodule AlertsUI.AlertBuilderTest do
                %Route{
                  id: "2427",
                  line_id: nil,
-                 type: 0,
+                 type: 1,
                  description: :rapid_transit,
                  name: "2427"
-               }
-
-             "Shuttle_JFKPark", _opts ->
-               %Route{
-                 id: "Shuttle_JFKPark",
-                 line_id: nil,
-                 type: 3,
-                 description: :rail_replacement_bus,
-                 name: "cool shuttle"
-               }
-           end
-         ]},
-        {LinesRepo, [],
-         [
-           get: fn
-             "line-24", _opts ->
-               %Line{
-                 id: "line-24",
-                 route_ids: ["24", "2427"],
-                 routes: [
-                   %Route{id: "24", line_id: "line-24", type: 1, description: :rapid_transit},
-                   %Route{id: "2427", type: 1, description: :rapid_transit}
-                 ]
-               }
-
-             "line-27", _opts ->
-               %Line{
-                 id: "line-27",
-                 route_ids: ["27", "2427", "Shuttle_JFKPark"],
-                 routes: [
-                   %Route{id: "27", line_id: "line-27", type: 1, description: :rapid_transit},
-                   %Route{id: "2427", type: 1, description: :rapid_transit},
-                   %Route{
-                     id: "Shuttle_JFKPark",
-                     line_id: nil,
-                     type: 3,
-                     description: :rail_replacement_bus
-                   }
-                 ]
                }
            end
          ]}
@@ -479,6 +474,7 @@ defmodule AlertsUI.AlertBuilderTest do
           header_text: "hello",
           effect_name: "Delay",
           route_ids: ["24", "27", "57"],
+          stop_ids: [],
           direction: "default",
           active_period_start: ~N[2024-04-30 11:54:00],
           active_period_end_specifier: :until_further_notice,
@@ -505,12 +501,6 @@ defmodule AlertsUI.AlertBuilderTest do
                    },
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
-                     route_id: "2427",
-                     route_type: 1,
-                     agency_id: "1"
-                   },
-                   %{
-                     activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "27",
                      route_type: 1,
                      agency_id: "1"
@@ -518,6 +508,12 @@ defmodule AlertsUI.AlertBuilderTest do
                    %{
                      activities: [:BOARD, :EXIT, :RIDE],
                      route_id: "57",
+                     route_type: 1,
+                     agency_id: "1"
+                   },
+                   %{
+                     activities: [:BOARD, :EXIT, :RIDE],
+                     route_id: "2427",
                      route_type: 1,
                      agency_id: "1"
                    }
@@ -561,63 +557,31 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [],
          [
-           by_route_id: fn _route_id, _opts -> [] end
+           by_route_id: fn
+             "741", [include: "representative_trip.stops,route"] ->
+               [
+                 %APIRoutePattern{
+                   id: "1",
+                   direction_id: 0,
+                   stops: [],
+                   route_id: "746",
+                   listed_route: false
+                 }
+               ]
+
+             _id, [include: "representative_trip.stops,route"] ->
+               [%APIRoutePattern{id: "1", direction_id: 0, stops: [], route_id: nil}]
+           end
          ]},
         {RoutesRepo, [],
          [
            get: fn
-             "741", _opts ->
+             id, _opts ->
                %Route{
-                 id: "741",
-                 line_id: "line-SLWaterfront",
+                 id: id,
                  type: 3,
                  description: :rapid_transit,
-                 name: "SL2"
-               }
-
-             "746", _opts ->
-               %Route{
-                 id: "746",
-                 line_id: "line-SLWaterfront",
-                 type: 3,
-                 description: :rapid_transit,
-                 name: "SLW"
-               }
-           end
-         ]},
-        {LinesRepo, [],
-         [
-           get: fn
-             "line-SLWaterfront", _opts ->
-               %Line{
-                 id: "line-SLWaterfront",
-                 route_ids: ["741", "742", "743", "746"],
-                 routes: [
-                   %Route{
-                     id: "741",
-                     line_id: "line-SLWaterfront",
-                     type: 3,
-                     description: :rapid_transit
-                   },
-                   %Route{
-                     id: "742",
-                     line_id: "line-SLWaterfront",
-                     type: 3,
-                     description: :rapid_transit
-                   },
-                   %Route{
-                     id: "743",
-                     line_id: "line-SLWaterfront",
-                     type: 3,
-                     description: :rapid_transit
-                   },
-                   %Route{
-                     id: "746",
-                     line_id: "line-SLWaterfront",
-                     type: 3,
-                     description: :rapid_transit
-                   }
-                 ]
+                 name: id
                }
            end
          ]}
@@ -628,6 +592,7 @@ defmodule AlertsUI.AlertBuilderTest do
           header_text: "hello",
           effect_name: "Delay",
           direction: "default",
+          stop_ids: [],
           active_period_start: ~N[2024-04-30 11:54:00],
           active_period_end_specifier: :until_further_notice,
           active_period_start_specifier: :custom,
@@ -657,6 +622,12 @@ defmodule AlertsUI.AlertBuilderTest do
 
         assert result_2.informed_entity == [
                  %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "746",
+                   route_type: 3,
+                   agency_id: "1"
+                 },
+                 %{
                    agency_id: "1",
                    route_id: "741",
                    route_type: 3,
@@ -673,12 +644,6 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_id: "743",
                    route_type: 3,
                    activities: [:BOARD, :EXIT, :RIDE]
-                 },
-                 %{
-                   activities: [:BOARD, :EXIT, :RIDE],
-                   route_id: "746",
-                   route_type: 3,
-                   agency_id: "1"
                  }
                ]
       end
@@ -688,43 +653,24 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [],
          [
-           by_route_id: fn _route_id, _opts -> [] end
+           by_route_id: fn
+             "Green-D", [include: "representative_trip.stops,route"] ->
+               [
+                 %APIRoutePattern{
+                   id: "4",
+                   direction_id: 0,
+                   stops: [],
+                   route_id: "Green-D",
+                   listed_route: true
+                 }
+               ]
+           end
          ]},
         {RoutesRepo, [],
          [
            get: fn
              "Green-D", _opts ->
                %Route{id: "Green-D", line_id: "line-Green", type: 0, description: :rapid_transit}
-           end
-         ]},
-        {LinesRepo, [],
-         [
-           get: fn
-             "line-Green", _opts ->
-               %Line{
-                 id: "line-Green",
-                 route_ids: ["Green-B", "Green-C", "Green-D"],
-                 routes: [
-                   %Route{
-                     id: "Green-B",
-                     line_id: "line-Green",
-                     type: 1,
-                     description: :rapid_transit
-                   },
-                   %Route{
-                     id: "Green-C",
-                     line_id: "line-Green",
-                     type: 1,
-                     description: :rapid_transit
-                   },
-                   %Route{
-                     id: "Green-D",
-                     line_id: "line-Green",
-                     type: 1,
-                     description: :rapid_transit
-                   }
-                 ]
-               }
            end
          ]}
       ]) do
@@ -733,6 +679,7 @@ defmodule AlertsUI.AlertBuilderTest do
           header_text: "header",
           effect_name: "Delay",
           route_ids: ["Green-D"],
+          stop_ids: [],
           direction: "default",
           active_period_start: ~N[2024-04-30 11:54:00],
           active_period_end_specifier: :until_further_notice,
@@ -757,7 +704,29 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [],
          [
-           by_route_id: fn _route_id, _opts -> [] end
+           by_route_id: fn
+             "24", [include: "representative_trip.stops,route"] ->
+               [
+                 %APIRoutePattern{
+                   id: "1",
+                   direction_id: 0,
+                   stops: [],
+                   route_id: "Shuttle_JFKPark",
+                   listed_route: false
+                 }
+               ]
+
+             id, [include: "representative_trip.stops,route"] ->
+               [
+                 %APIRoutePattern{
+                   id: "1",
+                   direction_id: 0,
+                   stops: [],
+                   route_id: id,
+                   listed_route: true
+                 }
+               ]
+           end
          ]},
         {RoutesRepo, [],
          [
@@ -773,17 +742,6 @@ defmodule AlertsUI.AlertBuilderTest do
                  description: :rail_replacement_bus
                }
            end
-         ]},
-        {LinesRepo, [],
-         [
-           get: fn
-             "line-24", _opts ->
-               %Line{
-                 id: "line-24",
-                 route_ids: [],
-                 routes: []
-               }
-           end
          ]}
       ]) do
         existing_alert = insert(:alert, alert_id: "0")
@@ -794,6 +752,7 @@ defmodule AlertsUI.AlertBuilderTest do
           header_text: "hello",
           effect_name: "Delay",
           route_ids: ["24", "Shuttle_JFKPark"],
+          stop_ids: [],
           direction: "default",
           active_period_start: ~N[2024-04-30 11:54:00],
           active_period_end_specifier: :until_further_notice,
@@ -801,9 +760,16 @@ defmodule AlertsUI.AlertBuilderTest do
           cause_detail: ""
         }
 
-        result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 05:54:00Z])
+        result_1 = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 05:54:00Z])
 
-        assert result.informed_entity == [
+        result_2 =
+          AlertBuilder.build_alert(
+            alert_data |> Map.put(:route_ids, ["24"]),
+            :R,
+            ~U[2024-04-30 05:54:00Z]
+          )
+
+        assert result_1.informed_entity == [
                  %{
                    agency_id: "1",
                    route_id: "24",
@@ -818,7 +784,16 @@ defmodule AlertsUI.AlertBuilderTest do
                  }
                ]
 
-        result
+        assert result_2.informed_entity == [
+                 %{
+                   agency_id: "1",
+                   route_id: "24",
+                   route_type: 1,
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 }
+               ]
+
+        result_1
         |> Alerts.create_or_update_alert(build(:user))
 
         [alert_1, alert_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id, :desc)
@@ -919,8 +894,16 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [],
          [
-           by_route_id: fn route_id, [direction_id: "0", include: "representative_trip.stops"] ->
-             [%APIRoutePattern{direction_id: 0, stops: stops, route_id: route_id}]
+           by_route_id: fn route_id,
+                           [direction_id: "0", include: "representative_trip.stops,route"] ->
+             [
+               %APIRoutePattern{
+                 direction_id: 0,
+                 stops: stops,
+                 route_id: route_id,
+                 listed_route: true
+               }
+             ]
            end
          ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]}
@@ -1092,6 +1075,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  direction_id: 1,
                  stops: child_stops,
                  route_id: route_id,
+                 listed_route: true,
                  id: "rp_1"
                }
              ]
@@ -1156,6 +1140,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  direction_id: 0,
                  stops: parent_stops,
                  route_id: route_id,
+                 listed_route: true,
                  id: "rp_1"
                }
              ]
@@ -1228,6 +1213,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  direction_id: 0,
                  stops: child_stops,
                  route_id: route_id,
+                 listed_route: true,
                  id: "rp_1"
                }
              ]
@@ -1297,18 +1283,20 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [],
          [
-           by_route_id: fn "Red", [include: "representative_trip.stops"] ->
+           by_route_id: fn "Red", [include: "representative_trip.stops,route"] ->
              [
                %APIRoutePattern{
                  direction_id: 0,
                  stops: child_stops_0,
                  route_id: "Red",
+                 listed_route: true,
                  id: "Red-1"
                },
                %APIRoutePattern{
                  direction_id: 1,
                  stops: child_stops_1,
                  route_id: "Red",
+                 listed_route: true,
                  id: "Red-2"
                }
              ]
@@ -1409,6 +1397,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  direction_id: 1,
                  stops: child_stops,
                  route_id: route_id,
+                 listed_route: true,
                  id: "rp-1"
                }
              ]
@@ -1488,24 +1477,28 @@ defmodule AlertsUI.AlertBuilderTest do
                    direction_id: 0,
                    stops: [jfk_child, ashmont_child],
                    route_id: "Red",
+                   listed_route: true,
                    id: "Red-1"
                  },
                  %APIRoutePattern{
                    direction_id: 1,
                    stops: [ashmont_child, jfk_child],
                    route_id: "Red",
+                   listed_route: true,
                    id: "Red-2"
                  },
                  %APIRoutePattern{
                    direction_id: 0,
                    stops: [jfk_child, braintree_child],
                    route_id: "Red",
+                   listed_route: true,
                    id: "Red-3"
                  },
                  %APIRoutePattern{
                    direction_id: 1,
                    stops: [braintree_child, jfk_child],
                    route_id: "Red",
+                   listed_route: true,
                    id: "Red-4"
                  }
                ]
@@ -1608,24 +1601,28 @@ defmodule AlertsUI.AlertBuilderTest do
                    direction_id: 0,
                    stops: [jfk_child, ashmont_child],
                    route_id: "Red",
+                   listed_route: true,
                    id: "Red-1"
                  },
                  %APIRoutePattern{
                    direction_id: 1,
                    stops: [ashmont_child, jfk_child],
                    route_id: "Red",
+                   listed_route: true,
                    id: "Red-2"
                  },
                  %APIRoutePattern{
                    direction_id: 0,
                    stops: [jfk_child, braintree_child],
                    route_id: "Red",
+                   listed_route: true,
                    id: "Red-3"
                  },
                  %APIRoutePattern{
                    direction_id: 1,
                    stops: [braintree_child, jfk_child],
                    route_id: "Red",
+                   listed_route: true,
                    id: "Red-4"
                  }
                ]
@@ -1731,6 +1728,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    direction_id: 0,
                    stops: [andrew_child_s, jfk_child_to_quincy_s, north_quincy_child_s],
                    route_id: "Red",
+                   listed_route: true,
                    typicality: 1
                  },
                  %APIRoutePattern{
@@ -1739,6 +1737,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    direction_id: 1,
                    stops: [north_quincy_child_n, jfk_child_to_quincy_n, andrew_child_n],
                    route_id: "Red",
+                   listed_route: true,
                    typicality: 1
                  },
                  %APIRoutePattern{
@@ -1747,6 +1746,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    direction_id: 0,
                    stops: [andrew_child_s, jfk_child_to_savin_s, savin_child_s],
                    route_id: "Red",
+                   listed_route: true,
                    typicality: 3
                  },
                  %APIRoutePattern{
@@ -1755,6 +1755,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    direction_id: 1,
                    stops: [savin_child_n, jfk_child_to_savin_n, andrew_child_n],
                    route_id: "Red",
+                   listed_route: true,
                    typicality: 3
                  },
                  %APIRoutePattern{
@@ -1762,6 +1763,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    direction_id: 0,
                    stops: [%Stop{id: "121"}, %Stop{id: "305"}],
                    route_id: "Red",
+                   listed_route: true,
                    typicality: 5
                  }
                ]
@@ -1893,12 +1895,14 @@ defmodule AlertsUI.AlertBuilderTest do
                    direction_id: 0,
                    stops: [hynes_child, kenmore_child],
                    route_id: "Green-B",
+                   listed_route: true,
                    id: "green-b-1"
                  },
                  %APIRoutePattern{
                    direction_id: 1,
                    stops: [kenmore_child, hynes_child],
                    route_id: "Green-B",
+                   listed_route: true,
                    id: "green-b-2"
                  }
                ]
@@ -1909,12 +1913,14 @@ defmodule AlertsUI.AlertBuilderTest do
                    direction_id: 0,
                    stops: [kenmore_child, hynes_child],
                    route_id: "Green-C",
+                   listed_route: true,
                    id: "green-c-1"
                  },
                  %APIRoutePattern{
                    direction_id: 1,
                    stops: [hynes_child, kenmore_child],
                    route_id: "Green-C",
+                   listed_route: true,
                    id: "green-c-2"
                  }
                ]
@@ -1925,12 +1931,14 @@ defmodule AlertsUI.AlertBuilderTest do
                    direction_id: 0,
                    stops: [fenway_child, kenmore_child, hynes_child],
                    route_id: "Green-D",
+                   listed_route: true,
                    id: "green-d-1"
                  },
                  %APIRoutePattern{
                    direction_id: 1,
                    stops: [hynes_child, kenmore_child, fenway_child],
                    route_id: "Green-D",
+                   listed_route: true,
                    id: "green-d-2"
                  }
                ]
@@ -2505,6 +2513,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  direction_id: 1,
                  stops: child_stops,
                  route_id: route_id,
+                 listed_route: true,
                  id: "rp_1"
                }
              ]
@@ -2626,6 +2635,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  direction_id: 0,
                  stops: child_stops,
                  route_id: route_id,
+                 listed_route: true,
                  id: "rp-1"
                }
              ]
@@ -2699,6 +2709,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  direction_id: 0,
                  stops: child_stops,
                  route_id: route_id,
+                 listed_route: true,
                  id: "rp_1"
                }
              ]
@@ -2772,6 +2783,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  direction_id: 0,
                  stops: child_stops,
                  route_id: route_id,
+                 listed_route: true,
                  id: "rp_1"
                }
              ]
@@ -2853,6 +2865,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  direction_id: 0,
                  stops: child_stops,
                  route_id: route_id,
+                 listed_route: true,
                  id: "rp_1"
                }
              ]
@@ -2927,18 +2940,20 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [],
          [
-           by_route_id: fn "CR-Fitchburg", [include: "representative_trip.stops"] ->
+           by_route_id: fn "CR-Fitchburg", [include: "representative_trip.stops,route"] ->
              [
                %APIRoutePattern{
                  direction_id: 0,
                  stops: child_stops_0,
                  route_id: "CR-Fitchburg",
+                 listed_route: true,
                  id: "CR-Fitchburg-1"
                },
                %APIRoutePattern{
                  direction_id: 1,
                  stops: child_stops_1,
                  route_id: "CR-Fitchburg",
+                 listed_route: true,
                  id: "CR-Fitchburg-2"
                }
              ]
@@ -3022,6 +3037,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  direction_id: 0,
                  stops: child_stops,
                  route_id: route_id,
+                 listed_route: true,
                  id: "rp_1"
                }
              ]
@@ -3123,6 +3139,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  direction_id: 0,
                  stops: child_stops,
                  route_id: route_id,
+                 listed_route: true,
                  id: "rp_1"
                }
              ]
@@ -3131,20 +3148,7 @@ defmodule AlertsUI.AlertBuilderTest do
          ]},
         {StopsRepo, [], [by_route: fn _route_id, _direction -> parent_stops ++ child_stops end]},
         {RoutesRepo, [],
-         [get: fn "Boat-F4", _opts -> %Route{id: "Boat-F4", line_id: "line-Boat-F4", type: 4} end]},
-        {LinesRepo, [],
-         [
-           get: fn
-             "line-Boat-F4", _opts ->
-               %Line{
-                 id: "line-Boat-F4",
-                 route_ids: ["Boat-F4"],
-                 routes: [
-                   %Route{id: "Boat-F4", line_id: "line-Boat-F4", type: 4}
-                 ]
-               }
-           end
-         ]}
+         [get: fn "Boat-F4", _opts -> %Route{id: "Boat-F4", line_id: "line-Boat-F4", type: 4} end]}
       ]) do
         result = AlertBuilder.build_alert(alert_data, :SR)
 
@@ -3184,7 +3188,8 @@ defmodule AlertsUI.AlertBuilderTest do
                %APIRoutePattern{
                  direction_id: 0,
                  stops: parent_stops ++ child_stops,
-                 route_id: route_id
+                 route_id: route_id,
+                 listed_route: true
                }
              ]
            end,
@@ -3195,19 +3200,6 @@ defmodule AlertsUI.AlertBuilderTest do
          [
            get: fn "435", _opts -> %Route{id: "435", line_id: "line-435", type: 3} end,
            green_line: fn -> @green_line_virtual_route end
-         ]},
-        {LinesRepo, [],
-         [
-           get: fn
-             "line-435", _opts ->
-               %Line{
-                 id: "line-435",
-                 route_ids: ["435"],
-                 routes: [
-                   %Route{id: "435", type: 3}
-                 ]
-               }
-           end
          ]}
       ]) do
         result = AlertBuilder.build_alert(alert_data, :SR)
@@ -3253,6 +3245,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  direction_id: 0,
                  stops: child_stops,
                  route_id: route_id,
+                 listed_route: true,
                  id: "rp_1"
                }
              ]
@@ -3367,6 +3360,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  direction_id: 0,
                  stops: child_stops,
                  route_id: route_id,
+                 listed_route: true,
                  id: "rp_1"
                }
              ]
