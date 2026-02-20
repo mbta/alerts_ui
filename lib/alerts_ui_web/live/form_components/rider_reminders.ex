@@ -185,7 +185,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
     ~H"""
     <div class="min-w-full flex flex-col mt-8" id="rider_reminder_view">
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
-        Rider Reminders
+        Rider reminders
       </.h5>
       <.form
         for={@form}
