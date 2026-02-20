@@ -96,7 +96,7 @@ defmodule AlertsUIWeb.FormComponents.Submit do
         type="button"
         id="back"
       >
-        <.icon name="hero-arrow-left-solid" class="h-3 w-3" /> Back
+        <.icon name="hero-arrow-left-solid" class="h-3 w-3 mr-2" /> Back
       </.button_secondary>
       <div class="flex flex-1">&nbsp;</div>
       <.button_secondary
