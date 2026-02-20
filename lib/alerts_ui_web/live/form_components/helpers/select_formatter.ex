@@ -53,7 +53,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
 
       if tooltip_id?(object) do
         [
-          id: key,
+          id: "#{key}-#{unique_id_suffix()}",
           key: key,
           value: id_for_option(object, split_stops?),
           "phx-hook": "Tippy",
@@ -232,5 +232,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
       |> List.last()
 
     "#{type} ID #{id_for_option(object, false)}"
+  end
+
+  defp unique_id_suffix() do
+    :crypto.strong_rand_bytes(8) |> Base.encode64()
   end
 end
