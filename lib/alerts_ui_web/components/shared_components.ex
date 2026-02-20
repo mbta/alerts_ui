@@ -1086,24 +1086,24 @@ defmodule AlertsUIWeb.SharedComponents do
           :if={@modal_filter_id}
           phx-click={show_modal(@modal_filter_id)}
           class={[
-            "flex items-center leading-tight mb-2 min-h-[1.3rem] text-right",
+            "flex shrink min-w-0 items-center leading-tight ml-2 mb-2 min-h-[1.3rem] text-right",
             if(@disabled, do: "text-text-disabled", else: "text-primary")
           ]}
           type="button"
           disabled={@disabled}
         >
           <span class={[
-            "hero-funnel-mini w-4 h-4 mr-1",
+            "shrink-0 hero-funnel-mini w-4 h-4 mr-1",
             if(@disabled, do: "text-text-disabled", else: "bg-primary")
           ]} />
-          {@modal_filter_title}
+          <span class="truncate">{@modal_filter_title}</span>
           <span
             :if={@modal_filter_active}
             id="clear-button"
             phx-target={@target_id}
             phx-click="clear_filter"
             phx-value-filter-id={@modal_filter_id}
-            class="hero-x-circle-mini w-4 h-4 ml-1 bg-primary"
+            class="shrink-0 hero-x-circle-mini w-4 h-4 ml-1 bg-primary"
           />
         </button>
       </div>
