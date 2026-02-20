@@ -3,6 +3,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.DateTimeFormatters do
   Utility functions for formatting dates and times.
   """
 
+  alias AlertsUI.Helpers.DateTime, as: DTHelpers
   alias AlertsUI.Models.ActivePeriod
   alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
 
@@ -65,13 +66,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.DateTimeFormatters do
         ActivePeriod.datetime_to_service_date(dt)
       end
 
-    service_shifted_dt = DateTime.new!(new_date, DateTime.to_time(dt), "America/New_York")
+    service_shifted_dt =
+      DTHelpers.new_protecting_gaps!(new_date, DateTime.to_time(dt), "America/New_York")
+
     Calendar.strftime(service_shifted_dt, format)
   end
 
   @doc """
   Return a human-friendly time string relative to "now".
-
   iex> friendly_time(~U[2022-01-07 14:01:00.00Z])
   "9:01 AM"
   iex> friendly_time(nil)
