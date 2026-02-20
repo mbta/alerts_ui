@@ -49,24 +49,23 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
     options
     |> Enum.sort_by(&sort_order/1)
     |> Enum.map(fn object ->
-      key = name_for_option(object, route_type)
+      name = name_for_option(object, route_type)
+      id = id_for_option(object, split_stops?)
+
+      base_attrs = [key: name, value: id, id: "option-#{id}"]
 
       if tooltip_id?(object) do
-        [
-          id: "#{key}-#{unique_id_suffix()}",
-          key: key,
-          value: id_for_option(object, split_stops?),
-          "phx-hook": "Tippy",
-          "phx-update": "ignore",
-          "data-tippy-content": tooltip_content(object),
-          "data-tippy-delay": "[1000, 200]"
-        ]
+        Keyword.merge(
+          base_attrs,
+          [
+            "phx-hook": "Tippy",
+            "phx-update": "ignore",
+            "data-tippy-content": tooltip_content(object),
+            "data-tippy-delay": "[1000, 200]"
+          ]
+        )
       else
-        [
-          id: "#{key}-#{unique_id_suffix()}",
-          key: name_for_option(object, route_type),
-          value: id_for_option(object, split_stops?)
-        ]
+        base_attrs
       end
     end)
     |> apply_search(search_term, values_to_keep)
