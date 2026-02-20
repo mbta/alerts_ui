@@ -494,6 +494,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           spellcheck="true"
         />
       </.form>
+      <hr class="mt-8" />
     </div>
     """
   end

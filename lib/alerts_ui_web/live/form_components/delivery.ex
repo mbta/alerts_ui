@@ -180,11 +180,11 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
         for={@form}
         phx-target={@myself}
         phx-change="validate"
-        class="form-control gap-8"
+        class="form-control gap-4"
         id="delivery_form"
         hidden={:last_push_notification_timestamp}
       >
-        <div class="flex flex-row mt-4">
+        <div class="flex flex-row">
           <.checkbox
             field={@form[:notification_toggle]}
             phx-change="notification_toggle_change"
@@ -242,6 +242,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
           </div>
         </div>
       </.form>
+      <hr class="mt-8" />
     </div>
     """
   end
