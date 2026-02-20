@@ -382,23 +382,23 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         class="form-control gap-4"
         id="details_form"
       >
-        <div class="flex flex-col md:flex-row">
+        <div class="flex flex-col md:flex-row md:w-[50%]">
           <.select
             label="Cause"
             field={@form[:cause_detail]}
             options={@cause_options}
-            class="md:min-w-64 md:max-w-64 md:mr-8"
+            class="shrink min-w-0 md:mr-8"
             id="cause_input"
           />
           <.select
             label="Severity"
             field={@form[:severity]}
             options={@severity_options}
-            class="md:max-w-64"
+            class="shrink min-w-0"
             id="severity_input"
           />
         </div>
-        <div class="flex flex-row">
+        <div class="flex flex-col md:flex-row">
           <div class="flex flex-col md:w-[50%]">
             <.textarea
               field={@form[:header_text]}
@@ -424,7 +424,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
             label="Auto refresh"
           />
         </div>
-        <div class="flex flex-row">
+        <div class="flex flex-col md:flex-row">
           <div class="flex flex-col md:w-[50%]">
             <.textarea
               field={@form[:description_text]}
