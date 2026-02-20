@@ -14,14 +14,16 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
             search_term: "",
             route_type: nil,
             values_to_keep: [],
-            schedules_by_route_name: nil
+            schedules_by_route_name: nil,
+            option_prefix: "option"
 
   @type t :: %__MODULE__{
           options: [Route.t() | Stop.t()] | nil,
           search_term: String.t(),
           route_type: integer() | nil,
           values_to_keep: [String.t()],
-          schedules_by_route_name: %{} | nil
+          schedules_by_route_name: %{} | nil,
+          option_prefix: String.t()
         }
 
   @doc """
@@ -41,7 +43,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
           options: options,
           route_type: route_type,
           search_term: search_term,
-          values_to_keep: values_to_keep
+          values_to_keep: values_to_keep,
+          option_prefix: option_prefix
         },
         split_stops?
       )
@@ -52,7 +55,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
       name = name_for_option(object, route_type)
       id = id_for_option(object, split_stops?)
 
-      base_attrs = [key: name, value: id, id: "option-#{id}"]
+      base_attrs = [key: name, value: id, id: "#{option_prefix}-#{id}"]
 
       if tooltip_id?(object) do
         Keyword.merge(

@@ -107,7 +107,8 @@ defmodule AlertsUIWeb.FilterForm do
             SelectFormatter.formatted_select_options(%SelectFormatter{
               options: format_service_type_options(),
               search_term: assigns.form[:service_type_search_term].value,
-              values_to_keep: List.wrap(assigns.form[:service_type].value)
+              values_to_keep: List.wrap(assigns.form[:service_type].value),
+              option_prefix: "service-type-filter"
             })
           }
         />
@@ -119,7 +120,8 @@ defmodule AlertsUIWeb.FilterForm do
             SelectFormatter.formatted_select_options(%SelectFormatter{
               options: format_routes_options(),
               search_term: assigns.form[:routes_search_term].value,
-              values_to_keep: List.wrap(assigns.form[:routes].value)
+              values_to_keep: List.wrap(assigns.form[:routes].value),
+              option_prefix: "route-filter"
             })
           }
         />
@@ -131,7 +133,8 @@ defmodule AlertsUIWeb.FilterForm do
             SelectFormatter.formatted_select_options(%SelectFormatter{
               options: format_effect_options(),
               search_term: assigns.form[:effects_search_term].value,
-              values_to_keep: List.wrap(assigns.form[:effects].value)
+              values_to_keep: List.wrap(assigns.form[:effects].value),
+              option_prefix: "effect-filter"
             })
           }
         />

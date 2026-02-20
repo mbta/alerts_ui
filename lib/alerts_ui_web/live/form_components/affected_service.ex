@@ -499,7 +499,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         options: Map.get(assigns.available_routes, :result, []) || [],
         search_term: route_search_term,
         route_type: assigns.route_type,
-        values_to_keep: route_ids
+        values_to_keep: route_ids,
+        option_prefix: "route-search"
       })
 
     direction_names_map =
@@ -524,7 +525,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
           schedules_by_route_name: get_schedules_by_route_type(assigns),
           route_type: assigns.route_type,
           search_term: trip_search_term,
-          values_to_keep: trip_ids
+          values_to_keep: trip_ids,
+          option_prefix: "trip-search"
         })
       else
         []
@@ -539,7 +541,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
           options: Map.get(assigns.available_stops, :result, []) || [],
           search_term: stop_search_term,
           route_type: assigns.route_type,
-          values_to_keep: stop_names_and_ids
+          values_to_keep: stop_names_and_ids,
+          option_prefix: "stop-search"
         },
         true
       )

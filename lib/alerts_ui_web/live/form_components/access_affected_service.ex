@@ -342,7 +342,8 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
       SelectFormatter.formatted_select_options(%SelectFormatter{
         options: Map.get(stops, :stops) || [],
         search_term: stop_search_term,
-        values_to_keep: stop_id |> List.wrap()
+        values_to_keep: stop_id |> List.wrap(),
+        option_prefix: "stop-filter"
       })
 
     # Facility selector
@@ -364,7 +365,8 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
         SelectFormatter.formatted_select_options(%SelectFormatter{
           options: options,
           search_term: facility_search_term,
-          values_to_keep: List.wrap(facility_id)
+          values_to_keep: List.wrap(facility_id),
+          option_prefix: "facility-filter"
         })
       else
         []

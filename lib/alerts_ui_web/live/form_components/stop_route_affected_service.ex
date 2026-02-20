@@ -453,7 +453,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         options: Map.get(assigns.available_filter_routes, :result) || [],
         search_term: modal_route_search_term,
         route_type: assigns.route_type,
-        values_to_keep: modal_route_id |> List.wrap()
+        values_to_keep: modal_route_id |> List.wrap(),
+        option_prefix: "route-filter"
       })
 
     # Stop selector
@@ -481,7 +482,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
           options: options,
           search_term: stop_search_term,
           route_type: assigns.route_type,
-          values_to_keep: stop_ids
+          values_to_keep: stop_ids,
+          option_prefix: "stop-selector"
         })
       else
         []
@@ -498,7 +500,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         options: Map.get(assigns.available_routes, :result, []) || [],
         search_term: route_search_term,
         route_type: assigns.route_type,
-        values_to_keep: route_ids
+        values_to_keep: route_ids,
+        option_prefix: "route-selector"
       })
 
     assigns =
