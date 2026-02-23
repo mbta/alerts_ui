@@ -522,7 +522,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         for={@form}
         phx-target={@myself}
         phx-change="validate"
-        class="form-control gap-4"
+        class="form-control"
         id="time_range_form"
       >
         <.select
@@ -558,7 +558,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     ~H"""
     <div
       :if={@form[:alert_timing].value in [:"one-time", "one-time"]}
-      class="flex flex-col md:flex-row md:flex-wrap md:gap-8 md:mt-8"
+      class="flex flex-col md:flex-row md:flex-wrap md:gap-8 md:mt-4"
     >
       <.select
         label="Effect period"
@@ -623,7 +623,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   defp recurring_alert_component(assigns) do
     ~H"""
-    <div :if={@form[:alert_timing].value === :recurring} class="flex flex-col gap-8 my-8">
+    <div :if={@form[:alert_timing].value === :recurring} class="flex flex-col">
       <div class="flex flex-col md:flex-row gap-8 md:my-4">
         <div class="flex flex-col md:flex-row gap-4 md:gap-8">
           <.select
@@ -662,7 +662,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         </div>
       </div>
 
-      <div class="flex flex-col md:flex-row gap-8 md:my-4">
+      <div class="flex flex-col md:flex-row gap-8 md:mb-8">
         <div class="flex flex-col md:flex-row gap-8">
           <.select
             label="Recurring alert start"

@@ -485,12 +485,12 @@ defmodule AlertsUIWeb.SharedComponents do
   def copy_button(assigns) do
     ~H"""
     <button
-      class="h-7 w-7 mt-4 border border-border-primary bg-bg-input-default active:bg-menu-active rounded hover:bg-primary-hover"
+      class="px-2 py-1 border border-border-primary bg-bg-input-default active:bg-secondary-active rounded hover:bg-secondary-hover"
       phx-click={JS.dispatch("phx:copy", to: @copy_id)}
       title={@title}
       type="button"
     >
-      <span class="hero-square-2-stack-solid w-5 h-5 stroke-3" />
+      <span class="hero-square-2-stack-solid w-5 h-5 stroke-3" /> Copy text
     </button>
     """
   end
@@ -1086,24 +1086,24 @@ defmodule AlertsUIWeb.SharedComponents do
           :if={@modal_filter_id}
           phx-click={show_modal(@modal_filter_id)}
           class={[
-            "flex items-center leading-tight mb-2 min-h-[1.3rem] text-right",
+            "flex shrink min-w-0 items-center leading-tight ml-2 mb-2 min-h-[1.3rem] text-right",
             if(@disabled, do: "text-text-disabled", else: "text-primary")
           ]}
           type="button"
           disabled={@disabled}
         >
           <span class={[
-            "hero-funnel-mini w-4 h-4 mr-1",
+            "shrink-0 hero-funnel-mini w-4 h-4 mr-1",
             if(@disabled, do: "text-text-disabled", else: "bg-primary")
           ]} />
-          {@modal_filter_title}
+          <span class="truncate">{@modal_filter_title}</span>
           <span
             :if={@modal_filter_active}
             id="clear-button"
             phx-target={@target_id}
             phx-click="clear_filter"
             phx-value-filter-id={@modal_filter_id}
-            class="hero-x-circle-mini w-4 h-4 ml-1 bg-primary"
+            class="shrink-0 hero-x-circle-mini w-4 h-4 ml-1 bg-primary"
           />
         </button>
       </div>
@@ -1287,7 +1287,6 @@ defmodule AlertsUIWeb.SharedComponents do
         ]}
         {@rest}
       ><%=  @value%></textarea>
-      <.input_error :for={msg <- @errors} class="-mt-[1.5rem] ml-1 relative">{msg}</.input_error>
     </div>
     """
   end
@@ -1297,38 +1296,43 @@ defmodule AlertsUIWeb.SharedComponents do
 
   ## Examples
 
-      <.textarea_counter field={@form[:fieldname]} />
+      <.textarea_footer field={@form[:fieldname]} />
   """
 
   attr :class, :string, default: "", doc: "additional classes to add"
   attr :character_limit, :integer, required: true
 
+  attr :copy_id, :string,
+    default: nil,
+    doc: "id of input component for copying, to be passed to copy button"
+
+  attr :copy_title, :string, doc: "text to be passed to copy button"
+
   attr :field, FormField,
     required: true,
     doc: "the form field the counter is associated with"
 
-  attr :rest, :global, include: ~w(disabled)
-
-  def textarea_counter(%{field: %FormField{} = field} = assigns) do
+  def textarea_footer(%{field: %FormField{} = field} = assigns) do
     assigns =
       assigns
       |> assign_new(:value, fn -> field.value end)
-      |> assign(
-        :error_length,
-        Enum.map(field.errors, &CoreComponents.translate_error(&1)) |> length
-      )
+      |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
 
     ~H"""
     <div class={[
-      "flex flex-row justify-end min-w-full text-sm text-text-secondary bg-bg-elevation-3 px-2 pt-4 rounded-b border border-bg-elevation-6 border-t-0 -mt-2",
-      if(@error_length > 0, do: "border-danger"),
+      "flex flex-row items-center min-w-full text-sm bg-bg-elevation-3 px-3 py-2 rounded-b border border-bg-elevation-6 border-t-0 -mt-2",
+      if(@errors != [], do: "border-danger"),
       if(String.length(@value || "") == @character_limit, do: "text-danger ")
     ]}>
-      {String.length(@value || "")}/{@character_limit}<span
-        :if={String.length(@value || "") == @character_limit}
-        class="ml-1"
-      > Character limit reached</span>
+      <.copy_button :if={@copy_id} title={@copy_title} copy_id={@copy_id} />
+      <div class="text-text-secondary ml-auto">
+        {String.length(@value || "")}/{@character_limit}
+        <span :if={String.length(@value || "") == @character_limit} class="ml-1">
+          Character limit reached
+        </span>
+      </div>
     </div>
+    <.input_error :for={msg <- @errors} class="ml-1 relative">{msg}</.input_error>
     """
   end
 
@@ -1364,7 +1368,6 @@ defmodule AlertsUIWeb.SharedComponents do
 
     ~H"""
     <div>
-      <.label :if={@label} for={@id}>{@label}</.label>
       <div phx-feedback-for={@name} class={@class}>
         <input type="hidden" name={@name} value="false" />
         <input
@@ -1374,69 +1377,15 @@ defmodule AlertsUIWeb.SharedComponents do
           value="true"
           checked={@checked}
           class={[
-            "[appearance:none] hover:bg-primary-hover w-4 h-4 checked:bg-primary checked:before:content-['']
-            rounded bg-bg-input-default checked:before:content-['✓'] font-bold leading-none",
+            "[appearance:none] hover:bg-primary-hover w-4 h-4 checked:bg-primary
+            rounded bg-bg-input-default before:content-['✓'] [&:not(:checked)]:text-transparent
+            font-bold leading-none",
             @check_class,
             if(length(@errors) > 0, do: "border border-1 border-danger focus:border-danger")
           ]}
           {@rest}
         />
-        <.input_error :for={msg <- @errors}>{msg}</.input_error>
-      </div>
-    </div>
-    """
-  end
-
-  @doc """
-  Renders a sync toggle input.
-
-  ## Examples
-
-      <.sync_toggle field={@form[:fieldname]} />
-  """
-  attr :id, :any, default: nil
-  attr :value, :any
-  attr :hidden, :boolean, default: false
-  attr :class, :string, default: "", doc: "additional classes to add to container div"
-  attr :label, :string, default: nil
-
-  attr :field, FormField,
-    doc: "a form field struct retrieved from the form, for example: @form[:email]"
-
-  attr :errors, :list, default: []
-  attr :checked, :boolean, doc: "the checked flag for checkbox inputs"
-
-  attr :rest, :global, include: ~w(phx-debounce disabled)
-
-  def sync_toggle(%{field: %FormField{} = field} = assigns) do
-    assigns =
-      assigns
-      |> assign(id: assigns.id || field.id)
-      |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
-      |> assign(:name, field.name)
-      |> assign_new(:checked, fn -> Form.normalize_value("checkbox", field.value) end)
-
-    ~H"""
-    <div>
-      <.label :if={@label} for={@id}>{@label}</.label>
-      <div phx-feedback-for={@name} class={@class}>
-        <input type="hidden" name={@name} value="false" />
-        <input
-          type="checkbox"
-          id={@id}
-          name={@name}
-          value="true"
-          checked={@checked}
-          class={[
-            "[appearance:none] hover:bg-primary-hover w-7 h-7 border border-border-primary rounded
-            bg-bg-input-default font-bold leading-none flex items-center justify-center text-text-primary",
-            "before:hero-arrow-path",
-            "checked:bg-primary checked:before:content-[''] checked:text-bg-primary",
-            @class,
-            if(length(@errors) > 0, do: "border border-1 border-danger focus:border-danger")
-          ]}
-          {@rest}
-        />
+        <.label :if={@label} for={@id}>{@label}</.label>
         <.input_error :for={msg <- @errors}>{msg}</.input_error>
       </div>
     </div>
@@ -1503,7 +1452,7 @@ defmodule AlertsUIWeb.SharedComponents do
           disabled={@disabled}
           value={Form.normalize_value("datetime-local", @value)}
           class={[
-            "bg-bg-elevation-5 border border-border-primary px-3 py-1.5 p-0 min-w-full
+            "bg-bg-elevation-5 border border-border-primary px-3 py-1.5 p-0 w-64
               rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto
               disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
               focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) appearance-auto dark:text-white dark:[color-scheme:dark]",

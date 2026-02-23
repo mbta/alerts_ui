@@ -250,14 +250,14 @@
     />
     <div class="flex flex-col w-[16rem]">
       <.textarea
-        field={@form[:textarea_counter]}
+        field={@form[:textarea_footer]}
         label="Text Area with Counter"
         phx-debounce={120}
         maxlength="20"
-        value={@form[:textarea_counter].value}
+        value={@form[:textarea_footer].value}
         class="min-w-[16rem]"
       />
-      <.textarea_counter character_limit={20} field={@form[:textarea_counter]} />
+      <.textarea_footer character_limit={20} field={@form[:textarea_footer]} />
     </div>
     <.toggle_checkgroup
       label="Checkgroup with icons"

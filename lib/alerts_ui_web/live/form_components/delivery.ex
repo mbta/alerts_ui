@@ -180,11 +180,11 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
         for={@form}
         phx-target={@myself}
         phx-change="validate"
-        class="form-control gap-8"
+        class="form-control gap-4"
         id="delivery_form"
         hidden={:last_push_notification_timestamp}
       >
-        <div class="flex flex-row mt-4">
+        <div class="flex flex-row">
           <.checkbox
             field={@form[:notification_toggle]}
             phx-change="notification_toggle_change"
@@ -196,13 +196,16 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
             Send notification to alert subscribers
           </span>
         </div>
-        <div id="banner_div" class="flex flex-col w-[50%]">
+        <div id="banner_div" class="flex flex-col">
           <div class="flex flex-row mb-2">
             <.checkbox field={@form[:view_banner]} phx-change="view_banner" phx-target={@myself} />
             <span class="ml-4">Banner on all MBTA.com pages</span>
           </div>
-          <div :if={Form.normalize_value("checkbox", @form[:view_banner].value)} class="flex flex-row">
-            <div class="min-w-[100%]" id="banner-container">
+          <div
+            :if={Form.normalize_value("checkbox", @form[:view_banner].value)}
+            class="flex flex-col md:flex-row"
+          >
+            <div class="flex flex-col md:w-[50%]" id="banner-container">
               <.textarea
                 field={@form[:banner_text]}
                 label="Website banner text"
@@ -213,13 +216,18 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
                 phx-target={@myself}
                 value={@form[:banner_text].value}
               />
-              <.textarea_counter character_limit={4000} field={@form[:banner_text]} />
+              <.textarea_footer
+                character_limit={4000}
+                copy_id="#delivery_banner_text"
+                copy_title="Copy banner text to Clipboard"
+                field={@form[:banner_text]}
+              />
             </div>
-
-            <div class="flex flex-col justify-center ml-4">
-              <.sync_toggle field={@form[:banner_sync_toggle]} />
-              <.copy_button copy_id="#delivery_banner_text" title="Copy banner text to Clipboard" />
-            </div>
+            <.checkbox
+              class="mt-2 md:ml-4 md:mt-8"
+              field={@form[:header_sync_toggle]}
+              label="Auto refresh"
+            />
           </div>
           <div
             :if={Form.normalize_value("checkbox", @form[:view_banner].value)}
@@ -234,6 +242,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
           </div>
         </div>
       </.form>
+      <hr class="mt-8" />
     </div>
     """
   end

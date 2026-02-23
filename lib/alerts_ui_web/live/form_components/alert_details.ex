@@ -382,23 +382,23 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         class="form-control gap-4"
         id="details_form"
       >
-        <div class="flex flex-col md:flex-row">
+        <div class="flex flex-col md:flex-row md:w-[50%]">
           <.select
             label="Cause"
             field={@form[:cause_detail]}
             options={@cause_options}
-            class="md:min-w-64 md:max-w-64 md:mr-8"
+            class="shrink min-w-0 md:mr-8"
             id="cause_input"
           />
           <.select
             label="Severity"
             field={@form[:severity]}
             options={@severity_options}
-            class="md:max-w-64"
+            class="shrink min-w-0"
             id="severity_input"
           />
         </div>
-        <div class="flex flex-row">
+        <div class="flex flex-col md:flex-row">
           <div class="flex flex-col md:w-[50%]">
             <.textarea
               field={@form[:header_text]}
@@ -411,14 +411,20 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
               phx-target={@myself}
               value={@form[:header_text].value}
             />
-            <.textarea_counter character_limit={255} field={@form[:header_text]} />
+            <.textarea_footer
+              character_limit={255}
+              copy_id="#alert_details_header_text"
+              copy_title="Copy main message to Clipboard"
+              field={@form[:header_text]}
+            />
           </div>
-          <div class="flex flex-col justify-center ml-4">
-            <.sync_toggle field={@form[:header_sync_toggle]} />
-            <.copy_button copy_id="#alert_details_header_text" title="Copy main message to Clipboard" />
-          </div>
+          <.checkbox
+            class="mt-2 md:ml-4 md:mt-8"
+            field={@form[:header_sync_toggle]}
+            label="Auto refresh"
+          />
         </div>
-        <div class="flex flex-row">
+        <div class="flex flex-col md:flex-row">
           <div class="flex flex-col md:w-[50%]">
             <.textarea
               field={@form[:description_text]}
@@ -431,15 +437,18 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
               phx-target={@myself}
               value={@form[:description_text].value}
             />
-            <.textarea_counter character_limit={3000} field={@form[:description_text]} />
-          </div>
-          <div class="flex flex-col justify-center ml-4">
-            <.sync_toggle field={@form[:description_sync_toggle]} />
-            <.copy_button
+            <.textarea_footer
+              character_limit={3000}
               copy_id="#alert_details_description_text"
-              title="Copy supporting information to Clipboard"
+              copy_title="Copy supporting information to Clipboard"
+              field={@form[:description_text]}
             />
           </div>
+          <.checkbox
+            class="mt-2 md:ml-4 md:mt-8"
+            field={@form[:description_sync_toggle]}
+            label="Auto refresh"
+          />
         </div>
         <.text_input
           field={@form[:url]}
@@ -485,6 +494,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           spellcheck="true"
         />
       </.form>
+      <hr class="mt-8" />
     </div>
     """
   end

@@ -11,14 +11,10 @@ defmodule AlertsUIWeb.FormComponents.Timeline do
 
     ~H"""
     <div class="flex flex-wrap md:flex-nowrap flex-row items-center mb-12 bg-bg-elevation-3 border-b border-border-primary px-4 min-w-full">
-      <.h3 :if={@form_type == :creating} class="w-full md:w-auto lg:mx-6 mt-2 text-text-primary">
-        Creating New Alert
-      </.h3>
-      <.h3 :if={@form_type == :editing} class="w-full md:w-auto lg:mx-6 mt-2 text-text-primary">
-        Editing Alert #{@alert_id}
-      </.h3>
-      <.h3 :if={@form_type == :duplicating} class="w-full md:w-auto lg:mx-6 mt-2 text-text-primary">
-        Duplicating Alert #{@alert_id}
+      <.h3 class="w-full md:w-auto md:mx-6 mt-2 text-text-primary">
+        <span :if={@form_type == :creating}>Creating New Alert</span>
+        <span :if={@form_type == :editing}>Editing Alert #{@alert_id}</span>
+        <span :if={@form_type == :duplicating}>Duplicating Alert #{@alert_id}</span>
       </.h3>
       <div class="flex items-center">
         <div :for={{step, i} <- Enum.with_index(@steps)} class="flex items-center">
