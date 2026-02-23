@@ -167,6 +167,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeGetters do
   end
 
   # The DateTime getters execute on output from the Date / Time getters
+  def get_recurring_start_datetime("", _), do: nil
+  def get_recurring_start_datetime(_, ""), do: nil
+
   def get_recurring_start_datetime(start_date, start_time) do
     start_date
     |> string_to_date_helper()
@@ -194,7 +197,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeGetters do
   defp string_to_date_helper(date) when is_binary(date), do: Date.from_iso8601!(date)
   defp string_to_date_helper(date), do: date
 
-  defp string_to_time_helper(time) when is_binary(time), do: Time.from_iso8601!(time <> ":00")
+  defp string_to_time_helper(time) when is_binary(time) do
+    case Time.from_iso8601(time <> ":00") do
+      {:ok, time} -> time
+      {:error, _} -> nil
+    end
+  end
+
   defp string_to_time_helper(time), do: time
 
   def string_to_datetime_helper(%DateTime{} = datetime),
