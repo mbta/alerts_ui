@@ -9,11 +9,6 @@ on:
     branches: ["main"]
 
 jobs:
-    call-deploy-dev-green:
-        uses: ./.github/workflows/deploy-dev.yml
-        with:
-          environment: dev-green
-        secrets: inherit
     call-deploy-dev-orange:
         uses: ./.github/workflows/deploy-dev.yml
         with:
