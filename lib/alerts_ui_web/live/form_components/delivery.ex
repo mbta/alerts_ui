@@ -225,7 +225,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
             </div>
             <.checkbox
               class="mt-2 md:ml-4 md:mt-8"
-              field={@form[:header_sync_toggle]}
+              field={@form[:banner_sync_toggle]}
               label="Auto refresh"
             />
           </div>
