@@ -104,6 +104,7 @@ cond do
 
     config :alerts_ui,
       environment_name: System.get_env("SENTRY_ENV", "local"),
+      full_story_org_id: System.get_env("FULLSTORY_ORG_ID"),
       api_url: String.replace_trailing(System.get_env("API_URL"), "/", ""),
       api_key: get_api_key.(),
       ibi_enhanced_alerts_api_url:
