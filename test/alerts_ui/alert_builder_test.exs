@@ -565,7 +565,7 @@ defmodule AlertsUI.AlertBuilderTest do
                    direction_id: 0,
                    stops: [],
                    route_id: "746",
-                   listed_route: false
+                   listed_route: true
                  }
                ]
 
