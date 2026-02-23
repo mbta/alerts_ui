@@ -123,7 +123,6 @@ defmodule AlertsUIWeb.Router do
         AlertsUIWeb.PutEnvironmentInAssigns,
         AlertsUIWeb.PreloadCacheOnMount
       ] do
-      live("/validate", ValidateLive)
       live("/db", DBPageLive)
       live("/import", IBIImporterLive)
     end

@@ -1,9 +1,9 @@
-defmodule AlertsUI.RecurringAlertUpdaterTest do
+defmodule AlertsUI.Jobs.RecurringAlertUpdaterTest do
   use AlertsUI.DataCase, async: false
   import AlertsUI.Support.Factory
   import Mock
   import ExUnit.CaptureLog
-  alias AlertsUI.RecurringAlertUpdater
+  alias AlertsUI.Jobs.RecurringAlertUpdater
   alias Oban.Job
 
   describe "perform" do

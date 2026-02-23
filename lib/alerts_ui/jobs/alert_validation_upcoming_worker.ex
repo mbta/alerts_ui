@@ -1,4 +1,4 @@
-defmodule AlertsUI.AlertValidation.AlertValidationUpcomingWorker do
+defmodule AlertsUI.Jobs.AlertValidationUpcomingWorker do
   @moduledoc """
   Oban worker that checks the informed entities of open alerts for validity
   against the dev API when there's a new build.

@@ -22,8 +22,8 @@ defmodule AlertsUI.FeedOutput.WriteFeed do
     recently_closed_alerts = get_recently_closed_alerts()
     open_alerts = get_open_alerts()
     enhanced_alerts = Enum.concat(open_alerts, recently_closed_alerts)
-    ibi_enhanced_alerts = get_ibi_alerts(:enhanced)
-    ibi_standard_alerts = get_ibi_alerts(:standard)
+    ibi_enhanced_alerts = get_ibi_alerts(:ibi_enhanced_alerts)
+    ibi_standard_alerts = get_ibi_alerts(:ibi_standard_alerts)
 
     rv =
       with {:ok, enhanced_alerts_json} <- write(:enhanced, enhanced_alerts),
@@ -56,8 +56,8 @@ defmodule AlertsUI.FeedOutput.WriteFeed do
   end
 
   defp get_ibi_alerts(flavor) do
-    {:ok, ibi_json} = FeedReader.ibi_json(flavor)
-    {:ok, ibi_data} = Jason.decode(ibi_json)
+    {:ok, alerts_json} = FeedReader.alerts_json(flavor)
+    {:ok, ibi_data} = Jason.decode(alerts_json)
     %{"entity" => entity} = ibi_data
     entity
   end

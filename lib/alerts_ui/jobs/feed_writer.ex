@@ -1,4 +1,4 @@
-defmodule AlertsUI.FeedWriter do
+defmodule AlertsUI.Jobs.FeedWriter do
   @moduledoc """
   Oban worker that periodically writes the up-to-date version of our alerts feed.
   """

@@ -1,9 +1,9 @@
-defmodule AlertsUI.AlertValidation.AlertValidationUpcomingWorkerTest do
+defmodule AlertsUI.Jobs.AlertValidationUpcomingWorkerTest do
   use AlertsUI.DataCase, async: false
   import ExUnit.CaptureLog
   import Test.Support.Helpers
   import Mock
-  alias AlertsUI.AlertValidation.AlertValidationUpcomingWorker
+  alias AlertsUI.Jobs.AlertValidationUpcomingWorker
   alias AlertsUI.Models.LastGTFSValidation
   alias Oban.Job
 

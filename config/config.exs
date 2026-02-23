@@ -29,7 +29,7 @@ config :alerts_ui,
   ibi_standard_alerts_api_url:
     System.get_env(
       "IBI_STANDARD_ALERTS_API_URL",
-      "https://cdn.mbta.com/realtime/Alerts.json"
+      "http://s3.amazonaws.com/mbta-realtime-test/alerts_pb.json"
     ),
   skip_migrations: true
 
@@ -103,25 +103,27 @@ config :alerts_ui, Oban,
        # Write GTFS feeds every minute
        {
          "*/1 * * * *",
-         AlertsUI.FeedWriter,
+         AlertsUI.Jobs.FeedWriter,
          max_attempts: 1, unique: [period: 30, states: [:available, :scheduled, :executing]]
        },
        # Write GTFS feeds every minute, offset by 30s
        {
          "*/1 * * * *",
-         AlertsUI.DelayedJob,
-         args: %{delay: 30_000, module: AlertsUI.FeedWriter},
+         AlertsUI.Jobs.DelayedJob,
+         args: %{delay: 30_000, module: AlertsUI.Jobs.FeedWriter},
          max_attempts: 1,
          unique: [period: 30, states: [:available, :scheduled, :executing]]
        },
+       # Log checksum of published S3 files every minute
+       {"*/1 * * * *", AlertsUI.Jobs.FeedChecker, max_attempts: 1},
        # Update recurring alerts every day at 3:01 am EST
-       {"1 8 * * *", AlertsUI.RecurringAlertUpdater},
+       {"1 8 * * *", AlertsUI.Jobs.RecurringAlertUpdater},
        # Validate alerts against production every day at 4:00 am EST
-       {"0 9 * * *", AlertsUI.AlertValidation.AlertValidationDailyWorker},
+       {"0 9 * * *", AlertsUI.Jobs.AlertValidationDailyWorker},
        # Check if we need to validate alerts against dev every minute
        {
          "*/1 * * * *",
-         AlertsUI.AlertValidation.AlertValidationUpcomingWorker,
+         AlertsUI.Jobs.AlertValidationUpcomingWorker,
          max_attempts: 1
        }
      ]}

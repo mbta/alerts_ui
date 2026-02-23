@@ -1,7 +1,7 @@
-defmodule AlertsUI.FeedWriterTest do
+defmodule AlertsUI.Jobs.FeedWriterTest do
   use AlertsUI.DataCase, async: false
 
-  alias AlertsUI.FeedWriter
+  alias AlertsUI.Jobs.FeedWriter
   alias Oban.Job
   import Test.Support.Helpers
 
