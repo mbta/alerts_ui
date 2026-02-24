@@ -39,7 +39,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
       }
       |> Enum.reject(fn {_k, v} -> is_nil(v) end)
 
-    struct!(BuildAutoText, conversion)
+    BuildAutoText |> struct!(conversion) |> maybe_reverse_stops()
   end
 
   defp get_direction("0"), do: [0]
@@ -65,4 +65,20 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
 
   defp dedup_stops(stops) when is_list(stops), do: Enum.uniq(stops)
   defp dedup_stops(_), do: []
+
+  defp maybe_reverse_stops(autotext) do
+    # if we have "both directions" selected but all our trips are for
+    # inbound (eg direction 1) we want to reverse the trips
+    # so they show up in the inbound order in the autotext
+    trip_directions =
+      unless Enum.empty?(autotext.schedules) do
+        autotext.schedules |> Enum.map(& &1.trip.direction_id) |> Enum.uniq()
+      end
+
+    if trip_directions == [1] && autotext.direction == [0, 1] do
+      Map.put(autotext, :stops, Enum.reverse(autotext.stops))
+    else
+      autotext
+    end
+  end
 end
