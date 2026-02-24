@@ -237,33 +237,34 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
       end
     end
 
+    test "shows error if url has invalid scheme" do
+      {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_details" => %{
+          "image_url" => "httpa://cdn.mbta.com/image.jpg"
+        }
+      })
+
+      assert view
+             |> render() =~ ~s(Enter a valid image URL)
+    end
+
     test "shows error if image is not from our CDN" do
-      with_mock(Req,
-        head: fn "https://cdn.mbta.com/image.jpg" ->
-          {:ok,
-           %Req.Response{
-             status: 200,
-             headers: %{
-               "content-length" => ["304839"],
-               "content-type" => ["image/png"]
-             },
-             body: ""
-           }}
-        end
-      ) do
-        {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
+      {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
 
-        view
-        |> element("form")
-        |> render_change(%{
-          "alert_details" => %{
-            "image_url" => "https://example.com/image.jpg"
-          }
-        })
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_details" => %{
+          "image_url" => "https://example.com/image.jpg"
+        }
+      })
 
-        assert view
-               |> render() =~ ~s(Enter a valid image URL)
-      end
+      assert view
+             |> render() =~ ~s(Enter a valid image URL)
     end
 
     test "shows error if image has wrong content type" do

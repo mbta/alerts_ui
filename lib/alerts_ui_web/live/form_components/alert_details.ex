@@ -361,9 +361,12 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     changeset
     |> cast(params, @fields)
     |> validate_change(:url, fn :url, url ->
-      if url_valid?(url),
-        do: [],
-        else: [url: "Enter a correctly formatted URL (e.g. http://www.example.com) "]
+      with {:ok, parsed_url} <- URI.new(url),
+           true <- url_valid?(parsed_url) do
+        []
+      else
+        _ -> [url: "Enter a correctly formatted URL (e.g. http://www.example.com) "]
+      end
     end)
   end
 
@@ -535,19 +538,16 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     [{"<none>", ""} | options_list]
   end
 
-  defp url_valid?(url) do
-    uri = URI.parse(url)
-    !is_nil(uri.scheme) && !is_nil(uri.host) && uri.host =~ "."
+  defp url_valid?(uri) do
+    uri.scheme in ["http", "https"] && !is_nil(uri.host) && uri.host =~ "."
   end
 
-  defp image_from_correct_host?(url) do
-    uri = URI.parse(url)
-    uri.host == @cdn_host
-  end
+  defp image_from_correct_host?(host), do: host == @cdn_host
 
   defp get_image_size(url) do
-    with true <- url_valid?(url),
-         true <- image_from_correct_host?(url),
+    with {:ok, parsed_url} <- URI.new(url),
+         true <- url_valid?(parsed_url),
+         true <- image_from_correct_host?(parsed_url.host),
          {:ok,
           %{headers: %{"content-type" => content_type, "content-length" => [content_length]}}} <-
            Req.head(url),
