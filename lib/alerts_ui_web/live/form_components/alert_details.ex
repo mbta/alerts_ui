@@ -394,7 +394,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
             label="Severity"
             field={@form[:severity]}
             options={@severity_options}
-            class="shrink min-w-0"
+            class="shrink grow min-w-0"
             id="severity_input"
           />
         </div>
