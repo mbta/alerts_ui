@@ -10,10 +10,14 @@ defmodule AlertsUI.Trapeze.Importer do
   alias AlertsUI.Alerts
   alias AlertsUI.Models.Alert
   alias AlertsUI.Repo
+  alias AlertsUI.Trapeze.Monitor
   alias AlertsUI.Trapeze.SFTP
   alias AlertsUI.Trapeze.WorkOrder
 
   require Logger
+
+  @open_origin "(Opened automatically via Trapeze EAM)"
+  @closed_origin "(Closed automatically via Trapeze EAM)"
 
   @doc """
   Example: 
@@ -28,55 +32,47 @@ defmodule AlertsUI.Trapeze.Importer do
   """
   @impl Oban.Worker
   def perform(_, _opts \\ []) do
-    info("Starting #{now_string()}")
+    Monitor.start()
 
     cond do
       configuration_incomplete?() ->
-        warning("Not Loading Escalator/Elevator Feed: missing configuration.")
-        {:ok, "Missing Configuration"}
+        Monitor.result({:warning, "Missing Configuration"})
 
       production?() && not allowed_in_production?() ->
-        warning("Not Loading Escalator/Elevator Feed: running in production.")
-        {:ok, "Running in Production"}
+        Monitor.result({:warning, "Running in Production"})
 
       true ->
-        info("Loading Escalator/Elevator Feed.")
+        try do
+          case SFTP.fetch(SFTP.source_description()) do
+            {:ok, {feed, mtime}} ->
+              Monitor.processing(feed, mtime)
 
-        case SFTP.fetch(SFTP.source_description()) do
-          {:ok, feed} ->
-            info("Processing #{length(feed)} entries")
-            process_feed(feed)
+              process_feed(feed)
+              |> Monitor.result()
 
-          {:error, e} ->
-            error("Unable to import. #{inspect(e)}")
-            {:error, e}
+            {:error, e} ->
+              Monitor.result({:error, e})
+          end
+        rescue
+          error ->
+            Monitor.result({:error, error})
         end
     end
+
+    Monitor.finish()
+    Monitor.close()
   end
 
-  @spec info(String.t()) :: any()
-  def info(message) do
-    Logger.info("#{__MODULE__}: #{message}")
-  end
-
-  @spec warning(String.t()) :: any()
-  def warning(message) do
-    Logger.warning("#{__MODULE__}: #{message}")
-  end
-
-  @spec error(String.t()) :: any()
-  def error(message) do
-    Logger.error("#{__MODULE__}: #{message}")
-  end
-
-  @spec process_feed([String.t()]) :: :ok | :error
+  @spec process_feed([String.t()]) :: {:ok, String.t()} | {:error, String.t()}
   def process_feed(feed) do
     feed
     |> Stream.map(&WorkOrder.from_trapeze_line/1)
+    |> Stream.map(&Monitor.start_work_order/1)
     |> Stream.map(&WorkOrder.to_params/1)
     |> Stream.map(&persist/1)
+    |> Stream.map(&Monitor.finish_work_order/1)
     |> Enum.to_list()
-    |> Enum.find(:ok, &(&1 == :error))
+    |> Enum.find({:ok, "finish"}, &(&1 != :ok))
   end
 
   defp get_existing_alert(alert_params) do
@@ -101,78 +97,101 @@ defmodule AlertsUI.Trapeze.Importer do
     )
   end
 
-  @spec persist(map() | {atom(), String.t(), String.t()}) :: :ok | :error
-  def persist({:skip, work_order_id, reason}) do
-    info("Skipping #{work_order_id}: #{reason}")
+  @spec persist(map() | {atom(), String.t(), String.t()}) ::
+          {:ok, String.t()} | {:error, String.t()}
+  def persist({:skip, _work_order_id, reason}) do
+    {:warning, "IGNORE #{reason}"}
   end
 
   def persist(alert_params) do
     alert = get_existing_alert(alert_params) || %Alert{}
 
-    cond do
-      closed_alert?(alert) && not closed_params?(alert_params) ->
-        info(
-          "Ignoring Work Order ##{alert_params.work_order_id} because the Alert is CLOSED in AM but OPEN in Trapeze"
-        )
+    case alert_change_state(alert, alert_params) do
+      :create ->
+        Monitor.change_work_order(from: "none", to: "open")
+        create(alert_params)
+        {:ok, "CREATE"}
 
-        :ok
+      :ignore_already_closed ->
+        Monitor.change_work_order(from: "none", to: "closed")
+        {:ok, "IGNORE already closed"}
 
-      existing_alert?(alert) || not closed_params?(alert_params) ->
-        info("Work Order ##{alert_params.work_order_id}")
+      :ignore_no_change ->
+        Monitor.change_work_order(from: "open", to: "open")
+        {:ok, "IGNORE open, no change"}
 
-        alert
-        |> Alert.changeset(
-          alert_params
-          |> Map.merge(%{
-            last_modified_timestamp: DateTime.now!("Etc/UTC"),
-            last_push_notification_timestamp: DateTime.now!("Etc/UTC")
-          })
-        )
-        |> PaperTrail.insert_or_update!(
-          user: nil,
-          origin: "(Opened automatically via Trapeze EAM)"
-        )
-        |> close_if_necessary(alert.closed_timestamp)
+      :close ->
+        Monitor.change_work_order(from: "open", to: "closed")
+        close(alert, alert_params.closed_timestamp)
+        {:ok, "CLOSE"}
 
-      true ->
-        info(
-          "Ignoring Work Order ##{alert_params.work_order_id} because it does not exist in AM and is already CLOSED"
-        )
+      :ignore_closed_manually ->
+        Monitor.change_work_order(from: "closed", to: "open")
+        {:ok, "IGNORE closed manually"}
 
-        :ok
+      :ignore_closed ->
+        Monitor.change_work_order(from: "closed", to: "closed")
+        {:ok, "IGNORE closed, no change"}
     end
   end
 
-  defp closed_alert?(map) do
-    Map.get(map, :closed_timestamp) != nil
+  defp alert_change_state(
+         %Alert{alert_id: nil},
+         %{status: :open, closed_timestamp: nil}
+       ),
+       do: :create
+
+  defp alert_change_state(%Alert{alert_id: nil}, %{status: :closed, closed_timestamp: _}),
+    do: :ignore_already_closed
+
+  defp alert_change_state(%Alert{alert_id: _, closed_timestamp: nil}, %{
+         status: :open,
+         closed_timestamp: nil
+       }),
+       do: :ignore_no_change
+
+  defp alert_change_state(%Alert{alert_id: _, closed_timestamp: nil}, %{
+         status: :closed,
+         closed_timestamp: _
+       }),
+       do: :close
+
+  defp alert_change_state(%Alert{alert_id: _, closed_timestamp: _}, %{
+         status: :open,
+         closed_timestamp: nil
+       }),
+       do: :ignore_closed_manually
+
+  defp alert_change_state(%Alert{alert_id: _, closed_timestamp: _}, %{
+         status: :closed,
+         closed_timestamp: _
+       }),
+       do: :ignore_closed
+
+  defp create(alert_params) do
+    %Alert{}
+    |> Alert.changeset(
+      alert_params
+      |> Map.merge(%{
+        last_modified_timestamp: DateTime.now!("Etc/UTC"),
+        last_push_notification_timestamp: DateTime.now!("Etc/UTC")
+      })
+    )
+    |> PaperTrail.insert!(user: nil, origin: @open_origin)
   end
 
-  defp closed_params?(%{status: :closed}), do: true
-  defp closed_params?(_), do: false
+  defp close(%Alert{}, nil), do: {:ok, "IGNORE"}
 
-  defp existing_alert?(%Alert{alert_id: alert_id}) when not is_nil(alert_id), do: true
-  defp existing_alert?(_), do: false
-
-  defp close_if_necessary(%Alert{} = alert, nil) do
-    if alert.closed_timestamp != nil do
-      info("Closing Work Order #{alert.work_order_id}")
-
-      Alerts.close(
-        Repo.reload!(alert),
-        "(Closed automatically by Trapeze EAM)",
-        true,
-        alert.closed_timestamp |> DateTime.from_naive!("Etc/UTC")
-      )
-    end
-
-    :ok
+  defp close(%Alert{closed_timestamp: nil} = alert, closed_timestamp) do
+    Alerts.close(
+      Repo.reload!(alert),
+      @closed_origin,
+      true,
+      closed_timestamp |> DateTime.from_naive!("Etc/UTC")
+    )
   end
 
-  defp close_if_necessary(%Alert{}, _), do: :ok
-
-  defp close_if_necessary(_, _), do: :error
-
-  defp now_string, do: NaiveDateTime.local_now() |> NaiveDateTime.to_iso8601()
+  defp close(%Alert{closed_timestamp: _}, _), do: {:ok, "IGNORE"}
 
   defp configuration_incomplete?,
     do:
@@ -182,7 +201,7 @@ defmodule AlertsUI.Trapeze.Importer do
         SFTP.source_description().password in [nil, ""] ||
         SFTP.source_description().filename in [nil, ""]
 
-  defp production?, do: System.get_env("SENTRY_ENV") == "prod"
+  defp production?, do: AlertsUI.config(:sentry_env) == "prod"
 
-  defp allowed_in_production?, do: System.get_env("TRAPEZE_IN_PRODUCTION") == "true"
+  defp allowed_in_production?, do: AlertsUI.config(:trapeze_in_production) == "true"
 end

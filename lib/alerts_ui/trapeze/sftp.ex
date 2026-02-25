@@ -39,21 +39,31 @@ defmodule AlertsUI.Trapeze.SFTP do
           user: String.t(),
           password: String.t(),
           filename: String.t()
-        }) :: {:ok, [String.t()]} | {:error, Exception.t()}
+        }) :: {:ok, {[String.t()], NaiveDateTime.t()}} | {:error, Exception.t()}
   def fetch(%{filename: filename} = source_description) do
     connection_arguments = Map.delete(source_description, :filename)
 
-    try do
-      SFTPClient.connect(connection_arguments, fn conn ->
+    SFTPClient.connect(connection_arguments, fn conn ->
+      mtime =
+        conn
+        |> SFTPClient.file_info!(filename)
+        |> Map.get(:mtime)
+
+      mtime =
+        case mtime do
+          {date, time} -> NaiveDateTime.from_erl!({date, time})
+          _ -> nil
+        end
+
+      feed =
         conn
         |> SFTPClient.stream_file!(filename)
         |> Enum.to_list()
         |> Enum.join("")
         |> String.split("\r\n")
-        |> Enum.filter(&(String.length(&1) > 0))
-      end)
-    rescue
-      e in SFTPClient.OperationError -> {:error, e}
-    end
+        |> Enum.filter(&(&1 != ""))
+
+      {feed, mtime}
+    end)
   end
 end

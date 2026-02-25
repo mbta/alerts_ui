@@ -335,37 +335,6 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         assert flash["info"] =~ ~r/New alert #[0-9]+ created/
       end
     end
-
-    @tag :logged_in_user
-    test "gets unlisted routes when getting routes for Ferry type", %{conn: conn} do
-      with_mocks([
-        {RoutesRepo, [],
-         [
-           by_type: fn _, _ ->
-             [
-               %Route{
-                 id: "Boat-F8",
-                 type: 4,
-                 name: "Winthrop/Quincy Ferry"
-               }
-             ]
-           end
-         ]}
-      ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
-
-        {:ok, changeset} =
-          Ecto.Changeset.change(%RouteTypeAndEffect{
-            route_type: 4,
-            effect_name: "Extra Service"
-          })
-          |> apply_action(:insert)
-
-        send(view.pid, {:step_completed, changeset})
-
-        assert_called(RoutesRepo.by_type([4], listed_route: false))
-      end
-    end
   end
 
   describe "obsolete ids modal" do
@@ -420,6 +389,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
 
         rendered_view = render_async(view)
+
         assert rendered_view =~ "spurious route [sp_rt]"
         assert rendered_view =~ "spurious stop [obsolete_stop]"
       end

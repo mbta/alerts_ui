@@ -36,7 +36,9 @@ config :alerts_ui,
   trapeze_sftp_port: System.get_env("TRAPEZE_SFTP_PORT", ""),
   trapeze_sftp_user: System.get_env("TRAPEZE_SFTP_USER", ""),
   trapeze_sftp_password: System.get_env("TRAPEZE_SFTP_PASSWORD", ""),
-  trapeze_sftp_filename: System.get_env("TRAPEZE_SFTP_FILENAME", "")
+  trapeze_sftp_filename: System.get_env("TRAPEZE_SFTP_FILENAME", ""),
+  sentry_env: System.get_env("SENTRY_ENV"),
+  trapeze_in_production: System.get_env("TRAPEZE_IN_PRODUCTION") == "true"
 
 config :alerts_ui, :phoenix_swagger,
   swagger_files: %{

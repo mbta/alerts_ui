@@ -12,6 +12,8 @@ defmodule AlertsUI.Support.Factory do
     User
   }
 
+  alias AlertsUI.Trapeze.Models.TrapezeMonitor
+
   def extended_time_factory, do: %ExtendedTime{relative_day: 1, time: ~T[12:12:12]}
 
   def informed_entity_factory, do: %InformedEntity{route_id: "1"}
@@ -171,6 +173,13 @@ defmodule AlertsUI.Support.Factory do
       line_id: ""
     }
     |> Map.merge(route_data)
+  end
+
+  def trapeze_monitor_factory do
+    %TrapezeMonitor{
+      checked_at: DateTime.now!("Etc/UTC"),
+      reason: "None given"
+    }
   end
 
   def with_header_text(alert_entity_data, text),
