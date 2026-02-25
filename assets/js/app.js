@@ -48,7 +48,6 @@ setTimeout(() => {
     console.log(JSON.stringify(event, null, 4))
   });
 }, 2000)
->>>>>>> abd25dc (add websocket logging and longpoll fallback)
 
 // Show progress bar on live navigation and form submits
 topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
