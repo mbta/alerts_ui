@@ -307,7 +307,6 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
       ]) do
         conn = log_in_user(conn)
         {:ok, view, _html} = live(conn, "/alerts/new")
-        F
 
         {:ok, changeset} =
           Ecto.Changeset.change(%RouteTypeAndEffect{
@@ -334,6 +333,37 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         send(view.pid, :create_alert)
         flash = assert_redirect(view, "/")
         assert flash["info"] =~ ~r/New alert #[0-9]+ created/
+      end
+    end
+
+    @tag :logged_in_user
+    test "gets unlisted routes when getting routes for Ferry type", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _, _ ->
+             [
+               %Route{
+                 id: "Boat-F8",
+                 type: 4,
+                 name: "Winthrop/Quincy Ferry"
+               }
+             ]
+           end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        {:ok, changeset} =
+          Ecto.Changeset.change(%RouteTypeAndEffect{
+            route_type: 4,
+            effect_name: "Extra Service"
+          })
+          |> apply_action(:insert)
+
+        send(view.pid, {:step_completed, changeset})
+
+        assert_called(RoutesRepo.by_type([4], listed_route: false))
       end
     end
   end
