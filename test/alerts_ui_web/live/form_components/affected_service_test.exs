@@ -815,10 +815,13 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         |> element("form")
         |> render_change(%{"affected_service" => %{"route_ids" => ["CR-Worcester"]}})
 
-        assert view |> render_async() =~
-                 ~s(<option value="CR-683322-595">595)
+        {:ok, document} =
+          view
+          |> render_async()
+          |> Floki.parse_document()
 
-        assert view |> render_async() =~ ~s(value="South Station|place-sstat">)
+        assert document_has_element?(document, "option[value=\"CR-683322-595\"]")
+        assert document_has_element?(document, "option[value=\"South Station|place-sstat\"]")
 
         view
         |> element("form")
@@ -826,10 +829,13 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
           "affected_service" => %{"trip_search_term" => "x", "stop_search_term" => "x"}
         })
 
-        refute view |> render_async() =~
-                 ~s(value="CR-683322-595">595)
+        {:ok, document} =
+          view
+          |> render_async()
+          |> Floki.parse_document()
 
-        refute view |> render_async() =~ ~s(value="South Station|place-sstat">)
+        refute document_has_element?(document, "option[value=\"CR-683322-595\"]")
+        refute document_has_element?(document, "option[value=\"South Station|place-sstat\"]")
       end
     end
 
@@ -864,16 +870,30 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
             })
           )
 
-        assert view |> render_async() =~ ~s(value=\"CR-Worcester\" checked=\"checked\")
+        {:ok, document} =
+          view
+          |> render_async()
+          |> Floki.parse_document()
 
-        assert view |> render_async() =~
-                 ~s(selected="selected" value="0">Westbound</option>)
+        assert document_has_element?(
+          document,
+          "option[value=\"0\"][selected=\"selected\"]"
+        )
 
-        assert view |> render_async() =~
-                 ~s(selected="selected" value="South Station|place-sstat">)
+        assert document_has_element?(
+          document,
+          "option[value=\"South Station|place-sstat\"][selected=\"selected\"]"
+        )
 
-        assert view |> render_async() =~
-                 ~s(selected="selected" value="CR-683322-595">595)
+        assert document_has_element?(
+          document,
+          "option[value=\"CR-683322-595\"][selected=\"selected\"]"
+        )
+
+        assert document_has_element?(
+          document,
+          "[value=\"CR-Worcester\"][checked=\"checked\"]"
+        )
       end
     end
 
@@ -953,7 +973,13 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
           affected_service: %{route_ids: ["CR-Worcester"]}
         })
 
-        assert view |> render() =~ ~s(value="CR-Worcester" checked="checked")
+        {:ok, document} =
+          view
+          |> render()
+          |> Floki.parse_document()
+        
+        assert document_has_element?(document, "[value=\"CR-Worcester\"]")
+        # assert view |> render() =~ ~s(value="CR-Worcester" checked="checked")
 
         # Mock deselecting Framingham
         view

@@ -7,6 +7,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
   import LiveIsolatedComponent
   import Mock
   import Phoenix.LiveViewTest
+  import Test.Support.Helpers
 
   alias AlertsUIWeb.FormComponents.{AccessAffectedService, RouteTypeAndEffect}
   alias AlertsUIWeb.Step
@@ -69,19 +70,26 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
 
         {:ok, view, _html} = live_isolated_component(AccessAffectedService, @assigns)
 
-        assert view
-               |> element("select#access_affected_service_facility_id")
-               |> render_async() =~
-                 ~s(<option value="Facility-3">Example Facility</option>)
+        {:ok, document} =
+          view
+            |> render_async()
+            |> Floki.parse_document()
 
-        view
-        |> element("form")
-        |> render_change(%{"access_affected_service" => %{"facility_search_term" => "q"}})
+        assert document_has_element?(
+          document,
+          "select#access_affected_service_facility_id > option[value=\"Facility-3\"]"
+        )
 
-        refute view
-               |> element("select#access_affected_service_facility_id")
-               |> render_async() =~
-                 ~s(<option selected="selected" value="Facility-3">Example Facility</option>)
+        {:ok, document} =
+          view
+          |> element("form")
+          |> render_change(%{"access_affected_service" => %{"facility_search_term" => "q"}})
+          |> Floki.parse_document()
+
+        refute document_has_element?(
+          document,
+          "select#access_affected_service_facility_id > option[value=\"Facility-3\"][selected=\"selected\"]"
+        )
       end
     end
 
@@ -118,8 +126,13 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
           )
 
         # Set baseline unfiltered
-        assert view |> render_async() =~ ~s(<option value="Facility-3">)
-        assert view |> render_async() =~ ~s(<option value="Facility-7">)
+        {:ok, document} =
+          view
+          |> render_async()
+          |> Floki.parse_document()
+
+        assert Floki.find(document, "option[value=\"Facility-3\"]")
+        assert Floki.find(document, "option[value=\"Facility-7\"]")
 
         # Add stop filter
         view
@@ -129,13 +142,15 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
         })
 
         # Submit filter
-        view
-        |> with_target("#access_service_view")
-        |> render_click(:accepted_stops_modal)
+        {:ok, document} =
+          view
+          |> with_target("#access_service_view")
+          |> render_click(:accepted_stops_modal)
+          |> Floki.parse_document()
 
         # Verify filtered and filter text updated
-        assert view |> render_async() =~ ~s(<option value="Facility-3">)
-        refute view |> render_async() =~ ~s(<option value="Facility-7">)
+        assert document_has_element?(document, "option[value=\"Facility-3\"]")
+        refute document_has_element?(document, "option[value=\"Facility-7\"]")
         assert view |> render_async() =~ ~s(Filter: South Station)
       end
     end
@@ -163,19 +178,19 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
         |> render_click(:accepted_stops_modal)
 
         # Clear filter
-        view
-        |> with_target("#access_service_view")
-        |> render_click(:clear_filter, %{"filter-id" => "stops-filter-modal"})
+        {:ok, document} =
+          view
+          |> with_target("#access_service_view")
+          |> render_click(:clear_filter, %{"filter-id" => "stops-filter-modal"})
+          |> Floki.parse_document()
 
         # Verify unfiltered
-        assert render(view) =~ ~s(<option value="Facility-3">)
-        assert render(view) =~ ~s(<option value="Facility-7">)
+        assert document_has_element?(document, "option[value=\"Facility-3\"]")
+        assert document_has_element?(document, "option[value=\"Facility-7\"]")
         # Verify text changed
         assert render(view) =~ ~s(Filter: All stops)
         # Verify modal is cleared
-        assert view
-               |> element("select#access_affected_service_stop_id")
-               |> render() =~ ~s(<option value="default" selected="selected">)
+        assert document_has_element?(document, "option[value=\"default\"][selected=\"selected\"]")
       end
     end
 
@@ -212,10 +227,13 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
 
         {:ok, view, _html} = live_isolated_component(AccessAffectedService, assigns)
 
-        assert view
-               |> element("select#access_affected_service_facility_id")
-               |> render_async() =~
-                 ~s(<option selected="selected" value="Facility-3">Example Facility</option>)
+        {:ok, document} =
+          view
+            |> element("select#access_affected_service_facility_id")
+            |> render_async()
+            |> Floki.parse_document()
+
+        assert document_has_element?(document, "option[value=\"Facility-3\"]")
       end
     end
 

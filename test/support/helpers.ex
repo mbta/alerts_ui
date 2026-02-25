@@ -83,4 +83,8 @@ defmodule Test.Support.Helpers do
     |> String.replace(" created successfully\n</h3>", "")
     |> AlertsUI.Alerts.get_by_alert_id()
   end
+
+  def document_has_element?(document, selector) do
+    !(Floki.find(document, selector) |> Enum.empty?())
+  end
 end
