@@ -19,6 +19,7 @@ defmodule AlertsUIWeb.Step do
 end
 
 defmodule AlertsUIWeb.CreateAlertLive do
+  require Logger
   use AlertsUIWeb, :live_view
 
   alias AlertsUI.AlertBuilder
@@ -76,6 +77,16 @@ defmodule AlertsUIWeb.CreateAlertLive do
     },
     %Step{name: "preview", previous: nil, next: nil, label: "Preview and Submit"}
   ]
+
+  @impl true
+  def terminate(reason, socket) do
+    code = :crypto.strong_rand_bytes(8) |> Base.encode64()
+    Logger.warning("[LV #{code}] terminating at #{DateTime.utc_now()}")
+    dbg(code)
+    dbg(reason)
+    dbg(socket)
+    dbg(code)
+  end
 
   @impl true
   def mount(params, _session, socket) do

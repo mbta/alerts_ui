@@ -37,6 +37,19 @@ let liveSocket = new LiveSocket(
   }
 )
 
+// Add the connection error handler after 2 sec
+setTimeout(() => {
+  liveSocket.socket.conn.addEventListener("close", (event) => {
+    console.log("[LV] websocket closed!")
+    console.log("[LV] code:", event.code)
+    console.log("[LV] reason:", event.reason)
+    console.log("[LV] was clean:", event.wasClean)
+    console.log("[LV] event:")
+    console.log(JSON.stringify(event, null, 4))
+  });
+}, 2000)
+>>>>>>> abd25dc (add websocket logging and longpoll fallback)
+
 // Show progress bar on live navigation and form submits
 topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
 window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
