@@ -164,6 +164,12 @@ defmodule AlertsUIWeb.CreateAlertLive do
     {:noreply, socket |> redirect(to: "/")}
   end
 
+  def get_routes([4]) do
+    [4]
+    |> RoutesRepo.by_type(listed_route: false)
+    |> Enum.sort_by(&SelectFormatter.sort_order/1)
+  end
+
   def get_routes(route_types) do
     route_types
     |> RoutesRepo.by_type()
