@@ -478,6 +478,12 @@ defmodule AlertsUI.AlertBuilder do
     |> Enum.concat(["741", "742", "743"])
   end
 
+  def add_special_combo_routes(route_ids, route_id) when route_id in ["741", "742", "743"] do
+    # adds SLW if other SL routes are selected
+    route_ids
+    |> Enum.concat(["746"])
+  end
+
   def add_special_combo_routes(route_ids, _), do: route_ids
 
   @spec child_stops_with_context([Route.id_t()], String.t(), [Stop.id_t()]) ::
