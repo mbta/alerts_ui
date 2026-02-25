@@ -448,41 +448,39 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     # assign result to socket first
     socket = assign(socket, async_key, AsyncResult.ok(socket.assigns[async_key], result))
 
-    # then check if all our required fields have arrived
+    mapping = %{
+      available_routes: :route_ids,
+      available_schedules: :trip_ids,
+      available_stops: :stop_ids
+    }
+
+    obsolete_ids_for_field =
+      EntityValidator.get_obsolete_ids(
+        socket.assigns.alert_data[mapping[async_key]],
+        socket.assigns[async_key]
+      )
+
+    obsolete_ids =
+      socket.assigns.obsolete_ids |> Map.put_new(mapping[async_key], obsolete_ids_for_field)
+
     required_fields =
       socket.assigns.combination
       |> ServiceEffectCombinations.required_fields()
       |> Enum.reject(&(&1 == :direction))
 
-    mapping = %{
-      route_ids: :available_routes,
-      trip_ids: :available_schedules,
-      stop_ids: :available_stops
-    }
+    # check that we got results and contains all required fields
+    obsolete_ids_found = Enum.any?(obsolete_ids, fn {_k, v} -> !Enum.empty?(v) end)
+    all_fields_in = Map.keys(obsolete_ids) == required_fields
 
-    obsolete_ids =
-      Enum.map(required_fields, fn field ->
-        {field,
-         EntityValidator.get_obsolete_ids(
-           socket.assigns.alert_data[field],
-           socket.assigns[mapping[field]]
-         )}
-      end)
-      |> Enum.into(%{})
-
-    found_obsolete_ids =
-      Enum.all?(obsolete_ids, fn {_k, v} -> is_list(v) end) &&
-        Enum.any?(obsolete_ids, fn {_k, v} -> !Enum.empty?(v) end)
+    send_obsolete_ids? = obsolete_ids_found && all_fields_in
 
     # if all our fields have been returned and there are obsolete ids
-    # and we have not yet assigned any obsolete ids
     # send result to parent
-    if found_obsolete_ids && Enum.empty?(socket.assigns.obsolete_ids) do
+    if send_obsolete_ids? do
       send(self(), {:got_obsolete_ids, obsolete_ids})
-      {:noreply, assign(socket, :obsolete_ids, obsolete_ids)}
-    else
-      {:noreply, socket}
     end
+
+    {:noreply, assign(socket, :obsolete_ids, obsolete_ids)}
   end
 
   @impl true

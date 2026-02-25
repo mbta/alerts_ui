@@ -402,14 +402,13 @@ defmodule AlertsUIWeb.CreateAlertLive do
         # step through obsolete ids and gets names if available
         # the ID is used as a fallback
         names =
-          Enum.map_join(obsolete_ids, ", ", fn obsolete_id ->
-            Map.get(original_names_map, obsolete_id, obsolete_id)
+          Enum.map(obsolete_ids, fn obsolete_id ->
+            Map.get(original_names_map, obsolete_id, obsolete_id) <> " [#{obsolete_id}]"
           end)
 
         {title, names}
       end)
-      |> Enum.reject(fn {_title, names} -> names == "" end)
-      |> Enum.map(fn {title, names} -> "#{title}: #{names}" end)
+      |> Enum.reject(fn {_title, names} -> Enum.empty?(names) end)
 
     socket =
       socket

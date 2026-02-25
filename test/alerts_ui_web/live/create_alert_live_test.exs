@@ -390,8 +390,8 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
 
         rendered_view = render_async(view)
-        assert rendered_view =~ "spurious route"
-        assert rendered_view =~ "spurious stop"
+        assert rendered_view =~ "spurious route [sp_rt]"
+        assert rendered_view =~ "spurious stop [obsolete_stop]"
       end
     end
   end
