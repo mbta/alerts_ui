@@ -186,19 +186,19 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
           |> Floki.parse_document()
 
         refute document_has_element?(
-          document,
-          "#stop_route_affected_service_route_ids > option[value=\"place-aqucl\"]"
-        )
+                 document,
+                 "#stop_route_affected_service_route_ids > option[value=\"place-aqucl\"]"
+               )
 
         refute document_has_element?(
-          document,
-          "#stop_route_affected_service_route_ids > option[value=\"Blue\"][selected=\"selected\"]"
-        )
+                 document,
+                 "#stop_route_affected_service_route_ids > option[value=\"Blue\"][selected=\"selected\"]"
+               )
 
         assert document_has_element?(
-          document,
-          "#stop_route_affected_service_route_ids > option[value=\"Bluer\"][selected=\"selected\"]"
-        )
+                 document,
+                 "#stop_route_affected_service_route_ids > option[value=\"Bluer\"][selected=\"selected\"]"
+               )
       end
     end
 
@@ -218,11 +218,11 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         assert view |> render_async() =~ ~s(value="place-aqucl">)
 
         view
-          |> element("form")
-          |> render_change(%{
-            "_target" => ["stop_route_affected_service", "stop_ids"],
-            "stop_route_affected_service" => %{"stop_ids" => ["place-aqucl"]}
-          })
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["stop_route_affected_service", "stop_ids"],
+          "stop_route_affected_service" => %{"stop_ids" => ["place-aqucl"]}
+        })
 
         {:ok, document} =
           view
@@ -230,9 +230,9 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
           |> Floki.parse_document()
 
         assert document_has_element?(
-          document,
-          "#stop_route_affected_service_route_ids > option[value=\"Blue\"][selected=\"selected\"]"
-        )
+                 document,
+                 "#stop_route_affected_service_route_ids > option[value=\"Blue\"][selected=\"selected\"]"
+               )
 
         view
         |> element("form")
@@ -250,11 +250,15 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
           |> render_async()
           |> Floki.parse_document()
 
-        assert document_has_element?(document, "option[value=\"place-aqucl\"][selected=\"selected\"]")
+        assert document_has_element?(
+                 document,
+                 "option[value=\"place-aqucl\"][selected=\"selected\"]"
+               )
+
         refute document_has_element?(
-          document,
-          "#stop_route_affected_service_route_ids > option[selected=\"selected\"][value=\"Blue\"]"
-        )
+                 document,
+                 "#stop_route_affected_service_route_ids > option[selected=\"selected\"][value=\"Blue\"]"
+               )
       end
     end
 
@@ -299,19 +303,19 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
           |> Floki.parse_document()
 
         assert document_has_element?(
-          document,
-          "select#stop_route_affected_service_stop_ids > option[value=\"place-pktrm-inbound\"]"
-        )
+                 document,
+                 "select#stop_route_affected_service_stop_ids > option[value=\"place-pktrm-inbound\"]"
+               )
 
         assert document_has_element?(
-          document,
-          "select#stop_route_affected_service_stop_ids > option[value=\"place-aqucl\"]"
-        )
+                 document,
+                 "select#stop_route_affected_service_stop_ids > option[value=\"place-aqucl\"]"
+               )
 
         assert document_has_element?(
-          document,
-          "select#stop_route_affected_service_stop_ids > option[value=\"place-pktrm\"]"
-        )
+                 document,
+                 "select#stop_route_affected_service_stop_ids > option[value=\"place-pktrm\"]"
+               )
       end
     end
 
@@ -333,13 +337,13 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
           |> Floki.parse_document()
 
         assert document_has_element?(
-          document,
-          "select#stop_route_affected_service_modal_route_id > option[value=\"Blue\"]"
-        )
+                 document,
+                 "select#stop_route_affected_service_modal_route_id > option[value=\"Blue\"]"
+               )
 
         view
-          |> element("form")
-          |> render_change(%{"stop_route_affected_service" => %{"modal_route_search_term" => "q"}})
+        |> element("form")
+        |> render_change(%{"stop_route_affected_service" => %{"modal_route_search_term" => "q"}})
 
         {:ok, document} =
           view
@@ -347,9 +351,9 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
           |> Floki.parse_document()
 
         refute document_has_element?(
-          document,
-          "select#stop_route_affected_service_modal_route_id > option[value=\"Blue\"]"
-        )
+                 document,
+                 "select#stop_route_affected_service_modal_route_id > option[value=\"Blue\"]"
+               )
       end
     end
 

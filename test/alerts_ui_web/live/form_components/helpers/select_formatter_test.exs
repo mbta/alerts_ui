@@ -137,17 +137,17 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
         })
 
       assert results == [
-        [
-          key: "Ashmont/Braintree platform to lobby",
-          value: "951",
-          id: "option-951"
-        ],
-        [
-          key: "Ashmont/Braintree platform to Massachusetts Avenue",
-          value: "861",
-          id: "option-861"
-        ]
-      ]
+               [
+                 key: "Ashmont/Braintree platform to lobby",
+                 value: "951",
+                 id: "option-951"
+               ],
+               [
+                 key: "Ashmont/Braintree platform to Massachusetts Avenue",
+                 value: "861",
+                 id: "option-861"
+               ]
+             ]
 
       results =
         SelectFormatter.formatted_select_options(%SelectFormatter{
@@ -156,12 +156,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
         })
 
       assert results == [
-        [
-          key: "Ashmont/Braintree platform to lobby",
-          value: "951",
-          id: "option-951"
-        ]
-      ]
+               [
+                 key: "Ashmont/Braintree platform to lobby",
+                 value: "951",
+                 id: "option-951"
+               ]
+             ]
     end
   end
 
@@ -216,32 +216,32 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
         })
 
       assert results == [
-        [
-          key: "527 (9:01 AM from South Station) CR-683300-527",
-          value: "CR-683300-527",
-          id: "option-CR-683300-527"
-        ],
-        [
-          key: "527 (9:01 AM from South Station) CR-683300-special",
-          value: "CR-683300-special",
-          id: "option-CR-683300-special"
-        ],
-        [
-          key: "595 (9:15 AM from South Station)",
-          value: "CR-683322-595",
-          id: "option-CR-683322-595"
-        ],
-        [
-          key: "594 (9:45 AM from Framingham)",
-          value: "CR-683321-594",
-          id: "option-CR-683321-594"
-        ],
-        [
-          key: "529 (10:01 AM from South Station)",
-          value: "CR-683302-529",
-          id: "option-CR-683302-529"
-        ]
-      ]
+               [
+                 key: "527 (9:01 AM from South Station) CR-683300-527",
+                 value: "CR-683300-527",
+                 id: "option-CR-683300-527"
+               ],
+               [
+                 key: "527 (9:01 AM from South Station) CR-683300-special",
+                 value: "CR-683300-special",
+                 id: "option-CR-683300-special"
+               ],
+               [
+                 key: "595 (9:15 AM from South Station)",
+                 value: "CR-683322-595",
+                 id: "option-CR-683322-595"
+               ],
+               [
+                 key: "594 (9:45 AM from Framingham)",
+                 value: "CR-683321-594",
+                 id: "option-CR-683321-594"
+               ],
+               [
+                 key: "529 (10:01 AM from South Station)",
+                 value: "CR-683302-529",
+                 id: "option-CR-683302-529"
+               ]
+             ]
     end
 
     test "it properly formats ferry trips" do

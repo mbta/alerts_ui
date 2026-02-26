@@ -72,13 +72,13 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
 
         {:ok, document} =
           view
-            |> render_async()
-            |> Floki.parse_document()
+          |> render_async()
+          |> Floki.parse_document()
 
         assert document_has_element?(
-          document,
-          "select#access_affected_service_facility_id > option[value=\"Facility-3\"]"
-        )
+                 document,
+                 "select#access_affected_service_facility_id > option[value=\"Facility-3\"]"
+               )
 
         {:ok, document} =
           view
@@ -87,9 +87,9 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
           |> Floki.parse_document()
 
         refute document_has_element?(
-          document,
-          "select#access_affected_service_facility_id > option[value=\"Facility-3\"][selected=\"selected\"]"
-        )
+                 document,
+                 "select#access_affected_service_facility_id > option[value=\"Facility-3\"][selected=\"selected\"]"
+               )
       end
     end
 
@@ -229,9 +229,9 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
 
         {:ok, document} =
           view
-            |> element("select#access_affected_service_facility_id")
-            |> render_async()
-            |> Floki.parse_document()
+          |> element("select#access_affected_service_facility_id")
+          |> render_async()
+          |> Floki.parse_document()
 
         assert document_has_element?(document, "option[value=\"Facility-3\"]")
       end

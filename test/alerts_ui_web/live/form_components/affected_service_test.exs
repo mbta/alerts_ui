@@ -876,24 +876,24 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
           |> Floki.parse_document()
 
         assert document_has_element?(
-          document,
-          "option[value=\"0\"][selected=\"selected\"]"
-        )
+                 document,
+                 "option[value=\"0\"][selected=\"selected\"]"
+               )
 
         assert document_has_element?(
-          document,
-          "option[value=\"South Station|place-sstat\"][selected=\"selected\"]"
-        )
+                 document,
+                 "option[value=\"South Station|place-sstat\"][selected=\"selected\"]"
+               )
 
         assert document_has_element?(
-          document,
-          "option[value=\"CR-683322-595\"][selected=\"selected\"]"
-        )
+                 document,
+                 "option[value=\"CR-683322-595\"][selected=\"selected\"]"
+               )
 
         assert document_has_element?(
-          document,
-          "[value=\"CR-Worcester\"][checked=\"checked\"]"
-        )
+                 document,
+                 "[value=\"CR-Worcester\"][checked=\"checked\"]"
+               )
       end
     end
 
@@ -977,7 +977,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
           view
           |> render()
           |> Floki.parse_document()
-        
+
         assert document_has_element?(document, "[value=\"CR-Worcester\"]")
         # assert view |> render() =~ ~s(value="CR-Worcester" checked="checked")
 
