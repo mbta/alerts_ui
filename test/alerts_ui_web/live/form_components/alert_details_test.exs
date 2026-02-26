@@ -763,7 +763,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         |> DateTime.shift_zone!("America/New_York")
         |> DateTime.to_date()
 
-      get_to_submission_page(view, "Systemwide", "Summary")
+      get_to_submission_page(view, "Systemwide", "Delay")
 
       render_async(view)
 
@@ -803,7 +803,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
       assert view
              |> element("#alert_details_header_text")
              |> render() =~
-               "Subway and Ferry notice from #{Calendar.strftime(@start_time, "%a, %b %-d at %-I:%M %p")} to #{Calendar.strftime(@end_time, "%a, %b %-d at %-I:%M %p")} due to ice in harbor"
+               "Subway and Ferry service may experience delays from #{Calendar.strftime(@start_time, "%a, %b %-d at %-I:%M %p")} to #{Calendar.strftime(@end_time, "%a, %b %-d at %-I:%M %p")} due to ice in harbor"
 
       assert view
              |> element("#alert_details_description_text")

@@ -26,6 +26,17 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffectTest do
   end
 
   describe "complete_step event" do
+    test "does not show forbidden effects" do
+      {:ok, view, _html} = live_isolated_component(RouteTypeAndEffect, @assigns)
+
+      view
+      |> element("button", "Systemwide")
+      |> render_click()
+
+      refute view
+             |> render() =~ ~s(Summary)
+    end
+
     test "given a valid changset, goes to next step" do
       assigns =
         @assigns
