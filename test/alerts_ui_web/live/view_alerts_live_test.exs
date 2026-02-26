@@ -208,9 +208,11 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
                  {"option", [{"id", "route-filter-76"}, {"value", "76"}], ["76"]},
                  {"option", [{"id", "route-filter-350"}, {"value", "350"}], ["350"]},
                  {"option", [{"id", "route-filter-Green"}, {"value", "Green"}], ["Green Line"]},
-                 {"option", [{"id", "route-filter-Green-C"}, {"value", "Green-C"}], ["Green Line-C"]},
+                 {"option", [{"id", "route-filter-Green-C"}, {"value", "Green-C"}],
+                  ["Green Line-C"]},
                  {"option", [{"id", "route-filter-Red"}, {"value", "Red"}], ["Red Line"]},
-                 {"option", [{"id", "route-filter-CR-Fitchburg"}, {"value", "CR-Fitchburg"}], ["Fitchburg Line"]}
+                 {"option", [{"id", "route-filter-CR-Fitchburg"}, {"value", "CR-Fitchburg"}],
+                  ["Fitchburg Line"]}
                ] = children_nodes
       end
     end

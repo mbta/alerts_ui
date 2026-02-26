@@ -546,7 +546,10 @@ defmodule AlertsUIWeb.SharedComponents do
       <.label for={@id} class={"text-base #{if is_nil(@label), do: "hidden"}"}>{@label}</.label>
 
       <div class={["flex gap-2 w-full", if(@column, do: "flex-col", else: "flex-col md:flex-row")]}>
-        <div :for={[key: option_name, value: id, id: dom_id] <- @options} class={["flex-1", @button_class]}>
+        <div
+          :for={[key: option_name, value: id, id: dom_id] <- @options}
+          class={["flex-1", @button_class]}
+        >
           <.label for={dom_id}>
             <div class={[
               @base_toggle_classes,
