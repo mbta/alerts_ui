@@ -11,6 +11,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
 
   alias MBTAV3API.Routes.Route
+  require Logger
 
   # credo:disable-for-this-file
   defstruct [
@@ -148,7 +149,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       :original_facility_selections
     ]
 
-    Enum.reduce(direct_from_alert_keys, %__MODULE__{}, fn key, params ->
+    alert_data = Enum.reduce(direct_from_alert_keys, %__MODULE__{}, fn key, params ->
       Map.put(params, key, Map.get(alert, key))
     end)
     |> Map.merge(create_and_edit_metadata(alert, form_type))
@@ -158,6 +159,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     |> Map.merge(notification_period(alert, form_type))
     |> Map.merge(service_types(alert))
     |> Map.merge(banner_sync_toggle(alert))
+
+    Logger.info(alert_data)
+    alert_data
   end
 
   def build_alert_data(_, _), do: %__MODULE__{}

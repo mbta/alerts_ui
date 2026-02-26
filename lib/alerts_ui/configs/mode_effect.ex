@@ -53,6 +53,14 @@ defmodule AlertsUI.Configs.ModeEffect do
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
+      "Notice" => %ModeEffectStruct{
+        combination: :RDS,
+        default_cause: nil,
+        default_severity: 1,
+        send_push_notification_on_create: true,
+        send_push_notification_on_edit: false,
+        prediction_suppression_warning: false
+      },
       "Schedule Change" => %ModeEffectStruct{
         combination: :R,
         default_cause: nil,
@@ -141,6 +149,14 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 3,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
+        prediction_suppression_warning: false
+      },
+      "Notice" => %ModeEffectStruct{
+        combination: :RDTS,
+        default_cause: nil,
+        default_severity: 1,
+        send_push_notification_on_create: true,
+        send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
       "Schedule Change" => %ModeEffectStruct{
@@ -241,6 +257,14 @@ defmodule AlertsUI.Configs.ModeEffect do
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
       },
+      "Notice" => %ModeEffectStruct{
+        combination: :RDS,
+        default_cause: nil,
+        default_severity: 1,
+        send_push_notification_on_create: true,
+        send_push_notification_on_edit: false,
+        prediction_suppression_warning: false
+      },
       "Schedule Change" => %ModeEffectStruct{
         combination: :R,
         default_cause: nil,
@@ -335,6 +359,14 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: :R,
         default_cause: nil,
         default_severity: 3,
+        send_push_notification_on_create: true,
+        send_push_notification_on_edit: false,
+        prediction_suppression_warning: false
+      },
+      "Notice" => %ModeEffectStruct{
+        combination: :RDTS,
+        default_cause: nil,
+        default_severity: 1,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
@@ -451,6 +483,14 @@ defmodule AlertsUI.Configs.ModeEffect do
         combination: nil,
         default_cause: nil,
         default_severity: 3,
+        send_push_notification_on_create: true,
+        send_push_notification_on_edit: false,
+        prediction_suppression_warning: false
+      },
+      "Notice" => %ModeEffectStruct{
+        combination: nil,
+        default_cause: nil,
+        default_severity: 1,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false
