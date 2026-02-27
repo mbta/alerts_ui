@@ -1134,7 +1134,7 @@ defmodule AlertsUIWeb.SharedComponents do
         <.select
           multiple={@multiple}
           size="2"
-          options={if @loading && !@options, do: [], else: @options}
+          options={if @loading && is_nil(@options), do: [], else: @options}
           field={@field}
           no_results={@no_results}
           prompt={
