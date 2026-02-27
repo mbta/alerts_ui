@@ -26,7 +26,16 @@ import Hooks from "./hooks/hooks"
 // import "./fullstory";
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
-let liveSocket = new LiveSocket("/live", Socket, {hooks: Hooks, params: {_csrf_token: csrfToken}, heartbeatIntervalMs: 3000})
+let liveSocket = new LiveSocket(
+  "/live",
+  Socket,
+  {
+    heartbeatIntervalMs: 30000,
+    hooks: Hooks,
+    logger: (kind, msg, data) => console.log(`[LV] ${kind} / ${msg}`) && console.log(data),
+    params: {_csrf_token: csrfToken},
+  }
+)
 
 // Show progress bar on live navigation and form submits
 topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})

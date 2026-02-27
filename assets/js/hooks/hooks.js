@@ -145,11 +145,18 @@ Hooks.Selector = {
       }
     });
 
-    // Prevents scroll on select
-    this.el.addEventListener('pointerdown', () => {
+    this.el.addEventListener('pointerdown', (e) => {
+      // save the current scroll top so we can return after rerender
+      this.savedScrollTop = this.el.scrollTop;
+      // prevents scroll on select
       this.el.focus({ preventScroll: true });
     });
   },
+
+  updated() {
+    // return to where we were before the update
+    this.el.scrollTop = this.savedScrollTop;
+  }
 };
 
 Hooks.MeasureImage = {

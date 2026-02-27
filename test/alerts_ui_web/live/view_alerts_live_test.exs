@@ -202,15 +202,17 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         assert [
                  {"option", [{"value", "default"}, {"selected", "selected"}],
                   ["\n      All\n    "]},
-                 {"option", [{"value", "708"}], ["CT3"]},
-                 {"option", [{"value", "62"}], ["62"]},
-                 {"option", [{"value", "67"}], ["67"]},
-                 {"option", [{"value", "76"}], ["76"]},
-                 {"option", [{"value", "350"}], ["350"]},
-                 {"option", [{"value", "Green"}], ["Green Line"]},
-                 {"option", [{"value", "Green-C"}], ["Green Line-C"]},
-                 {"option", [{"value", "Red"}], ["Red Line"]},
-                 {"option", [{"value", "CR-Fitchburg"}], ["Fitchburg Line"]}
+                 {"option", [{"id", "route-filter-708"}, {"value", "708"}], ["CT3"]},
+                 {"option", [{"id", "route-filter-62"}, {"value", "62"}], ["62"]},
+                 {"option", [{"id", "route-filter-67"}, {"value", "67"}], ["67"]},
+                 {"option", [{"id", "route-filter-76"}, {"value", "76"}], ["76"]},
+                 {"option", [{"id", "route-filter-350"}, {"value", "350"}], ["350"]},
+                 {"option", [{"id", "route-filter-Green"}, {"value", "Green"}], ["Green Line"]},
+                 {"option", [{"id", "route-filter-Green-C"}, {"value", "Green-C"}],
+                  ["Green Line-C"]},
+                 {"option", [{"id", "route-filter-Red"}, {"value", "Red"}], ["Red Line"]},
+                 {"option", [{"id", "route-filter-CR-Fitchburg"}, {"value", "CR-Fitchburg"}],
+                  ["Fitchburg Line"]}
                ] = children_nodes
       end
     end

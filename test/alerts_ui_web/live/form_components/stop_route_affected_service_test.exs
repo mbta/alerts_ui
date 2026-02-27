@@ -5,6 +5,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
   import LiveIsolatedComponent
   import Mock
   import Phoenix.LiveViewTest
+  import Test.Support.Helpers
 
   alias AlertsUIWeb.FormComponents.StopRouteAffectedService
   alias AlertsUIWeb.Step
@@ -179,9 +180,25 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
           "stop_route_affected_service" => %{"route_ids" => ["Bluer"]}
         })
 
-        refute view |> render_async() =~ ~s(<option value="place-aqucl">)
-        refute view |> render_async() =~ ~s(<option selected="selected" value="Blue">)
-        assert view |> render_async() =~ ~s(<option selected="selected" value="Bluer">)
+        {:ok, document} =
+          view
+          |> render_async()
+          |> Floki.parse_document()
+
+        refute document_has_element?(
+                 document,
+                 "#stop_route_affected_service_route_ids > option[value=\"place-aqucl\"]"
+               )
+
+        refute document_has_element?(
+                 document,
+                 "#stop_route_affected_service_route_ids > option[value=\"Blue\"][selected=\"selected\"]"
+               )
+
+        assert document_has_element?(
+                 document,
+                 "#stop_route_affected_service_route_ids > option[value=\"Bluer\"][selected=\"selected\"]"
+               )
       end
     end
 
@@ -207,8 +224,15 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
           "stop_route_affected_service" => %{"stop_ids" => ["place-aqucl"]}
         })
 
-        assert view |> element("#stop_route_affected_service_route_ids") |> render_async() =~
-                 ~s(<option selected="selected" value="Blue">)
+        {:ok, document} =
+          view
+          |> render_async()
+          |> Floki.parse_document()
+
+        assert document_has_element?(
+                 document,
+                 "#stop_route_affected_service_route_ids > option[value=\"Blue\"][selected=\"selected\"]"
+               )
 
         view
         |> element("form")
@@ -221,10 +245,20 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         })
 
         # Search doesn't affect the things selected
-        assert view |> render_async() =~ ~s(selected="selected" value="place-aqucl">)
+        {:ok, document} =
+          view
+          |> render_async()
+          |> Floki.parse_document()
 
-        refute view |> element("#stop_route_affected_service_route_ids") |> render_async() =~
-                 ~s(<option selected="selected" value="Blue">)
+        assert document_has_element?(
+                 document,
+                 "option[value=\"place-aqucl\"][selected=\"selected\"]"
+               )
+
+        refute document_has_element?(
+                 document,
+                 "#stop_route_affected_service_route_ids > option[selected=\"selected\"][value=\"Blue\"]"
+               )
       end
     end
 
@@ -263,10 +297,25 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         |> with_target("#stop_route_service_view")
         |> render_click(:accepted_routes_modal)
 
-        assert view
-               |> element("select##stop_route_affected_service_stop_ids")
-               |> render_async() =~
-                 ~r/value="place-pktrm-inbound".*value="place-aqucl".*value="place-pktrm"/
+        {:ok, document} =
+          view
+          |> render_async()
+          |> Floki.parse_document()
+
+        assert document_has_element?(
+                 document,
+                 "select#stop_route_affected_service_stop_ids > option[value=\"place-pktrm-inbound\"]"
+               )
+
+        assert document_has_element?(
+                 document,
+                 "select#stop_route_affected_service_stop_ids > option[value=\"place-aqucl\"]"
+               )
+
+        assert document_has_element?(
+                 document,
+                 "select#stop_route_affected_service_stop_ids > option[value=\"place-pktrm\"]"
+               )
       end
     end
 
@@ -282,19 +331,29 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
             @assigns
           )
 
-        assert view
-               |> element("select#stop_route_affected_service_modal_route_id")
-               |> render_async() =~
-                 ~s(<option value="Blue">route_number_1</option>)
+        {:ok, document} =
+          view
+          |> render_async()
+          |> Floki.parse_document()
+
+        assert document_has_element?(
+                 document,
+                 "select#stop_route_affected_service_modal_route_id > option[value=\"Blue\"]"
+               )
 
         view
         |> element("form")
         |> render_change(%{"stop_route_affected_service" => %{"modal_route_search_term" => "q"}})
 
-        refute view
-               |> element("select#stop_route_affected_service_modal_route_id")
-               |> render_async() =~
-                 ~s(<option value="Blue">route_number_1</option>)
+        {:ok, document} =
+          view
+          |> render_async()
+          |> Floki.parse_document()
+
+        refute document_has_element?(
+                 document,
+                 "select#stop_route_affected_service_modal_route_id > option[value=\"Blue\"]"
+               )
       end
     end
 
@@ -403,7 +462,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         assert [
                  {"option",
                   [
-                    {"id", "Park Street (inbound)"},
+                    {"id", "stop-selector-place-pktrm"},
                     {"phx-hook", "Tippy"},
                     {"data-tippy-content", "Stop ID place-pktrm"},
                     {"data-tippy-delay", "[1000, 200]"},
@@ -412,7 +471,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
                   ], ["Park Street (inbound)"]},
                  {"option",
                   [
-                    {"id", "Aquarium"},
+                    {"id", "stop-selector-place-aqucl"},
                     {"phx-hook", "Tippy"},
                     {"data-tippy-content", "Stop ID place-aqucl"},
                     {"data-tippy-delay", "[1000, 200]"},
@@ -577,8 +636,13 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
           stop_route_affected_service: %{stop_ids: ["place-aqucl"]}
         })
 
-        assert view |> render_async() =~ ~s(<option selected="selected" value="Blue">)
-        assert view |> render_async() =~ ~s(<option selected="selected" value="Bluer">)
+        {:ok, document} =
+          view
+          |> render_async()
+          |> Floki.parse_document()
+
+        assert document_has_element?(document, "option[value=\"Blue\"][selected=\"selected\"]")
+        assert document_has_element?(document, "option[value=\"Bluer\"][selected=\"selected\"]")
 
         # Simulate separately selecting a second stop
         view
@@ -713,8 +777,13 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
           stop_route_affected_service: %{route_ids: ["Bluer"]}
         })
 
-        assert view |> render_async() =~ ~s(<option value="Blue">)
-        assert view |> render_async() =~ ~s(<option selected="selected" value="Bluer">)
+        {:ok, document} =
+          view
+          |> render_async()
+          |> Floki.parse_document()
+
+        assert document_has_element?(document, "option[value=\"Blue\"]")
+        assert document_has_element?(document, "option[value=\"Bluer\"][selected=\"selected\"]")
 
         view
         |> element("#details_form")

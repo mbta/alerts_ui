@@ -546,15 +546,18 @@ defmodule AlertsUIWeb.SharedComponents do
       <.label for={@id} class={"text-base #{if is_nil(@label), do: "hidden"}"}>{@label}</.label>
 
       <div class={["flex gap-2 w-full", if(@column, do: "flex-col", else: "flex-col md:flex-row")]}>
-        <div :for={[key: option_name, value: id] <- @options} class={["flex-1", @button_class]}>
-          <.label for={id}>
+        <div
+          :for={[key: option_name, value: id, id: dom_id] <- @options}
+          class={["flex-1", @button_class]}
+        >
+          <.label for={dom_id}>
             <div class={[
               @base_toggle_classes,
               if(@field_value && id in @field_value, do: @toggled_on, else: @toggled_off)
             ]}>
               <input
                 type="checkbox"
-                id={id}
+                id={dom_id}
                 name={@name}
                 value={id}
                 checked={@field_value && id in @field_value}
@@ -1131,7 +1134,7 @@ defmodule AlertsUIWeb.SharedComponents do
         <.select
           multiple={@multiple}
           size="2"
-          options={if @loading, do: [], else: @options}
+          options={if @loading && is_nil(@options), do: [], else: @options}
           field={@field}
           no_results={@no_results}
           prompt={

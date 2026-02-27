@@ -20,9 +20,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
       results = SelectFormatter.formatted_select_options(%SelectFormatter{options: options})
 
       assert results == [
-               [key: "alice", value: "101"],
-               [key: "joe", value: "202"],
-               [key: "bob", value: "303"]
+               [key: "alice", value: "101", id: "option-101"],
+               [key: "joe", value: "202", id: "option-202"],
+               [key: "bob", value: "303", id: "option-303"]
              ]
     end
 
@@ -38,25 +38,25 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
 
       assert results == [
                [
-                 id: "joe",
                  key: "joe",
                  value: "202",
+                 id: "option-202",
                  "phx-hook": "Tippy",
                  "data-tippy-content": "Stop ID 202",
                  "data-tippy-delay": "[1000, 200]"
                ],
                [
-                 id: "bob",
                  key: "bob",
                  value: "303",
+                 id: "option-303",
                  "phx-hook": "Tippy",
                  "data-tippy-content": "Stop ID 303",
                  "data-tippy-delay": "[1000, 200]"
                ],
                [
-                 id: "alice",
                  key: "alice",
                  value: "101",
+                 id: "option-101",
                  "phx-hook": "Tippy",
                  "data-tippy-content": "Stop ID 101",
                  "data-tippy-delay": "[1000, 200]"
@@ -76,25 +76,25 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
 
       assert results == [
                [
-                 id: "joe",
                  key: "joe",
                  value: "joe|202",
+                 id: "option-joe|202",
                  "phx-hook": "Tippy",
                  "data-tippy-content": "Stop ID 202",
                  "data-tippy-delay": "[1000, 200]"
                ],
                [
-                 id: "bob",
                  key: "bob",
                  value: "bob|303",
+                 id: "option-bob|303",
                  "phx-hook": "Tippy",
                  "data-tippy-content": "Stop ID 303",
                  "data-tippy-delay": "[1000, 200]"
                ],
                [
-                 id: "alice",
                  key: "alice",
                  value: "alice|101",
+                 id: "option-alice|101",
                  "phx-hook": "Tippy",
                  "data-tippy-content": "Stop ID 101",
                  "data-tippy-delay": "[1000, 200]"
@@ -137,8 +137,16 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
         })
 
       assert results == [
-               [key: "Ashmont/Braintree platform to lobby", value: "951"],
-               [key: "Ashmont/Braintree platform to Massachusetts Avenue", value: "861"]
+               [
+                 key: "Ashmont/Braintree platform to lobby",
+                 value: "951",
+                 id: "option-951"
+               ],
+               [
+                 key: "Ashmont/Braintree platform to Massachusetts Avenue",
+                 value: "861",
+                 id: "option-861"
+               ]
              ]
 
       results =
@@ -148,7 +156,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
         })
 
       assert results == [
-               [key: "Ashmont/Braintree platform to lobby", value: "951"]
+               [
+                 key: "Ashmont/Braintree platform to lobby",
+                 value: "951",
+                 id: "option-951"
+               ]
              ]
     end
   end
@@ -204,14 +216,31 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
         })
 
       assert results == [
-               [key: "527 (9:01 AM from South Station) CR-683300-527", value: "CR-683300-527"],
+               [
+                 key: "527 (9:01 AM from South Station) CR-683300-527",
+                 value: "CR-683300-527",
+                 id: "option-CR-683300-527"
+               ],
                [
                  key: "527 (9:01 AM from South Station) CR-683300-special",
-                 value: "CR-683300-special"
+                 value: "CR-683300-special",
+                 id: "option-CR-683300-special"
                ],
-               [key: "595 (9:15 AM from South Station)", value: "CR-683322-595"],
-               [key: "594 (9:45 AM from Framingham)", value: "CR-683321-594"],
-               [key: "529 (10:01 AM from South Station)", value: "CR-683302-529"]
+               [
+                 key: "595 (9:15 AM from South Station)",
+                 value: "CR-683322-595",
+                 id: "option-CR-683322-595"
+               ],
+               [
+                 key: "594 (9:45 AM from Framingham)",
+                 value: "CR-683321-594",
+                 id: "option-CR-683321-594"
+               ],
+               [
+                 key: "529 (10:01 AM from South Station)",
+                 value: "CR-683302-529",
+                 id: "option-CR-683302-529"
+               ]
              ]
     end
 
@@ -248,7 +277,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
       assert results == [
                [
                  key: "10:01 AM from Long Wharf (South) to Charlestown Navy Yard",
-                 value: "Boat-F4-1430-Long-B-01-Weekday-Fall-24"
+                 value: "Boat-F4-1430-Long-B-01-Weekday-Fall-24",
+                 id: "option-Boat-F4-1430-Long-B-01-Weekday-Fall-24"
                ]
              ]
     end
@@ -298,13 +328,29 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
       assert results == [
                {"Framingham/Worcester line",
                 [
-                  [key: "527 (9:01 AM from South Station)", value: "CR-683300-527"],
-                  [key: "595 (9:15 AM from Framingham)", value: "CR-683322-595"]
+                  [
+                    key: "527 (9:01 AM from South Station)",
+                    value: "CR-683300-527",
+                    id: "option-CR-683300-527"
+                  ],
+                  [
+                    key: "595 (9:15 AM from Framingham)",
+                    value: "CR-683322-595",
+                    id: "option-CR-683322-595"
+                  ]
                 ]},
                {"Providence/Stoughton Line",
                 [
-                  [key: "839 (11:03 AM from South Station)", value: "CR-687393-839"],
-                  [key: "841 (11:15 AM from Forest Hills)", value: "CR-687395-841"]
+                  [
+                    key: "839 (11:03 AM from South Station)",
+                    value: "CR-687393-839",
+                    id: "option-CR-687393-839"
+                  ],
+                  [
+                    key: "841 (11:15 AM from Forest Hills)",
+                    value: "CR-687395-841",
+                    id: "option-CR-687395-841"
+                  ]
                 ]}
              ]
     end
@@ -356,7 +402,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
                {"Framingham/Worcester line", []},
                {"Providence/Stoughton Line",
                 [
-                  [key: "841 (11:15 AM from Forest Hills)", value: "CR-687395-841"]
+                  [
+                    key: "841 (11:15 AM from Forest Hills)",
+                    value: "CR-687395-841",
+                    id: "option-CR-687395-841"
+                  ]
                 ]}
              ]
     end
