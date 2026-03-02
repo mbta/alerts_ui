@@ -59,6 +59,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :stop_names_and_ids,
     :trip_ids,
     :url,
+    :last_push_notification_timestamp,
     :notification_toggle
   ]
 
@@ -111,6 +112,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           stop_names_and_ids: [String.t()] | nil,
           trip_ids: [String.t()] | nil,
           url: String.t() | nil,
+          last_push_notification_timestamp: NaiveDateTime.t() | nil,
           notification_toggle: boolean()
         }
 
@@ -138,6 +140,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       :image_url,
       :severity,
       :url,
+      :last_push_notification_timestamp,
       :original_route_selections,
       :original_trip_selections,
       :original_stop_selections,

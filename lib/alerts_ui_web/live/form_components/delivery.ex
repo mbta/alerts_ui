@@ -27,8 +27,54 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
       |> changeset(%{})
       |> to_form()
 
-    socket = assign(socket, %{form: form})
+    socket = assign(socket, %{form: form, edit_data_has_been_filled: false})
     {:ok, socket}
+  end
+
+  @impl true
+  def update(
+        %{form_type: form_type, alert_data: alert_data} = assigns,
+        %{
+          assigns: %{
+            edit_data_has_been_filled: false
+          }
+        } = socket
+      )
+      when form_type in [:editing, :duplicating] do
+    form = socket.assigns.form
+
+    banner_text_map =
+      if Form.normalize_value("checkbox", form[:banner_sync_toggle].value) and
+           Form.normalize_value("checkbox", form[:view_banner].value) do
+        %{"banner_text" => Map.get(alert_data, :header_text, "")}
+      else
+        %{}
+      end
+
+    data =
+      alert_data
+      |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
+      |> Map.merge(form.params)
+      |> Map.merge(banner_text_map)
+
+    data =
+      if Map.get(form.params, "banner_text") do
+        Map.put(data, "view_banner", true)
+      else
+        data
+      end
+
+    changeset = changeset(%__MODULE__{}, data)
+
+    changes = changeset |> apply_action!(:validate)
+
+    send(self(), {:section_completed, changes})
+
+    form =
+      changeset
+      |> to_form()
+
+    {:ok, socket |> assign(assigns) |> assign(form: form, edit_data_has_been_filled: true)}
   end
 
   @impl true
