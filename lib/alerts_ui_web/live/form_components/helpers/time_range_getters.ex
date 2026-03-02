@@ -167,8 +167,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeGetters do
   end
 
   # The DateTime getters execute on output from the Date / Time getters
-  def get_recurring_start_datetime("", _), do: nil
-  def get_recurring_start_datetime(_, ""), do: nil
+  def get_recurring_start_datetime("", _), do: ""
+  def get_recurring_start_datetime(_, ""), do: ""
 
   def get_recurring_start_datetime(start_date, start_time) do
     start_date
@@ -177,6 +177,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeGetters do
   end
 
   def get_recurring_end_datetime("", _), do: ""
+  def get_recurring_end_datetime(_, ""), do: ""
 
   def get_recurring_end_datetime(end_date, end_time) do
     end_time = string_to_time_helper(end_time)
@@ -211,7 +212,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeGetters do
 
   def string_to_datetime_helper(%NaiveDateTime{} = datetime), do: datetime
 
-  def string_to_datetime_helper(datetime) do
+  def string_to_datetime_helper(datetime) when is_binary(datetime) do
     # At this stage, we see string dates in the following formats:
     # 2025-12-13T03:00
     # 2025-12-13T03:00:00
