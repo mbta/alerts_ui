@@ -64,7 +64,6 @@ defmodule AlertsUIWeb.Router do
 
     get "/", Redirector, to: "/alerts"
     get "/download_history", DownloadHistoryController, :export
-    oban_dashboard("/oban")
 
     live_session :require_authenticated_user,
       on_mount: [
@@ -114,6 +113,7 @@ defmodule AlertsUIWeb.Router do
       :require_developer
     ]
 
+    oban_dashboard("/oban")
     get("/_version", VersionController, :index)
 
     live_session :require_developer,
