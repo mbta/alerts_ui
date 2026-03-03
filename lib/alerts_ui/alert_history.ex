@@ -16,6 +16,7 @@ defmodule AlertsUI.AlertHistory do
     :closed,
     :last_modified_by,
     :last_modified_datetime,
+    :push_notification_datetime,
     :service_type,
     :effect_name,
     :effect,
@@ -54,6 +55,7 @@ defmodule AlertsUI.AlertHistory do
           closed: String.t() | nil,
           last_modified_by: String.t(),
           last_modified_datetime: String.t(),
+          push_notification_datetime: String.t(),
           service_type: String.t(),
           effect_name: String.t(),
           effect: String.t(),
@@ -108,6 +110,7 @@ defmodule AlertsUI.AlertHistory do
       closed: alert_map |> closed(),
       last_modified_by: alert_map |> last_modified_by(),
       last_modified_datetime: alert_map |> last_modified_datetime(),
+      push_notification_datetime: alert_map |> push_notification_datetime(),
       service_type: alert_map |> service_type(),
       effect_name: alert_map |> effect_name(),
       effect: alert_map |> effect(),
@@ -145,7 +148,8 @@ defmodule AlertsUI.AlertHistory do
   end
 
   defp created_datetime(map) do
-    format_datetime(Map.get(map, :created_timestamp), @with_seconds)
+    created_datetime = Map.get(map, :created_timestamp) || Map.get(map, :created_at)
+    format_datetime(created_datetime, @with_seconds)
   end
 
   defp closed(map) do
@@ -158,6 +162,10 @@ defmodule AlertsUI.AlertHistory do
 
   defp last_modified_datetime(map) do
     format_datetime(Map.get(map, :last_modified_timestamp), @with_seconds)
+  end
+
+  defp push_notification_datetime(map) do
+    format_datetime(Map.get(map, :last_push_notification_timestamp), @with_seconds)
   end
 
   defp service_type(map) do

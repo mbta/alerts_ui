@@ -1,6 +1,11 @@
 defmodule AlertsUIWeb.FormComponents.Delivery do
   @moduledoc """
     Live Component for delivery section of form
+
+    Some notes on last push notification timestamp:
+    When editing, if the box is not checked, the LPNT should not be UPDATED
+    But it shouldn't be set to nil if it wasn't nil in the first place.
+    It's also unique in that it's a full non-naive eastern timezone datetime
   """
   use AlertsUIWeb, :live_component
   use AlertsUI.Schema
@@ -50,7 +55,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
       |> Map.merge(banner_text_map)
 
     data =
-      if is_nil(data["last_push_notification_timestamp"]) && data["notification_toggle"] == true do
+      if data["notification_toggle"] == true do
         Map.put(data, "last_push_notification_timestamp", DateTimeHelpers.current_time())
       else
         data
