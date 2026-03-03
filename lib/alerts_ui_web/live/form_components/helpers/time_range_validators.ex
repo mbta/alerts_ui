@@ -419,7 +419,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
   defp validate_not_in_dst_gap(naive_datetime, field) do
     case DateTime.from_naive(naive_datetime, "America/New_York") do
       {:ok, _datetime} -> []
-      {:gap, _, _} -> [{field, "Time falls within nonexistent hour: start of DST"}]
+      {:gap, _, _} -> [{field, "Effect periods cannot start or end during a skipped daylight savings time hour"}]
     end
   end
 

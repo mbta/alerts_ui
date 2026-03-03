@@ -650,7 +650,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         }
       })
 
-      assert render(view) =~ ~s(Time falls within nonexistent hour: start of DST)
+      assert render(view) =~ ~s(Effect periods cannot start or end during a skipped daylight savings time hour)
     end
 
     test "displays error if one-time end occurs during DST gap" do
@@ -673,7 +673,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         }
       })
 
-      assert render(view) =~ ~s(Time falls within nonexistent hour: start of DST)
+      assert render(view) =~ ~s(Effect periods cannot start or end during a skipped daylight savings time hour)
     end
 
     test "start and end time updated if 'all trips' selected" do
