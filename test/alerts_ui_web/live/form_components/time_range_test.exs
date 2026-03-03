@@ -630,6 +630,52 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
                ~s(Effect must start before 05/01/2024, 10:15 AM)
     end
 
+    test "displays error if one-time start occurs during DST gap" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_start_specifier" => "custom"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_start" => "2025-03-09T02:30:00"
+        }
+      })
+
+      assert render(view) =~ ~s(Time falls within nonexistent hour: start of DST)
+    end
+
+    test "displays error if one-time end occurs during DST gap" do
+      {:ok, view, _html} =
+        live_isolated_component(TimeRange, @assigns)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end_specifier" => "custom",
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "time_range" => %{
+          "active_period_end" => "2025-03-09T02:30:00",
+        }
+      })
+
+      assert render(view) =~ ~s(Time falls within nonexistent hour: start of DST)
+    end
+
     test "start and end time updated if 'all trips' selected" do
       {:ok, view, _html} =
         live_isolated_component(

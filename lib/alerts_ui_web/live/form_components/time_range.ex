@@ -308,6 +308,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         form_params,
         socket.assigns.form_type == :editing
       )
+      |> TimeRangeValidators.validate_not_dst_gap()
 
     errors =
       case changeset |> apply_action(:validate) do
@@ -466,6 +467,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
           socket.assigns.form_type != :editing
         )
         |> TimeRangeValidators.validate_required_fields(time_range)
+        |> TimeRangeValidators.validate_not_dst_gap()
       else
         changeset
       end
