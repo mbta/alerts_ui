@@ -650,7 +650,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         }
       })
 
-      assert render(view) =~ ~s(Effect periods cannot start or end during a skipped daylight savings time hour)
+      assert render(view) =~
+               ~s(Effect periods cannot start or end during a skipped daylight savings time hour)
     end
 
     test "displays error if one-time end occurs during DST gap" do
@@ -661,7 +662,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       |> element("form")
       |> render_change(%{
         "time_range" => %{
-          "active_period_end_specifier" => "custom",
+          "active_period_end_specifier" => "custom"
         }
       })
 
@@ -669,11 +670,12 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       |> element("form")
       |> render_change(%{
         "time_range" => %{
-          "active_period_end" => "2025-03-09T02:30:00",
+          "active_period_end" => "2025-03-09T02:30:00"
         }
       })
 
-      assert render(view) =~ ~s(Effect periods cannot start or end during a skipped daylight savings time hour)
+      assert render(view) =~
+               ~s(Effect periods cannot start or end during a skipped daylight savings time hour)
     end
 
     test "start and end time updated if 'all trips' selected" do
