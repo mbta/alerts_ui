@@ -223,7 +223,7 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
     end
 
     @tag :logged_in_user
-    test "last push notification timestamp does not get filled in when editing",
+    test "last push notification timestamp does not UPDATE when editing when box is unchecked by default",
          %{
            conn: conn
          } do
@@ -245,16 +245,19 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
             effect: :ADDITIONAL_SERVICE,
             effect_detail: "EXTRA_SERVICE",
             header_text: "cool header text",
-            last_push_notification_timestamp: DateTime.utc_now(),
+            last_push_notification_timestamp:
+              DateTime.new!(~D[2025-01-01], ~T[02:00:00], "America/New_York"),
             informed_entity: [
-              %{route_type: 3, route_id: "Red", direction_id: 0}
+              %{route_type: 1, route_id: "Red", direction_id: 0}
             ],
             original_route_selections: [
               "Red Line|Red"
             ]
           })
 
-        Alerts.create_or_update_alert(alert_params, build(:user))
+        {:ok, original_alert} = Alerts.create_or_update_alert(alert_params, build(:user))
+
+        original_lpnt = original_alert.last_push_notification_timestamp
 
         {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
         render_async(view)
@@ -272,8 +275,65 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
 
         assert AlertsUI.Alerts.list_all()
                |> hd
-               |> Map.get(:last_push_notification_timestamp)
-               |> is_nil
+               |> Map.get(:last_push_notification_timestamp) == original_lpnt
+      end
+    end
+
+    @tag :logged_in_user
+    test "last push notification timestamp does update when editing when box is checked by default",
+         %{
+           conn: conn
+         } do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _types -> [@route] end,
+           get: fn _, _ -> @route end,
+           all: fn _ -> [@route] end
+         ]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _route_id, _opts -> [] end
+         ]}
+      ]) do
+        alert_params =
+          build(:alert_map, %{
+            alert_id: "123",
+            effect: :ADDITIONAL_SERVICE,
+            effect_detail: "EXTRA_SERVICE",
+            header_text: "cool header text",
+            primary_service_type: "2",
+            last_push_notification_timestamp:
+              DateTime.new!(~D[2025-01-01], ~T[02:00:00], "America/New_York"),
+            informed_entity: [
+              %{route_type: 2, route_id: "Red", direction_id: 0}
+            ],
+            original_route_selections: [
+              "Red Line|Red"
+            ]
+          })
+
+        {:ok, original_alert} = Alerts.create_or_update_alert(alert_params, build(:user))
+
+        original_lpnt = original_alert.last_push_notification_timestamp
+
+        {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
+        render_async(view)
+
+        view
+        |> element("button#review", "Review and submit")
+        |> render_click()
+
+        view
+        |> element("#review-modal-container button", "Submit")
+        |> render_click()
+
+        # # wait a smidge for the alert to get persisted to the database
+        :timer.sleep(50)
+
+        assert AlertsUI.Alerts.list_all()
+               |> hd
+               |> Map.get(:last_push_notification_timestamp) != original_lpnt
       end
     end
   end
