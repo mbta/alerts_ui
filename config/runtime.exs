@@ -117,6 +117,11 @@ cond do
           "IBI_STANDARD_ALERTS_API_URL",
           "https://cdn.mbta.com/realtime/Alerts.json"
         ),
+      trapeze_sftp_host: System.get_env("TRAPEZE_SFTP_HOST", ""),
+      trapeze_sftp_port: System.get_env("TRAPEZE_SFTP_PORT", ""),
+      trapeze_sftp_user: System.get_env("TRAPEZE_SFTP_USER", ""),
+      trapeze_sftp_password: System.get_env("TRAPEZE_SFTP_PASSWORD", ""),
+      trapeze_sftp_filename: System.get_env("TRAPEZE_SFTP_FILENAME", ""),
       # below are used only for GTFS validation
       dev_api_url: String.replace_trailing(System.fetch_env!("DEV_API_URL"), "/", ""),
       dev_api_key: System.fetch_env!("DEV_API_KEY")
