@@ -140,7 +140,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       :image_url,
       :severity,
       :url,
-      :last_push_notification_timestamp,
       :original_route_selections,
       :original_trip_selections,
       :original_stop_selections,
@@ -153,6 +152,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     end)
     |> Map.merge(create_and_edit_metadata(alert, form_type))
     |> Map.merge(effect_name_combination_and_informed_entities(alert, form_type))
+    |> Map.merge(last_push_notification_timestamp(alert))
     |> Map.merge(active_period_map(alert))
     |> Map.merge(reminder_times(alert))
     |> Map.merge(notification_period(alert, form_type))
@@ -367,10 +367,21 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   defp get_notification_specifier(nil), do: :same_as_effect_period
   defp get_notification_specifier(_notification_period_start), do: :custom
 
+  defp last_push_notification_timestamp(alert) do
+    lpnt = alert |> Map.get(:last_push_notification_timestamp) |> shift_to_eastern
+    %{last_push_notification_timestamp: lpnt}
+  end
+
   def shift_to_naive(nil), do: nil
 
   def shift_to_naive(time) do
-    time |> Timex.Timezone.convert("America/New_York") |> DateTime.to_naive()
+    time |> DateTime.shift_zone!("America/New_York") |> DateTime.to_naive()
+  end
+
+  def shift_to_eastern(nil), do: nil
+
+  def shift_to_eastern(time) do
+    time |> DateTime.shift_zone!("America/New_York")
   end
 
   def start_date(nil), do: nil
