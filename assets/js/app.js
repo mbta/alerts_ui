@@ -30,9 +30,9 @@ let liveSocket = new LiveSocket(
   "/live",
   Socket,
   {
-    heartbeatIntervalMs: 30000,
+    heartbeatIntervalMs: 3000,
+    longPollFallbackMs: 3000,
     hooks: Hooks,
-    logger: (kind, msg, data) => console.log(`[LV] ${kind} / ${msg}`) && console.log(data),
     params: {_csrf_token: csrfToken},
   }
 )
@@ -40,12 +40,18 @@ let liveSocket = new LiveSocket(
 // Add the connection error handler after 2 sec
 setTimeout(() => {
   liveSocket.socket.conn.addEventListener("close", (event) => {
-    console.log("[LV] websocket closed!")
-    console.log("[LV] code:", event.code)
-    console.log("[LV] reason:", event.reason)
-    console.log("[LV] was clean:", event.wasClean)
-    console.log("[LV] event:")
-    console.log(JSON.stringify(event, null, 4))
+    const element = document.getElementById("form_container")
+
+    if (!!element) {
+      const logPrefix = `[LV ${element.dataset.debugTag}]`
+
+      console.log(`${logPrefix} socket closed!`)
+      console.log(`${logPrefix} code: ${event.code}`)
+      console.log(`${logPrefix} reason: ${event.reason}`)
+      console.log(`${logPrefix} clean: ${event.wasClean}`)
+      console.log(`${logPrefix} event:`)
+      console.log(`${logPrefix} ${JSON.stringify(event, null, 4)}`)
+    }
   });
 }, 2000)
 

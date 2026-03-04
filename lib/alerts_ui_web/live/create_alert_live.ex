@@ -79,13 +79,12 @@ defmodule AlertsUIWeb.CreateAlertLive do
   ]
 
   @impl true
-  def terminate(reason, socket) do
-    code = :crypto.strong_rand_bytes(8) |> Base.encode64()
-    Logger.warning("[LV #{code}] terminating at #{DateTime.utc_now()}")
-    dbg(code)
-    dbg(reason)
-    dbg(socket)
-    dbg(code)
+  def terminate({reason, event}, socket) do
+    debug_tag = socket.assigns.debug_tag
+    Logger.warning("[LV #{debug_tag}] terminating at #{DateTime.utc_now()}")
+    Logger.warning("[LV #{debug_tag}] reason: #{reason}")
+    Logger.warning("[LV #{debug_tag}] event: #{event}")
+    Logger.warning("[LV #{debug_tag}] socket: #{inspect(socket)}")
   end
 
   @impl true
@@ -143,7 +142,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
         errors: %{},
         submitted: false,
         obsolete_ids: %{},
-        obsolete_id_text: []
+        obsolete_id_text: [],
+        debug_tag: :crypto.strong_rand_bytes(8) |> Base.encode64()
       })
 
     {:ok, socket}
