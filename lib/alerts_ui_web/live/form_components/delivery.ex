@@ -40,6 +40,9 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
   def update(%{alert_data: alert_data} = assigns, socket) do
     form = socket.assigns.form
 
+    # this will be nil for a new alert but the previous value for an edited one
+    original_push_notification_timestamp = Map.get(alert_data, :last_push_notification_timestamp)
+
     banner_text_map =
       if Form.normalize_value("checkbox", form[:banner_sync_toggle].value) and
            Form.normalize_value("checkbox", form[:view_banner].value) do
@@ -78,7 +81,13 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
       changeset
       |> to_form()
 
-    {:ok, socket |> assign(assigns) |> assign(form: form)}
+    {:ok,
+     socket
+     |> assign(assigns)
+     |> assign(form: form)
+     |> assign_new(:original_last_push_notification_timestamp, fn ->
+       original_push_notification_timestamp
+     end)}
   end
 
   @impl true
@@ -125,7 +134,11 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
 
   def handle_event("notification_toggle_change", %{"delivery" => delivery}, socket) do
     if Form.normalize_value("checkbox", delivery["notification_toggle"]) == false do
-      Map.put(delivery, "last_push_notification_timestamp", nil)
+      Map.put(
+        delivery,
+        "last_push_notification_timestamp",
+        socket.assigns.original_last_push_notification_timestamp
+      )
     else
       Map.put(delivery, "last_push_notification_timestamp", DateTimeHelpers.current_time())
     end
