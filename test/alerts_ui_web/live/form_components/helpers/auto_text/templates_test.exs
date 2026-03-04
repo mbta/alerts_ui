@@ -340,6 +340,30 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       assert expected_service_effect == actual_service_effect
     end
 
+    test "systemwide alert notice" do
+      autotext_data = %{
+        route_type: nil,
+        service_types: [4],
+        effect_name: "Notice",
+        cause_detail: "SLIPPERY_RAIL",
+        alert_timing: :"one-time",
+        start_specifier: :now,
+        end_specifier: :custom,
+        start_datetime: ~N[2025-05-08 13:00:00],
+        end_datetime: ~N[2025-05-10 15:00:00]
+      }
+
+      expected_header =
+        "Ferry notice until Sat, May 10 at 3:00 PM due to a slippery rail"
+
+      actual_header = Templates.build_auto_text(autotext_data, :header_template)
+      assert expected_header == actual_header
+
+      expected_service_effect = "Ferry notice"
+      actual_service_effect = Templates.build_auto_text(autotext_data, :service_effect_template)
+      assert expected_service_effect == actual_service_effect
+    end
+
     test "systemwide alert policy change issue" do
       autotext_data = %{
         route_type: nil,
@@ -1237,6 +1261,31 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       assert expected_header == actual_header
 
       expected_service_effect = "Route 1 delay"
+      actual_service_effect = Templates.build_auto_text(autotext_data, :service_effect_template)
+      assert expected_service_effect == actual_service_effect
+    end
+
+    test "Notice" do
+      autotext_data = %{
+        route_type: 2,
+        routes: [@route_1],
+        schedules: [],
+        effect_name: "Notice",
+        cause_detail: "SLIPPERY_RAIL",
+        alert_timing: :"one-time",
+        start_specifier: :now,
+        end_specifier: :custom,
+        start_datetime: ~N[2025-05-08 13:00:00],
+        end_datetime: ~N[2025-05-10 15:00:00]
+      }
+
+      expected_header =
+        "Route 1 notice today through Sat, May 10 due to a slippery rail"
+
+      actual_header = Templates.build_auto_text(autotext_data, :header_template)
+      assert expected_header == actual_header
+
+      expected_service_effect = "Route 1 notice"
       actual_service_effect = Templates.build_auto_text(autotext_data, :service_effect_template)
       assert expected_service_effect == actual_service_effect
     end

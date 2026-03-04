@@ -1,6 +1,9 @@
 defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   @moduledoc """
-    Live Component for route type and effect section of form
+    Live Component for route type and effect section of form.
+    "Forbidden effects" are effects that we don't want to show as
+    selectable but don't want to tear out of the app for compatibility
+    reasons.
   """
   use AlertsUIWeb, :live_component
   use AlertsUI.Schema
@@ -25,6 +28,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
 
   @fields ~w[route_type effect_name]a
   @required_fields ~w[effect_name]a
+  @forbidden_effects ~w[Summary]
 
   @impl true
   @spec mount(any()) :: {:ok, any()}
@@ -38,7 +42,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
         selected_route_type: nil,
         selected_effect: nil,
         route_types: @route_types,
-        effects: EffectsForRouteTypes.list_effects(nil)
+        effects: list_effects(nil)
       })
 
     {:ok, socket}
@@ -60,7 +64,9 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   @impl true
   def handle_event("route_type", %{"value" => route_type}, socket) do
     effects =
-      EffectsForRouteTypes.list_effects(route_type |> String.to_existing_atom())
+      route_type
+      |> String.to_existing_atom()
+      |> list_effects()
 
     {:noreply,
      assign(socket, %{selected_route_type: route_type, effects: effects, selected_effect: nil})}
@@ -99,6 +105,12 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
       {:error, changeset} ->
         {:noreply, assign(socket, :changeset, changeset |> to_form())}
     end
+  end
+
+  defp list_effects(mode) do
+    mode
+    |> EffectsForRouteTypes.list_effects()
+    |> Enum.reject(&(&1 in @forbidden_effects))
   end
 
   @impl true

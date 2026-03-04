@@ -74,9 +74,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
       service_effect_template: "Amber Alert"
     },
     %{
-      pattern: {nil, "Amber Alert"},
-      header_template: "Amber Alert",
-      service_effect_template: "Amber Alert"
+      pattern: {nil, "Notice"},
+      header_template: "?impacted_modes notice ?alert_duration ?due_to_cause",
+      service_effect_template: "?impacted_modes notice"
     },
     %{
       pattern: {nil, "Policy Change"},
@@ -295,6 +295,17 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
       service_effect_template: "?route_names_short delay"
     },
     %{
+      pattern: {1, "Notice"},
+      header_template: "?route_names notice ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        stop_count: 0,
+        trip_count: nil,
+        direction_count: 1
+      },
+      service_effect_template: "?route_names notice"
+    },
+    %{
       pattern: {1, "Service Change"},
       header_template: "?route_names service change ?alert_duration ?due_to_cause",
       description_template: %{
@@ -471,6 +482,17 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         direction_count: 1
       },
       service_effect_template: "?route_names_short delay"
+    },
+    %{
+      pattern: {"Notice"},
+      header_template: "?route_names notice ?alert_duration ?due_to_cause",
+      description_template: %{
+        route_count: 5,
+        stop_count: 2,
+        trip_count: 2,
+        direction_count: 1
+      },
+      service_effect_template: "?route_names notice"
     },
     %{
       pattern: {"Schedule Change"},

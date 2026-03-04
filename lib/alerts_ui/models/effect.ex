@@ -141,6 +141,7 @@ defmodule AlertsUI.Models.Effect do
       {"Extra Service", :ADDITIONAL_SERVICE, "EXTRA_SERVICE"},
       {"Facility Issue", :OTHER_EFFECT, "FACILITY_ISSUE"},
       {"Multi-Route Detour", :DETOUR, "DETOUR"},
+      {"Notice", :OTHER_EFFECT, "NOTICE"},
       {"Parking Closure", :OTHER_EFFECT, "PARKING_CLOSURE"},
       {"Parking Issue", :OTHER_EFFECT, "PARKING_ISSUE"},
       {"Policy Change", :OTHER_EFFECT, "POLICY_CHANGE"},
