@@ -64,6 +64,19 @@ defmodule AlertsUI.Trapeze.WorkOrderTest do
                }
       end
     end
+
+    test "skips lines that are not public facilities" do
+      with_mock(FacilitiesRepo,
+        get: fn _ -> @facility end
+      ) do
+        input =
+          "2026-02-17T12:52:38-05:00|FS-DWNXST-ELEV-891|ELEV-891|ELEVATOR, DOWNTOWN CROSSING EL-891, OL NB-FRANKLIN ST|ORANGE LINE,RED LINE - MAIN|310-2026-184|2026-01-12T15:50:03+00:00|2026-01-12T15:52:14+00:00|2026-01-12T15:50:03+00:00||OPEN"
+
+        output = input |> WorkOrder.from_trapeze_line()
+
+        assert output == {:skip, "310-2026-184", "not public"}
+      end
+    end
   end
 
   describe "to_params" do
@@ -86,16 +99,16 @@ defmodule AlertsUI.Trapeze.WorkOrderTest do
                  notification_period_start: ~U[2026-01-12 15:50:03Z],
                  notification_period_end: nil,
                  primary_service_type: "access",
-                 cause_detail: "maintenance",
+                 cause_detail: "MAINTENANCE",
                  cause: :MAINTENANCE,
                  combination: :ACCESS,
                  duration_certainty: :UNKNOWN,
-                 effect_detail: "ELEVATOR CLOSURE",
+                 effect_detail: "ELEVATOR_CLOSURE",
                  effect_name: "Elevator Closure",
                  effect: :ACCESSIBILITY_ISSUE,
                  service_effect_text: "elevator unavailable",
                  original_facility_selections: [
-                   "ELEVATOR, DOWNTOWN CROSSING EL-891, OL NB-FRANKLIN ST|891"
+                   "Alewife Escalator 349 (Platform to Russell Field)|891"
                  ],
                  severity_level: :WARNING,
                  severity: 3,
@@ -110,6 +123,10 @@ defmodule AlertsUI.Trapeze.WorkOrderTest do
                  status: :open
                }
       end
+    end
+
+    test "does nothing with a skip message" do
+      assert WorkOrder.to_params({:skip, "123", "reason"}) == {:skip, "123", "reason"}
     end
   end
 end

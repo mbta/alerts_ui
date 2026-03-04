@@ -7,6 +7,7 @@ defmodule AlertsUI.Trapeze.WorkOrder do
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.Templates
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
+  alias MBTAV3API.Stops.Repo, as: StopsRepo
 
   defstruct [
     :file_process_datetime,
@@ -38,7 +39,7 @@ defmodule AlertsUI.Trapeze.WorkOrder do
           status: :open | :closed | :pending | :work_finished
         }
 
-  @spec from_trapeze_line(String.t()) :: WorkOrder.t()
+  @spec from_trapeze_line(String.t()) :: WorkOrder.t() | {atom(), String.t(), String.t()}
   def from_trapeze_line(input_line) do
     [
       file_process_datetime,
@@ -54,33 +55,43 @@ defmodule AlertsUI.Trapeze.WorkOrder do
       status
     ] = String.split(input_line, "|")
 
-    [_fp, _location, effect, facility_id] = String.split(equipment_id, "-")
+    [fp, _location, effect, facility_id] = String.split(equipment_id, "-")
 
-    effect =
-      case effect do
-        "ESCL" -> :escalator
-        "ELEV" -> :elevator
-      end
-
-    %__MODULE__{
-      file_process_datetime: get_datetime(file_process_datetime),
-      equipment_id: equipment_id,
-      effect: effect,
-      facility_id: facility_id,
-      asset_id: asset_id,
-      description: description,
-      lines: lines,
-      work_order_id: work_order_id,
-      create_datetime: get_datetime(create_datetime),
-      update_datetime: get_datetime(update_datetime),
-      start_datetime: get_datetime(start_datetime),
-      end_datetime: get_datetime(end_datetime),
-      status: convert_status(status)
-    }
+    if fp == "FP" do
+      %__MODULE__{
+        file_process_datetime: get_datetime(file_process_datetime),
+        equipment_id: equipment_id,
+        effect: effect(effect),
+        facility_id: facility_id,
+        asset_id: asset_id,
+        description: description,
+        lines: lines,
+        work_order_id: work_order_id,
+        create_datetime: get_datetime(create_datetime),
+        update_datetime: get_datetime(update_datetime),
+        start_datetime: get_datetime(start_datetime),
+        end_datetime: get_datetime(end_datetime),
+        status: convert_status(status)
+      }
+    else
+      {:skip, work_order_id, "not public"}
+    end
   end
 
-  @spec to_params(WorkOrder.t()) :: map()
+  defp effect("ESCL"), do: :escalator
+  defp effect("ELEV"), do: :elevator
+
+  @spec to_params(WorkOrder.t() | {atom(), String.t()}) ::
+          map() | {atom(), String.t(), String.t()}
+  def to_params({:skip, work_order_id, reason}), do: {:skip, work_order_id, reason}
+
   def to_params(%__MODULE__{} = work_order) do
+    facility_name =
+      case FacilitiesRepo.get(work_order.facility_id) do
+        nil -> work_order.description
+        facility -> facility.long_name
+      end
+
     %{
       active_period_start: work_order.start_datetime,
       active_period_end: end_datetime(work_order),
@@ -88,15 +99,15 @@ defmodule AlertsUI.Trapeze.WorkOrder do
       notification_period_end: end_datetime(work_order),
       closed_timestamp: end_datetime(work_order),
       primary_service_type: "access",
-      cause_detail: "maintenance",
+      cause_detail: "MAINTENANCE",
       cause: :MAINTENANCE,
       combination: :ACCESS,
       duration_certainty: duration_certainty(work_order),
       effect_detail: effect_detail(work_order.effect),
       effect_name: effect_name(work_order.effect),
       effect: :ACCESSIBILITY_ISSUE,
-      service_effect_text: service_effect_text(work_order.effect),
-      original_facility_selections: ["#{work_order.description}|#{work_order.facility_id}"],
+      service_effect_text: autotext(work_order) |> service_effect_text_for(),
+      original_facility_selections: ["#{facility_name}|#{work_order.facility_id}"],
       severity_level: :WARNING,
       severity: 3,
       work_order_id: work_order.work_order_id,
@@ -111,13 +122,17 @@ defmodule AlertsUI.Trapeze.WorkOrder do
   end
 
   defp autotext(work_order) do
+    facility = FacilitiesRepo.get(work_order.facility_id)
+    stops = if facility, do: [Map.get(facility, :stop)], else: []
+
     AlertDataToAutoText.build_autotext_data(%{
       route_type: nil,
       effect_name: "Elevator Closure",
       cause_detail: "maintenance",
       start_datetime: work_order.start_datetime,
       end_specifier: :until_further_notice,
-      facility: FacilitiesRepo.get(work_order.facility_id)
+      facility: facility,
+      stops: stops |> Enum.map(fn stop -> StopsRepo.get(stop.id) end)
     })
   end
 
@@ -127,20 +142,20 @@ defmodule AlertsUI.Trapeze.WorkOrder do
   defp description_for(autotext),
     do: Templates.build_auto_text(autotext, :description_template)
 
+  def service_effect_text_for(autotext),
+    do: Templates.build_auto_text(autotext, :service_effect_template)
+
   defp duration_certainty(%{end_datetime: _, status: :closed}), do: :KNOWN
   defp duration_certainty(_), do: :UNKNOWN
 
   defp end_datetime(%{end_datetime: datetime, status: :closed}), do: datetime
   defp end_datetime(_), do: nil
 
-  defp effect_detail(:escalator), do: "ESCALATOR CLOSURE"
-  defp effect_detail(:elevator), do: "ELEVATOR CLOSURE"
+  defp effect_detail(:escalator), do: "ESCALATOR_CLOSURE"
+  defp effect_detail(:elevator), do: "ELEVATOR_CLOSURE"
 
   defp effect_name(:escalator), do: "Escalator Closure"
   defp effect_name(:elevator), do: "Elevator Closure"
-
-  defp service_effect_text(:escalator), do: "escalator unavailable"
-  defp service_effect_text(:elevator), do: "elevator unavailable"
 
   defp get_datetime(iso8601_string) do
     case DateTime.from_iso8601(iso8601_string) do

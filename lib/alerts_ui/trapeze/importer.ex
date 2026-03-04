@@ -100,7 +100,11 @@ defmodule AlertsUI.Trapeze.Importer do
     )
   end
 
-  @spec persist(map()) :: :ok | :error
+  @spec persist(map() | {atom(), String.t(), String.t()}) :: :ok | :error
+  def persist({:skip, work_order_id, reason}) do
+    info("Skipping #{work_order_id}: #{reason}")
+  end
+
   def persist(alert_params) do
     alert = get_existing_alert(alert_params) || %Alert{}
 
@@ -116,7 +120,13 @@ defmodule AlertsUI.Trapeze.Importer do
         info("Work Order ##{alert_params.work_order_id}")
 
         alert
-        |> Alert.changeset(alert_params)
+        |> Alert.changeset(
+          alert_params
+          |> Map.merge(%{
+            last_modified_timestamp: DateTime.now!("Etc/UTC"),
+            last_push_notification_timestamp: DateTime.now!("Etc/UTC")
+          })
+        )
         |> PaperTrail.insert_or_update!(
           user: nil,
           origin: "(Opened automatically via Trapeze EAM)"
