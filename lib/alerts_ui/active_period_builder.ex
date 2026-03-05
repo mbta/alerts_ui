@@ -15,6 +15,8 @@ defmodule AlertsUI.ActivePeriodBuilder do
     Do not change that without also changing the recurring alert updater
   """
 
+  alias AlertsUI.Helpers.DateTime, as: DTHelpers
+
   @type active_period_data_t :: %{
           active_period: [any()],
           active_period_start: DateTime.t(),
@@ -107,12 +109,12 @@ defmodule AlertsUI.ActivePeriodBuilder do
         %{
           start:
             date
-            |> DateTime.new!(start_time, "America/New_York")
+            |> DTHelpers.new_round_up_to_gap!(start_time, "America/New_York")
             |> DateTime.shift_zone!("Etc/UTC"),
           end:
             date
             |> Date.add(next_day_modifier)
-            |> DateTime.new!(end_time, "America/New_York")
+            |> DTHelpers.new_round_up_to_gap!(end_time, "America/New_York")
             |> DateTime.shift_zone!("Etc/UTC")
         }
       end)

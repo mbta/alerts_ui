@@ -402,6 +402,35 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
     end)
   end
 
+  def validate_not_dst_gap(changeset) do
+    changeset
+    |> validate_change(:active_period_start, fn :active_period_start, active_period_start ->
+      validate_not_in_dst_gap(
+        ensure_naive_datetime_format(active_period_start),
+        :active_period_start
+      )
+    end)
+    |> validate_change(:active_period_end, fn :active_period_end, active_period_end ->
+      validate_not_in_dst_gap(
+        ensure_naive_datetime_format(active_period_end),
+        :active_period_end
+      )
+    end)
+  end
+
+  defp validate_not_in_dst_gap(naive_datetime, field) do
+    case DateTime.from_naive(naive_datetime, "America/New_York") do
+      {:ok, _datetime} ->
+        []
+
+      {:gap, _, _} ->
+        [
+          {field,
+           "Effect periods cannot start or end during a skipped daylight savings time hour"}
+        ]
+    end
+  end
+
   defp formatted_datetime(datetime, format_string \\ "{0M}/{0D}/{YYYY}, {0h12}:{0m} {AM}"),
     do: Timex.format!(datetime, format_string)
 

@@ -1,5 +1,5 @@
 defmodule AlertsUI.Helpers.RecurrenceTest do
-  use ExUnit.Case, asyne: true
+  use ExUnit.Case, async: true
 
   import AlertsUI.Helpers.Recurrence
 
