@@ -16,8 +16,8 @@ defmodule AlertsUI.Helpers.DateTime do
         gap = Time.diff(DateTime.to_time(late), DateTime.to_time(early))
         new_protecting_gaps!(date, Time.add(time, gap), zone)
 
-      e ->
-        raise e
+      {:error, e} ->
+        raise "Error in adjusting time for DST: #{e}"
     end
   end
 
@@ -34,8 +34,8 @@ defmodule AlertsUI.Helpers.DateTime do
         # round up to the gap
         new_protecting_gaps!(date, DateTime.to_time(late), zone)
 
-      e ->
-        raise e
+      {:error, e} ->
+        raise "Error in rounding time to DST gap: #{e}"
     end
   end
 end
