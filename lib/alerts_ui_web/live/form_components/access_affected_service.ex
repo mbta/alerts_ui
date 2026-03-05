@@ -5,8 +5,6 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
   use AlertsUIWeb, :live_component
   use AlertsUI.Schema
 
-  require Logger
-
   import Ecto.Changeset
 
   alias AlertsUI.Models.InformedEntity
