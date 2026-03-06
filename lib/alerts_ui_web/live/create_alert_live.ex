@@ -19,6 +19,7 @@ defmodule AlertsUIWeb.Step do
 end
 
 defmodule AlertsUIWeb.CreateAlertLive do
+  require Logger
   use AlertsUIWeb, :live_view
 
   alias AlertsUI.AlertBuilder
@@ -78,6 +79,15 @@ defmodule AlertsUIWeb.CreateAlertLive do
   ]
 
   @impl true
+  def terminate({reason, event}, socket) do
+    debug_tag = socket.assigns.debug_tag
+    Logger.warning("[LV #{debug_tag}] terminating at #{DateTime.utc_now()}")
+    Logger.warning("[LV #{debug_tag}] reason: #{reason}")
+    Logger.warning("[LV #{debug_tag}] event: #{event}")
+    Logger.warning("[LV #{debug_tag}] socket: #{inspect(socket)}")
+  end
+
+  @impl true
   def mount(params, _session, socket) do
     alert_id = Map.get(params, "alert_id")
 
@@ -132,7 +142,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
         errors: %{},
         submitted: false,
         obsolete_ids: %{},
-        obsolete_id_text: []
+        obsolete_id_text: [],
+        debug_tag: :crypto.strong_rand_bytes(8) |> Base.encode64()
       })
 
     {:ok, socket}
