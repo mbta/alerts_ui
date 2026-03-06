@@ -369,8 +369,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   defp get_notification_specifier(_notification_period_start), do: :custom
 
   defp last_push_notification_timestamp(alert) do
-    lpnt = alert |> Map.get(:last_push_notification_timestamp)
-    %{last_push_notification_timestamp: lpnt}
+    %{last_push_notification_timestamp: Map.get(alert, :last_push_notification_timestamp)}
   end
 
   def shift_to_naive(nil), do: nil
