@@ -22,7 +22,7 @@
   </div>
 
   <div
-    class="overflow-x-auto md:h-full md:overflow-auto"
+    class="overflow-x-auto min-h-48 md:h-full md:overflow-auto"
     phx-hook="ScrollToTop"
     data-scroll-to-top={inspect(@scroll_to_top)}
     data-showing-alert-id={Map.get(assigns, :selected_alert_id, "")}
