@@ -102,7 +102,7 @@ defmodule AlertsUI.AlertBuilder do
     end)
     |> Map.merge(%{current_time: current_time})
     |> Map.merge(recurrence_text(alert_data))
-    |> Map.merge(last_push_notification_timestamp(alert_data))
+    |> Map.merge(last_push_notification_timestamp(alert_data, current_time))
     |> Map.merge(severity_level(alert_data))
     |> Map.merge(reminder_times(alert_data))
     |> Map.merge(plaintext_reminder_selections(alert_data))
@@ -132,13 +132,17 @@ defmodule AlertsUI.AlertBuilder do
     %{last_modified_timestamp: current_time}
   end
 
-  defp last_push_notification_timestamp(alert_data) do
-    last_push_notification_timestamp =
-      alert_data
-      |> Map.get(:last_push_notification_timestamp)
-      |> ActivePeriodBuilder.naive_eastern_datetime_to_utc()
+  defp last_push_notification_timestamp(%{notification_toggle: false} = alert_data, _current_time) do
+    # if notification toggle is false, keep original LPNT (default to nil if there is no original)
+    original_last_push_notification_timestamp =
+      Map.get(alert_data, :last_push_notification_timestamp)
 
-    %{last_push_notification_timestamp: last_push_notification_timestamp}
+    %{last_push_notification_timestamp: original_last_push_notification_timestamp}
+  end
+
+  defp last_push_notification_timestamp(_alert_data, current_time) do
+    # if notification toggle is true, LPNT is set to current time
+    %{last_push_notification_timestamp: current_time}
   end
 
   defp primary_service_type(alert_data) do

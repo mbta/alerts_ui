@@ -128,7 +128,7 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
 
   describe "end-to-end" do
     @tag :logged_in_user
-    test "last push notification timestamp gets filled in by default",
+    test "last push notification timestamp gets filled in by default upon alert creation",
          %{
            conn: conn
          } do
@@ -165,13 +165,19 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
 
         # wait a smidge for the alert to get persisted to the database
         :timer.sleep(50)
+
         alert = AlertsUI.Alerts.list_all() |> hd
         assert %DateTime{} = alert.last_push_notification_timestamp
+
+        assert DateTime.compare(
+                 alert.last_push_notification_timestamp,
+                 alert.last_modified_timestamp
+               ) == :eq
       end
     end
 
     @tag :logged_in_user
-    test "Unselecting notification toggle results in no last push notification timestamp",
+    test "Unselecting notification toggle results last push notification timestamp of nil upon alert creation",
          %{
            conn: conn
          } do
@@ -397,9 +403,13 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
         # # wait a smidge for the alert to get persisted to the database
         :timer.sleep(50)
 
-        assert AlertsUI.Alerts.list_all()
-               |> hd
-               |> Map.get(:last_push_notification_timestamp) != original_lpnt
+        alert = hd(AlertsUI.Alerts.list_all())
+        assert Map.get(alert, :last_push_notification_timestamp) != original_lpnt
+
+        assert DateTime.compare(
+                 alert.last_push_notification_timestamp,
+                 alert.last_modified_timestamp
+               ) == :eq
       end
     end
   end
