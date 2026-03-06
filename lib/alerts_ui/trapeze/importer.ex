@@ -93,7 +93,8 @@ defmodule AlertsUI.Trapeze.Importer do
                fragment(
                  "array_to_string(original_facility_selections, ',') LIKE concat('%|', ?::text)",
                  ^facility_id
-               )),
+               ) and
+               is_nil(a.work_order_id)),
         order_by: [desc: a.active_period_start],
         limit: 1,
         preload: [:informed_entity, :user]

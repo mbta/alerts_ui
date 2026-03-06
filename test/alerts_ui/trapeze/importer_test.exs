@@ -66,6 +66,25 @@ defmodule AlertsUI.Trapeze.ImporterTest do
         assert alert_4 == nil
       end
     end
+
+    test "handles multiple work orders for the same elevator" do
+      with_mock(FacilitiesRepo,
+        get: fn _ -> @facility end
+      ) do
+        input = [
+          "2026-02-17T12:52:38-05:00|FP-DWNXST-ELEV-891|ELEV-891|ELEVATOR, DOWNTOWN CROSSING EL-891, OL NB-FRANKLIN ST|ORANGE LINE,RED LINE - MAIN|310-2026-184|2026-01-12T15:50:03+00:00|2026-01-12T15:52:14+00:00|2026-01-12T15:50:03+00:00||OPEN",
+          "2026-02-17T12:52:38-05:00|FP-DWNXST-ELEV-891|ELEV-891|ELEVATOR, DOWNTOWN CROSSING EL-891, OL NB-FRANKLIN ST|ORANGE LINE,RED LINE - MAIN|310-2026-999|2026-01-12T15:50:03+00:00|2026-01-12T15:52:14+00:00|2026-01-12T15:50:03+00:00||OPEN"
+        ]
+
+        Importer.process_feed(input)
+
+        alert_1 = get("310-2026-184")
+        alert_2 = get("310-2026-999")
+
+        assert alert_1
+        assert alert_2
+      end
+    end
   end
 
   describe "persist" do
