@@ -10,6 +10,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   alias AlertsUIWeb.CreateAlertLive
 
   alias AlertsUIWeb.FormComponents.Helpers.{
+    AlertData,
     ContentFormatter,
     EntityValidator,
     ErrorFormatter,
@@ -37,9 +38,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     field :modal_date_search_term, :string
   end
 
-  # put effect names here if you only want people
-  # to be able to select 1 route
-  @single_route_effect_names ["Detour", "Snow Route"]
+  # effects where user can only select 1 route
+  @single_route_effect_names AlertData.get_single_route_effect_names()
 
   @fields ~w[route_ids direction trip_ids stop_ids stop_names stop_names_and_ids trip_information_by_id route_search_term trip_search_term stop_search_term single_route_id modal_date modal_date_search_term]a
 
@@ -702,7 +702,11 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         </div>
       </.form>
       <p :if={@show_stop_ids}>
-        Selected stop ids: {(@form[:stop_ids].value || []) |> Enum.join(", ")}
+        Selected stop ids: {(@form[:stop_ids].value || []) |> Enum.join(", ")} Selected route ids: {(@form[
+                                                                                                       :route_ids
+                                                                                                     ].value ||
+                                                                                                       [])
+        |> Enum.join(", ")}
       </p>
       <hr class="mt-4" />
     </div>
