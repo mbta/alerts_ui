@@ -37,6 +37,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     field :modal_date_search_term, :string
   end
 
+  # put effect names here if you only want people
+  # to be able to select 1 route
+  @single_route_effect_names ["Detour", "Snow Route"]
+
   @fields ~w[route_ids direction trip_ids stop_ids stop_names stop_names_and_ids trip_information_by_id route_search_term trip_search_term stop_search_term single_route_id modal_date modal_date_search_term]a
 
   @impl true
@@ -375,9 +379,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   def build_changeset(changeset, params), do: cast(changeset, params, @fields)
 
-  def wrap_single_route_id(affected_service, "Detour") do
-    # if it's a detour alert, we need to set route_ids to equal the single_route_id
-    # from the form, so we don't have to worry about whether it's a list
+  def wrap_single_route_id(affected_service, effect_name)
+      when effect_name in @single_route_effect_names do
+    # if it's an alert effect that can only take 1 route (eg Detour), we need to set route_ids to equal
+    # the single_route_id from the form, so we don't have to worry about whether it's a list
     # elsewhere
     incoming_route_id = Map.get(affected_service, "single_route_id")
 
@@ -564,7 +569,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         trip_id_options: trip_id_options,
         stop_id_options: stop_id_options,
         modal_options: modal_options,
-        stop_selections: stop_selections
+        stop_selections: stop_selections,
+        single_route_effect_names: @single_route_effect_names
       )
 
     ~H"""
@@ -589,13 +595,17 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
           <.filtered_select
             :if={@route_type === 3}
             label={if @route_type in [0, 1, 2], do: "Lines", else: "Routes"}
-            field={if @effect_name == "Detour", do: @form[:single_route_id], else: @form[:route_ids]}
+            field={
+              if @effect_name in @single_route_effect_names,
+                do: @form[:single_route_id],
+                else: @form[:route_ids]
+            }
             filter_field={@form[:route_search_term]}
             loading={@available_routes.loading}
             no_results={Enum.empty?(@route_id_options)}
             options={@route_id_options}
             class="h-full"
-            multiple={if @effect_name == "Detour", do: false, else: true}
+            multiple={if @effect_name in @single_route_effect_names, do: false, else: true}
           />
           <.toggle_checkgroup
             :if={@route_type !== 3}
