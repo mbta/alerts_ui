@@ -5,7 +5,7 @@ defmodule AlertsUI.Alerts do
   import Ecto.Changeset
   import Ecto.Query
   alias AlertsUI.DBContexts.Users
-  alias AlertsUI.Models.{Alert, User}
+  alias AlertsUI.Models.{ActivePeriod, Alert, User}
   alias AlertsUI.Repo
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   require Logger
@@ -181,18 +181,29 @@ defmodule AlertsUI.Alerts do
     )
   end
 
+  def active_period_preload_query do
+    from a in ActivePeriod, order_by: a.start
+  end
+
+  # comments_query = from c in Comment, order_by: c.popularity, limit: 5 Repo.all from p in Post, preload: [comments: ^comments_query]
   @spec list_all_open() :: [Alert.t()]
   def list_all_open do
     # Using an inner join here reduces the
     # number of overall queries
     # ref. https://hexdocs.pm/ecto/Ecto.Query.html#preload/3
+    # active_period_query = from a in ActivePeriod, order_by: a.start
     Repo.all(
       from(
         a in Alert,
         where: is_nil(a.closed_timestamp),
         inner_join: ie in AlertsUI.Models.InformedEntity,
         on: ie.alert_id == a.id,
-        preload: [:user, :active_period, :reminder_times, informed_entity: {ie, :trip}],
+        preload: [
+          :user,
+          :reminder_times,
+          active_period: ^active_period_preload_query(),
+          informed_entity: {ie, :trip}
+        ],
         order_by: [asc: a.alert_id]
       )
     )
@@ -206,7 +217,12 @@ defmodule AlertsUI.Alerts do
         where: not is_nil(a.closed_timestamp) and a.closed_timestamp > from_now(-5, "minute"),
         inner_join: ie in AlertsUI.Models.InformedEntity,
         on: ie.alert_id == a.id,
-        preload: [:user, :active_period, :reminder_times, informed_entity: {ie, :trip}],
+        preload: [
+          :user,
+          :reminder_times,
+          active_period: ^active_period_preload_query(),
+          informed_entity: {ie, :trip}
+        ],
         order_by: [asc: a.alert_id]
       )
     )
