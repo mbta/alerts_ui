@@ -151,12 +151,18 @@ defmodule AlertsUI.IBIAlertImporterTest do
 
     test ":active_period_start_time", %{recurring_alert: recurring_alert} do
       assert recurring_alert.recurrence_start_time == "07:00:00"
-      assert from_ibi(recurring_alert, :active_period_start_time) == ~T[12:00:00]
+      utc_offset = DateTime.now!("America/New_York").utc_offset
+      std_offset = DateTime.now!("America/New_York").std_offset
+      time_in_utc = Time.add(~T[07:00:00], -(utc_offset + std_offset))
+      assert from_ibi(recurring_alert, :active_period_start_time) == time_in_utc
     end
 
     test ":active_period_end_time", %{recurring_alert: recurring_alert} do
       assert recurring_alert.recurrence_end_time == "17:00:00"
-      assert from_ibi(recurring_alert, :active_period_end_time) == ~T[22:00:00]
+      utc_offset = DateTime.now!("America/New_York").utc_offset
+      std_offset = DateTime.now!("America/New_York").std_offset
+      time_in_utc = Time.add(~T[17:00:00], -(utc_offset + std_offset))
+      assert from_ibi(recurring_alert, :active_period_end_time) == time_in_utc
     end
 
     test ":active_period_start_date", %{recurring_alert: recurring_alert} do
