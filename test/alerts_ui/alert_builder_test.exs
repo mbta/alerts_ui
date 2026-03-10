@@ -116,7 +116,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  created_timestamp: nil,
                  last_modified_timestamp: ~U[2024-04-30 05:54:00Z],
                  source: nil,
-                 notification_duration_certainty: nil
+                 notification_duration_certainty: nil,
+                 work_order_id: nil
                }
 
         Alerts.create_or_update_alert(result, build(:user))
@@ -548,7 +549,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  created_timestamp: nil,
                  last_modified_timestamp: ~U[2024-04-30 05:54:00Z],
                  source: nil,
-                 notification_duration_certainty: nil
+                 notification_duration_certainty: nil,
+                 work_order_id: nil
                }
       end
     end
@@ -872,7 +874,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  created_timestamp: nil,
                  last_modified_timestamp: ~U[2024-04-30 05:54:00Z],
                  source: nil,
-                 notification_duration_certainty: nil
+                 notification_duration_certainty: nil,
+                 work_order_id: nil
                }
 
         result

@@ -3,6 +3,7 @@ defmodule AlertsUI.Trapeze.WorkOrder do
   One escalator/elevator work order
   """
 
+  alias AlertsUI.AlertBuilder
   alias AlertsUI.Trapeze.WorkOrder
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.Templates
@@ -81,43 +82,45 @@ defmodule AlertsUI.Trapeze.WorkOrder do
   defp effect("ESCL"), do: :escalator
   defp effect("ELEV"), do: :elevator
 
-  @spec to_params(WorkOrder.t() | {atom(), String.t()}) ::
-          map() | {atom(), String.t(), String.t()}
+  @spec to_params(WorkOrder.t() | {atom(), String.t(), String.t()}) ::
+          AlertBuilder.alert_data_t() | {atom(), String.t(), String.t()}
   def to_params({:skip, work_order_id, reason}), do: {:skip, work_order_id, reason}
 
   def to_params(%__MODULE__{} = work_order) do
-    facility_name =
-      case FacilitiesRepo.get(work_order.facility_id) do
-        nil -> work_order.description
-        facility -> facility.long_name
-      end
-
     %{
-      active_period_start: work_order.start_datetime,
+      active_period_end_specifier: :until_further_notice,
       active_period_end: end_datetime(work_order),
-      notification_period_start: work_order.start_datetime,
-      notification_period_end: end_datetime(work_order),
-      closed_timestamp: end_datetime(work_order),
-      primary_service_type: "access",
+      active_period_start_specifier: :custom,
+      active_period_start: work_order.start_datetime |> DateTime.to_naive(),
+      alert_timing: :one_time,
       cause_detail: "MAINTENANCE",
       cause: :MAINTENANCE,
+      child_stops_with_context: [],
+      closed_timestamp: end_datetime(work_order),
       combination: :ACCESS,
-      duration_certainty: duration_certainty(work_order),
+      description_text: autotext(work_order) |> description_for(),
+      direction: "default",
       effect_detail: effect_detail(work_order.effect),
       effect_name: effect_name(work_order.effect),
-      effect: :ACCESSIBILITY_ISSUE,
-      service_effect_text: autotext(work_order) |> service_effect_text_for(),
-      original_facility_selections: ["#{facility_name}|#{work_order.facility_id}"],
-      severity_level: :WARNING,
-      severity: 3,
-      work_order_id: work_order.work_order_id,
-      informed_entity: [
-        %{facility_id: work_order.facility_id}
-      ],
+      effect: "ACCESSIBILITY_ISSUE",
+      facility_id: work_order.facility_id,
       header_text: autotext(work_order) |> header_for(),
-      description_text: autotext(work_order) |> description_for(),
+      notification_period_end: end_datetime(work_order),
+      notification_period_start: work_order.start_datetime |> DateTime.to_naive(),
+      notification_specifier: :now,
+      reminder_times: [],
+      route_ids: [],
+      route_type: nil,
+      route_types_by_id: %{},
+      service_types: [],
+      severity: 3,
       source: :TRAPEZE,
-      status: work_order.status
+      status: work_order.status,
+      stop_ids: [],
+      stop_names_and_ids: [],
+      trip_ids: [],
+      trip_information_by_id: [],
+      work_order_id: work_order.work_order_id
     }
   end
 
@@ -127,7 +130,7 @@ defmodule AlertsUI.Trapeze.WorkOrder do
 
     AlertDataToAutoText.build_autotext_data(%{
       route_type: nil,
-      effect_name: "Elevator Closure",
+      effect_name: effect_name(work_order.effect),
       cause_detail: "maintenance",
       start_datetime: work_order.start_datetime,
       end_specifier: :until_further_notice,
@@ -145,10 +148,9 @@ defmodule AlertsUI.Trapeze.WorkOrder do
   def service_effect_text_for(autotext),
     do: Templates.build_auto_text(autotext, :service_effect_template)
 
-  defp duration_certainty(%{end_datetime: _, status: :closed}), do: :KNOWN
-  defp duration_certainty(_), do: :UNKNOWN
+  defp end_datetime(%{end_datetime: datetime, status: :closed}),
+    do: datetime |> DateTime.to_naive()
 
-  defp end_datetime(%{end_datetime: datetime, status: :closed}), do: datetime
   defp end_datetime(_), do: nil
 
   defp effect_detail(:escalator), do: "ESCALATOR_CLOSURE"

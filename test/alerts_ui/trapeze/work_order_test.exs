@@ -93,34 +93,40 @@ defmodule AlertsUI.Trapeze.WorkOrderTest do
           |> WorkOrder.to_params()
 
         assert output == %{
-                 active_period_start: ~U[2026-01-12 15:50:03Z],
+                 active_period_start: ~N[2026-01-12 15:50:03],
                  active_period_end: nil,
                  closed_timestamp: nil,
-                 notification_period_start: ~U[2026-01-12 15:50:03Z],
+                 notification_period_start: ~N[2026-01-12 15:50:03],
                  notification_period_end: nil,
-                 primary_service_type: "access",
                  cause_detail: "MAINTENANCE",
                  cause: :MAINTENANCE,
                  combination: :ACCESS,
-                 duration_certainty: :UNKNOWN,
                  effect_detail: "ELEVATOR_CLOSURE",
                  effect_name: "Elevator Closure",
-                 effect: :ACCESSIBILITY_ISSUE,
-                 service_effect_text: "elevator unavailable",
-                 original_facility_selections: [
-                   "Alewife Escalator 349 (Platform to Russell Field)|891"
-                 ],
-                 severity_level: :WARNING,
+                 effect: "ACCESSIBILITY_ISSUE",
                  severity: 3,
                  work_order_id: "310-2026-184",
-                 informed_entity: [
-                   %{facility_id: "891"}
-                 ],
                  header_text:
                    "Alewife Escalator 349 (Platform to Russell Field) unavailable due to maintenance",
                  description_text: "",
                  source: :TRAPEZE,
-                 status: :open
+                 status: :open,
+                 active_period_end_specifier: :until_further_notice,
+                 active_period_start_specifier: :custom,
+                 alert_timing: :one_time,
+                 child_stops_with_context: [],
+                 direction: "default",
+                 facility_id: "891",
+                 notification_specifier: :now,
+                 reminder_times: [],
+                 route_ids: [],
+                 route_type: nil,
+                 route_types_by_id: %{},
+                 service_types: [],
+                 stop_ids: [],
+                 stop_names_and_ids: [],
+                 trip_ids: [],
+                 trip_information_by_id: []
                }
       end
     end

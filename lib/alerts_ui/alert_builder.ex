@@ -65,7 +65,10 @@ defmodule AlertsUI.AlertBuilder do
           reminder_times: [NaiveDateTime.t()] | nil,
           recurrence_days: [atom()] | nil,
           route_types_by_id: %{String.t() => Route.type_int()},
-          source: atom() | nil
+          source: atom() | nil,
+          closed_timestamp: NaiveDateTime.t() | nil,
+          work_order_id: String.t() | nil,
+          status: nil | :open | :closed | :pending | :work_finished
         }
   @type direction_t :: 0 | 1
   @type stop_with_context_t :: {Stop.t(), Route.id_t(), direction_t(), RoutePattern.stop_type()}
@@ -90,7 +93,8 @@ defmodule AlertsUI.AlertBuilder do
       :severity,
       :source,
       :created_timestamp,
-      :closed_timestamp
+      :closed_timestamp,
+      :work_order_id
     ]
 
     Enum.reduce(direct_from_alert_data_keys, %{}, fn key, params ->
@@ -701,7 +705,7 @@ defmodule AlertsUI.AlertBuilder do
         ) ::
           [map()]
   # Systemwide, all service types
-  defp build_informed_entities(nil, %{service_types: []}, effect) do
+  def build_informed_entities(nil, %{service_types: []}, effect) do
     [
       %{
         activities: Activities.for_effect(effect),
@@ -711,7 +715,7 @@ defmodule AlertsUI.AlertBuilder do
   end
 
   # Systemwide, specified service types
-  defp build_informed_entities(nil, %{service_types: service_types}, effect) do
+  def build_informed_entities(nil, %{service_types: service_types}, effect) do
     Enum.map(
       service_types,
       fn service_type ->
@@ -724,22 +728,22 @@ defmodule AlertsUI.AlertBuilder do
     )
   end
 
-  defp build_informed_entities(:ACCESS, %{facility_id: facility_id}, effect) do
+  def build_informed_entities(:ACCESS, %{facility_id: facility_id}, effect) do
     [facility_id]
     |> Enum.map(&FacilitiesRepo.get/1)
     |> Enum.flat_map(&build_facility_maps(&1, effect))
   end
 
-  defp build_informed_entities(
-         :R,
-         %{
-           route_ids: route_ids,
-           direction: direction,
-           route_type: route_type,
-           route_types_by_id: route_types_by_id
-         },
-         effect
-       ) do
+  def build_informed_entities(
+        :R,
+        %{
+          route_ids: route_ids,
+          direction: direction,
+          route_type: route_type,
+          route_types_by_id: route_types_by_id
+        },
+        effect
+      ) do
     route_ids
     |> Routes.expanding_green_line()
     |> Enum.map(
@@ -754,22 +758,22 @@ defmodule AlertsUI.AlertBuilder do
   end
 
   # No stops, treat like :R
-  defp build_informed_entities(:RDS, %{stop_ids: []} = alert_data, effect),
+  def build_informed_entities(:RDS, %{stop_ids: []} = alert_data, effect),
     do: build_informed_entities(:R, alert_data, effect)
 
   # Did not get stops from route patterns (fallback)
-  defp build_informed_entities(
-         :RDS,
-         %{
-           child_stops_with_context: [],
-           route_ids: route_ids,
-           route_types_by_id: route_types_by_id,
-           route_type: route_type,
-           direction: direction,
-           stop_ids: stop_ids
-         },
-         effect
-       ) do
+  def build_informed_entities(
+        :RDS,
+        %{
+          child_stops_with_context: [],
+          route_ids: route_ids,
+          route_types_by_id: route_types_by_id,
+          route_type: route_type,
+          direction: direction,
+          stop_ids: stop_ids
+        },
+        effect
+      ) do
     stop_ids
     |> stop_route_pairs(route_ids)
     |> Enum.map(fn {stop_id, route_id} ->
@@ -785,15 +789,15 @@ defmodule AlertsUI.AlertBuilder do
   end
 
   # Child stops from route pattern
-  defp build_informed_entities(
-         :RDS,
-         %{
-           child_stops_with_context: [_ | _] = child_stops_with_context,
-           route_types_by_id: route_types_by_id,
-           route_type: route_type
-         },
-         effect
-       ) do
+  def build_informed_entities(
+        :RDS,
+        %{
+          child_stops_with_context: [_ | _] = child_stops_with_context,
+          route_types_by_id: route_types_by_id,
+          route_type: route_type
+        },
+        effect
+      ) do
     child_stops_with_context
     |> Enum.map(fn {%Stop{id: stop_id}, route_id, direction_id, stop_type} ->
       %{
@@ -808,23 +812,23 @@ defmodule AlertsUI.AlertBuilder do
     |> Enum.uniq()
   end
 
-  defp build_informed_entities(
-         :RDT,
-         %{trip_ids: []} = alert_data,
-         effect
-       ) do
+  def build_informed_entities(
+        :RDT,
+        %{trip_ids: []} = alert_data,
+        effect
+      ) do
     build_informed_entities(:R, alert_data, effect)
   end
 
-  defp build_informed_entities(
-         :RDT,
-         %{
-           trip_ids: [_ | _] = trip_ids,
-           route_type: route_type,
-           trip_information_by_id: trip_information_by_id
-         },
-         effect
-       ) do
+  def build_informed_entities(
+        :RDT,
+        %{
+          trip_ids: [_ | _] = trip_ids,
+          route_type: route_type,
+          trip_information_by_id: trip_information_by_id
+        },
+        effect
+      ) do
     trip_ids
     |> Enum.map(fn trip_id ->
       %{direction_id: direction_id, route_id: route_id} = trip_information_by_id[trip_id]
@@ -844,27 +848,27 @@ defmodule AlertsUI.AlertBuilder do
     end)
   end
 
-  defp build_informed_entities(:RDTS, %{stop_ids: [], trip_ids: []} = alert_data, effect),
+  def build_informed_entities(:RDTS, %{stop_ids: [], trip_ids: []} = alert_data, effect),
     do: build_informed_entities(:R, alert_data, effect)
 
-  defp build_informed_entities(:RDTS, %{stop_ids: []} = alert_data, effect),
+  def build_informed_entities(:RDTS, %{stop_ids: []} = alert_data, effect),
     do: build_informed_entities(:RDT, alert_data, effect)
 
-  defp build_informed_entities(:RDTS, %{trip_ids: []} = alert_data, effect),
+  def build_informed_entities(:RDTS, %{trip_ids: []} = alert_data, effect),
     do: build_informed_entities(:RDS, alert_data, effect)
 
   # Did not get stops from route patterns (fallback)
-  defp build_informed_entities(
-         :RDTS,
-         %{
-           stop_ids: [_ | _] = stop_ids,
-           child_stops_with_context: [],
-           trip_ids: [_ | _] = trip_ids,
-           route_type: route_type,
-           route_ids: route_ids
-         },
-         effect
-       ) do
+  def build_informed_entities(
+        :RDTS,
+        %{
+          stop_ids: [_ | _] = stop_ids,
+          child_stops_with_context: [],
+          trip_ids: [_ | _] = trip_ids,
+          route_type: route_type,
+          route_ids: route_ids
+        },
+        effect
+      ) do
     trips = get_trips(trip_ids)
 
     stop_ids
@@ -891,15 +895,15 @@ defmodule AlertsUI.AlertBuilder do
   end
 
   # Child stops from route patterns
-  defp build_informed_entities(
-         :RDTS,
-         %{
-           child_stops_with_context: [_ | _] = child_stops_with_context,
-           trip_ids: [_ | _] = trip_ids,
-           route_type: route_type
-         },
-         effect
-       ) do
+  def build_informed_entities(
+        :RDTS,
+        %{
+          child_stops_with_context: [_ | _] = child_stops_with_context,
+          trip_ids: [_ | _] = trip_ids,
+          route_type: route_type
+        },
+        effect
+      ) do
     trips = get_trips(trip_ids)
     trip_directions = trip_directions(trips)
 
@@ -928,15 +932,15 @@ defmodule AlertsUI.AlertBuilder do
     |> Enum.uniq()
   end
 
-  defp build_informed_entities(
-         :SR,
-         %{
-           child_stops_with_context: [_ | _] = child_stops_with_context,
-           route_types_by_id: route_types_by_id,
-           route_type: route_type
-         },
-         effect
-       ) do
+  def build_informed_entities(
+        :SR,
+        %{
+          child_stops_with_context: [_ | _] = child_stops_with_context,
+          route_types_by_id: route_types_by_id,
+          route_type: route_type
+        },
+        effect
+      ) do
     child_stops_with_context
     |> Enum.filter(fn {%Stop{parent_id: parent_id, id: id}, route_id, _, _} ->
       id_to_use = if parent_id, do: parent_id, else: id
@@ -954,17 +958,17 @@ defmodule AlertsUI.AlertBuilder do
     |> Enum.uniq()
   end
 
-  defp build_informed_entities(
-         :SR,
-         %{
-           stop_ids: stop_ids,
-           route_ids: route_ids,
-           route_types_by_id: route_types_by_id,
-           route_type: route_type,
-           child_stops_with_context: []
-         },
-         effect
-       ) do
+  def build_informed_entities(
+        :SR,
+        %{
+          stop_ids: stop_ids,
+          route_ids: route_ids,
+          route_types_by_id: route_types_by_id,
+          route_type: route_type,
+          child_stops_with_context: []
+        },
+        effect
+      ) do
     route_ids = Routes.expanding_green_line(route_ids)
 
     stop_ids
@@ -981,7 +985,7 @@ defmodule AlertsUI.AlertBuilder do
     end)
   end
 
-  defp build_informed_entities(_mode, _data, _effect), do: []
+  def build_informed_entities(_mode, _data, _effect), do: []
 
   @spec get_trips([String.t()]) :: [Trip.t()]
   defp get_trips(trip_ids) do

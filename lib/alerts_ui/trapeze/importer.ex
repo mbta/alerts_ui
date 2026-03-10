@@ -4,6 +4,7 @@ defmodule AlertsUI.Trapeze.Importer do
   """
   import Ecto.Query
 
+  alias AlertsUI.AlertBuilder
   alias AlertsUI.FeedOutput.GTFSProtobufDefinition.Alert
   use Oban.Worker
 
@@ -76,14 +77,20 @@ defmodule AlertsUI.Trapeze.Importer do
   end
 
   defp get_existing_alert(alert_params) do
-    [facility | _] = alert_params.original_facility_selections
-    [_, facility_id] = String.split(facility, "|")
+    original_facility_selections = Map.get(alert_params, :original_facility_selections)
+
+    facility_id =
+      if original_facility_selections do
+        [facility | _] = original_facility_selections
+        [_, facility_id] = String.split(facility, "|")
+        facility_id
+      end
 
     Repo.one(
       from a in Alert,
         where:
           a.work_order_id == ^alert_params.work_order_id or
-            (a.primary_service_type == ^alert_params.primary_service_type and
+            (a.primary_service_type == "access" and
                a.effect_name == ^alert_params.effect_name and
                is_nil(a.closed_timestamp) and
                fragment(
@@ -97,7 +104,7 @@ defmodule AlertsUI.Trapeze.Importer do
     )
   end
 
-  @spec persist(map() | {atom(), String.t(), String.t()}) ::
+  @spec persist(AlertBuilder.alert_data_t() | {atom(), String.t(), String.t()}) ::
           {:ok, String.t()} | {:error, String.t()}
   def persist({:skip, _work_order_id, reason}) do
     {:warning, "IGNORE #{reason}"}
@@ -168,10 +175,13 @@ defmodule AlertsUI.Trapeze.Importer do
        }),
        do: :ignore_closed
 
+  @spec create(AlertBuilder.alert_data_t()) :: any()
   defp create(alert_params) do
+    alert_data_params = AlertBuilder.build_alert(alert_params, :ACCESS)
+
     %Alert{}
     |> Alert.changeset(
-      alert_params
+      alert_data_params
       |> Map.merge(%{
         last_modified_timestamp: DateTime.now!("Etc/UTC"),
         last_push_notification_timestamp: DateTime.now!("Etc/UTC")

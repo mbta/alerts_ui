@@ -9,6 +9,9 @@ defmodule AlertsUI.Trapeze.ImporterTest do
   alias AlertsUI.Trapeze.SFTP
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
+  alias MBTAV3API.Routes.Repo, as: RoutesRepo
+  alias MBTAV3API.Routes.Route
+  alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
 
   import AlertsUI.Support.Factory
@@ -17,16 +20,22 @@ defmodule AlertsUI.Trapeze.ImporterTest do
 
   import Mock
 
+  @route %Route{
+    id: "Red",
+    type: 1
+  }
+  @stop %Stop{
+    id: "place-alfcl",
+    name: "Aquarium",
+    type: "stop",
+    child_ids: ["place"]
+  }
   @facility %Facility{
     id: "349",
     type: "ESCALATOR",
     short_name: "Platform to Russell Field",
     long_name: "Alewife Escalator 349 (Platform to Russell Field)",
-    stop: %Stop{
-      id: "place-alfcl",
-      name: "Aquarium",
-      type: "stop"
-    },
+    stop: @stop,
     latitude: 42.395428,
     longitude: -71.142483,
     properties: [
@@ -42,7 +51,12 @@ defmodule AlertsUI.Trapeze.ImporterTest do
   }
 
   def get(work_order_id),
-    do: Repo.one(from a in Alert, where: a.work_order_id == ^work_order_id)
+    do:
+      Repo.one(
+        from a in Alert,
+          where: a.work_order_id == ^work_order_id,
+          preload: [:informed_entity, :active_period]
+      )
 
   def latest_monitor,
     do: Repo.one(from t in TrapezeMonitor, order_by: [desc: t.created_at], limit: 1)
@@ -107,9 +121,11 @@ defmodule AlertsUI.Trapeze.ImporterTest do
 
   describe "process_feed" do
     test "turns Trapeze lines into Alerts" do
-      with_mock(FacilitiesRepo,
-        get: fn _ -> @facility end
-      ) do
+      with_mocks([
+        {FacilitiesRepo, [], [get: fn _ -> @facility end]},
+        {StopsRepo, [], [get: fn _ -> @stop end, get!: fn _ -> @stop end]},
+        {RoutesRepo, [], [by_stop: fn _ -> [@route] end]}
+      ]) do
         input = [
           "2026-02-17T12:52:38-05:00|FP-DWNXST-ELEV-891|ELEV-891|ELEVATOR, DOWNTOWN CROSSING EL-891, OL NB-FRANKLIN ST|ORANGE LINE,RED LINE - MAIN|310-2026-184|2026-01-12T15:50:03+00:00|2026-01-12T15:52:14+00:00|2026-01-12T15:50:03+00:00||OPEN",
           "2026-02-17T12:52:38-05:00|FP-STATST-ESCL-502|ESCL-502|ESCALATOR, STATE ESC-502, BLUE LINE NB--LOBBY|BLUE LINE,ORANGE LINE|310-2026-180|2026-01-12T11:29:05+00:00|2026-01-12T11:31:37+00:00|2026-01-12T11:29:05+00:00|2026-01-12T13:29:05+00:00|CLOSED",
@@ -138,9 +154,11 @@ defmodule AlertsUI.Trapeze.ImporterTest do
     end
 
     test "handles multiple work orders for the same elevator" do
-      with_mock(FacilitiesRepo,
-        get: fn _ -> @facility end
-      ) do
+      with_mocks([
+        {FacilitiesRepo, [], [get: fn _ -> @facility end]},
+        {StopsRepo, [], [get: fn _ -> @stop end, get!: fn _ -> @stop end]},
+        {RoutesRepo, [], [by_stop: fn _ -> [@route] end]}
+      ]) do
         input = [
           "2026-02-17T12:52:38-05:00|FP-DWNXST-ELEV-891|ELEV-891|ELEVATOR, DOWNTOWN CROSSING EL-891, OL NB-FRANKLIN ST|ORANGE LINE,RED LINE - MAIN|310-2026-184|2026-01-12T15:50:03+00:00|2026-01-12T15:52:14+00:00|2026-01-12T15:50:03+00:00||OPEN",
           "2026-02-17T12:52:38-05:00|FP-DWNXST-ELEV-891|ELEV-891|ELEVATOR, DOWNTOWN CROSSING EL-891, OL NB-FRANKLIN ST|ORANGE LINE,RED LINE - MAIN|310-2026-999|2026-01-12T15:50:03+00:00|2026-01-12T15:52:14+00:00|2026-01-12T15:50:03+00:00||OPEN"
@@ -207,21 +225,32 @@ defmodule AlertsUI.Trapeze.ImporterTest do
     end
 
     test "alert does not exist, but closed_timestamp is nil, save it" do
-      result =
-        Importer.persist(
-          build(:alert_map, %{
-            primary_service_type: "access",
-            effect_name: "Elevator Closure",
-            original_facility_selections: ["stop|123"],
+      with_mocks([
+        {FacilitiesRepo, [], [get: fn _ -> @facility end]},
+        {StopsRepo, [], [get: fn _ -> @stop end, get!: fn _ -> @stop end]},
+        {RoutesRepo, [], [by_stop: fn _ -> [@route] end]}
+      ]) do
+        result =
+          Importer.persist(%{
             work_order_id: "TESTORDER1",
+            primary_service_type: "access",
+            facility_id: "123",
+            description_text: "ok",
+            header_text: "hello",
+            effect_name: "Escalator Closure",
+            active_period_start: ~N[2024-04-30 11:54:00],
+            notification_period_start: ~N[2024-04-30 11:54:00],
+            active_period_end_specifier: :until_further_notice,
+            active_period_start_specifier: :custom,
+            cause_detail: "ESCALATOR_CLOSURE",
             closed_timestamp: nil,
             status: :open
           })
-        )
 
-      maybe_alert = get("TESTORDER1")
-      assert maybe_alert != nil
-      assert result == {:ok, "CREATE"}
+        maybe_alert = get("TESTORDER1")
+        assert maybe_alert != nil
+        assert result == {:ok, "CREATE"}
+      end
     end
 
     test "alert does not exist, but closed_timestamp exists, ignore it" do
@@ -282,6 +311,45 @@ defmodule AlertsUI.Trapeze.ImporterTest do
       alert = Repo.reload!(existing_alert)
       assert alert.closed_timestamp == ~U[2026-02-14T12:00:00Z]
       assert result == {:ok, "IGNORE closed, no change"}
+    end
+
+    test "properly creates an informed entity and active period" do
+      with_mocks([
+        {FacilitiesRepo, [], [get: fn _ -> @facility end]},
+        {StopsRepo, [], [get: fn _ -> @stop end, get!: fn _ -> @stop end]},
+        {RoutesRepo, [], [by_stop: fn _ -> [@route] end]}
+      ]) do
+        start_datetime = ~N[2024-04-30 11:54:00]
+
+        Importer.persist(%{
+          work_order_id: "TESTORDER1",
+          primary_service_type: "access",
+          facility_id: "123",
+          description_text: "ok",
+          header_text: "hello",
+          effect_name: "Escalator Closure",
+          active_period_start: start_datetime,
+          notification_period_start: ~N[2024-04-30 11:54:00],
+          active_period_end_specifier: :until_further_notice,
+          active_period_start_specifier: :custom,
+          cause_detail: "ESCALATOR_CLOSURE",
+          closed_timestamp: nil,
+          status: :open
+        })
+
+        alert = get("TESTORDER1")
+        assert alert.informed_entity != [%{facility_id: "891"}]
+
+        assert alert.active_period != [
+                 %{
+                   start:
+                     start_datetime
+                     |> DateTime.from_naive!("America/New_York")
+                     |> DateTime.shift_zone!("Etc/UTC"),
+                   end: nil
+                 }
+               ]
+      end
     end
   end
 end
