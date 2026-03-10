@@ -115,7 +115,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           last_push_notification_timestamp: NaiveDateTime.t() | nil,
           notification_toggle: boolean()
         }
-
+  # effect names where user can only select 1 route
+  @single_route_effect_names ["Detour", "Snow Route"]
   @spec build_alert_data(String.t() | Alert.t() | nil, :creating | :duplicating | :editing | nil) ::
           t()
   def build_alert_data(alert, form_type \\ nil)
@@ -211,7 +212,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     route_ids = Alert.get_original_ids(alert.original_route_selections || [])
 
     single_route_id =
-      if alert.effect_name == "Detour" and length(route_ids) === 1 do
+      if alert.effect_name in @single_route_effect_names and length(route_ids) === 1 do
         hd(route_ids)
       else
         nil
@@ -423,6 +424,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       "custom"
     end
   end
+
+  def get_single_route_effect_names(), do: @single_route_effect_names
 
   defp get_route_type(nil), do: nil
   defp get_route_type("access"), do: nil
