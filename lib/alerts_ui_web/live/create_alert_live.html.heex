@@ -88,6 +88,7 @@
           current_user={@current_user}
         />
         <.modal
+          :if={!(Map.get(assigns, :obsolete_ids, nil) |> Enum.empty?())}
           id="gtfs-warning-modal"
           class="flex flex-col h-full justify-center w-[600px]"
           header_text=""
