@@ -303,14 +303,14 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     autotext_data = AlertDataToAutoText.build_autotext_data(updated_autotext_data)
 
     header_text_map =
-      if alert_details["header_sync_toggle"] == true do
+      if Form.normalize_value("checkbox", alert_details["header_sync_toggle"]) == true do
         %{"header_text" => Templates.build_auto_text(autotext_data, :header_template)}
       else
         %{}
       end
 
     description_text_map =
-      if alert_details["description_sync_toggle"] == true do
+      if Form.normalize_value("checkbox", alert_details["description_sync_toggle"]) == true do
         %{"description_text" => Templates.build_auto_text(autotext_data, :description_template)}
       else
         %{}
