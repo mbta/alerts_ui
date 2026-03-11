@@ -88,7 +88,7 @@ defmodule AlertsUI.Trapeze.WorkOrder do
 
   def to_params(%__MODULE__{} = work_order) do
     %{
-      active_period_end_specifier: :until_further_notice,
+      active_period_end_specifier: end_datetime_specifier(work_order),
       active_period_end: end_datetime(work_order),
       active_period_start_specifier: :custom,
       active_period_start: work_order.start_datetime |> DateTime.to_naive(),
@@ -99,7 +99,7 @@ defmodule AlertsUI.Trapeze.WorkOrder do
       closed_timestamp: end_datetime(work_order),
       combination: :ACCESS,
       description_text: autotext(work_order) |> description_for(),
-      direction: "default",
+      direction: nil,
       effect_detail: effect_detail(work_order.effect),
       effect_name: effect_name(work_order.effect),
       effect: "ACCESSIBILITY_ISSUE",
@@ -112,6 +112,7 @@ defmodule AlertsUI.Trapeze.WorkOrder do
       route_ids: [],
       route_type: nil,
       route_types_by_id: %{},
+      service_effect_text: autotext(work_order) |> service_effect_text_for(),
       service_types: [],
       severity: 3,
       source: :TRAPEZE,
@@ -124,7 +125,7 @@ defmodule AlertsUI.Trapeze.WorkOrder do
     }
   end
 
-  defp autotext(work_order) do
+  def autotext(work_order) do
     facility = FacilitiesRepo.get(work_order.facility_id)
     stops = if facility, do: [Map.get(facility, :stop)], else: []
 
@@ -132,7 +133,7 @@ defmodule AlertsUI.Trapeze.WorkOrder do
       route_type: nil,
       effect_name: effect_name(work_order.effect),
       cause_detail: "maintenance",
-      start_datetime: work_order.start_datetime,
+      start_datetime: work_order.start_datetime |> DateTime.to_naive(),
       end_specifier: :until_further_notice,
       facility: facility,
       stops: stops |> Enum.map(fn stop -> StopsRepo.get(stop.id) end)
@@ -142,8 +143,12 @@ defmodule AlertsUI.Trapeze.WorkOrder do
   defp header_for(autotext),
     do: Templates.build_auto_text(autotext, :header_template)
 
-  defp description_for(autotext),
-    do: Templates.build_auto_text(autotext, :description_template)
+  defp description_for(autotext) do
+    case Templates.build_auto_text(autotext, :description_template) do
+      "" -> nil
+      description -> description
+    end
+  end
 
   def service_effect_text_for(autotext),
     do: Templates.build_auto_text(autotext, :service_effect_template)
@@ -152,6 +157,12 @@ defmodule AlertsUI.Trapeze.WorkOrder do
     do: datetime |> DateTime.to_naive()
 
   defp end_datetime(_), do: nil
+
+  defp end_datetime_specifier(%{end_datetime: datetime, status: :closed})
+       when not is_nil(datetime),
+       do: :custom
+
+  defp end_datetime_specifier(_), do: :until_further_notice
 
   defp effect_detail(:escalator), do: "ESCALATOR_CLOSURE"
   defp effect_detail(:elevator), do: "ELEVATOR_CLOSURE"

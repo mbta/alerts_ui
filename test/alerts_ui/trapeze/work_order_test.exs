@@ -6,20 +6,23 @@ defmodule AlertsUI.Trapeze.WorkOrderTest do
   alias AlertsUI.Models.Alert
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
+  alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
 
   import Mock
 
+  @stop %Stop{
+    id: "place-alfcl",
+    name: "Aquarium",
+    type: "stop",
+    child_ids: ["place"]
+  }
   @facility %Facility{
     id: "349",
     type: "ESCALATOR",
     short_name: "Platform to Russell Field",
     long_name: "Alewife Escalator 349 (Platform to Russell Field)",
-    stop: %Stop{
-      id: "place-alfcl",
-      name: "Aquarium",
-      type: "stop"
-    },
+    stop: @stop,
     latitude: 42.395428,
     longitude: -71.142483,
     properties: [
@@ -81,9 +84,10 @@ defmodule AlertsUI.Trapeze.WorkOrderTest do
 
   describe "to_params" do
     test "turns WorkOrder into Alert params" do
-      with_mock(FacilitiesRepo,
-        get: fn _ -> @facility end
-      ) do
+      with_mocks([
+        {FacilitiesRepo, [], [get: fn _ -> @facility end]},
+        {StopsRepo, [], [get: fn _ -> @stop end, get!: fn _ -> @stop end]}
+      ]) do
         input =
           "2026-02-17T12:52:38-05:00|FP-DWNXST-ELEV-891|ELEV-891|ELEVATOR, DOWNTOWN CROSSING EL-891, OL NB-FRANKLIN ST|ORANGE LINE,RED LINE - MAIN|310-2026-184|2026-01-12T15:50:03+00:00|2026-01-12T15:52:14+00:00|2026-01-12T15:50:03+00:00|1999-12-31T11:59:59+00:00|OPEN"
 
@@ -108,14 +112,15 @@ defmodule AlertsUI.Trapeze.WorkOrderTest do
                  work_order_id: "310-2026-184",
                  header_text:
                    "Alewife Escalator 349 (Platform to Russell Field) unavailable due to maintenance",
-                 description_text: "",
+                 description_text: nil,
+                 service_effect_text: "Aquarium elevator unavailable",
                  source: :TRAPEZE,
                  status: :open,
                  active_period_end_specifier: :until_further_notice,
                  active_period_start_specifier: :custom,
                  alert_timing: :one_time,
                  child_stops_with_context: [],
-                 direction: "default",
+                 direction: nil,
                  facility_id: "891",
                  notification_specifier: :now,
                  reminder_times: [],
