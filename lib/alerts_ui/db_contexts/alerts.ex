@@ -181,17 +181,16 @@ defmodule AlertsUI.Alerts do
     )
   end
 
-  def active_period_preload_query do
+  @spec active_period_preload_query() :: Ecto.Query.t()
+  defp active_period_preload_query do
     from a in ActivePeriod, order_by: a.start
   end
 
-  # comments_query = from c in Comment, order_by: c.popularity, limit: 5 Repo.all from p in Post, preload: [comments: ^comments_query]
   @spec list_all_open() :: [Alert.t()]
   def list_all_open do
     # Using an inner join here reduces the
     # number of overall queries
     # ref. https://hexdocs.pm/ecto/Ecto.Query.html#preload/3
-    # active_period_query = from a in ActivePeriod, order_by: a.start
     Repo.all(
       from(
         a in Alert,
@@ -233,7 +232,12 @@ defmodule AlertsUI.Alerts do
     Repo.all(
       from(
         a in Alert,
-        preload: [:user, :active_period, :reminder_times, informed_entity: [:trip]]
+        preload: [
+          :user,
+          :reminder_times,
+          active_period: ^active_period_preload_query(),
+          informed_entity: [:trip]
+        ]
       )
     )
   end
@@ -249,7 +253,12 @@ defmodule AlertsUI.Alerts do
     Repo.get_by(
       from(
         a in Alert,
-        preload: [:user, :active_period, :reminder_times, informed_entity: [:trip]]
+        preload: [
+          :user,
+          :reminder_times,
+          active_period: ^active_period_preload_query(),
+          informed_entity: [:trip]
+        ]
       ),
       alert_id: alert_id
     )
@@ -260,7 +269,12 @@ defmodule AlertsUI.Alerts do
     Repo.get_by(
       from(
         a in Alert,
-        preload: [:user, :active_period, :reminder_times, informed_entity: [:trip]]
+        preload: [
+          :user,
+          :reminder_times,
+          active_period: ^active_period_preload_query(),
+          informed_entity: [:trip]
+        ]
       ),
       id: uuid
     )
