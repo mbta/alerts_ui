@@ -396,44 +396,46 @@ defmodule AlertsUI.Models.Alert do
     end
   end
 
+  # nearly all alerts should go through the "original selections" route
+  # but as a fallback we can look at the informed entities instead.
+  def gather_route_ids(%__MODULE__{original_route_selections: nil} = alert) do
+    gather_route_ids_from_informed_entities(alert.informed_entity)
+  end
+
   def gather_route_ids(%__MODULE__{} = alert) do
-    if alert.source == :IBI do
-      gather_route_ids_from_original_selections(alert)
-    else
-      gather_route_ids_from_informed_entities(alert.informed_entity)
-    end
+    gather_route_ids_from_original_selections(alert)
+  end
+
+  def gather_facility_ids(%__MODULE__{original_facility_selections: nil} = alert) do
+    gather_facility_ids_from_informed_entities(alert.informed_entity)
   end
 
   def gather_facility_ids(%__MODULE__{} = alert) do
-    if alert.source == :IBI do
-      gather_facility_ids_from_original_selections(alert)
-    else
-      gather_facility_ids_from_informed_entities(alert.informed_entity)
-    end
+    gather_facility_ids_from_original_selections(alert)
+  end
+
+  def gather_stop_ids(%__MODULE__{original_stop_selections: nil} = alert) do
+    gather_stop_ids_from_informed_entities(alert.informed_entity)
   end
 
   def gather_stop_ids(%__MODULE__{} = alert) do
-    if alert.source == :IBI do
-      gather_stop_ids_from_original_selections(alert)
-    else
-      gather_stop_ids_from_informed_entities(alert.informed_entity)
-    end
+    gather_stop_ids_from_original_selections(alert)
+  end
+
+  def gather_parent_stop_ids(%__MODULE__{original_stop_selections: nil} = alert) do
+    gather_parent_stop_ids_from_informed_entities(alert.informed_entity)
   end
 
   def gather_parent_stop_ids(%__MODULE__{} = alert) do
-    if alert.source == :IBI do
-      gather_parent_stop_ids_from_original_selections(alert)
-    else
-      gather_parent_stop_ids_from_informed_entities(alert.informed_entity)
-    end
+    gather_parent_stop_ids_from_original_selections(alert)
+  end
+
+  def gather_trip_ids(%__MODULE__{original_trip_selections: nil} = alert) do
+    gather_trip_ids_from_informed_entities(alert.informed_entity)
   end
 
   def gather_trip_ids(%__MODULE__{} = alert) do
-    if alert.source == :IBI do
-      gather_trip_ids_from_original_selections(alert)
-    else
-      gather_trip_ids_from_informed_entities(alert.informed_entity)
-    end
+    gather_trip_ids_from_original_selections(alert)
   end
 
   defp gather_route_ids_from_original_selections(alert) do
