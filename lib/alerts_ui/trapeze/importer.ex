@@ -33,16 +33,16 @@ defmodule AlertsUI.Trapeze.Importer do
   """
   @impl Oban.Worker
   def perform(_, _opts \\ []) do
-    Monitor.start()
-
     cond do
-      configuration_incomplete?() ->
-        Monitor.result({:warning, "Missing Configuration"})
-
       production?() && not allowed_in_production?() ->
         Monitor.result({:warning, "Running in Production"})
 
+      configuration_incomplete?() ->
+        Monitor.result({:warning, "Missing Configuration"})
+
       true ->
+        Monitor.start()
+
         try do
           case SFTP.fetch(SFTP.source_description()) do
             {:ok, {feed, mtime}} ->
@@ -58,10 +58,10 @@ defmodule AlertsUI.Trapeze.Importer do
           error ->
             Monitor.result({:error, error})
         end
-    end
 
-    Monitor.finish()
-    Monitor.close()
+        Monitor.finish()
+        Monitor.close()
+    end
   end
 
   @spec process_feed([String.t()]) :: {:ok, String.t()} | {:error, String.t()}
