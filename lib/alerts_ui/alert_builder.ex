@@ -184,6 +184,14 @@ defmodule AlertsUI.AlertBuilder do
 
   defp cause_and_effect(alert_data) do
     route_type = Map.get(alert_data, :route_type)
+
+    route_type =
+      if is_nil(route_type) and Map.get(alert_data, :combination) == :ACCESS do
+        :ACCESS
+      else
+        route_type
+      end
+
     cause_detail = Map.get(alert_data, :cause_detail, "")
     cause = Map.get(alert_data, :cause, Cause.get_by_mode_and_detail(route_type, cause_detail))
     effect_name = Map.get(alert_data, :effect_name)

@@ -392,6 +392,40 @@ defmodule AlertsUI.AlertBuilderTest do
       end
     end
 
+    test "facility causes get set correctly" do
+      facility = %Facility{
+        id: "retailsale-303012",
+        type: "FARE_VENDING_RETAILER",
+        short_name: "7-Eleven"
+      }
+
+      with_mocks([
+        {FacilitiesRepo, [], [get: fn _facility_id -> facility end]}
+      ]) do
+        alert_data = %{
+          route_type: nil,
+          header_text: "hello",
+          cause_detail: "MAINTENANCE",
+          effect_name: "Delay",
+          effect: "MODIFIED_SERVICE",
+          effect_detail: "evelator broke",
+          facility_id: ["57"],
+          active_period_start: ~N[2024-04-30 11:54:00],
+          active_period_end: ~N[2024-04-30 13:54:00],
+          alert_timing: :"one-time",
+          active_period_end_specifier: :later_today,
+          active_period_start_specifier: :custom,
+          notification_period_start: ~N[2024-04-30 05:52:00],
+          notification_period_end: ~N[2025-10-13 17:00:00],
+          severity: 3,
+          combination: :ACCESS
+        }
+
+        result = AlertBuilder.build_alert(alert_data, :ACCESS, ~U[2024-04-30 11:54:00Z])
+        assert result.cause == :MAINTENANCE
+      end
+    end
+
     test "it correctly adds combo ids" do
       with_mocks([
         {RoutePatternsRepo, [],
