@@ -2,6 +2,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeGetters do
   @moduledoc """
     Helpers for fetching the proper date/time/datetimes from the time_range form
   """
+  alias AlertsUI.Helpers.DateTime, as: DTHelpers
   alias AlertsUI.Models.ActivePeriod
   alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
 
@@ -173,7 +174,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeGetters do
   def get_recurring_start_datetime(start_date, start_time) do
     start_date
     |> string_to_date_helper()
-    |> DateTime.new!(string_to_time_helper(start_time), "America/New_York")
+    |> DTHelpers.new_round_up_to_gap!(string_to_time_helper(start_time), "America/New_York")
   end
 
   def get_recurring_end_datetime("", _), do: ""
@@ -185,11 +186,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeGetters do
     if Time.compare(end_time, ActivePeriod.start_of_service_time()) == :lt do
       end_date
       |> string_to_date_helper()
-      |> DateTime.new!(end_time, "America/New_York")
+      |> DTHelpers.new_round_up_to_gap!(end_time, "America/New_York")
     else
       end_date
       |> string_to_date_helper()
-      |> DateTime.new!(end_time, "America/New_York")
+      |> DTHelpers.new_round_up_to_gap!(end_time, "America/New_York")
       |> DateTime.add(1, :day)
     end
   end
