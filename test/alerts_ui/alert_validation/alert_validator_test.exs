@@ -57,6 +57,43 @@ defmodule AlertsUI.AlertValidation.AlertValidatorTest do
       end
     end
 
+    test "does not return green line as invalid" do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           all: fn ["filter[id]": _], [reject_hidden: false, base_url: _, api_key: _] ->
+             [%Route{id: "1", type: 3}]
+           end,
+           green_line: fn ->
+             %Route{
+               id: "Green",
+               name: "Green Line"
+             }
+           end
+         ]}
+      ]) do
+        insert(:alert, %{
+          alert_id: "123",
+          informed_entity: [
+            %{route_type: 3, route_id: "1"},
+            %{route_type: 3, route_id: "3"},
+            %{route_type: 1, route_id: "Green"}
+          ]
+        })
+
+        assert AlertValidator.validate_alerts() ==
+                 [
+                   %{
+                     alert_id: "123",
+                     invalid_facilities: [],
+                     invalid_routes: ["3"],
+                     invalid_stops: [],
+                     invalid_trips: []
+                   }
+                 ]
+      end
+    end
+
     test "finds alerts with stops no longer in api" do
       with_mocks([
         {StopsRepo, [],
