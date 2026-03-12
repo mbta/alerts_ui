@@ -34,11 +34,11 @@ defmodule AlertsUI.Trapeze.Importer do
   @impl Oban.Worker
   def perform(_, _opts \\ []) do
     cond do
-      configuration_incomplete?() ->
-        Monitor.result({:warning, "Missing Configuration"})
-
       production?() && not allowed_in_production?() ->
         Monitor.result({:warning, "Running in Production"})
+
+      configuration_incomplete?() ->
+        Monitor.result({:warning, "Missing Configuration"})
 
       true ->
         Monitor.start()
