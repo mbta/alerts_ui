@@ -359,7 +359,10 @@ defmodule AlertsUI.Alerts do
 
   @spec close(Alert.t(), User.t() | String.t(), boolean(), DateTime.t()) :: Alert.t()
   def close(alert, origin, send_all_clear?, closed_time \\ DateTime.utc_now()) do
-    closed_time = DateTime.truncate(closed_time, :second)
+    closed_time =
+      closed_time
+      |> DateTime.shift_zone!("Etc/UTC")
+      |> DateTime.truncate(:second)
 
     last_push_notification_timestamp =
       if send_all_clear?, do: closed_time, else: alert.last_push_notification_timestamp

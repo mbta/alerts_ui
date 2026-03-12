@@ -27,16 +27,16 @@ defmodule AlertsUI.Trapeze.WorkOrder do
   ]
 
   @type t :: %__MODULE__{
-          file_process_datetime: NaiveDateTime.t() | nil,
+          file_process_datetime: DateTime.t() | nil,
           equipment_id: String.t(),
           asset_id: String.t(),
           description: String.t(),
           lines: String.t(),
           work_order_id: String.t(),
-          create_datetime: NaiveDateTime.t() | nil,
-          update_datetime: NaiveDateTime.t() | nil,
-          start_datetime: NaiveDateTime.t() | nil,
-          end_datetime: NaiveDateTime.t() | nil,
+          create_datetime: DateTime.t() | nil,
+          update_datetime: DateTime.t() | nil,
+          start_datetime: DateTime.t() | nil,
+          end_datetime: DateTime.t() | nil,
           status: :open | :closed | :pending | :work_finished
         }
 
@@ -91,7 +91,7 @@ defmodule AlertsUI.Trapeze.WorkOrder do
       active_period_end_specifier: end_datetime_specifier(work_order),
       active_period_end: end_datetime(work_order),
       active_period_start_specifier: :custom,
-      active_period_start: work_order.start_datetime |> DateTime.to_naive(),
+      active_period_start: work_order.start_datetime |> to_naive_eastern(),
       alert_timing: :one_time,
       cause_detail: "MAINTENANCE",
       cause: :MAINTENANCE,
@@ -106,7 +106,7 @@ defmodule AlertsUI.Trapeze.WorkOrder do
       facility_id: work_order.facility_id,
       header_text: autotext(work_order) |> header_for(),
       notification_period_end: end_datetime(work_order),
-      notification_period_start: work_order.start_datetime |> DateTime.to_naive(),
+      notification_period_start: work_order.start_datetime |> to_naive_eastern(),
       notification_specifier: :now,
       reminder_times: [],
       route_ids: [],
@@ -133,7 +133,7 @@ defmodule AlertsUI.Trapeze.WorkOrder do
       route_type: nil,
       effect_name: effect_name(work_order.effect),
       cause_detail: "maintenance",
-      start_datetime: work_order.start_datetime |> DateTime.to_naive(),
+      start_datetime: work_order.start_datetime |> to_naive_eastern(),
       end_specifier: :until_further_notice,
       facility: facility,
       stops: stops |> Enum.map(fn stop -> StopsRepo.get(stop.id) end)
@@ -154,7 +154,7 @@ defmodule AlertsUI.Trapeze.WorkOrder do
     do: Templates.build_auto_text(autotext, :service_effect_template)
 
   defp end_datetime(%{end_datetime: datetime, status: :closed}),
-    do: datetime |> DateTime.to_naive()
+    do: datetime |> to_naive_eastern()
 
   defp end_datetime(_), do: nil
 
@@ -172,7 +172,7 @@ defmodule AlertsUI.Trapeze.WorkOrder do
 
   defp get_datetime(iso8601_string) do
     case DateTime.from_iso8601(iso8601_string) do
-      {:ok, datetime, _offset} -> datetime |> DateTime.shift_zone!("Etc/UTC")
+      {:ok, datetime, _offset} -> datetime
       {:error, _} -> nil
     end
   end
@@ -185,4 +185,10 @@ defmodule AlertsUI.Trapeze.WorkOrder do
       "WORK FINISHED" -> :work_finished
     end
   end
+
+  defp to_naive_eastern(%DateTime{} = datetime),
+    do:
+      datetime
+      |> DateTime.shift_zone!("America/New_York")
+      |> DateTime.to_naive()
 end

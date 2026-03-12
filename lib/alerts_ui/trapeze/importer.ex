@@ -177,7 +177,8 @@ defmodule AlertsUI.Trapeze.Importer do
 
   @spec create(AlertBuilder.alert_data_t()) :: any()
   defp create(alert_params) do
-    alert_data_params = AlertBuilder.build_alert(alert_params, :ACCESS)
+    alert_data_params =
+      AlertBuilder.build_alert(alert_params, :ACCESS)
 
     %Alert{}
     |> Alert.changeset(
@@ -197,7 +198,7 @@ defmodule AlertsUI.Trapeze.Importer do
       Repo.reload!(alert),
       @closed_origin,
       true,
-      closed_timestamp |> DateTime.from_naive!("Etc/UTC")
+      closed_timestamp |> DateTime.from_naive!("America/New_York")
     )
   end
 

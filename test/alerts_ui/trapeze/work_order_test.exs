@@ -97,10 +97,10 @@ defmodule AlertsUI.Trapeze.WorkOrderTest do
           |> WorkOrder.to_params()
 
         assert output == %{
-                 active_period_start: ~N[2026-01-12 15:50:03],
+                 active_period_start: ~N[2026-01-12 10:50:03],
                  active_period_end: nil,
                  closed_timestamp: nil,
-                 notification_period_start: ~N[2026-01-12 15:50:03],
+                 notification_period_start: ~N[2026-01-12 10:50:03],
                  notification_period_end: nil,
                  cause_detail: "MAINTENANCE",
                  cause: :MAINTENANCE,
