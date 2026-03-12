@@ -87,7 +87,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
         reassign_env(:alerts_ui, :trapeze_sftp_user, "user")
         reassign_env(:alerts_ui, :trapeze_sftp_password, "password")
         reassign_env(:alerts_ui, :trapeze_sftp_filename, "filename")
-        reassign_env(:alerts_ui, :sentry_env, "prod")
+        reassign_env(:alerts_ui, :environment_name, "prod")
         reassign_env(:alerts_ui, :trapeze_in_production, "false")
 
         {_, log} = with_log(fn -> Importer.perform([], %{}) end)
@@ -107,7 +107,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
            fetch: fn _ -> {:ok, {[], nil}} end
          ]}
       ]) do
-        reassign_env(:alerts_ui, :sentry_env, "test")
+        reassign_env(:alerts_ui, :environment_name, "test")
         before_monitor = latest_monitor()
 
         with_log(fn -> Importer.perform([], %{}) end)

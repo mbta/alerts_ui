@@ -21,7 +21,7 @@ defmodule AlertsUI.Trapeze.Importer do
   @closed_origin "(Closed automatically via Trapeze EAM)"
 
   @doc """
-  Example: 
+  Example:
   config :alerts_ui, Oban,
     plugins: [
       {Oban.Plugins.Cron,
@@ -211,7 +211,7 @@ defmodule AlertsUI.Trapeze.Importer do
         SFTP.source_description().password in [nil, ""] ||
         SFTP.source_description().filename in [nil, ""]
 
-  defp production?, do: AlertsUI.config(:sentry_env) == "prod"
+  defp production?, do: AlertsUI.config(:environment_name) == "prod"
 
   defp allowed_in_production?, do: AlertsUI.config(:trapeze_in_production) == "true"
 end
