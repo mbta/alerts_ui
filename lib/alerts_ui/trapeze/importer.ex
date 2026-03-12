@@ -42,6 +42,7 @@ defmodule AlertsUI.Trapeze.Importer do
 
       true ->
         Monitor.start()
+
         try do
           case SFTP.fetch(SFTP.source_description()) do
             {:ok, {feed, mtime}} ->
@@ -57,6 +58,7 @@ defmodule AlertsUI.Trapeze.Importer do
           error ->
             Monitor.result({:error, error})
         end
+
         Monitor.finish()
         Monitor.close()
     end
