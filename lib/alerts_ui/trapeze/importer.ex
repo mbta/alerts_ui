@@ -77,14 +77,7 @@ defmodule AlertsUI.Trapeze.Importer do
   end
 
   defp get_existing_alert(alert_params) do
-    original_facility_selections = Map.get(alert_params, :original_facility_selections)
-
-    facility_id =
-      if original_facility_selections do
-        [facility | _] = original_facility_selections
-        [_, facility_id] = String.split(facility, "|")
-        facility_id
-      end
+    facility_id = Map.get(alert_params, :facility_id)
 
     Repo.one(
       from a in Alert,

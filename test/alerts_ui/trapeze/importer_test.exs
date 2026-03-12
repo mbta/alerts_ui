@@ -153,6 +153,37 @@ defmodule AlertsUI.Trapeze.ImporterTest do
       end
     end
 
+    test "does not make a new alert if a manual one for this facility exists" do
+      with_mocks([
+        {FacilitiesRepo, [], [get: fn _ -> @facility end]},
+        {StopsRepo, [], [get: fn _ -> @stop end, get!: fn _ -> @stop end]},
+        {RoutesRepo, [], [by_stop: fn _ -> [@route] end]}
+      ]) do
+        input = [
+          "2026-02-17T12:52:38-05:00|FP-DWNXST-ELEV-891|ELEV-891|ELEVATOR, DOWNTOWN CROSSING EL-891, OL NB-FRANKLIN ST|ORANGE LINE,RED LINE - MAIN|310-2026-184|2026-01-12T15:50:03+00:00|2026-01-12T15:52:14+00:00|2026-01-12T15:50:03+00:00||OPEN"
+        ]
+
+        existing =
+          insert(:alert, %{
+            work_order_id: nil,
+            effect_name: "Elevator Closure",
+            primary_service_type: "access",
+            original_facility_selections: ["this is a label|891"]
+          })
+
+        with_log(fn ->
+          Monitor.start()
+          Importer.process_feed(input)
+          Monitor.close()
+        end)
+
+        alert_1 = get("310-2026-184")
+
+        assert existing
+        refute alert_1
+      end
+    end
+
     test "handles multiple work orders for the same elevator" do
       with_mocks([
         {FacilitiesRepo, [], [get: fn _ -> @facility end]},
