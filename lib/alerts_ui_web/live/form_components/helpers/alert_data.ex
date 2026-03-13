@@ -7,7 +7,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
   alias AlertsUI.Alerts
   alias AlertsUI.Models.{ActivePeriod, Alert, Effect}
-
   alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
 
   alias MBTAV3API.Routes.Route
@@ -212,11 +211,16 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     route_ids = Alert.get_original_ids(alert.original_route_selections || [])
 
     single_route_id =
-      if alert.effect_name in @single_route_effect_names and length(route_ids) === 1 do
+      if alert.effect_name in @single_route_effect_names && length(route_ids) === 1 do
         hd(route_ids)
       else
         nil
       end
+
+    route_ids =
+      if is_nil(single_route_id) && alert.effect_name in @single_route_effect_names,
+        do: [],
+        else: route_ids
 
     notifcation_key =
       if form_type == :editing,
