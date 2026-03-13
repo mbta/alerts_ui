@@ -118,7 +118,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  last_modified_timestamp: ~U[2024-04-30 05:54:00Z],
                  source: nil,
                  notification_duration_certainty: nil,
-                 work_order_id: nil
+                 work_order_id: nil,
+                 recurring: false
                }
 
         Alerts.create_or_update_alert(result, build(:user))
