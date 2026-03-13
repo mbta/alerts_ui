@@ -336,6 +336,7 @@ defmodule AlertsUI.AlertBuilder do
 
   defp active_periods(alert_data, current_time, options) do
     if Keyword.get(options, :no_active_periods) do
+      recurring = Map.get(alert_data, :alert_timing) == :recurring
       Map.take(
         alert_data,
         [
@@ -346,7 +347,7 @@ defmodule AlertsUI.AlertBuilder do
           :recurrence_end_time,
           :recurrence_days
         ]
-      )
+      ) |> Map.put(:recurring, recurring)
     else
       if Map.get(alert_data, :alert_timing) === :recurring do
         ActivePeriodBuilder.build_recurring_active_period(%{
