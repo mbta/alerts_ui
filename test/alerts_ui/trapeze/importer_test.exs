@@ -72,9 +72,10 @@ defmodule AlertsUI.Trapeze.ImporterTest do
         reassign_env(:alerts_ui, :trapeze_sftp_password, "")
         reassign_env(:alerts_ui, :trapeze_sftp_filename, "")
 
-        {_, log} = with_log(fn -> Importer.perform([], %{}) end)
+        {result, log} = with_log(fn -> Importer.perform([], %{}) end)
 
         assert log =~ ~r/warning.*AlertsUI.Trapeze.Monitor: Missing Configuration/
+        assert result == {:ok, "Missing Configuration"}
       end
     end
 
@@ -90,9 +91,10 @@ defmodule AlertsUI.Trapeze.ImporterTest do
         reassign_env(:alerts_ui, :environment_name, "prod")
         reassign_env(:alerts_ui, :trapeze_in_production, "false")
 
-        {_, log} = with_log(fn -> Importer.perform([], %{}) end)
+        {result, log} = with_log(fn -> Importer.perform([], %{}) end)
 
-        assert log =~ ~r/warning.*AlertsUI.Trapeze.Monitor: Running in Production/
+        assert log =~ ~r/warning.*AlertsUI.Trapeze.Monitor: Prevented from running in Production/
+        assert result == {:ok, "Prevented from running in Production"}
       end
     end
 

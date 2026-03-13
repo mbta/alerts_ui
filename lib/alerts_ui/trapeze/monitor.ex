@@ -125,6 +125,8 @@ defmodule AlertsUI.Trapeze.Monitor do
     if result != :ok, do: apply(__MODULE__, result, [reason])
     set(:result, Atom.to_string(result))
     set(:reason, reason)
+    # :warning is not a valid Oban response
+    result = if result == :warning, do: :ok, else: result
     {result, reason}
   end
 
