@@ -325,7 +325,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       active_period_start_specifier: determine_start_specifier(shifted_active_period_start),
       active_period_end_specifier: end_specifier,
       # preserve selections when ex-recurring alerts are made recurring again
-      recurrence_days: alert.recurrence_days |> Enum.map(&Atom.to_string/1)
+      recurrence_days: (alert.recurrence_days || []) |> Enum.map(&Atom.to_string/1)
     }
   end
 
