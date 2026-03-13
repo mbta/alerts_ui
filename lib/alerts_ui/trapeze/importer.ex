@@ -35,7 +35,7 @@ defmodule AlertsUI.Trapeze.Importer do
   def perform(_, _opts \\ []) do
     cond do
       production?() && not allowed_in_production?() ->
-        Monitor.result({:warning, "Running in Production"})
+        Monitor.result({:warning, "Prevented from running in Production"})
 
       configuration_incomplete?() ->
         Monitor.result({:warning, "Missing Configuration"})
