@@ -1,16 +1,11 @@
 defmodule AlertsUIWeb.FormComponents.Delivery do
   @moduledoc """
     Live Component for delivery section of form
-
-    Some notes on last push notification timestamp:
-    When editing, if the box is not checked, the LPNT should not be UPDATED
-    But it shouldn't be set to nil if it wasn't nil in the first place.
-    It's also unique in that it's a full non-naive eastern timezone datetime
   """
   use AlertsUIWeb, :live_component
   use AlertsUI.Schema
   import Ecto.Changeset
-  alias AlertsUIWeb.FormComponents.Helpers.{DateTimeHelpers, ErrorFormatter}
+  alias AlertsUIWeb.FormComponents.Helpers.ErrorFormatter
   alias Phoenix.HTML.Form
 
   @primary_key false
@@ -19,11 +14,10 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
     field :banner_sync_toggle, :boolean, default: true
     field :view_banner, :boolean, default: false
     field :accept_banner, :boolean, default: false
-    field :last_push_notification_timestamp, :naive_datetime
     field :notification_toggle, :boolean, default: true
   end
 
-  @fields ~w[banner_text banner_sync_toggle view_banner accept_banner last_push_notification_timestamp notification_toggle]a
+  @fields ~w[banner_text banner_sync_toggle view_banner accept_banner notification_toggle]a
 
   @impl true
   def mount(socket) do
@@ -40,9 +34,6 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
   def update(%{alert_data: alert_data} = assigns, socket) do
     form = socket.assigns.form
 
-    # this will be nil for a new alert but the previous value for an edited one
-    original_push_notification_timestamp = Map.get(alert_data, :last_push_notification_timestamp)
-
     banner_text_map =
       if Form.normalize_value("checkbox", form[:banner_sync_toggle].value) and
            Form.normalize_value("checkbox", form[:view_banner].value) do
@@ -56,13 +47,6 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
       |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
       |> Map.merge(form.params)
       |> Map.merge(banner_text_map)
-
-    data =
-      if data["notification_toggle"] == true do
-        Map.put(data, "last_push_notification_timestamp", DateTimeHelpers.current_time())
-      else
-        data
-      end
 
     data =
       if Map.get(form.params, "banner_text") do
@@ -84,10 +68,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
     {:ok,
      socket
      |> assign(assigns)
-     |> assign(form: form)
-     |> assign_new(:original_last_push_notification_timestamp, fn ->
-       original_push_notification_timestamp
-     end)}
+     |> assign(form: form)}
   end
 
   @impl true
@@ -133,16 +114,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
   end
 
   def handle_event("notification_toggle_change", %{"delivery" => delivery}, socket) do
-    if Form.normalize_value("checkbox", delivery["notification_toggle"]) == false do
-      Map.put(
-        delivery,
-        "last_push_notification_timestamp",
-        socket.assigns.original_last_push_notification_timestamp
-      )
-    else
-      Map.put(delivery, "last_push_notification_timestamp", DateTimeHelpers.current_time())
-    end
-    |> validate(socket)
+    validate(delivery, socket)
   end
 
   def handle_event("banner_text_change", %{"delivery" => delivery}, socket) do
@@ -200,7 +172,6 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
         phx-change="validate"
         class="form-control gap-4"
         id="delivery_form"
-        hidden={:last_push_notification_timestamp}
       >
         <div class="flex flex-row">
           <.checkbox

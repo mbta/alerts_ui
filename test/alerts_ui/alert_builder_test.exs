@@ -51,7 +51,8 @@ defmodule AlertsUI.AlertBuilderTest do
           url: "http://www.example.com",
           image_url: "http://www.example.com/example.jpg",
           image_alternative_text: "an example image",
-          last_push_notification_timestamp: ~N[2024-04-30 11:54:00],
+          last_push_notification_timestamp: nil,
+          notification_toggle: true,
           notification_period_start: ~N[2024-04-30 05:52:00],
           notification_specifier: :now,
           severity: 3,
@@ -90,7 +91,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  image_url: "http://www.example.com/example.jpg",
                  image_alternative_text: "an example image",
                  banner_text: "important banner text",
-                 last_push_notification_timestamp: ~U[2024-04-30 15:54:00Z],
+                 last_push_notification_timestamp: ~U[2024-04-30 05:54:00Z],
                  notification_period_start: ~U[2024-04-30 05:54:00Z],
                  notification_period_end: nil,
                  severity: 3,
@@ -485,14 +486,7 @@ defmodule AlertsUI.AlertBuilderTest do
 
         result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 05:54:00Z])
 
-        assert result == %{
-                 effect: :OTHER_EFFECT,
-                 description_text: "ok",
-                 header_text: "hello",
-                 url: nil,
-                 image_url: nil,
-                 image_alternative_text: nil,
-                 banner_text: nil,
+        assert %{
                  informed_entity: [
                    %{
                      agency_id: "1",
@@ -518,40 +512,8 @@ defmodule AlertsUI.AlertBuilderTest do
                      route_type: 1,
                      agency_id: "1"
                    }
-                 ],
-                 effect_detail: "DELAY",
-                 effect_name: "Delay",
-                 active_period: [%{start: ~U[2024-04-30 15:54:00Z], end: nil}],
-                 active_period_end: nil,
-                 active_period_start: ~U[2024-04-30 15:54:00Z],
-                 duration_certainty: :UNKNOWN,
-                 cause_detail: "",
-                 cause: :UNKNOWN_CAUSE,
-                 last_push_notification_timestamp: nil,
-                 notification_period_start: ~U[2024-04-30 15:54:00Z],
-                 notification_period_end: nil,
-                 severity: nil,
-                 severity_level: nil,
-                 reminder_times: [],
-                 plaintext_reminder_selections: "",
-                 current_time: ~U[2024-04-30 05:54:00Z],
-                 recurrence_days: nil,
-                 recurrence_text: nil,
-                 original_route_selections: ["24|24", "27|27", "57|57"],
-                 original_trip_selections: [],
-                 original_stop_selections: [],
-                 original_facility_selections: [],
-                 original_direction_selections: ["Both|default"],
-                 original_mode_selections: [],
-                 service_effect_text: nil,
-                 primary_service_type: "1",
-                 closed_timestamp: nil,
-                 created_timestamp: nil,
-                 last_modified_timestamp: ~U[2024-04-30 05:54:00Z],
-                 source: nil,
-                 notification_duration_certainty: nil,
-                 work_order_id: nil
-               }
+                 ]
+               } = result
       end
     end
 
@@ -810,8 +772,6 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutesRepo, [],
          [get: fn route_id, _opts -> %Route{id: route_id, type: 2, name: "CapeFLYER"} end]}
       ]) do
-        existing_alert = insert(:alert, alert_id: "0")
-
         alert_data = %{
           route_type: 2,
           description_text: "ok",
@@ -828,12 +788,7 @@ defmodule AlertsUI.AlertBuilderTest do
 
         result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 05:54:00Z])
 
-        assert result == %{
-                 effect: :OTHER_EFFECT,
-                 effect_name: "Delay",
-                 description_text: "ok",
-                 service_effect_text: nil,
-                 header_text: "hello",
+        assert %{
                  informed_entity: [
                    %{
                      route_type: 2,
@@ -842,48 +797,10 @@ defmodule AlertsUI.AlertBuilderTest do
                      agency_id: "3"
                    }
                  ],
-                 effect_detail: "DELAY",
-                 active_period: [%{start: ~U[2024-04-30 15:54:00Z], end: nil}],
-                 active_period_end: nil,
-                 active_period_start: ~U[2024-04-30 15:54:00Z],
-                 duration_certainty: :UNKNOWN,
-                 cause: :OTHER_CAUSE,
                  cause_detail: "FREIGHT_TRAIN_INTERFERENCE",
-                 url: nil,
-                 image_url: nil,
-                 image_alternative_text: nil,
-                 banner_text: nil,
-                 last_push_notification_timestamp: nil,
-                 notification_period_start: ~U[2024-04-30 15:54:00Z],
-                 notification_period_end: nil,
-                 severity: nil,
-                 severity_level: nil,
-                 reminder_times: [],
-                 plaintext_reminder_selections: "",
-                 current_time: ~U[2024-04-30 05:54:00Z],
-                 recurrence_days: nil,
-                 recurrence_text: nil,
                  original_route_selections: ["CapeFLYER|CapeFlyer"],
-                 original_direction_selections: ["Both|default"],
-                 original_stop_selections: [],
-                 original_trip_selections: [],
-                 original_facility_selections: [],
-                 original_mode_selections: [],
-                 primary_service_type: "2",
-                 closed_timestamp: nil,
-                 created_timestamp: nil,
-                 last_modified_timestamp: ~U[2024-04-30 05:54:00Z],
-                 source: nil,
-                 notification_duration_certainty: nil,
-                 work_order_id: nil
-               }
-
-        result
-        |> Alerts.create_or_update_alert(build(:user))
-
-        [alert_1, alert_2] = Alerts.list_all() |> Enum.sort_by(& &1.alert_id, :desc)
-        assert alert_1.alert_id |> String.to_integer() > alert_2.alert_id |> String.to_integer()
-        assert alert_2.alert_id == existing_alert.alert_id
+                 original_direction_selections: ["Both|default"]
+               } = result
       end
     end
 

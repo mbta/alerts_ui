@@ -111,7 +111,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           stop_names_and_ids: [String.t()] | nil,
           trip_ids: [String.t()] | nil,
           url: String.t() | nil,
-          last_push_notification_timestamp: NaiveDateTime.t() | nil,
+          last_push_notification_timestamp: DateTime.t() | nil,
           notification_toggle: boolean()
         }
   # effect names where user can only select 1 route
@@ -373,20 +373,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   defp get_notification_specifier(_notification_period_start), do: :custom
 
   defp last_push_notification_timestamp(alert) do
-    lpnt = alert |> Map.get(:last_push_notification_timestamp) |> shift_to_eastern
-    %{last_push_notification_timestamp: lpnt}
+    %{last_push_notification_timestamp: Map.get(alert, :last_push_notification_timestamp)}
   end
 
   def shift_to_naive(nil), do: nil
 
   def shift_to_naive(time) do
     time |> DateTime.shift_zone!("America/New_York") |> DateTime.to_naive()
-  end
-
-  def shift_to_eastern(nil), do: nil
-
-  def shift_to_eastern(time) do
-    time |> DateTime.shift_zone!("America/New_York")
   end
 
   def start_date(nil), do: nil
