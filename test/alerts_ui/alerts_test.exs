@@ -1014,15 +1014,23 @@ defmodule AlertsUI.AlertsTest do
 
   describe "list_all_open/0" do
     test "lists all alerts" do
+      active_period_1 =
+        build(:active_period, %{start: ~U[2023-10-12 00:01:00Z], end: ~U[2023-10-13 00:01:00Z]})
+
+      active_period_2 =
+        build(:active_period, %{start: ~U[2023-10-10 00:01:00Z], end: ~U[2023-10-11 00:01:00Z]})
+
       insert(:alert, %{alert_id: "234", closed_timestamp: ~U[2023-10-14 00:01:00Z]})
       insert(:alert, %{alert_id: "456"})
-      insert(:alert, %{alert_id: "123"})
+      insert(:alert, %{alert_id: "123", active_period: [active_period_1, active_period_2]})
 
-      all_alerts = Alerts.list_all_open()
+      [alert_1, alert_2] = Alerts.list_all_open()
+      assert alert_1.alert_id == "123"
+      assert alert_2.alert_id == "456"
 
-      assert Enum.find(all_alerts, &(&1.alert_id == "123"))
-      assert Enum.find(all_alerts, &(&1.alert_id == "456"))
-      refute Enum.find(all_alerts, &(&1.alert_id == "234"))
+      [active_period_result_1, active_period_result_2] = alert_1.active_period
+      assert active_period_result_1.start == ~U[2023-10-10 00:01:00Z]
+      assert active_period_result_2.start == ~U[2023-10-12 00:01:00Z]
     end
   end
 
