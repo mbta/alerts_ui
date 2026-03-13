@@ -124,7 +124,12 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       Flop.set_page(socket.assigns.meta.flop, page)
 
     with {alerts, meta} <- Alerts.list_all_paginated(flop) do
-      {:noreply, assign(socket, meta: meta, alerts: alerts, scroll_to_top: true)}
+      params = Map.merge(socket.assigns.params, %{"page" => page})
+
+      {:noreply,
+       socket
+       |> assign(meta: meta, alerts: alerts, scroll_to_top: true)
+       |> push_patch(to: ~p"/alerts?#{params}")}
     end
   end
 
@@ -268,7 +273,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       # Make sure 'default' and modal search terms don't get pushed to params
       |> remove_unused_params()
 
-    params = %{"filter" => filters}
+    params = socket.assigns.params |> Map.drop(["page"]) |> Map.merge(%{"filter" => filters})
 
     socket =
       assign(socket,
@@ -292,7 +297,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       |> Map.get("filter", %{})
       |> Map.merge(%{"timeline" => value})
 
-    params = %{"filter" => filters}
+    params = socket.assigns.params |> Map.drop(["page"]) |> Map.merge(%{"filter" => filters})
     socket = assign(socket, scroll_to_top: true)
     {:noreply, push_patch(socket, to: ~p"/alerts?#{params}")}
   end
