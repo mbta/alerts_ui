@@ -1,5 +1,4 @@
 defmodule AlertsUIWeb.FormComponents.TimeRange do
-  require Logger
   @moduledoc """
     Live Component for active period of form
   """
@@ -172,8 +171,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       |> Map.put(:action, :validate)
 
     assigns = Map.merge(assigns, %{form: form, edited: true, alert_data: alert_data})
-
-    Logger.warn("FORM is: #{inspect(form)}")
 
     {:ok, assign(socket, assigns)}
   end
