@@ -88,7 +88,9 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   @impl true
-  def mount(params, _session, socket) do
+  def mount(params, session, socket) do
+    socket = socket |> assign_new(:return_to, fn -> session["return_to"] end)
+
     alert_id = Map.get(params, "alert_id")
 
     existing_alert =
@@ -172,7 +174,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   @impl true
   def handle_event("cancelled_gtfs_modal", _params, socket) do
-    {:noreply, socket |> redirect(to: "/")}
+    {:noreply, socket |> redirect(to: return_to(socket.assigns.return_to || "/"))}
   end
 
   def get_routes([4]) do
@@ -572,7 +574,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
         socket
         |> put_flash(:info, flash_text(socket.assigns.alert_id, alert_id, form_type))
-        |> redirect(to: "/")
+        |> redirect(to: return_to(socket.assigns.return_to || "/"))
 
       {:error, result} ->
         errors =
@@ -581,6 +583,16 @@ defmodule AlertsUIWeb.CreateAlertLive do
           |> format_errors(socket.assigns.combination)
 
         display_errors(socket, errors)
+    end
+  end
+
+  def return_to(return_to_value) do
+    uri = URI.parse(return_to_value)
+
+    if uri.path == "/alerts" do
+      "/alerts?#{uri.query}"
+    else
+      "/"
     end
   end
 

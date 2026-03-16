@@ -10,7 +10,10 @@ defmodule AlertsUIWeb.FormComponents.Submit do
 
   @impl true
   def handle_event("cancel", _params, socket) do
-    {:noreply, push_navigate(socket, to: ~p"/alerts")}
+    {:noreply,
+     push_navigate(socket,
+       to: AlertsUIWeb.CreateAlertLive.return_to(socket.assigns[:return_to] || "/alerts")
+     )}
   end
 
   @impl true

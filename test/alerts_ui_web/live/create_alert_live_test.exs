@@ -335,6 +335,55 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         assert flash["info"] =~ ~r/New alert #[0-9]+ created/
       end
     end
+
+    @tag :logged_in_user
+    test "redirects to the referer upon successful save", %{conn: conn} do
+      :ELEVATOR_CLOSURE
+      child_stop = %Stop{id: "3", name: "baby stop"}
+      stop = %Stop{id: "2", name: "stop", child_ids: [child_stop.id]}
+      facility = %Facility{id: "1", long_name: "real big elevator", stop: stop}
+      facilities = [facility]
+
+      with_mocks([
+        {RoutesRepo, [], by_stop: fn _stop_id -> [%Route{id: "Blue", name: "blue route"}] end},
+        {FacilitiesRepo, [],
+         [get_by_type: fn _types, _opts -> facilities end, get: fn _id -> facility end]},
+        {StopsRepo, [],
+         get!: fn
+           "2" -> stop
+           "3" -> child_stop
+         end}
+      ]) do
+        conn =
+          conn
+          |> log_in_user()
+          |> put_req_header("referer", "/alerts?filter[timeline]=future")
+
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        {:ok, changeset} =
+          Ecto.Changeset.change(%RouteTypeAndEffect{
+            route_type: nil,
+            effect_name: "Elevator Closure"
+          })
+          |> apply_action(:insert)
+
+        send(view.pid, {:step_completed, changeset})
+
+        view |> render_async
+
+        {:ok, access_changeset} =
+          Ecto.Changeset.change(%AccessAffectedService{
+            facility_id: "1"
+          })
+          |> apply_action(:insert)
+
+        send(view.pid, {:section_completed, access_changeset})
+        send(view.pid, :create_alert)
+        flash = assert_redirect(view, "/alerts?filter[timeline]=future")
+        assert flash["info"] =~ ~r/New alert #[0-9]+ created/
+      end
+    end
   end
 
   describe "obsolete ids modal" do

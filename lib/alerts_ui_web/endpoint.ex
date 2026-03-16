@@ -52,5 +52,12 @@ defmodule AlertsUIWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
+  plug :store_http_referer
   plug AlertsUIWeb.Router
+
+  def store_http_referer(conn, _opts) do
+    conn
+    |> fetch_session()
+    |> put_session(:return_to, conn |> get_req_header("referer") |> Enum.at(0))
+  end
 end
