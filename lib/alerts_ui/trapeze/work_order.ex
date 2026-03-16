@@ -91,7 +91,7 @@ defmodule AlertsUI.Trapeze.WorkOrder do
       active_period_end_specifier: end_datetime_specifier(work_order),
       active_period_end: end_datetime(work_order),
       active_period_start_specifier: :custom,
-      active_period_start: work_order.start_datetime |> to_naive_eastern(),
+      active_period_start: DateTime.utc_now() |> to_naive_eastern(),
       alert_timing: :one_time,
       cause_detail: "MAINTENANCE",
       cause: :MAINTENANCE,

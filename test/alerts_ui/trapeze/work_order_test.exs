@@ -84,8 +84,11 @@ defmodule AlertsUI.Trapeze.WorkOrderTest do
 
   describe "to_params" do
     test "turns WorkOrder into Alert params" do
+      dt = DateTime.new!(~D[2026-03-01], ~T[12:34:56])
+
       with_mocks([
         {FacilitiesRepo, [], [get: fn _ -> @facility end]},
+        {DateTime, [:passthrough], [utc_now: fn -> dt end]},
         {StopsRepo, [], [get: fn _ -> @stop end, get!: fn _ -> @stop end]}
       ]) do
         input =
@@ -97,7 +100,7 @@ defmodule AlertsUI.Trapeze.WorkOrderTest do
           |> WorkOrder.to_params()
 
         assert output == %{
-                 active_period_start: ~N[2026-01-12 10:50:03],
+                 active_period_start: ~N[2026-03-01 07:34:56],
                  active_period_end: nil,
                  closed_timestamp: nil,
                  notification_period_start: ~N[2026-01-12 10:50:03],
