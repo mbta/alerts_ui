@@ -20,7 +20,7 @@ defmodule AlertsUIWeb.ActivityTracker do
 
     new_socket =
       if UserAuth.auth_expired?(socket.assigns, now) do
-        redirect(socket, to: ~p"/auth/keycloak?prompt=login&login_hint=#{email}")
+        redirect(socket, to: ~p"/reauthenticate?email=#{email}")
       else
         assign(socket, last_active: now)
       end
