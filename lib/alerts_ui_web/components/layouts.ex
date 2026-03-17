@@ -5,5 +5,7 @@ defmodule AlertsUIWeb.Layouts do
 
   use AlertsUIWeb, :html
 
+  import AlertsUIWeb.ApplicationHeader
+
   embed_templates "layouts/*"
 end
