@@ -202,7 +202,7 @@ defmodule AlertsUIWeb.ReviewModal do
               <p>Routes:</p>
               <p>{@route_names}</p>
             <% end %>
-            <%= if @direction_names && @direction_names != "" do %>
+            <%= if @direction_names && @direction_names != "" && @alert_data.combination != :ACCESS do %>
               <p>Direction:</p>
               <p>{@direction_names}</p>
             <% end %>
