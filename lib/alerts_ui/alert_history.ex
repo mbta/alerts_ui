@@ -170,9 +170,23 @@ defmodule AlertsUI.AlertHistory do
     last_push_notification_timestamp =
       Map.get(map, :last_push_notification_timestamp)
 
-    # the dates are ISO strings at this point, so a simple comparison is ok
-    last_modified_datetime == last_push_notification_timestamp
+    # cast to datetimes and compare. If times are less than a minute apart
+    # we say that we sent a push notification.
+    push_notification_sent?(last_modified_datetime, last_push_notification_timestamp)
   end
+
+  defp push_notification_sent?(last_modified_datetime, last_push_notification_timestamp)
+       when is_binary(last_modified_datetime) and is_binary(last_push_notification_timestamp) do
+    with {:ok, last_modified_datetime, _} <- DateTime.from_iso8601(last_modified_datetime),
+         {:ok, last_push_notification_timestamp, _} <-
+           DateTime.from_iso8601(last_push_notification_timestamp) do
+      DateTime.diff(last_modified_datetime, last_push_notification_timestamp, :second) |> abs < 60
+    else
+      {:error, _} -> false
+    end
+  end
+
+  defp push_notification_sent?(_, nil), do: false
 
   defp service_type(map) do
     get_service_type(Map.get(map, :primary_service_type))

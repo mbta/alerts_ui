@@ -225,7 +225,7 @@ defmodule AlertsUIWeb.AlertHistoryTest do
                closed: false,
                last_modified_by: "",
                last_modified_datetime: "",
-               push_notification_sent: true,
+               push_notification_sent: false,
                service_type: "",
                effect_name: nil,
                effect: nil,
