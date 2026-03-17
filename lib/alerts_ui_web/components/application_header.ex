@@ -2,7 +2,7 @@ defmodule AlertsUIWeb.ApplicationHeader do
   @moduledoc """
   Component for the application header.
   """
-    
+
   use Phoenix.Component
   use AlertsUIWeb, :verified_routes
 
