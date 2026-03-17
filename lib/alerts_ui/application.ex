@@ -22,7 +22,8 @@ defmodule AlertsUI.Application do
         {Phoenix.PubSub, name: AlertsUI.PubSub},
         # Start the Endpoint (http/https)
         AlertsUIWeb.Endpoint,
-        {Oban, Application.fetch_env!(:alerts_ui, Oban)}
+        {Oban, Application.fetch_env!(:alerts_ui, Oban)},
+        {AlertsUI.CacheWarmer, []}
       ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
