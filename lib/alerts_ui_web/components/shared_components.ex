@@ -399,19 +399,22 @@ defmodule AlertsUIWeb.SharedComponents do
     # with outline
     [
       base_toggle_classes: "
-      hover:bg-secondary-hover
-      hover:border-secondary-hover-border
-      hover:text-text-invert
-      disabled:text-secondary-disabled
-      disabled:border-secondary-disabled
-      cursor-pointer
-        " <> shared_base_toggle_classes(),
-      toggled_off: "text-primary
+        disabled:text-secondary-disabled
+        disabled:border-secondary-disabled
+        cursor-pointer" <> shared_base_toggle_classes(),
+      toggled_off: "
+        hover:bg-secondary-hover
+        hover:border-secondary-hover-border
+        text-primary
         border-primary
         bg-transparent",
-      toggled_on: "bg-secondary-active
-      border-secondary-active
-      text-text-invert"
+      toggled_on: "
+        hover:bg-primary-hover
+        hover:border-primary-border-hover
+        hover:text-text-invert
+        bg-secondary-active
+        border-secondary-active
+        text-text-invert"
     ]
   end
 

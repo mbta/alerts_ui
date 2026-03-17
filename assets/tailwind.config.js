@@ -24,7 +24,7 @@ module.exports = {
         "primary-active": "#74a5cc",
         "primary-disabled": "#628cae",
         "secondary-border": "#495057",
-        "secondary-hover": "#85c0ee",
+        "secondary-hover": "#0b2f4c",
         "secondary-hover-border": "#8AC6F6",
         "secondary-active": "#74a5cc",
         "secondary-focus-border": "#8ECDFF",
