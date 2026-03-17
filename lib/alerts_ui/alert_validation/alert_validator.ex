@@ -96,6 +96,7 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
         ["filter[id]": Enum.join(route_ids, ",")],
         Keyword.put(api_opts, :reject_hidden, false)
       )
+      |> maybe_include_virtual_green_line(route_ids)
       |> Enum.map(& &1.id)
 
     route_ids -- found_route_ids
@@ -133,5 +134,13 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
 
   defp format_entity_strings(items, category) do
     "#{category}: #{Enum.join(items, ", ")}"
+  end
+
+  defp maybe_include_virtual_green_line(returned_routes, ids) do
+    if "Green" in ids do
+      [RoutesRepo.green_line() | returned_routes]
+    else
+      returned_routes
+    end
   end
 end
