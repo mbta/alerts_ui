@@ -69,8 +69,7 @@ defmodule AlertsUIWeb.Router do
       on_mount: [
         {AlertsUIWeb.UserAuth, :ensure_authenticated},
         AlertsUIWeb.PutFlagsInAssignsHook,
-        AlertsUIWeb.PutMetadataInAssigns,
-        AlertsUIWeb.PreloadCacheOnMount
+        AlertsUIWeb.PutMetadataInAssigns
       ] do
       live("/alerts", ViewAlertsLive)
       live("/components", ComponentsLive)
@@ -93,8 +92,7 @@ defmodule AlertsUIWeb.Router do
       on_mount: [
         {AlertsUIWeb.UserAuth, :ensure_authenticated},
         AlertsUIWeb.PutFlagsInAssignsHook,
-        AlertsUIWeb.PutMetadataInAssigns,
-        AlertsUIWeb.PreloadCacheOnMount
+        AlertsUIWeb.PutMetadataInAssigns
       ] do
       live("/alerts/new", CreateAlertLive, :new)
       live("/alerts/edit", CreateAlertLive, :edit)
@@ -120,8 +118,7 @@ defmodule AlertsUIWeb.Router do
       on_mount: [
         {AlertsUIWeb.UserAuth, :ensure_authenticated},
         AlertsUIWeb.PutFlagsInAssignsHook,
-        AlertsUIWeb.PutMetadataInAssigns,
-        AlertsUIWeb.PreloadCacheOnMount
+        AlertsUIWeb.PutMetadataInAssigns
       ] do
       live("/db", DBPageLive)
       live("/import", IBIImporterLive)

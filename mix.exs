@@ -24,7 +24,6 @@ defmodule AlertsUI.MixProject do
           AlertsUIWeb.ComponentsLive,
           AlertsUIWeb.DBPageLive,
           AlertsUIWeb.PageHTML,
-          AlertsUIWeb.PreloadCacheOnMount,
           AlertsUIWeb.ErrorHTML,
           AlertsUIWeb.CoreComponents,
           AlertsUIWeb.SharedComponents,
