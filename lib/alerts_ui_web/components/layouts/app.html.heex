@@ -68,6 +68,7 @@
   </header>
   <main class="md:overflow-auto">
     <.live_component
+      :if={@current_user}
       module={AlertsUIWeb.ActivityTracker}
       id="activity_tracker"
       last_auth_time={@last_auth_time}
