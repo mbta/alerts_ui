@@ -4,7 +4,7 @@ defmodule AlertsUIWeb.PageController do
   """
   use AlertsUIWeb, :controller
 
-  def help(conn, _params) do
-    render(conn, :help)
+  def reauthenticate(conn, _params) do
+    render(conn, :reauthenticate)
   end
 end
