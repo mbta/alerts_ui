@@ -273,7 +273,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       # Make sure 'default' and modal search terms don't get pushed to params
       |> remove_unused_params()
 
-    params = socket.assigns.params |> Map.drop(["page"]) |> Map.merge(%{"filter" => filters})
+    params = %{"filter" => filters}
 
     socket =
       assign(socket,
@@ -297,7 +297,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       |> Map.get("filter", %{})
       |> Map.merge(%{"timeline" => value})
 
-    params = socket.assigns.params |> Map.drop(["page"]) |> Map.merge(%{"filter" => filters})
+    params = %{"filter" => filters}
     socket = assign(socket, scroll_to_top: true)
     {:noreply, push_patch(socket, to: ~p"/alerts?#{params}")}
   end
