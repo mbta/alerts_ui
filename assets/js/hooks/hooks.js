@@ -7,6 +7,8 @@ Hooks.ActivityTracker = {
   throttled: false,
   // 30s throttle
   delay: 30 * 1000,
+  // 30s window for autologout on inactivity
+  autologoutWindow: 30 * 1000,
 
   pushActivity() {
     if (!this.throttled) {
@@ -19,9 +21,16 @@ Hooks.ActivityTracker = {
     }
   },
 
+  pushInactivity() {
+    this.pushEventTo("#" + this.el.id, "inactivity");
+    setTimeout(() => { this.pushInactivity() }, this.autologoutWindow);
+  },
+
   mounted() {
+    this.pushInactivity = this.pushInactivity.bind(this);
     this.pushActivity = this.pushActivity.bind(this);
 
+    this.pushInactivity();
     this.pushActivity();
     window.addEventListener("mousemove", this.pushActivity);
     window.addEventListener("scroll", this.pushActivity);
