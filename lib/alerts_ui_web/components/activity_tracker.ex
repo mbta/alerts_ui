@@ -29,7 +29,7 @@ defmodule AlertsUIWeb.ActivityTracker do
     check_authentication(socket, false)
   end
 
-  defp check_authentication(socket, update_last_active \\ true) do
+  defp check_authentication(socket, update_last_active) do
     now = System.system_time(:second)
     email = socket.assigns.current_user.email
 
