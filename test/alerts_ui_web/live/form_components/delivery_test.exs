@@ -135,7 +135,7 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> [@route] end,
+           by_type: fn _types, _opts -> [@route] end,
            get: fn _, _ -> @route end
          ]},
         {RoutePatternsRepo, [],
@@ -184,7 +184,7 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> [@route] end,
+           by_type: fn _types, _opts -> [@route] end,
            get: fn _, _ -> @route end
          ]},
         {RoutePatternsRepo, [],
@@ -236,7 +236,7 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> [@route] end,
+           by_type: fn _types, _opts -> [@route] end,
            get: fn _, _ -> @route end,
            all: fn _ -> [@route] end
          ]},
@@ -293,7 +293,7 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> [@route] end,
+           by_type: fn _types, _opts -> [@route] end,
            get: fn _, _ -> @route end,
            all: fn _ -> [@route] end
          ]},
@@ -359,7 +359,7 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> [@route] end,
+           by_type: fn _types, _opts -> [@route] end,
            get: fn _, _ -> @route end,
            all: fn _ -> [@route] end
          ]},

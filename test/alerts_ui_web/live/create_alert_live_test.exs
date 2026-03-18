@@ -63,8 +63,9 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
            by_route_id: fn _route_id, _opts -> [@route_pattern] end,
            included_stops_by_route_id: fn _route_id, _ -> [@stop] end
          ]},
-        {StopsRepo, [], by_route: fn _, _ -> [@stop] end},
-        {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]}
+        {StopsRepo, [], by_route: fn _, _, _opts -> [@stop] end},
+        {RoutesRepo, [],
+         [by_type: fn _type, _opts -> [@route] end, get: fn _id, _opts -> @route end]}
       ]) do
         insert(:alert, alert_id: "1")
         {:ok, view, _html} = live(conn, "/alerts/new")
@@ -110,6 +111,8 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
     @tag :logged_in_user
     test "shows correct affected service for access combination", %{conn: conn} do
+      :PARKING_ISSUE
+
       with_mocks([
         {RoutePatternsRepo, [], [included_stops_by_route_id: fn _route_id, _direction -> [] end]},
         {FacilitiesRepo, [], get_by_type: fn _types, _opts -> [] end}
@@ -186,7 +189,8 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [@route_pattern] end]},
         {StopsRepo, [], by_route: fn _, _ -> [@stop] end},
-        {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]}
+        {RoutesRepo, [],
+         [by_type: fn _type, _opts -> [@route] end, get: fn _id, _opts -> @route end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
         first_rendered_view = render(view)
@@ -265,7 +269,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
       stops = [%Stop{id: "1", name: "cool stop name"}]
 
       with_mocks([
-        {StopsRepo, [], by_route: fn _route, _direction -> stops end},
+        {StopsRepo, [], by_route: fn _route, _direction, _opts -> stops end},
         {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [] end}
       ]) do
         conn = log_in_user(conn)
@@ -343,6 +347,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
       with_mocks([
         {RoutesRepo, [],
          [
+           by_type: fn _types, _opts -> [@route] end,
            by_type: fn _types -> [@route] end,
            get: fn _id -> @route end,
            get: fn _id, _opts -> @route end,
@@ -350,6 +355,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
          ]},
         {StopsRepo, [],
          [
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            by_route: fn _route, _direction -> [@stop] end,
            get_parent: fn
              "place-sstat" -> @stop

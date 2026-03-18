@@ -1023,7 +1023,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         {RoutesRepo, [],
          [
            by_stop: fn _stop_id, _ -> [@route] end,
-           by_type: fn _types -> [@route] end,
+           by_type: fn _types, _opts -> [@route] end,
            all: fn _opts -> [@route] end,
            get: fn _, _ -> @route end,
            get: fn _ -> @route end
@@ -1042,7 +1042,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
         {StopsRepo, [],
          [
            by_route_type: fn _route_type -> [@stop] end,
-           by_route: fn _, _ -> [@stop] end,
+           by_route: fn _, _, _opts -> [@stop] end,
            get_parent: fn
              "place-sstat" -> @stop
            end,
