@@ -111,6 +111,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
       ]) do
         reassign_env(:alerts_ui, :environment_name, "test")
         before_monitor = latest_monitor()
+        AlertsUI.FeatureFlags.enable("Trapeze Import")
 
         with_log(fn -> Importer.perform([], %{}) end)
 

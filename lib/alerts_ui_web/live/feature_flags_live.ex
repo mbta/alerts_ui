@@ -15,11 +15,22 @@ defmodule AlertsUIWeb.FeatureFlagsLive do
   end
 
   @impl true
-  def handle_event("toggle", %{"flag_id" => flag_id}, socket) do
-    flag_id
-    |> get_flag()
-    |> FeatureFlag.toggle()
-    |> Repo.update!()
+  def handle_event("toggle", params, socket) do
+    :ok =
+      params
+      |> Map.to_list()
+      |> Enum.filter(fn {key, _} -> String.length(key) == 36 end)
+      |> Enum.each(fn {flag_id, enabled} ->
+        case get_flag(flag_id) do
+          nil ->
+            nil
+
+          flag ->
+            flag
+            |> FeatureFlag.set(enabled == "true")
+            |> Repo.update!()
+        end
+      end)
 
     {:noreply, assign(socket, flags: get_flags())}
   end

@@ -5,6 +5,7 @@ defmodule AlertsUI.Trapeze.Importer do
   import Ecto.Query
 
   alias AlertsUI.AlertBuilder
+  alias AlertsUI.FeatureFlags
   alias AlertsUI.FeedOutput.GTFSProtobufDefinition.Alert
   use Oban.Worker
 
@@ -39,6 +40,9 @@ defmodule AlertsUI.Trapeze.Importer do
 
       configuration_incomplete?() ->
         Monitor.result({:warning, "Missing Configuration"})
+
+      not enabled?() ->
+        Monitor.result({:warning, "\"Trapeze Import\" Feature Flag Disabled"})
 
       true ->
         Monitor.start()
@@ -208,4 +212,6 @@ defmodule AlertsUI.Trapeze.Importer do
   defp production?, do: AlertsUI.config(:environment_name) == "prod"
 
   defp allowed_in_production?, do: AlertsUI.config(:trapeze_in_production) == "true"
+
+  defp enabled?, do: FeatureFlags.enabled?("Trapeze Import")
 end

@@ -4,16 +4,16 @@
     <ul>
       <ol :for={flag <- @flags} class="m-2">
         <label>
+          <input type="hidden" name={flag.id} value="false" />
           <input
             type="checkbox"
             phx-change="toggle"
             id={flag.id}
-            name="flag_id"
-            value={flag.id}
+            name={flag.id}
+            value="true"
             checked={flag.enabled}
           />
           {flag.name}
-          <input type="hidden" name="flag_id" value={flag.id} />
         </label>
       </ol>
     </ul>

@@ -11,11 +11,11 @@ defmodule AlertsUI.Models.FeatureFlagTest do
     end
   end
 
-  describe "toggle/1" do
-    test "flips the enabled flag" do
+  describe "set/2" do
+    test "sets the enabled flag" do
       changeset =
         %FeatureFlag{name: "Test Flag", enabled: false}
-        |> FeatureFlag.toggle()
+        |> FeatureFlag.set(true)
 
       assert get_change(changeset, :enabled) == true
     end

@@ -28,9 +28,9 @@ defmodule AlertsUI.Models.FeatureFlag do
     changeset(%__MODULE__{}, %{name: name, enabled: enabled})
   end
 
-  @spec toggle(t()) :: Ecto.Changeset.t()
-  def toggle(%__MODULE__{} = feature_flag) do
-    feature_flag |> changeset(%{enabled: !feature_flag.enabled})
+  @spec set(t(), boolean()) :: Ecto.Changeset.t()
+  def set(%__MODULE__{} = feature_flag, enabled) do
+    feature_flag |> changeset(%{enabled: enabled})
   end
 
   @spec changeset(any(), map(), keyword()) :: Ecto.Changeset.t()
