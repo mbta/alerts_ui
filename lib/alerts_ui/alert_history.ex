@@ -16,7 +16,7 @@ defmodule AlertsUI.AlertHistory do
     :closed,
     :last_modified_by,
     :last_modified_datetime,
-    :push_notification_datetime,
+    :push_notification_sent,
     :service_type,
     :effect_name,
     :effect,
@@ -55,7 +55,7 @@ defmodule AlertsUI.AlertHistory do
           closed: String.t() | nil,
           last_modified_by: String.t(),
           last_modified_datetime: String.t(),
-          push_notification_datetime: String.t(),
+          push_notification_sent: boolean(),
           service_type: String.t(),
           effect_name: String.t(),
           effect: String.t(),
@@ -110,7 +110,7 @@ defmodule AlertsUI.AlertHistory do
       closed: alert_map |> closed(),
       last_modified_by: alert_map |> last_modified_by(),
       last_modified_datetime: alert_map |> last_modified_datetime(),
-      push_notification_datetime: alert_map |> push_notification_datetime(),
+      push_notification_sent: alert_map |> push_notification_sent(),
       service_type: alert_map |> service_type(),
       effect_name: alert_map |> effect_name(),
       effect: alert_map |> effect(),
@@ -164,9 +164,30 @@ defmodule AlertsUI.AlertHistory do
     format_datetime(Map.get(map, :last_modified_timestamp), @with_seconds)
   end
 
-  defp push_notification_datetime(map) do
-    format_datetime(Map.get(map, :last_push_notification_timestamp), @with_seconds)
+  defp push_notification_sent(map) do
+    last_modified_datetime = Map.get(map, :last_modified_timestamp)
+
+    last_push_notification_timestamp =
+      Map.get(map, :last_push_notification_timestamp)
+
+    # cast to datetimes and compare. If times are less than 2 minutes apart
+    # we say that we sent a push notification.
+    # (older alerts will have LPNT slightly before LMD)
+    push_notification_sent?(last_modified_datetime, last_push_notification_timestamp)
   end
+
+  defp push_notification_sent?(last_modified_datetime, last_push_notification_timestamp)
+       when is_binary(last_modified_datetime) and is_binary(last_push_notification_timestamp) do
+    with {:ok, last_modified_datetime, _} <- DateTime.from_iso8601(last_modified_datetime),
+         {:ok, last_push_notification_timestamp, _} <-
+           DateTime.from_iso8601(last_push_notification_timestamp) do
+      DateTime.diff(last_modified_datetime, last_push_notification_timestamp, :minute) |> abs < 2
+    else
+      {:error, _} -> false
+    end
+  end
+
+  defp push_notification_sent?(_, _), do: false
 
   defp service_type(map) do
     get_service_type(Map.get(map, :primary_service_type))
