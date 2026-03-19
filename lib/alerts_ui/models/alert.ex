@@ -83,7 +83,8 @@ defmodule AlertsUI.Models.Alert do
   plaintext_reminder_selections
   primary_service_type
   work_order_id
-  source)a
+  source
+  recurring)a
 
   @cause Cause.causes()
   @effect Effect.effects()
@@ -144,7 +145,8 @@ defmodule AlertsUI.Models.Alert do
           updated_at: DateTime.t(),
           url: String.t() | nil,
           user_id: User.id(),
-          work_order_id: String.t() | nil
+          work_order_id: String.t() | nil,
+          recurring: boolean()
         }
 
   @derive {
@@ -244,6 +246,7 @@ defmodule AlertsUI.Models.Alert do
     field :primary_service_type, :string
     field :source, Ecto.Enum, values: @sources, default: :ALERTS_MANAGER
     field :work_order_id, :string
+    field :recurring, :boolean
 
     field :recurrence_days, {:array, Ecto.Enum},
       values: ~w[sunday monday tuesday wednesday thursday friday saturday]a

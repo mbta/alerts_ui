@@ -568,7 +568,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         duration_certainty: :KNOWN,
         recurrence_days: [:thursday, :friday, :saturday],
         recurrence_start_time: ~T[12:09:34],
-        recurrence_end_time: ~T[13:09:34]
+        recurrence_end_time: ~T[13:09:34],
+        recurring: true
       })
 
       alert = AlertData.build_alert_data("1")
@@ -610,7 +611,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         duration_certainty: :KNOWN,
         recurrence_days: [:thursday, :friday, :saturday],
         recurrence_start_time: ~T[16:09:34],
-        recurrence_end_time: ~T[06:09:34]
+        recurrence_end_time: ~T[06:09:34],
+        recurring: true
       })
 
       alert = AlertData.build_alert_data("1")
@@ -648,7 +650,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
           }
         ],
         duration_certainty: :KNOWN,
-        recurrence_days: ["thursday", "saturday"]
+        recurrence_days: ["thursday", "saturday"],
+        recurring: true
       })
 
       alert = AlertData.build_alert_data("1")

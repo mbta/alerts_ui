@@ -250,7 +250,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   end
 
   defp active_period_map(alert) do
-    if alert.recurrence_days && !Enum.empty?(alert.recurrence_days) do
+    if alert.recurring do
       determine_recurring_active_period(alert)
     else
       determine_one_time_active_period(alert)
@@ -323,7 +323,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       active_period_end_date: end_date(shifted_active_period_end, end_specifier),
       active_period_start_date: start_date(shifted_active_period_start),
       active_period_start_specifier: determine_start_specifier(shifted_active_period_start),
-      active_period_end_specifier: end_specifier
+      active_period_end_specifier: end_specifier,
+      # preserve selections when ex-recurring alerts are made recurring again
+      recurrence_days: (alert.recurrence_days || []) |> Enum.map(&Atom.to_string/1)
     }
   end
 
@@ -412,7 +414,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
   def determine_end_specifier(nil, nil), do: nil
   def determine_end_specifier(_ap_end, :ESTIMATED), do: "later_today"
-  def determine_end_specifier(nil, :UNKNOWN), do: "until_further_notice"
+  def determine_end_specifier(nil, _certainty), do: "until_further_notice"
 
   def determine_end_specifier(ap_end, :KNOWN) do
     if ap_end |> NaiveDateTime.to_time() == ActivePeriod.end_of_service_time() do

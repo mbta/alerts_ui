@@ -23,7 +23,8 @@ defmodule AlertsUI.ActivePeriodBuilder do
           active_period_end: DateTime.t() | nil,
           duration_certainty: atom(),
           recurrence_start_time: Time.t(),
-          recurrence_end_time: Time.t()
+          recurrence_end_time: Time.t(),
+          recurring: boolean()
         }
 
   @spec build_one_time_active_period(
@@ -36,13 +37,13 @@ defmodule AlertsUI.ActivePeriodBuilder do
           DateTime.t()
         ) :: active_period_data_t() | %{}
 
-  def build_one_time_active_period(%{active_period_start: nil}, _), do: %{}
+  def build_one_time_active_period(%{active_period_start: nil}, _), do: %{recurring: false}
 
   def build_one_time_active_period(%{active_period_end_specifier: nil} = params, _),
-    do: %{active_period_start: Map.get(params, :active_period_start)}
+    do: %{active_period_start: Map.get(params, :active_period_start), recurring: false}
 
   def build_one_time_active_period(%{active_period_start_specifier: nil} = params, _),
-    do: %{active_period_start: Map.get(params, :active_period_start)}
+    do: %{active_period_start: Map.get(params, :active_period_start), recurring: false}
 
   def build_one_time_active_period(
         %{
@@ -69,7 +70,8 @@ defmodule AlertsUI.ActivePeriodBuilder do
       active_period_end: utc_end,
       active_period: [%{start: utc_start, end: utc_end}],
       duration_certainty:
-        active_period_end_specifier_to_duration_certainty(active_period_end_specifier)
+        active_period_end_specifier_to_duration_certainty(active_period_end_specifier),
+      recurring: false
     }
   end
 
@@ -140,7 +142,8 @@ defmodule AlertsUI.ActivePeriodBuilder do
       # recurrence times are stored in eastern time, NOT shifted to UTC
       recurrence_start_time: start_time,
       recurrence_end_time: end_time,
-      duration_certainty: duration_certainty
+      duration_certainty: duration_certainty,
+      recurring: true
     }
   end
 
