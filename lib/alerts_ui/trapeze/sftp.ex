@@ -3,7 +3,15 @@ defmodule AlertsUI.Trapeze.SFTP do
   Downloads the Elevator/Escalator file from the Trapeze SFTP server
   """
 
-  @spec source_description(map()) :: map()
+  @type source_description_t :: %{
+          host: String.t() | nil,
+          port: integer() | nil,
+          user: String.t() | nil,
+          password: String.t() | nil,
+          filename: String.t() | nil
+        }
+
+  @spec source_description(map()) :: source_description_t()
   def source_description(override \\ %{}) do
     %{
       host: host(),
@@ -33,13 +41,8 @@ defmodule AlertsUI.Trapeze.SFTP do
   @spec filename() :: String.t()
   def filename, do: AlertsUI.config(:trapeze_sftp_filename)
 
-  @spec fetch(%{
-          host: String.t(),
-          port: integer(),
-          user: String.t(),
-          password: String.t(),
-          filename: String.t()
-        }) :: {:ok, {[String.t()], NaiveDateTime.t()}} | {:error, Exception.t()}
+  @spec fetch(source_description_t()) ::
+          {:ok, {[String.t()], NaiveDateTime.t() | nil}} | {:error, Exception.t()}
   def fetch(%{filename: filename} = source_description) do
     connection_arguments = Map.delete(source_description, :filename)
 

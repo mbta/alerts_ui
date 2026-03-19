@@ -1,0 +1,14 @@
+<div id="container">
+  <form class="flex flex-col items-start" phx-submit="submit">
+    <select name="config_key" class="text-black m-2 p-2">
+      <option :for={{key, config} <- @configurations} selected={@config_key == key} value={key}>
+        {"#{key}: #{config_to_string(config)}"}
+      </option>
+    </select>
+    <input name="password" class="text-black m-2 p-2" value={@password} placeholder="Password" />
+    <button type="submit" class="m-2 p-2">Update</button>
+    <section id="sftp_output" class="whitespace-pre font-mono overflow-auto">
+      {@output}
+    </section>
+  </form>
+</div>

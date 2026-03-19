@@ -74,6 +74,7 @@ defmodule AlertsUIWeb.Router do
       live("/alerts", ViewAlertsLive)
       live("/components", ComponentsLive)
       live("/help", HelpPageLive)
+      live("/sftp_demo", SFTPDemoLive)
     end
   end
 
