@@ -13,6 +13,9 @@ defmodule AlertsUI.CacheWarmer do
       # Small delay to ensure the app is fully started
       Process.sleep(2_000)
       AlertsUIWeb.CreateAlertLive.get_stops(nil, 3, nil)
+
+      # Let's just test warming this first, then find the gaps?
+      AlertsUIWeb.CreateAlertLive.get_stops_for_stop_route(nil, 2)
     end
   end
 end
