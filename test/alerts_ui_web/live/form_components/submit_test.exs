@@ -37,13 +37,13 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _id -> @route_one end,
            get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -81,13 +81,13 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _id -> @route_one end,
            get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -130,7 +130,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn
              "Blue" -> @route_one
              "Bluer" -> @route_two
@@ -142,7 +142,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -192,13 +192,13 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _ -> @route_one end,
            get: fn _, _ -> @route_one end
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]},
         {RoutePatternsRepo, [],

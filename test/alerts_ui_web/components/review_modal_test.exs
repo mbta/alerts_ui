@@ -83,13 +83,13 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _ -> @route_one end,
            get: fn _, _ -> @route_one end
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _ -> @stop end
          ]}
       ]) do
@@ -117,14 +117,14 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _id -> @route_one end,
            get: fn _id, _opts -> @route_one end,
            all: fn _opts -> @routes end
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get_parent: fn nil -> nil end
          ]},
         {SchedulesRepo, [],
@@ -170,14 +170,14 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _id -> @route_one end,
            get: fn _id, _opts -> @route_one end,
            all: fn _opts -> @routes end
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get_parent: fn nil -> nil end
          ]},
         {SchedulesRepo, [],
@@ -219,13 +219,13 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _ -> @route_one end,
            get: fn _, _ -> @route_one end
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _ -> @stop end
          ]}
       ]) do
@@ -276,13 +276,13 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _id -> @route_one end,
            get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -311,13 +311,13 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _id -> @route_one end,
            get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -347,13 +347,13 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _id -> @route_one end,
            get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -375,14 +375,14 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _id -> @route_one end,
            get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
            by_route_type: fn _rt -> [@stop] end,
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -408,7 +408,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _id -> @route_one end,
            get: fn _id, _opts -> @route_one end
          ]},
@@ -446,7 +446,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _id -> @route_one end,
            get: fn _id, _opts -> @route_one end
          ]},
@@ -457,7 +457,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         {StopsRepo, [],
          [
            # by_route_type: fn _rt -> [@stop] end,
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -539,13 +539,13 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _id -> @route_one end,
            get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -570,13 +570,13 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _id -> @route_one end,
            get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -617,13 +617,13 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _id -> @route_one end,
            get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -654,13 +654,13 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _id -> @route_one end,
            get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -690,13 +690,13 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _id -> @route_one end,
            get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -737,13 +737,13 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _ -> @route_one end,
            get: fn _, _ -> @route_one end
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _ -> @stop end
          ]}
       ]) do
@@ -766,13 +766,13 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _ -> @route_one end,
            get: fn _, _ -> @route_one end
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _ -> @stop end
          ]}
       ]) do
@@ -812,13 +812,13 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _id -> @route_one end,
            get: fn _, _ -> @route_one end
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -841,13 +841,13 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _id -> @route_one end,
            get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -924,13 +924,13 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _id -> @route_one end,
            get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -953,13 +953,13 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _id -> @route_one end,
            get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -991,13 +991,13 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _id -> @route_one end,
            get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -1029,13 +1029,13 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _id -> @route_one end,
            get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -1060,13 +1060,13 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _id -> @route_one end,
            get: fn _id, _opts -> @route_one end
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -1098,14 +1098,14 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _ -> @route_one end,
            get: fn _, _ -> @route_one end,
            all: fn _ -> @routes end
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end,
            get_parent: fn _id -> @stop end
          ]},
@@ -1195,14 +1195,14 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _types -> @routes end,
+           by_type: fn _types, _opts -> @routes end,
            get: fn _id -> @route_one end,
            get: fn _id, _opts -> @route_one end,
            all: fn _opts -> @routes end
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get_parent: fn nil -> nil end
          ]},
         {SchedulesRepo, [],
