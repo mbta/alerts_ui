@@ -410,8 +410,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
       conn: conn
     } do
       with_mocks([
-        {RoutesRepo, [], [by_type: fn _types, _opts -> [@route] end]},
-        {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
+        {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
+        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
 
@@ -453,8 +453,8 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
       conn: conn
     } do
       with_mocks([
-        {RoutesRepo, [], [by_type: fn _types, _opts -> [@route] end]},
-        {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
+        {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
+        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
 
@@ -503,11 +503,11 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
     } do
       with_mocks([
         {RoutesRepo, [],
-         [by_stop: fn _route_id -> [@route] end, by_type: fn _types, _opts -> [@route] end]},
+         [by_stop: fn _route_id -> [@route] end, by_type: fn _types -> [@route] end]},
         {StopsRepo, [],
          [
            by_route_type: fn _route_type, _ -> [@stop, @stop_2, @stop_3] end,
-           by_route: fn _, _, _opts -> [@stop, @stop_2, @stop_3] end
+           by_route: fn _, _ -> [@stop, @stop_2, @stop_3] end
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
@@ -547,7 +547,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
       conn: conn
     } do
       with_mocks([
-        {RoutesRepo, [], [by_type: fn _types, _opts -> [@route] end]},
+        {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
         {SchedulesRepo, [],
          [
            by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end,
@@ -558,7 +558,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
              |> Date.add(10)
            end
          ]},
-        {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop, @stop_2] end]}
+        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop, @stop_2] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
 
@@ -636,11 +636,11 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
     } do
       with_mocks([
         {RoutesRepo, [],
-         [by_stop: fn _route_id -> [@route] end, by_type: fn _types, _opts -> [@route] end]},
+         [by_stop: fn _route_id -> [@route] end, by_type: fn _types -> [@route] end]},
         {StopsRepo, [],
          [
            by_route_type: fn _route_type, _ -> [@stop, @stop_2, @stop_3] end,
-           by_route: fn _, _, _opts -> [@stop, @stop_2, @stop_3] end
+           by_route: fn _, _ -> [@stop, @stop_2, @stop_3] end
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")

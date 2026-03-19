@@ -20,8 +20,8 @@ defmodule AlertsUIWeb.StepTest do
     @tag :logged_in_user
     test "form content does not persist after going back to mode-effect selection", %{conn: conn} do
       with_mocks([
-        {RoutesRepo, [], [by_type: fn _types, _opts -> [@route] end]},
-        {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
+        {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
+        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
 

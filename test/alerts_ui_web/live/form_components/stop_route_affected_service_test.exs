@@ -106,11 +106,11 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         {RoutesRepo, [],
          [
            by_stop: fn _stop_id, ["filter[type]": 3] -> @routes ++ [@shuttle_route] end,
-           by_type: fn 3, _opts -> @routes ++ [@shuttle_route] end
+           by_type: fn 3 -> @routes ++ [@shuttle_route] end
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _routes, _direction, _opts -> [@stop] end
+           by_route: fn _routes, _direction -> [@stop] end
          ]}
       ]) do
         {:ok, view, _html} =
@@ -127,12 +127,10 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_stop: fn _stop_id, ["filter[type]": 3, include: ""] ->
-             @routes ++ [@shuttle_route]
-           end,
-           by_type: fn 3, _ -> @routes ++ [@shuttle_route] end
+           by_stop: fn _stop_id, ["filter[type]": 3] -> @routes ++ [@shuttle_route] end,
+           by_type: fn 3 -> @routes ++ [@shuttle_route] end
          ]},
-        {StopsRepo, [], [by_route: fn _routes, _direction, _ -> [@stop] end]}
+        {StopsRepo, [], [by_route: fn _routes, _direction -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
           live_isolated_component(
@@ -154,7 +152,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
     test "route options are all selected by default and allows user entry" do
       with_mocks([
         {RoutesRepo, [],
-         [by_stop: fn _stop_id, _opts -> @routes end, by_type: fn _types, _opts -> @routes end]},
+         [by_stop: fn _stop_id -> @routes end, by_type: fn _types -> @routes end]},
         {StopsRepo, [], [by_route_type: fn _route_type, _ -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
@@ -208,7 +206,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
     test "search works" do
       with_mocks([
         {RoutesRepo, [],
-         [by_stop: fn _stop_id, _opts -> @routes end, by_type: fn _types, _opts -> @routes end]},
+         [by_stop: fn _stop_id -> @routes end, by_type: fn _types -> @routes end]},
         {StopsRepo, [], [by_route_type: fn _route_type, _ -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
@@ -267,15 +265,12 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
     test "stop order is by name when not filtering and by direction when filtering" do
       with_mocks([
         {RoutesRepo, [],
-         [
-           by_stop: fn _route_id, _opts -> @routes end,
-           by_type: fn _types, _opts -> [@route_one] end
-         ]},
+         [by_stop: fn _route_id -> @routes end, by_type: fn _types -> [@route_one] end]},
         {StopsRepo, [],
          [
            by_route: fn
-             "Blue", 0, _opts -> [@stop, @stop_two]
-             "Blue", 1, _opts -> [@stop, @stop_two_but_different]
+             "Blue", 0 -> [@stop, @stop_two]
+             "Blue", 1 -> [@stop, @stop_two_but_different]
            end
          ]}
       ]) do
@@ -327,7 +322,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
     test "modal search works" do
       with_mocks([
         {RoutesRepo, [],
-         [by_stop: fn _route_id, _opts -> @routes end, by_type: fn _types, _opts -> @routes end]},
+         [by_stop: fn _route_id -> @routes end, by_type: fn _types -> @routes end]},
         {StopsRepo, [], [by_route_type: fn _route_type, _ -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
@@ -365,7 +360,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
     test "add route filter on stops works" do
       with_mocks([
         {RoutesRepo, [],
-         [by_stop: fn _route_id, _opts -> @routes end, by_type: fn _types, _opts -> @routes end]},
+         [by_stop: fn _route_id -> @routes end, by_type: fn _types -> @routes end]},
         {StopsRepo, [],
          [
            by_route_type: fn
@@ -373,9 +368,9 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
              _route_type, ["filter[route]": "Blue,Bluer", direction_id: 1] -> [@stop_two]
            end,
            by_route: fn
-             "Bluer", _, _opts -> [@stop]
-             _, 0, _opts -> [@stop]
-             _, 1, _opts -> [@stop, @stop_two]
+             "Bluer", _ -> [@stop]
+             _, 0 -> [@stop]
+             _, 1 -> [@stop, @stop_two]
            end
          ]}
       ]) do
@@ -413,8 +408,9 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_stop: fn _route_id, _opts -> @routes end,
-           by_type: fn _types, _opts -> @routes end
+           by_stop: fn _route_id -> @routes end,
+           by_stop: fn _, _ -> @routes end,
+           by_type: fn _types -> @routes end
          ]},
         {StopsRepo, [],
          [
@@ -423,9 +419,9 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
              _route_type, ["filter[route]": "Blue,Bluer", direction_id: 1] -> [@stop_two]
            end,
            by_route: fn
-             "Bluer", _, _opts -> [@stop]
-             _, 0, _opts -> [@stop]
-             _, 1, _opts -> [@stop, @stop_two]
+             "Bluer", _ -> [@stop]
+             _, 0 -> [@stop]
+             _, 1 -> [@stop, @stop_two]
            end
          ]}
       ]) do
@@ -488,13 +484,13 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
     test "clear route filter for stops works" do
       with_mocks([
         {RoutesRepo, [],
-         [by_stop: fn _route_id, _opts -> @routes end, by_type: fn _types, _opts -> @routes end]},
+         [by_stop: fn _route_id -> @routes end, by_type: fn _types -> @routes end]},
         {StopsRepo, [],
          [
            by_route_type: fn _route_type, _ -> [@stop, @stop_two] end,
            by_route: fn
-             "Bluer", _, _opts -> [@stop]
-             _, _, _opts -> [@stop, @stop_two]
+             "Bluer", _ -> [@stop]
+             _, _ -> [@stop, @stop_two]
            end
          ]}
       ]) do
@@ -536,7 +532,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
     test "works correctly if editing" do
       with_mocks([
         {RoutesRepo, [],
-         [by_stop: fn _stop_id, _opts -> @routes end, by_type: fn _types, _opts -> @routes end]},
+         [by_stop: fn _stop_id -> @routes end, by_type: fn _types -> @routes end]},
         {StopsRepo, [], [by_route_type: fn _route_type, _ -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
@@ -590,7 +586,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         {RoutesRepo, [],
          [
            by_stop: fn _stop_id, _ -> @routes end,
-           by_type: fn _types, _opts -> @routes end,
+           by_type: fn _types -> @routes end,
            get: fn
              "Blue", _ -> @route_one
              "Bluer", _ -> @route_two
@@ -605,7 +601,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
          [
            by_route_type: fn _route_type -> [@stop, @stop_two] end,
            by_route: fn _, _ -> [@stop, @stop_two] end,
-           by_route: fn _, _, _opts -> [@stop, @stop_two] end,
            get: fn _id -> @stop end,
            get_parent: fn _id -> nil end
          ]},
@@ -731,7 +726,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         {RoutesRepo, [],
          [
            by_stop: fn _stop_id, _ -> @routes end,
-           by_type: fn _types, _opts -> @routes end,
+           by_type: fn _types -> @routes end,
            get: fn
              "Blue", _ -> @route_one
              "Bluer", _ -> @route_two
@@ -742,7 +737,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
          [
            by_route_type: fn _route_type -> [@stop] end,
            by_route: fn _, _ -> [@stop] end,
-           by_route: fn _, _, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]},
         {RoutePatternsRepo, [],
@@ -825,8 +819,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
            conn: conn
          } do
       with_mocks([
-        {RoutesRepo, [], [by_type: fn _types, _opts -> @routes end]},
-        {StopsRepo, [], [by_route: fn _route_type, _direction, _opts -> [@stop] end]}
+        {RoutesRepo, [], [by_type: fn _types -> @routes end]},
+        {StopsRepo, [], [by_route: fn _route_type, _opts -> [@stop] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
 
