@@ -8,7 +8,7 @@
       <meta name="userEmail" content={@current_user.email} />
       <meta name="userName" content={"#{@current_user.first_name} #{@current_user.last_name}"} />
     <% end %>
-    <%= if @conn.assigns[:full_story_org_id] && false do %>
+    <%= if @conn.assigns[:fullstory_enabled] && @conn.assigns[:full_story_org_id] do %>
       <meta name="fullStoryOrgId" content={@full_story_org_id} />
     <% end %>
     <.live_title suffix=" - Alerts Manager">
@@ -20,7 +20,6 @@
     <link rel="icon" href={"/images/icons/favicon-#{@environment}.ico"} />
   </head>
   <body class="min-h-dvh bg-bg-primary font-body font-normal text-base text-text-primary">
-    <!-- <div id="fullstory-tracker" phx-hook="FullStory" style="display: none;"></div>  -->
     {@inner_content}
   </body>
 </html>
