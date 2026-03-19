@@ -1,0 +1,21 @@
+<section class="m-4">
+  <h1>Feature Flags</h1>
+  <form>
+    <ul>
+      <ol :for={flag <- @flags} class="m-2">
+        <label>
+          <input
+            type="checkbox"
+            phx-change="toggle"
+            id={flag.id}
+            name="flag_id"
+            value={flag.id}
+            checked={flag.enabled}
+          />
+          {flag.name}
+          <input type="hidden" name="flag_id" value={flag.id} />
+        </label>
+      </ol>
+    </ul>
+  </form>
+</section>

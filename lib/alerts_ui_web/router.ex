@@ -123,6 +123,7 @@ defmodule AlertsUIWeb.Router do
       ] do
       live("/db", DBPageLive)
       live("/import", IBIImporterLive)
+      live("/feature_flags", FeatureFlagsLive)
     end
   end
 
