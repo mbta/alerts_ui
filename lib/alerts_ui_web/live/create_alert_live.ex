@@ -177,13 +177,13 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   def get_routes([4]) do
     [4]
-    |> RoutesRepo.by_type(listed_route: false, include: "")
+    |> RoutesRepo.by_type(listed_route: false)
     |> Enum.sort_by(&SelectFormatter.sort_order/1)
   end
 
   def get_routes(route_types) do
     route_types
-    |> RoutesRepo.by_type(include: "")
+    |> RoutesRepo.by_type()
     |> Enum.filter(&(Map.get(&1, :description) !== :rail_replacement_bus))
     |> maybe_include_virtual_green_line()
     |> Enum.sort_by(&SelectFormatter.sort_order/1)
@@ -278,7 +278,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
     # included with the call. Doing 1 call for every route id
     # is too many so we have to chunk them up thus.
     # note- larger chunks take longer. small chunk is good.
-    RoutesRepo.by_type(3, include: "")
+    RoutesRepo.by_type(3)
     |> Enum.map(& &1.id)
     |> Enum.chunk_every(10)
     |> Enum.map(&Enum.join(&1, ","))
@@ -288,14 +288,14 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   def get_stops(nil, 1, nil) do
     # used for stop-route combination, subway (also gets light rail)
-    (StopsRepo.by_route_type(0, include: "") ++ StopsRepo.by_route_type(1, include: ""))
+    (StopsRepo.by_route_type(0, []) ++ StopsRepo.by_route_type(1, []))
     |> Enum.sort_by(&String.downcase(&1.name))
     |> Enum.uniq()
   end
 
   def get_stops(nil, route_type, nil) do
     # used for stop-route combination, other modes
-    StopsRepo.by_route_type(route_type, include: "") |> Enum.sort_by(&String.downcase(&1.name))
+    StopsRepo.by_route_type(route_type, []) |> Enum.sort_by(&String.downcase(&1.name))
   end
 
   def get_stops(["Green"] = route_ids, _route_type, direction) do
@@ -324,13 +324,13 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   def get_routes_by_stop(stop_ids, 3) do
-    Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1, "filter[type]": 3, include: ""))
+    Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1, "filter[type]": 3))
     |> Enum.filter(&(Map.get(&1, :description) !== :rail_replacement_bus))
     |> Enum.sort_by(&SelectFormatter.sort_order/1)
   end
 
   def get_routes_by_stop(stop_ids, _route_type) do
-    Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1, include: ""))
+    Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1))
     |> maybe_include_virtual_green_line()
     |> Enum.sort_by(&SelectFormatter.sort_order/1)
   end
@@ -657,13 +657,13 @@ defmodule AlertsUIWeb.CreateAlertLive do
   defp available_stops_for_bus_stop_route(route_id_lists) do
     outbound =
       route_id_lists
-      |> Enum.map(&StopsRepo.by_route(&1, 0, include: ""))
+      |> Enum.map(&StopsRepo.by_route(&1, 0))
       |> List.flatten()
       |> Enum.uniq()
 
     inbound =
       route_id_lists
-      |> Enum.map(&StopsRepo.by_route(&1, 1, include: ""))
+      |> Enum.map(&StopsRepo.by_route(&1, 1))
       |> List.flatten()
       |> Enum.uniq()
 
@@ -686,12 +686,11 @@ defmodule AlertsUIWeb.CreateAlertLive do
   @spec get_stops_by_route(String.t(), integer(), integer()) :: [Stop.t()]
   defp get_stops_by_route(route, direction, 3) do
     route
-    |> StopsRepo.by_route(direction, include: "")
+    |> StopsRepo.by_route(direction)
     |> map_direction_names_to_stops(direction)
   end
 
-  defp get_stops_by_route(route, direction, _route_type),
-    do: StopsRepo.by_route(route, direction, include: "")
+  defp get_stops_by_route(route, direction, _route_type), do: StopsRepo.by_route(route, direction)
 
   defp map_direction_names_to_stops(stops, direction) do
     direction_word = if direction == 0, do: "outbound", else: "inbound"

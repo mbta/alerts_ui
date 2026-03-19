@@ -43,7 +43,7 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
        ]},
       {RoutesRepo, [],
        [
-         by_type: fn _types, _opts -> @routes end,
+         by_type: fn _types -> @routes end,
          get: fn _id -> @route_one end,
          get: fn _id, _opts -> @route_one end,
          all: fn -> @routes end,
@@ -51,7 +51,7 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
        ]},
       {StopsRepo, [],
        [
-         by_route: fn _route, _direction, _opts -> [@stop] end,
+         by_route: fn _route, _direction -> [@stop] end,
          get_parent: fn nil -> nil end
        ]}
     ]) do
@@ -178,7 +178,7 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
        ]},
       {RoutesRepo, [],
        [
-         by_type: fn _types, _opts -> @routes end,
+         by_type: fn _types -> @routes end,
          get: fn _id -> @route_one end,
          get: fn _id, _opts -> @route_one end,
          all: fn -> @routes end,
@@ -186,7 +186,7 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
        ]},
       {StopsRepo, [],
        [
-         by_route: fn _route, _direction, _opts -> [@stop] end,
+         by_route: fn _route, _direction -> [@stop] end,
          get_parent: fn nil -> nil end
        ]}
     ]) do
