@@ -114,7 +114,7 @@ defmodule AlertsUI.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:postgrex, ">= 0.0.0"},
       {:req, "~> 0.5.0"},
-      {:sentry, "~> 11.0"},
+      {:sentry, "~> 12.0"},
       {:sftp_client, "~> 2.1"},
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
       {:stream_data, "~> 1.3.0", only: :test},
