@@ -255,10 +255,14 @@ defmodule AlertsUI.AlertBuilder do
     # added to our list of routes
 
     user_selected_directions =
-      [
-        direction_name(selected_routes, pre_combo_routes(selected_routes), direction_id) <>
-          "|" <> (direction_id || "")
-      ]
+      if selected_routes in [nil, []] do
+        nil
+      else
+        [
+          direction_name(selected_routes, pre_combo_routes(selected_routes), direction_id) <>
+            "|" <> (direction_id || "")
+        ]
+      end
 
     original_direction_selections =
       if user_selected_directions in [[], nil] do

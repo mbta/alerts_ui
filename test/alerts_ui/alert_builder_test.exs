@@ -3530,6 +3530,20 @@ defmodule AlertsUI.AlertBuilderTest do
     end
   end
 
+  test "does not insert a direction if there is no route" do
+    alert_data = %{
+      description_text: "ok",
+      header_text: "hello",
+      effect_name: "Elevator Closure",
+      route_ids: [],
+      direction: "default"
+    }
+
+    result = AlertBuilder.build_alert(alert_data, :ACCESS, ~U[2024-04-30 05:54:00Z])
+
+    assert %{original_direction_selections: nil} = result
+  end
+
   test "builds facility informed entities with nil stop" do
     alert_data = %{
       route_type: nil,
