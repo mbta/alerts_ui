@@ -723,7 +723,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
       html =
         view
-        |> element("input[aria-label='Current']")
+        |> element("label:has(input[aria-label='Current'])")
         |> render_click()
 
       assert get_alert_id_order(html) == Enum.map(91..100, fn i -> "#{i}" end)

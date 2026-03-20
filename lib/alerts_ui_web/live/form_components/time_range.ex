@@ -710,7 +710,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       class="md:max-w-[50%]"
       button_class="justify-center"
       column={false}
-      use_outline_buttons={true}
       show_icons={false}
     />
     """

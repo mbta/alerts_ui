@@ -260,10 +260,9 @@ defmodule AlertsUIWeb.SharedComponents do
     #{base_button_classes()}
     text-primary
     border-primary
-    bg-transparent
-    hover:bg-secondary-hover
+    bg-elevation-3
+    hover:bg-bg-elevation-6
     hover:border-secondary-hover-border
-    hover:text-text-invert
     active:bg-secondary-active
     active:border-secondary-active
     active:text-text-invert
@@ -367,47 +366,23 @@ defmodule AlertsUIWeb.SharedComponents do
     """
   end
 
-  @spec toggle_button_classes(boolean()) :: [
+  @spec toggle_button_classes :: [
           {:base_toggle_classes, String.t()}
           | {:toggled_off, String.t()}
           | {:toggled_on, String.t()},
           ...
         ]
-  def toggle_button_classes(false) do
-    # without outline
-    [
-      base_toggle_classes: "
-        active:bg-border-primary
-        active:border-border-primary
-        active:text-text-primary
-        hover:bg-toggle-active
-        hover:border-toggle-active
-        hover:!text-text-primary
-        disabled:bg-border-primary
-        disabled:border-border-primary
-        disabled:text-text-toggle-disabled" <> shared_base_toggle_classes(),
-      toggled_off: "bg-bg-input-default
-        border-border-primary
-        text-text-primary",
-      toggled_on: "
-        bg-menu-active
-        !text-text-invert"
-    ]
-  end
-
-  def toggle_button_classes(true) do
-    # with outline
+  def toggle_button_classes do
     [
       base_toggle_classes: "
         disabled:text-secondary-disabled
         disabled:border-secondary-disabled
         cursor-pointer" <> shared_base_toggle_classes(),
       toggled_off: "
-        hover:bg-secondary-hover
-        hover:border-secondary-hover-border
-        text-primary
-        border-primary
-        bg-transparent",
+        hover:bg-bg-elevation-4
+        text-white
+        border-toggle-active
+        bg-bg-elevation-3",
       toggled_on: "
         hover:bg-primary-hover
         hover:border-primary-border-hover
@@ -448,9 +423,7 @@ defmodule AlertsUIWeb.SharedComponents do
   slot :inner_block, required: true
 
   def button_toggle(assigns) do
-    assigns =
-      assigns
-      |> assign(toggle_button_classes(assigns.use_outline_buttons))
+    assigns = assigns |> assign(toggle_button_classes())
 
     ~H"""
     <button
@@ -538,7 +511,7 @@ defmodule AlertsUIWeb.SharedComponents do
       assigns
       |> assign(id: field.id, field_value: normalize_strings_to_integers(field.value))
       |> assign_new(:name, fn -> field.name <> "[]" end)
-      |> assign(toggle_button_classes(assigns.use_outline_buttons))
+      |> assign(toggle_button_classes())
       |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
 
     ~H"""
@@ -1496,11 +1469,11 @@ defmodule AlertsUIWeb.SharedComponents do
       class="flex flex-row justify-center has-[.ellipsis]:w-[370px]"
       page_link_attrs={[
         class:
-          "rounded-none btn h-auto min-h-fit #{secondary_button_classes()} !py-1 !px-2 leading-[1.5] font-normal"
+          "rounded-none h-auto min-h-fit #{secondary_button_classes()} !py-1 !px-2 leading-[1.5] font-normal"
       ]}
       current_page_link_attrs={[
         class:
-          "rounded-none btn h-auto min-h-fit #{secondary_button_classes()} !py-1 !px-2 leading-[1.5] font-normal !bg-primary text-text-invert"
+          "rounded-none h-auto min-h-fit #{secondary_button_classes()} !py-1 !px-2 leading-[1.5] font-normal !bg-primary hover:!bg-primary-hover text-text-invert"
       ]}
       page_list_attrs={[
         class: "join mx-3 [&>:first-child>button]:rounded-s-sm [&>:last-child>button]:rounded-e-sm"

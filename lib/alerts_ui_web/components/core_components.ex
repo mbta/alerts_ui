@@ -393,39 +393,57 @@ defmodule AlertsUIWeb.CoreComponents do
   attr :on_change, :string, default: ""
 
   def radio_switch_input(assigns) do
+    base_classes = "
+      join-item
+      rounded btn
+      !h-[38px]
+      !min-h-0
+      grow
+      text-primary
+      font-medium
+      px-3
+      text-primary
+      text-base
+      border-bg-elevation-6
+      bg-bg-elevation-3
+      transition-none
+      hover:!z-50
+      hover:bg-bg-elevation-5
+      hover:border-secondary-hover-border
+      focus:border-secondary-focus-border
+      focus:shadow-secondary-focus-shadow
+      disabled:text-secondary-disabled
+      disabled:border-secondary-disabled"
+
+    checked_classes =
+      if assigns.checked do
+        "!bg-secondary-active
+        hover:!bg-primary-hover
+        hover:!bg-primary-border-hover
+        !border-primary
+        !text-text-invert"
+      else
+        ""
+      end
+
+    assigns =
+      assign(assigns, %{
+        base_classes: base_classes,
+        checked_classes: checked_classes
+      })
+
     ~H"""
-    <input
-      type="radio"
-      name={@name}
-      value={@value}
-      aria-label={@label}
-      checked={@checked}
-      class={[
-        "join-item
-        rounded btn
-        !h-[38px]
-        !min-h-0
-        grow
-        text-primary
-        font-medium
-        px-3
-        text-primary
-        text-base
-        border-primary
-        bg-transparent
-        hover:bg-secondary-hover
-        hover:border-secondary-hover-border
-        hover:text-text-invert
-        focus:border-secondary-focus-border
-        focus:shadow-secondary-focus-shadow
-        disabled:text-secondary-disabled
-        disabled:border-secondary-disabled",
-        if(@checked,
-          do: "after:bg-primary after:text-text-invert !bg-primary !border-primary !text-text-invert"
-        )
-      ]}
-      phx-click={@on_change}
-    />
+    <label class={[@base_classes, @checked_classes]} phx-click={@on_change} phx-value-value={@value}>
+      {@label}
+      <input
+        type="radio"
+        class="hidden"
+        name={@name}
+        value={@value}
+        aria-label={@label}
+        checked={@checked}
+      />
+    </label>
     """
   end
 

@@ -56,7 +56,18 @@ defmodule AlertsUIWeb.FilterForm do
           class="h-[2.375rem] w-full"
           phx-change="apply_filter"
         />
-        <.button_secondary class="btn-outline" name="reset">
+        <.button_secondary
+          class="
+          btn-outline
+          text-primary
+          text-base
+          active:!text-text-invert
+          bg-bg-elevation-3
+          hover:bg-secondary-active
+          hover:text-text-invert
+        "
+          name="reset"
+        >
           Reset
         </.button_secondary>
       </div>
