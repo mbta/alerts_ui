@@ -586,14 +586,13 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
         phx-target={@myself}
         phx-change="validate"
         class={[
-          "form-control flex flex-row flex-wrap mb-4",
-          @route_type !== 2 && "min-h-[38rem] md:min-h-[32rem]"
+          "form-control flex flex-row flex-wrap mb-4 min-h-[38rem] md:min-h-[32rem]"
         ]}
         id="service_form"
       >
         <div class="mb-4 md:mb-0 w-full md:w-[25%] md:mr-8">
           <.filtered_select
-            :if={@route_type === 3}
+            :if={filtered_select_for_route_type?(@route_type)}
             label={if @route_type in [0, 1, 2], do: "Lines", else: "Routes"}
             field={
               if @effect_name in @single_route_effect_names,
@@ -608,7 +607,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
             multiple={if @effect_name in @single_route_effect_names, do: false, else: true}
           />
           <.toggle_checkgroup
-            :if={@route_type !== 3}
+            :if={!filtered_select_for_route_type?(@route_type)}
             label={if @route_type in [0, 1, 2], do: "Lines", else: "Routes"}
             field={@form[:route_ids]}
             options={@route_id_options}
@@ -892,5 +891,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
   defp get_selected_stops(available_stops, stop_names) do
     Enum.filter(available_stops, &(&1.name in stop_names))
+  end
+
+  defp filtered_select_for_route_type?(route_type) do
+    Enum.member?([2, 3, 4], route_type)
   end
 end

@@ -892,7 +892,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
 
         assert document_has_element?(
                  document,
-                 "[value=\"CR-Worcester\"][checked=\"checked\"]"
+                 "[value=\"CR-Worcester\"][selected=\"selected\"]"
                )
       end
     end
@@ -1157,14 +1157,25 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
 
         {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
 
-        rendered_view = render_async(view)
+        {:ok, document} =
+          view
+          |> render()
+          |> Floki.parse_document()
 
-        assert rendered_view =~ ~s(value="CR-Worcester" checked="checked")
+        assert document_has_element?(
+                 document,
+                 "[value=\"CR-Worcester\"][selected=\"selected\"]"
+               )
 
-        assert rendered_view =~
-                 ~s(selected="selected" value="South Station|place-sstat">South Station)
+        assert document_has_element?(
+                 document,
+                 "[value=\"South Station|place-sstat\"][selected=\"selected\"]"
+               )
 
-        assert rendered_view =~ ~s(selected="selected" value="CR-683322-595">595)
+        assert document_has_element?(
+                 document,
+                 "[value=\"CR-683322-595\"][selected=\"selected\"]"
+               )
 
         view
         |> element("#service_form")
