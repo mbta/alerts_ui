@@ -63,7 +63,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
            by_route_id: fn _route_id, _opts -> [@route_pattern] end,
            included_stops_by_route_id: fn _route_id, _ -> [@stop] end
          ]},
-        {StopsRepo, [], by_route: fn _, _ -> [@stop] end},
+        {StopsRepo, [], by_route: fn _, _, _opts -> [@stop] end},
         {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]}
       ]) do
         insert(:alert, alert_id: "1")
@@ -185,7 +185,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
     test "submitting the second part of the form saves the alert", %{conn: conn} do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [@route_pattern] end]},
-        {StopsRepo, [], by_route: fn _, _ -> [@stop] end},
+        {StopsRepo, [], by_route: fn _, _, _opts -> [@stop] end},
         {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
@@ -265,7 +265,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
       stops = [%Stop{id: "1", name: "cool stop name"}]
 
       with_mocks([
-        {StopsRepo, [], by_route: fn _route, _direction -> stops end},
+        {StopsRepo, [], by_route: fn _route, _direction, _opts -> stops end},
         {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [] end}
       ]) do
         conn = log_in_user(conn)
@@ -399,7 +399,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get_parent: fn
              "place-sstat" -> @stop
              "obsolete_stop" -> %Stop{id: "obsolete_stop", name: "spurious stop"}
@@ -438,7 +438,6 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
 
         rendered_view = render_async(view)
-
         assert rendered_view =~ "spurious route [sp_rt]"
         assert rendered_view =~ "spurious stop [obsolete_stop]"
       end

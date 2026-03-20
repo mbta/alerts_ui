@@ -21,7 +21,7 @@ defmodule AlertsUI.AlertBuilder do
   alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
-
+  require Logger
   @green_line_branch_ids Routes.green_line_branch_ids()
 
   @type alert_data_t :: %{
@@ -451,6 +451,11 @@ defmodule AlertsUI.AlertBuilder do
           direction,
           Map.get(alert_data, :stop_ids)
         )
+
+      Logger.info(
+        "length of child stops for #{Map.get(alert_data, :effect_name, "")} alert: " <>
+          (child_stops_with_context |> length() |> Integer.to_string())
+      )
 
       entity_data =
         Map.merge(alert_data, %{

@@ -51,7 +51,7 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
        ]},
       {StopsRepo, [],
        [
-         by_route: fn _route, _direction -> [@stop] end,
+         by_route: fn _route, _direction, _opts -> [@stop] end,
          get_parent: fn nil -> nil end
        ]}
     ]) do
@@ -186,7 +186,7 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
        ]},
       {StopsRepo, [],
        [
-         by_route: fn _route, _direction -> [@stop] end,
+         by_route: fn _route, _direction, _opts -> [@stop] end,
          get_parent: fn nil -> nil end
        ]}
     ]) do

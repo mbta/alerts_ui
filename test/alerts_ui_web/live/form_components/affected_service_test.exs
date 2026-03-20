@@ -167,7 +167,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     end
 
     test "direction options are only populated once a route is chosen" do
-      with_mock(StopsRepo, by_route: fn _route, _direction -> [] end) do
+      with_mock(StopsRepo, by_route: fn _route, _direction, _opts -> [] end) do
         {:ok, view, _html} =
           live_isolated_component(
             AffectedService,
@@ -300,7 +300,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end
+           by_route: fn _route, _direction, _opts -> [@stop] end
          ]}
       ]) do
         {:ok, view, _html} =
@@ -488,7 +488,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
            end,
            end_of_rating: fn -> Date.add(@todays_date, 1) end
          ]},
-        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+        {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
           live_isolated_component(AffectedService, %{
@@ -569,7 +569,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       with_mocks([
         {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},
         {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]},
-        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+        {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
           live_isolated_component(AffectedService, %{
@@ -596,7 +596,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       with_mocks([
         {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},
         {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]},
-        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+        {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
           live_isolated_component(AffectedService, %{
@@ -622,7 +622,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     test "enables stop selection if one route selected" do
       with_mocks([
         {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},
-        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+        {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
           live_isolated_component(
@@ -664,7 +664,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       with_mocks([
         {RoutesRepo, [], [by_type: fn _route_types -> [@route, route_2] end]},
         {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]},
-        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+        {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
           live_isolated_component(AffectedService, %{
@@ -709,8 +709,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         {StopsRepo, [],
          [
            by_route: fn
-             _route, 0 -> [@stop, @stop_2]
-             _route, 1 -> [@stop_2, @stop]
+             _route, 0, _opts -> [@stop, @stop_2]
+             _route, 1, _opts -> [@stop_2, @stop]
            end
          ]}
       ]) do
@@ -744,7 +744,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     test "stops are preselected even when duplicating an event with old info" do
       with_mocks([
         {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},
-        {StopsRepo, [], [by_route: fn _rt, _dir -> [@stop, @stop_2] end]}
+        {StopsRepo, [], [by_route: fn _rt, _dir, _opts -> [@stop, @stop_2] end]}
       ]) do
         {:ok, view, _html} =
           live_isolated_component(
@@ -781,7 +781,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     test "disables stop selection if multiple routes selected" do
       stops = [%Stop{id: "1", name: "cool stop name"}]
 
-      with_mock(StopsRepo, by_route: fn _route, _direction -> stops end) do
+      with_mock(StopsRepo, by_route: fn _route, _direction, _opts -> stops end) do
         {:ok, view, _html} =
           live_isolated_component(AffectedService, %{
             @assigns
@@ -806,7 +806,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       with_mocks([
         {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},
         {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]},
-        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+        {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
           live_isolated_component(AffectedService, @assigns)
@@ -852,7 +852,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
              |> Date.add(10)
            end
          ]},
-        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+        {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
           live_isolated_component(
@@ -903,7 +903,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         {RoutePatternsRepo, [], [included_stops_by_route_id: fn _route_id, _direction -> [] end]},
         {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},
         {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]},
-        {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+        {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
 
@@ -1013,7 +1013,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         {StopsRepo, [],
          [
            by_route_type: fn _route_type -> [@stop] end,
-           by_route: fn _, _ -> [@stop] end
+           by_route: fn _, _, _opts -> [@stop] end
          ]},
         {RoutePatternsRepo, [],
          [
@@ -1098,7 +1098,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         {StopsRepo, [],
          [
            by_route_type: fn _route_type -> [@stop, @stop_2] end,
-           by_route: fn _, _ -> [@stop, @stop_2] end,
+           by_route: fn _, _, _opts -> [@stop, @stop_2] end,
            get_parent: fn
              "place-sstat" -> @stop
              "place-crtst" -> @stop_2
@@ -1228,7 +1228,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         {StopsRepo, [],
          [
            by_route_type: fn _route_type -> [@stop] end,
-           by_route: fn _, _ -> [@stop] end
+           by_route: fn _, _, _opts -> [@stop] end
          ]},
         {RoutePatternsRepo, [],
          [
