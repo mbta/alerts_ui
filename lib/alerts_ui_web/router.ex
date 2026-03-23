@@ -50,11 +50,16 @@ defmodule AlertsUIWeb.Router do
     plug :require_roles, required_roles: [:developer]
   end
 
+  pipeline :static_layout do
+    plug :put_layout, html: {AlertsUIWeb.Layouts, :static}
+  end
+
   scope "/", AlertsUIWeb do
     # Unauthenticated pages
-    pipe_through [:redirect_prod_http, :browser]
+    pipe_through [:redirect_prod_http, :browser, :static_layout]
 
     get("/unauthorized", UnauthorizedController, :index)
+    get("/reauthenticate", PageController, :reauthenticate)
   end
 
   # Viewers
