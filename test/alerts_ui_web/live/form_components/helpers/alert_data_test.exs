@@ -271,6 +271,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       result = AlertData.build_alert_data("1")
       assert result.single_route_id == nil
       assert result.route_ids == []
+      assert result.original_route_selections == []
     end
 
     test "handles multi-route detour alert" do

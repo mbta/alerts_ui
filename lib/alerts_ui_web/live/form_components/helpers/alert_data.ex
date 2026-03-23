@@ -4,7 +4,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   Used to populate form when editing an alert
   Can take an Alert struct or an alert_id
   """
-  require Logger
   alias AlertsUI.Alerts
   alias AlertsUI.Models.{ActivePeriod, Alert, Effect}
   alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
@@ -208,37 +207,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
         GetKeyForModeEffect.get_value_of_key(:combination, route_type, effect_name)
       end
 
-    original_route_selections = alert.original_route_selections || []
-    route_ids = Alert.get_original_ids(original_route_selections)
-    Logger.info("original route_ids: " <> Enum.join(route_ids, ", "))
-    Logger.info("effect name: " <> alert.effect_name)
-
-    single_route_id =
-      if alert.effect_name in @single_route_effect_names && length(route_ids) === 1 do
-        hd(route_ids)
-      else
-        nil
-      end
-
-    Logger.info("single route id: " <> (single_route_id || "nil"))
-
-    if alert.effect_name in @single_route_effect_names,
-      do: Logger.info("effect name is in it?: true"),
-      else: Logger.info("effect name is in it?: false")
-
-    route_ids =
-      if is_nil(single_route_id) && alert.effect_name in @single_route_effect_names,
-        do: [],
-        else: route_ids
-
-    original_route_selections =
-      if is_nil(single_route_id) && alert.effect_name in @single_route_effect_names,
-        do: [],
-        else: original_route_selections
-
-    Logger.info("new route_ids: " <> Enum.join(route_ids, ", "))
-    Logger.info("new original selections: " <> Enum.join(original_route_selections, ", "))
-
     notifcation_key =
       if form_type == :editing,
         do: :send_push_notification_on_edit,
@@ -256,14 +224,40 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       effect_name: effect_name,
       direction: Alert.get_direction(alert) || "default",
       facility_id: Alert.gather_facility_ids(alert) |> List.first(),
-      route_ids: route_ids,
-      original_route_selections: original_route_selections,
       route_type: route_type,
-      single_route_id: single_route_id,
       stop_ids: Alert.gather_parent_stop_ids(alert),
       stop_names_and_ids: alert.original_stop_selections,
       trip_ids: Alert.gather_trip_ids(alert),
       notification_toggle: send_push_notification?
+    }
+    |> Map.merge(route_information(alert))
+  end
+
+  defp route_information(alert) do
+    original_route_selections = alert.original_route_selections || []
+    route_ids = Alert.get_original_ids(original_route_selections)
+
+    single_route_id =
+      if alert.effect_name in @single_route_effect_names && length(route_ids) === 1 do
+        hd(route_ids)
+      else
+        nil
+      end
+
+    route_ids =
+      if is_nil(single_route_id) && alert.effect_name in @single_route_effect_names,
+        do: [],
+        else: route_ids
+
+    original_route_selections =
+      if is_nil(single_route_id) && alert.effect_name in @single_route_effect_names,
+        do: [],
+        else: original_route_selections
+
+    %{
+      route_ids: route_ids,
+      original_route_selections: original_route_selections,
+      single_route_id: single_route_id
     }
   end
 
