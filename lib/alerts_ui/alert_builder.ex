@@ -1069,16 +1069,17 @@ defmodule AlertsUI.AlertBuilder do
       else
         routes_from_children
       end
-      |> Enum.map(& &1.id)
+      |> Enum.map(&[id: &1.id, type: &1.type])
       |> Enum.uniq()
 
     child_stop_ids
     |> Enum.flat_map(fn stop_id ->
-      Enum.map(route_ids, fn route_id ->
+      Enum.map(route_ids, fn [id: route_id, type: route_type] ->
         %{
           activities: Activities.for_effect(effect),
           facility_id: facility_id,
           route_id: route_id,
+          route_type: route_type,
           stop_id: stop_id
         }
       end)
