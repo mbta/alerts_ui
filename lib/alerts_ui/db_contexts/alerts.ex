@@ -351,16 +351,16 @@ defmodule AlertsUI.Alerts do
   defp get_originator_id(%{user_id: user_id, origin: "user"}), do: user_id
   defp get_originator_id(_), do: nil
 
-  @spec list_all_paginated_by_creation_date(map()) :: {[any()], Flop.Meta.t()}
-  def list_all_paginated_by_creation_date(params) do
+  @spec list_all_paginated_by_id(map()) :: {[any()], Flop.Meta.t()}
+  def list_all_paginated_by_id(params) do
     opts = [for: Alert, page_size: 50]
 
     with {:ok, flop} <- Flop.validate(params, opts) do
       Alert
-      |> order_by([a], asc: a.created_at)
       |> select_merge([a], %{
         alert_id: a.alert_id |> type(:integer) |> selected_as(:integer_alert_id)
       })
+      |> order_by([a], asc: a.alert_id |> type(:integer))
       |> Flop.run(flop, opts)
     end
   end
