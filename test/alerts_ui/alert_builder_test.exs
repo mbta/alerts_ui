@@ -3505,24 +3505,28 @@ defmodule AlertsUI.AlertBuilderTest do
                %{
                  stop_id: "70061",
                  route_id: "Red",
+                 route_type: 1,
                  facility_id: "349",
                  activities: [:USING_WHEELCHAIR]
                },
                %{
                  stop_id: "Alewife-01",
                  route_id: "Red",
+                 route_type: 1,
                  facility_id: "349",
                  activities: [:USING_WHEELCHAIR]
                },
                %{
                  stop_id: "Alewife-02",
                  route_id: "Red",
+                 route_type: 1,
                  facility_id: "349",
                  activities: [:USING_WHEELCHAIR]
                },
                %{
                  stop_id: "door-alfcl-russell",
                  route_id: "Red",
+                 route_type: 1,
                  facility_id: "349",
                  activities: [:USING_WHEELCHAIR]
                }
