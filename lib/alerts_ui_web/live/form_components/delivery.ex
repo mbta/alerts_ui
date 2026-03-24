@@ -118,10 +118,21 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
   end
 
   def handle_event("banner_text_change", %{"delivery" => delivery}, socket) do
+    validate(delivery, socket)
+  end
+
+  def handle_event("banner_text_focus", _, socket) do
     # disables sync if user types in banner field
-    delivery
-    |> Map.put("banner_sync_toggle", false)
-    |> validate(socket)
+    delivery = Map.put(socket.assigns.form.params, "banner_sync_toggle", false)
+
+    changeset = changeset(%__MODULE__{}, delivery)
+
+    form =
+      changeset
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    {:noreply, assign(socket, %{form: form})}
   end
 
   def validate(delivery, socket) do
@@ -198,11 +209,11 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
               <.textarea
                 field={@form[:banner_text]}
                 label="Website banner text"
-                phx-throttle
-                phx-debounce
+                phx-debounce="500"
                 class="w-[100%] min-h-[10rem] border-b-0"
                 maxlength="4000"
                 phx-change="banner_text_change"
+                phx-focus="banner_text_focus"
                 phx-target={@myself}
                 value={@form[:banner_text].value}
               />

@@ -255,9 +255,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
 
   @impl true
   def handle_event("header_text_change", %{"alert_details" => alert_details}, socket) do
-    # disables sync if user types in header field
     alert_details = Map.merge(socket.assigns.form.params, alert_details)
-    alert_details = Map.put(alert_details, "header_sync_toggle", false)
 
     changeset = changeset(%__MODULE__{}, alert_details)
 
@@ -272,14 +270,42 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   end
 
   @impl true
+  def handle_event("header_text_focus", _, socket) do
+    # disables sync if user types in header field
+    alert_details = Map.put(socket.assigns.form.params, "header_sync_toggle", false)
+
+    changeset = changeset(%__MODULE__{}, alert_details)
+
+    form =
+      changeset
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    {:noreply, assign(socket, %{form: form})}
+  end
+
+  @impl true
   def handle_event("description_text_change", %{"alert_details" => alert_details}, socket) do
-    # disables sync if user types in description field
     alert_details = Map.merge(socket.assigns.form.params, alert_details)
-    alert_details = Map.put(alert_details, "description_sync_toggle", false)
 
     changeset = changeset(%__MODULE__{}, alert_details)
 
     send_changeset(changeset)
+
+    form =
+      changeset
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    {:noreply, assign(socket, %{form: form})}
+  end
+
+  @impl true
+  def handle_event("description_text_focus", _, socket) do
+    # disables sync if user types in description field
+    alert_details = Map.put(socket.assigns.form.params, "description_sync_toggle", false)
+
+    changeset = changeset(%__MODULE__{}, alert_details)
 
     form =
       changeset
@@ -406,12 +432,12 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
             <.textarea
               field={@form[:header_text]}
               label="Main message"
-              phx-throttle
-              phx-debounce
+              phx-debounce="500"
               maxlength="255"
               id="header_input"
               class="w-[100%] min-h-[10rem] border-b-0 z-20 mt-3"
               phx-change="header_text_change"
+              phx-focus="header_text_focus"
               phx-target={@myself}
               value={@form[:header_text].value}
             />
@@ -433,12 +459,12 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
             <.textarea
               field={@form[:description_text]}
               label="Supporting information"
-              phx-throttle
-              phx-debounce
+              phx-debounce="500"
               id="description_input"
               class="w-[100%] min-h-[10rem] border-b-0 z-20 mt-3"
               maxlength="3000"
               phx-change="description_text_change"
+              phx-focus="description_text_focus"
               phx-target={@myself}
               value={@form[:description_text].value}
             />
@@ -458,8 +484,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         <.text_input
           field={@form[:url]}
           label="URL"
-          phx-throttle
-          phx-debounce
+          phx-debounce="500"
           id="url_input"
           class="md:min-w-[50%]"
         />
@@ -467,8 +492,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           <.text_input
             field={@form[:image_url]}
             label="Image URL"
-            phx-throttle
-            phx-debounce={500}
+            phx-debounce="500"
             id="image_url_input"
             class={[
               "md:min-w-[50%]",
@@ -495,8 +519,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         <.text_input
           field={@form[:image_alternative_text]}
           label="Image alt text"
-          phx-throttle
-          phx-debounce
+          phx-debounce="500"
           id="image_alt_text_input"
           class="md:min-w-[50%]"
           spellcheck="true"
