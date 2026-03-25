@@ -150,6 +150,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       Map.put(params, key, Map.get(alert, key))
     end)
     |> Map.merge(create_and_edit_metadata(alert, form_type))
+    |> Map.merge(route_information(alert))
     |> Map.merge(effect_name_combination_and_informed_entities(alert, form_type))
     |> Map.merge(last_push_notification_timestamp(alert))
     |> Map.merge(active_period_map(alert))
@@ -230,7 +231,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       trip_ids: Alert.gather_trip_ids(alert),
       notification_toggle: send_push_notification?
     }
-    |> Map.merge(route_information(alert))
   end
 
   defp route_information(alert) do
