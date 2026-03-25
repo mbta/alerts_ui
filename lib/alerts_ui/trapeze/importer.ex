@@ -35,9 +35,6 @@ defmodule AlertsUI.Trapeze.Importer do
   @impl Oban.Worker
   def perform(_, _opts \\ []) do
     cond do
-      production?() && not allowed_in_production?() ->
-        Monitor.result({:warning, "Prevented from running in Production"})
-
       configuration_incomplete?() ->
         Monitor.result({:warning, "Missing Configuration"})
 
@@ -208,10 +205,6 @@ defmodule AlertsUI.Trapeze.Importer do
         SFTP.source_description().user in [nil, ""] ||
         SFTP.source_description().password in [nil, ""] ||
         SFTP.source_description().filename in [nil, ""]
-
-  defp production?, do: AlertsUI.config(:environment_name) == "prod"
-
-  defp allowed_in_production?, do: AlertsUI.config(:trapeze_in_production) == "true"
 
   defp enabled?, do: FeatureFlags.enabled?("Trapeze Import")
 end

@@ -79,25 +79,6 @@ defmodule AlertsUI.Trapeze.ImporterTest do
       end
     end
 
-    test "in production without confirmation stops early" do
-      with_mocks([
-        {FacilitiesRepo, [], [get: fn _ -> @facility end]}
-      ]) do
-        reassign_env(:alerts_ui, :trapeze_sftp_host, "host")
-        reassign_env(:alerts_ui, :trapeze_sftp_port, "port")
-        reassign_env(:alerts_ui, :trapeze_sftp_user, "user")
-        reassign_env(:alerts_ui, :trapeze_sftp_password, "password")
-        reassign_env(:alerts_ui, :trapeze_sftp_filename, "filename")
-        reassign_env(:alerts_ui, :environment_name, "prod")
-        reassign_env(:alerts_ui, :trapeze_in_production, "false")
-
-        {result, log} = with_log(fn -> Importer.perform([], %{}) end)
-
-        assert log =~ ~r/warning.*AlertsUI.Trapeze.Monitor: Prevented from running in Production/
-        assert result == {:ok, "Prevented from running in Production"}
-      end
-    end
-
     test "that in the right env it completes" do
       with_mocks([
         {FacilitiesRepo, [], [get: fn _ -> @facility end]},
