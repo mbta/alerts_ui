@@ -198,8 +198,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
               <.textarea
                 field={@form[:banner_text]}
                 label="Website banner text"
-                phx-throttle
-                phx-debounce
+                phx-debounce={120}
                 class="w-[100%] min-h-[10rem] border-b-0"
                 maxlength="4000"
                 phx-change="banner_text_change"

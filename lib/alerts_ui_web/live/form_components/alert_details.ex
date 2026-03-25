@@ -406,8 +406,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
             <.textarea
               field={@form[:header_text]}
               label="Main message"
-              phx-throttle
-              phx-debounce
+              phx-debounce={120}
               maxlength="255"
               id="header_input"
               class="w-[100%] min-h-[10rem] border-b-0 z-20 mt-3"
@@ -433,8 +432,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
             <.textarea
               field={@form[:description_text]}
               label="Supporting information"
-              phx-throttle
-              phx-debounce
+              phx-debounce={120}
               id="description_input"
               class="w-[100%] min-h-[10rem] border-b-0 z-20 mt-3"
               maxlength="3000"
@@ -458,8 +456,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         <.text_input
           field={@form[:url]}
           label="URL"
-          phx-throttle
-          phx-debounce
+          phx-debounce={120}
           id="url_input"
           class="md:min-w-[50%]"
         />
@@ -467,7 +464,6 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
           <.text_input
             field={@form[:image_url]}
             label="Image URL"
-            phx-throttle
             phx-debounce={500}
             id="image_url_input"
             class={[
@@ -495,8 +491,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
         <.text_input
           field={@form[:image_alternative_text]}
           label="Image alt text"
-          phx-throttle
-          phx-debounce
+          phx-debounce={120}
           id="image_alt_text_input"
           class="md:min-w-[50%]"
           spellcheck="true"
