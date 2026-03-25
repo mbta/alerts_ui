@@ -89,7 +89,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _ -> @stop end
          ]}
       ]) do
@@ -124,7 +124,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get_parent: fn nil -> nil end
          ]},
         {SchedulesRepo, [],
@@ -177,7 +177,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get_parent: fn nil -> nil end
          ]},
         {SchedulesRepo, [],
@@ -225,7 +225,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _ -> @stop end
          ]}
       ]) do
@@ -282,7 +282,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -317,7 +317,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -353,7 +353,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -383,6 +383,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          [
            by_route_type: fn _rt -> [@stop] end,
            by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -457,7 +458,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         {StopsRepo, [],
          [
            # by_route_type: fn _rt -> [@stop] end,
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -545,7 +546,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -576,7 +577,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -623,7 +624,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -660,7 +661,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -696,7 +697,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -743,7 +744,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _ -> @stop end
          ]}
       ]) do
@@ -772,7 +773,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _ -> @stop end
          ]}
       ]) do
@@ -818,7 +819,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -847,7 +848,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -910,7 +911,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
     # test "TBD populate some past reminders for an edited alert", %{conn: conn} do
     #   with_mocks([
     #     {RoutesRepo, [], [by_type: fn _types -> @routes end]},
-    #     {StopsRepo, [], [by_route: fn _route, _direction -> [@stop] end]}
+    #     {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
     #   ]) do
     #     ...
     #     assert render(view) =~ ~r/Reminders.*Sent.*Sent.*Scheduled/s
@@ -930,7 +931,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -959,7 +960,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -997,7 +998,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -1035,7 +1036,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -1066,7 +1067,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -1105,7 +1106,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end,
            get_parent: fn _id -> @stop end
          ]},
@@ -1202,7 +1203,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
            get_parent: fn nil -> nil end
          ]},
         {SchedulesRepo, [],

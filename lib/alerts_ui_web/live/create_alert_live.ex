@@ -290,14 +290,14 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   def get_stops(nil, 1, nil) do
     # used for stop-route combination, subway (also gets light rail)
-    (StopsRepo.by_route_type(0, []) ++ StopsRepo.by_route_type(1, []))
+    (StopsRepo.by_route_type(0, include: "") ++ StopsRepo.by_route_type(1, include: ""))
     |> Enum.sort_by(&String.downcase(&1.name))
     |> Enum.uniq()
   end
 
   def get_stops(nil, route_type, nil) do
     # used for stop-route combination, other modes
-    StopsRepo.by_route_type(route_type, []) |> Enum.sort_by(&String.downcase(&1.name))
+    StopsRepo.by_route_type(route_type, include: "") |> Enum.sort_by(&String.downcase(&1.name))
   end
 
   def get_stops(["Green"] = route_ids, _route_type, direction) do
@@ -669,13 +669,13 @@ defmodule AlertsUIWeb.CreateAlertLive do
   defp available_stops_for_bus_stop_route(route_id_lists) do
     outbound =
       route_id_lists
-      |> Enum.map(&StopsRepo.by_route(&1, 0))
+      |> Enum.map(&StopsRepo.by_route(&1, 0, include: ""))
       |> List.flatten()
       |> Enum.uniq()
 
     inbound =
       route_id_lists
-      |> Enum.map(&StopsRepo.by_route(&1, 1))
+      |> Enum.map(&StopsRepo.by_route(&1, 1, include: ""))
       |> List.flatten()
       |> Enum.uniq()
 
@@ -698,11 +698,13 @@ defmodule AlertsUIWeb.CreateAlertLive do
   @spec get_stops_by_route(String.t(), integer(), integer()) :: [Stop.t()]
   defp get_stops_by_route(route, direction, 3) do
     route
-    |> StopsRepo.by_route(direction)
+    |> StopsRepo.by_route(direction, include: "")
     |> map_direction_names_to_stops(direction)
   end
 
-  defp get_stops_by_route(route, direction, _route_type), do: StopsRepo.by_route(route, direction)
+  defp get_stops_by_route(route, direction, _route_type) do
+    StopsRepo.by_route(route, direction, include: "")
+  end
 
   defp map_direction_names_to_stops(stops, direction) do
     direction_word = if direction == 0, do: "outbound", else: "inbound"
