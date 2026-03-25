@@ -257,7 +257,7 @@ defmodule AlertsUI.IBIAlertImporter do
   end
 
   def parallel_convert_alerts() do
-    1..70
+    1..80
     |> Enum.map(&{(&1 - 1) * 10000, &1 * 10000 - 1})
     |> Enum.chunk_every(7)
     |> Enum.each(fn batch ->
