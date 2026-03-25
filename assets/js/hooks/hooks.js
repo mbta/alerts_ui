@@ -1,3 +1,4 @@
+// import { FullStory, isInitialized } from '@fullstory/browser';
 import tippy from "tippy.js";
 
 let Hooks = {};
@@ -214,6 +215,35 @@ Hooks.FilterSelect = {
     });
   },
 };
+
+// TODO: What all should we track in FS?
+// Right now, I've just got page nav
+// Hooks.FullStory = {
+//   mounted() {
+//     // Track initial page view
+//     this.trackPageView()
+//
+//     // Listen for LiveView navigation events
+//     window.addEventListener("phx:page-loading-stop", () => {
+//       console.log("page load ended")
+//       this.trackPageView()
+//     })
+//   },
+//
+//   trackPageView() {
+//     console.log("tracking page view")
+//     if (isInitialized()) {
+//       console.log("setting page in fullstory")
+//       FullStory('setProperties', {
+//         type: 'page',
+//         properties: {
+//           path: window.location.pathname
+//         }
+//       })
+//     }
+//
+//   }
+// }
 
 Hooks.Tippy = {
   mounted() {
