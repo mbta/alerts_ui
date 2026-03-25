@@ -3,7 +3,7 @@ defmodule AlertsUIWeb.DownloadHistoryController do
   """
   use AlertsUIWeb, :controller
   alias AlertsUI.AlertHistory
-  alias NimbleCSV.RFC4180, as: CSV
+  alias NimbleCSV.Spreadsheet, as: CSV
 
   def export(conn, %{"alert_id" => alert_id}) do
     file =

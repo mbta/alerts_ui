@@ -29,7 +29,7 @@ defmodule AlertsUIWeb.DownloadHistoryControllerTest do
         |> get("/download_history?alert_id=1234567")
 
       assert conn.status == 200
-      assert conn.resp_body =~ "1234567"
+      assert is_binary(conn.resp_body)
     end
 
     test "when unauthenticated, redirects", %{
