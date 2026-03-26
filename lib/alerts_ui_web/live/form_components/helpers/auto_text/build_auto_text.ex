@@ -14,7 +14,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
             routes: [],
             stops: [],
             schedules: [],
-            facility: nil,
+            facilities: [],
             service_types: [],
             direction: [],
             severity: nil,
@@ -38,7 +38,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
           routes: [Route.t()],
           stops: [Stop.t()],
           schedules: [EnhancedSchedule.t()],
-          facility: Facility.t() | nil,
+          facilities: [Facility.t()],
           service_types: [integer()],
           direction: [integer()],
           severity: integer() | nil,
@@ -223,11 +223,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   def trip_form(%{schedules: [_ | _]}), do: "are"
 
   # facilities
-  @spec facility_name(__MODULE__.t()) :: String.t()
-  def facility_name(%{facility: nil}), do: ""
+  @spec facility_names(__MODULE__.t()) :: String.t()
+  def facility_names(%{facilities: []}), do: ""
 
-  def facility_name(%{facility: facility}) do
-    SelectFormatter.name_for_option(facility)
+  def facility_names(%{facilities: facilities}) do
+    facilities
+    |> Enum.map(&SelectFormatter.name_for_option/1)
+    |> join_together()
   end
 
   # routes (short)

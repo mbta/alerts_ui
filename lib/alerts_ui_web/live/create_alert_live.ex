@@ -80,11 +80,11 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   @impl true
   def terminate({reason, event}, socket) do
-    debug_tag = socket.assigns.debug_tag
-    Logger.warning("[LV #{debug_tag}] terminating at #{DateTime.utc_now()}")
-    Logger.warning("[LV #{debug_tag}] reason: #{inspect(reason)}")
-    Logger.warning("[LV #{debug_tag}] event: #{inspect(event)}")
-    Logger.warning("[LV #{debug_tag}] socket: #{inspect(socket)}")
+    # debug_tag = socket.assigns.debug_tag
+    # Logger.warning("[LV #{debug_tag}] terminating at #{DateTime.utc_now()}")
+    # Logger.warning("[LV #{debug_tag}] reason: #{inspect(reason)}")
+    # Logger.warning("[LV #{debug_tag}] event: #{inspect(event)}")
+    # Logger.warning("[LV #{debug_tag}] socket: #{inspect(socket)}")
   end
 
   @impl true
@@ -137,7 +137,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
         selected_routes: [],
         selected_stops: [],
         selected_schedules: [],
-        selected_facility: nil,
+        selected_facilities: [],
         alert_uuid: nil,
         alert_id: alert_id,
         form_type: form_type,
@@ -382,8 +382,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
     {:noreply, assign(socket, selected_schedules: selected_schedules)}
   end
 
-  def handle_info({:selected_facility, selected_facility}, socket) do
-    {:noreply, assign(socket, selected_facility: selected_facility)}
+  def handle_info({:selected_facilities, selected_facilities}, socket) do
+    {:noreply, assign(socket, selected_facilities: selected_facilities)}
   end
 
   def handle_info({:got_obsolete_ids, obsolete_ids_map}, socket) do
@@ -495,7 +495,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
         }),
       combination: combination,
       selected_schedules: nil,
-      selected_facility: nil,
+      selected_facilities: nil,
       selected_routes: nil,
       selected_stops: nil,
       errors: %{}

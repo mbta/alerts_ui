@@ -60,7 +60,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
 
   # putting these here to prevent a weird test race condition
   # with string_to_existing_atom
-  :facility_name
+  :facility_names
   :route_names
   :impacted_modes
   :stop_form
@@ -96,7 +96,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
     # access
     test "access alert bike issue" do
       autotext_data = %{
-        facility: @facility,
+        facilities: [@facility],
         combination: :ACCESS,
         route_type: nil,
         effect_name: "Bike Issue",
@@ -122,7 +122,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
 
     test "access alert escalator closure" do
       autotext_data = %{
-        facility: @facility,
+        facilities: [@facility],
         combination: :ACCESS,
         route_type: nil,
         effect_name: "Escalator Closure",
@@ -148,7 +148,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
 
     test "access alert parking closure" do
       autotext_data = %{
-        facility: @facility,
+        facilities: [@facility],
         combination: :ACCESS,
         route_type: nil,
         effect_name: "Parking Closure",
@@ -174,7 +174,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
 
     test "access alert elevator closure" do
       autotext_data = %{
-        facility: @facility,
+        facilities: [@facility],
         combination: :ACCESS,
         route_type: nil,
         effect_name: "Elevator Closure",
@@ -200,7 +200,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
 
     test "access alert access issue" do
       autotext_data = %{
-        facility: @facility,
+        facilities: [@facility],
         combination: :ACCESS,
         route_type: nil,
         effect_name: "Access Issue",
@@ -226,7 +226,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
 
     test "access alert facility issue" do
       autotext_data = %{
-        facility: @facility,
+        facilities: [@facility],
         route_type: nil,
         effect_name: "Facility Issue",
         cause_detail: "HOLIDAY",
@@ -251,7 +251,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
 
     test "access alert parking issue" do
       autotext_data = %{
-        facility: @facility,
+        facilities: [@facility],
         route_type: nil,
         effect_name: "Parking Issue",
         cause_detail: "HOLIDAY",
@@ -1384,7 +1384,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       autotext_data = %{
         route_type: nil,
         effect_name: "Elevator Closure",
-        facility: @facility
+        facilities: [@facility]
       }
 
       expected =

@@ -19,7 +19,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
         routes: Map.get(alert_data, :routes, []),
         stops: get_stops(alert_data),
         schedules: Map.get(alert_data, :schedules, []),
-        facility: Map.get(alert_data, :facility),
+        facilities: Map.get(alert_data, :facilities),
         service_types: Map.get(alert_data, :service_types),
         direction: get_direction(Map.get(alert_data, :direction)),
         severity: Map.get(alert_data, :severity) |> safe_string_to_int(),
@@ -56,9 +56,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
     dedup_stops(stops)
   end
 
-  defp get_stops(%{facility: %{stop: stop}}) when not is_nil(stop) do
-    # gets stop from facility when there is a facility with a stop in the alert.
-    [stop]
+  defp get_stops(%{facilities: nil}), do: []
+
+  defp get_stops(%{facilities: facilities}) do
+    # gets stops from facilities when there is are facilities with stops in the alert.
+    facilities |> Enum.map(fn %{stop: stop} -> stop end) |> Enum.reject(&is_nil/1)
   end
 
   defp get_stops(_), do: nil

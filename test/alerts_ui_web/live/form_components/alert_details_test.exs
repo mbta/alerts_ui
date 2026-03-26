@@ -95,7 +95,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
     effect_name: "Delay",
     combination: :RDT,
     alert_data: %{},
-    selected_facility: nil,
+    selected_facilities: [],
     selected_schedules: [],
     selected_routes: [],
     selected_stops: []
@@ -712,7 +712,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         view
         |> element("#service_form")
         |> render_change(%{
-          access_affected_service: %{facility_id: @facility.id}
+          access_affected_service: %{facility_ids: [@facility.id]}
         })
 
         # Mock timerange selections

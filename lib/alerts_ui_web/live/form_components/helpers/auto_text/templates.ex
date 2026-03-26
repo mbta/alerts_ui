@@ -23,37 +23,37 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     # access
     %{
       pattern: {nil, "Bike Issue"},
-      header_template: "?facility_name issue ?alert_duration ?due_to_cause",
+      header_template: "?facility_names issue ?alert_duration ?due_to_cause",
       service_effect_template: "?stop_names bicycle issue"
     },
     %{
       pattern: {nil, "Escalator Closure"},
-      header_template: "?facility_name unavailable ?alert_duration ?due_to_cause",
+      header_template: "?facility_names unavailable ?alert_duration ?due_to_cause",
       service_effect_template: "?stop_names escalator unavailable"
     },
     %{
       pattern: {nil, "Parking Closure"},
-      header_template: "?facility_name closed ?alert_duration ?due_to_cause",
+      header_template: "?facility_names closed ?alert_duration ?due_to_cause",
       service_effect_template: "?stop_names parking closure"
     },
     %{
       pattern: {nil, "Elevator Closure"},
-      header_template: "?facility_name unavailable ?alert_duration ?due_to_cause",
+      header_template: "?facility_names unavailable ?alert_duration ?due_to_cause",
       service_effect_template: "?stop_names elevator unavailable"
     },
     %{
       pattern: {nil, "Access Issue"},
-      header_template: "?facility_name issue ?alert_duration ?due_to_cause",
+      header_template: "?facility_names issue ?alert_duration ?due_to_cause",
       service_effect_template: "?stop_names access issue"
     },
     %{
       pattern: {nil, "Facility Issue"},
-      header_template: "?facility_name issue ?alert_duration ?due_to_cause",
+      header_template: "?facility_names issue ?alert_duration ?due_to_cause",
       service_effect_template: "?stop_names issue"
     },
     %{
       pattern: {nil, "Parking Issue"},
-      header_template: "?facility_name issue ?alert_duration ?due_to_cause",
+      header_template: "?facility_names issue ?alert_duration ?due_to_cause",
       service_effect_template: "?stop_names parking issue"
     },
 
@@ -544,7 +544,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         :description_template
       ) do
     # access
-    BuildDescriptionText.affected_facility(autotext_data)
+    BuildDescriptionText.affected_facilities(autotext_data)
   end
 
   def build_auto_text(

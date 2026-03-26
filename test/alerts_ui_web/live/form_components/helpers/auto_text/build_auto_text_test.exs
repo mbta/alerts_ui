@@ -414,14 +414,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
     end
   end
 
-  describe "facility_name/1" do
-    test "facility nil" do
-      assert BuildAutoText.facility_name(%{facility: nil}) == ""
+  describe "facility_names/1" do
+    test "facility empty" do
+      assert BuildAutoText.facility_names(%{facilities: []}) == ""
     end
 
     test "facility has long name" do
       expected = "Charles/MGH Elevator 952 (Alewife platform to lobby)"
-      actual = BuildAutoText.facility_name(%{facility: @facility})
+      actual = BuildAutoText.facility_names(%{facilities: [@facility]})
       assert expected == actual
     end
   end
