@@ -20,7 +20,6 @@ defmodule AlertsUIWeb.ApplicationHeader do
   attr :current_user, :map, default: nil
 
   def application_header(assigns) do
-
     header_variants = %{
       "local" => "bg-mbta-the-ride/25 before:bg-mbta-the-ride",
       "dev-green" => "bg-mbta-green/25 before:bg-mbta-green",
