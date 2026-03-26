@@ -325,7 +325,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
         {:ok, access_changeset} =
           Ecto.Changeset.change(%AccessAffectedService{
-            facility_id: "1"
+            facility_ids: ["1"]
           })
           |> apply_action(:insert)
 
@@ -342,12 +342,11 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
       child_stop = %Stop{id: "3", name: "baby stop"}
       stop = %Stop{id: "2", name: "stop", child_ids: [child_stop.id]}
       facility = %Facility{id: "1", long_name: "real big elevator", stop: stop}
-      facilities = [facility]
 
       with_mocks([
         {RoutesRepo, [], by_stop: fn _stop_id -> [%Route{id: "Blue", name: "blue route"}] end},
         {FacilitiesRepo, [],
-         [get_by_type: fn _types, _opts -> facilities end, get: fn _id -> facility end]},
+         [get_by_type: fn _types, _opts -> [facility] end, get: fn _id -> facility end]},
         {StopsRepo, [],
          get!: fn
            "2" -> stop
@@ -374,7 +373,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
 
         {:ok, access_changeset} =
           Ecto.Changeset.change(%AccessAffectedService{
-            facility_id: "1"
+            facility_ids: ["1"]
           })
           |> apply_action(:insert)
 

@@ -411,7 +411,7 @@ defmodule AlertsUI.AlertBuilderTest do
           effect_name: "Delay",
           effect: "MODIFIED_SERVICE",
           effect_detail: "evelator broke",
-          facility_id: ["57"],
+          facility_ids: ["57"],
           active_period_start: ~N[2024-04-30 11:54:00],
           active_period_end: ~N[2024-04-30 13:54:00],
           alert_timing: :"one-time",
@@ -3439,7 +3439,7 @@ defmodule AlertsUI.AlertBuilderTest do
       effect_name: "Elevator Closure",
       header_text: "test header",
       description_text: "test description",
-      facility_id: "349"
+      facility_ids: ["349"]
     }
 
     facility = %Facility{
@@ -3554,7 +3554,7 @@ defmodule AlertsUI.AlertBuilderTest do
       effect_name: "Elevator Closure",
       header_text: "test header",
       description_text: "test description",
-      facility_id: "retailsale-303012"
+      facility_ids: ["retailsale-303012"]
     }
 
     facility = %Facility{

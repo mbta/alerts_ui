@@ -253,7 +253,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
 
         fill_out_form(view, "#service_form", %{
           access_affected_service: %{
-            facility_id: "349"
+            facility_ids: ["349"]
           }
         })
 
@@ -501,11 +501,13 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         {:ok, view, _html} = live(conn, "/alerts/new")
         get_to_submission_page(view, "Facility", "Elevator closure")
 
-        fill_out_required_form_fields(view, %{access_affected_service: %{facility_id: "349"}})
+        fill_out_required_form_fields(view, %{access_affected_service: %{facility_ids: ["349"]}})
 
         open_review_modal(view)
 
-        assert render(view) =~ ~r/Facility:.*Alewife Escalator 349 \(Platform to Russell Field\)/s
+        assert render(view) =~
+                 ~r/Facilities:.*Alewife Escalator 349 \(Platform to Russell Field\)/s
+
         refute render(view) =~ "Routes:"
         refute render(view) =~ "Stops:"
         refute render(view) =~ "Direction:"

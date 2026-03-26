@@ -116,9 +116,9 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       send(self(), {:selected_schedules, selected_schedules})
     end
 
-    if :facility_id in required_fields && !is_nil(alert_data.facility_id) do
-      selected_facility = FacilitiesRepo.get(alert_data.facility_id)
-      send(self(), {:selected_facility, selected_facility})
+    if :facility_ids in required_fields do
+      selected_facilities = Enum.map(alert_data.facility_ids, &FacilitiesRepo.get(&1))
+      send(self(), {:selected_facilities, selected_facilities})
     end
 
     cause_options =
@@ -158,7 +158,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   def update(
         %{
           alert_data: alert_data,
-          selected_facility: selected_facility,
+          selected_facilities: selected_facilities,
           selected_schedules: selected_schedules,
           selected_routes: selected_routes,
           selected_stops: selected_stops
@@ -177,7 +177,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
       AlertDataToAutoText.build_autotext_data(
         alert_data
         |> Map.merge(%{
-          facility: selected_facility,
+          facilities: selected_facilities,
           routes: selected_routes,
           stops: selected_stops,
           schedules: selected_schedules

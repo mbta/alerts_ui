@@ -28,7 +28,7 @@ defmodule AlertsUI.AlertBuilder do
           alert_id: String.t() | nil,
           route_type: Route.type_int() | nil,
           combination: atom(),
-          facility_id: String.t(),
+          facility_ids: [String.t()],
           direction: String.t(),
           route_ids: [Route.id_t()],
           stop_ids: [Stop.id_t()],
@@ -300,12 +300,15 @@ defmodule AlertsUI.AlertBuilder do
       )
 
     user_selected_facilities =
-      case Map.get(alert_data, :facility_id) do
+      case Map.get(alert_data, :facility_ids) do
         nil ->
           []
 
-        facility_id ->
-          [facility_id]
+        [] ->
+          []
+
+        facility_ids ->
+          facility_ids
           |> Enum.map(&FacilitiesRepo.get/1)
           |> Enum.map(fn
             nil -> nil
@@ -748,8 +751,8 @@ defmodule AlertsUI.AlertBuilder do
     )
   end
 
-  def build_informed_entities(:ACCESS, %{facility_id: facility_id}, effect) do
-    [facility_id]
+  def build_informed_entities(:ACCESS, %{facility_ids: facility_ids}, effect) do
+    facility_ids
     |> Enum.map(&FacilitiesRepo.get/1)
     |> Enum.flat_map(&build_facility_maps(&1, effect))
   end
