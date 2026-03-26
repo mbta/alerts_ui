@@ -223,6 +223,25 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     {:noreply, socket}
   end
 
+  # Reset only the text filter
+  @impl true
+  def handle_event("reset_text_filter", _params, socket) do
+    handle_event("apply_filter", %{"view_alerts_live" => %{"multi_column_search" => ""}}, socket)
+  end
+
+  # Reset only the modal filters
+  @impl true
+  def handle_event("reset_modal_filters", _params, socket) do
+    handle_event(
+      "apply_filter",
+      %{
+        "view_alerts_live" =>
+          @modal_filter_fields |> Enum.reduce(%{}, fn name, acc -> Map.put(acc, name, "") end)
+      },
+      socket
+    )
+  end
+
   # On reset filter, if filter id is provided, then reset just that field
   @impl true
   def handle_event("reset_filter", %{"filter-id" => filter_id}, socket) do
@@ -232,7 +251,13 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       cast(%__MODULE__{}, filters, @fields)
       |> to_form(action: :validate)
 
-    socket = assign(socket, form: form, scroll_to_top: false)
+    socket =
+      assign(socket,
+        params: socket.assigns.params |> Map.merge(%{"filter" => filters}),
+        form: form,
+        scroll_to_top: false
+      )
+
     {:noreply, socket}
   end
 

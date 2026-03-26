@@ -55,21 +55,9 @@ defmodule AlertsUIWeb.FilterForm do
           icon="hero-magnifying-glass-mini"
           class="h-[2.375rem] w-full"
           phx-change="apply_filter"
+          action_icon="hero-x-circle-solid"
+          action_event="reset_text_filter"
         />
-        <.button_secondary
-          class="
-          btn-outline
-          text-primary
-          text-base
-          active:!text-text-invert
-          bg-bg-elevation-3
-          hover:bg-secondary-active
-          hover:text-text-invert
-        "
-          name="reset"
-        >
-          Reset
-        </.button_secondary>
       </div>
     </.form>
     """
@@ -82,7 +70,6 @@ defmodule AlertsUIWeb.FilterForm do
     <.filter_modal form={@form} filter_count={@filter_count} />
   """
 
-  attr :button_label, :string, default: "Filters"
   attr :filter_count, :integer, required: true
   attr :form, Form, required: true
   attr :header_text, :string, default: "Filters"
@@ -102,8 +89,64 @@ defmodule AlertsUIWeb.FilterForm do
   # touch too much code right now
 
   def filter_modal(assigns) do
+    button_classes = "
+      !h-[38px]
+      !min-h-0
+      active:bg-secondary-active
+      align-center
+      bg-bg-elevation-3
+      border
+      border-bg-elevation-6
+      disabled:border-secondary-disabled
+      disabled:text-secondary-disabled
+      flex
+      flex-row
+      focus:border-secondary-focus-border
+      focus:shadow-secondary-focus-shadow
+      hover:bg-bg-elevation-5
+      hover:border-secondary-hover-border
+      active:text-text-invert
+      items-center
+      join-item
+      leading-tight
+      min-h-[1.3rem]
+      px-3
+      rounded
+      text-primary
+      text-right
+      transition-none
+      cursor-pointer
+    "
+
+    active_button_classes =
+      if assigns.filter_count > 0 do
+        "!bg-secondary-active
+        border-0
+        hover:!bg-primary-hover
+        !text-text-invert"
+      else
+        ""
+      end
+
+    button_label =
+      if assigns.filter_count == 0 do
+        "Filter"
+      else
+        "Filters: #{assigns.filter_count}"
+      end
+
+    assigns =
+      assign(assigns, %{
+        button_label: button_label,
+        button_classes: button_classes,
+        active_button_classes: active_button_classes
+      })
+
     ~H"""
-    <fieldset id={"filter-modal-#{@header_text}"}>
+    <fieldset
+      id={"filter-modal-#{@header_text}"}
+      class="flex items-center leading-tight min-h-[1.3rem] text-right text-primary hover:text-primary-hover"
+    >
       <.modal
         id="alerts-filter-modal"
         header_text={@header_text}
@@ -151,9 +194,6 @@ defmodule AlertsUIWeb.FilterForm do
         />
         <:footer>
           <div class="flex flex-row justify-end px-4 py-4 gap-2">
-            <.button_secondary type="button" class="ml-auto" phx-click={JS.push("reset_filter")}>
-              Reset
-            </.button_secondary>
             <.button_primary
               type="submit"
               phx-remove={hide_modal("alerts-filter-modal")}
@@ -167,16 +207,26 @@ defmodule AlertsUIWeb.FilterForm do
           </div>
         </:footer>
       </.modal>
-      <button
-        phx-click={show_modal("alerts-filter-modal")}
-        class="flex items-center leading-tight min-h-[1.3rem] text-right text-primary hover:underline hover:text-primary-hover"
-        type="button"
-      >
-        <span class={[
-          "hero-funnel-mini w-4 h-4 mr-1"
-        ]} />
-        {@button_label <> " (" <> Integer.to_string(@filter_count) <> ")"}
-      </button>
+      <div class="flex flex-row items-center join ">
+        <button
+          phx-click={show_modal("alerts-filter-modal")}
+          class={[@button_classes, @active_button_classes]}
+          type="button"
+        >
+          <span class={[
+            "#{if @filter_count > 0, do: "hero-funnel-solid", else: "hero-funnel"} w-4 h-4 mr-1"
+          ]} />
+          {@button_label}
+        </button>
+        <span
+          :if={@filter_count > 0}
+          class={[@button_classes, @active_button_classes, "ms-px"]}
+          phx-click="reset_modal_filters"
+          title="Clear filters"
+        >
+          <AlertsUIWeb.CoreComponents.icon name="hero-x-circle-solid" />
+        </span>
+      </div>
     </fieldset>
     """
   end

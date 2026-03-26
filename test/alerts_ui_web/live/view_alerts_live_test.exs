@@ -341,6 +341,78 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       refute html =~ "799999"
       assert html =~ "899999"
     end
+
+    @tag :logged_in_user
+    test "text search and the modal filters have oneoff resets", %{conn: conn} do
+      insert(:alert, %{
+        alert_id: "899",
+        original_route_selections: ["Orange"]
+      })
+
+      insert(:alert, %{
+        alert_id: "999",
+        original_route_selections: ["Orange"]
+      })
+
+      {:ok, _view, html} = live(conn, "/alerts?filter[timeline]=all")
+      assert html =~ "899"
+      assert html =~ "999"
+
+      {:ok, _view, html} =
+        live(
+          conn,
+          "/alerts?filter[timeline]=all&filter[multi_column_search]=899"
+        )
+
+      assert html =~ "899"
+      refute html =~ "999"
+
+      {:ok, _view, html} =
+        live(
+          conn,
+          "/alerts?filter[timeline]all&filter[multi_column_search]=999"
+        )
+
+      refute html =~ "899"
+      assert html =~ "999"
+    end
+
+    @tag :logged_in_user
+    test "text filtering shows a reset button that affects no other filters", %{conn: conn} do
+      {:ok, view, _html} =
+        live(
+          conn,
+          "/alerts?filter[routes][]=abcd&filter[timeline]=past&filter[multi_column_search]=foobarbaz"
+        )
+
+      reset_text_filters =
+        element(
+          view,
+          "[phx-feedback-for=\"view_alerts_live[multi_column_search]\"] span:has(span.hero-x-circle-solid)"
+        )
+
+      assert reset_text_filters
+
+      reset_text_filters |> render_click()
+      assert_patch view, ~p"/alerts?filter[routes][]=abcd&filter[timeline]=past"
+    end
+
+    @tag :logged_in_user
+    test "selecing route shows a reset button that affects no other filters", %{conn: conn} do
+      {:ok, view, _html} =
+        live(
+          conn,
+          "/alerts?filter[routes][]=abcd&filter[timeline]=past&filter[multi_column_search]=foobarbaz"
+        )
+
+      reset_modal_filters =
+        element(view, "#filter-modal-Filters span:has(span.hero-x-circle-solid)")
+
+      assert reset_modal_filters
+
+      reset_modal_filters |> render_click()
+      assert_patch view, ~p"/alerts?filter[multi_column_search]=foobarbaz&filter[timeline]=past"
+    end
   end
 
   describe "alerts list timeline filtering and sorting" do

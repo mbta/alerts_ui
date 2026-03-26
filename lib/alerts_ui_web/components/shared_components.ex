@@ -1180,6 +1180,9 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :disabled, :boolean, default: false, doc: "whether the element is disabled"
 
+  attr :action_icon, :string, default: nil, doc: "hero icon button"
+  attr :action_event, :string, default: nil, doc: "event triggered by action button"
+
   attr :rest, :global,
     include: ~w(value phx-debounce maxlength minlength placeholder spellcheck phx-change)
 
@@ -1194,7 +1197,7 @@ defmodule AlertsUIWeb.SharedComponents do
     ~H"""
     <div phx-feedback-for={@name} class="relative flex flex-col">
       <.label :if={not is_nil(@label)} for={@id}>{@label}</.label>
-      <div class="">
+      <div class="flex flex-row items-center">
         <AlertsUIWeb.CoreComponents.icon
           :if={@icon && !@disabled}
           name={@icon}
@@ -1217,6 +1220,13 @@ defmodule AlertsUIWeb.SharedComponents do
           disabled={@disabled}
           {@rest}
         />
+        <span
+          :if={@action_event != nil && @action_icon != nil}
+          class={"w-5 h-5 relative right-[2rem] flex flex-row justify-center align-center rounded-xl text-primary hover:text-primary-hover active:text-primary-active cursor-pointer #{if @value in ["", nil], do: "invisible"}"}
+          phx-click={@action_event}
+        >
+          <AlertsUIWeb.CoreComponents.icon name={@action_icon} class="p-2" />
+        </span>
       </div>
       <.input_error :for={msg <- @errors}>{msg}</.input_error>
     </div>
