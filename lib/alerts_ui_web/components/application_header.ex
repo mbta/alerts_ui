@@ -20,9 +20,19 @@ defmodule AlertsUIWeb.ApplicationHeader do
   attr :current_user, :map, default: nil
 
   def application_header(assigns) do
+
+    header_variants = %{
+      "local" => "bg-mbta-the-ride/25 before:bg-mbta-the-ride",
+      "dev-green" => "bg-mbta-green/25 before:bg-mbta-green",
+      "dev-orange" => "bg-mbta-orange/25 before:bg-mbta-orange",
+      "staging" => "bg-mbta-commuter-rail/25 before:bg-mbta-commuter-rail"
+    }
+
+    assigns = assign(assigns, header_variants: header_variants)
+
     ~H"""
     <header class="bg-secondary">
-      <div class="flex items-center justify-between py-4 text-sm">
+      <div class={"flex items-center justify-between py-4 text-sm before:absolute before:top-0 before:left-0 before:right-0 before:h-3 #{@header_variants[@environment]}"}>
         <div class="flex items-center gap-4 mx-4">
           <a href="/"><img class="h-12" src={"/images/logos/logo-#{@environment}.svg"} /></a>
           <.h1 class="!mb-0"><a href="/">Alerts Manager </a></.h1>
