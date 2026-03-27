@@ -283,7 +283,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
           Importer.persist(%{
             work_order_id: "TESTORDER1",
             primary_service_type: "access",
-            facility_id: "123",
+            facility_ids: ["123"],
             description_text: "ok",
             header_text: "hello",
             effect_name: "Escalator Closure",
@@ -373,7 +373,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
         Importer.persist(%{
           work_order_id: "TESTORDER1",
           primary_service_type: "access",
-          facility_id: "123",
+          facility_ids: ["123"],
           description_text: "ok",
           header_text: "hello",
           effect_name: "Escalator Closure",

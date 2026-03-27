@@ -123,9 +123,9 @@ defmodule AlertsUI.IBIAlertImporterTest do
       assert from_ibi(ibi_alert, :direction) == "1"
     end
 
-    test ":facility_id", %{ibi_alert: ibi_alert} do
+    test ":facility_ids", %{ibi_alert: ibi_alert} do
       assert ibi_alert.informed_facility_list == "1|My Elevator"
-      assert from_ibi(ibi_alert, :facility_id) == "My Elevator|1"
+      assert from_ibi(ibi_alert, :facility_ids) == ["My Elevator|1"]
     end
 
     test ":service_types", %{ibi_alert: ibi_alert} do

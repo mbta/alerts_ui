@@ -122,7 +122,7 @@ defmodule AlertsUI.Trapeze.WorkOrderTest do
                  alert_timing: :one_time,
                  child_stops_with_context: [],
                  direction: "",
-                 facility_id: "891",
+                 facility_ids: ["891"],
                  notification_specifier: :now,
                  reminder_times: [],
                  route_ids: [],
