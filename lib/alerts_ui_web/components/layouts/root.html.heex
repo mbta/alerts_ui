@@ -18,6 +18,7 @@
     <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
     </script>
     <link rel="icon" href={"/images/icons/favicon-#{@environment}.ico"} />
+    {Application.get_env(:live_debugger, :live_debugger_tags)}
   </head>
   <body class="min-h-dvh bg-bg-primary font-body font-normal text-base text-text-primary">
     <!-- <div id="fullstory-tracker" phx-hook="FullStory" style="display: none;"></div>  -->

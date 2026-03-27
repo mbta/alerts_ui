@@ -47,6 +47,22 @@ Now you can visit [`localhost:4010`](http://localhost:4010) from your browser.
 
 Swagger docs for the API enpoints can be found at `/api/swagger`.
 
+## Debugging/special routes
+
+- Live Debugger: `:4007` local only by default, change in `mix.exs`
+
+- LiveDashboard dashboard: `/dev/dashboard` enabled only locally by default, use config item `dev_routes` to change
+
+- Oban dashboard: `/oban`
+
+- Client side flags: `/_flags`- mediated by Laboratory library (check `mix.exs` for github if you need docs)
+
+- Server side flags: `/feature_flags`
+
+- DB viewer: `/db`
+
+- Version: `/_version` shows currently deployed version, must be developer to view
+
 ## Our Environments
 
 - dev-green
@@ -60,6 +76,7 @@ Swagger docs for the API enpoints can be found at `/api/swagger`.
 - staging
   - supposed to be as production-like as possible
   - main is automatically pushed here
+  - used by MBTA teams to make test alerts
   - pointed toward: keycloak staging, API prod
 - prod
   - this is production
