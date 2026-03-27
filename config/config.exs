@@ -182,7 +182,9 @@ config :laboratory,
      "Shows the menu link to a page showing a guide to our components"},
     {:show_stop_ids, "Show stop ids", "Show a list of selected stop ids in the form."},
     {:show_validate_page, "Show Validate Page",
-     "Shows the menu link to a page that helps validate alerts feeds"}
+     "Shows the menu link to a page that helps validate alerts feeds"},
+    {:fullstory_disabled, "Stop Fullstory",
+     "When enabled, turns OFF Fullstory, our session tracker"}
   ],
   cookie: [
     # one month,
