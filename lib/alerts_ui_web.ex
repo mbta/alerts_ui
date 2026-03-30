@@ -55,6 +55,7 @@ defmodule AlertsUIWeb do
         layout: {AlertsUIWeb.Layouts, :app}
 
       unquote(html_helpers())
+      unquote(socket_helpers())
     end
   end
 
@@ -63,6 +64,7 @@ defmodule AlertsUIWeb do
       use Phoenix.LiveComponent
 
       unquote(html_helpers())
+      unquote(socket_helpers())
     end
   end
 
@@ -95,6 +97,12 @@ defmodule AlertsUIWeb do
 
       # Routes generation with the ~p sigil
       unquote(verified_routes())
+    end
+  end
+
+  defp socket_helpers do
+    quote do
+      import AlertsUIWeb.SocketHelpers
     end
   end
 

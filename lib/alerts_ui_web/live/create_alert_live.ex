@@ -92,8 +92,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   @impl true
   def mount(params, session, socket) do
-    if connected?(socket) && (get_connect_params(socket)["_mounts"] || 0) > 0 do
-      live_mount(params, session, socket)
+    if remount?(socket) do
+      live_remount(params, session, socket)
     else
       live_mount(params, session, socket)
     end
