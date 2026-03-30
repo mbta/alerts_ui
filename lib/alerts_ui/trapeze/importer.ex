@@ -79,11 +79,13 @@ defmodule AlertsUI.Trapeze.Importer do
 
   def get_existing_alert(alert_params) do
     facility_ids = Map.get(alert_params, :facility_ids)
-    facility_id = if is_nil(facility_ids) do
-      nil
-    else
-      hd(facility_ids)
-    end
+
+    facility_id =
+      if is_nil(facility_ids) do
+        nil
+      else
+        hd(facility_ids)
+      end
 
     Repo.one(
       from a in Alert,
@@ -111,6 +113,7 @@ defmodule AlertsUI.Trapeze.Importer do
 
   def persist(alert_params) do
     alert = get_existing_alert(alert_params) || %Alert{}
+
     case alert_change_state(alert, alert_params) do
       :create ->
         Monitor.change_work_order(from: "none", to: "open")

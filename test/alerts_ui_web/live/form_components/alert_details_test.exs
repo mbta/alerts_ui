@@ -744,7 +744,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         assert view
                |> element("#alert_details_header_text")
                |> render() =~
-                 "Alewife Escalator 349 (Platform to Russell Field) unavailable from #{Calendar.strftime(@start_time, "%a, %b %-d at %-I:%M %p")} to #{Calendar.strftime(@end_time, "%a, %b %-d at %-I:%M %p")} due to ice in harbor"
+                 "Alewife Escalator 349 (Platform to Russell Field) is unavailable from #{Calendar.strftime(@start_time, "%a, %b %-d at %-I:%M %p")} to #{Calendar.strftime(@end_time, "%a, %b %-d at %-I:%M %p")} due to ice in harbor"
 
         assert view
                |> element("#alert_details_description_text")

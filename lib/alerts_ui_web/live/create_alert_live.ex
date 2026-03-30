@@ -80,11 +80,11 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   @impl true
   def terminate({reason, event}, socket) do
-    # debug_tag = socket.assigns.debug_tag
-    # Logger.warning("[LV #{debug_tag}] terminating at #{DateTime.utc_now()}")
-    # Logger.warning("[LV #{debug_tag}] reason: #{inspect(reason)}")
-    # Logger.warning("[LV #{debug_tag}] event: #{inspect(event)}")
-    # Logger.warning("[LV #{debug_tag}] socket: #{inspect(socket)}")
+    debug_tag = socket.assigns.debug_tag
+    Logger.warning("[LV #{debug_tag}] terminating at #{DateTime.utc_now()}")
+    Logger.warning("[LV #{debug_tag}] reason: #{inspect(reason)}")
+    Logger.warning("[LV #{debug_tag}] event: #{inspect(event)}")
+    Logger.warning("[LV #{debug_tag}] socket: #{inspect(socket)}")
   end
 
   @impl true
