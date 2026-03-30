@@ -92,6 +92,18 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   @impl true
   def mount(params, session, socket) do
+    if connected?(socket) && (get_connect_params(socket)["_mounts"] || 0) > 0 do
+      live_mount(params, session, socket)
+    else
+      live_mount(params, session, socket)
+    end
+  end
+
+  defp live_remount(_params, _session, _socket) do
+    raise "blammo!"
+  end
+
+  defp live_mount(params, session, socket) do
     socket = socket |> assign_new(:return_to, fn -> session["return_to"] end)
 
     alert_id = Map.get(params, "alert_id")
