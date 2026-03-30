@@ -54,7 +54,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
   def update(%{alert_data: alert_data, form_type: form_type} = assigns, socket)
       when form_type in [:editing, :duplicating] do
     effect_name = Map.get(alert_data, :effect_name) || socket.assigns.effect_name
-    # TODO multiple={true}
+
     facility_types =
       effect_name
       |> string_to_formatted_atom
@@ -193,8 +193,9 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     # and we have not assigned obsolete ids before
     # send result to parent and assign errors
     if found_obsolete_ids && Enum.empty?(socket.assigns.obsolete_ids) do
-      new_facility_ids = Map.get(socket.assigns.alert_data, :facility_ids) -- found_obsolete_ids
+      new_facility_ids = Map.get(socket.assigns.alert_data, :facility_ids) -- obsolete_ids
 
+      new_facility_ids = if new_facility_ids == [], do: nil, else: new_facility_ids
       new_alert_data = Map.put(socket.assigns.alert_data, :facility_ids, new_facility_ids)
 
       changeset =

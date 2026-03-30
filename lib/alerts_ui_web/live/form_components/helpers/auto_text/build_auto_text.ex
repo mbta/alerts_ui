@@ -237,8 +237,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   def facility_names(%{facilities: facilities}) do
     facilities
     |> Enum.map(&SelectFormatter.name_for_option/1)
-    |> join_together()
+    |> join_facilities()
   end
+
+  @spec facility_form(__MODULE__.t()) :: String.t()
+  def facility_form(%{facilities: []}), do: ""
+  def facility_form(%{facilities: [_facility]}), do: "is"
+  def facility_form(%{facilities: _facilities}), do: "are"
 
   # routes (short)
   @spec route_names_short(__MODULE__.t()) :: String.t()
@@ -340,6 +345,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   end
 
   # formatters
+
+  def join_facilities([first, second | rest] = facilities) when length(facilities) > 3 do
+    "#{first}, #{second} and #{length(rest)} other facilities"
+  end
+
+  def join_facilities(facilities) do
+    join_together(facilities)
+  end
 
   def join_trips([_ | _] = trips, trip_word) when length(trips) > 2 do
     "#{hd(trips)} and #{length(trips) - 1} other #{trip_word}"

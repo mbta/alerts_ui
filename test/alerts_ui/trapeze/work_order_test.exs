@@ -112,7 +112,7 @@ defmodule AlertsUI.Trapeze.WorkOrderTest do
                  severity: 3,
                  work_order_id: "310-2026-184",
                  header_text:
-                   "Alewife Escalator 349 (Platform to Russell Field) unavailable due to maintenance",
+                   "Alewife Escalator 349 (Platform to Russell Field) is unavailable due to maintenance",
                  description_text: nil,
                  service_effect_text: "Aquarium elevator unavailable",
                  source: :TRAPEZE,
