@@ -38,9 +38,9 @@ defmodule AlertsUI.Jobs.DelayedJob do
     Logger.info("Delaying job #{module_name} by #{delay}ms")
     Process.sleep(delay)
     module = Module.safe_concat([module_name])
-    job = Map.put(job, "args", Map.get(args, "args", nil))
+    job = Map.put(job, :args, Map.get(args, "args", nil))
     module.perform(job, opts)
   rescue
-    e -> Logger.warning("Error delaying job. args=#{inspect(args)}: #{e}")
+    e -> Logger.warning("Error delaying job. args=#{inspect(args)}: #{inspect(e)}")
   end
 end
