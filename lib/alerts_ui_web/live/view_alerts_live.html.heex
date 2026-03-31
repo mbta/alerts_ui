@@ -49,7 +49,7 @@
       ]}
       row_click={&JS.push("open_details", value: %{alert_id: &1.alert_id})}
     >
-      <:col :let={alert} label="Service" field={:alert_id} col_style="width: 12.6%;">
+      <:col :let={alert} label="Service" field={:service_pill_sort_key} col_style="width: 12.6%;">
         <.service_pills
           entities={Alert.get_original_names_and_ids(alert.original_route_selections)}
           effect_name={alert.effect_name}
