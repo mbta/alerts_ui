@@ -34,44 +34,53 @@ defmodule AlertsUI.Trapeze.Importer do
   """
   @impl Oban.Worker
   def perform(_, _opts \\ []) do
-    cond do
-      configuration_incomplete?() ->
-        Monitor.result({:warning, "Missing Configuration"})
+    Monitor.start()
 
-      not enabled?() ->
-        Monitor.result({:warning, "\"Trapeze Import\" Feature Flag Disabled"})
+    result =
+      cond do
+        configuration_incomplete?() ->
+          Monitor.result({:warning, "Missing Configuration"})
 
-      true ->
-        Monitor.start()
+        not enabled?() ->
+          Monitor.result({:warning, "\"Trapeze Import\" Feature Flag Disabled"})
 
-        try do
-          case SFTP.fetch(SFTP.source_description()) do
-            {:ok, {feed, mtime}} ->
-              Monitor.processing(feed, mtime)
+        true ->
+          try do
+            case SFTP.fetch(SFTP.source_description()) do
+              {:ok, {feed, mtime}} ->
+                Monitor.processing(feed, mtime)
 
-              process_feed(feed)
-              |> Monitor.result()
+                process_feed(feed)
+                |> Monitor.result()
 
-            {:error, e} ->
-              Monitor.result({:error, e})
+              {:error, e} ->
+                Monitor.result({:error, e})
+            end
+          rescue
+            error ->
+              Monitor.result({:error, inspect(error)})
           end
-        rescue
-          error ->
-            Monitor.result({:error, error})
-        end
+      end
 
-        Monitor.finish()
-        Monitor.close()
-    end
+    Monitor.finalize()
+    Monitor.stop()
+    result
   end
 
-  @spec process_feed([String.t()]) :: {:ok, String.t()} | {:error, String.t()}
+  @spec process_feed([String.t()]) :: {:ok | :error, String.t()}
   def process_feed(feed) do
     feed
-    |> Stream.map(&WorkOrder.from_trapeze_line/1)
-    |> Stream.map(&Monitor.start_work_order/1)
-    |> Stream.map(&WorkOrder.to_params/1)
-    |> Stream.map(&persist/1)
+    |> Stream.each(&Monitor.start_work_order/1)
+    |> Stream.map(fn line ->
+      try do
+        with {:ok, work_order} <- WorkOrder.from_trapeze_line(line),
+             {:ok, params} <- WorkOrder.to_params(work_order) do
+          persist(params)
+        end
+      rescue
+        e -> {:error, "ERROR #{inspect(e)}"}
+      end
+    end)
     |> Stream.map(&Monitor.finish_work_order/1)
     |> Enum.to_list()
     |> Enum.find({:ok, "finish"}, &(&1 != :ok))
@@ -98,42 +107,35 @@ defmodule AlertsUI.Trapeze.Importer do
     )
   end
 
-  @spec persist(AlertBuilder.alert_data_t() | {atom(), String.t(), String.t()}) ::
-          {:ok, String.t()} | {:error, String.t()}
-  def persist({:skip, _work_order_id, reason}) do
-    {:warning, "IGNORE #{reason}"}
-  end
-
+  # This should be AlertBuilder.alert_data_t() but dialyzer can't tell merge
+  # why it's wrong, just that it is.
+  @spec persist(map()) :: {:ok | :error, String.t()}
   def persist(alert_params) do
     alert = get_existing_alert(alert_params) || %Alert{}
 
     case alert_change_state(alert, alert_params) do
       :create ->
-        Monitor.change_work_order(from: "none", to: "open")
         create(alert_params)
-        {:ok, "CREATE"}
+        {:ok, "none -> open: CREATE"}
 
       :ignore_already_closed ->
-        Monitor.change_work_order(from: "none", to: "closed")
-        {:ok, "IGNORE already closed"}
+        {:ok, "none -> closed: IGNORE already closed"}
 
       :ignore_no_change ->
-        Monitor.change_work_order(from: "open", to: "open")
-        {:ok, "IGNORE open, no change"}
+        {:ok, "open -> open: IGNORE open, no change"}
 
       :close ->
-        Monitor.change_work_order(from: "open", to: "closed")
         close(alert, alert_params.closed_timestamp)
-        {:ok, "CLOSE"}
+        {:ok, "open -> closed: CLOSE"}
 
       :ignore_closed_manually ->
-        Monitor.change_work_order(from: "closed", to: "open")
-        {:ok, "IGNORE closed manually"}
+        {:ok, "closed -> open: IGNORE closed manually"}
 
       :ignore_closed ->
-        Monitor.change_work_order(from: "closed", to: "closed")
-        {:ok, "IGNORE closed, no change"}
+        {:ok, "closed -> closed: IGNORE closed, no change"}
     end
+  rescue
+    e -> {:error, "ERROR #{inspect(e)}"}
   end
 
   defp alert_change_state(

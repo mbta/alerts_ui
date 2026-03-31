@@ -10,7 +10,6 @@ defmodule AlertsUI.Trapeze.Monitor do
 
   alias AlertsUI.Repo
   alias AlertsUI.Trapeze.Models.TrapezeMonitor
-  alias AlertsUI.Trapeze.WorkOrder
 
   # 2 hours
   @mtime_error 120 * 60
@@ -125,8 +124,8 @@ defmodule AlertsUI.Trapeze.Monitor do
     if result != :ok, do: apply(__MODULE__, result, [reason])
     set(:result, Atom.to_string(result))
     set(:reason, reason)
-    # :warning is not a valid Oban response
-    result = if result == :warning, do: :ok, else: result
+    # :warning is not a valid Oban response, and only :ok and :error are log calls
+    result = if result == :error, do: :error, else: :ok
     {result, reason}
   end
 
@@ -135,32 +134,15 @@ defmodule AlertsUI.Trapeze.Monitor do
     GenServer.call(__MODULE__, :report)
   end
 
-  @spec start_work_order(WorkOrder.t() | {atom(), String.t(), String.t()}) :: WorkOrder.t()
-  def start_work_order({:skip, work_order_id, reason}) do
-    GenServer.cast(__MODULE__, {:start_work_order, work_order_id})
-    {:skip, work_order_id, reason}
+  @spec start_work_order(String.t()) :: String.t()
+  def start_work_order(work_order_entry) do
+    GenServer.cast(__MODULE__, {:start_work_order, work_order_entry})
+    work_order_entry
   end
 
-  def start_work_order(%WorkOrder{} = work_order) do
-    GenServer.cast(__MODULE__, {:start_work_order, work_order.work_order_id})
-    work_order
-  end
-
-  @spec change_work_order([from: String.t(), to: String.t()] | String.t()) :: any
-  def change_work_order(string) when is_binary(string) do
-    GenServer.cast(__MODULE__, {:change_work_order, string})
-  end
-
-  def change_work_order(args) do
-    from_source = args[:from]
-    to_source = args[:to]
-    change_work_order("#{from_source} -> #{to_source}")
-  end
-
-  @spec finish_work_order({:ok | :warning | :error, String.t()}) ::
-          {:ok | :warning | :error, String.t()}
+  @spec finish_work_order({atom(), String.t()}) :: {atom(), String.t()}
   def finish_work_order({result, reason} = response) do
-    log_call = if result == :ok, do: :info, else: result
+    log_call = if result in [:warning, :error], do: result, else: :info
     message = GenServer.call(__MODULE__, {:get_current_work_order})
     apply(__MODULE__, log_call, ["#{message} #{reason}"])
     # There's no guarantee of delivery and reception timing, so do this second
@@ -169,16 +151,19 @@ defmodule AlertsUI.Trapeze.Monitor do
     response
   end
 
-  @spec finish() :: any
-  def finish do
-    report()
+  @spec finalize() :: any
+  def finalize do
+    report = report()
+
+    report
     |> TrapezeMonitor.changeset(%{})
     |> Repo.insert!()
 
     info("Finished processing #{now_string()}")
+    report
   end
 
-  def close, do: GenServer.stop(__MODULE__)
+  def stop, do: GenServer.stop(__MODULE__)
 
   defp set(key, value) do
     GenServer.cast(__MODULE__, {:set, key, value})
@@ -226,10 +211,10 @@ defmodule AlertsUI.Trapeze.Monitor do
   end
 
   @impl true
-  def handle_cast({:start_work_order, work_order_id}, state) do
+  def handle_cast({:start_work_order, work_order_entry}, state) do
     new_current =
       Map.put(state.current, :work_order_changes, [
-        work_order_id | state.current.work_order_changes
+        "Processing: " <> work_order_entry | state.current.work_order_changes
       ])
 
     {:noreply, %{state | current: new_current}}

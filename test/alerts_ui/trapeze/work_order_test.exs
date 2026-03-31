@@ -48,7 +48,7 @@ defmodule AlertsUI.Trapeze.WorkOrderTest do
         input =
           "2026-02-17T12:52:38-05:00|FP-DWNXST-ELEV-891|ELEV-891|ELEVATOR, DOWNTOWN CROSSING EL-891, OL NB-FRANKLIN ST|ORANGE LINE,RED LINE - MAIN|310-2026-184|2026-01-12T15:50:03+00:00|2026-01-12T15:52:14+00:00|2026-01-12T15:50:03+00:00||OPEN"
 
-        output = input |> WorkOrder.from_trapeze_line()
+        {:ok, output} = input |> WorkOrder.from_trapeze_line()
 
         assert output == %WorkOrder{
                  file_process_datetime: ~U[2026-02-17 17:52:38Z],
@@ -77,7 +77,7 @@ defmodule AlertsUI.Trapeze.WorkOrderTest do
 
         output = input |> WorkOrder.from_trapeze_line()
 
-        assert output == {:skip, "310-2026-184", "not public"}
+        assert output == {:skip, "equipment_id (column B) marked FS"}
       end
     end
   end
@@ -94,10 +94,8 @@ defmodule AlertsUI.Trapeze.WorkOrderTest do
         input =
           "2026-02-17T12:52:38-05:00|FP-DWNXST-ELEV-891|ELEV-891|ELEVATOR, DOWNTOWN CROSSING EL-891, OL NB-FRANKLIN ST|ORANGE LINE,RED LINE - MAIN|310-2026-184|2026-01-12T15:50:03+00:00|2026-01-12T15:52:14+00:00|2026-01-12T15:50:03+00:00|1999-12-31T11:59:59+00:00|OPEN"
 
-        output =
-          input
-          |> WorkOrder.from_trapeze_line()
-          |> WorkOrder.to_params()
+        {:ok, wo} = WorkOrder.from_trapeze_line(input)
+        {:ok, output} = WorkOrder.to_params(wo)
 
         assert output == %{
                  active_period_start: ~N[2026-03-01 07:34:56],
@@ -123,7 +121,7 @@ defmodule AlertsUI.Trapeze.WorkOrderTest do
                  active_period_start_specifier: :custom,
                  alert_timing: :one_time,
                  child_stops_with_context: [],
-                 direction: nil,
+                 direction: "",
                  facility_id: "891",
                  notification_specifier: :now,
                  reminder_times: [],
@@ -137,10 +135,6 @@ defmodule AlertsUI.Trapeze.WorkOrderTest do
                  trip_information_by_id: []
                }
       end
-    end
-
-    test "does nothing with a skip message" do
-      assert WorkOrder.to_params({:skip, "123", "reason"}) == {:skip, "123", "reason"}
     end
   end
 end

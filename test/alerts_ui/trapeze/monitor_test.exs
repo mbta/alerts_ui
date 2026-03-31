@@ -2,7 +2,6 @@ defmodule AlertsUI.Trapeze.MonitorTest do
   @moduledoc false
   alias AlertsUI.Trapeze.Models.TrapezeMonitor
   alias AlertsUI.Trapeze.Monitor
-  alias AlertsUI.Trapeze.WorkOrder
   use AlertsUI.DataCase, async: false
 
   import AlertsUI.Support.Factory
@@ -225,52 +224,38 @@ defmodule AlertsUI.Trapeze.MonitorTest do
       with_log(fn ->
         Monitor.start()
 
-        Monitor.start_work_order(%WorkOrder{work_order_id: "ABC-123"})
-        Monitor.start_work_order(%WorkOrder{work_order_id: "XYZ-789"})
+        Monitor.start_work_order("Test Line 1")
+        Monitor.start_work_order("Test Line 2")
       end)
 
       report = Monitor.report()
-      assert report.work_order_changes == ["XYZ-789", "ABC-123"]
-    end
-
-    test "change_work_order continues a line entry" do
-      with_log(fn ->
-        Monitor.start()
-        Monitor.start_work_order(%WorkOrder{work_order_id: "ABC-123"})
-
-        Monitor.change_work_order(from: "one", to: "other")
-      end)
-
-      report = Monitor.report()
-      assert report.work_order_changes == ["ABC-123 one -> other"]
+      assert report.work_order_changes == ["Processing: Test Line 2", "Processing: Test Line 1"]
     end
 
     test "finish_work_order ends and logs a line entry info" do
       {_, log} =
         with_log(fn ->
           Monitor.start()
-          Monitor.start_work_order(%WorkOrder{work_order_id: "ABC-123"})
-          Monitor.start_work_order(%WorkOrder{work_order_id: "XYZ-789"})
-          Monitor.change_work_order(from: "one", to: "other")
+          Monitor.start_work_order("WORKORDER-123")
+          Monitor.start_work_order("WORKORDER-789|OPEN")
 
           Monitor.finish_work_order({:ok, "created"})
         end)
 
-      assert log =~ ~r/info.*AlertsUI.Trapeze.Monitor: XYZ-789 one -> other/
+      assert log =~ ~r/info.*AlertsUI.Trapeze.Monitor: Processing: WORKORDER-789/
     end
 
     test "finish_work_order ends and logs a line entry error" do
       {_, log} =
         with_log(fn ->
           Monitor.start()
-          Monitor.start_work_order(%WorkOrder{work_order_id: "ABC-123"})
-          Monitor.start_work_order(%WorkOrder{work_order_id: "XYZ-789"})
-          Monitor.change_work_order(from: "one", to: "other")
+          Monitor.start_work_order("ABC-123")
+          Monitor.start_work_order("WORKORDER-789")
 
           Monitor.finish_work_order({:error, "silly"})
         end)
 
-      assert log =~ ~r/error.*AlertsUI.Trapeze.Monitor: XYZ-789 one -> other silly/
+      assert log =~ ~r/error.*AlertsUI.Trapeze.Monitor: Processing: WORKORDER-789 silly/
     end
   end
 
@@ -278,18 +263,17 @@ defmodule AlertsUI.Trapeze.MonitorTest do
     test "creates a TrapezeMonitor record" do
       with_log(fn ->
         Monitor.start()
-        Monitor.start_work_order(%WorkOrder{work_order_id: "ABC-123"})
-        Monitor.change_work_order(from: "up", to: "down")
+        Monitor.start_work_order("WORKORDER")
         Monitor.finish_work_order({:ok, "gravity"})
         Monitor.result({:ok, "cool"})
 
-        Monitor.finish()
+        Monitor.finalize()
       end)
 
       record = Repo.one(from t in TrapezeMonitor, order_by: [desc: t.created_at], limit: 1)
       assert record.result == "ok"
       assert record.reason == "cool"
-      assert record.work_order_changes == ["ABC-123 up -> down gravity"]
+      assert record.work_order_changes == ["Processing: WORKORDER gravity"]
     end
   end
 end

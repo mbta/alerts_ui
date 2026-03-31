@@ -120,7 +120,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
         with_log(fn ->
           Monitor.start()
           Importer.process_feed(input)
-          Monitor.close()
+          Monitor.stop()
         end)
 
         alert_1 = get("310-2026-184")
@@ -134,6 +134,40 @@ defmodule AlertsUI.Trapeze.ImporterTest do
         assert alert_3
         assert alert_3.closed_timestamp == nil
         assert alert_4 == nil
+      end
+    end
+
+    test "continues processing if an error happens" do
+      with_mocks([
+        {FacilitiesRepo, [],
+         [
+           get: fn
+             "502" -> raise "This is an error."
+             _ -> @facility
+           end
+         ]},
+        {StopsRepo, [], [get: fn _ -> @stop end, get!: fn _ -> @stop end]},
+        {RoutesRepo, [], [by_stop: fn _ -> [@route] end]}
+      ]) do
+        input = [
+          "2026-02-17T12:52:38-05:00|FP-DWNXST-ELEV-891|ELEV-891|ELEVATOR, DOWNTOWN CROSSING EL-891, OL NB-FRANKLIN ST|ORANGE LINE,RED LINE - MAIN|310-2026-184|2026-01-12T15:50:03+00:00|2026-01-12T15:52:14+00:00|2026-01-12T15:50:03+00:00||OPEN",
+          "2026-02-17T12:52:38-05:00|FP-STATST-ESCL-502|ESCL-502|ESCALATOR, STATE ESC-502, BLUE LINE NB--LOBBY|BLUE LINE,ORANGE LINE|310-2026-180|2026-01-12T11:29:05+00:00|2026-01-12T11:31:37+00:00|2026-01-12T11:29:05+00:00||OPEN",
+          "2026-02-17T12:52:38-05:00|FP-GOVCST-ESCL-444|ESCL-444|ESCALATOR, GOVERNMENT CENTER ESC-444, ST -LVL - GL|BLUE LINE|310-2026-163|2026-01-11T05:23:58+00:00|2026-01-11T05:25:38+00:00|2026-01-11T05:23:58+00:00||OPEN"
+        ]
+
+        with_log(fn ->
+          Monitor.start()
+          Importer.process_feed(input)
+          Monitor.stop()
+        end)
+
+        alert_1 = get("310-2026-184")
+        alert_2 = get("310-2026-180")
+        alert_3 = get("310-2026-163")
+
+        assert alert_1
+        assert alert_2 == nil
+        assert alert_3
       end
     end
 
@@ -158,7 +192,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
         with_log(fn ->
           Monitor.start()
           Importer.process_feed(input)
-          Monitor.close()
+          Monitor.stop()
         end)
 
         alert_1 = get("310-2026-184")
@@ -182,7 +216,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
         with_log(fn ->
           Monitor.start()
           Importer.process_feed(input)
-          Monitor.close()
+          Monitor.stop()
         end)
 
         alert_1 = get("310-2026-184")
@@ -214,7 +248,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
 
       alert = Repo.reload!(existing_alert)
       assert alert.closed_timestamp == nil
-      assert result == {:ok, "IGNORE open, no change"}
+      assert result == {:ok, "open -> open: IGNORE open, no change"}
     end
 
     test "alert does exist, and closed_timestamp exists, save it" do
@@ -236,7 +270,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
 
       alert = Repo.reload!(existing_alert)
       assert alert.closed_timestamp != nil
-      assert result == {:ok, "CLOSE"}
+      assert result == {:ok, "open -> closed: CLOSE"}
     end
 
     test "alert does not exist, but closed_timestamp is nil, save it" do
@@ -264,7 +298,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
 
         maybe_alert = get("TESTORDER1")
         assert maybe_alert != nil
-        assert result == {:ok, "CREATE"}
+        assert result == {:ok, "none -> open: CREATE"}
       end
     end
 
@@ -281,7 +315,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
 
       maybe_alert = get("TESTORDER1")
       assert maybe_alert == nil
-      assert result == {:ok, "IGNORE already closed"}
+      assert result == {:ok, "none -> closed: IGNORE already closed"}
     end
 
     test "alert is closed, but open in import, ignore it" do
@@ -303,7 +337,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
 
       alert = Repo.reload!(existing_alert)
       assert alert.closed_timestamp == ~U[2026-02-14T12:00:00Z]
-      assert result == {:ok, "IGNORE closed manually"}
+      assert result == {:ok, "closed -> open: IGNORE closed manually"}
     end
 
     test "alert is closed, but closed in import, ignore it" do
@@ -325,7 +359,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
 
       alert = Repo.reload!(existing_alert)
       assert alert.closed_timestamp == ~U[2026-02-14T12:00:00Z]
-      assert result == {:ok, "IGNORE closed, no change"}
+      assert result == {:ok, "closed -> closed: IGNORE closed, no change"}
     end
 
     test "properly creates an informed entity and active period" do
