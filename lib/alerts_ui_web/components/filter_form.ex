@@ -252,18 +252,18 @@ defmodule AlertsUIWeb.FilterForm do
         class="collapse-label min-h-0 flex flex-row items-center p-2 leading-[20px]"
       >
         <h3 class="font-medium mr-auto">{@label}</h3>
-        <span
-          :if={@field.value && @field.value != ["default"]}
-          id={@field_string <> "-clear-filter-button"}
-          phx-click="reset_filter"
-          phx-value-filter-id={@field_string}
-          class="hero-x-circle-mini w-4 h-4 bg-primary mr-3 cursor-pointer"
-        />
         <.icon
           name="hero-chevron-right"
           class="text-primary h-4 w-4 group-has-[.trigger:checked]:rotate-90"
         />
       </label>
+      <span
+        :if={@field.value && @field.value != ["default"]}
+        id={@field_string <> "-clear-filter-button"}
+        phx-click="reset_filter"
+        phx-value-filter-id={@field_string}
+        class="hero-x-circle-mini w-4 h-4 bg-primary cursor-pointer absolute right-8 top-2.5"
+      />
       <div class="collapse-content text-base !p-0">
         <.filtered_select class="h-[20rem]" field={@field} prompt="All" {@rest} />
       </div>

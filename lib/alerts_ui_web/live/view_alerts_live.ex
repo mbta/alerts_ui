@@ -226,10 +226,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   # On reset filter, if filter id is provided, then reset just that field
   @impl true
   def handle_event("reset_filter", %{"filter-id" => filter_id}, socket) do
-    filters =
-      socket.assigns.params
-      |> Map.get("filter", %{"timeline" => "current"})
-      |> Map.drop([filter_id])
+    filters = Map.drop(socket.assigns.form.params, [filter_id])
 
     form =
       cast(%__MODULE__{}, filters, @fields)
