@@ -1104,7 +1104,10 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
         refute html =~ ~s(<span class="hero-pencil-solid w-4 h-4"></span>)
         refute html =~ ~s(<span class="hero-x-mark-solid w-4 h-4"></span>)
-        assert html =~ ~s(<span class="hero-ellipsis-vertical w-4 h-4"></span>)
+
+        assert html =~
+                 ~s(<span class="hero-ellipsis-vertical w-4 h-4" style="mask-position: center"></span>)
+
         assert view |> has_element?("#duplicate-button-123")
       end
     end
@@ -1130,8 +1133,12 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
         {:ok, view, html} = live(conn, "/alerts")
 
-        assert html =~ ~s(<span class="hero-pencil-solid w-4 h-4"></span>)
-        assert html =~ ~s(<span class="hero-x-mark-solid w-4 h-4"></span>)
+        assert html =~
+                 ~s(<span class="hero-pencil-solid w-4 h-4" style="mask-position: center"></span>)
+
+        assert html =~
+                 ~s(<span class="hero-x-mark-solid w-4 h-4" style="mask-position: center"></span>)
+
         assert view |> has_element?("#duplicate-button-345")
       end
     end
@@ -1145,9 +1152,15 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         {:ok, view, html} =
           live(conn, "/alerts?filter[timeline]=past")
 
-        refute html =~ ~s(<span class="hero-pencil-solid w-4 h-4"></span>)
-        refute html =~ ~s(<span class="hero-x-mark-solid w-4 h-4"></span>)
-        assert html =~ ~s(<span class="hero-ellipsis-vertical w-4 h-4"></span>)
+        refute html =~
+                 ~s(<span class="hero-pencil-solid w-4 h-4" style="mask-position: center"></span>)
+
+        refute html =~
+                 ~s(<span class="hero-x-mark-solid w-4 h-4" style="mask-position: center"></span>)
+
+        assert html =~
+                 ~s(<span class="hero-ellipsis-vertical w-4 h-4" style="mask-position: center"></span>)
+
         refute view |> has_element?("#duplicate-button-123")
         assert view |> has_element?("#download-history-button-123")
       end
