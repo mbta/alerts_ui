@@ -1,5 +1,4 @@
 defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
-  require IEx
   @moduledoc """
     Live Component for route type and effect section of form.
     "Forbidden effects" are effects that we don't want to show as
@@ -80,8 +79,6 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
         %{changeset: form}
       )
 
-    IEx.pry
-
     Logger.warning("VALIDATE")
     Logger.warning(inspect(params))
     Logger.warning(inspect(socket.assigns))
@@ -90,6 +87,9 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
 
   @impl true
   def handle_event("route_type", %{"value" => route_type}, socket) do
+    Logger.warning("ROUTE TYPE")
+    Logger.warning(inspect(route_type))
+
     effects =
       route_type
       |> String.to_existing_atom()
@@ -206,6 +206,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
       active={@active_route}
       phx-target={@myself}
       phx-click="route_type"
+      phx-change="route_type"
       class="self-center min-w-[16rem]"
       value={@route_type}
       icon={@route_type}
@@ -228,6 +229,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
     <.button_toggle
       phx-target={@myself}
       phx-click="effect"
+      phx-change="effect"
       class="self-cente min-w-[16rem]"
       value={@effect}
       active={@active_effect}
