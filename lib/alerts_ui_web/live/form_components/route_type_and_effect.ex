@@ -1,4 +1,5 @@
 defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
+  require IEx
   @moduledoc """
     Live Component for route type and effect section of form.
     "Forbidden effects" are effects that we don't want to show as
@@ -10,6 +11,8 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   import Ecto.Changeset
   alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.FormComponents.Helpers.{ContentFormatter, EffectsForRouteTypes}
+
+  require Logger
 
   @route_types [
     :bus,
@@ -50,6 +53,9 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
 
   @impl true
   def update(%{alert_data: alert_data} = assigns, socket) do
+    Logger.warning("UPDATE")
+    Logger.warning(inspect(assigns))
+    Logger.warning(inspect(socket.assigns))
     clean_alert_data = Map.merge(alert_data, %{route_ids: [], trip_ids: [], stop_ids: []})
     assigns = Map.put(assigns, :alert_data, clean_alert_data)
     {:ok, assign(socket, assigns)}
@@ -59,6 +65,27 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
     changeset
     |> cast(params, @fields)
     |> validate_required(@required_fields)
+  end
+
+  @impl true
+  def handle_event("validate", params, socket) do
+    form =
+      %__MODULE__{}
+      |> changeset(params)
+      |> to_form()
+
+    socket =
+      assign(
+        socket,
+        %{changeset: form}
+      )
+
+    IEx.pry
+
+    Logger.warning("VALIDATE")
+    Logger.warning(inspect(params))
+    Logger.warning(inspect(socket.assigns))
+    {:noreply, socket}
   end
 
   @impl true
@@ -131,6 +158,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
         for={@changeset}
         phx-target={@myself}
         phx-submit="complete_step"
+        phx-change="validate"
         class="form-control gap-4 min-w-full"
         id="route_types_form"
       >
@@ -174,6 +202,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
 
     ~H"""
     <.button_toggle
+      id={"route-type-#{@route_type}-button"}
       active={@active_route}
       phx-target={@myself}
       phx-click="route_type"

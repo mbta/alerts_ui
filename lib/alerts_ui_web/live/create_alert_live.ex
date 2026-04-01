@@ -20,6 +20,7 @@ end
 
 defmodule AlertsUIWeb.CreateAlertLive do
   require Logger
+  require IEx
   use AlertsUIWeb, :live_view
 
   alias AlertsUI.AlertBuilder
@@ -93,7 +94,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
   @impl true
   def mount(params, session, socket) do
     if remount?(socket) do
-      live_remount(params, session, socket)
+      live_mount(params, session, socket)
     else
       live_mount(params, session, socket)
     end
