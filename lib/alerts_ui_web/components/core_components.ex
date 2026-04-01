@@ -665,7 +665,7 @@ defmodule AlertsUIWeb.CoreComponents do
 
   def icon(%{name: "hero-" <> _} = assigns) do
     ~H"""
-    <span class={[@name, @class]} />
+    <span class={[@name, @class]} style="mask-position: center" />
     """
   end
 

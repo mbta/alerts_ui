@@ -1222,10 +1222,10 @@ defmodule AlertsUIWeb.SharedComponents do
         />
         <span
           :if={@action_event != nil && @action_icon != nil}
-          class={"w-5 h-5 relative right-[2rem] flex flex-row justify-center align-center rounded-xl text-primary hover:text-primary-hover active:text-primary-active cursor-pointer #{if @value in ["", nil], do: "invisible"}"}
+          class={"h-[38px] relative right-[3rem] flex flex-row items-center justify-center align-center rounded-xl text-primary hover:text-primary-hover active:text-primary-active cursor-pointer z-1 #{if @value in ["", nil], do: "invisible"}"}
           phx-click={@action_event}
         >
-          <AlertsUIWeb.CoreComponents.icon name={@action_icon} class="p-2" />
+          <AlertsUIWeb.CoreComponents.icon name={@action_icon} class="p-2 z-1 w-[3rem]" />
         </span>
       </div>
       <.input_error :for={msg <- @errors}>{msg}</.input_error>
