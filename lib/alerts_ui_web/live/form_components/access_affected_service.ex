@@ -209,11 +209,10 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
 
       case changeset |> apply_action(:validate) do
         {:ok, _changeset} ->
-          []
+          send(self(), {:section_completed, changeset})
 
         {:error, changeset} ->
           send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
-          send(self(), {:section_completed, changeset})
       end
 
       send(self(), {:got_obsolete_ids, %{facility_ids: obsolete_ids}})

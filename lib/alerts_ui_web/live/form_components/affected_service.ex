@@ -483,10 +483,41 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     # if all our fields have been returned and there are obsolete ids
     # send result to parent
     if send_obsolete_ids? do
-      send(self(), {:got_obsolete_ids, obsolete_ids})
-    end
+      # # remove obsolete ids from required fields
+      alert_data = socket.assigns.alert_data
 
-    {:noreply, assign(socket, :obsolete_ids, obsolete_ids)}
+      ids_with_obsolete_entities_removed =
+        required_fields
+        |> Enum.map(fn field ->
+          obsolete_ids = Map.get(obsolete_ids, field, [])
+          {field, alert_data[field] -- obsolete_ids}
+        end)
+        |> Enum.map(fn
+          {k, []} -> {k, nil}
+          {k, v} -> {k, v}
+        end)
+        |> Enum.into(%{})
+
+      new_alert_data = Map.merge(alert_data, ids_with_obsolete_entities_removed)
+
+      changeset =
+        %__MODULE__{}
+        |> build_changeset(new_alert_data)
+        |> validate_required(required_fields)
+
+      case changeset |> apply_action(:validate) do
+        {:ok, _changeset} ->
+          send(self(), {:section_completed, changeset})
+
+        {:error, changeset} ->
+          send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
+      end
+
+      send(self(), {:got_obsolete_ids, obsolete_ids})
+      {:noreply, assign(socket, %{alert_data: new_alert_data, obsolete_ids: obsolete_ids})}
+    else
+      {:noreply, assign(socket, :obsolete_ids, obsolete_ids)}
+    end
   end
 
   @impl true
@@ -706,7 +737,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
                                                                                                        :route_ids
                                                                                                      ].value ||
                                                                                                        [])
-        |> Enum.join(", ")}
+        |> Enum.join(", ")} Selected trip ids: {(@form[:trip_ids].value || []) |> Enum.join(", ")}
       </p>
       <hr class="mt-4" />
     </div>
