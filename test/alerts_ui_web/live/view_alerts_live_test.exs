@@ -423,7 +423,8 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         notification_period_start: @six_hours_ago,
         active_period_end: nil,
         notification_period_end: nil,
-        duration_certainty: :UNKNOWN
+        duration_certainty: :UNKNOWN,
+        informed_entity: []
       })
 
       insert(:alert, %{
@@ -432,7 +433,15 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         notification_period_start: @one_day_ago,
         active_period_end: nil,
         notification_period_end: nil,
-        duration_certainty: :UNKNOWN
+        duration_certainty: :UNKNOWN,
+        original_route_selections: [
+          "Red Line|Red",
+          "62|62",
+          "67|67",
+          "76|76",
+          "350|350",
+          "CT3|708"
+        ]
       })
 
       insert(:alert, %{
@@ -450,7 +459,8 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         notification_period_start: @six_hours_ago,
         active_period_end: @one_hour_from_now,
         notification_period_end: @one_hour_from_now,
-        duration_certainty: :KNOWN
+        duration_certainty: :KNOWN,
+        original_route_selections: ["Red Line|Red"]
       })
 
       insert(:alert, %{
@@ -468,7 +478,8 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         notification_period_start: @two_hours_ago,
         active_period_end: @two_hours_from_now,
         notification_period_end: @two_hours_from_now,
-        duration_certainty: :ESTIMATED
+        duration_certainty: :ESTIMATED,
+        original_route_selections: ["Blue Line|Blue"]
       })
 
       insert(:alert, %{
@@ -477,7 +488,8 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         notification_period_start: @one_day_ago,
         active_period_end: @end_of_service_utc,
         notification_period_end: @end_of_service_utc,
-        duration_certainty: :KNOWN
+        duration_certainty: :KNOWN,
+        original_route_selections: ["10"]
       })
 
       insert(:alert, %{
@@ -504,7 +516,8 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         notification_period_start: @six_hours_ago,
         active_period_end: @two_days_from_now,
         notification_period_end: @two_days_from_now,
-        duration_certainty: :KNOWN
+        duration_certainty: :KNOWN,
+        original_route_selections: ["1|1"]
       })
 
       insert(:alert, %{
@@ -742,6 +755,31 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
                "hero-arrow-down"
 
       assert get_alert_id_order(html) == ["10000", "10100", "10900", "10600", "10500", "10300"]
+    end
+
+    @tag :logged_in_user
+    test "sorting by service type orders as expected", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts")
+
+      html =
+        view
+        |> element("a", "Service")
+        |> render_click()
+
+      assert element(view, "th[aria-sort='ascending'] span.order-direction") |> render() =~
+               "hero-arrow-up"
+
+      assert get_alert_id_order(html) == ["10900", "10600", "10500", "10300", "10100", "10000"]
+
+      html =
+        view
+        |> element("a", "Service")
+        |> render_click()
+
+      assert element(view, "th[aria-sort='descending'] span.order-direction") |> render() =~
+               "hero-arrow-down"
+
+      assert get_alert_id_order(html) == ["10000", "10300", "10100", "10500", "10600", "10900"]
     end
   end
 

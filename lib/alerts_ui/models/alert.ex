@@ -162,8 +162,8 @@ defmodule AlertsUI.Models.Alert do
       :multi_column_search
     ],
     sortable: [
-      # service,
-      :effect_detail,
+      :service_pill_sort_key,
+      :effect_name,
       :integer_alert_id,
       :active_period_start,
       :active_period_end,
@@ -172,7 +172,7 @@ defmodule AlertsUI.Models.Alert do
       :notification_period_start
     ],
     adapter_opts: [
-      alias_fields: [:integer_alert_id],
+      alias_fields: [:integer_alert_id, :service_pill_sort_key],
       compound_fields: [text_content: [:header_text, :description_text]],
       custom_fields: [
         effects: [
@@ -259,6 +259,8 @@ defmodule AlertsUI.Models.Alert do
     field :original_direction_selections, {:array, :string}
     field :original_facility_selections, {:array, :string}
     field :original_mode_selections, {:array, :integer}
+
+    field :service_pill_sort_key, :string, virtual: true
 
     timestamps()
   end

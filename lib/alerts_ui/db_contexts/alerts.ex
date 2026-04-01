@@ -7,6 +7,7 @@ defmodule AlertsUI.Alerts do
   alias AlertsUI.DBContexts.Users
   alias AlertsUI.Models.{ActivePeriod, Alert, User}
   alias AlertsUI.Repo
+  alias AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   require Logger
 
@@ -369,11 +370,44 @@ defmodule AlertsUI.Alerts do
   def list_all_paginated(params) do
     opts = [for: Alert, page_size: 50]
 
+    facility_effect_types = EffectsForRouteTypes.list_effects(:facility)
+
     with {:ok, flop} <- Flop.validate(params, opts) do
       Alert
       |> where([a], a.draft == false or is_nil(a.draft))
       |> select_merge([a], %{
-        alert_id: a.alert_id |> type(:integer) |> selected_as(:integer_alert_id)
+        alert_id: a.alert_id |> type(:integer) |> selected_as(:integer_alert_id),
+        # If original_route_selections is not []:
+        #   Take the first route and pad it with characters if it's numeric
+        #   so that a basic alphanumeric sort will work correctly (because that's what flop does)
+        #   E.g. 1 < 4 < 10 < Red Line
+        # If it is []:
+        #   Use facility if in facility effect types
+        #   Otherwise, systemwide
+        service_pill_sort_key:
+          fragment(
+            """
+            CASE
+              WHEN COALESCE(array_length(?, 1), 0) > 0 THEN
+                COALESCE(
+                  lpad(NULLIF(regexp_replace((?)[1], '[^0-9].*', ''), ''), 10, '0')
+                    || regexp_replace((?)[1], '^[0-9]+', ''),
+                  (?)[1]
+                )
+              WHEN ? = ANY(?) THEN ?
+              ELSE ?
+            END
+            """,
+            a.original_route_selections,
+            a.original_route_selections,
+            a.original_route_selections,
+            a.original_route_selections,
+            a.effect_name,
+            ^facility_effect_types,
+            ^"Facility",
+            ^"Systemwide"
+          )
+          |> selected_as(:service_pill_sort_key)
       })
       |> Flop.run(flop, opts)
     end
