@@ -65,6 +65,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
     "DISABLED_BUS",
     "DISABLED_TRAIN",
     "DRAWBRIDGE_BEING_RAISED",
+    "DRAWBRIDGE_ISSUE",
     "FIRE",
     "HAZMAT_CONDITION",
     "HURRICANE",
