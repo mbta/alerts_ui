@@ -8,6 +8,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
   alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Stop
 
+  @now AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers.current_time()
+  @one_hour_from_now NaiveDateTime.add(@now, 1, :hour)
+
   @stop_1 %Stop{id: "place-lech", name: "Lechmere"}
   @stop_2 %Stop{id: "place-lngmd", name: "Longwood Medical Area"}
   @stop_3 %Stop{id: "place-masta", name: "Massachusetts Avenue"}
@@ -197,21 +200,26 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
 
   describe "stop_form/1" do
     test "stops empty" do
-      assert BuildAutoText.stop_form(%{stops: []}) == ""
+      assert BuildAutoText.stop_form(%{stops: [], start_datetime: nil}) == ""
     end
 
-    test "one stop" do
-      assert BuildAutoText.stop_form(%{stops: [@stop_1]}) == "is"
+    test "starts in future" do
+      assert BuildAutoText.stop_form(%{stops: [@stop_1], start_datetime: @one_hour_from_now}) ==
+               "will be"
     end
 
-    test "multiple stops" do
-      assert BuildAutoText.stop_form(%{stops: [@stop_1, @stop_2]}) == "are"
+    test "one stop starts now" do
+      assert BuildAutoText.stop_form(%{stops: [@stop_1], start_datetime: @now}) == "is"
+    end
+
+    test "multiple stops starts now" do
+      assert BuildAutoText.stop_form(%{stops: [@stop_1, @stop_2], start_datetime: @now}) == "are"
     end
   end
 
   describe "stop_word/1" do
     test "stops empty" do
-      assert BuildAutoText.stop_form(%{stops: []}) == ""
+      assert BuildAutoText.stop_word(%{stops: []}) == ""
     end
 
     test "one stop" do
@@ -401,16 +409,25 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
 
   describe "trip_form/1" do
     test "trips empty" do
-      assert BuildAutoText.trip_form(%{schedules: []}) == ""
+      assert BuildAutoText.trip_form(%{schedules: [], start_datetime: nil}) == ""
+    end
+
+    test "starts in future" do
+      assert BuildAutoText.trip_form(%{
+               schedules: [@schedule_1],
+               start_datetime: @one_hour_from_now
+             }) == "will be"
     end
 
     test "one trip" do
-      assert BuildAutoText.trip_form(%{schedules: [@schedule_1]}) == "is"
+      assert BuildAutoText.trip_form(%{schedules: [@schedule_1], start_datetime: @now}) == "is"
     end
 
     test "multiple trips" do
-      assert BuildAutoText.trip_form(%{schedules: [@schedule_1, @schedule_2]}) ==
-               "are"
+      assert BuildAutoText.trip_form(%{
+               schedules: [@schedule_1, @schedule_2],
+               start_datetime: @now
+             }) == "are"
     end
   end
 
@@ -633,15 +650,21 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
 
   describe "route_form/1" do
     test "routes empty" do
-      assert BuildAutoText.route_form(%{routes: []}) == ""
+      assert BuildAutoText.route_form(%{routes: [], start_datetime: nil}) == ""
+    end
+
+    test "starts in future" do
+      assert BuildAutoText.route_form(%{routes: [@route_1], start_datetime: @one_hour_from_now}) ==
+               "will be"
     end
 
     test "one route" do
-      assert BuildAutoText.route_form(%{routes: [@route_1]}) == "is"
+      assert BuildAutoText.route_form(%{routes: [@route_1], start_datetime: @now}) == "is"
     end
 
     test "multiple routes" do
-      assert BuildAutoText.route_form(%{routes: [@route_1, @route_2]}) == "are"
+      assert BuildAutoText.route_form(%{routes: [@route_1, @route_2], start_datetime: @now}) ==
+               "are"
     end
   end
 end

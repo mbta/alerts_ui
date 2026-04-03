@@ -5,10 +5,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
   """
   alias AlertsUI.Models.ActivePeriod
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText
-  alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
+  alias AlertsUIWeb.FormComponents.Helpers.{DateTimeHelpers, GetKeyForModeEffect}
 
   @spec build_duration_text(BuildAutoText.t()) :: String.t()
-  def build_duration_text(autotext_data, current_time \\ current_time_naive())
+  def build_duration_text(autotext_data, current_time \\ DateTimeHelpers.current_time())
 
   def build_duration_text(
         # duration text for alerts with 1 active period
@@ -640,12 +640,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
 
   defp build_datetime(date, time) do
     NaiveDateTime.new!(date, time)
-  end
-
-  defp current_time_naive do
-    DateTime.utc_now()
-    |> DateTime.shift_zone!("America/New_York")
-    |> DateTime.to_naive()
   end
 
   # weekdays for recurring
