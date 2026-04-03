@@ -228,10 +228,13 @@ defmodule AlertsUIWeb.CreateAlertLive do
   defp assign_from_params(alert_data, params) do
     # this will be the numeric version, not the string (unlike
     # selected_* in the the top level assigns)
-    route_type =
+    route_type_mapping =
       case route_type_from_params!(params) do
         nil -> nil
-        route_type -> InformedEntity.route_type_mapping(route_type)
+        route_type ->
+          route_type
+          |> String.to_existing_atom()
+          |> InformedEntity.route_type_mapping()
       end
 
     effect_name = effect_name_from_params!(params)
@@ -239,12 +242,12 @@ defmodule AlertsUIWeb.CreateAlertLive do
     combination =
       GetKeyForModeEffect.get_value_of_key(
         :combination,
-        route_type,
+        route_type_mapping,
         effect_name
       )
 
     alert_data
-    |> Map.put(:route_type, Map.get(alert_data, :route_type, route_type))
+    |> Map.put(:route_type, Map.get(alert_data, :route_type, route_type_mapping))
     |> Map.put(:effect_name, Map.get(alert_data, :effect, effect_name))
     |> Map.put(:combination, combination)
   end

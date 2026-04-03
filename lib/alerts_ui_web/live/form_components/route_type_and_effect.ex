@@ -35,15 +35,16 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   @spec mount(any()) :: {:ok, any()}
   def mount(socket) do
     changeset = %__MODULE__{} |> change() |> to_form()
+    selected_route_type = Map.get(socket.assigns, :selected_route_type)
 
     socket =
       socket
       |> assign(%{
         changeset: changeset,
-        selected_route_type: Map.get(socket.assigns, :selected_route_type),
+        selected_route_type: selected_route_type,
         selected_effect: nil,
         route_types: @route_types,
-        effects: list_effects(nil)
+        effects: list_effects(selected_route_type)
       })
 
     {:ok, socket}
@@ -136,6 +137,12 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
     end
   end
 
+  defp list_effects(mode) when is_binary(mode) do
+    mode
+    |> String.to_existing_atom()
+    |> list_effects()
+  end
+
   defp list_effects(mode) do
     mode
     |> EffectsForRouteTypes.list_effects()
@@ -186,7 +193,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
             Select a service type to see possible effects.
           </p>
           <div class="flex flex-wrap justify-center md:justify-normal gap-2">
-            <div :for={effect <- @effects} class={if is_nil(@selected_route_type), do: "hidden"}>
+            <div :for={effect <- list_effects(@selected_route_type)} class={if is_nil(@selected_route_type), do: "hidden"}>
               {effect_buttons(assigns, effect)}
             </div>
             <input type="hidden" id="effect_name" name="effect_name" value={@selected_effect} />
