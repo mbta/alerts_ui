@@ -26,7 +26,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
   alias AlertsUI.AlertBuilder
   alias AlertsUI.Alerts
   alias AlertsUI.DBContexts.Users
-  alias AlertsUI.Models.{ActivePeriod, Alert, EnhancedSchedule}
+  alias AlertsUI.Models.{ActivePeriod, Alert, EnhancedSchedule, InformedEntity}
   alias AlertsUI.Routes
 
   alias AlertsUIWeb.FormComponents.{
@@ -96,35 +96,18 @@ defmodule AlertsUIWeb.CreateAlertLive do
     socket = socket |> assign_new(:return_to, fn -> session["return_to"] end)
 
     alert_id = Map.get(params, "alert_id")
-
-    existing_alert =
-      if is_nil(alert_id) do
-        nil
-      else
-        Alerts.get_by_alert_id(alert_id)
-      end
-
     form_type = form_type_from_socket(socket)
     form_title = form_title_from_type(form_type)
+    alert_data = alert_data_on_mount(params, form_type, alert_id)
 
-    alert_data =
-      if existing_alert,
-        do: AlertData.build_alert_data(existing_alert, form_type) |> Map.from_struct(),
-        else: %{}
-
-    [first_step, second_step | _] = @steps
-
-    alert_data =
-      if form_type == :duplicating do
-        Map.put(alert_data, :reminder_times, [])
-      else
-        alert_data
-      end
+    Logger.warning("MOUNT")
+    Logger.warning(inspect(params))
+    Logger.warning(inspect(alert_data))
 
     socket =
       assign(socket, %{
         page_title: "#{form_title} an Alert",
-        progress: if(form_type == :creating, do: first_step, else: second_step),
+        progress: progress_on_mount(params, form_type, @steps),
         steps: @steps,
         alert_data: alert_data,
         combination: Map.get(alert_data, :combination),
@@ -161,23 +144,81 @@ defmodule AlertsUIWeb.CreateAlertLive do
     end
   end
 
-  defp mount_alert_data(socket, form_type, alert_id \\ nil) do
-    if remount?(socket) do
-      recover_alert_data_from_socket(socket)
+  defp progress_on_mount(params, form_type, [first_step, second_step | _]) do
+    Logger.warn("PROGRESS")
+    Logger.warn(inspect(params))
+
+    route_type = Map.get(params, "route_type")
+    effect = Map.get(params, "effect")
+
+    if form_type == :creating && (is_nil(route_type) || is_nil(effect)) do
+      first_step
     else
-      case alert_id do
-        nil -> %{}
-        alert_id ->
-          Alerts.get_by_alert_id(alert_id)
-          |> AlertData.build_alert_data(form_type)
-          |> Map.from_struct()
-      end
+      second_step
     end
   end
 
-  defp recover_alert_data_from_socket(socket) do
-    Logger.warning("RECOVER")
-    %{}
+  def effect_from_url_name(nil), do: nil
+  def effect_from_url_name(url_name) do
+    url_name
+    |> String.replace("_", " ")
+    |> String.split(" ")
+    |> Enum.map(& String.capitalize(&1))
+    |> Enum.join(" ")
+  end
+
+  def effect_to_url_name(effect_name) do
+    effect_name
+    |> String.split(" ")
+    |> Enum.map(& String.downcase(&1))
+    |> Enum.join("_")
+  end
+
+  defp alert_data_on_mount(params, form_type, alert_id \\ nil) do
+    case alert_id do
+      nil -> %{}
+      alert_id ->
+        Alerts.get_by_alert_id(alert_id)
+        |> AlertData.build_alert_data(form_type)
+        |> Map.from_struct()
+    end
+    |> adjust_by_form_type(form_type)
+    |> assign_from_params(params)
+  end
+
+  defp adjust_by_form_type(alert_data, :duplicating) do
+    Map.put(alert_data, :reminder_times, [])
+  end
+
+  defp adjust_by_form_type(alert_data, _), do: alert_data
+
+  defp assign_from_params(alert_data, params) do
+    route_type =
+      case Map.get(params, "route_type") do
+        nil -> nil
+        route_type ->
+          route_type
+          |> String.to_existing_atom()
+          |> InformedEntity.route_type_mapping()
+      end
+
+    effect_name =
+      case Map.get(params, "effect") do
+        nil -> nil
+        effect -> effect_from_url_name(effect)
+      end
+
+    combination =
+      GetKeyForModeEffect.get_value_of_key(
+        :combination,
+        route_type,
+        effect_name
+      )
+
+    alert_data
+    |> Map.put(:route_type, Map.get(alert_data, :route_type, route_type))
+    |> Map.put(:effect_name, Map.get(alert_data, :effect, effect_name))
+    |> Map.put(:combination, combination)
   end
 
   @impl true
@@ -741,6 +782,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   defp choose_affected_service_component(combination) do
+    Logger.warning("CASC")
+    Logger.warning(inspect(combination))
     case combination do
       :SR -> StopRouteAffectedService
       :ACCESS -> AccessAffectedService

@@ -8,6 +8,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   use AlertsUIWeb, :live_component
   use AlertsUI.Schema
   import Ecto.Changeset
+  import AlertsUIWeb.CreateAlertLive, only: [effect_to_url_name: 1]
   alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.FormComponents.Helpers.{ContentFormatter, EffectsForRouteTypes}
 
@@ -95,13 +96,25 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
       |> String.to_existing_atom()
       |> list_effects()
 
-    {:noreply,
-     assign(socket, %{selected_route_type: route_type, effects: effects, selected_effect: nil})}
+    socket =
+      socket
+      |> assign(%{selected_route_type: route_type, effects: effects, selected_effect: nil})
+      |> push_patch(to: "/alerts/new/#{route_type}")
+
+    {:noreply, socket}
   end
 
   @impl true
   def handle_event("effect", %{"value" => effect}, socket) do
-    {:noreply, assign(socket, %{selected_effect: effect})}
+    route_type = socket.assigns.selected_route_type
+    effect_for_url = effect_to_url_name(effect)
+
+    socket =
+      socket
+      |> assign(%{selected_effect: effect})
+      |> push_patch(to: "/alerts/new/#{route_type}/#{effect_for_url}")
+
+    {:noreply, socket}
   end
 
   @impl true
@@ -206,7 +219,6 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
       active={@active_route}
       phx-target={@myself}
       phx-click="route_type"
-      phx-change="route_type"
       class="self-center min-w-[16rem]"
       value={@route_type}
       icon={@route_type}
@@ -229,7 +241,6 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
     <.button_toggle
       phx-target={@myself}
       phx-click="effect"
-      phx-change="effect"
       class="self-cente min-w-[16rem]"
       value={@effect}
       active={@active_effect}
