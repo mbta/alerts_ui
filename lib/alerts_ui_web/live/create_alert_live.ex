@@ -157,26 +157,30 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   def effect_from_url_name(nil), do: nil
+
   def effect_from_url_name(url_name) do
     url_name
     |> String.replace("_", " ")
     |> String.split(" ")
-    |> Enum.map(& String.capitalize(&1))
+    |> Enum.map(&String.capitalize(&1))
     |> Enum.join(" ")
   end
 
   def effect_to_url_name(effect_name) do
     effect_name
     |> String.split(" ")
-    |> Enum.map(& String.downcase(&1))
+    |> Enum.map(&String.downcase(&1))
     |> Enum.join("_")
   end
 
   def effect_name_from_params!(params) do
     case Map.get(params, "effect") do
-      nil -> nil
+      nil ->
+        nil
+
       effect ->
         effect_name = effect_from_url_name(effect)
+
         if Effect.effect_map_by_name(effect_name) == %{} do
           raise ArgumentError, "no such effect #{effect_name}"
         else
@@ -187,9 +191,12 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   def route_type_from_params!(params) do
     case Map.get(params, "route_type") do
-      nil -> nil
+      nil ->
+        nil
+
       route_type ->
         route_type_atom = String.to_existing_atom(route_type)
+
         if InformedEntity.valid_route_type?(route_type_atom) do
           route_type
         else
@@ -198,9 +205,11 @@ defmodule AlertsUIWeb.CreateAlertLive do
     end
   end
 
-  defp alert_data_on_mount(params, form_type, alert_id \\ nil) do
+  defp alert_data_on_mount(params, form_type, alert_id) do
     case alert_id do
-      nil -> %{}
+      nil ->
+        %{}
+
       alert_id ->
         Alerts.get_by_alert_id(alert_id)
         |> AlertData.build_alert_data(form_type)
