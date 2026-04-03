@@ -104,18 +104,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
         Alerts.get_by_alert_id(alert_id)
       end
 
-    form_type =
-      case socket.assigns.live_action do
-        :edit -> :editing
-        :duplicate -> :duplicating
-        _ -> :creating
-      end
-
-    form_type_to_title = %{
-      editing: "Edit",
-      duplicating: "Duplicate",
-      creating: "Create"
-    }
+    form_type = form_type_from_socket(socket)
+    form_title = form_title_from_type(form_type)
 
     alert_data =
       if existing_alert,
@@ -133,7 +123,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
     socket =
       assign(socket, %{
-        page_title: "#{form_type_to_title[form_type]} an Alert",
+        page_title: "#{form_title} an Alert",
         progress: if(form_type == :creating, do: first_step, else: second_step),
         steps: @steps,
         alert_data: alert_data,
@@ -153,6 +143,41 @@ defmodule AlertsUIWeb.CreateAlertLive do
       })
 
     {:ok, socket}
+  end
+
+  defp form_type_from_socket(socket) do
+    case socket.assigns.live_action do
+      :edit -> :editing
+      :duplicate -> :duplicating
+      _ -> :creating
+    end
+  end
+
+  defp form_title_from_type(title) do
+    case title do
+      :editing -> "Edit"
+      :duplicating -> "Duplicating"
+      :creating -> "Create"
+    end
+  end
+
+  defp mount_alert_data(socket, form_type, alert_id \\ nil) do
+    if remount?(socket) do
+      recover_alert_data_from_socket(socket)
+    else
+      case alert_id do
+        nil -> %{}
+        alert_id ->
+          Alerts.get_by_alert_id(alert_id)
+          |> AlertData.build_alert_data(form_type)
+          |> Map.from_struct()
+      end
+    end
+  end
+
+  defp recover_alert_data_from_socket(socket) do
+    Logger.warning("RECOVER")
+    %{}
   end
 
   @impl true
