@@ -12,8 +12,6 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.FormComponents.Helpers.{ContentFormatter, EffectsForRouteTypes}
 
-  require Logger
-
   @route_types [
     :bus,
     :subway,
@@ -53,9 +51,6 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
 
   @impl true
   def update(%{alert_data: alert_data} = assigns, socket) do
-    Logger.warning("UPDATE")
-    Logger.warning(inspect(assigns))
-    Logger.warning(inspect(socket.assigns))
     clean_alert_data = Map.merge(alert_data, %{route_ids: [], trip_ids: [], stop_ids: []})
     assigns = Map.put(assigns, :alert_data, clean_alert_data)
     {:ok, assign(socket, assigns)}
@@ -80,16 +75,11 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
         %{changeset: form}
       )
 
-    Logger.warning("VALIDATE")
-    Logger.warning(inspect(params))
-    Logger.warning(inspect(socket.assigns))
     {:noreply, socket}
   end
 
   @impl true
   def handle_event("route_type", %{"value" => route_type}, socket) do
-    Logger.warning("ROUTE TYPE")
-    Logger.warning(inspect(route_type))
 
     effects =
       route_type

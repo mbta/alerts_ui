@@ -100,10 +100,6 @@ defmodule AlertsUIWeb.CreateAlertLive do
     form_title = form_title_from_type(form_type)
     alert_data = alert_data_on_mount(params, form_type, alert_id)
 
-    Logger.warning("MOUNT")
-    Logger.warning(inspect(params))
-    Logger.warning(inspect(alert_data))
-
     socket =
       assign(socket, %{
         page_title: "#{form_title} an Alert",
@@ -145,9 +141,6 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   defp progress_on_mount(params, form_type, [first_step, second_step | _]) do
-    Logger.warn("PROGRESS")
-    Logger.warn(inspect(params))
-
     route_type = Map.get(params, "route_type")
     effect = Map.get(params, "effect")
 
@@ -782,8 +775,6 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   defp choose_affected_service_component(combination) do
-    Logger.warning("CASC")
-    Logger.warning(inspect(combination))
     case combination do
       :SR -> StopRouteAffectedService
       :ACCESS -> AccessAffectedService
