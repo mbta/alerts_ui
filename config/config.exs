@@ -147,6 +147,10 @@ config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
+# Change the reporting period for queue telemetry
+# 5 seconds is the default, but it can be changed here.
+config :telemetry_poller, :default, period: 5_000
+
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 

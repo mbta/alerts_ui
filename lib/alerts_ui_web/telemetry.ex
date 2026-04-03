@@ -77,12 +77,6 @@ defmodule AlertsUIWeb.Telemetry do
         description:
           "The time the connection spent waiting before being checked out for the query"
       ),
-
-      # VM Metrics
-      summary("vm.memory.total", unit: {:byte, :kilobyte}),
-      summary("vm.total_run_queue_lengths.total"),
-      summary("vm.total_run_queue_lengths.cpu"),
-      summary("vm.total_run_queue_lengths.io")
     ]
   end
 

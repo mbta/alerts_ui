@@ -38,6 +38,22 @@ defmodule AlertsUI.Application do
         %{}
       )
 
+    :ok =
+      :telemetry.attach(
+        "vm-queue-logger",
+        [:vm, :total_run_queue_lengths],
+        &AlertsUI.Telemetry.handle_event/4,
+        %{}
+      )
+
+    :ok =
+      :telemetry.attach(
+        "vm-memory-logger",
+        [:vm, :memory],
+        &AlertsUI.Telemetry.handle_event/4,
+        %{}
+      )
+
     opts = [strategy: :one_for_one, name: AlertsUI.Supervisor]
     Supervisor.start_link(children, opts)
   end

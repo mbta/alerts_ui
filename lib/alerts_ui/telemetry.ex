@@ -28,4 +28,14 @@ defmodule AlertsUI.Telemetry do
   defp convert_time(time) do
     System.convert_time_unit(time, :native, :millisecond)
   end
+
+  def handle_event([:vm, :total_run_queue_lengths], measurements, _, _) do
+    %{cpu: cpu, io: io, total: total} = measurements
+    Logger.info("Queue Lengths CPU: #{cpu}, IO: #{io}, Total: #{total}")
+  end
+
+  def handle_event([:vm, :memory], measurements, _, _) do
+    total = measurements.total / 1024 / 1024
+    Logger.info("Memory: #{:erlang.float_to_binary(total, [decimals: 2])}MB")
+  end
 end
