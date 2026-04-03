@@ -26,7 +26,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
   alias AlertsUI.AlertBuilder
   alias AlertsUI.Alerts
   alias AlertsUI.DBContexts.Users
-  alias AlertsUI.Models.{ActivePeriod, Alert, EnhancedSchedule, InformedEntity}
+  alias AlertsUI.Models.{ActivePeriod, Alert, Effect, EnhancedSchedule, InformedEntity}
   alias AlertsUI.Routes
 
   alias AlertsUIWeb.FormComponents.{
@@ -95,12 +95,16 @@ defmodule AlertsUIWeb.CreateAlertLive do
   def mount(params, session, socket) do
     socket = socket |> assign_new(:return_to, fn -> session["return_to"] end)
 
+    route_type = route_type_from_params!(params)
+    effect_name = effect_name_from_params!(params)
+
     alert_id = Map.get(params, "alert_id")
     form_type = form_type_from_socket(socket)
     form_title = form_title_from_type(form_type)
     alert_data = alert_data_on_mount(params, form_type, alert_id)
 
-    socket =
+    {
+      :ok,
       assign(socket, %{
         page_title: "#{form_title} an Alert",
         progress: progress_on_mount(params, form_type, @steps),
@@ -111,6 +115,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
         selected_stops: [],
         selected_schedules: [],
         selected_facility: nil,
+        selected_route_type: route_type,
+        selected_effect: effect_name,
         alert_uuid: nil,
         alert_id: alert_id,
         form_type: form_type,
@@ -120,8 +126,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
         obsolete_id_text: [],
         debug_tag: :crypto.strong_rand_bytes(8) |> Base.encode64()
       })
-
-    {:ok, socket}
+    }
   end
 
   defp form_type_from_socket(socket) do
@@ -167,6 +172,32 @@ defmodule AlertsUIWeb.CreateAlertLive do
     |> Enum.join("_")
   end
 
+  def effect_name_from_params!(params) do
+    case Map.get(params, "effect") do
+      nil -> nil
+      effect ->
+        effect_name = effect_from_url_name(effect)
+        if Effect.effect_map_by_name(effect_name) == %{} do
+          raise ArgumentError, "no such effect #{effect_name}"
+        else
+          effect_name
+        end
+    end
+  end
+
+  def route_type_from_params!(params) do
+    case Map.get(params, "route_type") do
+      nil -> nil
+      route_type ->
+        route_type_atom = String.to_existing_atom(route_type)
+        if InformedEntity.valid_route_type?(route_type_atom) do
+          route_type
+        else
+          raise ArgumentError, "no such route type #{route_type}"
+        end
+    end
+  end
+
   defp alert_data_on_mount(params, form_type, alert_id \\ nil) do
     case alert_id do
       nil -> %{}
@@ -186,20 +217,15 @@ defmodule AlertsUIWeb.CreateAlertLive do
   defp adjust_by_form_type(alert_data, _), do: alert_data
 
   defp assign_from_params(alert_data, params) do
+    # this will be the numeric version, not the string (unlike
+    # selected_* in the the top level assigns)
     route_type =
-      case Map.get(params, "route_type") do
+      case route_type_from_params!(params) do
         nil -> nil
-        route_type ->
-          route_type
-          |> String.to_existing_atom()
-          |> InformedEntity.route_type_mapping()
+        route_type -> InformedEntity.route_type_mapping(route_type)
       end
 
-    effect_name =
-      case Map.get(params, "effect") do
-        nil -> nil
-        effect -> effect_from_url_name(effect)
-      end
+    effect_name = effect_name_from_params!(params)
 
     combination =
       GetKeyForModeEffect.get_value_of_key(

@@ -40,7 +40,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
       socket
       |> assign(%{
         changeset: changeset,
-        selected_route_type: nil,
+        selected_route_type: Map.get(socket.assigns, :selected_route_type),
         selected_effect: nil,
         route_types: @route_types,
         effects: list_effects(nil)
@@ -80,7 +80,6 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
 
   @impl true
   def handle_event("route_type", %{"value" => route_type}, socket) do
-
     effects =
       route_type
       |> String.to_existing_atom()
