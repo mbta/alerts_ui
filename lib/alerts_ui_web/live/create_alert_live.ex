@@ -20,7 +20,6 @@ end
 
 defmodule AlertsUIWeb.CreateAlertLive do
   require Logger
-  require IEx
   use AlertsUIWeb, :live_view
 
   alias AlertsUI.AlertBuilder
@@ -124,6 +123,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
         submitted: false,
         obsolete_ids: %{},
         obsolete_id_text: [],
+        remounted: remounting?(socket),
         debug_tag: :crypto.strong_rand_bytes(8) |> Base.encode64()
       })
     }
