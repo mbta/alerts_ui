@@ -230,7 +230,9 @@ defmodule AlertsUIWeb.CreateAlertLive do
     # selected_* in the the top level assigns)
     route_type_mapping =
       case route_type_from_params!(params) do
-        nil -> nil
+        nil ->
+          nil
+
         route_type ->
           route_type
           |> String.to_existing_atom()

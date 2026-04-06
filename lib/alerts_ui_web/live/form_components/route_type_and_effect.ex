@@ -193,7 +193,10 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
             Select a service type to see possible effects.
           </p>
           <div class="flex flex-wrap justify-center md:justify-normal gap-2">
-            <div :for={effect <- list_effects(@selected_route_type)} class={if is_nil(@selected_route_type), do: "hidden"}>
+            <div
+              :for={effect <- list_effects(@selected_route_type)}
+              class={if is_nil(@selected_route_type), do: "hidden"}
+            >
               {effect_buttons(assigns, effect)}
             </div>
             <input type="hidden" id="effect_name" name="effect_name" value={@selected_effect} />

@@ -6,7 +6,7 @@ defmodule AlertsUIWeb.SocketHelpers do
   To be called after `mount/3` (and after `mark_if_remounted/1` below) in handlers.
   """
   def remounted?(socket) do
-    !!(Map.get(socket.assigns, :remounted))
+    !!Map.get(socket.assigns, :remounted)
   end
 
   @doc """
