@@ -74,39 +74,39 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   def handle_params(params, _url, socket) do
     # default to timeline: current if params have no values
     # (eg no user input has occurred and we're probably in a fresh reload)
-
+    filters = get_filters(params, "current")
+    params = params |> Map.put("filter", filters)
+    timefield = filters["timeline"]
     # Process the params to construct the filters in the format Flop needs
-    flop_filters =
-      params
-      |> Map.get("filter", [])
-      |> Enum.reduce([], fn {k, v}, acc ->
-        if v != "" do
-          acc ++ [%{"field" => k, "value" => v}]
-        else
-          acc
-        end
-      end)
-
-    timefield = Enum.find(flop_filters, fn %{"field" => k, "value" => _v} -> k == "timeline" end)
-
-    flop_filters =
-      if timefield,
-        do: flop_filters,
-        else: flop_filters ++ [%{"field" => "timeline", "value" => "current"}]
-
-    params = if timefield, do: params, else: Map.put(params, "timeline", "current")
-    timefield = if timefield, do: timefield["value"], else: "current"
+    flop_filters = extract_flop_filters(filters)
 
     default_order_fields = lookup_end_time_order_fields_by_params(timefield)
     default_order_directions = lookup_end_time_order_directions_by_params(timefield)
+
+    order_fields =
+      if params["order_by"] in ["", nil] do
+        default_order_fields
+      else
+        order_by = String.to_existing_atom(params["order_by"])
+        order_fields = Enum.filter(default_order_fields, &(&1 != order_by))
+        [order_by | order_fields]
+      end
+
+    order_directions =
+      order_directions(
+        hd(order_fields),
+        params["order_direction"],
+        timefield,
+        default_order_directions
+      )
 
     # Flop gets updated
     flop =
       socket.assigns.meta.flop
       |> Flop.set_page(params["page"] || "1")
-      |> Map.put(:order_by, default_order_fields)
-      |> Map.put(:order_directions, default_order_directions)
       |> Map.put(:filters, flop_filters)
+      |> Map.put(:order_by, order_fields)
+      |> Map.put(:order_directions, order_directions)
 
     # And here we build the form according to the params
     form =
@@ -133,55 +133,13 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     end
   end
 
-  @impl true
-  # Custom sort for the End column, given complicated sort expectations there
-  def handle_event("sort-alerts", %{"order" => order}, socket)
-      when order in ["notification_period_end", "active_period_end"] do
-    flop = socket.assigns.meta.flop
-
-    # Need to mimic Flop.push_order in a custom way because push_order
-    # updates the ordered fields AND direction, but takes too many liberties.
-    # (e.g. defaults to asc, keeps the other sort fields, etc.)
-
-    # If the existing flop metadata has notification_period_end,
-    # then the directions need reversing. Otherwise, use default directions
-
-    timefield = socket.assigns.form.params["timeline"]
-
-    new_order_directions =
-      if hd(flop.order_by) in [:notification_period_end, :active_period_end] do
-        flop.order_directions
-        |> Enum.map(&reverse_order_direction(&1))
-      else
-        lookup_end_time_order_directions_by_params(timefield)
-      end
-
-    order_fields = lookup_end_time_order_fields_by_params(timefield)
-
-    flop =
-      flop
-      |> Map.put(:order_by, order_fields)
-      |> Map.put(:order_directions, new_order_directions)
-
-    with {alerts, meta} <- Alerts.list_all_paginated(flop) do
-      {:noreply, assign(socket, meta: meta, alerts: alerts, scroll_to_top: true)}
-    end
-  end
-
   def handle_event("sort-alerts", %{"order" => order}, socket) do
-    flop = Flop.push_order(socket.assigns.meta.flop, order)
+    params =
+      put_order_in_params(socket, order)
+      |> Map.delete("page")
 
-    new_order_directions =
-      flop.order_directions
-      |> Enum.map(&if &1 == :desc, do: :desc_nulls_last, else: &1)
-      |> Enum.map(&if &1 == :asc, do: :asc_nulls_first, else: &1)
-
-    flop =
-      Map.put(flop, :order_directions, new_order_directions)
-
-    with {alerts, meta} <- Alerts.list_all_paginated(flop) do
-      {:noreply, assign(socket, meta: meta, alerts: alerts, scroll_to_top: true)}
-    end
+    socket = assign(socket, scroll_to_top: true)
+    {:noreply, push_patch(socket, to: ~p"/alerts?#{params}")}
   end
 
   ### Filter handlers section ###
@@ -414,6 +372,47 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   ### Helpers section ###
 
+  defp get_filters(params, default_timeline),
+    do:
+      params
+      |> Map.get("filter", %{})
+      |> Map.put_new("timeline", default_timeline)
+
+  defp get_timeline(params),
+    do:
+      params
+      |> get_filters("current")
+      |> Map.get("timeline")
+
+  defp extract_flop_filters(filters),
+    do:
+      filters
+      |> Enum.map(fn
+        {_, ""} -> nil
+        {k, v} -> %{"field" => k, "value" => v}
+      end)
+      |> Enum.filter(&(&1 != nil))
+
+  defp current_order_param(flop),
+    do:
+      flop.order_by
+      |> hd()
+      |> Atom.to_string()
+
+  defp opposite_current_direction_param(flop),
+    do:
+      flop.order_directions
+      |> hd()
+      |> reverse_order_direction()
+      |> stringify_order_direction()
+
+  defp default_direction_param(timeline),
+    do:
+      timeline
+      |> lookup_end_time_order_directions_by_params()
+      |> hd()
+      |> stringify_order_direction()
+
   def lookup_end_time_order_fields_by_params("past"),
     do: [
       :active_period_end,
@@ -452,6 +451,13 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   def reverse_order_direction(:asc_nulls_first), do: :desc_nulls_last
   def reverse_order_direction(:desc_nulls_first), do: :asc_nulls_last
 
+  def stringify_order_direction(:asc), do: "asc"
+  def stringify_order_direction(:desc), do: "desc"
+  def stringify_order_direction(:asc_nulls_last), do: "asc"
+  def stringify_order_direction(:desc_nulls_last), do: "desc"
+  def stringify_order_direction(:asc_nulls_first), do: "asc"
+  def stringify_order_direction(:desc_nulls_first), do: "desc"
+
   @spec clean_filter_params(map()) :: map()
   defp clean_filter_params(params) do
     nonempty_params = Map.filter(params, fn {k, v} -> v != "" || k == "multi_column_search" end)
@@ -467,6 +473,50 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   defp get_filter_count(filters) do
     filters |> Map.drop(@other_filter_fields) |> Map.keys() |> length()
   end
+
+  @spec put_order_in_params(map(), String.t()) :: map()
+  defp put_order_in_params(socket, order) do
+    current_order = current_order_param(socket.assigns.meta.flop)
+    opposite_current_direction = opposite_current_direction_param(socket.assigns.meta.flop)
+    timeline = get_timeline(socket.assigns.params)
+    default_direction = default_direction_param(timeline)
+
+    {order, direction} =
+      cond do
+        order == current_order ->
+          {order, opposite_current_direction}
+
+        order in ["active_period_end", "notification_period_end"] ->
+          {order, default_direction}
+
+        true ->
+          {order, "asc"}
+      end
+
+    socket.assigns.params
+    |> Map.merge(%{"order_by" => order, "order_direction" => direction})
+  end
+
+  defp order_directions(:active_period_end, "asc", _, directions),
+    do: directions |> Enum.map(&reverse_order_direction/1)
+
+  defp order_directions(:active_period_end, _, _, directions),
+    do: directions
+
+  defp order_directions(:notification_period_end, "asc", "all", directions),
+    do: directions |> Enum.map(&reverse_order_direction/1)
+
+  defp order_directions(:notification_period_end, _, "all", directions),
+    do: directions
+
+  defp order_directions(:notification_period_end, "desc", _, directions),
+    do: directions |> Enum.map(&reverse_order_direction/1)
+
+  defp order_directions(:notification_period_end, _, _, directions),
+    do: directions
+
+  defp order_directions(_, direction, _, _),
+    do: [String.to_existing_atom(direction || "asc")]
 
   ### END Helpers section ###
 

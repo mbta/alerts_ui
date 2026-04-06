@@ -660,7 +660,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
       html =
         view
-        |> element("a", "End")
+        |> element("th[aria-sort='descending'] a", "End")
         |> render_click()
 
       assert element(view, "th[aria-sort='ascending'] span.order-direction") |> render() =~
