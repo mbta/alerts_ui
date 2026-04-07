@@ -84,10 +84,6 @@ defmodule AlertsUIWeb.CreateAlertLive do
     Logger.warning("[LV #{debug_tag}] terminating at #{DateTime.utc_now()}")
     Logger.warning("[LV #{debug_tag}] reason: #{inspect(reason)}")
     Logger.warning("[LV #{debug_tag}] event: #{inspect(event)}")
-
-    Logger.warning(
-      "[LV #{debug_tag}] socket: #{inspect(Map.put(socket.assigns, :current_user, "REDACTED"))}"
-    )
   end
 
   @impl true
