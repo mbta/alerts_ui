@@ -49,11 +49,11 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
 
         form = changeset(%__MODULE__{}, alert_data) |> to_form
 
-          assign(socket, %{
-            form: form,
-            current_time: current_time,
-            edited: false
-          })
+        assign(socket, %{
+          form: form,
+          current_time: current_time,
+          edited: false
+        })
       end
 
     {:ok, socket}
