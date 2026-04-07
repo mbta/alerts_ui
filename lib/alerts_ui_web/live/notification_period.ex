@@ -35,22 +35,26 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
 
   @impl true
   def mount(socket) do
-    current_time = DateTimeHelpers.current_time()
-
-    alert_data =
-      %{
-        notification_period_start_date: current_time |> naive_datetime_to_iso_date
-      }
-      |> Map.put_new(:notification_period_start, current_time)
-
-    form = changeset(%__MODULE__{}, alert_data) |> to_form
-
     socket =
-      assign(socket, %{
-        form: form,
-        current_time: current_time,
-        edited: false
-      })
+      if remounted?(socket) do
+        socket
+      else
+        current_time = DateTimeHelpers.current_time()
+
+        alert_data =
+          %{
+            notification_period_start_date: current_time |> naive_datetime_to_iso_date
+          }
+          |> Map.put_new(:notification_period_start, current_time)
+
+        form = changeset(%__MODULE__{}, alert_data) |> to_form
+
+          assign(socket, %{
+            form: form,
+            current_time: current_time,
+            edited: false
+          })
+      end
 
     {:ok, socket}
   end
@@ -178,12 +182,17 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
 
   @impl true
   def handle_event("validate", %{"notification_period" => notification_period}, socket) do
-    notification_period = Map.merge(socket.assigns.form.params, notification_period)
-
-    notification_period_start = notification_period_start(notification_period, socket.assigns)
-
     notification_period =
-      Map.put(notification_period, "notification_period_start", notification_period_start)
+      if remounted?(socket) do
+        notification_period
+      else
+        notification_period = Map.merge(socket.assigns.form.params, notification_period)
+
+        notification_period_start = notification_period_start(notification_period, socket.assigns)
+
+        notification_period =
+          Map.put(notification_period, "notification_period_start", notification_period_start)
+      end
 
     changeset =
       changeset(%__MODULE__{}, notification_period)
