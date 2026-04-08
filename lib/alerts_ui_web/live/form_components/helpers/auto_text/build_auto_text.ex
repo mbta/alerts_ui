@@ -187,6 +187,15 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
     "at #{join_together(stop_names)}"
   end
 
+  @spec closest_stop_text(__MODULE__.t()) :: String.t()
+  def closest_stop_text(%{direction: [_direction]}) do
+    "The closest stops with service are ___ and ___."
+  end
+
+  def closest_stop_text(_alert_data) do
+    "The closest stops with inbound service are ___ and ___. The closest stops with outbound service are ___ and ___."
+  end
+
   # trips
   @spec trip_names_only(__MODULE__.t()) :: String.t()
   def trip_names_only(%{schedules: []}), do: ""

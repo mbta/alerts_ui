@@ -779,7 +779,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Route 1 westbound is detoured until Sat, May 10 at 3:00 PM due to a parade"
+        "Route 1 westbound is detoured until Sat, May 10 at 3:00 PM due to a parade. The closest stops with service are ___ and ___."
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
