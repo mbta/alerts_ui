@@ -148,16 +148,12 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
         clean_reminder_times =
           changes.reminder_times
           |> Enum.map(&%{id: &1.id, time: &1.reminder_time})
-
         changes =
           changes
           |> Map.put(:reminder_times, clean_reminder_times)
+        {:ok, changes}
 
-        send(self(), {:add_errors, [], __MODULE__})
-        send(self(), {:section_completed, changes})
-
-      {:error, changeset} ->
-        send(self(), {:add_errors, parse_field_errors(changeset), __MODULE__})
+      {:error, changeset} -> {:error, changeset}
     end
   end
 
@@ -165,12 +161,18 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
   def handle_event("validate", %{"rider_reminders" => rider_reminders}, socket) do
     changeset = changeset(%__MODULE__{}, rider_reminders)
 
-    validate(changeset)
-
     form =
       changeset
       |> Map.put(:action, :validate)
       |> to_form()
+
+    case validate(changeset) do
+      {:ok, changes} ->
+        send(self(), {:add_errors, [], __MODULE__})
+        send(self(), {:section_completed, changes})
+      {:error, changeset} ->
+        send(self(), {:add_errors, parse_field_errors(changeset), __MODULE__})
+    end
 
     {:noreply, assign(socket, %{form: form})}
   end
@@ -201,7 +203,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
                 editable={ReminderTimes.editable?(rt[:id].value, rt[:reminder_time].value)}
                 current_time={@current_time}
                 field={rt[:reminder_time]}
-                id={rt[:id].value}
+                id={rt.id}
                 index={rt.index}
                 notification_start={@notification_start}
                 notification_end={@notification_end}
@@ -234,16 +236,23 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
 
   def reminder_input(assigns) do
     ~H"""
-    <input type="hidden" name="rider_reminders[reminder_sort][]" value={@index} />
+    <input
+      type="hidden"
+      name="rider_reminders[reminder_sort][]"
+      value={@index}
+      id={"rider_reminders-sort-#{@id}"}
+    />
     <input
       type="hidden"
       name={"rider_reminders[reminder_times][#{@index}][min_time]"}
       value={@current_time}
+      id={"rider_reminders-reminder_times-#{@id}-min_time"}
     />
     <input
       type="hidden"
       name={"rider_reminders[reminder_times][#{@index}][max_time]"}
       value={@notification_end |> naive_datetime_to_iso8601()}
+      id={"rider_reminders-reminder_times-#{@id}-max_time"}
     />
     <input type="hidden" name={"rider_reminders[reminder_times][#{@index}][id]"} value={@id} />
     <input
@@ -251,6 +260,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
       type="hidden"
       name={"rider_reminders[reminder_times][#{@index}][reminder_time]"}
       value={@field.value}
+      id={"rider_reminders-reminder_times-#{@id}-reminder_time"}
     />
     <.datetime
       label="Reminder date and time"
@@ -259,6 +269,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
       field={@field}
       value={@field.value}
       disabled={!@editable}
+      id={"rider_reminders-reminder_times-#{@id}-reminder_datetime"}
     >
       <button
         :if={@editable}
@@ -267,6 +278,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
         name="rider_reminders[reminder_drop][]"
         value={@index}
         phx-click={JS.dispatch("change")}
+        id={"rider_reminders-reminder_times-#{@id}-drop"}
       >
         <.icon name="hero-x-mark" class="w-6 h-6" />
       </button>
