@@ -20,6 +20,7 @@ end
 
 defmodule AlertsUIWeb.CreateAlertLive do
   require Logger
+
   use AlertsUIWeb, :live_view
 
   alias AlertsUI.AlertBuilder
@@ -109,8 +110,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
         selected_stops: [],
         selected_schedules: [],
         selected_facility: nil,
-        selected_route_type: route_type,
-        selected_effect: effect_name,
+        selected_route_type: route_type_from_params!(params),
+        selected_effect: effect_name_from_params!(params),
         alert_uuid: nil,
         alert_id: alert_id,
         form_type: form_type,
@@ -200,10 +201,10 @@ defmodule AlertsUIWeb.CreateAlertLive do
     end
   end
 
-  defp alert_data_on_mount(params, form_type, existing_alert \\ nil) do
-    case existing_alert do
+  defp alert_data_on_mount(params, form_type, existing_alert_or_nil) do
+    case existing_alert_or_nil do
       nil ->
-        %{}
+        assign_from_params(%{}, params)
 
       alert ->
         alert
@@ -211,7 +212,6 @@ defmodule AlertsUIWeb.CreateAlertLive do
         |> Map.from_struct()
     end
     |> adjust_by_form_type(form_type)
-    |> assign_from_params(params)
   end
 
   defp adjust_by_form_type(alert_data, :duplicating) do
@@ -246,7 +246,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
     alert_data
     |> Map.put(:route_type, Map.get(alert_data, :route_type, route_type_mapping))
     |> Map.put(:effect_name, Map.get(alert_data, :effect, effect_name))
-    |> Map.put(:combination, combination)
+    |> Map.put(:combination, Map.get(alert_data, :combination, combination))
   end
 
   @impl true
