@@ -1,5 +1,6 @@
 defmodule AlertsUIWeb.FormComponents.RiderReminders do
   require Logger
+
   @moduledoc """
     Live Component for Rider Reminders section of form
   """
@@ -39,16 +40,20 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
 
   @impl true
 
-  def update(%{
-    active_period_end: active_period_end,
-    active_period_end_specifier: active_period_end_specifier,
-    active_period_start: active_period_start,
-    notification_period_end: notification_period_end,
-    notification_period_start: notification_period_start,
-    notification_specifier: notification_specifier,
-    reminder_times: reminder_times
-  } = assigns, socket) do
+  def update(
+        %{
+          active_period_end: active_period_end,
+          active_period_end_specifier: active_period_end_specifier,
+          active_period_start: active_period_start,
+          notification_period_end: notification_period_end,
+          notification_period_start: notification_period_start,
+          notification_specifier: notification_specifier,
+          reminder_times: reminder_times
+        } = assigns,
+        socket
+      ) do
     Logger.warning("RR UPDATE")
+
     notification_start =
       cond do
         notification_specifier == :now -> DateTime.now!("America/New_York")
@@ -57,11 +62,12 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
         true -> nil
       end
 
-    notification_end = calculate_notification_end(
-      active_period_end,
-      active_period_end_specifier,
-      notification_period_end
-    )
+    notification_end =
+      calculate_notification_end(
+        active_period_end,
+        active_period_end_specifier,
+        notification_period_end
+      )
 
     processed_reminder_times =
       (reminder_times || [])
@@ -108,10 +114,10 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
   end
 
   defp calculate_notification_end(
-    active_period_end,
-    active_period_end_specifier,
-    notification_period_end
-  ) do
+         active_period_end,
+         active_period_end_specifier,
+         notification_period_end
+       ) do
     unbounded = active_period_end_specifier == :until_further_notice
     unspecified_notification_end = notification_period_end in ["", nil]
     unspecified_active_end = active_period_end in ["", nil]
@@ -166,12 +172,15 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
         clean_reminder_times =
           changes.reminder_times
           |> Enum.map(&%{id: &1.id, time: &1.reminder_time})
+
         changes =
           changes
           |> Map.put(:reminder_times, clean_reminder_times)
+
         {:ok, changes}
 
-      {:error, changeset} -> {:error, changeset}
+      {:error, changeset} ->
+        {:error, changeset}
     end
   end
 
@@ -191,6 +200,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
       {:ok, changes} ->
         send(self(), {:add_errors, [], __MODULE__})
         send(self(), {:section_completed, changes})
+
       {:error, changeset} ->
         send(self(), {:add_errors, parse_field_errors(changeset), __MODULE__})
     end
@@ -206,6 +216,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
   @impl true
   def render(assigns) do
     Logger.warning("RR RENDER")
+
     ~H"""
     <div class="min-w-full flex flex-col mt-8" id="rider_reminder_view">
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
