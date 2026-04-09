@@ -464,7 +464,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       EntityValidator.get_obsolete_ids(
         socket.assigns.alert_data[mapping[async_key]],
         socket.assigns[async_key]
-      ) |> IO.inspect(label: :here)
+      )
 
     obsolete_ids =
       socket.assigns.obsolete_ids |> Map.put_new(mapping[async_key], obsolete_ids_for_field)
@@ -473,19 +473,19 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       socket.assigns.combination
       |> ServiceEffectCombinations.required_fields()
       |> Enum.reject(&(&1 == :direction))
+      |> Enum.sort()
 
     # check that we got results and contains all required fields
     obsolete_ids_found = Enum.any?(obsolete_ids, fn {_k, v} -> !Enum.empty?(v) end)
-    IO.inspect(required_fields, label: :required_fields)
-    IO.inspect(Map.keys(obsolete_ids), label: :obsolete_keys)
-    all_fields_in = (Enum.sort(Map.keys(obsolete_ids)) == Enum.sort(required_fields)) |> IO.inspect(label: :all_in?)
+
+    all_fields_in = Enum.sort(Map.keys(obsolete_ids)) == required_fields
     send_obsolete_ids? = obsolete_ids_found && all_fields_in
 
     # if all our fields have been returned and there are obsolete ids
     # send result to parent
-    if send_obsolete_ids? do
-            #TODO need to check that we haven't sent before
-      IO.inspect("a")
+    previous_assigns = Enum.sort(Map.keys(socket.assigns.obsolete_ids))
+
+    if send_obsolete_ids? && previous_assigns !== required_fields do
       # remove obsolete ids from required fields
       alert_data = socket.assigns.alert_data
 

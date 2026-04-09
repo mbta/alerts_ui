@@ -393,8 +393,9 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
     # if all our fields have been returned and there are obsolete ids
     # send result to parent
-    if send_obsolete_ids? do
-      #TODO need to check that we haven't sent before
+    previous_assigns = Enum.sort(Map.keys(socket.assigns.obsolete_ids))
+
+    if send_obsolete_ids? && previous_assigns !== @required_fields do
       alert_data = socket.assigns.alert_data
 
       ids_with_obsolete_entities_removed =

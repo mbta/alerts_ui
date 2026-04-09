@@ -187,11 +187,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   end
 
   defp effect_name_combination_and_informed_entities(alert, form_type) do
-        alert = Map.merge(alert, %{
-      # original_trip_selections: alert.original_trip_selections ++ ["a|b"],
-      original_route_selections: alert.original_route_selections ++ ["c|d"],
-      original_stop_selections: alert.original_stop_selections ++ ["e|f"],
-    })
     effect_name =
       case Map.get(alert, :effect_name) do
         nil ->
