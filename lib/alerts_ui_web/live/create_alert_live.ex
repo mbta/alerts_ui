@@ -90,13 +90,12 @@ defmodule AlertsUIWeb.CreateAlertLive do
   def mount(params, session, socket) do
     socket = socket |> assign_new(:return_to, fn -> session["return_to"] end)
 
-    route_type = route_type_from_params!(params)
-    effect_name = effect_name_from_params!(params)
-
     alert_id = Map.get(params, "alert_id")
+    existing_alert_or_nil = alert_id && Alerts.get_by_alert_id(alert_id)
+
     form_type = form_type_from_socket(socket)
     form_title = form_title_from_type(form_type)
-    alert_data = alert_data_on_mount(params, form_type, alert_id)
+    alert_data = alert_data_on_mount(params, form_type, existing_alert_or_nil)
 
     {
       :ok,
@@ -201,13 +200,13 @@ defmodule AlertsUIWeb.CreateAlertLive do
     end
   end
 
-  defp alert_data_on_mount(params, form_type, alert_id) do
-    case alert_id do
+  defp alert_data_on_mount(params, form_type, existing_alert \\ nil) do
+    case existing_alert do
       nil ->
         %{}
 
-      alert_id ->
-        Alerts.get_by_alert_id(alert_id)
+      alert ->
+        alert
         |> AlertData.build_alert_data(form_type)
         |> Map.from_struct()
     end

@@ -1,4 +1,5 @@
 defmodule AlertsUIWeb.FormComponents.RiderReminders do
+  require Logger
   @moduledoc """
     Live Component for Rider Reminders section of form
   """
@@ -38,19 +39,32 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
 
   @impl true
 
-  def update(%{alert_data: alert_data} = assigns, socket) do
+  def update(%{
+    active_period_end: active_period_end,
+    active_period_end_specifier: active_period_end_specifier,
+    active_period_start: active_period_start,
+    notification_period_end: notification_period_end,
+    notification_period_start: notification_period_start,
+    notification_specifier: notification_specifier,
+    reminder_times: reminder_times
+  } = assigns, socket) do
+    Logger.warning("RR UPDATE")
     notification_start =
       cond do
-        Map.get(alert_data, :notification_specifier) == :now -> DateTime.now!("America/New_York")
-        Map.get(alert_data, :notification_period_start) -> alert_data.notification_period_start
-        Map.get(alert_data, :active_period_start) -> alert_data.active_period_start
+        notification_specifier == :now -> DateTime.now!("America/New_York")
+        notification_period_start -> notification_period_start
+        active_period_start -> active_period_start
         true -> nil
       end
 
-    notification_end = calculate_notification_end(alert_data)
+    notification_end = calculate_notification_end(
+      active_period_end,
+      active_period_end_specifier,
+      notification_period_end
+    )
 
     processed_reminder_times =
-      (Map.get(alert_data, :reminder_times, []) || [])
+      (reminder_times || [])
       |> Enum.with_index(fn element, index -> {element, Integer.to_string(index)} end)
       |> Enum.reduce(%{}, fn {%{id: id, time: time}, index}, acc ->
         Map.put(acc, index, %{
@@ -93,17 +107,21 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
     )
   end
 
-  defp calculate_notification_end(%{} = alert_data) do
-    unbounded = Map.get(alert_data, :active_period_end_specifier) == :until_further_notice
-    unspecified_notification_end = Map.get(alert_data, :notification_period_end) in ["", nil]
-    unspecified_active_end = Map.get(alert_data, :active_period_end) in ["", nil]
+  defp calculate_notification_end(
+    active_period_end,
+    active_period_end_specifier,
+    notification_period_end
+  ) do
+    unbounded = active_period_end_specifier == :until_further_notice
+    unspecified_notification_end = notification_period_end in ["", nil]
+    unspecified_active_end = active_period_end in ["", nil]
     forever = ~N[9999-12-31 23:59:59]
 
     cond do
       unbounded -> forever
       unspecified_notification_end && unspecified_active_end -> forever
-      unspecified_notification_end -> Map.get(alert_data, :active_period_end)
-      true -> alert_data.notification_period_end
+      unspecified_notification_end -> active_period_end
+      true -> notification_period_end
     end
   end
 
@@ -159,6 +177,9 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
 
   @impl true
   def handle_event("validate", %{"rider_reminders" => rider_reminders}, socket) do
+    Logger.warning("RR VALIDATE")
+    Logger.warning(inspect(rider_reminders))
+
     changeset = changeset(%__MODULE__{}, rider_reminders)
 
     form =
@@ -184,6 +205,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
 
   @impl true
   def render(assigns) do
+    Logger.warning("RR RENDER")
     ~H"""
     <div class="min-w-full flex flex-col mt-8" id="rider_reminder_view">
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
