@@ -795,7 +795,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       end)
 
       # current
-      Enum.each(1..10, fn i ->
+      Enum.each(1..110, fn i ->
         insert(:alert, %{
           alert_id: "#{90 + i}",
           active_period_start: ~U[2023-01-01 00:01:00Z],
@@ -807,8 +807,14 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
     @tag :logged_in_user
     test "it paginates records", %{conn: conn} do
       {:ok, _view, html} = live(conn, "/alerts?filter[timeline]=past")
-      assert Repo.aggregate(Alert, :count) == 100
+      assert Repo.aggregate(Alert, :count) == 200
       assert get_alert_id_order(html) == Enum.map(1..50, fn i -> "#{i}" end)
+    end
+
+    @tag :logged_in_user
+    test "it does not paginate Current records", %{conn: conn} do
+      {:ok, _view, html} = live(conn, "/alerts?filter[timeline]=current")
+      assert get_alert_id_order(html) == Enum.map(91..200, fn i -> "#{i}" end)
     end
 
     @tag :logged_in_user
@@ -831,12 +837,16 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       |> element("button[aria-label='Go to page 2']", "2")
       |> render_click()
 
+      view
+      |> element("label:has(input[aria-label='Current'])")
+      |> render_click()
+
       html =
         view
-        |> element("label:has(input[aria-label='Current'])")
+        |> element("label:has(input[aria-label='Past'])")
         |> render_click()
 
-      assert get_alert_id_order(html) == Enum.map(91..100, fn i -> "#{i}" end)
+      assert get_alert_id_order(html) == Enum.map(1..50, fn i -> "#{i}" end)
     end
   end
 
