@@ -76,7 +76,7 @@ defmodule AlertsUIWeb.Telemetry do
         unit: {:native, :millisecond},
         description:
           "The time the connection spent waiting before being checked out for the query"
-      ),
+      )
     ]
   end
 
