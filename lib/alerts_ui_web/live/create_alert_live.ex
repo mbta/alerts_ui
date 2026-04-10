@@ -19,8 +19,6 @@ defmodule AlertsUIWeb.Step do
 end
 
 defmodule AlertsUIWeb.CreateAlertLive do
-  require Logger
-
   use AlertsUIWeb, :live_view
 
   alias AlertsUI.AlertBuilder
@@ -78,14 +76,6 @@ defmodule AlertsUIWeb.CreateAlertLive do
     },
     %Step{name: "preview", previous: nil, next: nil, label: "Preview and Submit"}
   ]
-
-  @impl true
-  def terminate({reason, event}, socket) do
-    debug_tag = socket.assigns.debug_tag
-    Logger.warning("[LV #{debug_tag}] terminating at #{DateTime.utc_now()}")
-    Logger.warning("[LV #{debug_tag}] reason: #{inspect(reason)}")
-    Logger.warning("[LV #{debug_tag}] event: #{inspect(event)}")
-  end
 
   @impl true
   def mount(params, session, socket) do
