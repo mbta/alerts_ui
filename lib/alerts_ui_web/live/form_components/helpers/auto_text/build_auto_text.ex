@@ -4,7 +4,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   """
   alias AlertsUI.Models.{EnhancedSchedule, InformedEntity, SeverityLevel}
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration
-  alias AlertsUIWeb.FormComponents.Helpers.{ContentFormatter, SelectFormatter}
+  alias AlertsUIWeb.FormComponents.Helpers.{ContentFormatter, DateTimeHelpers, SelectFormatter}
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Stops.Stop
@@ -156,9 +156,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
 
   # stop form (modifies stops)
   @spec stop_form(__MODULE__.t()) :: String.t()
-  def stop_form(%{stops: []}), do: ""
-  def stop_form(%{stops: [_stop]}), do: "is"
-  def stop_form(%{stops: _stops}), do: "are"
+  def stop_form(%{stops: stops, start_datetime: start_datetime}) do
+    standard_form(stops, start_datetime)
+  end
 
   @spec stop_word(__MODULE__.t()) :: String.t()
   def stop_word(%{stops: []}), do: ""
@@ -186,6 +186,15 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   def stop_range_at(%{stops: stops}) do
     stop_names = Enum.map(stops, &SelectFormatter.name_for_option/1)
     "at #{join_together(stop_names)}"
+  end
+
+  @spec closest_stop_text(__MODULE__.t()) :: String.t()
+  def closest_stop_text(%{direction: [_direction]}) do
+    "The closest stops with service are ___ and ___."
+  end
+
+  def closest_stop_text(_alert_data) do
+    "The closest stops with inbound service are ___ and ___. The closest stops with outbound service are ___ and ___."
   end
 
   # trips
@@ -217,11 +226,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   defp trip_word(_), do: "trip"
 
   @spec trip_form(__MODULE__.t()) :: String.t()
-  def trip_form(%{schedules: []}), do: ""
-
-  def trip_form(%{schedules: [_schedule]}), do: "is"
-
-  def trip_form(%{schedules: [_ | _]}), do: "are"
+  def trip_form(%{schedules: schedules, start_datetime: start_datetime}) do
+    standard_form(schedules, start_datetime)
+  end
 
   # facilities
   @spec facility_name(__MODULE__.t()) :: String.t()
@@ -299,9 +306,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
 
   # route form (modifies routes)
   @spec route_form(__MODULE__.t()) :: String.t()
-  def route_form(%{routes: []}), do: ""
-  def route_form(%{routes: [_route]}), do: "is"
-  def route_form(_), do: "are"
+  def route_form(%{routes: routes, start_datetime: start_datetime}) do
+    standard_form(routes, start_datetime)
+  end
 
   defp first_letter_numeric?(route_name) do
     route_name
@@ -372,4 +379,20 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   defp format_service_type(route_type) do
     route_type |> InformedEntity.route_code_mapping() |> ContentFormatter.route_atom_to_string()
   end
+
+  @spec standard_form(list(), NaiveDateTime.t()) :: String.t()
+  defp standard_form([], _start_datetime), do: ""
+
+  defp standard_form([_ | _] = entities, start_datetime) do
+    current_time = DateTimeHelpers.current_time()
+
+    if DateTimeHelpers.time_is_in_future?(start_datetime, current_time) do
+      "will be"
+    else
+      form_word(entities)
+    end
+  end
+
+  defp form_word([_item]), do: "is"
+  defp form_word(_item), do: "are"
 end

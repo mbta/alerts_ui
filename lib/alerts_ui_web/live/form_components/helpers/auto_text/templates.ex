@@ -249,7 +249,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     },
     %{
       pattern: {3, "Detour"},
-      header_template: "?route_names detoured ?alert_duration ?due_to_cause",
+      header_template:
+        "?route_names ?direction_name ?route_form detoured ?alert_duration ?due_to_cause|. ?closest_stop_text",
       description_template: %{
         route_count: 5,
         stop_count: 0,

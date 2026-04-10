@@ -767,6 +767,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       autotext_data = %{
         route_type: 3,
         routes: [@route_1],
+        direction: [0],
         schedules: [],
         effect_name: "Detour",
         cause_detail: "PARADE",
@@ -777,7 +778,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         end_datetime: ~N[2025-05-10 15:00:00]
       }
 
-      expected_header = "Route 1 detoured until Sat, May 10 at 3:00 PM due to a parade"
+      expected_header =
+        "Route 1 westbound is detoured until Sat, May 10 at 3:00 PM due to a parade. The closest stops with service are ___ and ___."
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
