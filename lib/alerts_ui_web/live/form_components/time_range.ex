@@ -3,7 +3,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     Live Component for active period of form
   """
 
-  require Logger
   use AlertsUIWeb, :live_component
   use AlertsUI.Schema
   import Ecto.Changeset
