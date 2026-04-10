@@ -23,37 +23,37 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     # access
     %{
       pattern: {nil, "Bike Issue"},
-      header_template: "?facility_name issue ?alert_duration ?due_to_cause",
+      header_template: "?facility_name issue ?alert_duration ?due_to_cause|.",
       service_effect_template: "?stop_names bicycle issue"
     },
     %{
       pattern: {nil, "Escalator Closure"},
-      header_template: "?facility_name unavailable ?alert_duration ?due_to_cause",
+      header_template: "?facility_name unavailable ?alert_duration ?due_to_cause|.",
       service_effect_template: "?stop_names escalator unavailable"
     },
     %{
       pattern: {nil, "Parking Closure"},
-      header_template: "?facility_name closed ?alert_duration ?due_to_cause",
+      header_template: "?facility_name closed ?alert_duration ?due_to_cause|.",
       service_effect_template: "?stop_names parking closure"
     },
     %{
       pattern: {nil, "Elevator Closure"},
-      header_template: "?facility_name unavailable ?alert_duration ?due_to_cause",
+      header_template: "?facility_name unavailable ?alert_duration ?due_to_cause|.",
       service_effect_template: "?stop_names elevator unavailable"
     },
     %{
       pattern: {nil, "Access Issue"},
-      header_template: "?facility_name issue ?alert_duration ?due_to_cause",
+      header_template: "?facility_name issue ?alert_duration ?due_to_cause|.",
       service_effect_template: "?stop_names access issue"
     },
     %{
       pattern: {nil, "Facility Issue"},
-      header_template: "?facility_name issue ?alert_duration ?due_to_cause",
+      header_template: "?facility_name issue ?alert_duration ?due_to_cause|.",
       service_effect_template: "?stop_names issue"
     },
     %{
       pattern: {nil, "Parking Issue"},
-      header_template: "?facility_name issue ?alert_duration ?due_to_cause",
+      header_template: "?facility_name issue ?alert_duration ?due_to_cause|.",
       service_effect_template: "?stop_names parking issue"
     },
 
@@ -250,7 +250,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     %{
       pattern: {3, "Detour"},
       header_template:
-        "?route_names ?direction_name ?route_form detoured ?alert_duration ?due_to_cause|. ?closest_stop_text",
+        "?route_names ?direction_name ?route_form detoured ?alert_duration|, skipping ?stop_names ?due_to_cause|. ?closest_stop_text|.",
       description_template: %{
         route_count: 5,
         stop_count: 0,

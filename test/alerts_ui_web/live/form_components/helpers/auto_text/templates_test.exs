@@ -110,7 +110,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Charles/MGH Elevator 952 (Alewife platform to lobby) issue today due to the holiday"
+        "Charles/MGH Elevator 952 (Alewife platform to lobby) issue today due to the holiday."
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -136,7 +136,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Charles/MGH Elevator 952 (Alewife platform to lobby) unavailable today due to the holiday"
+        "Charles/MGH Elevator 952 (Alewife platform to lobby) unavailable today due to the holiday."
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -162,7 +162,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Charles/MGH Elevator 952 (Alewife platform to lobby) closed today due to the holiday"
+        "Charles/MGH Elevator 952 (Alewife platform to lobby) closed today due to the holiday."
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -188,7 +188,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Charles/MGH Elevator 952 (Alewife platform to lobby) unavailable today due to the holiday"
+        "Charles/MGH Elevator 952 (Alewife platform to lobby) unavailable today due to the holiday."
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -214,7 +214,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Charles/MGH Elevator 952 (Alewife platform to lobby) issue today due to the holiday"
+        "Charles/MGH Elevator 952 (Alewife platform to lobby) issue today due to the holiday."
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -239,7 +239,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Charles/MGH Elevator 952 (Alewife platform to lobby) issue today due to the holiday"
+        "Charles/MGH Elevator 952 (Alewife platform to lobby) issue today due to the holiday."
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -264,7 +264,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Charles/MGH Elevator 952 (Alewife platform to lobby) issue today due to the holiday"
+        "Charles/MGH Elevator 952 (Alewife platform to lobby) issue today due to the holiday."
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -767,6 +767,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       autotext_data = %{
         route_type: 3,
         routes: [@route_1],
+        stops: [@stop_1_bus],
         direction: [0],
         schedules: [],
         effect_name: "Detour",
@@ -779,7 +780,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Route 1 westbound is detoured until Sat, May 10 at 3:00 PM due to a parade. The closest stops with service are ___ and ___."
+        "Route 1 westbound is detoured until Sat, May 10 at 3:00 PM, skipping Lechmere (inbound) due to a parade. The closest stops with service are ___ and ___."
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
