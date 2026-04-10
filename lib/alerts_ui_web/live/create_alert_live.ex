@@ -148,15 +148,13 @@ defmodule AlertsUIWeb.CreateAlertLive do
     url_name
     |> String.replace("_", " ")
     |> String.split(" ")
-    |> Enum.map(&String.capitalize(&1))
-    |> Enum.join(" ")
+    |> Enum.map_join(" ", &String.capitalize(&1))
   end
 
   def effect_to_url_name(effect_name) do
     effect_name
     |> String.split(" ")
-    |> Enum.map(&String.downcase(&1))
-    |> Enum.join("_")
+    |> Enum.map_join(" ", &String.downcase(&1))
   end
 
   def effect_name_from_params!(params) do

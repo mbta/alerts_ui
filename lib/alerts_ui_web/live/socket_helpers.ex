@@ -1,4 +1,8 @@
 defmodule AlertsUIWeb.SocketHelpers do
+  @moduledoc """
+  Utilities for dealing with LV sockets.
+  """
+
   import Phoenix.LiveView, only: [connected?: 1, get_connect_params: 1]
   import Phoenix.Component, only: [assign: 3]
 
