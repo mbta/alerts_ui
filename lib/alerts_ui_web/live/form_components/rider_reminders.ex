@@ -1,6 +1,4 @@
 defmodule AlertsUIWeb.FormComponents.RiderReminders do
-  require Logger
-
   @moduledoc """
     Live Component for Rider Reminders section of form
   """
@@ -52,8 +50,6 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
         } = assigns,
         socket
       ) do
-    Logger.warning("RR UPDATE")
-
     notification_start =
       cond do
         notification_specifier == :now -> DateTime.now!("America/New_York")
@@ -186,9 +182,6 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
 
   @impl true
   def handle_event("validate", %{"rider_reminders" => rider_reminders}, socket) do
-    Logger.warning("RR VALIDATE")
-    Logger.warning(inspect(rider_reminders))
-
     changeset = changeset(%__MODULE__{}, rider_reminders)
 
     form =
@@ -215,8 +208,6 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
 
   @impl true
   def render(assigns) do
-    Logger.warning("RR RENDER")
-
     ~H"""
     <div class="min-w-full flex flex-col mt-8" id="rider_reminder_view">
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
