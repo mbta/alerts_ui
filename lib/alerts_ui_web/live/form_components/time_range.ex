@@ -357,12 +357,14 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         %{"time_range" => time_range},
         socket
       ) do
-    unless remounted?(socket) do
-      form_params = socket.assigns.form.params
-      time_range = Map.merge(socket.assigns.form.params, time_range)
-      current_time = socket.assigns.current_time
+    time_range =
+      if remounted?(socket) do
+        time_range
+      else
+        form_params = socket.assigns.form.params
+        time_range = Map.merge(socket.assigns.form.params, time_range)
+        current_time = socket.assigns.current_time
 
-      time_range =
         case time_range["alert_timing"] do
           "one-time" ->
             start_datetime_string =
@@ -446,7 +448,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
               "active_period_end" => end_datetime
             })
         end
-    end
+      end
 
     changeset =
       changeset(%__MODULE__{}, time_range)

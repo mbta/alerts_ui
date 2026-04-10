@@ -187,11 +187,8 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriod do
         notification_period
       else
         notification_period = Map.merge(socket.assigns.form.params, notification_period)
-
         notification_period_start = notification_period_start(notification_period, socket.assigns)
-
-        notification_period =
-          Map.put(notification_period, "notification_period_start", notification_period_start)
+        Map.put(notification_period, "notification_period_start", notification_period_start)
       end
 
     changeset =
