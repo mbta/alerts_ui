@@ -42,13 +42,13 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
     refute view
            |> render() =~ ~s(id="reminder-time-component-0")
 
-    view
-    |> element("form")
-    |> render_change(%{
-      "rider_reminders" => %{"reminder_sort" => ["new"]}
-    })
+    rendered =
+      view
+      |> element("form")
+      |> render_change(%{
+        "rider_reminders" => %{"reminder_sort" => ["new"]}
+      })
 
-    rendered = render(view)
     assert rendered =~ ~s(id="reminder-time-component-0")
     assert rendered =~ ~s(Select reminder time)
   end
@@ -60,14 +60,14 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
         @assigns
       )
 
-    view
-    |> element("form")
-    |> render_change(%{
-      "rider_reminders" => %{"reminder_sort" => ["new"]}
-    })
+    rendered =
+      view
+      |> element("form")
+      |> render_change(%{
+        "rider_reminders" => %{"reminder_sort" => ["new"]}
+      })
 
-    assert view
-           |> render() =~ ~s(id="reminder-time-component-0")
+    assert rendered =~ ~s(id="reminder-time-component-0")
 
     view
     |> element("form")
