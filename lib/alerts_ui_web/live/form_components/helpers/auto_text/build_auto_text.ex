@@ -241,9 +241,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   end
 
   @spec facility_form(__MODULE__.t()) :: String.t()
-  def facility_form(%{facilities: []}), do: ""
-  def facility_form(%{facilities: [_facility]}), do: "is"
-  def facility_form(%{facilities: _facilities}), do: "are"
+  # facility form (modifies routes)
+  @spec facility_form(__MODULE__.t()) :: String.t()
+  def facility_form(%{facilities: facilities, start_datetime: start_datetime}) do
+    standard_form(facilities, start_datetime)
+  end
 
   # routes (short)
   @spec route_names_short(__MODULE__.t()) :: String.t()
