@@ -215,7 +215,7 @@ defmodule AlertsUIWeb.ReviewModal do
               <p>{@trip_names}</p>
             <% end %>
             <%= if @facility_names && @facility_names != "" do %>
-              <p>Facility:</p>
+              <p>Facilities:</p>
               <p>{@facility_names}</p>
             <% end %>
             <%= if ContentFormatter.service_type_string(@alert_data.route_type, @alert_data.combination) == "Systemwide" do %>

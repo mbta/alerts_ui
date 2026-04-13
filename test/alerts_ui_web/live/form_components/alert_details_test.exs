@@ -95,7 +95,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
     effect_name: "Delay",
     combination: :RDT,
     alert_data: %{},
-    selected_facility: nil,
+    selected_facilities: [],
     selected_schedules: [],
     selected_routes: [],
     selected_stops: []
@@ -712,7 +712,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         view
         |> element("#service_form")
         |> render_change(%{
-          access_affected_service: %{facility_id: @facility.id}
+          access_affected_service: %{facility_ids: [@facility.id]}
         })
 
         # Mock timerange selections
@@ -744,7 +744,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         assert view
                |> element("#alert_details_header_text")
                |> render() =~
-                 "Alewife Escalator 349 (Platform to Russell Field) unavailable from #{Calendar.strftime(@start_time, "%a, %b %-d at %-I:%M %p")} to #{Calendar.strftime(@end_time, "%a, %b %-d at %-I:%M %p")} due to ice in harbor"
+                 "Alewife Escalator 349 (Platform to Russell Field) will be unavailable from #{Calendar.strftime(@start_time, "%a, %b %-d at %-I:%M %p")} to #{Calendar.strftime(@end_time, "%a, %b %-d at %-I:%M %p")} due to ice in harbor"
 
         assert view
                |> element("#alert_details_description_text")

@@ -86,8 +86,15 @@ defmodule AlertsUI.Trapeze.Importer do
     |> Enum.find({:ok, "finish"}, &(&1 != :ok))
   end
 
-  defp get_existing_alert(alert_params) do
-    facility_id = Map.get(alert_params, :facility_id)
+  def get_existing_alert(alert_params) do
+    facility_ids = Map.get(alert_params, :facility_ids)
+
+    facility_id =
+      if is_nil(facility_ids) do
+        nil
+      else
+        hd(facility_ids)
+      end
 
     Repo.one(
       from a in Alert,

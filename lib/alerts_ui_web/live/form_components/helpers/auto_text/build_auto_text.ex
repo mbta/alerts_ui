@@ -14,7 +14,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
             routes: [],
             stops: [],
             schedules: [],
-            facility: nil,
+            facilities: [],
             service_types: [],
             direction: [],
             severity: nil,
@@ -38,7 +38,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
           routes: [Route.t()],
           stops: [Stop.t()],
           schedules: [EnhancedSchedule.t()],
-          facility: Facility.t() | nil,
+          facilities: [Facility.t()],
           service_types: [integer()],
           direction: [integer()],
           severity: integer() | nil,
@@ -240,11 +240,20 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   end
 
   # facilities
-  @spec facility_name(__MODULE__.t()) :: String.t()
-  def facility_name(%{facility: nil}), do: ""
+  @spec facility_names(__MODULE__.t()) :: String.t()
+  def facility_names(%{facilities: []}), do: ""
 
-  def facility_name(%{facility: facility}) do
-    SelectFormatter.name_for_option(facility)
+  def facility_names(%{facilities: facilities}) do
+    facilities
+    |> Enum.map(&SelectFormatter.name_for_option/1)
+    |> join_facilities()
+  end
+
+  @spec facility_form(__MODULE__.t()) :: String.t()
+  # facility form (modifies routes)
+  @spec facility_form(__MODULE__.t()) :: String.t()
+  def facility_form(%{facilities: facilities, start_datetime: start_datetime}) do
+    standard_form(facilities, start_datetime)
   end
 
   # routes (short)
@@ -347,6 +356,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   end
 
   # formatters
+
+  def join_facilities([first, second | rest] = facilities) when length(facilities) > 3 do
+    "#{first}, #{second} and #{length(rest)} other facilities"
+  end
+
+  def join_facilities(facilities) do
+    join_together(facilities)
+  end
 
   def join_trips([_ | _] = trips, trip_word) when length(trips) > 2 do
     "#{hd(trips)} and #{length(trips) - 1} other #{trip_word}"
