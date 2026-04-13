@@ -282,12 +282,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
   describe "closest_stop_text/1" do
     test "when there's only 1 direction" do
       assert BuildAutoText.closest_stop_text(%{direction: [0]}) ==
-               "The closest stops with service are ___ and ___."
+               "The closest stops with service are ___ and ___"
     end
 
     test "when there's multiple directions" do
       assert BuildAutoText.closest_stop_text(%{direction: [0, 1]}) ==
-               "The closest stops with inbound service are ___ and ___. The closest stops with outbound service are ___ and ___."
+               "The closest stops with inbound service are ___ and ___. The closest stops with outbound service are ___ and ___"
     end
   end
 

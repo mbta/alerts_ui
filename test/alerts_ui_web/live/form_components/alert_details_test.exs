@@ -359,7 +359,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
       assert view
              |> element("#alert_details_header_text")
              |> render() =~
-               "on #{Calendar.strftime(@tomorrows_date, "%a, %b %-d")}</textarea>"
+               "on #{Calendar.strftime(@tomorrows_date, "%a, %b %-d")}.</textarea>"
     end
 
     @tag :logged_in_user
