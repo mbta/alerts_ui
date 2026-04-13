@@ -19,13 +19,12 @@ defmodule AlertsUIWeb.Step do
 end
 
 defmodule AlertsUIWeb.CreateAlertLive do
-  require Logger
   use AlertsUIWeb, :live_view
 
   alias AlertsUI.AlertBuilder
   alias AlertsUI.Alerts
   alias AlertsUI.DBContexts.Users
-  alias AlertsUI.Models.{ActivePeriod, Alert, EnhancedSchedule}
+  alias AlertsUI.Models.{ActivePeriod, Alert, Effect, EnhancedSchedule, InformedEntity}
   alias AlertsUI.Routes
 
   alias AlertsUIWeb.FormComponents.{
@@ -79,61 +78,21 @@ defmodule AlertsUIWeb.CreateAlertLive do
   ]
 
   @impl true
-  def terminate({reason, event}, socket) do
-    debug_tag = socket.assigns.debug_tag
-    Logger.warning("[LV #{debug_tag}] terminating at #{DateTime.utc_now()}")
-    Logger.warning("[LV #{debug_tag}] reason: #{inspect(reason)}")
-    Logger.warning("[LV #{debug_tag}] event: #{inspect(event)}")
-
-    Logger.warning(
-      "[LV #{debug_tag}] socket: #{inspect(Map.put(socket.assigns, :current_user, "REDACTED"))}"
-    )
-  end
-
-  @impl true
   def mount(params, session, socket) do
     socket = socket |> assign_new(:return_to, fn -> session["return_to"] end)
 
     alert_id = Map.get(params, "alert_id")
+    existing_alert_or_nil = alert_id && Alerts.get_by_alert_id(alert_id)
 
-    existing_alert =
-      if is_nil(alert_id) do
-        nil
-      else
-        Alerts.get_by_alert_id(alert_id)
-      end
+    form_type = form_type_from_socket(socket)
+    form_title = form_title_from_type(form_type)
+    alert_data = alert_data_on_mount(params, form_type, existing_alert_or_nil)
 
-    form_type =
-      case socket.assigns.live_action do
-        :edit -> :editing
-        :duplicate -> :duplicating
-        _ -> :creating
-      end
-
-    form_type_to_title = %{
-      editing: "Edit",
-      duplicating: "Duplicate",
-      creating: "Create"
-    }
-
-    alert_data =
-      if existing_alert,
-        do: AlertData.build_alert_data(existing_alert, form_type) |> Map.from_struct(),
-        else: %{}
-
-    [first_step, second_step | _] = @steps
-
-    alert_data =
-      if form_type == :duplicating do
-        Map.put(alert_data, :reminder_times, [])
-      else
-        alert_data
-      end
-
-    socket =
+    {
+      :ok,
       assign(socket, %{
-        page_title: "#{form_type_to_title[form_type]} an Alert",
-        progress: if(form_type == :creating, do: first_step, else: second_step),
+        page_title: "#{form_title} an Alert",
+        progress: progress_on_mount(params, form_type, @steps),
         steps: @steps,
         alert_data: alert_data,
         combination: Map.get(alert_data, :combination),
@@ -141,6 +100,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
         selected_stops: [],
         selected_schedules: [],
         selected_facility: nil,
+        selected_route_type: route_type_from_params!(params),
+        selected_effect: effect_name_from_params!(params),
         alert_uuid: nil,
         alert_id: alert_id,
         form_type: form_type,
@@ -148,10 +109,132 @@ defmodule AlertsUIWeb.CreateAlertLive do
         submitted: false,
         obsolete_ids: %{},
         obsolete_id_text: [],
+        remounted: remounting?(socket),
         debug_tag: :crypto.strong_rand_bytes(8) |> Base.encode64()
       })
+    }
+  end
 
-    {:ok, socket}
+  defp form_type_from_socket(socket) do
+    case socket.assigns.live_action do
+      :edit -> :editing
+      :duplicate -> :duplicating
+      _ -> :creating
+    end
+  end
+
+  defp form_title_from_type(title) do
+    case title do
+      :editing -> "Edit"
+      :duplicating -> "Duplicating"
+      :creating -> "Create"
+    end
+  end
+
+  defp progress_on_mount(params, form_type, [first_step, second_step | _]) do
+    route_type = Map.get(params, "route_type")
+    effect = Map.get(params, "effect")
+
+    if form_type == :creating && (is_nil(route_type) || is_nil(effect)) do
+      first_step
+    else
+      second_step
+    end
+  end
+
+  def effect_from_url_name(nil), do: nil
+
+  def effect_from_url_name(url_name) do
+    url_name
+    |> String.replace("_", " ")
+    |> String.split(" ")
+    |> Enum.map_join(" ", &String.capitalize(&1))
+  end
+
+  def effect_to_url_name(effect_name) do
+    effect_name
+    |> String.split(" ")
+    |> Enum.map_join(" ", &String.downcase(&1))
+  end
+
+  def effect_name_from_params!(params) do
+    case Map.get(params, "effect") do
+      nil ->
+        nil
+
+      effect ->
+        effect_name = effect_from_url_name(effect)
+
+        if Effect.effect_map_by_name(effect_name) == %{} do
+          raise ArgumentError, "no such effect #{effect_name}"
+        else
+          effect_name
+        end
+    end
+  end
+
+  def route_type_from_params!(params) do
+    case Map.get(params, "route_type") do
+      nil ->
+        nil
+
+      route_type ->
+        route_type_atom = String.to_existing_atom(route_type)
+
+        if InformedEntity.valid_route_type?(route_type_atom) do
+          route_type
+        else
+          raise ArgumentError, "no such route type #{route_type}"
+        end
+    end
+  end
+
+  defp alert_data_on_mount(params, form_type, existing_alert_or_nil) do
+    case existing_alert_or_nil do
+      nil ->
+        assign_from_params(%{}, params)
+
+      alert ->
+        alert
+        |> AlertData.build_alert_data(form_type)
+        |> Map.from_struct()
+    end
+    |> adjust_by_form_type(form_type)
+  end
+
+  defp adjust_by_form_type(alert_data, :duplicating) do
+    Map.put(alert_data, :reminder_times, [])
+  end
+
+  defp adjust_by_form_type(alert_data, _), do: alert_data
+
+  defp assign_from_params(alert_data, params) do
+    # this will be the numeric version, not the string (unlike
+    # selected_* in the the top level assigns)
+    route_type_mapping =
+      case route_type_from_params!(params) do
+        nil ->
+          nil
+
+        route_type ->
+          route_type
+          |> String.to_existing_atom()
+          |> InformedEntity.route_type_mapping()
+      end
+
+    effect_name = effect_name_from_params!(params)
+
+    combination =
+      GetKeyForModeEffect.get_value_of_key(
+        :combination,
+        route_type_mapping,
+        effect_name
+      )
+
+    alert_data
+    |> Map.put(:route_type, Map.get(alert_data, :route_type, route_type_mapping))
+    |> Map.put(:effect_name, Map.get(alert_data, :effect, effect_name))
+    |> Map.put(:combination, Map.get(alert_data, :combination, combination))
   end
 
   @impl true

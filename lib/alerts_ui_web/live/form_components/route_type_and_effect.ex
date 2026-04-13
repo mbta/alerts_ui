@@ -8,6 +8,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   use AlertsUIWeb, :live_component
   use AlertsUI.Schema
   import Ecto.Changeset
+  import AlertsUIWeb.CreateAlertLive, only: [effect_to_url_name: 1]
   alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.FormComponents.Helpers.{ContentFormatter, EffectsForRouteTypes}
 
@@ -34,15 +35,16 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   @spec mount(any()) :: {:ok, any()}
   def mount(socket) do
     changeset = %__MODULE__{} |> change() |> to_form()
+    selected_route_type = Map.get(socket.assigns, :selected_route_type)
 
     socket =
       socket
       |> assign(%{
         changeset: changeset,
-        selected_route_type: nil,
+        selected_route_type: selected_route_type,
         selected_effect: nil,
         route_types: @route_types,
-        effects: list_effects(nil)
+        effects: list_effects(selected_route_type)
       })
 
     {:ok, socket}
@@ -62,19 +64,47 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
   end
 
   @impl true
+  def handle_event("validate", params, socket) do
+    form =
+      %__MODULE__{}
+      |> changeset(params)
+      |> to_form()
+
+    socket =
+      assign(
+        socket,
+        %{changeset: form}
+      )
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event("route_type", %{"value" => route_type}, socket) do
     effects =
       route_type
       |> String.to_existing_atom()
       |> list_effects()
 
-    {:noreply,
-     assign(socket, %{selected_route_type: route_type, effects: effects, selected_effect: nil})}
+    socket =
+      socket
+      |> assign(%{selected_route_type: route_type, effects: effects, selected_effect: nil})
+      |> push_patch(to: "/alerts/new/#{route_type}")
+
+    {:noreply, socket}
   end
 
   @impl true
   def handle_event("effect", %{"value" => effect}, socket) do
-    {:noreply, assign(socket, %{selected_effect: effect})}
+    route_type = socket.assigns.selected_route_type
+    effect_for_url = effect_to_url_name(effect)
+
+    socket =
+      socket
+      |> assign(%{selected_effect: effect})
+      |> push_patch(to: "/alerts/new/#{route_type}/#{effect_for_url}")
+
+    {:noreply, socket}
   end
 
   @impl true
@@ -107,6 +137,12 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
     end
   end
 
+  defp list_effects(mode) when is_binary(mode) do
+    mode
+    |> String.to_existing_atom()
+    |> list_effects()
+  end
+
   defp list_effects(mode) do
     mode
     |> EffectsForRouteTypes.list_effects()
@@ -131,6 +167,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
         for={@changeset}
         phx-target={@myself}
         phx-submit="complete_step"
+        phx-change="validate"
         class="form-control gap-4 min-w-full"
         id="route_types_form"
       >
@@ -156,7 +193,10 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
             Select a service type to see possible effects.
           </p>
           <div class="flex flex-wrap justify-center md:justify-normal gap-2">
-            <div :for={effect <- @effects} class={if is_nil(@selected_route_type), do: "hidden"}>
+            <div
+              :for={effect <- list_effects(@selected_route_type)}
+              class={if is_nil(@selected_route_type), do: "hidden"}
+            >
               {effect_buttons(assigns, effect)}
             </div>
             <input type="hidden" id="effect_name" name="effect_name" value={@selected_effect} />
@@ -174,6 +214,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
 
     ~H"""
     <.button_toggle
+      id={"route-type-#{@route_type}-button"}
       active={@active_route}
       phx-target={@myself}
       phx-click="route_type"

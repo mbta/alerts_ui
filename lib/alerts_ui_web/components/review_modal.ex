@@ -21,7 +21,7 @@ defmodule AlertsUIWeb.ReviewModal do
   }
 
   alias AlertsUIWeb.FormComponents.Helpers.Helpers, as: FormHelpers
-  alias AlertsUIWeb.Helpers
+  alias AlertsUIWeb.UserHelpers
 
   alias Phoenix.LiveView.JS
 
@@ -395,7 +395,7 @@ defmodule AlertsUIWeb.ReviewModal do
       <:footer :if={!@form_type}>
         <div class="flex flex-none flex-col justify-items-stretch md:flex-row md:justify-end px-4 py-4 gap-2">
           <%!-- food for thought: should type=button be here or in the component? --%>
-          <%= if Helpers.author?(@current_user) do %>
+          <%= if UserHelpers.author?(@current_user) do %>
             <.button_danger
               :if={ActiveStatus.get_alert_status(@alert_data) != :past}
               type="button"

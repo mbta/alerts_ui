@@ -56,7 +56,7 @@ defmodule AlertsUI.Models.Effect do
     |> Enum.map(fn {name, _e, _d} -> name end)
   end
 
-  @spec effect_map_by_name(String.t()) :: struct()
+  @spec effect_map_by_name(String.t()) :: map()
   @doc """
   Returns effect mapping given a name
 

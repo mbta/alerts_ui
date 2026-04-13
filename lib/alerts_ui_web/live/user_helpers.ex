@@ -1,6 +1,6 @@
-defmodule AlertsUIWeb.Helpers do
+defmodule AlertsUIWeb.UserHelpers do
   @moduledoc """
-  Other generic frontend helpers
+  Other generic frontend helpers related to users
   """
   def developer?(%{roles: roles}) do
     :developer in roles

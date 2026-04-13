@@ -2,6 +2,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   @moduledoc """
     Live Component for active period of form
   """
+
   use AlertsUIWeb, :live_component
   use AlertsUI.Schema
   import Ecto.Changeset
@@ -355,95 +356,97 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         %{"time_range" => time_range},
         socket
       ) do
-    form_params = socket.assigns.form.params
-
-    time_range = Map.merge(socket.assigns.form.params, time_range)
-
-    current_time = socket.assigns.current_time
-
     time_range =
-      case time_range["alert_timing"] do
-        "one-time" ->
-          start_datetime_string =
-            TimeRangeGetters.get_onetime_start_datetime(
-              time_range,
-              current_time,
-              form_params["active_period_start_specifier"]
-            )
+      if remounted?(socket) do
+        time_range
+      else
+        form_params = socket.assigns.form.params
+        time_range = Map.merge(socket.assigns.form.params, time_range)
+        current_time = socket.assigns.current_time
 
-          end_datetime_string =
-            TimeRangeGetters.get_onetime_end_datetime(
-              time_range,
-              current_time,
-              form_params["active_period_end_specifier"]
-            )
+        case time_range["alert_timing"] do
+          "one-time" ->
+            start_datetime_string =
+              TimeRangeGetters.get_onetime_start_datetime(
+                time_range,
+                current_time,
+                form_params["active_period_start_specifier"]
+              )
 
-          start_date =
-            start_datetime_string
-            |> TimeRangeGetters.string_to_datetime_helper()
-            |> TimeRangeGetters.get_onetime_start_date()
+            end_datetime_string =
+              TimeRangeGetters.get_onetime_end_datetime(
+                time_range,
+                current_time,
+                form_params["active_period_end_specifier"]
+              )
 
-          end_date =
-            end_datetime_string
-            |> TimeRangeGetters.string_to_datetime_helper()
-            |> TimeRangeGetters.get_onetime_end_date()
+            start_date =
+              start_datetime_string
+              |> TimeRangeGetters.string_to_datetime_helper()
+              |> TimeRangeGetters.get_onetime_start_date()
 
-          Map.merge(time_range, %{
-            "active_period_start" => start_datetime_string,
-            "active_period_end" => end_datetime_string,
-            "active_period_start_date" => start_date,
-            "active_period_end_date" => end_date
-          })
+            end_date =
+              end_datetime_string
+              |> TimeRangeGetters.string_to_datetime_helper()
+              |> TimeRangeGetters.get_onetime_end_date()
 
-        "recurring" ->
-          start_time =
-            TimeRangeGetters.get_recurring_start_time(
-              time_range,
-              current_time,
-              form_params["active_period_start_time_specifier"]
-            )
+            Map.merge(time_range, %{
+              "active_period_start" => start_datetime_string,
+              "active_period_end" => end_datetime_string,
+              "active_period_start_date" => start_date,
+              "active_period_end_date" => end_date
+            })
 
-          end_time =
-            TimeRangeGetters.get_recurring_end_time(
-              time_range,
-              current_time,
-              form_params["active_period_end_time_specifier"]
-            )
+          "recurring" ->
+            start_time =
+              TimeRangeGetters.get_recurring_start_time(
+                time_range,
+                current_time,
+                form_params["active_period_start_time_specifier"]
+              )
 
-          start_date =
-            TimeRangeGetters.get_recurring_start_date(
-              time_range,
-              current_time,
-              form_params["active_period_start_specifier"]
-            )
+            end_time =
+              TimeRangeGetters.get_recurring_end_time(
+                time_range,
+                current_time,
+                form_params["active_period_end_time_specifier"]
+              )
 
-          end_date =
-            TimeRangeGetters.get_recurring_end_date(
-              time_range,
-              current_time,
-              form_params["active_period_end_specifier"]
-            )
+            start_date =
+              TimeRangeGetters.get_recurring_start_date(
+                time_range,
+                current_time,
+                form_params["active_period_start_specifier"]
+              )
 
-          start_datetime =
-            TimeRangeGetters.get_recurring_start_datetime(
-              start_date,
-              start_time
-            )
+            end_date =
+              TimeRangeGetters.get_recurring_end_date(
+                time_range,
+                current_time,
+                form_params["active_period_end_specifier"]
+              )
 
-          end_datetime =
-            TimeRangeGetters.get_recurring_end_datetime(
-              end_date,
-              end_time
-            )
+            start_datetime =
+              TimeRangeGetters.get_recurring_start_datetime(
+                start_date,
+                start_time
+              )
 
-          Map.merge(time_range, %{
-            "active_period_start_time" => start_time,
-            "active_period_end_time" => end_time,
-            "active_period_start_date" => start_date,
-            "active_period_end_date" => end_date,
-            "active_period_start" => start_datetime,
-            "active_period_end" => end_datetime
-          })
+            end_datetime =
+              TimeRangeGetters.get_recurring_end_datetime(
+                end_date,
+                end_time
+              )
+
+            Map.merge(time_range, %{
+              "active_period_start_time" => start_time,
+              "active_period_end_time" => end_time,
+              "active_period_start_date" => start_date,
+              "active_period_end_date" => end_date,
+              "active_period_start" => start_datetime,
+              "active_period_end" => end_datetime
+            })
+        end
       end
 
     changeset =

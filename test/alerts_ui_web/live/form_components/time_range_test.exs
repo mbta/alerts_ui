@@ -330,7 +330,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       })
 
       assert view
-             |> render() =~ "custom"
+             |> render_async() =~ "custom"
 
       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
                       {:add_errors,

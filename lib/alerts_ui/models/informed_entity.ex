@@ -171,4 +171,14 @@ defmodule AlertsUI.Models.InformedEntity do
   def route_code_mapping(3), do: :bus
   def route_code_mapping(4), do: :ferry
   def route_code_mapping(_), do: nil
+
+  @route_type_atoms [:access, :bus, :commuter_rail, :ferry, :light_rail, :subway]
+
+  @doc """
+  Boolean for testing route type validity.
+  """
+  @spec valid_route_type?(mode_atom_t()) :: boolean()
+  def valid_route_type?(mode_atom) do
+    Enum.member?(@route_type_atoms, mode_atom)
+  end
 end

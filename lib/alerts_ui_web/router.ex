@@ -101,6 +101,8 @@ defmodule AlertsUIWeb.Router do
         AlertsUIWeb.PutMetadataInAssigns
       ] do
       live("/alerts/new", CreateAlertLive, :new)
+      live("/alerts/new/:route_type/", CreateAlertLive, :new)
+      live("/alerts/new/:route_type/:effect", CreateAlertLive, :new)
       live("/alerts/edit", CreateAlertLive, :edit)
       live("/alerts/duplicate", CreateAlertLive, :duplicate)
     end

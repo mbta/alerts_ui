@@ -38,19 +38,35 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
 
   @impl true
 
-  def update(%{alert_data: alert_data} = assigns, socket) do
+  def update(
+        %{
+          active_period_end: active_period_end,
+          active_period_end_specifier: active_period_end_specifier,
+          active_period_start: active_period_start,
+          notification_period_end: notification_period_end,
+          notification_period_start: notification_period_start,
+          notification_specifier: notification_specifier,
+          reminder_times: reminder_times
+        } = assigns,
+        socket
+      ) do
     notification_start =
       cond do
-        Map.get(alert_data, :notification_specifier) == :now -> DateTime.now!("America/New_York")
-        Map.get(alert_data, :notification_period_start) -> alert_data.notification_period_start
-        Map.get(alert_data, :active_period_start) -> alert_data.active_period_start
+        notification_specifier == :now -> DateTime.now!("America/New_York")
+        notification_period_start -> notification_period_start
+        active_period_start -> active_period_start
         true -> nil
       end
 
-    notification_end = calculate_notification_end(alert_data)
+    notification_end =
+      calculate_notification_end(
+        active_period_end,
+        active_period_end_specifier,
+        notification_period_end
+      )
 
     processed_reminder_times =
-      (Map.get(alert_data, :reminder_times, []) || [])
+      (reminder_times || [])
       |> Enum.with_index(fn element, index -> {element, Integer.to_string(index)} end)
       |> Enum.reduce(%{}, fn {%{id: id, time: time}, index}, acc ->
         Map.put(acc, index, %{
@@ -93,17 +109,21 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
     )
   end
 
-  defp calculate_notification_end(%{} = alert_data) do
-    unbounded = Map.get(alert_data, :active_period_end_specifier) == :until_further_notice
-    unspecified_notification_end = Map.get(alert_data, :notification_period_end) in ["", nil]
-    unspecified_active_end = Map.get(alert_data, :active_period_end) in ["", nil]
+  defp calculate_notification_end(
+         active_period_end,
+         active_period_end_specifier,
+         notification_period_end
+       ) do
+    unbounded = active_period_end_specifier == :until_further_notice
+    unspecified_notification_end = notification_period_end in ["", nil]
+    unspecified_active_end = active_period_end in ["", nil]
     forever = ~N[9999-12-31 23:59:59]
 
     cond do
       unbounded -> forever
       unspecified_notification_end && unspecified_active_end -> forever
-      unspecified_notification_end -> Map.get(alert_data, :active_period_end)
-      true -> alert_data.notification_period_end
+      unspecified_notification_end -> active_period_end
+      true -> notification_period_end
     end
   end
 
@@ -153,11 +173,10 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
           changes
           |> Map.put(:reminder_times, clean_reminder_times)
 
-        send(self(), {:add_errors, [], __MODULE__})
-        send(self(), {:section_completed, changes})
+        {:ok, changes}
 
       {:error, changeset} ->
-        send(self(), {:add_errors, parse_field_errors(changeset), __MODULE__})
+        {:error, changeset}
     end
   end
 
@@ -165,12 +184,19 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
   def handle_event("validate", %{"rider_reminders" => rider_reminders}, socket) do
     changeset = changeset(%__MODULE__{}, rider_reminders)
 
-    validate(changeset)
-
     form =
       changeset
       |> Map.put(:action, :validate)
       |> to_form()
+
+    case validate(changeset) do
+      {:ok, changes} ->
+        send(self(), {:add_errors, [], __MODULE__})
+        send(self(), {:section_completed, changes})
+
+      {:error, changeset} ->
+        send(self(), {:add_errors, parse_field_errors(changeset), __MODULE__})
+    end
 
     {:noreply, assign(socket, %{form: form})}
   end
@@ -201,7 +227,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
                 editable={ReminderTimes.editable?(rt[:id].value, rt[:reminder_time].value)}
                 current_time={@current_time}
                 field={rt[:reminder_time]}
-                id={rt[:id].value}
+                id={rt.id}
                 index={rt.index}
                 notification_start={@notification_start}
                 notification_end={@notification_end}
@@ -234,16 +260,23 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
 
   def reminder_input(assigns) do
     ~H"""
-    <input type="hidden" name="rider_reminders[reminder_sort][]" value={@index} />
+    <input
+      type="hidden"
+      name="rider_reminders[reminder_sort][]"
+      value={@index}
+      id={"rider_reminders-sort-#{@id}"}
+    />
     <input
       type="hidden"
       name={"rider_reminders[reminder_times][#{@index}][min_time]"}
       value={@current_time}
+      id={"rider_reminders-reminder_times-#{@id}-min_time"}
     />
     <input
       type="hidden"
       name={"rider_reminders[reminder_times][#{@index}][max_time]"}
       value={@notification_end |> naive_datetime_to_iso8601()}
+      id={"rider_reminders-reminder_times-#{@id}-max_time"}
     />
     <input type="hidden" name={"rider_reminders[reminder_times][#{@index}][id]"} value={@id} />
     <input
@@ -251,6 +284,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
       type="hidden"
       name={"rider_reminders[reminder_times][#{@index}][reminder_time]"}
       value={@field.value}
+      id={"rider_reminders-reminder_times-#{@id}-reminder_time"}
     />
     <.datetime
       label="Reminder date and time"
@@ -259,6 +293,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
       field={@field}
       value={@field.value}
       disabled={!@editable}
+      id={"rider_reminders-reminder_times-#{@id}-reminder_datetime"}
     >
       <button
         :if={@editable}
@@ -267,6 +302,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
         name="rider_reminders[reminder_drop][]"
         value={@index}
         phx-click={JS.dispatch("change")}
+        id={"rider_reminders-reminder_times-#{@id}-drop"}
       >
         <.icon name="hero-x-mark" class="w-6 h-6" />
       </button>
