@@ -229,7 +229,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       |> Helpers.filter_empty_list_fields()
       |> populate_default_stops()
       |> populate_default_trips()
-      |> split_stop_names_and_ids
+      |> remove_stops_not_on_this_direction()
+      |> split_stop_names_and_ids()
 
     changeset = validate(affected_service, socket.assigns)
 
@@ -847,10 +848,25 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     end
   end
 
+  defp remove_stops_not_on_this_direction(
+         %{"stop_names_and_ids" => stop_names_and_ids, "direction" => direction} =
+           affected_service
+       ) do
+    marker =
+      case direction do
+        "0" -> ~r/outbound/
+        "1" -> ~r/inbound/
+        _ -> ~r/./
+      end
+
+    stop_names_and_ids = Enum.filter(stop_names_and_ids, &(&1 =~ marker))
+    Map.put(affected_service, "stop_names_and_ids", stop_names_and_ids)
+  end
+
   defp split_stop_names_and_ids(%{"stop_names_and_ids" => stop_names_and_ids} = affected_service) do
     split_names_and_ids =
-      Enum.reduce(stop_names_and_ids, %{"stop_names" => [], "stop_ids" => []}, fn name_and_id,
-                                                                                  acc ->
+      stop_names_and_ids
+      |> Enum.reduce(%{"stop_names" => [], "stop_ids" => []}, fn name_and_id, acc ->
         [stop_name, stop_id] = String.split(name_and_id, "|")
         stop_names = [stop_name | acc["stop_names"]]
         stop_ids = [stop_id | acc["stop_ids"]]

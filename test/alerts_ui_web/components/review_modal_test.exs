@@ -317,7 +317,11 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]},
         {StopsRepo, [],
          [
-           by_route: fn _route, _direction, _opts -> [@stop] end,
+           by_route: fn _route, _direction, _opts ->
+             [
+               Map.put(@stop, :name, @stop.name <> "(inbound)")
+             ]
+           end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -329,7 +333,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
           affected_service: %{
             route_ids: ["CR-Worcester"],
             direction: "1",
-            stop_names_and_ids: ["Aquarium|place-aqucl"]
+            stop_names_and_ids: ["Aquarium (inbound)|place-aqucl"]
           }
         })
 
@@ -458,7 +462,11 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         {StopsRepo, [],
          [
            # by_route_type: fn _rt -> [@stop] end,
-           by_route: fn _route, _direction, _opts -> [@stop] end,
+           by_route: fn _route, _direction, _opts ->
+             [
+               Map.put(@stop, :name, @stop.name <> "(inbound)")
+             ]
+           end,
            get: fn _id -> @stop end
          ]}
       ]) do
@@ -472,7 +480,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
             route_ids: ["CR-Worcester"],
             direction: "1",
             trip_ids: ["CR-683322-595"],
-            stop_names_and_ids: ["Aquarium|place-aqucl"]
+            stop_names_and_ids: ["Aquarium (inbound)|place-aqucl"]
           }
         })
 
