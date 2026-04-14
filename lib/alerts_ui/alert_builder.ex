@@ -1058,6 +1058,9 @@ defmodule AlertsUI.AlertBuilder do
     child_stop_ids =
       (stop.child_ids -- excluded_stops_from_facility_properties(properties)) |> Enum.uniq()
 
+    # fallback for rare cases the stop has no child stops (eg fare vending machines)
+    child_stop_ids = if Enum.empty?(child_stop_ids), do: [stop_id], else: child_stop_ids
+
     routes_from_children =
       child_stop_ids
       |> Enum.flat_map(&RoutesRepo.by_stop/1)
