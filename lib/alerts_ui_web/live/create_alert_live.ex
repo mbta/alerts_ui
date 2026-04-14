@@ -202,8 +202,35 @@ defmodule AlertsUIWeb.CreateAlertLive do
     |> adjust_by_form_type(form_type)
   end
 
+  @spec adjust_by_form_type(AlertData.t(), atom()) :: AlertData.t()
+
   defp adjust_by_form_type(alert_data, :duplicating) do
-    Map.put(alert_data, :reminder_times, [])
+    if AlertsUI.ActiveStatus.get_alert_status(alert_data) == :past do
+      now = DateTime.utc_now() |> DateTime.shift_zone!("America/New_York")
+
+      active_period_end_specifier =
+        if Map.get(alert_data, :alert_timing, :"one-time") == :"one-time" do
+          :later_today
+        else
+          :until_further_notice
+        end
+
+      Map.merge(alert_data, %{
+        start_datetime: now,
+        end_datetime: nil,
+        active_period_start_specifier: :now,
+        active_period_start: now,
+        active_period_start_date: now |> DateTime.to_date(),
+        active_period_end_specifier: active_period_end_specifier,
+        active_period_end: nil,
+        active_period_end_date: nil,
+        notification_specifier: :now,
+        notification_period_start: now
+      })
+    else
+      alert_data
+    end
+    |> Map.put(:reminder_times, [])
   end
 
   defp adjust_by_form_type(alert_data, _), do: alert_data

@@ -556,7 +556,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         {one_time_alert_component(assigns)}
         <div
           :if={@form[:alert_timing].value in [:"one-time", "one-time"] and Enum.empty?(@form.errors)}
-          class="text-text-secondary"
+          class="duration-explanation text-text-secondary"
         >
           Effect duration: {TimeRangeDurationText.one_time_duration_text(@form.params)}
         </div>
@@ -566,7 +566,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
             @form[:alert_timing].value in [:recurring, "recurring"] and Enum.empty?(@form.errors) and
               @form[:recurrence_days].value not in [[], nil]
           }
-          class="text-text-secondary"
+          class="duration-explanation text-text-secondary"
         >
           Effect duration: {RecurringDurationText.recurring_duration_text(assigns)}
         </div>

@@ -518,4 +518,225 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
       assert trip2.departure_time == ~U[2024-11-15 20:25:00Z]
     end
   end
+
+  describe "duplicating an alert" do
+    @tag :logged_in_user
+    test "defaults to now/later_today when duplicating a past alert", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _types -> [@route] end,
+           get: fn _id -> @route end,
+           get: fn _id, _opts -> @route end,
+           all: fn _opts -> [@route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [@stop] end,
+           get_parent: fn
+             "place-sstat" -> @stop
+             "obsolete_stop" -> %Stop{id: "obsolete_stop", name: "spurious stop"}
+           end
+         ]}
+      ]) do
+        alert_params =
+          build(:alert_map, %{
+            alert_id: "123",
+            effect: :OTHER_EFFECT,
+            effect_detail: "DELAY",
+            header_text: "cool header text",
+            severity: 3,
+            severity_level: :WARNING,
+            cause_detail: "UNKNOWN",
+            reminder_times: [],
+            informed_entity: [
+              %{route_type: 3, route_id: "CR-Worcester", direction_id: 0, stop_id: "place-sstat"},
+              %{
+                route_type: 3,
+                route_id: "CR-Worcester",
+                direction_id: 0,
+                stop_id: "obsolete_stop"
+              }
+            ],
+            original_route_selections: [
+              "Framingham/Worcester Line|CR-Worcester",
+              "spurious route|sp_rt"
+            ],
+            original_stop_selections: ["South Station|place-sstat", "spurious stop|obsolete_stop"],
+            duration_certainty: :KNOWN,
+            active_period_start_specifier: :custom,
+            active_period_start: ~N[2020-03-07 00:00:00],
+            active_period_end_specifier: :custom,
+            active_period_end: ~N[2023-03-07 23:59:59],
+            closed_timestamp: ~N[2023-03-07 23:59:59]
+          })
+
+        {:ok, alert} =
+          Alerts.create_or_update_alert(alert_params, build(:user))
+
+        {:ok, view, _html} = live(conn, "/alerts/duplicate?alert_id=#{alert.alert_id}")
+
+        assert view
+               |> element("#time_range_active_period_start_specifier option[selected]")
+               |> render() =~ ">Now<"
+
+        assert view
+               |> element("#time_range_active_period_end_specifier option[selected]")
+               |> render() =~ ">Later today<"
+
+        assert view
+               |> element("#notification_period_notification_specifier option[selected]")
+               |> render() =~ ">Now<"
+      end
+    end
+
+    @tag :logged_in_user
+    test "defaults to now/until_further_notice when duplicating a recurring past alert", %{
+      conn: conn
+    } do
+      with_mocks([
+        {DateTime, [:passthrough], utc_now: fn -> ~U[2025-10-13 12:00:00Z] end},
+        {RoutesRepo, [],
+         [
+           by_type: fn _types -> [@route] end,
+           get: fn _id -> @route end,
+           get: fn _id, _opts -> @route end,
+           all: fn _opts -> [@route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [@stop] end,
+           get_parent: fn
+             "place-sstat" -> @stop
+             "obsolete_stop" -> %Stop{id: "obsolete_stop", name: "spurious stop"}
+           end
+         ]}
+      ]) do
+        alert_params =
+          build(:alert_map, %{
+            alert_id: "123",
+            recurring: true,
+            recurrence_days: [:saturday],
+            effect: :OTHER_EFFECT,
+            effect_detail: "DELAY",
+            header_text: "cool header text",
+            severity: 3,
+            severity_level: :WARNING,
+            cause_detail: "UNKNOWN",
+            reminder_times: [],
+            informed_entity: [
+              %{route_type: 3, route_id: "CR-Worcester", direction_id: 0, stop_id: "place-sstat"},
+              %{
+                route_type: 3,
+                route_id: "CR-Worcester",
+                direction_id: 0,
+                stop_id: "obsolete_stop"
+              }
+            ],
+            original_route_selections: [
+              "Framingham/Worcester Line|CR-Worcester",
+              "spurious route|sp_rt"
+            ],
+            original_stop_selections: ["South Station|place-sstat", "spurious stop|obsolete_stop"],
+            duration_certainty: :KNOWN,
+            active_period_start_specifier: :custom,
+            active_period_start: ~N[2020-03-07 12:00:00],
+            active_period_end_specifier: :custom,
+            active_period_end: ~N[2023-03-07 23:59:59],
+            closed_timestamp: ~N[2023-03-07 23:59:59]
+          })
+
+        {:ok, alert} =
+          Alerts.create_or_update_alert(alert_params, build(:user))
+
+        {:ok, view, _html} = live(conn, "/alerts/duplicate?alert_id=#{alert.alert_id}")
+
+        assert view
+               |> element("#time_range_active_period_start_specifier option[selected]")
+               |> render() =~ ">Now<"
+
+        assert view
+               |> element("#time_range_active_period_end_specifier option[selected]")
+               |> render() =~ ">When alert is closed<"
+
+        assert view
+               |> element("#notification_period_notification_specifier option[selected]")
+               |> render() =~ ">Now<"
+
+        assert view
+               |> element("#time_range_form .duration-explanation")
+               |> render() =~
+                 ~r"Effect duration:.*every Saturday from Mon Oct 13, 2025 until alert is manually closed"
+      end
+    end
+
+    @tag :logged_in_user
+    test "should not change the dates when duplicating a current alert", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _types -> [@route] end,
+           get: fn _id -> @route end,
+           get: fn _id, _opts -> @route end,
+           all: fn _opts -> [@route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [@stop] end,
+           get_parent: fn
+             "place-sstat" -> @stop
+             "obsolete_stop" -> %Stop{id: "obsolete_stop", name: "spurious stop"}
+           end
+         ]}
+      ]) do
+        alert_params =
+          build(:alert_map, %{
+            alert_id: "123",
+            effect: :OTHER_EFFECT,
+            effect_detail: "DELAY",
+            header_text: "cool header text",
+            severity: 3,
+            severity_level: :WARNING,
+            cause_detail: "UNKNOWN",
+            reminder_times: [],
+            informed_entity: [
+              %{route_type: 3, route_id: "CR-Worcester", direction_id: 0, stop_id: "place-sstat"},
+              %{
+                route_type: 3,
+                route_id: "CR-Worcester",
+                direction_id: 0,
+                stop_id: "obsolete_stop"
+              }
+            ],
+            original_route_selections: [
+              "Framingham/Worcester Line|CR-Worcester",
+              "spurious route|sp_rt"
+            ],
+            original_stop_selections: ["South Station|place-sstat", "spurious stop|obsolete_stop"],
+            duration_certainty: :KNOWN,
+            active_period_start_specifier: :custom,
+            active_period_start: ~N[2020-03-07 00:00:00],
+            active_period_end_specifier: :custom,
+            active_period_end: ~N[2030-03-07 23:59:59]
+          })
+
+        {:ok, alert} =
+          Alerts.create_or_update_alert(alert_params, build(:user))
+
+        {:ok, view, _html} = live(conn, "/alerts/duplicate?alert_id=#{alert.alert_id}")
+
+        assert view
+               |> element("#time_range_active_period_start_specifier option[selected]")
+               |> render() =~ ">Custom<"
+
+        assert view
+               |> element("#time_range_active_period_end_specifier option[selected]")
+               |> render() =~ ">Custom<"
+
+        assert view
+               |> element("#notification_period_notification_specifier option[selected]")
+               |> render() =~ ">Same as effect period<"
+      end
+    end
+  end
 end
