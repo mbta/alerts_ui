@@ -229,7 +229,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       |> Helpers.filter_empty_list_fields()
       |> populate_default_stops()
       |> populate_default_trips()
-      |> remove_stops_not_on_this_direction()
+      |> remove_stops_not_in_this_direction()
       |> split_stop_names_and_ids()
 
     changeset = validate(affected_service, socket.assigns)
@@ -848,18 +848,18 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     end
   end
 
-  defp remove_stops_not_on_this_direction(
+  defp remove_stops_not_in_this_direction(
          %{"stop_names_and_ids" => stop_names_and_ids, "direction" => direction} =
            affected_service
        ) do
     marker =
       case direction do
-        "0" -> ~r/outbound/
-        "1" -> ~r/inbound/
-        _ -> ~r/./
+        "0" -> ~r/inbound/
+        "1" -> ~r/outbound/
+        _ -> ~r/\A\Z/
       end
 
-    stop_names_and_ids = Enum.filter(stop_names_and_ids, &(&1 =~ marker))
+    stop_names_and_ids = Enum.filter(stop_names_and_ids, &(!(&1 =~ marker)))
     Map.put(affected_service, "stop_names_and_ids", stop_names_and_ids)
   end
 

@@ -66,8 +66,26 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     name: "Framingham/Worcester Line"
   }
 
+  @bus_route %Route{
+    direction_names: %{1 => "Inbound", 0 => "Outbound"},
+    sort_order: 3,
+    id: "746",
+    type: 3,
+    name: "SLW"
+  }
+
+  @subway_route %Route{
+    direction_names: %{1 => "Northbound", 0 => "Southbound"},
+    sort_order: 3,
+    id: "Red",
+    type: 1,
+    name: "Red Line"
+  }
+
   @stop %Stop{id: "place-sstat", name: "South Station"}
   @stop_2 %Stop{id: "place-crtst", name: "Courthouse"}
+  @bus_stop %Stop{id: "place-wtcst", name: "World Trade Center"}
+  @subway_stop %Stop{id: "place-cntsq", name: "Central"}
 
   @facility %Facility{
     id: "349",
@@ -1282,6 +1300,108 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         })
 
         refute render(view) =~ ~s(Effect must start before)
+      end
+    end
+  end
+
+  describe "remove_stops_not_in_this_direction/1" do
+    @tag :logged_in_user
+    test "removes directional stops not in this direction", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_stop: fn _stop_id, _ -> [@bus_route] end,
+           by_type: fn _types -> [@bus_route] end,
+           get: fn _, _ -> @bus_route end,
+           get: fn _ -> @bus_route end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _route_type -> [@bus_stop] end,
+           by_route: fn _, _, _opts -> [@bus_stop] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        get_to_submission_page(view, "Bus", "Delay")
+
+        render_async(view)
+
+        view
+        |> element("#service_form")
+        |> render_change(%{
+          affected_service: %{route_ids: ["746"]}
+        })
+
+        view
+        |> element("#service_form")
+        |> render_change(%{
+          affected_service: %{
+            stop_names_and_ids: [
+              "World Trade Center (outbound)|place-wtcst",
+              "World Trade Center (inbound)|place-wtcst"
+            ]
+          }
+        })
+
+        view
+        |> element("#service_form")
+        |> render_change(%{
+          affected_service: %{direction: "0"}
+        })
+
+        open_review_modal(view)
+        html = render_async(view)
+
+        assert html =~ ~r/Stops:.*World Trade Center \(outbound\)/
+        refute html =~ ~r/Stops:.*World Trade Center \(inbound\)/
+      end
+    end
+
+    @tag :logged_in_user
+    test "does not removes directional stops not that are not marked", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_stop: fn _stop_id, _ -> [@subway_route] end,
+           by_type: fn _types -> [@subway_route] end,
+           get: fn _, _ -> @subway_route end,
+           get: fn _ -> @subway_route end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _route_type -> [@subway_stop] end,
+           by_route: fn _, _, _opts -> [@subway_stop] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        get_to_submission_page(view, "Subway", "Notice")
+
+        render_async(view)
+
+        view
+        |> element("#service_form")
+        |> render_change(%{
+          affected_service: %{route_ids: ["Red"]}
+        })
+
+        view
+        |> element("#service_form")
+        |> render_change(%{
+          affected_service: %{stop_names_and_ids: ["Central|place-cntsq"]}
+        })
+
+        view
+        |> element("#service_form")
+        |> render_change(%{
+          affected_service: %{direction: "0"}
+        })
+
+        open_review_modal(view)
+        html = render_async(view)
+
+        assert html =~ ~r/Stops:.*Central/
       end
     end
   end
