@@ -712,7 +712,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         view
         |> element("#service_form")
         |> render_change(%{
-          access_affected_service: %{facility_ids: [@facility.id]}
+          access_affected_service: %{single_facility_id: @facility.id}
         })
 
         # Mock timerange selections

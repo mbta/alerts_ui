@@ -509,7 +509,9 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         {:ok, view, _html} = live(conn, "/alerts/new")
         get_to_submission_page(view, "Facility", "Elevator closure")
 
-        fill_out_required_form_fields(view, %{access_affected_service: %{facility_ids: ["349"]}})
+        fill_out_required_form_fields(view, %{
+          access_affected_service: %{single_facility_id: "349"}
+        })
 
         open_review_modal(view)
 
