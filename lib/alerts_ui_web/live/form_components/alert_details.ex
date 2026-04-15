@@ -409,7 +409,16 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
               phx-debounce={120}
               maxlength="255"
               id="header_input"
-              class="w-[100%] min-h-[10rem] border-b-0 z-20 mt-3"
+              class={
+                [
+                  "w-[100%] min-h-[10rem] z-20 mt-3",
+                  if(String.length(@form[:header_text].value || "") >= 255,
+                    do: "!border-error border-b-1",
+                    else: "border-b-0"
+                  )
+                ]
+                |> Enum.join(" ")
+              }
               phx-change="header_text_change"
               phx-target={@myself}
               value={@form[:header_text].value}
@@ -434,7 +443,16 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
               label="Supporting information"
               phx-debounce={120}
               id="description_input"
-              class="w-[100%] min-h-[10rem] border-b-0 z-20 mt-3"
+              class={
+                [
+                  "w-[100%] min-h-[10rem] z-20 mt-3",
+                  if(String.length(@form[:description_text].value || "") >= 3000,
+                    do: "!border-error border-b-1",
+                    else: "border-b-0"
+                  )
+                ]
+                |> Enum.join(" ")
+              }
               maxlength="3000"
               phx-change="description_text_change"
               phx-target={@myself}

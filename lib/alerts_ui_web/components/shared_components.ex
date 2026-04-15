@@ -1275,7 +1275,7 @@ defmodule AlertsUIWeb.SharedComponents do
           @errors != [] && "border-danger focus:border-danger"
         ]}
         {@rest}
-      ><%=  @value%></textarea>
+      ><%= @value %></textarea>
     </div>
     """
   end
@@ -1305,18 +1305,18 @@ defmodule AlertsUIWeb.SharedComponents do
     assigns =
       assigns
       |> assign_new(:value, fn -> field.value end)
+      |> assign(:at_limit, String.length(field.value || "") >= assigns.character_limit)
       |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
 
     ~H"""
     <div class={[
       "flex flex-row items-center min-w-full text-sm bg-bg-elevation-3 px-3 py-2 rounded-b border border-bg-elevation-6 border-t-0 -mt-2",
-      if(@errors != [], do: "border-danger"),
-      if(String.length(@value || "") == @character_limit, do: "text-danger ")
+      if(@errors != [], do: "border-danger")
     ]}>
       <.copy_button :if={@copy_id} title={@copy_title} copy_id={@copy_id} />
-      <div class="text-text-secondary ml-auto">
+      <div class={["text-text-secondary ml-auto", if(@at_limit, do: "!text-error")]}>
         {String.length(@value || "")}/{@character_limit}
-        <span :if={String.length(@value || "") == @character_limit} class="ml-1">
+        <span :if={@at_limit} class="ml-1">
           Character limit reached
         </span>
       </div>

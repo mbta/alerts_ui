@@ -543,6 +543,103 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
     end
 
     @tag :logged_in_user
+    test "main message displays red when character limit reached", %{
+      conn: conn
+    } do
+      with_mocks([
+        {RoutesRepo, [],
+         [by_stop: fn _route_id -> [@route] end, by_type: fn _types -> [@route] end]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _route_type, _ -> [@stop, @stop_2, @stop_3] end,
+           by_route: fn _, _, _opts -> [@stop, @stop_2, @stop_3] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        get_to_submission_page(view, "Ferry", "Dock closure")
+
+        render_async(view)
+
+        almost_too_long_string = String.pad_leading("", 254, "A")
+
+        view
+        |> element("#details_form")
+        |> render_change(%{
+          alert_details: %{header_sync_toggle: false, header_text: almost_too_long_string}
+        })
+
+        assert view
+               |> element("#alert_details_header_text")
+               |> render() =~
+                 ~r(class=".*text-text-primary.*border-b-0".*>#{almost_too_long_string}</textarea>)s
+
+        too_long_string = String.pad_leading("", 255, "A")
+
+        view
+        |> element("#details_form")
+        |> render_change(%{
+          alert_details: %{header_sync_toggle: false, header_text: too_long_string}
+        })
+
+        assert view
+               |> element("#alert_details_header_text")
+               |> render() =~
+                 ~r(class=".*text-text-primary.*!border-error border-b-1".*>#{too_long_string}</textarea>)s
+      end
+    end
+
+    @tag :logged_in_user
+    test "description displays red when character limit reached", %{
+      conn: conn
+    } do
+      with_mocks([
+        {RoutesRepo, [],
+         [by_stop: fn _route_id -> [@route] end, by_type: fn _types -> [@route] end]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _route_type, _ -> [@stop, @stop_2, @stop_3] end,
+           by_route: fn _, _, _opts -> [@stop, @stop_2, @stop_3] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        get_to_submission_page(view, "Ferry", "Dock closure")
+
+        render_async(view)
+
+        almost_too_long_string = String.pad_leading("", 2999, "A")
+
+        view
+        |> element("#details_form")
+        |> render_change(%{
+          alert_details: %{
+            description_sync_toggle: false,
+            description_text: almost_too_long_string
+          }
+        })
+
+        assert view
+               |> element("#alert_details_description_text")
+               |> render() =~
+                 ~r(class=".*text-text-primary.*border-b-0".*>#{almost_too_long_string}</textarea>)s
+
+        too_long_string = String.pad_leading("", 3000, "A")
+
+        view
+        |> element("#details_form")
+        |> render_change(%{
+          alert_details: %{description_sync_toggle: false, description_text: too_long_string}
+        })
+
+        assert view
+               |> element("#alert_details_description_text")
+               |> render() =~
+                 ~r(class=".*text-text-primary.*!border-error border-b-1".*>#{too_long_string}</textarea>)s
+      end
+    end
+
+    @tag :logged_in_user
     test "affected service autotext works", %{
       conn: conn
     } do
