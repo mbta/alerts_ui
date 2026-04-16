@@ -229,7 +229,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     %{
       pattern: {3, "Multi-Route Detour"},
       header_template:
-        "?route_names ?stop_form detoured ?alert_duration|, skipping ?stop_names ?due_to_cause|.",
+        "?route_names ?route_form detoured ?alert_duration|, skipping ?stop_names ?due_to_cause|.",
       description_template: %{
         route_count: 5,
         stop_count: 0,
@@ -252,7 +252,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     %{
       pattern: {3, "Detour"},
       header_template:
-        "?route_names ?direction_name ?route_form detoured ?alert_duration|, skipping ?stop_names ?due_to_cause|. ?closest_stop_text|.",
+        "?route_names ?direction_name ?route_form detoured ?alert_duration|, ?skipping_stop_text ?due_to_cause|. ?closest_stop_text|.",
       description_template: %{
         route_count: 5,
         stop_count: 0,
@@ -638,7 +638,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     |> String.replace(" |", "")
     |> String.replace(~r/\s{2,}/, " ")
     |> String.replace(" :", ":")
+    |> String.replace(" ,", ",")
     |> String.replace(" .", ".")
+    |> String.replace(",.", ".")
     |> String.trim()
   end
 
