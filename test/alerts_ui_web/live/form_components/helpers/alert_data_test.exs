@@ -149,6 +149,41 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
              } = AlertData.build_alert_data("1")
     end
 
+    test "gets facility id correctly for alerts with single facility" do
+      alert =
+        insert(:alert, %{
+          alert_id: "1",
+          effect: :ACCESSIBILITY_ISSUE,
+          effect_detail: "ELEVATOR_CLOSURE",
+          effect_name: "Elevator Closure",
+          header_text: "cool header text",
+          description_text: "description text",
+          informed_entity: [
+            %{facility_id: "example-facility"}
+          ],
+          primary_service_type: "access"
+        })
+
+      reminder_id = hd(alert.reminder_times).id
+
+      assert %AlertData{
+               combination: :ACCESS,
+               direction: "default",
+               effect_name: "Elevator Closure",
+               facility_ids: ["example-facility"],
+               single_facility_id: "example-facility",
+               stop_ids: [],
+               route_ids: [],
+               trip_ids: [],
+               service_types: [nil],
+               header_text: "cool header text",
+               description_text: "description text",
+               reminder_times: [%{id: ^reminder_id, time: ~N[2024-09-24 20:01:00]}],
+               alert_timing: :"one-time",
+               notification_specifier: :same_as_effect_period
+             } = AlertData.build_alert_data("1")
+    end
+
     test "builds alert data from alert" do
       alert =
         insert(:alert, %{

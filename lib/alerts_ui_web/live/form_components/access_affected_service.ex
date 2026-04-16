@@ -26,10 +26,12 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     field :facility_types, {:array, :string}
     field :facility_types_filter, :string
     field :facility_ids, {:array, :string}
+    field :single_facility_id, :string
     field :facility_search_term, :string
   end
 
-  @fields ~w[stop_id stop_search_term facility_types facility_types_filter facility_ids facility_search_term]a
+  @single_facility_effect_names ["Elevator Closure", "Escalator Closure"]
+  @fields ~w[stop_id stop_search_term facility_types facility_types_filter facility_ids single_facility_id facility_search_term]a
   @required_fields ~w[facility_ids]a
 
   @impl true
@@ -242,6 +244,9 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
         %{"access_affected_service" => access_affected_service},
         socket
       ) do
+    access_affected_service =
+      wrap_single_facility_id(access_affected_service, socket.assigns.effect_name)
+
     changeset = build_changeset(%__MODULE__{}, access_affected_service)
 
     case apply_action(changeset |> validate_required(@required_fields), :validate) do
@@ -369,7 +374,8 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     assigns =
       assign(assigns,
         modal_stop_id_options: modal_stop_id_options,
-        facility_id_options: facility_id_options
+        facility_id_options: facility_id_options,
+        single_facility_effect_names: @single_facility_effect_names
       )
 
     ~H"""
@@ -409,14 +415,18 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
           </.modal>
           <.filtered_select
             class="md:w-[25%] h-[32rem]"
-            field={@form[:facility_ids]}
+            field={
+              if @effect_name in @single_facility_effect_names,
+                do: @form[:single_facility_id],
+                else: @form[:facility_ids]
+            }
             filter_field={@form[:facility_search_term]}
             label="Facilities"
             loading={Map.get(@available_facilities, :loading, true)}
             modal_filter_active={filter_active?(@stop_id_filter_value)}
             modal_filter_id="stops-filter-modal"
             modal_filter_title={"Filter: #{@filter_title_value}"}
-            multiple={true}
+            multiple={@effect_name not in @single_facility_effect_names}
             no_results={Enum.empty?(@facility_id_options)}
             options={@facility_id_options}
             target_id="#service_form"
@@ -443,6 +453,19 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
 
     equals_stop_id or facility.id in selected_facility_ids
   end
+
+  def wrap_single_facility_id(access_affected_service, effect_name)
+      when effect_name in @single_facility_effect_names do
+    # if it's an alert effect that can only take 1 facility (eg Elevator Issue), we need to set facility_ids to equal
+    # the single_facility_id from the form, so we don't have to worry about whether it's a list
+    # elsewhere
+    incoming_facility_id = Map.get(access_affected_service, "single_facility_id")
+
+    access_affected_service
+    |> Map.put("facility_ids", List.wrap(incoming_facility_id))
+  end
+
+  def wrap_single_facility_id(access_affected_service, _effect), do: access_affected_service
 
   defp string_to_formatted_atom(string) do
     string
