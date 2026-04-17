@@ -496,6 +496,11 @@ defmodule AlertsUI.AlertBuilder do
     selected_routes ++ combo_routes
   end
 
+  def add_special_combo_routes(route_ids, "Boat-F2H") do
+    # adds Hingham ferry if Hingam/Hull ferry is selected
+    route_ids |> Enum.concat(["Boat-F1"])
+  end
+
   def add_special_combo_routes(route_ids, "746") do
     # adds other SL routes if SLW is selected
     route_ids
@@ -504,8 +509,7 @@ defmodule AlertsUI.AlertBuilder do
 
   def add_special_combo_routes(route_ids, route_id) when route_id in ["741", "742", "743"] do
     # adds SLW if other SL routes are selected
-    route_ids
-    |> Enum.concat(["746"])
+    route_ids |> Enum.concat(["746"])
   end
 
   def add_special_combo_routes(route_ids, _), do: route_ids
