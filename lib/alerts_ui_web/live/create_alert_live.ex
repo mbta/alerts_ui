@@ -149,12 +149,13 @@ defmodule AlertsUIWeb.CreateAlertLive do
     |> String.replace("_", " ")
     |> String.split(" ")
     |> Enum.map_join(" ", &String.capitalize(&1))
+    |> String.replace("-route", "-Route")
   end
 
   def effect_to_url_name(effect_name) do
     effect_name
     |> String.split(" ")
-    |> Enum.map_join(" ", &String.downcase(&1))
+    |> Enum.map_join("_", &String.downcase(&1))
   end
 
   def effect_name_from_params!(params) do
@@ -209,20 +210,25 @@ defmodule AlertsUIWeb.CreateAlertLive do
   defp adjust_by_form_type(alert_data, _), do: alert_data
 
   defp assign_from_params(alert_data, params) do
-    # this will be the numeric version, not the string (unlike
-    # selected_* in the the top level assigns)
+    effect_name = effect_name_from_params!(params)
+
     route_type_mapping =
       case route_type_from_params!(params) do
         nil ->
           nil
 
         route_type ->
-          route_type
-          |> String.to_existing_atom()
-          |> InformedEntity.route_type_mapping()
-      end
+          mapping =
+            route_type
+            |> String.to_existing_atom()
+            |> InformedEntity.route_type_mapping()
 
-    effect_name = effect_name_from_params!(params)
+          if is_nil(mapping) && effect_name in EffectsForRouteTypes.list_effects(:facility) do
+            :facility
+          else
+            mapping
+          end
+      end
 
     combination =
       GetKeyForModeEffect.get_value_of_key(

@@ -172,7 +172,16 @@ defmodule AlertsUI.Models.InformedEntity do
   def route_code_mapping(4), do: :ferry
   def route_code_mapping(_), do: nil
 
-  @route_type_atoms [:access, :bus, :commuter_rail, :ferry, :light_rail, :subway]
+  @route_type_atoms [
+    :access,
+    :bus,
+    :commuter_rail,
+    :ferry,
+    :light_rail,
+    :subway,
+    :facility,
+    :systemwide
+  ]
 
   @doc """
   Boolean for testing route type validity.
