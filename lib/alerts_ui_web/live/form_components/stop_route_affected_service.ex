@@ -14,6 +14,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     EntityValidator,
     ErrorFormatter,
     Helpers,
+    ObsoleteEntities,
     SelectFormatter
   }
 
@@ -385,11 +386,9 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     obsolete_ids =
       socket.assigns.obsolete_ids |> Map.put_new(mapping[async_key], obsolete_ids_for_field)
 
-    # check that we got results and contains all required fields
-    obsolete_ids_found = Enum.any?(obsolete_ids, fn {_k, v} -> !Enum.empty?(v) end)
-    all_fields_in = Enum.sort(Map.keys(obsolete_ids)) == Enum.sort(@required_fields)
+    # check that we got results and contains all required field
 
-    send_obsolete_ids? = obsolete_ids_found && all_fields_in
+    send_obsolete_ids? = ObsoleteEntities.send_obsolete_ids?(obsolete_ids, @required_fields)
 
     # if all our fields have been returned and there are obsolete ids
     # send result to parent
@@ -399,16 +398,11 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
       alert_data = socket.assigns.alert_data
 
       ids_with_obsolete_entities_removed =
-        @required_fields
-        |> Enum.map(fn field ->
-          obsolete_ids = Map.get(obsolete_ids, field, [])
-          {field, alert_data[field] -- obsolete_ids}
-        end)
-        |> Enum.map(fn
-          {k, []} -> {k, nil}
-          {k, v} -> {k, v}
-        end)
-        |> Enum.into(%{})
+        ObsoleteEntities.ids_with_obsolete_entities_removed(
+          alert_data,
+          obsolete_ids,
+          @required_fields
+        )
 
       new_alert_data = Map.merge(alert_data, ids_with_obsolete_entities_removed)
 
