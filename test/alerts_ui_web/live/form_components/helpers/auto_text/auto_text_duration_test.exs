@@ -91,6 +91,24 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
       assert expected == actual
     end
 
+    test "no trip specific starts today end same day" do
+      current_time = ~N[2025-05-09 13:00:00]
+
+      auto_text_data = %BuildAutoText{
+        alert_timing: :"one-time",
+        route_type: 2,
+        effect_name: "Track Change",
+        schedules: [],
+        end_specifier: :custom,
+        start_datetime: ~N[2025-05-09 13:00:00],
+        end_datetime: ~N[2025-05-09 15:04:00]
+      }
+
+      expected = "until 3:04 PM"
+      actual = AutoTextDuration.build_duration_text(auto_text_data, current_time)
+      assert expected == actual
+    end
+
     test "trip specific starts today end same day" do
       current_time = ~N[2025-05-09 13:00:00]
 
@@ -749,8 +767,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
         recurrence_days: [:friday]
       }
 
-      expected =
-        "today"
+      expected = "today"
 
       actual = AutoTextDuration.build_duration_text(auto_text_data, current_time)
 

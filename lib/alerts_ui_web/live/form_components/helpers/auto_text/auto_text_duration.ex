@@ -166,6 +166,17 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         is_trip_combination?: true,
         within_same_service_day?: true,
         starts_today?: true,
+        end_specifier: :custom,
+        end_datetime: end_datetime
+      })
+      when not is_nil(end_datetime) do
+    "until #{datetime_to_formatted_time(end_datetime)}"
+  end
+
+  def build_onetime_string(%{
+        is_trip_combination?: true,
+        within_same_service_day?: true,
+        starts_today?: true,
         end_datetime: end_datetime
       })
       when not is_nil(end_datetime) do
