@@ -543,6 +543,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
   end
 
   def build_auto_text(
+        %{route_type: :facility, effect_name: _effect_name} = autotext_data,
+        :description_template
+      ) do
+    # access
+    build_auto_text(Map.put(autotext_data, :route_type, nil), :description_template)
+  end
+
+  def build_auto_text(
         %{route_type: nil, effect_name: _effect_name} = autotext_data,
         :description_template
       ) do
