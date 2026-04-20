@@ -605,6 +605,7 @@ defmodule AlertsUIWeb.SharedComponents do
   attr :class, :string, default: "", doc: "classes to add to the containing div"
   attr :outer_class, :string, default: "", doc: "classes to add to the outer containing div"
   attr :inner_class, :string, default: "", doc: "classes to add on the inner_block"
+  attr :container_class, :string, default: "", doc: "classes to add on the container focus_wrap"
 
   attr :id, :string, required: true
   attr :show, :boolean, default: false
@@ -650,8 +651,11 @@ defmodule AlertsUIWeb.SharedComponents do
                 JS.push(@cancel_event_name, target: @target_id)
                 |> JS.exec("data-cancel", to: "##{@id}")
               }
-              class="max-h-dvh w-full md:max-h-[calc(100dvh-3rem)] md:w-auto md:max-w-2xl !flex flex-col justify-stretch content-stretch shadow-zinc-700/10 ring-zinc-700/10 hidden md:rounded-md bg-bg-elevation-4
-              border-bg-elevation-6 shadow-lg ring-1 transition border"
+              class={[
+                "max-h-dvh w-full md:max-h-[calc(100dvh-3rem)] md:w-auto !flex flex-col justify-stretch content-stretch shadow-zinc-700/10 ring-zinc-700/10 hidden md:rounded-md bg-bg-elevation-4
+              border-bg-elevation-6 shadow-lg ring-1 transition border",
+                @container_class
+              ]}
             >
               <div class="flex-none flex flex-row items-center justify-between py-3 pr-3 pl-4">
                 <h1 class={["md:text-xl", @header_class]}>

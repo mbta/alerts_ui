@@ -40,6 +40,12 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
     stop: %Stop{id: "place-aqucl", name: "Aquarium"}
   }
 
+  @facility_three %Facility{
+    id: "Facility-10",
+    long_name: "Another Place Entirely",
+    stop: %Stop{id: "place-apent", name: "Somewhere Else"}
+  }
+
   describe "component" do
     test "renders" do
       rendered = render_component(AccessAffectedService, @assigns)
@@ -90,6 +96,47 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
                  document,
                  "select#access_affected_service_facility_ids > option[value=\"Facility-3\"][selected=\"selected\"]"
                )
+      end
+    end
+
+    test "search does not reset itself on selection" do
+      with_mock(FacilitiesRepo,
+        get_by_type: fn _facility_types, _opts -> [@facility, @facility_two, @facility_three] end
+      ) do
+        :BIKE_ISSUE
+
+        matcher = fn v ->
+          "select#access_affected_service_facility_ids > option[value=\"#{v}\"]"
+        end
+
+        {:ok, view, _html} = live_isolated_component(AccessAffectedService, @assigns)
+
+        {:ok, document} =
+          view
+          |> render_async()
+          |> Floki.parse_document()
+
+        assert document_has_element?(document, matcher.("Facility-3"))
+
+        {:ok, document} =
+          view
+          |> element("form")
+          |> render_change(%{"access_affected_service" => %{"facility_search_term" => "Place"}})
+          |> Floki.parse_document()
+
+        refute document_has_element?(document, matcher.("Facility-3"))
+        refute document_has_element?(document, matcher.("Facility-7"))
+        assert document_has_element?(document, matcher.("Facility-10"))
+
+        {:ok, document} =
+          view
+          |> element("form")
+          |> render_change(%{"access_affected_service" => %{"facility_id" => "Facility-10"}})
+          |> Floki.parse_document()
+
+        refute document_has_element?(document, matcher.("Facility-3"))
+        refute document_has_element?(document, matcher.("Facility-7"))
+        assert document_has_element?(document, matcher.("Facility-10"))
       end
     end
 

@@ -152,6 +152,7 @@ defmodule AlertsUIWeb.FilterForm do
         header_text={@header_text}
         cancel_event_name="cancel_filter_modal"
         button_type="submit"
+        container_class="!w-[20rem]"
       >
         <.filter_modal_group
           field={@form[:service_type]}
