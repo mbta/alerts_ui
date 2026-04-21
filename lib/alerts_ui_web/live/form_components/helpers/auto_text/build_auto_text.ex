@@ -190,7 +190,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
 
   @spec skipping_stop_text(__MODULE__.t()) :: String.t()
   def skipping_stop_text(%{direction: [_direction], stops: [_ | _]} = alert_data) do
-    "skipping #{stop_names(alert_data)}"
+    ", skipping #{stop_names(alert_data)}"
   end
 
   def skipping_stop_text(_alert_data) do
