@@ -103,7 +103,11 @@
             )
           }
         >
-          {format_end_time(alert.active_period_end, alert.duration_certainty)}
+          {format_end_time(
+            alert.active_period_end,
+            alert.duration_certainty,
+            alert.can_close_automatically
+          )}
         </div>
       </:col>
       <:action :let={alert} label="Actions" col_style="width: 8rem;">

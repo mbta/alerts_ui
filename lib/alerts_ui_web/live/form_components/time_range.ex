@@ -33,6 +33,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
     :later_today,
     :end_of_service,
     :until_further_notice,
+    :when_work_order_is_closed,
     :custom
   ]
 
@@ -59,9 +60,11 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
     field :recurrence_days, {:array, Ecto.Enum},
       values: ~w[sunday monday tuesday wednesday thursday friday saturday]a
+
+    field :can_close_automatically, :boolean
   end
 
-  @fields ~w[active_period_end active_period_end_specifier alert_timing active_period_start_specifier active_period_start active_period_start_date active_period_end_date active_period_end_time active_period_start_time recurrence_days active_period_start_time_specifier active_period_end_time_specifier]a
+  @fields ~w[active_period_end active_period_end_specifier alert_timing active_period_start_specifier active_period_start active_period_start_date active_period_end_date active_period_end_time active_period_start_time recurrence_days active_period_start_time_specifier active_period_end_time_specifier can_close_automatically]a
 
   @impl true
   def mount(socket) do
@@ -73,7 +76,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       active_period_start_date: current_time |> NaiveDateTime.to_date(),
       active_period_start_time: ActivePeriod.start_of_service_time(),
       active_period_start_specifier: "now",
-      active_period_end_specifier: "later_today",
+      active_period_end_specifier: :later_today,
       recurrence_days: [],
       active_period_end:
         ActivePeriod.end_of_service_datetime_naive(current_time)
@@ -84,7 +87,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         |> ActivePeriod.start_of_current_service_day()
         |> NaiveDateTime.to_date(),
       active_period_start_time_specifier: "start_of_service",
-      active_period_end_time_specifier: "end_of_service"
+      active_period_end_time_specifier: "end_of_service",
+      can_close_automatically: false
     }
 
     changeset = changeset(%__MODULE__{}, alert_data)
@@ -330,7 +334,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   @impl true
   def update(assigns, socket) do
-    {:ok, assign(socket, assigns)}
+    socket = assign(socket, assigns)
+    {:ok, socket}
   end
 
   defp get_trip_departure_time(selected_schedules) do
@@ -380,6 +385,10 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
                 form_params["active_period_end_specifier"]
               )
 
+            can_close_automatically =
+              time_range["active_period_end_specifier"] ==
+                "when_work_order_is_closed"
+
             start_date =
               start_datetime_string
               |> TimeRangeGetters.string_to_datetime_helper()
@@ -394,7 +403,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
               "active_period_start" => start_datetime_string,
               "active_period_end" => end_datetime_string,
               "active_period_start_date" => start_date,
-              "active_period_end_date" => end_date
+              "active_period_end_date" => end_date,
+              "can_close_automatically" => can_close_automatically
             })
 
           "recurring" ->
@@ -507,10 +517,17 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   @impl true
   def render(assigns) do
+    end_values =
+      if elevator_escalator_alert?(assigns.alert_data) do
+        @end_values
+      else
+        @end_values |> Enum.filter(&(&1 != :when_work_order_is_closed))
+      end
+
     assigns =
       assign(assigns,
         start_values: @start_values,
-        end_values: @end_values,
+        end_values: end_values,
         alert_timing_values: @alert_timing_values
       )
 
@@ -737,4 +754,10 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
 
   defp utc_datetime_to_naive(nil), do: nil
   defp utc_datetime_to_naive(datetime), do: DateTime.to_naive(datetime)
+
+  defp elevator_escalator_alert?(alert_data) do
+    combination = Map.get(alert_data, :combination) || Map.get(alert_data, "combination")
+    effect_name = Map.get(alert_data, :effect_name) || Map.get(alert_data, "effect_name")
+    combination == :ACCESS && effect_name in ["Elevator Closure", "Escalator Closure"]
+  end
 end

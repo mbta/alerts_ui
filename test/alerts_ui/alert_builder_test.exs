@@ -46,6 +46,7 @@ defmodule AlertsUI.AlertBuilderTest do
           active_period_start: ~N[2024-04-30 11:54:00],
           alert_timing: :"one-time",
           active_period_end_specifier: :until_further_notice,
+          can_close_automatically: false,
           active_period_start_specifier: :custom,
           cause_detail: "DISABLED_TRAIN",
           url: "http://www.example.com",
@@ -119,7 +120,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  source: nil,
                  notification_duration_certainty: nil,
                  work_order_id: nil,
-                 recurring: false
+                 recurring: false,
+                 can_close_automatically: false
                }
 
         Alerts.create_or_update_alert(result, build(:user))

@@ -95,7 +95,8 @@ defmodule AlertsUI.AlertBuilder do
       :source,
       :created_timestamp,
       :closed_timestamp,
-      :work_order_id
+      :work_order_id,
+      :can_close_automatically
     ]
 
     Enum.reduce(direct_from_alert_data_keys, %{}, fn key, params ->

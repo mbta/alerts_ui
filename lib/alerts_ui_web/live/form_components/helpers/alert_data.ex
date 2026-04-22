@@ -26,6 +26,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :alert_timing,
     :banner_text,
     :banner_sync_toggle,
+    :can_close_automatically,
     :cause_detail,
     :combination,
     :created_timestamp,
@@ -80,6 +81,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           active_period_start_time_specifier: String.t() | nil,
           alert_timing: atom() | nil,
           banner_text: String.t() | nil,
+          can_close_automatically: boolean(),
           cause_detail: String.t() | nil,
           combination: atom() | nil,
           created_timestamp: DateTime.t() | nil,
@@ -327,7 +329,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     end_specifier =
       determine_end_specifier(
         shifted_active_period_end,
-        alert.duration_certainty
+        alert.duration_certainty,
+        alert.can_close_automatically
       )
 
     %{
@@ -373,7 +376,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       active_period_start: shifted_active_period_start,
       active_period_end: shifted_active_period_end,
       active_period_start_time_specifier: determine_start_specifier(start_datetime),
-      active_period_end_time_specifier: determine_end_specifier(end_datetime, :KNOWN),
+      active_period_end_time_specifier:
+        determine_end_specifier(end_datetime, :KNOWN, alert.can_close_automatically),
       active_period_start_specifier: "custom",
       active_period_end_specifier: end_specifier,
       active_period_start_time: recurrence_start_time,
@@ -426,11 +430,16 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     end
   end
 
-  def determine_end_specifier(nil, nil), do: nil
-  def determine_end_specifier(_ap_end, :ESTIMATED), do: "later_today"
-  def determine_end_specifier(nil, _certainty), do: "until_further_notice"
+  @spec determine_end_specifier(NaiveDateTime.t(), atom() | nil, boolean()) ::
+          String.t() | nil
+  def determine_end_specifier(ap_end, certainty, autoclosable \\ false)
 
-  def determine_end_specifier(ap_end, :KNOWN) do
+  def determine_end_specifier(nil, nil, _), do: nil
+  def determine_end_specifier(_, _, true), do: "when_work_order_is_closed"
+  def determine_end_specifier(_, :ESTIMATED, _), do: "later_today"
+  def determine_end_specifier(nil, _, _), do: "until_further_notice"
+
+  def determine_end_specifier(ap_end, :KNOWN, _) do
     if ap_end |> NaiveDateTime.to_time() == ActivePeriod.end_of_service_time() do
       "end_of_service"
     else

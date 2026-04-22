@@ -557,13 +557,17 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     end
   end
 
-  def format_end_time(_end_time_utc, :UNKNOWN), do: "further notice"
+  def format_end_time(end_time_utc, certainty, can_close_automatically \\ false)
 
-  def format_end_time(_end_time_utc, :ESTIMATED), do: "later today"
+  def format_end_time(_, _, true), do: "work complete"
 
-  def format_end_time(nil, :KNOWN), do: ""
+  def format_end_time(_end_time_utc, :UNKNOWN, _), do: "further notice"
 
-  def format_end_time(end_time_utc, :KNOWN) do
+  def format_end_time(_end_time_utc, :ESTIMATED, _), do: "later today"
+
+  def format_end_time(nil, :KNOWN, _), do: ""
+
+  def format_end_time(end_time_utc, :KNOWN, _) do
     if DateTime.compare(
          ActivePeriod.end_of_service_datetime_utc(DateTime.utc_now()),
          end_time_utc
@@ -574,7 +578,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     end
   end
 
-  def format_end_time(_, _), do: ""
+  def format_end_time(_, _, _), do: ""
 
   def danger_text(active_period_end, closed_timestamp) do
     if DateTimeHelpers.will_be_ending_today?(active_period_end, closed_timestamp) do

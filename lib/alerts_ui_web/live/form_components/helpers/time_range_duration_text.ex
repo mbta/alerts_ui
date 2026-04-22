@@ -64,6 +64,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationText do
     "alert is manually closed"
   end
 
+  defp end_text(:when_work_order_is_closed, end_dt),
+    do: end_text("when_work_order_is_closed", end_dt)
+
+  defp end_text("when_work_order_is_closed", _end_dt) do
+    "a work order with this facility ID is closed"
+  end
+
   defp end_text("later_today", _end_dt) do
     "later today"
   end
@@ -79,10 +86,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationText do
   end
 
   defp duration(:until_further_notice, _, _), do: "(indefinite)"
+  defp duration("until_further_notice", _, _), do: "(indefinite)"
 
-  defp duration("until_further_notice", _start_dt, _end_dt) do
-    "(indefinite)"
-  end
+  defp duration(:when_work_order_is_closed, _, _), do: ""
+  defp duration("when_work_order_is_closed", _, _), do: ""
 
   defp duration(_, nil, _), do: ""
   defp duration(_, _, nil), do: ""

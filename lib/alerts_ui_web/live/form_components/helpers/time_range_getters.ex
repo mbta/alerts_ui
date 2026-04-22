@@ -39,43 +39,67 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeGetters do
     end
   end
 
-  def get_onetime_end_datetime(time_range, current_time, previous_state) do
-    case time_range["active_period_end_specifier"] do
-      "later_today" ->
-        current_time
-        |> ActivePeriod.end_of_service_datetime_naive()
+  def get_onetime_end_datetime(
+        %{"active_period_end_specifier" => "later_today"} = _time_range,
+        current_time,
+        _previous_state
+      ) do
+    current_time
+    |> ActivePeriod.end_of_service_datetime_naive()
+    |> DateTimeHelpers.naive_datetime_to_iso8601()
+  end
+
+  def get_onetime_end_datetime(
+        %{"active_period_end_specifier" => "end_of_service"} = time_range,
+        _current_time,
+        _previous_state
+      ) do
+    if time_range["active_period_end_date"] in ["", nil] do
+      ""
+    else
+      # The provided end date should always result in the end of service for that day
+      # (ie the next morning)
+      time_range["active_period_end_date"]
+      |> Date.from_iso8601!()
+      |> Date.add(1)
+      |> NaiveDateTime.new!(ActivePeriod.end_of_service_time())
+      |> DateTimeHelpers.naive_datetime_to_iso8601()
+    end
+  end
+
+  def get_onetime_end_datetime(
+        %{"active_period_end_specifier" => "until_further_notice"} = _time_range,
+        _current_time,
+        _previous_state
+      ) do
+    ""
+  end
+
+  def get_onetime_end_datetime(
+        %{"active_period_end_specifier" => "when_work_order_is_closed"} = _time_range,
+        _current_time,
+        _previous_state
+      ) do
+    ""
+  end
+
+  def get_onetime_end_datetime(
+        %{"active_period_end_specifier" => "custom"} = time_range,
+        current_time,
+        previous_state
+      ) do
+    cond do
+      previous_state == "until_further_notice" ->
+        current_time |> DateTimeHelpers.naive_datetime_to_iso8601()
+
+      previous_state !== "custom" ->
+        time_range["active_period_end_date"]
+        |> Date.from_iso8601!()
+        |> NaiveDateTime.new!(~T[23:59:00])
         |> DateTimeHelpers.naive_datetime_to_iso8601()
 
-      "end_of_service" ->
-        if time_range["active_period_end_date"] in ["", nil] do
-          ""
-        else
-          # The provided end date should always result in the end of service for that day
-          # (ie the next morning)
-          time_range["active_period_end_date"]
-          |> Date.from_iso8601!()
-          |> Date.add(1)
-          |> NaiveDateTime.new!(ActivePeriod.end_of_service_time())
-          |> DateTimeHelpers.naive_datetime_to_iso8601()
-        end
-
-      "until_further_notice" ->
-        ""
-
-      "custom" ->
-        cond do
-          previous_state == "until_further_notice" ->
-            current_time |> DateTimeHelpers.naive_datetime_to_iso8601()
-
-          previous_state !== "custom" ->
-            time_range["active_period_end_date"]
-            |> Date.from_iso8601!()
-            |> NaiveDateTime.new!(~T[23:59:00])
-            |> DateTimeHelpers.naive_datetime_to_iso8601()
-
-          true ->
-            time_range["active_period_end"]
-        end
+      true ->
+        time_range["active_period_end"]
     end
   end
 

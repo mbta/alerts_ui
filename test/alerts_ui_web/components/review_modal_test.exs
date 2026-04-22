@@ -579,6 +579,37 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
     end
 
     @tag :logged_in_user
+    test "when work order is closed", %{conn: conn} do
+      with_mocks([
+        {FacilitiesRepo, [],
+         [
+           get: fn _type -> @facility end,
+           get_by_type: fn _type, _opts -> [@facility] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        get_to_submission_page(view, "Facility", "Elevator closure")
+
+        fill_out_form(view, "#service_form", %{
+          access_affected_service: %{single_facility_id: "349"}
+        })
+
+        fill_out_form(view, "#time_range_form", %{
+          time_range: %{active_period_end_specifier: :when_work_order_is_closed}
+        })
+
+        open_review_modal(view)
+
+        assert render(view) =~ ~r/Timing.*One-time/s
+
+        assert render(view) =~
+                 ~r/Effect period.*until a work order with this facility ID is closed/s
+
+        assert render(view) =~ ~r/Notification period.*Same as effect period/s
+      end
+    end
+
+    @tag :logged_in_user
     test "recurring timeframe", %{conn: conn} do
       with_mocks([
         {RoutesRepo, [],

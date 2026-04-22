@@ -149,6 +149,7 @@ defmodule AlertsUI.ActivePeriodBuilder do
 
   defp active_period_end_specifier_to_duration_certainty(:later_today), do: :ESTIMATED
   defp active_period_end_specifier_to_duration_certainty(:until_further_notice), do: :UNKNOWN
+  defp active_period_end_specifier_to_duration_certainty(:when_work_order_is_closed), do: :UNKNOWN
   defp active_period_end_specifier_to_duration_certainty(:end_of_service), do: :KNOWN
   defp active_period_end_specifier_to_duration_certainty(:custom), do: :KNOWN
 

@@ -1328,6 +1328,35 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       assert expected_timestamp == actual_timestamp
     end
 
+    test "when work is complete" do
+      alert =
+        build(:alert, %{
+          alert_id: "123",
+          active_period: [
+            build(:active_period, %{start: ~U[2023-10-12 00:01:00Z]})
+          ],
+          duration_certainty: :UNKNOWN,
+          can_close_automatically: true
+        })
+
+      expected = "work complete"
+
+      actual =
+        AlertsUIWeb.ViewAlertsLive.format_end_time(
+          alert.active_period_end,
+          alert.duration_certainty,
+          alert.can_close_automatically
+        )
+
+      assert expected == actual
+
+      expected_timestamp = nil
+
+      actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_end)
+
+      assert expected_timestamp == actual_timestamp
+    end
+
     test "end of later today" do
       alert =
         build(:alert, %{

@@ -132,8 +132,7 @@ defmodule AlertsUI.Trapeze.Importer do
         {:ok, "open -> open: IGNORE open, no change"}
 
       :close ->
-        close(alert, alert_params.closed_timestamp)
-        {:ok, "open -> closed: CLOSE"}
+        close(alert, alert_params)
 
       :ignore_closed_manually ->
         {:ok, "closed -> open: IGNORE closed manually"}
@@ -187,6 +186,7 @@ defmodule AlertsUI.Trapeze.Importer do
     |> Alert.changeset(
       alert_data_params
       |> Map.merge(%{
+        can_close_automatically: true,
         last_modified_timestamp: DateTime.now!("Etc/UTC"),
         last_push_notification_timestamp: DateTime.now!("Etc/UTC")
       })
@@ -194,18 +194,45 @@ defmodule AlertsUI.Trapeze.Importer do
     |> PaperTrail.insert!(user: nil, origin: @open_origin)
   end
 
-  defp close(%Alert{}, nil), do: {:ok, "IGNORE"}
+  # When the alert is marked as automatically closeable
+  defp close(
+         %Alert{
+           closed_timestamp: nil,
+           can_close_automatically: true
+         } = alert,
+         %{
+           closed_timestamp: closed_timestamp
+         }
+       ),
+       do: do_close(alert, closed_timestamp)
 
-  defp close(%Alert{closed_timestamp: nil} = alert, closed_timestamp) do
+  # When the alert is operating on the same Work Order
+  defp close(
+         %Alert{
+           closed_timestamp: nil,
+           work_order_id: work_order_id
+         } = alert,
+         %{
+           closed_timestamp: closed_timestamp,
+           work_order_id: work_order_id
+         }
+       ),
+       do: do_close(alert, closed_timestamp)
+
+  # Any other case should be ignored.
+  defp close(%Alert{closed_timestamp: _}, _),
+    do: {:ok, "open -> open: IGNORE can't close automatically"}
+
+  defp do_close(alert, closed_timestamp) do
     Alerts.close(
       Repo.reload!(alert),
       @closed_origin,
       true,
       closed_timestamp |> DateTime.from_naive!("America/New_York")
     )
-  end
 
-  defp close(%Alert{closed_timestamp: _}, _), do: {:ok, "IGNORE"}
+    {:ok, "open -> closed: CLOSE"}
+  end
 
   defp configuration_incomplete?,
     do:
