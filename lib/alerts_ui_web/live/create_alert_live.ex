@@ -99,7 +99,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
         selected_routes: [],
         selected_stops: [],
         selected_schedules: [],
-        selected_facility: nil,
+        selected_facilities: [],
         selected_route_type: route_type_from_params!(params),
         selected_effect: effect_name_from_params!(params),
         alert_uuid: nil,
@@ -474,8 +474,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
     {:noreply, assign(socket, selected_schedules: selected_schedules)}
   end
 
-  def handle_info({:selected_facility, selected_facility}, socket) do
-    {:noreply, assign(socket, selected_facility: selected_facility)}
+  def handle_info({:selected_facilities, selected_facilities}, socket) do
+    {:noreply, assign(socket, selected_facilities: selected_facilities)}
   end
 
   def handle_info({:got_obsolete_ids, obsolete_ids_map}, socket) do
@@ -587,7 +587,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
         }),
       combination: combination,
       selected_schedules: nil,
-      selected_facility: nil,
+      selected_facilities: nil,
       selected_routes: nil,
       selected_stops: nil,
       errors: %{}

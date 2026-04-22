@@ -56,6 +56,26 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
     short_name: "Alewife platform to lobby",
     long_name: "Charles/MGH Elevator 952 (Alewife platform to lobby)"
   }
+  @facility_2 %Facility{
+    id: "953",
+    type: "ELEVATOR",
+    short_name: "Alewife platform to lobby",
+    long_name: "Charles/MGH Elevator 953"
+  }
+
+  @facility_3 %Facility{
+    id: "954",
+    type: "ELEVATOR",
+    short_name: "Alewife platform to lobby",
+    long_name: "Charles/MGH Elevator 954"
+  }
+
+  @facility_4 %Facility{
+    id: "955",
+    type: "ELEVATOR",
+    short_name: "Alewife platform to lobby",
+    long_name: "Charles/MGH Elevator 955"
+  }
 
   describe "due_to_cause/1" do
     test "when cause is empty string" do
@@ -454,14 +474,34 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
     end
   end
 
-  describe "facility_name/1" do
-    test "facility nil" do
-      assert BuildAutoText.facility_name(%{facility: nil}) == ""
+  describe "facility_names/1" do
+    test "facility empty" do
+      assert BuildAutoText.facility_names(%{facilities: []}) == ""
     end
 
     test "facility has long name" do
       expected = "Charles/MGH Elevator 952 (Alewife platform to lobby)"
-      actual = BuildAutoText.facility_name(%{facility: @facility})
+      actual = BuildAutoText.facility_names(%{facilities: [@facility]})
+      assert expected == actual
+    end
+
+    test "there's 3 facilities" do
+      expected =
+        "Charles/MGH Elevator 952 (Alewife platform to lobby), Charles/MGH Elevator 953, and Charles/MGH Elevator 954"
+
+      actual = BuildAutoText.facility_names(%{facilities: [@facility, @facility_2, @facility_3]})
+      assert expected == actual
+    end
+
+    test "there's 4 facilities" do
+      expected =
+        "Charles/MGH Elevator 952 (Alewife platform to lobby), Charles/MGH Elevator 953 and 2 other facilities"
+
+      actual =
+        BuildAutoText.facility_names(%{
+          facilities: [@facility, @facility_2, @facility_3, @facility_4]
+        })
+
       assert expected == actual
     end
   end

@@ -231,35 +231,35 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionTextTest d
     end
   end
 
-  describe "affected_facility/1" do
-    test "when facility is nil" do
-      assert BuildDescriptionText.affected_facility(%{facility: nil}) == ""
+  describe "affected_facilities/1" do
+    test "when facilities is empty" do
+      assert BuildDescriptionText.affected_facilities(%{facilities: []}) == ""
     end
 
     test "when facility has no alternate service text" do
       autotext_data = %{
-        facility: @facility_no_service_text
+        facilities: [@facility_no_service_text]
       }
 
-      actual = BuildDescriptionText.affected_facility(autotext_data)
+      actual = BuildDescriptionText.affected_facilities(autotext_data)
       assert "" == actual
     end
 
     test "when facility has alternate service text" do
       autotext_data = %{
-        facility: @facility_with_service_text
+        facilities: [@facility_with_service_text]
       }
 
       expected =
         "To access the Bowdoin platform or Bremen St lobby from the Wonderland platform..."
 
-      actual = BuildDescriptionText.affected_facility(autotext_data)
+      actual = BuildDescriptionText.affected_facilities(autotext_data)
       assert expected == actual
     end
 
     test "when there are multiple facilities" do
       autotext_data = %{
-        facility: [
+        facilities: [
           @facility_with_service_text,
           @facility_no_service_text,
           @facility_with_service_text
@@ -269,7 +269,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionTextTest d
       expected =
         "To access the Bowdoin platform or Bremen St lobby from the Wonderland platform...\n\nTo access the Bowdoin platform or Bremen St lobby from the Wonderland platform..."
 
-      actual = BuildDescriptionText.affected_facility(autotext_data)
+      actual = BuildDescriptionText.affected_facilities(autotext_data)
       assert expected == actual
     end
   end

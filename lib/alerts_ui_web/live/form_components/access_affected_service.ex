@@ -25,12 +25,14 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     field :stop_search_term, :binary
     field :facility_types, {:array, :string}
     field :facility_types_filter, :string
-    field :facility_id, :string
+    field :facility_ids, {:array, :string}
+    field :single_facility_id, :string
     field :facility_search_term, :string
   end
 
-  @fields ~w[stop_id stop_search_term facility_types facility_types_filter facility_id facility_search_term]a
-  @required_fields ~w[facility_id]a
+  @single_facility_effect_names ["Elevator Closure", "Escalator Closure"]
+  @fields ~w[stop_id stop_search_term facility_types facility_types_filter facility_ids single_facility_id facility_search_term]a
+  @required_fields ~w[facility_ids]a
 
   @impl true
   def mount(socket) do
@@ -44,7 +46,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
        filter_title_value: "All stops",
        obsolete_ids: %{},
        alert_data: %{
-         facility_id: ""
+         facility_ids: []
        },
        available_facilities: AsyncResult.loading()
      })}
@@ -66,7 +68,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
       else
         alert_data
       end
-      |> Map.put_new(:facility_id, "")
+      |> Map.put_new(:facility_ids, [])
 
     form =
       %__MODULE__{}
@@ -92,7 +94,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     changeset =
       %__MODULE__{}
       |> build_changeset(%{})
-      |> validate_required([:facility_id])
+      |> validate_required([:facility_ids])
 
     errors =
       case changeset |> apply_action(:validate) do
@@ -122,7 +124,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
 
     case apply_action(
            changeset
-           |> validate_required([:facility_id]),
+           |> validate_required([:facility_ids]),
            :validate
          ) do
       {:ok, _changeset} ->
@@ -182,7 +184,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
 
     obsolete_ids =
       EntityValidator.get_obsolete_ids(
-        Map.get(socket.assigns.alert_data, :facility_id),
+        Map.get(socket.assigns.alert_data, :facility_ids),
         filter_stops_from_result(socket.assigns.available_facilities)
       )
 
@@ -193,14 +195,10 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     # and we have not assigned obsolete ids before
     # send result to parent and assign errors
     if found_obsolete_ids && Enum.empty?(socket.assigns.obsolete_ids) do
-      new_facility_id =
-        if Map.get(socket.assigns.alert_data, :facility_id) in obsolete_ids do
-          nil
-        else
-          Map.get(socket.assigns.alert_data, :facility_id)
-        end
+      new_facility_ids = Map.get(socket.assigns.alert_data, :facility_ids) -- obsolete_ids
 
-      new_alert_data = Map.put(socket.assigns.alert_data, :facility_id, new_facility_id)
+      new_facility_ids = if new_facility_ids == [], do: nil, else: new_facility_ids
+      new_alert_data = Map.put(socket.assigns.alert_data, :facility_ids, new_facility_ids)
 
       changeset =
         %__MODULE__{}
@@ -246,6 +244,9 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
         %{"access_affected_service" => access_affected_service},
         socket
       ) do
+    access_affected_service =
+      wrap_single_facility_id(access_affected_service, socket.assigns.effect_name)
+
     changeset = build_changeset(%__MODULE__{}, access_affected_service)
 
     case apply_action(changeset |> validate_required(@required_fields), :validate) do
@@ -254,12 +255,12 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
           Map.get(socket.assigns.available_facilities, :result, %{facilities: []}) ||
             %{facilities: []}
 
-        selected_facility =
-          Enum.find(available_facilities, &(&1.id == access_affected_service["facility_id"]))
+        selected_facilities =
+          available_facilities |> Enum.filter(&(&1.id in access_affected_service["facility_ids"]))
 
         send(self(), {:add_errors, [], __MODULE__})
         send(self(), {:section_completed, changeset})
-        send(self(), {:selected_facility, selected_facility})
+        send(self(), {:selected_facilities, selected_facilities})
 
       {:error, changeset} ->
         send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
@@ -346,7 +347,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
 
     # Facility selector
     facility_search_term = assigns.form[:facility_search_term].value
-    facility_id = assigns.form[:facility_id].value || ""
+    facility_ids = assigns.form[:facility_ids].value || []
 
     facility_id_options =
       if Helpers.async_available?(assigns, :available_facilities) do
@@ -356,14 +357,14 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             &filter_facility_by_stop_ids(
               &1,
               assigns.stop_id_filter_value,
-              facility_id
+              facility_ids
             )
           )
 
         SelectFormatter.formatted_select_options(%SelectFormatter{
           options: options,
           search_term: facility_search_term,
-          values_to_keep: List.wrap(facility_id),
+          values_to_keep: facility_ids,
           option_prefix: "facility-filter"
         })
       else
@@ -373,7 +374,8 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     assigns =
       assign(assigns,
         modal_stop_id_options: modal_stop_id_options,
-        facility_id_options: facility_id_options
+        facility_id_options: facility_id_options,
+        single_facility_effect_names: @single_facility_effect_names
       )
 
     ~H"""
@@ -413,14 +415,18 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
           </.modal>
           <.filtered_select
             class="md:w-[25%] h-[32rem]"
-            field={@form[:facility_id]}
+            field={
+              if @effect_name in @single_facility_effect_names,
+                do: @form[:single_facility_id],
+                else: @form[:facility_ids]
+            }
             filter_field={@form[:facility_search_term]}
             label="Facilities"
             loading={Map.get(@available_facilities, :loading, true)}
             modal_filter_active={filter_active?(@stop_id_filter_value)}
             modal_filter_id="stops-filter-modal"
             modal_filter_title={"Filter: #{@filter_title_value}"}
-            multiple={false}
+            multiple={@effect_name not in @single_facility_effect_names}
             no_results={Enum.empty?(@facility_id_options)}
             options={@facility_id_options}
             target_id="#service_form"
@@ -436,7 +442,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
   defp filter_active?(filter_value) when filter_value in ["", nil, "default"], do: false
   defp filter_active?(_), do: true
 
-  defp filter_facility_by_stop_ids(facility, stop_id_filter_value, selected_facility_id) do
+  defp filter_facility_by_stop_ids(facility, stop_id_filter_value, selected_facility_ids) do
     # returns true if facility in list if it belongs to a selected stop or has already been selected by the user.
     equals_stop_id =
       if stop_id_filter_value === "default" do
@@ -445,8 +451,21 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
         facility.stop.id === stop_id_filter_value
       end
 
-    equals_stop_id or facility.id == selected_facility_id
+    equals_stop_id or facility.id in selected_facility_ids
   end
+
+  def wrap_single_facility_id(access_affected_service, effect_name)
+      when effect_name in @single_facility_effect_names do
+    # if it's an alert effect that can only take 1 facility (eg Elevator Issue), we need to set facility_ids to equal
+    # the single_facility_id from the form, so we don't have to worry about whether it's a list
+    # elsewhere
+    incoming_facility_id = Map.get(access_affected_service, "single_facility_id")
+
+    access_affected_service
+    |> Map.put("facility_ids", List.wrap(incoming_facility_id))
+  end
+
+  def wrap_single_facility_id(access_affected_service, _effect), do: access_affected_service
 
   defp string_to_formatted_atom(string) do
     string

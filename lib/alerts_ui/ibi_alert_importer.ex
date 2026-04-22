@@ -433,7 +433,7 @@ defmodule AlertsUI.IBIAlertImporter do
       :stop_ids,
       :trip_ids,
       :stop_names_and_ids,
-      :facility_id,
+      :facility_ids,
       :direction,
       :service_types,
       :alert_timing,
@@ -542,8 +542,8 @@ defmodule AlertsUI.IBIAlertImporter do
     from_ibi(ibi_alert, :original_direction_selections) |> Enum.at(0)
   end
 
-  def from_ibi(ibi_alert, :facility_id) do
-    from_ibi(ibi_alert, :original_facility_selections) |> Enum.at(0)
+  def from_ibi(ibi_alert, :facility_ids) do
+    from_ibi(ibi_alert, :original_facility_selections)
   end
 
   def from_ibi(ibi_alert, :service_types), do: [from_ibi(ibi_alert, :route_type)]

@@ -58,10 +58,10 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
 
       view
       |> element("form")
-      |> render_change(%{"access_affected_service" => %{"facility_id" => "Facility-3"}})
+      |> render_change(%{"access_affected_service" => %{"facility_ids" => ["Facility-3"]}})
 
       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
-                      {:section_completed, %AccessAffectedService{facility_id: "Facility-3"}}}
+                      {:section_completed, %AccessAffectedService{facility_ids: ["Facility-3"]}}}
     end
 
     test "search works" do
@@ -77,7 +77,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
 
         assert document_has_element?(
                  document,
-                 "select#access_affected_service_facility_id > option[value=\"Facility-3\"]"
+                 "select#access_affected_service_facility_ids > option[value=\"Facility-3\"]"
                )
 
         {:ok, document} =
@@ -88,7 +88,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
 
         refute document_has_element?(
                  document,
-                 "select#access_affected_service_facility_id > option[value=\"Facility-3\"][selected=\"selected\"]"
+                 "select#access_affected_service_facility_ids > option[value=\"Facility-3\"][selected=\"selected\"]"
                )
       end
     end
@@ -205,12 +205,12 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
 
       view
       |> element("form")
-      |> render_change(%{"access_affected_service" => %{"facility_id" => nil}})
+      |> render_change(%{"access_affected_service" => %{"facility_ids" => []}})
 
       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
                       {:section_completed,
                        %Ecto.Changeset{
-                         errors: [facility_id: {"can't be blank", [validation: :required]}]
+                         errors: [facility_ids: {"can't be blank", [validation: :required]}]
                        }}}
     end
 
@@ -219,7 +219,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
         :BIKE_ISSUE
 
         alert_data = %AlertsUIWeb.FormComponents.Helpers.AlertData{
-          facility_id: "Facility-3",
+          facility_ids: ["Facility-3"],
           effect_name: "Bike Issue"
         }
 
@@ -229,7 +229,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
 
         {:ok, document} =
           view
-          |> element("select#access_affected_service_facility_id")
+          |> element("select#access_affected_service_facility_ids")
           |> render_async()
           |> Floki.parse_document()
 

@@ -24,6 +24,22 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
     ]
   }
 
+  @facility_2 %Facility{
+    id: "953",
+    type: "ELEVATOR",
+    short_name: "Alewife platform 2 to lobby",
+    long_name: "Charles/MGH Elevator 953 (Alewife platform 2 to lobby 2)",
+    properties: [
+      %{
+        name: "alternate-service-text",
+        value: "To access the Bowdoin platform or Bremen St lobby from the Wonderland platform..."
+      },
+      %{name: "excludes-stop", value: 70_047},
+      %{name: "excludes-stop", value: 70_96},
+      %{name: "excludes-stop", value: 70_97}
+    ]
+  }
+
   @route_1 %Route{id: "1", name: "1", direction_names: %{0 => "Westbound", 1 => "Eastbound"}}
   @route_2 %Route{id: "22", name: "22"}
 
@@ -60,7 +76,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
 
   # putting these here to prevent a weird test race condition
   # with string_to_existing_atom
-  :facility_name
+  :facility_names
   :route_names
   :impacted_modes
   :stop_form
@@ -96,7 +112,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
     # access
     test "access alert bike issue" do
       autotext_data = %{
-        facility: @facility,
+        facilities: [@facility],
         combination: :ACCESS,
         route_type: nil,
         effect_name: "Bike Issue",
@@ -110,7 +126,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Charles/MGH Elevator 952 (Alewife platform to lobby) issue today due to the holiday."
+        "Charles/MGH Elevator 952 (Alewife platform to lobby): issue today due to the holiday."
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -122,7 +138,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
 
     test "access alert escalator closure" do
       autotext_data = %{
-        facility: @facility,
+        facilities: [@facility],
         combination: :ACCESS,
         route_type: nil,
         effect_name: "Escalator Closure",
@@ -136,7 +152,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Charles/MGH Elevator 952 (Alewife platform to lobby) unavailable today due to the holiday."
+        "Charles/MGH Elevator 952 (Alewife platform to lobby) is unavailable today due to the holiday."
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -148,7 +164,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
 
     test "access alert parking closure" do
       autotext_data = %{
-        facility: @facility,
+        facilities: [@facility],
         combination: :ACCESS,
         route_type: nil,
         effect_name: "Parking Closure",
@@ -174,7 +190,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
 
     test "access alert elevator closure" do
       autotext_data = %{
-        facility: @facility,
+        facilities: [@facility, @facility_2],
         combination: :ACCESS,
         route_type: nil,
         effect_name: "Elevator Closure",
@@ -188,7 +204,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Charles/MGH Elevator 952 (Alewife platform to lobby) unavailable today due to the holiday."
+        "Charles/MGH Elevator 952 (Alewife platform to lobby) and Charles/MGH Elevator 953 (Alewife platform 2 to lobby 2) are unavailable today due to the holiday."
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -200,7 +216,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
 
     test "access alert access issue" do
       autotext_data = %{
-        facility: @facility,
+        facilities: [@facility],
         combination: :ACCESS,
         route_type: nil,
         effect_name: "Access Issue",
@@ -214,7 +230,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Charles/MGH Elevator 952 (Alewife platform to lobby) issue today due to the holiday."
+        "Charles/MGH Elevator 952 (Alewife platform to lobby): issue today due to the holiday."
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -226,7 +242,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
 
     test "access alert facility issue" do
       autotext_data = %{
-        facility: @facility,
+        facilities: [@facility],
         route_type: nil,
         effect_name: "Facility Issue",
         cause_detail: "HOLIDAY",
@@ -239,7 +255,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Charles/MGH Elevator 952 (Alewife platform to lobby) issue today due to the holiday."
+        "Charles/MGH Elevator 952 (Alewife platform to lobby): issue today due to the holiday."
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -251,7 +267,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
 
     test "access alert parking issue" do
       autotext_data = %{
-        facility: @facility,
+        facilities: [@facility],
         route_type: nil,
         effect_name: "Parking Issue",
         cause_detail: "HOLIDAY",
@@ -264,7 +280,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Charles/MGH Elevator 952 (Alewife platform to lobby) issue today due to the holiday."
+        "Charles/MGH Elevator 952 (Alewife platform to lobby): issue today due to the holiday."
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -1389,7 +1405,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       autotext_data = %{
         route_type: nil,
         effect_name: "Elevator Closure",
-        facility: @facility
+        facilities: [@facility]
       }
 
       expected =

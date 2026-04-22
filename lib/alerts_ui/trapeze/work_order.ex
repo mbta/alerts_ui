@@ -101,7 +101,7 @@ defmodule AlertsUI.Trapeze.WorkOrder do
        effect_detail: effect_detail(work_order.effect),
        effect_name: effect_name(work_order.effect),
        effect: "ACCESSIBILITY_ISSUE",
-       facility_id: work_order.facility_id,
+       facility_ids: [work_order.facility_id],
        header_text: autotext(work_order) |> header_for(),
        notification_period_end: end_datetime(work_order),
        notification_period_start: work_order.start_datetime |> to_naive_eastern(),
@@ -133,7 +133,7 @@ defmodule AlertsUI.Trapeze.WorkOrder do
       cause_detail: "maintenance",
       start_datetime: work_order.start_datetime |> to_naive_eastern(),
       end_specifier: :until_further_notice,
-      facility: facility,
+      facilities: [facility],
       stops: stops |> Enum.map(fn stop -> StopsRepo.get(stop.id) end)
     })
   end

@@ -35,7 +35,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                route_ids: [],
                stop_ids: [],
                trip_ids: [],
-               facility_id: nil,
+               facility_ids: [],
                header_text: "cool header text",
                description_text: "description text",
                service_types: [],
@@ -68,7 +68,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                route_ids: [],
                stop_ids: [],
                trip_ids: [],
-               facility_id: nil,
+               facility_ids: [],
                header_text: "cool header text",
                description_text: "description text",
                service_types: [],
@@ -102,7 +102,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                combination: :RDS,
                direction: "default",
                effect_name: "Delay",
-               facility_id: nil,
+               facility_ids: [],
                route_type: 1,
                route_ids: ["1", "2", "3", "4"],
                stop_ids: ["a2", "a3"],
@@ -136,7 +136,42 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                combination: :ACCESS,
                direction: "default",
                effect_name: "Bike Issue",
-               facility_id: "example-facility",
+               facility_ids: ["example-facility"],
+               stop_ids: [],
+               route_ids: [],
+               trip_ids: [],
+               service_types: [nil],
+               header_text: "cool header text",
+               description_text: "description text",
+               reminder_times: [%{id: ^reminder_id, time: ~N[2024-09-24 20:01:00]}],
+               alert_timing: :"one-time",
+               notification_specifier: :same_as_effect_period
+             } = AlertData.build_alert_data("1")
+    end
+
+    test "gets facility id correctly for alerts with single facility" do
+      alert =
+        insert(:alert, %{
+          alert_id: "1",
+          effect: :ACCESSIBILITY_ISSUE,
+          effect_detail: "ELEVATOR_CLOSURE",
+          effect_name: "Elevator Closure",
+          header_text: "cool header text",
+          description_text: "description text",
+          informed_entity: [
+            %{facility_id: "example-facility"}
+          ],
+          primary_service_type: "access"
+        })
+
+      reminder_id = hd(alert.reminder_times).id
+
+      assert %AlertData{
+               combination: :ACCESS,
+               direction: "default",
+               effect_name: "Elevator Closure",
+               facility_ids: ["example-facility"],
+               single_facility_id: "example-facility",
                stop_ids: [],
                route_ids: [],
                trip_ids: [],
@@ -194,7 +229,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                image_url: "http://www.example.com/example.jpg",
                image_alternative_text: "An example image",
                route_type: 3,
-               facility_id: nil,
+               facility_ids: [],
                route_ids: ["1", "2", "3", "4"],
                stop_ids: ["a2", "a3"],
                trip_ids: ["b1"],
@@ -353,7 +388,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                stop_ids: [],
                trip_ids: [],
                direction: "default",
-               facility_id: nil,
+               facility_ids: [],
                header_text: "cool header text",
                description_text: "description text",
                reminder_times: [%{id: ^reminder_time_id, time: ~N[2024-09-24 20:01:00]}],
@@ -388,7 +423,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                stop_ids: [],
                trip_ids: [],
                direction: "default",
-               facility_id: nil,
+               facility_ids: [],
                header_text: "cool header text",
                description_text: "description text",
                reminder_times: [%{id: ^reminder_time_id, time: ~N[2024-09-24 20:01:00]}],

@@ -33,7 +33,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :description_text,
     :direction,
     :effect_name,
-    :facility_id,
+    :facility_ids,
+    :single_facility_id,
     :header_text,
     :image_alternative_text,
     :image_url,
@@ -86,7 +87,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           description_text: String.t() | nil,
           direction: String.t() | nil,
           effect_name: String.t() | nil,
-          facility_id: String.t() | nil,
+          facility_ids: [String.t()] | nil,
+          single_facility_id: String.t() | nil,
           header_text: String.t() | nil,
           image_alternative_text: String.t() | nil,
           image_url: String.t() | nil,
@@ -114,8 +116,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           last_push_notification_timestamp: DateTime.t() | nil,
           notification_toggle: boolean()
         }
-  # effect names where user can only select 1 route
+  # effect names where user can only select 1 type of thing
   @single_route_effect_names ["Detour", "Snow Route"]
+  @single_facility_effect_names ["Elevator Closure", "Escalator Closure"]
+
   @spec build_alert_data(String.t() | Alert.t() | nil, :creating | :duplicating | :editing | nil) ::
           t()
   def build_alert_data(alert, form_type \\ nil)
@@ -222,6 +226,15 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
         do: [],
         else: route_ids
 
+    facility_ids = Alert.gather_facility_ids(alert)
+
+    single_facility_id =
+      if alert.effect_name in @single_facility_effect_names && length(facility_ids) === 1 do
+        hd(facility_ids)
+      else
+        nil
+      end
+
     notifcation_key =
       if form_type == :editing,
         do: :send_push_notification_on_edit,
@@ -238,7 +251,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       combination: combination,
       effect_name: effect_name,
       direction: Alert.get_direction(alert) || "default",
-      facility_id: Alert.gather_facility_ids(alert) |> List.first(),
+      facility_ids: facility_ids,
+      single_facility_id: single_facility_id,
       route_ids: route_ids,
       route_type: route_type,
       single_route_id: single_route_id,
