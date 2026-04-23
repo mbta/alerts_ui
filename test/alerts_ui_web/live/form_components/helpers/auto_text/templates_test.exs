@@ -178,7 +178,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Charles/MGH Elevator 952 (Alewife platform to lobby) closed today due to the holiday."
+        "Charles/MGH Elevator 952 (Alewife platform to lobby) is closed today due to the holiday."
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
