@@ -358,7 +358,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   # formatters
 
   def join_facilities([first, second | rest] = facilities) when length(facilities) > 3 do
-    "#{first}, #{second} and #{length(rest)} other facilities"
+    "#{first}, #{second}, and #{length(rest)} other facilities"
   end
 
   def join_facilities(facilities) do

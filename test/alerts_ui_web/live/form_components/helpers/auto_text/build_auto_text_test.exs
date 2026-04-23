@@ -495,7 +495,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
 
     test "there's 4 facilities" do
       expected =
-        "Charles/MGH Elevator 952 (Alewife platform to lobby), Charles/MGH Elevator 953 and 2 other facilities"
+        "Charles/MGH Elevator 952 (Alewife platform to lobby), Charles/MGH Elevator 953, and 2 other facilities"
 
       actual =
         BuildAutoText.facility_names(%{

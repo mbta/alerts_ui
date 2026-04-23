@@ -239,6 +239,8 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
 
     @tag :logged_in_user
     test "shows missing field error upon submission", %{conn: conn} do
+      :PARKING_ISSUE
+
       with_mocks([
         {RoutePatternsRepo, [], [included_stops_by_route_id: fn _route_id, _direction -> [] end]},
         {FacilitiesRepo, [], get_by_type: fn _types, _opts -> [] end}

@@ -34,7 +34,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     },
     %{
       pattern: {nil, "Parking Closure"},
-      header_template: "?facility_names closed ?alert_duration ?due_to_cause|.",
+      header_template: "?facility_names ?facility_form closed ?alert_duration ?due_to_cause|.",
       service_effect_template: "?stop_names parking closure"
     },
     %{
