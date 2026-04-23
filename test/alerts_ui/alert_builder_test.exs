@@ -3591,6 +3591,57 @@ defmodule AlertsUI.AlertBuilderTest do
     end
   end
 
+  test "builds facility informed entities when stop has no child stops" do
+    alert_data = %{
+      route_type: nil,
+      effect_name: "Elevator Closure",
+      header_text: "test header",
+      description_text: "test description",
+      facility_id: "349"
+    }
+
+    facility = %Facility{
+      id: "349",
+      type: "ESCALATOR",
+      short_name: "Platform to Russell Field",
+      long_name: "Alewife Escalator 349 (Platform to Russell Field)",
+      stop: %Stop{
+        id: "place-alfcl",
+        type: "stop"
+      },
+      properties: []
+    }
+
+    stop = %Stop{
+      id: "place-alfcl",
+      type: "stop",
+      child_ids: []
+    }
+
+    route = %Route{
+      id: "Red",
+      type: 1
+    }
+
+    with_mocks([
+      {FacilitiesRepo, [], [get: fn _facility_id -> facility end]},
+      {StopsRepo, [], [get!: fn _stop_id -> stop end]},
+      {RoutesRepo, [], [by_stop: fn _stop_id -> [route] end]}
+    ]) do
+      result = AlertBuilder.build_alert(alert_data, :ACCESS)
+
+      assert result.informed_entity == [
+               %{
+                 stop_id: "place-alfcl",
+                 route_id: "Red",
+                 route_type: 1,
+                 facility_id: "349",
+                 activities: [:USING_WHEELCHAIR]
+               }
+             ]
+    end
+  end
+
   test "does not insert a direction if there is no route" do
     alert_data = %{
       description_text: "ok",
