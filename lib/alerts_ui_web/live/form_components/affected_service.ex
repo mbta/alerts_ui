@@ -15,6 +15,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     EntityValidator,
     ErrorFormatter,
     Helpers,
+    ObsoleteEntities,
     SelectFormatter,
     ServiceEffectCombinations
   }
@@ -473,20 +474,46 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       socket.assigns.combination
       |> ServiceEffectCombinations.required_fields()
       |> Enum.reject(&(&1 == :direction))
+      |> Enum.sort()
 
     # check that we got results and contains all required fields
-    obsolete_ids_found = Enum.any?(obsolete_ids, fn {_k, v} -> !Enum.empty?(v) end)
-    all_fields_in = Map.keys(obsolete_ids) == required_fields
-
-    send_obsolete_ids? = obsolete_ids_found && all_fields_in
+    send_obsolete_ids? = ObsoleteEntities.send_obsolete_ids?(obsolete_ids, required_fields)
 
     # if all our fields have been returned and there are obsolete ids
     # send result to parent
-    if send_obsolete_ids? do
-      send(self(), {:got_obsolete_ids, obsolete_ids})
-    end
+    previous_assigns = Enum.sort(Map.keys(socket.assigns.obsolete_ids))
 
-    {:noreply, assign(socket, :obsolete_ids, obsolete_ids)}
+    if send_obsolete_ids? && previous_assigns !== required_fields do
+      # remove obsolete ids from required fields
+      alert_data = socket.assigns.alert_data
+
+      ids_with_obsolete_entities_removed =
+        ObsoleteEntities.ids_with_obsolete_entities_removed(
+          alert_data,
+          obsolete_ids,
+          required_fields
+        )
+
+      new_alert_data = Map.merge(socket.assigns.alert_data, ids_with_obsolete_entities_removed)
+
+      changeset =
+        %__MODULE__{}
+        |> build_changeset(new_alert_data)
+        |> validate_required(required_fields)
+
+      case changeset |> apply_action(:validate) do
+        {:ok, _changeset} ->
+          send(self(), {:section_completed, changeset})
+
+        {:error, changeset} ->
+          send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
+      end
+
+      send(self(), {:got_obsolete_ids, obsolete_ids})
+      {:noreply, assign(socket, %{alert_data: new_alert_data, obsolete_ids: obsolete_ids})}
+    else
+      {:noreply, assign(socket, :obsolete_ids, obsolete_ids)}
+    end
   end
 
   @impl true
@@ -706,7 +733,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
                                                                                                        :route_ids
                                                                                                      ].value ||
                                                                                                        [])
-        |> Enum.join(", ")}
+        |> Enum.join(", ")} Selected trip ids: {(@form[:trip_ids].value || []) |> Enum.join(", ")}
       </p>
       <hr class="mt-4" />
     </div>

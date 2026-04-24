@@ -14,6 +14,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     EntityValidator,
     ErrorFormatter,
     Helpers,
+    ObsoleteEntities,
     SelectFormatter
   }
 
@@ -385,15 +386,39 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     obsolete_ids =
       socket.assigns.obsolete_ids |> Map.put_new(mapping[async_key], obsolete_ids_for_field)
 
-    # check that we got results and contains all required fields
-    obsolete_ids_found = Enum.any?(obsolete_ids, fn {_k, v} -> !Enum.empty?(v) end)
-    all_fields_in = Map.keys(obsolete_ids) == @required_fields
+    # check that we got results and contains all required field
 
-    send_obsolete_ids? = obsolete_ids_found && all_fields_in
+    send_obsolete_ids? = ObsoleteEntities.send_obsolete_ids?(obsolete_ids, @required_fields)
 
     # if all our fields have been returned and there are obsolete ids
     # send result to parent
-    if send_obsolete_ids? do
+    previous_assigns = Enum.sort(Map.keys(socket.assigns.obsolete_ids))
+
+    if send_obsolete_ids? && previous_assigns !== @required_fields do
+      alert_data = socket.assigns.alert_data
+
+      ids_with_obsolete_entities_removed =
+        ObsoleteEntities.ids_with_obsolete_entities_removed(
+          alert_data,
+          obsolete_ids,
+          @required_fields
+        )
+
+      new_alert_data = Map.merge(alert_data, ids_with_obsolete_entities_removed)
+
+      changeset =
+        %__MODULE__{}
+        |> build_changeset(new_alert_data)
+        |> validate_required(@required_fields)
+
+      case changeset |> apply_action(:validate) do
+        {:ok, _changeset} ->
+          send(self(), {:section_completed, changeset})
+
+        {:error, changeset} ->
+          send(self(), {:add_errors, ErrorFormatter.parse_field_errors(changeset), __MODULE__})
+      end
+
       send(self(), {:got_obsolete_ids, obsolete_ids})
     end
 

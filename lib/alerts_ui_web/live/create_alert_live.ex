@@ -48,8 +48,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
     ErrorFormatter,
     GetKeyForModeEffect,
     GreenLine,
-    SelectFormatter,
-    ServiceEffectCombinations
+    SelectFormatter
   }
 
   alias AlertsUIWeb.Step
@@ -625,28 +624,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
     user = Users.create_or_update_user_from_session(socket.assigns.current_user)
 
-    alert_data =
-      socket.assigns.alert_data
-
-    # remove obsolete ids from required fields
-    ids_with_obsolete_entities_removed =
-      if socket.assigns.combination == :ACCESS do
-        # ids have already been removed from facility alerts
-        %{}
-      else
-        ServiceEffectCombinations.required_fields(socket.assigns.combination)
-        |> Enum.reject(&(&1 == :direction))
-        |> Enum.map(fn field ->
-          obsolete_ids = Map.get(socket.assigns.obsolete_ids, field, [])
-          {field, alert_data[field] -- obsolete_ids}
-        end)
-        |> Enum.into(%{})
-      end
-
-    alert_data =
-      alert_data
-      |> Map.merge(ids_with_obsolete_entities_removed)
-      |> AlertBuilder.build_alert(socket.assigns.combination)
+    alert_data = AlertBuilder.build_alert(socket.assigns.alert_data, socket.assigns.combination)
 
     existing_alert =
       if is_nil(socket.assigns.alert_id) || form_type == :duplicating do

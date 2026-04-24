@@ -19,6 +19,10 @@ defmodule AlertsUI.MixProject do
         ignore_modules: [
           AlertsUI.DataCase,
           AlertsUI.IBIAlertImporter,
+          AlertsUIWeb.IBIImporterLive,
+          AlertsUI.Models.LatestIBIAlert,
+          AlertsUI.IBIAlertImportParser,
+          AlertsUI.Models.IBIAlert,
           # Ignoring due to swagger definitions
           AlertsUIWeb.ApiController,
           AlertsUIWeb.ComponentsLive,

@@ -145,8 +145,8 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
             severity_level: :WARNING,
             cause_detail: "PARADE",
             reminder_times: [],
-            informed_entity: [%{route_type: 3, route_id: "1"}],
-            original_route_selections: ["|1", "|2", "|3"]
+            informed_entity: [%{route_type: 3, route_id: @route_one.id, direction_id: 0}],
+            original_route_selections: ["#{@route_one.name}|#{@route_one.id}"]
           })
 
         {:ok, _} =
@@ -199,8 +199,8 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
             severity_level: :WARNING,
             cause_detail: "PARADE",
             reminder_times: [],
-            informed_entity: [%{route_type: 3, route_id: "1"}],
-            original_route_selections: ["|1", "|2", "|3"]
+            informed_entity: [%{route_type: 3, route_id: @route_one.id}],
+            original_route_selections: ["#{@route_one.name}|#{@route_one.id}"]
           })
 
         {:ok, _} =
@@ -1236,8 +1236,8 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
             severity_level: :WARNING,
             cause_detail: "UNKNOWN",
             reminder_times: [],
-            informed_entity: [%{route_type: 3, route_id: "1", direction_id: 0}],
-            original_route_selections: ["|1", "|2", "|3"]
+            informed_entity: [%{route_type: 3, route_id: @route_one.id, direction_id: 0}],
+            original_route_selections: ["#{@route_one.name}|#{@route_one.id}"]
           })
 
         {:ok, _} =
