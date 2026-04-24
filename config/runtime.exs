@@ -101,7 +101,7 @@ cond do
       configure: {AlertsUI.Repo, :before_connect, []},
       timeout: 30_000,
       ssl: true,
-      ssl_opts: [
+      ssl: [
         cacertfile: "priv/aws-cert-bundle.pem",
         verify: :verify_peer,
         server_name_indication: String.to_charlist(hostname),
