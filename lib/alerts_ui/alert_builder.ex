@@ -109,7 +109,7 @@ defmodule AlertsUI.AlertBuilder do
     |> Map.merge(plaintext_reminder_selections(alert_data))
     |> Map.merge(primary_service_type(alert_data))
     |> Map.merge(cause_and_effect(alert_data))
-    |> Map.merge(original_selections(alert_data, options))
+    |> Map.merge(original_selections(alert_data, combination, options))
     |> Map.merge(time_periods(alert_data, current_time, options))
     |> Map.merge(informed_entity(alert_data, combination, options))
     |> Map.merge(last_modified_timestamp(alert_data, current_time))
@@ -221,11 +221,11 @@ defmodule AlertsUI.AlertBuilder do
     }
   end
 
-  def original_selections(alert_data, options \\ []) do
+  def original_selections(alert_data, combination, options \\ []) do
     if Keyword.get(options, :no_original_selections) do
       original_selections_from_import(alert_data)
     else
-      original_selections_from_form(alert_data)
+      original_selections_from_form(alert_data, combination)
     end
   end
 
@@ -245,7 +245,7 @@ defmodule AlertsUI.AlertBuilder do
     ])
   end
 
-  defp original_selections_from_form(alert_data) do
+  defp original_selections_from_form(alert_data, combination) do
     # used to generate original_direction_selections, original_route_selection, routes, etc.
     selected_routes = Map.get(alert_data, :route_ids, [])
     # direction_id needed for original_direction_selections, child_stops_with_context
@@ -256,13 +256,13 @@ defmodule AlertsUI.AlertBuilder do
     # added to our list of routes
 
     user_selected_directions =
-      if selected_routes in [nil, []] do
-        nil
-      else
+      if combination in [:RDS, :RDT, :RDTS] do
         [
           direction_name(selected_routes, pre_combo_routes(selected_routes), direction_id) <>
             "|" <> (direction_id || "")
         ]
+      else
+        nil
       end
 
     original_direction_selections =

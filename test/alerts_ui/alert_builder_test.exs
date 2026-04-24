@@ -112,7 +112,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  original_facility_selections: [],
                  original_mode_selections: [],
                  primary_service_type: "1",
-                 original_direction_selections: ["Inbound|1"],
+                 original_direction_selections: nil,
                  closed_timestamp: nil,
                  created_timestamp: nil,
                  last_modified_timestamp: ~U[2024-04-30 05:54:00Z],
@@ -153,7 +153,7 @@ defmodule AlertsUI.AlertBuilderTest do
           trip_ids: ["trip-1"],
           original_trip_selections: ["old trip|trip-0"],
           direction: "1",
-          original_direction_selections: ["northbound|0"],
+          original_direction_selections: ["Inbound|1"],
           active_period_start: ~N[2024-04-30 11:54:00],
           alert_timing: :"one-time",
           active_period_end_specifier: :until_further_notice,
@@ -173,12 +173,13 @@ defmodule AlertsUI.AlertBuilderTest do
           ]
         }
 
-        result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 05:54:00Z])
+        result = AlertBuilder.build_alert(alert_data, :RDS, ~U[2024-04-30 05:54:00Z])
 
         assert %{
                  original_route_selections: ["57|57"],
                  original_stop_selections: ["new stop|place-1"],
                  original_trip_selections: ["|trip-1"],
+                 original_direction_selections: ["Inbound|1"],
                  original_facility_selections: []
                } = result
       end
@@ -891,7 +892,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  ],
                  cause_detail: "FREIGHT_TRAIN_INTERFERENCE",
                  original_route_selections: ["CapeFLYER|CapeFlyer"],
-                 original_direction_selections: ["Both|default"]
+                 original_direction_selections: nil
                } = result
       end
     end
@@ -3597,7 +3598,7 @@ defmodule AlertsUI.AlertBuilderTest do
       effect_name: "Elevator Closure",
       header_text: "test header",
       description_text: "test description",
-      facility_id: "349"
+      facility_ids: ["349"]
     }
 
     facility = %Facility{
