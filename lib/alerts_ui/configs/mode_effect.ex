@@ -7,7 +7,8 @@ defmodule AlertsUI.Models.ModeEffectStruct do
     :default_cause,
     :default_severity,
     :send_push_notification_on_edit,
-    :prediction_suppression_warning
+    :prediction_suppression_warning,
+    :path_name
   ]
   defstruct [
     :combination,
@@ -15,6 +16,7 @@ defmodule AlertsUI.Models.ModeEffectStruct do
     :default_severity,
     :send_push_notification_on_edit,
     :prediction_suppression_warning,
+    :path_name,
     send_push_notification_on_create: true
   ]
 
@@ -24,7 +26,8 @@ defmodule AlertsUI.Models.ModeEffectStruct do
           default_severity: integer(),
           send_push_notification_on_create: boolean(),
           send_push_notification_on_edit: boolean(),
-          prediction_suppression_warning: boolean()
+          prediction_suppression_warning: boolean(),
+          path_name: String.t()
         }
 end
 
@@ -43,7 +46,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 3,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "delay"
       },
       "Extra Service" => %ModeEffectStruct{
         combination: :R,
@@ -51,7 +55,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 3,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "extra_service"
       },
       "Notice" => %ModeEffectStruct{
         combination: :RDS,
@@ -59,7 +64,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 1,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "notice"
       },
       "Schedule Change" => %ModeEffectStruct{
         combination: :R,
@@ -67,7 +73,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 3,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "schedule_change"
       },
       "Service Change" => %ModeEffectStruct{
         combination: :RDS,
@@ -75,7 +82,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 3,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "service_change"
       },
       "Shuttle" => %ModeEffectStruct{
         combination: :RDS,
@@ -83,7 +91,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 7,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: true
+        prediction_suppression_warning: true,
+        path_name: "shuttle"
       },
       "Single Tracking" => %ModeEffectStruct{
         combination: :RDS,
@@ -91,7 +100,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 1,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "single_tracking",
       },
       "Station Bypass" => %ModeEffectStruct{
         combination: :RDS,
@@ -99,7 +109,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 7,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "station_bypass"
       },
       "Station Closure" => %ModeEffectStruct{
         combination: :SR,
@@ -107,7 +118,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 7,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "station_closure"
       },
       "Station Issue" => %ModeEffectStruct{
         combination: :SR,
@@ -115,7 +127,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 1,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "station_issue"
       },
       "Suspension" => %ModeEffectStruct{
         combination: :RDS,
@@ -123,7 +136,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 7,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: true
+        prediction_suppression_warning: true,
+        path_name: "suspension"
       }
     },
     commuter_rail: %{
@@ -133,7 +147,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 5,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
-        prediction_suppression_warning: true
+        prediction_suppression_warning: true,
+        path_name: "cancellation" 
       },
       "Delay" => %ModeEffectStruct{
         combination: :RDTS,
@@ -141,7 +156,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 3,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "delay"
       },
       "Extra Service" => %ModeEffectStruct{
         combination: :R,
@@ -149,7 +165,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 3,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "extra_service"
       },
       "Notice" => %ModeEffectStruct{
         combination: :RDTS,
@@ -157,7 +174,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 1,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "notice"
       },
       "Schedule Change" => %ModeEffectStruct{
         combination: :R,
@@ -165,7 +183,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 3,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "schedule_change"
       },
       "Service Change" => %ModeEffectStruct{
         combination: :RDTS,
@@ -173,7 +192,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 3,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "service_change"
       },
       "Shuttle" => %ModeEffectStruct{
         combination: :RDTS,
@@ -181,7 +201,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 7,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
-        prediction_suppression_warning: true
+        prediction_suppression_warning: true,
+        path_name: "shuttle"
       },
       "Station Bypass" => %ModeEffectStruct{
         combination: :RDTS,
@@ -189,7 +210,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 7,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "station_bypass"
       },
       "Station Closure" => %ModeEffectStruct{
         combination: :SR,
@@ -197,7 +219,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 7,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "station_closure"
       },
       "Station Issue" => %ModeEffectStruct{
         combination: :SR,
@@ -205,7 +228,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 1,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "station_issue"
       },
       "Suspension" => %ModeEffectStruct{
         combination: :RDTS,
@@ -213,7 +237,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 7,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
-        prediction_suppression_warning: true
+        prediction_suppression_warning: true,
+        path_name: "suspension"
       },
       "Track Change" => %ModeEffectStruct{
         combination: :RDTS,
@@ -221,7 +246,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 7,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "track_change"
       }
     },
     bus: %{
@@ -231,7 +257,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 4,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "delay"
       },
       "Detour" => %ModeEffectStruct{
         combination: :RDS,
@@ -239,7 +266,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 7,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "detour"
       },
       "Extra Service" => %ModeEffectStruct{
         combination: :R,
@@ -247,7 +275,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 3,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "extra_service"
       },
       "Multi-Route Detour" => %ModeEffectStruct{
         combination: :SR,
@@ -255,7 +284,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 7,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "multi-route_detour"
       },
       "Notice" => %ModeEffectStruct{
         combination: :RDS,
@@ -263,7 +293,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 1,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "notice"
       },
       "Schedule Change" => %ModeEffectStruct{
         combination: :R,
@@ -271,7 +302,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 3,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "schedule_change"
       },
       "Service Change" => %ModeEffectStruct{
         combination: :RDS,
@@ -279,7 +311,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 3,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "service_change"
       },
       "Snow Route" => %ModeEffectStruct{
         combination: :RDS,
@@ -287,7 +320,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 5,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "snow_route"
       },
       "Stop Closure" => %ModeEffectStruct{
         combination: :SR,
@@ -295,7 +329,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 5,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "stop_closure"
       },
       "Stop Move" => %ModeEffectStruct{
         combination: :SR,
@@ -303,7 +338,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 1,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "stop_move"
       },
       "Suspension" => %ModeEffectStruct{
         combination: :RDS,
@@ -311,7 +347,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 7,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: true
+        prediction_suppression_warning: true,
+        path_name: "suspension"
       }
     },
     ferry: %{
@@ -321,7 +358,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 5,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: true
+        prediction_suppression_warning: true,
+        path_name: "cancellation"
       },
       "Delay" => %ModeEffectStruct{
         combination: :RDTS,
@@ -329,7 +367,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 3,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "delay"
       },
       "Dock Bypass" => %ModeEffectStruct{
         combination: :RDTS,
@@ -337,7 +376,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 7,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "dock_bypass"
       },
       "Dock Closure" => %ModeEffectStruct{
         combination: :SR,
@@ -345,7 +385,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 5,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "dock_closure"
       },
       "Dock Issue" => %ModeEffectStruct{
         combination: :SR,
@@ -353,7 +394,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 1,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "dock_issue"
       },
       "Extra Service" => %ModeEffectStruct{
         combination: :R,
@@ -361,7 +403,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 3,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "extra_service"
       },
       "Notice" => %ModeEffectStruct{
         combination: :RDTS,
@@ -369,7 +412,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 1,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "notice"
       },
       "Schedule Change" => %ModeEffectStruct{
         combination: :R,
@@ -377,7 +421,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 3,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "schedule_change"
       },
       "Service Change" => %ModeEffectStruct{
         combination: :RDTS,
@@ -385,7 +430,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 3,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "service_change"
       },
       "Shuttle" => %ModeEffectStruct{
         combination: :RDTS,
@@ -393,7 +439,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 7,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: true
+        prediction_suppression_warning: true,
+        path_name: "shuttle"
       },
       "Suspension" => %ModeEffectStruct{
         combination: :RDTS,
@@ -401,7 +448,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 7,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: true
+        prediction_suppression_warning: true,
+        path_name: "shuttle"
       }
     },
     facility: %{
@@ -411,7 +459,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 3,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "access_issue"
       },
       "Bike Issue" => %ModeEffectStruct{
         combination: :ACCESS,
@@ -419,7 +468,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 3,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "bike_issue"
       },
       "Elevator Closure" => %ModeEffectStruct{
         combination: :ACCESS,
@@ -427,7 +477,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 3,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "elevator_closure"
       },
       "Escalator Closure" => %ModeEffectStruct{
         combination: :ACCESS,
@@ -435,7 +486,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 3,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "escalator_closure"
       },
       "Facility Issue" => %ModeEffectStruct{
         combination: :ACCESS,
@@ -443,7 +495,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 3,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "facility_issue"
       },
       "Parking Closure" => %ModeEffectStruct{
         combination: :ACCESS,
@@ -451,7 +504,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 3,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "parking_closure"
       },
       "Parking Issue" => %ModeEffectStruct{
         combination: :ACCESS,
@@ -459,7 +513,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 3,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "parking_issue"
       }
     },
     systemwide: %{
@@ -469,7 +524,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 3,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "amber_alert"
       },
       "Delay" => %ModeEffectStruct{
         combination: nil,
@@ -477,7 +533,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 5,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "delay"
       },
       "Extra Service" => %ModeEffectStruct{
         combination: nil,
@@ -485,7 +542,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 3,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "extra_service"
       },
       "Notice" => %ModeEffectStruct{
         combination: nil,
@@ -493,7 +551,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 1,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "notice"
       },
       "Policy Change" => %ModeEffectStruct{
         combination: nil,
@@ -501,7 +560,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 3,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "policy_change"
       },
       "Schedule Change" => %ModeEffectStruct{
         combination: nil,
@@ -509,7 +569,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 3,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "schedule_change"
       },
       "Service Change" => %ModeEffectStruct{
         combination: nil,
@@ -517,7 +578,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 7,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "service_change"
       },
       "Summary" => %ModeEffectStruct{
         combination: nil,
@@ -525,7 +587,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 1,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "summary"
       },
       "Suspension" => %ModeEffectStruct{
         combination: nil,
@@ -533,11 +596,17 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_severity: 7,
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
-        prediction_suppression_warning: false
+        prediction_suppression_warning: false,
+        path_name: "suspension"
       }
     }
   }
 
   @spec mode_effect() :: %{atom => %{String.t() => ModeEffectStruct.t()}}
   def mode_effect, do: @mode_effect
+
+  @spec mode_effects_by_route_type_name(String.t()) :: %{String.t() => ModeEffectStruct.t()}
+  def mode_effects_by_route_type_name(route_type_name) do
+    @mode_effect[route_type_name]
+  end
 end

@@ -1,4 +1,4 @@
-defprotocol AlertsUIWeb.CreateAlertMonoLive.AlertData.Slice do
+defprotocol AlertsUIWeb.CreateAlertMonoLive.Slice do
   @moduledoc """
   Protocols and etc. related to **slices**: logical subsets of
   alert data, modularized for ease of management and comprehension.
@@ -14,6 +14,4 @@ defprotocol AlertsUIWeb.CreateAlertMonoLive.AlertData.Slice do
 
   @spec validate(t, Changeset.t()) :: Changeset.t()
   def validate(slice, changeset)
-
-  def render(slice, assigns)
 end
