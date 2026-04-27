@@ -3,40 +3,64 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   A monolithic LiveView for creating and editing alerts.
   """
 
+  require Logger
+
   use AlertsUIWeb, :live_view
 
   alias Phoenix.LiveView
   alias AlertsUI.Alerts
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
+  alias AlertsUIWeb.CreateAlertMonoLive.{AlertData, Timeline}
+  alias AlertsUIWeb.CreateAlertMonoLive.Slices.{UrlSlice}
+
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.{
+    AlertData,
+    Path,
+    Params
+  }
 
   @impl true
   def mount(params, _session, socket) do
     # initialize the alert data form or throw an exception trying
-    {:ok, start_socket(socket, params)}
+    {:ok, start_socket(socket, with_atomized_keys(params))}
   end
 
   @impl true
   def handle_params(params, _url, socket) do
     # accept changes to url params
-    {:noreply, sync_socket(socket, params)}
+    {:noreply, sync_socket(socket, with_atomized_keys(params))}
   end
 
   @impl true
   def handle_event("validate", params, socket) do
     # accept changes to form params
-    {:noreply, sync_socket(params, socket)}
+    {:noreply, sync_socket(socket, with_atomized_keys(params))}
   end
 
   @impl true
-  def handle_event("edit_route_type", _params, socket) do
-    # push patch to root, clear state?
-    {:noreply, socket}
+  def handle_event("push_route_type", params, socket) do
+    route_type = Map.get(params, "value")
+
+    path = path_with_route_type(
+      socket.assigns.live_action,
+      route_type,
+      alert_data_from_form(socket.assigns.form, :alert_id)
+    )
+
+    {:noreply, push_patch(socket, to: path)}
   end
 
   @impl true
-  def handle_event("edit_effect_name", _params, socket) do
-    # push patch to /:route_name, clear state?
-    {:noreply, socket}
+  def handle_event("push_effect_name", params, socket) do
+    effect_name = Map.get(params, "value")
+
+    path = path_with_route_type_and_effect_name(
+      socket.assigns.live_action,
+      alert_data_from_form(socket.assigns.form, :route_type),
+      effect_name,
+      alert_data_from_form(socket.assigns.form, :alert_id)
+    )
+
+    {:noreply, push_patch(socket, to: path)}
   end
 
   @impl true
@@ -71,15 +95,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   """
   @spec start_socket(LiveView.Socket.t(), LiveView.unsigned_params()) :: LiveView.Socket.t()
   def start_socket(socket, params) do
-    case {Map.get(params, "alert_id"), socket.assigns.live_action} do
+    case {Map.get(params, :alert_id), socket.assigns.live_action} do
       {nil, :new} ->
         # create a new alert
-        alert_data_form =
+        form =
           params
           |> AlertData.init(:new)
           |> to_form()
 
-        assign(socket, :alert_data_form, alert_data_form)
+        assign(socket, :form, form)
 
       {nil, action} when action in [:edit, :duplicate] ->
         raise %ArgumentError{message: "you need an alert id to #{action}"}
@@ -88,23 +112,23 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         # edit an existing alert
         alert = Alerts.get_by_alert_id!(alert_id)
 
-        alert_data_form =
+        form =
           params
           |> AlertData.init(:edit, alert)
           |> to_form()
 
-         assign(socket, :alert_data_form, alert_data_form)
+         assign(socket, :form, form)
 
       {alert_id, :duplicate} ->
         # duplicate an existing alert
         alert = Alerts.get_by_alert_id!(alert_id)
 
-        alert_data_form =
+        form =
           params
           |> AlertData.init(:duplicate, strip_on_duplicate(alert))
           |> to_form()
 
-        assign(socket, :alert_data_form, alert_data_form)
+        assign(socket, :form, form)
 
       {_alert_id, action} ->
         raise %ArgumentError{message: "no such action #{action}"}
@@ -117,12 +141,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   """
   @spec sync_socket(LiveView.Socket.t(), LiveView.unsigned_params()) :: LiveView.Socket.t()
   def sync_socket(socket, params) do
-    alert_data_form =
-      socket.assigns.alert_data_form.source
+    form =
+      socket.assigns.form.source
       |> AlertData.sync(params)
       |> to_form()
 
-    assign(socket, :alert_data_form, alert_data_form)
+    assign(socket, :form, form)
   end
 
   defp strip_on_duplicate(alert), do: alert

@@ -5,8 +5,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   alias Ecto.Changeset
   import Changeset
 
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData.Slice
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData.UrlSlice
+  alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice
 
   use AlertsUI.Schema
 
@@ -24,7 +24,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :form_type, :string
     field :route_type, :string
     field :effect_name, :string
-    field :reviewing, :boolean
+    field :review, :boolean
     # affected service
     field :direction, :string
     field :facility_ids, {:array, :string}
@@ -145,28 +145,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
   def slices(), do: @slices
 
-  def form_state(route_type, effect_name) do
-    case {route_type, effect_name} do
-      {nil, nil} ->
-        :select_route_type
-
-      {_route_type, nil} ->
-        :select_effect_name
-
-      {nil, _effect_type} ->
-        raise ArgumentError, "if route_type is nil effect_name must be too"
-
-      {_route_type, _effect_type} ->
-        :details
-    end
-  end
-
   def url_fields, do: Map.keys(%UrlSlice{})
 
   def form_fields do
     slices()
-    |> List.delete(UrlSlice)
-    |> Enum.map(& struct(&1) |> Map.keys())
+    |> Enum.map(& struct(&1) |> Map.delete(:__struct__) |> Map.keys())
     |> List.flatten()
   end
 end

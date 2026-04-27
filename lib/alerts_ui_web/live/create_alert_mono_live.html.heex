@@ -1,3 +1,13 @@
-<div id="hello-world">
-  Hello world
+<div
+  class="flex flex-col items-center justify-center"
+  id="form_container"
+>
+  <div class="flex flex-col items-center justify-center w-[90%]" id="article-view">
+    <UrlSlice.render
+      route_type={alert_data_from_form(@form, :route_type)}
+      effect_name={alert_data_from_form(@form, :effect_name)}
+      form_type={alert_data_from_form(@form, :form_type)}
+      alert_id={alert_data_from_form(@form, :alert_id)}
+    />
+  </div>
 </div>

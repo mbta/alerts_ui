@@ -107,13 +107,13 @@ defmodule AlertsUIWeb.Router do
       live("/alerts/duplicate", CreateAlertLive, :duplicate)
       live("/alerts/mono/new", CreateAlertMonoLive, :new)
       live("/alerts/mono/new/:route_type/", CreateAlertMonoLive, :new)
-      live("/alerts/mono/new/:route_type/:effect", CreateAlertMonoLive, :new)
+      live("/alerts/mono/new/:route_type/:effect_name", CreateAlertMonoLive, :new)
       live("/alerts/mono/edit/:alert_id", CreateAlertMonoLive, :edit)
       live("/alerts/mono/edit/:alert_id/:route_type/", CreateAlertMonoLive, :edit)
-      live("/alerts/mono/edit/:alert_id/:route_type/:effect", CreateAlertMonoLive, :edit)
+      live("/alerts/mono/edit/:alert_id/:route_type/:effect_name", CreateAlertMonoLive, :edit)
       live("/alerts/mono/duplicate/:alert_id", CreateAlertMonoLive, :duplicate)
       live("/alerts/mono/duplicate/:alert_id/:route_type/", CreateAlertMonoLive, :duplicate)
-      live("/alerts/mono/duplicate/:alert_id/:route_type/:effect", CreateAlertMonoLive, :duplicate)
+      live("/alerts/mono/duplicate/:alert_id/:route_type/:effect_name", CreateAlertMonoLive, :duplicate)
     end
   end
 
