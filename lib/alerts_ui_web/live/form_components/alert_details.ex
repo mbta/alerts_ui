@@ -16,11 +16,12 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}
   alias Phoenix.HTML.Form
 
+  alias AlertsUI.Models.Alert
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Repo, as: Schedules
-  alias MBTAV3API.Stops.Api, as: StopsApi
+  alias MBTAV3API.Stops.Stop
 
   @primary_key false
   embedded_schema do
@@ -97,8 +98,13 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
     end
 
     if :stop_ids in required_fields do
-      stop_ids = Enum.join(alert_data.stop_ids, ",")
-      selected_stops = StopsApi.all("filter[id]": stop_ids)
+      selected_stops =
+        alert_data.original_stop_selections
+        |> Alert.get_original_names_and_ids()
+        |> Enum.map(fn {name, id} ->
+          %Stop{name: name, id: id}
+        end)
+
       send(self(), {:selected_stops, selected_stops})
     end
 

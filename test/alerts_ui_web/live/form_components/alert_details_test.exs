@@ -2,11 +2,13 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
 
+  import AlertsUI.Support.Factory
   import LiveIsolatedComponent
   import Mock
   import Phoenix.LiveViewTest
   import Test.Support.Helpers
 
+  alias AlertsUI.Alerts
   alias AlertsUI.Models.EnhancedSchedule
   alias AlertsUIWeb.FormComponents.AlertDetails
   alias AlertsUIWeb.FormComponents.Helpers.DateTimeFormatters
@@ -905,6 +907,85 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
       assert view
              |> element("#alert_details_description_text")
              |> render() =~ ~s(></textarea>)
+    end
+
+    @tag :logged_in_user
+    test "stop route affected service autotext works when editing", %{
+      conn: conn
+    } do
+      bus_route = %Route{
+        direction_names: %{0 => "Outbound", 1 => "Inbound"},
+        sort_order: 3,
+        id: "33",
+        type: 3,
+        name: "33"
+      }
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_stop: fn _route_id -> [bus_route] end,
+           by_stop: fn _route_id, _ -> [bus_route] end,
+           by_type: fn _types -> [bus_route] end,
+           all: fn _ -> [bus_route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _route_type, _ -> [@stop, @stop_2, @stop_3] end,
+           by_route: fn _, _ -> [@stop, @stop_2, @stop_3] end,
+           by_route: fn _, _, _ -> [@stop, @stop_2, @stop_3] end,
+           get_parent: fn _ -> %{id: @stop.id} end
+         ]}
+      ]) do
+        ie =
+          build(:informed_entity, %{
+            route_id: bus_route.id,
+            route_type: bus_route.type,
+            activities: [:BOARD],
+            stop_id: @stop.id,
+            direction_id: nil,
+            trip: nil
+          })
+
+        alert_params =
+          build(
+            :alert_map,
+            %{
+              alert_id: "123",
+              header_text: "example header text",
+              informed_entity: [Map.from_struct(ie)],
+              effect: :OTHER_EFFECT,
+              effect_detail: "STOP_CLOSURE",
+              original_route_selections: ["#{bus_route.name}|#{bus_route.id}"],
+              original_stop_selections: ["#{@stop.name <> " (outgoing)"}|#{@stop.id}"],
+              reminder_times: [],
+              severity: 7,
+              cause_detail: "unknown",
+              user: build(:user),
+              primary_service_type: "3"
+            }
+          )
+
+        {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
+        {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
+
+        render_async(view)
+
+        assert view
+               |> element("#alert_details_header_text")
+               |> render() =~ "example header text"
+
+        view
+        |> element("#details_form")
+        |> render_change(%{
+          alert_details: %{header_sync_toggle: true}
+        })
+
+        assert view
+               |> element("#alert_details_header_text")
+               |> render() =~
+                 "The following stop is closed beginning Thu, Oct 19 at 8:01 PM: South Station (outgoing)."
+      end
     end
   end
 end
