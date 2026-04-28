@@ -10,7 +10,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
     UrlSlice,
-    DeliverySlice
+    DeliverySlice,
+    SystemwideServiceSlice
   }
 
   use AlertsUI.Schema
@@ -39,6 +40,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :original_stop_selections, {:array, :string}
     field :original_trip_selections, {:array, :string}
     field :route_ids, {:array, :string}
+    field :service_types, {:array, :integer}
     # time range
     field :active_period_end, :naive_datetime
     field :active_period_end_date, :date
@@ -89,7 +91,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
   @slices [
     UrlSlice,
-    DeliverySlice
+    DeliverySlice,
+    SystemwideServiceSlice
   ]
 
   @actions [:new, :edit, :duplicate]

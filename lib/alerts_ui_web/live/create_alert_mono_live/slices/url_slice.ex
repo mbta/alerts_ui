@@ -8,7 +8,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
   import AlertsUIWeb.FormComponents.Helpers.ContentFormatter, only: [route_atom_to_string: 1]
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Effects, only: [humanize_effect_name: 2, list_effect_path_names: 1]
 
-
   defstruct [
     :alert_id,
     :effect_name,

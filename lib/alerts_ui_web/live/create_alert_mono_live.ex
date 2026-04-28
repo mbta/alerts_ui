@@ -12,7 +12,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   alias AlertsUIWeb.CreateAlertMonoLive.{AlertData, Timeline}
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
     UrlSlice,
-    DeliverySlice
+    DeliverySlice,
+    SystemwideServiceSlice
   }
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.{
@@ -20,6 +21,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     Path,
     Params
   }
+
+  import AlertsUIWeb.FormComponents.Helpers.ContentFormatter, only: [route_atom_to_string: 1]
 
   import Ecto.Changeset, only: [change: 1]
 
