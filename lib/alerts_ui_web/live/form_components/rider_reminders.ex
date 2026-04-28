@@ -227,7 +227,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
                 editable={ReminderTimes.editable?(rt[:id].value, rt[:reminder_time].value)}
                 current_time={@current_time}
                 field={rt[:reminder_time]}
-                id={rt.id}
+                id={rt[:id].value}
                 index={rt.index}
                 notification_start={@notification_start}
                 notification_end={@notification_end}
