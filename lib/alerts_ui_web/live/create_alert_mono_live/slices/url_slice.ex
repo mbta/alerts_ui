@@ -6,7 +6,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
   use AlertsUIWeb, :html
 
   import AlertsUIWeb.FormComponents.Helpers.ContentFormatter, only: [route_atom_to_string: 1]
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Effects, only: [humanize_effect_name: 2, list_effect_path_names: 1]
+
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Effects,
+    only: [humanize_effect_name: 2, list_effect_path_names: 1]
 
   defstruct [
     :alert_id,
@@ -25,10 +27,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
       route_type = Alert.get_route_type(alert)
 
       %{
-        url_data |
-        alert_id: alert_id,
-        effect_name: effect_name,
-        route_type: route_type
+        url_data
+        | alert_id: alert_id,
+          effect_name: effect_name,
+          route_type: route_type
       }
     end
 
@@ -47,12 +49,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
     ]
   end
 
-  def render(%{
-    alert_id: alert_id,
-    form_type: form_type,
-    route_type: route_type,
-    effect_name: effect_name
-  } = assigns) do
+  def render(
+        %{
+          alert_id: alert_id,
+          form_type: form_type,
+          route_type: route_type,
+          effect_name: effect_name
+        } = assigns
+      ) do
     if is_nil(route_type) || is_nil(effect_name) do
       ~H"""
       <div class="min-w-full flex flex-col mb-8" id="route_view">
@@ -65,10 +69,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
         <div id="service_type_buttons" class="mb-8">
           <div class="flex flex-wrap justify-center md:justify-normal gap-2">
             <div :for={this_route_type <- route_types()}>
-              <.route_type_button
-                this_route_type={this_route_type}
-                selected_route_type={@route_type}
-              />
+              <.route_type_button this_route_type={this_route_type} selected_route_type={@route_type} />
             </div>
           </div>
         </div>
@@ -103,10 +104,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
     end
   end
 
-  def route_type_button(%{
-    this_route_type: this_route_type,
-    selected_route_type: selected_route_type
-  } = assigns) do
+  def route_type_button(
+        %{
+          this_route_type: this_route_type,
+          selected_route_type: selected_route_type
+        } = assigns
+      ) do
     ~H"""
     <.button_toggle
       id={"route-type-#{@this_route_type}-button"}
@@ -121,11 +124,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
     """
   end
 
-  def effect_name_button(%{
-    this_effect_name: this_effect_name,
-    selected_effect_name: selected_effect_name,
-    selected_route_type: selected_route_type
-  } = assigns) do
+  def effect_name_button(
+        %{
+          this_effect_name: this_effect_name,
+          selected_effect_name: selected_effect_name,
+          selected_route_type: selected_route_type
+        } = assigns
+      ) do
     ~H"""
     <.button_toggle
       phx-click="push_effect_name"

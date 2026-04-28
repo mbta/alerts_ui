@@ -8,6 +8,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   import Changeset
 
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
+
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
     UrlSlice,
     DeliverySlice,
@@ -46,7 +47,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :active_period_end_date, :date
     field :active_period_end_specifier, Ecto.Enum, values: @end_values, default: :later_today
     field :active_period_end_time, :time
-    field :active_period_end_time_specifier, Ecto.Enum, values: @end_values, default: :end_of_service
+
+    field :active_period_end_time_specifier, Ecto.Enum,
+      values: @end_values,
+      default: :end_of_service
+
     field :active_period_start, :naive_datetime
     field :active_period_start_date, :date
     field :active_period_start_specifier, Ecto.Enum, values: @start_values, default: :now
@@ -81,6 +86,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
       field :min_time, :naive_datetime
       field :max_time, :naive_datetime
     end
+
     # generated
     field :combination, Ecto.Enum, values: @combination_values
     field :created_timestamp, :utc_datetime
@@ -120,6 +126,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   def sync(alert_data_or_changeset, params, fields \\ form_fields()) do
     Logger.warning("FORM FIELDS are: #{inspect(fields)}")
     Logger.warning("PARAMS are: #{inspect(params)}")
+
     alert_data_or_changeset
     |> cast(params, form_fields())
     |> transform()
@@ -127,20 +134,21 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   end
 
   def transform(%Changeset{} = changeset) do
-    Enum.reduce(slices(), changeset, fn slice_module, changeset -> 
+    Enum.reduce(slices(), changeset, fn slice_module, changeset ->
       changeset
       |> slice_from_changeset(slice_module)
       |> Slice.transform(changeset)
     end)
-  end   
+  end
 
   def validate(%Changeset{} = changeset) do
-    Enum.reduce(slices(), changeset, fn slice_module, changeset -> 
+    Enum.reduce(slices(), changeset, fn slice_module, changeset ->
       changeset
       |> slice_from_changeset(slice_module)
       |> Slice.validate(changeset)
-    end) |> apply_action(:validate)
-  end   
+    end)
+    |> apply_action(:validate)
+  end
 
   def slice_from_changeset(changeset, slice_module) do
     as_map =
@@ -149,7 +157,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
       |> Map.keys()
       |> Enum.map(fn key -> {key, get_field(changeset, key)} end)
       |> Enum.into(%{})
-      |> Map.from_struct
+      |> Map.from_struct()
 
     struct(slice_module, as_map)
   end
@@ -160,7 +168,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
   def form_fields do
     slices()
-    |> Enum.map(& struct(&1) |> Map.delete(:__struct__) |> Map.keys())
+    |> Enum.map(&(struct(&1) |> Map.delete(:__struct__) |> Map.keys()))
     |> List.flatten()
   end
 end

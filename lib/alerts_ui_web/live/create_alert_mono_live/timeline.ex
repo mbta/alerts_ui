@@ -20,7 +20,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Timeline do
     },
     %{
       name: "preview",
-      previous: nil, 
+      previous: nil,
       next: nil,
       label: "Preview and Submit"
     }

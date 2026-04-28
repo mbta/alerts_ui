@@ -10,6 +10,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   alias Phoenix.LiveView
   alias AlertsUI.Alerts
   alias AlertsUIWeb.CreateAlertMonoLive.{AlertData, Timeline}
+
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
     UrlSlice,
     DeliverySlice,
@@ -48,11 +49,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   def handle_event("push_route_type", params, socket) do
     route_type = Map.get(params, "value")
 
-    path = path_with_route_type(
-      socket.assigns.live_action,
-      route_type,
-      alert_data_from_form(socket.assigns.form, :alert_id)
-    )
+    path =
+      path_with_route_type(
+        socket.assigns.live_action,
+        route_type,
+        alert_data_from_form(socket.assigns.form, :alert_id)
+      )
 
     {:noreply, push_patch(socket, to: path)}
   end
@@ -61,12 +63,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   def handle_event("push_effect_name", params, socket) do
     effect_name = Map.get(params, "value")
 
-    path = path_with_route_type_and_effect_name(
-      socket.assigns.live_action,
-      alert_data_from_form(socket.assigns.form, :route_type),
-      effect_name,
-      alert_data_from_form(socket.assigns.form, :alert_id)
-    )
+    path =
+      path_with_route_type_and_effect_name(
+        socket.assigns.live_action,
+        alert_data_from_form(socket.assigns.form, :route_type),
+        effect_name,
+        alert_data_from_form(socket.assigns.form, :alert_id)
+      )
 
     {:noreply, push_patch(socket, to: path)}
   end
