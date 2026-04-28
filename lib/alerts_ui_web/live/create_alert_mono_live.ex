@@ -21,22 +21,24 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     Params
   }
 
+  import Ecto.Changeset, only: [change: 1]
+
   @impl true
   def mount(params, _session, socket) do
     # initialize the alert data form or throw an exception trying
-    {:ok, start_socket(socket, with_atomized_keys(params))}
+    {:ok, start_socket(socket, params)}
   end
 
   @impl true
   def handle_params(params, _url, socket) do
     # accept changes to url params
-    {:noreply, sync_socket(socket, with_atomized_keys(params))}
+    {:noreply, sync_socket(socket, params)}
   end
 
   @impl true
-  def handle_event("validate", params, socket) do
+  def handle_event("validate", %{"alert_data" => params}, socket) do
     # accept changes to form params
-    {:noreply, sync_socket(socket, with_atomized_keys(params))}
+    {:noreply, sync_socket(socket, params)}
   end
 
   @impl true
@@ -101,12 +103,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     case {Map.get(params, :alert_id), socket.assigns.live_action} do
       {nil, :new} ->
         # create a new alert
-        form =
-          params
-          |> AlertData.init(:new)
-          |> to_form()
+        case AlertData.init(params, :new) do
+          {:ok, alert_data} ->
+            assign(socket, :form, to_form(change(alert_data)))
 
-        assign(socket, :form, form)
+          {:error, changeset} ->
+            assign(socket, :form, to_form(changeset))
+        end
 
       {nil, action} when action in [:edit, :duplicate] ->
         raise %ArgumentError{message: "you need an alert id to #{action}"}
@@ -115,23 +118,25 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         # edit an existing alert
         alert = Alerts.get_by_alert_id!(alert_id)
 
-        form =
-          params
-          |> AlertData.init(:edit, alert)
-          |> to_form()
+        case AlertData.init(params, :edit, alert) do
+          {:ok, alert_data} ->
+            assign(socket, :form, to_form(change(alert_data)))
 
-         assign(socket, :form, form)
+          {:error, changeset} ->
+            assign(socket, :form, to_form(changeset))
+        end
 
       {alert_id, :duplicate} ->
         # duplicate an existing alert
         alert = Alerts.get_by_alert_id!(alert_id)
 
-        form =
-          params
-          |> AlertData.init(:duplicate, strip_on_duplicate(alert))
-          |> to_form()
+        case AlertData.init(params, :duplicate, strip_on_duplicate(alert)) do
+          {:ok, alert_data} ->
+            assign(socket, :form, to_form(change(alert_data)))
 
-        assign(socket, :form, form)
+          {:error, changeset} ->
+            assign(socket, :form, to_form(changeset))
+        end
 
       {_alert_id, action} ->
         raise %ArgumentError{message: "no such action #{action}"}
@@ -144,12 +149,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   """
   @spec sync_socket(LiveView.Socket.t(), LiveView.unsigned_params()) :: LiveView.Socket.t()
   def sync_socket(socket, params) do
-    form =
-      socket.assigns.form.source
-      |> AlertData.sync(params)
-      |> to_form()
+    case AlertData.sync(socket.assigns.form.source, params) do
+      {:ok, alert_data} ->
+        Logger.warn("SYNC OK - alert data is #{inspect(alert_data)}")
+        assign(socket, :form, to_form(change(alert_data)))
 
-    assign(socket, :form, form)
+      {:error, changeset} ->
+        Logger.warn("SYNC ERROR")
+        assign(socket, :form, to_form(changeset))
+    end
   end
 
   defp strip_on_duplicate(alert), do: alert

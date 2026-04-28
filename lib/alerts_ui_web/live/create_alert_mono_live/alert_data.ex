@@ -8,7 +8,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   import Changeset
 
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
-  alias AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice
+  alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
+    UrlSlice,
+    DeliverySlice
+  }
 
   use AlertsUI.Schema
 
@@ -85,7 +88,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   end
 
   @slices [
-    UrlSlice
+    UrlSlice,
+    DeliverySlice
   ]
 
   @actions [:new, :edit, :duplicate]
@@ -111,7 +115,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   end
 
   def sync(alert_data_or_changeset, params, fields \\ form_fields()) do
-    Logger.warning(inspect(params))
+    Logger.warning("FORM FIELDS are: #{inspect(fields)}")
+    Logger.warning("PARAMS are: #{inspect(params)}")
     alert_data_or_changeset
     |> cast(params, form_fields())
     |> transform()
@@ -131,7 +136,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
       changeset
       |> slice_from_changeset(slice_module)
       |> Slice.validate(changeset)
-    end)
+    end) |> apply_action(:validate)
   end   
 
   def slice_from_changeset(changeset, slice_module) do
