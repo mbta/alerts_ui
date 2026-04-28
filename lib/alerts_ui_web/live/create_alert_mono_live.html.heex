@@ -12,6 +12,7 @@
           alert_id={alert_data_from_form(@form, :alert_id)}
         />
         <.form for={@form} id="alert_form" class="form-control" phx-change="validate" :if={show_details?(@form)}>
+          <SystemwideServiceSlice.render form={@form} />
           <DeliverySlice.render form={@form} />
         </.form>
       </div>

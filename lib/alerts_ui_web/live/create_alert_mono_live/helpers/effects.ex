@@ -4,6 +4,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Effects do
   """
   alias AlertsUI.Configs.ModeEffect
   alias AlertsUI.Models.Effect
+  alias Phoenix.HTML.Form
 
   @forbidden_effects ~w[Summary]
 
@@ -22,6 +23,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Effects do
         |> Enum.reject(fn {name, struct} -> name in @forbidden_effects end)
         |> Enum.map(fn {name, struct} -> struct.path_name end)
     end
+  end
+
+  def humanize_effect_name(%Form{} = form) do
+    route_type_name = String.to_existing_atom(form[:route_type].value)
+    effect_name = form[:effect_name].value
+    humanize_effect_name(route_type_name, effect_name)
   end
 
   def humanize_effect_name(_, nil), do: nil 
