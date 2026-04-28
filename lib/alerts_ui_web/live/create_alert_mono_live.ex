@@ -10,7 +10,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   alias Phoenix.LiveView
   alias AlertsUI.Alerts
   alias AlertsUIWeb.CreateAlertMonoLive.{AlertData, Timeline}
-  alias AlertsUIWeb.CreateAlertMonoLive.Slices.{UrlSlice}
+  alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
+    UrlSlice,
+    DeliverySlice
+  }
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.{
     AlertData,

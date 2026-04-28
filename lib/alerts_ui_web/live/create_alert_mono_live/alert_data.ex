@@ -2,6 +2,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   @moduledoc """
   Alert data v2
   """
+  require Logger
+
   alias Ecto.Changeset
   import Changeset
 
@@ -109,6 +111,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   end
 
   def sync(alert_data_or_changeset, params, fields \\ form_fields()) do
+    Logger.warning(inspect(params))
     alert_data_or_changeset
     |> cast(params, form_fields())
     |> transform()
