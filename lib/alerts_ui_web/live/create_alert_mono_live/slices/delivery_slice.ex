@@ -1,6 +1,6 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
   alias AlertsUI.Models.Alert
-	alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias Phoenix.HTML.Form
 
   use AlertsUIWeb, :html
@@ -11,18 +11,21 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
     :banner_text,
     :notification_toggle,
     :view_banner
-	]
+  ]
 
-	defimpl Slice, for: __MODULE__ do
-		def extract(delivery_data, %Alert{} = alert) do
-		end
+  defimpl Slice, for: __MODULE__ do
+    def extract(_delivery_data, %Alert{} = alert) do
+      struct(__MODULE__, alert)
+    end
 
-		def transform(_delivery_data, changeset) do
-		end
-		
-		def validate(_delivery_data, changeset) do
-		end
-	end
+    def transform(_delivery_data, changeset) do
+      changeset
+    end
+
+    def validate(_delivery_data, changeset) do
+      changeset
+    end
+  end
 
   def render(assigns) do
     ~H"""
@@ -46,7 +49,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
           <span class="ml-4">Banner on all MBTA.com pages</span>
         </div>
         <div
-          :if={@form[:view_banner]}
+          :if={@form[:view_banner].value}
           class="flex flex-col md:flex-row"
         >
           <div class="flex flex-col md:w-[50%]" id="banner-container">

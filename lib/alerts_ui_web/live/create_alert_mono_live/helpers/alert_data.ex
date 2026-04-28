@@ -6,7 +6,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
   """
 
   @doc """
-  Get alert data from the changeset. Required (at least) by URL params.
+  Get alert data from the changeset. Used for passing data as props,
+  as `form[:field]` gives you a field struct rather than an actual value.
   """
   def alert_data_from_form(form, :route_type) do
     case get_field(form.source, :route_type) do
