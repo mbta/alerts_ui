@@ -114,6 +114,24 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
 
       auto_text_data = %BuildAutoText{
         alert_timing: :"one-time",
+        route_type: 2,
+        effect_name: "Track Change",
+        schedules: [@schedule_1],
+        end_specifier: :custom,
+        start_datetime: ~N[2025-05-09 13:00:00],
+        end_datetime: ~N[2025-05-09 15:04:00]
+      }
+
+      expected = "today"
+      actual = AutoTextDuration.build_duration_text(auto_text_data, current_time)
+      assert expected == actual
+    end
+
+    test "another trip specific starts today end same day" do
+      current_time = ~N[2025-05-09 13:00:00]
+
+      auto_text_data = %BuildAutoText{
+        alert_timing: :"one-time",
         route_type: 4,
         effect_name: "Delay",
         schedules: [@schedule_1],
