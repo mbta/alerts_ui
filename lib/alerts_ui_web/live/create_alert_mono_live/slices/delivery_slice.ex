@@ -34,10 +34,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
         Delivery
       </.h5>
       <div class="flex flex-row">
-        <.checkbox
-          field={@form[:notification_toggle]}
-          id="notification-toggle"
-        />
+        <.checkbox field={@form[:notification_toggle]} id="notification-toggle" />
 
         <span class="ml-4">
           Send notification to alert subscribers
@@ -48,10 +45,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
           <.checkbox field={@form[:view_banner]} />
           <span class="ml-4">Banner on all MBTA.com pages</span>
         </div>
-        <div
-          :if={@form[:view_banner].value}
-          class="flex flex-col md:flex-row"
-        >
+        <div :if={@form[:view_banner].value} class="flex flex-col md:flex-row">
           <div class="flex flex-col md:w-[50%]" id="banner-container">
             <.textarea
               field={@form[:banner_text]}
@@ -77,9 +71,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
           class="flex flex-row mt-4"
         >
           <.checkbox field={@form[:accept_banner]} />
-          <span class={
-            if @form[:accept_banner].errors |> length > 0, do: "-ml-[14rem]", else: "ml-4"
-          }>
+          <span class={if @form[:accept_banner].errors |> length > 0, do: "-ml-[14rem]", else: "ml-4"}>
             I understand this will post a high priority alert banner on every page of MBTA.com.
           </span>
         </div>

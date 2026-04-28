@@ -101,7 +101,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false,
-        path_name: "single_tracking",
+        path_name: "single_tracking"
       },
       "Station Bypass" => %ModeEffectStruct{
         combination: :RDS,
@@ -148,7 +148,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
         prediction_suppression_warning: true,
-        path_name: "cancellation" 
+        path_name: "cancellation"
       },
       "Delay" => %ModeEffectStruct{
         combination: :RDTS,

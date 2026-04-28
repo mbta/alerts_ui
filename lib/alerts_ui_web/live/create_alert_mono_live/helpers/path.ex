@@ -12,7 +12,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Path do
 
       :edit ->
         ~p"/alerts/mono/edit/#{alert_id}/#{route_type}"
-      
+
       :duplicate ->
         ~p"/alerts/mono/duplicate/#{alert_id}/#{route_type}"
     end
@@ -25,7 +25,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Path do
 
       :edit ->
         ~p"/alerts/mono/edit/#{alert_id}/#{route_type}/#{effect_name}"
-      
+
       :duplicate ->
         ~p"/alerts/mono/duplicate/#{alert_id}/#{route_type}/#{effect_name}"
     end
