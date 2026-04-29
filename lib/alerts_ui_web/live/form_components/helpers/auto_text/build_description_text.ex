@@ -7,44 +7,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionText do
 
   @spec affected_routes(BuildAutoText.t()) :: String.t()
   def affected_routes(%{routes: routes, effect_name: effect, route_type: route_type}) do
-    # routes = Enum.sort(& &1.name)
-    grouped_routes = Enum.group_by(routes, & &1.type)
-
-    route_names =
-      [
-        Map.get(grouped_routes, 3, []),
-        Map.get(grouped_routes, 1, []) ++ Map.get(grouped_routes, 0, []),
-        Map.get(grouped_routes, 2, []),
-        Map.get(grouped_routes, 4, [])
-      ]
-      |> Enum.reject(&Enum.empty?/1)
-      # Within each group, sort alphanumerically
-      |> Enum.map(fn route_sub_list ->
-        route_sub_list
-        |> Enum.sort(&(maybe_cast_to_integer(&1) <= maybe_cast_to_integer(&2)))
-      end)
-      |> List.flatten()
-      |> Enum.map(&SelectFormatter.name_for_option/1)
-      |> Enum.group_by(&first_letter_numeric?/1)
-
     routes =
-      (Map.get(route_names, false, []) ++ Map.get(route_names, true, [])) |> Enum.join("\n")
+      routes
+      |> BuildAutoText.sort_routes()
+      |> Enum.join("\n")
 
     "#{affected_route_term(effect)} #{route_term(route_type)}:\n#{routes}"
-  end
-
-  # Turns strings into sortable integers, if relevant
-  defp maybe_cast_to_integer(%{name: route_name}) do
-    case Integer.parse(route_name) do
-      :error -> route_name
-      {result, _rest} -> result
-    end
-  end
-
-  defp first_letter_numeric?(route_name) do
-    route_name
-    |> String.first()
-    |> Integer.parse() !== :error
   end
 
   @spec affected_stops(BuildAutoText.t()) :: String.t()

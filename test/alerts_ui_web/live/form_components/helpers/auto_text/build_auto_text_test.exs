@@ -703,6 +703,25 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
       assert expected == actual
     end
 
+    test "route names are sorted correctly" do
+      expected = "Orange, Red and Routes 22 and 119"
+
+      routes = [
+        %Route{name: "Red", type: 1},
+        %Route{name: "Orange", type: 1},
+        %Route{name: "119", type: 3},
+        %Route{name: "22", type: 3}
+      ]
+
+      actual =
+        BuildAutoText.route_names(%{
+          routes: routes,
+          schedules: []
+        })
+
+      assert expected == actual
+    end
+
     test "when there is a route not associated with a given schedule" do
       expected = "Framingham/Worcester Line"
       route_2 = %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"}

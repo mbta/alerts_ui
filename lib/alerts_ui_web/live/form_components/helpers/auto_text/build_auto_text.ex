@@ -293,28 +293,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   end
 
   def route_names(%{routes: routes, schedules: []}) do
-    grouped_routes = Enum.group_by(routes, & &1.type)
+    grouped_routes = sort_routes(routes) |> Enum.group_by(&first_letter_numeric?/1)
 
-    # Properly organizing by mode: Bus, Subway, CR, Ferry
-    route_names =
-      [
-        Map.get(grouped_routes, 3, []),
-        Map.get(grouped_routes, 1, []) ++ Map.get(grouped_routes, 0, []),
-        Map.get(grouped_routes, 2, []),
-        Map.get(grouped_routes, 4, [])
-      ]
-      |> Enum.reject(&Enum.empty?/1)
-      # Within each group, sort alphanumerically
-      |> Enum.map(fn route_sub_list ->
-        route_sub_list
-        |> Enum.sort(&(maybe_cast_to_integer(&1) <= maybe_cast_to_integer(&2)))
-      end)
-      |> List.flatten()
-      |> Enum.map(&SelectFormatter.name_for_option/1)
-      |> Enum.group_by(&first_letter_numeric?/1)
-
-    numerical_routes = Map.get(route_names, true)
-    non_numerical_routes = Map.get(route_names, false)
+    numerical_routes = Map.get(grouped_routes, true)
+    non_numerical_routes = Map.get(grouped_routes, false)
 
     numerical_routes_phrase = numerical_routes_phrase(numerical_routes)
     # if there are numerical routes, non-numerical don't get "and"
@@ -332,14 +314,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
     filtered_routes = Enum.filter(routes, &(&1.id in route_ids_from_schedules))
 
     autotext |> Map.merge(%{routes: filtered_routes, schedules: []}) |> route_names()
-  end
-
-  # Turns strings into sortable integers, if relevant
-  defp maybe_cast_to_integer(%{name: route_name}) do
-    case Integer.parse(route_name) do
-      :error -> route_name
-      {result, _rest} -> result
-    end
   end
 
   def route_word([_route]), do: "route"
@@ -444,4 +418,27 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
 
   defp form_word([_item]), do: "is"
   defp form_word(_item), do: "are"
+
+  def sort_routes(routes) do
+    # groups routes by route type,
+    # sorts the route types,
+    # sorts routes by name WITHIN the route type,
+    # then flattens the list
+    routes
+    |> Enum.group_by(& &1.type)
+    |> Enum.sort_by(fn {k, _v} -> k end)
+    |> Enum.flat_map(fn {_k, route_sub_list} ->
+      route_sub_list
+      |> Enum.sort(&(maybe_cast_to_integer(&1) <= maybe_cast_to_integer(&2)))
+      |> Enum.map(&SelectFormatter.name_for_option/1)
+    end)
+  end
+
+  # Turns strings into sortable integers, if relevant
+  def maybe_cast_to_integer(%{name: route_name}) do
+    case Integer.parse(route_name) do
+      :error -> route_name
+      {result, _rest} -> result
+    end
+  end
 end
