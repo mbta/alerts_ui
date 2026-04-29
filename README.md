@@ -6,10 +6,15 @@ A UI for creating and modifying alerts
 
 ### Requirements
 
-- [`asdf`](https://asdf-vm.com/) with plugins: `elixir`, `erlang`
+- [`asdf`](https://asdf-vm.com/) with plugins: `elixir`, `erlang`, `nodejs`
+  - `asdf plugin add elixir https://github.com/asdf-vm/asdf-elixir.git`
+  - `asdf plugin add erlang https://github.com/asdf-vm/asdf-erlang.git`
+  - `asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git`
+  - Make sure `asdf` is [configured](https://asdf-vm.com/guide/getting-started.html#_2-configure-asdf) to add shims to your PATH
 - PostgreSQL 15 (using Homebrew: `brew install postgresql@15`)
-- You will need Postgres client tools in your PATH; if using Homebrew and you
+  - You will need Postgres client tools in your PATH; if using Homebrew and you
   get an error about missing tools, use `brew link postgresql@15`
+  - Make sure the postgres daemon has started: `brew services start postgresql@15`
 - [`direnv`](https://direnv.net/) _(optional, for auto-loading env vars)_
 
 ### Instructions
@@ -28,10 +33,6 @@ may need to adjust the username in `.envrc`.
 
 If not using `direnv`, you can instead `source .envrc` to perform a one-time
 export of the environment variables into your current shell session.
-
-### Notes for deployment
-
-Postgres 15 needs special permissions to allow migrations to be run, and they'll need set up for each new environment. cf this [asana ticket](https://app.asana.com/0/1113179098808463/1205855651255216/f)
 
 ### Running tests
 
