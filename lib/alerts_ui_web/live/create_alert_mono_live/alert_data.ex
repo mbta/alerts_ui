@@ -41,6 +41,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :original_stop_selections, {:array, :string}
     field :original_trip_selections, {:array, :string}
     field :route_ids, {:array, :string}
+    field :stop_ids, {:array, :string}
+    field :stop_names_and_ids, {:array, :string}
+    field :trip_ids, {:array, :string}
+    field :trip_information_by_id, {:array, :string}
     field :service_types, {:array, :integer}
     # time range
     field :active_period_end, :naive_datetime
