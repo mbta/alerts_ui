@@ -273,13 +273,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   def route_names(%{routes: []}), do: ""
 
   def route_names(%{routes: routes, schedules: []}) when length(routes) > 5 do
-    route_names =
-      routes
-      |> Enum.map(&SelectFormatter.name_for_option/1)
-      |> Enum.group_by(&first_letter_numeric?/1)
+    grouped_routes = sort_routes(routes)
 
-    numerical_routes = Map.get(route_names, true, nil)
-    non_numerical_routes = Map.get(route_names, false, nil)
+    numerical_routes = Map.get(grouped_routes, true, nil)
+    non_numerical_routes = Map.get(grouped_routes, false, nil)
 
     other_routes_length = length(routes) - 1
 
@@ -293,7 +290,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   end
 
   def route_names(%{routes: routes, schedules: []}) do
-    grouped_routes = sort_routes(routes) |> Enum.group_by(&first_letter_numeric?/1)
+    grouped_routes = sort_routes(routes)
 
     numerical_routes = Map.get(grouped_routes, true)
     non_numerical_routes = Map.get(grouped_routes, false)
@@ -325,7 +322,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
     standard_form(routes, start_datetime)
   end
 
-  defp first_letter_numeric?(route_name) do
+  def first_letter_numeric?(route_name) do
     route_name
     |> String.first()
     |> Integer.parse() !== :error
@@ -424,6 +421,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
     # sorts the route types,
     # sorts routes by name WITHIN the route type,
     # then flattens the list
+    # then groups routes on whether their first lietter is numeric
     routes
     |> Enum.group_by(& &1.type)
     |> Enum.sort_by(fn {k, _v} -> k end)
@@ -432,6 +430,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
       |> Enum.sort(&(maybe_cast_to_integer(&1) <= maybe_cast_to_integer(&2)))
       |> Enum.map(&SelectFormatter.name_for_option/1)
     end)
+    |> Enum.group_by(&first_letter_numeric?/1)
   end
 
   # Turns strings into sortable integers, if relevant

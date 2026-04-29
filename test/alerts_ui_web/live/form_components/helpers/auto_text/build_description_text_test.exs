@@ -109,13 +109,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionTextTest d
           %Route{name: "Red", type: 1},
           %Route{name: "Orange", type: 1},
           %Route{name: "119", type: 3},
-          %Route{name: "22", type: 3}
+          %Route{name: "22", type: 3},
+          %Route{name: "CT3", type: 3}
         ],
         effect_name: "Parking Closure",
         route_type: 3
       }
 
-      expected = "Affected routes:\nOrange\nRed\n22\n119"
+      expected = "Affected routes:\nOrange\nRed\nCT3\n22\n119"
 
       actual = BuildDescriptionText.affected_routes(autotext_data)
       assert expected == actual
