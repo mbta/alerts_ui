@@ -15,7 +15,7 @@
           class="form-control"
           phx-change="validate"
         >
-          <.service_slice form={@form} />
+          <StopRouteServiceSlice.render form={@form} selector={mock_selector()} />
           <DeliverySlice.render form={@form} />
         </.form>
       </div>

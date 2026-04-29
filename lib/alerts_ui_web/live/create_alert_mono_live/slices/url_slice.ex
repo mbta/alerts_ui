@@ -5,7 +5,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
 
   use AlertsUIWeb, :html
 
-  import AlertsUIWeb.FormComponents.Helpers.ContentFormatter, only: [route_atom_to_string: 1]
+  import AlertsUIWeb.FormComponents.Helpers.ContentFormatter,
+    only: [route_atom_to_string: 1]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Effects,
     only: [humanize_effect_name: 2, list_effect_path_names: 1]

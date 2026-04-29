@@ -176,4 +176,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   defp service_slice_by_combination(:ACCESS), do: AccessServiceSlice
   defp service_slice_by_combination(nil), do: SystemwideServiceSlice
   defp service_slice_by_combination(_), do: AffectedServiceSlice
+
+  def mock_selector() do
+    # %AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice.Selector{}
+    %{}
+  end
 end

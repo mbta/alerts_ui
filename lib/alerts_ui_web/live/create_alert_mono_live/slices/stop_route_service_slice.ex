@@ -37,25 +37,26 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   end
 
   def render(%{
-    available_filter_routes: available_filter_routes,
-    available_routes: available_routes,
-    available_stops: available_stops,
     form: form,
-    selected_stops: selected_stops
+    selector: %{
+      available_filter_routes: available_filter_routes,
+      available_routes: available_routes,
+      available_stops: available_stops,
+      selected_stops: selected_stops
+    }
   } = assigns) do
     # Route filter
     route_type = form[:route_type].value
     modal_route_search_term = form[:modal_route_search_term].value
     modal_route_id = form[:modal_route_id].value || ""
+    filter_routes = Map.get(available_filter_routes, :result) || []
 
-    modal_route_id_options =
-      SelectFormatter.formatted_select_options(%SelectFormatter{
-        options: Map.get(available_filter_routes, :result) || [],
-        search_term: modal_route_search_term,
-        route_type: route_type,
-        values_to_keep: modal_route_id |> List.wrap(),
-        option_prefix: "route-filter"
-      })
+    modal_route_id_options = modal_route_id_options(
+        filter_routes,
+        modal_route_search_term,
+        route_type,
+        modal_route_id
+    )
 
     # Stop selector
     stop_search_term = form[:stop_search_term].value
@@ -63,29 +64,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
     # Yeah this is weird. Basically, available_stops might be filtered down by route and sorted by stop order,
     # so we have to carefully preserve already selected stops.
-    stop_id_options =
-      if async_available?(available_stops) do
-        # Available stops will only include the stops visible with the given route filter
-        # And now just a list of stop ids
-        available_stop_ids = Enum.map(available_stops.result, fn stop -> stop.id end)
-
-        # Get all the stops that were selected but are no longer included in `available_stops`
-        # Then append them to the top of the list
-        previously_selected_stops =
-          Enum.filter(selected_stops, fn stop -> stop.id not in available_stop_ids end)
-
-        options = previously_selected_stops ++ available_stops.result
-
-        SelectFormatter.formatted_select_options(%SelectFormatter{
-          options: options,
-          search_term: stop_search_term,
-          route_type: route_type,
-          values_to_keep: stop_ids,
-          option_prefix: "stop-selector"
-        })
-      else
-        []
-      end
+    stop_id_options = stop_id_options(
+      available_stops,
+      selected_stops,
+      stop_search_term,
+      route_type,
+      stop_ids  
+    )
 
     stop_selections = AffectedService.extract_selections(form, stop_id_options)
 
@@ -93,14 +78,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
     route_search_term = form[:route_search_term].value
     route_ids = form[:route_ids].value || []
 
-    route_id_options =
-      SelectFormatter.formatted_select_options(%SelectFormatter{
-        options: Map.get(available_routes, :result, []) || [],
-        search_term: route_search_term,
-        route_type: route_type,
-        values_to_keep: route_ids,
-        option_prefix: "route-selector"
-      })
+    route_id_options = route_id_options(
+      available_routes,
+      route_ids,
+      route_search_term,
+      route_type
+    )
 
     assigns =
       assign(assigns,
@@ -118,60 +101,52 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
         Affected service
       </.h5>
-      <.form
-        for={@form}
-        phx-target={@myself}
-        phx-change="validate"
-        class="form-control md:flex md:flex-row gap-x-8 mb-4 h-[32rem]"
-        id="service_form"
+      <.modal
+        id="routes-filter-modal"
+        header_text="Filter by route"
+        cancel_event_name="cancelled_modal"
+        accept_event_name="accepted_routes_modal"
+        accept_button_text="Apply"
+        target_id="#service_form"
       >
-        <.modal
-          id="routes-filter-modal"
-          header_text="Filter by route"
-          cancel_event_name="cancelled_modal"
-          accept_event_name="accepted_routes_modal"
-          accept_button_text="Apply"
-          target_id="#service_form"
-        >
-          <.filtered_select
-            label="Routes"
-            field={@form[:modal_route_id]}
-            filter_field={@form[:modal_route_search_term]}
-            options={@modal_route_id_options}
-            loading={@available_filter_routes.loading}
-            no_results={Enum.empty?(@modal_route_id_options)}
-            class="h-[32rem]"
-            prompt="All routes"
-            multiple={false}
-          />
-        </.modal>
-
         <.filtered_select
-          class="md:w-[25%]"
-          field={@form[:stop_ids]}
-          filter_field={@form[:stop_search_term]}
-          selected={@stop_selections}
-          label="Stops"
-          loading={Map.get(@available_stops, :loading, true)}
-          modal_filter_active={@selected_route_id}
-          modal_filter_id="routes-filter-modal"
-          modal_filter_title={"Filter: #{@filter_title_value}"}
-          no_results={Enum.empty?(@stop_id_options)}
-          options={@stop_id_options}
-          target_id="#service_form"
+          label="Routes"
+          field={@form[:modal_route_id]}
+          filter_field={@form[:modal_route_search_term]}
+          options={@modal_route_id_options}
+          loading={@available_filter_routes.loading}
+          no_results={Enum.empty?(@modal_route_id_options)}
+          class="h-[32rem]"
+          prompt="All routes"
+          multiple={false}
         />
+      </.modal>
 
-        <.filtered_select
-          label="Impacted routes"
-          field={@form[:route_ids]}
-          filter_field={@form[:routes_search_term]}
-          loading={Map.get(@available_routes, :loading, true)}
-          no_results={Enum.empty?(@route_id_options) && !disable_routes_input?(assigns)}
-          disabled={disable_routes_input?(assigns)}
-          options={@route_id_options}
-          class="md:w-[25%]"
-        />
-      </.form>
+      <.filtered_select
+        class="md:w-[25%]"
+        field={@form[:stop_ids]}
+        filter_field={@form[:stop_search_term]}
+        selected={@stop_selections}
+        label="Stops"
+        loading={Map.get(@available_stops, :loading, true)}
+        modal_filter_active={@selected_route_id}
+        modal_filter_id="routes-filter-modal"
+        modal_filter_title={"Filter: #{@filter_title_value}"}
+        no_results={Enum.empty?(@stop_id_options)}
+        options={@stop_id_options}
+        target_id="#service_form"
+      />
+
+      <.filtered_select
+        label="Impacted routes"
+        field={@form[:route_ids]}
+        filter_field={@form[:routes_search_term]}
+        loading={Map.get(@available_routes, :loading, true)}
+        no_results={Enum.empty?(@route_id_options) && !disable_routes_input?(assigns)}
+        disabled={disable_routes_input?(assigns)}
+        options={@route_id_options}
+        class="md:w-[25%]"
+      />
       <p :if={@show_stop_ids}>
         Selected stop ids: {(@form[:stop_ids].value || []) |> Enum.join(", ")}
       </p>
@@ -205,5 +180,68 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
       end
     end)
     |> List.flatten()
+  end
+
+  defp modal_route_id_options(
+    filter_routes,
+    modal_route_search_term,
+    route_type,
+    modal_route_id
+  ) do
+    SelectFormatter.formatted_select_options(%SelectFormatter{
+      options: filter_routes,
+      search_term: modal_route_search_term,
+      route_type: route_type,
+      values_to_keep: modal_route_id |> List.wrap(),
+      option_prefix: "route-filter"
+    })
+  end
+
+  def stop_id_options(
+    available_stops,
+    selected_stops,
+    stop_search_term,
+    route_type,
+    stop_ids
+  ) do
+    # Yeah this is weird. Basically, available_stops might be filtered down by route and sorted by stop order,
+    # so we have to carefully preserve already selected stops.
+    if async_available?(available_stops) do
+      # Available stops will only include the stops visible with the given route filter
+      # And now just a list of stop ids
+      available_stop_ids = Enum.map(available_stops.result, fn stop -> stop.id end)
+
+      # Get all the stops that were selected but are no longer included in `available_stops`
+      # Then append them to the top of the list
+      previously_selected_stops =
+        Enum.filter(selected_stops, fn stop -> stop.id not in available_stop_ids end)
+
+      options = previously_selected_stops ++ available_stops.result
+
+      SelectFormatter.formatted_select_options(%SelectFormatter{
+        options: options,
+        search_term: stop_search_term,
+        route_type: route_type,
+        values_to_keep: stop_ids,
+        option_prefix: "stop-selector"
+      })
+    else
+      []
+    end
+  end
+  
+  defp route_id_options(
+    available_routes,
+    route_ids,
+    route_search_term,
+    route_type
+  ) do
+    SelectFormatter.formatted_select_options(%SelectFormatter{
+      options: Map.get(available_routes, :result, []) || [],
+      search_term: route_search_term,
+      route_type: route_type,
+      values_to_keep: route_ids,
+      option_prefix: "route-selector"
+    })
   end
 end
