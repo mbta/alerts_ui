@@ -11,9 +11,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   alias AlertsUI.Alerts
   alias AlertsUIWeb.CreateAlertMonoLive.{AlertData, Timeline}
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
-    UrlSlice,
+    AccessServiceSlice,
+    AffectedServiceSlice,
     DeliverySlice,
-    SystemwideServiceSlice
+    StopRouteServiceSlice,
+    SystemwideServiceSlice,
+    UrlSlice
   }
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.{
@@ -155,14 +158,22 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   def sync_socket(socket, params) do
     case AlertData.sync(socket.assigns.form.source, params) do
       {:ok, alert_data} ->
-        Logger.warn("SYNC OK - alert data is #{inspect(alert_data)}")
         assign(socket, :form, to_form(change(alert_data)))
 
       {:error, changeset} ->
-        Logger.warn("SYNC ERROR")
         assign(socket, :form, to_form(changeset))
     end
   end
 
+  def service_slice(assigns) do
+    Logger.warning("SERVICE SLICE: #{inspect(assigns.form)}")
+    service_slice_by_combination(assigns.form[:combination].value).render(assigns)
+  end
+
   defp strip_on_duplicate(alert), do: alert
+
+  defp service_slice_by_combination(:SR), do: StopRouteServiceSlice
+  defp service_slice_by_combination(:ACCESS), do: AccessServiceSlice
+  defp service_slice_by_combination(nil), do: SystemwideServiceSlice
+  defp service_slice_by_combination(_), do: AffectedServiceSlice
 end
