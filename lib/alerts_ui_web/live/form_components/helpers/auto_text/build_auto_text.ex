@@ -273,7 +273,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   def route_names(%{routes: []}), do: ""
 
   def route_names(%{routes: routes, schedules: []}) when length(routes) > 5 do
-    grouped_routes = sort_routes(routes)
+    grouped_routes = routes |> sort_routes() |> Enum.group_by(&first_letter_numeric?/1)
 
     numerical_routes = Map.get(grouped_routes, true, nil)
     non_numerical_routes = Map.get(grouped_routes, false, nil)
@@ -290,7 +290,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   end
 
   def route_names(%{routes: routes, schedules: []}) do
-    grouped_routes = sort_routes(routes)
+    grouped_routes = routes |> sort_routes() |> Enum.group_by(&first_letter_numeric?/1)
 
     numerical_routes = Map.get(grouped_routes, true)
     non_numerical_routes = Map.get(grouped_routes, false)
@@ -429,8 +429,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
       route_sub_list
       |> Enum.sort(&(maybe_cast_to_integer(&1) <= maybe_cast_to_integer(&2)))
       |> Enum.map(&SelectFormatter.name_for_option/1)
+      # make routes starting with letters come first instead of last
+      |> Enum.sort_by(&first_letter_numeric?/1)
     end)
-    |> Enum.group_by(&first_letter_numeric?/1)
   end
 
   # Turns strings into sortable integers, if relevant

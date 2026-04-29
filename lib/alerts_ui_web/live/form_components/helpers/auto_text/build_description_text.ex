@@ -9,20 +9,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionText do
   def affected_routes(%{routes: routes, effect_name: effect, route_type: route_type}) do
     routes =
       routes
-      # group routes by type and sort by type
-      |> Enum.group_by(& &1.type)
-      |> Enum.sort_by(fn {k, _v} -> k end)
-      # sort within the sub-groups
-      |> Enum.flat_map(fn
-        {_k, route_sub_list} ->
-          route_sub_list
-          |> Enum.sort(
-            &(BuildAutoText.maybe_cast_to_integer(&1) <= BuildAutoText.maybe_cast_to_integer(&2))
-          )
-          |> Enum.map(&SelectFormatter.name_for_option/1)
-          # make routes starting with letters come first instead of last
-          |> Enum.sort_by(&BuildAutoText.first_letter_numeric?/1)
-      end)
+      |> BuildAutoText.sort_routes()
       |> Enum.join("\n")
 
     "#{affected_route_term(effect)} #{route_term(route_type)}:\n#{routes}"
