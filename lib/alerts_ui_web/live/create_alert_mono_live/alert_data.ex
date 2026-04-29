@@ -124,9 +124,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   end
 
   def sync(alert_data_or_changeset, params, fields \\ form_fields()) do
-    Logger.warning("FORM FIELDS are: #{inspect(fields)}")
-    Logger.warning("PARAMS are: #{inspect(params)}")
-
     alert_data_or_changeset
     |> cast(params, form_fields())
     |> transform()

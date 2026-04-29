@@ -19,22 +19,25 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
   ]
 
   defimpl Slice, for: __MODULE__ do
-    @doc """
-    """
     def extract(url_data, %Alert{} = alert) do
       alert_id = alert.alert_id
       effect_name = alert.effect
       route_type = Alert.get_route_type(alert)
-
+      slice = 
       %{
         url_data
         | alert_id: alert_id,
           effect_name: effect_name,
           route_type: route_type
       }
+      slice
     end
 
-    def transform(_url_data, changeset), do: changeset
+    def transform(url_data, changeset) do
+      Logger.warning("URL DATA is: #{inspect(url_data)}")
+      changeset
+    end
+
     def validate(_url_data, changeset), do: changeset
   end
 
