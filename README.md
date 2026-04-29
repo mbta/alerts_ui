@@ -10,22 +10,32 @@ A UI for creating and modifying alerts
   - `asdf plugin add elixir https://github.com/asdf-vm/asdf-elixir.git`
   - `asdf plugin add erlang https://github.com/asdf-vm/asdf-erlang.git`
   - `asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git`
-  - Make sure `asdf` is [configured](https://asdf-vm.com/guide/getting-started.html#_2-configure-asdf) to add shims to your PATH
+  - Make sure `asdf` is [configured](https://asdf-vm.com/guide/getting-started.html#_2-configure-asdf) to add shims to your PATH so that you can run i.e. `node` directly
 - PostgreSQL 15 (using Homebrew: `brew install postgresql@15`)
   - You will need Postgres client tools in your PATH; if using Homebrew and you
   get an error about missing tools, use `brew link postgresql@15`
   - Make sure the postgres daemon has started: `brew services start postgresql@15`
 - [`direnv`](https://direnv.net/) _(optional, for auto-loading env vars)_
+- An MBTA v3 API key
+  - Visit https://api-dev.mbtace.com for dev or https://api.mbtace.com for prod
+  - Register for a developer account and request a key
 
 ### Instructions
 
+Install dependencies
 1. `asdf install`
 2. `mix deps.get`
 1. `npm --prefix assets i`
-4. `cat .envrc.example | sed -e "s/__username__/$(logname)/g" > .envrc`
-6. `direnv allow`
-7. `mix ecto.setup`
-8. `mix ecto.test_setup`
+
+Set up environment variables
+1. `cat .envrc.example | sed -e "s/__username__/$(logname)/g" > .envrc`
+1. Paste your MBTA API Key to `.envrc` for `API_KEY` and `DEV_API_KEY`
+1. `direnv allow`
+
+Create the database and setup the app
+1. `mix ecto.setup`
+1. `mix ecto.test_setup`
+
 
 The above assumes you have a PostgreSQL user with the same name as your OS user
 (`logname`), which should be the default with a Homebrew install. Otherwise, you
