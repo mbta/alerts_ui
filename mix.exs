@@ -98,7 +98,7 @@ defmodule AlertsUI.MixProject do
       {:hackney, "1.25.0"},
       {:jason, "~> 1.2"},
       {:laboratory, github: "paulswartz/laboratory", ref: "cookie_opts"},
-      {:live_debugger, "~> 0.7.0", only: :dev},
+      {:live_debugger, "~> 0.8.0", only: :dev},
       {:live_isolated_component, "~> 0.9", only: :test},
       {:logster, "~> 1.1"},
       {:map_diff, "~> 1.3.4"},
