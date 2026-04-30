@@ -35,7 +35,32 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
       changeset
     end
 
-    def assign(_service_data, socket) do
+    def assign(_service_data, socket, params) do
+      # update selections here
+      assign_selections(socket)
+    end
+
+    defp assign_selections(socket) do
+    end
+
+    defp selections() do
+      %{
+        available_filter_routes: CreateAlertLive.get_routes(route_type),
+        available_routes: CreateAlertLive.get_routes_by_stop(stop_ids, route_type),
+        available_stops: Create
+      }
+    end
+
+    defp fetch_filter_routes(route_type) do
+      CreateAlertLive.get_routes(route_type)
+    end
+
+    defp fetch_routes(route_type, stop_ids) do
+      CreateAlertLive.get_routes_by_stop(stop_ids, route_type)
+    end
+
+    defp fetch_stops(route_type, route_ids) do
+      CreateAlertLive.get_stops_for_stop_route(route_ids, route_type)
     end
   end
 
