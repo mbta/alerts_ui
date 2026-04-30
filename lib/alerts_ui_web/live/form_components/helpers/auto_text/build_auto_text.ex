@@ -29,7 +29,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
             end_date: nil,
             start_time: nil,
             end_time: nil,
-            alert_timing: :one_time,
+            alert_timing: :"one-time",
             recurrence_days: []
 
   @type t :: %__MODULE__{
@@ -53,7 +53,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
           end_date: Date.t() | nil,
           start_time: Time.t() | nil,
           end_time: Time.t() | nil,
-          alert_timing: :one_time | :recurring,
+          alert_timing: :"one-time" | :recurring,
           recurrence_days: [atom()]
         }
 
