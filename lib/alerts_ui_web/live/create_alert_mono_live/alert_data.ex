@@ -11,6 +11,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
 
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
+    AlertDetailsSlice,
     UrlSlice,
     DeliverySlice,
     AccessAffectedServiceSlice,
@@ -99,14 +100,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :cause_detail, :string, default: ""
     field :description_text, :string
     field :description_sync_toggle, :boolean, default: true
-    field :header_text, :string
+    field :header_text, :string, default: ""
     field :header_sync_toggle, :boolean, default: true
     field :image_alternative_text, :string
     field :image_size, :map, default: %{}
-    field :image_url, :string
+    field :image_url, :string, default: ""
     field :service_effect_text, :string
     field :severity, :integer, default: 4
-    field :url, :string
+    field :url, :string, default: ""
     # delivery
     field :accept_banner, :boolean, default: false
     field :banner_sync_toggle, :boolean, default: true
@@ -185,9 +186,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
         }
 
   @slices [
-    UrlSlice,
+    AlertDetailsSlice,
     DeliverySlice,
-    AccessAffectedServiceSlice
+    AccessAffectedServiceSlice,
+    StopRouteServiceSlice,
+    SystemwideServiceSlice,
+    UrlSlice
   ]
 
   @actions [:new, :edit, :duplicate]
