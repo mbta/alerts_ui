@@ -40,6 +40,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
     end
 
     def validate(_url_data, changeset), do: changeset
+
+    def assign(_url_data, socket), do: socket
   end
 
   def route_types do

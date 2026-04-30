@@ -25,6 +25,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
     def validate(_delivery_data, changeset) do
       changeset
     end
+
+    def assign(_delivery_data, socket) do
+      socket
+    end
   end
 
   def render(assigns) do
