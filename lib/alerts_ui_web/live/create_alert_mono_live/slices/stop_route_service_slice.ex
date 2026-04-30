@@ -34,6 +34,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
     def validate(_service_data, changeset) do
       changeset
     end
+
+    def assign(_service_data, socket) do
+    end
   end
 
   def render(%{

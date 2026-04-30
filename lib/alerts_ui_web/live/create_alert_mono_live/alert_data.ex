@@ -151,6 +151,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     |> apply_action(:validate)
   end
 
+  def assign(socket) do
+    Enum.reduce(slices(), socket, fn slice_module, socket ->
+      Slice.assign(struct(slice_module), socket)
+    end)
+  end
+
   def slice_from_changeset(changeset, slice_module) do
     as_map =
       slice_module

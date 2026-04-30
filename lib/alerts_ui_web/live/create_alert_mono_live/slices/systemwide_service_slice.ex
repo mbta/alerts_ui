@@ -31,6 +31,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSlice do
     def validate(_service_data, changeset) do
       changeset
     end
+
+    def assign(_service_data, socket) do
+      socket
+    end
   end
 
   def render(assigns) do
