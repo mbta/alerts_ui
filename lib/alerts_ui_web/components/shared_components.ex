@@ -1108,6 +1108,8 @@ defmodule AlertsUIWeb.SharedComponents do
           placeholder={if @disabled, do: nil, else: "Search..."}
           disabled={@disabled}
           phx-debounce="250"
+          action_icon="hero-x-circle-solid"
+          action_event={"reset_search_filter"}
           {@rest}
         />
         <hr class="w-5/6 self-center border-y-1 border-bg-elevation-6 min-h-[1rem]" />
@@ -1198,6 +1200,9 @@ defmodule AlertsUIWeb.SharedComponents do
       |> assign_new(:name, fn -> field.name end)
       |> assign_new(:value, fn -> field.value end)
 
+    # IO.inspect(assigns, label: "text input assigns")
+    # IO.inspect([field.name, field.value], label: "field name and value")
+
     ~H"""
     <div phx-feedback-for={@name} class="relative flex flex-col">
       <.label :if={not is_nil(@label)} for={@id}>{@label}</.label>
@@ -1228,7 +1233,7 @@ defmodule AlertsUIWeb.SharedComponents do
         <span
           :if={@action_event != nil && @action_icon != nil}
           class={"h-[38px] relative right-[3rem] flex flex-row items-center justify-center align-center rounded-xl text-primary hover:text-primary-hover active:text-primary-active cursor-pointer z-1 #{if @value in ["", nil], do: "invisible"}"}
-          phx-click={@action_event}
+          phx-click={JS.push(@action_event, value: %{name: @name})}
         >
           <AlertsUIWeb.CoreComponents.icon name={@action_icon} class="p-2 z-1 w-[3rem]" />
         </span>

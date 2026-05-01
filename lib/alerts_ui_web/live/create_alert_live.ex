@@ -295,6 +295,16 @@ defmodule AlertsUIWeb.CreateAlertLive do
     {:noreply, socket |> redirect(to: return_to(socket.assigns.return_to || "/"))}
   end
 
+  @impl true
+  def handle_event("reset_search_filter", %{"name" => name}, socket) do
+    IO.inspect(socket.assigns, label: "socket assigns")
+    IO.inspect(name, label: "name")
+    # TODO: figure out from name which key to replace?
+    new_alert_data = socket.assigns.alert_data
+    |> Map.put(:route_search_term, "")
+    {:noreply, assign(socket, :alert_data, new_alert_data)}
+  end
+
   def get_routes([4]) do
     [4]
     |> RoutesRepo.by_type(listed_route: false)
