@@ -7,6 +7,7 @@ concurrency:
   cancel-in-progress: true
 env:
   DATABASE_URL_TEST: postgresql://postgres:postgres@localhost:5432/alerts_ui
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   asdf:
@@ -14,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       # cache the ASDF directory, using the values from .tool-versions
       - name: ASDF cache
         uses: actions/cache@v4
