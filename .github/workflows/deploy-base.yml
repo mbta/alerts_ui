@@ -25,7 +25,7 @@ jobs:
     env:
       TARGET: ${{ inputs.environment }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v5
       - uses: mbta/actions/build-push-ecr@v2
         id: build-push
         with:
