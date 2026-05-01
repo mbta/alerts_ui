@@ -434,14 +434,20 @@ defmodule AlertsUI.AlertBuilder do
       service_types = Map.get(alert_data, :service_types, []) |> expand_subway_service_types()
       direction = Map.get(alert_data, :direction)
 
+      selected_stop_ids = Map.get(alert_data, :stop_ids, [])
+      selected_route_ids = Map.get(alert_data, :route_ids, [])
+
       routes =
-        alert_data
-        |> Map.get(:route_ids, [])
+        selected_route_ids
         |> pre_combo_routes()
         |> Enum.reject(&(&1 == %{}))
         |> add_combo_routes(direction)
+        |> maybe_remove_green_line_routes(
+          selected_route_ids,
+          selected_stop_ids,
+          alert_data.effect_name
+        )
 
-      # get route patterns
       route_ids = Enum.map(routes, & &1.id)
 
       route_types_by_id =
@@ -454,7 +460,7 @@ defmodule AlertsUI.AlertBuilder do
         child_stops_with_context(
           routes,
           direction,
-          Map.get(alert_data, :stop_ids)
+          selected_stop_ids
         )
 
       entity_data =
@@ -517,6 +523,31 @@ defmodule AlertsUI.AlertBuilder do
   end
 
   def add_special_combo_routes(route_ids, _), do: route_ids
+
+  defp maybe_remove_green_line_routes(routes, ["Green"], selected_stop_ids, effect)
+       when effect in ["Shuttle", "Suspension"] do
+    route_ids_to_remove =
+      routes
+      |> Enum.map(& &1.id)
+      |> Enum.filter(fn
+        route_id when route_id in @green_line_branch_ids ->
+          {_, stops_on_route} = stops_on_route(route_id, "default")
+
+          selected_stops_on_route =
+            stops_on_route |> Enum.filter(&(&1.id in selected_stop_ids)) |> Enum.uniq() |> length
+
+          selected_stops_on_route <= 1
+
+        _route_id ->
+          true
+      end)
+
+    Enum.reject(routes, &(&1.id in route_ids_to_remove))
+  end
+
+  defp maybe_remove_green_line_routes(routes, _selected_route_ids, _selected_stop_ids, _effect) do
+    routes
+  end
 
   @spec child_stops_with_context([Route.id_t()], String.t(), [Stop.id_t()]) ::
           [
