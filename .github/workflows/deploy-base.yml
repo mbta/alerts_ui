@@ -24,9 +24,8 @@ jobs:
     concurrency: ${{ inputs.environment }}
     env:
       TARGET: ${{ inputs.environment }}
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: mbta/actions/build-push-ecr@v2
         id: build-push
         with:
