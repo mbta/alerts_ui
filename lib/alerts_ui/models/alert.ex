@@ -322,7 +322,6 @@ defmodule AlertsUI.Models.Alert do
   defp get_direction_from_original_selections(alert) do
     case alert.original_direction_selections do
       [] -> nil
-      ["|"] -> nil
       [direction] -> get_route_id(direction)
       [direction | _] -> get_route_id(direction)
     end
