@@ -7,6 +7,7 @@ concurrency:
   cancel-in-progress: true
 env:
   DATABASE_URL_TEST: postgresql://postgres:postgres@localhost:5432/alerts_ui
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   asdf:
