@@ -27,15 +27,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
       struct(service_data, Map.from_struct(alert))
     end
 
-    def transform(_service_data, changeset) do
+    def transform(_service_data, changeset, _params) do
       changeset
     end
 
-    def validate(_service_data, changeset) do
+    def validate(_service_data, changeset, _params) do
       changeset
     end
 
-    def assign(_service_data, socket, params) do
+    def assign(_service_data, socket, _params) do
       # update selections here
       assign_selections(socket)
     end
@@ -43,7 +43,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
     defp assign_selections(socket) do
     end
 
-    defp selections() do
+    defp selections(route_type, stop_ids) do
       %{
         available_filter_routes: CreateAlertLive.get_routes(route_type),
         available_routes: CreateAlertLive.get_routes_by_stop(stop_ids, route_type),

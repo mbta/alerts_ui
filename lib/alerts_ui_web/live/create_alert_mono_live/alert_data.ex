@@ -5,10 +5,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   require Logger
 
   alias Ecto.Changeset
-  import Changeset
+  alias Phoenix.LiveView.Socket
 
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
-
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
     UrlSlice,
     DeliverySlice,
@@ -16,6 +15,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   }
 
   use AlertsUI.Schema
+
+  import Changeset
 
   @combination_values [:ACCESS, :R, :RDS, :RDT, :RDTS, :SR]
   @alert_timing_values [:"one-time", :recurring]
@@ -107,7 +108,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
   @actions [:new, :edit, :duplicate]
 
-  def init(params, action, alert_or_nil \\ nil) when action in @actions do
+  @spec init(
+    Socket.t(),
+    Socket.unsigned_params(),
+    atom(),
+    Alert.t() | nil
+  ) :: {:ok, {Changeset.t(), Socket.t()}} | {:error, {Changeset.t(), Socket.t()}}
+  def init(socket, params, action, alert_or_nil \\ nil) when action in @actions do
     base_params =
       slices()
       |> Enum.map(fn slice_module ->
@@ -124,29 +131,35 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
     __MODULE__
     |> struct(base_params)
-    |> sync(params, url_fields())
+    |> sync(socket, params, url_fields())
   end
 
-  def sync(alert_data_or_changeset, params, fields \\ form_fields()) do
+  @spec sync(
+    Changeset.t(),
+    Socket.t(),
+    Socket.unsigned_params(),
+    list(atom())
+  ) :: {:ok, {Changeset.t(), Socket.t()}} | {:error, {Changeset.t(), Socket.t}}
+  def sync(alert_data_or_changeset, socket, params, fields \\ form_fields()) do
     alert_data_or_changeset
-    |> cast(params, form_fields())
-    |> transform()
-    |> validate()
+    |> cast(params["alert_data"], form_fields())
+    |> transform(params)
+    |> validate(params)
   end
 
-  def transform(%Changeset{} = changeset) do
+  def transform(%Changeset{} = changeset, params) do
     Enum.reduce(slices(), changeset, fn slice_module, changeset ->
       changeset
       |> slice_from_changeset(slice_module)
-      |> Slice.transform(changeset)
+      |> Slice.transform(changeset, params)
     end)
   end
 
-  def validate(%Changeset{} = changeset) do
+  def validate(%Changeset{} = changeset, params) do
     Enum.reduce(slices(), changeset, fn slice_module, changeset ->
       changeset
       |> slice_from_changeset(slice_module)
-      |> Slice.validate(changeset)
+      |> Slice.validate(changeset, params)
     end)
     |> apply_action(:validate)
   end
