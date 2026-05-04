@@ -99,6 +99,53 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
       end
     end
 
+    test "search can clear" do
+      with_mock(FacilitiesRepo, get_by_type: fn _facility_types, _opts -> [@facility] end) do
+        :BIKE_ISSUE
+
+        {:ok, view, _html} = live_isolated_component(AccessAffectedService, @assigns)
+
+        {:ok, document} =
+          view
+          |> render_async()
+          |> Floki.parse_document()
+
+        assert document_has_element?(
+                 document,
+                 "select#access_affected_service_facility_ids > option[value=\"Facility-3\"]"
+               )
+
+        {:ok, document} =
+          view
+          |> element("form")
+          |> render_change(%{"access_affected_service" => %{"facility_search_term" => "q"}})
+          |> Floki.parse_document()
+
+        refute document_has_element?(
+                 document,
+                 "select#access_affected_service_facility_ids > option[value=\"Facility-3\"][selected=\"selected\"]"
+               )
+
+        {:ok, document} =
+          view
+          |> element("[phx-value-name='access_affected_service[facility_search_term]']")
+          |> render_click()
+          |> Floki.parse_document()
+
+        # Confirm the search input cleared
+        refute document_has_element?(
+                 document,
+                 "input#access_affected_service_facility_search_term[value=\"q\"]"
+               )
+
+        #  And that the options include previously filtered out values
+        assert document_has_element?(
+                 document,
+                 "select#access_affected_service_facility_ids > option[value=\"Facility-3\"]"
+               )
+      end
+    end
+
     test "search does not reset itself on selection" do
       with_mock(FacilitiesRepo,
         get_by_type: fn _facility_types, _opts -> [@facility, @facility_two, @facility_three] end
