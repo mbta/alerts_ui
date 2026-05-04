@@ -1110,6 +1110,7 @@ defmodule AlertsUIWeb.SharedComponents do
           phx-debounce="250"
           action_icon="hero-x-circle-solid"
           action_event={"reset_search_filter"}
+          action_name="Clear"
           {@rest}
         />
         <hr class="w-5/6 self-center border-y-1 border-bg-elevation-6 min-h-[1rem]" />
@@ -1188,6 +1189,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :action_icon, :string, default: nil, doc: "hero icon button"
   attr :action_event, :string, default: nil, doc: "event triggered by action button"
+  attr :action_name, :string, default: nil, doc: "name of action triggered by action button (for screen readers)"
 
   attr :rest, :global,
     include: ~w(value phx-debounce maxlength minlength placeholder spellcheck phx-change)
@@ -1228,14 +1230,16 @@ defmodule AlertsUIWeb.SharedComponents do
           {@rest}
         />
         <% # phx-target="" will make the event bubble to the the parent LiveComponent instead of the parent LiveView %>
-        <span
+        <button
           :if={@action_event != nil && @action_icon != nil}
           class={"h-[38px] relative right-[3rem] flex flex-row items-center justify-center align-center rounded-xl text-primary hover:text-primary-hover active:text-primary-active cursor-pointer z-1 #{if @value in ["", nil], do: "invisible"}"}
           phx-click={JS.push(@action_event, value: %{name: @name})}
           phx-target=""
+          type="button"
         >
           <AlertsUIWeb.CoreComponents.icon name={@action_icon} class="p-2 z-1 w-[3rem]" />
-        </span>
+          <span class="sr-only">{@action_name}</span>
+        </button>
       </div>
       <.input_error :for={msg <- @errors}>{msg}</.input_error>
     </div>

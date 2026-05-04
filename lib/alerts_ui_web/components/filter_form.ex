@@ -57,6 +57,7 @@ defmodule AlertsUIWeb.FilterForm do
           phx-change="apply_filter"
           action_icon="hero-x-circle-solid"
           action_event="reset_text_filter"
+          action_name="Clear"
         />
       </div>
     </.form>
