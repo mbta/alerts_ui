@@ -34,14 +34,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
       slice
     end
 
-    def transform(url_data, changeset) do
+    def transform(url_data, changeset, _params) do
       Logger.warning("URL DATA is: #{inspect(url_data)}")
       changeset
     end
 
-    def validate(_url_data, changeset), do: changeset
+    def validate(_url_data, changeset, _params), do: changeset
 
-    def assign(_url_data, socket), do: socket
+    def assign(_url_data, socket, _params), do: socket
   end
 
   def route_types do

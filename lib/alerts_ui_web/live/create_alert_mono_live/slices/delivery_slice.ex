@@ -18,15 +18,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
       struct(delivery_data, Map.from_struct(alert))
     end
 
-    def transform(_delivery_data, changeset) do
+    def transform(_delivery_data, changeset, _params) do
       changeset
     end
 
-    def validate(_delivery_data, changeset) do
+    def validate(_delivery_data, changeset, _params) do
       changeset
     end
 
-    def assign(_delivery_data, socket) do
+    def assign(_delivery_data, socket, _params) do
       socket
     end
   end

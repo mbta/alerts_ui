@@ -110,11 +110,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     case {Map.get(params, "alert_id"), socket.assigns.live_action} do
       {nil, :new} ->
         # create a new alert
-        case AlertData.init(params, :new) do
-          {:ok, alert_data} ->
+        case AlertData.init(socket, params, :new) do
+          {:ok, {alert_data, socket}} ->
             assign(socket, :form, to_form(change(alert_data)))
 
-          {:error, changeset} ->
+          {:error, {changeset, socket}} ->
             assign(socket, :form, to_form(changeset))
         end
 
@@ -125,11 +125,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         # edit an existing alert
         alert = Alerts.get_by_alert_id!(alert_id)
 
-        case AlertData.init(params, :edit, alert) do
-          {:ok, alert_data} ->
+        case AlertData.init(socket, params, :edit, alert) do
+          {:ok, {alert_data, socket}} ->
             assign(socket, :form, to_form(change(alert_data)))
 
-          {:error, changeset} ->
+          {:error, {changeset, socket}} ->
             assign(socket, :form, to_form(changeset))
         end
 
@@ -137,11 +137,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         # duplicate an existing alert
         alert = Alerts.get_by_alert_id!(alert_id)
 
-        case AlertData.init(params, :duplicate, strip_on_duplicate(alert)) do
-          {:ok, alert_data} ->
+        case AlertData.init(socket, params, :duplicate, strip_on_duplicate(alert)) do
+          {:ok, {alert_data, socket}} ->
             assign(socket, :form, to_form(change(alert_data)))
 
-          {:error, changeset} ->
+          {:error, {changeset, socket}} ->
             assign(socket, :form, to_form(changeset))
         end
 
