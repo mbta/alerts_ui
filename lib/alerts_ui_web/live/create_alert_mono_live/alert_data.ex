@@ -19,11 +19,22 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   import Changeset
 
   @combination_values [:ACCESS, :R, :RDS, :RDT, :RDTS, :SR]
+  @type combination :: :ACCESS | :R | :RDS | :RDT | :RDTS | :SR
+
   @alert_timing_values [:"one-time", :recurring]
+  @type alert_timing :: :"one-time" | :recurring
+
   @start_values [:now, :start_of_service, :custom]
+  @type start_values :: :now | :start_of_service | :custom
+
   @end_values [:later_today, :end_of_service, :until_further_notice, :custom]
+  @type end_values :: :later_today | :end_of_service | :until_further_notice | :custom
+
   @notification_values [:same_as_effect_period, :now, :start_of_service, :custom]
+  @type notification_values :: :same_as_effect_period | :now | :start_of_service | :custom
+
   @recurrence_days_values [:sunday, :monday, :tuesday, :wednesday, :thursday, :friday, :saturday]
+  @type recurrence_days :: :sunday | :monday | :tuesday | :wednesday | :thursday | :friday | :saturday
 
   @primary_key false
   embedded_schema do
@@ -100,6 +111,61 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :last_edited_by, :string
   end
 
+  @type t :: %__MODULE__{
+    # basic params
+    form_type: :atom,
+    alert_id: String.t() | nil,
+    route_type: Route.type_int() | nil,
+    effect_name: String.t() | nil,
+    review: boolean() | nil,
+    # service
+    direction: String.t() | nil,
+    facility_ids: [String.t()] | nil,
+    original_direction_selections: [String.t()] | nil,
+    original_facility_selections: [String.t()] | nil,
+    original_route_selections: [String.t()] | nil,
+    original_stop_selections: [String.t()] | nil,
+    original_trip_selections: [String.t()] | nil,
+    trip_information_by_id: [String.t()] | nil,
+    service_types: [integer()] | nil,
+    # timing
+    active_period_end: NaiveDateTime.t() | nil,
+    active_period_end_date: Date.t() | nil,
+    active_period_end_specifier: end_values() | nil,
+    active_period_end_time: Time.t() | nil,
+    active_period_end_time_specifier: end_values() | nil,
+    active_period_start: NaiveDateTime.t() | nil,
+    active_period_start_date: Date.t() | nil,
+    active_period_start_specifier: start_values() | nil,
+    active_period_start_time: Time.t() | nil,
+    active_period_start_specifier: start_values() | nil,
+    alert_timing: alert_timing() | nil,
+    notification_period_start: NaiveDateTime.t() | nil,
+    notification_period_start_date: Date.t() | nil,
+    notification_specifier: notification_values(),
+    recurrence_days: [recurrence_days()] | nil,
+    # details
+    cause_detail: String.t() | nil,
+    description_text: String.t() | nil,
+    description_sync_toggle: boolean() | nil,
+    header_text: String.t() | nil,
+    header_sync_toggle: boolean() | nil,
+    image_alternative_text: String.t() | nil,
+    image_size: map(),
+    image_url: String.t() | nil,
+    service_effect_text: String.t() | nil,
+    severity: integer(),
+    url: String.t() | nil,
+    # delivery
+    accept_banner: boolean(),
+    banner_sync_toggle: boolean(),
+    banner_text: String.t(),
+    notification_toggle: boolean(),
+    view_banner: boolean(),
+    # reminders
+    reminder_times: [ReminderTime.t()]
+  }
+
   @slices [
     UrlSlice,
     DeliverySlice,
@@ -135,16 +201,25 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   end
 
   @spec sync(
-    Changeset.t(),
+    t() | Changeset.t(),
     Socket.t(),
     Socket.unsigned_params(),
     list(atom())
   ) :: {:ok, {Changeset.t(), Socket.t()}} | {:error, {Changeset.t(), Socket.t}}
   def sync(alert_data_or_changeset, socket, params, fields \\ form_fields()) do
     alert_data_or_changeset
-    |> cast(params["alert_data"], form_fields())
+    |> cast(Map.get(params, "alert_data", %{}), form_fields())
     |> transform(params)
     |> validate(params)
+    |> case do
+      {:ok, alert_data} ->
+        # clear errors, etc.
+        {:ok, {alert_data, assign(socket, params)}}
+
+      {:error, changeset} ->
+        # set errors, etc.; do we want to run `assign` if validation fails?
+        {:error, {changeset, assign(socket, params)}}
+    end
   end
 
   def transform(%Changeset{} = changeset, params) do
@@ -164,9 +239,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     |> apply_action(:validate)
   end
 
-  def assign(socket) do
+  def assign(socket, params) do
     Enum.reduce(slices(), socket, fn slice_module, socket ->
-      Slice.assign(struct(slice_module), socket)
+      Slice.assign(struct(slice_module), socket, params)
     end)
   end
 
