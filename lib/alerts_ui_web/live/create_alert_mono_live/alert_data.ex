@@ -208,7 +208,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   ) :: {:ok, {Changeset.t(), Socket.t()}} | {:error, {Changeset.t(), Socket.t}}
   def sync(alert_data_or_changeset, socket, params, fields \\ form_fields()) do
     alert_data_or_changeset
-    |> cast(Map.get(params, "alert_data", %{}), form_fields())
+    |> cast(Map.get(params, "alert_data", %{}), fields)
     |> transform(params)
     |> validate(params)
     |> case do
