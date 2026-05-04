@@ -3,8 +3,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   A monolithic LiveView for creating and editing alerts.
   """
 
-  require Logger
-
   use AlertsUIWeb, :live_view
 
   alias Phoenix.LiveView
@@ -162,7 +160,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   end
 
   def service_slice(assigns) do
-    Logger.warning("SERVICE SLICE: #{inspect(assigns.form)}")
     service_slice_by_combination(assigns.form[:combination].value).render(assigns)
   end
 
