@@ -526,6 +526,12 @@ defmodule AlertsUI.AlertBuilder do
 
   defp maybe_remove_green_line_routes(routes, ["Green"], selected_stop_ids, effect)
        when effect in ["Shuttle", "Suspension"] do
+    # the intention here is to NOT include a green line route
+    # for shuttle and suspension alerts if the user has
+    # selected "Green" but one of the green line routes
+    # only has 1 selected stop on it. This probably
+    # means that the selected stop is a shared node
+    # and the branch in question isn't actually closed.
     route_ids_to_remove =
       routes
       |> Enum.map(& &1.id)

@@ -758,6 +758,113 @@ defmodule AlertsUI.AlertBuilderTest do
       end
     end
 
+    test "it correctly removes green line routes for shuttle and suspension alerts if they only have 1 associated stop" do
+      with_mocks([
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn
+             _route_id, [include: "representative_trip.stops,route"] -> []
+           end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn
+             "Green-E", _ -> [%Stop{id: "a"}]
+             _, _ -> [%Stop{id: "a"}, %Stop{id: "b"}, %Stop{id: "c"}]
+           end
+         ]},
+        {RoutesRepo, [],
+         [
+           green_line: fn -> @green_line_virtual_route end,
+           get: fn
+             route_id, _opts ->
+               %Route{id: route_id, line_id: "line-Green", type: 1, description: :rapid_transit}
+           end
+         ]}
+      ]) do
+        alert_data = %{
+          route_type: 1,
+          header_text: "header",
+          effect_name: "Shuttle",
+          route_ids: ["Green"],
+          stop_ids: ["a", "b", "c"],
+          direction: "default",
+          active_period_start: ~N[2024-04-30 11:54:00],
+          active_period_end_specifier: :until_further_notice,
+          active_period_start_specifier: :custom,
+          cause_detail: ""
+        }
+
+        result = AlertBuilder.build_alert(alert_data, :RDS, ~U[2024-04-30 05:54:00Z])
+
+        assert result.informed_entity == [
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   agency_id: "1",
+                   route_id: "Green-B",
+                   route_type: 1,
+                   stop_id: "a"
+                 },
+                 %{
+                   agency_id: "1",
+                   route_id: "Green-C",
+                   route_type: 1,
+                   stop_id: "a",
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 },
+                 %{
+                   agency_id: "1",
+                   route_id: "Green-D",
+                   route_type: 1,
+                   stop_id: "a",
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 },
+                 %{
+                   agency_id: "1",
+                   route_id: "Green-B",
+                   route_type: 1,
+                   stop_id: "b",
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 },
+                 %{
+                   agency_id: "1",
+                   route_id: "Green-C",
+                   route_type: 1,
+                   stop_id: "b",
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 },
+                 %{
+                   agency_id: "1",
+                   route_id: "Green-D",
+                   route_type: 1,
+                   stop_id: "b",
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 },
+                 %{
+                   agency_id: "1",
+                   route_id: "Green-B",
+                   route_type: 1,
+                   stop_id: "c",
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 },
+                 %{
+                   agency_id: "1",
+                   route_id: "Green-C",
+                   route_type: 1,
+                   stop_id: "c",
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 },
+                 %{
+                   agency_id: "1",
+                   route_id: "Green-D",
+                   route_type: 1,
+                   stop_id: "c",
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 }
+               ]
+      end
+    end
+
     test "it does not filter out shuttle routes if they were part of the original selection" do
       with_mocks([
         {RoutePatternsRepo, [],
