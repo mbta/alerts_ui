@@ -120,6 +120,7 @@
             id={"edit-button-#{alert.alert_id}"}
             href={~p"/alerts/edit?alert_id=#{alert.alert_id}"}
             class="inline-flex rounded !px-2 !py-[3px]"
+            title="Edit alert"
           >
             <.icon name="hero-pencil-solid" class="w-4 h-4" />
           </.button_secondary_link>
@@ -130,6 +131,7 @@
             }
             id={"close-button-#{alert.alert_id}"}
             class="inline-flex rounded !px-2 !py-[3px]"
+            title="Close alert"
             phx-click={
               JS.push("opening_close_modal",
                 value: %{send_all_clear?: !is_nil(alert.last_push_notification_timestamp)}
@@ -141,7 +143,10 @@
           </.button_secondary_link>
           <.button_menu id={"button-menu-#{alert.alert_id}"} container_id="view_alerts_live_view">
             <:toggle>
-              <.button_secondary class="inline-flex rounded !px-2 !py-[3px]">
+              <.button_secondary
+                class="inline-flex rounded !px-2 !py-[3px]"
+                title="Show more actions"
+              >
                 <.icon name="hero-ellipsis-vertical" class="w-4 h-4" />
               </.button_secondary>
             </:toggle>
