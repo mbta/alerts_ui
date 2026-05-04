@@ -276,9 +276,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
     socket =
       socket
-      |> assign(
-        form: form
-      )
+      |> assign(form: form)
 
     {:noreply, socket}
   end

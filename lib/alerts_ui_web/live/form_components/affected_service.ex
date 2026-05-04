@@ -307,9 +307,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
 
     socket =
       socket
-      |> assign(
-        form: form
-      )
+      |> assign(form: form)
 
     {:noreply, socket}
   end

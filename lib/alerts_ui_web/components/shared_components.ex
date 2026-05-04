@@ -1109,7 +1109,7 @@ defmodule AlertsUIWeb.SharedComponents do
           disabled={@disabled}
           phx-debounce="250"
           action_icon="hero-x-circle-solid"
-          action_event={"reset_search_filter"}
+          action_event="reset_search_filter"
           action_name="Clear"
           {@rest}
         />
@@ -1189,7 +1189,10 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :action_icon, :string, default: nil, doc: "hero icon button"
   attr :action_event, :string, default: nil, doc: "event triggered by action button"
-  attr :action_name, :string, default: nil, doc: "name of action triggered by action button (for screen readers)"
+
+  attr :action_name, :string,
+    default: nil,
+    doc: "name of action triggered by action button (for screen readers)"
 
   attr :rest, :global,
     include: ~w(value phx-debounce maxlength minlength placeholder spellcheck phx-change)

@@ -309,7 +309,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
     {:noreply, socket}
   end
 
-   @impl true
+  @impl true
   def handle_event("reset_search_filter", %{"name" => name}, socket) do
     # The name will come back as i.e. "affected_service[route_search_term]" but we only want "route_search_term"
     search_filter_name = hd(Regex.run(~r/\[(.*?)\]/, name, capture: :all_but_first))
@@ -327,9 +327,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
 
     socket =
       socket
-      |> assign(
-        form: form
-      )
+      |> assign(form: form)
 
     {:noreply, socket}
   end
