@@ -9,7 +9,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   alias Phoenix.LiveView
   alias AlertsUI.Alerts
-  alias AlertsUIWeb.CreateAlertMonoLive.{AlertData, Timeline}
+  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
     AccessServiceSlice,
     AffectedServiceSlice,
@@ -22,10 +22,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.{
     AlertData,
     Path,
-    Params
   }
-
-  import AlertsUIWeb.FormComponents.Helpers.ContentFormatter, only: [route_atom_to_string: 1]
 
   import Ecto.Changeset, only: [change: 1]
 
@@ -106,7 +103,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   """
   @spec start_socket(LiveView.Socket.t(), LiveView.unsigned_params()) :: LiveView.Socket.t()
   def start_socket(socket, params) do
-    Logger.warn("PARAMS are #{inspect(params)}")
     case {Map.get(params, "alert_id"), socket.assigns.live_action} do
       {nil, :new} ->
         # create a new alert

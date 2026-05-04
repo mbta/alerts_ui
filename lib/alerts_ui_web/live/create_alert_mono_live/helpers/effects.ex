@@ -3,7 +3,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Effects do
   All things effects.
   """
   alias AlertsUI.Configs.ModeEffect
-  alias AlertsUI.Models.Effect
   alias Phoenix.HTML.Form
 
   @forbidden_effects ~w[Summary]
@@ -21,8 +20,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Effects do
 
       effects ->
         effects
-        |> Enum.reject(fn {name, struct} -> name in @forbidden_effects end)
-        |> Enum.map(fn {name, struct} -> struct.path_name end)
+        |> Enum.reject(fn {name, _struct} -> name in @forbidden_effects end)
+        |> Enum.map(fn {_name, struct} -> struct.path_name end)
     end
   end
 
@@ -37,7 +36,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Effects do
   def humanize_effect_name(route_type_name, effect_name) do
     mode_effect =
       ModeEffect.mode_effects_by_route_type_name(route_type_name)
-      |> Enum.find(fn {mode_effect_name, mode_effect_struct} ->
+      |> Enum.find(fn {_mode_effect_name, mode_effect_struct} ->
         mode_effect_struct.path_name == effect_name
       end)
 
