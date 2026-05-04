@@ -1236,7 +1236,8 @@ defmodule AlertsUIWeb.SharedComponents do
         <button
           :if={@action_event != nil && @action_icon != nil}
           class={"h-[38px] relative right-[3rem] flex flex-row items-center justify-center align-center rounded-xl text-primary hover:text-primary-hover active:text-primary-active cursor-pointer z-1 #{if @value in ["", nil], do: "invisible"}"}
-          phx-click={JS.push(@action_event, value: %{name: @name})}
+          phx-click={@action_event}
+          phx-value-name={@name}
           phx-target=""
           type="button"
         >
