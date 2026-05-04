@@ -290,6 +290,31 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   end
 
   @impl true
+  def handle_event("reset_search_filter", %{"name" => name}, socket) do
+    # The name will come back as i.e. "affected_service[route_search_term]" but we only want "route_search_term"
+    search_filter_name = hd(Regex.run(~r/\[(.*?)\]/, name, capture: :all_but_first))
+
+    affected_service =
+      socket.assigns.form.params
+      |> Map.merge(%{search_filter_name => ""})
+
+    changeset = build_changeset(%__MODULE__{}, affected_service)
+
+    form =
+      changeset
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    socket =
+      socket
+      |> assign(
+        form: form
+      )
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event("accepted_dates_modal", _params, socket) do
     params = socket.assigns.form.params
 

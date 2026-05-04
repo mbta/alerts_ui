@@ -1110,6 +1110,7 @@ defmodule AlertsUIWeb.SharedComponents do
           phx-debounce="250"
           action_icon="hero-x-circle-solid"
           action_event={"reset_search_filter"}
+          target_id={@target_id}
           {@rest}
         />
         <hr class="w-5/6 self-center border-y-1 border-bg-elevation-6 min-h-[1rem]" />
@@ -1189,6 +1190,8 @@ defmodule AlertsUIWeb.SharedComponents do
   attr :action_icon, :string, default: nil, doc: "hero icon button"
   attr :action_event, :string, default: nil, doc: "event triggered by action button"
 
+  attr :target_id, :string, default: nil, doc: "The target to send the events to (eg form component id)"
+
   attr :rest, :global,
     include: ~w(value phx-debounce maxlength minlength placeholder spellcheck phx-change)
 
@@ -1223,7 +1226,7 @@ defmodule AlertsUIWeb.SharedComponents do
               disabled:bg-bg-elevation-3 ring-0 min-w-full focus:ring-0 ring-border-focus
               focus:border-border-focus",
             @icon && "ps-10",
-            @action_icon && "pe-[3rem]",
+            @action_icon && @action_event && "pe-[3rem]",
             @class,
             @errors != [] && "border-danger focus:border-danger"
           ]}
@@ -1234,6 +1237,7 @@ defmodule AlertsUIWeb.SharedComponents do
           :if={@action_event != nil && @action_icon != nil}
           class={"h-[38px] relative right-[3rem] flex flex-row items-center justify-center align-center rounded-xl text-primary hover:text-primary-hover active:text-primary-active cursor-pointer z-1 #{if @value in ["", nil], do: "invisible"}"}
           phx-click={JS.push(@action_event, value: %{name: @name})}
+          phx-target={@target_id}
         >
           <AlertsUIWeb.CoreComponents.icon name={@action_icon} class="p-2 z-1 w-[3rem]" />
         </span>
