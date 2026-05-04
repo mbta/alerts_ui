@@ -265,11 +265,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
   def init_param_fields, do: [:alert_id, :effect_name, :route_type]
 
+  @uncastable_fields [:__struct__, :reminder_times]
+
   def form_fields do
     slices()
     |> Enum.map(&(struct(&1) |> Map.keys()))
     |> List.flatten()
     |> Enum.uniq()
-    |> Enum.reject(&(&1 == :__struct__))
+    |> Enum.reject(&(&1 in @uncastable_fields))
   end
 end
