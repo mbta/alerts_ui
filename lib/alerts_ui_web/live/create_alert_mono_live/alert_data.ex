@@ -8,6 +8,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   alias Phoenix.LiveView.Socket
 
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
+
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
     UrlSlice,
     DeliverySlice,
@@ -34,7 +35,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   @type notification_values :: :same_as_effect_period | :now | :start_of_service | :custom
 
   @recurrence_days_values [:sunday, :monday, :tuesday, :wednesday, :thursday, :friday, :saturday]
-  @type recurrence_days :: :sunday | :monday | :tuesday | :wednesday | :thursday | :friday | :saturday
+  @type recurrence_days ::
+          :sunday | :monday | :tuesday | :wednesday | :thursday | :friday | :saturday
 
   @primary_key false
   embedded_schema do
@@ -113,60 +115,60 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   end
 
   @type t :: %__MODULE__{
-    # basic params
-    form_type: :atom,
-    alert_id: String.t() | nil,
-    route_type: String.t() | nil,
-    route_type_int: Route.type_int() | nil,
-    effect_name: String.t() | nil,
-    review: boolean() | nil,
-    # service
-    direction: String.t() | nil,
-    facility_ids: [String.t()] | nil,
-    original_direction_selections: [String.t()] | nil,
-    original_facility_selections: [String.t()] | nil,
-    original_route_selections: [String.t()] | nil,
-    original_stop_selections: [String.t()] | nil,
-    original_trip_selections: [String.t()] | nil,
-    trip_information_by_id: [String.t()] | nil,
-    service_types: [integer()] | nil,
-    # timing
-    active_period_end: NaiveDateTime.t() | nil,
-    active_period_end_date: Date.t() | nil,
-    active_period_end_specifier: end_values() | nil,
-    active_period_end_time: Time.t() | nil,
-    active_period_end_time_specifier: end_values() | nil,
-    active_period_start: NaiveDateTime.t() | nil,
-    active_period_start_date: Date.t() | nil,
-    active_period_start_specifier: start_values() | nil,
-    active_period_start_time: Time.t() | nil,
-    active_period_start_specifier: start_values() | nil,
-    alert_timing: alert_timing() | nil,
-    notification_period_start: NaiveDateTime.t() | nil,
-    notification_period_start_date: Date.t() | nil,
-    notification_specifier: notification_values(),
-    recurrence_days: [recurrence_days()] | nil,
-    # details
-    cause_detail: String.t() | nil,
-    description_text: String.t() | nil,
-    description_sync_toggle: boolean() | nil,
-    header_text: String.t() | nil,
-    header_sync_toggle: boolean() | nil,
-    image_alternative_text: String.t() | nil,
-    image_size: map(),
-    image_url: String.t() | nil,
-    service_effect_text: String.t() | nil,
-    severity: integer(),
-    url: String.t() | nil,
-    # delivery
-    accept_banner: boolean(),
-    banner_sync_toggle: boolean(),
-    banner_text: String.t(),
-    notification_toggle: boolean(),
-    view_banner: boolean(),
-    # reminders
-    reminder_times: [ReminderTime.t()]
-  }
+          # basic params
+          form_type: :atom,
+          alert_id: String.t() | nil,
+          route_type: String.t() | nil,
+          route_type_int: Route.type_int() | nil,
+          effect_name: String.t() | nil,
+          review: boolean() | nil,
+          # service
+          direction: String.t() | nil,
+          facility_ids: [String.t()] | nil,
+          original_direction_selections: [String.t()] | nil,
+          original_facility_selections: [String.t()] | nil,
+          original_route_selections: [String.t()] | nil,
+          original_stop_selections: [String.t()] | nil,
+          original_trip_selections: [String.t()] | nil,
+          trip_information_by_id: [String.t()] | nil,
+          service_types: [integer()] | nil,
+          # timing
+          active_period_end: NaiveDateTime.t() | nil,
+          active_period_end_date: Date.t() | nil,
+          active_period_end_specifier: end_values() | nil,
+          active_period_end_time: Time.t() | nil,
+          active_period_end_time_specifier: end_values() | nil,
+          active_period_start: NaiveDateTime.t() | nil,
+          active_period_start_date: Date.t() | nil,
+          active_period_start_specifier: start_values() | nil,
+          active_period_start_time: Time.t() | nil,
+          active_period_start_specifier: start_values() | nil,
+          alert_timing: alert_timing() | nil,
+          notification_period_start: NaiveDateTime.t() | nil,
+          notification_period_start_date: Date.t() | nil,
+          notification_specifier: notification_values(),
+          recurrence_days: [recurrence_days()] | nil,
+          # details
+          cause_detail: String.t() | nil,
+          description_text: String.t() | nil,
+          description_sync_toggle: boolean() | nil,
+          header_text: String.t() | nil,
+          header_sync_toggle: boolean() | nil,
+          image_alternative_text: String.t() | nil,
+          image_size: map(),
+          image_url: String.t() | nil,
+          service_effect_text: String.t() | nil,
+          severity: integer(),
+          url: String.t() | nil,
+          # delivery
+          accept_banner: boolean(),
+          banner_sync_toggle: boolean(),
+          banner_text: String.t(),
+          notification_toggle: boolean(),
+          view_banner: boolean(),
+          # reminders
+          reminder_times: [ReminderTime.t()]
+        }
 
   @slices [
     UrlSlice,
@@ -177,11 +179,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   @actions [:new, :edit, :duplicate]
 
   @spec init(
-    Socket.t(),
-    Socket.unsigned_params(),
-    atom(),
-    Alert.t() | nil
-  ) :: {:ok, {Changeset.t(), Socket.t()}} | {:error, {Changeset.t(), Socket.t()}}
+          Socket.t(),
+          Socket.unsigned_params(),
+          atom(),
+          Alert.t() | nil
+        ) :: {:ok, {Changeset.t(), Socket.t()}} | {:error, {Changeset.t(), Socket.t()}}
   def init(socket, params, action, alert_or_nil \\ nil) when action in @actions do
     base_params =
       slices()
@@ -203,11 +205,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   end
 
   @spec sync(
-    t() | Changeset.t(),
-    Socket.t(),
-    Socket.unsigned_params(),
-    list(atom())
-  ) :: {:ok, {Changeset.t(), Socket.t()}} | {:error, {Changeset.t(), Socket.t}}
+          t() | Changeset.t(),
+          Socket.t(),
+          Socket.unsigned_params(),
+          list(atom())
+        ) :: {:ok, {Changeset.t(), Socket.t()}} | {:error, {Changeset.t(), Socket.t()}}
   def sync(alert_data_or_changeset, socket, params, fields \\ form_fields()) do
     alert_data_or_changeset
     |> cast(Map.get(params, "alert_data", %{}), fields)
@@ -265,9 +267,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
   def form_fields do
     slices()
-    |> Enum.map(&(struct(&1) |> Map.keys))
+    |> Enum.map(&(struct(&1) |> Map.keys()))
     |> List.flatten()
     |> Enum.uniq()
-    |> Enum.reject(& &1 == :__struct__)
+    |> Enum.reject(&(&1 == :__struct__))
   end
 end
