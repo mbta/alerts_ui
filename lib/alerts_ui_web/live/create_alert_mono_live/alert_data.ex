@@ -42,6 +42,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :alert_id, :string
     field :form_type, :string
     field :route_type, :string
+    field :route_type_int, :integer
     field :effect_name, :string
     field :review, :boolean
     # affected service
@@ -115,7 +116,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     # basic params
     form_type: :atom,
     alert_id: String.t() | nil,
-    route_type: Route.type_int() | nil,
+    route_type: String.t() | nil,
+    route_type_int: Route.type_int() | nil,
     effect_name: String.t() | nil,
     review: boolean() | nil,
     # service
@@ -197,7 +199,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
     __MODULE__
     |> struct(base_params)
-    |> sync(socket, params, url_fields())
+    |> sync(socket, params, init_param_fields())
   end
 
   @spec sync(
@@ -259,11 +261,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
   def slices(), do: @slices
 
-  def url_fields, do: Map.keys(%UrlSlice{})
+  def init_param_fields, do: [:alert_id, :effect_name, :route_type]
 
   def form_fields do
     slices()
-    |> Enum.map(&(struct(&1) |> Map.delete(:__struct__) |> Map.keys()))
+    |> Enum.map(&(struct(&1) |> Map.keys))
     |> List.flatten()
+    |> Enum.uniq()
+    |> Enum.reject(& &1 == :__struct__)
   end
 end

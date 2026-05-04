@@ -149,7 +149,14 @@ defmodule AlertsUI.Models.InformedEntity do
       iex> InformedEntity.route_type_mapping(:light_rail)
       0
   """
-  @spec route_type_mapping(mode_atom_t()) :: Route.type_int() | nil
+  @spec route_type_mapping(String.t() | mode_atom_t()) :: Route.type_int() | nil
+  def route_type_mapping("light_rail"), do: 0
+  def route_type_mapping("subway"), do: 1
+  def route_type_mapping("commuter_rail"), do: 2
+  def route_type_mapping("bus"), do: 3
+  def route_type_mapping("ferry"), do: 4
+  def route_type_mapping("facility"), do: nil
+  def route_type_mapping("systemwide"), do: nil
   def route_type_mapping(:light_rail), do: 0
   def route_type_mapping(:subway), do: 1
   def route_type_mapping(:commuter_rail), do: 2

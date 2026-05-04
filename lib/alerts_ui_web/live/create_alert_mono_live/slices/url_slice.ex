@@ -1,9 +1,11 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
-  require Logger
   alias AlertsUI.Models.Alert
+  alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
 
   use AlertsUIWeb, :html
+
+  import Ecto.Changeset, only: [cast: 3]
 
   import AlertsUIWeb.FormComponents.Helpers.ContentFormatter,
     only: [route_atom_to_string: 1]
@@ -24,24 +26,40 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
       alert_id = alert.alert_id
       effect_name = alert.effect
       route_type = Alert.get_route_type(alert)
-      slice = 
+
+      slice =
       %{
         url_data
-        | alert_id: alert_id,
+        | alert_id: alert.alert_id,
           effect_name: effect_name,
           route_type: route_type
       }
       slice
     end
 
-    def transform(url_data, changeset, _params) do
-      Logger.warning("URL DATA is: #{inspect(url_data)}")
-      changeset
+    @url_fields [:effect_name, :route_type, :route_type_int]
+
+    def transform(_url_data, changeset, params) do
+      cast(changeset, get_url_params(params), @url_fields)
     end
 
     def validate(_url_data, changeset, _params), do: changeset
 
     def assign(_url_data, socket, _params), do: socket
+
+    defp get_url_params(params) do
+      # These params are read out of the base params object rather than the
+      # alert data form. Also we don't look for alert id here because it can't
+      # be reassigned.
+      route_type_int = case Map.get(params, "route_type") do
+        nil -> nil
+        route_type -> InformedEntity.route_type_mapping(route_type)
+      end
+
+      params
+      |> Map.take(["route_type", "effect_name"])
+      |> Map.put("route_type_int", route_type_int)
+    end
   end
 
   def route_types do
