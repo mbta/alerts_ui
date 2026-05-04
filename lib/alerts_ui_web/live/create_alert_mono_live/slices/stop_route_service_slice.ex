@@ -6,7 +6,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.API, only: [async_available?: 1]
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Effects, only: [humanize_effect_name: 1]
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.SelectFormatter, only: [formatted_select_options: 1]
+
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.SelectFormatter,
+    only: [formatted_select_options: 1]
 
   use AlertsUIWeb, :html
 
@@ -64,27 +66,30 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
     end
   end
 
-  def render(%{
-    form: form,
-    selector: %{
-      available_filter_routes: available_filter_routes,
-      available_routes: available_routes,
-      available_stops: available_stops,
-      selected_stops: selected_stops
-    }
-  } = assigns) do
+  def render(
+        %{
+          form: form,
+          selector: %{
+            available_filter_routes: available_filter_routes,
+            available_routes: available_routes,
+            available_stops: available_stops,
+            selected_stops: selected_stops
+          }
+        } = assigns
+      ) do
     # Route filter
     route_type = form[:route_type].value
     modal_route_search_term = form[:modal_route_search_term].value
     modal_route_id = form[:modal_route_id].value || ""
     filter_routes = Map.get(available_filter_routes, :result) || []
 
-    modal_route_id_options = modal_route_id_options(
+    modal_route_id_options =
+      modal_route_id_options(
         filter_routes,
         modal_route_search_term,
         route_type,
         modal_route_id
-    )
+      )
 
     # Stop selector
     stop_search_term = form[:stop_search_term].value
@@ -92,13 +97,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
     # Yeah this is weird. Basically, available_stops might be filtered down by route and sorted by stop order,
     # so we have to carefully preserve already selected stops.
-    stop_id_options = stop_id_options(
-      available_stops,
-      selected_stops,
-      stop_search_term,
-      route_type,
-      stop_ids  
-    )
+    stop_id_options =
+      stop_id_options(
+        available_stops,
+        selected_stops,
+        stop_search_term,
+        route_type,
+        stop_ids
+      )
 
     stop_selections = AffectedService.extract_selections(form, stop_id_options)
 
@@ -106,12 +112,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
     route_search_term = form[:route_search_term].value
     route_ids = form[:route_ids].value || []
 
-    route_id_options = route_id_options(
-      available_routes,
-      route_ids,
-      route_search_term,
-      route_type
-    )
+    route_id_options =
+      route_id_options(
+        available_routes,
+        route_ids,
+        route_search_term,
+        route_type
+      )
 
     assigns =
       assign(assigns,
@@ -211,11 +218,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   end
 
   defp modal_route_id_options(
-    filter_routes,
-    modal_route_search_term,
-    route_type,
-    modal_route_id
-  ) do
+         filter_routes,
+         modal_route_search_term,
+         route_type,
+         modal_route_id
+       ) do
     SelectFormatter.formatted_select_options(%SelectFormatter{
       options: filter_routes,
       search_term: modal_route_search_term,
@@ -226,12 +233,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   end
 
   def stop_id_options(
-    available_stops,
-    selected_stops,
-    stop_search_term,
-    route_type,
-    stop_ids
-  ) do
+        available_stops,
+        selected_stops,
+        stop_search_term,
+        route_type,
+        stop_ids
+      ) do
     # Yeah this is weird. Basically, available_stops might be filtered down by route and sorted by stop order,
     # so we have to carefully preserve already selected stops.
     if async_available?(available_stops) do
@@ -257,13 +264,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
       []
     end
   end
-  
+
   defp route_id_options(
-    available_routes,
-    route_ids,
-    route_search_term,
-    route_type
-  ) do
+         available_routes,
+         route_ids,
+         route_search_term,
+         route_type
+       ) do
     SelectFormatter.formatted_select_options(%SelectFormatter{
       options: Map.get(available_routes, :result, []) || [],
       search_term: route_search_term,

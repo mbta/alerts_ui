@@ -30,6 +30,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
   def get_route_type(nil), do: nil
   def get_route_type("access"), do: nil
   def get_route_type("systemwide"), do: nil
+
   def get_route_type(%Alert{} = alert) do
     get_route_type(alert.primary_service_type)
   end

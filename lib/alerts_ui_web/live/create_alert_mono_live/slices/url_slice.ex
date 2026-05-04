@@ -28,12 +28,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
       route_type = Alert.get_route_type(alert)
 
       slice =
-      %{
-        url_data
-        | alert_id: alert.alert_id,
-          effect_name: effect_name,
-          route_type: route_type
-      }
+        %{
+          url_data
+          | alert_id: alert.alert_id,
+            effect_name: effect_name,
+            route_type: route_type
+        }
+
       slice
     end
 
@@ -51,10 +52,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
       # These params are read out of the base params object rather than the
       # alert data form. Also we don't look for alert id here because it can't
       # be reassigned.
-      route_type_int = case Map.get(params, "route_type") do
-        nil -> nil
-        route_type -> InformedEntity.route_type_mapping(route_type)
-      end
+      route_type_int =
+        case Map.get(params, "route_type") do
+          nil -> nil
+          route_type -> InformedEntity.route_type_mapping(route_type)
+        end
 
       params
       |> Map.take(["route_type", "effect_name"])
