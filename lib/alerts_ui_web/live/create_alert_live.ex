@@ -295,7 +295,6 @@ defmodule AlertsUIWeb.CreateAlertLive do
     {:noreply, socket |> redirect(to: return_to(socket.assigns.return_to || "/"))}
   end
 
-
   def get_routes([4]) do
     [4]
     |> RoutesRepo.by_type(listed_route: false)
