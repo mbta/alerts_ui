@@ -1111,6 +1111,7 @@ defmodule AlertsUIWeb.SharedComponents do
           action_icon="hero-x-circle-solid"
           action_event="reset_search_filter"
           action_name="Clear"
+          target_id={@target_id}
           {@rest}
         />
         <hr class="w-5/6 self-center border-y-1 border-bg-elevation-6 min-h-[1rem]" />
@@ -1194,6 +1195,10 @@ defmodule AlertsUIWeb.SharedComponents do
     default: nil,
     doc: "name of action triggered by action button (for screen readers)"
 
+  attr :target_id, :string,
+    default: "",
+    doc: "The target to send the events to (eg form component id)"
+
   attr :rest, :global,
     include: ~w(value phx-debounce maxlength minlength placeholder spellcheck phx-change)
 
@@ -1238,7 +1243,7 @@ defmodule AlertsUIWeb.SharedComponents do
           class={"h-[38px] relative right-[3rem] flex flex-row items-center justify-center align-center rounded-xl text-primary hover:text-primary-hover active:text-primary-active cursor-pointer z-1 #{if @value in ["", nil], do: "invisible"}"}
           phx-click={@action_event}
           phx-value-name={@name}
-          phx-target=""
+          phx-target={@target_id}
           type="button"
         >
           <AlertsUIWeb.CoreComponents.icon name={@action_icon} class="p-2 z-1 w-[3rem]" />

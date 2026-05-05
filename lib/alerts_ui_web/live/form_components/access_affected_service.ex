@@ -432,6 +432,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
               prompt="All Stops"
               multiple={false}
               class="h-[32rem]"
+              target_id={@myself}
             />
           </.modal>
           <.filtered_select
@@ -450,6 +451,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             multiple={@effect_name not in @single_facility_effect_names}
             no_results={Enum.empty?(@facility_id_options)}
             options={@facility_id_options}
+            target_id={@myself}
           />
         </fieldset>
       </.form>
