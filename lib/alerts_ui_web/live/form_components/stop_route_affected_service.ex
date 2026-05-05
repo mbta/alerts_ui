@@ -259,6 +259,29 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
   end
 
   @impl true
+  def handle_event("reset_search_filter", %{"name" => name}, socket) do
+    # The name will come back as i.e. "affected_service[route_search_term]" but we only want "route_search_term"
+    search_filter_name = hd(Regex.run(~r/\[(.*?)\]/, name, capture: :all_but_first))
+
+    affected_service =
+      socket.assigns.form.params
+      |> Map.merge(%{search_filter_name => ""})
+
+    changeset = build_changeset(%__MODULE__{}, affected_service)
+
+    form =
+      changeset
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    socket =
+      socket
+      |> assign(form: form)
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event("accepted_routes_modal", _params, socket) do
     route_type = socket.assigns.route_type
 
@@ -570,6 +593,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
             class="h-[32rem]"
             prompt="All routes"
             multiple={false}
+            target_id={@myself}
           />
         </.modal>
 
@@ -585,7 +609,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
           modal_filter_title={"Filter: #{@filter_title_value}"}
           no_results={Enum.empty?(@stop_id_options)}
           options={@stop_id_options}
-          target_id="#service_form"
+          target_id={@myself}
         />
 
         <.filtered_select

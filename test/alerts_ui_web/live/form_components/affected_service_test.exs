@@ -857,6 +857,80 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       end
     end
 
+    test "search can clear" do
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]},
+        {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
+      ]) do
+        {:ok, view, _html} =
+          live_isolated_component(AffectedService, @assigns)
+
+        view
+        |> element("form")
+        |> render_change(%{"affected_service" => %{"route_ids" => ["CR-Worcester"]}})
+
+        {:ok, document} =
+          view
+          |> render_async()
+          |> Floki.parse_document()
+
+        assert document_has_element?(document, "option[value=\"CR-683322-595\"]")
+        assert document_has_element?(document, "option[value=\"South Station|place-sstat\"]")
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "affected_service" => %{"trip_search_term" => "x", "stop_search_term" => "x"}
+        })
+
+        {:ok, document} =
+          view
+          |> render_async()
+          |> Floki.parse_document()
+
+        refute document_has_element?(document, "option[value=\"CR-683322-595\"]")
+        refute document_has_element?(document, "option[value=\"South Station|place-sstat\"]")
+
+        {:ok, document} =
+          view
+          |> element("[phx-value-name='affected_service[trip_search_term]']")
+          |> render_click()
+          |> Floki.parse_document()
+
+        # Confirm the trip search input cleared
+        refute document_has_element?(
+                 document,
+                 "input#affected_service_trip_search_term[value=\"x\"]"
+               )
+
+        # but that stop search term is still there
+        assert document_has_element?(
+                 document,
+                 "input#affected_service_stop_search_term[value=\"x\"]"
+               )
+
+        #  And that the options are back for trip but not stop
+        assert document_has_element?(document, "option[value=\"CR-683322-595\"]")
+        refute document_has_element?(document, "option[value=\"South Station|place-sstat\"]")
+
+        # Now clear the stop search term too
+        {:ok, document} =
+          view
+          |> element("[phx-value-name='affected_service[stop_search_term]']")
+          |> render_click()
+          |> Floki.parse_document()
+
+        refute document_has_element?(
+                 document,
+                 "input#affected_service_stop_search_term[value=\"x\"]"
+               )
+
+        # And confirm the option has returned
+        assert document_has_element?(document, "option[value=\"South Station|place-sstat\"]")
+      end
+    end
+
     test "works correctly if editing" do
       with_mocks([
         {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},

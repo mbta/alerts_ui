@@ -310,6 +310,29 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
   end
 
   @impl true
+  def handle_event("reset_search_filter", %{"name" => name}, socket) do
+    # The name will come back as i.e. "affected_service[route_search_term]" but we only want "route_search_term"
+    search_filter_name = hd(Regex.run(~r/\[(.*?)\]/, name, capture: :all_but_first))
+
+    affected_service =
+      socket.assigns.form.params
+      |> Map.merge(%{search_filter_name => ""})
+
+    changeset = build_changeset(%__MODULE__{}, affected_service)
+
+    form =
+      changeset
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    socket =
+      socket
+      |> assign(form: form)
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event("clear_filter", %{"filter-id" => "stops-filter-modal"}, socket) do
     access_affected_service =
       socket.assigns.form.params
@@ -409,6 +432,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
               prompt="All Stops"
               multiple={false}
               class="h-[32rem]"
+              target_id={@myself}
             />
           </.modal>
           <.filtered_select
@@ -427,6 +451,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             multiple={@effect_name not in @single_facility_effect_names}
             no_results={Enum.empty?(@facility_id_options)}
             options={@facility_id_options}
+            target_id={@myself}
           />
         </fieldset>
       </.form>

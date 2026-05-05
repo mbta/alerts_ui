@@ -266,6 +266,67 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       end
     end
 
+    test "search can clear" do
+      with_mocks([
+        {RoutesRepo, [],
+         [by_stop: fn _stop_id -> @routes end, by_type: fn _types -> @routes end]},
+        {StopsRepo, [], [by_route_type: fn _route_type, _ -> [@stop] end]}
+      ]) do
+        {:ok, view, _html} =
+          live_isolated_component(
+            StopRouteAffectedService,
+            @assigns
+          )
+
+        {:ok, document} =
+          view
+          |> render_async()
+          |> Floki.parse_document()
+
+        assert document_has_element?(
+                 document,
+                 "#stop_route_affected_service_stop_ids > option[value=\"place-aqucl\"]"
+               )
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "stop_route_affected_service" => %{
+            "stop_search_term" => "x"
+          }
+        })
+
+        {:ok, document} =
+          view
+          |> render_async()
+          |> Floki.parse_document()
+
+        refute document_has_element?(
+                 document,
+                 "#stop_route_affected_service_stop_ids > option[value=\"place-aqucl\"]"
+               )
+
+        # Clear the search term
+        {:ok, document} =
+          view
+          |> element("[phx-value-name='stop_route_affected_service[stop_search_term]']")
+          |> render_click()
+          |> Floki.parse_document()
+
+        # Confirm the search input cleared
+        assert document_has_element?(
+                 document,
+                 "input#stop_route_affected_service_stop_search_term[value=\"\"]"
+               )
+
+        #  And that the Aquarium option is back
+        assert document_has_element?(
+                 document,
+                 "#stop_route_affected_service_stop_ids > option[value=\"place-aqucl\"]"
+               )
+      end
+    end
+
     test "stop order is by name when not filtering and by direction when filtering" do
       with_mocks([
         {RoutesRepo, [],
@@ -355,6 +416,62 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
           |> Floki.parse_document()
 
         refute document_has_element?(
+                 document,
+                 "select#stop_route_affected_service_modal_route_id > option[value=\"Blue\"]"
+               )
+      end
+    end
+
+    test "modal search can clear" do
+      with_mocks([
+        {RoutesRepo, [],
+         [by_stop: fn _route_id -> @routes end, by_type: fn _types -> @routes end]},
+        {StopsRepo, [], [by_route_type: fn _route_type, _ -> [@stop] end]}
+      ]) do
+        {:ok, view, _html} =
+          live_isolated_component(
+            StopRouteAffectedService,
+            @assigns
+          )
+
+        {:ok, document} =
+          view
+          |> render_async()
+          |> Floki.parse_document()
+
+        assert document_has_element?(
+                 document,
+                 "select#stop_route_affected_service_modal_route_id > option[value=\"Blue\"]"
+               )
+
+        view
+        |> element("form")
+        |> render_change(%{"stop_route_affected_service" => %{"modal_route_search_term" => "q"}})
+
+        {:ok, document} =
+          view
+          |> render_async()
+          |> Floki.parse_document()
+
+        refute document_has_element?(
+                 document,
+                 "select#stop_route_affected_service_modal_route_id > option[value=\"Blue\"]"
+               )
+
+        {:ok, document} =
+          view
+          |> element("[phx-value-name='stop_route_affected_service[modal_route_search_term]']")
+          |> render_click()
+          |> Floki.parse_document()
+
+        # Confirm the search input cleared
+        assert document_has_element?(
+                 document,
+                 "input#stop_route_affected_service_modal_route_search_term[value=\"\"]"
+               )
+
+        #  And that the 'Blue' option is back
+        assert document_has_element?(
                  document,
                  "select#stop_route_affected_service_modal_route_id > option[value=\"Blue\"]"
                )

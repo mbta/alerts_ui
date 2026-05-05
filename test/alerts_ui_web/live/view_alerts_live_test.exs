@@ -388,7 +388,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       reset_text_filters =
         element(
           view,
-          "[phx-feedback-for=\"view_alerts_live[multi_column_search]\"] span:has(span.hero-x-circle-solid)"
+          "[phx-feedback-for=\"view_alerts_live[multi_column_search]\"] button:has(span.hero-x-circle-solid)"
         )
 
       assert reset_text_filters
