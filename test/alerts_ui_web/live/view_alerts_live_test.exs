@@ -1482,6 +1482,44 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
       expected_timestamp = "Oct 11, 2023, 8:02 PM"
 
+      actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_end, alert.duration_certainty, %{
+          can_close_automatically: alert.can_close_automatically,
+          primary_service_type: alert.primary_service_type,
+          effect_name: alert.effect_name
+      })
+
+      assert expected_timestamp == actual_timestamp
+    end
+
+    test "when work has been completed externally" do
+      alert =
+        build(:alert, %{
+          alert_id: "123",
+          active_period_end: ~U[2023-10-12 00:02:00Z],
+          closed_timestamp: ~U[2023-10-12 00:02:00Z],
+          duration_certainty: :KNOWN,
+          can_close_automatically: true,
+          primary_service_type: "access",
+          effect_name: "Elevator Closure"
+        })
+
+      expected = "Oct 11, 2023"
+
+      actual =
+        AlertsUIWeb.ViewAlertsLive.format_end_time(
+          alert.active_period_end,
+          alert.duration_certainty,
+          %{
+            can_close_automatically: alert.can_close_automatically,
+            primary_service_type: alert.primary_service_type,
+            effect_name: alert.effect_name
+          }
+        )
+
+      assert expected == actual
+
+      expected_timestamp = "Oct 11, 2023, 8:02 PM"
+
       actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_end)
 
       assert expected_timestamp == actual_timestamp
