@@ -188,9 +188,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     base_params =
       slices()
       |> Enum.map(fn slice_module ->
+        slice =
         slice_module
         |> struct()
         |> Slice.extract(alert_or_nil || %Alert{})
+        Logger.warning("SLICE AT EXTRACT: #{inspect(slice)}")
+        slice
       end)
       |> Enum.reduce(%{}, fn slice, alert_data_params ->
         Map.merge(alert_data_params, Map.from_struct(slice))

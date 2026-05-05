@@ -3,8 +3,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSlice do
   alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Effects, only: [humanize_effect_name: 1]
-
   use AlertsUIWeb, :html
 
   defstruct [
@@ -40,7 +38,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSlice do
   def render(assigns) do
     ~H"""
     <div class="min-w-full flex flex-col" id="systemwide_service_view">
-      <.h1>Systemwide • {humanize_effect_name(@form)}</.h1>
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
         Affected service
       </.h5>
