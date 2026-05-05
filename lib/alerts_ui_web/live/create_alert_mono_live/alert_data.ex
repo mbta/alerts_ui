@@ -7,8 +7,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   alias Ecto.Changeset
   alias Phoenix.LiveView.Socket
 
+  alias AlertsUI.Models.Alert
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
-
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
     UrlSlice,
     DeliverySlice,
@@ -188,12 +188,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     base_params =
       slices()
       |> Enum.map(fn slice_module ->
-        slice = struct(slice_module)
-
-        case alert_or_nil do
-          nil -> slice
-          alert -> Slice.extract(slice, alert)
-        end
+        slice_module
+        |> struct()
+        |> Slice.extract(alert_or_nil || %Alert{})
       end)
       |> Enum.reduce(%{}, fn slice, alert_data_params ->
         Map.merge(alert_data_params, Map.from_struct(slice))
