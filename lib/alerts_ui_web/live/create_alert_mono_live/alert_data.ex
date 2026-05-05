@@ -218,11 +218,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     |> case do
       {:ok, alert_data} ->
         # clear errors, etc.
-        {:ok, {alert_data, assign(socket, params)}}
+        {:ok, {alert_data, assigns(socket, params)}}
 
       {:error, changeset} ->
         # set errors, etc.; do we want to run `assign` if validation fails?
-        {:error, {changeset, assign(socket, params)}}
+        {:error, {changeset, assigns(socket, params)}}
     end
   end
 
@@ -243,9 +243,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     |> apply_action(:validate)
   end
 
-  def assign(socket, params) do
+  def assigns(socket, params) do
     Enum.reduce(slices(), socket, fn slice_module, socket ->
-      Slice.assign(struct(slice_module), socket, params)
+      Slice.assigns(struct(slice_module), socket, params)
     end)
   end
 

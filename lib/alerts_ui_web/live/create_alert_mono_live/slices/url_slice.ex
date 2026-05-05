@@ -46,7 +46,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
 
     def validate(_url_data, changeset, _params), do: changeset
 
-    def assign(_url_data, socket, _params), do: socket
+    def assigns(_url_data, socket, _params), do: socket
 
     defp get_url_params(params) do
       # These params are read out of the base params object rather than the

@@ -32,7 +32,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSlice do
       changeset
     end
 
-    def assign(_service_data, socket, _params) do
+    def assigns(_service_data, socket, _params) do
       socket
     end
   end
