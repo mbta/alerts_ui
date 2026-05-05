@@ -10,39 +10,41 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
   import AlertsUIWeb.FormComponents.Helpers.ContentFormatter,
     only: [route_atom_to_string: 1]
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Effects,
-    only: [humanize_effect_name: 2, list_effect_path_names: 1]
+  import AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect,
+    only: [get_value_of_key: 3]
+
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
+    only: [humanize_effect_name: 2, list_effect_path_names: 1, get_route_type_int: 1]
 
   defstruct [
     :alert_id,
+    :combination,
     :effect_name,
-    :form_type,
     :route_type,
     review: false
   ]
 
   defimpl Slice, for: __MODULE__ do
     def extract(url_data, %Alert{} = alert) do
+      # on extract, convert the alert's primary service type into
+      # route type, route type int
       alert_id = alert.alert_id
       effect_name = alert.effect
-      route_type = if alert.id do
-        Alert.get_route_type(alert)
-      else
-        nil
-      end
+      route_type = Alert.get_route_type(alert)
 
       slice =
         %{
           url_data
           | alert_id: alert.alert_id,
             effect_name: effect_name,
-            route_type: route_type
+            route_type: route_type,
+            combination: "foo"
         }
 
       slice
     end
 
-    @url_fields [:effect_name, :route_type, :route_type_int]
+    @url_fields [:combination, :effect_name, :route_type, :route_type_int]
 
     def transform(_url_data, changeset, params) do
       cast(changeset, get_url_params(params), @url_fields)
@@ -62,10 +64,19 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
           route_type -> InformedEntity.route_type_mapping(route_type)
         end
 
+      combination = get_value_of_key(
+          :combination,
+          route_type_int,
+          Map.get(params, "effect_name")
+        )
+
       params
       |> Map.take(["route_type", "effect_name"])
       |> Map.put("route_type_int", route_type_int)
+      |> Map.put("combination", combination)
     end
+
+    defp route_type
   end
 
   def route_types do
@@ -82,7 +93,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
   def render(
         %{
           alert_id: alert_id,
-          form_type: form_type,
           route_type: route_type,
           effect_name: effect_name
         } = assigns

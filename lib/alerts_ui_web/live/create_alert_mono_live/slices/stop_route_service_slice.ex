@@ -10,7 +10,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   alias AlertsUIWeb.FormComponents.Helpers.ContentFormatter
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.API, only: [async_available?: 1]
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Effects, only: [humanize_effect_name: 1]
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData, only: [humanize_effect_name: 1]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.SelectFormatter,
     only: [formatted_select_options: 1]
@@ -155,9 +155,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
     ~H"""
     <div class="min-w-full flex flex-col" id="stop_route_service_view">
-      <.h1>
-        {ContentFormatter.service_type_string(@form[:route_type].value)} • {@form[:effect_name].value}
-      </.h1>
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
         Affected service
       </.h5>
