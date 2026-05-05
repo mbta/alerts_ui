@@ -984,7 +984,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         assert view
                |> element("#alert_details_header_text")
                |> render() =~
-                 "The following stop is closed beginning Thu, Oct 19 at 8:01 PM: South Station (outgoing)."
+                 "South Station (outgoing) is closed beginning Thu, Oct 19 at 8:01 PM."
       end
     end
   end

@@ -99,7 +99,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         end_datetime: ~N[2025-05-08 15:00:00]
       }
 
-      expected_header = "The following stop is closed: Lechmere."
+      expected_header = "Lechmere is closed."
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -666,7 +666,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "The following stop is closed until Sat, May 10 at 3:00 PM due to a parade: Lechmere."
+        "Lechmere is closed until Sat, May 10 at 3:00 PM due to a parade."
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
