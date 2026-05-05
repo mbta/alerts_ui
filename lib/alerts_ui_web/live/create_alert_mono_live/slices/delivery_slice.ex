@@ -26,7 +26,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
       changeset
     end
 
-    def assign(_delivery_data, socket, _params) do
+    def assigns(_delivery_data, socket, _params) do
       socket
     end
   end

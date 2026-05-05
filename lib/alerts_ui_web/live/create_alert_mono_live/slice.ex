@@ -15,6 +15,6 @@ defprotocol AlertsUIWeb.CreateAlertMonoLive.Slice do
   @spec validate(t, Changeset.t(), map()) :: Changeset.t()
   def validate(slice, changeset, params)
 
-  @spec assign(t, Socket.t(), map()) :: Socket.t()
-  def assign(slice, socket, params)
+  @spec assigns(t, Socket.t(), map()) :: Socket.t()
+  def assigns(slice, socket, params)
 end
