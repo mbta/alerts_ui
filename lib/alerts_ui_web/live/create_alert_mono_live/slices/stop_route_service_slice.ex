@@ -7,6 +7,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.SelectFormatter
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.FormComponents.AffectedService
+  alias AlertsUIWeb.FormComponents.Helpers.ContentFormatter
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.API, only: [async_available?: 1]
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Effects, only: [humanize_effect_name: 1]
@@ -34,7 +35,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
       available_filter_routes: AsyncResult.loading(),
       available_routes: AsyncResult.loading(),
       available_stops: AsyncResult.loading(),
-      selected_stops: []
+      filter_title_value: "All routes",
+      disable_routes_input?: true,
+      modal_route_id_options: [],
+      retained_stops: [],
+      route_id_options: [],
+      selected_stops: [],
+      selected_route_id: nil,
+      show_stop_ids?: true,
+      stop_id_options: []
     ]
   end
 
@@ -88,7 +97,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
             available_filter_routes: available_filter_routes,
             available_routes: available_routes,
             available_stops: available_stops,
-            selected_stops: selected_stops
+            selected_stops: selected_stops,
+            selected_route_id: selected_route_id
           }
         } = assigns
       ) do
@@ -121,7 +131,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
         stop_ids
       )
 
-    stop_selections = AffectedService.extract_selections(form, stop_id_options)
+    retained_stops = AffectedService.extract_selections(form, stop_id_options)
 
     # Impacted routes selector
     route_search_term = form[:route_search_term].value
@@ -140,13 +150,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
         route_id_options: route_id_options,
         stop_id_options: stop_id_options,
         modal_route_id_options: modal_route_id_options,
-        stop_selections: stop_selections
+        retained_stops: retained_stops
       )
 
     ~H"""
     <div class="min-w-full flex flex-col" id="stop_route_service_view">
       <.h1>
-        {ContentFormatter.service_type_string(@route_type)} • {@effect_name}
+        {ContentFormatter.service_type_string(@form[:route_type].value)} • {@form[:effect_name].value}
       </.h1>
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
         Affected service
@@ -163,7 +173,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
           label="Routes"
           field={@form[:modal_route_id]}
           filter_field={@form[:modal_route_search_term]}
-          options={@modal_route_id_options}
+          options={@selections.modal_route_id_options}
           loading={@selections.available_filter_routes.loading}
           no_results={Enum.empty?(@modal_route_id_options)}
           class="h-[32rem]"
@@ -176,14 +186,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
         class="md:w-[25%]"
         field={@form[:stop_ids]}
         filter_field={@form[:stop_search_term]}
-        selected={@stop_selections}
+        selected={@selections.retained_stops}
         label="Stops"
         loading={Map.get(@selections.available_stops, :loading, true)}
-        modal_filter_active={@selected_route_id}
+        modal_filter_active={@selections.selected_route_id}
         modal_filter_id="routes-filter-modal"
-        modal_filter_title={"Filter: #{@filter_title_value}"}
-        no_results={Enum.empty?(@stop_id_options)}
-        options={@stop_id_options}
+        modal_filter_title={"Filter: #{@selections.filter_title_value}"}
+        no_results={Enum.empty?(@selections.stop_id_options)}
+        options={@selections.stop_id_options}
         target_id="#service_form"
       />
 
@@ -191,13 +201,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
         label="Impacted routes"
         field={@form[:route_ids]}
         filter_field={@form[:routes_search_term]}
-        loading={Map.get(@available_routes, :loading, true)}
-        no_results={Enum.empty?(@route_id_options) && !disable_routes_input?(assigns)}
-        disabled={disable_routes_input?(assigns)}
-        options={@route_id_options}
+        loading={Map.get(@selections.available_routes, :loading, true)}
+        no_results={Enum.empty?(@selections.route_id_options) && @selections.disable_routes_input?}
+        disabled={@selections.disable_routes_input?}
+        options={@selections.route_id_options}
         class="md:w-[25%]"
       />
-      <p :if={@show_stop_ids}>
+      <p :if={@selections.show_stop_ids?}>
         Selected stop ids: {(@form[:stop_ids].value || []) |> Enum.join(", ")}
       </p>
       <hr class="mt-4" />
