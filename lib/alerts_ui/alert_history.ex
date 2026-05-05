@@ -220,7 +220,12 @@ defmodule AlertsUI.AlertHistory do
   defp effect_end(map) do
     effect_end(
       Map.get(map, :duration_certainty) || "UNKNOWN",
-      Map.get(map, :active_period_end)
+      Map.get(map, :active_period_end),
+      %{
+        can_close_automatically: Map.get(map, :can_close_automatically),
+        primary_service_type: Map.get(map, :primary_service_type),
+        effect_name: Map.get(map, :effect_name)
+      }
     )
   end
 
@@ -405,12 +410,28 @@ defmodule AlertsUI.AlertHistory do
     |> Enum.map(&Map.new(&1, fn {k, v} -> {String.to_atom(k), v} end))
   end
 
-  defp effect_end("ESTIMATED", _), do: "later today"
-  defp effect_end("UNKNOWN", _), do: "further notice"
+  defp effect_end(estimate, active_period_end, opts \\ %{})
 
-  defp effect_end("KNOWN", active_period_end) do
+  defp effect_end("KNOWN", active_period_end, _) do
     format_datetime(active_period_end, @without_seconds)
   end
+
+  defp effect_end(_, _, %{
+         can_close_automatically: true,
+         primary_service_type: "access",
+         effect_name: "Elevator Closure"
+       }),
+       do: "from Trapeze"
+
+  defp effect_end(_, _, %{
+         can_close_automatically: true,
+         primary_service_type: "access",
+         effect_name: "Escalator Closure"
+       }),
+       do: "from Trapeze"
+
+  defp effect_end("ESTIMATED", _, _), do: "later today"
+  defp effect_end("UNKNOWN", _, _), do: "further notice"
 
   defp closed?(nil), do: false
   defp closed?(_), do: true
