@@ -1,8 +1,12 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
+  alias Phoenix.LiveView.AsyncResult
+
   alias AlertsUI.Models.Alert
   alias AlertsUI.Models.InformedEntity
+  alias AlertsUIWeb.CreateAlertLive
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.SelectFormatter
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.FormComponents.AffectedService
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.API, only: [async_available?: 1]
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Effects, only: [humanize_effect_name: 1]
@@ -24,6 +28,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
     :service_types
   ]
 
+
+  defmodule Selections do
+    defstruct [
+      available_filter_routes: AsyncResult.loading(),
+      available_routes: AsyncResult.loading(),
+      available_stops: AsyncResult.loading(),
+      selected_stops: []
+    ]
+  end
+
   defimpl Slice, for: __MODULE__ do
     def extract(service_data, %Alert{} = alert) do
       struct(service_data, Map.from_struct(alert))
@@ -37,19 +51,20 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
       changeset
     end
 
-    def assign(_service_data, socket, _params) do
+    def assigns(_service_data, socket, _params) do
       # update selections here
       assign_selections(socket)
     end
 
     defp assign_selections(socket) do
+      assign(socket, :selections, %Selections{})
     end
 
-    defp selections(route_type, stop_ids) do
-      %{
+    defp get_selections(route_type, stop_ids) do
+      %Selections{
         available_filter_routes: CreateAlertLive.get_routes(route_type),
         available_routes: CreateAlertLive.get_routes_by_stop(stop_ids, route_type),
-        available_stops: Create
+        available_stops: CreateAlertLive.get_stops_by_route_id()
       }
     end
 
@@ -69,7 +84,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   def render(
         %{
           form: form,
-          selector: %{
+          selections: %Selections{
             available_filter_routes: available_filter_routes,
             available_routes: available_routes,
             available_stops: available_stops,
@@ -149,7 +164,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
           field={@form[:modal_route_id]}
           filter_field={@form[:modal_route_search_term]}
           options={@modal_route_id_options}
-          loading={@available_filter_routes.loading}
+          loading={@selections.available_filter_routes.loading}
           no_results={Enum.empty?(@modal_route_id_options)}
           class="h-[32rem]"
           prompt="All routes"
@@ -163,7 +178,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
         filter_field={@form[:stop_search_term]}
         selected={@stop_selections}
         label="Stops"
-        loading={Map.get(@available_stops, :loading, true)}
+        loading={Map.get(@selections.available_stops, :loading, true)}
         modal_filter_active={@selected_route_id}
         modal_filter_id="routes-filter-modal"
         modal_filter_title={"Filter: #{@filter_title_value}"}
@@ -188,6 +203,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
       <hr class="mt-4" />
     </div>
     """
+  end
+
+  def render(%{form: form} = assigns) do
+    assign(assigns, :selections, %Selections{}) |> render()
   end
 
   @spec disable_routes_input?(map()) :: boolean()
