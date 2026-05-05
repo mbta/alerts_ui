@@ -593,6 +593,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
             class="h-[32rem]"
             prompt="All routes"
             multiple={false}
+            target_id={@myself}
           />
         </.modal>
 
@@ -608,7 +609,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
           modal_filter_title={"Filter: #{@filter_title_value}"}
           no_results={Enum.empty?(@stop_id_options)}
           options={@stop_id_options}
-          target_id="#service_form"
+          target_id={@myself}
         />
 
         <.filtered_select
