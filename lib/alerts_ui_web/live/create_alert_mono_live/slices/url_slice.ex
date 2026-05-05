@@ -25,7 +25,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
     def extract(url_data, %Alert{} = alert) do
       alert_id = alert.alert_id
       effect_name = alert.effect
-      route_type = Alert.get_route_type(alert)
+      route_type = if alert.id do
+        Alert.get_route_type(alert)
+      else
+        nil
+      end
 
       slice =
         %{
