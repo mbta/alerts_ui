@@ -1,12 +1,12 @@
 defmodule AlertsUIWeb.FormComponents.SystemwideAffectedServiceTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
-  use AlertsUIWeb, :live_view
 
   import LiveIsolatedComponent
   import Phoenix.LiveViewTest
+  import Test.Support.Helpers
 
-  alias AlertsUIWeb.FormComponents.{RouteTypeAndEffect, SystemwideAffectedService}
+  alias AlertsUIWeb.FormComponents.SystemwideAffectedService
   alias AlertsUIWeb.Step
   alias Phoenix.LiveView
 
@@ -71,12 +71,13 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedServiceTest do
     test "shows missing field error upon submission", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/new")
 
-      send(
-        view.pid,
-        {:step_completed, %RouteTypeAndEffect{route_type: nil, effect_name: nil}}
-      )
+      get_to_submission_page(view, "Systemwide", "Notice")
 
-      send_update(view.pid, SystemwideAffectedService, id: "affected_service", submitted: true)
+      render_async(view)
+
+      view
+      |> element("button#review", "Review and submit")
+      |> render_click()
 
       assert view
              |> render() =~

@@ -1,7 +1,6 @@
 defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
-  use AlertsUIWeb, :live_view
 
   import AlertsUI.Support.Factory
   import LiveIsolatedComponent
@@ -11,7 +10,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
 
   alias AlertsUI.Alerts
   alias AlertsUI.Models.EnhancedSchedule
-  alias AlertsUIWeb.FormComponents.{AffectedService, RouteTypeAndEffect}
+  alias AlertsUIWeb.FormComponents.AffectedService
   alias AlertsUIWeb.Step
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
@@ -999,16 +998,17 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
 
-        send(
-          view.pid,
-          {:step_completed, %RouteTypeAndEffect{route_type: 3, effect_name: "Detour"}}
-        )
+        get_to_submission_page(view, "Bus", "Detour")
+
+        render_async(view)
 
         refute view
                |> render_async() =~
                  ~s(text-text-error)
 
-        send_update(view.pid, AffectedService, id: "affected_service", submitted: true)
+        view
+        |> element("button#review", "Review and submit")
+        |> render_click()
 
         assert view
                |> render_async() =~
