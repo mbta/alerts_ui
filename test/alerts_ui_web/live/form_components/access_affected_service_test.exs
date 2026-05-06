@@ -1,7 +1,6 @@
 defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
-  use AlertsUIWeb, :live_view
   import Mock
 
   import LiveIsolatedComponent
@@ -9,7 +8,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
   import Phoenix.LiveViewTest
   import Test.Support.Helpers
 
-  alias AlertsUIWeb.FormComponents.{AccessAffectedService, RouteTypeAndEffect}
+  alias AlertsUIWeb.FormComponents.AccessAffectedService
   alias AlertsUIWeb.Step
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
@@ -294,16 +293,15 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
 
-        send(
-          view.pid,
-          {:step_completed, %RouteTypeAndEffect{route_type: nil, effect_name: "Parking Issue"}}
-        )
+        get_to_submission_page(view, "Facility", "Parking issue")
 
         refute view
                |> render() =~
                  ~s(text-text-error)
 
-        send_update(view.pid, AccessAffectedService, id: "affected_service", submitted: true)
+        view
+        |> element("button#review", "Review and submit")
+        |> render_click()
 
         assert view
                |> render() =~

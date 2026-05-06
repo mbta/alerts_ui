@@ -1,7 +1,6 @@
 defmodule AlertsUIWeb.FormComponents.DeliveryTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
-  use AlertsUIWeb, :live_view
 
   import LiveIsolatedComponent
   import Mock
