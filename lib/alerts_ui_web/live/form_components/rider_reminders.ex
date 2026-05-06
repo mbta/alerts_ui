@@ -264,19 +264,19 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
       type="hidden"
       name="rider_reminders[reminder_sort][]"
       value={@index}
-      id={"rider_reminders-sort-#{@id}"}
+      id={"rider_reminders-sort-#{@index}"}
     />
     <input
       type="hidden"
       name={"rider_reminders[reminder_times][#{@index}][min_time]"}
       value={@current_time}
-      id={"rider_reminders-reminder_times-#{@id}-min_time"}
+      id={"rider_reminders-reminder_times-#{@index}-min_time"}
     />
     <input
       type="hidden"
       name={"rider_reminders[reminder_times][#{@index}][max_time]"}
       value={@notification_end |> naive_datetime_to_iso8601()}
-      id={"rider_reminders-reminder_times-#{@id}-max_time"}
+      id={"rider_reminders-reminder_times-#{@index}-max_time"}
     />
     <input type="hidden" name={"rider_reminders[reminder_times][#{@index}][id]"} value={@id} />
     <input
@@ -284,7 +284,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
       type="hidden"
       name={"rider_reminders[reminder_times][#{@index}][reminder_time]"}
       value={@field.value}
-      id={"rider_reminders-reminder_times-#{@id}-reminder_time"}
+      id={"rider_reminders-reminder_times-#{@index}-reminder_time"}
     />
     <.datetime
       label="Reminder date and time"
@@ -293,7 +293,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
       field={@field}
       value={@field.value}
       disabled={!@editable}
-      id={"rider_reminders-reminder_times-#{@id}-reminder_datetime"}
+      id={"rider_reminders-reminder_times-#{@index}-reminder_datetime"}
     >
       <button
         :if={@editable}
@@ -302,7 +302,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
         name="rider_reminders[reminder_drop][]"
         value={@index}
         phx-click={JS.dispatch("change")}
-        id={"rider_reminders-reminder_times-#{@id}-drop"}
+        id={"rider_reminders-reminder_times-#{@index}-drop"}
       >
         <.icon name="hero-x-mark" class="w-6 h-6" />
       </button>
