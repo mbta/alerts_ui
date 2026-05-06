@@ -1,4 +1,5 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
+  alias Ecto.Changeset
   alias AlertsUI.Models.Alert
   alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
@@ -28,30 +29,20 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
   ]
 
   defimpl Slice, for: __MODULE__ do
+    import Ecto.Changeset, only: [get_field: 2, cast: 3]
+    alias AlertsUI.Models.Alert
+    alias AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice
+
     def extract(url_data, %Alert{} = alert, params) do
-      # on extract, convert the alert's primary service type into
-      # route type, route type int
-      alert_id = alert.alert_id
-      effect_name = alert.effect
-      route_type = Alert.get_route_type(alert)
-
-      slice =
-        %{
-          url_data
-          | alert_id: alert.alert_id,
-            effect_name: effect_name,
-            route_type: route_type,
-            combination: "foo"
-        }
+      slice = new_url_params(alert, params)
       IO.inspect(slice)
-
       slice
     end
 
-    @url_fields [:combination, :effect_name, :route_type, :route_type_int]
+    @url_fields [:alert_id, :combination, :effect_name, :route_type]
 
     def transform(_url_data, changeset, params) do
-      cast(changeset, get_url_params(params), @url_fields)
+      cast(changeset, new_url_params(changeset, params) |> Map.from_struct, @url_fields)
     end
 
     def validate(_url_data, changeset, _params), do: changeset
@@ -66,26 +57,45 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
       )
     end
 
-    defp get_url_params(params) do
-      # These params are read out of the base params object rather than the
-      # alert data form. Also we don't look for alert id here because it can't
-      # be reassigned.
-      route_type_int =
-        case Map.get(params, "route_type") do
+    defp new_url_params(alert_or_changeset, params) do
+      {base_route_type_int, base_effect_name } =
+        case alert_or_changeset do
+          %Changeset{} = changeset ->
+            {
+              get_field(changeset, :route_type),
+              get_field(changeset, :effect_name)
+            }
+
+          %Alert{} = alert ->
+            {
+              Alert.get_route_type(alert),
+              alert.effect
+            }
+        end
+
+      path_route_type = params["route_type"]
+      path_effect_name = params["effect_name"]
+
+      path_route_type_int =
+        case path_route_type do
           nil -> nil
           route_type -> InformedEntity.route_type_mapping(route_type)
         end
 
+      route_type_int = path_route_type_int || base_route_type_int
+      effect_name = path_effect_name || base_effect_name
+
       combination = get_value_of_key(
           :combination,
           route_type_int,
-          Map.get(params, "effect_name")
+          effect_name
         )
 
-      params
-      |> Map.take(["route_type", "effect_name"])
-      |> Map.put("route_type_int", route_type_int)
-      |> Map.put("combination", combination)
+      %UrlSlice{
+        route_type: route_type_int,
+        effect_name: effect_name,
+        combination: combination
+      }
     end
   end
 
