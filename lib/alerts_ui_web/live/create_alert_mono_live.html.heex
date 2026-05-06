@@ -2,14 +2,9 @@
   <div class="flex flex-col items-center justify-center w-[90%]" id="article-view">
     <article class="flex flex-col items-center justify-center w-[90%]" id="article-view">
       <div class="w-full">
-        <UrlSlice.render
-          route_type={alert_data_from_form(@form, :route_type)}
-          effect_name={alert_data_from_form(@form, :effect_name)}
-          form_type={alert_data_from_form(@form, :form_type)}
-          alert_id={alert_data_from_form(@form, :alert_id)}
-        />
+        <UrlSlice.render alert_id={@alert_id} path_route_type={@path_route_type} path_effect_name={@path_effect_name} />
         <.form
-          :if={show_details?(@form)}
+          :if={show_details?(@path_route_type, @path_effect_name)}
           for={@form}
           id="alert_form"
           class="form-control"
