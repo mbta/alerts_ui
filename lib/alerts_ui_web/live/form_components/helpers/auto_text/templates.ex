@@ -194,8 +194,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     },
     %{
       pattern: {3, "Stop Closure"},
-      header_template:
-        "The following ?stop_word ?stop_form closed ?alert_duration ?due_to_cause|: ?stop_names|.",
+      header_template: "?stop_names ?stop_form closed ?alert_duration ?due_to_cause|.",
       description_template: %{
         route_count: 0,
         stop_count: 2,
