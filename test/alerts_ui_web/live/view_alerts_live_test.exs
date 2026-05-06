@@ -5,6 +5,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
   import AlertsUI.Support.Factory
   import Mock
   import Phoenix.LiveViewTest
+  import Test.Support.Helpers
 
   alias AlertsUI.Alerts
   alias AlertsUI.Models.ActivePeriod
@@ -412,6 +413,89 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
       reset_modal_filters |> render_click()
       assert_patch view, ~p"/alerts?filter[multi_column_search]=foobarbaz&filter[timeline]=past"
+    end
+
+    @tag :logged_in_user
+    test "can clear search bars in the filter modal independently", %{conn: conn} do
+      {:ok, view, _html} =
+        live(conn, "/alerts")
+
+      view
+      |> render_async()
+      |> Floki.parse_document()
+
+      # Service type
+      assert has_element?(view, "option", "Bus")
+      # Route
+      assert has_element?(view, "option", "Green Line")
+      # Effect
+      assert has_element?(view, "option", "Access Issue")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "view_alerts_live" => %{
+          "service_type_search_term" => "q",
+          "routes_search_term" => "q",
+          "effects_search_term" => "q"
+        }
+      })
+
+      refute has_element?(view, "option", "Bus")
+      refute has_element?(view, "option", "Green Line")
+      refute has_element?(view, "option", "Access Issue")
+
+      {:ok, document} =
+        view
+        |> element("[phx-value-name='view_alerts_live[service_type_search_term]']")
+        |> render_click()
+        |> Floki.parse_document()
+
+      # Confirm the trip search input cleared
+      assert document_has_element?(
+               document,
+               "input#view_alerts_live_service_type_search_term[value=\"\"]"
+             )
+
+      # And that the 'Bus' option is back
+      assert has_element?(view, "option", "Bus")
+
+      # But Route and Effect should be unaffected
+      refute has_element?(view, "option", "Green Line")
+      refute has_element?(view, "option", "Access Issue")
+
+      # Now clear Route
+      {:ok, document} =
+        view
+        |> element("[phx-value-name='view_alerts_live[routes_search_term]']")
+        |> render_click()
+        |> Floki.parse_document()
+
+      assert document_has_element?(
+               document,
+               "input#view_alerts_live_routes_search_term[value=\"\"]"
+             )
+
+      # Bus and Route should be reset, Effect should still be filtered
+      assert has_element?(view, "option", "Bus")
+      assert has_element?(view, "option", "Green Line")
+      refute has_element?(view, "option", "Access Issue")
+
+      # Finally, clear Effects, and everything should be reset
+      {:ok, document} =
+        view
+        |> element("[phx-value-name='view_alerts_live[effects_search_term]']")
+        |> render_click()
+        |> Floki.parse_document()
+
+      assert document_has_element?(
+               document,
+               "input#view_alerts_live_effects_search_term[value=\"\"]"
+             )
+
+      assert has_element?(view, "option", "Bus")
+      assert has_element?(view, "option", "Green Line")
+      assert has_element?(view, "option", "Access Issue")
     end
   end
 
