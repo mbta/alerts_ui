@@ -913,7 +913,9 @@ defmodule AlertsUIWeb.SharedComponents do
       |> assign(field: nil, id: field.id)
       |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
       |> assign_new(:name, fn -> if assigns.multiple, do: field.name <> "[]", else: field.name end)
-      |> assign_new(:value, fn -> assigns.selected || field.value || [] end)
+      |> assign_new(:value, fn ->
+        assigns.selected || field.value || if assigns.multiple, do: [], else: nil
+      end)
 
     ~H"""
     <div phx-feedback-for={@name} class={["#{@class}", @hidden && "hidden"]}>
@@ -968,9 +970,16 @@ defmodule AlertsUIWeb.SharedComponents do
           value="default"
           selected={
             cond do
-              @loading -> false
-              is_list(@value) and length(@value -- ["default"]) >= 1 -> false
-              true -> true
+              @loading ->
+                false
+
+              # an empty value might be [] or nil or ""
+              is_list(@value) and length(@value -- ["default"]) >= 1 and @value != nil and
+                  @value != "" ->
+                false
+
+              true ->
+                true
             end
           }
           disabled={if @loading, do: true, else: false}
