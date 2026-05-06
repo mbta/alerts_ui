@@ -18,7 +18,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSlice do
   ]
 
   defimpl Slice, for: __MODULE__ do
-    def extract(service_data, %Alert{} = alert) do
+    def extract(service_data, %Alert{} = alert, _params) do
       struct(service_data, Map.from_struct(alert))
     end
 
