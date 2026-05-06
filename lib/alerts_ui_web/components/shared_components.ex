@@ -1230,7 +1230,7 @@ defmodule AlertsUIWeb.SharedComponents do
               disabled:bg-bg-elevation-3 ring-0 min-w-full focus:ring-0 ring-border-focus
               focus:border-border-focus",
             @icon && "ps-10",
-            @action_icon && @action_event && "pe-[3rem]",
+            @action_icon && @action_event && "pe-[3rem] w-full",
             @class,
             @errors != [] && "border-danger focus:border-danger"
           ]}
