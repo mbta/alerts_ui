@@ -7,7 +7,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionText do
 
   @spec affected_routes(BuildAutoText.t()) :: String.t()
   def affected_routes(%{routes: routes, effect_name: effect, route_type: route_type}) do
-    "#{affected_route_term(effect)} #{route_term(route_type)}:\n#{join(routes, route_type)}"
+    routes =
+      routes
+      |> BuildAutoText.sort_routes()
+      |> Enum.join("\n")
+
+    "#{affected_route_term(effect)} #{route_term(route_type)}:\n#{routes}"
   end
 
   @spec affected_stops(BuildAutoText.t()) :: String.t()

@@ -1440,7 +1440,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         direction: []
       }
 
-      expected = "Affected ferries:\n1\n22\n1\n22\n1\n22"
+      expected = "Affected ferries:\n1\n1\n1\n22\n22\n22"
       actual = Templates.build_auto_text(autotext_data, :description_template)
       assert expected == actual
     end
@@ -1489,7 +1489,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         direction: [0]
       }
 
-      expected = "Affected ferries:\n1\n22\n1\n22\n1\n22"
+      expected = "Affected ferries:\n1\n1\n1\n22\n22\n22"
       actual = Templates.build_auto_text(autotext_data, :description_template)
       assert expected == actual
     end
@@ -1534,7 +1534,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         stops: [@stop_1]
       }
 
-      expected = "Suspended ferries:\n1\n22\n1\n22\n1\n22\n\nAffected docks:\nLechmere"
+      expected = "Suspended ferries:\n1\n1\n1\n22\n22\n22\n\nAffected docks:\nLechmere"
       actual = Templates.build_auto_text(autotext_data, :description_template)
       assert expected == actual
     end
@@ -1550,7 +1550,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         direction: []
       }
 
-      expected = "Affected routes:\n1\n22\n1\n22\n1\n22\n\nAffected inbound stops:\nLechmere"
+      expected = "Affected routes:\n1\n1\n1\n22\n22\n22\n\nAffected inbound stops:\nLechmere"
       actual = Templates.build_auto_text(autotext_data, :description_template)
       assert expected == actual
     end
@@ -1580,7 +1580,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         direction: []
       }
 
-      expected = "Affected routes:\n1\n22\n1\n22\n1\n22\n\nSkipped inbound stops:\nLechmere"
+      expected = "Affected routes:\n1\n1\n1\n22\n22\n22\n\nSkipped inbound stops:\nLechmere"
       actual = Templates.build_auto_text(autotext_data, :description_template)
       assert expected == actual
     end
@@ -1595,7 +1595,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         direction: [1]
       }
 
-      expected = "Affected routes:\n1\n22\n1\n22\n1\n22\n\nSkipped inbound stops:\nLechmere"
+      expected = "Affected routes:\n1\n1\n1\n22\n22\n22\n\nSkipped inbound stops:\nLechmere"
       actual = Templates.build_auto_text(autotext_data, :description_template)
       assert expected == actual
     end
@@ -1642,7 +1642,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         direction: [1]
       }
 
-      expected = "Suspended routes:\n1\n22\n1\n22\n1\n22"
+      expected = "Suspended routes:\n1\n1\n1\n22\n22\n22"
       actual = Templates.build_auto_text(autotext_data, :description_template)
       assert expected == actual
     end
@@ -1692,7 +1692,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         direction: [0, 1]
       }
 
-      expected = "Affected lines:\n1\n22\n1\n22\n1\n22\n\nAffected stations:\nLechmere"
+      expected = "Affected lines:\n1\n1\n1\n22\n22\n22\n\nAffected stations:\nLechmere"
       actual = Templates.build_auto_text(autotext_data, :description_template)
       assert expected == actual
     end
@@ -1775,7 +1775,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         direction: []
       }
 
-      expected = "Affected lines:\n1\n22\n1\n22\n1\n22\n\nAffected stations:\nLechmere"
+      expected = "Affected lines:\n1\n1\n1\n22\n22\n22\n\nAffected stations:\nLechmere"
       actual = Templates.build_auto_text(autotext_data, :description_template)
       assert expected == actual
     end
@@ -1790,7 +1790,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         direction: []
       }
 
-      expected = "Affected lines:\n1\n22\n1\n22\n1\n22\n\nAffected stations:\nLechmere"
+      expected = "Affected lines:\n1\n1\n1\n22\n22\n22\n\nAffected stations:\nLechmere"
       actual = Templates.build_auto_text(autotext_data, :description_template)
       assert expected == actual
     end
@@ -1805,7 +1805,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         direction: []
       }
 
-      expected = "Suspended lines:\n1\n22\n1\n22\n1\n22\n\nAffected stations:\nLechmere"
+      expected = "Suspended lines:\n1\n1\n1\n22\n22\n22\n\nAffected stations:\nLechmere"
       actual = Templates.build_auto_text(autotext_data, :description_template)
       assert expected == actual
     end
@@ -1834,7 +1834,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         stops: [@stop_1]
       }
 
-      expected = "Affected ferries:\n1\n22\n1\n22\n1\n22"
+      expected = "Affected ferries:\n1\n1\n1\n22\n22\n22"
       actual = Templates.build_auto_text(autotext_data, :description_template)
       assert expected == actual
     end
@@ -1848,7 +1848,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         stops: [@stop_1]
       }
 
-      expected = "Affected ferries:\n1\n22\n1\n22\n1\n22"
+      expected = "Affected ferries:\n1\n1\n1\n22\n22\n22"
       actual = Templates.build_auto_text(autotext_data, :description_template)
       assert expected == actual
     end
@@ -1862,7 +1862,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         stops: [@stop_1]
       }
 
-      expected = "Affected ferries:\n1\n22\n1\n22\n1\n22\n\nAffected docks:\nLechmere"
+      expected = "Affected ferries:\n1\n1\n1\n22\n22\n22\n\nAffected docks:\nLechmere"
       actual = Templates.build_auto_text(autotext_data, :description_template)
       assert expected == actual
     end
@@ -1892,7 +1892,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
         stops: [@stop_1]
       }
 
-      expected = "Affected ferries:\n1\n22\n1\n22\n1\n22\n\nAffected docks:\nLechmere"
+      expected = "Affected ferries:\n1\n1\n1\n22\n22\n22\n\nAffected docks:\nLechmere"
       actual = Templates.build_auto_text(autotext_data, :description_template)
       assert expected == actual
     end

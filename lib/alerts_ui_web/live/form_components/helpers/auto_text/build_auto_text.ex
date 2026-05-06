@@ -29,7 +29,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
             end_date: nil,
             start_time: nil,
             end_time: nil,
-            alert_timing: :one_time,
+            alert_timing: :"one-time",
             recurrence_days: []
 
   @type t :: %__MODULE__{
@@ -53,7 +53,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
           end_date: Date.t() | nil,
           start_time: Time.t() | nil,
           end_time: Time.t() | nil,
-          alert_timing: :one_time | :recurring,
+          alert_timing: :"one-time" | :recurring,
           recurrence_days: [atom()]
         }
 
@@ -273,13 +273,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   def route_names(%{routes: []}), do: ""
 
   def route_names(%{routes: routes, schedules: []}) when length(routes) > 5 do
-    route_names =
-      routes
-      |> Enum.map(&SelectFormatter.name_for_option/1)
-      |> Enum.group_by(&first_letter_numeric?/1)
+    grouped_routes = routes |> sort_routes() |> Enum.group_by(&first_letter_numeric?/1)
 
-    numerical_routes = Map.get(route_names, true, nil)
-    non_numerical_routes = Map.get(route_names, false, nil)
+    numerical_routes = Map.get(grouped_routes, true, nil)
+    non_numerical_routes = Map.get(grouped_routes, false, nil)
 
     other_routes_length = length(routes) - 1
 
@@ -293,13 +290,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   end
 
   def route_names(%{routes: routes, schedules: []}) do
-    route_names =
-      routes
-      |> Enum.map(&SelectFormatter.name_for_option/1)
-      |> Enum.group_by(&first_letter_numeric?/1)
+    grouped_routes = routes |> sort_routes() |> Enum.group_by(&first_letter_numeric?/1)
 
-    numerical_routes = Map.get(route_names, true)
-    non_numerical_routes = Map.get(route_names, false)
+    numerical_routes = Map.get(grouped_routes, true)
+    non_numerical_routes = Map.get(grouped_routes, false)
 
     numerical_routes_phrase = numerical_routes_phrase(numerical_routes)
     # if there are numerical routes, non-numerical don't get "and"
@@ -328,7 +322,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
     standard_form(routes, start_datetime)
   end
 
-  defp first_letter_numeric?(route_name) do
+  def first_letter_numeric?(route_name) do
     route_name
     |> String.first()
     |> Integer.parse() !== :error
@@ -421,4 +415,30 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
 
   defp form_word([_item]), do: "is"
   defp form_word(_item), do: "are"
+
+  def sort_routes(routes) do
+    # groups routes by route type,
+    # sorts the route types,
+    # sorts routes by name WITHIN the route type,
+    # then flattens the list
+    # then groups routes on whether their first lietter is numeric
+    routes
+    |> Enum.group_by(& &1.type)
+    |> Enum.sort_by(fn {k, _v} -> k end)
+    |> Enum.flat_map(fn {_k, route_sub_list} ->
+      route_sub_list
+      |> Enum.sort(&(maybe_cast_to_integer(&1) <= maybe_cast_to_integer(&2)))
+      |> Enum.map(&SelectFormatter.name_for_option/1)
+      # make routes starting with letters come first instead of last
+      |> Enum.sort_by(&first_letter_numeric?/1)
+    end)
+  end
+
+  # Turns strings into sortable integers, if relevant
+  def maybe_cast_to_integer(%{name: route_name}) do
+    case Integer.parse(route_name) do
+      :error -> route_name
+      {result, _rest} -> result
+    end
+  end
 end
