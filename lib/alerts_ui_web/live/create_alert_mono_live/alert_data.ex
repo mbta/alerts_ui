@@ -2,8 +2,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   @moduledoc """
   Alert data v2
   """
-  require Logger
-
   alias Ecto.Changeset
   alias Phoenix.Component
   alias Phoenix.LiveView.Socket
@@ -224,9 +222,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
           socket
           |> assign(:form, to_form(change(alert_data)))
           |> assigns(params)
-
-        IO.inspect(inspect(socket.assigns), label: "post-assigns")
-        IO.inspect(inspect(socket.assigns.form[:route_type_int].value), label: "route_type")
 
         {:ok, socket}
 
