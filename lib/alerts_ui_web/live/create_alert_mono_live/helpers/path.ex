@@ -3,31 +3,66 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Path do
   Utilities for computing paths for `push_patch/2`.
   """
 
+  alias Phoenix.HTML.Form
+  alias Phoenix.LiveView.Socket
+  alias AlertsUI.Models.InformedEntity
+  alias AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes
+
   use AlertsUIWeb, :verified_routes
 
-  def path_with_route_type(form_action, route_type, alert_id \\ nil) do
-    case form_action do
+  def path_with_route_type(%{
+    live_action: live_action,
+    alert_id: alert_id
+  } = _assigns, path_route_type) do
+    case live_action do
       :new ->
-        ~p"/alerts/mono/new/#{route_type}"
+        ~p"/alerts/mono/new/#{path_route_type}"
 
       :edit ->
-        ~p"/alerts/mono/edit/#{alert_id}/#{route_type}"
+        ~p"/alerts/mono/edit/#{alert_id}/#{path_route_type}"
 
       :duplicate ->
-        ~p"/alerts/mono/duplicate/#{alert_id}/#{route_type}"
+        ~p"/alerts/mono/duplicate/#{alert_id}/#{path_route_type}"
     end
   end
 
-  def path_with_route_type_and_effect_name(form_action, route_type, effect_name, alert_id \\ nil) do
-    case form_action do
+  def path_with_route_type_and_effect_name(%{
+    live_action: live_action,
+    path_route_type: path_route_type,
+    alert_id: alert_id
+  } = _assigns, new_path_effect_name) do
+    case live_action do
       :new ->
-        ~p"/alerts/mono/new/#{route_type}/#{effect_name}"
+        ~p"/alerts/mono/new/#{path_route_type}/#{new_path_effect_name}"
 
       :edit ->
-        ~p"/alerts/mono/edit/#{alert_id}/#{route_type}/#{effect_name}"
+        ~p"/alerts/mono/edit/#{alert_id}/#{path_route_type}/#{new_path_effect_name}"
 
       :duplicate ->
-        ~p"/alerts/mono/duplicate/#{alert_id}/#{route_type}/#{effect_name}"
+        ~p"/alerts/mono/duplicate/#{alert_id}/#{path_route_type}/#{new_path_effect_name}"
     end
+  end
+
+  def path_route_type_from_socket(%Socket{} = socket) do
+    path_route_type_from_form(socket.assigns.form)
+  end
+
+  def path_route_type_from_form(%Form{} = form) do
+    route_type = form[:route_type].value
+    effect_name = form[:effect_name].value
+
+    case InformedEntity.route_code_mapping(route_type) do
+      nil ->
+        if effect_name in EffectsForRouteTypes.list_effects(:facility) do
+          :facility
+        else
+          :systemwide
+        end
+      mapping -> mapping
+    end
+  end
+
+  def path_effect_name_from_socket(%Socket{} = socket) do
+    socket.assigns.form[:effect_name].value
   end
 end

@@ -6,6 +6,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
   alias AlertsUIWeb.FormComponents.Helpers.ContentFormatter
 
   import Ecto.Changeset, only: [get_field: 2]
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Path,
+    only: [path_route_type_from_form: 1]
 
   @forbidden_effects ~w[Summary]
 
@@ -28,20 +30,19 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
     get_field(form.source, key)
   end
 
-  def show_details?(form) do
-    !is_nil(alert_data_from_form(form, :route_type)) &&
-      !is_nil(alert_data_from_form(form, :effect_name))
+  def show_details?(route_type, effect_name) do
+    !is_nil(route_type) && !is_nil(effect_name)
   end
 
-  def get_route_type_int(nil), do: nil
-  def get_route_type_int("access"), do: nil
-  def get_route_type_int("systemwide"), do: nil
+  def get_route_type(nil), do: nil
+  def get_route_type("access"), do: nil
+  def get_route_type("systemwide"), do: nil
 
-  def get_route_type_int(%Alert{} = alert) do
+  def get_route_type(%Alert{} = alert) do
     get_route_type(alert.primary_service_type)
   end
 
-  def get_route_type_int(route_type_string_int) do
+  def get_route_type(route_type_string_int) do
     String.to_integer(route_type_string_int)
   end
 
@@ -64,12 +65,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
   end
 
   def humanize_effect_name(%Form{} = form) do
-    route_type_name = String.to_existing_atom(form[:route_type].value)
+    route_type_name = path_route_type_from_form(form)
     effect_name = form[:effect_name].value
     humanize_effect_name(route_type_name, effect_name)
   end
 
   def humanize_effect_name(_, nil), do: nil
+  def humanize_effect_name(nil, nil), do: nil
+  def humanize_effect_name(route_type_name, effect_name) when is_binary(route_type_name) do
+    route_type_name
+    |> String.to_existing_atom()
+    |> humanize_effect_name(effect_name)
+  end
 
   def humanize_effect_name(route_type_name, effect_name) do
     mode_effect =

@@ -5,9 +5,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   require Logger
 
   alias Ecto.Changeset
+  alias Phoenix.Component
   alias Phoenix.LiveView.Socket
 
   alias AlertsUI.Models.Alert
+  alias AlertsUI.Repo
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
     UrlSlice,
@@ -18,6 +20,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   use AlertsUI.Schema
 
   import Changeset
+  import Component, only: [assign: 3, to_form: 1]
 
   @combination_values [:ACCESS, :R, :RDS, :RDT, :RDTS, :SR]
   @type combination :: :ACCESS | :R | :RDS | :RDT | :RDTS | :SR
@@ -188,12 +191,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     base_params =
       slices()
       |> Enum.map(fn slice_module ->
-        slice =
         slice_module
         |> struct()
-        |> Slice.extract(alert_or_nil || %Alert{})
-        Logger.warning("SLICE AT EXTRACT: #{inspect(slice)}")
-        slice
+        |> Slice.extract(alert_or_nil || %Alert{} |> Repo.preload(:informed_entity))
       end)
       |> Enum.reduce(%{}, fn slice, alert_data_params ->
         Map.merge(alert_data_params, Map.from_struct(slice))
@@ -218,11 +218,24 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     |> case do
       {:ok, alert_data} ->
         # clear errors, etc.
-        {:ok, {alert_data, assigns(socket, params)}}
+        socket =
+          socket
+          |> assign(:form, to_form(change(alert_data)))
+          |> assigns(params)
+
+        IO.inspect(inspect(socket.assigns), label: "post-assigns")
+        IO.inspect(inspect(socket.assigns.form[:route_type_int].value), label: "route_type")
+
+        {:ok, socket}
 
       {:error, changeset} ->
         # set errors, etc.; do we want to run `assign` if validation fails?
-        {:error, {changeset, assigns(socket, params)}}
+        socket =
+          socket
+          |> assign(:form, to_form(changeset))
+          |> assigns(params)
+
+        {:error, socket}
     end
   end
 
