@@ -14,7 +14,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
   ]
 
   defimpl Slice, for: __MODULE__ do
-    def extract(delivery_data, %Alert{} = alert) do
+    def extract(delivery_data, %Alert{} = alert, params) do
       struct(delivery_data, Map.from_struct(alert))
     end
 

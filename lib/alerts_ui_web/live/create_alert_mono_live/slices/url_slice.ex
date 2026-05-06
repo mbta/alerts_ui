@@ -28,7 +28,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
   ]
 
   defimpl Slice, for: __MODULE__ do
-    def extract(url_data, %Alert{} = alert) do
+    def extract(url_data, %Alert{} = alert, params) do
       # on extract, convert the alert's primary service type into
       # route type, route type int
       alert_id = alert.alert_id

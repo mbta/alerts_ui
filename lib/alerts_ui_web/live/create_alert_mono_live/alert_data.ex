@@ -187,13 +187,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
           atom(),
           Alert.t() | nil
         ) :: {:ok, {Changeset.t(), Socket.t()}} | {:error, {Changeset.t(), Socket.t()}}
-  def init(socket, params, action, alert_or_nil \\ nil) when action in @actions do
+  def init(socket, params, action, alert \\ %Alert{}) when action in @actions do
+    base = Repo.preload(alert, :informed_entity)
+
     base_params =
       slices()
       |> Enum.map(fn slice_module ->
         slice_module
         |> struct()
-        |> Slice.extract(alert_or_nil || %Alert{} |> Repo.preload(:informed_entity))
+        |> Slice.extract(base, params)
       end)
       |> Enum.reduce(%{}, fn slice, alert_data_params ->
         Map.merge(alert_data_params, Map.from_struct(slice))
