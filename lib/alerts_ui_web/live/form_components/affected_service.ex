@@ -678,6 +678,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
           accept_event_name="accepted_dates_modal"
           accept_button_text="Apply"
           target_id="#service_form"
+          container_class="md:!w-[25rem]"
         >
           <.filtered_select
             label="Upcoming dates"

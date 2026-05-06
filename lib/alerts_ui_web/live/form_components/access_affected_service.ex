@@ -421,6 +421,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedService do
             accept_event_name="accepted_stops_modal"
             accept_button_text="Apply"
             target_id="#service_form"
+            container_class="md:!w-[25rem]"
           >
             <.filtered_select
               label="Stops"

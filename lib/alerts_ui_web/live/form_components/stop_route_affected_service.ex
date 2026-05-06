@@ -582,6 +582,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
           accept_event_name="accepted_routes_modal"
           accept_button_text="Apply"
           target_id="#service_form"
+          container_class="md:!w-[25rem]"
         >
           <.filtered_select
             label="Routes"

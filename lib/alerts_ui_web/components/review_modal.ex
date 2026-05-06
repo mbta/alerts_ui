@@ -133,7 +133,6 @@ defmodule AlertsUIWeb.ReviewModal do
     <.modal
       id={@id}
       show={true}
-      container_class="md:max-w-2xl"
       header_text="Create new alert"
       cancel_button_text="Keep editing"
       accept_button_text="Submit"

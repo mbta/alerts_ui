@@ -652,7 +652,7 @@ defmodule AlertsUIWeb.SharedComponents do
                 |> JS.exec("data-cancel", to: "##{@id}")
               }
               class={[
-                "max-h-dvh w-full md:max-h-[calc(100dvh-3rem)] md:w-auto !flex flex-col justify-stretch content-stretch shadow-zinc-700/10 ring-zinc-700/10 hidden md:rounded-md bg-bg-elevation-4
+                "max-h-dvh w-full md:max-h-[calc(100dvh-3rem)] md:w-auto md:max-w-2xl !flex flex-col justify-stretch content-stretch shadow-zinc-700/10 ring-zinc-700/10 hidden md:rounded-md bg-bg-elevation-4
               border-bg-elevation-6 shadow-lg ring-1 transition border",
                 @container_class
               ]}
