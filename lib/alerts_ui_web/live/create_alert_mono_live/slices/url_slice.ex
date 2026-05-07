@@ -1,4 +1,5 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
+  require Logger
   alias Ecto.Changeset
   alias AlertsUI.Models.Alert
   alias AlertsUI.Models.InformedEntity
@@ -18,7 +19,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
     only: [humanize_effect_name: 2, list_effect_path_names: 1, get_route_type_int: 1]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Path,
-    only: [path_route_type_from_socket: 1, path_effect_name_from_socket: 1]
+    only: [path_route_type_from_socket: 1, path_effect_name_from_socket: 1, path_route_type: 2]
 
   defstruct [
     :alert_id,
@@ -88,7 +89,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
       combination = get_value_of_key(
           :combination,
           route_type_int,
-          effect_name
+          humanize_effect_name(
+            route_type_int,
+            effect_name
+          )
         )
 
       %UrlSlice{
@@ -170,8 +174,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
           selected_route_type: selected_route_type
         } = assigns
       ) do
-        IO.inspect(this_route_type, label: "THIS")
-        IO.inspect(selected_route_type, label: "SELECTED")
     ~H"""
     <.button_toggle
       id={"route-type-#{@this_route_type}-button"}

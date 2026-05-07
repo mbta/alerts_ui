@@ -48,9 +48,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Path do
   end
 
   def path_route_type_from_form(%Form{} = form) do
-    route_type = form[:route_type].value
-    effect_name = form[:effect_name].value
+    path_route_type(
+      form[:route_type].value,
+      form[:effect_name].value
+    )
+  end
 
+  def path_route_type(route_type, effect_name) do
     case InformedEntity.route_code_mapping(route_type) do
       nil ->
         if effect_name in EffectsForRouteTypes.list_effects(:facility) do
