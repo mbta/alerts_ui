@@ -99,12 +99,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
   end
 
   def humanize_route_type(%Form{} = form) do
-    Logger.warning("FORM is #{inspect(form)}")
-    Logger.warning("RT is #{inspect(form[:route_type].value)}")
-    Logger.warning("COMBO is #{inspect(form[:combination].value)}")
-
     ContentFormatter.service_type_string(
-      form[:route_type_int].value, form[:combination].value
+      form[:route_type].value, form[:combination].value
     )
   end
 end
