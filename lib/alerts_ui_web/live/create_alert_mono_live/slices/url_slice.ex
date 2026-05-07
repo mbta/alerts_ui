@@ -35,9 +35,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice
 
     def extract(url_data, %Alert{} = alert, params) do
-      slice = new_url_params(alert, params)
-      IO.inspect(slice)
-      slice
+      new_url_params(alert, params)
     end
 
     @url_fields [:alert_id, :combination, :effect_name, :route_type]

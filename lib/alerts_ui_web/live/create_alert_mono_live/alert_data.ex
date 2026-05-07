@@ -12,6 +12,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
     UrlSlice,
     DeliverySlice,
+    StopRouteServiceSlice,
     SystemwideServiceSlice
   }
 
@@ -44,7 +45,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     # carried in the url and/or necessary for all alerts
     field :alert_id, :string
     field :form_type, :string
-    field :route_type, :string
+    field :route_type, :integer
     field :route_type_int, :integer
     field :effect_name, :string
     field :review, :boolean
@@ -174,7 +175,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   @slices [
     UrlSlice,
     DeliverySlice,
-    SystemwideServiceSlice
+    StopRouteServiceSlice
   ]
 
   @actions [:new, :edit, :duplicate]
