@@ -28,7 +28,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
     :original_stop_selections,
     :original_trip_selections,
     :route_ids,
-    :service_types
+    :service_types,
+    :stop_ids,
+    :route_ids
   ]
 
 
@@ -55,6 +57,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
     end
 
     def transform(_service_data, changeset, _params) do
+      IO.inspect(changeset)
       changeset
     end
 
@@ -85,8 +88,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
         selected_stops = selections.selected_stops
 
         available_filter_routes = CreateAlertLive.get_routes(route_type)
-        available_routes = CreateAlertLive.get_routes_by_stop(stop_ids, route_type)
         available_stops = CreateAlertLive.get_stops_for_stop_route(route_ids, route_type)
+        available_routes = CreateAlertLive.get_routes_by_stop(stop_ids, route_type)
 
         # filter_routes = get(available_filter_routes, :result) || []
 
@@ -201,8 +204,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
     else
       assign(assigns, :selections, assigns.selections.result)
     end
-
-    IO.inspect(assigns.selections, label: "SELECTIONS ON RENDER")
 
     ~H"""
     <div class="min-w-full flex flex-col" id="stop_route_service_view">
