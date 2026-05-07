@@ -47,11 +47,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
     def validate(_url_data, changeset, _params), do: changeset
 
     def assigns(_url_data, socket, params) do
+      path_route_type =
+        params["route_type"] || path_route_type_from_socket(socket)
+
+      path_effect_name =
+        params["effect_name"] || path_effect_name_from_socket(socket)
+
       assign(
         socket,
         %{
-          path_route_type: params["route_type"],
-          path_effect_name: params["effect_name"]
+          path_route_type: path_route_type,
+          path_effect_name: path_effect_name
         }
       )
     end
