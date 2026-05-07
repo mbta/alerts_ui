@@ -7,7 +7,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
 
   import Ecto.Changeset, only: [get_field: 2]
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Path,
-    only: [path_route_type_from_form: 1]
+    only: [path_route_type_from_form: 1, path_route_type: 2]
 
   @forbidden_effects ~w[Summary]
 
@@ -78,6 +78,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
     |> humanize_effect_name(effect_name)
   end
 
+  def humanize_effect_name(route_type_int, effect_name) when is_integer(route_type_int) do
+    humanize_effect_name(
+      path_route_type(route_type_int, effect_name),
+      effect_name
+    )
+  end
+
   def humanize_effect_name(route_type_name, effect_name) do
     mode_effect =
       ModeEffect.mode_effects_by_route_type_name(route_type_name)
@@ -92,8 +99,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
   end
 
   def humanize_route_type(%Form{} = form) do
-    Logger.warning("RTI is: #{form[:route_type_int].value}")
-    Logger.warning("COMBO is: #{form[:combination].value}")
+    Logger.warning("FORM is #{inspect(form)}")
+    Logger.warning("RT is #{inspect(form[:route_type].value)}")
+    Logger.warning("COMBO is #{inspect(form[:combination].value)}")
 
     ContentFormatter.service_type_string(
       form[:route_type_int].value, form[:combination].value
