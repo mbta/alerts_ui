@@ -73,7 +73,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
       if update_selections?(params) do
         assign_async(socket, :selections, fn ->
           form = socket.assigns.form
-          selections = socket.assigns.selections
 
           modal_route_search_term = form[:modal_route_search_term].value
           modal_route_id = form[:modal_route_id].value
@@ -83,7 +82,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
           stop_ids = form[:stop_ids].value || []
           stop_search_term = form[:stop_search_term].value
 
-          selected_stops = selections.selected_stops
+          selected_stops = case Map.get(socket.assigns, :selections) do
+            nil -> []
+            %AsyncResult{ok?: true} = async_ok -> async_ok.result.selected_stops
+            %Selections{} = selections -> selections.selected_stops
+          end
 
           available_filter_routes = CreateAlertLive.get_routes(route_type)
           available_stops = CreateAlertLive.get_stops_for_stop_route(route_ids, route_type)
@@ -255,7 +258,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
         class="md:w-[25%]"
         field={@form[:stop_ids]}
         filter_field={@form[:stop_search_term]}
-        selected={@selections.retained_stops}
+        selected={@form[:stop_ids].value}
         label="Stops"
         loading={Map.get(@selections, :loading, true)}
         modal_filter_active={@selections.selected_route_id}
