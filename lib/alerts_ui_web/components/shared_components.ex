@@ -973,9 +973,8 @@ defmodule AlertsUIWeb.SharedComponents do
               @loading ->
                 false
 
-              # an empty value might be [] or nil or ""
-              is_list(@value) and length(@value -- ["default"]) >= 1 and @value != nil and
-                  @value != "" ->
+              # possible 'empty' states for 'value'
+              @value not in [nil, "", [], ["default"]] ->
                 false
 
               true ->

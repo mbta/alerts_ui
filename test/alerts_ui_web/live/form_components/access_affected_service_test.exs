@@ -253,6 +253,70 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
       end
     end
 
+    test "modal search clears and persists selected option" do
+      with_mock(FacilitiesRepo, get_by_type: fn _facility_types, _opts -> [@facility] end) do
+        :BIKE_ISSUE
+
+        {:ok, view, _html} = live_isolated_component(AccessAffectedService, @assigns)
+
+        {:ok, document} =
+          view
+          |> render_async()
+          |> Floki.parse_document()
+
+        assert document_has_element?(
+                 document,
+                 "select#access_affected_service_stop_id > option[value=\"place-sstat\"]"
+               )
+
+        # Add stop filter
+        view
+        |> element("form")
+        |> render_change(%{
+          "access_affected_service" => %{"stop_id" => "place-sstat"}
+        })
+
+        {:ok, document} =
+          view
+          |> element("form")
+          |> render_change(%{"access_affected_service" => %{"stop_search_term" => "q"}})
+          |> Floki.parse_document()
+
+        # selected option should still be listed even with the filter
+        assert document_has_element?(
+                 document,
+                 "select#access_affected_service_stop_id > option[value=\"place-sstat\"][selected=\"selected\"]"
+               )
+
+        {:ok, document} =
+          view
+          |> element("[phx-value-name='access_affected_service[stop_search_term]']")
+          |> render_click()
+          |> Floki.parse_document()
+
+        assert document_has_element?(
+                 document,
+                 "input#access_affected_service_stop_search_term[value=\"\"]"
+               )
+
+        # The previously selected value should still be selected after clearing
+        assert document_has_element?(
+                 document,
+                 "select#access_affected_service_stop_id > option[value=\"place-sstat\"][selected=\"selected\"]"
+               )
+
+        # Also assert that this is the ONLY option selected,
+        # as this bug was manifesting when the default was also selected
+        selected_options =
+          Floki.find(
+            document,
+            "select#access_affected_service_stop_id > option[selected=\"selected\"]"
+          )
+
+        assert length(selected_options) == 1
+      end
+    end
+
     test "add stop filter on facilities works" do
       with_mock(FacilitiesRepo,
         get_by_type: fn _facility_types, _opts -> [@facility, @facility_two] end
