@@ -26,7 +26,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
     combination = GetKeyForModeEffect.get_value_of_key(:combination, route_type, effect_name)
     is_trip_combination? = combination in [:RDT, :RDTS]
     schedules = Map.get(autotext, :schedules)
-    has_trips? = is_list(schedules) && schedules != []
+    has_trips? = (is_list(schedules) && schedules != [])
 
     start_specifier = change_start_specifier(start_datetime, start_specifier)
     end_specifier = change_end_specifier(end_datetime, end_specifier)
@@ -163,6 +163,16 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
       })
       when not is_nil(end_datetime) do
     "today through #{datetime_to_formatted_date(end_datetime)}"
+  end
+
+  def build_onetime_string(%{
+        is_trip_combination?: true,
+        has_trips?: false,
+        within_same_service_day?: true,
+        starts_today?: true,
+        end_specifier: :later_today,
+      }) do
+    "today"
   end
 
   def build_onetime_string(%{
