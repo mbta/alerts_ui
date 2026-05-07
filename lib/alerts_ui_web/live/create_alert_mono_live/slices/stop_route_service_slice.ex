@@ -38,7 +38,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
       available_routes: AsyncResult.loading(),
       available_stops: AsyncResult.loading(),
       filter_title_value: "All routes",
-      disable_routes_input?: true,
+      disable_routes_input?: false,
       modal_route_id_options: [],
       retained_stops: [],
       route_id_options: [],
@@ -75,8 +75,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
         selections = socket.assigns.selections
 
         modal_route_search_term = form[:modal_route_search_term].value
-        modal_route_id = form[:modal_route_id].value || ""
-        route_ids = form[:route_ids].value || []
+        modal_route_id = form[:modal_route_id].value
+        route_ids = form[:route_ids].value
         route_search_term = form[:route_search_term].value
         route_type = form[:route_type].value
         stop_ids = form[:stop_ids].value || []
@@ -159,28 +159,24 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
         ) do
       # Yeah this is weird. Basically, available_stops might be filtered down by route and sorted by stop order,
       # so we have to carefully preserve already selected stops.
-      if async_available?(available_stops) do
-        # Available stops will only include the stops visible with the given route filter
-        # And now just a list of stop ids
-        available_stop_ids = Enum.map(available_stops.result, fn stop -> stop.id end)
+      # Available stops will only include the stops visible with the given route filter
+      # And now just a list of stop ids
+      available_stop_ids = Enum.map(available_stops, fn stop -> stop.id end)
 
-        # Get all the stops that were selected but are no longer included in `available_stops`
-        # Then append them to the top of the list
-        previously_selected_stops =
-          Enum.filter(selected_stops, fn stop -> stop.id not in available_stop_ids end)
+      # Get all the stops that were selected but are no longer included in `available_stops`
+      # Then append them to the top of the list
+      previously_selected_stops =
+        Enum.filter(selected_stops, fn stop -> stop.id not in available_stop_ids end)
 
-        options = previously_selected_stops ++ available_stops.result
+      options = previously_selected_stops ++ available_stops
 
-        SelectFormatter.formatted_select_options(%SelectFormatter{
-          options: options,
-          search_term: stop_search_term,
-          route_type: route_type,
-          values_to_keep: stop_ids,
-          option_prefix: "stop-selector"
-        })
-      else
-        []
-      end
+      SelectFormatter.formatted_select_options(%SelectFormatter{
+        options: options,
+        search_term: stop_search_term,
+        route_type: route_type,
+        values_to_keep: stop_ids,
+        option_prefix: "stop-selector"
+      })
     end
 
     defp route_id_options(
