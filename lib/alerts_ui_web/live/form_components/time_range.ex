@@ -346,6 +346,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
   end
 
   defp get_trip_arrival_time(%{modal_date: "default"}, _), do: nil
+  defp get_trip_arrival_time(%{modal_date: nil}, _), do: nil
 
   defp get_trip_arrival_time(_, selected_schedules) do
     selected_schedules
