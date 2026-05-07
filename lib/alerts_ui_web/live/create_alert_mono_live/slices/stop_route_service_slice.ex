@@ -57,7 +57,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
     end
 
     def transform(_service_data, changeset, _params) do
-      IO.inspect(changeset)
       changeset
     end
 
@@ -65,77 +64,84 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
       changeset
     end
 
-    def assigns(_service_data, socket, _params) do
+    def assigns(_service_data, socket, params) do
       # update selections here
-      socket
-      |> assign(:selections, %Selections{})
-      |> async_assign_selections()
+      async_assign_selections(socket, params)
     end
 
-    defp async_assign_selections(socket) do
-      assign_async(socket, :selections, fn ->
-        form = socket.assigns.form
-        selections = socket.assigns.selections
+    defp async_assign_selections(socket, params) do
+      if update_selections?(params) do
+        assign_async(socket, :selections, fn ->
+          form = socket.assigns.form
+          selections = socket.assigns.selections
 
-        modal_route_search_term = form[:modal_route_search_term].value
-        modal_route_id = form[:modal_route_id].value
-        route_ids = form[:route_ids].value
-        route_search_term = form[:route_search_term].value
-        route_type = form[:route_type].value
-        stop_ids = form[:stop_ids].value || []
-        stop_search_term = form[:stop_search_term].value
+          modal_route_search_term = form[:modal_route_search_term].value
+          modal_route_id = form[:modal_route_id].value
+          route_ids = form[:route_ids].value
+          route_search_term = form[:route_search_term].value
+          route_type = form[:route_type].value
+          stop_ids = form[:stop_ids].value || []
+          stop_search_term = form[:stop_search_term].value
 
-        selected_stops = selections.selected_stops
+          selected_stops = selections.selected_stops
 
-        available_filter_routes = CreateAlertLive.get_routes(route_type)
-        available_stops = CreateAlertLive.get_stops_for_stop_route(route_ids, route_type)
-        available_routes = CreateAlertLive.get_routes_by_stop(stop_ids, route_type)
+          available_filter_routes = CreateAlertLive.get_routes(route_type)
+          available_stops = CreateAlertLive.get_stops_for_stop_route(route_ids, route_type)
+          available_routes = CreateAlertLive.get_routes_by_stop(stop_ids, route_type)
 
-        # filter_routes = get(available_filter_routes, :result) || []
+          # filter_routes = get(available_filter_routes, :result) || []
 
-        modal_route_id_options =
-          modal_route_id_options(
-            # filter_routes,
-            available_filter_routes,
-            modal_route_search_term,
-            route_type,
-            modal_route_id
-          )
+          modal_route_id_options =
+            modal_route_id_options(
+              # filter_routes,
+              available_filter_routes,
+              modal_route_search_term,
+              route_type,
+              modal_route_id
+            )
 
-        route_id_options =
-          route_id_options(
-            available_routes,
-            route_ids,
-            route_search_term,
-            route_type
-          )
+          route_id_options =
+            route_id_options(
+              available_routes,
+              route_ids,
+              route_search_term,
+              route_type
+            )
 
-        stop_id_options =
-          stop_id_options(
-            available_stops,
-            selected_stops,
-            stop_search_term,
-            route_type,
-            stop_ids
-          )
+          stop_id_options =
+            stop_id_options(
+              available_stops,
+              selected_stops,
+              stop_search_term,
+              route_type,
+              stop_ids
+            )
 
-        selections = %Selections{
-          available_filter_routes: available_filter_routes,
-          available_routes: available_routes,
-          available_stops: available_stops,
-          # filter_title_value: filter_title_value,
-          # disable_routes_input?: disable_routes_input,
-          # modal_route_id_options: modal_route_id_options,
-          # retained_stops: retained_stops,
-          route_id_options: route_id_options,
-          selected_stops: selected_stops,
-          # selected_route_id: selected_route_id,
-          # show_stop_ids?: show_stop_ids,
-          stop_id_options: stop_id_options
-        }
+          selections = %Selections{
+            available_filter_routes: available_filter_routes,
+            available_routes: available_routes,
+            available_stops: available_stops,
+            # filter_title_value: filter_title_value,
+            # disable_routes_input?: disable_routes_input,
+            # modal_route_id_options: modal_route_id_options,
+            # retained_stops: retained_stops,
+            route_id_options: route_id_options,
+            selected_stops: selected_stops,
+            # selected_route_id: selected_route_id,
+            # show_stop_ids?: show_stop_ids,
+            stop_id_options: stop_id_options
+          }
 
-        {:ok, %{selections: selections}}
-      end)
+          {:ok, %{selections: selections}}
+        end) |> assign(:selections, %Selections{})
+      else
+        case Map.get(socket.assigns, :selections) do
+          nil ->
+            assign(socket, :selections, %Selections{})
+          _ ->
+            socket
+        end
+      end
     end
 
     defp modal_route_id_options(
@@ -196,14 +202,28 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
         option_prefix: "route-selector"
       })
     end
+
+    # update selections when a user interacts with one of our fields...
+    defp update_selections?(%{"_target" => ["alert_data", field]}) when field in ["stop_ids", "route_ids"], do: true
+    # ...but not on any other user interaction...
+    defp update_selections?(%{"_target" => _target}), do: false
+    # ...and always on mount, when there is no target
+    defp update_selections?(_), do: true
   end
 
   def render(assigns) do
-    assigns = if Map.get(assigns.selections, :loading) do
-      assign(assigns, :selections, %Selections{})
-    else
-      assign(assigns, :selections, assigns.selections.result)
-    end
+    assigns =
+      case assigns.selections do
+        %AsyncResult{loading: [:selections]} ->
+          assign(assigns, :selections, %Selections{})
+
+        %AsyncResult{} ->
+          assign(assigns, :selections, assigns.selections.result)
+
+        _ ->
+          IO.inspect(assigns.selections, label: "BRANCH 3")
+          assigns
+      end
 
     ~H"""
     <div class="min-w-full flex flex-col" id="stop_route_service_view">
