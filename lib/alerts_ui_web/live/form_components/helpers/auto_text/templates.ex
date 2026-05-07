@@ -122,7 +122,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     },
     %{
       pattern: {4, "Dock Closure"},
-      header_template: "?stop_names closed ?alert_duration ?due_to_cause|.",
+      header_template: "?stop_names ?stop_form closed ?alert_duration ?due_to_cause|.",
       description_template: %{
         route_count: 0,
         stop_count: 2,
@@ -466,7 +466,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     },
     %{
       pattern: {"Station Closure"},
-      header_template: "?stop_names closed ?alert_duration ?due_to_cause|.",
+      header_template: "?stop_names ?stop_form closed ?alert_duration ?due_to_cause|.",
       description_template: %{
         route_count: 0,
         stop_count: 2,

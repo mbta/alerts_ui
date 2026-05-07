@@ -537,7 +537,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Lechmere closed until Sat, May 10 at 3:00 PM due to an unruly passenger."
+        "Lechmere is closed until Sat, May 10 at 3:00 PM due to an unruly passenger."
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
@@ -1248,7 +1248,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Lechmere closed until Sat, May 10 at 3:00 PM due to a slippery rail."
+        "Lechmere is closed until Sat, May 10 at 3:00 PM due to a slippery rail."
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
