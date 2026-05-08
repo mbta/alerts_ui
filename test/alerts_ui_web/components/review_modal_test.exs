@@ -603,7 +603,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         assert render(view) =~ ~r/Timing.*One-time/s
 
         assert render(view) =~
-                 ~r/Effect period.*until a work order with this facility ID is closed/s
+                 ~r/Effect period.*until a work order for this facility is closed/s
 
         assert render(view) =~ ~r/Notification period.*Same as effect period/s
       end

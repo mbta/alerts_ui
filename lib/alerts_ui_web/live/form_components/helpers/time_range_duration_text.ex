@@ -68,7 +68,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationText do
     do: end_text("when_work_order_is_closed", end_dt)
 
   defp end_text("when_work_order_is_closed", _end_dt) do
-    "a work order with this facility ID is closed"
+    "a work order for this facility is closed"
   end
 
   defp end_text("later_today", _end_dt) do
