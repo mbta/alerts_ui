@@ -38,27 +38,27 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   @impl true
   def mount(params, _session, socket) do
-    Process.send_after(self(), :update, @ten_seconds_in_ms)
+    # only start the "update" event once, on live mount
+    if connected?(socket), do: Process.send_after(self(), :update, @ten_seconds_in_ms)
 
-    with {alerts, meta} <- Alerts.list_all_paginated(params) do
-      filters = Map.get(params, "filter", %{"timeline" => "current"})
+    filters = Map.get(params, "filter", %{"timeline" => "current"})
+    params = params |> Map.put("filter", filters)
 
-      form =
-        cast(%__MODULE__{}, filters, @fields)
-        |> Phoenix.Component.to_form()
+    form =
+      cast(%__MODULE__{}, filters, @fields)
+      |> Phoenix.Component.to_form()
 
-      {:ok,
-       assign(socket,
-         alerts: alerts,
-         filter_count: get_filter_count(filters),
-         form: form,
-         meta: meta,
-         page_title: "View Alerts",
-         params: params,
-         scroll_to_top: false,
-         send_all_clear?: false
-       )}
-    end
+    {:ok,
+     assign(socket,
+       filter_count: get_filter_count(filters),
+       form: form,
+       meta: %Flop.Meta{},
+       page_title: "View Alerts",
+       params: params,
+       scroll_to_top: false,
+       send_all_clear?: false,
+       alerts: []
+     )}
   end
 
   @impl true
@@ -68,6 +68,13 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     with {alerts, meta} <- Alerts.list_all_paginated(socket.assigns.meta.flop) do
       {:noreply, assign(socket, meta: meta, alerts: alerts)}
     end
+  end
+
+  @impl true
+  def handle_params(_params, _url, %{transport_pid: nil} = socket) do
+    # if this is the dead mount and the socket is not connected
+    # we don't need to make the expensive list_all_paginated call
+    {:noreply, socket}
   end
 
   @impl true
