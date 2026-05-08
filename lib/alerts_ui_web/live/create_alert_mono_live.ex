@@ -16,6 +16,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     AccessServiceSlice,
     AffectedServiceSlice,
     DeliverySlice,
+    AffectedServiceSlice,
     StopRouteServiceSlice,
     SystemwideServiceSlice,
     UrlSlice

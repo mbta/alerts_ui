@@ -11,7 +11,7 @@
           phx-change="validate"
         >
           <Title.render route_type_name={humanize_route_type(@form)} effect_name={humanize_effect_name(@form)} />
-          <StopRouteServiceSlice.render form={@form} selections={@selections}/>
+          <AffectedServiceSlice.render form={@form} selections={@selections} />
           <DeliverySlice.render form={@form} />
         </.form>
       </div>

@@ -103,4 +103,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
       form[:route_type].value, form[:combination].value
     )
   end
+
+  def get_single_route_effect_names() do
+    ["Detour", "Snow Route"]
+  end
 end

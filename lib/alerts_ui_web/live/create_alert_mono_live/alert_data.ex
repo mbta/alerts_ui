@@ -12,6 +12,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
     UrlSlice,
     DeliverySlice,
+    AffectedServiceSlice,
     StopRouteServiceSlice,
     SystemwideServiceSlice
   }
@@ -52,6 +53,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     # affected service
     field :direction, :string
     field :facility_ids, {:array, :string}
+    field :modal_date, :string
+    field :modal_date_search_term, :string
     field :modal_route_id, :string
     field :modal_route_search_term, :string
     field :original_direction_selections, {:array, :string}
@@ -61,11 +64,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :original_trip_selections, {:array, :string}
     field :route_ids, {:array, :string}
     field :route_search_term, :string
+    field :single_route_id, :string
     field :stop_ids, {:array, :string}
     field :stop_names_and_ids, {:array, :string}
     field :stop_search_term, :string
     field :trip_ids, {:array, :string}
     field :trip_information_by_id, {:array, :string}
+    field :trip_search_term, :string
     field :service_types, {:array, :integer}
     # time range
     field :active_period_end, :naive_datetime
@@ -179,7 +184,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   @slices [
     UrlSlice,
     DeliverySlice,
-    StopRouteServiceSlice
+    AffectedServiceSlice
   ]
 
   @actions [:new, :edit, :duplicate]
