@@ -37,7 +37,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
     :route_ids
   ]
 
-
   defmodule Selections do
     defstruct [
       available_filter_routes: AsyncResult.loading(),
@@ -84,6 +83,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
         stop_ids = form[:stop_ids].value || []
         stop_search_term = form[:stop_search_term].value
 
+        stop_route_ids = case modal_route_id do
+          nil -> route_ids
+          modal_route_id -> [modal_route_id]
+        end
+
         selected_stops = case Map.get(socket.assigns, :selections) do
           nil -> []
           %AsyncResult{ok?: true} = async_ok -> async_ok.result.selected_stops
@@ -92,7 +96,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
         assign_async(socket, :selections, fn ->
           available_filter_routes = CreateAlertLive.get_routes(route_type)
-          available_stops = CreateAlertLive.get_stops_for_stop_route(route_ids, route_type)
+          available_stops = CreateAlertLive.get_stops_for_stop_route(stop_route_ids, route_type)
           available_routes = CreateAlertLive.get_routes_by_stop(stop_ids, route_type)
 
           modal_route_id_options =
@@ -126,6 +130,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
             available_stops: available_stops,
             modal_route_id_options: modal_route_id_options,
             route_id_options: route_id_options,
+            selected_route_id: modal_route_id,
             selected_stops: selected_stops,
             stop_id_options: stop_id_options
           }
@@ -234,7 +239,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
         cancel_event_name="cancelled_modal"
         accept_event_name="accepted_routes_modal"
         accept_button_text="Apply"
-        target_id="#service_form"
+        target_id="#alert_form"
       >
         <.filtered_select
           label="Routes"

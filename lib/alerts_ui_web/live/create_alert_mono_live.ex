@@ -74,6 +74,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   end
 
   @impl true
+  def handle_event("accepted_routes_modal", _params, socket) do
+    # no updates necessary here as the relevant values are already in the
+    # form
+    {:noreply, sync_socket(socket, %{})}
+  end
+
+  @impl true
   def handle_event("review", _params, socket) do
     # if valid:
     #   live navigate to `?review=true`, opening the modal
