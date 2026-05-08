@@ -369,7 +369,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
 
         assert render(view) =~ ~r/Routes:.*Framingham\/Worcester Line/s
         refute render(view) =~ "Stops:"
-        assert render(view) =~ ~r/Direction:.*Both/s
+        refute render(view) =~ ~r/Direction:.*Both/s
         refute render(view) =~ "Trips:"
       end
     end

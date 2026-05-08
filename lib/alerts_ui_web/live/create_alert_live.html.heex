@@ -96,6 +96,7 @@
           selected_schedules={@selected_schedules}
           current_user={@current_user}
           return_to={@return_to}
+          combination={@combination}
         />
         <.modal
           :if={!(Map.get(assigns, :obsolete_ids, nil) |> Enum.empty?())}

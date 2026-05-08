@@ -314,12 +314,12 @@ defmodule AlertsUI.Models.Alert do
     |> unique_constraint(:alert_id, name: :alerts_alert_id_index)
   end
 
+  def get_direction(%__MODULE__{original_direction_selections: nil} = alert) do
+    get_direction_from_informed_entities(alert.informed_entity)
+  end
+
   def get_direction(%__MODULE__{} = alert) do
-    if alert.source == :IBI do
-      get_direction_from_original_selections(alert)
-    else
-      get_direction_from_informed_entities(alert.informed_entity)
-    end
+    get_direction_from_original_selections(alert)
   end
 
   defp get_direction_from_original_selections(alert) do
