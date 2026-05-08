@@ -63,6 +63,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   end
 
   @impl true
+  def handle_event("reset_search_filter", %{"name" => name}, socket) do
+    # i.e., "alert_data[the_field_we_want_to_clear]"
+    search_filter_name =
+      hd(Regex.run(~r/\[(.*?)\]/, name, capture: :all_but_first))
+
+    params = %{"alert_data" => %{search_filter_name => nil}}
+
+    {:noreply, sync_socket(socket, params)}
+  end
+
+  @impl true
   def handle_event("review", _params, socket) do
     # if valid:
     #   live navigate to `?review=true`, opening the modal
