@@ -69,7 +69,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       hd(Regex.run(~r/\[(.*?)\]/, name, capture: :all_but_first))
 
     params = %{"alert_data" => %{search_filter_name => nil}}
-
     {:noreply, sync_socket(socket, params)}
   end
 
@@ -77,6 +76,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   def handle_event("accepted_routes_modal", _params, socket) do
     # no updates necessary here as the relevant values are already in the
     # form
+    {:noreply, sync_socket(socket, %{})}
+  end
+
+  @impl true
+  def handle_event("clear_filter", %{"filter-id" => filter_field}, socket) do
+    params = %{"alert_data" => %{filter_field => nil}}
     {:noreply, sync_socket(socket, %{})}
   end
 
