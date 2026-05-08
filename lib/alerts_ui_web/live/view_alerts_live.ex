@@ -243,6 +243,27 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     {:noreply, socket}
   end
 
+  # This is for all of the search bars inside the "Filters" modal
+  @impl true
+  def handle_event("reset_search_filter", %{"name" => name}, socket) do
+    # The name will come back as i.e. "affected_service[route_search_term]" but we only want "route_search_term"
+    search_filter_name = hd(Regex.run(~r/\[(.*?)\]/, name, capture: :all_but_first))
+
+    updated_form =
+      socket.assigns.form.params
+      |> Map.merge(%{search_filter_name => ""})
+
+    form =
+      cast(%__MODULE__{}, updated_form, @fields)
+      |> to_form(action: :validate)
+
+    socket =
+      socket
+      |> assign(form: form)
+
+    {:noreply, socket}
+  end
+
   # Handle clicking the "Reset" button
   @impl true
   def handle_event("apply_filter", %{"reset" => ""}, socket) do
