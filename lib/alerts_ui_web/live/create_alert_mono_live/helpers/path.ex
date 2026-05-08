@@ -10,6 +10,24 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Path do
 
   use AlertsUIWeb, :verified_routes
 
+  def path(
+        %{
+          live_action: live_action,
+          alert_id: alert_id
+        } = _assigns
+      ) do
+    case live_action do
+      :new ->
+        ~p"/alerts/mono/new/"
+
+      :edit ->
+        ~p"/alerts/mono/edit/#{alert_id}"
+
+      :duplicate ->
+        ~p"/alerts/mono/duplicate/#{alert_id}"
+    end
+  end
+
   def path_with_route_type(
         %{
           live_action: live_action,

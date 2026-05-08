@@ -21,8 +21,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     StopRouteServiceSlice,
     SystemwideServiceSlice,
     ReminderTimesSlice,
+    TimelineSlice,
     UrlSlice
   }
+  alias AlertsUIWeb.CreateAlertMonoLive.Step
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.{
     AlertData,
@@ -30,6 +32,22 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   }
 
   import Ecto.Changeset, only: [change: 1]
+
+    @steps [
+    %Step{
+      name: "route_type_and_effect",
+      previous: nil,
+      next: "details",
+      label: "Select Alert Type"
+    },
+    %Step{
+      name: "details",
+      previous: "route_type_and_effect",
+      next: "preview",
+      label: "Alert Details"
+    },
+    %Step{name: "preview", previous: nil, next: nil, label: "Preview and Submit"}
+  ]
 
   @impl true
   def mount(params, _session, socket) do
@@ -61,6 +79,21 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     path = path_with_route_type(socket.assigns, route_type)
 
     {:noreply, push_patch(socket, to: path)}
+  end
+
+  @impl true
+  def handle_event("move_progress", %{"value" => "route_type_and_effect"}, socket) do
+      IO.inspect("one")
+    # {:noreply,
+    #  assign(socket, progress: get_step_by_name("route_type_and_effect"), alert_data: %{})}
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("move_progress", %{"value" => name}, socket) do
+    IO.inspect(name, label: :two)
+    # {:noreply, assign(socket, :progress, get_step_by_name(name))}
+      {:noreply, socket}
   end
 
   @impl true
@@ -119,6 +152,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   def handle_event("submit", _params, socket) do
     # commit the alert and redirect to the list view
     {:noreply, socket}
+  end
+
+    defp get_step_by_name(name) do
+    Enum.find(@steps, &(&1.name == name))
   end
 
   @doc """
