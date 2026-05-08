@@ -52,14 +52,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     # affected service
     field :direction, :string
     field :facility_ids, {:array, :string}
+    field :modal_route_id, :string
+    field :modal_route_search_term, :string
     field :original_direction_selections, {:array, :string}
     field :original_facility_selections, {:array, :string}
     field :original_route_selections, {:array, :string}
     field :original_stop_selections, {:array, :string}
     field :original_trip_selections, {:array, :string}
     field :route_ids, {:array, :string}
+    field :route_search_term, :string
     field :stop_ids, {:array, :string}
     field :stop_names_and_ids, {:array, :string}
+    field :stop_search_term, :string
     field :trip_ids, {:array, :string}
     field :trip_information_by_id, {:array, :string}
     field :service_types, {:array, :integer}
