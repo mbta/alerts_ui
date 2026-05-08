@@ -75,23 +75,22 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
     defp async_assign_selections(socket, params) do
       if update_selections?(params) do
+        form = socket.assigns.form
+        modal_route_search_term = form[:modal_route_search_term].value
+        modal_route_id = form[:modal_route_id].value
+        route_ids = form[:route_ids].value
+        route_search_term = form[:route_search_term].value
+        route_type = form[:route_type].value
+        stop_ids = form[:stop_ids].value || []
+        stop_search_term = form[:stop_search_term].value
+
+        selected_stops = case Map.get(socket.assigns, :selections) do
+          nil -> []
+          %AsyncResult{ok?: true} = async_ok -> async_ok.result.selected_stops
+          %Selections{} = selections -> selections.selected_stops
+        end
+
         assign_async(socket, :selections, fn ->
-          form = socket.assigns.form
-
-          modal_route_search_term = form[:modal_route_search_term].value
-          modal_route_id = form[:modal_route_id].value
-          route_ids = form[:route_ids].value
-          route_search_term = form[:route_search_term].value
-          route_type = form[:route_type].value
-          stop_ids = form[:stop_ids].value || []
-          stop_search_term = form[:stop_search_term].value
-
-          selected_stops = case Map.get(socket.assigns, :selections) do
-            nil -> []
-            %AsyncResult{ok?: true} = async_ok -> async_ok.result.selected_stops
-            %Selections{} = selections -> selections.selected_stops
-          end
-
           available_filter_routes = CreateAlertLive.get_routes(route_type)
           available_stops = CreateAlertLive.get_stops_for_stop_route(route_ids, route_type)
           available_routes = CreateAlertLive.get_routes_by_stop(stop_ids, route_type)
@@ -125,14 +124,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
             available_filter_routes: available_filter_routes,
             available_routes: available_routes,
             available_stops: available_stops,
-            # filter_title_value: filter_title_value,
-            # disable_routes_input?: disable_routes_input,
             modal_route_id_options: modal_route_id_options,
-            # retained_stops: retained_stops,
             route_id_options: route_id_options,
             selected_stops: selected_stops,
-            # selected_route_id: selected_route_id,
-            # show_stop_ids?: show_stop_ids,
             stop_id_options: stop_id_options
           }
 
