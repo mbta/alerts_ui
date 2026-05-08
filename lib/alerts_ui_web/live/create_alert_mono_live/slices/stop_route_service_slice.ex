@@ -39,11 +39,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
   defmodule Selections do
     defstruct [
-      available_filter_routes: AsyncResult.loading(),
-      available_routes: AsyncResult.loading(),
-      available_stops: AsyncResult.loading(),
+      available_filter_routes: [],
+      available_routes: [],
+      available_stops: [],
       filter_title_value: "All routes",
       disable_routes_input?: false,
+      loading: false,
       modal_route_id_options: [],
       retained_stops: [],
       route_id_options: [],
@@ -219,7 +220,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
     assigns =
       case assigns.selections do
         %AsyncResult{loading: [:selections]} ->
-          assign(assigns, :selections, %Selections{})
+          assign(assigns, :selections, %Selections{loading: true})
 
         %AsyncResult{} ->
           assign(assigns, :selections, assigns.selections.result)
@@ -266,7 +267,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
         modal_filter_title={"Filter: #{@selections.filter_title_value}"}
         no_results={Enum.empty?(@selections.stop_id_options)}
         options={@selections.stop_id_options}
-        target_id="#service_form"
+        target_id="#alert_form"
       />
 
       <.filtered_select
