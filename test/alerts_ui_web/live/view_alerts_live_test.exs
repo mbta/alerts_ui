@@ -1439,11 +1439,16 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
       expected_timestamp = "When work order is closed in Trapeze"
 
-      actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_end, alert.duration_certainty, %{
-          can_close_automatically: alert.can_close_automatically,
-          primary_service_type: alert.primary_service_type,
-          effect_name: alert.effect_name
-      })
+      actual_timestamp =
+        AlertsUIWeb.ViewAlertsLive.format_timestamp(
+          alert.active_period_end,
+          alert.duration_certainty,
+          %{
+            can_close_automatically: alert.can_close_automatically,
+            primary_service_type: alert.primary_service_type,
+            effect_name: alert.effect_name
+          }
+        )
 
       assert expected_timestamp == actual_timestamp
     end
