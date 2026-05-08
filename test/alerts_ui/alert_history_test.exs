@@ -255,6 +255,30 @@ defmodule AlertsUIWeb.AlertHistoryTest do
                reminders: ""
              }
     end
+
+    test "generates the right effect_end for Trapeze alerts" do
+      assert %AlertHistory{
+               effect_end: "from Trapeze"
+             } =
+               AlertHistory.build_history(
+                 {%{
+                    can_close_automatically: true,
+                    primary_service_type: "access",
+                    effect_name: "Elevator Closure"
+                  }, 1}
+               )
+
+      assert %AlertHistory{
+               effect_end: "from Trapeze"
+             } =
+               AlertHistory.build_history(
+                 {%{
+                    can_close_automatically: true,
+                    primary_service_type: "access",
+                    effect_name: "Escalator Closure"
+                  }, 1}
+               )
+    end
   end
 
   describe "build_history_csv/1" do
