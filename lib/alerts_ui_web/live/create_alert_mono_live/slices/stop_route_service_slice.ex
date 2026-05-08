@@ -15,6 +15,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.SelectFormatter,
     only: [formatted_select_options: 1]
 
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Selections,
+    only: [assign_unwrapped_selections: 2]
+
   import Phoenix.LiveView, only: [assign_async: 3]
 
   use AlertsUIWeb, :html
@@ -34,7 +37,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
     :service_types,
     :stop_ids,
     :stop_search_term,
-    :route_ids
   ]
 
   defmodule Selections do
@@ -217,17 +219,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   end
 
   def render(assigns) do
-    assigns =
-      case assigns.selections do
-        %AsyncResult{loading: [:selections]} ->
-          assign(assigns, :selections, %Selections{loading: true})
-
-        %AsyncResult{} ->
-          assign(assigns, :selections, assigns.selections.result)
-
-        _ ->
-          assigns
-      end
+    assigns = assign_unwrapped_selections(assigns, %Selections{loading: true})
 
     ~H"""
     <div class="min-w-full flex flex-col" id="stop_route_service_view">
