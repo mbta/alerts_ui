@@ -170,6 +170,16 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         has_trips?: false,
         within_same_service_day?: true,
         starts_today?: true,
+        end_specifier: :later_today
+      }) do
+    "today"
+  end
+
+  def build_onetime_string(%{
+        is_trip_combination?: true,
+        has_trips?: false,
+        within_same_service_day?: true,
+        starts_today?: true,
         end_specifier: :custom,
         end_datetime: end_datetime
       })
