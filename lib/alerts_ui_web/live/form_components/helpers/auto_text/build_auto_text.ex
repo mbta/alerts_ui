@@ -421,7 +421,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
     # sorts the route types,
     # sorts routes by name WITHIN the route type,
     # then flattens the list
-    # then groups routes on whether their first lietter is numeric
     routes
     |> Enum.group_by(& &1.type)
     |> Enum.sort_by(fn {k, _v} -> k end)

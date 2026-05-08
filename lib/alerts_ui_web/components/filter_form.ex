@@ -329,23 +329,15 @@ defmodule AlertsUIWeb.FilterForm do
   end
 
   def format_routes_options do
-    grouped_routes = Alerts.get_routes_grouped_by_mode()
-
-    # Properly organizing by mode: Bus, Subway, CR, Ferry
-    [
-      Map.get(grouped_routes, 3, []),
-      Map.get(grouped_routes, 1, []) ++ Map.get(grouped_routes, 0, []),
-      Map.get(grouped_routes, 2, []),
-      Map.get(grouped_routes, 4, [])
-    ]
+    # get list of lists of routes, ordered by route type
+    Alerts.get_routes_grouped_by_mode()
     # Within each group, sort alphanumerically
-    |> Enum.map(fn route_sub_list ->
+    |> Enum.flat_map(fn {_route_type, route_sub_list} ->
       route_sub_list
       |> Enum.map(fn route -> parse_route_name(route) end)
       |> Enum.sort(&comparator/2)
       |> Enum.map(&build_route_option/1)
     end)
-    |> List.flatten()
   end
 
   defp comparator({a, _}, {b, _}) when is_integer(a) and is_integer(b), do: a <= b
