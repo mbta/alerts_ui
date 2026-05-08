@@ -22,14 +22,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   defstruct [
     :direction,
     :facility_ids,
+    :modal_route_id,
+    :modal_route_search_term,
     :original_direction_selections,
     :original_facility_selections,
     :original_route_selections,
     :original_stop_selections,
     :original_trip_selections,
     :route_ids,
+    :route_search_term,
     :service_types,
     :stop_ids,
+    :stop_search_term,
     :route_ids
   ]
 
@@ -92,11 +96,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
           available_stops = CreateAlertLive.get_stops_for_stop_route(route_ids, route_type)
           available_routes = CreateAlertLive.get_routes_by_stop(stop_ids, route_type)
 
-          # filter_routes = get(available_filter_routes, :result) || []
-
           modal_route_id_options =
             modal_route_id_options(
-              # filter_routes,
               available_filter_routes,
               modal_route_search_term,
               route_type,
@@ -126,7 +127,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
             available_stops: available_stops,
             # filter_title_value: filter_title_value,
             # disable_routes_input?: disable_routes_input,
-            # modal_route_id_options: modal_route_id_options,
+            modal_route_id_options: modal_route_id_options,
             # retained_stops: retained_stops,
             route_id_options: route_id_options,
             selected_stops: selected_stops,
@@ -206,8 +207,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
       })
     end
 
+    @update_selection_targets ["stop_ids", "route_ids", "route_search_term", "stop_search_term", "modal_route_search_term"]
     # update selections when a user interacts with one of our fields...
-    defp update_selections?(%{"_target" => ["alert_data", field]}) when field in ["stop_ids", "route_ids"], do: true
+    defp update_selections?(%{"_target" => ["alert_data", field]}) when field in @update_selection_targets, do: true
     # ...but not on any other user interaction...
     defp update_selections?(%{"_target" => _target}), do: false
     # ...and always on mount, when there is no target
@@ -224,7 +226,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
           assign(assigns, :selections, assigns.selections.result)
 
         _ ->
-          IO.inspect(assigns.selections, label: "BRANCH 3")
           assigns
       end
 
