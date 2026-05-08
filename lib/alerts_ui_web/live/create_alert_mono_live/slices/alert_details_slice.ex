@@ -2,37 +2,51 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
   alias AlertsUI.Models.Alert
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}
   alias AlertsUI.Models.{Cause, EnhancedSchedule, SeverityLevel}
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias Ecto.Changeset
   use AlertsUIWeb, :html
 
   defstruct [
+    # general
     :combination,
     :route_type,
-    :direction,
-    :facility_ids,
-    :original_direction_selections,
-    :original_facility_selections,
-    :original_route_selections,
-    :original_stop_selections,
-    :original_trip_selections,
-    :route_ids,
-    :service_types,
-    :description_text,
-    :service_effect_text,
-    :image_alternative_text,
+    :effect_name,
+    # time range
+    :active_period_start_specifier,
+    :active_period_end_specifier,
+    :active_period_start_time_specifier,
+    :active_period_end_time_specifier,
+    :active_period_start,
+    :active_period_end,
+    :active_period_start_date,
+    :active_period_end_date,
+    :active_period_start_time,
+    :active_period_end_time,
+    :alert_timing,
+    :recurrence_days,
+    # affected service
+    direction: [],
+    route_ids: [],
+    stop_ids: [],
+    trip_ids: [],
+    facility_ids: [],
+    service_types: [],
+    # selected_facilities: [],
+    # selected_routes: [],
+    # selected_stops: [],
+    # selected_schedules: [],
+
     header_text: "",
     header_sync_toggle: true,
+    description_text: "",
     description_sync_toggle: true,
     cause_detail: "",
     severity: 4,
-    image_size: %{},
     image_url: "",
     url: ""
   ]
-
-  @cdn_host "cdn.mbta.com"
 
   defimpl Slice, for: __MODULE__ do
     import Ecto.Changeset
@@ -42,43 +56,111 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     @required_fields ~w[header_text]a
 
-    def extract(details_data, %Alert{} = alert) do
-      struct(details_data)
-      # struct(service_data, Map.from_struct(alert))
+    @cdn_host "cdn.mbta.com"
+
+    def extract(details_data, %Alert{} = _alert, _params) do
+      details_data
+      |> struct()
     end
 
     def transform(details_data, changeset, params) do
-      # IO.inspect(params, label: :transform_params)
-      # IO.inspect(details_data, label: :details_data)
-      # IO.inspect(params, labeL: :transform)
-      image_size = details_data.image_url |> get_image_size()
-      image_path = details_data.image_url |> get_image_path()
+      [_, target] = Map.get(params, "_target", [nil, nil])
+
+      autotext_data = AlertDataToAutoText.build_autotext_data(translated_details(details_data))
+
+      header_sync_toggle =
+        if target == "header_text" and details_data.header_sync_toggle == true do
+          false
+        else
+          details_data.header_sync_toggle
+        end
+
+      description_sync_toggle =
+        if target == "description_text" and details_data.description_sync_toggle == true do
+          false
+        else
+          details_data.description_sync_toggle
+        end
+
+      header_text = update_header_text(header_sync_toggle, details_data, autotext_data)
+
+      description_text =
+        update_description_text(description_sync_toggle, details_data, autotext_data)
+
       changeset
-      # |> IO.inspect
-      # |> cast(Map.from_struct(details_data), @fields)
+      |> change(%{
+        header_sync_toggle: header_sync_toggle,
+        header_text: header_text,
+        description_sync_toggle: description_sync_toggle,
+        description_text: description_text
+      })
     end
 
     def validate(details_data, changeset, _params) do
-      IO.inspect("VALIDATE")
+      image_size = details_data.image_url |> get_image_size()
+
       changeset
       |> validate_required(@required_fields)
       |> validate_url()
-      |> validate_image_fields(details_data.image_size)
+      |> validate_image_fields(image_size)
     end
 
     def assigns(details_data, socket, _params) do
-      IO.inspect("ASSIGN")
-
       cause_options =
         formatted_causes(
           Map.get(details_data, :route_type),
           Map.get(details_data, :combination)
         )
 
+      image_size = details_data.image_url |> get_image_size()
+      image_path = details_data.image_url |> get_image_path()
+
       Phoenix.Component.assign(socket,
+        cause_options: cause_options,
         severity_options: @severity_options,
-        cause_options: cause_options
+        image_size: image_size,
+        image_path: image_path
       )
+    end
+
+    defp update_header_text(header_sync_toggle, details_data, autotext_data) do
+      if header_sync_toggle == true do
+        Templates.build_auto_text(autotext_data, :header_template)
+      else
+        Map.get(details_data, :header_text)
+      end
+    end
+
+    defp update_description_text(description_sync_toggle, details_data, autotext_data) do
+      if description_sync_toggle == true do
+        Templates.build_auto_text(autotext_data, :description_template)
+      else
+        Map.get(details_data, :description_text)
+      end
+    end
+
+    defp translated_details(details_data) do
+      Map.merge(details_data, %{
+        effect_name: effect_from_url_name(details_data.effect_name),
+        start_specifier: details_data.active_period_start_specifier,
+        end_specifier: details_data.active_period_end_specifier,
+        start_time_specifier: details_data.active_period_start_time_specifier,
+        end_time_specifier: details_data.active_period_end_time_specifier,
+        start_datetime: details_data.active_period_start,
+        end_datetime: details_data.active_period_end,
+        start_date: details_data.active_period_start_date,
+        end_date: details_data.active_period_end_date,
+        start_time: details_data.active_period_start_time,
+        end_time: details_data.active_period_end_time
+      })
+    end
+
+    defp effect_from_url_name(url_name) do
+      url_name
+      |> String.replace("_", " ")
+      |> String.split(" ")
+      |> Enum.map_join(" ", &String.capitalize(&1))
+      |> String.replace("-route", "-Route")
     end
 
     defp formatted_causes(route_type, combination) do

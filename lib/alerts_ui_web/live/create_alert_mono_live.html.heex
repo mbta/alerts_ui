@@ -19,12 +19,14 @@
             effect_name={humanize_effect_name(@form)}
           />
           <AccessAffectedServiceSlice.render form={@form} selections={@selections} />
-          <StopRouteServiceSlice.render form={@form} selections={@selections}/>
+          <StopRouteServiceSlice.render form={@form} selections={@selections} />
           <SystemwideServiceSlice.render form={@form} />
           <AlertDetailsSlice.render
             form={@form}
             severity_options={@severity_options}
             cause_options={@cause_options}
+            image_size={@image_size}
+            image_path={@image_path}
           />
           <DeliverySlice.render form={@form} />
         </.form>

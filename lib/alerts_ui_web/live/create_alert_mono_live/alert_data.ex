@@ -5,7 +5,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   alias Ecto.Changeset
   alias Phoenix.Component
   alias Phoenix.LiveView.Socket
-
   alias AlertsUI.Models.Alert
   alias AlertsUI.Repo
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
@@ -23,6 +22,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   use AlertsUI.Schema
 
   import Changeset
+
   import Component, only: [assign: 3, to_form: 1]
 
   @combination_values [:ACCESS, :R, :RDS, :RDT, :RDTS, :SR]
@@ -105,6 +105,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :image_alternative_text, :string
     field :image_size, :map, default: %{}
     field :image_url, :string, default: ""
+    field :image_path, :string, default: ""
     field :service_effect_text, :string
     field :severity, :integer, default: 4
     field :url, :string, default: ""
@@ -170,7 +171,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
           header_text: String.t() | nil,
           header_sync_toggle: boolean() | nil,
           image_alternative_text: String.t() | nil,
-          image_size: map(),
           image_url: String.t() | nil,
           service_effect_text: String.t() | nil,
           severity: integer(),
