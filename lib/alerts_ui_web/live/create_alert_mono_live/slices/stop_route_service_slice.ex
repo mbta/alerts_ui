@@ -42,9 +42,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   ]
 
   defmodule Selections do
-    defstruct available_filter_routes: AsyncResult.loading(),
-              available_routes: AsyncResult.loading(),
-              available_stops: AsyncResult.loading(),
+    defstruct available_filter_routes: nil,
+              available_routes: nil,
+              available_stops: nil,
               filter_title_value: "All routes",
               disable_routes_input?: false,
               modal_route_id_options: [],
@@ -54,7 +54,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
               selected_route_id: nil,
               show_stop_ids?: true,
               stop_id_options: [],
-              loading: true
+              loading: false
   end
 
   defimpl Slice, for: __MODULE__ do

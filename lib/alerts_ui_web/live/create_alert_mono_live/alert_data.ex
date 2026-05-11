@@ -205,8 +205,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     StopRouteServiceSlice,
     SystemwideServiceSlice,
     UrlSlice,
-    ReminderTimesSlice
-    AccessAffectedServiceSlice
+    ReminderTimesSlice,
+    AccessAffectedServiceSlice,
     StopRouteServiceSlice,
     TimelineSlice
   ]
