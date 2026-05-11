@@ -643,7 +643,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         max="9999-12-31T23:59"
         value={
           DateTimeHelpers.naive_datetime_to_iso8601(
-            if @form[:active_period_end_specifier].value === :until_further_notice,
+            if @form[:active_period_end_specifier].value in [:until_further_notice, :when_work_order_is_closed],
               do: "",
               else: @form[:active_period_end].value
           )
