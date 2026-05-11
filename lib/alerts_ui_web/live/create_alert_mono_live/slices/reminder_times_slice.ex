@@ -30,15 +30,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
         %{"alert_data" => alert_data_params} ->
           changeset
           |> ReminderTimesSlice.add_new_time(alert_data_params)
-          |> IO.inspect(label: "before")
           |> cast_embed(:reminder_times,
             sort_param: :reminder_sort,
             with: &ReminderTimesSlice.reminder_time_changeset/2
           )
-          |> IO.inspect(label: "middle")
           # cast_embed's drop_params was refusing to drop the last one
           |> ReminderTimesSlice.drop_times(alert_data_params)
-          |> IO.inspect(label: "after")
 
         _ ->
           changeset
@@ -99,6 +96,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
 
   def drop_times(changeset, %{"reminder_drop" => indices}) do
     indices = Enum.filter(indices, &(&1 != ""))
+    IO.inspect(changeset)
     reminder_times = get_field(changeset, :reminder_times, [])
 
     # This is blowing away the errors byb pulling them out and readding them.
@@ -107,8 +105,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
         List.pop_at(rts, String.to_integer(index)) |> elem(1)
       end)
 
-    put_embed(changeset, :reminder_times, filtered |> IO.inspect(label: "filtered"))
-    |> IO.inspect(label: "after filtering")
+    put_embed(changeset, :reminder_times, filtered)
   end
 
   def drop_times(changeset, _), do: changeset
