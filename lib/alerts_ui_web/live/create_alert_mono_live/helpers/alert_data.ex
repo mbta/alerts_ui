@@ -122,4 +122,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
     end)
     Map.put(changeset, :errors, filtered_errors)
   end
+
+  def put_over_nil(map, key, value) do
+    case Map.get(map, key) do
+      nil -> Map.put(map, key, value)
+      _ -> map
+    end
+  end
 end

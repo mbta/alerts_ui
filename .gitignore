@@ -53,3 +53,5 @@ assets/outputs/alerts_feed*.pb
 .DS_Store
 *.swp
 *.swo
+
+.claude/*
