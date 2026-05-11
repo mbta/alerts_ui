@@ -9,6 +9,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   alias AlertsUI.Models.Alert
   alias AlertsUI.Repo
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
+
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
     UrlSlice,
     DeliverySlice,
@@ -54,6 +55,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     # affected service
     field :direction, :string
     field :facility_ids, {:array, :string}
+    field :facility_search_term, :string
     field :modal_date, :string
     field :modal_date_search_term, :string
     field :modal_route_id, :string

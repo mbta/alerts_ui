@@ -36,25 +36,23 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
     :route_search_term,
     :service_types,
     :stop_ids,
-    :stop_search_term,
+    :stop_search_term
   ]
 
   defmodule Selections do
-    defstruct [
-      available_filter_routes: [],
-      available_routes: [],
-      available_stops: [],
-      filter_title_value: "All routes",
-      disable_routes_input?: false,
-      loading: false,
-      modal_route_id_options: [],
-      retained_stops: [],
-      route_id_options: [],
-      selected_stops: [],
-      selected_route_id: nil,
-      show_stop_ids?: true,
-      stop_id_options: []
-    ]
+    defstruct available_filter_routes: [],
+              available_routes: [],
+              available_stops: [],
+              filter_title_value: "All routes",
+              disable_routes_input?: false,
+              loading: false,
+              modal_route_id_options: [],
+              retained_stops: [],
+              route_id_options: [],
+              selected_stops: [],
+              selected_route_id: nil,
+              show_stop_ids?: true,
+              stop_id_options: []
   end
 
   defimpl Slice, for: __MODULE__ do
@@ -86,16 +84,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
         stop_ids = form[:stop_ids].value || []
         stop_search_term = form[:stop_search_term].value
 
-        stop_route_ids = case modal_route_id do
-          nil -> route_ids
-          modal_route_id -> [modal_route_id]
-        end
+        stop_route_ids =
+          case modal_route_id do
+            nil -> route_ids
+            modal_route_id -> [modal_route_id]
+          end
 
-        selected_stops = case Map.get(socket.assigns, :selections) do
-          nil -> []
-          %AsyncResult{ok?: true} = async_ok -> async_ok.result.selected_stops
-          %Selections{} = selections -> selections.selected_stops
-        end
+        selected_stops =
+          case Map.get(socket.assigns, :selections) do
+            nil -> []
+            %AsyncResult{ok?: true} = async_ok -> async_ok.result.selected_stops
+            %Selections{} = selections -> selections.selected_stops
+          end
 
         assign_async(socket, :selections, fn ->
           available_filter_routes = CreateAlertLive.get_routes(route_type)
@@ -139,11 +139,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
           }
 
           {:ok, %{selections: selections}}
-        end) |> assign(:selections, %Selections{})
+        end)
+        |> assign(:selections, %Selections{})
       else
         case Map.get(socket.assigns, :selections) do
           nil ->
             assign(socket, :selections, %Selections{})
+
           _ ->
             socket
         end
@@ -209,9 +211,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
       })
     end
 
-    @update_selection_targets ["stop_ids", "route_ids", "route_search_term", "stop_search_term", "modal_route_search_term"]
+    @update_selection_targets [
+      "stop_ids",
+      "route_ids",
+      "route_search_term",
+      "stop_search_term",
+      "modal_route_search_term"
+    ]
     # update selections when a user interacts with one of our fields...
-    defp update_selections?(%{"_target" => ["alert_data", field]}) when field in @update_selection_targets, do: true
+    defp update_selections?(%{"_target" => ["alert_data", field]})
+         when field in @update_selection_targets,
+         do: true
+
     # ...but not on any other user interaction...
     defp update_selections?(%{"_target" => _target}), do: false
     # ...and always on mount, when there is no target

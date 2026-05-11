@@ -2,7 +2,11 @@
   <div class="flex flex-col items-center justify-center w-[90%]" id="article-view">
     <article class="flex flex-col items-center justify-center w-[90%]">
       <div class="w-full">
-        <UrlSlice.render alert_id={@alert_id} path_route_type={@path_route_type} path_effect_name={@path_effect_name} />
+        <UrlSlice.render
+          alert_id={@alert_id}
+          path_route_type={@path_route_type}
+          path_effect_name={@path_effect_name}
+        />
         <.form
           :if={show_details?(@path_route_type, @path_effect_name)}
           for={@form}
@@ -10,7 +14,10 @@
           class="form-control"
           phx-change="validate"
         >
-          <Title.render route_type_name={humanize_route_type(@form)} effect_name={humanize_effect_name(@form)} />
+          <Title.render
+            route_type_name={humanize_route_type(@form)}
+            effect_name={humanize_effect_name(@form)}
+          />
           <AccessAffectedServiceSlice.render form={@form} selections={@selections} />
           <DeliverySlice.render form={@form} />
         </.form>

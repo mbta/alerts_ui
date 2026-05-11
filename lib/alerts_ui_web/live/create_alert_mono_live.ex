@@ -7,6 +7,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   alias Phoenix.LiveView
   alias AlertsUI.Alerts
+
   alias AlertsUIWeb.CreateAlertMonoLive.{
     AlertData,
     Title
@@ -149,7 +150,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
         socket
         |> assign(:alert_id, alert.alert_id)
-        |> AlertData.init(params, :duplicate, strip_on_duplicate(alert)) 
+        |> AlertData.init(params, :duplicate, strip_on_duplicate(alert))
         |> case do
           {:ok, socket} -> socket
           {:error, socket} -> socket

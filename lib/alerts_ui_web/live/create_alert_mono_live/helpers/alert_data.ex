@@ -6,6 +6,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
   alias AlertsUIWeb.FormComponents.Helpers.ContentFormatter
 
   import Ecto.Changeset, only: [get_field: 2]
+
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Path,
     only: [path_route_type_from_form: 1, path_route_type: 2]
 
@@ -72,6 +73,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
 
   def humanize_effect_name(_, nil), do: nil
   def humanize_effect_name(nil, nil), do: nil
+
   def humanize_effect_name(route_type_name, effect_name) when is_binary(route_type_name) do
     route_type_name
     |> String.to_existing_atom()
@@ -100,7 +102,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
 
   def humanize_route_type(%Form{} = form) do
     ContentFormatter.service_type_string(
-      form[:route_type].value, form[:combination].value
+      form[:route_type].value,
+      form[:combination].value
     )
   end
 

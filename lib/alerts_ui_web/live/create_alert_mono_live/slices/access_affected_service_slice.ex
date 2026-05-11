@@ -1,45 +1,44 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
-	alias AlertsUI.Models.Alert
+  alias AlertsUI.Models.Alert
+  alias AlertsUI.Models.InformedEntity
+  alias AlertsUIWeb.CreateAlertLive
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
-	alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
+  alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
     only: [get_single_facility_effect_names: 0]
 
-	import Phoenix.LiveView, only: [assign_async: 3]
+  import Phoenix.LiveView, only: [assign_async: 3]
 
-	use AlertsUIWeb, :html
- 
+  use AlertsUIWeb, :html
+
   defstruct [
     :facility_ids,
     :facility_search_term,
-    :facility_types,
-    :facility_types_filter,
-    :single_facility_id,
     :stop_search_term
   ]
 
   defmodule Selections do
     defstruct facility_id_options: [], modal_stop_id_options: [], stop_id_filter_value: "default"
-  end 
+  end
 
   defimpl Slice, for: __MODULE__ do
     def extract(service_data, %Alert{} = alert, _params) do
       struct(service_data, Map.from_struct(alert))
-    end 
+    end
 
     def transform(_service_data, changeset, _params) do
       changeset
-    end 
+    end
 
     def validate(_service_data, changeset, _params) do
       changeset
-    end 
+    end
 
     def assigns(_service_data, socket, params) do
       # update selections here
       async_assign_selections(socket, params)
-    end 
+    end
 
     defp async_assign_selections(socket, params) do
       if update_selections?(params) do
@@ -47,6 +46,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
 
         facility_ids = form[:facility_ids].value || []
         facility_search_term = form[:facility_search_term].value
+
         facility_types =
           form[:effect_name].value
           |> effect_to_lookup_key()
@@ -56,7 +56,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
         stop_id = form[:stop_id].value
 
         assign_async(socket, :selections, fn ->
-          available_facilities = CreateAlertLive.get_facilities(facility_types)
+          available_facilities =
+            CreateAlertLive.get_facilities(facility_types)
 
           modal_stop_id_options =
             SelectFormatter.formatted_select_options(%SelectFormatter{
@@ -90,7 +91,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
           }
 
           {:ok, %{selections: selections}}
-        end) |> assign(:selections, %Selections{})
+        end)
+        |> assign(:selections, %Selections{})
       else
         case Map.get(socket.assigns, :selections) do
           nil ->
@@ -104,35 +106,40 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
 
     @update_selection_targets ["stop_id", "stop_search_term", "facility_search_term"]
     # update selections when a user interacts with one of our fields...
-    defp update_selections?(%{"_target" => ["alert_data", field]}) when field in @update_selection_targets, do: true
+    defp update_selections?(%{"_target" => ["alert_data", field]})
+         when field in @update_selection_targets,
+         do: true
+
     # ...but not on any other user interaction...
     defp update_selections?(%{"_target" => _target}), do: false
     # ...and always on mount, when there is no target
     defp update_selections?(_), do: true
 
-		defp filter_facility_by_stop_ids(facility, stop_id_filter_value, selected_facility_ids) do
-			# returns true if facility in list if it belongs to a selected stop or has already been selected by the user.
-			equals_stop_id =
-				if stop_id_filter_value === "default" do
-					true
-				else
-					facility.stop.id === stop_id_filter_value
-				end
+    defp filter_facility_by_stop_ids(facility, stop_id_filter_value, selected_facility_ids) do
+      # returns true if facility in list if it belongs to a selected stop or has already been selected by the user.
+      equals_stop_id =
+        if stop_id_filter_value === "default" do
+          true
+        else
+          facility.stop.id === stop_id_filter_value
+        end
 
-			equals_stop_id or facility.id in selected_facility_ids
-		end
+      equals_stop_id or facility.id in selected_facility_ids
+    end
+
+    defp effect_to_lookup_key(nil), do: nil
 
     defp effect_to_lookup_key(string) do
       string
       |> String.upcase()
       |> String.replace(" ", "_")
-      |> String.to_existing_atom()
     end
   end
 
   @impl true
   def render(assigns) do
     IO.inspect(assigns.selections, label: "SELECTIONS ON RENDER")
+
     ~H"""
     <div class="min-w-full flex flex-col" id="access_service_view">
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">

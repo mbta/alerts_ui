@@ -41,7 +41,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
     @url_fields [:alert_id, :combination, :effect_name, :route_type]
 
     def transform(_url_data, changeset, params) do
-      cast(changeset, new_url_params(changeset, params) |> Map.from_struct, @url_fields)
+      cast(changeset, new_url_params(changeset, params) |> Map.from_struct(), @url_fields)
     end
 
     def validate(_url_data, changeset, _params), do: changeset
@@ -63,7 +63,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
     end
 
     defp new_url_params(alert_or_changeset, params) do
-      {base_route_type_int, base_effect_name } =
+      {base_route_type_int, base_effect_name} =
         case alert_or_changeset do
           %Changeset{} = changeset ->
             {
@@ -90,7 +90,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
       route_type_int = path_route_type_int || base_route_type_int
       effect_name = path_effect_name || base_effect_name
 
-      combination = get_value_of_key(
+      combination =
+        get_value_of_key(
           :combination,
           route_type_int,
           humanize_effect_name(
@@ -137,7 +138,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
         <div id="service_type_buttons" class="mb-8">
           <div class="flex flex-wrap justify-center md:justify-normal gap-2">
             <div :for={this_route_type_name <- route_types()}>
-              <.route_type_button this_route_type={this_route_type_name} selected_route_type={@path_route_type} />
+              <.route_type_button
+                this_route_type={this_route_type_name}
+                selected_route_type={@path_route_type}
+              />
             </div>
           </div>
         </div>
