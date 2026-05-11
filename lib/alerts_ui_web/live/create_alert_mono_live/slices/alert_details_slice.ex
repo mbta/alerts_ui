@@ -155,10 +155,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       })
     end
 
-    defp effect_from_url_name(nil) do
-      ""
-    end
-
+    defp effect_from_url_name(nil), do: nil
     defp effect_from_url_name(url_name) do
       url_name
       |> String.replace("_", " ")
