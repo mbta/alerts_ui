@@ -53,7 +53,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
               selected_stops: [],
               selected_route_id: nil,
               show_stop_ids?: true,
-              stop_id_options: []
+              stop_id_options: [],
+              loading: true
   end
 
   defimpl Slice, for: __MODULE__ do
