@@ -2,6 +2,13 @@
   <div class="flex flex-col items-center justify-center w-[90%]" id="article-view">
     <article class="flex flex-col items-center justify-center w-[90%]">
       <div class="w-full">
+        <TimelineSlice.render
+          form={@form}
+          previous_steps={@previous_steps}
+          progress={@progress}
+          steps={@steps}
+          form_type={@form_type}
+        />
         <UrlSlice.render
           alert_id={@alert_id}
           path_route_type={@path_route_type}
