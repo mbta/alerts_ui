@@ -16,20 +16,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
     :facility_types,
     :facility_types_filter,
     :single_facility_id,
-    :stop_id,
     :stop_search_term
   ]
 
+  defmodule Selections do
+    defstruct facility_id_options: [], modal_stop_id_options: [], stop_id_filter_value: "default"
+  end 
 
   defimpl Slice, for: __MODULE__ do
-    defmodule Selections do
-      defstruct [
-        facility_id_options: [],
-        modal_stop_id_options: [],
-        stop_id_filter_value: "default"
-      ]
-    end 
-
     def extract(service_data, %Alert{} = alert, _params) do
       struct(service_data, Map.from_struct(alert))
     end 
@@ -53,14 +47,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
 
         facility_ids = form[:facility_ids].value || []
         facility_search_term = form[:facility_search_term].value
-        facility_types = form[:facility_types].value
+        facility_types =
+          form[:effect_name].value
+          |> effect_to_lookup_key()
+          |> InformedEntity.facility_effect_to_types()
 
         stop_search_term = form[:stop_search_term].value
         stop_id = form[:stop_id].value
 
         assign_async(socket, :selections, fn ->
-          IO.inspect(__MODULE__.Selections, label: "__MODULE__")
-          IO.inspect(Selections, label: "unqualified")
           available_facilities = CreateAlertLive.get_facilities(facility_types)
 
           modal_stop_id_options =
@@ -126,6 +121,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
 
 			equals_stop_id or facility.id in selected_facility_ids
 		end
+
+    defp effect_to_lookup_key(string) do
+      string
+      |> String.upcase()
+      |> String.replace(" ", "_")
+      |> String.to_existing_atom()
+    end
   end
 
   @impl true

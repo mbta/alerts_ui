@@ -185,7 +185,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   @slices [
     UrlSlice,
     DeliverySlice,
-    AffectedServiceSlice
+    AccessAffectedServiceSlice
   ]
 
   @actions [:new, :edit, :duplicate]
