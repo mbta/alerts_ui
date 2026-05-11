@@ -421,10 +421,17 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
     # sorts the route types,
     # sorts routes by name WITHIN the route type,
     # then flattens the list
-    routes
-    |> Enum.group_by(& &1.type)
-    |> Enum.sort_by(fn {k, _v} -> k end)
-    |> Enum.flat_map(fn {_k, route_sub_list} ->
+    grouped_routes =
+      routes
+      |> Enum.group_by(& &1.type)
+
+    [
+      Map.get(grouped_routes, 1, []) ++ Map.get(grouped_routes, 0, []),
+      Map.get(grouped_routes, 2, []),
+      Map.get(grouped_routes, 3, []),
+      Map.get(grouped_routes, 4, [])
+    ]
+    |> Enum.flat_map(fn route_sub_list ->
       route_sub_list
       |> Enum.sort(&(maybe_cast_to_integer(&1) <= maybe_cast_to_integer(&2)))
       |> Enum.map(&SelectFormatter.name_for_option/1)

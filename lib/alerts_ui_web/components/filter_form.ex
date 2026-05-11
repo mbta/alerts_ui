@@ -330,9 +330,16 @@ defmodule AlertsUIWeb.FilterForm do
 
   def format_routes_options do
     # get list of lists of routes, ordered by route type
-    Alerts.get_routes_grouped_by_mode()
+    grouped_routes = Alerts.get_routes_grouped_by_mode()
+
+    [
+      Map.get(grouped_routes, 1, []) ++ Map.get(grouped_routes, 0, []),
+      Map.get(grouped_routes, 2, []),
+      Map.get(grouped_routes, 3, []),
+      Map.get(grouped_routes, 4, [])
+    ]
     # Within each group, sort alphanumerically
-    |> Enum.flat_map(fn {_route_type, route_sub_list} ->
+    |> Enum.flat_map(fn route_sub_list ->
       route_sub_list
       |> Enum.map(fn route -> parse_route_name(route) end)
       |> Enum.sort(&comparator/2)
