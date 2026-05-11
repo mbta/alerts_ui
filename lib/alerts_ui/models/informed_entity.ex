@@ -5,6 +5,7 @@ defmodule AlertsUI.Models.InformedEntity do
   use AlertsUI.Schema
   import Ecto.Changeset
   alias AlertsUI.Models.{Activity, Alert, TripDescriptor}
+  alias AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes
   alias MBTAV3API.Routes.Route
 
   @facility_activities [
@@ -188,13 +189,20 @@ defmodule AlertsUI.Models.InformedEntity do
       iex> InformedEntity.route_code_mapping(0)
       :light_rail
   """
-  @spec route_code_mapping(Route.type_int()) :: String.t() | nil
-  def route_code_mapping(0), do: :light_rail
-  def route_code_mapping(1), do: :subway
-  def route_code_mapping(2), do: :commuter_rail
-  def route_code_mapping(3), do: :bus
-  def route_code_mapping(4), do: :ferry
-  def route_code_mapping(_), do: nil
+  @spec route_code_mapping(Route.type_int(), String.t() | nil) :: String.t() | nil
+  def route_code_mapping(code, effect \\ nil)
+  def route_code_mapping(0, _effect), do: :light_rail
+  def route_code_mapping(1, _effect), do: :subway
+  def route_code_mapping(2, _effect), do: :commuter_rail
+  def route_code_mapping(3, _effect), do: :bus
+  def route_code_mapping(4, _effect), do: :ferry
+  def route_code_mapping(nil, effect) do
+    if effect in EffectsForRouteTypes.list_effects(:facility) do
+      :facility
+    else
+      :systemwide
+    end
+  end
 
   @route_type_atoms [
     :access,
