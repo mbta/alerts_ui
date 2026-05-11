@@ -10,6 +10,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     only: [get_single_route_effect_names: 0]
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Selections,
     only: [selections_loading?: 1, assign_unwrapped_selections: 2]
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Time,
+    only: [today: 0]
 
   defstruct [
     :direction,
@@ -29,10 +31,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       available_schedules: [],
       available_stops: [],
       direction_options: [],
+      filter_title_value: "FILTER TITLE VALUE",
       loading: false,
+      modal_options: [],
       route_id_options: [],
       stop_id_options: [],
-      stop_selections: []
+      stop_selections: [],
+      today: nil,
+      trip_id_options: []
     ]
   end
 
@@ -253,7 +259,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
           field={@form[:direction]}
           modal_filter_id="dates-filter-modal"
           modal_filter_title={"Filter: #{@selections.filter_title_value}"}
-          modal_filter_active={date_filter_active?(@form[:modal_date].value, @today)}
+          modal_filter_active={date_filter_active?(@form[:modal_date].value, @selections.today)}
           options={@selections.direction_options}
           disabled={disable_stop_input?(@form[:route_ids].value)}
           modal_filter_disabled={@form[:route_ids].value in [nil, []]}
