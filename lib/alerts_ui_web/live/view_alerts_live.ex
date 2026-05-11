@@ -562,7 +562,23 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   ### Frontend styling functions ###
 
-  def format_timestamp(timestamp) do
+  def format_timestamp(timestamp, certainty \\ :KNOWN, opts \\ %{})
+
+  def format_timestamp(_, :UNKNOWN, %{
+        can_close_automatically: true,
+        primary_service_type: "access",
+        effect_name: "Elevator Closure"
+      }),
+      do: "When work order is closed in Trapeze"
+
+  def format_timestamp(_, :UNKNOWN, %{
+        can_close_automatically: true,
+        primary_service_type: "access",
+        effect_name: "Escalator Closure"
+      }),
+      do: "When work order is closed in Trapeze"
+
+  def format_timestamp(timestamp, _, _) do
     DateTimeFormatters.timestamp_date_time(timestamp)
   end
 
@@ -585,15 +601,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     end
   end
 
-  def format_end_time(end_time_utc, certainty, can_close_automatically \\ false)
-
-  def format_end_time(_, _, true), do: "work complete"
-
-  def format_end_time(_end_time_utc, :UNKNOWN, _), do: "further notice"
-
-  def format_end_time(_end_time_utc, :ESTIMATED, _), do: "later today"
-
-  def format_end_time(nil, :KNOWN, _), do: ""
+  def format_end_time(end_time_utc, certainty, opts \\ %{})
 
   def format_end_time(end_time_utc, :KNOWN, _) do
     if DateTime.compare(
@@ -606,6 +614,23 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     end
   end
 
+  def format_end_time(_, _, %{
+        can_close_automatically: true,
+        primary_service_type: "access",
+        effect_name: "Elevator Closure"
+      }),
+      do: "from Trapeze"
+
+  def format_end_time(_, _, %{
+        can_close_automatically: true,
+        primary_service_type: "access",
+        effect_name: "Escalator Closure"
+      }),
+      do: "from Trapeze"
+
+  def format_end_time(_, :UNKNOWN, _), do: "further notice"
+  def format_end_time(_, :ESTIMATED, _), do: "later today"
+  def format_end_time(nil, :KNOWN, _), do: ""
   def format_end_time(_, _, _), do: ""
 
   def danger_text(active_period_end, closed_timestamp) do
