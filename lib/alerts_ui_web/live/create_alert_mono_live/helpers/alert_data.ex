@@ -107,4 +107,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
   def get_single_route_effect_names() do
     ["Detour", "Snow Route"]
   end
+
+  def get_single_facility_effect_names() do
+    ["Elevator Closure", "Escalator Closure"]
+  end
 end
