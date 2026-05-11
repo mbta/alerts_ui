@@ -6,10 +6,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
 
   import Phoenix.LiveView, only: [assign_async: 3]
+
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
     only: [get_single_route_effect_names: 0]
+
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Selections,
     only: [selections_loading?: 1, assign_unwrapped_selections: 2]
+
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Time,
     only: [today: 0]
 
@@ -22,24 +25,22 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     :stop_names_and_ids,
     :stop_search_term,
     :trip_ids,
-    :trip_search_term,
+    :trip_search_term
   ]
 
   defmodule Selections do
-    defstruct [
-      available_routes: [],
-      available_schedules: [],
-      available_stops: [],
-      direction_options: [],
-      filter_title_value: "FILTER TITLE VALUE",
-      loading: false,
-      modal_options: [],
-      route_id_options: [],
-      stop_id_options: [],
-      stop_selections: [],
-      today: nil,
-      trip_id_options: []
-    ]
+    defstruct available_routes: [],
+              available_schedules: [],
+              available_stops: [],
+              direction_options: [],
+              filter_title_value: "FILTER TITLE VALUE",
+              loading: false,
+              modal_options: [],
+              route_id_options: [],
+              stop_id_options: [],
+              stop_selections: [],
+              today: nil,
+              trip_id_options: []
   end
 
   defimpl Slice, for: __MODULE__ do
@@ -85,17 +86,19 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
         |> assign_async(:selections, fn ->
           available_routes = CreateAlertLive.get_routes(all_route_types)
 
-          available_stops = CreateAlertLive.get_stops(
-            route_ids,
-            route_type,
-            direction
-          )
+          available_stops =
+            CreateAlertLive.get_stops(
+              route_ids,
+              route_type,
+              direction
+            )
 
-          available_schedules = CreateAlertLive.get_schedules_by_date(
-            route_ids,
-            direction,
-            modal_date
-          )
+          available_schedules =
+            CreateAlertLive.get_schedules_by_date(
+              route_ids,
+              direction,
+              modal_date
+            )
 
           direction_options =
             SelectFormatter.formatted_direction_options(
@@ -123,10 +126,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
           trip_id_options =
             SelectFormatter.formatted_select_options(%SelectFormatter{
-              schedules_by_route_name: get_schedules_by_route_type(
-                available_schedules,
-                route_ids
-              ),
+              schedules_by_route_name:
+                get_schedules_by_route_type(
+                  available_schedules,
+                  route_ids
+                ),
               search_term: trip_search_term,
               route_type: route_type,
               values_to_keep: trip_ids,
@@ -166,9 +170,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       "trip_search_term"
     ]
 
-    @update_selection_targets ["stop_ids", "route_ids", "route_search_term", "stop_search_term", "modal_route_search_term"]
+    @update_selection_targets [
+      "stop_ids",
+      "route_ids",
+      "route_search_term",
+      "stop_search_term",
+      "modal_route_search_term"
+    ]
     # update selections when a user interacts with one of our fields...
-    defp update_selections?(%{"_target" => ["alert_data", field]}) when field in @update_selection_targets, do: true
+    defp update_selections?(%{"_target" => ["alert_data", field]})
+         when field in @update_selection_targets,
+         do: true
+
     # ...but not on any other user interaction...
     defp update_selections?(%{"_target" => _target}), do: false
     # ...and always on mount, when there is no target
@@ -212,7 +225,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
           no_results={Enum.empty?(@selections.route_id_options)}
           options={@selections.route_id_options}
           class="h-full"
-          multiple={if @form[:effect_name].value in get_single_route_effect_names(), do: false, else: true}
+          multiple={
+            if @form[:effect_name].value in get_single_route_effect_names(), do: false, else: true
+          }
         />
         <.toggle_checkgroup
           :if={!filtered_select_for_route_type?(@form[:route_type].value)}
@@ -246,7 +261,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
           multiple={false}
         />
       </.modal>
-      <div :if={show_trips_input?(@form[:combination].value)} class="flex flex-col justify-start md:w-[25%] md:mr-8">
+      <div
+        :if={show_trips_input?(@form[:combination].value)}
+        class="flex flex-col justify-start md:w-[25%] md:mr-8"
+      >
         <.select
           :if={show_directions_input?(@form[:combination].value)}
           label={
@@ -281,7 +299,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       </div>
       <div class="flex flex-col justify-start w-full md:w-[25%]">
         <.select
-          :if={show_directions_input?(@form[:combination].value) && !show_trips_input?(@form[:combination].value)}
+          :if={
+            show_directions_input?(@form[:combination].value) &&
+              !show_trips_input?(@form[:combination].value)
+          }
           label={if show_stops_input?(@form[:combination].value), do: "Stops", else: "Direction"}
           field={@form[:direction]}
           options={@selections.direction_options}

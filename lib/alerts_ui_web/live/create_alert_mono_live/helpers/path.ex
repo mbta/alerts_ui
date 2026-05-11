@@ -10,10 +10,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Path do
 
   use AlertsUIWeb, :verified_routes
 
-  def path_with_route_type(%{
-    live_action: live_action,
-    alert_id: alert_id
-  } = _assigns, path_route_type) do
+  def path_with_route_type(
+        %{
+          live_action: live_action,
+          alert_id: alert_id
+        } = _assigns,
+        path_route_type
+      ) do
     case live_action do
       :new ->
         ~p"/alerts/mono/new/#{path_route_type}"
@@ -26,11 +29,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Path do
     end
   end
 
-  def path_with_route_type_and_effect_name(%{
-    live_action: live_action,
-    path_route_type: path_route_type,
-    alert_id: alert_id
-  } = _assigns, new_path_effect_name) do
+  def path_with_route_type_and_effect_name(
+        %{
+          live_action: live_action,
+          path_route_type: path_route_type,
+          alert_id: alert_id
+        } = _assigns,
+        new_path_effect_name
+      ) do
     case live_action do
       :new ->
         ~p"/alerts/mono/new/#{path_route_type}/#{new_path_effect_name}"
@@ -62,7 +68,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Path do
         else
           :systemwide
         end
-      mapping -> mapping
+
+      mapping ->
+        mapping
     end
   end
 
