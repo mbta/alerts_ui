@@ -134,6 +134,14 @@ defmodule AlertsUI.Models.InformedEntity do
     ["BIKE_STORAGE"]
   """
   @spec facility_effect_to_types(atom()) :: [String.t()]
+  def facility_effect_to_types(nil), do: nil
+  def facility_effect_to_types("ACCESS_ISSUE"), do: facility_effect_to_types(:ACCESS_ISSUE)
+  def facility_effect_to_types("FACILITY_ISSUE"), do: facility_effect_to_types(:FACILITY_ISSUE)
+  def facility_effect_to_types("BIKE_ISSUE"), do: facility_effect_to_types(:BIKE_ISSUE)
+  def facility_effect_to_types("ELEVATOR_CLOSURE"), do: facility_effect_to_types(:ELEVATOR_CLOSURE)
+  def facility_effect_to_types("ESCALATOR_CLOSURE"), do: facility_effect_to_types(:ESCALATOR_CLOSURE)
+  def facility_effect_to_types("PARKING_CLOSURE"), do: facility_effect_to_types(:PARKING_CLOSURE)
+  def facility_effect_to_types("PARKING_ISSUE"), do: facility_effect_to_types(:PARKING_ISSUE)
   def facility_effect_to_types(:ACCESS_ISSUE), do: @all_facility_types
   def facility_effect_to_types(:FACILITY_ISSUE), do: @all_facility_types
   def facility_effect_to_types(:BIKE_ISSUE), do: ["BIKE_STORAGE"]
@@ -141,6 +149,9 @@ defmodule AlertsUI.Models.InformedEntity do
   def facility_effect_to_types(:ESCALATOR_CLOSURE), do: ["ESCALATOR"]
   def facility_effect_to_types(:PARKING_CLOSURE), do: ["PARKING_AREA", "PICK_DROP"]
   def facility_effect_to_types(:PARKING_ISSUE), do: ["PARKING_AREA", "PICK_DROP"]
+  def facility_effect_to_types(effect) do
+    raise ArgumentError, "no such facility effect #{effect}"
+  end
 
   @doc """
   Map route type atoms to integer codes.
