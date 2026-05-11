@@ -15,14 +15,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
     AlertDetailsSlice,
     DeliverySlice,
-    # AccessAffectedServiceSlice,
+    AccessAffectedServiceSlice,
     AffectedServiceSlice,
     StopRouteServiceSlice,
     SystemwideServiceSlice,
     ReminderTimesSlice,
     SubmitSlice,
     UrlSlice,
-    TimelineSlice
+    TimelineSlice,
+    TimeRangeSlice
   }
 
   use AlertsUI.Schema
@@ -93,6 +94,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :service_types, {:array, :integer}
 
     # time range
+    field :alert_timing, Ecto.Enum, values: @alert_timing_values, default: :"one-time"
+    field :recurrence_days, {:array, Ecto.Enum}, values: @recurrence_days_values
+    field :can_close_automatically, :boolean, default: false
     field :active_period_end, :naive_datetime
     field :active_period_end_date, :date
     field :active_period_end_specifier, Ecto.Enum, values: @end_values, default: :later_today
@@ -107,11 +111,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :active_period_start_specifier, Ecto.Enum, values: @start_values, default: :now
     field :active_period_start_time, :time
     field :active_period_start_time_specifier, Ecto.Enum, values: @start_values, default: :now
-    field :alert_timing, Ecto.Enum, values: @alert_timing_values, default: :"one-time"
     field :notification_period_start, :naive_datetime
     field :notification_period_start_date, :date
     field :notification_specifier, Ecto.Enum, values: @notification_values, default: :now
-    field :recurrence_days, {:array, Ecto.Enum}, values: @recurrence_days_values
 
     # details
     field :cause_detail, :string, default: ""
@@ -299,7 +301,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   end
 
   def validate(%Changeset{} = changeset, params, socket) do
-    Enum.reduce(slices(socket), changeset, fn slice_module, changeset ->
+    # Restart validation from a clean slate
+    Enum.reduce(slices(socket), %{changeset | errors: [], valid?: true}, fn slice_module,
+                                                                            changeset ->
       changeset
       |> slice_from_changeset(slice_module)
       |> Slice.validate(changeset, params, socket)
@@ -331,7 +335,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
         nil ->
           nil
 
-      form ->
+        form ->
           socket.assigns.form[:combination].value
       end
 
@@ -342,6 +346,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
       AlertDetailsSlice,
       ReminderTimesSlice,
       DeliverySlice,
+      TimeRangeSlice,
       SubmitSlice
     ]
   end

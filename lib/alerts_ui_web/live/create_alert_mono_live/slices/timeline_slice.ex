@@ -27,7 +27,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
 
   defstruct [
     :route_type,
-    :effect_name,
+    :effect_name
   ]
 
   defimpl Slice, for: __MODULE__ do
@@ -87,11 +87,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
       do: acc ++ [current_step.name]
 
     def previous_steps(nil, _, _), do: []
+
     def previous_steps(current_step, steps, acc) do
       previous_steps(find_previous_step(current_step, steps), steps, acc ++ [current_step.name])
     end
 
     def find_previous_step(nil, _), do: nil
+
     def find_previous_step(current_step, steps) do
       Enum.find(steps, &(&1.name == current_step.previous))
     end

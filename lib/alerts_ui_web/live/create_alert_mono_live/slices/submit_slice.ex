@@ -5,9 +5,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
   alias AlertsUIWeb.ReviewModal
   use AlertsUIWeb, :html
 
-  defstruct [
-    header_text: ""
-  ]
+  defstruct header_text: ""
 
   defimpl Slice, for: __MODULE__ do
     def mount(_slice_data, socket, _base_params), do: socket
@@ -36,7 +34,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
   end
 
   def render(assigns) do
-    assigns = assign(assigns, :alert_data, Map.merge(assigns.form.source.data, assigns.form.source.changes))
+    assigns =
+      assign(
+        assigns,
+        :alert_data,
+        Map.merge(assigns.form.source.data, assigns.form.source.changes)
+      )
 
     # form changeset source has instance of alert data for review modal
     # default selected schedules?

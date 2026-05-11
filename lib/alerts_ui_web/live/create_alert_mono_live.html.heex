@@ -28,6 +28,7 @@
             effect_name={humanize_effect_name(@form)}
           />
           <ServiceSliceDispatcher.render form={@form} selections={@selections} />
+          <TimeRangeSlice.render form={@form} />
           <AlertDetailsSlice.render
             form={@form}
             severity_options={@severity_options}

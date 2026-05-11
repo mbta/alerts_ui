@@ -9,6 +9,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
     only: [get_single_facility_effect_names: 0]
+
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Selections,
     only: [assign_unwrapped_selections: 2]
 
@@ -23,14 +24,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
   ]
 
   defmodule Selections do
-    defstruct [
-      available_facilities: [],
-      facility_id_options: [],
-      filter_title_value: "All stops",
-      loading: false,
-      modal_stop_id_options: [],
-      stop_id_filter_value: "default"
-    ]
+    defstruct available_facilities: [],
+              facility_id_options: [],
+              filter_title_value: "All stops",
+              loading: false,
+              modal_stop_id_options: [],
+              stop_id_filter_value: "default"
   end
 
   defimpl Slice, for: __MODULE__ do
@@ -126,10 +125,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
     end
 
     def accept_modal("accepted_stops_modal", _params, socket) do
-      selections = case socket.assigns.selections do
-        %Selections{} = selections -> selections
-        %AsyncResult{ok?: true} = async -> async.result
-      end
+      selections =
+        case socket.assigns.selections do
+          %Selections{} = selections -> selections
+          %AsyncResult{ok?: true} = async -> async.result
+        end
 
       selected_stop_id = socket.assigns.form.params["stop_id"]
       stops = selections.available_facilities.stops
@@ -143,9 +143,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
           |> hd
         end
 
-      selections = %{selections |
-        stop_id_filter_value: selected_stop_id,
-        filter_title_value: filter_title_value
+      selections = %{
+        selections
+        | stop_id_filter_value: selected_stop_id,
+          filter_title_value: filter_title_value
       }
 
       {:halt, assign(socket, :selections, selections)}

@@ -197,6 +197,7 @@ defmodule AlertsUI.Models.InformedEntity do
   def route_code_mapping(2, _effect), do: :commuter_rail
   def route_code_mapping(3, _effect), do: :bus
   def route_code_mapping(4, _effect), do: :ferry
+
   def route_code_mapping(nil, effect) do
     if effect in EffectsForRouteTypes.list_effects(:facility) do
       :facility
