@@ -20,7 +20,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     StopRouteServiceSlice,
     SystemwideServiceSlice,
     ReminderTimesSlice,
-    UrlSlice
+    UrlSlice,
+    TimelineSlice
   }
 
   use AlertsUI.Schema
@@ -205,6 +206,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     SystemwideServiceSlice,
     UrlSlice,
     ReminderTimesSlice
+    AccessAffectedServiceSlice
+    StopRouteServiceSlice,
+    TimelineSlice
   ]
 
   @actions [:new, :edit, :duplicate]
