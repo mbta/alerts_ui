@@ -2,6 +2,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   @moduledoc """
   Alert data v2
   """
+  require Logger
+
   alias Ecto.Changeset
   alias Phoenix.Component
   alias Phoenix.LiveView.Socket
@@ -16,7 +18,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     AccessAffectedServiceSlice,
     AffectedServiceSlice,
     StopRouteServiceSlice,
-    SystemwideServiceSlice
+    SystemwideServiceSlice,
+    ReminderTimesSlice,
+    UrlSlice
   }
 
   use AlertsUI.Schema
@@ -43,6 +47,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   @recurrence_days_values [:sunday, :monday, :tuesday, :wednesday, :thursday, :friday, :saturday]
   @type recurrence_days ::
           :sunday | :monday | :tuesday | :wednesday | :thursday | :friday | :saturday
+
+  @uncastable_fields [:__struct__, :reminder_times]
 
   @primary_key false
   embedded_schema do
@@ -116,7 +122,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :notification_toggle, :boolean, default: true
     field :view_banner, :boolean, default: false
     # rider reminders
-    embeds_many :reminder_times, ReminderTimes, on_replace: :delete do
+    embeds_many :reminder_times, ReminderTime, on_replace: :delete do
       field :reminder_time, :naive_datetime
       field :min_time, :naive_datetime
       field :max_time, :naive_datetime
@@ -182,7 +188,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
           notification_toggle: boolean(),
           view_banner: boolean(),
           # reminders
-          reminder_times: [ReminderTime.t()]
+          reminder_times: [
+            %{
+              reminder_time: NaiveDateTime.t(),
+              min_time: NaiveDateTime.t(),
+              max_time: NaiveDateTime.t()
+            }
+          ]
         }
 
   @slices [
@@ -191,7 +203,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     AccessAffectedServiceSlice,
     StopRouteServiceSlice,
     SystemwideServiceSlice,
-    UrlSlice
+    UrlSlice,
+    ReminderTimesSlice
   ]
 
   @actions [:new, :edit, :duplicate]
@@ -291,8 +304,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   def slices(), do: @slices
 
   def init_param_fields, do: [:alert_id, :effect_name, :route_type]
-
-  @uncastable_fields [:__struct__, :reminder_times]
 
   def form_fields do
     slices()
