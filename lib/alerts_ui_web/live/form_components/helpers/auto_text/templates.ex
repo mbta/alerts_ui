@@ -571,6 +571,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         direction_count: direction_count
       }
     } =
+      IO.inspect(route_type, label: "RT")
+      IO.inspect(effect_name, label: "EN")
       Enum.find(@templates, fn %{pattern: pattern} ->
         match?(^pattern, {route_type, effect_name}) || match?(^pattern, {effect_name})
       end)
