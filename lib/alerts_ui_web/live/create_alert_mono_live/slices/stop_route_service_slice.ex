@@ -9,6 +9,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   alias AlertsUIWeb.FormComponents.AffectedService
   alias AlertsUIWeb.FormComponents.Helpers.ContentFormatter
 
+  alias AlertsUIWeb.CreateAlertLive
+
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.API, only: [async_available?: 1]
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData, only: [humanize_effect_name: 1]
 
@@ -40,12 +42,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   ]
 
   defmodule Selections do
-    defstruct available_filter_routes: [],
-              available_routes: [],
-              available_stops: [],
+    defstruct available_filter_routes: AsyncResult.loading(),
+              available_routes: AsyncResult.loading(),
+              available_stops: AsyncResult.loading(),
               filter_title_value: "All routes",
               disable_routes_input?: false,
-              loading: false,
               modal_route_id_options: [],
               retained_stops: [],
               route_id_options: [],

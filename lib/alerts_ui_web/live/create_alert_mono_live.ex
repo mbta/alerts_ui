@@ -19,6 +19,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     DeliverySlice,
     StopRouteServiceSlice,
     SystemwideServiceSlice,
+    ReminderTimesSlice,
     UrlSlice
   }
 
@@ -45,6 +46,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   def handle_event("validate", params, socket) do
     # accept changes to form params
     {:noreply, sync_socket(socket, params)}
+  end
+
+  @impl true
+  def handle_event("validate", other, socket) do
+    # accept changes to form params
+    {:noreply, socket}
   end
 
   @impl true
@@ -131,6 +138,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
       {nil, action} when action in [:edit, :duplicate] ->
         raise %ArgumentError{message: "you need an alert id to #{action}"}
+
+      {alert_id, :new} ->
+        redirect(socket, ~p"/alerts/mono/edit/#{alert_id}")
 
       {alert_id, :edit} ->
         # edit an existing alert

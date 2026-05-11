@@ -19,6 +19,8 @@
             effect_name={humanize_effect_name(@form)}
           />
           <AccessAffectedServiceSlice.render form={@form} selections={@selections} />
+          <StopRouteServiceSlice.render form={@form} selections={@selections} />
+          <ReminderTimesSlice.render form={@form} />
           <DeliverySlice.render form={@form} />
         </.form>
       </div>
