@@ -14,13 +14,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   }
 
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
-    AccessAffectedServiceSlice,
+    # AccessAffectedServiceSlice,
     AffectedServiceSlice,
     AlertDetailsSlice,
     DeliverySlice,
     StopRouteServiceSlice,
     SystemwideServiceSlice,
     ReminderTimesSlice,
+      SubmitSlice,
     TimelineSlice,
     UrlSlice
   }
@@ -30,6 +31,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     AlertData,
     Path
   }
+  alias AlertsUI.DBContexts.Users
 
   import Ecto.Changeset, only: [change: 1]
 
@@ -50,8 +52,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   ]
 
   @impl true
-  def mount(params, _session, socket) do
+  def mount(params, session, socket) do
     # initialize the alert data form or throw an exception trying
+    socket = socket |> assign_new(:return_to, fn -> session["return_to"] end)
     {:ok, start_socket(socket, params)}
   end
 
@@ -125,7 +128,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     {:noreply, sync_socket(socket, %{})}
   end
 
-  @impl true
+  # @impl true
   def handle_event("review", _params, socket) do
     # if valid:
     #   live navigate to `?review=true`, opening the modal
@@ -152,7 +155,50 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     {:noreply, socket}
   end
 
-    defp get_step_by_name(name) do
+
+  @impl true
+  def handle_event("save", _params, socket) do
+    send(self(), :create_alert)
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("check_predictions", params, socket) do
+    # IO.inspect(socket.assigns)
+
+    if AlertsUIWeb.PredictionSuppressionWarningModal.show_warning?(socket.assigns) do
+      {:noreply, socket |> assign(check_predictions: true)}
+    else
+      handle_event("review", params, socket)
+    end
+    # {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("dismiss_prediction_warning", _params, socket) do
+    {:noreply, socket |> assign(check_predictions: false)}
+  end
+
+  @impl true
+  def handle_event("cancel_review", _params, socket) do
+    # Need to pass `show:false` to unmount the modal
+    {:noreply, socket |> assign(show: false)}
+  end
+
+  @impl true
+  def handle_event(
+        "image-preview-size",
+        %{"id" => "size-of-image", "image_preview_size" => image_preview_size},
+        socket
+      ) do
+    {:noreply,
+     assign(socket,
+       alert_data: Map.put(socket.assigns.alert_data, :image_preview_size, image_preview_size)
+     )}
+  end
+
+
+  defp get_step_by_name(name) do
     Enum.find(@steps, &(&1.name == name))
   end
 
