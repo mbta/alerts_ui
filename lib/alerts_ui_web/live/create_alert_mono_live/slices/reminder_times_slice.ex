@@ -14,6 +14,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
   defimpl Slice, for: __MODULE__ do
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice
 
+    def mount(_slice, socket, _base_params), do: socket
+
     def extract(slice, %Alert{} = alert, _params) do
       reminder_times =
         case Map.get(alert, :reminder_times) do

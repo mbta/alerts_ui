@@ -1,4 +1,6 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
+  alias Phoenix.LiveView.AsyncResult
+
   alias AlertsUI.Models.Alert
   alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.CreateAlertLive
@@ -7,8 +9,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
     only: [get_single_facility_effect_names: 0]
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Selections,
+    only: [assign_unwrapped_selections: 2]
 
-  import Phoenix.LiveView, only: [assign_async: 3]
+  import Phoenix.LiveView, only: [assign_async: 3, attach_hook: 4]
 
   use AlertsUIWeb, :html
 
@@ -19,10 +23,26 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
   ]
 
   defmodule Selections do
-    defstruct facility_id_options: [], modal_stop_id_options: [], stop_id_filter_value: "default"
+    defstruct [
+      available_facilities: [],
+      facility_id_options: [],
+      filter_title_value: "FILTER TITLE VALUE",
+      loading: false,
+      modal_stop_id_options: [],
+      stop_id_filter_value: "default"
+    ]
   end
 
   defimpl Slice, for: __MODULE__ do
+    def mount(_service_data, socket, _base_params) do
+      attach_hook(
+        socket,
+        :accepted_stops_modal,
+        :handle_event,
+        &accept_modal/3
+      )
+    end
+
     def extract(service_data, %Alert{} = alert, _params) do
       struct(service_data, Map.from_struct(alert))
     end
@@ -86,6 +106,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
             })
 
           selections = %Selections{
+            available_facilities: available_facilities,
             modal_stop_id_options: modal_stop_id_options,
             facility_id_options: facility_id_options
           }
@@ -103,6 +124,36 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
         end
       end
     end
+
+    def accept_modal("accepted_stops_modal", _params, socket) do
+      selections = case socket.assigns.selections do
+        %Selections{} = selections -> selections
+        %AsyncResult{ok?: true} = async -> async.result
+      end
+
+      IO.inspect(selections, label: "SELECTIONS")
+
+      selected_stop_id = socket.assigns.form.params["stop_id"]
+      stops = selections.available_facilities.stops
+
+      filter_title_value =
+        if selected_stop_id in [nil, "", "default"] or Enum.empty?(stops) do
+          "All stops"
+        else
+          Enum.filter(stops, &(&1.id === selected_stop_id))
+          |> Enum.map(& &1.name)
+          |> hd
+        end
+
+      selections = %{selections |
+        stop_id_filter_value: selected_stop_id,
+        filter_title_value: filter_title_value
+      }
+
+      {:halt, assign(socket, :selections, selections)}
+    end
+
+    def accept_modal(_, _, socket), do: {:cont, socket}
 
     @update_selection_targets ["stop_id", "stop_search_term", "facility_search_term"]
     # update selections when a user interacts with one of our fields...
@@ -138,6 +189,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
 
   @impl true
   def render(assigns) do
+    assigns = assign_unwrapped_selections(assigns, %Selections{loading: true})
+
     ~H"""
     <div class="min-w-full flex flex-col" id="access_service_view">
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
@@ -178,7 +231,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
           modal_filter_active={filter_active?(@selections.stop_id_filter_value)}
           modal_filter_id="stops-filter-modal"
           modal_filter_title={"Filter: #{@selections.filter_title_value}"}
-          multiple={@effect_name not in get_single_facility_effect_names()}
+          multiple={@form[:effect_name].value not in get_single_facility_effect_names()}
           no_results={Enum.empty?(@selections.facility_id_options)}
           options={@selections.facility_id_options}
         />
