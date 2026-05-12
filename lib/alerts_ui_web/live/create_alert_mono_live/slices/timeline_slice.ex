@@ -48,6 +48,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
       %Step{name: "preview", previous: nil, next: nil, label: "Preview and Submit"}
     ]
 
+    def mount(_timeline_data, socket, _base_params), do: socket
+
     def extract(timeline_data, %Alert{}, _params) do
       struct(timeline_data)
     end

@@ -73,6 +73,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
 
   def humanize_effect_name(_, nil), do: nil
   def humanize_effect_name(nil, nil), do: nil
+  def humanize_effect_name(nil, _), do: nil
 
   def humanize_effect_name(route_type_name, effect_name) when is_binary(route_type_name) do
     route_type_name
@@ -81,6 +82,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
   end
 
   def humanize_effect_name(route_type_int, effect_name) when is_integer(route_type_int) do
+    IO.inspect(route_type_int, label: "HEN RTI")
     humanize_effect_name(
       path_route_type(route_type_int, effect_name),
       effect_name
@@ -88,6 +90,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
   end
 
   def humanize_effect_name(route_type_name, effect_name) do
+    IO.inspect(route_type_name, label: "HEN RTN")
     mode_effect =
       ModeEffect.mode_effects_by_route_type_name(route_type_name)
       |> Enum.find(fn {_mode_effect_name, mode_effect_struct} ->

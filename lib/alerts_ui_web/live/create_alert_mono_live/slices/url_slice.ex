@@ -34,6 +34,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
     alias AlertsUI.Models.Alert
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice
 
+    def mount(_url_data, socket, _base_params), do: socket
+
     def extract(url_data, %Alert{} = alert, params) do
       new_url_params(alert, params)
     end

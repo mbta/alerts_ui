@@ -58,6 +58,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   end
 
   defimpl Slice, for: __MODULE__ do
+    def mount(_service_data, socket, _base_params), do: socket
+
     def extract(service_data, %Alert{} = alert, _params) do
       struct(service_data, Map.from_struct(alert))
     end

@@ -5,6 +5,8 @@ defprotocol AlertsUIWeb.CreateAlertMonoLive.Slice do
 
   To be a slice, a struct must implement the following callbacks:
   """
+  @spec mount(t, Socket.t(), map()) :: Socket.t()
+  def mount(slice, socket, params)
 
   @spec extract(t, Alert.t() | nil, map()) :: t
   def extract(slice, alert, params)

@@ -58,6 +58,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     @cdn_host "cdn.mbta.com"
 
+    def mount(_details_data, socket, _base_params), do: socket
+
     def extract(details_data, %Alert{} = _alert, _params) do
       details_data
       |> struct()
