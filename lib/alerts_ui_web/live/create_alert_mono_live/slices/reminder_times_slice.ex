@@ -1,6 +1,7 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
   alias AlertsUI.Helpers.ReminderTimes
   alias AlertsUI.Models.Alert
+  alias AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
   alias Phoenix.HTML.FormField
@@ -29,15 +30,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
 
     def transform(_slice, changeset, params) do
       case params do
-        %{"alert_data" => alert_data_params} ->
+        %{"alert_data" => _alert_data_params} ->
           changeset
-          |> ReminderTimesSlice.add_new_time(alert_data_params)
           |> cast_embed(:reminder_times,
             sort_param: :reminder_sort,
+            drop_param: :reminder_drop,
             with: &ReminderTimesSlice.reminder_time_changeset/2
           )
-          # cast_embed's drop_params was refusing to drop the last one
-          |> ReminderTimesSlice.drop_times(alert_data_params)
 
         _ ->
           changeset
@@ -146,7 +145,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
       <.button_secondary
         class="self-start mb-4"
         type="button"
-        name="alert_data[reminder_times][new]"
+        name="alert_data[reminder_sort][]"
         value="new"
         phx-click={JS.dispatch("change")}
       >
