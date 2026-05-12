@@ -1,11 +1,9 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
   alias AlertsUI.Models.Alert
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}
   alias AlertsUI.Models.{Cause, EnhancedSchedule, SeverityLevel}
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
-  alias Ecto.Changeset
   use AlertsUIWeb, :html
 
   defstruct [
@@ -13,6 +11,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     :combination,
     :route_type,
     :effect_name,
+    :form_type,
     # time range
     :active_period_start_specifier,
     :active_period_end_specifier,
@@ -135,7 +134,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     defp update_description_text(description_sync_toggle, details_data, autotext_data) do
       if description_sync_toggle == true do
-        Templates.build_auto_text(autotext_data, :description_template)
+        ""
+        # Templates.build_auto_text(autotext_data, :description_template)
       else
         Map.get(details_data, :description_text)
       end
