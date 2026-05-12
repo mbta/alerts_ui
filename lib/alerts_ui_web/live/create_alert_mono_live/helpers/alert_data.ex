@@ -88,8 +88,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
   end
 
   def humanize_effect_name(route_type_name, effect_name) do
-    IO.inspect(route_type_name, label: "HEN: RTN")
-    IO.inspect(ModeEffect.mode_effects_by_route_type_name(route_type_name), label: "HEN: RTN")
     mode_effect =
       ModeEffect.mode_effects_by_route_type_name(route_type_name)
       |> Enum.find(fn {_mode_effect_name, mode_effect_struct} ->

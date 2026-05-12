@@ -64,7 +64,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
       #TODO make progress move when going from first to second page
       # make buttons actually navigate you
       # third page?
-      IO.inspect(Map.get(socket.assigns, :progress))
       progress = Map.get(socket.assigns, :progress, progress_on_mount(params, socket.assigns.live_action, @steps))
 
       Phoenix.Component.assign(socket,

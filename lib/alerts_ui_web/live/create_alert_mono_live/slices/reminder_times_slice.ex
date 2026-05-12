@@ -96,7 +96,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
 
   def drop_times(changeset, %{"reminder_drop" => indices}) do
     indices = Enum.filter(indices, &(&1 != ""))
-    IO.inspect(changeset)
     reminder_times = get_field(changeset, :reminder_times, [])
 
     # This is blowing away the errors byb pulling them out and readding them.

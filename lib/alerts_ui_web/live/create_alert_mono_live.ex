@@ -83,7 +83,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   @impl true
   def handle_event("move_progress", %{"value" => "route_type_and_effect"}, socket) do
-      IO.inspect("one")
     # {:noreply,
     #  assign(socket, progress: get_step_by_name("route_type_and_effect"), alert_data: %{})}
     {:noreply, socket}
@@ -91,7 +90,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   @impl true
   def handle_event("move_progress", %{"value" => name}, socket) do
-    IO.inspect(name, label: :two)
     # {:noreply, assign(socket, :progress, get_step_by_name(name))}
       {:noreply, socket}
   end
