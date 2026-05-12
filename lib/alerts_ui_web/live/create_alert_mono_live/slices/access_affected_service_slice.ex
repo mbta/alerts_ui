@@ -26,7 +26,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
     defstruct [
       available_facilities: [],
       facility_id_options: [],
-      filter_title_value: "FILTER TITLE VALUE",
+      filter_title_value: "All stops",
       loading: false,
       modal_stop_id_options: [],
       stop_id_filter_value: "default"
@@ -190,6 +190,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
   @impl true
   def render(assigns) do
     assigns = assign_unwrapped_selections(assigns, %Selections{loading: true})
+    IO.inspect(assigns.selections.facility_id_options, label: "FIO ON RENDER")
 
     ~H"""
     <div class="min-w-full flex flex-col" id="access_service_view">
