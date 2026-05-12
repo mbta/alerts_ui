@@ -138,8 +138,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
 
   @impl true
   def render(assigns) do
-    IO.inspect(assigns.selections, label: "SELECTIONS ON RENDER")
-
     ~H"""
     <div class="min-w-full flex flex-col" id="access_service_view">
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
