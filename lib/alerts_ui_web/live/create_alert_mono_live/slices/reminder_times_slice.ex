@@ -1,6 +1,7 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
   alias AlertsUI.Helpers.ReminderTimes
   alias AlertsUI.Models.Alert
+  alias AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
   alias Phoenix.HTML.FormField
@@ -27,15 +28,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
 
     def transform(_slice, changeset, params) do
       case params do
-        %{"alert_data" => alert_data_params} ->
+        %{"alert_data" => _alert_data_params} ->
           changeset
-          |> ReminderTimesSlice.add_new_time(alert_data_params)
           |> cast_embed(:reminder_times,
             sort_param: :reminder_sort,
+            drop_param: :reminder_drop,
             with: &ReminderTimesSlice.reminder_time_changeset/2
           )
-          # cast_embed's drop_params was refusing to drop the last one
-          |> ReminderTimesSlice.drop_times(alert_data_params)
 
         _ ->
           changeset
@@ -87,29 +86,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
     end)
   end
 
-  def add_new_time(changeset, %{"reminder_times" => %{"new" => "new"}}) do
-    existing = get_field(changeset, :reminder_times, [])
-    put_embed(changeset, :reminder_times, existing ++ [%{}])
-  end
-
-  def add_new_time(changeset, _), do: changeset
-
-  def drop_times(changeset, %{"reminder_drop" => indices}) do
-    indices = Enum.filter(indices, &(&1 != ""))
-    IO.inspect(changeset)
-    reminder_times = get_field(changeset, :reminder_times, [])
-
-    # This is blowing away the errors byb pulling them out and readding them.
-    filtered =
-      Enum.reduce(indices, reminder_times, fn index, rts ->
-        List.pop_at(rts, String.to_integer(index)) |> elem(1)
-      end)
-
-    put_embed(changeset, :reminder_times, filtered)
-  end
-
-  def drop_times(changeset, _), do: changeset
-
   def render(assigns) do
     assigns =
       assign(assigns, %{
@@ -145,7 +121,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
       <.button_secondary
         class="self-start mb-4"
         type="button"
-        name="alert_data[reminder_times][new]"
+        name="alert_data[reminder_sort][]"
         value="new"
         phx-click={JS.dispatch("change")}
       >
