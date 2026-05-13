@@ -32,7 +32,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     trip_ids: [],
     facility_ids: [],
     service_types: [],
-
     header_text: "",
     header_sync_toggle: true,
     description_text: "",
@@ -63,7 +62,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     def transform(details_data, changeset, params) do
       [_, target] = Map.get(params, "_target", [nil, nil])
 
-      #TODO how to get "selected x"
+      # TODO how to get "selected x"
+      # do this inside the assigns instead :)
       autotext_data = AlertDataToAutoText.build_autotext_data(translated_details(details_data))
 
       header_sync_toggle =
@@ -155,6 +155,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     end
 
     defp effect_from_url_name(nil), do: nil
+
     defp effect_from_url_name(url_name) do
       url_name
       |> String.replace("_", " ")

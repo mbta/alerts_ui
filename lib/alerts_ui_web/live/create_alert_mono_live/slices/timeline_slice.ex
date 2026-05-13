@@ -28,7 +28,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
   defstruct [
     :route_type,
     :effect_name,
-    form_type: :creating
   ]
 
   defimpl Slice, for: __MODULE__ do
@@ -63,16 +62,21 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
     end
 
     def assigns(timeline_data, socket, params) do
-      #TODO
+      # TODO
       # make buttons actually navigate you
       # third page?
-      progress = Map.get(socket.assigns, :progress, progress_on_mount(params, socket.assigns.live_action, @steps))
+      progress =
+        Map.get(
+          socket.assigns,
+          :progress,
+          progress_on_mount(params, socket.assigns.live_action, @steps)
+        )
 
       assign(socket,
         previous_steps: previous_steps(progress, @steps),
         progress: progress,
         steps: @steps,
-        form_type: timeline_data.form_type
+        form_type: socket.assigns.form_type
       )
     end
 
@@ -90,7 +94,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
       Enum.find(steps, &(&1.name == current_step.previous))
     end
 
-    defp progress_on_mount(params,  action, [first_step, second_step | _]) do
+    defp progress_on_mount(params, action, [first_step, second_step | _]) do
       route_type = Map.get(params, "route_type")
       effect = Map.get(params, "effect_name")
 
@@ -123,9 +127,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
   def step_buttons(assigns, step) do
     clickable_class =
       cond do
-       step.name in (assigns.previous_steps -- [assigns.progress.name]) -> "text-text-primary hover:underline"
-       step.name in (assigns.previous_steps) -> "text-text-primary"
-        true -> "text-text-secondary"
+        step.name in (assigns.previous_steps -- [assigns.progress.name]) ->
+          "text-text-primary hover:underline"
+
+        step.name in assigns.previous_steps ->
+          "text-text-primary"
+
+        true ->
+          "text-text-secondary"
       end
 
     selected_class =
@@ -135,7 +144,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
 
     ~H"""
     <button
-      disabled={disable_button(@step.name, @previous_steps-- [assigns.progress.name], @form_type != :creating)}
+      disabled={
+        disable_button(
+          @step.name,
+          @previous_steps -- [assigns.progress.name],
+          @form_type != :creating
+        )
+      }
       type="button"
       phx-click="move_progress"
       class={"#{@class}"}

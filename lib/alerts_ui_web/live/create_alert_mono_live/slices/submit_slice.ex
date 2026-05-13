@@ -4,33 +4,41 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
   alias AlertsUIWeb.ReviewModal
   use AlertsUIWeb, :html
 
-    defstruct [
-    :header_text,
-    :form_type,
-    ]
+  defstruct [
+    header_text: ""
+  ]
 
-    defimpl Slice, for: __MODULE__ do
-      def mount(_service_data, socket, _base_params), do: socket
-      def extract(submit_data, _alert, _params) do
+  defimpl Slice, for: __MODULE__ do
+    def mount(_slice_data, socket, _base_params), do: socket
+
+    def extract(submit_data, _alert, _params) do
       submit_data
       |> struct()
-      end
-
-      def transform(_data, changeset, _params) do
-        changeset
-      end
-
-      def validate(_data, changeset, _params) do
-        changeset
-      end
-
-      def assigns(_slice_data, socket, params) do
-        reviewing = Map.get(params, "review", false)
-        assign(socket, back: socket.assigns.form_type == :creating, show: reviewing in ["true", true])
-      end
     end
 
+    def transform(_data, changeset, _params) do
+      changeset
+    end
+
+    def validate(_data, changeset, _params) do
+      changeset
+    end
+
+    def assigns(_slice_data, socket, params) do
+      reviewing = Map.get(params, "review", false)
+
+      assign(socket,
+        back: socket.assigns.form_type == :creating,
+        show: reviewing in ["true", true]
+      )
+    end
+  end
+
   def render(assigns) do
+    assigns = assign(assigns, :alert_data, Map.merge(assigns.form.source.data, assigns.form.source.changes))
+
+    # form changeset source has instance of alert data for review modal
+    # default selected schedules?
     ~H"""
     <div class="min-w-full flex mt-4 mb-12 border-t border-border-primary" id="submit_view">
       <PredictionSuppressionWarningModal.prediction_suppression_warning_modal
@@ -43,17 +51,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
         selected_routes={@selections.selected_routes}
       />
       <ReviewModal.review_modal
-        :if={Map.get(assigns, :show, nil)}
+        :if={Map.get(assigns, :show, false)}
         form_type={@form_type}
         alert_data={
-          @form.data
+          @alert_data
           |> Map.merge(%{selected_schedules: []})
-          |> Map.merge(AlertsUI.AlertBuilder.original_selections(@form.data))
+          |> Map.merge(AlertsUI.AlertBuilder.original_selections(@alert_data))
         }
         cancel_event_name="cancel_review"
         accept_event_name="save"
         target_id="#submit_view"
-        alert_id={@form.data.alert_id}
+        alert_id={@alert_data.alert_id}
         current_user={@current_user}
       />
       <.button_secondary
@@ -91,5 +99,4 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
     </div>
     """
   end
-
 end
