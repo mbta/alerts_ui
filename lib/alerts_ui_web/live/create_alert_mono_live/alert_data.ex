@@ -204,10 +204,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
         }
 
   @slices [
+    UrlSlice,
     AlertDetailsSlice,
     DeliverySlice,
     AccessAffectedServiceSlice,
-    UrlSlice,
     ReminderTimesSlice,
     TimelineSlice
   ]
