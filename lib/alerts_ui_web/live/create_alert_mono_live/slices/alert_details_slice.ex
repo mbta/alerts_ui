@@ -32,10 +32,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     trip_ids: [],
     facility_ids: [],
     service_types: [],
-    # selected_facilities: [],
-    # selected_routes: [],
-    # selected_stops: [],
-    # selected_schedules: [],
 
     header_text: "",
     header_sync_toggle: true,
@@ -67,6 +63,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     def transform(details_data, changeset, params) do
       [_, target] = Map.get(params, "_target", [nil, nil])
 
+      #TODO how to get "selected x"
       autotext_data = AlertDataToAutoText.build_autotext_data(translated_details(details_data))
 
       header_sync_toggle =
@@ -116,7 +113,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       image_size = details_data.image_url |> get_image_size()
       image_path = details_data.image_url |> get_image_path()
 
-      Phoenix.Component.assign(socket,
+      assign(socket,
         cause_options: cause_options,
         severity_options: @severity_options,
         image_size: image_size,

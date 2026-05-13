@@ -5,10 +5,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
   use AlertsUIWeb, :html
 
     defstruct [
+    :header_text,
     :form_type,
     ]
 
     defimpl Slice, for: __MODULE__ do
+      def mount(_service_data, socket, _base_params), do: socket
       def extract(submit_data, _alert, _params) do
       submit_data
       |> struct()
@@ -22,8 +24,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
         changeset
       end
 
-      def assigns(slice_data, socket, _params) do
-        assign(socket, back: slice_data.form_type == :creating)
+      def assigns(_slice_data, socket, params) do
+        reviewing = Map.get(params, "review", false)
+        assign(socket, back: socket.assigns.form_type == :creating, show: reviewing in ["true", true])
       end
     end
 
@@ -37,20 +40,20 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
         cancel_event_name="dismiss_prediction_warning"
         accept_event_name="review"
         target_id="#submit_view"
-        selected_routes={@selected_schedules}
+        selected_routes={@selections.selected_routes}
       />
       <ReviewModal.review_modal
         :if={Map.get(assigns, :show, nil)}
         form_type={@form_type}
         alert_data={
-          @alert_data
-          |> Map.merge(%{selected_schedules: @selected_schedules})
-          |> Map.merge(AlertsUI.AlertBuilder.original_selections(@alert_data))
+          @form.data
+          |> Map.merge(%{selected_schedules: []})
+          |> Map.merge(AlertsUI.AlertBuilder.original_selections(@form.data))
         }
         cancel_event_name="cancel_review"
         accept_event_name="save"
         target_id="#submit_view"
-        alert_id={@alert_id}
+        alert_id={@form.data.alert_id}
         current_user={@current_user}
       />
       <.button_secondary
@@ -66,6 +69,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
       </.button_secondary>
       <div class="flex flex-1">&nbsp;</div>
       <.button_secondary
+        :if={@progress.name == "details"}
         class="mt-8 self-center border-none"
         name="cancel"
         phx-click="cancel"
@@ -75,6 +79,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
         Cancel
       </.button_secondary>
       <.button_primary
+        :if={@progress.name == "details"}
         class="mt-8 ml-2 self-center"
         name="review"
         phx-click="check_predictions"

@@ -28,7 +28,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
   defstruct [
     :route_type,
     :effect_name,
-    :form_type
+    form_type: :creating
   ]
 
   defimpl Slice, for: __MODULE__ do
@@ -63,12 +63,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
     end
 
     def assigns(timeline_data, socket, params) do
-      #TODO make progress move when going from first to second page
+      #TODO
       # make buttons actually navigate you
       # third page?
       progress = Map.get(socket.assigns, :progress, progress_on_mount(params, socket.assigns.live_action, @steps))
 
-      Phoenix.Component.assign(socket,
+      assign(socket,
         previous_steps: previous_steps(progress, @steps),
         progress: progress,
         steps: @steps,

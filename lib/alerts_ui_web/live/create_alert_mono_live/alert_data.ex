@@ -14,7 +14,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
     AlertDetailsSlice,
     DeliverySlice,
-    AccessAffectedServiceSlice,
+    # AccessAffectedServiceSlice,
     AffectedServiceSlice,
     StopRouteServiceSlice,
     SystemwideServiceSlice,
@@ -206,7 +206,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   @slices [
     AlertDetailsSlice,
     DeliverySlice,
-    AccessAffectedServiceSlice,
+    # AccessAffectedServiceSlice,
     UrlSlice,
     ReminderTimesSlice,
     SystemwideServiceSlice,

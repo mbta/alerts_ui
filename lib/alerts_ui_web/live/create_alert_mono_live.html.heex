@@ -25,7 +25,7 @@
             route_type_name={humanize_route_type(@form)}
             effect_name={humanize_effect_name(@form)}
           />
-          <AccessAffectedServiceSlice.render form={@form} selections={@selections} />
+
           <StopRouteServiceSlice.render form={@form} selections={@selections} />
           <SystemwideServiceSlice.render form={@form} />
           <AlertDetailsSlice.render
@@ -34,6 +34,7 @@
             cause_options={@cause_options}
             image_size={@image_size}
             image_path={@image_path}
+            selections={@selections}
           />
           <ReminderTimesSlice.render form={@form} />
           <DeliverySlice.render form={@form} />
@@ -44,8 +45,9 @@
           progress={@progress}
           current_user={@current_user}
           return_to={@return_to}
-          selected_routes={[]}
-          selected_schedules={[]}
+          selections={@selections}
+          form_type={@form_type}
+          show={@show}
         />
       </div>
     </article>
