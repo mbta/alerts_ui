@@ -10,6 +10,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   alias AlertsUI.Models.Alert
   alias AlertsUI.Repo
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.CreateAlertMonoLive.ServiceSliceDispatcher
 
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
     AlertDetailsSlice,
@@ -203,21 +204,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
           ]
         }
 
-  @slices [
-    UrlSlice,
-    AlertDetailsSlice,
-    DeliverySlice,
-    # AccessAffectedServiceSlice,
-    UrlSlice,
-    ReminderTimesSlice,
-    SystemwideServiceSlice,
-    SubmitSlice,
-    StopRouteServiceSlice,
-    TimelineSlice
-  ]
-
-  @actions [:new, :edit, :duplicate]
-
   @spec init(
           Socket.t(),
           Socket.unsigned_params(),
@@ -228,7 +214,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     base = Repo.preload(alert, :informed_entity)
 
     {base_params, socket} =
-      slices()
+      slices(socket)
+      |> IO.inspect(label: "INIT SLICES")
       |> Enum.map(fn slice_module ->
         slice_module
         |> struct()
@@ -243,6 +230,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
         {params, socket}
       end)
 
+    socket_with_selections = if Map.get(socket.assigns, :selections) do
+      IO.inspect("BRANCH 1")
+      socket
+    else
+      IO.inspect("BRANCH 2")
+      assign(socket, :selections, "hello world")
+    end
+
     __MODULE__
     |> struct(base_params)
     |> sync(socket, params, init_param_fields())
@@ -254,11 +249,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
           Socket.unsigned_params(),
           list(atom())
         ) :: {:ok, {Changeset.t(), Socket.t()}} | {:error, {Changeset.t(), Socket.t()}}
-  def sync(alert_data_or_changeset, socket, params, fields \\ form_fields()) do
+  def sync(alert_data_or_changeset, socket, params, fields \\ nil) do
     alert_data_or_changeset
-    |> cast(Map.get(params, "alert_data", %{}), fields)
-    |> transform(params)
-    |> validate(params)
+    |> cast(Map.get(params, "alert_data", %{}), fields || form_fields(socket))
+    |> transform(params, socket)
+    |> validate(params, socket)
     |> case do
       {:ok, alert_data} ->
         # clear errors, etc.
@@ -280,16 +275,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     end
   end
 
-  def transform(%Changeset{} = changeset, params) do
-    Enum.reduce(slices(), changeset, fn slice_module, changeset ->
+  def transform(%Changeset{} = changeset, params, socket) do
+    Enum.reduce(slices(socket) |> IO.inspect(label: "XFORM"), changeset, fn slice_module, changeset ->
       changeset
       |> slice_from_changeset(slice_module)
       |> Slice.transform(changeset, params)
     end)
   end
 
-  def validate(%Changeset{} = changeset, params) do
-    Enum.reduce(slices(), changeset, fn slice_module, changeset ->
+  def validate(%Changeset{} = changeset, params, socket) do
+    Enum.reduce(slices(socket) |> IO.inspect(label: "VAL"), changeset, fn slice_module, changeset ->
       changeset
       |> slice_from_changeset(slice_module)
       |> Slice.validate(changeset, params)
@@ -298,7 +293,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   end
 
   def assigns(socket, params) do
-    Enum.reduce(slices(), socket, fn slice_module, socket ->
+    Enum.reduce(slices(socket) |> IO.inspect(label: "ASS"), socket, fn slice_module, socket ->
       Slice.assigns(struct(slice_module), socket, params)
     end)
   end
@@ -315,12 +310,34 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     struct(slice_module, as_map)
   end
 
-  def slices(), do: @slices
+  def slices(socket) do
+    case Map.get(socket.assigns, :form) do
+      nil ->
+        []
+
+      form ->
+        route_type = socket.assigns.form[:route_type].value
+        effect_name = socket.assigns.form[:effect_name].value
+        combination = socket.assigns.form[:combination].value
+        if is_nil(route_type) || is_nil(effect_name) do
+          [TimelineSlice, UrlSlice]
+        else
+          [
+            TimelineSlice,
+            UrlSlice,
+            ServiceSliceDispatcher.affected_service_component(combination),
+            AlertDetailsSlice,
+            ReminderTimesSlice,
+            DeliverySlice
+          ]
+        end
+    end
+  end
 
   def init_param_fields, do: [:alert_id, :effect_name, :route_type]
 
-  def form_fields do
-    slices()
+  def form_fields(socket) do
+    slices(socket)
     |> Enum.map(&(struct(&1) |> Map.keys()))
     |> List.flatten()
     |> Enum.uniq()

@@ -276,6 +276,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   """
   @spec sync_socket(LiveView.Socket.t(), LiveView.unsigned_params()) :: LiveView.Socket.t()
   def sync_socket(socket, params) do
+    IO.inspect(socket.assigns, label: "SS")
     case AlertData.sync(socket.assigns.form.source, socket, params) do
       {:ok, socket} -> socket
       {:error, socket} -> socket
@@ -292,4 +293,27 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   defp service_slice_by_combination(:ACCESS), do: AccessServiceSlice
   defp service_slice_by_combination(nil), do: SystemwideServiceSlice
   defp service_slice_by_combination(_), do: AffectedServiceSlice
+
+  defmodule ServiceSliceDispatcher do
+    alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
+      AccessAffectedServiceSlice,
+      AffectedServiceSlice,
+      StopRouteServiceSlice,
+      SystemwideServiceSlice
+    }
+
+    def affected_service_component(combination) do
+      case combination do
+        :SR -> StopRouteServiceSlice
+        :ACCESS -> AccessAffectedServiceSlice
+        nil -> SystemwideServiceSlice
+        _ -> AffectedServiceSlice
+      end
+    end
+
+    def render(assigns) do
+      combination = assigns.form[:combination].value
+      affected_service_component(combination).render(assigns)
+    end
+  end
 end
