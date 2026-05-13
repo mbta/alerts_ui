@@ -25,9 +25,7 @@
             route_type_name={humanize_route_type(@form)}
             effect_name={humanize_effect_name(@form)}
           />
-
-          <StopRouteServiceSlice.render form={@form} selections={@selections} />
-          <SystemwideServiceSlice.render form={@form} />
+          <ServiceSliceDispatcher.render form={@form} selections={@selections} />
           <AlertDetailsSlice.render
             form={@form}
             severity_options={@severity_options}
