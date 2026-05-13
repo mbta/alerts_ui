@@ -561,6 +561,10 @@ defmodule AlertsUI.AlertBuilder do
           ]
 
   defp stops_with_context(routes, direction, parent_stop_ids) do
+    parent_stops =
+      StopsRepo.all(["filter[id]": Enum.join(parent_stop_ids, ",")], [])
+      |> Enum.into(%{}, fn stop -> {stop.id, stop} end)
+
     routes
     |> Enum.flat_map(fn route ->
       route_patterns =
@@ -586,7 +590,14 @@ defmodule AlertsUI.AlertBuilder do
       neighbor_stops =
         get_neighbor_stops(child_stops_context, route_patterns, parent_stop_ids, route)
 
-      child_stops_context ++ neighbor_stops
+      parent_stops_context =
+        child_stops_context
+        |> Enum.map(fn {child_stop, child_route, child_direction, child_stop_type} ->
+          {parent_stops[child_stop.parent_id], child_route, child_direction, child_stop_type}
+        end)
+
+      (child_stops_context ++ neighbor_stops ++ parent_stops_context)
+      |> Enum.uniq()
     end)
   end
 
