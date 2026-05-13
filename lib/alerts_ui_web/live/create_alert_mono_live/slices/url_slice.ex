@@ -230,6 +230,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
       ) do
     ~H"""
     <.button_toggle
+      id={"effect-name-#{@this_effect_name}-button"}
       phx-click="push_effect_name"
       class="self-cente min-w-[16rem]"
       value={@this_effect_name}
