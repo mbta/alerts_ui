@@ -96,9 +96,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
         selected_stops =
           case Map.get(socket.assigns, :selections) do
-            nil -> []
             %AsyncResult{ok?: true} = async_ok -> async_ok.result.selected_stops
             %Selections{} = selections -> selections.selected_stops
+            _ -> []
           end
 
         assign_async(socket, :selections, fn ->
