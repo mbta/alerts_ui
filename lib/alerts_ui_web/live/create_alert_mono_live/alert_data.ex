@@ -60,6 +60,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :route_type_int, :integer
     field :effect_name, :string
     field :review, :boolean
+
     # affected service
     field :direction, :string
     field :facility_ids, {:array, :string}
@@ -83,6 +84,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :trip_information_by_id, {:array, :string}
     field :trip_search_term, :string
     field :service_types, {:array, :integer}
+
     # time range
     field :active_period_end, :naive_datetime
     field :active_period_end_date, :date
@@ -103,6 +105,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :notification_period_start_date, :date
     field :notification_specifier, Ecto.Enum, values: @notification_values, default: :now
     field :recurrence_days, {:array, Ecto.Enum}, values: @recurrence_days_values
+
     # details
     field :cause_detail, :string, default: ""
     field :description_text, :string
@@ -116,12 +119,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :service_effect_text, :string
     field :severity, :integer, default: 4
     field :url, :string, default: ""
+
     # delivery
     field :accept_banner, :boolean, default: false
     field :banner_sync_toggle, :boolean, default: true
     field :banner_text, :string
     field :notification_toggle, :boolean, default: true
     field :view_banner, :boolean, default: false
+
     # rider reminders
     embeds_many :reminder_times, ReminderTime, on_replace: :delete do
       field :reminder_time, :naive_datetime
