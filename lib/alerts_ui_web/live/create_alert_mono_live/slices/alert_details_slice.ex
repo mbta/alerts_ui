@@ -1,11 +1,9 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
   alias AlertsUI.Models.Alert
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}
   alias AlertsUI.Models.{Cause, EnhancedSchedule, SeverityLevel}
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
-  alias Ecto.Changeset
   use AlertsUIWeb, :html
 
   defstruct [
@@ -13,6 +11,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     :combination,
     :route_type,
     :effect_name,
+    :form_type,
     # time range
     :active_period_start_specifier,
     :active_period_end_specifier,
@@ -33,11 +32,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     trip_ids: [],
     facility_ids: [],
     service_types: [],
-    # selected_facilities: [],
-    # selected_routes: [],
-    # selected_stops: [],
-    # selected_schedules: [],
-
     header_text: "",
     header_sync_toggle: true,
     description_text: "",
@@ -68,6 +62,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     def transform(details_data, changeset, params) do
       [_, target] = Map.get(params, "_target", [nil, nil])
 
+      # TODO how to get "selected x"
+      # do this inside the assigns instead :)
       autotext_data = AlertDataToAutoText.build_autotext_data(translated_details(details_data))
 
       header_sync_toggle =
@@ -117,7 +113,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       image_size = details_data.image_url |> get_image_size()
       image_path = details_data.image_url |> get_image_path()
 
-      Phoenix.Component.assign(socket,
+      assign(socket,
         cause_options: cause_options,
         severity_options: @severity_options,
         image_size: image_size,
@@ -135,7 +131,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     defp update_description_text(description_sync_toggle, details_data, autotext_data) do
       if description_sync_toggle == true do
-        Templates.build_auto_text(autotext_data, :description_template)
+        ""
+        # Templates.build_auto_text(autotext_data, :description_template)
       else
         Map.get(details_data, :description_text)
       end
@@ -158,6 +155,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     end
 
     defp effect_from_url_name(nil), do: nil
+
     defp effect_from_url_name(url_name) do
       url_name
       |> String.replace("_", " ")

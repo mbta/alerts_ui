@@ -187,7 +187,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
     end
   end
 
-  @impl true
   def render(assigns) do
     assigns = assign_unwrapped_selections(assigns, %Selections{loading: true})
     IO.inspect(assigns.selections.facility_id_options, label: "FIO ON RENDER")

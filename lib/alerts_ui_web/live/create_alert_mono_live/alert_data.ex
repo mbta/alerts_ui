@@ -12,14 +12,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
 
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
-    UrlSlice,
     AlertDetailsSlice,
     DeliverySlice,
-    AccessAffectedServiceSlice,
+    # AccessAffectedServiceSlice,
     AffectedServiceSlice,
     StopRouteServiceSlice,
     SystemwideServiceSlice,
     ReminderTimesSlice,
+    SubmitSlice,
     UrlSlice,
     TimelineSlice
   }
@@ -207,8 +207,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     UrlSlice,
     AlertDetailsSlice,
     DeliverySlice,
-    AccessAffectedServiceSlice,
+    # AccessAffectedServiceSlice,
+    UrlSlice,
     ReminderTimesSlice,
+    SystemwideServiceSlice,
+    SubmitSlice,
+    StopRouteServiceSlice,
     TimelineSlice
   ]
 

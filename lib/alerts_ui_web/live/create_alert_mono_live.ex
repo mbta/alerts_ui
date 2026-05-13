@@ -14,16 +14,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   }
 
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
-    AccessAffectedServiceSlice,
+    # AccessAffectedServiceSlice,
     AffectedServiceSlice,
     AlertDetailsSlice,
     DeliverySlice,
     StopRouteServiceSlice,
     SystemwideServiceSlice,
     ReminderTimesSlice,
+    SubmitSlice,
     TimelineSlice,
     UrlSlice
   }
+
   alias AlertsUIWeb.CreateAlertMonoLive.Step
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.{
@@ -31,9 +33,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     Path
   }
 
+  alias AlertsUI.DBContexts.Users
+
   import Ecto.Changeset, only: [change: 1]
 
-    @steps [
+  @steps [
     %Step{
       name: "route_type_and_effect",
       previous: nil,
@@ -50,9 +54,22 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   ]
 
   @impl true
-  def mount(params, _session, socket) do
+  def mount(params, session, socket) do
     # initialize the alert data form or throw an exception trying
+    socket =
+      socket
+      |> assign(:form_type, form_type_from_socket(socket))
+      |> assign_new(:return_to, fn -> session["return_to"] end)
+
     {:ok, start_socket(socket, params)}
+  end
+
+  defp form_type_from_socket(socket) do
+    case socket.assigns.live_action do
+      :edit -> :editing
+      :duplicate -> :duplicating
+      _ -> :creating
+    end
   end
 
   @impl true
@@ -68,12 +85,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   end
 
   @impl true
-  def handle_event("validate", other, socket) do
-    # accept changes to form params
-    {:noreply, socket}
-  end
-
-  @impl true
   def handle_event("push_route_type", params, socket) do
     route_type = Map.get(params, "value")
     path = path_with_route_type(socket.assigns, route_type)
@@ -83,22 +94,33 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   @impl true
   def handle_event("move_progress", %{"value" => "route_type_and_effect"}, socket) do
-    # {:noreply,
-    #  assign(socket, progress: get_step_by_name("route_type_and_effect"), alert_data: %{})}
-    {:noreply, socket}
+    new_form_data = socket.assigns.form.data |> Map.merge(%{route_type: nil, effect_name: nil})
+    new_form = socket.assigns.form |> Map.merge(%{data: new_form_data})
+
+    socket =
+      assign(
+        socket,
+        %{
+          progress: get_step_by_name("route_type_and_effect"),
+          path_route_type: nil,
+          path_effect_name: nil,
+          form: new_form
+        }
+      )
+
+    {:noreply, push_patch(socket, to: path(socket.assigns))}
   end
 
   @impl true
   def handle_event("move_progress", %{"value" => name}, socket) do
-    # {:noreply, assign(socket, :progress, get_step_by_name(name))}
-      {:noreply, socket}
+    {:noreply, assign(socket, :progress, get_step_by_name(name))}
   end
 
   @impl true
   def handle_event("push_effect_name", params, socket) do
     effect_name = Map.get(params, "value")
     path = path_with_route_type_and_effect_name(socket.assigns, effect_name)
-
+    socket = assign(socket, :progress, get_step_by_name(socket.assigns.progress.next))
     {:noreply, push_patch(socket, to: path)}
   end
 
@@ -125,13 +147,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     {:noreply, sync_socket(socket, %{})}
   end
 
-  @impl true
+  # @impl true
   def handle_event("review", _params, socket) do
     # if valid:
     #   live navigate to `?review=true`, opening the modal
+    effect_name = socket.assigns.path_effect_name
+    path = path_with_route_type_and_effect_name(socket.assigns, effect_name) <> "?review=true"
     # else:
     #   open error flash
-    {:noreply, socket}
+    {:noreply, push_patch(socket, to: path)}
   end
 
   @impl true
@@ -152,7 +176,46 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     {:noreply, socket}
   end
 
-    defp get_step_by_name(name) do
+  @impl true
+  def handle_event("save", _params, socket) do
+    send(self(), :create_alert)
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("check_predictions", params, socket) do
+    if AlertsUIWeb.PredictionSuppressionWarningModal.show_warning?(socket.assigns) do
+      {:noreply, socket |> assign(check_predictions: true)}
+    else
+      handle_event("review", params, socket)
+    end
+  end
+
+  @impl true
+  def handle_event("dismiss_prediction_warning", _params, socket) do
+    {:noreply, socket |> assign(check_predictions: false)}
+  end
+
+  @impl true
+  def handle_event("cancel_review", _params, socket) do
+    effect_name = socket.assigns.path_effect_name
+    path = path_with_route_type_and_effect_name(socket.assigns, effect_name)
+    {:noreply, push_patch(socket, to: path)}
+  end
+
+  @impl true
+  def handle_event(
+        "image-preview-size",
+        %{"id" => "size-of-image", "image_preview_size" => image_preview_size},
+        socket
+      ) do
+    {:noreply,
+     assign(socket,
+       alert_data: Map.put(socket.assigns.alert_data, :image_preview_size, image_preview_size)
+     )}
+  end
+
+  defp get_step_by_name(name) do
     Enum.find(@steps, &(&1.name == name))
   end
 
