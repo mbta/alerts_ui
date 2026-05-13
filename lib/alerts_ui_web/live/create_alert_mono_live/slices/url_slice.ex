@@ -65,6 +65,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
     end
 
     defp new_url_params(alert_or_changeset, params) do
+      IO.inspect(params, label: "NUP")
       {base_route_type_int, base_effect_name} =
         case alert_or_changeset do
           %Changeset{} = changeset ->
@@ -129,6 +130,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
         } = assigns
       ) do
     if is_nil(path_route_type) || is_nil(path_effect_name) do
+      IO.inspect(path_route_type, label: "PRT")
+      IO.inspect(path_effect_name, label: "PEN")
       ~H"""
       <div class="min-w-full flex flex-col mb-8" id="route_view">
         <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
@@ -152,21 +155,21 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
           <.body>
             Effect
           </.body>
-        </div>
-        <div id="effect_buttons">
-          <p class="text-bg-elevation-6 mb-[18rem]" hidden={!is_nil(@path_route_type)}>
-            Select a service type to see possible effects.
-          </p>
-          <div class="flex flex-wrap justify-center md:justify-normal gap-2">
-            <div
-              :for={this_effect_name <- list_effect_path_names(@path_route_type)}
-              class={if is_nil(@path_route_type), do: "hidden"}
-            >
-              <.effect_name_button
-                this_effect_name={this_effect_name}
-                selected_effect_name={@path_effect_name}
-                selected_route_type={@path_route_type}
-              />
+          <div id="effect_buttons">
+            <p class="text-bg-elevation-6 mb-[18rem]" hidden={!is_nil(@path_route_type)}>
+              Select a service type to see possible effects.
+            </p>
+            <div class="flex flex-wrap justify-center md:justify-normal gap-2">
+              <div
+                :for={this_effect_name <- list_effect_path_names(@path_route_type)}
+                class={if is_nil(@path_route_type), do: "hidden"}
+              >
+                <.effect_name_button
+                  this_effect_name={this_effect_name}
+                  selected_effect_name={@path_effect_name}
+                  selected_route_type={@path_route_type}
+                />
+              </div>
             </div>
           </div>
         </div>
