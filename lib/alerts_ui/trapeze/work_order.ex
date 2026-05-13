@@ -93,7 +93,7 @@ defmodule AlertsUI.Trapeze.WorkOrder do
        alert_timing: :one_time,
        cause_detail: "MAINTENANCE",
        cause: :MAINTENANCE,
-       child_stops_with_context: [],
+       stops_with_context: [],
        closed_timestamp: end_datetime(work_order),
        combination: :ACCESS,
        description_text: autotext(work_order) |> description_for(),
