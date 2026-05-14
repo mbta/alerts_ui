@@ -274,7 +274,7 @@ defmodule AlertsUI.AlertBuilder do
       end
 
     user_selected_routes =
-      selected_routes
+      (selected_routes || [])
       |> Enum.map(fn route_id ->
         matching_route = get_matching_route(route_id, pre_combo_routes(selected_routes))
         "#{SelectFormatter.name_for_option(matching_route)}|#{route_id}"
