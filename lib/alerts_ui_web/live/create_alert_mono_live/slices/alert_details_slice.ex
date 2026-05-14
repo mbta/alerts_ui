@@ -60,7 +60,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     end
 
     def transform(details_data, changeset, params) do
-      [_, target] = Map.get(params, "_target", [nil, nil])
+      [_, target | _] = Map.get(params, "_target", [nil, nil])
 
       # TODO how to get "selected x"
       # do this inside the assigns instead :)
