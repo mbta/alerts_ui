@@ -58,6 +58,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     # initialize the alert data form or throw an exception trying
     socket =
       socket
+      |> assign(:selections, %{})
       |> assign(:form_type, form_type_from_socket(socket))
       |> assign_new(:return_to, fn -> session["return_to"] end)
 
