@@ -199,7 +199,8 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
         {StopsRepo, [],
          [
            by_route: fn _route, _direction, _opts -> [@stop] end,
-           get: fn _id -> @stop end
+           get: fn _id -> @stop end,
+           all: fn _params, _opts -> [@stop] end
          ]},
         {RoutePatternsRepo, [],
          [

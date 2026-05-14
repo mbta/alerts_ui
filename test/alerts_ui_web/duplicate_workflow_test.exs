@@ -52,7 +52,8 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
       {StopsRepo, [],
        [
          by_route: fn _route, _direction, _opts -> [@stop] end,
-         get_parent: fn nil -> nil end
+         get_parent: fn nil -> nil end,
+         all: fn ["filter[id]": ""], _ -> [@stop] end
        ]}
     ]) do
       alert_params =
@@ -187,7 +188,8 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
       {StopsRepo, [],
        [
          by_route: fn _route, _direction, _opts -> [@stop] end,
-         get_parent: fn nil -> nil end
+         get_parent: fn nil -> nil end,
+         all: fn ["filter[id]": "stop-id"], _ -> [] end
        ]}
     ]) do
       alert_params =

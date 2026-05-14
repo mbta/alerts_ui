@@ -1046,7 +1046,8 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
            get_parent: fn
              "place-sstat" -> @stop
            end,
-           get: fn _ -> @stop end
+           get: fn _ -> @stop end,
+           all: fn _, _ -> [] end
          ]},
         {RoutePatternsRepo, [],
          [

@@ -724,7 +724,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
            by_route: fn _, _ -> [@stop, @stop_two] end,
            by_route: fn _, _, _opts -> [@stop, @stop_two] end,
            get: fn _id -> @stop end,
-           get_parent: fn _id -> nil end
+           get_parent: fn _id -> nil end,
+           all: fn _params, _opts -> [] end
          ]},
         {RoutePatternsRepo, [],
          [
@@ -860,7 +861,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
            by_route_type: fn _route_type -> [@stop] end,
            by_route: fn _, _ -> [@stop] end,
            by_route: fn _, _, _opts -> [@stop] end,
-           get: fn _id -> @stop end
+           get: fn _id -> @stop end,
+           all: fn _params, _opts -> [] end
          ]},
         {RoutePatternsRepo, [],
          [

@@ -14,6 +14,7 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
+  alias MBTAV3API.Stops.Repo, as: StopsRepo
 
   @assigns %{
     id: "delivery",
@@ -140,7 +141,8 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
         {RoutePatternsRepo, [],
          [
            by_route_id: fn _route_id, _opts -> [] end
-         ]}
+         ]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _ -> [] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
 
@@ -189,7 +191,8 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
         {RoutePatternsRepo, [],
          [
            by_route_id: fn _route_id, _opts -> [] end
-         ]}
+         ]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _ -> [] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
 
@@ -242,7 +245,8 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
         {RoutePatternsRepo, [],
          [
            by_route_id: fn _route_id, _opts -> [] end
-         ]}
+         ]},
+        {StopsRepo, [], [get_parent: fn _ -> nil end, all: fn ["filter[id]": ""], _ -> [] end]}
       ]) do
         alert_params =
           build(:alert_map, %{
@@ -299,7 +303,8 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
         {RoutePatternsRepo, [],
          [
            by_route_id: fn _route_id, _opts -> [] end
-         ]}
+         ]},
+        {StopsRepo, [], [get_parent: fn _ -> nil end, all: fn ["filter[id]": ""], _ -> [] end]}
       ]) do
         alert_params =
           build(:alert_map, %{
@@ -365,7 +370,8 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
         {RoutePatternsRepo, [],
          [
            by_route_id: fn _route_id, _opts -> [] end
-         ]}
+         ]},
+        {StopsRepo, [], [get_parent: fn _ -> nil end, all: fn ["filter[id]": ""], _ -> [] end]}
       ]) do
         alert_params =
           build(:alert_map, %{

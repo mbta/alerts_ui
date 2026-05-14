@@ -1151,7 +1151,8 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          [
            by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end,
-           get_parent: fn _id -> @stop end
+           get_parent: fn _id -> @stop end,
+           all: fn _params, _obj -> [@stop] end
          ]},
         {RoutePatternsRepo, [],
          [

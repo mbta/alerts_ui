@@ -595,6 +595,7 @@ defmodule AlertsUI.AlertBuilder do
         |> Enum.map(fn {child_stop, child_route, child_direction, child_stop_type} ->
           {parent_stops[child_stop.parent_id], child_route, child_direction, child_stop_type}
         end)
+        |> Enum.reject(fn {stop, _, _, _} -> is_nil(stop) end)
 
       (child_stops_context ++ neighbor_stops ++ parent_stops_context)
       |> Enum.uniq()

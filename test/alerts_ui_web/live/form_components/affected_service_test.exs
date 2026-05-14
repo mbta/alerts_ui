@@ -1105,7 +1105,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         {StopsRepo, [],
          [
            by_route_type: fn _route_type -> [@stop] end,
-           by_route: fn _, _, _opts -> [@stop] end
+           by_route: fn _, _, _opts -> [@stop] end,
+           all: fn _, _ -> [@stop] end
          ]},
         {RoutePatternsRepo, [],
          [
@@ -1198,6 +1199,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
            get: fn
              "place-sstat" -> @stop
              "place-crtst" -> @stop_2
+           end,
+           all: fn
+             ["filter[id]": "place-crtst"], _ -> []
+             ["filter[id]": "place-sstat"], _ -> []
            end
          ]},
         {RoutePatternsRepo, [],
