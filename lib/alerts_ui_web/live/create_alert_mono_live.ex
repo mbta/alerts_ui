@@ -277,7 +277,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   """
   @spec sync_socket(LiveView.Socket.t(), LiveView.unsigned_params()) :: LiveView.Socket.t()
   def sync_socket(socket, params) do
-    IO.inspect(socket.assigns, label: "SS")
     case AlertData.sync(socket.assigns.form.source, socket, params) do
       {:ok, socket} -> socket
       {:error, socket} -> socket

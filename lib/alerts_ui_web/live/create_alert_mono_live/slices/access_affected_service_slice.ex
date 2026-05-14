@@ -131,8 +131,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
         %AsyncResult{ok?: true} = async -> async.result
       end
 
-      IO.inspect(selections, label: "SELECTIONS")
-
       selected_stop_id = socket.assigns.form.params["stop_id"]
       stops = selections.available_facilities.stops
 
@@ -189,7 +187,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
 
   def render(assigns) do
     assigns = assign_unwrapped_selections(assigns, %Selections{loading: true})
-    IO.inspect(assigns.selections.facility_id_options, label: "FIO ON RENDER")
 
     ~H"""
     <div class="min-w-full flex flex-col" id="access_service_view">
