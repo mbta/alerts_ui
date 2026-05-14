@@ -563,8 +563,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
         %{route_type: route_type, effect_name: effect_name} = autotext_data,
         :description_template
       ) do
-      IO.inspect(route_type, label: "RT")
-      IO.inspect(effect_name, label: "EN")
+    IO.inspect(route_type, label: "RT")
+    IO.inspect(effect_name, label: "EN")
+
     %{
       description_template: %{
         route_count: route_count,

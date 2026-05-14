@@ -27,7 +27,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
 
   defstruct [
     :route_type,
-    :effect_name,
+    :effect_name
   ]
 
   defimpl Slice, for: __MODULE__ do

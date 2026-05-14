@@ -220,7 +220,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
       value={@this_effect_name}
       active={"#{@this_effect_name}" == @selected_effect_name}
     >
-      {humanize_effect_name(@selected_route_type, @this_effect_name)}
+      {@this_effect_name |> String.replace("_", " ") |> String.capitalize()}
     </.button_toggle>
     """
   end
