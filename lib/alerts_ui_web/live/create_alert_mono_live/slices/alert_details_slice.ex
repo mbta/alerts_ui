@@ -45,6 +45,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
   defimpl Slice, for: __MODULE__ do
     import Ecto.Changeset
 
+    alias Phoenix.LiveView.AsyncResult
+    alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
+    alias AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice
+    alias AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice
+
     @severity_options SeverityLevel.severity_tuples()
                       |> Enum.map(fn {desc, severity, _level} -> {desc, severity} end)
 
@@ -103,23 +108,115 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       |> validate_image_fields(image_size)
     end
 
-    def assigns(details_data, socket, _params) do
+    def assigns(_details_data, socket, _params) do
+      form = socket.assigns.form
+
       cause_options =
         formatted_causes(
-          Map.get(details_data, :route_type),
-          Map.get(details_data, :combination)
+          get_field(form.source, :route_type),
+          get_field(form.source, :combination)
         )
 
-      image_size = details_data.image_url |> get_image_size()
-      image_path = details_data.image_url |> get_image_path()
+      image_url = get_field(form.source, :image_url) || ""
+      image_size = get_image_size(image_url)
+      image_path = get_image_path(image_url)
 
-      assign(socket,
-        cause_options: cause_options,
-        severity_options: @severity_options,
-        image_size: image_size,
-        image_path: image_path
-      )
+      socket =
+        assign(socket,
+          cause_options: cause_options,
+          severity_options: @severity_options,
+          image_size: image_size,
+          image_path: image_path
+        )
+
+      if get_field(form.source, :header_sync_toggle) do
+        selections = unwrap_selections(socket)
+        selected = selected_objects(selections, form)
+
+        autotext_input =
+          %{
+            route_type: get_field(form.source, :route_type),
+            effect_name: effect_from_url_name(get_field(form.source, :effect_name)),
+            severity: get_field(form.source, :severity),
+            cause_detail: get_field(form.source, :cause_detail),
+            service_types: get_field(form.source, :service_types),
+            direction: get_field(form.source, :direction),
+            alert_timing: get_field(form.source, :alert_timing),
+            recurrence_days: get_field(form.source, :recurrence_days),
+            start_specifier: get_field(form.source, :active_period_start_specifier),
+            end_specifier: get_field(form.source, :active_period_end_specifier),
+            start_time_specifier: get_field(form.source, :active_period_start_time_specifier),
+            end_time_specifier: get_field(form.source, :active_period_end_time_specifier),
+            start_datetime: get_field(form.source, :active_period_start),
+            end_datetime: get_field(form.source, :active_period_end),
+            start_date: get_field(form.source, :active_period_start_date),
+            end_date: get_field(form.source, :active_period_end_date),
+            start_time: get_field(form.source, :active_period_start_time),
+            end_time: get_field(form.source, :active_period_end_time)
+          }
+          |> Map.merge(selected)
+
+        autotext_data = AlertDataToAutoText.build_autotext_data(autotext_input)
+        header_text = Templates.build_auto_text(autotext_data, :header_template)
+
+        updated_source = change(form.source, %{header_text: header_text})
+        assign(socket, :form, Phoenix.Component.to_form(updated_source))
+      else
+        socket
+      end
     end
+
+    defp unwrap_selections(socket) do
+      case Map.get(socket.assigns, :selections) do
+        %AsyncResult{ok?: true} = ar -> ar.result
+        selections when is_struct(selections) -> selections
+        _ -> nil
+      end
+    end
+
+    defp selected_objects(%AffectedServiceSlice.Selections{} = s, form) do
+      route_ids = get_field(form.source, :route_ids) || []
+      stop_ids = get_field(form.source, :stop_names_and_ids) || []
+      trip_ids = get_field(form.source, :trip_ids) || []
+
+      routes =
+        (s.available_routes || [])
+        |> Enum.filter(&(&1.id in route_ids))
+        |> maybe_include_virtual_green_line(route_ids)
+
+      stops = Enum.filter(s.available_stops || [], &(&1.id in stop_ids))
+      schedules = Enum.filter(s.available_schedules || [], &(&1.trip.id in trip_ids))
+
+      %{routes: routes, stops: stops, schedules: schedules}
+    end
+
+    defp selected_objects(%StopRouteServiceSlice.Selections{} = s, form) do
+      route_ids = get_field(form.source, :route_ids) || []
+      stop_ids = get_field(form.source, :stop_ids) || []
+
+      routes =
+        (s.available_routes || [])
+        |> Enum.filter(&(&1.id in route_ids))
+        |> maybe_include_virtual_green_line(route_ids)
+
+      stops = Enum.filter(s.available_stops || [], &(&1.id in stop_ids))
+
+      %{routes: routes, stops: stops}
+    end
+
+    defp selected_objects(%AccessAffectedServiceSlice.Selections{} = s, form) do
+      facility_ids = get_field(form.source, :facility_ids) || []
+
+      all_facilities =
+        if is_map(s.available_facilities),
+          do: Map.get(s.available_facilities, :facilities, []),
+          else: []
+
+      facilities = Enum.filter(all_facilities, &(&1.id in facility_ids))
+      %{facilities: facilities}
+    end
+
+    defp selected_objects(_selections, _form), do: %{}
 
     defp update_header_text(header_sync_toggle, details_data, autotext_data) do
       if header_sync_toggle == true do
