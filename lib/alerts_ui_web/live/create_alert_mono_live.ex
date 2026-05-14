@@ -152,7 +152,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   def handle_event("review", _params, socket) do
     # if valid:
     #   live navigate to `?review=true`, opening the modal
-    effect_name = socket.assigns.path_effect_name
+    effect_name = socket.assigns.form[:effect_name].value
     path = path_with_route_type_and_effect_name(socket.assigns, effect_name) <> "?review=true"
     # else:
     #   open error flash

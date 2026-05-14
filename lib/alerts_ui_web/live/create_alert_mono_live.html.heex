@@ -10,12 +10,13 @@
           form_type={@form_type}
         />
         <UrlSlice.render
+          :if={!show_details?(@form)}
           alert_id={@alert_id}
           path_route_type={@path_route_type}
           path_effect_name={@path_effect_name}
         />
         <.form
-          :if={show_details?(@path_route_type, @path_effect_name)}
+          :if={show_details?(@form)}
           for={@form}
           id="alert_form"
           class="form-control"
