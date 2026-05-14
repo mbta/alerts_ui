@@ -65,7 +65,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
     end
 
     defp new_url_params(alert_or_changeset, params) do
-      IO.inspect(params, label: "NUP")
       {base_route_type_int, base_effect_name} =
         case alert_or_changeset do
           %Changeset{} = changeset ->
@@ -130,8 +129,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
         } = assigns
       ) do
     if is_nil(path_route_type) || is_nil(path_effect_name) do
-      IO.inspect(path_route_type, label: "PRT")
-      IO.inspect(path_effect_name, label: "PEN")
       ~H"""
       <div class="min-w-full flex flex-col mb-8" id="route_view">
         <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">

@@ -217,7 +217,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
     {base_params, socket} =
       slices(socket)
-      |> IO.inspect(label: "INIT SLICES")
       |> Enum.map(fn slice_module ->
         slice_module
         |> struct()
@@ -233,10 +232,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
       end)
 
     socket_with_selections = if Map.get(socket.assigns, :selections) do
-      IO.inspect("BRANCH 1")
       socket
     else
-      IO.inspect("BRANCH 2")
       assign(socket, :selections, "hello world")
     end
 
@@ -278,7 +275,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   end
 
   def transform(%Changeset{} = changeset, params, socket) do
-    Enum.reduce(slices(socket) |> IO.inspect(label: "XFORM"), changeset, fn slice_module, changeset ->
+    Enum.reduce(slices(socket), changeset, fn slice_module, changeset ->
       changeset
       |> slice_from_changeset(slice_module)
       |> Slice.transform(changeset, params)
@@ -286,7 +283,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   end
 
   def validate(%Changeset{} = changeset, params, socket) do
-    Enum.reduce(slices(socket) |> IO.inspect(label: "VAL"), changeset, fn slice_module, changeset ->
+    Enum.reduce(slices(socket), changeset, fn slice_module, changeset ->
       changeset
       |> slice_from_changeset(slice_module)
       |> Slice.validate(changeset, params)
@@ -295,7 +292,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   end
 
   def assigns(socket, params) do
-    Enum.reduce(slices(socket) |> IO.inspect(label: "ASS"), socket, fn slice_module, socket ->
+    Enum.reduce(slices(socket), socket, fn slice_module, socket ->
       Slice.assigns(struct(slice_module), socket, params)
     end)
   end
