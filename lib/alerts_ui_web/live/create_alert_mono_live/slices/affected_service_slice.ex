@@ -216,123 +216,125 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
         Affected service
       </.h5>
-      <div class="mb-4 md:mb-0 w-full md:w-[25%] md:mr-8">
-        <.filtered_select
-          :if={filtered_select_for_route_type?(@form[:route_type].value)}
-          label={if @form[:route_type].value in [0, 1, 2], do: "Lines", else: "Routes"}
-          field={
-            if @form[:effect_name].value in get_single_route_effect_names(),
-              do: @form[:single_route_id],
-              else: @form[:route_ids]
-          }
-          filter_field={@form[:route_search_term]}
-          loading={selections_loading?(@selections)}
-          no_results={Enum.empty?(@selections.route_id_options)}
-          options={@selections.route_id_options}
-          class="h-full"
-          multiple={
-            if @form[:effect_name].value in get_single_route_effect_names(), do: false, else: true
-          }
-        />
-        <.toggle_checkgroup
-          :if={!filtered_select_for_route_type?(@form[:route_type].value)}
-          label={if @form[:route_type].value in [0, 1, 2], do: "Lines", else: "Routes"}
-          field={@form[:route_ids]}
-          options={@selections.route_id_options}
-          icon_type={icon_type(@form[:route_type].value)}
-          class="flex-col"
-          button_class="min-w-full"
-          show_icons={true}
-        />
-      </div>
+      <div class="flex flex-row flex-wrap mb-4 min-h-[38rem] md:min-h-[32rem]">
+        <div class="mb-4 md:mb-0 w-full md:w-[25%] md:mr-8">
+          <.filtered_select
+            :if={filtered_select_for_route_type?(@form[:route_type].value)}
+            label={if @form[:route_type].value in [0, 1, 2], do: "Lines", else: "Routes"}
+            field={
+              if @form[:effect_name].value in get_single_route_effect_names(),
+                do: @form[:single_route_id],
+                else: @form[:route_ids]
+            }
+            filter_field={@form[:route_search_term]}
+            loading={selections_loading?(@selections)}
+            no_results={Enum.empty?(@selections.route_id_options)}
+            options={@selections.route_id_options}
+            class="h-full"
+            multiple={
+              if @form[:effect_name].value in get_single_route_effect_names(), do: false, else: true
+            }
+          />
+          <.toggle_checkgroup
+            :if={!filtered_select_for_route_type?(@form[:route_type].value)}
+            label={if @form[:route_type].value in [0, 1, 2], do: "Lines", else: "Routes"}
+            field={@form[:route_ids]}
+            options={@selections.route_id_options}
+            icon_type={icon_type(@form[:route_type].value)}
+            class="flex-col"
+            button_class="min-w-full"
+            show_icons={true}
+          />
+        </div>
 
-      <.modal
-        :if={show_trips_input?(@form[:combination].value)}
-        id="dates-filter-modal"
-        header_text="Filter by day"
-        cancel_event_name="cancelled_modal"
-        accept_event_name="accepted_dates_modal"
-        accept_button_text="Apply"
-        target_id="#alert_form"
-        container_class="md:!w-[25rem]"
-      >
-        <.filtered_select
-          label="Upcoming dates"
-          field={@form[:modal_date]}
-          filter_field={@form[:modal_date_search_term]}
-          options={@selections.modal_options}
-          class="h-[32rem]"
-          prompt="All future trips"
-          multiple={false}
-        />
-      </.modal>
-      <div
-        :if={show_trips_input?(@form[:combination].value)}
-        class="flex flex-col justify-start md:w-[25%] md:mr-8"
-      >
-        <.select
-          :if={show_directions_input?(@form[:combination].value)}
-          label={
-            cond do
-              show_trips_input?(@form[:combination].value) -> "Trips"
-              show_stops_input?(@form[:combination].value) -> "Stops"
-              true -> "Direction"
-            end
-          }
-          field={@form[:direction]}
-          modal_filter_id="dates-filter-modal"
-          modal_filter_title={"Filter: #{@selections.filter_title_value}"}
-          modal_filter_active={date_filter_active?(@form[:modal_date].value, @selections.today)}
-          options={@selections.direction_options}
-          disabled={disable_stop_input?(@form[:route_ids].value)}
-          modal_filter_disabled={@form[:route_ids].value in [nil, []]}
-          prompt={if disable_stop_input?(@form[:route_ids].value), do: "", else: "Both Directions"}
+        <.modal
+          :if={show_trips_input?(@form[:combination].value)}
+          id="dates-filter-modal"
+          header_text="Filter by day"
+          cancel_event_name="cancelled_modal"
+          accept_event_name="accepted_dates_modal"
+          accept_button_text="Apply"
           target_id="#alert_form"
-        />
-        <.filtered_select
-          field={@form[:trip_ids]}
-          filter_field={@form[:trip_search_term]}
-          options={@selections.trip_id_options}
-          loading={selections_loading?(@selections)}
-          no_results={
-            Enum.empty?(@selections.trip_id_options) && !disable_trip_input?(@form[:route_ids].value)
-          }
-          class="min-w-full h-full"
-          disabled={disable_trip_input?(@form[:route_ids].value)}
-          prompt={if disable_trip_input?(@form[:route_ids].value), do: nil, else: "All Trips"}
-        />
-      </div>
-      <div class="flex flex-col justify-start w-full md:w-[25%]">
-        <.select
-          :if={
-            show_directions_input?(@form[:combination].value) &&
-              !show_trips_input?(@form[:combination].value)
-          }
-          label={if show_stops_input?(@form[:combination].value), do: "Stops", else: "Direction"}
-          field={@form[:direction]}
-          options={@selections.direction_options}
-          disabled={disable_stop_input?(@form[:route_ids].value)}
-          prompt={if disable_stop_input?(@form[:route_ids].value), do: "", else: "Both Directions"}
-        />
-        <.filtered_select
-          :if={show_stops_input?(@form[:combination].value)}
-          label={if show_trips_input?(@form[:combination].value), do: "Stops", else: nil}
-          field={@form[:stop_names_and_ids]}
-          selected={@selections.stop_selections}
-          filter_field={@form[:stop_search_term]}
-          options={@selections.stop_id_options}
-          loading={selections_loading?(@selections)}
-          no_results={
-            Enum.empty?(@selections.stop_id_options) && !disable_stop_input?(@form[:route_ids].value)
-          }
-          class="min-w-full h-full"
-          disabled={disable_stop_input?(@form[:route_ids].value)}
-          prompt={
-            if disable_stop_input?(@form[:route_ids].value),
-              do: nil,
-              else: "All Stops"
-          }
-        />
+          container_class="md:!w-[25rem]"
+        >
+          <.filtered_select
+            label="Upcoming dates"
+            field={@form[:modal_date]}
+            filter_field={@form[:modal_date_search_term]}
+            options={@selections.modal_options}
+            class="h-[32rem]"
+            prompt="All future trips"
+            multiple={false}
+          />
+        </.modal>
+        <div
+          :if={show_trips_input?(@form[:combination].value)}
+          class="flex flex-col justify-start md:w-[25%] md:mr-8"
+        >
+          <.select
+            :if={show_directions_input?(@form[:combination].value)}
+            label={
+              cond do
+                show_trips_input?(@form[:combination].value) -> "Trips"
+                show_stops_input?(@form[:combination].value) -> "Stops"
+                true -> "Direction"
+              end
+            }
+            field={@form[:direction]}
+            modal_filter_id="dates-filter-modal"
+            modal_filter_title={"Filter: #{@selections.filter_title_value}"}
+            modal_filter_active={date_filter_active?(@form[:modal_date].value, @selections.today)}
+            options={@selections.direction_options}
+            disabled={disable_stop_input?(@form[:route_ids].value)}
+            modal_filter_disabled={@form[:route_ids].value in [nil, []]}
+            prompt={if disable_stop_input?(@form[:route_ids].value), do: "", else: "Both Directions"}
+            target_id="#alert_form"
+          />
+          <.filtered_select
+            field={@form[:trip_ids]}
+            filter_field={@form[:trip_search_term]}
+            options={@selections.trip_id_options}
+            loading={selections_loading?(@selections)}
+            no_results={
+              Enum.empty?(@selections.trip_id_options) && !disable_trip_input?(@form[:route_ids].value)
+            }
+            class="min-w-full h-full"
+            disabled={disable_trip_input?(@form[:route_ids].value)}
+            prompt={if disable_trip_input?(@form[:route_ids].value), do: nil, else: "All Trips"}
+          />
+        </div>
+        <div class="flex flex-col justify-start w-full md:w-[25%]">
+          <.select
+            :if={
+              show_directions_input?(@form[:combination].value) &&
+                !show_trips_input?(@form[:combination].value)
+            }
+            label={if show_stops_input?(@form[:combination].value), do: "Stops", else: "Direction"}
+            field={@form[:direction]}
+            options={@selections.direction_options}
+            disabled={disable_stop_input?(@form[:route_ids].value)}
+            prompt={if disable_stop_input?(@form[:route_ids].value), do: "", else: "Both Directions"}
+          />
+          <.filtered_select
+            :if={show_stops_input?(@form[:combination].value)}
+            label={if show_trips_input?(@form[:combination].value), do: "Stops", else: nil}
+            field={@form[:stop_names_and_ids]}
+            selected={@selections.stop_selections}
+            filter_field={@form[:stop_search_term]}
+            options={@selections.stop_id_options}
+            loading={selections_loading?(@selections)}
+            no_results={
+              Enum.empty?(@selections.stop_id_options) && !disable_stop_input?(@form[:route_ids].value)
+            }
+            class="min-w-full h-full"
+            disabled={disable_stop_input?(@form[:route_ids].value)}
+            prompt={
+              if disable_stop_input?(@form[:route_ids].value),
+                do: nil,
+                else: "All Stops"
+            }
+          />
+        </div>
       </div>
       <p :if={false}>
         Selected stop ids: {(@form[:stop_ids].value || []) |> Enum.join(", ")} Selected route ids: {(@form[
