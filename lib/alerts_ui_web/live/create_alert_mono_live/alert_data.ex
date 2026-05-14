@@ -204,6 +204,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
           ]
         }
 
+  @actions [:new, :edit, :duplicate]
+
   @spec init(
           Socket.t(),
           Socket.unsigned_params(),
@@ -316,21 +318,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
         []
 
       form ->
-        route_type = socket.assigns.form[:route_type].value
-        effect_name = socket.assigns.form[:effect_name].value
         combination = socket.assigns.form[:combination].value
-        if is_nil(route_type) || is_nil(effect_name) do
-          [TimelineSlice, UrlSlice]
-        else
-          [
-            TimelineSlice,
-            UrlSlice,
-            ServiceSliceDispatcher.affected_service_component(combination),
-            AlertDetailsSlice,
-            ReminderTimesSlice,
-            DeliverySlice
-          ]
-        end
+        [
+          TimelineSlice,
+          UrlSlice,
+          ServiceSliceDispatcher.affected_service_component(combination),
+          AlertDetailsSlice,
+          ReminderTimesSlice,
+          DeliverySlice,
+          SubmitSlice
+        ]
     end
   end
 
