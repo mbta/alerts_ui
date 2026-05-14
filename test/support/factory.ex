@@ -76,7 +76,11 @@ defmodule AlertsUI.Support.Factory do
         "active_period" => [%{"start" => 1_681_419_933}],
         "alert_lifecycle" => "ONGOING",
         "cause" => "UNKNOWN_CAUSE",
-        "cause_detail" => "UNKNOWN_CAUSE",
+        "cause_detail" => %{
+          "translation" => [
+            %{"language" => "en", "text" => "UNKNOWN_CAUSE"}
+          ]
+        },
         "created_timestamp" => 1_681_419_934,
         "description_text" => %{
           "translation" => [
@@ -92,7 +96,11 @@ defmodule AlertsUI.Support.Factory do
           1_693_211_400
         ],
         "effect" => "STOP_MOVED",
-        "effect_detail" => "STOP_MOVE",
+        "effect_detail" => %{
+          "translation" => [
+            %{"language" => "en", "text" => "STOP_MOVE"}
+          ]
+        },
         "header_text" => %{
           "translation" => [
             %{

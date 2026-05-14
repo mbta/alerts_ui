@@ -19,7 +19,7 @@ defmodule AlertsUI.FeedOutput.CreateStandardAlertTest do
                  header_text: %{translation: [%{text: "hi mom", language: "en"}]},
                  informed_entity: [%{route_id: "1", trip: %{trip_id: "1"}}],
                  cause: :UNKNOWN_CAUSE,
-                 cause_detail: "UNKNOWN_CAUSE"
+                 cause_detail: %{translation: [%{text: "UNKNOWN_CAUSE", language: "en"}]}
                }
              }
     end
