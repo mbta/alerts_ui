@@ -262,31 +262,33 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
         />
       </.modal>
 
-      <.filtered_select
-        class="md:w-[25%]"
-        field={@form[:stop_ids]}
-        filter_field={@form[:stop_search_term]}
-        selected={@form[:stop_ids].value}
-        label="Stops"
-        loading={Map.get(@selections, :loading, true)}
-        modal_filter_active={@selections.selected_route_id}
-        modal_filter_id="routes-filter-modal"
-        modal_filter_title={"Filter: #{@selections.filter_title_value}"}
-        no_results={Enum.empty?(@selections.stop_id_options)}
-        options={@selections.stop_id_options}
-        target_id="#alert_form"
-      />
+      <div class="md:flex md:flex-row gap-x-8 mb-4 h-[32rem]">
+        <.filtered_select
+          class="md:w-[25%]"
+          field={@form[:stop_ids]}
+          filter_field={@form[:stop_search_term]}
+          selected={@form[:stop_ids].value}
+          label="Stops"
+          loading={Map.get(@selections, :loading, true)}
+          modal_filter_active={@selections.selected_route_id}
+          modal_filter_id="routes-filter-modal"
+          modal_filter_title={"Filter: #{@selections.filter_title_value}"}
+          no_results={Enum.empty?(@selections.stop_id_options)}
+          options={@selections.stop_id_options}
+          target_id="#alert_form"
+        />
 
-      <.filtered_select
-        label="Impacted routes"
-        field={@form[:route_ids]}
-        filter_field={@form[:routes_search_term]}
-        loading={Map.get(@selections, :loading, true)}
-        no_results={Enum.empty?(@selections.route_id_options) && @selections.disable_routes_input?}
-        disabled={@selections.disable_routes_input?}
-        options={@selections.route_id_options}
-        class="md:w-[25%]"
-      />
+        <.filtered_select
+          label="Impacted routes"
+          field={@form[:route_ids]}
+          filter_field={@form[:routes_search_term]}
+          loading={Map.get(@selections, :loading, true)}
+          no_results={Enum.empty?(@selections.route_id_options) && @selections.disable_routes_input?}
+          disabled={@selections.disable_routes_input?}
+          options={@selections.route_id_options}
+          class="md:w-[25%]"
+        />
+      </div>
       <p :if={@selections.show_stop_ids?}>
         Selected stop ids: {(@form[:stop_ids].value || []) |> Enum.join(", ")}
       </p>
