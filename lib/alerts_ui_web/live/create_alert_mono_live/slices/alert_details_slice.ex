@@ -4,6 +4,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}
   alias AlertsUI.Models.{Cause, EnhancedSchedule, SeverityLevel}
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
+  alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
   use AlertsUIWeb, :html
 
   defstruct [
@@ -26,6 +27,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     :alert_timing,
     :recurrence_days,
     # affected service
+    :severity,
+    :cause_detail,
     direction: [],
     route_ids: [],
     stop_ids: [],
@@ -36,8 +39,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     header_sync_toggle: true,
     description_text: "",
     description_sync_toggle: true,
-    cause_detail: "",
-    severity: 4,
     image_url: "",
     url: ""
   ]
@@ -57,18 +58,41 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     @cdn_host "cdn.mbta.com"
 
-    def mount(_details_data, socket, _base_params), do: socket
+    def mount(details_data, socket, _base_params), do: socket
 
     def extract(details_data, %Alert{} = _alert, _params) do
+      IO.inspect("EXTRACT!!!")
       details_data
       |> struct()
     end
 
     def transform(details_data, changeset, params) do
-      [_, target | _] = Map.get(params, "_target", [nil, nil])
+      severity =
+        if is_nil(details_data.severity) do
+          GetKeyForModeEffect.get_value_of_key(
+            :default_severity,
+            details_data.route_type,
+            details_data.effect_name
+          )
+        else
+          details_data.severity
+        end
+
+      default_cause = if is_nil(details_data.cause_detail) do
+                GetKeyForModeEffect.get_value_of_key(
+          :default_cause,
+          details_data.route_type,
+          details_data.effect_name
+        )
+      else
+        details_data.cause_details
+      end
+      ####################
+
+      [_, target] = Map.get(params, "_target", [nil, nil])
 
       # TODO how to get "selected x"
-      # do this inside the assigns instead :)
+      # do this inside the assigns instead? not working
       autotext_data = AlertDataToAutoText.build_autotext_data(translated_details(details_data))
 
       header_sync_toggle =
@@ -89,17 +113,19 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
       description_text =
         update_description_text(description_sync_toggle, details_data, autotext_data)
-
+        #####################
       changeset
       |> change(%{
         header_sync_toggle: header_sync_toggle,
         header_text: header_text,
         description_sync_toggle: description_sync_toggle,
-        description_text: description_text
+        description_text: description_text,
+        severity: severity
       })
     end
 
     def validate(details_data, changeset, _params) do
+            IO.inspect(details_data.severity, label: :BEING_CALLED)
       IO.inspect(details_data.route_type, label: :route_type)
       image_size = details_data.image_url |> get_image_size()
 
@@ -130,7 +156,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
           image_path: image_path
         )
 
-      if get_field(form.source, :header_sync_toggle) do
+      socket = if get_field(form.source, :header_sync_toggle) do
         selections = unwrap_selections(socket)
         selected = selected_objects(selections, form)
 
@@ -165,6 +191,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       else
         socket
       end
+
+      socket
+      |> assign(
+        cause_options: cause_options,
+        severity_options: @severity_options,
+        image_size: image_size,
+        image_path: image_path
+      )
     end
 
     defp unwrap_selections(socket) do
@@ -229,6 +263,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     defp update_description_text(description_sync_toggle, details_data, autotext_data) do
       if description_sync_toggle == true do
+        # TODO hopefully this works better once we get this into assigns
         ""
         # Templates.build_auto_text(autotext_data, :description_template)
       else

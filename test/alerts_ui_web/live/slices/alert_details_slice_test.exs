@@ -7,7 +7,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
   import Mock
   import Test.Support.Helpers
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice
-    alias AlertsUI.Alerts
+  alias AlertsUI.Alerts
   alias AlertsUI.Models.EnhancedSchedule
   alias AlertsUIWeb.FormComponents.AlertDetails
   alias AlertsUIWeb.FormComponents.Helpers.DateTimeFormatters
@@ -21,7 +21,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
 
-    @todays_date DateTime.utc_now()
+  @todays_date DateTime.utc_now()
                |> DateTime.shift_zone!("America/New_York")
                |> DateTime.to_date()
 
@@ -84,7 +84,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
     ]
   }
 
-    describe "component" do
+  describe "component" do
     @tag :logged_in_user
     test "renders", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
@@ -92,15 +92,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
       assert render(view) =~ ~s(id="details_view")
     end
 
-      @tag :logged_in_user
-      test "gets causes correctly", %{conn: conn} do
+    @tag :logged_in_user
+    test "gets causes correctly", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
       get_to_submission_page_refactor(view, "Ferry", "Delay")
       assert render(view) =~ ~s(fog)
     end
 
-          @tag :logged_in_user
-        test "capitalizes Amtrak in causes", %{conn: conn} do
+    @tag :logged_in_user
+    test "capitalizes Amtrak in causes", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
       get_to_submission_page_refactor(view, "Commuter Rail", "Delay")
 
@@ -117,6 +117,37 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
       assert view
              |> render() =~ ~s(Amtrak)
+    end
+
+    @tag :logged_in_user
+    test "capitalizes Coast Guard in causes", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      get_to_submission_page_refactor(view, "Ferry", "Delay")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "cause_detail" => "COAST_GUARD_RESTRICTION"
+        }
+      })
+
+      refute view
+             |> render() =~ ~s(coast guard)
+
+      assert view
+             |> render() =~ ~s(Coast Guard)
+    end
+  end
+
+  describe "severity" do
+    @tag :logged_in_user
+    test "gets default severity correctly", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      get_to_submission_page_refactor(view, "Ferry", "Delay")
+
+      assert view
+             |> render() =~ ~s(about 10 minutes)
     end
   end
 end
