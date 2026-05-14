@@ -1201,8 +1201,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
              "place-crtst" -> @stop_2
            end,
            all: fn
-             ["filter[id]": "place-crtst"], _ -> []
-             ["filter[id]": "place-sstat"], _ -> []
+             ["filter[id]": "place-sstat"], _ -> [@stop]
+             ["filter[id]": "place-crtst"], _ -> [@stop_2]
            end
          ]},
         {RoutePatternsRepo, [],

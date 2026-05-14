@@ -31,7 +31,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
         {RoutesRepo, [],
          [get: fn route_id, _opts -> %Route{id: route_id, type: 1, name: route_id} end]},
-        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         existing_alert = insert(:alert, alert_id: "0")
 
@@ -138,7 +138,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
         {RoutesRepo, [],
          [get: fn route_id, _opts -> %Route{id: route_id, type: 1, name: route_id} end]},
-        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 1,
@@ -193,7 +193,7 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]},
-        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 1,
@@ -220,7 +220,7 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]},
-        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 1,
@@ -247,7 +247,7 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]},
-        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 1,
@@ -275,7 +275,7 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]},
-        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 1,
@@ -302,7 +302,7 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]},
-        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 1,
@@ -340,7 +340,7 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]},
-        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 1,
@@ -378,7 +378,7 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]},
-        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 1,
@@ -415,7 +415,7 @@ defmodule AlertsUI.AlertBuilderTest do
 
       with_mocks([
         {FacilitiesRepo, [], [get: fn _facility_id -> facility end]},
-        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: nil,
@@ -517,7 +517,7 @@ defmodule AlertsUI.AlertBuilderTest do
                }
            end
          ]},
-        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 1,
@@ -589,7 +589,7 @@ defmodule AlertsUI.AlertBuilderTest do
                }
            end
          ]},
-        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 4,
@@ -656,7 +656,7 @@ defmodule AlertsUI.AlertBuilderTest do
                }
            end
          ]},
-        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 3,
@@ -745,7 +745,7 @@ defmodule AlertsUI.AlertBuilderTest do
                %Route{id: "Green-D", line_id: "line-Green", type: 0, description: :rapid_transit}
            end
          ]},
-        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 1,
@@ -774,6 +774,8 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "it correctly removes green line routes for shuttle and suspension alerts if they only have 1 associated stop" do
+      stops = [%Stop{id: "a"}, %Stop{id: "b"}, %Stop{id: "c"}]
+
       with_mocks([
         {RoutePatternsRepo, [],
          [
@@ -785,9 +787,9 @@ defmodule AlertsUI.AlertBuilderTest do
          [
            by_route: fn
              "Green-E", _ -> [%Stop{id: "a"}]
-             _, _ -> [%Stop{id: "a"}, %Stop{id: "b"}, %Stop{id: "c"}]
+             _, _ -> stops
            end,
-           all: fn _params, _opts -> [] end
+           all: fn ["filter[id]": "a,b,c"], _opts -> stops end
          ]},
         {RoutesRepo, [],
          [
@@ -924,7 +926,7 @@ defmodule AlertsUI.AlertBuilderTest do
                }
            end
          ]},
-        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         existing_alert = insert(:alert, alert_id: "0")
 
@@ -989,7 +991,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
         {RoutesRepo, [],
          [get: fn route_id, _opts -> %Route{id: route_id, type: 2, name: "CapeFLYER"} end]},
-        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 2,
@@ -1046,7 +1048,16 @@ defmodule AlertsUI.AlertBuilderTest do
            end
          ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]},
-        {StopsRepo, [], [all: fn _params, _opts -> [%Stop{id: "place-nubn", parent_id: nil}] end]}
+        {StopsRepo, [],
+         [
+           all: fn ["filter[id]": "place-nubn,1,2"], _opts ->
+             [
+               %Stop{id: "place-nubn", parent_id: nil},
+               %Stop{id: 1, parent_id: nil},
+               %Stop{id: 2, parent_id: nil}
+             ]
+           end
+         ]}
       ]) do
         alert_data = %{
           route_type: 3,
@@ -1101,7 +1112,7 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [], by_route_id: fn _route_id, _opts -> [] end},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]},
-        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 3,
@@ -1134,7 +1145,7 @@ defmodule AlertsUI.AlertBuilderTest do
            by_route_id: fn _route_id, _opts -> [] end
          ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]},
-        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 3,
@@ -1170,7 +1181,7 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]},
-        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 3,
@@ -1236,7 +1247,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {StopsRepo, [],
          [
            by_route: fn _route_id, _direction -> parent_stops ++ child_stops end,
-           all: fn _params, _opts -> [] end
+           all: fn ["filter[id]": "a,b,c"], _opts -> parent_stops end
          ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]}
       ]) do
@@ -1266,6 +1277,30 @@ defmodule AlertsUI.AlertBuilderTest do
                    agency_id: "1",
                    direction_id: 1,
                    stop_id: "3"
+                 },
+                 %{
+                   activities: [:BOARD, :RIDE],
+                   route_id: "57",
+                   route_type: 3,
+                   agency_id: "1",
+                   direction_id: 1,
+                   stop_id: "a"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "57",
+                   route_type: 3,
+                   agency_id: "1",
+                   direction_id: 1,
+                   stop_id: "b"
+                 },
+                 %{
+                   activities: [:EXIT, :RIDE],
+                   route_id: "57",
+                   route_type: 3,
+                   agency_id: "1",
+                   direction_id: 1,
+                   stop_id: "c"
                  }
                ]
       end
@@ -1305,7 +1340,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {StopsRepo, [],
          [
            by_route: fn _route_id, _direction -> parent_stops end,
-           all: fn _params, _opts -> [] end
+           all: fn ["filter[id]": "1,2"], _opts -> [%Stop{id: "1"}, %Stop{id: "2"}] end
          ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]}
       ]) do
@@ -1382,7 +1417,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {StopsRepo, [],
          [
            by_route: fn _route_id, _direction -> parent_stops ++ child_stops end,
-           all: fn _params, _opts -> parent_stops end
+           all: fn ["filter[id]": "place-WR-0067,place-WR-0075"], _opts -> parent_stops end
          ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2} end]}
       ]) do
@@ -1489,7 +1524,13 @@ defmodule AlertsUI.AlertBuilderTest do
            by_route: fn _route_id, _direction ->
              parent_stops ++ child_stops_0 ++ child_stops_1
            end,
-           all: fn _params, _opts -> parent_stops end
+           all: fn ["filter[id]": "place-alfcl,place-davis,place-portr"], _opts ->
+             [
+               %Stop{id: "place-alfcl"},
+               %Stop{id: "place-davis"},
+               %Stop{id: "place-portr"}
+             ]
+           end
          ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
       ]) do
@@ -1635,7 +1676,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {StopsRepo, [],
          [
            by_route: fn _route_id, _direction -> parent_stops ++ child_stops end,
-           all: fn _params, _opts -> parent_stops end
+           all: fn ["filter[id]": "a,b"], _opts -> [%Stop{id: "a"}, %Stop{id: "b"}] end
          ]},
         {RoutesRepo, [],
          [get: fn route_id, _opts -> %{id: route_id, type: 3, description: :local_bus} end]}
@@ -1777,7 +1818,7 @@ defmodule AlertsUI.AlertBuilderTest do
            by_route: fn
              "Red", _ -> [jfk, ashmont, braintree]
            end,
-           all: fn _params, _opts -> parent_stops end
+           all: fn ["filter[id]": "place-jfk,place-asmnl,place-brntn"], _opts -> parent_stops end
          ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
       ]) do
@@ -1889,7 +1930,6 @@ defmodule AlertsUI.AlertBuilderTest do
       jfk = %Stop{id: "place-jfk"}
       ashmont = %Stop{id: "place-asmnl"}
       braintree = %Stop{id: "place-brntn"}
-      parent_stops = [jfk, ashmont, braintree]
 
       jfk_child = %Stop{id: "jfk-child", parent_id: jfk.id}
       ashmont_child = %Stop{id: "ashmont-child", parent_id: ashmont.id}
@@ -1951,7 +1991,7 @@ defmodule AlertsUI.AlertBuilderTest do
            by_route: fn
              "Red", _ -> [jfk, ashmont, braintree]
            end,
-           all: fn _params, _opts -> parent_stops end
+           all: fn ["filter[id]": "place-jfk,place-asmnl"], _opts -> [jfk, ashmont] end
          ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
       ]) do
@@ -2031,7 +2071,6 @@ defmodule AlertsUI.AlertBuilderTest do
       jfk = %Stop{id: "place-jfk"}
       savin_hill = %Stop{id: "place-shmnl"}
       north_quincy = %Stop{id: "place-nqncy"}
-      parent_stops = [andrew, jfk, savin_hill, north_quincy]
 
       andrew_child_s = %Stop{id: "andrew-child-s", parent_id: andrew.id, vehicle_type: 1}
       andrew_child_n = %Stop{id: "andrew-child-n", parent_id: andrew.id, vehicle_type: 1}
@@ -2139,7 +2178,9 @@ defmodule AlertsUI.AlertBuilderTest do
            by_route: fn
              "Red", _ -> [jfk, savin_hill, andrew, north_quincy]
            end,
-           all: fn _params, _opts -> parent_stops end
+           all: fn ["filter[id]": "place-andrw,place-jfk,place-nqncy"], _opts ->
+             [andrew, jfk, north_quincy]
+           end
          ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
       ]) do
@@ -2267,7 +2308,6 @@ defmodule AlertsUI.AlertBuilderTest do
       hynes = %Stop{id: "place-hymnl"}
       kenmore = %Stop{id: "place-kencl"}
       fenway = %Stop{id: "place-fenwy"}
-      parent_stops = [hynes, kenmore, fenway]
 
       hynes_child = %Stop{id: "hynes-child", parent_id: hynes.id}
       kenmore_child = %Stop{id: "kenmore-child", parent_id: kenmore.id}
@@ -2357,7 +2397,9 @@ defmodule AlertsUI.AlertBuilderTest do
              "Green-D", _ -> [hynes, kenmore, fenway]
              "Green-E", _ -> []
            end,
-           all: fn _params, _opts -> parent_stops end
+           all: fn ["filter[id]": "place-hymnl,place-kencl,place-fenwy"], _opts ->
+             [hynes, kenmore, fenway]
+           end
          ]},
         {RoutesRepo, [],
          [
@@ -2604,7 +2646,7 @@ defmodule AlertsUI.AlertBuilderTest do
            get: fn route_id, _opts -> %Route{id: route_id, type: 3} end,
            green_line: fn -> @green_line_virtual_route end
          ]},
-        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 3,
@@ -2645,7 +2687,7 @@ defmodule AlertsUI.AlertBuilderTest do
            end,
            green_line: fn -> @green_line_virtual_route end
          ]},
-        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 1,
@@ -2701,7 +2743,7 @@ defmodule AlertsUI.AlertBuilderTest do
            get: fn route_id, _opts -> %Route{id: route_id, type: 3} end,
            green_line: fn -> @green_line_virtual_route end
          ]},
-        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 3,
@@ -2744,7 +2786,7 @@ defmodule AlertsUI.AlertBuilderTest do
            end,
            green_line: fn -> @green_line_virtual_route end
          ]},
-        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 1,
@@ -2800,7 +2842,7 @@ defmodule AlertsUI.AlertBuilderTest do
     test "properly builds RDT informed entity" do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
-        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 3,
@@ -2859,7 +2901,7 @@ defmodule AlertsUI.AlertBuilderTest do
     test "properly builds RDT informed entity with multiple routes, multiple trips" do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
-        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 3,
@@ -2919,7 +2961,7 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]},
-        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 3,
@@ -2947,7 +2989,7 @@ defmodule AlertsUI.AlertBuilderTest do
     test "RDTS informed entity with trips and no stops selected treated as RDT" do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
-        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 3,
@@ -3049,7 +3091,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {StopsRepo, [],
          [
            by_route: fn _route_id, _direction -> parent_stops ++ child_stops end,
-           all: fn _params, _opts -> parent_stops end
+           all: fn ["filter[id]": "a,b,c"], _opts -> parent_stops end
          ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]}
       ]) do
@@ -3112,7 +3154,7 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [], by_route_id: fn _route_id, _opts -> [] end},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]},
-        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 3,
@@ -3200,7 +3242,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {StopsRepo, [],
          [
            by_route: fn _route_id, _direction -> parent_stops ++ child_stops end,
-           all: fn _params, _opts -> parent_stops end
+           all: fn ["filter[id]": "place-FR-0201,place-FR-0219"], _opts -> parent_stops end
          ]},
         {SchedulesRepo, [],
          [trip: fn "CR-627754-435" -> %Trip{id: "CR-627754-435", direction_id: 0} end]},
@@ -3302,7 +3344,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {StopsRepo, [],
          [
            by_route: fn _route_id, _direction -> parent_stops ++ child_stops end,
-           all: fn _params, _opts -> parent_stops end
+           all: fn ["filter[id]": "Boat-Long"], _opts -> parent_stops end
          ]},
         {SchedulesRepo, [],
          [
@@ -3380,7 +3422,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {StopsRepo, [],
          [
            by_route: fn _route_id, _direction -> parent_stops ++ child_stops end,
-           all: fn _params, _opts -> parent_stops end
+           all: fn ["filter[id]": "place-WR-0067,place-WR-0075"], _opts -> parent_stops end
          ]},
         {SchedulesRepo, [],
          [trip: fn "CR-627678-295" -> %Trip{id: "CR-627678-295", direction_id: 0} end]},
@@ -3490,7 +3532,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {StopsRepo, [],
          [
            by_route: fn _route_id, _direction -> parent_stops ++ child_stops end,
-           all: fn _params, _opts -> parent_stops end
+           all: fn ["filter[id]": "place-WR-0067,place-WR-0075"], _opts -> parent_stops end
          ]},
         {SchedulesRepo, [],
          [trip: fn "CR-627678-295" -> %Trip{id: "CR-627678-295", direction_id: 0} end]},
@@ -3610,7 +3652,7 @@ defmodule AlertsUI.AlertBuilderTest do
            by_route: fn _route_id, _direction ->
              parent_stops ++ child_stops_0 ++ child_stops_1
            end,
-           all: fn _params, _opts -> parent_stops end
+           all: fn ["filter[id]": "place-FR-0201,place-FR-0219"], _opts -> parent_stops end
          ]},
         {SchedulesRepo, [], [trip: fn ^trip_id -> %Trip{id: trip_id, direction_id: 0} end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2} end]}
@@ -3715,7 +3757,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {StopsRepo, [],
          [
            by_route: fn _route_id, _direction -> parent_stops ++ child_stops end,
-           all: fn _params, _opts -> parent_stops end
+           all: fn ["filter[id]": "a,b"], _opts -> parent_stops end
          ]},
         {RoutesRepo, [],
          [
@@ -3877,7 +3919,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {StopsRepo, [],
          [
            by_route: fn _route_id, _direction -> parent_stops ++ child_stops end,
-           all: fn _params, _opts -> parent_stops end
+           all: fn ["filter[id]": "Boat-Charlestown"], _opts -> parent_stops end
          ]},
         {RoutesRepo, [],
          [get: fn "Boat-F4", _opts -> %Route{id: "Boat-F4", line_id: "line-Boat-F4", type: 4} end]}
@@ -3930,7 +3972,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {StopsRepo, [],
          [
            by_route: fn _route_id, _direction -> parent_stops ++ child_stops end,
-           all: fn _params, _opts -> parent_stops end
+           all: fn ["filter[id]": "4561"], _opts -> parent_stops end
          ]},
         {RoutesRepo, [],
          [
@@ -4001,7 +4043,9 @@ defmodule AlertsUI.AlertBuilderTest do
              "Green-E", 0 -> []
              "Green-E", 1 -> []
            end,
-           all: fn _params, _opts -> parent_stops end
+           all: fn ["filter[id]": "place-hymnl,place-kencl,place-fenwy"], _opts ->
+             parent_stops
+           end
          ]},
         {RoutesRepo, [],
          [
@@ -4157,7 +4201,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {StopsRepo, [],
          [
            by_route: fn _route_id, _direction -> parent_stops ++ child_stops end,
-           all: fn _params, _opts -> parent_stops end
+           all: fn ["filter[id]": "place-PB-0194"], _opts -> parent_stops end
          ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2} end]}
       ]) do
@@ -4191,7 +4235,7 @@ defmodule AlertsUI.AlertBuilderTest do
         description_text: "test description"
       }
 
-      with_mock(StopsRepo, [], all: fn _params, _opts -> [] end) do
+      with_mock(StopsRepo, [], all: fn ["filter[id]": ""], _opts -> [] end) do
         result = AlertBuilder.build_alert(alert_data, nil)
 
         assert result.informed_entity == [
@@ -4213,7 +4257,7 @@ defmodule AlertsUI.AlertBuilderTest do
         description_text: "test description"
       }
 
-      with_mock(StopsRepo, [], all: fn _params, _opts -> [] end) do
+      with_mock(StopsRepo, [], all: fn ["filter[id]": ""], _opts -> [] end) do
         result = AlertBuilder.build_alert(alert_data, nil)
 
         assert result.informed_entity == [
@@ -4240,7 +4284,7 @@ defmodule AlertsUI.AlertBuilderTest do
         description_text: "test description"
       }
 
-      with_mock(StopsRepo, [], all: fn _params, _opts -> [] end) do
+      with_mock(StopsRepo, [], all: fn ["filter[id]": ""], _opts -> [] end) do
         result = AlertBuilder.build_alert(alert_data, nil)
 
         assert result.informed_entity == [
@@ -4271,7 +4315,7 @@ defmodule AlertsUI.AlertBuilderTest do
         description_text: "test description"
       }
 
-      with_mock(StopsRepo, [], all: fn _params, _opts -> [] end) do
+      with_mock(StopsRepo, [], all: fn ["filter[id]": ""], _opts -> [] end) do
         result = AlertBuilder.build_alert(alert_data, nil)
 
         assert result.informed_entity == [
@@ -4347,7 +4391,8 @@ defmodule AlertsUI.AlertBuilderTest do
 
     with_mocks([
       {FacilitiesRepo, [], [get: fn _facility_id -> facility end]},
-      {StopsRepo, [], [get!: fn _stop_id -> stop end, all: fn _params, _opts -> [] end]},
+      {StopsRepo, [],
+       [get!: fn _stop_id -> stop end, all: fn ["filter[id]": ""], _opts -> [] end]},
       {RoutesRepo, [], [by_stop: fn _stop_id -> [route, shuttle_route] end]}
     ]) do
       result = AlertBuilder.build_alert(alert_data, :ACCESS)
@@ -4419,7 +4464,8 @@ defmodule AlertsUI.AlertBuilderTest do
 
     with_mocks([
       {FacilitiesRepo, [], [get: fn _facility_id -> facility end]},
-      {StopsRepo, [], [get!: fn _stop_id -> stop end, all: fn _params, _opts -> [] end]},
+      {StopsRepo, [],
+       [get!: fn _stop_id -> stop end, all: fn ["filter[id]": ""], _opts -> [] end]},
       {RoutesRepo, [], [by_stop: fn _stop_id -> [route] end]}
     ]) do
       result = AlertBuilder.build_alert(alert_data, :ACCESS)
@@ -4445,7 +4491,7 @@ defmodule AlertsUI.AlertBuilderTest do
       direction: "default"
     }
 
-    with_mock(StopsRepo, [], all: fn _params, _opts -> [] end) do
+    with_mock(StopsRepo, [], all: fn ["filter[id]": ""], _opts -> [] end) do
       result = AlertBuilder.build_alert(alert_data, :ACCESS, ~U[2024-04-30 05:54:00Z])
 
       assert %{original_direction_selections: nil} = result
@@ -4476,7 +4522,7 @@ defmodule AlertsUI.AlertBuilderTest do
 
     with_mocks([
       {FacilitiesRepo, [], [get: fn _facility_id -> facility end]},
-      {StopsRepo, [], all: fn _params, _opts -> [] end}
+      {StopsRepo, [], all: fn ["filter[id]": ""], _opts -> [] end}
     ]) do
       result = AlertBuilder.build_alert(alert_data, :ACCESS)
 
@@ -4498,7 +4544,7 @@ defmodule AlertsUI.AlertBuilderTest do
       route_ids: []
     }
 
-    with_mock(StopsRepo, [], all: fn _params, _opts -> [] end) do
+    with_mock(StopsRepo, [], all: fn ["filter[id]": ""], _opts -> [] end) do
       result = AlertBuilder.build_alert(alert_data, :RDS)
 
       assert result.informed_entity == []
@@ -4514,7 +4560,7 @@ defmodule AlertsUI.AlertBuilderTest do
       route_ids: []
     }
 
-    with_mock(StopsRepo, [], all: fn _params, _opts -> [] end) do
+    with_mock(StopsRepo, [], all: fn ["filter[id]": ""], _opts -> [] end) do
       result =
         AlertBuilder.build_alert(alert_data, :RDS, ~U[2024-04-30 05:54:00Z],
           no_informed_entity: true
@@ -4537,7 +4583,7 @@ defmodule AlertsUI.AlertBuilderTest do
       route_ids: []
     }
 
-    with_mock(StopsRepo, [], all: fn _params, _opts -> [] end) do
+    with_mock(StopsRepo, [], all: fn ["filter[id]": ""], _opts -> [] end) do
       result = AlertBuilder.build_alert(alert_data, :RDS, current_time, no_active_periods: true)
       assert result.active_period_start == start_time
       refute Map.get(result, :active_periods)

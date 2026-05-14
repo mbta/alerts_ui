@@ -1047,7 +1047,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
              "place-sstat" -> @stop
            end,
            get: fn _ -> @stop end,
-           all: fn _, _ -> [] end
+           all: fn ["filter[id]": "place-sstat"], _ -> [@stop] end
          ]},
         {RoutePatternsRepo, [],
          [

@@ -200,7 +200,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
          [
            by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end,
-           all: fn _params, _opts -> [@stop] end
+           all: fn ["filter[id]": "place-aqucl"], _opts -> [@stop] end
          ]},
         {RoutePatternsRepo, [],
          [

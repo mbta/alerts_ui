@@ -63,7 +63,8 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
            by_route_id: fn _route_id, _opts -> [@route_pattern] end,
            included_stops_by_route_id: fn _route_id, _ -> [@stop] end
          ]},
-        {StopsRepo, [], [by_route: fn _, _, _opts -> [@stop] end, all: fn _, _ -> [] end]},
+        {StopsRepo, [],
+         [by_route: fn _, _, _opts -> [@stop] end, all: fn ["filter[id]": ""], _ -> [@stop] end]},
         {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]}
       ]) do
         insert(:alert, alert_id: "1")
@@ -185,7 +186,8 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
     test "submitting the second part of the form saves the alert", %{conn: conn} do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [@route_pattern] end]},
-        {StopsRepo, [], by_route: fn _, _, _opts -> [@stop] end, all: fn _, _ -> [@stop] end},
+        {StopsRepo, [],
+         by_route: fn _, _, _opts -> [@stop] end, all: fn ["filter[id]": ""], _ -> [@stop] end},
         {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
@@ -304,7 +306,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
            "2" -> stop
            "3" -> child_stop
          end,
-         all: fn _, _ -> [stop] end}
+         all: fn ["filter[id]": ""], _ -> [stop, child_stop] end}
       ]) do
         conn = log_in_user(conn)
         {:ok, view, _html} = live(conn, "/alerts/new")
@@ -353,7 +355,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
            "2" -> stop
            "3" -> child_stop
          end,
-         all: fn _, _ -> [stop] end}
+         all: fn ["filter[id]": ""], _ -> [stop, child_stop] end}
       ]) do
         conn =
           conn

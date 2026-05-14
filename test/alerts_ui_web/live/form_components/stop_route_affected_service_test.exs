@@ -156,7 +156,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         {StopsRepo, [],
          [
            by_route_type: fn _route_type, _ -> [@stop] end,
-           by_route: fn _routes, _direction, _opts -> [@stop] end
+           by_route: fn _routes, _direction, _opts -> [@stop] end,
+           all: fn ["filter[id]": "place-aqucl"], _opts -> [@stop] end
          ]}
       ]) do
         {:ok, view, _html} =
@@ -725,7 +726,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
            by_route: fn _, _, _opts -> [@stop, @stop_two] end,
            get: fn _id -> @stop end,
            get_parent: fn _id -> nil end,
-           all: fn _params, _opts -> [] end
+           all: fn ["filter[id]": "place-aqucl,place-pktrm"], _opts -> [@stop, @stop_two] end
          ]},
         {RoutePatternsRepo, [],
          [
@@ -862,7 +863,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
            by_route: fn _, _ -> [@stop] end,
            by_route: fn _, _, _opts -> [@stop] end,
            get: fn _id -> @stop end,
-           all: fn _params, _opts -> [] end
+           all: fn ["filter[id]": "place-aqucl"], _opts -> [@stop] end
          ]},
         {RoutePatternsRepo, [],
          [
