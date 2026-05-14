@@ -40,7 +40,7 @@ Phoenix LiveView app that creates and manages MBTA transit alerts. Alerts are pu
 
 **Two alert creation flows exist in parallel:**
 - `create_alert_live.ex` — older multi-route alert flow
-- `create_alert_mono_live/` — newer single-route ("mono") flow, organized as a directory with `alert_data.ex`, `slice.ex`, `slices/`, and `title.ex`
+- `create_alert_mono_live/` — newer single-route ("mono") flow. `AlertData` is the Ecto-backed struct holding the full form state; it manages a list of `Slice` structs. Each slice implements the `Slice` protocol (`slice.ex`) with callbacks: `mount/3`, `extract/3`, `transform/3`, `validate/3`, `assigns/3`. The `combination` field on `AlertData` controls which slices are active (e.g., `:R`, `:RDS`, `:RDTS`, `:SR`, `:ACCESS`).
 
 **Form components** (`live/form_components/`) are shared LiveView function components for alert form fields: `affected_service.ex`, `route_type_and_effect.ex`, `time_range.ex`, `delivery.ex`, `rider_reminders.ex`, `submit.ex`, etc.
 
@@ -49,6 +49,22 @@ Phoenix LiveView app that creates and manages MBTA transit alerts. Alerts are pu
 **Feature flags** use two systems: client-side via Laboratory library (`/_flags`) and server-side (`/feature_flags`).
 
 **Key models:** `Alert`, `InformedEntity`, `ActivePeriod`, `Cause`, `Effect`, `User`. PaperTrail provides audit history on alerts.
+
+**External integrations:**
+- Feed output writes GTFS-RT protobuf to S3 via `FeedExporter` Oban job
+- Trapeze SFTP (`lib/alerts_ui/trapeze/`) imports work orders from MBTA's SFTP server
+- IBI alert importer syncs from an external JSON/protobuf API
+- GTFS validation runs via scheduled Oban workers against the MBTA API
+
+## Environment Setup
+
+Copy `.envrc.example` to `.envrc` and fill in `API_KEY` and `DEV_API_KEY` (from `api-dev.mbtace.com`). The `DATABASE_URL` uses your OS username by default (Homebrew Postgres default). `SECRET_KEY_BASE` can be left blank locally. Trapeze SFTP credentials are optional — leave blank to skip that integration.
+
+## Deployment Environments
+
+- **dev-green / dev-orange** — auto-deployed from `main`; sandbox/QA use; Keycloak dev + API dev
+- **staging** — auto-deployed from `main`; used by MBTA for test alerts; Keycloak staging + API prod
+- **prod** — deployed via GitHub release; roll back by creating a release for a prior tag
 
 ## Development URLs
 

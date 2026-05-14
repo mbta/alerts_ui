@@ -18,20 +18,25 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSlice do
   ]
 
   defimpl Slice, for: __MODULE__ do
+    @spec mount(struct(), Socket.t(), map()) :: Socket.t()
     def mount(_service_data, socket, _base_params), do: socket
 
+    @spec extract(struct(), Alert.t() | nil, map()) :: struct()
     def extract(service_data, %Alert{} = alert, _params) do
       struct(service_data, Map.from_struct(alert))
     end
 
+    @spec transform(struct(), Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
     def transform(_service_data, changeset, _params) do
       changeset
     end
 
+    @spec validate(struct(), Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
     def validate(_service_data, changeset, _params) do
       changeset
     end
 
+    @spec assigns(struct(), Socket.t(), map()) :: Socket.t()
     def assigns(_service_data, socket, _params) do
       socket
     end

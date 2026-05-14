@@ -15,8 +15,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
   defimpl Slice, for: __MODULE__ do
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice
 
+    @spec mount(struct(), Socket.t(), map()) :: Socket.t()
     def mount(_slice, socket, _base_params), do: socket
 
+    @spec extract(struct(), Alert.t() | nil, map()) :: struct()
     def extract(slice, %Alert{} = alert, _params) do
       reminder_times =
         case Map.get(alert, :reminder_times) do
@@ -28,6 +30,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
       struct(slice, Map.from_struct(Map.put(alert, :reminder_times, reminder_times)))
     end
 
+    @spec transform(struct(), Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
     def transform(_slice, changeset, params) do
       case params do
         %{"alert_data" => _alert_data_params} ->
@@ -43,10 +46,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
       end
     end
 
+    @spec validate(struct(), Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
     def validate(_slice, changeset, _params) do
       changeset
     end
 
+    @spec assigns(struct(), Socket.t(), map()) :: Socket.t()
     def assigns(_slice, socket, _params) do
       Phoenix.Component.assign(socket, %{
         current_time: DateTimeHelpers.current_time(),
@@ -56,6 +61,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
     end
   end
 
+  @spec reminder_time_changeset(Ecto.Changeset.t() | map(), map()) :: Ecto.Changeset.t()
   def reminder_time_changeset(source, params) do
     cast(source, params, [:reminder_time, :max_time, :min_time, :id])
     |> validate_change(:reminder_time, fn :reminder_time, time ->

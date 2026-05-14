@@ -47,20 +47,25 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
       %Step{name: "preview", previous: nil, next: nil, label: "Preview and Submit"}
     ]
 
+    @spec mount(struct(), Socket.t(), map()) :: Socket.t()
     def mount(_timeline_data, socket, _base_params), do: socket
 
+    @spec extract(struct(), Alert.t() | nil, map()) :: struct()
     def extract(timeline_data, %Alert{}, _params) do
       struct(timeline_data)
     end
 
+    @spec transform(struct(), Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
     def transform(_timeline_data, changeset, _params) do
       changeset
     end
 
+    @spec validate(struct(), Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
     def validate(_timeline_data, changeset, _params) do
       changeset
     end
 
+    @spec assigns(struct(), Socket.t(), map()) :: Socket.t()
     def assigns(timeline_data, socket, params) do
       # TODO
       # make buttons actually navigate you
@@ -80,7 +85,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
       )
     end
 
-    @spec previous_steps(Step.t(), [Step.t()], [String.t()]) :: [String.t()]
+    @spec previous_steps(Step.t() | nil, [Step.t()], [String.t()]) :: [String.t()]
     def previous_steps(current_step, steps, acc \\ [])
 
     def previous_steps(%Step{previous: nil} = current_step, _steps, acc),
@@ -91,6 +96,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
       previous_steps(find_previous_step(current_step, steps), steps, acc ++ [current_step.name])
     end
 
+    @spec find_previous_step(Step.t() | nil, [Step.t()]) :: Step.t() | nil
     def find_previous_step(nil, _), do: nil
     def find_previous_step(current_step, steps) do
       Enum.find(steps, &(&1.name == current_step.previous))

@@ -52,13 +52,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     @cdn_host "cdn.mbta.com"
 
+    @spec mount(struct(), Socket.t(), map()) :: Socket.t()
     def mount(_details_data, socket, _base_params), do: socket
 
+    @spec extract(struct(), Alert.t() | nil, map()) :: struct()
     def extract(details_data, %Alert{} = _alert, _params) do
       details_data
       |> struct()
     end
 
+    @spec transform(struct(), Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
     def transform(details_data, changeset, params) do
       [_, target | _] = Map.get(params, "_target", [nil, nil])
 
@@ -94,6 +97,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       })
     end
 
+    @spec validate(struct(), Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
     def validate(details_data, changeset, _params) do
       image_size = details_data.image_url |> get_image_size()
 
@@ -103,6 +107,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       |> validate_image_fields(image_size)
     end
 
+    @spec assigns(struct(), Socket.t(), map()) :: Socket.t()
     def assigns(details_data, socket, _params) do
       cause_options =
         formatted_causes(

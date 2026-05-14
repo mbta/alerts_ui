@@ -34,20 +34,25 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
     alias AlertsUI.Models.Alert
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice
 
+    @spec mount(struct(), Socket.t(), map()) :: Socket.t()
     def mount(_url_data, socket, _base_params), do: socket
 
+    @spec extract(struct(), Alert.t() | nil, map()) :: struct()
     def extract(url_data, %Alert{} = alert, params) do
       new_url_params(alert, params)
     end
 
     @url_fields [:alert_id, :combination, :effect_name, :route_type]
 
+    @spec transform(struct(), Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
     def transform(_url_data, changeset, params) do
       cast(changeset, new_url_params(changeset, params) |> Map.from_struct(), @url_fields)
     end
 
+    @spec validate(struct(), Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
     def validate(_url_data, changeset, _params), do: changeset
 
+    @spec assigns(struct(), Socket.t(), map()) :: Socket.t()
     def assigns(_url_data, socket, params) do
       path_route_type =
         params["route_type"]

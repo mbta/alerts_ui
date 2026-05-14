@@ -53,6 +53,11 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
     }
   end
 
+  @spec build_gtfs_header() :: %{
+          gtfs_realtime_version: String.t(),
+          incrementality: atom(),
+          timestamp: integer()
+        }
   def build_gtfs_header do
     %{
       gtfs_realtime_version: "2.0",
@@ -61,6 +66,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
     }
   end
 
+  @spec build_active_period([map()], DateTime.t(), DateTime.t() | nil) :: [map()] | nil
   def build_active_period(active_period, current_time, nil) do
     active_period
     |> Enum.filter(&end_is_in_future(&1.end, current_time))
@@ -69,6 +75,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
 
   def build_active_period(_active_period, _current_time, _closed_timestamp), do: []
 
+  @spec build_one_time_active_periods([map()] | nil) :: [map()] | nil
   def build_one_time_active_periods(nil), do: nil
 
   def build_one_time_active_periods(active_periods) do
@@ -92,12 +99,14 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
   defp build_reminder_times([]), do: nil
   defp build_reminder_times(reminder_times), do: Enum.map(reminder_times, &date_time_to_unix/1)
 
+  @spec build_informed_entities([map()] | nil) :: [map()] | nil
   def build_informed_entities(nil), do: nil
 
   def build_informed_entities(informed_entities) do
     Enum.map(informed_entities, &build_informed_entity/1)
   end
 
+  @spec build_informed_entity(map()) :: map()
   def build_informed_entity(informed_entity) do
     %{
       agency_id: informed_entity.agency_id,
@@ -112,6 +121,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
     |> Map.filter(&filter_out_nil_values/1)
   end
 
+  @spec build_trip(map() | nil) :: map() | nil
   def build_trip(nil), do: nil
 
   def build_trip(trip) do

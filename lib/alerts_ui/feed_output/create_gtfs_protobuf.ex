@@ -23,6 +23,7 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobuf do
     TripDescriptor
   }
 
+  @spec output_protobuf([map()]) :: binary()
   def output_protobuf(alerts) do
     header = FeedHeader.new(CreateOutputAlert.build_gtfs_header())
 
@@ -41,6 +42,7 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobuf do
     |> FeedMessage.encode()
   end
 
+  @spec build_alert(map()) :: Alert.t()
   def build_alert(alert) do
     alert
     |> Map.Helpers.atomize_keys()
@@ -61,18 +63,21 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobuf do
     |> Alert.new()
   end
 
+  @spec build_entity_selector(map()) :: EntitySelector.t()
   def build_entity_selector(informed_entity) do
     informed_entity
     |> Map.replace_lazy(:trip, &build_trip_descriptor/1)
     |> EntitySelector.new()
   end
 
+  @spec build_trip_descriptor(map()) :: TripDescriptor.t()
   def build_trip_descriptor(trip) do
     trip
     |> Map.replace_lazy(:schedule_relationship, &enumify_value/1)
     |> TripDescriptor.new()
   end
 
+  @spec build_time_range(map()) :: TimeRange.t()
   def build_time_range(time_range) do
     time_range
     |> TimeRange.new()
@@ -100,6 +105,7 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobuf do
     |> build_translated_string
   end
 
+  @spec build_translated_string(map()) :: TranslatedString.t()
   def build_translated_string(translated_string) do
     translated_string
     |> Map.replace_lazy(
@@ -109,6 +115,7 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobuf do
     |> TranslatedString.new()
   end
 
+  @spec build_translated_image(map()) :: TranslatedImage.t()
   def build_translated_image(translated_image) do
     translated_image
     |> Map.replace_lazy(
@@ -118,6 +125,7 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobuf do
     |> TranslatedImage.new()
   end
 
+  @spec enumify_value(atom() | number() | String.t()) :: atom() | number()
   def enumify_value(value) when is_atom(value), do: value
   def enumify_value(value) when is_number(value), do: value
 

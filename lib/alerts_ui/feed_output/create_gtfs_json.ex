@@ -28,6 +28,7 @@ defmodule AlertsUI.FeedOutput.CreateGtfsJson do
     |> encode_json
   end
 
+  @spec encode_json(map()) :: binary()
   def encode_json(alerts) do
     alerts
     |> Jason.encode!()

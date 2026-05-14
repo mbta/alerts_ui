@@ -9,21 +9,26 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
   ]
 
   defimpl Slice, for: __MODULE__ do
+    @spec mount(struct(), Socket.t(), map()) :: Socket.t()
     def mount(_slice_data, socket, _base_params), do: socket
 
+    @spec extract(struct(), AlertsUI.Models.Alert.t() | nil, map()) :: struct()
     def extract(submit_data, _alert, _params) do
       submit_data
       |> struct()
     end
 
+    @spec transform(struct(), Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
     def transform(_data, changeset, _params) do
       changeset
     end
 
+    @spec validate(struct(), Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
     def validate(_data, changeset, _params) do
       changeset
     end
 
+    @spec assigns(struct(), Socket.t(), map()) :: Socket.t()
     def assigns(_slice_data, socket, params) do
       reviewing = Map.get(params, "review", false)
 

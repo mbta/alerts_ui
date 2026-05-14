@@ -274,6 +274,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     end
   end
 
+  @spec transform(Changeset.t(), Socket.unsigned_params(), Socket.t()) :: Changeset.t()
   def transform(%Changeset{} = changeset, params, socket) do
     Enum.reduce(slices(socket), changeset, fn slice_module, changeset ->
       changeset
@@ -282,6 +283,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     end)
   end
 
+  @spec validate(Changeset.t(), Socket.unsigned_params(), Socket.t()) ::
+          {:ok, t()} | {:error, Changeset.t()}
   def validate(%Changeset{} = changeset, params, socket) do
     Enum.reduce(slices(socket), changeset, fn slice_module, changeset ->
       changeset
@@ -291,12 +294,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     |> apply_action(:validate)
   end
 
+  @spec assigns(Socket.t(), Socket.unsigned_params()) :: Socket.t()
   def assigns(socket, params) do
     Enum.reduce(slices(socket), socket, fn slice_module, socket ->
       Slice.assigns(struct(slice_module), socket, params)
     end)
   end
 
+  @spec slice_from_changeset(Changeset.t(), module()) :: struct()
   def slice_from_changeset(changeset, slice_module) do
     as_map =
       slice_module
@@ -309,6 +314,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     struct(slice_module, as_map)
   end
 
+  @spec slices(Socket.t()) :: [module()]
   def slices(socket) do
     case Map.get(socket.assigns, :form) do
       nil ->
@@ -328,8 +334,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     end
   end
 
+  @spec init_param_fields() :: [atom()]
   def init_param_fields, do: [:alert_id, :effect_name, :route_type]
 
+  @spec form_fields(Socket.t()) :: [atom()]
   def form_fields(socket) do
     slices(socket)
     |> Enum.map(&(struct(&1) |> Map.keys()))

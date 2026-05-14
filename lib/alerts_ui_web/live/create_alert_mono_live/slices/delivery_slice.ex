@@ -14,20 +14,25 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
   ]
 
   defimpl Slice, for: __MODULE__ do
+    @spec mount(struct(), Socket.t(), map()) :: Socket.t()
     def mount(_delivery_data, socket, _base_params), do: socket
 
+    @spec extract(struct(), Alert.t() | nil, map()) :: struct()
     def extract(delivery_data, %Alert{} = alert, params) do
       struct(delivery_data, Map.from_struct(alert))
     end
 
+    @spec transform(struct(), Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
     def transform(_delivery_data, changeset, _params) do
       changeset
     end
 
+    @spec validate(struct(), Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
     def validate(_delivery_data, changeset, _params) do
       changeset
     end
 
+    @spec assigns(struct(), Socket.t(), map()) :: Socket.t()
     def assigns(_delivery_data, socket, _params) do
       socket
     end
