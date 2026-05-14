@@ -100,6 +100,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     end
 
     def validate(details_data, changeset, _params) do
+      IO.inspect(details_data.route_type, label: :route_type)
       image_size = details_data.image_url |> get_image_size()
 
       changeset
