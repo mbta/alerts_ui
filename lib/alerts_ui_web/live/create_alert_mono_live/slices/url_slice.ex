@@ -50,10 +50,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
 
     def assigns(_url_data, socket, params) do
       path_route_type =
-        params["route_type"] || path_route_type_from_socket(socket)
+        params["route_type"]
 
       path_effect_name =
-        params["effect_name"] || path_effect_name_from_socket(socket)
+        params["effect_name"]
 
       assign(
         socket,
