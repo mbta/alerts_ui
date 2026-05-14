@@ -59,6 +59,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
   @uncastable_fields [:__struct__, :reminder_times]
 
+  @actions [:new, :edit, :duplicate]
+
   @primary_key false
   embedded_schema do
     # carried in the url and/or necessary for all alerts
@@ -117,7 +119,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :notification_specifier, Ecto.Enum, values: @notification_values, default: :now
 
     # details
-    field :cause_detail, :string, default: ""
+    field :cause_detail, :string
     field :description_text, :string
     field :description_sync_toggle, :boolean, default: true
     field :header_text, :string, default: ""
@@ -127,7 +129,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :image_url, :string, default: ""
     field :image_path, :string, default: ""
     field :service_effect_text, :string
-    field :severity, :integer, default: 4
+    field :severity, :integer
     field :url, :string, default: ""
 
     # delivery

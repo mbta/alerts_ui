@@ -4,6 +4,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}
   alias AlertsUI.Models.{Cause, EnhancedSchedule, SeverityLevel}
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
+  alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
   use AlertsUIWeb, :html
 
   defstruct [
@@ -21,6 +22,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     :alert_timing,
     :recurrence_days,
     # affected service
+    :severity,
+    :cause_detail,
     direction: [],
     route_ids: [],
     stop_ids: [],
@@ -31,8 +34,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     header_sync_toggle: true,
     description_text: "",
     description_sync_toggle: true,
-    cause_detail: "",
-    severity: 4,
     image_url: "",
     url: ""
   ]
@@ -55,8 +56,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     @cdn_host "cdn.mbta.com"
 
-    def mount(_details_data, socket, _base_params), do: socket
+    def mount(details_data, socket, _base_params), do: socket
 
+<<<<<<< HEAD
     def extract(details_data, %AlertData{} = _alert_data, _params) do
       %AlertDetailsSlice{details_data | severity: 4}
     end
@@ -74,10 +76,30 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
         ) do
       [_, target | _] = Map.get(params, "_target", [nil, nil])
 
-      # TODO how to get "selected x"
-      # do this inside the assigns instead :)
-      # effect_name = effect_from_url_name(form[:effect_name].value)
-      # autotext_data = AlertDataToAutoText.build_autotext_data(translated_details(details_data, effect_name))
+      severity =
+        if is_nil(details_data.severity) do
+          GetKeyForModeEffect.get_value_of_key(
+            :default_severity,
+            details_data.route_type,
+            details_data.effect_name
+          )
+        else
+          details_data.severity
+        end
+
+      default_cause = if is_nil(details_data.cause_detail) do
+        GetKeyForModeEffect.get_value_of_key(
+          :default_cause,
+          details_data.route_type,
+          details_data.effect_name
+        )
+      else
+        details_data.cause_details
+      end
+
+      [_, target] = Map.get(params, "_target", [nil, nil])
+
+      autotext_data = AlertDataToAutoText.build_autotext_data(translated_details(details_data))
 
       header_sync_toggle =
         if target == "header_text" and details_data.header_sync_toggle == true do
@@ -150,7 +172,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
         header_text: header_text,
         description_sync_toggle: description_sync_toggle,
         description_text: description_text,
-        service_effect_text: service_effect_text
+        service_effect_text: service_effect_text,
+        severity: severity
       })
     end
 
@@ -179,7 +202,52 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       image_size = get_image_size(image_url)
       image_path = get_image_path(image_url)
 
-      assign(socket,
+      socket =
+        assign(socket,
+          cause_options: cause_options,
+          severity_options: @severity_options,
+          image_size: image_size,
+          image_path: image_path
+        )
+
+      socket = if get_field(form.source, :header_sync_toggle) do
+        selections = unwrap_selections(socket)
+        selected = selected_objects(selections, form)
+
+        autotext_input =
+          %{
+            route_type: get_field(form.source, :route_type),
+            effect_name: effect_from_url_name(get_field(form.source, :effect_name)),
+            severity: get_field(form.source, :severity),
+            cause_detail: get_field(form.source, :cause_detail),
+            service_types: get_field(form.source, :service_types),
+            direction: get_field(form.source, :direction),
+            alert_timing: get_field(form.source, :alert_timing),
+            recurrence_days: get_field(form.source, :recurrence_days),
+            start_specifier: get_field(form.source, :active_period_start_specifier),
+            end_specifier: get_field(form.source, :active_period_end_specifier),
+            start_time_specifier: get_field(form.source, :active_period_start_time_specifier),
+            end_time_specifier: get_field(form.source, :active_period_end_time_specifier),
+            start_datetime: get_field(form.source, :active_period_start),
+            end_datetime: get_field(form.source, :active_period_end),
+            start_date: get_field(form.source, :active_period_start_date),
+            end_date: get_field(form.source, :active_period_end_date),
+            start_time: get_field(form.source, :active_period_start_time),
+            end_time: get_field(form.source, :active_period_end_time)
+          }
+          |> Map.merge(selected)
+
+        autotext_data = AlertDataToAutoText.build_autotext_data(autotext_input)
+        header_text = Templates.build_auto_text(autotext_data, :header_template)
+
+        updated_source = change(form.source, %{header_text: header_text})
+        assign(socket, :form, Phoenix.Component.to_form(updated_source)) |> IO.inspect()
+      else
+        socket
+      end
+
+      socket
+      |> assign(
         cause_options: cause_options,
         severity_options: @severity_options,
         image_size: image_size,
