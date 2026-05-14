@@ -95,12 +95,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
               direction
             )
 
-          available_schedules =
+          available_schedules = if (route_ids && direction && modal_date) do
             CreateAlertLive.get_schedules_by_date(
               route_ids,
               direction,
               modal_date
             )
+          else
+            []
+          end
 
           direction_options =
             SelectFormatter.formatted_direction_options(
