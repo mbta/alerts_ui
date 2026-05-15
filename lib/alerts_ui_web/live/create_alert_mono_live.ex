@@ -230,7 +230,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       {nil, :new} ->
         # create a new alert
         socket
-        |> assign(:alert_id, nil)
         |> AlertData.init(params, :new)
         |> case do
           {:ok, socket} -> socket
@@ -248,7 +247,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         alert = Alerts.get_by_alert_id!(alert_id)
 
         socket
-        |> assign(:alert_id, alert.alert_id)
         |> AlertData.init(params, :edit, alert)
         |> case do
           {:ok, socket} -> socket
@@ -260,7 +258,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         alert = Alerts.get_by_alert_id!(alert_id)
 
         socket
-        |> assign(:alert_id, alert.alert_id)
         |> AlertData.init(params, :duplicate, strip_on_duplicate(alert))
         |> case do
           {:ok, socket} -> socket
