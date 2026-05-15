@@ -14,6 +14,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
   ]
 
   defimpl Slice, for: __MODULE__ do
+    import Ecto.Changeset
+
     def mount(_delivery_data, socket, _base_params), do: socket
 
     def extract(delivery_data, %Alert{} = alert, params) do
@@ -24,8 +26,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
       changeset
     end
 
-    def validate(_delivery_data, changeset, _params) do
-      changeset
+    def validate(delivery_data, changeset, _params) do
+      if delivery_data.view_banner do
+        validate_acceptance(changeset, :accept_banner, message: "Check box to show you understand")
+      else
+        changeset
+      end
     end
 
     def assigns(_delivery_data, socket, _params) do
@@ -76,10 +82,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
           :if={Form.normalize_value("checkbox", @form[:view_banner].value)}
           class="flex flex-row mt-4"
         >
-          <.checkbox field={@form[:accept_banner]} />
-          <span class={if @form[:accept_banner].errors |> length > 0, do: "-ml-[14rem]", else: "ml-4"}>
-            I understand this will post a high priority alert banner on every page of MBTA.com.
-          </span>
+          <.checkbox
+            field={@form[:accept_banner]}
+            label="I understand this will post a high priority alert banner on every page of MBTA.com."
+          />
         </div>
       </div>
       <hr class="mt-8" />
