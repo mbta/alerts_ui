@@ -43,8 +43,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
   defmodule Selections do
     defstruct available_filter_routes: nil,
-              available_routes: nil,
-              available_stops: nil,
+              available_routes: [],
+              available_stops: [],
               filter_title_value: "All routes",
               disable_routes_input?: false,
               modal_route_id_options: [],

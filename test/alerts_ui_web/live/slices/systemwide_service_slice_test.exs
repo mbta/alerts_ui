@@ -25,10 +25,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideSliceTest do
       view |> render_click("#review button")
 
       assert render(view) =~ ~s(Select a service type)
-
     end
 
-      @tag :logged_in_user
+    @tag :logged_in_user
     test "doesn't show an error if you didn't select a service type", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/new")
       get_to_submission_page(view, "Systemwide", "Delay")
@@ -38,7 +37,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideSliceTest do
       view |> render_click("#review button")
 
       assert render(view) =~ ~s(Select a service type)
-
     end
 
     @tag :logged_in_user
