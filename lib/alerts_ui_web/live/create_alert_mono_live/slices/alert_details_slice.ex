@@ -160,7 +160,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
         header_text = Templates.build_auto_text(autotext_data, :header_template)
 
         updated_source = change(form.source, %{header_text: header_text})
-        assign(socket, :form, Phoenix.Component.to_form(updated_source))
+        assign(socket, :form, Phoenix.Component.to_form(updated_source)) |> IO.inspect()
       else
         socket
       end
