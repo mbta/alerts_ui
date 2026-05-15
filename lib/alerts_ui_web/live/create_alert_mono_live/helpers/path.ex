@@ -78,18 +78,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Path do
     )
   end
 
-  def path_route_type(route_type, effect_name) do
-    case InformedEntity.route_code_mapping(route_type) do
-      nil ->
-        if effect_name in EffectsForRouteTypes.list_effects(:facility) do
-          :facility
-        else
-          :systemwide
-        end
-
-      mapping ->
-        mapping
+  def path_route_type(nil, effect_name) do
+    if effect_name in EffectsForRouteTypes.list_path_names(:facility) do
+      :facility
+    else
+      :systemwide
     end
+  end
+
+  def path_route_type(route_type, _effect_name) do
+    InformedEntity.route_code_mapping(route_type)
   end
 
   def path_effect_name_from_socket(%Socket{} = socket) do
