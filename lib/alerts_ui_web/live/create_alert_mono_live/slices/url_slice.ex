@@ -37,7 +37,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
     def mount(_url_data, socket, _base_params), do: socket
 
     def extract(url_data, %Alert{} = alert, params) do
-      raise alert.id
       new_url_params(alert, params)
     end
 
@@ -50,6 +49,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
     def validate(_url_data, changeset, _params), do: changeset
 
     def assigns(_url_data, socket, params) do
+      alert_id =
+        case Map.fetch(params, "alert_id") do
+          {:ok, value} -> value
+          :error -> socket.assigns[:alert_id]
+        end
+
       path_route_type =
         case Map.fetch(params, "route_type") do
           {:ok, value} -> value
@@ -65,6 +70,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
       assign(
         socket,
         %{
+          alert_id: alert_id,
           path_route_type: path_route_type,
           path_effect_name: path_effect_name
         }
