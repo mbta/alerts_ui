@@ -40,4 +40,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes do
     # wondering if there are places in the app that need to see these?
     |> Enum.reject(&(&1 in @forbidden_effects))
   end
+
+  @spec list_path_names(route_type_names_t()) :: [String.t()]
+  def list_path_names(route_type_name) do
+    case ModeEffect.mode_effect()[route_type_name] do
+      nil -> []
+      effects -> effects |> Map.values() |> Enum.map(& &1.path_name)
+    end
+  end
 end
