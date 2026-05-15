@@ -105,12 +105,19 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
       route_type_int = path_route_type_int || base_route_type_int
       effect_name = path_effect_name || base_effect_name
 
+      # nil route_type is valid for facility/systemwide; use path_route_type atom for effect lookups
+      effective_route_type =
+        case {route_type_int, path_route_type} do
+          {nil, pt} when not is_nil(pt) -> String.to_existing_atom(pt)
+          _ -> route_type_int
+        end
+
       combination =
         get_value_of_key(
           :combination,
-          route_type_int,
+          effective_route_type,
           humanize_effect_name(
-            route_type_int,
+            effective_route_type,
             effect_name
           )
         )

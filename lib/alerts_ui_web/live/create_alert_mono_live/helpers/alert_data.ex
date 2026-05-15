@@ -32,7 +32,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
   end
 
   def show_details?(form) do
-    !is_nil(form[:route_type].value) && !is_nil(form[:effect_name].value)
+    !is_nil(form[:effect_name].value)
   end
 
   def get_route_type(nil), do: nil

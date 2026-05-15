@@ -231,12 +231,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
         {params, socket}
       end)
 
-    socket_with_selections = if Map.get(socket.assigns, :selections) do
-      socket
-    else
-      assign(socket, :selections, "hello world")
-    end
-
     __MODULE__
     |> struct(base_params)
     |> sync(socket, params, init_param_fields())
