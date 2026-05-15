@@ -215,8 +215,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
           ]
         }
 
-  @actions [:new, :edit, :duplicate]
-
   @spec init(
           Socket.t(),
           Socket.unsigned_params(),

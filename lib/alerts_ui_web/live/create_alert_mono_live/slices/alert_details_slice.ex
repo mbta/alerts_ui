@@ -56,9 +56,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     @cdn_host "cdn.mbta.com"
 
-    def mount(details_data, socket, _base_params), do: socket
+    #runs on mount and when params change?
+    #you can put your event hooks here & move your events
+    def mount(_details_data, socket, _base_params), do: socket
 
-<<<<<<< HEAD
     def extract(details_data, %AlertData{} = _alert_data, _params) do
       %AlertDetailsSlice{details_data | severity: 4}
     end
@@ -96,8 +97,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       else
         details_data.cause_details
       end
-
-      [_, target] = Map.get(params, "_target", [nil, nil])
 
       autotext_data = AlertDataToAutoText.build_autotext_data(translated_details(details_data))
 
