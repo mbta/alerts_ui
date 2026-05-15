@@ -26,6 +26,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     UrlSlice
   }
 
+  alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.CreateAlertMonoLive.Step
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.{
@@ -35,7 +36,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   alias AlertsUI.DBContexts.Users
 
-  import Ecto.Changeset, only: [change: 1]
+  import Ecto.Changeset, only: [change: 2]
 
   @steps [
     %Step{
@@ -95,8 +96,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   @impl true
   def handle_event("move_progress", %{"value" => "route_type_and_effect"}, socket) do
-    new_form_data = socket.assigns.form.data |> Map.merge(%{route_type: nil, effect_name: nil})
-    new_form = socket.assigns.form |> Map.merge(%{data: new_form_data})
+    cleared_source =
+      change(socket.assigns.form.source, %{route_type: nil, effect_name: nil, combination: nil})
 
     socket =
       assign(
@@ -105,7 +106,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
           progress: get_step_by_name("route_type_and_effect"),
           path_route_type: nil,
           path_effect_name: nil,
-          form: new_form
+          form: Phoenix.Component.to_form(cleared_source)
         }
       )
 
