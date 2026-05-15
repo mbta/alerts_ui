@@ -51,7 +51,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
           <.checkbox field={@form[:view_banner]} />
           <span class="ml-4">Banner on all MBTA.com pages</span>
         </div>
-        <div :if={Form.normalize_value("checkbox", @form[:view_banner].value)} class="flex flex-col md:flex-row">
+        <div
+          :if={Form.normalize_value("checkbox", @form[:view_banner].value)}
+          class="flex flex-col md:flex-row"
+        >
           <div class="flex flex-col md:w-[50%]" id="banner-container">
             <.textarea
               field={@form[:banner_text]}

@@ -58,37 +58,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     @cdn_host "cdn.mbta.com"
 
-    def mount(details_data, socket, _base_params), do: socket
+    #runs on mount and when params change?
+    #you can put your event hooks here & move your events
+    def mount(_details_data, socket, _base_params), do: socket
 
-    def extract(details_data, %Alert{} = _alert, _params) do
-      IO.inspect("EXTRACT!!!")
-      details_data
-      |> struct()
+
+    def extract(details_data, %Alert{} = alert, _params) do
+      struct(details_data, Map.from_struct(alert))
+      # struct(details_data)
     end
-
     def transform(details_data, changeset, params) do
-      severity =
-        if is_nil(details_data.severity) do
-          GetKeyForModeEffect.get_value_of_key(
-            :default_severity,
-            details_data.route_type,
-            details_data.effect_name
-          )
-        else
-          details_data.severity
-        end
-
-      default_cause = if is_nil(details_data.cause_detail) do
-                GetKeyForModeEffect.get_value_of_key(
-          :default_cause,
-          details_data.route_type,
-          details_data.effect_name
-        )
-      else
-        details_data.cause_details
-      end
-      ####################
-
       [_, target] = Map.get(params, "_target", [nil, nil])
 
       # TODO how to get "selected x"
@@ -113,20 +92,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
       description_text =
         update_description_text(description_sync_toggle, details_data, autotext_data)
-        #####################
+
       changeset
       |> change(%{
         header_sync_toggle: header_sync_toggle,
         header_text: header_text,
         description_sync_toggle: description_sync_toggle,
-        description_text: description_text,
-        severity: severity
+        description_text: description_text
       })
     end
 
     def validate(details_data, changeset, _params) do
-            IO.inspect(details_data.severity, label: :BEING_CALLED)
-      IO.inspect(details_data.route_type, label: :route_type)
       image_size = details_data.image_url |> get_image_size()
 
       changeset

@@ -312,11 +312,17 @@ defmodule AlertsUIWeb.ReviewModal do
                 <%= for reminder <- reminder_times_iterator(reminder_times) do %>
                   <p>
                     {Calendar.strftime(reminder_time(reminder), "%a %m/%d/%Y %-I:%M %p")}
-                    <span :if={ReminderTimes.sent?(reminder_time(reminder))} class="text-text-secondary">
+                    <span
+                      :if={ReminderTimes.sent?(reminder_time(reminder))}
+                      class="text-text-secondary"
+                    >
                       <.icon name="hero-check-circle-solid text-mbta-green" class="h-4 w-4" /> Sent
                     </span>
 
-                    <span :if={!ReminderTimes.sent?(reminder_time(reminder))} class="text-text-secondary">
+                    <span
+                      :if={!ReminderTimes.sent?(reminder_time(reminder))}
+                      class="text-text-secondary"
+                    >
                       <.icon name="hero-clock" class="h-4 w-4" /> Scheduled
                     </span>
                   </p>
@@ -487,7 +493,7 @@ defmodule AlertsUIWeb.ReviewModal do
 
   defp reminder_times_iterator(reminders) do
     reminders
-    |> Enum.filter(& !!reminder_time(&1))
+    |> Enum.filter(&(!!reminder_time(&1)))
     |> Enum.sort_by(&reminder_time(&1), NaiveDateTime)
   end
 

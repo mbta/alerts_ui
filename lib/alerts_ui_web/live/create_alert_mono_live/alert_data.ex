@@ -206,8 +206,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
           ]
         }
 
-  @actions [:new, :edit, :duplicate]
-
   @spec init(
           Socket.t(),
           Socket.unsigned_params(),
@@ -233,11 +231,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
         {params, socket}
       end)
 
-    socket_with_selections = if Map.get(socket.assigns, :selections) do
-      socket
-    else
-      assign(socket, :selections, "hello world")
-    end
+    socket_with_selections =
+      if Map.get(socket.assigns, :selections) do
+        socket
+      else
+        assign(socket, :selections, "hello world")
+      end
 
     __MODULE__
     |> struct(base_params)
@@ -318,6 +317,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
       form ->
         combination = socket.assigns.form[:combination].value
+
         [
           TimelineSlice,
           UrlSlice,

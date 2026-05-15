@@ -95,15 +95,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
               direction
             )
 
-          available_schedules = if (route_ids && direction && modal_date) do
-            CreateAlertLive.get_schedules_by_date(
-              route_ids,
-              direction,
-              modal_date
-            )
-          else
-            []
-          end
+          available_schedules =
+            if route_ids && direction && modal_date do
+              CreateAlertLive.get_schedules_by_date(
+                route_ids,
+                direction,
+                modal_date
+              )
+            else
+              []
+            end
 
           direction_options =
             SelectFormatter.formatted_direction_options(
@@ -296,7 +297,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             options={@selections.trip_id_options}
             loading={selections_loading?(@selections)}
             no_results={
-              Enum.empty?(@selections.trip_id_options) && !disable_trip_input?(@form[:route_ids].value)
+              Enum.empty?(@selections.trip_id_options) &&
+                !disable_trip_input?(@form[:route_ids].value)
             }
             class="min-w-full h-full"
             disabled={disable_trip_input?(@form[:route_ids].value)}
@@ -324,7 +326,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             options={@selections.stop_id_options}
             loading={selections_loading?(@selections)}
             no_results={
-              Enum.empty?(@selections.stop_id_options) && !disable_stop_input?(@form[:route_ids].value)
+              Enum.empty?(@selections.stop_id_options) &&
+                !disable_stop_input?(@form[:route_ids].value)
             }
             class="min-w-full h-full"
             disabled={disable_stop_input?(@form[:route_ids].value)}
