@@ -22,8 +22,27 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
       struct(delivery_data, Map.from_struct(alert))
     end
 
-    def transform(_delivery_data, changeset, _params) do
-      changeset
+    def transform(delivery_data, changeset, params) do
+      [_, target | _] = Map.get(params, "_target", [nil, nil])
+
+      banner_sync_toggle =
+        if target == "banner_text" and delivery_data.banner_sync_toggle == true do
+          false
+        else
+          delivery_data.banner_sync_toggle
+        end
+
+      banner_text =
+        if banner_sync_toggle and delivery_data.view_banner do
+          get_field(changeset, :header_text)
+        else
+          delivery_data.banner_text
+        end
+
+      change(changeset, %{
+        banner_sync_toggle: banner_sync_toggle,
+        banner_text: banner_text
+      })
     end
 
     def validate(delivery_data, changeset, _params) do
