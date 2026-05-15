@@ -50,10 +50,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
 
     def assigns(_url_data, socket, params) do
       path_route_type =
-        params["route_type"]
+        case Map.fetch(params, "route_type") do
+          {:ok, value} -> value
+          :error -> socket.assigns[:path_route_type]
+        end
 
       path_effect_name =
-        params["effect_name"]
+        case Map.fetch(params, "effect_name") do
+          {:ok, value} -> value
+          :error -> socket.assigns[:path_effect_name]
+        end
 
       assign(
         socket,
