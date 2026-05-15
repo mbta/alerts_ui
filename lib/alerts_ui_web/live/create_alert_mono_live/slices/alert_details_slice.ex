@@ -277,9 +277,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       facility_ids = form_data.facility_ids
 
       all_facilities =
-        if is_map(selections.available_facilities),
-          do: Map.get(selections.available_facilities, :facilities, []),
-          else: []
+        if is_map(selections.available_facilities) do
+          Map.get(selections.available_facilities, :facilities, [])
+        else
+          []
+        end
 
       facilities = Enum.filter(all_facilities, &(&1.id in facility_ids))
       %{facilities: facilities}
@@ -291,7 +293,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       trip_ids = form_data.trip_ids
 
       routes =
-        Map.get(selections, :available_routes) || []
+        (Map.get(selections, :available_routes) || [])
         |> Enum.filter(&(&1.id in route_ids))
 
       stops = Enum.filter(selections.available_stops, &(&1.id in stop_ids))
