@@ -56,8 +56,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     @cdn_host "cdn.mbta.com"
 
-    #runs on mount and when params change?
-    #you can put your event hooks here & move your events
+    # runs on mount and when params change?
+    # you can put your event hooks here & move your events
     def mount(_details_data, socket, _base_params), do: socket
 
     def extract(details_data, %AlertData{} = _alert_data, _params) do
@@ -97,6 +97,32 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       else
         details_data.cause_details
       end
+
+      effect_name = effect_from_url_name(details_data.effect_name || "")
+
+      severity =
+        if is_nil(details_data.severity) do
+          GetKeyForModeEffect.get_value_of_key(
+            :default_severity,
+            details_data.route_type,
+            effect_name
+          )
+        else
+          details_data.severity
+        end
+
+      cause_detail =
+        if is_nil(details_data.cause_detail) do
+          GetKeyForModeEffect.get_value_of_key(
+            :default_cause,
+            details_data.route_type,
+            effect_name
+          )
+        else
+          details_data.cause_detail
+        end
+
+      [_, target] = Map.get(params, "_target", [nil, nil])
 
       autotext_data = AlertDataToAutoText.build_autotext_data(translated_details(details_data))
 
@@ -168,11 +194,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       changeset
       |> change(%{
         header_sync_toggle: header_sync_toggle,
-        header_text: header_text,
         description_sync_toggle: description_sync_toggle,
         description_text: description_text,
         service_effect_text: service_effect_text,
-        severity: severity
+        severity: severity,
+        cause_detail: cause_detail
       })
     end
 
@@ -190,135 +216,105 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     def assigns(_details_data, socket, _params) do
       form = socket.assigns.form
+      form_data = Map.merge(form.source.data, form.source.changes)
 
       cause_options =
         formatted_causes(
-          get_field(form.source, :route_type),
-          get_field(form.source, :combination)
+          form_data.route_type,
+          form_data.combination
         )
 
-      image_url = get_field(form.source, :image_url) || ""
+      image_url = form_data.image_url
       image_size = get_image_size(image_url)
       image_path = get_image_path(image_url)
 
-      socket =
-        assign(socket,
-          cause_options: cause_options,
-          severity_options: @severity_options,
-          image_size: image_size,
-          image_path: image_path
+      autotext_data =
+        if form_data.header_sync_toggle or form_data.description_sync_toggle do
+          selections = unwrap_selections(socket)
+          selected = selected_objects(selections, form_data)
+
+          autotext_input =
+            translated_details(form_data)
+            |> Map.merge(selected)
+
+          AlertDataToAutoText.build_autotext_data(autotext_input)
+        else
+          %{}
+        end
+
+      header_text =
+        update_header_text(form_data.header_sync_toggle, form_data.header_text, autotext_data)
+
+      description_text =
+        update_description_text(
+          form_data.description_sync_toggle,
+          form_data.description_text,
+          autotext_data
         )
 
-      socket = if get_field(form.source, :header_sync_toggle) do
-        selections = unwrap_selections(socket)
-        selected = selected_objects(selections, form)
+      updated_source =
+        change(form.source, %{header_text: header_text, description_text: description_text})
 
-        autotext_input =
-          %{
-            route_type: get_field(form.source, :route_type),
-            effect_name: effect_from_url_name(get_field(form.source, :effect_name)),
-            severity: get_field(form.source, :severity),
-            cause_detail: get_field(form.source, :cause_detail),
-            service_types: get_field(form.source, :service_types),
-            direction: get_field(form.source, :direction),
-            alert_timing: get_field(form.source, :alert_timing),
-            recurrence_days: get_field(form.source, :recurrence_days),
-            start_specifier: get_field(form.source, :active_period_start_specifier),
-            end_specifier: get_field(form.source, :active_period_end_specifier),
-            start_time_specifier: get_field(form.source, :active_period_start_time_specifier),
-            end_time_specifier: get_field(form.source, :active_period_end_time_specifier),
-            start_datetime: get_field(form.source, :active_period_start),
-            end_datetime: get_field(form.source, :active_period_end),
-            start_date: get_field(form.source, :active_period_start_date),
-            end_date: get_field(form.source, :active_period_end_date),
-            start_time: get_field(form.source, :active_period_start_time),
-            end_time: get_field(form.source, :active_period_end_time)
-          }
-          |> Map.merge(selected)
-
-        autotext_data = AlertDataToAutoText.build_autotext_data(autotext_input)
-        header_text = Templates.build_auto_text(autotext_data, :header_template)
-
-        updated_source = change(form.source, %{header_text: header_text})
-        assign(socket, :form, Phoenix.Component.to_form(updated_source)) |> IO.inspect()
-      else
-        socket
-      end
-
-      socket
-      |> assign(
+      assign(socket, %{
+        form: Phoenix.Component.to_form(updated_source),
         cause_options: cause_options,
         severity_options: @severity_options,
         image_size: image_size,
         image_path: image_path
-      )
+      })
     end
 
     defp unwrap_selections(socket) do
       case Map.get(socket.assigns, :selections) do
-        %AsyncResult{ok?: true} = ar -> ar.result
-        selections when is_struct(selections) -> selections
-        _ -> nil
+        %AsyncResult{ok?: true} = async_result -> async_result.result
+        selections -> selections
       end
     end
 
-    defp selected_objects(%AffectedServiceSlice.Selections{} = s, form) do
-      route_ids = get_field(form.source, :route_ids) || []
-      stop_ids = get_field(form.source, :stop_names_and_ids) || []
-      trip_ids = get_field(form.source, :trip_ids) || []
+    defp selected_objects(selections, _form) when selections in [%{}, nil], do: %{}
 
-      routes =
-        (s.available_routes || [])
-        |> Enum.filter(&(&1.id in route_ids))
-        |> maybe_include_virtual_green_line(route_ids)
-
-      stops = Enum.filter(s.available_stops || [], &(&1.id in stop_ids))
-      schedules = Enum.filter(s.available_schedules || [], &(&1.trip.id in trip_ids))
-
-      %{routes: routes, stops: stops, schedules: schedules}
-    end
-
-    defp selected_objects(%StopRouteServiceSlice.Selections{} = s, form) do
-      route_ids = get_field(form.source, :route_ids) || []
-      stop_ids = get_field(form.source, :stop_ids) || []
-
-      routes =
-        (s.available_routes || [])
-        |> Enum.filter(&(&1.id in route_ids))
-        |> maybe_include_virtual_green_line(route_ids)
-
-      stops = Enum.filter(s.available_stops || [], &(&1.id in stop_ids))
-
-      %{routes: routes, stops: stops}
-    end
-
-    defp selected_objects(%AccessAffectedServiceSlice.Selections{} = s, form) do
-      facility_ids = get_field(form.source, :facility_ids) || []
+    defp selected_objects(%AccessAffectedServiceSlice.Selections{} = selections, form_data) do
+      facility_ids = form_data.facility_ids
 
       all_facilities =
-        if is_map(s.available_facilities),
-          do: Map.get(s.available_facilities, :facilities, []),
+        if is_map(selections.available_facilities),
+          do: Map.get(selections.available_facilities, :facilities, []),
           else: []
 
       facilities = Enum.filter(all_facilities, &(&1.id in facility_ids))
       %{facilities: facilities}
     end
 
-    defp selected_objects(_selections, _form), do: %{}
+    defp selected_objects(selections, form_data) do
+      route_ids = form_data.route_ids || []
+      stop_ids = form_data.stop_names_and_ids
+      trip_ids = form_data.trip_ids
 
-    defp update_header_text(header_sync_toggle, details_data, autotext_data) do
+      routes =
+        Map.get(selections, :available_routes) || []
+        |> Enum.filter(&(&1.id in route_ids))
+
+      stops = Enum.filter(selections.available_stops, &(&1.id in stop_ids))
+
+      schedules =
+        Enum.filter(Map.get(selections, :available_schedules, []), &(&1.trip.id in trip_ids))
+
+      %{routes: routes, stops: stops, schedules: schedules}
+    end
+
+    defp update_header_text(header_sync_toggle, original_header_text, autotext_data) do
       if header_sync_toggle == true do
         Templates.build_auto_text(autotext_data, :header_template)
       else
-        Map.get(details_data, :header_text)
+        original_header_text
       end
     end
 
-    defp update_description_text(description_sync_toggle, details_data, autotext_data) do
+    defp update_description_text(description_sync_toggle, description_text, autotext_data) do
       if description_sync_toggle == true do
         Templates.build_auto_text(autotext_data, :description_template)
       else
-        Map.get(details_data, :description_text)
+        description_text
       end
     end
 

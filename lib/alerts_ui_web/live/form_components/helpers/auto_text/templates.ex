@@ -562,7 +562,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
   def build_auto_text(
         %{route_type: route_type, effect_name: effect_name} = autotext_data,
         :description_template
-      ) do
+      )
+      when not is_nil(effect_name) do
     %{
       description_template: %{
         route_count: route_count,
@@ -594,6 +595,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
 
     templates[template_type] |> build_template(autotext_data)
   end
+
+  def build_auto_text(_, _), do: ""
 
   defp get_route_text(route_count, %{schedules: [], routes: routes} = autotext_data)
        when not is_nil(route_count) and length(routes) > route_count do
