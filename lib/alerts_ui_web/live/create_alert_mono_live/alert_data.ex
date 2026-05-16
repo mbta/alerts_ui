@@ -226,6 +226,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
       |> Repo.preload([:informed_entity, :reminder_times])
       |> build_alert_data(form_type)
       |> Map.from_struct()
+      |> alert_data_v1_to_v2()
       |> Map.put(:alert_id, alert.alert_id)
 
     base = struct(__MODULE__, base_params)
@@ -347,5 +348,24 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     |> List.flatten()
     |> Enum.uniq()
     |> Enum.reject(&(&1 in @uncastable_fields))
+  end
+
+  defp alert_data_v1_to_v2(v1_alert_data) do
+    normalize_effect_name(v1_alert_data)
+  end
+
+  defp normalize_effect_name(alert_data) do
+    normalized =
+      case Map.get(alert_data, :effect_name) do
+        nil -> nil
+
+        effect_name ->
+          effect_name
+          |> String.split(" ")
+          |> Enum.map(& String.downcase(&1))
+          |> Enum.join("_")
+      end
+
+    Map.put(alert_data, :effect_name, normalized)
   end
 end
