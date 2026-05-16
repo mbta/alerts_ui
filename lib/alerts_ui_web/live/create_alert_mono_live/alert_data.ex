@@ -304,22 +304,25 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   end
 
   def slices(socket) do
-    case Map.get(socket.assigns, :form) do
-      nil ->
-        []
+    combination =
+      case Map.get(socket.assigns, :form) do
+        nil ->
+          nil
 
       form ->
-        combination = socket.assigns.form[:combination].value
-        [
-          TimelineSlice,
-          UrlSlice,
-          ServiceSliceDispatcher.affected_service_component(combination),
-          AlertDetailsSlice,
-          ReminderTimesSlice,
-          DeliverySlice,
-          SubmitSlice
-        ]
-    end
+          socket.assigns.form[:combination].value
+      end
+
+
+    [
+      TimelineSlice,
+      UrlSlice,
+      ServiceSliceDispatcher.affected_service_component(combination),
+      AlertDetailsSlice,
+      ReminderTimesSlice,
+      DeliverySlice,
+      SubmitSlice
+    ]
   end
 
   def init_param_fields, do: [:alert_id, :effect_name, :route_type]
