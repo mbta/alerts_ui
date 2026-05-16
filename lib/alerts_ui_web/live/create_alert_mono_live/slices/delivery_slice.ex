@@ -33,7 +33,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
         end
 
       banner_text =
-        if banner_sync_toggle and delivery_data.view_banner do
+        if !!banner_sync_toggle and !!delivery_data.view_banner do
           get_field(changeset, :header_text)
         else
           delivery_data.banner_text
