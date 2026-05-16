@@ -78,16 +78,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
     end
 
     defp new_url_params(alert_or_changeset, params) do
-      {base_route_type_int, base_effect_name} =
+      {alert_id, base_route_type_int, base_effect_name} =
         case alert_or_changeset do
           %Changeset{} = changeset ->
             {
+              get_field(changeset, :alert_id),
               get_field(changeset, :route_type),
               get_field(changeset, :effect_name)
             }
 
           %Alert{} = alert ->
             {
+              alert.alert_id,
               Alert.get_route_type(alert),
               alert.effect
             }
@@ -123,6 +125,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
         )
 
       %UrlSlice{
+        alert_id: alert_id,
         route_type: route_type_int,
         effect_name: effect_name,
         combination: combination
