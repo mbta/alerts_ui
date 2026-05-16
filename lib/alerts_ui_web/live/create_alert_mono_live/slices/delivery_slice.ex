@@ -22,7 +22,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
       struct(delivery_data, Map.from_struct(alert))
     end
 
-    def transform(delivery_data, changeset, params) do
+    def transform(delivery_data, changeset, params, _socket) do
       [_, target | _] = Map.get(params, "_target", [nil, nil])
 
       banner_sync_toggle =
@@ -45,7 +45,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
       })
     end
 
-    def validate(delivery_data, changeset, _params) do
+    def validate(delivery_data, changeset, _params, _socket) do
       if delivery_data.view_banner do
         validate_acceptance(changeset, :accept_banner, message: "Check box to show you understand")
       else

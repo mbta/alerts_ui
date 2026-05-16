@@ -11,11 +11,11 @@ defprotocol AlertsUIWeb.CreateAlertMonoLive.Slice do
   @spec extract(t, Alert.t() | nil, map()) :: t
   def extract(slice, alert, params)
 
-  @spec transform(t, Changeset.t(), map()) :: Changeset.t()
-  def transform(slice, changeset, params)
+  @spec transform(t, Changeset.t(), map(), Socket.t()) :: Changeset.t()
+  def transform(slice, changeset, params, socket)
 
-  @spec validate(t, Changeset.t(), map()) :: Changeset.t()
-  def validate(slice, changeset, params)
+  @spec validate(t, Changeset.t(), map(), Socket.t()) :: Changeset.t()
+  def validate(slice, changeset, params, socket)
 
   @spec assigns(t, Socket.t(), map()) :: Socket.t()
   def assigns(slice, socket, params)

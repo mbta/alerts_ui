@@ -53,11 +53,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
       struct(timeline_data)
     end
 
-    def transform(_timeline_data, changeset, _params) do
+    def transform(_timeline_data, changeset, _params, _socket) do
       changeset
     end
 
-    def validate(_timeline_data, changeset, _params) do
+    def validate(_timeline_data, changeset, _params, _socket) do
       changeset
     end
 
