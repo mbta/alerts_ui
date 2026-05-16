@@ -1,7 +1,7 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   use AlertsUIWeb, :html
-  alias AlertsUI.Models.Alert
   alias AlertsUIWeb.CreateAlertLive
+  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
 
@@ -46,8 +46,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   defimpl Slice, for: __MODULE__ do
     def mount(_service_data, socket, _base_params), do: socket
 
-    def extract(service_data, %Alert{} = alert, _params) do
-      struct(service_data, Map.from_struct(alert))
+    def extract(service_data, %AlertData{} = _alert_data, _params) do
+      service_data
     end
 
     def transform(_service_data, changeset, _params, _socket) do

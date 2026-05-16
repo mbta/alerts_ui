@@ -1,4 +1,5 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
+  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.PredictionSuppressionWarningModal
   alias AlertsUIWeb.ReviewModal
@@ -11,7 +12,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
   defimpl Slice, for: __MODULE__ do
     def mount(_slice_data, socket, _base_params), do: socket
 
-    def extract(submit_data, _alert, _params) do
+    def extract(submit_data, _alert_data, _params) do
       submit_data
       |> struct()
     end

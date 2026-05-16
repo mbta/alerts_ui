@@ -1,9 +1,9 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
   alias Phoenix.LiveView.AsyncResult
 
-  alias AlertsUI.Models.Alert
   alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.CreateAlertLive
+  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
 
@@ -43,8 +43,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
       )
     end
 
-    def extract(service_data, %Alert{} = alert, _params) do
-      struct(service_data, Map.from_struct(alert))
+    def extract(service_data, %AlertData{} = _alert_data, _params) do
+      service_data
     end
 
     def transform(_service_data, changeset, _params, _socket) do

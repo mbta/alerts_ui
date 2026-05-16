@@ -20,7 +20,7 @@ end
 
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
   alias AlertsUIWeb.CreateAlertMonoLive.Step
-  alias AlertsUI.Models.Alert
+  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
 
   use AlertsUIWeb, :html
@@ -49,7 +49,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
 
     def mount(_timeline_data, socket, _base_params), do: socket
 
-    def extract(timeline_data, %Alert{}, _params) do
+    def extract(timeline_data, %AlertData{}, _params) do
       struct(timeline_data)
     end
 

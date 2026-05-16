@@ -1,5 +1,5 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
-  alias AlertsUI.Models.Alert
+  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}
   alias AlertsUI.Models.{Cause, EnhancedSchedule, SeverityLevel}
@@ -54,8 +54,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     def mount(_details_data, socket, _base_params), do: socket
 
-    def extract(details_data, %Alert{} = alert, _params) do
-      struct(details_data, Map.from_struct(alert))
+    def extract(details_data, %AlertData{} = _alert_data, _params) do
+      details_data
     end
 
     def transform(details_data, changeset, params, %{assigns: %{form: form}} = socket) do

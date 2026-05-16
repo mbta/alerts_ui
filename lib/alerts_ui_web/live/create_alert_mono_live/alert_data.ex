@@ -31,6 +31,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
   import Component, only: [assign: 3, to_form: 1]
 
+  import AlertsUIWeb.FormComponents.Helpers.AlertData, only: [build_alert_data: 2]
+
   @combination_values [:ACCESS, :R, :RDS, :RDT, :RDTS, :SR]
   @type combination :: :ACCESS | :R | :RDS | :RDT | :RDTS | :SR
 
@@ -213,26 +215,39 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
           Alert.t() | nil
         ) :: {:ok, {Changeset.t(), Socket.t()}} | {:error, {Changeset.t(), Socket.t()}}
   def init(socket, params, action, alert \\ %Alert{}) when action in @actions do
-    base = Repo.preload(alert, :informed_entity)
+    form_type = case action do
+      :new -> :new
+      :edit -> :editing
+      :duplicate -> :duplicating
+    end
 
-    {base_params, socket} =
+    base_params =
+      alert
+      |> Repo.preload([:informed_entity, :reminder_times])
+      |> build_alert_data(form_type)
+      |> Map.from_struct()
+      |> Map.put(:alert_id, alert.alert_id)
+
+    base = struct(__MODULE__, base_params)
+
+    {extracted_params, socket} =
       slices(socket)
       |> Enum.map(fn slice_module ->
         slice_module
-        |> struct()
+        |> struct(Map.from_struct(base))
         |> Slice.extract(base, params)
       end)
       |> Enum.reduce({%{}, socket}, fn slice, {alert_data_params, socket} ->
-        params =
+        extracted_params =
           Map.merge(alert_data_params, Map.from_struct(slice))
 
         socket = Slice.mount(slice, socket, params)
 
-        {params, socket}
+        {extracted_params, socket}
       end)
 
     __MODULE__
-    |> struct(base_params)
+    |> struct(extracted_params)
     |> sync(socket, params, init_param_fields())
   end
 
@@ -312,7 +327,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
       form ->
           socket.assigns.form[:combination].value
       end
-
 
     [
       TimelineSlice,

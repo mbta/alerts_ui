@@ -1,7 +1,7 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
   alias AlertsUI.Helpers.ReminderTimes
-  alias AlertsUI.Models.Alert
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime
+  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
   alias Phoenix.HTML.FormField
@@ -17,15 +17,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
 
     def mount(_slice, socket, _base_params), do: socket
 
-    def extract(slice, %Alert{} = alert, _params) do
-      reminder_times =
-        case Map.get(alert, :reminder_times) do
-          %Ecto.Association.NotLoaded{} -> []
-          nil -> []
-          data -> data
-        end
-
-      struct(slice, Map.from_struct(Map.put(alert, :reminder_times, reminder_times)))
+    def extract(slice, %AlertData{} = _alert_data, _params) do
+      slice
     end
 
     def transform(_slice, changeset, params, _socket) do

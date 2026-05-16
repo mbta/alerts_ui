@@ -1,8 +1,8 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
   require Logger
   alias Ecto.Changeset
-  alias AlertsUI.Models.Alert
   alias AlertsUI.Models.InformedEntity
+  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
 
   use AlertsUIWeb, :html
@@ -31,13 +31,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
 
   defimpl Slice, for: __MODULE__ do
     import Ecto.Changeset, only: [get_field: 2, cast: 3]
-    alias AlertsUI.Models.Alert
+    alias AlertsUIWeb.CreateAlertMonoLive.AlertData
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice
 
     def mount(_url_data, socket, _base_params), do: socket
 
-    def extract(url_data, %Alert{} = alert, params) do
-      new_url_params(alert, params)
+    def extract(url_data, %AlertData{} = alert_data, params) do
+      new_url_params(alert_data, params)
     end
 
     @url_fields [:alert_id, :combination, :effect_name, :route_type]
@@ -87,11 +87,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
               get_field(changeset, :effect_name)
             }
 
-          %Alert{} = alert ->
+          %AlertData{} = alert_data ->
             {
-              alert.alert_id,
-              Alert.get_route_type(alert),
-              alert.effect
+              alert_data.alert_id,
+              alert_data.route_type,
+              alert_data.effect_name
             }
         end
 
