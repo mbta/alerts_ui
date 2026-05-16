@@ -42,11 +42,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
 
     @url_fields [:alert_id, :combination, :effect_name, :route_type]
 
-    def transform(_url_data, changeset, params) do
+    def transform(_url_data, changeset, params, _socket) do
       cast(changeset, new_url_params(changeset, params) |> Map.from_struct(), @url_fields)
     end
 
-    def validate(_url_data, changeset, _params), do: changeset
+    def validate(_url_data, changeset, _params, _socket), do: changeset
 
     def assigns(_url_data, socket, params) do
       alert_id =

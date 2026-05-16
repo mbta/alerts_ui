@@ -28,7 +28,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
       struct(slice, Map.from_struct(Map.put(alert, :reminder_times, reminder_times)))
     end
 
-    def transform(_slice, changeset, params) do
+    def transform(_slice, changeset, params, _socket) do
       case params do
         %{"alert_data" => _alert_data_params} ->
           changeset
@@ -43,7 +43,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
       end
     end
 
-    def validate(_slice, changeset, _params) do
+    def validate(_slice, changeset, _params, _socket) do
       changeset
     end
 

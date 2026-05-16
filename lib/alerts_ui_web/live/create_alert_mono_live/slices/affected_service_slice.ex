@@ -50,11 +50,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       struct(service_data, Map.from_struct(alert))
     end
 
-    def transform(_service_data, changeset, _params) do
+    def transform(_service_data, changeset, _params, _socket) do
       changeset
     end
 
-    def validate(_service_data, changeset, _params) do
+    def validate(_service_data, changeset, _params, _socket) do
       changeset
     end
 

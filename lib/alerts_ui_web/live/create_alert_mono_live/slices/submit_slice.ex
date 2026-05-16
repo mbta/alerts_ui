@@ -16,11 +16,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
       |> struct()
     end
 
-    def transform(_data, changeset, _params) do
+    def transform(_data, changeset, _params, _socket) do
       changeset
     end
 
-    def validate(_data, changeset, _params) do
+    def validate(_data, changeset, _params, _socket) do
       changeset
     end
 

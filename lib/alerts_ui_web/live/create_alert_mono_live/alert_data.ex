@@ -272,7 +272,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     Enum.reduce(slices(socket), changeset, fn slice_module, changeset ->
       changeset
       |> slice_from_changeset(slice_module)
-      |> Slice.transform(changeset, params)
+      |> Slice.transform(changeset, params, socket)
     end)
   end
 
@@ -280,7 +280,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     Enum.reduce(slices(socket), changeset, fn slice_module, changeset ->
       changeset
       |> slice_from_changeset(slice_module)
-      |> Slice.validate(changeset, params)
+      |> Slice.validate(changeset, params, socket)
     end)
     |> apply_action(:validate)
   end

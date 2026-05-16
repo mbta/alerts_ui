@@ -7,11 +7,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
   use AlertsUIWeb, :html
 
   defstruct [
-    # general
-    :combination,
-    :route_type,
-    :effect_name,
-    :form_type,
     # time range
     :active_period_start_specifier,
     :active_period_end_specifier,
@@ -59,17 +54,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     def mount(_details_data, socket, _base_params), do: socket
 
-    def extract(details_data, %Alert{} = _alert, _params) do
-      details_data
-      |> struct()
+    def extract(details_data, %Alert{} = alert, _params) do
+      struct(details_data, Map.from_struct(alert))
     end
 
-    def transform(details_data, changeset, params) do
+    def transform(details_data, changeset, params, %{assigns: %{form: form}} = socket) do
       [_, target | _] = Map.get(params, "_target", [nil, nil])
 
       # TODO how to get "selected x"
       # do this inside the assigns instead :)
-      autotext_data = AlertDataToAutoText.build_autotext_data(translated_details(details_data))
+      effect_name = effect_from_url_name(form[:effect_name].value)
+      autotext_data = AlertDataToAutoText.build_autotext_data(translated_details(details_data, effect_name))
 
       header_sync_toggle =
         if target == "header_text" and details_data.header_sync_toggle == true do
@@ -99,7 +94,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       })
     end
 
-    def validate(details_data, changeset, _params) do
+    def transform(_details_data, changeset, _params, _socket), do: changeset
+
+    def validate(details_data, changeset, _params, _socket) do
       image_size = details_data.image_url |> get_image_size()
 
       changeset
@@ -235,9 +232,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       end
     end
 
-    defp translated_details(details_data) do
+    defp translated_details(details_data, effect_name) do
       Map.merge(details_data, %{
-        effect_name: effect_from_url_name(details_data.effect_name),
+        effect_name: effect_name,
         start_specifier: details_data.active_period_start_specifier,
         end_specifier: details_data.active_period_end_specifier,
         start_time_specifier: details_data.active_period_start_time_specifier,
@@ -252,6 +249,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     end
 
     defp effect_from_url_name(nil), do: nil
+
+    defp effect_from_url_name(url_name) when is_atom(url_name) do
+      effect_from_url_name("#{url_name}")
+    end
 
     defp effect_from_url_name(url_name) do
       url_name
@@ -318,6 +319,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     defp image_from_correct_host?(host), do: host == @cdn_host
 
+    defp get_image_size(nil), do: nil
     defp get_image_size(url) do
       with {:ok, parsed_url} <- URI.new(url),
            true <- url_valid?(parsed_url),
