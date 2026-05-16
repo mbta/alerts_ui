@@ -1,5 +1,5 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
-  alias AlertsUI.Models.Alert
+  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias Phoenix.HTML.Form
 
@@ -18,8 +18,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
 
     def mount(_delivery_data, socket, _base_params), do: socket
 
-    def extract(delivery_data, %Alert{} = alert, params) do
-      struct(delivery_data, Map.from_struct(alert))
+    def extract(delivery_data, %AlertData{} = _alert_data, _params) do
+      delivery_data
     end
 
     def transform(delivery_data, changeset, params, _socket) do
