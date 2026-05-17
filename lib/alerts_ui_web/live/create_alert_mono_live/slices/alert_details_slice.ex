@@ -41,6 +41,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     import Ecto.Changeset
 
     alias Phoenix.LiveView.AsyncResult
+    alias AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice
@@ -55,7 +56,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     def mount(_details_data, socket, _base_params), do: socket
 
     def extract(details_data, %AlertData{} = _alert_data, _params) do
-      details_data
+      %AlertDetailsSlice{details_data | severity: 4}
     end
 
     def transform(details_data, changeset, params, %{assigns: %{form: form}} = socket) do
