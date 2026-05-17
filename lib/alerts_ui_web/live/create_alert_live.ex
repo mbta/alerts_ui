@@ -364,6 +364,11 @@ defmodule AlertsUIWeb.CreateAlertLive do
     directions = directions_from_selection(direction)
     opts = [stop_sequences: [:first, :last], date: date] |> direction_option(directions)
 
+    IO.inspect(route_ids, label: ROUTE_IDS)
+    IO.inspect(direction, label: DIRECTION)
+    IO.inspect(date, label: DATE)
+    IO.inspect(opts, label: OPTS)
+
     route_ids
     |> SchedulesRepo.by_route_ids(opts)
     |> Enum.map(fn schedule ->

@@ -31,7 +31,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
   import Component, only: [assign: 3, to_form: 1]
 
-  import AlertsUIWeb.FormComponents.Helpers.AlertData, only: [build_alert_data: 2]
+  import AlertsUIWeb.FormComponents.Helpers.AlertData, only:
+    [build_alert_data: 2]
+
+  import AlertsUIWeb.FormComponents.Helpers.ErrorFormatter,
+    only: [parse_field_errors: 1]
 
   @combination_values [:ACCESS, :R, :RDS, :RDT, :RDTS, :SR]
   @type combination :: :ACCESS | :R | :RDS | :RDT | :RDTS | :SR
@@ -269,6 +273,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
         socket =
           socket
           |> assign(:form, to_form(change(alert_data)))
+          |> assign(:errors, [])
           |> assigns(params)
 
         {:ok, socket}
@@ -278,6 +283,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
         socket =
           socket
           |> assign(:form, to_form(changeset))
+          |> assign(:errors, parse_field_errors(changeset))
           |> assigns(params)
 
         {:error, socket}

@@ -122,8 +122,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   def handle_event("push_effect_name", params, socket) do
     effect_name = Map.get(params, "value")
     path = path_with_route_type_and_effect_name(socket.assigns, effect_name)
-    socket = assign(socket, :progress, get_step_by_name(socket.assigns.progress.next))
-    {:noreply, push_patch(socket, to: path)}
+    socket =
+      socket
+      |> assign(:progress, get_step_by_name(socket.assigns.progress.next))
+      |> push_patch(to: path)
+
+    {:noreply, socket}
   end
 
   @impl true
