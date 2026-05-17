@@ -225,8 +225,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     defp update_description_text(description_sync_toggle, details_data, autotext_data) do
       if description_sync_toggle == true do
-        ""
-        # Templates.build_auto_text(autotext_data, :description_template)
+        Templates.build_auto_text(autotext_data, :description_template) |> IO.inspect(label: "DESCR AUTOTEXT")
       else
         Map.get(details_data, :description_text)
       end
