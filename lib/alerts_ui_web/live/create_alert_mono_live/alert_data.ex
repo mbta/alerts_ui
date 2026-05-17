@@ -226,8 +226,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
       |> Repo.preload([:informed_entity, :reminder_times])
       |> build_alert_data(form_type)
       |> Map.from_struct()
-      |> alert_data_v1_to_v2()
       |> Map.put(:alert_id, alert.alert_id)
+      |> alert_data_v1_to_v2()
 
     base = struct(__MODULE__, base_params)
 
@@ -351,7 +351,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   end
 
   defp alert_data_v1_to_v2(v1_alert_data) do
-    normalize_effect_name(v1_alert_data)
+    v1_alert_data
+    |> normalize_effect_name()
+    |> set_sync_toggles()
   end
 
   defp normalize_effect_name(alert_data) do
@@ -367,5 +369,33 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
       end
 
     Map.put(alert_data, :effect_name, normalized)
+  end
+
+  defp set_sync_toggles(alert_data) do
+    toggle_data =
+      [:header, :description, :banner]
+      |> Enum.map(fn toggle ->
+        toggle_key = :"#{toggle}_sync_toggle"
+
+        toggle_value =
+          cond do
+            Map.get(alert_data, toggle_key) == false ->
+              # the toggle has explicitly been disabled
+              false
+
+            Map.get(alert_data, :"#{toggle}_text") != nil ->
+              # the field is present
+              false
+
+            true ->
+              # the field is nil and the toggle has not been disabled
+              true
+          end
+
+        {toggle_key, toggle_value}
+      end)
+      |> Enum.into(%{})
+
+    Map.merge(alert_data, toggle_data)
   end
 end
