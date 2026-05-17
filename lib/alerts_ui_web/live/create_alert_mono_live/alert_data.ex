@@ -383,7 +383,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
               # the toggle has explicitly been disabled
               false
 
-            Map.get(alert_data, :"#{toggle}_text") != nil ->
+            Map.get(alert_data, :"#{toggle}_text") not in [nil, ""] ->
               # the field is present
               false
 
