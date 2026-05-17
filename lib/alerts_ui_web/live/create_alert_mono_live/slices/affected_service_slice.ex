@@ -96,10 +96,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             )
 
           available_schedules = if (route_ids && direction && modal_date) do
+            date = case modal_date do
+              "default" ->
+                DateTime.utc_now() |> Calendar.strftime("%Y-%m-%d")
+
+              date -> date
+            end
+
             CreateAlertLive.get_schedules_by_date(
               route_ids,
               direction,
-              modal_date
+              date
             )
           else
             []

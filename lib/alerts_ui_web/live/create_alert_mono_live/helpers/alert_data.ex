@@ -115,4 +115,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
   def get_single_facility_effect_names() do
     ["Elevator Closure", "Escalator Closure"]
   end
+
+  def clear_my_errors(changeset, struct_module) do
+    filtered_errors = Keyword.reject(changeset.errors, fn {key, _value} ->
+      key in Map.keys(struct(struct_module))
+    end)
+    Map.put(changeset, :errors, filtered_errors)
+  end
 end
