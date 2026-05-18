@@ -61,13 +61,23 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       %AlertDetailsSlice{details_data | severity: 4}
     end
 
-    def transform(details_data, changeset, params, %{assigns: %{form: form}} = socket) do
+    def transform(
+      details_data,
+      changeset,
+      params,
+      %{
+        assigns: %{
+          form: form,
+          progress: %{name: "details"}
+        }
+      } = socket) do
+      IO.inspect(form[:effect_name])
       [_, target | _] = Map.get(params, "_target", [nil, nil])
 
       # TODO how to get "selected x"
       # do this inside the assigns instead :)
-      effect_name = effect_from_url_name(form[:effect_name].value)
-      autotext_data = AlertDataToAutoText.build_autotext_data(translated_details(details_data, effect_name))
+      # effect_name = effect_from_url_name(form[:effect_name].value)
+      # autotext_data = AlertDataToAutoText.build_autotext_data(translated_details(details_data, effect_name))
 
       header_sync_toggle =
         if target == "header_text" and details_data.header_sync_toggle == true do
@@ -83,17 +93,62 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
           details_data.description_sync_toggle
         end
 
-      header_text = update_header_text(header_sync_toggle, details_data, autotext_data)
+      selections = unwrap_selections(socket)
+      selected = selected_objects(selections, form)
 
-      description_text =
-        update_description_text(description_sync_toggle, details_data, autotext_data)
+      autotext_input =
+        %{
+          route_type: get_field(form.source, :route_type),
+          effect_name: effect_from_url_name(get_field(form.source, :effect_name)),
+          severity: get_field(form.source, :severity),
+          cause_detail: get_field(form.source, :cause_detail),
+          service_types: get_field(form.source, :service_types),
+          direction: get_field(form.source, :direction),
+          alert_timing: get_field(form.source, :alert_timing),
+          recurrence_days: get_field(form.source, :recurrence_days),
+          start_specifier: get_field(form.source, :active_period_start_specifier),
+          end_specifier: get_field(form.source, :active_period_end_specifier),
+          start_time_specifier: get_field(form.source, :active_period_start_time_specifier),
+          end_time_specifier: get_field(form.source, :active_period_end_time_specifier),
+          start_datetime: get_field(form.source, :active_period_start),
+          end_datetime: get_field(form.source, :active_period_end),
+          start_date: get_field(form.source, :active_period_start_date),
+          end_date: get_field(form.source, :active_period_end_date),
+          start_time: get_field(form.source, :active_period_start_time),
+          end_time: get_field(form.source, :active_period_end_time)
+        }
+        |> Map.merge(selected)
+
+      autotext_data = AlertDataToAutoText.build_autotext_data(autotext_input) |> IO.inspect(label: "ATD")
+
+      service_effect_text = Templates.build_auto_text(autotext_data, :service_effect_template)      
+
+      {header_text, description_text} =
+        if header_sync_toggle || description_sync_toggle do
+          header_text = if header_sync_toggle do
+            Templates.build_auto_text(autotext_data, :header_template)
+          else
+            get_field(form.source, :header_text)
+          end
+
+          description_text = if description_sync_toggle do
+            Templates.build_auto_text(autotext_data, :description_template)
+          else
+            get_field(form.source, :description_text)
+          end
+
+          {header_text, description_text}
+        else
+          {form[:header_text].value, form[:description_text].value}
+        end
 
       changeset
       |> change(%{
         header_sync_toggle: header_sync_toggle,
-        header_text: header_text,
+        header_text: header_text |> IO.inspect(label: "HT"),
         description_sync_toggle: description_sync_toggle,
-        description_text: description_text
+        description_text: description_text |> IO.inspect(label: "DT"),
+        service_effect_text: service_effect_text |> IO.inspect(label: "SET")
       })
     end
 
@@ -103,10 +158,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       image_size = details_data.image_url |> get_image_size()
 
       changeset
+      |> IO.inspect(label: "BEFORE CLEAR")
       |> clear_my_errors(AlertDetailsSlice)
       |> validate_required(@required_fields)
       |> validate_url()
       |> validate_image_fields(image_size)
+      |> IO.inspect(label: "AFTER VALIDATE")
     end
 
     def assigns(_details_data, socket, _params) do
@@ -122,49 +179,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       image_size = get_image_size(image_url)
       image_path = get_image_path(image_url)
 
-      socket =
-        assign(socket,
-          cause_options: cause_options,
-          severity_options: @severity_options,
-          image_size: image_size,
-          image_path: image_path
-        )
-
-      if get_field(form.source, :header_sync_toggle) do
-        selections = unwrap_selections(socket)
-        selected = selected_objects(selections, form)
-
-        autotext_input =
-          %{
-            route_type: get_field(form.source, :route_type),
-            effect_name: effect_from_url_name(get_field(form.source, :effect_name)),
-            severity: get_field(form.source, :severity),
-            cause_detail: get_field(form.source, :cause_detail),
-            service_types: get_field(form.source, :service_types),
-            direction: get_field(form.source, :direction),
-            alert_timing: get_field(form.source, :alert_timing),
-            recurrence_days: get_field(form.source, :recurrence_days),
-            start_specifier: get_field(form.source, :active_period_start_specifier),
-            end_specifier: get_field(form.source, :active_period_end_specifier),
-            start_time_specifier: get_field(form.source, :active_period_start_time_specifier),
-            end_time_specifier: get_field(form.source, :active_period_end_time_specifier),
-            start_datetime: get_field(form.source, :active_period_start),
-            end_datetime: get_field(form.source, :active_period_end),
-            start_date: get_field(form.source, :active_period_start_date),
-            end_date: get_field(form.source, :active_period_end_date),
-            start_time: get_field(form.source, :active_period_start_time),
-            end_time: get_field(form.source, :active_period_end_time)
-          }
-          |> Map.merge(selected)
-
-        autotext_data = AlertDataToAutoText.build_autotext_data(autotext_input)
-        header_text = Templates.build_auto_text(autotext_data, :header_template)
-
-        updated_source = change(form.source, %{header_text: header_text})
-        assign(socket, :form, Phoenix.Component.to_form(updated_source))
-      else
-        socket
-      end
+      assign(socket,
+        cause_options: cause_options,
+        severity_options: @severity_options,
+        image_size: image_size,
+        image_path: image_path
+      )
     end
 
     defp unwrap_selections(socket) do
@@ -229,7 +249,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     defp update_description_text(description_sync_toggle, details_data, autotext_data) do
       if description_sync_toggle == true do
-        Templates.build_auto_text(autotext_data, :description_template) |> IO.inspect(label: "DESCR AUTOTEXT")
+        Templates.build_auto_text(autotext_data, :description_template)
       else
         Map.get(details_data, :description_text)
       end
