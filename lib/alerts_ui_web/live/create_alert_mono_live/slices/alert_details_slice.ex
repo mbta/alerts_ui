@@ -98,24 +98,24 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
       autotext_input =
         %{
-          route_type: get_field(form.source, :route_type),
-          effect_name: effect_from_url_name(get_field(form.source, :effect_name)),
-          severity: get_field(form.source, :severity),
-          cause_detail: get_field(form.source, :cause_detail),
-          service_types: get_field(form.source, :service_types),
-          direction: get_field(form.source, :direction),
-          alert_timing: get_field(form.source, :alert_timing),
-          recurrence_days: get_field(form.source, :recurrence_days),
-          start_specifier: get_field(form.source, :active_period_start_specifier),
-          end_specifier: get_field(form.source, :active_period_end_specifier),
-          start_time_specifier: get_field(form.source, :active_period_start_time_specifier),
-          end_time_specifier: get_field(form.source, :active_period_end_time_specifier),
-          start_datetime: get_field(form.source, :active_period_start),
-          end_datetime: get_field(form.source, :active_period_end),
-          start_date: get_field(form.source, :active_period_start_date),
-          end_date: get_field(form.source, :active_period_end_date),
-          start_time: get_field(form.source, :active_period_start_time),
-          end_time: get_field(form.source, :active_period_end_time)
+          route_type: get_field(changeset, :route_type),
+          effect_name: effect_from_url_name(get_field(changeset, :effect_name)),
+          severity: get_field(changeset, :severity),
+          cause_detail: get_field(changeset, :cause_detail),
+          service_types: get_field(changeset, :service_types),
+          direction: get_field(changeset, :direction),
+          alert_timing: get_field(changeset, :alert_timing),
+          recurrence_days: get_field(changeset, :recurrence_days),
+          start_specifier: get_field(changeset, :active_period_start_specifier),
+          end_specifier: get_field(changeset, :active_period_end_specifier),
+          start_time_specifier: get_field(changeset, :active_period_start_time_specifier),
+          end_time_specifier: get_field(changeset, :active_period_end_time_specifier),
+          start_datetime: get_field(changeset, :active_period_start),
+          end_datetime: get_field(changeset, :active_period_end),
+          start_date: get_field(changeset, :active_period_start_date),
+          end_date: get_field(changeset, :active_period_end_date),
+          start_time: get_field(changeset, :active_period_start_time),
+          end_time: get_field(changeset, :active_period_end_time)
         }
         |> Map.merge(selected)
 
@@ -128,18 +128,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
           header_text = if header_sync_toggle do
             Templates.build_auto_text(autotext_data, :header_template)
           else
-            get_field(form.source, :header_text)
+            get_field(changeset, :header_text)
           end
 
           description_text = if description_sync_toggle do
             Templates.build_auto_text(autotext_data, :description_template)
           else
-            get_field(form.source, :description_text)
+            get_field(changeset, :description_text)
           end
 
           {header_text, description_text}
         else
-          {form[:header_text].value, form[:description_text].value}
+          {get_field(changeset, :header_text), get_field(changeset, :description_text)}
         end
 
       changeset
