@@ -209,9 +209,8 @@ defmodule AlertsUI.AlertHistory do
     build_affected_entities(map)
   end
 
-  defp recurrence(map) do
-    recurring?(Map.get(map, :recurrence_days))
-  end
+  defp recurrence(%{recurring: true}), do: true
+  defp recurrence(%{}), do: false
 
   defp effect_start(map) do
     format_datetime(Map.get(map, :active_period_start), @without_seconds)
@@ -435,9 +434,6 @@ defmodule AlertsUI.AlertHistory do
 
   defp closed?(nil), do: false
   defp closed?(_), do: true
-
-  defp recurring?([_ | _]), do: true
-  defp recurring?(_), do: false
 
   defp get_recurrence_days([_ | _] = recurrence_days) do
     recurrence_days |> Enum.map_join(",", &String.capitalize/1)

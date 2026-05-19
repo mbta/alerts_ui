@@ -16,6 +16,7 @@ defmodule AlertsUIWeb.AlertHistoryTest do
       %{start: ~U[2025-09-25 12:11:00Z], end: ~U[2025-09-25 17:11:00Z]}
     ],
     recurrence_days: [],
+    recurring: false,
     created_timestamp: ~U[2025-09-25 12:11:00Z],
     last_modified_timestamp: ~U[2025-09-25 12:11:00Z],
     last_push_notification_timestamp: nil,
@@ -42,6 +43,7 @@ defmodule AlertsUIWeb.AlertHistoryTest do
       %{start: ~U[2025-09-26 12:11:00Z], end: ~U[2025-09-26 17:11:00Z]}
     ],
     recurrence_days: ["thursday", "friday"],
+    recurring: true,
     last_modified_timestamp: ~U[2025-09-26 12:11:00Z],
     last_push_notification_timestamp: ~U[2025-09-26 12:11:00Z],
     active_period_start: ~U[2025-09-25 12:11:00Z],
@@ -254,6 +256,16 @@ defmodule AlertsUIWeb.AlertHistoryTest do
                website_banner_text: "",
                reminders: ""
              }
+    end
+
+    test "uses the right value for alert timing" do
+      assert %AlertHistory{recurrence: false} =
+               AlertHistory.build_history(
+                 {%{
+                    recurring: false,
+                    recurrence_days: ["Saturday", "Sunday"]
+                  }, 1}
+               )
     end
 
     test "generates the right effect_end for Trapeze alerts" do
