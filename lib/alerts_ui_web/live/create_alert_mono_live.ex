@@ -23,6 +23,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     StopRouteServiceSlice,
     TimelineSlice,
     TimeRangeSlice,
+    NotificationPeriodSlice,
     UrlSlice
   }
 
