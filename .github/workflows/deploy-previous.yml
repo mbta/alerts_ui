@@ -1,0 +1,65 @@
+name: Deploy previous tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        required: true
+      environment:
+        type: environment
+        required: true
+      aws-region:
+        type: string
+        description: AWS region to use
+        required: true
+        default: us-east-1
+
+jobs:
+  deploy_previous:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    environment: ${{ inputs.environment }}
+    concurrency: ${{ inputs.environment }}
+    env:
+      TARGET: ${{ inputs.environment }}
+
+    steps:
+        - uses: actions/checkout@v6
+          with:
+            fetch-tags: true
+        - name: Check that the inputted tag exists
+          id: check_tag
+          run: git show-ref -s ${{ inputs.version }}
+        - name: Report failure and exit if tag does not exist
+          if: failure()
+          run: |
+            echo "Tag ${{ inputs.version }} does not exist"
+            exit 1
+        - name: Get docker tag from git tag
+          id: settag
+          run: |
+            sha=$(git show-ref -s ${{ inputs.version }})
+            if [ -z "$sha" ]; then
+              echo "Tag ${{ inputs.version }} does not exist"
+              exit 1
+            fi
+            short_sha=$(git rev-parse --short "${sha}")
+            echo "tag=git-${short_sha}" >> $GITHUB_OUTPUT
+        - name: Deploy Alerts Manager to ${{ inputs.environment }}
+          uses: actions/checkout@v5
+        - uses: mbta/actions/deploy-ecs@v2
+          with:
+            role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+            ecs-cluster: alerts-manager
+            ecs-service: alerts-manager-${{ env.TARGET }}
+            docker-tag: "${{ secrets.DOCKER_REPO }}:${{ steps.settag.outputs.tag }}"
+        - uses: mbta/actions/notify-slack-deploy@v1
+          if: ${{ !cancelled() }}
+          with:
+            webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+            job-status: ${{ job.status }}
+            custom-message: "(${{ env.TARGET }})"
+
