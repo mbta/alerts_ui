@@ -158,12 +158,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       image_size = details_data.image_url |> get_image_size()
 
       changeset
-      |> IO.inspect(label: "BEFORE CLEAR")
       |> clear_my_errors(AlertDetailsSlice)
       |> validate_required(@required_fields)
       |> validate_url()
       |> validate_image_fields(image_size)
-      |> IO.inspect(label: "AFTER VALIDATE")
     end
 
     def assigns(_details_data, socket, _params) do
@@ -307,33 +305,41 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     end
 
     defp validate_url(changeset) do
-      changeset
-      |> validate_change(:url, fn :url, url ->
-        with {:ok, parsed_url} <- URI.new(url),
-             true <- url_valid?(parsed_url) do
-          []
-        else
-          _ -> [url: "Enter a correctly formatted URL (e.g. http://www.example.com) "]
-        end
-      end)
+      if get_field(changeset, :url) in [nil, ""] do
+        changeset
+      else
+        changeset
+        |> validate_change(:url, fn :url, url ->
+          with {:ok, parsed_url} <- URI.new(url),
+               true <- url_valid?(parsed_url) do
+            []
+          else
+            _ -> [url: "Enter a correctly formatted URL (e.g. http://www.example.com) "]
+          end
+        end)
+      end
     end
 
     defp validate_image_fields(changeset, image_size) do
-      changeset
-      |> Ecto.Changeset.validate_change(:image_url, fn :image_url, image_url ->
-        if image_url !== "" and is_number(image_size),
-          do: [],
-          else: [image_url: "Enter a valid image URL"]
-      end)
-      |> then(fn changeset ->
-        if Map.get(changeset.changes, :image_url) in [nil, ""] do
-          changeset
-        else
-          Ecto.Changeset.validate_required(changeset, :image_alternative_text,
-            message: "Enter alt text"
-          )
-        end
-      end)
+      if get_field(changeset, :image_url) in [nil, ""] do
+        changeset
+      else
+        changeset
+        |> Ecto.Changeset.validate_change(:image_url, fn :image_url, image_url ->
+          if image_url !== "" and is_number(image_size),
+            do: [],
+            else: [image_url: "Enter a valid image URL"]
+        end)
+        |> then(fn changeset ->
+          if Map.get(changeset.changes, :image_url) in [nil, ""] do
+            changeset
+          else
+            Ecto.Changeset.validate_required(changeset, :image_alternative_text,
+              message: "Enter alt text"
+            )
+          end
+        end)
+      end
     end
 
     defp url_valid?(uri) do
