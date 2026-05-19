@@ -62,6 +62,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       socket
       |> assign(:selections, %{})
       |> assign(:form_type, form_type_from_socket(socket))
+      |> assign(:submitting?, false)
       |> assign_new(:return_to, fn -> session["return_to"] end)
 
     {:ok, start_socket(socket, params)}
@@ -178,14 +179,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   end
 
   @impl true
-  def handle_event("submit", _params, socket) do
-    # commit the alert and redirect to the list view
-    {:noreply, socket}
-  end
+  def handle_event("save", params, socket) do
+    socket =
+      socket
+      |> assign(:submitting?, true)
+      |> sync_socket(params)
 
-  @impl true
-  def handle_event("save", _params, socket) do
-    send(self(), :create_alert)
     {:noreply, socket}
   end
 
@@ -281,8 +280,22 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   @spec sync_socket(LiveView.Socket.t(), LiveView.unsigned_params()) :: LiveView.Socket.t()
   def sync_socket(socket, params) do
     case AlertData.sync(socket.assigns.form.source, socket, params) do
-      {:ok, socket} -> socket
-      {:error, socket} -> socket
+      {:ok, socket} ->
+        if socket.assigns.submitting? do
+          raise "persist alert here"
+          socket
+        else
+          socket
+        end
+
+      {:error, socket} ->
+        if socket.assigns.submitting? do
+          socket
+          |> assign(:submitting?, false)
+          |> display_errors()
+        else
+          socket
+        end
     end
   end
 
@@ -319,4 +332,20 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       affected_service_component(combination).render(assigns)
     end
   end
+
+  defp display_errors(%{assigns: %{form: form}} = socket) do
+    formatted_errors =
+      socket.assigns.form.errors
+      |> Enum.map(fn {_title, {message, _error}} -> "#{message}" end)
+      |> Enum.uniq()
+      |> Enum.join(";")
+
+    socket
+    |> clear_flash
+    |> push_event("scroll_to_top", %{})
+    |> put_flash(:error, formatted_errors)
+    |> put_flash(:title, "Please fix the following errors:")
+  end
+
+  defp display_errors(socket), do: socket
 end
