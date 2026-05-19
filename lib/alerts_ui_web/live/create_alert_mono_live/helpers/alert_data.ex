@@ -129,4 +129,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
       _ -> map
     end
   end
+
+  def values_to_options(values) do
+    Enum.map(values, fn value ->
+      val = if is_atom(value), do: Atom.to_string(value), else: value
+      name = val |> String.replace("_", " ") |> String.capitalize()
+      {name, value}
+    end)
+  end
 end

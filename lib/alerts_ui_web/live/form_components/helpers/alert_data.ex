@@ -299,6 +299,17 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     }
   end
 
+  defp notification_period(alert, :new) do
+    notification_period_start = shift_to_naive(alert.notification_period_start)
+    notification_period_end = shift_to_naive(alert.notification_period_end)
+
+    %{
+      notification_period_start: notification_period_start,
+      notification_period_end: notification_period_end,
+      notification_specifier: :now
+    }
+  end
+
   defp notification_period(alert, _form_type) do
     notification_period_start = shift_to_naive(alert.notification_period_start)
     notification_period_end = shift_to_naive(alert.notification_period_end)

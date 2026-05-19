@@ -23,7 +23,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     SubmitSlice,
     UrlSlice,
     TimelineSlice,
-    TimeRangeSlice
+    TimeRangeSlice,
+    NotificationPeriodSlice
   }
 
   use AlertsUI.Schema
@@ -347,6 +348,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
       ReminderTimesSlice,
       DeliverySlice,
       TimeRangeSlice,
+      NotificationPeriodSlice,
       SubmitSlice
     ]
   end

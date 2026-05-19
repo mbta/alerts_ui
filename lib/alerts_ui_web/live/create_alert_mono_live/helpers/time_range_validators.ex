@@ -214,7 +214,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
     )
   end
 
-  def validate_notification(changeset, current_time, editing \\ false) do
+  def validate_notification(changeset) do
+    editing = not is_nil(get_field(changeset, :alert_id))
+    current_time = NaiveDateTime.local_now()
+
     naive_start =
       case get_field(changeset, :alert_timing) do
         :"one-time" ->

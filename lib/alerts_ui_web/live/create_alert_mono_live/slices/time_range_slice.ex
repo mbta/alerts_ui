@@ -4,7 +4,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     Alert
   }
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData, only: [put_over_nil: 3]
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData, only: [put_over_nil: 3, values_to_options: 1]
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Time, as: DTHelpers
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
 
@@ -459,14 +459,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     do: datetime |> NaiveDateTime.to_date() |> Date.to_iso8601()
 
   def naive_datetime_to_iso_date(_), do: ""
-
-  defp values_to_options(values) do
-    Enum.map(values, fn value ->
-      val = if is_atom(value), do: Atom.to_string(value), else: value
-      name = val |> String.replace("_", " ") |> String.capitalize()
-      {name, value}
-    end)
-  end
 
   defp fv(form, field), do: Ecto.Changeset.get_field(form.source, field)
 
