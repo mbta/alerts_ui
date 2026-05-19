@@ -137,4 +137,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
       {name, value}
     end)
   end
+
+  def display_alert_timing(alert_timing) when is_atom(alert_timing) do
+    display_alert_timing("#{alert_timing}")
+  end
+
+  def display_alert_timing(alert_timing) do
+    String.capitalize(alert_timing)
+  end
 end

@@ -7,6 +7,7 @@ defmodule AlertsUIWeb.ReviewModal do
 
   import AlertsUIWeb.CoreComponents
   import AlertsUIWeb.SharedComponents
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData, only: [display_alert_timing: 1]
   import PhoenixHTMLHelpers.Format, only: [text_to_html: 2]
 
   alias AlertsUI.ActiveStatus
@@ -278,7 +279,7 @@ defmodule AlertsUIWeb.ReviewModal do
 
             <p class="font-bold pb-1">Timing</p>
             <p class="pb-1">
-              {@alert_data.alert_timing |> Atom.to_string() |> String.capitalize()}
+              {display_alert_timing(@alert_data.alert_timing)}
             </p>
 
             <p class="font-bold pb-1">Effect period</p>
