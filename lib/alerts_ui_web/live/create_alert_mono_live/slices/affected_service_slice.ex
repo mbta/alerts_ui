@@ -44,6 +44,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
               loading: false,
               modal_options: [],
               route_id_options: [],
+              selected_stops: [],
               single_route_effect_names: @single_route_effect_names,
               stop_id_options: [],
               stop_selections: [],
