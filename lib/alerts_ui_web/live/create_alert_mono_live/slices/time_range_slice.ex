@@ -121,9 +121,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   end
 
   def ensure_start_date_values_for_specifier(changeset, :start_of_service, _, d) do
-    now = NaiveDateTime.local_now()
     change(changeset, %{
-      active_period_start: DTHelpers.replace_date(d, now),
+      active_period_start: NaiveDateTime.new!(d, ~T[03:00:00]),
     })
   end
 

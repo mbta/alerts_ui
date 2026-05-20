@@ -45,8 +45,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
   end
 
   def validate_end_after_start(changeset) do
-    case get_field(changeset, :alert_timing) do
-      :"one-time" ->
+    timing = get_field(changeset, :alert_timing)
+    cond do
+      timing in [:"one-time", "one-time"] ->
         active_period_start = get_field(changeset, :active_period_start)
 
         if active_period_start do
@@ -61,7 +62,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
           changeset
         end
 
-      :recurring ->
+      timing in [:recurring, "recurring"] ->
         validate_change(
           changeset,
           :active_period_end_date,
@@ -86,7 +87,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
           end
         )
 
-      _ ->
+      true ->
         changeset
     end
   end
