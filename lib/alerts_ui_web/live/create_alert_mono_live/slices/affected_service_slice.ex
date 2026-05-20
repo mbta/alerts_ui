@@ -3,6 +3,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   alias AlertsUIWeb.CreateAlertLive
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
+
   alias AlertsUIWeb.FormComponents.Helpers.{
     SelectFormatter,
     ServiceEffectCombinations
@@ -112,22 +113,25 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
               direction
             )
 
-          available_schedules = if (route_ids && direction && modal_date) do
-            date = case modal_date do
-              "default" ->
-                DateTime.utc_now() |> Calendar.strftime("%Y-%m-%d")
+          available_schedules =
+            if route_ids && direction && modal_date do
+              date =
+                case modal_date do
+                  "default" ->
+                    DateTime.utc_now() |> Calendar.strftime("%Y-%m-%d")
 
-              date -> date
+                  date ->
+                    date
+                end
+
+              CreateAlertLive.get_schedules_by_date(
+                route_ids,
+                direction,
+                date
+              )
+            else
+              []
             end
-
-            CreateAlertLive.get_schedules_by_date(
-              route_ids,
-              direction,
-              date
-            )
-          else
-            []
-          end
 
           direction_options =
             SelectFormatter.formatted_direction_options(
@@ -145,13 +149,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             })
 
           stop_id_options =
-            SelectFormatter.formatted_select_options(%SelectFormatter{
-              options: available_stops,
-              search_term: stop_search_term,
-              route_type: route_type,
-              values_to_keep: stop_names_and_ids,
-              option_prefix: "stop-search"
-            }, true)
+            SelectFormatter.formatted_select_options(
+              %SelectFormatter{
+                options: available_stops,
+                search_term: stop_search_term,
+                route_type: route_type,
+                values_to_keep: stop_names_and_ids,
+                option_prefix: "stop-search"
+              },
+              true
+            )
 
           trip_id_options =
             SelectFormatter.formatted_select_options(%SelectFormatter{

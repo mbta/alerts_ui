@@ -62,15 +62,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     end
 
     def transform(
-      details_data,
-      changeset,
-      params,
-      %{
-        assigns: %{
-          form: form,
-          progress: %{name: "details"}
-        }
-      } = socket) do
+          details_data,
+          changeset,
+          params,
+          %{
+            assigns: %{
+              form: form,
+              progress: %{name: "details"}
+            }
+          } = socket
+        ) do
       [_, target | _] = Map.get(params, "_target", [nil, nil])
 
       # TODO how to get "selected x"
@@ -120,21 +121,23 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
       autotext_data = AlertDataToAutoText.build_autotext_data(autotext_input)
 
-      service_effect_text = Templates.build_auto_text(autotext_data, :service_effect_template)      
+      service_effect_text = Templates.build_auto_text(autotext_data, :service_effect_template)
 
       {header_text, description_text} =
         if header_sync_toggle || description_sync_toggle do
-          header_text = if header_sync_toggle do
-            Templates.build_auto_text(autotext_data, :header_template)
-          else
-            get_field(changeset, :header_text)
-          end
+          header_text =
+            if header_sync_toggle do
+              Templates.build_auto_text(autotext_data, :header_template)
+            else
+              get_field(changeset, :header_text)
+            end
 
-          description_text = if description_sync_toggle do
-            Templates.build_auto_text(autotext_data, :description_template)
-          else
-            get_field(changeset, :description_text)
-          end
+          description_text =
+            if description_sync_toggle do
+              Templates.build_auto_text(autotext_data, :description_template)
+            else
+              get_field(changeset, :description_text)
+            end
 
           {header_text, description_text}
         else
@@ -348,6 +351,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     defp image_from_correct_host?(host), do: host == @cdn_host
 
     defp get_image_size(nil), do: nil
+
     defp get_image_size(url) do
       with {:ok, parsed_url} <- URI.new(url),
            true <- url_valid?(parsed_url),

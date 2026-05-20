@@ -128,6 +128,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   def handle_event("push_effect_name", params, socket) do
     effect_name = Map.get(params, "value")
     path = path_with_route_type_and_effect_name(socket.assigns, effect_name)
+
     socket =
       socket
       |> assign(:progress, get_step_by_name(socket.assigns.progress.next))
@@ -301,7 +302,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
       {:error, socket} ->
         if socket.assigns.submitting? do
-          #errors =
+          # errors =
           #  result
           #  |> Alerts.parse_changeset_errors()
           #  |> format_errors(combination)
@@ -393,14 +394,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     alert_data = socket.assigns.form.source.data
     form_type = socket.assigns.form_type
 
-    user = Users.create_or_update_user_from_session(
-      socket.assigns.current_user
-    )
+    user = Users.create_or_update_user_from_session(socket.assigns.current_user)
 
-    alert_params = AlertBuilder.build_alert(
-      alert_data,
-      alert_data.combination
-    )
+    alert_params =
+      AlertBuilder.build_alert(
+        alert_data,
+        alert_data.combination
+      )
 
     existing_alert =
       if is_nil(socket.assigns.alert_id) || form_type == :duplicating do

@@ -47,7 +47,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
 
     def validate(delivery_data, changeset, _params, _socket) do
       if delivery_data.view_banner do
-        validate_acceptance(changeset, :accept_banner, message: "Check box to show you understand")
+        validate_acceptance(changeset, :accept_banner,
+          message: "Check box to show you understand"
+        )
       else
         changeset
       end

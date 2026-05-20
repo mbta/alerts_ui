@@ -4,7 +4,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     Alert
   }
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData, only: [put_over_nil: 3, values_to_options: 1]
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
+    only: [put_over_nil: 3, values_to_options: 1]
+
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Time, as: DTHelpers
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
 
@@ -62,6 +64,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
     def extract(slice, %AlertData{} = _alert, _params) do
       now = NaiveDateTime.local_now()
+
       slice
       # |> Map.from_struct()
       |> put_over_nil(:alert_timing, "one-time")
@@ -108,12 +111,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   def ensure_start_date_values_for_specifier(changeset, _, dt, d) when is_nil(dt) or is_nil(d) do
     change(changeset, %{
       active_period_start: nil,
-      active_period_start_date: nil,
+      active_period_start_date: nil
     })
   end
 
   def ensure_start_date_values_for_specifier(changeset, :now, _, _) do
     now = NaiveDateTime.local_now()
+
     change(changeset, %{
       active_period_start: now,
       active_period_start_date: now |> NaiveDateTime.to_date()
@@ -122,7 +126,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
   def ensure_start_date_values_for_specifier(changeset, :start_of_service, _, d) do
     change(changeset, %{
-      active_period_start: NaiveDateTime.new!(d, ~T[03:00:00]),
+      active_period_start: NaiveDateTime.new!(d, ~T[03:00:00])
     })
   end
 
@@ -144,12 +148,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   def ensure_end_date_values_for_specifier(changeset, _, dt, d) when is_nil(dt) or is_nil(d) do
     change(changeset, %{
       active_period_end: nil,
-      active_period_end_date: nil,
+      active_period_end_date: nil
     })
   end
 
   def ensure_end_date_values_for_specifier(changeset, :later_today, _, _) do
     now = NaiveDateTime.local_now()
+
     change(changeset, %{
       active_period_end: now,
       active_period_end_date: now |> NaiveDateTime.to_date()
@@ -158,12 +163,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
   def ensure_end_date_values_for_specifier(changeset, :end_of_service, _, d) do
     change(changeset, %{
-      active_period_end: NaiveDateTime.new!(d, ~T[23:59:59]),
+      active_period_end: NaiveDateTime.new!(d, ~T[23:59:59])
     })
   end
 
   def ensure_end_date_values_for_specifier(changeset, :until_further_notice, _, _) do
     now = NaiveDateTime.local_now()
+
     change(changeset, %{
       active_period_end: DTHelpers.replace_time(now, ~T[23:59:59]),
       active_period_end_date: now |> NaiveDateTime.to_date()
@@ -172,6 +178,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
   def ensure_end_date_values_for_specifier(changeset, :when_work_order_is_closed, _, _) do
     now = NaiveDateTime.local_now()
+
     change(changeset, %{
       active_period_end: DTHelpers.replace_time(now, ~T[23:59:59]),
       active_period_end_date: now |> NaiveDateTime.to_date()

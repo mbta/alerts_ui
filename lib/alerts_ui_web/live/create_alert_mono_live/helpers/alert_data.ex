@@ -117,9 +117,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
   end
 
   def clear_my_errors(changeset, struct_module) do
-    filtered_errors = Keyword.reject(changeset.errors, fn {key, _value} ->
-      key in Map.keys(struct(struct_module))
-    end)
+    filtered_errors =
+      Keyword.reject(changeset.errors, fn {key, _value} ->
+        key in Map.keys(struct(struct_module))
+      end)
+
     Map.put(changeset, :errors, filtered_errors)
   end
 

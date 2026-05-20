@@ -7,8 +7,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.ReviewModal do
 
   import AlertsUIWeb.CoreComponents
   import AlertsUIWeb.SharedComponents
+
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
     only: [humanize_effect_name: 2, display_alert_timing: 1]
+
   import PhoenixHTMLHelpers.Format, only: [text_to_html: 2]
 
   alias AlertsUI.ActiveStatus
@@ -155,7 +157,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.ReviewModal do
               <p class="md:text-lg/6">Alert #{@alert_id} ({format_alert_status_text(@alert_data)})</p>
           <% end %>
           <p class="md:text-lg/6 font-bold">
-            {ContentFormatter.service_type_string(@alert_data.route_type, @alert_data.combination)} • {humanize_effect_name(@alert_data.route_type, @alert_data.effect_name)}
+            {ContentFormatter.service_type_string(@alert_data.route_type, @alert_data.combination)} • {humanize_effect_name(
+              @alert_data.route_type,
+              @alert_data.effect_name
+            )}
           </p>
         </div>
       </:header>
@@ -314,11 +319,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.ReviewModal do
                 <%= for reminder <- reminder_times_iterator(reminder_times) do %>
                   <p>
                     {Calendar.strftime(reminder_time(reminder), "%a %m/%d/%Y %-I:%M %p")}
-                    <span :if={ReminderTimes.sent?(reminder_time(reminder))} class="text-text-secondary">
+                    <span
+                      :if={ReminderTimes.sent?(reminder_time(reminder))}
+                      class="text-text-secondary"
+                    >
                       <.icon name="hero-check-circle-solid text-mbta-green" class="h-4 w-4" /> Sent
                     </span>
 
-                    <span :if={!ReminderTimes.sent?(reminder_time(reminder))} class="text-text-secondary">
+                    <span
+                      :if={!ReminderTimes.sent?(reminder_time(reminder))}
+                      class="text-text-secondary"
+                    >
                       <.icon name="hero-clock" class="h-4 w-4" /> Scheduled
                     </span>
                   </p>
@@ -489,7 +500,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.ReviewModal do
 
   defp reminder_times_iterator(reminders) do
     reminders
-    |> Enum.filter(& !!reminder_time(&1))
+    |> Enum.filter(&(!!reminder_time(&1)))
     |> Enum.sort_by(&reminder_time(&1), NaiveDateTime)
   end
 
