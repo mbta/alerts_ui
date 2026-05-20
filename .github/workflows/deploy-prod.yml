@@ -14,6 +14,9 @@ jobs:
     uses: ./.github/workflows/deploy-base.yml
     with:
       environment: prod
+    permissions:
+      id-token: write
+      contents: read
     secrets: 
       AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
       DOCKER_REPO: ${{ secrets.DOCKER_REPO }}

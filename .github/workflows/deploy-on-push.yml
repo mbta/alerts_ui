@@ -11,6 +11,9 @@ jobs:
         uses: ./.github/workflows/deploy-dev.yml
         with:
           environment: dev-orange
+        permissions:
+          id-token: write
+          contents: read
         secrets: 
           AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
           DOCKER_REPO: ${{ secrets.DOCKER_REPO }}
@@ -19,6 +22,9 @@ jobs:
         uses: ./.github/workflows/deploy-dev.yml
         with:
           environment: staging
+        permissions:
+          id-token: write
+          contents: read
         secrets: 
           AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
           DOCKER_REPO: ${{ secrets.DOCKER_REPO }}
