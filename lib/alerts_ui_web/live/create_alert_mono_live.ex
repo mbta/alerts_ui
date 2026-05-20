@@ -6,7 +6,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   use AlertsUIWeb, :live_view
 
   alias Phoenix.LiveView
+  alias AlertsUI.AlertBuilder
   alias AlertsUI.Alerts
+  alias AlertsUI.Models.Alert
+
+  alias AlertsUIWeb.FormComponents.Helpers.ErrorFormatter
 
   alias AlertsUIWeb.CreateAlertMonoLive.{
     AlertData,
@@ -282,8 +286,53 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     case AlertData.sync(socket.assigns.form.source, socket, params) do
       {:ok, socket} ->
         if socket.assigns.submitting? do
-          raise "persist alert here"
-          socket
+          alert_data = socket.assigns.form.source.data
+          form_type = socket.assigns.form_type
+
+          user = Users.create_or_update_user_from_session(
+            socket.assigns.current_user
+          )
+
+          alert_params = AlertBuilder.build_alert(
+            alert_data,
+            alert_data.combination
+          )
+
+          existing_alert =
+            if is_nil(socket.assigns.alert_id) || form_type == :duplicating do
+              %Alert{}
+            else
+              Alerts.get_by_alert_id(socket.assigns.alert_id)
+            end
+
+          alert_params
+          |> Alerts.create_or_update_alert(user, existing_alert)
+          |> case do
+            {:ok, alert} ->
+              alert_id =
+                alert.id
+                |> Alerts.get_by_id()
+                |> Map.get(:alert_id)
+
+              flash = flash_text(socket.assigns.alert_id, alert_id, form_type)
+
+              socket
+              |> put_flash(:info, flash)
+              |> redirect(to: return_to(socket.assigns.return_to || "/"))
+
+            {:error, result} ->
+              IO.inspect(result, label: "RESULT")
+              combination = socket.assigns.form[:combination].value
+
+              errors =
+                result
+                |> Alerts.parse_changeset_errors()
+                |> format_errors(combination)
+
+              socket
+              |> assign(:submitting?, false)
+              |> display_errors()
+          end
         else
           socket
         end
@@ -348,4 +397,28 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   end
 
   defp display_errors(socket), do: socket
+
+  defp format_errors(errors, combination) do
+    errors
+    |> ErrorFormatter.parse_field_errors(combination)
+    |> Enum.uniq()
+    |> Enum.map_join("; ", fn {_title, {message, _error}} -> "#{message}" end)
+  end
+
+  def return_to(return_to_value) do
+    uri = URI.parse(return_to_value)
+
+    if uri.path == "/alerts" do
+      "/alerts?#{uri.query}"
+    else
+      "/"
+    end
+  end
+
+  defp flash_text(nil, alert_id, _form_type), do: "New alert ##{alert_id} created"
+
+  defp flash_text(assigns_alert_id, alert_id, :duplicating),
+    do: "Alert ##{alert_id} duplicated from ##{assigns_alert_id}"
+
+  defp flash_text(_assigns_alert_id, alert_id, _form_type), do: "Alert ##{alert_id} updated"
 end
