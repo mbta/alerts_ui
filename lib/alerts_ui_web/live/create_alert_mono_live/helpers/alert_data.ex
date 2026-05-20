@@ -145,4 +145,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
   def display_alert_timing(alert_timing) do
     String.capitalize(alert_timing)
   end
+
+  def filter_empty_list_fields(map) do
+    map
+    |> Enum.reject(fn {_, v} -> v == [] end)
+    |> Map.new()
+  end
 end

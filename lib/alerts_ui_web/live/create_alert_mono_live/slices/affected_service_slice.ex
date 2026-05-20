@@ -6,6 +6,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
 
   import Phoenix.LiveView, only: [assign_async: 3]
+  import Ecto.Changeset, only: [cast: 3, get_field: 2]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
     only: [get_single_route_effect_names: 0]
@@ -37,6 +38,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
               loading: false,
               modal_options: [],
               route_id_options: [],
+              single_route_effect_names: @single_route_effect_names,
               stop_id_options: [],
               stop_selections: [],
               today: nil,
@@ -52,6 +54,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
     def transform(_service_data, changeset, _params, _socket) do
       changeset
+      |> ensure_default_direction()
+      |> ensure_route_ids()
+      # |> ensure_coherent_selections()
+      # |> filter_empty_list_fields()
+      |> ensure_stop_names_and_ids()
+      |> ensure_trip_ids()
+      |> filter_stops_by_direction()
+      |> split_stop_names_and_ids()
     end
 
     def validate(_service_data, changeset, _params, _socket) do
@@ -134,7 +144,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
               route_type: route_type,
               values_to_keep: stop_names_and_ids,
               option_prefix: "stop-search"
-            })
+            }, true)
 
           trip_id_options =
             SelectFormatter.formatted_select_options(%SelectFormatter{
@@ -155,7 +165,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             available_schedules: available_schedules,
             direction_options: direction_options,
             route_id_options: route_id_options,
-            stop_id_options: stop_id_options
+            stop_id_options: stop_id_options,
+            # stop_selections: stop_selections,
+            trip_id_options: trip_id_options
           }
 
           {:ok, %{selections: selections}}
@@ -212,6 +224,84 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
         schedule.route.id in (route_ids || [])
       end)
       |> Enum.group_by(&SelectFormatter.name_for_option(&1.route))
+    end
+
+    defp ensure_default_direction(changeset) do
+      case get_field(changeset, :direction) do
+        nil -> cast(changeset, %{direction: "default"}, [:direction])
+        _ -> changeset
+      end
+    end
+
+    @single_route_effect_names ["Detour", "Snow Route"]
+
+    defp ensure_route_ids(changeset) do
+      effect_name = get_field(changeset, :effect_name)
+
+      cond do
+        effect_name in @single_route_effect_names ->
+          incoming_route_id = get_field(changeset, :single_route_id)
+          cast(changeset, %{route_ids: [incoming_route_id]}, [:route_ids])
+
+        get_field(changeset, :route_ids) == nil ->
+          cast(changeset, %{route_ids: []}, [:route_ids])
+
+        true ->
+          changeset
+      end
+    end
+
+    # come back to this - see adjust_selections/1 in original
+    defp ensure_selections(changeset), do: changeset
+
+    defp ensure_stop_names_and_ids(changeset) do
+      if get_field(changeset, :stop_names_and_ids) in [nil, "default", ["default"]] do
+        cast(changeset, %{stop_names_and_ids: []}, [:stop_names_and_ids])
+      else
+        changeset
+      end
+    end
+
+    defp ensure_trip_ids(changeset) do
+      if get_field(changeset, :trip_ids) in [nil, "default", ["default"]] do
+        cast(changeset, %{trip_ids: []}, [:trip_ids])
+      else
+        changeset
+      end
+    end
+
+    defp filter_stops_by_direction(changeset) do
+      marker =
+        case get_field(changeset, :direction) do
+          "0" -> ~r/inbound/
+          "1" -> ~r/outbound/
+          _ -> ~r/\A\Z/
+        end
+
+      stop_names_and_ids =
+        changeset
+        |> get_field(:stop_names_and_ids)
+        |> Enum.filter(&(!(&1 =~ marker)))
+
+      cast(
+        changeset,
+        %{stop_names_and_ids: stop_names_and_ids},
+        [:stop_names_and_ids]
+      )
+    end
+
+    defp split_stop_names_and_ids(changeset) do
+      split_names_and_ids =
+        get_field(changeset, :stop_names_and_ids)
+        |> Enum.reduce(%{stop_names: [], stop_ids: []}, fn name_and_id, acc ->
+          [stop_name, stop_id] = String.split(name_and_id, "|")
+          stop_names = [stop_name | acc[:stop_names]]
+          stop_ids = [stop_id | acc[:stop_ids]]
+
+          %{stop_names: stop_names, stop_ids: stop_ids}
+        end)
+
+      cast(changeset, split_names_and_ids, [:stop_names, :stop_ids])
     end
   end
 
