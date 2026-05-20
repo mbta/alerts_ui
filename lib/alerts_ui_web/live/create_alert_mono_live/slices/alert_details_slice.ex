@@ -71,7 +71,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
           progress: %{name: "details"}
         }
       } = socket) do
-      IO.inspect(form[:effect_name])
       [_, target | _] = Map.get(params, "_target", [nil, nil])
 
       # TODO how to get "selected x"
@@ -119,7 +118,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
         }
         |> Map.merge(selected)
 
-      autotext_data = AlertDataToAutoText.build_autotext_data(autotext_input) |> IO.inspect(label: "ATD")
+      autotext_data = AlertDataToAutoText.build_autotext_data(autotext_input)
 
       service_effect_text = Templates.build_auto_text(autotext_data, :service_effect_template)      
 
@@ -145,10 +144,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       changeset
       |> change(%{
         header_sync_toggle: header_sync_toggle,
-        header_text: header_text |> IO.inspect(label: "HT"),
+        header_text: header_text,
         description_sync_toggle: description_sync_toggle,
-        description_text: description_text |> IO.inspect(label: "DT"),
-        service_effect_text: service_effect_text |> IO.inspect(label: "SET")
+        description_text: description_text,
+        service_effect_text: service_effect_text
       })
     end
 
