@@ -14,6 +14,9 @@ jobs:
   asdf:
     name: ASDF
     runs-on: ubuntu-latest
+    permissions: {
+      contents: read # To check out the repo
+    }
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -54,6 +57,9 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+    permissions: {
+      contents: read # To check out the repo
+    }
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
