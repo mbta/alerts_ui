@@ -67,7 +67,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
           params,
           %{
             assigns: %{
-              form: _form,
+              form: form,
               progress: %{name: "details"}
             }
           } = socket
