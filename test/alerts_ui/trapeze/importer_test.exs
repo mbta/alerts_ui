@@ -107,7 +107,8 @@ defmodule AlertsUI.Trapeze.ImporterTest do
     test "turns Trapeze lines into Alerts" do
       with_mocks([
         {FacilitiesRepo, [], [get: fn _ -> @facility end]},
-        {StopsRepo, [], [get: fn _ -> @stop end, get!: fn _ -> @stop end]},
+        {StopsRepo, [],
+         [get: fn _ -> @stop end, get!: fn _ -> @stop end, all: fn _, _ -> [@stop] end]},
         {RoutesRepo, [], [by_stop: fn _ -> [@route] end]}
       ]) do
         input = [
@@ -146,7 +147,8 @@ defmodule AlertsUI.Trapeze.ImporterTest do
              _ -> @facility
            end
          ]},
-        {StopsRepo, [], [get: fn _ -> @stop end, get!: fn _ -> @stop end]},
+        {StopsRepo, [],
+         [get: fn _ -> @stop end, get!: fn _ -> @stop end, all: fn _, _ -> [@stop] end]},
         {RoutesRepo, [], [by_stop: fn _ -> [@route] end]}
       ]) do
         input = [
@@ -205,7 +207,8 @@ defmodule AlertsUI.Trapeze.ImporterTest do
     test "handles multiple work orders for the same elevator" do
       with_mocks([
         {FacilitiesRepo, [], [get: fn _ -> @facility end]},
-        {StopsRepo, [], [get: fn _ -> @stop end, get!: fn _ -> @stop end]},
+        {StopsRepo, [],
+         [get: fn _ -> @stop end, get!: fn _ -> @stop end, all: fn _, _ -> [@stop] end]},
         {RoutesRepo, [], [by_stop: fn _ -> [@route] end]}
       ]) do
         input = [
@@ -329,7 +332,8 @@ defmodule AlertsUI.Trapeze.ImporterTest do
     test "alert does not exist, but closed_timestamp is nil, save it" do
       with_mocks([
         {FacilitiesRepo, [], [get: fn _ -> @facility end]},
-        {StopsRepo, [], [get: fn _ -> @stop end, get!: fn _ -> @stop end]},
+        {StopsRepo, [],
+         [get: fn _ -> @stop end, get!: fn _ -> @stop end, all: fn _, _ -> [@stop] end]},
         {RoutesRepo, [], [by_stop: fn _ -> [@route] end]}
       ]) do
         result =
@@ -418,7 +422,8 @@ defmodule AlertsUI.Trapeze.ImporterTest do
     test "properly creates an informed entity and active period" do
       with_mocks([
         {FacilitiesRepo, [], [get: fn _ -> @facility end]},
-        {StopsRepo, [], [get: fn _ -> @stop end, get!: fn _ -> @stop end]},
+        {StopsRepo, [],
+         [get: fn _ -> @stop end, get!: fn _ -> @stop end, all: fn _, _ -> [@stop] end]},
         {RoutesRepo, [], [by_stop: fn _ -> [@route] end]}
       ]) do
         start_datetime = ~N[2024-04-30 11:54:00]

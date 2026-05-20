@@ -120,7 +120,7 @@ defmodule AlertsUI.Trapeze.WorkOrderTest do
                  active_period_end_specifier: :until_further_notice,
                  active_period_start_specifier: :custom,
                  alert_timing: :one_time,
-                 child_stops_with_context: [],
+                 stops_with_context: [],
                  direction: "",
                  facility_ids: ["891"],
                  notification_specifier: :now,

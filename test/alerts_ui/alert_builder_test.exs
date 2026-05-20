@@ -30,7 +30,8 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
         {RoutesRepo, [],
-         [get: fn route_id, _opts -> %Route{id: route_id, type: 1, name: route_id} end]}
+         [get: fn route_id, _opts -> %Route{id: route_id, type: 1, name: route_id} end]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         existing_alert = insert(:alert, alert_id: "0")
 
@@ -136,7 +137,8 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
         {RoutesRepo, [],
-         [get: fn route_id, _opts -> %Route{id: route_id, type: 1, name: route_id} end]}
+         [get: fn route_id, _opts -> %Route{id: route_id, type: 1, name: route_id} end]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 1,
@@ -190,7 +192,8 @@ defmodule AlertsUI.AlertBuilderTest do
     test "notification period end is same as alert end if specifier is custom" do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
-        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 1,
@@ -216,7 +219,8 @@ defmodule AlertsUI.AlertBuilderTest do
     test "notification period end is end of service today if end specifier is later today" do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
-        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 1,
@@ -242,7 +246,8 @@ defmodule AlertsUI.AlertBuilderTest do
     test "notification period end can be set directly in alert data for IBI alerts" do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
-        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 1,
@@ -269,7 +274,8 @@ defmodule AlertsUI.AlertBuilderTest do
     test "notification period end to be recalculated in alert_data for non-IBI alerts" do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
-        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 1,
@@ -295,7 +301,8 @@ defmodule AlertsUI.AlertBuilderTest do
     test "notification period end is properly set for a recurring alert with no end (regression test)" do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
-        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 1,
@@ -332,7 +339,8 @@ defmodule AlertsUI.AlertBuilderTest do
     test "notification period end is properly set for a recurring alert with end date (regression test)" do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
-        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 1,
@@ -369,7 +377,8 @@ defmodule AlertsUI.AlertBuilderTest do
     test "cause/effect fields can be set directly in alert data" do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
-        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 1,
@@ -405,7 +414,8 @@ defmodule AlertsUI.AlertBuilderTest do
       }
 
       with_mocks([
-        {FacilitiesRepo, [], [get: fn _facility_id -> facility end]}
+        {FacilitiesRepo, [], [get: fn _facility_id -> facility end]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: nil,
@@ -506,7 +516,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  name: "2427"
                }
            end
-         ]}
+         ]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 1,
@@ -577,7 +588,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  name: id
                }
            end
-         ]}
+         ]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 4,
@@ -643,7 +655,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  name: id
                }
            end
-         ]}
+         ]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 3,
@@ -731,7 +744,8 @@ defmodule AlertsUI.AlertBuilderTest do
              "Green-D", _opts ->
                %Route{id: "Green-D", line_id: "line-Green", type: 0, description: :rapid_transit}
            end
-         ]}
+         ]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 1,
@@ -760,6 +774,8 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "it correctly removes green line routes for shuttle and suspension alerts if they only have 1 associated stop" do
+      stops = [%Stop{id: "a"}, %Stop{id: "b"}, %Stop{id: "c"}]
+
       with_mocks([
         {RoutePatternsRepo, [],
          [
@@ -771,8 +787,9 @@ defmodule AlertsUI.AlertBuilderTest do
          [
            by_route: fn
              "Green-E", _ -> [%Stop{id: "a"}]
-             _, _ -> [%Stop{id: "a"}, %Stop{id: "b"}, %Stop{id: "c"}]
-           end
+             _, _ -> stops
+           end,
+           all: fn ["filter[id]": "a,b,c"], _opts -> stops end
          ]},
         {RoutesRepo, [],
          [
@@ -908,7 +925,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  description: :rail_replacement_bus
                }
            end
-         ]}
+         ]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         existing_alert = insert(:alert, alert_id: "0")
 
@@ -972,7 +990,8 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
         {RoutesRepo, [],
-         [get: fn route_id, _opts -> %Route{id: route_id, type: 2, name: "CapeFLYER"} end]}
+         [get: fn route_id, _opts -> %Route{id: route_id, type: 2, name: "CapeFLYER"} end]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 2,
@@ -1028,7 +1047,17 @@ defmodule AlertsUI.AlertBuilderTest do
              ]
            end
          ]},
-        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]}
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]},
+        {StopsRepo, [],
+         [
+           all: fn ["filter[id]": "place-nubn,1,2"], _opts ->
+             [
+               %Stop{id: "place-nubn", parent_id: nil},
+               %Stop{id: 1, parent_id: nil},
+               %Stop{id: 2, parent_id: nil}
+             ]
+           end
+         ]}
       ]) do
         alert_data = %{
           route_type: 3,
@@ -1066,6 +1095,14 @@ defmodule AlertsUI.AlertBuilderTest do
                    agency_id: "1",
                    direction_id: 0,
                    stop_id: 2
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "87",
+                   route_type: 3,
+                   agency_id: "1",
+                   direction_id: 0,
+                   stop_id: "place-nubn"
                  }
                ]
       end
@@ -1074,7 +1111,8 @@ defmodule AlertsUI.AlertBuilderTest do
     test "properly builds RDS all-stops informed entity with 1 route" do
       with_mocks([
         {RoutePatternsRepo, [], by_route_id: fn _route_id, _opts -> [] end},
-        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]}
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 3,
@@ -1106,7 +1144,8 @@ defmodule AlertsUI.AlertBuilderTest do
          [
            by_route_id: fn _route_id, _opts -> [] end
          ]},
-        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]}
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 3,
@@ -1141,7 +1180,8 @@ defmodule AlertsUI.AlertBuilderTest do
     test "properly builds RDS all-stops informed entity with one route and direction" do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
-        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]}
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 3,
@@ -1204,7 +1244,11 @@ defmodule AlertsUI.AlertBuilderTest do
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
-        {StopsRepo, [], [by_route: fn _route_id, _direction -> parent_stops ++ child_stops end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route_id, _direction -> parent_stops ++ child_stops end,
+           all: fn ["filter[id]": "a,b,c"], _opts -> parent_stops end
+         ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]}
       ]) do
         result = AlertBuilder.build_alert(alert_data, :RDS)
@@ -1233,6 +1277,30 @@ defmodule AlertsUI.AlertBuilderTest do
                    agency_id: "1",
                    direction_id: 1,
                    stop_id: "3"
+                 },
+                 %{
+                   activities: [:BOARD, :RIDE],
+                   route_id: "57",
+                   route_type: 3,
+                   agency_id: "1",
+                   direction_id: 1,
+                   stop_id: "a"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "57",
+                   route_type: 3,
+                   agency_id: "1",
+                   direction_id: 1,
+                   stop_id: "b"
+                 },
+                 %{
+                   activities: [:EXIT, :RIDE],
+                   route_id: "57",
+                   route_type: 3,
+                   agency_id: "1",
+                   direction_id: 1,
+                   stop_id: "c"
                  }
                ]
       end
@@ -1269,7 +1337,11 @@ defmodule AlertsUI.AlertBuilderTest do
            end,
            included_stops_by_route_id: fn _route_id, _direction -> parent_stops end
          ]},
-        {StopsRepo, [], [by_route: fn _route_id, _direction -> parent_stops end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route_id, _direction -> parent_stops end,
+           all: fn ["filter[id]": "1,2"], _opts -> [%Stop{id: "1"}, %Stop{id: "2"}] end
+         ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]}
       ]) do
         result = AlertBuilder.build_alert(alert_data, :RDS)
@@ -1342,7 +1414,11 @@ defmodule AlertsUI.AlertBuilderTest do
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
-        {StopsRepo, [], [by_route: fn _route_id, _direction -> parent_stops ++ child_stops end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route_id, _direction -> parent_stops ++ child_stops end,
+           all: fn ["filter[id]": "place-WR-0067,place-WR-0075"], _opts -> parent_stops end
+         ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2} end]}
       ]) do
         result = AlertBuilder.build_alert(alert_data, :RDTS)
@@ -1363,6 +1439,22 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_id: "CR-Haverhill",
                    route_type: 2,
                    stop_id: "WR-0075-01"
+                 },
+                 %{
+                   activities: [:BOARD],
+                   agency_id: "1",
+                   direction_id: 0,
+                   route_id: "CR-Haverhill",
+                   route_type: 2,
+                   stop_id: "place-WR-0067"
+                 },
+                 %{
+                   activities: [:BOARD],
+                   agency_id: "1",
+                   direction_id: 0,
+                   route_id: "CR-Haverhill",
+                   route_type: 2,
+                   stop_id: "place-WR-0075"
                  }
                ]
       end
@@ -1431,6 +1523,13 @@ defmodule AlertsUI.AlertBuilderTest do
          [
            by_route: fn _route_id, _direction ->
              parent_stops ++ child_stops_0 ++ child_stops_1
+           end,
+           all: fn ["filter[id]": "place-alfcl,place-davis,place-portr"], _opts ->
+             [
+               %Stop{id: "place-alfcl"},
+               %Stop{id: "place-davis"},
+               %Stop{id: "place-portr"}
+             ]
            end
          ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
@@ -1485,6 +1584,54 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_id: "Red",
                    route_type: 1,
                    stop_id: "alfcl-child"
+                 },
+                 %{
+                   activities: [:BOARD, :RIDE],
+                   agency_id: "1",
+                   direction_id: 0,
+                   route_id: "Red",
+                   route_type: 1,
+                   stop_id: "place-alfcl"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   agency_id: "1",
+                   direction_id: 0,
+                   route_id: "Red",
+                   route_type: 1,
+                   stop_id: "place-davis"
+                 },
+                 %{
+                   activities: [:EXIT, :RIDE],
+                   agency_id: "1",
+                   direction_id: 0,
+                   route_id: "Red",
+                   route_type: 1,
+                   stop_id: "place-portr"
+                 },
+                 %{
+                   activities: [:BOARD, :RIDE],
+                   agency_id: "1",
+                   direction_id: 1,
+                   route_id: "Red",
+                   route_type: 1,
+                   stop_id: "place-portr"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   agency_id: "1",
+                   direction_id: 1,
+                   route_id: "Red",
+                   route_type: 1,
+                   stop_id: "place-davis"
+                 },
+                 %{
+                   activities: [:EXIT, :RIDE],
+                   agency_id: "1",
+                   direction_id: 1,
+                   route_id: "Red",
+                   route_type: 1,
+                   stop_id: "place-alfcl"
                  }
                ]
       end
@@ -1526,7 +1673,11 @@ defmodule AlertsUI.AlertBuilderTest do
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
-        {StopsRepo, [], [by_route: fn _route_id, _direction -> parent_stops ++ child_stops end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route_id, _direction -> parent_stops ++ child_stops end,
+           all: fn ["filter[id]": "a,b"], _opts -> [%Stop{id: "a"}, %Stop{id: "b"}] end
+         ]},
         {RoutesRepo, [],
          [get: fn route_id, _opts -> %{id: route_id, type: 3, description: :local_bus} end]}
       ]) do
@@ -1552,6 +1703,22 @@ defmodule AlertsUI.AlertBuilderTest do
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
                    direction_id: 1,
+                   route_id: "57",
+                   route_type: 3,
+                   agency_id: "1",
+                   stop_id: "a"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   direction_id: 1,
+                   route_id: "57",
+                   route_type: 3,
+                   agency_id: "1",
+                   stop_id: "b"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   direction_id: 1,
                    route_id: "58",
                    route_type: 3,
                    agency_id: "1",
@@ -1564,6 +1731,22 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_type: 3,
                    agency_id: "1",
                    stop_id: "2"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   direction_id: 1,
+                   route_id: "58",
+                   route_type: 3,
+                   agency_id: "1",
+                   stop_id: "a"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   direction_id: 1,
+                   route_id: "58",
+                   route_type: 3,
+                   agency_id: "1",
+                   stop_id: "b"
                  }
                ]
       end
@@ -1573,6 +1756,7 @@ defmodule AlertsUI.AlertBuilderTest do
       jfk = %Stop{id: "place-jfk"}
       ashmont = %Stop{id: "place-asmnl"}
       braintree = %Stop{id: "place-brntn"}
+      parent_stops = [jfk, ashmont, braintree]
 
       jfk_child = %Stop{id: "jfk-child", parent_id: jfk.id}
       ashmont_child = %Stop{id: "ashmont-child", parent_id: ashmont.id}
@@ -1633,7 +1817,8 @@ defmodule AlertsUI.AlertBuilderTest do
          [
            by_route: fn
              "Red", _ -> [jfk, ashmont, braintree]
-           end
+           end,
+           all: fn ["filter[id]": "place-jfk,place-asmnl,place-brntn"], _opts -> parent_stops end
          ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
       ]) do
@@ -1688,6 +1873,54 @@ defmodule AlertsUI.AlertBuilderTest do
                      route_type: 1,
                      direction_id: 1,
                      stop_id: "braintree-child"
+                   },
+                   %{
+                     activities: [:BOARD, :RIDE],
+                     agency_id: "1",
+                     direction_id: 0,
+                     route_id: "Red",
+                     route_type: 1,
+                     stop_id: "place-jfk"
+                   },
+                   %{
+                     activities: [:EXIT, :RIDE],
+                     agency_id: "1",
+                     direction_id: 0,
+                     route_id: "Red",
+                     route_type: 1,
+                     stop_id: "place-asmnl"
+                   },
+                   %{
+                     activities: [:BOARD, :RIDE],
+                     agency_id: "1",
+                     direction_id: 1,
+                     route_id: "Red",
+                     route_type: 1,
+                     stop_id: "place-asmnl"
+                   },
+                   %{
+                     activities: [:EXIT, :RIDE],
+                     agency_id: "1",
+                     direction_id: 1,
+                     route_id: "Red",
+                     route_type: 1,
+                     stop_id: "place-jfk"
+                   },
+                   %{
+                     activities: [:EXIT, :RIDE],
+                     agency_id: "1",
+                     route_id: "Red",
+                     route_type: 1,
+                     direction_id: 0,
+                     stop_id: "place-brntn"
+                   },
+                   %{
+                     activities: [:BOARD, :RIDE],
+                     agency_id: "1",
+                     route_id: "Red",
+                     route_type: 1,
+                     direction_id: 1,
+                     stop_id: "place-brntn"
                    }
                  ]
       end
@@ -1757,7 +1990,8 @@ defmodule AlertsUI.AlertBuilderTest do
          [
            by_route: fn
              "Red", _ -> [jfk, ashmont, braintree]
-           end
+           end,
+           all: fn ["filter[id]": "place-jfk,place-asmnl"], _opts -> [jfk, ashmont] end
          ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
       ]) do
@@ -1795,6 +2029,38 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_id: "Red",
                    route_type: 1,
                    stop_id: "jfk-child"
+                 },
+                 %{
+                   activities: [:BOARD, :RIDE],
+                   agency_id: "1",
+                   direction_id: 0,
+                   route_id: "Red",
+                   route_type: 1,
+                   stop_id: "place-jfk"
+                 },
+                 %{
+                   activities: [:EXIT, :RIDE],
+                   agency_id: "1",
+                   direction_id: 0,
+                   route_id: "Red",
+                   route_type: 1,
+                   stop_id: "place-asmnl"
+                 },
+                 %{
+                   activities: [:BOARD, :RIDE],
+                   agency_id: "1",
+                   direction_id: 1,
+                   route_id: "Red",
+                   route_type: 1,
+                   stop_id: "place-asmnl"
+                 },
+                 %{
+                   activities: [:EXIT, :RIDE],
+                   agency_id: "1",
+                   direction_id: 1,
+                   route_id: "Red",
+                   route_type: 1,
+                   stop_id: "place-jfk"
                  }
                ]
       end
@@ -1911,6 +2177,9 @@ defmodule AlertsUI.AlertBuilderTest do
          [
            by_route: fn
              "Red", _ -> [jfk, savin_hill, andrew, north_quincy]
+           end,
+           all: fn ["filter[id]": "place-andrw,place-jfk,place-nqncy"], _opts ->
+             [andrew, jfk, north_quincy]
            end
          ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]}
@@ -1982,6 +2251,54 @@ defmodule AlertsUI.AlertBuilderTest do
                      direction_id: 1,
                      stop_id: "jfk-child-4",
                      activities: [:BOARD, :RIDE]
+                   },
+                   %{
+                     activities: [:BOARD, :RIDE],
+                     agency_id: "1",
+                     direction_id: 0,
+                     route_id: "Red",
+                     route_type: 1,
+                     stop_id: "place-andrw"
+                   },
+                   %{
+                     activities: [:BOARD, :EXIT, :RIDE],
+                     agency_id: "1",
+                     direction_id: 0,
+                     route_id: "Red",
+                     route_type: 1,
+                     stop_id: "place-jfk"
+                   },
+                   %{
+                     activities: [:EXIT, :RIDE],
+                     agency_id: "1",
+                     direction_id: 0,
+                     route_id: "Red",
+                     route_type: 1,
+                     stop_id: "place-nqncy"
+                   },
+                   %{
+                     activities: [:BOARD, :RIDE],
+                     agency_id: "1",
+                     direction_id: 1,
+                     route_id: "Red",
+                     route_type: 1,
+                     stop_id: "place-nqncy"
+                   },
+                   %{
+                     activities: [:BOARD, :EXIT, :RIDE],
+                     agency_id: "1",
+                     direction_id: 1,
+                     route_id: "Red",
+                     route_type: 1,
+                     stop_id: "place-jfk"
+                   },
+                   %{
+                     activities: [:EXIT, :RIDE],
+                     agency_id: "1",
+                     direction_id: 1,
+                     route_id: "Red",
+                     route_type: 1,
+                     stop_id: "place-andrw"
                    }
                  ]
       end
@@ -2079,6 +2396,9 @@ defmodule AlertsUI.AlertBuilderTest do
              "Green-C", _ -> [hynes, kenmore]
              "Green-D", _ -> [hynes, kenmore, fenway]
              "Green-E", _ -> []
+           end,
+           all: fn ["filter[id]": "place-hymnl,place-kencl,place-fenwy"], _opts ->
+             [hynes, kenmore, fenway]
            end
          ]},
         {RoutesRepo, [],
@@ -2123,6 +2443,38 @@ defmodule AlertsUI.AlertBuilderTest do
                    stop_id: "hynes-child"
                  },
                  %{
+                   agency_id: "1",
+                   route_id: "Green-B",
+                   route_type: 0,
+                   direction_id: 0,
+                   stop_id: hynes.id,
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 },
+                 %{
+                   agency_id: "1",
+                   route_id: "Green-B",
+                   route_type: 0,
+                   direction_id: 0,
+                   stop_id: kenmore.id,
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 },
+                 %{
+                   agency_id: "1",
+                   route_id: "Green-B",
+                   route_type: 0,
+                   direction_id: 1,
+                   stop_id: kenmore.id,
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   agency_id: "1",
+                   direction_id: 1,
+                   route_id: "Green-B",
+                   route_type: 0,
+                   stop_id: hynes.id
+                 },
+                 %{
                    activities: [:BOARD, :EXIT, :RIDE],
                    agency_id: "1",
                    direction_id: 0,
@@ -2153,6 +2505,38 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_id: "Green-C",
                    route_type: 0,
                    stop_id: "kenmore-child"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   agency_id: "1",
+                   direction_id: 0,
+                   route_id: "Green-C",
+                   route_type: 0,
+                   stop_id: kenmore.id
+                 },
+                 %{
+                   agency_id: "1",
+                   route_id: "Green-C",
+                   route_type: 0,
+                   direction_id: 0,
+                   stop_id: hynes.id,
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   agency_id: "1",
+                   direction_id: 1,
+                   route_id: "Green-C",
+                   route_type: 0,
+                   stop_id: hynes.id
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   agency_id: "1",
+                   direction_id: 1,
+                   route_id: "Green-C",
+                   route_type: 0,
+                   stop_id: kenmore.id
                  },
                  %{
                    agency_id: "1",
@@ -2201,6 +2585,54 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_id: "Green-D",
                    route_type: 0,
                    stop_id: "fenway-child"
+                 },
+                 %{
+                   agency_id: "1",
+                   route_id: "Green-D",
+                   route_type: 0,
+                   direction_id: 0,
+                   stop_id: fenway.id,
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 },
+                 %{
+                   agency_id: "1",
+                   route_id: "Green-D",
+                   route_type: 0,
+                   direction_id: 0,
+                   stop_id: kenmore.id,
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 },
+                 %{
+                   agency_id: "1",
+                   route_id: "Green-D",
+                   route_type: 0,
+                   direction_id: 0,
+                   stop_id: hynes.id,
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   agency_id: "1",
+                   direction_id: 1,
+                   route_id: "Green-D",
+                   route_type: 0,
+                   stop_id: hynes.id
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   agency_id: "1",
+                   direction_id: 1,
+                   route_id: "Green-D",
+                   route_type: 0,
+                   stop_id: kenmore.id
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   agency_id: "1",
+                   direction_id: 1,
+                   route_id: "Green-D",
+                   route_type: 0,
+                   stop_id: fenway.id
                  }
                ]
       end
@@ -2213,7 +2645,8 @@ defmodule AlertsUI.AlertBuilderTest do
          [
            get: fn route_id, _opts -> %Route{id: route_id, type: 3} end,
            green_line: fn -> @green_line_virtual_route end
-         ]}
+         ]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 3,
@@ -2253,7 +2686,8 @@ defmodule AlertsUI.AlertBuilderTest do
              route_id, _opts -> %Route{id: route_id, type: 0}
            end,
            green_line: fn -> @green_line_virtual_route end
-         ]}
+         ]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 1,
@@ -2308,7 +2742,8 @@ defmodule AlertsUI.AlertBuilderTest do
          [
            get: fn route_id, _opts -> %Route{id: route_id, type: 3} end,
            green_line: fn -> @green_line_virtual_route end
-         ]}
+         ]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 3,
@@ -2350,7 +2785,8 @@ defmodule AlertsUI.AlertBuilderTest do
              route_id, _opts -> %Route{id: route_id, type: 0}
            end,
            green_line: fn -> @green_line_virtual_route end
-         ]}
+         ]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 1,
@@ -2404,7 +2840,10 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "properly builds RDT informed entity" do
-      with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
+      with_mocks([
+        {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
+      ]) do
         alert_data = %{
           route_type: 3,
           description_text: "ok",
@@ -2460,7 +2899,10 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "properly builds RDT informed entity with multiple routes, multiple trips" do
-      with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
+      with_mocks([
+        {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
+      ]) do
         alert_data = %{
           route_type: 3,
           description_text: "ok",
@@ -2518,7 +2960,8 @@ defmodule AlertsUI.AlertBuilderTest do
     test "properly builds RDT informed entity with 1 route, all trips" do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
-        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]}
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 3,
@@ -2544,7 +2987,10 @@ defmodule AlertsUI.AlertBuilderTest do
     end
 
     test "RDTS informed entity with trips and no stops selected treated as RDT" do
-      with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
+      with_mocks([
+        {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
+      ]) do
         alert_data = %{
           route_type: 3,
           description_text: "ok",
@@ -2642,7 +3088,11 @@ defmodule AlertsUI.AlertBuilderTest do
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
-        {StopsRepo, [], [by_route: fn _route_id, _direction -> parent_stops ++ child_stops end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route_id, _direction -> parent_stops ++ child_stops end,
+           all: fn ["filter[id]": "a,b,c"], _opts -> parent_stops end
+         ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]}
       ]) do
         result = AlertBuilder.build_alert(alert_data, :RDTS)
@@ -2671,6 +3121,30 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_type: 3,
                    agency_id: "1",
                    stop_id: "3"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   direction_id: 1,
+                   route_id: "57",
+                   route_type: 3,
+                   agency_id: "1",
+                   stop_id: "a"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   direction_id: 1,
+                   route_id: "57",
+                   route_type: 3,
+                   agency_id: "1",
+                   stop_id: "b"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   direction_id: 1,
+                   route_id: "57",
+                   route_type: 3,
+                   agency_id: "1",
+                   stop_id: "c"
                  }
                ]
       end
@@ -2679,7 +3153,8 @@ defmodule AlertsUI.AlertBuilderTest do
     test "RDTS informed entity with no stops and no trips selected treated as R" do
       with_mocks([
         {RoutePatternsRepo, [], by_route_id: fn _route_id, _opts -> [] end},
-        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]}
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 3} end]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
           route_type: 3,
@@ -2764,7 +3239,11 @@ defmodule AlertsUI.AlertBuilderTest do
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
-        {StopsRepo, [], [by_route: fn _route_id, _direction -> parent_stops ++ child_stops end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route_id, _direction -> parent_stops ++ child_stops end,
+           all: fn ["filter[id]": "place-FR-0201,place-FR-0219"], _opts -> parent_stops end
+         ]},
         {SchedulesRepo, [],
          [trip: fn "CR-627754-435" -> %Trip{id: "CR-627754-435", direction_id: 0} end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2} end]}
@@ -2790,6 +3269,30 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_id: "CR-Fitchburg",
                    route_type: 2,
                    stop_id: "FR-0219-01",
+                   trip: %{
+                     direction_id: 0,
+                     route_id: "CR-Fitchburg",
+                     trip_id: "CR-627754-435"
+                   }
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   agency_id: "1",
+                   route_id: "CR-Fitchburg",
+                   route_type: 2,
+                   stop_id: "place-FR-0201",
+                   trip: %{
+                     direction_id: 0,
+                     route_id: "CR-Fitchburg",
+                     trip_id: "CR-627754-435"
+                   }
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   agency_id: "1",
+                   route_id: "CR-Fitchburg",
+                   route_type: 2,
+                   stop_id: "place-FR-0219",
                    trip: %{
                      direction_id: 0,
                      route_id: "CR-Fitchburg",
@@ -2838,7 +3341,11 @@ defmodule AlertsUI.AlertBuilderTest do
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
-        {StopsRepo, [], [by_route: fn _route_id, _direction -> parent_stops ++ child_stops end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route_id, _direction -> parent_stops ++ child_stops end,
+           all: fn ["filter[id]": "Boat-Long"], _opts -> parent_stops end
+         ]},
         {SchedulesRepo, [],
          [
            trip: fn "Boat-EastBoston-1115-Long-BEB-01-Weekday-Summer-24" ->
@@ -2912,7 +3419,11 @@ defmodule AlertsUI.AlertBuilderTest do
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
-        {StopsRepo, [], [by_route: fn _route_id, _direction -> parent_stops ++ child_stops end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route_id, _direction -> parent_stops ++ child_stops end,
+           all: fn ["filter[id]": "place-WR-0067,place-WR-0075"], _opts -> parent_stops end
+         ]},
         {SchedulesRepo, [],
          [trip: fn "CR-627678-295" -> %Trip{id: "CR-627678-295", direction_id: 0} end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2} end]}
@@ -2938,6 +3449,30 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_type: 2,
                    agency_id: "1",
                    stop_id: "WR-0075-01",
+                   trip: %{
+                     trip_id: "CR-627678-295",
+                     route_id: "CR-Haverhill",
+                     direction_id: 0
+                   }
+                 },
+                 %{
+                   activities: [:BOARD],
+                   route_id: "CR-Haverhill",
+                   route_type: 2,
+                   agency_id: "1",
+                   stop_id: "place-WR-0067",
+                   trip: %{
+                     trip_id: "CR-627678-295",
+                     route_id: "CR-Haverhill",
+                     direction_id: 0
+                   }
+                 },
+                 %{
+                   activities: [:BOARD],
+                   route_id: "CR-Haverhill",
+                   route_type: 2,
+                   agency_id: "1",
+                   stop_id: "place-WR-0075",
                    trip: %{
                      trip_id: "CR-627678-295",
                      route_id: "CR-Haverhill",
@@ -2994,7 +3529,11 @@ defmodule AlertsUI.AlertBuilderTest do
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
-        {StopsRepo, [], [by_route: fn _route_id, _direction -> parent_stops ++ child_stops end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route_id, _direction -> parent_stops ++ child_stops end,
+           all: fn ["filter[id]": "place-WR-0067,place-WR-0075"], _opts -> parent_stops end
+         ]},
         {SchedulesRepo, [],
          [trip: fn "CR-627678-295" -> %Trip{id: "CR-627678-295", direction_id: 0} end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2} end]}
@@ -3020,6 +3559,30 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_type: 2,
                    agency_id: "1",
                    stop_id: "WR-0075-01",
+                   trip: %{
+                     trip_id: "CR-627678-295",
+                     route_id: "CR-Haverhill",
+                     direction_id: 0
+                   }
+                 },
+                 %{
+                   activities: [:BOARD],
+                   route_id: "CR-Haverhill",
+                   route_type: 2,
+                   agency_id: "1",
+                   stop_id: "place-WR-0067",
+                   trip: %{
+                     trip_id: "CR-627678-295",
+                     route_id: "CR-Haverhill",
+                     direction_id: 0
+                   }
+                 },
+                 %{
+                   activities: [:BOARD],
+                   route_id: "CR-Haverhill",
+                   route_type: 2,
+                   agency_id: "1",
+                   stop_id: "place-WR-0075",
                    trip: %{
                      trip_id: "CR-627678-295",
                      route_id: "CR-Haverhill",
@@ -3088,7 +3651,8 @@ defmodule AlertsUI.AlertBuilderTest do
          [
            by_route: fn _route_id, _direction ->
              parent_stops ++ child_stops_0 ++ child_stops_1
-           end
+           end,
+           all: fn ["filter[id]": "place-FR-0201,place-FR-0219"], _opts -> parent_stops end
          ]},
         {SchedulesRepo, [], [trip: fn ^trip_id -> %Trip{id: trip_id, direction_id: 0} end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2} end]}
@@ -3114,6 +3678,30 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_type: 2,
                    agency_id: "1",
                    stop_id: "FR-0219-01",
+                   trip: %{
+                     trip_id: trip_id,
+                     route_id: "CR-Fitchburg",
+                     direction_id: 0
+                   }
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "CR-Fitchburg",
+                   route_type: 2,
+                   agency_id: "1",
+                   stop_id: "place-FR-0201",
+                   trip: %{
+                     trip_id: trip_id,
+                     route_id: "CR-Fitchburg",
+                     direction_id: 0
+                   }
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "CR-Fitchburg",
+                   route_type: 2,
+                   agency_id: "1",
+                   stop_id: "place-FR-0219",
                    trip: %{
                      trip_id: trip_id,
                      route_id: "CR-Fitchburg",
@@ -3166,7 +3754,11 @@ defmodule AlertsUI.AlertBuilderTest do
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
-        {StopsRepo, [], [by_route: fn _route_id, _direction -> parent_stops ++ child_stops end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route_id, _direction -> parent_stops ++ child_stops end,
+           all: fn ["filter[id]": "a,b"], _opts -> parent_stops end
+         ]},
         {RoutesRepo, [],
          [
            get: fn
@@ -3194,6 +3786,20 @@ defmodule AlertsUI.AlertBuilderTest do
                  },
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "56",
+                   route_type: 3,
+                   agency_id: "1",
+                   stop_id: "a"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "56",
+                   route_type: 3,
+                   agency_id: "1",
+                   stop_id: "b"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "57",
                    route_type: 3,
                    agency_id: "1",
@@ -3205,6 +3811,20 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_type: 3,
                    agency_id: "1",
                    stop_id: "child-b"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "57",
+                   route_type: 3,
+                   agency_id: "1",
+                   stop_id: "a"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "57",
+                   route_type: 3,
+                   agency_id: "1",
+                   stop_id: "b"
                  },
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
@@ -3222,6 +3842,20 @@ defmodule AlertsUI.AlertBuilderTest do
                  },
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "58",
+                   route_type: 3,
+                   agency_id: "1",
+                   stop_id: "a"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "58",
+                   route_type: 3,
+                   agency_id: "1",
+                   stop_id: "b"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "Red",
                    route_type: 1,
                    agency_id: "1",
@@ -3233,6 +3867,20 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_type: 1,
                    agency_id: "1",
                    stop_id: "child-b"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "Red",
+                   route_type: 1,
+                   agency_id: "1",
+                   stop_id: "a"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "Red",
+                   route_type: 1,
+                   agency_id: "1",
+                   stop_id: "b"
                  }
                ]
       end
@@ -3268,7 +3916,11 @@ defmodule AlertsUI.AlertBuilderTest do
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
-        {StopsRepo, [], [by_route: fn _route_id, _direction -> parent_stops ++ child_stops end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route_id, _direction -> parent_stops ++ child_stops end,
+           all: fn ["filter[id]": "Boat-Charlestown"], _opts -> parent_stops end
+         ]},
         {RoutesRepo, [],
          [get: fn "Boat-F4", _opts -> %Route{id: "Boat-F4", line_id: "line-Boat-F4", type: 4} end]}
       ]) do
@@ -3317,7 +3969,11 @@ defmodule AlertsUI.AlertBuilderTest do
            end,
            included_stops_by_route_id: fn _route_id, _direction -> parent_stops ++ child_stops end
          ]},
-        {StopsRepo, [], [by_route: fn _route_id, _direction -> parent_stops ++ child_stops end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route_id, _direction -> parent_stops ++ child_stops end,
+           all: fn ["filter[id]": "4561"], _opts -> parent_stops end
+         ]},
         {RoutesRepo, [],
          [
            get: fn "435", _opts -> %Route{id: "435", line_id: "line-435", type: 3} end,
@@ -3352,6 +4008,7 @@ defmodule AlertsUI.AlertBuilderTest do
       hynes = %Stop{id: "place-hymnl"}
       kenmore = %Stop{id: "place-kencl"}
       fenway = %Stop{id: "place-fenwy"}
+      parent_stops = [hynes, kenmore, fenway]
 
       hynes_child = %Stop{id: "hynes-child", parent_id: "place-hymnl"}
       kenmore_child = %Stop{id: "kenmore-child", parent_id: "place-kencl"}
@@ -3385,6 +4042,9 @@ defmodule AlertsUI.AlertBuilderTest do
              "Green-D", 1 -> [hynes, hynes_child, kenmore, kenmore_child, fenway, fenway_child]
              "Green-E", 0 -> []
              "Green-E", 1 -> []
+           end,
+           all: fn ["filter[id]": "place-hymnl,place-kencl,place-fenwy"], _opts ->
+             parent_stops
            end
          ]},
         {RoutesRepo, [],
@@ -3412,6 +4072,20 @@ defmodule AlertsUI.AlertBuilderTest do
                  },
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "Green-B",
+                   route_type: 0,
+                   agency_id: "1",
+                   stop_id: "place-hymnl"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "Green-B",
+                   route_type: 0,
+                   agency_id: "1",
+                   stop_id: "place-kencl"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
                    route_id: "Green-C",
                    route_type: 0,
                    agency_id: "1",
@@ -3423,6 +4097,20 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_type: 0,
                    agency_id: "1",
                    stop_id: "kenmore-child"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "Green-C",
+                   route_type: 0,
+                   agency_id: "1",
+                   stop_id: "place-hymnl"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "Green-C",
+                   route_type: 0,
+                   agency_id: "1",
+                   stop_id: "place-kencl"
                  },
                  %{
                    activities: [:BOARD, :EXIT, :RIDE],
@@ -3444,6 +4132,27 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_type: 0,
                    agency_id: "1",
                    stop_id: "fenway-child"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "Green-D",
+                   route_type: 0,
+                   agency_id: "1",
+                   stop_id: "place-hymnl"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "Green-D",
+                   route_type: 0,
+                   agency_id: "1",
+                   stop_id: "place-kencl"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "Green-D",
+                   route_type: 0,
+                   agency_id: "1",
+                   stop_id: "place-fenwy"
                  }
                ]
       end
@@ -3489,7 +4198,11 @@ defmodule AlertsUI.AlertBuilderTest do
            end,
            included_stops_by_route_id: fn _route_id, _direction -> child_stops end
          ]},
-        {StopsRepo, [], [by_route: fn _route_id, _direction -> parent_stops ++ child_stops end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route_id, _direction -> parent_stops ++ child_stops end,
+           all: fn ["filter[id]": "place-PB-0194"], _opts -> parent_stops end
+         ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2} end]}
       ]) do
         result = AlertBuilder.build_alert(alert_data, :SR)
@@ -3501,6 +4214,13 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_id: "CR-Kingston",
                    route_type: 2,
                    stop_id: "PB-0194-S"
+                 },
+                 %{
+                   activities: [:BOARD],
+                   agency_id: "1",
+                   route_id: "CR-Kingston",
+                   route_type: 2,
+                   stop_id: "place-PB-0194"
                  }
                ]
       end
@@ -3515,15 +4235,17 @@ defmodule AlertsUI.AlertBuilderTest do
         description_text: "test description"
       }
 
-      result = AlertBuilder.build_alert(alert_data, nil)
+      with_mock(StopsRepo, [], all: fn ["filter[id]": ""], _opts -> [] end) do
+        result = AlertBuilder.build_alert(alert_data, nil)
 
-      assert result.informed_entity == [
-               %{
-                 activities: [:BOARD, :EXIT, :RIDE],
-                 route_type: 3,
-                 agency_id: "1"
-               }
-             ]
+        assert result.informed_entity == [
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_type: 3,
+                   agency_id: "1"
+                 }
+               ]
+      end
     end
 
     test "builds systemwide subway informed entities" do
@@ -3535,20 +4257,22 @@ defmodule AlertsUI.AlertBuilderTest do
         description_text: "test description"
       }
 
-      result = AlertBuilder.build_alert(alert_data, nil)
+      with_mock(StopsRepo, [], all: fn ["filter[id]": ""], _opts -> [] end) do
+        result = AlertBuilder.build_alert(alert_data, nil)
 
-      assert result.informed_entity == [
-               %{
-                 activities: [:BOARD, :EXIT, :RIDE],
-                 route_type: 0,
-                 agency_id: "1"
-               },
-               %{
-                 activities: [:BOARD, :EXIT, :RIDE],
-                 route_type: 1,
-                 agency_id: "1"
-               }
-             ]
+        assert result.informed_entity == [
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_type: 0,
+                   agency_id: "1"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_type: 1,
+                   agency_id: "1"
+                 }
+               ]
+      end
     end
 
     test "builds systemwide informed entities for multiple service types" do
@@ -3560,25 +4284,27 @@ defmodule AlertsUI.AlertBuilderTest do
         description_text: "test description"
       }
 
-      result = AlertBuilder.build_alert(alert_data, nil)
+      with_mock(StopsRepo, [], all: fn ["filter[id]": ""], _opts -> [] end) do
+        result = AlertBuilder.build_alert(alert_data, nil)
 
-      assert result.informed_entity == [
-               %{
-                 activities: [:BOARD, :EXIT, :RIDE],
-                 route_type: 3,
-                 agency_id: "1"
-               },
-               %{
-                 activities: [:BOARD, :EXIT, :RIDE],
-                 route_type: 0,
-                 agency_id: "1"
-               },
-               %{
-                 activities: [:BOARD, :EXIT, :RIDE],
-                 route_type: 1,
-                 agency_id: "1"
-               }
-             ]
+        assert result.informed_entity == [
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_type: 3,
+                   agency_id: "1"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_type: 0,
+                   agency_id: "1"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_type: 1,
+                   agency_id: "1"
+                 }
+               ]
+      end
     end
 
     test "builds systemwide informed entities for all service types" do
@@ -3589,14 +4315,16 @@ defmodule AlertsUI.AlertBuilderTest do
         description_text: "test description"
       }
 
-      result = AlertBuilder.build_alert(alert_data, nil)
+      with_mock(StopsRepo, [], all: fn ["filter[id]": ""], _opts -> [] end) do
+        result = AlertBuilder.build_alert(alert_data, nil)
 
-      assert result.informed_entity == [
-               %{
-                 activities: [:BOARD, :EXIT, :RIDE],
-                 agency_id: "1"
-               }
-             ]
+        assert result.informed_entity == [
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   agency_id: "1"
+                 }
+               ]
+      end
     end
   end
 
@@ -3663,7 +4391,8 @@ defmodule AlertsUI.AlertBuilderTest do
 
     with_mocks([
       {FacilitiesRepo, [], [get: fn _facility_id -> facility end]},
-      {StopsRepo, [], [get!: fn _stop_id -> stop end]},
+      {StopsRepo, [],
+       [get!: fn _stop_id -> stop end, all: fn ["filter[id]": ""], _opts -> [] end]},
       {RoutesRepo, [], [by_stop: fn _stop_id -> [route, shuttle_route] end]}
     ]) do
       result = AlertBuilder.build_alert(alert_data, :ACCESS)
@@ -3735,7 +4464,8 @@ defmodule AlertsUI.AlertBuilderTest do
 
     with_mocks([
       {FacilitiesRepo, [], [get: fn _facility_id -> facility end]},
-      {StopsRepo, [], [get!: fn _stop_id -> stop end]},
+      {StopsRepo, [],
+       [get!: fn _stop_id -> stop end, all: fn ["filter[id]": ""], _opts -> [] end]},
       {RoutesRepo, [], [by_stop: fn _stop_id -> [route] end]}
     ]) do
       result = AlertBuilder.build_alert(alert_data, :ACCESS)
@@ -3761,9 +4491,11 @@ defmodule AlertsUI.AlertBuilderTest do
       direction: "default"
     }
 
-    result = AlertBuilder.build_alert(alert_data, :ACCESS, ~U[2024-04-30 05:54:00Z])
+    with_mock(StopsRepo, [], all: fn ["filter[id]": ""], _opts -> [] end) do
+      result = AlertBuilder.build_alert(alert_data, :ACCESS, ~U[2024-04-30 05:54:00Z])
 
-    assert %{original_direction_selections: nil} = result
+      assert %{original_direction_selections: nil} = result
+    end
   end
 
   test "builds facility informed entities with nil stop" do
@@ -3789,7 +4521,8 @@ defmodule AlertsUI.AlertBuilderTest do
     }
 
     with_mocks([
-      {FacilitiesRepo, [], [get: fn _facility_id -> facility end]}
+      {FacilitiesRepo, [], [get: fn _facility_id -> facility end]},
+      {StopsRepo, [], all: fn ["filter[id]": ""], _opts -> [] end}
     ]) do
       result = AlertBuilder.build_alert(alert_data, :ACCESS)
 
@@ -3811,9 +4544,11 @@ defmodule AlertsUI.AlertBuilderTest do
       route_ids: []
     }
 
-    result = AlertBuilder.build_alert(alert_data, :RDS)
+    with_mock(StopsRepo, [], all: fn ["filter[id]": ""], _opts -> [] end) do
+      result = AlertBuilder.build_alert(alert_data, :RDS)
 
-    assert result.informed_entity == []
+      assert result.informed_entity == []
+    end
   end
 
   test "informed entity is nil if :no_informed_entity is set" do
@@ -3825,12 +4560,14 @@ defmodule AlertsUI.AlertBuilderTest do
       route_ids: []
     }
 
-    result =
-      AlertBuilder.build_alert(alert_data, :RDS, ~U[2024-04-30 05:54:00Z],
-        no_informed_entity: true
-      )
+    with_mock(StopsRepo, [], all: fn ["filter[id]": ""], _opts -> [] end) do
+      result =
+        AlertBuilder.build_alert(alert_data, :RDS, ~U[2024-04-30 05:54:00Z],
+          no_informed_entity: true
+        )
 
-    assert result.informed_entity == []
+      assert result.informed_entity == []
+    end
   end
 
   test "active_period_start is passed unchanged if :no_active_periods is set" do
@@ -3846,8 +4583,10 @@ defmodule AlertsUI.AlertBuilderTest do
       route_ids: []
     }
 
-    result = AlertBuilder.build_alert(alert_data, :RDS, current_time, no_active_periods: true)
-    assert result.active_period_start == start_time
-    refute Map.get(result, :active_periods)
+    with_mock(StopsRepo, [], all: fn ["filter[id]": ""], _opts -> [] end) do
+      result = AlertBuilder.build_alert(alert_data, :RDS, current_time, no_active_periods: true)
+      assert result.active_period_start == start_time
+      refute Map.get(result, :active_periods)
+    end
   end
 end

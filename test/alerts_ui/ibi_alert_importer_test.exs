@@ -4,12 +4,14 @@ defmodule AlertsUI.IBIAlertImporterTest do
   use AlertsUI.DataCase
 
   import AlertsUI.IBIAlertImporter
+  import Mock
 
   alias AlertsUI.AlertBuilder
   alias AlertsUI.Models.Alert
   alias AlertsUI.Models.IBIAlert
   alias AlertsUI.Models.LatestIBIAlert
   alias AlertsUI.Repo
+  alias MBTAV3API.Stops.Repo, as: StopsRepo
 
   @import_fixture_path "./test/support/fixtures/ibi_alert_importer/import.csv"
 
@@ -51,11 +53,13 @@ defmodule AlertsUI.IBIAlertImporterTest do
     test "sets source = \"ibi\"", %{
       ibi_alert: ibi_alert
     } do
-      changeset =
-        %Ecto.Changeset{} =
-        ibi_alert_to_changeset(ibi_alert, %Alert{})
+      with_mock(StopsRepo, [], all: fn _params, _opts -> [] end) do
+        changeset =
+          %Ecto.Changeset{} =
+          ibi_alert_to_changeset(ibi_alert, %Alert{})
 
-      assert get_field(changeset, :source) == :IBI
+        assert get_field(changeset, :source) == :IBI
+      end
     end
 
     test "active period and informed entity can be disabled via options", %{
@@ -75,10 +79,12 @@ defmodule AlertsUI.IBIAlertImporterTest do
     test "informed entity is required with no options", %{
       ibi_alert: ibi_alert
     } do
-      changeset = %Ecto.Changeset{} = ibi_alert_to_changeset(ibi_alert, %Alert{})
-      assert changeset.data.__struct__ == Alert
-      assert Keyword.get(changeset.errors, :informed_entity)
-      refute changeset.valid?
+      with_mock(StopsRepo, [], all: fn _params, _opts -> [] end) do
+        changeset = %Ecto.Changeset{} = ibi_alert_to_changeset(ibi_alert, %Alert{})
+        assert changeset.data.__struct__ == Alert
+        assert Keyword.get(changeset.errors, :informed_entity)
+        refute changeset.valid?
+      end
     end
   end
 
@@ -86,10 +92,12 @@ defmodule AlertsUI.IBIAlertImporterTest do
     test "given a valid IBI alert it produces alert data consumable by AlertBuilder", %{
       ibi_alert: ibi_alert
     } do
-      assert _alert_params =
-               ibi_alert
-               |> ibi_alert_to_alert_data()
-               |> AlertBuilder.build_alert(from_ibi(ibi_alert, :combination))
+      with_mock(StopsRepo, [], all: fn _params, _opts -> [] end) do
+        assert _alert_params =
+                 ibi_alert
+                 |> ibi_alert_to_alert_data()
+                 |> AlertBuilder.build_alert(from_ibi(ibi_alert, :combination))
+      end
     end
   end
 

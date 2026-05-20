@@ -33,7 +33,7 @@ defmodule AlertsUI.AlertBuilder do
           route_ids: [Route.id_t()],
           stop_ids: [Stop.id_t()],
           stop_names_and_ids: [String.t()],
-          child_stops_with_context: [stop_with_context_t()] | [],
+          stops_with_context: [stop_with_context_t()] | [],
           trip_ids: [String.t()],
           trip_information_by_id: [map()],
           service_types: [Route.type_int()],
@@ -249,7 +249,7 @@ defmodule AlertsUI.AlertBuilder do
   defp original_selections_from_form(alert_data, combination) do
     # used to generate original_direction_selections, original_route_selection, routes, etc.
     selected_routes = Map.get(alert_data, :route_ids, [])
-    # direction_id needed for original_direction_selections, child_stops_with_context
+    # direction_id needed for original_direction_selections, stops_with_context
     direction_id = Map.get(alert_data, :direction)
 
     # the original route and direction selections are meant to reflect the routes that the user
@@ -456,8 +456,8 @@ defmodule AlertsUI.AlertBuilder do
           Map.put(acc, route.id, route.type)
         end)
 
-      child_stops_with_context =
-        child_stops_with_context(
+      stops_with_context =
+        stops_with_context(
           routes,
           direction,
           selected_stop_ids
@@ -465,7 +465,7 @@ defmodule AlertsUI.AlertBuilder do
 
       entity_data =
         Map.merge(alert_data, %{
-          child_stops_with_context: child_stops_with_context,
+          stops_with_context: stops_with_context,
           route_ids: route_ids,
           service_types: service_types,
           route_types_by_id: route_types_by_id
@@ -555,12 +555,16 @@ defmodule AlertsUI.AlertBuilder do
     routes
   end
 
-  @spec child_stops_with_context([Route.id_t()], String.t(), [Stop.id_t()]) ::
+  @spec stops_with_context([Route.id_t()], String.t(), [Stop.id_t()]) ::
           [
             stop_with_context_t()
           ]
 
-  defp child_stops_with_context(routes, direction, parent_stop_ids) do
+  defp stops_with_context(routes, direction, parent_stop_ids) do
+    parent_stops =
+      StopsRepo.all(["filter[id]": Enum.join(parent_stop_ids, ",")], [])
+      |> Enum.into(%{}, fn stop -> {stop.id, stop} end)
+
     routes
     |> Enum.flat_map(fn route ->
       route_patterns =
@@ -586,7 +590,15 @@ defmodule AlertsUI.AlertBuilder do
       neighbor_stops =
         get_neighbor_stops(child_stops_context, route_patterns, parent_stop_ids, route)
 
-      child_stops_context ++ neighbor_stops
+      parent_stops_context =
+        child_stops_context
+        |> Enum.map(fn {child_stop, child_route, child_direction, child_stop_type} ->
+          {parent_stops[child_stop.parent_id], child_route, child_direction, child_stop_type}
+        end)
+        |> Enum.reject(fn {stop, _, _, _} -> is_nil(stop) end)
+
+      (child_stops_context ++ neighbor_stops ++ parent_stops_context)
+      |> Enum.uniq()
     end)
   end
 
@@ -830,7 +842,7 @@ defmodule AlertsUI.AlertBuilder do
   def build_informed_entities(
         :RDS,
         %{
-          child_stops_with_context: [],
+          stops_with_context: [],
           route_ids: route_ids,
           route_types_by_id: route_types_by_id,
           route_type: route_type,
@@ -857,13 +869,13 @@ defmodule AlertsUI.AlertBuilder do
   def build_informed_entities(
         :RDS,
         %{
-          child_stops_with_context: [_ | _] = child_stops_with_context,
+          stops_with_context: [_ | _] = stops_with_context,
           route_types_by_id: route_types_by_id,
           route_type: route_type
         },
         effect
       ) do
-    child_stops_with_context
+    stops_with_context
     |> Enum.map(fn {%Stop{id: stop_id}, route_id, direction_id, stop_type} ->
       %{
         activities: Activities.for_effect(effect, stop_type),
@@ -927,7 +939,7 @@ defmodule AlertsUI.AlertBuilder do
         :RDTS,
         %{
           stop_ids: [_ | _] = stop_ids,
-          child_stops_with_context: [],
+          stops_with_context: [],
           trip_ids: [_ | _] = trip_ids,
           route_type: route_type,
           route_ids: route_ids
@@ -963,7 +975,7 @@ defmodule AlertsUI.AlertBuilder do
   def build_informed_entities(
         :RDTS,
         %{
-          child_stops_with_context: [_ | _] = child_stops_with_context,
+          stops_with_context: [_ | _] = stops_with_context,
           trip_ids: [_ | _] = trip_ids,
           route_type: route_type
         },
@@ -972,7 +984,7 @@ defmodule AlertsUI.AlertBuilder do
     trips = get_trips(trip_ids)
     trip_directions = trip_directions(trips)
 
-    child_stops_with_context
+    stops_with_context
     |> Enum.filter(fn {_, _, stop_direction_id, _} ->
       Enum.member?(trip_directions, stop_direction_id)
     end)
@@ -1000,13 +1012,13 @@ defmodule AlertsUI.AlertBuilder do
   def build_informed_entities(
         :SR,
         %{
-          child_stops_with_context: [_ | _] = child_stops_with_context,
+          stops_with_context: [_ | _] = stops_with_context,
           route_types_by_id: route_types_by_id,
           route_type: route_type
         },
         effect
       ) do
-    child_stops_with_context
+    stops_with_context
     |> Enum.filter(fn {%Stop{parent_id: parent_id, id: id}, route_id, _, _} ->
       id_to_use = if parent_id, do: parent_id, else: id
       on_route?({id_to_use, route_id}, "default")
@@ -1030,7 +1042,7 @@ defmodule AlertsUI.AlertBuilder do
           route_ids: route_ids,
           route_types_by_id: route_types_by_id,
           route_type: route_type,
-          child_stops_with_context: []
+          stops_with_context: []
         },
         effect
       ) do
