@@ -13,6 +13,8 @@ on:
         type: environment
         required: true
 
+permissions: {}
+
 jobs:
   fail_if_prod:
     name: "Fail if production environment"
@@ -29,4 +31,7 @@ jobs:
     uses: ./.github/workflows/deploy-base.yml
     with:
       environment: ${{ github.event.inputs.env || inputs.environment }}
-    secrets: inherit
+    secrets:
+      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+      DOCKER_REPO: ${{ secrets.DOCKER_REPO }}
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
