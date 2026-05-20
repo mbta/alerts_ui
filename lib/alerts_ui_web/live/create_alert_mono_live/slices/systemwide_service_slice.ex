@@ -3,6 +3,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSlice do
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
 
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,
+    only: [always_validate_required: 3]
+
   use AlertsUIWeb, :html
 
   defstruct [
@@ -29,7 +32,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSlice do
     end
 
     def validate(_service_data, changeset, _params, _socket) do
-      changeset
+      always_validate_required(changeset, :service_types, "Select a service type")
     end
 
     def assigns(_service_data, socket, _params) do

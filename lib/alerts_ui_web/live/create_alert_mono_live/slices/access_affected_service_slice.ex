@@ -13,6 +13,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Selections,
     only: [assign_unwrapped_selections: 2]
 
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,
+    only: [always_validate_required: 3]
+
   import Ecto.Changeset, only: [validate_length: 3, validate_required: 2]
 
   import Phoenix.LiveView, only: [assign_async: 3, attach_hook: 4]
@@ -53,10 +56,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
     end
 
     def validate(_service_data, changeset, _params, _socket) do
-      changeset
-      |> validate_required(:facility_ids)
-      |> validate_length(:facility_ids, min: 1)
-      |> IO.inspect(label: "VAL")
+      always_validate_required(changeset, :facility_ids, "You must select a facility")
     end
 
     def assigns(_service_data, socket, params) do
