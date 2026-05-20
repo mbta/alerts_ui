@@ -163,11 +163,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   def handle_event("review", _params, socket) do
     # if valid:
     #   live navigate to `?review=true`, opening the modal
-    effect_name = socket.assigns.form[:effect_name].value
-    path = path_with_route_type_and_effect_name(socket.assigns, effect_name) <> "?review=true"
     # else:
     #   open error flash
-    {:noreply, push_patch(socket, to: path)}
+    socket =
+      socket
+      |> assign(:submitting?, true)
+      |> sync_socket()
+
+    {:noreply, socket}
   end
 
   @impl true
@@ -184,12 +187,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   @impl true
   def handle_event("save", params, socket) do
-    socket =
-      socket
-      |> assign(:submitting?, true)
-      |> sync_socket(params)
-
-    {:noreply, socket}
+    {:noreply, persist_valid_alert(socket)}
   end
 
   @impl true
@@ -282,63 +280,32 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   event handler.
   """
   @spec sync_socket(LiveView.Socket.t(), LiveView.unsigned_params()) :: LiveView.Socket.t()
-  def sync_socket(socket, params) do
+  def sync_socket(socket, params \\ %{}) do
     case AlertData.sync(socket.assigns.form.source, socket, params) do
       {:ok, socket} ->
         if socket.assigns.submitting? do
-          alert_data = socket.assigns.form.source.data
-          form_type = socket.assigns.form_type
+          effect_name = socket.assigns.form[:effect_name].value
 
-          user = Users.create_or_update_user_from_session(
-            socket.assigns.current_user
-          )
+          path =
+            path_with_route_type_and_effect_name(
+              socket.assigns,
+              effect_name
+            ) <> "?review=true"
 
-          alert_params = AlertBuilder.build_alert(
-            alert_data,
-            alert_data.combination
-          )
-
-          existing_alert =
-            if is_nil(socket.assigns.alert_id) || form_type == :duplicating do
-              %Alert{}
-            else
-              Alerts.get_by_alert_id(socket.assigns.alert_id)
-            end
-
-          alert_params
-          |> Alerts.create_or_update_alert(user, existing_alert)
-          |> case do
-            {:ok, alert} ->
-              alert_id =
-                alert.id
-                |> Alerts.get_by_id()
-                |> Map.get(:alert_id)
-
-              flash = flash_text(socket.assigns.alert_id, alert_id, form_type)
-
-              socket
-              |> put_flash(:info, flash)
-              |> redirect(to: return_to(socket.assigns.return_to || "/"))
-
-            {:error, result} ->
-              IO.inspect(result, label: "RESULT")
-              combination = socket.assigns.form[:combination].value
-
-              errors =
-                result
-                |> Alerts.parse_changeset_errors()
-                |> format_errors(combination)
-
-              socket
-              |> assign(:submitting?, false)
-              |> display_errors()
-          end
+          socket
+          |> assign(:submitting?, false)
+          |> push_patch(to: path)
         else
           socket
         end
 
       {:error, socket} ->
         if socket.assigns.submitting? do
+          #errors =
+          #  result
+          #  |> Alerts.parse_changeset_errors()
+          #  |> format_errors(combination)
+
           socket
           |> assign(:submitting?, false)
           |> display_errors()
@@ -421,4 +388,44 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     do: "Alert ##{alert_id} duplicated from ##{assigns_alert_id}"
 
   defp flash_text(_assigns_alert_id, alert_id, _form_type), do: "Alert ##{alert_id} updated"
+
+  defp persist_valid_alert(socket) do
+    alert_data = socket.assigns.form.source.data
+    form_type = socket.assigns.form_type
+
+    user = Users.create_or_update_user_from_session(
+      socket.assigns.current_user
+    )
+
+    alert_params = AlertBuilder.build_alert(
+      alert_data,
+      alert_data.combination
+    )
+
+    existing_alert =
+      if is_nil(socket.assigns.alert_id) || form_type == :duplicating do
+        %Alert{}
+      else
+        Alerts.get_by_alert_id(socket.assigns.alert_id)
+      end
+
+    alert_params
+    |> Alerts.create_or_update_alert(user, existing_alert)
+    |> case do
+      {:ok, alert} ->
+        alert_id =
+          alert.id
+          |> Alerts.get_by_id()
+          |> Map.get(:alert_id)
+
+        flash = flash_text(socket.assigns.alert_id, alert_id, form_type)
+
+        socket
+        |> put_flash(:info, flash)
+        |> redirect(to: return_to(socket.assigns.return_to || "/"))
+
+      {:error, changeset} ->
+        raise "couldn't persist alert but it was supposed to be valid"
+    end
+  end
 end
