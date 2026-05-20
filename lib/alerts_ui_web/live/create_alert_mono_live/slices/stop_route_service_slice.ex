@@ -20,6 +20,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Selections,
     only: [assign_unwrapped_selections: 2]
 
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,
+    only: [always_validate_required: 3]
+
   import Phoenix.LiveView, only: [assign_async: 3]
 
   use AlertsUIWeb, :html
@@ -70,6 +73,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
     def validate(_service_data, changeset, _params, _socket) do
       changeset
+      |> always_validate_required(:route_ids, "You must select a route")
+      |> always_validate_required(:stop_ids, "You must select a stop")
     end
 
     def assigns(_service_data, socket, params) do

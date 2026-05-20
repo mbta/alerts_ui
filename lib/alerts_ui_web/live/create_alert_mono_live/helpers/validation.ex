@@ -5,7 +5,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation do
 
   def always_validate_required(changeset, field, message) do
     case get_field(changeset, field) do
-      missing when missing in @missing -> add_error(changeset, field, message) |> IO.inspect(label: "CH")
+      missing when missing in @missing -> add_error(changeset, field, message)
       _ -> changeset
     end
   end
