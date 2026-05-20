@@ -1,8 +1,6 @@
 name: Deploy on Push
 
-permissions:
-  id-token: write
-  contents: read
+permissions: {}
 
 on:
   push:
@@ -13,10 +11,16 @@ jobs:
         uses: ./.github/workflows/deploy-dev.yml
         with:
           environment: dev-orange
-        secrets: inherit
+        secrets: 
+          AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+          DOCKER_REPO: ${{ secrets.DOCKER_REPO }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
     call-deploy-staging:
         uses: ./.github/workflows/deploy-dev.yml
         with:
           environment: staging
-        secrets: inherit
+        secrets: 
+          AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+          DOCKER_REPO: ${{ secrets.DOCKER_REPO }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
