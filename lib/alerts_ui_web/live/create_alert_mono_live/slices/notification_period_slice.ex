@@ -50,11 +50,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
     def extract(slice, %AlertData{} = _alert, _params) do
       now = NaiveDateTime.local_now()
       slice
-      |> IO.inspect(label: "before")
       |> put_over_nil(:notification_specifier, :now)
       |> put_over_nil(:notification_period_start, now)
       |> put_over_nil(:notification_period_start_date, NaiveDateTime.to_date(now))
-      |> IO.inspect(label: "slioce")
     end
 
     def transform(_slice, changeset, _params, _socket) do
@@ -105,13 +103,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
     })
   end
 
-  def ensure_notification_start_for_specifier(changeset, :custom, _, _) do
-    now = NaiveDateTime.local_now()
-    change(changeset, %{
-      notification_period_start: now,
-      notification_period_start_date: now |> NaiveDateTime.to_date()
-    })
-  end
+  def ensure_notification_start_for_specifier(changeset, :custom, _, _), do: changeset
 
   def ensure_notification_start_for_specifier(changeset, _, _, _), do: changeset
 
