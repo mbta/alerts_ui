@@ -425,7 +425,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         |> redirect(to: return_to(socket.assigns.return_to || "/"))
 
       {:error, changeset} ->
-        raise "couldn't persist alert but it was supposed to be valid"
+        raise "couldn't persist alert but it was supposed to be valid: #{inspect(changeset.errors)}"
     end
   end
 end
