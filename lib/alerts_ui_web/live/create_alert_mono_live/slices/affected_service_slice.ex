@@ -3,7 +3,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   alias AlertsUIWeb.CreateAlertLive
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
-  alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
+  alias AlertsUIWeb.FormComponents.Helpers.{
+    SelectFormatter,
+    ServiceEffectCombinations
+  }
 
   import Phoenix.LiveView, only: [assign_async: 3]
   import Ecto.Changeset, only: [cast: 3, get_field: 2]
@@ -16,6 +19,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Time,
     only: [today: 0]
+
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,
+    only: [always_validate_required: 3]
 
   defstruct [
     :direction,
@@ -65,7 +71,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     end
 
     def validate(_service_data, changeset, _params, _socket) do
-      changeset
+      always_validate_required(changeset, :route_ids, "You must select a route")
     end
 
     def assigns(_service_data, socket, params) do
