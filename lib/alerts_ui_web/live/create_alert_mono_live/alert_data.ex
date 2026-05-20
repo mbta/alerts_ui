@@ -272,7 +272,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     |> validate(params, socket)
     |> case do
       {:ok, alert_data} ->
-        # clear errors, etc.
         socket =
           socket
           |> assign(:form, to_form(change(alert_data)))
@@ -282,7 +281,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
         {:ok, socket}
 
       {:error, changeset} ->
-        # set errors, etc.; do we want to run `assign` if validation fails?
         socket =
           socket
           |> assign(:form, to_form(changeset))
