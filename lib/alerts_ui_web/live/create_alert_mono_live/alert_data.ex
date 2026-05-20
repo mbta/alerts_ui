@@ -87,6 +87,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :route_search_term, :string
     field :single_route_id, :string
     field :stop_ids, {:array, :string}
+    field :stop_names, {:array, :string}
     field :stop_names_and_ids, {:array, :string}
     field :stop_search_term, :string
     field :trip_ids, {:array, :string}
