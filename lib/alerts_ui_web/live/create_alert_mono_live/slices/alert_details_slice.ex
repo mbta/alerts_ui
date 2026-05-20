@@ -88,17 +88,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
           details_data.severity
         end
 
-      default_cause = if is_nil(details_data.cause_detail) do
-        GetKeyForModeEffect.get_value_of_key(
-          :default_cause,
-          details_data.route_type,
-          details_data.effect_name
-        )
-      else
-        details_data.cause_details
-      end
-
-      effect_name = effect_from_url_name(details_data.effect_name || "")
+      route_type = form[:route_type].value
+      effect_name = form[:effect_name].value
 
       severity =
         if is_nil(details_data.severity) do
@@ -115,7 +106,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
         if is_nil(details_data.cause_detail) do
           GetKeyForModeEffect.get_value_of_key(
             :default_cause,
-            details_data.route_type,
+            route_type,
             effect_name
           )
         else
@@ -124,7 +115,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
       [_, target] = Map.get(params, "_target", [nil, nil])
 
-      autotext_data = AlertDataToAutoText.build_autotext_data(translated_details(details_data))
+      autotext_data = AlertDataToAutoText.build_autotext_data(translated_details(details_data, effect_name))
 
       header_sync_toggle =
         if target == "header_text" and details_data.header_sync_toggle == true do
@@ -214,49 +205,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       |> validate_image_fields(image_size)
     end
 
-    def assigns(_details_data, socket, _params) do
-      form = socket.assigns.form
-      form_data = Map.merge(form.source.data, form.source.changes)
-
+    def assigns(_details_data, %{assigns: %{form: form}} = socket, _params) do
       cause_options =
         formatted_causes(
-          form_data.route_type,
-          form_data.combination
+          form[:route_type].value,
+          form[:combination].value
         )
 
-      image_url = form_data.image_url
+      image_url = form[:image_url].value
       image_size = get_image_size(image_url)
       image_path = get_image_path(image_url)
 
-      autotext_data =
-        if form_data.header_sync_toggle or form_data.description_sync_toggle do
-          selections = unwrap_selections(socket)
-          selected = selected_objects(selections, form_data)
-
-          autotext_input =
-            translated_details(form_data)
-            |> Map.merge(selected)
-
-          AlertDataToAutoText.build_autotext_data(autotext_input)
-        else
-          %{}
-        end
-
-      header_text =
-        update_header_text(form_data.header_sync_toggle, form_data.header_text, autotext_data)
-
-      description_text =
-        update_description_text(
-          form_data.description_sync_toggle,
-          form_data.description_text,
-          autotext_data
-        )
-
-      updated_source =
-        change(form.source, %{header_text: header_text, description_text: description_text})
-
       assign(socket, %{
-        form: Phoenix.Component.to_form(updated_source),
         cause_options: cause_options,
         severity_options: @severity_options,
         image_size: image_size,
@@ -273,8 +233,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     defp selected_objects(selections, _form) when selections in [%{}, nil], do: %{}
 
-    defp selected_objects(%AccessAffectedServiceSlice.Selections{} = selections, form_data) do
-      facility_ids = form_data.facility_ids
+    defp selected_objects(%AccessAffectedServiceSlice.Selections{} = selections, form) do
+      facility_ids = form[:facility_ids].value || []
 
       all_facilities =
         if is_map(selections.available_facilities) do
