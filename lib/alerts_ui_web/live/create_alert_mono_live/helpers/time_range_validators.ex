@@ -46,12 +46,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
 
   def validate_end_after_start(changeset) do
     timing = get_field(changeset, :alert_timing)
+
     cond do
       timing in [:"one-time", "one-time"] ->
         active_period_start = get_field(changeset, :active_period_start)
 
         if active_period_start do
-          validate_change(changeset, :active_period_end, fn :active_period_end, active_period_end ->
+          validate_change(changeset, :active_period_end, fn :active_period_end,
+                                                            active_period_end ->
             if NaiveDateTime.compare(active_period_end, active_period_start) in [:lt, :eq] do
               end_error(get_field(changeset, :active_period_end_specifier), active_period_start)
             else

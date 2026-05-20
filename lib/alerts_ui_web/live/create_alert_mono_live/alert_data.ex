@@ -33,8 +33,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
   import Component, only: [assign: 3, to_form: 1]
 
-  import AlertsUIWeb.FormComponents.Helpers.AlertData, only:
-    [build_alert_data: 2]
+  import AlertsUIWeb.FormComponents.Helpers.AlertData, only: [build_alert_data: 2]
 
   import AlertsUIWeb.FormComponents.Helpers.ErrorFormatter,
     only: [parse_field_errors: 1]
@@ -223,11 +222,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
           Alert.t() | nil
         ) :: {:ok, {Changeset.t(), Socket.t()}} | {:error, {Changeset.t(), Socket.t()}}
   def init(socket, params, action, alert \\ %Alert{}) when action in @actions do
-    form_type = case action do
-      :new -> :new
-      :edit -> :editing
-      :duplicate -> :duplicating
-    end
+    form_type =
+      case action do
+        :new -> :new
+        :edit -> :editing
+        :duplicate -> :duplicating
+      end
 
     base_params =
       alert
@@ -371,12 +371,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   defp normalize_effect_name(alert_data) do
     normalized =
       case Map.get(alert_data, :effect_name) do
-        nil -> nil
+        nil ->
+          nil
 
         effect_name ->
           effect_name
           |> String.split(" ")
-          |> Enum.map(& String.downcase(&1))
+          |> Enum.map(&String.downcase(&1))
           |> Enum.join("_")
       end
 

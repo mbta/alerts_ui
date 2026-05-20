@@ -7,7 +7,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
     Alert
   }
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData, only: [put_over_nil: 3, values_to_options: 1]
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
+    only: [put_over_nil: 3, values_to_options: 1]
+
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Time, as: DTHelpers
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
 
@@ -23,7 +25,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
 
   use AlertsUIWeb, :html
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData, only: [put_over_nil: 3, values_to_options: 1]
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
+    only: [put_over_nil: 3, values_to_options: 1]
 
   @notification_values [
     :same_as_effect_period,
@@ -35,7 +38,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
   defstruct [
     :notification_period_start,
     :notification_period_start_date,
-    notification_specifier: :now,
+    notification_specifier: :now
   ]
 
   defimpl Slice, for: __MODULE__ do
@@ -49,6 +52,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
 
     def extract(slice, %AlertData{} = _alert, _params) do
       now = NaiveDateTime.local_now()
+
       slice
       |> put_over_nil(:notification_specifier, :now)
       |> put_over_nil(:notification_period_start, now)
@@ -89,6 +93,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
 
   def ensure_notification_start_for_specifier(changeset, :now, _, _) do
     now = NaiveDateTime.local_now()
+
     change(changeset, %{
       notification_period_start: now,
       notification_period_start_date: now |> NaiveDateTime.to_date()
@@ -97,6 +102,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
 
   def ensure_notification_start_for_specifier(changeset, :start_of_service, _, _) do
     now = NaiveDateTime.local_now()
+
     change(changeset, %{
       notification_period_start: now,
       notification_period_start_date: now |> NaiveDateTime.to_date()
@@ -114,63 +120,63 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
   def render(assigns) do
     ~H"""
     <div class="min-w-full flex flex-col" id="notification_period_view">
-        <div id="scheduled-selector-div" class="flex flex-col md:flex-row md:flex-wrap gap-8 my-4">
-          <.select
-            label="Notification period"
-            field={@form[:notification_specifier]}
-            options={values_to_options(notification_values())}
-            class="md:w-[16rem] h-10"
-          />
-          <.datetime
-            :if={@form[:notification_specifier].value === :start_of_service}
-            type="date"
-            label=""
-            field={@form[:notification_period_start_date]}
-            min={NaiveDateTime.local_now() |> naive_datetime_to_iso_date}
-            max={
-              [naive_datetime_to_iso_date(@form[:active_period_start].value), "9999-12-31"]
-              |> Enum.max()
-            }
-            value={@form[:notification_period_start_date].value}
-            class="md:min-w-64 md:max-w-64 h-10"
-          />
-          <.datetime
-            :if={@form[:notification_specifier].value === :custom}
-            label=""
-            field={@form[:notification_period_start]}
-            min={@form[:active_period_start].value |> naive_datetime_to_iso8601}
-            max={
-              [naive_datetime_to_iso_date(@form[:active_period_end].value), "9999-12-31T23:59"]
-              |> Enum.max()
-            }
-            value={@form[:notification_period_start].value |> naive_datetime_to_iso8601}
-            class="md:min-w-64 md:max-w-64 h-10"
-          />
-          <div
-            :if={
-              @form[:notification_specifier].value not in [
-                :same_as_effect_period,
-                "same_as_effect_period"
-              ]
-            }
-            class="flex flex-col md:flex-row"
-          >
-            <p class="pt-[2rem] mr-[2rem]">
-              to
-            </p>
-            <input
-              disabled={true}
-              type="text"
-              id="closed-placeholder"
-              value="When alert is closed"
-              placeholder="When alert is closed"
-              class="border border-bg-elevation-6 pl-2
+      <div id="scheduled-selector-div" class="flex flex-col md:flex-row md:flex-wrap gap-8 my-4">
+        <.select
+          label="Notification period"
+          field={@form[:notification_specifier]}
+          options={values_to_options(notification_values())}
+          class="md:w-[16rem] h-10"
+        />
+        <.datetime
+          :if={@form[:notification_specifier].value === :start_of_service}
+          type="date"
+          label=""
+          field={@form[:notification_period_start_date]}
+          min={NaiveDateTime.local_now() |> naive_datetime_to_iso_date}
+          max={
+            [naive_datetime_to_iso_date(@form[:active_period_start].value), "9999-12-31"]
+            |> Enum.max()
+          }
+          value={@form[:notification_period_start_date].value}
+          class="md:min-w-64 md:max-w-64 h-10"
+        />
+        <.datetime
+          :if={@form[:notification_specifier].value === :custom}
+          label=""
+          field={@form[:notification_period_start]}
+          min={@form[:active_period_start].value |> naive_datetime_to_iso8601}
+          max={
+            [naive_datetime_to_iso_date(@form[:active_period_end].value), "9999-12-31T23:59"]
+            |> Enum.max()
+          }
+          value={@form[:notification_period_start].value |> naive_datetime_to_iso8601}
+          class="md:min-w-64 md:max-w-64 h-10"
+        />
+        <div
+          :if={
+            @form[:notification_specifier].value not in [
+              :same_as_effect_period,
+              "same_as_effect_period"
+            ]
+          }
+          class="flex flex-col md:flex-row"
+        >
+          <p class="pt-[2rem] mr-[2rem]">
+            to
+          </p>
+          <input
+            disabled={true}
+            type="text"
+            id="closed-placeholder"
+            value="When alert is closed"
+            placeholder="When alert is closed"
+            class="border border-bg-elevation-6 pl-2
                   rounded text-text-secondary
                   bg-bg-elevation-3 ring-0  ring-border-focus
                   mt-[1.75rem] h-10 min-w-[16rem]"
-            />
-          </div>
+          />
         </div>
+      </div>
       <hr class="mt-8" />
     </div>
     """
