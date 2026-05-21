@@ -387,131 +387,133 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
         Alert details
       </.h5>
-      <div class="flex flex-col md:flex-row md:w-[50%]">
-        <.select
-          label="Cause"
-          field={@form[:cause_detail]}
-          options={@cause_options}
-          class="shrink min-w-0 md:mr-8"
-          id="cause_input"
-        />
-        <.select
-          label="Severity"
-          field={@form[:severity]}
-          options={@severity_options}
-          class="shrink grow min-w-0"
-          id="severity_input"
-        />
-      </div>
-      <div class="flex flex-col md:flex-row">
-        <div class="flex flex-col md:w-[50%]">
-          <.textarea
-            field={@form[:header_text]}
-            label="Main message"
-            phx-debounce={120}
-            maxlength="255"
-            id="header_input"
-            class={
-              [
-                "w-[100%] min-h-[10rem] z-20 mt-3",
-                if(String.length(@form[:header_text].value || "") >= 255,
-                  do: "!border-error border-b-1",
-                  else: "border-b-0"
-                )
-              ]
-              |> Enum.join(" ")
-            }
-            value={@form[:header_text].value}
+      <div class="flex flex-col gap-4">
+        <div class="flex flex-col md:flex-row md:w-[50%]">
+          <.select
+            label="Cause"
+            field={@form[:cause_detail]}
+            options={@cause_options}
+            class="shrink min-w-0 md:mr-8"
+            id="cause_input"
           />
-          <.textarea_footer
-            character_limit={255}
-            copy_id="#alert_details_header_text"
-            copy_title="Copy main message to Clipboard"
-            field={@form[:header_text]}
+          <.select
+            label="Severity"
+            field={@form[:severity]}
+            options={@severity_options}
+            class="shrink grow min-w-0"
+            id="severity_input"
           />
         </div>
-        <.checkbox
-          class="mt-2 md:ml-4 md:mt-8"
-          field={@form[:header_sync_toggle]}
-          label="Auto refresh"
-        />
-      </div>
-      <div class="flex flex-col md:flex-row">
-        <div class="flex flex-col md:w-[50%]">
-          <.textarea
-            field={@form[:description_text]}
-            label="Supporting information"
-            phx-debounce={120}
-            id="description_input"
-            class={
-              [
-                "w-[100%] min-h-[10rem] z-20 mt-3",
-                if(String.length(@form[:description_text].value || "") >= 3000,
-                  do: "!border-error border-b-1",
-                  else: "border-b-0"
-                )
-              ]
-              |> Enum.join(" ")
-            }
-            maxlength="3000"
-            value={@form[:description_text].value}
-          />
-          <.textarea_footer
-            character_limit={3000}
-            copy_id="#alert_details_description_text"
-            copy_title="Copy supporting information to Clipboard"
-            field={@form[:description_text]}
+        <div class="flex flex-col md:flex-row">
+          <div class="flex flex-col md:w-[50%]">
+            <.textarea
+              field={@form[:header_text]}
+              label="Main message"
+              phx-debounce={120}
+              maxlength="255"
+              id="header_input"
+              class={
+                [
+                  "w-[100%] min-h-[10rem] z-20 mt-3",
+                  if(String.length(@form[:header_text].value || "") >= 255,
+                    do: "!border-error border-b-1",
+                    else: "border-b-0"
+                  )
+                ]
+                |> Enum.join(" ")
+              }
+              value={@form[:header_text].value}
+            />
+            <.textarea_footer
+              character_limit={255}
+              copy_id="#alert_details_header_text"
+              copy_title="Copy main message to Clipboard"
+              field={@form[:header_text]}
+            />
+          </div>
+          <.checkbox
+            class="mt-2 md:ml-4 md:mt-8"
+            field={@form[:header_sync_toggle]}
+            label="Auto refresh"
           />
         </div>
-        <.checkbox
-          class="mt-2 md:ml-4 md:mt-8"
-          field={@form[:description_sync_toggle]}
-          label="Auto refresh"
-        />
-      </div>
-      <.text_input
-        field={@form[:url]}
-        label="URL"
-        phx-debounce={120}
-        id="url_input"
-        class="md:min-w-[50%]"
-      />
-      <div id="image-preview-div">
+        <div class="flex flex-col md:flex-row">
+          <div class="flex flex-col md:w-[50%]">
+            <.textarea
+              field={@form[:description_text]}
+              label="Supporting information"
+              phx-debounce={120}
+              id="description_input"
+              class={
+                [
+                  "w-[100%] min-h-[10rem] z-20 mt-3",
+                  if(String.length(@form[:description_text].value || "") >= 3000,
+                    do: "!border-error border-b-1",
+                    else: "border-b-0"
+                  )
+                ]
+                |> Enum.join(" ")
+              }
+              maxlength="3000"
+              value={@form[:description_text].value}
+            />
+            <.textarea_footer
+              character_limit={3000}
+              copy_id="#alert_details_description_text"
+              copy_title="Copy supporting information to Clipboard"
+              field={@form[:description_text]}
+            />
+          </div>
+          <.checkbox
+            class="mt-2 md:ml-4 md:mt-8"
+            field={@form[:description_sync_toggle]}
+            label="Auto refresh"
+          />
+        </div>
         <.text_input
-          field={@form[:image_url]}
-          label="Image URL"
-          phx-debounce={500}
-          id="image_url_input"
-          class={[
-            "md:min-w-[50%]",
-            if(@form[:image_url].value not in ["", nil] && is_number(@image_size),
-              do: "border-b-0 rounded-none rounded-t"
-            )
-          ]}
+          field={@form[:url]}
+          label="URL"
+          phx-debounce={120}
+          id="url_input"
+          class="md:min-w-[50%]"
         />
-        <div
-          :if={@form[:image_url].value not in ["", nil] && is_number(@image_size)}
-          id="image-information"
-          class="flex flex-col md:flex-row md:w-[50%] text-sm text-text-secondary bg-bg-elevation-3 p-4 rounded-b border border-bg-elevation-6 border-t-0"
-        >
-          <img
-            src={@form[:image_url].value}
-            class={["md:max-h-[8rem] mt-4", if(@form[:image_url].value in ["", nil], do: "hidden")]}
+        <div id="image-preview-div">
+          <.text_input
+            field={@form[:image_url]}
+            label="Image URL"
+            phx-debounce={500}
+            id="image_url_input"
+            class={[
+              "md:min-w-[50%]",
+              if(@form[:image_url].value not in ["", nil] && is_number(@image_size),
+                do: "border-b-0 rounded-none rounded-t"
+              )
+            ]}
           />
-          <div class="flex flex-col justify-center mt-4 md:mt-0 md:ml-4">
-            <p :if={@image_path} class="break-all">{@image_path}</p>
-            <p :if={@image_size}>{"#{@image_size} mB"}</p>
+          <div
+            :if={@form[:image_url].value not in ["", nil] && is_number(@image_size)}
+            id="image-information"
+            class="flex flex-col md:flex-row md:w-[50%] text-sm text-text-secondary bg-bg-elevation-3 p-4 rounded-b border border-bg-elevation-6 border-t-0"
+          >
+            <img
+              src={@form[:image_url].value}
+              class={["md:max-h-[8rem] mt-4", if(@form[:image_url].value in ["", nil], do: "hidden")]}
+            />
+            <div class="flex flex-col justify-center mt-4 md:mt-0 md:ml-4">
+              <p :if={@image_path} class="break-all">{@image_path}</p>
+              <p :if={@image_size}>{"#{@image_size} mB"}</p>
+            </div>
           </div>
         </div>
+        <.text_input
+          field={@form[:image_alternative_text]}
+          label="Image alt text"
+          phx-debounce={120}
+          id="image_alt_text_input"
+          class="md:min-w-[50%]"
+          spellcheck="true"
+        />
       </div>
-      <.text_input
-        field={@form[:image_alternative_text]}
-        label="Image alt text"
-        phx-debounce={120}
-        id="image_alt_text_input"
-        class="md:min-w-[50%]"
-        spellcheck="true"
-      />
       <hr class="mt-8" />
     </div>
     """
