@@ -36,7 +36,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.{
     AlertData,
-    Path
+    Path,
+    Selections
   }
 
   alias AlertsUI.DBContexts.Users
@@ -189,6 +190,30 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   @impl true
   def handle_event("save", params, socket) do
     {:noreply, persist_valid_alert(socket)}
+  end
+
+  @impl true
+  def handle_event("accept_filter", _params, %{assigns: %{selections: selections}} = socket) do
+    selections =
+      socket.assigns
+      |> assign_unwrapped_selections()
+      |> Map.get(:selections)
+
+    case Map.get(selections, :on_accept) do
+      handler when is_function(handler) -> {:noreply, handler.(socket)}
+      _ -> {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_event("accept_filter", _, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("cancel_filter", params, socket) do
+    params |> IO.inspect(label: "CANCEL")
+    {:noreply, socket}
   end
 
   @impl true
