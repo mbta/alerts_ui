@@ -199,7 +199,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       |> assign_unwrapped_selections()
       |> Map.get(:selections)
 
-    case Map.get(selections, :on_accept) do
+    case Map.get(selections, :on_filter_accept) do
       handler when is_function(handler) -> {:noreply, handler.(socket)}
       _ -> {:noreply, socket}
     end

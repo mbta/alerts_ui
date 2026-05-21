@@ -46,7 +46,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
               filter_title_value: "FILTER TITLE VALUE",
               loading: false,
               modal_options: [],
-              on_accept: &AffectedServiceSlice.on_accept/1,
+              on_filter_accept: &AffectedServiceSlice.on_filter_accept/1,
               route_id_options: [],
               selected_stops: [],
               single_route_effect_names: @single_route_effect_names,
@@ -499,20 +499,48 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   end
 
   def on_filter_accept(socket) do
-    selections = socket.assigns.selections
+    async_assign_schedules(socket)
+  end
+
+  def on_filter_cancel(socket) do
+    socket
+  end
+
+  defp async_assign_schedules(socket) do
     form = socket.assigns.form
     combination = form[:combination].value
     required_fields = ServiceEffectCombinations.required_fields(combination)
 
-    {filter_title_value, _} =
-      selections.modal_options # ?
-      |> Enum.find({"All future trips", nil}, fn {_option, value} ->
-        value == modal_date
+    if :trip_ids in required_fields do
+      route_ids = form[:route_ids].value
+      direction = form[:direction].value
+      modal_date = case form[:modal_date].value do
+        blank when blank in [nil, "", "default"] -> nil
+        modal_date -> modal_date
+      end
+
+      selections =
+        socket.assigns
+        |> assign_unwrapped_selections(%Selections{loading: true})
+        |> Map.get(:selections)
+
+      {filter_title_value, _} =
+        selections.modal_options # ?
+        |> Enum.find({"All future trips", nil}, fn {_option, value} ->
+          value == modal_date
+        end)
+
+      assign_async(socket, :selections, fn ->
+        available_schedules =
+          CreateAlertLive.get_schedules_by_date(route_ids, direction, modal_date)
+
+        {
+          :ok,
+          %{selections: %{selections|available_schedules: available_schedules, filter_title_value: filter_title_value}}
+        }
       end)
-
-    async_assign_schedules(socket, route_ids, direction, fields)
-  end
-
-  def on_filter_cancel(socket) do
+    else
+      socket
+    end
   end
 end
