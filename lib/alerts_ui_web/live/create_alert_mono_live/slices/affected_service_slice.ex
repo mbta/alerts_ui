@@ -37,6 +37,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   ]
 
   defmodule Selections do
+    alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
+
     defstruct available_routes: [],
               available_schedules: [],
               available_stops: [],
@@ -44,6 +46,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
               filter_title_value: "FILTER TITLE VALUE",
               loading: false,
               modal_options: [],
+              on_accept: &AffectedServiceSlice.on_accept/1,
               route_id_options: [],
               selected_stops: [],
               single_route_effect_names: @single_route_effect_names,
@@ -362,8 +365,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
           :if={show_trips_input?(@form[:combination].value)}
           id="dates-filter-modal"
           header_text="Filter by day"
-          cancel_event_name="cancelled_modal"
-          accept_event_name="accepted_dates_modal"
+          cancel_event_name="cancel_filter"
+          accept_event_name="accept_filter"
           accept_button_text="Apply"
           target_id="#alert_form"
           container_class="md:!w-[25rem]"
@@ -493,5 +496,23 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   defp filtered_select_for_route_type?(route_type) do
     Enum.member?([2, 3, 4], route_type)
+  end
+
+  def on_filter_accept(socket) do
+    selections = socket.assigns.selections
+    form = socket.assigns.form
+    combination = form[:combination].value
+    required_fields = ServiceEffectCombinations.required_fields(combination)
+
+    {filter_title_value, _} =
+      selections.modal_options # ?
+      |> Enum.find({"All future trips", nil}, fn {_option, value} ->
+        value == modal_date
+      end)
+
+    async_assign_schedules(socket, route_ids, direction, fields)
+  end
+
+  def on_filter_cancel(socket) do
   end
 end

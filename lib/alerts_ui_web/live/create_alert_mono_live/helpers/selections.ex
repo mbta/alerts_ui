@@ -8,7 +8,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Selections do
   def selections_loading?(%AsyncResult{loading: true}), do: true
   def selections_loading?(_), do: false
 
-  def assign_unwrapped_selections(assigns, default) do
+  def assign_unwrapped_selections(assigns, default \\ %{}) do
     case assigns.selections do
       %AsyncResult{loading: [:selections]} ->
         assign(assigns, :selections, default)
