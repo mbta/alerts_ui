@@ -88,7 +88,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSlice do
   defp integer_service_type(service_type_int) when service_type_int in 0..4, do: service_type_int
 
   defp integer_service_type(unknown_service_type) do
-    Logger.error("Unknown service type: #{inspect(unknown_service_type)}")
-    nil
+    raise ArgumentError, "Unknown service type: #{inspect(unknown_service_type)}"
   end
 end

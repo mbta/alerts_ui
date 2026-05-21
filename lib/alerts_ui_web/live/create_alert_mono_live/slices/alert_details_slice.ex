@@ -2,7 +2,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}
-  alias AlertsUI.Models.{Cause, EnhancedSchedule, SeverityLevel}
+  alias AlertsUI.Models.{Cause, SeverityLevel}
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
   use AlertsUIWeb, :html
@@ -45,9 +45,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     alias Phoenix.LiveView.AsyncResult
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice
-    alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice
-    alias AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice
 
     @severity_options SeverityLevel.severity_tuples()
                       |> Enum.map(fn {desc, severity, _level} -> {desc, severity} end)
@@ -77,17 +75,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
         ) do
       [_, target | _] = Map.get(params, "_target", [nil, nil])
 
-      severity =
-        if is_nil(details_data.severity) do
-          GetKeyForModeEffect.get_value_of_key(
-            :default_severity,
-            details_data.route_type,
-            details_data.effect_name
-          )
-        else
-          details_data.severity
-        end
-
       route_type = form[:route_type].value
       effect_name = form[:effect_name].value
 
@@ -112,10 +99,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
         else
           details_data.cause_detail
         end
-
-      [_, target] = Map.get(params, "_target", [nil, nil])
-
-      autotext_data = AlertDataToAutoText.build_autotext_data(translated_details(details_data, effect_name))
 
       header_sync_toggle =
         if target == "header_text" and details_data.header_sync_toggle == true do
@@ -185,6 +168,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       changeset
       |> change(%{
         header_sync_toggle: header_sync_toggle,
+        header_text: header_text,
         description_sync_toggle: description_sync_toggle,
         description_text: description_text,
         service_effect_text: service_effect_text,
@@ -247,10 +231,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       %{facilities: facilities}
     end
 
-    defp selected_objects(selections, form_data) do
-      route_ids = form_data.route_ids || []
-      stop_ids = form_data.stop_names_and_ids
-      trip_ids = form_data.trip_ids
+    defp selected_objects(selections, form) do
+      route_ids = form[:route_ids].value
+      stop_ids = form[:stop_names_and_ids].value
+      trip_ids = form[:trip_ids]
 
       routes =
         (Map.get(selections, :available_routes) || [])
@@ -262,22 +246,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
         Enum.filter(Map.get(selections, :available_schedules, []), &(&1.trip.id in trip_ids))
 
       %{routes: routes, stops: stops, schedules: schedules}
-    end
-
-    defp update_header_text(header_sync_toggle, original_header_text, autotext_data) do
-      if header_sync_toggle == true do
-        Templates.build_auto_text(autotext_data, :header_template)
-      else
-        original_header_text
-      end
-    end
-
-    defp update_description_text(description_sync_toggle, description_text, autotext_data) do
-      if description_sync_toggle == true do
-        Templates.build_auto_text(autotext_data, :description_template)
-      else
-        description_text
-      end
     end
 
     defp translated_details(details_data, effect_name) do

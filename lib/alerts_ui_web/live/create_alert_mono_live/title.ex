@@ -3,8 +3,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Title do
 
   def render(
         %{
-          route_type_name: route_type_name,
-          effect_name: effect_name
+          route_type_name: _route_type_name,
+          effect_name: _effect_name
         } = assigns
       ) do
     ~H"""

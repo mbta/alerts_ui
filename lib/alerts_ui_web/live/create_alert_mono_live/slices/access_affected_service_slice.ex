@@ -16,8 +16,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,
     only: [always_validate_required: 3]
 
-  import Ecto.Changeset, only: [validate_length: 3, validate_required: 2]
-
   import Phoenix.LiveView, only: [assign_async: 3, attach_hook: 4]
 
   use AlertsUIWeb, :html

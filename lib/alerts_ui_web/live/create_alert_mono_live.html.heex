@@ -10,14 +10,6 @@
   <div class="flex flex-col items-center justify-center w-[90%]" id="article-view">
     <article class="flex flex-col items-center justify-center w-[100%]">
       <div class="w-full">
-        <TimelineSlice.render
-          alert_id={@alert_id}
-          form={@form}
-          previous_steps={@previous_steps}
-          progress={@progress}
-          steps={@steps}
-          form_type={@form_type}
-        />
         <UrlSlice.render
           :if={!show_details?(@form)}
           alert_id={@alert_id}

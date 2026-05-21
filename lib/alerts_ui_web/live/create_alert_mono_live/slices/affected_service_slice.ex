@@ -4,10 +4,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
 
-  alias AlertsUIWeb.FormComponents.Helpers.{
-    SelectFormatter,
-    ServiceEffectCombinations
-  }
+  alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
 
   import Phoenix.LiveView, only: [assign_async: 3]
   import Ecto.Changeset, only: [cast: 3, get_field: 2]
@@ -17,9 +14,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Selections,
     only: [selections_loading?: 1, assign_unwrapped_selections: 2]
-
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Time,
-    only: [today: 0]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,
     only: [always_validate_required: 3]
@@ -35,8 +29,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     :trip_ids,
     :trip_search_term
   ]
-
+ 
   defmodule Selections do
+    import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
+      only: [get_single_route_effect_names: 0]
+
     defstruct available_routes: [],
               available_schedules: [],
               available_stops: [],
@@ -46,7 +43,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
               modal_options: [],
               route_id_options: [],
               selected_stops: [],
-              single_route_effect_names: @single_route_effect_names,
+              single_route_effect_names: get_single_route_effect_names(),
               stop_id_options: [],
               stop_selections: [],
               today: nil,
@@ -247,13 +244,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       end
     end
 
-    @single_route_effect_names ["Detour", "Snow Route"]
-
     defp ensure_route_ids(changeset) do
       effect_name = get_field(changeset, :effect_name)
 
       cond do
-        effect_name in @single_route_effect_names ->
+        effect_name in get_single_route_effect_names() ->
           incoming_route_id = get_field(changeset, :single_route_id)
           cast(changeset, %{route_ids: [incoming_route_id]}, [:route_ids])
 
@@ -266,7 +261,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     end
 
     # come back to this - see adjust_selections/1 in original
-    defp ensure_selections(changeset), do: changeset
+    # defp ensure_selections(changeset), do: changeset
 
     defp ensure_stop_names_and_ids(changeset) do
       if get_field(changeset, :stop_names_and_ids) in [nil, "default", ["default"]] do

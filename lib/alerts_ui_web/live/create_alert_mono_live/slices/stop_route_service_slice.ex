@@ -1,21 +1,12 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   alias Phoenix.LiveView.AsyncResult
 
-  alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.CreateAlertLive
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.SelectFormatter
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
-  alias AlertsUIWeb.FormComponents.AffectedService
-  alias AlertsUIWeb.FormComponents.Helpers.ContentFormatter
 
   alias AlertsUIWeb.CreateAlertLive
-
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.API, only: [async_available?: 1]
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData, only: [humanize_effect_name: 1]
-
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.SelectFormatter,
-    only: [formatted_select_options: 1]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Selections,
     only: [assign_unwrapped_selections: 2]
@@ -300,10 +291,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
       <hr class="mt-4" />
     </div>
     """
-  end
-
-  def render(%{form: form} = assigns) do
-    assign(assigns, :selections, %Selections{}) |> render()
   end
 
   @spec disable_routes_input?(map()) :: boolean()

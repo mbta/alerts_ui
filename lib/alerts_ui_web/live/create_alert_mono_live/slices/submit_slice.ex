@@ -1,5 +1,4 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.ReviewModal
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.PredictionSuppressionWarningModal

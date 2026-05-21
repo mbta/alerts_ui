@@ -31,7 +31,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     UrlSlice
   }
 
-  alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.CreateAlertMonoLive.Step
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.{
@@ -157,7 +156,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   @impl true
   def handle_event("clear_filter", %{"filter-id" => filter_field}, socket) do
     params = %{"alert_data" => %{filter_field => nil}}
-    {:noreply, sync_socket(socket, %{})}
+    {:noreply, sync_socket(socket, params)}
   end
 
   # @impl true
@@ -187,7 +186,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   end
 
   @impl true
-  def handle_event("save", params, socket) do
+  def handle_event("save", _params, socket) do
     {:noreply, persist_valid_alert(socket)}
   end
 

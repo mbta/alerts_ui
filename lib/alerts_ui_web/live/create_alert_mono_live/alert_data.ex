@@ -15,10 +15,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
     AlertDetailsSlice,
     DeliverySlice,
-    AccessAffectedServiceSlice,
-    AffectedServiceSlice,
-    StopRouteServiceSlice,
-    SystemwideServiceSlice,
     ReminderTimesSlice,
     SubmitSlice,
     UrlSlice,
@@ -332,11 +328,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   def slices(socket) do
     combination =
       case Map.get(socket.assigns, :form) do
-        nil ->
-          nil
-
-        form ->
-          socket.assigns.form[:combination].value
+        nil -> nil
+        form -> form[:combination].value
       end
 
     [
