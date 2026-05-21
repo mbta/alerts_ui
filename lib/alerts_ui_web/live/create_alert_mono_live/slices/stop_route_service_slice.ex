@@ -289,7 +289,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
           field={@form[:route_ids]}
           filter_field={@form[:routes_search_term]}
           loading={Map.get(@selections, :loading, true)}
-          no_results={Enum.empty?(@selections.route_id_options) && @selections.disable_routes_input?}
+          no_results={Enum.empty?(@selections.route_id_options) && !@selections.disable_routes_input?}
           disabled={@selections.disable_routes_input?}
           options={@selections.route_id_options}
           class="md:w-[25%]"
