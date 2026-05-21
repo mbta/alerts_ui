@@ -67,18 +67,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
           params,
           %{
             assigns: %{
-              form: form,
+              form: _form,
               progress: %{name: "details"}
             }
           } = socket
         ) do
       [_, target | _] = Map.get(params, "_target", [nil, nil])
-
       # TODO how to get "selected x"
       # do this inside the assigns instead :)
       # effect_name = effect_from_url_name(form[:effect_name].value)
       # autotext_data = AlertDataToAutoText.build_autotext_data(translated_details(details_data, effect_name))
-
       header_sync_toggle =
         if target == "header_text" and details_data.header_sync_toggle == true do
           false
@@ -94,7 +92,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
         end
 
       selections = unwrap_selections(socket)
-      selected = selected_objects(selections, form)
+      selected = selected_objects(selections, changeset)
 
       autotext_input =
         %{
@@ -195,10 +193,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       end
     end
 
-    defp selected_objects(%AffectedServiceSlice.Selections{} = s, form) do
-      route_ids = get_field(form.source, :route_ids) || []
-      stop_ids = get_field(form.source, :stop_names_and_ids) || []
-      trip_ids = get_field(form.source, :trip_ids) || []
+    defp selected_objects(%AffectedServiceSlice.Selections{} = s, changeset) do
+      route_ids = get_field(changeset, :route_ids) || []
+      stop_ids = get_field(changeset, :stop_names_and_ids) || []
+      trip_ids = get_field(changeset, :trip_ids) || []
 
       routes =
         (s.available_routes || [])
@@ -211,9 +209,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       %{routes: routes, stops: stops, schedules: schedules}
     end
 
-    defp selected_objects(%StopRouteServiceSlice.Selections{} = s, form) do
-      route_ids = get_field(form.source, :route_ids) || []
-      stop_ids = get_field(form.source, :stop_ids) || []
+    defp selected_objects(%StopRouteServiceSlice.Selections{} = s, changeset) do
+      route_ids = get_field(changeset, :route_ids) || []
+      stop_ids = get_field(changeset, :stop_ids) || []
 
       routes =
         (s.available_routes || [])
@@ -225,8 +223,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       %{routes: routes, stops: stops}
     end
 
-    defp selected_objects(%AccessAffectedServiceSlice.Selections{} = s, form) do
-      facility_ids = get_field(form.source, :facility_ids) || []
+    defp selected_objects(%AccessAffectedServiceSlice.Selections{} = s, changeset) do
+      facility_ids = get_field(changeset, :facility_ids) || []
 
       all_facilities =
         if is_map(s.available_facilities),
