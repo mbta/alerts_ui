@@ -40,17 +40,17 @@
           />
           <ReminderTimesSlice.render form={@form} />
           <DeliverySlice.render form={@form} />
+          <SubmitSlice.render
+            back={@back}
+            form={@form}
+            progress={@progress}
+            current_user={@current_user}
+            return_to={@return_to}
+            selections={@selections}
+            form_type={@form_type}
+            show={@show}
+          />
         </.form>
-        <SubmitSlice.render
-          back={@back}
-          form={@form}
-          progress={@progress}
-          current_user={@current_user}
-          return_to={@return_to}
-          selections={@selections}
-          form_type={@form_type}
-          show={@show}
-        />
       </div>
     </article>
   </div>
