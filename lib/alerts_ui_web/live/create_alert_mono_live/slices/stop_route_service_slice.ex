@@ -101,7 +101,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
       stop_route_ids =
         case modal_route_id do
-          nil -> route_ids
+          nil ->
+            case route_ids do
+              [] -> nil
+              route_ids -> route_ids
+            end
+
           modal_route_id -> [modal_route_id]
         end
 
