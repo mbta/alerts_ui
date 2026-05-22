@@ -157,38 +157,41 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
         <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
           Alert type
         </.h5>
-        <div class="w-4 mr-4 w-full text-center md:text-left">
-          <.body>Service Type</.body>
-        </div>
-        <div id="service_type_buttons" class="mb-8">
-          <div class="flex flex-wrap justify-center md:justify-normal gap-2">
-            <div :for={this_route_type_name <- route_types()}>
-              <.route_type_button
-                this_route_type={this_route_type_name}
-                selected_route_type={@path_route_type}
-              />
-            </div>
+        <div class="form-control gap-4 min-w-full">
+          <div class="w-4 mr-4 w-full text-center md:text-left">
+            Service Type
           </div>
-        </div>
-
-        <div :if={is_nil(@path_effect_name)} class="w-4 mr-4 w-full text-center md:text-left">
-          <.body>
-            Effect
-          </.body>
-          <div id="effect_buttons">
-            <p class="text-bg-elevation-6 mb-[18rem]" hidden={!is_nil(@path_route_type)}>
-              Select a service type to see possible effects.
-            </p>
+          <div id="service_type_buttons" class="mb-8">
             <div class="flex flex-wrap justify-center md:justify-normal gap-2">
-              <div
-                :for={this_effect_name <- list_effect_path_names(@path_route_type)}
-                class={if is_nil(@path_route_type), do: "hidden"}
-              >
-                <.effect_name_button
-                  this_effect_name={this_effect_name}
-                  selected_effect_name={@path_effect_name}
+              <div :for={this_route_type_name <- route_types()}>
+                <.route_type_button
+                  this_route_type={this_route_type_name}
                   selected_route_type={@path_route_type}
                 />
+              </div>
+            </div>
+          </div>
+
+          <div
+            :if={is_nil(@path_effect_name)}
+            class="w-4 mr-4 w-full text-center md:text-left gap-4 flex flex-col"
+          >
+            Effect
+            <div id="effect_buttons">
+              <p class="text-text-secondary mb-[18rem]" hidden={!is_nil(@path_route_type)}>
+                Select a service type to see possible effects.
+              </p>
+              <div class="flex flex-wrap justify-center md:justify-normal gap-2">
+                <div
+                  :for={this_effect_name <- list_effect_path_names(@path_route_type)}
+                  class={if is_nil(@path_route_type), do: "hidden"}
+                >
+                  <.effect_name_button
+                    this_effect_name={this_effect_name}
+                    selected_effect_name={@path_effect_name}
+                    selected_route_type={@path_route_type}
+                  />
+                </div>
               </div>
             </div>
           </div>
