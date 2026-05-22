@@ -552,8 +552,4 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   def on_filter_accept(socket) do
     async_assign_selections(socket, %{})
   end
-
-  def on_filter_cancel(socket) do
-    socket
-  end
 end
