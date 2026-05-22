@@ -282,7 +282,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       # Make sure 'default' and modal search terms don't get pushed to params
       |> remove_unused_params()
 
-    params = %{"filter" => filters}
+    params = Map.merge(socket.assigns.params, %{"filter" => filters})
 
     socket =
       assign(socket,

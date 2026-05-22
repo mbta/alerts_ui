@@ -525,7 +525,9 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
           "76|76",
           "350|350",
           "CT3|708"
-        ]
+        ],
+        header_text: "Problems on the red line and some buses",
+        primary_service_type: "3"
       })
 
       insert(:alert, %{
@@ -544,7 +546,8 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         active_period_end: @one_hour_from_now,
         notification_period_end: @one_hour_from_now,
         duration_certainty: :KNOWN,
-        original_route_selections: ["Red Line|Red"]
+        original_route_selections: ["Red Line|Red"],
+        header_text: "Problems on the red line"
       })
 
       insert(:alert, %{
@@ -573,7 +576,8 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         active_period_end: @end_of_service_utc,
         notification_period_end: @end_of_service_utc,
         duration_certainty: :KNOWN,
-        original_route_selections: ["10"]
+        original_route_selections: ["10"],
+        primary_service_type: "3"
       })
 
       insert(:alert, %{
@@ -601,7 +605,8 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         active_period_end: @two_days_from_now,
         notification_period_end: @two_days_from_now,
         duration_certainty: :KNOWN,
-        original_route_selections: ["1|1"]
+        original_route_selections: ["1|1"],
+        primary_service_type: "3"
       })
 
       insert(:alert, %{
@@ -864,6 +869,97 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
                "hero-arrow-down"
 
       assert get_alert_id_order(html) == ["10000", "10300", "10100", "10500", "10600", "10900"]
+    end
+
+    @tag :logged_in_user
+    test "can sort, then search while retaining sort order", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts")
+
+      # sort descending by clicking twice
+      view
+      |> element("a", "ID")
+      |> render_click()
+
+      html =
+        view
+        |> element("a", "ID")
+        |> render_click()
+
+      assert_patch(
+        view,
+        ~p"/alerts?filter[timeline]=current&order_by=integer_alert_id&order_direction=desc"
+      )
+
+      assert element(view, "th[aria-sort='descending'] span.order-direction") |> render() =~
+               "hero-arrow-down"
+
+      assert get_alert_id_order(html) == ["10900", "10600", "10500", "10300", "10100", "10000"]
+
+      # search in the search bar and make sure we are still in sort desc order
+      html =
+        view
+        |> element("input[name='view_alerts_live[multi_column_search]']")
+        |> render_change(%{
+          "view_alerts_live" => %{
+            "multi_column_search" => "red line"
+          }
+        })
+
+      assert get_alert_id_order(html) == ["10300", "10100"]
+
+      assert_patch(
+        view,
+        ~p"/alerts?filter[multi_column_search]=red+line&filter[timeline]=current&order_by=integer_alert_id&order_direction=desc"
+      )
+
+      assert element(view, "th[aria-sort='descending'] span.order-direction") |> render() =~
+               "hero-arrow-down"
+    end
+
+    @tag :logged_in_user
+    test "can sort, then filter in the modal while retaining sort order", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts")
+
+      # sort descending by clicking twice
+      view
+      |> element("a", "ID")
+      |> render_click()
+
+      html =
+        view
+        |> element("a", "ID")
+        |> render_click()
+
+      assert_patch(
+        view,
+        ~p"/alerts?filter[timeline]=current&order_by=integer_alert_id&order_direction=desc"
+      )
+
+      assert element(view, "th[aria-sort='descending'] span.order-direction") |> render() =~
+               "hero-arrow-down"
+
+      assert get_alert_id_order(html) == ["10900", "10600", "10500", "10300", "10100", "10000"]
+
+      # filter in the modal for just buses (3)
+      html =
+        view
+        |> element("#alert-filter-form")
+        |> render_submit(%{
+          "view_alerts_live" => %{
+            # bus
+            "service_type" => ["3"]
+          }
+        })
+
+      assert get_alert_id_order(html) == ["10900", "10600", "10100"]
+
+      assert_patch(
+        view,
+        ~p"/alerts?filter[service_type][]=3&filter[timeline]=current&order_by=integer_alert_id&order_direction=desc"
+      )
+
+      assert element(view, "th[aria-sort='descending'] span.order-direction") |> render() =~
+               "hero-arrow-down"
     end
   end
 
