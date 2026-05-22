@@ -230,6 +230,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   end
 
   @update_selection_targets [
+    "direction",
     "stop_ids",
     "route_ids",
     "trip_ids",
@@ -239,13 +240,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     "trip_search_term"
   ]
 
-  @update_selection_targets [
-    "stop_ids",
-    "route_ids",
-    "route_search_term",
-    "stop_search_term",
-    "modal_route_search_term"
-  ]
   # update selections when a user interacts with one of our fields...
   defp update_selections?(%{"_target" => ["alert_data", field]})
        when field in @update_selection_targets,
