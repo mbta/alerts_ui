@@ -212,7 +212,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   @impl true
   def handle_event("cancel_filter", params, socket) do
-    params |> IO.inspect(label: "CANCEL")
     {:noreply, socket}
   end
 

@@ -203,8 +203,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
         <.modal
           id="stops-filter-modal"
           header_text="Filter by stop"
-          cancel_event_name="cancelled_modal"
-          accept_event_name="accepted_stops_modal"
+          cancel_event_name="cancel_filter"
+          accept_event_name="accept_filter"
           accept_button_text="Apply"
           target_id="#alert_form"
           container_class="md:!w-[25rem]"

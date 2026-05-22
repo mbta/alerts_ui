@@ -262,8 +262,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
       <.modal
         id="routes-filter-modal"
         header_text="Filter by route"
-        cancel_event_name="cancelled_modal"
-        accept_event_name="accepted_routes_modal"
+        cancel_event_name="cancel_filter"
+        accept_event_name="accept_filter"
         accept_button_text="Apply"
         target_id="#alert_form"
       >
