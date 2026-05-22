@@ -107,31 +107,51 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     end
   end
 
-  def change_timing(changeset, "alert_timing", :"one-time"), do: change_timing(changeset, "alert_timing", "one-time")
+  def change_timing(changeset, "alert_timing", :"one-time"),
+    do: change_timing(changeset, "alert_timing", "one-time")
 
   def change_timing(changeset, "alert_timing", "one-time") do
     changeset
-    |> force_change(:active_period_start_specifier, get_field(changeset, :active_period_start_specifier))
+    |> force_change(
+      :active_period_start_specifier,
+      get_field(changeset, :active_period_start_specifier)
+    )
     |> force_change(:active_period_start, get_field(changeset, :active_period_start))
     |> force_change(:active_period_start_date, get_field(changeset, :active_period_start_date))
-    |> force_change(:active_period_end_specifier, get_field(changeset, :active_period_end_specifier))
+    |> force_change(
+      :active_period_end_specifier,
+      get_field(changeset, :active_period_end_specifier)
+    )
     |> force_change(:active_period_end, get_field(changeset, :active_period_end))
     |> force_change(:active_period_end_date, get_field(changeset, :active_period_end_date))
     |> force_change(:can_close_automatically, get_field(changeset, :can_close_automatically))
   end
 
-  def change_timing(changeset, "alert_timing", :recurring), do: change_timing(changeset, "alert_timing", "recurring")
+  def change_timing(changeset, "alert_timing", :recurring),
+    do: change_timing(changeset, "alert_timing", "recurring")
 
   def change_timing(changeset, "alert_timing", "recurring") do
     changeset
     |> force_change(:active_period_start_date, get_field(changeset, :active_period_start_date))
     |> force_change(:active_period_start_time, get_field(changeset, :active_period_start_time))
-    |> force_change(:active_period_start_time_specifier, get_field(changeset, :active_period_start_time_specifier))
-    |> force_change(:active_period_start_specifier, get_field(changeset, :active_period_start_specifier))
+    |> force_change(
+      :active_period_start_time_specifier,
+      get_field(changeset, :active_period_start_time_specifier)
+    )
+    |> force_change(
+      :active_period_start_specifier,
+      get_field(changeset, :active_period_start_specifier)
+    )
     |> force_change(:active_period_end_date, get_field(changeset, :active_period_end_date))
     |> force_change(:active_period_end_time, get_field(changeset, :active_period_end_time))
-    |> force_change(:active_period_end_time_specifier, get_field(changeset, :active_period_end_time_specifier))
-    |> force_change(:active_period_end_specifier, get_field(changeset, :active_period_end_specifier))
+    |> force_change(
+      :active_period_end_time_specifier,
+      get_field(changeset, :active_period_end_time_specifier)
+    )
+    |> force_change(
+      :active_period_end_specifier,
+      get_field(changeset, :active_period_end_specifier)
+    )
     |> force_change(:recurrence_days, get_field(changeset, :recurrence_days))
     |> force_change(:can_close_automatically, get_field(changeset, :can_close_automatically))
   end
@@ -194,9 +214,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   end
 
   def ensure_end_date_values_for_specifier(changeset, :later_today, _, _) do
-    end_of_service = ActivePeriod.end_of_service_datetime_naive(
-      NaiveDateTime.local_now()
-    )
+    end_of_service = ActivePeriod.end_of_service_datetime_naive(NaiveDateTime.local_now())
 
     change(changeset, %{
       active_period_end: end_of_service,
@@ -219,7 +237,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     change(changeset, %{
       active_period_end: DTHelpers.replace_time(now, ~T[23:59:59]),
       active_period_end_date: now |> NaiveDateTime.to_date(),
-      can_close_automatically: true,
+      can_close_automatically: true
     })
   end
 
