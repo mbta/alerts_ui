@@ -34,17 +34,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
               filter_title_value: "All stops",
               loading: false,
               modal_stop_id_options: [],
+              on_filter_accept: &AccessAffectedServiceSlice.on_filter_accept/1,
               stop_id_filter_value: "default"
   end
 
   defimpl Slice, for: __MODULE__ do
     def mount(_service_data, socket, _base_params) do
-      attach_hook(
-        socket,
-        :accepted_stops_modal,
-        :handle_event,
-        &accept_modal/3
-      )
+      socket
     end
 
     def extract(service_data, %AlertData{} = _alert_data, _params) do
@@ -129,7 +125,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
       end
     end
 
-    def accept_modal("accepted_stops_modal", _params, socket) do
+    def on_filter_accept(socket) do
       selections =
         case socket.assigns.selections do
           %Selections{} = selections -> selections
@@ -157,7 +153,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
       {:halt, assign(socket, :selections, selections)}
     end
 
-    def accept_modal(_, _, socket), do: {:cont, socket}
+    def on_filter_accept(socket), do: {:cont, socket}
 
     @update_selection_targets ["stop_id", "stop_search_term", "facility_search_term"]
     # update selections when a user interacts with one of our fields...

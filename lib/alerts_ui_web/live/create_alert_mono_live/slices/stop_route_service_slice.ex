@@ -45,12 +45,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   ]
 
   defmodule Selections do
+    alias AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice
+
     defstruct available_filter_routes: nil,
               available_routes: nil,
               available_stops: nil,
               filter_title_value: "All routes",
               disable_routes_input?: false,
               modal_route_id_options: [],
+              on_filter_accept: &StopRouteServiceSlice.on_filter_accept/1,
               retained_stops: [],
               route_id_options: [],
               selected_stops: [],
@@ -61,6 +64,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   end
 
   defimpl Slice, for: __MODULE__ do
+    alias AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice
+
     def mount(_service_data, socket, _base_params), do: socket
 
     def extract(service_data, %AlertData{} = _alert_data, _params) do
@@ -79,177 +84,178 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
     def assigns(_service_data, socket, params) do
       # update selections here
-      async_assign_selections(socket, params)
+      StopRouteServiceSlice.async_assign_selections(socket, params)
     end
+  end
 
-    defp async_assign_selections(socket, params) do
-      if update_selections?(params) do
-        form = socket.assigns.form
-        modal_route_search_term = form[:modal_route_search_term].value
-        modal_route_id = form[:modal_route_id].value
-        route_ids = form[:route_ids].value
-        route_search_term = form[:route_search_term].value
-        route_type = form[:route_type].value
-        stop_ids = form[:stop_ids].value || []
-        stop_search_term = form[:stop_search_term].value
+  def async_assign_selections(socket, params) do
+    if update_selections?(params) do
+      form = socket.assigns.form
+      modal_route_search_term = form[:modal_route_search_term].value
+      modal_route_id = form[:modal_route_id].value
+      route_ids = form[:route_ids].value
+      route_search_term = form[:route_search_term].value
+      route_type = form[:route_type].value
+      stop_ids = form[:stop_ids].value || []
+      stop_search_term = form[:stop_search_term].value
 
-        stop_route_ids =
-          case modal_route_id do
-            nil -> route_ids
-            modal_route_id -> [modal_route_id]
-          end
-
-        selected_stops =
-          case Map.get(socket.assigns, :selections) do
-            %AsyncResult{ok?: true} = async_ok -> async_ok.result.selected_stops
-            %Selections{} = selections -> selections.selected_stops
-            _ -> []
-          end
-
-        assign_async(socket, :selections, fn ->
-          available_filter_routes = CreateAlertLive.get_routes(route_type)
-          available_stops = CreateAlertLive.get_stops_for_stop_route(stop_route_ids, route_type)
-          available_routes = CreateAlertLive.get_routes_by_stop(stop_ids, route_type)
-
-          modal_route_id_options =
-            modal_route_id_options(
-              available_filter_routes,
-              modal_route_search_term,
-              route_type,
-              modal_route_id
-            )
-
-          route_id_options =
-            route_id_options(
-              available_routes,
-              route_ids,
-              route_search_term,
-              route_type
-            )
-
-          stop_id_options =
-            stop_id_options(
-              available_stops,
-              selected_stops,
-              stop_search_term,
-              route_type,
-              stop_ids
-            )
-
-          filter_title_value =
-            if modal_route_id in [nil, ""] do
-              "All routes"
-            else
-              available_filter_routes
-              |> Enum.find(&(&1.id == modal_route_id))
-              |> case do
-                nil -> "All routes"
-                route -> SelectFormatter.name_for_option(route)
-              end
-            end
-
-          selections = %Selections{
-            available_filter_routes: available_filter_routes,
-            available_routes: available_routes,
-            available_stops: available_stops,
-            disable_routes_input?: selected_stops in [nil, []],
-            filter_title_value: filter_title_value,
-            modal_route_id_options: modal_route_id_options,
-            route_id_options: route_id_options,
-            selected_route_id: modal_route_id,
-            selected_stops: selected_stops,
-            stop_id_options: stop_id_options
-          }
-
-          {:ok, %{selections: selections}}
-        end)
-        |> assign(:selections, %Selections{})
-      else
-        case Map.get(socket.assigns, :selections) do
-          nil ->
-            assign(socket, :selections, %Selections{})
-          _ ->
-            socket
+      stop_route_ids =
+        case modal_route_id do
+          nil -> route_ids
+          modal_route_id -> [modal_route_id]
         end
+
+      selected_stops =
+        case Map.get(socket.assigns, :selections) do
+          %AsyncResult{ok?: true} = async_ok -> async_ok.result.selected_stops
+          %Selections{} = selections -> selections.selected_stops
+          _ -> []
+        end
+
+      assign_async(socket, :selections, fn ->
+        available_filter_routes = CreateAlertLive.get_routes(route_type) |> IO.inspect(label: "AFR")
+        available_stops = CreateAlertLive.get_stops_for_stop_route(stop_route_ids, route_type) |> IO.inspect(label: "AS")
+        available_routes = CreateAlertLive.get_routes_by_stop(stop_ids, route_type) |> IO.inspect(label: "AR")
+
+        modal_route_id_options =
+          modal_route_id_options(
+            available_filter_routes,
+            modal_route_search_term,
+            route_type,
+            modal_route_id
+          )
+
+        route_id_options =
+          route_id_options(
+            available_routes,
+            route_ids,
+            route_search_term,
+            route_type
+          )
+
+        stop_id_options =
+          stop_id_options(
+            available_stops,
+            selected_stops,
+            stop_search_term,
+            route_type,
+            stop_ids
+          )
+
+        filter_title_value =
+          if modal_route_id in [nil, ""] do
+            "All routes"
+          else
+            available_filter_routes
+            |> Enum.find(&(&1.id == modal_route_id))
+            |> case do
+              nil -> "All routes"
+              route -> SelectFormatter.name_for_option(route)
+            end
+          end
+
+        selections = %Selections{
+          available_filter_routes: available_filter_routes,
+          available_routes: available_routes,
+          available_stops: available_stops,
+          disable_routes_input?: selected_stops in [nil, []],
+          filter_title_value: filter_title_value,
+          modal_route_id_options: modal_route_id_options,
+          route_id_options: route_id_options,
+          selected_route_id: modal_route_id,
+          selected_stops: selected_stops,
+          stop_id_options: stop_id_options
+        }
+
+        {:ok, %{selections: selections}}
+      end)
+      |> assign(:selections, %Selections{})
+    else
+      case Map.get(socket.assigns, :selections) do
+        nil ->
+          assign(socket, :selections, %Selections{})
+        _ ->
+          socket
       end
     end
-
-    defp modal_route_id_options(
-           filter_routes,
-           modal_route_search_term,
-           route_type,
-           modal_route_id
-         ) do
-      SelectFormatter.formatted_select_options(%SelectFormatter{
-        options: filter_routes,
-        search_term: modal_route_search_term,
-        route_type: route_type,
-        values_to_keep: modal_route_id |> List.wrap(),
-        option_prefix: "route-filter"
-      })
-    end
-
-    def stop_id_options(
-          available_stops,
-          selected_stops,
-          stop_search_term,
-          route_type,
-          stop_ids
-        ) do
-      # Yeah this is weird. Basically, available_stops might be filtered down by route and sorted by stop order,
-      # so we have to carefully preserve already selected stops.
-      # Available stops will only include the stops visible with the given route filter
-      # And now just a list of stop ids
-      available_stop_ids = Enum.map(available_stops, fn stop -> stop.id end)
-
-      # Get all the stops that were selected but are no longer included in `available_stops`
-      # Then append them to the top of the list
-      previously_selected_stops =
-        Enum.filter(selected_stops, fn stop -> stop.id not in available_stop_ids end)
-
-      options = previously_selected_stops ++ available_stops
-
-      SelectFormatter.formatted_select_options(%SelectFormatter{
-        options: options,
-        search_term: stop_search_term,
-        route_type: route_type,
-        values_to_keep: stop_ids,
-        option_prefix: "stop-selector"
-      })
-    end
-
-    defp route_id_options(
-           available_routes,
-           route_ids,
-           route_search_term,
-           route_type
-         ) do
-      SelectFormatter.formatted_select_options(%SelectFormatter{
-        options: available_routes,
-        search_term: route_search_term,
-        route_type: route_type,
-        values_to_keep: route_ids,
-        option_prefix: "route-selector"
-      })
-    end
-
-    @update_selection_targets [
-      "stop_ids",
-      "route_ids",
-      "route_search_term",
-      "stop_search_term",
-      "modal_route_search_term"
-    ]
-    # update selections when a user interacts with one of our fields...
-    defp update_selections?(%{"_target" => ["alert_data", field]})
-         when field in @update_selection_targets,
-         do: true
-
-    # ...but not on any other user interaction...
-    defp update_selections?(%{"_target" => _target}), do: false
-    # ...and always on mount, when there is no target
-    defp update_selections?(_), do: true
   end
+
+  defp modal_route_id_options(
+         filter_routes,
+         modal_route_search_term,
+         route_type,
+         modal_route_id
+       ) do
+    SelectFormatter.formatted_select_options(%SelectFormatter{
+      options: filter_routes,
+      search_term: modal_route_search_term,
+      route_type: route_type,
+      values_to_keep: modal_route_id |> List.wrap(),
+      option_prefix: "route-filter"
+    })
+  end
+
+  def stop_id_options(
+        available_stops,
+        selected_stops,
+        stop_search_term,
+        route_type,
+        stop_ids
+      ) do
+    # Yeah this is weird. Basically, available_stops might be filtered down by route and sorted by stop order,
+    # so we have to carefully preserve already selected stops.
+    # Available stops will only include the stops visible with the given route filter
+    # And now just a list of stop ids
+    available_stop_ids = Enum.map(available_stops, fn stop -> stop.id end)
+
+    # Get all the stops that were selected but are no longer included in `available_stops`
+    # Then append them to the top of the list
+    previously_selected_stops =
+      Enum.filter(selected_stops, fn stop -> stop.id not in available_stop_ids end)
+
+    options = previously_selected_stops ++ available_stops
+
+    SelectFormatter.formatted_select_options(%SelectFormatter{
+      options: options,
+      search_term: stop_search_term,
+      route_type: route_type,
+      values_to_keep: stop_ids,
+      option_prefix: "stop-selector"
+    })
+  end
+
+  defp route_id_options(
+         available_routes,
+         route_ids,
+         route_search_term,
+         route_type
+       ) do
+    SelectFormatter.formatted_select_options(%SelectFormatter{
+      options: available_routes,
+      search_term: route_search_term,
+      route_type: route_type,
+      values_to_keep: route_ids,
+      option_prefix: "route-selector"
+    })
+  end
+
+  @update_selection_targets [
+    "stop_ids",
+    "route_ids",
+    "route_search_term",
+    "stop_search_term",
+    "modal_route_search_term"
+  ]
+  # update selections when a user interacts with one of our fields...
+  defp update_selections?(%{"_target" => ["alert_data", field]})
+       when field in @update_selection_targets,
+       do: true
+
+  # ...but not on any other user interaction...
+  defp update_selections?(%{"_target" => _target}), do: false
+  # ...and always on mount, when there is no target, or if we pass in
+  # %{} to force a rerender, say when a modal is accepted
+  defp update_selections?(_), do: true
 
   def render(assigns) do
     assigns = assign_unwrapped_selections(assigns, %Selections{loading: true})
@@ -344,5 +350,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
       end
     end)
     |> List.flatten()
+  end
+
+  def on_filter_accept(socket) do
+    async_assign_selections(socket, %{})
   end
 end
