@@ -92,7 +92,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
             |> Enum.filter(
               &filter_facility_by_stop_ids(
                 &1,
-                stop_id,
+                stop_id || "default",
                 facility_ids
               )
             )
