@@ -136,11 +136,24 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
               stop_ids
             )
 
+          filter_title_value =
+            if modal_route_id in [nil, ""] do
+              "All routes"
+            else
+              available_filter_routes
+              |> Enum.find(&(&1.id == modal_route_id))
+              |> case do
+                nil -> "All routes"
+                route -> SelectFormatter.name_for_option(route)
+              end
+            end
+
           selections = %Selections{
             available_filter_routes: available_filter_routes,
             available_routes: available_routes,
             available_stops: available_stops,
             disable_routes_input?: selected_stops in [nil, []],
+            filter_title_value: filter_title_value,
             modal_route_id_options: modal_route_id_options,
             route_id_options: route_id_options,
             selected_route_id: modal_route_id,
@@ -155,7 +168,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
         case Map.get(socket.assigns, :selections) do
           nil ->
             assign(socket, :selections, %Selections{})
-
           _ ->
             socket
         end
