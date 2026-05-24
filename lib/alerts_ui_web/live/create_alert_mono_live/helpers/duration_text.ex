@@ -6,6 +6,125 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.DurationText do
   use Timex
   use AlertsUIWeb, :live_component
 
+  # One-Time
+
+  def one_time_duration_text(form) do
+    start_text = one_time_duration_start_phrase(form)
+    end_text = one_time_duration_end_phrase(form)
+    duration = one_time_duration_phrase(form)
+
+    "#{start_text} #{end_text} #{duration}"
+  end
+
+  def one_time_duration_start_phrase(form) do
+    start_dt = ensure_naive_datetime_format(form[:active_period_start].value)
+    start_text = start_text(start_dt)
+
+    "#{start_text} until"
+  end
+
+  def one_time_duration_end_phrase(form) do
+    end_dt = ensure_naive_datetime_format(form[:active_period_end].value)
+
+    end_text(form[:active_period_end_specifier].value, end_dt)
+  end
+
+  def one_time_duration_phrase(form) do
+    start_dt = ensure_naive_datetime_format(form[:active_period_start].value)
+    end_dt = ensure_naive_datetime_format(form[:active_period_end].value)
+
+    duration(
+      form[:active_period_end_specifier].value,
+      start_dt,
+      end_dt
+    )
+  end
+
+  defp start_text(nil), do: ""
+
+  defp start_text(start_dt) do
+    Calendar.strftime(start_dt, "%a %b %-d, %Y @ %-I:%M %p")
+  end
+
+  defp end_text(:until_further_notice, end_dt), do: end_text("until_further_notice", end_dt)
+
+  defp end_text("until_further_notice", _end_dt) do
+    "alert is manually closed"
+  end
+
+  defp end_text(:when_work_order_is_closed, end_dt),
+    do: end_text("when_work_order_is_closed", end_dt)
+
+  defp end_text("when_work_order_is_closed", _end_dt) do
+    "a work order with this facility ID is closed"
+  end
+
+  defp end_text("later_today", _end_dt) do
+    "later today"
+  end
+
+  defp end_text(:later_today, _end_dt) do
+    "later today"
+  end
+
+  defp end_text(_, nil), do: ""
+
+  defp end_text(_, end_dt) do
+    Calendar.strftime(end_dt, "%a %b %-d, %Y @ %-I:%M %p")
+  end
+
+  defp duration(:until_further_notice, _, _), do: "(indefinite)"
+  defp duration("until_further_notice", _, _), do: "(indefinite)"
+
+  defp duration(:when_work_order_is_closed, _, _), do: ""
+  defp duration("when_work_order_is_closed", _, _), do: ""
+
+  defp duration(_, nil, _), do: ""
+  defp duration(_, _, nil), do: ""
+
+  defp duration(:later_today, start_dt, end_dt), do: duration("later_today", start_dt, end_dt)
+
+  defp duration("later_today", start_dt, end_dt) do
+    "(max #{duration_text(start_dt, end_dt)})"
+  end
+
+  defp duration(_, start_dt, end_dt) do
+    "(#{duration_text(start_dt, end_dt)})"
+  end
+
+  defp duration_text(start_dt, end_dt) do
+    if NaiveDateTime.diff(end_dt, start_dt, :second) > 60 do
+      Interval.new(from: Timex.set(start_dt, second: 0), until: Timex.set(end_dt, second: 0))
+      |> Interval.duration(:duration)
+      |> Timex.format_duration(:humanized)
+    else
+      "0 minutes"
+    end
+  end
+
+
+  @spec ensure_naive_datetime_format(nil | String.t() | NaiveDateTime.t()) ::
+          nil | NaiveDateTime.t()
+  defp ensure_naive_datetime_format(nil), do: nil
+
+  defp ensure_naive_datetime_format(""), do: nil
+
+  defp ensure_naive_datetime_format(datetime) when is_binary(datetime) do
+    {result, time} = datetime |> String.pad_trailing(19, ":00") |> NaiveDateTime.from_iso8601()
+
+    if result === :ok do
+      time
+    else
+      nil
+    end
+  end
+
+  defp ensure_naive_datetime_format(%DateTime{} = datetime), do: DateTime.to_naive(datetime)
+  defp ensure_naive_datetime_format(%NaiveDateTime{} = datetime), do: datetime
+
+
+  # Recurring
+
   def recurring_duration_text(form) do
     start_date = form[:active_period_start_date].value
     start_time = form[:active_period_start_time].value

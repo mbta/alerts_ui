@@ -444,15 +444,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       />
     </div>
     <div :if={Enum.empty?(@form.errors)} class="duration-explanation text-text-secondary">
-      Effect duration: {TimeRangeDurationText.one_time_duration_text(paramify_form(@form))}
+      Effect duration: {DurationText.one_time_duration_text(@form)}
     </div>
     """
-  end
-
-  defp paramify_form(form) do
-    form.data
-    |> Map.from_struct()
-    |> Map.new(fn {key, value} -> {Atom.to_string(key), value} end)
   end
 
   attr :form, Form
