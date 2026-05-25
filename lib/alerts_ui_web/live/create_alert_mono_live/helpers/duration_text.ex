@@ -102,7 +102,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.DurationText do
     end
   end
 
-
   @spec ensure_naive_datetime_format(nil | String.t() | NaiveDateTime.t()) ::
           nil | NaiveDateTime.t()
   defp ensure_naive_datetime_format(nil), do: nil
@@ -121,7 +120,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.DurationText do
 
   defp ensure_naive_datetime_format(%DateTime{} = datetime), do: DateTime.to_naive(datetime)
   defp ensure_naive_datetime_format(%NaiveDateTime{} = datetime), do: datetime
-
 
   # Recurring
 
