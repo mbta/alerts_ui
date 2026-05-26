@@ -449,7 +449,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: true,
-        path_name: "shuttle"
+        path_name: "suspension"
       }
     },
     facility: %{
