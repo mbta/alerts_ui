@@ -23,13 +23,11 @@ defmodule AlertsUI.FeedOutput.Filters do
     end
   end
 
-  defp effect_matches?(%{alert: %{effect_detail: %{translation: [%{text: effect_detail}]}}}) do
+  defp effect_matches?(%{alert: %{effect_detail: effect_detail}}) do
     effect_detail in ["SHUTTLE", "SUSPENSION", "STATION_CLOSURE"]
   end
 
-  defp effect_matches?(%{
-         "alert" => %{"effect_detail" => %{"translation" => [%{"text" => effect_detail}]}}
-       }) do
+  defp effect_matches?(%{"alert" => %{"effect_detail" => effect_detail}}) do
     effect_detail in ["SHUTTLE", "SUSPENSION", "STATION_CLOSURE"]
   end
 
