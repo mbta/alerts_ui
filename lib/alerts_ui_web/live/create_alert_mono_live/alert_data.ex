@@ -124,7 +124,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :image_size, :map, default: %{}
     field :image_url, :string, default: ""
     field :image_path, :string, default: ""
-    field :service_effect_text, :string
+    field :service_effect_text, :string, default: ""
     field :severity, :integer
     field :url, :string, default: ""
 

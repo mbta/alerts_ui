@@ -1,13 +1,13 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}
   alias AlertsUI.Models.{Cause, SeverityLevel}
-  alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
   use AlertsUIWeb, :html
 
   defstruct [
+    :effect_name,
+    :route_type,
     # time range
     :active_period_start_specifier,
     :active_period_end_specifier,
@@ -34,13 +34,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     header_sync_toggle: true,
     description_text: "",
     description_sync_toggle: true,
+    service_effect_text: "",
     image_url: "",
     url: ""
   ]
 
   defimpl Slice, for: __MODULE__ do
     import Ecto.Changeset
-
     import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData, only: [clear_my_errors: 2]
 
     alias Phoenix.LiveView.AsyncResult
@@ -54,51 +54,19 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     @cdn_host "cdn.mbta.com"
 
-    # runs on mount and when params change?
-    # you can put your event hooks here & move your events
     def mount(_details_data, socket, _base_params), do: socket
 
-    def extract(details_data, %AlertData{} = _alert_data, _params) do
-      %AlertDetailsSlice{details_data | severity: 4}
+    def extract(details_data, _alert, _params) do
+      struct(details_data)
     end
 
-    def transform(
-          details_data,
-          changeset,
-          params,
-          %{
-            assigns: %{
-              form: form,
-              progress: %{name: "details"}
-            }
-          } = socket
-        ) do
-      [_, target | _] = Map.get(params, "_target", [nil, nil])
+    def transform(details_data, changeset, params, socket) do
+      effect_name = effect_from_url_name(details_data.effect_name || "")
 
-      route_type = form[:route_type].value
-      effect_name = form[:effect_name].value
+      severity = get_severity(details_data, effect_name)
+      cause_detail = get_cause_detail(details_data, effect_name)
 
-      severity =
-        if is_nil(details_data.severity) do
-          GetKeyForModeEffect.get_value_of_key(
-            :default_severity,
-            details_data.route_type,
-            effect_name
-          )
-        else
-          details_data.severity
-        end
-
-      cause_detail =
-        if is_nil(details_data.cause_detail) do
-          GetKeyForModeEffect.get_value_of_key(
-            :default_cause,
-            route_type,
-            effect_name
-          )
-        else
-          details_data.cause_detail
-        end
+      [_, target] = Map.get(params, "_target", [nil, nil])
 
       header_sync_toggle =
         if target == "header_text" and details_data.header_sync_toggle == true do
@@ -114,70 +82,43 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
           details_data.description_sync_toggle
         end
 
-      selections = unwrap_selections(socket)
-      selected = selected_objects(selections, form)
+      autotext_data =
+        if header_sync_toggle or description_sync_toggle do
+          selections = unwrap_selections(socket)
+          selected = selected_objects(selections, changeset)
 
-      autotext_input =
-        %{
-          route_type: get_field(changeset, :route_type),
-          effect_name: effect_from_url_name(get_field(changeset, :effect_name)),
-          severity: get_field(changeset, :severity),
-          cause_detail: get_field(changeset, :cause_detail),
-          service_types: get_field(changeset, :service_types),
-          direction: get_field(changeset, :direction),
-          alert_timing: get_field(changeset, :alert_timing),
-          recurrence_days: get_field(changeset, :recurrence_days),
-          start_specifier: get_field(changeset, :active_period_start_specifier),
-          end_specifier: get_field(changeset, :active_period_end_specifier),
-          start_time_specifier: get_field(changeset, :active_period_start_time_specifier),
-          end_time_specifier: get_field(changeset, :active_period_end_time_specifier),
-          start_datetime: get_field(changeset, :active_period_start),
-          end_datetime: get_field(changeset, :active_period_end),
-          start_date: get_field(changeset, :active_period_start_date),
-          end_date: get_field(changeset, :active_period_end_date),
-          start_time: get_field(changeset, :active_period_start_time),
-          end_time: get_field(changeset, :active_period_end_time)
-        }
-        |> Map.merge(selected)
+          autotext_input =
+            translated_details(details_data)
+            |> Map.merge(selected)
 
-      autotext_data = AlertDataToAutoText.build_autotext_data(autotext_input)
+          AlertDataToAutoText.build_autotext_data(autotext_input)
+        else
+          %{}
+        end
+
+      header_text =
+        update_header_text(header_sync_toggle, details_data.header_text, autotext_data)
+
+      description_text =
+        update_description_text(
+          description_sync_toggle,
+          details_data.description_text,
+          autotext_data
+        )
 
       service_effect_text = Templates.build_auto_text(autotext_data, :service_effect_template)
-
-      {header_text, description_text} =
-        if header_sync_toggle || description_sync_toggle do
-          header_text =
-            if header_sync_toggle do
-              Templates.build_auto_text(autotext_data, :header_template)
-            else
-              get_field(changeset, :header_text)
-            end
-
-          description_text =
-            if description_sync_toggle do
-              Templates.build_auto_text(autotext_data, :description_template)
-            else
-              get_field(changeset, :description_text)
-            end
-
-          {header_text, description_text}
-        else
-          {get_field(changeset, :header_text), get_field(changeset, :description_text)}
-        end
 
       changeset
       |> change(%{
         header_sync_toggle: header_sync_toggle,
-        header_text: header_text,
         description_sync_toggle: description_sync_toggle,
+        header_text: header_text,
         description_text: description_text,
         service_effect_text: service_effect_text,
         severity: severity,
         cause_detail: cause_detail
       })
     end
-
-    def transform(_details_data, changeset, _params, _socket), do: changeset
 
     def validate(details_data, changeset, _params, _socket) do
       image_size = details_data.image_url |> get_image_size()
@@ -189,14 +130,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       |> validate_image_fields(image_size)
     end
 
-    def assigns(_details_data, %{assigns: %{form: form}} = socket, _params) do
+    def assigns(_details_data, socket, _params) do
+      form = socket.assigns.form
+      form_data = Map.merge(form.source.data, form.source.changes)
+
       cause_options =
         formatted_causes(
-          form[:route_type].value,
-          form[:combination].value
+          form_data.route_type,
+          form_data.combination
         )
 
-      image_url = form[:image_url].value
+      image_url = form_data.image_url
       image_size = get_image_size(image_url)
       image_path = get_image_path(image_url)
 
@@ -208,6 +152,26 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       })
     end
 
+    defp get_severity(%{severity: nil, route_type: route_type}, effect_name) do
+      GetKeyForModeEffect.get_value_of_key(
+        :default_severity,
+        route_type,
+        effect_name
+      )
+    end
+
+    defp get_severity(%{severity: severity}, _effect_name), do: severity
+
+    defp get_cause_detail(%{cause_detail: nil, route_type: route_type}, effect_name) do
+      GetKeyForModeEffect.get_value_of_key(
+        :default_cause,
+        route_type,
+        effect_name
+      )
+    end
+
+    defp get_cause_detail(%{cause_detail: cause_detail}, _effect_name), do: cause_detail
+
     defp unwrap_selections(socket) do
       case Map.get(socket.assigns, :selections) do
         %AsyncResult{ok?: true} = async_result -> async_result.result
@@ -217,8 +181,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     defp selected_objects(selections, _form) when selections in [%{}, nil], do: %{}
 
-    defp selected_objects(%AccessAffectedServiceSlice.Selections{} = selections, form) do
-      facility_ids = form[:facility_ids].value || []
+    defp selected_objects(%AccessAffectedServiceSlice.Selections{} = selections, changeset) do
+      facility_ids = get_field(changeset, :facility_ids) || []
 
       all_facilities =
         if is_map(selections.available_facilities) do
@@ -231,10 +195,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       %{facilities: facilities}
     end
 
-    defp selected_objects(selections, form) do
-      route_ids = form[:route_ids].value
-      stop_ids = form[:stop_names_and_ids].value
-      trip_ids = form[:trip_ids]
+    defp selected_objects(selections, changeset) do
+      route_ids = get_field(changeset, :route_ids) || []
+      stop_ids = get_field(changeset, :stop_names_and_ids) || []
+      trip_ids = get_field(changeset, :trip_ids) || []
 
       routes =
         (Map.get(selections, :available_routes) || [])
@@ -248,9 +212,26 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       %{routes: routes, stops: stops, schedules: schedules}
     end
 
-    defp translated_details(details_data, effect_name) do
+    defp update_header_text(header_sync_toggle, original_header_text, autotext_data) do
+      if header_sync_toggle == true do
+        Templates.build_auto_text(autotext_data, :header_template)
+      else
+        original_header_text
+      end
+    end
+
+    defp update_description_text(description_sync_toggle, description_text, autotext_data) do
+      if description_sync_toggle == true do
+        Templates.build_auto_text(autotext_data, :description_template)
+      else
+        description_text
+      end
+    end
+
+    defp translated_details(details_data) do
       Map.merge(details_data, %{
-        effect_name: effect_name,
+        effect_name: effect_from_url_name(details_data.effect_name || ""),
+        direction: get_direction(Map.get(details_data, :direction)),
         start_specifier: details_data.active_period_start_specifier,
         end_specifier: details_data.active_period_end_specifier,
         start_time_specifier: details_data.active_period_start_time_specifier,
@@ -366,14 +347,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     defp get_image_path(url) when is_binary(url),
       do: url |> Path.split() |> List.last() |> String.split("?") |> hd
 
-    @spec maybe_include_virtual_green_line([Route.t()], [String.t()]) :: [Route.t()]
-    defp maybe_include_virtual_green_line(routes, route_ids) do
-      if "Green" in route_ids do
-        [RoutesRepo.green_line() | routes]
-      else
-        routes
-      end
-    end
+    defp get_direction("0"), do: [0]
+    defp get_direction("1"), do: [1]
+    defp get_direction("default"), do: [0, 1]
+    defp get_direction(direction), do: direction
   end
 
   def render(assigns) do
@@ -382,131 +359,133 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
         Alert details
       </.h5>
-      <div class="flex flex-col md:flex-row md:w-[50%]">
-        <.select
-          label="Cause"
-          field={@form[:cause_detail]}
-          options={@cause_options}
-          class="shrink min-w-0 md:mr-8"
-          id="cause_input"
-        />
-        <.select
-          label="Severity"
-          field={@form[:severity]}
-          options={@severity_options}
-          class="shrink grow min-w-0"
-          id="severity_input"
-        />
-      </div>
-      <div class="flex flex-col md:flex-row">
-        <div class="flex flex-col md:w-[50%]">
-          <.textarea
-            field={@form[:header_text]}
-            label="Main message"
-            phx-debounce={120}
-            maxlength="255"
-            id="header_input"
-            class={
-              [
-                "w-[100%] min-h-[10rem] z-20 mt-3",
-                if(String.length(@form[:header_text].value || "") >= 255,
-                  do: "!border-error border-b-1",
-                  else: "border-b-0"
-                )
-              ]
-              |> Enum.join(" ")
-            }
-            value={@form[:header_text].value}
+      <div class="flex flex-col gap-4">
+        <div class="flex flex-col md:flex-row md:w-[50%]">
+          <.select
+            label="Cause"
+            field={@form[:cause_detail]}
+            options={@cause_options}
+            class="shrink min-w-0 md:mr-8"
+            id="cause_input"
           />
-          <.textarea_footer
-            character_limit={255}
-            copy_id="#alert_details_header_text"
-            copy_title="Copy main message to Clipboard"
-            field={@form[:header_text]}
+          <.select
+            label="Severity"
+            field={@form[:severity]}
+            options={@severity_options}
+            class="shrink grow min-w-0"
+            id="severity_input"
           />
         </div>
-        <.checkbox
-          class="mt-2 md:ml-4 md:mt-8"
-          field={@form[:header_sync_toggle]}
-          label="Auto refresh"
-        />
-      </div>
-      <div class="flex flex-col md:flex-row">
-        <div class="flex flex-col md:w-[50%]">
-          <.textarea
-            field={@form[:description_text]}
-            label="Supporting information"
-            phx-debounce={120}
-            id="description_input"
-            class={
-              [
-                "w-[100%] min-h-[10rem] z-20 mt-3",
-                if(String.length(@form[:description_text].value || "") >= 3000,
-                  do: "!border-error border-b-1",
-                  else: "border-b-0"
-                )
-              ]
-              |> Enum.join(" ")
-            }
-            maxlength="3000"
-            value={@form[:description_text].value}
-          />
-          <.textarea_footer
-            character_limit={3000}
-            copy_id="#alert_details_description_text"
-            copy_title="Copy supporting information to Clipboard"
-            field={@form[:description_text]}
+        <div class="flex flex-col md:flex-row">
+          <div class="flex flex-col md:w-[50%]">
+            <.textarea
+              field={@form[:header_text]}
+              label="Main message"
+              phx-debounce={120}
+              maxlength="255"
+              id="header_input"
+              class={
+                [
+                  "w-[100%] min-h-[10rem] z-20 mt-3",
+                  if(String.length(@form[:header_text].value || "") >= 255,
+                    do: "!border-error border-b-1",
+                    else: "border-b-0"
+                  )
+                ]
+                |> Enum.join(" ")
+              }
+              value={@form[:header_text].value}
+            />
+            <.textarea_footer
+              character_limit={255}
+              copy_id="#alert_details_header_text"
+              copy_title="Copy main message to Clipboard"
+              field={@form[:header_text]}
+            />
+          </div>
+          <.checkbox
+            class="mt-2 md:ml-4 md:mt-8"
+            field={@form[:header_sync_toggle]}
+            label="Auto refresh"
           />
         </div>
-        <.checkbox
-          class="mt-2 md:ml-4 md:mt-8"
-          field={@form[:description_sync_toggle]}
-          label="Auto refresh"
-        />
-      </div>
-      <.text_input
-        field={@form[:url]}
-        label="URL"
-        phx-debounce={120}
-        id="url_input"
-        class="md:min-w-[50%]"
-      />
-      <div id="image-preview-div">
+        <div class="flex flex-col md:flex-row">
+          <div class="flex flex-col md:w-[50%]">
+            <.textarea
+              field={@form[:description_text]}
+              label="Supporting information"
+              phx-debounce={120}
+              id="description_input"
+              class={
+                [
+                  "w-[100%] min-h-[10rem] z-20 mt-3",
+                  if(String.length(@form[:description_text].value || "") >= 3000,
+                    do: "!border-error border-b-1",
+                    else: "border-b-0"
+                  )
+                ]
+                |> Enum.join(" ")
+              }
+              maxlength="3000"
+              value={@form[:description_text].value}
+            />
+            <.textarea_footer
+              character_limit={3000}
+              copy_id="#alert_details_description_text"
+              copy_title="Copy supporting information to Clipboard"
+              field={@form[:description_text]}
+            />
+          </div>
+          <.checkbox
+            class="mt-2 md:ml-4 md:mt-8"
+            field={@form[:description_sync_toggle]}
+            label="Auto refresh"
+          />
+        </div>
         <.text_input
-          field={@form[:image_url]}
-          label="Image URL"
-          phx-debounce={500}
-          id="image_url_input"
-          class={[
-            "md:min-w-[50%]",
-            if(@form[:image_url].value not in ["", nil] && is_number(@image_size),
-              do: "border-b-0 rounded-none rounded-t"
-            )
-          ]}
+          field={@form[:url]}
+          label="URL"
+          phx-debounce={120}
+          id="url_input"
+          class="md:min-w-[50%]"
         />
-        <div
-          :if={@form[:image_url].value not in ["", nil] && is_number(@image_size)}
-          id="image-information"
-          class="flex flex-col md:flex-row md:w-[50%] text-sm text-text-secondary bg-bg-elevation-3 p-4 rounded-b border border-bg-elevation-6 border-t-0"
-        >
-          <img
-            src={@form[:image_url].value}
-            class={["md:max-h-[8rem] mt-4", if(@form[:image_url].value in ["", nil], do: "hidden")]}
+        <div id="image-preview-div">
+          <.text_input
+            field={@form[:image_url]}
+            label="Image URL"
+            phx-debounce={500}
+            id="image_url_input"
+            class={[
+              "md:min-w-[50%]",
+              if(@form[:image_url].value not in ["", nil] && is_number(@image_size),
+                do: "border-b-0 rounded-none rounded-t"
+              )
+            ]}
           />
-          <div class="flex flex-col justify-center mt-4 md:mt-0 md:ml-4">
-            <p :if={@image_path} class="break-all">{@image_path}</p>
-            <p :if={@image_size}>{"#{@image_size} mB"}</p>
+          <div
+            :if={@form[:image_url].value not in ["", nil] && is_number(@image_size)}
+            id="image-information"
+            class="flex flex-col md:flex-row md:w-[50%] text-sm text-text-secondary bg-bg-elevation-3 p-4 rounded-b border border-bg-elevation-6 border-t-0"
+          >
+            <img
+              src={@form[:image_url].value}
+              class={["md:max-h-[8rem] mt-4", if(@form[:image_url].value in ["", nil], do: "hidden")]}
+            />
+            <div class="flex flex-col justify-center mt-4 md:mt-0 md:ml-4">
+              <p :if={@image_path} class="break-all">{@image_path}</p>
+              <p :if={@image_size}>{"#{@image_size} mB"}</p>
+            </div>
           </div>
         </div>
+        <.text_input
+          field={@form[:image_alternative_text]}
+          label="Image alt text"
+          phx-debounce={120}
+          id="image_alt_text_input"
+          class="md:min-w-[50%]"
+          spellcheck="true"
+        />
       </div>
-      <.text_input
-        field={@form[:image_alternative_text]}
-        label="Image alt text"
-        phx-debounce={120}
-        id="image_alt_text_input"
-        class="md:min-w-[50%]"
-        spellcheck="true"
-      />
       <hr class="mt-8" />
     </div>
     """

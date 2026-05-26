@@ -2,16 +2,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
   use ExUnit.Case, async: false
   use AlertsUIWeb.ConnCase
   import AlertsUI.Support.Factory
-  import Ecto.Changeset
   import Phoenix.LiveViewTest
   import Mock
   import Test.Support.Helpers
-  alias AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice
   alias AlertsUI.Alerts
   alias AlertsUI.Models.EnhancedSchedule
-  alias AlertsUIWeb.FormComponents.AlertDetails
   alias AlertsUIWeb.FormComponents.Helpers.DateTimeFormatters
-  alias AlertsUIWeb.Step
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
@@ -172,9 +168,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
     @tag :logged_in_user
     test "gets default cause detail correctly", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Ferry", "Delay")
+      get_to_submission_page_refactor(view, "Subway", "Single tracking")
 
       assert view
+             |> element("#details_view")
              |> render() =~ ~s(single tracking)
     end
 
@@ -192,6 +189,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
       })
 
       assert view
+             |> element("#details_view")
              |> render() =~ ~s(fog)
     end
   end
@@ -344,22 +342,21 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
       render(view)
 
-      # Mock timerange selections
       view
       |> element("form")
       |> render_change(%{
         "alert_data" => %{
-          "start_specifier" => "start_of_service",
-          "end_specifier" => "end_of_service"
-        }
-      })
-
-      view
-      |> element("form")
-      |> render_change(%{
-        "alert_data" => %{
-          "start_date" => @tomorrows_date |> Date.to_iso8601(),
-          "end_date" => @tomorrows_date |> Date.to_iso8601()
+          "active_period_start_specifier" => "start_of_service",
+          "active_period_end_specifier" => "end_of_service",
+          "active_period_start_date" => Date.to_iso8601(@tomorrows_date),
+          "active_period_end_date" => Date.to_iso8601(@tomorrows_date),
+          "active_period_start" =>
+            @tomorrows_date |> NaiveDateTime.new!(~T[03:00:00]) |> NaiveDateTime.to_iso8601(),
+          "active_period_end" =>
+            @tomorrows_date
+            |> Date.add(1)
+            |> NaiveDateTime.new!(~T[03:00:00])
+            |> NaiveDateTime.to_iso8601()
         }
       })
 
@@ -385,17 +382,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
       |> element("form")
       |> render_change(%{
         "alert_data" => %{
-          "start_specifier" => "start_of_service",
-          "end_specifier" => "end_of_service"
-        }
-      })
-
-      view
-      |> element("form")
-      |> render_change(%{
-        "alert_data" => %{
-          "start_date" => @tomorrows_date |> Date.to_iso8601(),
-          "end_date" => Date.add(@tomorrows_date, 1) |> Date.to_iso8601()
+          "active_period_start_specifier" => "start_of_service",
+          "active_period_end_specifier" => "end_of_service",
+          "active_period_start_date" => @tomorrows_date |> Date.to_iso8601(),
+          "active_period_end_date" => @tomorrows_date |> Date.add(1),
+          "active_period_start" =>
+            @tomorrows_date |> NaiveDateTime.new!(~T[03:00:00]) |> NaiveDateTime.to_iso8601(),
+          "active_period_end" =>
+            @tomorrows_date
+            |> Date.add(2)
+            |> NaiveDateTime.new!(~T[03:00:00])
+            |> NaiveDateTime.to_iso8601()
         }
       })
 
@@ -461,21 +458,24 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
     } do
       with_mocks([
         {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
-        {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
+        {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop, @stop_2] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
+
         get_to_submission_page_refactor(view, "Commuter Rail", "Suspension")
+
+        render_async(view)
 
         view
         |> element("form")
         |> render_change(%{
-          alert_data: %{header_sync_toggle: false, header_text: "my custom text"}
+          alert_data: %{route_ids: ["CR-Worcester"]}
         })
 
         view
         |> element("form")
         |> render_change(%{
-          "alert_data" => %{"route_ids" => ["CR-Worcester"]}
+          alert_data: %{header_sync_toggle: false, header_text: "my custom text"}
         })
 
         assert view
@@ -677,12 +677,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
         view
         |> element("form")
         |> render_change(%{
-          "alert_data" => %{"direction" => "1"}
+          "alert_data" => %{"route_ids" => ["CR-Worcester"], "direction" => "1"}
         })
 
         assert view
                |> element("#alert_data_description_text")
-               |> render() =~
+               |> render_async() =~
                  "Affected direction: eastbound"
 
         # Mock affected service selections
@@ -737,7 +737,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
         {StopsRepo, [],
          [
            by_route_type: fn _route_type, _ -> [@stop, @stop_2, @stop_3] end,
-           by_route: fn _, _ -> [@stop, @stop_2, @stop_3] end
+           by_route: fn _, _, _ -> [@stop, @stop_2, @stop_3] end
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
@@ -761,8 +761,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
         |> element("form")
         |> render_change(%{
           "alert_data" => %{
-            "start_specifier" => "custom",
-            "end_specifier" => "custom"
+            "active_period_start_specifier" => "custom",
+            "active_period_end_specifier" => "custom"
           }
         })
 
@@ -803,39 +803,20 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
         get_to_submission_page_refactor(view, "Facility", "Elevator closure")
 
-        render_async(view)
-        open_browser(view)
-        # Mock affected service selections
-        view
-        |> element("form")
-        |> render_change(%{
-          alert_data: %{single_facility_id: @facility.id}
-        })
-
         # Mock timerange selections
         view
         |> element("form")
         |> render_change(%{
           "alert_data" => %{
-            "start_specifier" => "custom",
-            "end_specifier" => "custom"
+            "facility_ids" => [@facility.id],
+            "cause_detail" => "ICE_IN_HARBOR",
+            "active_period_start_specifier" => "custom",
+            "active_period_end_specifier" => "custom",
+            "active_period_start_date" => Date.to_iso8601(@tomorrows_date),
+            "active_period_end_date" => Date.to_iso8601(@tomorrows_date),
+            "active_period_start" => NaiveDateTime.to_iso8601(@start_time),
+            "active_period_end" => NaiveDateTime.to_iso8601(@end_time)
           }
-        })
-
-        view
-        |> element("form")
-        |> render_change(%{
-          "alert_data" => %{
-            "start" => NaiveDateTime.to_iso8601(@start_time),
-            "end" => NaiveDateTime.to_iso8601(@end_time)
-          }
-        })
-
-        # Mock alert details selections
-        view
-        |> element("form")
-        |> render_change(%{
-          alert_data: %{cause_detail: "ICE_IN_HARBOR"}
         })
 
         assert view
@@ -864,37 +845,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
       render_async(view)
 
-      # Mock affected service selections
-      view
-      |> element("form")
-      |> render_change(%{
-        alert_data: %{service_types: [1, 4]}
-      })
-
-      # Mock timerange selections
       view
       |> element("form")
       |> render_change(%{
         "alert_data" => %{
-          "start_specifier" => "custom",
-          "end_specifier" => "custom"
+          "service_types" => [1, 4],
+          "cause_detail" => "ICE_IN_HARBOR",
+          "active_period_start_specifier" => "custom",
+          "active_period_end_specifier" => "custom",
+          "active_period_start" => NaiveDateTime.to_iso8601(@start_time),
+          "active_period_end" => NaiveDateTime.to_iso8601(@end_time)
         }
-      })
-
-      view
-      |> element("form")
-      |> render_change(%{
-        "alert_data" => %{
-          "start" => NaiveDateTime.to_iso8601(@start_time),
-          "end" => NaiveDateTime.to_iso8601(@end_time)
-        }
-      })
-
-      # Mock alert details selections
-      view
-      |> element("form")
-      |> render_change(%{
-        alert_data: %{cause_detail: "ICE_IN_HARBOR"}
       })
 
       assert view
@@ -980,7 +941,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
         })
 
         assert view
-               |> element("#details_view")
+               |> element("#alert_data_header_text")
                |> render() =~
                  "South Station (outgoing) is closed beginning Thu, Oct 19 at 8:01 PM."
       end

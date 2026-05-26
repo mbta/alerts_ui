@@ -29,7 +29,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     :trip_ids,
     :trip_search_term
   ]
- 
+
   defmodule Selections do
     import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
       only: [get_single_route_effect_names: 0]

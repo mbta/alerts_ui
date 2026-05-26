@@ -47,7 +47,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Path do
     end
   end
 
-  #TODO not really sure we should keep this in but the tests weren't filling this in correctly. Re-evaluate.
+  # TODO not really sure we should keep this in but the tests weren't filling this in correctly. Re-evaluate.
   def path_with_route_type_and_effect_name(%{path_route_type: nil}, _), do: ~p"/alerts/mono/new"
 
   def path_with_route_type_and_effect_name(
