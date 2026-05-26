@@ -55,3 +55,4 @@ assets/outputs/alerts_feed*.pb
 *.swo
 
 .claude/*
+.playwright-mcp/*

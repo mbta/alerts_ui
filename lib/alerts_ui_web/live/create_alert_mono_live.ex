@@ -183,8 +183,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   @impl true
   def handle_event("cancel", _params, socket) do
-    # return to the alert list view, dismissing the form and modal
-    {:noreply, socket}
+    {:noreply,
+     push_navigate(socket,
+       to: return_to(socket.assigns[:return_to] || "/alerts")
+     )}
   end
 
   @impl true

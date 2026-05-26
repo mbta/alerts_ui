@@ -11,6 +11,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.ReviewModal do
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
     only: [humanize_effect_name: 2, display_alert_timing: 1]
 
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Value,
+    only: [blank?: 1]
+
   import PhoenixHTMLHelpers.Format, only: [text_to_html: 2]
 
   alias AlertsUI.ActiveStatus
@@ -175,7 +178,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.ReviewModal do
           <div>
             <span class="block pb-4">
               <p class="font-bold">Supporting information</p>
-              <%= if @alert_data.description_text do %>
+              <%= if not blank?(@alert_data.description_text) do %>
                 {text_to_html(@alert_data.description_text,
                   attributes: [class: "pb-4 last-of-type:pb-0"]
                 )}
@@ -184,7 +187,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.ReviewModal do
               <% end %>
             </span>
 
-            <span :if={@alert_data.url} class="block pb-4 break-all">
+            <span :if={not blank?(@alert_data.url)} class="block pb-4 break-all">
               <p class="font-bold url_label">URL</p>
               <a
                 target="_blank"
@@ -232,7 +235,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.ReviewModal do
           </div>
 
           <%!-- Image --%>
-          <%= if @alert_data.image_url do %>
+          <%= if not blank?(@alert_data.image_url) do %>
             <p class="font-bold">Image</p>
             <div class="pb-4 break-all">
               <a

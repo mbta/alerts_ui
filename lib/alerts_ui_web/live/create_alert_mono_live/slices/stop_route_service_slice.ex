@@ -107,7 +107,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
               route_ids -> route_ids
             end
 
-          modal_route_id -> [modal_route_id]
+          modal_route_id ->
+            [modal_route_id]
         end
 
       selected_stops =
@@ -118,9 +119,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
         end
 
       assign_async(socket, :selections, fn ->
-        available_filter_routes = CreateAlertLive.get_routes(route_type) |> IO.inspect(label: "AFR")
-        available_stops = CreateAlertLive.get_stops_for_stop_route(stop_route_ids, route_type) |> IO.inspect(label: "AS")
-        available_routes = CreateAlertLive.get_routes_by_stop(stop_ids, route_type) |> IO.inspect(label: "AR")
+        available_filter_routes =
+          CreateAlertLive.get_routes(route_type) |> IO.inspect(label: "AFR")
+
+        available_stops =
+          CreateAlertLive.get_stops_for_stop_route(stop_route_ids, route_type)
+          |> IO.inspect(label: "AS")
+
+        available_routes =
+          CreateAlertLive.get_routes_by_stop(stop_ids, route_type) |> IO.inspect(label: "AR")
 
         modal_route_id_options =
           modal_route_id_options(
@@ -179,6 +186,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
       case Map.get(socket.assigns, :selections) do
         nil ->
           assign(socket, :selections, %Selections{})
+
         _ ->
           socket
       end

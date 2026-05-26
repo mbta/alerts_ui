@@ -351,11 +351,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   end
 
   def default_selections(selections \\ %Selections{}) do
-    %{selections|service_dates: service_dates(), loading: true, today: today()}
+    %{selections | service_dates: service_dates(), loading: true, today: today()}
   end
 
   def service_dates() do
-    (0..6)
+    0..6
     |> Enum.to_list()
     |> Enum.map(fn i ->
       DateTime.now!("America/New_York")
