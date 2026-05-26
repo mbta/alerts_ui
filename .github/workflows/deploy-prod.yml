@@ -6,6 +6,7 @@ on:
     types:
       - released
 
+permissions: {}
 
 jobs:
   deploy:
@@ -13,4 +14,10 @@ jobs:
     uses: ./.github/workflows/deploy-base.yml
     with:
       environment: prod
-    secrets: inherit
+    permissions:
+      id-token: write
+      contents: read
+    secrets: 
+      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+      DOCKER_REPO: ${{ secrets.DOCKER_REPO }}
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
