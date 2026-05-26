@@ -368,11 +368,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     split_names_and_ids =
       get_field(changeset, :stop_names_and_ids)
       |> Enum.reduce(%{stop_names: [], stop_ids: []}, fn name_and_id, acc ->
-        [stop_name, stop_id] = String.split(name_and_id, "|")
-        stop_names = [stop_name | acc[:stop_names]]
-        stop_ids = [stop_id | acc[:stop_ids]]
+        case name_and_id do
+          "default" ->
+            acc
 
-        %{stop_names: stop_names, stop_ids: stop_ids}
+          _ ->
+            [stop_name, stop_id] = String.split(name_and_id, "|")
+            stop_names = [stop_name | acc[:stop_names]]
+            stop_ids = [stop_id | acc[:stop_ids]]
+
+            %{stop_names: stop_names, stop_ids: stop_ids}
+        end
       end)
 
     cast(changeset, split_names_and_ids, [:stop_names, :stop_ids])
