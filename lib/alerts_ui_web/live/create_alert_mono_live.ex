@@ -323,10 +323,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       {:ok, socket} ->
         if socket.assigns.submitting? do
           effect_name = socket.assigns.form[:effect_name].value
+          path_route_type = socket.assigns[:path_route_type] || path_route_type_from_socket(socket)
 
           path =
             path_with_route_type_and_effect_name(
-              socket.assigns,
+              %{socket.assigns | path_route_type: path_route_type},
               effect_name
             ) <> "?review=true"
 
