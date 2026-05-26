@@ -90,7 +90,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :stop_names_and_ids, {:array, :string}
     field :stop_search_term, :string
     field :trip_ids, {:array, :string}
-    field :trip_information_by_id, {:array, :string}
+    field :trip_information_by_id, {:map, :map}
     field :trip_search_term, :string
     field :service_types, {:array, :integer}
 
@@ -168,7 +168,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
           original_route_selections: [String.t()] | nil,
           original_stop_selections: [String.t()] | nil,
           original_trip_selections: [String.t()] | nil,
-          trip_information_by_id: [String.t()] | nil,
+          trip_information_by_id: map() | nil,
           service_types: [integer()] | nil,
           # timing
           active_period_end: NaiveDateTime.t() | nil,
