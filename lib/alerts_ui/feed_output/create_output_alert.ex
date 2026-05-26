@@ -7,14 +7,16 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
 
   @spec build_alert(Alert.t(), DateTime.t()) :: %{id: String.t(), alert: map()}
   def build_alert(alert, current_time \\ DateTime.utc_now()) do
+    # cause_detail and effect_detail should be translated_string types according to GTFS spec
+    # but in the current feed they are simple strings
     %{
       id: alert.alert_id,
       alert:
         %{
           effect: alert.effect,
-          effect_detail: alert.effect_detail |> build_translated_string,
+          effect_detail: alert.effect_detail,
           cause: alert.cause || :UNKNOWN_CAUSE,
-          cause_detail: (alert.cause_detail || "UNKNOWN_CAUSE") |> build_translated_string,
+          cause_detail: alert.cause_detail || "UNKNOWN_CAUSE",
           header_text: alert.header_text |> build_translated_string,
           description_text: alert.description_text |> build_translated_string,
           banner_text: alert.banner_text |> build_translated_string,
