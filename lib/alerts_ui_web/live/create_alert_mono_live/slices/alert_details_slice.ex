@@ -1,12 +1,13 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}
-  alias AlertsUI.Models.{Cause, EnhancedSchedule, SeverityLevel}
-  alias MBTAV3API.Routes.Repo, as: RoutesRepo
+  alias AlertsUI.Models.{Cause, SeverityLevel}
+  alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
   use AlertsUIWeb, :html
 
   defstruct [
+    :effect_name,
+    :route_type,
     # time range
     :active_period_start_specifier,
     :active_period_end_specifier,
@@ -21,6 +22,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     :alert_timing,
     :recurrence_days,
     # affected service
+    :severity,
+    :cause_detail,
     direction: [],
     route_ids: [],
     stop_ids: [],
@@ -31,22 +34,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     header_sync_toggle: true,
     description_text: "",
     description_sync_toggle: true,
-    cause_detail: "",
-    severity: 4,
+    service_effect_text: "",
     image_url: "",
     url: ""
   ]
 
   defimpl Slice, for: __MODULE__ do
     import Ecto.Changeset
-
     import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData, only: [clear_my_errors: 2]
 
     alias Phoenix.LiveView.AsyncResult
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice
-    alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice
-    alias AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice
 
     @severity_options SeverityLevel.severity_tuples()
                       |> Enum.map(fn {desc, severity, _level} -> {desc, severity} end)
@@ -57,26 +56,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     def mount(_details_data, socket, _base_params), do: socket
 
-    def extract(details_data, %AlertData{} = _alert_data, _params) do
-      %AlertDetailsSlice{details_data | severity: 4}
+    def extract(details_data, _alert, _params) do
+      struct(details_data)
     end
 
-    def transform(
-          details_data,
-          changeset,
-          params,
-          %{
-            assigns: %{
-              form: form,
-              progress: %{name: "details"}
-            }
-          } = socket
-        ) do
-      [_, target | _] = Map.get(params, "_target", [nil, nil])
-      # TODO how to get "selected x"
-      # do this inside the assigns instead :)
-      # effect_name = effect_from_url_name(form[:effect_name].value)
-      # autotext_data = AlertDataToAutoText.build_autotext_data(translated_details(details_data, effect_name))
+    def transform(details_data, changeset, params, socket) do
+      effect_name = effect_from_url_name(details_data.effect_name || "")
+
+      severity = get_severity(details_data, effect_name)
+      cause_detail = get_cause_detail(details_data, effect_name)
+
+      [_, target] = Map.get(params, "_target", [nil, nil])
+
       header_sync_toggle =
         if target == "header_text" and details_data.header_sync_toggle == true do
           false
@@ -91,68 +82,43 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
           details_data.description_sync_toggle
         end
 
-      selections = unwrap_selections(socket)
-      selected = selected_objects(selections, changeset)
+      autotext_data =
+        if header_sync_toggle or description_sync_toggle do
+          selections = unwrap_selections(socket)
+          selected = selected_objects(selections, changeset)
 
-      autotext_input =
-        %{
-          route_type: get_field(changeset, :route_type),
-          effect_name: effect_from_url_name(get_field(changeset, :effect_name)),
-          severity: get_field(changeset, :severity),
-          cause_detail: get_field(changeset, :cause_detail),
-          service_types: get_field(changeset, :service_types),
-          direction: get_field(changeset, :direction),
-          alert_timing: get_field(changeset, :alert_timing),
-          recurrence_days: get_field(changeset, :recurrence_days),
-          start_specifier: get_field(changeset, :active_period_start_specifier),
-          end_specifier: get_field(changeset, :active_period_end_specifier),
-          start_time_specifier: get_field(changeset, :active_period_start_time_specifier),
-          end_time_specifier: get_field(changeset, :active_period_end_time_specifier),
-          start_datetime: get_field(changeset, :active_period_start),
-          end_datetime: get_field(changeset, :active_period_end),
-          start_date: get_field(changeset, :active_period_start_date),
-          end_date: get_field(changeset, :active_period_end_date),
-          start_time: get_field(changeset, :active_period_start_time),
-          end_time: get_field(changeset, :active_period_end_time)
-        }
-        |> Map.merge(selected)
+          autotext_input =
+            translated_details(details_data)
+            |> Map.merge(selected)
 
-      autotext_data = AlertDataToAutoText.build_autotext_data(autotext_input)
+          AlertDataToAutoText.build_autotext_data(autotext_input)
+        else
+          %{}
+        end
+
+      header_text =
+        update_header_text(header_sync_toggle, details_data.header_text, autotext_data)
+
+      description_text =
+        update_description_text(
+          description_sync_toggle,
+          details_data.description_text,
+          autotext_data
+        )
 
       service_effect_text = Templates.build_auto_text(autotext_data, :service_effect_template)
-
-      {header_text, description_text} =
-        if header_sync_toggle || description_sync_toggle do
-          header_text =
-            if header_sync_toggle do
-              Templates.build_auto_text(autotext_data, :header_template)
-            else
-              get_field(changeset, :header_text)
-            end
-
-          description_text =
-            if description_sync_toggle do
-              Templates.build_auto_text(autotext_data, :description_template)
-            else
-              get_field(changeset, :description_text)
-            end
-
-          {header_text, description_text}
-        else
-          {get_field(changeset, :header_text), get_field(changeset, :description_text)}
-        end
 
       changeset
       |> change(%{
         header_sync_toggle: header_sync_toggle,
-        header_text: header_text,
         description_sync_toggle: description_sync_toggle,
+        header_text: header_text,
         description_text: description_text,
-        service_effect_text: service_effect_text
+        service_effect_text: service_effect_text,
+        severity: severity,
+        cause_detail: cause_detail
       })
     end
-
-    def transform(_details_data, changeset, _params, _socket), do: changeset
 
     def validate(details_data, changeset, _params, _socket) do
       image_size = details_data.image_url |> get_image_size()
@@ -166,96 +132,106 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     def assigns(_details_data, socket, _params) do
       form = socket.assigns.form
+      form_data = Map.merge(form.source.data, form.source.changes)
 
       cause_options =
         formatted_causes(
-          get_field(form.source, :route_type),
-          get_field(form.source, :combination)
+          form_data.route_type,
+          form_data.combination
         )
 
-      image_url = get_field(form.source, :image_url) || ""
+      image_url = form_data.image_url
       image_size = get_image_size(image_url)
       image_path = get_image_path(image_url)
 
-      assign(socket,
+      assign(socket, %{
         cause_options: cause_options,
         severity_options: @severity_options,
         image_size: image_size,
         image_path: image_path
+      })
+    end
+
+    defp get_severity(%{severity: nil, route_type: route_type}, effect_name) do
+      GetKeyForModeEffect.get_value_of_key(
+        :default_severity,
+        route_type,
+        effect_name
       )
     end
 
+    defp get_severity(%{severity: severity}, _effect_name), do: severity
+
+    defp get_cause_detail(%{cause_detail: nil, route_type: route_type}, effect_name) do
+      GetKeyForModeEffect.get_value_of_key(
+        :default_cause,
+        route_type,
+        effect_name
+      )
+    end
+
+    defp get_cause_detail(%{cause_detail: cause_detail}, _effect_name), do: cause_detail
+
     defp unwrap_selections(socket) do
       case Map.get(socket.assigns, :selections) do
-        %AsyncResult{ok?: true} = ar -> ar.result
-        selections when is_struct(selections) -> selections
-        _ -> nil
+        %AsyncResult{ok?: true} = async_result -> async_result.result
+        selections -> selections
       end
     end
 
-    defp selected_objects(%AffectedServiceSlice.Selections{} = s, changeset) do
-      route_ids = get_field(changeset, :route_ids) || []
-      stop_ids = get_field(changeset, :stop_names_and_ids) || []
-      trip_ids = get_field(changeset, :trip_ids) || []
+    defp selected_objects(selections, _form) when selections in [%{}, nil], do: %{}
 
-      routes =
-        (s.available_routes || [])
-        |> Enum.filter(&(&1.id in route_ids))
-        |> maybe_include_virtual_green_line(route_ids)
-
-      stops = Enum.filter(s.available_stops || [], &(&1.id in stop_ids))
-      schedules = Enum.filter(s.available_schedules || [], &(&1.trip.id in trip_ids))
-
-      %{routes: routes, stops: stops, schedules: schedules}
-    end
-
-    defp selected_objects(%StopRouteServiceSlice.Selections{} = s, changeset) do
-      route_ids = get_field(changeset, :route_ids) || []
-      stop_ids = get_field(changeset, :stop_ids) || []
-
-      routes =
-        (s.available_routes || [])
-        |> Enum.filter(&(&1.id in route_ids))
-        |> maybe_include_virtual_green_line(route_ids)
-
-      stops = Enum.filter(s.available_stops || [], &(&1.id in stop_ids))
-
-      %{routes: routes, stops: stops}
-    end
-
-    defp selected_objects(%AccessAffectedServiceSlice.Selections{} = s, changeset) do
+    defp selected_objects(%AccessAffectedServiceSlice.Selections{} = selections, changeset) do
       facility_ids = get_field(changeset, :facility_ids) || []
 
       all_facilities =
-        if is_map(s.available_facilities),
-          do: Map.get(s.available_facilities, :facilities, []),
-          else: []
+        if is_map(selections.available_facilities) do
+          Map.get(selections.available_facilities, :facilities, [])
+        else
+          []
+        end
 
       facilities = Enum.filter(all_facilities, &(&1.id in facility_ids))
       %{facilities: facilities}
     end
 
-    defp selected_objects(_selections, _form), do: %{}
+    defp selected_objects(selections, changeset) do
+      route_ids = get_field(changeset, :route_ids) || []
+      stop_ids = get_field(changeset, :stop_names_and_ids) || []
+      trip_ids = get_field(changeset, :trip_ids) || []
 
-    defp update_header_text(header_sync_toggle, details_data, autotext_data) do
+      routes =
+        (Map.get(selections, :available_routes) || [])
+        |> Enum.filter(&(&1.id in route_ids))
+
+      stops = Enum.filter(selections.available_stops, &(&1.id in stop_ids))
+
+      schedules =
+        Enum.filter(Map.get(selections, :available_schedules, []), &(&1.trip.id in trip_ids))
+
+      %{routes: routes, stops: stops, schedules: schedules}
+    end
+
+    defp update_header_text(header_sync_toggle, original_header_text, autotext_data) do
       if header_sync_toggle == true do
         Templates.build_auto_text(autotext_data, :header_template)
       else
-        Map.get(details_data, :header_text)
+        original_header_text
       end
     end
 
-    defp update_description_text(description_sync_toggle, details_data, autotext_data) do
+    defp update_description_text(description_sync_toggle, description_text, autotext_data) do
       if description_sync_toggle == true do
         Templates.build_auto_text(autotext_data, :description_template)
       else
-        Map.get(details_data, :description_text)
+        description_text
       end
     end
 
-    defp translated_details(details_data, effect_name) do
+    defp translated_details(details_data) do
       Map.merge(details_data, %{
-        effect_name: effect_name,
+        effect_name: effect_from_url_name(details_data.effect_name || ""),
+        direction: get_direction(Map.get(details_data, :direction)),
         start_specifier: details_data.active_period_start_specifier,
         end_specifier: details_data.active_period_end_specifier,
         start_time_specifier: details_data.active_period_start_time_specifier,
@@ -371,14 +347,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     defp get_image_path(url) when is_binary(url),
       do: url |> Path.split() |> List.last() |> String.split("?") |> hd
 
-    @spec maybe_include_virtual_green_line([Route.t()], [String.t()]) :: [Route.t()]
-    defp maybe_include_virtual_green_line(routes, route_ids) do
-      if "Green" in route_ids do
-        [RoutesRepo.green_line() | routes]
-      else
-        routes
-      end
-    end
+    defp get_direction("0"), do: [0]
+    defp get_direction("1"), do: [1]
+    defp get_direction("default"), do: [0, 1]
+    defp get_direction(direction), do: direction
   end
 
   def render(assigns) do
