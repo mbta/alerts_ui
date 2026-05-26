@@ -103,17 +103,28 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   @impl true
   def handle_event("move_progress", %{"value" => "route_type_and_effect"}, socket) do
-    cleared_source =
-      change(socket.assigns.form.source, %{route_type: nil, effect_name: nil, combination: nil})
+    cleared_source = change(
+      socket.assigns.form.source,
+      %{
+        route_type: nil,
+        effect_name: nil,
+        combination: nil,
+        route_ids: nil,
+        stop_ids: nil,
+        trip_ids: nil,
+        facility_ids: nil
+      }
+    )
 
     socket =
       assign(
         socket,
         %{
+          form: Phoenix.Component.to_form(cleared_source),
           progress: get_step_by_name("route_type_and_effect"),
           path_route_type: nil,
           path_effect_name: nil,
-          form: Phoenix.Component.to_form(cleared_source)
+          selections: nil
         }
       )
 
