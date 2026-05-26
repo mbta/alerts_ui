@@ -56,3 +56,4 @@ assets/outputs/alerts_feed*.pb
 
 # LLMs
 .claude
+.playwright-mcp

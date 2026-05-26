@@ -25,6 +25,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
       case params do
         %{"alert_data" => _alert_data_params} ->
           changeset
+          |> ReminderTimesSlice.materialize_reminder_times()
           |> cast_embed(:reminder_times,
             sort_param: :reminder_sort,
             drop_param: :reminder_drop,
@@ -47,6 +48,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
         notification_end: Map.get(%{}, :notification_period_end)
       })
     end
+  end
+
+  def materialize_reminder_times(changeset) do
+    current = get_field(changeset, :reminder_times, [])
+    new_data = %{changeset.data | reminder_times: current}
+    %{changeset | data: new_data, changes: Map.delete(changeset.changes, :reminder_times)}
   end
 
   def reminder_time_changeset(source, params) do

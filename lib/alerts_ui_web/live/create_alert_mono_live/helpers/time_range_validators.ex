@@ -2,8 +2,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
   import Ecto.Changeset
 
   def validate_required_fields(changeset) do
-    case get_field(changeset, :alert_timing) do
-      :"one-time" ->
+    timing = get_field(changeset, :alert_timing)
+
+    cond do
+      timing in [:"one-time", "one-time"] ->
         changeset
         |> validate_required(
           required_one_time_start_fields(get_field(changeset, :active_period_start_specifier)),
@@ -14,7 +16,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
           message: "Enter a valid time range end"
         )
 
-      :recurring ->
+      timing in [:recurring, "recurring"] ->
         changeset
         |> validate_required(
           required_recurring_time_fields(
@@ -39,7 +41,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
           message: "Enter a valid end date"
         )
 
-      _ ->
+      true ->
         changeset
     end
   end
@@ -102,13 +104,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
     else
       now = NaiveDateTime.local_now()
       specifier = get_field(changeset, :active_period_start_specifier)
+      timing = get_field(changeset, :alert_timing)
 
-      case get_field(changeset, :alert_timing) do
-        "one-time" ->
+      cond do
+        timing in [:"one-time", "one-time"] ->
           changeset
           |> validate_change(:active_period_start, fn :active_period_start, active_period_start ->
-            time_in_past? = NaiveDateTime.diff(now, active_period_start, :minute) > 1
-            start_error(time_in_past?, :"one-time", specifier)
+            if specifier == :custom do
+              time_in_past? = NaiveDateTime.diff(now, active_period_start, :minute) > 1
+              start_error(time_in_past?, :"one-time", specifier)
+            else
+              []
+            end
           end)
           |> validate_change(
             :active_period_start_date,
@@ -128,7 +135,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
             end
           )
 
-        "recurring" ->
+        timing in [:recurring, "recurring"] ->
           start_date = get_field(changeset, :active_period_start_date)
           start_time = get_field(changeset, :active_period_start_time)
 
@@ -147,39 +154,45 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
             changeset
           end
 
-        _ ->
+        true ->
           changeset
       end
     end
   end
 
   def validate_at_least_one_recurrence(changeset) do
-    case get_field(changeset, :alert_timing) do
-      :recurring ->
+    timing = get_field(changeset, :alert_timing)
+
+    cond do
+      timing in [:recurring, "recurring"] ->
         validate_length(changeset, :recurrence_days,
           min: 1,
           message: "Select one or more days for alert to recur"
         )
 
-      _ ->
+      true ->
         changeset
     end
   end
 
-  def validate_recurs_on_today(changeset) do
-    case get_field(changeset, :alert_timing) do
-      :recurring ->
+  def validate_start_date_matches_weekday(changeset) do
+    timing = get_field(changeset, :alert_timing)
+
+    cond do
+      timing in [:recurring, "recurring"] ->
         validate_change(
           changeset,
           :active_period_start_date,
           fn :active_period_start_date, start_date ->
-            recurrence_days = get_field(changeset, :recurrence_days)
+            recurrence_days =
+              get_field(changeset, :recurrence_days)
+
             specifier = get_field(changeset, :active_period_start_specifier)
             validate_start_date_matches_weekday(start_date, recurrence_days, specifier)
           end
         )
 
-      _ ->
+      true ->
         changeset
     end
   end
@@ -222,17 +235,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
     current_time = NaiveDateTime.local_now()
 
     naive_start =
-      case get_field(changeset, :alert_timing) do
-        :"one-time" ->
-          get_field(changeset, :active_period_start)
+      if get_field(changeset, :alert_timing) in [:"one-time", "one-time"] do
+        get_field(changeset, :active_period_start)
+      else
+        start_date = get_field(changeset, :active_period_start_date)
+        start_time = get_field(changeset, :active_period_start_time)
 
-        _ ->
-          start_date = get_field(changeset, :active_period_start_date)
-          start_time = get_field(changeset, :active_period_start_time)
-
-          if start_date && start_time,
-            do: NaiveDateTime.new!(start_date, start_time),
-            else: nil
+        if start_date && start_time,
+          do: NaiveDateTime.new!(start_date, start_time),
+          else: nil
       end
 
     if naive_start do
