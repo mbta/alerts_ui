@@ -13,6 +13,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   import Phoenix.LiveView, only: [assign_async: 3]
   import Ecto.Changeset, only: [cast: 3, get_field: 2, change: 2]
 
+  alias Phoenix.LiveView.AsyncResult
+
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
     only: [get_single_route_effect_names: 0]
 
@@ -65,8 +67,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       service_data
     end
 
-    def transform(_service_data, changeset, _params, _socket) do
-      AffectedServiceSlice.transform_changeset(changeset)
+    def transform(_service_data, changeset, _params, socket) do
+      changeset
+      |> AffectedServiceSlice.transform_changeset()
+      |> AffectedServiceSlice.build_trip_information(socket)
     end
 
     def validate(_service_data, changeset, _params, _socket) do
@@ -83,6 +87,37 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       socket
       |> assign(:selections, selections)
       |> AffectedServiceSlice.async_assign_selections(params)
+    end
+  end
+
+  def build_trip_information(changeset, socket) do
+    available_schedules = available_schedules_from_socket(socket)
+    trip_ids = get_field(changeset, :trip_ids) || []
+    route_type = get_field(changeset, :route_type)
+    direction = get_field(changeset, :direction)
+
+    trip_info =
+      available_schedules
+      |> Stream.filter(&(&1.trip.id in trip_ids))
+      |> Stream.filter(fn s ->
+        direction in [nil, "default", s.trip.direction_id, Integer.to_string(s.trip.direction_id)]
+      end)
+      |> Enum.reduce(%{}, fn s, acc ->
+        Map.put(acc, s.trip.id, %{
+          direction_id: s.trip.direction_id,
+          route_id: s.route.id,
+          trip_name: SelectFormatter.name_for_option(s, route_type)
+        })
+      end)
+
+    cast(changeset, %{trip_information_by_id: trip_info}, [:trip_information_by_id])
+  end
+
+  defp available_schedules_from_socket(socket) do
+    case Map.get(socket.assigns, :selections) do
+      %AsyncResult{ok?: true, result: %Selections{available_schedules: schedules}} -> schedules || []
+      %Selections{available_schedules: schedules} -> schedules || []
+      _ -> []
     end
   end
 
