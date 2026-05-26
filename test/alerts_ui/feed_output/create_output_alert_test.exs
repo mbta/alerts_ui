@@ -102,23 +102,9 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
                id: "524485",
                alert: %{
                  effect: :OTHER_EFFECT,
-                 effect_detail: %{
-                   translation: [
-                     %{
-                       text: "DELAY",
-                       language: "en"
-                     }
-                   ]
-                 },
+                 effect_detail: "DELAY",
                  cause: :UNKNOWN_CAUSE,
-                 cause_detail: %{
-                   translation: [
-                     %{
-                       text: "UNKNOWN_CAUSE",
-                       language: "en"
-                     }
-                   ]
-                 },
+                 cause_detail: "UNKNOWN_CAUSE",
                  header_text: %{
                    translation: [
                      %{

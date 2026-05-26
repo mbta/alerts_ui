@@ -9,23 +9,9 @@
             "id": "524485",
             "alert": {
                 "effect": "OTHER_EFFECT",
-                "effect_detail": {
-                    "translation": [
-                        {
-                            "text": "DELAY",
-                            "language": "en"
-                        }
-                    ]
-                },
+                "effect_detail": "DELAY",
                 "cause": "UNKNOWN_CAUSE",
-                "cause_detail": {
-                    "translation": [
-                        {
-                            "text": "UNKNOWN_CAUSE",
-                            "language": "en"
-                        }
-                    ]
-                },
+                "cause_detail": "UNKNOWN_CAUSE",
                 "header_text": {
                     "translation": [
                         {
@@ -146,23 +132,9 @@
             "id": "525019",
             "alert": {
                 "effect": "UNKNOWN_EFFECT",
-                "effect_detail": {
-                    "translation": [
-                        {
-                            "text": "STATION_ISSUE",
-                            "language": "en"
-                        }
-                    ]
-                },
+                "effect_detail": "STATION_ISSUE",
                 "cause": "MAINTENANCE",
-                "cause_detail": {
-                    "translation": [
-                        {
-                            "text": "MAINTENANCE",
-                            "language": "en"
-                        }
-                    ]
-                },
+                "cause_detail": "MAINTENANCE",
                 "header_text": {
                     "translation": [
                         {
