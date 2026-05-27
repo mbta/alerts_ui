@@ -77,19 +77,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
           details_data.description_sync_toggle
         end
 
+      selected = socket |> unwrap_selections() |> selected_objects(changeset)
+
       autotext_data =
-        if header_sync_toggle or description_sync_toggle do
-          selections = unwrap_selections(socket)
-          selected = selected_objects(selections, changeset)
-
-          autotext_input =
-            translated_details(details_data)
-            |> Map.merge(selected)
-
-          AlertDataToAutoText.build_autotext_data(autotext_input)
-        else
-          %{}
-        end
+        details_data
+        |> translated_details()
+        |> Map.merge(selected)
+        |> AlertDataToAutoText.build_autotext_data()
 
       header_text =
         update_header_text(header_sync_toggle, details_data.header_text, autotext_data)
@@ -192,17 +186,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     defp selected_objects(selections, changeset) do
       route_ids = get_field(changeset, :route_ids) || []
-      stop_ids = get_field(changeset, :stop_names_and_ids) || []
+      stop_ids = get_field(changeset, :stop_ids) || []
       trip_ids = get_field(changeset, :trip_ids) || []
 
-      routes =
-        (Map.get(selections, :available_routes) || [])
-        |> Enum.filter(&(&1.id in route_ids))
+      routes = Enum.filter(selections.available_routes || [], &(&1.id in route_ids))
 
       stops = Enum.filter(selections.available_stops || [], &(&1.id in stop_ids))
 
       schedules =
-        Enum.filter(Map.get(selections, :available_schedules, []), &(&1.trip.id in trip_ids))
+        Enum.filter(Map.get(selections, :available_schedules) || [], &(&1.trip.id in trip_ids))
 
       %{routes: routes, stops: stops, schedules: schedules}
     end

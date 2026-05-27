@@ -457,30 +457,29 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
       conn: conn
     } do
       with_mocks([
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]},
         {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
         {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop, @stop_2] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
 
-        get_to_submission_page_refactor(view, "Commuter Rail", "Suspension")
+        get_to_submission_page_refactor(view, "Commuter Rail", "Extra service")
 
         render_async(view)
 
         view
         |> element("form")
         |> render_change(%{
-          alert_data: %{route_ids: ["CR-Worcester"]}
-        })
-
-        view
-        |> element("form")
-        |> render_change(%{
-          alert_data: %{header_sync_toggle: false, header_text: "my custom text"}
+          alert_data: %{
+            header_sync_toggle: false,
+            header_text: "my custom text",
+            route_ids: ["CR-Worcester"]
+          }
         })
 
         assert view
                |> element("#alert_data_header_text")
-               |> render() =~ "my custom text"
+               |> render_async() =~ "my custom text"
 
         view
         |> element("form")
@@ -490,12 +489,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
         refute view
                |> element("#alert_data_header_text")
-               |> render() =~
+               |> render_async() =~
                  "my custom text"
 
         assert view
                |> element("#alert_data_header_text")
-               |> render() =~
+               |> render_async() =~
                  "Framingham/Worcester"
       end
     end
@@ -661,7 +660,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
         get_to_submission_page_refactor(view, "Commuter Rail", "Delay")
 
-        render_async(view)
+        render_async(view, 800)
 
         view
         |> element("form")
@@ -671,7 +670,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
         assert view
                |> element("#alert_data_description_text")
-               |> render() =~
+               |> render_async(800) =~
                  "Affected direction: westbound"
 
         view
@@ -682,47 +681,41 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
         assert view
                |> element("#alert_data_description_text")
-               |> render_async() =~
+               |> render_async(800) =~
                  "Affected direction: eastbound"
 
         # Mock affected service selections
+
         view
         |> element("form")
         |> render_change(%{
           "alert_data" => %{
+            "severity" => 4,
             "modal_date" => nil,
-            "direction" => "default"
+            "direction" => "default",
+            "trip_ids" => [@schedule.trip.id]
           }
         })
 
-        view
-        |> with_target("#service_view")
-        |> render_hook(:accepted_dates_modal, %{})
+        render_async(view)
 
         view
         |> element("form")
         |> render_change(%{
           "alert_data" => %{
-            "trip_ids" => [@schedule.trip.id],
-            "stop_names_and_ids" => ["#{@stop.name}|#{@stop.id}", "#{@stop_2.name}|#{@stop_2.id}"]
+            "cause_detail" => "ICE_IN_HARBOR",
+            "stop_names_and_ids" => ["South Station|place-sstat", "Courthouse|place-crtst"]
           }
-        })
-
-        # Mock alert details selections
-        view
-        |> element("form")
-        |> render_change(%{
-          alert_data: %{cause_detail: "ICE_IN_HARBOR", severity: 4}
         })
 
         assert view
-               |> element("#details_view")
-               |> render() =~
+               |> element("#alert_data_header_text")
+               |> render_async() =~
                  "Framingham/Worcester Line Train 595 (#{DateTimeFormatters.friendly_time(@schedule.departure_time)} from South Station) is operating about 15 minutes behind schedule between Courthouse and South Station due to ice in harbor."
 
         assert view
                |> element("#alert_data_description_text")
-               |> render() =~
+               |> render_async() =~
                  "Affected stations:\nCourthouse\nSouth Station"
       end
     end
@@ -746,44 +739,22 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
         render_async(view)
 
-        # Mock affected service selections
-        view
-        |> element("form")
-        |> render_change(%{
-          alert_data: %{
-            route_ids: [@route.id],
-            stop_ids: [@stop.id, @stop_2.id, @stop_3.id]
-          }
-        })
-
-        # Mock timerange selections
         view
         |> element("form")
         |> render_change(%{
           "alert_data" => %{
+            "route_ids" => [@route.id],
+            "stop_ids" => [@stop.id, @stop_2.id, @stop_3.id],
+            "cause_detail" => "ICE_IN_HARBOR",
             "active_period_start_specifier" => "custom",
-            "active_period_end_specifier" => "custom"
+            "active_period_end_specifier" => "custom",
+            "active_period_start" => NaiveDateTime.to_iso8601(@start_time),
+            "active_period_end" => NaiveDateTime.to_iso8601(@end_time)
           }
-        })
-
-        view
-        |> element("form")
-        |> render_change(%{
-          "alert_data" => %{
-            "start" => NaiveDateTime.to_iso8601(@start_time),
-            "end" => NaiveDateTime.to_iso8601(@end_time)
-          }
-        })
-
-        # Mock alert details selections
-        view
-        |> element("form")
-        |> render_change(%{
-          alert_data: %{cause_detail: "ICE_IN_HARBOR"}
         })
 
         assert view
-               |> element("#details_view")
+               |> element("#alert_data_header_text")
                |> render() =~
                  "3 stops closed from #{Calendar.strftime(@start_time, "%a, %b %-d at %-I:%M %p")} to #{Calendar.strftime(@end_time, "%a, %b %-d at %-I:%M %p")} due to ice in harbor"
 
@@ -820,7 +791,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
         })
 
         assert view
-               |> element("#details_view")
+               |> element("#alert_data_header_text")
                |> render() =~
                  "Alewife Escalator 349 (Platform to Russell Field) will be unavailable from #{Calendar.strftime(@start_time, "%a, %b %-d at %-I:%M %p")} to #{Calendar.strftime(@end_time, "%a, %b %-d at %-I:%M %p")} due to ice in harbor"
 
@@ -894,7 +865,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
            by_route: fn _, _ -> [@stop, @stop_2, @stop_3] end,
            by_route: fn _, _, _ -> [@stop, @stop_2, @stop_3] end,
            get_parent: fn _ -> %{id: @stop.id} end
-         ]}
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]}
       ]) do
         ie =
           build(:informed_entity, %{
@@ -932,7 +904,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
         assert view
                |> element("#details_view")
-               |> render() =~ "example header text"
+               |> render_async() =~ "example header text"
 
         view
         |> element("form")
@@ -942,7 +914,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
         assert view
                |> element("#alert_data_header_text")
-               |> render() =~
+               |> render_async() =~
                  "South Station (outgoing) is closed beginning Thu, Oct 19 at 8:01 PM."
       end
     end
