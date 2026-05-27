@@ -2,6 +2,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSliceTest do
   use ExUnit.Case, async: false
   use AlertsUIWeb.ConnCase
   import Phoenix.LiveViewTest
+  import Ecto.Changeset
+  import Mock
+  import Test.Support.Helpers
+  alias AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice
 
   describe "component" do
     @tag :logged_in_user
@@ -31,6 +35,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSliceTest do
       |> render_click()
 
       assert render(view) =~ ~s(Station issue)
+    end
+
+    test "without filling required fields, review is blocked", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      get_to_submission_page_refactor(view, "Bus", "Delay")
+
+      open_review_modal(view)
+
+      refute has_element?(view, "#review-modal-container")
+      assert render(view) =~ "Please fix the following errors"
     end
 
     @tag :logged_in_user
