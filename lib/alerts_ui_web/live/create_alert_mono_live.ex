@@ -167,9 +167,21 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   end
 
   @impl true
-  def handle_event("clear_filter", %{"filter-id" => filter_field}, socket) do
-    params = %{"alert_data" => %{filter_field => nil}}
-    {:noreply, sync_socket(socket, %{})}
+  def handle_event("clear_filter", _params, %{assigns: %{selections: _}} = socket) do
+    selections =
+      socket.assigns
+      |> assign_unwrapped_selections()
+      |> Map.get(:selections)
+
+    case Map.get(selections, :on_filter_clear) do
+      handler when is_function(handler) -> {:noreply, handler.(socket)}
+      _ -> {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_event("clear_filter", _params, socket) do
+    {:noreply, socket}
   end
 
   # @impl true

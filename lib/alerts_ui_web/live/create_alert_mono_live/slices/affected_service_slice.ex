@@ -46,6 +46,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
               filter_title_value: "FILTER TITLE VALUE",
               loading: false,
               on_filter_accept: &AffectedServiceSlice.on_filter_accept/1,
+              on_filter_clear: &AffectedServiceSlice.on_filter_clear/1,
               route_id_options: [],
               selected_stops: [],
               service_dates: [],
@@ -592,5 +593,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   def on_filter_accept(socket) do
     async_assign_selections(socket, %{})
+  end
+
+  def on_filter_clear(socket) do
+    case AlertData.sync(socket.assigns.form.source, socket, %{"alert_data" => %{"modal_date" => today()}}) do
+      {:ok, socket} -> async_assign_selections(socket, %{})
+      {:error, socket} -> async_assign_selections(socket, %{})
+    end
   end
 end
