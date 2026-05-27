@@ -6,6 +6,13 @@ on:
       environment:
         type: string
         required: true
+    secrets:
+      AWS_ROLE_ARN:
+        required: true
+      DOCKER_REPO:
+        required: true
+      SLACK_WEBHOOK:
+        required: true
 
   workflow_dispatch:
     inputs:
