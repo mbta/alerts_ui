@@ -156,6 +156,34 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
     end
   end
 
+  def on_filter_accept(socket) do
+    selections =
+      case socket.assigns.selections do
+        %Selections{} = selections -> selections
+        %AsyncResult{ok?: true} = async -> async.result
+      end
+
+    selected_stop_id = socket.assigns.form.params["stop_id"]
+    stops = selections.available_facilities.stops
+
+    filter_title_value =
+      if selected_stop_id in [nil, "", "default"] or Enum.empty?(stops) do
+        "All stops"
+      else
+        Enum.filter(stops, &(&1.id === selected_stop_id))
+        |> Enum.map(& &1.name)
+        |> hd
+      end
+
+    selections = %{
+      selections
+      | stop_id_filter_value: selected_stop_id,
+        filter_title_value: filter_title_value
+    }
+
+    assign(socket, :selections, selections)
+  end
+
   def render(assigns) do
     assigns = assign_unwrapped_selections(assigns, %Selections{loading: true})
 

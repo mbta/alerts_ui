@@ -112,14 +112,29 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
         end
 
       combination =
-        get_value_of_key(
-          :combination,
-          effective_route_type,
-          humanize_effect_name(
+        if is_nil(effective_route_type) and is_nil(path_route_type) do
+          # During form field changes or direct edit for facility/systemwide alerts,
+          # path_route_type is absent. Preserve the existing combination rather than
+          # resetting to nil, since route_type is intentionally nil for these alert types.
+          case alert_or_changeset do
+            %Changeset{} = cs ->
+              get_field(cs, :combination) ||
+                get_value_of_key(:combination, effective_route_type, humanize_effect_name(effective_route_type, effect_name))
+
+            %AlertData{} = ad ->
+              ad.combination ||
+                get_value_of_key(:combination, effective_route_type, humanize_effect_name(effective_route_type, effect_name))
+          end
+        else
+          get_value_of_key(
+            :combination,
             effective_route_type,
-            effect_name
+            humanize_effect_name(
+              effective_route_type,
+              effect_name
+            )
           )
-        )
+        end
 
       %UrlSlice{
         alert_id: alert_id,
