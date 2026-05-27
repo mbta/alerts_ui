@@ -52,8 +52,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
       changeset
     end
 
-    def validate(_service_data, changeset, _params, _socket) do
-      always_validate_required(changeset, :facility_ids, "You must select a facility")
+    def validate(_service_data, changeset, _params, socket) do
+      if socket.assigns.submitted? do
+        always_validate_required(changeset, :facility_ids, "You must select a facility")
+      else
+        changeset
+      end
     end
 
     def assigns(_service_data, socket, params) do
