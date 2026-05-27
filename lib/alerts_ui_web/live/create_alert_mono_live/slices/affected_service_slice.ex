@@ -43,7 +43,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
               available_schedules: [],
               available_stops: [],
               direction_options: [],
-              filter_title_value: "FILTER TITLE VALUE",
+              filter_title_value: nil,
               loading: false,
               on_filter_accept: &AffectedServiceSlice.on_filter_accept/1,
               on_filter_clear: &AffectedServiceSlice.on_filter_clear/1,
@@ -246,7 +246,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
           filter_title_value: filter_title_value,
           route_id_options: route_id_options,
           stop_id_options: stop_id_options,
-          # stop_selections: stop_selections,
           service_dates: service_dates(),
           trip_id_options: trip_id_options
         }
@@ -415,6 +414,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     |> Date.to_iso8601()
   end
 
+  def default_filter_title() do
+    service_dates()
+    |> Enum.find({"All future trips", nil}, fn {_option, value} ->
+      value == today()
+    end)
+    |> elem(0)
+  end
+
   def render(assigns) do
     assigns = assign_unwrapped_selections(assigns, default_selections())
 
@@ -489,7 +496,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             }
             field={@form[:direction]}
             modal_filter_id="dates-filter-modal"
-            modal_filter_title={"Filter: #{@selections.filter_title_value}"}
+            modal_filter_title={"Filter: #{@selections.filter_title_value || default_filter_title()}"}
             modal_filter_active={date_filter_active?(@form[:modal_date].value, today())}
             options={@selections.direction_options}
             disabled={disable_stop_input?(@form[:route_ids].value)}
