@@ -204,7 +204,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
         (Map.get(selections, :available_routes) || [])
         |> Enum.filter(&(&1.id in route_ids))
 
-      stops = Enum.filter(selections.available_stops, &(&1.id in stop_ids))
+      stops = Enum.filter(selections.available_stops || [], &(&1.id in stop_ids))
 
       schedules =
         Enum.filter(Map.get(selections, :available_schedules, []), &(&1.trip.id in trip_ids))

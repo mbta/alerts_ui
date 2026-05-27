@@ -54,6 +54,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
               disable_routes_input?: false,
               modal_route_id_options: [],
               on_filter_accept: &StopRouteServiceSlice.on_filter_accept/1,
+              on_filter_clear: &StopRouteServiceSlice.on_filter_clear/1,
               retained_stops: [],
               route_id_options: [],
               selected_stops: [],
@@ -120,14 +121,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
       assign_async(socket, :selections, fn ->
         available_filter_routes =
-          CreateAlertLive.get_routes(route_type) |> IO.inspect(label: "AFR")
+          CreateAlertLive.get_routes(route_type)
 
         available_stops =
           CreateAlertLive.get_stops_for_stop_route(stop_route_ids, route_type)
-          |> IO.inspect(label: "AS")
 
         available_routes =
-          CreateAlertLive.get_routes_by_stop(stop_ids, route_type) |> IO.inspect(label: "AR")
+          CreateAlertLive.get_routes_by_stop(stop_ids, route_type)
 
         modal_route_id_options =
           modal_route_id_options(
@@ -367,5 +367,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
   def on_filter_accept(socket) do
     async_assign_selections(socket, %{})
+  end
+
+  def on_filter_clear(socket) do
+    case AlertData.sync(socket.assigns.form.source, socket, %{"alert_data" => %{"modal_route_id" => nil}}) do
+      {:ok, socket} -> async_assign_selections(socket, %{})
+      {:error, socket} -> async_assign_selections(socket, %{})
+    end
   end
 end
