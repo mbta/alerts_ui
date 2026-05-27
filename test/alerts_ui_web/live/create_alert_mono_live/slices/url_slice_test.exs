@@ -2,9 +2,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSliceTest do
   use ExUnit.Case, async: false
   use AlertsUIWeb.ConnCase
   import Phoenix.LiveViewTest
-  import Ecto.Changeset
-  import Mock
-  alias AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice
 
   describe "component" do
     @tag :logged_in_user
@@ -23,6 +20,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSliceTest do
       |> render_click()
 
       refute render(view) =~ ~s(Summary)
+    end
+
+    @tag :logged_in_user
+    test "Capitalizes effects correctly", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+
+      view
+      |> element("#route-type-subway-button")
+      |> render_click()
+
+      assert render(view) =~ ~s(Station issue)
     end
 
     @tag :logged_in_user
