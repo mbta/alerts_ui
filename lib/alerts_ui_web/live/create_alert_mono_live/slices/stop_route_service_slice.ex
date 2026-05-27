@@ -101,21 +101,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
       stop_route_ids =
         case modal_route_id do
-          nil ->
-            case route_ids do
-              [] -> nil
-              route_ids -> route_ids
-            end
-
-          modal_route_id ->
-            [modal_route_id]
-        end
-
-      selected_stops =
-        case Map.get(socket.assigns, :selections) do
-          %AsyncResult{ok?: true} = async_ok -> async_ok.result.selected_stops
-          %Selections{} = selections -> selections.selected_stops
-          _ -> []
+          _none when _none in [nil, "default"] -> nil
+          modal_route_id -> [modal_route_id]
         end
 
       assign_async(socket, :selections, fn ->
@@ -127,6 +114,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
         available_routes =
           CreateAlertLive.get_routes_by_stop(stop_ids, route_type)
+
+        selected_stops = get_selected_stops(available_stops, stop_ids)
 
         modal_route_id_options =
           modal_route_id_options(
@@ -338,7 +327,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
   @spec disable_routes_input?(map()) :: boolean()
   defp disable_routes_input?(form) do
-    (form[:stop_ids].value |> IO.inspect) in [nil, []]
+    form[:stop_ids].value in [nil, []]
   end
 
   defp get_selected_stops(nil, _), do: nil
