@@ -16,6 +16,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
   use AlertsUIWeb, :html
 
+  @responsive_class "flex flex-col md:gap-x-8 md:flex-row"
+  defp responsive_class, do: @responsive_class
+
   defstruct [
     :form_type,
     :active_period_start,
@@ -407,7 +410,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       />
       <.one_time_alert
         :if={@form[:alert_timing].value in [:"one-time", "one-time"]}
-        class="flex flex-col md:flex-row md:flex-wrap md:gap-8 md:mt-4"
+        class="flex-wrap md:mt-4"
         current_time={current_time()}
         start_values={start_values()}
         end_values={end_values(@form)}
@@ -415,7 +418,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       />
       <.recurring_alert
         :if={@form[:alert_timing].value in [:recurring, "recurring"]}
-        class="flex flex-col md:gap-8 md:mt-4"
+        class="flex-wrap md:mt-4"
         current_time={current_time()}
         day_of_week_options={day_of_week_options()}
         form={@form}
@@ -432,52 +435,59 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
   defp one_time_alert(assigns) do
     ~H"""
-    <div class={@class}>
-      <.select
-        label="Effect period"
-        field={@form[:active_period_start_specifier]}
-        options={values_to_options(@start_values)}
-        class="md:min-w-64 md:max-w-64"
-      />
-      <.datetime
-        field={@form[:active_period_start]}
-        min={DateTimeHelpers.naive_datetime_to_iso8601(@current_time)}
-        max="9999-12-31T23:59"
-        value={DateTimeHelpers.naive_datetime_to_iso8601(@form[:active_period_start].value)}
-        class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_start_specifier) === :custom, do: "", else: "hidden")}
-      />
-      <.datetime
-        type="date"
-        field={@form[:active_period_start_date]}
-        min={next_start_of_service_date(@current_time)}
-        max={
-          [naive_datetime_to_iso_date(@form[:active_period_end].value), "9999-12-31"] |> Enum.max()
-        }
-        value={@form[:active_period_start_date].value}
-        class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_start_specifier) === :start_of_service, do: "", else: "hidden")}
-      />
-      <p class="pt-5 md:pt-10">to</p>
-      <.select
-        field={@form[:active_period_end_specifier]}
-        options={values_to_options(@end_values)}
-        class="md:min-w-64 md:max-w-64"
-        select_class="mt-[28.8px]"
-      />
-      <.datetime
-        type="date"
-        field={@form[:active_period_end_date]}
-        min={@form[:active_period_start].value |> naive_datetime_to_iso_date}
-        max="9999-12-31"
-        value={@form[:active_period_end_date].value}
-        class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_end_specifier) === :end_of_service, do: "", else: "hidden")}
-      />
-      <.datetime
-        field={@form[:active_period_end]}
-        min={DateTimeHelpers.naive_datetime_to_iso8601(@form[:active_period_start].value)}
-        max="9999-12-31T23:59"
-        value={DateTimeHelpers.naive_datetime_to_iso8601(@form[:active_period_end].value)}
-        class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_end_specifier) === :custom, do: "", else: "hidden")}
-      />
+    <div class={[responsive_class(), @class]}>
+      <div class={responsive_class()}>
+        <div class={responsive_class()}>
+          <.select
+            label="Effect period"
+            field={@form[:active_period_start_specifier]}
+            options={values_to_options(@start_values)}
+            class="md:min-w-64 md:max-w-64"
+          />
+          <.datetime
+            field={@form[:active_period_start]}
+            min={DateTimeHelpers.naive_datetime_to_iso8601(@current_time)}
+            max="9999-12-31T23:59"
+            value={DateTimeHelpers.naive_datetime_to_iso8601(@form[:active_period_start].value)}
+            class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_start_specifier) === :custom, do: "", else: "hidden")}
+          />
+          <.datetime
+            type="date"
+            field={@form[:active_period_start_date]}
+            min={next_start_of_service_date(@current_time)}
+            max={
+              [naive_datetime_to_iso_date(@form[:active_period_end].value), "9999-12-31"]
+              |> Enum.max()
+            }
+            value={@form[:active_period_start_date].value}
+            class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_start_specifier) === :start_of_service, do: "", else: "hidden")}
+          />
+        </div>
+        <p class="pt-5 md:pt-10">to</p>
+      </div>
+      <div class={responsive_class()}>
+        <.select
+          field={@form[:active_period_end_specifier]}
+          options={values_to_options(@end_values)}
+          class="md:min-w-64 md:max-w-64"
+          select_class="mt-[28.8px]"
+        />
+        <.datetime
+          type="date"
+          field={@form[:active_period_end_date]}
+          min={@form[:active_period_start].value |> naive_datetime_to_iso_date}
+          max="9999-12-31"
+          value={@form[:active_period_end_date].value}
+          class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_end_specifier) === :end_of_service, do: "", else: "hidden")}
+        />
+        <.datetime
+          field={@form[:active_period_end]}
+          min={DateTimeHelpers.naive_datetime_to_iso8601(@form[:active_period_start].value)}
+          max="9999-12-31T23:59"
+          value={DateTimeHelpers.naive_datetime_to_iso8601(@form[:active_period_end].value)}
+          class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_end_specifier) === :custom, do: "", else: "hidden")}
+        />
+      </div>
     </div>
     <div :if={Enum.empty?(@form.errors)} class="duration-explanation text-text-secondary">
       Effect duration: {DurationText.one_time_duration_text(@form)}
@@ -492,10 +502,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
   defp recurring_alert(assigns) do
     ~H"""
-    <div class={["flex flex-col", @class]}>
-      <div>
-        <div class="flex flex-col md:flex-row gap-8 md:my-4">
-          <div class="flex flex-col md:flex-row gap-4 md:gap-8">
+    <div class={["flex flex-col gap-4", @class]}>
+      <div class="flex flex-col gap-4">
+        <div class={[responsive_class(), "flex-wrap gap-4"]}>
+          <div class={[responsive_class(), "gap-4"]}>
             <.select
               label="Effect start"
               field={@form[:active_period_start_time_specifier]}
@@ -508,12 +518,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
               type="time"
               field={@form[:active_period_start_time]}
               value={DateTimeHelpers.time_to_iso8601(@form[:active_period_start_time].value)}
-              class={"md:min-w-64 md:max-w-64 h-10 " <> (if fv(@form, :active_period_start_time_specifier) === :custom, do: "", else: "hidden")}
+              class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_start_time_specifier) === :custom, do: "", else: "hidden")}
               phx-debounce={120}
             />
+            <p class="md:pt-10">to</p>
           </div>
-          <p class="md:pt-[2rem]">to</p>
-          <div class="flex flex-col md:flex-row gap-4 md:gap-8">
+          <div class={responsive_class()}>
             <.select
               label="Effect end"
               field={@form[:active_period_end_time_specifier]}
@@ -526,14 +536,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
               type="time"
               field={@form[:active_period_end_time]}
               value={DateTimeHelpers.time_to_iso8601(@form[:active_period_end_time].value)}
-              class={"md:min-w-64 md:max-w-64 h-10 " <> (if fv(@form, :active_period_end_time_specifier) === :custom, do: "", else: "hidden")}
+              class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_end_time_specifier) === :custom, do: "", else: "hidden")}
               phx-debounce={120}
             />
           </div>
         </div>
 
-        <div class="flex flex-col md:flex-row gap-8 md:mb-8">
-          <div class="flex flex-col md:flex-row gap-8">
+        <div class={[responsive_class(), "gap-4 flex-wrap"]}>
+          <div class={[responsive_class(), "gap-4"]}>
             <.select
               label="Recurring alert start"
               field={@form[:active_period_start_specifier]}
@@ -547,12 +557,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
               max="9999-12-31"
               field={@form[:active_period_start_date]}
               value={@form[:active_period_start_date].value}
-              class={"md:min-w-64 md:max-w-64 h-10 " <> (if fv(@form, :active_period_start_specifier) === :custom, do: "", else: "hidden")}
+              class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_start_specifier) === :custom, do: "", else: "hidden")}
               phx-debounce={120}
             />
+            <p class="md:pt-10">to</p>
           </div>
-          <p class="md:pt-[2rem]">to</p>
-          <div class="flex flex-col md:flex-row gap-8">
+          <div class={responsive_class()}>
             <.select
               label="Recurring alert end"
               field={@form[:active_period_end_specifier]}
@@ -566,27 +576,29 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
               max="9999-12-31"
               field={@form[:active_period_end_date]}
               value={@form[:active_period_end_date].value}
-              class={"md:min-w-64 md:max-w-64 h-10 " <> (if fv(@form, :active_period_end_specifier) === :custom, do: "", else: "hidden")}
+              class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_end_specifier) === :custom, do: "", else: "hidden")}
               phx-debounce={120}
             />
           </div>
         </div>
       </div>
-      <.input type="hidden" name="alert_data[recurrence_days][]" value="" />
-      <.toggle_checkgroup
-        :if={fv(@form, :alert_timing) in [:recurring, "recurring"]}
-        field={@form[:recurrence_days]}
-        options={@day_of_week_options}
-        class="md:max-w-[50%]"
-        button_class="justify-center"
-        column={false}
-        show_icons={false}
-      />
-      <div
-        :if={Enum.empty?(@form.errors) and @form[:recurrence_days].value not in [[], nil]}
-        class="duration-explanation text-text-secondary"
-      >
-        Effect duration: {DurationText.recurring_duration_text(@form)}
+      <div>
+        <.input type="hidden" name="alert_data[recurrence_days][]" value="" />
+        <.toggle_checkgroup
+          :if={fv(@form, :alert_timing) in [:recurring, "recurring"]}
+          field={@form[:recurrence_days]}
+          options={@day_of_week_options}
+          class="md:max-w-[50%]"
+          button_class="justify-center"
+          column={false}
+          show_icons={false}
+        />
+        <div
+          :if={Enum.empty?(@form.errors) and @form[:recurrence_days].value not in [[], nil]}
+          class="duration-explanation text-text-secondary"
+        >
+          Effect duration: {DurationText.recurring_duration_text(@form)}
+        </div>
       </div>
     </div>
     """
