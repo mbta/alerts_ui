@@ -260,7 +260,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
     end
   end
 
-    # Drives AlertData.sync end-to-end, returning the resulting socket regardless of
+  # Drives AlertData.sync end-to-end, returning the resulting socket regardless of
   # whether validation succeeded.
   defp sync!(socket, params) do
     case AlertData.sync(socket.assigns.form.source, socket, params) do

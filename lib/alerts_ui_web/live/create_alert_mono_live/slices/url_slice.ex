@@ -141,9 +141,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
     ]
   end
 
-  @spec render(any()) :: Phoenix.LiveView.Rendered.t()
-  def render(assigns) do
-    if is_nil(assigns.path_route_type) || is_nil(assigns.path_effect_name) do
+  def render(
+        %{
+          path_route_type: path_route_type,
+          path_effect_name: path_effect_name
+        } = assigns
+      ) do
+    if is_nil(path_route_type) || is_nil(path_effect_name) do
       ~H"""
       <div class="min-w-full flex flex-col mb-8" id="route_view">
         <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">

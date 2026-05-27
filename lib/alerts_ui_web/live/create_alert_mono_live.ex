@@ -103,18 +103,19 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   @impl true
   def handle_event("move_progress", %{"value" => "route_type_and_effect"}, socket) do
-    cleared_source = change(
-      socket.assigns.form.source,
-      %{
-        route_type: nil,
-        effect_name: nil,
-        combination: nil,
-        route_ids: nil,
-        stop_ids: nil,
-        trip_ids: nil,
-        facility_ids: nil
-      }
-    )
+    cleared_source =
+      change(
+        socket.assigns.form.source,
+        %{
+          route_type: nil,
+          effect_name: nil,
+          combination: nil,
+          route_ids: nil,
+          stop_ids: nil,
+          trip_ids: nil,
+          facility_ids: nil
+        }
+      )
 
     socket =
       assign(
@@ -323,7 +324,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       {:ok, socket} ->
         if socket.assigns.submitting? do
           effect_name = socket.assigns.form[:effect_name].value
-          path_route_type = socket.assigns[:path_route_type] || path_route_type_from_socket(socket)
+
+          path_route_type =
+            socket.assigns[:path_route_type] || path_route_type_from_socket(socket)
 
           path =
             path_with_route_type_and_effect_name(
