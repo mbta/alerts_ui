@@ -51,7 +51,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
               available_routes: nil,
               available_stops: nil,
               filter_title_value: "All routes",
-              disable_routes_input?: false,
               modal_route_id_options: [],
               on_filter_accept: &StopRouteServiceSlice.on_filter_accept/1,
               on_filter_clear: &StopRouteServiceSlice.on_filter_clear/1,
@@ -170,7 +169,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
           available_filter_routes: available_filter_routes,
           available_routes: available_routes,
           available_stops: available_stops,
-          disable_routes_input?: selected_stops in [nil, []],
           filter_title_value: filter_title_value,
           modal_route_id_options: modal_route_id_options,
           route_id_options: route_id_options,
@@ -320,8 +318,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
           field={@form[:route_ids]}
           filter_field={@form[:routes_search_term]}
           loading={Map.get(@selections, :loading, true)}
-          no_results={Enum.empty?(@selections.route_id_options) && !@selections.disable_routes_input?}
-          disabled={@selections.disable_routes_input?}
+          no_results={Enum.empty?(@selections.route_id_options) && disable_routes_input?(@form)}
+          disabled={disable_routes_input?(@form)}
           options={@selections.route_id_options}
           class="md:w-[25%]"
         />
@@ -339,8 +337,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   end
 
   @spec disable_routes_input?(map()) :: boolean()
-  defp disable_routes_input?(%{form: form}) do
-    form[:stop_ids].value in [nil, []]
+  defp disable_routes_input?(form) do
+    (form[:stop_ids].value |> IO.inspect) in [nil, []]
   end
 
   defp get_selected_stops(nil, _), do: nil
