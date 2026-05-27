@@ -81,7 +81,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       |> put_over_nil(:can_close_automatically, nil)
     end
 
-    def transform(_slice, changeset, params, _socket) do
+    def transform(_slice, changeset, params, socket) do
       [_, target | _] = Map.get(params, "_target", [nil, nil])
 
       changeset
@@ -90,6 +90,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       |> TimeRangeSlice.ensure_start_date_values()
       |> TimeRangeSlice.ensure_end_date_values()
       |> TimeRangeSlice.ensure_start_time_values()
+      |> TimeRangeSlice.set_start_end_from_trip_selection(target, socket.assigns.selections, get_field(changeset, :trip_ids, []))
     end
 
     def validate(_slice, changeset, _params, _socket) do
@@ -289,6 +290,46 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     do: force_change(changeset, :active_period_end_time, ~T[03:00:00])
 
   def ensure_end_time_values_for_specifier(changeset, _, _), do: changeset
+
+  def set_start_end_from_trip_selection(changeset, "trip_ids", _, []),
+    do:
+      changeset
+
+  def set_start_end_from_trip_selection(changeset, "trip_ids", %{ok?: true, result: selections}, trip_ids) do
+    available_schedules = Map.get(selections, :available_schedules, [])
+    selected_schedules = Enum.filter(available_schedules, &(&1.trip.id in trip_ids))
+    departure = get_trip_departure_time(selected_schedules)
+    arrival = get_trip_arrival_time(nil, selected_schedules)
+    IO.inspect(%{
+      departure: departure,
+      arrival: arrival
+    })
+    changeset
+    |> force_change(:active_period_start_specifier, :custom)
+    |> force_change(:active_period_start, departure)
+    |> force_change(:active_period_start_date, departure |> NaiveDateTime.to_date())
+    |> force_change(:active_period_end_specifier, :custom)
+    |> force_change(:active_period_end, NaiveDateTime.add(arrival, 1, :hour))
+    |> force_change(:active_period_end_date, arrival |> NaiveDateTime.to_date())
+  end
+
+  def set_start_end_from_trip_selection(changeset, _, _, _), do: changeset
+
+  defp get_trip_departure_time(selected_schedules) do
+    selected_schedules
+    |> Enum.map(& &1.departure_time)
+    |> Enum.min(DateTime, fn -> nil end)
+    |> utc_datetime_to_naive()
+  end
+
+  defp get_trip_arrival_time("default", _), do: nil
+
+  defp get_trip_arrival_time(_, selected_schedules) do
+    selected_schedules
+    |> Enum.map(& &1.time_of_last_trip_arrival)
+    |> Enum.max(DateTime, fn -> nil end)
+    |> utc_datetime_to_naive()
+  end
 
   def normalize_alert_timing(changeset) do
     alert_timing = get_field(changeset, :alert_timing, :"one-time")
