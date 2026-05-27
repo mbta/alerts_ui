@@ -305,6 +305,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSliceTest 
           alert_id: "test-access-edit",
           effect: :OTHER_EFFECT,
           effect_detail: "BIKE_ISSUE",
+          primary_service_type: "access",
           informed_entity: [
             %{facility_id: "Facility-3", route_type: nil}
           ],
