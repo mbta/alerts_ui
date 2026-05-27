@@ -98,7 +98,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
           autotext_data
         )
 
-      service_effect_text = Templates.build_auto_text(autotext_data, :service_effect_template)
+      service_effect_text =
+        if autotext_data == %{},
+          do: "",
+          else: Templates.build_auto_text(autotext_data, :service_effect_template)
 
       changeset
       |> change(%{
