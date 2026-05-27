@@ -31,8 +31,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSlice do
       changeset
     end
 
-    def validate(_service_data, changeset, _params, _socket) do
-      always_validate_required(changeset, :service_types, "Select a service type")
+    def validate(_service_data, changeset, _params, socket) do
+      if socket.assigns.submitted? do
+        always_validate_required(changeset, :service_types, "Select a service type")
+      else
+        changeset
+      end
     end
 
     def assigns(_service_data, socket, _params) do

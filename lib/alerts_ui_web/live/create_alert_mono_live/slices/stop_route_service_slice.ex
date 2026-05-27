@@ -76,10 +76,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
       changeset
     end
 
-    def validate(_service_data, changeset, _params, _socket) do
-      changeset
-      |> always_validate_required(:route_ids, "You must select a route")
-      |> always_validate_required(:stop_ids, "You must select a stop")
+    def validate(_service_data, changeset, _params, socket) do
+      if socket.assigns.submitted? do
+        changeset
+        |> always_validate_required(:route_ids, "You must select a route")
+        |> always_validate_required(:stop_ids, "You must select a stop")
+      else
+        changeset
+      end
     end
 
     def assigns(_service_data, socket, params) do

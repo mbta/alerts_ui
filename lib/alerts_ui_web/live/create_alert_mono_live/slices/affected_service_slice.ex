@@ -74,8 +74,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       |> AffectedServiceSlice.build_trip_information(socket)
     end
 
-    def validate(_service_data, changeset, _params, _socket) do
-      AffectedServiceSlice.validate_changeset(changeset)
+    def validate(_service_data, changeset, _params, socket) do
+      if socket.assigns.submitted? do
+        AffectedServiceSlice.validate_changeset(changeset)
+      else
+        changeset
+      end
     end
 
     def assigns(_service_data, socket, params) do

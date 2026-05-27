@@ -68,6 +68,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       |> assign(:selections, %{})
       |> assign(:form_type, form_type_from_socket(socket))
       |> assign(:submitting?, false)
+      |> assign(:submitted?, false)
       |> assign_new(:return_to, fn -> session["return_to"] end)
 
     {:ok, start_socket(socket, params)}
@@ -194,6 +195,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     socket =
       socket
       |> assign(:submitting?, true)
+      |> assign(:submitted?, true)
       |> sync_socket()
 
     {:noreply, socket}
