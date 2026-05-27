@@ -53,6 +53,17 @@ defmodule Test.Support.Helpers do
     |> render_submit()
   end
 
+    def get_to_submission_page_refactor(view, mode, effect) do
+    # Use any combo to proceed to next page
+    view
+    |> element("#service_type_buttons button", mode)
+    |> render_click()
+
+    view
+    |> element("#effect_buttons button", effect)
+    |> render_click()
+  end
+
   def open_review_modal(view) do
     view
     |> element("button#review", "Review and submit")
