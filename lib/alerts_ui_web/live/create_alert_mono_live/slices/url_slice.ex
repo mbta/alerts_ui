@@ -16,10 +16,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
     only: [get_value_of_key: 3]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
-    only: [humanize_effect_name: 2, list_effect_path_names: 1, get_route_type_int: 1]
-
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Path,
-    only: [path_route_type_from_socket: 1, path_effect_name_from_socket: 1, path_route_type: 2]
+    only: [humanize_effect_name: 2, list_effect_path_names: 1]
 
   defstruct [
     :alert_id,
@@ -36,7 +33,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
 
     def mount(_url_data, socket, _base_params), do: socket
 
-    def extract(url_data, %AlertData{} = alert_data, params) do
+    def extract(_url_data, %AlertData{} = alert_data, params) do
       new_url_params(alert_data, params)
     end
 
@@ -146,7 +143,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
 
   def render(
         %{
-          alert_id: alert_id,
           path_route_type: path_route_type,
           path_effect_name: path_effect_name
         } = assigns
@@ -204,12 +200,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
     end
   end
 
-  def route_type_button(
-        %{
-          this_route_type: this_route_type,
-          selected_route_type: selected_route_type
-        } = assigns
-      ) do
+  def route_type_button(assigns) do
     ~H"""
     <.button_toggle
       id={"route-type-#{@this_route_type}-button"}
@@ -224,21 +215,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
     """
   end
 
-  def effect_name_button(
-        %{
-          this_effect_name: this_effect_name,
-          selected_effect_name: selected_effect_name,
-          selected_route_type: selected_route_type
-        } = assigns
-      ) do
+  def effect_name_button(assigns) do
     ~H"""
     <.button_toggle
+      id={"effect-name-#{@this_effect_name}-button"}
       phx-click="push_effect_name"
       class="self-cente min-w-[16rem]"
       value={@this_effect_name}
       active={"#{@this_effect_name}" == @selected_effect_name}
     >
-      {humanize_effect_name(@selected_route_type, @this_effect_name)}
+      {@this_effect_name |> String.replace("_", " ") |> String.capitalize()}
     </.button_toggle>
     """
   end
