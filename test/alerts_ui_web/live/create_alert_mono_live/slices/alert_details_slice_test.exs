@@ -463,7 +463,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
 
-        get_to_submission_page_refactor(view, "Commuter Rail", "Extra service")
+        get_to_submission_page_refactor(view, "Commuter Rail", "Suspension")
 
         render_async(view)
 
@@ -660,7 +660,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
         get_to_submission_page_refactor(view, "Commuter Rail", "Delay")
 
-        render_async(view, 800)
+        render_async(view)
 
         view
         |> element("form")
@@ -670,7 +670,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
         assert view
                |> element("#alert_data_description_text")
-               |> render_async(800) =~
+               |> render_async() =~
                  "Affected direction: westbound"
 
         view
@@ -681,10 +681,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
         assert view
                |> element("#alert_data_description_text")
-               |> render_async(800) =~
+               |> render_async() =~
                  "Affected direction: eastbound"
-
-        # Mock affected service selections
 
         view
         |> element("form")
@@ -693,16 +691,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
             "severity" => 4,
             "modal_date" => nil,
             "direction" => "default",
-            "trip_ids" => [@schedule.trip.id]
-          }
-        })
-
-        render_async(view)
-
-        view
-        |> element("form")
-        |> render_change(%{
-          "alert_data" => %{
+            "trip_ids" => [@schedule.trip.id],
             "cause_detail" => "ICE_IN_HARBOR",
             "stop_names_and_ids" => ["South Station|place-sstat", "Courthouse|place-crtst"]
           }
@@ -792,12 +781,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
         assert view
                |> element("#alert_data_header_text")
-               |> render() =~
+               |> render_async() =~
                  "Alewife Escalator 349 (Platform to Russell Field) will be unavailable from #{Calendar.strftime(@start_time, "%a, %b %-d at %-I:%M %p")} to #{Calendar.strftime(@end_time, "%a, %b %-d at %-I:%M %p")} due to ice in harbor"
 
         assert view
                |> element("#alert_data_description_text")
-               |> render() =~ ~s(the elevator broke i&amp;#39;m sorry)
+               |> render_async() =~ ~s(the elevator broke i&amp;#39;m sorry)
       end
     end
 
@@ -820,7 +809,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
       |> element("form")
       |> render_change(%{
         "alert_data" => %{
-          "service_types" => [1, 4],
+          "service_types" => ["1", "4"],
           "cause_detail" => "ICE_IN_HARBOR",
           "active_period_start_specifier" => "custom",
           "active_period_end_specifier" => "custom",
@@ -830,7 +819,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
       })
 
       assert view
-             |> element("#details_view")
+             |> element("#alert_data_header_text")
              |> render() =~
                "Subway and Ferry service may experience delays from #{Calendar.strftime(@start_time, "%a, %b %-d at %-I:%M %p")} to #{Calendar.strftime(@end_time, "%a, %b %-d at %-I:%M %p")} due to ice in harbor"
 
@@ -843,6 +832,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
     test "stop route affected service autotext works when editing", %{
       conn: conn
     } do
+      # TODO failing because of stop route editing not working
       bus_route = %Route{
         direction_names: %{0 => "Outbound", 1 => "Inbound"},
         sort_order: 3,
@@ -865,8 +855,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
            by_route: fn _, _ -> [@stop, @stop_2, @stop_3] end,
            by_route: fn _, _, _ -> [@stop, @stop_2, @stop_3] end,
            get_parent: fn _ -> %{id: @stop.id} end
-         ]},
-        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]}
+         ]}
       ]) do
         ie =
           build(:informed_entity, %{
