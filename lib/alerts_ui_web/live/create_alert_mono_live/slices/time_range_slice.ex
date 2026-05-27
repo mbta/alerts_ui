@@ -175,10 +175,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   def ensure_start_date_values_for_specifier(changeset, :now, _, _) do
     now = NaiveDateTime.local_now()
 
-    change(changeset, %{
-      active_period_start: now,
-      active_period_start_date: now |> NaiveDateTime.to_date()
-    })
+    changeset
+    |> force_change(:active_period_start, now)
+    |> force_change(:active_period_start_date, now |> NaiveDateTime.to_date())
   end
 
   def ensure_start_date_values_for_specifier(changeset, _, dt, d) when is_nil(dt) or is_nil(d),
@@ -187,15 +186,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   def ensure_start_date_values_for_specifier(changeset, :start_of_service, _, d) do
     now = NaiveDateTime.local_now()
 
-    change(changeset, %{
-      active_period_start: DTHelpers.replace_date(d, now)
-    })
+    changeset
+    |> force_change(:active_period_start, DTHelpers.replace_date(d, now))
   end
 
   def ensure_start_date_values_for_specifier(changeset, :custom, dt, _) do
-    change(changeset, %{
-      active_period_start_date: NaiveDateTime.to_date(dt)
-    })
+    changeset
+    |> force_change(:active_period_start_date, NaiveDateTime.to_date(dt))
   end
 
   def ensure_start_date_values_for_specifier(changeset, _, _, _), do: changeset
@@ -216,44 +213,39 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   def ensure_end_date_values_for_specifier(changeset, :later_today, _, _) do
     end_of_service = ActivePeriod.end_of_service_datetime_naive(NaiveDateTime.local_now())
 
-    change(changeset, %{
-      active_period_end: end_of_service,
-      active_period_end_date: NaiveDateTime.to_date(end_of_service)
-    })
+    changeset
+    |> force_change(:active_period_end, end_of_service)
+    |> force_change(:active_period_end_date, NaiveDateTime.to_date(end_of_service))
   end
 
   def ensure_end_date_values_for_specifier(changeset, :until_further_notice, _, _) do
     now = NaiveDateTime.local_now()
 
-    change(changeset, %{
-      active_period_end: DTHelpers.replace_time(now, ~T[23:59:59]),
-      active_period_end_date: now |> NaiveDateTime.to_date()
-    })
+    changeset
+    |> force_change(:active_period_end, DTHelpers.replace_time(now, ~T[23:59:59]))
+    |> force_change(:active_period_end_date, now |> NaiveDateTime.to_date())
   end
 
   def ensure_end_date_values_for_specifier(changeset, :when_work_order_is_closed, _, _) do
     now = NaiveDateTime.local_now()
 
-    change(changeset, %{
-      active_period_end: DTHelpers.replace_time(now, ~T[23:59:59]),
-      active_period_end_date: now |> NaiveDateTime.to_date(),
-      can_close_automatically: true
-    })
+    changeset
+    |> force_change(:active_period_end, DTHelpers.replace_time(now, ~T[23:59:59]))
+    |> force_change(:active_period_end_date, now |> NaiveDateTime.to_date())
+    |> force_change(:can_close_automatically, true)
   end
 
   def ensure_end_date_values_for_specifier(changeset, _, dt, d) when is_nil(dt) or is_nil(d),
     do: changeset
 
   def ensure_end_date_values_for_specifier(changeset, :end_of_service, _, d) do
-    change(changeset, %{
-      active_period_end: NaiveDateTime.new!(d, ActivePeriod.end_of_service_time())
-    })
+    changeset
+    |> force_change(:active_period_end, NaiveDateTime.new!(d, ActivePeriod.end_of_service_time()))
   end
 
   def ensure_end_date_values_for_specifier(changeset, :custom, dt, _) do
-    change(changeset, %{
-      active_period_end_date: NaiveDateTime.to_date(dt)
-    })
+    changeset
+    |> force_change(:active_period_end_date, NaiveDateTime.to_date(dt))
   end
 
   def ensure_end_date_values_for_specifier(changeset, _, _, _), do: changeset
@@ -294,13 +286,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   end
 
   def ensure_end_time_values_for_specifier(changeset, :end_of_service, _),
-    do: change(changeset, %{active_period_end_time: ~T[03:00:00]})
+    do: force_change(changeset, :active_period_end_time, ~T[03:00:00])
 
   def ensure_end_time_values_for_specifier(changeset, _, _), do: changeset
 
   def normalize_alert_timing(changeset) do
     alert_timing = get_field(changeset, :alert_timing, :"one-time")
-    put_change(changeset, :alert_timing, normalize_alert_timing_field(alert_timing))
+    change(changeset, %{alert_timing: normalize_alert_timing_field(alert_timing)})
   end
 
   def normalize_alert_timing_field(:"one-time"), do: :"one-time"
