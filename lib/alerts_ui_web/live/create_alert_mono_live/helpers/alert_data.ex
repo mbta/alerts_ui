@@ -53,16 +53,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
     |> list_effect_path_names()
   end
 
-  def list_effect_path_names(route_type_name) do
-    case ModeEffect.mode_effects_by_route_type_name(route_type_name) do
-      nil ->
-        []
+  def list_effect_path_names(nil), do: []
 
-      effects ->
-        effects
-        |> Enum.reject(fn {name, _struct} -> name in @forbidden_effects end)
-        |> Enum.map(fn {_name, struct} -> struct.path_name end)
-    end
+  def list_effect_path_names(route_type_name) do
+    ModeEffect.mode_effects_by_route_type_name(route_type_name)
+    |> Enum.reject(fn {name, _struct} -> name in @forbidden_effects end)
+    |> Enum.map(fn {_name, struct} -> struct.path_name end)
   end
 
   def humanize_effect_name(%Form{} = form) do

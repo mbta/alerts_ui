@@ -116,9 +116,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   defp available_schedules_from_socket(socket) do
     case Map.get(socket.assigns, :selections) do
-      %AsyncResult{ok?: true, result: %Selections{available_schedules: schedules}} -> schedules || []
-      %Selections{available_schedules: schedules} -> schedules || []
-      _ -> []
+      %AsyncResult{ok?: true, result: %Selections{available_schedules: schedules}} ->
+        schedules || []
+
+      %Selections{available_schedules: schedules} ->
+        schedules || []
+
+      _ ->
+        []
     end
   end
 

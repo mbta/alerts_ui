@@ -53,7 +53,7 @@ defmodule Test.Support.Helpers do
     |> render_submit()
   end
 
-    def get_to_submission_page_refactor(view, mode, effect) do
+  def get_to_submission_page_refactor(view, mode, effect) do
     # Use any combo to proceed to next page
     view
     |> element("#service_type_buttons button", mode)
