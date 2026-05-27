@@ -9,11 +9,6 @@ on:
       environment:
         type: environment
         required: true
-      aws-region:
-        type: string
-        description: AWS region to use
-        required: true
-        default: us-east-1
 
 jobs:
   deploy_previous:
