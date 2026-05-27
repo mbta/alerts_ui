@@ -96,7 +96,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            by_type: fn _ -> [@route] end,
            get: fn _, _ -> @route end
          ]},
-        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
         get_to_submission_page_refactor(view, "Commuter Rail", "Delay")
@@ -149,14 +150,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     @tag :logged_in_user
     test "trip options are populated when route and direction are selected", %{conn: conn} do
       today = @todays_date |> Date.to_string()
+      # Use a future arrival_time so filter_out_old_trips keeps the schedule
+      future = DateTime.add(DateTime.utc_now(), 7200)
+      schedule = %{@schedule | arrival_time: future}
 
       with_mocks([
         {RoutesRepo, [], [by_type: fn _ -> [@route] end]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]},
         {SchedulesRepo, [],
          [
-           by_route_ids: fn ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^today] ->
-             [@schedule, @schedule]
+           by_route_ids: fn
+             ["CR-Worcester"], _ -> [schedule, schedule]
+             _, _ -> []
            end,
            end_of_rating: fn -> Date.add(@todays_date, 7) end
          ]}
@@ -196,7 +201,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
       alert_params =
         build(:alert_map, %{
           alert_id: "test-cr-edit",
-          effect: :DELAY,
+          effect: :OTHER_EFFECT,
           effect_detail: "DELAY",
           primary_service_type: "2",
           informed_entity: [
@@ -215,7 +220,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            get: fn _, _ -> @route end,
            all: fn _ -> [@route] end
          ]},
-        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end, get_parent: fn _ -> nil end]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/edit/test-cr-edit")
         render_async(view)
