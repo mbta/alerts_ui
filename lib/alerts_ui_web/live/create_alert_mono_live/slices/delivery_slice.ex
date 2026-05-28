@@ -42,14 +42,23 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
           delivery_data.banner_sync_toggle
         end
 
+      # todo check this, intended for edit
+      view_banner =
+        if delivery_data.banner_text not in [nil, ""] do
+          true
+        else
+          delivery_data.view_banner
+        end
+
       banner_text =
-        if banner_sync_toggle and delivery_data.view_banner do
+        if banner_sync_toggle and view_banner do
           delivery_data.header_text
         else
           delivery_data.banner_text || ""
         end
 
       change(changeset, %{
+        view_banner: view_banner,
         banner_sync_toggle: banner_sync_toggle,
         banner_text: banner_text,
         notification_toggle: notification_toggle,
@@ -58,7 +67,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
     end
 
     def validate(delivery_data, changeset, _params, _socket) do
-      changeset = changeset |> clear_my_errors(DeliverySlice)
       if delivery_data.view_banner do
         changeset
         |> validate_acceptance(:accept_banner,

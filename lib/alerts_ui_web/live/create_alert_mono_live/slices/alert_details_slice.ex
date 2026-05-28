@@ -1,6 +1,6 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
-  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path
+  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path, as: EffectHelper
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}
   alias AlertsUI.Models.{Cause, SeverityLevel}
   alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
@@ -58,7 +58,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     end
 
     def transform(details_data, changeset, params, socket) do
-      effect_name = Path.effect_from_url_name(details_data.effect_name || "")
+      effect_name = EffectHelper.effect_from_url_name(details_data.effect_name || "")
 
       severity = get_severity(details_data, effect_name)
       cause_detail = get_cause_detail(details_data, effect_name)
@@ -113,11 +113,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     def validate(details_data, changeset, _params, _socket) do
       image_size = details_data.image_url |> get_image_size()
-      IO.inspect(details_data)
+
       changeset
       |> clear_my_errors(AlertDetailsSlice)
       |> validate_required([:header_text])
-      |> IO.inspect()
       |> validate_url()
       |> validate_image_fields(image_size)
     end
@@ -220,7 +219,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     defp translated_details(details_data) do
       Map.merge(details_data, %{
-        effect_name: Path.effect_from_url_name(details_data.effect_name || ""),
+        effect_name: EffectHelper.effect_from_url_name(details_data.effect_name || ""),
         direction: get_direction(Map.get(details_data, :direction)),
         start_specifier: details_data.active_period_start_specifier,
         end_specifier: details_data.active_period_end_specifier,

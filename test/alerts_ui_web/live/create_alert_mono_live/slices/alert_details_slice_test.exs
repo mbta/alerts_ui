@@ -332,7 +332,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
   end
 
   describe "auto text" do
-
     @tag :logged_in_user
     test "shows error if header text is blank", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
@@ -342,18 +341,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
       |> element("form")
       |> render_change(%{
         "alert_data" => %{
-          "header_text" => ""
+          "header_text" => "",
+          "header_sync_toggle" => false
         }
       })
 
-        view
-        |> element("button#review", "Review and submit")
-        |> render_click()
-
-
       assert view
-             |> render()
-              |> element("#details_view") =~ ~s(Enter message text)
+             |> render() =~ ~s(can&#39;t be blank)
     end
 
     @tag :logged_in_user

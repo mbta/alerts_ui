@@ -70,7 +70,48 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
 
         assert view
                |> element("#alert_data_banner_text")
-               |> render_async() =~ ~s(delays)
+               |> render_async(1000) =~ ~s(delays)
+      end
+    end
+
+    @tag :logged_in_user
+    test "cannot submit banner text without accept banner checkbox", %{conn: conn} do
+      with_mocks([
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop] end,
+           get_parent: fn _ -> %{id: @stop.id} end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        get_to_submission_page_refactor(view, "Subway", "Delay")
+
+        render_async(view, 1000)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          alert_data: %{banner_sync_toggle: true, view_banner: true}
+        })
+
+        view
+        |> element("button#review", "Review and submit")
+        |> render_click()
+
+        assert view |> render_async() =~ ~s(Check box to show you understand)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          alert_data: %{accept_banner: true}
+        })
+
+        view
+        |> element("button#review", "Review and submit")
+        |> render_click()
+
+        refute view |> render_async() =~ ~s(Check box to show you understand)
       end
     end
 
