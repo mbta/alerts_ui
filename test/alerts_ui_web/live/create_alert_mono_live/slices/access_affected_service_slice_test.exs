@@ -36,7 +36,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSliceTest 
 
   # "Bike Issue" + "Facility" navigation → combination :ACCESS
   defp navigate_to_access(view) do
-    get_to_submission_page_refactor(view, "Facility", "Bike Issue")
+    get_to_submission_page_refactor(view, "Facility", "Bike issue")
   end
 
   describe "component" do
