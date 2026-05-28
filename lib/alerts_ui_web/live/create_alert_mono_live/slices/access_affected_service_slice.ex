@@ -1,6 +1,5 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
   alias Phoenix.LiveView.AsyncResult
-
   alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.CreateAlertLive
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
@@ -16,9 +15,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,
     only: [always_validate_required: 3]
 
-  import Ecto.Changeset, only: [validate_length: 3, validate_required: 2]
-
-  import Phoenix.LiveView, only: [assign_async: 3, attach_hook: 4]
+  import Phoenix.LiveView, only: [assign_async: 3]
 
   use AlertsUIWeb, :html
 
@@ -29,14 +26,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
   ]
 
   defmodule Selections do
+    alias AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice
     defstruct available_facilities: [],
               facility_id_options: [],
               filter_title_value: "All stops",
               loading: false,
               modal_stop_id_options: [],
               on_filter_accept: &AccessAffectedServiceSlice.on_filter_accept/1,
-              on_filter_clear: &AccessAffectedServiceSlice.on_filter_clear/1,
               stop_id_filter_value: "default"
+
   end
 
   defimpl Slice, for: __MODULE__ do
@@ -52,12 +50,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
       changeset
     end
 
-    def validate(_service_data, changeset, _params, socket) do
-      if socket.assigns.submitted? do
-        always_validate_required(changeset, :facility_ids, "You must select a facility")
-      else
-        changeset
-      end
+    def validate(_service_data, changeset, _params, _socket) do
+      always_validate_required(changeset, :facility_ids, "You must select a facility")
     end
 
     def assigns(_service_data, socket, params) do
@@ -129,36 +123,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
         end
       end
     end
-
-    def on_filter_accept(socket) do
-      selections =
-        case socket.assigns.selections do
-          %Selections{} = selections -> selections
-          %AsyncResult{ok?: true} = async -> async.result
-        end
-
-      selected_stop_id = socket.assigns.form.params["stop_id"]
-      stops = selections.available_facilities.stops
-
-      filter_title_value =
-        if selected_stop_id in [nil, "", "default"] or Enum.empty?(stops) do
-          "All stops"
-        else
-          Enum.filter(stops, &(&1.id === selected_stop_id))
-          |> Enum.map(& &1.name)
-          |> hd
-        end
-
-      selections = %{
-        selections
-        | stop_id_filter_value: selected_stop_id,
-          filter_title_value: filter_title_value
-      }
-
-      {:halt, assign(socket, :selections, selections)}
-    end
-
-    def on_filter_accept(socket), do: {:cont, socket}
 
     @update_selection_targets ["stop_id", "stop_search_term", "facility_search_term"]
     # update selections when a user interacts with one of our fields...
@@ -245,47 +209,34 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
     """
   end
 
+      def on_filter_accept(socket) do
+      selections =
+        case socket.assigns.selections do
+          %Selections{} = selections -> selections
+          %AsyncResult{ok?: true} = async -> async.result
+        end
+
+      selected_stop_id = socket.assigns.form.params["stop_id"]
+      stops = selections.available_facilities.stops
+
+      filter_title_value =
+        if selected_stop_id in [nil, "", "default"] or Enum.empty?(stops) do
+          "All stops"
+        else
+          Enum.filter(stops, &(&1.id === selected_stop_id))
+          |> Enum.map(& &1.name)
+          |> hd
+        end
+
+      selections = %{
+        selections
+        | stop_id_filter_value: selected_stop_id,
+          filter_title_value: filter_title_value
+      }
+
+      {:halt, assign(socket, :selections, selections)}
+    end
+
   defp filter_active?(filter_value) when filter_value in ["", nil, "default"], do: false
   defp filter_active?(_), do: true
-
-  def on_filter_accept(socket) do
-    case Map.get(socket.assigns, :selections) do
-      %Selections{} = selections ->
-        apply_filter_accept(socket, selections)
-
-      %AsyncResult{ok?: true, result: %Selections{} = selections} ->
-        apply_filter_accept(socket, selections)
-
-      _ ->
-        socket
-    end
-  end
-
-  defp apply_filter_accept(socket, selections) do
-    selected_stop_id = socket.assigns.form.params["stop_id"]
-    stops = selections.available_facilities.stops
-
-    filter_title_value =
-      if selected_stop_id in [nil, "", "default"] or Enum.empty?(stops) do
-        "All stops"
-      else
-        stops
-        |> Enum.filter(&(&1.id === selected_stop_id))
-        |> Enum.map(& &1.name)
-        |> hd()
-      end
-
-    assign(socket, :selections, %{
-      selections
-      | stop_id_filter_value: selected_stop_id,
-        filter_title_value: filter_title_value
-    })
-  end
-
-  def on_filter_clear(socket) do
-    case AlertData.sync(socket.assigns.form.source, socket, %{"alert_data" => %{"stop_id" => nil}}) do
-      {:ok, socket} -> socket
-      {:error, socket} -> socket
-    end
-  end
 end

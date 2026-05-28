@@ -172,7 +172,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   defp create_and_edit_metadata(_alert, :duplicating), do: %{}
 
   # if the alert is new (mono flow) it has no history
-  defp create_and_edit_metadata(%Alert{id: nil} = alert, _), do: %{}
+  defp create_and_edit_metadata(%Alert{id: nil}, _), do: %{}
 
   defp create_and_edit_metadata(alert, _form_type) do
     created_by =

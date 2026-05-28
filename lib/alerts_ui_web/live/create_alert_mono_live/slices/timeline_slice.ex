@@ -61,10 +61,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
       changeset
     end
 
-    def assigns(timeline_data, socket, params) do
-      # TODO
-      # make buttons actually navigate you
-      # third page?
+    def assigns(_timeline_data, socket, params) do
       progress =
         Map.get(
           socket.assigns,
