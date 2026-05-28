@@ -56,8 +56,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
       |> NotificationPeriodSlice.ensure_notification_start()
     end
 
-    def validate(_slice, changeset, _params, _socket) do
+    def validate(_slice, changeset, params, _socket) do
       changeset
+      |> TimeRangeValidators.validate_cast_notification_datetimes(params)
       |> TimeRangeValidators.validate_notification()
       |> TimeRangeValidators.validate_required_notification_fields()
     end
@@ -99,31 +100,32 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
   end
 
   def ensure_notification_start_for_specifier(changeset, :same_as_effect_period, _, _) do
-    change(changeset, %{
-      notification_period_start: nil,
-      notification_period_start_date: nil
-    })
+    changeset
+    |> force_change(:notification_period_start, nil)
+    |> force_change(:notification_period_start_date, nil)
   end
 
   def ensure_notification_start_for_specifier(changeset, :now, _, _) do
     now = NaiveDateTime.local_now()
 
-    change(changeset, %{
-      notification_period_start: now,
-      notification_period_start_date: now |> NaiveDateTime.to_date()
-    })
+    changeset
+    |> force_change(:notification_period_start, now)
+    |> force_change(:notification_period_start_date, now |> NaiveDateTime.to_date())
   end
 
-  def ensure_notification_start_for_specifier(changeset, :start_of_service, _, _) do
-    now = NaiveDateTime.local_now()
+  def ensure_notification_start_for_specifier(changeset, :start_of_service, _, d) do
+    datetime = NaiveDateTime.new!(d, ActivePeriod.start_of_service_time())
 
-    change(changeset, %{
-      notification_period_start: now,
-      notification_period_start_date: now |> NaiveDateTime.to_date()
-    })
+    changeset
+    |> force_change(:notification_period_start, datetime)
+    |> force_change(:notification_period_start_date, d)
   end
 
-  def ensure_notification_start_for_specifier(changeset, :custom, _, _), do: changeset
+  def ensure_notification_start_for_specifier(changeset, :custom, dt, _) do
+    changeset
+    |> force_change(:notification_period_start, dt)
+    |> force_change(:notification_period_start_date, NaiveDateTime.to_date(dt))
+  end
 
   def ensure_notification_start_for_specifier(changeset, _, _, _), do: changeset
 
@@ -142,7 +144,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
           class="md:w-[16rem] h-10"
         />
         <.datetime
-          :if={@form[:notification_specifier].value === :start_of_service}
+          :if={@form[:notification_specifier].value in [:start_of_service, "start_of_service"]}
           type="date"
           label=""
           field={@form[:notification_period_start_date]}
@@ -155,7 +157,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
           class="md:min-w-64 md:max-w-64 h-10"
         />
         <.datetime
-          :if={@form[:notification_specifier].value === :custom}
+          :if={@form[:notification_specifier].value in [:custom, "custom"]}
           label=""
           field={@form[:notification_period_start]}
           min={@form[:active_period_start].value |> naive_datetime_to_iso8601}

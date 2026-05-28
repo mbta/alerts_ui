@@ -9,7 +9,19 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
     |> maybe_validate_datetime(alert_params, "active_period_end", :active_period_end)
   end
 
-  defp maybe_validate_datetime(changeset, params, key, field) do
+  def validate_cast_notification_datetimes(changeset, params) do
+    alert_params = Map.get(params, "alert_data", %{})
+
+    maybe_validate_datetime(
+      changeset,
+      alert_params,
+      "notification_period_start",
+      :notification_period_start,
+      "Enter a valid date and time"
+    )
+  end
+
+  defp maybe_validate_datetime(changeset, params, key, field, message \\ "Enter a valid datetime") do
     case Map.get(params, key) do
       nil ->
         changeset
@@ -20,7 +32,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
       value ->
         case Ecto.Type.cast(:naive_datetime, value) do
           {:ok, _} -> changeset
-          _ -> add_error(changeset, field, "Enter a valid datetime")
+          _ -> add_error(changeset, field, message)
         end
     end
   end
