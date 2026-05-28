@@ -1,6 +1,30 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
   import Ecto.Changeset
 
+  def validate_cast_datetimes(changeset, params) do
+    alert_params = Map.get(params, "alert_data", %{})
+
+    changeset
+    |> maybe_validate_datetime(alert_params, "active_period_start", :active_period_start)
+    |> maybe_validate_datetime(alert_params, "active_period_end", :active_period_end)
+  end
+
+  defp maybe_validate_datetime(changeset, params, key, field) do
+    case Map.get(params, key) do
+      nil ->
+        changeset
+
+      "" ->
+        changeset
+
+      value ->
+        case Ecto.Type.cast(:naive_datetime, value) do
+          {:ok, _} -> changeset
+          _ -> add_error(changeset, field, "Enter a valid datetime")
+        end
+    end
+  end
+
   def validate_required_fields(changeset) do
     timing = get_field(changeset, :alert_timing)
 

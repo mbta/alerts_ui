@@ -81,8 +81,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       )
     end
 
-    def validate(_slice, changeset, _params, _socket) do
+    def validate(_slice, changeset, params, _socket) do
       changeset
+      |> TimeRangeValidators.validate_cast_datetimes(params)
       |> TimeRangeValidators.validate_required_fields()
       |> TimeRangeValidators.validate_end_after_start()
       |> TimeRangeValidators.validate_start_is_after_now()
@@ -303,6 +304,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   def set_start_end_from_trip_selection(changeset, "trip_ids", _, []) do
     now = NaiveDateTime.local_now()
     end_of_service = now |> ActivePeriod.end_of_service_datetime_naive()
+
     changeset
     |> force_change(:active_period_start_specifier, :now)
     |> force_change(:active_period_start, now)
