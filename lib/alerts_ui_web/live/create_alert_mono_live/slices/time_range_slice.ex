@@ -300,8 +300,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
   def ensure_end_time_values_for_specifier(changeset, _, _), do: changeset
 
-  def set_start_end_from_trip_selection(changeset, "trip_ids", _, []),
-    do: changeset
+  def set_start_end_from_trip_selection(changeset, "trip_ids", _, []) do
+    now = NaiveDateTime.local_now()
+    end_of_service = now |> ActivePeriod.end_of_service_datetime_naive()
+    changeset
+    |> force_change(:active_period_start_specifier, :now)
+    |> force_change(:active_period_start, now)
+    |> force_change(:active_period_start_date, now |> NaiveDateTime.to_date())
+    |> force_change(:active_period_end_specifier, :later_today)
+    |> force_change(:active_period_end, end_of_service)
+    |> force_change(:active_period_end_date, end_of_service |> NaiveDateTime.to_date())
+  end
 
   def set_start_end_from_trip_selection(
         changeset,
@@ -311,11 +320,19 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       ) do
     available_schedules = Map.get(selections, :available_schedules, [])
     selected_schedules = Enum.filter(available_schedules, &(&1.trip.id in trip_ids))
+    now = NaiveDateTime.local_now()
     departure = get_trip_departure_time(selected_schedules)
     arrival = get_trip_arrival_time(nil, selected_schedules)
 
+    {departure, start_specifier} =
+      if NaiveDateTime.compare(now, departure) == :gt do
+        {now, :now}
+      else
+        {departure, :custom}
+      end
+
     changeset
-    |> force_change(:active_period_start_specifier, :custom)
+    |> force_change(:active_period_start_specifier, start_specifier)
     |> force_change(:active_period_start, departure)
     |> force_change(:active_period_start_date, departure |> NaiveDateTime.to_date())
     |> force_change(:active_period_end_specifier, :custom)
