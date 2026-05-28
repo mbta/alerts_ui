@@ -96,6 +96,20 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
           modal_route_id -> [modal_route_id]
         end
 
+      # Capture previous selected stops before the async re-fetch so that stops which were
+      # selected but are now absent from route-filtered available_stops are preserved.
+      prev_selected_stops =
+        case Map.get(socket.assigns, :selections) do
+          %AsyncResult{ok?: true, result: %Selections{selected_stops: stops}} when is_list(stops) ->
+            stops
+
+          %Selections{selected_stops: stops} when is_list(stops) ->
+            stops
+
+          _ ->
+            []
+        end
+
       assign_async(socket, :selections, fn ->
         available_filter_routes =
           CreateAlertLive.get_routes(route_type)
@@ -106,7 +120,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
         available_routes =
           CreateAlertLive.get_routes_by_stop(stop_ids, route_type)
 
-        selected_stops = get_selected_stops(available_stops, stop_ids)
+        # Merge previously selected stops with currently available stops so that
+        # stops hidden by a route filter are still tracked as selected.
+        candidate_stops =
+          Enum.uniq_by(prev_selected_stops ++ available_stops, & &1.id)
+
+        selected_stops = get_selected_stops(candidate_stops, stop_ids)
 
         modal_route_id_options =
           modal_route_id_options(
