@@ -906,7 +906,6 @@ defmodule AlertsUI.AlertBuilder do
         },
         effect
       ) do
-    IO.puts("DEBUG build_informed_entities :RDT trip_ids=#{inspect(trip_ids)} trip_information_by_id=#{inspect(trip_information_by_id)}")
     trip_ids
     |> Enum.map(fn trip_id ->
       %{direction_id: direction_id, route_id: route_id} = trip_information_by_id[trip_id]

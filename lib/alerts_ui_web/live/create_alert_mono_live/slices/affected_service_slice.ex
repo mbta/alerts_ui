@@ -101,21 +101,27 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     route_type = get_field(changeset, :route_type)
     direction = get_field(changeset, :direction)
 
-    trip_info =
-      available_schedules
-      |> Stream.filter(&(&1.trip.id in trip_ids))
-      |> Stream.filter(fn s ->
-        direction in [nil, "default", s.trip.direction_id, Integer.to_string(s.trip.direction_id)]
-      end)
-      |> Enum.reduce(%{}, fn s, acc ->
-        Map.put(acc, s.trip.id, %{
-          direction_id: s.trip.direction_id,
-          route_id: s.route.id,
-          trip_name: SelectFormatter.name_for_option(s, route_type)
-        })
-      end)
+    # If selections aren't loaded yet (empty schedules) but trips are selected,
+    # preserve existing trip_information_by_id rather than overwriting with empty map.
+    if Enum.empty?(available_schedules) and Enum.any?(trip_ids) do
+      changeset
+    else
+      trip_info =
+        available_schedules
+        |> Stream.filter(&(&1.trip.id in trip_ids))
+        |> Stream.filter(fn s ->
+          direction in [nil, "default", s.trip.direction_id, Integer.to_string(s.trip.direction_id)]
+        end)
+        |> Enum.reduce(%{}, fn s, acc ->
+          Map.put(acc, s.trip.id, %{
+            direction_id: s.trip.direction_id,
+            route_id: s.route.id,
+            trip_name: SelectFormatter.name_for_option(s, route_type)
+          })
+        end)
 
-    cast(changeset, %{trip_information_by_id: trip_info}, [:trip_information_by_id])
+      cast(changeset, %{trip_information_by_id: trip_info}, [:trip_information_by_id])
+    end
   end
 
   defp available_schedules_from_socket(socket) do
@@ -245,6 +251,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
           |> Enum.find({"All future trips", nil}, fn {_option, value} ->
             value == (modal_date || today())
           end)
+
 
         selections = %Selections{
           available_routes: available_routes,

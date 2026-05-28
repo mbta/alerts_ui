@@ -350,11 +350,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
 
         render_async(view)
 
-        # Set modal_date to empty string, which maps to "All future trips"
+        # Set modal_date to "default", which maps to "All future trips"
         view
         |> element("form")
         |> render_change(%{
-          "alert_data" => %{"modal_date" => "", "route_ids" => ["CR-Worcester"]}
+          "alert_data" => %{"modal_date" => "default", "route_ids" => ["CR-Worcester"]}
         })
 
         render_click(view, "accept_filter")
@@ -913,7 +913,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     test "shows field validation error on review attempt with no route selected", %{conn: conn} do
       with_mocks([
         {RoutesRepo, [], [by_type: fn _ -> [@bus_route] end]},
-        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
         get_to_submission_page_refactor(view, "Bus", "Detour")
@@ -983,26 +984,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         get_to_submission_page_refactor(view, "Bus", "Delay")
         render_async(view)
 
-        view
-        |> element("form")
-        |> render_change(%{
-          "_target" => ["alert_data", "route_ids"],
-          "alert_data" => %{"route_ids" => [@bus_route.id]}
-        })
-
-        render_async(view)
-
-        # Deselect route
-        view
-        |> element("form")
-        |> render_change(%{
-          "_target" => ["alert_data", "route_ids"],
-          "alert_data" => %{"route_ids" => []}
-        })
-
+        # Attempt review without selecting any route
         open_review_modal(view)
 
-        assert render(view) =~ "text-text-error"
+        assert render_async(view) =~ "text-text-error"
       end
     end
 
@@ -1014,7 +999,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            by_type: fn _ -> [@route] end,
            get: fn _, _ -> @route end
          ]},
-        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
         get_to_submission_page_refactor(view, "Commuter Rail", "Delay")
