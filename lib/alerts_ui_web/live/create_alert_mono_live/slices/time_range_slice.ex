@@ -288,11 +288,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     departure = get_trip_departure_time(selected_schedules)
     arrival = get_trip_arrival_time(nil, selected_schedules)
 
-    IO.inspect(%{
-      departure: departure,
-      arrival: arrival
-    })
-
     changeset
     |> force_change(:active_period_start_specifier, :custom)
     |> force_change(:active_period_start, departure)
