@@ -192,7 +192,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     #   live navigate to `?review=true`, opening the modal
     # else:
     #   open error flash
-
     socket =
       socket
       |> assign(:submitting?, true)

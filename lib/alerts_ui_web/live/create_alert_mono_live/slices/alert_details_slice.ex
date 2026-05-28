@@ -41,13 +41,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData, only: [clear_my_errors: 2]
 
     alias Phoenix.LiveView.AsyncResult
+    alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice
 
     @severity_options SeverityLevel.severity_tuples()
                       |> Enum.map(fn {desc, severity, _level} -> {desc, severity} end)
 
-    @required_fields ~w[header_text]a
+    @required_fields %{header_text: "can't be blank"}
 
     @cdn_host "cdn.mbta.com"
 
@@ -116,7 +117,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
       changeset
       |> clear_my_errors(AlertDetailsSlice)
-      |> validate_required([:header_text])
+      |> Validation.always_validate_required(@required_fields)
       |> validate_url()
       |> validate_image_fields(image_size)
     end

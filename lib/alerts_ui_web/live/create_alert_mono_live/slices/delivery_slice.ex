@@ -42,7 +42,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
           delivery_data.banner_sync_toggle
         end
 
-      # todo check this, intended for edit
       view_banner =
         if delivery_data.banner_text not in [nil, ""] do
           true
@@ -68,12 +67,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
 
     def validate(delivery_data, changeset, _params, _socket) do
       if delivery_data.view_banner do
-        changeset
-        |> validate_acceptance(:accept_banner,
-          message: "Check box to show you understand"
-        )
+        always_validate_acceptance(changeset, :accept_banner, "Check box to show you understand")
       else
         changeset
+      end
+    end
+
+    def always_validate_acceptance(changeset, field, message) do
+      case get_field(changeset, field) do
+        missing when missing == false -> add_error(changeset, field, message)
+        _ -> changeset
       end
     end
 
