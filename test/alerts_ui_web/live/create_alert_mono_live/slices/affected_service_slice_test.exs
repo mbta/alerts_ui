@@ -966,6 +966,103 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
                )
       end
     end
+
+    @tag :logged_in_user
+    test "modal search works", %{conn: conn} do
+      tomorrow_day_name = Calendar.strftime(Date.add(@todays_date, 1), "%a %b %0d")
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@route] end,
+           get: fn _, _ -> @route end
+         ]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn ["CR-Worcester"], _ -> [@schedule_future, @schedule_future] end,
+           end_of_rating: fn -> Date.add(@todays_date, 1) end
+         ]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        get_to_submission_page_refactor(view, "Commuter Rail", "Delay")
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => ["CR-Worcester"]}
+        })
+
+        render_async(view)
+
+        assert view
+               |> element("select#alert_data_modal_date")
+               |> render() =~ "#{tomorrow_day_name}"
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{"modal_date_search_term" => "q", "route_ids" => ["CR-Worcester"]}
+        })
+
+        render_async(view)
+
+        refute view
+               |> element("select#alert_data_modal_date")
+               |> render() =~ "#{tomorrow_day_name}"
+      end
+    end
+
+    @tag :logged_in_user
+    test "stop element not spuriously disabled if second is selected", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@route, @route_2] end,
+           by_type: fn _, _ -> [@route, @route_2] end,
+           get: fn _, _ -> @route end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        get_to_submission_page_refactor(view, "Ferry", "Delay")
+        render_async(view)
+
+        assert render_async(view) =~
+                 ~s(id="alert_data_stop_names_and_ids" disabled="disabled")
+
+        refute render_async(view) =~ "All Stops"
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => [@route.id]}
+        })
+
+        render_async(view)
+
+        refute render_async(view) =~
+                 ~s(id="alert_data_stop_names_and_ids" disabled="disabled")
+
+        assert render_async(view) =~ "All Stops"
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => [@route_2.id]}
+        })
+
+        render_async(view)
+
+        refute render_async(view) =~
+                 ~s(id="alert_data_stop_names_and_ids" disabled="disabled")
+      end
+    end
   end
 
   describe "end-to-end" do
@@ -1268,6 +1365,316 @@ assert document_has_element?(
         render_async(view)
 
         # Set time range far in the future
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "active_period_start_specifier" => "custom",
+            "active_period_end_specifier" => "custom"
+          }
+        })
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "active_period_start" => ~N[2045-03-28 03:00:00],
+            "active_period_end" => ~N[2045-03-31 19:00:00]
+          }
+        })
+
+        refute render(view) =~ ~s(Effect must start before)
+      end
+    end
+
+    @tag :logged_in_user
+    test "publishing a bus delay AFTER selecting and deselecting will put up a flash error for the missing route",
+         %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@bus_route] end,
+           get: fn _, _ -> @bus_route end
+         ]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+
+        get_to_submission_page_refactor(view, "Bus", "Delay")
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => []}
+        })
+
+        open_review_modal(view)
+
+        render_async(view)
+
+        # Inline
+        assert has_element?(view, "p.text-text-error", "You must select a route")
+
+        # Flash
+        assert view
+               |> element("#flash")
+               |> render() =~ "You must select a route"
+      end
+    end
+
+    @tag :logged_in_user
+    test "trip select makes 'All Trips' and individual trip selection mutually exclusive",
+         %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_stop: fn _stop_id, _ -> [@route] end,
+           by_type: fn _types -> [@route] end,
+           get: fn _, _ -> @route end,
+           get: fn _ -> @route end
+         ]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _, _ ->
+             [@schedule_future, @schedule_future, @schedule_3, @schedule_3]
+           end,
+           end_of_rating: fn -> Date.add(@todays_date, 7) end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _route_type -> [@stop] end,
+           by_route: fn _, _, _ -> [@stop] end
+         ]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _, _ -> [] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+
+        get_to_submission_page_refactor(view, "Commuter Rail", "Delay")
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => ["CR-Worcester"]}
+        })
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "trip_ids"],
+          "alert_data" => %{"trip_ids" => ["default", "trip-595", "trip-596"]}
+        })
+
+        render_async(view)
+
+        open_review_modal(view)
+
+        view
+        |> element("#review-modal-container button", "Submit")
+        |> render_click()
+
+        flash = assert_redirect(view, "/")
+
+        alert_id =
+          flash["info"]
+          |> String.replace("New alert #", "")
+          |> String.replace(" created", "")
+
+        new_alert = Alerts.get_by_alert_id(alert_id)
+
+        assert [%{trip: %{trip_id: "trip-595"}}, %{trip: %{trip_id: "trip-596"}}] =
+                 Map.get(new_alert, :informed_entity) |> Enum.sort_by(& &1.trip.trip_id)
+      end
+    end
+
+    @tag :logged_in_user
+    test "end-to-end editing", %{conn: conn} do
+      trip = build(:trip_descriptor, %{trip_id: "trip-595"})
+
+      ie =
+        build(:informed_entity, %{
+          route_id: @route.id,
+          route_type: @route.type,
+          activities: [:BOARD],
+          stop_id: @stop.id,
+          trip: Map.from_struct(trip),
+          direction_id: nil
+        })
+
+      alert_params =
+        build(
+          :alert_map,
+          %{
+            alert_id: "test-e2e-editing",
+            header_text: "example header text",
+            informed_entity: [Map.from_struct(ie)],
+            effect: :OTHER_EFFECT,
+            effect_detail: "DELAY",
+            original_route_selections: [@route.id],
+            original_stop_selections: ["#{@stop.name}|#{@stop.id}"],
+            reminder_times: [],
+            severity: 7,
+            cause_detail: "unknown",
+            user: build(:user),
+            primary_service_type: Integer.to_string(@route.type)
+          }
+        )
+
+      {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_stop: fn _stop_id, _ -> [@route] end,
+           by_type: fn _types -> [@route] end,
+           all: fn _opts -> [@route] end,
+           get: fn _ -> @route end,
+           get: fn _, _ -> @route end
+         ]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _, _ -> [@schedule_future, @schedule_future] end,
+           end_of_rating: fn -> Date.add(@todays_date, 7) end,
+           trip: fn "trip-595" -> %Trip{id: "trip-595", name: "595", direction_id: 0} end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _route_type -> [@stop, @stop_2] end,
+           by_route: fn _, _, _ -> [@stop, @stop_2] end,
+           get_parent: fn
+             "place-sstat" -> @stop
+             "place-crtst" -> @stop_2
+           end,
+           get: fn
+             "place-sstat" -> @stop
+             "place-crtst" -> @stop_2
+           end
+         ]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _, _ -> [] end,
+           included_stops_by_route_id: fn "CR-Worcester", _ -> [@stop, @stop_2] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/edit/test-e2e-editing")
+        render_async(view)
+
+        {:ok, document} =
+          view
+          |> render()
+          |> Floki.parse_document()
+
+        assert document_has_element?(
+                 document,
+                 "[value=\"CR-Worcester\"][selected=\"selected\"]"
+               )
+
+        assert document_has_element?(
+                 document,
+                 "[value=\"South Station|place-sstat\"][selected=\"selected\"]"
+               )
+
+        assert document_has_element?(
+                 document,
+                 "[value=\"trip-595\"][selected=\"selected\"]"
+               )
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "stop_names_and_ids" => ["#{@stop_2.name}|#{@stop_2.id}"]
+          }
+        })
+
+        open_review_modal(view)
+
+        view
+        |> element("#review-modal-container button", "Submit")
+        |> render_click()
+
+        :timer.sleep(50)
+        alert = Alerts.get_by_alert_id("test-e2e-editing")
+
+        assert [
+                 %{
+                   stop_id: "place-crtst",
+                   route_id: "CR-Worcester",
+                   trip: %{trip_id: "trip-595"}
+                 }
+               ] = Map.get(alert, :informed_entity)
+      end
+    end
+
+    @tag :logged_in_user
+    test "user can select 'All future trips', a trip, and then effect start far from now",
+         %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_stop: fn _stop_id, _ -> [@route] end,
+           by_type: fn _types -> [@route] end,
+           get: fn _, _ -> @route end,
+           get: fn _ -> @route end
+         ]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _, _ ->
+             [@schedule_future, @schedule_future, @schedule_3, @schedule_3]
+           end,
+           end_of_rating: fn -> Date.add(@todays_date, 7) end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _route_type -> [@stop] end,
+           by_route: fn _, _, _ -> [@stop] end
+         ]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _, _ -> [] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+
+        get_to_submission_page_refactor(view, "Commuter Rail", "Cancellation")
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => ["CR-Worcester"]}
+        })
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{"modal_date" => "default", "route_ids" => ["CR-Worcester"]}
+        })
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "trip_ids"],
+          "alert_data" => %{"trip_ids" => ["trip-595", "trip-596"]}
+        })
+
+        render_async(view)
+
         view
         |> element("form")
         |> render_change(%{
