@@ -2,22 +2,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
   @moduledoc """
     Live Component for notification period of form
   """
-  alias AlertsUI.Models.{
-    ActivePeriod,
-    Alert
-  }
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
     only: [put_over_nil: 3, values_to_options: 1]
 
-  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Time, as: DTHelpers
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
-
-  alias AlertsUIWeb.FormComponents.Helpers.{
-    DateTimeHelpers,
-    TimeRangeDurationText,
-    RecurringDurationText
-  }
 
   alias Phoenix.HTML.Form
 

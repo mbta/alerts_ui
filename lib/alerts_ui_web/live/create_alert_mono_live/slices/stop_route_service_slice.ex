@@ -1,21 +1,9 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
-  alias Phoenix.LiveView.AsyncResult
 
-  alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.CreateAlertLive
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.SelectFormatter
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
-  alias AlertsUIWeb.FormComponents.AffectedService
-  alias AlertsUIWeb.FormComponents.Helpers.ContentFormatter
-
-  alias AlertsUIWeb.CreateAlertLive
-
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.API, only: [async_available?: 1]
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData, only: [humanize_effect_name: 1]
-
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.SelectFormatter,
-    only: [formatted_select_options: 1]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Selections,
     only: [assign_unwrapped_selections: 2]
@@ -105,7 +93,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
       stop_route_ids =
         case modal_route_id do
-          _none when _none in [nil, "default"] -> nil
+          none when none in [nil, "default"] -> nil
           modal_route_id -> [modal_route_id]
         end
 
@@ -325,10 +313,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
     """
   end
 
-  def render(%{form: form} = assigns) do
-    assign(assigns, :selections, %Selections{}) |> render()
-  end
-
   @spec disable_routes_input?(map()) :: boolean()
   defp disable_routes_input?(form) do
     form[:stop_ids].value in [nil, []]
@@ -339,21 +323,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
   defp get_selected_stops(available_stops, stop_ids) do
     Enum.filter(available_stops, &(&1.id in stop_ids))
-  end
-
-  defp get_selected_routes(nil, _), do: nil
-  defp get_selected_routes(_, nil), do: nil
-
-  defp get_selected_routes(available_routes, route_ids) do
-    available_routes
-    |> Enum.reduce([], fn {route_id, route}, acc ->
-      if route_id in route_ids do
-        acc ++ List.wrap(route)
-      else
-        acc
-      end
-    end)
-    |> List.flatten()
   end
 
   def on_filter_accept(socket) do

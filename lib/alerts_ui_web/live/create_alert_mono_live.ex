@@ -10,8 +10,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   alias AlertsUI.Alerts
   alias AlertsUI.Models.Alert
 
-  alias AlertsUIWeb.FormComponents.Helpers.ErrorFormatter
-
   alias AlertsUIWeb.CreateAlertMonoLive.{
     AlertData,
     Title
@@ -31,7 +29,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     UrlSlice
   }
 
-  alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.CreateAlertMonoLive.Step
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.{
@@ -216,12 +213,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   end
 
   @impl true
-  def handle_event("save", params, socket) do
+  def handle_event("save", _params, socket) do
     {:noreply, persist_valid_alert(socket)}
   end
 
   @impl true
-  def handle_event("accept_filter", _params, %{assigns: %{selections: selections}} = socket) do
+  def handle_event("accept_filter", _params, %{assigns: %{selections: _selections}} = socket) do
     selections =
       socket.assigns
       |> assign_unwrapped_selections()
@@ -239,7 +236,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   end
 
   @impl true
-  def handle_event("cancel_filter", params, socket) do
+  def handle_event("cancel_filter", _params, socket) do
     {:noreply, socket}
   end
 
@@ -420,13 +417,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   end
 
   defp display_errors(socket), do: socket
-
-  defp format_errors(errors, combination) do
-    errors
-    |> ErrorFormatter.parse_field_errors(combination)
-    |> Enum.uniq()
-    |> Enum.map_join("; ", fn {_title, {message, _error}} -> "#{message}" end)
-  end
 
   def return_to(return_to_value) do
     uri = URI.parse(return_to_value)

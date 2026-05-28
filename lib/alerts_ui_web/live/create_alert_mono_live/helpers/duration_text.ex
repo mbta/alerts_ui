@@ -236,30 +236,4 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.DurationText do
     |> Enum.reverse()
     |> Enum.join(", ")
   end
-
-  @spec ensure_date_format(nil | String.t() | Date.t()) ::
-          nil | Date.t()
-  defp ensure_date_format(nil), do: nil
-
-  defp ensure_date_format(""), do: nil
-
-  defp ensure_date_format(date) when is_binary(date) do
-    Date.from_iso8601!(date)
-  end
-
-  defp ensure_date_format(%Date{} = date), do: date
-
-  defp ensure_time_format(nil), do: nil
-
-  @spec ensure_time_format(nil | String.t() | Time.t()) ::
-          nil | Time.t()
-  defp ensure_time_format(""), do: nil
-
-  defp ensure_time_format(time) when is_binary(time) do
-    time
-    |> String.pad_trailing(08, ":00")
-    |> Time.from_iso8601!()
-  end
-
-  defp ensure_time_format(%Time{} = time), do: time
 end
