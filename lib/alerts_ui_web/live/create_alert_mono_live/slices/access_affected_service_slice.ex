@@ -22,6 +22,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
   defstruct [
     :facility_ids,
     :facility_search_term,
+    :stop_id,
     :stop_search_term
   ]
 
@@ -163,7 +164,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
         %AsyncResult{ok?: true} = async -> async.result
       end
 
-    selected_stop_id = socket.assigns.form.params["stop_id"]
+    selected_stop_id = socket.assigns.form[:stop_id].value
     stops = selections.available_facilities.stops
 
     filter_title_value =
