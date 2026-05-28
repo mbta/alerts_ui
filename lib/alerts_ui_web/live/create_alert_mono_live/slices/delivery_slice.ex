@@ -52,13 +52,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
       change(changeset, %{
         banner_sync_toggle: banner_sync_toggle,
         banner_text: banner_text,
-        notification_toggle: notification_toggle
+        notification_toggle: notification_toggle,
+        accept_banner: delivery_data.accept_banner
       })
     end
 
     def validate(delivery_data, changeset, _params, _socket) do
+      changeset = changeset |> clear_my_errors(DeliverySlice)
       if delivery_data.view_banner do
-        validate_acceptance(changeset, :accept_banner,
+        changeset
+        |> validate_acceptance(:accept_banner,
           message: "Check box to show you understand"
         )
       else

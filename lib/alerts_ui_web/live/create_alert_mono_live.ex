@@ -192,6 +192,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     #   live navigate to `?review=true`, opening the modal
     # else:
     #   open error flash
+
     socket =
       socket
       |> assign(:submitting?, true)
@@ -407,7 +408,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   defp display_errors(%{assigns: %{form: form}} = socket) do
     formatted_errors =
-      socket.assigns.form.errors
+      form.errors
       |> Enum.map(fn {_title, {message, _error}} -> "#{message}" end)
       |> Enum.uniq()
       |> Enum.join(";")

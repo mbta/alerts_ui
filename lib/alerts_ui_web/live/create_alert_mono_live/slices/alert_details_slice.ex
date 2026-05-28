@@ -113,15 +113,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     def validate(details_data, changeset, _params, _socket) do
       image_size = details_data.image_url |> get_image_size()
-
+      IO.inspect(details_data)
       changeset
       |> clear_my_errors(AlertDetailsSlice)
-      |> validate_required(@required_fields)
+      |> validate_required([:header_text])
+      |> IO.inspect()
       |> validate_url()
       |> validate_image_fields(image_size)
     end
 
-    def assigns(details_data, socket, _params) do
+    def assigns(_details_data, socket, _params) do
       form = socket.assigns.form
       form_data = Map.merge(form.source.data, form.source.changes)
 

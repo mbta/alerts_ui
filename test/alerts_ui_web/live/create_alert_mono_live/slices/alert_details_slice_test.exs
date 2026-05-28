@@ -332,6 +332,30 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
   end
 
   describe "auto text" do
+
+    @tag :logged_in_user
+    test "shows error if header text is blank", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      get_to_submission_page_refactor(view, "Ferry", "Delay")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "header_text" => ""
+        }
+      })
+
+        view
+        |> element("button#review", "Review and submit")
+        |> render_click()
+
+
+      assert view
+             |> render()
+              |> element("#details_view") =~ ~s(Enter message text)
+    end
+
     @tag :logged_in_user
     test "duration works correctly in case where time is start-to-end in future the same day", %{
       conn: conn
