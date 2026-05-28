@@ -32,10 +32,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     :trip_ids,
     :trip_search_term
   ]
+
   @single_route_effect_names ["Detour", "Snow Route"]
 
   defmodule Selections do
-
     @single_route_effect_names ["Detour", "Snow Route"]
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
 
