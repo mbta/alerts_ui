@@ -35,10 +35,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
               loading: false,
               modal_stop_id_options: [],
               on_filter_accept: &AccessAffectedServiceSlice.on_filter_accept/1,
+              on_filter_clear: &AccessAffectedServiceSlice.on_filter_clear/1,
               stop_id_filter_value: "default"
   end
 
   defimpl Slice, for: __MODULE__ do
+    alias AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice
+
     def mount(_service_data, socket, _base_params) do
       socket
     end
@@ -60,105 +63,100 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
     end
 
     def assigns(_service_data, socket, params) do
-      # update selections here
-      async_assign_selections(socket, params)
+      AccessAffectedServiceSlice.async_assign_selections(socket, params)
     end
+  end
 
-    defp async_assign_selections(socket, params) do
-      if update_selections?(params) do
-        form = socket.assigns.form
+  def async_assign_selections(socket, params) do
+    if update_selections?(params) do
+      form = socket.assigns.form
 
-        facility_ids = form[:facility_ids].value || []
-        facility_search_term = form[:facility_search_term].value
+      facility_ids = form[:facility_ids].value || []
+      facility_search_term = form[:facility_search_term].value
 
-        facility_types =
-          form[:effect_name].value
-          |> effect_to_lookup_key()
-          |> InformedEntity.facility_effect_to_types()
+      facility_types =
+        form[:effect_name].value
+        |> effect_to_lookup_key()
+        |> InformedEntity.facility_effect_to_types()
 
-        stop_search_term = form[:stop_search_term].value
-        stop_id = form[:stop_id].value
+      stop_search_term = form[:stop_search_term].value
+      stop_id = form[:stop_id].value
 
-        assign_async(socket, :selections, fn ->
-          available_facilities =
-            CreateAlertLive.get_facilities(facility_types)
+      assign_async(socket, :selections, fn ->
+        available_facilities =
+          CreateAlertLive.get_facilities(facility_types)
 
-          modal_stop_id_options =
-            SelectFormatter.formatted_select_options(%SelectFormatter{
-              options: Map.get(available_facilities, :stops) || [],
-              search_term: stop_search_term,
-              values_to_keep: stop_id |> List.wrap(),
-              option_prefix: "stop-filter"
-            })
+        modal_stop_id_options =
+          SelectFormatter.formatted_select_options(%SelectFormatter{
+            options: Map.get(available_facilities, :stops) || [],
+            search_term: stop_search_term,
+            values_to_keep: stop_id |> List.wrap(),
+            option_prefix: "stop-filter"
+          })
 
-          filtered_facilities =
-            available_facilities.facilities
-            |> Enum.filter(
-              &filter_facility_by_stop_ids(
-                &1,
-                stop_id || "default",
-                facility_ids
-              )
+        filtered_facilities =
+          available_facilities.facilities
+          |> Enum.filter(
+            &filter_facility_by_stop_ids(
+              &1,
+              stop_id || "default",
+              facility_ids
             )
+          )
 
-          facility_id_options =
-            SelectFormatter.formatted_select_options(%SelectFormatter{
-              options: filtered_facilities,
-              search_term: facility_search_term,
-              values_to_keep: facility_ids,
-              option_prefix: "facility-filter"
-            })
+        facility_id_options =
+          SelectFormatter.formatted_select_options(%SelectFormatter{
+            options: filtered_facilities,
+            search_term: facility_search_term,
+            values_to_keep: facility_ids,
+            option_prefix: "facility-filter"
+          })
 
-          selections = %Selections{
-            available_facilities: available_facilities,
-            modal_stop_id_options: modal_stop_id_options,
-            facility_id_options: facility_id_options
-          }
+        selections = %Selections{
+          available_facilities: available_facilities,
+          modal_stop_id_options: modal_stop_id_options,
+          facility_id_options: facility_id_options
+        }
 
-          {:ok, %{selections: selections}}
-        end)
-        |> assign(:selections, %Selections{})
-      else
-        case Map.get(socket.assigns, :selections) do
-          nil ->
-            assign(socket, :selections, %Selections{})
+        {:ok, %{selections: selections}}
+      end)
+      |> assign(:selections, %Selections{})
+    else
+      case Map.get(socket.assigns, :selections) do
+        nil ->
+          assign(socket, :selections, %Selections{})
 
-          _ ->
-            socket
-        end
+        _ ->
+          socket
       end
     end
+  end
 
-    @update_selection_targets ["stop_id", "stop_search_term", "facility_search_term"]
-    # update selections when a user interacts with one of our fields...
-    defp update_selections?(%{"_target" => ["alert_data", field]})
-         when field in @update_selection_targets,
-         do: true
+  @update_selection_targets ["stop_id", "stop_search_term", "facility_search_term"]
+  defp update_selections?(%{"_target" => ["alert_data", field]})
+       when field in @update_selection_targets,
+       do: true
 
-    # ...but not on any other user interaction...
-    defp update_selections?(%{"_target" => _target}), do: false
-    # ...and always on mount, when there is no target
-    defp update_selections?(_), do: true
+  defp update_selections?(%{"_target" => _target}), do: false
+  defp update_selections?(_), do: true
 
-    defp filter_facility_by_stop_ids(facility, stop_id_filter_value, selected_facility_ids) do
-      # returns true if facility in list if it belongs to a selected stop or has already been selected by the user.
-      equals_stop_id =
-        if stop_id_filter_value === "default" do
-          true
-        else
-          facility.stop.id === stop_id_filter_value
-        end
+  defp filter_facility_by_stop_ids(facility, stop_id_filter_value, selected_facility_ids) do
+    equals_stop_id =
+      if stop_id_filter_value === "default" do
+        true
+      else
+        facility.stop.id === stop_id_filter_value
+      end
 
-      equals_stop_id or facility.id in selected_facility_ids
-    end
+    equals_stop_id or facility.id in selected_facility_ids
+  end
 
-    defp effect_to_lookup_key(nil), do: nil
+  defp effect_to_lookup_key(nil), do: nil
 
-    defp effect_to_lookup_key(string) do
-      string
-      |> String.upcase()
-      |> String.replace(" ", "_")
-    end
+  defp effect_to_lookup_key(string) do
+    string
+    |> String.upcase()
+    |> String.replace(" ", "_")
   end
 
   def on_filter_accept(socket) do
@@ -187,6 +185,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
     }
 
     assign(socket, :selections, selections)
+  end
+
+  def on_filter_clear(socket) do
+    case AlertData.sync(socket.assigns.form.source, socket, %{
+           "alert_data" => %{"stop_id" => nil}
+         }) do
+      {:ok, socket} -> async_assign_selections(socket, %{})
+      {:error, socket} -> async_assign_selections(socket, %{})
+    end
   end
 
   def render(assigns) do
