@@ -2,7 +2,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
   use ExUnit.Case, async: false
   use AlertsUIWeb.ConnCase
   import AlertsUI.Support.Factory
-  import Ecto.Changeset
   import Phoenix.LiveViewTest
   import Mock
   import Test.Support.Helpers
@@ -773,7 +772,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         get_to_submission_page_refactor(view, "Subway", "Station closure")
         render_async(view)
 
-        # Select first stop
+        # Select first stop — both routes should auto-select
         view
         |> element("form")
         |> render_change(%{
@@ -783,18 +782,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         render_async(view)
 
-        # Both routes should now be available; explicitly select both
-        view
-        |> element("form")
-        |> render_change(%{
-          "alert_data" => %{"route_ids" => ["Blue", "Red"]}
-        })
-
-        render_async(view)
-
         {:ok, document} = view |> render_async() |> Floki.parse_document()
-        assert document_has_element?(document, "option[value=\"Blue\"]")
-        assert document_has_element?(document, "option[value=\"Red\"]")
+        assert document_has_element?(document, "option[value=\"Blue\"][selected=\"selected\"]")
+        assert document_has_element?(document, "option[value=\"Red\"][selected=\"selected\"]")
 
         # Select second stop
         view
@@ -833,6 +823,32 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
                  %{route_id: "Red", route_type: 1, stop_id: "place-pktrm"}
                ] =
                  Map.get(new_alert, :informed_entity)
+
+        # Edit the alert and verify informed entities are preserved
+        {:ok, view, _html} = live(conn, "/alerts/mono/edit/#{alert_id}")
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{"alert_data" => %{"header_text" => "edited alert"}})
+
+        view |> element("button#review", "Review and submit") |> render_click()
+
+        assert has_element?(view, "#review-modal-container")
+
+        view |> element("#review-modal-container button", "Submit") |> render_click()
+
+        assert_redirect(view, "/")
+
+        edited_alert = AlertsUI.Alerts.get_by_alert_id(alert_id)
+
+        assert [
+                 %{route_id: "Blue", route_type: 1, stop_id: "place-aqucl"},
+                 %{route_id: "Red", route_type: 1, stop_id: "place-aqucl"},
+                 %{route_id: "Blue", route_type: 1, stop_id: "place-pktrm"},
+                 %{route_id: "Red", route_type: 1, stop_id: "place-pktrm"}
+               ] =
+                 Map.get(edited_alert, :informed_entity)
       end
     end
 
@@ -873,7 +889,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         get_to_submission_page_refactor(view, "Subway", "Station closure")
         render_async(view)
 
-        # Select stop — both routes become available
+        # Select stop — both routes should auto-select by default
         view
         |> element("form")
         |> render_change(%{
@@ -883,7 +899,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         render_async(view)
 
-        # Explicitly select only Red route
+        {:ok, document} = view |> render_async() |> Floki.parse_document()
+        assert document_has_element?(document, "option[value=\"Blue\"][selected=\"selected\"]")
+        assert document_has_element?(document, "option[value=\"Red\"][selected=\"selected\"]")
+
+        # Explicitly select only Red route (subset of defaults)
         view
         |> element("form")
         |> render_change(%{
@@ -917,6 +937,82 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         new_alert = AlertsUI.Alerts.get_by_alert_id(alert_id)
 
         assert [%{route_id: "Red"}] = Map.get(new_alert, :informed_entity)
+      end
+    end
+
+    @tag :logged_in_user
+    test "publishing a bus multi-route detour AFTER selecting and deselecting will put up a flash error for the missing route",
+         %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _ -> [@route, @route_two] end]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        get_to_submission_page_refactor(view, "Bus", "Multi-route detour")
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "stop_ids"],
+          "alert_data" => %{"stop_ids" => [], "route_ids" => []}
+        })
+
+        view |> element("button#review", "Review and submit") |> render_click()
+
+        assert has_element?(view, "p.text-text-error", "You must select a stop")
+        assert has_element?(view, "p.text-text-error", "You must select a route")
+
+        flash_html = view |> element("#flash") |> render()
+        assert flash_html =~ "You must select a stop"
+        assert flash_html =~ "You must select a route"
+      end
+    end
+
+    @tag :logged_in_user
+    test "route options are all selected by default and allows user entry", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@route, @route_two] end,
+           by_stop: fn _ -> [@route, @route_two] end,
+           by_stop: fn _, _ -> [@route, @route_two] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _, _ -> [@stop] end,
+           by_route: fn _, _, _ -> [@stop] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        get_to_submission_page_refactor(view, "Subway", "Station closure")
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "stop_ids"],
+          "alert_data" => %{"stop_ids" => ["place-aqucl"]}
+        })
+
+        render_async(view)
+
+        {:ok, document} = view |> render_async() |> Floki.parse_document()
+        assert document_has_element?(document, "option[value=\"Blue\"][selected=\"selected\"]")
+        assert document_has_element?(document, "option[value=\"Red\"][selected=\"selected\"]")
+
+        # User deselects Blue, keeping only Red
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{"route_ids" => ["Red"]}
+        })
+
+        render_async(view)
+
+        {:ok, document} = view |> render_async() |> Floki.parse_document()
+        refute document_has_element?(document, "option[value=\"Blue\"][selected=\"selected\"]")
+        assert document_has_element?(document, "option[value=\"Red\"][selected=\"selected\"]")
       end
     end
   end

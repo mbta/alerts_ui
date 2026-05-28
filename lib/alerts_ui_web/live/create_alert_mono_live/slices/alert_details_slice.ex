@@ -39,10 +39,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     import Ecto.Changeset
     import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData, only: [clear_my_errors: 2]
 
+    alias AlertsUI.Models.Alert
     alias Phoenix.LiveView.AsyncResult
     alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice
+    alias MBTAV3API.Stops.Stop
 
     @severity_options SeverityLevel.severity_tuples()
                       |> Enum.map(fn {desc, severity, _level} -> {desc, severity} end)
@@ -85,6 +87,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
         details_data
         |> translated_details()
         |> Map.merge(selected)
+        |> Map.merge(%{service_types: get_field(changeset, :service_types)})
         |> AlertDataToAutoText.build_autotext_data()
 
       header_text =
@@ -196,7 +199,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
       routes = Enum.filter(selections.available_routes || [], &(&1.id in route_ids))
 
-      stops = Enum.filter(selections.available_stops || [], &(&1.id in stop_ids))
+      stops_from_original =
+        (get_field(changeset, :original_stop_selections) || [])
+        |> Alert.get_original_names_and_ids()
+        |> Enum.map(fn {name, id} -> %Stop{name: name, id: id} end)
+        |> Enum.filter(&(&1.id in stop_ids))
+
+      original_ids = MapSet.new(stops_from_original, & &1.id)
+
+      stops_from_available =
+        Enum.filter(selections.available_stops || [], &(&1.id in stop_ids and &1.id not in original_ids))
+
+      stops = stops_from_original ++ stops_from_available
 
       schedules =
         Enum.filter(Map.get(selections, :available_schedules) || [], &(&1.trip.id in trip_ids))

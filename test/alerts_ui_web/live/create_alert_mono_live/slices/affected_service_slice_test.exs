@@ -47,7 +47,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     departure_time: ~U[2099-01-01 12:00:00Z]
   }
 
-  defp base_changeset(attrs \\ %{}) do
+  defp base_changeset(attrs) do
     Ecto.Changeset.cast(
       %AlertData{},
       Map.merge(%{route_type: 2, direction: "0", trip_ids: []}, attrs),
@@ -322,8 +322,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
 
     @tag :logged_in_user
     test "filter title updates to all future trips when no date selected", %{conn: conn} do
-      today = @todays_date |> Date.to_string()
-
       with_mocks([
         {RoutesRepo, [],
          [
