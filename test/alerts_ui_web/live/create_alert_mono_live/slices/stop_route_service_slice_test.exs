@@ -23,6 +23,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteSliceTest do
         )
 
       option_values = Enum.map(options, &Keyword.get(&1, :value))
+
       refute "place-pktrm" in option_values,
              "Expected Park Street to be absent from options, but it appeared — " <>
                "this would mean preservation is working, disproving the hypothesis"
@@ -42,6 +43,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteSliceTest do
         )
 
       option_values = Enum.map(options, &Keyword.get(&1, :value))
+
       assert "place-pktrm" in option_values,
              "Expected Park Street to be preserved in options when selected_stops is populated"
     end
