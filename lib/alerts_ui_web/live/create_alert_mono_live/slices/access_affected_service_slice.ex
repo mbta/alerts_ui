@@ -27,6 +27,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
 
   defmodule Selections do
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice
+
     defstruct available_facilities: [],
               facility_id_options: [],
               filter_title_value: "All stops",
@@ -34,7 +35,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
               modal_stop_id_options: [],
               on_filter_accept: &AccessAffectedServiceSlice.on_filter_accept/1,
               stop_id_filter_value: "default"
-
   end
 
   defimpl Slice, for: __MODULE__ do
@@ -209,33 +209,33 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
     """
   end
 
-      def on_filter_accept(socket) do
-      selections =
-        case socket.assigns.selections do
-          %Selections{} = selections -> selections
-          %AsyncResult{ok?: true} = async -> async.result
-        end
+  def on_filter_accept(socket) do
+    selections =
+      case socket.assigns.selections do
+        %Selections{} = selections -> selections
+        %AsyncResult{ok?: true} = async -> async.result
+      end
 
-      selected_stop_id = socket.assigns.form.params["stop_id"]
-      stops = selections.available_facilities.stops
+    selected_stop_id = socket.assigns.form.params["stop_id"]
+    stops = selections.available_facilities.stops
 
-      filter_title_value =
-        if selected_stop_id in [nil, "", "default"] or Enum.empty?(stops) do
-          "All stops"
-        else
-          Enum.filter(stops, &(&1.id === selected_stop_id))
-          |> Enum.map(& &1.name)
-          |> hd
-        end
+    filter_title_value =
+      if selected_stop_id in [nil, "", "default"] or Enum.empty?(stops) do
+        "All stops"
+      else
+        Enum.filter(stops, &(&1.id === selected_stop_id))
+        |> Enum.map(& &1.name)
+        |> hd
+      end
 
-      selections = %{
-        selections
-        | stop_id_filter_value: selected_stop_id,
-          filter_title_value: filter_title_value
-      }
+    selections = %{
+      selections
+      | stop_id_filter_value: selected_stop_id,
+        filter_title_value: filter_title_value
+    }
 
-      {:halt, assign(socket, :selections, selections)}
-    end
+    {:halt, assign(socket, :selections, selections)}
+  end
 
   defp filter_active?(filter_value) when filter_value in ["", nil, "default"], do: false
   defp filter_active?(_), do: true
