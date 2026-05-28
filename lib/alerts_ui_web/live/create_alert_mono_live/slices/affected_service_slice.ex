@@ -5,10 +5,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
 
-  alias AlertsUIWeb.FormComponents.Helpers.{
-    SelectFormatter,
-    ServiceEffectCombinations
-  }
+  alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
 
   import Phoenix.LiveView, only: [assign_async: 3]
   import Ecto.Changeset, only: [cast: 3, get_field: 2, change: 2]
@@ -35,8 +32,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     :trip_ids,
     :trip_search_term
   ]
+  @single_route_effect_names ["Detour", "Snow Route"]
 
   defmodule Selections do
+
+    @single_route_effect_names ["Detour", "Snow Route"]
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
 
     defstruct available_routes: [],
@@ -156,7 +156,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       # stops
       # schedules
       form = socket.assigns.form
-      selections = socket.assigns.selections
 
       direction = form[:direction].value
       modal_date = form[:modal_date].value
@@ -315,8 +314,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       _ -> changeset
     end
   end
-
-  @single_route_effect_names ["Detour", "Snow Route"]
 
   defp ensure_route_ids(changeset) do
     effect_name = get_field(changeset, :effect_name)

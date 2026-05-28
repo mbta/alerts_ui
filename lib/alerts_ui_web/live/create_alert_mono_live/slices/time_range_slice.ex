@@ -1,8 +1,5 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
-  alias AlertsUI.Models.{
-    ActivePeriod,
-    Alert
-  }
+  alias AlertsUI.Models.ActivePeriod
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
     only: [put_over_nil: 3, values_to_options: 1]
@@ -11,10 +8,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Time, as: DTHelpers
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
 
-  alias AlertsUIWeb.FormComponents.Helpers.{
-    DateTimeHelpers,
-    TimeRangeDurationText
-  }
+  alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
 
   alias Phoenix.HTML.Form
 
@@ -42,21 +36,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     alias AlertsUIWeb.CreateAlertMonoLive.AlertData
     alias AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice
-
-    @time_range_params [
-      :active_period_end_date,
-      :active_period_end_specifier,
-      :active_period_end_time_specifier,
-      :active_period_end_time,
-      :active_period_end,
-      :active_period_start_date,
-      :active_period_start_specifier,
-      :active_period_start_time_specifier,
-      :active_period_start_time,
-      :alert_timing,
-      :can_close_automatically,
-      :recurrence_days
-    ]
 
     def mount(_slice, socket, _params) do
       socket
@@ -161,7 +140,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     |> force_change(:can_close_automatically, get_field(changeset, :can_close_automatically))
   end
 
-  def change_timing(changeset, a, b) do
+  def change_timing(changeset, _, _) do
     changeset
   end
 

@@ -156,7 +156,7 @@ defmodule AlertsUI.Models.InformedEntity do
   def facility_effect_to_types(:PARKING_CLOSURE), do: ["PARKING_AREA", "PICK_DROP"]
   def facility_effect_to_types(:PARKING_ISSUE), do: ["PARKING_AREA", "PICK_DROP"]
 
-  def facility_effect_to_types(effect) do
+  def facility_effect_to_types(_effect) do
     []
     # raise ArgumentError, "no such facility effect #{effect}"
   end

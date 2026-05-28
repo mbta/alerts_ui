@@ -310,7 +310,7 @@ defmodule AlertsUIWeb.ReviewModal do
             <p class="font-bold pb-1">Reminders</p>
             <%= if @reminder_times != [] do %>
               <div class="pb-4">
-                <%= for reminder <- reminder_times_iterator(reminder_times) do %>
+                <%= for reminder <- reminder_times_iterator(@reminder_times) do %>
                   <p>
                     {Calendar.strftime(reminder_time(reminder), "%a %m/%d/%Y %-I:%M %p")}
                     <span

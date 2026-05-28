@@ -74,25 +74,4 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSlice do
       ]
     end)
   end
-
-  defp integer_service_types(%{"service_types" => service_types} = systemwide_affected_service)
-       when is_list(service_types) do
-    service_types =
-      service_types
-      |> Enum.map(&integer_service_type/1)
-      |> Enum.reject(&is_nil/1)
-
-    %{systemwide_affected_service | "service_types" => service_types}
-  end
-
-  defp integer_service_type("1"), do: 1
-  defp integer_service_type("2"), do: 2
-  defp integer_service_type("3"), do: 3
-  defp integer_service_type("4"), do: 4
-  defp integer_service_type(service_type_int) when service_type_int in 0..4, do: service_type_int
-
-  defp integer_service_type(unknown_service_type) do
-    Logger.error("Unknown service type: #{inspect(unknown_service_type)}")
-    nil
-  end
 end

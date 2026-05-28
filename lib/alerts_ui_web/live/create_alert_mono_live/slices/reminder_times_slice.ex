@@ -1,6 +1,5 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
   alias AlertsUI.Helpers.ReminderTimes
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
