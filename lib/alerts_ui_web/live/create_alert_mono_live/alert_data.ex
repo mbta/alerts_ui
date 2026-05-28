@@ -252,8 +252,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
         {extracted_params, socket}
       end)
 
+    merged_params = Map.merge(Map.from_struct(base), extracted_params)
+
     __MODULE__
-    |> struct(extracted_params)
+    |> struct(merged_params)
     |> sync(socket, params, init_param_fields())
   end
 
