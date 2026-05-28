@@ -496,7 +496,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             label="Upcoming dates"
             field={@form[:modal_date]}
             filter_field={@form[:modal_date_search_term]}
-            options={service_dates()}
+            options={filter_service_dates(service_dates(), @form[:modal_date_search_term].value, @form[:modal_date].value)}
             class="h-[32rem]"
             prompt="All future trips"
             multiple={false}
@@ -583,6 +583,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       <hr class="mt-4" />
     </div>
     """
+  end
+
+  defp filter_service_dates(dates, nil, _selected), do: dates
+  defp filter_service_dates(dates, "", _selected), do: dates
+
+  defp filter_service_dates(dates, search_term, selected) do
+    lower = String.downcase(search_term)
+
+    Enum.filter(dates, fn {label, value} ->
+      String.contains?(String.downcase(label), lower) || value == selected
+    end)
   end
 
   defp date_filter_active?(filter_value, today) when filter_value == today, do: false
