@@ -90,7 +90,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       |> TimeRangeSlice.ensure_start_date_values()
       |> TimeRangeSlice.ensure_end_date_values()
       |> TimeRangeSlice.ensure_start_time_values()
-      |> TimeRangeSlice.set_start_end_from_trip_selection(target, socket.assigns.selections, get_field(changeset, :trip_ids, []))
+      |> TimeRangeSlice.set_start_end_from_trip_selection(
+        target,
+        socket.assigns.selections,
+        get_field(changeset, :trip_ids, [])
+      )
     end
 
     def validate(_slice, changeset, _params, _socket) do
@@ -292,18 +296,24 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   def ensure_end_time_values_for_specifier(changeset, _, _), do: changeset
 
   def set_start_end_from_trip_selection(changeset, "trip_ids", _, []),
-    do:
-      changeset
+    do: changeset
 
-  def set_start_end_from_trip_selection(changeset, "trip_ids", %{ok?: true, result: selections}, trip_ids) do
+  def set_start_end_from_trip_selection(
+        changeset,
+        "trip_ids",
+        %{ok?: true, result: selections},
+        trip_ids
+      ) do
     available_schedules = Map.get(selections, :available_schedules, [])
     selected_schedules = Enum.filter(available_schedules, &(&1.trip.id in trip_ids))
     departure = get_trip_departure_time(selected_schedules)
     arrival = get_trip_arrival_time(nil, selected_schedules)
+
     IO.inspect(%{
       departure: departure,
       arrival: arrival
     })
+
     changeset
     |> force_change(:active_period_start_specifier, :custom)
     |> force_change(:active_period_start, departure)

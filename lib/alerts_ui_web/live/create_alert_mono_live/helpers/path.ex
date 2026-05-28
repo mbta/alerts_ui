@@ -93,4 +93,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Path do
   def path_effect_name_from_socket(%Socket{} = socket) do
     socket.assigns.form[:effect_name].value
   end
+
+  def effect_from_url_name(nil), do: nil
+
+  def effect_from_url_name(url_name) when is_atom(url_name) do
+    effect_from_url_name("#{url_name}")
+  end
+
+  def effect_from_url_name(url_name) do
+    url_name
+    |> String.replace("_", " ")
+    |> String.split(" ")
+    |> Enum.map_join(" ", &String.capitalize(&1))
+    |> String.replace("-route", "-Route")
+  end
 end

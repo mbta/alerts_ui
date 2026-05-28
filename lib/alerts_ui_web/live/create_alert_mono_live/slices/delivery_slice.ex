@@ -1,11 +1,16 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
+  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
   alias Phoenix.HTML.Form
 
   use AlertsUIWeb, :html
 
   defstruct [
+    :effect_name,
+    :route_type,
+    :header_text,
     :accept_banner,
     :banner_sync_toggle,
     :banner_text,
@@ -19,10 +24,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
     def mount(_delivery_data, socket, _base_params), do: socket
 
     def extract(delivery_data, %AlertData{} = _alert_data, _params) do
-      delivery_data
+      struct(delivery_data)
     end
 
-    def transform(delivery_data, changeset, params, _socket) do
+    def transform(delivery_data, changeset, params, socket) do
+      effect_name = Path.effect_from_url_name(delivery_data.effect_name || "")
+
+      notification_toggle =
+        get_notification_toggle_default(delivery_data, effect_name, socket.assigns.form_type)
+
       [_, target | _] = Map.get(params, "_target", [nil, nil])
 
       banner_sync_toggle =
@@ -33,15 +43,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
         end
 
       banner_text =
-        if !!banner_sync_toggle and !!delivery_data.view_banner do
-          get_field(changeset, :header_text)
+        if banner_sync_toggle and delivery_data.view_banner do
+          delivery_data.header_text
         else
-          delivery_data.banner_text
+          delivery_data.banner_text || ""
         end
 
       change(changeset, %{
         banner_sync_toggle: banner_sync_toggle,
-        banner_text: banner_text
+        banner_text: banner_text,
+        notification_toggle: notification_toggle
       })
     end
 
@@ -57,6 +68,34 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
 
     def assigns(_delivery_data, socket, _params) do
       socket
+    end
+
+    defp get_notification_toggle_default(
+           %{notification_toggle: nil, route_type: route_type},
+           effect_name,
+           :creating
+         ) do
+      GetKeyForModeEffect.get_value_of_key(
+        :send_push_notification_on_create,
+        route_type,
+        effect_name
+      )
+    end
+
+    defp get_notification_toggle_default(
+           %{notification_toggle: nil, route_type: route_type},
+           effect_name,
+           :editing
+         ) do
+      GetKeyForModeEffect.get_value_of_key(
+        :send_push_notification_on_edit,
+        route_type,
+        effect_name
+      )
+    end
+
+    defp get_notification_toggle_default(%{notification_toggle: notification_toggle}, _, _) do
+      notification_toggle
     end
   end
 
@@ -87,8 +126,20 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
               <.textarea
                 field={@form[:banner_text]}
                 label="Website banner text"
-                class="w-[100%] min-h-[10rem] border-b-0"
-                maxlength="4000"
+                phx-debounce={120}
+                maxlength="255"
+                id="header_input"
+                class={
+                  [
+                    "w-[100%] min-h-[10rem] z-20 mt-3",
+                    if(String.length(@form[:header_text].value || "") >= 4000,
+                      do: "!border-error border-b-1",
+                      else: "border-b-0"
+                    )
+                  ]
+                  |> Enum.join(" ")
+                }
+                value={@form[:banner_text].value}
               />
               <.textarea_footer
                 character_limit={4000}

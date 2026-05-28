@@ -1,11 +1,16 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.ReviewModal
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.PredictionSuppressionWarningModal
   use AlertsUIWeb, :html
 
-  defstruct header_text: ""
+  defstruct [
+    :created_timestamp,
+    :created_by,
+    :last_edited_at,
+    :last_edited_by,
+    :last_push_notification_timestamp
+  ]
 
   defimpl Slice, for: __MODULE__ do
     def mount(_slice_data, socket, _base_params), do: socket

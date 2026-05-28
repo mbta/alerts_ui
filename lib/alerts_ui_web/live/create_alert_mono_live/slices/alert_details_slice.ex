@@ -1,5 +1,6 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}
   alias AlertsUI.Models.{Cause, SeverityLevel}
   alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
@@ -57,12 +58,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     end
 
     def transform(details_data, changeset, params, socket) do
-      effect_name = effect_from_url_name(details_data.effect_name || "")
+      effect_name = Path.effect_from_url_name(details_data.effect_name || "")
 
       severity = get_severity(details_data, effect_name)
       cause_detail = get_cause_detail(details_data, effect_name)
 
-      [_, target] = Map.get(params, "_target", [nil, nil])
+      [_, target | _] = Map.get(params, "_target", [nil, nil])
 
       header_sync_toggle =
         if target == "header_text" and details_data.header_sync_toggle == true do
@@ -120,7 +121,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       |> validate_image_fields(image_size)
     end
 
-    def assigns(_details_data, socket, _params) do
+    def assigns(details_data, socket, _params) do
       form = socket.assigns.form
       form_data = Map.merge(form.source.data, form.source.changes)
 
@@ -218,7 +219,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     defp translated_details(details_data) do
       Map.merge(details_data, %{
-        effect_name: effect_from_url_name(details_data.effect_name || ""),
+        effect_name: Path.effect_from_url_name(details_data.effect_name || ""),
         direction: get_direction(Map.get(details_data, :direction)),
         start_specifier: details_data.active_period_start_specifier,
         end_specifier: details_data.active_period_end_specifier,
@@ -231,20 +232,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
         start_time: details_data.active_period_start_time,
         end_time: details_data.active_period_end_time
       })
-    end
-
-    defp effect_from_url_name(nil), do: nil
-
-    defp effect_from_url_name(url_name) when is_atom(url_name) do
-      effect_from_url_name("#{url_name}")
-    end
-
-    defp effect_from_url_name(url_name) do
-      url_name
-      |> String.replace("_", " ")
-      |> String.split(" ")
-      |> Enum.map_join(" ", &String.capitalize(&1))
-      |> String.replace("-route", "-Route")
     end
 
     defp formatted_causes(route_type, combination) do
