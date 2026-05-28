@@ -9,7 +9,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
   defstruct [
     :effect_name,
     :route_type,
-    :service_types,
     # time range
     :active_period_start_specifier,
     :active_period_end_specifier,

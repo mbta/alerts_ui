@@ -2,10 +2,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSliceTest do
   use ExUnit.Case, async: false
   use AlertsUIWeb.ConnCase
   import AlertsUI.Support.Factory
+  import Ecto.Changeset
   import Phoenix.LiveViewTest
   import Test.Support.Helpers
 
   alias AlertsUI.Alerts
+  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
+  alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSlice
 
   describe "component" do
     @tag :logged_in_user
@@ -25,6 +29,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSliceTest do
       view |> element("button#review", "Review and submit") |> render_click()
 
       assert render(view) =~ "Please fix the following errors:"
+      assert render(view) =~ "Select a service type"
     end
 
     @tag :logged_in_user
@@ -55,6 +60,64 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSliceTest do
       {:ok, view, _html} = live(conn, "/alerts/mono/edit/test-systemwide-edit")
 
       assert render(view) =~ ~s(value="1")
+    end
+
+    @tag :logged_in_user
+    test "service type checkbox is shown as checked after selecting it", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      get_to_submission_page_refactor(view, "Systemwide", "Notice")
+
+      view
+      |> element("form")
+      |> render_change(%{"alert_data" => %{"service_types" => ["1"]}})
+
+      {:ok, document} = view |> render() |> Floki.parse_document()
+
+      assert document_has_element?(document, "input#service-type-subway[checked]")
+    end
+
+    @tag :logged_in_user
+    test "invalid service type string is rejected on submit", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      get_to_submission_page_refactor(view, "Systemwide", "Notice")
+
+      view
+      |> element("form")
+      |> render_change(%{"alert_data" => %{"service_types" => ["a"]}})
+
+      view |> element("button#review", "Review and submit") |> render_click()
+
+      assert render(view) =~ "Select a service type"
+    end
+
+    @tag :logged_in_user
+    test "string service type values are cast to integers and shown as checked", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      get_to_submission_page_refactor(view, "Systemwide", "Notice")
+
+      view
+      |> element("form")
+      |> render_change(%{"alert_data" => %{"service_types" => ["1"]}})
+
+      {:ok, document} = view |> render() |> Floki.parse_document()
+
+      assert document_has_element?(document, "input#service-type-subway[checked]")
+    end
+  end
+
+  describe "Slice.transform/4" do
+    test "is a pass-through (conversion handled by Ecto cast)" do
+      changeset = change(%AlertData{}, service_types: [3])
+
+      result =
+        Slice.transform(
+          %SystemwideServiceSlice{service_types: [3]},
+          changeset,
+          %{},
+          %Phoenix.LiveView.Socket{}
+        )
+
+      assert result == changeset
     end
   end
 end
