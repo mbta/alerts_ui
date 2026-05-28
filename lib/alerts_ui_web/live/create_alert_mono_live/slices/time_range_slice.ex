@@ -81,7 +81,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       |> put_over_nil(:can_close_automatically, nil)
     end
 
-    def transform(_slice, changeset, params, _socket) do
+    def transform(_slice, changeset, params, socket) do
       [_, target | _] = Map.get(params, "_target", [nil, nil])
 
       changeset
@@ -90,6 +90,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       |> TimeRangeSlice.ensure_start_date_values()
       |> TimeRangeSlice.ensure_end_date_values()
       |> TimeRangeSlice.ensure_start_time_values()
+      |> TimeRangeSlice.set_start_end_from_trip_selection(target, socket.assigns.selections, get_field(changeset, :trip_ids, []))
     end
 
     def validate(_slice, changeset, _params, _socket) do
@@ -175,10 +176,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   def ensure_start_date_values_for_specifier(changeset, :now, _, _) do
     now = NaiveDateTime.local_now()
 
-    change(changeset, %{
-      active_period_start: now,
-      active_period_start_date: now |> NaiveDateTime.to_date()
-    })
+    changeset
+    |> force_change(:active_period_start, now)
+    |> force_change(:active_period_start_date, now |> NaiveDateTime.to_date())
   end
 
   def ensure_start_date_values_for_specifier(changeset, _, dt, d) when is_nil(dt) or is_nil(d),
@@ -187,15 +187,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   def ensure_start_date_values_for_specifier(changeset, :start_of_service, _, d) do
     now = NaiveDateTime.local_now()
 
-    change(changeset, %{
-      active_period_start: DTHelpers.replace_date(d, now)
-    })
+    changeset
+    |> force_change(:active_period_start, DTHelpers.replace_date(d, now))
   end
 
   def ensure_start_date_values_for_specifier(changeset, :custom, dt, _) do
-    change(changeset, %{
-      active_period_start_date: NaiveDateTime.to_date(dt)
-    })
+    changeset
+    |> force_change(:active_period_start_date, NaiveDateTime.to_date(dt))
   end
 
   def ensure_start_date_values_for_specifier(changeset, _, _, _), do: changeset
@@ -216,44 +214,39 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   def ensure_end_date_values_for_specifier(changeset, :later_today, _, _) do
     end_of_service = ActivePeriod.end_of_service_datetime_naive(NaiveDateTime.local_now())
 
-    change(changeset, %{
-      active_period_end: end_of_service,
-      active_period_end_date: NaiveDateTime.to_date(end_of_service)
-    })
+    changeset
+    |> force_change(:active_period_end, end_of_service)
+    |> force_change(:active_period_end_date, NaiveDateTime.to_date(end_of_service))
   end
 
   def ensure_end_date_values_for_specifier(changeset, :until_further_notice, _, _) do
     now = NaiveDateTime.local_now()
 
-    change(changeset, %{
-      active_period_end: DTHelpers.replace_time(now, ~T[23:59:59]),
-      active_period_end_date: now |> NaiveDateTime.to_date()
-    })
+    changeset
+    |> force_change(:active_period_end, DTHelpers.replace_time(now, ~T[23:59:59]))
+    |> force_change(:active_period_end_date, now |> NaiveDateTime.to_date())
   end
 
   def ensure_end_date_values_for_specifier(changeset, :when_work_order_is_closed, _, _) do
     now = NaiveDateTime.local_now()
 
-    change(changeset, %{
-      active_period_end: DTHelpers.replace_time(now, ~T[23:59:59]),
-      active_period_end_date: now |> NaiveDateTime.to_date(),
-      can_close_automatically: true
-    })
+    changeset
+    |> force_change(:active_period_end, DTHelpers.replace_time(now, ~T[23:59:59]))
+    |> force_change(:active_period_end_date, now |> NaiveDateTime.to_date())
+    |> force_change(:can_close_automatically, true)
   end
 
   def ensure_end_date_values_for_specifier(changeset, _, dt, d) when is_nil(dt) or is_nil(d),
     do: changeset
 
   def ensure_end_date_values_for_specifier(changeset, :end_of_service, _, d) do
-    change(changeset, %{
-      active_period_end: NaiveDateTime.new!(d, ActivePeriod.end_of_service_time())
-    })
+    changeset
+    |> force_change(:active_period_end, NaiveDateTime.new!(d, ActivePeriod.end_of_service_time()))
   end
 
   def ensure_end_date_values_for_specifier(changeset, :custom, dt, _) do
-    change(changeset, %{
-      active_period_end_date: NaiveDateTime.to_date(dt)
-    })
+    changeset
+    |> force_change(:active_period_end_date, NaiveDateTime.to_date(dt))
   end
 
   def ensure_end_date_values_for_specifier(changeset, _, _, _), do: changeset
@@ -294,13 +287,53 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   end
 
   def ensure_end_time_values_for_specifier(changeset, :end_of_service, _),
-    do: change(changeset, %{active_period_end_time: ~T[03:00:00]})
+    do: force_change(changeset, :active_period_end_time, ~T[03:00:00])
 
   def ensure_end_time_values_for_specifier(changeset, _, _), do: changeset
 
+  def set_start_end_from_trip_selection(changeset, "trip_ids", _, []),
+    do:
+      changeset
+
+  def set_start_end_from_trip_selection(changeset, "trip_ids", %{ok?: true, result: selections}, trip_ids) do
+    available_schedules = Map.get(selections, :available_schedules, [])
+    selected_schedules = Enum.filter(available_schedules, &(&1.trip.id in trip_ids))
+    departure = get_trip_departure_time(selected_schedules)
+    arrival = get_trip_arrival_time(nil, selected_schedules)
+    IO.inspect(%{
+      departure: departure,
+      arrival: arrival
+    })
+    changeset
+    |> force_change(:active_period_start_specifier, :custom)
+    |> force_change(:active_period_start, departure)
+    |> force_change(:active_period_start_date, departure |> NaiveDateTime.to_date())
+    |> force_change(:active_period_end_specifier, :custom)
+    |> force_change(:active_period_end, NaiveDateTime.add(arrival, 1, :hour))
+    |> force_change(:active_period_end_date, arrival |> NaiveDateTime.to_date())
+  end
+
+  def set_start_end_from_trip_selection(changeset, _, _, _), do: changeset
+
+  defp get_trip_departure_time(selected_schedules) do
+    selected_schedules
+    |> Enum.map(& &1.departure_time)
+    |> Enum.min(DateTime, fn -> nil end)
+    |> utc_datetime_to_naive()
+  end
+
+  defp get_trip_arrival_time("default", _), do: nil
+
+  defp get_trip_arrival_time(_, selected_schedules) do
+    selected_schedules
+    |> Enum.map(& &1.time_of_last_trip_arrival)
+    |> Enum.max(DateTime, fn -> nil end)
+    |> utc_datetime_to_naive()
+  end
+
   def normalize_alert_timing(changeset) do
     alert_timing = get_field(changeset, :alert_timing, :"one-time")
-    put_change(changeset, :alert_timing, normalize_alert_timing_field(alert_timing))
+    change(changeset, %{alert_timing: normalize_alert_timing_field(alert_timing)})
   end
 
   def normalize_alert_timing_field(:"one-time"), do: :"one-time"
