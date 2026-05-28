@@ -2,16 +2,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
   use ExUnit.Case, async: false
   use AlertsUIWeb.ConnCase
   import AlertsUI.Support.Factory
-  import Ecto.Changeset
   import Phoenix.LiveViewTest
   import Mock
   import Test.Support.Helpers
   alias AlertsUI.Alerts
-  alias AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
   alias MBTAV3API.Routes.Route
+  alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
+  alias MBTAV3API.Stops.Repo, as: StopsRepo
+  alias MBTAV3API.Stops.Stop
 
+  @stop %Stop{id: "place-sstat", name: "South Station"}
   @route %Route{
     direction_names: %{0 => "Westbound", 1 => "Eastbound"},
     sort_order: 3,
@@ -52,12 +54,65 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
 
     @tag :logged_in_user
     test "banner text syncs with header text", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Subway", "Delay")
+      with_mocks([
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        get_to_submission_page_refactor(view, "Subway", "Delay")
 
-      assert view
-             |> element("div#banner_div")
-             |> render() =~ ~s(example_header_text)
+        render_async(view, 1000)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          alert_data: %{banner_sync_toggle: true, view_banner: true}
+        })
+
+        assert view
+               |> element("#alert_data_banner_text")
+               |> render_async(1000) =~ ~s(delays)
+      end
+    end
+
+    @tag :logged_in_user
+    test "cannot submit banner text without accept banner checkbox", %{conn: conn} do
+      with_mocks([
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop] end,
+           get_parent: fn _ -> %{id: @stop.id} end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        get_to_submission_page_refactor(view, "Subway", "Delay")
+
+        render_async(view, 1000)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          alert_data: %{banner_sync_toggle: true, view_banner: true}
+        })
+
+        view
+        |> element("button#review", "Review and submit")
+        |> render_click()
+
+        assert view |> render_async() =~ ~s(Check box to show you understand)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          alert_data: %{accept_banner: true}
+        })
+
+        view
+        |> element("button#review", "Review and submit")
+        |> render_click()
+
+        refute view |> render_async() =~ ~s(Check box to show you understand)
+      end
     end
 
     @tag :logged_in_user
@@ -181,20 +236,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
         get_to_submission_page_refactor(view, "Subway", "Extra service")
         render_async(view)
 
-        # Mock selecting Red line
+        # unselect notification toggle
         view
         |> element("form")
         |> render_change(%{
-          alert_data: %{route_ids: ["Red"]}
-        })
-
-        # unselect notification toggle
-        view
-        |> render_change(%{
-          alert_data: %{notification_toggle: false}
-          # "alert_data" => %{
-          #   "notification_toggle" => "false"
-          # }
+          "alert_data" => %{
+            "route_ids" => ["Red"],
+            "notification_toggle" => "false"
+          }
         })
 
         view
@@ -218,6 +267,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
            conn: conn
          } do
       with_mocks([
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop] end,
+           get_parent: fn _ -> %{id: @stop.id} end
+         ]},
         {RoutesRepo, [],
          [
            by_type: fn _types -> [@route] end,
@@ -227,7 +281,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
         {RoutePatternsRepo, [],
          [
            by_route_id: fn _route_id, _opts -> [] end
-         ]}
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]}
       ]) do
         alert_params =
           build(:alert_map, %{
@@ -250,7 +305,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
         original_lpnt = original_alert.last_push_notification_timestamp
 
         {:ok, view, _html} = live(conn, "/alerts/mono/edit/123")
-        render_async(view)
 
         view
         |> element("button#review", "Review and submit")
@@ -275,6 +329,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
            conn: conn
          } do
       with_mocks([
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop] end,
+           get_parent: fn _ -> %{id: @stop.id} end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]},
         {RoutesRepo, [],
          [
            by_type: fn _types -> [@route] end,
@@ -311,6 +371,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
         render_async(view)
 
         view
+        |> element("form")
         |> render_change(%{
           "alert_data" => %{
             "notification_toggle" => "false"
@@ -340,6 +401,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
            conn: conn
          } do
       with_mocks([
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop] end,
+           get_parent: fn _ -> %{id: @stop.id} end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]},
         {RoutesRepo, [],
          [
            by_type: fn _types -> [@route] end,
@@ -372,7 +439,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
 
         original_lpnt = original_alert.last_push_notification_timestamp
 
-        {:ok, view, _html} = live(conn, "/alerts/mono/edit?alert_id=123")
+        {:ok, view, _html} = live(conn, "/alerts/mono/edit/123")
         render_async(view)
 
         view
