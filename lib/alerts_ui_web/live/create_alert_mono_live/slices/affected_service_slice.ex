@@ -339,9 +339,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     end
   end
 
-  # come back to this - see adjust_selections/1 in original
-  defp ensure_selections(changeset), do: changeset
-
   defp ensure_stop_names_and_ids(changeset) do
     if get_field(changeset, :stop_names_and_ids) in [nil, "default", ["default"]] do
       cast(changeset, %{stop_names_and_ids: []}, [:stop_names_and_ids])
