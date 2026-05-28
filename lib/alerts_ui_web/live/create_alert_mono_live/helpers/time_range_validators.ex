@@ -332,8 +332,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
       []
     else
       [
-        recurrence_days:
-          {"Alert start day must match a selected day of the week.", []}
+        recurrence_days: {"Alert start day must match a selected day of the week.", []}
       ]
     end
   end
