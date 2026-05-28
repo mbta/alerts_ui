@@ -254,6 +254,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
           filter_title_value: filter_title_value,
           route_id_options: route_id_options,
           stop_id_options: stop_id_options,
+          stop_selections: stop_names_and_ids,
           service_dates: service_dates(),
           trip_id_options: trip_id_options
         }
@@ -343,10 +344,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   end
 
   defp ensure_trip_ids(changeset) do
-    if get_field(changeset, :trip_ids) in [nil, "default", ["default"]] do
-      cast(changeset, %{trip_ids: []}, [:trip_ids])
-    else
-      changeset
+    trip_ids = get_field(changeset, :trip_ids)
+
+    cond do
+      trip_ids in [nil, "default", ["default"]] ->
+        cast(changeset, %{trip_ids: []}, [:trip_ids])
+
+      is_list(trip_ids) and "default" in trip_ids ->
+        cast(changeset, %{trip_ids: List.delete(trip_ids, "default")}, [:trip_ids])
+
+      true ->
+        changeset
     end
   end
 
