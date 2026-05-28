@@ -229,6 +229,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
         socket
       )
       when not is_nil(selected_schedules) do
+        IO.inspect(selected_schedules, label: "selected_schedules")
     trip_departure_time = get_trip_departure_time(selected_schedules)
     trip_arrival_time = get_trip_arrival_time(alert_data, selected_schedules)
     form_type = Map.get(socket.assigns, :form_type)
