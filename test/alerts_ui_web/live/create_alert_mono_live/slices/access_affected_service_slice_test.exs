@@ -2,12 +2,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSliceTest 
   use ExUnit.Case, async: false
   use AlertsUIWeb.ConnCase
   import AlertsUI.Support.Factory
-  import Ecto.Changeset
   import Phoenix.LiveViewTest
   import Mock
   import Test.Support.Helpers
   alias AlertsUI.Alerts
-  alias AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.Stops.Stop

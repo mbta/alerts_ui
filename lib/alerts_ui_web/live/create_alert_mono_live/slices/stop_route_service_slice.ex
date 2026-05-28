@@ -82,6 +82,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
   def async_assign_selections(socket, params) do
     if update_selections?(params) do
+      auto_select_routes = match?(%{"_target" => ["alert_data", "stop_ids"]}, params)
+      lv_pid = self()
+
       form = socket.assigns.form
       modal_route_search_term = form[:modal_route_search_term].value
       modal_route_id = form[:modal_route_id].value
@@ -164,6 +167,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
               route -> SelectFormatter.name_for_option(route)
             end
           end
+
+        if auto_select_routes do
+          send(lv_pid, {:sr_auto_select_routes, Enum.map(available_routes, & &1.id)})
+        end
 
         selections = %Selections{
           available_filter_routes: available_filter_routes,

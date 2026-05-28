@@ -273,6 +273,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
      )}
   end
 
+  @impl true
+  def handle_info({:sr_auto_select_routes, route_ids}, socket) do
+    if socket.assigns.form[:route_ids].value in [nil, []] do
+      {:noreply, sync_socket(socket, %{"alert_data" => %{"route_ids" => route_ids}})}
+    else
+      {:noreply, socket}
+    end
+  end
+
   defp get_step_by_name(name) do
     Enum.find(@steps, &(&1.name == name))
   end
