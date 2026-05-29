@@ -25,6 +25,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
   ]
 
   defstruct [
+    :form_type,
+    :active_period_end,
     :notification_period_start,
     :notification_period_start_date,
     notification_specifier: :now
@@ -43,6 +45,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
       now = NaiveDateTime.local_now()
 
       slice
+      |> update_times_if_duplicating(slice.form_type, now)
       |> put_over_nil(:notification_specifier, :now)
       |> put_over_nil(:notification_period_start, now)
       |> put_over_nil(:notification_period_start_date, NaiveDateTime.to_date(now))
@@ -62,6 +65,20 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
     def assigns(_slice, socket, _params) do
       socket
     end
+
+    def update_times_if_duplicating(slice, :duplicating, now) do
+      if NaiveDateTime.compare(now, slice.active_period_end) == :gt do
+        Map.merge(slice, %{
+          notification_specifier: :now,
+          notification_period_start: now,
+          notification_period_start_date: NaiveDateTime.to_date(now)
+        })
+      else
+        slice
+      end
+    end
+
+    def update_times_if_duplicating(slice, _, _), do: slice
   end
 
   def ensure_notification_start(changeset) do

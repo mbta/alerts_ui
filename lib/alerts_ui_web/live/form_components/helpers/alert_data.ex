@@ -162,6 +162,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     |> Map.merge(active_period_map(alert))
     |> Map.merge(reminder_times(alert))
     |> Map.merge(notification_period(alert, form_type))
+    |> Map.put(:form_type, form_type)
     |> Map.merge(service_types(alert))
     |> Map.merge(banner_sync_toggle(alert))
   end

@@ -17,6 +17,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   use AlertsUIWeb, :html
 
   defstruct [
+    :form_type,
     :active_period_start,
     :active_period_start_time_specifier,
     :active_period_start_date,
@@ -45,6 +46,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       now = NaiveDateTime.local_now()
 
       slice
+      |> update_times_if_duplicating(slice.form_type, slice.alert_timing, now)
       |> put_over_nil(:alert_timing, :"one-time")
       |> put_over_nil(:active_period_start_specifier, :now)
       |> put_over_nil(:active_period_start_time_specifier, :start_of_service)
@@ -89,6 +91,23 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     def assigns(_slice, socket, _params) do
       socket
     end
+
+    def update_times_if_duplicating(slice, _, :recurring, _), do: slice
+
+    def update_times_if_duplicating(slice, :duplicating, _, now) do
+      if NaiveDateTime.compare(now, slice.active_period_end) == :gt do
+        Map.merge(slice, %{
+          active_period_start_specifier: :now,
+          active_period_end_specifier: :later_today,
+          active_period_start: now,
+          active_period_end: now
+        })
+      else
+        slice
+      end
+    end
+
+    def update_times_if_duplicating(slice, _, _, _), do: slice
   end
 
   def change_timing(changeset, "alert_timing", :"one-time"),

@@ -1,4 +1,5 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
+  alias AlertsUIWeb.CreateAlertMonoLive
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path, as: EffectHelper
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}
@@ -90,7 +91,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
           details_data.description_sync_toggle
         end
 
-      selected = socket |> unwrap_selections() |> selected_objects(changeset)
+      selected =
+        socket |> unwrap_selections() |> selected_objects(changeset, socket.assigns.form_type)
 
       autotext_data =
         details_data
@@ -189,9 +191,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       end
     end
 
-    defp selected_objects(selections, _form) when selections in [%{}, nil], do: %{}
+    defp selected_objects(selections, _form, _form_type) when selections in [%{}, nil], do: %{}
 
-    defp selected_objects(%AccessAffectedServiceSlice.Selections{} = selections, changeset) do
+    defp selected_objects(
+           %AccessAffectedServiceSlice.Selections{} = selections,
+           changeset,
+           _form_type
+         ) do
       facility_ids = get_field(changeset, :facility_ids) || []
 
       all_facilities =
@@ -205,7 +211,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       %{facilities: facilities}
     end
 
-    defp selected_objects(selections, changeset) do
+    defp selected_objects(selections, changeset, form_type) do
       route_ids = get_field(changeset, :route_ids) || []
       stop_ids = get_field(changeset, :stop_ids) || []
       trip_ids = get_field(changeset, :trip_ids) || []
@@ -230,6 +236,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
       schedules =
         Enum.filter(Map.get(selections, :available_schedules) || [], &(&1.trip.id in trip_ids))
+
+      schedules =
+        if form_type == :editing do
+          CreateAlertMonoLive.filter_out_old_trips(schedules)
+        else
+          schedules
+        end
 
       %{routes: routes, stops: stops, schedules: schedules}
     end
