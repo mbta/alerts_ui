@@ -65,6 +65,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
         view
         |> element("form")
         |> render_change(%{
+          _target: [:foo, :bar],
           alert_data: %{banner_sync_toggle: true, view_banner: true}
         })
 
@@ -192,6 +193,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
         view
         |> element("form")
         |> render_change(%{
+          _target: [:foo, :bar],
           alert_data: %{route_ids: ["Red"]}
         })
 
@@ -241,6 +243,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
         view
         |> element("form")
         |> render_change(%{
+          "_target" => [:foo, :bar],
           "alert_data" => %{
             "route_ids" => ["Red"],
             "notification_toggle" => "false"

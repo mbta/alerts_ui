@@ -50,7 +50,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
       option_values = Enum.map(options, &Keyword.get(&1, :value))
 
       assert "place-pktrm" in option_values,
-        "Expected Park Street to be preserved in options when selected_stops is populated"
+             "Expected Park Street to be preserved in options when selected_stops is populated"
     end
   end
 
@@ -116,7 +116,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         get_to_submission_page_refactor(view, "Subway", "Station closure")
         render_async(view)
         {:ok, document} = view |> render() |> Floki.parse_document()
-        assert Test.Support.Helpers.document_has_element?(document, "select[id=\"alert_data_route_ids\"][disabled]")
+
+        assert Test.Support.Helpers.document_has_element?(
+                 document,
+                 "select[id=\"alert_data_route_ids\"][disabled]"
+               )
       end
     end
 
@@ -251,8 +255,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         render_async(view)
 
         {:ok, document} = view |> render() |> Floki.parse_document()
-        assert Test.Support.Helpers.document_has_element?(document, "option[value=\"place-aqucl\"]")
-        assert Test.Support.Helpers.document_has_element?(document, "option[value=\"place-pktrm\"]")
+
+        assert Test.Support.Helpers.document_has_element?(
+                 document,
+                 "option[value=\"place-aqucl\"]"
+               )
+
+        assert Test.Support.Helpers.document_has_element?(
+                 document,
+                 "option[value=\"place-pktrm\"]"
+               )
 
         view
         |> element("form")
@@ -264,8 +276,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         render_async(view)
 
         {:ok, document} = view |> render() |> Floki.parse_document()
-        assert Test.Support.Helpers.document_has_element?(document, "option[value=\"place-aqucl\"]")
-        refute Test.Support.Helpers.document_has_element?(document, "option[value=\"place-pktrm\"]")
+
+        assert Test.Support.Helpers.document_has_element?(
+                 document,
+                 "option[value=\"place-aqucl\"]"
+               )
+
+        refute Test.Support.Helpers.document_has_element?(
+                 document,
+                 "option[value=\"place-pktrm\"]"
+               )
       end
     end
 
