@@ -109,6 +109,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :active_period_start_specifier, Ecto.Enum, values: @start_values, default: :now
     field :active_period_start_time, :time
     field :active_period_start_time_specifier, Ecto.Enum, values: @start_values, default: :now
+    field :notification_period_end, :naive_datetime
+    field :notification_period_end_date, :date
     field :notification_period_start, :naive_datetime
     field :notification_period_start_date, :date
     field :notification_specifier, Ecto.Enum, values: @notification_values, default: :now
@@ -180,6 +182,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
           active_period_start_time: Time.t() | nil,
           active_period_start_specifier: start_values() | nil,
           alert_timing: alert_timing() | nil,
+          notification_period_end: NaiveDateTime.t() | nil,
+          notification_period_end_date: Date.t() | nil,
           notification_period_start: NaiveDateTime.t() | nil,
           notification_period_start_date: Date.t() | nil,
           notification_specifier: notification_values(),

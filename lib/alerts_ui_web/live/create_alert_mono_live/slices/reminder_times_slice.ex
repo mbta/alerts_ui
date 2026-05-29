@@ -128,9 +128,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
   def render(assigns) do
     assigns =
       assign(assigns, %{
-        current_time: DateTimeHelpers.current_time(),
-        notification_start: "",
-        notification_end: ""
+        current_time: DateTimeHelpers.current_time()
       })
 
     ~H"""
@@ -147,8 +145,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
               field={rt[:reminder_time]}
               id={rt[:id].value}
               index={rt.index}
-              notification_start={@notification_start}
-              notification_end={@notification_end}
+              notification_start={@form[:notification_period_start].value}
+              notification_end={@form[:notification_period_end].value}
             />
           </div>
         </.inputs_for>
