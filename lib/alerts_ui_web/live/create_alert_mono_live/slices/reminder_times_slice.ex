@@ -22,8 +22,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
 
     def mount(_slice, socket, _base_params), do: socket
 
-    def extract(slice, %AlertData{} = _alert_data, _params) do
-      slice
+    def extract(slice, %AlertData{reminder_times: reminder_times} = _alert_data, _params) do
+      converted =
+        Enum.map(reminder_times || [], fn
+          %{id: id, time: time} -> %AlertData.ReminderTime{id: id, reminder_time: time}
+          %AlertData.ReminderTime{} = rt -> rt
+        end)
+
+      %{slice | reminder_times: converted}
     end
 
     def transform(_slice, changeset, params, _socket) do

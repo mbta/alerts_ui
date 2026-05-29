@@ -36,7 +36,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
     end
 
     @tag :logged_in_user
-    # TODO known failure. X does not close first element when it is invalid
     test "reminder picker disappears when X is pressed", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
       get_to_submission_page_refactor(view, "Bus", "Detour")
@@ -229,7 +228,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
     end
 
     @tag :logged_in_user
-    # TODO known failure
     test "works if editing", %{conn: conn} do
       alert_params =
         build(:alert_map, %{
@@ -254,8 +252,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
 
       rendered_view = render(view)
 
-      assert rendered_view =~ ~s(value="2024-04-30T11:54")
-      assert rendered_view =~ ~s(value="2024-04-30T12:54")
+      # reminder_times are stored as UTC and shifted to America/New_York on load
+      assert rendered_view =~ ~s(value="2024-04-30T07:54")
+      assert rendered_view =~ ~s(value="2024-04-30T08:54")
     end
   end
 
