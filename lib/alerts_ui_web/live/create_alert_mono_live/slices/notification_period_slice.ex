@@ -3,10 +3,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
     Live Component for notification period of form
   """
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
-    only: [put_over_nil: 3, values_to_options: 1]
-
+  alias AlertsUI.Models.ActivePeriod
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Time, as: DTHelpers
 
   alias Phoenix.HTML.Form
 
@@ -51,6 +50,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
     def transform(_slice, changeset, _params, _socket) do
       changeset
       |> NotificationPeriodSlice.ensure_notification_start()
+      |> NotificationPeriodSlice.extract_notification_end()
     end
 
     def validate(_slice, changeset, _params, _socket) do
@@ -101,6 +101,52 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
   def ensure_notification_start_for_specifier(changeset, :custom, _, _), do: changeset
 
   def ensure_notification_start_for_specifier(changeset, _, _, _), do: changeset
+
+  def extract_notification_end(changeset) do
+    specifier = get_field(changeset, :active_period_end_specifier)
+    end_dt = get_field(changeset, :active_period_end, :unspecified)
+    end_d = get_field(changeset, :active_period_end_date, :unspecified)
+
+    changeset
+    |> extract_notification_end_for_specifier(specifier, end_dt, end_d)
+  end
+
+  def extract_notification_end_for_specifier(changeset, :later_today, _, _) do
+    now = NaiveDateTime.local_now()
+
+    changeset
+    |> force_change(:notification_period_end, now |> NaiveDateTime.add(2, :hour))
+    |> force_change(:notification_period_end_date, now |> NaiveDateTime.to_date())
+  end
+
+  def extract_notification_end_for_specifier(changeset, :end_of_service, _, date) do
+    datetime =
+      date
+      |> NaiveDateTime.new!(~T[12:00:00])
+      |> ActivePeriod.end_of_service_datetime_naive()
+
+    changeset
+    |> force_change(:notification_period_end, datetime)
+    |> force_change(:notification_period_end_date, datetime |> NaiveDateTime.to_date())
+  end
+
+  def extract_notification_end_for_specifier(changeset, :until_further_notice, _, _) do
+    now = NaiveDateTime.local_now()
+
+    changeset
+    |> force_change(:notification_period_end, DTHelpers.replace_time(now, ~T[23:59:59]))
+    |> force_change(:notification_period_end_date, now |> NaiveDateTime.to_date())
+  end
+
+  def extract_notification_end_for_specifier(changeset, :custom, dt, _) do
+    changeset
+    |> force_change(:notification_period_end, dt)
+    |> force_change(:notification_period_end_date, dt |> NaiveDateTime.to_date())
+  end
+
+  def extract_notification_end_for_specifier(changeset, _, _, _) do
+    changeset
+  end
 
   def notification_values(), do: @notification_values
 

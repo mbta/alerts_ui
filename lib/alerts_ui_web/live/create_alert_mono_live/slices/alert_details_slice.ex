@@ -208,7 +208,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       original_ids = MapSet.new(stops_from_original, & &1.id)
 
       stops_from_available =
-        Enum.filter(selections.available_stops || [], &(&1.id in stop_ids and &1.id not in original_ids))
+        Enum.filter(
+          selections.available_stops || [],
+          &(&1.id in stop_ids and &1.id not in original_ids)
+        )
 
       stops = stops_from_original ++ stops_from_available
 

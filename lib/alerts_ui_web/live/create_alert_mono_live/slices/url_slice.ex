@@ -119,11 +119,19 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
           case alert_or_changeset do
             %Changeset{} = cs ->
               get_field(cs, :combination) ||
-                get_value_of_key(:combination, effective_route_type, humanize_effect_name(effective_route_type, effect_name))
+                get_value_of_key(
+                  :combination,
+                  effective_route_type,
+                  humanize_effect_name(effective_route_type, effect_name)
+                )
 
             %AlertData{} = ad ->
               ad.combination ||
-                get_value_of_key(:combination, effective_route_type, humanize_effect_name(effective_route_type, effect_name))
+                get_value_of_key(
+                  :combination,
+                  effective_route_type,
+                  humanize_effect_name(effective_route_type, effect_name)
+                )
           end
         else
           get_value_of_key(
