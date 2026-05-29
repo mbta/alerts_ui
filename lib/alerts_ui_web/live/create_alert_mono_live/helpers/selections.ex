@@ -7,8 +7,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Selections do
 
   require Logger
 
-  alias Phoenix.LiveView.AsyncResult
-
   use AlertsUIWeb, :html
 
   def selections_loading?(%{loading: true}), do: true

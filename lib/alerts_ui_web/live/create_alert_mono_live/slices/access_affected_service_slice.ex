@@ -5,7 +5,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
   facility picker with an optional stop-filter modal.
   """
 
-  alias Phoenix.LiveView.AsyncResult
   alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.CreateAlertLive
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
