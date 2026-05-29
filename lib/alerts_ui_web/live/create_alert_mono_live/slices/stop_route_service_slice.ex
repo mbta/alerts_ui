@@ -303,7 +303,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
           selected={@form[:stop_ids].value}
           label="Stops"
           loading={Map.get(@selections, :loading, true)}
-          modal_filter_active={@selections.selected_route_id}
+          modal_filter_active={!(@selections.selected_route_id in [nil, "default"])}
           modal_filter_id="routes-filter-modal"
           modal_filter_title={"Filter: #{@selections.filter_title_value}"}
           no_results={Enum.empty?(@selections.stop_id_options)}
