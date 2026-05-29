@@ -329,7 +329,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   def set_start_end_from_trip_selection(
         changeset,
         "trip_ids",
-        %{ok?: true, result: selections},
+        %{loading: false} = selections,
         trip_ids
       ) do
     available_schedules = Map.get(selections, :available_schedules, [])
