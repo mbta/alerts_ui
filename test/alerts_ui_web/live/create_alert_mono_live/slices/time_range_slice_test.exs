@@ -612,7 +612,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       result = Slice.validate(%TimeRangeSlice{}, changeset, %{}, socket)
 
       deadline = DateTime.to_naive(@future_arrival) |> NaiveDateTime.add(1, :hour)
-      expected_msg = "Effect must start before #{Calendar.strftime(deadline, "%m/%d/%Y, %I:%M %p")}"
+
+      expected_msg =
+        "Effect must start before #{Calendar.strftime(deadline, "%m/%d/%Y, %I:%M %p")}"
+
       assert {^expected_msg, []} = result.errors[:active_period_start]
     end
 
@@ -671,7 +674,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       result = Slice.validate(%TimeRangeSlice{}, changeset, %{}, socket)
 
       deadline = DateTime.to_naive(@future_arrival) |> NaiveDateTime.add(1, :hour)
-      expected_msg = "Effect must start before #{Calendar.strftime(deadline, "%m/%d/%Y, %I:%M %p")}"
+
+      expected_msg =
+        "Effect must start before #{Calendar.strftime(deadline, "%m/%d/%Y, %I:%M %p")}"
+
       assert {^expected_msg, []} = result.errors[:active_period_start]
     end
 
@@ -751,7 +757,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
           socket
         )
 
-      assert Ecto.Changeset.get_field(result, :active_period_end_specifier) == :until_further_notice
+      assert Ecto.Changeset.get_field(result, :active_period_end_specifier) ==
+               :until_further_notice
+
       # until_further_notice sets active_period_end to today's 23:59:59 as a sentinel value
       refute is_nil(Ecto.Changeset.get_field(result, :active_period_end))
     end

@@ -10,6 +10,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
   use AlertsUIWeb, :html
 
   import Ecto.Changeset
+
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
     only: [put_over_nil: 3, values_to_options: 1]
 
