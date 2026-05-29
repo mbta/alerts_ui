@@ -77,6 +77,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
     @tag :logged_in_user
     test "cannot submit banner text without accept banner checkbox", %{conn: conn} do
       with_mocks([
+        {RoutesRepo, [], [by_type: fn _ -> [@route] end]},
         {StopsRepo, [],
          [
            by_route: fn _, _, _ -> [@stop] end,
