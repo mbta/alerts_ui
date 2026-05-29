@@ -83,7 +83,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       |> TimeRangeSlice.set_start_end_from_trip_selection(
         target,
         socket.assigns.selections,
-        get_field(changeset, :trip_ids, [])
+        get_field(changeset, :trip_ids, []),
+        socket.assigns[:form_type]
       )
     end
 
@@ -313,7 +314,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
   def ensure_end_time_values_for_specifier(changeset, _, _), do: changeset
 
-  def set_start_end_from_trip_selection(changeset, "trip_ids", _, []) do
+  def set_start_end_from_trip_selection(changeset, "trip_ids", _, _, :editing), do: changeset
+
+  def set_start_end_from_trip_selection(changeset, "trip_ids", _, [], _form_type) do
     now = NaiveDateTime.local_now()
     end_of_service = now |> ActivePeriod.end_of_service_datetime_naive()
 
@@ -330,7 +333,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
         changeset,
         "trip_ids",
         %{loading: false} = selections,
-        trip_ids
+        trip_ids,
+        _form_type
       ) do
     available_schedules = Map.get(selections, :available_schedules, [])
     selected_schedules = Enum.filter(available_schedules, &(&1.trip.id in trip_ids))
@@ -354,7 +358,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     |> force_change(:active_period_end_date, arrival |> NaiveDateTime.to_date())
   end
 
-  def set_start_end_from_trip_selection(changeset, _, _, _), do: changeset
+  def set_start_end_from_trip_selection(changeset, _, _, _, _), do: changeset
 
   defp get_trip_departure_time(selected_schedules) do
     selected_schedules

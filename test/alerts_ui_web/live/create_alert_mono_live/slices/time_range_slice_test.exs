@@ -79,6 +79,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     }
   end
 
+  defp socket_for_transform(schedules, form_type \\ :creating) do
+    %{
+      assigns: %{
+        form_type: form_type,
+        selections: %AffectedServiceSlice.Selections{available_schedules: schedules}
+      }
+    }
+  end
+
   describe "component" do
     @tag :logged_in_user
     test "renders", %{conn: conn} do
@@ -792,6 +801,132 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
       assert Ecto.Changeset.get_field(result, :active_period_start_specifier) == :now
       assert Ecto.Changeset.get_field(result, :active_period_end_specifier) == :later_today
+    end
+
+    test "start and end time updated if 'all trips' selected" do
+      changeset =
+        Ecto.Changeset.cast(
+          %AlertData{},
+          %{
+            trip_ids: [],
+            active_period_start_specifier: :custom,
+            active_period_end_specifier: :custom,
+            active_period_start: ~N[2040-01-01 10:16:00],
+            active_period_end: ~N[2040-01-01 11:54:00]
+          },
+          [
+            :trip_ids,
+            :active_period_start_specifier,
+            :active_period_end_specifier,
+            :active_period_start,
+            :active_period_end
+          ]
+        )
+
+      socket = socket_for_transform([])
+
+      result =
+        Slice.transform(
+          %TimeRangeSlice{},
+          changeset,
+          %{"_target" => ["alert_data", "trip_ids"], "alert_data" => %{}},
+          socket
+        )
+
+      assert Ecto.Changeset.get_field(result, :active_period_start_specifier) == :now
+      assert Ecto.Changeset.get_field(result, :active_period_end_specifier) == :later_today
+      refute Ecto.Changeset.get_field(result, :active_period_start) == ~N[2040-01-01 10:16:00]
+      refute Ecto.Changeset.get_field(result, :active_period_end) == ~N[2040-01-01 11:54:00]
+    end
+
+    test "start and end time updated if trip changes and departure before current time" do
+      schedule = %EnhancedSchedule{
+        route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+        trip: %Trip{id: "trip-595", name: "595", direction_id: 0},
+        stop: %Stop{id: "place-sstat", name: "South Station"},
+        arrival_time: nil,
+        departure_time: @past_departure,
+        time_of_last_trip_arrival: @past_arrival
+      }
+
+      changeset =
+        Ecto.Changeset.cast(
+          %AlertData{},
+          %{
+            trip_ids: ["trip-595"],
+            active_period_start_specifier: :custom,
+            active_period_end_specifier: :custom,
+            active_period_start: ~N[2040-01-01 10:16:00],
+            active_period_end: ~N[2040-01-01 11:54:00]
+          },
+          [
+            :trip_ids,
+            :active_period_start_specifier,
+            :active_period_end_specifier,
+            :active_period_start,
+            :active_period_end
+          ]
+        )
+
+      socket = socket_for_transform([schedule])
+
+      result =
+        Slice.transform(
+          %TimeRangeSlice{},
+          changeset,
+          %{"_target" => ["alert_data", "trip_ids"], "alert_data" => %{}},
+          socket
+        )
+
+      assert Ecto.Changeset.get_field(result, :active_period_start_specifier) == :now
+      assert Ecto.Changeset.get_field(result, :active_period_end_specifier) == :custom
+      expected_end = DateTime.to_naive(@past_arrival) |> NaiveDateTime.add(1, :hour)
+      assert Ecto.Changeset.get_field(result, :active_period_end) == expected_end
+    end
+
+    test "start and end time not updated if trip changes and departure before current time but form is in editing mode" do
+      schedule = %EnhancedSchedule{
+        route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+        trip: %Trip{id: "trip-595", name: "595", direction_id: 0},
+        stop: %Stop{id: "place-sstat", name: "South Station"},
+        arrival_time: nil,
+        departure_time: @past_departure,
+        time_of_last_trip_arrival: @past_arrival
+      }
+
+      changeset =
+        Ecto.Changeset.cast(
+          %AlertData{},
+          %{
+            trip_ids: ["trip-595"],
+            active_period_start_specifier: :custom,
+            active_period_end_specifier: :custom,
+            active_period_start: ~N[2040-01-01 10:16:00],
+            active_period_end: ~N[2040-01-01 11:54:00]
+          },
+          [
+            :trip_ids,
+            :active_period_start_specifier,
+            :active_period_end_specifier,
+            :active_period_start,
+            :active_period_end
+          ]
+        )
+
+      socket = socket_for_transform([schedule], :editing)
+
+      result =
+        Slice.transform(
+          %TimeRangeSlice{},
+          changeset,
+          %{"_target" => ["alert_data", "trip_ids"], "alert_data" => %{}},
+          socket
+        )
+
+      assert Ecto.Changeset.get_field(result, :active_period_start_specifier) == :custom
+      assert Ecto.Changeset.get_field(result, :active_period_end_specifier) == :custom
+      assert Ecto.Changeset.get_field(result, :active_period_start) == ~N[2040-01-01 10:16:00]
+      assert Ecto.Changeset.get_field(result, :active_period_end) == ~N[2040-01-01 11:54:00]
     end
   end
 end
