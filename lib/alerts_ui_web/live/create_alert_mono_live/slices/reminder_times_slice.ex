@@ -24,7 +24,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
       case params do
         %{"alert_data" => _alert_data_params} ->
           changeset
-          |> ReminderTimesSlice.materialize_reminder_times()
+          |> cast(params, [])
+          # |> ReminderTimesSlice.materialize_reminder_times()
           |> cast_embed(:reminder_times,
             sort_param: :reminder_sort,
             drop_param: :reminder_drop,
@@ -36,8 +37,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
       end
     end
 
-    def validate(_slice, changeset, _params, _socket) do
-      changeset
+    def validate(_reminder_data, changeset, _params, _socket) do
+      has_nested_error =
+        get_embed(changeset, :reminder_times)
+        |> Enum.find(fn rt -> is_list(rt.errors) and rt.errors != [] end)
+
+      if has_nested_error do
+        changeset |> add_error(:reminder_times, "Invalid entry in reminder times")
+      else
+        changeset
+      end
     end
 
     def assigns(_slice, socket, _params) do
@@ -57,6 +66,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
 
   def reminder_time_changeset(source, params) do
     cast(source, params, [:reminder_time, :max_time, :min_time, :id])
+    |> validate_required(:reminder_time, message: "Select reminder time")
     |> validate_change(:reminder_time, fn :reminder_time, time ->
       exists? = String.trim(params["id"] || "") != ""
       min_time_string = params["min_time"] |> String.pad_trailing(19, ":00")
@@ -90,7 +100,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
   def render(assigns) do
     assigns =
       assign(assigns, %{
-        current_time: DateTimeHelpers.current_time()
+        current_time: DateTimeHelpers.current_time(),
+        notification_start: "",
+        notification_end: ""
       })
 
     ~H"""
@@ -107,14 +119,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
               field={rt[:reminder_time]}
               id={rt[:id].value}
               index={rt.index}
-              notification_start={
-                # @notification_start
-                nil
-              }
-              notification_end={
-                # @notification_end
-                nil
-              }
+              notification_start={@notification_start}
+              notification_end={@notification_end}
             />
           </div>
         </.inputs_for>
@@ -202,7 +208,25 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
   end
 
   def parse_field_errors(%Ecto.Changeset{} = changeset) do
-    changeset
+    traverse_errors(changeset, fn _changeset, _field, {msg, _opts} -> msg end)
+    |> Enum.map(&traverse_inner_errors/1)
+  end
+
+  defp traverse_inner_errors({key, value}) do
+    new_value =
+      value
+      |> Enum.uniq()
+      |> Enum.reduce([], fn reminder_map, acc ->
+        if is_list(Map.get(reminder_map, :reminder_time)) do
+          [hd(reminder_map.reminder_time) | acc]
+        else
+          acc
+        end
+      end)
+      |> List.flatten()
+      |> Enum.join(";")
+
+    {key, {new_value, []}}
   end
 
   defp naive_datetime_to_iso8601(nil), do: ""
