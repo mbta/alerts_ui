@@ -65,7 +65,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
         alert_data={
           @alert_data
           |> Map.merge(%{selected_schedules: []})
-          |> Map.merge(AlertsUI.AlertBuilder.original_selections(@alert_data, @alert_data.combination))
+          |> Map.merge(
+            AlertsUI.AlertBuilder.original_selections(@alert_data, @alert_data.combination)
+          )
         }
         cancel_event_name="cancel_review"
         accept_event_name="save"

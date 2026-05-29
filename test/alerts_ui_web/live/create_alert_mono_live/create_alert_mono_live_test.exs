@@ -296,7 +296,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     @tag :logged_in_user
     @tag :skip
     test "displays modal with obsolete ids", %{conn: conn} do
-      #TODO unskip this when the obsolete entities modal is ready
+      # TODO unskip this when the obsolete entities modal is ready
       with_mocks([
         {RoutesRepo, [],
          [
