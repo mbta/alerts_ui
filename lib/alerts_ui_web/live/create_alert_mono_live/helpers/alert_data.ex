@@ -1,7 +1,7 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
   require Logger
-  alias AlertsUI.Models.Alert
   alias AlertsUI.Configs.ModeEffect
+  alias AlertsUI.Models.Alert
   alias AlertsUIWeb.FormComponents.Helpers.ContentFormatter
   alias Phoenix.HTML.Form
 

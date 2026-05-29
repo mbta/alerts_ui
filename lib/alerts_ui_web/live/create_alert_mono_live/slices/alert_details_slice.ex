@@ -5,10 +5,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
   and validates text fields and media URLs.
   """
 
-  alias AlertsUIWeb.CreateAlertMonoLive.Slice
-  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path, as: EffectHelper
-  alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}
   alias AlertsUI.Models.{Cause, SeverityLevel}
+  alias AlertsUIWeb.CreateAlertMonoLive
+  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path, as: EffectHelper
+  alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}
   alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
   use AlertsUIWeb, :html
 
@@ -48,8 +49,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     alias AlertsUI.Models.Alert
     alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation
-    alias AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice
+    alias AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice
     alias MBTAV3API.Stops.Stop
     alias Phoenix.LiveView.AsyncResult
 

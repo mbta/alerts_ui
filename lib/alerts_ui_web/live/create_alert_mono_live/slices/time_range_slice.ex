@@ -433,7 +433,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     end
   end
 
-  defp day_of_week_options(),
+  defp day_of_week_options,
     do: [
       [key: :Monday, value: :monday, id: "monday"],
       [key: :Tuesday, value: :tuesday, id: "tuesday"],

@@ -24,7 +24,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
   header bar. Manages the list of `Step` structs and the currently active step.
   """
 
-  alias AlertsUIWeb.CreateAlertMonoLive.Step
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.CreateAlertMonoLive.Step

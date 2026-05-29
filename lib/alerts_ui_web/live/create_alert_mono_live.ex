@@ -22,14 +22,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     DeliverySlice,
     NotificationPeriodSlice,
     ReminderTimesSlice,
-    SubmitSlice,
     StopRouteServiceSlice,
+    SubmitSlice,
     TimelineSlice,
     TimeRangeSlice,
     UrlSlice
   }
 
   alias AlertsUIWeb.CreateAlertMonoLive.Step
+  alias Phoenix.LiveView
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.{
     AlertData,

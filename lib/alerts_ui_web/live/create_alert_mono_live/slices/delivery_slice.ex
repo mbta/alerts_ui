@@ -5,8 +5,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
   acknowledgement checkbox), and their default values based on route/effect.
   """
 
-  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
+  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
   alias Phoenix.HTML.Form

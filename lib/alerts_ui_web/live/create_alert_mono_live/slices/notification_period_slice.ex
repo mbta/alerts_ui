@@ -4,9 +4,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
   """
 
   alias AlertsUI.Models.ActivePeriod
-  alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Time, as: DTHelpers
-
+  alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias Phoenix.HTML.Form
 
   use AlertsUIWeb, :html
@@ -175,7 +174,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
     changeset
   end
 
-  def notification_values(), do: @notification_values
+  def notification_values, do: @notification_values
 
   attr :form, Form
 
