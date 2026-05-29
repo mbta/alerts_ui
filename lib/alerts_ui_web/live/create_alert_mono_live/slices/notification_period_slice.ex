@@ -3,17 +3,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
     Live Component for notification period of form
   """
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
-    only: [put_over_nil: 3, values_to_options: 1]
-
+  alias AlertsUI.Models.ActivePeriod
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
-
   alias Phoenix.HTML.Form
-
-  import Ecto.Changeset
 
   use AlertsUIWeb, :html
 
+  import Ecto.Changeset
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
     only: [put_over_nil: 3, values_to_options: 1]
 

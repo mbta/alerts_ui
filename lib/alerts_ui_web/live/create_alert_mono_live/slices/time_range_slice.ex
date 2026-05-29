@@ -81,7 +81,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       )
     end
 
-    def validate(_slice, changeset, params, _socket) do
+    def validate(_slice, changeset, params, socket) do
+      trip_ids = get_field(changeset, :trip_ids, [])
+
+      trip_arrival_time =
+        TimeRangeSlice.get_trip_arrival_time_for_validate(trip_ids, socket.assigns.selections)
+
       changeset
       |> TimeRangeValidators.validate_cast_datetimes(params)
       |> TimeRangeValidators.validate_required_fields()
@@ -90,6 +95,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       |> TimeRangeValidators.validate_at_least_one_recurrence()
       |> TimeRangeValidators.validate_start_date_matches_weekday()
       |> TimeRangeValidators.validate_not_dst_gap()
+      |> TimeRangeValidators.validate_start_is_before_trip(trip_arrival_time)
     end
 
     def assigns(_slice, socket, _params) do
@@ -370,6 +376,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   def normalize_alert_timing_field(:recurring), do: :recurring
   def normalize_alert_timing_field("recurring"), do: :recurring
   def normalize_alert_timing_field(_), do: :"one-time"
+
+  def get_trip_arrival_time_for_validate(trip_ids, %{ok?: true, result: selections}) do
+    available = Map.get(selections, :available_schedules, [])
+    selected = Enum.filter(available, &(&1.trip.id in trip_ids))
+
+    selected
+    |> Enum.map(& &1.time_of_last_trip_arrival)
+    |> Enum.max(DateTime, fn -> nil end)
+    |> utc_datetime_to_naive()
+  end
+
+  def get_trip_arrival_time_for_validate(_, _), do: nil
 
   defp current_time, do: NaiveDateTime.local_now()
 

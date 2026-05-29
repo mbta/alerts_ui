@@ -5,14 +5,20 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
   import AlertsUI.Support.Factory
   import Phoenix.LiveViewTest
   import Test.Support.Helpers
+  import Mock
+
   alias AlertsUI.Alerts
   alias AlertsUI.Models.EnhancedSchedule
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice
+  alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
+  alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
+  alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
   alias MBTAV3API.Schedules.Trip
+  alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
   alias Phoenix.LiveView.AsyncResult
 
@@ -32,6 +38,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         effect: Keyword.get(opts, :effect, :OTHER_EFFECT),
         effect_detail: Keyword.get(opts, :effect_detail, "DELAY"),
         informed_entity: [%{route_type: 3, activities: [:BOARD]}],
+        original_route_selections: Keyword.get(opts, :original_route_selections, nil),
         reminder_times: [],
         severity: 4,
         primary_service_type: "3",
@@ -51,6 +58,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
   defp trip_changeset(attrs \\ %{}) do
     Ecto.Changeset.cast(%AlertData{}, Map.merge(%{trip_ids: []}, attrs), [:trip_ids])
+  end
+
+  defp trip_validate_changeset(trip_ids, active_period_start) do
+    Ecto.Changeset.cast(
+      %AlertData{},
+      %{trip_ids: trip_ids, active_period_start: active_period_start, alert_timing: :"one-time"},
+      [:trip_ids, :active_period_start, :alert_timing]
+    )
   end
 
   defp socket_with_trip_selections(schedules) do
@@ -313,6 +328,42 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     end
 
     @tag :logged_in_user
+    test "setting effect to end of service outputs an expected duration text", %{conn: conn} do
+      # Use a fixed far-future start time so the start is not "in the past"
+      # and the end_of_service end (3:00 AM next day) is guaranteed after it.
+      start_dt = ~N[2040-12-16 03:00:00]
+      end_date = ~D[2040-12-17]
+      # end_of_service sets active_period_end to end_date @ 3:00 AM
+      end_dt = NaiveDateTime.new!(end_date, ~T[03:00:00])
+
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      get_to_submission_page_refactor(view, "Bus", "Delay")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_start_specifier" => "custom",
+          "active_period_end_specifier" => "end_of_service"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_start" => NaiveDateTime.to_iso8601(start_dt),
+          "active_period_end_date" => Date.to_iso8601(end_date)
+        }
+      })
+
+      start_text = Calendar.strftime(start_dt, "%a %b %-d, %Y @ %-I:%M %p")
+      end_text = Calendar.strftime(end_dt, "%a %b %-d, %Y @ %-I:%M %p")
+
+      assert render(view) =~ "Effect duration: #{start_text} until #{end_text} (1 day)"
+    end
+
+    @tag :logged_in_user
     test "displays error if start invalid", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
       get_to_submission_page_refactor(view, "Bus", "Delay")
@@ -379,6 +430,61 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       })
 
       refute view |> render() =~ "Effect must end after"
+    end
+
+    @tag :logged_in_user
+    test "editing saves updated end time to database", %{conn: conn} do
+      bus_route = %Route{id: "22", type: 3, name: "Route 22"}
+
+      create_test_alert("tr-edit-db-1",
+        duration_certainty: :UNKNOWN,
+        active_period_attrs: %{start: ~U[2024-05-10 14:30:54Z]},
+        original_route_selections: ["Route 22|22"]
+      )
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _types -> [bus_route] end,
+           get: fn _id, _opts -> bus_route end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [] end,
+           get_parent: fn _stop_id -> nil end
+         ]},
+        {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/edit/tr-edit-db-1")
+        render_async(view, 3000)
+
+        future_end =
+          NaiveDateTime.utc_now()
+          |> NaiveDateTime.add(2, :day)
+          |> NaiveDateTime.truncate(:second)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "active_period_end_specifier" => "custom",
+            "active_period_end" => NaiveDateTime.to_iso8601(future_end)
+          }
+        })
+
+        view
+        |> element("button#review", "Review and submit")
+        |> render_click()
+
+        view
+        |> element("#review-modal-container button", "Submit")
+        |> render_click()
+
+        :timer.sleep(50)
+        updated = Alerts.get_by_alert_id("tr-edit-db-1")
+        assert updated.duration_certainty == :KNOWN
+      end
     end
 
     @tag :logged_in_user
@@ -487,6 +593,167 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
       expected_end = DateTime.to_naive(@past_arrival) |> NaiveDateTime.add(1, :hour)
       assert Ecto.Changeset.get_field(result, :active_period_end) == expected_end
+    end
+
+    test "displays error if start after trip end when start changes" do
+      schedule = %EnhancedSchedule{
+        route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+        trip: %Trip{id: "trip-595", name: "595", direction_id: 0},
+        stop: %Stop{id: "place-sstat", name: "South Station"},
+        arrival_time: nil,
+        departure_time: @future_departure,
+        time_of_last_trip_arrival: @future_arrival
+      }
+
+      late_start = DateTime.to_naive(@future_arrival) |> NaiveDateTime.add(61, :minute)
+      changeset = trip_validate_changeset(["trip-595"], late_start)
+      socket = socket_with_trip_selections([schedule])
+
+      result = Slice.validate(%TimeRangeSlice{}, changeset, %{}, socket)
+
+      deadline = DateTime.to_naive(@future_arrival) |> NaiveDateTime.add(1, :hour)
+      expected_msg = "Effect must start before #{Calendar.strftime(deadline, "%m/%d/%Y, %I:%M %p")}"
+      assert {^expected_msg, []} = result.errors[:active_period_start]
+    end
+
+    test "no error if start after trip end when start changes on recurring alert" do
+      schedule = %EnhancedSchedule{
+        route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+        trip: %Trip{id: "trip-595", name: "595", direction_id: 0},
+        stop: %Stop{id: "place-sstat", name: "South Station"},
+        arrival_time: nil,
+        departure_time: @future_departure,
+        time_of_last_trip_arrival: @future_arrival
+      }
+
+      late_start = DateTime.to_naive(@future_arrival) |> NaiveDateTime.add(61, :minute)
+
+      changeset =
+        Ecto.Changeset.cast(
+          %AlertData{},
+          %{trip_ids: ["trip-595"], active_period_start: late_start, alert_timing: :recurring},
+          [:trip_ids, :active_period_start, :alert_timing]
+        )
+
+      socket = socket_with_trip_selections([schedule])
+
+      result = Slice.validate(%TimeRangeSlice{}, changeset, %{}, socket)
+
+      refute Keyword.has_key?(result.errors, :active_period_start)
+    end
+
+    test "displays error if start after trip end when 'start of service' is selected" do
+      schedule = %EnhancedSchedule{
+        route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+        trip: %Trip{id: "trip-595", name: "595", direction_id: 0},
+        stop: %Stop{id: "place-sstat", name: "South Station"},
+        arrival_time: nil,
+        departure_time: @future_departure,
+        time_of_last_trip_arrival: @future_arrival
+      }
+
+      late_start = DateTime.to_naive(@future_arrival) |> NaiveDateTime.add(61, :minute)
+
+      changeset =
+        Ecto.Changeset.cast(
+          %AlertData{},
+          %{
+            trip_ids: ["trip-595"],
+            active_period_start: late_start,
+            active_period_start_specifier: :start_of_service,
+            alert_timing: :"one-time"
+          },
+          [:trip_ids, :active_period_start, :active_period_start_specifier, :alert_timing]
+        )
+
+      socket = socket_with_trip_selections([schedule])
+
+      result = Slice.validate(%TimeRangeSlice{}, changeset, %{}, socket)
+
+      deadline = DateTime.to_naive(@future_arrival) |> NaiveDateTime.add(1, :hour)
+      expected_msg = "Effect must start before #{Calendar.strftime(deadline, "%m/%d/%Y, %I:%M %p")}"
+      assert {^expected_msg, []} = result.errors[:active_period_start]
+    end
+
+    test "doesn't display error if start within 1 hour of trip end" do
+      schedule = %EnhancedSchedule{
+        route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+        trip: %Trip{id: "trip-595", name: "595", direction_id: 0},
+        stop: %Stop{id: "place-sstat", name: "South Station"},
+        arrival_time: nil,
+        departure_time: @future_departure,
+        time_of_last_trip_arrival: @future_arrival
+      }
+
+      # exactly 60 minutes after arrival — the diff is NOT > 60, so no error
+      on_time_start = DateTime.to_naive(@future_arrival) |> NaiveDateTime.add(60, :minute)
+      changeset = trip_validate_changeset(["trip-595"], on_time_start)
+      socket = socket_with_trip_selections([schedule])
+
+      result = Slice.validate(%TimeRangeSlice{}, changeset, %{}, socket)
+
+      refute Keyword.has_key?(result.errors, :active_period_start)
+    end
+
+    test "if recurring, active_period_end should be the last active period end" do
+      changeset =
+        Ecto.Changeset.cast(
+          %AlertData{},
+          %{
+            alert_timing: "recurring",
+            active_period_end_specifier: :custom,
+            active_period_end_date: ~D[2024-12-17],
+            active_period_end: ~N[2024-12-17 10:00:00],
+            recurrence_days: [:tuesday]
+          },
+          [
+            :alert_timing,
+            :active_period_end_specifier,
+            :active_period_end_date,
+            :active_period_end,
+            :recurrence_days
+          ]
+        )
+
+      socket = socket_with_trip_selections([])
+
+      result =
+        Slice.transform(
+          %TimeRangeSlice{},
+          changeset,
+          %{"_target" => ["alert_data", "active_period_end_date"], "alert_data" => %{}},
+          socket
+        )
+
+      assert Ecto.Changeset.get_field(result, :active_period_end_date) == ~D[2024-12-17]
+      assert Ecto.Changeset.get_field(result, :active_period_end_specifier) == :custom
+    end
+
+    test "if recurring and no end time, active_period_end should reflect that" do
+      changeset =
+        Ecto.Changeset.cast(
+          %AlertData{},
+          %{
+            alert_timing: "recurring",
+            active_period_end_specifier: :until_further_notice,
+            recurrence_days: [:tuesday]
+          },
+          [:alert_timing, :active_period_end_specifier, :recurrence_days]
+        )
+
+      socket = socket_with_trip_selections([])
+
+      result =
+        Slice.transform(
+          %TimeRangeSlice{},
+          changeset,
+          %{"_target" => ["alert_data", "active_period_end_specifier"], "alert_data" => %{}},
+          socket
+        )
+
+      assert Ecto.Changeset.get_field(result, :active_period_end_specifier) == :until_further_notice
+      # until_further_notice sets active_period_end to today's 23:59:59 as a sentinel value
+      refute is_nil(Ecto.Changeset.get_field(result, :active_period_end))
     end
 
     test "resets start and end to defaults when all trips are deselected" do
