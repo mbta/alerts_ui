@@ -195,6 +195,7 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
         send(self(), {:section_completed, changes})
 
       {:error, changeset} ->
+        parse_field_errors(changeset) |> IO.inspect(label: "parse errors orig")
         send(self(), {:add_errors, parse_field_errors(changeset), __MODULE__})
     end
 
@@ -259,6 +260,8 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
   attr :current_time, DateTime
 
   def reminder_input(assigns) do
+    IO.inspect(assigns.field, label: "reminder input")
+
     ~H"""
     <input
       type="hidden"
@@ -314,6 +317,8 @@ defmodule AlertsUIWeb.FormComponents.RiderReminders do
   end
 
   def parse_field_errors(%Ecto.Changeset{} = changeset) do
+    IO.inspect(changeset, label: "rider reminders changeset")
+
     traverse_errors(changeset, fn _changeset, _field, {msg, _opts} -> msg end)
     |> Enum.map(&traverse_inner_errors/1)
   end
