@@ -1,4 +1,10 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
+  @moduledoc """
+  Slice that manages the core alert details: header text, description, cause,
+  severity, URL, and image. Drives auto-text generation from route/effect context
+  and validates text fields and media URLs.
+  """
+
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path, as: EffectHelper
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}

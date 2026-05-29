@@ -1,4 +1,11 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
+  @moduledoc """
+  Changeset validation helpers for alert time-range fields. Validates that
+  datetimes are parseable, start/end ordering is correct, starts are not in
+  the past, recurrence days are set, DST gaps are avoided, and notification
+  period constraints are satisfied.
+  """
+
   import Ecto.Changeset
 
   def validate_cast_datetimes(changeset, params) do

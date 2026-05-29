@@ -1,4 +1,10 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
+  @moduledoc """
+  Slice that handles stop and route selection for bus/subway/ferry/commuter-rail
+  alerts. Asynchronously loads available stops, routes, and filter options, and
+  renders the dual filtered-select UI with optional route-filter modal.
+  """
+
   alias AlertsUIWeb.CreateAlertLive
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.SelectFormatter
@@ -29,6 +35,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   ]
 
   defmodule Selections do
+    @moduledoc "Holds async-loaded route and stop option lists for `StopRouteServiceSlice`."
+
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice
 
     defstruct available_filter_routes: nil,

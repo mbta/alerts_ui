@@ -1,4 +1,10 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
+  @moduledoc """
+  Slice that manages affected-service selection for single-route alerts:
+  routes, stops, directions, trips, and service-date filtering. Asynchronously
+  loads schedules and renders the route/stop/trip picker for the details step.
+  """
+
   use AlertsUIWeb, :html
   alias AlertsUI.Models.ActivePeriod
   alias AlertsUIWeb.CreateAlertLive
@@ -33,6 +39,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   ]
 
   defmodule Selections do
+    @moduledoc "Holds async-loaded route, stop, and schedule option lists for `AffectedServiceSlice`."
+
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
 
     defstruct available_routes: [],

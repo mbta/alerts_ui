@@ -1,4 +1,10 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
+  @moduledoc """
+  Slice that manages the alert active period (start/end datetimes, one-time vs.
+  recurring timing, recurrence days, and automatic-close eligibility). Provides
+  changeset transformation helpers and the timeframe section of the details form.
+  """
+
   alias AlertsUI.Models.ActivePeriod
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,

@@ -1,7 +1,10 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
   @moduledoc """
-  URL slice (first form page) for refactored form
+  Slice that manages URL-derived parameters: route type, effect name, and their
+  combined `combination` key. Renders the route-type and effect-name picker shown
+  on the first step of the alert creation form.
   """
+
   require Logger
   alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData

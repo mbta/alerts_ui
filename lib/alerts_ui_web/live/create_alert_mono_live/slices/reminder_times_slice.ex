@@ -1,4 +1,10 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
+  @moduledoc """
+  Slice that manages rider reminder datetimes embedded in an alert. Provides
+  changeset helpers for casting/dropping reminder entries and renders the
+  rider-reminders section of the alert form.
+  """
+
   alias AlertsUI.Helpers.ReminderTimes
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice

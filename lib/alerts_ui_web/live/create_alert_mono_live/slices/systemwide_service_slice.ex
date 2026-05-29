@@ -1,4 +1,10 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSlice do
+  @moduledoc """
+  Slice that handles affected-service selection for systemwide alerts. Validates
+  that at least one service type (bus, commuter rail, ferry, subway) is chosen
+  and renders the corresponding checkgroup.
+  """
+
   alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
