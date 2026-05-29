@@ -19,7 +19,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
   alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
-  alias Phoenix.LiveView.AsyncResult
 
   # Past departure time — kept for Slice.transform/4 unit tests only
   @schedule %EnhancedSchedule{
@@ -64,7 +63,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
   end
 
   defp socket_with_loading_selections do
-    %{assigns: %{selections: %AsyncResult{loading: [:selections]}}}
+    %{assigns: %{selections: %AffectedServiceSlice.Selections{loading: true}}}
   end
 
   @route %Route{
@@ -1800,6 +1799,34 @@ assert document_has_element?(
         html = render_async(view)
 
         assert html =~ ~r/Stops:.*Central/s
+      end
+    end
+  end
+
+  describe "no-flicker: options preserved during async reload" do
+    @tag :logged_in_user
+    test "route options remain visible while a new async load is in progress", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _ -> [@route] end]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        get_to_submission_page_refactor(view, "Commuter Rail", "Delay")
+        render_async(view)
+
+        # Verify initial options are loaded
+        assert render(view) =~ "CR-Worcester"
+
+        # Trigger a new async load (direction change) — this should NOT clear options
+        html_mid_load =
+          view
+          |> element("form")
+          |> render_change(%{"alert_data" => %{"direction" => "0"}})
+
+        # Route options must still be visible before the async task completes
+        {:ok, document} = Floki.parse_document(html_mid_load)
+        assert document_has_element?(document, "option[value=\"CR-Worcester\"]")
       end
     end
   end

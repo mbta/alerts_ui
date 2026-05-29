@@ -7,16 +7,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
 
-  import Phoenix.LiveView, only: [assign_async: 3]
+  import Phoenix.LiveView, only: [start_async: 3]
   import Ecto.Changeset, only: [cast: 3, get_field: 2, change: 2]
-
-  alias Phoenix.LiveView.AsyncResult
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
     only: [get_single_route_effect_names: 0]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Selections,
-    only: [selections_loading?: 1, assign_unwrapped_selections: 2]
+    only: [selections_loading?: 1]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,
     only: [always_validate_required: 3]
@@ -83,15 +81,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     end
 
     def assigns(_service_data, socket, params) do
-      # update selections here
-      selections =
-        socket.assigns
-        |> assign_unwrapped_selections(AffectedServiceSlice.default_selections())
-        |> Map.get(:selections)
-
-      socket
-      |> assign(:selections, selections)
-      |> AffectedServiceSlice.async_assign_selections(params)
+      AffectedServiceSlice.async_assign_selections(socket, params)
     end
   end
 
@@ -126,14 +116,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   defp available_schedules_from_socket(socket) do
     case Map.get(socket.assigns, :selections) do
-      %AsyncResult{ok?: true, result: %Selections{available_schedules: schedules}} ->
-        schedules || []
-
-      %Selections{available_schedules: schedules} ->
-        schedules || []
-
-      _ ->
-        []
+      %Selections{available_schedules: schedules} -> schedules || []
+      _ -> []
     end
   end
 
@@ -156,11 +140,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   def async_assign_selections(socket, params) do
     if update_selections?(params) do
-      # prep work:
-      # modal date -> nil
-      # routes
-      # stops
-      # schedules
+      prev =
+        case Map.get(socket.assigns, :selections) do
+          %Selections{} = s -> s
+          _ -> %Selections{}
+        end
+
       form = socket.assigns.form
 
       direction = form[:direction].value
@@ -176,7 +161,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       all_route_types = all_route_types(route_type)
 
       socket
-      |> assign_async(:selections, fn ->
+      |> assign(:selections, %{prev | loading: true})
+      |> start_async(:fetch_selections, fn ->
         available_routes = CreateAlertLive.get_routes(all_route_types)
 
         available_stops =
@@ -252,8 +238,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             value == (modal_date || today())
           end)
 
-
-        selections = %Selections{
+        %Selections{
           available_routes: available_routes,
           available_stops: available_stops,
           available_schedules: available_schedules,
@@ -265,10 +250,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
           service_dates: service_dates(),
           trip_id_options: trip_id_options
         }
-
-        {:ok, %{selections: selections}}
       end)
-      |> assign(:selections, %Selections{})
     else
       case Map.get(socket.assigns, :selections) do
         nil ->
@@ -441,8 +423,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   end
 
   def render(assigns) do
-    assigns = assign_unwrapped_selections(assigns, default_selections())
-
     ~H"""
     <div class="min-w-full self-start flex flex-col" id="service_view">
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">

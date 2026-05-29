@@ -33,8 +33,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.{
     AlertData,
-    Path,
-    Selections
+    Path
   }
 
   alias AlertsUI.DBContexts.Users
@@ -166,12 +165,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   end
 
   @impl true
-  def handle_event("clear_filter", _params, %{assigns: %{selections: _}} = socket) do
-    selections =
-      socket.assigns
-      |> assign_unwrapped_selections()
-      |> Map.get(:selections)
-
+  def handle_event("clear_filter", _params, %{assigns: %{selections: selections}} = socket) do
     case Map.get(selections, :on_filter_clear) do
       handler when is_function(handler) -> {:noreply, handler.(socket)}
       _ -> {:noreply, socket}
@@ -218,12 +212,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   end
 
   @impl true
-  def handle_event("accept_filter", _params, %{assigns: %{selections: _selections}} = socket) do
-    selections =
-      socket.assigns
-      |> assign_unwrapped_selections()
-      |> Map.get(:selections)
-
+  def handle_event("accept_filter", _params, %{assigns: %{selections: selections}} = socket) do
     case Map.get(selections, :on_filter_accept) do
       handler when is_function(handler) -> {:noreply, handler.(socket)}
       _ -> {:noreply, socket}
@@ -271,6 +260,22 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
      assign(socket,
        alert_data: Map.put(socket.assigns.alert_data, :image_preview_size, image_preview_size)
      )}
+  end
+
+  @impl true
+  def handle_async(:fetch_selections, {:ok, new_selections}, socket) do
+    {:noreply, assign(socket, :selections, new_selections)}
+  end
+
+  @impl true
+  def handle_async(:fetch_selections, {:exit, reason}, socket) do
+    require Logger
+    Logger.error("Selections load failed: #{inspect(reason)}")
+
+    case socket.assigns[:selections] do
+      %{loading: _} = sel -> {:noreply, assign(socket, :selections, %{sel | loading: false})}
+      _ -> {:noreply, socket}
+    end
   end
 
   @impl true

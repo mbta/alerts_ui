@@ -1,5 +1,4 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
-  alias Phoenix.LiveView.AsyncResult
   alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.CreateAlertLive
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
@@ -9,13 +8,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
     only: [get_single_facility_effect_names: 0]
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Selections,
-    only: [assign_unwrapped_selections: 2]
-
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,
     only: [always_validate_required: 3]
 
-  import Phoenix.LiveView, only: [assign_async: 3]
+  import Phoenix.LiveView, only: [start_async: 3]
 
   use AlertsUIWeb, :html
 
@@ -69,6 +65,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
 
   def async_assign_selections(socket, params) do
     if update_selections?(params) do
+      prev =
+        case Map.get(socket.assigns, :selections) do
+          %Selections{} = s -> s
+          _ -> %Selections{}
+        end
+
       form = socket.assigns.form
 
       facility_ids = form[:facility_ids].value || []
@@ -82,7 +84,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
       stop_search_term = form[:stop_search_term].value
       stop_id = form[:stop_id].value
 
-      assign_async(socket, :selections, fn ->
+      socket
+      |> assign(:selections, %{prev | loading: true})
+      |> start_async(:fetch_selections, fn ->
         available_facilities =
           CreateAlertLive.get_facilities(facility_types)
 
@@ -112,15 +116,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
             option_prefix: "facility-filter"
           })
 
-        selections = %Selections{
+        %Selections{
           available_facilities: available_facilities,
           modal_stop_id_options: modal_stop_id_options,
           facility_id_options: facility_id_options
         }
-
-        {:ok, %{selections: selections}}
       end)
-      |> assign(:selections, %Selections{})
     else
       case Map.get(socket.assigns, :selections) do
         nil ->
@@ -160,12 +161,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
   end
 
   def on_filter_accept(socket) do
-    selections =
-      case socket.assigns.selections do
-        %Selections{} = selections -> selections
-        %AsyncResult{ok?: true} = async -> async.result
-      end
-
+    selections = socket.assigns.selections
     selected_stop_id = socket.assigns.form[:stop_id].value
     stops = selections.available_facilities.stops
 
@@ -197,8 +193,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
   end
 
   def render(assigns) do
-    assigns = assign_unwrapped_selections(assigns, %Selections{loading: true})
-
     ~H"""
     <div class="min-w-full flex flex-col" id="access_service_view">
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">

@@ -3,15 +3,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.SelectFormatter
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
-  alias Phoenix.LiveView.AsyncResult
-
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Selections,
-    only: [assign_unwrapped_selections: 2]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,
     only: [always_validate_required: 3]
 
-  import Phoenix.LiveView, only: [assign_async: 3]
+  import Phoenix.LiveView, only: [start_async: 3]
 
   use AlertsUIWeb, :html
 
@@ -82,6 +78,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
   def async_assign_selections(socket, params) do
     if update_selections?(params) do
+      prev =
+        case Map.get(socket.assigns, :selections) do
+          %Selections{} = s -> s
+          _ -> %Selections{}
+        end
+
       auto_select_routes = match?(%{"_target" => ["alert_data", "stop_ids"]}, params)
       lv_pid = self()
 
@@ -100,21 +102,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
           modal_route_id -> [modal_route_id]
         end
 
-      # Capture previous selected stops before the async re-fetch so that stops which were
-      # selected but are now absent from route-filtered available_stops are preserved.
       prev_selected_stops =
-        case Map.get(socket.assigns, :selections) do
-          %AsyncResult{ok?: true, result: %Selections{selected_stops: stops}} when is_list(stops) ->
-            stops
-
-          %Selections{selected_stops: stops} when is_list(stops) ->
-            stops
-
-          _ ->
-            []
+        case prev do
+          %Selections{selected_stops: stops} when is_list(stops) -> stops
+          _ -> []
         end
 
-      assign_async(socket, :selections, fn ->
+      socket
+      |> assign(:selections, %{prev | loading: true})
+      |> start_async(:fetch_selections, fn ->
         available_filter_routes =
           CreateAlertLive.get_routes(route_type)
 
@@ -172,7 +168,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
           send(lv_pid, {:sr_auto_select_routes, Enum.map(available_routes, & &1.id)})
         end
 
-        selections = %Selections{
+        %Selections{
           available_filter_routes: available_filter_routes,
           available_routes: available_routes,
           available_stops: available_stops,
@@ -183,10 +179,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
           selected_stops: selected_stops,
           stop_id_options: stop_id_options
         }
-
-        {:ok, %{selections: selections}}
       end)
-      |> assign(:selections, %Selections{})
     else
       case Map.get(socket.assigns, :selections) do
         nil ->
@@ -276,8 +269,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   defp update_selections?(_), do: true
 
   def render(assigns) do
-    assigns = assign_unwrapped_selections(assigns, %Selections{loading: true})
-
     ~H"""
     <div class="min-w-full flex flex-col" id="stop_route_service_view">
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
