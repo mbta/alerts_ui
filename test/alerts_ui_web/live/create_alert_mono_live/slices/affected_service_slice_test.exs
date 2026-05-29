@@ -381,6 +381,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
                  ^tomorrow -> [@schedule_3, @schedule_3]
                  _ -> []
                end
+
              _, _ ->
                []
            end,
@@ -499,6 +500,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
                  ^tomorrow -> [@schedule_3, @schedule_3]
                  _ -> []
                end
+
              _, _ ->
                []
            end,
@@ -722,8 +724,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            get: fn _, _ -> @bus_route end,
            all: fn _ -> [@bus_route] end
          ]},
-        {StopsRepo,
-         [],
+        {StopsRepo, [],
          [
            by_route: fn _, _, _ -> [@stop, @stop_2] end,
            get_parent: fn _ -> nil end
@@ -1140,7 +1141,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          ]},
         {SchedulesRepo, [],
          [
-           by_route_ids: fn _, _ -> [@schedule_future, @schedule_future, @schedule_3, @schedule_3] end,
+           by_route_ids: fn _, _ ->
+             [@schedule_future, @schedule_future, @schedule_3, @schedule_3]
+           end,
            end_of_rating: fn -> Date.add(@todays_date, 7) end
          ]},
         {StopsRepo, [],
@@ -1275,7 +1278,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
                  "[value=\"CR-Worcester\"][selected=\"selected\"]"
                )
 
-assert document_has_element?(
+        assert document_has_element?(
                  document,
                  "[value=\"South Station|place-sstat\"][selected=\"selected\"]"
                )
@@ -1315,7 +1318,9 @@ assert document_has_element?(
          ]},
         {SchedulesRepo, [],
          [
-           by_route_ids: fn _, _ -> [@schedule_future, @schedule_future, @schedule_3, @schedule_3] end,
+           by_route_ids: fn _, _ ->
+             [@schedule_future, @schedule_future, @schedule_3, @schedule_3]
+           end,
            end_of_rating: fn -> Date.add(@todays_date, 7) end
          ]},
         {StopsRepo, [],

@@ -100,7 +100,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
         available_schedules
         |> Stream.filter(&(&1.trip.id in trip_ids))
         |> Stream.filter(fn s ->
-          direction in [nil, "default", s.trip.direction_id, Integer.to_string(s.trip.direction_id)]
+          direction in [
+            nil,
+            "default",
+            s.trip.direction_id,
+            Integer.to_string(s.trip.direction_id)
+          ]
         end)
         |> Enum.reduce(%{}, fn s, acc ->
           Map.put(acc, s.trip.id, %{
@@ -473,7 +478,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             label="Upcoming dates"
             field={@form[:modal_date]}
             filter_field={@form[:modal_date_search_term]}
-            options={filter_service_dates(service_dates(), @form[:modal_date_search_term].value, @form[:modal_date].value)}
+            options={
+              filter_service_dates(
+                service_dates(),
+                @form[:modal_date_search_term].value,
+                @form[:modal_date].value
+              )
+            }
             class="h-[32rem]"
             prompt="All future trips"
             multiple={false}

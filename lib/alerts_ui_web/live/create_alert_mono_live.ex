@@ -451,6 +451,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   defp persist_valid_alert(socket) do
     alert_data = socket.assigns.form.source.data
+
+    alert_data =
+      alert_data
+      |> Map.merge(%{
+        effect_name:
+          AlertsUIWeb.CreateAlertMonoLive.Helpers.Path.effect_from_url_name(
+            alert_data.effect_name
+          )
+      })
+
     form_type = socket.assigns.form_type
 
     user = Users.create_or_update_user_from_session(socket.assigns.current_user)

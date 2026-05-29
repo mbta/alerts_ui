@@ -65,7 +65,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       severity = get_severity(details_data, effect_name)
       cause_detail = get_cause_detail(details_data, effect_name)
 
+      # checking for a nil target prevents autotext from changing when the user hasn't actually selected
+      # anything (eg upon submission)
+      # if trying to get this to fire in a test, you need to add eg `_target: [:foo, "header_text"]` to
+      # the map you give to render_change
       [_, target | _] = Map.get(params, "_target", [nil, nil])
+
+      # if the target is nil and submitted? is true then we're in the review modal
+      # and shouldn't recalcuate autotext. (if target is nil and submitted is false we
+      # have just loaded the page)
+      submitting? = is_nil(target) and socket.assigns.submitted?
 
       header_sync_toggle =
         if target == "header_text" and details_data.header_sync_toggle == true do
@@ -91,18 +100,22 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
         |> AlertDataToAutoText.build_autotext_data()
 
       header_text =
-        update_header_text(header_sync_toggle, details_data.header_text, autotext_data)
+        if header_sync_toggle == false or submitting? do
+          details_data.header_text
+        else
+          Templates.build_auto_text(autotext_data, :header_template)
+        end
 
       description_text =
-        update_description_text(
-          description_sync_toggle,
-          details_data.description_text,
-          autotext_data
-        )
+        if description_sync_toggle == false or submitting? do
+          details_data.description_text
+        else
+          Templates.build_auto_text(autotext_data, :description_template)
+        end
 
       service_effect_text =
-        if autotext_data == %{},
-          do: "",
+        if submitting?,
+          do: details_data.service_effect_text,
           else: Templates.build_auto_text(autotext_data, :service_effect_template)
 
       changeset
@@ -208,7 +221,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       original_ids = MapSet.new(stops_from_original, & &1.id)
 
       stops_from_available =
-        Enum.filter(selections.available_stops || [], &(&1.id in stop_ids and &1.id not in original_ids))
+        Enum.filter(
+          selections.available_stops || [],
+          &(&1.id in stop_ids and &1.id not in original_ids)
+        )
 
       stops = stops_from_original ++ stops_from_available
 
@@ -216,22 +232,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
         Enum.filter(Map.get(selections, :available_schedules) || [], &(&1.trip.id in trip_ids))
 
       %{routes: routes, stops: stops, schedules: schedules}
-    end
-
-    defp update_header_text(header_sync_toggle, original_header_text, autotext_data) do
-      if header_sync_toggle == true do
-        Templates.build_auto_text(autotext_data, :header_template)
-      else
-        original_header_text
-      end
-    end
-
-    defp update_description_text(description_sync_toggle, description_text, autotext_data) do
-      if description_sync_toggle == true do
-        Templates.build_auto_text(autotext_data, :description_template)
-      else
-        description_text
-      end
     end
 
     defp translated_details(details_data) do
