@@ -624,7 +624,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   def on_filter_clear(socket) do
     case AlertData.sync(socket.assigns.form.source, socket, %{
-           "alert_data" => %{"modal_date" => today()}
+           "alert_data" => %{"modal_date" => today(), "modal_date_search_term" => nil}
          }) do
       {:ok, socket} -> async_assign_selections(socket, %{})
       {:error, socket} -> async_assign_selections(socket, %{})
