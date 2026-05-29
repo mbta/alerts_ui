@@ -132,7 +132,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :banner_sync_toggle, :boolean, default: true
     field :banner_text, :string
     field :notification_toggle, :boolean
-    field :view_banner, :boolean, default: false
+    field :view_banner, :boolean
 
     # rider reminders
     embeds_many :reminder_times, ReminderTime, on_replace: :delete do
@@ -200,7 +200,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
           banner_sync_toggle: boolean(),
           banner_text: String.t(),
           notification_toggle: boolean() | nil,
-          view_banner: boolean(),
+          view_banner: boolean() | nil,
           # reminders
           reminder_times: [
             %{

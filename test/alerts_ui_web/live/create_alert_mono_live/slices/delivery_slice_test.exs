@@ -53,6 +53,35 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
     end
 
     @tag :logged_in_user
+    test "unchecking banner checkbox hides banner even when banner text is present", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      get_to_submission_page_refactor(view, "Subway", "Delay")
+
+      # set header text so the sync will populate banner_text
+      view
+      |> element("form")
+      |> render_change(%{"alert_data" => %{"header_text" => "Some header text"}})
+
+      # check the banner checkbox — banner_text syncs to header_text
+      view
+      |> element("form")
+      |> render_change(%{"alert_data" => %{"view_banner" => "true"}})
+
+      assert view
+             |> element("div#banner_div")
+             |> render() =~ ~s(id="banner-container")
+
+      # uncheck the banner checkbox — banner should be hidden even though banner_text is non-empty
+      view
+      |> element("form")
+      |> render_change(%{"alert_data" => %{"view_banner" => "false"}})
+
+      refute view
+             |> element("div#banner_div")
+             |> render() =~ ~s(id="banner-container")
+    end
+
+    @tag :logged_in_user
     test "banner text syncs with header text", %{conn: conn} do
       with_mocks([
         {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]}
