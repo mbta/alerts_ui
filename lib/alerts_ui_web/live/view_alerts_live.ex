@@ -282,7 +282,8 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       # Make sure 'default' and modal search terms don't get pushed to params
       |> remove_unused_params()
 
-    params = Map.merge(socket.assigns.params, %{"filter" => filters})
+    # Remove 'page' to go back to the first page with the new applied filter
+    params = Map.merge(Map.drop(socket.assigns.params, ["page"]), %{"filter" => filters})
 
     socket =
       assign(socket,

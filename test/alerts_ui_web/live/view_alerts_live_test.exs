@@ -970,7 +970,8 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         insert(:alert, %{
           alert_id: "#{i}",
           active_period_start: ~U[2023-01-01 00:01:00Z],
-          active_period_end: ~U[2023-01-01 01:01:00Z]
+          active_period_end: ~U[2023-01-01 01:01:00Z],
+          primary_service_type: "3"
         })
       end)
 
@@ -1027,6 +1028,33 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         |> render_click()
 
       assert get_alert_id_order(html) == Enum.map(1..50, fn i -> "#{i}" end)
+    end
+
+    @tag :logged_in_user
+    test "it removes page param when filtering", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts?filter[timeline]=past&page=2")
+
+      view
+      |> element("#alert-filter-form")
+      |> render_submit(%{
+        "view_alerts_live" => %{
+          # bus
+          "service_type" => ["3"]
+        }
+      })
+
+      assert_patch(
+        view,
+        ~p"/alerts?filter[service_type][]=3&filter[timeline]=past"
+      )
+
+      # Assert we are back on page 1
+      html =
+        view
+        |> element("nav button", "1")
+        |> render()
+
+      assert html =~ "aria-current=\"page\""
     end
   end
 
