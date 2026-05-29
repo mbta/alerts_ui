@@ -235,28 +235,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
     """
   end
 
-  def parse_field_errors(%Ecto.Changeset{} = changeset) do
-    traverse_errors(changeset, fn _changeset, _field, {msg, _opts} -> msg end)
-    |> Enum.map(&traverse_inner_errors/1)
-  end
-
-  defp traverse_inner_errors({key, value}) do
-    new_value =
-      value
-      |> Enum.uniq()
-      |> Enum.reduce([], fn reminder_map, acc ->
-        if is_list(Map.get(reminder_map, :reminder_time)) do
-          [hd(reminder_map.reminder_time) | acc]
-        else
-          acc
-        end
-      end)
-      |> List.flatten()
-      |> Enum.join(";")
-
-    {key, {new_value, []}}
-  end
-
   defp naive_datetime_to_iso8601(nil), do: ""
 
   defp naive_datetime_to_iso8601(iso_datetime) when is_binary(iso_datetime), do: iso_datetime
