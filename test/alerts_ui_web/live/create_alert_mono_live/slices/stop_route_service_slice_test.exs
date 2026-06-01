@@ -780,7 +780,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
            by_route: fn _, _ -> [@stop, @stop_two] end,
            by_route: fn _, _, _ -> [@stop, @stop_two] end,
            get: fn _ -> @stop end,
-           get_parent: fn _ -> nil end
+           get_parent: fn _ -> nil end,
+           all: fn _, _ -> [@stop] end
          ]},
         {RoutePatternsRepo, [],
          [
@@ -897,7 +898,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
            by_route: fn _, _ -> [@stop] end,
            by_route: fn _, _, _ -> [@stop] end,
            get: fn _ -> @stop end,
-           get_parent: fn _ -> nil end
+           get_parent: fn _ -> nil end,
+           all: fn _, _ -> [@stop] end
          ]},
         {RoutePatternsRepo, [],
          [

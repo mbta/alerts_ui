@@ -211,7 +211,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
         {RoutePatternsRepo, [],
          [
            by_route_id: fn _route_id, _opts -> [] end
-         ]}
+         ]},
+        {StopsRepo, [], [all: fn _, _ -> [@stop] end, by_route: fn _, _, _ -> [@stop] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
 
@@ -261,7 +262,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
         {RoutePatternsRepo, [],
          [
            by_route_id: fn _route_id, _opts -> [] end
-         ]}
+         ]},
+        {StopsRepo, [], [all: fn _, _ -> [@stop] end, by_route: fn _, _, _ -> [@stop] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
 
@@ -303,7 +305,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
         {StopsRepo, [],
          [
            by_route: fn _, _, _ -> [@stop] end,
-           get_parent: fn _ -> %{id: @stop.id} end
+           get_parent: fn _ -> %{id: @stop.id} end,
+           all: fn _, _ -> [@stop] end
          ]},
         {RoutesRepo, [],
          [
@@ -365,7 +368,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
         {StopsRepo, [],
          [
            by_route: fn _, _, _ -> [@stop] end,
-           get_parent: fn _ -> %{id: @stop.id} end
+           get_parent: fn _ -> %{id: @stop.id} end,
+           all: fn _, _ -> [@stop] end
          ]},
         {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]},
         {RoutesRepo, [],
@@ -437,7 +441,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
         {StopsRepo, [],
          [
            by_route: fn _, _, _ -> [@stop] end,
-           get_parent: fn _ -> %{id: @stop.id} end
+           get_parent: fn _ -> %{id: @stop.id} end,
+           all: fn _, _ -> [@stop] end
          ]},
         {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]},
         {RoutesRepo, [],

@@ -1149,7 +1149,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {StopsRepo, [],
          [
            by_route: fn _, _, _ -> [@stop] end,
-           by_route_type: fn _ -> [@stop] end
+           by_route_type: fn _ -> [@stop] end,
+           all: fn _, _ -> [@stop] end
          ]},
         {RoutePatternsRepo, [],
          [
@@ -1253,6 +1254,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          [
            by_route: fn _, _, _ -> [@stop, @stop_2] end,
            by_route_type: fn _ -> [@stop, @stop_2] end,
+           all: fn _, _ -> [@stop] end,
            get_parent: fn
              "place-sstat" -> @stop
              "place-crtst" -> @stop_2
@@ -1447,7 +1449,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {StopsRepo, [],
          [
            by_route_type: fn _route_type -> [@stop] end,
-           by_route: fn _, _, _ -> [@stop] end
+           by_route: fn _, _, _ -> [@stop] end,
+           all: fn _, _ -> [@stop] end
          ]},
         {RoutePatternsRepo, [],
          [
@@ -1552,6 +1555,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          [
            by_route_type: fn _route_type -> [@stop, @stop_2] end,
            by_route: fn _, _, _ -> [@stop, @stop_2] end,
+           all: fn _, _ -> [@stop] end,
            get_parent: fn
              "place-sstat" -> @stop
              "place-crtst" -> @stop_2
