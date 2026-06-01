@@ -5,8 +5,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
   import Phoenix.LiveViewTest
   import Mock
   import Test.Support.Helpers
-  alias AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice
   alias AlertsUI.Alerts
+  alias AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
@@ -117,7 +117,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         render_async(view)
         {:ok, document} = view |> render() |> Floki.parse_document()
 
-        assert Test.Support.Helpers.document_has_element?(
+        assert document_has_element?(
                  document,
                  "select[id=\"alert_data_route_ids\"][disabled]"
                )
@@ -256,12 +256,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         {:ok, document} = view |> render() |> Floki.parse_document()
 
-        assert Test.Support.Helpers.document_has_element?(
+        assert document_has_element?(
                  document,
                  "option[value=\"place-aqucl\"]"
                )
 
-        assert Test.Support.Helpers.document_has_element?(
+        assert document_has_element?(
                  document,
                  "option[value=\"place-pktrm\"]"
                )
@@ -277,12 +277,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         {:ok, document} = view |> render() |> Floki.parse_document()
 
-        assert Test.Support.Helpers.document_has_element?(
+        assert document_has_element?(
                  document,
                  "option[value=\"place-aqucl\"]"
                )
 
-        refute Test.Support.Helpers.document_has_element?(
+        refute document_has_element?(
                  document,
                  "option[value=\"place-pktrm\"]"
                )
@@ -298,7 +298,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         {:ok, document} = view |> render() |> Floki.parse_document()
 
-        assert Test.Support.Helpers.document_has_element?(
+        assert document_has_element?(
                  document,
                  "option[value=\"place-aqucl\"]"
                )
@@ -314,7 +314,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         {:ok, document} = view |> render() |> Floki.parse_document()
 
-        refute Test.Support.Helpers.document_has_element?(
+        refute document_has_element?(
                  document,
                  "option[value=\"place-aqucl\"]"
                )
@@ -324,7 +324,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         {:ok, document} = view |> render() |> Floki.parse_document()
 
-        assert Test.Support.Helpers.document_has_element?(
+        assert document_has_element?(
                  document,
                  "option[value=\"place-aqucl\"]"
                )
@@ -412,7 +412,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         {:ok, document} = view |> render() |> Floki.parse_document()
 
-        assert Test.Support.Helpers.document_has_element?(
+        assert document_has_element?(
                  document,
                  "select#alert_data_modal_route_id > option[value=\"Blue\"]"
                )
@@ -428,12 +428,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         {:ok, document} = view |> render() |> Floki.parse_document()
 
-        refute Test.Support.Helpers.document_has_element?(
+        refute document_has_element?(
                  document,
                  "select#alert_data_modal_route_id > option[value=\"Blue\"]"
                )
 
-        assert Test.Support.Helpers.document_has_element?(
+        assert document_has_element?(
                  document,
                  "select#alert_data_modal_route_id > option[value=\"Red\"]"
                )
@@ -470,7 +470,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         {:ok, document} = view |> render() |> Floki.parse_document()
 
-        refute Test.Support.Helpers.document_has_element?(
+        refute document_has_element?(
                  document,
                  "select#alert_data_modal_route_id > option[value=\"Blue\"]"
                )
@@ -483,7 +483,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         {:ok, document} = view |> render() |> Floki.parse_document()
 
-        assert Test.Support.Helpers.document_has_element?(
+        assert document_has_element?(
                  document,
                  "select#alert_data_modal_route_id > option[value=\"Blue\"]"
                )
@@ -677,7 +677,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         {:ok, document} = view |> render() |> Floki.parse_document()
 
-        assert Test.Support.Helpers.document_has_element?(
+        assert document_has_element?(
                  document,
                  "option[value=\"place-aqucl\"][selected=\"selected\"]"
                )
@@ -780,7 +780,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
            by_route: fn _, _ -> [@stop, @stop_two] end,
            by_route: fn _, _, _ -> [@stop, @stop_two] end,
            get: fn _ -> @stop end,
-           get_parent: fn _ -> nil end
+           get_parent: fn _ -> nil end,
+           all: fn ["filter[id]": "place-aqucl,place-pktrm"], _opts -> [@stop, @stop_two] end
          ]},
         {RoutePatternsRepo, [],
          [
@@ -897,7 +898,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
            by_route: fn _, _ -> [@stop] end,
            by_route: fn _, _, _ -> [@stop] end,
            get: fn _ -> @stop end,
-           get_parent: fn _ -> nil end
+           get_parent: fn _ -> nil end,
+           all: fn ["filter[id]": "place-aqucl"], _opts -> [@stop] end
          ]},
         {RoutePatternsRepo, [],
          [
@@ -1001,7 +1003,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         {StopsRepo, [],
          [
            by_route_type: fn _, _ -> [@stop] end,
-           by_route: fn _, _, _ -> [@stop] end
+           by_route: fn _, _, _ -> [@stop] end,
+           all: fn ["filter[id]": "place-aqucl"], _opts -> [@stop] end
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")

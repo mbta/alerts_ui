@@ -1,9 +1,9 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
   require Logger
-  alias Phoenix.HTML.Form
   alias AlertsUI.Models.Alert
   alias AlertsUI.Configs.ModeEffect
   alias AlertsUIWeb.FormComponents.Helpers.ContentFormatter
+  alias Phoenix.HTML.Form
 
   import Ecto.Changeset, only: [get_field: 2]
 
@@ -56,7 +56,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
   def list_effect_path_names(nil), do: []
 
   def list_effect_path_names(route_type_name) do
-    ModeEffect.mode_effects_by_route_type_name(route_type_name)
+    (ModeEffect.mode_effects_by_route_type_name(route_type_name) || [])
     |> Enum.reject(fn {name, _struct} -> name in @forbidden_effects end)
     |> Enum.map(fn {_name, struct} -> struct.path_name end)
   end
@@ -104,11 +104,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
     )
   end
 
-  def get_single_route_effect_names() do
+  def get_single_route_effect_names do
     ["Detour", "Snow Route"]
   end
 
-  def get_single_facility_effect_names() do
+  def get_single_facility_effect_names do
     ["Elevator Closure", "Escalator Closure"]
   end
 

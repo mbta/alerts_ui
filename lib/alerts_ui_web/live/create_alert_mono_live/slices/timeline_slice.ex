@@ -19,9 +19,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Step do
 end
 
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
-  alias AlertsUIWeb.CreateAlertMonoLive.Step
+  @moduledoc """
+  timeline slice for refactored form
+  """
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.CreateAlertMonoLive.Step
 
   use AlertsUIWeb, :html
 

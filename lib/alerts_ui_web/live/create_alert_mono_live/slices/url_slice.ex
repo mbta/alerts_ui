@@ -1,9 +1,12 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
+  @moduledoc """
+  URL slice (first form page) for refactored form
+  """
   require Logger
-  alias Ecto.Changeset
   alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias Ecto.Changeset
 
   use AlertsUIWeb, :html
 

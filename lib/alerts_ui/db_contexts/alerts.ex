@@ -259,7 +259,7 @@ defmodule AlertsUI.Alerts do
     Repo.get_by!(get_by_alert_id_query(), alert_id: alert_id)
   end
 
-  defp get_by_alert_id_query() do
+  defp get_by_alert_id_query do
     from(
       a in Alert,
       preload: [

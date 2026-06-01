@@ -5,10 +5,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   use AlertsUIWeb, :live_view
 
-  alias Phoenix.LiveView
   alias AlertsUI.AlertBuilder
   alias AlertsUI.Alerts
   alias AlertsUI.Models.Alert
+  alias Phoenix.LiveView
 
   alias AlertsUIWeb.CreateAlertMonoLive.{
     AlertData,
@@ -20,12 +20,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     AffectedServiceSlice,
     AlertDetailsSlice,
     DeliverySlice,
+    NotificationPeriodSlice,
     ReminderTimesSlice,
     SubmitSlice,
     StopRouteServiceSlice,
     TimelineSlice,
     TimeRangeSlice,
-    NotificationPeriodSlice,
     UrlSlice
   }
 

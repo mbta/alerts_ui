@@ -193,6 +193,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
          ]},
         {StopsRepo, [],
          [
+           all: fn _, _ -> [@stop] end,
            by_route: fn _route, _direction, _opts -> [@stop] end,
            get: fn _id -> @stop end
          ]},
@@ -215,12 +216,35 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
           }
         })
 
+        todays_date =
+          DateTime.utc_now()
+          |> DateTime.shift_zone!("America/New_York")
+          |> DateTime.to_date()
+
+        tomorrows_date = Date.add(todays_date, 1)
+
+        active_period_start = NaiveDateTime.new!(tomorrows_date, ~T[03:00:00])
+
+        active_period_end =
+          tomorrows_date
+          |> Date.add(1)
+          |> NaiveDateTime.new!(~T[03:00:00])
+
         view
         |> element("form")
         |> render_change(%{
           _target: [:foo, :bar],
           alert_data: %{
-            stop_names_and_ids: ["Aquarium (outbound)|place-aqucl"]
+            stop_names_and_ids: ["Aquarium (outbound)|place-aqucl"],
+            active_period_start_specifier: "start_of_service",
+            active_period_end_specifier: "end_of_service",
+            active_period_start_date: tomorrows_date |> Date.to_iso8601(),
+            active_period_end_date: tomorrows_date |> Date.add(1),
+            active_period_start:
+              tomorrows_date |> NaiveDateTime.new!(~T[03:00:00]) |> NaiveDateTime.to_iso8601(),
+            active_period_end:
+              active_period_end
+              |> NaiveDateTime.to_iso8601()
           }
         })
 
@@ -239,6 +263,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
           |> String.replace("New alert #", "")
           |> String.replace(" created", "")
 
+        expected_start =
+          active_period_start
+          |> DateTime.from_naive!("America/New_York")
+          |> DateTime.shift_zone!("Etc/UTC")
+
+        expected_end =
+          active_period_end
+          |> DateTime.from_naive!("America/New_York")
+          |> DateTime.shift_zone!("Etc/UTC")
+
         assert %AlertsUI.Models.Alert{
                  id: _,
                  alert_id: ^alert_id,
@@ -248,7 +282,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
                  banner_text: nil,
                  cause: :UNKNOWN_CAUSE,
                  cause_detail: nil,
-                 header_text: "route_number_1 is experiencing delays of about 15 minutes.",
+                 header_text: "route_number_1 will be experiencing delays of about 15 minutes.",
                  description_text: "",
                  severity_level: :WARNING,
                  url: nil,
@@ -262,7 +296,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
                  timeframe_text: nil,
                  recurrence_text: nil,
                  alert_lifecycle: nil,
-                 duration_certainty: :ESTIMATED,
+                 duration_certainty: :KNOWN,
                  reminder_times: [],
                  active_period: [
                    %AlertsUI.Models.ActivePeriod{
@@ -275,8 +309,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
                      updated_at: _
                    }
                  ],
-                 active_period_start: _,
-                 active_period_end: _,
+                 active_period_start: ^expected_start,
+                 active_period_end: ^expected_end,
                  image_url: nil,
                  image_alternative_text: nil,
                  tts_header_text: nil,

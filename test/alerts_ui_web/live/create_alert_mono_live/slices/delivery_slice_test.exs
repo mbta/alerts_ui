@@ -6,9 +6,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
   import Mock
   import Test.Support.Helpers
   alias AlertsUI.Alerts
-  alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
   alias MBTAV3API.Routes.Route
+  alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
@@ -211,7 +211,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
         {RoutePatternsRepo, [],
          [
            by_route_id: fn _route_id, _opts -> [] end
-         ]}
+         ]},
+        {StopsRepo, [],
+         [all: fn ["filter[id]": ""], _ -> [] end, by_route: fn _, _, _ -> [@stop] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
 
@@ -261,7 +263,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
         {RoutePatternsRepo, [],
          [
            by_route_id: fn _route_id, _opts -> [] end
-         ]}
+         ]},
+        {StopsRepo, [],
+         [all: fn ["filter[id]": ""], _ -> [] end, by_route: fn _, _, _ -> [@stop] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
 
@@ -303,7 +307,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
         {StopsRepo, [],
          [
            by_route: fn _, _, _ -> [@stop] end,
-           get_parent: fn _ -> %{id: @stop.id} end
+           get_parent: fn _ -> %{id: @stop.id} end,
+           all: fn ["filter[id]": ""], _ -> [] end
          ]},
         {RoutesRepo, [],
          [
@@ -365,7 +370,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
         {StopsRepo, [],
          [
            by_route: fn _, _, _ -> [@stop] end,
-           get_parent: fn _ -> %{id: @stop.id} end
+           get_parent: fn _ -> %{id: @stop.id} end,
+           all: fn ["filter[id]": ""], _ -> [] end
          ]},
         {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]},
         {RoutesRepo, [],
@@ -437,7 +443,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
         {StopsRepo, [],
          [
            by_route: fn _, _, _ -> [@stop] end,
-           get_parent: fn _ -> %{id: @stop.id} end
+           get_parent: fn _ -> %{id: @stop.id} end,
+           all: fn _, _ -> [@stop] end
          ]},
         {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]},
         {RoutesRepo, [],

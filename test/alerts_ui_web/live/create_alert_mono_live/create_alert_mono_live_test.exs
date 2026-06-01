@@ -14,8 +14,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
   alias MBTAV3API.RoutePatterns.RoutePattern
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
-  alias MBTAV3API.Schedules.{Schedule, Trip}
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
+  alias MBTAV3API.Schedules.{Schedule, Trip}
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
 
@@ -145,7 +145,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     test "submitting the second part of the form saves the alert", %{conn: conn} do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [@route_pattern] end]},
-        {StopsRepo, [], by_route: fn _, _, _opts -> [@stop] end},
+        {StopsRepo, [], [by_route: fn _, _, _opts -> [@stop] end, all: fn _, _ -> [@stop] end]},
         {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
@@ -229,7 +229,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
          get!: fn
            "2" -> stop
            "3" -> child_stop
-         end}
+         end,
+         all: fn ["filter[id]": ""], _ -> [stop, child_stop] end}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
         get_to_submission_page_refactor(view, "Facility", "Elevator closure")
@@ -266,6 +267,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         {FacilitiesRepo, [],
          [get_by_type: fn _types, _opts -> [facility] end, get: fn _id -> facility end]},
         {StopsRepo, [],
+         all: fn _, _ -> [stop] end,
          get!: fn
            "2" -> stop
            "3" -> child_stop

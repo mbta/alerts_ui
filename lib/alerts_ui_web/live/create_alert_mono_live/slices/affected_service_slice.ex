@@ -398,7 +398,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     %{selections | service_dates: service_dates(), loading: true, today: today()}
   end
 
-  def service_dates() do
+  def service_dates do
     0..6
     |> Enum.to_list()
     |> Enum.map(fn i ->
@@ -411,13 +411,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     end)
   end
 
-  def today() do
+  def today do
     DateTime.now!("America/New_York")
     |> ActivePeriod.datetime_to_service_date()
     |> Date.to_iso8601()
   end
 
-  def default_filter_title() do
+  def default_filter_title do
     service_dates()
     |> Enum.find({"All future trips", nil}, fn {_option, value} ->
       value == today()

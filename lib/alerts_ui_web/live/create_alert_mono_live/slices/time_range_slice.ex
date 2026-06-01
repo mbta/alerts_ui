@@ -94,6 +94,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
     def update_times_if_duplicating(slice, _, :recurring, _), do: slice
 
+    def update_times_if_duplicating(%{active_period_end: nil} = slice, :duplicating, _, _) do
+      slice
+    end
+
     def update_times_if_duplicating(slice, :duplicating, _, now) do
       if NaiveDateTime.compare(now, slice.active_period_end) == :gt do
         Map.merge(slice, %{
@@ -347,13 +351,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
   defp current_time, do: NaiveDateTime.local_now()
 
-  defp alert_timing_values(),
+  defp alert_timing_values,
     do: [
       "one-time",
       "recurring"
     ]
 
-  defp start_values(),
+  defp start_values,
     do: [
       :now,
       :start_of_service,

@@ -1,5 +1,4 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
-  alias AlertsUIWeb.CreateAlertMonoLive
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path, as: EffectHelper
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}
@@ -41,11 +40,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData, only: [clear_my_errors: 2]
 
     alias AlertsUI.Models.Alert
-    alias Phoenix.LiveView.AsyncResult
     alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice
     alias MBTAV3API.Stops.Stop
+    alias Phoenix.LiveView.AsyncResult
 
     @severity_options SeverityLevel.severity_tuples()
                       |> Enum.map(fn {desc, severity, _level} -> {desc, severity} end)
@@ -92,7 +91,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
         end
 
       selected =
-        socket |> unwrap_selections() |> selected_objects(changeset, socket.assigns.form_type)
+        socket |> unwrap_selections() |> selected_objects(changeset)
 
       autotext_data =
         details_data
@@ -191,12 +190,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       end
     end
 
-    defp selected_objects(selections, _form, _form_type) when selections in [%{}, nil], do: %{}
+    defp selected_objects(selections, _form) when selections in [%{}, nil], do: %{}
 
     defp selected_objects(
            %AccessAffectedServiceSlice.Selections{} = selections,
-           changeset,
-           _form_type
+           changeset
          ) do
       facility_ids = get_field(changeset, :facility_ids) || []
 
@@ -211,7 +209,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       %{facilities: facilities}
     end
 
-    defp selected_objects(selections, changeset, form_type) do
+    defp selected_objects(selections, changeset) do
       route_ids = get_field(changeset, :route_ids) || []
       stop_ids = get_field(changeset, :stop_ids) || []
       trip_ids = get_field(changeset, :trip_ids) || []
@@ -236,13 +234,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
       schedules =
         Enum.filter(Map.get(selections, :available_schedules) || [], &(&1.trip.id in trip_ids))
-
-      schedules =
-        if form_type == :editing do
-          CreateAlertMonoLive.filter_out_old_trips(schedules)
-        else
-          schedules
-        end
 
       %{routes: routes, stops: stops, schedules: schedules}
     end
