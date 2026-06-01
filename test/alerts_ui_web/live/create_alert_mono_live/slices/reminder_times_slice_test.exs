@@ -6,7 +6,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
   alias AlertsUI.Alerts
   import Test.Support.Helpers
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
-  alias AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice
 
   describe "component" do
     @tag :logged_in_user
@@ -21,9 +20,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
       get_to_submission_page_refactor(view, "Bus", "Detour")
 
-      refute view
-             |> render() =~ ~s(id="reminder-time-component-0")
-
       rendered =
         view
         |> element("form")
@@ -33,6 +29,66 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
 
       assert rendered =~ ~s(id="reminder-time-component-0")
       assert rendered =~ ~s(Select reminder time)
+    end
+
+    @tag :logged_in_user
+    test "generates a new empty entry when a filled one exists", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      get_to_submission_page_refactor(view, "Bus", "Detour")
+
+      refute view
+             |> render() =~ ~s(id="reminder-time-component-0")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{"reminder_sort" => ["new"]}
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "reminder_sort" => ["0"],
+          "reminder_times" => %{
+            "0" => %{
+              "_persistent_id" => "0",
+              "max_time" => "2024-09-27T03:00:00",
+              "min_time" => "2024-09-26 02:00:00",
+              "reminder_time" => "2024-09-26T03:00",
+              "reminder_time_specifier" => "custom"
+            }
+          }
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "reminder_sort" => ["0", "new"],
+          "reminder_times" => %{
+            "0" => %{
+              "_persistent_id" => "0",
+              "max_time" => "2024-09-27T03:00:00",
+              "min_time" => "2024-09-26 02:00:00",
+              "reminder_time" => "2024-09-26T03:00",
+              "reminder_time_specifier" => "custom"
+            }
+          }
+        }
+      })
+
+      input0 =
+        element(view, "input[name='alert_data[reminder_times][0][reminder_time]']")
+        |> render()
+
+      input1 =
+        element(view, "input[name='alert_data[reminder_times][1][reminder_time]']")
+        |> render()
+
+      assert input0 =~ ~s(value="2024-09-26T03:00")
+      refute input1 =~ ~s(value="2024-09-26T03:00")
     end
 
     @tag :logged_in_user
@@ -98,7 +154,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
               "_persistent_id" => "0",
               "max_time" => "2024-09-27T03:00:00",
               "min_time" => "2024-09-26 02:00:00",
-              "reminder_time" => "2024-09-26 03:00:00",
+              "reminder_time" => "2024-09-26T03:00",
               "reminder_time_specifier" => "custom"
             }
           }

@@ -179,6 +179,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
   attr :current_time, DateTime
 
   def reminder_input(assigns) do
+    # the reminder_time id is prevented from showing if it's nil because of a
+    # subtle bug where "" and nil are treated both the same and different in
+    # different parts of Ecto, which means a new Reminder would appear as a
+    # duplicate of an old one if the field were allowed to exist.
     ~H"""
     <input
       type="hidden"
@@ -198,7 +202,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
       value={@notification_end |> naive_datetime_to_iso8601()}
       id={"reminder_times-#{@index}-max_time"}
     />
-    <input type="hidden" name={"alert_data[reminder_times][#{@index}][id]"} value={@id} />
+    <input :if={@id} type="hidden" name={"alert_data[reminder_times][#{@index}][id]"} value={@id} />
     <input
       type="hidden"
       name={"alert_data[reminder_times][#{@index}][_persistent_id]"}
