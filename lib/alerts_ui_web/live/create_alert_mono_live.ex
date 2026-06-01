@@ -65,6 +65,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       |> assign(:form_type, form_type_from_socket(socket))
       |> assign(:submitting?, false)
       |> assign(:submitted?, false)
+      |> assign(:image_preview_size, nil)
       |> assign_new(:return_to, fn -> session["return_to"] end)
 
     {:ok, start_socket(socket, params)}
@@ -256,10 +257,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         %{"id" => "size-of-image", "image_preview_size" => image_preview_size},
         socket
       ) do
-    {:noreply,
-     assign(socket,
-       alert_data: Map.put(socket.assigns.alert_data, :image_preview_size, image_preview_size)
-     )}
+    {:noreply, assign(socket, :image_preview_size, image_preview_size)}
   end
 
   @impl true

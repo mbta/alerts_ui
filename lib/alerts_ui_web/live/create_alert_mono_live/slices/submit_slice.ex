@@ -65,6 +65,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
         alert_data={
           @alert_data
           |> Map.merge(%{selected_schedules: []})
+          |> Map.merge(%{image_preview_size: @image_preview_size})
           |> Map.merge(
             AlertsUI.AlertBuilder.original_selections(@alert_data, @alert_data.combination)
           )

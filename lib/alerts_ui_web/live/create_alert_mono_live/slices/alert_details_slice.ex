@@ -26,6 +26,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     # affected service
     :severity,
     :cause_detail,
+    :image_alternative_text,
     direction: [],
     header_text: "",
     header_sync_toggle: true,
@@ -128,7 +129,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
         description_text: description_text,
         service_effect_text: service_effect_text,
         severity: severity,
-        cause_detail: cause_detail
+        cause_detail: cause_detail,
+        image_alternative_text: details_data.image_alternative_text
       })
     end
 
@@ -450,7 +452,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
         <.text_input
           field={@form[:url]}
           label="URL"
-          phx-debounce={120}
+          phx-debounce={500}
           id="url_input"
           class="md:min-w-[50%]"
         />
