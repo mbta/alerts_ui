@@ -4,23 +4,23 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   """
   require Logger
 
-  alias Ecto.Changeset
-  alias Phoenix.Component
-  alias Phoenix.LiveView.Socket
   alias AlertsUI.Models.Alert
   alias AlertsUI.Repo
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.CreateAlertMonoLive.ServiceSliceDispatcher
+  alias Ecto.Changeset
+  alias Phoenix.Component
+  alias Phoenix.LiveView.Socket
 
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
     AlertDetailsSlice,
     DeliverySlice,
+    NotificationPeriodSlice,
     ReminderTimesSlice,
     SubmitSlice,
     UrlSlice,
     TimelineSlice,
-    TimeRangeSlice,
-    NotificationPeriodSlice
+    TimeRangeSlice
   }
 
   use AlertsUI.Schema

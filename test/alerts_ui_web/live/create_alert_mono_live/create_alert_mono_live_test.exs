@@ -14,8 +14,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
   alias MBTAV3API.RoutePatterns.RoutePattern
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
-  alias MBTAV3API.Schedules.{Schedule, Trip}
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
+  alias MBTAV3API.Schedules.{Schedule, Trip}
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
 

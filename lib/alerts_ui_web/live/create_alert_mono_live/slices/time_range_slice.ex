@@ -351,13 +351,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
   defp current_time, do: NaiveDateTime.local_now()
 
-  defp alert_timing_values(),
+  defp alert_timing_values,
     do: [
       "one-time",
       "recurring"
     ]
 
-  defp start_values(),
+  defp start_values,
     do: [
       :now,
       :start_of_service,

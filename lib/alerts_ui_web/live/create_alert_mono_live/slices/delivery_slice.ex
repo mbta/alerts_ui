@@ -48,10 +48,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
             false
 
           _ ->
-            if delivery_data.banner_text not in [nil, ""] do
-              true
-            else
+            if delivery_data.banner_text in [nil, ""] do
               delivery_data.view_banner
+            else
+              true
             end
         end
 

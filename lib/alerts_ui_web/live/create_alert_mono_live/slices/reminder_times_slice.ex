@@ -129,14 +129,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
               field={rt[:reminder_time]}
               id={rt[:id].value}
               index={rt.index}
-              notification_start={
-                # @notification_start
-                nil
-              }
-              notification_end={
-                # @notification_end
-                nil
-              }
+              notification_start={@notification_start}
+              notification_end={@notification_end}
             />
           </div>
         </.inputs_for>

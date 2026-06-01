@@ -18,7 +18,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidatorsTest do
     NaiveDateTime.local_now() |> NaiveDateTime.add(offset_days, :day)
   end
 
-  defp future_date() do
+  defp future_date do
     future_naive() |> NaiveDateTime.to_date()
   end
 

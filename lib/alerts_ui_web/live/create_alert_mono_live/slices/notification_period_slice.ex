@@ -127,7 +127,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
 
   def ensure_notification_start_for_specifier(changeset, _, _, _), do: changeset
 
-  def notification_values(), do: @notification_values
+  def notification_values, do: @notification_values
 
   attr :form, Form
 

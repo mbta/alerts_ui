@@ -1,7 +1,7 @@
 defprotocol AlertsUIWeb.CreateAlertMonoLive.Slice do
+  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias Ecto.Changeset
   alias Phoenix.LiveView.Socket
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
 
   @moduledoc """
   Protocols and etc. related to **slices**: logical subsets of

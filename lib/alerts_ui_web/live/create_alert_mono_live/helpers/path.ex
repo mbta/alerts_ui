@@ -3,10 +3,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Path do
   Utilities for computing paths for `push_patch/2`.
   """
 
-  alias Phoenix.HTML.Form
-  alias Phoenix.LiveView.Socket
   alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes
+  alias Phoenix.HTML.Form
+  alias Phoenix.LiveView.Socket
 
   use AlertsUIWeb, :verified_routes
 

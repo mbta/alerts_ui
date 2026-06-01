@@ -22,7 +22,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
   # Returns a params map that puts the form into an invalid state by setting the
   # active period start to a date in the past. We merge `extra` (typically reminder
   # params) into the alert_data portion so the bug condition is reproducible.
-  defp invalid_form_params(extra \\ %{}) do
+  defp invalid_form_params(extra) do
     base = %{
       "active_period_start_specifier" => "start_of_service",
       "active_period_start_date" => "2020-01-01"

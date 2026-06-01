@@ -850,7 +850,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
     test "stop route affected service autotext works when editing", %{
       conn: conn
     } do
-      # TODO failing because of stop route editing not working
       bus_route = %Route{
         direction_names: %{0 => "Outbound", 1 => "Inbound"},
         sort_order: 3,
