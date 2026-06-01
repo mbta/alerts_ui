@@ -1043,7 +1043,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected_header =
-        "Please board Route 1 Train 527 (9:01 AM from South Station) on opposite track at Lechmere today through Sat, May 10 due to a hazmat condition."
+        "Please board Route 1 Train 527 (9:01 AM from South Station) on the ___ platform (Track ___) at Lechmere today through Sat, May 10 due to a hazmat condition."
 
       actual_header = Templates.build_auto_text(autotext_data, :header_template)
       assert expected_header == actual_header
