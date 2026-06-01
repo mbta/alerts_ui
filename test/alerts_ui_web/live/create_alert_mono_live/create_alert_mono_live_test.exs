@@ -226,13 +226,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         {FacilitiesRepo, [],
          [get_by_type: fn _types, _opts -> facilities end, get: fn _id -> facility end]},
         {StopsRepo, [],
-         [
-           all: fn _, _ -> [@stop] end,
-           get!: fn
-             "2" -> stop
-             "3" -> child_stop
-           end
-         ]}
+         get!: fn
+           "2" -> stop
+           "3" -> child_stop
+         end,
+         all: fn ["filter[id]": ""], _ -> [stop, child_stop] end}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
         get_to_submission_page_refactor(view, "Facility", "Elevator closure")

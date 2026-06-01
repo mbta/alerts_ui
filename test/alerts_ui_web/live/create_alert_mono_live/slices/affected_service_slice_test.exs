@@ -1555,7 +1555,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          [
            by_route_type: fn _route_type -> [@stop, @stop_2] end,
            by_route: fn _, _, _ -> [@stop, @stop_2] end,
-           all: fn _, _ -> [@stop] end,
+           all: fn
+             ["filter[id]": "place-sstat"], _ -> [@stop]
+             ["filter[id]": "place-crtst"], _ -> [@stop_2]
+           end,
            get_parent: fn
              "place-sstat" -> @stop
              "place-crtst" -> @stop_2
