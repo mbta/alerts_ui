@@ -24,6 +24,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     :modal_date,
     :modal_date_search_term,
     :route_ids,
+    :route_search_term,
     :single_route_id,
     :stop_names_and_ids,
     :stop_search_term,
