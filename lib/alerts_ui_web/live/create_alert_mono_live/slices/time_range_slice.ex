@@ -88,7 +88,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       )
     end
 
-    def validate(_slice, changeset, params, socket) do
+    def validate(slice, changeset, params, socket) do
       trip_ids = get_field(changeset, :trip_ids, [])
 
       trip_arrival_time =
@@ -98,7 +98,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       |> TimeRangeValidators.validate_cast_datetimes(params)
       |> TimeRangeValidators.validate_required_fields()
       |> TimeRangeValidators.validate_end_after_start()
-      |> TimeRangeValidators.validate_start_is_after_now()
+      |> TimeRangeValidators.validate_start_is_after_now(slice.form_type == :editing)
       |> TimeRangeValidators.validate_at_least_one_recurrence()
       |> TimeRangeValidators.validate_start_date_matches_weekday()
       |> TimeRangeValidators.validate_not_dst_gap()

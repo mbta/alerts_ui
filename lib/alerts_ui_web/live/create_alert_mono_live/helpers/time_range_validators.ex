@@ -139,9 +139,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
     end
   end
 
-  def validate_start_is_after_now(changeset) do
-    editing = not is_nil(get_field(changeset, :alert_id))
-
+  def validate_start_is_after_now(changeset, editing \\ false) do
     if editing do
       changeset
     else
@@ -272,7 +270,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
   end
 
   def validate_notification(changeset) do
-    editing = not is_nil(get_field(changeset, :alert_id))
     current_time = NaiveDateTime.local_now()
 
     naive_start =
@@ -293,8 +290,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
         :notification_period_start,
         fn :notification_period_start, notification_period_start ->
           cond do
-            NaiveDateTime.diff(current_time, notification_period_start, :minute) > 1 and
-                not editing ->
+            NaiveDateTime.diff(current_time, notification_period_start, :minute) > 1 ->
               [
                 notification_period_start: {"Notifications can't be set in the past", []},
                 notification_period_start_date: {"Notifications can't be set in the past", []}

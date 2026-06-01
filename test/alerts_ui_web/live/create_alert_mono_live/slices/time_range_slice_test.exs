@@ -526,7 +526,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     end
 
     @tag :logged_in_user
-    test "duplicating does not check start time", %{conn: conn} do
+    test "duplicating DOES check start time", %{conn: conn} do
       create_test_alert("tr-dup-2", duration_certainty: :UNKNOWN)
 
       {:ok, view, _html} = live(conn, "/alerts/mono/duplicate/tr-dup-2")
@@ -539,7 +539,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         }
       })
 
-      refute view |> render() =~ "Effect can't start in the past"
+      assert view |> render() =~ "Effect can&#39;t start in the past"
     end
   end
 

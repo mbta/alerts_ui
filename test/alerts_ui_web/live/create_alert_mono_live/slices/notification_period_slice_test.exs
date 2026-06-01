@@ -157,7 +157,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
 
   describe "duplicating" do
     @tag :logged_in_user
-    test "duplicating DOES check start time", %{conn: conn} do
+    test "DOES check start time", %{conn: conn} do
       create_test_alert("np-dup-1")
 
       {:ok, view, _html} = live(conn, "/alerts/mono/duplicate/np-dup-1")
