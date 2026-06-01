@@ -21,12 +21,20 @@ defmodule AlertsUI.TimeframeText do
   defp distant_date_ends_same_day(start_date), do: start_date
   defp distant_date(start_date, end_date), do: "#{start_date}-#{end_date}"
 
-  @spec timeframe_text(DateTime.t(), DateTime.t() | nil) :: String.t() | nil
-  @spec timeframe_text(DateTime.t(), DateTime.t() | nil, DateTime.t()) :: String.t() | nil
-  def timeframe_text(start_datetime, end_datetime, current_datetime \\ DateTime.utc_now())
-  def timeframe_text(_start_datetime, nil, _current_datetime), do: nil
+  @spec timeframe_text(DateTime.t(), DateTime.t() | nil, boolean()) :: String.t() | nil
+  @spec timeframe_text(DateTime.t(), DateTime.t() | nil, boolean(), DateTime.t()) ::
+          String.t() | nil
+  def timeframe_text(
+        start_datetime,
+        end_datetime,
+        recurring,
+        current_datetime \\ DateTime.utc_now()
+      )
 
-  def timeframe_text(start_datetime, end_datetime, current_datetime) do
+  # TODO: "starting later today"
+  def timeframe_text(_start_datetime, nil, _recurring, _current_datetime), do: nil
+
+  def timeframe_text(start_datetime, end_datetime, recurring, current_datetime) do
     # all datetimes are shifted to Eastern time and calculated from there
     {current_datetime, current_date, _} = to_local_with_date(current_datetime)
 
