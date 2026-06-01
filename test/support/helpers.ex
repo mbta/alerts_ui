@@ -70,6 +70,12 @@ defmodule Test.Support.Helpers do
     |> render_click()
   end
 
+  def submit_alert(view) do
+    view
+    |> element("#review-modal-container button", "Submit")
+    |> render_click()
+  end
+
   def dismiss_prediction_warning(view) do
     view
     |> element("button", "Yes, continue")
