@@ -55,5 +55,7 @@ assets/outputs/alerts_feed*.pb
 *.swo
 
 # LLMs
-.claude
+.claude/*
 .playwright-mcp
+!.claude/skills
+!.claude/skills/*
