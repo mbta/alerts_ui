@@ -134,10 +134,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
   end
 
   def extract_notification_end_for_specifier(changeset, :later_today, _, _) do
-    now = NaiveDateTime.local_now()
+    now =
+      NaiveDateTime.local_now()
+      |> ActivePeriod.end_of_service_datetime_naive()
 
     changeset
-    |> force_change(:notification_period_end, now |> NaiveDateTime.add(2, :hour))
+    |> force_change(:notification_period_end, now)
     |> force_change(:notification_period_end_date, now |> NaiveDateTime.to_date())
   end
 
