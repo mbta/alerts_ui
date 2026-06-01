@@ -362,10 +362,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     |> Enum.reject(&(&1 in @uncastable_fields))
   end
 
-  defp alert_data_v1_to_v2(v1_alert_data) do
+  def alert_data_v1_to_v2(v1_alert_data) do
     v1_alert_data
     |> normalize_effect_name()
     |> set_sync_toggles()
+  end
+
+  def alert_data_v2_to_v1(v2_alert_data) do
+    v2_alert_data
+    |> strip_banner_text_unless_enabled()
   end
 
   defp normalize_effect_name(alert_data) do
@@ -410,5 +415,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
       |> Enum.into(%{})
 
     Map.merge(alert_data, toggle_data)
+  end
+
+  defp strip_banner_text_unless_enabled(v2_alert_data) do
+    if v2_alert_data.view_banner do
+      v2_alert_data
+    else
+      Map.put(v2_alert_data, :banner_text, nil)
+    end
   end
 end

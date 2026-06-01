@@ -490,10 +490,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     user = Users.create_or_update_user_from_session(socket.assigns.current_user)
 
     alert_params =
-      AlertBuilder.build_alert(
-        alert_data,
-        alert_data.combination
-      )
+      alert_data
+      |> AlertData.alert_data_v2_to_v1()
+      |> AlertBuilder.build_alert(alert_data.combination)
 
     existing_alert =
       if is_nil(socket.assigns.alert_id) || form_type == :duplicating do
