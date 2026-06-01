@@ -11,7 +11,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   import Ecto.Changeset, only: [cast: 3, get_field: 2, change: 2]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
-    only: [get_single_route_effect_names: 0]
+    only: [get_single_route_effect_names: 0, humanize_effect_name: 1]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Selections,
     only: [selections_loading?: 1]
@@ -31,10 +31,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     :trip_search_term
   ]
 
-  @single_route_effect_names ["Detour", "Snow Route"]
-
   defmodule Selections do
-    @single_route_effect_names ["Detour", "Snow Route"]
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
 
     defstruct available_routes: [],
@@ -48,11 +45,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
               route_id_options: [],
               selected_stops: [],
               service_dates: [],
-              single_route_effect_names: @single_route_effect_names,
               stop_id_options: [],
               stop_selections: [],
               today: nil,
               trip_id_options: []
+
   end
 
   defimpl Slice, for: __MODULE__ do
@@ -274,6 +271,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     "trip_ids",
     "modal_route_search_term",
     "route_search_term",
+    "single_route_id",
     "stop_search_term",
     "trip_search_term"
   ]
@@ -314,7 +312,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     effect_name = get_field(changeset, :effect_name)
 
     cond do
-      effect_name in @single_route_effect_names ->
+      effect_name in get_single_route_effect_names() ->
         incoming_route_id = get_field(changeset, :single_route_id)
         cast(changeset, %{route_ids: [incoming_route_id]}, [:route_ids])
 
@@ -439,7 +437,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             :if={filtered_select_for_route_type?(@form[:route_type].value)}
             label={if @form[:route_type].value in [0, 1, 2], do: "Lines", else: "Routes"}
             field={
-              if @form[:effect_name].value in get_single_route_effect_names(),
+              if humanize_effect_name(@form) in get_single_route_effect_names(),
                 do: @form[:single_route_id],
                 else: @form[:route_ids]
             }
@@ -449,7 +447,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             options={@selections.route_id_options}
             class="h-full"
             multiple={
-              if @form[:effect_name].value in get_single_route_effect_names(), do: false, else: true
+              if humanize_effect_name(@form) in get_single_route_effect_names(), do: false, else: true
             }
           />
           <.toggle_checkgroup
