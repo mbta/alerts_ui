@@ -204,35 +204,31 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
   def validate_at_least_one_recurrence(changeset) do
     timing = get_field(changeset, :alert_timing)
 
-    cond do
-      timing in [:recurring, "recurring"] ->
-        validate_length(changeset, :recurrence_days,
-          min: 1,
-          message: "Select one or more days for alert to recur"
-        )
-
-      true ->
-        changeset
+    if timing in [:recurring, "recurring"] do
+      validate_length(changeset, :recurrence_days,
+        min: 1,
+        message: "Select one or more days for alert to recur"
+      )
+    else
+      changeset
     end
   end
 
   def validate_start_date_matches_weekday(changeset) do
     timing = get_field(changeset, :alert_timing)
 
-    cond do
-      timing in [:recurring, "recurring"] ->
-        validate_change(
-          changeset,
-          :recurrence_days,
-          fn :recurrence_days, recurrence_days ->
-            start_date = get_field(changeset, :active_period_start_date)
-            specifier = get_field(changeset, :active_period_start_specifier)
-            validate_start_date_matches_weekday(start_date, recurrence_days, specifier)
-          end
-        )
-
-      true ->
-        changeset
+    if timing in [:recurring, "recurring"] do
+      validate_change(
+        changeset,
+        :recurrence_days,
+        fn :recurrence_days, recurrence_days ->
+          start_date = get_field(changeset, :active_period_start_date)
+          specifier = get_field(changeset, :active_period_start_specifier)
+          validate_start_date_matches_weekday(start_date, recurrence_days, specifier)
+        end
+      )
+    else
+      changeset
     end
   end
 

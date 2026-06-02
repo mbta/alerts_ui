@@ -330,7 +330,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
     normalized_single_route_effects =
       Enum.map(get_single_route_effect_names(), fn name ->
-        name |> String.split(" ") |> Enum.map(&String.downcase/1) |> Enum.join("_")
+        name |> String.split(" ") |> Enum.map_join("_", &String.downcase/1)
       end)
 
     cond do
