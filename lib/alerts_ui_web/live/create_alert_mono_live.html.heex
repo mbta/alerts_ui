@@ -27,7 +27,11 @@
             route_type_name={humanize_route_type(@form)}
             effect_name={humanize_effect_name(@form)}
           />
-          <ServiceSliceDispatcher.render form={@form} selections={@selections} />
+          <ServiceSliceDispatcher.render
+            form={@form}
+            selections={@selections}
+            show_stop_ids={@show_stop_ids}
+          />
           <TimeRangeSlice.render form={@form} />
           <NotificationPeriodSlice.render form={@form} />
           <AlertDetailsSlice.render

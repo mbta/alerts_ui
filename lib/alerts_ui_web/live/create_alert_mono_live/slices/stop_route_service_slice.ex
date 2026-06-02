@@ -50,7 +50,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
               route_id_options: [],
               selected_stops: [],
               selected_route_id: nil,
-              show_stop_ids?: true,
+              show_stop_ids?: false,
               stop_id_options: [],
               loading: false
   end
@@ -333,7 +333,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
           class="md:w-[25%]"
         />
       </div>
-      <p :if={@selections.show_stop_ids?}>
+      <p :if={@show_stop_ids}>
         Selected stop ids: {(@form[:stop_ids].value || []) |> Enum.join(", ")}
       </p>
       <hr class="mt-4" />
