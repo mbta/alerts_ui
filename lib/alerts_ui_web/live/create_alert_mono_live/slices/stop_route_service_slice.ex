@@ -52,7 +52,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
               selected_route_id: nil,
               show_stop_ids?: false,
               stop_id_options: [],
-              loading: false
+              loading: false,
+              pending_auto_select_route_ids: nil
   end
 
   defimpl Slice, for: __MODULE__ do
@@ -93,7 +94,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
         end
 
       auto_select_routes = match?(%{"_target" => ["alert_data", "stop_ids"]}, params)
-      lv_pid = self()
 
       form = socket.assigns.form
       modal_route_search_term = form[:modal_route_search_term].value
@@ -172,9 +172,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
             end
           end
 
-        if auto_select_routes do
-          send(lv_pid, {:sr_auto_select_routes, Enum.map(available_routes, & &1.id)})
-        end
+        pending_auto_select_route_ids =
+          if auto_select_routes, do: Enum.map(available_routes, & &1.id), else: nil
 
         %Selections{
           available_filter_routes: available_filter_routes,
@@ -185,7 +184,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
           route_id_options: route_id_options,
           selected_route_id: modal_route_id,
           selected_stops: selected_stops,
-          stop_id_options: stop_id_options
+          stop_id_options: stop_id_options,
+          pending_auto_select_route_ids: pending_auto_select_route_ids
         }
       end)
     else

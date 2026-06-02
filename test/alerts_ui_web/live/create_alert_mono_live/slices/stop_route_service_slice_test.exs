@@ -751,6 +751,40 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         assert render(view) =~ "Please fix the following errors"
       end
     end
+
+    @tag :logged_in_user
+    test "bus multi-route detour header text includes route and stop name after stop selection",
+         %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@bus_route_one] end,
+           by_stop: fn _ -> [@bus_route_one] end,
+           by_stop: fn _, _ -> [@bus_route_one] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        get_to_submission_page_refactor(view, "Bus", "Multi-route detour")
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "stop_ids"],
+          "alert_data" => %{"stop_ids" => ["place-aqucl"]}
+        })
+
+        render_async(view)
+
+        header_html = view |> element("#alert_data_header_text") |> render()
+        assert header_html =~ "Blue Line"
+        assert header_html =~ "Aquarium"
+      end
+    end
   end
 
   describe "end-to-end" do

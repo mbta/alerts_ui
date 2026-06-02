@@ -268,7 +268,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   @impl true
   def handle_async(:fetch_selections, {:ok, new_selections}, socket) do
-    {:noreply, assign(socket, :selections, new_selections)}
+    pending_route_ids = Map.get(new_selections, :pending_auto_select_route_ids)
+
+    socket =
+      if is_nil(pending_route_ids) do
+        assign(socket, :selections, new_selections)
+      else
+        socket
+        |> assign(:selections, %{new_selections | pending_auto_select_route_ids: nil})
+        |> sync_socket(%{"alert_data" => %{"route_ids" => pending_route_ids}})
+      end
+
+    {:noreply, socket}
   end
 
   @impl true
