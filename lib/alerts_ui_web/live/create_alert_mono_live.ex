@@ -270,6 +270,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   def handle_async(:fetch_selections, {:ok, new_selections}, socket) do
     pending_route_ids = Map.get(new_selections, :pending_auto_select_route_ids)
 
+    # Always override route_ids — no guard for pre-existing selections; see design spec.
     socket =
       if is_nil(pending_route_ids) do
         assign(socket, :selections, new_selections)
