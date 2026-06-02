@@ -127,7 +127,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
   def extract_notification_end(changeset) do
     specifier = get_field(changeset, :active_period_end_specifier)
     end_dt = get_field(changeset, :active_period_end) || :unspecified
-    end_d = get_field(changeset, :active_period_end_date) ||  :unspecified
+    end_d = get_field(changeset, :active_period_end_date) || :unspecified
 
     changeset
     |> extract_notification_end_for_specifier(specifier, end_dt, end_d)
