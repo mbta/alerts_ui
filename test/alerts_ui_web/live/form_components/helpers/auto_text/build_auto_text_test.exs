@@ -235,6 +235,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
     test "multiple stops starts now" do
       assert BuildAutoText.stop_form(%{stops: [@stop_1, @stop_2], start_datetime: @now}) == "are"
     end
+
+    test "start_specifier :now overrides future start_datetime" do
+      assert BuildAutoText.stop_form(%{
+               stops: [@stop_1],
+               start_datetime: @one_hour_from_now,
+               start_specifier: :now
+             }) == "is"
+    end
   end
 
   describe "stop_word/1" do
@@ -471,6 +479,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
                schedules: [@schedule_1, @schedule_2],
                start_datetime: @now
              }) == "are"
+    end
+
+    test "start_specifier :now overrides future start_datetime" do
+      assert BuildAutoText.trip_form(%{
+               schedules: [@schedule_1],
+               start_datetime: @one_hour_from_now,
+               start_specifier: :now
+             }) == "is"
     end
   end
 
@@ -747,6 +763,41 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
     test "multiple routes" do
       assert BuildAutoText.route_form(%{routes: [@route_1, @route_2], start_datetime: @now}) ==
                "are"
+    end
+
+    test "start_specifier :now overrides future start_datetime" do
+      assert BuildAutoText.route_form(%{
+               routes: [@route_1],
+               start_datetime: @one_hour_from_now,
+               start_specifier: :now
+             }) == "is"
+    end
+  end
+
+  describe "facility_form/1" do
+    @facility %Facility{id: "elev-alewife", short_name: "Alewife Elevator 843"}
+
+    test "facilities empty" do
+      assert BuildAutoText.facility_form(%{facilities: [], start_datetime: nil}) == ""
+    end
+
+    test "starts in future" do
+      assert BuildAutoText.facility_form(%{
+               facilities: [@facility],
+               start_datetime: @one_hour_from_now
+             }) == "will be"
+    end
+
+    test "one facility starts now" do
+      assert BuildAutoText.facility_form(%{facilities: [@facility], start_datetime: @now}) == "is"
+    end
+
+    test "start_specifier :now overrides future start_datetime" do
+      assert BuildAutoText.facility_form(%{
+               facilities: [@facility],
+               start_datetime: @one_hour_from_now,
+               start_specifier: :now
+             }) == "is"
     end
   end
 end
