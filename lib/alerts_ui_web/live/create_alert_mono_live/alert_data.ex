@@ -387,7 +387,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
         effect_name ->
           effect_name
           |> String.split(" ")
-          |> Enum.map_join( "_", &String.downcase(&1))
+          |> Enum.map_join("_", &String.downcase(&1))
       end
 
     Map.put(alert_data, :effect_name, normalized)
