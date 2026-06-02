@@ -25,6 +25,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
   ]
 
   defimpl Slice, for: __MODULE__ do
+    alias AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice
     import Ecto.Changeset
 
     def mount(_delivery_data, socket, _base_params), do: socket
@@ -42,31 +43,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
       [_, target | _] = Map.get(params, "_target", [nil, nil])
 
       banner_sync_toggle =
-        if target == "banner_text" and delivery_data.banner_sync_toggle == true do
-          false
-        else
-          delivery_data.banner_sync_toggle
-        end
+        DeliverySlice.compute_banner_sync_toggle(delivery_data.banner_sync_toggle, target)
 
-      view_banner =
-        case delivery_data.view_banner do
-          false ->
-            false
-
-          _ ->
-            if delivery_data.banner_text in [nil, ""] do
-              delivery_data.view_banner
-            else
-              true
-            end
-        end
+      view_banner = DeliverySlice.compute_view_banner(delivery_data)
 
       banner_text =
-        if banner_sync_toggle and view_banner do
-          delivery_data.header_text
-        else
-          delivery_data.banner_text || ""
-        end
+        DeliverySlice.compute_banner_text(banner_sync_toggle, view_banner, delivery_data)
 
       change(changeset, %{
         view_banner: view_banner,
@@ -123,6 +105,20 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
     defp get_notification_toggle_default(%{notification_toggle: notification_toggle}, _, _) do
       notification_toggle
     end
+  end
+
+  def compute_banner_sync_toggle(toggle, target) do
+    if target == "banner_text" and toggle == true, do: false, else: toggle
+  end
+
+  def compute_view_banner(%{view_banner: false}), do: false
+
+  def compute_view_banner(%{view_banner: view_banner, banner_text: banner_text}) do
+    if banner_text in [nil, ""], do: view_banner, else: true
+  end
+
+  def compute_banner_text(banner_sync_toggle, view_banner, data) do
+    if banner_sync_toggle and view_banner, do: data.header_text, else: data.banner_text || ""
   end
 
   def render(assigns) do

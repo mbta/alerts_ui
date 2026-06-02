@@ -93,111 +93,109 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
     timing = get_field(changeset, :alert_timing)
 
     cond do
-      timing in [:"one-time", "one-time"] ->
-        active_period_start = get_field(changeset, :active_period_start)
-
-        if active_period_start do
-          validate_change(changeset, :active_period_end, fn :active_period_end,
-                                                            active_period_end ->
-            if NaiveDateTime.compare(active_period_end, active_period_start) in [:lt, :eq] do
-              end_error(get_field(changeset, :active_period_end_specifier), active_period_start)
-            else
-              []
-            end
-          end)
-        else
-          changeset
-        end
-
-      timing in [:recurring, "recurring"] ->
-        validate_change(
-          changeset,
-          :active_period_end_date,
-          fn :active_period_end_date, end_date ->
-            start_date = get_field(changeset, :active_period_start_date)
-            start_time = get_field(changeset, :active_period_start_time)
-            end_time = get_field(changeset, :active_period_end_time)
-
-            naive_start =
-              if start_date && start_time,
-                do: NaiveDateTime.new!(start_date, start_time),
-                else: nil
-
-            naive_end =
-              if end_time, do: NaiveDateTime.new!(end_date, end_time), else: nil
-
-            if naive_start && naive_end && Date.compare(naive_end, naive_start) == :lt do
-              [active_period_end_date: "Effect must end after #{formatted_datetime(naive_start)}"]
-            else
-              []
-            end
-          end
-        )
-
-      true ->
-        changeset
+      timing in [:"one-time", "one-time"] -> validate_one_time_end(changeset)
+      timing in [:recurring, "recurring"] -> validate_recurring_end(changeset)
+      true -> changeset
     end
   end
 
-  def validate_start_is_after_now(changeset, editing \\ false) do
-    if editing do
-      changeset
-    else
-      now = NaiveDateTime.local_now()
-      specifier = get_field(changeset, :active_period_start_specifier)
-      timing = get_field(changeset, :alert_timing)
+  defp validate_one_time_end(changeset) do
+    case get_field(changeset, :active_period_start) do
+      nil ->
+        changeset
 
-      cond do
-        timing in [:"one-time", "one-time"] ->
-          changeset
-          |> validate_change(:active_period_start, fn :active_period_start, active_period_start ->
-            if specifier == :custom do
-              time_in_past? = NaiveDateTime.diff(now, active_period_start, :minute) > 1
-              start_error(time_in_past?, :"one-time", specifier)
-            else
-              []
-            end
-          end)
-          |> validate_change(
-            :active_period_start_date,
-            fn :active_period_start_date, start_date ->
-              if specifier == :start_of_service do
-                time_in_past? =
-                  NaiveDateTime.diff(
-                    now,
-                    NaiveDateTime.new!(start_date, ~T[03:00:00]),
-                    :minute
-                  ) > 1
-
-                start_error(time_in_past?, :"one-time", specifier)
-              else
-                []
-              end
-            end
+      active_period_start ->
+        validate_change(changeset, :active_period_end, fn :active_period_end, end_dt ->
+          one_time_end_errors(
+            end_dt,
+            active_period_start,
+            get_field(changeset, :active_period_end_specifier)
           )
+        end)
+    end
+  end
 
-        timing in [:recurring, "recurring"] ->
-          start_date = get_field(changeset, :active_period_start_date)
-          start_time = get_field(changeset, :active_period_start_time)
+  defp one_time_end_errors(end_dt, start_dt, specifier) do
+    if NaiveDateTime.compare(end_dt, start_dt) in [:lt, :eq] do
+      end_error(specifier, start_dt)
+    else
+      []
+    end
+  end
 
-          if start_date && start_time do
-            naive_start = NaiveDateTime.new!(start_date, start_time)
+  defp validate_recurring_end(changeset) do
+    validate_change(changeset, :active_period_end_date, fn :active_period_end_date, end_date ->
+      recurring_end_errors(end_date, changeset)
+    end)
+  end
 
-            validate_change(
-              changeset,
-              :active_period_start_date,
-              fn :active_period_start_date, _date ->
-                time_in_past? = NaiveDateTime.diff(now, naive_start, :minute) > 1
-                start_error(time_in_past?, :recurring, specifier)
-              end
-            )
-          else
-            changeset
-          end
+  defp recurring_end_errors(end_date, changeset) do
+    start_date = get_field(changeset, :active_period_start_date)
+    start_time = get_field(changeset, :active_period_start_time)
+    end_time = get_field(changeset, :active_period_end_time)
+    naive_start = start_date && start_time && NaiveDateTime.new!(start_date, start_time)
+    naive_end = end_time && NaiveDateTime.new!(end_date, end_time)
 
-        true ->
-          changeset
+    if naive_start && naive_end && Date.compare(naive_end, naive_start) == :lt do
+      [active_period_end_date: "Effect must end after #{formatted_datetime(naive_start)}"]
+    else
+      []
+    end
+  end
+
+  def validate_start_is_after_now(changeset, editing \\ false)
+  def validate_start_is_after_now(changeset, true), do: changeset
+
+  def validate_start_is_after_now(changeset, _editing) do
+    now = NaiveDateTime.local_now()
+    specifier = get_field(changeset, :active_period_start_specifier)
+    timing = get_field(changeset, :alert_timing)
+    validate_start_by_timing(changeset, timing, specifier, now)
+  end
+
+  defp validate_start_by_timing(changeset, timing, specifier, now)
+       when timing in [:"one-time", "one-time"] do
+    changeset
+    |> validate_change(:active_period_start, fn _, t -> custom_start_errors(t, specifier, now) end)
+    |> validate_start_date_not_in_past(specifier, now)
+  end
+
+  defp validate_start_by_timing(changeset, timing, specifier, now)
+       when timing in [:recurring, "recurring"] do
+    validate_recurring_start_not_in_past(changeset, specifier, now)
+  end
+
+  defp validate_start_by_timing(changeset, _, _, _), do: changeset
+
+  defp custom_start_errors(t, specifier, now) do
+    if specifier == :custom,
+      do: start_error(NaiveDateTime.diff(now, t, :minute) > 1, :"one-time", specifier),
+      else: []
+  end
+
+  defp validate_start_date_not_in_past(changeset, specifier, now) do
+    validate_change(changeset, :active_period_start_date, fn :active_period_start_date, date ->
+      if specifier == :start_of_service do
+        past? = NaiveDateTime.diff(now, NaiveDateTime.new!(date, ~T[03:00:00]), :minute) > 1
+        start_error(past?, :"one-time", specifier)
+      else
+        []
       end
+    end)
+  end
+
+  defp validate_recurring_start_not_in_past(changeset, specifier, now) do
+    start_date = get_field(changeset, :active_period_start_date)
+    start_time = get_field(changeset, :active_period_start_time)
+
+    if start_date && start_time do
+      naive_start = NaiveDateTime.new!(start_date, start_time)
+
+      validate_change(changeset, :active_period_start_date, fn :active_period_start_date, _ ->
+        start_error(NaiveDateTime.diff(now, naive_start, :minute) > 1, :recurring, specifier)
+      end)
+    else
+      changeset
     end
   end
 
@@ -281,33 +279,28 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
       end
 
     if naive_start do
-      validate_change(
-        changeset,
-        :notification_period_start,
-        fn :notification_period_start, notification_period_start ->
-          cond do
-            NaiveDateTime.diff(current_time, notification_period_start, :minute) > 1 ->
-              [
-                notification_period_start: {"Notifications can't be set in the past", []},
-                notification_period_start_date: {"Notifications can't be set in the past", []}
-              ]
-
-            NaiveDateTime.diff(notification_period_start, naive_start, :minute) > 1 ->
-              msg =
-                "Notification period must start on or before #{formatted_datetime(naive_start)}"
-
-              [
-                notification_period_start: {msg, []},
-                notification_period_start_date: {msg, []}
-              ]
-
-            true ->
-              []
-          end
-        end
-      )
+      validate_change(changeset, :notification_period_start, fn :notification_period_start, t ->
+        notification_period_errors(t, naive_start, current_time)
+      end)
     else
       changeset
+    end
+  end
+
+  defp notification_period_errors(notification_period_start, naive_start, current_time) do
+    cond do
+      NaiveDateTime.diff(current_time, notification_period_start, :minute) > 1 ->
+        [
+          notification_period_start: {"Notifications can't be set in the past", []},
+          notification_period_start_date: {"Notifications can't be set in the past", []}
+        ]
+
+      NaiveDateTime.diff(notification_period_start, naive_start, :minute) > 1 ->
+        msg = "Notification period must start on or before #{formatted_datetime(naive_start)}"
+        [notification_period_start: {msg, []}, notification_period_start_date: {msg, []}]
+
+      true ->
+        []
     end
   end
 

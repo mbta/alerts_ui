@@ -297,13 +297,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   def start_socket(socket, params) do
     case {Map.get(params, "alert_id"), socket.assigns.live_action} do
       {nil, :new} ->
-        # create a new alert
-        socket
-        |> AlertData.init(params, :new)
-        |> case do
-          {:ok, socket} -> socket
-          {:error, socket} -> socket
-        end
+        run_init(socket, params, :new)
 
       {nil, action} when action in [:edit, :duplicate] ->
         raise %ArgumentError{message: "you need an alert id to #{action}"}
@@ -312,29 +306,30 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         redirect(socket, ~p"/alerts/mono/edit/#{alert_id}")
 
       {alert_id, :edit} ->
-        # edit an existing alert
-        alert = Alerts.get_by_alert_id!(alert_id)
-
-        socket
-        |> AlertData.init(params, :edit, alert)
-        |> case do
-          {:ok, socket} -> socket
-          {:error, socket} -> socket
-        end
+        run_init(socket, params, :edit, Alerts.get_by_alert_id!(alert_id))
 
       {alert_id, :duplicate} ->
-        # duplicate an existing alert
-        alert = Alerts.get_by_alert_id!(alert_id)
-
-        socket
-        |> AlertData.init(params, :duplicate, strip_on_duplicate(alert))
-        |> case do
-          {:ok, socket} -> socket
-          {:error, socket} -> socket
-        end
+        run_init(
+          socket,
+          params,
+          :duplicate,
+          strip_on_duplicate(Alerts.get_by_alert_id!(alert_id))
+        )
 
       {_alert_id, action} ->
         raise %ArgumentError{message: "no such action #{action}"}
+    end
+  end
+
+  defp run_init(socket, params, form_type, alert \\ nil) do
+    result =
+      if alert,
+        do: AlertData.init(socket, params, form_type, alert),
+        else: AlertData.init(socket, params, form_type)
+
+    case result do
+      {:ok, socket} -> socket
+      {:error, socket} -> socket
     end
   end
 

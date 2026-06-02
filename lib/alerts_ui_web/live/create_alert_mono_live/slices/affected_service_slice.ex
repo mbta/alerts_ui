@@ -147,7 +147,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   def validate_changeset(changeset) do
     normalized_single_route_effects =
       Enum.map(get_single_route_effect_names(), fn name ->
-        name |> String.split(" ") |> Enum.map(&String.downcase/1) |> Enum.join("_")
+        name |> String.split(" ") |> Enum.map_join("_", &String.downcase/1)
       end)
 
     if get_field(changeset, :effect_name) in normalized_single_route_effects do
@@ -160,126 +160,109 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   def async_assign_selections(socket, params) do
     if update_selections?(params) do
       prev =
-        case Map.get(socket.assigns, :selections) do
-          %Selections{} = s -> s
-          _ -> %Selections{}
-        end
+        Map.get(socket.assigns, :selections)
+        |> then(&if match?(%Selections{}, &1), do: &1, else: %Selections{})
 
       form = socket.assigns.form
 
-      direction = form[:direction].value
-      modal_date = form[:modal_date].value
-      route_ids = form[:route_ids].value || []
-      route_search_term = form[:route_search_term].value
-      route_type = form[:route_type].value
-      stop_names_and_ids = form[:stop_names_and_ids].value || []
-      stop_search_term = form[:stop_search_term].value
-      trip_ids = form[:trip_ids].value || []
-      trip_search_term = form[:trip_search_term].value
-
-      all_route_types = all_route_types(route_type)
+      args = {
+        form[:direction].value,
+        form[:modal_date].value,
+        form[:route_ids].value || [],
+        form[:route_search_term].value,
+        form[:route_type].value,
+        form[:stop_names_and_ids].value || [],
+        form[:stop_search_term].value,
+        form[:trip_ids].value || [],
+        form[:trip_search_term].value
+      }
 
       socket
       |> assign(:selections, %{prev | loading: true})
-      |> start_async(:fetch_selections, fn ->
-        available_routes = CreateAlertLive.get_routes(all_route_types)
-
-        available_stops =
-          CreateAlertLive.get_stops(
-            route_ids,
-            route_type,
-            direction
-          )
-
-        available_schedules =
-          if route_ids && direction && modal_date do
-            date =
-              case modal_date do
-                "default" ->
-                  DateTime.utc_now() |> Calendar.strftime("%Y-%m-%d")
-
-                date ->
-                  date
-              end
-
-            CreateAlertLive.get_schedules_by_date(
-              route_ids,
-              direction,
-              date
-            )
-          else
-            []
-          end
-
-        direction_options =
-          SelectFormatter.formatted_direction_options(
-            route_ids,
-            Map.new(available_routes, &{&1.id, &1.direction_names})
-          )
-
-        route_id_options =
-          SelectFormatter.formatted_select_options(%SelectFormatter{
-            options: available_routes,
-            search_term: route_search_term,
-            route_type: route_type,
-            values_to_keep: route_ids,
-            option_prefix: "route-search"
-          })
-
-        stop_id_options =
-          SelectFormatter.formatted_select_options(
-            %SelectFormatter{
-              options: available_stops,
-              search_term: stop_search_term,
-              route_type: route_type,
-              values_to_keep: stop_names_and_ids,
-              option_prefix: "stop-search"
-            },
-            true
-          )
-
-        trip_id_options =
-          SelectFormatter.formatted_select_options(%SelectFormatter{
-            schedules_by_route_name:
-              get_schedules_by_route_type(
-                available_schedules,
-                route_ids
-              ),
-            search_term: trip_search_term,
-            route_type: route_type,
-            values_to_keep: trip_ids,
-            option_prefix: "trip-search"
-          })
-
-        {filter_title_value, _} =
-          service_dates()
-          |> Enum.find({"All future trips", nil}, fn {_option, value} ->
-            value == (modal_date || today())
-          end)
-
-        %Selections{
-          available_routes: available_routes,
-          available_stops: available_stops,
-          available_schedules: available_schedules,
-          direction_options: direction_options,
-          filter_title_value: filter_title_value,
-          route_id_options: route_id_options,
-          stop_id_options: stop_id_options,
-          stop_selections: stop_names_and_ids,
-          service_dates: service_dates(),
-          trip_id_options: trip_id_options
-        }
-      end)
+      |> start_async(:fetch_selections, fn -> fetch_selections(args) end)
     else
       case Map.get(socket.assigns, :selections) do
-        nil ->
-          assign(socket, :selections, %Selections{})
-
-        _ ->
-          socket
+        nil -> assign(socket, :selections, %Selections{})
+        _ -> socket
       end
     end
   end
+
+  defp fetch_selections(
+         {direction, modal_date, route_ids, route_search_term, route_type, stop_names_and_ids,
+          stop_search_term, trip_ids, trip_search_term}
+       ) do
+    all_route_types = all_route_types(route_type)
+    available_routes = CreateAlertLive.get_routes(all_route_types)
+    available_stops = CreateAlertLive.get_stops(route_ids, route_type, direction)
+    available_schedules = fetch_schedules(route_ids, direction, modal_date)
+
+    direction_options =
+      SelectFormatter.formatted_direction_options(
+        route_ids,
+        Map.new(available_routes, &{&1.id, &1.direction_names})
+      )
+
+    route_id_options =
+      SelectFormatter.formatted_select_options(%SelectFormatter{
+        options: available_routes,
+        search_term: route_search_term,
+        route_type: route_type,
+        values_to_keep: route_ids,
+        option_prefix: "route-search"
+      })
+
+    stop_id_options =
+      SelectFormatter.formatted_select_options(
+        %SelectFormatter{
+          options: available_stops,
+          search_term: stop_search_term,
+          route_type: route_type,
+          values_to_keep: stop_names_and_ids,
+          option_prefix: "stop-search"
+        },
+        true
+      )
+
+    trip_id_options =
+      SelectFormatter.formatted_select_options(%SelectFormatter{
+        schedules_by_route_name: get_schedules_by_route_type(available_schedules, route_ids),
+        search_term: trip_search_term,
+        route_type: route_type,
+        values_to_keep: trip_ids,
+        option_prefix: "trip-search"
+      })
+
+    {filter_title_value, _} =
+      Enum.find(service_dates(), {"All future trips", nil}, fn {_, v} ->
+        v == (modal_date || today())
+      end)
+
+    %Selections{
+      available_routes: available_routes,
+      available_stops: available_stops,
+      available_schedules: available_schedules,
+      direction_options: direction_options,
+      filter_title_value: filter_title_value,
+      route_id_options: route_id_options,
+      stop_id_options: stop_id_options,
+      stop_selections: stop_names_and_ids,
+      service_dates: service_dates(),
+      trip_id_options: trip_id_options
+    }
+  end
+
+  defp fetch_schedules(route_ids, direction, modal_date)
+       when route_ids != [] and not is_nil(direction) and not is_nil(modal_date) do
+    date =
+      if modal_date == "default",
+        do: DateTime.utc_now() |> Calendar.strftime("%Y-%m-%d"),
+        else: modal_date
+
+    CreateAlertLive.get_schedules_by_date(route_ids, direction, date)
+  end
+
+  defp fetch_schedules(_, _, _), do: []
 
   @update_selection_targets [
     "direction",

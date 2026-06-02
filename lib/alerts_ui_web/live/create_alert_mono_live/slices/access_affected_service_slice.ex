@@ -78,7 +78,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
 
     normalized_single_facility_effects =
       Enum.map(get_single_facility_effect_names(), fn name ->
-        name |> String.split(" ") |> Enum.map(&String.downcase/1) |> Enum.join("_")
+        name |> String.split(" ") |> Enum.map_join("_", &String.downcase/1)
       end)
 
     if effect_name in normalized_single_facility_effects do

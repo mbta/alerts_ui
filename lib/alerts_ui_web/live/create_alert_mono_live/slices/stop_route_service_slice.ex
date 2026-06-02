@@ -87,28 +87,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   def async_assign_selections(socket, params) do
     if update_selections?(params) do
       prev =
-        case Map.get(socket.assigns, :selections) do
-          %Selections{} = s -> s
-          _ -> %Selections{}
-        end
+        Map.get(socket.assigns, :selections)
+        |> then(&if match?(%Selections{}, &1), do: &1, else: %Selections{})
 
       auto_select_routes = match?(%{"_target" => ["alert_data", "stop_ids"]}, params)
       lv_pid = self()
 
       form = socket.assigns.form
-      modal_route_search_term = form[:modal_route_search_term].value
       modal_route_id = form[:modal_route_id].value
-      route_ids = form[:route_ids].value
-      route_search_term = form[:route_search_term].value
-      route_type = form[:route_type].value
-      stop_ids = form[:stop_ids].value || []
-      stop_search_term = form[:stop_search_term].value
-
-      stop_route_ids =
-        case modal_route_id do
-          none when none in [nil, "default"] -> nil
-          modal_route_id -> [modal_route_id]
-        end
+      stop_route_ids = if modal_route_id in [nil, "default"], do: nil, else: [modal_route_id]
 
       prev_selected_stops =
         case prev do
@@ -116,85 +103,79 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
           _ -> []
         end
 
+      args = {
+        form[:modal_route_search_term].value,
+        modal_route_id,
+        form[:route_ids].value,
+        form[:route_search_term].value,
+        form[:route_type].value,
+        form[:stop_ids].value || [],
+        form[:stop_search_term].value,
+        stop_route_ids,
+        prev_selected_stops,
+        auto_select_routes,
+        lv_pid
+      }
+
       socket
       |> assign(:selections, %{prev | loading: true})
-      |> start_async(:fetch_selections, fn ->
-        available_filter_routes =
-          CreateAlertLive.get_routes(route_type)
-
-        available_stops =
-          CreateAlertLive.get_stops_for_stop_route(stop_route_ids, route_type)
-
-        available_routes =
-          CreateAlertLive.get_routes_by_stop(stop_ids, route_type)
-
-        # Merge previously selected stops with currently available stops so that
-        # stops hidden by a route filter are still tracked as selected.
-        candidate_stops =
-          Enum.uniq_by(prev_selected_stops ++ available_stops, & &1.id)
-
-        selected_stops = get_selected_stops(candidate_stops, stop_ids)
-
-        modal_route_id_options =
-          modal_route_id_options(
-            available_filter_routes,
-            modal_route_search_term,
-            route_type,
-            modal_route_id
-          )
-
-        route_id_options =
-          route_id_options(
-            available_routes,
-            route_ids,
-            route_search_term,
-            route_type
-          )
-
-        stop_id_options =
-          stop_id_options(
-            available_stops,
-            selected_stops,
-            stop_search_term,
-            route_type,
-            stop_ids
-          )
-
-        filter_title_value =
-          if modal_route_id in [nil, ""] do
-            "All routes"
-          else
-            available_filter_routes
-            |> Enum.find(&(&1.id == modal_route_id))
-            |> case do
-              nil -> "All routes"
-              route -> SelectFormatter.name_for_option(route)
-            end
-          end
-
-        if auto_select_routes do
-          send(lv_pid, {:sr_auto_select_routes, Enum.map(available_routes, & &1.id)})
-        end
-
-        %Selections{
-          available_filter_routes: available_filter_routes,
-          available_routes: available_routes,
-          available_stops: available_stops,
-          filter_title_value: filter_title_value,
-          modal_route_id_options: modal_route_id_options,
-          route_id_options: route_id_options,
-          selected_route_id: modal_route_id,
-          selected_stops: selected_stops,
-          stop_id_options: stop_id_options
-        }
-      end)
+      |> start_async(:fetch_selections, fn -> fetch_selections(args) end)
     else
       case Map.get(socket.assigns, :selections) do
-        nil ->
-          assign(socket, :selections, %Selections{})
+        nil -> assign(socket, :selections, %Selections{})
+        _ -> socket
+      end
+    end
+  end
 
-        _ ->
-          socket
+  defp fetch_selections(
+         {modal_route_search_term, modal_route_id, route_ids, route_search_term, route_type,
+          stop_ids, stop_search_term, stop_route_ids, prev_selected_stops, auto_select_routes,
+          lv_pid}
+       ) do
+    available_filter_routes = CreateAlertLive.get_routes(route_type)
+    available_stops = CreateAlertLive.get_stops_for_stop_route(stop_route_ids, route_type)
+    available_routes = CreateAlertLive.get_routes_by_stop(stop_ids, route_type)
+
+    # Merge previously selected stops with currently available stops so that
+    # stops hidden by a route filter are still tracked as selected.
+    candidate_stops = Enum.uniq_by(prev_selected_stops ++ available_stops, & &1.id)
+    selected_stops = get_selected_stops(candidate_stops, stop_ids)
+
+    filter_title_value = derive_filter_title(available_filter_routes, modal_route_id)
+
+    if auto_select_routes do
+      send(lv_pid, {:sr_auto_select_routes, Enum.map(available_routes, & &1.id)})
+    end
+
+    %Selections{
+      available_filter_routes: available_filter_routes,
+      available_routes: available_routes,
+      available_stops: available_stops,
+      filter_title_value: filter_title_value,
+      modal_route_id_options:
+        modal_route_id_options(
+          available_filter_routes,
+          modal_route_search_term,
+          route_type,
+          modal_route_id
+        ),
+      route_id_options:
+        route_id_options(available_routes, route_ids, route_search_term, route_type),
+      selected_route_id: modal_route_id,
+      selected_stops: selected_stops,
+      stop_id_options:
+        stop_id_options(available_stops, selected_stops, stop_search_term, route_type, stop_ids)
+    }
+  end
+
+  defp derive_filter_title(available_filter_routes, modal_route_id) do
+    if modal_route_id in [nil, ""] do
+      "All routes"
+    else
+      case Enum.find(available_filter_routes, &(&1.id == modal_route_id)) do
+        nil -> "All routes"
+        route -> SelectFormatter.name_for_option(route)
       end
     end
   end

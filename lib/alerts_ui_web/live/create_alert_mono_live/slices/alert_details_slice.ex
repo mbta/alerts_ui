@@ -84,18 +84,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       submitting? = is_nil(target) and socket.assigns.submitted?
 
       header_sync_toggle =
-        if target == "header_text" and details_data.header_sync_toggle == true do
-          false
-        else
-          details_data.header_sync_toggle
-        end
+        maybe_disable_sync_toggle(details_data.header_sync_toggle, target, "header_text")
 
       description_sync_toggle =
-        if target == "description_text" and details_data.description_sync_toggle == true do
-          false
-        else
-          details_data.description_sync_toggle
-        end
+        maybe_disable_sync_toggle(
+          details_data.description_sync_toggle,
+          target,
+          "description_text"
+        )
 
       selected =
         socket |> unwrap_selections() |> selected_objects(changeset)
@@ -288,15 +284,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       if get_field(changeset, :url) in [nil, ""] do
         changeset
       else
-        changeset
-        |> validate_change(:url, fn :url, url ->
-          with {:ok, parsed_url} <- URI.new(url),
-               true <- url_valid?(parsed_url) do
-            []
-          else
-            _ -> [url: "Enter a correctly formatted URL (e.g. http://www.example.com) "]
-          end
-        end)
+        validate_change(changeset, :url, fn :url, url -> url_errors(url) end)
+      end
+    end
+
+    defp url_errors(url) do
+      with {:ok, parsed_url} <- URI.new(url), true <- url_valid?(parsed_url) do
+        []
+      else
+        _ -> [url: "Enter a correctly formatted URL (e.g. http://www.example.com) "]
       end
     end
 
@@ -305,21 +301,31 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
         changeset
       else
         changeset
-        |> Ecto.Changeset.validate_change(:image_url, fn :image_url, image_url ->
-          if image_url !== "" and is_number(image_size),
-            do: [],
-            else: [image_url: "Enter a valid image URL"]
-        end)
-        |> then(fn changeset ->
-          if Map.get(changeset.changes, :image_url) in [nil, ""] do
-            changeset
-          else
-            Ecto.Changeset.validate_required(changeset, :image_alternative_text,
-              message: "Enter alt text"
-            )
-          end
-        end)
+        |> validate_image_url(image_size)
+        |> maybe_require_alt_text()
       end
+    end
+
+    defp validate_image_url(changeset, image_size) do
+      Ecto.Changeset.validate_change(changeset, :image_url, fn :image_url, image_url ->
+        if image_url !== "" and is_number(image_size),
+          do: [],
+          else: [image_url: "Enter a valid image URL"]
+      end)
+    end
+
+    defp maybe_require_alt_text(changeset) do
+      if Map.get(changeset.changes, :image_url) in [nil, ""] do
+        changeset
+      else
+        Ecto.Changeset.validate_required(changeset, :image_alternative_text,
+          message: "Enter alt text"
+        )
+      end
+    end
+
+    defp maybe_disable_sync_toggle(toggle, target, field_name) do
+      if target == field_name and toggle == true, do: false, else: toggle
     end
 
     defp url_valid?(uri) do
