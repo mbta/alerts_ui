@@ -209,7 +209,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
   def ensure_start_date_values_for_specifier(changeset, :start_of_service, _, d) do
     changeset
-    |> force_change(:active_period_start, NaiveDateTime.new!(d, ActivePeriod.start_of_service_time()))
+    |> force_change(
+      :active_period_start,
+      NaiveDateTime.new!(d, ActivePeriod.start_of_service_time())
+    )
   end
 
   def ensure_start_date_values_for_specifier(changeset, :custom, dt, _) do
