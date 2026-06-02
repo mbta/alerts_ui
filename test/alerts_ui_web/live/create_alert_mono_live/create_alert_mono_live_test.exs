@@ -93,6 +93,31 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     end
 
     @tag :logged_in_user
+    test "Correctly displays prediction suppression modal", %{conn: conn} do
+      with_mocks([
+        {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [] end},
+        {StopsRepo, [], by_route: fn _, _, _opts -> [@stop] end},
+        {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+
+        get_to_submission_page_refactor(view, "Commuter Rail", "Suspension")
+
+        view
+        |> element("form")
+        |> render_change(%{"alert_data" => %{"route_ids" => [@route.id]}})
+
+        open_review_modal(view)
+
+        assert view |> element("#check_predictions_modal-container") |> render() =~
+                 ~s(Warning: Predictions will be suppressed)
+
+        assert view |> element("#check_predictions_modal-container") |> render() =~
+                 "#{@route.name}"
+      end
+    end
+
+    @tag :logged_in_user
     test "shows correct affected service for access combination", %{conn: conn} do
       with_mocks([
         {RoutePatternsRepo, [], [included_stops_by_route_id: fn _route_id, _direction -> [] end]},

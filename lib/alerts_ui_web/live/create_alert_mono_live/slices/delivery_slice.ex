@@ -41,12 +41,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
 
       [_, target | _] = Map.get(params, "_target", [nil, nil])
 
-      banner_sync_toggle =
-        if target == "banner_text" and delivery_data.banner_sync_toggle == true do
-          false
-        else
-          delivery_data.banner_sync_toggle
-        end
+      banner_sync_toggle = banner_sync_toggle(target, delivery_data.banner_sync_toggle)
 
       view_banner =
         case delivery_data.view_banner do
@@ -76,6 +71,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
         accept_banner: delivery_data.accept_banner
       })
     end
+
+    defp banner_sync_toggle("banner_text", true), do: false
+    defp banner_sync_toggle(_, current_toggle), do: current_toggle
 
     def validate(delivery_data, changeset, _params, _socket) do
       if delivery_data.view_banner do

@@ -83,19 +83,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       # have just loaded the page)
       submitting? = is_nil(target) and socket.assigns.submitted?
 
-      header_sync_toggle =
-        if target == "header_text" and details_data.header_sync_toggle == true do
-          false
-        else
-          details_data.header_sync_toggle
-        end
+      header_sync_toggle = header_sync_toggle(target, details_data.header_sync_toggle)
 
       description_sync_toggle =
-        if target == "description_text" and details_data.description_sync_toggle == true do
-          false
-        else
-          details_data.description_sync_toggle
-        end
+        description_sync_toggle(target, details_data.description_sync_toggle)
 
       selected =
         socket |> unwrap_selections() |> selected_objects(changeset)
@@ -139,13 +130,19 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       })
     end
 
+    defp header_sync_toggle("header_text", true), do: false
+    defp header_sync_toggle(_, current_toggle), do: current_toggle
+
+    defp description_sync_toggle("description_text", true), do: false
+    defp description_sync_toggle(_, current_toggle), do: current_toggle
+
     def validate(details_data, changeset, _params, _socket) do
       image_size = details_data.image_url |> get_image_size()
 
       changeset
       |> clear_my_errors(AlertDetailsSlice)
       |> Validation.always_validate_required(@required_fields)
-      |> validate_url()
+      |> validate_url(get_field(changeset, :url))
       |> validate_image_fields(image_size)
     end
 
@@ -284,20 +281,20 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       [{"<none>", ""} | options_list]
     end
 
-    defp validate_url(changeset) do
-      if get_field(changeset, :url) in [nil, ""] do
-        changeset
-      else
-        changeset
-        |> validate_change(:url, fn :url, url ->
-          with {:ok, parsed_url} <- URI.new(url),
-               true <- url_valid?(parsed_url) do
-            []
-          else
-            _ -> [url: "Enter a correctly formatted URL (e.g. http://www.example.com) "]
-          end
-        end)
-      end
+    defp validate_url(changeset, url_field) when url_field in [nil, ""] do
+      changeset
+    end
+
+    defp validate_url(changeset, _url_field) do
+      changeset
+      |> validate_change(:url, fn :url, url ->
+        with {:ok, parsed_url} <- URI.new(url),
+             true <- url_valid?(parsed_url) do
+          []
+        else
+          _ -> [url: "Enter a correctly formatted URL (e.g. http://www.example.com) "]
+        end
+      end)
     end
 
     defp validate_image_fields(changeset, image_size) do
@@ -310,16 +307,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
             do: [],
             else: [image_url: "Enter a valid image URL"]
         end)
-        |> then(fn changeset ->
-          if Map.get(changeset.changes, :image_url) in [nil, ""] do
-            changeset
-          else
-            Ecto.Changeset.validate_required(changeset, :image_alternative_text,
-              message: "Enter alt text"
-            )
-          end
-        end)
+        |> validate_alt_text(Map.get(changeset.changes, :image_url))
       end
+    end
+
+    defp validate_alt_text(changeset, image_url) when image_url in [nil, ""] do
+      changeset
+    end
+
+    defp validate_alt_text(changeset, _image_url) do
+      Ecto.Changeset.validate_required(changeset, :image_alternative_text,
+        message: "Enter alt text"
+      )
     end
 
     defp url_valid?(uri) do
