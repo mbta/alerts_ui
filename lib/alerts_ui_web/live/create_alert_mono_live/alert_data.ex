@@ -6,11 +6,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
   alias AlertsUI.Models.Alert
   alias AlertsUI.Repo
-  alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.CreateAlertMonoLive.ServiceSliceDispatcher
-  alias Ecto.Changeset
-  alias Phoenix.Component
-  alias Phoenix.LiveView.Socket
+  alias AlertsUIWeb.CreateAlertMonoLive.Slice
 
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
     AlertDetailsSlice,
@@ -18,10 +15,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     NotificationPeriodSlice,
     ReminderTimesSlice,
     SubmitSlice,
-    UrlSlice,
     TimelineSlice,
-    TimeRangeSlice
+    TimeRangeSlice,
+    UrlSlice
   }
+
+  alias Ecto.Changeset
+  alias Phoenix.Component
+  alias Phoenix.LiveView.Socket
 
   use AlertsUI.Schema
 
@@ -109,6 +110,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :active_period_start_specifier, Ecto.Enum, values: @start_values, default: :now
     field :active_period_start_time, :time
     field :active_period_start_time_specifier, Ecto.Enum, values: @start_values, default: :now
+    field :notification_period_end, :naive_datetime
+    field :notification_period_end_date, :date
     field :notification_period_start, :naive_datetime
     field :notification_period_start_date, :date
     field :notification_specifier, Ecto.Enum, values: @notification_values, default: :now
@@ -180,6 +183,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
           active_period_start_time: Time.t() | nil,
           active_period_start_specifier: start_values() | nil,
           alert_timing: alert_timing() | nil,
+          notification_period_end: NaiveDateTime.t() | nil,
+          notification_period_end_date: Date.t() | nil,
           notification_period_start: NaiveDateTime.t() | nil,
           notification_period_start_date: Date.t() | nil,
           notification_specifier: notification_values(),
@@ -393,7 +398,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     toggle_data =
       [:header, :description, :banner]
       |> Enum.map(fn toggle ->
-        toggle_key = :"#{toggle}_sync_toggle"
+        toggle_key = toggle_sync_key(toggle)
 
         toggle_value =
           cond do
@@ -401,7 +406,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
               # the toggle has explicitly been disabled
               false
 
-            Map.get(alert_data, :"#{toggle}_text") not in [nil, ""] ->
+            Map.get(alert_data, toggle_text_key(toggle)) not in [nil, ""] ->
               # the field is present
               false
 
@@ -416,6 +421,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
     Map.merge(alert_data, toggle_data)
   end
+
+  defp toggle_sync_key(:header), do: :header_sync_toggle
+  defp toggle_sync_key(:description), do: :description_sync_toggle
+  defp toggle_sync_key(:banner), do: :banner_sync_toggle
+
+  defp toggle_text_key(:header), do: :header_text
+  defp toggle_text_key(:description), do: :description_text
+  defp toggle_text_key(:banner), do: :banner_text
 
   defp strip_banner_text_unless_enabled(v2_alert_data) do
     if v2_alert_data.view_banner do

@@ -20,8 +20,10 @@ end
 
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
   @moduledoc """
-  timeline slice for refactored form
+  Slice that tracks multi-step form progress and renders the step-navigation
+  header bar. Manages the list of `Step` structs and the currently active step.
   """
+
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.CreateAlertMonoLive.Step

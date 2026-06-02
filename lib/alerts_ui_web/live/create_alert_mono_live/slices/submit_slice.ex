@@ -1,4 +1,10 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
+  @moduledoc """
+  Slice that renders the bottom action bar with Back, Cancel, and Review/Submit
+  buttons, and conditionally shows the review modal and prediction-suppression
+  warning modal before saving an alert.
+  """
+
   alias AlertsUIWeb.CreateAlertMonoLive.ReviewModal
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.PredictionSuppressionWarningModal

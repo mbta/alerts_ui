@@ -1,5 +1,48 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
+  @moduledoc """
+  Changeset validation helpers for alert time-range fields. Validates that
+  datetimes are parseable, start/end ordering is correct, starts are not in
+  the past, recurrence days are set, DST gaps are avoided, and notification
+  period constraints are satisfied.
+  """
+
   import Ecto.Changeset
+
+  def validate_cast_datetimes(changeset, params) do
+    alert_params = Map.get(params, "alert_data", %{})
+
+    changeset
+    |> maybe_validate_datetime(alert_params, "active_period_start", :active_period_start)
+    |> maybe_validate_datetime(alert_params, "active_period_end", :active_period_end)
+  end
+
+  def validate_cast_notification_datetimes(changeset, params) do
+    alert_params = Map.get(params, "alert_data", %{})
+
+    maybe_validate_datetime(
+      changeset,
+      alert_params,
+      "notification_period_start",
+      :notification_period_start,
+      "Enter a valid date and time"
+    )
+  end
+
+  defp maybe_validate_datetime(changeset, params, key, field, message \\ "Enter a valid datetime") do
+    case Map.get(params, key) do
+      nil ->
+        changeset
+
+      "" ->
+        changeset
+
+      value ->
+        case Ecto.Type.cast(:naive_datetime, value) do
+          {:ok, _} -> changeset
+          _ -> add_error(changeset, field, message)
+        end
+    end
+  end
 
   def validate_required_fields(changeset) do
     timing = get_field(changeset, :alert_timing)
@@ -96,9 +139,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
     end
   end
 
-  def validate_start_is_after_now(changeset) do
-    editing = not is_nil(get_field(changeset, :alert_id))
-
+  def validate_start_is_after_now(changeset, editing \\ false) do
     if editing do
       changeset
     else
@@ -163,35 +204,31 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
   def validate_at_least_one_recurrence(changeset) do
     timing = get_field(changeset, :alert_timing)
 
-    cond do
-      timing in [:recurring, "recurring"] ->
-        validate_length(changeset, :recurrence_days,
-          min: 1,
-          message: "Select one or more days for alert to recur"
-        )
-
-      true ->
-        changeset
+    if timing in [:recurring, "recurring"] do
+      validate_length(changeset, :recurrence_days,
+        min: 1,
+        message: "Select one or more days for alert to recur"
+      )
+    else
+      changeset
     end
   end
 
   def validate_start_date_matches_weekday(changeset) do
     timing = get_field(changeset, :alert_timing)
 
-    cond do
-      timing in [:recurring, "recurring"] ->
-        validate_change(
-          changeset,
-          :recurrence_days,
-          fn :recurrence_days, recurrence_days ->
-            start_date = get_field(changeset, :active_period_start_date)
-            specifier = get_field(changeset, :active_period_start_specifier)
-            validate_start_date_matches_weekday(start_date, recurrence_days, specifier)
-          end
-        )
-
-      true ->
-        changeset
+    if timing in [:recurring, "recurring"] do
+      validate_change(
+        changeset,
+        :recurrence_days,
+        fn :recurrence_days, recurrence_days ->
+          start_date = get_field(changeset, :active_period_start_date)
+          specifier = get_field(changeset, :active_period_start_specifier)
+          validate_start_date_matches_weekday(start_date, recurrence_days, specifier)
+        end
+      )
+    else
+      changeset
     end
   end
 
@@ -229,7 +266,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
   end
 
   def validate_notification(changeset) do
-    editing = not is_nil(get_field(changeset, :alert_id))
     current_time = NaiveDateTime.local_now()
 
     naive_start =
@@ -250,8 +286,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
         :notification_period_start,
         fn :notification_period_start, notification_period_start ->
           cond do
-            NaiveDateTime.diff(current_time, notification_period_start, :minute) > 1 and
-                not editing ->
+            NaiveDateTime.diff(current_time, notification_period_start, :minute) > 1 ->
               [
                 notification_period_start: {"Notifications can't be set in the past", []},
                 notification_period_start_date: {"Notifications can't be set in the past", []}

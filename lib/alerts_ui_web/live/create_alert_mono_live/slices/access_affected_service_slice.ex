@@ -1,4 +1,10 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
+  @moduledoc """
+  Slice that handles facility selection for accessibility alerts (elevator/escalator
+  closures). Asynchronously loads facilities filtered by stop, and renders the
+  facility picker with an optional stop-filter modal.
+  """
+
   alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.CreateAlertLive
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
@@ -23,6 +29,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
   ]
 
   defmodule Selections do
+    @moduledoc "Holds async-loaded facility and stop option lists for `AccessAffectedServiceSlice`."
+
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice
 
     defstruct available_facilities: [],

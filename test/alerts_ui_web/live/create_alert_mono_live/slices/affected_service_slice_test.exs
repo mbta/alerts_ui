@@ -774,8 +774,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
 
     @tag :logged_in_user
     test "route search filter results", %{conn: conn} do
-      today = @todays_date |> Date.to_string()
-
       with_mocks([
         {RoutesRepo, [],
          [

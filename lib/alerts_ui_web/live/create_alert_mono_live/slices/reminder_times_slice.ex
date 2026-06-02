@@ -1,4 +1,10 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
+  @moduledoc """
+  Slice that manages rider reminder datetimes embedded in an alert. Provides
+  changeset helpers for casting/dropping reminder entries and renders the
+  rider-reminders section of the alert form.
+  """
+
   alias AlertsUI.Helpers.ReminderTimes
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
@@ -16,14 +22,21 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
 
     def mount(_slice, socket, _base_params), do: socket
 
-    def extract(slice, %AlertData{} = _alert_data, _params) do
-      slice
+    def extract(slice, %AlertData{reminder_times: reminder_times} = _alert_data, _params) do
+      converted =
+        Enum.map(reminder_times || [], fn
+          %{id: id, time: time} -> %AlertData.ReminderTime{id: id, reminder_time: time}
+          %AlertData.ReminderTime{} = rt -> rt
+        end)
+
+      %{slice | reminder_times: converted}
     end
 
     def transform(_slice, changeset, params, _socket) do
       case params do
         %{"alert_data" => _alert_data_params} ->
           changeset
+          |> cast(params, [])
           |> ReminderTimesSlice.materialize_reminder_times()
           |> cast_embed(:reminder_times,
             sort_param: :reminder_sort,
@@ -36,8 +49,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
       end
     end
 
-    def validate(_slice, changeset, _params, _socket) do
-      changeset
+    def validate(_reminder_data, changeset, _params, _socket) do
+      has_nested_error =
+        get_embed(changeset, :reminder_times)
+        |> Enum.find(fn rt -> is_list(rt.errors) and rt.errors != [] end)
+
+      if has_nested_error do
+        changeset |> add_error(:reminder_times, "Invalid entry in reminder times")
+      else
+        changeset
+      end
     end
 
     def assigns(_slice, socket, _params) do
@@ -57,6 +78,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
 
   def reminder_time_changeset(source, params) do
     cast(source, params, [:reminder_time, :max_time, :min_time, :id])
+    |> validate_required(:reminder_time, message: "Select reminder time")
     |> validate_change(:reminder_time, fn :reminder_time, time ->
       exists? = String.trim(params["id"] || "") != ""
       min_time_string = params["min_time"] |> String.pad_trailing(19, ":00")
@@ -129,8 +151,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
               field={rt[:reminder_time]}
               id={rt[:id].value}
               index={rt.index}
-              notification_start={@notification_start}
-              notification_end={@notification_end}
+              notification_start={@form[:notification_period_start].value}
+              notification_end={@form[:notification_period_end].value}
             />
           </div>
         </.inputs_for>
@@ -157,6 +179,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
   attr :current_time, DateTime
 
   def reminder_input(assigns) do
+    # the reminder_time id is prevented from showing if it's nil because of a
+    # subtle bug where "" and nil are treated both the same and different in
+    # different parts of Ecto, which means a new Reminder would appear as a
+    # duplicate of an old one if the field were allowed to exist.
     ~H"""
     <input
       type="hidden"
@@ -176,7 +202,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
       value={@notification_end |> naive_datetime_to_iso8601()}
       id={"reminder_times-#{@index}-max_time"}
     />
-    <input type="hidden" name={"alert_data[reminder_times][#{@index}][id]"} value={@id} />
+    <input :if={@id} type="hidden" name={"alert_data[reminder_times][#{@index}][id]"} value={@id} />
     <input
       type="hidden"
       name={"alert_data[reminder_times][#{@index}][_persistent_id]"}
@@ -215,10 +241,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
       </span>
     </.datetime>
     """
-  end
-
-  def parse_field_errors(%Ecto.Changeset{} = changeset) do
-    changeset
   end
 
   defp naive_datetime_to_iso8601(nil), do: ""

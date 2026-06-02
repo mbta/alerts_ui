@@ -158,7 +158,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         |> element("form")
         |> render_change(%{
           alert_data: %{
-            route_ids: ["1", "2"]
+            single_route_id: "1"
           }
         })
 

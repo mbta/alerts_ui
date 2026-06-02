@@ -1,4 +1,10 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
+  @moduledoc """
+  Slice that manages the alert active period (start/end datetimes, one-time vs.
+  recurring timing, recurrence days, and automatic-close eligibility). Provides
+  changeset transformation helpers and the timeframe section of the details form.
+  """
+
   alias AlertsUI.Models.ActivePeriod
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
@@ -77,18 +83,26 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       |> TimeRangeSlice.set_start_end_from_trip_selection(
         target,
         socket.assigns.selections,
-        get_field(changeset, :trip_ids, [])
+        get_field(changeset, :trip_ids, []),
+        socket.assigns[:form_type]
       )
     end
 
-    def validate(_slice, changeset, _params, _socket) do
+    def validate(slice, changeset, params, socket) do
+      trip_ids = get_field(changeset, :trip_ids, [])
+
+      trip_arrival_time =
+        TimeRangeSlice.get_trip_arrival_time_for_validate(trip_ids, socket.assigns.selections)
+
       changeset
+      |> TimeRangeValidators.validate_cast_datetimes(params)
       |> TimeRangeValidators.validate_required_fields()
       |> TimeRangeValidators.validate_end_after_start()
-      |> TimeRangeValidators.validate_start_is_after_now()
+      |> TimeRangeValidators.validate_start_is_after_now(slice.form_type == :editing)
       |> TimeRangeValidators.validate_at_least_one_recurrence()
       |> TimeRangeValidators.validate_start_date_matches_weekday()
       |> TimeRangeValidators.validate_not_dst_gap()
+      |> TimeRangeValidators.validate_start_is_before_trip(trip_arrival_time)
     end
 
     def assigns(_slice, socket, _params) do
@@ -194,10 +208,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     do: changeset
 
   def ensure_start_date_values_for_specifier(changeset, :start_of_service, _, d) do
-    now = NaiveDateTime.local_now()
-
     changeset
-    |> force_change(:active_period_start, DTHelpers.replace_date(d, now))
+    |> force_change(
+      :active_period_start,
+      NaiveDateTime.new!(d, ActivePeriod.start_of_service_time())
+    )
   end
 
   def ensure_start_date_values_for_specifier(changeset, :custom, dt, _) do
@@ -300,22 +315,44 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
   def ensure_end_time_values_for_specifier(changeset, _, _), do: changeset
 
-  def set_start_end_from_trip_selection(changeset, "trip_ids", _, []),
-    do: changeset
+  def set_start_end_from_trip_selection(changeset, "trip_ids", _, _, :editing), do: changeset
+
+  def set_start_end_from_trip_selection(changeset, "trip_ids", _, [], _form_type) do
+    now = NaiveDateTime.local_now()
+    end_of_service = now |> ActivePeriod.end_of_service_datetime_naive()
+
+    changeset
+    |> force_change(:active_period_start_specifier, :now)
+    |> force_change(:active_period_start, now)
+    |> force_change(:active_period_start_date, now |> NaiveDateTime.to_date())
+    |> force_change(:active_period_end_specifier, :later_today)
+    |> force_change(:active_period_end, end_of_service)
+    |> force_change(:active_period_end_date, end_of_service |> NaiveDateTime.to_date())
+  end
 
   def set_start_end_from_trip_selection(
         changeset,
         "trip_ids",
-        %{ok?: true, result: selections},
-        trip_ids
-      ) do
+        %{loading: loading} = selections,
+        trip_ids,
+        _form_type
+      )
+      when loading != true do
     available_schedules = Map.get(selections, :available_schedules, [])
     selected_schedules = Enum.filter(available_schedules, &(&1.trip.id in trip_ids))
+    now = NaiveDateTime.local_now()
     departure = get_trip_departure_time(selected_schedules)
     arrival = get_trip_arrival_time(nil, selected_schedules)
 
+    {departure, start_specifier} =
+      if NaiveDateTime.compare(now, departure) == :gt do
+        {now, :now}
+      else
+        {departure, :custom}
+      end
+
     changeset
-    |> force_change(:active_period_start_specifier, :custom)
+    |> force_change(:active_period_start_specifier, start_specifier)
     |> force_change(:active_period_start, departure)
     |> force_change(:active_period_start_date, departure |> NaiveDateTime.to_date())
     |> force_change(:active_period_end_specifier, :custom)
@@ -323,7 +360,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     |> force_change(:active_period_end_date, arrival |> NaiveDateTime.to_date())
   end
 
-  def set_start_end_from_trip_selection(changeset, _, _, _), do: changeset
+  def set_start_end_from_trip_selection(changeset, _, _, _, _) do
+    changeset
+  end
 
   defp get_trip_departure_time(selected_schedules) do
     selected_schedules
@@ -351,6 +390,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   def normalize_alert_timing_field(:recurring), do: :recurring
   def normalize_alert_timing_field("recurring"), do: :recurring
   def normalize_alert_timing_field(_), do: :"one-time"
+
+  def get_trip_arrival_time_for_validate(trip_ids, %{ok?: true, result: selections}) do
+    available = Map.get(selections, :available_schedules, [])
+    selected = Enum.filter(available, &(&1.trip.id in trip_ids))
+
+    selected
+    |> Enum.map(& &1.time_of_last_trip_arrival)
+    |> Enum.max(DateTime, fn -> nil end)
+    |> utc_datetime_to_naive()
+  end
+
+  def get_trip_arrival_time_for_validate(_, _), do: nil
 
   defp current_time, do: NaiveDateTime.local_now()
 
@@ -386,7 +437,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     end
   end
 
-  defp day_of_week_options(),
+  defp day_of_week_options,
     do: [
       [key: :Monday, value: :monday, id: "monday"],
       [key: :Tuesday, value: :tuesday, id: "tuesday"],

@@ -13,7 +13,9 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
       active_period_end_in_unix = DateTime.to_unix(active_period_end)
 
       expected_time_frame_text =
-        "#{Timex.month_name(active_period_end.month)} #{active_period_end.day}"
+        active_period_end
+        |> Timex.Timezone.convert("America/New_York")
+        |> then(&"#{Timex.month_name(&1.month)} #{&1.day}")
 
       trip1 =
         build(:trip_descriptor, %{

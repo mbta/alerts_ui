@@ -333,11 +333,17 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
              |> render_async() =~ "custom"
 
       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
-                      {:add_errors,
-                       [
-                         {:active_period_end, {"Effect must end after 04/30/2024, 11:54 AM", []}},
-                         {:active_period_start_date, {"Effect can't start in the past", []}}
-                       ], AlertsUIWeb.FormComponents.TimeRange}}
+                      {:add_errors, errors, AlertsUIWeb.FormComponents.TimeRange}}
+
+      assert Enum.member?(
+               errors,
+               {:active_period_end, {"Effect must end after 04/30/2024, 11:54 AM", []}}
+             )
+
+      assert Enum.member?(
+               errors,
+               {:active_period_start_date, {"Effect can't start in the past", []}}
+             )
     end
 
     test "duplicating with no errors sends data" do
