@@ -279,11 +279,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   @impl true
   def handle_info({:sr_auto_select_routes, route_ids}, socket) do
-    if socket.assigns.form[:route_ids].value in [nil, []] do
-      {:noreply, sync_socket(socket, %{"alert_data" => %{"route_ids" => route_ids}})}
-    else
-      {:noreply, socket}
-    end
+    {:noreply, sync_socket(socket, %{"alert_data" => %{"route_ids" => route_ids}})}
   end
 
   defp get_step_by_name(name) do
