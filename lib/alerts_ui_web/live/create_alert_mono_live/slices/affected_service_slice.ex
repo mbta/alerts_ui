@@ -55,7 +55,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
               selected_stops: [],
               service_dates: [],
               stop_id_options: [],
-              stop_selections: [],
               today: nil,
               trip_id_options: []
   end
@@ -265,7 +264,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
           filter_title_value: filter_title_value,
           route_id_options: route_id_options,
           stop_id_options: stop_id_options,
-          stop_selections: stop_names_and_ids,
           service_dates: service_dates(),
           trip_id_options: trip_id_options
         }
@@ -563,7 +561,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             :if={show_stops_input?(@form[:combination].value)}
             label={if show_trips_input?(@form[:combination].value), do: "Stops", else: nil}
             field={@form[:stop_names_and_ids]}
-            selected={@selections.stop_selections}
+            selected={@form[:stop_names_and_ids].value}
             filter_field={@form[:stop_search_term]}
             options={@selections.stop_id_options}
             loading={selections_loading?(@selections)}

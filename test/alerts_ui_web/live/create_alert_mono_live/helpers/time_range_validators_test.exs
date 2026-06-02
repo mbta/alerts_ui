@@ -15,7 +15,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidatorsTest do
   # A NaiveDateTime far enough in the future that "is_after_now" passes
   # regardless of when the test runs.
   defp future_naive(offset_days \\ 365) do
-    NaiveDateTime.local_now() |> NaiveDateTime.add(offset_days, :day)
+    DateTime.now!("America/New_York") |> DateTime.to_naive() |> NaiveDateTime.add(offset_days, :day)
   end
 
   defp future_date do

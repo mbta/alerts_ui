@@ -143,7 +143,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
     if editing do
       changeset
     else
-      now = NaiveDateTime.local_now()
+      now = eastern_now()
       specifier = get_field(changeset, :active_period_start_specifier)
       timing = get_field(changeset, :alert_timing)
 
@@ -266,7 +266,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
   end
 
   def validate_notification(changeset) do
-    current_time = NaiveDateTime.local_now()
+    current_time = eastern_now()
 
     naive_start =
       if get_field(changeset, :alert_timing) in [:"one-time", "one-time"] do
@@ -275,9 +275,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
         start_date = get_field(changeset, :active_period_start_date)
         start_time = get_field(changeset, :active_period_start_time)
 
-        if start_date && start_time,
-          do: NaiveDateTime.new!(start_date, start_time),
-          else: nil
+        if start_date && start_time do
+          # TODO: database should store UTC, front end should use local time
+          NaiveDateTime.new!(start_date, start_time)
+          |> DateTime.from_naive!("America/New_York")
+          |> DateTime.to_naive()
+        else
+          nil
+        end
       end
 
     if naive_start do
@@ -402,6 +407,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
         ]
     end
   end
+
+  defp eastern_now, do: DateTime.now!("America/New_York") |> DateTime.to_naive()
 
   defp formatted_datetime(datetime), do: Calendar.strftime(datetime, "%m/%d/%Y, %I:%M %p")
 end
