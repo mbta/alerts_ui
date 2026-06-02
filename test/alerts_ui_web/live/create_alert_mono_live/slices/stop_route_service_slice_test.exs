@@ -1038,5 +1038,57 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         assert document_has_element?(document, "option[value=\"Red\"][selected=\"selected\"]")
       end
     end
+
+    @tag :logged_in_user
+    test "route options are reselected when stop changes", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@route, @route_two] end,
+           by_stop: fn
+             "place-aqucl" -> [@route]
+             "place-pktrm" -> [@route_two]
+           end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _, _ -> [@stop, @stop_two] end,
+           by_route: fn "Blue", _direction -> [@stop] end,
+           by_route: fn "Red", _direction -> [@stop_two] end,
+           all: fn ["filter[id]": "place-aqucl"], _opts -> [@stop, @stop_two] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        get_to_submission_page_refactor(view, "Subway", "Station closure")
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "stop_ids"],
+          "alert_data" => %{"stop_ids" => ["place-aqucl"]}
+        })
+
+        render_async(view)
+
+        {:ok, document} = view |> render_async() |> Floki.parse_document()
+        assert document_has_element?(document, "option[value=\"Blue\"][selected=\"selected\"]")
+        refute document_has_element?(document, "option[value=\"Red\"][selected=\"selected\"]")
+
+        # User selects place-pktrm on Red instead
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "stop_ids"],
+          "alert_data" => %{"stop_ids" => ["place-pktrm"]}
+        })
+
+        render_async(view)
+
+        {:ok, document} = view |> render_async() |> Floki.parse_document()
+        refute document_has_element?(document, "option[value=\"Blue\"][selected=\"selected\"]")
+        assert document_has_element?(document, "option[value=\"Red\"][selected=\"selected\"]")
+      end
+    end
   end
 end
