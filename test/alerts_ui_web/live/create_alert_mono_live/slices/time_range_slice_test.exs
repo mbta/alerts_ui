@@ -460,7 +460,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         {StopsRepo, [],
          [
            by_route: fn _route, _direction, _opts -> [] end,
-           get_parent: fn _stop_id -> nil end
+           get_parent: fn _stop_id -> nil end,
+           all: fn _filters, _opts -> [] end
          ]},
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
         {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]}
@@ -555,7 +556,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       }
 
       changeset = trip_changeset(%{trip_ids: ["trip-595"]})
-      socket = socket_with_trip_selections([schedule])
+      socket = socket_for_transform([schedule])
 
       result =
         Slice.transform(
@@ -587,7 +588,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       }
 
       changeset = trip_changeset(%{trip_ids: ["trip-595"]})
-      socket = socket_with_trip_selections([schedule])
+      socket = socket_for_transform([schedule])
 
       result =
         Slice.transform(

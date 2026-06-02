@@ -58,7 +58,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
               stop_selections: [],
               today: nil,
               trip_id_options: []
-
   end
 
   defimpl Slice, for: __MODULE__ do
@@ -146,7 +145,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   end
 
   def validate_changeset(changeset) do
-    always_validate_required(changeset, :route_ids, "You must select a route")
+    normalized_single_route_effects =
+      Enum.map(get_single_route_effect_names(), fn name ->
+        name |> String.split(" ") |> Enum.map(&String.downcase/1) |> Enum.join("_")
+      end)
+
+    if get_field(changeset, :effect_name) in normalized_single_route_effects do
+      always_validate_required(changeset, :single_route_id, "You must select a route")
+    else
+      always_validate_required(changeset, :route_ids, "You must select a route")
+    end
   end
 
   def async_assign_selections(socket, params) do
@@ -320,8 +328,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   defp ensure_route_ids(changeset) do
     effect_name = get_field(changeset, :effect_name)
 
+    normalized_single_route_effects =
+      Enum.map(get_single_route_effect_names(), fn name ->
+        name |> String.split(" ") |> Enum.map(&String.downcase/1) |> Enum.join("_")
+      end)
+
     cond do
-      effect_name in get_single_route_effect_names() ->
+      effect_name in normalized_single_route_effects ->
         incoming_route_id = get_field(changeset, :single_route_id)
         cast(changeset, %{route_ids: [incoming_route_id]}, [:route_ids])
 

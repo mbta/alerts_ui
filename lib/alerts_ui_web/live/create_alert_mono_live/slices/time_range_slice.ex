@@ -208,10 +208,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     do: changeset
 
   def ensure_start_date_values_for_specifier(changeset, :start_of_service, _, d) do
-    now = NaiveDateTime.local_now()
-
     changeset
-    |> force_change(:active_period_start, DTHelpers.replace_date(d, now))
+    |> force_change(:active_period_start, NaiveDateTime.new!(d, ActivePeriod.start_of_service_time()))
   end
 
   def ensure_start_date_values_for_specifier(changeset, :custom, dt, _) do
@@ -332,10 +330,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   def set_start_end_from_trip_selection(
         changeset,
         "trip_ids",
-        %{loading: false} = selections,
+        %{loading: loading} = selections,
         trip_ids,
         _form_type
-      ) do
+      )
+      when loading != true do
     available_schedules = Map.get(selections, :available_schedules, [])
     selected_schedules = Enum.filter(available_schedules, &(&1.trip.id in trip_ids))
     now = NaiveDateTime.local_now()
@@ -358,7 +357,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     |> force_change(:active_period_end_date, arrival |> NaiveDateTime.to_date())
   end
 
-  def set_start_end_from_trip_selection(changeset, _, _, _, _), do: changeset
+  def set_start_end_from_trip_selection(changeset, _, _, _, _) do
+    changeset
+  end
 
   defp get_trip_departure_time(selected_schedules) do
     selected_schedules

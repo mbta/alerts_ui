@@ -34,7 +34,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertDataTest do
     end
 
     @tag :logged_in_user
-    test "AC-3: active_period_end is a non-nil NaiveDateTime at ~T[23:59:59] after mount", %{
+    test "active_period_end is a non-nil NaiveDateTime at ~T[03:00:00] after mount", %{
       conn: conn
     } do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
@@ -45,9 +45,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertDataTest do
       assert %NaiveDateTime{} = end_dt,
              "active_period_end should be a NaiveDateTime after mount, got: #{inspect(end_dt)}"
 
-      assert end_dt.hour == 23
-      assert end_dt.minute == 59
-      assert end_dt.second == 59
+      assert end_dt.hour == 03
+      assert end_dt.minute == 00
+      assert end_dt.second == 00
     end
 
     @tag :logged_in_user

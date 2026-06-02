@@ -423,7 +423,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
         )
 
       assert reminders(after_drop) == [],
-            "a reminder with a datetime should drop cleanly even when other validations fail"
+             "a reminder with a datetime should drop cleanly even when other validations fail"
     end
   end
 end

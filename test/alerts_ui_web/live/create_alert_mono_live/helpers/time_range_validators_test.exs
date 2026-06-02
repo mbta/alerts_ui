@@ -264,15 +264,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidatorsTest do
   end
 
   describe "validate_start_is_after_now/1" do
-    test "is a no-op when editing (alert_id is set)" do
+    test "is a no-op when editing" do
       cs =
         changeset(%{
-          alert_id: "1",
           alert_timing: :"one-time",
           active_period_start_specifier: :custom,
           active_period_start: ~N[2020-01-01 09:00:00]
         })
-        |> TimeRangeValidators.validate_start_is_after_now()
+        |> TimeRangeValidators.validate_start_is_after_now(true)
 
       assert cs.errors == []
     end
@@ -570,17 +569,19 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidatorsTest do
       assert msg =~ "Notification period must start on or before"
     end
 
-    test "is a no-op for editing when the notification is in the past" do
+    test "errors when the notification is in the past, even when editing" do
       cs =
         changeset(%{
-          alert_id: "1",
           alert_timing: :"one-time",
           active_period_start: future_naive(),
           notification_period_start: ~N[2020-01-01 09:00:00]
         })
         |> TimeRangeValidators.validate_notification()
 
-      assert cs.errors == []
+      assert cs.errors == [
+               notification_period_start: {"Notifications can't be set in the past", []},
+               notification_period_start_date: {"Notifications can't be set in the past", []}
+             ]
     end
 
     test "passes when notification_period_start is on or before active_period_start" do

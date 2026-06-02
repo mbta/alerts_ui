@@ -241,7 +241,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
             active_period_start_date: tomorrows_date |> Date.to_iso8601(),
             active_period_end_date: tomorrows_date |> Date.add(1),
             active_period_start:
-              tomorrows_date |> NaiveDateTime.new!(~T[03:00:00]) |> NaiveDateTime.to_iso8601(),
+              active_period_start
+              |> NaiveDateTime.to_iso8601(),
             active_period_end:
               active_period_end
               |> NaiveDateTime.to_iso8601()

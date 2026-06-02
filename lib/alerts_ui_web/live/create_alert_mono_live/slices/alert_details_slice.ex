@@ -6,7 +6,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
   """
 
   alias AlertsUI.Models.{Cause, SeverityLevel}
-  alias AlertsUIWeb.CreateAlertMonoLive
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path, as: EffectHelper
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}
