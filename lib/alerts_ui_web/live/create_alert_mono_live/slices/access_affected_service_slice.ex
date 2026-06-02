@@ -17,6 +17,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,
     only: [always_validate_required: 3]
 
+  import Ecto.Changeset, only: [get_field: 2, cast: 3]
   import Phoenix.LiveView, only: [start_async: 3]
 
   use AlertsUIWeb, :html
@@ -24,6 +25,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
   defstruct [
     :facility_ids,
     :facility_search_term,
+    :single_facility_id,
     :stop_id,
     :stop_search_term
   ]
@@ -55,7 +57,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
     end
 
     def transform(_service_data, changeset, _params, _socket) do
-      changeset
+      AccessAffectedServiceSlice.ensure_facility_ids(changeset)
     end
 
     def validate(_service_data, changeset, _params, socket) do
@@ -68,6 +70,24 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
 
     def assigns(_service_data, socket, params) do
       AccessAffectedServiceSlice.async_assign_selections(socket, params)
+    end
+  end
+
+  def ensure_facility_ids(changeset) do
+    effect_name = get_field(changeset, :effect_name)
+
+    normalized_single_facility_effects =
+      Enum.map(get_single_facility_effect_names(), fn name ->
+        name |> String.split(" ") |> Enum.map(&String.downcase/1) |> Enum.join("_")
+      end)
+
+    if effect_name in normalized_single_facility_effects do
+      case get_field(changeset, :single_facility_id) do
+        nil -> changeset
+        id -> cast(changeset, %{facility_ids: [id]}, [:facility_ids])
+      end
+    else
+      changeset
     end
   end
 

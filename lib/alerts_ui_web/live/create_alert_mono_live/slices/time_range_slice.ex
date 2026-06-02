@@ -675,8 +675,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   defp utc_datetime_to_naive(datetime), do: DateTime.to_naive(datetime)
 
   def elevator_escalator_alert?(alert_data) do
-    combination = Map.get(alert_data, :combination) || Map.get(alert_data, "combination")
     effect_name = Map.get(alert_data, :effect_name) || Map.get(alert_data, "effect_name")
-    combination == :ACCESS && effect_name in ["Elevator Closure", "Escalator Closure"]
+    effect_name in ["elevator_closure", "escalator_closure"]
   end
 end
