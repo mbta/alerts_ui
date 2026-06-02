@@ -13,6 +13,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice
+  alias MBTAV3API.Facilities.Facility
+  alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
@@ -55,6 +57,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
   @future_arrival ~U[2040-01-01 13:00:00Z]
   @past_departure ~U[2024-01-01 10:00:00Z]
   @past_arrival ~U[2024-01-01 13:00:00Z]
+
+  @stop_sstat %Stop{id: "place-sstat", name: "South Station"}
+  @facility %Facility{
+    id: "814",
+    long_name: "Example Facility",
+    stop: @stop_sstat
+  }
 
   defp trip_changeset(attrs \\ %{}) do
     Ecto.Changeset.cast(%AlertData{}, Map.merge(%{trip_ids: []}, attrs), [:trip_ids])
@@ -411,6 +420,52 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
       assert render(view) =~ "Enter a valid datetime"
     end
+
+    @tag :logged_in_user
+    test "allows a 'when work order is closed' value for Elevator alerts", %{conn: conn} do
+      with_mock(FacilitiesRepo,
+        get_by_type: fn _types, _opts -> [@facility] end,
+        get: fn _id -> @facility end
+      ) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        get_to_submission_page_refactor(view, "Facility", "Elevator closure")
+        render_async(view)
+
+        # option is present in the dropdown for Elevator alerts
+        assert render(view) =~ "When work order is closed"
+
+        # selecting it doesn't cause an error
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "single_facility_id" => "Facility-3",
+            "active_period_end_specifier" => "when_work_order_is_closed"
+          }
+        })
+
+        refute render(view) =~ "Enter a valid time range end"
+      end
+    end
+
+    @tag :logged_in_user
+    test "valid creating form with future custom times shows no errors", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      get_to_submission_page_refactor(view, "Bus", "Delay")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_start_specifier" => "custom",
+          "active_period_start" => "2040-05-01T08:00:00",
+          "active_period_end_specifier" => "custom",
+          "active_period_end" => "2040-05-01T10:00:00"
+        }
+      })
+
+      refute view |> render() =~ "text-text-error"
+    end
   end
 
   describe "editing" do
@@ -516,6 +571,45 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
       refute view |> render() =~ "Effect can't start in the past"
     end
+
+    @tag :logged_in_user
+    test "editing with end before start shows inline error", %{conn: conn} do
+      create_test_alert("tr-edit-err-1",
+        duration_certainty: :KNOWN,
+        active_period_attrs: %{start: ~U[2024-05-10 14:30:54Z], end: ~U[2024-05-11 14:00:00Z]}
+      )
+
+      {:ok, view, _html} = live(conn, "/alerts/mono/edit/tr-edit-err-1")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_end_specifier" => "custom",
+          "active_period_end" => "2024-05-10T08:00:00"
+        }
+      })
+
+      assert view |> render() =~ "Effect must end after"
+    end
+
+    @tag :logged_in_user
+    test "editing with valid change shows no errors", %{conn: conn} do
+      create_test_alert("tr-edit-ok-1", duration_certainty: :UNKNOWN)
+
+      {:ok, view, _html} = live(conn, "/alerts/mono/edit/tr-edit-ok-1")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_end_specifier" => "until_further_notice"
+        }
+      })
+
+      refute view |> render() =~ "text-text-error"
+      assert view |> render() =~ "alert is manually closed"
+    end
   end
 
   describe "duplicating" do
@@ -544,6 +638,44 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       })
 
       assert view |> render() =~ "Effect can&#39;t start in the past"
+    end
+
+    @tag :logged_in_user
+    test "duplicating with end before start shows end and start-in-past errors", %{conn: conn} do
+      create_test_alert("tr-dup-err-1", duration_certainty: :UNKNOWN)
+
+      {:ok, view, _html} = live(conn, "/alerts/mono/duplicate/tr-dup-err-1")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_end_specifier" => "custom",
+          "active_period_end" => "2024-05-10T08:00:00"
+        }
+      })
+
+      assert view |> render() =~ "Effect must end after"
+      assert view |> render() =~ "Effect can&#39;t start in the past"
+    end
+
+    @tag :logged_in_user
+    test "duplicating with valid change shows no errors", %{conn: conn} do
+      create_test_alert("tr-dup-ok-1", duration_certainty: :UNKNOWN)
+
+      {:ok, view, _html} = live(conn, "/alerts/mono/duplicate/tr-dup-ok-1")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_start_specifier" => "now",
+          "active_period_end_specifier" => "until_further_notice"
+        }
+      })
+
+      refute view |> render() =~ "text-text-error"
+      assert view |> render() =~ "alert is manually closed"
     end
   end
 
