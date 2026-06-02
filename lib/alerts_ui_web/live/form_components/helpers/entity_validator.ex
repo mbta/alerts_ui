@@ -14,7 +14,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.EntityValidator do
     get_obsolete_ids(List.wrap(id), available_entities)
   end
 
-  def get_obsolete_ids(ids, %{ok?: true, result: available_entities})
+  def get_obsolete_ids(ids, %{ok?: true, result: available_entities}) do
+    get_obsolete_ids(ids, available_entities)
+  end
+
+  def get_obsolete_ids(ids, available_entities)
       when not is_nil(available_entities) and is_list(ids) do
     available_ids = Enum.map(available_entities, &get_entity_id/1)
 

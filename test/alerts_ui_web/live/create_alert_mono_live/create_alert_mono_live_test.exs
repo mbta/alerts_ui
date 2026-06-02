@@ -321,7 +321,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
 
   describe "obsolete ids modal" do
     @tag :logged_in_user
-    @tag :skip
     test "displays modal with obsolete ids", %{conn: conn} do
       with_mocks([
         {RoutesRepo, [],
@@ -331,6 +330,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
            get: fn _id, _opts -> @route end,
            all: fn _opts -> [@route] end
          ]},
+        {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [] end},
         {StopsRepo, [],
          [
            by_route: fn _route, _direction, _opts -> [@stop] end,
