@@ -45,25 +45,30 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
   end
 
   def render(assigns) do
+    alert_data = Map.merge(assigns.form.source.data, assigns.form.source.changes)
+
+    selected_routes =
+      Enum.filter(
+        Map.get(assigns.selections, :available_routes) || [],
+        &(&1.id in alert_data.route_ids)
+      )
+
     assigns =
       assign(
         assigns,
-        :alert_data,
-        Map.merge(assigns.form.source.data, assigns.form.source.changes)
+        %{alert_data: alert_data, selected_routes: selected_routes}
       )
 
-    # form changeset source has instance of alert data for review modal
-    # default selected schedules?
     ~H"""
     <div class="min-w-full flex mt-4 mb-12 border-t border-border-primary" id="submit_view">
       <PredictionSuppressionWarningModal.prediction_suppression_warning_modal
-        :if={Map.get(assigns, :check_predictions, nil)}
+        :if={@check_predictions}
         id="check_predictions_modal"
         alert_data={@alert_data}
         cancel_event_name="dismiss_prediction_warning"
         accept_event_name="review"
         target_id="#submit_view"
-        selected_routes={@selections.selected_routes}
+        selected_routes={@selected_routes}
       />
       <ReviewModal.review_modal
         :if={Map.get(assigns, :show, false)}

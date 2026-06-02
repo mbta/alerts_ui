@@ -32,10 +32,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   alias AlertsUIWeb.CreateAlertMonoLive.Step
   alias Phoenix.LiveView
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.{
-    AlertData,
-    Path
-  }
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData
+
+  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path, as: PathHelper
 
   alias AlertsUI.DBContexts.Users
 
@@ -63,6 +62,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     socket =
       socket
       |> assign(:selections, %{})
+      |> assign(:check_predictions, false)
       |> assign(:form_type, form_type_from_socket(socket))
       |> assign(:submitting?, false)
       |> assign(:submitted?, false)
@@ -95,7 +95,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   @impl true
   def handle_event("push_route_type", params, socket) do
     route_type = Map.get(params, "value")
-    path = path_with_route_type(socket.assigns, route_type)
+    path = PathHelper.path_with_route_type(socket.assigns, route_type)
 
     {:noreply, push_patch(socket, to: path)}
   end
@@ -128,7 +128,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         }
       )
 
-    {:noreply, push_patch(socket, to: path(socket.assigns))}
+    {:noreply, push_patch(socket, to: PathHelper.path(socket.assigns))}
   end
 
   @impl true
@@ -139,7 +139,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   @impl true
   def handle_event("push_effect_name", params, socket) do
     effect_name = Map.get(params, "value")
-    path = path_with_route_type_and_effect_name(socket.assigns, effect_name)
+    path = PathHelper.path_with_route_type_and_effect_name(socket.assigns, effect_name)
 
     socket =
       socket
@@ -233,7 +233,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   @impl true
   def handle_event("check_predictions", params, socket) do
-    if AlertsUIWeb.PredictionSuppressionWarningModal.show_warning?(socket.assigns) do
+    # form data with properly capitalized effect name
+    alert_data =
+      socket.assigns.form.data
+      |> Map.put(:effect_name, PathHelper.effect_from_url_name(socket.assigns.path_effect_name))
+
+    if AlertsUIWeb.PredictionSuppressionWarningModal.show_warning?(alert_data) do
       {:noreply, socket |> assign(check_predictions: true)}
     else
       handle_event("review", params, socket)
@@ -248,7 +253,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   @impl true
   def handle_event("cancel_review", _params, socket) do
     effect_name = socket.assigns.path_effect_name
-    path = path_with_route_type_and_effect_name(socket.assigns, effect_name)
+    path = PathHelper.path_with_route_type_and_effect_name(socket.assigns, effect_name)
     {:noreply, push_patch(socket, to: path)}
   end
 
@@ -350,10 +355,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
           effect_name = socket.assigns.form[:effect_name].value
 
           path_route_type =
-            socket.assigns[:path_route_type] || path_route_type_from_socket(socket)
+            socket.assigns[:path_route_type] || PathHelper.path_route_type_from_socket(socket)
 
           path =
-            path_with_route_type_and_effect_name(
+            PathHelper.path_with_route_type_and_effect_name(
               %{socket.assigns | path_route_type: path_route_type},
               effect_name
             ) <> "?review=true"
@@ -478,10 +483,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     alert_data =
       alert_data
       |> Map.merge(%{
-        effect_name:
-          AlertsUIWeb.CreateAlertMonoLive.Helpers.Path.effect_from_url_name(
-            alert_data.effect_name
-          )
+        effect_name: PathHelper.effect_from_url_name(alert_data.effect_name)
       })
 
     form_type = socket.assigns.form_type

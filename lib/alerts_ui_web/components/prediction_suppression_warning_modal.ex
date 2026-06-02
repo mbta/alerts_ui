@@ -73,7 +73,6 @@ defmodule AlertsUIWeb.PredictionSuppressionWarningModal do
 
   def predictable_alert?(%{route_type: route_type, effect_name: effect_name}) do
     mode_name = InformedEntity.route_code_mapping(route_type)
-
     GetKeyForModeEffect.get_value_of_key(:prediction_suppression_warning, mode_name, effect_name)
   end
 
