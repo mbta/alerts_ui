@@ -123,6 +123,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.DurationText do
 
   # Recurring
 
+  # These strings are all built using time values, which are not generally
+  # editable in the same way plain strings are.
+
+  # sobelow_skip ["XSS.Raw"]
   def recurring_duration_text(form) do
     start_date = form[:active_period_start_date].value
     start_time = form[:active_period_start_time].value

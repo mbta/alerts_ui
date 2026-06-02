@@ -22,7 +22,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
   alias MBTAV3API.Stops.Stop
   alias Phoenix.LiveView.AsyncResult
 
-  defp create_test_alert(alert_id, opts \\ []) do
+  defp create_test_alert(alert_id, opts) do
     ap =
       build(
         :active_period,
