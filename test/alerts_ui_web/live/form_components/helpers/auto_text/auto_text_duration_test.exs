@@ -1121,7 +1121,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
       # With pinned 2020 time: start_dt is "today" relative to that time
       result_with_pinned_time = AutoTextDuration.build_duration_text(autotext, pinned_time)
       # With live time (today ~2026): start_dt is in the past, so different branch fires
-      result_with_live_time = AutoTextDuration.build_duration_text(autotext, DateTimeHelpers.current_time())
+      result_with_live_time =
+        AutoTextDuration.build_duration_text(autotext, DateTimeHelpers.current_time())
 
       # Confirm the scenario is meaningful: pinned vs live produce different text
       refute result_with_pinned_time == result_with_live_time

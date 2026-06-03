@@ -98,7 +98,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
         details_data
         |> translated_details()
         |> Map.merge(selected)
-        |> Map.merge(%{service_types: get_field(changeset, :service_types), current_time: current_time})
+        |> Map.merge(%{
+          service_types: get_field(changeset, :service_types),
+          current_time: current_time
+        })
         |> AlertDataToAutoText.build_autotext_data()
 
       header_text =
