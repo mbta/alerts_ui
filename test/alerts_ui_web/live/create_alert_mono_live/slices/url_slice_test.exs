@@ -2,6 +2,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSliceTest do
   use ExUnit.Case, async: false
   use AlertsUIWeb.ConnCase
   import Phoenix.LiveViewTest
+  import Test.Support.Helpers
 
   describe "component" do
     @tag :logged_in_user
@@ -46,6 +47,45 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSliceTest do
       |> render_click()
 
       assert render(view) =~ ~s(Alert details)
+    end
+  end
+
+  describe "resetting" do
+    @tag :logged_in_user
+    test "changes to the form should be removed when restarting", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+
+      get_to_submission_page_refactor(view, "Bus", "Delay")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_end_specifier" => "end_of_service",
+          "active_period_end_date" => "2000-01-01"
+        }
+      })
+
+      assert render(view) =~ ~s(Effect must end after)
+
+      view
+      |> element("button", "Select Alert Type")
+      |> render_click()
+
+      refute render(view) =~ ~s(Effect must end after)
+
+      get_to_submission_page_refactor(view, "Bus", "Delay")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_end_specifier" => "end_of_service"
+        }
+      })
+
+      # It's not there because everything reset
+      refute render(view) =~ ~s(Effect must end after)
     end
   end
 end
