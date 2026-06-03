@@ -541,14 +541,14 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
     # Impacted routes selector
     route_search_term = assigns.form[:route_search_term].value
-    route_ids = assigns.form[:route_ids].value || []
+    _route_ids = assigns.form[:route_ids].value || []
 
     route_id_options =
       SelectFormatter.formatted_select_options(%SelectFormatter{
         options: Map.get(assigns.available_routes, :result, []) || [],
         search_term: route_search_term,
         route_type: assigns.route_type,
-        values_to_keep: route_ids,
+        values_to_keep: [],
         option_prefix: "route-selector"
       })
 
