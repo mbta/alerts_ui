@@ -1474,7 +1474,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         |> element("#edit-button-345")
         |> render_click()
 
-        assert_redirect(view, "/alerts/edit?alert_id=345")
+        assert_redirect(view, "/alerts/mono/edit/345")
       end
     end
 
@@ -1503,7 +1503,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         |> element("#duplicate-button-345")
         |> render_click()
 
-        assert_redirect(view, "/alerts/duplicate?alert_id=345")
+        assert_redirect(view, "/alerts/mono/duplicate/345")
       end
     end
   end
