@@ -35,7 +35,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       build(:alert_map, %{
         alert_id: alert_id,
         active_period: [Map.from_struct(ap)],
-        active_period_start: ~U[2024-05-10 14:30:54Z],
+        active_period_start: ap.start,
+        active_period_end: ap.end,
         duration_certainty: Keyword.get(opts, :duration_certainty, :UNKNOWN),
         effect: Keyword.get(opts, :effect, :OTHER_EFFECT),
         effect_detail: Keyword.get(opts, :effect_detail, "DELAY"),
@@ -470,7 +471,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
   describe "editing" do
     @tag :logged_in_user
-    test "editing keeps correct end time specifier when there is no end time", %{conn: conn} do
+    test "keeps correct end time specifier when there is no end time", %{conn: conn} do
       create_test_alert("tr-edit-1", duration_certainty: :UNKNOWN)
 
       {:ok, view, _html} = live(conn, "/alerts/mono/edit/tr-edit-1")
@@ -480,7 +481,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     end
 
     @tag :logged_in_user
-    test "editing custom fields to start/end of service correctly validates", %{conn: conn} do
+    test "custom fields to start/end of service correctly validates", %{conn: conn} do
       create_test_alert("tr-edit-2",
         duration_certainty: :KNOWN,
         active_period_attrs: %{start: ~U[2040-04-29 10:54:00Z], end: ~U[2040-04-30 15:59:00Z]}
@@ -500,7 +501,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     end
 
     @tag :logged_in_user
-    test "editing saves updated end time to database", %{conn: conn} do
+    test "saves updated end time to database", %{conn: conn} do
       bus_route = %Route{id: "22", type: 3, name: "Route 22"}
 
       create_test_alert("tr-edit-db-1",
@@ -556,7 +557,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     end
 
     @tag :logged_in_user
-    test "editing does not check start time", %{conn: conn} do
+    test "does not check start time", %{conn: conn} do
       create_test_alert("tr-edit-3", duration_certainty: :UNKNOWN)
 
       {:ok, view, _html} = live(conn, "/alerts/mono/edit/tr-edit-3")
@@ -609,6 +610,51 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
       refute view |> render() =~ "text-text-error"
       assert view |> render() =~ "alert is manually closed"
+    end
+
+    @tag :logged_in_user
+    test "custom start and end loads date picker", %{conn: conn} do
+      create_test_alert("tr-edit-4",
+        duration_certainty: :KNOWN,
+        active_period_attrs: %{start: ~U[2040-04-29 10:54:00Z], end: ~U[2040-04-30 15:59:00Z]}
+      )
+
+      {:ok, view, _html} = live(conn, "/alerts/mono/edit/tr-edit-4")
+      html = render(view)
+
+      # specifier for start and end should be 'Custom'
+      {:ok, document} = Floki.parse_document(html)
+
+      selected_start =
+        Floki.find(document, "select#alert_data_active_period_start_specifier option[selected]")
+        |> Floki.attribute("value")
+
+      assert selected_start === ["custom"]
+
+      selected_end =
+        Floki.find(document, "select#alert_data_active_period_end_specifier option[selected]")
+        |> Floki.attribute("value")
+
+      assert selected_end === ["custom"]
+
+      # the effect start and end should not be hidden
+      assert has_element?(view, "#alert_data_active_period_start-root-element")
+      refute has_element?(view, "#alert_data_active_period_start-root-element.hidden")
+      assert has_element?(view, "#alert_data_active_period_end-root-element")
+      refute has_element?(view, "#alert_data_active_period_end-root-element.hidden")
+
+      # and they should have the right values
+      start_date =
+        Floki.find(document, "input#alert_data_active_period_start")
+        |> Floki.attribute("value")
+
+      assert start_date === ["2040-04-29T06:54"]
+
+      end_date =
+        Floki.find(document, "input#alert_data_active_period_end")
+        |> Floki.attribute("value")
+
+      assert end_date === ["2040-04-30T11:59"]
     end
   end
 
