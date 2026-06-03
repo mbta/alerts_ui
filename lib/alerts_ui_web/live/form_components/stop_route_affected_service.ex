@@ -616,7 +616,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         <.filtered_select
           label="Impacted routes"
           field={@form[:route_ids]}
-          filter_field={@form[:routes_search_term]}
+          filter_field={@form[:route_search_term]}
           loading={Map.get(@available_routes, :loading, true)}
           no_results={Enum.empty?(@route_id_options) && !disable_routes_input?(assigns)}
           disabled={disable_routes_input?(assigns)}
