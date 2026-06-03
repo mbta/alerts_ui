@@ -8,6 +8,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
 
   import Ecto.Changeset
 
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Time, only: [localize: 1]
+
   def validate_cast_datetimes(changeset, params) do
     alert_params = Map.get(params, "alert_data", %{})
 
@@ -94,7 +96,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
 
     cond do
       timing in [:"one-time", "one-time"] ->
-        active_period_start = get_field(changeset, :active_period_start)
+        active_period_start = case get_field(changeset, :active_period_start) do
+          nil -> nil
+          utc_time -> localize(utc_time)
+        end
 
         if active_period_start do
           validate_change(changeset, :active_period_end, fn :active_period_end,
@@ -152,7 +157,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
           changeset
           |> validate_change(:active_period_start, fn :active_period_start, active_period_start ->
             if specifier == :custom do
-              time_in_past? = NaiveDateTime.diff(now, active_period_start, :minute) > 1
+              time_in_past? = NaiveDateTime.diff(now, localize(active_period_start), :minute) > 1
               start_error(time_in_past?, :"one-time", specifier)
             else
               []
@@ -181,7 +186,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
           start_time = get_field(changeset, :active_period_start_time)
 
           if start_date && start_time do
-            naive_start = NaiveDateTime.new!(start_date, start_time)
+            naive_start = NaiveDateTime.new!(start_date, start_time) |> localize()
 
             validate_change(
               changeset,
@@ -277,9 +282,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
 
         if start_date && start_time do
           # TODO: database should store UTC, front end should use local time
-          NaiveDateTime.new!(start_date, start_time)
-          |> DateTime.from_naive!("America/New_York")
-          |> DateTime.to_naive()
+          NaiveDateTime.new!(start_date, start_time) |> localize()
         else
           nil
         end

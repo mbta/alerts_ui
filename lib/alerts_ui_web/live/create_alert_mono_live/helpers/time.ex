@@ -7,6 +7,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Time do
     DateTime.now!("America/New_York") |> DateTime.to_date()
   end
 
+  def localize(%NaiveDateTime{} = dt) do
+    dt
+    |> DateTime.from_naive!("America/New_York")
+    |> DateTime.to_naive()
+  end
+
   def replace_date(d, %DateTime{} = dt) do
     DateTime.new!(d, DateTime.to_time(dt), dt.time_zone)
   end

@@ -195,7 +195,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             date =
               case modal_date do
                 "default" ->
-                  DateTime.utc_now() |> Calendar.strftime("%Y-%m-%d")
+                  DateTime.now("America/New_York") |> Calendar.strftime("%Y-%m-%d")
 
                 date ->
                   date
