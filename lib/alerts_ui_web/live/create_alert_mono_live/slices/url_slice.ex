@@ -76,7 +76,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
         end
 
       socket =
-        if path_route_type == nil || path_effect_name == nil do
+        if alert_id == nil && (path_route_type == nil || path_effect_name == nil) do
           socket
           |> assign(:halt_flushing, true)
           |> CreateAlertMonoLive.start_socket(params)
