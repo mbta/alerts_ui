@@ -14,6 +14,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.EntityValidator do
     get_obsolete_ids(List.wrap(id), available_entities)
   end
 
+  def get_obsolete_ids(_ids, %{result: nil}), do: nil
+
   def get_obsolete_ids(ids, %{ok?: true, result: available_entities}) do
     get_obsolete_ids(ids, available_entities)
   end

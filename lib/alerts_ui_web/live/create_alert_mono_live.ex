@@ -307,10 +307,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
           new_selections |> Map.from_struct() |> filter_stops_from_facility_result()
 
         ids =
-          EntityValidator.get_obsolete_ids(
-            form[field].value,
-            new_selections[mapping[field]]
-          ) || []
+          (EntityValidator.get_obsolete_ids(
+             form[field].value,
+             new_selections[mapping[field]]
+           ) || [])
+          |> Enum.reject(&is_nil/1)
 
         {field, ids}
       end)
@@ -327,26 +328,34 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         required_fields
       )
 
-    # new_form_data = Map.merge(form.data, ids_with_obsolete_entities_removed)
-    # new_form = Map.put(form, :data, new_form_data)
+    # TEST IT OVER IN ALERT DATA
 
     pending_route_ids = Map.get(new_selections, :pending_auto_select_route_ids)
 
     # Always override route_ids — no guard for pre-existing selections; see design spec.
     socket =
       if is_nil(pending_route_ids) do
-        assign(socket, :selections, new_selections)
-        |> sync_socket(%{alert_data: ids_with_obsolete_entities_removed})
+        new_form_data = Map.merge(form.data, ids_with_obsolete_entities_removed)
+        new_form = Map.put(form, :data, new_form_data)
+        assign(socket, %{selections: new_selections, form: new_form, obsolete_ids: obsolete_ids})
       else
-         pending_route_ids = pending_route_ids -- obsolete_ids.route_ids
-         ids_with_obsolete_entities_removed = Map.put(ids_with_obsolete_entities_removed, :route_ids, pending_route_ids)
+        pending_route_ids = pending_route_ids -- obsolete_ids.route_ids
+
+        ids_with_obsolete_entities_removed =
+          Map.put(ids_with_obsolete_entities_removed, :route_ids, pending_route_ids)
+
+        new_form_data = Map.merge(form.data, ids_with_obsolete_entities_removed)
+        new_form = Map.put(form, :data, new_form_data)
+
         socket
         |> assign(:selections, %{new_selections | pending_auto_select_route_ids: nil})
-        |> sync_socket(%{alert_data: ids_with_obsolete_entities_removed})
+        |> assign(%{form: new_form, obsolete_ids: obsolete_ids})
+        |> sync_socket(%{"alert_data" => %{"route_ids" => pending_route_ids}})
       end
 
-    {:noreply,
-     assign(socket, %{ obsolete_ids: obsolete_ids})}
+    {:noreply, socket}
+    # {:noreply,
+    #  assign(socket, %{selections: new_selections, form: new_form, obsolete_ids: obsolete_ids})}
   end
 
   @impl true
