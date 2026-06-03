@@ -243,17 +243,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
     })
   end
 
-  defp route_id_options(
-         available_routes,
-         route_ids,
-         route_search_term,
-         route_type
-       ) do
+  def route_id_options(
+        available_routes,
+        _route_ids,
+        route_search_term,
+        route_type
+      ) do
     SelectFormatter.formatted_select_options(%SelectFormatter{
       options: available_routes,
       search_term: route_search_term,
       route_type: route_type,
-      values_to_keep: route_ids,
+      values_to_keep: [],
       option_prefix: "route-selector"
     })
   end
