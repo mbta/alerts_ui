@@ -97,10 +97,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
 
     cond do
       timing in [:"one-time", "one-time"] ->
-        active_period_start = case get_field(changeset, :active_period_start) do
-          nil -> nil
-          utc_time -> localize(utc_time)
-        end
+        active_period_start =
+          case get_field(changeset, :active_period_start) do
+            nil -> nil
+            utc_time -> localize(utc_time)
+          end
 
         if active_period_start do
           validate_change(changeset, :active_period_end, fn :active_period_end,
