@@ -52,7 +52,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     end
 
     def extract(slice, %AlertData{} = _alert, _params) do
-      now = NaiveDateTime.local_now()
+      now = DateTimeHelpers.current_time()
 
       slice
       |> update_times_if_duplicating(slice.form_type, slice.alert_timing, now)
@@ -197,7 +197,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   end
 
   def ensure_start_date_values_for_specifier(changeset, :now, _, _) do
-    now = NaiveDateTime.local_now()
+    now = current_time()
 
     changeset
     |> force_change(:active_period_start, now)
@@ -236,7 +236,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   end
 
   def ensure_end_date_values_for_specifier(changeset, :later_today, _, _) do
-    end_of_service = ActivePeriod.end_of_service_datetime_naive(NaiveDateTime.local_now())
+    end_of_service = ActivePeriod.end_of_service_datetime_naive(current_time())
 
     changeset
     |> force_change(:active_period_end, end_of_service)
@@ -244,7 +244,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   end
 
   def ensure_end_date_values_for_specifier(changeset, :until_further_notice, _, _) do
-    now = NaiveDateTime.local_now()
+    now = current_time()
 
     changeset
     |> force_change(:active_period_end, DTHelpers.replace_time(now, ~T[23:59:59]))
@@ -252,7 +252,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   end
 
   def ensure_end_date_values_for_specifier(changeset, :when_work_order_is_closed, _, _) do
-    now = NaiveDateTime.local_now()
+    now = current_time()
 
     changeset
     |> force_change(:active_period_end, DTHelpers.replace_time(now, ~T[23:59:59]))
@@ -290,7 +290,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   end
 
   def ensure_start_time_values_for_specifier(changeset, :start_of_service, _) do
-    now = NaiveDateTime.local_now()
+    now = current_time()
     change(changeset, %{active_period_start_time: NaiveDateTime.to_time(now)})
   end
 
@@ -318,7 +318,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   def set_start_end_from_trip_selection(changeset, "trip_ids", _, _, :editing), do: changeset
 
   def set_start_end_from_trip_selection(changeset, "trip_ids", _, [], _form_type) do
-    now = NaiveDateTime.local_now()
+    now = current_time()
     end_of_service = now |> ActivePeriod.end_of_service_datetime_naive()
 
     changeset
@@ -340,7 +340,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       when loading != true do
     available_schedules = Map.get(selections, :available_schedules, [])
     selected_schedules = Enum.filter(available_schedules, &(&1.trip.id in trip_ids))
-    now = NaiveDateTime.local_now()
+    now = current_time()
     departure = get_trip_departure_time(selected_schedules)
     arrival = get_trip_arrival_time(nil, selected_schedules)
 
@@ -403,7 +403,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
   def get_trip_arrival_time_for_validate(_, _), do: nil
 
-  defp current_time, do: NaiveDateTime.local_now()
+  defp current_time, do: DateTimeHelpers.current_time()
 
   defp alert_timing_values,
     do: [
@@ -672,7 +672,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   defp fv(form, field), do: Ecto.Changeset.get_field(form.source, field)
 
   defp utc_datetime_to_naive(nil), do: nil
-  defp utc_datetime_to_naive(datetime), do: DateTime.to_naive(datetime)
+
+  defp utc_datetime_to_naive(datetime),
+    do: datetime |> DateTime.shift_zone!("America/New_York") |> DateTime.to_naive()
 
   def elevator_escalator_alert?(alert_data) do
     combination = Map.get(alert_data, :combination) || Map.get(alert_data, "combination")

@@ -88,6 +88,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     }
   end
 
+  defp to_eastern_naive(utc_datetime),
+    do: utc_datetime |> DateTime.shift_zone!("America/New_York") |> DateTime.to_naive()
+
   describe "component" do
     @tag :logged_in_user
     test "renders", %{conn: conn} do
@@ -569,11 +572,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       assert Ecto.Changeset.get_field(result, :active_period_start_specifier) == :custom
 
       assert Ecto.Changeset.get_field(result, :active_period_start) ==
-               DateTime.to_naive(@future_departure)
+               to_eastern_naive(@future_departure)
 
       assert Ecto.Changeset.get_field(result, :active_period_end_specifier) == :custom
 
-      expected_end = DateTime.to_naive(@future_arrival) |> NaiveDateTime.add(1, :hour)
+      expected_end = to_eastern_naive(@future_arrival) |> NaiveDateTime.add(1, :hour)
       assert Ecto.Changeset.get_field(result, :active_period_end) == expected_end
     end
 
@@ -601,7 +604,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       assert Ecto.Changeset.get_field(result, :active_period_start_specifier) == :now
       assert Ecto.Changeset.get_field(result, :active_period_end_specifier) == :custom
 
-      expected_end = DateTime.to_naive(@past_arrival) |> NaiveDateTime.add(1, :hour)
+      expected_end = to_eastern_naive(@past_arrival) |> NaiveDateTime.add(1, :hour)
       assert Ecto.Changeset.get_field(result, :active_period_end) == expected_end
     end
 
@@ -615,13 +618,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         time_of_last_trip_arrival: @future_arrival
       }
 
-      late_start = DateTime.to_naive(@future_arrival) |> NaiveDateTime.add(61, :minute)
+      late_start = to_eastern_naive(@future_arrival) |> NaiveDateTime.add(61, :minute)
       changeset = trip_validate_changeset(["trip-595"], late_start)
       socket = socket_with_trip_selections([schedule])
 
       result = Slice.validate(%TimeRangeSlice{}, changeset, %{}, socket)
 
-      deadline = DateTime.to_naive(@future_arrival) |> NaiveDateTime.add(1, :hour)
+      deadline = to_eastern_naive(@future_arrival) |> NaiveDateTime.add(1, :hour)
 
       expected_msg =
         "Effect must start before #{Calendar.strftime(deadline, "%m/%d/%Y, %I:%M %p")}"
@@ -639,7 +642,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         time_of_last_trip_arrival: @future_arrival
       }
 
-      late_start = DateTime.to_naive(@future_arrival) |> NaiveDateTime.add(61, :minute)
+      late_start = to_eastern_naive(@future_arrival) |> NaiveDateTime.add(61, :minute)
 
       changeset =
         Ecto.Changeset.cast(
@@ -665,7 +668,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         time_of_last_trip_arrival: @future_arrival
       }
 
-      late_start = DateTime.to_naive(@future_arrival) |> NaiveDateTime.add(61, :minute)
+      late_start = to_eastern_naive(@future_arrival) |> NaiveDateTime.add(61, :minute)
 
       changeset =
         Ecto.Changeset.cast(
@@ -683,7 +686,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
       result = Slice.validate(%TimeRangeSlice{}, changeset, %{}, socket)
 
-      deadline = DateTime.to_naive(@future_arrival) |> NaiveDateTime.add(1, :hour)
+      deadline = to_eastern_naive(@future_arrival) |> NaiveDateTime.add(1, :hour)
 
       expected_msg =
         "Effect must start before #{Calendar.strftime(deadline, "%m/%d/%Y, %I:%M %p")}"
@@ -702,7 +705,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       }
 
       # exactly 60 minutes after arrival — the diff is NOT > 60, so no error
-      on_time_start = DateTime.to_naive(@future_arrival) |> NaiveDateTime.add(60, :minute)
+      on_time_start = to_eastern_naive(@future_arrival) |> NaiveDateTime.add(60, :minute)
       changeset = trip_validate_changeset(["trip-595"], on_time_start)
       socket = socket_with_trip_selections([schedule])
 
@@ -881,8 +884,71 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
       assert Ecto.Changeset.get_field(result, :active_period_start_specifier) == :now
       assert Ecto.Changeset.get_field(result, :active_period_end_specifier) == :custom
-      expected_end = DateTime.to_naive(@past_arrival) |> NaiveDateTime.add(1, :hour)
+      expected_end = to_eastern_naive(@past_arrival) |> NaiveDateTime.add(1, :hour)
       assert Ecto.Changeset.get_field(result, :active_period_end) == expected_end
+    end
+
+    test "get_trip_arrival_time_for_validate/2 converts UTC to Eastern Standard Time (UTC-5 in January)" do
+      # 19:00 UTC → 14:00 EST
+      arrival_utc = ~U[2024-01-15 19:00:00Z]
+
+      schedule = %EnhancedSchedule{
+        route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+        trip: %Trip{id: "trip-tz-1", name: "1", direction_id: 0},
+        stop: %Stop{id: "place-sstat", name: "South Station"},
+        arrival_time: nil,
+        departure_time: arrival_utc,
+        time_of_last_trip_arrival: arrival_utc
+      }
+
+      result =
+        TimeRangeSlice.get_trip_arrival_time_for_validate(
+          ["trip-tz-1"],
+          %AsyncResult{
+            ok?: true,
+            result: %AffectedServiceSlice.Selections{available_schedules: [schedule]}
+          }
+        )
+
+      assert result == ~N[2024-01-15 14:00:00]
+    end
+
+    test "get_trip_arrival_time_for_validate/2 converts UTC to Eastern Daylight Time (UTC-4 in July)" do
+      # 19:00 UTC → 15:00 EDT
+      arrival_utc = ~U[2024-07-15 19:00:00Z]
+
+      schedule = %EnhancedSchedule{
+        route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+        trip: %Trip{id: "trip-tz-2", name: "2", direction_id: 0},
+        stop: %Stop{id: "place-sstat", name: "South Station"},
+        arrival_time: nil,
+        departure_time: arrival_utc,
+        time_of_last_trip_arrival: arrival_utc
+      }
+
+      result =
+        TimeRangeSlice.get_trip_arrival_time_for_validate(
+          ["trip-tz-2"],
+          %AsyncResult{
+            ok?: true,
+            result: %AffectedServiceSlice.Selections{available_schedules: [schedule]}
+          }
+        )
+
+      assert result == ~N[2024-07-15 15:00:00]
+    end
+
+    test "get_trip_arrival_time_for_validate/2 returns nil when no schedules match" do
+      result =
+        TimeRangeSlice.get_trip_arrival_time_for_validate(
+          ["trip-unknown"],
+          %AsyncResult{
+            ok?: true,
+            result: %AffectedServiceSlice.Selections{available_schedules: []}
+          }
+        )
+
+      assert is_nil(result)
     end
 
     test "start and end time not updated if trip changes and departure before current time but form is in editing mode" do

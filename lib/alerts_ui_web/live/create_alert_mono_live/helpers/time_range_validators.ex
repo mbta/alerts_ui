@@ -9,6 +9,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
   import Ecto.Changeset
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Time, only: [localize: 1]
+  alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
 
   def validate_cast_datetimes(changeset, params) do
     alert_params = Map.get(params, "alert_data", %{})
@@ -148,7 +149,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
     if editing do
       changeset
     else
-      now = eastern_now()
+      now = DateTimeHelpers.current_time()
       specifier = get_field(changeset, :active_period_start_specifier)
       timing = get_field(changeset, :alert_timing)
 
@@ -271,7 +272,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
   end
 
   def validate_notification(changeset) do
-    current_time = eastern_now()
+    current_time = DateTimeHelpers.current_time()
 
     naive_start =
       if get_field(changeset, :alert_timing) in [:"one-time", "one-time"] do

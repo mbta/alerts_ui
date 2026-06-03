@@ -6,6 +6,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
   alias AlertsUI.Models.ActivePeriod
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Time, as: DTHelpers
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
   alias Phoenix.HTML.Form
 
   use AlertsUIWeb, :html
@@ -40,7 +41,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
     end
 
     def extract(slice, %AlertData{} = _alert, _params) do
-      now = NaiveDateTime.local_now()
+      now = DateTimeHelpers.current_time()
 
       slice
       |> update_times_if_duplicating(slice.form_type, now)
@@ -101,7 +102,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
   end
 
   def ensure_notification_start_for_specifier(changeset, :now, _, _) do
-    now = NaiveDateTime.local_now()
+    now = DateTimeHelpers.current_time()
 
     changeset
     |> force_change(:notification_period_start, now)
@@ -135,7 +136,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
 
   def extract_notification_end_for_specifier(changeset, :later_today, _, _) do
     now =
-      NaiveDateTime.local_now()
+      DateTimeHelpers.current_time()
       |> ActivePeriod.end_of_service_datetime_naive()
 
     changeset
@@ -155,7 +156,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
   end
 
   def extract_notification_end_for_specifier(changeset, :until_further_notice, _, _) do
-    now = NaiveDateTime.local_now()
+    now = DateTimeHelpers.current_time()
 
     changeset
     |> force_change(:notification_period_end, DTHelpers.replace_time(now, ~T[23:59:59]))
@@ -191,7 +192,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
           type="date"
           label=""
           field={@form[:notification_period_start_date]}
-          min={NaiveDateTime.local_now() |> naive_datetime_to_iso_date}
+          min={DateTimeHelpers.current_time() |> naive_datetime_to_iso_date}
           max={
             [naive_datetime_to_iso_date(@form[:active_period_start].value), "9999-12-31"]
             |> Enum.max()
