@@ -322,7 +322,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
         <.filtered_select
           label="Impacted routes"
           field={@form[:route_ids]}
-          filter_field={@form[:routes_search_term]}
+          filter_field={@form[:route_search_term]}
           loading={Map.get(@selections, :loading, true)}
           no_results={
             Enum.empty?(@selections.route_id_options) && !Enum.empty?(@form[:stop_ids].value || []) &&
