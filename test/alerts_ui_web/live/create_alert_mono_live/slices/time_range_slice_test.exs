@@ -996,4 +996,78 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       assert Ecto.Changeset.get_field(result, :active_period_end) == ~N[2040-01-01 11:54:00]
     end
   end
+
+  describe "ensure_start_date_values/2 with :now specifier" do
+    test "does not advance active_period_start when target is unrelated (e.g. header_sync_toggle)" do
+      existing_dt = ~N[2024-01-15 10:30:00]
+
+      changeset =
+        Ecto.Changeset.cast(
+          %AlertData{},
+          %{
+            active_period_start_specifier: :now,
+            active_period_start: existing_dt,
+            active_period_start_date: ~D[2024-01-15]
+          },
+          [:active_period_start_specifier, :active_period_start, :active_period_start_date]
+        )
+
+      result = TimeRangeSlice.ensure_start_date_values(changeset, "header_sync_toggle")
+
+      assert Ecto.Changeset.get_field(result, :active_period_start) == existing_dt
+    end
+
+    test "updates active_period_start when target is active_period_start_specifier" do
+      existing_dt = ~N[2020-01-01 00:00:00]
+
+      changeset =
+        Ecto.Changeset.cast(
+          %AlertData{},
+          %{
+            active_period_start_specifier: :now,
+            active_period_start: existing_dt,
+            active_period_start_date: ~D[2020-01-01]
+          },
+          [:active_period_start_specifier, :active_period_start, :active_period_start_date]
+        )
+
+      result = TimeRangeSlice.ensure_start_date_values(changeset, "active_period_start_specifier")
+
+      refute Ecto.Changeset.get_field(result, :active_period_start) == existing_dt
+    end
+
+    test "updates active_period_start when target is nil (initial load)" do
+      changeset =
+        Ecto.Changeset.cast(
+          %AlertData{},
+          %{active_period_start_specifier: :now},
+          [:active_period_start_specifier]
+        )
+
+      result = TimeRangeSlice.ensure_start_date_values(changeset, nil)
+
+      assert %NaiveDateTime{} = Ecto.Changeset.get_field(result, :active_period_start)
+    end
+  end
+
+  describe "ensure_end_date_values/2 with :later_today specifier" do
+    test "does not recompute active_period_end when target is unrelated" do
+      existing_end = ~N[2024-06-03 02:30:00]
+
+      changeset =
+        Ecto.Changeset.cast(
+          %AlertData{},
+          %{
+            active_period_end_specifier: :later_today,
+            active_period_end: existing_end,
+            active_period_end_date: ~D[2024-06-03]
+          },
+          [:active_period_end_specifier, :active_period_end, :active_period_end_date]
+        )
+
+      result = TimeRangeSlice.ensure_end_date_values(changeset, "header_sync_toggle")
+
+      assert Ecto.Changeset.get_field(result, :active_period_end) == existing_end
+    end
+  end
 end
