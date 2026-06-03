@@ -374,6 +374,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         rendered_view = render_async(view, 1000)
         assert rendered_view =~ "spurious route [sp_rt]"
         assert rendered_view =~ "spurious stop [obsolete_stop]"
+        open_review_modal(view)
+        assert view |> element("#review-modal-container") |> render_async() =~ "Framingham/Worcester"
       end
     end
   end

@@ -72,6 +72,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       |> assign(:check_predictions, false)
       |> assign(:form_type, form_type_from_socket(socket))
       |> assign(:obsolete_id_text, [])
+      |> assign(:obsolete_ids, %{})
       |> assign(:submitting?, false)
       |> assign(:submitted?, false)
       |> assign(:image_preview_size, nil)
@@ -286,6 +287,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   @impl true
   def handle_async(:fetch_selections, {:ok, new_selections}, socket) do
+    IO.inspect(Map.keys(socket.assigns))
     form = socket.assigns.form
 
     required_fields =
@@ -300,6 +302,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       stop_ids: :available_stops,
       facility_ids: :available_facilities
     }
+
 
     obsolete_ids =
       Enum.map(required_fields, fn field ->
@@ -328,6 +331,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         required_fields
       )
 
+       new_form_data = Map.merge(form.data, ids_with_obsolete_entities_removed)
+        new_form = Map.put(form, :data, new_form_data)
+        socket =  assign(socket, %{form: new_form, obsolete_ids: obsolete_ids})
+
     # TEST IT OVER IN ALERT DATA
 
     pending_route_ids = Map.get(new_selections, :pending_auto_select_route_ids)
@@ -335,27 +342,23 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     # Always override route_ids — no guard for pre-existing selections; see design spec.
     socket =
       if is_nil(pending_route_ids) do
-        new_form_data = Map.merge(form.data, ids_with_obsolete_entities_removed)
-        new_form = Map.put(form, :data, new_form_data)
-        assign(socket, %{selections: new_selections, form: new_form, obsolete_ids: obsolete_ids})
+
+         assign(socket, %{selections: new_selections})
+
       else
         pending_route_ids = pending_route_ids -- obsolete_ids.route_ids
 
-        ids_with_obsolete_entities_removed =
-          Map.put(ids_with_obsolete_entities_removed, :route_ids, pending_route_ids)
+        # ids_with_obsolete_entities_removed =
+        #   Map.put(ids_with_obsolete_entities_removed, :route_ids, pending_route_ids)
 
-        new_form_data = Map.merge(form.data, ids_with_obsolete_entities_removed)
-        new_form = Map.put(form, :data, new_form_data)
+
 
         socket
         |> assign(:selections, %{new_selections | pending_auto_select_route_ids: nil})
-        |> assign(%{form: new_form, obsolete_ids: obsolete_ids})
         |> sync_socket(%{"alert_data" => %{"route_ids" => pending_route_ids}})
       end
 
     {:noreply, socket}
-    # {:noreply,
-    #  assign(socket, %{selections: new_selections, form: new_form, obsolete_ids: obsolete_ids})}
   end
 
   @impl true
@@ -526,7 +529,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         end
 
       {:error, socket} ->
+
         if assigns.submitting? do
+
           # errors =
           #  result
           #  |> Alerts.parse_changeset_errors()
