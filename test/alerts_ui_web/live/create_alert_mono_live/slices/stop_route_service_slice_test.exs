@@ -57,6 +57,19 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
   # Subway routes (type 1) for "Station closure" → combination :SR
   @route %Route{sort_order: 1, id: "Blue", name: "Blue Line", type: 1}
   @route_two %Route{sort_order: 2, id: "Red", name: "Red Line", type: 1}
+
+  describe "route_id_options/4 filtering" do
+    test "filters by search_term even when all route ids are in the selected list" do
+      routes = [@route, @route_two]
+
+      options = StopRouteServiceSlice.route_id_options(routes, ["Blue", "Red"], "Blue", 1)
+      values = Enum.map(options, &Keyword.get(&1, :value))
+
+      assert "Blue" in values
+      # Before fix: "Red" is retained because values_to_keep includes all route ids
+      refute "Red" in values
+    end
+  end
   @shuttle_route %Route{
     sort_order: 99,
     id: "Shuttle-BlueLine",
@@ -487,6 +500,98 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
                  document,
                  "select#alert_data_modal_route_id > option[value=\"Blue\"]"
                )
+      end
+    end
+
+    @tag :logged_in_user
+    test "route search filters impacted route options after stop selection", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@route, @route_two] end,
+           by_stop: fn _ -> [@route, @route_two] end,
+           by_stop: fn _, _ -> [@route, @route_two] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _, _ -> [@stop] end,
+           by_route: fn _, _, _ -> [@stop] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        get_to_submission_page_refactor(view, "Subway", "Station closure")
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "stop_ids"],
+          "alert_data" => %{"stop_ids" => ["place-aqucl"]}
+        })
+
+        render_async(view)
+
+        {:ok, document} = view |> render() |> Floki.parse_document()
+        assert document_has_element?(document, "select#alert_data_route_ids > option[value=\"Blue\"]")
+        assert document_has_element?(document, "select#alert_data_route_ids > option[value=\"Red\"]")
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_search_term"],
+          "alert_data" => %{"route_search_term" => "Blue"}
+        })
+
+        render_async(view)
+
+        {:ok, document} = view |> render() |> Floki.parse_document()
+        assert document_has_element?(document, "select#alert_data_route_ids > option[value=\"Blue\"]")
+        # Before fix: Red still visible (H1 prevents update trigger; H2 keeps it via values_to_keep)
+        refute document_has_element?(document, "select#alert_data_route_ids > option[value=\"Red\"]")
+      end
+    end
+
+    @tag :logged_in_user
+    test "route search can clear", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@route, @route_two] end,
+           by_stop: fn _ -> [@route, @route_two] end,
+           by_stop: fn _, _ -> [@route, @route_two] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _, _ -> [@stop] end,
+           by_route: fn _, _, _ -> [@stop] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        get_to_submission_page_refactor(view, "Subway", "Station closure")
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "stop_ids"],
+          "alert_data" => %{"stop_ids" => ["place-aqucl"]}
+        })
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_search_term"],
+          "alert_data" => %{"route_search_term" => "Blue"}
+        })
+
+        render_async(view)
+
+        render_click(view, "reset_search_filter", %{"name" => "alert_data[route_search_term]"})
+        render_async(view)
+
+        {:ok, document} = view |> render() |> Floki.parse_document()
+        assert document_has_element?(document, "select#alert_data_route_ids > option[value=\"Blue\"]")
+        assert document_has_element?(document, "select#alert_data_route_ids > option[value=\"Red\"]")
       end
     end
 
