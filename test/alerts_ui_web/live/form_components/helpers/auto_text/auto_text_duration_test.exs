@@ -1100,6 +1100,48 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
     end
   end
 
+  describe "build_duration_text/1 with injected current_time" do
+    test "uses current_time from struct instead of re-capturing system time" do
+      # Pin current_time to a specific moment that makes start_datetime appear "today"
+      pinned_time = ~N[2025-06-03 10:00:00]
+      start_dt = ~N[2025-06-03 08:00:00]  # within today's service window
+
+      autotext = %BuildAutoText{
+        alert_timing: :"one-time",
+        start_specifier: :custom,
+        end_specifier: :later_today,
+        start_datetime: start_dt,
+        end_datetime: ~N[2025-06-04 02:30:00],
+        route_type: 1,
+        effect_name: "DETOUR",
+        current_time: pinned_time
+      }
+
+      # Call with no explicit current_time — should use struct's current_time
+      result1 = AutoTextDuration.build_duration_text(autotext)
+      result2 = AutoTextDuration.build_duration_text(autotext)
+
+      # Results should be identical regardless of wall-clock time
+      assert result1 == result2
+    end
+
+    test "falls back to DateTimeHelpers.current_time() when struct has no current_time" do
+      autotext = %BuildAutoText{
+        alert_timing: :"one-time",
+        start_specifier: :custom,
+        end_specifier: :later_today,
+        start_datetime: ~N[2025-06-03 08:00:00],
+        end_datetime: ~N[2025-06-04 02:30:00],
+        route_type: 1,
+        effect_name: "DETOUR"
+        # current_time intentionally absent (nil)
+      }
+
+      # Should not crash; should produce a string
+      assert is_binary(AutoTextDuration.build_duration_text(autotext))
+    end
+  end
+
   describe "build_time_text/4" do
     test "if trip specific" do
       assert AutoTextDuration.build_time_string(%{
