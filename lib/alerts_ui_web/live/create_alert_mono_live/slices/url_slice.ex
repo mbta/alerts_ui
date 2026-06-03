@@ -34,6 +34,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
 
   defimpl Slice, for: __MODULE__ do
     import Ecto.Changeset, only: [get_field: 2, cast: 3]
+    alias AlertsUIWeb.CreateAlertMonoLive
     alias AlertsUIWeb.CreateAlertMonoLive.AlertData
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice
 
@@ -50,6 +51,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
     end
 
     def validate(_url_data, changeset, _params, _socket), do: changeset
+
+    def assigns(_, %{assigns: %{halt_flushing: true}} = socket, _) do
+      assign(socket, :halt_flushing, false)
+    end
 
     def assigns(_url_data, socket, params) do
       alert_id =
@@ -68,6 +73,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
         case Map.fetch(params, "effect_name") do
           {:ok, value} -> value
           :error -> socket.assigns[:path_effect_name]
+        end
+
+      socket =
+        if alert_id == nil && (path_route_type == nil || path_effect_name == nil) do
+          socket
+          |> assign(:halt_flushing, true)
+          |> CreateAlertMonoLive.start_socket(params)
+        else
+          socket
         end
 
       assign(
