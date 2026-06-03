@@ -36,7 +36,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
         start_time: Map.get(alert_data, :active_period_start_time),
         end_time: Map.get(alert_data, :active_period_end_time),
         alert_timing: Map.get(alert_data, :alert_timing),
-        recurrence_days: Map.get(alert_data, :recurrence_days)
+        recurrence_days: Map.get(alert_data, :recurrence_days),
+        current_time: Map.get(alert_data, :current_time)
       }
       |> Enum.reject(fn {_k, v} -> is_nil(v) end)
 

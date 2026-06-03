@@ -50,6 +50,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice
+    alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
     alias MBTAV3API.Stops.Stop
     alias Phoenix.LiveView.AsyncResult
 
@@ -91,11 +92,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       selected =
         socket |> unwrap_selections() |> selected_objects(changeset)
 
+      current_time = DateTimeHelpers.current_time()
+
       autotext_data =
         details_data
         |> translated_details()
         |> Map.merge(selected)
-        |> Map.merge(%{service_types: get_field(changeset, :service_types)})
+        |> Map.merge(%{service_types: get_field(changeset, :service_types), current_time: current_time})
         |> AlertDataToAutoText.build_autotext_data()
 
       header_text =

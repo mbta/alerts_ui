@@ -5,6 +5,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
   alias AlertsUI.Models.EnhancedSchedule
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText
+  alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
 
   @schedule_1 %EnhancedSchedule{
     departure_time: ~U[2024-02-21 14:01:00.00Z]
@@ -1102,27 +1103,33 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest 
 
   describe "build_duration_text/1 with injected current_time" do
     test "uses current_time from struct instead of re-capturing system time" do
-      # Pin current_time to a specific moment that makes start_datetime appear "today"
-      pinned_time = ~N[2025-06-03 10:00:00]
-      start_dt = ~N[2025-06-03 08:00:00]  # within today's service window
+      # A past date: with this as current_time, start_dt appears "today" (same service day)
+      pinned_time = ~N[2020-01-15 10:00:00]
+      start_dt = ~N[2020-01-15 08:00:00]
 
       autotext = %BuildAutoText{
         alert_timing: :"one-time",
         start_specifier: :custom,
         end_specifier: :later_today,
         start_datetime: start_dt,
-        end_datetime: ~N[2025-06-04 02:30:00],
+        end_datetime: ~N[2020-01-15 23:00:00],
         route_type: 1,
         effect_name: "DETOUR",
         current_time: pinned_time
       }
 
-      # Call with no explicit current_time — should use struct's current_time
-      result1 = AutoTextDuration.build_duration_text(autotext)
-      result2 = AutoTextDuration.build_duration_text(autotext)
+      # With pinned 2020 time: start_dt is "today" relative to that time
+      result_with_pinned_time = AutoTextDuration.build_duration_text(autotext, pinned_time)
+      # With live time (today ~2026): start_dt is in the past, so different branch fires
+      result_with_live_time = AutoTextDuration.build_duration_text(autotext, DateTimeHelpers.current_time())
 
-      # Results should be identical regardless of wall-clock time
-      assert result1 == result2
+      # Confirm the scenario is meaningful: pinned vs live produce different text
+      refute result_with_pinned_time == result_with_live_time
+
+      # The 1-arg form should use struct's current_time (not live time)
+      # After the H2 fix this should equal result_with_pinned_time
+      # Before the fix it uses DateTimeHelpers.current_time() → equals result_with_live_time → FAILS
+      assert AutoTextDuration.build_duration_text(autotext) == result_with_pinned_time
     end
 
     test "falls back to DateTimeHelpers.current_time() when struct has no current_time" do
