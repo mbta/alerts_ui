@@ -272,7 +272,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
     )
   end
 
-  def validate_notification(changeset) do
+  def validate_notification(changeset, editing?) do
     current_time = DateTimeHelpers.current_time()
 
     naive_start =
@@ -283,8 +283,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
         start_time = get_field(changeset, :active_period_start_time)
 
         if start_date && start_time do
-          # TODO: database should store UTC, front end should use local time
-          NaiveDateTime.new!(start_date, start_time) |> localize()
+          current_time
         else
           nil
         end
@@ -296,7 +295,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
         :notification_period_start,
         fn :notification_period_start, notification_period_start ->
           cond do
-            NaiveDateTime.diff(current_time, notification_period_start, :minute) > 1 ->
+            NaiveDateTime.diff(current_time, notification_period_start, :minute) > 1 && !editing? ->
               [
                 notification_period_start: {"Notifications can't be set in the past", []},
                 notification_period_start_date: {"Notifications can't be set in the past", []}
