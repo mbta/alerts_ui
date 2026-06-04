@@ -36,7 +36,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         alert_id: alert_id,
         active_period: [Map.from_struct(ap)],
         active_period_start: ap.start,
-        active_period_end: ap.end,
+        active_period_end: opts[:active_period_attrs][:end],
         duration_certainty: Keyword.get(opts, :duration_certainty, :UNKNOWN),
         effect: Keyword.get(opts, :effect, :OTHER_EFFECT),
         effect_detail: Keyword.get(opts, :effect_detail, "DELAY"),
