@@ -61,18 +61,25 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSliceTest do
       |> element("form")
       |> render_change(%{
         "alert_data" => %{
-          "active_period_end_specifier" => "end_of_service",
-          "active_period_end_date" => "2000-01-01"
+          "active_period_start_specifier" => "start_of_service"
         }
       })
 
-      assert render(view) =~ ~s(Effect must end after)
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_start_date" => "2000-01-01"
+        }
+      })
+
+      assert render(view) =~ ~s(Effect can&#39;t start in the past)
 
       view
       |> element("button", "Select Alert Type")
       |> render_click()
 
-      refute render(view) =~ ~s(Effect must end after)
+      refute render(view) =~ ~s(Effect can&#39;t start in the past)
 
       get_to_submission_page_refactor(view, "Bus", "Delay")
 
@@ -80,12 +87,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSliceTest do
       |> element("form")
       |> render_change(%{
         "alert_data" => %{
-          "active_period_end_specifier" => "end_of_service"
+          "active_period_start_specifier" => "end_of_service"
         }
       })
 
       # It's not there because everything reset
-      refute render(view) =~ ~s(Effect must end after)
+      refute render(view) =~ ~s(Effect can&#39;t start in the past)
     end
   end
 end
