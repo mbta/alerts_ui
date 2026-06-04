@@ -136,7 +136,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     socket =
       socket
       |> assign(assigns)
-      |> assign(service_type_name: route_type |> InformedEntity.route_code_mapping() || nil)
+      |> assign(service_type_name: route_type |> InformedEntity.route_code_mapping() )
       |> assign_stops(route_type)
       |> assign_async([:available_filter_routes], fn ->
         {:ok,
