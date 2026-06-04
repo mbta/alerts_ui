@@ -266,6 +266,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
           multiple={@form[:effect_name].value not in get_single_facility_effect_names()}
           no_results={Enum.empty?(@selections.facility_id_options)}
           options={@selections.facility_id_options}
+          ensure_value_when_unselected={true}
         />
       </fieldset>
       <hr class="mt-8" />

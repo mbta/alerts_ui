@@ -905,6 +905,11 @@ defmodule AlertsUIWeb.SharedComponents do
   attr :hook, :string, default: nil, doc: "a JS hook to be attached to the element"
   attr :selected, :list, default: nil
 
+  attr :ensure_value_when_unselected, :boolean,
+    default: false,
+    doc:
+      "when all values are unselected, will not return a key in the changeset unless this is true"
+
   attr :rest, :global, include: ~w(disabled size phx-debounce)
 
   def select(%{field: %FormField{} = field} = assigns) do
@@ -949,7 +954,7 @@ defmodule AlertsUIWeb.SharedComponents do
           />
         </button>
       </div>
-      <input type="hidden" name={@name} value="" />
+      <input :if={@ensure_value_when_unselected} type="hidden" name={@name} value={nil} />
       <select
         name={@name}
         id={@id}
@@ -1057,6 +1062,11 @@ defmodule AlertsUIWeb.SharedComponents do
     default: nil,
     doc: "a separate list of selected items that overrides the field's value"
 
+  attr :ensure_value_when_unselected, :boolean,
+    default: false,
+    doc:
+      "when all values are unselected, will not return a key in the changeset unless this is true"
+
   attr :rest, :global, include: ~w(disabled phx-debounce hook)
 
   def filtered_select(
@@ -1144,6 +1154,7 @@ defmodule AlertsUIWeb.SharedComponents do
           select_class="min-w-full pt-0 mt-0 [scrollbar-width:thin] overflow-auto
             border-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-t-none [appearance:none] max-w-[100%] h-full"
           selected={@selected}
+          ensure_value_when_unselected={@ensure_value_when_unselected}
           {@rest}
         />
       </div>
