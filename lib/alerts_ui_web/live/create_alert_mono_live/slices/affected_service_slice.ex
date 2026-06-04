@@ -603,7 +603,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
           />
         </div>
       </div>
-      <p :if={false}>
+      <p :if={@show_stop_ids}>
         Selected stop ids: {(@form[:stop_ids].value || []) |> Enum.join(", ")} Selected route ids: {(@form[
                                                                                                        :route_ids
                                                                                                      ].value ||

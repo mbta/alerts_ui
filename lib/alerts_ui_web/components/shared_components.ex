@@ -949,6 +949,7 @@ defmodule AlertsUIWeb.SharedComponents do
           />
         </button>
       </div>
+      <input type="hidden" name={@name} value="" />
       <select
         name={@name}
         id={@id}
