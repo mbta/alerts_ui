@@ -245,7 +245,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
   def route_id_options(
         available_routes,
-        _route_ids,
+        route_ids,
         route_search_term,
         route_type
       ) do
@@ -253,7 +253,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
       options: available_routes,
       search_term: route_search_term,
       route_type: route_type,
-      values_to_keep: [],
+      values_to_keep: route_ids || [],
       option_prefix: "route-selector"
     })
   end

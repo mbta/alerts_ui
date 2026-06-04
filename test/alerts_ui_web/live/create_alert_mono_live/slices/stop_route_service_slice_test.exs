@@ -59,14 +59,23 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
   @route_two %Route{sort_order: 2, id: "Red", name: "Red Line", type: 1}
 
   describe "route_id_options/4 filtering" do
-    test "filters by search_term even when all route ids are in the selected list" do
+    test "selected routes remain visible even when they don't match the search term" do
       routes = [@route, @route_two]
 
       options = StopRouteServiceSlice.route_id_options(routes, ["Blue", "Red"], "Blue", 1)
       values = Enum.map(options, &Keyword.get(&1, :value))
 
       assert "Blue" in values
-      # Before fix: "Red" is retained because values_to_keep includes all route ids
+      assert "Red" in values
+    end
+
+    test "unselected routes are hidden when they don't match the search term" do
+      routes = [@route, @route_two]
+
+      options = StopRouteServiceSlice.route_id_options(routes, ["Blue"], "Blue", 1)
+      values = Enum.map(options, &Keyword.get(&1, :value))
+
+      assert "Blue" in values
       refute "Red" in values
     end
   end
@@ -545,8 +554,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         {:ok, document} = view |> render() |> Floki.parse_document()
         assert document_has_element?(document, "select#alert_data_route_ids > option[value=\"Blue\"]")
-        # Before fix: Red still visible (H1 prevents update trigger; H2 keeps it via values_to_keep)
-        refute document_has_element?(document, "select#alert_data_route_ids > option[value=\"Red\"]")
+        # Red is auto-selected after stop selection, so it stays visible even when the search doesn't match
+        assert document_has_element?(document, "select#alert_data_route_ids > option[value=\"Red\"]")
       end
     end
 
@@ -592,6 +601,59 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         {:ok, document} = view |> render() |> Floki.parse_document()
         assert document_has_element?(document, "select#alert_data_route_ids > option[value=\"Blue\"]")
         assert document_has_element?(document, "select#alert_data_route_ids > option[value=\"Red\"]")
+      end
+    end
+
+    @tag :logged_in_user
+    test "route search hides a route that was deselected by the user", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@route, @route_two] end,
+           by_stop: fn _ -> [@route, @route_two] end,
+           by_stop: fn _, _ -> [@route, @route_two] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _, _ -> [@stop] end,
+           by_route: fn _, _, _ -> [@stop] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        get_to_submission_page_refactor(view, "Subway", "Station closure")
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "stop_ids"],
+          "alert_data" => %{"stop_ids" => ["place-aqucl"]}
+        })
+
+        render_async(view)
+
+        # Deselect Red — only Blue is now selected
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => ["Blue"]}
+        })
+
+        render_async(view)
+
+        # Search for "Blue" — Red is not selected so it should be hidden
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_search_term"],
+          "alert_data" => %{"route_search_term" => "Blue"}
+        })
+
+        render_async(view)
+
+        {:ok, document} = view |> render() |> Floki.parse_document()
+        assert document_has_element?(document, "select#alert_data_route_ids > option[value=\"Blue\"]")
+        refute document_has_element?(document, "select#alert_data_route_ids > option[value=\"Red\"]")
       end
     end
 
