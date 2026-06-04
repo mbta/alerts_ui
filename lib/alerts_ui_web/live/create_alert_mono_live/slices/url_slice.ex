@@ -57,23 +57,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
     end
 
     def assigns(_url_data, socket, params) do
-      alert_id =
-        case Map.fetch(params, "alert_id") do
-          {:ok, value} -> value
-          :error -> socket.assigns[:alert_id]
-        end
+      alert_id = get_alert_id(socket, params)
 
-      path_route_type =
-        case Map.fetch(params, "route_type") do
-          {:ok, value} -> value
-          :error -> socket.assigns[:path_route_type]
-        end
+      path_route_type = get_path_route_type(socket, params)
 
-      path_effect_name =
-        case Map.fetch(params, "effect_name") do
-          {:ok, value} -> value
-          :error -> socket.assigns[:path_effect_name]
-        end
+      path_effect_name = get_path_effect_name(socket, params)
 
       socket =
         if alert_id == nil && (path_route_type == nil || path_effect_name == nil) do
@@ -92,6 +80,27 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
           path_effect_name: path_effect_name
         }
       )
+    end
+
+    defp get_alert_id(socket, params) do
+      case Map.fetch(params, "alert_id") do
+        {:ok, value} -> value
+        :error -> socket.assigns[:alert_id]
+      end
+    end
+
+    defp get_path_route_type(socket, params) do
+      case Map.fetch(params, "route_type") do
+        {:ok, value} -> value
+        :error -> socket.assigns[:path_route_type]
+      end
+    end
+
+    defp get_path_effect_name(socket, params) do
+      case Map.fetch(params, "effect_name") do
+        {:ok, value} -> value
+        :error -> socket.assigns[:path_effect_name]
+      end
     end
 
     defp new_url_params(alert_or_changeset, params) do
@@ -115,11 +124,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
       path_route_type = params["route_type"]
       path_effect_name = params["effect_name"]
 
-      path_route_type_int =
-        case path_route_type do
-          nil -> nil
-          route_type -> InformedEntity.route_type_mapping(route_type)
-        end
+      path_route_type_int = path_type_int(path_route_type)
 
       route_type_int = path_route_type_int || base_route_type_int
       effect_name = path_effect_name || base_effect_name
@@ -132,37 +137,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
         end
 
       combination =
-        if is_nil(effective_route_type) and is_nil(path_route_type) do
-          # During form field changes or direct edit for facility/systemwide alerts,
-          # path_route_type is absent. Preserve the existing combination rather than
-          # resetting to nil, since route_type is intentionally nil for these alert types.
-          case alert_or_changeset do
-            %Changeset{} = cs ->
-              get_field(cs, :combination) ||
-                get_value_of_key(
-                  :combination,
-                  effective_route_type,
-                  humanize_effect_name(effective_route_type, effect_name)
-                )
-
-            %AlertData{} = ad ->
-              ad.combination ||
-                get_value_of_key(
-                  :combination,
-                  effective_route_type,
-                  humanize_effect_name(effective_route_type, effect_name)
-                )
-          end
-        else
-          get_value_of_key(
-            :combination,
-            effective_route_type,
-            humanize_effect_name(
-              effective_route_type,
-              effect_name
-            )
-          )
-        end
+        combination(effective_route_type, path_route_type, effect_name, alert_or_changeset)
 
       %UrlSlice{
         alert_id: alert_id,
@@ -170,6 +145,46 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
         effect_name: effect_name,
         combination: combination
       }
+    end
+
+    defp combination(nil, nil, effect_name, alert_or_changeset) do
+      # During form field changes or direct edit for facility/systemwide alerts,
+      # path_route_type is absent. Preserve the existing combination rather than
+      # resetting to nil, since route_type is intentionally nil for these alert types.
+      case alert_or_changeset do
+        %Changeset{} = cs ->
+          get_field(cs, :combination) ||
+            get_value_of_key(
+              :combination,
+              nil,
+              humanize_effect_name(nil, effect_name)
+            )
+
+        %AlertData{} = ad ->
+          ad.combination ||
+            get_value_of_key(
+              :combination,
+              nil,
+              humanize_effect_name(nil, effect_name)
+            )
+      end
+    end
+
+    defp combination(effective_route_type, _path_route_type, effect_name, _alert_or_changeset) do
+      get_value_of_key(
+        :combination,
+        effective_route_type,
+        humanize_effect_name(
+          effective_route_type,
+          effect_name
+        )
+      )
+    end
+
+    defp path_type_int(nil), do: nil
+
+    defp path_type_int(route_type) do
+      InformedEntity.route_type_mapping(route_type)
     end
   end
 

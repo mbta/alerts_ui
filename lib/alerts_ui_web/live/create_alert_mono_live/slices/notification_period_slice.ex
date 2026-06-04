@@ -183,6 +183,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
   end
 
   def extract_notification_end_for_specifier(changeset, :custom, dt, _) do
+
     changeset
     |> force_change(:notification_period_end, dt)
     |> force_change(:notification_period_end_date, dt |> NaiveDateTime.to_date())

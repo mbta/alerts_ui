@@ -143,13 +143,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     defp description_sync_toggle(_, current_toggle), do: current_toggle
 
     def validate(details_data, changeset, _params, _socket) do
-      image_size = details_data.image_url |> get_image_size()
+      image_url = details_data.image_url
+      image_size = image_url |> get_image_size()
 
       changeset
       |> clear_my_errors(AlertDetailsSlice)
       |> Validation.always_validate_required(@required_fields)
       |> validate_url(get_field(changeset, :url))
-      |> validate_image_fields(image_size)
+      |> validate_image_fields(image_size, image_url)
     end
 
     def assigns(_details_data, socket, _params) do
@@ -303,18 +304,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       end)
     end
 
-    defp validate_image_fields(changeset, image_size) do
-      if get_field(changeset, :image_url) in [nil, ""] do
-        changeset
-      else
-        changeset
-        |> Ecto.Changeset.validate_change(:image_url, fn :image_url, image_url ->
-          if image_url !== "" and is_number(image_size),
-            do: [],
-            else: [image_url: "Enter a valid image URL"]
-        end)
-        |> validate_alt_text(Map.get(changeset.changes, :image_url))
-      end
+    defp validate_image_fields(changeset, _image_size, image_url) when image_url in [nil, ""] do
+      changeset
+    end
+
+    defp validate_image_fields(changeset, image_size, _image_url) do
+      changeset
+      |> Ecto.Changeset.validate_change(:image_url, fn :image_url, image_url ->
+        if image_url !== "" and is_number(image_size),
+          do: [],
+          else: [image_url: "Enter a valid image URL"]
+      end)
+      |> validate_alt_text(Map.get(changeset.changes, :image_url))
     end
 
     defp validate_alt_text(changeset, image_url) when image_url in [nil, ""] do

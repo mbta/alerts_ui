@@ -78,7 +78,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
 
     normalized_single_facility_effects =
       Enum.map(get_single_facility_effect_names(), fn name ->
-        name |> String.split(" ") |> Enum.map(&String.downcase/1) |> Enum.join("_")
+        name |> String.split(" ") |> Enum.map_join("_", &String.downcase/1)
       end)
 
     if effect_name in normalized_single_facility_effects do
@@ -91,10 +91,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
     end
   end
 
-  def async_assign_selections(socket, params) do
+  def async_assign_selections(%{assigns: %{} = assigns} = socket, params) do
     if update_selections?(params) do
       prev =
-        case Map.get(socket.assigns, :selections) do
+        case Map.get(assigns, :selections) do
           %Selections{} = s -> s
           _ -> %Selections{}
         end
@@ -161,6 +161,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
     end
   end
 
+  def async_assign_selections(socket, _params), do: socket
+
   @update_selection_targets ["stop_id", "stop_search_term", "facility_search_term"]
   defp update_selections?(%{"_target" => ["alert_data", field]})
        when field in @update_selection_targets,
@@ -212,12 +214,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
   end
 
   def on_filter_clear(socket) do
-    case AlertData.sync(socket.assigns.form.source, socket, %{
+    {_, socket} =  AlertData.sync(socket.assigns.form.source, socket, %{
            "alert_data" => %{"stop_id" => nil}
-         }) do
-      {:ok, socket} -> async_assign_selections(socket, %{})
-      {:error, socket} -> async_assign_selections(socket, %{})
-    end
+         })
+         async_assign_selections(socket, %{})
   end
 
   def render(assigns) do

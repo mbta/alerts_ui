@@ -47,12 +47,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
   def render(assigns) do
     alert_data = Map.merge(assigns.form.source.data, assigns.form.source.changes)
 
+    route_ids = (Map.get(alert_data, :route_ids) || [])
     selected_routes =
       case assigns.selections do
         nil -> []
         selections ->
           Enum.filter(
-            Map.get(selections, :available_routes, []) || [],
+            route_ids,
             &(&1.id in alert_data.route_ids)
           )
       end
