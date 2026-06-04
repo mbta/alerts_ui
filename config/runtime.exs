@@ -114,16 +114,6 @@ cond do
       full_story_org_id: System.get_env("FULLSTORY_ORG_ID"),
       api_url: String.replace_trailing(System.get_env("API_URL"), "/", ""),
       api_key: get_api_key.(),
-      ibi_enhanced_alerts_api_url:
-        System.get_env(
-          "IBI_ENHANCED_ALERTS_API_URL",
-          "http://s3.amazonaws.com/mbta-realtime-test/alerts_enhanced.json"
-        ),
-      ibi_standard_alerts_api_url:
-        System.get_env(
-          "IBI_STANDARD_ALERTS_API_URL",
-          "https://cdn.mbta.com/realtime/Alerts.json"
-        ),
       trapeze_sftp_host: System.get_env("TRAPEZE_SFTP_HOST", ""),
       trapeze_sftp_port: System.get_env("TRAPEZE_SFTP_PORT", ""),
       trapeze_sftp_user: System.get_env("TRAPEZE_SFTP_USER", ""),
