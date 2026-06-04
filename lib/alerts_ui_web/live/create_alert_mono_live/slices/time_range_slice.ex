@@ -540,7 +540,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
             min={DateTimeHelpers.naive_datetime_to_iso8601(@current_time)}
             max="9999-12-31T23:59"
             value={DateTimeHelpers.naive_datetime_to_iso8601(@form[:active_period_start].value)}
-            class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_start_specifier) === :custom, do: "", else: "hidden")}
+            class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_start_specifier) in [:custom, "custom"], do: "", else: "hidden")}
           />
           <.datetime
             type="date"
@@ -551,7 +551,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
               |> Enum.max()
             }
             value={@form[:active_period_start_date].value}
-            class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_start_specifier) === :start_of_service, do: "", else: "hidden")}
+            class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_start_specifier) in [:start_of_service, "start_of_service"], do: "", else: "hidden")}
           />
         </div>
         <p class="pt-5 md:pt-10">to</p>
@@ -569,14 +569,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
           min={@form[:active_period_start].value |> naive_datetime_to_iso_date}
           max="9999-12-31"
           value={@form[:active_period_end_date].value}
-          class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_end_specifier) === :end_of_service, do: "", else: "hidden")}
+          class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_end_specifier) in [:end_of_service, "end_of_service"], do: "", else: "hidden")}
         />
         <.datetime
           field={@form[:active_period_end]}
           min={DateTimeHelpers.naive_datetime_to_iso8601(@form[:active_period_start].value)}
           max="9999-12-31T23:59"
           value={DateTimeHelpers.naive_datetime_to_iso8601(@form[:active_period_end].value)}
-          class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_end_specifier) === :custom, do: "", else: "hidden")}
+          class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_end_specifier) in [:custom, "custom"], do: "", else: "hidden")}
         />
       </div>
     </div>
@@ -609,7 +609,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
               type="time"
               field={@form[:active_period_start_time]}
               value={DateTimeHelpers.time_to_iso8601(@form[:active_period_start_time].value)}
-              class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_start_time_specifier) === :custom, do: "", else: "hidden")}
+              class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_start_time_specifier) in [:custom, "custom"], do: "", else: "hidden")}
               phx-debounce={120}
             />
             <p class="md:pt-[2rem]">to</p>
@@ -627,7 +627,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
               type="time"
               field={@form[:active_period_end_time]}
               value={DateTimeHelpers.time_to_iso8601(@form[:active_period_end_time].value)}
-              class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_end_time_specifier) === :custom, do: "", else: "hidden")}
+              class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_end_time_specifier) in [:custom, "custom"], do: "", else: "hidden")}
               phx-debounce={120}
             />
           </div>
@@ -648,7 +648,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
               max="9999-12-31"
               field={@form[:active_period_start_date]}
               value={@form[:active_period_start_date].value}
-              class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_start_specifier) === :custom, do: "", else: "hidden")}
+              class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_start_specifier) in [:custom, "custom"], do: "", else: "hidden")}
               phx-debounce={120}
             />
             <p class="md:pt-[2rem]">to</p>
@@ -667,7 +667,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
               max="9999-12-31"
               field={@form[:active_period_end_date]}
               value={@form[:active_period_end_date].value}
-              class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_end_specifier) === :custom, do: "", else: "hidden")}
+              class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_end_specifier) in [:custom, "custom"], do: "", else: "hidden")}
               phx-debounce={120}
             />
           </div>
