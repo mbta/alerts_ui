@@ -79,6 +79,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
       refute "Red" in values
     end
   end
+
   @shuttle_route %Route{
     sort_order: 99,
     id: "Shuttle-BlueLine",
@@ -540,8 +541,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         render_async(view)
 
         {:ok, document} = view |> render() |> Floki.parse_document()
-        assert document_has_element?(document, "select#alert_data_route_ids > option[value=\"Blue\"]")
-        assert document_has_element?(document, "select#alert_data_route_ids > option[value=\"Red\"]")
+
+        assert document_has_element?(
+                 document,
+                 "select#alert_data_route_ids > option[value=\"Blue\"]"
+               )
+
+        assert document_has_element?(
+                 document,
+                 "select#alert_data_route_ids > option[value=\"Red\"]"
+               )
 
         view
         |> element("form")
@@ -553,6 +562,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         render_async(view)
 
         {:ok, document} = view |> render() |> Floki.parse_document()
+
         assert document_has_element?(document, "select#alert_data_route_ids > option[value=\"Blue\"]")
         # Red is auto-selected after stop selection, so it stays visible even when the search doesn't match
         assert document_has_element?(document, "select#alert_data_route_ids > option[value=\"Red\"]")
@@ -599,8 +609,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         render_async(view)
 
         {:ok, document} = view |> render() |> Floki.parse_document()
-        assert document_has_element?(document, "select#alert_data_route_ids > option[value=\"Blue\"]")
-        assert document_has_element?(document, "select#alert_data_route_ids > option[value=\"Red\"]")
+
+        assert document_has_element?(
+                 document,
+                 "select#alert_data_route_ids > option[value=\"Blue\"]"
+               )
+
+        assert document_has_element?(
+                 document,
+                 "select#alert_data_route_ids > option[value=\"Red\"]"
+               )
       end
     end
 

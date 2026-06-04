@@ -144,6 +144,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
     |> force_change(:notification_period_end_date, now |> NaiveDateTime.to_date())
   end
 
+  def extract_notification_end_for_specifier(changeset, :end_of_service, _, :unspecified) do
+    now = NaiveDateTime.local_now() |> NaiveDateTime.to_date()
+    extract_notification_end_for_specifier(changeset, :end_of_service, :ignored, now)
+  end
+
   def extract_notification_end_for_specifier(changeset, :end_of_service, _, date) do
     datetime =
       date
@@ -161,6 +166,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
     changeset
     |> force_change(:notification_period_end, DTHelpers.replace_time(now, ~T[23:59:59]))
     |> force_change(:notification_period_end_date, now |> NaiveDateTime.to_date())
+  end
+
+  def extract_notification_end_for_specifier(changeset, :custom, :unspecified, _) do
+    now = NaiveDateTime.local_now()
+    extract_notification_end_for_specifier(changeset, :custom, now, :ignored)
   end
 
   def extract_notification_end_for_specifier(changeset, :custom, dt, _) do

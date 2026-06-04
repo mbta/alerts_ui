@@ -210,7 +210,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     |> ensure_start_date_values_for_specifier(specifier, start_dt, start_d, recompute?)
   end
 
-  def ensure_start_date_values_for_specifier(changeset, :now, _, _) do
+  def ensure_start_date_values_for_specifier(changeset, :now, _, _, true) do
     now = current_time()
 
     changeset
@@ -251,7 +251,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     |> ensure_end_date_values_for_specifier(specifier, end_dt, end_d, recompute?)
   end
 
-  def ensure_end_date_values_for_specifier(changeset, :later_today, _, _) do
+  def ensure_end_date_values_for_specifier(changeset, :later_today, _, _, true) do
     end_of_service = ActivePeriod.end_of_service_datetime_naive(current_time())
 
     changeset
@@ -259,7 +259,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     |> force_change(:active_period_end_date, NaiveDateTime.to_date(end_of_service))
   end
 
-  def ensure_end_date_values_for_specifier(changeset, :until_further_notice, _, _) do
+  def ensure_end_date_values_for_specifier(changeset, :until_further_notice, _, _, true) do
     now = current_time()
 
     changeset
@@ -267,13 +267,32 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     |> force_change(:active_period_end_date, now |> NaiveDateTime.to_date())
   end
 
-  def ensure_end_date_values_for_specifier(changeset, :when_work_order_is_closed, _, _) do
+  def ensure_end_date_values_for_specifier(changeset, :when_work_order_is_closed, _, _, true) do
     now = current_time()
 
     changeset
     |> force_change(:active_period_end, DTHelpers.replace_time(now, ~T[23:59:59]))
     |> force_change(:active_period_end_date, now |> NaiveDateTime.to_date())
     |> force_change(:can_close_automatically, true)
+  end
+
+  def ensure_end_date_values_for_specifier(changeset, :custom, nil, _, true) do
+    now = current_time()
+
+    changeset
+    |> force_change(:active_period_end, now)
+    |> force_change(:active_period_end_date, NaiveDateTime.to_date(now))
+  end
+
+  def ensure_end_date_values_for_specifier(changeset, :end_of_service, _, nil, true) do
+    today = current_time() |> NaiveDateTime.to_date()
+
+    changeset
+    |> force_change(
+      :active_period_end,
+      NaiveDateTime.new!(today, ActivePeriod.end_of_service_time())
+    )
+    |> force_change(:active_period_end_date, today)
   end
 
   def ensure_end_date_values_for_specifier(changeset, _, dt, d, _)
