@@ -13,7 +13,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
 
-  import Phoenix.LiveView, only: [start_async: 3]
+  import Phoenix.LiveView, only: [push_event: 3, start_async: 3]
   import Ecto.Changeset, only: [cast: 3, get_field: 2, change: 2]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
@@ -85,7 +85,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     end
 
     def assigns(_service_data, socket, params) do
-      AffectedServiceSlice.async_assign_selections(socket, params)
+      socket = AffectedServiceSlice.async_assign_selections(socket, params)
+
+      # When the server clears stop selections (e.g. route was deselected), morphdom
+      # removes the `selected` attribute but does NOT update option.selected properties.
+      # Push an explicit event so the JS hook can sync the DOM property to match.
+      if socket.assigns.form[:stop_names_and_ids].value in [nil, []] do
+        push_event(socket, "adjustSelections", %{stop_names_and_ids: []})
+      else
+        socket
+      end
     end
   end
 
