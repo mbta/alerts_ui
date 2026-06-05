@@ -214,10 +214,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
   end
 
   def on_filter_clear(socket) do
-    {_, socket} =  AlertData.sync(socket.assigns.form.source, socket, %{
-           "alert_data" => %{"stop_id" => nil}
-         })
-         async_assign_selections(socket, %{})
+    {_, socket} =
+      AlertData.sync(socket.assigns.form.source, socket, %{
+        "alert_data" => %{"stop_id" => nil}
+      })
+
+    async_assign_selections(socket, %{})
   end
 
   def render(assigns) do

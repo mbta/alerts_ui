@@ -364,9 +364,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   end
 
   def on_filter_clear(socket) do
-    {_, socket} = AlertData.sync(socket.assigns.form.source, socket, %{
-           "alert_data" => %{"modal_route_id" => nil, "modal_route_search_term" => nil}
-         })
-         async_assign_selections(socket, %{})
+    {_, socket} =
+      AlertData.sync(socket.assigns.form.source, socket, %{
+        "alert_data" => %{"modal_route_id" => nil, "modal_route_search_term" => nil}
+      })
+
+    async_assign_selections(socket, %{})
   end
 end

@@ -331,12 +331,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   defp create_new_alert(%{assigns: %{} = _assigns} = socket, params) do
     # create a new alert
-    {_, socket} =  AlertData.init(socket, params, :new)
+    {_, socket} = AlertData.init(socket, params, :new)
 
     socket
   end
 
-    defp create_new_alert(socket, _params), do: socket
+  defp create_new_alert(socket, _params), do: socket
 
   defp edit_existing_alert(socket, params, alert_id) do
     # edit an existing alert
@@ -368,6 +368,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   """
   @spec sync_socket(LiveView.Socket.t(), map()) :: LiveView.Socket.t()
   def sync_socket(socket, params \\ %{})
+
   def sync_socket(%LiveView.Socket{assigns: %{} = assigns} = socket, params) do
     case AlertData.sync(assigns.form.source, socket, params) do
       {:ok, socket} ->
@@ -406,7 +407,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     end
   end
 
-    def sync_socket(socket, _), do: socket
+  def sync_socket(socket, _), do: socket
 
   def service_slice(assigns) do
     service_slice_by_combination(assigns.form[:combination].value).render(assigns)

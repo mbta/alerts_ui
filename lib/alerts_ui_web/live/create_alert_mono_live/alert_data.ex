@@ -21,7 +21,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   }
 
   alias Ecto.Changeset
-  alias MBTAV3API.Routes.Route
   alias Phoenix.Component
   alias Phoenix.LiveView.Socket
 
@@ -220,8 +219,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
   @actions [:new, :edit, :duplicate]
 
-  @spec init(atom() | %{:assigns => map(), optional(any()) => any()}, map(), :duplicate | :edit | :new) ::
-          {:error, {map()}} | {:ok, {map()}}
+  @spec init(
+          Socket.t(),
+          Socket.unsigned_params(),
+          atom(),
+          Alert.t() | nil
+        ) :: {:ok, {Changeset.t(), Socket.t()}} | {:error, {Changeset.t(), Socket.t()}}
   def init(socket, params, action, alert \\ %Alert{}) when action in @actions do
     form_type =
       case action do
@@ -231,17 +234,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
       end
 
     base_params =
-      if action == :new do
-        %{}
-      else
-              alert
+      alert
       |> Repo.preload([:informed_entity, :reminder_times])
       |> build_alert_data(form_type)
       |> Map.from_struct()
       |> Map.put(:alert_id, alert.alert_id)
       |> alert_data_v1_to_v2()
-      end
-
 
     base = struct(__MODULE__, base_params)
 
@@ -271,9 +269,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   @spec sync(
           t() | Changeset.t(),
           Socket.t(),
-          Phoenix.LiveView.unsigned_params(),
-          list(atom()) | nil
-        ) :: {:ok, {Socket.t()}} | {:error, {Socket.t()}} | any()
+          Socket.unsigned_params(),
+          list(atom())
+        ) :: {:ok, {Changeset.t(), Socket.t()}} | {:error, {Changeset.t(), Socket.t()}}
   def sync(alert_data_or_changeset, socket, params, fields \\ nil) do
     alert_data_or_changeset
     |> cast(Map.get(params, "alert_data", %{}), fields || form_fields(socket))
@@ -436,7 +434,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     if v2_alert_data.view_banner do
       v2_alert_data
     else
-      Map.drop(v2_alert_data, [:banner_text])
+      Map.put(v2_alert_data, :banner_text, nil)
     end
   end
 end
