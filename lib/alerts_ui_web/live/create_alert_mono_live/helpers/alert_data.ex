@@ -56,12 +56,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
   def list_effect_path_names(nil), do: []
 
   def list_effect_path_names(route_type_name) do
-    ModeEffect.mode_effects_by_route_type_name(route_type_name)
+    (ModeEffect.mode_effects_by_route_type_name(route_type_name) || [])
     |> Enum.reject(fn {name, _struct} -> name in @forbidden_effects end)
     |> Enum.map(fn {_name, struct} -> struct.path_name end)
   end
 
-  @spec humanize_effect_name(Phoenix.HTML.Form.t()) :: nil
   def humanize_effect_name(%Form{} = form) do
     route_type_name = path_route_type_from_form(form)
     effect_name = form[:effect_name].value

@@ -21,6 +21,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   }
 
   alias Ecto.Changeset
+  alias MBTAV3API.Routes.Route
   alias Phoenix.Component
   alias Phoenix.LiveView.Socket
 
@@ -220,11 +221,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   @actions [:new, :edit, :duplicate]
 
   @spec init(
-          Socket.t(),
-          Socket.unsigned_params(),
-          atom(),
-          Alert.t() | nil
-        ) :: {:ok, {Changeset.t(), Socket.t()}} | {:error, {Changeset.t(), Socket.t()}}
+          atom() | %{:assigns => map(), optional(any()) => any()},
+          map(),
+          :duplicate | :edit | :new
+        ) ::
+          {:error, {map()}} | {:ok, {map()}}
   def init(socket, params, action, alert \\ %Alert{}) when action in @actions do
     form_type =
       case action do
@@ -269,9 +270,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   @spec sync(
           t() | Changeset.t(),
           Socket.t(),
-          Socket.unsigned_params(),
-          list(atom())
-        ) :: {:ok, {Changeset.t(), Socket.t()}} | {:error, {Changeset.t(), Socket.t()}}
+          Phoenix.LiveView.unsigned_params(),
+          list(atom()) | nil
+        ) :: {:ok, {Socket.t()}} | {:error, {Socket.t()}} | any()
   def sync(alert_data_or_changeset, socket, params, fields \\ nil) do
     alert_data_or_changeset
     |> cast(Map.get(params, "alert_data", %{}), fields || form_fields(socket))
@@ -434,7 +435,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     if v2_alert_data.view_banner do
       v2_alert_data
     else
-      Map.put(v2_alert_data, :banner_text, nil)
+      Map.drop(v2_alert_data, [:banner_text])
     end
   end
 end
