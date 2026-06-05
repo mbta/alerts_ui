@@ -275,8 +275,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
           list(atom()) | nil
         ) :: {:ok, {Socket.t()}} | {:error, {Socket.t()}} | any()
   def sync(alert_data_or_changeset, socket, params, fields \\ nil) do
+    alert_data_params =
+      params
+      |> Map.get("alert_data", %{})
+      |> inject_empty_for_cleared_multiselect(params)
+
     alert_data_or_changeset
-    |> cast(Map.get(params, "alert_data", %{}), fields || form_fields(socket))
+    |> cast(alert_data_params, fields || form_fields(socket))
     |> transform(params, socket)
     |> validate(params, socket)
     |> case do
@@ -480,4 +485,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
       Map.drop(v2_alert_data, [:banner_text])
     end
   end
+
+  # When a multiselect field is fully deselected, browsers omit it from form
+  # submissions entirely. Ecto's cast then skips the field, leaving the prior
+  # value intact. If the _target indicates the user interacted with a field
+  # that is now absent from the params, inject an empty list so cast resets it.
+  defp inject_empty_for_cleared_multiselect(
+         alert_data_params,
+         %{"_target" => ["alert_data", field]}
+       )
+       when not is_map_key(alert_data_params, field) do
+    Map.put(alert_data_params, field, [])
+  end
+
+  defp inject_empty_for_cleared_multiselect(alert_data_params, _params), do: alert_data_params
 end
