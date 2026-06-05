@@ -165,7 +165,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
        when timing in [:"one-time", "one-time"] do
     changeset
     |> validate_change(:active_period_start, fn :active_period_start, active_period_start ->
-      if specifier == :custom do
+      if specifier == :custom and
+           Keyword.get_values(changeset.errors, :active_period_start) == [] do
         time_in_past? = NaiveDateTime.diff(now, localize(active_period_start), :minute) > 1
         start_error(time_in_past?, :"one-time", specifier)
       else
