@@ -339,6 +339,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
              "place-sstat" -> @stop
              "obsolete_stop" -> %Stop{id: "obsolete_stop", name: "spurious stop"}
            end
+         ]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _route_id, _opts -> [@route_pattern] end,
+           included_stops_by_route_id: fn _route_id, _ -> [@stop] end
          ]}
       ]) do
         alert_params =

@@ -54,6 +54,7 @@ defmodule AlertsUIWeb.ApiControllerTest do
       end
     end
 
+    @tag capture_log: true
     test "when authorized, but alert is not valid, return 400", %{
       conn: conn,
       swagger_schema: schema
@@ -87,6 +88,7 @@ defmodule AlertsUIWeb.ApiControllerTest do
       end
     end
 
+    @tag capture_log: true
     test "when unauthenticated, returns 401 unauthenticated", %{
       conn: conn,
       swagger_schema: schema
