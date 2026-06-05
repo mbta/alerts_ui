@@ -69,6 +69,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
 
   def humanize_effect_name(_, nil), do: nil
   def humanize_effect_name(nil, nil), do: nil
+
   def humanize_effect_name(nil, effect_name) do
     humanize_effect_name(path_route_type(nil, effect_name), effect_name)
   end
