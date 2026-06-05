@@ -85,6 +85,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     end
 
     def assigns(_service_data, socket, params) do
+      IO.inspect(socket.assigns.form[:modal_date].value, label: "MD AT ASSIGNS")
       AffectedServiceSlice.async_assign_selections(socket, params)
     end
   end
@@ -502,6 +503,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             label="Upcoming dates"
             field={@form[:modal_date]}
             filter_field={@form[:modal_date_search_term]}
+            modal_filter_active={date_filter_active?(@form[:modal_date].value, today())}
             options={
               filter_service_dates(
                 service_dates(),
@@ -530,7 +532,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             field={@form[:direction]}
             modal_filter_id="dates-filter-modal"
             modal_filter_title={"Filter: #{@selections.filter_title_value || default_filter_title()}"}
-            modal_filter_active={date_filter_active?(@form[:modal_date].value, today())}
             options={@selections.direction_options}
             disabled={disable_stop_input?(@form[:route_ids].value)}
             modal_filter_disabled={@form[:route_ids].value in [nil, []]}
