@@ -56,10 +56,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
       |> NotificationPeriodSlice.extract_notification_end()
     end
 
-    def validate(_slice, changeset, params, _socket) do
+    def validate(_slice, changeset, params, socket) do
       changeset
       |> TimeRangeValidators.validate_cast_notification_datetimes(params)
-      |> TimeRangeValidators.validate_notification()
+      |> TimeRangeValidators.validate_notification(socket.assigns.form_type == :editing)
       |> TimeRangeValidators.validate_required_notification_fields()
     end
 

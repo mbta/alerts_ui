@@ -320,48 +320,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     end
 
     @tag :logged_in_user
-    test "filter title updates to all future trips when no date selected", %{conn: conn} do
-      with_mocks([
-        {RoutesRepo, [],
-         [
-           by_type: fn _ -> [@route] end,
-           get: fn _, _ -> @route end
-         ]},
-        {SchedulesRepo, [],
-         [
-           by_route_ids: fn _, _ -> [@schedule_future, @schedule_future] end,
-           end_of_rating: fn -> Date.add(@todays_date, 7) end
-         ]},
-        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
-      ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Commuter Rail", "Delay")
-        render_async(view)
-
-        view
-        |> element("form")
-        |> render_change(%{
-          "_target" => ["alert_data", "route_ids"],
-          "alert_data" => %{"route_ids" => ["CR-Worcester"]}
-        })
-
-        render_async(view)
-
-        # Set modal_date to "default", which maps to "All future trips"
-        view
-        |> element("form")
-        |> render_change(%{
-          "alert_data" => %{"modal_date" => "default", "route_ids" => ["CR-Worcester"]}
-        })
-
-        render_click(view, "accept_filter")
-        render_async(view)
-
-        assert render(view) =~ "Filter: All future trips"
-      end
-    end
-
-    @tag :logged_in_user
     test "schedule list updates when a different date is selected", %{conn: conn} do
       today = @todays_date |> Date.to_string()
       tomorrow = @todays_date |> Date.add(1) |> Date.to_string()
@@ -665,6 +623,51 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     end
 
     @tag :logged_in_user
+    test "stop select is disabled on direct URL load for single-route effect before any route selected",
+         %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _ -> [@bus_route] end]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new/bus/detour")
+        render_async(view)
+
+        assert render(view) =~ ~s(id="alert_data_stop_names_and_ids" disabled="disabled")
+      end
+    end
+
+    @tag :logged_in_user
+    test "stop select becomes enabled after single_route_id selected on direct URL load",
+         %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@bus_route] end,
+           get: fn _, _ -> @bus_route end
+         ]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new/bus/detour")
+        render_async(view)
+
+        assert render(view) =~ ~s(id="alert_data_stop_names_and_ids" disabled="disabled")
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "single_route_id"],
+          "alert_data" => %{"single_route_id" => @bus_route.id}
+        })
+
+        render_async(view)
+
+        refute render(view) =~ ~s(id="alert_data_stop_names_and_ids" disabled="disabled")
+      end
+    end
+
+    @tag :logged_in_user
     test "bus stop names include direction suffix and are ordered outbound then inbound",
          %{conn: conn} do
       with_mocks([
@@ -739,6 +742,130 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         assert document_has_element?(
                  document,
                  "option[value=\"Courthouse (outbound)|place-crtst\"][selected=\"selected\"]"
+               )
+      end
+    end
+
+    @tag :logged_in_user
+    test "stop selection is cleared when route is deselected", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@bus_route] end,
+           get: fn _, _ -> @bus_route end
+         ]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop, @stop_2] end]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        get_to_submission_page_refactor(view, "Bus", "Delay")
+        render_async(view)
+
+        # Select a route and then a stop
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => [@bus_route.id]}
+        })
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "route_ids" => [@bus_route.id],
+            "stop_names_and_ids" => ["#{@stop_2.name} (outbound)|#{@stop_2.id}"]
+          }
+        })
+
+        render_async(view)
+
+        {:ok, document} = view |> render() |> Floki.parse_document()
+
+        assert document_has_element?(
+                 document,
+                 "option[value=\"#{@stop_2.name} (outbound)|#{@stop_2.id}\"][selected=\"selected\"]"
+               )
+
+        # Deselect the route — stop selection must be cleared
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => []}
+        })
+
+        render_async(view)
+
+        {:ok, document} = view |> render() |> Floki.parse_document()
+
+        refute document_has_element?(
+                 document,
+                 "option[value=\"#{@stop_2.name} (outbound)|#{@stop_2.id}\"][selected]"
+               )
+      end
+    end
+
+    @tag :logged_in_user
+    test "stop selection is cleared when a second route is added", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@bus_route] end,
+           get: fn _, _ -> @bus_route end
+         ]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop, @stop_2] end]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        get_to_submission_page_refactor(view, "Bus", "Delay")
+        render_async(view)
+
+        # Select a route and then a stop
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => [@bus_route.id]}
+        })
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "route_ids" => [@bus_route.id],
+            "stop_names_and_ids" => ["#{@stop_2.name} (outbound)|#{@stop_2.id}"]
+          }
+        })
+
+        render_async(view)
+
+        {:ok, document} = view |> render() |> Floki.parse_document()
+
+        assert document_has_element?(
+                 document,
+                 "option[value=\"#{@stop_2.name} (outbound)|#{@stop_2.id}\"][selected=\"selected\"]"
+               )
+
+        # Add a second route — stop selection must be cleared
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => [@bus_route.id, "second-route"]}
+        })
+
+        render_async(view)
+
+        {:ok, document} = view |> render() |> Floki.parse_document()
+
+        refute document_has_element?(
+                 document,
+                 "option[value=\"#{@stop_2.name} (outbound)|#{@stop_2.id}\"][selected]"
                )
       end
     end
@@ -1911,6 +2038,52 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
       trip_info = Ecto.Changeset.get_field(result, :trip_information_by_id)
 
       assert trip_info in [nil, %{}]
+    end
+  end
+
+  describe "transform_changeset - stop coherence" do
+    defp stop_coherence_changeset(attrs) do
+      Ecto.Changeset.cast(
+        %AlertData{},
+        Map.merge(%{route_type: 1, direction: "default", trip_ids: []}, attrs),
+        [:direction, :effect_name, :route_ids, :stop_names_and_ids, :route_type, :trip_ids]
+      )
+    end
+
+    test "clears stop selection when route is deselected" do
+      changeset =
+        stop_coherence_changeset(%{route_ids: [], stop_names_and_ids: ["Central|place-cntsq"]})
+
+      result = AffectedServiceSlice.transform_changeset(changeset)
+
+      assert Ecto.Changeset.get_field(result, :stop_names_and_ids) == []
+      assert Ecto.Changeset.get_field(result, :stop_ids) == []
+    end
+
+    test "clears stop selection when multiple routes are selected" do
+      changeset =
+        stop_coherence_changeset(%{
+          route_ids: ["Red", "Orange"],
+          stop_names_and_ids: ["Central|place-cntsq"]
+        })
+
+      result = AffectedServiceSlice.transform_changeset(changeset)
+
+      assert Ecto.Changeset.get_field(result, :stop_names_and_ids) == []
+      assert Ecto.Changeset.get_field(result, :stop_ids) == []
+    end
+
+    test "preserves stop selection when exactly one route is selected" do
+      changeset =
+        stop_coherence_changeset(%{
+          route_ids: ["Red"],
+          stop_names_and_ids: ["Central|place-cntsq"]
+        })
+
+      result = AffectedServiceSlice.transform_changeset(changeset)
+
+      assert Ecto.Changeset.get_field(result, :stop_names_and_ids) == ["Central|place-cntsq"]
+      assert Ecto.Changeset.get_field(result, :stop_ids) == ["place-cntsq"]
     end
   end
 end

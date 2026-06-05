@@ -6,6 +6,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
   alias AlertsUI.Models.Alert
   alias AlertsUI.Repo
+  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.ServiceSliceDispatcher
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
 
@@ -274,8 +275,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
           list(atom()) | nil
         ) :: {:ok, {Socket.t()}} | {:error, {Socket.t()}} | any()
   def sync(alert_data_or_changeset, socket, params, fields \\ nil) do
+    alert_data_params =
+      params
+      |> Map.get("alert_data", %{})
+      |> inject_empty_for_cleared_multiselect(params)
+
     alert_data_or_changeset
-    |> cast(Map.get(params, "alert_data", %{}), fields || form_fields(socket))
+    |> cast(alert_data_params, fields || form_fields(socket))
     |> transform(params, socket)
     |> validate(params, socket)
     |> case do
@@ -371,13 +377,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
   def alert_data_v1_to_v2(v1_alert_data) do
     v1_alert_data
+    |> atomize_specifiers()
     |> normalize_effect_name()
     |> set_sync_toggles()
   end
 
   def alert_data_v2_to_v1(v2_alert_data) do
     v2_alert_data
+    |> atomize_specifiers()
     |> strip_banner_text_unless_enabled()
+    |> strip_recurrence_days_if_one_time()
   end
 
   defp normalize_effect_name(alert_data) do
@@ -393,6 +402,49 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
       end
 
     Map.put(alert_data, :effect_name, normalized)
+  end
+
+  @specifier_fields [
+    :active_period_start_specifier,
+    :active_period_start_time_specifier,
+    :active_period_end_specifier,
+    :active_period_end_time_specifier,
+    :notification_specifier
+  ]
+
+  defp atomize_specifiers(%AlertData{} = alert_data) do
+    alert_data
+    |> Map.from_struct()
+    |> atomize_specifiers()
+  end
+
+  defp atomize_specifiers(alert_data) when is_map(alert_data) do
+    for {key, value} <- alert_data, into: %{} do
+      value =
+        if Enum.member?(@specifier_fields, key) do
+          atomize_specifier(value)
+        else
+          value
+        end
+
+      {key, value}
+    end
+  end
+
+  defp atomize_specifier(value) do
+    case value do
+      value when is_binary(value) -> String.to_existing_atom(value)
+      value when is_atom(value) -> value
+    end
+  end
+
+  # I know we have a fix for this in PR but I need it done now
+  defp strip_recurrence_days_if_one_time(alert_data) do
+    if alert_data.alert_timing in [:"one-time", "one-time"] do
+      Map.put(alert_data, :recurrence_days, [])
+    else
+      alert_data
+    end
   end
 
   defp set_sync_toggles(alert_data) do
@@ -438,4 +490,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
       Map.drop(v2_alert_data, [:banner_text])
     end
   end
+
+  # When a multiselect field is fully deselected, browsers omit it from form
+  # submissions entirely. Ecto's cast then skips the field, leaving the prior
+  # value intact. If the _target indicates the user interacted with a field
+  # that is now absent from the params, inject an empty list so cast resets it.
+  defp inject_empty_for_cleared_multiselect(
+         alert_data_params,
+         %{"_target" => ["alert_data", field]}
+       )
+       when not is_map_key(alert_data_params, field) do
+    Map.put(alert_data_params, field, [])
+  end
+
+  defp inject_empty_for_cleared_multiselect(alert_data_params, _params), do: alert_data_params
 end

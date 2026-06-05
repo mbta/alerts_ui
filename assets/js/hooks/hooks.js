@@ -143,12 +143,16 @@ Hooks.Selector = {
       // Only apply to a subset of selectors found in the lookup table
       if (payloadKey) {
         // If "default" hasn't already been filtered out, do so
-        const newSelections = payload[payloadKey].filter(item => item != "default");
+        const newSelections = (payload[payloadKey] || []).filter(item => item != "default");
 
-        // If newSelections is 0, then only default is selected. Otherwise, the opposite
         if (newSelections.length != 0) {
+          // Other options are selected — deselect the prompt "default" option
           const defaultIndex = options.findIndex((opt) => opt.value == "default");
-          options[defaultIndex].selected = false;
+          if (defaultIndex >= 0) options[defaultIndex].selected = false;
+        } else {
+          // Server cleared all selections — sync .selected to match the attributes
+          // (morphdom patches attributes but does not update the .selected property)
+          options.forEach(opt => { opt.selected = opt.hasAttribute("selected"); });
         }
       }
     });

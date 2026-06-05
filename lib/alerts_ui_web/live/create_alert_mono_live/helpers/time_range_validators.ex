@@ -278,7 +278,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
     )
   end
 
-  def validate_notification(changeset) do
+  def validate_notification(changeset, editing? \\ false)
+
+  def validate_notification(changeset, true), do: changeset
+
+  def validate_notification(changeset, _) do
     current_time = DateTimeHelpers.current_time()
     naive_start = naive_start(changeset, current_time)
 

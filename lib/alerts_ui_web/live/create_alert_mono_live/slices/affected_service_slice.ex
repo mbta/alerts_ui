@@ -13,7 +13,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
 
-  import Phoenix.LiveView, only: [start_async: 3]
+  import Phoenix.LiveView, only: [push_event: 3, start_async: 3]
   import Ecto.Changeset, only: [cast: 3, get_field: 2, change: 2]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
@@ -85,7 +85,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     end
 
     def assigns(_service_data, socket, params) do
-      AffectedServiceSlice.async_assign_selections(socket, params)
+      socket = AffectedServiceSlice.async_assign_selections(socket, params)
+
+      # When the server clears stop selections (e.g. route was deselected), morphdom
+      # removes the `selected` attribute but does NOT update option.selected properties.
+      # Push an explicit event so the JS hook can sync the DOM property to match.
+      if socket.assigns.form[:stop_names_and_ids].value in [nil, []] do
+        push_event(socket, "adjustSelections", %{stop_names_and_ids: []})
+      else
+        socket
+      end
     end
   end
 
@@ -134,8 +143,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     changeset
     |> ensure_default_direction()
     |> ensure_route_ids()
-    # |> ensure_coherent_selections()
-    # |> filter_empty_list_fields()
+    |> clear_stops_when_multi_route()
     |> ensure_stop_names_and_ids()
     |> ensure_trip_ids()
     |> filter_stops_by_direction()
@@ -337,14 +345,26 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
     cond do
       effect_name in normalized_single_route_effects ->
-        incoming_route_id = get_field(changeset, :single_route_id)
-        cast(changeset, %{route_ids: [incoming_route_id]}, [:route_ids])
+        case get_field(changeset, :single_route_id) do
+          nil -> cast(changeset, %{route_ids: []}, [:route_ids])
+          route_id -> cast(changeset, %{route_ids: [route_id]}, [:route_ids])
+        end
 
       get_field(changeset, :route_ids) == nil ->
         cast(changeset, %{route_ids: []}, [:route_ids])
 
       true ->
         changeset
+    end
+  end
+
+  defp clear_stops_when_multi_route(changeset) do
+    route_ids = get_field(changeset, :route_ids) || []
+
+    if length(route_ids) != 1 do
+      cast(changeset, %{stop_names_and_ids: []}, [:stop_names_and_ids])
+    else
+      changeset
     end
   end
 
@@ -413,7 +433,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   def ensure_modal_date(changeset) do
     case get_field(changeset, :modal_date) do
-      nil -> change(changeset, modal_date: today())
+      modal_date when modal_date in [nil, "default"] -> change(changeset, modal_date: today())
       _ -> changeset
     end
   end
@@ -500,6 +520,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             label="Upcoming dates"
             field={@form[:modal_date]}
             filter_field={@form[:modal_date_search_term]}
+            modal_filter_active={date_filter_active?(@form[:modal_date].value, today())}
             options={
               filter_service_dates(
                 service_dates(),
@@ -528,7 +549,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             field={@form[:direction]}
             modal_filter_id="dates-filter-modal"
             modal_filter_title={"Filter: #{@selections.filter_title_value || default_filter_title()}"}
-            modal_filter_active={date_filter_active?(@form[:modal_date].value, today())}
             options={@selections.direction_options}
             disabled={disable_stop_input?(@form[:route_ids].value)}
             modal_filter_disabled={@form[:route_ids].value in [nil, []]}

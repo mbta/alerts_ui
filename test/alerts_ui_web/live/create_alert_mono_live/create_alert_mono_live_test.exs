@@ -231,7 +231,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         view
         |> element("form")
         |> render_change(%{
-          "alert_data" => %{"route_ids" => ["CR-Worcester"], "directions" => "0"}
+          "alert_data" => %{"single_route_id" => "CR-Worcester", "directions" => "0"}
         })
 
         assert render(view) =~ "cool stop name"
