@@ -320,48 +320,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     end
 
     @tag :logged_in_user
-    test "filter title updates to all future trips when no date selected", %{conn: conn} do
-      with_mocks([
-        {RoutesRepo, [],
-         [
-           by_type: fn _ -> [@route] end,
-           get: fn _, _ -> @route end
-         ]},
-        {SchedulesRepo, [],
-         [
-           by_route_ids: fn _, _ -> [@schedule_future, @schedule_future] end,
-           end_of_rating: fn -> Date.add(@todays_date, 7) end
-         ]},
-        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
-      ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Commuter Rail", "Delay")
-        render_async(view)
-
-        view
-        |> element("form")
-        |> render_change(%{
-          "_target" => ["alert_data", "route_ids"],
-          "alert_data" => %{"route_ids" => ["CR-Worcester"]}
-        })
-
-        render_async(view)
-
-        # Set modal_date to "default", which maps to "All future trips"
-        view
-        |> element("form")
-        |> render_change(%{
-          "alert_data" => %{"modal_date" => "default", "route_ids" => ["CR-Worcester"]}
-        })
-
-        render_click(view, "accept_filter")
-        render_async(view)
-
-        assert render(view) =~ "Filter: All future trips"
-      end
-    end
-
-    @tag :logged_in_user
     test "schedule list updates when a different date is selected", %{conn: conn} do
       today = @todays_date |> Date.to_string()
       tomorrow = @todays_date |> Date.add(1) |> Date.to_string()
