@@ -122,7 +122,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   @single_route_effect_names ["Detour", "Snow Route"]
   @single_facility_effect_names ["Elevator Closure", "Escalator Closure"]
 
-  @spec build_alert_data(String.t() | Alert.t() | nil, :creating | :duplicating | :editing | nil) ::
+  @spec build_alert_data(String.t() | Alert.t() | nil, atom()) ::
           t()
   def build_alert_data(alert, form_type \\ nil)
 
