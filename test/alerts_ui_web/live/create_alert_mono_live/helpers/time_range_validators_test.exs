@@ -541,7 +541,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidatorsTest do
     end
   end
 
-  describe "validate_notification/1" do
+  describe "validate_notification/2" do
     test "errors when notification_period_start is in the past and not editing" do
       cs =
         changeset(%{
@@ -549,7 +549,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidatorsTest do
           active_period_start: future_naive(),
           notification_period_start: ~N[2020-01-01 09:00:00]
         })
-        |> TimeRangeValidators.validate_notification()
+        |> TimeRangeValidators.validate_notification(false)
 
       assert {msg1, []} = cs.errors[:notification_period_start]
       assert msg1 =~ "in the past"
@@ -565,25 +565,35 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidatorsTest do
           active_period_start: future_naive(30),
           notification_period_start: future_naive(60)
         })
-        |> TimeRangeValidators.validate_notification()
+        |> TimeRangeValidators.validate_notification(false)
 
       assert {msg, []} = cs.errors[:notification_period_start]
       assert msg =~ "Notification period must start on or before"
     end
 
-    test "errors when the notification is in the past, even when editing" do
+    test "skips the in-the-past check when editing" do
       cs =
         changeset(%{
           alert_timing: :"one-time",
           active_period_start: future_naive(),
           notification_period_start: ~N[2020-01-01 09:00:00]
         })
-        |> TimeRangeValidators.validate_notification()
+        |> TimeRangeValidators.validate_notification(true)
 
-      assert cs.errors == [
-               notification_period_start: {"Notifications can't be set in the past", []},
-               notification_period_start_date: {"Notifications can't be set in the past", []}
-             ]
+      assert cs.errors == []
+    end
+
+    test "still errors when notification is after alert start, even when editing" do
+      cs =
+        changeset(%{
+          alert_timing: :"one-time",
+          active_period_start: future_naive(30),
+          notification_period_start: future_naive(60)
+        })
+        |> TimeRangeValidators.validate_notification(true)
+
+      assert {msg, []} = cs.errors[:notification_period_start]
+      assert msg =~ "Notification period must start on or before"
     end
 
     test "passes when notification_period_start is on or before active_period_start" do
@@ -595,7 +605,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidatorsTest do
           active_period_start: start,
           notification_period_start: NaiveDateTime.add(start, -3600, :second)
         })
-        |> TimeRangeValidators.validate_notification()
+        |> TimeRangeValidators.validate_notification(false)
 
       assert cs.errors == []
     end
@@ -608,7 +618,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidatorsTest do
           active_period_start_time: ~T[09:00:00],
           notification_period_start: ~N[2020-01-01 09:00:00]
         })
-        |> TimeRangeValidators.validate_notification()
+        |> TimeRangeValidators.validate_notification(false)
 
       assert {msg, []} = cs.errors[:notification_period_start]
       assert msg =~ "in the past"
@@ -620,7 +630,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidatorsTest do
           alert_timing: :recurring,
           notification_period_start: ~N[2020-01-01 09:00:00]
         })
-        |> TimeRangeValidators.validate_notification()
+        |> TimeRangeValidators.validate_notification(false)
 
       assert cs.errors == []
     end
