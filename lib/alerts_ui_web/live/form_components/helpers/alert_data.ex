@@ -153,8 +153,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       :original_facility_selections
     ]
 
-    alert = alert |> Map.put(:original_route_selections, (Map.get(alert, :original_route_selections) || []) ++ ["Bad Route|bad_routes_id"])
-
     Enum.reduce(direct_from_alert_keys, %__MODULE__{}, fn key, params ->
       Map.put(params, key, Map.get(alert, key))
     end)

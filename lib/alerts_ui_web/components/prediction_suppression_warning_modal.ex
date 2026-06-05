@@ -79,7 +79,7 @@ defmodule AlertsUIWeb.PredictionSuppressionWarningModal do
   defp missing_information?(%{combination: :RDTS} = alert_data) do
     trip_ids = Map.get(alert_data, :trip_ids, [])
     stop_ids = Map.get(alert_data, :stop_ids, [])
-    trip_ids in [[], nil] || stop_ids in [[], nil]
+    trip_ids == [] || stop_ids == []
   end
 
   defp missing_information?(%{combination: :RDT} = alert_data) do

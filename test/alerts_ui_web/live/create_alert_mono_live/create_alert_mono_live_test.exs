@@ -333,6 +333,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [] end},
         {StopsRepo, [],
          [
+           all: fn _, _ -> [@stop] end,
            by_route: fn _route, _direction, _opts -> [@stop] end,
            get_parent: fn
              "place-sstat" -> @stop
@@ -375,7 +376,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         assert rendered_view =~ "spurious route [sp_rt]"
         assert rendered_view =~ "spurious stop [obsolete_stop]"
         open_review_modal(view)
-        assert view |> element("#review-modal-container") |> render_async() =~ "Framingham/Worcester"
+
+        assert view |> element("#review-modal-container") |> render_async() =~
+                 "Framingham/Worcester"
+
+        open_review_modal(view)
+        submit_alert(view)
+
+        assert Alerts.get_by_alert_id("123").original_route_selections == [
+                 "Framingham/Worcester Line|CR-Worcester"
+               ]
       end
     end
   end

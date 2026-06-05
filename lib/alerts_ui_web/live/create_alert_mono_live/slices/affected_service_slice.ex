@@ -159,7 +159,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   def async_assign_selections(%{assigns: %{} = assigns} = socket, params) do
     if update_selections?(params) do
       update_selections(socket)
-
     else
       dont_update_selections(Map.get(assigns, :selections), socket)
     end

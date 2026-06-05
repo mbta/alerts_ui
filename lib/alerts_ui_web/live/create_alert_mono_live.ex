@@ -287,7 +287,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   @impl true
   def handle_async(:fetch_selections, {:ok, new_selections}, socket) do
-    IO.inspect(Map.keys(socket.assigns))
     form = socket.assigns.form
 
     required_fields =
@@ -302,7 +301,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       stop_ids: :available_stops,
       facility_ids: :available_facilities
     }
-
 
     obsolete_ids =
       Enum.map(required_fields, fn field ->
@@ -320,39 +318,32 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       end)
       |> Enum.into(%{})
 
-    if Enum.any?(obsolete_ids, fn {_k, v} -> !Enum.empty?(v) end) do
-      send(self(), {:got_obsolete_ids, obsolete_ids})
-    end
+    socket =
+      if obsolete_ids_found?(obsolete_ids) and socket.assigns.obsolete_ids === %{} do
+        ids_with_obsolete_entities_removed =
+          ObsoleteEntities.ids_with_obsolete_entities_removed(
+            Map.from_struct(form.data),
+            obsolete_ids,
+            required_fields
+          )
 
-    ids_with_obsolete_entities_removed =
-      ObsoleteEntities.ids_with_obsolete_entities_removed(
-        Map.from_struct(form.data),
-        obsolete_ids,
-        required_fields
-      )
+        send(self(), {:got_obsolete_ids, obsolete_ids})
 
-       new_form_data = Map.merge(form.data, ids_with_obsolete_entities_removed)
-        new_form = Map.put(form, :data, new_form_data)
-        socket =  assign(socket, %{form: new_form, obsolete_ids: obsolete_ids})
+        assign(socket, :obsolete_ids, obsolete_ids)
+        |> sync_socket(%{"alert_data" => ids_with_obsolete_entities_removed})
+      else
+        socket
+      end
 
-    # TEST IT OVER IN ALERT DATA
+    socket = assign(socket, :obsolete_ids, obsolete_ids)
 
     pending_route_ids = Map.get(new_selections, :pending_auto_select_route_ids)
 
     # Always override route_ids — no guard for pre-existing selections; see design spec.
     socket =
       if is_nil(pending_route_ids) do
-
-         assign(socket, %{selections: new_selections})
-
+        assign(socket, %{selections: new_selections})
       else
-        pending_route_ids = pending_route_ids -- obsolete_ids.route_ids
-
-        # ids_with_obsolete_entities_removed =
-        #   Map.put(ids_with_obsolete_entities_removed, :route_ids, pending_route_ids)
-
-
-
         socket
         |> assign(:selections, %{new_selections | pending_auto_select_route_ids: nil})
         |> sync_socket(%{"alert_data" => %{"route_ids" => pending_route_ids}})
@@ -370,6 +361,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       %{loading: _} = sel -> {:noreply, assign(socket, :selections, %{sel | loading: false})}
       _ -> {:noreply, socket}
     end
+  end
+
+  defp obsolete_ids_found?(obsolete_ids) do
+    Enum.any?(obsolete_ids, fn {_k, v} -> !Enum.empty?(v) end)
   end
 
   def handle_info({:got_obsolete_ids, obsolete_ids_map}, socket) do
@@ -529,9 +524,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         end
 
       {:error, socket} ->
-
         if assigns.submitting? do
-
           # errors =
           #  result
           #  |> Alerts.parse_changeset_errors()
