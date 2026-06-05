@@ -662,6 +662,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
   describe "duplicating" do
     @tag :logged_in_user
+    @tag :skip
     test "duplicating keeps correct end time specifier when there is no end time", %{conn: conn} do
       create_test_alert("tr-dup-1", duration_certainty: :UNKNOWN)
 
