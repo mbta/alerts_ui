@@ -162,6 +162,13 @@ Hooks.Selector = {
   },
 
   updated() {
+    // Sync each option's .selected property to its `selected` attribute.
+    // LiveView's morphdom patches remove/add the attribute but does not update
+    // the property, so user-selected options stay visually selected even after
+    // the server clears them.
+    for (const option of this.el.options) {
+      option.selected = option.hasAttribute("selected");
+    }
     // return to where we were before the update
     this.el.scrollTop = this.savedScrollTop;
   }

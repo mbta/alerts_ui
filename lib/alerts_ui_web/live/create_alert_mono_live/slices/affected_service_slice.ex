@@ -134,8 +134,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     changeset
     |> ensure_default_direction()
     |> ensure_route_ids()
-    # |> ensure_coherent_selections()
-    # |> filter_empty_list_fields()
+    |> clear_stops_when_multi_route()
     |> ensure_stop_names_and_ids()
     |> ensure_trip_ids()
     |> filter_stops_by_direction()
@@ -345,6 +344,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
       true ->
         changeset
+    end
+  end
+
+  defp clear_stops_when_multi_route(changeset) do
+    route_ids = get_field(changeset, :route_ids) || []
+
+    if length(route_ids) != 1 do
+      cast(changeset, %{stop_names_and_ids: []}, [:stop_names_and_ids])
+    else
+      changeset
     end
   end
 
