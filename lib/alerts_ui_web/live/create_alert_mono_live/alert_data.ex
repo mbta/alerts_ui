@@ -422,15 +422,19 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     for {key, value} <- alert_data, into: %{} do
       value =
         if Enum.member?(@specifier_fields, key) do
-          case value do
-            value when is_binary(value) -> String.to_existing_atom(value)
-            value when is_atom(value) -> value
-          end
+          atomize_specifier(value)
         else
           value
         end
 
       {key, value}
+    end
+  end
+
+  defp atomize_specifier(value) do
+    case value do
+      value when is_binary(value) -> String.to_existing_atom(value)
+      value when is_atom(value) -> value
     end
   end
 

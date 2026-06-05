@@ -85,7 +85,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     end
 
     def assigns(_service_data, socket, params) do
-      IO.inspect(socket.assigns.form[:modal_date].value, label: "MD AT ASSIGNS")
       AffectedServiceSlice.async_assign_selections(socket, params)
     end
   end
