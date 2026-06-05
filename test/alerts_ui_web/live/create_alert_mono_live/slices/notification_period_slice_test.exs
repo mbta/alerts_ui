@@ -150,7 +150,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
           "notification_period_start" => "2024-04-29T10:54:00"
         }
       })
-
       assert render(view) =~ "Notifications can&#39;t be set in the past"
     end
   end
