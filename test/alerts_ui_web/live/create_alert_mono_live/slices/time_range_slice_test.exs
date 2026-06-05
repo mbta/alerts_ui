@@ -222,7 +222,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     end
 
     @tag :logged_in_user
-    @tag :skip
     test "displays error if one-time start occurs during DST gap", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
       get_to_submission_page_refactor(view, "Bus", "Delay")

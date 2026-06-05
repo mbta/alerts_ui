@@ -110,11 +110,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       changeset
       |> TimeRangeValidators.validate_cast_datetimes(params)
       |> TimeRangeValidators.validate_required_fields()
+      |> TimeRangeValidators.validate_not_dst_gap()
       |> TimeRangeValidators.validate_end_after_start()
       |> TimeRangeValidators.validate_start_is_after_now(slice.form_type == :editing)
       |> TimeRangeValidators.validate_at_least_one_recurrence()
       |> TimeRangeValidators.validate_start_date_matches_weekday()
-      |> TimeRangeValidators.validate_not_dst_gap()
       |> TimeRangeValidators.validate_start_is_before_trip(trip_arrival_time)
     end
 
