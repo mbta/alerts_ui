@@ -227,7 +227,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
 
         active_period_end =
           tomorrows_date
-          |> Date.add(1)
+          |> Date.add(2)
           |> NaiveDateTime.new!(~T[03:00:00])
 
         view
