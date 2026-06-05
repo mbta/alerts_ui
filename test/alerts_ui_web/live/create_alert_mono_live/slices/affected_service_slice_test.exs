@@ -665,6 +665,51 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     end
 
     @tag :logged_in_user
+    test "stop select is disabled on direct URL load for single-route effect before any route selected",
+         %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _ -> [@bus_route] end]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new/bus/detour")
+        render_async(view)
+
+        assert render(view) =~ ~s(id="alert_data_stop_names_and_ids" disabled="disabled")
+      end
+    end
+
+    @tag :logged_in_user
+    test "stop select becomes enabled after single_route_id selected on direct URL load",
+         %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@bus_route] end,
+           get: fn _, _ -> @bus_route end
+         ]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new/bus/detour")
+        render_async(view)
+
+        assert render(view) =~ ~s(id="alert_data_stop_names_and_ids" disabled="disabled")
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "single_route_id"],
+          "alert_data" => %{"single_route_id" => @bus_route.id}
+        })
+
+        render_async(view)
+
+        refute render(view) =~ ~s(id="alert_data_stop_names_and_ids" disabled="disabled")
+      end
+    end
+
+    @tag :logged_in_user
     test "bus stop names include direction suffix and are ordered outbound then inbound",
          %{conn: conn} do
       with_mocks([

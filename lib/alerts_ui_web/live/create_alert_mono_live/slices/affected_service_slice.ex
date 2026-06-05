@@ -337,8 +337,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
     cond do
       effect_name in normalized_single_route_effects ->
-        incoming_route_id = get_field(changeset, :single_route_id)
-        cast(changeset, %{route_ids: [incoming_route_id]}, [:route_ids])
+        case get_field(changeset, :single_route_id) do
+          nil -> cast(changeset, %{route_ids: []}, [:route_ids])
+          route_id -> cast(changeset, %{route_ids: [route_id]}, [:route_ids])
+        end
 
       get_field(changeset, :route_ids) == nil ->
         cast(changeset, %{route_ids: []}, [:route_ids])
