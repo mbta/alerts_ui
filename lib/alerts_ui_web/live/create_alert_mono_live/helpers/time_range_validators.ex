@@ -99,7 +99,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
   end
 
   defp validate_recurring_end(changeset, timing) when timing in [:"one-time", "one-time"] do
-    active_period_start = active_period_start(get_field(changeset, :active_period_start))
+    active_period_start =
+      with dt when not is_nil(dt) <- get_field(changeset, :active_period_start),
+           [] <- Keyword.get_values(changeset.errors, :active_period_start) do
+        localize(dt)
+      else
+        _ -> nil
+      end
 
     get_recurring_end_errors(active_period_start, changeset)
   end
@@ -131,12 +137,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
   end
 
   defp validate_recurring_end(changeset, _timing), do: changeset
-
-  defp active_period_start(nil), do: nil
-
-  defp active_period_start(utc_time) do
-    localize(utc_time)
-  end
 
   defp get_recurring_end_errors(nil, changeset), do: changeset
 
