@@ -378,7 +378,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     selected_schedules = Enum.filter(available_schedules, &(&1.trip.id in trip_ids))
     now = current_time()
     departure = get_trip_departure_time(selected_schedules)
-    arrival = get_trip_arrival_time(nil, selected_schedules)
+    arrival = get_trip_arrival_time(selected_schedules)
 
     {departure, start_specifier} =
       if NaiveDateTime.compare(now, departure) == :gt do
@@ -407,9 +407,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     |> utc_datetime_to_naive()
   end
 
-  defp get_trip_arrival_time("default", _), do: nil
-
-  defp get_trip_arrival_time(_, selected_schedules) do
+  defp get_trip_arrival_time(selected_schedules) do
     selected_schedules
     |> Enum.map(& &1.time_of_last_trip_arrival)
     |> Enum.max(DateTime, fn -> nil end)
@@ -580,7 +578,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
         />
       </div>
     </div>
-    <div :if={Enum.empty?(@form.errors)} class="duration-explanation text-text-secondary">
+    <div
+      :if={Enum.empty?(@form.errors)}
+      class="duration-explanation text-text-secondary"
+      id="duration-text"
+    >
       Effect duration: {DurationText.one_time_duration_text(@form)}
     </div>
     """

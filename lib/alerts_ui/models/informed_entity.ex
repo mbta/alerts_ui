@@ -190,7 +190,7 @@ defmodule AlertsUI.Models.InformedEntity do
       iex> InformedEntity.route_code_mapping(0)
       :light_rail
   """
-  @spec route_code_mapping(Route.type_int(), String.t() | nil) :: String.t() | nil
+  @spec route_code_mapping(Route.type_int() | nil, String.t() | nil) :: atom()
   def route_code_mapping(code, effect \\ nil)
   def route_code_mapping(0, _effect), do: :light_rail
   def route_code_mapping(1, _effect), do: :subway

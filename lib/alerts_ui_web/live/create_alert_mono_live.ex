@@ -306,17 +306,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   @doc """
   Initialize a form. Called from `mount/3`.
   """
-  @spec start_socket(LiveView.Socket.t(), LiveView.unsigned_params()) :: LiveView.Socket.t()
+  # @spec start_socket(LiveView.Socket.t(), LiveView.unsigned_params()) :: LiveView.Socket.t()
   def start_socket(socket, params) do
     case {Map.get(params, "alert_id"), socket.assigns.live_action} do
       {nil, :new} ->
-        # create a new alert
-        socket
-        |> AlertData.init(params, :new)
-        |> case do
-          {:ok, socket} -> socket
-          {:error, socket} -> socket
-        end
+        create_new_alert(socket, params)
 
       {nil, action} when action in [:edit, :duplicate] ->
         raise %ArgumentError{message: "you need an alert id to #{action}"}
@@ -325,29 +319,46 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         redirect(socket, ~p"/alerts/mono/edit/#{alert_id}")
 
       {alert_id, :edit} ->
-        # edit an existing alert
-        alert = Alerts.get_by_alert_id!(alert_id)
-
-        socket
-        |> AlertData.init(params, :edit, alert)
-        |> case do
-          {:ok, socket} -> socket
-          {:error, socket} -> socket
-        end
+        edit_existing_alert(socket, params, alert_id)
 
       {alert_id, :duplicate} ->
-        # duplicate an existing alert
-        alert = Alerts.get_by_alert_id!(alert_id)
-
-        socket
-        |> AlertData.init(params, :duplicate, strip_on_duplicate(alert))
-        |> case do
-          {:ok, socket} -> socket
-          {:error, socket} -> socket
-        end
+        duplicate_existing_alert(socket, params, alert_id)
 
       {_alert_id, action} ->
         raise %ArgumentError{message: "no such action #{action}"}
+    end
+  end
+
+  defp create_new_alert(%{assigns: %{} = _assigns} = socket, params) do
+    # create a new alert
+    {_, socket} = AlertData.init(socket, params, :new)
+
+    socket
+  end
+
+  defp create_new_alert(socket, _params), do: socket
+
+  defp edit_existing_alert(socket, params, alert_id) do
+    # edit an existing alert
+    alert = Alerts.get_by_alert_id!(alert_id)
+
+    socket
+    |> AlertData.init(params, :edit, alert)
+    |> case do
+      {:ok, socket} -> socket
+      {:error, socket} -> socket
+    end
+  end
+
+  defp duplicate_existing_alert(socket, params, alert_id) do
+    # duplicate an existing alert
+    alert = Alerts.get_by_alert_id!(alert_id)
+
+    socket
+    |> AlertData.init(params, :duplicate, strip_on_duplicate(alert))
+    |> case do
+      {:ok, socket} -> socket
+      {:error, socket} -> socket
     end
   end
 
@@ -355,19 +366,21 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   Accept incoming data. Called from `handle_params/3` and the `validate`
   event handler.
   """
-  @spec sync_socket(LiveView.Socket.t(), LiveView.unsigned_params()) :: LiveView.Socket.t()
-  def sync_socket(socket, params \\ %{}) do
-    case AlertData.sync(socket.assigns.form.source, socket, params) do
+  @spec sync_socket(LiveView.Socket.t(), map()) :: LiveView.Socket.t()
+  def sync_socket(socket, params \\ %{})
+
+  def sync_socket(%LiveView.Socket{assigns: %{} = assigns} = socket, params) do
+    case AlertData.sync(assigns.form.source, socket, params) do
       {:ok, socket} ->
-        if socket.assigns.submitting? do
-          effect_name = socket.assigns.form[:effect_name].value
+        if assigns.submitting? do
+          effect_name = assigns.form[:effect_name].value
 
           path_route_type =
-            socket.assigns[:path_route_type] || PathHelper.path_route_type_from_socket(socket)
+            assigns[:path_route_type] || PathHelper.path_route_type_from_socket(socket)
 
           path =
             PathHelper.path_with_route_type_and_effect_name(
-              %{socket.assigns | path_route_type: path_route_type},
+              %{assigns | path_route_type: path_route_type},
               effect_name
             ) <> "?review=true"
 
@@ -379,7 +392,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         end
 
       {:error, socket} ->
-        if socket.assigns.submitting? do
+        if assigns.submitting? do
           # errors =
           #  result
           #  |> Alerts.parse_changeset_errors()
@@ -393,6 +406,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         end
     end
   end
+
+  def sync_socket(socket, _), do: socket
 
   def service_slice(assigns) do
     service_slice_by_combination(assigns.form[:combination].value).render(assigns)

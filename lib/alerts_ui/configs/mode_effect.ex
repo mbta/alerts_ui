@@ -605,7 +605,6 @@ defmodule AlertsUI.Configs.ModeEffect do
   @spec mode_effect() :: %{atom => %{String.t() => ModeEffectStruct.t()}}
   def mode_effect, do: @mode_effect
 
-  @spec mode_effects_by_route_type_name(String.t()) :: %{String.t() => ModeEffectStruct.t()}
   def mode_effects_by_route_type_name(route_type_name) do
     @mode_effect[route_type_name]
   end

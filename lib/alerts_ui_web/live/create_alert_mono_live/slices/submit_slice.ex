@@ -49,7 +49,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
 
     selected_routes =
       case assigns.selections do
-        nil -> []
+        nil ->
+          []
+
         selections ->
           Enum.filter(
             Map.get(selections, :available_routes, []) || [],
