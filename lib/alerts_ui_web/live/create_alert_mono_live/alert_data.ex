@@ -6,6 +6,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
   alias AlertsUI.Models.Alert
   alias AlertsUI.Repo
+  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.ServiceSliceDispatcher
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
 
@@ -371,13 +372,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
   def alert_data_v1_to_v2(v1_alert_data) do
     v1_alert_data
+    |> atomize_specifiers()
     |> normalize_effect_name()
     |> set_sync_toggles()
   end
 
   def alert_data_v2_to_v1(v2_alert_data) do
     v2_alert_data
+    |> atomize_specifiers()
     |> strip_banner_text_unless_enabled()
+    |> strip_recurrence_days_if_one_time()
   end
 
   defp normalize_effect_name(alert_data) do
@@ -393,6 +397,44 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
       end
 
     Map.put(alert_data, :effect_name, normalized)
+  end
+
+  @specifier_fields [
+    :active_period_start_specifier,
+    :active_period_start_time_specifier,
+    :active_period_end_specifier,
+    :active_period_end_time_specifier,
+    :notification_specifier
+  ]
+
+  defp atomize_specifiers(%AlertData{} = alert_data) do
+    alert_data
+    |> Map.from_struct()
+    |> atomize_specifiers()
+  end
+
+  defp atomize_specifiers(alert_data) when is_map(alert_data) do
+    for {key, value} <- alert_data, into: %{} do
+      value = if Enum.member?(@specifier_fields, key) do
+        case value do
+          value when is_binary(value) -> String.to_existing_atom(value)
+          value when is_atom(value) -> value
+        end
+      else
+        value
+      end
+
+      {key, value}
+    end
+  end
+
+  # I know we have a fix for this in PR but I need it done now
+  defp strip_recurrence_days_if_one_time(alert_data) do
+    if alert_data.alert_timing in [:"one-time", "one-time"] do
+      Map.put(alert_data, :recurrence_days, [])
+    else
+      alert_data
+    end
   end
 
   defp set_sync_toggles(alert_data) do
