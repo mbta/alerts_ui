@@ -116,6 +116,46 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
     end
 
     @tag :logged_in_user
+    test "min_time hidden input reflects notification start, not current time, when specifier is same_as_effect_period",
+         %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      get_to_submission_page_refactor(view, "Bus", "Detour")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_start_specifier" => "custom",
+          "active_period_start" => "2030-01-01T10:00:00",
+          "notification_specifier" => "same_as_effect_period"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{"alert_data" => %{"reminder_sort" => ["new"]}})
+
+      min_time_input = element(view, "#reminder_times-0-min_time") |> render()
+      assert min_time_input =~ ~s(value="2030-01-01T10:00")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "reminder_times" => %{
+            "0" => %{"reminder_time" => "2029-01-01T00:00:00"}
+          }
+        }
+      })
+
+      min_time_element =
+        element(view, "#alert_data_reminder_times_0_reminder_time-root-element") |> render()
+
+      assert min_time_element =~
+               ~s(Reminder time must be after notification period starts (01/01/2030, 10:00 AM\))
+    end
+
+    @tag :logged_in_user
     test "doesn't error if time entered is within notification period", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
       get_to_submission_page_refactor(view, "Bus", "Detour")

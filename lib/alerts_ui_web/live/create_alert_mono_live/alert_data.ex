@@ -357,10 +357,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
       UrlSlice,
       ServiceSliceDispatcher.affected_service_component(combination),
       AlertDetailsSlice,
-      ReminderTimesSlice,
-      DeliverySlice,
       TimeRangeSlice,
       NotificationPeriodSlice,
+      ReminderTimesSlice,
+      DeliverySlice,
       SubmitSlice
     ]
   end
