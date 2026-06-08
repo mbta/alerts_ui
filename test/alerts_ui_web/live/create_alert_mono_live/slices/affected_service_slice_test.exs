@@ -2085,5 +2085,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
       assert Ecto.Changeset.get_field(result, :stop_names_and_ids) == ["Central|place-cntsq"]
       assert Ecto.Changeset.get_field(result, :stop_ids) == ["place-cntsq"]
     end
+
+    test "filters out Name|default entries from stop_names_and_ids" do
+      changeset =
+        stop_coherence_changeset(%{
+          route_ids: ["Red"],
+          stop_names_and_ids: ["Central|default"]
+        })
+
+      result = AffectedServiceSlice.transform_changeset(changeset)
+
+      assert Ecto.Changeset.get_field(result, :stop_ids) == []
+    end
   end
 end
