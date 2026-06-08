@@ -358,6 +358,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
       ServiceSliceDispatcher.affected_service_component(combination),
       AlertDetailsSlice,
       TimeRangeSlice,
+      ReminderTimesSlice,
+      DeliverySlice,
       NotificationPeriodSlice,
       ReminderTimesSlice,
       DeliverySlice,
