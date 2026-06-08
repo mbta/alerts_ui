@@ -96,9 +96,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
   end
 
   def ensure_notification_start_for_specifier(changeset, :same_as_effect_period, _, _) do
+    active_period_start = get_field(changeset, :active_period_start)
+    active_period_start_date = get_field(changeset, :active_period_start_date)
+
     changeset
-    |> force_change(:notification_period_start, nil)
-    |> force_change(:notification_period_start_date, nil)
+    |> force_change(:notification_period_start, active_period_start)
+    |> force_change(:notification_period_start_date, active_period_start_date)
   end
 
   def ensure_notification_start_for_specifier(changeset, :now, _, _) do

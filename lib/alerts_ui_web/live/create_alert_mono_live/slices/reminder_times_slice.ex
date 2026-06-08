@@ -8,7 +8,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
   alias AlertsUI.Helpers.ReminderTimes
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
-  alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
   alias Phoenix.HTML.FormField
 
   import Ecto.Changeset
@@ -61,13 +60,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
       end
     end
 
-    def assigns(_slice, socket, _params) do
-      Phoenix.Component.assign(socket, %{
-        current_time: DateTimeHelpers.current_time(),
-        notification_start: Map.get(%{}, :notification_period_start),
-        notification_end: Map.get(%{}, :notification_period_end)
-      })
-    end
+    def assigns(_slice, socket, _params), do: socket
   end
 
   def materialize_reminder_times(changeset) do
@@ -132,11 +125,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
   def drop_times(changeset, _), do: changeset
 
   def render(assigns) do
-    assigns =
-      assign(assigns, %{
-        current_time: DateTimeHelpers.current_time()
-      })
-
     ~H"""
     <div class="min-w-full flex flex-col mt-8" id="reminder_times_form">
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
@@ -147,7 +135,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
           <div class="flex flex-row mb-4" id={"reminder-time-component-#{rt.index}"}>
             <.reminder_input
               editable={ReminderTimes.editable?(rt[:id].value, rt[:reminder_time].value)}
-              current_time={@current_time}
               field={rt[:reminder_time]}
               id={rt[:id].value}
               index={rt.index}
@@ -176,7 +163,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
   attr :editable, :any, default: true
   attr :notification_start, DateTime
   attr :notification_end, DateTime
-  attr :current_time, DateTime
 
   def reminder_input(assigns) do
     # the reminder_time id is prevented from showing if it's nil because of a
@@ -193,7 +179,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
     <input
       type="hidden"
       name={"alert_data[reminder_times][#{@index}][min_time]"}
-      value={@current_time}
+      value={@notification_start |> naive_datetime_to_iso8601()}
       id={"reminder_times-#{@index}-min_time"}
     />
     <input
