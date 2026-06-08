@@ -30,6 +30,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   }
 
   alias AlertsUIWeb.CreateAlertMonoLive.Step
+
+  alias AlertsUIWeb.FormComponents.Helpers.{
+    EntityValidator,
+    ObsoleteEntities,
+    ServiceEffectCombinations
+  }
+
   alias Phoenix.LiveView
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData
@@ -64,6 +71,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       |> assign(:selections, %{})
       |> assign(:check_predictions, false)
       |> assign(:form_type, form_type_from_socket(socket))
+      |> assign(:obsolete_id_text, [])
+      |> assign(:obsolete_ids, %{})
       |> assign(:submitting?, false)
       |> assign(:submitted?, false)
       |> assign(:image_preview_size, nil)
@@ -267,13 +276,73 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   end
 
   @impl true
+  def handle_event("accepted_gtfs_modal", _params, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("cancelled_gtfs_modal", _params, socket) do
+    {:noreply, socket |> redirect(to: return_to(socket.assigns.return_to || "/"))}
+  end
+
+  @impl true
   def handle_async(:fetch_selections, {:ok, new_selections}, socket) do
+    form = socket.assigns.form
+
+    required_fields =
+      socket.assigns.form[:combination].value
+      |> ServiceEffectCombinations.required_fields()
+      |> Enum.reject(&(&1 == :direction))
+      |> Enum.sort()
+
+    mapping = %{
+      route_ids: :available_routes,
+      trip_ids: :available_schedules,
+      stop_ids: :available_stops,
+      facility_ids: :available_facilities
+    }
+
+    obsolete_ids =
+      Enum.map(required_fields, fn field ->
+        new_selections =
+          new_selections |> Map.from_struct() |> filter_stops_from_facility_result()
+
+        ids =
+          (EntityValidator.get_obsolete_ids(
+             form[field].value,
+             new_selections[mapping[field]]
+           ) || [])
+          |> Enum.reject(&is_nil/1)
+
+        {field, ids}
+      end)
+      |> Enum.into(%{})
+
+    socket =
+      if obsolete_ids_found?(obsolete_ids) and socket.assigns.obsolete_ids === %{} do
+        ids_with_obsolete_entities_removed =
+          ObsoleteEntities.ids_with_obsolete_entities_removed(
+            Map.from_struct(form.data),
+            obsolete_ids,
+            required_fields
+          )
+
+        send(self(), {:got_obsolete_ids, obsolete_ids})
+
+        assign(socket, :obsolete_ids, obsolete_ids)
+        |> sync_socket(%{"alert_data" => ids_with_obsolete_entities_removed})
+      else
+        socket
+      end
+
+    socket = assign(socket, :obsolete_ids, obsolete_ids)
+
     pending_route_ids = Map.get(new_selections, :pending_auto_select_route_ids)
 
     # Always override route_ids — no guard for pre-existing selections; see design spec.
     socket =
       if is_nil(pending_route_ids) do
-        assign(socket, :selections, new_selections)
+        assign(socket, %{selections: new_selections})
       else
         socket
         |> assign(:selections, %{new_selections | pending_auto_select_route_ids: nil})
@@ -284,7 +353,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   end
 
   @impl true
-  def handle_async(:fetch_selections, {:exit, reason}, socket) do
+  def handle_async(_, {:exit, reason}, socket) do
     require Logger
     Logger.error("Selections load failed: #{inspect(reason)}")
 
@@ -292,6 +361,61 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       %{loading: _} = sel -> {:noreply, assign(socket, :selections, %{sel | loading: false})}
       _ -> {:noreply, socket}
     end
+  end
+
+  defp obsolete_ids_found?(obsolete_ids) do
+    Enum.any?(obsolete_ids, fn {_k, v} -> !Enum.empty?(v) end)
+  end
+
+  def handle_info({:got_obsolete_ids, obsolete_ids_map}, socket) do
+    alert_data = socket.assigns.form.data
+
+    # builds a list of the text to go in the obsolete ids modal
+    obsolete_id_text =
+      obsolete_ids_map
+      # for every field (route, stop, etc in the obsolete ids map)
+      |> Enum.map(fn {field_name, obsolete_ids} ->
+        # build name of corresponding "original selections" field
+        name_part = field_name |> Atom.to_string() |> String.split("_") |> hd
+
+        original_field =
+          Map.get(alert_data, String.to_existing_atom("original_#{name_part}_selections"))
+
+        # build map of original selected ids -> names
+        original_names_map =
+          (original_field || [])
+          |> Enum.map(fn name_and_id ->
+            [name, id] = String.split(name_and_id, "|")
+
+            {id, if(name == "", do: id, else: name)}
+          end)
+          |> Enum.into(%{})
+
+        # build text title
+        title =
+          field_name
+          |> Atom.to_string()
+          |> String.replace("_id", "")
+          |> String.replace("ys", "ies")
+          |> String.capitalize()
+
+        # step through obsolete ids and gets names if available
+        # the ID is used as a fallback
+        names =
+          Enum.map(obsolete_ids, fn obsolete_id ->
+            Map.get(original_names_map, obsolete_id, obsolete_id) <> " [#{obsolete_id}]"
+          end)
+
+        {title, names}
+      end)
+      |> Enum.reject(fn {_title, names} -> Enum.empty?(names) end)
+
+    socket =
+      socket
+      |> assign(obsolete_id_text: obsolete_id_text, obsolete_ids: obsolete_ids_map)
+      |> push_event("show-gtfs-modal", %{id: "gtfs-warning-modal"})
+
+    {:noreply, socket}
   end
 
   @impl true
@@ -302,6 +426,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   defp get_step_by_name(name) do
     Enum.find(@steps, &(&1.name == name))
   end
+
+  defp filter_stops_from_facility_result(%{
+         available_facilities: %{facilities: facilities, stops: _stops}
+       }) do
+    %{available_facilities: facilities}
+  end
+
+  defp filter_stops_from_facility_result(available_entities), do: available_entities
 
   @doc """
   Initialize a form. Called from `mount/3`.

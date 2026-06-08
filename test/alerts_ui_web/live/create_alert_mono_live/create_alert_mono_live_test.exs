@@ -321,7 +321,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
 
   describe "obsolete ids modal" do
     @tag :logged_in_user
-    @tag :skip
     test "displays modal with obsolete ids", %{conn: conn} do
       with_mocks([
         {RoutesRepo, [],
@@ -331,13 +330,20 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
            get: fn _id, _opts -> @route end,
            all: fn _opts -> [@route] end
          ]},
+        {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [] end},
         {StopsRepo, [],
          [
+           all: fn _, _ -> [@stop] end,
            by_route: fn _route, _direction, _opts -> [@stop] end,
            get_parent: fn
              "place-sstat" -> @stop
              "obsolete_stop" -> %Stop{id: "obsolete_stop", name: "spurious stop"}
            end
+         ]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _route_id, _opts -> [@route_pattern] end,
+           included_stops_by_route_id: fn _route_id, _ -> [@stop] end
          ]}
       ]) do
         alert_params =
@@ -374,6 +380,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         rendered_view = render_async(view, 1000)
         assert rendered_view =~ "spurious route [sp_rt]"
         assert rendered_view =~ "spurious stop [obsolete_stop]"
+        open_review_modal(view)
+
+        assert view |> element("#review-modal-container") |> render_async() =~
+                 "Framingham/Worcester"
+
+        open_review_modal(view)
+        submit_alert(view)
+
+        assert Alerts.get_by_alert_id("123").original_route_selections == [
+                 "Framingham/Worcester Line|CR-Worcester"
+               ]
       end
     end
   end

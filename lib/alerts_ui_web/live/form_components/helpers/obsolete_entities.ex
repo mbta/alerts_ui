@@ -16,7 +16,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ObsoleteEntities do
     required_fields
     |> Enum.map(fn field ->
       obsolete_ids = Map.get(obsolete_ids, field, [])
-      {field, alert_data[field] -- obsolete_ids}
+      {field, (alert_data[field] || []) -- obsolete_ids}
     end)
     |> Enum.map(fn
       {k, []} -> {k, nil}
