@@ -439,6 +439,44 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     end
 
     @tag :logged_in_user
+    test "filter title updates if 'all trips' is selected", %{conn: conn} do
+      today = @todays_date |> Date.to_string()
+      today_day_name = Calendar.strftime(@todays_date, "%a %b %0d")
+      tomorrow = @todays_date |> Date.add(1) |> Date.to_string()
+      tomorrow_day_name = Calendar.strftime(Date.add(@todays_date, 1), "%a %b %0d")
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@route] end,
+           get: fn _, _ -> @route end
+         ]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _, _ -> [@schedule_future, @schedule_future] end,
+           end_of_rating: fn -> Date.add(@todays_date, 7) end
+         ]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        get_to_submission_page_refactor(view, "Commuter Rail", "Delay")
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{"route_ids" => ["CR-Worcester"], "modal_date" => "default"}
+        })
+
+        render_click(view, "accept_filter")
+
+        render_async(view)
+
+        assert render(view) =~ ~s(Filter: All future trips)
+      end
+    end
+
+    @tag :logged_in_user
     test "clear date filter resets to today", %{conn: conn} do
       today = @todays_date |> Date.to_string()
       today_day_name = Calendar.strftime(@todays_date, "%a %b %0d")
