@@ -1231,8 +1231,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         {RoutesRepo, [],
          [
            by_type: fn _ -> [@route, @route_two] end,
-           by_stop: fn _ -> [@route, @route_two] end,
-           by_stop: fn _, _ -> [@route, @route_two] end
+           by_stop: fn _ -> [@route, @route_two] end
          ]},
         {StopsRepo, [],
          [
@@ -1322,6 +1321,38 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         {:ok, document} = view |> render_async() |> Floki.parse_document()
         refute document_has_element?(document, "option[value=\"Blue\"][selected=\"selected\"]")
         assert document_has_element?(document, "option[value=\"Red\"][selected=\"selected\"]")
+      end
+    end
+
+    @tag :logged_in_user
+    test "route options are never duplicated", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           # Simulate two different stops on the same route
+           by_type: fn _ -> [@route, @route_two] end,
+           by_stop: fn _, _ -> [@route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _, _ -> [@stop, @stop_two] end,
+           by_route: fn _routes, _direction, _opts -> [@stop, @stop_two] end,
+           all: fn ["filter[id]": "place-aqucl"], _opts -> [@stop, @stop_two] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        get_to_submission_page_refactor(view, "Bus", "Multi-route detour")
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "stop_ids"],
+          "alert_data" => %{"stop_ids" => ["place-aqucl", "place-pktrm"]}
+        })
+
+        # Make sure it does not say "Blue Line and Blue Line are detoured"
+        assert render(view) =~ ~s(Blue Line is detoured, skipping Aquarium and Park Street.)
       end
     end
   end
