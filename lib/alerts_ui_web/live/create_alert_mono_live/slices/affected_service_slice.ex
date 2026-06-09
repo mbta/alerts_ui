@@ -70,9 +70,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       service_data
     end
 
-    def transform(_service_data, changeset, _params, socket) do
+    def transform(_service_data, changeset, params, socket) do
       changeset
-      |> AffectedServiceSlice.transform_changeset()
+      |> AffectedServiceSlice.transform_changeset(params)
       |> AffectedServiceSlice.build_trip_information(socket)
     end
 
@@ -139,11 +139,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     end
   end
 
-  def transform_changeset(changeset) do
+  def transform_changeset(changeset, params) do
     changeset
     |> ensure_default_direction()
     |> ensure_route_ids()
-    |> clear_stops_when_multi_route()
+    |> clear_stops_when_multi_route(params)
     |> ensure_stop_names_and_ids()
     |> ensure_trip_ids()
     |> filter_stops_by_direction()
@@ -358,7 +358,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     end
   end
 
-  defp clear_stops_when_multi_route(changeset) do
+  defp clear_stops_when_multi_route(changeset, %{"_target" => _target}) do
     route_ids = get_field(changeset, :route_ids) || []
 
     if length(route_ids) != 1 do
@@ -367,6 +367,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       changeset
     end
   end
+
+  defp clear_stops_when_multi_route(changeset, _params), do: changeset
 
   defp ensure_stop_names_and_ids(changeset) do
     if get_field(changeset, :stop_names_and_ids) in [nil, "default", ["default"]] do

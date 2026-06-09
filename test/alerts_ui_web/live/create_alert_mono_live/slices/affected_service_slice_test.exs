@@ -2050,27 +2050,52 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
       )
     end
 
-    test "clears stop selection when route is deselected" do
+    test "clears stop selection when route is deselected by user input" do
       changeset =
         stop_coherence_changeset(%{route_ids: [], stop_names_and_ids: ["Central|place-cntsq"]})
 
-      result = AffectedServiceSlice.transform_changeset(changeset)
+      params = %{"_target" => ["alert_data", "my_target"]}
 
+      result = AffectedServiceSlice.transform_changeset(changeset, params)
       assert Ecto.Changeset.get_field(result, :stop_names_and_ids) == []
       assert Ecto.Changeset.get_field(result, :stop_ids) == []
     end
 
-    test "clears stop selection when multiple routes are selected" do
+    test "preserves stop selection when no user input is present" do
+      changeset =
+        stop_coherence_changeset(%{route_ids: [], stop_names_and_ids: ["Central|place-cntsq"]})
+
+      result = AffectedServiceSlice.transform_changeset(changeset, %{})
+
+      assert Ecto.Changeset.get_field(result, :stop_names_and_ids) == ["Central|place-cntsq"]
+      assert Ecto.Changeset.get_field(result, :stop_ids) == ["place-cntsq"]
+    end
+
+    test "clears stop selection when multiple routes are selected via user input" do
       changeset =
         stop_coherence_changeset(%{
           route_ids: ["Red", "Orange"],
           stop_names_and_ids: ["Central|place-cntsq"]
         })
 
-      result = AffectedServiceSlice.transform_changeset(changeset)
+      params = %{"_target" => ["alert_data", "my_target"]}
+
+      result = AffectedServiceSlice.transform_changeset(changeset, params)
 
       assert Ecto.Changeset.get_field(result, :stop_names_and_ids) == []
       assert Ecto.Changeset.get_field(result, :stop_ids) == []
+    end
+
+    test "preserves stop selection when multiple routes are selected and no user input is present" do
+      changeset =
+        stop_coherence_changeset(%{
+          route_ids: ["Red", "Orange"],
+          stop_names_and_ids: ["Central|place-cntsq"]
+        })
+
+      result = AffectedServiceSlice.transform_changeset(changeset, %{})
+      assert Ecto.Changeset.get_field(result, :stop_names_and_ids) == ["Central|place-cntsq"]
+      assert Ecto.Changeset.get_field(result, :stop_ids) == ["place-cntsq"]
     end
 
     test "preserves stop selection when exactly one route is selected" do
@@ -2080,7 +2105,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
           stop_names_and_ids: ["Central|place-cntsq"]
         })
 
-      result = AffectedServiceSlice.transform_changeset(changeset)
+      result = AffectedServiceSlice.transform_changeset(changeset, %{})
 
       assert Ecto.Changeset.get_field(result, :stop_names_and_ids) == ["Central|place-cntsq"]
       assert Ecto.Changeset.get_field(result, :stop_ids) == ["place-cntsq"]
@@ -2093,7 +2118,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
           stop_names_and_ids: ["Central|default"]
         })
 
-      result = AffectedServiceSlice.transform_changeset(changeset)
+      result = AffectedServiceSlice.transform_changeset(changeset, %{})
 
       assert Ecto.Changeset.get_field(result, :stop_ids) == []
     end
