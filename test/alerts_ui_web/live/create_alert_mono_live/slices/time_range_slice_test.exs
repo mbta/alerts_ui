@@ -387,6 +387,40 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     end
 
     @tag :logged_in_user
+    test "end of service duration text shows next-day 3am for the selected service date", %{
+      conn: conn
+    } do
+      # Service day June 9 ends at June 10 @ 03:00 AM, not June 9 @ 03:00 AM.
+      # Selecting end_of_service with date 2040-06-09 must show "Wed Jun 10, 2040 @ 3:00 AM".
+      service_date = ~D[2040-06-09]
+      start_dt = ~N[2040-06-09 12:00:00]
+
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      get_to_submission_page_refactor(view, "Bus", "Delay")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_start_specifier" => "custom",
+          "active_period_end_specifier" => "end_of_service"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_start" => NaiveDateTime.to_iso8601(start_dt),
+          "active_period_end_date" => Date.to_iso8601(service_date)
+        }
+      })
+
+      assert view |> element("#duration-text") |> render() =~
+               ~s[Effect duration: Sat Jun 9, 2040 @ 12:00 PM until Sun Jun 10, 2040 @ 3:00 AM (15 hours)]
+    end
+
+    @tag :logged_in_user
     test "displays error if start invalid", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
       get_to_submission_page_refactor(view, "Bus", "Delay")

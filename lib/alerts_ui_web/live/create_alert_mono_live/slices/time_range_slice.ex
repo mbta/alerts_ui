@@ -300,8 +300,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       do: changeset
 
   def ensure_end_date_values_for_specifier(changeset, :end_of_service, _, d, _) do
+    end_of_service =
+      NaiveDateTime.new!(d, ~T[12:00:00])
+      |> ActivePeriod.end_of_service_datetime_naive()
+
     changeset
-    |> force_change(:active_period_end, NaiveDateTime.new!(d, ActivePeriod.end_of_service_time()))
+    |> force_change(:active_period_end, end_of_service)
   end
 
   def ensure_end_date_values_for_specifier(changeset, :custom, dt, _, _) do
