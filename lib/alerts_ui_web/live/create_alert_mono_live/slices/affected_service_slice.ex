@@ -492,6 +492,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             multiple={
               if humanize_effect_name(@form) in get_single_route_effect_names(), do: false, else: true
             }
+            ensure_value_when_unselected={true}
           />
           <.toggle_checkgroup
             :if={!filtered_select_for_route_type?(@form[:route_type].value)}
@@ -566,6 +567,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             class="min-w-full h-full"
             disabled={disable_trip_input?(@form[:route_ids].value)}
             prompt={if disable_trip_input?(@form[:route_ids].value), do: nil, else: "All Trips"}
+            ensure_value_when_unselected={true}
           />
         </div>
         <div class="flex flex-col justify-start w-full md:w-[25%]">
@@ -599,10 +601,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
                 do: nil,
                 else: "All Stops"
             }
+            ensure_value_when_unselected={true}
           />
         </div>
       </div>
-      <p :if={false}>
+      <p :if={@show_stop_ids}>
         Selected stop ids: {(@form[:stop_ids].value || []) |> Enum.join(", ")} Selected route ids: {(@form[
                                                                                                        :route_ids
                                                                                                      ].value ||

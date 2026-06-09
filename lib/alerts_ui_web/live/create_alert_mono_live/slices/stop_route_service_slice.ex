@@ -324,6 +324,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
           no_results={Enum.empty?(@selections.stop_id_options)}
           options={@selections.stop_id_options}
           target_id="#alert_form"
+          ensure_value_when_unselected={true}
         />
 
         <.filtered_select
@@ -337,11 +338,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
           }
           disabled={disable_routes_input?(@form)}
           options={@selections.route_id_options}
+          ensure_value_when_unselected={true}
           class="md:w-[25%]"
         />
       </div>
       <p :if={@show_stop_ids}>
-        Selected stop ids: {(@form[:stop_ids].value || []) |> Enum.join(", ")}
+        Selected stop ids: {(@form[:stop_ids].value || []) |> Enum.join(", ")} Selected route ids:{(@form[
+                                                                                                      :route_ids
+                                                                                                    ].value ||
+                                                                                                      [])
+        |> Enum.join(", ")}
       </p>
       <hr class="mt-4" />
     </div>
