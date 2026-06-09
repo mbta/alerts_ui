@@ -57,7 +57,10 @@ defmodule AlertsUIWeb.Tickets.DirectionChangeClearsOppositeBusStopsTest do
     defp bus_changeset(attrs) do
       Ecto.Changeset.cast(
         %AlertData{},
-        Map.merge(%{route_type: 3, direction: "default", trip_ids: [], route_ids: ["741"]}, attrs),
+        Map.merge(
+          %{route_type: 3, direction: "default", trip_ids: [], route_ids: ["741"]},
+          attrs
+        ),
         [:direction, :effect_name, :route_ids, :stop_names_and_ids, :route_type, :trip_ids]
       )
     end

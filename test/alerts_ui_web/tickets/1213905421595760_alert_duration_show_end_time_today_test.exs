@@ -21,8 +21,8 @@ defmodule AlertsUIWeb.Tickets.AlertDurationShowEndTimeTodayTest do
   """
   use AlertsUIWeb.ConnCase, async: true
 
-  alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AutoTextDuration, BuildAutoText}
   alias AlertsUI.Models.EnhancedSchedule
+  alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AutoTextDuration, BuildAutoText}
 
   # Midday "now" so that a 3:00 PM end is "later today" within the same service day.
   @current_time ~N[2025-05-09 13:00:00]
@@ -46,7 +46,7 @@ defmodule AlertsUIWeb.Tickets.AlertDurationShowEndTimeTodayTest do
   end
 
   describe "alert_duration for a trip-selector alert type with NO trip selected" do
-    test "shows the end time (\"until 3:00 PM\") instead of a bare \"today\"" do
+    test "shows the end time ('until 3:00 PM') instead of a 'bare today'" do
       data = base_data(%{schedules: []})
 
       actual = AutoTextDuration.build_duration_text(data, @current_time)

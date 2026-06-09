@@ -262,7 +262,7 @@ defmodule AlertsUIWeb.Tickets.ClearFilterButtonTest do
              "Service Types clear button should NOT re-appear after being cleared (issue 2 regression)"
 
       assert service_type_values == ["default"] or service_type_values == [] or
-               not ("2" in service_type_values),
+               "2" not in service_type_values,
              "Service Types value should NOT be re-set to '2' after clearing (issue 2 regression), got: #{inspect(service_type_values)}"
     end
   end
