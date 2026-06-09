@@ -6,9 +6,6 @@ defmodule AlertsUI.FeedReader do
   @doc """
   Fetch an Alerts Feed as JSON
 
-  alerts_json(:ibi_enhanced_alerts) -> IBI's enhanced feed
-  alerts_json(:ibi_standard_alerts) -> IBI's standard production feed
-
   alerts_json(:enhanced_json) -> Our enhanced feed
   alerts_json(:enhanced_sita_json) -> Our enhanced modified SITA feed
   alerts_json(:standard_json) -> Our standard feed
@@ -28,9 +25,6 @@ defmodule AlertsUI.FeedReader do
       decode_body: false
     )
   end
-
-  defp alerts_api_url(:ibi_enhanced_alerts), do: AlertsUI.config(:ibi_enhanced_alerts_api_url)
-  defp alerts_api_url(:ibi_standard_alerts), do: AlertsUI.config(:ibi_standard_alerts_api_url)
 
   defp alerts_api_url(:enhanced_json), do: build_s3_path() <> "alerts_feed_enhanced.json"
 

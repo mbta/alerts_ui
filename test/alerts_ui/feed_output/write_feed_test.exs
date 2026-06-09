@@ -235,7 +235,7 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
         Alerts.list_all_open()
         |> Enum.map(&CreateOutputAlert.build_alert/1)
 
-      {:ok, output} = WriteFeed.write(:combined_enhanced_sita, alerts)
+      {:ok, output} = WriteFeed.write(:enhanced_sita, alerts)
 
       assert %{
                "entity" => [
