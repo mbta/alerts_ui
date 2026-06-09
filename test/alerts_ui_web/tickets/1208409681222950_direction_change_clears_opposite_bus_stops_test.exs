@@ -218,6 +218,7 @@ defmodule AlertsUIWeb.Tickets.DirectionChangeClearsOppositeBusStopsTest do
         view
         |> element("form")
         |> render_change(%{
+          "_target" => ["alert_data", "my_input_element"],
           "alert_data" => %{
             "stop_names_and_ids" => [
               "South Station (outbound)|place-sstat",
@@ -232,6 +233,7 @@ defmodule AlertsUIWeb.Tickets.DirectionChangeClearsOppositeBusStopsTest do
         view
         |> element("form")
         |> render_change(%{
+          "_target" => ["alert_data", "my_input_element"],
           "alert_data" => %{"direction" => "1"}
         })
 
