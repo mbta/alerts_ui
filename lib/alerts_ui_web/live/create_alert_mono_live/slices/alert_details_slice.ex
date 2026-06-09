@@ -47,7 +47,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     alias AlertsUI.Models.Alert
     alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice
-    alias AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice
     alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
     alias MBTAV3API.Stops.Stop
     alias Phoenix.LiveView.AsyncResult

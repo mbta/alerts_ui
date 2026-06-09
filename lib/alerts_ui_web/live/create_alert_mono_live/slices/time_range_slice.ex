@@ -82,7 +82,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       |> put_over_nil(:recurrence_days, [])
       |> put_over_nil(:can_close_automatically, nil)
       |> update_times_if_duplicating(slice.form_type, slice.alert_timing, now)
-      |> IO.inspect(label: "TR AT SLICE EXTRACT")
     end
 
     def transform(_slice, changeset, params, socket) do
@@ -136,8 +135,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
           active_period_start_time_specifier: :now,
           active_period_end_specifier: :later_today,
           active_period_end_time_specifier: :later_today,
-          active_period_start: now,
-          active_period_end: now
+          active_period_start: now
         })
       else
         slice
