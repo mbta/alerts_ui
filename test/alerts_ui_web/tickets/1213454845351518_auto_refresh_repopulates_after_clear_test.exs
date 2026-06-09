@@ -29,8 +29,8 @@ defmodule AlertsUIWeb.Tickets.AutoRefreshRepopulatesAfterClearTest do
 
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
-  alias AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
+  alias AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice
 
   # Minimal socket stub — AlertDetailsSlice.transform/4 needs:
   #   assigns.submitted?  (to decide whether to recalculate autotext on submit)
