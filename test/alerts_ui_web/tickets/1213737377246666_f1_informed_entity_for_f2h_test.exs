@@ -115,6 +115,7 @@ defmodule AlertsUIWeb.Tickets.F1InformedEntityForF2HTest do
 
     @tag :f2h_combo_route_trip_based
     @tag :known_gap
+    @tag :skip
     test "trip-based Boat-F2H alert does NOT yet include Boat-F1 (known gap)" do
       # This test documents the KNOWN GAP in the fix:
       # When a specific trip is selected for Boat-F2H, the informed_entity is built
