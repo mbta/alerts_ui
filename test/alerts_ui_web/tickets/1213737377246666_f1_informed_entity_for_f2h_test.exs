@@ -100,6 +100,7 @@ defmodule AlertsUIWeb.Tickets.F1InformedEntityForF2HTest do
     test "add_special_combo_routes/2 adds Boat-F1 for Boat-F2H" do
       # Unit test for the specific function that implements the fix.
       route_ids = AlertBuilder.add_special_combo_routes([], "Boat-F2H")
+
       assert "Boat-F1" in route_ids,
              "add_special_combo_routes/2 should add Boat-F1 for Boat-F2H, got: #{inspect(route_ids)}"
     end

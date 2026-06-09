@@ -50,7 +50,9 @@ defmodule AlertsUIWeb.Tickets.HoverCssSelectedButtonsTest do
     assigns = %{active: active?}
 
     ~H"""
-    <SharedComponents.button_toggle active={@active} value="monday">Monday</SharedComponents.button_toggle>
+    <SharedComponents.button_toggle active={@active} value="monday">
+      Monday
+    </SharedComponents.button_toggle>
     """
     |> rendered_to_string()
   end

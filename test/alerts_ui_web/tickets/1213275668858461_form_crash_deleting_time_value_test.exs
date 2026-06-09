@@ -46,12 +46,14 @@ defmodule AlertsUIWeb.Tickets.FormCrashDeletingTimeValueTest do
       # Before the fix, this would call string_to_time_helper("") which called
       # Time.from_iso8601!("" <> ":00") and raised FunctionClauseError.
       result = TimeRangeGetters.get_recurring_start_datetime("2026-03-01", "")
+
       assert result == "",
              "expected empty string when time is \"\", got: #{inspect(result)}"
     end
 
     test "get_recurring_start_datetime/2 returns empty string when date is empty string" do
       result = TimeRangeGetters.get_recurring_start_datetime("", "08:30")
+
       assert result == "",
              "expected empty string when date is \"\", got: #{inspect(result)}"
     end
@@ -65,6 +67,7 @@ defmodule AlertsUIWeb.Tickets.FormCrashDeletingTimeValueTest do
       # Before the fix (9ed1487b), get_recurring_end_datetime(date, "") was missing the
       # guard and would fall through to string_to_time_helper(""), crashing.
       result = TimeRangeGetters.get_recurring_end_datetime("2026-03-01", "")
+
       assert result == "",
              "expected empty string when end time is \"\", got: #{inspect(result)}"
     end

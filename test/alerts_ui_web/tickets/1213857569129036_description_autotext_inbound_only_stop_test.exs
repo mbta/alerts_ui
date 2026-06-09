@@ -113,7 +113,9 @@ defmodule AlertsUIWeb.Tickets.DescriptionAutotextInboundOnlyStopTest do
       outbound_section_start = Enum.find_index(lines, &String.contains?(&1, "outbound"))
       inbound_section_start = Enum.find_index(lines, &String.contains?(&1, "inbound"))
 
-      assert outbound_section_start != nil, "Expected an outbound section (for the bidirectional stop)"
+      assert outbound_section_start != nil,
+             "Expected an outbound section (for the bidirectional stop)"
+
       assert inbound_section_start != nil, "Expected an inbound section"
 
       # The stop names in each section

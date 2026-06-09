@@ -270,6 +270,7 @@ defmodule AlertsUIWeb.Tickets.StopSearchFilterConsistencyTest do
 
           refute "place-aqucl" in result
           refute "place-pktrm" in result
+
           refute "place-north" in result,
                  "North Station does not contain 'south station' and must not appear (AC1)"
         end

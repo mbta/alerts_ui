@@ -81,6 +81,7 @@ defmodule AlertsUIWeb.Tickets.EscapeReviewModalTest do
 
         # Open the review modal
         open_review_modal(view)
+
         assert has_element?(view, "#review-modal-container"),
                "review modal should be open before pressing escape"
 

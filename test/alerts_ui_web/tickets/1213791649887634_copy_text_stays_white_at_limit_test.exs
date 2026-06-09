@@ -56,6 +56,7 @@ defmodule AlertsUIWeb.Tickets.CopyTextStaysWhiteAtLimitTest do
       # onto the Copy text button).
       [outer_div | _] = Floki.parse_document!(html) |> Floki.find("div")
       outer_classes = outer_div |> Floki.attribute("class") |> List.first() || ""
+
       refute outer_classes =~ "!text-error",
              "Outer footer div must not carry !text-error — it would cascade onto the Copy text button"
     end
@@ -66,6 +67,7 @@ defmodule AlertsUIWeb.Tickets.CopyTextStaysWhiteAtLimitTest do
 
       # The copy button must not have !text-error applied
       copy_button_html = Floki.parse_document!(html) |> Floki.find("button") |> Floki.raw_html()
+
       refute copy_button_html =~ "!text-error",
              "Copy text button must not have !text-error class"
 

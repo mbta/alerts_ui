@@ -56,7 +56,8 @@ defmodule AlertsUIWeb.Tickets.FacilitiesVisibleWithoutStopFilterTest do
   }
 
   # Navigate to the Facility • Bike Issue form (combination :ACCESS).
-  defp navigate_to_access(view), do: get_to_submission_page_refactor(view, "Facility", "Bike issue")
+  defp navigate_to_access(view),
+    do: get_to_submission_page_refactor(view, "Facility", "Bike issue")
 
   describe "facility list is populated when no stop filter is applied" do
     @tag :logged_in_user
@@ -85,7 +86,9 @@ defmodule AlertsUIWeb.Tickets.FacilitiesVisibleWithoutStopFilterTest do
 
   describe "selecting a facility and reviewing does not raise a facility validation error" do
     @tag :logged_in_user
-    test "selecting a Terminal facility and clicking Review shows no facility error", %{conn: conn} do
+    test "selecting a Terminal facility and clicking Review shows no facility error", %{
+      conn: conn
+    } do
       with_mock(FacilitiesRepo,
         get_by_type: fn _types, _ -> [@terminal_facility, @other_facility] end,
         # AlertBuilder.original_selections_from_form/2 calls Repo.get/1 for each

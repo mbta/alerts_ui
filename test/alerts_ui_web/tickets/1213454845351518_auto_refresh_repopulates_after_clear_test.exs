@@ -39,11 +39,12 @@ defmodule AlertsUIWeb.Tickets.AutoRefreshRepopulatesAfterClearTest do
     %{
       assigns: %{
         submitted?: Keyword.get(opts, :submitted?, false),
-        selections: Keyword.get(
-          opts,
-          :selections,
-          %AffectedServiceSlice.Selections{available_routes: [], available_stops: []}
-        )
+        selections:
+          Keyword.get(
+            opts,
+            :selections,
+            %AffectedServiceSlice.Selections{available_routes: [], available_stops: []}
+          )
       }
     }
   end
@@ -137,7 +138,8 @@ defmodule AlertsUIWeb.Tickets.AutoRefreshRepopulatesAfterClearTest do
             effect_name: "delay",
             route_type: 2,
             header_text: "",
-            header_sync_toggle: true   # the cast value after checkbox is checked
+            # the cast value after checkbox is checked
+            header_sync_toggle: true
           },
           cast(cleared_changeset, %{"header_sync_toggle" => "true"}, [:header_sync_toggle]),
           %{
@@ -186,6 +188,7 @@ defmodule AlertsUIWeb.Tickets.AutoRefreshRepopulatesAfterClearTest do
         )
 
       seeded_text = get_field(seed_result, :header_text)
+
       assert seeded_text not in [nil, ""],
              "auto-text should be seeded on load; got: #{inspect(seeded_text)}"
 
@@ -226,7 +229,8 @@ defmodule AlertsUIWeb.Tickets.AutoRefreshRepopulatesAfterClearTest do
         effect_name: "delay",
         route_type: 2,
         header_text: "",
-        header_sync_toggle: true    # the new value after checkbox is checked
+        # the new value after checkbox is checked
+        header_sync_toggle: true
       }
 
       retoggle_changeset =

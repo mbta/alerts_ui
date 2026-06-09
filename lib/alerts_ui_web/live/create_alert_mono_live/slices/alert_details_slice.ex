@@ -44,12 +44,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
   defimpl Slice, for: __MODULE__ do
     import Ecto.Changeset
-    import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData, only: [clear_my_errors: 2]
-
     alias AlertsUI.Models.Alert
     alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice
-    alias AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice
     alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
     alias MBTAV3API.Stops.Stop
     alias Phoenix.LiveView.AsyncResult
@@ -147,7 +144,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       image_size = image_url |> get_image_size()
 
       changeset
-      |> clear_my_errors(AlertDetailsSlice)
       |> Validation.always_validate_required(@required_fields)
       |> validate_url(get_field(changeset, :url))
       |> validate_image_fields(image_size, image_url)

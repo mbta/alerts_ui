@@ -48,14 +48,21 @@ defmodule AlertsUIWeb.Tickets.AffectedRoutesAutotextSortingTest do
 
       # The precise regression assertion from the ticket:
       i = fn name -> Enum.find_index(sorted, &(&1 == name)) end
+
       assert i.("100") < i.("171") and i.("171") < i.("200"),
              "171 must fall between 100 and 200"
+
       assert i.("18") < i.("171"), "171 must NOT be sorted between 17 and 18"
     end
 
     test "alpha bus routes come before numerical bus routes" do
-      routes = [bus("1"), bus("171"), %Route{id: "SL1", type: 3, name: "SL1"},
-                %Route{id: "CT3", type: 3, name: "CT3"}, bus("9")]
+      routes = [
+        bus("1"),
+        bus("171"),
+        %Route{id: "SL1", type: 3, name: "SL1"},
+        %Route{id: "CT3", type: 3, name: "CT3"},
+        bus("9")
+      ]
 
       sorted = BuildAutoText.sort_routes(routes)
 
@@ -99,8 +106,14 @@ defmodule AlertsUIWeb.Tickets.AffectedRoutesAutotextSortingTest do
     test "matches the Andrew station-issue order observed live on dev-green" do
       # Affected routes for Andrew: Red Line + bus connections CT3, 9, 10, 16, 17, 18, 171
       routes = [
-        bus("171"), bus("17"), subway("Red", "Red Line"), bus("10"),
-        %Route{id: "CT3", type: 3, name: "CT3"}, bus("18"), bus("9"), bus("16")
+        bus("171"),
+        bus("17"),
+        subway("Red", "Red Line"),
+        bus("10"),
+        %Route{id: "CT3", type: 3, name: "CT3"},
+        bus("18"),
+        bus("9"),
+        bus("16")
       ]
 
       sorted = BuildAutoText.sort_routes(routes)

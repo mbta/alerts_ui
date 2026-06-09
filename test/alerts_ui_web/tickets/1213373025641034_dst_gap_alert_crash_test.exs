@@ -83,6 +83,7 @@ defmodule AlertsUIWeb.Tickets.DstGapAlertCrashTest do
       })
 
       html = render(view)
+
       assert html =~ @dst_error,
              "Expected DST gap validation error for start = #{@dst_gap_mid}"
 
@@ -120,6 +121,7 @@ defmodule AlertsUIWeb.Tickets.DstGapAlertCrashTest do
       })
 
       html = render(view)
+
       assert html =~ @dst_error,
              "Expected DST gap validation error for end = #{@dst_gap_mid}"
 
@@ -127,7 +129,9 @@ defmodule AlertsUIWeb.Tickets.DstGapAlertCrashTest do
     end
 
     @tag :logged_in_user
-    test "DST error shown at both the start and end of the gap hour (boundary check)", %{conn: conn} do
+    test "DST error shown at both the start and end of the gap hour (boundary check)", %{
+      conn: conn
+    } do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
       get_to_submission_page_refactor(view, "Bus", "Delay")
 
@@ -223,7 +227,8 @@ defmodule AlertsUIWeb.Tickets.DstGapAlertCrashTest do
       assert html =~ "Effect period", "LiveView should still be rendering the form"
 
       # At minimum the DST error must appear
-      assert html =~ @dst_error, "DST gap error must be shown even when end-before-start also applies"
+      assert html =~ @dst_error,
+             "DST gap error must be shown even when end-before-start also applies"
     end
   end
 end
