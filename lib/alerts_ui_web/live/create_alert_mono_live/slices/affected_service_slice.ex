@@ -276,7 +276,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   end
 
   defp available_schedules(route_ids, direction, modal_date) do
-    date = get_schedule_date(modal_date)
+    date = if modal_date === "default", do: nil, else: modal_date
 
     CreateAlertLive.get_schedules_by_date(
       route_ids,
@@ -284,12 +284,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       date
     )
   end
-
-  defp get_schedule_date("default") do
-    DateTime.now!("America/New_York") |> Calendar.strftime("%Y-%m-%d")
-  end
-
-  defp get_schedule_date(modal_date), do: modal_date
 
   @update_selection_targets [
     "direction",
@@ -445,7 +439,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   def ensure_modal_date(changeset) do
     case get_field(changeset, :modal_date) do
-      modal_date when modal_date in [nil, "default"] -> change(changeset, modal_date: today())
+      modal_date when modal_date === nil -> change(changeset, modal_date: today())
       _ -> changeset
     end
   end
