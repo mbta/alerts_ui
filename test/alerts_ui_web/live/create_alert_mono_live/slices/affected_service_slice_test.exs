@@ -188,7 +188,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            get: fn _, _ -> @route end
          ]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]},
-        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+        {SchedulesRepo, [],
+         [by_route_ids: fn _, _ -> [] end, end_of_rating: fn -> Date.add(@todays_date, 7) end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
         get_to_submission_page_refactor(view, "Commuter Rail", "Delay")
@@ -501,7 +502,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            by_type: fn _, _ -> [@ferry_route] end,
            get: fn _, _ -> @ferry_route end
          ]},
-        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]},
+        {SchedulesRepo, [],
+         [by_route_ids: fn _, _ -> [] end, end_of_rating: fn -> Date.add(@todays_date, 7) end]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
@@ -530,7 +532,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            by_type: fn _, _ -> [@ferry_route] end,
            get: fn _, _ -> @ferry_route end
          ]},
-        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]},
+        {SchedulesRepo, [],
+         [by_route_ids: fn _, _ -> [] end, end_of_rating: fn -> Date.add(@todays_date, 7) end]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
@@ -589,7 +592,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            by_type: fn _, _ -> [@route, @route_2] end,
            get: fn _, _ -> @route end
          ]},
-        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]},
+        {SchedulesRepo, [],
+         [by_route_ids: fn _, _ -> [] end, end_of_rating: fn -> Date.add(@todays_date, 7) end]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
@@ -887,7 +891,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            by_type: fn _, _ -> [@ferry_route, boat_f1] end,
            get: fn _, _ -> @ferry_route end
          ]},
-        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]},
+        {SchedulesRepo, [],
+         [by_route_ids: fn _, _ -> [] end, end_of_rating: fn -> Date.add(@todays_date, 7) end]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
@@ -1194,7 +1199,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            by_type: fn _, _ -> [@route, @route_2] end,
            get: fn _, _ -> @route end
          ]},
-        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]},
+        {SchedulesRepo, [],
+         [by_route_ids: fn _, _ -> [] end, end_of_rating: fn -> Date.add(@todays_date, 7) end]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
@@ -1266,7 +1272,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            by_type: fn _ -> [@route] end,
            get: fn _, _ -> @route end
          ]},
-        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]},
+        {SchedulesRepo, [],
+         [by_route_ids: fn _, _ -> [] end, end_of_rating: fn -> Date.add(@todays_date, 7) end]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
@@ -1993,7 +2000,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
       with_mocks([
         {RoutesRepo, [], [by_type: fn _ -> [@route] end]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]},
-        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+        {SchedulesRepo, [],
+         [by_route_ids: fn _, _ -> [] end, end_of_rating: fn -> Date.add(@todays_date, 7) end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
         get_to_submission_page_refactor(view, "Commuter Rail", "Delay")

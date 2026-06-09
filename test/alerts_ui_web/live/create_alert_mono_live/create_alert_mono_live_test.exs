@@ -36,6 +36,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     id: "CR-Worcester-1"
   }
 
+  @todays_date DateTime.utc_now()
+               |> DateTime.shift_zone!("America/New_York")
+               |> DateTime.to_date()
+
   describe "create alerts page" do
     @tag :logged_in_user
     test "connected mount displays first page of form when logged in", %{conn: conn} do
@@ -95,7 +99,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     @tag :logged_in_user
     test "Correctly displays prediction suppression modal", %{conn: conn} do
       with_mocks([
-        {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [] end},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _route_ids, _opts -> [] end,
+           end_of_rating: fn -> Date.add(@todays_date, 7) end
+         ]},
         {StopsRepo, [], by_route: fn _, _, _opts -> [@stop] end},
         {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]}
       ]) do

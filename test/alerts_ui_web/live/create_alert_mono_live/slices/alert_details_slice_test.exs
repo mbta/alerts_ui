@@ -475,7 +475,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
       conn: conn
     } do
       with_mocks([
-        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _route_ids, _opts -> [] end,
+           end_of_rating: fn -> Date.add(@todays_date, 1) end
+         ]},
         {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
         {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop, @stop_2] end]}
       ]) do
