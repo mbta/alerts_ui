@@ -275,6 +275,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     []
   end
 
+  defp available_schedules([], _direction, _modal_date) do
+    []
+  end
+
   defp available_schedules(route_ids, direction, modal_date) do
     date = if modal_date === "default", do: nil, else: modal_date
 
