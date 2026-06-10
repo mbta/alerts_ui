@@ -177,7 +177,8 @@ defmodule AlertsUIWeb.Tickets.DirectionChangeClearsOppositeBusStopsTest do
 
   # Integration test that follows the exact Steps to Reproduce from the ticket.
   describe "LiveView integration: Bus Detour stop clearing on direction change" do
-    @tag :skip # behaving strangely here, works in the real world, let's come back to it
+    # behaving strangely here, works in the real world, let's come back to it
+    @tag :skip
     @tag :logged_in_user
     test "stops in opposite direction are cleared from review modal when direction changes",
          %{conn: conn} do
