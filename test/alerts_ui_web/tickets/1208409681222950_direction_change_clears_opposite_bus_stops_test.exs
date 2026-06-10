@@ -24,7 +24,7 @@ defmodule AlertsUIWeb.Tickets.DirectionChangeClearsOppositeBusStopsTest do
   """
 
   use AlertsUIWeb.ConnCase
-  use ExUnit.Case, async: false
+  use ExUnit.Case, async: true
 
   import Mock
   import Phoenix.LiveViewTest
