@@ -133,15 +133,13 @@ defmodule AlertsUIWeb.Tickets.RecurringToOneTimeTest do
     test "recurrence_days are empty after editing a recurring alert to one-time", %{conn: conn} do
       with_mocks([
         {SchedulesRepo, [], [by_route_ids: fn _ids, _opts -> [] end]},
-        {FacilitiesRepo,
-         [],
+        {FacilitiesRepo, [],
          [
            get: fn _id -> @facility end,
            all: fn _opts -> [@facility] end,
            get_by_type: fn _types, _opts -> [@facility] end
          ]},
-        {StopsRepo,
-         [],
+        {StopsRepo, [],
          [
            all: fn _, _ -> [] end,
            by_route: fn _route, _direction, _opts -> [] end,
@@ -201,6 +199,7 @@ defmodule AlertsUIWeb.Tickets.RecurringToOneTimeTest do
         # Step 2: Load the edit form for the recurring alert
         # The recurring flag should be set in the DB
         db_alert = Alerts.get_by_id(alert.id)
+
         assert db_alert.recurring == true,
                "pre-condition: alert must be recurring before the edit"
 
@@ -208,7 +207,8 @@ defmodule AlertsUIWeb.Tickets.RecurringToOneTimeTest do
           live(conn, "/alerts/mono/edit/#{db_alert.alert_id}/facility/elevator_closure")
 
         # Verify it renders as recurring in the form
-        assert html =~ "recurring" or has_element?(view, "select[name='alert_data[alert_timing]']"),
+        assert html =~ "recurring" or
+                 has_element?(view, "select[name='alert_data[alert_timing]']"),
                "form should render for this alert"
 
         # Step 3: Submit with alert_timing = one-time (simulating the user changing it)
@@ -235,6 +235,7 @@ defmodule AlertsUIWeb.Tickets.RecurringToOneTimeTest do
 
           # Wait for redirect (returns to "/" or configured return_to path)
           {_redirect_path, flash} = assert_redirect(view)
+
           assert flash["info"] =~ "updated" or flash["info"] =~ "created",
                  "Expected a success flash, got: #{inspect(flash)}"
 

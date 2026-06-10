@@ -74,9 +74,21 @@ defmodule AlertsUIWeb.Tickets.AffectedServiceFilterWeirdnessTest do
 
         # All three routes should be present in the modal filter select initially
         {:ok, doc_initial} = view |> render() |> Floki.parse_document()
-        assert document_has_element?(doc_initial, "select#alert_data_modal_route_id > option[value=\"88\"]")
-        assert document_has_element?(doc_initial, "select#alert_data_modal_route_id > option[value=\"77\"]")
-        assert document_has_element?(doc_initial, "select#alert_data_modal_route_id > option[value=\"1\"]")
+
+        assert document_has_element?(
+                 doc_initial,
+                 "select#alert_data_modal_route_id > option[value=\"88\"]"
+               )
+
+        assert document_has_element?(
+                 doc_initial,
+                 "select#alert_data_modal_route_id > option[value=\"77\"]"
+               )
+
+        assert document_has_element?(
+                 doc_initial,
+                 "select#alert_data_modal_route_id > option[value=\"1\"]"
+               )
 
         # User types "88" in the modal search to narrow the list
         view
@@ -91,10 +103,16 @@ defmodule AlertsUIWeb.Tickets.AffectedServiceFilterWeirdnessTest do
         {:ok, doc_searched} = view |> render() |> Floki.parse_document()
 
         # Only route 88 should appear after searching
-        assert document_has_element?(doc_searched, "select#alert_data_modal_route_id > option[value=\"88\"]"),
+        assert document_has_element?(
+                 doc_searched,
+                 "select#alert_data_modal_route_id > option[value=\"88\"]"
+               ),
                "route 88 should be present in options after searching for '88'"
 
-        refute document_has_element?(doc_searched, "select#alert_data_modal_route_id > option[value=\"77\"]"),
+        refute document_has_element?(
+                 doc_searched,
+                 "select#alert_data_modal_route_id > option[value=\"77\"]"
+               ),
                "route 77 should NOT be present in options when search term is '88'"
 
         # User clicks route 88 (selects it)

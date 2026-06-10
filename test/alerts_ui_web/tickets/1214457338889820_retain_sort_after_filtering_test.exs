@@ -84,8 +84,13 @@ defmodule AlertsUIWeb.Tickets.RetainSortAfterFilteringTest do
 
       render_click(view, "sort-alerts", %{"order" => "active_period_start"})
       sort_path = assert_patch(view)
+
       direction =
-        sort_path |> URI.parse() |> Map.get(:query) |> URI.decode_query() |> Map.fetch!("order_direction")
+        sort_path
+        |> URI.parse()
+        |> Map.get(:query)
+        |> URI.decode_query()
+        |> Map.fetch!("order_direction")
 
       # Apply a modal filter (a Service Types selection) on top of the sort.
       # service_type is the simplest modal filter field; the value shape mirrors
@@ -98,7 +103,10 @@ defmodule AlertsUIWeb.Tickets.RetainSortAfterFilteringTest do
       filter_query = filter_path |> URI.parse() |> Map.get(:query) |> URI.decode_query()
 
       # The modal filter is applied (service_type present in the URL)...
-      assert filter_query |> Map.keys() |> Enum.any?(&String.starts_with?(&1, "filter[service_type]"))
+      assert filter_query
+             |> Map.keys()
+             |> Enum.any?(&String.starts_with?(&1, "filter[service_type]"))
+
       # ...AND the sort parameters are RETAINED (the bug: these used to be erased).
       assert filter_query["order_by"] == "active_period_start"
       assert filter_query["order_direction"] == direction

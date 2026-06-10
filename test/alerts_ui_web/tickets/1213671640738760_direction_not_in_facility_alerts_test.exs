@@ -203,7 +203,9 @@ defmodule AlertsUIWeb.Tickets.DirectionNotInFacilityAlertsTest do
         {StopsRepo, [],
          [
            all: fn ["filter[id]": ""], _opts -> [] end,
-           get_parent: fn _stop_id -> %MBTAV3API.Stops.Stop{id: "place-alfcl", name: "Alewife"} end
+           get_parent: fn _stop_id ->
+             %MBTAV3API.Stops.Stop{id: "place-alfcl", name: "Alewife"}
+           end
          ]}
       ]) do
         # Build a stored facility alert with no direction selections

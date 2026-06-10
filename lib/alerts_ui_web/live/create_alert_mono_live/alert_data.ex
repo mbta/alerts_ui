@@ -254,7 +254,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
       end)
       |> Enum.reduce({%{}, socket}, fn slice, {alert_data_params, socket} ->
         extracted_params =
-          Map.merge(alert_data_params, Map.from_struct(slice))
+          Map.merge(alert_data_params, Map.from_struct(slice), &keep_non_nil/3)
 
         socket = Slice.mount(slice, socket, params)
 
@@ -356,8 +356,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
       TimelineSlice,
       UrlSlice,
       ServiceSliceDispatcher.affected_service_component(combination),
-      AlertDetailsSlice,
       TimeRangeSlice,
+      AlertDetailsSlice,
       NotificationPeriodSlice,
       ReminderTimesSlice,
       DeliverySlice,
@@ -388,6 +388,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     |> strip_banner_text_unless_enabled()
     |> strip_recurrence_days_if_one_time()
   end
+
+  defp keep_non_nil(_key, v1, v2), do: if(is_nil(v2), do: v1, else: v2)
 
   defp normalize_effect_name(alert_data) do
     normalized =

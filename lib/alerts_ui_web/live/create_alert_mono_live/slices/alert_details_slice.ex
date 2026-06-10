@@ -44,12 +44,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
   defimpl Slice, for: __MODULE__ do
     import Ecto.Changeset
-    import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData, only: [clear_my_errors: 2]
-
     alias AlertsUI.Models.Alert
     alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice
-    alias AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice
     alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
     alias MBTAV3API.Stops.Stop
     alias Phoenix.LiveView.AsyncResult
@@ -61,10 +58,25 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     @cdn_host "cdn.mbta.com"
 
+    @time_range_fields [
+      :active_period_start_specifier,
+      :active_period_end_specifier,
+      :active_period_start_time_specifier,
+      :active_period_end_time_specifier,
+      :active_period_start,
+      :active_period_end,
+      :active_period_start_date,
+      :active_period_end_date,
+      :active_period_start_time,
+      :active_period_end_time,
+      :alert_timing,
+      :recurrence_days
+    ]
+
     def mount(_details_data, socket, _base_params), do: socket
 
     def extract(details_data, _alert, _params) do
-      struct(details_data)
+      Map.drop(details_data, @time_range_fields)
     end
 
     def transform(details_data, changeset, params, socket) do
@@ -147,7 +159,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       image_size = image_url |> get_image_size()
 
       changeset
-      |> clear_my_errors(AlertDetailsSlice)
       |> Validation.always_validate_required(@required_fields)
       |> validate_url(get_field(changeset, :url))
       |> validate_image_fields(image_size, image_url)

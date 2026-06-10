@@ -48,9 +48,14 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
         "id" => ""
       }
 
-      changeset = ReminderTimesSlice.reminder_time_changeset(%AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{}, params)
+      changeset =
+        ReminderTimesSlice.reminder_time_changeset(
+          %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{},
+          params
+        )
 
       refute changeset.valid?
+
       assert {:reminder_time, {"Select reminder time", [validation: :required]}} in changeset.errors
     end
 
@@ -61,9 +66,14 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
         "id" => ""
       }
 
-      changeset = ReminderTimesSlice.reminder_time_changeset(%AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{}, params)
+      changeset =
+        ReminderTimesSlice.reminder_time_changeset(
+          %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{},
+          params
+        )
 
       refute changeset.valid?
+
       assert {:reminder_time, {"Select reminder time", [validation: :required]}} in changeset.errors
     end
   end
@@ -78,14 +88,19 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
         "id" => ""
       }
 
-      changeset = ReminderTimesSlice.reminder_time_changeset(%AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{}, params)
+      changeset =
+        ReminderTimesSlice.reminder_time_changeset(
+          %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{},
+          params
+        )
 
       refute changeset.valid?
 
       error_messages = Keyword.get_values(changeset.errors, :reminder_time)
+
       assert Enum.any?(error_messages, fn {msg, _opts} ->
-        String.contains?(msg, "Reminder time must be after notification period starts")
-      end)
+               String.contains?(msg, "Reminder time must be after notification period starts")
+             end)
     end
 
     test "existing reminder (has id) before min_time does NOT produce a past-time error" do
@@ -97,13 +112,18 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
         "id" => "some-existing-uuid"
       }
 
-      changeset = ReminderTimesSlice.reminder_time_changeset(%AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{}, params)
+      changeset =
+        ReminderTimesSlice.reminder_time_changeset(
+          %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{},
+          params
+        )
 
       # existing records bypass the min_time check
       past_time_errors = Keyword.get_values(changeset.errors, :reminder_time)
+
       refute Enum.any?(past_time_errors, fn {msg, _opts} ->
-        String.contains?(msg, "Reminder time must be after notification period starts")
-      end)
+               String.contains?(msg, "Reminder time must be after notification period starts")
+             end)
     end
   end
 
@@ -116,7 +136,11 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
         "id" => ""
       }
 
-      changeset = ReminderTimesSlice.reminder_time_changeset(%AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{}, params)
+      changeset =
+        ReminderTimesSlice.reminder_time_changeset(
+          %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{},
+          params
+        )
 
       assert changeset.valid?
       assert changeset.errors == []
@@ -129,7 +153,9 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
 
   describe "LiveView — reminder validation end-to-end" do
     @tag :logged_in_user
-    test "past reminder date shows validation error in rendered HTML; no 'Sent' indicator", %{conn: conn} do
+    test "past reminder date shows validation error in rendered HTML; no 'Sent' indicator", %{
+      conn: conn
+    } do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
       get_to_submission_page_refactor(view, "Bus", "Detour")
 
@@ -166,7 +192,9 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
     end
 
     @tag :logged_in_user
-    test "blank reminder date shows 'Select reminder time' error; no 'Sent' indicator", %{conn: conn} do
+    test "blank reminder date shows 'Select reminder time' error; no 'Sent' indicator", %{
+      conn: conn
+    } do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
       get_to_submission_page_refactor(view, "Bus", "Detour")
 

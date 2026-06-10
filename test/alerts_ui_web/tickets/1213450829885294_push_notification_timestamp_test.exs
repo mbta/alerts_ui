@@ -34,8 +34,12 @@ defmodule AlertsUIWeb.Tickets.PushNotificationTimestampTest do
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Stops.Repo, as: StopsRepo
 
-  @route %Route{id: "Red", type: 1, name: "Red Line",
-                direction_names: %{0 => "Westbound", 1 => "Eastbound"}}
+  @route %Route{
+    id: "Red",
+    type: 1,
+    name: "Red Line",
+    direction_names: %{0 => "Westbound", 1 => "Eastbound"}
+  }
 
   # Minimal alert data map sufficient to call AlertBuilder.build_alert/3.
   # Based on the shape from alert_builder_test.exs and produced by

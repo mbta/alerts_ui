@@ -30,8 +30,8 @@ defmodule AlertsUIWeb.Tickets.ButtonsGoDarkOnHoverTest do
   import Phoenix.Component, only: [sigil_H: 2]
   import Phoenix.LiveViewTest
 
-  alias AlertsUIWeb.SharedComponents
   alias AlertsUIWeb.CoreComponents
+  alias AlertsUIWeb.SharedComponents
 
   # The offending hover colour from BEFORE the fix: very dark (near-black)
   @dark_hover_bg "bg-secondary-hover"

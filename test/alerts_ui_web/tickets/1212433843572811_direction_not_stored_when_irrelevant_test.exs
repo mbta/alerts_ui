@@ -202,6 +202,7 @@ defmodule AlertsUIWeb.Tickets.DirectionNotStoredWhenIrrelevantTest do
   end
 
   defp direction_contains_both?(nil), do: false
+
   defp direction_contains_both?(selections) when is_list(selections) do
     Enum.any?(selections, fn s ->
       s |> to_string() |> String.downcase() |> String.contains?("both")
