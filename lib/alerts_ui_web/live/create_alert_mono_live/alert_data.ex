@@ -245,6 +245,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
     base = struct(__MODULE__, base_params)
 
+    IO.puts("init")
+
     {extracted_params, socket} =
       slices(socket)
       |> Enum.map(fn slice_module ->
@@ -282,6 +284,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
     alert_data_or_changeset
     |> cast(alert_data_params, fields || form_fields(socket))
+    |> transform_url_slice(params, socket)
     |> transform(params, socket)
     |> validate(params, socket)
     |> case do
@@ -305,7 +308,22 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     end
   end
 
+  def transform_url_slice(%Changeset{} = changeset, params, socket) do
+    url_slice =
+      changeset
+      |> slice_from_changeset(UrlSlice)
+      |> Slice.extract(changeset.data, params)
+
+    new_changeset = Slice.transform(url_slice, changeset, params, socket)
+    new_changeset = Slice.validate(url_slice, new_changeset, params, socket)
+    IO.inspect(new_changeset)
+    new_changeset
+  end
+
   def transform(%Changeset{} = changeset, params, socket) do
+    IO.puts("transform from alert_data")
+    IO.inspect(slices(socket), label: "slices socket")
+
     Enum.reduce(slices(socket), changeset, fn slice_module, changeset ->
       changeset
       |> slice_from_changeset(slice_module)
@@ -350,7 +368,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
         _ ->
           socket.assigns.form[:combination].value
+          # slice = slice_from_changeset(socket.assigns.form.source, UrlSlice)
+          # IO.inspect(slice, label: "??")
+          # slice.combination
       end
+
+    IO.inspect(combination, label: "combination from slices()")
 
     [
       TimelineSlice,

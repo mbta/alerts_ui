@@ -91,8 +91,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   @impl true
   def handle_params(params, _url, socket) do
+    IO.puts("handle params")
     # accept changes to url params
-    {:noreply, sync_socket(socket, params)}
+    {:noreply, start_socket(socket, params)}
   end
 
   @impl true
