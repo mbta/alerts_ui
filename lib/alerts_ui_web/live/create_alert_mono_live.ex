@@ -335,8 +335,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         socket
       end
 
-    socket = assign(socket, :obsolete_ids, obsolete_ids)
-
     pending_route_ids = Map.get(new_selections, :pending_auto_select_route_ids)
 
     # Always override route_ids — no guard for pre-existing selections; see design spec.

@@ -872,11 +872,19 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
 
     @tag :logged_in_user
     test "stop select is disabled when multiple routes are selected", %{conn: conn} do
+      boat_f1 = %Route{
+        direction_names: %{0 => "Outbound", 1 => "Inbound"},
+        sort_order: 1,
+        id: "Boat-F1",
+        type: 4,
+        name: "Hingham Ferry"
+      }
+
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _ -> [@ferry_route] end,
-           by_type: fn _, _ -> [@ferry_route] end,
+           by_type: fn _ -> [@ferry_route, boat_f1] end,
+           by_type: fn _, _ -> [@ferry_route, boat_f1] end,
            get: fn _, _ -> @ferry_route end
          ]},
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]},
@@ -895,7 +903,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
 
         render_async(view)
 
-        assert render(view) =~ ~s(id="alert_data_stop_names_and_ids" disabled="disabled")
+        assert render(view) =~ ~s(id="alert_data_stop_names_and_ids" disabled="disabled"),
+               "stop names should be disabled"
       end
     end
 
