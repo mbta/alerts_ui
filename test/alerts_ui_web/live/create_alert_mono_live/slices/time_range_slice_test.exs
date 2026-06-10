@@ -395,6 +395,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
                ~s(until alert is manually closed)
     end
 
+    # TODO recurring start from now -> custom back to -> now
+
     @tag :logged_in_user
     test "displays error if end before start", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
@@ -503,16 +505,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
           "alert_timing" => "recurring"
         }
       })
-
-      # 2024-12-03 is a Tuesday
-      # view
-      # |> element("form")
-      # |> render_change(%{
-      #   "alert_data" => %{
-      #     "active_period_start_time_specifier" => "custom",
-      #     "active_period_start_specifier" => "custom"
-      #   }
-      # })
 
       view
       |> element("form")
@@ -1464,7 +1456,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     end
   end
 
-  describe "ensure_end_date_values/2 with :later_today specifier" do
+  describe "ensure_end_values/2 with :later_today specifier" do
     test "does not recompute active_period_end when target is unrelated" do
       existing_end = ~N[2024-06-03 02:30:00]
 
@@ -1479,7 +1471,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
           [:active_period_end_specifier, :active_period_end, :active_period_end_date]
         )
 
-      result = TimeRangeSlice.ensure_end_date_values(changeset, :custom, "header_sync_toggle")
+      result = TimeRangeSlice.ensure_end_values(changeset, :custom, "header_sync_toggle")
 
       assert Ecto.Changeset.get_field(result, :active_period_end) == existing_end
     end
