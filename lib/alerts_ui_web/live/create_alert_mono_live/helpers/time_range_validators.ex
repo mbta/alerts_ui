@@ -150,11 +150,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
     end)
   end
 
-  def validate_start_is_after_now(changeset, editing \\ false)
-  def validate_start_is_after_now(changeset, true), do: changeset
+  def validate_start_is_after_now(changeset, _, :editing), do: changeset
 
-  def validate_start_is_after_now(changeset, _editing) do
-    now = DateTimeHelpers.current_time()
+  def validate_start_is_after_now(changeset, now, _editing) do
     specifier = get_field(changeset, :active_period_start_specifier)
     timing = get_field(changeset, :alert_timing)
 

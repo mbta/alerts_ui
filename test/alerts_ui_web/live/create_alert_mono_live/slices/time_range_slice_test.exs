@@ -84,6 +84,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
   defp socket_with_trip_selections(schedules) do
     %{
       assigns: %{
+        current_time: DateTime.to_naive(@todays_datetime),
         selections: %AsyncResult{
           ok?: true,
           result: %AffectedServiceSlice.Selections{available_schedules: schedules}
@@ -96,6 +97,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     %{
       assigns: %{
         form_type: form_type,
+        current_time: DateTime.to_naive(@todays_datetime),
         selections: %AffectedServiceSlice.Selections{available_schedules: schedules}
       }
     }
@@ -401,8 +403,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       assert view |> element("#duration-text-recurring") |> render =~
                ~s(until alert is manually closed)
     end
-
-    # TODO recurring start from now -> custom back to -> now
 
     @tag :logged_in_user
     test "displays error if end before start", %{conn: conn} do
@@ -1412,7 +1412,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     end
   end
 
-  describe "ensure_start_values/2 with :now specifier" do
+  describe "ensure_start_values/5 with :now specifier" do
     test "does not advance active_period_start when target is unrelated (e.g. header_sync_toggle)" do
       existing_dt = ~N[2024-01-15 10:30:00]
 
@@ -1428,7 +1428,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         )
 
       result =
-        TimeRangeSlice.ensure_start_values(changeset, "header_sync_toggle", "one-time")
+        TimeRangeSlice.ensure_start_values(
+          changeset,
+          :custom,
+          nil,
+          DateTime.to_naive(@todays_datetime),
+          "one-time"
+        )
 
       assert Ecto.Changeset.get_field(result, :active_period_start) == existing_dt
     end
@@ -1450,7 +1456,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       result =
         TimeRangeSlice.ensure_start_values(
           changeset,
-          "active_period_start_specifier",
+          :custom,
+          nil,
+          DateTime.to_naive(@todays_datetime),
           "one-time"
         )
 
@@ -1465,12 +1473,20 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
           [:active_period_start_specifier]
         )
 
-      result = TimeRangeSlice.ensure_start_values(changeset, nil, "one-time")
+      result =
+        TimeRangeSlice.ensure_start_values(
+          changeset,
+          nil,
+          nil,
+          DateTime.to_naive(@todays_datetime),
+          "one-time"
+        )
+
       assert %NaiveDateTime{} = Ecto.Changeset.get_field(result, :active_period_start)
     end
   end
 
-  describe "ensure_end_values/2 with :later_today specifier" do
+  describe "ensure_end_values/5 with :later_today specifier" do
     test "does not recompute active_period_end when target is unrelated" do
       existing_end = ~N[2024-06-03 02:30:00]
 
@@ -1485,7 +1501,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
           [:active_period_end_specifier, :active_period_end, :active_period_end_date]
         )
 
-      result = TimeRangeSlice.ensure_end_values(changeset, :custom, "header_sync_toggle")
+      result =
+        TimeRangeSlice.ensure_end_values(
+          changeset,
+          :custom,
+          :custom,
+          DateTime.to_naive(@todays_datetime),
+          :"one-time"
+        )
 
       assert Ecto.Changeset.get_field(result, :active_period_end) == existing_end
     end

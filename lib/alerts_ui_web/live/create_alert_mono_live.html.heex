@@ -34,8 +34,11 @@
           />
           <TimeRangeSlice.render
             form={@form}
+            current_time={@current_time}
             previous_start_specifier={@previous_start_specifier}
             previous_end_specifier={@previous_end_specifier}
+            previous_start_time_specifier={@previous_start_time_specifier}
+            previous_end_time_specifier={@previous_end_time_specifier}
           />
           <NotificationPeriodSlice.render form={@form} />
           <AlertDetailsSlice.render
