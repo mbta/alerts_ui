@@ -373,7 +373,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       |> element("form")
       |> render_change(%{
         "alert_data" => %{
-          "active_period_start_specifier" => "custom",
+          "active_period_start_specifier" => "custom"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
           "active_period_start_date" => Date.add(@todays_date, 1),
           "recurrence_days" => [
             :sunday,
@@ -511,7 +518,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       |> render_change(%{
         "alert_data" => %{
           "active_period_start_time_specifier" => "custom",
-          "active_period_start_specifier" => "custom",
+          "active_period_start_specifier" => "custom"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
           "active_period_start_time" => "10:00:00",
           "active_period_start_date" => "2024-12-03",
           "recurrence_days" => ["monday"]
@@ -1398,7 +1412,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     end
   end
 
-  describe "ensure_start_date_values/2 with :now specifier" do
+  describe "ensure_start_values/2 with :now specifier" do
     test "does not advance active_period_start when target is unrelated (e.g. header_sync_toggle)" do
       existing_dt = ~N[2024-01-15 10:30:00]
 
@@ -1414,7 +1428,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         )
 
       result =
-        TimeRangeSlice.ensure_start_date_values(changeset, "header_sync_toggle", "one-time")
+        TimeRangeSlice.ensure_start_values(changeset, "header_sync_toggle", "one-time")
 
       assert Ecto.Changeset.get_field(result, :active_period_start) == existing_dt
     end
@@ -1434,7 +1448,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         )
 
       result =
-        TimeRangeSlice.ensure_start_date_values(
+        TimeRangeSlice.ensure_start_values(
           changeset,
           "active_period_start_specifier",
           "one-time"
@@ -1451,7 +1465,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
           [:active_period_start_specifier]
         )
 
-      result = TimeRangeSlice.ensure_start_date_values(changeset, nil, "one-time")
+      result = TimeRangeSlice.ensure_start_values(changeset, nil, "one-time")
       assert %NaiveDateTime{} = Ecto.Changeset.get_field(result, :active_period_start)
     end
   end

@@ -69,7 +69,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeSliceGetters do
     end
   end
 
-  def get_recurring_start_date(%{active_period_start_specifier: active_period_start_specifier, active_period_start_date: active_period_start_date}, current_time, previous_state) do
+  def get_recurring_start_date(
+        %{
+          active_period_start_specifier: active_period_start_specifier,
+          active_period_start_date: active_period_start_date
+        },
+        current_time,
+        previous_state
+      ) do
     case active_period_start_specifier do
       :now ->
         current_time |> NaiveDateTime.to_date()
@@ -93,7 +100,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeSliceGetters do
     start_date
     |> DTHelpers.new_round_up_to_gap!(start_time, "America/New_York")
   end
-
 
   # one-time end
 
