@@ -2130,7 +2130,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
           stop_names_and_ids: ["default", "Central|place-cntsq"]
         })
 
-      result = AffectedServiceSlice.transform_changeset(changeset)
+      result = AffectedServiceSlice.transform_changeset(changeset, %{})
 
       assert Ecto.Changeset.get_field(result, :stop_names_and_ids) == ["Central|place-cntsq"]
       refute "default" in Ecto.Changeset.get_field(result, :stop_names_and_ids)
