@@ -46,10 +46,10 @@ defmodule AlertsUIWeb.Tickets.DirectionChangeClearsOppositeBusStopsTest do
     name: "SL1"
   }
 
-  @outbound_stop_1 %Stop{id: "place-sstat", name: "South Station (outbound)"}
-  @outbound_stop_2 %Stop{id: "place-crtst", name: "Courthouse (outbound)"}
-  @inbound_stop_1 %Stop{id: "17091", name: "Terminal A (inbound)"}
-  @inbound_stop_2 %Stop{id: "27092", name: "Terminal B Stop 1 - Arrivals Level (inbound)"}
+  @outbound_stop_1 %Stop{id: "place-sstat", name: "South Station"}
+  @outbound_stop_2 %Stop{id: "place-crtst", name: "Courthouse"}
+  @inbound_stop_1 %Stop{id: "17091", name: "Terminal A"}
+  @inbound_stop_2 %Stop{id: "27092", name: "Terminal B Stop 1 - Arrivals Level"}
 
   # Directly tests `filter_stops_by_direction` via `transform_changeset/2`.
   # These unit tests don't need a browser or auth.
