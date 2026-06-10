@@ -150,7 +150,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
       stop_id_options =
         stop_id_options(
-          available_stops,
+          candidate_stops,
           selected_stops,
           stop_search_term,
           route_type,
@@ -165,7 +165,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
       %Selections{
         available_filter_routes: available_filter_routes,
         available_routes: available_routes,
-        available_stops: available_stops,
+        available_stops: candidate_stops,
         filter_title_value: filter_title_value,
         modal_route_id_options: modal_route_id_options,
         route_id_options: route_id_options,

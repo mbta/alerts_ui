@@ -737,15 +737,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         {RoutesRepo, [],
          [
            by_type: fn _ -> [@route, @route_two] end,
-           by_stop: fn _ -> [@route, @route_two] end,
-           by_stop: fn _, _ -> [@route, @route_two] end
+           by_stop: fn "place-pktrm" -> [@route_two] end
          ]},
         {StopsRepo, [],
          [
            by_route_type: fn _, _ -> [@stop, @stop_two] end,
            by_route: fn
              "Blue", _, _ -> [@stop]
-             _, _, _ -> [@stop, @stop_two]
+             "Red", _, _ -> [@stop_two]
            end
          ]}
       ]) do
@@ -778,17 +777,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         {:ok, document} = view |> render() |> Floki.parse_document()
 
-        # Park Street should be preserved at the top since it was selected
         assert document_has_element?(
                  document,
                  "select#alert_data_stop_ids > option[value=\"place-pktrm\"][selected=\"selected\"]"
-               )
+               ),
+               "Park Street should be preserved since it was previously selected"
 
-        # Aquarium should also appear (from filtered route Blue)
         assert document_has_element?(
                  document,
                  "select#alert_data_stop_ids > option[value=\"place-aqucl\"]"
-               )
+               ),
+               "Aquarium should also appear (from filtered route Blue)"
       end
     end
 
