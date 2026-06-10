@@ -227,7 +227,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
 
         active_period_end =
           tomorrows_date
-          |> Date.add(2)
+          |> Date.add(1)
           |> NaiveDateTime.new!(~T[03:00:00])
 
         view
@@ -236,16 +236,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
           _target: [:foo, :bar],
           alert_data: %{
             stop_names_and_ids: ["Aquarium (outbound)|place-aqucl"],
-            active_period_start_specifier: "start_of_service",
-            active_period_end_specifier: "end_of_service",
+            active_period_start_specifier: :start_of_service,
+            active_period_end_specifier: :end_of_service,
             active_period_start_date: tomorrows_date |> Date.to_iso8601(),
-            active_period_end_date: tomorrows_date,
-            active_period_start:
-              active_period_start
-              |> NaiveDateTime.to_iso8601(),
-            active_period_end:
-              active_period_end
-              |> NaiveDateTime.to_iso8601()
+            active_period_end_date: tomorrows_date |> Date.to_iso8601()
           }
         })
 

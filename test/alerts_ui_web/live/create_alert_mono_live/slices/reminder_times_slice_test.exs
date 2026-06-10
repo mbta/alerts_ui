@@ -126,8 +126,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
       |> render_change(%{
         "alert_data" => %{
           "active_period_start_specifier" => "custom",
-          "active_period_start" => "2030-01-01T10:00:00",
           "notification_specifier" => "same_as_effect_period"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_start" => "2030-01-01T10:00:00"
         }
       })
 

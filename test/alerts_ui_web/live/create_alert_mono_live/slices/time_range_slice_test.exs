@@ -311,7 +311,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       expected_value =
         @todays_datetime
         |> NaiveDateTime.to_iso8601()
-        |> String.slice(0, 15)
+        |> String.slice(0, 14)
 
       assert view |> element("#alert_data_active_period_end") |> render =~
                ~s(value="#{expected_value})

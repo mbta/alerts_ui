@@ -150,14 +150,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
     end)
   end
 
-  def validate_start_is_after_now(changeset, _, :editing), do: changeset
-
-  def validate_start_is_after_now(changeset, now, _editing) do
+  def validate_start_is_after_now(changeset, now, :new) do
     specifier = get_field(changeset, :active_period_start_specifier)
     timing = get_field(changeset, :alert_timing)
 
     validate_recurring_start(now, specifier, changeset, timing)
   end
+
+  def validate_start_is_after_now(changeset, _, _), do: changeset
 
   defp validate_recurring_start(now, specifier, changeset, timing)
        when timing in [:"one-time", "one-time"] do
