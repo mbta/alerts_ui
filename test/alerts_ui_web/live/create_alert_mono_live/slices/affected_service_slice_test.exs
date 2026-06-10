@@ -2122,5 +2122,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
 
       assert Ecto.Changeset.get_field(result, :stop_ids) == []
     end
+
+    test "strips bare \"default\" when selected alongside a real stop" do
+      changeset =
+        stop_coherence_changeset(%{
+          route_ids: ["Red"],
+          stop_names_and_ids: ["default", "Central|place-cntsq"]
+        })
+
+      result = AffectedServiceSlice.transform_changeset(changeset)
+
+      assert Ecto.Changeset.get_field(result, :stop_names_and_ids) == ["Central|place-cntsq"]
+      refute "default" in Ecto.Changeset.get_field(result, :stop_names_and_ids)
+    end
   end
 end

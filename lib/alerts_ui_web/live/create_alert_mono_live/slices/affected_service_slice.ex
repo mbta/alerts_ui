@@ -371,10 +371,21 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   defp clear_stops_when_multi_route(changeset, _params), do: changeset
 
   defp ensure_stop_names_and_ids(changeset) do
-    if get_field(changeset, :stop_names_and_ids) in [nil, "default", ["default"]] do
-      cast(changeset, %{stop_names_and_ids: []}, [:stop_names_and_ids])
-    else
-      changeset
+    stop_names_and_ids = get_field(changeset, :stop_names_and_ids)
+
+    cond do
+      stop_names_and_ids in [nil, "default", ["default"]] ->
+        cast(changeset, %{stop_names_and_ids: []}, [:stop_names_and_ids])
+
+      is_list(stop_names_and_ids) and "default" in stop_names_and_ids ->
+        cast(
+          changeset,
+          %{stop_names_and_ids: List.delete(stop_names_and_ids, "default")},
+          [:stop_names_and_ids]
+        )
+
+      true ->
+        changeset
     end
   end
 
