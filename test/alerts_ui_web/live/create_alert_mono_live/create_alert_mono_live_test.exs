@@ -321,6 +321,31 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
 
   describe "obsolete ids modal" do
     @tag :logged_in_user
+    test "should not render by default", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _types -> [@route] end,
+           get: fn _id -> @route end,
+           get: fn _id, _opts -> @route end,
+           all: fn _opts -> [@route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [@stop] end,
+           get: fn _id -> @stop end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        get_to_submission_page_refactor(view, "Bus", "Multi-route detour")
+
+        refute view
+               |> element("#gtfs-warning-modal")
+               |> has_element?
+      end
+    end
+
+    @tag :logged_in_user
     test "displays modal with obsolete ids", %{conn: conn} do
       with_mocks([
         {RoutesRepo, [],
