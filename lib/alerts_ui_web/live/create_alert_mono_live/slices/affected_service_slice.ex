@@ -63,20 +63,26 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
 
     def mount(_service_data, socket, _base_params) do
+      IO.puts("mount")
       socket
     end
 
     def extract(service_data, %AlertData{} = _alert_data, _params) do
+      IO.puts("extract")
       service_data
     end
 
     def transform(_service_data, changeset, params, socket) do
+      IO.puts("transform")
+
       changeset
       |> AffectedServiceSlice.transform_changeset(params)
       |> AffectedServiceSlice.build_trip_information(socket)
     end
 
     def validate(_service_data, changeset, _params, socket) do
+      IO.puts("validate")
+
       if socket.assigns.submitted? do
         AffectedServiceSlice.validate_changeset(changeset)
       else
@@ -187,8 +193,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     stop_search_term = form[:stop_search_term].value
     trip_ids = form[:trip_ids].value || []
     trip_search_term = form[:trip_search_term].value
-
     all_route_types = all_route_types(route_type)
+
+    IO.inspect(modal_date, label: "assigns")
 
     socket
     |> assign(:selections, %{prev | loading: true})
@@ -247,7 +254,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       {filter_title_value, _} =
         service_dates()
         |> Enum.find({"All future trips", nil}, fn {_option, value} ->
-          value == (modal_date || today())
+          value == modal_date
         end)
 
       %Selections{
@@ -442,6 +449,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   end
 
   def ensure_modal_date(changeset) do
+    IO.inspect(get_field(changeset, :modal_date), label: "ensure modal date")
+
     case get_field(changeset, :modal_date) do
       modal_date when modal_date === nil -> change(changeset, modal_date: today())
       _ -> changeset
