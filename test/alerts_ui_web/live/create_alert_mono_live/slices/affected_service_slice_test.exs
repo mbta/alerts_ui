@@ -439,7 +439,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     end
 
     @tag :logged_in_user
-    test "filter title updates if 'all trips' is selected", %{conn: conn} do
+    test "filter title updates if 'all trips' is selected and queries all trips", %{conn: conn} do
       today = @todays_date |> Date.to_string()
       today_day_name = Calendar.strftime(@todays_date, "%a %b %0d")
       tomorrow = @todays_date |> Date.add(1) |> Date.to_string()
@@ -454,7 +454,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {SchedulesRepo, [],
          [
            by_route_ids: fn _, _ -> [@schedule_future, @schedule_future] end,
-           end_of_rating: fn -> Date.add(@todays_date, 7) end
+           end_of_rating: fn -> Date.add(@todays_date, 2) end
          ]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
@@ -465,7 +465,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         view
         |> element("form")
         |> render_change(%{
-          "alert_data" => %{"route_ids" => ["CR-Worcester"], "modal_date" => "default"}
+          "alert_data" => %{"route_ids" => ["CR-Worcester"]}
+        })
+
+        render_async(view)
+
+        assert render(view) =~ ~s(Filter: #{today_day_name})
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{"modal_date" => ["default"]}
         })
 
         render_click(view, "accept_filter")
@@ -473,6 +483,21 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         render_async(view)
 
         assert render(view) =~ ~s(Filter: All future trips)
+
+        # Assert that we are querying for future trips (up until end of rating)
+        assert_called(
+          SchedulesRepo.by_route_ids(:_,
+            stop_sequences: [:first, :last],
+            date: @todays_date |> Date.add(1)
+          )
+        )
+
+        assert_called(
+          SchedulesRepo.by_route_ids(:_,
+            stop_sequences: [:first, :last],
+            date: @todays_date |> Date.add(2)
+          )
+        )
       end
     end
 
