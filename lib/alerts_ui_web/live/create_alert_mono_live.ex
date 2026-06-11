@@ -324,24 +324,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         form_data = Map.from_struct(form.data)
 
         ids_with_obsolete_entities_removed =
-          ObsoleteEntities.ids_with_obsolete_entities_removed(
+          ObsoleteEntities.all_obsolete_entities_removed(
             form_data,
             obsolete_ids,
             required_fields
-          )
-          |> Map.merge(
-            ObsoleteEntities.original_selections_with_obsolete_entities_removed(
-              form_data,
-              obsolete_ids,
-              required_fields
-            )
-          )
-          |> Map.merge(
-            ObsoleteEntities.stop_names_and_ids_with_obsolete_entities_removed(
-              form_data,
-              obsolete_ids,
-              required_fields
-            )
           )
 
         original_selections =
@@ -356,9 +342,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
           struct(AlertData, Map.merge(form_data, ids_with_obsolete_entities_removed))
 
         new_form_source = Map.put(form.source, :data, new_form_data)
-
         new_form = form |> Map.put(:data, new_form_data) |> Map.put(:source, new_form_source)
 
+        # sending original selections so we can show the names in the modal
         send(self(), {:got_obsolete_ids, obsolete_ids, original_selections})
 
         assign(socket, %{obsolete_ids: obsolete_ids, form: new_form})

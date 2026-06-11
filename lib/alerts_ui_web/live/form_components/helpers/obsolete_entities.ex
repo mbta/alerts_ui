@@ -11,6 +11,33 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ObsoleteEntities do
     obsolete_ids_found && all_fields_in
   end
 
+  @spec all_obsolete_entities_removed(map(), map(), list()) :: map()
+  def all_obsolete_entities_removed(
+        alert_data,
+        obsolete_ids,
+        required_fields
+      ) do
+    ids_with_obsolete_entities_removed(
+      alert_data,
+      obsolete_ids,
+      required_fields
+    )
+    |> Map.merge(
+      original_selections_with_obsolete_entities_removed(
+        alert_data,
+        obsolete_ids,
+        required_fields
+      )
+    )
+    |> Map.merge(
+      stop_names_and_ids_with_obsolete_entities_removed(
+        alert_data,
+        obsolete_ids,
+        required_fields
+      )
+    )
+  end
+
   @spec ids_with_obsolete_entities_removed(map(), map(), list()) :: map()
   def ids_with_obsolete_entities_removed(alert_data, obsolete_ids, required_fields) do
     required_fields
@@ -33,11 +60,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ObsoleteEntities do
       obsolete_stop_ids = Map.get(obsolete_ids, :stop_ids, [])
 
       new_stop_names_and_ids =
-        Enum.reject(original_stop_names_and_ids, fn stop_and_id ->
-          [_name, original_id] = String.split(stop_and_id, "|")
-
-          original_id in obsolete_stop_ids
-        end)
+        reject_strings_with_obsolete_ids(original_stop_names_and_ids, obsolete_stop_ids)
 
       %{stop_names_and_ids: new_stop_names_and_ids} |> filter_out_empty_values |> Enum.into(%{})
     else
@@ -65,16 +88,20 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ObsoleteEntities do
       target_field = field_map[field]
 
       target_field_values =
-        Enum.reject(alert_data[target_field] || [], fn original_string ->
-          [_name, original_id] = String.split(original_string, "|")
-          original_id in obsolete_ids
-        end)
+        reject_strings_with_obsolete_ids(alert_data[target_field] || [], obsolete_ids)
 
       {target_field, target_field_values}
     end)
     |> filter_out_empty_values
     |> Enum.into(%{})
     |> Map.put(:stop_names_and_ids, ["South Station|place-sstat"])
+  end
+
+  defp reject_strings_with_obsolete_ids(names_and_ids, obsolete_ids) do
+    Enum.reject(names_and_ids, fn original_string ->
+      [_name, original_id] = String.split(original_string, "|")
+      original_id in obsolete_ids
+    end)
   end
 
   defp filter_out_empty_values(enum) do

@@ -341,8 +341,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
 
         assert view |> element("#gtfs-warning-modal-container") |> render_async(1000) =~
                  ~s(aria-hidden=\"true\")
-
-        # refute render_async(view, 1000) =~ "Warning: Outdated entities will be omitted"
       end
     end
 
@@ -414,6 +412,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
 
         assert view |> element("#review-modal-container") |> render_async() =~
                  "South Station"
+
+        refute view |> element("#review-modal-container") |> render_async() =~
+                 "spurious route"
+
+        refute view |> element("#review-modal-container") |> render_async() =~
+                 "spurious stop"
 
         open_review_modal(view)
         submit_alert(view)
