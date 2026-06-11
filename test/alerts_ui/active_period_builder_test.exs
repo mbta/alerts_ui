@@ -187,6 +187,30 @@ defmodule AlertsUI.ActivePeriodBuilderTest do
       assert result.active_period_end == DateTime.new!(~D[2024-05-01], @end_of_service_utc)
       assert result.duration_certainty == :KNOWN
     end
+
+    test "builds active period with no end value when_work_order_is_closed" do
+      alert_data =
+        %{
+          active_period_start: ~N[2024-04-30 11:54:00],
+          active_period_end: NaiveDateTime.new!(~D[2024-05-01], @end_of_service_eastern),
+          active_period_end_specifier: :when_work_order_is_closed,
+          active_period_start_specifier: :custom
+        }
+
+      result =
+        ActivePeriodBuilder.build_one_time_active_period(alert_data, ~U[2024-04-15 05:54:00Z])
+
+      assert result.active_period == [
+               %{
+                 start: ~U[2024-04-30 15:54:00Z],
+                 end: nil
+               }
+             ]
+
+      assert result.active_period_start == ~U[2024-04-30 15:54:00Z]
+      assert result.active_period_end == nil
+      assert result.duration_certainty == :UNKNOWN
+    end
   end
 
   describe "build_recurring_active_period/2" do

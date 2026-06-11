@@ -163,6 +163,8 @@ defmodule AlertsUI.ActivePeriodBuilder do
 
   defp build_one_time_active_period_end(nil, _, _, _), do: nil
 
+  defp build_one_time_active_period_end(_, :when_work_order_is_closed, _, _), do: nil
+
   defp build_one_time_active_period_end(_, :until_further_notice, _, _), do: nil
 
   defp build_one_time_active_period_end(_naive_end, :later_today, naive_start, current_time) do
