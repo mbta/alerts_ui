@@ -48,7 +48,10 @@ defmodule AlertsUIWeb.UserAuth do
   """
   @spec log_out_user(Conn.t(), keyword()) :: Conn.t()
   def log_out_user(conn, opts \\ []) do
+    Logger.info("USER LOGGING: logging out user")
+
     if live_socket_id = get_session(conn, :live_socket_id) do
+      Logger.info("USER LOGGING: live socket disconnected")
       AlertsUIWeb.Endpoint.broadcast(live_socket_id, "disconnect", %{})
     end
 
@@ -126,6 +129,10 @@ defmodule AlertsUIWeb.UserAuth do
     if socket.assigns.current_user do
       {:cont, socket}
     else
+      Logger.info(
+        "USER LOGGING: no current user inside on_mount(:ensure_authenticated). redirecting."
+      )
+
       socket = Phoenix.LiveView.redirect(socket, to: ~p"/auth/keycloak")
 
       {:halt, socket}
@@ -177,6 +184,8 @@ defmodule AlertsUIWeb.UserAuth do
       now = System.system_time(:second)
 
       if auth_expired?(conn, now) do
+        Logger.info("USER LOGGING: user auth has expired")
+
         conn
         |> maybe_store_return_to()
         |> redirect(to: ~p"/auth/keycloak?prompt=login&login_hint=#{email}")
@@ -185,6 +194,8 @@ defmodule AlertsUIWeb.UserAuth do
         put_session(conn, :last_active, now)
       end
     else
+      Logger.info("USER LOGGING: no current user in 'require authenticated user'. redirecting.")
+
       conn
       |> maybe_store_return_to()
       |> redirect(to: ~p"/auth/keycloak")
