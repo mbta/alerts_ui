@@ -4,7 +4,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
   """
 
   alias AlertsUI.Models.ActivePeriod
-  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Time, as: DTHelpers
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
   alias Phoenix.HTML.Form
