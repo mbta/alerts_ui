@@ -1591,12 +1591,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         render_async(view)
 
         # Inline
-        assert has_element?(view, "p.text-text-error", "You must select a route")
+        assert has_element?(view, "p.text-text-error", "Select route(s)")
 
         # Flash
         assert view
                |> element("#flash")
-               |> render() =~ "You must select a route"
+               |> render() =~ "Select route(s)"
       end
     end
 

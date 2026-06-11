@@ -347,7 +347,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
       })
 
       assert view
-             |> render() =~ ~s(can&#39;t be blank)
+             |> render() =~ ~s(Enter message text)
     end
 
     @tag :logged_in_user

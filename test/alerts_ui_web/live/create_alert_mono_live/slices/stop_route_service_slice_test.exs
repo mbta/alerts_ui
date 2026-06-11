@@ -1215,12 +1215,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         view |> element("button#review", "Review and submit") |> render_click()
 
-        assert has_element?(view, "p.text-text-error", "You must select a stop")
-        assert has_element?(view, "p.text-text-error", "You must select a route")
+        assert has_element?(view, "p.text-text-error", "Select stop(s)")
+        assert has_element?(view, "p.text-text-error", "Select route(s)")
 
         flash_html = view |> element("#flash") |> render()
-        assert flash_html =~ "You must select a stop"
-        assert flash_html =~ "You must select a route"
+        assert flash_html =~ "Select stop(s)"
+        assert flash_html =~ "Select route(s)"
       end
     end
 
