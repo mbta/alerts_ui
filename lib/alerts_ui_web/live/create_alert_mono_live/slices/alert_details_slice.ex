@@ -154,14 +154,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     defp description_sync_toggle("description_text", true), do: false
     defp description_sync_toggle(_, current_toggle), do: current_toggle
 
-    def validate(details_data, changeset, _params, _socket) do
-      image_url = details_data.image_url
-      image_size = image_url |> get_image_size()
+    def validate(details_data, changeset, _params, socket) do
+      if socket.assigns.submitted? do
+        image_url = details_data.image_url
+        image_size = image_url |> get_image_size()
 
-      changeset
-      |> Validation.always_validate_required(@required_fields)
-      |> validate_url(get_field(changeset, :url))
-      |> validate_image_fields(image_size, image_url)
+        changeset
+        |> Validation.always_validate_required(@required_fields)
+        |> validate_url(get_field(changeset, :url))
+        |> validate_image_fields(image_size, image_url)
+      else
+        changeset
+      end
     end
 
     def assigns(_details_data, socket, _params) do
