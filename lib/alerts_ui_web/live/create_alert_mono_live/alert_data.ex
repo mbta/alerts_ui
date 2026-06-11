@@ -295,7 +295,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
         {:ok, socket}
 
       {:error, changeset} ->
-        changeset = %{changeset | errors: parse_field_errors(changeset)}
+        new_errors = parse_field_errors(changeset)
+        changeset = %{changeset | errors: new_errors}
 
         socket =
           socket
