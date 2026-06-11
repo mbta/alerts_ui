@@ -13,6 +13,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Time do
     |> DateTime.to_naive()
   end
 
+  def localize(%DateTime{} = dt) do
+    DateTime.to_naive(dt)
+  end
+
   def replace_date(d, %DateTime{} = dt) do
     DateTime.new!(d, DateTime.to_time(dt), dt.time_zone)
   end
