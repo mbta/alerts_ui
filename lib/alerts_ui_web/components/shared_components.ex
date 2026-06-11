@@ -1307,7 +1307,7 @@ defmodule AlertsUIWeb.SharedComponents do
         id={@id}
         name={@name}
         resize="none"
-        value="true"
+        value={@value}
         class={[
           "bg-bg-input-default border border-bg-elevation-6 px-3 py-1.5
             rounded text-text-primary disabled:text-text-secondary

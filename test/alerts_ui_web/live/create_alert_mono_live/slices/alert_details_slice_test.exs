@@ -518,6 +518,51 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
     end
 
     @tag :logged_in_user
+    test "header value attribute re-syncs to autotext when sync re-enabled with form errors", %{
+      conn: conn
+    } do
+      with_mocks([
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]},
+        {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
+        {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop, @stop_2] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        get_to_submission_page_refactor(view, "Commuter Rail", "Suspension")
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          alert_data: %{
+            header_sync_toggle: false,
+            header_text: "my custom text",
+            route_ids: ["CR-Worcester"]
+          }
+        })
+
+        view
+        |> element("form")
+        |> render_change(%{
+          alert_data: %{"url" => "not-a-valid-url"}
+        })
+
+        view
+        |> element("form")
+        |> render_change(%{
+          alert_data: %{header_sync_toggle: true}
+        })
+
+        rendered = view |> element("#alert_data_header_text") |> render_async()
+
+        refute rendered =~ "my custom text"
+        assert rendered =~ "Framingham/Worcester"
+
+        refute rendered =~ ~s(value="true")
+        assert rendered =~ ~s(value="Framingham/Worcester)
+      end
+    end
+
+    @tag :logged_in_user
     test "description does not update automatically if sync button is off", %{
       conn: conn
     } do
