@@ -171,11 +171,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
   end
 
   def extract_notification_end_for_specifier(changeset, :until_further_notice, _, _) do
-    now = DateTimeHelpers.current_time()
-
     changeset
-    |> force_change(:notification_period_end, DTHelpers.replace_time(now, ~T[23:59:59]))
-    |> force_change(:notification_period_end_date, now |> NaiveDateTime.to_date())
+    |> force_change(:notification_period_end, nil)
+    |> force_change(:notification_period_end_date, nil)
   end
 
   def extract_notification_end_for_specifier(changeset, :custom, :unspecified, _) do

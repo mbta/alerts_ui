@@ -163,6 +163,45 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
     end
 
     @tag :logged_in_user
+    test "max_time hidden input is nil when active period specifier is until further notice",
+         %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      get_to_submission_page_refactor(view, "Bus", "Detour")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_end_specifier" => "until_further_notice",
+          "notification_specifier" => "same_as_effect_period"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{"alert_data" => %{"reminder_sort" => ["new"]}})
+
+      max_time_input = element(view, "#reminder_times-0-max_time") |> render()
+      assert max_time_input =~ ~s(value="")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "reminder_times" => %{
+            "0" => %{"reminder_time" => "3030-01-01T00:00:00"}
+          }
+        }
+      })
+
+      max_time_element =
+        element(view, "#alert_data_reminder_times_0_reminder_time-root-element") |> render()
+
+      refute max_time_element =~
+               ~s(Reminder time must be before notification period)
+    end
+
+    @tag :logged_in_user
     test "doesn't error if time entered is within notification period", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
       get_to_submission_page_refactor(view, "Bus", "Detour")
