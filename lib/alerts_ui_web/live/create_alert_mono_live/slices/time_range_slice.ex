@@ -11,9 +11,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     only: [put_over_nil: 3, values_to_options: 1]
 
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.DurationText
-  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Time, as: DTHelpers
+  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeSliceGetters, as: TimeGetters
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
-
   alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
 
   alias Phoenix.HTML.Form
@@ -24,19 +23,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
   @responsive_class "flex flex-col md:gap-x-8 md:flex-row"
   defp responsive_class, do: @responsive_class
-
-  @time_range_targets ~w[
-    active_period_start_specifier
-    active_period_start
-    active_period_start_date
-    active_period_start_time
-    active_period_end_specifier
-    active_period_end
-    active_period_end_date
-    active_period_end_time
-    alert_timing
-    recurrence_days
-  ]
 
   defstruct [
     :form_type,
@@ -61,7 +47,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice
 
     def mount(_slice, socket, _params) do
-      socket
+      assign(socket, :current_time, DateTimeHelpers.current_time())
     end
 
     def extract(slice, %AlertData{} = _alert, _params) do
@@ -76,9 +62,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       |> put_over_nil(:active_period_start_time, NaiveDateTime.to_time(now))
       |> put_over_nil(:active_period_end_specifier, :later_today)
       |> put_over_nil(:active_period_end_time_specifier, :end_of_service)
-      |> put_over_nil(:active_period_end, now)
-      |> put_over_nil(:active_period_end_date, NaiveDateTime.to_date(now))
-      |> put_over_nil(:active_period_end_time, NaiveDateTime.to_time(now))
       |> put_over_nil(:recurrence_days, [])
       |> put_over_nil(:can_close_automatically, nil)
       |> update_times_if_duplicating(slice.form_type, slice.alert_timing, now)
@@ -86,22 +69,48 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
     def transform(_slice, changeset, params, socket) do
       [_, target | _] = Map.get(params, "_target", [nil, nil])
+      timing = params["alert_data"]["alert_timing"] |> ensure_atom()
+
+      current_time = socket.assigns.current_time
+
+      previous_start_specifier =
+        Map.get(socket.assigns, :previous_start_specifier, nil) |> ensure_atom()
+
+      previous_end_specifier =
+        Map.get(socket.assigns, :previous_end_specifier, nil) |> ensure_atom()
+
+      previous_start_time_specifier =
+        Map.get(socket.assigns, :previous_start_time_specifier, nil) |> ensure_atom()
+
+      previous_end_time_specifier =
+        Map.get(socket.assigns, :previous_end_time_specifier, nil) |> ensure_atom()
 
       changeset
       |> TimeRangeSlice.normalize_alert_timing()
-      |> TimeRangeSlice.change_timing(target, params["alert_data"]["alert_timing"])
-      |> TimeRangeSlice.ensure_start_date_values(target)
-      |> TimeRangeSlice.ensure_end_date_values(target)
-      |> TimeRangeSlice.ensure_start_time_values()
+      |> TimeRangeSlice.change_timing(target, timing)
+      |> TimeRangeSlice.ensure_start_values(
+        previous_start_specifier,
+        previous_start_time_specifier,
+        current_time,
+        timing
+      )
+      |> TimeRangeSlice.ensure_end_values(
+        previous_end_specifier,
+        previous_end_time_specifier,
+        current_time,
+        timing
+      )
       |> TimeRangeSlice.set_start_end_from_trip_selection(
         target,
         socket.assigns.selections,
         get_field(changeset, :trip_ids, []),
+        current_time,
         socket.assigns[:form_type]
       )
     end
 
     def validate(slice, changeset, params, socket) do
+      current_time = socket.assigns.current_time
       trip_ids = get_field(changeset, :trip_ids, [])
 
       trip_arrival_time =
@@ -112,15 +121,28 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       |> TimeRangeValidators.validate_required_fields()
       |> TimeRangeValidators.validate_not_dst_gap()
       |> TimeRangeValidators.validate_end_after_start()
-      |> TimeRangeValidators.validate_start_is_after_now(slice.form_type == :editing)
+      |> TimeRangeValidators.validate_start_is_after_now(current_time, slice.form_type)
       |> TimeRangeValidators.validate_at_least_one_recurrence()
       |> TimeRangeValidators.validate_start_date_matches_weekday()
       |> TimeRangeValidators.validate_start_is_before_trip(trip_arrival_time)
     end
 
     def assigns(_slice, socket, _params) do
-      socket
+      form = socket.assigns.form
+      form_data = Map.merge(form.source.data, form.source.changes)
+
+      assign(socket, %{
+        previous_start_specifier: form_data.active_period_start_specifier,
+        previous_end_specifier: form_data.active_period_end_specifier,
+        previous_start_time_specifier: form_data.active_period_start_time_specifier,
+        previous_end_time_specifier: form_data.active_period_end_time_specifier
+      })
     end
+
+    defp ensure_atom(potential_atom) when is_binary(potential_atom),
+      do: String.to_existing_atom(potential_atom)
+
+    defp ensure_atom(potential_atom), do: potential_atom
 
     def update_times_if_duplicating(slice, _, :recurring, _), do: slice
 
@@ -145,10 +167,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     def update_times_if_duplicating(slice, _, _, _), do: slice
   end
 
-  def change_timing(changeset, "alert_timing", :"one-time"),
-    do: change_timing(changeset, "alert_timing", "one-time")
-
-  def change_timing(changeset, "alert_timing", "one-time") do
+  def change_timing(changeset, "alert_timing", :"one-time") do
     changeset
     |> force_change(
       :active_period_start_specifier,
@@ -198,172 +217,147 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     changeset
   end
 
-  def ensure_start_date_values(changeset, target \\ nil) do
-    specifier = get_field(changeset, :active_period_start_specifier)
-    start_dt = get_field(changeset, :active_period_start, :unspecified)
-    start_d = get_field(changeset, :active_period_start_date, :unspecified)
-    recompute? = is_nil(target) or target in @time_range_targets
+  def ensure_start_values(
+        changeset,
+        previous_start_specifier,
+        previous_start_time_specifier,
+        current_time,
+        :recurring
+      ) do
+    specifier = get_field(changeset, :active_period_start_specifier) |> ensure_atom
+    time_specifier = get_field(changeset, :active_period_start_time_specifier) |> ensure_atom
+    start_d = get_field(changeset, :active_period_start_date)
+    start_t = get_field(changeset, :active_period_start_time)
+
+    time_data = %{
+      active_period_start_specifier: specifier,
+      active_period_start_date: start_d,
+      active_period_start_time_specifier: time_specifier,
+      active_period_start_time: start_t
+    }
+
+    start_date =
+      TimeGetters.get_recurring_start_date(
+        time_data,
+        current_time,
+        previous_start_specifier
+      )
+
+    start_time =
+      TimeGetters.get_recurring_start_time(
+        time_data,
+        current_time,
+        previous_start_time_specifier
+      )
+
+    start_datetime =
+      TimeGetters.get_recurring_start_datetime(start_date, start_time)
 
     changeset
     |> force_change(:active_period_start_specifier, specifier)
-    |> force_change(:active_period_start, start_dt)
-    |> force_change(:active_period_start_date, start_d)
-    |> ensure_start_date_values_for_specifier(specifier, start_dt, start_d, recompute?)
+    |> force_change(:active_period_start_time, start_time)
+    |> force_change(:active_period_start_date, start_date)
+    |> force_change(:active_period_start, start_datetime)
   end
 
-  def ensure_start_date_values_for_specifier(changeset, :now, _, _, true) do
-    now = current_time()
+  def ensure_start_values(changeset, previous_start_specifier, _, current_time, _timing) do
+    # one-time
+    specifier = get_field(changeset, :active_period_start_specifier) |> ensure_atom
+    start_dt = get_field(changeset, :active_period_start)
+    start_d = get_field(changeset, :active_period_start_date)
+
+    start_datetime =
+      TimeGetters.get_onetime_start_datetime(
+        %{
+          active_period_start_specifier: specifier,
+          active_period_start: start_dt,
+          active_period_start_date: start_d
+        },
+        current_time,
+        previous_start_specifier
+      )
+
+    start_date = TimeGetters.get_onetime_start_date(start_datetime)
 
     changeset
-    |> force_change(:active_period_start, now)
-    |> force_change(:active_period_start_date, now |> NaiveDateTime.to_date())
+    |> force_change(:active_period_start_specifier, specifier)
+    |> force_change(:active_period_start, start_datetime)
+    |> force_change(:active_period_start_date, start_date)
   end
 
-  def ensure_start_date_values_for_specifier(changeset, _, dt, d, _)
-      when is_nil(dt) or is_nil(d),
-      do: changeset
-
-  def ensure_start_date_values_for_specifier(changeset, :start_of_service, _, d, _) do
-    changeset
-    |> force_change(
-      :active_period_start,
-      NaiveDateTime.new!(d, ActivePeriod.start_of_service_time())
-    )
-  end
-
-  def ensure_start_date_values_for_specifier(changeset, :custom, dt, _, _) do
-    changeset
-    |> force_change(:active_period_start_date, NaiveDateTime.to_date(dt))
-  end
-
-  def ensure_start_date_values_for_specifier(changeset, _, _, _, _), do: changeset
-
-  def ensure_end_date_values(changeset, target \\ nil) do
-    specifier = get_field(changeset, :active_period_end_specifier)
-    end_dt = get_field(changeset, :active_period_end)
+  def ensure_end_values(
+        changeset,
+        previous_end_specifier,
+        previous_end_time_specifier,
+        current_time,
+        :recurring
+      ) do
+    specifier = get_field(changeset, :active_period_end_specifier) |> ensure_atom
+    time_specifier = get_field(changeset, :active_period_end_time_specifier) |> ensure_atom
     end_d = get_field(changeset, :active_period_end_date)
-    recompute? = is_nil(target) or target in @time_range_targets
+    end_t = get_field(changeset, :active_period_end_time)
+
+    time_data = %{
+      active_period_end_specifier: specifier,
+      active_period_end_date: end_d,
+      active_period_end_time_specifier: time_specifier,
+      active_period_end_time: end_t
+    }
+
+    end_date =
+      TimeGetters.get_recurring_end_date(
+        time_data,
+        current_time,
+        previous_end_specifier
+      )
+
+    end_time =
+      TimeGetters.get_recurring_end_time(
+        time_data,
+        current_time,
+        previous_end_time_specifier
+      )
+
+    end_datetime =
+      TimeGetters.get_recurring_end_datetime(end_date, end_time)
 
     changeset
     |> force_change(:active_period_end_specifier, specifier)
-    |> force_change(:active_period_end, end_dt)
-    |> force_change(:active_period_end_date, end_d)
     |> force_change(:can_close_automatically, false)
-    |> ensure_end_date_values_for_specifier(specifier, end_dt, end_d, recompute?)
+    |> force_change(:active_period_end, end_datetime)
+    |> force_change(:active_period_end_time, end_time)
+    |> force_change(:active_period_end_date, end_date)
   end
 
-  def ensure_end_date_values_for_specifier(changeset, :later_today, _, _, true) do
-    end_of_service = ActivePeriod.end_of_service_datetime_naive(current_time())
+  def ensure_end_values(changeset, previous_end_specifier, _, current_time, _timing) do
+    # one-time
+    specifier = get_field(changeset, :active_period_end_specifier) |> ensure_atom()
+    end_dt = get_field(changeset, :active_period_end)
+    end_d = get_field(changeset, :active_period_end_date)
 
-    changeset
-    |> force_change(:active_period_end, end_of_service)
-    |> force_change(:active_period_end_date, NaiveDateTime.to_date(end_of_service))
-  end
-
-  def ensure_end_date_values_for_specifier(changeset, :until_further_notice, _, _, true) do
-    now = current_time()
-
-    changeset
-    |> force_change(:active_period_end, DTHelpers.replace_time(now, ~T[23:59:59]))
-    |> force_change(:active_period_end_date, now |> NaiveDateTime.to_date())
-  end
-
-  def ensure_end_date_values_for_specifier(changeset, :when_work_order_is_closed, _, _, true) do
-    now = current_time()
-
-    changeset
-    |> force_change(:active_period_end, DTHelpers.replace_time(now, ~T[23:59:59]))
-    |> force_change(:active_period_end_date, now |> NaiveDateTime.to_date())
-    |> force_change(:can_close_automatically, true)
-  end
-
-  def ensure_end_date_values_for_specifier(changeset, :custom, nil, _, true) do
-    now = current_time()
-
-    changeset
-    |> force_change(:active_period_end, now)
-    |> force_change(:active_period_end_date, NaiveDateTime.to_date(now))
-  end
-
-  def ensure_end_date_values_for_specifier(changeset, :end_of_service, _, nil, true) do
-    today = current_time() |> NaiveDateTime.to_date()
-
-    changeset
-    |> force_change(
-      :active_period_end,
-      NaiveDateTime.new!(today, ActivePeriod.end_of_service_time())
-    )
-    |> force_change(:active_period_end_date, today)
-  end
-
-  def ensure_end_date_values_for_specifier(changeset, _, dt, d, _)
-      when is_nil(dt) or is_nil(d),
-      do: changeset
-
-  def ensure_end_date_values_for_specifier(changeset, :end_of_service, _, d, _) do
-    actual_end_date = Date.add(d, 1)
-
-    changeset
-    |> force_change(
-      :active_period_end,
-      NaiveDateTime.new!(
-        actual_end_date,
-        ActivePeriod.end_of_service_time()
+    end_datetime =
+      TimeGetters.get_onetime_end_datetime(
+        %{
+          active_period_end_specifier: specifier,
+          active_period_end: end_dt,
+          active_period_end_date: end_d
+        },
+        current_time,
+        previous_end_specifier
       )
-    )
-  end
 
-  def ensure_end_date_values_for_specifier(changeset, :custom, dt, _, _) do
+    end_date = TimeGetters.get_onetime_end_date(end_datetime)
+
     changeset
-    |> force_change(:active_period_end_date, NaiveDateTime.to_date(dt))
+    |> force_change(:active_period_end_specifier, specifier)
+    |> force_change(:can_close_automatically, false)
+    |> force_change(:active_period_end, end_datetime)
+    |> force_change(:active_period_end_date, end_date)
   end
 
-  def ensure_end_date_values_for_specifier(changeset, _, _, _, _), do: changeset
+  def set_start_end_from_trip_selection(changeset, "trip_ids", _, _, _, :editing), do: changeset
 
-  def ensure_start_time_values(changeset) do
-    if get_field(changeset, :alert_timing) in [:recurring, "recurring"] do
-      specifier = get_field(changeset, :active_period_start_time_specifier)
-      start_t = get_field(changeset, :active_period_start_time)
-
-      changeset
-      |> force_change(:active_period_start_time_specifier, specifier)
-      |> force_change(:active_period_start_time, start_t)
-      |> ensure_start_time_values_for_specifier(specifier, start_t)
-    else
-      changeset
-    end
-  end
-
-  def ensure_start_time_values_for_specifier(changeset, :start_of_service, _) do
-    now = current_time()
-    change(changeset, %{active_period_start_time: NaiveDateTime.to_time(now)})
-  end
-
-  def ensure_start_time_values_for_specifier(changeset, _, _), do: changeset
-
-  def ensure_end_time_values(changeset) do
-    if get_field(changeset, :alert_timing) == :recurring do
-      specifier = get_field(changeset, :active_period_end_time_specifier)
-      end_t = get_field(changeset, :active_period_end_time, :unspecified)
-
-      changeset
-      |> force_change(:active_period_end_time_specifier, specifier)
-      |> force_change(:active_period_end_time, end_t)
-      |> ensure_end_time_values_for_specifier(specifier, end_t)
-    else
-      changeset
-    end
-  end
-
-  def ensure_end_time_values_for_specifier(changeset, :end_of_service, _),
-    do: force_change(changeset, :active_period_end_time, ~T[03:00:00])
-
-  def ensure_end_time_values_for_specifier(changeset, _, _), do: changeset
-
-  def set_start_end_from_trip_selection(changeset, "trip_ids", _, _, :editing), do: changeset
-
-  def set_start_end_from_trip_selection(changeset, "trip_ids", _, [], _form_type) do
-    now = current_time()
+  def set_start_end_from_trip_selection(changeset, "trip_ids", _, [], now, _form_type) do
     end_of_service = now |> ActivePeriod.end_of_service_datetime_naive()
 
     changeset
@@ -380,12 +374,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
         "trip_ids",
         %{loading: loading} = selections,
         trip_ids,
+        now,
         _form_type
       )
       when loading != true do
     available_schedules = Map.get(selections, :available_schedules, [])
     selected_schedules = Enum.filter(available_schedules, &(&1.trip.id in trip_ids))
-    now = current_time()
     departure = get_trip_departure_time(selected_schedules)
     arrival = get_trip_arrival_time(selected_schedules)
 
@@ -405,7 +399,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     |> force_change(:active_period_end_date, arrival |> NaiveDateTime.to_date())
   end
 
-  def set_start_end_from_trip_selection(changeset, _, _, _, _) do
+  def set_start_end_from_trip_selection(changeset, _, _, _, _, _) do
     changeset
   end
 
@@ -425,14 +419,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
   def normalize_alert_timing(changeset) do
     alert_timing = get_field(changeset, :alert_timing, :"one-time")
-    change(changeset, %{alert_timing: normalize_alert_timing_field(alert_timing)})
+    change(changeset, %{alert_timing: ensure_atom(alert_timing)})
   end
-
-  def normalize_alert_timing_field(:"one-time"), do: :"one-time"
-  def normalize_alert_timing_field("one-time"), do: :"one-time"
-  def normalize_alert_timing_field(:recurring), do: :recurring
-  def normalize_alert_timing_field("recurring"), do: :recurring
-  def normalize_alert_timing_field(_), do: :"one-time"
 
   def get_trip_arrival_time_for_validate(trip_ids, %{ok?: true, result: selections}) do
     available = Map.get(selections, :available_schedules, [])
@@ -446,7 +434,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
   def get_trip_arrival_time_for_validate(_, _), do: nil
 
-  defp current_time, do: DateTimeHelpers.current_time()
+  defp ensure_atom(potential_atom) when is_binary(potential_atom),
+    do: String.to_existing_atom(potential_atom)
+
+  defp ensure_atom(potential_atom), do: potential_atom
 
   defp alert_timing_values,
     do: [
@@ -492,6 +483,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     ]
 
   attr :form, Form
+  attr :current_time, NaiveDateTime
+  attr :previous_start_specifier, :atom
+  attr :previous_end_specifier, :atom
+  attr :previous_start_time_specifier, :atom
+  attr :previous_end_time_specifier, :atom
 
   def render(assigns) do
     ~H"""
@@ -509,7 +505,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       <.one_time_alert
         :if={@form[:alert_timing].value in [:"one-time", "one-time"]}
         class="flex-wrap md:mt-4"
-        current_time={current_time()}
+        current_time={@current_time}
         start_values={start_values()}
         end_values={end_values(@form)}
         form={@form}
@@ -517,7 +513,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       <.recurring_alert
         :if={@form[:alert_timing].value in [:recurring, "recurring"]}
         class="flex-wrap md:mt-4"
-        current_time={current_time()}
+        current_time={@current_time}
         day_of_week_options={day_of_week_options()}
         form={@form}
       />
@@ -698,6 +694,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
         <div
           :if={Enum.empty?(@form.errors) and @form[:recurrence_days].value not in [[], nil]}
           class="duration-explanation text-text-secondary"
+          id="duration-text-recurring"
         >
           Effect duration: {DurationText.recurring_duration_text(@form)}
         </div>

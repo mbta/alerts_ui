@@ -32,7 +32,14 @@
             selections={@selections}
             show_stop_ids={@show_stop_ids}
           />
-          <TimeRangeSlice.render form={@form} />
+          <TimeRangeSlice.render
+            form={@form}
+            current_time={@current_time}
+            previous_start_specifier={@previous_start_specifier}
+            previous_end_specifier={@previous_end_specifier}
+            previous_start_time_specifier={@previous_start_time_specifier}
+            previous_end_time_specifier={@previous_end_time_specifier}
+          />
           <NotificationPeriodSlice.render form={@form} />
           <AlertDetailsSlice.render
             form={@form}

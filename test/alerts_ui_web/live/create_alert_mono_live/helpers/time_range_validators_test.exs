@@ -5,6 +5,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidatorsTest do
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators
 
+  @naive_now DateTime.now!("America/New_York") |> DateTime.to_naive()
+
   # All validators read via Ecto.Changeset.get_field and validate_change, which
   # read from changes (then data). Building the changeset via change/2 puts
   # every test attribute into changes, so validate_change sees them.
@@ -273,7 +275,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidatorsTest do
           active_period_start_specifier: :custom,
           active_period_start: ~N[2020-01-01 09:00:00]
         })
-        |> TimeRangeValidators.validate_start_is_after_now(true)
+        |> TimeRangeValidators.validate_start_is_after_now(@naive_now, :editing)
 
       assert cs.errors == []
     end
@@ -285,7 +287,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidatorsTest do
           active_period_start_specifier: :custom,
           active_period_start: ~N[2020-01-01 09:00:00]
         })
-        |> TimeRangeValidators.validate_start_is_after_now()
+        |> TimeRangeValidators.validate_start_is_after_now(@naive_now, :new)
 
       assert cs.errors[:active_period_start] ==
                {"Effect can't start in the past", []}
@@ -298,7 +300,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidatorsTest do
           active_period_start_specifier: :start_of_service,
           active_period_start_date: ~D[2020-01-01]
         })
-        |> TimeRangeValidators.validate_start_is_after_now()
+        |> TimeRangeValidators.validate_start_is_after_now(@naive_now, :new)
 
       assert cs.errors[:active_period_start_date] ==
                {"Effect can't start in the past", []}
@@ -312,7 +314,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidatorsTest do
           active_period_start_date: ~D[2020-01-01],
           active_period_start_time: ~T[09:00:00]
         })
-        |> TimeRangeValidators.validate_start_is_after_now()
+        |> TimeRangeValidators.validate_start_is_after_now(@naive_now, :new)
 
       assert cs.errors[:active_period_start_specifier] ==
                {"Effect can't start in the past", []}
@@ -326,7 +328,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidatorsTest do
           active_period_start_date: ~D[2020-01-01],
           active_period_start_time: ~T[09:00:00]
         })
-        |> TimeRangeValidators.validate_start_is_after_now()
+        |> TimeRangeValidators.validate_start_is_after_now(@naive_now, :new)
 
       assert cs.errors[:active_period_start_date] ==
                {"Effect can't start in the past", []}
@@ -339,7 +341,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidatorsTest do
           active_period_start_specifier: :custom,
           active_period_start: future_naive()
         })
-        |> TimeRangeValidators.validate_start_is_after_now()
+        |> TimeRangeValidators.validate_start_is_after_now(@naive_now, :new)
 
       assert cs.errors == []
     end
@@ -351,7 +353,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidatorsTest do
           active_period_start_specifier: :now,
           active_period_start_date: ~D[2020-01-01]
         })
-        |> TimeRangeValidators.validate_start_is_after_now()
+        |> TimeRangeValidators.validate_start_is_after_now(@naive_now, :new)
 
       assert cs.errors == []
     end

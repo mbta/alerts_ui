@@ -66,6 +66,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     stop: @stop_sstat
   }
 
+  @todays_datetime DateTime.now!("America/New_York")
+  @todays_date DateTime.to_date(@todays_datetime)
+
   defp trip_changeset(attrs \\ %{}) do
     Ecto.Changeset.cast(%AlertData{}, Map.merge(%{trip_ids: []}, attrs), [:trip_ids])
   end
@@ -81,6 +84,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
   defp socket_with_trip_selections(schedules) do
     %{
       assigns: %{
+        current_time: DateTime.to_naive(@todays_datetime),
         selections: %AsyncResult{
           ok?: true,
           result: %AffectedServiceSlice.Selections{available_schedules: schedules}
@@ -93,6 +97,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     %{
       assigns: %{
         form_type: form_type,
+        current_time: DateTime.to_naive(@todays_datetime),
         selections: %AffectedServiceSlice.Selections{available_schedules: schedules}
       }
     }
@@ -164,7 +169,158 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     end
 
     @tag :logged_in_user
-    test "switching between end specifiers retains old date", %{conn: conn} do
+    test "switching from end of custom to end-of-service retains old service date", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      get_to_submission_page_refactor(view, "Bus", "Delay")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_end_specifier" => "custom",
+          "active_period_end_date" => ~D[2025-03-27]
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_end_specifier" => "end_of_service"
+        }
+      })
+
+      assert view |> element("#alert_data_active_period_end_date") |> render =~
+               ~s(value="2025-03-27")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_end" => NaiveDateTime.new!(Date.add(@todays_date, 2), ~T[03:00:00]),
+          "active_period_end_date" => Date.add(@todays_date, 1)
+        }
+      })
+
+      assert render(view) =~ ~s(value="#{Date.add(@todays_date, 1) |> Date.to_iso8601()}")
+    end
+
+    @tag :logged_in_user
+    test "switching from end of end-of-service to custom has default of 11:59", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      get_to_submission_page_refactor(view, "Bus", "Delay")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_end_specifier" => "end_of_service"
+        }
+      })
+
+      expected_value = @todays_date |> Date.to_iso8601()
+
+      assert view |> element("#alert_data_active_period_end_date") |> render =~
+               ~s(value="#{expected_value}")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_end_specifier" => "custom"
+        }
+      })
+
+      expected_value =
+        @todays_date
+        |> DateTime.new!(~T[23:59:59])
+        |> DateTime.to_iso8601()
+        |> String.slice(0, 16)
+
+      assert view |> element("#alert_data_active_period_end") |> render =~
+               ~s(value="#{expected_value}")
+    end
+
+    @tag :logged_in_user
+    test "switching from end of 'later today' to custom has default of 11:59", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      get_to_submission_page_refactor(view, "Bus", "Delay")
+
+      assert view |> element("#time_range_view") |> render =~ "Later today"
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_end_specifier" => "custom"
+        }
+      })
+
+      expected_value =
+        @todays_date
+        |> NaiveDateTime.new!(~T[23:59:59])
+        |> NaiveDateTime.to_iso8601()
+        |> String.slice(0, 16)
+
+      assert view |> element("#alert_data_active_period_end") |> render =~
+               ~s(value="#{expected_value}")
+
+      # test that we can change the datetime and it works
+      new_expected_datetime = NaiveDateTime.new!(Date.add(@todays_date, 3), ~T[13:00:00])
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_end" => new_expected_datetime
+        }
+      })
+
+      expected_value =
+        new_expected_datetime
+        |> NaiveDateTime.to_iso8601()
+        |> String.slice(0, 16)
+
+      assert view |> element("#alert_data_active_period_end") |> render =~
+               ~s(value="#{expected_value}")
+    end
+
+    @tag :logged_in_user
+    test "switching from end of 'further notice' to custom has default of current datetime", %{
+      conn: conn
+    } do
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      get_to_submission_page_refactor(view, "Bus", "Delay")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_end_specifier" => "until_further_notice"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_end_specifier" => "custom"
+        }
+      })
+
+      expected_value =
+        @todays_datetime
+        |> NaiveDateTime.to_iso8601()
+        |> String.slice(0, 14)
+
+      assert view |> element("#alert_data_active_period_end") |> render =~
+               ~s(value="#{expected_value})
+    end
+
+    @tag :logged_in_user
+    test "switching from end of 'custom' to end-of-service has default of current date", %{
+      conn: conn
+    } do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
       get_to_submission_page_refactor(view, "Bus", "Delay")
 
@@ -180,7 +336,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       |> element("form")
       |> render_change(%{
         "alert_data" => %{
-          "active_period_end" => ~N[2025-03-28 03:00:00]
+          "active_period_end" => NaiveDateTime.new!(Date.add(@todays_date, 2), ~T[14:00:00])
         }
       })
 
@@ -192,7 +348,60 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         }
       })
 
-      assert render(view) =~ ~s(value="2025-03-28")
+      expected_value =
+        Date.add(@todays_date, 2)
+        |> Date.to_iso8601()
+
+      assert view |> element("#alert_data_active_period_end_date") |> render =~
+               ~s(value="#{expected_value})
+    end
+
+    @tag :logged_in_user
+    test "switching from one-time to recurring has correct defaults", %{
+      conn: conn
+    } do
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      get_to_submission_page_refactor(view, "Bus", "Delay")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "alert_timing" => "recurring"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_start_specifier" => "custom"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_start_date" => Date.add(@todays_date, 1),
+          "recurrence_days" => [
+            :sunday,
+            :monday,
+            :tuesday,
+            :wednesday,
+            :thursday,
+            :friday,
+            :saturday,
+            :sunday
+          ]
+        }
+      })
+
+      assert view |> element("#duration-text-recurring") |> render =~
+               ~s(Effect duration: 3:00 AM – 3:00 AM<sup>+1</sup> \(1 day\) )
+
+      assert view |> element("#duration-text-recurring") |> render =~
+               ~s(until alert is manually closed)
     end
 
     @tag :logged_in_user
@@ -304,20 +513,27 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         }
       })
 
-      # 2024-12-03 is a Tuesday
       view
       |> element("form")
       |> render_change(%{
         "alert_data" => %{
           "active_period_start_time_specifier" => "custom",
-          "active_period_start_specifier" => "custom",
+          "active_period_start_specifier" => "custom"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
           "active_period_start_time" => "10:00:00",
-          "active_period_start" => "2024-12-03T10:00:00",
+          "active_period_start_date" => "2024-12-03",
           "recurrence_days" => ["monday"]
         }
       })
 
-      assert view |> render() =~ ~s(Alert start day must match a selected day of the week.)
+      assert view |> element("#time_range_view") |> render() =~
+               ~s(Alert start day must match a selected day of the week.)
 
       view
       |> element("form")
@@ -327,7 +543,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         }
       })
 
-      refute view |> render() =~ ~s(Alert start day must match a selected day of the week.)
+      refute view |> element("#time_range_view") |> render() =~
+               ~s(Alert start day must match a selected day of the week.)
     end
 
     @tag :logged_in_user
@@ -460,8 +677,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       |> render_change(%{
         "alert_data" => %{
           "active_period_start_specifier" => "custom",
+          "active_period_end_specifier" => "custom"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
           "active_period_start" => "2040-05-01T08:00:00",
-          "active_period_end_specifier" => "custom",
           "active_period_end" => "2040-05-01T10:00:00"
         }
       })
@@ -489,7 +713,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       )
 
       {:ok, view, _html} = live(conn, "/alerts/mono/edit/tr-edit-2")
-
+      # 1002401
       view
       |> element("form")
       |> render_change(%{
@@ -498,7 +722,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         }
       })
 
-      refute view |> render() =~ "Effect must end after"
+      refute view |> element("#time_range_view") |> render() =~ "Effect must end after"
     end
 
     @tag :logged_in_user
@@ -661,14 +885,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
   describe "duplicating" do
     @tag :logged_in_user
-    @tag :skip
     test "duplicating keeps correct end time specifier when there is no end time", %{conn: conn} do
       create_test_alert("tr-dup-1", duration_certainty: :UNKNOWN)
 
       {:ok, view, _html} = live(conn, "/alerts/mono/duplicate/tr-dup-1")
 
-      assert view |> render() =~ "alert is manually closed"
-      refute view |> render() =~ "until later today"
+      assert view |> element("#alert_data_active_period_end_specifier") |> render() =~
+               ~s(<option selected=\"selected\" value=\"until_further_notice\">)
     end
 
     @tag :logged_in_user
@@ -701,13 +924,22 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       |> element("form")
       |> render_change(%{
         "alert_data" => %{
-          "active_period_end_specifier" => "custom",
+          "active_period_end_specifier" => "custom"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
           "active_period_end" => "2024-05-10T08:00:00"
         }
       })
 
-      assert view |> render() =~ "Effect must end after"
-      assert view |> render() =~ "Effect can&#39;t start in the past"
+      assert view |> element("#time_range_view") |> render() =~ "Effect must end after"
+
+      assert view |> element("#time_range_view") |> render() =~
+               "Effect can&#39;t start in the past"
     end
 
     @tag :logged_in_user
@@ -1180,7 +1412,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     end
   end
 
-  describe "ensure_start_date_values/2 with :now specifier" do
+  describe "ensure_start_values/5 with :now specifier" do
     test "does not advance active_period_start when target is unrelated (e.g. header_sync_toggle)" do
       existing_dt = ~N[2024-01-15 10:30:00]
 
@@ -1195,7 +1427,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
           [:active_period_start_specifier, :active_period_start, :active_period_start_date]
         )
 
-      result = TimeRangeSlice.ensure_start_date_values(changeset, "header_sync_toggle")
+      result =
+        TimeRangeSlice.ensure_start_values(
+          changeset,
+          :custom,
+          nil,
+          DateTime.to_naive(@todays_datetime),
+          "one-time"
+        )
 
       assert Ecto.Changeset.get_field(result, :active_period_start) == existing_dt
     end
@@ -1214,7 +1453,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
           [:active_period_start_specifier, :active_period_start, :active_period_start_date]
         )
 
-      result = TimeRangeSlice.ensure_start_date_values(changeset, "active_period_start_specifier")
+      result =
+        TimeRangeSlice.ensure_start_values(
+          changeset,
+          :custom,
+          nil,
+          DateTime.to_naive(@todays_datetime),
+          "one-time"
+        )
 
       refute Ecto.Changeset.get_field(result, :active_period_start) == existing_dt
     end
@@ -1227,12 +1473,20 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
           [:active_period_start_specifier]
         )
 
-      result = TimeRangeSlice.ensure_start_date_values(changeset, nil)
+      result =
+        TimeRangeSlice.ensure_start_values(
+          changeset,
+          nil,
+          nil,
+          DateTime.to_naive(@todays_datetime),
+          "one-time"
+        )
+
       assert %NaiveDateTime{} = Ecto.Changeset.get_field(result, :active_period_start)
     end
   end
 
-  describe "ensure_end_date_values/2 with :later_today specifier" do
+  describe "ensure_end_values/5 with :later_today specifier" do
     test "does not recompute active_period_end when target is unrelated" do
       existing_end = ~N[2024-06-03 02:30:00]
 
@@ -1247,7 +1501,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
           [:active_period_end_specifier, :active_period_end, :active_period_end_date]
         )
 
-      result = TimeRangeSlice.ensure_end_date_values(changeset, "header_sync_toggle")
+      result =
+        TimeRangeSlice.ensure_end_values(
+          changeset,
+          :custom,
+          :custom,
+          DateTime.to_naive(@todays_datetime),
+          :"one-time"
+        )
 
       assert Ecto.Changeset.get_field(result, :active_period_end) == existing_end
     end

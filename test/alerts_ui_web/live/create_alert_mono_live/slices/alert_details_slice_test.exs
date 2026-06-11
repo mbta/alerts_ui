@@ -752,9 +752,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
           "alert_data" => %{
             "route_ids" => [@route.id],
             "stop_ids" => [@stop.id, @stop_2.id, @stop_3.id],
-            "cause_detail" => "ICE_IN_HARBOR",
             "active_period_start_specifier" => "custom",
-            "active_period_end_specifier" => "custom",
+            "active_period_end_specifier" => "custom"
+          }
+        })
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "cause_detail" => "ICE_IN_HARBOR",
             "active_period_start" => NaiveDateTime.to_iso8601(@start_time),
             "active_period_end" => NaiveDateTime.to_iso8601(@end_time)
           }
@@ -781,15 +788,21 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
         get_to_submission_page_refactor(view, "Facility", "Elevator closure")
 
-        # Mock timerange selections
         view
         |> element("form")
         |> render_change(%{
           "alert_data" => %{
             "facility_ids" => [@facility.id],
-            "cause_detail" => "ICE_IN_HARBOR",
             "active_period_start_specifier" => "custom",
-            "active_period_end_specifier" => "custom",
+            "active_period_end_specifier" => "custom"
+          }
+        })
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "cause_detail" => "ICE_IN_HARBOR",
             "active_period_start_date" => Date.to_iso8601(@tomorrows_date),
             "active_period_end_date" => Date.to_iso8601(@tomorrows_date),
             "active_period_start" => NaiveDateTime.to_iso8601(@start_time),
@@ -828,9 +841,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
       |> render_change(%{
         "alert_data" => %{
           "service_types" => ["1", "4"],
-          "cause_detail" => "ICE_IN_HARBOR",
           "active_period_start_specifier" => "custom",
-          "active_period_end_specifier" => "custom",
+          "active_period_end_specifier" => "custom"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "cause_detail" => "ICE_IN_HARBOR",
           "active_period_start" => NaiveDateTime.to_iso8601(@start_time),
           "active_period_end" => NaiveDateTime.to_iso8601(@end_time)
         }
@@ -839,7 +859,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
       assert view
              |> element("#alert_data_header_text")
              |> render() =~
-               "Subway and Ferry service may experience delays from #{Calendar.strftime(@start_time, "%a, %b %-d at %-I:%M %p")} to #{Calendar.strftime(@end_time, "%a, %b %-d at %-I:%M %p")} due to ice in harbor"
+               "Ferry and Subway service may experience delays from #{Calendar.strftime(@start_time, "%a, %b %-d at %-I:%M %p")} to #{Calendar.strftime(@end_time, "%a, %b %-d at %-I:%M %p")} due to ice in harbor"
 
       assert view
              |> element("#alert_data_description_text")
