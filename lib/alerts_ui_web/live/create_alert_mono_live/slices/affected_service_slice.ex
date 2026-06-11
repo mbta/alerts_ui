@@ -358,6 +358,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     end
   end
 
+  defp clear_stops_when_multi_route(changeset, %{"_target" => ["alert_data", field]})
+       when field in ["route_ids", "single_route_id"] do
+    cast(changeset, %{stop_names_and_ids: [], trip_ids: []}, [:stop_names_and_ids, :trip_ids])
+  end
+
   defp clear_stops_when_multi_route(changeset, %{"_target" => _target}) do
     route_ids = get_field(changeset, :route_ids) || []
 

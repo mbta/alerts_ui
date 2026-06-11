@@ -2144,5 +2144,37 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
       assert Ecto.Changeset.get_field(result, :stop_names_and_ids) == ["Central|place-cntsq"]
       refute "default" in Ecto.Changeset.get_field(result, :stop_names_and_ids)
     end
+
+    test "clears stop and trip selections when route_ids target fires with a different single route" do
+      changeset =
+        stop_coherence_changeset(%{
+          route_ids: ["Red"],
+          stop_names_and_ids: ["Central|place-cntsq"],
+          trip_ids: ["trip-595"]
+        })
+
+      params = %{"_target" => ["alert_data", "route_ids"]}
+
+      result = AffectedServiceSlice.transform_changeset(changeset, params)
+
+      assert Ecto.Changeset.get_field(result, :stop_names_and_ids) == []
+      assert Ecto.Changeset.get_field(result, :trip_ids) == []
+    end
+
+    test "clears stop and trip selections when single_route_id target fires" do
+      changeset =
+        stop_coherence_changeset(%{
+          route_ids: ["746"],
+          stop_names_and_ids: ["World Trade Center (outbound)|place-wtcst"],
+          trip_ids: ["trip-595"]
+        })
+
+      params = %{"_target" => ["alert_data", "single_route_id"]}
+
+      result = AffectedServiceSlice.transform_changeset(changeset, params)
+
+      assert Ecto.Changeset.get_field(result, :stop_names_and_ids) == []
+      assert Ecto.Changeset.get_field(result, :trip_ids) == []
+    end
   end
 end
