@@ -70,7 +70,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
 
         get_to_submission_page_refactor(view, "Commuter Rail", "Suspension")
 
-        second_rendered_view = render_async(view)
+        second_rendered_view = render_async(view, 1000)
 
         refute second_rendered_view =~ ~s(class="min-w-full flex flex-col mb-8" id="route_view")
         assert second_rendered_view =~ ~s(class="min-w-full flex flex-col mt-4" id="details_view")
@@ -339,9 +339,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
         get_to_submission_page_refactor(view, "Bus", "Multi-route detour")
 
-        refute view
-               |> element("#gtfs-warning-modal")
-               |> has_element?
+        assert view |> element("#gtfs-warning-modal-container") |> render_async(1000) =~
+                 ~s(aria-hidden=\"true\")
       end
     end
 
@@ -402,7 +401,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
 
         {:ok, view, _html} = live(conn, "/alerts/mono/edit/123")
 
-        rendered_view = render_async(view, 1000)
+        rendered_view = view |> element("#gtfs-warning-modal-content") |> render_async(1000)
+        refute rendered_view =~ ~s(aria-hidden=\"true\")
         assert rendered_view =~ "spurious route [sp_rt]"
         assert rendered_view =~ "spurious stop [obsolete_stop]"
         open_review_modal(view)
@@ -410,11 +410,24 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         assert view |> element("#review-modal-container") |> render_async() =~
                  "Framingham/Worcester"
 
+        assert view |> element("#review-modal-container") |> render_async() =~
+                 "South Station"
+
+        refute view |> element("#review-modal-container") |> render_async() =~
+                 "spurious route"
+
+        refute view |> element("#review-modal-container") |> render_async() =~
+                 "spurious stop"
+
         open_review_modal(view)
         submit_alert(view)
 
         assert Alerts.get_by_alert_id("123").original_route_selections == [
                  "Framingham/Worcester Line|CR-Worcester"
+               ]
+
+        assert Alerts.get_by_alert_id("123").original_stop_selections == [
+                 "South Station|place-sstat"
                ]
       end
     end
