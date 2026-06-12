@@ -82,7 +82,7 @@ defmodule AlertsUIWeb.AuthControllerTest do
     %Auth{
       uid: email,
       provider: :keycloak,
-      strategy: Ueberauth.Strategy.Oidcc,
+      strategy: Ueberauth.Strategy.FakeKeycloak,
       info: %Info{
         name: "John Rider",
         email: email
@@ -101,12 +101,6 @@ defmodule AlertsUIWeb.AuthControllerTest do
             "sub" => id,
             "auth_time" => System.system_time(:second)
           },
-          opts: %{
-            module: __MODULE__.FakeOidcc,
-            issuer: :keycloak_issuer,
-            client_id: "fake_client",
-            client_secret: "fake_client_secret"
-          },
           userinfo: %{
             "email" => email,
             "email_verified" => true,
@@ -124,12 +118,5 @@ defmodule AlertsUIWeb.AuthControllerTest do
         }
       }
     }
-  end
-
-  defmodule FakeOidcc do
-    @moduledoc false
-    def initiate_logout_url("FAKE ID TOKEN", :keycloak_issuer, "fake_client", opts) do
-      {:ok, "/end_session?#{URI.encode_query(opts)}"}
-    end
   end
 end

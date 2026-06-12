@@ -74,13 +74,29 @@ defmodule AlertsUIWeb.AuthController do
 
   defp parse_role(_), do: []
 
-  @spec logout_uri(map()) :: {:ok, String.t()}
+  @spec logout_uri(map()) :: {:ok, String.t()} | {:error, atom()}
   defp logout_uri(%Ueberauth.Auth{strategy: Ueberauth.Strategy.FakeKeycloak}) do
     {:ok, "fake logout url"}
   end
 
-  defp logout_uri(%Ueberauth.Auth{strategy: Ueberauth.Strategy.Oidcc} = auth) do
-    logout_params = %{post_logout_redirect_uri: url(~p"/")}
-    UeberauthOidcc.initiate_logout_url(auth, logout_params)
+  defp logout_uri(%Ueberauth.Auth{strategy: Ueberauth.Strategy.Oidcc}) do
+    provider_config =
+      Oidcc.ProviderConfiguration.Worker.get_provider_configuration(:keycloak_issuer)
+
+    case provider_config.end_session_endpoint do
+      :undefined ->
+        {:error, :end_session_endpoint_not_supported}
+
+      end_session_endpoint ->
+        client_id = Application.get_env(:ueberauth_oidcc, :providers)[:keycloak][:client_id]
+
+        query =
+          URI.encode_query(%{
+            "client_id" => client_id,
+            "post_logout_redirect_uri" => url(~p"/")
+          })
+
+        {:ok, URI.to_string(%{URI.parse(to_string(end_session_endpoint)) | query: query})}
+    end
   end
 end
