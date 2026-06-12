@@ -455,8 +455,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   def ensure_modal_date(changeset) do
     case Changeset.get_field(changeset, :modal_date) do
-      modal_date when modal_date in [nil, "default"] -> Changeset.change(changeset, modal_date: today())
-      _ -> changeset
+      modal_date when modal_date in [nil, "default"] ->
+        Changeset.change(changeset, modal_date: today())
+
+      _ ->
+        changeset
     end
   end
 
