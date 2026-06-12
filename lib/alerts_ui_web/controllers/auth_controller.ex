@@ -8,6 +8,7 @@ defmodule AlertsUIWeb.AuthController do
 
   alias AlertsUI.Models.User
   alias AlertsUIWeb.UserAuth
+  alias Oidcc.ProviderConfiguration.Worker, as: ProviderConfiguration
   alias Plug.Conn
 
   plug(Ueberauth)
@@ -81,7 +82,7 @@ defmodule AlertsUIWeb.AuthController do
 
   defp logout_uri(%Ueberauth.Auth{strategy: Ueberauth.Strategy.Oidcc}) do
     provider_config =
-      Oidcc.ProviderConfiguration.Worker.get_provider_configuration(:keycloak_issuer)
+      ProviderConfiguration.get_provider_configuration(:keycloak_issuer)
 
     case provider_config.end_session_endpoint do
       :undefined ->

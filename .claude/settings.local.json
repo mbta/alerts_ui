@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(DATABASE_URL_TEST=postgresql://postgres:postgres@localhost:5432/alerts_ui_test mix test test/alerts_ui_web/live/create_alert_mono_live/slices/affected_service_slice_test.exs --seed 0)",
+      "Bash(DATABASE_URL_TEST=postgresql://postgres:postgres@localhost:5432/alerts_ui_test mix test test/alerts_ui_web/live/form_components/affected_service_test.exs --seed 0)",
+      "Bash(mix test *)",
+      "Bash(direnv exec *)",
+      "Bash(printenv)",
+      "Bash(DATABASE_URL_TEST=postgresql://localhost/alerts_ui_test mix test test/alerts_ui_web/live/create_alert_mono_live/slices/access_affected_service_slice_test.exs:267)",
+      "Bash(env)",
+      "Bash(psql -l)",
+      "Bash(psql postgres *)",
+      "Bash(pg_lsclusters)",
+      "Bash(brew services *)",
+      "Bash(psql -U postgres -l)",
+      "Bash(psql -h localhost -U postgres -l)",
+      "Bash(DATABASE_URL_TEST=postgresql://postgres@localhost:5432/alerts_ui_test mix test test/alerts_ui_web/live/create_alert_mono_live/slices/access_affected_service_slice_test.exs:267)",
+      "Bash(DATABASE_URL_TEST=postgresql://postgres@localhost:5432/alerts_ui_test mix test test/alerts_ui_web/live/create_alert_mono_live/slices/access_affected_service_slice_test.exs)",
+      "Bash(DATABASE_URL_TEST=postgresql://postgres@localhost:5432/alerts_ui_test mix test test/alerts_ui_web/live/create_alert_mono_live/slices/alert_details_slice_test.exs --seed 0)",
+      "WebFetch(domain:api-dev.mbtace.com)",
+      "Bash(DATABASE_URL_TEST=postgresql://postgres@localhost:5432/alerts_ui_test mix test test/alerts_ui_web/live/create_alert_mono_live/slices/alert_details_slice_test.exs:850)",
+      "Bash(DATABASE_URL_TEST=postgresql://postgres@localhost:5432/alerts_ui_test mix test test/alerts_ui_web/live/create_alert_mono_live/slices/alert_details_slice_test.exs)"
+    ]
+  }
+}
