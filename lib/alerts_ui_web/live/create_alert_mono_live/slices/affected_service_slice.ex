@@ -10,11 +10,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   alias AlertsUIWeb.CreateAlertLive
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
-
   alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
 
+  alias Ecto.Changeset
+
   import Phoenix.LiveView, only: [push_event: 3, start_async: 3]
-  import Ecto.Changeset, only: [cast: 3, get_field: 2, change: 2]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
     only: [get_single_route_effect_names: 0, humanize_effect_name: 1]
@@ -100,9 +100,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   def build_trip_information(changeset, socket) do
     available_schedules = available_schedules_from_socket(socket)
-    trip_ids = get_field(changeset, :trip_ids) || []
-    route_type = get_field(changeset, :route_type)
-    direction = get_field(changeset, :direction)
+    trip_ids = Changeset.get_field(changeset, :trip_ids) || []
+    route_type = Changeset.get_field(changeset, :route_type)
+    direction = Changeset.get_field(changeset, :direction)
 
     # If selections aren't loaded yet (empty schedules) but trips are selected,
     # preserve existing trip_information_by_id rather than overwriting with empty map.
@@ -128,7 +128,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
           })
         end)
 
-      cast(changeset, %{trip_information_by_id: trip_info}, [:trip_information_by_id])
+      Changeset.cast(changeset, %{trip_information_by_id: trip_info}, [:trip_information_by_id])
     end
   end
 
@@ -143,7 +143,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     changeset
     |> ensure_default_direction()
     |> ensure_route_ids()
-    |> clear_stops_when_multi_route(params)
+    |> clear_selections_on_change(params)
     |> ensure_stop_names_and_ids()
     |> ensure_trip_ids()
     |> filter_stops_by_direction()
@@ -157,7 +157,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
         name |> String.split(" ") |> Enum.map_join("_", &String.downcase/1)
       end)
 
-    if get_field(changeset, :effect_name) in normalized_single_route_effects do
+    if Changeset.get_field(changeset, :effect_name) in normalized_single_route_effects do
       always_validate_required(changeset, :single_route_id, "You must select a route")
     else
       always_validate_required(changeset, :route_ids, "You must select a route")
@@ -329,14 +329,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   end
 
   defp ensure_default_direction(changeset) do
-    case get_field(changeset, :direction) do
-      nil -> cast(changeset, %{direction: "default"}, [:direction])
+    case Changeset.get_field(changeset, :direction) do
+      nil -> Changeset.cast(changeset, %{direction: "default"}, [:direction])
       _ -> changeset
     end
   end
 
   defp ensure_route_ids(changeset) do
-    effect_name = get_field(changeset, :effect_name)
+    effect_name = Changeset.get_field(changeset, :effect_name)
 
     normalized_single_route_effects =
       Enum.map(get_single_route_effect_names(), fn name ->
@@ -345,45 +345,50 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
     cond do
       effect_name in normalized_single_route_effects ->
-        case get_field(changeset, :single_route_id) do
-          nil -> cast(changeset, %{route_ids: []}, [:route_ids])
-          route_id -> cast(changeset, %{route_ids: [route_id]}, [:route_ids])
+        case Changeset.get_field(changeset, :single_route_id) do
+          nil -> Changeset.cast(changeset, %{route_ids: []}, [:route_ids])
+          route_id -> Changeset.cast(changeset, %{route_ids: [route_id]}, [:route_ids])
         end
 
-      get_field(changeset, :route_ids) == nil ->
-        cast(changeset, %{route_ids: []}, [:route_ids])
+      Changeset.get_field(changeset, :route_ids) == nil ->
+        Changeset.cast(changeset, %{route_ids: []}, [:route_ids])
 
       true ->
         changeset
     end
   end
 
-  defp clear_stops_when_multi_route(changeset, %{"_target" => ["alert_data", field]})
-       when field in ["route_ids", "single_route_id"] do
-    cast(changeset, %{stop_names_and_ids: [], trip_ids: []}, [:stop_names_and_ids, :trip_ids])
-  end
-
-  defp clear_stops_when_multi_route(changeset, %{"_target" => _target}) do
-    route_ids = get_field(changeset, :route_ids) || []
-
-    if length(route_ids) != 1 do
-      cast(changeset, %{stop_names_and_ids: []}, [:stop_names_and_ids])
+  defp clear_selections_on_change(changeset, %{"_target" => _target}) do
+    if Changeset.changed?(changeset, :route_ids) do
+      Changeset.cast(
+        changeset,
+        %{
+          stop_names_and_ids: [],
+          stop_ids: [],
+          trip_ids: []
+        },
+        [
+          :stop_names_and_ids,
+          :stop_ids,
+          :trip_ids
+        ]
+      )
     else
       changeset
     end
   end
 
-  defp clear_stops_when_multi_route(changeset, _params), do: changeset
+  defp clear_selections_on_change(changeset, _params), do: changeset
 
   defp ensure_stop_names_and_ids(changeset) do
-    stop_names_and_ids = get_field(changeset, :stop_names_and_ids)
+    stop_names_and_ids = Changeset.get_field(changeset, :stop_names_and_ids)
 
     cond do
       stop_names_and_ids in [nil, "default", ["default"]] ->
-        cast(changeset, %{stop_names_and_ids: []}, [:stop_names_and_ids])
+        Changeset.cast(changeset, %{stop_names_and_ids: []}, [:stop_names_and_ids])
 
       is_list(stop_names_and_ids) and "default" in stop_names_and_ids ->
-        cast(
+        Changeset.cast(
           changeset,
           %{stop_names_and_ids: List.delete(stop_names_and_ids, "default")},
           [:stop_names_and_ids]
@@ -395,14 +400,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   end
 
   defp ensure_trip_ids(changeset) do
-    trip_ids = get_field(changeset, :trip_ids)
+    trip_ids = Changeset.get_field(changeset, :trip_ids)
 
     cond do
       trip_ids in [nil, "default", ["default"]] ->
-        cast(changeset, %{trip_ids: []}, [:trip_ids])
+        Changeset.cast(changeset, %{trip_ids: []}, [:trip_ids])
 
       is_list(trip_ids) and "default" in trip_ids ->
-        cast(changeset, %{trip_ids: List.delete(trip_ids, "default")}, [:trip_ids])
+        Changeset.cast(changeset, %{trip_ids: List.delete(trip_ids, "default")}, [:trip_ids])
 
       true ->
         changeset
@@ -411,7 +416,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   defp filter_stops_by_direction(changeset) do
     marker =
-      case get_field(changeset, :direction) do
+      case Changeset.get_field(changeset, :direction) do
         "0" -> ~r/inbound/
         "1" -> ~r/outbound/
         _ -> ~r/\A\Z/
@@ -419,10 +424,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
     stop_names_and_ids =
       changeset
-      |> get_field(:stop_names_and_ids)
+      |> Changeset.get_field(:stop_names_and_ids)
       |> Enum.filter(&(!(&1 =~ marker)))
 
-    cast(
+    Changeset.cast(
       changeset,
       %{stop_names_and_ids: stop_names_and_ids},
       [:stop_names_and_ids]
@@ -431,7 +436,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   defp split_stop_names_and_ids(changeset) do
     split_names_and_ids =
-      get_field(changeset, :stop_names_and_ids)
+      Changeset.get_field(changeset, :stop_names_and_ids)
       |> Enum.reduce(%{stop_names: [], stop_ids: []}, fn name_and_id, acc ->
         case String.split(name_and_id, "|") do
           ["default"] ->
@@ -445,12 +450,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
         end
       end)
 
-    cast(changeset, split_names_and_ids, [:stop_names, :stop_ids])
+    Changeset.cast(changeset, split_names_and_ids, [:stop_names, :stop_ids])
   end
 
   def ensure_modal_date(changeset) do
-    case get_field(changeset, :modal_date) do
-      modal_date when modal_date in [nil, "default"] -> change(changeset, modal_date: today())
+    case Changeset.get_field(changeset, :modal_date) do
+      modal_date when modal_date in [nil, "default"] -> Changeset.change(changeset, modal_date: today())
       _ -> changeset
     end
   end
