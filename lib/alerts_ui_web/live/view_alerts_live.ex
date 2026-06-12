@@ -604,6 +604,8 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   def format_end_time(end_time_utc, certainty, opts \\ %{})
 
+  def format_end_time(nil, :KNOWN, _), do: ""
+
   def format_end_time(end_time_utc, :KNOWN, _) do
     if DateTime.compare(
          ActivePeriod.end_of_service_datetime_utc(DateTime.utc_now()),
