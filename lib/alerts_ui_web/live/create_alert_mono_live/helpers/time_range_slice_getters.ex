@@ -107,14 +107,22 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeSliceGetters do
 
   def get_onetime_end_date(end_datetime) do
     end_date = NaiveDateTime.to_date(end_datetime)
-
     end_time = NaiveDateTime.to_time(end_datetime)
 
-    if Time.compare(end_time, ActivePeriod.start_of_service_time()) == :eq do
-      Date.add(end_date, -1)
-    else
-      end_date
-    end
+    time_after_midnight? = Time.compare(end_time, ~T[00:00:00]) in [:gt, :eq]
+
+    time_before_end_of_service? =
+      Time.compare(end_time, ActivePeriod.end_of_service_time()) in [:lt, :eq]
+
+    # date should be previous day IF previously set time was between midnight and end-of-service
+    day_to_add =
+      if time_after_midnight? and time_before_end_of_service? do
+        -1
+      else
+        0
+      end
+
+    Date.add(end_date, day_to_add)
   end
 
   def get_onetime_end_datetime(
@@ -133,16 +141,25 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeSliceGetters do
         },
         _current_time,
         _previous_state
+      )
+      when active_period_end_date in ["", nil] do
+    nil
+  end
+
+  def get_onetime_end_datetime(
+        %{
+          active_period_end_specifier: :end_of_service,
+          active_period_end_date: active_period_end_date
+        },
+        _current_time,
+        _previous_state
       ) do
-    if active_period_end_date in ["", nil] do
-      nil
-    else
-      # The provided end date should always result in the end of service for that day
-      # (ie the next morning)
-      active_period_end_date
-      |> Date.add(1)
-      |> NaiveDateTime.new!(ActivePeriod.end_of_service_time())
-    end
+    # The provided end date should always result in the end of service for that day
+    # (ie the next morning)
+
+    active_period_end_date
+    |> Date.add(1)
+    |> NaiveDateTime.new!(ActivePeriod.end_of_service_time())
   end
 
   def get_onetime_end_datetime(
