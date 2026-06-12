@@ -36,10 +36,30 @@ defmodule AlertsUIWeb.UserAuthTest do
       assert redirected_to(conn) == ~p"/"
     end
 
-    test "stores the logout URI in the session", %{conn: conn, user: user} do
+    test "stores the logout URI in a path-scoped cookie, not the session", %{
+      conn: conn,
+      user: user
+    } do
       conn = UserAuth.log_in_user(conn, user, logout_uri(), @now)
 
-      assert is_binary(get_session(conn, :logout_uri))
+      assert %{value: value, path: "/auth/keycloak/logout"} =
+               conn.resp_cookies["_alerts_ui_logout"]
+
+      assert is_binary(value)
+      refute get_session(conn, :logout_uri)
+    end
+
+    test "stores a fresh, per-session salt for the logout cookie", %{conn: conn, user: user} do
+      conn1 = UserAuth.log_in_user(conn, user, logout_uri(), @now)
+      conn2 = UserAuth.log_in_user(conn, user, logout_uri(), @now)
+
+      salt1 = get_session(conn1, :logout_cookie_salt)
+      salt2 = get_session(conn2, :logout_cookie_salt)
+
+      assert is_binary(salt1)
+      assert is_binary(salt2)
+      # each session derives its own salt, so the value rotates per login
+      refute salt1 == salt2
     end
 
     test "stores the auth time in the session", %{conn: conn, user: user} do
@@ -101,6 +121,23 @@ defmodule AlertsUIWeb.UserAuthTest do
 
       refute get_session(conn, :user_token)
       assert redirected_to(conn) == ~p"/"
+    end
+
+    test "redirects to the logout URI carried by the logout cookie", %{conn: conn, user: user} do
+      login_conn = UserAuth.log_in_user(conn, user, logout_uri(), @now)
+
+      conn =
+        conn
+        |> Plug.Test.recycle_cookies(login_conn)
+        # the real session cookie carries the per-session salt across requests;
+        # init_test_session keeps the session out of band, so replay it here
+        |> init_test_session(get_session(login_conn))
+        |> fetch_flash()
+        |> UserAuth.log_out_user()
+
+      assert redirected_to(conn) == logout_uri()
+      # the logout cookie is cleared on the way out
+      assert conn.resp_cookies["_alerts_ui_logout"].max_age == 0
     end
   end
 

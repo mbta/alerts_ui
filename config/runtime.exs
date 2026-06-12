@@ -78,7 +78,13 @@ cond do
         # See the documentation on https://hexdocs.pm/plug_cowboy/Plug.Cowboy.html
         # for details about using IPv6 vs IPv4 and loopback vs public addresses.
         ip: {0, 0, 0, 0, 0, 0, 0, 0},
-        port: port
+        port: port,
+        # Cowboy defaults the max length of a single header value to 4096 bytes.
+        # Between auth, analytics, and the two AWSALB cookies, the Cookie header
+        # routinely approaches that, producing intermittent HTTP 431s. Raise it to
+        # a value well above real traffic (~4 KB) yet comfortably under the ALB's
+        # own (much larger) header limits.
+        protocol_options: [max_header_value_length: 16_384]
       ],
       secret_key_base: secret_key_base
 

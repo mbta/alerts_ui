@@ -14,6 +14,18 @@ defmodule AlertsUIWeb.UserAuth do
   alias Oidcc.{ClientContext, Token}
   alias Plug.Conn
 
+  # The Keycloak logout URL embeds a full `id_token_hint` JWT and is large enough
+  # to push the `_alerts_ui_key` session cookie past header-size limits (HTTP 431).
+  # We keep it out of the session by storing it in its own encrypted cookie scoped
+  # to the logout route, so the browser only sends it when actually logging out.
+  @logout_cookie "_alerts_ui_logout"
+  @logout_cookie_path "/auth/keycloak/logout"
+  # The salt that derives the logout cookie's encryption key is generated freshly
+  # per session and stashed in the (encrypted) session cookie under this key, so a
+  # new key protects every session's logout cookie. The salt is a handful of bytes,
+  # far too small to reintroduce the HTTP 431 the logout cookie itself avoids.
+  @logout_cookie_salt_session_key :logout_cookie_salt
+
   @doc """
   Logs the user in.
 
@@ -33,7 +45,7 @@ defmodule AlertsUIWeb.UserAuth do
     conn
     |> renew_session()
     |> put_current_user_in_session(user)
-    |> put_session(:logout_uri, logout_uri)
+    |> put_logout_cookie(logout_uri)
     |> put_session(:last_auth_time, auth_time)
     |> redirect(to: user_return_to || signed_in_path(conn))
   end
@@ -55,7 +67,7 @@ defmodule AlertsUIWeb.UserAuth do
       AlertsUIWeb.Endpoint.broadcast(live_socket_id, "disconnect", %{})
     end
 
-    logout_uri = Conn.get_session(conn, :logout_uri)
+    logout_uri = get_logout_cookie(conn)
 
     redirect_to =
       if Keyword.get(opts, :skip_oidc_sign_out, false) or is_nil(logout_uri) do
@@ -66,6 +78,7 @@ defmodule AlertsUIWeb.UserAuth do
 
     conn
     |> renew_session()
+    |> delete_logout_cookie()
     |> redirect(redirect_to)
   end
 
@@ -343,6 +356,50 @@ defmodule AlertsUIWeb.UserAuth do
     conn
     |> put_session(:user, user)
     |> put_session(:live_socket_id, "users_sessions:#{User.keycloak_id(user)}")
+  end
+
+  # Encrypt the logout URL into a dedicated cookie scoped to the logout route.
+  # Mirrors how `ueberauth_oidcc` stores its own transient cookie. No max age is
+  # set so it shares the browser-session lifetime of `_alerts_ui_key`.
+  defp put_logout_cookie(conn, logout_uri) do
+    salt = generate_logout_cookie_salt()
+    value = Plug.Crypto.encrypt(conn.secret_key_base, salt, logout_uri)
+
+    conn
+    |> put_session(@logout_cookie_salt_session_key, salt)
+    |> put_resp_cookie(@logout_cookie, value, logout_cookie_opts(conn))
+  end
+
+  defp get_logout_cookie(conn) do
+    conn = fetch_cookies(conn)
+
+    with salt when is_binary(salt) <- get_session(conn, @logout_cookie_salt_session_key),
+         cookie when is_binary(cookie) <- conn.cookies[@logout_cookie],
+         {:ok, logout_uri} <-
+           Plug.Crypto.decrypt(conn.secret_key_base, salt, cookie) do
+      logout_uri
+    else
+      _ -> nil
+    end
+  end
+
+  # 16 cryptographically-random bytes is ample salt for key derivation; Base64
+  # keeps it printable for the session store.
+  defp generate_logout_cookie_salt do
+    16 |> :crypto.strong_rand_bytes() |> Base.url_encode64()
+  end
+
+  defp delete_logout_cookie(conn) do
+    delete_resp_cookie(conn, @logout_cookie, logout_cookie_opts(conn))
+  end
+
+  defp logout_cookie_opts(conn) do
+    [
+      path: @logout_cookie_path,
+      http_only: true,
+      same_site: "Lax",
+      secure: conn.scheme == :https
+    ]
   end
 
   defp maybe_store_return_to(%{method: "GET"} = conn) do
