@@ -602,6 +602,16 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     end
   end
 
+  def safe_format_end_time(end_time_utc, certainty, opts \\ %{}) do
+    try do
+      format_end_time(end_time_utc, certainty, opts)
+    rescue
+      exception ->
+        Logger.error("Error formatting time: #{Exception.message(exception)}")
+        "ERROR"
+    end
+  end
+
   def format_end_time(end_time_utc, certainty, opts \\ %{})
 
   def format_end_time(end_time_utc, :KNOWN, _) do

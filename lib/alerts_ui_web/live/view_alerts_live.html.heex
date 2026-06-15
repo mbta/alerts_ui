@@ -94,33 +94,33 @@
         col_style="width: 7rem;"
         tbody_td_attrs={[class: "p-1 whitespace-nowrap"]}
       >
-        <.error_boundary>
-          <div
-            title={
-              format_timestamp(alert.active_period_end, alert.duration_certainty, %{
-                can_close_automatically: alert.can_close_automatically,
-                primary_service_type: alert.primary_service_type,
-                effect_name: alert.effect_name
-              })
-            }
-            class={
-              danger_text(
-                alert.active_period_end,
-                alert.closed_timestamp
-              )
-            }
-          >
-            {format_end_time(
+        <%!-- <.error_boundary> --%>
+        <div
+          title={
+            format_timestamp(alert.active_period_end, alert.duration_certainty, %{
+              can_close_automatically: alert.can_close_automatically,
+              primary_service_type: alert.primary_service_type,
+              effect_name: alert.effect_name
+            })
+          }
+          class={
+            danger_text(
               alert.active_period_end,
-              alert.duration_certainty,
-              %{
-                can_close_automatically: alert.can_close_automatically,
-                primary_service_type: alert.primary_service_type,
-                effect_name: alert.effect_name
-              }
-            )}
-          </div>
-        </.error_boundary>
+              alert.closed_timestamp
+            )
+          }
+        >
+          {safe_format_end_time(
+            alert.active_period_end,
+            alert.duration_certainty,
+            %{
+              can_close_automatically: alert.can_close_automatically,
+              primary_service_type: alert.primary_service_type,
+              effect_name: alert.effect_name
+            }
+          )}
+        </div>
+        <%!-- </.error_boundary> --%>
       </:col>
       <:action :let={alert} label="Actions" col_style="width: 8rem;">
         <div class="inline-flex justify-end space-x-2 w-full">
