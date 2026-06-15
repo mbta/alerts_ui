@@ -155,14 +155,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     defp description_sync_toggle(_, current_toggle), do: current_toggle
 
     def validate(details_data, changeset, _params, socket) do
-      if socket.assigns.submitted? do
-        image_url = details_data.image_url
-        image_size = image_url |> get_image_size()
+      # Validate URLs on change, but required fields only on submit
+      image_url = details_data.image_url
+      image_size = image_url |> get_image_size()
 
+      changeset =
         changeset
-        |> Validation.always_validate_required(@required_fields)
         |> validate_url(get_field(changeset, :url))
         |> validate_image_fields(image_size, image_url)
+
+      if socket.assigns.submitted? do
+        changeset
+        |> Validation.always_validate_required(@required_fields)
       else
         changeset
       end
