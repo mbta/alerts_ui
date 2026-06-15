@@ -1094,7 +1094,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
 
         open_review_modal(view)
 
-        assert render_async(view) =~ "text-text-error"
+        render_async(view)
+
+        assert has_element?(view, "p.text-text-error", "Select a route")
+
+        # Flash
+        assert view
+               |> element("#flash")
+               |> render() =~ "Select a route"
       end
     end
 
