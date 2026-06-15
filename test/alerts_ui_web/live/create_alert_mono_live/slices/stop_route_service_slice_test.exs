@@ -1199,8 +1199,25 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
     test "publishing a bus multi-route detour AFTER selecting and deselecting will put up a flash error for the missing route",
          %{conn: conn} do
       with_mocks([
-        {RoutesRepo, [], [by_type: fn _ -> [@route, @route_two] end]},
-        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@route, @route_two] end,
+           by_stop: fn _ -> [@route, @route_two] end,
+           by_stop: fn _, _ -> [@route, @route_two] end,
+           get: fn
+             "Blue" -> @route
+             _ -> @route_two
+           end,
+           get: fn
+             "Blue", _ -> @route
+             _, _ -> @route_two
+           end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop] end
+           #  all: fn ["filter[id]": "place-aqucl"], _opts -> [@stop] end
+         ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
         get_to_submission_page_refactor(view, "Bus", "Multi-route detour")
@@ -1210,16 +1227,41 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         |> element("form")
         |> render_change(%{
           "_target" => ["alert_data", "stop_ids"],
-          "alert_data" => %{"stop_ids" => [], "route_ids" => []}
+          "alert_data" => %{"stop_ids" => []}
         })
 
         view |> element("button#review", "Review and submit") |> render_click()
 
         assert has_element?(view, "p.text-text-error", "Select stop(s)")
-        assert has_element?(view, "p.text-text-error", "Select route(s)")
+        # Should not see an error on routes until we select a stop
+        refute has_element?(view, "p.text-text-error", "Select route(s)")
 
         flash_html = view |> element("#flash") |> render()
         assert flash_html =~ "Select stop(s)"
+
+        # Now select stops, routes will autoselect
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "stop_ids"],
+          "alert_data" => %{"stop_ids" => [@stop.id]}
+        })
+
+        view |> element("button#review", "Review and submit") |> render_click()
+        refute has_element?(view, "p.text-text-error")
+
+        # Force unselecting routes
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => []}
+        })
+
+        view |> element("button#review", "Review and submit") |> render_click()
+
+        assert has_element?(view, "p.text-text-error", "Select route(s)")
+        flash_html = view |> element("#flash") |> render()
         assert flash_html =~ "Select route(s)"
       end
     end
