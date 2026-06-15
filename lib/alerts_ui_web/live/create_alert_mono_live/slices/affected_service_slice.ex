@@ -10,7 +10,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   alias AlertsUIWeb.CreateAlertLive
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
-  alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
+
+  alias AlertsUIWeb.FormComponents.Helpers.{SelectFormatter, ServiceEffectCombinations}
 
   alias Ecto.Changeset
 
@@ -78,7 +79,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
     def validate(_service_data, changeset, _params, socket) do
       if socket.assigns.submitted? do
-        AffectedServiceSlice.validate_changeset(changeset)
+        AffectedServiceSlice.validate_changeset(
+          changeset,
+          socket.assigns.form[:combination].value
+        )
       else
         changeset
       end
@@ -151,17 +155,30 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     |> ensure_modal_date()
   end
 
-  def validate_changeset(changeset) do
+  def validate_changeset(changeset, combination) do
     normalized_single_route_effects =
       Enum.map(get_single_route_effect_names(), fn name ->
         name |> String.split(" ") |> Enum.map_join("_", &String.downcase/1)
       end)
 
-    if Changeset.get_field(changeset, :effect_name) in normalized_single_route_effects do
-      always_validate_required(changeset, :single_route_id, "You must select a route")
-    else
-      always_validate_required(changeset, :route_ids, "You must select a route")
-    end
+    required_fields = ServiceEffectCombinations.required_fields(combination)
+
+    is_single_route =
+      Changeset.get_field(changeset, :effect_name) in normalized_single_route_effects
+
+    required_fields =
+      if is_single_route,
+        do: [:single_route_id | required_fields] |> List.delete(:route_ids),
+        else: required_fields
+
+    Enum.reduce(
+      required_fields,
+      changeset,
+      fn field, cs ->
+        # This message will be overwritten by the error formatter as long as the field is listed in error_formatter.ex
+        always_validate_required(cs, field, "Required")
+      end
+    )
   end
 
   def async_assign_selections(%{assigns: %{} = assigns} = socket, params) do
