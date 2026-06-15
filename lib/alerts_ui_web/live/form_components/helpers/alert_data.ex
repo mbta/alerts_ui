@@ -435,7 +435,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   def determine_end_specifier(ap_end, certainty, autoclosable \\ false)
 
   def determine_end_specifier(nil, nil, _), do: nil
-  def determine_end_specifier(_, _, true), do: "when_work_order_is_closed"
+  def determine_end_specifier(nil, _, true), do: "when_work_order_is_closed"
   def determine_end_specifier(_, :ESTIMATED, _), do: "later_today"
   def determine_end_specifier(nil, _, _), do: "until_further_notice"
 
