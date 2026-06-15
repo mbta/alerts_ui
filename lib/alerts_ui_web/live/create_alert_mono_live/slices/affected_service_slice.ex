@@ -10,7 +10,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   alias AlertsUIWeb.CreateAlertLive
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
-
   alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
 
   alias Ecto.Changeset

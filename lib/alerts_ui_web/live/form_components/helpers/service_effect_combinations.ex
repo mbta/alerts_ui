@@ -28,13 +28,4 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations do
   def required_fields(:RDS), do: ~w[route_ids direction stop_ids]a
   def required_fields(:RDT), do: ~w[route_ids direction trip_ids]a
   def required_fields(:RDTS), do: ~w[route_ids direction trip_ids stop_ids]a
-
-  @spec non_empty_fields(service_effect_combination() | nil) :: [atom()]
-  def non_empty_fields(nil), do: []
-  def non_empty_fields(:ACCESS), do: ~w[facility_ids]a
-  def non_empty_fields(:R), do: ~w[route_ids]a
-  def non_empty_fields(:SR), do: ~w[route_ids stop_ids]a
-  def non_empty_fields(:RDS), do: ~w[route_ids]a
-  def non_empty_fields(:RDT), do: ~w[route_ids]a
-  def non_empty_fields(:RDTS), do: ~w[route_ids]a
 end
