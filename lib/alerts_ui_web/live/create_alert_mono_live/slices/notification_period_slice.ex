@@ -36,7 +36,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice
 
     def mount(_slice, socket, _params) do
-      socket
+      assign(socket, :current_time, DateTimeHelpers.current_time())
     end
 
     def extract(slice, %AlertData{} = _alert, _params) do
@@ -49,16 +49,21 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
       |> update_times_if_duplicating(slice.form_type, now)
     end
 
-    def transform(_slice, changeset, _params, _socket) do
+    def transform(_slice, changeset, _params, socket) do
+      current_time = socket.assigns.current_time
+
       changeset
-      |> NotificationPeriodSlice.ensure_notification_start()
-      |> NotificationPeriodSlice.extract_notification_end()
+      |> NotificationPeriodSlice.ensure_notification_start(current_time)
+      |> NotificationPeriodSlice.extract_notification_end(current_time)
     end
 
     def validate(_slice, changeset, params, socket) do
       changeset
       |> TimeRangeValidators.validate_cast_notification_datetimes(params)
-      |> TimeRangeValidators.validate_notification(socket.assigns.form_type == :editing)
+      |> TimeRangeValidators.validate_notification(
+        socket.assigns.current_time,
+        socket.assigns.form_type == :editing
+      )
       |> TimeRangeValidators.validate_required_notification_fields()
     end
 
@@ -83,16 +88,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
     def update_times_if_duplicating(slice, _, _), do: slice
   end
 
-  def ensure_notification_start(changeset) do
+  def ensure_notification_start(changeset, current_time) do
     specifier = get_field(changeset, :notification_specifier)
     start_dt = get_field(changeset, :notification_period_start, :unspecified)
     start_d = get_field(changeset, :notification_period_start_date, :unspecified)
 
     changeset
-    |> ensure_notification_start_for_specifier(specifier, start_dt, start_d)
+    |> ensure_notification_start_for_specifier(specifier, start_dt, start_d, current_time)
   end
 
-  def ensure_notification_start_for_specifier(changeset, :same_as_effect_period, _, _) do
+  def ensure_notification_start_for_specifier(changeset, :same_as_effect_period, _, _, _) do
     active_period_start = get_field(changeset, :active_period_start)
     active_period_start_date = get_field(changeset, :active_period_start_date)
 
@@ -101,15 +106,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
     |> force_change(:notification_period_start_date, active_period_start_date)
   end
 
-  def ensure_notification_start_for_specifier(changeset, :now, _, _) do
-    now = DateTimeHelpers.current_time()
+  def ensure_notification_start_for_specifier(changeset, :now, _, _, current_time) do
+    now = current_time
 
     changeset
     |> force_change(:notification_period_start, now)
     |> force_change(:notification_period_start_date, now |> NaiveDateTime.to_date())
   end
 
-  def ensure_notification_start_for_specifier(changeset, :start_of_service, _, d) do
+  def ensure_notification_start_for_specifier(changeset, :start_of_service, _, d, _) do
     datetime = NaiveDateTime.new!(d, ActivePeriod.start_of_service_time())
 
     changeset
@@ -117,48 +122,60 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
     |> force_change(:notification_period_start_date, d)
   end
 
-  def ensure_notification_start_for_specifier(changeset, :custom, nil, d) do
+  def ensure_notification_start_for_specifier(changeset, :custom, nil, d, current_time) do
     ensure_notification_start_for_specifier(
       changeset,
       :custom,
-      DateTimeHelpers.current_time(),
-      d
+      current_time,
+      d,
+      current_time
     )
   end
 
-  def ensure_notification_start_for_specifier(changeset, :custom, dt, _) do
+  def ensure_notification_start_for_specifier(changeset, :custom, dt, _, _) do
     changeset
     |> force_change(:notification_period_start, dt)
     |> force_change(:notification_period_start_date, NaiveDateTime.to_date(dt))
   end
 
-  def ensure_notification_start_for_specifier(changeset, _, _, _), do: changeset
+  def ensure_notification_start_for_specifier(changeset, _, _, _, _), do: changeset
 
-  def extract_notification_end(changeset) do
+  def extract_notification_end(changeset, current_time) do
     specifier = get_field(changeset, :active_period_end_specifier)
     end_dt = get_field(changeset, :active_period_end) || :unspecified
     end_d = get_field(changeset, :active_period_end_date) || :unspecified
 
     changeset
-    |> extract_notification_end_for_specifier(specifier, end_dt, end_d)
+    |> extract_notification_end_for_specifier(specifier, end_dt, end_d, current_time)
   end
 
-  def extract_notification_end_for_specifier(changeset, :later_today, _, _) do
-    now =
-      DateTimeHelpers.current_time()
-      |> ActivePeriod.end_of_service_datetime_naive()
+  def extract_notification_end_for_specifier(changeset, :later_today, _, _, current_time) do
+    notification_end = ActivePeriod.end_of_service_datetime_naive(current_time)
 
     changeset
-    |> force_change(:notification_period_end, now)
-    |> force_change(:notification_period_end_date, now |> NaiveDateTime.to_date())
+    |> force_change(:notification_period_end, notification_end)
+    |> force_change(:notification_period_end_date, notification_end |> NaiveDateTime.to_date())
   end
 
-  def extract_notification_end_for_specifier(changeset, :end_of_service, _, :unspecified) do
-    now = NaiveDateTime.local_now() |> NaiveDateTime.to_date()
-    extract_notification_end_for_specifier(changeset, :end_of_service, :ignored, now)
+  def extract_notification_end_for_specifier(
+        changeset,
+        :end_of_service,
+        _,
+        :unspecified,
+        current_time
+      ) do
+    current_date = NaiveDateTime.to_date(current_time)
+
+    extract_notification_end_for_specifier(
+      changeset,
+      :end_of_service,
+      :ignored,
+      current_date,
+      current_time
+    )
   end
 
-  def extract_notification_end_for_specifier(changeset, :end_of_service, _, date) do
+  def extract_notification_end_for_specifier(changeset, :end_of_service, _, date, _) do
     datetime =
       date
       |> NaiveDateTime.new!(~T[12:00:00])
@@ -169,30 +186,31 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
     |> force_change(:notification_period_end_date, datetime |> NaiveDateTime.to_date())
   end
 
-  def extract_notification_end_for_specifier(changeset, :until_further_notice, _, _) do
+  def extract_notification_end_for_specifier(changeset, :until_further_notice, _, _, _) do
     changeset
     |> force_change(:notification_period_end, nil)
     |> force_change(:notification_period_end_date, nil)
   end
 
-  def extract_notification_end_for_specifier(changeset, :custom, :unspecified, _) do
-    now = NaiveDateTime.local_now()
-    extract_notification_end_for_specifier(changeset, :custom, now, :ignored)
+  def extract_notification_end_for_specifier(changeset, :custom, :unspecified, _, current_time) do
+    now = current_time
+    extract_notification_end_for_specifier(changeset, :custom, now, :ignored, now)
   end
 
-  def extract_notification_end_for_specifier(changeset, :custom, dt, _) do
+  def extract_notification_end_for_specifier(changeset, :custom, dt, _, _) do
     changeset
     |> force_change(:notification_period_end, dt)
     |> force_change(:notification_period_end_date, dt |> NaiveDateTime.to_date())
   end
 
-  def extract_notification_end_for_specifier(changeset, _, _, _) do
+  def extract_notification_end_for_specifier(changeset, _, _, _, _) do
     changeset
   end
 
   def notification_values, do: @notification_values
 
   attr :form, Form
+  attr :current_time, NaiveDateTime
 
   def render(assigns) do
     ~H"""
@@ -209,7 +227,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
           type="date"
           label=""
           field={@form[:notification_period_start_date]}
-          min={DateTimeHelpers.current_time() |> naive_datetime_to_iso_date}
+          min={@current_time |> naive_datetime_to_iso_date}
           max={
             [naive_datetime_to_iso_date(@form[:active_period_start].value), "9999-12-31"]
             |> Enum.max()
