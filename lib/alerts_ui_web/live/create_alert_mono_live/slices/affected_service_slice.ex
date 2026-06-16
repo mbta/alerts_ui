@@ -140,6 +140,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   end
 
   def transform_changeset(changeset, params) do
+    # The select component renders the prompt option with value="default". When the user
+    # selects "All future trips", the browser sends modal_date=default. Ecto would cast
+    # "default" normally, and ensure_modal_date would then convert it to today(). We must
+    # force nil into the changeset here so ensure_modal_date sees nil and passes it through.
+    # ("" is also handled for robustness, though the browser always sends "default".)
+    changeset =
+      if get_in(params, ["alert_data", "modal_date"]) in ["", "default"] do
+        Changeset.force_change(changeset, :modal_date, nil)
+      else
+        changeset
+      end
+
     changeset
     |> ensure_default_direction()
     |> ensure_route_ids()
@@ -247,7 +259,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       {filter_title_value, _} =
         service_dates()
         |> Enum.find({"All future trips", nil}, fn {_option, value} ->
-          value == (modal_date || today())
+          value == modal_date
         end)
 
       %Selections{
@@ -270,19 +282,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   defp prev(%Selections{} = selections), do: selections
   defp prev(_), do: %Selections{}
 
-  defp available_schedules(route_ids, direction, modal_date)
-       when nil in [route_ids, direction, modal_date] do
+  defp available_schedules(route_ids, direction, _modal_date)
+       when nil in [route_ids, direction] or route_ids == [] do
     []
   end
 
   defp available_schedules(route_ids, direction, modal_date) do
     date = get_schedule_date(modal_date)
-
-    CreateAlertLive.get_schedules_by_date(
-      route_ids,
-      direction,
-      date
-    )
+    CreateAlertLive.get_schedules_by_date(route_ids, direction, date)
   end
 
   defp get_schedule_date("default") do
@@ -455,7 +462,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   def ensure_modal_date(changeset) do
     case Changeset.get_field(changeset, :modal_date) do
-      modal_date when modal_date in [nil, "default"] ->
+      "default" ->
         Changeset.change(changeset, modal_date: today())
 
       _ ->

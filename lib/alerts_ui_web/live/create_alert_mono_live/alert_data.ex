@@ -76,7 +76,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :facility_ids, {:array, :string}
     field :facility_search_term, :string
     field :single_facility_id, :string
-    field :modal_date, :string
+    field :modal_date, :string, default: "default"
     field :modal_date_search_term, :string
     field :modal_route_id, :string
     field :modal_route_search_term, :string
@@ -334,12 +334,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     combination = get_field(changeset, :combination)
 
     # Restart validation from a clean slate
-    Enum.reduce(slices(socket, combination), %{changeset | errors: [], valid?: true}, fn slice_module,
-                                                                            changeset ->
-      changeset
-      |> slice_from_changeset(slice_module)
-      |> Slice.validate(changeset, params, socket)
-    end)
+    Enum.reduce(
+      slices(socket, combination),
+      %{changeset | errors: [], valid?: true},
+      fn slice_module, changeset ->
+        changeset
+        |> slice_from_changeset(slice_module)
+        |> Slice.validate(changeset, params, socket)
+      end
+    )
     |> apply_action(:validate)
   end
 
@@ -364,7 +367,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   def slices(socket), do: slices(socket, combination_from_socket(socket))
 
   def slices(_socket, combination) do
-    IO.inspect(combination, label: "COMBO")
     [
       TimelineSlice,
       UrlSlice,

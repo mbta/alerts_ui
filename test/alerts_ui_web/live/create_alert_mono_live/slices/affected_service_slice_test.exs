@@ -438,6 +438,70 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     end
 
     @tag :logged_in_user
+    test "selecting 'All future trips' loads trips across all future dates and shows correct filter title",
+         %{conn: conn} do
+      today = @todays_date |> Date.to_string()
+      tomorrow = @todays_date |> Date.add(1) |> Date.to_string()
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@route] end,
+           get: fn _, _ -> @route end
+         ]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn
+             ["CR-Worcester"], opts ->
+               case opts |> Keyword.get(:date) |> to_string() do
+                 ^today -> [@schedule_future, @schedule_future]
+                 ^tomorrow -> [@schedule_3, @schedule_3]
+                 _ -> []
+               end
+
+             _, _ ->
+               []
+           end,
+           end_of_rating: fn -> Date.add(@todays_date, 1) end
+         ]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        get_to_submission_page_refactor(view, "Commuter Rail", "Delay")
+        render_async(view)
+
+        # First select a specific date (today) — only today's trip should appear
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{"route_ids" => ["CR-Worcester"], "modal_date" => today}
+        })
+
+        render_click(view, "accept_filter")
+        render_async(view)
+
+        assert render(view) =~ @schedule_future.trip.name
+        refute render(view) =~ @schedule_3.trip.name
+
+        # Select "All future trips" — the select component renders the prompt with value="default",
+        # so the browser sends "default" when "All future trips" is chosen.
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{"modal_date" => "default", "route_ids" => ["CR-Worcester"]}
+        })
+
+        render_click(view, "accept_filter")
+        render_async(view)
+
+        # Both trips — today's and tomorrow's — should appear
+        assert render(view) =~ @schedule_future.trip.name
+        assert render(view) =~ @schedule_3.trip.name
+        assert render(view) =~ "Filter: All future trips"
+      end
+    end
+
+    @tag :logged_in_user
     test "clear date filter resets to today", %{conn: conn} do
       today = @todays_date |> Date.to_string()
       today_day_name = Calendar.strftime(@todays_date, "%a %b %0d")
