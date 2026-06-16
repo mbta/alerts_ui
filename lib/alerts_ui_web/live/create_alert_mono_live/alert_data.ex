@@ -295,10 +295,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
         {:ok, socket}
 
       {:error, changeset} ->
+        new_errors = parse_field_errors(changeset)
+        changeset = %{changeset | errors: new_errors}
+
         socket =
           socket
           |> assign(:form, to_form(changeset))
-          |> assign(:errors, parse_field_errors(changeset))
           |> assigns(params)
 
         {:error, socket}

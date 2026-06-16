@@ -249,6 +249,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
       assert view
              |> render() =~ ~s(Enter a valid image URL)
+
+      assert view
+             |> render() =~ ~s(Enter alt text)
     end
 
     @tag :logged_in_user
@@ -333,7 +336,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
   describe "auto text" do
     @tag :logged_in_user
-    test "shows error if header text is blank", %{conn: conn} do
+    test "shows error on submit if header text is blank", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
       get_to_submission_page_refactor(view, "Ferry", "Delay")
 
@@ -346,8 +349,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
         }
       })
 
+      view |> element("button#review", "Review and submit") |> render_click()
+
       assert view
-             |> render() =~ ~s(can&#39;t be blank)
+             |> render() =~ ~s(Enter message text)
     end
 
     @tag :logged_in_user

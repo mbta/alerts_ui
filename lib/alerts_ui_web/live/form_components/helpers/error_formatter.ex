@@ -9,6 +9,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ErrorFormatter do
 
   @field_name_to_error_message %{
     header_text: "Enter message text",
+    single_route_id: "Select a route",
     route_ids: "Select route(s)",
     stop_ids: "Select stop(s)",
     trip_ids: "Select trip(s)",
