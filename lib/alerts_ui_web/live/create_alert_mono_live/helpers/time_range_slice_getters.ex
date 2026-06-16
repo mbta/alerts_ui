@@ -109,14 +109,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeSliceGetters do
     end_date = NaiveDateTime.to_date(end_datetime)
     end_time = NaiveDateTime.to_time(end_datetime)
 
-    time_after_midnight? = Time.compare(end_time, ~T[00:00:00]) in [:gt, :eq]
-
     time_before_end_of_service? =
       Time.compare(end_time, ActivePeriod.end_of_service_time()) in [:lt, :eq]
 
     # date should be previous day IF previously set time was between midnight and end-of-service
     day_to_add =
-      if time_after_midnight? and time_before_end_of_service? do
+      if time_before_end_of_service? do
         -1
       else
         0
