@@ -10,7 +10,6 @@ defmodule AlertsUIWeb.SharedComponents do
   """
   use Phoenix.Component
   import AlertsUIWeb.{Gettext, IconComponents}
-  import Logger
 
   alias AlertsUIWeb.CoreComponents
   alias AlertsUIWeb.FormComponents.Helpers.ContentFormatter
@@ -1588,41 +1587,5 @@ defmodule AlertsUIWeb.SharedComponents do
       </svg>
     </span>
     """
-  end
-
-  @doc """
-  Renders an error boundary that logs if the child component has an error.
-
-  ## Example
-
-      <.error_boundary>
-        {format_data_maybe_throw_error(data)}
-      </.error_boundary>
-
-  """
-  slot :inner_block, required: true
-
-  def error_boundary(assigns) do
-    try do
-      # We need to force HEEx to render the slot in order to catch any errors
-      lazy_render = ~H"""
-      {render_slot(assigns.inner_block)}
-      """
-
-      assigns = assign(assigns, :evaluated_html, Phoenix.HTML.Safe.to_iodata(lazy_render))
-
-      ~H"""
-      {Phoenix.HTML.raw(@evaluated_html)}
-      """
-    rescue
-      exception ->
-        Logger.error("Error boundary: #{Exception.message(exception)}")
-
-        ~H"""
-        <div class="text text-danger">
-          ERROR
-        </div>
-        """
-    end
   end
 end
