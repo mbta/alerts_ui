@@ -3,6 +3,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
   alias AlertsUI.Configs.ModeEffect
   alias AlertsUI.Models.Alert
   alias AlertsUIWeb.FormComponents.Helpers.ContentFormatter
+  alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
   alias Phoenix.HTML.Form
 
   import Ecto.Changeset, only: [get_field: 2]
@@ -113,6 +114,34 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
 
   def get_single_facility_effect_names do
     ["Elevator Closure", "Escalator Closure"]
+  end
+
+  @doc """
+  Returns the combination atom for a given route_type and effect_name.
+
+  When route_type is nil (facility/systemwide alerts), existing_combination is
+  returned as a fallback before attempting a lookup, because nil route_type is
+  intentional for those alert types and we don't want to reset a valid combination.
+  """
+  @spec combination_for(integer() | binary() | atom() | nil, binary() | nil, atom() | nil) ::
+          atom() | nil
+  def combination_for(route_type, effect_name, existing_combination \\ nil)
+
+  def combination_for(nil, effect_name, existing_combination) do
+    existing_combination ||
+      GetKeyForModeEffect.get_value_of_key(
+        :combination,
+        nil,
+        humanize_effect_name(nil, effect_name)
+      )
+  end
+
+  def combination_for(route_type, effect_name, _existing_combination) do
+    GetKeyForModeEffect.get_value_of_key(
+      :combination,
+      route_type,
+      humanize_effect_name(route_type, effect_name)
+    )
   end
 
   def clear_my_errors(changeset, struct_module) do
