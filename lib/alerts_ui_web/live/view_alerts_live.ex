@@ -563,13 +563,11 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   ### Frontend styling functions ###
   def safe_format_timestamp(timestamp, certainty \\ :KNOWN, opts \\ %{}) do
-    try do
-      format_timestamp(timestamp, certainty, opts)
-    rescue
-      exception ->
-        Logger.error("Error formatting time: #{Exception.message(exception)}")
-        "ERROR"
-    end
+    format_timestamp(timestamp, certainty, opts)
+  rescue
+    exception ->
+      Logger.error("Error formatting time: #{Exception.message(exception)}")
+      "ERROR"
   end
 
   defp format_timestamp(timestamp, certainty, opts)
@@ -593,38 +591,34 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   end
 
   def safe_format_start_time(start_time_utc) do
-    try do
-      current_service_date =
-        DateTime.now!("America/New_York")
-        |> ActivePeriod.datetime_to_service_date()
+    current_service_date =
+      DateTime.now!("America/New_York")
+      |> ActivePeriod.datetime_to_service_date()
 
-      most_recent_start_of_service =
-        DateTime.new!(
-          current_service_date,
-          ActivePeriod.start_of_service_time(),
-          "America/New_York"
-        )
+    most_recent_start_of_service =
+      DateTime.new!(
+        current_service_date,
+        ActivePeriod.start_of_service_time(),
+        "America/New_York"
+      )
 
-      if start_time_utc && DateTime.compare(most_recent_start_of_service, start_time_utc) == :eq do
-        "start of service"
-      else
-        DateTimeFormatters.friendly_date_time(start_time_utc, :start)
-      end
-    rescue
-      exception ->
-        Logger.error("Error formatting start time: #{Exception.message(exception)}")
-        "ERROR"
+    if start_time_utc && DateTime.compare(most_recent_start_of_service, start_time_utc) == :eq do
+      "start of service"
+    else
+      DateTimeFormatters.friendly_date_time(start_time_utc, :start)
     end
+  rescue
+    exception ->
+      Logger.error("Error formatting start time: #{Exception.message(exception)}")
+      "ERROR"
   end
 
   def safe_format_end_time(end_time_utc, certainty, opts \\ %{}) do
-    try do
-      format_end_time(end_time_utc, certainty, opts)
-    rescue
-      exception ->
-        Logger.error("Error formatting end time: #{Exception.message(exception)}")
-        "ERROR"
-    end
+    format_end_time(end_time_utc, certainty, opts)
+  rescue
+    exception ->
+      Logger.error("Error formatting end time: #{Exception.message(exception)}")
+      "ERROR"
   end
 
   defp format_end_time(end_time_utc, certainty, opts)
