@@ -50,7 +50,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       assign(socket, :current_time, DateTimeHelpers.current_time())
     end
 
-    def extract(slice, %AlertData{} = _alert, _params) do
+    def extract(slice, %AlertData{} = alert, _params) do
       now = DateTimeHelpers.current_time()
 
       slice
@@ -64,7 +64,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       |> put_over_nil(:active_period_end_time_specifier, :end_of_service)
       |> put_over_nil(:recurrence_days, [])
       |> put_over_nil(:can_close_automatically, nil)
-      |> update_times_if_duplicating(slice.form_type, slice.alert_timing, now)
+      |> update_times_if_duplicating(slice.form_type, slice.alert_timing, now, alert)
     end
 
     def transform(_slice, changeset, params, socket) do
@@ -87,6 +87,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
       changeset
       |> TimeRangeSlice.normalize_alert_timing()
+      |> TimeRangeSlice.set_mode_effect_defaults()
       |> TimeRangeSlice.ensure_start_values(
         previous_start_specifier,
         previous_start_time_specifier,
@@ -143,18 +144,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
     defp ensure_atom(potential_atom), do: potential_atom
 
-    def update_times_if_duplicating(slice, _, :recurring, _), do: slice
+    def update_times_if_duplicating(slice, _, :recurring, _, _), do: slice
 
-    def update_times_if_duplicating(%{active_period_end: nil} = slice, :duplicating, _, _) do
+    def update_times_if_duplicating(%{active_period_end: nil} = slice, :duplicating, _, _, _) do
       slice
     end
 
-    def update_times_if_duplicating(slice, :duplicating, _, now) do
+    def update_times_if_duplicating(slice, :duplicating, _, now, alert) do
       if NaiveDateTime.compare(now, slice.active_period_end) in [:eq, :gt] do
         Map.merge(slice, %{
           active_period_start_specifier: :now,
           active_period_start_time_specifier: :now,
-          active_period_end_specifier: :later_today,
+          active_period_end_specifier: duplicate_end_specifier(alert),
           active_period_end_time_specifier: :later_today,
           active_period_start: now
         })
@@ -163,7 +164,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       end
     end
 
-    def update_times_if_duplicating(slice, _, _, _), do: slice
+    def update_times_if_duplicating(slice, _, _, _, _), do: slice
+
+    # Elevator/escalator alerts close when the work order closes, so duplicating a past
+    # one mirrors the create flow's auto-selected end specifier instead of "later today".
+    defp duplicate_end_specifier(alert) do
+      if TimeRangeSlice.elevator_escalator_alert?(alert),
+        do: :when_work_order_is_closed,
+        else: :later_today
+    end
   end
 
   def ensure_start_values(
@@ -270,9 +279,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     end_datetime =
       TimeGetters.get_recurring_end_datetime(end_date, end_time)
 
+    can_close_automatically = specifier == :when_work_order_is_closed
+
     changeset
     |> force_change(:active_period_end_specifier, specifier)
-    |> force_change(:can_close_automatically, false)
+    |> force_change(:can_close_automatically, can_close_automatically)
     |> force_change(:active_period_end, end_datetime)
     |> force_change(:active_period_end_time, end_time)
     |> force_change(:active_period_end_date, end_date)
@@ -297,9 +308,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
     end_date = TimeGetters.get_onetime_end_date(end_datetime)
 
+    can_close_automatically = specifier == :when_work_order_is_closed
+
     changeset
     |> force_change(:active_period_end_specifier, specifier)
-    |> force_change(:can_close_automatically, false)
+    |> force_change(:can_close_automatically, can_close_automatically)
     |> force_change(:active_period_end, end_datetime)
     |> force_change(:active_period_end_date, end_date)
   end
@@ -369,6 +382,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   def normalize_alert_timing(changeset) do
     alert_timing = get_field(changeset, :alert_timing, :"one-time")
     change(changeset, %{alert_timing: ensure_atom(alert_timing)})
+  end
+
+  def set_mode_effect_defaults(changeset) do
+    case get_change(changeset, :effect_name) do
+      effect when effect in ["elevator_closure", "escalator_closure"] ->
+        changeset
+        |> force_change(:active_period_end_specifier, :when_work_order_is_closed)
+        |> force_change(:can_close_automatically, true)
+
+      _ ->
+        changeset
+    end
   end
 
   def get_trip_arrival_time_for_validate(trip_ids, %{ok?: true, result: selections}) do

@@ -106,6 +106,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
   defp to_eastern_naive(utc_datetime),
     do: utc_datetime |> DateTime.shift_zone!("America/New_York") |> DateTime.to_naive()
 
+  defp selected_end_specifier(view) do
+    view
+    |> render()
+    |> Floki.parse_document!()
+    |> Floki.find(~s(select[name="alert_data[active_period_end_specifier]"] option[selected]))
+    |> Floki.attribute("value")
+    |> List.first()
+  end
+
   describe "component" do
     @tag :logged_in_user
     test "renders", %{conn: conn} do
@@ -367,6 +376,38 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
       assert view |> element("#duration-text") |> render =~
                ~s(Effect duration: #{expected_start_text} until #{expected_end_text} \(1 day, 15 hours\))
+    end
+
+    @tag :logged_in_user
+    test "auto-selects 'when work order is closed' for an elevator closure alert", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      get_to_submission_page_refactor(view, "Facility", "Elevator closure")
+
+      assert selected_end_specifier(view) == "when_work_order_is_closed"
+    end
+
+    @tag :logged_in_user
+    test "auto-selects 'when work order is closed' for an escalator closure alert", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      get_to_submission_page_refactor(view, "Facility", "Escalator closure")
+
+      assert selected_end_specifier(view) == "when_work_order_is_closed"
+    end
+
+    @tag :logged_in_user
+    test "keeps the user's end specifier after auto-selecting for an elevator closure", %{
+      conn: conn
+    } do
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      get_to_submission_page_refactor(view, "Facility", "Elevator closure")
+      assert selected_end_specifier(view) == "when_work_order_is_closed"
+
+      view
+      |> element("form")
+      |> render_change(%{"alert_data" => %{"active_period_end_specifier" => "end_of_service"}})
+
+      # effect_name is unchanged this cycle, so set_mode_effect_defaults must NOT re-fire
+      assert selected_end_specifier(view) == "end_of_service"
     end
 
     @tag :logged_in_user
@@ -1524,6 +1565,78 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         )
 
       assert Ecto.Changeset.get_field(result, :active_period_end) == existing_end
+    end
+  end
+
+  describe "extract/3 when duplicating a past alert" do
+    defp past_duplicating_slice do
+      %TimeRangeSlice{form_type: :duplicating, active_period_end: ~N[2020-01-01 00:00:00]}
+    end
+
+    test "defaults the end specifier to when_work_order_is_closed for an elevator closure" do
+      alert = %AlertData{effect_name: "elevator_closure"}
+
+      result = Slice.extract(past_duplicating_slice(), alert, %{})
+
+      assert result.active_period_end_specifier == :when_work_order_is_closed
+    end
+
+    test "defaults the end specifier to when_work_order_is_closed for an escalator closure" do
+      alert = %AlertData{effect_name: "escalator_closure"}
+
+      result = Slice.extract(past_duplicating_slice(), alert, %{})
+
+      assert result.active_period_end_specifier == :when_work_order_is_closed
+    end
+
+    test "keeps later_today for a non-elevator/escalator past alert" do
+      alert = %AlertData{effect_name: "delay"}
+
+      result = Slice.extract(past_duplicating_slice(), alert, %{})
+
+      assert result.active_period_end_specifier == :later_today
+    end
+  end
+
+  describe "ensure_end_values/5 and can_close_automatically" do
+    test "sets can_close_automatically true for :when_work_order_is_closed" do
+      changeset =
+        Ecto.Changeset.cast(
+          %AlertData{},
+          %{active_period_end_specifier: :when_work_order_is_closed},
+          [:active_period_end_specifier]
+        )
+
+      result =
+        TimeRangeSlice.ensure_end_values(
+          changeset,
+          nil,
+          nil,
+          DateTime.to_naive(@todays_datetime),
+          :"one-time"
+        )
+
+      assert Ecto.Changeset.get_field(result, :can_close_automatically) == true
+    end
+
+    test "sets can_close_automatically false for other end specifiers" do
+      changeset =
+        Ecto.Changeset.cast(
+          %AlertData{},
+          %{active_period_end_specifier: :custom, active_period_end: ~N[2099-01-01 00:00:00]},
+          [:active_period_end_specifier, :active_period_end]
+        )
+
+      result =
+        TimeRangeSlice.ensure_end_values(
+          changeset,
+          :custom,
+          :custom,
+          DateTime.to_naive(@todays_datetime),
+          :"one-time"
+        )
+
+      assert Ecto.Changeset.get_field(result, :can_close_automatically) == false
     end
   end
 end

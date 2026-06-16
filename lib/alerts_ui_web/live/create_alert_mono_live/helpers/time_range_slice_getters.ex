@@ -170,10 +170,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeSliceGetters do
 
   def get_onetime_end_datetime(
         %{active_period_end_specifier: :when_work_order_is_closed},
-        _current_time,
+        current_time,
         _previous_state
       ) do
-    nil
+    DateTime.new!(NaiveDateTime.to_date(current_time), ~T[23:59:59])
   end
 
   def get_onetime_end_datetime(
@@ -187,6 +187,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeSliceGetters do
       ) do
     cond do
       previous_state == :until_further_notice ->
+        current_time
+
+      previous_state == :when_work_order_is_closed ->
         current_time
 
       # for trips
@@ -243,6 +246,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeSliceGetters do
         end
 
       :until_further_notice ->
+        nil
+
+      :when_work_order_is_closed ->
         nil
 
       _ ->
