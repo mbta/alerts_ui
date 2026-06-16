@@ -321,6 +321,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     test "switching from end of 'custom' to end-of-service has default of current date", %{
       conn: conn
     } do
+      start_time = NaiveDateTime.new!(Date.add(@todays_date, 1), ~T[12:00:00])
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
       get_to_submission_page_refactor(view, "Bus", "Delay")
 
@@ -328,7 +329,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       |> element("form")
       |> render_change(%{
         "alert_data" => %{
-          "active_period_end_specifier" => "custom"
+          "active_period_end_specifier" => "custom",
+          "active_period_start_specifier" => "custom"
         }
       })
 
@@ -336,6 +338,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       |> element("form")
       |> render_change(%{
         "alert_data" => %{
+          "active_period_start" => start_time,
           "active_period_end" => NaiveDateTime.new!(Date.add(@todays_date, 2), ~T[14:00:00])
         }
       })
@@ -348,12 +351,22 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         }
       })
 
-      expected_value =
+      expected_date_value =
         Date.add(@todays_date, 2)
         |> Date.to_iso8601()
 
+      expected_start_text = start_time |> Calendar.strftime("%a %b %-d, %Y @ %-I:%M %p")
+
+      expected_end_text =
+        Date.add(@todays_date, 3)
+        |> NaiveDateTime.new!(~T[03:00:00])
+        |> Calendar.strftime("%a %b %-d, %Y @ %-I:%M %p")
+
       assert view |> element("#alert_data_active_period_end_date") |> render =~
-               ~s(value="#{expected_value})
+               ~s(value="#{expected_date_value})
+
+      assert view |> element("#duration-text") |> render =~
+               ~s(Effect duration: #{expected_start_text} until #{expected_end_text} (1 day, 15 hours)
     end
 
     @tag :logged_in_user

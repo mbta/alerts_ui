@@ -87,7 +87,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
       changeset
       |> TimeRangeSlice.normalize_alert_timing()
-      |> TimeRangeSlice.change_timing(target, timing)
       |> TimeRangeSlice.ensure_start_values(
         previous_start_specifier,
         previous_start_time_specifier,
@@ -165,56 +164,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     end
 
     def update_times_if_duplicating(slice, _, _, _), do: slice
-  end
-
-  def change_timing(changeset, "alert_timing", :"one-time") do
-    changeset
-    |> force_change(
-      :active_period_start_specifier,
-      get_field(changeset, :active_period_start_specifier)
-    )
-    |> force_change(:active_period_start, get_field(changeset, :active_period_start))
-    |> force_change(:active_period_start_date, get_field(changeset, :active_period_start_date))
-    |> force_change(
-      :active_period_end_specifier,
-      get_field(changeset, :active_period_end_specifier)
-    )
-    |> force_change(:active_period_end, get_field(changeset, :active_period_end))
-    |> force_change(:active_period_end_date, get_field(changeset, :active_period_end_date))
-    |> force_change(:can_close_automatically, get_field(changeset, :can_close_automatically))
-  end
-
-  def change_timing(changeset, "alert_timing", :recurring),
-    do: change_timing(changeset, "alert_timing", "recurring")
-
-  def change_timing(changeset, "alert_timing", "recurring") do
-    changeset
-    |> force_change(:active_period_start_date, get_field(changeset, :active_period_start_date))
-    |> force_change(:active_period_start_time, get_field(changeset, :active_period_start_time))
-    |> force_change(
-      :active_period_start_time_specifier,
-      get_field(changeset, :active_period_start_time_specifier)
-    )
-    |> force_change(
-      :active_period_start_specifier,
-      get_field(changeset, :active_period_start_specifier)
-    )
-    |> force_change(:active_period_end_date, get_field(changeset, :active_period_end_date))
-    |> force_change(:active_period_end_time, get_field(changeset, :active_period_end_time))
-    |> force_change(
-      :active_period_end_time_specifier,
-      get_field(changeset, :active_period_end_time_specifier)
-    )
-    |> force_change(
-      :active_period_end_specifier,
-      get_field(changeset, :active_period_end_specifier)
-    )
-    |> force_change(:recurrence_days, get_field(changeset, :recurrence_days))
-    |> force_change(:can_close_automatically, get_field(changeset, :can_close_automatically))
-  end
-
-  def change_timing(changeset, _, _) do
-    changeset
   end
 
   def ensure_start_values(
