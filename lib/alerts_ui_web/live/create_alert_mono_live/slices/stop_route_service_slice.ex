@@ -333,7 +333,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
           no_results={Enum.empty?(@selections.stop_id_options)}
           options={@selections.stop_id_options}
           target_id="#alert_form"
-          ensure_value_when_unselected={true}
         />
 
         <.filtered_select
@@ -347,7 +346,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
           }
           disabled={disable_routes_input?(@form)}
           options={@selections.route_id_options}
-          ensure_value_when_unselected={true}
           class="md:w-[25%]"
         />
       </div>
