@@ -580,7 +580,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
 
         view
         |> element("form")
-        |> render_change(%{"alert_data" => %{"route_ids" => ["CR-Worcester"], "modal_date" => today}})
+        |> render_change(%{
+          "alert_data" => %{"route_ids" => ["CR-Worcester"], "modal_date" => today}
+        })
 
         render_async(view)
 
@@ -590,7 +592,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         # Apply a non-today filter
         view
         |> element("form")
-        |> render_change(%{"alert_data" => %{"modal_date" => tomorrow, "route_ids" => ["CR-Worcester"]}})
+        |> render_change(%{
+          "alert_data" => %{"modal_date" => tomorrow, "route_ids" => ["CR-Worcester"]}
+        })
 
         render_click(view, "accept_filter")
         render_async(view)
