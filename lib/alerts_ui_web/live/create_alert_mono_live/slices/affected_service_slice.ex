@@ -61,9 +61,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   defimpl Slice, for: __MODULE__ do
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
+    alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice.Selections
 
     def mount(_service_data, socket, _base_params) do
-      socket
+      assign(
+        socket,
+        :selections,
+        %Selections{today: AffectedServiceSlice.today()}
+      )
     end
 
     def extract(service_data, %AlertData{} = _alert_data, _params) do
@@ -140,6 +145,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   end
 
   def transform_changeset(changeset, params) do
+    # The select component renders the prompt option with value="default". When the user
+    # selects "All future trips", the browser sends modal_date=default. Ecto would cast
+    # "default" normally, and ensure_modal_date would then convert it to today(). We must
+    # force nil into the changeset here so ensure_modal_date sees nil and passes it through.
+    # ("" is also handled for robustness, though the browser always sends "default".)
+    changeset =
+      if get_in(params, ["alert_data", "modal_date"]) in ["", "default"] do
+        Changeset.force_change(changeset, :modal_date, nil)
+      else
+        changeset
+      end
+
     changeset
     |> ensure_default_direction()
     |> ensure_route_ids()
@@ -190,8 +207,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
     all_route_types = all_route_types(route_type)
 
+    {filter_title_value, _} =
+      service_dates()
+      |> Enum.find({"All future trips", nil}, fn {_option, value} ->
+        value == modal_date
+      end)
+
     socket
-    |> assign(:selections, %{prev | loading: true})
+    |> assign(:selections, %{prev | loading: true, filter_title_value: filter_title_value})
     |> start_async(:fetch_selections, fn ->
       available_routes = CreateAlertLive.get_routes(all_route_types)
 
@@ -244,12 +267,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
           option_prefix: "trip-search"
         })
 
-      {filter_title_value, _} =
-        service_dates()
-        |> Enum.find({"All future trips", nil}, fn {_option, value} ->
-          value == (modal_date || today())
-        end)
-
       %Selections{
         available_routes: available_routes,
         available_stops: available_stops,
@@ -270,19 +287,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   defp prev(%Selections{} = selections), do: selections
   defp prev(_), do: %Selections{}
 
-  defp available_schedules(route_ids, direction, modal_date)
-       when nil in [route_ids, direction, modal_date] do
+  defp available_schedules(route_ids, direction, _modal_date)
+       when nil in [route_ids, direction] or route_ids == [] do
     []
   end
 
   defp available_schedules(route_ids, direction, modal_date) do
     date = get_schedule_date(modal_date)
-
-    CreateAlertLive.get_schedules_by_date(
-      route_ids,
-      direction,
-      date
-    )
+    CreateAlertLive.get_schedules_by_date(route_ids, direction, date)
   end
 
   defp get_schedule_date("default") do
@@ -455,7 +467,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   def ensure_modal_date(changeset) do
     case Changeset.get_field(changeset, :modal_date) do
-      modal_date when modal_date in [nil, "default"] ->
+      "default" ->
         Changeset.change(changeset, modal_date: today())
 
       _ ->
@@ -575,6 +587,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             field={@form[:direction]}
             modal_filter_id="dates-filter-modal"
             modal_filter_title={"Filter: #{@selections.filter_title_value || default_filter_title()}"}
+            modal_filter_active={date_filter_active?(@form[:modal_date].value, today())}
             options={@selections.direction_options}
             disabled={disable_stop_input?(@form[:route_ids].value)}
             modal_filter_disabled={@form[:route_ids].value in [nil, []]}
