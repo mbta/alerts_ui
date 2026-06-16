@@ -557,6 +557,57 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     end
 
     @tag :logged_in_user
+    test "cancel button appears when filter is active and hides when filter is cleared",
+         %{conn: conn} do
+      today = @todays_date |> Date.to_string()
+      tomorrow = @todays_date |> Date.add(1) |> Date.to_string()
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@route] end,
+           get: fn _, _ -> @route end
+         ]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _, _ -> [@schedule_future] end,
+           end_of_rating: fn -> Date.add(@todays_date, 7) end
+         ]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        get_to_submission_page_refactor(view, "Commuter Rail", "Delay")
+
+        view
+        |> element("form")
+        |> render_change(%{"alert_data" => %{"route_ids" => ["CR-Worcester"], "modal_date" => today}})
+
+        render_async(view)
+
+        # No cancel button before filter is applied (today is the default)
+        refute render(view) =~ ~s(id="clear-button")
+
+        # Apply a non-today filter
+        view
+        |> element("form")
+        |> render_change(%{"alert_data" => %{"modal_date" => tomorrow, "route_ids" => ["CR-Worcester"]}})
+
+        render_click(view, "accept_filter")
+        render_async(view)
+
+        # Cancel button appears when a non-default filter is active
+        assert render(view) =~ ~s(id="clear-button")
+
+        # Clear the filter
+        render_click(view, "clear_filter")
+        render_async(view)
+
+        # Cancel button disappears after clearing
+        refute render(view) =~ ~s(id="clear-button")
+      end
+    end
+
+    @tag :logged_in_user
     test "date filter button is disabled until route is selected", %{conn: conn} do
       with_mocks([
         {RoutesRepo, [],

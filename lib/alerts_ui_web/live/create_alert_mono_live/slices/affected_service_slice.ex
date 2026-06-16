@@ -582,6 +582,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             field={@form[:direction]}
             modal_filter_id="dates-filter-modal"
             modal_filter_title={"Filter: #{@selections.filter_title_value || default_filter_title()}"}
+            modal_filter_active={date_filter_active?(@form[:modal_date].value, today())}
             options={@selections.direction_options}
             disabled={disable_stop_input?(@form[:route_ids].value)}
             modal_filter_disabled={@form[:route_ids].value in [nil, []]}
