@@ -61,9 +61,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   defimpl Slice, for: __MODULE__ do
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
+    alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice.Selections
 
     def mount(_service_data, socket, _base_params) do
-      socket
+      assign(
+        socket,
+        :selections,
+        %Selections{today: AffectedServiceSlice.today()}
+      )
     end
 
     def extract(service_data, %AlertData{} = _alert_data, _params) do
@@ -202,8 +207,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
     all_route_types = all_route_types(route_type)
 
+    {filter_title_value, _} =
+      service_dates()
+      |> Enum.find({"All future trips", nil}, fn {_option, value} ->
+        value == modal_date
+      end)
+
     socket
-    |> assign(:selections, %{prev | loading: true})
+    |> assign(:selections, %{prev | loading: true, filter_title_value: filter_title_value})
     |> start_async(:fetch_selections, fn ->
       available_routes = CreateAlertLive.get_routes(all_route_types)
 
@@ -255,12 +266,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
           values_to_keep: trip_ids,
           option_prefix: "trip-search"
         })
-
-      {filter_title_value, _} =
-        service_dates()
-        |> Enum.find({"All future trips", nil}, fn {_option, value} ->
-          value == modal_date
-        end)
 
       %Selections{
         available_routes: available_routes,
