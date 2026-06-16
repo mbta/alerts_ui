@@ -78,8 +78,8 @@
         col_style="width: 7rem;"
         tbody_td_attrs={[class: "p-1 whitespace-nowrap"]}
       >
-        <div title={format_timestamp(alert.active_period_start)}>
-          {format_start_time(alert.active_period_start)}
+        <div title={safe_format_timestamp(alert.active_period_start)}>
+          {safe_format_start_time(alert.active_period_start)}
         </div>
       </:col>
       <:col
@@ -94,10 +94,9 @@
         col_style="width: 7rem;"
         tbody_td_attrs={[class: "p-1 whitespace-nowrap"]}
       >
-        <%!-- <.error_boundary> --%>
         <div
           title={
-            format_timestamp(alert.active_period_end, alert.duration_certainty, %{
+            safe_format_timestamp(alert.active_period_end, alert.duration_certainty, %{
               can_close_automatically: alert.can_close_automatically,
               primary_service_type: alert.primary_service_type,
               effect_name: alert.effect_name
@@ -120,7 +119,6 @@
             }
           )}
         </div>
-        <%!-- </.error_boundary> --%>
       </:col>
       <:action :let={alert} label="Actions" col_style="width: 8rem;">
         <div class="inline-flex justify-end space-x-2 w-full">
