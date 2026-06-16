@@ -366,7 +366,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
                ~s(value="#{expected_date_value})
 
       assert view |> element("#duration-text") |> render =~
-               ~s(Effect duration: #{expected_start_text} until #{expected_end_text} (1 day, 15 hours)
+               ~s(Effect duration: #{expected_start_text} until #{expected_end_text} \(1 day, 15 hours\))
     end
 
     @tag :logged_in_user
@@ -1201,8 +1201,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       assert Ecto.Changeset.get_field(result, :active_period_end_specifier) ==
                :until_further_notice
 
-      # until_further_notice sets active_period_end to today's 23:59:59 as a sentinel value
-      refute is_nil(Ecto.Changeset.get_field(result, :active_period_end))
+      # until_further_notice sets active_period_end to nil
+      assert is_nil(Ecto.Changeset.get_field(result, :active_period_end))
     end
 
     test "resets start and end to defaults when all trips are deselected" do

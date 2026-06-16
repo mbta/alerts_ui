@@ -162,10 +162,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeSliceGetters do
 
   def get_onetime_end_datetime(
         %{active_period_end_specifier: :until_further_notice},
-        current_time,
+        _current_time,
         _previous_state
       ) do
-    DateTime.new!(NaiveDateTime.to_date(current_time), ~T[23:59:59])
+    nil
   end
 
   def get_onetime_end_datetime(
