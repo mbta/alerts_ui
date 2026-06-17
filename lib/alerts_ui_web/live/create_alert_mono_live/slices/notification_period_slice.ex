@@ -210,9 +210,19 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
   def notification_values, do: @notification_values
 
   attr :form, Form
+  attr :form_type, Atom
   attr :current_time, NaiveDateTime
 
   def render(assigns) do
+    minimum_time =
+      if assigns.form_type == :editing do
+        nil
+      else
+        assigns.current_time
+      end
+
+    assigns = assign(assigns, :minimum_time, minimum_time)
+
     ~H"""
     <div class="min-w-full flex flex-col" id="notification_period_view">
       <div id="scheduled-selector-div" class="flex flex-col md:flex-row md:flex-wrap gap-8 my-4">
@@ -227,7 +237,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
           type="date"
           label=""
           field={@form[:notification_period_start_date]}
-          min={@current_time |> naive_datetime_to_iso_date}
+          min={naive_datetime_to_iso_date(@minimum_time)}
           max={
             [naive_datetime_to_iso_date(@form[:active_period_start].value), "9999-12-31"]
             |> Enum.max()
@@ -239,7 +249,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
           :if={@form[:notification_specifier].value in [:custom, "custom"]}
           label=""
           field={@form[:notification_period_start]}
-          min={@form[:active_period_start].value |> naive_datetime_to_iso8601}
+          min={naive_datetime_to_iso8601(@minimum_time)}
           max={
             [naive_datetime_to_iso_date(@form[:active_period_end].value), "9999-12-31T23:59"]
             |> Enum.max()

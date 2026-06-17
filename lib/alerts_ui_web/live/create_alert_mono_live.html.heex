@@ -40,7 +40,11 @@
             previous_start_time_specifier={@previous_start_time_specifier}
             previous_end_time_specifier={@previous_end_time_specifier}
           />
-          <NotificationPeriodSlice.render form={@form} current_time={@current_time} />
+          <NotificationPeriodSlice.render
+            form={@form}
+            current_time={@current_time}
+            form_type={@form_type}
+          />
           <AlertDetailsSlice.render
             form={@form}
             severity_options={@severity_options}
