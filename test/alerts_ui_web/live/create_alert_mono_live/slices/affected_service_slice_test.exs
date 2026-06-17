@@ -117,6 +117,24 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
 
   describe "integration" do
     @tag :logged_in_user
+    test "date filter initializes to today when navigating to a commuter rail suspension (RDTS) alert",
+         %{conn: conn} do
+      today_day_name = Calendar.strftime(@todays_date, "%a %b %0d")
+
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _ -> [@route] end]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        get_to_submission_page_refactor(view, "Commuter Rail", "Suspension")
+        render_async(view)
+
+        assert render(view) =~ ~s(Filter: #{today_day_name})
+        refute render(view) =~ "Filter: All future trips"
+      end
+    end
+
+    @tag :logged_in_user
     test "renders for commuter rail delay", %{conn: conn} do
       with_mocks([
         {RoutesRepo, [],
