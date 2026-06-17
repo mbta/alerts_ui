@@ -15,26 +15,54 @@ random-input fuzzer) — see `PERSONA_WORKFLOW.md`.
 - **local** runs need the dev server: `mix phx.server` (serves
   `localhost:4010`, auto-logs in via `FakeKeycloak` with all roles). Seed data:
   `mix ecto.setup`.
-- **deployed** runs (`dev-green` / `dev-orange` / `staging`) need a captured
-  Keycloak session at
-  `.claude/skills/qa-asana-ticket/scripts/.auth/<env>-state.json`. Capture or
-  refresh it with the `qa-capture-auth-session` skill (you log in once; Claude
-  never holds credentials), and preflight with
-  `cd ../../../.claude/skills/qa-asana-ticket/scripts && node auth-smoke-test.mjs <env>`.
-  Without a session, `@readonly` specs can't authenticate and `@mutating` specs
-  skip.
+- **deployed** runs (`dev-green` / `dev-orange` / `staging`) sit behind a real
+  Keycloak wall. You don't capture a session by hand — `npm run test:<env>`
+  opens a **headed browser** and prompts you to log in if no valid session
+  exists (see "Running on a deployed environment" below). The session is saved
+  to `.claude/skills/qa-asana-ticket/scripts/.auth/<env>-state.json` (gitignored,
+  reused for ~10h). You log in yourself; credentials are never handled by the
+  tooling — only the resulting session cookies, matching the
+  `qa-capture-auth-session` skill.
 
 ## Running
 
 ```bash
-npm run test:local                                   # whole suite, local
+npx playwright test                                  # bare run => local only
+npm run test:local                                   # same, explicit
 npx playwright test --project=local --grep @readonly # read-only specs only
-npx playwright test --project=dev-green --grep @readonly  # read-only on dev-green (needs session)
 npx playwright test tests/alerts_list.spec.ts --project=local   # one file
 npm run report                                       # open the HTML report
 ```
 
-Projects: `local` (default target), `dev-green`, `dev-orange`, `staging`.
+A bare `npx playwright test` runs **only the `local` project** — it never
+touches the deployed environments, so it can't fail on missing auth. Deployed
+projects are engaged only via the `E2E_ENVS` env var, which the `test:<env>`
+scripts set for you.
+
+## Running on a deployed environment
+
+```bash
+npm run test:dev-green     # = E2E_ENVS=dev-green playwright test --project=dev-green
+npm run test:dev-orange
+npm run test:staging
+```
+
+Each of these first runs a headed `auth-setup` step:
+
+- If a saved session for that env is still valid, it is reused silently.
+- Otherwise a browser window opens to the environment's login page and waits up
+  to 5 minutes for **you** to sign in. Once you reach the app, the session is
+  captured and the specs run.
+
+Add `--grep @readonly` to limit to the read-only specs (recommended on deployed,
+since `@mutating` specs skip there anyway):
+
+```bash
+E2E_ENVS=dev-green npx playwright test --project=dev-green --grep @readonly
+```
+
+Projects: `local` (default), plus `dev-green` / `dev-orange` / `staging` (each
+engaged only when named in `E2E_ENVS`).
 
 ### Tags and environment safety
 

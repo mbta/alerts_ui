@@ -22,9 +22,9 @@ test.describe('Create a one-time Subway alert @mutating', () => {
       // consensus (qa): autotext incorporates the chosen stop.
       await expect(create.mainMessage()).toHaveValue(/Station issue at Alewife\./);
 
-      // Review shows the selections.
+      // Review shows the selections (modal open is a server round-trip).
       await create.reviewAndSubmit();
-      await expect(create.reviewModal()).toBeVisible();
+      await expect(create.reviewModal()).toBeVisible({ timeout: 15000 });
       await expect(create.reviewModal()).toContainText('Station issue at Alewife.');
 
       // Keep editing returns to the form with state preserved.
@@ -34,7 +34,7 @@ test.describe('Create a one-time Subway alert @mutating', () => {
 
       // Review again and submit for real.
       await create.reviewAndSubmit();
-      await expect(create.reviewModal()).toBeVisible();
+      await expect(create.reviewModal()).toBeVisible({ timeout: 15000 });
       await create.submit();
 
       // Lands back on the alerts list with the newly created alert present.

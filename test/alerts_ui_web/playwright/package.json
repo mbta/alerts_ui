@@ -6,7 +6,9 @@
   "scripts": {
     "test": "playwright test",
     "test:local": "playwright test --project=local",
-    "test:dev-green": "playwright test --project=dev-green",
+    "test:dev-green": "E2E_ENVS=dev-green playwright test --project=dev-green",
+    "test:dev-orange": "E2E_ENVS=dev-orange playwright test --project=dev-orange",
+    "test:staging": "E2E_ENVS=staging playwright test --project=staging",
     "report": "playwright show-report"
   },
   "devDependencies": {
