@@ -194,6 +194,10 @@ defmodule AlertsUI.Trapeze.Importer do
     |> PaperTrail.insert!(user: nil, origin: @open_origin)
   end
 
+  # When neither the new or old alerts are closed
+  defp close(%Alert{closed_timestamp: nil}, %{closed_timestamp: nil}),
+    do: {:ok, "open -> open: IGNORE not closed"}
+
   # When the alert is marked as automatically closeable
   defp close(
          %Alert{
@@ -201,10 +205,10 @@ defmodule AlertsUI.Trapeze.Importer do
            can_close_automatically: true
          } = alert,
          %{
-           closed_timestamp: closed_timestamp
+           closed_timestamp: _closed_timestamp
          }
        ),
-       do: do_close(alert, closed_timestamp)
+       do: do_close(alert)
 
   # When the alert is operating on the same Work Order
   defp close(
@@ -213,22 +217,22 @@ defmodule AlertsUI.Trapeze.Importer do
            work_order_id: work_order_id
          } = alert,
          %{
-           closed_timestamp: closed_timestamp,
+           closed_timestamp: _closed_timestamp,
            work_order_id: work_order_id
          }
        ),
-       do: do_close(alert, closed_timestamp)
+       do: do_close(alert)
 
   # Any other case should be ignored.
   defp close(%Alert{closed_timestamp: _}, _),
     do: {:ok, "open -> open: IGNORE can't close automatically"}
 
-  defp do_close(alert, closed_timestamp) do
+  defp do_close(alert) do
     Alerts.close(
       Repo.reload!(alert),
       @closed_origin,
       true,
-      closed_timestamp |> DateTime.from_naive!("America/New_York")
+      DateTime.now!("America/New_York") |> DateTime.truncate(:second)
     )
 
     {:ok, "open -> closed: CLOSE"}

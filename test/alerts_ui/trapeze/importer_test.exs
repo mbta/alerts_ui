@@ -276,7 +276,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
         })
 
       alert = Repo.reload!(existing_alert)
-      assert alert.closed_timestamp != nil
+      assert alert.closed_timestamp == DateTime.now!("Etc/UTC") |> DateTime.truncate(:second)
       assert result == {:ok, "open -> closed: CLOSE"}
     end
 
