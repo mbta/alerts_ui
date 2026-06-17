@@ -12,7 +12,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
   alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
-    only: [get_single_facility_effect_names: 0]
+    only: [get_single_facility_effect_names: 0, humanize_effect_name: 1]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,
     only: [always_validate_required: 3]
@@ -62,7 +62,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
 
     def validate(_service_data, changeset, _params, socket) do
       if socket.assigns.submitted? do
-        always_validate_required(changeset, :facility_ids, "You must select a facility")
+        AccessAffectedServiceSlice.validate_changeset(changeset)
       else
         changeset
       end
@@ -73,7 +73,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
     end
   end
 
-  def ensure_facility_ids(changeset) do
+  def is_single_facility_effect(changeset) do
     effect_name = get_field(changeset, :effect_name)
 
     normalized_single_facility_effects =
@@ -81,13 +81,25 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
         name |> String.split(" ") |> Enum.map_join("_", &String.downcase/1)
       end)
 
-    if effect_name in normalized_single_facility_effects do
+    effect_name in normalized_single_facility_effects
+  end
+
+  def ensure_facility_ids(changeset) do
+    if is_single_facility_effect(changeset) do
       case get_field(changeset, :single_facility_id) do
         nil -> changeset
         id -> cast(changeset, %{facility_ids: [id]}, [:facility_ids])
       end
     else
       changeset
+    end
+  end
+
+  def validate_changeset(changeset) do
+    if is_single_facility_effect(changeset) do
+      always_validate_required(changeset, :single_facility_id, "You must select a facility")
+    else
+      always_validate_required(changeset, :facility_ids, "You must select a facility")
     end
   end
 
@@ -223,6 +235,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
   end
 
   def render(assigns) do
+    IO.inspect(assigns.form[:effect_name].value, label: "effect name")
+
     ~H"""
     <div class="min-w-full flex flex-col" id="access_service_view">
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
@@ -253,7 +267,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
         <.filtered_select
           class="md:w-[25%] h-[32rem]"
           field={
-            if @form[:effect_name].value in get_single_facility_effect_names(),
+            if humanize_effect_name(@form) in get_single_facility_effect_names(),
               do: @form[:single_facility_id],
               else: @form[:facility_ids]
           }
@@ -263,7 +277,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
           modal_filter_active={filter_active?(@selections.stop_id_filter_value)}
           modal_filter_id="stops-filter-modal"
           modal_filter_title={"Filter: #{@selections.filter_title_value}"}
-          multiple={@form[:effect_name].value not in get_single_facility_effect_names()}
+          multiple={humanize_effect_name(@form) not in get_single_facility_effect_names()}
           no_results={Enum.empty?(@selections.facility_id_options)}
           options={@selections.facility_id_options}
         />
