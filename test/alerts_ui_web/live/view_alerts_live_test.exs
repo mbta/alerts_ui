@@ -115,8 +115,8 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
           alert_id: "345",
           active_period: [
             build(:active_period, %{
-              start: ~U[2023-10-12 00:01:00Z]
-              # end: ~U[2023-10-13 00:01:00Z]
+              start: ~U[2023-10-12 00:01:00Z],
+              end: nil
             })
           ],
           active_period_start: ~U[2023-10-12 00:01:00Z],
