@@ -19,9 +19,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
     only: [get_single_route_effect_names: 0, humanize_effect_name: 1]
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Selections,
-    only: [selections_loading?: 1]
-
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,
     only: [always_validate_required: 3]
 
@@ -523,7 +520,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
                 else: @form[:route_ids]
             }
             filter_field={@form[:route_search_term]}
-            loading={selections_loading?(@selections)}
+            loading={@selections.loading}
             no_results={Enum.empty?(@selections.route_id_options)}
             options={@selections.route_id_options}
             class="h-full"
@@ -596,8 +593,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
           <.filtered_select
             field={@form[:trip_ids]}
             filter_field={@form[:trip_search_term]}
-            options={@selections.trip_id_options}
-            loading={selections_loading?(@selections)}
+            options={if @selections.loading, do: [], else: @selections.trip_id_options}
+            loading={@selections.loading}
             no_results={
               Enum.empty?(@selections.trip_id_options) &&
                 !disable_trip_input?(@form[:route_ids].value)
@@ -625,8 +622,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             field={@form[:stop_names_and_ids]}
             selected={@form[:stop_names_and_ids].value}
             filter_field={@form[:stop_search_term]}
-            options={@selections.stop_id_options}
-            loading={selections_loading?(@selections)}
+            options={if @selections.loading, do: [], else: @selections.stop_id_options}
+            loading={@selections.loading}
             no_results={
               Enum.empty?(@selections.stop_id_options) &&
                 !disable_stop_input?(@form[:route_ids].value)
