@@ -87,6 +87,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
       changeset
       |> TimeRangeSlice.normalize_alert_timing()
+      |> force_change(:recurrence_days, get_field(changeset, :recurrence_days))
       |> TimeRangeSlice.set_mode_effect_defaults()
       |> TimeRangeSlice.ensure_start_values(
         previous_start_specifier,
@@ -655,7 +656,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
         </div>
       </div>
       <div>
-        <.input type="hidden" name="alert_data[recurrence_days][]" value="" />
         <.toggle_checkgroup
           :if={fv(@form, :alert_timing) in [:recurring, "recurring"]}
           field={@form[:recurrence_days]}
