@@ -82,6 +82,11 @@ always-present *hidden* error overlay — confirmed before reporting.
 11. The Direction option list can **transiently collapse to only "Both
     Directions"** right after a rapid line change, because `direction_options` is
     server-computed and loaded async. Timing window, not a hard bug.
+12. The **"Start of service" effect-period date picker defaults to today but its
+    `min` is tomorrow** (`#alert_data_active_period_start_date`: `value` =
+    today, `min` = today + 1). The default value is below the field's own
+    minimum, so the documented "today's date" default is not selectable — either
+    the default or the `min` is off by a day.
 
 ### Doc discrepancy
 
@@ -99,7 +104,8 @@ behavior, so they stay red until fixed):
 - `test/alerts_ui_web/live/view_alerts_order_param_known_bug_test.exs` — unknown
   `order_by` param crashes via `String.to_existing_atom` (`@tag :known_bug`).
 - `test/alerts_ui_web/playwright/tests/known_bugs.spec.ts` — Subway Direction
-  control mislabeled "Stops" (`test.fail()`, `@bug`).
+  control mislabeled "Stops", and the "Start of service" date picker defaulting
+  below its own `min` (`test.fail()`, `@bug`).
 
 The ExUnit ones are excluded from the default suite (`mix test --include
 known_bug` to run them); the Playwright one is an expected failure, so the suite
