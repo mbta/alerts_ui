@@ -1,10 +1,10 @@
 import { Page, Locator, expect } from '@playwright/test';
-import { CREATE } from './selectors';
 
 /**
  * Page object for the "mono" alert creation flow (/alerts/mono/new...).
  * Drives controls like a human (click/fill/selectOption) — never synthetic
- * value/checked mutation, which LiveView ignores.
+ * value/checked mutation, which LiveView ignores. Element ids verified live
+ * (alert_data_* form fields; #review button; #review-modal dialog).
  */
 export class CreateAlertPage {
   constructor(private readonly page: Page) {}
@@ -12,55 +12,50 @@ export class CreateAlertPage {
   async gotoNew() {
     await this.page.goto('/alerts/mono/new');
     await expect(this.page).toHaveURL(/\/alerts\/mono\/new/);
-    // LiveView server events need the socket joined before interacting.
+    await this.page.locator('[data-phx-main].phx-connected').waitFor();
+  }
+
+  /** Deep-link straight to a route_type + effect details form. */
+  async gotoEffect(routeType: string, effectSlug: string) {
+    await this.page.goto(`/alerts/mono/new/${routeType}/${effectSlug}`);
+    await expect(this.page).toHaveURL(new RegExp(`/alerts/mono/new/${routeType}/${effectSlug}`));
     await this.page.locator('[data-phx-main].phx-connected').waitFor();
   }
 
   /** Service-type buttons: ids like #route-type-subway-button. */
-  serviceTypeButton(routeKey: string): Locator {
-    return this.page.locator(`#route-type-${routeKey}-button`);
-  }
-
   async chooseServiceType(routeKey: string) {
-    await this.serviceTypeButton(routeKey).click();
+    await this.page.locator(`#route-type-${routeKey}-button`).click();
   }
 
-  /** Effect buttons appear after a service type is selected. */
-  async chooseEffect(name: string | RegExp) {
-    await this.page.getByRole('button', { name }).first().click();
-    await expect(this.page).toHaveURL(/\/alerts\/mono\/new\/.+\/.+/);
+  /** Effect buttons: ids like #effect-name-station_issue-button. */
+  async chooseEffect(effectSlug: string) {
+    await this.page.locator(`#effect-name-${effectSlug}-button`).click();
+    await expect(this.page).toHaveURL(new RegExp(`/alerts/mono/new/.+/${effectSlug}`));
   }
 
-  async chooseSubwayLine(name: string) {
-    await this.page.getByRole('button', { name, exact: true }).click();
-  }
-
-  directionSelect(): Locator {
-    return this.page.getByLabel(CREATE.directionLabel);
-  }
-
-  stopsSelect(): Locator {
-    return this.page.getByLabel(CREATE.stopsLabel);
-  }
-
-  causeSelect(): Locator {
-    return this.page.getByLabel(CREATE.causeLabel);
-  }
-
-  severitySelect(): Locator {
-    return this.page.getByLabel(CREATE.severityLabel);
+  /** Stops render as a role=listbox "Stops" with role=option children. */
+  async selectStop(name: string) {
+    await this.page.getByRole('option', { name, exact: true }).click();
   }
 
   mainMessage(): Locator {
-    return this.page.getByLabel(CREATE.mainMessageLabel);
+    return this.page.locator('#alert_data_header_text');
+  }
+
+  async selectCause(label: string) {
+    await this.page.locator('#alert_data_cause_detail').selectOption({ label });
+  }
+
+  async selectSeverity(label: string) {
+    await this.page.locator('#alert_data_severity').selectOption({ label });
   }
 
   notificationToggle(): Locator {
-    return this.page.locator(CREATE.notificationToggleId);
+    return this.page.getByRole('checkbox', { name: /Send notification to alert subscribers/i });
   }
 
   async reviewAndSubmit() {
-    await this.page.locator(CREATE.reviewButtonId).click();
+    await this.page.locator('#review').click();
   }
 
   reviewModal(): Locator {
@@ -68,10 +63,10 @@ export class CreateAlertPage {
   }
 
   async keepEditing() {
-    await this.page.getByRole('button', { name: CREATE.keepEditing }).click();
+    await this.reviewModal().getByRole('button', { name: /keep editing/i }).click();
   }
 
   async submit() {
-    await this.page.getByRole('button', { name: CREATE.submit }).click();
+    await this.reviewModal().getByRole('button', { name: /^submit$/i }).click();
   }
 }

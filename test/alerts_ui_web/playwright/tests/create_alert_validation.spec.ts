@@ -9,7 +9,7 @@ test.describe('Subway create-form validation @readonly', () => {
     const create = new CreateAlertPage(loggedInPage);
     await create.gotoNew();
     await create.chooseServiceType('subway');
-    await create.chooseEffect(/station issue/i);
+    await create.chooseEffect('station_issue');
 
     await create.reviewAndSubmit();
 
