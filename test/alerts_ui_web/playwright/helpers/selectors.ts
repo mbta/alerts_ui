@@ -42,10 +42,10 @@ export const CREATE = {
   defaultSeverity: 'about 15 minutes',
 };
 
-// ACTUAL enforced validation strings (differ from regression doc — see spec).
-// Doc claims "Select route(s)/stop(s)"; the app emits these:
+// Displayed validation strings (confirmed live). The red error flash uses the
+// error_formatter wording, which matches the regression doc. For an empty
+// Subway/Station-issue form the flash shows the title plus "Select stop(s)".
 export const VALIDATION = {
   errorFlashTitle: 'Please fix the following errors:',
-  subwayRoute: 'You must select a route',
-  subwayStop: 'You must select a stop',
+  subwayStop: 'Select stop(s)',
 };
