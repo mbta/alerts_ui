@@ -68,5 +68,11 @@ assets/outputs/alerts_feed*.pb
 # Never commit captured auth sessions
 .claude/skills/qa-asana-ticket/scripts/.auth/
 
+# Playwright E2E harness
+/test/alerts_ui_web/playwright/node_modules/
+/test/alerts_ui_web/playwright/test-results/
+/test/alerts_ui_web/playwright/playwright-report/
+/test/alerts_ui_web/playwright/.last-run.json
+
 # Git worktrees
 .worktrees/

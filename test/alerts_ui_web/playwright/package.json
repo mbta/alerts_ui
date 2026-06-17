@@ -1,0 +1,15 @@
+{
+  "name": "alerts-ui-playwright",
+  "version": "1.0.0",
+  "private": true,
+  "description": "End-to-end regression tests for alerts_ui",
+  "scripts": {
+    "test": "playwright test",
+    "test:local": "playwright test --project=local",
+    "test:dev-green": "playwright test --project=dev-green",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0"
+  }
+}
