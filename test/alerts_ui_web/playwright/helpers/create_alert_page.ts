@@ -12,6 +12,8 @@ export class CreateAlertPage {
   async gotoNew() {
     await this.page.goto('/alerts/mono/new');
     await expect(this.page).toHaveURL(/\/alerts\/mono\/new/);
+    // LiveView server events need the socket joined before interacting.
+    await this.page.locator('[data-phx-main].phx-connected').waitFor();
   }
 
   /** Service-type buttons: ids like #route-type-subway-button. */
