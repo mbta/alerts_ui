@@ -321,7 +321,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
 
   describe "obsolete ids modal" do
     @tag :logged_in_user
-    test "should not render by default", %{conn: conn} do
+    test "should not render at all by default", %{conn: conn} do
+      # If the modal renders at all (even hidden), it will capture esc's and reroute us to the home page
       with_mocks([
         {RoutesRepo, [],
          [
@@ -339,8 +340,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
         get_to_submission_page_refactor(view, "Bus", "Multi-route detour")
 
-        assert view |> element("#gtfs-warning-modal-container") |> render_async(1000) =~
-                 ~s(aria-hidden=\"true\")
+        refute view
+               |> element("#gtfs-warning-modal")
+               |> has_element?
       end
     end
 
