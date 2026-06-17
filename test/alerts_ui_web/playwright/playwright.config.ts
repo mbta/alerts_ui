@@ -17,6 +17,9 @@ const stateFor = (env: string) => {
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
+  // The suite drives a single stateful LiveView dev server; a modest worker cap
+  // avoids server/DB contention that otherwise makes round-trip events flaky.
+  workers: process.env.CI ? 1 : 3,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: [['html', { open: 'never' }], ['list']],
