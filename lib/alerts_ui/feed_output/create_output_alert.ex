@@ -12,9 +12,11 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
       alert:
         %{
           effect: alert.effect,
-          effect_detail: alert.effect_detail |> build_translated_string,
+          effect_detail: alert.effect_detail |> maybe_build_translated_cause_effect_detail_string,
           cause: alert.cause || :UNKNOWN_CAUSE,
-          cause_detail: (alert.cause_detail || "UNKNOWN_CAUSE") |> build_translated_string,
+          cause_detail:
+            (alert.cause_detail || "UNKNOWN_CAUSE")
+            |> maybe_build_translated_cause_effect_detail_string,
           header_text: alert.header_text |> build_translated_string,
           description_text: alert.description_text |> build_translated_string,
           banner_text: alert.banner_text |> build_translated_string,
@@ -122,6 +124,14 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
       schedule_relationship: trip.schedule_relationship
     }
     |> Map.filter(&filter_out_nil_values/1)
+  end
+
+  defp maybe_build_translated_cause_effect_detail_string(input_string) do
+    if Application.get_env(:alerts_ui, :translated_cause_effect_detail) == true do
+      build_translated_string(input_string)
+    else
+      input_string
+    end
   end
 
   defp build_translated_string(nil), do: nil
