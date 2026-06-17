@@ -73,7 +73,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
     end
   end
 
-  def is_single_facility_effect(changeset) do
+  def single_facility_effect?(changeset) do
     effect_name = get_field(changeset, :effect_name)
 
     normalized_single_facility_effects =
@@ -85,7 +85,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
   end
 
   def ensure_facility_ids(changeset) do
-    if is_single_facility_effect(changeset) do
+    if single_facility_effect?(changeset) do
       case get_field(changeset, :single_facility_id) do
         nil -> changeset
         id -> cast(changeset, %{facility_ids: [id]}, [:facility_ids])
@@ -96,7 +96,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
   end
 
   def validate_changeset(changeset) do
-    if is_single_facility_effect(changeset) do
+    if single_facility_effect?(changeset) do
       always_validate_required(changeset, :single_facility_id, "You must select a facility")
     else
       always_validate_required(changeset, :facility_ids, "You must select a facility")
