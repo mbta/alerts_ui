@@ -10,6 +10,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Time, only: [localize: 1]
 
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,
+    only: [always_validate_required: 3]
+
   def validate_cast_datetimes(changeset, params) do
     alert_params = Map.get(params, "alert_data", %{})
 
@@ -216,10 +219,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
     timing = get_field(changeset, :alert_timing)
 
     if timing in [:recurring, "recurring"] do
-      validate_length(changeset, :recurrence_days,
-        min: 1,
-        message: "Select one or more days for alert to recur"
-      )
+      changeset
+      |> always_validate_required(:recurrence_days, "Select one or more days for alert to recur")
     else
       changeset
     end

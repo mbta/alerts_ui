@@ -366,8 +366,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidatorsTest do
         |> TimeRangeValidators.validate_at_least_one_recurrence()
 
       assert cs.errors[:recurrence_days] ==
-               {"Select one or more days for alert to recur",
-                [count: 1, validation: :length, kind: :min, type: :list]}
+               {"Select one or more days for alert to recur", []}
     end
 
     test "passes when recurrence_days has at least one entry" do

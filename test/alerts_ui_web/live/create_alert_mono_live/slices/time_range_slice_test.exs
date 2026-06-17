@@ -602,6 +602,24 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     end
 
     @tag :logged_in_user
+    test "if recurring, renders error when recurrence day is not selected", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      get_to_submission_page_refactor(view, "Bus", "Delay")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "alert_timing" => "recurring"
+        }
+      })
+
+      assert view |> element("#time_range_view") |> render() =~
+               ~s(Select one or more days for alert to recur),
+             "Error should render if recurrence day is not selected"
+    end
+
+    @tag :logged_in_user
     test "does not show recurrence error if no weekdays selected", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
       get_to_submission_page_refactor(view, "Bus", "Delay")
