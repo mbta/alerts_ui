@@ -15,7 +15,6 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
   alias AlertsUI.ActivePeriodBuilder
   alias AlertsUI.Alerts
   alias AlertsUI.Models.EnhancedSchedule
-  alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
   alias AlertsUIWeb.ReviewModal
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
