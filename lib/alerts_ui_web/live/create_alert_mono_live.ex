@@ -320,38 +320,43 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
     # socket.assigns.obsolete_ids is only nil on the first check, so this can't happen twice
     socket =
-      if obsolete_ids_found?(obsolete_ids) and is_nil(socket.assigns.obsolete_ids) do
-        form_data = Map.from_struct(form.data)
+      cond do
+        obsolete_ids_found?(obsolete_ids) and is_nil(socket.assigns.obsolete_ids) ->
+          form_data = Map.from_struct(form.data)
 
-        ids_with_obsolete_entities_removed =
-          ObsoleteEntities.all_obsolete_entities_removed(
-            form_data,
-            obsolete_ids,
-            required_fields
-          )
+          ids_with_obsolete_entities_removed =
+            ObsoleteEntities.all_obsolete_entities_removed(
+              form_data,
+              obsolete_ids,
+              required_fields
+            )
 
-        original_selections =
-          Map.take(form_data, [
-            :original_route_selections,
-            :original_trip_selections,
-            :original_stop_selections,
-            :original_facility_selections
-          ])
+          original_selections =
+            Map.take(form_data, [
+              :original_route_selections,
+              :original_trip_selections,
+              :original_stop_selections,
+              :original_facility_selections
+            ])
 
-        new_form_data =
-          struct(AlertData, Map.merge(form_data, ids_with_obsolete_entities_removed))
+          new_form_data =
+            struct(AlertData, Map.merge(form_data, ids_with_obsolete_entities_removed))
 
-        new_form_source = Map.put(form.source, :data, new_form_data)
-        new_form = form |> Map.put(:data, new_form_data) |> Map.put(:source, new_form_source)
+          new_form_source = Map.put(form.source, :data, new_form_data)
+          new_form = form |> Map.put(:data, new_form_data) |> Map.put(:source, new_form_source)
 
-        # sending original selections so we can show the names in the modal
-        send(self(), {:got_obsolete_ids, obsolete_ids, original_selections})
+          # sending original selections so we can show the names in the modal
+          send(self(), {:got_obsolete_ids, obsolete_ids, original_selections})
 
-        assign(socket, %{obsolete_ids: obsolete_ids, form: new_form})
-        |> sync_socket(%{"alert_data" => ids_with_obsolete_entities_removed})
-      else
-        # sets obsolete ids to empty map so we don't go through this loop again.
-        assign(socket, %{obsolete_ids: obsolete_ids})
+          assign(socket, %{obsolete_ids: obsolete_ids, form: new_form})
+          |> sync_socket(%{"alert_data" => ids_with_obsolete_entities_removed})
+
+        is_nil(socket.assigns.obsolete_ids) ->
+          # sets obsolete ids to empty map so we don't go through this loop again.
+          assign(socket, %{obsolete_ids: obsolete_ids})
+
+        true ->
+          socket
       end
 
     pending_route_ids = Map.get(new_selections, :pending_auto_select_route_ids)
@@ -380,7 +385,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     end
   end
 
-  defp obsolete_ids_found?(obsolete_ids) do
+  def obsolete_ids_found?(nil), do: false
+
+  def obsolete_ids_found?(obsolete_ids) do
     Enum.any?(obsolete_ids, fn {_k, v} -> !Enum.empty?(v) end)
   end
 

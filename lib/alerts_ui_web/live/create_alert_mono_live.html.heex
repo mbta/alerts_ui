@@ -64,7 +64,7 @@
             check_predictions={@check_predictions}
           />
           <.modal
-            :if={is_map(@obsolete_ids)}
+            :if={obsolete_ids_found?(@obsolete_ids)}
             id="gtfs-warning-modal"
             class="flex flex-col h-full justify-center w-[600px]"
             header_text=""
