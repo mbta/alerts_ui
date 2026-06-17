@@ -1254,25 +1254,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
 
         {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
 
-        {:ok, document} =
-          view
-          |> render()
-          |> Floki.parse_document()
-
-        assert document_has_element?(
-                 document,
-                 "[value=\"CR-Worcester\"][selected=\"selected\"]"
-               )
-
-        assert document_has_element?(
-                 document,
-                 "[value=\"South Station|place-sstat\"][selected=\"selected\"]"
-               )
-
-        assert document_has_element?(
-                 document,
-                 "[value=\"CR-683322-595\"][selected=\"selected\"]"
-               )
+        html = render(view)
+        assert html =~ ~s(selected="selected" value="CR-Worcester")
+        assert html =~ ~s(selected="selected" value="South Station|place-sstat")
+        assert html =~ ~s(selected="selected" value="CR-683322-595")
 
         view
         |> element("#service_form")
