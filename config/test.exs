@@ -50,5 +50,3 @@ config :laboratory,
     max_age: 3600 * 24 * 30,
     http_only: true
   ]
-
-config :alerts_ui, translated_cause_effect_detail: true

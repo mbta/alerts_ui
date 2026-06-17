@@ -81,5 +81,3 @@ config :ex_aws,
   debug_requests: true
 
 config :ex_aws, :s3, scheme: "http://", host: "localhost", port: 9000, region: "local"
-
-config :alerts_ui, translated_cause_effect_detail: true
