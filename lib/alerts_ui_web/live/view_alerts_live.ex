@@ -562,28 +562,35 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   ### END Helpers section ###
 
   ### Frontend styling functions ###
+  def safe_format_timestamp(timestamp, certainty \\ :KNOWN, opts \\ %{}) do
+    format_timestamp(timestamp, certainty, opts)
+  rescue
+    exception ->
+      Logger.error("Error formatting time: #{Exception.message(exception)}")
+      "ERROR"
+  end
 
-  def format_timestamp(timestamp, certainty \\ :KNOWN, opts \\ %{})
+  defp format_timestamp(timestamp, certainty, opts)
 
-  def format_timestamp(_, :UNKNOWN, %{
-        can_close_automatically: true,
-        primary_service_type: "access",
-        effect_name: "Elevator Closure"
-      }),
-      do: "When work order is closed in Trapeze"
+  defp format_timestamp(_, :UNKNOWN, %{
+         can_close_automatically: true,
+         primary_service_type: "access",
+         effect_name: "Elevator Closure"
+       }),
+       do: "When work order is closed in Trapeze"
 
-  def format_timestamp(_, :UNKNOWN, %{
-        can_close_automatically: true,
-        primary_service_type: "access",
-        effect_name: "Escalator Closure"
-      }),
-      do: "When work order is closed in Trapeze"
+  defp format_timestamp(_, :UNKNOWN, %{
+         can_close_automatically: true,
+         primary_service_type: "access",
+         effect_name: "Escalator Closure"
+       }),
+       do: "When work order is closed in Trapeze"
 
-  def format_timestamp(timestamp, _, _) do
+  defp format_timestamp(timestamp, _, _) do
     DateTimeFormatters.timestamp_date_time(timestamp)
   end
 
-  def format_start_time(start_time_utc) do
+  def safe_format_start_time(start_time_utc) do
     current_service_date =
       DateTime.now!("America/New_York")
       |> ActivePeriod.datetime_to_service_date()
@@ -600,13 +607,23 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     else
       DateTimeFormatters.friendly_date_time(start_time_utc, :start)
     end
+  rescue
+    exception ->
+      Logger.error("Error formatting start time: #{Exception.message(exception)}")
+      "ERROR"
   end
 
-  def format_end_time(end_time_utc, certainty, opts \\ %{})
+  def safe_format_end_time(end_time_utc, certainty, opts \\ %{}) do
+    format_end_time(end_time_utc, certainty, opts)
+  rescue
+    exception ->
+      Logger.error("Error formatting end time: #{Exception.message(exception)}")
+      "ERROR"
+  end
 
-  def format_end_time(nil, :KNOWN, _), do: ""
+  defp format_end_time(end_time_utc, certainty, opts)
 
-  def format_end_time(end_time_utc, :KNOWN, _) do
+  defp format_end_time(end_time_utc, :KNOWN, _) do
     if DateTime.compare(
          ActivePeriod.end_of_service_datetime_utc(DateTime.utc_now()),
          end_time_utc
@@ -617,24 +634,24 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     end
   end
 
-  def format_end_time(_, _, %{
-        can_close_automatically: true,
-        primary_service_type: "access",
-        effect_name: "Elevator Closure"
-      }),
-      do: "from Trapeze"
+  defp format_end_time(_, _, %{
+         can_close_automatically: true,
+         primary_service_type: "access",
+         effect_name: "Elevator Closure"
+       }),
+       do: "from Trapeze"
 
-  def format_end_time(_, _, %{
-        can_close_automatically: true,
-        primary_service_type: "access",
-        effect_name: "Escalator Closure"
-      }),
-      do: "from Trapeze"
+  defp format_end_time(_, _, %{
+         can_close_automatically: true,
+         primary_service_type: "access",
+         effect_name: "Escalator Closure"
+       }),
+       do: "from Trapeze"
 
-  def format_end_time(_, :UNKNOWN, _), do: "further notice"
-  def format_end_time(_, :ESTIMATED, _), do: "later today"
-  def format_end_time(nil, :KNOWN, _), do: ""
-  def format_end_time(_, _, _), do: ""
+  defp format_end_time(_, :UNKNOWN, _), do: "further notice"
+  defp format_end_time(_, :ESTIMATED, _), do: "later today"
+  defp format_end_time(nil, :KNOWN, _), do: ""
+  defp format_end_time(_, _, _), do: ""
 
   def danger_text(active_period_end, closed_timestamp) do
     if DateTimeHelpers.will_be_ending_today?(active_period_end, closed_timestamp) do
@@ -642,16 +659,6 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     else
       ""
     end
-  end
-
-  @spec format_effect(nil | binary()) :: binary()
-  def format_effect(nil), do: ""
-
-  def format_effect(effect) do
-    effect
-    |> String.replace("_", " ")
-    |> String.split()
-    |> Enum.map_join(" ", fn s -> String.capitalize(s) end)
   end
 
   defp sort_icon(:asc) do

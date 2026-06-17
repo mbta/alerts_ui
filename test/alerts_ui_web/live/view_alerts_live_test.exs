@@ -6,6 +6,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
   import Mock
   import Phoenix.LiveViewTest
   import Test.Support.Helpers
+  import ExUnit.CaptureLog
 
   alias AlertsUI.Alerts
   alias AlertsUI.Models.ActivePeriod
@@ -101,6 +102,37 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       ) do
         {:ok, view, _html} = live(conn, "/alerts")
         refute view |> has_element?("span", "Create new alert")
+      end
+    end
+
+    @tag :logged_in_user
+    test "can render even with bad data", %{conn: conn} do
+      with_mock(RoutesRepo, [],
+        all: fn -> [] end,
+        get: fn route_id -> %{name: route_id} end
+      ) do
+        insert(:alert, %{
+          alert_id: "345",
+          active_period: [
+            build(:active_period, %{
+              start: ~U[2023-10-12 00:01:00Z],
+              end: nil
+            })
+          ],
+          active_period_start: ~U[2023-10-12 00:01:00Z],
+          header_text: "this is a malformed alert",
+          effect_detail: "SUMMARY",
+          original_route_selections: [],
+          duration_certainty: :KNOWN
+        })
+
+        log =
+          capture_log(fn ->
+            {:ok, _view, html} = live(conn, "/alerts")
+            assert html =~ ~r/Alerts/
+          end)
+
+        assert log =~ "Error formatting end time"
       end
     end
   end
@@ -1522,7 +1554,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       expected = "further notice"
 
       actual =
-        AlertsUIWeb.ViewAlertsLive.format_end_time(
+        AlertsUIWeb.ViewAlertsLive.safe_format_end_time(
           alert.active_period_end,
           alert.duration_certainty
         )
@@ -1531,7 +1563,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
       expected_timestamp = nil
 
-      actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_end)
+      actual_timestamp = AlertsUIWeb.ViewAlertsLive.safe_format_timestamp(alert.active_period_end)
 
       assert expected_timestamp == actual_timestamp
     end
@@ -1549,7 +1581,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       expected = "from Trapeze"
 
       actual =
-        AlertsUIWeb.ViewAlertsLive.format_end_time(
+        AlertsUIWeb.ViewAlertsLive.safe_format_end_time(
           alert.active_period_end,
           alert.duration_certainty,
           %{
@@ -1564,7 +1596,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       expected_timestamp = "When work order is closed in Trapeze"
 
       actual_timestamp =
-        AlertsUIWeb.ViewAlertsLive.format_timestamp(
+        AlertsUIWeb.ViewAlertsLive.safe_format_timestamp(
           alert.active_period_end,
           alert.duration_certainty,
           %{
@@ -1592,7 +1624,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       expected = "Oct 11, 2023"
 
       actual =
-        AlertsUIWeb.ViewAlertsLive.format_end_time(
+        AlertsUIWeb.ViewAlertsLive.safe_format_end_time(
           alert.active_period_end,
           alert.duration_certainty,
           %{
@@ -1606,7 +1638,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
       expected_timestamp = "Oct 11, 2023, 8:02 PM"
 
-      actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_end)
+      actual_timestamp = AlertsUIWeb.ViewAlertsLive.safe_format_timestamp(alert.active_period_end)
 
       assert expected_timestamp == actual_timestamp
     end
@@ -1628,7 +1660,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       expected = "later today"
 
       actual =
-        AlertsUIWeb.ViewAlertsLive.format_end_time(
+        AlertsUIWeb.ViewAlertsLive.safe_format_end_time(
           alert.active_period_end,
           alert.duration_certainty
         )
@@ -1637,7 +1669,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
       expected_timestamp = "Oct 12, 2023, 8:01 PM"
 
-      actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_end)
+      actual_timestamp = AlertsUIWeb.ViewAlertsLive.safe_format_timestamp(alert.active_period_end)
 
       assert expected_timestamp == actual_timestamp
     end
@@ -1663,7 +1695,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         expected = "end of service"
 
         actual =
-          AlertsUIWeb.ViewAlertsLive.format_end_time(
+          AlertsUIWeb.ViewAlertsLive.safe_format_end_time(
             alert.active_period_end,
             alert.duration_certainty
           )
@@ -1672,7 +1704,8 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
         expected_timestamp = "Jul 1, 2025, 3:00 AM"
 
-        actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_end)
+        actual_timestamp =
+          AlertsUIWeb.ViewAlertsLive.safe_format_timestamp(alert.active_period_end)
 
         assert expected_timestamp == actual_timestamp
       end
@@ -1704,7 +1737,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         expected = "Jun 29"
 
         actual =
-          AlertsUIWeb.ViewAlertsLive.format_end_time(
+          AlertsUIWeb.ViewAlertsLive.safe_format_end_time(
             alert.active_period_end,
             alert.duration_certainty
           )
@@ -1713,7 +1746,8 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
         expected_timestamp = "Jun 30, #{this_year}, 2:00 AM"
 
-        actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_end)
+        actual_timestamp =
+          AlertsUIWeb.ViewAlertsLive.safe_format_timestamp(alert.active_period_end)
 
         assert expected_timestamp == actual_timestamp
       end
@@ -1744,13 +1778,14 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       expected = "start of service"
 
       actual =
-        AlertsUIWeb.ViewAlertsLive.format_start_time(alert.active_period_start)
+        AlertsUIWeb.ViewAlertsLive.safe_format_start_time(alert.active_period_start)
 
       assert expected == actual
 
       expected_timestamp = "Jun 30, 2025, 3:00 AM"
 
-      actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_start)
+      actual_timestamp =
+        AlertsUIWeb.ViewAlertsLive.safe_format_timestamp(alert.active_period_start)
 
       assert expected_timestamp == actual_timestamp
     end
@@ -1780,13 +1815,14 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       expected = "Jun 29"
 
       actual =
-        AlertsUIWeb.ViewAlertsLive.format_start_time(alert.active_period_start)
+        AlertsUIWeb.ViewAlertsLive.safe_format_start_time(alert.active_period_start)
 
       assert expected == actual
 
       expected_timestamp = "Jun 29, 2025, 3:00 AM"
 
-      actual_timestamp = AlertsUIWeb.ViewAlertsLive.format_timestamp(alert.active_period_start)
+      actual_timestamp =
+        AlertsUIWeb.ViewAlertsLive.safe_format_timestamp(alert.active_period_start)
 
       assert expected_timestamp == actual_timestamp
     end
