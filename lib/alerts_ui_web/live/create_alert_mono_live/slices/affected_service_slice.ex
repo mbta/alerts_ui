@@ -68,7 +68,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       )
     end
 
-    def extract(service_data, %AlertData{} = _alert_data, _params) do
+    def extract(service_data, _alert_data, _params) do
       service_data
     end
 
