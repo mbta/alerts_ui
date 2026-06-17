@@ -49,8 +49,19 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   @start_values [:now, :start_of_service, :custom]
   @type start_values :: :now | :start_of_service | :custom
 
-  @end_values [:later_today, :end_of_service, :until_further_notice, :custom]
-  @type end_values :: :later_today | :end_of_service | :until_further_notice | :custom
+  @end_values [
+    :later_today,
+    :end_of_service,
+    :until_further_notice,
+    :when_work_order_is_closed,
+    :custom
+  ]
+  @type end_values ::
+          :later_today
+          | :end_of_service
+          | :until_further_notice
+          | :when_work_order_is_closed
+          | :custom
 
   @notification_values [:same_as_effect_period, :now, :start_of_service, :custom]
   @type notification_values :: :same_as_effect_period | :now | :start_of_service | :custom
