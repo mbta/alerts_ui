@@ -1359,6 +1359,51 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
                  ~s(id="alert_data_stop_names_and_ids" disabled="disabled")
       end
     end
+
+    @tag :logged_in_user
+    test "stop element not spuriously disabled if there is an error in the form", %{conn: conn} do
+      # https://app.notion.com/p/mbta-downtown-crossing/Stop-selector-disabled-for-recurring-alert-37ef5d8d11ea8047a5b4ebad98deacc4?source=copy_link
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@route, @route_2] end,
+           by_type: fn _, _ -> [@route, @route_2] end,
+           get: fn _, _ -> @route end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        get_to_submission_page_refactor(view, "Bus", "Delay")
+        render_async(view)
+
+        assert render_async(view) =~
+                 ~s(id="alert_data_stop_names_and_ids" disabled="disabled")
+
+        refute render_async(view) =~ "All Stops"
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => [@route.id]}
+        })
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "alert_timing" => "recurring"
+          }
+        })
+
+        render_async(view)
+
+        refute render_async(view) =~
+                 ~s(id="alert_data_stop_names_and_ids" disabled="disabled"),
+               "stop selector should not be disabled"
+      end
+    end
   end
 
   describe "end-to-end" do
