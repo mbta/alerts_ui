@@ -89,6 +89,22 @@ Default severity is not always "about 15 minutes" as the regression doc states:
 Station Issue defaults to "information"; Delay defaults to "about 10 minutes"
 (value `3`). Minor doc inaccuracy.
 
+## Demonstrator tests
+
+Three of these bugs now have executable demonstrators (they assert the intended
+behavior, so they stay red until fixed):
+
+- `test/alerts_ui/models/custom_filters_known_bugs_test.exs` — unescaped `LIKE`
+  wildcard in search (`@tag :known_bug`).
+- `test/alerts_ui_web/live/view_alerts_order_param_known_bug_test.exs` — unknown
+  `order_by` param crashes via `String.to_existing_atom` (`@tag :known_bug`).
+- `test/alerts_ui_web/playwright/tests/known_bugs.spec.ts` — Subway Direction
+  control mislabeled "Stops" (`test.fail()`, `@bug`).
+
+The ExUnit ones are excluded from the default suite (`mix test --include
+known_bug` to run them); the Playwright one is an expected failure, so the suite
+stays green and flips to an "unexpected pass" when the bug is fixed.
+
 ## Operational notes
 
 - **Node:** run on the repo's pinned Node 20 (or ≤ 22). Node **23.x breaks**
