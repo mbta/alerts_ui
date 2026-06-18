@@ -268,7 +268,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         view
         |> element("form")
         |> render_change(%{
-          "alert_data" => %{"facility_ids" => [1]}
+          "alert_data" => %{"single_facility_id" => facility.id}
         })
 
         open_review_modal(view)
@@ -307,7 +307,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         view
         |> element("form")
         |> render_change(%{
-          "alert_data" => %{"facility_ids" => [1]}
+          "alert_data" => %{"single_facility_id" => facility.id}
         })
 
         open_review_modal(view)

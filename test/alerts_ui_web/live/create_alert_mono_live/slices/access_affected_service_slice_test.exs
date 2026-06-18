@@ -331,7 +331,38 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSliceTest 
         view |> element("button#review", "Review and submit") |> render_click()
 
         refute has_element?(view, "#review-modal-container")
-        assert render(view) =~ "Please fix the following errors"
+
+        assert view
+               |> element("#flash")
+               |> render() =~ "Select facility"
+      end
+    end
+
+    @tag :logged_in_user
+    test "renders single facility select properly", %{conn: conn} do
+      with_mock(FacilitiesRepo, get_by_type: fn _types, _ -> [] end) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        get_to_submission_page_refactor(view, "Facility", "Elevator closure")
+        render_async(view)
+
+        refute view
+               |> element("#alert_data_single_facility_id")
+               |> render() =~ "multiple",
+               "Elevator closures can only select one option"
+      end
+    end
+
+    @tag :logged_in_user
+    test "renders multiple facility select properly", %{conn: conn} do
+      with_mock(FacilitiesRepo, get_by_type: fn _types, _ -> [] end) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        get_to_submission_page_refactor(view, "Facility", "Bike issue")
+        render_async(view)
+
+        assert view
+               |> element("#alert_data_facility_ids")
+               |> render() =~ "multiple",
+               "Bike issues allow multiple facilities to be selected"
       end
     end
   end
