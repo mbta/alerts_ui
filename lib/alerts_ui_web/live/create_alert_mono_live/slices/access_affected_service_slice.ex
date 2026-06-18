@@ -255,7 +255,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
             field={@form[:stop_id]}
             filter_field={@form[:stop_search_term]}
             options={@selections.modal_stop_id_options}
-            loading={@selections.loading}
+            loading={@selections.loading && @first_async_load}
             no_results={Enum.empty?(@selections.modal_stop_id_options)}
             prompt="All Stops"
             multiple={false}
@@ -271,7 +271,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
           }
           filter_field={@form[:facility_search_term]}
           label="Facilities"
-          loading={@selections.loading}
+          loading={@selections.loading && @first_async_load}
           modal_filter_active={filter_active?(@selections.stop_id_filter_value)}
           modal_filter_id="stops-filter-modal"
           modal_filter_title={"Filter: #{@selections.filter_title_value}"}
