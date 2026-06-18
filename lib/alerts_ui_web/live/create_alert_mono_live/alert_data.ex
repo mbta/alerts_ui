@@ -260,6 +260,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     base = struct(__MODULE__, base_params)
 
     initial_route_type = base.route_type || params["route_type"]
+
     initial_humanized_effect_name =
       humanize_effect_name(
         initial_route_type,
