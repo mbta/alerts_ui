@@ -153,7 +153,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     socket =
       socket
       |> assign(:progress, get_step_by_name(socket.assigns.progress.next))
-      |> push_patch(to: path)
+      |> push_navigate(to: path)
 
     {:noreply, socket}
   end
