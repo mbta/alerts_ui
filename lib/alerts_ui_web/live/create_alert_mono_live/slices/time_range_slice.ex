@@ -387,7 +387,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   end
 
   def set_mode_effect_defaults(changeset) do
-    case get_field(changeset, :effect_name) do
+    case get_change(changeset, :effect_name) do
       effect when effect in ["elevator_closure", "escalator_closure"] ->
         changeset
         |> force_change(:active_period_end_specifier, :when_work_order_is_closed)

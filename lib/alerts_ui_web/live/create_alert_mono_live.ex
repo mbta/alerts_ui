@@ -92,7 +92,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   @impl true
   def handle_params(params, _url, socket) do
     # accept changes to url params
-    {:noreply, start_socket(socket, params)}
+    {:noreply, sync_socket(socket, params)}
   end
 
   @impl true
@@ -126,8 +126,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       )
 
     socket =
-      assign(
-        socket,
+      socket
+      |> start_socket(%{})
+      |> assign(
         %{
           form: Phoenix.Component.to_form(cleared_source),
           progress: get_step_by_name("route_type_and_effect"),
@@ -136,8 +137,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
           selections: nil
         }
       )
+      |> push_patch(to: PathHelper.path(socket.assigns))
 
-    {:noreply, push_patch(socket, to: PathHelper.path(socket.assigns))}
+    {:noreply, socket}
   end
 
   @impl true
