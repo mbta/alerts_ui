@@ -133,6 +133,50 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
       assert render(view) =~
                "Notification period must start on or before 05/01/2040, 10:54 AM"
     end
+
+    @tag :logged_in_user
+    test "minimum times on calendar set correctly", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+
+      now =
+        DateTime.now!("America/New_York")
+        |> DateTime.to_naive()
+        |> NaiveDateTime.truncate(:second)
+
+      get_to_submission_page_refactor(view, "Bus", "Delay")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "notification_specifier" => "custom"
+        }
+      })
+
+      expected_datetime =
+        now
+        |> NaiveDateTime.to_iso8601()
+        |> String.slice(0..-4//1)
+
+      assert view |> element("#alert_data_notification_period_start") |> render() =~
+               ~s(min="#{expected_datetime}")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "notification_specifier" => "start_of_service"
+        }
+      })
+
+      expected_date =
+        now
+        |> NaiveDateTime.to_date()
+        |> Date.to_iso8601()
+
+      assert view |> element("#alert_data_notification_period_start_date") |> render() =~
+               ~s(min="#{expected_date}")
+    end
   end
 
   describe "editing" do
@@ -152,6 +196,35 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
       })
 
       refute render(view) =~ "Notifications can&#39;t be set in the past"
+    end
+
+    @tag :logged_in_user
+    test "minimum times on calendar set to nil", %{conn: conn} do
+      create_test_alert("np-edit-1")
+
+      {:ok, view, _html} = live(conn, "/alerts/mono/edit/np-edit-1")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "notification_specifier" => "custom"
+        }
+      })
+
+      assert view |> element("#alert_data_notification_period_start") |> render() =~
+               ~s(min="")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "notification_specifier" => "start_of_service"
+        }
+      })
+
+      assert view |> element("#alert_data_notification_period_start_date") |> render() =~
+               ~s(min="")
     end
   end
 
