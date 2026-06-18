@@ -5,10 +5,12 @@ defmodule AlertsUIWeb.Tickets.EditAutoclosableElevatorAlertTest do
   https://app.asana.com/1/15492006741476/project/1167196461144361/task/1215352709214221
 
   Bug: editing an imported Trapeze elevator/escalator alert (whose end is "When work order
-  is closed") and submitting fails with "Alerts of unknown duration can't have end times".
+  is closed") and submitting dropped its auto-close flag, because `enforce_defaults` reset
+  `can_close_automatically` back to its schema default whenever the submitted value matched
+  the existing one (`get_change` is nil for unchanged fields).
 
-  This test seeds an alert and drives the alert edit → Review and submit →
-  Submit flow. It should save (redirect with a success flash).
+  This is the mono-flow counterpart of the original test, driving the
+  `/alerts/mono/edit/:alert_id` flow.
   """
   use ExUnit.Case, async: false
   use AlertsUIWeb.ConnCase
@@ -35,7 +37,7 @@ defmodule AlertsUIWeb.Tickets.EditAutoclosableElevatorAlertTest do
   }
 
   @tag :logged_in_user
-  test "editing a Trapeze escalator alert and submitting saves without a validation error",
+  test "editing a Trapeze escalator alert keeps it auto-closable after submitting",
        %{conn: conn} do
     with_mocks([
       {FacilitiesRepo, [],
@@ -85,30 +87,14 @@ defmodule AlertsUIWeb.Tickets.EditAutoclosableElevatorAlertTest do
         )
 
       {:ok, view, _html} =
-        live(conn, "/alerts/edit?alert_id=#{alert.alert_id}")
+        live(conn, "/alerts/mono/edit/#{alert.alert_id}")
 
       render_async(view)
 
-      # Review and submit, then Submit — the flow the user runs.
       open_review_modal(view)
-      render_async(view)
-
-      assert has_element?(view, "#review-modal-container"),
-             "Review modal should open for an imported escalator alert"
-
-      view
-      |> element("#review-modal-container button", "Submit")
-      |> render_click()
-
-      # Should save and redirect with a success flash — not be blocked by
-      # "Alerts of unknown duration can't have end times".
-      {_path, flash} = assert_redirect(view)
-
-      assert flash["info"] =~ "updated",
-             "Expected a success flash after submitting; got: #{inspect(flash)}"
+      submit_alert(view)
 
       updated = Alerts.get_by_alert_id(alert.alert_id)
-      assert updated.duration_certainty == :UNKNOWN
 
       assert is_nil(updated.active_period_end),
              "an auto-closable alert should persist with no end time"

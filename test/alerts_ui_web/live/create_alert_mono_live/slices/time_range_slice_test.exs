@@ -1616,6 +1616,32 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     end
   end
 
+  describe "extract/3 when editing an auto-closable alert" do
+    test "derives can_close_automatically true from a when_work_order_is_closed end specifier" do
+      slice = %TimeRangeSlice{
+        form_type: :editing,
+        active_period_end_specifier: :when_work_order_is_closed,
+        can_close_automatically: nil
+      }
+
+      result = Slice.extract(slice, %AlertData{}, %{})
+
+      assert result.can_close_automatically == true
+    end
+
+    test "derives can_close_automatically false from a non-auto-closing end specifier" do
+      slice = %TimeRangeSlice{
+        form_type: :editing,
+        active_period_end_specifier: :until_further_notice,
+        can_close_automatically: nil
+      }
+
+      result = Slice.extract(slice, %AlertData{}, %{})
+
+      assert result.can_close_automatically == false
+    end
+  end
+
   describe "ensure_end_values/5 and can_close_automatically" do
     test "sets can_close_automatically true for :when_work_order_is_closed" do
       changeset =
