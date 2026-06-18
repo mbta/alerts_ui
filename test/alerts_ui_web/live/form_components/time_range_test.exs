@@ -117,6 +117,50 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
              |> render() =~ "later today"
     end
 
+    test "editing an auto-closable alert keeps can_close_automatically true" do
+      {:ok, _view, _html} =
+        live_isolated_component(
+          TimeRange,
+          Map.merge(
+            @assigns,
+            %{
+              form_type: :editing,
+              alert_data: %{
+                active_period_start_specifier: "custom",
+                active_period_start: ~N[2024-04-29 10:54:00],
+                active_period_end_specifier: "when_work_order_is_closed",
+                active_period_end: nil
+              }
+            }
+          )
+        )
+
+      assert_receive {:__live_isolated_component_handle_info_received__, _pid,
+                      {:section_completed, %TimeRange{can_close_automatically: true}}}
+    end
+
+    test "editing a non-auto-closable alert leaves can_close_automatically false" do
+      {:ok, _view, _html} =
+        live_isolated_component(
+          TimeRange,
+          Map.merge(
+            @assigns,
+            %{
+              form_type: :editing,
+              alert_data: %{
+                active_period_start_specifier: "custom",
+                active_period_start: ~N[2024-04-29 10:54:00],
+                active_period_end_specifier: "until_further_notice",
+                active_period_end: nil
+              }
+            }
+          )
+        )
+
+      assert_receive {:__live_isolated_component_handle_info_received__, _pid,
+                      {:section_completed, %TimeRange{can_close_automatically: false}}}
+    end
+
     test "editing custom fields to start/end of service correctly validates" do
       {:ok, view, _html} =
         live_isolated_component(

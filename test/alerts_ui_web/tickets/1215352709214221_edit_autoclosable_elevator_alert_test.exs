@@ -112,6 +112,9 @@ defmodule AlertsUIWeb.Tickets.EditAutoclosableElevatorAlertTest do
 
       assert is_nil(updated.active_period_end),
              "an auto-closable alert should persist with no end time"
+
+      assert updated.can_close_automatically,
+             "an auto-closable alert should stay auto-closable after editing"
     end
   end
 end

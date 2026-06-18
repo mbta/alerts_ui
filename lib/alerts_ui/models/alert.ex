@@ -291,7 +291,7 @@ defmodule AlertsUI.Models.Alert do
   defp enforce_defaults(starting_changeset, fields_with_defaults) do
     fields_with_defaults
     |> Enum.reduce(starting_changeset, fn {key, default}, changeset ->
-      case get_change(changeset, key) do
+      case get_field(changeset, key) do
         "" -> put_change(changeset, key, default)
         nil -> put_change(changeset, key, default)
         _ -> changeset
