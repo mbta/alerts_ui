@@ -570,7 +570,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          ]},
         {SchedulesRepo, [],
          [
-           by_route_ids: fn _, _ -> [@schedule_future] end,
+           by_route_ids: fn _, _ -> [@schedule_future, @schedule_future] end,
            end_of_rating: fn -> Date.add(@todays_date, 7) end
          ]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
