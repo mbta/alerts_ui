@@ -143,7 +143,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
         |> DateTime.to_naive()
         |> NaiveDateTime.truncate(:second)
 
-      get_to_submission_page_refactor(view, "Bus", "Delay")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
       |> element("form")

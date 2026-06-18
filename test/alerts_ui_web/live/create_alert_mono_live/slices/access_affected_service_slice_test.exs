@@ -342,7 +342,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSliceTest 
     test "renders single facility select properly", %{conn: conn} do
       with_mock(FacilitiesRepo, get_by_type: fn _types, _ -> [] end) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Facility", "Elevator closure")
+        view = get_to_submission_page_refactor(conn, view, "Facility", "Elevator closure")
         render_async(view)
 
         refute view
@@ -356,7 +356,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSliceTest 
     test "renders multiple facility select properly", %{conn: conn} do
       with_mock(FacilitiesRepo, get_by_type: fn _types, _ -> [] end) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Facility", "Bike issue")
+        view = get_to_submission_page_refactor(conn, view, "Facility", "Bike issue")
         render_async(view)
 
         assert view
