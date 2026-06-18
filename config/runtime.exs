@@ -31,6 +31,14 @@ get_api_key = fn ->
   end
 end
 
+get_translated_cause_effect_detail = fn ->
+  if System.get_env("SENTRY_ENV", "") == "prod" do
+    false
+  else
+    true
+  end
+end
+
 cond do
   config_env() == :test ->
     config :alerts_ui, AlertsUI.Repo, url: System.fetch_env!("DATABASE_URL_TEST")
@@ -40,7 +48,8 @@ cond do
       api_url: "https://api-dev.mbtace.com",
       api_key: "",
       dev_api_url: "https://api-dev.mbtace.com",
-      dev_api_key: ""
+      dev_api_key: "",
+      translated_cause_effect_detail: true
 
     config :mbta_v3_api,
       base_url: "https://api-dev.mbtace.com/",
@@ -127,7 +136,8 @@ cond do
       trapeze_sftp_filename: System.get_env("TRAPEZE_SFTP_FILENAME", ""),
       # below are used only for GTFS validation
       dev_api_url: String.replace_trailing(System.fetch_env!("DEV_API_URL"), "/", ""),
-      dev_api_key: System.fetch_env!("DEV_API_KEY")
+      dev_api_key: System.fetch_env!("DEV_API_KEY"),
+      translated_cause_effect_detail: get_translated_cause_effect_detail.()
 
     config :mbta_v3_api,
       base_url: String.replace_trailing(System.fetch_env!("API_URL"), "/", ""),
@@ -163,7 +173,8 @@ cond do
       api_key: System.fetch_env!("API_KEY"),
       # below are used only for GTFS validation
       dev_api_url: String.replace_trailing(System.fetch_env!("DEV_API_URL"), "/", ""),
-      dev_api_key: System.fetch_env!("DEV_API_KEY")
+      dev_api_key: System.fetch_env!("DEV_API_KEY"),
+      translated_cause_effect_detail: true
 
     config :sentry,
       # Prevents sentry reporting in local environments

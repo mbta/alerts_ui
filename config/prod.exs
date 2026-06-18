@@ -23,5 +23,3 @@ config :ehmon, :report_mf, {:ehmon, :info_report}
 config :alerts_ui,
   file_write_module: AlertsUI.FeedOutput.WriteToS3,
   skip_migrations: false
-
-config :alerts_ui, translated_cause_effect_detail: false
