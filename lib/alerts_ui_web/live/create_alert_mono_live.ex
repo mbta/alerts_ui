@@ -128,15 +128,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     socket =
       socket
       |> start_socket(%{})
-      |> assign(
-        %{
-          form: Phoenix.Component.to_form(cleared_source),
-          progress: get_step_by_name("route_type_and_effect"),
-          path_route_type: nil,
-          path_effect_name: nil,
-          selections: nil
-        }
-      )
+      |> assign(%{
+        form: Phoenix.Component.to_form(cleared_source),
+        progress: get_step_by_name("route_type_and_effect"),
+        path_route_type: nil,
+        path_effect_name: nil,
+        selections: nil
+      })
       |> push_patch(to: PathHelper.path(socket.assigns))
 
     {:noreply, socket}
