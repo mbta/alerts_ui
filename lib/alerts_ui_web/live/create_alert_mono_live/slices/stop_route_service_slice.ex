@@ -311,7 +311,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
           field={@form[:modal_route_id]}
           filter_field={@form[:modal_route_search_term]}
           options={@selections.modal_route_id_options}
-          loading={Map.get(@selections, :loading, true)}
+          loading={@selections.loading}
           no_results={Enum.empty?(@selections.modal_route_id_options)}
           class="h-[32rem]"
           prompt="All routes"
@@ -326,7 +326,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
           filter_field={@form[:stop_search_term]}
           selected={@form[:stop_ids].value}
           label="Stops"
-          loading={Map.get(@selections, :loading, true)}
+          loading={@selections.loading}
           modal_filter_active={!(@selections.selected_route_id in [nil, "default"])}
           modal_filter_id="routes-filter-modal"
           modal_filter_title={"Filter: #{@selections.filter_title_value}"}
@@ -339,13 +339,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
           label="Impacted routes"
           field={@form[:route_ids]}
           filter_field={@form[:route_search_term]}
-          loading={Map.get(@selections, :loading, true)}
+          loading={@selections.loading}
           no_results={
             Enum.empty?(@selections.route_id_options) && !Enum.empty?(@form[:stop_ids].value || []) &&
               disable_routes_input?(@form)
           }
           disabled={disable_routes_input?(@form)}
-          options={@selections.route_id_options}
+          options={if @selections.loading, do: [], else: @selections.route_id_options}
           class="md:w-[25%]"
         />
       </div>
