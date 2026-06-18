@@ -38,7 +38,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     only: [parse_field_errors: 1]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
-    only: [combination_for: 2, combination_for: 3]
+    only: [combination_for: 2, combination_for: 3, humanize_effect_name: 2]
 
   @combination_values [:ACCESS, :R, :RDS, :RDT, :RDTS, :SR]
   @type combination :: :ACCESS | :R | :RDS | :RDT | :RDTS | :SR
@@ -259,11 +259,19 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
     base = struct(__MODULE__, base_params)
 
+    initial_route_type = base.route_type || params["route_type"]
+
+    initial_humanized_effect_name =
+      humanize_effect_name(
+        initial_route_type,
+        base.effect_name || params["effect_name"]
+      )
+
     initial_combination =
       base.combination ||
         combination_for(
-          base.route_type || params["route_type"],
-          base.effect_name || params["effect_name"]
+          initial_route_type,
+          initial_humanized_effect_name
         )
 
     {extracted_params, socket} =

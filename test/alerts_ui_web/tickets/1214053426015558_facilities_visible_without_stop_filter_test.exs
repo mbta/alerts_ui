@@ -56,8 +56,8 @@ defmodule AlertsUIWeb.Tickets.FacilitiesVisibleWithoutStopFilterTest do
   }
 
   # Navigate to the Facility • Bike Issue form (combination :ACCESS).
-  defp navigate_to_access(view),
-    do: get_to_submission_page_refactor(view, "Facility", "Bike issue")
+  defp navigate_to_access(conn, view),
+    do: get_to_submission_page_refactor(conn, view, "Facility", "Bike issue")
 
   describe "facility list is populated when no stop filter is applied" do
     @tag :logged_in_user
@@ -69,7 +69,7 @@ defmodule AlertsUIWeb.Tickets.FacilitiesVisibleWithoutStopFilterTest do
         get_by_type: fn _types, _ -> [@terminal_facility, @other_facility] end
       ) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        navigate_to_access(view)
+        view = navigate_to_access(conn, view)
         render_async(view)
 
         html = render(view)
@@ -96,7 +96,7 @@ defmodule AlertsUIWeb.Tickets.FacilitiesVisibleWithoutStopFilterTest do
         get: fn "bike-17091" -> @terminal_facility end
       ) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        navigate_to_access(view)
+        view = navigate_to_access(conn, view)
         render_async(view)
 
         # Select the Terminal A bike rack facility (as the user would from the

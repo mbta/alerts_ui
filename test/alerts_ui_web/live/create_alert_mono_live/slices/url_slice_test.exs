@@ -42,11 +42,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSliceTest do
       |> element("#route-type-subway-button")
       |> render_click()
 
-      view
-      |> element("#effect-name-station_issue-button")
-      |> render_click()
+      {:ok, _details_view, details_html} =
+        view
+        |> element("#effect-name-station_issue-button")
+        |> render_click()
+        |> follow_redirect(conn)
 
-      assert render(view) =~ ~s(Alert details)
+      assert details_html =~ ~s(Alert details)
     end
   end
 
@@ -55,7 +57,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSliceTest do
     test "changes to the form should be removed when restarting", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
 
-      get_to_submission_page_refactor(view, "Bus", "Delay")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
       |> element("form")
@@ -81,7 +83,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSliceTest do
 
       refute render(view) =~ ~s(Effect can&#39;t start in the past)
 
-      get_to_submission_page_refactor(view, "Bus", "Delay")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
       |> element("form")

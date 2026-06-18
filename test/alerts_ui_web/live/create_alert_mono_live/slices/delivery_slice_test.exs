@@ -26,14 +26,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
     @tag :logged_in_user
     test "renders", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Subway", "Delay")
+      view = get_to_submission_page_refactor(conn, view, "Subway", "Delay")
       assert render(view) =~ ~s(id="delivery_view")
     end
 
     @tag :logged_in_user
     test "banner text is hidden if checkbox is not checked", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Subway", "Delay")
+      view = get_to_submission_page_refactor(conn, view, "Subway", "Delay")
 
       refute view
              |> element("div#banner_div")
@@ -55,7 +55,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
     @tag :logged_in_user
     test "unchecking banner checkbox hides banner even when banner text is present", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Subway", "Delay")
+      view = get_to_submission_page_refactor(conn, view, "Subway", "Delay")
 
       # set header text so the sync will populate banner_text
       view
@@ -87,7 +87,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
         {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Subway", "Delay")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Delay")
 
         render_async(view, 1000)
 
@@ -116,7 +116,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
         {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Subway", "Delay")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Delay")
 
         render_async(view, 1000)
 
@@ -149,7 +149,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
     @tag :logged_in_user
     test "banner text does not secretly get filled in when unselecting email box", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Detour")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
 
       view
       |> element("form")
@@ -217,7 +217,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
 
-        get_to_submission_page_refactor(view, "Subway", "Extra service")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Extra service")
         render_async(view)
 
         # Mock selecting Red line
@@ -269,7 +269,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
 
-        get_to_submission_page_refactor(view, "Subway", "Extra service")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Extra service")
         render_async(view)
 
         # unselect notification toggle

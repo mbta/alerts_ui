@@ -104,7 +104,7 @@ defmodule AlertsUIWeb.Tickets.FormCrashDeletingTimeValueTest do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
 
       # Navigate to the Alert Details step: Subway / Delay
-      get_to_submission_page_refactor(view, "Subway", "Delay")
+      view = get_to_submission_page_refactor(conn, view, "Subway", "Delay")
 
       # Switch to recurring timing
       view
@@ -158,7 +158,7 @@ defmodule AlertsUIWeb.Tickets.FormCrashDeletingTimeValueTest do
          %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
 
-      get_to_submission_page_refactor(view, "Subway", "Delay")
+      view = get_to_submission_page_refactor(conn, view, "Subway", "Delay")
 
       # Set one-time start specifier to custom (reveals the datetime-local input)
       view

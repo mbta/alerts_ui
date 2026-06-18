@@ -114,7 +114,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
     test "renders", %{conn: conn} do
       with_mocks(base_mocks()) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Subway", "Station closure")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Station closure")
         render_async(view)
         assert render(view) =~ ~s(id="stop_route_service_view")
       end
@@ -136,7 +136,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Subway", "Station closure")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Station closure")
         render_async(view)
         {:ok, document} = view |> render() |> Floki.parse_document()
 
@@ -163,7 +163,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Subway", "Station closure")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Station closure")
         render_async(view)
 
         refute render(view) =~ "Shuttle"
@@ -187,7 +187,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Bus", "Multi-route detour")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Multi-route detour")
 
         view
         |> element("form")
@@ -218,7 +218,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Subway", "Station closure")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Station closure")
 
         assert view |> render_async() =~ ~s(value="place-aqucl">)
 
@@ -274,7 +274,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Subway", "Station closure")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Station closure")
         render_async(view)
 
         {:ok, document} = view |> render() |> Floki.parse_document()
@@ -316,7 +316,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
     test "stop search can clear", %{conn: conn} do
       with_mocks(base_mocks()) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Subway", "Station closure")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Station closure")
         render_async(view)
 
         {:ok, document} = view |> render() |> Floki.parse_document()
@@ -374,7 +374,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Bus", "Multi-route detour")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Multi-route detour")
         render_async(view)
 
         assert view
@@ -430,7 +430,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Subway", "Station closure")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Station closure")
         render_async(view)
 
         {:ok, document} = view |> render() |> Floki.parse_document()
@@ -479,7 +479,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Subway", "Station closure")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Station closure")
         render_async(view)
 
         view
@@ -529,7 +529,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Subway", "Station closure")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Station closure")
 
         view
         |> element("form")
@@ -592,7 +592,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Subway", "Station closure")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Station closure")
 
         view
         |> element("form")
@@ -645,7 +645,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Subway", "Station closure")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Station closure")
 
         view
         |> element("form")
@@ -709,7 +709,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Subway", "Station closure")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Station closure")
         render_async(view)
 
         assert render(view) =~ "place-aqucl"
@@ -749,7 +749,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Subway", "Station closure")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Station closure")
         render_async(view)
 
         # Select Park Street
@@ -810,7 +810,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Subway", "Station closure")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Station closure")
         render_async(view)
 
         # Apply route filter
@@ -909,7 +909,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Subway", "Station closure")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Station closure")
         render_async(view)
 
         view
@@ -941,7 +941,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
     test "review modal shows errors when stop and route not selected", %{conn: conn} do
       with_mocks(base_mocks()) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Subway", "Station closure")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Station closure")
         render_async(view)
 
         view |> element("button#review", "Review and submit") |> render_click()
@@ -967,7 +967,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Bus", "Multi-route detour")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Multi-route detour")
         render_async(view)
 
         view
@@ -1023,7 +1023,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Subway", "Station closure")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Station closure")
         render_async(view)
 
         # Select first stop — both routes should auto-select
@@ -1141,7 +1141,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Subway", "Station closure")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Station closure")
         render_async(view)
 
         # Select stop — both routes should auto-select by default
@@ -1220,7 +1220,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Bus", "Multi-route detour")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Multi-route detour")
         render_async(view)
 
         view
@@ -1282,7 +1282,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Subway", "Station closure")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Station closure")
         render_async(view)
 
         view
@@ -1333,7 +1333,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Subway", "Station closure")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Station closure")
         render_async(view)
 
         view
@@ -1382,7 +1382,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Bus", "Multi-route detour")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Multi-route detour")
         render_async(view)
 
         view

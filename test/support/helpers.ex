@@ -3,7 +3,9 @@ defmodule Test.Support.Helpers do
   Test helpers
   """
 
+  import Phoenix.ConnTest
   import Phoenix.LiveViewTest
+  @endpoint AlertsUIWeb.Endpoint
 
   defmacro reassign_env(app, var, value) do
     quote do
@@ -53,15 +55,18 @@ defmodule Test.Support.Helpers do
     |> render_submit()
   end
 
-  def get_to_submission_page_refactor(view, mode, effect) do
-    # Use any combo to proceed to next page
+  def get_to_submission_page_refactor(conn, view, mode, effect) do
     view
     |> element("#service_type_buttons button", mode)
     |> render_click()
 
-    view
-    |> element("#effect_buttons button", effect)
-    |> render_click()
+    {:ok, new_view, _html} =
+      view
+      |> element("#effect_buttons button", effect)
+      |> render_click()
+      |> follow_redirect(conn)
+
+    new_view
   end
 
   def open_review_modal(view) do
