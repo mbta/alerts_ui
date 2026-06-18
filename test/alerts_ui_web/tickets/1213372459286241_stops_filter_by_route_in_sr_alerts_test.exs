@@ -94,7 +94,7 @@ defmodule AlertsUIWeb.Tickets.StopsFilterByRouteInSrAlertsTest do
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Bus", "Stop closure")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Stop closure")
         render_async(view)
 
         # Step 1: Verify all stops are shown before applying any filter
@@ -156,7 +156,7 @@ defmodule AlertsUIWeb.Tickets.StopsFilterByRouteInSrAlertsTest do
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Bus", "Stop closure")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Stop closure")
         render_async(view)
 
         # Apply route 88 filter

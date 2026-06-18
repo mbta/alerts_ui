@@ -203,7 +203,7 @@ defmodule AlertsUIWeb.Tickets.DirectionChangeClearsOppositeBusStopsTest do
       ]) do
         # Step 1: Create a Bus - Detour alert
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Bus", "Detour")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
         render_async(view)
 
         # Step 2: Select route SL1

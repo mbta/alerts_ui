@@ -11,14 +11,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
     @tag :logged_in_user
     test "renders", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Detour")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
       assert render(view) =~ ~s(id="reminder_times_form")
     end
 
     @tag :logged_in_user
     test "reminder picker appears with error message when Add Reminder is pressed", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Detour")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
 
       rendered =
         view
@@ -34,7 +34,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
     @tag :logged_in_user
     test "generates a new empty entry when a filled one exists", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Detour")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
 
       refute view
              |> render() =~ ~s(id="reminder-time-component-0")
@@ -94,7 +94,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
     @tag :logged_in_user
     test "reminder picker disappears when X is pressed", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Detour")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
 
       rendered =
         view
@@ -119,7 +119,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
     test "min_time hidden input reflects notification start, not current time, when specifier is same_as_effect_period",
          %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Detour")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
 
       view
       |> element("form")
@@ -166,7 +166,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
     test "max_time hidden input is nil when active period specifier is until further notice",
          %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Detour")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
 
       view
       |> element("form")
@@ -204,7 +204,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
     @tag :logged_in_user
     test "doesn't error if time entered is within notification period", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Detour")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
 
       view
       |> element("form")
@@ -253,7 +253,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
     @tag :logged_in_user
     test "shows error if time entered is before effect start", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Detour")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
 
       view
       |> element("form")
@@ -290,7 +290,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
     @tag :logged_in_user
     test "shows error if time entered is before notification period", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Detour")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
 
       view
       |> element("form")
@@ -330,7 +330,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
     @tag :logged_in_user
     test "shows error if time entered is after effect start", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Detour")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
 
       view
       |> element("form")

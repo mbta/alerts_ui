@@ -14,7 +14,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSliceTest do
       assert view |> element("#details") |> render =~ ~s(text-text-secondary)
 
       # navigate to second page
-      get_to_submission_page_refactor(view, "Bus", "Schedule change")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Schedule change")
       refute render(view) =~ ~s(Alert type)
       assert view |> element("#route_type_and_effect") |> render =~ ~s(hover:underline)
       assert view |> element("#details") |> render =~ ~s(text-text-primary)

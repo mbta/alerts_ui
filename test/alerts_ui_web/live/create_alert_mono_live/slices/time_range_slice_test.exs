@@ -119,14 +119,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     @tag :logged_in_user
     test "renders", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Delay")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
       assert render(view) =~ ~s(id="time_range_view")
     end
 
     @tag :logged_in_user
     test "enddate picker hidden unless end_of_service option selected", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Delay")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       assert view
              |> render() =~
@@ -148,7 +148,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     @tag :logged_in_user
     test "switching between start specifiers retains old date", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Delay")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
       |> element("form")
@@ -180,7 +180,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     @tag :logged_in_user
     test "switching from end of custom to end-of-service retains old service date", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Delay")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
       |> element("form")
@@ -217,7 +217,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     @tag :logged_in_user
     test "switching from end of end-of-service to custom has default of 11:59", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Delay")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
       |> element("form")
@@ -253,7 +253,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     @tag :logged_in_user
     test "switching from end of 'later today' to custom has default of 11:59", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Delay")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       assert view |> element("#time_range_view") |> render =~ "Later today"
 
@@ -299,7 +299,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       conn: conn
     } do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Delay")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
       |> element("form")
@@ -332,7 +332,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     } do
       start_time = NaiveDateTime.new!(Date.add(@todays_date, 1), ~T[12:00:00])
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Delay")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
       |> element("form")
@@ -381,7 +381,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     @tag :logged_in_user
     test "auto-selects 'when work order is closed' for an elevator closure alert", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Facility", "Elevator closure")
+      view = get_to_submission_page_refactor(conn, view, "Facility", "Elevator closure")
 
       assert selected_end_specifier(view) == "when_work_order_is_closed"
     end
@@ -389,7 +389,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     @tag :logged_in_user
     test "auto-selects 'when work order is closed' for an escalator closure alert", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Facility", "Escalator closure")
+      view = get_to_submission_page_refactor(conn, view, "Facility", "Escalator closure")
 
       assert selected_end_specifier(view) == "when_work_order_is_closed"
     end
@@ -399,7 +399,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       conn: conn
     } do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Facility", "Elevator closure")
+      view = get_to_submission_page_refactor(conn, view, "Facility", "Elevator closure")
       assert selected_end_specifier(view) == "when_work_order_is_closed"
 
       view
@@ -415,7 +415,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       conn: conn
     } do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Delay")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
       |> element("form")
@@ -461,7 +461,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     @tag :logged_in_user
     test "displays error if end before start", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Delay")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
       |> element("form")
@@ -487,7 +487,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     @tag :logged_in_user
     test "displays error if one-time start occurs during DST gap", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Delay")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
       |> element("form")
@@ -512,7 +512,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     @tag :logged_in_user
     test "displays error if one-time end occurs during DST gap", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Delay")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
       |> element("form")
@@ -537,7 +537,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     @tag :logged_in_user
     test "recurring section is hidden unless recurring is selected", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Delay")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       refute view |> render() =~ ~s(Sunday)
 
@@ -557,7 +557,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     @tag :logged_in_user
     test "if recurring, start date must match weekday selection", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Delay")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
       |> element("form")
@@ -604,7 +604,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     @tag :logged_in_user
     test "if recurring, renders error when recurrence day is not selected", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Delay")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
       |> element("form")
@@ -622,7 +622,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     @tag :logged_in_user
     test "does not show recurrence error if no weekdays selected", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Delay")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
       |> element("form")
@@ -648,7 +648,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       end_dt = NaiveDateTime.new!(Date.add(end_date, 1), ~T[03:00:00])
 
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Delay")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
       |> element("form")
@@ -678,7 +678,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     @tag :logged_in_user
     test "displays error if start invalid", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Delay")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
       |> element("form")
@@ -694,7 +694,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     @tag :logged_in_user
     test "displays error if end invalid", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Delay")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
       |> element("form")
@@ -719,7 +719,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         get: fn _id -> @facility end
       ) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        get_to_submission_page_refactor(view, "Facility", "Elevator closure")
+        view = get_to_submission_page_refactor(conn, view, "Facility", "Elevator closure")
         render_async(view)
 
         # option is present in the dropdown for Elevator alerts
@@ -742,7 +742,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     @tag :logged_in_user
     test "valid creating form with future custom times shows no errors", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
-      get_to_submission_page_refactor(view, "Bus", "Delay")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
       |> element("form")

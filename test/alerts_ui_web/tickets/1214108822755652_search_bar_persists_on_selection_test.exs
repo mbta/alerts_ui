@@ -30,8 +30,8 @@ defmodule AlertsUIWeb.Tickets.SearchBarPersistsOnSelectionTest do
   @facility_b %Facility{id: "Facility-B", long_name: "Quincy Center Garage", stop: @stop_b}
 
   # Parking Closure is a multi-select facility effect, the ticket's example.
-  defp navigate_to_parking_closure(view) do
-    get_to_submission_page_refactor(view, "Facility", "Parking closure")
+  defp navigate_to_parking_closure(conn, view) do
+    get_to_submission_page_refactor(conn, view, "Facility", "Parking closure")
   end
 
   defp type_in_filter(view, field, term) do
@@ -50,7 +50,7 @@ defmodule AlertsUIWeb.Tickets.SearchBarPersistsOnSelectionTest do
     test "selecting a facility does not clear the facility search term", %{conn: conn} do
       with_mock(FacilitiesRepo, get_by_type: fn _types, _ -> [@facility_a, @facility_b] end) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        navigate_to_parking_closure(view)
+        view = navigate_to_parking_closure(conn, view)
         render_async(view)
 
         # Enter a search term that narrows to a single facility.
@@ -85,7 +85,7 @@ defmodule AlertsUIWeb.Tickets.SearchBarPersistsOnSelectionTest do
     test "selecting a stop does not clear the modal stop search term", %{conn: conn} do
       with_mock(FacilitiesRepo, get_by_type: fn _types, _ -> [@facility_a, @facility_b] end) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        navigate_to_parking_closure(view)
+        view = navigate_to_parking_closure(conn, view)
         render_async(view)
 
         # Type into the modal's stop search bar; narrows to one stop.
@@ -131,7 +131,7 @@ defmodule AlertsUIWeb.Tickets.SearchBarPersistsOnSelectionTest do
     test "modal width is pinned and independent of result count (AC3)", %{conn: conn} do
       with_mock(FacilitiesRepo, get_by_type: fn _types, _ -> [@facility_a, @facility_b] end) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
-        navigate_to_parking_closure(view)
+        view = navigate_to_parking_closure(conn, view)
         render_async(view)
 
         # The modal panel carries a fixed width class regardless of result count.
