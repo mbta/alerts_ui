@@ -87,7 +87,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
       changeset
       |> TimeRangeSlice.normalize_alert_timing()
-      |> force_change(:recurrence_days, get_field(changeset, :recurrence_days)) # ensure values are preserved; see test suite
+      # ensure values are preserved; see test suite
+      |> force_change(:recurrence_days, get_field(changeset, :recurrence_days))
       |> TimeRangeSlice.set_mode_effect_defaults()
       |> TimeRangeSlice.ensure_start_values(
         previous_start_specifier,
