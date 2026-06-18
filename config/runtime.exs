@@ -32,10 +32,10 @@ get_api_key = fn ->
 end
 
 get_translated_cause_effect_detail = fn ->
-  if System.get_env("SENTRY_ENV", "") |> String.contains?("dev") do
-    true
-  else
+  if System.get_env("SENTRY_ENV", "") == "prod" do
     false
+  else
+    true
   end
 end
 
