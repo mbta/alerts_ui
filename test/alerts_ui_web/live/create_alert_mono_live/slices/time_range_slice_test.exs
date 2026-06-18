@@ -1657,4 +1657,48 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       assert Ecto.Changeset.get_field(result, :can_close_automatically) == false
     end
   end
+
+  describe "transform/4 recurrence_days rendering" do
+    # Regression test for the bug where recurrence day checkboxes visually deselected
+    # after any validation error appeared on an unrelated field.
+    #
+    # Root cause: after a successful sync sets data.recurrence_days = [:monday] (atoms),
+    # a subsequent sync with errors on other fields triggers Ecto's equal-value cast
+    # optimization: cast(["monday"]) → [:monday] == data [:monday], so recurrence_days
+    # is NOT placed in changeset.changes. phoenix_ecto's input_value/3 then falls through
+    # changes (absent) → params["recurrence_days"] = ["monday"] (strings). The
+    # toggle_checkgroup component checks `:monday in ["monday"]` = false (atom ≠ string),
+    # so Monday appears unchecked even though the data is intact.
+    #
+    # Fix: force_change(:recurrence_days, ...) in TimeRangeSlice.transform bypasses the
+    # Ecto optimization, ensuring recurrence_days is always in changes as atoms.
+    test "force_change bypasses Ecto equal-value optimization for recurrence_days" do
+      # Simulate the changeset state after a successful sync: data.recurrence_days = [:monday],
+      # no changes, no params (this is what to_form(change(alert_data)) produces).
+      alert_data = %AlertData{alert_timing: :recurring, recurrence_days: [:monday]}
+      base_changeset = Ecto.Changeset.change(alert_data)
+
+      # Ecto cast with browser string params: "monday" → :monday, but [:monday] == data [:monday],
+      # so the equal-value optimization fires and recurrence_days is absent from changes.
+      cast_changeset =
+        Ecto.Changeset.cast(base_changeset, %{"recurrence_days" => ["monday"]}, [:recurrence_days])
+
+      refute Map.has_key?(cast_changeset.changes, :recurrence_days),
+             "pre-condition: Ecto equal-value optimization must skip recurrence_days from changes"
+
+      # transform/4 calls force_change(:recurrence_days, ...), which unconditionally places
+      # the current atom value in changes. Without this, input_value returns the string params
+      # and :monday in ["monday"] = false causes the visual deselection.
+      socket = socket_for_transform([])
+      params = %{"alert_data" => %{"recurrence_days" => ["monday"]}}
+
+      result = Slice.transform(%TimeRangeSlice{}, cast_changeset, params, socket)
+
+      assert Map.has_key?(result.changes, :recurrence_days),
+             "transform must force recurrence_days into changes to prevent atom/string mismatch"
+
+      assert result.changes[:recurrence_days] == [:monday],
+             "recurrence_days must be atoms in changes so :monday in [:monday] = true in rendering"
+    end
+  end
 end
