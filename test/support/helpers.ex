@@ -3,9 +3,9 @@ defmodule Test.Support.Helpers do
   Test helpers
   """
 
-  use AlertsUIWeb.ConnCase, async: true
-
+  import Phoenix.ConnTest
   import Phoenix.LiveViewTest
+  @endpoint AlertsUIWeb.Endpoint
 
   defmacro reassign_env(app, var, value) do
     quote do
