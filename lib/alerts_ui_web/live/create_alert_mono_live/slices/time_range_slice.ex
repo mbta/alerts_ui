@@ -89,7 +89,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       |> TimeRangeSlice.normalize_alert_timing()
       # ensure values are preserved; see test suite
       |> force_change(:recurrence_days, get_field(changeset, :recurrence_days))
-      |> TimeRangeSlice.set_mode_effect_defaults()
+      |> TimeRangeSlice.set_mode_effect_defaults(params)
       |> TimeRangeSlice.ensure_start_values(
         previous_start_specifier,
         previous_start_time_specifier,
@@ -386,8 +386,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     change(changeset, %{alert_timing: ensure_atom(alert_timing)})
   end
 
-  def set_mode_effect_defaults(changeset) do
-    case get_change(changeset, :effect_name) do
+  def set_mode_effect_defaults(changeset, %{"alert_data" => _}) do
+    changeset
+  end
+
+  def set_mode_effect_defaults(changeset, _params) do
+    case get_field(changeset, :effect_name) do
       effect when effect in ["elevator_closure", "escalator_closure"] ->
         changeset
         |> force_change(:active_period_end_specifier, :when_work_order_is_closed)
