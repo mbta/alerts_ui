@@ -1730,5 +1730,56 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       assert result.changes[:recurrence_days] == [:monday],
              "recurrence_days must be atoms in changes so :monday in [:monday] = true in rendering"
     end
+
+    test "restores the last recurrence day when a recurring alert is fully deselected" do
+      changeset =
+        %AlertData{alert_timing: :recurring, recurrence_days: []}
+        |> Ecto.Changeset.change()
+
+      result = TimeRangeSlice.prevent_recurrence_day_deselection(changeset, [:monday])
+
+      assert result.changes[:recurrence_days] == [:monday],
+             "must restore the previous recurrence day when the user deselects them all"
+    end
+
+    test "does not resurrect recurrence days for a one-time alert" do
+      changeset =
+        %AlertData{alert_timing: :"one-time", recurrence_days: []}
+        |> Ecto.Changeset.change()
+
+      result = TimeRangeSlice.prevent_recurrence_day_deselection(changeset, [:monday])
+
+      assert (result.changes[:recurrence_days] || []) == [],
+             "one-time alerts must not have recurrence days restored"
+    end
+
+    @tag :logged_in_user
+    test "end-to-end: cannot uncheck the last recurrence day", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+
+      view
+      |> element("form")
+      |> render_change(%{"alert_data" => %{"alert_timing" => "recurring"}})
+
+      view
+      |> element("form")
+      |> render_change(%{"alert_data" => %{"recurrence_days" => ["wednesday", "friday"]}})
+
+      assert has_element?(view, "input#wednesday[checked]")
+      assert has_element?(view, "input#friday[checked]")
+
+      view
+      |> element("form")
+      |> render_change(%{"alert_data" => %{"recurrence_days" => ["wednesday"]}})
+
+      refute has_element?(view, "input#friday[checked]")
+
+      view
+      |> element("form")
+      |> render_change(%{"alert_data" => %{"recurrence_days" => []}})
+
+      assert has_element?(view, "input#wednesday[checked]")
+    end
   end
 end

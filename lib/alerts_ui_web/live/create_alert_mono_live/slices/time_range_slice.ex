@@ -97,10 +97,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       previous_end_time_specifier =
         Map.get(socket.assigns, :previous_end_time_specifier, nil) |> ensure_atom()
 
+      previous_recurrence_days = Map.get(socket.assigns, :previous_recurrence_days, [])
+
       changeset
       |> TimeRangeSlice.normalize_alert_timing()
-      # ensure values are preserved; see test suite
-      |> force_change(:recurrence_days, get_field(changeset, :recurrence_days))
+      |> TimeRangeSlice.prevent_recurrence_day_deselection(previous_recurrence_days)
       |> TimeRangeSlice.set_mode_effect_defaults(params)
       |> TimeRangeSlice.ensure_start_values(
         previous_start_specifier,
@@ -149,7 +150,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
         previous_start_specifier: form_data.active_period_start_specifier,
         previous_end_specifier: form_data.active_period_end_specifier,
         previous_start_time_specifier: form_data.active_period_start_time_specifier,
-        previous_end_time_specifier: form_data.active_period_end_time_specifier
+        previous_end_time_specifier: form_data.active_period_end_time_specifier,
+        previous_recurrence_days: form_data.recurrence_days
       })
     end
 
@@ -396,6 +398,20 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   def normalize_alert_timing(changeset) do
     alert_timing = get_field(changeset, :alert_timing, :"one-time")
     change(changeset, %{alert_timing: ensure_atom(alert_timing)})
+  end
+
+  def prevent_recurrence_day_deselection(changeset, previous_recurrence_days) do
+    current = get_field(changeset, :recurrence_days) || []
+    recurring? = get_field(changeset, :alert_timing) in [:recurring, "recurring"]
+
+    desired =
+      if recurring? and current == [] and previous_recurrence_days not in [nil, []] do
+        previous_recurrence_days
+      else
+        current
+      end
+
+    force_change(changeset, :recurrence_days, desired)
   end
 
   def set_mode_effect_defaults(changeset, %{"alert_data" => _}) do
