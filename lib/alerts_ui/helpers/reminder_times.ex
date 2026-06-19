@@ -11,11 +11,18 @@ defmodule AlertsUI.Helpers.ReminderTimes do
   def editable?(_, nil), do: true
   def editable?(_, ""), do: true
 
-  def editable?(_, reminder_time) do
+  def editable?(_, %NaiveDateTime{} = reminder_time) do
     reminder_time
     |> ActivePeriodBuilder.naive_eastern_datetime_to_utc()
     |> Kernel.||(~N[2999-01-01T00:00:00])
     |> DateTime.compare(DateTime.utc_now()) == :gt
+  end
+
+  def editable?(id, reminder_time) when is_binary(reminder_time) do
+    case NaiveDateTime.from_iso8601(reminder_time) do
+      {:ok, dt} -> editable?(id, dt)
+      {:error, _} -> true
+    end
   end
 
   @spec sent?(NaiveDateTime.t()) :: true | false

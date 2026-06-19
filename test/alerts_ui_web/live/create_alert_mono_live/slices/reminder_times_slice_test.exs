@@ -370,7 +370,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
     end
 
     @tag :logged_in_user
-    test "works if editing", %{conn: conn} do
+    test "renders if editing", %{conn: conn} do
       alert_params =
         build(:alert_map, %{
           alert_id: "123",
@@ -397,6 +397,63 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
       # reminder_times are stored as UTC and shifted to America/New_York on load
       assert rendered_view =~ ~s(value="2024-04-30T07:54")
       assert rendered_view =~ ~s(value="2024-04-30T08:54")
+    end
+
+    @tag :logged_in_user
+    test "allows adding more if editing", %{conn: conn} do
+      alert_params =
+        build(:alert_map, %{
+          alert_id: "123",
+          effect: :OTHER_EFFECT,
+          effect_detail: "DELAY",
+          header_text: "cool header text",
+          severity: 3,
+          severity_level: :WARNING,
+          cause_detail: "UNKNOWN",
+          active_period_start: ~U[2024-04-30 11:45:00Z],
+          reminder_times: [
+            %{reminder_time: ~U[2024-04-30 11:54:00Z]},
+            %{reminder_time: ~U[2024-04-30 12:54:00Z]}
+          ]
+        })
+
+      {:ok, _} =
+        Alerts.create_or_update_alert(alert_params, build(:user))
+
+      {:ok, view, _html} = live(conn, "/alerts/mono/edit/123")
+
+      render(view)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{"reminder_sort" => ["0", "1", "new"]}
+      })
+
+      rendered_view = view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "reminder_sort" => ["0", "1", "2"],
+          "reminder_times" => %{
+            "2" => %{
+              "_persistent_id" => "0",
+              "max_time" => "2040-09-26T04:00:00",
+              "min_time" => "2024-09-25T13:04:12",
+              "reminder_time" => "2030-06-01T12:12:12",
+              "reminder_time_specifier" => "custom"
+            }
+          }
+        }
+      })
+
+      open_browser(view)
+
+      # reminder_times are stored as UTC and shifted to America/New_York on load
+      assert rendered_view =~ ~s(value="2024-04-30T07:54")
+      assert rendered_view =~ ~s(value="2024-04-30T08:54")
+      # But this one was typed in, so we check for that value.
+      assert rendered_view =~ ~s(value="2030-06-01T12:12")
     end
   end
 
