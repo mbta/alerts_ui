@@ -392,11 +392,57 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
 
       {:ok, view, _html} = live(conn, "/alerts/mono/edit/123")
 
-      rendered_view = render(view)
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "cause_detail" => "ICE_IN_HARBOR"
+        }
+      })
+
+      rendered_view = render_async(view, 1000)
 
       # reminder_times are stored as UTC and shifted to America/New_York on load
       assert rendered_view =~ ~s(value="2024-04-30T07:54")
       assert rendered_view =~ ~s(value="2024-04-30T08:54")
+    end
+
+    @tag :logged_in_user
+    test "works if duplicating", %{conn: conn} do
+      alert_params =
+        build(:alert_map, %{
+          alert_id: "123",
+          effect: :OTHER_EFFECT,
+          effect_detail: "DELAY",
+          header_text: "cool header text",
+          severity: 3,
+          severity_level: :WARNING,
+          cause_detail: "UNKNOWN",
+          active_period_start: ~U[2024-04-30 11:45:00Z],
+          reminder_times: [
+            %{reminder_time: ~U[2024-04-30 11:54:00Z]},
+            %{reminder_time: ~U[2024-04-30 12:54:00Z]}
+          ]
+        })
+
+      {:ok, _} =
+        Alerts.create_or_update_alert(alert_params, build(:user))
+
+      {:ok, view, _html} = live(conn, "/alerts/mono/duplicate/123")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "cause_detail" => "ICE_IN_HARBOR"
+        }
+      })
+
+      rendered_view = view |> element("#reminder_times_form") |> render_async(1000)
+
+      # reminder_times are stored as UTC and shifted to America/New_York on load
+      assert rendered_view =~ ~s(value=\"2024-04-30T07:54:00\")
+      assert rendered_view =~ ~s(value=\"2024-04-30T08:54:00\")
     end
   end
 
