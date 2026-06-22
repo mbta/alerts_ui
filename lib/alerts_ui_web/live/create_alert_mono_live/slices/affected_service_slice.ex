@@ -520,7 +520,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
                 else: @form[:route_ids]
             }
             filter_field={@form[:route_search_term]}
-            loading={@selections.loading}
+            loading={@selections.loading && @first_async_load}
             no_results={Enum.empty?(@selections.route_id_options)}
             options={@selections.route_id_options}
             class="h-full"
