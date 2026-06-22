@@ -820,7 +820,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
            all: fn _filters, _opts -> [] end
          ]},
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
-        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]}
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _route_ids, _opts -> [] end,
+           end_of_rating: fn -> Date.add(@todays_date, 7) end
+         ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/edit/tr-edit-db-1")
         render_async(view, 3000)
