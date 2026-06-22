@@ -610,6 +610,51 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
     end
 
     @tag :logged_in_user
+    test "when work order-based alert has been closed", %{conn: conn} do
+      with_mocks([
+        {FacilitiesRepo, [],
+         [
+           get: fn _type -> @facility end,
+           get_by_type: fn _type, _opts -> [@facility] end
+         ]}
+      ]) do
+        alert_id = "T-#{System.unique_integer([:positive])}"
+        now = NaiveDateTime.new!(~D[2040-02-14], ~T[12:00:00])
+
+        {:ok, _alert} =
+          Alerts.create_or_update_alert(
+            %{
+              alert_id: alert_id,
+              source: :TRAPEZE,
+              work_order_id: "310-2026-0000",
+              effect: "ACCESSIBILITY_ISSUE",
+              effect_detail: "ESCALATOR_CLOSURE",
+              effect_name: "Escalator Closure",
+              primary_service_type: "access",
+              can_close_automatically: true,
+              duration_certainty: :KNOWN,
+              active_period_start: now,
+              active_period_end: now |> NaiveDateTime.add(3, :minute),
+              active_period: [%{start: now, end: now}],
+              header_text: "Forest Hills Escalator 128 is out of service.",
+              informed_entity: [%{facility_id: "128", activities: [:USING_ESCALATOR]}],
+              severity: 3,
+              last_modified_timestamp: DateTime.utc_now(),
+              reminder_times: []
+            },
+            build(:user)
+          )
+
+        {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=#{alert_id}")
+
+        open_review_modal(view)
+
+        assert render(view) =~
+                 ~r/Effect period.*Tue Feb 14, 2040 @ 7:00 AM until Tue Feb 14, 2040 @ 7:03 AM/s
+      end
+    end
+
+    @tag :logged_in_user
     test "recurring timeframe", %{conn: conn} do
       with_mocks([
         {RoutesRepo, [],

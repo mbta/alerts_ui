@@ -133,6 +133,16 @@ defmodule AlertsUIWeb.FormComponents.TimeRange do
       |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
       |> (&Map.merge(socket.assigns.form.params, &1)).()
 
+    # Auto-close is derived from the Effect end specifier. Keep it in sync when
+    # populating the edit form so editing an auto-closable (Trapeze) alert doesn't
+    # drop the flag (mirrors the `validate` handler below and the mono TimeRangeSlice).
+    alert_data =
+      Map.put(
+        alert_data,
+        "can_close_automatically",
+        alert_data["active_period_end_specifier"] == "when_work_order_is_closed"
+      )
+
     changeset =
       %__MODULE__{}
       |> changeset(alert_data)

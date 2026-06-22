@@ -72,7 +72,6 @@ defmodule AlertsUIWeb.ConnCase do
     |> Phoenix.ConnTest.init_test_session(%{})
     |> Plug.Conn.put_session(:user, user)
     |> Plug.Conn.put_session(:last_auth_time, auth_time)
-    |> Plug.Conn.put_session(:logout_uri, logout_uri())
   end
 
   def logout_uri, do: "http://oidc.example/end_session_uri"

@@ -117,28 +117,6 @@ defmodule AlertsUI.Models.AlertTest do
       assert changeset.valid?
     end
 
-    test "create with improper recurrence days is not valid" do
-      params = %{
-        alert_id: "123",
-        header_text: "a",
-        description_text: "b",
-        active_period: [
-          %{
-            start: ~U[2025-10-01 01:00:38Z],
-            end: ~U[2025-10-01 05:45:38Z]
-          }
-        ],
-        active_period_start: ~U[2025-10-01 01:00:38Z],
-        recurrence_days: ["friday"],
-        informed_entity: [%{route_id: "1", trip: %{trip_id: "2"}}],
-        current_time: ~U[2023-10-19 18:45:38.571154Z],
-        user: build(:user)
-      }
-
-      changeset = Alert.changeset(%Alert{}, params)
-      refute changeset.valid?
-    end
-
     test "create with correct recurrence days is valid" do
       params = %{
         alert_id: "123",
@@ -219,6 +197,40 @@ defmodule AlertsUI.Models.AlertTest do
         |> Alert.changeset(%{})
 
       refute changeset.valid?
+    end
+
+    test "purges recurring data if alert is one-time" do
+      changeset =
+        %Alert{
+          recurring: false,
+          recurrence_days: [:monday],
+          recurrence_text: "Mondays, am I right?",
+          recurrence_start_time: ~T[09:00:00],
+          recurrence_end_time: ~T[17:00:00]
+        }
+        |> Alert.changeset(%{})
+
+      assert get_field(changeset, :recurrence_days) == []
+      assert get_field(changeset, :recurrence_text) == nil
+      assert get_field(changeset, :recurrence_start_time) == nil
+      assert get_field(changeset, :recurrence_end_time) == nil
+    end
+
+    test "keeps recurring data if alert is recurring" do
+      changeset =
+        %Alert{
+          recurring: true,
+          recurrence_days: [:monday],
+          recurrence_text: "Mondays, am I right?",
+          recurrence_start_time: ~T[09:00:00],
+          recurrence_end_time: ~T[17:00:00]
+        }
+        |> Alert.changeset(%{})
+
+      assert get_field(changeset, :recurrence_days) == [:monday]
+      assert get_field(changeset, :recurrence_text) == "Mondays, am I right?"
+      assert get_field(changeset, :recurrence_start_time) == ~T[09:00:00]
+      assert get_field(changeset, :recurrence_end_time) == ~T[17:00:00]
     end
   end
 

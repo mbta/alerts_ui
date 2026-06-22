@@ -12,32 +12,21 @@ config :alerts_ui,
   ecto_repos: [AlertsUI.Repo],
   aws_rds_mod: ExAws.RDS,
   gtfs_proto_filename: "./assets/outputs/gtfs-realtime.proto",
-  standard_json_output_filename: "alerts_manager_feed.json",
-  enhanced_json_output_filename: "alerts_manager_feed_enhanced.json",
-  protobuf_output_filename: "alerts_manager_feed.pb",
-  combined_enhanced_json_output_filename: "alerts_feed_enhanced.json",
-  combined_enhanced_sita_json_output_filename: "alerts_feed_enhanced_SITA.json",
-  combined_standard_json_output_filename: "alerts_feed.json",
-  combined_protobuf_output_filename: "alerts_feed.pb",
+  standard_json_output_filename: "alerts_feed.json",
+  enhanced_json_output_filename: "alerts_feed_enhanced.json",
+  protobuf_output_filename: "alerts_feed.pb",
+  enhanced_sita_json_output_filename: "alerts_feed_enhanced_SITA.json",
   s3_bucket_name: System.get_env("S3_BUCKET_NAME", ""),
   s3_bucket_prefix: System.get_env("S3_BUCKET_PREFIX", ""),
-  ibi_enhanced_alerts_api_url:
-    System.get_env(
-      "IBI_ENHANCED_ALERTS_API_URL",
-      "http://s3.amazonaws.com/mbta-realtime-test/alerts_enhanced.json"
-    ),
-  ibi_standard_alerts_api_url:
-    System.get_env(
-      "IBI_STANDARD_ALERTS_API_URL",
-      "http://s3.amazonaws.com/mbta-realtime-test/alerts_pb.json"
-    ),
   skip_migrations: true,
   trapeze_sftp_host: System.get_env("TRAPEZE_SFTP_HOST", ""),
   trapeze_sftp_port: System.get_env("TRAPEZE_SFTP_PORT", ""),
   trapeze_sftp_user: System.get_env("TRAPEZE_SFTP_USER", ""),
   trapeze_sftp_password: System.get_env("TRAPEZE_SFTP_PASSWORD", ""),
   trapeze_sftp_filename: System.get_env("TRAPEZE_SFTP_FILENAME", ""),
-  sentry_env: System.get_env("SENTRY_ENV")
+  sentry_env: System.get_env("SENTRY_ENV"),
+  # Whether to use translated strings for `cause_detail` and `effect_detail`
+  translated_cause_effect_detail: false
 
 config :alerts_ui, :phoenix_swagger,
   swagger_files: %{

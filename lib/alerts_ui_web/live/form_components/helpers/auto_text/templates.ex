@@ -373,7 +373,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     %{
       pattern: {2, "Track Change"},
       header_template:
-        "Please board ?route_names ?trip_names on opposite track ?stop_range_at ?alert_duration ?due_to_cause|.",
+        "Please board ?route_names ?trip_names on the ___ platform (Track ___) ?stop_range_at ?alert_duration ?due_to_cause|.",
       description_template: %{
         route_count: 5,
         direction_count: 1,

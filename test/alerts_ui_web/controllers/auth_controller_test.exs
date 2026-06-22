@@ -45,13 +45,17 @@ defmodule AlertsUIWeb.AuthControllerTest do
              } = session_user
     end
 
-    test "adds a logout URI to the session", %{conn: conn, user: user} do
+    test "adds a logout URI cookie scoped to the logout route", %{conn: conn, user: user} do
       conn =
         conn
         |> assign(:ueberauth_auth, auth_for(user))
         |> get(~p"/auth/keycloak/callback")
 
-      assert is_binary(get_session(conn, :logout_uri))
+      assert %{value: value, path: "/auth/keycloak/logout"} =
+               conn.resp_cookies["_alerts_ui_logout"]
+
+      assert is_binary(value)
+      refute get_session(conn, :logout_uri)
     end
 
     test "given an ueberauth auth, redirects to the home page", %{conn: conn, user: user} do

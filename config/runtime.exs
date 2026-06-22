@@ -31,6 +31,14 @@ get_api_key = fn ->
   end
 end
 
+get_translated_cause_effect_detail = fn ->
+  if System.get_env("SENTRY_ENV", "") == "prod" do
+    false
+  else
+    true
+  end
+end
+
 cond do
   config_env() == :test ->
     config :alerts_ui, AlertsUI.Repo, url: System.fetch_env!("DATABASE_URL_TEST")
@@ -40,7 +48,8 @@ cond do
       api_url: "https://api-dev.mbtace.com",
       api_key: "",
       dev_api_url: "https://api-dev.mbtace.com",
-      dev_api_key: ""
+      dev_api_key: "",
+      translated_cause_effect_detail: true
 
     config :mbta_v3_api,
       base_url: "https://api-dev.mbtace.com/",
@@ -78,7 +87,13 @@ cond do
         # See the documentation on https://hexdocs.pm/plug_cowboy/Plug.Cowboy.html
         # for details about using IPv6 vs IPv4 and loopback vs public addresses.
         ip: {0, 0, 0, 0, 0, 0, 0, 0},
-        port: port
+        port: port,
+        # Cowboy defaults the max length of a single header value to 4096 bytes.
+        # Between auth, analytics, and the two AWSALB cookies, the Cookie header
+        # routinely approaches that, producing intermittent HTTP 431s. Raise it to
+        # a value well above real traffic (~4 KB) yet comfortably under the ALB's
+        # own (much larger) header limits.
+        protocol_options: [max_header_value_length: 16_384]
       ],
       secret_key_base: secret_key_base
 
@@ -114,16 +129,6 @@ cond do
       full_story_org_id: System.get_env("FULLSTORY_ORG_ID"),
       api_url: String.replace_trailing(System.get_env("API_URL"), "/", ""),
       api_key: get_api_key.(),
-      ibi_enhanced_alerts_api_url:
-        System.get_env(
-          "IBI_ENHANCED_ALERTS_API_URL",
-          "http://s3.amazonaws.com/mbta-realtime-test/alerts_enhanced.json"
-        ),
-      ibi_standard_alerts_api_url:
-        System.get_env(
-          "IBI_STANDARD_ALERTS_API_URL",
-          "https://cdn.mbta.com/realtime/Alerts.json"
-        ),
       trapeze_sftp_host: System.get_env("TRAPEZE_SFTP_HOST", ""),
       trapeze_sftp_port: System.get_env("TRAPEZE_SFTP_PORT", ""),
       trapeze_sftp_user: System.get_env("TRAPEZE_SFTP_USER", ""),
@@ -131,7 +136,8 @@ cond do
       trapeze_sftp_filename: System.get_env("TRAPEZE_SFTP_FILENAME", ""),
       # below are used only for GTFS validation
       dev_api_url: String.replace_trailing(System.fetch_env!("DEV_API_URL"), "/", ""),
-      dev_api_key: System.fetch_env!("DEV_API_KEY")
+      dev_api_key: System.fetch_env!("DEV_API_KEY"),
+      translated_cause_effect_detail: get_translated_cause_effect_detail.()
 
     config :mbta_v3_api,
       base_url: String.replace_trailing(System.fetch_env!("API_URL"), "/", ""),
@@ -167,7 +173,8 @@ cond do
       api_key: System.fetch_env!("API_KEY"),
       # below are used only for GTFS validation
       dev_api_url: String.replace_trailing(System.fetch_env!("DEV_API_URL"), "/", ""),
-      dev_api_key: System.fetch_env!("DEV_API_KEY")
+      dev_api_key: System.fetch_env!("DEV_API_KEY"),
+      translated_cause_effect_detail: true
 
     config :sentry,
       # Prevents sentry reporting in local environments

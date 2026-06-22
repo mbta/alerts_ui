@@ -274,6 +274,7 @@ defmodule AlertsUI.Models.Alert do
     |> cast(params, @permitted_fields)
     |> enforce_defaults(source: :ALERTS_MANAGER, can_close_automatically: false)
     |> cast_assoc(:reminder_times, required: false, with: &ReminderTime.changeset/2)
+    |> remove_lingering_recurrence_values()
     |> validate_recurrence_days(options)
     |> validate_timestamps()
     |> validate_inclusion(:effect, @effect)
@@ -290,7 +291,7 @@ defmodule AlertsUI.Models.Alert do
   defp enforce_defaults(starting_changeset, fields_with_defaults) do
     fields_with_defaults
     |> Enum.reduce(starting_changeset, fn {key, default}, changeset ->
-      case get_change(changeset, key) do
+      case get_field(changeset, key) do
         "" -> put_change(changeset, key, default)
         nil -> put_change(changeset, key, default)
         _ -> changeset
@@ -606,6 +607,20 @@ defmodule AlertsUI.Models.Alert do
         active_period_start,
         recurrence_days
       )
+    end
+  end
+
+  defp remove_lingering_recurrence_values(changeset) do
+    if get_field(changeset, :recurring) == true do
+      changeset
+    else
+      changeset
+      |> change(%{
+        recurrence_days: [],
+        recurrence_text: nil,
+        recurrence_end_time: nil,
+        recurrence_start_time: nil
+      })
     end
   end
 

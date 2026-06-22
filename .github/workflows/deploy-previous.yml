@@ -1,0 +1,57 @@
+name: Deploy previous tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        required: true
+      environment:
+        type: environment
+        required: true
+
+jobs:
+  deploy_previous:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    environment: ${{ inputs.environment }}
+    concurrency: ${{ inputs.environment }}
+    env:
+      TARGET: ${{ inputs.environment }}
+      VERSION: ${{ inputs.version }}
+
+    steps:
+        - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+          with:
+            fetch-tags: true
+            persist-credentials: false
+        - name: Check that the inputted tag exists
+          id: check_tag
+          run: git show-ref -s ${VERSION}
+        - name: Report failure and exit if tag does not exist
+          if: failure()
+          run: |
+            echo "Tag ${VERSION} does not exist"
+            exit 1
+        - name: Get docker tag from git tag
+          id: settag
+          run: |
+            sha=$(git show-ref -s ${VERSION})
+            short_sha=$(git rev-parse --short "${sha}")
+            echo "tag=git-${short_sha}" >> $GITHUB_OUTPUT
+        - name: Deploy Alerts Manager to ${{ inputs.environment }}
+          uses: mbta/actions/deploy-ecs@6cff1d5eef7e0d780190353278bc84fdf6177dab # v2.18
+          with:
+            role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+            ecs-cluster: alerts-manager
+            ecs-service: alerts-manager-${{ env.TARGET }}
+            docker-tag: "${{ secrets.DOCKER_REPO }}:${{ steps.settag.outputs.tag }}"
+        - uses: mbta/actions/notify-slack-deploy@6cff1d5eef7e0d780190353278bc84fdf6177dab # v2.18
+          if: ${{ !cancelled() }}
+          with:
+            webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+            job-status: ${{ job.status }}
+            custom-message: "(${{ env.TARGET }})"
+
