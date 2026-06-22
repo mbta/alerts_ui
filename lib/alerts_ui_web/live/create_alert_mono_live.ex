@@ -66,12 +66,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   @impl true
   def mount(params, session, socket) do
     # initialize the alert data form or throw an exception trying
+    form_type = form_type_from_socket(socket)
+    form_title = form_title_from_type(form_type)
+
     socket =
       socket
       |> assign(%{
+        page_title: "#{form_title} an Alert",
         selections: %{},
         check_predictions: false,
-        form_type: form_type_from_socket(socket),
+        form_type: form_type,
         obsolete_id_text: [],
         obsolete_ids: nil,
         submitting?: false,
@@ -89,6 +93,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       :edit -> :editing
       :duplicate -> :duplicating
       _ -> :creating
+    end
+  end
+
+  defp form_title_from_type(title) do
+    case title do
+      :editing -> "Edit"
+      :duplicating -> "Duplicating"
+      :creating -> "Create"
     end
   end
 
