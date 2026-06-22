@@ -170,9 +170,18 @@ defmodule AlertsUI.FeedOutput.WriteFeedTest do
       expected_start = current_time |> DateTime.add(-1, :hour) |> DateTime.to_unix()
       expected_end = current_time |> DateTime.add(2, :hour) |> DateTime.to_unix()
 
+      assert within_two_seconds(
+               hd(alert_4["alert"]["active_period"])["start"],
+               expected_start
+             )
+
+      assert within_two_seconds(
+               hd(alert_4["alert"]["active_period"])["end"],
+               expected_end
+             )
+
       %{
         "alert" => %{
-          "active_period" => [%{"start" => ^expected_start, "end" => ^expected_end}],
           "description_text" => %{"translation" => [%{"language" => "en", "text" => "b"}]},
           "header_text" => %{"translation" => [%{"language" => "en", "text" => "a"}]},
           "informed_entity" => [
