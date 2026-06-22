@@ -401,6 +401,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     Enum.any?(obsolete_ids, fn {_k, v} -> !Enum.empty?(v) end)
   end
 
+  @impl true
   def handle_info({:got_obsolete_ids, obsolete_ids_map, original_selections}, socket) do
     # builds a list of the text to go in the obsolete ids modal
     obsolete_id_text =
@@ -451,11 +452,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       |> push_event("show-gtfs-modal", %{id: "gtfs-warning-modal"})
 
     {:noreply, socket}
-  end
-
-  @impl true
-  def handle_info({:sr_auto_select_routes, route_ids}, socket) do
-    {:noreply, sync_socket(socket, %{"alert_data" => %{"route_ids" => route_ids}})}
   end
 
   defp get_step_by_name(name) do
