@@ -36,6 +36,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     id: "CR-Worcester-1"
   }
 
+  @todays_date DateTime.utc_now()
+               |> DateTime.shift_zone!("America/New_York")
+               |> DateTime.to_date()
+
   describe "create alerts page" do
     @tag :logged_in_user
     test "connected mount displays first page of form when logged in", %{conn: conn} do
@@ -356,7 +360,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
            get: fn _id, _opts -> @route end,
            all: fn _opts -> [@route] end
          ]},
-        {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [] end},
+        {SchedulesRepo, [],
+         by_route_ids: fn _route_ids, _opts -> [] end,
+         end_of_rating: fn -> Date.add(@todays_date, 7) end},
         {StopsRepo, [],
          [
            all: fn _, _ -> [@stop] end,
@@ -402,6 +408,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
           Alerts.create_or_update_alert(alert_params, build(:user))
 
         {:ok, view, _html} = live(conn, "/alerts/mono/edit/123")
+        render_async(view)
 
         rendered_view = view |> element("#gtfs-warning-modal-content") |> render_async(1000)
         refute rendered_view =~ ~s(aria-hidden=\"true\")
