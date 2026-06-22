@@ -1443,5 +1443,85 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
                |> render() =~ ~r/Aquarium.*Park/s
       end
     end
+
+    @tag :logged_in_user
+    test "stop options do not disappear when interacting with other parts of the form", %{
+      conn: conn
+    } do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@route, @route_two] end,
+           by_stop: fn
+             "place-aqucl" -> [@route]
+             "place-pktrm" -> [@route_two]
+           end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _, _ -> [@stop, @stop_two] end,
+           by_route: fn
+             "Blue", _, _ -> [@stop]
+             "Red", _, _ -> [@stop_two]
+           end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Station closure")
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "stop_ids"],
+          "alert_data" => %{"stop_ids" => ["place-pktrm"]}
+        })
+
+        render_async(view)
+
+        # Set modal route filter
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "modal_route_id"],
+          "alert_data" => %{"modal_route_id" => "Blue"}
+        })
+
+        render_click(view, "accept_filter")
+        render_async(view)
+
+        assert view
+               |> element("#alert_data_stop_ids")
+               |> render() =~ ~r/Park.*Aquarium/s,
+               "Park should render before Aquarium"
+
+        # Now unclick Park which is not part of the blue line
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "stop_ids"],
+          "alert_data" => %{"stop_ids" => ["place-aqucl"]}
+        })
+
+        # Park should still exist
+        assert view
+               |> element("#alert_data_stop_ids")
+               |> render() =~ ~r/Park.*Aquarium/s,
+               "Park should still be listed as an option before Aquarium"
+
+        # Even after we interact with another part of the form
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "alert_timing" => "recurring"
+          }
+        })
+
+        assert view
+               |> element("#alert_data_stop_ids")
+               |> render() =~ ~r/Park.*Aquarium/s,
+               "Park should still be listed as an option before Aquarium"
+      end
+    end
   end
 end
