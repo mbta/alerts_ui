@@ -32,7 +32,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     :stop_names_and_ids,
     :stop_search_term,
     :trip_ids,
-    :trip_search_term
+    :trip_search_term,
+    :form_type
   ]
 
   defmodule Selections do
@@ -69,7 +70,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     end
 
     def extract(service_data, _alert_data, _params) do
-      service_data
+      if service_data.form_type == :editing do
+        # When editing, we want to force the trip filter to "All Future Trips"
+        %{service_data | modal_date: nil}
+      else
+        service_data
+      end
     end
 
     def transform(_service_data, changeset, params, socket) do
