@@ -398,7 +398,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidatorsTest do
         })
         |> TimeRangeValidators.validate_start_date_matches_weekday()
 
-      assert cs.errors[:recurrence_days] ==
+      assert cs.errors[:active_period_start_date] ==
                {"Alert start day must match a selected day of the week.", []}
     end
 
@@ -412,7 +412,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidatorsTest do
         })
         |> TimeRangeValidators.validate_start_date_matches_weekday()
 
-      assert cs.errors[:recurrence_days] ==
+      assert cs.errors[:active_period_start_date] ==
                {"Alert start day must match a selected day of the week.", []}
     end
 
