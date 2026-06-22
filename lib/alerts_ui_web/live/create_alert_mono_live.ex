@@ -291,7 +291,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   @impl true
   def handle_async(:fetch_selections, {:ok, new_selections}, socket) do
     socket = handle_obsolete_ids(socket, new_selections)
-    first_async_load = if socket.assigns.first_async_load, do: false, else: true
+
+    first_async_load =
+      if socket.assigns.first_async_load, do: false, else: socket.assigns.first_async_load
 
     pending_route_ids = Map.get(new_selections, :pending_auto_select_route_ids)
 
