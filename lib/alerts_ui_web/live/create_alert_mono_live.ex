@@ -4,6 +4,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   """
 
   use AlertsUIWeb, :live_view
+  require Logger
 
   alias AlertsUI.AlertBuilder
   alias AlertsUI.Alerts
@@ -33,6 +34,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   alias AlertsUIWeb.FormComponents.Helpers.{
     EntityValidator,
+    ErrorFormatter,
     ObsoleteEntities,
     ServiceEffectCombinations
   }
@@ -572,14 +574,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
       {:error, socket} ->
         if assigns.submitting? do
-          # errors =
-          #  result
-          #  |> Alerts.parse_changeset_errors()
-          #  |> format_errors(combination)
-
           socket
           |> assign(:submitting?, false)
-          |> display_errors()
+          |> display_errors(socket.assigns.form.errors)
         else
           socket
         end
@@ -622,21 +619,19 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     end
   end
 
-  defp display_errors(%{assigns: %{form: form}} = socket) do
-    formatted_errors =
-      form.errors
-      |> Enum.map(fn {_title, {message, _error}} -> "#{message}" end)
-      |> Enum.uniq()
-      |> Enum.join(";")
-
+  defp display_errors(socket, errors) do
     socket
     |> clear_flash
     |> push_event("scroll_to_top", %{})
-    |> put_flash(:error, formatted_errors)
+    |> put_flash(:error, format_errors(errors))
     |> put_flash(:title, "Please fix the following errors:")
   end
 
-  defp display_errors(socket), do: socket
+  defp format_errors(errors) do
+    errors
+    |> Enum.uniq()
+    |> Enum.map_join("; ", fn {_title, {message, _error}} -> "#{message}" end)
+  end
 
   def return_to(return_to_value) do
     uri = URI.parse(return_to_value)
@@ -720,7 +715,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         |> redirect(to: return_to(socket.assigns.return_to || "/"))
 
       {:error, changeset} ->
-        raise "couldn't persist alert but it was supposed to be valid: #{inspect(changeset.errors)}"
+        # Form validation should prevent us from getting here
+        # but in case we do, we log an error and show
+        # an error flash to the user
+        errors =
+          changeset
+          |> Alerts.parse_changeset_errors()
+          |> ErrorFormatter.parse_field_errors(socket.assigns.form[:combination].value)
+
+        Logger.error("Errors upon alert submission: #{format_errors(errors)}")
+        display_errors(assign(socket, :submitting?, false), errors)
     end
   end
 end
