@@ -291,6 +291,10 @@ defmodule AlertsUI.Models.Alert do
   defp enforce_defaults(starting_changeset, fields_with_defaults) do
     fields_with_defaults
     |> Enum.reduce(starting_changeset, fn {key, default}, changeset ->
+      # Use the effective field value (change > existing data > schema default), not
+      # just the change. `get_change` is nil both when a field is unset AND when it's
+      # set to its existing value, which would wrongly reset unchanged values to the
+      # default on edit (e.g. flipping an auto-closable Trapeze alert back to false).
       case get_field(changeset, key) do
         "" -> put_change(changeset, key, default)
         nil -> put_change(changeset, key, default)

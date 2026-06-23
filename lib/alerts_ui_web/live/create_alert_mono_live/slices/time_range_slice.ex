@@ -63,8 +63,20 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       |> put_over_nil(:active_period_end_specifier, :later_today)
       |> put_over_nil(:active_period_end_time_specifier, :end_of_service)
       |> put_over_nil(:recurrence_days, [])
-      |> put_over_nil(:can_close_automatically, nil)
       |> update_times_if_duplicating(slice.form_type, slice.alert_timing, now, alert)
+      |> sync_can_close_automatically()
+    end
+
+    # Auto-close is derived from the end specifier. Keep it in sync when populating the
+    # form so editing an auto-closable (Trapeze) alert doesn't drop the flag (mirrors the
+    # transform/validate path's `ensure_end_values` and the old TimeRange component). Runs
+    # after `update_times_if_duplicating`, which may itself change the end specifier.
+    defp sync_can_close_automatically(slice) do
+      %{
+        slice
+        | can_close_automatically:
+            ensure_atom(slice.active_period_end_specifier) == :when_work_order_is_closed
+      }
     end
 
     def transform(_slice, changeset, params, socket) do
