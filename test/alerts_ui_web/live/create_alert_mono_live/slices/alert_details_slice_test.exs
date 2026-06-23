@@ -476,7 +476,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
     end
 
     @tag :logged_in_user
-    test "header updates if sync buttons is turned off and back on", %{
+    test "header updates if sync buttons is turned off and back on with no error", %{
       conn: conn
     } do
       with_mocks([
@@ -503,6 +503,62 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
         assert view
                |> element("#alert_data_header_text")
                |> render_async() =~ "my custom text"
+
+        view
+        |> element("form")
+        |> render_change(%{
+          alert_data: %{header_sync_toggle: true}
+        })
+
+        refute view
+               |> element("#alert_data_header_text")
+               |> render_async() =~
+                 "my custom text"
+
+        assert view
+               |> element("#alert_data_header_text")
+               |> render_async() =~
+                 "Framingham/Worcester"
+      end
+    end
+
+    @tag :logged_in_user
+    test "header updates if sync buttons is turned off and back with error", %{
+      conn: conn
+    } do
+      with_mocks([
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]},
+        {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
+        {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop, @stop_2] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+
+        view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Suspension")
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          alert_data: %{
+            header_sync_toggle: false,
+            header_text: "my custom text",
+            route_ids: ["CR-Worcester"]
+          }
+        })
+
+        assert view
+               |> element("#alert_data_header_text")
+               |> render_async() =~ "my custom text"
+
+        view
+        |> element("form")
+        |> render_change(%{
+          alert_data: %{view_banner: true}
+        })
+
+        assert view
+               |> render_async() =~ "Check box to show you understand"
 
         view
         |> element("form")
