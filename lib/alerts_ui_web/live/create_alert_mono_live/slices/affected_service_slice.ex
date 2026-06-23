@@ -207,6 +207,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     stop_search_term = form[:stop_search_term].value
     trip_ids = form[:trip_ids].value || []
     trip_search_term = form[:trip_search_term].value
+    combination = form[:combination].value
 
     all_route_types = all_route_types(route_type)
 
@@ -228,7 +229,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
           direction
         )
 
-      available_schedules = available_schedules(route_ids, direction, modal_date)
+      available_schedules =
+        if show_trips_input?(combination),
+          do: available_schedules(route_ids, direction, modal_date),
+          else: []
 
       direction_options =
         SelectFormatter.formatted_direction_options(

@@ -1286,6 +1286,55 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     end
 
     @tag :logged_in_user
+    test "does not query schedules if not a trip based alert",
+         %{conn: conn} do
+      alert_params =
+        build(:alert_map, %{
+          alert_id: "test-bus-query",
+          effect: :OTHER_EFFECT,
+          effect_detail: "DELAY",
+          primary_service_type: "3",
+          informed_entity: [
+            %{route_type: 3, route_id: @bus_route.id, stop_id: @stop_2.id, direction_id: 0}
+          ],
+          original_route_selections: ["SLW|746"],
+          original_stop_selections: ["Courthouse (outbound)|place-crtst"]
+        })
+
+      {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@bus_route] end,
+           get: fn _ -> @bus_route end,
+           get: fn _, _ -> @bus_route end,
+           all: fn _ -> [@bus_route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop, @stop_2] end,
+           get_parent: fn _ -> nil end
+         ]},
+        {SchedulesRepo, [],
+         [by_route_ids: fn _, _ -> [] end, end_of_rating: fn -> Date.add(@todays_date, 1) end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/edit/test-bus-query")
+        render_async(view)
+
+        {:ok, document} = view |> render() |> Floki.parse_document()
+
+        assert document_has_element?(
+                 document,
+                 "option[value=\"746\"][selected=\"selected\"]"
+               )
+
+        refute called(SchedulesRepo.end_of_rating())
+        refute called(SchedulesRepo.by_route_ids(:_, :_))
+      end
+    end
+
+    @tag :logged_in_user
     test "modal search works", %{conn: conn} do
       tomorrow_day_name = Calendar.strftime(Date.add(@todays_date, 1), "%a %b %0d")
 
