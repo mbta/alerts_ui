@@ -150,10 +150,6 @@ Hooks.Selector = {
           // Other options are selected — deselect the prompt "default" option
           const defaultIndex = options.findIndex((opt) => opt.value == "default");
           if (defaultIndex >= 0) options[defaultIndex].selected = false;
-        } else {
-          // Server cleared all selections — sync .selected to match the attributes
-          // (morphdom patches attributes but does not update the .selected property)
-          options.forEach(opt => { opt.selected = opt.hasAttribute("selected"); });
         }
       }
     });
