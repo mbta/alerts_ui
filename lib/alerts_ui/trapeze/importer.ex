@@ -205,10 +205,10 @@ defmodule AlertsUI.Trapeze.Importer do
            can_close_automatically: true
          } = alert,
          %{
-           closed_timestamp: _closed_timestamp
+           closed_timestamp: closed_timestamp
          }
        ),
-       do: do_close(alert)
+       do: do_close(alert, closed_timestamp)
 
   # When the alert is operating on the same Work Order
   defp close(
@@ -217,22 +217,27 @@ defmodule AlertsUI.Trapeze.Importer do
            work_order_id: work_order_id
          } = alert,
          %{
-           closed_timestamp: _closed_timestamp,
+           closed_timestamp: closed_timestamp,
            work_order_id: work_order_id
          }
        ),
-       do: do_close(alert)
+       do: do_close(alert, closed_timestamp)
 
   # Any other case should be ignored.
   defp close(%Alert{closed_timestamp: _}, _),
     do: {:ok, "open -> open: IGNORE can't close automatically"}
 
-  defp do_close(alert) do
+  defp do_close(alert, closed_timestamp) do
+    closed_timestamp =
+      if close_when_noticed?(),
+        do: DateTime.now!("America/New_York") |> DateTime.truncate(:second),
+        else: closed_timestamp |> DateTime.from_naive!("America/New_York")
+
     Alerts.close(
       Repo.reload!(alert),
       @closed_origin,
       true,
-      DateTime.now!("America/New_York") |> DateTime.truncate(:second)
+      closed_timestamp
     )
 
     {:ok, "open -> closed: CLOSE"}
@@ -247,4 +252,5 @@ defmodule AlertsUI.Trapeze.Importer do
         SFTP.source_description().filename in [nil, ""]
 
   defp enabled?, do: FeatureFlags.enabled?("Trapeze Import")
+  defp close_when_noticed?, do: FeatureFlags.enabled?("Trapeze Close Time When Noticed")
 end

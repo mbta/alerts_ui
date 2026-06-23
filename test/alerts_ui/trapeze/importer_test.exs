@@ -254,7 +254,37 @@ defmodule AlertsUI.Trapeze.ImporterTest do
       assert result == {:ok, "open -> open: IGNORE open, no change"}
     end
 
-    test "alert for this facility exists and can close automatically, close it" do
+    test "alert for this facility exists and is closable, close when it closed" do
+      AlertsUI.FeatureFlags.disable("Trapeze Close Time When Noticed")
+
+      existing_alert =
+        insert(:alert, %{
+          primary_service_type: "access",
+          effect_name: "Elevator Closure",
+          closed_timestamp: nil,
+          original_facility_selections: ["stop|123"],
+          work_order_id: nil,
+          can_close_automatically: true
+        })
+
+      result =
+        Importer.persist(%{
+          primary_service_type: "access",
+          effect_name: "Elevator Closure",
+          facility_ids: ["123"],
+          work_order_id: "TESTORDER1",
+          closed_timestamp: ~U[2026-02-19 08:01:00Z],
+          status: :closed
+        })
+
+      alert = Repo.reload!(existing_alert)
+      assert alert.closed_timestamp != nil
+      assert result == {:ok, "open -> closed: CLOSE"}
+    end
+
+    test "alert for this facility exists and is closable, close 'now'" do
+      AlertsUI.FeatureFlags.enable("Trapeze Close Time When Noticed")
+
       existing_alert =
         insert(:alert, %{
           primary_service_type: "access",
