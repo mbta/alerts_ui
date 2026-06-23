@@ -1243,7 +1243,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     end
 
     @tag :logged_in_user
-    test "renders correctly while editing an existing commuter rail alert", %{conn: conn} do
+    test "renders with 'All Future Trips' selected while editing an existing commuter rail alert",
+         %{conn: conn} do
       alert_params =
         build(:alert_map, %{
           alert_id: "test-cr-edit",
@@ -1267,7 +1268,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            all: fn _ -> [@route] end
          ]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end, get_parent: fn _ -> nil end]},
-        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+        {SchedulesRepo, [],
+         [by_route_ids: fn _, _ -> [] end, end_of_rating: fn -> Date.add(@todays_date, 7) end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/mono/edit/test-cr-edit")
         render_async(view)
@@ -1278,6 +1280,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
                  document,
                  "option[value=\"CR-Worcester\"][selected=\"selected\"]"
                )
+
+        assert render(view) =~ "Filter: All future trips"
       end
     end
 

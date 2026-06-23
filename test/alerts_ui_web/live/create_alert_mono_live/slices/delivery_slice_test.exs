@@ -22,6 +22,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
     name: "Red Line"
   }
 
+  @todays_date DateTime.utc_now()
+               |> DateTime.shift_zone!("America/New_York")
+               |> DateTime.to_date()
+
   describe "component" do
     @tag :logged_in_user
     test "renders", %{conn: conn} do
@@ -320,7 +324,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
          [
            by_route_id: fn _route_id, _opts -> [] end
          ]},
-        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]}
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _route_ids, _opts -> [] end,
+           end_of_rating: fn -> Date.add(@todays_date, 7) end
+         ]}
       ]) do
         alert_params =
           build(:alert_map, %{
@@ -373,7 +381,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
            get_parent: fn _ -> %{id: @stop.id} end,
            all: fn ["filter[id]": ""], _ -> [] end
          ]},
-        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _route_ids, _opts -> [] end,
+           end_of_rating: fn -> Date.add(@todays_date, 7) end
+         ]},
         {RoutesRepo, [],
          [
            by_type: fn _types -> [@route] end,
@@ -446,7 +458,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
            get_parent: fn _ -> %{id: @stop.id} end,
            all: fn _, _ -> [@stop] end
          ]},
-        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _route_ids, _opts -> [] end,
+           end_of_rating: fn -> Date.add(@todays_date, 7) end
+         ]},
         {RoutesRepo, [],
          [
            by_type: fn _types -> [@route] end,
