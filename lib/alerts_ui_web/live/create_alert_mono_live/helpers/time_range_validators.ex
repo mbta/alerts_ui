@@ -279,12 +279,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
     )
   end
 
-  def validate_notification(changeset, _current_time, true), do: changeset
+  def validate_notification_time(changeset, start_time) do
+    naive_start = naive_start(changeset, start_time)
 
-  def validate_notification(changeset, current_time, _) do
-    naive_start = naive_start(changeset, current_time)
-
-    validate_start(changeset, naive_start, current_time)
+    validate_notification_start(changeset, naive_start, start_time)
   end
 
   def validate_required_notification_fields(changeset) do
@@ -315,9 +313,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
     end
   end
 
-  defp validate_start(changeset, nil, _), do: changeset
+  defp validate_notification_start(changeset, nil, _), do: changeset
 
-  defp validate_start(changeset, naive_start, current_time) do
+  defp validate_notification_start(changeset, naive_start, current_time) do
     validate_change(
       changeset,
       :notification_period_start,

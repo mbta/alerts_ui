@@ -181,7 +181,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
 
   describe "editing" do
     @tag :logged_in_user
-    test "editing does not check start time", %{conn: conn} do
+    test "editing checks notification start time", %{conn: conn} do
       create_test_alert("np-edit-1")
 
       {:ok, view, _html} = live(conn, "/alerts/mono/edit/np-edit-1")
@@ -195,7 +195,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
         }
       })
 
-      refute render(view) =~ "Notifications can&#39;t be set in the past"
+      assert render(view) =~ "Notifications can&#39;t be set in the past"
     end
 
     @tag :logged_in_user
