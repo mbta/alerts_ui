@@ -95,14 +95,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     def assigns(_service_data, socket, params) do
       socket = AffectedServiceSlice.async_assign_selections(socket, params)
 
-      # When the server clears stop selections (e.g. route was deselected), morphdom
-      # removes the `selected` attribute but does NOT update option.selected properties.
-      # Push an explicit event so the JS hook can sync the DOM property to match.
-      if socket.assigns.form[:stop_names_and_ids].value in [nil, []] do
-        push_event(socket, "adjustSelections", %{stop_names_and_ids: []})
-      else
-        socket
-      end
+      # We do not want to let the user select both "All trips" and an individual trip
+      # We push the data to the client (hooks.js) to filter for us
+      maybe_needs_adjusting = %{
+        stop_names_and_ids: socket.assigns.form[:stop_names_and_ids].value,
+        trip_ids: socket.assigns.form[:trip_ids].value
+      }
+
+      push_event(socket, "adjustSelections", maybe_needs_adjusting)
     end
   end
 
