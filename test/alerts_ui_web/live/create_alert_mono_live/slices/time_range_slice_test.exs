@@ -586,7 +586,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         }
       })
 
-      assert view |> element("#time_range_view") |> render() =~
+      assert view |> element("#alert_data_active_period_start_date-root-element") |> render() =~
                ~s(Alert start day must match a selected day of the week.)
 
       view
@@ -597,7 +597,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         }
       })
 
-      refute view |> element("#time_range_view") |> render() =~
+      refute view |> element("#alert_data_active_period_start_date-root-element") |> render() =~
                ~s(Alert start day must match a selected day of the week.)
     end
 

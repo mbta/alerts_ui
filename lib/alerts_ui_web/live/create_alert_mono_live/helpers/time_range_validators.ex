@@ -232,11 +232,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
     if timing in [:recurring, "recurring"] do
       validate_change(
         changeset,
-        :recurrence_days,
-        fn :recurrence_days, recurrence_days ->
-          start_date = get_field(changeset, :active_period_start_date)
-          specifier = get_field(changeset, :active_period_start_specifier)
-          validate_start_date_matches_weekday(start_date, recurrence_days, specifier)
+        :active_period_start_date,
+        fn :active_period_start_date, active_period_start_date ->
+          validate_start_date_matches_weekday(
+            active_period_start_date,
+            get_field(changeset, :recurrence_days),
+            get_field(changeset, :active_period_start_specifier)
+          )
         end
       )
     else
@@ -386,7 +388,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
       []
     else
       [
-        recurrence_days: {"Alert start day must match a selected day of the week.", []}
+        active_period_start_date: {"Alert start day must match a selected day of the week.", []}
       ]
     end
   end
@@ -395,7 +397,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
     if day_num_to_atom(Date.day_of_week(start_date)) in recurrence_days do
       []
     else
-      [recurrence_days: {"Alert start day must match a selected day of the week.", []}]
+      [active_period_start_date: {"Alert start day must match a selected day of the week.", []}]
     end
   end
 
