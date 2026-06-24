@@ -181,7 +181,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     search_filter_name =
       hd(Regex.run(~r/\[(.*?)\]/, name, capture: :all_but_first))
 
-    params = %{"alert_data" => %{search_filter_name => nil}}
+    params = %{
+      "_target" => ["alert_data", search_filter_name],
+      "alert_data" => %{search_filter_name => nil}
+    }
+
     {:noreply, sync_socket(socket, params)}
   end
 
