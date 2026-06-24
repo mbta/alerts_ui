@@ -122,11 +122,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
     prev_selected_stops = prev_selected_stops(prev)
 
+    route_type_for_filter =
+      if route_type in [0, 1] do
+        [0, 1]
+      else
+        route_type
+      end
+
     socket
     |> assign(:selections, %{prev | loading: true})
     |> start_async(:fetch_selections, fn ->
       available_filter_routes =
-        CreateAlertLive.get_routes(route_type)
+        CreateAlertLive.get_routes(route_type_for_filter)
 
       available_stops =
         CreateAlertLive.get_stops_for_stop_route(stop_route_ids, route_type)
