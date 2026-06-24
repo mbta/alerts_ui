@@ -8,7 +8,7 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
   silently created a "sent" reminder at the current time instead of showing a
   validation error.
 
-  Root cause was in `ReminderTimesSlice.reminder_time_changeset/2`: it lacked a
+  Root cause was in `ReminderTimesSlice.reminder_time_changeset`: it lacked a
   `validate_required` call, so a blank `reminder_time` (what iOS Safari's lack of
   `datetime-local` support produces) or a past time would pass without error.
   The `validate` callback in the `Slice` impl was also a no-op before the fix.
@@ -39,19 +39,22 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
   # Changeset-level unit tests (fast, no browser required)
   # ---------------------------------------------------------------------------
 
-  describe "reminder_time_changeset/2 — blank value" do
+  @min_time ~N[2024-09-25 08:00:00]
+  @max_time ~N[2024-09-26 03:00:00]
+
+  describe "reminder_time_changeset/4 — blank value" do
     test "blank reminder_time produces 'Select reminder time' error" do
       params = %{
         "reminder_time" => "",
-        "min_time" => "2024-09-25T08:00:00",
-        "max_time" => "2024-09-26T03:00:00",
         "id" => ""
       }
 
       changeset =
         ReminderTimesSlice.reminder_time_changeset(
           %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{},
-          params
+          params,
+          @min_time,
+          @max_time
         )
 
       refute changeset.valid?
@@ -61,15 +64,15 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
 
     test "nil reminder_time produces 'Select reminder time' error" do
       params = %{
-        "min_time" => "2024-09-25T08:00:00",
-        "max_time" => "2024-09-26T03:00:00",
         "id" => ""
       }
 
       changeset =
         ReminderTimesSlice.reminder_time_changeset(
           %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{},
-          params
+          params,
+          @min_time,
+          @max_time
         )
 
       refute changeset.valid?
@@ -78,20 +81,20 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
     end
   end
 
-  describe "reminder_time_changeset/2 — past value" do
-    test "reminder_time before min_time produces 'after notification period starts' error for new entries" do
+  describe "reminder_time_changeset/4 — past value" do
+    test "reminder_time before notification start produces 'after notification period starts' error for new entries" do
       # new entry: id is blank
       params = %{
         "reminder_time" => "2024-09-25T06:00:00",
-        "min_time" => "2024-09-25T08:00:00",
-        "max_time" => "2024-09-26T03:00:00",
         "id" => ""
       }
 
       changeset =
         ReminderTimesSlice.reminder_time_changeset(
           %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{},
-          params
+          params,
+          @min_time,
+          @max_time
         )
 
       refute changeset.valid?
@@ -103,22 +106,22 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
              end)
     end
 
-    test "existing reminder (has id) before min_time does NOT produce a past-time error" do
+    test "existing reminder (has id) before notification start does NOT produce a past-time error" do
       # existing record: past times are allowed (already sent)
       params = %{
         "reminder_time" => "2024-09-25T06:00:00",
-        "min_time" => "2024-09-25T08:00:00",
-        "max_time" => "2024-09-26T03:00:00",
         "id" => "some-existing-uuid"
       }
 
       changeset =
         ReminderTimesSlice.reminder_time_changeset(
           %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{},
-          params
+          params,
+          @min_time,
+          @max_time
         )
 
-      # existing records bypass the min_time check
+      # existing records bypass the notification-start check
       past_time_errors = Keyword.get_values(changeset.errors, :reminder_time)
 
       refute Enum.any?(past_time_errors, fn {msg, _opts} ->
@@ -127,19 +130,37 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
     end
   end
 
-  describe "reminder_time_changeset/2 — valid future value" do
-    test "future reminder time within max_time has no errors" do
+  describe "reminder_time_changeset/4 — valid future value" do
+    test "future reminder time within notification end has no errors" do
       params = %{
         "reminder_time" => "2024-09-25T12:00:00",
-        "min_time" => "2024-09-25T08:00:00",
-        "max_time" => "2024-09-26T03:00:00",
         "id" => ""
       }
 
       changeset =
         ReminderTimesSlice.reminder_time_changeset(
           %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{},
-          params
+          params,
+          @min_time,
+          @max_time
+        )
+
+      assert changeset.valid?
+      assert changeset.errors == []
+    end
+
+    test "nil notification end (until further notice) skips the upper-bound check" do
+      params = %{
+        "reminder_time" => "3030-01-01T00:00:00",
+        "id" => ""
+      }
+
+      changeset =
+        ReminderTimesSlice.reminder_time_changeset(
+          %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{},
+          params,
+          @min_time,
+          nil
         )
 
       assert changeset.valid?
@@ -166,7 +187,8 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
         "alert_data" => %{"reminder_sort" => ["new"]}
       })
 
-      # Submit a past reminder time with min_time set to a clearly later time
+      # Submit a reminder time in the past. Bounds come from the notification period,
+      # which defaults to "now" for a new alert, so 2020 is before it.
       rendered =
         view
         |> element("form")
@@ -177,8 +199,6 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
               "0" => %{
                 "_persistent_id" => "0",
                 "id" => "",
-                "min_time" => "2026-01-01T08:00:00",
-                "max_time" => "2026-12-31T23:00:00",
                 "reminder_time" => "2020-01-01T10:00:00"
               }
             }
@@ -215,8 +235,6 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
               "0" => %{
                 "_persistent_id" => "0",
                 "id" => "",
-                "min_time" => "2026-01-01T08:00:00",
-                "max_time" => "2026-12-31T23:00:00",
                 "reminder_time" => ""
               }
             }

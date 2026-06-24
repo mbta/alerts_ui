@@ -34,13 +34,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
     def transform(_slice, changeset, params, _socket) do
       case params do
         %{"alert_data" => _alert_data_params} ->
+          # NotificationPeriodSlice definitely runs first, so these are accurate
+          min_time = get_field(changeset, :notification_period_start)
+          max_time = get_field(changeset, :notification_period_end)
+
           changeset
           |> cast(params, [])
           |> ReminderTimesSlice.materialize_reminder_times()
           |> cast_embed(:reminder_times,
             sort_param: :reminder_sort,
             drop_param: :reminder_drop,
-            with: &ReminderTimesSlice.reminder_time_changeset/2
+            with: &ReminderTimesSlice.reminder_time_changeset(&1, &2, min_time, max_time)
           )
 
         _ ->
@@ -69,38 +73,47 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
     %{changeset | data: new_data, changes: Map.delete(changeset.changes, :reminder_times)}
   end
 
-  def reminder_time_changeset(source, params) do
-    cast(source, params, [:reminder_time, :max_time, :min_time, :id])
+  def reminder_time_changeset(source, params, min_time, max_time) do
+    source
+    |> cast(params, [:reminder_time, :id])
     |> validate_required(:reminder_time, message: "Select reminder time")
-    |> validate_change(:reminder_time, fn :reminder_time, time ->
-      exists? = String.trim(params["id"] || "") != ""
-      min_time_string = params["min_time"] |> String.pad_trailing(19, ":00")
-
-      with {:ok, min_time} <- NaiveDateTime.from_iso8601(min_time_string),
-           false <- exists?,
-           :gt <- NaiveDateTime.compare(min_time, time) do
-        message =
-          "Reminder time must be after notification period starts (#{min_time |> formatted_datetime})"
-
-        [reminder_time: message]
-      else
-        _ -> []
-      end
-    end)
-    |> validate_change(:reminder_time, fn :reminder_time, time ->
-      max_time_string = params["max_time"] |> String.pad_trailing(19, ":00")
-
-      with {:ok, max_time} <- NaiveDateTime.from_iso8601(max_time_string),
-           :lt <- NaiveDateTime.compare(max_time, time) do
-        message =
-          "Reminder time must be before notification period ends (#{max_time |> formatted_datetime})"
-
-        [reminder_time: message]
-      else
-        _ -> []
-      end
-    end)
+    |> validate_after_notification_start(params, min_time)
+    |> validate_before_notification_end(max_time)
   end
+
+  defp validate_after_notification_start(changeset, params, %NaiveDateTime{} = min_time) do
+    exists? = String.trim(params["id"] || "") != ""
+    time = get_field(changeset, :reminder_time)
+
+    if not exists? and match?(%NaiveDateTime{}, time) and
+         NaiveDateTime.compare(min_time, time) == :gt do
+      add_error(
+        changeset,
+        :reminder_time,
+        "Reminder time must be after notification period starts (#{min_time |> formatted_datetime})"
+      )
+    else
+      changeset
+    end
+  end
+
+  defp validate_after_notification_start(changeset, _params, _min_time), do: changeset
+
+  defp validate_before_notification_end(changeset, %NaiveDateTime{} = max_time) do
+    time = get_field(changeset, :reminder_time)
+
+    if match?(%NaiveDateTime{}, time) and NaiveDateTime.compare(max_time, time) == :lt do
+      add_error(
+        changeset,
+        :reminder_time,
+        "Reminder time must be before notification period ends (#{max_time |> formatted_datetime})"
+      )
+    else
+      changeset
+    end
+  end
+
+  defp validate_before_notification_end(changeset, _max_time), do: changeset
 
   def add_new_time(changeset, %{"reminder_times" => %{"new" => "new"}}) do
     existing = get_field(changeset, :reminder_times, [])
@@ -113,7 +126,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
     indices = Enum.filter(indices, &(&1 != ""))
     reminder_times = get_field(changeset, :reminder_times, [])
 
-    # This is blowing away the errors byb pulling them out and readding them.
+    # This is blowing away the errors by pulling them out and readding them.
     filtered =
       Enum.reduce(indices, reminder_times, fn index, rts ->
         List.pop_at(rts, String.to_integer(index)) |> elem(1)
@@ -175,18 +188,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
       name="alert_data[reminder_sort][]"
       value={@index}
       id={"reminder_times-sort-#{@index}"}
-    />
-    <input
-      type="hidden"
-      name={"alert_data[reminder_times][#{@index}][min_time]"}
-      value={@notification_start |> naive_datetime_to_iso8601()}
-      id={"reminder_times-#{@index}-min_time"}
-    />
-    <input
-      type="hidden"
-      name={"alert_data[reminder_times][#{@index}][max_time]"}
-      value={@notification_end |> naive_datetime_to_iso8601()}
-      id={"reminder_times-#{@index}-max_time"}
     />
     <input :if={@id} type="hidden" name={"alert_data[reminder_times][#{@index}][id]"} value={@id} />
     <input
