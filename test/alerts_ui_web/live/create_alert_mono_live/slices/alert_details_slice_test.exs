@@ -527,7 +527,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
       conn: conn
     } do
       with_mock(
-        FacilitiesRepo, get_by_type: fn _facility_types, _opts -> [@facility] end
+        FacilitiesRepo,
+        get_by_type: fn _facility_types, _opts -> [@facility] end
       ) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
 
@@ -552,7 +553,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
         |> render_change(%{
           alert_data: %{
             header_sync_toggle: false,
-            header_text: "my custom text",
+            header_text: "my custom text"
           }
         })
 
