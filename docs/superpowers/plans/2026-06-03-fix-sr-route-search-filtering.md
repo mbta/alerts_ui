@@ -64,7 +64,7 @@ test "route search filters impacted route options after stop selection", %{conn:
        by_route: fn _, _, _ -> [@stop] end
      ]}
   ]) do
-    {:ok, view, _html} = live(conn, "/alerts/mono/new")
+    {:ok, view, _html} = live(conn, "/alerts/new")
     get_to_submission_page_refactor(view, "Subway", "Station closure")
 
     view
@@ -111,7 +111,7 @@ test "route search can clear", %{conn: conn} do
        by_route: fn _, _, _ -> [@stop] end
      ]}
   ]) do
-    {:ok, view, _html} = live(conn, "/alerts/mono/new")
+    {:ok, view, _html} = live(conn, "/alerts/new")
     get_to_submission_page_refactor(view, "Subway", "Station closure")
 
     view

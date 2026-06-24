@@ -14,7 +14,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSliceTest do
   describe "component" do
     @tag :logged_in_user
     test "renders", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Systemwide", "Notice")
 
       assert render(view) =~ ~s(id="systemwide_service_view")
@@ -23,7 +23,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSliceTest do
 
     @tag :logged_in_user
     test "shows an error if no service type selected", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Systemwide", "Notice")
 
       view |> element("button#review", "Review and submit") |> render_click()
@@ -34,7 +34,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSliceTest do
 
     @tag :logged_in_user
     test "no error when service type is selected", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Systemwide", "Notice")
 
       view
@@ -57,14 +57,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSliceTest do
         })
 
       {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
-      {:ok, view, _html} = live(conn, "/alerts/mono/edit/test-systemwide-edit")
+      {:ok, view, _html} = live(conn, "/alerts/edit/test-systemwide-edit")
 
       assert render(view) =~ ~s(value="1")
     end
 
     @tag :logged_in_user
     test "service type checkbox is shown as checked after selecting it", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Systemwide", "Notice")
 
       view
@@ -78,7 +78,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSliceTest do
 
     @tag :logged_in_user
     test "invalid service type string is rejected on submit", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Systemwide", "Notice")
 
       view
@@ -92,7 +92,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSliceTest do
 
     @tag :logged_in_user
     test "string service type values are cast to integers and shown as checked", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Systemwide", "Notice")
 
       view

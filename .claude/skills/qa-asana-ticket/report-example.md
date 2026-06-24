@@ -51,7 +51,7 @@ No console errors (CSP/live-debugger noise excluded).
 
 ## Notes / blockers
 
-- Direct URL `/alerts/mono/new/3/stop_closure` 500s (`Protocol.UndefinedError`
+- Direct URL `/alerts/new/3/stop_closure` 500s (`Protocol.UndefinedError`
   in `humanize_effect_name`) — the bus route_type slug in the URL is `bus`, not
   `3`. Drove the UI by clicking instead; not part of this ticket.
 - No iteration caps were hit.

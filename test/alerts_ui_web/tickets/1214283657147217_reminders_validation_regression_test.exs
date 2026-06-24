@@ -177,7 +177,7 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
     test "past reminder date shows validation error in rendered HTML; no 'Sent' indicator", %{
       conn: conn
     } do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
 
       # Add a reminder entry
@@ -215,7 +215,7 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
     test "blank reminder date shows 'Select reminder time' error; no 'Sent' indicator", %{
       conn: conn
     } do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
 
       # Add a reminder entry with no reminder_time value

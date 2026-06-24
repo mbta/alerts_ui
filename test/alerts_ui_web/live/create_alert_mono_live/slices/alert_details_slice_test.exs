@@ -83,21 +83,21 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
   describe "component" do
     @tag :logged_in_user
     test "renders", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Ferry", "Delay")
       assert render(view) =~ ~s(id="details_view")
     end
 
     @tag :logged_in_user
     test "gets causes correctly", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Ferry", "Delay")
       assert render(view) =~ ~s(fog)
     end
 
     @tag :logged_in_user
     test "capitalizes Amtrak in causes", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Delay")
 
       view
@@ -117,7 +117,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
     @tag :logged_in_user
     test "capitalizes Coast Guard in causes", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Ferry", "Delay")
 
       view
@@ -139,7 +139,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
   describe "severity" do
     @tag :logged_in_user
     test "gets default severity correctly", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Ferry", "Delay")
 
       assert view
@@ -148,7 +148,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
     @tag :logged_in_user
     test "allows severity to be set by user", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Ferry", "Delay")
 
       view
@@ -167,7 +167,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
   describe "cause detail" do
     @tag :logged_in_user
     test "gets default cause detail correctly", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Subway", "Single tracking")
 
       assert view
@@ -177,7 +177,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
     @tag :logged_in_user
     test "allows cause to be set by user", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Ferry", "Delay")
 
       view
@@ -210,7 +210,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
            }}
         end
       ) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Ferry", "Delay")
 
         refute view
@@ -236,7 +236,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
     @tag :logged_in_user
     test "shows error if url has invalid scheme", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Ferry", "Delay")
 
       view
@@ -256,7 +256,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
     @tag :logged_in_user
     test "shows error if image is not from our CDN", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Ferry", "Delay")
 
       view
@@ -286,7 +286,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
            }}
         end
       ) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Ferry", "Delay")
 
         view
@@ -317,7 +317,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
            }}
         end
       ) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Ferry", "Delay")
 
         view
@@ -337,7 +337,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
   describe "auto text" do
     @tag :logged_in_user
     test "shows error on submit if header text is blank", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Ferry", "Delay")
 
       view
@@ -359,7 +359,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
     test "duration works correctly in case where time is start-to-end in future the same day", %{
       conn: conn
     } do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
 
       view = get_to_submission_page_refactor(conn, view, "Ferry", "Dock closure")
 
@@ -394,7 +394,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
          %{
            conn: conn
          } do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
 
       view = get_to_submission_page_refactor(conn, view, "Ferry", "Dock closure")
 
@@ -440,7 +440,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
         {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
         {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
 
         view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Suspension")
 
@@ -484,7 +484,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
         {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
         {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop, @stop_2] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
 
         view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Suspension")
 
@@ -530,7 +530,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
         FacilitiesRepo,
         get_by_type: fn _facility_types, _opts -> [@facility] end
       ) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
 
         view = get_to_submission_page_refactor(conn, view, "Facility", "Bike issue")
 
@@ -591,7 +591,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
         {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
         {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop, @stop_2] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Suspension")
         render_async(view)
 
@@ -640,7 +640,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
            by_route: fn _, _, _opts -> [@stop, @stop_2, @stop_3] end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
 
         view = get_to_submission_page_refactor(conn, view, "Ferry", "Dock closure")
 
@@ -685,7 +685,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
            by_route: fn _, _, _opts -> [@stop, @stop_2, @stop_3] end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
 
         view = get_to_submission_page_refactor(conn, view, "Ferry", "Dock closure")
 
@@ -731,7 +731,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
            by_route: fn _, _, _opts -> [@stop, @stop_2, @stop_3] end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
 
         view = get_to_submission_page_refactor(conn, view, "Ferry", "Dock closure")
 
@@ -784,7 +784,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
          ]},
         {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop, @stop_2] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
 
         view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Delay")
 
@@ -850,7 +850,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
            by_route: fn _, _, _ -> [@stop, @stop_2, @stop_3] end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
 
         view = get_to_submission_page_refactor(conn, view, "Ferry", "Dock closure")
 
@@ -894,7 +894,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
       conn: conn
     } do
       with_mock(FacilitiesRepo, get_by_type: fn _facility_types, _opts -> [@facility] end) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
 
         view = get_to_submission_page_refactor(conn, view, "Facility", "Elevator closure")
 
@@ -935,7 +935,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
     test "systemwide autotext works", %{
       conn: conn
     } do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
 
       @todays_date =
         DateTime.utc_now()
@@ -1034,7 +1034,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
           )
 
         {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
-        {:ok, view, _html} = live(conn, "/alerts/mono/edit/123")
+        {:ok, view, _html} = live(conn, "/alerts/edit/123")
 
         render_async(view)
 

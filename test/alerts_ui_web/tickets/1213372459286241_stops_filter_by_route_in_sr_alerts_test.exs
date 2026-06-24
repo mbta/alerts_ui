@@ -93,7 +93,7 @@ defmodule AlertsUIWeb.Tickets.StopsFilterByRouteInSrAlertsTest do
            end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Bus", "Stop closure")
         render_async(view)
 
@@ -155,7 +155,7 @@ defmodule AlertsUIWeb.Tickets.StopsFilterByRouteInSrAlertsTest do
            end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Bus", "Stop closure")
         render_async(view)
 

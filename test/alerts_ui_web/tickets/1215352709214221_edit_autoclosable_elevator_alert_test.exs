@@ -10,7 +10,7 @@ defmodule AlertsUIWeb.Tickets.EditAutoclosableElevatorAlertTest do
   the existing one (`get_change` is nil for unchanged fields).
 
   This is the mono-flow counterpart of the original test, driving the
-  `/alerts/mono/edit/:alert_id` flow.
+  `/alerts/edit/:alert_id` flow.
   """
   use ExUnit.Case, async: false
   use AlertsUIWeb.ConnCase
@@ -87,7 +87,7 @@ defmodule AlertsUIWeb.Tickets.EditAutoclosableElevatorAlertTest do
         )
 
       {:ok, view, _html} =
-        live(conn, "/alerts/mono/edit/#{alert.alert_id}")
+        live(conn, "/alerts/edit/#{alert.alert_id}")
 
       render_async(view)
 

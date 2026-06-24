@@ -497,7 +497,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         raise %ArgumentError{message: "you need an alert id to #{action}"}
 
       {alert_id, :new} ->
-        redirect(socket, ~p"/alerts/mono/edit/#{alert_id}")
+        redirect(socket, ~p"/alerts/edit/#{alert_id}")
 
       {alert_id, :edit} ->
         edit_existing_alert(socket, params, alert_id)

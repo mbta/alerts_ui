@@ -10,14 +10,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
   describe "component" do
     @tag :logged_in_user
     test "renders", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
       assert render(view) =~ ~s(id="reminder_times_form")
     end
 
     @tag :logged_in_user
     test "reminder picker appears with error message when Add Reminder is pressed", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
 
       rendered =
@@ -33,7 +33,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
 
     @tag :logged_in_user
     test "generates a new empty entry when a filled one exists", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
 
       refute view
@@ -89,7 +89,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
 
     @tag :logged_in_user
     test "reminder picker disappears when X is pressed", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
 
       rendered =
@@ -114,7 +114,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
     @tag :logged_in_user
     test "reminder validates against notification start, not current time, when specifier is same_as_effect_period",
          %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
 
       view
@@ -158,7 +158,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
     @tag :logged_in_user
     test "reminder has no upper bound when active period specifier is until further notice",
          %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
 
       view
@@ -193,7 +193,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
 
     @tag :logged_in_user
     test "doesn't error if time entered is within notification period", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
 
       view
@@ -240,7 +240,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
 
     @tag :logged_in_user
     test "shows error if time entered is before effect start", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
 
       view
@@ -278,7 +278,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
 
     @tag :logged_in_user
     test "shows error if time entered is before notification period", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
 
       view
@@ -318,7 +318,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
     @tag :logged_in_user
     test "reminder validates when the notifiation period changes",
          %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
 
       view
@@ -364,7 +364,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
 
     @tag :logged_in_user
     test "shows error if time entered is after effect start", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
 
       # End of service for 2024-09-25 lands at 2024-09-26 03:00, before the reminder.
@@ -474,7 +474,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
       {:ok, _} =
         Alerts.create_or_update_alert(alert_params, build(:user))
 
-      {:ok, view, _html} = live(conn, "/alerts/mono/edit/123")
+      {:ok, view, _html} = live(conn, "/alerts/edit/123")
 
       rendered_view = render(view)
 
@@ -504,7 +504,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
       {:ok, _} =
         Alerts.create_or_update_alert(alert_params, build(:user))
 
-      {:ok, view, _html} = live(conn, "/alerts/mono/edit/123")
+      {:ok, view, _html} = live(conn, "/alerts/edit/123")
 
       render(view)
 
@@ -556,7 +556,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
       {:ok, _} =
         Alerts.create_or_update_alert(alert_params, build(:user))
 
-      {:ok, view, _html} = live(conn, "/alerts/mono/duplicate/123")
+      {:ok, view, _html} = live(conn, "/alerts/duplicate/123")
 
       refute view |> element("#reminder_times_form") |> render =~
                ~s(value=\"2024-04-30T07:54:00\")
@@ -596,7 +596,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
     test "removes a freshly-added empty reminder even when other validation errors exist", %{
       conn: conn
     } do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new/bus/delay")
+      {:ok, view, _html} = live(conn, "/alerts/new/bus/delay")
       initial_socket = :sys.get_state(view.pid).socket
 
       # Add a reminder while the form is invalid (effect start in the past). The
@@ -633,7 +633,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
     test "removes a reminder that has a datetime value while form is invalid", %{conn: conn} do
       # The "drop the last one" case called out in the f2f10fb6 commit message —
       # specifically a reminder that has a real value, not just a blank row.
-      {:ok, view, _html} = live(conn, "/alerts/mono/new/bus/delay")
+      {:ok, view, _html} = live(conn, "/alerts/new/bus/delay")
       initial_socket = :sys.get_state(view.pid).socket
 
       after_add = sync!(initial_socket, invalid_form_params(%{"reminder_sort" => ["new"]}))

@@ -7,7 +7,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSliceTest do
   describe "component" do
     @tag :logged_in_user
     test "renders", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       # first page
       assert render(view) =~ ~s(Alert type)
       assert view |> element("#route_type_and_effect") |> render =~ ~s(text-text-primary)

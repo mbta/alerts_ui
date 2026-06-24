@@ -358,13 +358,13 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   @impl true
   def handle_event("edit_alert", %{"alert_id" => alert_id}, socket) do
     socket = assign(socket, scroll_to_top: false)
-    {:noreply, push_navigate(socket, to: ~p"/alerts/mono/edit/#{alert_id}")}
+    {:noreply, push_navigate(socket, to: ~p"/alerts/edit/#{alert_id}")}
   end
 
   @impl true
   def handle_event("duplicate_alert", %{"alert_id" => alert_id}, socket) do
     socket = assign(socket, scroll_to_top: true)
-    {:noreply, push_navigate(socket, to: ~p"/alerts/mono/duplicate/#{alert_id}")}
+    {:noreply, push_navigate(socket, to: ~p"/alerts/duplicate/#{alert_id}")}
   end
 
   @impl true

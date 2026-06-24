@@ -26,7 +26,7 @@ page.on('console', (m) => m.type() === 'error' && consoleErrors.push(m.text()));
 
 try {
   // --- adapt from here: follow the ticket's Steps to Reproduce ---
-  await page.goto(`${BASE}/alerts/mono/new`);          // alert URLs must contain /mono/
+  await page.goto(`${BASE}/alerts/new`);          // alert URLs must contain /mono/
   // If this lands on login-dev.mbtace.com, the saved session has expired:
   // report BLOCKED and ask the orchestrator/user to re-capture, don't try to log in.
   await page.getByRole('button', { name: /subway/i }).click();

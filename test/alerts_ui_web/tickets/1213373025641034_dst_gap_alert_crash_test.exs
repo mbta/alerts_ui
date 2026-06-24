@@ -36,7 +36,7 @@ defmodule AlertsUIWeb.Tickets.DstGapAlertCrashTest do
 
   ## Test approach
 
-  These tests drive the LiveView form at `/alerts/mono/new` to verify that:
+  These tests drive the LiveView form at `/alerts/new` to verify that:
   - The exact error message appears for DST gap inputs on start, end, and both.
   - No other errors (crash indicators) appear alongside the DST error.
   - Validator ordering is pinned: entering a DST time AND simultaneously
@@ -65,7 +65,7 @@ defmodule AlertsUIWeb.Tickets.DstGapAlertCrashTest do
   describe "DST gap validation — one-time alerts (ticket 1213373025641034)" do
     @tag :logged_in_user
     test "shows exact DST error when effect start is in the 2026 DST gap", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       # Set start specifier to custom to expose the datetime field
@@ -93,7 +93,7 @@ defmodule AlertsUIWeb.Tickets.DstGapAlertCrashTest do
 
     @tag :logged_in_user
     test "shows exact DST error when effect end is in the 2026 DST gap", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       # Set both specifiers to custom
@@ -132,7 +132,7 @@ defmodule AlertsUIWeb.Tickets.DstGapAlertCrashTest do
     test "DST error shown at both the start and end of the gap hour (boundary check)", %{
       conn: conn
     } do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
@@ -162,7 +162,7 @@ defmodule AlertsUIWeb.Tickets.DstGapAlertCrashTest do
 
     @tag :logged_in_user
     test "no DST error for valid times just before and just after the gap", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
@@ -198,7 +198,7 @@ defmodule AlertsUIWeb.Tickets.DstGapAlertCrashTest do
       # the gap datetime, crashing the LiveView. The fix runs `validate_not_dst_gap`
       # first so errors on `active_period_start` are recorded before the
       # localise-dependent validators skip them.
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view

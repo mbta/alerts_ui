@@ -125,7 +125,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {RoutesRepo, [], [by_type: fn _ -> [@route] end]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Suspension")
         render_async(view)
 
@@ -144,7 +144,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          ]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Delay")
         render_async(view)
         assert render(view) =~ ~s(id="service_view")
@@ -182,7 +182,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          ]},
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Subway", "Delay")
         render_async(view)
 
@@ -208,7 +208,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]},
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Delay")
         render_async(view)
 
@@ -234,7 +234,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {RoutesRepo, [], [by_type: fn _ -> [@route] end]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Delay")
         render_async(view)
 
@@ -252,7 +252,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          ]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Ferry", "Delay")
         render_async(view)
 
@@ -266,7 +266,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {RoutesRepo, [], [by_type: fn _ -> [@subway_route] end]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Subway", "Delay")
         render_async(view)
 
@@ -280,7 +280,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {RoutesRepo, [], [by_type: fn _ -> [@bus_route] end]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
         render_async(view)
 
@@ -307,7 +307,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            end_of_rating: fn -> Date.add(@todays_date, 7) end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Delay")
         render_async(view)
 
@@ -365,7 +365,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          ]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Delay")
         render_async(view)
 
@@ -414,7 +414,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          ]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Delay")
         render_async(view)
 
@@ -484,7 +484,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          ]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Delay")
         render_async(view)
 
@@ -548,7 +548,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          ]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Delay")
         render_async(view)
 
@@ -593,7 +593,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          ]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Delay")
 
         view
@@ -641,7 +641,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Ferry", "Delay")
         render_async(view)
 
@@ -670,7 +670,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Ferry", "Delay")
         render_async(view)
 
@@ -698,7 +698,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]},
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
         render_async(view)
 
@@ -729,7 +729,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Ferry", "Delay")
         render_async(view)
 
@@ -767,7 +767,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]},
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new/bus/detour")
+        {:ok, view, _html} = live(conn, "/alerts/new/bus/detour")
         render_async(view)
 
         assert render(view) =~ ~s(id="alert_data_stop_names_and_ids" disabled="disabled")
@@ -786,7 +786,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]},
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new/bus/detour")
+        {:ok, view, _html} = live(conn, "/alerts/new/bus/detour")
         render_async(view)
 
         assert render(view) =~ ~s(id="alert_data_stop_names_and_ids" disabled="disabled")
@@ -822,7 +822,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          ]},
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
         render_async(view)
 
@@ -871,7 +871,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          ]},
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/duplicate/test-dup-stops")
+        {:ok, view, _html} = live(conn, "/alerts/duplicate/test-dup-stops")
         render_async(view)
 
         {:ok, document} = view |> render() |> Floki.parse_document()
@@ -894,7 +894,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop, @stop_2] end]},
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
         render_async(view)
 
@@ -956,7 +956,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop, @stop_2] end]},
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
         render_async(view)
 
@@ -1027,7 +1027,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Ferry", "Delay")
         render_async(view)
 
@@ -1060,7 +1060,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          ]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Delay")
         render_async(view)
 
@@ -1098,7 +1098,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          ]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Delay")
         render_async(view)
 
@@ -1158,7 +1158,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          ]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Delay")
         render_async(view)
 
@@ -1223,7 +1223,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]},
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
         render_async(view)
 
@@ -1271,7 +1271,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {SchedulesRepo, [],
          [by_route_ids: fn _, _ -> [] end, end_of_rating: fn -> Date.add(@todays_date, 7) end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/edit/test-cr-edit")
+        {:ok, view, _html} = live(conn, "/alerts/edit/test-cr-edit")
         render_async(view)
 
         {:ok, document} = view |> render() |> Floki.parse_document()
@@ -1319,7 +1319,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {SchedulesRepo, [],
          [by_route_ids: fn _, _ -> [] end, end_of_rating: fn -> Date.add(@todays_date, 1) end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/edit/test-bus-query")
+        {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-query")
         render_async(view)
 
         {:ok, document} = view |> render() |> Floki.parse_document()
@@ -1351,7 +1351,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          ]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Delay")
         render_async(view)
 
@@ -1395,7 +1395,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Ferry", "Delay")
         render_async(view)
 
@@ -1445,7 +1445,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
         render_async(view)
 
@@ -1490,7 +1490,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]},
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
         render_async(view)
 
@@ -1512,7 +1512,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Delay")
         render_async(view)
 
@@ -1572,7 +1572,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            by_route_id: fn _, _ -> [] end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Delay")
         render_async(view)
 
@@ -1685,7 +1685,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            included_stops_by_route_id: fn "CR-Worcester", _ -> [@stop, @stop_2] end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/edit/test-edit-stop")
+        {:ok, view, _html} = live(conn, "/alerts/edit/test-edit-stop")
         render_async(view)
 
         {:ok, document} = view |> render() |> Floki.parse_document()
@@ -1750,7 +1750,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            by_route_id: fn _, _ -> [] end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Cancellation")
         render_async(view)
 
@@ -1818,7 +1818,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]},
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
 
         view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
@@ -1872,7 +1872,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            by_route_id: fn _, _ -> [] end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
 
         view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Delay")
 
@@ -1995,7 +1995,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            included_stops_by_route_id: fn "CR-Worcester", _ -> [@stop, @stop_2] end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/edit/test-e2e-editing")
+        {:ok, view, _html} = live(conn, "/alerts/edit/test-e2e-editing")
         render_async(view)
 
         {:ok, document} =
@@ -2073,7 +2073,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            by_route_id: fn _, _ -> [] end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
 
         view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Cancellation")
 
@@ -2146,7 +2146,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          ]},
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
         render_async(view)
 
@@ -2201,7 +2201,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          ]},
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Subway", "Notice")
         render_async(view)
 
@@ -2244,7 +2244,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]},
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Delay")
         render_async(view)
 

@@ -113,8 +113,8 @@ defmodule AlertsUIWeb.Tickets.OtherActionsMenuNotTruncatedTest do
       for link <- duplicate_links do
         href = Floki.attribute([link], "href") |> List.first()
 
-        assert href =~ "/mono/",
-               "Duplicate link href should contain /mono/, got: #{inspect(href)}"
+        assert href =~ "/alerts/duplicate/",
+               "Duplicate link href should contain /alerts/duplicate/, got: #{inspect(href)}"
       end
 
       # There should be a "Download history" link.
