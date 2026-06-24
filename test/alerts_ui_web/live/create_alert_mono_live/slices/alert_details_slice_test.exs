@@ -476,7 +476,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
     end
 
     @tag :logged_in_user
-    test "header updates if sync buttons is turned off and back on with no error", %{
+    test "header updates if sync buttons is turned off and back on", %{
       conn: conn
     } do
       with_mocks([
@@ -523,19 +523,29 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
     end
 
     @tag :logged_in_user
-    test "header updates if sync buttons is turned off and back with error", %{
+    test "header updates if sync buttons is turned off and back with error on facility alert", %{
       conn: conn
     } do
-      with_mocks([
-        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]},
-        {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
-        {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop, @stop_2] end]}
-      ]) do
+      with_mock(
+        FacilitiesRepo, get_by_type: fn _facility_types, _opts -> [@facility] end
+      ) do
         {:ok, view, _html} = live(conn, "/alerts/mono/new")
 
-        view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Suspension")
+        view = get_to_submission_page_refactor(conn, view, "Facility", "Bike issue")
 
         render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          alert_data: %{facility_ids: ["349"]}
+        })
+
+        view
+        |> element("form")
+        |> render_change(%{
+          alert_data: %{view_banner: true}
+        })
 
         view
         |> element("form")
@@ -543,19 +553,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
           alert_data: %{
             header_sync_toggle: false,
             header_text: "my custom text",
-            route_ids: ["CR-Worcester"]
           }
         })
 
         assert view
                |> element("#alert_data_header_text")
                |> render_async() =~ "my custom text"
-
-        view
-        |> element("form")
-        |> render_change(%{
-          alert_data: %{view_banner: true}
-        })
 
         assert view
                |> render_async() =~ "Check box to show you understand"
@@ -574,7 +577,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
         assert view
                |> element("#alert_data_header_text")
                |> render_async() =~
-                 "Framingham/Worcester"
+                 "Alewife Escalator 349"
       end
     end
 
