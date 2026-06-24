@@ -288,6 +288,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
   # ...but not on any other user interaction...
   defp update_selections?(%{"_target" => _target}), do: false
+  # ...also not on auto-route selection (which does not send a _target)...
+  defp update_selections?(%{"alert_data" => %{"route_ids" => _ids}}), do: false
   # ...and always on mount, when there is no target, or if we pass in
   # %{} to force a rerender, say when a modal is accepted
   defp update_selections?(_), do: true
