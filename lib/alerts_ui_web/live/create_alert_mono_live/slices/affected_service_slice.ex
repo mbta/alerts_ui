@@ -298,7 +298,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     update_selections(socket, params, true)
   end
 
-  defp update_selections(socket, _params, skip_handler \\ false) do
+  defp update_selections(socket, _params, synchronous \\ false) do
     prev = prev(Map.get(socket.assigns, :selections))
     form = socket.assigns.form
 
@@ -312,7 +312,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
     assigns = socket.assigns
 
-    if skip_handler do
+    if synchronous do
       socket
       |> assign(:selections, new_selections(assigns))
     else

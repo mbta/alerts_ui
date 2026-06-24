@@ -188,11 +188,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
     update_selections(socket, params, true)
   end
 
-  defp update_selections(socket, params, skip_handler \\ false) do
+  defp update_selections(socket, params, synchronous \\ false) do
     assigns = socket.assigns
     prev = prev(Map.get(assigns, :selections))
 
-    if skip_handler do
+    if synchronous do
       socket
       |> assign(:selections, new_selections(assigns, params))
     else
