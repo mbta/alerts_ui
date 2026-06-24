@@ -55,7 +55,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
   end
 
   # Subway routes (type 1) for "Station closure" → combination :SR
-  @route %Route{sort_order: 1, id: "Blue", name: "Blue Line", type: 1}
+  @route %Route{sort_order: 1, id: "Blue", name: "Blue Line", type: 0}
   @route_two %Route{sort_order: 2, id: "Red", name: "Red Line", type: 1}
 
   describe "route_id_options/4 filtering" do
@@ -97,7 +97,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
     [
       {RoutesRepo, [],
        [
-         by_type: fn _ -> [@route] end,
+         by_type: fn [0, 1] -> [@route] end,
          by_stop: fn _ -> [@route] end,
          by_stop: fn _, _ -> [@route] end
        ]},
@@ -125,7 +125,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _ -> [@route, @shuttle_route] end,
+           by_type: fn [0, 1] -> [@route, @shuttle_route] end,
            by_stop: fn _ -> [@route, @shuttle_route] end,
            by_stop: fn _, _ -> [@route, @shuttle_route] end
          ]},
@@ -152,7 +152,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _ -> [@route, @shuttle_route] end,
+           by_type: fn [0, 1] -> [@route, @shuttle_route] end,
            by_stop: fn _ -> [@route, @shuttle_route] end,
            by_stop: fn _, _ -> [@route, @shuttle_route] end
          ]},
@@ -177,7 +177,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _ -> [@bus_route_one, @shuttle_route] end,
+           by_type: fn 3 -> [@bus_route_one, @shuttle_route] end,
            by_stop: fn _ -> [@bus_route_one, @shuttle_route] end,
            by_stop: fn _, _ -> [@bus_route_one, @shuttle_route] end
          ]},
@@ -207,7 +207,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _ -> [@route, @shuttle_route] end,
+           by_type: fn [0, 1] -> [@route, @shuttle_route] end,
            by_stop: fn _ -> [@route, @route_two] end,
            by_stop: fn _, _ -> [@route, @route_two] end
          ]},
@@ -263,7 +263,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _ -> [@route, @route_two] end,
+           by_type: fn [0, 1] -> [@route, @route_two] end,
            by_stop: fn _ -> [@route, @route_two] end,
            by_stop: fn _, _ -> [@route, @route_two] end
          ]},
@@ -354,6 +354,30 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
       end
     end
 
+    @tag :logged_in_user
+    test "filter shows light rail AND subway routes for subway alerts", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn [0, 1] -> [@route, @route_two] end,
+           by_stop: fn _ -> [@route, @route_two] end,
+           by_stop: fn _, _ -> [@route, @route_two] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _, _ -> [@stop] end,
+           by_route: fn _, _, _ -> [@stop] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Station closure")
+        render_async(view)
+
+        assert view |> element("#routes-filter-modal-container") |> render =~ "Blue Line"
+        assert view |> element("#routes-filter-modal-container") |> render =~ "Red Line"
+      end
+    end
+
     # Uses Bus + "Multi-route detour" because bus route loading adds direction suffixes
     # to stop names, which is required to test direction-based ordering.
     @tag :logged_in_user
@@ -363,7 +387,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
          [
            by_stop: fn _ -> [@bus_route_one] end,
            by_stop: fn _, _ -> [@bus_route_one] end,
-           by_type: fn _ -> [@bus_route_one] end
+           by_type: fn 3 -> [@bus_route_one] end
          ]},
         {StopsRepo, [],
          [
@@ -419,7 +443,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _ -> [@route, @route_two] end,
+           by_type: fn [0, 1] -> [@route, @route_two] end,
            by_stop: fn _ -> [@route, @route_two] end,
            by_stop: fn _, _ -> [@route, @route_two] end
          ]},
@@ -468,7 +492,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _ -> [@route, @route_two] end,
+           by_type: fn [0, 1] -> [@route, @route_two] end,
            by_stop: fn _ -> [@route, @route_two] end,
            by_stop: fn _, _ -> [@route, @route_two] end
          ]},
@@ -518,7 +542,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _ -> [@route, @route_two] end,
+           by_type: fn [0, 1] -> [@route, @route_two] end,
            by_stop: fn _ -> [@route, @route_two] end,
            by_stop: fn _, _ -> [@route, @route_two] end
          ]},
@@ -581,7 +605,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _ -> [@route, @route_two] end,
+           by_type: fn [0, 1] -> [@route, @route_two] end,
            by_stop: fn _ -> [@route, @route_two] end,
            by_stop: fn _, _ -> [@route, @route_two] end
          ]},
@@ -634,7 +658,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _ -> [@route, @route_two] end,
+           by_type: fn [0, 1] -> [@route, @route_two] end,
            by_stop: fn _ -> [@route, @route_two] end,
            by_stop: fn _, _ -> [@route, @route_two] end
          ]},
@@ -695,7 +719,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _ -> [@route, @route_two] end,
+           by_type: fn [0, 1] -> [@route, @route_two] end,
            by_stop: fn _ -> [@route, @route_two] end,
            by_stop: fn _, _ -> [@route, @route_two] end
          ]},
@@ -736,7 +760,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _ -> [@route, @route_two] end,
+           by_type: fn [0, 1] -> [@route, @route_two] end,
            by_stop: fn "place-pktrm" -> [@route_two] end
          ]},
         {StopsRepo, [],
@@ -796,7 +820,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _ -> [@route, @route_two] end,
+           by_type: fn [0, 1] -> [@route, @route_two] end,
            by_stop: fn _ -> [@route, @route_two] end,
            by_stop: fn _, _ -> [@route, @route_two] end
          ]},
@@ -853,7 +877,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _ -> [@route] end,
+           by_type: fn [0, 1] -> [@route] end,
            get: fn _ -> @route end,
            get: fn _, _ -> @route end,
            by_stop: fn _ -> [@route] end,
@@ -888,7 +912,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _ -> [@route] end,
+           by_type: fn [0, 1] -> [@route] end,
            by_stop: fn _ -> [@route] end,
            by_stop: fn _, _ -> [@route] end,
            get: fn _ -> @route end,
@@ -957,7 +981,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _ -> [@bus_route_one] end,
+           by_type: fn 3 -> [@bus_route_one] end,
            by_stop: fn _ -> [@bus_route_one] end,
            by_stop: fn _, _ -> [@bus_route_one] end
          ]},
@@ -994,7 +1018,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _ -> [@route, @route_two] end,
+           by_type: fn [0, 1] -> [@route, @route_two] end,
            by_stop: fn _ -> [@route, @route_two] end,
            by_stop: fn _, _ -> [@route, @route_two] end,
            get: fn
@@ -1071,9 +1095,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         new_alert = AlertsUI.Alerts.get_by_alert_id(alert_id)
 
         assert [
-                 %{route_id: "Blue", route_type: 1, stop_id: "place-aqucl"},
+                 %{route_id: "Blue", route_type: 0, stop_id: "place-aqucl"},
                  %{route_id: "Red", route_type: 1, stop_id: "place-aqucl"},
-                 %{route_id: "Blue", route_type: 1, stop_id: "place-pktrm"},
+                 %{route_id: "Blue", route_type: 0, stop_id: "place-pktrm"},
                  %{route_id: "Red", route_type: 1, stop_id: "place-pktrm"}
                ] =
                  Map.get(new_alert, :informed_entity)
@@ -1097,9 +1121,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         edited_alert = AlertsUI.Alerts.get_by_alert_id(alert_id)
 
         assert [
-                 %{route_id: "Blue", route_type: 1, stop_id: "place-aqucl"},
+                 %{route_id: "Blue", route_type: 0, stop_id: "place-aqucl"},
                  %{route_id: "Red", route_type: 1, stop_id: "place-aqucl"},
-                 %{route_id: "Blue", route_type: 1, stop_id: "place-pktrm"},
+                 %{route_id: "Blue", route_type: 0, stop_id: "place-pktrm"},
                  %{route_id: "Red", route_type: 1, stop_id: "place-pktrm"}
                ] =
                  Map.get(edited_alert, :informed_entity)
@@ -1113,7 +1137,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _ -> [@route, @route_two] end,
+           by_type: fn [0, 1] -> [@route, @route_two] end,
            by_stop: fn _ -> [@route, @route_two] end,
            by_stop: fn _, _ -> [@route, @route_two] end,
            get: fn
@@ -1201,7 +1225,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _ -> [@route, @route_two] end,
+           by_type: fn 3 -> [@route, @route_two] end,
            by_stop: fn _ -> [@route, @route_two] end,
            by_stop: fn _, _ -> [@route, @route_two] end,
            get: fn
@@ -1271,7 +1295,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _ -> [@route, @route_two] end,
+           by_type: fn [0, 1] -> [@route, @route_two] end,
            by_stop: fn _ -> [@route, @route_two] end
          ]},
         {StopsRepo, [],
@@ -1318,7 +1342,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
       with_mocks([
         {RoutesRepo, [],
          [
-           by_type: fn _ -> [@route, @route_two] end,
+           by_type: fn [0, 1] -> [@route, @route_two] end,
            by_stop: fn
              "place-aqucl" -> [@route]
              "place-pktrm" -> [@route_two]
@@ -1371,7 +1395,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         {RoutesRepo, [],
          [
            # Simulate two different stops on the same route
-           by_type: fn _ -> [@route, @route_two] end,
+           by_type: fn 3 -> [@route, @route_two] end,
            by_stop: fn _, _ -> [@route] end
          ]},
         {StopsRepo, [],
