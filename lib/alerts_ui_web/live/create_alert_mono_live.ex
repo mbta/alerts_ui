@@ -576,7 +576,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         if assigns.submitting? do
           socket
           |> assign(:submitting?, false)
-          |> display_errors(socket.assigns.form.errors)
+          |> display_errors()
         else
           socket
         end
@@ -618,6 +618,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       affected_service_component(combination).render(assigns)
     end
   end
+
+  defp display_errors(%{assigns: %{form: form}} = socket), do: display_errors(socket, form.errors)
 
   defp display_errors(socket, errors) do
     socket
