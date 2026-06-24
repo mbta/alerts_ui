@@ -173,7 +173,9 @@ config :laboratory,
     {:show_validate_page, "Show Validate Page",
      "Shows the menu link to a page that helps validate alerts feeds"},
     {:fullstory_disabled, "Stop Fullstory",
-     "When enabled, turns OFF Fullstory, our session tracker"}
+     "When enabled, turns OFF Fullstory, our session tracker"},
+    {:use_legacy_form, "Use legacy form",
+     "When enabled, goes back to the legacy version of the form, not the new refactor"}
   ],
   cookie: [
     # one month,

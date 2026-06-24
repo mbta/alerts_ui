@@ -94,7 +94,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
            by_route: fn _, _, _ -> [@stop] end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Subway", "Delay")
 
         view
