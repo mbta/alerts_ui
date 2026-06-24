@@ -45,7 +45,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     test "connected mount displays first page of form when logged in", %{conn: conn} do
       {:ok, view, html} = live(conn, "/alerts/mono/new")
 
-      assert html =~ ~r/Create an Alert/
+      assert html =~ ~r/Create Alert/
 
       assert view
              |> element("#form_container", "Creating New Alert")
@@ -411,7 +411,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
 
         {:ok, view, html} = live(conn, "/alerts/mono/edit/123")
 
-        assert html =~ ~r/Edit an Alert/
+        assert html =~ ~r/Edit Alert/
 
         rendered_view = view |> element("#gtfs-warning-modal-content") |> render_async(1000)
         refute rendered_view =~ ~s(aria-hidden=\"true\")
@@ -578,7 +578,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
 
         {:ok, view, html} = live(conn, "/alerts/mono/duplicate/#{alert.alert_id}")
 
-        assert html =~ ~r/Duplicating an Alert/
+        assert html =~ ~r/Duplicate Alert/
 
         assert view
                |> element("#alert_data_active_period_start_specifier option[selected]")

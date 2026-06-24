@@ -72,7 +72,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     socket =
       socket
       |> assign(%{
-        page_title: "#{form_title} an Alert",
+        page_title: "#{form_title} Alert",
         selections: %{},
         check_predictions: false,
         form_type: form_type,
@@ -99,7 +99,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   defp form_title_from_type(title) do
     case title do
       :editing -> "Edit"
-      :duplicating -> "Duplicating"
+      :duplicating -> "Duplicate"
       :creating -> "Create"
     end
   end
