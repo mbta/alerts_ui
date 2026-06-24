@@ -152,7 +152,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
                 label="Website banner text"
                 phx-debounce={120}
                 maxlength="255"
-                id="header_input"
+                id="banner_input"
                 class={
                   [
                     "w-[100%] min-h-[10rem] z-20 mt-3",

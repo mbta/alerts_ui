@@ -523,6 +523,66 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
     end
 
     @tag :logged_in_user
+    test "header updates if sync buttons is turned off and back with error on facility alert", %{
+      conn: conn
+    } do
+      with_mock(
+        FacilitiesRepo,
+        get_by_type: fn _facility_types, _opts -> [@facility] end
+      ) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+
+        view = get_to_submission_page_refactor(conn, view, "Facility", "Bike issue")
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          alert_data: %{facility_ids: ["349"]}
+        })
+
+        view
+        |> element("form")
+        |> render_change(%{
+          alert_data: %{view_banner: true}
+        })
+
+        view
+        |> element("form")
+        |> render_change(%{
+          alert_data: %{
+            header_sync_toggle: false,
+            header_text: "my custom text"
+          }
+        })
+
+        assert view
+               |> element("#alert_data_header_text")
+               |> render_async() =~ "my custom text"
+
+        assert view
+               |> render_async() =~ "Check box to show you understand"
+
+        view
+        |> element("form")
+        |> render_change(%{
+          alert_data: %{header_sync_toggle: true}
+        })
+
+        refute view
+               |> element("#alert_data_header_text")
+               |> render_async() =~
+                 "my custom text"
+
+        assert view
+               |> element("#alert_data_header_text")
+               |> render_async() =~
+                 "Alewife Escalator 349"
+      end
+    end
+
+    @tag :logged_in_user
     test "header value attribute re-syncs to autotext when sync re-enabled with form errors", %{
       conn: conn
     } do

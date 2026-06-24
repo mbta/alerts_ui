@@ -135,17 +135,21 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
           do: details_data.service_effect_text,
           else: Templates.build_auto_text(autotext_data, :service_effect_template)
 
-      changeset
-      |> change(%{
-        header_sync_toggle: header_sync_toggle,
-        description_sync_toggle: description_sync_toggle,
-        header_text: header_text,
-        description_text: description_text,
-        service_effect_text: service_effect_text,
-        severity: severity,
-        cause_detail: cause_detail,
-        image_alternative_text: details_data.image_alternative_text
-      })
+      details_params =
+        %{
+          header_sync_toggle: header_sync_toggle,
+          description_sync_toggle: description_sync_toggle,
+          header_text: header_text,
+          description_text: description_text,
+          service_effect_text: service_effect_text,
+          severity: severity,
+          cause_detail: cause_detail,
+          image_alternative_text: details_data.image_alternative_text
+        }
+
+      Enum.reduce(details_params, changeset, fn {key, value}, changeset ->
+        force_change(changeset, key, value)
+      end)
     end
 
     defp header_sync_toggle("header_text", true), do: false
