@@ -454,6 +454,34 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
       # But this one was typed in, so we check for that value.
       assert rendered_view =~ ~s(value="2030-06-01T12:12")
     end
+
+    @tag :logged_in_user
+    test "don't keep reminders if duplicating", %{conn: conn} do
+      alert_params =
+        build(:alert_map, %{
+          alert_id: "123",
+          effect: :OTHER_EFFECT,
+          effect_detail: "DELAY",
+          severity: 3,
+          cause_detail: "UNKNOWN",
+          active_period_start: ~U[2024-04-30 11:45:00Z],
+          reminder_times: [
+            %{reminder_time: ~U[2024-04-30 11:54:00Z]},
+            %{reminder_time: ~U[2024-04-30 12:54:00Z]}
+          ]
+        })
+
+      {:ok, _} =
+        Alerts.create_or_update_alert(alert_params, build(:user))
+
+      {:ok, view, _html} = live(conn, "/alerts/mono/duplicate/123")
+
+      refute view |> element("#reminder_times_form") |> render =~
+               ~s(value=\"2024-04-30T07:54:00\")
+
+      refute view |> element("#reminder_times_form") |> render =~
+               ~s(value=\"2024-04-30T08:54:00\")
+    end
   end
 
   # Drives AlertData.sync end-to-end, returning the resulting socket regardless of
