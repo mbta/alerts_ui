@@ -14,7 +14,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
 
   use AlertsUIWeb, :html
 
-  defstruct reminder_times: []
+  defstruct [:form_type, reminder_times: []]
 
   defimpl Slice, for: __MODULE__ do
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice
@@ -23,10 +23,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
 
     def extract(slice, %AlertData{reminder_times: reminder_times} = _alert_data, _params) do
       converted =
-        Enum.map(reminder_times || [], fn
-          %{id: id, time: time} -> %AlertData.ReminderTime{id: id, reminder_time: time}
-          %AlertData.ReminderTime{} = rt -> rt
-        end)
+        if slice.form_type == :duplicating do
+          []
+        else
+          Enum.map(reminder_times || [], fn
+            %{id: id, time: time} -> %AlertData.ReminderTime{id: id, reminder_time: time}
+            %AlertData.ReminderTime{} = rt -> rt
+          end)
+        end
 
       %{slice | reminder_times: converted}
     end
