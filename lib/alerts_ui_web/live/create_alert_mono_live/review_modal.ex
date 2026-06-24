@@ -200,7 +200,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.ReviewModal do
               </a>
             </span>
 
-            <span :if={@alert_data.banner_text} class="block pb-4">
+            <span :if={Map.get(@alert_data, :banner_text)} class="block pb-4">
               <p class="font-bold">Web Banner Text</p>
               <p>{@alert_data.banner_text}</p>
             </span>

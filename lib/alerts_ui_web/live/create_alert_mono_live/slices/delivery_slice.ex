@@ -63,6 +63,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
           delivery_data.banner_text || ""
         end
 
+      banner_text = if view_banner == false, do: nil, else: banner_text
+
       change(changeset, %{
         view_banner: view_banner,
         banner_sync_toggle: banner_sync_toggle,

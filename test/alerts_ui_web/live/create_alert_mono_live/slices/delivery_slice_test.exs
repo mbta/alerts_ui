@@ -86,6 +86,35 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
     end
 
     @tag :logged_in_user
+    test "unchecking banner checkbox deletes banner text", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _ -> [@route] end, get: fn _, _ -> @route end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Delay")
+
+        view
+        |> element("form")
+        |> render_change(%{"alert_data" => %{"route_ids" => [@route.id], "view_banner" => "true"}})
+
+        view
+        |> element("form")
+        |> render_change(%{"alert_data" => %{"view_banner" => "false"}})
+
+        view
+        |> element("button#review", "Review and submit")
+        |> render_click()
+
+        refute view |> element("#review-modal-container") |> render_async(1000) =~
+                 ~s(Web Banner Text)
+      end
+    end
+
+    @tag :logged_in_user
     test "banner text syncs with header text", %{conn: conn} do
       with_mocks([
         {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]}
