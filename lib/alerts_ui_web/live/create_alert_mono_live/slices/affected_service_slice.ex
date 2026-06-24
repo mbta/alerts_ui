@@ -186,7 +186,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   def async_assign_selections(%{assigns: %{} = assigns} = socket, params) do
     if update_selections?(params) do
-      update_selections(socket)
+      update_selections(socket, params)
     else
       dont_update_selections(Map.get(assigns, :selections), socket)
     end
@@ -194,9 +194,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   def async_assign_selections(socket, _params), do: socket
 
-  defp update_selections(socket) do
-    prev = prev(Map.get(socket.assigns, :selections))
-    form = socket.assigns.form
+  defp new_selections(assigns) do
+    form = assigns.form
 
     direction = form[:direction].value
     modal_date = form[:modal_date].value
@@ -217,75 +216,110 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
         value == modal_date
       end)
 
-    socket
-    |> assign(:selections, %{prev | loading: true, filter_title_value: filter_title_value})
-    |> start_async(:fetch_selections, fn ->
-      available_routes = CreateAlertLive.get_routes(all_route_types)
+    available_routes = CreateAlertLive.get_routes(all_route_types)
 
-      available_stops =
-        CreateAlertLive.get_stops(
-          route_ids,
-          route_type,
-          direction
-        )
+    available_stops =
+      CreateAlertLive.get_stops(
+        route_ids,
+        route_type,
+        direction
+      )
 
-      available_schedules =
-        if show_trips_input?(combination),
-          do: available_schedules(route_ids, direction, modal_date),
-          else: []
+    available_schedules =
+      if show_trips_input?(combination),
+        do: available_schedules(route_ids, direction, modal_date),
+        else: []
 
-      direction_options =
-        SelectFormatter.formatted_direction_options(
-          route_ids,
-          Map.new(available_routes, &{&1.id, &1.direction_names})
-        )
+    direction_options =
+      SelectFormatter.formatted_direction_options(
+        route_ids,
+        Map.new(available_routes, &{&1.id, &1.direction_names})
+      )
 
-      route_id_options =
-        SelectFormatter.formatted_select_options(%SelectFormatter{
-          options: available_routes,
-          search_term: route_search_term,
+    route_id_options =
+      SelectFormatter.formatted_select_options(%SelectFormatter{
+        options: available_routes,
+        search_term: route_search_term,
+        route_type: route_type,
+        values_to_keep: route_ids,
+        option_prefix: "route-search"
+      })
+
+    stop_id_options =
+      SelectFormatter.formatted_select_options(
+        %SelectFormatter{
+          options: available_stops,
+          search_term: stop_search_term,
           route_type: route_type,
-          values_to_keep: route_ids,
-          option_prefix: "route-search"
-        })
+          values_to_keep: stop_names_and_ids,
+          option_prefix: "stop-search"
+        },
+        true
+      )
 
-      stop_id_options =
-        SelectFormatter.formatted_select_options(
-          %SelectFormatter{
-            options: available_stops,
-            search_term: stop_search_term,
-            route_type: route_type,
-            values_to_keep: stop_names_and_ids,
-            option_prefix: "stop-search"
-          },
-          true
-        )
+    trip_id_options =
+      SelectFormatter.formatted_select_options(%SelectFormatter{
+        schedules_by_route_name:
+          get_schedules_by_route_type(
+            available_schedules,
+            route_ids
+          ),
+        search_term: trip_search_term,
+        route_type: route_type,
+        values_to_keep: trip_ids,
+        option_prefix: "trip-search"
+      })
 
-      trip_id_options =
-        SelectFormatter.formatted_select_options(%SelectFormatter{
-          schedules_by_route_name:
-            get_schedules_by_route_type(
-              available_schedules,
-              route_ids
-            ),
-          search_term: trip_search_term,
-          route_type: route_type,
-          values_to_keep: trip_ids,
-          option_prefix: "trip-search"
-        })
+    %Selections{
+      available_routes: available_routes,
+      available_stops: available_stops,
+      available_schedules: available_schedules,
+      direction_options: direction_options,
+      filter_title_value: filter_title_value,
+      route_id_options: route_id_options,
+      stop_id_options: stop_id_options,
+      service_dates: service_dates(),
+      trip_id_options: trip_id_options
+    }
+  end
 
-      %Selections{
-        available_routes: available_routes,
-        available_stops: available_stops,
-        available_schedules: available_schedules,
-        direction_options: direction_options,
-        filter_title_value: filter_title_value,
-        route_id_options: route_id_options,
-        stop_id_options: stop_id_options,
-        service_dates: service_dates(),
-        trip_id_options: trip_id_options
-      }
-    end)
+  @search_targets [
+    "modal_route_search_term",
+    "route_search_term",
+    "stop_search_term",
+    "trip_search_term"
+  ]
+
+  defp update_selections(
+         socket,
+         %{"_target" => ["alert_data", search_term]} = params
+       )
+       when search_term in @search_targets do
+    update_selections(socket, params, true)
+  end
+
+  defp update_selections(socket, _params, skip_handler \\ false) do
+    prev = prev(Map.get(socket.assigns, :selections))
+    form = socket.assigns.form
+
+    modal_date = form[:modal_date].value
+
+    {filter_title_value, _} =
+      service_dates()
+      |> Enum.find({"All future trips", nil}, fn {_option, value} ->
+        value == modal_date
+      end)
+
+    assigns = socket.assigns
+
+    if skip_handler do
+      socket
+      |> assign(:selections, new_selections(assigns))
+    else
+      socket
+      |> assign(:selections, %{prev | loading: true, filter_title_value: filter_title_value})
+      |> start_async(:fetch_selections, fn -> new_selections(assigns) end)
+    end
   end
 
   defp dont_update_selections(nil, socket), do: assign(socket, :selections, %Selections{})

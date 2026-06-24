@@ -103,6 +103,56 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
     end
   end
 
+  defp new_selections(assigns) do
+    form = assigns.form
+
+    facility_ids = form[:facility_ids].value || []
+    facility_search_term = form[:facility_search_term].value
+
+    facility_types =
+      form[:effect_name].value
+      |> effect_to_lookup_key()
+      |> InformedEntity.facility_effect_to_types()
+
+    stop_search_term = form[:stop_search_term].value
+    stop_id = form[:stop_id].value
+
+    available_facilities =
+      CreateAlertLive.get_facilities(facility_types)
+
+    modal_stop_id_options =
+      SelectFormatter.formatted_select_options(%SelectFormatter{
+        options: Map.get(available_facilities, :stops) || [],
+        search_term: stop_search_term,
+        values_to_keep: stop_id |> List.wrap(),
+        option_prefix: "stop-filter"
+      })
+
+    filtered_facilities =
+      available_facilities.facilities
+      |> Enum.filter(
+        &filter_facility_by_stop_ids(
+          &1,
+          stop_id || "default",
+          facility_ids
+        )
+      )
+
+    facility_id_options =
+      SelectFormatter.formatted_select_options(%SelectFormatter{
+        options: filtered_facilities,
+        search_term: facility_search_term,
+        values_to_keep: facility_ids,
+        option_prefix: "facility-filter"
+      })
+
+    %Selections{
+      available_facilities: available_facilities,
+      modal_stop_id_options: modal_stop_id_options,
+      facility_id_options: facility_id_options
+    }
+  end
+
   def async_assign_selections(%{assigns: %{} = assigns} = socket, params) do
     if update_selections?(params) do
       prev =
@@ -111,57 +161,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
           _ -> %Selections{}
         end
 
-      form = socket.assigns.form
-
-      facility_ids = form[:facility_ids].value || []
-      facility_search_term = form[:facility_search_term].value
-
-      facility_types =
-        form[:effect_name].value
-        |> effect_to_lookup_key()
-        |> InformedEntity.facility_effect_to_types()
-
-      stop_search_term = form[:stop_search_term].value
-      stop_id = form[:stop_id].value
-
-      socket
-      |> assign(:selections, %{prev | loading: true})
-      |> start_async(:fetch_selections, fn ->
-        available_facilities =
-          CreateAlertLive.get_facilities(facility_types)
-
-        modal_stop_id_options =
-          SelectFormatter.formatted_select_options(%SelectFormatter{
-            options: Map.get(available_facilities, :stops) || [],
-            search_term: stop_search_term,
-            values_to_keep: stop_id |> List.wrap(),
-            option_prefix: "stop-filter"
-          })
-
-        filtered_facilities =
-          available_facilities.facilities
-          |> Enum.filter(
-            &filter_facility_by_stop_ids(
-              &1,
-              stop_id || "default",
-              facility_ids
-            )
-          )
-
-        facility_id_options =
-          SelectFormatter.formatted_select_options(%SelectFormatter{
-            options: filtered_facilities,
-            search_term: facility_search_term,
-            values_to_keep: facility_ids,
-            option_prefix: "facility-filter"
-          })
-
-        %Selections{
-          available_facilities: available_facilities,
-          modal_stop_id_options: modal_stop_id_options,
-          facility_id_options: facility_id_options
-        }
-      end)
+      if search_term?(params) do
+        socket
+        |> assign(:selections, new_selections(assigns))
+      else
+        socket
+        |> assign(:selections, %{prev | loading: true})
+        |> start_async(:fetch_selections, fn -> new_selections(assigns) end)
+      end
     else
       case Map.get(socket.assigns, :selections) do
         nil ->
@@ -182,6 +189,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
 
   defp update_selections?(%{"_target" => _target}), do: false
   defp update_selections?(_), do: true
+
+  @search_targets ["stop_search_term", "facility_search_term"]
+  defp search_term?(%{"_target" => ["alert_data", field]}) when field in @search_targets, do: true
+  defp search_term?(_), do: false
 
   defp filter_facility_by_stop_ids(facility, stop_id_filter_value, selected_facility_ids) do
     equals_stop_id =

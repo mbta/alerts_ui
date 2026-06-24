@@ -182,12 +182,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
   defp update_selections(
          socket,
-         %{"_target" => ["alert_data", "modal_route_search_term"]} = params
-       ) do
-    update_selections(socket, params, true)
-  end
-
-  defp update_selections(socket, %{"_target" => ["alert_data", "stop_search_term"]} = params) do
+         %{"_target" => ["alert_data", search_term]} = params
+       )
+       when search_term in ["modal_route_search_term", "stop_search_term"] do
     update_selections(socket, params, true)
   end
 
