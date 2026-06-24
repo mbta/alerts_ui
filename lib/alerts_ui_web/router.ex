@@ -100,11 +100,11 @@ defmodule AlertsUIWeb.Router do
         AlertsUIWeb.PutFlagsInAssignsHook,
         AlertsUIWeb.PutMetadataInAssigns
       ] do
-      live("/alerts/new", CreateAlertLive, :new)
-      live("/alerts/new/:route_type/", CreateAlertLive, :new)
-      live("/alerts/new/:route_type/:effect", CreateAlertLive, :new)
-      live("/alerts/edit", CreateAlertLive, :edit)
-      live("/alerts/duplicate", CreateAlertLive, :duplicate)
+      live("/alerts/legacy/new", CreateAlertLive, :new)
+      live("/alerts/legacy/new/:route_type/", CreateAlertLive, :new)
+      live("/alerts/legacy/new/:route_type/:effect", CreateAlertLive, :new)
+      live("/alerts/legacy/edit", CreateAlertLive, :edit)
+      live("/alerts/legacy/duplicate", CreateAlertLive, :duplicate)
       live("/alerts/mono/new", CreateAlertMonoLive, :new)
       live("/alerts/mono/new/:route_type/", CreateAlertMonoLive, :new)
       live("/alerts/mono/new/:route_type/:effect_name", CreateAlertMonoLive, :new)

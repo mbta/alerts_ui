@@ -1006,7 +1006,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]},
         {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Bus", "Detour")
 
@@ -1033,7 +1033,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
          %{
            conn: conn
          } do
-      {:ok, view, _html} = live(conn, "/alerts/new")
+      {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
       get_to_submission_page(view, "Bus", "Delay")
 
@@ -1062,7 +1062,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
         {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Commuter Rail", "Delay")
 
@@ -1123,7 +1123,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
            by_route_id: fn _route_id, _opts -> [] end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Commuter Rail", "Delay")
 
@@ -1262,7 +1262,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
 
         {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
 
-        {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/edit?alert_id=123")
 
         html = render(view)
         assert html =~ ~s(selected="selected" value="CR-Worcester")
@@ -1327,7 +1327,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
            by_route_id: fn _route_id, _opts -> [] end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Commuter Rail", "Cancellation")
 
@@ -1395,7 +1395,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
            by_route: fn _, _, _opts -> [@bus_stop] end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Bus", "Delay")
 
@@ -1448,7 +1448,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
            by_route: fn _, _, _opts -> [@subway_stop] end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Subway", "Notice")
 

@@ -15,6 +15,7 @@ defmodule AlertsUIWeb.FormComponents.Timeline do
         <span :if={@form_type == :creating}>Creating New Alert</span>
         <span :if={@form_type == :editing}>Editing Alert #{@alert_id}</span>
         <span :if={@form_type == :duplicating}>Duplicating Alert #{@alert_id}</span>
+        <span> (Legacy Version)</span>
       </.h3>
       <div class="flex items-center">
         <div :for={{step, i} <- Enum.with_index(@steps)} class="flex items-center">
