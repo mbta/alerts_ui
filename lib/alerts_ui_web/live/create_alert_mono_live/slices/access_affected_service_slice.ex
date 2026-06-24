@@ -153,22 +153,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
     }
   end
 
-  def async_assign_selections(%{assigns: %{} = assigns} = socket, params) do
+  def async_assign_selections(%{assigns: %{}} = socket, params) do
     if update_selections?(params) do
-      prev =
-        case Map.get(assigns, :selections) do
-          %Selections{} = s -> s
-          _ -> %Selections{}
-        end
-
-      if search_term?(params) do
-        socket
-        |> assign(:selections, new_selections(assigns))
-      else
-        socket
-        |> assign(:selections, %{prev | loading: true})
-        |> start_async(:fetch_selections, fn -> new_selections(assigns) end)
-      end
+      update_selections(socket, params)
     else
       case Map.get(socket.assigns, :selections) do
         nil ->
@@ -181,6 +168,23 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
   end
 
   def async_assign_selections(socket, _params), do: socket
+
+  defp update_selections(%{assigns: %{} = assigns} = socket, params) do
+    prev =
+      case Map.get(assigns, :selections) do
+        %Selections{} = s -> s
+        _ -> %Selections{}
+      end
+
+    if search_term?(params) do
+      socket
+      |> assign(:selections, new_selections(assigns))
+    else
+      socket
+      |> assign(:selections, %{prev | loading: true})
+      |> start_async(:fetch_selections, fn -> new_selections(assigns) end)
+    end
+  end
 
   @update_selection_targets ["stop_id", "stop_search_term", "facility_search_term"]
   defp update_selections?(%{"_target" => ["alert_data", field]})
