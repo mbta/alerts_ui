@@ -53,8 +53,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
           "reminder_times" => %{
             "0" => %{
               "_persistent_id" => "0",
-              "max_time" => "2024-09-27T03:00:00",
-              "min_time" => "2024-09-26 02:00:00",
               "reminder_time" => "2024-09-26T03:00",
               "reminder_time_specifier" => "custom"
             }
@@ -70,8 +68,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
           "reminder_times" => %{
             "0" => %{
               "_persistent_id" => "0",
-              "max_time" => "2024-09-27T03:00:00",
-              "min_time" => "2024-09-26 02:00:00",
               "reminder_time" => "2024-09-26T03:00",
               "reminder_time_specifier" => "custom"
             }
@@ -116,7 +112,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
     end
 
     @tag :logged_in_user
-    test "min_time hidden input reflects notification start, not current time, when specifier is same_as_effect_period",
+    test "reminder validates against notification start, not current time, when specifier is same_as_effect_period",
          %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
@@ -142,9 +138,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
       |> element("form")
       |> render_change(%{"alert_data" => %{"reminder_sort" => ["new"]}})
 
-      min_time_input = element(view, "#reminder_times-0-min_time") |> render()
-      assert min_time_input =~ ~s(value="2030-01-01T10:00")
-
       view
       |> element("form")
       |> render_change(%{
@@ -163,7 +156,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
     end
 
     @tag :logged_in_user
-    test "max_time hidden input is nil when active period specifier is until further notice",
+    test "reminder has no upper bound when active period specifier is until further notice",
          %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
@@ -180,9 +173,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
       view
       |> element("form")
       |> render_change(%{"alert_data" => %{"reminder_sort" => ["new"]}})
-
-      max_time_input = element(view, "#reminder_times-0-max_time") |> render()
-      assert max_time_input =~ ~s(value="")
 
       view
       |> element("form")
@@ -238,8 +228,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
           "reminder_times" => %{
             "0" => %{
               "_persistent_id" => "0",
-              "max_time" => "2024-09-27T03:00:00",
-              "min_time" => "2024-09-26 02:00:00",
               "reminder_time" => "2024-09-26T03:00",
               "reminder_time_specifier" => "custom"
             }
@@ -258,7 +246,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
       view
       |> element("form")
       |> render_change(%{
-        "alert_data" => %{"active_period_start" => "2024-09-26T04:00:00"}
+        "alert_data" => %{
+          "active_period_start" => "2024-09-26T04:00:00",
+          "notification_specifier" => "same_as_effect_period"
+        }
       })
 
       view
@@ -275,8 +266,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
           "reminder_times" => %{
             "0" => %{
               "_persistent_id" => "0",
-              "max_time" => "2024-09-26T04:00:00",
-              "min_time" => "2024-09-25T13:04:12",
               "reminder_time" => "2024-09-25T12:12:12",
               "reminder_time_specifier" => "custom"
             }
@@ -297,6 +286,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
       |> render_change(%{
         "alert_data" => %{
           "active_period_start" => "2024-09-26T02:00:00",
+          "notification_specifier" => "custom",
           "notification_period_start" => "2024-09-26T04:00:00"
         }
       })
@@ -315,8 +305,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
           "reminder_times" => %{
             "0" => %{
               "_persistent_id" => "0",
-              "max_time" => "2024-09-26T03:00:00",
-              "min_time" => "2024-09-25T13:04:12",
               "reminder_time" => "2024-09-25T12:12:12",
               "reminder_time_specifier" => "custom"
             }
@@ -328,7 +316,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
     end
 
     @tag :logged_in_user
-    test "shows error if time entered is after effect start", %{conn: conn} do
+    test "reminder validates when the notifiation period changes",
+         %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
 
@@ -336,8 +325,57 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
       |> element("form")
       |> render_change(%{
         "alert_data" => %{
-          "active_period_start" => "2024-09-25T13:04:12",
-          "notification_period_start" => "2024-09-25T03:00:00"
+          "active_period_start_specifier" => "custom",
+          "active_period_end_specifier" => "until_further_notice",
+          "notification_specifier" => "custom"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "reminder_times" => %{
+            "0" => %{"reminder_time" => "2028-01-01T10:00:00"}
+          }
+        }
+      })
+
+      min_time_element =
+        element(view, "#alert_data_reminder_times_0_reminder_time-root-element") |> render()
+
+      refute min_time_element =~
+               ~s(Reminder time must be after notification period starts)
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "notification_period_start" => "2029-01-01T10:00:00"
+        }
+      })
+
+      min_time_element =
+        element(view, "#alert_data_reminder_times_0_reminder_time-root-element") |> render()
+
+      assert min_time_element =~
+               ~s(Reminder time must be after notification period starts (01/01/2029, 10:00 AM\))
+    end
+
+    @tag :logged_in_user
+    test "shows error if time entered is after effect start", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
+
+      # End of service for 2024-09-25 lands at 2024-09-26 03:00, before the reminder.
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "notification_specifier" => "custom",
+          "notification_period_start" => "2024-09-25T03:00:00",
+          "active_period_end_specifier" => "end_of_service",
+          "active_period_end_date" => "2024-09-25"
         }
       })
 
@@ -355,8 +393,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
           "reminder_times" => %{
             "0" => %{
               "_persistent_id" => "0",
-              "max_time" => "2024-09-25T03:00:00",
-              "min_time" => "2024-09-24T13:04:12",
               "reminder_time" => "2024-09-26T12:12:12",
               "reminder_time_specifier" => "custom"
             }
@@ -438,10 +474,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
             "reminder_sort" => ["0", "1", "2"],
             "reminder_times" => %{
               "2" => %{
-                "_persistent_id" => "0",
-                "max_time" => "2040-09-26T04:00:00",
-                "min_time" => "2024-09-25T13:04:12",
-                "reminder_time" => "2030-06-01T12:12:12",
+                "_persistent_id" => "2",
+                "reminder_time" => "2025-06-01T12:12:12",
                 "reminder_time_specifier" => "custom"
               }
             }
@@ -452,7 +486,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
       assert rendered_view =~ ~s(value="2024-04-30T07:54")
       assert rendered_view =~ ~s(value="2024-04-30T08:54")
       # But this one was typed in, so we check for that value.
-      assert rendered_view =~ ~s(value="2030-06-01T12:12")
+      assert rendered_view =~ ~s(value="2025-06-01T12:12")
     end
 
     @tag :logged_in_user
@@ -538,7 +572,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
             "reminder_sort" => ["0"],
             "reminder_drop" => ["", "0"],
             "reminder_times" => %{
-              "0" => %{"id" => "", "min_time" => "2026-05-22T15:00:00", "max_time" => ""}
+              "0" => %{"id" => ""}
             }
           })
         )
@@ -564,8 +598,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
             "reminder_times" => %{
               "0" => %{
                 "id" => "",
-                "min_time" => "2026-05-22T15:00:00",
-                "max_time" => "",
                 "reminder_time" => "2222-02-22T22:22:00"
               }
             }
@@ -584,8 +616,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
             "reminder_times" => %{
               "0" => %{
                 "id" => "",
-                "min_time" => "2026-05-22T15:00:00",
-                "max_time" => "",
                 "reminder_time" => "2222-02-22T22:22:00"
               }
             }

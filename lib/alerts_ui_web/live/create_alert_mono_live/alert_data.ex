@@ -157,8 +157,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     # rider reminders
     embeds_many :reminder_times, ReminderTime, on_replace: :delete do
       field :reminder_time, :naive_datetime
-      field :min_time, :naive_datetime
-      field :max_time, :naive_datetime
     end
 
     # generated
@@ -226,9 +224,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
           # reminders
           reminder_times: [
             %{
-              reminder_time: NaiveDateTime.t(),
-              min_time: NaiveDateTime.t(),
-              max_time: NaiveDateTime.t()
+              reminder_time: NaiveDateTime.t()
             }
           ]
         }
