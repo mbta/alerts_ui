@@ -78,7 +78,7 @@ Hooks.DropdownPosition = {
       ? document.getElementById(menu.dataset.containerId).getBoundingClientRect().bottom
       // fallback to viewport edge if container not provided
       : window.innerHeight;
-    const dropdownSpaceNeeded =  menu.getBoundingClientRect().bottom - toggleRect.top
+    const dropdownSpaceNeeded = menu.getBoundingClientRect().bottom - toggleRect.top
 
     // Space between the toggle button and edge of the container (aka room for the dropdown)
     const spaceBelow = containerHeight - toggleRect.bottom;
@@ -129,8 +129,9 @@ Hooks.Selector = {
     // to make sure the tests are good, I suppose!
     const selectorIDLookup = {
       affected_service_trip_ids: "trip_ids",
-      affected_service_stop_ids: "stop_ids",
       affected_service_stop_names_and_ids: "stop_names_and_ids",
+      alert_data_trip_ids: "trip_ids",
+      alert_data_stop_names_and_ids: "stop_names_and_ids",
       view_alerts_live_service_type: "service_type",
       view_alerts_live_routes: "routes",
       view_alerts_live_effects: "effects"
@@ -149,10 +150,6 @@ Hooks.Selector = {
           // Other options are selected — deselect the prompt "default" option
           const defaultIndex = options.findIndex((opt) => opt.value == "default");
           if (defaultIndex >= 0) options[defaultIndex].selected = false;
-        } else {
-          // Server cleared all selections — sync .selected to match the attributes
-          // (morphdom patches attributes but does not update the .selected property)
-          options.forEach(opt => { opt.selected = opt.hasAttribute("selected"); });
         }
       }
     });

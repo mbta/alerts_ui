@@ -1886,12 +1886,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
 
         render_async(view)
 
+        # Mock user selecting 2 trips in addition to "All Trips"
         view
         |> element("form")
         |> render_change(%{
           "_target" => ["alert_data", "trip_ids"],
           "alert_data" => %{"trip_ids" => ["default", "trip-595", "trip-596"]}
         })
+
+        # At this time, we CAN'T test the JS hook unless we set up Playwright.
+        # So, we can't check whether the selections look right to the user,
+        # but we can verify that the data on the server is correct when the form
+        # is submitted
 
         render_async(view)
 
