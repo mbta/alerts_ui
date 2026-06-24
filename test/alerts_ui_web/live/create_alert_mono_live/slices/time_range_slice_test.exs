@@ -957,6 +957,34 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
       assert end_date === ["2040-04-30T11:59"]
     end
+
+    @tag :logged_in_user
+    test "correctly shows recurrence days for recurring alert", %{conn: conn} do
+      params =
+        build(:alert_map, %{
+          alert_id: "tr-edit-5",
+          active_period: [
+            %{start: ~U[2026-06-24 14:30:54Z], end: ~U[2026-06-24 16:30:54Z]},
+            %{start: ~U[2026-06-25 14:30:54Z], end: ~U[2026-06-25 16:30:54Z]}
+          ],
+          active_period_start: ~U[2026-06-24 14:30:54Z],
+          active_period_end: ~U[2026-06-25 16:30:54Z],
+          recurrence_days: [:tuesday, :wednesday],
+          recurring: true,
+          effect: :OTHER_EFFECT,
+          effect_detail: "DELAY"
+        })
+
+      {:ok, _} = Alerts.create_or_update_alert(params, build(:user))
+
+      {:ok, view, _html} = live(conn, "/alerts/mono/edit/tr-edit-5")
+
+      refute view |> element("#time_range_view") |> render() =~
+               "Alert start day must match a selected day of the week."
+
+      assert view |> render() =~ ~s(value="tuesday" checked="checked")
+      assert view |> render() =~ ~s(value="wednesday" checked="checked")
+    end
   end
 
   describe "duplicating" do

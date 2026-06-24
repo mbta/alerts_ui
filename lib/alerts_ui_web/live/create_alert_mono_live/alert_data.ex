@@ -416,14 +416,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
   def alert_data_v1_to_v2(v1_alert_data) do
     v1_alert_data
-    |> atomize_specifiers()
+    |> atomize_fields()
     |> normalize_effect_name()
     |> set_sync_toggles()
   end
 
   def alert_data_v2_to_v1(v2_alert_data) do
     v2_alert_data
-    |> atomize_specifiers()
+    |> atomize_fields()
     |> strip_banner_text_unless_enabled()
     |> strip_recurrence_days_if_one_time()
   end
@@ -445,25 +445,26 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     Map.put(alert_data, :effect_name, normalized)
   end
 
-  @specifier_fields [
+  @atomized_fields [
     :active_period_start_specifier,
     :active_period_start_time_specifier,
     :active_period_end_specifier,
     :active_period_end_time_specifier,
-    :notification_specifier
+    :notification_specifier,
+    :recurrence_days
   ]
 
-  defp atomize_specifiers(%AlertData{} = alert_data) do
+  defp atomize_fields(%AlertData{} = alert_data) do
     alert_data
     |> Map.from_struct()
-    |> atomize_specifiers()
+    |> atomize_fields()
   end
 
-  defp atomize_specifiers(alert_data) when is_map(alert_data) do
+  defp atomize_fields(alert_data) when is_map(alert_data) do
     for {key, value} <- alert_data, into: %{} do
       value =
-        if Enum.member?(@specifier_fields, key) do
-          atomize_specifier(value)
+        if Enum.member?(@atomized_fields, key) do
+          atomize_field(value)
         else
           value
         end
@@ -472,7 +473,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     end
   end
 
-  defp atomize_specifier(value) do
+  defp atomize_field(value) when is_list(value) do
+    Enum.map(value, &atomize_field/1)
+  end
+
+  defp atomize_field(value) do
     case value do
       value when is_binary(value) -> String.to_existing_atom(value)
       value when is_atom(value) -> value
