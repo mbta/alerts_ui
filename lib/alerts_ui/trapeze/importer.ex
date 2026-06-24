@@ -251,6 +251,6 @@ defmodule AlertsUI.Trapeze.Importer do
         SFTP.source_description().password in [nil, ""] ||
         SFTP.source_description().filename in [nil, ""]
 
-  defp enabled?, do: FeatureFlags.enabled?("Trapeze Import")
-  defp close_when_noticed?, do: FeatureFlags.enabled?("Trapeze Close Time When Noticed")
+  def enabled?, do: FeatureFlags.enabled?("Trapeze Import")
+  def close_when_noticed?, do: FeatureFlags.enabled?("Trapeze Close Time When Noticed")
 end

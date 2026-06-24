@@ -11,6 +11,8 @@ defmodule AlertsUI.Trapeze.Monitor do
   alias AlertsUI.Repo
   alias AlertsUI.Trapeze.Models.TrapezeMonitor
 
+  import AlertsUI.Trapeze.Importer, only: [close_when_noticed?: 0]
+
   # 2 hours
   @mtime_error 120 * 60
   # 30 minutes
@@ -106,7 +108,14 @@ defmodule AlertsUI.Trapeze.Monitor do
     checksum = :crypto.hash(:md5, joined) |> Base.encode16()
     set(:checksum, checksum)
 
-    info("Processing #{length(feed)} entries. Checksum #{checksum}.")
+    close_timestamps =
+      if close_when_noticed?(),
+        do: "When Noticed",
+        else: "As Specified"
+
+    info(
+      "Processing #{length(feed)} entries. Checksum #{checksum}. Close Timestamps: #{close_timestamps}"
+    )
   end
 
   @spec result({:ok | :warning | :error, String.t() | Exception.t()}) :: any()
