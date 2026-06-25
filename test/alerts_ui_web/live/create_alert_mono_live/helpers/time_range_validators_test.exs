@@ -542,15 +542,25 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidatorsTest do
     end
   end
 
-  describe "validate_notification/1" do
-    test "errors when notification_period_start is in the past" do
+  describe "validate_notification_time/3" do
+    # Build a changeset whose `data` holds the originally-saved notification start
+    # while `changes` holds the (force-changed) current value — mirrors how the
+    # form's transform always force_changes notification_period_start.
+    defp editing_changeset(original, current, attrs) do
+      %AlertData{notification_period_start: original}
+      |> Ecto.Changeset.change(attrs)
+      |> Ecto.Changeset.force_change(:notification_period_start, current)
+    end
+
+    test "errors when notification_period_start is in the past (req 1)" do
       cs =
         changeset(%{
           alert_timing: :"one-time",
+          notification_specifier: :custom,
           active_period_start: future_naive(),
           notification_period_start: ~N[2020-01-01 09:00:00]
         })
-        |> TimeRangeValidators.validate_notification_time(@naive_now)
+        |> TimeRangeValidators.validate_notification_time(@naive_now, false)
 
       assert {msg1, []} = cs.errors[:notification_period_start]
       assert msg1 =~ "in the past"
@@ -559,71 +569,126 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidatorsTest do
       assert msg2 =~ "in the past"
     end
 
-    test "errors when notification_period_start is after the active start" do
+    test "passes when start is after actual now but before a future effect start (req 1)" do
       cs =
         changeset(%{
           alert_timing: :"one-time",
+          notification_specifier: :custom,
           active_period_start: future_naive(30),
-          notification_period_start: future_naive(60)
+          notification_period_start: future_naive(10)
         })
-        |> TimeRangeValidators.validate_notification_time(@naive_now)
-
-      assert {msg, []} = cs.errors[:notification_period_start]
-      assert msg =~ "Notification period must start on or before"
-    end
-
-    test "errors when the notification is in the past, even when editing" do
-      cs =
-        changeset(%{
-          alert_timing: :"one-time",
-          active_period_start: future_naive(),
-          notification_period_start: ~N[2020-01-01 09:00:00]
-        })
-        |> TimeRangeValidators.validate_notification_time(@naive_now)
-
-      assert cs.errors == [
-               notification_period_start: {"Notifications can't be set in the past", []},
-               notification_period_start_date: {"Notifications can't be set in the past", []}
-             ]
-    end
-
-    test "passes when notification_period_start is on or before active_period_start" do
-      start = future_naive(30)
-
-      cs =
-        changeset(%{
-          alert_timing: :"one-time",
-          active_period_start: start,
-          notification_period_start: NaiveDateTime.add(start, -3600, :second)
-        })
-        |> TimeRangeValidators.validate_notification_time(@naive_now)
+        |> TimeRangeValidators.validate_notification_time(@naive_now, true)
 
       assert cs.errors == []
     end
 
-    test "uses start_date + start_time for recurring alerts" do
+    test ":same_as_effect_period is never flagged, even with a past effect start" do
       cs =
         changeset(%{
-          alert_timing: :recurring,
-          active_period_start_date: future_date(),
-          active_period_start_time: ~T[09:00:00],
+          alert_timing: :"one-time",
+          notification_specifier: :same_as_effect_period,
+          active_period_start: ~N[2020-01-01 09:00:00],
           notification_period_start: ~N[2020-01-01 09:00:00]
         })
-        |> TimeRangeValidators.validate_notification_time(@naive_now)
+        |> TimeRangeValidators.validate_notification_time(@naive_now, true)
+
+      assert cs.errors == []
+    end
+
+    test "editing: an unchanged saved past value stays valid (req 2)" do
+      past = ~N[2020-01-01 09:00:00]
+
+      cs =
+        editing_changeset(past, past, %{
+          alert_timing: :"one-time",
+          notification_specifier: :custom,
+          active_period_start: future_naive()
+        })
+        |> TimeRangeValidators.validate_notification_time(@naive_now, true)
+
+      assert cs.errors == []
+    end
+
+    test "editing: changing to a different past value errors (req 2)" do
+      cs =
+        editing_changeset(~N[2020-01-01 09:00:00], ~N[2019-06-01 09:00:00], %{
+          alert_timing: :"one-time",
+          notification_specifier: :custom,
+          active_period_start: future_naive()
+        })
+        |> TimeRangeValidators.validate_notification_time(@naive_now, true)
 
       assert {msg, []} = cs.errors[:notification_period_start]
       assert msg =~ "in the past"
     end
 
-    test "is a no-op when the resolved start datetime is nil" do
+    test "allows a start after the effect start (no effect-start bound)" do
+      cs =
+        changeset(%{
+          alert_timing: :"one-time",
+          notification_specifier: :custom,
+          active_period_start: future_naive(10),
+          notification_period_end: future_naive(30),
+          notification_period_start: future_naive(20)
+        })
+        |> TimeRangeValidators.validate_notification_time(@naive_now, false)
+
+      assert cs.errors == []
+    end
+
+    test "errors when after the notification period end" do
+      cs =
+        changeset(%{
+          alert_timing: :"one-time",
+          notification_specifier: :custom,
+          notification_period_end: future_naive(10),
+          notification_period_start: future_naive(20)
+        })
+        |> TimeRangeValidators.validate_notification_time(@naive_now, false)
+
+      assert {msg, []} = cs.errors[:notification_period_start]
+      assert msg =~ "Notification period must start on or before"
+    end
+
+    test "passes when on or before the notification period end" do
+      cs =
+        changeset(%{
+          alert_timing: :"one-time",
+          notification_specifier: :custom,
+          notification_period_end: future_naive(20),
+          notification_period_start: future_naive(10)
+        })
+        |> TimeRangeValidators.validate_notification_time(@naive_now, false)
+
+      assert cs.errors == []
+    end
+
+    test "has no upper bound when the notification period has no end" do
+      cs =
+        changeset(%{
+          alert_timing: :"one-time",
+          notification_specifier: :custom,
+          notification_period_end: nil,
+          notification_period_start: future_naive(365)
+        })
+        |> TimeRangeValidators.validate_notification_time(@naive_now, false)
+
+      assert cs.errors == []
+    end
+
+    test "errors for recurring alerts with a past notification start (req 1)" do
       cs =
         changeset(%{
           alert_timing: :recurring,
+          notification_specifier: :custom,
+          active_period_start_date: future_date(),
+          active_period_start_time: ~T[09:00:00],
           notification_period_start: ~N[2020-01-01 09:00:00]
         })
-        |> TimeRangeValidators.validate_notification_time(@naive_now)
+        |> TimeRangeValidators.validate_notification_time(@naive_now, false)
 
-      assert cs.errors == []
+      assert {msg, []} = cs.errors[:notification_period_start]
+      assert msg =~ "in the past"
     end
   end
 

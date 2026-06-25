@@ -58,16 +58,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
     end
 
     def validate(_slice, changeset, params, socket) do
-      start_time =
-        if socket.assigns.form_type == :editing do
-          get_field(changeset, :active_period_start)
-        else
-          socket.assigns.current_time
-        end
-
       changeset
       |> TimeRangeValidators.validate_cast_notification_datetimes(params)
-      |> TimeRangeValidators.validate_notification_time(start_time)
+      |> TimeRangeValidators.validate_notification_time(
+        socket.assigns.current_time,
+        socket.assigns.form_type == :editing
+      )
       |> TimeRangeValidators.validate_required_notification_fields()
     end
 

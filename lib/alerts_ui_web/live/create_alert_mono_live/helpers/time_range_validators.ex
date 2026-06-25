@@ -279,10 +279,66 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
     )
   end
 
-  def validate_notification_time(changeset, start_time) do
-    naive_start = naive_start(changeset, start_time)
+  def validate_notification_time(changeset, current_time, editing?) do
+    validate_change(
+      changeset,
+      :notification_period_start,
+      fn :notification_period_start, value ->
+        notification_start_errors(changeset, value, current_time, editing?)
+      end
+    )
+  end
 
-    validate_notification_start(changeset, naive_start, start_time)
+  # Only datetimes the user picks (:custom / :start_of_service) are bounded. :now
+  # tracks the current time and :same_as_effect_period tracks the effect start,
+  # whose own (edit-lenient) validation governs it — so those are never flagged.
+  defp notification_start_errors(changeset, value, current_time, editing?) do
+    notification_end = get_field(changeset, :notification_period_end)
+
+    cond do
+      not user_chosen_notification?(changeset) ->
+        []
+
+      # An unchanged saved value stays valid until the user modifies it.
+      editing? and unchanged_notification?(changeset, value) ->
+        []
+
+      # The lower bound is the actual current time, never the effect start.
+      in_past?(value, current_time) ->
+        notification_error("Notifications can't be set in the past")
+
+      # The only upper bound is the notification period end (nil ⇒ unbounded).
+      after_notification_end?(value, notification_end) ->
+        notification_error(
+          "Notification period must start on or before #{formatted_datetime(notification_end)}"
+        )
+
+      true ->
+        []
+    end
+  end
+
+  defp user_chosen_notification?(changeset),
+    do: get_field(changeset, :notification_specifier) in [:custom, :start_of_service]
+
+  defp unchanged_notification?(changeset, value) do
+    original = changeset.data.notification_period_start
+    not is_nil(original) and NaiveDateTime.compare(value, original) == :eq
+  end
+
+  defp in_past?(value, current_time),
+    do: NaiveDateTime.diff(current_time, value, :minute) > 1
+
+  defp after_notification_end?(_value, nil), do: false
+
+  defp after_notification_end?(value, notification_end),
+    do: NaiveDateTime.diff(value, notification_end, :minute) > 1
+
+  defp notification_error(message) do
+    [
+      notification_period_start: {message, []},
+      notification_period_start_date: {message, []}
+    ]
   end
 
   def validate_required_notification_fields(changeset) do
@@ -295,51 +351,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
         :custom -> [:notification_period_start]
       end,
       message: "Enter a valid date and/or time"
-    )
-  end
-
-  defp naive_start(changeset, current_time) do
-    if get_field(changeset, :alert_timing) in [:"one-time", "one-time"] do
-      get_field(changeset, :active_period_start)
-    else
-      start_date = get_field(changeset, :active_period_start_date)
-      start_time = get_field(changeset, :active_period_start_time)
-
-      if start_date && start_time do
-        current_time
-      else
-        nil
-      end
-    end
-  end
-
-  defp validate_notification_start(changeset, nil, _), do: changeset
-
-  defp validate_notification_start(changeset, naive_start, current_time) do
-    validate_change(
-      changeset,
-      :notification_period_start,
-      fn :notification_period_start, notification_period_start ->
-        cond do
-          NaiveDateTime.diff(current_time, notification_period_start, :minute) > 1 ->
-            [
-              notification_period_start: {"Notifications can't be set in the past", []},
-              notification_period_start_date: {"Notifications can't be set in the past", []}
-            ]
-
-          NaiveDateTime.diff(notification_period_start, naive_start, :minute) > 1 ->
-            msg =
-              "Notification period must start on or before #{formatted_datetime(naive_start)}"
-
-            [
-              notification_period_start: {msg, []},
-              notification_period_start_date: {msg, []}
-            ]
-
-          true ->
-            []
-        end
-      end
     )
   end
 

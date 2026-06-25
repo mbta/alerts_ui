@@ -8,28 +8,43 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
   alias AlertsUI.Alerts
 
   defp create_test_alert(alert_id, opts \\ []) do
+    start = Keyword.get(opts, :active_period_start, ~U[2024-05-10 14:30:54Z])
+
     ap =
       build(
         :active_period,
-        Keyword.get(opts, :active_period_attrs, %{start: ~U[2024-05-10 14:30:54Z]})
+        Keyword.get(opts, :active_period_attrs, %{start: start})
       )
 
-    params =
-      build(:alert_map, %{
-        alert_id: alert_id,
-        active_period: [Map.from_struct(ap)],
-        active_period_start: ~U[2024-05-10 14:30:54Z],
-        duration_certainty: Keyword.get(opts, :duration_certainty, :UNKNOWN),
-        effect: Keyword.get(opts, :effect, :OTHER_EFFECT),
-        effect_detail: Keyword.get(opts, :effect_detail, "DELAY"),
-        informed_entity: [%{route_type: 3, activities: [:BOARD]}],
-        reminder_times: [],
-        severity: 4,
-        primary_service_type: "3",
-        description_text: nil
-      })
+    base = %{
+      alert_id: alert_id,
+      active_period: [Map.from_struct(ap)],
+      active_period_start: start,
+      duration_certainty: Keyword.get(opts, :duration_certainty, :UNKNOWN),
+      effect: Keyword.get(opts, :effect, :OTHER_EFFECT),
+      effect_detail: Keyword.get(opts, :effect_detail, "DELAY"),
+      informed_entity: [%{route_type: 3, activities: [:BOARD]}],
+      reminder_times: [],
+      severity: 4,
+      primary_service_type: "3",
+      description_text: nil
+    }
 
-    {:ok, _} = Alerts.create_or_update_alert(params, build(:user))
+    base =
+      case Keyword.get(opts, :notification_period_start) do
+        nil -> base
+        nps -> Map.put(base, :notification_period_start, nps)
+      end
+
+    {:ok, _} = Alerts.create_or_update_alert(build(:alert_map, base), build(:user))
+  end
+
+  defp future_utc(offset_days) do
+    DateTime.utc_now() |> DateTime.add(offset_days, :day) |> DateTime.truncate(:second)
+  end
+
+  defp eastern_now do
+    DateTime.now!("America/New_York") |> DateTime.to_naive() |> NaiveDateTime.truncate(:second)
   end
 
   describe "component" do
@@ -108,7 +123,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
     end
 
     @tag :logged_in_user
-    test "scheduled start time must be before active period start", %{conn: conn} do
+    test "scheduled start time must be before the notification period end", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/mono/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
@@ -117,6 +132,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
       |> render_change(%{
         "alert_data" => %{
           "active_period_start_specifier" => "custom",
+          "active_period_end_specifier" => "custom",
           "notification_specifier" => "custom"
         }
       })
@@ -126,12 +142,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
       |> render_change(%{
         "alert_data" => %{
           "active_period_start" => "2040-05-01T10:54:00",
-          "notification_period_start" => "2040-05-02T10:54:00"
+          "active_period_end" => "2040-05-02T10:54:00",
+          "notification_period_start" => "2040-05-03T10:54:00"
         }
       })
 
       assert render(view) =~
-               "Notification period must start on or before 05/01/2040, 10:54 AM"
+               "Notification period must start on or before 05/02/2040"
     end
 
     @tag :logged_in_user
@@ -192,6 +209,54 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
         "alert_data" => %{
           "notification_specifier" => "custom",
           "notification_period_start" => "2024-04-29T10:54:00"
+        }
+      })
+
+      assert render(view) =~ "Notifications can&#39;t be set in the past"
+    end
+
+    @tag :logged_in_user
+    test "notification after now but before a future effect start is valid (req 1)", %{conn: conn} do
+      create_test_alert("np-future-start",
+        active_period_start: future_utc(60),
+        active_period_attrs: %{start: future_utc(60), end: future_utc(61)},
+        notification_period_start: future_utc(1)
+      )
+
+      {:ok, view, _html} = live(conn, "/alerts/mono/edit/np-future-start")
+
+      notification = eastern_now() |> NaiveDateTime.add(2, :day) |> NaiveDateTime.to_iso8601()
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "notification_specifier" => "custom",
+          "notification_period_start" => notification
+        }
+      })
+
+      html = render(view)
+      refute html =~ "Notifications can&#39;t be set in the past"
+      refute html =~ "Notification period must start on or before"
+    end
+
+    @tag :logged_in_user
+    test "a saved past notification stays valid until modified (req 2)", %{conn: conn} do
+      create_test_alert("np-past-notif", notification_period_start: ~U[2024-04-29 14:54:00Z])
+
+      {:ok, view, _html} = live(conn, "/alerts/mono/edit/np-past-notif")
+
+      # On load the existing past value is not flagged
+      refute render(view) =~ "Notifications can&#39;t be set in the past"
+
+      # Changing it to a different past value surfaces the error
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "notification_specifier" => "custom",
+          "notification_period_start" => "2024-04-28T10:54:00"
         }
       })
 
