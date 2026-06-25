@@ -1067,8 +1067,6 @@ defmodule AlertsUIWeb.SharedComponents do
       |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
       |> assign_new(:filter_value, fn -> String.downcase(filter_field.value || "") end)
 
-    IO.inspect(assigns.filter_field.id)
-
     ~H"""
     <div {@rest} class={["flex flex-col justify-start", @class]} id={"#{@field.id}_selector"}>
       <div :if={@modal_filter_id || @label} class="flex flex-row justify-between">
