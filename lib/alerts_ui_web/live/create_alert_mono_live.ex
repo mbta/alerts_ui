@@ -177,7 +177,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   @impl true
   def handle_event("reset_search_filter", %{"name" => name}, socket) do
-    IO.inspect(System.system_time(:millisecond), label: "reset search filter")
     # i.e., "alert_data[the_field_we_want_to_clear]"
     search_filter_name =
       hd(Regex.run(~r/\[(.*?)\]/, name, capture: :all_but_first))
@@ -552,8 +551,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   def sync_socket(socket, params \\ %{})
 
   def sync_socket(%LiveView.Socket{assigns: %{} = assigns} = socket, params) do
-    IO.inspect(System.system_time(:millisecond), label: "sync_socket")
-
     case AlertData.sync(assigns.form.source, socket, params) do
       {:ok, socket} ->
         if assigns.submitting? do
@@ -572,7 +569,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
           |> assign(:submitting?, false)
           |> push_patch(to: path)
         else
-          IO.inspect(System.system_time(:millisecond), label: "sync_socket done")
           socket
         end
 
