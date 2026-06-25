@@ -1245,7 +1245,6 @@ defmodule AlertsUIWeb.SharedComponents do
           disabled={@disabled}
           {@rest}
         />
-        <% # phx-target="" will make the event bubble to the the parent LiveComponent instead of the parent LiveView %>
         <button
           :if={@action_event != nil && @action_icon != nil}
           class={"h-[38px] relative right-[3rem] flex flex-row items-center justify-center align-center rounded-xl text-primary hover:text-primary-hover active:text-primary-active cursor-pointer z-1 #{if @value in ["", nil], do: "invisible"}"}

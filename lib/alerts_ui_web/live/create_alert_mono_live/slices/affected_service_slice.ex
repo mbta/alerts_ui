@@ -186,7 +186,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   def async_assign_selections(%{assigns: %{} = assigns} = socket, params) do
     if update_selections?(params) do
-      update_selections(socket)
+      update_selections(socket, params)
     else
       dont_update_selections(Map.get(assigns, :selections), socket)
     end
@@ -194,19 +194,53 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   def async_assign_selections(socket, _params), do: socket
 
-  defp update_selections(socket) do
+  defp update_selections(
+         socket,
+         %{"_target" => ["alert_data", "route_search_term"]}
+       ) do
+    prev = prev(Map.get(socket.assigns, :selections))
+    form = socket.assigns.form
+
+    route_id_options = route_id_options(prev.available_routes, form)
+
+    socket
+    |> assign(:selections, %{prev | route_id_options: route_id_options})
+  end
+
+  defp update_selections(
+         socket,
+         %{"_target" => ["alert_data", "stop_search_term"]}
+       ) do
+    prev = prev(Map.get(socket.assigns, :selections))
+    form = socket.assigns.form
+
+    stop_id_options = stop_id_options(prev.available_stops, form)
+
+    socket
+    |> assign(:selections, %{prev | stop_id_options: stop_id_options})
+  end
+
+  defp update_selections(
+         socket,
+         %{"_target" => ["alert_data", "trip_search_term"]}
+       ) do
+    prev = prev(Map.get(socket.assigns, :selections))
+    form = socket.assigns.form
+
+    trip_id_options = trip_id_options(prev.available_schedules, form)
+
+    socket
+    |> assign(:selections, %{prev | trip_id_options: trip_id_options})
+  end
+
+  defp update_selections(socket, _params) do
     prev = prev(Map.get(socket.assigns, :selections))
     form = socket.assigns.form
 
     direction = form[:direction].value
     modal_date = form[:modal_date].value
     route_ids = form[:route_ids].value || []
-    route_search_term = form[:route_search_term].value
     route_type = form[:route_type].value
-    stop_names_and_ids = form[:stop_names_and_ids].value || []
-    stop_search_term = form[:stop_search_term].value
-    trip_ids = form[:trip_ids].value || []
-    trip_search_term = form[:trip_search_term].value
     combination = form[:combination].value
 
     all_route_types = all_route_types(route_type)
@@ -240,39 +274,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
           Map.new(available_routes, &{&1.id, &1.direction_names})
         )
 
-      route_id_options =
-        SelectFormatter.formatted_select_options(%SelectFormatter{
-          options: available_routes,
-          search_term: route_search_term,
-          route_type: route_type,
-          values_to_keep: route_ids,
-          option_prefix: "route-search"
-        })
+      route_id_options = route_id_options(available_routes, form)
 
-      stop_id_options =
-        SelectFormatter.formatted_select_options(
-          %SelectFormatter{
-            options: available_stops,
-            search_term: stop_search_term,
-            route_type: route_type,
-            values_to_keep: stop_names_and_ids,
-            option_prefix: "stop-search"
-          },
-          true
-        )
+      stop_id_options = stop_id_options(available_stops, form)
 
-      trip_id_options =
-        SelectFormatter.formatted_select_options(%SelectFormatter{
-          schedules_by_route_name:
-            get_schedules_by_route_type(
-              available_schedules,
-              route_ids
-            ),
-          search_term: trip_search_term,
-          route_type: route_type,
-          values_to_keep: trip_ids,
-          option_prefix: "trip-search"
-        })
+      trip_id_options = trip_id_options(available_schedules, form)
 
       %Selections{
         available_routes: available_routes,
@@ -286,6 +292,46 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
         trip_id_options: trip_id_options
       }
     end)
+  end
+
+  defp route_id_options(
+         available_routes,
+         form
+       ) do
+    SelectFormatter.formatted_select_options(%SelectFormatter{
+      options: available_routes,
+      search_term: form[:route_search_term].value,
+      route_type: form[:route_type].value,
+      values_to_keep: form[:route_ids].value || [],
+      option_prefix: "route-selector"
+    })
+  end
+
+  defp stop_id_options(available_stops, form) do
+    SelectFormatter.formatted_select_options(
+      %SelectFormatter{
+        options: available_stops,
+        search_term: form[:stop_search_term].value,
+        route_type: form[:route_type].value,
+        values_to_keep: form[:stop_names_and_ids].value || [],
+        option_prefix: "stop-search"
+      },
+      true
+    )
+  end
+
+  defp trip_id_options(available_schedules, form) do
+    SelectFormatter.formatted_select_options(%SelectFormatter{
+      schedules_by_route_name:
+        group_schedules_by_route_type(
+          available_schedules,
+          form[:route_ids].value || []
+        ),
+      search_term: form[:trip_search_term].value,
+      route_type: form[:route_type].value,
+      values_to_keep: form[:trip_ids].value,
+      option_prefix: "trip-search"
+    })
   end
 
   defp dont_update_selections(nil, socket), do: assign(socket, :selections, %Selections{})
@@ -315,7 +361,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     "stop_ids",
     "route_ids",
     "trip_ids",
-    "modal_route_search_term",
     "route_search_term",
     "single_route_id",
     "stop_search_term",
@@ -339,7 +384,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   defp all_route_types(4), do: [4]
   defp all_route_types(_), do: []
 
-  defp get_schedules_by_route_type(available_schedules, route_ids) do
+  defp group_schedules_by_route_type(available_schedules, route_ids) do
     Enum.filter(available_schedules, fn schedule ->
       # If a line was selected and deselected, value here may be set to nil
       schedule.route.id in (route_ids || [])

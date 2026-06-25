@@ -1371,6 +1371,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         view
         |> element("form")
         |> render_change(%{
+          "_target" => ["alert_data", "modal_date_search_term"],
           "alert_data" => %{"modal_date_search_term" => "q", "route_ids" => ["CR-Worcester"]}
         })
 

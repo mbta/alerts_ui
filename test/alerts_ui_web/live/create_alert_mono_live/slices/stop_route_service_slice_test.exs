@@ -14,46 +14,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
 
-  describe "stop_id_options/5 preservation logic" do
-    test "a stop that was selected but is no longer in available_stops disappears when selected_stops is empty" do
-      available_stops = [%Stop{id: "place-dwnxg", name: "Downtown Crossing"}]
-
-      options =
-        StopRouteServiceSlice.stop_id_options(
-          available_stops,
-          [],
-          nil,
-          1,
-          ["place-pktrm"]
-        )
-
-      option_values = Enum.map(options, &Keyword.get(&1, :value))
-
-      refute "place-pktrm" in option_values,
-             "Expected Park Street to be absent from options, but it appeared — " <>
-               "this would mean preservation is working, disproving the hypothesis"
-    end
-
-    test "a stop that was selected IS preserved when it is present in selected_stops" do
-      park_street = %Stop{id: "place-pktrm", name: "Park Street"}
-      available_stops = [%Stop{id: "place-dwnxg", name: "Downtown Crossing"}]
-
-      options =
-        StopRouteServiceSlice.stop_id_options(
-          available_stops,
-          [park_street],
-          nil,
-          1,
-          ["place-pktrm"]
-        )
-
-      option_values = Enum.map(options, &Keyword.get(&1, :value))
-
-      assert "place-pktrm" in option_values,
-             "Expected Park Street to be preserved in options when selected_stops is populated"
-    end
-  end
-
   # Subway routes (type 1) for "Station closure" → combination :SR
   @route %Route{sort_order: 1, id: "Blue", name: "Blue Line", type: 0}
   @route_two %Route{sort_order: 2, id: "Red", name: "Red Line", type: 1}
@@ -62,7 +22,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
     test "selected routes remain visible even when they don't match the search term" do
       routes = [@route, @route_two]
 
-      options = StopRouteServiceSlice.route_id_options(routes, ["Blue", "Red"], "Blue", 1)
+      form = %{
+        :route_search_term => %{value: "Blue"},
+        :route_type => %{value: 1},
+        :route_ids => %{value: ["Blue", "Red"]}
+      }
+
+      options = StopRouteServiceSlice.route_id_options(routes, form)
       values = Enum.map(options, &Keyword.get(&1, :value))
 
       assert "Blue" in values
@@ -72,7 +38,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
     test "unselected routes are hidden when they don't match the search term" do
       routes = [@route, @route_two]
 
-      options = StopRouteServiceSlice.route_id_options(routes, ["Blue"], "Blue", 1)
+      form = %{
+        :route_search_term => %{value: "Blue"},
+        :route_type => %{value: 1},
+        :route_ids => %{value: ["Blue"]}
+      }
+
+      options = StopRouteServiceSlice.route_id_options(routes, form)
       values = Enum.map(options, &Keyword.get(&1, :value))
 
       assert "Blue" in values
