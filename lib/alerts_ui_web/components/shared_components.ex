@@ -1067,6 +1067,8 @@ defmodule AlertsUIWeb.SharedComponents do
       |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
       |> assign_new(:filter_value, fn -> String.downcase(filter_field.value || "") end)
 
+    IO.inspect(assigns.filter_field.id)
+
     ~H"""
     <div {@rest} class={["flex flex-col justify-start", @class]} id={"#{@field.id}_selector"}>
       <div :if={@modal_filter_id || @label} class="flex flex-row justify-between">
@@ -1245,7 +1247,6 @@ defmodule AlertsUIWeb.SharedComponents do
           disabled={@disabled}
           {@rest}
         />
-        <% # phx-target="" will make the event bubble to the the parent LiveComponent instead of the parent LiveView %>
         <button
           :if={@action_event != nil && @action_icon != nil}
           class={"h-[38px] relative right-[3rem] flex flex-row items-center justify-center align-center rounded-xl text-primary hover:text-primary-hover active:text-primary-active cursor-pointer z-1 #{if @value in ["", nil], do: "invisible"}"}
