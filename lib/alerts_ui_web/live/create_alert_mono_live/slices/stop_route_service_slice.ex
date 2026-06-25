@@ -183,12 +183,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
       available_routes = CreateAlertLive.get_routes_by_stop(stop_ids, route_type)
 
-      # Merge previously selected stops with currently available stops so that
-      # stops hidden by a route filter are still tracked as selected.
       available_stop_ids = Enum.map(available_stops, fn stop -> stop.id end)
 
       # Get all the stops that were selected but are no longer included in `available_stops`
-      # Then append them to the top of the list
+      # Then append them to the top of the list so that stops hidden by a route filter
+      # are still tracked as selected.
       previously_selected_stops =
         Enum.filter(prev_selected_stops, fn stop -> stop.id not in available_stop_ids end)
 
