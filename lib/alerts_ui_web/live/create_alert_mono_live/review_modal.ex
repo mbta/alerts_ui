@@ -200,7 +200,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.ReviewModal do
               </a>
             </span>
 
-            <span :if={@alert_data.view_banner} class="block pb-4">
+            <span :if={Map.get(@alert_data, :banner_text)} class="block pb-4">
               <p class="font-bold">Web Banner Text</p>
               <p>{@alert_data.banner_text}</p>
             </span>
@@ -463,7 +463,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.ReviewModal do
           <% end %>
         </div>
       </:footer>
-      <AlertsUIWeb.ReviewModal.confirm_close_modal
+      <AlertsUIWeb.CreateAlertMonoLive.ReviewModal.confirm_close_modal
         id="close-alert-nested-modal"
         alert_id={@alert_id}
         send_all_clear?={@send_all_clear?}

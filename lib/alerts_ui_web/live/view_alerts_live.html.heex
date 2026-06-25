@@ -181,7 +181,7 @@
               </.link>
             </:menu>
           </.button_menu>
-          <AlertsUIWeb.ReviewModal.confirm_close_modal
+          <AlertsUIWeb.CreateAlertMonoLive.ReviewModal.confirm_close_modal
             alert_id={alert.alert_id}
             send_all_clear?={@send_all_clear?}
           />
@@ -190,7 +190,7 @@
     </Flop.Phoenix.table>
   </div>
 
-  <AlertsUIWeb.ReviewModal.review_modal
+  <AlertsUIWeb.CreateAlertMonoLive.ReviewModal.review_modal
     :if={Map.get(assigns, :selected_alert_data, nil)}
     alert_data={@selected_alert_data}
     alert_id={@selected_alert_id}
