@@ -406,6 +406,54 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
     end
 
     @tag :logged_in_user
+    test "shows errors in flash if there are any", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_start" => "2024-09-26T04:00:00",
+          "notification_specifier" => "same_as_effect_period"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{"reminder_sort" => ["new", "new"]}
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "reminder_sort" => ["0", "1"],
+          "reminder_times" => %{
+            "0" => %{
+              "_persistent_id" => "0",
+              "reminder_time" => "2024-09-25T12:12:12",
+              "reminder_time_specifier" => "custom"
+            }
+          }
+        }
+      })
+
+      assert render(view) =~ ~s(Reminder time must be after notification period starts)
+      assert render(view) =~ ~s(Select reminder time)
+
+      view
+      |> element("button#review", "Review and submit")
+      |> render_click()
+
+      flash = element(view, "#flash")
+
+      assert render(flash) =~ ~s(Reminder time must be after notification period starts)
+      assert render(flash) =~ ~s(Select reminder time)
+    end
+
+    @tag :logged_in_user
     test "renders if editing", %{conn: conn} do
       alert_params =
         build(:alert_map, %{

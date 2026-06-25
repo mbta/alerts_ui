@@ -628,8 +628,22 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   defp format_errors(errors) do
     errors
     |> Enum.uniq()
-    |> Enum.map_join("; ", fn {_title, {message, _error}} -> "#{message}" end)
+    |> Enum.map_join("; ", &format_error/1)
   end
+
+  defp format_error({_title, {messages, _error}}) when is_list(messages),
+    do:
+      messages
+      |> Enum.map(&format_message/1)
+      |> Enum.uniq()
+      |> Enum.join("; ")
+
+  defp format_error({_title, {message, _error}}), do: format_message(message)
+
+  defp format_message(%{} = messages),
+    do: Enum.map(messages, fn {_key, value} -> format_message(value) end)
+
+  defp format_message(message), do: "#{message}"
 
   def return_to(return_to_value) do
     uri = URI.parse(return_to_value)
