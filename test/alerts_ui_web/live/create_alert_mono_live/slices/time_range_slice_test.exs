@@ -1797,11 +1797,19 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       assert has_element?(view, "input#wednesday[checked]")
       assert has_element?(view, "input#friday[checked]")
 
+      # With two days selected, neither is locked.
+      refute has_element?(view, "label[for='wednesday'].pointer-events-none")
+      refute has_element?(view, "label[for='friday'].pointer-events-none")
+
       view
       |> element("form")
       |> render_change(%{"alert_data" => %{"recurrence_days" => ["wednesday"]}})
 
       refute has_element?(view, "input#friday[checked]")
+
+      # The lone remaining day is rendered non-interactive so clicking it can't
+      # empty the group (the server-side restore below is the backstop).
+      assert has_element?(view, "label[for='wednesday'].pointer-events-none")
 
       view
       |> element("form")
