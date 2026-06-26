@@ -8,6 +8,7 @@ defmodule AlertsUI.CacheWarming do
 
   require Logger
 
+  alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.CreateAlertLive
 
   def warm_all do
@@ -43,9 +44,6 @@ defmodule AlertsUI.CacheWarming do
   end
 
   defp warm_facilities do
-    # The three most-used facility alert types
-    CreateAlertLive.get_facilities(["ELEVATOR"])
-    CreateAlertLive.get_facilities(["ESCALATOR"])
-    CreateAlertLive.get_facilities(["PARKING_AREA", "PICK_DROP"])
+    InformedEntity.all_facility_types() |> CreateAlertLive.get_facilities()
   end
 end

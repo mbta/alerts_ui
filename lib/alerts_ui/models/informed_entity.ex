@@ -161,6 +161,8 @@ defmodule AlertsUI.Models.InformedEntity do
     # raise ArgumentError, "no such facility effect #{effect}"
   end
 
+  def all_facility_types(), do: @all_facility_types
+
   @doc """
   Map route type atoms to integer codes.
 
