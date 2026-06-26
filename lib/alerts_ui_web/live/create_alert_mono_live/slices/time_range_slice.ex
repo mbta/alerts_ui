@@ -697,6 +697,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
           button_class="justify-center"
           column={false}
           show_icons={false}
+          prevent_empty={true}
         />
         <div
           :if={Enum.empty?(@form.errors) and @form[:recurrence_days].value not in [[], nil]}

@@ -504,6 +504,12 @@ defmodule AlertsUIWeb.SharedComponents do
   attr :label, :string, default: nil
   attr :class, :string, default: "", doc: "additional classes to add"
   attr :button_class, :string, default: "", doc: "classes to add to buttons"
+
+  attr :prevent_empty, :boolean,
+    default: false,
+    doc:
+      "when true, the only remaining checked option is rendered non-interactive so it can't be unchecked"
+
   attr :rest, :global, include: ~w(disabled form readonly)
 
   def toggle_checkgroup(%{field: %FormField{} = field} = assigns) do
@@ -524,13 +530,19 @@ defmodule AlertsUIWeb.SharedComponents do
       <div class={["flex gap-2 w-full", if(@column, do: "flex-col", else: "flex-col md:flex-row")]}>
         <div
           :for={[key: option_name, value: id, id: dom_id] <- @options}
-          class={["flex-1", @button_class]}
+          class={[
+            "flex-1",
+            @button_class,
+            "!m-0 !p-0",
+            @base_toggle_classes,
+            if(@field_value && id in @field_value, do: @toggled_on, else: @toggled_off)
+          ]}
         >
-          <.label for={dom_id}>
-            <div class={[
-              @base_toggle_classes,
-              if(@field_value && id in @field_value, do: @toggled_on, else: @toggled_off)
-            ]}>
+          <.label
+            for={dom_id}
+            class={if @prevent_empty and @field_value == [id], do: "pointer-events-none"}
+          >
+            <div class="px-4 py-3">
               <input
                 type="checkbox"
                 id={dom_id}
@@ -540,7 +552,7 @@ defmodule AlertsUIWeb.SharedComponents do
                 class="hidden"
                 {@rest}
               />
-              <div class={["flex flex-row justify-left align-center", @button_class]}>
+              <div class={["lol flex flex-row justify-left align-center", @button_class]}>
                 <div :if={@show_icons} class="mr-3 self-center">
                   <.circle_icon type={if @icon_type, do: @icon_type, else: option_name} />
                 </div>
