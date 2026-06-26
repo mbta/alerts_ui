@@ -101,7 +101,7 @@ defmodule AlertsUIWeb.Tickets.FormCrashDeletingTimeValueTest do
   describe "mono alert form — form survives deleting time value (ticket 1213275668858461)" do
     @tag :logged_in_user
     test "Issue 1: recurring alert, clear custom start time → form must not crash", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
 
       # Navigate to the Alert Details step: Subway / Delay
       view = get_to_submission_page_refactor(conn, view, "Subway", "Delay")
@@ -156,7 +156,7 @@ defmodule AlertsUIWeb.Tickets.FormCrashDeletingTimeValueTest do
     @tag :logged_in_user
     test "Issue 2: one-time alert, clear custom start, switch to recurring → form must not crash",
          %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
 
       view = get_to_submission_page_refactor(conn, view, "Subway", "Delay")
 

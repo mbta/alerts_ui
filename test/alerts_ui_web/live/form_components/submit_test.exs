@@ -22,7 +22,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
     # will need to be e2e
     @tag :logged_in_user
     test "clicking review before filling out form doesn't show modal", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/new")
+      {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
       get_to_submission_page(view, "Bus", "Delay")
       open_review_modal(view)
@@ -47,7 +47,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
            get: fn _id -> @stop end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Bus", "Delay")
 
@@ -92,7 +92,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
          ]}
       ]) do
         # --- Same as before ---
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Bus", "Delay")
 
@@ -147,7 +147,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
          ]}
       ]) do
         # --- Same as before ---
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Bus", "Delay")
 
@@ -208,7 +208,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
            by_route_id: fn _route_id, _opts -> [] end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Bus", "Delay")
 
@@ -317,7 +317,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
   describe "other navigation events" do
     @tag :logged_in_user
     test "back button returns to previous step", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/new")
+      {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
       get_to_submission_page(view, "Bus", "Delay")
 
@@ -330,7 +330,7 @@ defmodule AlertsUIWeb.FormComponents.SubmitTest do
 
     @tag :logged_in_user
     test "cancel button returns to alerts list page", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/new")
+      {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
       get_to_submission_page(view, "Bus", "Delay")
 

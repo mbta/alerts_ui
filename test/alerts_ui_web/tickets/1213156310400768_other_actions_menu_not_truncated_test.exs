@@ -21,7 +21,7 @@ defmodule AlertsUIWeb.Tickets.OtherActionsMenuNotTruncatedTest do
            `DropdownPosition` hook — the JS mechanism that prevents truncation.
     * AC2: The menu's dropdown element carries the correct `data-container-id`
            attribute pointing to an element that exists in the DOM.
-    * AC3: The dropdown links include "Duplicate" (which uses the /mono/ path)
+    * AC3: The dropdown links include "Duplicate"
            and "Download history" — both menu items are rendered.
 
   Verified pass against dev-green on 2026-06-08 (7 alerts, all menus fully visible
@@ -102,7 +102,6 @@ defmodule AlertsUIWeb.Tickets.OtherActionsMenuNotTruncatedTest do
       {:ok, _view, html} = live(conn, "/alerts")
       {:ok, document} = Floki.parse_document(html)
 
-      # There should be a "Duplicate" link that goes to the /mono/ path (per skill constraint).
       duplicate_links =
         document
         |> Floki.find("[id^='duplicate-button-']")
@@ -113,8 +112,8 @@ defmodule AlertsUIWeb.Tickets.OtherActionsMenuNotTruncatedTest do
       for link <- duplicate_links do
         href = Floki.attribute([link], "href") |> List.first()
 
-        assert href =~ "/mono/",
-               "Duplicate link href should contain /mono/, got: #{inspect(href)}"
+        assert href =~ "/alerts/duplicate/",
+               "Duplicate link href should contain /alerts/duplicate/, got: #{inspect(href)}"
       end
 
       # There should be a "Download history" link.

@@ -21,7 +21,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
   describe "Cancel button" do
     @tag :logged_in_user
     test "navigates away from the mono flow when clicked", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new/bus/delay")
+      {:ok, view, _html} = live(conn, "/alerts/new/bus/delay")
 
       assert has_element?(view, "#cancel")
 
@@ -37,7 +37,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
 
     @tag :logged_in_user
     test "clicking review before filling out form doesn't show modal", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new/")
+      {:ok, view, _html} = live(conn, "/alerts/new/")
 
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
@@ -62,7 +62,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
            get: fn _id -> @stop end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
 
         view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
@@ -100,7 +100,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
          ]}
       ]) do
         # --- Same as before ---
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
 
         view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
@@ -148,7 +148,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
          ]}
       ]) do
         # --- Same as before ---
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
 
         view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
@@ -203,7 +203,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
            by_route_id: fn _route_id, _opts -> [] end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
 
         view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
@@ -341,7 +341,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
   describe "other navigation events" do
     @tag :logged_in_user
     test "back button returns to previous step", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
 
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
@@ -354,7 +354,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
 
     @tag :logged_in_user
     test "cancel button returns to alerts list page", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
 
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 

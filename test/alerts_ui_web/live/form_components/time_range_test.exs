@@ -1141,7 +1141,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
         {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
 
-        {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/edit?alert_id=123")
 
         rendered_view = render(view)
 
@@ -1202,7 +1202,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       next_day_date = Date.add(todays_date, 2)
 
       with_mocks([]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Bus", "Delay")
 

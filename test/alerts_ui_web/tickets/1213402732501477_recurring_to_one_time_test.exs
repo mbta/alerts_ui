@@ -204,7 +204,7 @@ defmodule AlertsUIWeb.Tickets.RecurringToOneTimeTest do
                "pre-condition: alert must be recurring before the edit"
 
         {:ok, view, html} =
-          live(conn, "/alerts/mono/edit/#{db_alert.alert_id}/facility/elevator_closure")
+          live(conn, "/alerts/edit/#{db_alert.alert_id}/facility/elevator_closure")
 
         # Verify it renders as recurring in the form
         assert html =~ "recurring" or

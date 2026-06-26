@@ -68,7 +68,7 @@ defmodule AlertsUIWeb.Tickets.FacilitiesVisibleWithoutStopFilterTest do
       with_mock(FacilitiesRepo,
         get_by_type: fn _types, _ -> [@terminal_facility, @other_facility] end
       ) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = navigate_to_access(conn, view)
         render_async(view)
 
@@ -95,7 +95,7 @@ defmodule AlertsUIWeb.Tickets.FacilitiesVisibleWithoutStopFilterTest do
         # selected facility when building the review modal preview.
         get: fn "bike-17091" -> @terminal_facility end
       ) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = navigate_to_access(conn, view)
         render_async(view)
 

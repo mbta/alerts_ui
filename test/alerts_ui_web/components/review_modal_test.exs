@@ -94,7 +94,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
@@ -152,7 +152,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         {:ok, _} =
           Alerts.create_or_update_alert(alert_params, build(:user))
 
-        {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/edit?alert_id=123")
 
         open_review_modal(view)
 
@@ -206,7 +206,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         {:ok, _} =
           Alerts.create_or_update_alert(alert_params, build(:user))
 
-        {:ok, view, _html} = live(conn, "/alerts/duplicate?alert_id=123")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/duplicate?alert_id=123")
 
         open_review_modal(view)
 
@@ -229,7 +229,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
            get: fn _ -> @stop end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
@@ -248,7 +248,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         get_by_type: fn _facility_types, _opts -> [@facility] end,
         get: fn _ -> @facility end
       ) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
         get_to_submission_page(view, "Facility", "Elevator closure")
 
         fill_out_form(view, "#service_form", %{
@@ -287,7 +287,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
@@ -326,7 +326,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
@@ -362,7 +362,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Extra Service
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
         get_to_submission_page(view, "Bus", "Extra service")
         fill_out_required_form_fields(view, %{affected_service: %{route_ids: ["CR-Worcester"]}})
         open_review_modal(view)
@@ -392,7 +392,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Stop Closure
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
         get_to_submission_page(view, "Bus", "Stop closure")
 
         fill_out_required_form_fields(view, %{
@@ -420,7 +420,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]}
       ]) do
         # CR Cancellation
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
         get_to_submission_page(view, "Commuter Rail", "Cancellation")
 
         fill_out_required_form_fields(view, %{
@@ -471,7 +471,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # CR Delay
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
         get_to_submission_page(view, "Commuter Rail", "Delay")
         render_async(view)
 
@@ -506,7 +506,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Access Elevator Closure
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
         get_to_submission_page(view, "Facility", "Elevator closure")
 
         fill_out_required_form_fields(view, %{
@@ -528,7 +528,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
     @tag :logged_in_user
     test "Systemwide", %{conn: conn} do
       # Systemwide delay
-      {:ok, view, _html} = live(conn, "/alerts/new")
+      {:ok, view, _html} = live(conn, "/alerts/legacy/new")
       get_to_submission_page(view, "Systemwide", "Delay")
 
       fill_out_form(view, "#systemwide-affected-service-form", %{
@@ -563,7 +563,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
@@ -587,7 +587,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
            get_by_type: fn _type, _opts -> [@facility] end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
         get_to_submission_page(view, "Facility", "Elevator closure")
 
         fill_out_form(view, "#service_form", %{
@@ -645,7 +645,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
             build(:user)
           )
 
-        {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=#{alert_id}")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/edit?alert_id=#{alert_id}")
 
         open_review_modal(view)
 
@@ -670,7 +670,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
@@ -717,7 +717,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
@@ -754,7 +754,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
@@ -790,7 +790,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
@@ -837,7 +837,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
@@ -866,7 +866,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
@@ -912,7 +912,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
@@ -941,7 +941,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
@@ -1024,7 +1024,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
@@ -1053,7 +1053,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
@@ -1091,7 +1091,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
@@ -1129,7 +1129,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
@@ -1160,7 +1160,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
         get_to_submission_page(view, "Bus", "Delay")
 
         fill_out_required_form_fields(view, %{
@@ -1208,7 +1208,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         # create an alert
         user = user_fixture([:viewer, :author], %{first_name: "original", last_name: "user"})
         conn = AlertsUIWeb.ConnCase.log_in_user(conn, user)
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Bus", "Delay")
 
@@ -1243,7 +1243,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
           DateTime.now!("America/New_York")
           |> Calendar.strftime("%a %m/%d/%Y")
 
-        {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=#{alert_id}")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/edit?alert_id=#{alert_id}")
 
         open_review_modal(view)
         assert render(view) =~ ~r/Created.*#{no_timestamp_today}/s
@@ -1256,7 +1256,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         user = user_fixture([:viewer, :author], %{first_name: "final", last_name: "finaluser"})
         conn = AlertsUIWeb.ConnCase.log_in_user(conn, user)
 
-        {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=#{alert_id}")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/edit?alert_id=#{alert_id}")
 
         timestamp_today =
           DateTime.now!("America/New_York")
@@ -1320,7 +1320,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         {:ok, _} =
           Alerts.create_or_update_alert(alert_params, build(:user))
 
-        {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/edit?alert_id=123")
 
         # Don't need to make any changes, just proceed with submitting the form
 

@@ -50,14 +50,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
   describe "component" do
     @tag :logged_in_user
     test "renders", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
       assert render(view) =~ ~s(id="notification_period_view")
     end
 
     @tag :logged_in_user
     test "'when alert is closed' hidden when same_as_effect_period selected", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       # Default specifier (:now) shows the "When alert is closed" placeholder
@@ -74,7 +74,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
 
     @tag :logged_in_user
     test "start date picker appears when start_of_service selected", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       # Default specifier (:now) does not show the date picker
@@ -91,7 +91,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
 
     @tag :logged_in_user
     test "displays error if start invalid", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
@@ -107,7 +107,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
 
     @tag :logged_in_user
     test "scheduled start time must not be in the past", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
@@ -123,8 +123,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
     end
 
     @tag :logged_in_user
-    test "scheduled start time must be before the notification period end", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+    test "scheduled start time must be before active period start", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
@@ -153,7 +153,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
 
     @tag :logged_in_user
     test "minimum times on calendar set correctly", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
 
       now =
         DateTime.now!("America/New_York")
@@ -197,7 +197,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
 
     @tag :logged_in_user
     test "maximum times on calendar set correctly", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
 
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
@@ -244,7 +244,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
     test "editing checks notification start time", %{conn: conn} do
       create_test_alert("np-edit-1")
 
-      {:ok, view, _html} = live(conn, "/alerts/mono/edit/np-edit-1")
+      {:ok, view, _html} = live(conn, "/alerts/edit/np-edit-1")
 
       view
       |> element("form")
@@ -266,7 +266,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
         notification_period_start: future_utc(1)
       )
 
-      {:ok, view, _html} = live(conn, "/alerts/mono/edit/np-future-start")
+      {:ok, view, _html} = live(conn, "/alerts/edit/np-future-start")
 
       notification = eastern_now() |> NaiveDateTime.add(2, :day) |> NaiveDateTime.to_iso8601()
 
@@ -288,7 +288,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
     test "a saved past notification stays valid until modified (req 2)", %{conn: conn} do
       create_test_alert("np-past-notif", notification_period_start: ~U[2024-04-29 14:54:00Z])
 
-      {:ok, view, _html} = live(conn, "/alerts/mono/edit/np-past-notif")
+      {:ok, view, _html} = live(conn, "/alerts/edit/np-past-notif")
 
       # On load the existing past value is not flagged
       refute render(view) =~ "Notifications can&#39;t be set in the past"
@@ -310,7 +310,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
     test "minimum times on calendar set to nil", %{conn: conn} do
       create_test_alert("np-edit-1")
 
-      {:ok, view, _html} = live(conn, "/alerts/mono/edit/np-edit-1")
+      {:ok, view, _html} = live(conn, "/alerts/edit/np-edit-1")
 
       view
       |> element("form")
@@ -341,7 +341,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
     test "duplicating DOES check start time", %{conn: conn} do
       create_test_alert("np-dup-1")
 
-      {:ok, view, _html} = live(conn, "/alerts/mono/duplicate/np-dup-1")
+      {:ok, view, _html} = live(conn, "/alerts/duplicate/np-dup-1")
 
       view
       |> element("form")

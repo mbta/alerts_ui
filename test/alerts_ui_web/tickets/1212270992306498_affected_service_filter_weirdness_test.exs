@@ -68,7 +68,7 @@ defmodule AlertsUIWeb.Tickets.AffectedServiceFilterWeirdnessTest do
     @tag :logged_in_user
     test "selected route is present in options after LiveView re-render", %{conn: conn} do
       with_mocks(base_mocks()) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Bus", "Multi-route detour")
         render_async(view)
 
@@ -148,7 +148,7 @@ defmodule AlertsUIWeb.Tickets.AffectedServiceFilterWeirdnessTest do
     @tag :logged_in_user
     test "selected route is preserved in options even when search term changes", %{conn: conn} do
       with_mocks(base_mocks()) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Bus", "Multi-route detour")
         render_async(view)
 

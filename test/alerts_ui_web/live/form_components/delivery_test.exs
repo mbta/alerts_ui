@@ -77,7 +77,7 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
 
   @tag :logged_in_user
   test "banner text does not secretly get filled in when unselecting email box", %{conn: conn} do
-    {:ok, view, _html} = live(conn, "/alerts/new")
+    {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
     send(
       view.pid,
@@ -144,7 +144,7 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
          ]},
         {StopsRepo, [], [all: fn ["filter[id]": ""], _ -> [] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Subway", "Extra service")
         render_async(view)
@@ -194,7 +194,7 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
          ]},
         {StopsRepo, [], [all: fn ["filter[id]": ""], _ -> [] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Subway", "Extra service")
         render_async(view)
@@ -268,7 +268,7 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
 
         original_lpnt = original_alert.last_push_notification_timestamp
 
-        {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/edit?alert_id=123")
         render_async(view)
 
         view
@@ -327,7 +327,7 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
 
         original_lpnt = original_alert.last_push_notification_timestamp
 
-        {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/edit?alert_id=123")
         render_async(view)
 
         view
@@ -394,7 +394,7 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
 
         original_lpnt = original_alert.last_push_notification_timestamp
 
-        {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/edit?alert_id=123")
         render_async(view)
 
         view

@@ -41,7 +41,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSliceTest 
     @tag :logged_in_user
     test "renders", %{conn: conn} do
       with_mock(FacilitiesRepo, get_by_type: fn _types, _ -> [@facility] end) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = navigate_to_access(conn, view)
         render_async(view)
         assert render(view) =~ ~s(id="access_service_view")
@@ -53,7 +53,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSliceTest 
       with_mock(FacilitiesRepo,
         get_by_type: fn _types, _ -> [@facility, @facility_two, @facility_three] end
       ) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = navigate_to_access(conn, view)
         render_async(view)
 
@@ -81,7 +81,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSliceTest 
     @tag :logged_in_user
     test "facility search clears", %{conn: conn} do
       with_mock(FacilitiesRepo, get_by_type: fn _types, _ -> [@facility, @facility_two] end) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = navigate_to_access(conn, view)
         render_async(view)
 
@@ -118,7 +118,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSliceTest 
       ) do
         matcher = fn v -> "option[value=\"#{v}\"]" end
 
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = navigate_to_access(conn, view)
         render_async(view)
 
@@ -156,7 +156,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSliceTest 
     @tag :logged_in_user
     test "modal stop search works", %{conn: conn} do
       with_mock(FacilitiesRepo, get_by_type: fn _types, _ -> [@facility, @facility_two] end) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = navigate_to_access(conn, view)
         render_async(view)
 
@@ -188,7 +188,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSliceTest 
     @tag :logged_in_user
     test "modal stop search clears", %{conn: conn} do
       with_mock(FacilitiesRepo, get_by_type: fn _types, _ -> [@facility, @facility_two] end) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = navigate_to_access(conn, view)
         render_async(view)
 
@@ -232,7 +232,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSliceTest 
       with_mock(FacilitiesRepo,
         get_by_type: fn _types, _ -> [@facility, @facility_two] end
       ) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = navigate_to_access(conn, view)
         render_async(view)
 
@@ -266,7 +266,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSliceTest 
       with_mock(FacilitiesRepo,
         get_by_type: fn _types, _ -> [@facility, @facility_two] end
       ) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = navigate_to_access(conn, view)
         render_async(view)
 
@@ -313,7 +313,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSliceTest 
       {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
 
       with_mock(FacilitiesRepo, get_by_type: fn _types, _ -> [@facility] end) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/edit/test-access-edit")
+        {:ok, view, _html} = live(conn, "/alerts/edit/test-access-edit")
         render_async(view)
 
         {:ok, document} = view |> render() |> Floki.parse_document()
@@ -324,7 +324,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSliceTest 
     @tag :logged_in_user
     test "shows error when no facility selected and review is clicked", %{conn: conn} do
       with_mock(FacilitiesRepo, get_by_type: fn _types, _ -> [] end) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = navigate_to_access(conn, view)
         render_async(view)
 
@@ -341,7 +341,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSliceTest 
     @tag :logged_in_user
     test "renders single facility select properly", %{conn: conn} do
       with_mock(FacilitiesRepo, get_by_type: fn _types, _ -> [] end) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Facility", "Elevator closure")
         render_async(view)
 
@@ -355,7 +355,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSliceTest 
     @tag :logged_in_user
     test "renders multiple facility select properly", %{conn: conn} do
       with_mock(FacilitiesRepo, get_by_type: fn _types, _ -> [] end) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Facility", "Bike issue")
         render_async(view)
 

@@ -7,9 +7,9 @@ defmodule AlertsUIWeb.Tickets.AlertsCrashUponReloadTest do
   Observed: the mono alert form crashed with "Internal server error" when the
   page was RELOADED for alerts whose effect is a 2-word effect, e.g.:
 
-    * Bus • Multi-route detour   (URL: /alerts/mono/new/bus/multi-route_detour)
-    * Any facility alert         (URL: /alerts/mono/new/facility/access_issue)
-    * Any systemwide alert       (URL: /alerts/mono/new/systemwide/amber_alert)
+    * Bus • Multi-route detour   (URL: /alerts/new/bus/multi-route_detour)
+    * Any facility alert         (URL: /alerts/new/facility/access_issue)
+    * Any systemwide alert       (URL: /alerts/new/systemwide/amber_alert)
 
   A reload re-mounts the LiveView and re-parses the `effect_name` segment from
   the URL via `CreateAlertMonoLive.Helpers.Path.effect_from_url_name/1`. The bug
@@ -48,7 +48,7 @@ defmodule AlertsUIWeb.Tickets.AlertsCrashUponReloadTest do
     @tag :logged_in_user
     test "the disconnected static render (hard reload) returns 200, not a 500", %{conn: conn} do
       for {route_type, effect, title_fragment} <- @reload_cases do
-        url = "/alerts/mono/new/#{route_type}/#{effect}"
+        url = "/alerts/new/#{route_type}/#{effect}"
 
         html = conn |> get(url) |> html_response(200)
 
@@ -63,7 +63,7 @@ defmodule AlertsUIWeb.Tickets.AlertsCrashUponReloadTest do
     @tag :logged_in_user
     test "the connected mount renders the form for the requested effect", %{conn: conn} do
       for {route_type, effect, title_fragment} <- @reload_cases do
-        url = "/alerts/mono/new/#{route_type}/#{effect}"
+        url = "/alerts/new/#{route_type}/#{effect}"
 
         {:ok, _view, html} = live(conn, url)
 

@@ -18,13 +18,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Path do
       ) do
     case live_action do
       :new ->
-        ~p"/alerts/mono/new/"
+        ~p"/alerts/new/"
 
       :edit ->
-        ~p"/alerts/mono/edit/#{alert_id}"
+        ~p"/alerts/edit/#{alert_id}"
 
       :duplicate ->
-        ~p"/alerts/mono/duplicate/#{alert_id}"
+        ~p"/alerts/duplicate/#{alert_id}"
     end
   end
 
@@ -37,13 +37,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Path do
       ) do
     case live_action do
       :new ->
-        ~p"/alerts/mono/new/#{path_route_type}"
+        ~p"/alerts/new/#{path_route_type}"
 
       :edit ->
-        ~p"/alerts/mono/edit/#{alert_id}/#{path_route_type}"
+        ~p"/alerts/edit/#{alert_id}/#{path_route_type}"
 
       :duplicate ->
-        ~p"/alerts/mono/duplicate/#{alert_id}/#{path_route_type}"
+        ~p"/alerts/duplicate/#{alert_id}/#{path_route_type}"
     end
   end
 
@@ -57,13 +57,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Path do
       ) do
     case live_action do
       :new ->
-        ~p"/alerts/mono/new/#{path_route_type}/#{new_path_effect_name}"
+        ~p"/alerts/new/#{path_route_type}/#{new_path_effect_name}"
 
       :edit ->
-        ~p"/alerts/mono/edit/#{alert_id}/#{path_route_type}/#{new_path_effect_name}"
+        ~p"/alerts/edit/#{alert_id}/#{path_route_type}/#{new_path_effect_name}"
 
       :duplicate ->
-        ~p"/alerts/mono/duplicate/#{alert_id}/#{path_route_type}/#{new_path_effect_name}"
+        ~p"/alerts/duplicate/#{alert_id}/#{path_route_type}/#{new_path_effect_name}"
     end
   end
 

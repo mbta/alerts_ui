@@ -49,7 +49,7 @@ defmodule AlertsUIWeb.Tickets.SearchBarPersistsOnSelectionTest do
     @tag :logged_in_user
     test "selecting a facility does not clear the facility search term", %{conn: conn} do
       with_mock(FacilitiesRepo, get_by_type: fn _types, _ -> [@facility_a, @facility_b] end) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = navigate_to_parking_closure(conn, view)
         render_async(view)
 
@@ -84,7 +84,7 @@ defmodule AlertsUIWeb.Tickets.SearchBarPersistsOnSelectionTest do
     @tag :logged_in_user
     test "selecting a stop does not clear the modal stop search term", %{conn: conn} do
       with_mock(FacilitiesRepo, get_by_type: fn _types, _ -> [@facility_a, @facility_b] end) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = navigate_to_parking_closure(conn, view)
         render_async(view)
 
@@ -130,7 +130,7 @@ defmodule AlertsUIWeb.Tickets.SearchBarPersistsOnSelectionTest do
     @tag :logged_in_user
     test "modal width is pinned and independent of result count (AC3)", %{conn: conn} do
       with_mock(FacilitiesRepo, get_by_type: fn _types, _ -> [@facility_a, @facility_b] end) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = navigate_to_parking_closure(conn, view)
         render_async(view)
 

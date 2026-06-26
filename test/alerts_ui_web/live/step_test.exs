@@ -23,7 +23,7 @@ defmodule AlertsUIWeb.StepTest do
         {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
         {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         # Start filling out form
         get_to_submission_page(view, "Bus", "Delay")

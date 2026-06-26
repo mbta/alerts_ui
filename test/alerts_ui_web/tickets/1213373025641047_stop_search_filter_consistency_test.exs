@@ -151,7 +151,7 @@ defmodule AlertsUIWeb.Tickets.StopSearchFilterConsistencyTest do
     @tag :logged_in_user
     test "search term filters stop list to only matching stops", %{conn: conn} do
       with_mocks(bus_stop_closure_mocks()) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Bus", "Stop closure")
         render_async(view)
 
@@ -184,7 +184,7 @@ defmodule AlertsUIWeb.Tickets.StopSearchFilterConsistencyTest do
     @tag :logged_in_user
     test "lowercase and uppercase search terms return identical stop sets", %{conn: conn} do
       with_mocks(bus_stop_closure_mocks()) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Bus", "Stop closure")
         render_async(view)
 
@@ -216,7 +216,7 @@ defmodule AlertsUIWeb.Tickets.StopSearchFilterConsistencyTest do
     @tag :logged_in_user
     test "searching the same term after a different term gives consistent results", %{conn: conn} do
       with_mocks(bus_stop_closure_mocks()) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Bus", "Stop closure")
         render_async(view)
 
@@ -250,7 +250,7 @@ defmodule AlertsUIWeb.Tickets.StopSearchFilterConsistencyTest do
     @tag :logged_in_user
     test "searching the same term three times always returns the same set", %{conn: conn} do
       with_mocks(bus_stop_closure_mocks()) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Bus", "Stop closure")
         render_async(view)
 

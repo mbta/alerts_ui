@@ -118,14 +118,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
   describe "component" do
     @tag :logged_in_user
     test "renders", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
       assert render(view) =~ ~s(id="time_range_view")
     end
 
     @tag :logged_in_user
     test "enddate picker hidden unless end_of_service option selected", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       assert view
@@ -147,7 +147,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
     @tag :logged_in_user
     test "switching between start specifiers retains old date", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
@@ -179,7 +179,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
     @tag :logged_in_user
     test "switching from end of custom to end-of-service retains old service date", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
@@ -216,7 +216,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
     @tag :logged_in_user
     test "switching from end of end-of-service to custom has default of 11:59", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
@@ -252,7 +252,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
     @tag :logged_in_user
     test "switching from end of 'later today' to custom has default of 11:59", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       assert view |> element("#time_range_view") |> render =~ "Later today"
@@ -298,7 +298,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     test "switching from end of 'further notice' to custom has default of current datetime", %{
       conn: conn
     } do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
@@ -331,7 +331,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       conn: conn
     } do
       start_time = NaiveDateTime.new!(Date.add(@todays_date, 1), ~T[12:00:00])
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
@@ -380,7 +380,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
     @tag :logged_in_user
     test "auto-selects 'when work order is closed' for an elevator closure alert", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Facility", "Elevator closure")
 
       assert selected_end_specifier(view) == "when_work_order_is_closed"
@@ -388,7 +388,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
     @tag :logged_in_user
     test "auto-selects 'when work order is closed' for an escalator closure alert", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Facility", "Escalator closure")
 
       assert selected_end_specifier(view) == "when_work_order_is_closed"
@@ -398,7 +398,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     test "keeps the user's end specifier after auto-selecting for an elevator closure", %{
       conn: conn
     } do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Facility", "Elevator closure")
       assert selected_end_specifier(view) == "when_work_order_is_closed"
 
@@ -414,7 +414,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     test "switching from one-time to recurring has correct defaults", %{
       conn: conn
     } do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
@@ -460,7 +460,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
     @tag :logged_in_user
     test "displays error if end before start", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
@@ -486,7 +486,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
     @tag :logged_in_user
     test "displays error if one-time start occurs during DST gap", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
@@ -511,7 +511,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
     @tag :logged_in_user
     test "displays error if one-time end occurs during DST gap", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
@@ -536,7 +536,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
     @tag :logged_in_user
     test "recurring section is hidden unless recurring is selected", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       refute view |> render() =~ ~s(Sunday)
@@ -556,7 +556,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
     @tag :logged_in_user
     test "if recurring, start date must match weekday selection", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
@@ -603,7 +603,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
     @tag :logged_in_user
     test "if recurring, renders error when recurrence day is not selected", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
@@ -621,7 +621,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
     @tag :logged_in_user
     test "does not show recurrence error if no weekdays selected", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
@@ -647,7 +647,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       # end_of_service sets active_period_end to end_date @ 3:00 AM
       end_dt = NaiveDateTime.new!(Date.add(end_date, 1), ~T[03:00:00])
 
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
@@ -677,7 +677,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
     @tag :logged_in_user
     test "displays error if start invalid", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
@@ -693,7 +693,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
     @tag :logged_in_user
     test "displays error if end invalid", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
@@ -718,7 +718,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         get_by_type: fn _types, _opts -> [@facility] end,
         get: fn _id -> @facility end
       ) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Facility", "Elevator closure")
         render_async(view)
 
@@ -741,7 +741,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
     @tag :logged_in_user
     test "valid creating form with future custom times shows no errors", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
@@ -771,7 +771,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     test "keeps correct end time specifier when there is no end time", %{conn: conn} do
       create_test_alert("tr-edit-1", duration_certainty: :UNKNOWN)
 
-      {:ok, view, _html} = live(conn, "/alerts/mono/edit/tr-edit-1")
+      {:ok, view, _html} = live(conn, "/alerts/edit/tr-edit-1")
 
       assert view |> render() =~ "alert is manually closed"
       refute view |> render() =~ "until later today"
@@ -784,7 +784,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         active_period_attrs: %{start: ~U[2040-04-29 10:54:00Z], end: ~U[2040-04-30 15:59:00Z]}
       )
 
-      {:ok, view, _html} = live(conn, "/alerts/mono/edit/tr-edit-2")
+      {:ok, view, _html} = live(conn, "/alerts/edit/tr-edit-2")
       # 1002401
       view
       |> element("form")
@@ -826,7 +826,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
            end_of_rating: fn -> Date.add(@todays_date, 7) end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/edit/tr-edit-db-1")
+        {:ok, view, _html} = live(conn, "/alerts/edit/tr-edit-db-1")
         render_async(view, 3000)
 
         future_end =
@@ -861,7 +861,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     test "does not check start time", %{conn: conn} do
       create_test_alert("tr-edit-3", duration_certainty: :UNKNOWN)
 
-      {:ok, view, _html} = live(conn, "/alerts/mono/edit/tr-edit-3")
+      {:ok, view, _html} = live(conn, "/alerts/edit/tr-edit-3")
 
       view
       |> element("form")
@@ -881,7 +881,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         active_period_attrs: %{start: ~U[2024-05-10 14:30:54Z], end: ~U[2024-05-11 14:00:00Z]}
       )
 
-      {:ok, view, _html} = live(conn, "/alerts/mono/edit/tr-edit-err-1")
+      {:ok, view, _html} = live(conn, "/alerts/edit/tr-edit-err-1")
 
       view
       |> element("form")
@@ -899,7 +899,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     test "editing with valid change shows no errors", %{conn: conn} do
       create_test_alert("tr-edit-ok-1", duration_certainty: :UNKNOWN)
 
-      {:ok, view, _html} = live(conn, "/alerts/mono/edit/tr-edit-ok-1")
+      {:ok, view, _html} = live(conn, "/alerts/edit/tr-edit-ok-1")
 
       view
       |> element("form")
@@ -920,7 +920,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         active_period_attrs: %{start: ~U[2040-04-29 10:54:00Z], end: ~U[2040-04-30 15:59:00Z]}
       )
 
-      {:ok, view, _html} = live(conn, "/alerts/mono/edit/tr-edit-4")
+      {:ok, view, _html} = live(conn, "/alerts/edit/tr-edit-4")
       html = render(view)
 
       # specifier for start and end should be 'Custom'
@@ -977,7 +977,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
       {:ok, _} = Alerts.create_or_update_alert(params, build(:user))
 
-      {:ok, view, _html} = live(conn, "/alerts/mono/edit/tr-edit-5")
+      {:ok, view, _html} = live(conn, "/alerts/edit/tr-edit-5")
 
       refute view |> element("#time_range_view") |> render() =~
                "Alert start day must match a selected day of the week."
@@ -992,7 +992,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     test "duplicating keeps correct end time specifier when there is no end time", %{conn: conn} do
       create_test_alert("tr-dup-1", duration_certainty: :UNKNOWN)
 
-      {:ok, view, _html} = live(conn, "/alerts/mono/duplicate/tr-dup-1")
+      {:ok, view, _html} = live(conn, "/alerts/duplicate/tr-dup-1")
 
       assert view |> element("#alert_data_active_period_end_specifier") |> render() =~
                ~s(<option selected=\"selected\" value=\"until_further_notice\">)
@@ -1002,7 +1002,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     test "duplicating does not check start time", %{conn: conn} do
       create_test_alert("tr-dup-2", duration_certainty: :UNKNOWN)
 
-      {:ok, view, _html} = live(conn, "/alerts/mono/duplicate/tr-dup-2")
+      {:ok, view, _html} = live(conn, "/alerts/duplicate/tr-dup-2")
 
       view
       |> element("form")
@@ -1022,7 +1022,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     test "duplicating with end before start shows end and start-in-past errors", %{conn: conn} do
       create_test_alert("tr-dup-err-1", duration_certainty: :UNKNOWN)
 
-      {:ok, view, _html} = live(conn, "/alerts/mono/duplicate/tr-dup-err-1")
+      {:ok, view, _html} = live(conn, "/alerts/duplicate/tr-dup-err-1")
 
       view
       |> element("form")
@@ -1050,7 +1050,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     test "duplicating with valid change shows no errors", %{conn: conn} do
       create_test_alert("tr-dup-ok-1", duration_certainty: :UNKNOWN)
 
-      {:ok, view, _html} = live(conn, "/alerts/mono/duplicate/tr-dup-ok-1")
+      {:ok, view, _html} = live(conn, "/alerts/duplicate/tr-dup-ok-1")
 
       view
       |> element("form")
@@ -1783,7 +1783,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
     @tag :logged_in_user
     test "end-to-end: cannot uncheck the last recurrence day", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view

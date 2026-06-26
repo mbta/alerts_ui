@@ -7,14 +7,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSliceTest do
   describe "component" do
     @tag :logged_in_user
     test "renders", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
 
       assert render(view) =~ ~s(id="route_view")
     end
 
     @tag :logged_in_user
     test "does not show forbidden effects", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
 
       view
       |> element("#route-type-systemwide-button")
@@ -25,7 +25,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSliceTest do
 
     @tag :logged_in_user
     test "Capitalizes effects correctly", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
 
       view
       |> element("#route-type-subway-button")
@@ -36,7 +36,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSliceTest do
 
     @tag :logged_in_user
     test "goes to next view when effect is selected", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
 
       view
       |> element("#route-type-subway-button")
@@ -55,7 +55,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSliceTest do
   describe "resetting" do
     @tag :logged_in_user
     test "changes to the form should be removed when restarting", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
 
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 

@@ -24,7 +24,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertDataTest do
   describe "init/4 and mount for :new action" do
     @tag :logged_in_user
     test "AC-2: active_period_start is a non-nil NaiveDateTime after mount", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       socket = :sys.get_state(view.pid).socket
 
       start = socket.assigns.form[:active_period_start].value
@@ -37,7 +37,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertDataTest do
     test "active_period_end is a non-nil NaiveDateTime at ~T[03:00:00] after mount", %{
       conn: conn
     } do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       socket = :sys.get_state(view.pid).socket
 
       end_dt = socket.assigns.form[:active_period_end].value
@@ -52,7 +52,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertDataTest do
 
     @tag :logged_in_user
     test "AC-4: Effect duration start text is non-empty on first load", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       socket = :sys.get_state(view.pid).socket
       form = socket.assigns.form
 
@@ -74,7 +74,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertDataTest do
 
     @tag :logged_in_user
     test "AC-5: sync/4 after init preserves non-nil datetimes", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       socket = :sys.get_state(view.pid).socket
 
       # Simulate sync with empty URL params (no alert_data key), as handle_params calls

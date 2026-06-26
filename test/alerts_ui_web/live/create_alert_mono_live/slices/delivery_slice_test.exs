@@ -29,14 +29,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
   describe "component" do
     @tag :logged_in_user
     test "renders", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Subway", "Delay")
       assert render(view) =~ ~s(id="delivery_view")
     end
 
     @tag :logged_in_user
     test "banner text is hidden if checkbox is not checked", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Subway", "Delay")
 
       refute view
@@ -58,7 +58,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
 
     @tag :logged_in_user
     test "unchecking banner checkbox hides banner even when banner text is present", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Subway", "Delay")
 
       # set header text so the sync will populate banner_text
@@ -94,7 +94,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
            by_route: fn _, _, _ -> [@stop] end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Subway", "Delay")
 
         view
@@ -119,7 +119,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
       with_mocks([
         {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Subway", "Delay")
 
         render_async(view, 1000)
@@ -148,7 +148,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
          ]},
         {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Subway", "Delay")
 
         render_async(view, 1000)
@@ -181,7 +181,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
 
     @tag :logged_in_user
     test "banner text does not secretly get filled in when unselecting email box", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/mono/new")
+      {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
 
       view
@@ -219,7 +219,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
         )
 
       {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
-      {:ok, view, _html} = live(conn, "/alerts/mono/edit/123")
+      {:ok, view, _html} = live(conn, "/alerts/edit/123")
 
       assert view
              |> element("div#banner_div")
@@ -248,7 +248,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
         {StopsRepo, [],
          [all: fn ["filter[id]": ""], _ -> [] end, by_route: fn _, _, _ -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
 
         view = get_to_submission_page_refactor(conn, view, "Subway", "Extra service")
         render_async(view)
@@ -300,7 +300,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
         {StopsRepo, [],
          [all: fn ["filter[id]": ""], _ -> [] end, by_route: fn _, _, _ -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/mono/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
 
         view = get_to_submission_page_refactor(conn, view, "Subway", "Extra service")
         render_async(view)
@@ -379,7 +379,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
 
         original_lpnt = original_alert.last_push_notification_timestamp
 
-        {:ok, view, _html} = live(conn, "/alerts/mono/edit/123")
+        {:ok, view, _html} = live(conn, "/alerts/edit/123")
 
         view
         |> element("button#review", "Review and submit")
@@ -447,7 +447,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
 
         original_lpnt = original_alert.last_push_notification_timestamp
 
-        {:ok, view, _html} = live(conn, "/alerts/mono/edit/123")
+        {:ok, view, _html} = live(conn, "/alerts/edit/123")
         render_async(view)
 
         view
@@ -524,7 +524,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
 
         original_lpnt = original_alert.last_push_notification_timestamp
 
-        {:ok, view, _html} = live(conn, "/alerts/mono/edit/123")
+        {:ok, view, _html} = live(conn, "/alerts/edit/123")
         render_async(view)
 
         view

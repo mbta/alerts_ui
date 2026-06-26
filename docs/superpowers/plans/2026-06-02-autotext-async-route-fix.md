@@ -47,7 +47,7 @@ test "bus multi-route detour header text includes route and stop name after stop
        by_route: fn _, _, _ -> [@stop] end
      ]}
   ]) do
-    {:ok, view, _html} = live(conn, "/alerts/mono/new")
+    {:ok, view, _html} = live(conn, "/alerts/new")
     get_to_submission_page_refactor(view, "Bus", "Multi-route detour")
     render_async(view)
 

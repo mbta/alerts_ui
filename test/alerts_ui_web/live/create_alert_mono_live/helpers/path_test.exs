@@ -9,59 +9,59 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.PathTest do
 
   describe "path/1" do
     test "returns the new path for :new" do
-      assert PathHelper.path(%{live_action: :new, alert_id: nil}) == "/alerts/mono/new/"
+      assert PathHelper.path(%{live_action: :new, alert_id: nil}) == "/alerts/new/"
     end
 
     test "returns the edit path for :edit" do
-      assert PathHelper.path(%{live_action: :edit, alert_id: "abc"}) == "/alerts/mono/edit/abc"
+      assert PathHelper.path(%{live_action: :edit, alert_id: "abc"}) == "/alerts/edit/abc"
     end
 
     test "returns the duplicate path for :duplicate" do
       assert PathHelper.path(%{live_action: :duplicate, alert_id: "abc"}) ==
-               "/alerts/mono/duplicate/abc"
+               "/alerts/duplicate/abc"
     end
   end
 
   describe "path_with_route_type/2" do
-    test ":new builds /alerts/mono/new/<route_type>" do
+    test ":new builds /alerts/new/<route_type>" do
       assigns = %{live_action: :new, alert_id: nil}
 
-      assert PathHelper.path_with_route_type(assigns, "bus") == "/alerts/mono/new/bus"
+      assert PathHelper.path_with_route_type(assigns, "bus") == "/alerts/new/bus"
     end
 
-    test ":edit builds /alerts/mono/edit/<alert_id>/<route_type>" do
+    test ":edit builds /alerts/edit/<alert_id>/<route_type>" do
       assigns = %{live_action: :edit, alert_id: "abc"}
 
-      assert PathHelper.path_with_route_type(assigns, "bus") == "/alerts/mono/edit/abc/bus"
+      assert PathHelper.path_with_route_type(assigns, "bus") == "/alerts/edit/abc/bus"
     end
 
-    test ":duplicate builds /alerts/mono/duplicate/<alert_id>/<route_type>" do
+    test ":duplicate builds /alerts/duplicate/<alert_id>/<route_type>" do
       assigns = %{live_action: :duplicate, alert_id: "abc"}
 
-      assert PathHelper.path_with_route_type(assigns, "bus") == "/alerts/mono/duplicate/abc/bus"
+      assert PathHelper.path_with_route_type(assigns, "bus") == "/alerts/duplicate/abc/bus"
     end
   end
 
   describe "path_with_route_type_and_effect_name/2" do
-    test ":new builds /alerts/mono/new/<route_type>/<effect_name>" do
+    test ":new builds /alerts/new/<route_type>/<effect_name>" do
       assigns = %{live_action: :new, alert_id: nil, path_route_type: "bus"}
 
       assert PathHelper.path_with_route_type_and_effect_name(assigns, "detour") ==
-               "/alerts/mono/new/bus/detour"
+               "/alerts/new/bus/detour"
     end
 
-    test ":edit builds /alerts/mono/edit/<alert_id>/<route_type>/<effect_name>" do
+    test ":edit builds /alerts/edit/<alert_id>/<route_type>/<effect_name>" do
       assigns = %{live_action: :edit, alert_id: "abc", path_route_type: "bus"}
 
       assert PathHelper.path_with_route_type_and_effect_name(assigns, "detour") ==
-               "/alerts/mono/edit/abc/bus/detour"
+               "/alerts/edit/abc/bus/detour"
     end
 
-    test ":duplicate builds /alerts/mono/duplicate/<alert_id>/<route_type>/<effect_name>" do
+    test ":duplicate builds /alerts/duplicate/<alert_id>/<route_type>/<effect_name>" do
       assigns = %{live_action: :duplicate, alert_id: "abc", path_route_type: "bus"}
 
       assert PathHelper.path_with_route_type_and_effect_name(assigns, "detour") ==
-               "/alerts/mono/duplicate/abc/bus/detour"
+               "/alerts/duplicate/abc/bus/detour"
     end
   end
 
