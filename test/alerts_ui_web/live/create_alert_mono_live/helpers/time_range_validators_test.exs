@@ -622,26 +622,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidatorsTest do
       assert msg =~ "in the past"
     end
 
-    test "allows a start after the effect start (no effect-start bound)" do
+    test "create: errors when after the effect start" do
       cs =
         changeset(%{
           alert_timing: :"one-time",
           notification_specifier: :custom,
           active_period_start: future_naive(10),
-          notification_period_end: future_naive(30),
-          notification_period_start: future_naive(20)
-        })
-        |> TimeRangeValidators.validate_notification_time(@naive_now, false)
-
-      assert cs.errors == []
-    end
-
-    test "errors when after the notification period end" do
-      cs =
-        changeset(%{
-          alert_timing: :"one-time",
-          notification_specifier: :custom,
-          notification_period_end: future_naive(10),
           notification_period_start: future_naive(20)
         })
         |> TimeRangeValidators.validate_notification_time(@naive_now, false)
@@ -650,12 +636,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidatorsTest do
       assert msg =~ "Notification period must start on or before"
     end
 
-    test "passes when on or before the notification period end" do
+    test "create: passes when on or before the effect start" do
       cs =
         changeset(%{
           alert_timing: :"one-time",
           notification_specifier: :custom,
-          notification_period_end: future_naive(20),
+          active_period_start: future_naive(20),
           notification_period_start: future_naive(10)
         })
         |> TimeRangeValidators.validate_notification_time(@naive_now, false)
@@ -663,7 +649,62 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidatorsTest do
       assert cs.errors == []
     end
 
-    test "has no upper bound when the notification period has no end" do
+    test "create: the notification period end does not bound the start" do
+      cs =
+        changeset(%{
+          alert_timing: :"one-time",
+          notification_specifier: :custom,
+          active_period_start: future_naive(20),
+          notification_period_end: future_naive(5),
+          notification_period_start: future_naive(10)
+        })
+        |> TimeRangeValidators.validate_notification_time(@naive_now, false)
+
+      assert cs.errors == []
+    end
+
+    test "editing: errors when after the notification period end" do
+      cs =
+        changeset(%{
+          alert_timing: :"one-time",
+          notification_specifier: :custom,
+          notification_period_end: future_naive(10),
+          notification_period_start: future_naive(20)
+        })
+        |> TimeRangeValidators.validate_notification_time(@naive_now, true)
+
+      assert {msg, []} = cs.errors[:notification_period_start]
+      assert msg =~ "Notification period must start on or before"
+    end
+
+    test "editing: passes when on or before the notification period end" do
+      cs =
+        changeset(%{
+          alert_timing: :"one-time",
+          notification_specifier: :custom,
+          notification_period_end: future_naive(20),
+          notification_period_start: future_naive(10)
+        })
+        |> TimeRangeValidators.validate_notification_time(@naive_now, true)
+
+      assert cs.errors == []
+    end
+
+    test "editing: the effect start does not bound the start" do
+      cs =
+        changeset(%{
+          alert_timing: :"one-time",
+          notification_specifier: :custom,
+          active_period_start: future_naive(10),
+          notification_period_end: future_naive(30),
+          notification_period_start: future_naive(20)
+        })
+        |> TimeRangeValidators.validate_notification_time(@naive_now, true)
+
+      assert cs.errors == []
+    end
+
+    test "editing: has no upper bound when the notification period has no end" do
       cs =
         changeset(%{
           alert_timing: :"one-time",
@@ -671,7 +712,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidatorsTest do
           notification_period_end: nil,
           notification_period_start: future_naive(365)
         })
-        |> TimeRangeValidators.validate_notification_time(@naive_now, false)
+        |> TimeRangeValidators.validate_notification_time(@naive_now, true)
 
       assert cs.errors == []
     end

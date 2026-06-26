@@ -293,7 +293,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
   # tracks the current time and :same_as_effect_period tracks the effect start,
   # whose own (edit-lenient) validation governs it — so those are never flagged.
   defp notification_start_errors(changeset, value, current_time, editing?) do
-    notification_end = get_field(changeset, :notification_period_end)
+    upper_bound = notification_upper_bound(changeset, editing?)
 
     cond do
       not user_chosen_notification?(changeset) ->
@@ -307,16 +307,25 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
       in_past?(value, current_time) ->
         notification_error("Notifications can't be set in the past")
 
-      # The only upper bound is the notification period end (nil ⇒ unbounded).
-      after_notification_end?(value, notification_end) ->
+      # Upper bound (nil ⇒ unbounded): see notification_upper_bound/2.
+      after_upper_bound?(value, upper_bound) ->
         notification_error(
-          "Notification period must start on or before #{formatted_datetime(notification_end)}"
+          "Notification period must start on or before #{formatted_datetime(upper_bound)}"
         )
 
       true ->
         []
     end
   end
+
+  # On create the notification must precede the effect start; when editing an
+  # existing alert (whose effect may already be underway) it's bounded by the
+  # notification period end instead.
+  defp notification_upper_bound(changeset, true),
+    do: get_field(changeset, :notification_period_end)
+
+  defp notification_upper_bound(changeset, false),
+    do: get_field(changeset, :active_period_start)
 
   defp user_chosen_notification?(changeset),
     do: get_field(changeset, :notification_specifier) in [:custom, :start_of_service]
@@ -329,10 +338,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
   defp in_past?(value, current_time),
     do: NaiveDateTime.diff(current_time, value, :minute) > 1
 
-  defp after_notification_end?(_value, nil), do: false
+  defp after_upper_bound?(_value, nil), do: false
 
-  defp after_notification_end?(value, notification_end),
-    do: NaiveDateTime.diff(value, notification_end, :minute) > 1
+  defp after_upper_bound?(value, bound),
+    do: NaiveDateTime.diff(value, bound, :minute) > 1
 
   defp notification_error(message) do
     [

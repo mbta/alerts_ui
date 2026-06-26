@@ -223,14 +223,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
         assigns.current_time
       end
 
+    # Mirror the notification-start validation bound: the effect start on create,
+    # the notification period end when editing (nil ⇒ no max).
     maximum_time =
-      if assigns.form.data.active_period_end_specifier in [
-           :until_further_notice,
-           :when_work_order_is_closed
-         ] do
-        nil
+      if assigns.form_type == :editing do
+        alert_data.notification_period_end
       else
-        alert_data.active_period_end
+        alert_data.active_period_start
       end
 
     assigns = assign(assigns, [{:minimum_time, minimum_time}, {:maximum_time, maximum_time}])

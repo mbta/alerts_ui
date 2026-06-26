@@ -148,7 +148,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
       })
 
       assert render(view) =~
-               "Notification period must start on or before 05/02/2040"
+               "Notification period must start on or before 05/01/2040"
     end
 
     @tag :logged_in_user
@@ -196,7 +196,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
     end
 
     @tag :logged_in_user
-    test "maximum times on calendar set correctly", %{conn: conn} do
+    test "maximum time on calendar is the effect start when creating", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/new")
 
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
@@ -206,7 +206,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
       |> render_change(%{
         "alert_data" => %{
           "notification_specifier" => "custom",
-          "active_period_end_specifier" => "custom"
+          "active_period_start_specifier" => "custom"
         }
       })
 
@@ -214,28 +214,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
       |> element("form")
       |> render_change(%{
         "alert_data" => %{
-          "active_period_end" => ~N[2026-06-25 12:12:12]
+          "active_period_start" => ~N[2040-06-25 12:12:12]
         }
       })
 
       expected_datetime =
-        ~N[2026-06-25 12:12:12]
+        ~N[2040-06-25 12:12:12]
         |> NaiveDateTime.to_iso8601()
         |> String.slice(0..-4//1)
 
       assert view |> element("#alert_data_notification_period_start") |> render() =~
                ~s(max="#{expected_datetime}")
-
-      view
-      |> element("form")
-      |> render_change(%{
-        "alert_data" => %{
-          "active_period_end_specifier" => "until_further_notice"
-        }
-      })
-
-      assert view |> element("#alert_data_notification_period_start") |> render() =~
-               ~s(max=\"\")
     end
   end
 
@@ -304,6 +293,46 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
       })
 
       assert render(view) =~ "Notifications can&#39;t be set in the past"
+    end
+
+    @tag :logged_in_user
+    test "maximum time on calendar is the notification period end when editing", %{conn: conn} do
+      create_test_alert("np-max-edit")
+
+      {:ok, view, _html} = live(conn, "/alerts/edit/np-max-edit")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "notification_specifier" => "custom",
+          "active_period_end_specifier" => "custom"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{"active_period_end" => ~N[2040-06-25 12:12:12]}
+      })
+
+      expected_datetime =
+        ~N[2040-06-25 12:12:12]
+        |> NaiveDateTime.to_iso8601()
+        |> String.slice(0..-4//1)
+
+      assert view |> element("#alert_data_notification_period_start") |> render() =~
+               ~s(max="#{expected_datetime}")
+
+      # When notifications run until the alert is closed there is no upper bound.
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{"active_period_end_specifier" => "until_further_notice"}
+      })
+
+      assert view |> element("#alert_data_notification_period_start") |> render() =~
+               ~s(max=\"\")
     end
 
     @tag :logged_in_user
