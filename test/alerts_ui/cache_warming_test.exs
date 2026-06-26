@@ -6,6 +6,7 @@ defmodule AlertsUI.CacheWarmingTest do
   import Test.Support.Helpers
 
   alias AlertsUI.CacheWarming
+  alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.CreateAlertLive
 
   describe "warm_all/0" do
@@ -66,9 +67,7 @@ defmodule AlertsUI.CacheWarmingTest do
       ) do
         CacheWarming.warm_all()
 
-        assert_called(CreateAlertLive.get_facilities(["ELEVATOR"]))
-        assert_called(CreateAlertLive.get_facilities(["ESCALATOR"]))
-        assert_called(CreateAlertLive.get_facilities(["PARKING_AREA", "PICK_DROP"]))
+        assert_called(CreateAlertLive.get_facilities(InformedEntity.all_facility_types()))
       end
     end
   end
