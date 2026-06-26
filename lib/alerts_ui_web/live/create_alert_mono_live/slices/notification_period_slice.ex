@@ -228,7 +228,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
       end
 
     maximum_time =
-      if assigns.form.data.active_period_end_specifier == :until_further_notice do
+      if assigns.form.data.active_period_end_specifier in [
+           :until_further_notice,
+           :when_work_order_is_closed
+         ] do
         nil
       else
         alert_data.active_period_end
