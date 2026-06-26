@@ -263,10 +263,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeSliceGetters do
     if Time.compare(end_time, ActivePeriod.start_of_service_time()) == :lt do
       end_date
       |> DTHelpers.new_round_up_to_gap!(end_time, "America/New_York")
+      |> DateTime.to_naive()
     else
       end_date
       |> DTHelpers.new_round_up_to_gap!(end_time, "America/New_York")
       |> DateTime.add(1, :day)
+      |> DateTime.to_naive()
     end
   end
 end

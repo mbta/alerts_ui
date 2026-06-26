@@ -214,6 +214,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
   attr :current_time, NaiveDateTime
 
   def render(assigns) do
+    alert_data = Map.merge(assigns.form.source.data, assigns.form.source.changes)
+
     minimum_time =
       if assigns.form_type == :editing do
         nil
@@ -221,7 +223,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
         assigns.current_time
       end
 
-    assigns = assign(assigns, :minimum_time, minimum_time)
+    maximum_time =
+      if assigns.form.data.active_period_end_specifier in [
+           :until_further_notice,
+           :when_work_order_is_closed
+         ] do
+        nil
+      else
+        alert_data.active_period_end
+      end
+
+    assigns = assign(assigns, [{:minimum_time, minimum_time}, {:maximum_time, maximum_time}])
 
     ~H"""
     <div class="min-w-full flex flex-col" id="notification_period_view">
@@ -238,10 +250,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
           label=""
           field={@form[:notification_period_start_date]}
           min={naive_datetime_to_iso_date(@minimum_time)}
-          max={
-            [naive_datetime_to_iso_date(@form[:active_period_start].value), "9999-12-31"]
-            |> Enum.max()
-          }
+          max={naive_datetime_to_iso_date(@maximum_time)}
           value={@form[:notification_period_start_date].value}
           class="md:min-w-64 md:max-w-64 h-10"
         />
@@ -250,10 +259,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
           label=""
           field={@form[:notification_period_start]}
           min={naive_datetime_to_iso8601(@minimum_time)}
-          max={
-            [naive_datetime_to_iso_date(@form[:active_period_end].value), "9999-12-31T23:59"]
-            |> Enum.max()
-          }
+          max={naive_datetime_to_iso8601(@maximum_time)}
           value={@form[:notification_period_start].value |> naive_datetime_to_iso8601}
           class="md:min-w-64 md:max-w-64 h-10"
         />
