@@ -122,7 +122,9 @@ config :alerts_ui, Oban,
          "*/1 * * * *",
          AlertsUI.Jobs.AlertValidationUpcomingWorker,
          max_attempts: 1
-       }
+       },
+       # Refresh MBTA API caches every 55 minutes (TTL is 1 hour)
+       {"*/55 * * * *", AlertsUI.Jobs.CacheRefreshWorker, max_attempts: 1}
      ]}
   ],
   queues: [default: 10]
