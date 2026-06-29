@@ -1830,6 +1830,24 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
     end
   end
 
+  @tag :logged_in_user
+  test "shows a loading state on the dead render, then alerts once connected", %{conn: conn} do
+    with_mock(RoutesRepo, [], all: fn -> [] end, get: fn route_id -> %{name: route_id} end) do
+      insert(:alert, %{
+        alert_id: "999",
+        original_route_selections: ["Orange"],
+        header_text: "Out of juice"
+      })
+
+      conn = get(conn, "/alerts")
+      assert html_response(conn, 200) =~ "Loading..."
+
+      {:ok, _view, html} = live(conn)
+      refute html =~ "Loading"
+      assert html =~ "Out of juice"
+    end
+  end
+
   # Takes html of alert list page, parses the html, returns order of alert ids
   defp get_alert_id_order(html) do
     {:ok, document} = Floki.parse_document(html)

@@ -74,7 +74,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   def handle_params(_params, _url, %{transport_pid: nil} = socket) do
     # if this is the dead mount and the socket is not connected
     # we don't need to make the expensive list_all_paginated call
-    {:noreply, socket}
+    {:noreply, assign(socket, loading: true)}
   end
 
   @impl true
@@ -122,7 +122,8 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       |> Phoenix.Component.to_form()
 
     with {alerts, meta} <- Alerts.list_all_paginated(flop) do
-      {:noreply, assign(socket, meta: meta, alerts: alerts, form: form, params: params)}
+      {:noreply,
+       assign(socket, meta: meta, alerts: alerts, form: form, params: params, loading: false)}
     end
   end
 

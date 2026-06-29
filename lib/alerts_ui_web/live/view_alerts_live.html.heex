@@ -15,7 +15,9 @@
 
   <div class="sticky top-0 z-20 flex items-center bg-bg-secondary p-2 text-sm border-t border-border-primary justify-between">
     <span class="w-24">
-      {@meta.total_count} {BuildAutoText.maybe_pluralize("alert", @meta.total_count != 1)}
+      <span :if={!@loading}>
+        {@meta.total_count} {BuildAutoText.maybe_pluralize("alert", @meta.total_count != 1)}
+      </span>
     </span>
     <.pagination meta={@meta} />
     <span class="w-24" />
@@ -33,7 +35,7 @@
       meta={@meta}
       on_sort={JS.push("sort-alerts")}
       opts={[
-        no_results_content: "No alerts found",
+        no_results_content: if(@loading, do: "Loading...", else: "No alerts found"),
         symbol_asc: sort_icon(:asc),
         symbol_desc: sort_icon(:desc),
         symbol_unsorted: sort_icon(nil),
