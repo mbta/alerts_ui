@@ -429,7 +429,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
       |> element("form")
       |> render_change(%{
         "alert_data" => %{
-          "reminder_sort" => ["0", "1"],
+          "reminder_sort" => ["0"],
           "reminder_times" => %{
             "0" => %{
               "_persistent_id" => "0",
