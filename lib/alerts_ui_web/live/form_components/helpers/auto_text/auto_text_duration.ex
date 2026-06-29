@@ -8,7 +8,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
   alias AlertsUIWeb.FormComponents.Helpers.{DateTimeHelpers, GetKeyForModeEffect}
 
   @spec build_duration_text(BuildAutoText.t()) :: String.t()
-  def build_duration_text(autotext_data, current_time \\ DateTimeHelpers.current_time())
+  @spec build_duration_text(BuildAutoText.t(), NaiveDateTime.t() | nil) :: String.t()
+  def build_duration_text(autotext_data, current_time \\ nil)
+
+  def build_duration_text(autotext_data, nil) do
+    ct = Map.get(autotext_data, :current_time) || DateTimeHelpers.current_time()
+    build_duration_text(autotext_data, ct)
+  end
 
   def build_duration_text(
         # duration text for alerts with 1 active period

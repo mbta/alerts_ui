@@ -1506,7 +1506,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         |> element("#edit-button-345")
         |> render_click()
 
-        assert_redirect(view, "/alerts/edit?alert_id=345")
+        assert_redirect(view, "/alerts/edit/345")
       end
     end
 
@@ -1535,7 +1535,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         |> element("#duplicate-button-345")
         |> render_click()
 
-        assert_redirect(view, "/alerts/duplicate?alert_id=345")
+        assert_redirect(view, "/alerts/duplicate/345")
       end
     end
   end
@@ -1712,13 +1712,15 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
     end
 
     test "known end where end is not end of service" do
-      %{year: this_year} = DateTime.now!("America/New_York")
-      date = ~U[2025-06-29 17:50:14.844524Z] |> Map.put(:year, this_year)
+      eastern_now = DateTime.new!(~D[2025-05-29], ~T[02:00:00], "America/New_York")
+      utc_now = DateTime.new!(~D[2025-05-29], ~T[06:00:00], "Etc/UTC")
 
-      with_mocks([{DateTime, [:passthrough], [utc_now: fn -> date end]}]) do
+      with_mocks([
+        {DateTime, [:passthrough], [now!: fn _ -> eastern_now end, utc_now: fn -> utc_now end]}
+      ]) do
         end_time_utc =
           DateTime.new!(
-            ~D[2025-06-30] |> Map.put(:year, this_year),
+            ~D[2025-06-30],
             ~T[02:00:00],
             "America/New_York"
           )
@@ -1744,7 +1746,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
         assert expected == actual
 
-        expected_timestamp = "Jun 30, #{this_year}, 2:00 AM"
+        expected_timestamp = "Jun 30, 2025, 2:00 AM"
 
         actual_timestamp =
           AlertsUIWeb.ViewAlertsLive.safe_format_timestamp(alert.active_period_end)

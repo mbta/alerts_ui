@@ -51,6 +51,25 @@ defmodule AlertsUI.ActivePeriodBuilderTest do
       assert result.duration_certainty == :UNKNOWN
     end
 
+    test "drops the end time for a when_work_order_is_closed alert" do
+      # unknown-duration alerts must persist with no end time, even though the form
+      # supplies a placeholder end datetime for this specifier
+      alert_data =
+        %{
+          active_period_start: ~N[2024-04-30 11:54:00],
+          active_period_end: ~N[2024-04-30 23:59:59],
+          active_period_end_specifier: :when_work_order_is_closed,
+          active_period_start_specifier: :custom
+        }
+
+      result =
+        ActivePeriodBuilder.build_one_time_active_period(alert_data, ~U[2024-04-30 15:54:00Z])
+
+      assert result.active_period == [%{start: ~U[2024-04-30 15:54:00Z], end: nil}]
+      assert result.active_period_end == nil
+      assert result.duration_certainty == :UNKNOWN
+    end
+
     test "builds active period with end value pick" do
       alert_data =
         %{

@@ -7,6 +7,7 @@ defmodule AlertsUIWeb.ReviewModal do
 
   import AlertsUIWeb.CoreComponents
   import AlertsUIWeb.SharedComponents
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData, only: [display_alert_timing: 1]
   import PhoenixHTMLHelpers.Format, only: [text_to_html: 2]
 
   alias AlertsUI.ActiveStatus
@@ -278,7 +279,7 @@ defmodule AlertsUIWeb.ReviewModal do
 
             <p class="font-bold pb-1">Timing</p>
             <p class="pb-1">
-              {@alert_data.alert_timing |> Atom.to_string() |> String.capitalize()}
+              {display_alert_timing(@alert_data.alert_timing)}
             </p>
 
             <p class="font-bold pb-1">Effect period</p>
@@ -309,14 +310,20 @@ defmodule AlertsUIWeb.ReviewModal do
             <p class="font-bold pb-1">Reminders</p>
             <%= if @reminder_times != [] do %>
               <div class="pb-4">
-                <%= for reminder <- Enum.sort_by(@reminder_times, &(&1.time), NaiveDateTime) do %>
+                <%= for reminder <- reminder_times_iterator(@reminder_times) do %>
                   <p>
-                    {Calendar.strftime(reminder.time, "%a %m/%d/%Y %-I:%M %p")}
-                    <span :if={ReminderTimes.sent?(reminder.time)} class="text-text-secondary">
+                    {Calendar.strftime(reminder_time(reminder), "%a %m/%d/%Y %-I:%M %p")}
+                    <span
+                      :if={ReminderTimes.sent?(reminder_time(reminder))}
+                      class="text-text-secondary"
+                    >
                       <.icon name="hero-check-circle-solid text-mbta-green" class="h-4 w-4" /> Sent
                     </span>
 
-                    <span :if={!ReminderTimes.sent?(reminder.time)} class="text-text-secondary">
+                    <span
+                      :if={!ReminderTimes.sent?(reminder_time(reminder))}
+                      class="text-text-secondary"
+                    >
                       <.icon name="hero-clock" class="h-4 w-4" /> Scheduled
                     </span>
                   </p>
@@ -483,6 +490,16 @@ defmodule AlertsUIWeb.ReviewModal do
     |> String.replace("_", " ")
     |> String.split()
     |> Enum.map_join(" / ", &String.capitalize/1)
+  end
+
+  defp reminder_times_iterator(reminders) do
+    reminders
+    |> Enum.filter(&(!!reminder_time(&1)))
+    |> Enum.sort_by(&reminder_time(&1), NaiveDateTime)
+  end
+
+  defp reminder_time(reminder) do
+    Map.get(reminder, :time, Map.get(reminder, :reminder_time))
   end
 
   attr :alert_data, :map

@@ -333,7 +333,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
     test "duration works correctly in case where time is start-to-end in future the same day", %{
       conn: conn
     } do
-      {:ok, view, _html} = live(conn, "/alerts/new")
+      {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
       get_to_submission_page(view, "Ferry", "Dock closure")
 
@@ -369,7 +369,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
          %{
            conn: conn
          } do
-      {:ok, view, _html} = live(conn, "/alerts/new")
+      {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
       get_to_submission_page(view, "Ferry", "Dock closure")
 
@@ -415,7 +415,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
         {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Commuter Rail", "Suspension")
 
@@ -458,7 +458,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
         {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
         {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Commuter Rail", "Suspension")
 
@@ -512,7 +512,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
            by_route: fn _, _, _opts -> [@stop, @stop_2, @stop_3] end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Ferry", "Dock closure")
 
@@ -557,7 +557,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
            by_route: fn _, _, _opts -> [@stop, @stop_2, @stop_3] end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Ferry", "Dock closure")
 
@@ -604,7 +604,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
            by_route: fn _, _, _opts -> [@stop, @stop_2, @stop_3] end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Ferry", "Dock closure")
 
@@ -659,7 +659,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
          ]},
         {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop, @stop_2] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Commuter Rail", "Delay")
 
@@ -742,7 +742,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
            by_route: fn _, _ -> [@stop, @stop_2, @stop_3] end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Ferry", "Dock closure")
 
@@ -801,7 +801,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
       conn: conn
     } do
       with_mock(FacilitiesRepo, get_by_type: fn _facility_types, _opts -> [@facility] end) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Facility", "Elevator closure")
 
@@ -855,7 +855,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
     test "systemwide autotext works", %{
       conn: conn
     } do
-      {:ok, view, _html} = live(conn, "/alerts/new")
+      {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
       @todays_date =
         DateTime.utc_now()
@@ -967,7 +967,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
           )
 
         {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
-        {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/edit?alert_id=123")
 
         render_async(view)
 

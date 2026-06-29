@@ -354,21 +354,29 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       today = @todays_date |> Date.to_string()
       tomorrow = @todays_date |> Date.add(1) |> Date.to_string()
 
-      with_mock(SchedulesRepo,
-        by_route_ids: fn
-          # ISO date used when date is selected
-          ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^today] ->
-            [@schedule, @schedule_2]
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _types -> [@route] end,
+           get: fn _id -> @route end
+         ]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn
+             # ISO date used when date is selected
+             ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^today] ->
+               [@schedule, @schedule_2]
 
-          # Date struct used in all trips- consider refactoring for consistency
-          ["CR-Worcester"], [stop_sequences: [:first, :last], date: @todays_date] ->
-            [@schedule, @schedule_2]
-
-          ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^tomorrow] ->
-            [@schedule_3, @schedule_4]
-        end,
-        end_of_rating: fn -> Date.add(@todays_date, 1) end
-      ) do
+             ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^tomorrow] ->
+               [@schedule_3, @schedule_4]
+           end,
+           end_of_rating: fn -> Date.add(@todays_date, 1) end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [@stop] end
+         ]}
+      ]) do
         {:ok, view, _html} =
           live_isolated_component(AffectedService, %{
             @assigns
@@ -378,6 +386,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         view
         |> element("form")
         |> render_change(%{"affected_service" => %{"route_ids" => ["CR-Worcester"]}})
+
+        render_async(view)
 
         assert view
                |> render() =~ @schedule.trip.name
@@ -996,7 +1006,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]},
         {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Bus", "Detour")
 
@@ -1023,7 +1033,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
          %{
            conn: conn
          } do
-      {:ok, view, _html} = live(conn, "/alerts/new")
+      {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
       get_to_submission_page(view, "Bus", "Delay")
 
@@ -1052,7 +1062,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
         {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Commuter Rail", "Delay")
 
@@ -1113,7 +1123,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
            by_route_id: fn _route_id, _opts -> [] end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Commuter Rail", "Delay")
 
@@ -1252,27 +1262,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
 
         {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
 
-        {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/edit?alert_id=123")
 
-        {:ok, document} =
-          view
-          |> render()
-          |> Floki.parse_document()
-
-        assert document_has_element?(
-                 document,
-                 "[value=\"CR-Worcester\"][selected=\"selected\"]"
-               )
-
-        assert document_has_element?(
-                 document,
-                 "[value=\"South Station|place-sstat\"][selected=\"selected\"]"
-               )
-
-        assert document_has_element?(
-                 document,
-                 "[value=\"CR-683322-595\"][selected=\"selected\"]"
-               )
+        html = render(view)
+        assert html =~ ~s(selected="selected" value="CR-Worcester")
+        assert html =~ ~s(selected="selected" value="South Station|place-sstat")
+        assert html =~ ~s(selected="selected" value="CR-683322-595")
 
         view
         |> element("#service_form")
@@ -1332,7 +1327,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
            by_route_id: fn _route_id, _opts -> [] end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Commuter Rail", "Cancellation")
 
@@ -1400,7 +1395,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
            by_route: fn _, _, _opts -> [@bus_stop] end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Bus", "Delay")
 
@@ -1453,7 +1448,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
            by_route: fn _, _, _opts -> [@subway_stop] end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Subway", "Notice")
 

@@ -1,0 +1,12 @@
+       table       |                index                 |   cols   
+-------------------+--------------------------------------+----------
+ active_period     | active_period_alert_id_index         | alert_id
+ alerts            | alerts_alert_id_index                | alert_id
+ alerts            | alerts_user_id_index                 | user_id
+ ibi_alerts        | ibi_alerts_alert_id_index            | alert_id
+ ibi_alerts        | ibi_alerts_alert_id_version_no_index | alert_id
+ ibi_alerts        | latest_ibi_alerts_join_index         | alert_id
+ informed_entities | informed_entities_alert_id_index     | alert_id
+ reminder_times    | reminder_times_alert_id_index        | alert_id
+(8 rows)
+

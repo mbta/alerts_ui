@@ -89,7 +89,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
     socket =
       socket
       |> assign(%{selected_route_type: route_type, effects: effects, selected_effect: nil})
-      |> push_patch(to: "/alerts/new/#{route_type}")
+      |> push_patch(to: "/alerts/legacy/new/#{route_type}")
 
     {:noreply, socket}
   end
@@ -102,7 +102,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffect do
     socket =
       socket
       |> assign(%{selected_effect: effect})
-      |> push_patch(to: "/alerts/new/#{route_type}/#{effect_for_url}")
+      |> push_patch(to: "/alerts/legacy/new/#{route_type}/#{effect_for_url}")
 
     {:noreply, socket}
   end

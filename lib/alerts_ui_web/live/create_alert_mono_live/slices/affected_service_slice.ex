@@ -1,0 +1,765 @@
+defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
+  @moduledoc """
+  Slice that manages affected-service selection for single-route alerts:
+  routes, stops, directions, trips, and service-date filtering. Asynchronously
+  loads schedules and renders the route/stop/trip picker for the details step.
+  """
+
+  use AlertsUIWeb, :html
+  alias AlertsUI.Models.ActivePeriod
+  alias AlertsUIWeb.CreateAlertLive
+  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
+  alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
+
+  alias Ecto.Changeset
+
+  import Phoenix.LiveView, only: [push_event: 3, start_async: 3]
+
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
+    only: [get_single_route_effect_names: 0, humanize_effect_name: 1]
+
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,
+    only: [always_validate_required: 3]
+
+  defstruct [
+    :direction,
+    :modal_date,
+    :modal_date_search_term,
+    :route_ids,
+    :route_search_term,
+    :single_route_id,
+    :stop_names_and_ids,
+    :stop_search_term,
+    :trip_ids,
+    :trip_search_term,
+    :form_type
+  ]
+
+  defmodule Selections do
+    @moduledoc "Holds async-loaded route, stop, and schedule option lists for `AffectedServiceSlice`."
+
+    alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
+
+    defstruct available_routes: [],
+              available_schedules: [],
+              available_stops: [],
+              direction_options: [],
+              filter_title_value: nil,
+              loading: false,
+              on_filter_accept: &AffectedServiceSlice.on_filter_accept/1,
+              on_filter_clear: &AffectedServiceSlice.on_filter_clear/1,
+              route_id_options: [],
+              selected_stops: [],
+              service_dates: [],
+              stop_id_options: [],
+              today: nil,
+              trip_id_options: []
+  end
+
+  defimpl Slice, for: __MODULE__ do
+    alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
+    alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice.Selections
+
+    def mount(_service_data, socket, _base_params) do
+      assign(
+        socket,
+        :selections,
+        %Selections{today: AffectedServiceSlice.today()}
+      )
+    end
+
+    def extract(service_data, _alert_data, _params) do
+      if service_data.form_type == :editing do
+        # When editing, we want to force the trip filter to "All Future Trips"
+        %{service_data | modal_date: nil}
+      else
+        service_data
+      end
+    end
+
+    def transform(_service_data, changeset, params, socket) do
+      changeset
+      |> AffectedServiceSlice.transform_changeset(params)
+      |> AffectedServiceSlice.build_trip_information(socket)
+    end
+
+    def validate(_service_data, changeset, _params, socket) do
+      if socket.assigns.submitted? do
+        AffectedServiceSlice.validate_changeset(changeset)
+      else
+        changeset
+      end
+    end
+
+    def assigns(_service_data, socket, params) do
+      socket = AffectedServiceSlice.async_assign_selections(socket, params)
+
+      # We do not want to let the user select both "All trips" and an individual trip
+      # We push the data to the client (hooks.js) to filter for us
+      maybe_needs_adjusting = %{
+        stop_names_and_ids: socket.assigns.form[:stop_names_and_ids].value,
+        trip_ids: socket.assigns.form[:trip_ids].value
+      }
+
+      push_event(socket, "adjustSelections", maybe_needs_adjusting)
+    end
+  end
+
+  def build_trip_information(changeset, socket) do
+    available_schedules = available_schedules_from_socket(socket)
+    trip_ids = Changeset.get_field(changeset, :trip_ids) || []
+    route_type = Changeset.get_field(changeset, :route_type)
+    direction = Changeset.get_field(changeset, :direction)
+
+    # If selections aren't loaded yet (empty schedules) but trips are selected,
+    # preserve existing trip_information_by_id rather than overwriting with empty map.
+    if Enum.empty?(available_schedules) and Enum.any?(trip_ids) do
+      changeset
+    else
+      trip_info =
+        available_schedules
+        |> Stream.filter(&(&1.trip.id in trip_ids))
+        |> Stream.filter(fn s ->
+          direction in [
+            nil,
+            "default",
+            s.trip.direction_id,
+            Integer.to_string(s.trip.direction_id)
+          ]
+        end)
+        |> Enum.reduce(%{}, fn s, acc ->
+          Map.put(acc, s.trip.id, %{
+            direction_id: s.trip.direction_id,
+            route_id: s.route.id,
+            trip_name: SelectFormatter.name_for_option(s, route_type)
+          })
+        end)
+
+      Changeset.cast(changeset, %{trip_information_by_id: trip_info}, [:trip_information_by_id])
+    end
+  end
+
+  defp available_schedules_from_socket(socket) do
+    case Map.get(socket.assigns, :selections) do
+      %Selections{available_schedules: schedules} -> schedules || []
+      _ -> []
+    end
+  end
+
+  def transform_changeset(changeset, params) do
+    # The select component renders the prompt option with value="default". When the user
+    # selects "All future trips", the browser sends modal_date=default. Ecto would cast
+    # "default" normally, and ensure_modal_date would then convert it to today(). We must
+    # force nil into the changeset here so ensure_modal_date sees nil and passes it through.
+    # ("" is also handled for robustness, though the browser always sends "default".)
+    changeset =
+      if get_in(params, ["alert_data", "modal_date"]) in ["", "default"] do
+        Changeset.force_change(changeset, :modal_date, nil)
+      else
+        changeset
+      end
+
+    changeset
+    |> ensure_default_direction()
+    |> ensure_route_ids()
+    |> clear_selections_on_change(params)
+    |> ensure_stop_names_and_ids()
+    |> ensure_trip_ids()
+    |> filter_stops_by_direction()
+    |> split_stop_names_and_ids()
+    |> ensure_modal_date()
+  end
+
+  def validate_changeset(changeset) do
+    normalized_single_route_effects =
+      Enum.map(get_single_route_effect_names(), fn name ->
+        name |> String.split(" ") |> Enum.map_join("_", &String.downcase/1)
+      end)
+
+    if Changeset.get_field(changeset, :effect_name) in normalized_single_route_effects do
+      always_validate_required(changeset, :single_route_id, "You must select a route")
+    else
+      always_validate_required(changeset, :route_ids, "You must select a route")
+    end
+  end
+
+  def async_assign_selections(%{assigns: %{} = assigns} = socket, params) do
+    if update_selections?(params) do
+      update_selections(socket, params)
+    else
+      dont_update_selections(Map.get(assigns, :selections), socket)
+    end
+  end
+
+  def async_assign_selections(socket, _params), do: socket
+
+  defp update_selections(
+         socket,
+         %{"_target" => ["alert_data", "route_search_term"]}
+       ) do
+    prev = prev(Map.get(socket.assigns, :selections))
+    form = socket.assigns.form
+
+    route_id_options = route_id_options(prev.available_routes, form)
+
+    socket
+    |> assign(:selections, %{prev | route_id_options: route_id_options})
+  end
+
+  defp update_selections(
+         socket,
+         %{"_target" => ["alert_data", "stop_search_term"]}
+       ) do
+    prev = prev(Map.get(socket.assigns, :selections))
+    form = socket.assigns.form
+
+    stop_id_options = stop_id_options(prev.available_stops, form)
+
+    socket
+    |> assign(:selections, %{prev | stop_id_options: stop_id_options})
+  end
+
+  defp update_selections(
+         socket,
+         %{"_target" => ["alert_data", "trip_search_term"]}
+       ) do
+    prev = prev(Map.get(socket.assigns, :selections))
+    form = socket.assigns.form
+
+    trip_id_options = trip_id_options(prev.available_schedules, form)
+
+    socket
+    |> assign(:selections, %{prev | trip_id_options: trip_id_options})
+  end
+
+  defp update_selections(socket, _params) do
+    prev = prev(Map.get(socket.assigns, :selections))
+    form = socket.assigns.form
+
+    direction = form[:direction].value
+    modal_date = form[:modal_date].value
+    route_ids = form[:route_ids].value || []
+    route_type = form[:route_type].value
+    combination = form[:combination].value
+
+    all_route_types = all_route_types(route_type)
+
+    {filter_title_value, _} =
+      service_dates()
+      |> Enum.find({"All future trips", nil}, fn {_option, value} ->
+        value == modal_date
+      end)
+
+    socket
+    |> assign(:selections, %{prev | loading: true, filter_title_value: filter_title_value})
+    |> start_async(:fetch_selections, fn ->
+      available_routes = CreateAlertLive.get_routes(all_route_types)
+
+      available_stops =
+        CreateAlertLive.get_stops(
+          route_ids,
+          route_type,
+          direction
+        )
+
+      available_schedules =
+        if show_trips_input?(combination),
+          do: available_schedules(route_ids, direction, modal_date),
+          else: []
+
+      direction_options =
+        SelectFormatter.formatted_direction_options(
+          route_ids,
+          Map.new(available_routes, &{&1.id, &1.direction_names})
+        )
+
+      route_id_options = route_id_options(available_routes, form)
+
+      stop_id_options = stop_id_options(available_stops, form)
+
+      trip_id_options = trip_id_options(available_schedules, form)
+
+      %Selections{
+        available_routes: available_routes,
+        available_stops: available_stops,
+        available_schedules: available_schedules,
+        direction_options: direction_options,
+        filter_title_value: filter_title_value,
+        route_id_options: route_id_options,
+        stop_id_options: stop_id_options,
+        service_dates: service_dates(),
+        trip_id_options: trip_id_options
+      }
+    end)
+  end
+
+  defp route_id_options(
+         available_routes,
+         form
+       ) do
+    SelectFormatter.formatted_select_options(%SelectFormatter{
+      options: available_routes,
+      search_term: form[:route_search_term].value,
+      route_type: form[:route_type].value,
+      values_to_keep: form[:route_ids].value || [],
+      option_prefix: "route-selector"
+    })
+  end
+
+  defp stop_id_options(available_stops, form) do
+    SelectFormatter.formatted_select_options(
+      %SelectFormatter{
+        options: available_stops,
+        search_term: form[:stop_search_term].value,
+        route_type: form[:route_type].value,
+        values_to_keep: form[:stop_names_and_ids].value || [],
+        option_prefix: "stop-search"
+      },
+      true
+    )
+  end
+
+  defp trip_id_options(available_schedules, form) do
+    SelectFormatter.formatted_select_options(%SelectFormatter{
+      schedules_by_route_name:
+        group_schedules_by_route_type(
+          available_schedules,
+          form[:route_ids].value || []
+        ),
+      search_term: form[:trip_search_term].value,
+      route_type: form[:route_type].value,
+      values_to_keep: form[:trip_ids].value,
+      option_prefix: "trip-search"
+    })
+  end
+
+  defp dont_update_selections(nil, socket), do: assign(socket, :selections, %Selections{})
+  defp dont_update_selections(_selections, socket), do: socket
+
+  defp prev(%Selections{} = selections), do: selections
+  defp prev(_), do: %Selections{}
+
+  defp available_schedules(route_ids, direction, _modal_date)
+       when nil in [route_ids, direction] or route_ids == [] do
+    []
+  end
+
+  defp available_schedules(route_ids, direction, modal_date) do
+    date = get_schedule_date(modal_date)
+    CreateAlertLive.get_schedules_by_date(route_ids, direction, date)
+  end
+
+  defp get_schedule_date("default") do
+    DateTime.now!("America/New_York") |> Calendar.strftime("%Y-%m-%d")
+  end
+
+  defp get_schedule_date(modal_date), do: modal_date
+
+  @update_selection_targets [
+    "direction",
+    "stop_ids",
+    "route_ids",
+    "trip_ids",
+    "route_search_term",
+    "single_route_id",
+    "stop_search_term",
+    "trip_search_term"
+  ]
+
+  # update selections when a user interacts with one of our fields...
+  defp update_selections?(%{"_target" => ["alert_data", field]})
+       when field in @update_selection_targets,
+       do: true
+
+  # ...but not on any other user interaction...
+  defp update_selections?(%{"_target" => _target}), do: false
+  # ...and always on mount, when there is no target
+  defp update_selections?(_), do: true
+
+  defp all_route_types(0), do: [0, 1]
+  defp all_route_types(1), do: [0, 1]
+  defp all_route_types(2), do: [2]
+  defp all_route_types(3), do: [3]
+  defp all_route_types(4), do: [4]
+  defp all_route_types(_), do: []
+
+  defp group_schedules_by_route_type(available_schedules, route_ids) do
+    Enum.filter(available_schedules, fn schedule ->
+      # If a line was selected and deselected, value here may be set to nil
+      schedule.route.id in (route_ids || [])
+    end)
+    |> Enum.group_by(&SelectFormatter.name_for_option(&1.route))
+  end
+
+  defp ensure_default_direction(changeset) do
+    case Changeset.get_field(changeset, :direction) do
+      nil -> Changeset.cast(changeset, %{direction: "default"}, [:direction])
+      _ -> changeset
+    end
+  end
+
+  defp ensure_route_ids(changeset) do
+    effect_name = Changeset.get_field(changeset, :effect_name)
+
+    normalized_single_route_effects =
+      Enum.map(get_single_route_effect_names(), fn name ->
+        name |> String.split(" ") |> Enum.map_join("_", &String.downcase/1)
+      end)
+
+    cond do
+      effect_name in normalized_single_route_effects ->
+        case Changeset.get_field(changeset, :single_route_id) do
+          nil -> Changeset.cast(changeset, %{route_ids: []}, [:route_ids])
+          route_id -> Changeset.cast(changeset, %{route_ids: [route_id]}, [:route_ids])
+        end
+
+      Changeset.get_field(changeset, :route_ids) == nil ->
+        Changeset.cast(changeset, %{route_ids: []}, [:route_ids])
+
+      true ->
+        changeset
+    end
+  end
+
+  defp clear_selections_on_change(changeset, %{"_target" => _target}) do
+    if Changeset.changed?(changeset, :route_ids) do
+      Changeset.cast(
+        changeset,
+        %{
+          stop_names_and_ids: [],
+          stop_ids: [],
+          trip_ids: []
+        },
+        [
+          :stop_names_and_ids,
+          :stop_ids,
+          :trip_ids
+        ]
+      )
+    else
+      changeset
+    end
+  end
+
+  defp clear_selections_on_change(changeset, _params), do: changeset
+
+  defp ensure_stop_names_and_ids(changeset) do
+    stop_names_and_ids = Changeset.get_field(changeset, :stop_names_and_ids)
+
+    cond do
+      stop_names_and_ids in [nil, "default", ["default"]] ->
+        Changeset.cast(changeset, %{stop_names_and_ids: []}, [:stop_names_and_ids])
+
+      is_list(stop_names_and_ids) and "default" in stop_names_and_ids ->
+        Changeset.cast(
+          changeset,
+          %{stop_names_and_ids: List.delete(stop_names_and_ids, "default")},
+          [:stop_names_and_ids]
+        )
+
+      true ->
+        changeset
+    end
+  end
+
+  defp ensure_trip_ids(changeset) do
+    trip_ids = Changeset.get_field(changeset, :trip_ids)
+
+    cond do
+      trip_ids in [nil, "default", ["default"]] ->
+        Changeset.cast(changeset, %{trip_ids: []}, [:trip_ids])
+
+      is_list(trip_ids) and "default" in trip_ids ->
+        Changeset.cast(changeset, %{trip_ids: List.delete(trip_ids, "default")}, [:trip_ids])
+
+      true ->
+        changeset
+    end
+  end
+
+  defp filter_stops_by_direction(changeset) do
+    marker =
+      case Changeset.get_field(changeset, :direction) do
+        "0" -> ~r/inbound/
+        "1" -> ~r/outbound/
+        _ -> ~r/\A\Z/
+      end
+
+    stop_names_and_ids =
+      changeset
+      |> Changeset.get_field(:stop_names_and_ids)
+      |> Enum.filter(&(!(&1 =~ marker)))
+
+    Changeset.cast(
+      changeset,
+      %{stop_names_and_ids: stop_names_and_ids},
+      [:stop_names_and_ids]
+    )
+  end
+
+  defp split_stop_names_and_ids(changeset) do
+    split_names_and_ids =
+      Changeset.get_field(changeset, :stop_names_and_ids)
+      |> Enum.reduce(%{stop_names: [], stop_ids: []}, fn name_and_id, acc ->
+        case String.split(name_and_id, "|") do
+          ["default"] ->
+            acc
+
+          [_, "default"] ->
+            acc
+
+          [stop_name, stop_id] ->
+            %{stop_names: [stop_name | acc[:stop_names]], stop_ids: [stop_id | acc[:stop_ids]]}
+        end
+      end)
+
+    Changeset.cast(changeset, split_names_and_ids, [:stop_names, :stop_ids])
+  end
+
+  def ensure_modal_date(changeset) do
+    case Changeset.get_field(changeset, :modal_date) do
+      "default" ->
+        Changeset.change(changeset, modal_date: today())
+
+      _ ->
+        changeset
+    end
+  end
+
+  def default_selections(selections \\ %Selections{}) do
+    %{selections | service_dates: service_dates(), loading: true, today: today()}
+  end
+
+  def service_dates do
+    0..6
+    |> Enum.to_list()
+    |> Enum.map(fn i ->
+      DateTime.now!("America/New_York")
+      |> ActivePeriod.datetime_to_service_date()
+      |> Date.add(i)
+    end)
+    |> Enum.map(fn date ->
+      {Calendar.strftime(date, "%a %b %0d"), Date.to_iso8601(date)}
+    end)
+  end
+
+  def today do
+    DateTime.now!("America/New_York")
+    |> ActivePeriod.datetime_to_service_date()
+    |> Date.to_iso8601()
+  end
+
+  def default_filter_title do
+    service_dates()
+    |> Enum.find({"All future trips", nil}, fn {_option, value} ->
+      value == today()
+    end)
+    |> elem(0)
+  end
+
+  def render(assigns) do
+    ~H"""
+    <div class="min-w-full self-start flex flex-col" id="service_view">
+      <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
+        Affected service
+      </.h5>
+      <div class="flex flex-row flex-wrap mb-4 min-h-[38rem] md:min-h-[32rem]">
+        <div class="mb-4 md:mb-0 w-full md:w-[25%] md:mr-8">
+          <.filtered_select
+            :if={filtered_select_for_route_type?(@form[:route_type].value)}
+            label={if @form[:route_type].value in [0, 1, 2], do: "Lines", else: "Routes"}
+            field={
+              if humanize_effect_name(@form) in get_single_route_effect_names(),
+                do: @form[:single_route_id],
+                else: @form[:route_ids]
+            }
+            filter_field={@form[:route_search_term]}
+            loading={@selections.loading && @first_async_load}
+            no_results={Enum.empty?(@selections.route_id_options)}
+            options={@selections.route_id_options}
+            class="h-full"
+            multiple={
+              if humanize_effect_name(@form) in get_single_route_effect_names(), do: false, else: true
+            }
+          />
+          <.toggle_checkgroup
+            :if={!filtered_select_for_route_type?(@form[:route_type].value)}
+            label={if @form[:route_type].value in [0, 1, 2], do: "Lines", else: "Routes"}
+            field={@form[:route_ids]}
+            options={@selections.route_id_options}
+            icon_type={icon_type(@form[:route_type].value)}
+            class="flex-col"
+            button_class="min-w-full"
+            show_icons={true}
+          />
+        </div>
+
+        <.modal
+          :if={show_trips_input?(@form[:combination].value)}
+          id="dates-filter-modal"
+          header_text="Filter by day"
+          cancel_event_name="cancel_filter"
+          accept_event_name="accept_filter"
+          accept_button_text="Apply"
+          target_id="#alert_form"
+          container_class="md:!w-[25rem]"
+        >
+          <.filtered_select
+            label="Upcoming dates"
+            field={@form[:modal_date]}
+            filter_field={@form[:modal_date_search_term]}
+            modal_filter_active={date_filter_active?(@form[:modal_date].value, today())}
+            options={
+              filter_service_dates(
+                service_dates(),
+                @form[:modal_date_search_term].value,
+                @form[:modal_date].value
+              )
+            }
+            class="h-[32rem]"
+            prompt="All future trips"
+            multiple={false}
+          />
+        </.modal>
+        <div
+          :if={show_trips_input?(@form[:combination].value)}
+          class="flex flex-col justify-start md:w-[25%] md:mr-8"
+        >
+          <.select
+            :if={show_directions_input?(@form[:combination].value)}
+            label={
+              cond do
+                show_trips_input?(@form[:combination].value) -> "Trips"
+                show_stops_input?(@form[:combination].value) -> "Stops"
+                true -> "Direction"
+              end
+            }
+            field={@form[:direction]}
+            modal_filter_id="dates-filter-modal"
+            modal_filter_title={"Filter: #{@selections.filter_title_value || default_filter_title()}"}
+            modal_filter_active={date_filter_active?(@form[:modal_date].value, today())}
+            options={@selections.direction_options}
+            disabled={disable_stop_input?(@form[:route_ids].value)}
+            modal_filter_disabled={@form[:route_ids].value in [nil, []]}
+            prompt={if disable_stop_input?(@form[:route_ids].value), do: "", else: "Both Directions"}
+            target_id="#alert_form"
+          />
+          <.filtered_select
+            field={@form[:trip_ids]}
+            filter_field={@form[:trip_search_term]}
+            options={if @selections.loading, do: [], else: @selections.trip_id_options}
+            loading={@selections.loading}
+            no_results={
+              Enum.empty?(@selections.trip_id_options) &&
+                !disable_trip_input?(@form[:route_ids].value)
+            }
+            class="min-w-full h-full"
+            disabled={disable_trip_input?(@form[:route_ids].value)}
+            prompt={if disable_trip_input?(@form[:route_ids].value), do: nil, else: "All Trips"}
+          />
+        </div>
+        <div class="flex flex-col justify-start w-full md:w-[25%]">
+          <.select
+            :if={
+              show_directions_input?(@form[:combination].value) &&
+                !show_trips_input?(@form[:combination].value)
+            }
+            label={if show_stops_input?(@form[:combination].value), do: "Stops", else: "Direction"}
+            field={@form[:direction]}
+            options={@selections.direction_options}
+            disabled={disable_stop_input?(@form[:route_ids].value)}
+            prompt={if disable_stop_input?(@form[:route_ids].value), do: "", else: "Both Directions"}
+          />
+          <.filtered_select
+            :if={show_stops_input?(@form[:combination].value)}
+            label={if show_trips_input?(@form[:combination].value), do: "Stops", else: nil}
+            field={@form[:stop_names_and_ids]}
+            selected={@form[:stop_names_and_ids].value}
+            filter_field={@form[:stop_search_term]}
+            options={if @selections.loading, do: [], else: @selections.stop_id_options}
+            loading={@selections.loading}
+            no_results={
+              Enum.empty?(@selections.stop_id_options) &&
+                !disable_stop_input?(@form[:route_ids].value)
+            }
+            class="min-w-full h-full"
+            disabled={disable_stop_input?(@form[:route_ids].value)}
+            prompt={
+              if disable_stop_input?(@form[:route_ids].value),
+                do: nil,
+                else: "All Stops"
+            }
+          />
+        </div>
+      </div>
+      <p :if={@show_stop_ids}>
+        Selected stop ids: {(@form[:stop_ids].value || []) |> Enum.join(", ")} Selected route ids: {(@form[
+                                                                                                       :route_ids
+                                                                                                     ].value ||
+                                                                                                       [])
+        |> Enum.join(", ")} Selected trip ids: {(@form[:trip_ids].value || []) |> Enum.join(", ")}
+      </p>
+      <hr class="mt-4" />
+    </div>
+    """
+  end
+
+  defp filter_service_dates(dates, nil, _selected), do: dates
+  defp filter_service_dates(dates, "", _selected), do: dates
+
+  defp filter_service_dates(dates, search_term, selected) do
+    lower = String.downcase(search_term)
+
+    Enum.filter(dates, fn {label, value} ->
+      String.contains?(String.downcase(label), lower) || value == selected
+    end)
+  end
+
+  defp date_filter_active?(filter_value, today) when filter_value == today, do: false
+  defp date_filter_active?(_, _), do: true
+
+  defp icon_type(route_type) do
+    case route_type do
+      2 -> :commuter_rail
+      4 -> :ferry
+      _ -> nil
+    end
+  end
+
+  defp disable_stop_input?(nil), do: true
+  defp disable_stop_input?(route_ids) when is_list(route_ids), do: length(route_ids) !== 1
+  defp disable_stop_input?(_route_ids), do: true
+
+  defp disable_trip_input?(route_ids) when is_list(route_ids), do: Enum.empty?(route_ids)
+  defp disable_trip_input?(_route_ids), do: true
+
+  defp show_trips_input?(combination) do
+    combination in [:RDT, :RDTS]
+  end
+
+  defp show_stops_input?(combination) do
+    combination in [:RDS, :RDTS]
+  end
+
+  defp show_directions_input?(combination) do
+    combination in [:RDS, :RDTS, :RDS, :RDT]
+  end
+
+  defp filtered_select_for_route_type?(route_type) do
+    Enum.member?([2, 3, 4], route_type)
+  end
+
+  def on_filter_accept(socket) do
+    async_assign_selections(socket, %{})
+  end
+
+  def on_filter_clear(socket) do
+    {_, socket} =
+      AlertData.sync(socket.assigns.form.source, socket, %{
+        "alert_data" => %{"modal_date" => today(), "modal_date_search_term" => nil}
+      })
+
+    async_assign_selections(socket, %{})
+  end
+end

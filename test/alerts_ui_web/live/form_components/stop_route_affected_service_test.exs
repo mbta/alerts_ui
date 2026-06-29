@@ -736,7 +736,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       ]) do
         conn = put_resp_cookie(conn, "show_created_alert", "true")
 
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         view
         |> element("#route_types_form button", "Bus")
@@ -811,7 +811,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
                ] =
                  Map.get(new_alert, :informed_entity)
 
-        {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=#{alert_id}")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/edit?alert_id=#{alert_id}")
 
         view
         |> element("#time_range_form")
@@ -873,7 +873,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       ]) do
         conn = put_resp_cookie(conn, "show_created_alert", "true")
 
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         view
         |> element("#route_types_form button", "Bus")
@@ -948,7 +948,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         {RoutesRepo, [], [by_type: fn _types -> @routes end]},
         {StopsRepo, [], [by_route: fn _route_type, _direction, _opts -> [@stop] end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         view
         |> element("#route_types_form button", "Bus")

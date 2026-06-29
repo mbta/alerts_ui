@@ -24,10 +24,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
         direction: get_direction(Map.get(alert_data, :direction)),
         severity: Map.get(alert_data, :severity) |> safe_string_to_int(),
         cause_detail: Map.get(alert_data, :cause_detail),
-        start_specifier: Map.get(alert_data, :active_period_start_specifier),
-        end_specifier: Map.get(alert_data, :active_period_end_specifier),
-        start_time_specifier: Map.get(alert_data, :active_period_start_time_specifier),
-        end_time_specifier: Map.get(alert_data, :active_period_end_time_specifier),
+        start_specifier: Map.get(alert_data, :active_period_start_specifier, :now),
+        end_specifier: Map.get(alert_data, :active_period_end_specifier, :later_today),
+        start_time_specifier: Map.get(alert_data, :active_period_start_time_specifier, :now),
+        end_time_specifier:
+          Map.get(alert_data, :active_period_end_time_specifier, :end_of_service),
         start_datetime: Map.get(alert_data, :active_period_start),
         end_datetime: end_datetime,
         start_date: Map.get(alert_data, :active_period_start_date),
@@ -35,7 +36,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
         start_time: Map.get(alert_data, :active_period_start_time),
         end_time: Map.get(alert_data, :active_period_end_time),
         alert_timing: Map.get(alert_data, :alert_timing),
-        recurrence_days: Map.get(alert_data, :recurrence_days)
+        recurrence_days: Map.get(alert_data, :recurrence_days),
+        current_time: Map.get(alert_data, :current_time)
       }
       |> Enum.reject(fn {_k, v} -> is_nil(v) end)
 

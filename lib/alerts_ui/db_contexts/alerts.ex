@@ -251,17 +251,23 @@ defmodule AlertsUI.Alerts do
   end
 
   def get_by_alert_id(alert_id) do
-    Repo.get_by(
-      from(
-        a in Alert,
-        preload: [
-          :user,
-          :reminder_times,
-          active_period: ^active_period_preload_query(),
-          informed_entity: [:trip]
-        ]
-      ),
-      alert_id: alert_id
+    Repo.get_by(get_by_alert_id_query(), alert_id: alert_id)
+  end
+
+  @spec get_by_alert_id!(String.t()) :: Alert.t()
+  def get_by_alert_id!(alert_id) do
+    Repo.get_by!(get_by_alert_id_query(), alert_id: alert_id)
+  end
+
+  defp get_by_alert_id_query do
+    from(
+      a in Alert,
+      preload: [
+        :user,
+        :reminder_times,
+        active_period: ^active_period_preload_query(),
+        informed_entity: [:trip]
+      ]
     )
   end
 

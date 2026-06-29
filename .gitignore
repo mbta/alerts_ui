@@ -2,7 +2,7 @@
 /_build/
 
 # If you run "mix test --cover", coverage assets end up here.
-/cover/
+/cover/*
 
 # The directory Mix downloads your dependencies sources to.
 /deps/
@@ -53,3 +53,20 @@ assets/outputs/alerts_feed*.pb
 .DS_Store
 *.swp
 *.swo
+
+# LLMs
+.claude/*
+.playwright-mcp
+!.claude/skills
+!.claude/skills/*
+!.claude/agents
+!.claude/agents/*
+.claude/skills/*/scripts/node_modules/
+.claude/skills/qa-asana-ticket/scripts/*
+!.claude/skills/qa-asana-ticket/scripts/example-verify.mjs
+!.claude/skills/qa-asana-ticket/scripts/auth-smoke-test.mjs
+# Never commit captured auth sessions
+.claude/skills/qa-asana-ticket/scripts/.auth/
+
+# Git worktrees
+.worktrees/

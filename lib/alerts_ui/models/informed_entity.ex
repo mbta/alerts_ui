@@ -5,6 +5,7 @@ defmodule AlertsUI.Models.InformedEntity do
   use AlertsUI.Schema
   import Ecto.Changeset
   alias AlertsUI.Models.{Activity, Alert, TripDescriptor}
+  alias AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes
   alias MBTAV3API.Routes.Route
 
   @facility_activities [
@@ -134,6 +135,19 @@ defmodule AlertsUI.Models.InformedEntity do
     ["BIKE_STORAGE"]
   """
   @spec facility_effect_to_types(atom()) :: [String.t()]
+  def facility_effect_to_types(nil), do: nil
+  def facility_effect_to_types("ACCESS_ISSUE"), do: facility_effect_to_types(:ACCESS_ISSUE)
+  def facility_effect_to_types("FACILITY_ISSUE"), do: facility_effect_to_types(:FACILITY_ISSUE)
+  def facility_effect_to_types("BIKE_ISSUE"), do: facility_effect_to_types(:BIKE_ISSUE)
+
+  def facility_effect_to_types("ELEVATOR_CLOSURE"),
+    do: facility_effect_to_types(:ELEVATOR_CLOSURE)
+
+  def facility_effect_to_types("ESCALATOR_CLOSURE"),
+    do: facility_effect_to_types(:ESCALATOR_CLOSURE)
+
+  def facility_effect_to_types("PARKING_CLOSURE"), do: facility_effect_to_types(:PARKING_CLOSURE)
+  def facility_effect_to_types("PARKING_ISSUE"), do: facility_effect_to_types(:PARKING_ISSUE)
   def facility_effect_to_types(:ACCESS_ISSUE), do: @all_facility_types
   def facility_effect_to_types(:FACILITY_ISSUE), do: @all_facility_types
   def facility_effect_to_types(:BIKE_ISSUE), do: ["BIKE_STORAGE"]
@@ -142,6 +156,11 @@ defmodule AlertsUI.Models.InformedEntity do
   def facility_effect_to_types(:PARKING_CLOSURE), do: ["PARKING_AREA", "PICK_DROP"]
   def facility_effect_to_types(:PARKING_ISSUE), do: ["PARKING_AREA", "PICK_DROP"]
 
+  def facility_effect_to_types(_effect) do
+    []
+    # raise ArgumentError, "no such facility effect #{effect}"
+  end
+
   @doc """
   Map route type atoms to integer codes.
 
@@ -149,7 +168,14 @@ defmodule AlertsUI.Models.InformedEntity do
       iex> InformedEntity.route_type_mapping(:light_rail)
       0
   """
-  @spec route_type_mapping(mode_atom_t()) :: Route.type_int() | nil
+  @spec route_type_mapping(String.t() | mode_atom_t()) :: Route.type_int() | nil
+  def route_type_mapping("light_rail"), do: 0
+  def route_type_mapping("subway"), do: 1
+  def route_type_mapping("commuter_rail"), do: 2
+  def route_type_mapping("bus"), do: 3
+  def route_type_mapping("ferry"), do: 4
+  def route_type_mapping("facility"), do: nil
+  def route_type_mapping("systemwide"), do: nil
   def route_type_mapping(:light_rail), do: 0
   def route_type_mapping(:subway), do: 1
   def route_type_mapping(:commuter_rail), do: 2
@@ -164,13 +190,21 @@ defmodule AlertsUI.Models.InformedEntity do
       iex> InformedEntity.route_code_mapping(0)
       :light_rail
   """
-  @spec route_code_mapping(Route.type_int()) :: String.t() | nil
-  def route_code_mapping(0), do: :light_rail
-  def route_code_mapping(1), do: :subway
-  def route_code_mapping(2), do: :commuter_rail
-  def route_code_mapping(3), do: :bus
-  def route_code_mapping(4), do: :ferry
-  def route_code_mapping(_), do: nil
+  @spec route_code_mapping(Route.type_int() | nil, String.t() | nil) :: atom()
+  def route_code_mapping(code, effect \\ nil)
+  def route_code_mapping(0, _effect), do: :light_rail
+  def route_code_mapping(1, _effect), do: :subway
+  def route_code_mapping(2, _effect), do: :commuter_rail
+  def route_code_mapping(3, _effect), do: :bus
+  def route_code_mapping(4, _effect), do: :ferry
+
+  def route_code_mapping(nil, effect) do
+    if effect in EffectsForRouteTypes.list_effects(:facility) do
+      :facility
+    else
+      :systemwide
+    end
+  end
 
   @route_type_atoms [
     :access,

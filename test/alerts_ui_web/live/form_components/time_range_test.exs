@@ -377,11 +377,17 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
              |> render_async() =~ "custom"
 
       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
-                      {:add_errors,
-                       [
-                         {:active_period_end, {"Effect must end after 04/30/2024, 11:54 AM", []}},
-                         {:active_period_start_date, {"Effect can't start in the past", []}}
-                       ], AlertsUIWeb.FormComponents.TimeRange}}
+                      {:add_errors, errors, AlertsUIWeb.FormComponents.TimeRange}}
+
+      assert Enum.member?(
+               errors,
+               {:active_period_end, {"Effect must end after 04/30/2024, 11:54 AM", []}}
+             )
+
+      assert Enum.member?(
+               errors,
+               {:active_period_start_date, {"Effect can't start in the past", []}}
+             )
     end
 
     test "duplicating with no errors sends data" do
@@ -1135,7 +1141,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
         {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
 
-        {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/edit?alert_id=123")
 
         rendered_view = render(view)
 
@@ -1196,7 +1202,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       next_day_date = Date.add(todays_date, 2)
 
       with_mocks([]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         get_to_submission_page(view, "Bus", "Delay")
 

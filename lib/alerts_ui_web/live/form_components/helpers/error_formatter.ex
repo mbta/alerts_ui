@@ -9,11 +9,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ErrorFormatter do
 
   @field_name_to_error_message %{
     header_text: "Enter message text",
+    single_route_id: "Select a route",
     route_ids: "Select route(s)",
     stop_ids: "Select stop(s)",
     trip_ids: "Select trip(s)",
     direction: "Select direction",
-    facility_id: "Select a facility",
+    single_facility_id: "Select a facility",
+    facility_ids: "Select facility",
     accept_banner: "Check box to show you understand"
   }
 
@@ -28,7 +30,16 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ErrorFormatter do
     traverse_errors(changeset, fn _changeset, field, {msg, _opts} ->
       Map.get(@field_name_to_error_message, field, msg)
     end)
-    |> Enum.map(fn {k, v} -> {k, {v |> Enum.join(", "), []}} end)
+    |> Enum.map(fn {k, v} -> {k, {v |> join_errors(), []}} end)
+  end
+
+  def join_errors([first | _] = errors) when is_binary(first) do
+    Enum.join(errors, ", ")
+  end
+
+  # For array fields
+  def join_errors(errors) do
+    errors
   end
 
   def parse_field_errors(error_map, combination) when is_map(error_map) do

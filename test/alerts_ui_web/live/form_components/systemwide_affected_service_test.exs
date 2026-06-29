@@ -69,7 +69,7 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedServiceTest do
 
     @tag :logged_in_user
     test "shows missing field error upon submission", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/new")
+      {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
       get_to_submission_page(view, "Systemwide", "Notice")
 

@@ -30,7 +30,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
             start_time: nil,
             end_time: nil,
             alert_timing: :"one-time",
-            recurrence_days: []
+            recurrence_days: [],
+            current_time: nil
 
   @type t :: %__MODULE__{
           route_type: integer() | nil,
@@ -54,7 +55,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
           start_time: Time.t() | nil,
           end_time: Time.t() | nil,
           alert_timing: :"one-time" | :recurring,
-          recurrence_days: [atom()]
+          recurrence_days: [atom()],
+          current_time: NaiveDateTime.t() | nil
         }
 
   @uses_indefinite_article [
@@ -156,8 +158,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
 
   # stop form (modifies stops)
   @spec stop_form(__MODULE__.t()) :: String.t()
-  def stop_form(%{stops: stops, start_datetime: start_datetime}) do
-    standard_form(stops, start_datetime)
+  def stop_form(%{stops: stops, start_datetime: start_datetime} = autotext) do
+    standard_form(stops, start_datetime, Map.get(autotext, :start_specifier))
   end
 
   @spec stop_word(__MODULE__.t()) :: String.t()
@@ -235,8 +237,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   defp trip_word(_), do: "trip"
 
   @spec trip_form(__MODULE__.t()) :: String.t()
-  def trip_form(%{schedules: schedules, start_datetime: start_datetime}) do
-    standard_form(schedules, start_datetime)
+  def trip_form(%{schedules: schedules, start_datetime: start_datetime} = autotext) do
+    standard_form(schedules, start_datetime, Map.get(autotext, :start_specifier))
   end
 
   # facilities
@@ -252,8 +254,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   @spec facility_form(__MODULE__.t()) :: String.t()
   # facility form (modifies routes)
   @spec facility_form(__MODULE__.t()) :: String.t()
-  def facility_form(%{facilities: facilities, start_datetime: start_datetime}) do
-    standard_form(facilities, start_datetime)
+  def facility_form(%{facilities: facilities, start_datetime: start_datetime} = autotext) do
+    standard_form(facilities, start_datetime, Map.get(autotext, :start_specifier))
   end
 
   # routes (short)
@@ -318,8 +320,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
 
   # route form (modifies routes)
   @spec route_form(__MODULE__.t()) :: String.t()
-  def route_form(%{routes: routes, start_datetime: start_datetime}) do
-    standard_form(routes, start_datetime)
+  def route_form(%{routes: routes, start_datetime: start_datetime} = autotext) do
+    standard_form(routes, start_datetime, Map.get(autotext, :start_specifier))
   end
 
   def first_letter_numeric?(route_name) do
@@ -400,10 +402,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
     route_type |> InformedEntity.route_code_mapping() |> ContentFormatter.route_atom_to_string()
   end
 
-  @spec standard_form(list(), NaiveDateTime.t()) :: String.t()
-  defp standard_form([], _start_datetime), do: ""
+  @spec standard_form(list(), NaiveDateTime.t() | nil, atom() | nil) :: String.t()
+  defp standard_form([], _start_datetime, _start_specifier), do: ""
 
-  defp standard_form([_ | _] = entities, start_datetime) do
+  defp standard_form([_ | _] = entities, _start_datetime, :now), do: form_word(entities)
+
+  defp standard_form([_ | _] = entities, start_datetime, _start_specifier) do
     current_time = DateTimeHelpers.current_time()
 
     if DateTimeHelpers.time_is_in_future?(start_datetime, current_time) do

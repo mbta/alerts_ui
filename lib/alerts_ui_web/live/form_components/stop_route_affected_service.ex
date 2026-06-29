@@ -136,7 +136,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
     socket =
       socket
       |> assign(assigns)
-      |> assign(service_type_name: route_type |> InformedEntity.route_code_mapping() || nil)
+      |> assign(service_type_name: route_type |> InformedEntity.route_code_mapping())
       |> assign_stops(route_type)
       |> assign_async([:available_filter_routes], fn ->
         {:ok,
@@ -541,14 +541,14 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
 
     # Impacted routes selector
     route_search_term = assigns.form[:route_search_term].value
-    route_ids = assigns.form[:route_ids].value || []
+    _route_ids = assigns.form[:route_ids].value || []
 
     route_id_options =
       SelectFormatter.formatted_select_options(%SelectFormatter{
         options: Map.get(assigns.available_routes, :result, []) || [],
         search_term: route_search_term,
         route_type: assigns.route_type,
-        values_to_keep: route_ids,
+        values_to_keep: [],
         option_prefix: "route-selector"
       })
 
@@ -616,7 +616,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedService do
         <.filtered_select
           label="Impacted routes"
           field={@form[:route_ids]}
-          filter_field={@form[:routes_search_term]}
+          filter_field={@form[:route_search_term]}
           loading={Map.get(@available_routes, :loading, true)}
           no_results={Enum.empty?(@route_id_options) && !disable_routes_input?(assigns)}
           disabled={disable_routes_input?(assigns)}

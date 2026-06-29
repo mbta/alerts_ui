@@ -562,7 +562,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
   def build_auto_text(
         %{route_type: route_type, effect_name: effect_name} = autotext_data,
         :description_template
-      ) do
+      )
+      when effect_name not in [nil, ""] and not is_nil(route_type) do
     %{
       description_template: %{
         route_count: route_count,

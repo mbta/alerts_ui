@@ -122,7 +122,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   @single_route_effect_names ["Detour", "Snow Route"]
   @single_facility_effect_names ["Elevator Closure", "Escalator Closure"]
 
-  @spec build_alert_data(String.t() | Alert.t() | nil, :creating | :duplicating | :editing | nil) ::
+  @spec build_alert_data(String.t() | Alert.t() | nil, atom()) ::
           t()
   def build_alert_data(alert, form_type \\ nil)
 
@@ -162,6 +162,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     |> Map.merge(active_period_map(alert))
     |> Map.merge(reminder_times(alert))
     |> Map.merge(notification_period(alert, form_type))
+    |> Map.put(:form_type, form_type)
     |> Map.merge(service_types(alert))
     |> Map.merge(banner_sync_toggle(alert))
   end
@@ -170,6 +171,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
   # if the alert is being duplicated, don't include any of the original metadata
   defp create_and_edit_metadata(_alert, :duplicating), do: %{}
+
+  # if the alert is new (mono flow) it has no history
+  defp create_and_edit_metadata(%Alert{id: nil}, _), do: %{}
 
   defp create_and_edit_metadata(alert, _form_type) do
     created_by =
@@ -293,6 +297,17 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     %{
       notification_period_start: notification_period_start,
       notification_specifier: notification_specifier
+    }
+  end
+
+  defp notification_period(alert, :new) do
+    notification_period_start = shift_to_naive(alert.notification_period_start)
+    notification_period_end = shift_to_naive(alert.notification_period_end)
+
+    %{
+      notification_period_start: notification_period_start,
+      notification_period_end: notification_period_end,
+      notification_specifier: :now
     }
   end
 

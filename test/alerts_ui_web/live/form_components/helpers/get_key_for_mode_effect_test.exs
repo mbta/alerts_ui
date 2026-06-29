@@ -66,8 +66,17 @@ defmodule AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffectTest do
       assert GetKeyForModeEffect.get_value_of_key(:combination, "access", nil) == nil
     end
 
-    test "if service type is nil gets systemwide values" do
+    test "if service type is nil and effect is systemwide, gets systemwide values" do
       assert GetKeyForModeEffect.get_value_of_key(:default_severity, nil, "Delay") == 5
+    end
+
+    test "if service type is nil and effect is a facility effect, gets facility values" do
+      with_mock(ModeEffect,
+        mode_effect: fn -> @fake_mode_effect_table end
+      ) do
+        assert GetKeyForModeEffect.get_value_of_key(:combination, nil, "Elevator Closure") ==
+                 :ACCESS
+      end
     end
 
     test "if key is string" do

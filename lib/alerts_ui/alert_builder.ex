@@ -173,7 +173,11 @@ defmodule AlertsUI.AlertBuilder do
       reminder_times =
         Map.get(alert_data, :reminder_times, [])
         |> Enum.map(
-          &%{id: &1.id, reminder_time: ActivePeriodBuilder.naive_eastern_datetime_to_utc(&1.time)}
+          &%{
+            id: &1.id,
+            reminder_time:
+              ActivePeriodBuilder.naive_eastern_datetime_to_utc(reminder_time_value(&1))
+          }
         )
 
       %{reminder_times: reminder_times}
@@ -183,10 +187,12 @@ defmodule AlertsUI.AlertBuilder do
   defp plaintext_reminder_selections(alert_data) do
     plaintext_reminder_selections =
       Map.get(alert_data, :reminder_times, [])
-      |> Enum.map_join(", ", &Calendar.strftime(&1.time, "%Y-%m-%dT%H:%M:%S"))
+      |> Enum.map_join(", ", &Calendar.strftime(reminder_time_value(&1), "%Y-%m-%dT%H:%M:%S"))
 
     %{plaintext_reminder_selections: plaintext_reminder_selections}
   end
+
+  defp reminder_time_value(rt), do: Map.get(rt, :reminder_time) || Map.get(rt, :time)
 
   defp cause_and_effect(alert_data) do
     route_type = Map.get(alert_data, :route_type)
@@ -274,7 +280,7 @@ defmodule AlertsUI.AlertBuilder do
       end
 
     user_selected_routes =
-      selected_routes
+      (selected_routes || [])
       |> Enum.map(fn route_id ->
         matching_route = get_matching_route(route_id, pre_combo_routes(selected_routes))
         "#{SelectFormatter.name_for_option(matching_route)}|#{route_id}"

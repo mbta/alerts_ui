@@ -46,12 +46,12 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
   describe "create alerts page" do
     @tag :logged_in_user
     test "connected mount displays a list of alerts when logged in", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/alerts/new")
+      {:ok, _view, html} = live(conn, "/alerts/legacy/new")
       assert html =~ ~r/Create an Alert/
     end
 
     test "redirects the user when not logged in", %{conn: conn} do
-      assert live(conn, "/alerts/new") ==
+      assert live(conn, "/alerts/legacy/new") ==
                {:error, {:redirect, %{to: "/auth/keycloak", flash: %{}}}}
     end
 
@@ -68,7 +68,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]}
       ]) do
         insert(:alert, alert_id: "1")
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         first_rendered_view = render_async(view)
         assert first_rendered_view =~ ~s(class="min-w-full flex flex-col mb-8" id="route_view")
@@ -115,7 +115,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         {RoutePatternsRepo, [], [included_stops_by_route_id: fn _route_id, _direction -> [] end]},
         {FacilitiesRepo, [], get_by_type: fn _types, _opts -> [] end}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         {:ok, changeset} =
           Ecto.Changeset.change(%RouteTypeAndEffect{
@@ -134,7 +134,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
     test "shows correct affected service for systemwide combination", %{conn: conn} do
       with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
         insert(:alert, alert_id: "1")
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         {:ok, changeset} =
           Ecto.Changeset.change(%RouteTypeAndEffect{route_type: nil, effect_name: "Summary"})
@@ -153,7 +153,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         {StopsRepo, [], by_route_type: fn _route_type, _opts -> [] end}
       ]) do
         insert(:alert, alert_id: "1")
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         {:ok, changeset} =
           Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 3, effect_name: "Stop Move"})
@@ -169,7 +169,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
     test "shows correct affected service for other combination", %{conn: conn} do
       with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
         insert(:alert, alert_id: "1")
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         {:ok, changeset} =
           Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 3, effect_name: "Detour"})
@@ -190,7 +190,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
          by_route: fn _, _, _opts -> [@stop] end, all: fn ["filter[id]": ""], _ -> [@stop] end},
         {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
         first_rendered_view = render(view)
         assert first_rendered_view =~ ~s(id="route_view")
 
@@ -245,7 +245,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
     @tag :logged_in_user
     test "clicking on timeline moves view back", %{conn: conn} do
       insert(:alert, alert_id: "1")
-      {:ok, view, _html} = live(conn, "/alerts/new")
+      {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
       {:ok, changeset} =
         Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 3, effect_name: "Detour"})
@@ -271,7 +271,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [] end}
       ]) do
         conn = log_in_user(conn)
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         {:ok, changeset} =
           Ecto.Changeset.change(%RouteTypeAndEffect{route_type: 3, effect_name: "Detour"})
@@ -309,7 +309,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
          all: fn ["filter[id]": ""], _ -> [stop, child_stop] end}
       ]) do
         conn = log_in_user(conn)
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         {:ok, changeset} =
           Ecto.Changeset.change(%RouteTypeAndEffect{
@@ -362,7 +362,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
           |> log_in_user()
           |> put_req_header("referer", "/alerts?filter[timeline]=future")
 
-        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         {:ok, changeset} =
           Ecto.Changeset.change(%RouteTypeAndEffect{
@@ -438,7 +438,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         {:ok, _} =
           Alerts.create_or_update_alert(alert_params, build(:user))
 
-        {:ok, view, _html} = live(conn, "/alerts/edit?alert_id=123")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/edit?alert_id=123")
 
         rendered_view = render_async(view)
         assert rendered_view =~ "spurious route [sp_rt]"
@@ -578,7 +578,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         {:ok, alert} =
           Alerts.create_or_update_alert(alert_params, build(:user))
 
-        {:ok, view, _html} = live(conn, "/alerts/duplicate?alert_id=#{alert.alert_id}")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/duplicate?alert_id=#{alert.alert_id}")
 
         assert view
                |> element("#time_range_active_period_start_specifier option[selected]")
@@ -653,7 +653,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         {:ok, alert} =
           Alerts.create_or_update_alert(alert_params, build(:user))
 
-        {:ok, view, _html} = live(conn, "/alerts/duplicate?alert_id=#{alert.alert_id}")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/duplicate?alert_id=#{alert.alert_id}")
 
         assert view
                |> element("#time_range_active_period_start_specifier option[selected]")
@@ -727,7 +727,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
         {:ok, alert} =
           Alerts.create_or_update_alert(alert_params, build(:user))
 
-        {:ok, view, _html} = live(conn, "/alerts/duplicate?alert_id=#{alert.alert_id}")
+        {:ok, view, _html} = live(conn, "/alerts/legacy/duplicate?alert_id=#{alert.alert_id}")
 
         assert view
                |> element("#time_range_active_period_start_specifier option[selected]")

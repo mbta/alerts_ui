@@ -447,11 +447,13 @@ defmodule AlertsUIWeb.CreateAlertLive do
     Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1, "filter[type]": 3))
     |> Enum.filter(&(Map.get(&1, :description) !== :rail_replacement_bus))
     |> Enum.sort_by(&SelectFormatter.sort_order/1)
+    |> Enum.uniq()
   end
 
   def get_routes_by_stop(stop_ids, _route_type) do
     Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1))
     |> Enum.sort_by(&SelectFormatter.sort_order/1)
+    |> Enum.uniq()
   end
 
   def get_facilities(facility_types) do
