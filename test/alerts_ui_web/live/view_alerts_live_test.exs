@@ -1542,12 +1542,13 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
     @tag :logged_in_user
     test "clicking an alert row opens the details modal with route type and effect name",
          %{conn: conn} do
-      alert = insert(:alert, %{
-        alert_id: "999",
-        header_text: "modal rendering test alert",
-        active_period_start: ~U[2023-10-12 00:01:00Z],
-        closed_timestamp: ~U[2024-10-12 00:01:00Z]
-      })
+      alert =
+        insert(:alert, %{
+          alert_id: "999",
+          header_text: "modal rendering test alert",
+          active_period_start: ~U[2023-10-12 00:01:00Z],
+          closed_timestamp: ~U[2024-10-12 00:01:00Z]
+        })
 
       alert_data = %AlertsUIWeb.FormComponents.Helpers.AlertData{
         route_type: 1,

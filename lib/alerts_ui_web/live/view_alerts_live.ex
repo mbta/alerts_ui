@@ -9,9 +9,9 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   alias AlertsUI.Alerts
   alias AlertsUI.Models.{ActivePeriod, Alert}
+  alias AlertsUIWeb.CreateAlertMonoLive.AlertData, as: AlertDataMono
   alias AlertsUIWeb.FormComponents.Helpers.{AlertData, DateTimeFormatters, DateTimeHelpers}
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData, as: AlertDataMono
   alias AlertsUIWeb.UserHelpers
 
   require Logger
