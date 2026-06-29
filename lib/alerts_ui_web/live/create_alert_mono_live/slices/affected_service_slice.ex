@@ -567,7 +567,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       <div class="flex flex-row flex-wrap mb-4 min-h-[38rem] md:min-h-[32rem]">
         <div class="mb-4 md:mb-0 w-full md:w-[25%] md:mr-8">
           <.filtered_select
-            :if={filtered_select_for_route_type?(@form[:route_type].value)}
             label={if @form[:route_type].value in [0, 1, 2], do: "Lines", else: "Routes"}
             field={
               if humanize_effect_name(@form) in get_single_route_effect_names(),
@@ -582,16 +581,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             multiple={
               if humanize_effect_name(@form) in get_single_route_effect_names(), do: false, else: true
             }
-          />
-          <.toggle_checkgroup
-            :if={!filtered_select_for_route_type?(@form[:route_type].value)}
-            label={if @form[:route_type].value in [0, 1, 2], do: "Lines", else: "Routes"}
-            field={@form[:route_ids]}
-            options={@selections.route_id_options}
-            icon_type={icon_type(@form[:route_type].value)}
-            class="flex-col"
-            button_class="min-w-full"
-            show_icons={true}
           />
         </div>
 
@@ -719,14 +708,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   defp date_filter_active?(filter_value, today) when filter_value == today, do: false
   defp date_filter_active?(_, _), do: true
 
-  defp icon_type(route_type) do
-    case route_type do
-      2 -> :commuter_rail
-      4 -> :ferry
-      _ -> nil
-    end
-  end
-
   defp disable_stop_input?(nil), do: true
   defp disable_stop_input?(route_ids) when is_list(route_ids), do: length(route_ids) !== 1
   defp disable_stop_input?(_route_ids), do: true
@@ -744,10 +725,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   defp show_directions_input?(combination) do
     combination in [:RDS, :RDTS, :RDS, :RDT]
-  end
-
-  defp filtered_select_for_route_type?(route_type) do
-    Enum.member?([2, 3, 4], route_type)
   end
 
   def on_filter_accept(socket) do
