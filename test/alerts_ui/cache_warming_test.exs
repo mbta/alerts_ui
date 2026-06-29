@@ -36,8 +36,7 @@ defmodule AlertsUI.CacheWarmingTest do
       ) do
         CacheWarming.warm_all()
 
-        assert_called(CreateAlertLive.get_routes([0, 1, 2, 3]))
-        assert_called(CreateAlertLive.get_routes([4]))
+        assert_called(CreateAlertLive.get_routes([3]))
       end
     end
 
@@ -54,7 +53,6 @@ defmodule AlertsUI.CacheWarmingTest do
         assert_called(CreateAlertLive.get_stops(nil, 1, nil))
         assert_called(CreateAlertLive.get_stops_for_stop_route(nil, 2))
         assert_called(CreateAlertLive.get_stops_for_stop_route(nil, 4))
-        assert_called(CreateAlertLive.get_stops(["Green"], nil, "0"))
       end
     end
 

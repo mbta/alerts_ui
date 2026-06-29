@@ -21,7 +21,7 @@ defmodule AlertsUI.CacheWarming do
 
   defp warm_routes do
     # Standard route types used in the alert form
-    CreateAlertLive.get_routes([0, 1, 2, 3])
+    CreateAlertLive.get_routes([3])
     # Unlisted routes (type 4)
     CreateAlertLive.get_routes([4])
   end
@@ -38,9 +38,6 @@ defmodule AlertsUI.CacheWarming do
 
     # Ferry stops for stop-route combination
     CreateAlertLive.get_stops_for_stop_route(nil, 4)
-
-    # Green Line stops (direction 0 covers all branches; direction is only used for ordering)
-    CreateAlertLive.get_stops(["Green"], nil, "0")
   end
 
   defp warm_facilities do
