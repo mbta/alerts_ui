@@ -62,7 +62,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
       |> TimeRangeValidators.validate_cast_notification_datetimes(params)
       |> TimeRangeValidators.validate_notification_time(
         socket.assigns.current_time,
-        socket.assigns.form_type == :editing
+        socket.assigns.form_type
       )
       |> TimeRangeValidators.validate_required_notification_fields()
     end

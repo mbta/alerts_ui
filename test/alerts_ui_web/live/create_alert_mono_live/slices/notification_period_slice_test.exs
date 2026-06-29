@@ -383,5 +383,20 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
 
       assert render(view) =~ "Notifications can&#39;t be set in the past"
     end
+
+    @tag :logged_in_user
+    test "duplicating does NOT check an unchanged carried-over start time", %{conn: conn} do
+      # A past notification carried from the original (effect still in the future,
+      # so the duplicate flow does not reset the times).
+      create_test_alert("np-dup-unchanged",
+        active_period_attrs: %{start: future_utc(60), end: future_utc(61)},
+        active_period_start: future_utc(60),
+        notification_period_start: ~U[2024-04-29 14:54:00Z]
+      )
+
+      {:ok, view, _html} = live(conn, "/alerts/duplicate/np-dup-unchanged")
+
+      refute render(view) =~ "Notifications can&#39;t be set in the past"
+    end
   end
 end

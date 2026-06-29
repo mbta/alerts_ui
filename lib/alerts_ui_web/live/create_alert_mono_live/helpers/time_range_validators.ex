@@ -279,12 +279,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
     )
   end
 
-  def validate_notification_time(changeset, current_time, editing?) do
+  def validate_notification_time(changeset, current_time, form_type) do
     validate_change(
       changeset,
       :notification_period_start,
       fn :notification_period_start, value ->
-        notification_start_errors(changeset, value, current_time, editing?)
+        notification_start_errors(changeset, value, current_time, form_type)
       end
     )
   end
@@ -292,15 +292,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
   # Only datetimes the user picks (:custom / :start_of_service) are bounded. :now
   # tracks the current time and :same_as_effect_period tracks the effect start,
   # whose own (edit-lenient) validation governs it — so those are never flagged.
-  defp notification_start_errors(changeset, value, current_time, editing?) do
-    upper_bound = notification_upper_bound(changeset, editing?)
+  defp notification_start_errors(changeset, value, current_time, form_type) do
+    upper_bound = notification_upper_bound(changeset, form_type)
 
     cond do
       not user_chosen_notification?(changeset) ->
         []
 
-      # An unchanged saved value stays valid until the user modifies it.
-      editing? and unchanged_notification?(changeset, value) ->
+      # On an existing alert (edit/duplicate) a carried-over value stays valid
+      # until the user actually modifies it.
+      keeps_existing_value?(form_type) and unchanged_notification?(changeset, value) ->
         []
 
       # The lower bound is the actual current time, never the effect start.
@@ -318,14 +319,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
     end
   end
 
-  # On create the notification must precede the effect start; when editing an
-  # existing alert (whose effect may already be underway) it's bounded by the
-  # notification period end instead.
-  defp notification_upper_bound(changeset, true),
+  # When editing an existing alert (whose effect may already be underway) the
+  # bound is the notification period end; on create/duplicate the notification
+  # must precede the effect start.
+  defp notification_upper_bound(changeset, :editing),
     do: get_field(changeset, :notification_period_end)
 
-  defp notification_upper_bound(changeset, false),
+  defp notification_upper_bound(changeset, _),
     do: get_field(changeset, :active_period_start)
+
+  # Edits and duplicates carry a saved notification start that should not be
+  # re-validated unless changed; a brand-new alert has no such value.
+  defp keeps_existing_value?(form_type), do: form_type in [:editing, :duplicating]
 
   defp user_chosen_notification?(changeset),
     do: get_field(changeset, :notification_specifier) in [:custom, :start_of_service]
