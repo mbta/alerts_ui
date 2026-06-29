@@ -1516,6 +1516,74 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     end
   end
 
+  describe "validate/4 recurring start-in-the-past error placement" do
+    @weekday_atoms ~w(monday tuesday wednesday thursday friday saturday sunday)a
+
+    # Recurring, "now" start specifier, with a past start time on the given
+    # recurrence days. start_date shares the weekday of the recurrence day so the
+    # start-date/weekday check is satisfied and only the "in the past" error fires.
+    defp recurring_past_start(recurrence_days, start_date) do
+      Ecto.Changeset.cast(
+        %AlertData{},
+        %{
+          alert_timing: :recurring,
+          active_period_start_specifier: :now,
+          active_period_start_date: start_date,
+          active_period_start_time: ~T[09:00:00],
+          active_period_end_specifier: :until_further_notice,
+          recurrence_days: recurrence_days
+        },
+        [
+          :alert_timing,
+          :active_period_start_specifier,
+          :active_period_start_date,
+          :active_period_start_time,
+          :active_period_end_specifier,
+          :recurrence_days
+        ]
+      )
+    end
+
+    test "when today is a recurrence day, the time error is on the start time specifier" do
+      today = Enum.at(@weekday_atoms, Date.day_of_week(@todays_date) - 1)
+      # a week ago: in the past, same weekday as today
+      start_date = Date.add(@todays_date, -7)
+
+      result =
+        Slice.validate(
+          %TimeRangeSlice{form_type: :new},
+          recurring_past_start([today], start_date),
+          %{},
+          socket_with_trip_selections([])
+        )
+
+      assert result.errors[:active_period_start_time_specifier] ==
+               {"Effect can't start in the past", []}
+
+      refute Keyword.has_key?(result.errors, :active_period_start_specifier)
+    end
+
+    test "when today is not a recurrence day, the time error is on the start specifier" do
+      # the day after today, which is not today
+      other = Enum.at(@weekday_atoms, rem(Date.day_of_week(@todays_date), 7))
+      # six days ago: in the past, same weekday as `other`
+      start_date = Date.add(@todays_date, -6)
+
+      result =
+        Slice.validate(
+          %TimeRangeSlice{form_type: :new},
+          recurring_past_start([other], start_date),
+          %{},
+          socket_with_trip_selections([])
+        )
+
+      assert result.errors[:active_period_start_specifier] ==
+               {"Effect can't start in the past", []}
+
+      refute Keyword.has_key?(result.errors, :active_period_start_time_specifier)
+    end
+  end
+
   describe "ensure_start_values/5 with :now specifier" do
     test "does not advance active_period_start when target is unrelated (e.g. header_sync_toggle)" do
       existing_dt = ~N[2024-01-15 10:30:00]

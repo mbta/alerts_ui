@@ -6,9 +6,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
   period constraints are satisfied.
   """
 
+  alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
+
   import Ecto.Changeset
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Time, only: [localize: 1]
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Time, only: [localize: 1, day_num_to_atom: 1]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,
     only: [always_validate_required: 3]
@@ -196,6 +198,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
        when timing in [:recurring, "recurring"] do
     start_date = get_field(changeset, :active_period_start_date)
     start_time = get_field(changeset, :active_period_start_time)
+    recurrence_days = get_field(changeset, :recurrence_days) || []
+    today = day_num_to_atom(Date.day_of_week(DateTimeHelpers.current_time()))
+    today_selected = today in recurrence_days
 
     if start_date && start_time do
       naive_start = NaiveDateTime.new!(start_date, start_time) |> localize()
@@ -205,7 +210,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
         :active_period_start_date,
         fn :active_period_start_date, _date ->
           time_in_past? = NaiveDateTime.diff(now, naive_start, :minute) > 1
-          start_error(time_in_past?, :recurring, specifier)
+          start_error(time_in_past?, :recurring, specifier, today_selected)
         end
       )
     else
@@ -384,18 +389,23 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
   defp required_recurring_time_fields(:custom, field), do: [field]
   defp required_recurring_time_fields(_, _), do: []
 
-  defp start_error(false, _, _), do: []
+  defp start_error(in_past?, timing, specifier, today_selected \\ false)
 
-  defp start_error(true, :"one-time", :custom),
+  defp start_error(false, _, _, _), do: []
+
+  defp start_error(true, :"one-time", :custom, _),
     do: [active_period_start: "Effect can't start in the past"]
 
-  defp start_error(true, :"one-time", _),
+  defp start_error(true, :"one-time", _, _),
     do: [active_period_start_date: "Effect can't start in the past"]
 
-  defp start_error(true, :recurring, :now),
+  defp start_error(true, :recurring, :now, false),
     do: [active_period_start_specifier: "Effect can't start in the past"]
 
-  defp start_error(true, :recurring, _),
+  defp start_error(true, :recurring, :now, true),
+    do: [active_period_start_time_specifier: "Effect can't start in the past"]
+
+  defp start_error(true, :recurring, _, _),
     do: [active_period_start_date: "Effect can't start in the past"]
 
   defp end_error(:later_today, ap_start),
@@ -430,14 +440,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
   end
 
   defp validate_start_date_matches_weekday(_, _, _), do: []
-
-  defp day_num_to_atom(1), do: :monday
-  defp day_num_to_atom(2), do: :tuesday
-  defp day_num_to_atom(3), do: :wednesday
-  defp day_num_to_atom(4), do: :thursday
-  defp day_num_to_atom(5), do: :friday
-  defp day_num_to_atom(6), do: :saturday
-  defp day_num_to_atom(7), do: :sunday
 
   defp validate_not_in_dst_gap(naive_datetime, field) do
     case DateTime.from_naive(naive_datetime, "America/New_York") do
