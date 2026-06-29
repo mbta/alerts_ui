@@ -422,14 +422,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
       view
       |> element("form")
       |> render_change(%{
-        "alert_data" => %{"reminder_sort" => ["new", "new"]}
+        "alert_data" => %{"reminder_sort" => ["new"]}
       })
 
       view
       |> element("form")
       |> render_change(%{
         "alert_data" => %{
-          "reminder_sort" => ["0", "1"],
+          "reminder_sort" => ["0", "new"],
           "reminder_times" => %{
             "0" => %{
               "_persistent_id" => "0",
