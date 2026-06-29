@@ -296,6 +296,34 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
     end
 
     @tag :logged_in_user
+    test "a past notification with seconds stays valid when an unrelated field changes", %{
+      conn: conn
+    } do
+      # Non-zero seconds: the form renders the notification to the minute, so a
+      # field change resubmits it truncated. That must still count as unchanged.
+      create_test_alert("np-repro", notification_period_start: ~U[2024-04-29 14:54:37Z])
+
+      {:ok, view, _html} = live(conn, "/alerts/edit/np-repro")
+      refute render(view) =~ "Notifications can&#39;t be set in the past"
+
+      # Mimic a real browser phx-change for "supporting information"
+      # (description_text): the whole form is resubmitted, with the notification
+      # rendered to the minute ("…10:54", dropping the saved :37 seconds).
+      view
+      |> element("form")
+      |> render_change(%{
+        "_target" => ["alert_data", "description_text"],
+        "alert_data" => %{
+          "description_text" => "some supporting info",
+          "notification_specifier" => "custom",
+          "notification_period_start" => "2024-04-29T10:54"
+        }
+      })
+
+      refute render(view) =~ "Notifications can&#39;t be set in the past"
+    end
+
+    @tag :logged_in_user
     test "maximum time on calendar is the notification period end when editing", %{conn: conn} do
       create_test_alert("np-max-edit")
 

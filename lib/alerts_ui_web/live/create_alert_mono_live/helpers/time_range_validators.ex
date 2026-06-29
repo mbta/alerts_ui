@@ -335,10 +335,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
   defp user_chosen_notification?(changeset),
     do: get_field(changeset, :notification_specifier) in [:custom, :start_of_service]
 
+  # Compared at minute precision: the notification input is rendered/edited to
+  # the minute, so a saved value with non-zero seconds round-trips through the
+  # form as the same minute and must still count as unchanged.
   defp unchanged_notification?(changeset, value) do
     original = changeset.data.notification_period_start
-    not is_nil(original) and NaiveDateTime.compare(value, original) == :eq
+    not is_nil(original) and not is_nil(value) and to_minute(value) == to_minute(original)
   end
+
+  defp to_minute(%NaiveDateTime{} = datetime), do: %{datetime | second: 0, microsecond: {0, 0}}
 
   defp in_past?(value, current_time),
     do: NaiveDateTime.diff(current_time, value, :minute) > 1
