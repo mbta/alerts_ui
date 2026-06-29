@@ -452,7 +452,6 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   def get_routes_by_stop(stop_ids, _route_type) do
     Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1))
-    |> maybe_include_virtual_green_line()
     |> Enum.sort_by(&SelectFormatter.sort_order/1)
     |> Enum.uniq()
   end

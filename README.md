@@ -58,6 +58,16 @@ Now you can visit [`localhost:4010`](http://localhost:4010) from your browser.
 
 Swagger docs for the API enpoints can be found at `/api/swagger`.
 
+### Mobile development
+
+You can access your server on your phone by making the following changes:
+
+- In `config/dev.exs`, change `http: [ip: {127, 0, 0, 1}, port: 4010]` to `http: [ip: {0, 0, 0, 0}, port: 4010]`
+- Restart your Phoenix server with this change
+- Look up your local IP address. On OSX: `ipconfig getifaddr en0`
+- On any device connected to your network, visit `{ip_address}:4010`
+
+
 ## Debugging/special routes
 
 - Live Debugger: `:4007` local only by default, change in `mix.exs`

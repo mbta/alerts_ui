@@ -375,7 +375,7 @@ defmodule AlertsUI.Configs.ModeEffect do
         default_cause: nil,
         default_severity: 7,
         send_push_notification_on_create: true,
-        send_push_notification_on_edit: true,
+        send_push_notification_on_edit: false,
         prediction_suppression_warning: false,
         path_name: "dock_bypass"
       },
