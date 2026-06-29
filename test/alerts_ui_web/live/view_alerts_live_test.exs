@@ -1547,29 +1547,17 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
           alert_id: "999",
           header_text: "modal rendering test alert",
           active_period_start: ~U[2023-10-12 00:01:00Z],
-          closed_timestamp: ~U[2024-10-12 00:01:00Z]
+          closed_timestamp: ~U[2024-10-12 00:01:00Z],
+          severity: 4
         })
 
-      alert_data = %AlertsUIWeb.FormComponents.Helpers.AlertData{
-        route_type: 1,
-        effect_name: "station_closure"
-      }
+      {:ok, view, _html} = live(conn, "/alerts?filter[timeline]=past")
 
-      with_mocks([
-        {RoutesRepo, [], [all: fn -> [] end, get: fn route_id -> %{name: route_id} end]},
-        {AlertsUIWeb.FormComponents.Helpers.AlertData, [:passthrough],
-         [build_alert_data: fn _id -> alert_data end]},
-        {AlertsUIWeb.CreateAlertMonoLive.AlertData, [:passthrough],
-         [normalize_effect_name: fn data -> data end]}
-      ]) do
-        {:ok, view, _html} = live(conn, "/alerts?filter[timeline]=past")
+      view |> element("td[phx-click]", alert.alert_id) |> render_click()
 
-        view |> element("tr[phx-click]", alert.alert_id) |> render_click()
-
-        html = render(view)
-        assert html =~ "Subway"
-        assert html =~ "Station Closure"
-      end
+      html = render(view)
+      assert html =~ "Subway"
+      assert html =~ "Station Closure"
     end
   end
 
