@@ -426,7 +426,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
   defp keep_non_nil(_key, v1, v2), do: if(is_nil(v2), do: v1, else: v2)
 
-  defp normalize_effect_name(alert_data) do
+  def normalize_effect_name(alert_data) do
     normalized =
       case Map.get(alert_data, :effect_name) do
         nil ->
