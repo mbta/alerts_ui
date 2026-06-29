@@ -523,6 +523,78 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
     end
 
     @tag :logged_in_user
+    test "behaves correctly if text is cleared", %{
+      conn: conn
+    } do
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
+        {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]},
+        {SchedulesRepo, [],
+         [
+           end_of_rating: fn _ -> Date.utc_today() end,
+           by_route_ids: fn _route_ids, _opts -> [] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Suspension")
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          alert_data: %{
+            route_ids: ["CR-Worcester"]
+          }
+        })
+
+        assert view
+               |> element("#alert_data_header_text")
+               |> render() =~
+                 "Framingham/Worcester Line"
+
+        assert view
+               |> element("#alert_data_header_sync_toggle")
+               |> render() =~ ~s(checked=\"checked\")
+
+        view
+        |> element("form")
+        |> render_change(%{
+          alert_data: %{
+            header_sync_toggle: false,
+            header_text: ""
+          }
+        })
+
+        refute view
+               |> element("#alert_data_header_sync_toggle")
+               |> render_async(1000) =~ ~s(checked=\"checked\")
+
+        assert view
+               |> element("#alert_data_header_text")
+               |> render_async(1000) =~ ""
+
+        view
+        |> element("form")
+        |> render_change(%{
+          alert_data: %{
+            header_sync_toggle: true
+          }
+        })
+
+        assert view
+               |> element("#alert_data_header_text")
+               |> render() =~
+                 "Framingham/Worcester Line"
+
+        assert view
+               |> element("#alert_data_header_sync_toggle")
+               |> render() =~ ~s(checked=\"checked\")
+      end
+    end
+
+    @tag :logged_in_user
     test "header updates if sync buttons is turned off and back with error on facility alert", %{
       conn: conn
     } do

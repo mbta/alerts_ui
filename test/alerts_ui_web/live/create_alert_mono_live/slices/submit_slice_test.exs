@@ -278,7 +278,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
                  cause: :UNKNOWN_CAUSE,
                  cause_detail: nil,
                  header_text: "route_number_1 will be experiencing delays of about 15 minutes.",
-                 description_text: "",
+                 description_text: nil,
                  severity_level: :WARNING,
                  url: nil,
                  service_effect_text: "route_number_1 delay",

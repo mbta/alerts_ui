@@ -215,11 +215,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     #   live navigate to `?review=true`, opening the modal
     # else:
     #   open error flash
+
+    alert_data = Map.merge(socket.assigns.form.source.data, socket.assigns.form.source.changes)
+
+    autotext_data = AlertDetailsSlice.autotext_map(alert_data, socket.assigns)
+
     socket =
       socket
       |> assign(:submitting?, true)
       |> assign(:submitted?, true)
-      |> sync_socket()
+      |> sync_socket(%{"alert_data" => autotext_data})
 
     {:noreply, socket}
   end
