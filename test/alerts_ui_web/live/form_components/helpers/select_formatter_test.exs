@@ -9,8 +9,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
   alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Stop
 
-  describe "formatted_select_options/1 (routes)" do
-    test "returns properly formatted and ordered routes, deduplicated" do
+  describe "formatted_select_options/2" do
+    test "returns properly formatted and ordered routes" do
       options = [
         %Route{id: "202", name: "joe", sort_order: 2},
         %Route{id: "303", name: "", long_name: "bob", sort_order: 3},
@@ -35,10 +35,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
 
       assert results == [[key: "Long Name", value: "1", id: "option-1"]]
     end
-  end
 
-  describe "formatted_select_options/1 (stops)" do
-    test "preserves original order and attaches a Tippy tooltip" do
+    test "stops have original order, tooltips" do
       options = [
         %Stop{id: "202", name: "joe"},
         %Stop{id: "303", name: "bob"},
@@ -76,7 +74,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
              ]
     end
 
-    test "when split_stops? is true, stops have name|id combo values" do
+    test "values will be combo of stop names and ids if second argument is true" do
       options = [
         %Stop{id: "202", name: "joe"},
         %Stop{id: "303", name: "bob"},
@@ -114,10 +112,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
                ]
              ]
     end
-  end
 
-  describe "formatted_select_options/1 (facilities + search)" do
-    test "filters facility options by search term, matching name or value" do
+    test "it returns properly filtered facility options by name and value" do
       options = [
         %Facility{
           id: "952",
@@ -176,10 +172,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
                ]
              ]
     end
-  end
 
-  describe "formatted_select_options/1 with schedules_by_route_name" do
-    test "single-route trip map (non-ferry) is flattened with trip-id-in-name when flagged" do
+    test "it properly formats non-ferry trips" do
       trip_map = %{
         "Framingham/Worcester line" => [
           %EnhancedSchedule{
@@ -192,10 +186,32 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
           },
           %EnhancedSchedule{
             route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+            trip: %Trip{id: "CR-683300-special", name: "527", direction_id: 0},
+            stop: %Stop{id: "place-sstat", name: "South Station"},
+            arrival_time: nil,
+            departure_time: ~U[2024-02-21 14:01:00.00Z],
+            use_trip_id_in_name?: true
+          },
+          %EnhancedSchedule{
+            route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
             trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
             stop: %Stop{id: "place-sstat", name: "South Station"},
             arrival_time: nil,
             departure_time: ~U[2024-02-21 14:15:00.00Z]
+          },
+          %EnhancedSchedule{
+            route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+            trip: %Trip{id: "CR-683321-594", name: "594", direction_id: 1},
+            stop: %Stop{id: "place-WML-0214", name: "Framingham"},
+            arrival_time: nil,
+            departure_time: ~U[2024-02-21 14:45:00.00Z]
+          },
+          %EnhancedSchedule{
+            route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+            trip: %Trip{id: "CR-683302-529", name: "529", direction_id: 0},
+            stop: %Stop{id: "place-sstat", name: "South Station"},
+            arrival_time: nil,
+            departure_time: ~U[2024-02-21 15:01:00.00Z]
           }
         ]
       }
@@ -216,11 +232,35 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
                  "data-tippy-delay": "[1000, 200]"
                ],
                [
+                 key: "527 (9:01 AM from South Station) CR-683300-special",
+                 value: "CR-683300-special",
+                 id: "option-CR-683300-special",
+                 "phx-hook": "Tippy",
+                 "data-tippy-content": "Trip ID CR-683300-special",
+                 "data-tippy-delay": "[1000, 200]"
+               ],
+               [
                  key: "595 (9:15 AM from South Station)",
                  value: "CR-683322-595",
                  id: "option-CR-683322-595",
                  "phx-hook": "Tippy",
                  "data-tippy-content": "Trip ID CR-683322-595",
+                 "data-tippy-delay": "[1000, 200]"
+               ],
+               [
+                 key: "594 (9:45 AM from Framingham)",
+                 value: "CR-683321-594",
+                 id: "option-CR-683321-594",
+                 "phx-hook": "Tippy",
+                 "data-tippy-content": "Trip ID CR-683321-594",
+                 "data-tippy-delay": "[1000, 200]"
+               ],
+               [
+                 key: "529 (10:01 AM from South Station)",
+                 value: "CR-683302-529",
+                 id: "option-CR-683302-529",
+                 "phx-hook": "Tippy",
+                 "data-tippy-content": "Trip ID CR-683302-529",
                  "data-tippy-delay": "[1000, 200]"
                ]
              ]
@@ -258,7 +298,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
              ]
     end
 
-    test "multi-route trip map nests options under route names" do
+    test "it properly formats nested trips" do
       trip_map = %{
         "Framingham/Worcester line" => [
           %EnhancedSchedule{
