@@ -131,9 +131,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
   end
 
   def step_buttons(assigns, step) do
+    disabled =
+      disable_button(
+        step.name,
+        assigns.previous_steps -- [assigns.progress.name],
+        assigns.form_type != :creating
+      )
+
     clickable_class =
       cond do
-        step.name in (assigns.previous_steps -- [assigns.progress.name]) ->
+        step.name in (assigns.previous_steps -- [assigns.progress.name]) && !disabled ->
           "text-text-primary hover:underline"
 
         step.name in assigns.previous_steps ->
@@ -146,17 +153,19 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
     selected_class =
       if assigns.progress.name == step.name, do: "text-base font-medium", else: "text-sm"
 
-    assigns = assign(assigns, %{step: step, class: "#{clickable_class} #{selected_class}"})
+    assigns =
+      assign(
+        assigns,
+        %{
+          step: step,
+          class: "#{clickable_class} #{selected_class}",
+          disabled: disabled
+        }
+      )
 
     ~H"""
     <button
-      disabled={
-        disable_button(
-          @step.name,
-          @previous_steps -- [assigns.progress.name],
-          @form_type != :creating
-        )
-      }
+      disabled={@disabled}
       type="button"
       phx-click="move_progress"
       class={"#{@class}"}
