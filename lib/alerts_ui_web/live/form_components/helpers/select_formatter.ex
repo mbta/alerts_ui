@@ -60,9 +60,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
       if tooltip_id?(object) do
         Keyword.merge(
           base_attrs,
-          "phx-hook": "Tippy",
-          "data-tippy-content": tooltip_content(object),
-          "data-tippy-delay": "[1000, 200]"
+          title: tooltip_content(object)
         )
       else
         base_attrs

@@ -51,25 +51,19 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
                  key: "joe",
                  value: "202",
                  id: "option-202",
-                 "phx-hook": "Tippy",
-                 "data-tippy-content": "Stop ID 202",
-                 "data-tippy-delay": "[1000, 200]"
+                 title: "Stop ID 202"
                ],
                [
                  key: "bob",
                  value: "303",
                  id: "option-303",
-                 "phx-hook": "Tippy",
-                 "data-tippy-content": "Stop ID 303",
-                 "data-tippy-delay": "[1000, 200]"
+                 title: "Stop ID 303"
                ],
                [
                  key: "alice",
                  value: "101",
                  id: "option-101",
-                 "phx-hook": "Tippy",
-                 "data-tippy-content": "Stop ID 101",
-                 "data-tippy-delay": "[1000, 200]"
+                 title: "Stop ID 101"
                ]
              ]
     end
@@ -90,25 +84,19 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
                  key: "joe",
                  value: "joe|202",
                  id: "option-joe|202",
-                 "phx-hook": "Tippy",
-                 "data-tippy-content": "Stop ID 202",
-                 "data-tippy-delay": "[1000, 200]"
+                 title: "Stop ID 202"
                ],
                [
                  key: "bob",
                  value: "bob|303",
                  id: "option-bob|303",
-                 "phx-hook": "Tippy",
-                 "data-tippy-content": "Stop ID 303",
-                 "data-tippy-delay": "[1000, 200]"
+                 title: "Stop ID 303"
                ],
                [
                  key: "alice",
                  value: "alice|101",
                  id: "option-alice|101",
-                 "phx-hook": "Tippy",
-                 "data-tippy-content": "Stop ID 101",
-                 "data-tippy-delay": "[1000, 200]"
+                 title: "Stop ID 101"
                ]
              ]
     end
@@ -227,41 +215,31 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
                  key: "527 (9:01 AM from South Station) CR-683300-527",
                  value: "CR-683300-527",
                  id: "option-CR-683300-527",
-                 "phx-hook": "Tippy",
-                 "data-tippy-content": "Trip ID CR-683300-527",
-                 "data-tippy-delay": "[1000, 200]"
+                 title: "Trip ID CR-683300-527"
                ],
                [
                  key: "527 (9:01 AM from South Station) CR-683300-special",
                  value: "CR-683300-special",
                  id: "option-CR-683300-special",
-                 "phx-hook": "Tippy",
-                 "data-tippy-content": "Trip ID CR-683300-special",
-                 "data-tippy-delay": "[1000, 200]"
+                 title: "Trip ID CR-683300-special"
                ],
                [
                  key: "595 (9:15 AM from South Station)",
                  value: "CR-683322-595",
                  id: "option-CR-683322-595",
-                 "phx-hook": "Tippy",
-                 "data-tippy-content": "Trip ID CR-683322-595",
-                 "data-tippy-delay": "[1000, 200]"
+                 title: "Trip ID CR-683322-595"
                ],
                [
                  key: "594 (9:45 AM from Framingham)",
                  value: "CR-683321-594",
                  id: "option-CR-683321-594",
-                 "phx-hook": "Tippy",
-                 "data-tippy-content": "Trip ID CR-683321-594",
-                 "data-tippy-delay": "[1000, 200]"
+                 title: "Trip ID CR-683321-594"
                ],
                [
                  key: "529 (10:01 AM from South Station)",
                  value: "CR-683302-529",
                  id: "option-CR-683302-529",
-                 "phx-hook": "Tippy",
-                 "data-tippy-content": "Trip ID CR-683302-529",
-                 "data-tippy-delay": "[1000, 200]"
+                 title: "Trip ID CR-683302-529"
                ]
              ]
     end
@@ -291,9 +269,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
                  key: "10:01 AM from Long Wharf (South) to Charlestown Navy Yard",
                  value: "Boat-F4-1430-Long-B-01-Weekday-Fall-24",
                  id: "option-Boat-F4-1430-Long-B-01-Weekday-Fall-24",
-                 "phx-hook": "Tippy",
-                 "data-tippy-content": "Trip ID Boat-F4-1430-Long-B-01-Weekday-Fall-24",
-                 "data-tippy-delay": "[1000, 200]"
+                 title: "Trip ID Boat-F4-1430-Long-B-01-Weekday-Fall-24"
                ]
              ]
     end
@@ -333,9 +309,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
                     key: "527 (9:01 AM from South Station)",
                     value: "CR-683300-527",
                     id: "option-CR-683300-527",
-                    "phx-hook": "Tippy",
-                    "data-tippy-content": "Trip ID CR-683300-527",
-                    "data-tippy-delay": "[1000, 200]"
+                    title: "Trip ID CR-683300-527"
                   ]
                 ]},
                {"Providence/Stoughton Line",
@@ -344,9 +318,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
                     key: "839 (11:03 AM from South Station)",
                     value: "CR-687393-839",
                     id: "option-CR-687393-839",
-                    "phx-hook": "Tippy",
-                    "data-tippy-content": "Trip ID CR-687393-839",
-                    "data-tippy-delay": "[1000, 200]"
+                    title: "Trip ID CR-687393-839"
                   ]
                 ]}
              ]
@@ -389,9 +361,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
                     key: "841 (11:15 AM from Forest Hills)",
                     value: "CR-687395-841",
                     id: "option-CR-687395-841",
-                    "phx-hook": "Tippy",
-                    "data-tippy-content": "Trip ID CR-687395-841",
-                    "data-tippy-delay": "[1000, 200]"
+                    title: "Trip ID CR-687395-841"
                   ]
                 ]}
              ]
