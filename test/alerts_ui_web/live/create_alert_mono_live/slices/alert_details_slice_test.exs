@@ -10,6 +10,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
   alias AlertsUIWeb.FormComponents.Helpers.DateTimeFormatters
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
+  alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
@@ -519,6 +520,78 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
                |> element("#alert_data_header_text")
                |> render_async() =~
                  "Framingham/Worcester"
+      end
+    end
+
+    @tag :logged_in_user
+    test "behaves correctly if text is cleared", %{
+      conn: conn
+    } do
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
+        {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]},
+        {SchedulesRepo, [],
+         [
+           end_of_rating: fn _ -> Date.utc_today() end,
+           by_route_ids: fn _route_ids, _opts -> [] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Suspension")
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          alert_data: %{
+            route_ids: ["CR-Worcester"]
+          }
+        })
+
+        assert view
+               |> element("#alert_data_header_text")
+               |> render() =~
+                 "Framingham/Worcester Line"
+
+        assert view
+               |> element("#alert_data_header_sync_toggle")
+               |> render() =~ ~s(checked=\"checked\")
+
+        view
+        |> element("form")
+        |> render_change(%{
+          alert_data: %{
+            header_sync_toggle: false,
+            header_text: ""
+          }
+        })
+
+        refute view
+               |> element("#alert_data_header_sync_toggle")
+               |> render_async(1000) =~ ~s(checked=\"checked\")
+
+        assert view
+               |> element("#alert_data_header_text")
+               |> render_async(1000) =~ ""
+
+        view
+        |> element("form")
+        |> render_change(%{
+          alert_data: %{
+            header_sync_toggle: true
+          }
+        })
+
+        assert view
+               |> element("#alert_data_header_text")
+               |> render() =~
+                 "Framingham/Worcester Line"
+
+        assert view
+               |> element("#alert_data_header_sync_toggle")
+               |> render() =~ ~s(checked=\"checked\")
       end
     end
 
@@ -1052,6 +1125,67 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
                |> element("#alert_data_header_text")
                |> render_async() =~
                  "South Station (outgoing) is closed beginning Thu, Oct 19 at 8:01 PM."
+      end
+    end
+
+    @tag :logged_in_user
+    test "service effect text is correctly maintained when editing", %{
+      conn: conn
+    } do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_stop: fn _route_id -> [@route] end,
+           by_type: fn _types -> [@route] end,
+           get: fn _ -> @route end,
+           get: fn _, _ -> @route end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _route_type, _ -> [] end,
+           by_route: fn _, _, _ -> [] end,
+           get_parent: fn _ -> %{} end,
+           all: fn _, _ -> [] end
+         ]},
+        {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]}
+      ]) do
+        ie =
+          build(:informed_entity, %{
+            route_id: @route.id,
+            route_type: @route.type,
+            activities: [:BOARD],
+            direction_id: nil,
+            trip: nil
+          })
+
+        expected_service_effect_text = "Extra Framingham/Worcester Line service"
+
+        alert_params =
+          build(
+            :alert_map,
+            %{
+              alert_id: "123",
+              service_effect_text: expected_service_effect_text,
+              informed_entity: [Map.from_struct(ie)],
+              effect: :OTHER_EFFECT,
+              effect_detail: "EXTRA_SERVICE",
+              original_route_selections: ["#{@route.name}|#{@route.id}"]
+            }
+          )
+
+        {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
+        {:ok, view, _html} = live(conn, "/alerts/edit/123")
+
+        render_async(view, 1000)
+
+        open_review_modal(view)
+
+        view
+        |> element("#review-modal-container button", "Submit")
+        |> render_click()
+
+        created_alert = AlertsUI.Alerts.get_by_alert_id("123")
+        assert created_alert.service_effect_text == expected_service_effect_text
       end
     end
   end

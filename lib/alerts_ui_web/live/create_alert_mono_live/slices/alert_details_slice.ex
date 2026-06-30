@@ -5,11 +5,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
   and validates text fields and media URLs.
   """
 
-  alias AlertsUI.Models.{Cause, SeverityLevel}
+  import Ecto.Changeset
+
+  alias AlertsUI.Models.{Alert, Cause, SeverityLevel}
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path, as: EffectHelper
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}
-  alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
+  alias AlertsUIWeb.FormComponents.Helpers.{DateTimeHelpers, GetKeyForModeEffect}
+  alias MBTAV3API.Stops.Stop
+  alias Phoenix.LiveView.AsyncResult
+
   use AlertsUIWeb, :html
 
   defstruct [
@@ -79,7 +85,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       Map.drop(details_data, @time_range_fields)
     end
 
-    def transform(details_data, changeset, params, socket) do
+    def transform(details_data, changeset, params, _socket) do
       effect_name = EffectHelper.effect_from_url_name(details_data.effect_name || "")
 
       severity = get_severity(details_data, effect_name)
@@ -91,57 +97,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       # the map you give to render_change
       [_, target | _] = Map.get(params, "_target", [nil, nil])
 
-      # if the target is nil and submitted? is true then we're in the review modal
-      # and shouldn't recalcuate autotext. (if target is nil and submitted is false we
-      # have just loaded the page)
-      submitting? = is_nil(target) and socket.assigns.submitted?
-
       header_sync_toggle = header_sync_toggle(target, details_data.header_sync_toggle)
 
       description_sync_toggle =
         description_sync_toggle(target, details_data.description_sync_toggle)
 
-      selected =
-        socket |> unwrap_selections() |> selected_objects(changeset)
-
-      current_time = DateTimeHelpers.current_time()
-
-      autotext_data =
-        details_data
-        |> translated_details()
-        |> Map.merge(selected)
-        |> Map.merge(%{
-          service_types: get_field(changeset, :service_types),
-          current_time: current_time
-        })
-        |> AlertDataToAutoText.build_autotext_data()
-
-      header_text =
-        if header_sync_toggle == false or submitting? do
-          details_data.header_text
-        else
-          Templates.build_auto_text(autotext_data, :header_template)
-        end
-
-      description_text =
-        if description_sync_toggle == false or submitting? do
-          details_data.description_text
-        else
-          Templates.build_auto_text(autotext_data, :description_template)
-        end
-
-      service_effect_text =
-        if submitting?,
-          do: details_data.service_effect_text,
-          else: Templates.build_auto_text(autotext_data, :service_effect_template)
-
       details_params =
         %{
           header_sync_toggle: header_sync_toggle,
           description_sync_toggle: description_sync_toggle,
-          header_text: header_text,
-          description_text: description_text,
-          service_effect_text: service_effect_text,
           severity: severity,
           cause_detail: cause_detail,
           image_alternative_text: details_data.image_alternative_text
@@ -217,78 +181,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     end
 
     defp get_cause_detail(%{cause_detail: cause_detail}, _effect_name), do: cause_detail
-
-    defp unwrap_selections(socket) do
-      case Map.get(socket.assigns, :selections) do
-        %AsyncResult{ok?: true} = async_result -> async_result.result
-        selections -> selections
-      end
-    end
-
-    defp selected_objects(selections, _form) when selections in [%{}, nil], do: %{}
-
-    defp selected_objects(
-           %AccessAffectedServiceSlice.Selections{} = selections,
-           changeset
-         ) do
-      facility_ids = get_field(changeset, :facility_ids) || []
-
-      all_facilities =
-        if is_map(selections.available_facilities) do
-          Map.get(selections.available_facilities, :facilities, [])
-        else
-          []
-        end
-
-      facilities = Enum.filter(all_facilities, &(&1.id in facility_ids))
-      %{facilities: facilities}
-    end
-
-    defp selected_objects(selections, changeset) do
-      route_ids = get_field(changeset, :route_ids) || []
-      stop_ids = get_field(changeset, :stop_ids) || []
-      trip_ids = get_field(changeset, :trip_ids) || []
-
-      routes = Enum.filter(selections.available_routes || [], &(&1.id in route_ids))
-
-      stops_from_original =
-        (get_field(changeset, :original_stop_selections) || [])
-        |> Alert.get_original_names_and_ids()
-        |> Enum.map(fn {name, id} -> %Stop{name: name, id: id} end)
-        |> Enum.filter(&(&1.id in stop_ids))
-
-      original_ids = MapSet.new(stops_from_original, & &1.id)
-
-      stops_from_available =
-        Enum.filter(
-          selections.available_stops || [],
-          &(&1.id in stop_ids and &1.id not in original_ids)
-        )
-
-      stops = stops_from_original ++ stops_from_available
-
-      schedules =
-        Enum.filter(Map.get(selections, :available_schedules) || [], &(&1.trip.id in trip_ids))
-
-      %{routes: routes, stops: stops, schedules: schedules}
-    end
-
-    defp translated_details(details_data) do
-      Map.merge(details_data, %{
-        effect_name: EffectHelper.effect_from_url_name(details_data.effect_name || ""),
-        direction: get_direction(Map.get(details_data, :direction)),
-        start_specifier: details_data.active_period_start_specifier,
-        end_specifier: details_data.active_period_end_specifier,
-        start_time_specifier: details_data.active_period_start_time_specifier,
-        end_time_specifier: details_data.active_period_end_time_specifier,
-        start_datetime: details_data.active_period_start,
-        end_datetime: details_data.active_period_end,
-        start_date: details_data.active_period_start_date,
-        end_date: details_data.active_period_end_date,
-        start_time: details_data.active_period_start_time,
-        end_time: details_data.active_period_end_time
-      })
-    end
 
     defp formatted_causes(route_type, combination) do
       mode = if combination == :ACCESS, do: :ACCESS, else: route_type
@@ -379,14 +271,127 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     defp get_image_path(url) when is_binary(url),
       do: url |> Path.split() |> List.last() |> String.split("?") |> hd
+  end
 
-    defp get_direction("0"), do: [0]
-    defp get_direction("1"), do: [1]
-    defp get_direction("default"), do: [0, 1]
-    defp get_direction(direction), do: direction
+  defp get_direction("0"), do: [0]
+  defp get_direction("1"), do: [1]
+  defp get_direction("default"), do: [0, 1]
+  defp get_direction(direction), do: direction
+
+  defp translated_details(details_data) do
+    Map.merge(details_data, %{
+      effect_name: EffectHelper.effect_from_url_name(details_data.effect_name || ""),
+      direction: get_direction(Map.get(details_data, :direction)),
+      start_specifier: details_data.active_period_start_specifier,
+      end_specifier: details_data.active_period_end_specifier,
+      start_time_specifier: details_data.active_period_start_time_specifier,
+      end_time_specifier: details_data.active_period_end_time_specifier,
+      start_datetime: details_data.active_period_start,
+      end_datetime: details_data.active_period_end,
+      start_date: details_data.active_period_start_date,
+      end_date: details_data.active_period_end_date,
+      start_time: details_data.active_period_start_time,
+      end_time: details_data.active_period_end_time
+    })
+  end
+
+  defp selected_objects(selections, _form) when selections in [%{}, nil], do: %{}
+
+  defp selected_objects(
+         %AccessAffectedServiceSlice.Selections{} = selections,
+         data
+       ) do
+    facility_ids = Map.get(data, :facility_ids) || []
+
+    all_facilities =
+      if is_map(selections.available_facilities) do
+        Map.get(selections.available_facilities, :facilities, [])
+      else
+        []
+      end
+
+    facilities = Enum.filter(all_facilities, &(&1.id in facility_ids))
+    %{facilities: facilities}
+  end
+
+  defp selected_objects(selections, data) do
+    route_ids = Map.get(data, :route_ids) || []
+    stop_ids = Map.get(data, :stop_ids) || []
+    trip_ids = Map.get(data, :trip_ids) || []
+
+    routes = Enum.filter(selections.available_routes || [], &(&1.id in route_ids))
+
+    stops_from_original =
+      (Map.get(data, :original_stop_selections) || [])
+      |> Alert.get_original_names_and_ids()
+      |> Enum.map(fn {name, id} -> %Stop{name: name, id: id} end)
+      |> Enum.filter(&(&1.id in stop_ids))
+
+    original_ids = MapSet.new(stops_from_original, & &1.id)
+
+    stops_from_available =
+      Enum.filter(
+        selections.available_stops || [],
+        &(&1.id in stop_ids and &1.id not in original_ids)
+      )
+
+    stops = stops_from_original ++ stops_from_available
+
+    schedules =
+      Enum.filter(Map.get(selections, :available_schedules) || [], &(&1.trip.id in trip_ids))
+
+    %{routes: routes, stops: stops, schedules: schedules}
+  end
+
+  defp unwrap_selections(assigns) do
+    case Map.get(assigns, :selections) do
+      %AsyncResult{ok?: true} = async_result -> async_result.result
+      selections -> selections
+    end
+  end
+
+  def autotext_map(alert_data, assigns) do
+    selected =
+      assigns |> unwrap_selections() |> selected_objects(alert_data)
+
+    autotext_data =
+      alert_data
+      |> translated_details()
+      |> Map.merge(selected)
+      |> Map.merge(%{
+        service_types: alert_data.service_types,
+        current_time: DateTimeHelpers.current_time()
+      })
+      |> AlertDataToAutoText.build_autotext_data()
+
+    header_text =
+      if alert_data.header_sync_toggle == false do
+        alert_data.header_text
+      else
+        Templates.build_auto_text(autotext_data, :header_template)
+      end
+
+    description_text =
+      if alert_data.description_sync_toggle == false do
+        alert_data.description_text
+      else
+        Templates.build_auto_text(autotext_data, :description_template)
+      end
+
+    service_effect_text = Templates.build_auto_text(autotext_data, :service_effect_template)
+
+    %{
+      header_text: header_text,
+      description_text: description_text,
+      service_effect_text: service_effect_text
+    }
   end
 
   def render(assigns) do
+    alert_data = Map.merge(assigns.form.source.data, assigns.form.source.changes)
+
+    assigns = assign(assigns, autotext_map(alert_data, assigns))
+
     ~H"""
     <div class="min-w-full flex flex-col mt-4" id="details_view">
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
@@ -427,7 +432,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
                 ]
                 |> Enum.join(" ")
               }
-              value={@form[:header_text].value}
+              value={@header_text}
             />
             <.textarea_footer
               character_limit={255}
@@ -460,7 +465,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
                 |> Enum.join(" ")
               }
               maxlength="3000"
-              value={@form[:description_text].value}
+              value={@description_text}
             />
             <.textarea_footer
               character_limit={3000}
