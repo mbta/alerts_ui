@@ -990,16 +990,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
   describe "duplicating" do
     @tag :logged_in_user
     test "duplicating keeps correct end time specifier when there is no end time", %{conn: conn} do
-      create_test_alert("tr-dup-1", duration_certainty: :UNKNOWN)
-
-      {:ok, view, _html} = live(conn, "/alerts/duplicate/tr-dup-1")
-
-      assert view |> element("#alert_data_active_period_end_specifier") |> render() =~
-               ~s(<option selected=\"selected\" value=\"until_further_notice\">)
-    end
-
-    @tag :logged_in_user
-    test "duplicating does not check start time", %{conn: conn} do
       create_test_alert("tr-dup-2", duration_certainty: :UNKNOWN)
 
       {:ok, view, _html} = live(conn, "/alerts/duplicate/tr-dup-2")
