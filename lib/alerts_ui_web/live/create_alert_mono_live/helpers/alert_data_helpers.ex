@@ -1,5 +1,4 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers do
-  require Logger
   alias AlertsUI.Configs.ModeEffect
   alias AlertsUI.Models.Alert
   alias AlertsUIWeb.FormComponents.Helpers.ContentFormatter
@@ -12,6 +11,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers do
     only: [path_route_type_from_form: 1, path_route_type: 2]
 
   @forbidden_effects ~w[Summary]
+
+  @atomized_fields [
+    :active_period_start_specifier,
+    :active_period_start_time_specifier,
+    :active_period_end_specifier,
+    :active_period_end_time_specifier,
+    :notification_specifier,
+    :recurrence_days
+  ]
 
   @moduledoc """
   Helpers for dealing with alert data.
@@ -100,6 +108,21 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers do
     end
   end
 
+  def normalize_effect_name(alert_data) do
+    normalized =
+      case Map.get(alert_data, :effect_name) do
+        nil ->
+          nil
+
+        effect_name ->
+          effect_name
+          |> String.split(" ")
+          |> Enum.map_join("_", &String.downcase(&1))
+      end
+
+    Map.put(alert_data, :effect_name, normalized)
+  end
+
   def humanize_route_type(%Form{} = form) do
     ContentFormatter.service_type_string(
       form[:route_type].value,
@@ -179,5 +202,52 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers do
     map
     |> Enum.reject(fn {_, v} -> v == [] end)
     |> Map.new()
+  end
+
+  # I know we have a fix for this in PR but I need it done now
+  def strip_recurrence_days_if_one_time(alert_data) do
+    if alert_data.alert_timing in [:"one-time", "one-time"] do
+      Map.put(alert_data, :recurrence_days, [])
+    else
+      alert_data
+    end
+  end
+
+  def strip_banner_text_unless_enabled(alert_data) do
+    if alert_data.view_banner do
+      alert_data
+    else
+      Map.drop(alert_data, [:banner_text])
+    end
+  end
+
+  def atomize_fields(alert_data) when is_struct(alert_data) do
+    alert_data
+    |> Map.from_struct()
+    |> atomize_fields()
+  end
+
+  def atomize_fields(alert_data) when is_map(alert_data) do
+    for {key, value} <- alert_data, into: %{} do
+      value =
+        if Enum.member?(@atomized_fields, key) do
+          atomize_field(value)
+        else
+          value
+        end
+
+      {key, value}
+    end
+  end
+
+  def atomize_field(value) when is_list(value) do
+    Enum.map(value, &atomize_field/1)
+  end
+
+  def atomize_field(value) do
+    case value do
+      value when is_binary(value) -> String.to_existing_atom(value)
+      value when is_atom(value) -> value
+    end
   end
 end
