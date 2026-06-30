@@ -328,7 +328,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     end
 
     defp validate_image_fields(changeset, _image_size, image_url) when image_url in [nil, ""] do
-      changeset
+      validate_alt_text(changeset, image_url)
     end
 
     defp validate_image_fields(changeset, image_size, _image_url) do
@@ -342,7 +342,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     end
 
     defp validate_alt_text(changeset, image_url) when image_url in [nil, ""] do
-      changeset
+      case Ecto.Changeset.get_field(changeset, :image_alternative_text) do
+        blank when blank in [nil, ""] ->
+          changeset
+
+        _ ->
+          add_error(changeset, :image_alternative_text, "To enter alt text, provide an image URL")
+      end
     end
 
     defp validate_alt_text(changeset, _image_url) do

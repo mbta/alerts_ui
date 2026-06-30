@@ -332,6 +332,23 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
                |> render() =~ ~s(Enter a valid image URL)
       end
     end
+
+    @tag :logged_in_user
+    test "shows error if alt text is provided with no image url", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/new")
+      view = get_to_submission_page_refactor(conn, view, "Ferry", "Delay")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "image_alternative_text" => "alt text"
+        }
+      })
+
+      assert view
+             |> render() =~ ~s(To enter alt text, provide an image URL)
+    end
   end
 
   describe "auto text" do
