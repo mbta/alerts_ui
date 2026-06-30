@@ -1538,6 +1538,27 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         assert_redirect(view, "/alerts/duplicate/345")
       end
     end
+
+    @tag :logged_in_user
+    test "clicking an alert row opens the details modal with route type and effect name",
+         %{conn: conn} do
+      alert =
+        insert(:alert, %{
+          alert_id: "999",
+          header_text: "modal rendering test alert",
+          active_period_start: ~U[2023-10-12 00:01:00Z],
+          closed_timestamp: ~U[2024-10-12 00:01:00Z],
+          severity: 4
+        })
+
+      {:ok, view, _html} = live(conn, "/alerts?filter[timeline]=past")
+
+      view |> element("td[phx-click]", alert.alert_id) |> render_click()
+
+      html = render(view)
+      assert html =~ "Subway"
+      assert html =~ "Station Closure"
+    end
   end
 
   describe "start and end times" do
