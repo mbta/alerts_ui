@@ -220,8 +220,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   defp tooltip_id?(object) do
     case object do
       %Stop{} -> true
+      %EnhancedSchedule{} -> true
       _ -> false
     end
+  end
+
+  defp tooltip_content(%EnhancedSchedule{} = object) do
+    "Trip ID #{id_for_option(object, false)}"
   end
 
   defp tooltip_content(object) do

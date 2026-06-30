@@ -25,7 +25,7 @@ defmodule AlertsUIWeb.Tickets.StopSearchFilterConsistencyTest do
   import Mock
   import Test.Support.Helpers
 
-  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.SelectFormatter
+  alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Stops.Repo, as: StopsRepo
