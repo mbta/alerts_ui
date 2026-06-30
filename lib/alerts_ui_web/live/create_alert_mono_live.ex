@@ -62,7 +62,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   alias Phoenix.LiveView
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers
 
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path, as: PathHelper
 

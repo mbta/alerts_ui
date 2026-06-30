@@ -1,4 +1,5 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
+defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers do
+  require Logger
   alias AlertsUI.Configs.ModeEffect
   alias AlertsUI.Models.Alert
   alias AlertsUIWeb.FormComponents.Helpers.ContentFormatter

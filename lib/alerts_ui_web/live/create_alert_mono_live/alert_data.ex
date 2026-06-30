@@ -35,7 +35,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   import AlertsUIWeb.FormComponents.Helpers.ErrorFormatter,
     only: [parse_field_errors: 1]
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers,
     only: [combination_for: 2, combination_for: 3]
 
   @combination_values [:ACCESS, :R, :RDS, :RDT, :RDTS, :SR]
