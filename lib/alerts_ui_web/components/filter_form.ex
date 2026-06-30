@@ -290,7 +290,7 @@ defmodule AlertsUIWeb.FilterForm do
     assigns = assign(assigns, field_string: assigns.field.field |> to_string())
 
     ~H"""
-    <div class="collapse rounded-none border-bg-elevation-6 border-b-[1px] first:border-t-0 last:border-b-0 has-[.trigger:checked]:border-b-0">
+    <div class="group collapse rounded-none border-bg-elevation-6 border-b-[1px] first:border-t-0 last:border-b-0 has-[.trigger:checked]:border-b-0">
       <input
         id={@field_string <> "_filter"}
         type="radio"
@@ -306,7 +306,11 @@ defmodule AlertsUIWeb.FilterForm do
         <h3 class="font-medium mr-auto">{@label}</h3>
         <.icon
           name="hero-chevron-right"
-          class="text-primary h-4 w-4 group-has-[.trigger:checked]:rotate-90"
+          class="text-primary h-4 w-4 group-has-[.trigger:checked]:hidden"
+        />
+        <.icon
+          name="hero-chevron-down"
+          class="text-primary h-4 w-4 hidden group-has-[.trigger:checked]:block"
         />
       </label>
       <span
