@@ -568,7 +568,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     "/alerts/legacy/new"
   end
 
-  def form_path_new(false = _use_legacy_form) do
+  def form_path_new(_use_legacy_form) do
     "/alerts/new"
   end
 
@@ -576,7 +576,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     "/alerts/legacy/edit?alert_id=#{alert_id}"
   end
 
-  def form_path_edit(false = _use_legacy_form, alert_id) do
+  def form_path_edit(_use_legacy_form, alert_id) do
     "/alerts/edit/#{alert_id}"
   end
 
@@ -584,7 +584,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     "/alerts/legacy/duplicate?alert_id=#{alert_id}"
   end
 
-  def form_path_duplicate(false = _use_legacy_form, alert_id) do
+  def form_path_duplicate(_use_legacy_form, alert_id) do
     "/alerts/duplicate/#{alert_id}"
   end
 
