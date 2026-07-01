@@ -18,6 +18,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
+  alias MBTAV3API.Schedules.Schedule
   alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
@@ -29,7 +30,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: nil,
     departure_time:
-      DateTime.utc_now() |> DateTime.shift_zone!("America/New_York") |> DateTime.add(-1, :hour)
+      DateTime.utc_now() |> DateTime.shift_zone!("America/New_York") |> DateTime.add(-1, :hour),
+    added_route_ids: []
   }
 
   @schedule_2 %EnhancedSchedule{
@@ -37,7 +39,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: DateTime.utc_now() |> DateTime.shift_zone!("America/New_York"),
-    departure_time: nil
+    departure_time: nil,
+    added_route_ids: []
   }
 
   @schedule_3 %EnhancedSchedule{
@@ -46,7 +49,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: DateTime.utc_now() |> DateTime.shift_zone!("America/New_York"),
     departure_time:
-      DateTime.utc_now() |> DateTime.shift_zone!("America/New_York") |> DateTime.add(-1, :hour)
+      DateTime.utc_now() |> DateTime.shift_zone!("America/New_York") |> DateTime.add(-1, :hour),
+    added_route_ids: []
   }
 
   @schedule_4 %EnhancedSchedule{
@@ -54,7 +58,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     trip: %Trip{id: "CR-683322-596", name: "596", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: DateTime.utc_now() |> DateTime.shift_zone!("America/New_York"),
-    departure_time: nil
+    departure_time: nil,
+    added_route_ids: []
   }
 
   @route %Route{
@@ -869,7 +874,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     test "search can clear" do
       with_mocks([
         {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},
-        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end
+         ]},
         {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
@@ -1110,7 +1118,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
          [
            by_route_ids: fn _route_ids, _opts ->
              [@schedule, @schedule_2, @schedule_3, @schedule_4]
-           end
+           end,
+           all: fn "filter[trip]": _ -> [%Schedule{added_route_ids: []}] end
          ]},
         {StopsRepo, [],
          [

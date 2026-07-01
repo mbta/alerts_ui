@@ -16,6 +16,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
+  alias MBTAV3API.Schedules.Schedule
   alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
@@ -26,7 +27,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     trip: %Trip{id: "trip-595", name: "595", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: nil,
-    departure_time: ~U[2024-06-01 14:00:00Z]
+    departure_time: ~U[2024-06-01 14:00:00Z],
+    added_route_ids: []
   }
 
   # Far-future times survive filter_out_old_trips; departure_time must be non-nil for sort
@@ -35,7 +37,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     trip: %Trip{id: "trip-595", name: "595", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: ~U[2099-01-01 12:00:00Z],
-    departure_time: ~U[2099-01-01 11:00:00Z]
+    departure_time: ~U[2099-01-01 11:00:00Z],
+    added_route_ids: []
   }
 
   @schedule_3 %EnhancedSchedule{
@@ -43,7 +46,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     trip: %Trip{id: "trip-596", name: "596", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: ~U[2099-01-01 13:00:00Z],
-    departure_time: ~U[2099-01-01 12:00:00Z]
+    departure_time: ~U[2099-01-01 12:00:00Z],
+    added_route_ids: []
   }
 
   defp base_changeset(attrs) do
@@ -1094,7 +1098,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {SchedulesRepo, [],
          [
            by_route_ids: fn _, _ -> [@schedule_future, @schedule_future] end,
-           end_of_rating: fn -> Date.add(@todays_date, 7) end
+           end_of_rating: fn -> Date.add(@todays_date, 7) end,
+           all: fn "filter[trip]": _ -> %Schedule{added_route_ids: []} end
          ]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
@@ -1155,6 +1160,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          [
            by_route_ids: fn _, _ -> [@schedule_future, @schedule_future] end,
            end_of_rating: fn -> Date.add(@todays_date, 7) end
+           #  all: fn _ -> %Schedule{added_route_ids: []} end
          ]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
@@ -1559,7 +1565,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            by_route_ids: fn _, _ ->
              [@schedule_future, @schedule_future, @schedule_3, @schedule_3]
            end,
-           end_of_rating: fn -> Date.add(@todays_date, 7) end
+           end_of_rating: fn -> Date.add(@todays_date, 7) end,
+           all: fn ["filter[trip]": _] -> [@schedule_future, @schedule_3] end
          ]},
         {StopsRepo, [],
          [
@@ -1616,7 +1623,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     end
 
     @tag :logged_in_user
-    test "end-to-end editing updates stop selection in the database", %{conn: conn} do
+    test "editing updates stop selection in the database", %{conn: conn} do
       trip = build(:trip_descriptor, %{trip_id: "trip-595"})
 
       ie =
@@ -1663,7 +1670,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          [
            by_route_ids: fn _, _ -> [@schedule_future, @schedule_future] end,
            end_of_rating: fn -> Date.add(@todays_date, 7) end,
-           trip: fn "trip-595" -> %Trip{id: "trip-595", name: "595", direction_id: 0} end
+           trip: fn "trip-595" -> %Trip{id: "trip-595", name: "595", direction_id: 0} end,
+           all: fn ["filter[trip]": "trip-595"] -> [%Schedule{added_route_ids: []}] end
          ]},
         {StopsRepo, [],
          [
@@ -1859,7 +1867,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            by_route_ids: fn _, _ ->
              [@schedule_future, @schedule_future, @schedule_3, @schedule_3]
            end,
-           end_of_rating: fn -> Date.add(@todays_date, 7) end
+           end_of_rating: fn -> Date.add(@todays_date, 7) end,
+           all: fn _ -> [%Schedule{added_route_ids: []}] end
          ]},
         {StopsRepo, [],
          [
@@ -1923,7 +1932,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     end
 
     @tag :logged_in_user
-    test "end-to-end editing", %{conn: conn} do
+    test "editing", %{conn: conn} do
       trip = build(:trip_descriptor, %{trip_id: "trip-595"})
 
       ie =
@@ -1970,7 +1979,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          [
            by_route_ids: fn _, _ -> [@schedule_future, @schedule_future] end,
            end_of_rating: fn -> Date.add(@todays_date, 7) end,
-           trip: fn "trip-595" -> %Trip{id: "trip-595", name: "595", direction_id: 0} end
+           trip: fn "trip-595" -> %Trip{id: "trip-595", name: "595", direction_id: 0} end,
+           all: fn ["filter[trip]": "trip-595"] -> [%Schedule{added_route_ids: []}] end
          ]},
         {StopsRepo, [],
          [
