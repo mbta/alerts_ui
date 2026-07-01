@@ -12,6 +12,7 @@ defmodule AlertsUI.AlertBuilderTest do
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
+  alias MBTAV3API.Schedules.Schedule
   alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
@@ -2842,7 +2843,11 @@ defmodule AlertsUI.AlertBuilderTest do
     test "properly builds RDT informed entity" do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
-        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]},
+        {SchedulesRepo, [],
+         [
+           all: fn "filter[trip]": _ -> [%Schedule{added_route_ids: []}] end
+         ]}
       ]) do
         alert_data = %{
           route_type: 3,
@@ -2901,7 +2906,11 @@ defmodule AlertsUI.AlertBuilderTest do
     test "properly builds RDT informed entity with multiple routes, multiple trips" do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
-        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]},
+        {SchedulesRepo, [],
+         [
+           all: fn "filter[trip]": _ -> [%Schedule{added_route_ids: []}] end
+         ]}
       ]) do
         alert_data = %{
           route_type: 3,
@@ -2989,7 +2998,11 @@ defmodule AlertsUI.AlertBuilderTest do
     test "RDTS informed entity with trips and no stops selected treated as RDT" do
       with_mocks([
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
-        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]},
+        {SchedulesRepo, [],
+         [
+           all: fn "filter[trip]": _ -> [%Schedule{added_route_ids: []}] end
+         ]}
       ]) do
         alert_data = %{
           route_type: 3,
@@ -3245,7 +3258,10 @@ defmodule AlertsUI.AlertBuilderTest do
            all: fn ["filter[id]": "place-FR-0201,place-FR-0219"], _opts -> parent_stops end
          ]},
         {SchedulesRepo, [],
-         [trip: fn "CR-627754-435" -> %Trip{id: "CR-627754-435", direction_id: 0} end]},
+         [
+           trip: fn "CR-627754-435" -> %Trip{id: "CR-627754-435", direction_id: 0} end,
+           all: fn "filter[trip]": "CR-627754-435" -> [%Schedule{added_route_ids: []}] end
+         ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2} end]}
       ]) do
         result = AlertBuilder.build_alert(alert_data, :RDTS)
@@ -3350,6 +3366,9 @@ defmodule AlertsUI.AlertBuilderTest do
          [
            trip: fn "Boat-EastBoston-1115-Long-BEB-01-Weekday-Summer-24" ->
              %Trip{id: "Boat-EastBoston-1115-Long-BEB-01-Weekday-Summer-24", direction_id: 0}
+           end,
+           all: fn "filter[trip]": "Boat-EastBoston-1115-Long-BEB-01-Weekday-Summer-24" ->
+             [%Schedule{added_route_ids: []}]
            end
          ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 4} end]}
@@ -3425,7 +3444,10 @@ defmodule AlertsUI.AlertBuilderTest do
            all: fn ["filter[id]": "place-WR-0067,place-WR-0075"], _opts -> parent_stops end
          ]},
         {SchedulesRepo, [],
-         [trip: fn "CR-627678-295" -> %Trip{id: "CR-627678-295", direction_id: 0} end]},
+         [
+           trip: fn "CR-627678-295" -> %Trip{id: "CR-627678-295", direction_id: 0} end,
+           all: fn "filter[trip]": "CR-627678-295" -> [%Schedule{added_route_ids: []}] end
+         ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2} end]}
       ]) do
         result = AlertBuilder.build_alert(alert_data, :RDTS)
@@ -3535,7 +3557,10 @@ defmodule AlertsUI.AlertBuilderTest do
            all: fn ["filter[id]": "place-WR-0067,place-WR-0075"], _opts -> parent_stops end
          ]},
         {SchedulesRepo, [],
-         [trip: fn "CR-627678-295" -> %Trip{id: "CR-627678-295", direction_id: 0} end]},
+         [
+           trip: fn "CR-627678-295" -> %Trip{id: "CR-627678-295", direction_id: 0} end,
+           all: fn "filter[trip]": "CR-627678-295" -> [%Schedule{added_route_ids: []}] end
+         ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2} end]}
       ]) do
         result = AlertBuilder.build_alert(alert_data, :RDTS)
@@ -3654,7 +3679,11 @@ defmodule AlertsUI.AlertBuilderTest do
            end,
            all: fn ["filter[id]": "place-FR-0201,place-FR-0219"], _opts -> parent_stops end
          ]},
-        {SchedulesRepo, [], [trip: fn ^trip_id -> %Trip{id: trip_id, direction_id: 0} end]},
+        {SchedulesRepo, [],
+         [
+           trip: fn ^trip_id -> %Trip{id: trip_id, direction_id: 0} end,
+           all: fn "filter[trip]": ^trip_id -> [%Schedule{added_route_ids: []}] end
+         ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2} end]}
       ]) do
         result = AlertBuilder.build_alert(alert_data, :RDTS)
