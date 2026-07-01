@@ -420,22 +420,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     force_change(changeset, :recurrence_days, desired)
   end
 
-  def set_mode_effect_defaults(changeset, %{"alert_data" => _}), do: changeset
-
-  def set_mode_effect_defaults(changeset, %{"review" => "true"}), do: changeset
-
-  def set_mode_effect_defaults(changeset, %{"effect_name" => effect_name}) do
-    if effect_name in ["elevator_closure", "escalator_closure"] do
-      changeset
-      |> force_change(:active_period_end_specifier, :when_work_order_is_closed)
-      |> force_change(:can_close_automatically, true)
-    else
-      changeset
-    end
-  end
-
-  def set_mode_effect_defaults(changeset, _), do: changeset
-
   def get_trip_arrival_time_for_validate(trip_ids, %{ok?: true, result: selections}) do
     available = Map.get(selections, :available_schedules, [])
     selected = Enum.filter(available, &(&1.trip.id in trip_ids))

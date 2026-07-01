@@ -407,7 +407,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       |> element("form")
       |> render_change(%{"alert_data" => %{"active_period_end_specifier" => "end_of_service"}})
 
-      # effect_name is unchanged this cycle, so set_mode_effect_defaults must NOT re-fire
       assert selected_end_specifier(view) == "end_of_service"
     end
 
