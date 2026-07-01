@@ -37,7 +37,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     :recurrence_days,
     :can_close_automatically,
     active_period_start_specifier: :now,
-    active_period_end_specifier: :later_today,
+    active_period_end_specifier: nil,
     alert_timing: "one-time"
   ]
 
@@ -50,8 +50,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       assign(socket, :current_time, DateTimeHelpers.current_time())
     end
 
-    def extract(slice, %AlertData{} = alert, _params) do
+    def extract(slice, %AlertData{} = alert, params) do
       now = DateTimeHelpers.current_time()
+
+      end_specifier =
+        if params["effect_name"] in ["elevator_closure", "escalator_closure"] do
+          :when_work_order_is_closed
+        else
+          :later_today
+        end
 
       slice
       |> put_over_nil(:alert_timing, :"one-time")
@@ -60,7 +67,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       |> put_over_nil(:active_period_start, now)
       |> put_over_nil(:active_period_start_date, NaiveDateTime.to_date(now))
       |> put_over_nil(:active_period_start_time, NaiveDateTime.to_time(now))
-      |> put_over_nil(:active_period_end_specifier, :later_today)
+      |> put_over_nil(:active_period_end_specifier, end_specifier)
       |> put_over_nil(:active_period_end_time_specifier, :end_of_service)
       |> put_over_nil(:recurrence_days, [])
       |> update_times_if_duplicating(slice.form_type, slice.alert_timing, now, alert)
@@ -102,7 +109,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       changeset
       |> TimeRangeSlice.normalize_alert_timing()
       |> TimeRangeSlice.prevent_recurrence_day_deselection(previous_recurrence_days)
-      |> TimeRangeSlice.set_mode_effect_defaults(params)
       |> TimeRangeSlice.ensure_start_values(
         previous_start_specifier,
         previous_start_time_specifier,
@@ -412,22 +418,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       end
 
     force_change(changeset, :recurrence_days, desired)
-  end
-
-  def set_mode_effect_defaults(changeset, %{"alert_data" => _}) do
-    changeset
-  end
-
-  def set_mode_effect_defaults(changeset, _params) do
-    case get_field(changeset, :effect_name) do
-      effect when effect in ["elevator_closure", "escalator_closure"] ->
-        changeset
-        |> force_change(:active_period_end_specifier, :when_work_order_is_closed)
-        |> force_change(:can_close_automatically, true)
-
-      _ ->
-        changeset
-    end
   end
 
   def get_trip_arrival_time_for_validate(trip_ids, %{ok?: true, result: selections}) do

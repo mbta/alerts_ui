@@ -115,7 +115,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :can_close_automatically, :boolean, default: false
     field :active_period_end, :naive_datetime
     field :active_period_end_date, :date
-    field :active_period_end_specifier, Ecto.Enum, values: @end_values, default: :later_today
+    field :active_period_end_specifier, Ecto.Enum, values: @end_values
     field :active_period_end_time, :time
 
     field :active_period_end_time_specifier, Ecto.Enum,
