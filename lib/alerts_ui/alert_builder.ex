@@ -913,10 +913,10 @@ defmodule AlertsUI.AlertBuilder do
         effect
       ) do
     trip_ids
-    |> Enum.map(fn trip_id ->
+    |> Enum.flat_map(fn trip_id ->
       %{direction_id: direction_id, route_id: route_id} = trip_information_by_id[trip_id]
 
-      %{
+      entity = %{
         activities: Activities.for_effect(effect),
         route_id: route_id,
         route_type: route_type,
@@ -928,6 +928,8 @@ defmodule AlertsUI.AlertBuilder do
             route_id
           )
       }
+
+      [entity] ++ get_alternate_route_entities(trip_id, entity)
     end)
   end
 
@@ -958,8 +960,8 @@ defmodule AlertsUI.AlertBuilder do
     |> stop_route_pairs(route_ids)
     |> Enum.flat_map(fn {stop_id, route_id} ->
       trips
-      |> Enum.map(fn %Trip{id: trip_id, direction_id: trip_direction_id} ->
-        %{
+      |> Enum.flat_map(fn %Trip{id: trip_id, direction_id: trip_direction_id} ->
+        entity = %{
           activities: Activities.for_effect(effect),
           route_id: route_id,
           route_type: route_type,
@@ -972,6 +974,8 @@ defmodule AlertsUI.AlertBuilder do
             ),
           stop_id: stop_id
         }
+
+        [entity] ++ get_alternate_route_entities(trip_id, entity)
       end)
     end)
     |> Enum.uniq()
@@ -996,20 +1000,23 @@ defmodule AlertsUI.AlertBuilder do
     end)
     |> Enum.flat_map(fn {%Stop{id: stop_id}, route_id, _direction_id, _stop_type} ->
       trips
-      |> Enum.map(fn %Trip{id: trip_id, direction_id: trip_direction_id} ->
-        %{
-          activities: Activities.for_effect(effect),
-          route_id: route_id,
-          route_type: route_type,
-          agency_id: Routes.agency_id(route_id),
-          trip:
-            build_trip(
-              trip_id,
-              trip_direction_id,
-              route_id
-            ),
-          stop_id: stop_id
-        }
+      |> Enum.flat_map(fn %Trip{id: trip_id, direction_id: trip_direction_id} ->
+        entity =
+          %{
+            activities: Activities.for_effect(effect),
+            route_id: route_id,
+            route_type: route_type,
+            agency_id: Routes.agency_id(route_id),
+            trip:
+              build_trip(
+                trip_id,
+                trip_direction_id,
+                route_id
+              ),
+            stop_id: stop_id
+          }
+
+        [entity] ++ get_alternate_route_entities(trip_id, entity)
       end)
     end)
     |> Enum.uniq()
@@ -1069,6 +1076,28 @@ defmodule AlertsUI.AlertBuilder do
   end
 
   def build_informed_entities(_mode, _data, _effect), do: []
+
+  @doc """
+  Some trips include alternate trips (i.e. Boat-F1 and Boat-F2H).
+  Query to see if the trip has alternate trips, and if so, return
+  informed entities for that route as well.
+  """
+  @spec get_alternate_route_entities(Trip.t(), map()) :: [map()]
+  def get_alternate_route_entities(trip_id, entity) do
+    schedules = SchedulesRepo.all("filter[trip]": trip_id)
+
+    additional_route_ids =
+      Enum.flat_map(schedules, fn schedule -> schedule.added_route_ids end) |> Enum.uniq()
+
+    additional_route_ids
+    |> Enum.map(fn route_id ->
+      %{
+        entity
+        | route_id: route_id,
+          trip: build_trip(trip_id, entity.trip.direction_id, route_id)
+      }
+    end)
+  end
 
   @spec get_trips([String.t()]) :: [Trip.t()]
   defp get_trips(trip_ids) do
