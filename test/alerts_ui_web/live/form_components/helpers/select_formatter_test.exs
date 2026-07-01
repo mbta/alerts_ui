@@ -269,7 +269,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
                  key: "10:01 AM from Long Wharf (South) to Charlestown Navy Yard",
                  value: "Boat-F4-1430-Long-B-01-Weekday-Fall-24",
                  id: "option-Boat-F4-1430-Long-B-01-Weekday-Fall-24",
-                 title: "Trip ID Boat-F4-1430-Long-B-01-Weekday-Fall-24"
+                 title: "Trip ID Boat-F4-1430-Long-\nB-01-Weekday-Fall-24"
                ]
              ]
     end

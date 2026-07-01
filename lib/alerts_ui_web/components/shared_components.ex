@@ -977,7 +977,6 @@ defmodule AlertsUIWeb.SharedComponents do
         ]}
         multiple={@multiple}
         phx-hook="Selector"
-        data-placement="right"
         {@rest}
       >
         <option
