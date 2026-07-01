@@ -116,7 +116,7 @@ defmodule AlertsUI.Helpers.Recurrence do
   end
 
   @spec number_to_day(integer()) :: atom()
-  defp number_to_day(day_number) do
+  def number_to_day(day_number) do
     case day_number do
       1 -> :monday
       2 -> :tuesday

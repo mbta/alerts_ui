@@ -32,12 +32,4 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Time do
   def replace_time(%NaiveDateTime{} = dt, t) do
     NaiveDateTime.new!(NaiveDateTime.to_date(dt), t)
   end
-
-  def day_num_to_atom(1), do: :monday
-  def day_num_to_atom(2), do: :tuesday
-  def day_num_to_atom(3), do: :wednesday
-  def day_num_to_atom(4), do: :thursday
-  def day_num_to_atom(5), do: :friday
-  def day_num_to_atom(6), do: :saturday
-  def day_num_to_atom(7), do: :sunday
 end

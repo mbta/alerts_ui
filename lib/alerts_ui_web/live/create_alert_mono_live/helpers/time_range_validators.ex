@@ -10,7 +10,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
 
   import Ecto.Changeset
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Time, only: [localize: 1, day_num_to_atom: 1]
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Time, only: [localize: 1]
+  import AlertsUI.Helpers.Recurrence, only: [number_to_day: 1]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,
     only: [always_validate_required: 3]
@@ -199,7 +200,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
     start_date = get_field(changeset, :active_period_start_date)
     start_time = get_field(changeset, :active_period_start_time)
     recurrence_days = get_field(changeset, :recurrence_days) || []
-    today = day_num_to_atom(Date.day_of_week(DateTimeHelpers.current_time()))
+    today = number_to_day(Date.day_of_week(DateTimeHelpers.current_time()))
     today_selected = today in recurrence_days
 
     if start_date && start_time do
@@ -422,7 +423,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
        do: []
 
   defp validate_start_date_matches_weekday(start_date, recurrence_days, :now) do
-    if day_num_to_atom(Date.day_of_week(start_date)) in recurrence_days do
+    if number_to_day(Date.day_of_week(start_date)) in recurrence_days do
       []
     else
       [
@@ -432,7 +433,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
   end
 
   defp validate_start_date_matches_weekday(start_date, recurrence_days, :custom) do
-    if day_num_to_atom(Date.day_of_week(start_date)) in recurrence_days do
+    if number_to_day(Date.day_of_week(start_date)) in recurrence_days do
       []
     else
       [active_period_start_date: {"Alert start day must match a selected day of the week.", []}]
