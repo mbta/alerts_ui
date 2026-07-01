@@ -71,6 +71,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
   defp trip_changeset(attrs \\ %{}) do
     Ecto.Changeset.cast(%AlertData{}, Map.merge(%{trip_ids: []}, attrs), [:trip_ids])
+    |> Ecto.Changeset.change(%{active_period_end_specifier: :custom})
   end
 
   defp trip_validate_changeset(trip_ids, active_period_start) do
@@ -778,6 +779,32 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     end
 
     @tag :logged_in_user
+    test "does not secretly change end specifier of elevator alerts", %{conn: conn} do
+      params =
+        build(:alert_map, %{
+          alert_id: "123",
+          active_period: [%{start: ~U[2024-05-10 15:30:54Z]}],
+          active_period_start: ~U[2024-05-10 15:30:54Z],
+          active_period_end: nil,
+          duration_certainty: :UNKNOWN,
+          effect: :ACCESSIBILITY_ISSUE,
+          effect_detail: "ELEVATOR_CLOSURE",
+          informed_entity: [%{facility_id: @facility.id}],
+          original_facility_selections: ["#{@facility.long_name}|#{@facility.id}"],
+          primary_service_type: "access"
+        })
+
+      {:ok, _} = Alerts.create_or_update_alert(params, build(:user))
+
+      {:ok, view, _html} = live(conn, "/alerts/edit/123")
+
+      assert view |> element("#duration-text") |> render() =~ "alert is manually closed"
+
+      refute view |> element("#duration-text") |> render() =~
+               "until a work order with this facility ID is closed"
+    end
+
+    @tag :logged_in_user
     test "custom fields to start/end of service correctly validates", %{conn: conn} do
       create_test_alert("tr-edit-2",
         duration_certainty: :KNOWN,
@@ -785,7 +812,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       )
 
       {:ok, view, _html} = live(conn, "/alerts/edit/tr-edit-2")
-      # 1002401
+
       view
       |> element("form")
       |> render_change(%{
@@ -1068,6 +1095,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       }
 
       changeset = trip_changeset(%{trip_ids: ["trip-595"]})
+
       socket = socket_for_transform([schedule])
 
       result =
@@ -1707,36 +1735,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
   end
 
   describe "transform/4 recurrence_days rendering" do
-    # Regression test for the bug where recurrence day checkboxes visually deselected
-    # after any validation error appeared on an unrelated field.
-    #
-    # Root cause: after a successful sync sets data.recurrence_days = [:monday] (atoms),
-    # a subsequent sync with errors on other fields triggers Ecto's equal-value cast
-    # optimization: cast(["monday"]) → [:monday] == data [:monday], so recurrence_days
-    # is NOT placed in changeset.changes. phoenix_ecto's input_value/3 then falls through
-    # changes (absent) → params["recurrence_days"] = ["monday"] (strings). The
-    # toggle_checkgroup component checks `:monday in ["monday"]` = false (atom ≠ string),
-    # so Monday appears unchecked even though the data is intact.
-    #
-    # Fix: force_change(:recurrence_days, ...) in TimeRangeSlice.transform bypasses the
-    # Ecto optimization, ensuring recurrence_days is always in changes as atoms.
-    test "force_change bypasses Ecto equal-value optimization for recurrence_days" do
-      # Simulate the changeset state after a successful sync: data.recurrence_days = [:monday],
-      # no changes, no params (this is what to_form(change(alert_data)) produces).
+    test "recurrence days don't get unselected on errors due to them being strings" do
       alert_data = %AlertData{alert_timing: :recurring, recurrence_days: [:monday]}
       base_changeset = Ecto.Changeset.change(alert_data)
 
-      # Ecto cast with browser string params: "monday" → :monday, but [:monday] == data [:monday],
-      # so the equal-value optimization fires and recurrence_days is absent from changes.
       cast_changeset =
         Ecto.Changeset.cast(base_changeset, %{"recurrence_days" => ["monday"]}, [:recurrence_days])
+        |> Ecto.Changeset.change(%{active_period_end_specifier: :custom})
 
       refute Map.has_key?(cast_changeset.changes, :recurrence_days),
              "pre-condition: Ecto equal-value optimization must skip recurrence_days from changes"
 
-      # transform/4 calls force_change(:recurrence_days, ...), which unconditionally places
-      # the current atom value in changes. Without this, input_value returns the string params
-      # and :monday in ["monday"] = false causes the visual deselection.
       socket = socket_for_transform([])
       params = %{"alert_data" => %{"recurrence_days" => ["monday"]}}
 

@@ -53,11 +53,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     def extract(slice, %AlertData{} = alert, params) do
       now = DateTimeHelpers.current_time()
 
-      end_specifier = if params["effect_name"] in ["elevator_closure", "escalator_closure"] do
-        :when_work_order_is_closed
-      else
-        :later_today
-      end
+      end_specifier =
+        if params["effect_name"] in ["elevator_closure", "escalator_closure"] do
+          :when_work_order_is_closed
+        else
+          :later_today
+        end
 
       slice
       |> put_over_nil(:alert_timing, :"one-time")
@@ -127,7 +128,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
         current_time,
         socket.assigns[:form_type]
       )
-      |> IO.inspect(label: "end of trabsform")
     end
 
     def validate(slice, changeset, params, socket) do
