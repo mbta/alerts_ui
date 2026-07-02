@@ -916,7 +916,6 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :hook, :string, default: nil, doc: "a JS hook to be attached to the element"
   attr :selected, :list, default: nil
-  attr :title, :string, default: "", doc: "shows up as a tooltip"
 
   attr :rest, :global, include: ~w(disabled size phx-debounce)
 
@@ -966,7 +965,6 @@ defmodule AlertsUIWeb.SharedComponents do
         name={@name}
         id={@id}
         disabled={@disabled}
-        title={@title}
         class={[
           "bg-bg-elevation-5 border border-bg-elevation-6 px-3 mb-2 max-w-full min-w-full p-0 [color-scheme:light]
             rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto
@@ -1070,8 +1068,6 @@ defmodule AlertsUIWeb.SharedComponents do
     default: nil,
     doc: "a separate list of selected items that overrides the field's value"
 
-  attr :title, :string, default: "", doc: "shows up as a tooltip"
-
   attr :rest, :global, include: ~w(disabled phx-debounce hook)
 
   def filtered_select(
@@ -1145,7 +1141,6 @@ defmodule AlertsUIWeb.SharedComponents do
           options={if @loading && is_nil(@options), do: [], else: @options}
           field={@field}
           no_results={@no_results}
-          title={@title}
           prompt={
             cond do
               @disabled -> nil
