@@ -78,7 +78,7 @@ You can access your server on your phone by making the following changes:
 
 - Client side flags: `/_flags`- mediated by Laboratory library (check `mix.exs` for github if you need docs)
 
-- Server side flags: `/feature_flags`- these are hand rolled. To create one, call `FeatureFlags.enabled?("my_flag_name")` anywhere, and if the flag doesn't exist it will be created and put in the database.
+- Server side flags: `/feature_flags`- these are hand rolled. To create one, call `FeatureFlags.enabled?("my_flag_name")` anywhere, and if the flag doesn't exist it will be created and put in the database. You can then go ot the `/feature_flags` route to toggle it on and off for the whole environment. It will be set to `false` by default.
 
 - DB viewer: `/db`
 
