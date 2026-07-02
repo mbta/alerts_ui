@@ -22,9 +22,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,
     only: [always_validate_required: 3]
 
-  import AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice,
-    only: [get_trip_arrival_time: 1, get_trip_departure_time: 1]
-
   defstruct [
     :direction,
     :modal_date,
@@ -136,8 +133,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             direction_id: s.trip.direction_id,
             route_id: s.route.id,
             trip_name: SelectFormatter.name_for_option(s, route_type),
-            departure_time: get_trip_departure_time([s]),
-            arrival_time: get_trip_arrival_time([s])
+            added_route_ids: s.added_route_ids
           })
         end)
 

@@ -72,22 +72,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
                       |> DateTime.shift_zone!("America/New_York")
 
   @boat_f1_schedule_1 %Schedule{
-    stop: %Stop{
-      id: "Boat-Rowes",
-      name: "Rowes Wharf"
-    },
+    stop: %Stop{id: "Boat-Rowes", name: "Rowes Wharf"},
     departure_time: @two_hours_from_now,
     arrival_time: DateTime.add(@two_hours_from_now, 30, :minute),
-    trip: %Trip{
-      id: "Boat-F1-2030-Rowes-F1-A-PM-Weekday-Summer-26",
-      name: "",
-      direction_id: 0
-    },
-    route: %Route{
-      id: "Boat-F1",
-      type: 4,
-      name: "Hingham Ferry"
-    },
+    trip: %Trip{id: "Boat-F1-2030-Rowes-F1-A-PM-Weekday-Summer-26", name: "", direction_id: 0},
+    route: %Route{id: "Boat-F1", type: 4, name: "Hingham Ferry"},
     added_route_ids: ["Boat-F2H"]
   }
 
@@ -1610,8 +1599,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            by_route_ids: fn _, _ ->
              [@schedule_future, @schedule_future, @schedule_3, @schedule_3]
            end,
-           end_of_rating: fn -> Date.add(@todays_date, 7) end,
-           all: fn ["filter[trip]": _, "filter[date]": _] -> [@schedule_future, @schedule_3] end
+           end_of_rating: fn -> Date.add(@todays_date, 7) end
          ]},
         {StopsRepo, [],
          [
@@ -1705,10 +1693,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          [
            by_route_ids: fn _, _ -> [@schedule_future, @schedule_future] end,
            end_of_rating: fn -> Date.add(@todays_date, 7) end,
-           trip: fn "trip-595" -> %Trip{id: "trip-595", name: "595", direction_id: 0} end,
-           all: fn ["filter[trip]": "trip-595", "filter[date]": _] ->
-             [%Schedule{added_route_ids: []}]
-           end
+           trip: fn "trip-595" -> %Trip{id: "trip-595", name: "595", direction_id: 0} end
          ]},
         {StopsRepo, [],
          [
@@ -1904,8 +1889,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            by_route_ids: fn _, _ ->
              [@schedule_future, @schedule_future, @schedule_3, @schedule_3]
            end,
-           end_of_rating: fn -> Date.add(@todays_date, 7) end,
-           all: fn _ -> [%Schedule{added_route_ids: []}] end
+           end_of_rating: fn -> Date.add(@todays_date, 7) end
          ]},
         {StopsRepo, [],
          [
@@ -2016,10 +2000,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          [
            by_route_ids: fn _, _ -> [@schedule_future, @schedule_future] end,
            end_of_rating: fn -> Date.add(@todays_date, 7) end,
-           trip: fn "trip-595" -> %Trip{id: "trip-595", name: "595", direction_id: 0} end,
-           all: fn ["filter[trip]": "trip-595", "filter[date]": _] ->
-             [%Schedule{added_route_ids: []}]
-           end
+           trip: fn "trip-595" -> %Trip{id: "trip-595", name: "595", direction_id: 0} end
          ]},
         {StopsRepo, [],
          [
@@ -2187,13 +2168,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          ]},
         {SchedulesRepo, [],
          [
-           by_route_ids: fn _, _ -> [@boat_f1_schedule_1, @boat_f1_schedule_2] end,
-           all: fn [
-                     "filter[trip]": "Boat-F1-2030-Rowes-F1-A-PM-Weekday-Summer-26",
-                     "filter[date]": _
-                   ] ->
-             [@boat_f1_schedule_1, @boat_f1_schedule_2]
-           end
+           by_route_ids: fn _, _ -> [@boat_f1_schedule_1, @boat_f1_schedule_2] end
          ]},
         {StopsRepo, [],
          [
@@ -2260,13 +2235,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          ]},
         {SchedulesRepo, [],
          [
-           by_route_ids: fn _, _ -> [@boat_f1_schedule_1, @boat_f1_schedule_2] end,
-           all: fn [
-                     "filter[trip]": "Boat-F1-2030-Rowes-F1-A-PM-Weekday-Summer-26",
-                     "filter[date]": _
-                   ] ->
-             [@boat_f1_schedule_1, @boat_f1_schedule_2]
-           end
+           by_route_ids: fn _, _ -> [@boat_f1_schedule_1, @boat_f1_schedule_2] end
          ]},
         {StopsRepo, [],
          [
@@ -2343,22 +2312,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
       }
 
       cr_franklin_schedule = %Schedule{
-        stop: %Stop{
-          id: "place-sstat",
-          name: "South Station"
-        },
+        stop: %Stop{id: "place-sstat", name: "South Station"},
         departure_time: @two_hours_from_now,
         arrival_time: DateTime.add(@two_hours_from_now, 30, :minute),
-        trip: %Trip{
-          id: "SWKDYWCPeriod-831443-1775",
-          name: "",
-          direction_id: 0
-        },
-        route: %Route{
-          id: "CR-Franklin",
-          type: 4,
-          name: "Franklin/Foxboro Line"
-        },
+        trip: %Trip{id: "SWKDYWCPeriod-831443-1775", name: "", direction_id: 0},
+        route: %Route{id: "CR-Franklin", type: 4, name: "Franklin/Foxboro Line"},
         added_route_ids: ["CR-Fairmount"]
       }
 
@@ -2377,13 +2335,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          ]},
         {SchedulesRepo, [],
          [
-           by_route_ids: fn _, _ -> [cr_franklin_schedule, cr_franklin_schedule_2] end,
-           all: fn [
-                     "filter[trip]": "SWKDYWCPeriod-831443-1775",
-                     "filter[date]": _
-                   ] ->
-             [cr_franklin_schedule, cr_franklin_schedule_2]
-           end
+           by_route_ids: fn _, _ -> [cr_franklin_schedule, cr_franklin_schedule_2] end
          ]},
         {StopsRepo, [],
          [

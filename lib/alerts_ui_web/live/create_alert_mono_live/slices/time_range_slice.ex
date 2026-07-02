@@ -387,14 +387,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     changeset
   end
 
-  def get_trip_departure_time(selected_schedules) do
+  defp get_trip_departure_time(selected_schedules) do
     selected_schedules
     |> Enum.map(& &1.departure_time)
     |> Enum.min(DateTime, fn -> nil end)
     |> utc_datetime_to_naive()
   end
 
-  def get_trip_arrival_time(selected_schedules) do
+  defp get_trip_arrival_time(selected_schedules) do
     selected_schedules
     |> Enum.map(& &1.time_of_last_trip_arrival)
     |> Enum.max(DateTime, fn -> nil end)

@@ -17,7 +17,6 @@ defmodule AlertsUI.AlertBuilder do
   alias MBTAV3API.RoutePatterns.RoutePattern, as: APIRoutePattern
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
-  alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
   alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
@@ -79,8 +78,7 @@ defmodule AlertsUI.AlertBuilder do
           direction_id: direction_t(),
           route_id: Route.id_t(),
           trip_name: String.t(),
-          departure_time: NaiveDateTime.t(),
-          arrival_time: NaiveDateTime.t()
+          added_route_ids: [Route.id_t()]
         }
 
   @spec build_alert(
@@ -925,8 +923,7 @@ defmodule AlertsUI.AlertBuilder do
       %{
         direction_id: direction_id,
         route_id: route_id,
-        departure_time: departure_time,
-        arrival_time: arrival_time
+        added_route_ids: added_route_ids
       } = trip_information_by_id[trip_id]
 
       entity = %{
@@ -942,7 +939,7 @@ defmodule AlertsUI.AlertBuilder do
           )
       }
 
-      [entity] ++ get_alternate_route_entities(trip_id, entity, departure_time, arrival_time)
+      [entity] ++ build_alternate_route_entities(trip_id, entity, added_route_ids)
     end)
   end
 
@@ -988,7 +985,7 @@ defmodule AlertsUI.AlertBuilder do
         }
 
         [entity] ++
-          get_alternate_route_entities(trip_id, entity, info.departure_time, info.arrival_time)
+          build_alternate_route_entities(trip_id, entity, info.added_route_ids)
       end)
     end)
     |> Enum.uniq()
@@ -1030,7 +1027,7 @@ defmodule AlertsUI.AlertBuilder do
           }
 
         [entity] ++
-          get_alternate_route_entities(trip_id, entity, info.departure_time, info.arrival_time)
+          build_alternate_route_entities(trip_id, entity, info.added_route_ids)
       end)
     end)
     |> Enum.uniq()
@@ -1091,27 +1088,13 @@ defmodule AlertsUI.AlertBuilder do
 
   def build_informed_entities(_mode, _data, _effect), do: []
 
-  @spec get_alternate_route_entities(
+  @spec build_alternate_route_entities(
           Trip.id_t(),
           map(),
-          NaiveDateTime.t(),
-          NaiveDateTime.t()
+          [Route.id_t()]
         ) :: [map()]
-  defp get_alternate_route_entities(trip_id, entity, departure_time, arrival_time) do
-    # Some trips include alternate trips (i.e. Boat-F1 and Boat-F2H).
-    # Query to see if the trip has alternate trips, and if so, return
-    # informed entities for that route as well.
-    dates = Date.range(departure_time, arrival_time) |> Enum.to_list()
-
-    schedules =
-      Enum.reduce(dates, [], fn date, acc ->
-        acc ++ SchedulesRepo.all("filter[trip]": trip_id, "filter[date]": date)
-      end)
-
-    additional_route_ids =
-      Enum.flat_map(schedules, fn schedule -> schedule.added_route_ids end) |> Enum.uniq()
-
-    additional_route_ids
+  defp build_alternate_route_entities(trip_id, entity, added_route_ids) do
+    added_route_ids
     |> Enum.map(fn route_id ->
       %{
         entity
