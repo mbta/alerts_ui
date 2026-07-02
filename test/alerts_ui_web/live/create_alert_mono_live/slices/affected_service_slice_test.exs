@@ -42,6 +42,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     added_route_ids: []
   }
 
+  @schedule_future_2 %EnhancedSchedule{
+    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    trip: %Trip{id: "trip-595", name: "595", direction_id: 0},
+    stop: %Stop{id: "place-sstat", name: "South Station"},
+    arrival_time: ~U[2099-01-01 14:00:00Z],
+    departure_time: ~U[2099-01-01 13:00:00Z]
+  }
+
   @schedule_3 %EnhancedSchedule{
     route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
     trip: %Trip{id: "trip-596", name: "596", direction_id: 0},
@@ -84,6 +92,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     @boat_f1_schedule_1
     | departure_time: DateTime.add(@boat_f1_schedule_1.departure_time, 2, :hour),
       arrival_time: DateTime.add(@boat_f1_schedule_1.arrival_time, 2, :hour)
+  }
+
+  @schedule_3_2 %EnhancedSchedule{
+    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    trip: %Trip{id: "trip-596", name: "596", direction_id: 0},
+    stop: %Stop{id: "place-sstat", name: "South Station"},
+    arrival_time: ~U[2099-01-01 14:00:00Z],
+    departure_time: ~U[2099-01-01 13:00:00Z]
   }
 
   defp base_changeset(attrs) do
@@ -334,6 +350,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
       # Use a future arrival_time so filter_out_old_trips keeps the schedule
       future = DateTime.add(DateTime.utc_now(), 7200)
       schedule = %{@schedule | arrival_time: future}
+      schedule_2 = %{@schedule | arrival_time: future |> DateTime.add(3600)}
 
       with_mocks([
         {RoutesRepo, [], [by_type: fn _ -> [@route] end]},
@@ -341,7 +358,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {SchedulesRepo, [],
          [
            by_route_ids: fn
-             ["CR-Worcester"], _ -> [schedule, schedule]
+             ["CR-Worcester"], _ -> [schedule, schedule_2]
              _, _ -> []
            end,
            end_of_rating: fn -> Date.add(@todays_date, 7) end
@@ -393,8 +410,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            by_route_ids: fn
              ["CR-Worcester"], opts ->
                case Keyword.get(opts, :date) do
-                 ^today -> [@schedule_future, @schedule_future]
-                 ^tomorrow -> [@schedule_3, @schedule_3]
+                 ^today -> [@schedule_future, @schedule_future_2]
+                 ^tomorrow -> [@schedule_3, @schedule_3_2]
                  _ -> []
                end
 
@@ -449,7 +466,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          ]},
         {SchedulesRepo, [],
          [
-           by_route_ids: fn _, _ -> [@schedule_future, @schedule_future] end,
+           by_route_ids: fn _, _ -> [@schedule_future, @schedule_future_2] end,
            end_of_rating: fn -> Date.add(@todays_date, 7) end
          ]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
@@ -512,8 +529,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            by_route_ids: fn
              ["CR-Worcester"], opts ->
                case opts |> Keyword.get(:date) |> to_string() do
-                 ^today -> [@schedule_future, @schedule_future]
-                 ^tomorrow -> [@schedule_3, @schedule_3]
+                 ^today -> [@schedule_future, @schedule_future_2]
+                 ^tomorrow -> [@schedule_3, @schedule_3_2]
                  _ -> []
                end
 
@@ -576,8 +593,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            by_route_ids: fn
              ["CR-Worcester"], opts ->
                case Keyword.get(opts, :date) do
-                 ^today -> [@schedule_future, @schedule_future]
-                 ^tomorrow -> [@schedule_3, @schedule_3]
+                 ^today -> [@schedule_future, @schedule_future_2]
+                 ^tomorrow -> [@schedule_3, @schedule_3_2]
                  _ -> []
                end
 
@@ -628,7 +645,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          ]},
         {SchedulesRepo, [],
          [
-           by_route_ids: fn _, _ -> [@schedule_future, @schedule_future] end,
+           by_route_ids: fn _, _ -> [@schedule_future, @schedule_future_2] end,
            end_of_rating: fn -> Date.add(@todays_date, 7) end
          ]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
@@ -1133,7 +1150,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          ]},
         {SchedulesRepo, [],
          [
-           by_route_ids: fn _, _ -> [@schedule_future, @schedule_future] end,
+           by_route_ids: fn _, _ -> [@schedule_future, @schedule_future_2] end,
            end_of_rating: fn -> Date.add(@todays_date, 7) end
          ]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
@@ -1193,7 +1210,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          ]},
         {SchedulesRepo, [],
          [
-           by_route_ids: fn _, _ -> [@schedule_future, @schedule_future] end,
+           by_route_ids: fn _, _ -> [@schedule_future, @schedule_future_2] end,
            end_of_rating: fn -> Date.add(@todays_date, 7) end
          ]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
@@ -1386,7 +1403,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          ]},
         {SchedulesRepo, [],
          [
-           by_route_ids: fn ["CR-Worcester"], _ -> [@schedule_future, @schedule_future] end,
+           by_route_ids: fn ["CR-Worcester"], _ -> [@schedule_future, @schedule_future_2] end,
            end_of_rating: fn -> Date.add(@todays_date, 1) end
          ]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
@@ -1597,7 +1614,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {SchedulesRepo, [],
          [
            by_route_ids: fn _, _ ->
-             [@schedule_future, @schedule_future, @schedule_3, @schedule_3]
+             [@schedule_future, @schedule_future_2, @schedule_3, @schedule_3_2]
            end,
            end_of_rating: fn -> Date.add(@todays_date, 7) end
          ]},
@@ -1691,7 +1708,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          ]},
         {SchedulesRepo, [],
          [
-           by_route_ids: fn _, _ -> [@schedule_future, @schedule_future] end,
+           by_route_ids: fn _, _ -> [@schedule_future, @schedule_future_2] end,
            end_of_rating: fn -> Date.add(@todays_date, 7) end,
            trip: fn "trip-595" -> %Trip{id: "trip-595", name: "595", direction_id: 0} end
          ]},
@@ -1766,7 +1783,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {SchedulesRepo, [],
          [
            by_route_ids: fn _, _ ->
-             [@schedule_future, @schedule_future, @schedule_3, @schedule_3]
+             [@schedule_future, @schedule_future_2, @schedule_3, @schedule_3_2]
            end,
            end_of_rating: fn -> Date.add(@todays_date, 7) end
          ]},
@@ -1887,7 +1904,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {SchedulesRepo, [],
          [
            by_route_ids: fn _, _ ->
-             [@schedule_future, @schedule_future, @schedule_3, @schedule_3]
+             [@schedule_future, @schedule_future_2, @schedule_3, @schedule_3_2]
            end,
            end_of_rating: fn -> Date.add(@todays_date, 7) end
          ]},
@@ -1998,7 +2015,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          ]},
         {SchedulesRepo, [],
          [
-           by_route_ids: fn _, _ -> [@schedule_future, @schedule_future] end,
+           by_route_ids: fn _, _ -> [@schedule_future, @schedule_future_2] end,
            end_of_rating: fn -> Date.add(@todays_date, 7) end,
            trip: fn "trip-595" -> %Trip{id: "trip-595", name: "595", direction_id: 0} end
          ]},
@@ -2089,7 +2106,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {SchedulesRepo, [],
          [
            by_route_ids: fn _, _ ->
-             [@schedule_future, @schedule_future, @schedule_3, @schedule_3]
+             [@schedule_future, @schedule_future_2, @schedule_3, @schedule_3_2]
            end,
            end_of_rating: fn -> Date.add(@todays_date, 7) end
          ]},

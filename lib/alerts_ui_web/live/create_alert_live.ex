@@ -324,15 +324,10 @@ defmodule AlertsUIWeb.CreateAlertLive do
         route_ids
         |> get_schedules(direction, date)
         |> Enum.group_by(& &1.trip.id)
-        |> Enum.map(fn
-          {_k, [first_schedule, last_schedule]} ->
-            update_schedule(first_schedule, last_schedule)
-
-          {_, _} ->
-            []
+        |> Enum.map(fn {_k, [first_schedule, last_schedule]} ->
+          update_schedule(first_schedule, last_schedule)
         end)
       end)
-      |> Enum.reject(fn s -> s == [] end)
       |> Enum.uniq_by(&{&1.trip.id, DateTime.to_time(&1.departure_time), &1.trip.name})
       |> Enum.sort_by(&(&1.departure_time |> DateTime.to_time()), Time)
 
@@ -374,6 +369,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
       SchedulesRepo.by_route_ids([route_id], opts)
     end)
     |> List.flatten()
+    |> Enum.uniq()
     |> Enum.map(fn schedule ->
       map = Map.from_struct(schedule)
       Kernel.struct(EnhancedSchedule, map)
@@ -834,18 +830,14 @@ defmodule AlertsUIWeb.CreateAlertLive do
   def filter_out_old_trips(schedules, current_time \\ DateTime.utc_now()) do
     schedules
     |> Enum.group_by(& &1.trip.id)
-    |> Enum.reduce([], fn
-      {_k, [first_schedule, last_schedule]}, acc ->
-        one_hour_from_arrival = Timex.shift(last_schedule.arrival_time, hours: 1)
+    |> Enum.reduce([], fn {_k, [first_schedule, last_schedule]}, acc ->
+      one_hour_from_arrival = Timex.shift(last_schedule.arrival_time, hours: 1)
 
-        if DateTime.compare(one_hour_from_arrival, current_time) in [:gt, :eq] do
-          [update_schedule(first_schedule, last_schedule) | acc]
-        else
-          acc
-        end
-
-      {_, _}, acc ->
+      if DateTime.compare(one_hour_from_arrival, current_time) in [:gt, :eq] do
+        [update_schedule(first_schedule, last_schedule) | acc]
+      else
         acc
+      end
     end)
     |> Enum.reverse()
     |> Enum.sort_by(& &1.departure_time, DateTime)
