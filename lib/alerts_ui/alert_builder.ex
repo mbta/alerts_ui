@@ -35,7 +35,7 @@ defmodule AlertsUI.AlertBuilder do
           stop_names_and_ids: [String.t()],
           stops_with_context: [stop_with_context_t()] | [],
           trip_ids: [String.t()],
-          trip_information_by_id: [map()],
+          trip_information_by_id: trip_information_by_id_t(),
           service_types: [Route.type_int()],
           service_effect_text: String.t() | nil,
           alert_timing: atom(),
@@ -74,6 +74,14 @@ defmodule AlertsUI.AlertBuilder do
   @type direction_t :: 0 | 1
   @type stop_with_context_t :: {Stop.t(), Route.id_t(), direction_t(), RoutePattern.stop_type()}
   @type alert_changeset_params :: map()
+  @type trip_information_by_id_t :: %{String.t() => trip_information_t()}
+  @type trip_information_t :: %{
+          direction_id: direction_t(),
+          route_id: Route.id_t(),
+          trip_name: String.t(),
+          departure_time: NaiveDateTime.t(),
+          arrival_time: NaiveDateTime.t()
+        }
 
   @spec build_alert(
           alert_data_t(),
@@ -914,7 +922,12 @@ defmodule AlertsUI.AlertBuilder do
       ) do
     trip_ids
     |> Enum.flat_map(fn trip_id ->
-      %{direction_id: direction_id, route_id: route_id} = trip_information_by_id[trip_id]
+      %{
+        direction_id: direction_id,
+        route_id: route_id,
+        departure_time: departure_time,
+        arrival_time: arrival_time
+      } = trip_information_by_id[trip_id]
 
       entity = %{
         activities: Activities.for_effect(effect),
@@ -929,7 +942,7 @@ defmodule AlertsUI.AlertBuilder do
           )
       }
 
-      [entity] ++ get_alternate_route_entities(trip_id, entity)
+      [entity] ++ get_alternate_route_entities(trip_id, entity, departure_time, arrival_time)
     end)
   end
 
@@ -948,19 +961,18 @@ defmodule AlertsUI.AlertBuilder do
         %{
           stop_ids: [_ | _] = stop_ids,
           stops_with_context: [],
-          trip_ids: [_ | _] = trip_ids,
+          trip_ids: [_ | _] = _trip_ids,
           route_type: route_type,
-          route_ids: route_ids
+          route_ids: route_ids,
+          trip_information_by_id: trip_information_by_id
         },
         effect
       ) do
-    trips = get_trips(trip_ids)
-
     stop_ids
     |> stop_route_pairs(route_ids)
     |> Enum.flat_map(fn {stop_id, route_id} ->
-      trips
-      |> Enum.flat_map(fn %Trip{id: trip_id, direction_id: trip_direction_id} ->
+      trip_information_by_id
+      |> Enum.flat_map(fn {trip_id, info} ->
         entity = %{
           activities: Activities.for_effect(effect),
           route_id: route_id,
@@ -969,13 +981,14 @@ defmodule AlertsUI.AlertBuilder do
           trip:
             build_trip(
               trip_id,
-              trip_direction_id,
+              info.direction_id,
               route_id
             ),
           stop_id: stop_id
         }
 
-        [entity] ++ get_alternate_route_entities(trip_id, entity)
+        [entity] ++
+          get_alternate_route_entities(trip_id, entity, info.departure_time, info.arrival_time)
       end)
     end)
     |> Enum.uniq()
@@ -986,21 +999,21 @@ defmodule AlertsUI.AlertBuilder do
         :RDTS,
         %{
           stops_with_context: [_ | _] = stops_with_context,
-          trip_ids: [_ | _] = trip_ids,
-          route_type: route_type
+          trip_ids: [_ | _] = _trip_ids,
+          route_type: route_type,
+          trip_information_by_id: trip_information_by_id
         },
         effect
       ) do
-    trips = get_trips(trip_ids)
-    trip_directions = trip_directions(trips)
+    trip_directions = trip_directions(trip_information_by_id)
 
     stops_with_context
     |> Enum.filter(fn {_, _, stop_direction_id, _} ->
       Enum.member?(trip_directions, stop_direction_id)
     end)
     |> Enum.flat_map(fn {%Stop{id: stop_id}, route_id, _direction_id, _stop_type} ->
-      trips
-      |> Enum.flat_map(fn %Trip{id: trip_id, direction_id: trip_direction_id} ->
+      trip_information_by_id
+      |> Enum.flat_map(fn {trip_id, info} ->
         entity =
           %{
             activities: Activities.for_effect(effect),
@@ -1010,13 +1023,14 @@ defmodule AlertsUI.AlertBuilder do
             trip:
               build_trip(
                 trip_id,
-                trip_direction_id,
+                info.direction_id,
                 route_id
               ),
             stop_id: stop_id
           }
 
-        [entity] ++ get_alternate_route_entities(trip_id, entity)
+        [entity] ++
+          get_alternate_route_entities(trip_id, entity, info.departure_time, info.arrival_time)
       end)
     end)
     |> Enum.uniq()
@@ -1077,14 +1091,22 @@ defmodule AlertsUI.AlertBuilder do
 
   def build_informed_entities(_mode, _data, _effect), do: []
 
-  @doc """
-  Some trips include alternate trips (i.e. Boat-F1 and Boat-F2H).
-  Query to see if the trip has alternate trips, and if so, return
-  informed entities for that route as well.
-  """
-  @spec get_alternate_route_entities(Trip.t(), map()) :: [map()]
-  def get_alternate_route_entities(trip_id, entity) do
-    schedules = SchedulesRepo.all("filter[trip]": trip_id)
+  @spec get_alternate_route_entities(
+          Trip.id_t(),
+          map(),
+          NaiveDateTime.t(),
+          NaiveDateTime.t()
+        ) :: [map()]
+  defp get_alternate_route_entities(trip_id, entity, departure_time, arrival_time) do
+    # Some trips include alternate trips (i.e. Boat-F1 and Boat-F2H).
+    # Query to see if the trip has alternate trips, and if so, return
+    # informed entities for that route as well.
+    dates = Date.range(departure_time, arrival_time) |> Enum.to_list()
+
+    schedules =
+      Enum.reduce(dates, [], fn date, acc ->
+        acc ++ SchedulesRepo.all("filter[trip]": trip_id, "filter[date]": date)
+      end)
 
     additional_route_ids =
       Enum.flat_map(schedules, fn schedule -> schedule.added_route_ids end) |> Enum.uniq()
@@ -1099,23 +1121,10 @@ defmodule AlertsUI.AlertBuilder do
     end)
   end
 
-  @spec get_trips([String.t()]) :: [Trip.t()]
-  defp get_trips(trip_ids) do
-    trip_ids
-    |> Enum.filter(&(&1 != "default"))
-    |> Enum.map(&get_trip/1)
-    |> Enum.reject(&is_nil/1)
-  end
-
-  @spec get_trip(String.t()) :: Trip.t() | nil
-  defp get_trip(trip_id) do
-    SchedulesRepo.trip(trip_id)
-  end
-
-  @spec trip_directions([Trip.t()]) :: [Trip.direction_id_t()]
-  defp trip_directions(trips) do
-    trips
-    |> Enum.map(fn %Trip{direction_id: direction_id} -> direction_id end)
+  @spec trip_directions(trip_information_by_id_t()) :: [Trip.direction_id_t()]
+  defp trip_directions(trip_information_by_id) do
+    trip_information_by_id
+    |> Enum.map(fn {_trip_id, info} -> info.direction_id end)
     |> Enum.uniq()
   end
 

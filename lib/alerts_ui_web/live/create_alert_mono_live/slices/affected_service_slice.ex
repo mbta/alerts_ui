@@ -141,8 +141,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
           })
         end)
 
-      IO.inspect(trip_info)
-
       Changeset.cast(changeset, %{trip_information_by_id: trip_info}, [:trip_information_by_id])
     end
   end
