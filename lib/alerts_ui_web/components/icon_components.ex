@@ -8,13 +8,19 @@ defmodule AlertsUIWeb.IconComponents do
   Renders a small circle route or mode icon.
   """
   attr :type, :string, required: true
+  attr :size, :integer, default: 20
+  attr :title, :string, default: nil
 
   def circle_icon(%{type: :bus} = assigns) do
     ~H"""
-    <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
-      <title>
-        bus
-      </title>
+    <svg
+      width={@size}
+      height={@size}
+      xmlns="http://www.w3.org/2000/svg"
+      role="img"
+      viewBox="0 0 48 48"
+    >
+      <title>{@title || @type}</title>
       <path
         fill="#ffc72c"
         d="m24.12432 47.99966c13.44632-.345 24.22342-11.27549 23.87132-24.128-.36299-13.24986-10.87335-23.94219-24.12799-23.87132a24 24 0 1 0 .25667 47.99932"
@@ -29,10 +35,14 @@ defmodule AlertsUIWeb.IconComponents do
 
   def circle_icon(%{type: :subway} = assigns) do
     ~H"""
-    <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
-      <title>
-        subway
-      </title>
+    <svg
+      width={@size}
+      height={@size}
+      xmlns="http://www.w3.org/2000/svg"
+      role="img"
+      viewBox="0 0 48 48"
+    >
+      <title>{@title || @type}</title>
       <path fill="#494f5b" d="m24 0a24 24 0 1 0 24 24 24 24 0 0 0 -24-24" />
       <g fill="#fff">
         <path d="m25.8889 5.8222a1.4111 1.4111 0 1 0 -1.4111-1.4111 1.411 1.411 0 0 0 1.4111 1.4111z" />
@@ -44,11 +54,18 @@ defmodule AlertsUIWeb.IconComponents do
   end
 
   def circle_icon(%{type: :commuter_rail} = assigns) do
+    correct_title = if is_nil(assigns.title), do: "commuter rail", else: assigns.title
+    assigns = Map.put(assigns, :title, correct_title)
+
     ~H"""
-    <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
-      <title>
-        commuter rail
-      </title>
+    <svg
+      width={@size}
+      height={@size}
+      xmlns="http://www.w3.org/2000/svg"
+      role="img"
+      viewBox="0 0 48 48"
+    >
+      <title>{@title || @type}</title>
       <path fill="#80276c" d="m24 0a24 24 0 1 0 24 24 24 24 0 0 0 -24-24" />
       <path
         fill="#fff"
@@ -60,10 +77,14 @@ defmodule AlertsUIWeb.IconComponents do
 
   def circle_icon(%{type: :ferry} = assigns) do
     ~H"""
-    <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
-      <title>
-        ferry
-      </title>
+    <svg
+      width={@size}
+      height={@size}
+      xmlns="http://www.w3.org/2000/svg"
+      role="img"
+      viewBox="0 0 48 48"
+    >
+      <title>{@title || @type}</title>
       <path fill="#008eaa" d="m24 0a24 24 0 1 0 24 24 24 24 0 0 0 -24-24" />
       <path
         fill="#fff"
@@ -75,10 +96,14 @@ defmodule AlertsUIWeb.IconComponents do
 
   def circle_icon(%{type: :systemwide} = assigns) do
     ~H"""
-    <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
-      <title>
-        alert
-      </title>
+    <svg
+      width={@size}
+      height={@size}
+      xmlns="http://www.w3.org/2000/svg"
+      role="img"
+      viewBox="0 0 48 48"
+    >
+      <title>{@title || @type}</title>
       <path
         fill="#1c1e23"
         d="m47.55089 42.53651-20.5403-40.60229a3.60991 3.60991 0 0 0 -1.27059-1.3994 3.08289 3.08289 0 0 0 -3.4708 0 3.57213 3.57213 0 0 0 -1.2518 1.3994l-20.5404 40.60229a3.715 3.715 0 0 0 0 3.6423 3.47281 3.47281 0 0 0 1.2518 1.3228 3.21739 3.21739 0 0 0 1.70689.49839h41.1186a3.16147 3.16147 0 0 0 1.688-.49841 3.47248 3.47248 0 0 0 1.2517-1.3228 3.71467 3.71467 0 0 0 .0569-3.64228z"
@@ -93,10 +118,14 @@ defmodule AlertsUIWeb.IconComponents do
 
   def circle_icon(%{type: :facility} = assigns) do
     ~H"""
-    <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
-      <title>
-        accessible
-      </title>
+    <svg
+      width={@size}
+      height={@size}
+      xmlns="http://www.w3.org/2000/svg"
+      role="img"
+      viewBox="0 0 48 48"
+    >
+      <title>{@title || @type}</title>
       <path
         fill="#165c96"
         d="m42.71047.00524s-37.34559-.0118-37.33368 0c-3.44194 0-5.37679 1.77646-5.37679 5.40607v37.416c0 3.39508 1.73958 5.17269 5.17869 5.17269h37.63978c3.43929 0 5.18153-1.68908 5.18153-5.17265v-37.41604c0-3.54109-1.74224-5.40607-5.28953-5.40607z"
@@ -111,10 +140,14 @@ defmodule AlertsUIWeb.IconComponents do
 
   def circle_icon(%{type: "Red Line"} = assigns) do
     ~H"""
-    <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
-      <title>
-        red line
-      </title>
+    <svg
+      width={@size}
+      height={@size}
+      xmlns="http://www.w3.org/2000/svg"
+      role="img"
+      viewBox="0 0 48 48"
+    >
+      <title>red line</title>
       <path fill="#da291c" d="m24 0a24 24 0 1 0 24 24 24 24 0 0 0 -24-24" />
       <g fill="#fff">
         <path d="m17.17865 13.86377a6.66777 6.66777 0 0 1 2.50879.44971 5.78371 5.78371 0 0 1 1.91406 1.23242 5.35737 5.35737 0 0 1 1.21778 1.8125 5.81127 5.81127 0 0 1 .41992 2.21826 6.23057 6.23057 0 0 1 -.76758 3.16113 4.83029 4.83029 0 0 1 -2.50879 2.03028v.05761a3.5199 3.5199 0 0 1 1.3916.71045 3.9559 3.9559 0 0 1 .89942 1.13135 5.2879 5.2879 0 0 1 .50683 1.43555 12.49638 12.49638 0 0 1 .21778 1.56592q.0293.49292.05859 1.15966.02782.668.10156 1.36328a9.06039 9.06039 0 0 0 .23145 1.31934 3.043 3.043 0 0 0 .47851 1.05859h-4.55273a7.99213 7.99213 0 0 1 -.46384-2.34912q-.08788-1.3623-.26172-2.60986a4.11552 4.11552 0 0 0 -.98535-2.37793 3.39116 3.39116 0 0 0 -2.46484-.75391h-4.55374v8.09082h-4.55274v-20.706zm-1.624 9.36719a3.44032 3.44032 0 0 0 2.34863-.69629 2.88641 2.88641 0 0 0 .7832-2.26172 2.75737 2.75737 0 0 0 -.7832-2.18945 3.49346 3.49346 0 0 0 -2.34863-.68164h-4.9883v5.82914z" />
@@ -126,10 +159,14 @@ defmodule AlertsUIWeb.IconComponents do
 
   def circle_icon(%{type: "Blue Line"} = assigns) do
     ~H"""
-    <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
-      <title>
-        blue line
-      </title>
+    <svg
+      width={@size}
+      height={@size}
+      xmlns="http://www.w3.org/2000/svg"
+      role="img"
+      viewBox="0 0 48 48"
+    >
+      <title>blue line</title>
       <path fill="#003da5" d="m24 0a24 24 0 1 0 24 24 24 24 0 0 0 -24-24" />
       <g fill="#fff">
         <path d="m16.21338 13.647a12.87772 12.87772 0 0 1 2.69726.26123 5.83 5.83 0 0 1 2.0879.85547 3.98326 3.98326 0 0 1 1.34863 1.58057 5.56185 5.56185 0 0 1 .47851 2.43555 4.5366 4.5366 0 0 1 -.71093 2.61035 5.16141 5.16141 0 0 1 -2.10254 1.71093 4.97692 4.97692 0 0 1 2.85644 1.92823 5.74358 5.74358 0 0 1 .94239 3.3208 5.70688 5.70688 0 0 1 -.6084 2.71142 5.28726 5.28726 0 0 1 -1.63864 1.87058 7.25022 7.25022 0 0 1 -2.3496 1.07275 10.589 10.589 0 0 1 -2.71094.34815h-10.03422v-20.70603zm-.58008 8.38086a3.27472 3.27472 0 0 0 2.001-.57959 2.19 2.19 0 0 0 .7832-1.88525 2.41024 2.41024 0 0 0 -.26074-1.189 1.94175 1.94175 0 0 0 -.69629-.72509 2.94457 2.94457 0 0 0 -1.001-.36231 6.66287 6.66287 0 0 0 -1.17383-.10156h-4.26364v4.84277zm.26074 8.78711a6.08961 6.08961 0 0 0 1.27637-.13037 3.12816 3.12816 0 0 0 1.07324-.43506 2.20243 2.20243 0 0 0 .73926-.82666 2.84574 2.84574 0 0 0 .27539-1.334 2.67712 2.67712 0 0 0 -.89941-2.27637 3.83584 3.83584 0 0 0 -2.37793-.68164h-4.95896v5.68408z" />
@@ -141,10 +178,14 @@ defmodule AlertsUIWeb.IconComponents do
 
   def circle_icon(%{type: "Orange Line"} = assigns) do
     ~H"""
-    <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
-      <title>
-        orange line
-      </title>
+    <svg
+      width={@size}
+      height={@size}
+      xmlns="http://www.w3.org/2000/svg"
+      role="img"
+      viewBox="0 0 48 48"
+    >
+      <title>orange line</title>
       <path fill="#ed8b00" d="m24 0a24 24 0 1 0 24 24 24 24 0 0 0 -24-24" />
       <g fill="#fff">
         <path d="m5.64307 19.79541a10.34622 10.34622 0 0 1 2.001-3.46582 9.1562 9.1562 0 0 1 3.20508-2.31982 10.45537 10.45537 0 0 1 4.27734-.84131 10.43467 10.43467 0 0 1 4.292.84131 9.19465 9.19465 0 0 1 3.18945 2.31982 10.34624 10.34624 0 0 1 2.001 3.46582 12.94012 12.94012 0 0 1 .69629 4.30615 12.51018 12.51018 0 0 1 -.69629 4.21973 10.07168 10.07168 0 0 1 -2.001 3.40723 9.20067 9.20067 0 0 1 -3.18945 2.27685 10.595 10.595 0 0 1 -4.292.82617 10.616 10.616 0 0 1 -4.27734-.82617 9.16311 9.16311 0 0 1 -3.20515-2.27685 10.07166 10.07166 0 0 1 -2.001-3.40723 12.50994 12.50994 0 0 1 -.69629-4.21973 12.93987 12.93987 0 0 1 .69636-4.30615zm4.16211 6.84375a6.844 6.844 0 0 0 .9707 2.21875 4.978 4.978 0 0 0 1.74023 1.58009 5.31164 5.31164 0 0 0 2.61035.59472 5.31031 5.31031 0 0 0 2.60938-.59472 4.978 4.978 0 0 0 1.74023-1.58008 6.86683 6.86683 0 0 0 .97168-2.21875 10.53182 10.53182 0 0 0 .30469-2.5376 11.32323 11.32323 0 0 0 -.30469-2.63867 7.00147 7.00147 0 0 0 -.97168-2.27685 4.9307 4.9307 0 0 0 -1.74023-1.59473 5.31558 5.31558 0 0 0 -2.60938-.59473 5.3169 5.3169 0 0 0 -2.61035.59473 4.9307 4.9307 0 0 0 -1.74023 1.59468 6.9789 6.9789 0 0 0 -.9707 2.27685 11.32323 11.32323 0 0 0 -.30469 2.63867 10.53182 10.53182 0 0 0 .30469 2.53764z" />
@@ -156,7 +197,8 @@ defmodule AlertsUIWeb.IconComponents do
 
   def circle_icon(%{type: "Green Line B"} = assigns) do
     ~H"""
-    <svg width="20" height="20" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <svg width={@size} height={@size} viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+      <title>green line b</title>
       <path d="M8 0a8 8 0 1 0 8 8 8 8 0 0 0-8-8" fill="#00843d" />
       <path
         d="M8.59 4a5.3979 5.3979 0 0 1 1.0856.1012 2.3943 2.3943 0 0 1 .8395.33 1.5577 1.5577 0 0 1 .5422.6106 2.0668 2.0668 0 0 1 .1926.941 1.7013 1.7013 0 0 1-.286 1.0083 2.06 2.06 0 0 1-.8452.6614 2.0033 2.0033 0 0 1 1.1482.7451 2.1514 2.1514 0 0 1 .3794 1.2829 2.1366 2.1366 0 0 1-.2449 1.0477 2.0576 2.0576 0 0 1-.66.7221 2.9575 2.9575 0 0 1-.9443.4147A4.4245 4.4245 0 0 1 8.7078 12H4.6719V4zm-.2331 3.2382a1.3524 1.3524 0 0 0 .8054-.2243.8317.8317 0 0 0 .3144-.7282.8922.8922 0 0 0-.1048-.459.7518.7518 0 0 0-.2791-.28 1.2228 1.2228 0 0 0-.4033-.14 2.7534 2.7534 0 0 0-.4716-.0394H6.5024v1.871zm.1059 3.3946a2.51 2.51 0 0 0 .5126-.05 1.2918 1.2918 0 0 0 .4318-.1679.8617.8617 0 0 0 .2973-.3195A1.06 1.06 0 0 0 9.815 9.58a1.0169 1.0169 0 0 0-.3611-.8792 1.591 1.591 0 0 0-.9569-.2637H6.5024v2.196z"
@@ -168,7 +210,8 @@ defmodule AlertsUIWeb.IconComponents do
 
   def circle_icon(%{type: "Green Line C"} = assigns) do
     ~H"""
-    <svg width="20" height="20" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <svg width={@size} height={@size} viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+      <title>green line c</title>
       <path d="M8 0a8 8 0 1 0 8 8 8 8 0 0 0-8-8" fill="#00843d" />
       <path
         d="M9.9124 6.2224a1.6857 1.6857 0 0 0-.3744-.4231 1.7545 1.7545 0 0 0-1.1034-.3859 1.9643 1.9643 0 0 0-.9632.22 1.8205 1.8205 0 0 0-.6432.5894 2.5892 2.5892 0 0 0-.3587.84 4.227 4.227 0 0 0-.1119.9747 3.93 3.93 0 0 0 .1119.937 2.5346 2.5346 0 0 0 .3587.8194 1.8376 1.8376 0 0 0 .6432.5836 1.9577 1.9577 0 0 0 .9632.22 1.5536 1.5536 0 0 0 1.2048-.4711 2.1735 2.1735 0 0 0 .53-1.2424h1.6286a3.88 3.88 0 0 1-.3326 1.2957 3.0876 3.0876 0 0 1-.707.9852 2.997 2.997 0 0 1-1.028.6212A3.7625 3.7625 0 0 1 8.4346 12a3.9225 3.9225 0 0 1-1.5792-.3054 3.393 3.393 0 0 1-1.1838-.8408 3.7192 3.7192 0 0 1-.7384-1.2581 4.6162 4.6162 0 0 1-.2573-1.5583 4.7732 4.7732 0 0 1 .2573-1.59 3.8314 3.8314 0 0 1 .7384-1.28 3.3919 3.3919 0 0 1 1.1838-.8565A3.8616 3.8616 0 0 1 8.4346 4a3.853 3.853 0 0 1 1.1943.182 3.254 3.254 0 0 1 1.0072.53 2.8628 2.8628 0 0 1 .7331.8623 3.09 3.09 0 0 1 .3639 1.1776h-1.6273a1.3759 1.3759 0 0 0-.1934-.5295z"
@@ -180,7 +223,8 @@ defmodule AlertsUIWeb.IconComponents do
 
   def circle_icon(%{type: "Green Line D"} = assigns) do
     ~H"""
-    <svg width="20" height="20" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <svg width={@size} height={@size} viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+      <title>green line d</title>
       <path d="M8 0a8 8 0 1 0 8 8 8 8 0 0 0-8-8" fill="#00843d" />
       <path
         d="M7.91 4a4.1211 4.1211 0 0 1 1.44.2467 3.1258 3.1258 0 0 1 1.1543.74 3.4027 3.4027 0 0 1 .7615 1.232 4.9663 4.9663 0 0 1 .2747 1.737 5.5243 5.5243 0 0 1-.2243 1.6134 3.5523 3.5523 0 0 1-.6773 1.2774 3.1866 3.1866 0 0 1-1.1314.8458A3.8377 3.8377 0 0 1 7.91 12H4.46V4zm-.1225 6.5212a2.252 2.252 0 0 0 .74-.1236 1.6222 1.6222 0 0 0 .6379-.4087 2.043 2.043 0 0 0 .4486-.7451 3.285 3.285 0 0 0 .1686-1.12 4.6465 4.6465 0 0 0-.1182-1.0926 2.1848 2.1848 0 0 0-.3863-.8348 1.7177 1.7177 0 0 0-.7112-.5318 2.8381 2.8381 0 0 0-1.093-.1849H6.2181v5.0419z"
@@ -192,7 +236,8 @@ defmodule AlertsUIWeb.IconComponents do
 
   def circle_icon(%{type: "Green Line E"} = assigns) do
     ~H"""
-    <svg width="20" height="20" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <svg width={@size} height={@size} viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+      <title>green line e</title>
       <path d="M8 0a8 8 0 1 0 8 8 8 8 0 0 0-8-8" fill="#00843d" />
       <path
         d="M11.1835 4v1.4793H6.959v1.714h3.8766v1.3672H6.959v1.9607h4.3143V12H5.2006V4z"
@@ -204,10 +249,14 @@ defmodule AlertsUIWeb.IconComponents do
 
   def circle_icon(%{type: "Green Line"} = assigns) do
     ~H"""
-    <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 16 16">
-      <title>
-        green line
-      </title>
+    <svg
+      width={@size}
+      height={@size}
+      xmlns="http://www.w3.org/2000/svg"
+      role="img"
+      viewBox="0 0 16 16"
+    >
+      <title>green line</title>
       <path fill="#00843d" d="m8 0a8 8 0 1 0 8 8 8 8 0 0 0 -8-8" />
       <g fill="#fff">
         <path d="m6.083 11.53381a2.63844 2.63844 0 0 1 -1.03434.21619 3.67706 3.67706 0 0 1 -1.48049-.28629 3.18108 3.18108 0 0 1 -1.10987-.78829 3.48761 3.48761 0 0 1 -.69221-1.17949 4.327 4.327 0 0 1 -.24119-1.46088 4.47445 4.47445 0 0 1 .24119-1.49078 3.59212 3.59212 0 0 1 .69221-1.20008 3.17958 3.17958 0 0 1 1.10987-.803 3.62061 3.62061 0 0 1 1.48049-.29119 3.48952 3.48952 0 0 1 1.06968.1657 3.037 3.037 0 0 1 .93339.48679 2.63108 2.63108 0 0 1 1.01968 1.87758h-1.506a1.5098 1.5098 0 0 0 -.54219-.90349 1.57786 1.57786 0 0 0 -.97458-.30149 1.84057 1.84057 0 0 0 -.903.20589 1.70591 1.70591 0 0 0 -.603.55249 2.42823 2.42823 0 0 0 -.3363.7878 3.95986 3.95986 0 0 0 -.1049.91378 3.68309 3.68309 0 0 0 .1049.87849 2.37769 2.37769 0 0 0 .3363.76819 1.72339 1.72339 0 0 0 .603.54709 1.83509 1.83509 0 0 0 .903.2059 1.711 1.711 0 0 0 1.20989-.3966 1.72506 1.72506 0 0 0 .49709-1.14958h-1.58636v-1.17454h3.012v3.87526h-1.004l-.16079-.81329a2.3565 2.3565 0 0 1 -.93347.75784z" />
@@ -221,10 +270,14 @@ defmodule AlertsUIWeb.IconComponents do
   def circle_icon(assigns) do
     if is_binary(assigns.type) && assigns.type =~ ~r/^Mattapan/ do
       ~H"""
-      <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 48 48">
-        <title>
-          mattapan line
-        </title>
+      <svg
+        width={@size}
+        height={@size}
+        xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        viewBox="0 0 48 48"
+      >
+        <title>mattapan line</title>
         <path fill="#da291c" d="m24 0a24 24 0 1 0 24 24 24 24 0 0 0 -24-24" />
         <path
           fill="#fff"
