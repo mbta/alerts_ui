@@ -20,6 +20,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     ServiceEffectCombinations
   }
 
+  import AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice,
+    only: [get_trip_arrival_time: 1, get_trip_departure_time: 1]
+
   alias MBTAV3API.Routes.Route
   alias Phoenix.LiveView.AsyncResult
   @primary_key false
@@ -838,7 +841,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       Map.put(acc, schedule.trip.id, %{
         direction_id: schedule.trip.direction_id,
         route_id: schedule.route.id,
-        trip_name: SelectFormatter.name_for_option(schedule, route_type)
+        trip_name: SelectFormatter.name_for_option(schedule, route_type),
+        departure_time: get_trip_departure_time([schedule]),
+        arrival_time: get_trip_arrival_time([schedule])
       })
     end)
   end
