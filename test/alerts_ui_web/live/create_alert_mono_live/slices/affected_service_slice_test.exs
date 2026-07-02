@@ -50,6 +50,52 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     added_route_ids: []
   }
 
+  @boat_f1 %Route{
+    direction_names: %{0 => "Outbound", 1 => "Inbound"},
+    sort_order: 1,
+    id: "Boat-F1",
+    type: 4,
+    name: "Hingham/Hull Ferry"
+  }
+
+  @boat_f2h %Route{
+    direction_names: %{0 => "Outbound", 1 => "Inbound"},
+    sort_order: 1,
+    id: "Boat-F2H",
+    type: 4,
+    name: "Hingham Ferry"
+  }
+
+  @two_hours_from_now DateTime.utc_now()
+                      |> DateTime.add(2, :hour)
+                      |> DateTime.shift_zone!("America/New_York")
+
+  @boat_f1_schedule_1 %Schedule{
+    stop: %Stop{
+      id: "Boat-Rowes",
+      name: "Rowes Wharf"
+    },
+    departure_time: @two_hours_from_now,
+    arrival_time: DateTime.add(@two_hours_from_now, 30, :minute),
+    trip: %Trip{
+      id: "Boat-F1-2030-Rowes-F1-A-PM-Weekday-Summer-26",
+      name: "",
+      direction_id: 0
+    },
+    route: %Route{
+      id: "Boat-F1",
+      type: 4,
+      name: "Hingham Ferry"
+    },
+    added_route_ids: ["Boat-F2H"]
+  }
+
+  @boat_f1_schedule_2 %{
+    @boat_f1_schedule_1
+    | departure_time: DateTime.add(@boat_f1_schedule_1.departure_time, 2, :hour),
+      arrival_time: DateTime.add(@boat_f1_schedule_1.arrival_time, 2, :hour)
+  }
+
   defp base_changeset(attrs) do
     Ecto.Changeset.cast(
       %AlertData{},
@@ -1601,19 +1647,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         render_async(view)
 
         open_review_modal(view)
+        submit_alert(view)
 
-        view
-        |> element("#review-modal-container button", "Submit")
-        |> render_click()
-
-        flash = assert_redirect(view, "/")
-
-        alert_id =
-          flash["info"]
-          |> String.replace("New alert #", "")
-          |> String.replace(" created", "")
-
-        new_alert = Alerts.get_by_alert_id(alert_id)
+        new_alert = parse_alert_created_output(view)
         trip_ids = new_alert.informed_entity |> Enum.map(& &1.trip.trip_id) |> Enum.sort()
 
         assert trip_ids == ["trip-595", "trip-596"]
@@ -2136,6 +2172,143 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         })
 
         refute render(view) =~ ~s(Effect must start before)
+      end
+    end
+
+    @tag :logged_in_user
+    test "can add alternate route entities for RDT", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@boat_f1, @boat_f2h] end,
+           by_type: fn _, _ -> [@boat_f1, @boat_f2h] end,
+           get: fn _, _ -> @boat_f1 end
+         ]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _, _ -> [@boat_f1_schedule_1, @boat_f1_schedule_2] end,
+           all: fn [
+                     "filter[trip]": "Boat-F1-2030-Rowes-F1-A-PM-Weekday-Summer-26",
+                     "filter[date]": _
+                   ] ->
+             [@boat_f1_schedule_1]
+           end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@boat_f1_schedule_1.stop] end,
+           all: fn
+             ["filter[id]": ""], _ ->
+               []
+           end
+         ]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _, _ -> [] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Ferry", "Delay")
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => [@boat_f1_schedule_1.route.id]}
+        })
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "trip_ids"],
+          "alert_data" => %{"trip_ids" => [@boat_f1_schedule_1.trip.id]}
+        })
+
+        open_review_modal(view)
+        submit_alert(view)
+
+        new_alert = parse_alert_created_output(view)
+
+        [%{route_id: "Boat-F1", stop_id: nil}, %{route_id: "Boat-F2H", stop_id: nil}] =
+          new_alert.informed_entity
+      end
+    end
+
+    @tag :logged_in_user
+    test "can add alternate route entities for RDTS", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@boat_f1, @boat_f2h] end,
+           by_type: fn _, _ -> [@boat_f1, @boat_f2h] end,
+           get: fn _, _ -> @boat_f1 end
+         ]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _, _ -> [@boat_f1_schedule_1, @boat_f1_schedule_2] end,
+           all: fn [
+                     "filter[trip]": "Boat-F1-2030-Rowes-F1-A-PM-Weekday-Summer-26",
+                     "filter[date]": _
+                   ] ->
+             [@boat_f1_schedule_1]
+           end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@boat_f1_schedule_1.stop] end,
+           all: fn
+             ["filter[id]": "Boat-Rowes"], _ ->
+               [%Stop{id: "Boat-Rowes", name: "Rowes Wharf"}]
+           end
+         ]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _, _ -> [] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Ferry", "Delay")
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => [@boat_f1_schedule_1.route.id]}
+        })
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "trip_ids"],
+          "alert_data" => %{"trip_ids" => [@boat_f1_schedule_1.trip.id]}
+        })
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "stop_names_and_ids"],
+          "alert_data" => %{"stop_names_and_ids" => ["Rowes Wharf|Boat-Rowes"]}
+        })
+
+        render_async(view)
+
+        open_review_modal(view)
+        submit_alert(view)
+
+        new_alert = parse_alert_created_output(view)
+
+        [
+          %{route_id: "Boat-F1", stop_id: "Boat-Rowes"},
+          %{route_id: "Boat-F2H", stop_id: "Boat-Rowes"}
+        ] = new_alert.informed_entity
       end
     end
   end
