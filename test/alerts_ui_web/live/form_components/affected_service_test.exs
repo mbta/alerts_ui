@@ -874,10 +874,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     test "search can clear" do
       with_mocks([
         {RoutesRepo, [], [by_type: fn _route_types -> [@route] end]},
-        {SchedulesRepo, [],
-         [
-           by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end
-         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]},
         {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
@@ -1119,7 +1116,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
            by_route_ids: fn _route_ids, _opts ->
              [@schedule, @schedule_2, @schedule_3, @schedule_4]
            end,
-           all: fn "filter[trip]": _ -> [%Schedule{added_route_ids: []}] end
+           all: fn _ -> [%Schedule{added_route_ids: []}] end
          ]},
         {StopsRepo, [],
          [

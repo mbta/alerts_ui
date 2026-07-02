@@ -1098,8 +1098,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {SchedulesRepo, [],
          [
            by_route_ids: fn _, _ -> [@schedule_future, @schedule_future] end,
-           end_of_rating: fn -> Date.add(@todays_date, 7) end,
-           all: fn "filter[trip]": _ -> %Schedule{added_route_ids: []} end
+           end_of_rating: fn -> Date.add(@todays_date, 7) end
          ]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
@@ -1160,7 +1159,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
          [
            by_route_ids: fn _, _ -> [@schedule_future, @schedule_future] end,
            end_of_rating: fn -> Date.add(@todays_date, 7) end
-           #  all: fn _ -> %Schedule{added_route_ids: []} end
          ]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end]}
       ]) do
@@ -1566,7 +1564,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
              [@schedule_future, @schedule_future, @schedule_3, @schedule_3]
            end,
            end_of_rating: fn -> Date.add(@todays_date, 7) end,
-           all: fn ["filter[trip]": _] -> [@schedule_future, @schedule_3] end
+           all: fn ["filter[trip]": _, "filter[date]": _] -> [@schedule_future, @schedule_3] end
          ]},
         {StopsRepo, [],
          [
@@ -1671,7 +1669,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            by_route_ids: fn _, _ -> [@schedule_future, @schedule_future] end,
            end_of_rating: fn -> Date.add(@todays_date, 7) end,
            trip: fn "trip-595" -> %Trip{id: "trip-595", name: "595", direction_id: 0} end,
-           all: fn ["filter[trip]": "trip-595"] -> [%Schedule{added_route_ids: []}] end
+           all: fn ["filter[trip]": "trip-595", "filter[date]": _] ->
+             [%Schedule{added_route_ids: []}]
+           end
          ]},
         {StopsRepo, [],
          [
@@ -1980,7 +1980,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            by_route_ids: fn _, _ -> [@schedule_future, @schedule_future] end,
            end_of_rating: fn -> Date.add(@todays_date, 7) end,
            trip: fn "trip-595" -> %Trip{id: "trip-595", name: "595", direction_id: 0} end,
-           all: fn ["filter[trip]": "trip-595"] -> [%Schedule{added_route_ids: []}] end
+           all: fn ["filter[trip]": "trip-595", "filter[date]": _] ->
+             [%Schedule{added_route_ids: []}]
+           end
          ]},
         {StopsRepo, [],
          [
