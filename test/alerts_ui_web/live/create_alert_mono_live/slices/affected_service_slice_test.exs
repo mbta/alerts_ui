@@ -13,6 +13,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
+  alias MBTAV3API.RoutePatterns.RoutePattern
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
@@ -2191,7 +2192,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
                      "filter[trip]": "Boat-F1-2030-Rowes-F1-A-PM-Weekday-Summer-26",
                      "filter[date]": _
                    ] ->
-             [@boat_f1_schedule_1]
+             [@boat_f1_schedule_1, @boat_f1_schedule_2]
            end
          ]},
         {StopsRepo, [],
@@ -2232,7 +2233,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
 
         new_alert = parse_alert_created_output(view)
 
-        [%{route_id: "Boat-F1", stop_id: nil}, %{route_id: "Boat-F2H", stop_id: nil}] =
+        [
+          %{
+            route_id: "Boat-F1",
+            stop_id: nil,
+            trip: %{trip_id: "Boat-F1-2030-Rowes-F1-A-PM-Weekday-Summer-26"}
+          },
+          %{
+            route_id: "Boat-F2H",
+            stop_id: nil,
+            trip: %{trip_id: "Boat-F1-2030-Rowes-F1-A-PM-Weekday-Summer-26"}
+          }
+        ] =
           new_alert.informed_entity
       end
     end
@@ -2253,7 +2265,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
                      "filter[trip]": "Boat-F1-2030-Rowes-F1-A-PM-Weekday-Summer-26",
                      "filter[date]": _
                    ] ->
-             [@boat_f1_schedule_1]
+             [@boat_f1_schedule_1, @boat_f1_schedule_2]
            end
          ]},
         {StopsRepo, [],
@@ -2306,8 +2318,157 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         new_alert = parse_alert_created_output(view)
 
         [
-          %{route_id: "Boat-F1", stop_id: "Boat-Rowes"},
-          %{route_id: "Boat-F2H", stop_id: "Boat-Rowes"}
+          %{
+            route_id: "Boat-F1",
+            stop_id: "Boat-Rowes",
+            trip: %{trip_id: "Boat-F1-2030-Rowes-F1-A-PM-Weekday-Summer-26"}
+          },
+          %{
+            route_id: "Boat-F2H",
+            stop_id: "Boat-Rowes",
+            trip: %{trip_id: "Boat-F1-2030-Rowes-F1-A-PM-Weekday-Summer-26"}
+          }
+        ] = new_alert.informed_entity
+      end
+    end
+
+    @tag :logged_in_user
+    test "can add alternate route entities along with parent entities", %{conn: conn} do
+      cr_franklin = %Route{
+        direction_names: %{0 => "Outbound", 1 => "Inbound"},
+        sort_order: 1,
+        id: "CR-Franklin",
+        type: 4,
+        name: "Franklin/Foxboro Line"
+      }
+
+      cr_franklin_schedule = %Schedule{
+        stop: %Stop{
+          id: "place-sstat",
+          name: "South Station"
+        },
+        departure_time: @two_hours_from_now,
+        arrival_time: DateTime.add(@two_hours_from_now, 30, :minute),
+        trip: %Trip{
+          id: "SWKDYWCPeriod-831443-1775",
+          name: "",
+          direction_id: 0
+        },
+        route: %Route{
+          id: "CR-Franklin",
+          type: 4,
+          name: "Franklin/Foxboro Line"
+        },
+        added_route_ids: ["CR-Fairmount"]
+      }
+
+      cr_franklin_schedule_2 = %{
+        cr_franklin_schedule
+        | departure_time: DateTime.add(@boat_f1_schedule_1.departure_time, 2, :hour),
+          arrival_time: DateTime.add(@boat_f1_schedule_1.arrival_time, 2, :hour)
+      }
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [cr_franklin] end,
+           by_type: fn _, _ -> [cr_franklin] end,
+           get: fn _, _ -> cr_franklin end
+         ]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _, _ -> [cr_franklin_schedule, cr_franklin_schedule_2] end,
+           all: fn [
+                     "filter[trip]": "SWKDYWCPeriod-831443-1775",
+                     "filter[date]": _
+                   ] ->
+             [cr_franklin_schedule, cr_franklin_schedule_2]
+           end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [cr_franklin_schedule.stop] end,
+           all: fn
+             ["filter[id]": "place-sstat"], _ ->
+               [%Stop{id: "place-sstat", name: "South Station"}]
+           end
+         ]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn "CR-Franklin", _ ->
+             [
+               %RoutePattern{
+                 direction_id: 0,
+                 id: "CR-Franklin-3badde55-0",
+                 stop_ids: ["NEC-2287"],
+                 stops: [
+                   %Stop{
+                     id: "NEC-2287",
+                     parent_id: "place-sstat"
+                   }
+                 ]
+               }
+             ]
+           end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Ferry", "Delay")
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => [cr_franklin_schedule.route.id]}
+        })
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "trip_ids"],
+          "alert_data" => %{"trip_ids" => [cr_franklin_schedule.trip.id]}
+        })
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "stop_names_and_ids"],
+          "alert_data" => %{"stop_names_and_ids" => ["South Station|place-sstat"]}
+        })
+
+        render_async(view)
+
+        open_review_modal(view)
+        submit_alert(view)
+
+        new_alert = parse_alert_created_output(view)
+
+        [
+          %{
+            route_id: "CR-Franklin",
+            stop_id: "NEC-2287",
+            trip: %{trip_id: "SWKDYWCPeriod-831443-1775"}
+          },
+          %{
+            route_id: "CR-Fairmount",
+            stop_id: "NEC-2287",
+            trip: %{trip_id: "SWKDYWCPeriod-831443-1775"}
+          },
+          %{
+            route_id: "CR-Franklin",
+            stop_id: "place-sstat",
+            trip: %{trip_id: "SWKDYWCPeriod-831443-1775"}
+          },
+          %{
+            route_id: "CR-Fairmount",
+            stop_id: "place-sstat",
+            trip: %{trip_id: "SWKDYWCPeriod-831443-1775"}
+          }
         ] = new_alert.informed_entity
       end
     end
