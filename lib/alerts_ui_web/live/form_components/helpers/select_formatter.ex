@@ -60,9 +60,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
       if tooltip_id?(object) do
         Keyword.merge(
           base_attrs,
-          "phx-hook": "Tippy",
-          "data-tippy-content": tooltip_content(object),
-          "data-tippy-delay": "[1000, 200]"
+          title: tooltip_content(object)
         )
       else
         base_attrs
@@ -220,8 +218,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   defp tooltip_id?(object) do
     case object do
       %Stop{} -> true
+      %EnhancedSchedule{} -> true
       _ -> false
     end
+  end
+
+  defp tooltip_content(%EnhancedSchedule{} = object) do
+    insert_newline_in_long_tooltip("Trip ID #{id_for_option(object, false)}")
   end
 
   defp tooltip_content(object) do
@@ -233,5 +236,22 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
       |> List.last()
 
     "#{type} ID #{id_for_option(object, false)}"
+  end
+
+  defp insert_newline_in_long_tooltip(tooltip) do
+    # if the tooltip (title) is too long, split along the hyphens
+    # and insert a newline character into a list item from roughly the middle
+    # then put it back together
+    if String.length(tooltip) > 30 do
+      tooltip_list = String.split(tooltip, "-")
+
+      midway_point = Integer.floor_div(length(tooltip_list), 2)
+
+      tooltip_list
+      |> List.replace_at(midway_point, "\n" <> Enum.at(tooltip_list, midway_point))
+      |> Enum.join("-")
+    else
+      tooltip
+    end
   end
 end

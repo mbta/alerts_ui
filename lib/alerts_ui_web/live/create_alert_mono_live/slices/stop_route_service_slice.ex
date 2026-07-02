@@ -7,8 +7,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
   alias AlertsUIWeb.CreateAlertLive
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
-  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.SelectFormatter
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,
     only: [always_validate_required: 3]

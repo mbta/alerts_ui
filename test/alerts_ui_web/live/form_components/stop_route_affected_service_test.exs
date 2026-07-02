@@ -585,18 +585,14 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
                  {"option",
                   [
                     {"id", "stop-selector-place-pktrm"},
-                    {"phx-hook", "Tippy"},
-                    {"data-tippy-content", "Stop ID place-pktrm"},
-                    {"data-tippy-delay", "[1000, 200]"},
+                    {"title", "Stop ID place-pktrm"},
                     {"selected", "selected"},
                     {"value", "place-pktrm"}
                   ], ["Park Street (inbound)"]},
                  {"option",
                   [
                     {"id", "stop-selector-place-aqucl"},
-                    {"phx-hook", "Tippy"},
-                    {"data-tippy-content", "Stop ID place-aqucl"},
-                    {"data-tippy-delay", "[1000, 200]"},
+                    {"title", "Stop ID place-aqucl"},
                     {"value", "place-aqucl"}
                   ], ["Aquarium"]}
                ] = children_nodes
