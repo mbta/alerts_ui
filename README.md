@@ -105,4 +105,4 @@ You can access your server on your phone by making the following changes:
   - If you need to roll back you can create a release for a previous tag
   - pointed toward: keycloak prod, API prod
   
-You can use the `SENTRY_ENV` environment variable to find out the name of the current environment. Note that config in `prod.exs` runs for all deployed environments, so if you want a config that is just for a subset of deployed environments, you have to specify that.
+You can use the `SENTRY_ENV` environment variable to find out the name of the current environment. Note that `prod.exs` in `/config` runs for all deployed environments, so if you want a config that is just for a subset of deployed environments, you have to specify that.
