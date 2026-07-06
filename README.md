@@ -78,7 +78,7 @@ You can access your server on your phone by making the following changes:
 
 - Client side flags: `/_flags`- mediated by Laboratory library (check `mix.exs` for github if you need docs)
 
-- Server side flags: `/feature_flags`
+- Server side flags: `/feature_flags`- these are hand rolled. To create one, call `FeatureFlags.enabled?("my_flag_name")` anywhere, and if the flag doesn't exist it will be created and put in the database. You can then go ot the `/feature_flags` route to toggle it on and off for the whole environment. It will be set to `false` by default.
 
 - DB viewer: `/db`
 
@@ -104,3 +104,5 @@ You can access your server on your phone by making the following changes:
   - deployed automatically when a release is created and approved via [GitHub's release page](https://github.com/mbta/alerts_ui/releases).
   - If you need to roll back you can create a release for a previous tag
   - pointed toward: keycloak prod, API prod
+  
+You can use the `SENTRY_ENV` environment variable to find out the name of the current environment. Note that `prod.exs` in `/config` runs for all deployed environments, so if you want a config that is just for a subset of deployed environments, you have to specify that.
