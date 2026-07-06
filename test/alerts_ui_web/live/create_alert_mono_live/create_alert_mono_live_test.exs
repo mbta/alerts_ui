@@ -124,6 +124,39 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     end
 
     @tag :logged_in_user
+    test "Prediction suppression modal still comes up even if you went to the review modal and back",
+         %{conn: conn} do
+      with_mocks([
+        {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [] end},
+        {StopsRepo, [], by_route: fn _, _, _opts -> [@stop] end},
+        {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Suspension")
+
+        view
+        |> element("form")
+        |> render_change(%{"alert_data" => %{"route_ids" => [@route.id]}})
+
+        open_review_modal(view)
+
+        view
+        |> element("#check_predictions_modal-container button", "Yes, continue")
+        |> render_click()
+
+        view
+        |> element("#review-modal-container button", "Keep editing")
+        |> render_click()
+
+        open_review_modal(view)
+
+        assert view |> element("#check_predictions_modal-container") |> render() =~
+                 ~s(Warning: Predictions will be suppressed)
+      end
+    end
+
+    @tag :logged_in_user
     test "shows correct affected service for access combination", %{conn: conn} do
       with_mocks([
         {RoutePatternsRepo, [], [included_stops_by_route_id: fn _route_id, _direction -> [] end]},
