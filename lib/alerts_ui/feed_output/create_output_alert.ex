@@ -34,7 +34,8 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
             TimeframeText.timeframe_text(
               alert.active_period_start,
               alert.active_period_end,
-              alert.recurring
+              alert.recurring,
+              alert.duration_certainty
             )
             |> build_translated_string,
           recurrence_text: alert.recurrence_text |> build_translated_string,

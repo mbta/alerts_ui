@@ -2,7 +2,8 @@ defmodule AlertsUI.TimeframeText do
   @moduledoc """
     Returns timeframe text given a start and end time
   """
-  alias AlertsUI.Models.ActivePeriod
+  alias AlertsUI.Models.{ActivePeriod, DurationCertainty}
+
   @timezone "America/New_York"
 
   @type datetime_tuple :: {DateTime.t(), Date.t(), Time.t()}
@@ -21,43 +22,91 @@ defmodule AlertsUI.TimeframeText do
   defp distant_date_ends_same_day(start_date), do: start_date
   defp distant_date(start_date, end_date), do: "#{start_date}-#{end_date}"
 
-  @spec timeframe_text(DateTime.t(), DateTime.t() | nil, boolean()) :: String.t() | nil
-  @spec timeframe_text(DateTime.t(), DateTime.t() | nil, boolean(), DateTime.t()) ::
+  @type duration_certainties_t :: :KNOWN | :UNKNOWN | :ESTIMATED
+
+  @spec timeframe_text(
+          DateTime.t(),
+          DateTime.t() | nil,
+          boolean(),
+          duration_certainties_t
+        ) :: String.t() | nil
+  @spec timeframe_text(
+          DateTime.t(),
+          DateTime.t() | nil,
+          boolean(),
+          duration_certainties_t,
+          DateTime.t()
+        ) ::
           String.t() | nil
   def timeframe_text(
         start_datetime,
         end_datetime,
         recurring,
+        duration_certainty,
         current_datetime \\ DateTime.utc_now()
       )
 
-  # TODO: "starting later today"
-  def timeframe_text(_start_datetime, nil, _recurring, _current_datetime), do: nil
+  # # TODO: "starting later today"
+  # def timeframe_text(_start_datetime, nil, _recurring, _current_datetime) do
 
-  def timeframe_text(start_datetime, end_datetime, recurring, current_datetime) do
+  # end
+
+  def timeframe_text(
+        start_datetime,
+        end_datetime,
+        recurring,
+        duration_certainty,
+        current_datetime
+      ) do
     # all datetimes are shifted to Eastern time and calculated from there
     {current_datetime, current_date, _} = to_local_with_date(current_datetime)
 
     {start_datetime, start_date, _} = to_local_with_date(start_datetime)
 
-    {_, end_date, _} = end_time_tuple = to_local_with_date(end_datetime)
+    end_time_tuple = if end_datetime, do: to_local_with_date(end_datetime), else: nil
+
+    # {_, end_date, _} = end_time_tuple = to_local_with_date(end_datetime)
 
     cond do
-      more_than_six_days(current_datetime, start_datetime) ->
-        starts_more_than_six_days_from_now(start_date, end_time_tuple)
+      # more_than_six_days(current_datetime, start_datetime) ->
+      #   starts_more_than_six_days_from_now(start_date, end_time_tuple)
 
-      between_two_and_six_days(current_date, start_datetime) ->
-        starts_2_to_6_days_from_now(start_date, end_time_tuple)
+      # between_two_and_six_days(current_date, start_datetime) ->
+      #   starts_2_to_6_days_from_now(start_date, end_time_tuple)
 
-      start_date == Date.add(current_date, 1) ->
-        starts_tomorrow(current_date, start_date, end_time_tuple)
+      # start_date == Date.add(current_date, 1) ->
+      #   starts_tomorrow(current_date, start_date, end_time_tuple)
 
-      DateTime.compare(start_datetime, current_datetime) == :gt and
-          Date.compare(start_date, current_date) == :eq ->
-        starts_later_today(current_date, end_date)
+      # DateTime.compare(start_datetime, current_datetime) == :gt and
+      #     Date.compare(start_date, current_date) == :eq ->
+      #   starts_later_today(current_date, end_date)
+
+      within_x_days?(start_datetime, current_datetime, 7) and not recurring ->
+        nil
+
+      within_x_days?(start_datetime, current_datetime, 30) and recurring ->
+        nil
+
+      more_than_or_equal_x_days_ago?(start_datetime, current_datetime, 7) and
+          not recurring ->
+        started_a_while_ago(current_date, end_time_tuple, duration_certainty)
+
+      more_than_or_equal_x_days_ago?(start_datetime, current_datetime, 30) and
+          recurring ->
+        started_a_while_ago(current_date, end_time_tuple, duration_certainty)
 
       true ->
         nil
+    end
+  end
+
+  defp started_a_while_ago(_current_date, nil, _duration_certainty), do: "ongoing"
+
+  defp started_a_while_ago(current_date, end_time_tuple, duration_certainty) do
+    if same_day?(current_date, end_time_tuple) and duration_certainty == :KNOWN do
+      "last day"
+    else
+      "ongoing"
     end
   end
 
@@ -157,6 +206,24 @@ defmodule AlertsUI.TimeframeText do
     DateTime.compare(end_datetime, six_days_from_start) in [:gt, :eq]
   end
 
+  defp within_x_days?(datetime_a, datetime_b, x) do
+    # returns true if datetime_a is less than x days from datetime_b (lt, not eq)
+
+    x_days_from_a = DateTime.add(datetime_a, x, :day)
+    DateTime.compare(datetime_b, x_days_from_a) === :lt
+  end
+
+  defp more_than_or_equal_x_days_ago?(datetime_a, datetime_b, x) do
+    # returns true if datetime_a is >= x from the datetime_b
+
+    x_days_from_a = DateTime.add(datetime_a, x, :day)
+    DateTime.compare(datetime_b, x_days_from_a) in [:gt, :eq]
+  end
+
+  defp same_day?(start_date, end_time_tuple) do
+    get_service_date(end_time_tuple) == start_date
+  end
+
   defp get_day_name_for_end(end_time_tuple) do
     end_time_tuple |> get_service_date |> get_day_name
   end
@@ -197,6 +264,10 @@ defmodule AlertsUI.TimeframeText do
   end
 
   @spec to_local_with_date(DateTime.t()) :: datetime_tuple()
+  defp to_local_with_date(nil) do
+    {nil, nil, nil}
+  end
+
   defp to_local_with_date(datetime) do
     datetime = Timex.Timezone.convert(datetime, @timezone)
     {datetime, DateTime.to_date(datetime), DateTime.to_time(datetime)}
