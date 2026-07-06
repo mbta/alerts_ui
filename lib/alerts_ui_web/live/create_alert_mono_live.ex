@@ -224,6 +224,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       socket
       |> assign(:submitting?, true)
       |> assign(:submitted?, true)
+      |> assign(:check_predictions, false)
       |> sync_socket(%{"alert_data" => autotext_data})
 
     {:noreply, socket}
