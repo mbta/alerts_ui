@@ -149,7 +149,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         |> element("#review-modal-container button", "Keep editing")
         |> render_click()
 
+        refute render_async(view) =~ ~s(id="check_predictions_modal-container"),
+               "prediction modal should no longer be rendered"
+
         open_review_modal(view)
+
+        assert render_async(view) =~ ~s(id="check_predictions_modal-container"),
+               "prediction modal should render"
 
         assert view |> element("#check_predictions_modal-container") |> render() =~
                  ~s(Warning: Predictions will be suppressed)
