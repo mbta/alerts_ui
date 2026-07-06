@@ -17,7 +17,6 @@ defmodule AlertsUI.AlertBuilder do
   alias MBTAV3API.RoutePatterns.RoutePattern, as: APIRoutePattern
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
-  alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
   alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
@@ -35,7 +34,7 @@ defmodule AlertsUI.AlertBuilder do
           stop_names_and_ids: [String.t()],
           stops_with_context: [stop_with_context_t()] | [],
           trip_ids: [String.t()],
-          trip_information_by_id: [map()],
+          trip_information_by_id: trip_information_by_id_t(),
           service_types: [Route.type_int()],
           service_effect_text: String.t() | nil,
           alert_timing: atom(),
@@ -74,6 +73,13 @@ defmodule AlertsUI.AlertBuilder do
   @type direction_t :: 0 | 1
   @type stop_with_context_t :: {Stop.t(), Route.id_t(), direction_t(), RoutePattern.stop_type()}
   @type alert_changeset_params :: map()
+  @type trip_information_by_id_t :: %{String.t() => trip_information_t()}
+  @type trip_information_t :: %{
+          direction_id: direction_t(),
+          route_id: Route.id_t(),
+          trip_name: String.t(),
+          added_route_ids: [Route.id_t()]
+        }
 
   @spec build_alert(
           alert_data_t(),
@@ -913,10 +919,14 @@ defmodule AlertsUI.AlertBuilder do
         effect
       ) do
     trip_ids
-    |> Enum.map(fn trip_id ->
-      %{direction_id: direction_id, route_id: route_id} = trip_information_by_id[trip_id]
-
+    |> Enum.flat_map(fn trip_id ->
       %{
+        direction_id: direction_id,
+        route_id: route_id,
+        added_route_ids: added_route_ids
+      } = trip_information_by_id[trip_id]
+
+      entity = %{
         activities: Activities.for_effect(effect),
         route_id: route_id,
         route_type: route_type,
@@ -928,6 +938,8 @@ defmodule AlertsUI.AlertBuilder do
             route_id
           )
       }
+
+      [entity] ++ build_alternate_route_entities(trip_id, entity, added_route_ids)
     end)
   end
 
@@ -946,20 +958,19 @@ defmodule AlertsUI.AlertBuilder do
         %{
           stop_ids: [_ | _] = stop_ids,
           stops_with_context: [],
-          trip_ids: [_ | _] = trip_ids,
+          trip_ids: [_ | _] = _trip_ids,
           route_type: route_type,
-          route_ids: route_ids
+          route_ids: route_ids,
+          trip_information_by_id: trip_information_by_id
         },
         effect
       ) do
-    trips = get_trips(trip_ids)
-
     stop_ids
     |> stop_route_pairs(route_ids)
     |> Enum.flat_map(fn {stop_id, route_id} ->
-      trips
-      |> Enum.map(fn %Trip{id: trip_id, direction_id: trip_direction_id} ->
-        %{
+      trip_information_by_id
+      |> Enum.flat_map(fn {trip_id, info} ->
+        entity = %{
           activities: Activities.for_effect(effect),
           route_id: route_id,
           route_type: route_type,
@@ -967,11 +978,14 @@ defmodule AlertsUI.AlertBuilder do
           trip:
             build_trip(
               trip_id,
-              trip_direction_id,
+              info.direction_id,
               route_id
             ),
           stop_id: stop_id
         }
+
+        [entity] ++
+          build_alternate_route_entities(trip_id, entity, info.added_route_ids)
       end)
     end)
     |> Enum.uniq()
@@ -982,34 +996,38 @@ defmodule AlertsUI.AlertBuilder do
         :RDTS,
         %{
           stops_with_context: [_ | _] = stops_with_context,
-          trip_ids: [_ | _] = trip_ids,
-          route_type: route_type
+          trip_ids: [_ | _] = _trip_ids,
+          route_type: route_type,
+          trip_information_by_id: trip_information_by_id
         },
         effect
       ) do
-    trips = get_trips(trip_ids)
-    trip_directions = trip_directions(trips)
+    trip_directions = trip_directions(trip_information_by_id)
 
     stops_with_context
     |> Enum.filter(fn {_, _, stop_direction_id, _} ->
       Enum.member?(trip_directions, stop_direction_id)
     end)
     |> Enum.flat_map(fn {%Stop{id: stop_id}, route_id, _direction_id, _stop_type} ->
-      trips
-      |> Enum.map(fn %Trip{id: trip_id, direction_id: trip_direction_id} ->
-        %{
-          activities: Activities.for_effect(effect),
-          route_id: route_id,
-          route_type: route_type,
-          agency_id: Routes.agency_id(route_id),
-          trip:
-            build_trip(
-              trip_id,
-              trip_direction_id,
-              route_id
-            ),
-          stop_id: stop_id
-        }
+      trip_information_by_id
+      |> Enum.flat_map(fn {trip_id, info} ->
+        entity =
+          %{
+            activities: Activities.for_effect(effect),
+            route_id: route_id,
+            route_type: route_type,
+            agency_id: Routes.agency_id(route_id),
+            trip:
+              build_trip(
+                trip_id,
+                info.direction_id,
+                route_id
+              ),
+            stop_id: stop_id
+          }
+
+        [entity] ++
+          build_alternate_route_entities(trip_id, entity, info.added_route_ids)
       end)
     end)
     |> Enum.uniq()
@@ -1070,23 +1088,26 @@ defmodule AlertsUI.AlertBuilder do
 
   def build_informed_entities(_mode, _data, _effect), do: []
 
-  @spec get_trips([String.t()]) :: [Trip.t()]
-  defp get_trips(trip_ids) do
-    trip_ids
-    |> Enum.filter(&(&1 != "default"))
-    |> Enum.map(&get_trip/1)
-    |> Enum.reject(&is_nil/1)
+  @spec build_alternate_route_entities(
+          Trip.id_t(),
+          map(),
+          [Route.id_t()]
+        ) :: [map()]
+  defp build_alternate_route_entities(trip_id, entity, added_route_ids) do
+    added_route_ids
+    |> Enum.map(fn route_id ->
+      %{
+        entity
+        | route_id: route_id,
+          trip: build_trip(trip_id, entity.trip.direction_id, route_id)
+      }
+    end)
   end
 
-  @spec get_trip(String.t()) :: Trip.t() | nil
-  defp get_trip(trip_id) do
-    SchedulesRepo.trip(trip_id)
-  end
-
-  @spec trip_directions([Trip.t()]) :: [Trip.direction_id_t()]
-  defp trip_directions(trips) do
-    trips
-    |> Enum.map(fn %Trip{direction_id: direction_id} -> direction_id end)
+  @spec trip_directions(trip_information_by_id_t()) :: [Trip.direction_id_t()]
+  defp trip_directions(trip_information_by_id) do
+    trip_information_by_id
+    |> Enum.map(fn {_trip_id, info} -> info.direction_id end)
     |> Enum.uniq()
   end
 

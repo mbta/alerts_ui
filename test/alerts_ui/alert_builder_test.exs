@@ -11,7 +11,6 @@ defmodule AlertsUI.AlertBuilderTest do
   alias MBTAV3API.RoutePatterns.RoutePattern, as: APIRoutePattern
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
-  alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
   alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
@@ -2852,9 +2851,21 @@ defmodule AlertsUI.AlertBuilderTest do
           route_ids: ["57"],
           trip_ids: ["123", "345", "456"],
           trip_information_by_id: %{
-            "123" => %{direction_id: 0, route_id: "57"},
-            "345" => %{direction_id: 0, route_id: "57"},
-            "456" => %{direction_id: 0, route_id: "57"}
+            "123" => %{
+              direction_id: 0,
+              route_id: "57",
+              added_route_ids: []
+            },
+            "345" => %{
+              direction_id: 0,
+              route_id: "57",
+              added_route_ids: []
+            },
+            "456" => %{
+              direction_id: 0,
+              route_id: "57",
+              added_route_ids: []
+            }
           }
         }
 
@@ -2911,9 +2922,21 @@ defmodule AlertsUI.AlertBuilderTest do
           route_ids: ["57", "58"],
           trip_ids: ["123", "345", "456"],
           trip_information_by_id: %{
-            "123" => %{direction_id: 0, route_id: "57"},
-            "345" => %{direction_id: 0, route_id: "57"},
-            "456" => %{direction_id: 0, route_id: "58"}
+            "123" => %{
+              direction_id: 0,
+              route_id: "57",
+              added_route_ids: []
+            },
+            "345" => %{
+              direction_id: 0,
+              route_id: "57",
+              added_route_ids: []
+            },
+            "456" => %{
+              direction_id: 0,
+              route_id: "58",
+              added_route_ids: []
+            }
           }
         }
 
@@ -2999,9 +3022,21 @@ defmodule AlertsUI.AlertBuilderTest do
           route_ids: ["57"],
           trip_ids: ["123", "345", "456"],
           trip_information_by_id: %{
-            "123" => %{direction_id: 0, route_id: "57"},
-            "345" => %{direction_id: 0, route_id: "57"},
-            "456" => %{direction_id: 0, route_id: "57"}
+            "123" => %{
+              direction_id: 0,
+              route_id: "57",
+              added_route_ids: []
+            },
+            "345" => %{
+              direction_id: 0,
+              route_id: "57",
+              added_route_ids: []
+            },
+            "456" => %{
+              direction_id: 0,
+              route_id: "57",
+              added_route_ids: []
+            }
           },
           stop_ids: [],
           direction: "default"
@@ -3194,7 +3229,11 @@ defmodule AlertsUI.AlertBuilderTest do
         direction: "default",
         trip_ids: ["default", "CR-627754-435"],
         trip_information_by_id: %{
-          "CR-627754-435" => %{direction_id: 0, route_id: "CR-Fitchburg"}
+          "CR-627754-435" => %{
+            direction_id: 0,
+            route_id: "CR-Fitchburg",
+            added_route_ids: []
+          }
         },
         stop_ids: ["place-FR-0201", "place-FR-0219"],
         header_text: "t",
@@ -3244,8 +3283,6 @@ defmodule AlertsUI.AlertBuilderTest do
            by_route: fn _route_id, _direction -> parent_stops ++ child_stops end,
            all: fn ["filter[id]": "place-FR-0201,place-FR-0219"], _opts -> parent_stops end
          ]},
-        {SchedulesRepo, [],
-         [trip: fn "CR-627754-435" -> %Trip{id: "CR-627754-435", direction_id: 0} end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2} end]}
       ]) do
         result = AlertBuilder.build_alert(alert_data, :RDTS)
@@ -3313,7 +3350,8 @@ defmodule AlertsUI.AlertBuilderTest do
         trip_information_by_id: %{
           "Boat-EastBoston-1115-Long-BEB-01-Weekday-Summer-24" => %{
             direction_id: 0,
-            route_id: "Boat-EastBoston"
+            route_id: "Boat-EastBoston",
+            added_route_ids: []
           }
         },
         stop_ids: ["Boat-Long"],
@@ -3346,12 +3384,6 @@ defmodule AlertsUI.AlertBuilderTest do
            by_route: fn _route_id, _direction -> parent_stops ++ child_stops end,
            all: fn ["filter[id]": "Boat-Long"], _opts -> parent_stops end
          ]},
-        {SchedulesRepo, [],
-         [
-           trip: fn "Boat-EastBoston-1115-Long-BEB-01-Weekday-Summer-24" ->
-             %Trip{id: "Boat-EastBoston-1115-Long-BEB-01-Weekday-Summer-24", direction_id: 0}
-           end
-         ]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 4} end]}
       ]) do
         result = AlertBuilder.build_alert(alert_data, :RDTS)
@@ -3383,7 +3415,11 @@ defmodule AlertsUI.AlertBuilderTest do
         direction: "0",
         trip_ids: ["default", "CR-627678-295"],
         trip_information_by_id: %{
-          "CR-627678-295" => %{direction_id: 0, route_id: "CR-Haverhill"}
+          "CR-627678-295" => %{
+            direction_id: 0,
+            route_id: "CR-Haverhill",
+            added_route_ids: []
+          }
         },
         stop_ids: ["place-WR-0067", "place-WR-0075"]
       }
@@ -3424,8 +3460,6 @@ defmodule AlertsUI.AlertBuilderTest do
            by_route: fn _route_id, _direction -> parent_stops ++ child_stops end,
            all: fn ["filter[id]": "place-WR-0067,place-WR-0075"], _opts -> parent_stops end
          ]},
-        {SchedulesRepo, [],
-         [trip: fn "CR-627678-295" -> %Trip{id: "CR-627678-295", direction_id: 0} end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2} end]}
       ]) do
         result = AlertBuilder.build_alert(alert_data, :RDTS)
@@ -3493,7 +3527,11 @@ defmodule AlertsUI.AlertBuilderTest do
         direction: "0",
         trip_ids: ["default", "CR-627678-295"],
         trip_information_by_id: %{
-          "CR-627678-295" => %{direction_id: 0, route_id: "CR-Haverhill"}
+          "CR-627678-295" => %{
+            direction_id: 0,
+            route_id: "CR-Haverhill",
+            added_route_ids: []
+          }
         },
         stop_ids: ["place-WR-0067", "place-WR-0075"]
       }
@@ -3534,8 +3572,6 @@ defmodule AlertsUI.AlertBuilderTest do
            by_route: fn _route_id, _direction -> parent_stops ++ child_stops end,
            all: fn ["filter[id]": "place-WR-0067,place-WR-0075"], _opts -> parent_stops end
          ]},
-        {SchedulesRepo, [],
-         [trip: fn "CR-627678-295" -> %Trip{id: "CR-627678-295", direction_id: 0} end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2} end]}
       ]) do
         result = AlertBuilder.build_alert(alert_data, :RDTS)
@@ -3605,7 +3641,11 @@ defmodule AlertsUI.AlertBuilderTest do
         direction: "default",
         trip_ids: ["default", trip_id],
         trip_information_by_id: %{
-          trip_id => %{direction_id: 0, route_id: "CR-Fitchburg"}
+          trip_id => %{
+            direction_id: 0,
+            route_id: "CR-Fitchburg",
+            added_route_ids: []
+          }
         },
         stop_ids: ["place-FR-0201", "place-FR-0219"]
       }
@@ -3654,7 +3694,6 @@ defmodule AlertsUI.AlertBuilderTest do
            end,
            all: fn ["filter[id]": "place-FR-0201,place-FR-0219"], _opts -> parent_stops end
          ]},
-        {SchedulesRepo, [], [trip: fn ^trip_id -> %Trip{id: trip_id, direction_id: 0} end]},
         {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2} end]}
       ]) do
         result = AlertBuilder.build_alert(alert_data, :RDTS)

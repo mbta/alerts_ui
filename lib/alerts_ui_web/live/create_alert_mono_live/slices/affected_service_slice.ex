@@ -132,7 +132,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
           Map.put(acc, s.trip.id, %{
             direction_id: s.trip.direction_id,
             route_id: s.route.id,
-            trip_name: SelectFormatter.name_for_option(s, route_type)
+            trip_name: SelectFormatter.name_for_option(s, route_type),
+            added_route_ids: s.added_route_ids
           })
         end)
 

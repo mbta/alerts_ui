@@ -29,7 +29,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: nil,
     departure_time:
-      DateTime.utc_now() |> DateTime.shift_zone!("America/New_York") |> DateTime.add(-1, :hour)
+      DateTime.utc_now() |> DateTime.shift_zone!("America/New_York") |> DateTime.add(-1, :hour),
+    added_route_ids: []
   }
 
   @schedule_2 %EnhancedSchedule{
@@ -37,7 +38,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: DateTime.utc_now() |> DateTime.shift_zone!("America/New_York"),
-    departure_time: nil
+    departure_time: nil,
+    added_route_ids: []
   }
 
   @schedule_3 %EnhancedSchedule{
@@ -46,7 +48,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: DateTime.utc_now() |> DateTime.shift_zone!("America/New_York"),
     departure_time:
-      DateTime.utc_now() |> DateTime.shift_zone!("America/New_York") |> DateTime.add(-1, :hour)
+      DateTime.utc_now() |> DateTime.shift_zone!("America/New_York") |> DateTime.add(-1, :hour),
+    added_route_ids: []
   }
 
   @schedule_4 %EnhancedSchedule{
@@ -54,7 +57,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     trip: %Trip{id: "CR-683322-596", name: "596", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: DateTime.utc_now() |> DateTime.shift_zone!("America/New_York"),
-    departure_time: nil
+    departure_time: nil,
+    added_route_ids: []
   }
 
   @route %Route{

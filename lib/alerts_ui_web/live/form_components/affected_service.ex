@@ -838,7 +838,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
       Map.put(acc, schedule.trip.id, %{
         direction_id: schedule.trip.direction_id,
         route_id: schedule.route.id,
-        trip_name: SelectFormatter.name_for_option(schedule, route_type)
+        trip_name: SelectFormatter.name_for_option(schedule, route_type),
+        added_route_ids: schedule.added_route_ids
       })
     end)
   end

@@ -98,12 +98,14 @@ defmodule Test.Support.Helpers do
   end
 
   def parse_alert_created_output(view) do
-    view
-    |> element("#success_view h3")
-    |> render()
-    |> String.replace("<h3 class=\"font-bold mb-2 text-2xl  mr-4\">\n  Alert #", "")
-    |> String.replace(" created successfully\n</h3>", "")
-    |> AlertsUI.Alerts.get_by_alert_id()
+    flash = assert_redirect(view, "/")
+
+    alert_id =
+      flash["info"]
+      |> String.replace("New alert #", "")
+      |> String.replace(" created", "")
+
+    AlertsUI.Alerts.get_by_alert_id(alert_id)
   end
 
   def document_has_element?(document, selector) do
