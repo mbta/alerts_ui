@@ -20,8 +20,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Title do
 
     ~H"""
     <.h1>
-      <div class="flex flex-row justify-center">
-        <div class="mr-4 self-center">
+      <div class="flex flex-row justify-center items-center">
+        <div class="mr-2 self-center">
           <.circle_icon type={@icon_name} size={35} title={@title} />
         </div>
         {@route_type_name} • {@effect_name}
