@@ -417,8 +417,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
 
         render_async(view)
 
-        assert render(view) =~ @schedule_future.trip.name
-        refute render(view) =~ @schedule_3.trip.name
+        assert view |> element("#service_view") |> render =~ @schedule_future.trip.name
+        refute view |> element("#service_view") |> render =~ @schedule_3.trip.name
 
         view
         |> element("form")
@@ -429,8 +429,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         render_click(view, "accept_filter")
         render_async(view)
 
-        assert render(view) =~ @schedule_3.trip.name
-        refute render(view) =~ @schedule_future.trip.name
+        assert view |> element("#service_view") |> render =~ @schedule_3.trip.name
+        refute view |> element("#service_view") |> render =~ @schedule_future.trip.name
       end
     end
 
@@ -538,8 +538,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         render_click(view, "accept_filter")
         render_async(view)
 
-        assert render(view) =~ @schedule_future.trip.name
-        refute render(view) =~ @schedule_3.trip.name
+        assert view |> element("#service_view") |> render =~ @schedule_future.trip.name
+        refute view |> element("#service_view") |> render =~ @schedule_3.trip.name
 
         # Select "All future trips" — the select component renders the prompt with value="default",
         # so the browser sends "default" when "All future trips" is chosen.
@@ -553,9 +553,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         render_async(view)
 
         # Both trips — today's and tomorrow's — should appear
-        assert render(view) =~ @schedule_future.trip.name
-        assert render(view) =~ @schedule_3.trip.name
-        assert render(view) =~ "Filter: All future trips"
+        assert view |> element("#service_view") |> render =~ @schedule_future.trip.name
+        assert view |> element("#service_view") |> render =~ @schedule_3.trip.name
+        assert view |> element("#service_view") |> render =~ "Filter: All future trips"
       end
     end
 
@@ -607,10 +607,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         render_async(view)
 
         # Should show today's schedules, not tomorrow's
-        assert render(view) =~ @schedule_future.trip.name
-        refute render(view) =~ @schedule_3.trip.name
+        assert view |> element("#service_view") |> render =~ @schedule_future.trip.name
+        refute view |> element("#service_view") |> render =~ @schedule_3.trip.name
         # Filter title back to today
-        assert render(view) =~ ~s(Filter: #{today_day_name})
+        assert view |> element("#service_view") |> render =~ ~s(Filter: #{today_day_name})
       end
     end
 
