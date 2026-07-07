@@ -322,13 +322,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     routes = Enum.filter(selections.available_routes || [], &(&1.id in route_ids))
 
     stops_from_original =
-      (Map.get(data, :original_stop_selections) || [])
+      (Map.get(data, :stop_names_and_ids) || [])
       |> Alert.get_original_names_and_ids()
       |> Enum.map(fn {name, id} -> %Stop{name: name, id: id} end)
       |> Enum.filter(&(&1.id in stop_ids))
 
     original_ids = MapSet.new(stops_from_original, & &1.id)
 
+    # we need selected stop names
     stops_from_available =
       Enum.filter(
         selections.available_stops || [],
