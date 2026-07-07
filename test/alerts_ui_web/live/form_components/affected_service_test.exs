@@ -954,7 +954,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
              DateTime.utc_now()
              |> DateTime.shift_zone!("America/New_York")
              |> DateTime.to_date()
-             |> Date.add(10)
+             |> Date.add(1)
            end
          ]},
         {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}

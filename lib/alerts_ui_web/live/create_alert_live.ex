@@ -365,7 +365,11 @@ defmodule AlertsUIWeb.CreateAlertLive do
     opts = [stop_sequences: [:first, :last], date: date] |> direction_option(directions)
 
     route_ids
-    |> SchedulesRepo.by_route_ids(opts)
+    |> Enum.map(fn route_id ->
+      SchedulesRepo.by_route_ids([route_id], opts)
+    end)
+    |> List.flatten()
+    |> Enum.uniq()
     |> Enum.map(fn schedule ->
       map = Map.from_struct(schedule)
       Kernel.struct(EnhancedSchedule, map)
