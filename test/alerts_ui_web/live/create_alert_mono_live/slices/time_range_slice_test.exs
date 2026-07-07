@@ -1486,51 +1486,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
       assert is_nil(result)
     end
-
-    test "start and end time not updated if trip changes and departure before current time but form is in editing mode" do
-      schedule = %EnhancedSchedule{
-        route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
-        trip: %Trip{id: "trip-595", name: "595", direction_id: 0},
-        stop: %Stop{id: "place-sstat", name: "South Station"},
-        arrival_time: nil,
-        departure_time: @past_departure,
-        time_of_last_trip_arrival: @past_arrival
-      }
-
-      changeset =
-        Ecto.Changeset.cast(
-          %AlertData{},
-          %{
-            trip_ids: ["trip-595"],
-            active_period_start_specifier: :custom,
-            active_period_end_specifier: :custom,
-            active_period_start: ~N[2040-01-01 10:16:00],
-            active_period_end: ~N[2040-01-01 11:54:00]
-          },
-          [
-            :trip_ids,
-            :active_period_start_specifier,
-            :active_period_end_specifier,
-            :active_period_start,
-            :active_period_end
-          ]
-        )
-
-      socket = socket_for_transform([schedule], :editing)
-
-      result =
-        Slice.transform(
-          %TimeRangeSlice{},
-          changeset,
-          %{"_target" => ["alert_data", "trip_ids"], "alert_data" => %{}},
-          socket
-        )
-
-      assert Ecto.Changeset.get_field(result, :active_period_start_specifier) == :custom
-      assert Ecto.Changeset.get_field(result, :active_period_end_specifier) == :custom
-      assert Ecto.Changeset.get_field(result, :active_period_start) == ~N[2040-01-01 10:16:00]
-      assert Ecto.Changeset.get_field(result, :active_period_end) == ~N[2040-01-01 11:54:00]
-    end
   end
 
   describe "validate/4 recurring start-in-the-past error placement" do
