@@ -205,7 +205,7 @@ defmodule AlertsUI.TimeframeText do
     end
   end
 
-  @spec starts_2_to_6_days_from_now(Date.t(), Date.t(), datetime_tuple() | nil) ::
+  @spec starts_2_to_6_days_from_now(datetime_tuple(), Date.t(), datetime_tuple() | nil) ::
           String.t() | nil
   defp starts_2_to_6_days_from_now({_, start_date, _}, _current_date, nil) do
     "starting #{get_day_name(start_date)}"
@@ -281,7 +281,7 @@ defmodule AlertsUI.TimeframeText do
           datetime_tuple(),
           boolean(),
           duration_certainties_t()
-        ) :: boolean()
+        ) :: String.t()
   defp already_started(
          {_, start_date, _},
          {current_datetime, _, _} = current_time_tuple,
@@ -306,7 +306,7 @@ defmodule AlertsUI.TimeframeText do
     end
   end
 
-  @spec started_recently(Date.t(), datetime_tuple() | nil) :: String.t() | nil
+  @spec started_recently(datetime_tuple(), datetime_tuple() | nil) :: String.t() | nil
   defp started_recently(_, nil), do: nil
 
   defp started_recently(current_time_tuple, end_time_tuple) do
@@ -333,8 +333,7 @@ defmodule AlertsUI.TimeframeText do
 
   ## General helpers
 
-  @spec ends_today?(datetime_tuple(), datetime_tuple() | nil) :: boolean()
-  defp ends_today?(_, nil), do: false
+  @spec ends_today?(datetime_tuple(), datetime_tuple()) :: boolean()
 
   defp ends_today?(current_time_tuple, end_time_tuple) do
     get_service_date(end_time_tuple) == get_service_date(current_time_tuple)
