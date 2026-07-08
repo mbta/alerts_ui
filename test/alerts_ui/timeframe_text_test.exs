@@ -1,6 +1,7 @@
 defmodule AlertsUI.TimeframeTextTest do
   @moduledoc false
   use AlertsUI.DataCase
+  alias AlertsUI.Models.ActivePeriod
   alias AlertsUI.TimeframeText
 
   describe "one time alerts - effect start within past 7 days" do
@@ -182,13 +183,13 @@ defmodule AlertsUI.TimeframeTextTest do
       }
     end
 
-    test "effect end - tomorrow", %{
+    test "effect end - tomorrow (at end of service)", %{
       now: now,
       start_now: start_now,
       start_in_30: start_in_30,
       recurring: recurring
     } do
-      ending = DateTime.add(now, 1, :day)
+      ending = utc_datetime_from_local(~D[2024-02-27], ActivePeriod.end_of_service_time())
       duration_certainty = :KNOWN
 
       assert TimeframeText.timeframe_text(start_now, ending, recurring, duration_certainty, now) ==
@@ -330,8 +331,8 @@ defmodule AlertsUI.TimeframeTextTest do
       }
     end
 
-    test "effect end - today", %{now: now, start: start} do
-      ending = DateTime.add(now, 2, :hour)
+    test "effect end - today (at end of service)", %{now: now, start: start} do
+      ending = utc_datetime_from_local(~D[2024-02-26], ActivePeriod.end_of_service_time())
 
       assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "later today"
       assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "later today"

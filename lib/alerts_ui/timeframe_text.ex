@@ -40,7 +40,7 @@ defmodule AlertsUI.TimeframeText do
         current_datetime
       ) do
     # all datetimes are shifted to Eastern time and calculated from there
-    {current_datetime, current_date, _} =
+    {current_datetime, _, _} =
       current_time_tuple = to_local_with_date(current_datetime)
 
     {start_datetime, _, _} = start_time_tuple = to_local_with_date(start_datetime)
@@ -50,7 +50,7 @@ defmodule AlertsUI.TimeframeText do
     cond do
       # Alerts that start between now and in 30 minutes
       starts_now_or_soon?(start_datetime, current_datetime) ->
-        starts_now_or_soon(current_date, end_time_tuple, recurring)
+        starts_now_or_soon(current_time_tuple, end_time_tuple, recurring)
 
       # Alerts that have yet to start
       starts_in_future?(start_datetime, current_datetime) ->
@@ -85,20 +85,20 @@ defmodule AlertsUI.TimeframeText do
     end
   end
 
-  @spec starts_now_or_soon(Date.t(), datetime_tuple(), boolean()) :: String.t() | nil
+  @spec starts_now_or_soon(datetime_tuple(), datetime_tuple(), boolean()) :: String.t() | nil
   defp starts_now_or_soon(_current_date, _end_time_tuple, true), do: "starting today"
 
-  defp starts_now_or_soon(current_date, end_time_tuple, _recurring),
-    do: text_based_on_end(current_date, end_time_tuple)
+  defp starts_now_or_soon(current_time_tuple, end_time_tuple, _recurring),
+    do: text_based_on_end(current_time_tuple, end_time_tuple)
 
-  @spec text_based_on_end(Date.t(), datetime_tuple() | nil) :: String.t() | nil
+  @spec text_based_on_end(datetime_tuple(), datetime_tuple() | nil) :: String.t() | nil
   defp text_based_on_end(_, nil), do: nil
 
-  defp text_based_on_end(current_date, end_time_tuple) do
+  defp text_based_on_end({_, current_date, _} = current_time_tuple, end_time_tuple) do
     {end_datetime, _, _} = end_time_tuple
 
     cond do
-      ends_tomorrow?(current_date, end_time_tuple) ->
+      ends_tomorrow?(current_time_tuple, end_time_tuple) ->
         "through tomorrow"
 
       between_x_and_y_days?(current_date, end_datetime, 2, 6) ->
@@ -129,7 +129,7 @@ defmodule AlertsUI.TimeframeText do
   @spec starts_in_future(datetime_tuple(), datetime_tuple(), datetime_tuple()) :: String.t() | nil
   defp starts_in_future(
          {start_datetime, start_date, _},
-         {current_datetime, current_date, _},
+         {current_datetime, current_date, _} = current_time_tuple,
          end_time_tuple
        ) do
     cond do
@@ -137,7 +137,7 @@ defmodule AlertsUI.TimeframeText do
         starts_later_today(current_date, end_time_tuple)
 
       starts_tomorrow?(start_datetime, current_date) ->
-        starts_tomorrow(current_date, end_time_tuple)
+        starts_tomorrow(current_time_tuple, end_time_tuple)
 
       between_x_and_y_days?(current_date, start_datetime, 2, 6) ->
         starts_2_to_6_days_from_now(start_date, current_date, end_time_tuple)
@@ -180,14 +180,14 @@ defmodule AlertsUI.TimeframeText do
     end
   end
 
-  @spec starts_tomorrow(Date.t(), datetime_tuple() | nil) :: String.t()
+  @spec starts_tomorrow(datetime_tuple(), datetime_tuple() | nil) :: String.t()
   defp starts_tomorrow(_, nil), do: "starting tomorrow"
 
   defp starts_tomorrow(
-         current_date,
+         {_, current_date, _} = current_time_tuple,
          {end_datetime, _end_date, _end_time} = end_time_tuple
        ) do
-    ends_tomorrow = ends_tomorrow?(current_date, end_time_tuple)
+    ends_tomorrow = ends_tomorrow?(current_time_tuple, end_time_tuple)
 
     ends_within_7_days = within_x_days?(current_date, end_datetime, 7, true)
     ends_over_7_days_from_now = more_than_x_days?(current_date, end_datetime, 7)
@@ -283,17 +283,17 @@ defmodule AlertsUI.TimeframeText do
         ) :: boolean()
   defp already_started(
          {_, start_date, _},
-         {current_datetime, current_date, _},
+         {current_datetime, current_date, _} = current_time_tuple,
          end_time_tuple,
          recurring,
          duration_certainty
        ) do
     cond do
       within_x_days?(start_date, current_datetime, 7) and not recurring ->
-        started_recently(current_date, end_time_tuple)
+        started_recently(current_time_tuple, end_time_tuple)
 
       within_x_days?(start_date, current_datetime, 30) and recurring ->
-        started_recently(current_date, end_time_tuple)
+        started_recently(current_time_tuple, end_time_tuple)
 
       more_than_x_days?(start_date, current_datetime, 7, true) and
           not recurring ->
@@ -308,11 +308,11 @@ defmodule AlertsUI.TimeframeText do
   @spec started_recently(Date.t(), datetime_tuple() | nil) :: String.t() | nil
   defp started_recently(_, nil), do: nil
 
-  defp started_recently(current_date, end_time_tuple) do
-    if ends_today?(current_date, end_time_tuple) do
+  defp started_recently(current_time_tuple, end_time_tuple) do
+    if ends_today?(current_time_tuple, end_time_tuple) do
       nil
     else
-      text_based_on_end(current_date, end_time_tuple)
+      text_based_on_end(current_time_tuple, end_time_tuple)
     end
   end
 
@@ -332,18 +332,19 @@ defmodule AlertsUI.TimeframeText do
 
   ## General helpers
 
-  @spec ends_today?(Date.t(), datetime_tuple() | nil) :: boolean()
+  @spec ends_today?(datetime_tuple(), datetime_tuple() | nil) :: boolean()
   defp ends_today?(_, nil), do: false
 
-  defp ends_today?(current_date, {_end_datetime, end_date, end_time} = _end_time_tuple) do
-    end_date == current_date and
-      Time.compare(ActivePeriod.end_of_service_time(), end_time) in [:lt, :eq]
+  defp ends_today?(current_time_tuple, end_time_tuple) do
+    get_service_date(end_time_tuple) == get_service_date(current_time_tuple)
   end
 
-  @spec ends_tomorrow?(Date.t(), datetime_tuple()) :: boolean()
-  defp ends_tomorrow?(current_date, {_end_datetime, end_date, end_time} = _end_time_tuple) do
-    end_date == current_date |> Date.add(1) and
-      Time.compare(ActivePeriod.end_of_service_time(), end_time) in [:lt, :eq]
+  @spec ends_tomorrow?(datetime_tuple(), datetime_tuple()) :: boolean()
+  defp ends_tomorrow?(current_time_tuple, end_time_tuple) do
+    current_service_date = get_service_date(current_time_tuple)
+    end_service_date = get_service_date(end_time_tuple)
+
+    current_service_date |> Date.add(1) == end_service_date
   end
 
   @spec ends_this_year?(Date.t(), DateTime.t()) :: boolean()
