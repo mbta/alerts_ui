@@ -276,6 +276,32 @@ defmodule AlertsUI.TimeframeTextTest do
              ) == "until June"
     end
 
+    test "effect end - >90 days but still this year (until Dec end of service)", %{
+      now: now,
+      start_now: start_now,
+      start_in_30: start_in_30,
+      recurring: recurring
+    } do
+      ending = utc_datetime_from_local(~D[2024-12-31], ActivePeriod.end_of_service_time())
+      duration_certainty = :KNOWN
+
+      assert TimeframeText.timeframe_text(
+               start_now,
+               ending,
+               recurring,
+               duration_certainty,
+               now
+             ) == "until December"
+
+      assert TimeframeText.timeframe_text(
+               start_in_30,
+               ending,
+               recurring,
+               duration_certainty,
+               now
+             ) == "until December"
+    end
+
     test "effect end - >90 days but next year or beyond", %{
       now: now,
       start_now: start_now,
@@ -298,6 +324,35 @@ defmodule AlertsUI.TimeframeTextTest do
       assert TimeframeText.timeframe_text(
                start_in_30,
                ending_90,
+               recurring,
+               duration_certainty,
+               now
+             ) ==
+               "until January 2025"
+    end
+
+    test "effect end - >90 days but on Jan 1 start of service", %{
+      now: now,
+      start_now: start_now,
+      start_in_30: start_in_30,
+      recurring: recurring
+    } do
+      start_of_service = Time.add(ActivePeriod.start_of_service_time(), 1, :second)
+      ending = utc_datetime_from_local(~D[2025-01-01], start_of_service)
+      duration_certainty = :KNOWN
+
+      assert TimeframeText.timeframe_text(
+               start_now,
+               ending,
+               recurring,
+               duration_certainty,
+               now
+             ) ==
+               "until January 2025"
+
+      assert TimeframeText.timeframe_text(
+               start_in_30,
+               ending,
                recurring,
                duration_certainty,
                now
