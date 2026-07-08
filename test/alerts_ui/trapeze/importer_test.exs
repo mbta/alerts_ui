@@ -30,25 +30,28 @@ defmodule AlertsUI.Trapeze.ImporterTest do
     type: "stop",
     child_ids: ["place"]
   }
-  @facility %Facility{
-    id: "349",
-    type: "ESCALATOR",
-    short_name: "Platform to Russell Field",
-    long_name: "Alewife Escalator 349 (Platform to Russell Field)",
-    stop: @stop,
-    latitude: 42.395428,
-    longitude: -71.142483,
-    properties: [
-      %{name: "direction", value: "up"},
-      %{name: "excludes-stop", value: 141},
-      %{name: "excludes-stop", value: 9_070_061},
-      %{name: "excludes-stop", value: "door-alfcl-alewife"},
-      %{name: "excludes-stop", value: "door-alfcl-busway"},
-      %{name: "excludes-stop", value: "door-alfcl-cambridgepark"},
-      %{name: "excludes-stop", value: "door-alfcl-pathbusway"},
-      %{name: "excludes-stop", value: "door-alfcl-steel"}
-    ]
-  }
+
+  def facility_with_id(id) do
+    %Facility{
+      id: id,
+      type: "ESCALATOR",
+      short_name: "Platform to Russell Field",
+      long_name: "Alewife Escalator 349 (Platform to Russell Field)",
+      stop: @stop,
+      latitude: 42.395428,
+      longitude: -71.142483,
+      properties: [
+        %{name: "direction", value: "up"},
+        %{name: "excludes-stop", value: 141},
+        %{name: "excludes-stop", value: 9_070_061},
+        %{name: "excludes-stop", value: "door-alfcl-alewife"},
+        %{name: "excludes-stop", value: "door-alfcl-busway"},
+        %{name: "excludes-stop", value: "door-alfcl-cambridgepark"},
+        %{name: "excludes-stop", value: "door-alfcl-pathbusway"},
+        %{name: "excludes-stop", value: "door-alfcl-steel"}
+      ]
+    }
+  end
 
   def get(work_order_id),
     do:
@@ -64,7 +67,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
   describe "perform" do
     test "with incomplete configuration stops early" do
       with_mocks([
-        {FacilitiesRepo, [], [get: fn _ -> @facility end]}
+        {FacilitiesRepo, [], [get: fn _ -> nil end]}
       ]) do
         reassign_env(:alerts_ui, :trapeze_sftp_host, "")
         reassign_env(:alerts_ui, :trapeze_sftp_port, "")
@@ -81,7 +84,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
 
     test "that in the right env it completes" do
       with_mocks([
-        {FacilitiesRepo, [], [get: fn _ -> @facility end]},
+        {FacilitiesRepo, [], [get: fn _ -> nil end]},
         {SFTP, [],
          [
            source_description: fn ->
@@ -105,8 +108,19 @@ defmodule AlertsUI.Trapeze.ImporterTest do
 
   describe "process_feed" do
     test "turns Trapeze lines into Alerts" do
+      facility_891 = facility_with_id("891")
+      facility_502 = facility_with_id("502")
+      facility_444 = facility_with_id("444")
+      facility_800 = facility_with_id("800")
+
       with_mocks([
-        {FacilitiesRepo, [], [get: fn _ -> @facility end]},
+        {FacilitiesRepo, [],
+         [
+           get: fn _ -> facility_891 end,
+           get_by_type: fn _, _opts ->
+             [facility_891, facility_502, facility_444, facility_800]
+           end
+         ]},
         {StopsRepo, [],
          [get: fn _ -> @stop end, get!: fn _ -> @stop end, all: fn _, _ -> [@stop] end]},
         {RoutesRepo, [], [by_stop: fn _ -> [@route] end]}
@@ -139,12 +153,19 @@ defmodule AlertsUI.Trapeze.ImporterTest do
     end
 
     test "continues processing if an error happens" do
+      facility_891 = facility_with_id("891")
+      facility_502 = facility_with_id("502")
+      facility_444 = facility_with_id("444")
+
       with_mocks([
         {FacilitiesRepo, [],
          [
+           get_by_type: fn _, _opts ->
+             [facility_891, facility_502, facility_444]
+           end,
            get: fn
              "502" -> raise "This is an error."
-             _ -> @facility
+             _ -> facility_891
            end
          ]},
         {StopsRepo, [],
@@ -174,8 +195,16 @@ defmodule AlertsUI.Trapeze.ImporterTest do
     end
 
     test "does not make a new alert if a manual one for this facility exists" do
+      facility_891 = facility_with_id("891")
+
       with_mocks([
-        {FacilitiesRepo, [], [get: fn _ -> @facility end]},
+        {FacilitiesRepo, [],
+         [
+           get: fn _ -> facility_891 end,
+           get_by_type: fn _, _opts ->
+             [facility_891]
+           end
+         ]},
         {StopsRepo, [], [get: fn _ -> @stop end, get!: fn _ -> @stop end]},
         {RoutesRepo, [], [by_stop: fn _ -> [@route] end]}
       ]) do
@@ -205,8 +234,16 @@ defmodule AlertsUI.Trapeze.ImporterTest do
     end
 
     test "handles multiple work orders for the same elevator" do
+      facility_891 = facility_with_id("891")
+
       with_mocks([
-        {FacilitiesRepo, [], [get: fn _ -> @facility end]},
+        {FacilitiesRepo, [],
+         [
+           get: fn _ -> facility_891 end,
+           get_by_type: fn _, _opts ->
+             [facility_891]
+           end
+         ]},
         {StopsRepo, [],
          [get: fn _ -> @stop end, get!: fn _ -> @stop end, all: fn _, _ -> [@stop] end]},
         {RoutesRepo, [], [by_stop: fn _ -> [@route] end]}
@@ -330,8 +367,16 @@ defmodule AlertsUI.Trapeze.ImporterTest do
     end
 
     test "alert does not exist, but closed_timestamp is nil, save it" do
+      facility_123 = facility_with_id("123")
+
       with_mocks([
-        {FacilitiesRepo, [], [get: fn _ -> @facility end]},
+        {FacilitiesRepo, [],
+         [
+           get: fn _ -> facility_123 end,
+           get_by_type: fn _, _opts ->
+             [facility_123]
+           end
+         ]},
         {StopsRepo, [],
          [get: fn _ -> @stop end, get!: fn _ -> @stop end, all: fn _, _ -> [@stop] end]},
         {RoutesRepo, [], [by_stop: fn _ -> [@route] end]}
@@ -420,8 +465,16 @@ defmodule AlertsUI.Trapeze.ImporterTest do
     end
 
     test "properly creates an informed entity and active period" do
+      facility_123 = facility_with_id("123")
+
       with_mocks([
-        {FacilitiesRepo, [], [get: fn _ -> @facility end]},
+        {FacilitiesRepo, [],
+         [
+           get: fn _ -> facility_123 end,
+           get_by_type: fn _, _opts ->
+             [facility_123]
+           end
+         ]},
         {StopsRepo, [],
          [get: fn _ -> @stop end, get!: fn _ -> @stop end, all: fn _, _ -> [@stop] end]},
         {RoutesRepo, [], [by_stop: fn _ -> [@route] end]}

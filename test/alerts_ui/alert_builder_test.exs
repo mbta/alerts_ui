@@ -413,7 +413,7 @@ defmodule AlertsUI.AlertBuilderTest do
       }
 
       with_mocks([
-        {FacilitiesRepo, [], [get: fn _facility_id -> facility end]},
+        {FacilitiesRepo, [], [get_by_type: fn _, _opts -> [facility] end]},
         {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
       ]) do
         alert_data = %{
@@ -423,7 +423,7 @@ defmodule AlertsUI.AlertBuilderTest do
           effect_name: "Delay",
           effect: "MODIFIED_SERVICE",
           effect_detail: "evelator broke",
-          facility_ids: ["57"],
+          facility_ids: ["retailsale-303012"],
           active_period_start: ~N[2024-04-30 11:54:00],
           active_period_end: ~N[2024-04-30 13:54:00],
           alert_timing: :"one-time",
@@ -4429,7 +4429,7 @@ defmodule AlertsUI.AlertBuilderTest do
     }
 
     with_mocks([
-      {FacilitiesRepo, [], [get: fn _facility_id -> facility end]},
+      {FacilitiesRepo, [], [get_by_type: fn _, _opts -> [facility] end]},
       {StopsRepo, [],
        [get!: fn _stop_id -> stop end, all: fn ["filter[id]": ""], _opts -> [] end]},
       {RoutesRepo, [], [by_stop: fn _stop_id -> [route, shuttle_route] end]}
@@ -4502,7 +4502,7 @@ defmodule AlertsUI.AlertBuilderTest do
     }
 
     with_mocks([
-      {FacilitiesRepo, [], [get: fn _facility_id -> facility end]},
+      {FacilitiesRepo, [], [get_by_type: fn _, _opts -> [facility] end]},
       {StopsRepo, [],
        [get!: fn _stop_id -> stop end, all: fn ["filter[id]": ""], _opts -> [] end]},
       {RoutesRepo, [], [by_stop: fn _stop_id -> [route] end]}
@@ -4560,7 +4560,7 @@ defmodule AlertsUI.AlertBuilderTest do
     }
 
     with_mocks([
-      {FacilitiesRepo, [], [get: fn _facility_id -> facility end]},
+      {FacilitiesRepo, [], [get_by_type: fn _, _opts -> [facility] end]},
       {StopsRepo, [], all: fn ["filter[id]": ""], _opts -> [] end}
     ]) do
       result = AlertBuilder.build_alert(alert_data, :ACCESS)

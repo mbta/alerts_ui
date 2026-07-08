@@ -218,7 +218,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
         GetKeyForModeEffect.get_value_of_key(:combination, route_type, effect_name)
       end
 
-    route_ids = Alert.get_original_ids(alert.original_route_selections || [])
+    route_ids = Alert.gather_route_ids(alert)
 
     single_route_id =
       if alert.effect_name in @single_route_effect_names && length(route_ids) === 1 do
@@ -262,7 +262,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       route_ids: route_ids,
       route_type: route_type,
       single_route_id: single_route_id,
-      stop_ids: Alert.gather_parent_stop_ids(alert),
+      stop_ids: Alert.gather_stop_ids(alert),
       stop_names_and_ids: alert.original_stop_selections,
       trip_ids: Alert.gather_trip_ids(alert),
       notification_toggle: send_push_notification?

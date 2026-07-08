@@ -416,15 +416,41 @@ defmodule AlertsUI.Models.AlertTest do
              ]
     end
 
-    test "lists unique route ids from original selection for IBI alert" do
+    test "lists unique route ids from original selection if present" do
       alert =
         build(
           :alert,
-          source: :IBI,
           original_route_selections: ["foo|1", "bar|2", "dup|1"]
         )
 
       assert Alert.gather_route_ids(alert) == ["1", "2"]
+    end
+  end
+
+  describe "gather_stop_ids/1" do
+    test "lists stop ids from informed entity" do
+      informed_entity = [
+        %InformedEntity{stop_id: "27", route_type: 3, direction_id: 1},
+        %InformedEntity{stop_id: "28", route_type: 3, direction_id: 1},
+        %InformedEntity{stop_id: "29", route_type: 3, direction_id: 1},
+        %InformedEntity{stop_id: "29", route_type: 3, direction_id: 1}
+      ]
+
+      assert Alert.gather_stop_ids(build(:alert, informed_entity: informed_entity)) == [
+               "27",
+               "28",
+               "29"
+             ]
+    end
+
+    test "lists unique stop ids from original selection if present" do
+      alert =
+        build(
+          :alert,
+          original_stop_selections: ["foo|1", "bar|2", "dup|1"]
+        )
+
+      assert Alert.gather_stop_ids(alert) == ["1", "2"]
     end
   end
 

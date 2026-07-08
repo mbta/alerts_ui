@@ -11,6 +11,7 @@ defmodule AlertsUI.IBIAlertImporterTest do
   alias AlertsUI.Models.IBIAlert
   alias AlertsUI.Models.LatestIBIAlert
   alias AlertsUI.Repo
+  alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.Stops.Repo, as: StopsRepo
 
   @import_fixture_path "./test/support/fixtures/ibi_alert_importer/import.csv"
@@ -92,7 +93,11 @@ defmodule AlertsUI.IBIAlertImporterTest do
     test "given a valid IBI alert it produces alert data consumable by AlertBuilder", %{
       ibi_alert: ibi_alert
     } do
-      with_mock(StopsRepo, [], all: fn _params, _opts -> [] end) do
+      # with_mock(StopsRepo, [], all: fn _params, _opts -> [] end) do
+      with_mocks([
+        {FacilitiesRepo, [], [get_by_type: fn _, _opts -> [] end]},
+        {StopsRepo, [], [all: fn _params, _opts -> [] end]}
+      ]) do
         assert _alert_params =
                  ibi_alert
                  |> ibi_alert_to_alert_data()
