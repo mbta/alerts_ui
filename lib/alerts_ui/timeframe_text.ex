@@ -40,47 +40,31 @@ defmodule AlertsUI.TimeframeText do
         current_datetime
       ) do
     # all datetimes are shifted to Eastern time and calculated from there
-    {current_datetime, current_date, _} = to_local_with_date(current_datetime)
+    {current_datetime, current_date, _} =
+      current_time_tuple = to_local_with_date(current_datetime)
 
-    {start_datetime, start_date, _} = to_local_with_date(start_datetime)
+    {start_datetime, _, _} = start_time_tuple = to_local_with_date(start_datetime)
 
     end_time_tuple = if end_datetime, do: to_local_with_date(end_datetime), else: nil
 
     cond do
       # Alerts that start between now and in 30 minutes
-      starts_now_or_soon?(start_datetime, current_datetime) and recurring ->
-        "starting today"
-
       starts_now_or_soon?(start_datetime, current_datetime) ->
-        text_based_on_end(current_date, end_time_tuple)
+        starts_now_or_soon(current_date, end_time_tuple, recurring)
 
       # Alerts that have yet to start
-      starts_today?(start_datetime, current_datetime) ->
-        starts_later_today(current_date, end_time_tuple)
-
-      starts_tomorrow?(start_datetime, current_date) ->
-        starts_tomorrow(current_date, end_time_tuple)
-
-      between_x_and_y_days?(current_date, start_datetime, 2, 6) ->
-        starts_2_to_6_days_from_now(start_date, current_date, end_time_tuple)
-
-      more_than_x_days?(current_date, start_datetime, 7, true) ->
-        starts_a_while_later(start_date, end_time_tuple)
+      starts_in_future?(start_datetime, current_datetime) ->
+        starts_in_future(start_time_tuple, current_time_tuple, end_time_tuple)
 
       # Alerts that have already started
-      within_x_days?(start_date, current_datetime, 7) and not recurring ->
-        started_recently(current_date, end_time_tuple)
-
-      within_x_days?(start_date, current_datetime, 30) and recurring ->
-        started_recently(current_date, end_time_tuple)
-
-      more_than_x_days?(start_date, current_datetime, 7, true) and
-          not recurring ->
-        started_a_while_ago(current_date, end_time_tuple, duration_certainty)
-
-      more_than_x_days?(start_date, current_datetime, 30, true) and
-          recurring ->
-        started_a_while_ago(current_date, end_time_tuple, duration_certainty)
+      already_started?(start_datetime, current_datetime) ->
+        already_started(
+          start_time_tuple,
+          current_time_tuple,
+          end_time_tuple,
+          recurring,
+          duration_certainty
+        )
 
       true ->
         nil
@@ -94,14 +78,18 @@ defmodule AlertsUI.TimeframeText do
     in_future? = DateTime.compare(start_datetime, current_datetime) in [:eq, :gt]
     soon? = DateTime.compare(soon_datetime, start_datetime) in [:eq, :gt]
 
-    cond do
-      soon? and in_future? ->
-        true
-
-      true ->
-        false
+    if soon? and in_future? do
+      true
+    else
+      false
     end
   end
+
+  @spec starts_now_or_soon(Date.t(), datetime_tuple(), boolean()) :: String.t() | nil
+  defp starts_now_or_soon(_current_date, _end_time_tuple, true), do: "starting today"
+
+  defp starts_now_or_soon(current_date, end_time_tuple, _recurring),
+    do: text_based_on_end(current_date, end_time_tuple)
 
   @spec text_based_on_end(Date.t(), datetime_tuple() | nil) :: String.t() | nil
   defp text_based_on_end(_, nil), do: nil
@@ -115,10 +103,6 @@ defmodule AlertsUI.TimeframeText do
 
       between_x_and_y_days?(current_date, end_datetime, 2, 6) ->
         "through #{get_day_name_for_end(end_time_tuple)}"
-
-      between_x_and_y_days?(current_date, end_datetime, 7, 90) and
-          ends_after_this_year?(current_date, end_datetime) ->
-        "through #{get_human_readable_end_date(end_time_tuple)}"
 
       between_x_and_y_days?(current_date, end_datetime, 7, 90) ->
         "through #{get_human_readable_end_date(end_time_tuple)}"
@@ -137,9 +121,35 @@ defmodule AlertsUI.TimeframeText do
   end
 
   ## Helpers for alerts that have yet to start
+  @spec starts_in_future?(DateTime.t(), DateTime.t()) :: boolean()
+  defp starts_in_future?(start_datetime, current_datetime) do
+    DateTime.compare(start_datetime, current_datetime) == :gt
+  end
+
+  @spec starts_in_future(datetime_tuple(), datetime_tuple(), datetime_tuple()) :: String.t() | nil
+  defp starts_in_future(
+         {start_datetime, start_date, _},
+         {current_datetime, current_date, _},
+         end_time_tuple
+       ) do
+    cond do
+      starts_today?(start_datetime, current_datetime) ->
+        starts_later_today(current_date, end_time_tuple)
+
+      starts_tomorrow?(start_datetime, current_date) ->
+        starts_tomorrow(current_date, end_time_tuple)
+
+      between_x_and_y_days?(current_date, start_datetime, 2, 6) ->
+        starts_2_to_6_days_from_now(start_date, current_date, end_time_tuple)
+
+      more_than_x_days?(current_date, start_datetime, 7, true) ->
+        starts_a_while_later(start_date, end_time_tuple)
+    end
+  end
+
   @spec starts_today?(DateTime.t(), DateTime.t()) :: boolean()
   defp starts_today?(start_datetime, current_datetime) do
-    DateTime.compare(start_datetime, current_datetime) == :gt &&
+    starts_in_future?(start_datetime, current_datetime) &&
       DateTime.to_date(start_datetime) == DateTime.to_date(current_datetime)
   end
 
@@ -163,12 +173,10 @@ defmodule AlertsUI.TimeframeText do
   defp starts_later_today(current_date, end_time_tuple) do
     ends_today? = same_day?(current_date, end_time_tuple)
 
-    cond do
-      ends_today? ->
-        "later today"
-
-      true ->
-        "starting later today"
+    if ends_today? do
+      "later today"
+    else
+      "starting later today"
     end
   end
 
@@ -261,17 +269,50 @@ defmodule AlertsUI.TimeframeText do
   end
 
   ## Helpers for alerts that have already started
+  @spec already_started?(DateTime.t(), DateTime.t()) :: boolean()
+  defp already_started?(start_datetime, current_datetime) do
+    DateTime.compare(start_datetime, current_datetime) == :lt
+  end
+
+  @spec already_started(
+          datetime_tuple(),
+          datetime_tuple(),
+          datetime_tuple(),
+          boolean(),
+          duration_certainties_t()
+        ) :: boolean()
+  defp already_started(
+         {_, start_date, _},
+         {current_datetime, current_date, _},
+         end_time_tuple,
+         recurring,
+         duration_certainty
+       ) do
+    cond do
+      within_x_days?(start_date, current_datetime, 7) and not recurring ->
+        started_recently(current_date, end_time_tuple)
+
+      within_x_days?(start_date, current_datetime, 30) and recurring ->
+        started_recently(current_date, end_time_tuple)
+
+      more_than_x_days?(start_date, current_datetime, 7, true) and
+          not recurring ->
+        started_a_while_ago(current_date, end_time_tuple, duration_certainty)
+
+      more_than_x_days?(start_date, current_datetime, 30, true) and
+          recurring ->
+        started_a_while_ago(current_date, end_time_tuple, duration_certainty)
+    end
+  end
 
   @spec started_recently(Date.t(), datetime_tuple() | nil) :: String.t() | nil
   defp started_recently(_, nil), do: nil
 
   defp started_recently(current_date, end_time_tuple) do
-    cond do
-      ends_today?(current_date, end_time_tuple) ->
-        nil
-
-      true ->
-        text_based_on_end(current_date, end_time_tuple)
+    if ends_today?(current_date, end_time_tuple) do
+      nil
+    else
+      text_based_on_end(current_date, end_time_tuple)
     end
   end
 
@@ -282,12 +323,10 @@ defmodule AlertsUI.TimeframeText do
   defp started_a_while_ago(current_date, end_time_tuple, duration_certainty) do
     later_today? = same_day?(current_date, end_time_tuple) and duration_certainty == :KNOWN
 
-    cond do
-      later_today? ->
-        "last day"
-
-      true ->
-        "ongoing"
+    if later_today? do
+      "last day"
+    else
+      "ongoing"
     end
   end
 
