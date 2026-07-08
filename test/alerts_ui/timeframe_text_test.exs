@@ -222,7 +222,7 @@ defmodule AlertsUI.TimeframeTextTest do
 
       Enum.each([start_now, start_in_30], fn start ->
         assert TimeframeText.timeframe_text(
-                 start_now,
+                 start,
                  ending_7,
                  recurring,
                  duration_certainty,
@@ -231,7 +231,7 @@ defmodule AlertsUI.TimeframeTextTest do
                  "through March 3"
 
         assert TimeframeText.timeframe_text(
-                 start_now,
+                 start,
                  ending_90,
                  recurring,
                  duration_certainty,
@@ -398,60 +398,61 @@ defmodule AlertsUI.TimeframeTextTest do
     end
   end
 
-  # describe "starts after tomorrow but within 6 days" do
-  #   setup do
-  #     now = utc_datetime_from_local(~D[2024-02-25], ~T[22:00:00])
+  describe "starts after tomorrow but within 6 days" do
+    setup do
+      now = utc_datetime_from_local(~D[2024-02-25], ~T[22:00:00])
 
-  #     %{
-  #       now: now,
-  #       start: DateTime.add(now, 5, :day)
-  #     }
-  #   end
+      %{
+        now: now,
+        start: DateTime.add(now, 5, :day)
+      }
+    end
 
-  #   test "ends same day as start date", %{now: now, start: start} do
-  #     ending = DateTime.add(start, 1, :hour)
+    test "ends same day as start date", %{now: now, start: start} do
+      ending = DateTime.add(start, 1, :hour)
 
-  #     assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "Friday"
-  #     assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "Friday"
-  #   end
+      assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "Friday"
+      assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "Friday"
+    end
 
-  #   test "ends <= 7 days from now", %{now: now, start: start} do
-  #     ending = DateTime.add(start, 6, :day)
+    test "ends <= 7 days from now", %{now: now, start: start} do
+      ending = DateTime.add(now, 7, :day)
 
-  #     assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) ==
-  #              "Friday through Thursday"
+      assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) ==
+               "Friday through Sunday"
 
-  #     assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) ==
-  #              "Friday through Thursday"
-  #   end
+      assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) ==
+               "Friday through Sunday"
+    end
 
-  #   test "ends > 7 days from now", %{now: now, start: start} do
-  #     ending = DateTime.add(now, 8, :day)
+    test "ends > 7 days from now", %{now: now, start: start} do
+      ending = DateTime.add(now, 8, :day)
 
-  #     assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "starting Friday"
-  #     assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "starting Friday"
-  #   end
+      assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "starting Friday"
+      assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "starting Friday"
+    end
 
-  #   test "end effect - further notice", %{now: now, start: start} do
-  #     ending = nil
+    test "end effect - further notice", %{now: now, start: start} do
+      ending = nil
 
-  #     assert TimeframeText.timeframe_text(start, ending, false, :UNKNOWN, now) ==
-  #              "starting Friday"
+      assert TimeframeText.timeframe_text(start, ending, false, :UNKNOWN, now) ==
+               "starting Friday"
 
-  #     assert TimeframeText.timeframe_text(start, ending, true, :UNKNOWN, now) == "starting Friday"
-  #   end
-  # end
+      assert TimeframeText.timeframe_text(start, ending, true, :UNKNOWN, now) == "starting Friday"
+    end
+  end
 
-  # test "starts on a Saturday within 6 days and ends the Sunday directly after" do
-  #   # Saturday, Feb 24th
-  #   start = utc_datetime_from_local(~D[2024-02-24], ~T[22:00:00])
-  #   # Currently 5 days before Saturday
-  #   now = DateTime.add(start, -5, :day)
-  #   ending = utc_datetime_from_local(~D[2024-02-25], ~T[21:00:00])
+  test "starts on a Saturday within 6 days and ends the Sunday directly after" do
+    # Saturday, Feb 24th
+    start = utc_datetime_from_local(~D[2024-02-24], ~T[22:00:00])
+    # Currently 5 days before Saturday
+    now = DateTime.add(start, -5, :day)
+    # Sunday, Feb 25th
+    ending = utc_datetime_from_local(~D[2024-02-25], ~T[21:00:00])
 
-  #   assert TimeframeText.timeframe_text(start, ending, false, now) == "this weekend"
-  #   assert TimeframeText.timeframe_text(start, ending, true, now) == "this weekend"
-  # end
+    assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "this weekend"
+    assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "this weekend"
+  end
 
   # describe "starts >= 7 days from now" do
   #   setup do
