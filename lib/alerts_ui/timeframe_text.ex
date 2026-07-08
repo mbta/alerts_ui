@@ -80,8 +80,8 @@ defmodule AlertsUI.TimeframeText do
       # DateTime.compare(start_datetime, current_datetime) == :gt and
       #     Date.compare(start_date, current_date) == :eq ->
       #   starts_later_today(current_date, end_date)
-      # starts_now_or_soon?(start_datetime, current_datetime) and recurring ->
-      #   "starting today"
+      starts_now_or_soon?(start_datetime, current_datetime) and recurring ->
+        "starting today"
 
       # Alerts that start between now and in 30 minutes
       starts_now_or_soon?(start_datetime, current_datetime) ->
@@ -102,12 +102,10 @@ defmodule AlertsUI.TimeframeText do
         nil
 
       within_x_days?(start_date, current_datetime, 30) and recurring ->
-        IO.puts("here?")
         nil
 
       more_than_x_days?(start_date, current_datetime, 7, true) and
           not recurring ->
-        IO.puts("more than x days and not recurring")
         started_a_while_ago(current_date, end_time_tuple, duration_certainty)
 
       more_than_x_days?(start_date, current_datetime, 30, true) and

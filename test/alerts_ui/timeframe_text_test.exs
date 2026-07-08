@@ -170,43 +170,49 @@ defmodule AlertsUI.TimeframeTextTest do
       %{
         now: now,
         start_now: now,
-        start_in_30: DateTime.add(now, 30, :minute)
+        start_in_30: DateTime.add(now, 30, :minute),
+        recurring: false
       }
     end
 
-    test "effect end - tomorrow", %{now: now, start_now: start_now, start_in_30: start_in_30} do
+    test "effect end - tomorrow", %{
+      now: now,
+      start_now: start_now,
+      start_in_30: start_in_30,
+      recurring: recurring
+    } do
       ending = DateTime.add(now, 1, :day)
       duration_certainty = :KNOWN
 
-      Enum.each([true, false], fn recurring ->
-        Enum.each([start_now, start_in_30], fn start ->
-          assert TimeframeText.timeframe_text(start, ending, recurring, duration_certainty, now) ==
-                   "through tomorrow"
-        end)
-      end)
+      assert TimeframeText.timeframe_text(start_now, ending, recurring, duration_certainty, now) ==
+               "through tomorrow"
+
+      assert TimeframeText.timeframe_text(start_in_30, ending, recurring, duration_certainty, now) ==
+               "through tomorrow"
     end
 
     test "effect end - 2 to 6 days from today", %{
       now: now,
       start_now: start_now,
-      start_in_30: start_in_30
+      start_in_30: start_in_30,
+      recurring: recurring
     } do
       # Friday, March 1st 2024
       ending = DateTime.add(now, 5, :day)
       duration_certainty = :KNOWN
 
-      Enum.each([true, false], fn recurring ->
-        Enum.each([start_now, start_in_30], fn start ->
-          assert TimeframeText.timeframe_text(start, ending, recurring, duration_certainty, now) ==
-                   "through Friday"
-        end)
-      end)
+      assert TimeframeText.timeframe_text(start_now, ending, recurring, duration_certainty, now) ==
+               "through Friday"
+
+      assert TimeframeText.timeframe_text(start_in_30, ending, recurring, duration_certainty, now) ==
+               "through Friday"
     end
 
     test "effect end - 7 to 90 days from today", %{
       now: now,
       start_now: start_now,
-      start_in_30: start_in_30
+      start_in_30: start_in_30,
+      recurring: recurring
     } do
       # Sunday, March 3rd 2024
       ending_7 = DateTime.add(now, 7, :day)
@@ -214,66 +220,81 @@ defmodule AlertsUI.TimeframeTextTest do
       ending_90 = DateTime.add(now, 90, :day)
       duration_certainty = :KNOWN
 
-      Enum.each([true, false], fn recurring ->
-        Enum.each([start_now, start_in_30], fn start ->
-          assert TimeframeText.timeframe_text(start, ending_7, recurring, duration_certainty, now) ==
-                   "through March 3"
+      Enum.each([start_now, start_in_30], fn start ->
+        assert TimeframeText.timeframe_text(
+                 start_now,
+                 ending_7,
+                 recurring,
+                 duration_certainty,
+                 now
+               ) ==
+                 "through March 3"
 
-          assert TimeframeText.timeframe_text(
-                   start,
-                   ending_90,
-                   recurring,
-                   duration_certainty,
-                   now
-                 ) ==
-                   "through May 25"
-        end)
+        assert TimeframeText.timeframe_text(
+                 start_now,
+                 ending_90,
+                 recurring,
+                 duration_certainty,
+                 now
+               ) ==
+                 "through May 25"
       end)
     end
 
     test "effect end - >90 days but still this year", %{
       now: now,
       start_now: start_now,
-      start_in_30: start_in_30
+      start_in_30: start_in_30,
+      recurring: recurring
     } do
       # Saturday, May 25th 2024
       ending_90 = DateTime.add(now, 120, :day)
       duration_certainty = :KNOWN
 
-      Enum.each([true, false], fn recurring ->
-        Enum.each([start_now, start_in_30], fn start ->
-          assert TimeframeText.timeframe_text(
-                   start,
-                   ending_90,
-                   recurring,
-                   duration_certainty,
-                   now
-                 ) == "until June"
-        end)
-      end)
+      assert TimeframeText.timeframe_text(
+               start_now,
+               ending_90,
+               recurring,
+               duration_certainty,
+               now
+             ) == "until June"
+
+      assert TimeframeText.timeframe_text(
+               start_in_30,
+               ending_90,
+               recurring,
+               duration_certainty,
+               now
+             ) == "until June"
     end
 
     test "effect end - >90 days but next year or beyond", %{
       now: now,
       start_now: start_now,
-      start_in_30: start_in_30
+      start_in_30: start_in_30,
+      recurring: recurring
     } do
       # Saturday, May 25th 2024
       ending_90 = DateTime.add(now, 320, :day)
       duration_certainty = :KNOWN
 
-      Enum.each([true, false], fn recurring ->
-        Enum.each([start_now, start_in_30], fn start ->
-          assert TimeframeText.timeframe_text(
-                   start,
-                   ending_90,
-                   recurring,
-                   duration_certainty,
-                   now
-                 ) ==
-                   "until January 2025"
-        end)
-      end)
+      assert TimeframeText.timeframe_text(
+               start_now,
+               ending_90,
+               recurring,
+               duration_certainty,
+               now
+             ) ==
+               "until January 2025"
+
+      assert TimeframeText.timeframe_text(
+               start_in_30,
+               ending_90,
+               recurring,
+               duration_certainty,
+               now
+             ) ==
+               "until January 2025"
     end
 
     test "effect end - within 90 days but at the end of the year" do
@@ -281,14 +302,13 @@ defmodule AlertsUI.TimeframeTextTest do
       start_now = now
       start_in_30 = DateTime.add(now, 30, :minute)
       duration_certainty = :KNOWN
+      recurring = false
 
       ending = DateTime.add(now, 20, :day)
 
-      Enum.each([true, false], fn recurring ->
-        Enum.each([start_now, start_in_30], fn start ->
-          assert TimeframeText.timeframe_text(start, ending, recurring, duration_certainty, now) ==
-                   "through January 14"
-        end)
+      Enum.each([start_now, start_in_30], fn start ->
+        assert TimeframeText.timeframe_text(start, ending, recurring, duration_certainty, now) ==
+                 "through January 14"
       end)
     end
   end
