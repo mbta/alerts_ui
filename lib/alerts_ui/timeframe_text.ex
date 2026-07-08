@@ -92,6 +92,9 @@ defmodule AlertsUI.TimeframeText do
       between_x_and_y_days?(current_date, start_datetime, 2, 6) ->
         starts_2_to_6_days_from_now(start_date, current_date, end_time_tuple)
 
+      more_than_x_days?(current_date, start_datetime, 7, true) ->
+        starts_a_while_later(start_date, current_date, end_time_tuple)
+
       # Alerts that have already started
       within_x_days?(start_date, current_datetime, 7) and not recurring ->
         nil
@@ -109,6 +112,26 @@ defmodule AlertsUI.TimeframeText do
 
       true ->
         nil
+    end
+  end
+
+  defp starts_a_while_later(start_date, _current_date, nil) do
+    "starting #{get_human_readable_start_date(start_date)}"
+  end
+
+  defp starts_a_while_later(start_date, current_date, {_, end_date, _} = end_time_tuple) do
+    start_end_same_day = same_day?(start_date, end_time_tuple)
+    start_end_same_month = start_date.month == end_date.month
+
+    cond do
+      start_end_same_day ->
+        "#{get_human_readable_start_date(start_date)}"
+
+      start_end_same_month ->
+        "#{get_human_readable_start_date(start_date)}-#{end_date.day}"
+
+      true ->
+        "starting #{get_human_readable_start_date(start_date)}"
     end
   end
 

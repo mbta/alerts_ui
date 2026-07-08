@@ -454,45 +454,48 @@ defmodule AlertsUI.TimeframeTextTest do
     assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "this weekend"
   end
 
-  # describe "starts >= 7 days from now" do
-  #   setup do
-  #     now = utc_datetime_from_local(~D[2024-02-25], ~T[22:00:00])
+  describe "starts >= 7 days from now" do
+    setup do
+      now = utc_datetime_from_local(~D[2024-02-25], ~T[22:00:00])
 
-  #     %{
-  #       now: now,
-  #       # March 3rd
-  #       start: DateTime.add(now, 7, :day)
-  #     }
-  #   end
+      %{
+        now: now,
+        # March 3rd
+        start: DateTime.add(now, 7, :day)
+      }
+    end
 
-  #   test "ends same day as start date", %{now: now, start: start} do
-  #     ending = DateTime.add(start, 1, :hour)
+    test "ends same day as start date", %{now: now, start: start} do
+      ending = DateTime.add(start, 1, :hour)
 
-  #     assert TimeframeText.timeframe_text(start, ending, false, now) == "March 3"
-  #     assert TimeframeText.timeframe_text(start, ending, true, now) == "March 3"
-  #   end
+      assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "March 3"
+      assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "March 3"
+    end
 
-  #   test "ends same month as start date", %{now: now, start: start} do
-  #     ending = utc_datetime_from_local(~D[2024-03-31], ~T[22:00:00])
+    test "ends same month as start date", %{now: now, start: start} do
+      ending = utc_datetime_from_local(~D[2024-03-31], ~T[22:00:00])
 
-  #     assert TimeframeText.timeframe_text(start, ending, false, now) == "March 3-31"
-  #     assert TimeframeText.timeframe_text(start, ending, true, now) == "March 3-31"
-  #   end
+      assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "March 3-31"
+      assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "March 3-31"
+    end
 
-  #   test "ends different month from start date", %{now: now, start: start} do
-  #     ending = DateTime.add(start, 40, :day)
+    test "ends different month from start date", %{now: now, start: start} do
+      ending = DateTime.add(start, 40, :day)
 
-  #     assert TimeframeText.timeframe_text(start, ending, false, now) == "starting March 3"
-  #     assert TimeframeText.timeframe_text(start, ending, true, now) == "starting March 3"
-  #   end
+      assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "starting March 3"
+      assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "starting March 3"
+    end
 
-  #   test "end effect - further notice", %{now: now, start: start} do
-  #     ending = nil
+    test "end effect - further notice", %{now: now, start: start} do
+      ending = nil
 
-  #     assert TimeframeText.timeframe_text(start, ending, false, now) == "starting March 3"
-  #     assert TimeframeText.timeframe_text(start, ending, true, now) == "starting March 3"
-  #   end
-  # end
+      assert TimeframeText.timeframe_text(start, ending, false, :UNKNOWN, now) ==
+               "starting March 3"
+
+      assert TimeframeText.timeframe_text(start, ending, true, :UNKNOWN, now) ==
+               "starting March 3"
+    end
+  end
 
   # describe "old tests" do
   #   test "Starts now, ends next calendar day (before End of Service)" do
