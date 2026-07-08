@@ -52,7 +52,7 @@ defmodule AlertsUI.TimeframeText do
         "starting today"
 
       starts_now_or_soon?(start_datetime, current_datetime) ->
-        starts_now_or_soon(current_date, end_datetime)
+        text_based_on_end(current_date, end_time_tuple)
 
       # Alerts that have yet to start
       starts_today?(start_datetime, current_datetime) ->
@@ -69,10 +69,10 @@ defmodule AlertsUI.TimeframeText do
 
       # Alerts that have already started
       within_x_days?(start_date, current_datetime, 7) and not recurring ->
-        nil
+        started_recently(current_date, end_time_tuple)
 
       within_x_days?(start_date, current_datetime, 30) and recurring ->
-        nil
+        started_recently(current_date, end_time_tuple)
 
       more_than_x_days?(start_date, current_datetime, 7, true) and
           not recurring ->
@@ -103,9 +103,11 @@ defmodule AlertsUI.TimeframeText do
     end
   end
 
-  @spec starts_now_or_soon(Date.t(), DateTime.t()) :: String.t() | nil
-  defp starts_now_or_soon(current_date, end_datetime) do
-    {end_datetime, _, _} = end_time_tuple = to_local_with_date(end_datetime)
+  @spec text_based_on_end(Date.t(), datetime_tuple() | nil) :: String.t() | nil
+  defp text_based_on_end(_, nil), do: nil
+
+  defp text_based_on_end(current_date, end_time_tuple) do
+    {end_datetime, _, _} = end_time_tuple
 
     cond do
       ends_tomorrow?(current_date, end_time_tuple) ->
@@ -260,6 +262,19 @@ defmodule AlertsUI.TimeframeText do
 
   ## Helpers for alerts that have already started
 
+  @spec started_recently(Date.t(), datetime_tuple() | nil) :: String.t() | nil
+  defp started_recently(_, nil), do: nil
+
+  defp started_recently(current_date, end_time_tuple) do
+    cond do
+      ends_today?(current_date, end_time_tuple) ->
+        nil
+
+      true ->
+        text_based_on_end(current_date, end_time_tuple)
+    end
+  end
+
   @spec started_a_while_ago(Date.t(), datetime_tuple() | nil, duration_certainties_t) ::
           String.t()
   defp started_a_while_ago(_current_date, nil, _duration_certainty), do: "ongoing"
@@ -277,6 +292,14 @@ defmodule AlertsUI.TimeframeText do
   end
 
   ## General helpers
+
+  @spec ends_today?(Date.t(), datetime_tuple() | nil) :: boolean()
+  defp ends_today?(_, nil), do: false
+
+  defp ends_today?(current_date, {_end_datetime, end_date, end_time} = _end_time_tuple) do
+    end_date == current_date and
+      Time.compare(ActivePeriod.end_of_service_time(), end_time) in [:lt, :eq]
+  end
 
   @spec ends_tomorrow?(Date.t(), datetime_tuple()) :: boolean()
   defp ends_tomorrow?(current_date, {_end_datetime, end_date, end_time} = _end_time_tuple) do

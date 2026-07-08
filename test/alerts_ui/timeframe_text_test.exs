@@ -37,6 +37,14 @@ defmodule AlertsUI.TimeframeTextTest do
       assert TimeframeText.timeframe_text(start, ending, recurring, duration_certainty, now) ==
                nil
     end
+
+    test "effect end - tomorrow", %{recurring: recurring, now: now, start: start} do
+      duration_certainty = :KNOWN
+      ending = DateTime.add(now, 1, :day)
+
+      assert TimeframeText.timeframe_text(start, ending, recurring, duration_certainty, now) ==
+               "through tomorrow"
+    end
   end
 
   describe "one time alerts - effect start >=7 days ago" do
