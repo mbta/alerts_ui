@@ -285,34 +285,22 @@ defmodule AlertsUI.AlertBuilder do
         user_selected_directions
       end
 
-    user_selected_routes =
+    original_route_selections =
       (selected_routes || [])
       |> Enum.map(fn route_id ->
         matching_route = get_matching_route(route_id, pre_combo_routes(selected_routes))
         "#{SelectFormatter.name_for_option(matching_route)}|#{route_id}"
       end)
 
-    original_route_selections =
-      get_original_selection(
-        user_selected_routes,
-        Map.get(alert_data, :original_route_selections)
-      )
-
     original_stop_selections = Map.get(alert_data, :stop_names_and_ids, [])
 
-    user_selected_trips =
+    original_trip_selections =
       (Map.get(alert_data, :trip_information_by_id, %{}) || %{})
       |> Enum.map(fn {id, trip} ->
         "#{Map.get(trip, :trip_name, "")}|#{id}"
       end)
 
-    original_trip_selections =
-      get_original_selection(
-        user_selected_trips,
-        Map.get(alert_data, :original_trip_selections, [])
-      )
-
-    user_selected_facilities =
+    original_facility_selections =
       case Map.get(alert_data, :facility_ids) do
         nil ->
           []
@@ -330,12 +318,6 @@ defmodule AlertsUI.AlertBuilder do
           |> Enum.reject(&is_nil/1)
       end
 
-    original_facility_selections =
-      get_original_selection(
-        user_selected_facilities,
-        Map.get(alert_data, :original_facility_selections, [])
-      )
-
     original_mode_selections = Map.get(alert_data, :service_types, [])
 
     %{
@@ -347,9 +329,6 @@ defmodule AlertsUI.AlertBuilder do
       original_mode_selections: original_mode_selections
     }
   end
-
-  defp get_original_selection([], original_selection), do: original_selection
-  defp get_original_selection(user_selected, _), do: user_selected
 
   defp time_periods(alert_data, current_time, options) do
     active_period_map = active_periods(alert_data, current_time, options)
