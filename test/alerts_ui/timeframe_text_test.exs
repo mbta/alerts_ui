@@ -47,7 +47,7 @@ defmodule AlertsUI.TimeframeTextTest do
       %{
         recurring: false,
         now: now,
-        start: DateTime.add(now, -7, :day)
+        start: DateTime.add(now, -8, :day)
       }
     end
 
@@ -119,7 +119,7 @@ defmodule AlertsUI.TimeframeTextTest do
       %{
         recurring: true,
         now: now,
-        start: DateTime.add(now, -30, :day)
+        start: DateTime.add(now, -31, :day)
       }
     end
 
@@ -293,76 +293,90 @@ defmodule AlertsUI.TimeframeTextTest do
     end
   end
 
-  # describe "starts later today" do
-  #   setup do
-  #     now = utc_datetime_from_local(~D[2024-02-25], ~T[22:00:00])
+  describe "starts later today" do
+    setup do
+      now = utc_datetime_from_local(~D[2024-02-25], ~T[22:00:00])
 
-  #     %{
-  #       now: now,
-  #       start: DateTime.add(now, 1, :hour)
-  #     }
-  #   end
+      %{
+        now: now,
+        start: DateTime.add(now, 1, :hour)
+      }
+    end
 
-  #   test "effect end - today", %{now: now, start: start} do
-  #     ending = DateTime.add(now, 2, :hour)
+    test "effect end - today", %{now: now, start: start} do
+      ending = DateTime.add(now, 2, :hour)
 
-  #     assert TimeframeText.timeframe_text(start, ending, false, now) == "later today"
-  #     assert TimeframeText.timeframe_text(start, ending, true, now) == "later today"
-  #   end
+      assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "later today"
+      assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "later today"
+    end
 
-  #   test "effect end - after today", %{now: now, start: start} do
-  #     ending = DateTime.add(now, 1, :day)
+    test "effect end - after today", %{now: now, start: start} do
+      ending = DateTime.add(now, 1, :day)
 
-  #     assert TimeframeText.timeframe_text(start, ending, false, now) == "starting later today"
-  #     assert TimeframeText.timeframe_text(start, ending, true, now) == "starting later today"
-  #   end
+      assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) ==
+               "starting later today"
 
-  #   test "effect end - until further notice", %{now: now, start: start} do
-  #     ending = nil
+      assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) ==
+               "starting later today"
+    end
 
-  #     assert TimeframeText.timeframe_text(start, ending, false, now) == "starting later today"
-  #     assert TimeframeText.timeframe_text(start, ending, true, now) == "starting later today"
-  #   end
-  # end
+    test "effect end - until further notice", %{now: now, start: start} do
+      ending = nil
 
-  # describe "starts tomorrow" do
-  #   setup do
-  #     now = utc_datetime_from_local(~D[2024-02-25], ~T[22:00:00])
+      assert TimeframeText.timeframe_text(start, ending, false, :UNKNOWN, now) ==
+               "starting later today"
 
-  #     %{
-  #       now: now,
-  #       start: DateTime.add(now, 1, :day)
-  #     }
-  #   end
+      assert TimeframeText.timeframe_text(start, ending, true, :UNKNOWN, now) ==
+               "starting later today"
+    end
+  end
 
-  #   test "ends tomorrow", %{now: now, start: start} do
-  #     ending = DateTime.add(now, 1, :day) |> DateTime.add(1, :hour)
+  describe "starts tomorrow" do
+    setup do
+      now = utc_datetime_from_local(~D[2024-02-25], ~T[22:00:00])
 
-  #     assert TimeframeText.timeframe_text(start, ending, false, now) == "tomorrow"
-  #     assert TimeframeText.timeframe_text(start, ending, true, now) == "tomorrow"
-  #   end
+      %{
+        now: now,
+        start: DateTime.add(now, 1, :day)
+      }
+    end
 
-  #   test "ends <= 7 days from now", %{now: now, start: start} do
-  #     ending = DateTime.add(now, 7, :day)
+    test "ends tomorrow", %{now: now, start: start} do
+      ending = DateTime.add(now, 1, :day) |> DateTime.add(1, :hour)
 
-  #     assert TimeframeText.timeframe_text(start, ending, false, now) == "tomorrow through Sunday"
-  #     assert TimeframeText.timeframe_text(start, ending, true, now) == "tomorrow through Sunday"
-  #   end
+      assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "tomorrow"
+      assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "tomorrow"
+    end
 
-  #   test "ends > 7 days from now", %{now: now, start: start} do
-  #     ending = DateTime.add(now, 8, :day)
+    test "ends <= 7 days from now", %{now: now, start: start} do
+      ending = DateTime.add(now, 7, :day)
 
-  #     assert TimeframeText.timeframe_text(start, ending, false, now) == "starting tomorrow"
-  #     assert TimeframeText.timeframe_text(start, ending, true, now) == "starting tomorrow"
-  #   end
+      assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) ==
+               "tomorrow through Sunday"
 
-  #   test "end effect - further notice", %{now: now, start: start} do
-  #     ending = nil
+      assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) ==
+               "tomorrow through Sunday"
+    end
 
-  #     assert TimeframeText.timeframe_text(start, ending, false, now) == "starting tomorrow"
-  #     assert TimeframeText.timeframe_text(start, ending, true, now) == "starting tomorrow"
-  #   end
-  # end
+    test "ends > 7 days from now", %{now: now, start: start} do
+      ending = DateTime.add(now, 8, :day)
+
+      assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) ==
+               "starting tomorrow"
+
+      assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "starting tomorrow"
+    end
+
+    test "end effect - further notice", %{now: now, start: start} do
+      ending = nil
+
+      assert TimeframeText.timeframe_text(start, ending, false, :UNKNOWN, now) ==
+               "starting tomorrow"
+
+      assert TimeframeText.timeframe_text(start, ending, true, :UNKNOWN, now) ==
+               "starting tomorrow"
+    end
+  end
 
   # describe "starts after tomorrow but within 6 days" do
   #   setup do
@@ -377,29 +391,34 @@ defmodule AlertsUI.TimeframeTextTest do
   #   test "ends same day as start date", %{now: now, start: start} do
   #     ending = DateTime.add(start, 1, :hour)
 
-  #     assert TimeframeText.timeframe_text(start, ending, false, now) == "Friday"
-  #     assert TimeframeText.timeframe_text(start, ending, true, now) == "Friday"
+  #     assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "Friday"
+  #     assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "Friday"
   #   end
 
   #   test "ends <= 7 days from now", %{now: now, start: start} do
   #     ending = DateTime.add(start, 6, :day)
 
-  #     assert TimeframeText.timeframe_text(start, ending, false, now) == "Friday through Thursday"
-  #     assert TimeframeText.timeframe_text(start, ending, true, now) == "Friday through Thursday"
+  #     assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) ==
+  #              "Friday through Thursday"
+
+  #     assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) ==
+  #              "Friday through Thursday"
   #   end
 
   #   test "ends > 7 days from now", %{now: now, start: start} do
   #     ending = DateTime.add(now, 8, :day)
 
-  #     assert TimeframeText.timeframe_text(start, ending, false, now) == "starting Friday"
-  #     assert TimeframeText.timeframe_text(start, ending, true, now) == "starting Friday"
+  #     assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "starting Friday"
+  #     assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "starting Friday"
   #   end
 
   #   test "end effect - further notice", %{now: now, start: start} do
   #     ending = nil
 
-  #     assert TimeframeText.timeframe_text(start, ending, false, now) == "starting Friday"
-  #     assert TimeframeText.timeframe_text(start, ending, true, now) == "starting Friday"
+  #     assert TimeframeText.timeframe_text(start, ending, false, :UNKNOWN, now) ==
+  #              "starting Friday"
+
+  #     assert TimeframeText.timeframe_text(start, ending, true, :UNKNOWN, now) == "starting Friday"
   #   end
   # end
 

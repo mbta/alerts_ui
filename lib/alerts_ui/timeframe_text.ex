@@ -83,26 +83,80 @@ defmodule AlertsUI.TimeframeText do
       # starts_now_or_soon?(start_datetime, current_datetime) and recurring ->
       #   "starting today"
 
+      # Alerts that start between now and in 30 minutes
       starts_now_or_soon?(start_datetime, current_datetime) ->
         starts_now_or_soon(current_date, end_datetime)
 
+      # Alerts that have yet to start
+      starts_today?(start_datetime, current_datetime) ->
+        starts_later_today(current_date, end_time_tuple)
+
+      starts_tomorrow?(start_datetime, current_date) ->
+        starts_tomorrow(current_date, start_date, end_time_tuple)
+
+      between_x_and_y_days?(current_date, start_datetime, 2, 6) ->
+        starts_2_to_6_days_from_now(start_date, current_date, end_time_tuple)
+
+      # Alerts that have already started
       within_x_days?(start_date, current_datetime, 7) and not recurring ->
         nil
 
       within_x_days?(start_date, current_datetime, 30) and recurring ->
+        IO.puts("here?")
         nil
 
-      more_than_or_equal_x_days?(start_date, current_datetime, 7) and
+      more_than_x_days?(start_date, current_datetime, 7, true) and
           not recurring ->
+        IO.puts("more than x days and not recurring")
         started_a_while_ago(current_date, end_time_tuple, duration_certainty)
 
-      more_than_or_equal_x_days?(start_date, current_datetime, 30) and
+      more_than_x_days?(start_date, current_datetime, 30, true) and
           recurring ->
         started_a_while_ago(current_date, end_time_tuple, duration_certainty)
 
       true ->
         nil
     end
+  end
+
+  defp starts_2_to_6_days_from_now(_, start_date, nil) do
+    "starting #{get_day_name(start_date)}"
+  end
+
+  defp starts_2_to_6_days_from_now(
+         start_date,
+         current_date,
+         {end_datetime, end_date, _} = end_time_tuple
+       ) do
+    start_end_same_day = same_day?(start_date, end_time_tuple)
+    ends_within_7_days = within_x_days?(current_date, end_datetime, 7, true)
+    ends_over_7_days_from_now = more_than_x_days?(current_date, end_datetime, 7)
+
+    cond do
+      start_end_same_day ->
+        get_day_name(start_date)
+
+      ends_within_7_days ->
+        "#{get_day_name(start_date)} through #{get_day_name(end_date)}"
+
+      ends_over_7_days_from_now ->
+        "starting #{get_day_name(start_date)}"
+    end
+  end
+
+  defp starts_tomorrow?(start_datetime, current_date) do
+    # returns true if the start_datetime is at or after the start of service for the next day
+    tomorrow_start_of_service =
+      current_date
+      |> DateTime.new!(ActivePeriod.start_of_service_time(), @timezone)
+      |> DateTime.add(1, :day)
+
+    DateTime.compare(start_datetime, tomorrow_start_of_service) in [:gt, :eq]
+  end
+
+  defp starts_today?(start_datetime, current_datetime) do
+    DateTime.compare(start_datetime, current_datetime) == :gt &&
+      DateTime.to_date(start_datetime) == DateTime.to_date(current_datetime)
   end
 
   defp starts_now_or_soon(current_date, end_datetime) do
@@ -112,21 +166,21 @@ defmodule AlertsUI.TimeframeText do
       ends_tomorrow?(current_date, end_time_tuple) ->
         "through tomorrow"
 
-      between_x_and_y_days(current_date, end_datetime, 2, 6) ->
+      between_x_and_y_days?(current_date, end_datetime, 2, 6) ->
         "through #{get_day_name_for_end(end_time_tuple)}"
 
-      between_x_and_y_days(current_date, end_datetime, 7, 90) and
+      between_x_and_y_days?(current_date, end_datetime, 7, 90) and
           ends_after_this_year?(current_date, end_time_tuple) ->
         "through #{get_human_readable_end_date(end_time_tuple)}"
 
-      between_x_and_y_days(current_date, end_datetime, 7, 90) ->
+      between_x_and_y_days?(current_date, end_datetime, 7, 90) ->
         "through #{get_human_readable_end_date(end_time_tuple)}"
 
-      more_than_or_equal_x_days?(current_date, end_datetime, 90) and
+      more_than_x_days?(current_date, end_datetime, 90, true) and
           ends_this_year?(current_date, end_time_tuple) ->
         "until #{get_human_readable_end_date(end_time_tuple, :month)}"
 
-      more_than_or_equal_x_days?(current_date, end_datetime, 90) and
+      more_than_x_days?(current_date, end_datetime, 90, true) and
           ends_after_this_year?(current_date, end_time_tuple) ->
         "until #{get_human_readable_end_date(end_time_tuple, :month_year)}"
 
@@ -157,13 +211,17 @@ defmodule AlertsUI.TimeframeText do
     end
   end
 
-  defp starts_later_today(current_date, end_date) do
-    ends_today = Date.compare(end_date, current_date) == :eq
+  defp starts_later_today(current_date, nil) do
+    "starting later today"
+  end
+
+  defp starts_later_today(current_date, end_time_tuple) do
+    ends_today = same_day?(current_date, end_time_tuple)
 
     if ends_today do
-      starts_later_today_ends_same_calendar_day()
+      "later today"
     else
-      starts_later_today_ends_next_calendar_day()
+      "starting later today"
     end
   end
 
@@ -188,21 +246,27 @@ defmodule AlertsUI.TimeframeText do
     DateTime.compare(end_datetime, last_datetime_of_year) == :gt
   end
 
+  defp starts_tomorrow(_, _, nil), do: "starting tomorrow"
+
   defp starts_tomorrow(
          current_date,
          start_date,
          {end_datetime, end_date, end_time} = end_time_tuple
        ) do
-    ends_next_day_after_start_of_service =
-      end_date == start_date |> Date.add(1) and
-        Time.compare(ActivePeriod.end_of_service_time(), end_time) in [:lt, :eq]
+    ends_tomorrow = ends_tomorrow?(current_date, end_time_tuple)
 
-    ends_2_to_6_days_from_now = between_two_and_six_days(current_date, end_datetime)
+    ends_within_7_days = within_x_days?(current_date, end_datetime, 7, true)
+    ends_over_7_days_from_now = more_than_x_days?(current_date, end_datetime, 7)
 
-    if ends_next_day_after_start_of_service or ends_2_to_6_days_from_now do
-      starts_tomorrow_ends_this_week(get_day_name_for_end(end_time_tuple))
-    else
-      starts_tomorrow()
+    cond do
+      ends_tomorrow ->
+        "tomorrow"
+
+      ends_within_7_days ->
+        "tomorrow through #{get_day_name_for_end(end_time_tuple)}"
+
+      ends_over_7_days_from_now ->
+        "starting tomorrow"
     end
   end
 
@@ -245,7 +309,7 @@ defmodule AlertsUI.TimeframeText do
   #   end
   # end
 
-  defp between_x_and_y_days(date_a, datetime_b, x, y) do
+  defp between_x_and_y_days?(date_a, datetime_b, x, y) do
     # returns true if datetime_b falls between the beginning of service x days from
     # date_a and end of service y days from date_a
 
@@ -294,26 +358,31 @@ defmodule AlertsUI.TimeframeText do
     DateTime.compare(end_datetime, six_days_from_start) in [:gt, :eq]
   end
 
-  defp within_x_days?(date_a, datetime_b, x) do
-    # returns true if datetime_b is less than x days from start of service of date_a
+  # start date 2024-02-18, current_datetime 2024-02-25
+  defp within_x_days?(date_a, datetime_b, x, or_equal \\ false) do
+    # returns true if datetime_b is less than x days from end of service of date_a
+    comparisons = if or_equal, do: [:lt, :eq], else: [:lt]
 
+    # 2024-02-26 3AM
     x_days_from_a =
       date_a
-      |> DateTime.new!(ActivePeriod.start_of_service_time(), @timezone)
-      |> DateTime.add(x, :day)
+      |> DateTime.new!(ActivePeriod.end_of_service_time(), @timezone)
+      # +1 because end of service is 3am the next day
+      |> DateTime.add(x + 1, :day)
 
-    DateTime.compare(datetime_b, x_days_from_a) === :lt
+    DateTime.compare(datetime_b, x_days_from_a) in comparisons
   end
 
-  defp more_than_or_equal_x_days?(date_a, datetime_b, x) do
+  defp more_than_x_days?(date_a, datetime_b, x, or_equal \\ false) do
     # returns true if datetime_b is after the start of service x days after date_a
+    comparisons = if or_equal, do: [:gt, :eq], else: [:gt]
 
     x_days_from_a =
       date_a
       |> DateTime.new!(ActivePeriod.start_of_service_time(), @timezone)
       |> DateTime.add(x, :day)
 
-    DateTime.compare(datetime_b, x_days_from_a) in [:gt, :eq]
+    DateTime.compare(datetime_b, x_days_from_a) in comparisons
   end
 
   defp same_day?(start_date, end_time_tuple) do
