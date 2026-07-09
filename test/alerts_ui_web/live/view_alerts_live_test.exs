@@ -12,9 +12,9 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
   alias AlertsUI.Models.ActivePeriod
   alias AlertsUI.Models.Alert
   alias AlertsUI.Repo
+  alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
-  alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
