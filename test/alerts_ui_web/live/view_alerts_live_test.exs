@@ -26,20 +26,22 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
   @one_day_from_now DateTime.add(@now, 1, :day)
   @two_days_from_now DateTime.add(@now, 2, :day)
 
+  @alert_1 %{
+    alert_id: "123",
+    active_period: [
+      build(:active_period, %{start: ~U[2023-10-12 00:01:00Z]}),
+      build(:active_period, %{start: ~U[2023-10-13 00:01:00Z]})
+    ],
+    active_period_start: ~U[2023-10-12 00:01:00Z],
+    header_text: "this is the first alert",
+    effect_detail: "DETOUR",
+    original_route_selections: ["1", "2"],
+    duration_certainty: :UNKNOWN
+  }
+
   describe "alerts list page" do
     setup do
-      insert(:alert, %{
-        alert_id: "123",
-        active_period: [
-          build(:active_period, %{start: ~U[2023-10-12 00:01:00Z]}),
-          build(:active_period, %{start: ~U[2023-10-13 00:01:00Z]})
-        ],
-        active_period_start: ~U[2023-10-12 00:01:00Z],
-        header_text: "this is the first alert",
-        effect_detail: "DETOUR",
-        original_route_selections: ["1", "2"],
-        duration_certainty: :UNKNOWN
-      })
+      insert(:alert, @alert_1)
 
       insert(:alert, %{
         alert_id: "234",
@@ -1478,6 +1480,9 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         result = Alerts.get_by_alert_id("345")
         assert result.closed_timestamp !== nil
         assert result.last_push_notification_timestamp !== nil
+
+        html = render(view)
+        assert html =~ "No alerts found"
       end
     end
 
@@ -1866,6 +1871,29 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       {:ok, _view, html} = live(conn)
       refute html =~ "Loading"
       assert html =~ "Out of juice"
+    end
+  end
+
+  describe "multi-user" do
+    @tag :logged_in_user
+    test "closing an alert on one page also closes it on another page", %{conn: conn} do
+      insert(:alert, %{@alert_1 | alert_id: "345"})
+      {:ok, view, _html} = live(conn, "/alerts")
+      {:ok, view2, _html} = live(conn, "/alerts")
+
+      view
+      |> element("#all-clear-checkbox-close-alert-modal-345")
+      |> render_click()
+
+      view
+      |> element("#close-alert-modal-345 button", "Close now")
+      |> render_click()
+
+      html1 = render_async(view)
+      html2 = render_async(view2)
+
+      assert html1 =~ "No alerts found"
+      assert html2 =~ "No alerts found"
     end
   end
 
