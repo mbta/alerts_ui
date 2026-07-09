@@ -1,9 +1,8 @@
 defmodule AlertsUI.CacheWarmer do
   @moduledoc """
-    Preloads the cache with expensive API calls.
-    Doesn't restart if it fails.
+    Preloads the cache with expensive API calls
   """
-  use Task, restart: :temporary
+  use Task, restart: :transient
 
   def start_link(_arg) do
     Task.start_link(__MODULE__, :run, [])
