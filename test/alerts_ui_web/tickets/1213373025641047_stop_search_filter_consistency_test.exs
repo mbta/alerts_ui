@@ -73,7 +73,7 @@ defmodule AlertsUIWeb.Tickets.StopSearchFilterConsistencyTest do
   defp visible_stop_values(view) do
     {:ok, document} = view |> render() |> Floki.parse_document()
 
-    Floki.find(document, "select#alert_data_stop_ids option")
+    Floki.find(document, "select#alert_data_stop_names_and_ids option")
     |> Enum.map(&Floki.attribute(&1, "value"))
     |> List.flatten()
     |> Enum.reject(&(&1 == "" or is_nil(&1)))
@@ -157,24 +157,24 @@ defmodule AlertsUIWeb.Tickets.StopSearchFilterConsistencyTest do
 
         # All stops should be visible before searching
         initial_values = visible_stop_values(view)
-        assert "place-sstat" in initial_values
-        assert "place-aqucl" in initial_values
+        assert "South Station|place-sstat" in initial_values
+        assert "Aquarium|place-aqucl" in initial_values
 
         # Search for "station" — should show only stops with "station" in the name
         send_stop_search(view, "station")
 
         filtered = visible_stop_values(view)
 
-        assert "place-sstat" in filtered,
+        assert "South Station|place-sstat" in filtered,
                "South Station should appear in 'station' search results"
 
-        assert "place-north" in filtered,
+        assert "North Station|place-north" in filtered,
                "North Station should appear in 'station' search results"
 
-        refute "place-aqucl" in filtered,
+        refute "Aquarium|place-aqucl" in filtered,
                "Aquarium must NOT appear in 'station' search results (AC1: only matching results)"
 
-        refute "place-pktrm" in filtered,
+        refute "Park Street|place-pktrm" in filtered,
                "Park Street must NOT appear in 'station' search results (AC1: only matching results)"
       end
     end
@@ -227,8 +227,8 @@ defmodule AlertsUIWeb.Tickets.StopSearchFilterConsistencyTest do
         # Now search for something unrelated
         send_stop_search(view, "aquarium")
         aquarium_results = visible_stop_values(view)
-        assert "place-aqucl" in aquarium_results
-        refute "place-sstat" in aquarium_results
+        assert "Aquarium|place-aqucl" in aquarium_results
+        refute "South Station|place-sstat" in aquarium_results
 
         # Search for "south station" again — must match the original results
         send_stop_search(view, "south station")

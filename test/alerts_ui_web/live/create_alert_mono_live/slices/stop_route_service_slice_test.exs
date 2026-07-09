@@ -164,8 +164,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         view
         |> element("form")
         |> render_change(%{
-          "_target" => ["alert_data", "stop_ids"],
-          "alert_data" => %{"stop_ids" => ["place-aqucl"]}
+          "_target" => ["alert_data", "stop_names_and_ids"],
+          "alert_data" => %{
+            "stop_names_and_ids" => ["Aquarium|place-aqucl"]
+          }
         })
 
         render_async(view)
@@ -192,17 +194,19 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Subway", "Station closure")
 
-        assert view |> render_async() =~ ~s(value="place-aqucl">)
+        assert view |> render_async() =~ ~s(value="Aquarium|place-aqucl">)
 
         # Select a stop — both routes become available in the route selector
         view
         |> element("form")
         |> render_change(%{
-          "_target" => ["alert_data", "stop_ids"],
-          "alert_data" => %{"stop_ids" => ["place-aqucl"]}
+          "_target" => ["alert_data", "stop_names_and_ids"],
+          "alert_data" => %{
+            "stop_names_and_ids" => ["Aquarium|place-aqucl"]
+          }
         })
 
-        assert view |> render_async() =~ ~s(value="place-aqucl")
+        assert view |> render_async() =~ ~s(value="Aquarium|place-aqucl")
         assert view |> render_async() =~ ~s(value="Blue">)
         assert view |> render_async() =~ ~s(value="Red">)
 
@@ -253,12 +257,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         assert document_has_element?(
                  document,
-                 "option[value=\"place-aqucl\"]"
+                 "option[value=\"Aquarium|place-aqucl\"]"
                )
 
         assert document_has_element?(
                  document,
-                 "option[value=\"place-pktrm\"]"
+                 "option[value=\"Park Street|place-pktrm\"]"
                )
 
         view
@@ -274,12 +278,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         assert document_has_element?(
                  document,
-                 "option[value=\"place-aqucl\"]"
+                 "option[value=\"Aquarium|place-aqucl\"]"
                )
 
         refute document_has_element?(
                  document,
-                 "option[value=\"place-pktrm\"]"
+                 "option[value=\"Park Street|place-pktrm\"]"
                )
       end
     end
@@ -295,7 +299,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         assert document_has_element?(
                  document,
-                 "option[value=\"place-aqucl\"]"
+                 "option[value=\"Aquarium|place-aqucl\"]"
                )
 
         view
@@ -311,7 +315,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         refute document_has_element?(
                  document,
-                 "option[value=\"place-aqucl\"]"
+                 "option[value=\"Aquarium|place-aqucl\"]"
                )
 
         render_click(view, "reset_search_filter", %{"name" => "alert_data[stop_search_term]"})
@@ -321,7 +325,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         assert document_has_element?(
                  document,
-                 "option[value=\"place-aqucl\"]"
+                 "option[value=\"Aquarium|place-aqucl\"]"
                )
       end
     end
@@ -374,9 +378,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         render_async(view)
 
         assert view
-               |> element("select#alert_data_stop_ids")
+               |> element("select#alert_data_stop_names_and_ids")
                |> render_async() =~
-                 ~r/value="place-aqucl".*value="place-pktrm-inbound".*value="place-pktrm"/
+                 ~r/value="Aquarium|place-aqucl".*value="Park Street (inbound)|place-pktrm-inbound".*value="Park Street|place-pktrm"/
 
         # Add route filter
         view
@@ -395,17 +399,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         assert document_has_element?(
                  document,
-                 "select#alert_data_stop_ids > option[value=\"place-pktrm-inbound\"]"
+                 "select#alert_data_stop_names_and_ids > option[value=\"Park Street (inbound)|place-pktrm-inbound\"]"
                )
 
         assert document_has_element?(
                  document,
-                 "select#alert_data_stop_ids > option[value=\"place-aqucl\"]"
+                 "select#alert_data_stop_names_and_ids > option[value=\"Aquarium|place-aqucl\"]"
                )
 
         assert document_has_element?(
                  document,
-                 "select#alert_data_stop_ids > option[value=\"place-pktrm\"]"
+                 "select#alert_data_stop_names_and_ids > option[value=\"Park Street (outbound)|place-pktrm\"]"
                )
       end
     end
@@ -530,8 +534,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         view
         |> element("form")
         |> render_change(%{
-          "_target" => ["alert_data", "stop_ids"],
-          "alert_data" => %{"stop_ids" => ["place-aqucl"]}
+          "_target" => ["alert_data", "stop_names_and_ids"],
+          "alert_data" => %{
+            "stop_names_and_ids" => ["Aquarium|place-aqucl"]
+          }
         })
 
         render_async(view)
@@ -593,8 +599,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         view
         |> element("form")
         |> render_change(%{
-          "_target" => ["alert_data", "stop_ids"],
-          "alert_data" => %{"stop_ids" => ["place-aqucl"]}
+          "_target" => ["alert_data", "stop_names_and_ids"],
+          "alert_data" => %{
+            "stop_names_and_ids" => ["Aquarium|place-aqucl"]
+          }
         })
 
         render_async(view)
@@ -646,8 +654,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         view
         |> element("form")
         |> render_change(%{
-          "_target" => ["alert_data", "stop_ids"],
-          "alert_data" => %{"stop_ids" => ["place-aqucl"]}
+          "_target" => ["alert_data", "stop_names_and_ids"],
+          "alert_data" => %{
+            "stop_names_and_ids" => ["Aquarium|place-aqucl"]
+          }
         })
 
         render_async(view)
@@ -752,8 +762,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         view
         |> element("form")
         |> render_change(%{
-          "_target" => ["alert_data", "stop_ids"],
-          "alert_data" => %{"stop_ids" => ["place-pktrm"]}
+          "_target" => ["alert_data", "stop_names_and_ids"],
+          "alert_data" => %{
+            "stop_names_and_ids" => ["Park Street|place-pktrm"]
+          }
         })
 
         render_async(view)
@@ -775,13 +787,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         assert document_has_element?(
                  document,
-                 "select#alert_data_stop_ids > option[value=\"place-pktrm\"][selected=\"selected\"]"
+                 "select#alert_data_stop_names_and_ids > option[value=\"Park Street|place-pktrm\"][selected=\"selected\"]"
                ),
                "Park Street should be preserved since it was previously selected"
 
         assert document_has_element?(
                  document,
-                 "select#alert_data_stop_ids > option[value=\"place-aqucl\"]"
+                 "select#alert_data_stop_names_and_ids > option[value=\"Aquarium|place-aqucl\"]"
                ),
                "Aquarium should also appear (from filtered route Blue)"
       end
@@ -840,7 +852,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
           informed_entity: [
             %{route_type: 1, stop_id: "place-aqucl", route_id: "Blue"}
           ],
-          original_stop_selections: ["place-aqucl"],
+          original_stop_selections: ["Aquarium|place-aqucl"],
           original_route_selections: ["Blue Line|Blue"]
         })
 
@@ -874,7 +886,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         assert document_has_element?(
                  document,
-                 "option[value=\"place-aqucl\"][selected=\"selected\"]"
+                 "option[value=\"Aquarium|place-aqucl\"][selected=\"selected\"]"
                )
       end
     end
@@ -911,8 +923,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         view
         |> element("form")
         |> render_change(%{
-          "_target" => ["alert_data", "stop_ids"],
-          "alert_data" => %{"stop_ids" => ["place-aqucl"]}
+          "_target" => ["alert_data", "stop_names_and_ids"],
+          "alert_data" => %{
+            "stop_names_and_ids" => ["Aquarium|place-aqucl"]
+          }
         })
 
         render_async(view)
@@ -969,8 +983,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         view
         |> element("form")
         |> render_change(%{
-          "_target" => ["alert_data", "stop_ids"],
-          "alert_data" => %{"stop_ids" => ["place-aqucl"]}
+          "_target" => ["alert_data", "stop_names_and_ids"],
+          "alert_data" => %{
+            "stop_names_and_ids" => ["Aquarium|place-aqucl"]
+          }
         })
 
         render_async(view)
@@ -1026,8 +1042,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         view
         |> element("form")
         |> render_change(%{
-          "_target" => ["alert_data", "stop_ids"],
-          "alert_data" => %{"stop_ids" => ["place-aqucl"]}
+          "_target" => ["alert_data", "stop_names_and_ids"],
+          "alert_data" => %{
+            "stop_names_and_ids" => ["Aquarium|place-aqucl"]
+          }
         })
 
         render_async(view)
@@ -1040,8 +1058,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         view
         |> element("form")
         |> render_change(%{
-          "_target" => ["alert_data", "stop_ids"],
-          "alert_data" => %{"stop_ids" => ["place-aqucl", "place-pktrm"]}
+          "_target" => ["alert_data", "stop_names_and_ids"],
+          "alert_data" => %{
+            "stop_names_and_ids" => ["Aquarium|place-aqucl", "Park Street|place-pktrm"]
+          }
         })
 
         render_async(view)
@@ -1144,8 +1164,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         view
         |> element("form")
         |> render_change(%{
-          "_target" => ["alert_data", "stop_ids"],
-          "alert_data" => %{"stop_ids" => ["place-aqucl"]}
+          "_target" => ["alert_data", "stop_names_and_ids"],
+          "alert_data" => %{
+            "stop_names_and_ids" => ["Aquarium|place-aqucl"]
+          }
         })
 
         render_async(view)
@@ -1222,8 +1244,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         view
         |> element("form")
         |> render_change(%{
-          "_target" => ["alert_data", "stop_ids"],
-          "alert_data" => %{"stop_ids" => []}
+          "_target" => ["alert_data", "stop_names_and_ids"],
+          "alert_data" => %{
+            "stop_names_and_ids" => []
+          }
         })
 
         view |> element("button#review", "Review and submit") |> render_click()
@@ -1239,8 +1263,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         view
         |> element("form")
         |> render_change(%{
-          "_target" => ["alert_data", "stop_ids"],
-          "alert_data" => %{"stop_ids" => [@stop.id]}
+          "_target" => ["alert_data", "stop_names_and_ids"],
+          "alert_data" => %{
+            "stop_names_and_ids" => ["#{@stop.name}|#{@stop.id}"]
+          }
         })
 
         view |> element("button#review", "Review and submit") |> render_click()
@@ -1284,8 +1310,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         view
         |> element("form")
         |> render_change(%{
-          "_target" => ["alert_data", "stop_ids"],
-          "alert_data" => %{"stop_ids" => ["place-aqucl"]}
+          "_target" => ["alert_data", "stop_names_and_ids"],
+          "alert_data" => %{
+            "stop_names_and_ids" => ["Aquarium|place-aqucl"]
+          }
         })
 
         render_async(view)
@@ -1335,8 +1363,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         view
         |> element("form")
         |> render_change(%{
-          "_target" => ["alert_data", "stop_ids"],
-          "alert_data" => %{"stop_ids" => ["place-aqucl"]}
+          "_target" => ["alert_data", "stop_names_and_ids"],
+          "alert_data" => %{
+            "stop_names_and_ids" => ["Aquarium|place-aqucl"]
+          }
         })
 
         render_async(view)
@@ -1349,8 +1379,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         view
         |> element("form")
         |> render_change(%{
-          "_target" => ["alert_data", "stop_ids"],
-          "alert_data" => %{"stop_ids" => ["place-pktrm"]}
+          "_target" => ["alert_data", "stop_names_and_ids"],
+          "alert_data" => %{
+            "stop_names_and_ids" => ["Park Street|place-pktrm"]
+          }
         })
 
         render_async(view)
@@ -1384,8 +1416,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         view
         |> element("form")
         |> render_change(%{
-          "_target" => ["alert_data", "stop_ids"],
-          "alert_data" => %{"stop_ids" => ["place-aqucl", "place-pktrm"]}
+          "_target" => ["alert_data", "stop_names_and_ids"],
+          "alert_data" => %{
+            "stop_names_and_ids" => ["Aquarium|place-aqucl", "Park Street|place-pktrm"]
+          }
         })
 
         # Make sure it does not say "Blue Line and Blue Line are detoured"
@@ -1414,14 +1448,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         render_async(view)
 
         assert view
-               |> element("#alert_data_stop_ids")
+               |> element("#alert_data_stop_names_and_ids")
                |> render() =~ ~r/Aquarium.*Park/s
 
         view
         |> element("form")
         |> render_change(%{
-          "_target" => ["alert_data", "stop_ids"],
-          "alert_data" => %{"stop_ids" => ["place-pktrm"]}
+          "_target" => ["alert_data", "stop_names_and_ids"],
+          "alert_data" => %{
+            "stop_names_and_ids" => ["Park Street|place-pktrm"]
+          }
         })
 
         # Switching to 'recurring' triggers an error which makes the form rerender
@@ -1435,7 +1471,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         # Make sure the order is still the same
         assert view
-               |> element("#alert_data_stop_ids")
+               |> element("#alert_data_stop_names_and_ids")
                |> render() =~ ~r/Aquarium.*Park/s
       end
     end
@@ -1466,15 +1502,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         view = get_to_submission_page_refactor(conn, view, "Subway", "Station closure")
 
         assert view
-               |> element("#alert_data_stop_ids")
+               |> element("#alert_data_stop_names_and_ids")
                |> render() =~ ~r/Aquarium.*Park/s,
                "Park should render after Aquarium on initial load"
 
         view
         |> element("form")
         |> render_change(%{
-          "_target" => ["alert_data", "stop_ids"],
-          "alert_data" => %{"stop_ids" => ["place-pktrm"]}
+          "_target" => ["alert_data", "stop_names_and_ids"],
+          "alert_data" => %{
+            "stop_names_and_ids" => ["Park Street|place-pktrm"]
+          }
         })
 
         render_async(view)
@@ -1491,7 +1529,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         render_async(view)
 
         assert view
-               |> element("#alert_data_stop_ids")
+               |> element("#alert_data_stop_names_and_ids")
                |> render() =~ ~r/Park.*Aquarium/s,
                "Park should render before Aquarium"
 
@@ -1501,7 +1539,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         # Park should go back to where it used to be in the list
         assert view
-               |> element("#alert_data_stop_ids")
+               |> element("#alert_data_stop_names_and_ids")
                |> render() =~ ~r/Aquarium.*Park/s,
                "Park should render after Aquarium"
       end
@@ -1535,8 +1573,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         view
         |> element("form")
         |> render_change(%{
-          "_target" => ["alert_data", "stop_ids"],
-          "alert_data" => %{"stop_ids" => ["place-pktrm"]}
+          "_target" => ["alert_data", "stop_names_and_ids"],
+          "alert_data" => %{
+            "stop_names_and_ids" => ["Park Street|place-pktrm"]
+          }
         })
 
         render_async(view)
@@ -1553,7 +1593,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         render_async(view)
 
         assert view
-               |> element("#alert_data_stop_ids")
+               |> element("#alert_data_stop_names_and_ids")
                |> render() =~ ~r/Park.*Aquarium/s,
                "Park should render before Aquarium"
 
@@ -1561,13 +1601,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         view
         |> element("form")
         |> render_change(%{
-          "_target" => ["alert_data", "stop_ids"],
-          "alert_data" => %{"stop_ids" => ["place-aqucl"]}
+          "_target" => ["alert_data", "stop_names_and_ids"],
+          "alert_data" => %{
+            "stop_names_and_ids" => ["Aquarium|place-aqucl"]
+          }
         })
 
         # Park should still exist
         assert view
-               |> element("#alert_data_stop_ids")
+               |> element("#alert_data_stop_names_and_ids")
                |> render() =~ ~r/Park.*Aquarium/s,
                "Park should still be listed as an option before Aquarium"
 
@@ -1581,7 +1623,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         })
 
         assert view
-               |> element("#alert_data_stop_ids")
+               |> element("#alert_data_stop_names_and_ids")
                |> render() =~ ~r/Park.*Aquarium/s,
                "Park should still be listed as an option before Aquarium"
       end

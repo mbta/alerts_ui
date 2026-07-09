@@ -5,6 +5,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   renders the dual filtered-select UI with optional route-filter modal.
   """
 
+  alias AlertsUI.Models.Alert
   alias AlertsUIWeb.CreateAlertLive
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
@@ -13,6 +14,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,
     only: [always_validate_required: 3]
 
+  import Ecto.Changeset
   import Phoenix.LiveView, only: [start_async: 3]
 
   use AlertsUIWeb, :html
@@ -30,7 +32,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
     :route_ids,
     :route_search_term,
     :service_types,
-    :stop_ids,
+    :stop_names_and_ids,
     :stop_search_term
   ]
 
@@ -66,17 +68,25 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
     end
 
     def transform(_service_data, changeset, _params, _socket) do
-      changeset
+      changeset |> add_stop_ids_to_changeset()
     end
 
     def validate(_service_data, changeset, _params, socket) do
       if socket.assigns.submitting? do
         changeset
-        |> always_validate_required(:stop_ids, "You must select a stop")
+        |> always_validate_required(:stop_names_and_ids, "Select stop(s)")
         |> maybe_validate_route()
       else
         changeset
       end
+    end
+
+    defp add_stop_ids_to_changeset(changeset) do
+      stop_ids =
+        get_field(changeset, :stop_names_and_ids)
+        |> Alert.get_original_ids()
+
+      cast(changeset, %{stop_ids: stop_ids}, [:stop_ids])
     end
 
     defp maybe_validate_route(changeset) do
@@ -156,12 +166,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
     assigns = socket.assigns
     prev = prev(Map.get(assigns, :selections))
 
-    auto_select_routes = match?(%{"_target" => ["alert_data", "stop_ids"]}, params)
+    auto_select_routes = match?(%{"_target" => ["alert_data", "stop_names_and_ids"]}, params)
 
     form = assigns.form
     modal_route_id = form[:modal_route_id].value
     route_type = form[:route_type].value
-    stop_ids = form[:stop_ids].value || []
+    stop_names_and_ids = form[:stop_names_and_ids].value || []
 
     stop_route_ids = stop_route_ids(modal_route_id)
 
@@ -181,6 +191,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
       available_stops = CreateAlertLive.get_stops_for_stop_route(stop_route_ids, route_type)
 
+      stop_ids = Alert.get_original_ids(stop_names_and_ids)
       available_routes = CreateAlertLive.get_routes_by_stop(stop_ids, route_type)
 
       available_stop_ids = Enum.map(available_stops, fn stop -> stop.id end)
@@ -264,13 +275,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   end
 
   def stop_id_options(available_stops, form) do
-    SelectFormatter.formatted_select_options(%SelectFormatter{
-      options: available_stops,
-      search_term: form[:stop_search_term].value,
-      route_type: form[:route_type].value,
-      values_to_keep: form[:stop_ids].value || [],
-      option_prefix: "stop-selector"
-    })
+    SelectFormatter.formatted_select_options(
+      %SelectFormatter{
+        options: available_stops,
+        search_term: form[:stop_search_term].value,
+        route_type: form[:route_type].value,
+        values_to_keep: form[:stop_names_and_ids].value || [],
+        option_prefix: "stop-selector"
+      },
+      true
+    )
   end
 
   def route_id_options(available_routes, form) do
@@ -284,13 +298,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   end
 
   @update_selection_targets [
-    "stop_ids",
+    "stop_names_and_ids",
     "route_ids",
     "route_search_term",
     "stop_search_term",
     "modal_route_search_term"
   ]
-  # update selections when a user interacts with one of our fields...
+
   defp update_selections?(%{"_target" => ["alert_data", field]})
        when field in @update_selection_targets,
        do: true
@@ -333,9 +347,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
       <div class="md:flex md:flex-row gap-x-8 mb-4 h-[32rem]">
         <.filtered_select
           class="md:w-[25%]"
-          field={@form[:stop_ids]}
+          field={@form[:stop_names_and_ids]}
           filter_field={@form[:stop_search_term]}
-          selected={@form[:stop_ids].value}
+          selected={@form[:stop_names_and_ids].value}
           label="Stops"
           loading={@selections.loading && @first_async_load}
           modal_filter_active={!(@selections.selected_route_id in [nil, "default"])}
@@ -352,7 +366,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
           filter_field={@form[:route_search_term]}
           loading={@selections.loading}
           no_results={
-            Enum.empty?(@selections.route_id_options) && !Enum.empty?(@form[:stop_ids].value || []) &&
+            Enum.empty?(@selections.route_id_options) &&
+              !Enum.empty?(@form[:stop_names_and_ids].value || []) &&
               disable_routes_input?(@form)
           }
           disabled={disable_routes_input?(@form)}
@@ -361,10 +376,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
         />
       </div>
       <p :if={@show_stop_ids}>
-        Selected stop ids: {(@form[:stop_ids].value || []) |> Enum.join(", ")} Selected route ids:{(@form[
-                                                                                                      :route_ids
-                                                                                                    ].value ||
-                                                                                                      [])
+        Selected stop ids: {(@form[:stop_names_and_ids].value || []) |> Enum.join(", ")} Selected route ids:{(@form[
+                                                                                                                :route_ids
+                                                                                                              ].value ||
+                                                                                                                [])
         |> Enum.join(", ")}
       </p>
       <hr class="mt-4" />
@@ -374,10 +389,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
   @spec disable_routes_input?(map()) :: boolean()
   defp disable_routes_input?(form) do
-    form[:stop_ids].value in [nil, []]
+    form[:stop_names_and_ids].value in [nil, []]
   end
-
-  defp get_selected_stops(_, nil), do: nil
 
   defp get_selected_stops(available_stops, stop_ids) do
     Enum.filter(available_stops, &(&1.id in stop_ids))
