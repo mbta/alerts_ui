@@ -13,21 +13,31 @@ defmodule AlertsUI.CacheWarming do
 
   def warm_all do
     Logger.info("Warming MBTA API caches")
+    warm_routes()
     warm_stops()
     warm_facilities()
-    warm_schedules()
     Logger.info("MBTA API cache warming complete")
+  end
+
+  defp warm_routes do
+    # Standard route types used in the alert form
+    CreateAlertLive.get_routes([3])
+    # Unlisted routes (type 4)
+    CreateAlertLive.get_routes([4])
   end
 
   defp warm_stops do
     # Bus stops for the stop-route combination selector (expensive: chunks all bus routes)
     CreateAlertLive.get_stops(nil, 3, nil)
-  end
 
-  defp warm_schedules do
-    CreateAlertLive.get_routes([2, 4])
-    |> Enum.map(& &1.id)
-    |> CreateAlertLive.get_schedules_by_date("default", nil)
+    # Subway stops for stop-route combination (fetches types 0 and 1 together)
+    CreateAlertLive.get_stops(nil, 1, nil)
+
+    # Commuter rail stops for stop-route combination
+    CreateAlertLive.get_stops_for_stop_route(nil, 2)
+
+    # Ferry stops for stop-route combination
+    CreateAlertLive.get_stops_for_stop_route(nil, 4)
   end
 
   defp warm_facilities do

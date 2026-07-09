@@ -17,7 +17,6 @@ defmodule AlertsUI.CacheWarmingTest do
         get_routes: fn _types -> [] end,
         get_stops: fn _routes, _type, _dir -> [] end,
         get_stops_for_stop_route: fn _routes, _type -> [] end,
-        get_schedules_by_date: fn _, _, _ -> [] end,
         get_facilities: fn _types -> [] end
       ) do
         {result, log} = with_log(fn -> CacheWarming.warm_all() end)
@@ -28,23 +27,45 @@ defmodule AlertsUI.CacheWarmingTest do
       end
     end
 
-    test "makes expected calls" do
+    test "warms standard and unlisted route types" do
       with_mock(CreateAlertLive,
         get_routes: fn _types -> [] end,
         get_stops: fn _routes, _type, _dir -> [] end,
         get_stops_for_stop_route: fn _routes, _type -> [] end,
-        get_schedules_by_date: fn _, _, _ -> [] end,
+        get_facilities: fn _types -> [] end
+      ) do
+        CacheWarming.warm_all()
+
+        assert_called(CreateAlertLive.get_routes([3]))
+      end
+    end
+
+    test "warms stops for all service modes" do
+      with_mock(CreateAlertLive,
+        get_routes: fn _types -> [] end,
+        get_stops: fn _routes, _type, _dir -> [] end,
+        get_stops_for_stop_route: fn _routes, _type -> [] end,
         get_facilities: fn _types -> [] end
       ) do
         CacheWarming.warm_all()
 
         assert_called(CreateAlertLive.get_stops(nil, 3, nil))
+        assert_called(CreateAlertLive.get_stops(nil, 1, nil))
+        assert_called(CreateAlertLive.get_stops_for_stop_route(nil, 2))
+        assert_called(CreateAlertLive.get_stops_for_stop_route(nil, 4))
+      end
+    end
+
+    test "warms all facility types" do
+      with_mock(CreateAlertLive,
+        get_routes: fn _types -> [] end,
+        get_stops: fn _routes, _type, _dir -> [] end,
+        get_stops_for_stop_route: fn _routes, _type -> [] end,
+        get_facilities: fn _types -> [] end
+      ) do
+        CacheWarming.warm_all()
 
         assert_called(CreateAlertLive.get_facilities(InformedEntity.all_facility_types()))
-
-        assert_called(
-          Elixir.AlertsUIWeb.CreateAlertLive.get_schedules_by_date([], "default", nil)
-        )
       end
     end
   end
