@@ -14,8 +14,14 @@ defmodule AlertsUI.CacheWarming do
   def warm_all do
     Logger.info("Warming MBTA API caches")
     warm_stops()
+    Process.sleep(5_000)
     warm_facilities()
-    warm_schedules()
+    Process.sleep(5_000)
+    # commuter rail schedules
+    warm_schedules(2)
+    Process.sleep(5_000)
+    # ferry schedules
+    warm_schedules(4)
     Logger.info("MBTA API cache warming complete")
   end
 
@@ -24,8 +30,8 @@ defmodule AlertsUI.CacheWarming do
     CreateAlertLive.get_stops(nil, 3, nil)
   end
 
-  defp warm_schedules do
-    CreateAlertLive.get_routes([2, 4])
+  defp warm_schedules(route_type) do
+    CreateAlertLive.get_routes([route_type])
     |> Enum.map(& &1.id)
     |> CreateAlertLive.get_schedules_by_date("default", nil)
   end

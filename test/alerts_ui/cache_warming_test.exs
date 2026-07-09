@@ -13,13 +13,15 @@ defmodule AlertsUI.CacheWarmingTest do
     test "calls all warming functions and logs progress" do
       set_log_level(:info)
 
-      with_mock(CreateAlertLive,
-        get_routes: fn _types -> [] end,
-        get_stops: fn _routes, _type, _dir -> [] end,
-        get_stops_for_stop_route: fn _routes, _type -> [] end,
-        get_schedules_by_date: fn _, _, _ -> [] end,
-        get_facilities: fn _types -> [] end
-      ) do
+      with_mocks([
+        {CreateAlertLive, [],
+         get_routes: fn _types -> [] end,
+         get_stops: fn _routes, _type, _dir -> [] end,
+         get_stops_for_stop_route: fn _routes, _type -> [] end,
+         get_schedules_by_date: fn _, _, _ -> [] end,
+         get_facilities: fn _types -> [] end},
+        {Process, [:passthrough], sleep: fn _ms -> :ok end}
+      ]) do
         {result, log} = with_log(fn -> CacheWarming.warm_all() end)
 
         assert result == :ok
@@ -29,13 +31,15 @@ defmodule AlertsUI.CacheWarmingTest do
     end
 
     test "makes expected calls" do
-      with_mock(CreateAlertLive,
-        get_routes: fn _types -> [] end,
-        get_stops: fn _routes, _type, _dir -> [] end,
-        get_stops_for_stop_route: fn _routes, _type -> [] end,
-        get_schedules_by_date: fn _, _, _ -> [] end,
-        get_facilities: fn _types -> [] end
-      ) do
+      with_mocks([
+        {CreateAlertLive, [],
+         get_routes: fn _types -> [] end,
+         get_stops: fn _routes, _type, _dir -> [] end,
+         get_stops_for_stop_route: fn _routes, _type -> [] end,
+         get_schedules_by_date: fn _, _, _ -> [] end,
+         get_facilities: fn _types -> [] end},
+        {Process, [:passthrough], sleep: fn _ms -> :ok end}
+      ]) do
         CacheWarming.warm_all()
 
         assert_called(CreateAlertLive.get_stops(nil, 3, nil))
