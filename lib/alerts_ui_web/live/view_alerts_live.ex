@@ -30,7 +30,6 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     field :effects_search_term, :string
   end
 
-  @ten_seconds_in_ms 10_000
   @fields ~w[timeline multi_column_search service_type service_type_search_term routes routes_search_term effects effects_search_term]a
 
   @modal_filter_fields ["service_type", "routes", "effects"]
@@ -39,8 +38,10 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   @impl true
   def mount(params, _session, socket) do
-    # only start the "update" event once, on live mount
-    if connected?(socket), do: Process.send_after(self(), :update, @ten_seconds_in_ms)
+    # subscribe to changes in the alerts listing
+    if connected?(socket) do
+      Phoenix.PubSub.subscribe(AlertsUI.PubSub, "alerts")
+    end
 
     filters = Map.get(params, "filter", %{"timeline" => "current"})
     params = params |> Map.put("filter", filters)
@@ -63,9 +64,8 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   end
 
   @impl true
-  def handle_info(:update, socket) do
-    Process.send_after(self(), :update, @ten_seconds_in_ms)
-
+  def handle_info({:alerts_updated}, socket) do
+    # Whenever an alert is edited or added/deleted, list all the alerts again.
     with {alerts, meta} <- Alerts.list_all_paginated(socket.assigns.meta.flop) do
       {:noreply, assign(socket, meta: meta, alerts: alerts)}
     end
@@ -383,8 +383,6 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     |> Alerts.get_by_alert_id()
     |> Alerts.close(socket.assigns.current_user, socket.assigns.send_all_clear?)
 
-    # refresh view so alert is displayed in correct timeline category
-    Process.send(self(), :update, [])
     socket = assign(socket, scroll_to_top: false)
     {:noreply, socket}
   end
