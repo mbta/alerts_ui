@@ -934,7 +934,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
         |> render_change(%{
           "alert_data" => %{
             "route_ids" => [@route.id],
-            "stop_ids" => [@stop.id, @stop_2.id, @stop_3.id],
+            "stop_names_and_ids" => [
+              "#{@stop.name}|#{@stop.id}",
+              "#{@stop_2.name}|#{@stop_2.id}",
+              "#{@stop_3.name}|#{@stop_3.id}"
+            ],
             "active_period_start_specifier" => "custom",
             "active_period_end_specifier" => "custom"
           }
