@@ -93,7 +93,6 @@ defmodule AlertsUI.IBIAlertImporterTest do
     test "given a valid IBI alert it produces alert data consumable by AlertBuilder", %{
       ibi_alert: ibi_alert
     } do
-      # with_mock(StopsRepo, [], all: fn _params, _opts -> [] end) do
       with_mocks([
         {FacilitiesRepo, [], [get_by_type: fn _, _opts -> [] end]},
         {StopsRepo, [], [all: fn _params, _opts -> [] end]}

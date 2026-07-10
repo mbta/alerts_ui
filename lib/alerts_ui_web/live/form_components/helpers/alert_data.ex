@@ -262,7 +262,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       route_ids: route_ids,
       route_type: route_type,
       single_route_id: single_route_id,
-      stop_ids: Alert.gather_stop_ids(alert),
+      stop_ids: Alert.gather_parent_stop_ids(alert),
       stop_names_and_ids: alert.original_stop_selections,
       trip_ids: Alert.gather_trip_ids(alert),
       notification_toggle: send_push_notification?
