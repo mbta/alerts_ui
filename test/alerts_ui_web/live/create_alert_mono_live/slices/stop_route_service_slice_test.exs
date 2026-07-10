@@ -962,6 +962,41 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
     end
 
     @tag :logged_in_user
+    test "review modal correctly shows stop names",
+         %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn 3 -> [@bus_route_one] end,
+           by_stop: fn _ -> [@bus_route_one] end,
+           by_stop: fn _, _ -> [@bus_route_one] end,
+           get: fn _, _ -> @bus_route_one end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Stop closure")
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "stop_names_and_ids"],
+          "alert_data" => %{"stop_names_and_ids" => ["Aquarium|place-aqucl"]}
+        })
+
+        render_async(view)
+
+        open_review_modal(view)
+
+        assert view |> element("#affected_service_selections") |> render =~ "Aquarium"
+      end
+    end
+
+    @tag :logged_in_user
     test "bus multi-route detour header text includes route and stop name after stop selection",
          %{conn: conn} do
       with_mocks([
