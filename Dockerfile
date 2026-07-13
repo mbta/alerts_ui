@@ -33,7 +33,7 @@ FROM elixir-builder as app-builder
 ENV LANG=C.UTF-8 MIX_ENV=prod
 RUN apt-get update --allow-releaseinfo-change
 RUN apt-get install --no-install-recommends --yes curl
-RUN apt-get install protobuf-compiler
+RUN apt-get install protobuf-compiler --yes
 
 WORKDIR /root
 
