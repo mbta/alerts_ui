@@ -5,6 +5,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
   warning modal before saving an alert.
   """
 
+  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path, as: PathHelper
   alias AlertsUIWeb.CreateAlertMonoLive.ReviewModal
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.PredictionSuppressionWarningModal
@@ -84,7 +85,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
           |> Map.merge(%{selected_schedules: []})
           |> Map.merge(%{image_preview_size: @image_preview_size})
           |> Map.merge(
-            AlertsUI.AlertBuilder.original_selections(@alert_data, @alert_data.combination)
+            AlertsUI.AlertBuilder.original_selections(
+              @alert_data
+              |> Map.merge(%{
+                effect_name: PathHelper.effect_from_url_name(@alert_data.effect_name)
+              }),
+              @alert_data.combination
+            )
           )
         }
         cancel_event_name="cancel_review"

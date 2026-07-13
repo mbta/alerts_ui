@@ -435,6 +435,10 @@ defmodule AlertsUI.Models.Alert do
     gather_stop_ids_from_original_selections(alert)
   end
 
+  # in the case of a facility alert, there are stops in the informed entities but
+  # we don't need to gather them for anything, so we skip it
+  def gather_parent_stop_ids(%__MODULE__{primary_service_type: "access"}), do: []
+
   def gather_parent_stop_ids(%__MODULE__{original_stop_selections: nil} = alert) do
     gather_parent_stop_ids_from_informed_entities(alert.informed_entity)
   end

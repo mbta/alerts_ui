@@ -8,7 +8,7 @@ defmodule AlertsUI.AlertBuilder do
 
   alias AlertsUI.{ActivePeriodBuilder, Activities}
   alias AlertsUI.Helpers.Recurrence
-  alias AlertsUI.Models.{ActivePeriod, Cause, Effect, RoutePattern, SeverityLevel}
+  alias AlertsUI.Models.{ActivePeriod, Cause, Effect, InformedEntity, RoutePattern, SeverityLevel}
   alias AlertsUI.Routes
   alias AlertsUIWeb.FormComponents.Helpers.{SelectFormatter, ServiceEffectCombinations}
   alias MBTAV3API.Facilities.Facility
@@ -309,8 +309,13 @@ defmodule AlertsUI.AlertBuilder do
           []
 
         facility_ids ->
-          facility_ids
-          |> Enum.map(&FacilitiesRepo.get/1)
+          %{effect_detail: effect_detail} =
+            Effect.effect_map_by_name(alert_data.effect_name)
+
+          facility_types = InformedEntity.facility_effect_to_types(effect_detail)
+
+          FacilitiesRepo.get_by_type(facility_types, include: "stop")
+          |> Enum.filter(&(&1.id in facility_ids))
           |> Enum.map(fn
             nil -> nil
             facility -> "#{SelectFormatter.name_for_option(facility)}|#{facility.id}"
@@ -796,10 +801,13 @@ defmodule AlertsUI.AlertBuilder do
     )
   end
 
-  def build_informed_entities(:ACCESS, %{facility_ids: facility_ids}, effect) do
-    facility_ids
-    |> Enum.map(&FacilitiesRepo.get/1)
-    |> Enum.flat_map(&build_facility_maps(&1, effect))
+  def build_informed_entities(:ACCESS, %{facility_ids: facility_ids}, effect_name) do
+    %{effect_detail: effect_detail} = Effect.effect_map_by_name(effect_name)
+    facility_types = InformedEntity.facility_effect_to_types(effect_detail)
+
+    FacilitiesRepo.get_by_type(facility_types, include: "stop")
+    |> Enum.filter(&(&1.id in facility_ids))
+    |> Enum.flat_map(&build_facility_maps(&1, effect_name))
   end
 
   def build_informed_entities(
@@ -1126,7 +1134,8 @@ defmodule AlertsUI.AlertBuilder do
 
     routes_from_children =
       child_stop_ids
-      |> Enum.flat_map(&RoutesRepo.by_stop/1)
+      |> Enum.join(",")
+      |> RoutesRepo.by_stop()
       |> Enum.filter(&(&1.description !== :rail_replacement_bus))
 
     # use route_ids from parent stop if none are associated with children
