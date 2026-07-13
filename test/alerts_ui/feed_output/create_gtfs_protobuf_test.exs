@@ -2,7 +2,8 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobufTest do
   use AlertsUI.DataCase, async: true
   import AlertsUI.Support.Factory
   alias AlertsUI.Alerts
-  alias AlertsUI.FeedOutput.{CreateGtfsProtobuf, CreateOutputAlert, GTFSProtobufDefinition}
+
+  alias AlertsUI.FeedOutput.{CreateGtfsProtobuf, CreateOutputAlert}
 
   @translated_image %{
     localized_image: [
@@ -85,7 +86,8 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobufTest do
       actual_alert = CreateGtfsProtobuf.build_alert(@alert) |> Map.from_struct()
       actual_ie = actual_alert.informed_entity |> hd |> Map.from_struct()
       actual_trip = actual_ie.trip |> Map.from_struct()
-      assert actual_trip == @trip_descriptor
+      # Protox adds an array for unknown fields
+      assert actual_trip == Map.merge(@trip_descriptor, %{__uf__: []})
       assert actual_ie.agency_id == @entity_selector.agency_id
     end
 
@@ -123,10 +125,12 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobufTest do
     end
 
     test "encodes alert" do
-      assert @alert
-             |> CreateGtfsProtobuf.build_entity_selector()
-             |> GTFSProtobufDefinition.FeedMessage.encode()
-             |> is_binary()
+      {:ok, iodata, _size} =
+        @alert
+        |> CreateGtfsProtobuf.build_entity_selector()
+        |> Protox.encode()
+
+      assert IO.iodata_to_binary(iodata) |> is_binary()
     end
   end
 
@@ -145,9 +149,12 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobufTest do
     end
 
     test "informed_entity with trip encodes correctly" do
-      assert @entity_selector
-             |> CreateGtfsProtobuf.build_entity_selector()
-             |> GTFSProtobufDefinition.FeedMessage.encode()
+      {:ok, iodata, _size} =
+        @entity_selector
+        |> CreateGtfsProtobuf.build_entity_selector()
+        |> Protox.encode()
+
+      assert IO.iodata_to_binary(iodata)
              |> is_binary()
     end
   end
@@ -160,35 +167,47 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobufTest do
     end
 
     test "trip can be encoded without error" do
-      assert CreateGtfsProtobuf.build_trip_descriptor(@trip_descriptor)
-             |> GTFSProtobufDefinition.FeedMessage.encode()
+      {:ok, iodata, _size} =
+        CreateGtfsProtobuf.build_trip_descriptor(@trip_descriptor)
+        |> Protox.encode()
+
+      assert IO.iodata_to_binary(iodata)
              |> is_binary()
     end
   end
 
   describe "build_translated_string/2" do
     test "translated string can be encoded" do
-      assert @translated_string
-             |> CreateGtfsProtobuf.build_translated_string()
-             |> GTFSProtobufDefinition.FeedMessage.encode()
+      {:ok, iodata, _size} =
+        @translated_string
+        |> CreateGtfsProtobuf.build_translated_string()
+        |> Protox.encode()
+
+      assert IO.iodata_to_binary(iodata)
              |> is_binary()
     end
   end
 
   describe "build_translated_image/2" do
     test "translated image can be encoded" do
-      assert @translated_image
-             |> CreateGtfsProtobuf.build_translated_image()
-             |> GTFSProtobufDefinition.FeedMessage.encode()
+      {:ok, iodata, _size} =
+        @translated_image
+        |> CreateGtfsProtobuf.build_translated_image()
+        |> Protox.encode()
+
+      assert IO.iodata_to_binary(iodata)
              |> is_binary()
     end
   end
 
   describe "build_time_range/2" do
     test "time range can be encoded" do
-      assert @time_range
-             |> CreateGtfsProtobuf.build_time_range()
-             |> GTFSProtobufDefinition.FeedMessage.encode()
+      {:ok, iodata, _size} =
+        @time_range
+        |> CreateGtfsProtobuf.build_time_range()
+        |> Protox.encode()
+
+      assert IO.iodata_to_binary(iodata)
              |> is_binary()
     end
   end

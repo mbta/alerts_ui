@@ -2,7 +2,9 @@ defmodule AlertsUI.FeedOutput.GTFSProtobufDefinition do
   @moduledoc """
     Reads in GTFS protobuf definition
   """
-  use Protobuf, from: AlertsUI.config(:gtfs_proto_filename)
+  use Protox,
+    files: [AlertsUI.config(:gtfs_proto_filename)],
+    namespace: __MODULE__
 end
 
 defmodule AlertsUI.FeedOutput.CreateGtfsProtobuf do
@@ -11,7 +13,7 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobuf do
   """
   alias AlertsUI.FeedOutput.{CreateOutputAlert, CreateStandardAlert}
 
-  alias AlertsUI.FeedOutput.GTFSProtobufDefinition.{
+  alias AlertsUI.FeedOutput.GTFSProtobufDefinition.TransitRealtime.{
     Alert,
     EntitySelector,
     FeedEntity,
@@ -24,21 +26,23 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobuf do
   }
 
   def output_protobuf(alerts) do
-    header = FeedHeader.new(CreateOutputAlert.build_gtfs_header())
+    header = struct(FeedHeader, CreateOutputAlert.build_gtfs_header())
 
     entity =
       alerts
       |> Enum.map(&CreateStandardAlert.build_standard_alert/1)
       |> Enum.map(fn alert ->
-        %{
+        %FeedEntity{
           id: alert.id,
           alert: build_alert(alert.alert || alert["alert"])
         }
-        |> FeedEntity.new()
       end)
 
-    FeedMessage.new(header: header, entity: entity)
-    |> FeedMessage.encode()
+    {:ok, iodata, _size} =
+      %FeedMessage{header: header, entity: entity}
+      |> Protox.encode()
+
+    IO.iodata_to_binary(iodata)
   end
 
   def build_alert(alert) do
@@ -58,24 +62,23 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobuf do
     |> Map.replace_lazy(:cause, &enumify_value/1)
     |> Map.replace_lazy(:effect, &enumify_value/1)
     |> Map.replace_lazy(:severity_level, &enumify_value/1)
-    |> Alert.new()
+    |> then(fn alert -> struct(Alert, alert) end)
   end
 
   def build_entity_selector(informed_entity) do
     informed_entity
     |> Map.replace_lazy(:trip, &build_trip_descriptor/1)
-    |> EntitySelector.new()
+    |> then(fn ie -> struct(EntitySelector, ie) end)
   end
 
   def build_trip_descriptor(trip) do
     trip
     |> Map.replace_lazy(:schedule_relationship, &enumify_value/1)
-    |> TripDescriptor.new()
+    |> then(fn trip -> struct(TripDescriptor, trip) end)
   end
 
   def build_time_range(time_range) do
-    time_range
-    |> TimeRange.new()
+    struct(TimeRange, time_range)
   end
 
   defp string_to_translated_string(%{translation: [_]} = input) do
@@ -104,18 +107,18 @@ defmodule AlertsUI.FeedOutput.CreateGtfsProtobuf do
     translated_string
     |> Map.replace_lazy(
       :translation,
-      &Enum.map(&1, fn translation -> TranslatedString.Translation.new(translation) end)
+      &Enum.map(&1, fn translation -> struct(TranslatedString.Translation, translation) end)
     )
-    |> TranslatedString.new()
+    |> then(fn ts -> struct(TranslatedString, ts) end)
   end
 
   def build_translated_image(translated_image) do
     translated_image
     |> Map.replace_lazy(
       :localized_image,
-      &Enum.map(&1, fn localization -> TranslatedImage.LocalizedImage.new(localization) end)
+      &Enum.map(&1, fn localization -> struct(TranslatedImage.LocalizedImage, localization) end)
     )
-    |> TranslatedImage.new()
+    |> then(fn ti -> struct(TranslatedImage, ti) end)
   end
 
   def enumify_value(value) when is_atom(value), do: value
