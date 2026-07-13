@@ -15,8 +15,9 @@ defmodule AlertsUIWeb.CoreComponents do
   Icons are provided by [heroicons](https://heroicons.com). See `icon/1` for usage.
   """
   use Phoenix.Component
+  use Gettext, backend: AlertsUIWeb.Gettext
 
-  import AlertsUIWeb.{Gettext, IconComponents}
+  import AlertsUIWeb.IconComponents
 
   alias Phoenix.Flash
   alias Phoenix.HTML
