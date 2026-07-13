@@ -118,6 +118,7 @@ defmodule AlertsUI.MixProject do
       {:phoenix_swagger, "~> 0.8"},
       {:plug_cowboy, "~> 2.5"},
       {:postgrex, ">= 0.0.0"},
+      {:protox, "~> 2.0"},
       {:req, "~> 0.5.0"},
       {:sentry, "~> 12.0"},
       {:sftp_client, "~> 2.1"},
