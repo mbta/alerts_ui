@@ -479,7 +479,7 @@ defmodule AlertsUI.IBIAlertImporter do
         Map.put(alert_data, key, from_ibi(ibi_alert, key))
       rescue
         e ->
-          Logger.error("alert #{ibi_alert.alert_id} / #{key}: #{e.message}")
+          Logger.error("alert #{ibi_alert.alert_id} / #{key}: #{Exception.message(e)}")
           reraise e, __STACKTRACE__
       end
     end)
