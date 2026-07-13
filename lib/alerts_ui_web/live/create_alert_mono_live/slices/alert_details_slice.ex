@@ -437,7 +437,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
             />
             <.textarea_footer
               character_limit={255}
-              copy_id="#alert_details_header_text"
+              copy_id="#alert_data_header_text"
               copy_title="Copy main message to Clipboard"
               field={@form[:header_text]}
             />
@@ -470,7 +470,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
             />
             <.textarea_footer
               character_limit={3000}
-              copy_id="#alert_details_description_text"
+              copy_id="#alert_data_description_text"
               copy_title="Copy supporting information to Clipboard"
               field={@form[:description_text]}
             />

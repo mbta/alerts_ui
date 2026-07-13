@@ -169,7 +169,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
               />
               <.textarea_footer
                 character_limit={4000}
-                copy_id="#delivery_banner_text"
+                copy_id="#alert_data_banner_text"
                 copy_title="Copy banner text to Clipboard"
                 field={@form[:banner_text]}
               />
