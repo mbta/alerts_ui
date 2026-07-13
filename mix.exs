@@ -64,7 +64,7 @@ defmodule AlertsUI.MixProject do
     [
       mod: {AlertsUI.Application, []},
       included_applications: [:laboratory],
-      extra_applications: [:logger, :runtime_tools, :exprotobuf]
+      extra_applications: [:logger, :runtime_tools]
     ]
   end
 
@@ -89,7 +89,6 @@ defmodule AlertsUI.MixProject do
       {:ex_aws_s3, "~> 2.0"},
       {:ex_json_schema, "~> 0.5"},
       {:ex_machina, "~> 2.8.0", only: :test},
-      {:exprotobuf, "~> 1.2.17"},
       {:gen_stage, "~> 1.3.2"},
       {:gettext, "~> 0.20"},
       {:finch, "~> 0.13"},
