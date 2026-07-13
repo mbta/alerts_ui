@@ -604,7 +604,7 @@ defmodule AlertsUI.AlertBuilder do
     # need to be included in informed entities
     all_route_pattern_stops =
       route_patterns
-      |> Enum.map(& &1.stops())
+      |> Enum.map(& &1.stops)
 
     Enum.map(child_stops_with_context, fn {child_stop, _, child_direction, _} ->
       # get all stops next to our selected stops
