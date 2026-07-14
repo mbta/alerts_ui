@@ -37,16 +37,16 @@ defmodule AlertsUI.MixProject do
           AlertsUI.Telemetry,
           AlertsUI.Application,
           AlertsUI.Support.Factory,
-          AlertsUI.FeedOutput.GTFSProtobufDefinition.Position,
-          AlertsUI.FeedOutput.GTFSProtobufDefinition.Shape,
-          AlertsUI.FeedOutput.GTFSProtobufDefinition.TripUpdate,
-          AlertsUI.FeedOutput.GTFSProtobufDefinition.TripUpdate.StopTimeEvent,
-          AlertsUI.FeedOutput.GTFSProtobufDefinition.TripUpdate.StopTimeUpdate,
-          AlertsUI.FeedOutput.GTFSProtobufDefinition.TripUpdate.StopTimeUpdate.StopTimeProperties,
-          AlertsUI.FeedOutput.GTFSProtobufDefinition.TripUpdate.TripProperties,
-          AlertsUI.FeedOutput.GTFSProtobufDefinition.VehicleDescriptor,
-          AlertsUI.FeedOutput.GTFSProtobufDefinition.VehiclePosition,
-          AlertsUI.FeedOutput.GTFSProtobufDefinition.VehiclePosition.CarriageDetails,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.TransitRealtime.Position,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.TransitRealtime.Shape,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.TransitRealtime.TripUpdate,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.TransitRealtime.TripUpdate.StopTimeEvent,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.TransitRealtime.TripUpdate.StopTimeUpdate,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.TransitRealtime.TripUpdate.StopTimeUpdate.StopTimeProperties,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.TransitRealtime.TripUpdate.TripProperties,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.TransitRealtime.VehicleDescriptor,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.TransitRealtime.VehiclePosition,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.TransitRealtime.VehiclePosition.CarriageDetails,
           AlertsUI.FeedOutput.WriteToS3,
           AlertsUI.FeedOutput.WriteLocal,
           AlertsUIWeb.VersionController,
@@ -64,7 +64,7 @@ defmodule AlertsUI.MixProject do
     [
       mod: {AlertsUI.Application, []},
       included_applications: [:laboratory],
-      extra_applications: [:logger, :runtime_tools, :exprotobuf]
+      extra_applications: [:logger, :runtime_tools]
     ]
   end
 
@@ -89,7 +89,6 @@ defmodule AlertsUI.MixProject do
       {:ex_aws_s3, "~> 2.0"},
       {:ex_json_schema, "~> 0.5"},
       {:ex_machina, "~> 2.8.0", only: :test},
-      {:exprotobuf, "~> 1.2.17"},
       {:gen_stage, "~> 1.3.2"},
       {:gettext, "~> 0.20"},
       {:finch, "~> 0.13"},
@@ -118,6 +117,7 @@ defmodule AlertsUI.MixProject do
       {:phoenix_swagger, "~> 0.8"},
       {:plug_cowboy, "~> 2.5"},
       {:postgrex, ">= 0.0.0"},
+      {:protox, "~> 2.0"},
       {:req, "~> 0.5.0"},
       {:sentry, "~> 12.0"},
       {:sftp_client, "~> 2.1"},

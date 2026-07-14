@@ -6,7 +6,7 @@ defmodule AlertsUI.Trapeze.Importer do
 
   alias AlertsUI.AlertBuilder
   alias AlertsUI.FeatureFlags
-  alias AlertsUI.FeedOutput.GTFSProtobufDefinition.Alert
+  alias AlertsUI.FeedOutput.GTFSProtobufDefinition.TransitRealtime.Alert
   use Oban.Worker
 
   alias AlertsUI.Alerts
