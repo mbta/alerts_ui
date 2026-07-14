@@ -2,8 +2,8 @@ let Hooks = {};
 
 Hooks.ActivityTracker = {
   throttled: false,
-  // 30s throttle
-  delay: 30 * 1000,
+  // 5s throttle
+  delay: 5 * 1000,
   // 30s window for autologout on inactivity
   autologoutWindow: 30 * 1000,
 
