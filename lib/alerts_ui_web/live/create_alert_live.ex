@@ -73,7 +73,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
       next: "preview",
       label: "Alert Details"
     },
-    %Step{name: "preview", previous: nil, next: nil, label: "Preview and Submit"}
+    %Step{name: "preview", previous: nil, next: nil, label: "Review and Submit"}
   ]
 
   @impl true
