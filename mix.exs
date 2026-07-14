@@ -5,13 +5,12 @@ defmodule AlertsUI.MixProject do
     [
       app: :alerts_ui,
       version: "0.1.0",
-      elixir: "~> 1.15",
+      elixir: "~> 1.20",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: Mix.compilers() ++ [:phoenix_swagger],
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
-      preferred_cli_env: ["ecto.test_setup": :test],
       dialyzer: [
         plt_add_apps: [:laboratory]
       ],
@@ -161,5 +160,9 @@ defmodule AlertsUI.MixProject do
         "dialyzer"
       ]
     ]
+  end
+
+  def cli do
+    [preferred_cli_env: ["ecto.test_setup": :test]]
   end
 end
