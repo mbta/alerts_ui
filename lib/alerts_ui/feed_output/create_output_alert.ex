@@ -98,6 +98,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
 
   def build_informed_entities(informed_entities) do
     Enum.map(informed_entities, &build_informed_entity/1)
+    |> Enum.sort()
   end
 
   def build_informed_entity(informed_entity) do

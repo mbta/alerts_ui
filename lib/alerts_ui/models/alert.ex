@@ -241,11 +241,7 @@ defmodule AlertsUI.Models.Alert do
     field :image_alternative_text, :string
     field :tts_header_text, :string
     field :tts_description_text, :string
-
-    has_many :informed_entity, InformedEntity,
-      on_replace: :nilify,
-      preload_order: [asc: :id]
-
+    has_many :informed_entity, InformedEntity, on_replace: :nilify
     field :draft, :boolean, default: false
     field :notification_period_start, :utc_datetime
     field :notification_period_end, :utc_datetime
