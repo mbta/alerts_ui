@@ -1,6 +1,6 @@
 defmodule AlertsUI.Helpers.PipeTest do
   @moduledoc false
-  use ExUnit.Case, asyne: false
+  use ExUnit.Case, async: false
 
   alias AlertsUI.Helpers.Pipe
 

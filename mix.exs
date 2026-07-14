@@ -15,6 +15,7 @@ defmodule AlertsUI.MixProject do
       dialyzer: [
         plt_add_apps: [:laboratory]
       ],
+      listeners: [Phoenix.CodeReloader],
       test_coverage: [
         ignore_modules: [
           AlertsUI.DataCase,
