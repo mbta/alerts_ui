@@ -1,12 +1,12 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Step do
-  @moduledoc "Describe a step in the multi-step form and where it can go."
+  @moduledoc "Describes a timeline step in the multi-step form and what its previous and next steps are."
 
   @doc """
   Returns list of atoms allowed in alert lifecycle field of alert
-
-  ## Examples
-      iex> %AlertsUIWeb.Step{name: "example", previous: "cool", next: "bean", label: "hi"}
-      %AlertsUIWeb.Step{name: "example", previous: "cool", next: "bean", label: "hi"}
+  A value of nil for previous means this is the first step, and nil for
+  next means it's the last step. Otherwise
+  these values should reference the name strings of other steps.
+  Label is the text that shows up in the timeline.
   """
   defstruct [:name, :previous, :next, :label]
 
