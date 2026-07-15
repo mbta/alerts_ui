@@ -68,7 +68,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
   defp get_stops(_), do: nil
 
   defp dedup_stops(stops) when is_list(stops), do: Enum.uniq(stops)
-  defp dedup_stops(_), do: []
 
   defp maybe_reverse_stops(autotext) do
     # if we have "both directions" selected but all our trips are for

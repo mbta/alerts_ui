@@ -54,9 +54,6 @@ defmodule AlertsUI.Helpers.Recurrence do
   # First call of this function: use initial value as start_day
   defp day_range([day | rest], nil, _, _), do: day_range([day | rest], day, nil, nil)
 
-  # First call, so this is the only value.
-  defp day_range([day], start_day, _, _) when is_nil(start_day), do: [day, day]
-
   defp day_range([current, next | rest], start_day, end_day, next_start_day) do
     # More than one day in the list and...
     cond do

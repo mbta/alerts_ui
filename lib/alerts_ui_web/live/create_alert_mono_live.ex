@@ -524,8 +524,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     socket
   end
 
-  defp create_new_alert(socket, _params), do: socket
-
   defp edit_existing_alert(socket, params, alert_id) do
     # edit an existing alert
     alert = Alerts.get_by_alert_id!(alert_id)
