@@ -1,3 +1,23 @@
+defmodule AlertsUIWeb.CreateAlertMonoLive.Step do
+  @moduledoc "Describe a step in the multi-step form and where it can go."
+
+  @doc """
+  Returns list of atoms allowed in alert lifecycle field of alert
+
+  ## Examples
+      iex> %AlertsUIWeb.Step{name: "example", previous: "cool", next: "bean", label: "hi"}
+      %AlertsUIWeb.Step{name: "example", previous: "cool", next: "bean", label: "hi"}
+  """
+  defstruct [:name, :previous, :next, :label]
+
+  @type t :: %__MODULE__{
+          name: String.t(),
+          previous: String.t() | nil,
+          next: String.t() | nil,
+          label: String.t()
+        }
+end
+
 defmodule AlertsUIWeb.CreateAlertMonoLive do
   @moduledoc """
   A monolithic LiveView for creating and editing alerts.
@@ -83,7 +103,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         submitting?: false,
         submitted?: false,
         image_preview_size: nil,
-        first_async_load: true
+        first_async_load: true,
+        steps: @steps
       })
       |> assign_new(:return_to, fn -> session["return_to"] end)
 
