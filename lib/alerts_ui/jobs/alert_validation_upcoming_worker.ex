@@ -10,7 +10,6 @@ defmodule AlertsUI.Jobs.AlertValidationUpcomingWorker do
   use Oban.Worker
 
   require Logger
-  require Ecto.Query
 
   alias AlertsUI.AlertValidation.AlertValidator
   alias AlertsUI.Models.LastGTFSValidation

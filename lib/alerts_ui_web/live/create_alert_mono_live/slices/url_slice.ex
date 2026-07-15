@@ -5,7 +5,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
   on the first step of the alert creation form.
   """
 
-  require Logger
   alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice

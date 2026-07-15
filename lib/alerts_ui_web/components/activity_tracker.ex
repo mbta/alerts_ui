@@ -1,6 +1,4 @@
 defmodule AlertsUIWeb.ActivityTracker do
-  require Logger
-
   @moduledoc """
   Component tracks user movement in the app to decide when to expire
   their session based on idleness. We generate two kinds of events in

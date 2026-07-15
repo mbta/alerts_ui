@@ -16,8 +16,6 @@ defmodule AlertsUI.Trapeze.Importer do
   alias AlertsUI.Trapeze.SFTP
   alias AlertsUI.Trapeze.WorkOrder
 
-  require Logger
-
   @open_origin "(Opened automatically via Trapeze EAM)"
   @closed_origin "(Closed automatically via Trapeze EAM)"
 
