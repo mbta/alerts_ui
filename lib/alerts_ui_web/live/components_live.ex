@@ -159,7 +159,7 @@ defmodule AlertsUIWeb.ComponentsLive do
           option
         end
 
-      option = String.downcase(option || "")
+      option = String.downcase(option)
 
       case search_term do
         nil -> true
