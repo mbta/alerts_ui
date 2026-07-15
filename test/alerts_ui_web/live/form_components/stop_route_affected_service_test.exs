@@ -31,6 +31,14 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
     show_stop_ids: false
   }
 
+  defp assigns(overrides \\ %{}) do
+    if overrides do
+      Map.merge(@assigns, overrides)
+    else
+      @assigns
+    end
+  end
+
   @route_one %Route{sort_order: 1, id: "Blue", name: "route_number_1", type: 3}
   @route_two %Route{sort_order: 2, id: "Bluer", name: "route_number_2", type: 3}
   @shuttle_route %Route{
@@ -52,10 +60,10 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
 
     test "route options are disabled until a stop is chosen" do
       {:ok, view, _html} =
-        live_isolated_component(StopRouteAffectedService, %{
-          @assigns
-          | alert_data: %{route_type: 1}
-        })
+        live_isolated_component(
+          StopRouteAffectedService,
+          assigns(%{alert_data: %{route_type: 1}})
+        )
 
       view
       |> live_assign(%{
@@ -116,7 +124,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         {:ok, view, _html} =
           live_isolated_component(
             StopRouteAffectedService,
-            %{@assigns | route_type: 3}
+            assigns(%{route_type: 3})
           )
 
         refute view |> render_async() =~ ~s(shuttle)
@@ -135,7 +143,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         {:ok, view, _html} =
           live_isolated_component(
             StopRouteAffectedService,
-            %{@assigns | route_type: 3}
+            assigns(%{route_type: 3})
           )
 
         view
@@ -163,7 +171,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         {:ok, view, _html} =
           live_isolated_component(
             StopRouteAffectedService,
-            @assigns
+            assigns()
           )
 
         assert view |> render_async() =~ ~s(value="place-aqucl">)
@@ -217,7 +225,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         {:ok, view, _html} =
           live_isolated_component(
             StopRouteAffectedService,
-            @assigns
+            assigns()
           )
 
         assert view |> render_async() =~ ~s(value="place-aqucl">)
@@ -276,7 +284,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         {:ok, view, _html} =
           live_isolated_component(
             StopRouteAffectedService,
-            @assigns
+            assigns()
           )
 
         {:ok, document} =
@@ -343,7 +351,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         {:ok, view, _html} =
           live_isolated_component(
             StopRouteAffectedService,
-            %{@assigns | route_type: 3}
+            assigns(%{route_type: 3})
           )
 
         assert view
@@ -394,7 +402,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         {:ok, view, _html} =
           live_isolated_component(
             StopRouteAffectedService,
-            @assigns
+            assigns()
           )
 
         {:ok, document} =
@@ -432,7 +440,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         {:ok, view, _html} =
           live_isolated_component(
             StopRouteAffectedService,
-            @assigns
+            assigns()
           )
 
         {:ok, document} =
@@ -499,7 +507,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         {:ok, view, _html} =
           live_isolated_component(
             StopRouteAffectedService,
-            %{@assigns | route_type: 3}
+            assigns(%{route_type: 3})
           )
 
         # Set baseline unfiltered
@@ -550,7 +558,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         {:ok, view, _html} =
           live_isolated_component(
             StopRouteAffectedService,
-            %{@assigns | route_type: 3}
+            assigns(%{route_type: 3})
           )
 
         # Select Park Street
@@ -615,7 +623,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         {:ok, view, _html} =
           live_isolated_component(
             StopRouteAffectedService,
-            @assigns
+            assigns()
           )
 
         # Add route filter
@@ -656,8 +664,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         {:ok, view, _html} =
           live_isolated_component(
             StopRouteAffectedService,
-            @assigns
-            |> Map.merge(%{
+            assigns(%{
               form_type: :editing,
               effect_name: "DELAY",
               alert_data: %{
@@ -675,10 +682,10 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
 
     test "it sends section_completed if no error in changeset" do
       {:ok, view, _html} =
-        live_isolated_component(StopRouteAffectedService, %{
-          @assigns
-          | alert_data: %{route_type: 3}
-        })
+        live_isolated_component(
+          StopRouteAffectedService,
+          assigns(%{alert_data: %{route_type: 3}})
+        )
 
       view
       |> element("form")

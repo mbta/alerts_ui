@@ -20,6 +20,10 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffectTest do
     selected_route_type: "systemwide"
   }
 
+  defp assigns(overrides \\ %{}) do
+    Map.merge(@assigns, overrides)
+  end
+
   describe "component" do
     test "renders" do
       assert render_component(RouteTypeAndEffect, @assigns) =~ ~s(id="route_types_form")
@@ -28,15 +32,13 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffectTest do
 
   describe "complete_step event" do
     test "does not show forbidden effects" do
-      {:ok, view, _html} = live_isolated_component(RouteTypeAndEffect, @assigns)
+      {:ok, view, _html} = live_isolated_component(RouteTypeAndEffect, assigns())
       refute view |> render() =~ ~s(Summary)
     end
 
     test "given a valid changset, goes to next step" do
       assigns =
-        @assigns
-        |> Map.put(:selected_effect, "Detour")
-        |> Map.put(:selected_route_type, "bus")
+        assigns(%{selected_effect: "Detour", selected_route_type: "bus"})
 
       {:ok, view, _html} = live_isolated_component(RouteTypeAndEffect, assigns)
 
@@ -53,7 +55,7 @@ defmodule AlertsUIWeb.FormComponents.RouteTypeAndEffectTest do
     end
 
     test "given an invalid changset, does not sends a :step_completed event" do
-      {:ok, view, _html} = live_isolated_component(RouteTypeAndEffect, @assigns)
+      {:ok, view, _html} = live_isolated_component(RouteTypeAndEffect, assigns())
 
       view
       |> element("form")

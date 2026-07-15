@@ -28,6 +28,10 @@ defmodule AlertsUIWeb.FormComponents.TimelineTest do
     form_type: :creating
   }
 
+  defp assigns(overrides \\ %{}) do
+    Map.merge(@assigns, overrides)
+  end
+
   describe "previous_steps/3" do
     test "given a step, find names of previous steps" do
       [_, _, step_3, _] = @steps
@@ -38,7 +42,7 @@ defmodule AlertsUIWeb.FormComponents.TimelineTest do
 
   describe "component" do
     test "renders" do
-      {:ok, _view, html} = live_isolated_component(Timeline, @assigns)
+      {:ok, _view, html} = live_isolated_component(Timeline, assigns())
       assert html =~ ~s(value=\"step_one\")
     end
   end

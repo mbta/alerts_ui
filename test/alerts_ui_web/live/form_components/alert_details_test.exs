@@ -103,20 +103,24 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
     selected_stops: []
   }
 
+  defp assigns(overrides \\ %{}) do
+    Map.merge(@assigns, overrides)
+  end
+
   describe "component" do
     test "renders" do
-      assert render_component(AlertDetails, @assigns) =~ ~s(id="details_form")
+      assert render_component(AlertDetails, assigns()) =~ ~s(id="details_form")
     end
 
     test "gets causes correctly" do
-      {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
+      {:ok, view, _html} = live_isolated_component(AlertDetails, assigns())
 
       assert view
              |> render() =~ ~s(fog)
     end
 
     test "capitalizes Amtrak in causes" do
-      {:ok, view, _html} = live_isolated_component(AlertDetails, %{@assigns | route_type: 2})
+      {:ok, view, _html} = live_isolated_component(AlertDetails, assigns(%{route_type: 2}))
 
       view
       |> element("form")
@@ -134,7 +138,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
     end
 
     test "capitalizes Coast Guard in causes" do
-      {:ok, view, _html} = live_isolated_component(AlertDetails, %{@assigns | route_type: 4})
+      {:ok, view, _html} = live_isolated_component(AlertDetails, assigns(%{route_type: 4}))
 
       view
       |> element("form")
@@ -154,14 +158,14 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
 
   describe "severity" do
     test "gets default severity correctly" do
-      {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
+      {:ok, view, _html} = live_isolated_component(AlertDetails, assigns())
 
       assert view
              |> render() =~ ~s(about 10 minutes)
     end
 
     test "allows severity to be set by user" do
-      {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
+      {:ok, view, _html} = live_isolated_component(AlertDetails, assigns())
 
       view
       |> element("form")
@@ -178,15 +182,18 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
 
   describe "cause detail" do
     test "gets default cause detail correctly" do
-      assigns = Map.merge(@assigns, %{route_type: 1, effect_name: "Single Tracking"})
-      {:ok, view, _html} = live_isolated_component(AlertDetails, assigns)
+      {:ok, view, _html} =
+        live_isolated_component(
+          AlertDetails,
+          assigns(%{route_type: 1, effect_name: "Single Tracking"})
+        )
 
       assert view
              |> render() =~ ~s(single tracking)
     end
 
     test "allows severity to be set by user" do
-      {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
+      {:ok, view, _html} = live_isolated_component(AlertDetails, assigns())
 
       view
       |> element("form")
@@ -216,7 +223,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
            }}
         end
       ) do
-        {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
+        {:ok, view, _html} = live_isolated_component(AlertDetails, assigns())
 
         refute view
                |> element("div#image-preview-div")
@@ -240,7 +247,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
     end
 
     test "shows error if url has invalid scheme" do
-      {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
+      {:ok, view, _html} = live_isolated_component(AlertDetails, assigns())
 
       view
       |> element("form")
@@ -255,7 +262,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
     end
 
     test "shows error if image is not from our CDN" do
-      {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
+      {:ok, view, _html} = live_isolated_component(AlertDetails, assigns())
 
       view
       |> element("form")
@@ -283,7 +290,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
            }}
         end
       ) do
-        {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
+        {:ok, view, _html} = live_isolated_component(AlertDetails, assigns())
 
         view
         |> element("form")
@@ -312,7 +319,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
            }}
         end
       ) do
-        {:ok, view, _html} = live_isolated_component(AlertDetails, @assigns)
+        {:ok, view, _html} = live_isolated_component(AlertDetails, assigns())
 
         view
         |> element("form")
