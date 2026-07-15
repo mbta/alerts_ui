@@ -101,8 +101,11 @@ defmodule AlertsUI.MixProject do
       {:live_isolated_component, "~> 0.9", only: :test},
       {:logster, "~> 1.1"},
       {:map_diff, "~> 1.3.4"},
-      {:mbta_v3_api, git: "https://github.com/mbta/mbta_v3_api.git", branch: "mss-more-files"},
-      {:mock, "~> 0.3.8", only: :test},
+      {:mbta_v3_api,
+       git: "https://github.com/mbta/mbta_v3_api.git", branch: "aking/update-con_cache"},
+      # Mock needs a newer version of meck to compile in erlang 29
+      {:meck, "~> 1.2.0", only: :test, override: true},
+      {:mock, "~> 0.3.9", only: :test},
       {:nimble_csv, "~> 1.3.0"},
       {:oban, "~> 2.16"},
       {:oban_web, "~> 2.11"},
