@@ -666,27 +666,36 @@ defmodule AlertsUIWeb.CreateAlertLive do
         Alerts.get_by_alert_id(socket.assigns.alert_id)
       end
 
-    alert_data
-    |> Alerts.create_or_update_alert(user, existing_alert)
-    |> case do
-      {:ok, alert} ->
-        alert_id =
-          alert.id
-          |> Alerts.get_by_id()
-          |> Map.get(:alert_id)
+    alert =
+      alert_data
+      |> Alerts.create_or_update_alert(user, existing_alert)
+      |> case do
+        {:ok, alert} ->
+          alert_id =
+            alert.id
+            |> Alerts.get_by_id()
+            |> Map.get(:alert_id)
 
-        socket
-        |> put_flash(:info, flash_text(socket.assigns.alert_id, alert_id, form_type))
-        |> redirect(to: return_to(socket.assigns.return_to || "/"))
+          socket
+          |> put_flash(:info, flash_text(socket.assigns.alert_id, alert_id, form_type))
+          |> redirect(to: return_to(socket.assigns.return_to || "/"))
 
-      {:error, result} ->
-        errors =
-          result
-          |> Alerts.parse_changeset_errors()
-          |> format_errors(socket.assigns.combination)
+        {:error, result} ->
+          errors =
+            result
+            |> Alerts.parse_changeset_errors()
+            |> format_errors(socket.assigns.combination)
 
-        display_errors(socket, errors)
-    end
+          display_errors(socket, errors)
+      end
+
+    Phoenix.PubSub.broadcast(
+      AlertsUI.PubSub,
+      "alerts",
+      {:alerts_updated}
+    )
+
+    alert
   end
 
   def return_to(return_to_value) do

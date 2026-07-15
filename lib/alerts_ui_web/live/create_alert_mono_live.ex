@@ -721,32 +721,41 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         Alerts.get_by_alert_id(socket.assigns.alert_id)
       end
 
+    alert_params =
+      alert_params
+      |> Alerts.create_or_update_alert(user, existing_alert)
+      |> case do
+        {:ok, alert} ->
+          alert_id =
+            alert.id
+            |> Alerts.get_by_id()
+            |> Map.get(:alert_id)
+
+          flash = flash_text(socket.assigns.alert_id, alert_id, form_type)
+
+          socket
+          |> put_flash(:info, flash)
+          |> redirect(to: return_to(socket.assigns.return_to || "/"))
+
+        {:error, changeset} ->
+          # Form validation should prevent us from getting here
+          # but in case we do, we log an error and show
+          # an error flash to the user
+          errors =
+            changeset
+            |> Alerts.parse_changeset_errors()
+            |> ErrorFormatter.parse_field_errors(socket.assigns.form[:combination].value)
+
+          Logger.error("Errors upon alert submission: #{format_errors(errors)}")
+          display_errors(assign(socket, :submitting?, false), errors)
+      end
+
+    Phoenix.PubSub.broadcast(
+      AlertsUI.PubSub,
+      "alerts",
+      {:alerts_updated}
+    )
+
     alert_params
-    |> Alerts.create_or_update_alert(user, existing_alert)
-    |> case do
-      {:ok, alert} ->
-        alert_id =
-          alert.id
-          |> Alerts.get_by_id()
-          |> Map.get(:alert_id)
-
-        flash = flash_text(socket.assigns.alert_id, alert_id, form_type)
-
-        socket
-        |> put_flash(:info, flash)
-        |> redirect(to: return_to(socket.assigns.return_to || "/"))
-
-      {:error, changeset} ->
-        # Form validation should prevent us from getting here
-        # but in case we do, we log an error and show
-        # an error flash to the user
-        errors =
-          changeset
-          |> Alerts.parse_changeset_errors()
-          |> ErrorFormatter.parse_field_errors(socket.assigns.form[:combination].value)
-
-        Logger.error("Errors upon alert submission: #{format_errors(errors)}")
-        display_errors(assign(socket, :submitting?, false), errors)
-    end
   end
 end
