@@ -42,8 +42,9 @@ defmodule AlertsUIWeb do
         formats: [:html, :json],
         layouts: [html: AlertsUIWeb.Layouts]
 
+      use Gettext, backend: AlertsUIWeb.Gettext
+
       import Plug.Conn
-      import AlertsUIWeb.Gettext
 
       unquote(verified_routes())
     end
@@ -90,7 +91,7 @@ defmodule AlertsUIWeb do
       import AlertsUIWeb.CoreComponents
       import AlertsUIWeb.SharedComponents
       import AlertsUIWeb.IconComponents
-      import AlertsUIWeb.Gettext
+      use Gettext, backend: AlertsUIWeb.Gettext
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS

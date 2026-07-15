@@ -42,7 +42,7 @@ defmodule AlertsUI.FeedOutput.CompareFeed do
 
   @spec compare_alert_lists(list(), list()) :: :ok | {atom(), list()}
   def compare_alert_lists(incoming, outgoing) do
-    zipped_list = List.zip([incoming, outgoing])
+    zipped_list = Enum.zip([incoming, outgoing])
 
     alerts_match =
       Enum.map(zipped_list, fn {incoming, outgoing} ->

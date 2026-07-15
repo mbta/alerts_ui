@@ -25,6 +25,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     ReminderTimesSlice,
     StopRouteServiceSlice,
     SubmitSlice,
+    SystemwideServiceSlice,
     TimelineSlice,
     TimeRangeSlice,
     UrlSlice
@@ -598,7 +599,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   defp strip_on_duplicate(alert), do: alert
 
   defp service_slice_by_combination(:SR), do: StopRouteServiceSlice
-  defp service_slice_by_combination(:ACCESS), do: AccessServiceSlice
+  defp service_slice_by_combination(:ACCESS), do: AccessAffectedServiceSlice
   defp service_slice_by_combination(nil), do: SystemwideServiceSlice
   defp service_slice_by_combination(_), do: AffectedServiceSlice
 

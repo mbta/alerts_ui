@@ -15,7 +15,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertDataTest do
 
       slices = AlertData.slices(bare_socket)
 
-      refute slices == [], "slices/1 should return a non-empty list when form is nil"
+      refute Enum.empty?(slices), "slices/1 should return a non-empty list when form is nil"
       assert is_list(slices)
       refute Enum.empty?(slices)
     end
