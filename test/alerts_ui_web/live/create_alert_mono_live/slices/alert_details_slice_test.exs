@@ -1004,7 +1004,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
         assert view
                |> element("#alert_data_description_text")
-               |> render_async() =~ ~s(the elevator broke i&amp;#39;m sorry)
+               |> render_async() =~ ~s(the elevator broke i&#39;m sorry)
       end
     end
 

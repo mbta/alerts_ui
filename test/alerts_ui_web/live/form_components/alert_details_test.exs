@@ -854,7 +854,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
 
         assert view
                |> element("#alert_details_description_text")
-               |> render() =~ ~s(the elevator broke i&amp;#39;m sorry)
+               |> render() =~ ~s(the elevator broke i&#39;m sorry)
       end
     end
 
