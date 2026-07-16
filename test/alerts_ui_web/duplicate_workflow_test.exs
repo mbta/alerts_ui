@@ -211,7 +211,7 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
       {:ok, view, _html} = live(conn, "/alerts/legacy/duplicate?alert_id=123")
 
       assert render_async(view) =~
-               ~r/<option value="default" selected="selected">.*All Stops.*<\/option>/s
+               ~r/<option value="default" selected="">.*All Stops.*<\/option>/s
 
       view
       |> element("#service_form")

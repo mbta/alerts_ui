@@ -76,7 +76,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       })
 
       assert view
-             |> render() =~ ~s(id="stop_route_affected_service_route_ids" disabled="disabled")
+             |> render() =~ ~s(id="stop_route_affected_service_route_ids" disabled="")
 
       view
       |> live_assign(%{
@@ -93,7 +93,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
       |> render_change(%{"stop_route_affected_service" => %{"stop_ids" => ["Blue"]}})
 
       refute view
-             |> render() =~ ~s(id="stop_route_affected_service_route_ids" disabled="disabled")
+             |> render() =~ ~s(id="stop_route_affected_service_route_ids" disabled="")
 
       view
       |> live_assign(%{
@@ -183,9 +183,9 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
           "stop_route_affected_service" => %{"stop_ids" => ["place-aqucl"]}
         })
 
-        assert view |> render_async() =~ ~s(selected="selected" value="place-aqucl">)
-        assert view |> render_async() =~ ~s(selected="selected" value="Blue">)
-        assert view |> render_async() =~ ~s(selected="selected" value="Bluer">)
+        assert view |> render_async() =~ ~s(selected="" value="place-aqucl">)
+        assert view |> render_async() =~ ~s(selected="" value="Blue">)
+        assert view |> render_async() =~ ~s(selected="" value="Bluer">)
 
         view
         |> element("form")
@@ -205,12 +205,12 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
 
         refute document_has_element?(
                  document,
-                 "#stop_route_affected_service_route_ids > option[value=\"Blue\"][selected=\"selected\"]"
+                 "#stop_route_affected_service_route_ids > option[value=\"Blue\"][selected]"
                )
 
         assert document_has_element?(
                  document,
-                 "#stop_route_affected_service_route_ids > option[value=\"Bluer\"][selected=\"selected\"]"
+                 "#stop_route_affected_service_route_ids > option[value=\"Bluer\"][selected]"
                )
       end
     end
@@ -244,7 +244,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
 
         assert document_has_element?(
                  document,
-                 "#stop_route_affected_service_route_ids > option[value=\"Blue\"][selected=\"selected\"]"
+                 "#stop_route_affected_service_route_ids > option[value=\"Blue\"][selected]"
                )
 
         view
@@ -265,12 +265,12 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
 
         assert document_has_element?(
                  document,
-                 "option[value=\"place-aqucl\"][selected=\"selected\"]"
+                 "option[value=\"place-aqucl\"][selected]"
                )
 
         refute document_has_element?(
                  document,
-                 "#stop_route_affected_service_route_ids > option[selected=\"selected\"][value=\"Blue\"]"
+                 "#stop_route_affected_service_route_ids > option[selected][value=\"Blue\"]"
                )
       end
     end
@@ -355,7 +355,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
           )
 
         assert view
-               |> element("select##stop_route_affected_service_stop_ids")
+               |> element("select#stop_route_affected_service_stop_ids")
                |> render_async() =~
                  ~r/value="place-aqucl".*value="place-pktrm-inbound".*value="place-pktrm"/
 
@@ -594,7 +594,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
                   [
                     {"id", "stop-selector-place-pktrm"},
                     {"title", "Stop ID place-pktrm"},
-                    {"selected", "selected"},
+                    {"selected", ""},
                     {"value", "place-pktrm"}
                   ], ["Park Street (inbound)"]},
                  {"option",
@@ -651,7 +651,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
         # Verify modal is cleared
         assert view
                |> element("select#stop_route_affected_service_modal_route_id")
-               |> render() =~ ~s(<option value="default" selected="selected">)
+               |> render() =~ ~s(<option value="default" selected="">)
       end
     end
 
@@ -675,8 +675,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
             })
           )
 
-        assert view |> render_async() =~ ~s(selected="selected" value="place-aqucl">)
-        assert view |> render_async() =~ ~s(selected="selected" value="Blue">)
+        assert view |> render_async() =~ ~s(selected="" value="place-aqucl">)
+        assert view |> render_async() =~ ~s(selected="" value="Blue">)
       end
     end
 
@@ -768,8 +768,8 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
           |> render_async()
           |> Floki.parse_document()
 
-        assert document_has_element?(document, "option[value=\"Blue\"][selected=\"selected\"]")
-        assert document_has_element?(document, "option[value=\"Bluer\"][selected=\"selected\"]")
+        assert document_has_element?(document, "option[value=\"Blue\"][selected]")
+        assert document_has_element?(document, "option[value=\"Bluer\"][selected]")
 
         # Simulate separately selecting a second stop
         view
@@ -912,7 +912,7 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
           |> Floki.parse_document()
 
         assert document_has_element?(document, "option[value=\"Blue\"]")
-        assert document_has_element?(document, "option[value=\"Bluer\"][selected=\"selected\"]")
+        assert document_has_element?(document, "option[value=\"Bluer\"][selected]")
 
         view
         |> element("#details_form")

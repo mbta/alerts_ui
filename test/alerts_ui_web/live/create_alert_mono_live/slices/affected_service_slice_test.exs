@@ -685,7 +685,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         view = get_to_submission_page_refactor(conn, view, "Ferry", "Delay")
         render_async(view)
 
-        assert render_async(view) =~ ~s(id="dates-filter-modal_button" disabled="disabled")
+        assert render_async(view) =~ ~s(id="dates-filter-modal_button" disabled="")
 
         view
         |> element("form")
@@ -694,7 +694,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
           "alert_data" => %{"route_ids" => [@ferry_route.id]}
         })
 
-        refute render_async(view) =~ ~s(id="dates-filter-modal_button" disabled="disabled")
+        refute render_async(view) =~ ~s(id="dates-filter-modal_button" disabled="")
       end
     end
 
@@ -742,7 +742,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
         render_async(view)
 
-        assert render(view) =~ ~s(id="alert_data_stop_names_and_ids" disabled="disabled")
+        assert render(view) =~ ~s(id="alert_data_stop_names_and_ids" disabled="")
 
         view
         |> element("form")
@@ -753,7 +753,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
 
         render_async(view)
 
-        refute render(view) =~ ~s(id="alert_data_stop_names_and_ids" disabled="disabled")
+        refute render(view) =~ ~s(id="alert_data_stop_names_and_ids" disabled="")
       end
     end
 
@@ -774,7 +774,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         render_async(view)
 
         assert render_async(view) =~
-                 ~s(id="alert_data_stop_names_and_ids" disabled="disabled")
+                 ~s(id="alert_data_stop_names_and_ids" disabled="")
 
         view
         |> element("form")
@@ -784,7 +784,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         })
 
         render_async(view)
-        refute render(view) =~ ~s(id="alert_data_stop_names_and_ids" disabled="disabled")
+        refute render(view) =~ ~s(id="alert_data_stop_names_and_ids" disabled="")
         assert render_async(view) =~ "All Stops"
 
         view
@@ -795,7 +795,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         })
 
         render_async(view)
-        refute render(view) =~ ~s(id="alert_data_stop_names_and_ids" disabled="disabled")
+        refute render(view) =~ ~s(id="alert_data_stop_names_and_ids" disabled="")
       end
     end
 
@@ -810,7 +810,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {:ok, view, _html} = live(conn, "/alerts/new/bus/detour")
         render_async(view)
 
-        assert render(view) =~ ~s(id="alert_data_stop_names_and_ids" disabled="disabled")
+        assert render(view) =~ ~s(id="alert_data_stop_names_and_ids" disabled="")
       end
     end
 
@@ -829,7 +829,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         {:ok, view, _html} = live(conn, "/alerts/new/bus/detour")
         render_async(view)
 
-        assert render(view) =~ ~s(id="alert_data_stop_names_and_ids" disabled="disabled")
+        assert render(view) =~ ~s(id="alert_data_stop_names_and_ids" disabled="")
 
         view
         |> element("form")
@@ -840,7 +840,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
 
         render_async(view)
 
-        refute render(view) =~ ~s(id="alert_data_stop_names_and_ids" disabled="disabled")
+        refute render(view) =~ ~s(id="alert_data_stop_names_and_ids" disabled="")
       end
     end
 
@@ -918,7 +918,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
 
         assert document_has_element?(
                  document,
-                 "option[value=\"Courthouse (outbound)|place-crtst\"][selected=\"selected\"]"
+                 "option[value=\"Courthouse (outbound)|place-crtst\"][selected]"
                )
       end
     end
@@ -963,7 +963,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
 
         assert document_has_element?(
                  document,
-                 "option[value=\"#{@stop_2.name} (outbound)|#{@stop_2.id}\"][selected=\"selected\"]"
+                 "option[value=\"#{@stop_2.name} (outbound)|#{@stop_2.id}\"][selected]"
                )
 
         # Deselect the route — stop selection must be cleared
@@ -1025,7 +1025,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
 
         assert document_has_element?(
                  document,
-                 "option[value=\"#{@stop_2.name} (outbound)|#{@stop_2.id}\"][selected=\"selected\"]"
+                 "option[value=\"#{@stop_2.name} (outbound)|#{@stop_2.id}\"][selected]"
                )
 
         # Add a second route — stop selection must be cleared
@@ -1080,7 +1080,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
 
         render_async(view)
 
-        assert render(view) =~ ~s(id="alert_data_stop_names_and_ids" disabled="disabled"),
+        assert render(view) =~ ~s(id="alert_data_stop_names_and_ids" disabled=""),
                "stop names should be disabled"
       end
     end
@@ -1318,7 +1318,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
 
         assert document_has_element?(
                  document,
-                 "option[value=\"CR-Worcester\"][selected=\"selected\"]"
+                 "option[value=\"CR-Worcester\"][selected]"
                )
 
         assert render(view) =~ "Filter: All future trips"
@@ -1366,7 +1366,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
 
         assert document_has_element?(
                  document,
-                 "option[value=\"746\"][selected=\"selected\"]"
+                 "option[value=\"746\"][selected]"
                )
 
         refute called(SchedulesRepo.end_of_rating())
@@ -1440,7 +1440,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         render_async(view)
 
         assert render_async(view) =~
-                 ~s(id="alert_data_stop_names_and_ids" disabled="disabled")
+                 ~s(id="alert_data_stop_names_and_ids" disabled="")
 
         refute render_async(view) =~ "All Stops"
 
@@ -1454,7 +1454,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         render_async(view)
 
         refute render_async(view) =~
-                 ~s(id="alert_data_stop_names_and_ids" disabled="disabled")
+                 ~s(id="alert_data_stop_names_and_ids" disabled="")
 
         assert render_async(view) =~ "All Stops"
 
@@ -1468,7 +1468,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         render_async(view)
 
         refute render_async(view) =~
-                 ~s(id="alert_data_stop_names_and_ids" disabled="disabled")
+                 ~s(id="alert_data_stop_names_and_ids" disabled="")
       end
     end
 
@@ -1490,7 +1490,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         render_async(view)
 
         assert render_async(view) =~
-                 ~s(id="alert_data_stop_names_and_ids" disabled="disabled")
+                 ~s(id="alert_data_stop_names_and_ids" disabled="")
 
         refute render_async(view) =~ "All Stops"
 
@@ -1512,7 +1512,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         render_async(view)
 
         refute render_async(view) =~
-                 ~s(id="alert_data_stop_names_and_ids" disabled="disabled"),
+                 ~s(id="alert_data_stop_names_and_ids" disabled=""),
                "stop selector should not be disabled"
       end
     end
@@ -1722,12 +1722,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
 
         assert document_has_element?(
                  document,
-                 "[value=\"CR-Worcester\"][selected=\"selected\"]"
+                 "[value=\"CR-Worcester\"][selected]"
                )
 
         assert document_has_element?(
                  document,
-                 "[value=\"South Station|place-sstat\"][selected=\"selected\"]"
+                 "[value=\"South Station|place-sstat\"][selected]"
                )
 
         # Change stop selection to Courthouse
@@ -2035,17 +2035,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
 
         assert document_has_element?(
                  document,
-                 "[value=\"CR-Worcester\"][selected=\"selected\"]"
+                 "[value=\"CR-Worcester\"][selected]"
                )
 
         assert document_has_element?(
                  document,
-                 "[value=\"South Station|place-sstat\"][selected=\"selected\"]"
+                 "[value=\"South Station|place-sstat\"][selected]"
                )
 
         assert document_has_element?(
                  document,
-                 "[value=\"trip-595\"][selected=\"selected\"]"
+                 "[value=\"trip-595\"][selected]"
                )
 
         view

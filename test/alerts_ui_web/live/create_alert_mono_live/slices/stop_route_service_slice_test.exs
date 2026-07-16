@@ -224,12 +224,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         refute document_has_element?(
                  document,
-                 "#alert_data_route_ids > option[value=\"Blue\"][selected=\"selected\"]"
+                 "#alert_data_route_ids > option[value=\"Blue\"][selected]"
                )
 
         assert document_has_element?(
                  document,
-                 "#alert_data_route_ids > option[value=\"Red\"][selected=\"selected\"]"
+                 "#alert_data_route_ids > option[value=\"Red\"][selected]"
                )
       end
     end
@@ -787,7 +787,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         assert document_has_element?(
                  document,
-                 "select#alert_data_stop_names_and_ids > option[value=\"Park Street|place-pktrm\"][selected=\"selected\"]"
+                 "select#alert_data_stop_names_and_ids > option[value=\"Park Street|place-pktrm\"][selected]"
                ),
                "Park Street should be preserved since it was previously selected"
 
@@ -886,7 +886,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         assert document_has_element?(
                  document,
-                 "option[value=\"Aquarium|place-aqucl\"][selected=\"selected\"]"
+                 "option[value=\"Aquarium|place-aqucl\"][selected]"
                )
       end
     end
@@ -1086,8 +1086,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         render_async(view)
 
         {:ok, document} = view |> render_async() |> Floki.parse_document()
-        assert document_has_element?(document, "option[value=\"Blue\"][selected=\"selected\"]")
-        assert document_has_element?(document, "option[value=\"Red\"][selected=\"selected\"]")
+        assert document_has_element?(document, "option[value=\"Blue\"][selected]")
+        assert document_has_element?(document, "option[value=\"Red\"][selected]")
 
         # Select second stop
         view
@@ -1208,8 +1208,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         render_async(view)
 
         {:ok, document} = view |> render_async() |> Floki.parse_document()
-        assert document_has_element?(document, "option[value=\"Blue\"][selected=\"selected\"]")
-        assert document_has_element?(document, "option[value=\"Red\"][selected=\"selected\"]")
+        assert document_has_element?(document, "option[value=\"Blue\"][selected]")
+        assert document_has_element?(document, "option[value=\"Red\"][selected]")
 
         # Explicitly select only Red route (subset of defaults)
         view
@@ -1223,7 +1223,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
 
         {:ok, document} = view |> render_async() |> Floki.parse_document()
         assert document_has_element?(document, "option[value=\"Blue\"]")
-        assert document_has_element?(document, "option[value=\"Red\"][selected=\"selected\"]")
+        assert document_has_element?(document, "option[value=\"Red\"][selected]")
 
         view
         |> element("form")
@@ -1354,8 +1354,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         render_async(view)
 
         {:ok, document} = view |> render_async() |> Floki.parse_document()
-        assert document_has_element?(document, "option[value=\"Blue\"][selected=\"selected\"]")
-        assert document_has_element?(document, "option[value=\"Red\"][selected=\"selected\"]")
+        assert document_has_element?(document, "option[value=\"Blue\"][selected]")
+        assert document_has_element?(document, "option[value=\"Red\"][selected]")
 
         # User deselects Blue, keeping only Red
         view
@@ -1367,8 +1367,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         render_async(view)
 
         {:ok, document} = view |> render_async() |> Floki.parse_document()
-        refute document_has_element?(document, "option[value=\"Blue\"][selected=\"selected\"]")
-        assert document_has_element?(document, "option[value=\"Red\"][selected=\"selected\"]")
+        refute document_has_element?(document, "option[value=\"Blue\"][selected]")
+        assert document_has_element?(document, "option[value=\"Red\"][selected]")
       end
     end
 
@@ -1407,8 +1407,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         render_async(view)
 
         {:ok, document} = view |> render_async() |> Floki.parse_document()
-        assert document_has_element?(document, "option[value=\"Blue\"][selected=\"selected\"]")
-        refute document_has_element?(document, "option[value=\"Red\"][selected=\"selected\"]")
+        assert document_has_element?(document, "option[value=\"Blue\"][selected]")
+        refute document_has_element?(document, "option[value=\"Red\"][selected]")
 
         # User selects place-pktrm on Red instead
         view
@@ -1423,8 +1423,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
         render_async(view)
 
         {:ok, document} = view |> render_async() |> Floki.parse_document()
-        refute document_has_element?(document, "option[value=\"Blue\"][selected=\"selected\"]")
-        assert document_has_element?(document, "option[value=\"Red\"][selected=\"selected\"]")
+        refute document_has_element?(document, "option[value=\"Blue\"][selected]")
+        assert document_has_element?(document, "option[value=\"Red\"][selected]")
       end
     end
 
