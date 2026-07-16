@@ -94,11 +94,11 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
-        get_to_submission_page(view, "Bus", "Delay")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
-        fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
+        fill_out_form(view, "form", %{
+          alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
         open_review_modal(view)
@@ -152,7 +152,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         {:ok, _} =
           Alerts.create_or_update_alert(alert_params, build(:user))
 
-        {:ok, view, _html} = live(conn, "/alerts/legacy/edit?alert_id=123")
+        {:ok, view, _html} = live(conn, "/alerts/edit/123")
 
         open_review_modal(view)
 
@@ -191,6 +191,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         alert_params =
           build(:alert_map, %{
             active_period_start: @tomorrow_datetime,
+            active_period_end: nil,
             alert_id: "123",
             effect: :OTHER_EFFECT,
             effect_detail: "DELAY",
@@ -206,11 +207,19 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         {:ok, _} =
           Alerts.create_or_update_alert(alert_params, build(:user))
 
-        {:ok, view, _html} = live(conn, "/alerts/legacy/duplicate?alert_id=123")
+        {:ok, view, _html} = live(conn, "/alerts/duplicate/123")
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "active_period_end_specifier" => "until_further_notice"
+          }
+        })
 
         open_review_modal(view)
 
-        assert render(view) =~ ~r/Duplicate alert #123/s
+        assert view |> element("#review-modal-container") |> render =~ ~r/Duplicate alert #123/s
       end
     end
 
@@ -229,11 +238,11 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
            get: fn _ -> @stop end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
-        get_to_submission_page(view, "Bus", "Delay")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
-        fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
+        fill_out_form(view, "form", %{
+          alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
         open_review_modal(view)
@@ -243,28 +252,24 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
     end
 
     @tag :logged_in_user
-    test "correct mode and effect: Systemwide Suspension", %{conn: conn} do
+    test "correct mode and effect: Facility", %{conn: conn} do
       with_mock(FacilitiesRepo,
         get_by_type: fn _facility_types, _opts -> [@facility] end,
         get: fn _ -> @facility end
       ) do
-        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
-        get_to_submission_page(view, "Facility", "Elevator closure")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Facility", "Bike issue")
 
-        fill_out_form(view, "#service_form", %{
-          access_affected_service: %{
+        fill_out_form(view, "form", %{
+          alert_data: %{
             facility_ids: ["349"]
           }
-        })
-
-        fill_out_form(view, "#details_form", %{
-          alert_details: %{header_text: "hello world"}
         })
 
         open_review_modal(view)
 
         assert view
-               |> element("#review-modal-container", "Facility • Elevator Closure")
+               |> element("#review-modal-container", "Facility • Bike Issue")
                |> has_element?
       end
     end
@@ -287,11 +292,11 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
-        get_to_submission_page(view, "Bus", "Delay")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
-        fill_out_required_form_fields(view, %{
-          affected_service: %{
+        fill_out_form(view, "form", %{
+          alert_data: %{
             route_ids: ["CR-Worcester"],
             stop_names_and_ids: ["Aquarium|place-aqucl"]
           }
@@ -326,11 +331,11 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
-        get_to_submission_page(view, "Bus", "Delay")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
-        fill_out_required_form_fields(view, %{
-          affected_service: %{
+        fill_out_form(view, "form", %{
+          alert_data: %{
             route_ids: ["CR-Worcester"],
             direction: "1",
             stop_names_and_ids: ["Aquarium (inbound)|place-aqucl"]
@@ -362,9 +367,13 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Extra Service
-        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
-        get_to_submission_page(view, "Bus", "Extra service")
-        fill_out_required_form_fields(view, %{affected_service: %{route_ids: ["CR-Worcester"]}})
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Extra service")
+
+        fill_out_form(view, "form", %{
+          alert_data: %{route_ids: ["CR-Worcester"]}
+        })
+
         open_review_modal(view)
 
         assert render(view) =~ ~r/Routes:.*Framingham\/Worcester Line/s
@@ -380,6 +389,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         {RoutesRepo, [],
          [
            by_type: fn _types -> @routes end,
+           by_stop: fn _, _ -> @routes end,
            get: fn _id -> @route_one end,
            get: fn _id, _opts -> @route_one end
          ]},
@@ -392,16 +402,18 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Stop Closure
-        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
-        get_to_submission_page(view, "Bus", "Stop closure")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Stop closure")
 
-        fill_out_required_form_fields(view, %{
-          stop_route_affected_service: %{stop_ids: ["place-aqucl"], route_ids: ["CR-Worcester"]}
+        fill_out_form(view, "form", %{
+          alert_data: %{stop_names_and_ids: ["Aquarium|place-aqucl"], route_ids: ["CR-Worcester"]}
         })
 
         open_review_modal(view)
 
-        assert render(view) =~ ~r/Routes:.*Framingham\/Worcester Line/s
+        assert view |> element("#review-modal-container") |> render =~
+                 ~r/Routes:.*Framingham\/Worcester Line/s
+
         assert render(view) =~ ~r/Stops:.*Aquarium/s
         refute render(view) =~ "Direction:"
         refute render(view) =~ "Trips:"
@@ -417,31 +429,35 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
            get: fn _id -> @route_one end,
            get: fn _id, _opts -> @route_one end
          ]},
+        {StopsRepo, [], [by_route_type: fn _, _ -> [] end, by_route: fn _, _, _ -> [] end]},
         {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]}
       ]) do
         # CR Cancellation
-        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
-        get_to_submission_page(view, "Commuter Rail", "Cancellation")
+        {:ok, view, _html} = live(conn, "/alerts/new")
 
-        fill_out_required_form_fields(view, %{
-          affected_service: %{
-            route_ids: ["CR-Worcester"],
-            direction: "1",
+        view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Cancellation")
+
+        fill_out_form(view, "form", %{
+          alert_data: %{
+            route_ids: ["CR-Worcester"]
+          }
+        })
+
+        fill_out_form(view, "form", %{
+          alert_data: %{
+            direction: "0",
             trip_ids: ["CR-683322-595"]
           }
         })
 
-        # needed for populating trip names
-        send(view.pid, {:selected_schedules, [@schedule]})
-
         open_review_modal(view)
-        # This pops up because phoenix doesn't know we set the trip_ids,
-        # But we clearly do, as the assertion below attests.
-        dismiss_prediction_warning(view)
 
         assert render(view) =~ ~r/Routes:.*Framingham\/Worcester Line/s
-        assert render(view) =~ ~r/Direction:.*Inbound/s
-        assert render(view) =~ ~r/Trips:.*595 \(10:00 PM from South Station\)/s
+        assert render(view) =~ ~r/Direction:.*Outbound/s
+
+        assert view |> element("#review-modal-container") |> render =~
+                 ~r/Trips:.*595 \(10:00 PM from South Station\)/s
+
         refute render(view) =~ "Stops:"
       end
     end
@@ -471,26 +487,21 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # CR Delay
-        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
-        get_to_submission_page(view, "Commuter Rail", "Delay")
-        render_async(view)
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Delay")
 
-        fill_out_required_form_fields(view, %{
-          affected_service: %{
+        fill_out_form(view, "form", %{
+          alert_data: %{
             route_ids: ["CR-Worcester"],
-            direction: "1",
             trip_ids: ["CR-683322-595"],
             stop_names_and_ids: ["Aquarium (inbound)|place-aqucl"]
           }
         })
 
-        # needed for populating trip names
-        send(view.pid, {:selected_schedules, [@schedule]})
-
         open_review_modal(view)
 
         assert render(view) =~ ~r/Routes:.*Framingham\/Worcester Line/s
-        assert render(view) =~ ~r/Direction:.*Inbound/s
+        assert render(view) =~ ~r/Direction:.*Both/s
         assert render(view) =~ ~r/Trips:.*595 \(10:00 PM from South Station\)/s
         assert render(view) =~ ~r/Stops:.*Aquarium/s
       end
@@ -506,11 +517,11 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Access Elevator Closure
-        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
-        get_to_submission_page(view, "Facility", "Elevator closure")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Facility", "Elevator closure")
 
-        fill_out_required_form_fields(view, %{
-          access_affected_service: %{single_facility_id: "349"}
+        fill_out_form(view, "form", %{
+          alert_data: %{single_facility_id: "349"}
         })
 
         open_review_modal(view)
@@ -528,11 +539,11 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
     @tag :logged_in_user
     test "Systemwide", %{conn: conn} do
       # Systemwide delay
-      {:ok, view, _html} = live(conn, "/alerts/legacy/new")
-      get_to_submission_page(view, "Systemwide", "Delay")
+      {:ok, view, _html} = live(conn, "/alerts/new")
+      view = get_to_submission_page_refactor(conn, view, "Systemwide", "Delay")
 
-      fill_out_form(view, "#systemwide-affected-service-form", %{
-        systemwide_affected_service: %{service_types: [3, 2, 4, 1]}
+      fill_out_form(view, "form", %{
+        alert_data: %{service_types: [3, 2, 4, 1]}
       })
 
       open_review_modal(view)
@@ -563,18 +574,22 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
-        get_to_submission_page(view, "Bus", "Delay")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
-        fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
+        fill_out_form(view, "form", %{
+          alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
         open_review_modal(view)
 
-        assert render(view) =~ ~r/Timing.*One-time/s
-        assert render(view) =~ ~r/Effect period.*until later today.*\(max.*hours,.*minutes\)/s
-        assert render(view) =~ ~r/Notification period.*Same as effect period/s
+        assert view |> element("#review-modal-container") |> render =~ ~r/Timing.*One-time/s
+
+        assert view |> element("#review-modal-container") |> render =~
+                 ~r/Effect period.*until.*later today.*\(max.*hours,.*minutes\)/s
+
+        assert view |> element("#review-modal-container") |> render =~
+                 ~r/Notification period.*until.*alert is closed/s
       end
     end
 
@@ -587,23 +602,23 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
            get_by_type: fn _type, _opts -> [@facility] end
          ]}
       ]) do
-        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
-        get_to_submission_page(view, "Facility", "Elevator closure")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Facility", "Elevator closure")
 
-        fill_out_form(view, "#service_form", %{
-          access_affected_service: %{single_facility_id: "349"}
+        fill_out_form(view, "form", %{
+          alert_data: %{single_facility_id: "349"}
         })
 
-        fill_out_form(view, "#time_range_form", %{
-          time_range: %{active_period_end_specifier: :when_work_order_is_closed}
+        fill_out_form(view, "form", %{
+          alert_data: %{active_period_end_specifier: :when_work_order_is_closed}
         })
 
         open_review_modal(view)
 
         assert render(view) =~ ~r/Timing.*One-time/s
 
-        assert render(view) =~
-                 ~r/Effect period.*until a work order for this facility is closed/s
+        assert view |> element("#review-modal-container") |> render =~
+                 ~r/Effect period.*until.*a work order for this facility is closed/s
 
         assert render(view) =~ ~r/Notification period.*Same as effect period/s
       end
@@ -645,7 +660,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
             build(:user)
           )
 
-        {:ok, view, _html} = live(conn, "/alerts/legacy/edit?alert_id=#{alert_id}")
+        {:ok, view, _html} = live(conn, "/alerts/edit/#{alert_id}")
 
         open_review_modal(view)
 
@@ -670,23 +685,23 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
-        get_to_submission_page(view, "Bus", "Delay")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
-        fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
+        fill_out_form(view, "form", %{
+          alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
-        fill_out_form(view, "#time_range_form", %{
-          time_range: %{
+        fill_out_form(view, "form", %{
+          alert_data: %{
             alert_timing: :recurring,
             active_period_start_specifier: :custom
           }
         })
 
         # Needs to be 2 separate render_changes because of function `set_start_date` in TimeRange
-        fill_out_form(view, "#time_range_form", %{
-          time_range: %{
+        fill_out_form(view, "form", %{
+          alert_data: %{
             active_period_start_date: ~D[2999-06-08],
             recurrence_days: ["saturday"]
           }
@@ -717,14 +732,14 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
-        get_to_submission_page(view, "Bus", "Delay")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
-        fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
+        fill_out_form(view, "form", %{
+          alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
-        fill_out_form(view, "#notification_period_form", %{
+        fill_out_form(view, "form", %{
           notification_period: %{
             notification_specifier: :custom
           }
@@ -754,11 +769,11 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
-        get_to_submission_page(view, "Bus", "Delay")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
-        fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
+        fill_out_form(view, "form", %{
+          alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
         open_review_modal(view)
@@ -790,15 +805,15 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
-        get_to_submission_page(view, "Bus", "Delay")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
-        fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
+        fill_out_form(view, "form", %{
+          alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
-        fill_out_form(view, "#details_form", %{
-          alert_details: %{
+        fill_out_form(view, "form", %{
+          alert_data: %{
             header_text: "hello world",
             cause_detail: "DISABLED_BUS",
             severity: 7,
@@ -837,11 +852,11 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
-        get_to_submission_page(view, "Bus", "Delay")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
-        fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
+        fill_out_form(view, "form", %{
+          alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
         open_review_modal(view)
@@ -866,19 +881,19 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
-        get_to_submission_page(view, "Bus", "Delay")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
-        fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
+        fill_out_form(view, "form", %{
+          alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
         # Unsure how long mbta images stay archived, but I'm curious to try it!
         image_url =
           "https://cdn.mbta.com/sites/default/files/styles/max_2600x2600/public/media/2025-04/2025-04-24-red-line-may-3-4-weekend-closure.png"
 
-        fill_out_form(view, "#details_form", %{
-          alert_details: %{
+        fill_out_form(view, "form", %{
+          alert_data: %{
             image_url: image_url,
             image_alternative_text: "This is the alternative text"
           }
@@ -912,11 +927,11 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
-        get_to_submission_page(view, "Bus", "Delay")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
-        fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
+        fill_out_form(view, "form", %{
+          alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
         open_review_modal(view)
@@ -941,11 +956,11 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
-        get_to_submission_page(view, "Bus", "Delay")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
-        fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
+        fill_out_form(view, "form", %{
+          alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
         now =
@@ -962,8 +977,8 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         # There doesn't seem to be another test of rider reminders structured like this.
         # Does rider_reminders try testing multiple reminders?
         # What's the sort for?
-        fill_out_form(view, "#rider_reminder_form", %{
-          rider_reminders: %{
+        fill_out_form(view, "form", %{
+          alert_data: %{
             "reminder_sort" => ["0", "1", "2"],
             "reminder_times" => %{
               "0" => %{
@@ -1024,11 +1039,11 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
-        get_to_submission_page(view, "Bus", "Delay")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
-        fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
+        fill_out_form(view, "form", %{
+          alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
         open_review_modal(view)
@@ -1053,15 +1068,15 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
-        get_to_submission_page(view, "Bus", "Delay")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
-        fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
+        fill_out_form(view, "form", %{
+          alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
-        fill_out_form(view, "#delivery_form", %{
-          "delivery" => %{
+        fill_out_form(view, "form", %{
+          "alert_data" => %{
             "view_banner" => true,
             "banner_sync_toggle" => false,
             "banner_text" => "Well hello there",
@@ -1091,15 +1106,15 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
-        get_to_submission_page(view, "Bus", "Delay")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
-        fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
+        fill_out_form(view, "form", %{
+          alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
-        fill_out_form(view, "#delivery_form", %{
-          "delivery" => %{
+        fill_out_form(view, "form", %{
+          "alert_data" => %{
             "notification_toggle" => false,
             "view_banner" => true,
             "accept_banner" => true
@@ -1129,11 +1144,11 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
-        get_to_submission_page(view, "Bus", "Delay")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
-        fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
+        fill_out_form(view, "form", %{
+          alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
         open_review_modal(view)
@@ -1160,11 +1175,11 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         # Bus Delay
-        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
-        get_to_submission_page(view, "Bus", "Delay")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
-        fill_out_required_form_fields(view, %{
-          affected_service: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
+        fill_out_form(view, "form", %{
+          alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
         open_review_modal(view)
@@ -1208,14 +1223,14 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         # create an alert
         user = user_fixture([:viewer, :author], %{first_name: "original", last_name: "user"})
         conn = AlertsUIWeb.ConnCase.log_in_user(conn, user)
-        {:ok, view, _html} = live(conn, "/alerts/legacy/new")
+        {:ok, view, _html} = live(conn, "/alerts/new")
 
-        get_to_submission_page(view, "Bus", "Delay")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
         view
-        |> element("#service_form")
+        |> element("form")
         |> render_change(%{
-          affected_service: %{
+          alert_data: %{
             route_ids: [@route_one.id],
             stop_ids: [@stop.id]
           }
@@ -1243,7 +1258,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
           DateTime.now!("America/New_York")
           |> Calendar.strftime("%a %m/%d/%Y")
 
-        {:ok, view, _html} = live(conn, "/alerts/legacy/edit?alert_id=#{alert_id}")
+        {:ok, view, _html} = live(conn, "/alerts/edit/#{alert_id}")
 
         open_review_modal(view)
         assert render(view) =~ ~r/Created.*#{no_timestamp_today}/s
@@ -1256,7 +1271,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         user = user_fixture([:viewer, :author], %{first_name: "final", last_name: "finaluser"})
         conn = AlertsUIWeb.ConnCase.log_in_user(conn, user)
 
-        {:ok, view, _html} = live(conn, "/alerts/legacy/edit?alert_id=#{alert_id}")
+        {:ok, view, _html} = live(conn, "/alerts/edit/#{alert_id}")
 
         timestamp_today =
           DateTime.now!("America/New_York")
@@ -1320,7 +1335,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         {:ok, _} =
           Alerts.create_or_update_alert(alert_params, build(:user))
 
-        {:ok, view, _html} = live(conn, "/alerts/legacy/edit?alert_id=123")
+        {:ok, view, _html} = live(conn, "/alerts/edit/123")
 
         # Don't need to make any changes, just proceed with submitting the form
 
