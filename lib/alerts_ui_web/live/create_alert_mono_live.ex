@@ -1,3 +1,23 @@
+defmodule AlertsUIWeb.CreateAlertMonoLive.Step do
+  @moduledoc "Describes a timeline step in the multi-step form and what its previous and next steps are."
+
+  @doc """
+  Returns list of atoms allowed in alert lifecycle field of alert
+  A value of nil for previous means this is the first step, and nil for
+  next means it's the last step. Otherwise
+  these values should reference the name strings of other steps.
+  Label is the text that shows up in the timeline.
+  """
+  defstruct [:name, :previous, :next, :label]
+
+  @type t :: %__MODULE__{
+          name: String.t(),
+          previous: String.t() | nil,
+          next: String.t() | nil,
+          label: String.t()
+        }
+end
+
 defmodule AlertsUIWeb.CreateAlertMonoLive do
   @moduledoc """
   A monolithic LiveView for creating and editing alerts.
@@ -84,7 +104,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         submitting?: false,
         submitted?: false,
         image_preview_size: nil,
-        first_async_load: true
+        first_async_load: true,
+        steps: @steps
       })
       |> assign_new(:return_to, fn -> session["return_to"] end)
 
