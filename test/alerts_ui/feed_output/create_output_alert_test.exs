@@ -182,14 +182,11 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
                      agency_id: "1",
                      route_type: 2,
                      route_id: "CR-Lowell",
-                     stop_id: "1003",
-                     facility_id: "park-qamnl-garage",
                      trip: %{
                        route_id: "CR-Lowell",
-                       trip_id: "CR-627689-308",
+                       trip_id: "CR-627691-310",
                        direction_id: 1,
-                       start_date: "20230921",
-                       start_time: "25:40:30"
+                       start_time: "01:40:30"
                      },
                      activities: [
                        :BOARD,
@@ -201,11 +198,14 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlertTest do
                      agency_id: "1",
                      route_type: 2,
                      route_id: "CR-Lowell",
+                     stop_id: "1003",
+                     facility_id: "park-qamnl-garage",
                      trip: %{
                        route_id: "CR-Lowell",
-                       trip_id: "CR-627691-310",
+                       trip_id: "CR-627689-308",
                        direction_id: 1,
-                       start_time: "01:40:30"
+                       start_date: "20230921",
+                       start_time: "25:40:30"
                      },
                      activities: [
                        :BOARD,
