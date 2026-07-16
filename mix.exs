@@ -101,7 +101,7 @@ defmodule AlertsUI.MixProject do
       {:logster, "~> 1.1"},
       {:map_diff, "~> 1.3.4"},
       {:mbta_v3_api,
-       git: "https://github.com/mbta/mbta_v3_api.git", branch: "aking/update-con_cache"},
+       git: "https://github.com/mbta/mbta_v3_api.git", branch: "aking/fix-warnings"},
       # Mock needs a newer version of meck to compile in erlang 29
       {:meck, "~> 1.2.0", only: :test, override: true},
       {:mock, "~> 0.3.9", only: :test},
