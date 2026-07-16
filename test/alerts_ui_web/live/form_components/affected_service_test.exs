@@ -267,7 +267,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     end
 
     test "trip options are only populated once a route is chosen" do
-      with_mock(SchedulesRepo, by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end) do
+      with_mock(SchedulesRepo,
+        by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end
+      ) do
         {:ok, view, _html} =
           live_isolated_component(AffectedService, %{
             @assigns

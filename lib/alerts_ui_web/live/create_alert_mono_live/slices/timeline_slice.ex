@@ -1,27 +1,8 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Step do
-  @moduledoc "Describe a step in the multi-step form and where it can go."
-
-  @doc """
-  Returns list of atoms allowed in alert lifecycle field of alert
-
-  ## Examples
-      iex> %AlertsUIWeb.Step{name: "example", previous: "cool", next: "bean", label: "hi"}
-      %AlertsUIWeb.Step{name: "example", previous: "cool", next: "bean", label: "hi"}
-  """
-  defstruct [:name, :previous, :next, :label]
-
-  @type t :: %__MODULE__{
-          name: String.t(),
-          previous: String.t() | nil,
-          next: String.t() | nil,
-          label: String.t()
-        }
-end
-
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
   @moduledoc """
   Slice that tracks multi-step form progress and renders the step-navigation
-  header bar. Manages the list of `Step` structs and the currently active step.
+  header bar. Gets the list of "Step" structs from the assigns and
+  managers the currently active step.
   """
 
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
@@ -36,22 +17,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
   ]
 
   defimpl Slice, for: __MODULE__ do
-    @steps [
-      %Step{
-        name: "route_type_and_effect",
-        previous: nil,
-        next: "details",
-        label: "Select Alert Type"
-      },
-      %Step{
-        name: "details",
-        previous: "route_type_and_effect",
-        next: "preview",
-        label: "Alert Details"
-      },
-      %Step{name: "preview", previous: nil, next: nil, label: "Review and Submit"}
-    ]
-
     def mount(_timeline_data, socket, _base_params), do: socket
 
     def extract(timeline_data, %AlertData{}, _params) do
@@ -67,17 +32,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
     end
 
     def assigns(_timeline_data, socket, params) do
+      steps = socket.assigns.steps
+
       progress =
         Map.get(
           socket.assigns,
           :progress,
-          progress_on_mount(params, socket.assigns.live_action, @steps)
+          progress_on_mount(params, socket.assigns.live_action, steps)
         )
 
       assign(socket,
-        previous_steps: previous_steps(progress, @steps),
+        previous_steps: previous_steps(progress, steps),
         progress: progress,
-        steps: @steps,
         form_type: socket.assigns.form_type
       )
     end

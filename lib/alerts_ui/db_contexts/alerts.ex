@@ -437,16 +437,25 @@ defmodule AlertsUI.Alerts do
     last_push_notification_timestamp =
       if send_all_clear?, do: closed_time, else: alert.last_push_notification_timestamp
 
-    alert
-    |> change(
-      active_period_end: closed_time,
-      closed_timestamp: closed_time,
-      notification_period_end: closed_time,
-      last_modified_timestamp: closed_time,
-      last_push_notification_timestamp: last_push_notification_timestamp,
-      duration_certainty: :KNOWN
+    closed_alert =
+      alert
+      |> change(
+        active_period_end: closed_time,
+        closed_timestamp: closed_time,
+        notification_period_end: closed_time,
+        last_modified_timestamp: closed_time,
+        last_push_notification_timestamp: last_push_notification_timestamp,
+        duration_certainty: :KNOWN
+      )
+      |> update_papertrail(origin)
+
+    Phoenix.PubSub.broadcast(
+      AlertsUI.PubSub,
+      "alerts",
+      {:alerts_updated}
     )
-    |> update_papertrail(origin)
+
+    closed_alert
   end
 
   defp update_papertrail(alert, %User{} = user) do

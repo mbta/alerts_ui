@@ -64,6 +64,14 @@ defmodule AlertsUI.FeedOutput.WriteNowhere do
 
   @spec write(String.t(), String.t()) :: :ok | {:error, any()}
   def write(_filename, _content) do
-    :ok
+    # Have to trick elixir into thinking an error is possible to return here in order to suppress
+    # elixir 1.18 warnings
+    # https://forum.elixirforum.com/t/elixir-v-1-18-behaviours-and-different-builds-warnings/68592/3
+    if :rand.uniform() >= 0 do
+      # always true
+      :ok
+    else
+      {:error, "should never get here"}
+    end
   end
 end

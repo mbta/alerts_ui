@@ -1,3 +1,4 @@
-erlang 26.2.1
-elixir 1.16.0-otp-26
+erlang 27.3.4.14
+elixir 1.18.4-otp-27
 nodejs 20.10.0
+protoc 35.1

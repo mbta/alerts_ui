@@ -179,8 +179,6 @@ defmodule AlertsUI.Trapeze.MonitorTest do
           report = Monitor.report()
           assert report.result == "error"
           assert report.reason == "Unable to import. RuntimeError: a message!"
-      else
-        _ -> flunk("Nothing raised")
       end
     end
 

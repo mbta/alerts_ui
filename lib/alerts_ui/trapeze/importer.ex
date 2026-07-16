@@ -6,7 +6,7 @@ defmodule AlertsUI.Trapeze.Importer do
 
   alias AlertsUI.AlertBuilder
   alias AlertsUI.FeatureFlags
-  alias AlertsUI.FeedOutput.GTFSProtobufDefinition.Alert
+  alias AlertsUI.FeedOutput.GTFSProtobufDefinition.TransitRealtime.Alert
   use Oban.Worker
 
   alias AlertsUI.Alerts
@@ -182,16 +182,25 @@ defmodule AlertsUI.Trapeze.Importer do
     alert_data_params =
       AlertBuilder.build_alert(alert_params, :ACCESS)
 
-    %Alert{}
-    |> Alert.changeset(
-      alert_data_params
-      |> Map.merge(%{
-        can_close_automatically: true,
-        last_modified_timestamp: DateTime.now!("Etc/UTC"),
-        last_push_notification_timestamp: DateTime.now!("Etc/UTC")
-      })
+    alert =
+      %Alert{}
+      |> Alert.changeset(
+        alert_data_params
+        |> Map.merge(%{
+          can_close_automatically: true,
+          last_modified_timestamp: DateTime.now!("Etc/UTC"),
+          last_push_notification_timestamp: DateTime.now!("Etc/UTC")
+        })
+      )
+      |> PaperTrail.insert!(user: nil, origin: @open_origin)
+
+    Phoenix.PubSub.broadcast(
+      AlertsUI.PubSub,
+      "alerts",
+      {:alerts_updated}
     )
-    |> PaperTrail.insert!(user: nil, origin: @open_origin)
+
+    alert
   end
 
   # When neither the new or old alerts are closed

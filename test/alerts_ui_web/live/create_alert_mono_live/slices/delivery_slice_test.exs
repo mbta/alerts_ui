@@ -99,7 +99,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
 
         view
         |> element("form")
-        |> render_change(%{"alert_data" => %{"route_ids" => [@route.id], "view_banner" => "true"}})
+        |> render_change(%{
+          "alert_data" => %{"route_ids" => [@route.id], "view_banner" => "true"}
+        })
 
         view
         |> element("form")

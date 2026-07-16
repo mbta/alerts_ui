@@ -12,7 +12,12 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
   alias AlertsUI.Models.ActivePeriod
   alias AlertsUI.Models.Alert
   alias AlertsUI.Repo
+  alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
+  alias MBTAV3API.Routes.Route
+  alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
+  alias MBTAV3API.Stops.Repo, as: StopsRepo
+  alias MBTAV3API.Stops.Stop
 
   @now DateTime.utc_now()
   @one_day_ago DateTime.add(@now, -1, :day)
@@ -26,20 +31,22 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
   @one_day_from_now DateTime.add(@now, 1, :day)
   @two_days_from_now DateTime.add(@now, 2, :day)
 
+  @alert_1 %{
+    alert_id: "123",
+    active_period: [
+      build(:active_period, %{start: ~U[2023-10-12 00:01:00Z]}),
+      build(:active_period, %{start: ~U[2023-10-13 00:01:00Z]})
+    ],
+    active_period_start: ~U[2023-10-12 00:01:00Z],
+    header_text: "this is the first alert",
+    effect_detail: "DETOUR",
+    original_route_selections: ["1", "2"],
+    duration_certainty: :UNKNOWN
+  }
+
   describe "alerts list page" do
     setup do
-      insert(:alert, %{
-        alert_id: "123",
-        active_period: [
-          build(:active_period, %{start: ~U[2023-10-12 00:01:00Z]}),
-          build(:active_period, %{start: ~U[2023-10-13 00:01:00Z]})
-        ],
-        active_period_start: ~U[2023-10-12 00:01:00Z],
-        header_text: "this is the first alert",
-        effect_detail: "DETOUR",
-        original_route_selections: ["1", "2"],
-        duration_certainty: :UNKNOWN
-      })
+      insert(:alert, @alert_1)
 
       insert(:alert, %{
         alert_id: "234",
@@ -1478,6 +1485,9 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         result = Alerts.get_by_alert_id("345")
         assert result.closed_timestamp !== nil
         assert result.last_push_notification_timestamp !== nil
+
+        html = render(view)
+        assert html =~ "No alerts found"
       end
     end
 
@@ -1866,6 +1876,157 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       {:ok, _view, html} = live(conn)
       refute html =~ "Loading"
       assert html =~ "Out of juice"
+    end
+  end
+
+  describe "multi-user" do
+    @tag :logged_in_user
+    test "closing an alert on one page also closes it on another page", %{conn: conn} do
+      insert(:alert, %{@alert_1 | alert_id: "345"})
+      {:ok, view, _html} = live(conn, "/alerts")
+      {:ok, view2, _html} = live(conn, "/alerts")
+
+      view
+      |> element("#all-clear-checkbox-close-alert-modal-345")
+      |> render_click()
+
+      view
+      |> element("#close-alert-modal-345 button", "Close now")
+      |> render_click()
+
+      html1 = render_async(view)
+      html2 = render_async(view2)
+
+      assert html1 =~ "No alerts found"
+      assert html2 =~ "No alerts found"
+    end
+
+    @tag :logged_in_user
+    test "editing an alert on one page also edits it on another page", %{conn: conn} do
+      bus_route = %Route{
+        direction_names: %{1 => "Inbound", 0 => "Outbound"},
+        sort_order: 3,
+        id: "746",
+        type: 3,
+        name: "SLW"
+      }
+
+      stop = %Stop{id: "place-sstat", name: "South Station"}
+
+      alert_params =
+        build(:alert_map, %{
+          alert_id: "345",
+          effect: :OTHER_EFFECT,
+          effect_detail: "DELAY",
+          primary_service_type: "3",
+          informed_entity: [
+            %{route_type: 3, route_id: bus_route.id, stop_id: stop.id, direction_id: 0}
+          ],
+          original_route_selections: ["SLW|746"],
+          original_stop_selections: ["South Station (outbound)|place-sstat"]
+        })
+
+      {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [bus_route] end,
+           get: fn _, _ -> bus_route end,
+           all: fn -> [bus_route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [stop] end,
+           get_parent: fn _ -> nil end,
+           all: fn _, _ -> [stop] end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _, _ -> [] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/edit/345")
+        {:ok, view2, html2} = live(conn, "/alerts")
+
+        updated_header = "updated this alert which should sync right away on another screen"
+        refute html2 =~ updated_header
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "header_text"],
+          "alert_data" => %{"header_text" => updated_header}
+        })
+
+        open_review_modal(view)
+        submit_alert(view)
+
+        html2 = render_async(view2)
+        assert html2 =~ updated_header
+      end
+    end
+
+    @tag :logged_in_user
+    test "creating an alert on one page also makes it appear on another page", %{conn: conn} do
+      bus_route = %Route{
+        direction_names: %{1 => "Inbound", 0 => "Outbound"},
+        sort_order: 3,
+        id: "746",
+        type: 3,
+        name: "SLW"
+      }
+
+      stop = %Stop{id: "place-sstat", name: "South Station"}
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [bus_route] end,
+           get: fn _, _ -> bus_route end,
+           all: fn -> [bus_route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [stop] end,
+           get_parent: fn _ -> nil end,
+           all: fn _, _ -> [stop] end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _, _ -> [] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        {:ok, view2, html2} = live(conn, "/alerts")
+
+        updated_header = "I am a totally new alert!"
+        assert html2 =~ "No alerts found"
+
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => [bus_route.id]}
+        })
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "header_text"],
+          "alert_data" => %{"header_text" => updated_header}
+        })
+
+        open_review_modal(view)
+        submit_alert(view)
+
+        html2 = render_async(view2)
+        assert html2 =~ updated_header
+      end
     end
   end
 

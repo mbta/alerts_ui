@@ -1,5 +1,5 @@
 # --- Set up Elixir build ---
-FROM hexpm/elixir:1.16.0-erlang-26.2.1-debian-bullseye-20231009-slim as elixir-builder
+FROM hexpm/elixir:1.18.4-erlang-27.3.4.14-debian-bullseye-20260623-slim as elixir-builder
 
 ENV LANG=C.UTF-8 MIX_ENV=prod
 
@@ -33,6 +33,7 @@ FROM elixir-builder as app-builder
 ENV LANG=C.UTF-8 MIX_ENV=prod
 RUN apt-get update --allow-releaseinfo-change
 RUN apt-get install --no-install-recommends --yes curl
+RUN apt-get install protobuf-compiler --yes
 
 WORKDIR /root
 

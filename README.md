@@ -6,10 +6,11 @@ A UI for creating and modifying alerts
 
 ### Requirements
 
-- [`asdf`](https://asdf-vm.com/) with plugins: `elixir`, `erlang`, `nodejs`
+- [`asdf`](https://asdf-vm.com/) with plugins: `elixir`, `erlang`, `nodejs`, `protoc`
   - `asdf plugin add elixir https://github.com/asdf-vm/asdf-elixir.git`
   - `asdf plugin add erlang https://github.com/asdf-vm/asdf-erlang.git`
   - `asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git`
+  - `asdf plugin add protoc https://github.com/paxosglobal/asdf-protoc.git`
   - Make sure `asdf` is [configured](https://asdf-vm.com/guide/getting-started.html#_2-configure-asdf) to add shims to your PATH so that you can run i.e. `node` directly
 - PostgreSQL 15 (using Homebrew: `brew install postgresql@15`)
   - You will need Postgres client tools in your PATH; if using Homebrew and you

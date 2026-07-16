@@ -33,7 +33,9 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
           timeframe_text:
             TimeframeText.timeframe_text(
               alert.active_period_start,
-              alert.active_period_end
+              alert.active_period_end,
+              alert.recurring,
+              alert.duration_certainty
             )
             |> build_translated_string,
           recurrence_text: alert.recurrence_text |> build_translated_string,
@@ -96,6 +98,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
 
   def build_informed_entities(informed_entities) do
     Enum.map(informed_entities, &build_informed_entity/1)
+    |> Enum.sort()
   end
 
   def build_informed_entity(informed_entity) do

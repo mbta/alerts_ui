@@ -47,7 +47,9 @@ defmodule AlertsUI.Support.Factory do
       reminder_times: [build(:reminder_time)],
       active_period_start: ~U[2023-10-12 00:01:00Z],
       last_modified_timestamp: ~U[2023-10-12 00:01:00Z],
-      primary_service_type: "1"
+      primary_service_type: "1",
+      duration_certainty: :UNKNOWN,
+      recurring: false
     }
   end
 

@@ -15,6 +15,7 @@ defmodule AlertsUI.MixProject do
       dialyzer: [
         plt_add_apps: [:laboratory]
       ],
+      listeners: [Phoenix.CodeReloader],
       test_coverage: [
         ignore_modules: [
           AlertsUI.DataCase,
@@ -37,16 +38,16 @@ defmodule AlertsUI.MixProject do
           AlertsUI.Telemetry,
           AlertsUI.Application,
           AlertsUI.Support.Factory,
-          AlertsUI.FeedOutput.GTFSProtobufDefinition.Position,
-          AlertsUI.FeedOutput.GTFSProtobufDefinition.Shape,
-          AlertsUI.FeedOutput.GTFSProtobufDefinition.TripUpdate,
-          AlertsUI.FeedOutput.GTFSProtobufDefinition.TripUpdate.StopTimeEvent,
-          AlertsUI.FeedOutput.GTFSProtobufDefinition.TripUpdate.StopTimeUpdate,
-          AlertsUI.FeedOutput.GTFSProtobufDefinition.TripUpdate.StopTimeUpdate.StopTimeProperties,
-          AlertsUI.FeedOutput.GTFSProtobufDefinition.TripUpdate.TripProperties,
-          AlertsUI.FeedOutput.GTFSProtobufDefinition.VehicleDescriptor,
-          AlertsUI.FeedOutput.GTFSProtobufDefinition.VehiclePosition,
-          AlertsUI.FeedOutput.GTFSProtobufDefinition.VehiclePosition.CarriageDetails,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.TransitRealtime.Position,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.TransitRealtime.Shape,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.TransitRealtime.TripUpdate,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.TransitRealtime.TripUpdate.StopTimeEvent,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.TransitRealtime.TripUpdate.StopTimeUpdate,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.TransitRealtime.TripUpdate.StopTimeUpdate.StopTimeProperties,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.TransitRealtime.TripUpdate.TripProperties,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.TransitRealtime.VehicleDescriptor,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.TransitRealtime.VehiclePosition,
+          AlertsUI.FeedOutput.GTFSProtobufDefinition.TransitRealtime.VehiclePosition.CarriageDetails,
           AlertsUI.FeedOutput.WriteToS3,
           AlertsUI.FeedOutput.WriteLocal,
           AlertsUIWeb.VersionController,
@@ -64,7 +65,7 @@ defmodule AlertsUI.MixProject do
     [
       mod: {AlertsUI.Application, []},
       included_applications: [:laboratory],
-      extra_applications: [:logger, :runtime_tools, :exprotobuf]
+      extra_applications: [:logger, :runtime_tools]
     ]
   end
 
@@ -79,9 +80,9 @@ defmodule AlertsUI.MixProject do
     [
       {:credo, "~> 1.7.1", only: [:dev, :test]},
       {:dialyxir, "~> 1.4.1", only: [:dev, :test], runtime: false},
-      {:ecto, "~> 3.13.2"},
+      {:ecto, "~>  3.14.1"},
       {:ecto_psql_extras, "~> 0.8.8", only: :dev},
-      {:ecto_sql, "~> 3.13.2"},
+      {:ecto_sql, "~> 3.14.0"},
       {:ehmon, github: "mbta/ehmon", only: :prod},
       {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
       {:ex_aws, "~> 2.0"},
@@ -89,7 +90,6 @@ defmodule AlertsUI.MixProject do
       {:ex_aws_s3, "~> 2.0"},
       {:ex_json_schema, "~> 0.5"},
       {:ex_machina, "~> 2.8.0", only: :test},
-      {:exprotobuf, "~> 1.2.17"},
       {:gen_stage, "~> 1.3.2"},
       {:gettext, "~> 0.20"},
       {:finch, "~> 0.13"},
@@ -97,7 +97,7 @@ defmodule AlertsUI.MixProject do
       {:flop_phoenix, "~> 0.26.0"},
       {:hackney, "1.25.0"},
       {:jason, "~> 1.2"},
-      {:laboratory, github: "paulswartz/laboratory", ref: "cookie_opts"},
+      {:laboratory, github: "mbta/laboratory", ref: "master"},
       {:live_debugger, "~> 0.8.0", only: :dev},
       {:live_isolated_component, "~> 0.9", only: :test},
       {:logster, "~> 1.1"},
@@ -116,8 +116,9 @@ defmodule AlertsUI.MixProject do
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_view, "~> 1.0.1"},
       {:phoenix_swagger, "~> 0.8"},
-      {:plug_cowboy, "~> 2.5"},
+      {:plug_cowboy, "~> 2.7"},
       {:postgrex, ">= 0.0.0"},
+      {:protox, "~> 2.0"},
       {:req, "~> 0.5.0"},
       {:sentry, "~> 12.0"},
       {:sftp_client, "~> 2.1"},
