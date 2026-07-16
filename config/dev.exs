@@ -65,6 +65,12 @@ config :phoenix, :stacktrace_depth, 20
 # Initialize plugs at runtime for faster development compilation
 config :phoenix, :plug_init_mode, :runtime
 
+# Recommended phoenix live view config
+config :phoenix_live_view,
+  debug_heex_annotations: true,
+  debug_attributes: true,
+  enable_expensive_runtime_checks: true
+
 # function for writing feed output files
 config :alerts_ui, file_write_module: AlertsUI.FeedOutput.WriteLocal
 
