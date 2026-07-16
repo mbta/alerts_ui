@@ -97,7 +97,7 @@ defmodule AlertsUI.MixProject do
       {:jason, "~> 1.2"},
       {:laboratory, github: "mbta/laboratory", ref: "master"},
       {:lazy_html, ">= 0.0.0", only: :test},
-      {:live_debugger, "~> 0.8.0", only: :dev},
+      {:live_debugger, "~> 1.0.2", only: :dev},
       {:live_isolated_component, "~> 0.9", only: :test},
       {:logster, "~> 1.1"},
       {:map_diff, "~> 1.3.4"},
