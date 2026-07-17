@@ -250,24 +250,25 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     {:noreply, socket}
   end
 
-  # @impl true
+  @impl true
   def handle_event("review", _params, socket) do
     # if valid:
     #   live navigate to `?review=true`, opening the modal
     # else:
     #   open error flash
 
-    # TODO only show if both warnings are false
     alert_data = Map.merge(socket.assigns.form.source.data, socket.assigns.form.source.changes)
 
     autotext_data = AlertDetailsSlice.autotext_map(alert_data, socket.assigns)
 
     socket =
       socket
-      |> assign(:submitting?, true)
-      |> assign(:submitted?, true)
-      |> assign(:check_predictions, false)
-      |> assign(:check_trip_end, false)
+      |> assign(%{
+        submitting?: true,
+        submitted?: true,
+        check_predictions: false,
+        check_trip_end: false
+      })
       |> sync_socket(%{"alert_data" => autotext_data})
 
     {:noreply, socket}
@@ -311,11 +312,28 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   end
 
   @impl true
-  def handle_event("check_for_trip_warnings", params, socket) do
+  def handle_event("check_predictions", params, socket) do
     # form data with properly capitalized effect name
     alert_data =
       socket.assigns.form.data
       |> Map.put(:effect_name, PathHelper.effect_from_url_name(socket.assigns.path_effect_name))
+
+    show_prediction_warning? = PredictionSuppressionWarningModal.show_warning?(alert_data)
+
+    if show_prediction_warning? do
+      {:noreply,
+       assign(socket, %{
+         check_predictions: true
+       })}
+    else
+      handle_event("check_for_trip_warnings", params, socket)
+    end
+  end
+
+  @impl true
+  def handle_event("check_for_trip_warnings", params, socket) do
+    alert_data =
+      socket.assigns.form.data
 
     trip_arrival_time =
       TimeRangeSlice.get_trip_arrival_time_for_validate(
@@ -330,13 +348,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         alert_data.modal_date
       )
 
-    show_prediction_warning? = PredictionSuppressionWarningModal.show_warning?(alert_data)
-
-    if Enum.any?([show_trip_end_warning?, show_prediction_warning?]) do
+    if show_trip_end_warning? do
       {:noreply,
        assign(socket, %{
-         check_predictions: show_prediction_warning?,
-         check_trip_end: show_trip_end_warning?
+         check_trip_end: true
        })}
     else
       handle_event("review", params, socket)

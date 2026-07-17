@@ -9,9 +9,6 @@ defmodule AlertsUIWeb.TripEndWarningModal do
   import AlertsUIWeb.SharedComponents
   import AlertsUIWeb.IconComponents
 
-  alias AlertsUIWeb.Formatting
-  # alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
-
   @doc """
   Renders the warning modal
 
@@ -58,7 +55,5 @@ defmodule AlertsUIWeb.TripEndWarningModal do
     NaiveDateTime.compare(trip_arrival_time, active_period_start) == :lt
   end
 
-  def show_warning?(_, _, _) do
-    false
-  end
+  def show_warning?(_, _, _), do: false
 end

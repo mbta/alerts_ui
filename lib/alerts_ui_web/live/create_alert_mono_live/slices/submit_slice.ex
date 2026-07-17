@@ -8,8 +8,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path, as: PathHelper
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.PredictionSuppressionWarningModal
-  alias AlertsUIWeb.TripEndWarningModal
   alias AlertsUIWeb.ReviewModal
+  alias AlertsUIWeb.TripEndWarningModal
   use AlertsUIWeb, :html
 
   defstruct [
@@ -74,13 +74,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
         id="check_predictions_modal"
         alert_data={@alert_data}
         cancel_event_name="dismiss_prediction_warning"
-        accept_event_name="review"
+        accept_event_name="check_for_trip_warnings"
         target_id="#submit_view"
         selected_routes={@selected_routes}
       />
       <TripEndWarningModal.trip_end_warning_modal
         :if={@check_trip_end}
-        id="check_trip_end_modal"
         cancel_event_name="dismiss_trip_end_warning"
         accept_event_name="review"
         target_id="#submit_view"
@@ -134,7 +133,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
         :if={@progress.name == "details"}
         class="mt-8 ml-2 self-center"
         name="review"
-        phx-click="check_for_trip_warnings"
+        phx-click="check_predictions"
         type="button"
         id="review"
       >
