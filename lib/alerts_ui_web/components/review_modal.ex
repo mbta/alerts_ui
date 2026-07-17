@@ -7,7 +7,13 @@ defmodule AlertsUIWeb.ReviewModal do
 
   import AlertsUIWeb.CoreComponents
   import AlertsUIWeb.SharedComponents
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData, only: [display_alert_timing: 1]
+
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
+    only: [humanize_effect_name: 2, display_alert_timing: 1]
+
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Value,
+    only: [blank?: 1]
+
   import PhoenixHTMLHelpers.Format, only: [text_to_html: 2]
 
   alias AlertsUI.ActiveStatus
@@ -154,7 +160,10 @@ defmodule AlertsUIWeb.ReviewModal do
               <p class="md:text-lg/6">Alert #{@alert_id} ({format_alert_status_text(@alert_data)})</p>
           <% end %>
           <p class="md:text-lg/6 font-bold">
-            {ContentFormatter.service_type_string(@alert_data.route_type, @alert_data.combination)} • {@alert_data.effect_name}
+            {ContentFormatter.service_type_string(@alert_data.route_type, @alert_data.combination)} • {humanize_effect_name(
+              @alert_data.route_type,
+              @alert_data.effect_name
+            )}
           </p>
         </div>
       </:header>
@@ -169,7 +178,7 @@ defmodule AlertsUIWeb.ReviewModal do
           <div>
             <span class="block pb-4">
               <p class="font-bold">Supporting information</p>
-              <%= if @alert_data.description_text do %>
+              <%= if not blank?(@alert_data.description_text) do %>
                 {text_to_html(@alert_data.description_text,
                   attributes: [class: "pb-4 last-of-type:pb-0"]
                 )}
@@ -178,7 +187,7 @@ defmodule AlertsUIWeb.ReviewModal do
               <% end %>
             </span>
 
-            <span :if={@alert_data.url} class="block pb-4 break-all">
+            <span :if={not blank?(@alert_data.url)} class="block pb-4 break-all">
               <p class="font-bold url_label">URL</p>
               <a
                 target="_blank"
@@ -191,7 +200,7 @@ defmodule AlertsUIWeb.ReviewModal do
               </a>
             </span>
 
-            <span :if={Map.get(@alert_data, :banner_text)} class="block pb-4">
+            <span :if={not blank?(Map.get(@alert_data, :banner_text))} class="block pb-4">
               <p class="font-bold">Web Banner Text</p>
               <p>{@alert_data.banner_text}</p>
             </span>
@@ -226,7 +235,7 @@ defmodule AlertsUIWeb.ReviewModal do
           </div>
 
           <%!-- Image --%>
-          <%= if @alert_data.image_url do %>
+          <%= if not blank?(@alert_data.image_url) do %>
             <p class="font-bold">Image</p>
             <div class="pb-4 break-all">
               <a
