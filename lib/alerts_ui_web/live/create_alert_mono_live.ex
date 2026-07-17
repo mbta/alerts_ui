@@ -60,6 +60,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     ServiceEffectCombinations
   }
 
+  alias AlertsUIWeb.PredictionSuppressionWarningModal
+  alias AlertsUIWeb.TripEndWarningModal
+
   alias Phoenix.LiveView
 
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers
@@ -98,6 +101,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         page_title: "#{form_title} Alert",
         selections: %{},
         check_predictions: false,
+        check_trip_end: false,
         form_type: form_type,
         obsolete_id_text: [],
         obsolete_ids: nil,
@@ -253,6 +257,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     # else:
     #   open error flash
 
+    # TODO only show if both warnings are false
     alert_data = Map.merge(socket.assigns.form.source.data, socket.assigns.form.source.changes)
 
     autotext_data = AlertDetailsSlice.autotext_map(alert_data, socket.assigns)
@@ -262,6 +267,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       |> assign(:submitting?, true)
       |> assign(:submitted?, true)
       |> assign(:check_predictions, false)
+      |> assign(:check_trip_end, false)
       |> sync_socket(%{"alert_data" => autotext_data})
 
     {:noreply, socket}
@@ -305,14 +311,33 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   end
 
   @impl true
-  def handle_event("check_predictions", params, socket) do
+  def handle_event("check_for_trip_warnings", params, socket) do
     # form data with properly capitalized effect name
     alert_data =
       socket.assigns.form.data
       |> Map.put(:effect_name, PathHelper.effect_from_url_name(socket.assigns.path_effect_name))
 
-    if AlertsUIWeb.PredictionSuppressionWarningModal.show_warning?(alert_data) do
-      {:noreply, socket |> assign(check_predictions: true)}
+    trip_arrival_time =
+      TimeRangeSlice.get_trip_arrival_time_for_validate(
+        alert_data.trip_ids,
+        socket.assigns.selections
+      )
+
+    show_trip_end_warning? =
+      TripEndWarningModal.show_warning?(
+        trip_arrival_time,
+        alert_data.active_period_start,
+        alert_data.modal_date
+      )
+
+    show_prediction_warning? = PredictionSuppressionWarningModal.show_warning?(alert_data)
+
+    if Enum.any?([show_trip_end_warning?, show_prediction_warning?]) do
+      {:noreply,
+       assign(socket, %{
+         check_predictions: show_prediction_warning?,
+         check_trip_end: show_trip_end_warning?
+       })}
     else
       handle_event("review", params, socket)
     end
@@ -321,6 +346,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   @impl true
   def handle_event("dismiss_prediction_warning", _params, socket) do
     {:noreply, socket |> assign(check_predictions: false)}
+  end
+
+  @impl true
+  def handle_event("dismiss_trip_end_warning", _params, socket) do
+    {:noreply, socket |> assign(check_trip_end: false)}
   end
 
   @impl true

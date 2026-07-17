@@ -144,7 +144,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             direction_id: s.trip.direction_id,
             route_id: s.route.id,
             trip_name: SelectFormatter.name_for_option(s, route_type),
-            added_route_ids: s.added_route_ids
+            added_route_ids: s.added_route_ids,
+            arrival_time: s.arrival_time,
+            departure_time: s.departure_time
           })
         end)
 

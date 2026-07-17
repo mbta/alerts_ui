@@ -432,17 +432,29 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     force_change(changeset, :recurrence_days, desired)
   end
 
-  def get_trip_arrival_time_for_validate(trip_ids, %{ok?: true, result: selections}) do
-    available = Map.get(selections, :available_schedules, [])
-    selected = Enum.filter(available, &(&1.trip.id in trip_ids))
+  def get_trip_arrival_time_for_validate(trip_ids, %{
+        loading: false,
+        available_schedules: available_schedules
+      }) do
+    trip_arrival_time(trip_ids, available_schedules)
+  end
 
-    selected
+  def get_trip_arrival_time_for_validate(trip_ids, %{
+        ok?: true,
+        result: %{available_schedules: available_schedules}
+      }) do
+    trip_arrival_time(trip_ids, available_schedules)
+  end
+
+  def get_trip_arrival_time_for_validate(_, _), do: nil
+
+  defp trip_arrival_time(trip_ids, available_schedules) do
+    available_schedules
+    |> Enum.filter(&(&1.trip.id in trip_ids))
     |> Enum.map(& &1.time_of_last_trip_arrival)
     |> Enum.max(DateTime, fn -> nil end)
     |> utc_datetime_to_naive()
   end
-
-  def get_trip_arrival_time_for_validate(_, _), do: nil
 
   defp ensure_atom(potential_atom) when is_binary(potential_atom),
     do: String.to_existing_atom(potential_atom)
