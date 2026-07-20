@@ -387,7 +387,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeValidators do
     changeset
     |> validate_change(:active_period_start, fn :active_period_start, active_period_start ->
       if perform_validation and
-           !is_nil(trip_arrival_time) and
            get_field(changeset, :alert_timing) != :recurring and
            NaiveDateTime.diff(active_period_start, trip_arrival_time, :minute) > 60 do
         [

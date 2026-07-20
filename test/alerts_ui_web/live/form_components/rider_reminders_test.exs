@@ -26,6 +26,10 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
     reminder_times: []
   }
 
+  defp assigns(overrides \\ %{}) do
+    Map.merge(@assigns, overrides)
+  end
+
   describe "component" do
     test "renders" do
       assert render_component(RiderReminders, @assigns) =~ ~s(id="rider_reminder_form")
@@ -36,7 +40,7 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
     {:ok, view, _html} =
       live_isolated_component(
         RiderReminders,
-        @assigns
+        assigns()
       )
 
     refute view
@@ -57,7 +61,7 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
     {:ok, view, _html} =
       live_isolated_component(
         RiderReminders,
-        @assigns
+        assigns()
       )
 
     rendered =
@@ -83,10 +87,11 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
     {:ok, view, _html} =
       live_isolated_component(
         RiderReminders,
-        @assigns
-        |> Map.put(:alert_data, %{
-          active_period_start: ~N[2024-09-26 04:00:00],
-          notification_start: ~N[2024-09-26 02:00:00]
+        assigns(%{
+          alert_data: %{
+            active_period_start: ~N[2024-09-26 04:00:00],
+            notification_start: ~N[2024-09-26 02:00:00]
+          }
         })
       )
 
@@ -120,7 +125,7 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
     {:ok, view, _html} =
       live_isolated_component(
         RiderReminders,
-        @assigns |> Map.put(:alert_data, %{active_period_start: ~N[2024-09-26 04:00:00]})
+        assigns(%{alert_data: %{active_period_start: ~N[2024-09-26 04:00:00]}})
       )
 
     view
@@ -153,10 +158,11 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
     {:ok, view, _html} =
       live_isolated_component(
         RiderReminders,
-        @assigns
-        |> Map.put(:alert_data, %{
-          active_period_start: ~N[2024-09-26 02:00:00],
-          notification_start: ~N[2024-09-26 04:00:00]
+        assigns(%{
+          alert_data: %{
+            active_period_start: ~N[2024-09-26 02:00:00],
+            notification_start: ~N[2024-09-26 04:00:00]
+          }
         })
       )
 
@@ -190,10 +196,11 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
     {:ok, view, _html} =
       live_isolated_component(
         RiderReminders,
-        @assigns
-        |> Map.put(:alert_data, %{
-          active_period_start: ~N[2024-09-25 13:04:12],
-          active_period_end: ~N[2024-09-25 03:00:00]
+        assigns(%{
+          alert_data: %{
+            active_period_start: ~N[2024-09-25 13:04:12],
+            active_period_end: ~N[2024-09-25 03:00:00]
+          }
         })
       )
 
@@ -229,8 +236,7 @@ defmodule AlertsUIWeb.FormComponents.RiderRemindersTest do
     {:ok, view, _html} =
       live_isolated_component(
         RiderReminders,
-        @assigns
-        |> Map.merge(%{
+        assigns(%{
           form_type: :editing,
           reminder_times: [
             %{id: "1", time: ~N[2024-04-30 11:54:00]},

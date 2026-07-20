@@ -1,5 +1,4 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
-  require Logger
   alias AlertsUI.Configs.ModeEffect
   alias AlertsUI.Models.Alert
   alias AlertsUIWeb.FormComponents.Helpers.ContentFormatter
@@ -69,7 +68,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData do
   end
 
   def humanize_effect_name(_, nil), do: nil
-  def humanize_effect_name(nil, nil), do: nil
 
   def humanize_effect_name(nil, effect_name) do
     humanize_effect_name(path_route_type(nil, effect_name), effect_name)

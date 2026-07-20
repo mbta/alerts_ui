@@ -682,7 +682,6 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   defp format_end_time(_, :UNKNOWN, _), do: "further notice"
   defp format_end_time(_, :ESTIMATED, _), do: "later today"
-  defp format_end_time(nil, :KNOWN, _), do: ""
   defp format_end_time(_, _, _), do: ""
 
   def danger_text(active_period_end, closed_timestamp) do

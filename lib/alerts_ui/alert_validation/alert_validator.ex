@@ -12,7 +12,6 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
   alias MBTAV3API.Stops.Repo, as: StopsRepo
-  require Logger
 
   @type invalid_alert_t :: %{
           alert_id: String.t(),

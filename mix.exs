@@ -5,13 +5,12 @@ defmodule AlertsUI.MixProject do
     [
       app: :alerts_ui,
       version: "0.1.0",
-      elixir: "~> 1.15",
+      elixir: "~> 1.20",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: Mix.compilers() ++ [:phoenix_swagger],
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
-      preferred_cli_env: ["ecto.test_setup": :test],
       dialyzer: [
         plt_add_apps: [:laboratory]
       ],
@@ -95,7 +94,6 @@ defmodule AlertsUI.MixProject do
       {:finch, "~> 0.13"},
       {:floki, ">= 0.30.0", only: :test},
       {:flop_phoenix, "~> 0.26.0"},
-      {:hackney, "1.25.0"},
       {:jason, "~> 1.2"},
       {:laboratory, github: "mbta/laboratory", ref: "master"},
       {:live_debugger, "~> 0.8.0", only: :dev},
@@ -103,7 +101,9 @@ defmodule AlertsUI.MixProject do
       {:logster, "~> 1.1"},
       {:map_diff, "~> 1.3.4"},
       {:mbta_v3_api, git: "https://github.com/mbta/mbta_v3_api.git", branch: "mss-more-files"},
-      {:mock, "~> 0.3.8", only: :test},
+      # Mock needs a newer version of meck to compile in erlang 29
+      {:meck, "~> 1.2.0", only: :test, override: true},
+      {:mock, "~> 0.3.9", only: :test},
       {:nimble_csv, "~> 1.3.0"},
       {:oban, "~> 2.16"},
       {:oban_web, "~> 2.11"},
@@ -119,8 +119,8 @@ defmodule AlertsUI.MixProject do
       {:plug_cowboy, "~> 2.7"},
       {:postgrex, ">= 0.0.0"},
       {:protox, "~> 2.0"},
-      {:req, "~> 0.5.0"},
-      {:sentry, "~> 12.0"},
+      {:req, "~> 0.6.0"},
+      {:sentry, "~> 13.0"},
       {:sftp_client, "~> 2.1"},
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
       {:stream_data, "~> 1.3.0", only: :test},
@@ -161,5 +161,9 @@ defmodule AlertsUI.MixProject do
         "dialyzer"
       ]
     ]
+  end
+
+  def cli do
+    [preferred_cli_env: ["ecto.test_setup": :test]]
   end
 end

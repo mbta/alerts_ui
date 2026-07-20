@@ -6,7 +6,6 @@ defmodule AlertsUI.Jobs.AlertValidationDailyWorker do
   use Oban.Worker
 
   require Logger
-  require Ecto.Query
 
   alias AlertsUI.AlertValidation.AlertValidator
 

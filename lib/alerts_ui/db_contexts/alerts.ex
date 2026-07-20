@@ -9,7 +9,6 @@ defmodule AlertsUI.Alerts do
   alias AlertsUI.Repo
   alias AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
-  require Logger
 
   @spec create_or_update_alert(map(), User.t(), any()) :: {:ok | :error, any()}
   def create_or_update_alert(params, %User{} = user, %Alert{} = existing_alert \\ %Alert{}) do

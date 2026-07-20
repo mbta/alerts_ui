@@ -23,16 +23,20 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedServiceTest do
     form_type: :creating
   }
 
+  defp assigns(overrides \\ %{}) do
+    Map.merge(@assigns, overrides)
+  end
+
   describe "component" do
     test "renders" do
-      rendered = render_component(SystemwideAffectedService, @assigns)
+      rendered = render_component(SystemwideAffectedService, assigns())
 
       assert rendered =~ ~s(id="systemwide-affected-service-form")
       assert rendered =~ "Service types"
     end
 
     test "it sends section_completed if no error in changeset" do
-      {:ok, view, _html} = live_isolated_component(SystemwideAffectedService, @assigns)
+      {:ok, view, _html} = live_isolated_component(SystemwideAffectedService, assigns())
 
       view
       |> element("form")
@@ -44,7 +48,7 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedServiceTest do
 
     @tag capture_log: true
     test "it sends add_errors if errors in changeset" do
-      {:ok, view, _html} = live_isolated_component(SystemwideAffectedService, @assigns)
+      {:ok, view, _html} = live_isolated_component(SystemwideAffectedService, assigns())
 
       view
       |> element("form")
@@ -59,7 +63,7 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedServiceTest do
 
     test "renders while editing an existing alerts" do
       alert_data = Map.put(@assigns.alert_data, :service_types, [1])
-      assigns = %{@assigns | alert_data: alert_data, form_type: :editing}
+      assigns = assigns(%{alert_data: alert_data, form_type: :editing})
 
       {:ok, view, _html} = live_isolated_component(SystemwideAffectedService, assigns)
 

@@ -130,6 +130,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     show_stop_ids: false
   }
 
+  defp assigns(overrides \\ %{}) do
+    Map.merge(@assigns, overrides)
+  end
+
   @todays_date DateTime.utc_now()
                |> DateTime.shift_zone!("America/New_York")
                |> DateTime.to_date()
@@ -174,8 +178,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         {:ok, view, _html} =
           live_isolated_component(
             AffectedService,
-            @assigns
-            |> Map.merge(%{route_type: 1, combination: :RDS})
+            assigns(%{route_type: 1, combination: :RDS})
           )
 
         view
@@ -192,8 +195,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         {:ok, view, _html} =
           live_isolated_component(
             AffectedService,
-            @assigns
-            |> Map.merge(%{
+            assigns(%{
               alert_data: %{route_type: 3, effect_name: "Delay"}
             })
           )
@@ -226,20 +228,22 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
 
     test "trip select is only shown for commuter rail and ferry" do
       {:ok, cr_view, _html} =
-        live_isolated_component(AffectedService, %{
-          @assigns
-          | alert_data: %{route_type: 2, effect_name: "Delay"}
-        })
+        live_isolated_component(
+          AffectedService,
+          assigns(%{
+            alert_data: %{route_type: 2, effect_name: "Delay"}
+          })
+        )
 
       assert cr_view
              |> element("select#affected_service_trip_ids")
              |> has_element?()
 
       {:ok, ferry_view, _html} =
-        live_isolated_component(AffectedService, %{
-          @assigns
-          | alert_data: %{route_type: 4, effect_name: "Delay"}
-        })
+        live_isolated_component(
+          AffectedService,
+          assigns(%{alert_data: %{route_type: 4, effect_name: "Delay"}})
+        )
 
       assert ferry_view
              |> element("select#affected_service_trip_ids")
@@ -248,7 +252,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       {:ok, subway_view, _html} =
         live_isolated_component(
           AffectedService,
-          @assigns |> Map.merge(%{alert_data: %{route_type: 1}, combination: :RDS})
+          assigns(%{alert_data: %{route_type: 1}, combination: :RDS})
         )
 
       refute subway_view
@@ -258,7 +262,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       {:ok, bus_view, _html} =
         live_isolated_component(
           AffectedService,
-          @assigns |> Map.merge(%{alert_data: %{route_type: 3}, combination: :RDS})
+          assigns(%{alert_data: %{route_type: 3}, combination: :RDS})
         )
 
       refute bus_view
@@ -271,10 +275,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end
       ) do
         {:ok, view, _html} =
-          live_isolated_component(AffectedService, %{
-            @assigns
-            | alert_data: %{route_type: 2, effect_name: "Delay"}
-          })
+          live_isolated_component(
+            AffectedService,
+            assigns(%{alert_data: %{route_type: 2, effect_name: "Delay"}})
+          )
 
         refute view
                |> element("select#affected_service_trip_ids")
@@ -327,10 +331,10 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
          ]}
       ]) do
         {:ok, view, _html} =
-          live_isolated_component(AffectedService, %{
-            @assigns
-            | alert_data: %{route_type: 2, effect_name: "Delay"}
-          })
+          live_isolated_component(
+            AffectedService,
+            assigns(%{alert_data: %{route_type: 2, effect_name: "Delay"}})
+          )
 
         view
         |> element("form")
@@ -384,10 +388,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
          ]}
       ]) do
         {:ok, view, _html} =
-          live_isolated_component(AffectedService, %{
-            @assigns
-            | alert_data: %{route_type: 2, effect_name: "Delay"}
-          })
+          live_isolated_component(
+            AffectedService,
+            assigns(%{
+              alert_data: %{route_type: 2, effect_name: "Delay"}
+            })
+          )
 
         view
         |> element("form")
@@ -444,10 +450,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         end_of_rating: fn -> Date.add(@todays_date, 1) end
       ) do
         {:ok, view, _html} =
-          live_isolated_component(AffectedService, %{
-            @assigns
-            | alert_data: %{route_type: 2, effect_name: "Delay"}
-          })
+          live_isolated_component(
+            AffectedService,
+            assigns(%{
+              alert_data: %{route_type: 2, effect_name: "Delay"}
+            })
+          )
 
         view
         |> element("form")
@@ -524,10 +532,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
-          live_isolated_component(AffectedService, %{
-            @assigns
-            | alert_data: %{route_type: 2, effect_name: "Delay"}
-          })
+          live_isolated_component(
+            AffectedService,
+            assigns(%{
+              alert_data: %{route_type: 2, effect_name: "Delay"}
+            })
+          )
 
         # Add route selection and date filter
         view
@@ -573,10 +583,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         end_of_rating: fn -> Date.add(@todays_date, 1) end
       ) do
         {:ok, view, _html} =
-          live_isolated_component(AffectedService, %{
-            @assigns
-            | alert_data: %{route_type: 2, effect_name: "Delay"}
-          })
+          live_isolated_component(
+            AffectedService,
+            assigns(%{
+              alert_data: %{route_type: 2, effect_name: "Delay"}
+            })
+          )
 
         view
         |> element("form")
@@ -605,10 +617,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
-          live_isolated_component(AffectedService, %{
-            @assigns
-            | alert_data: %{route_type: 4, effect_name: "Shuttle"}
-          })
+          live_isolated_component(
+            AffectedService,
+            assigns(%{
+              alert_data: %{route_type: 4, effect_name: "Shuttle"}
+            })
+          )
 
         assert view |> render_async() =~ ~s(id="dates-filter-modal_button" disabled="disabled")
 
@@ -632,10 +646,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
-          live_isolated_component(AffectedService, %{
-            @assigns
-            | alert_data: %{route_type: 4, effect_name: "Shuttle"}
-          })
+          live_isolated_component(
+            AffectedService,
+            assigns(%{
+              alert_data: %{route_type: 4, effect_name: "Shuttle"}
+            })
+          )
 
         refute render_async(view) =~ "All Stops"
 
@@ -660,8 +676,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         {:ok, view, _html} =
           live_isolated_component(
             AffectedService,
-            @assigns
-            |> Map.merge(%{
+            assigns(%{
               route_type: 3,
               effect_name: "Delay",
               combination: :RDS,
@@ -700,10 +715,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
-          live_isolated_component(AffectedService, %{
-            @assigns
-            | alert_data: %{route_type: 4, effect_name: "Shuttle"}
-          })
+          live_isolated_component(
+            AffectedService,
+            assigns(%{
+              alert_data: %{route_type: 4, effect_name: "Shuttle"}
+            })
+          )
 
         assert render_async(view) =~
                  ~s(id="affected_service_stop_names_and_ids" disabled="disabled")
@@ -750,8 +767,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         {:ok, view, _html} =
           live_isolated_component(
             AffectedService,
-            @assigns
-            |> Map.merge(%{
+            assigns(%{
               route_type: 3,
               effect_name: "Delay",
               combination: :RDS,
@@ -782,7 +798,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         {:ok, view, _html} =
           live_isolated_component(
             AffectedService,
-            Map.merge(@assigns, %{
+            assigns(%{
               route_type: 3,
               form_type: :duplicating,
               effect_name: "Delay",
@@ -816,10 +832,12 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
 
       with_mock(StopsRepo, by_route: fn _route, _direction, _opts -> stops end) do
         {:ok, view, _html} =
-          live_isolated_component(AffectedService, %{
-            @assigns
-            | alert_data: %{route_type: 4, effect_name: "Shuttle"}
-          })
+          live_isolated_component(
+            AffectedService,
+            assigns(%{
+              alert_data: %{route_type: 4, effect_name: "Shuttle"}
+            })
+          )
 
         view
         |> element("form")
@@ -842,7 +860,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
-          live_isolated_component(AffectedService, @assigns)
+          live_isolated_component(AffectedService, assigns())
 
         view
         |> element("form")
@@ -879,7 +897,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
       ]) do
         {:ok, view, _html} =
-          live_isolated_component(AffectedService, @assigns)
+          live_isolated_component(AffectedService, assigns())
 
         view
         |> element("form")
@@ -964,8 +982,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         {:ok, view, _html} =
           live_isolated_component(
             AffectedService,
-            @assigns
-            |> Map.merge(%{
+            assigns(%{
               form_type: :editing,
               alert_data: %{
                 direction: "0",

@@ -27,6 +27,10 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
     form_type: :creating
   }
 
+  defp assigns(overrides \\ %{}) do
+    Map.merge(@assigns, overrides)
+  end
+
   @facility %Facility{
     id: "Facility-3",
     long_name: "Example Facility",
@@ -47,7 +51,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
 
   describe "component" do
     test "renders" do
-      rendered = render_component(AccessAffectedService, @assigns)
+      rendered = render_component(AccessAffectedService, assigns())
 
       assert rendered =~ ~s(id="access_service_view")
     end
@@ -56,10 +60,12 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
       :ACCESS_ISSUE
 
       {:ok, view, _html} =
-        live_isolated_component(AccessAffectedService, %{
-          @assigns
-          | alert_data: %{route_type: nil, effect_name: "Access Issue"}
-        })
+        live_isolated_component(
+          AccessAffectedService,
+          assigns(%{
+            alert_data: %{route_type: nil, effect_name: "Access Issue"}
+          })
+        )
 
       view
       |> element("form")
@@ -73,7 +79,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
       with_mock(FacilitiesRepo, get_by_type: fn _facility_types, _opts -> [@facility] end) do
         :BIKE_ISSUE
 
-        {:ok, view, _html} = live_isolated_component(AccessAffectedService, @assigns)
+        {:ok, view, _html} = live_isolated_component(AccessAffectedService, assigns())
 
         {:ok, document} =
           view
@@ -102,7 +108,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
       with_mock(FacilitiesRepo, get_by_type: fn _facility_types, _opts -> [@facility] end) do
         :BIKE_ISSUE
 
-        {:ok, view, _html} = live_isolated_component(AccessAffectedService, @assigns)
+        {:ok, view, _html} = live_isolated_component(AccessAffectedService, assigns())
 
         {:ok, document} =
           view
@@ -155,7 +161,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
           "select#access_affected_service_facility_ids > option[value=\"#{v}\"]"
         end
 
-        {:ok, view, _html} = live_isolated_component(AccessAffectedService, @assigns)
+        {:ok, view, _html} = live_isolated_component(AccessAffectedService, assigns())
 
         {:ok, document} =
           view
@@ -190,7 +196,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
       with_mock(FacilitiesRepo, get_by_type: fn _facility_types, _opts -> [@facility] end) do
         :BIKE_ISSUE
 
-        {:ok, view, _html} = live_isolated_component(AccessAffectedService, @assigns)
+        {:ok, view, _html} = live_isolated_component(AccessAffectedService, assigns())
 
         assert view
                |> element("select#access_affected_service_stop_id")
@@ -212,7 +218,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
       with_mock(FacilitiesRepo, get_by_type: fn _facility_types, _opts -> [@facility] end) do
         :BIKE_ISSUE
 
-        {:ok, view, _html} = live_isolated_component(AccessAffectedService, @assigns)
+        {:ok, view, _html} = live_isolated_component(AccessAffectedService, assigns())
 
         {:ok, document} =
           view
@@ -257,7 +263,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
       with_mock(FacilitiesRepo, get_by_type: fn _facility_types, _opts -> [@facility] end) do
         :BIKE_ISSUE
 
-        {:ok, view, _html} = live_isolated_component(AccessAffectedService, @assigns)
+        {:ok, view, _html} = live_isolated_component(AccessAffectedService, assigns())
 
         {:ok, document} =
           view
@@ -324,7 +330,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
         {:ok, view, _html} =
           live_isolated_component(
             AccessAffectedService,
-            @assigns
+            assigns()
           )
 
         # Set baseline unfiltered
@@ -364,7 +370,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
         {:ok, view, _html} =
           live_isolated_component(
             AccessAffectedService,
-            @assigns
+            assigns()
           )
 
         # Add stop filter
@@ -400,10 +406,12 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
       :FACILITY_ISSUE
 
       {:ok, view, _html} =
-        live_isolated_component(AccessAffectedService, %{
-          @assigns
-          | alert_data: %{route_type: nil, effect_name: "Facility Issue"}
-        })
+        live_isolated_component(
+          AccessAffectedService,
+          assigns(%{
+            alert_data: %{route_type: nil, effect_name: "Facility Issue"}
+          })
+        )
 
       view
       |> element("form")
@@ -425,7 +433,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
           effect_name: "Bike Issue"
         }
 
-        assigns = @assigns |> Map.merge(%{alert_data: alert_data, form_type: :editing})
+        assigns = assigns(%{alert_data: alert_data, form_type: :editing})
 
         {:ok, view, _html} = live_isolated_component(AccessAffectedService, assigns)
 

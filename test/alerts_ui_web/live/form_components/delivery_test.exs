@@ -35,6 +35,9 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
     type: 1,
     name: "Red Line"
   }
+  defp assigns(overrides \\ %{}) do
+    Map.merge(@assigns, overrides)
+  end
 
   describe "component" do
     test "renders" do
@@ -42,7 +45,7 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
     end
 
     test "banner text is hidden if checkbox is not checked" do
-      {:ok, view, _html} = live_isolated_component(Delivery, @assigns)
+      {:ok, view, _html} = live_isolated_component(Delivery, assigns())
 
       refute view
              |> element("div#banner_div")
@@ -65,8 +68,7 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
       {:ok, view, _html} =
         live_isolated_component(
           Delivery,
-          @assigns
-          |> Map.put(:alert_data, %{header_text: "example_header_text", view_banner: true})
+          assigns(%{alert_data: %{header_text: "example_header_text", view_banner: true}})
         )
 
       assert view
@@ -113,7 +115,7 @@ defmodule AlertsUIWeb.FormComponents.DeliveryTest do
       banner_text: "my banner text"
     }
 
-    assigns = @assigns |> Map.merge(%{alert_data: alert_data, form_type: :editing})
+    assigns = assigns(%{alert_data: alert_data, form_type: :editing})
 
     {:ok, view, _html} = live_isolated_component(Delivery, assigns)
 

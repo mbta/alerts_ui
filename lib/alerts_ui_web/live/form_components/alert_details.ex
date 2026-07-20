@@ -498,7 +498,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
             ]}
           />
           <div
-            :if={@form[:image_url].value not in ["", nil] && is_number(@image_size)}
+            :if={@form[:image_url].value not in ["", nil] && @image_size != nil}
             id="image-information"
             class="flex flex-col md:flex-row md:w-[50%] text-sm text-text-secondary bg-bg-elevation-3 p-4 rounded-b border border-bg-elevation-6 border-t-0"
           >

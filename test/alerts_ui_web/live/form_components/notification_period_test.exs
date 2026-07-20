@@ -25,6 +25,14 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriodTest do
     form_type: :creating
   }
 
+  defp assigns(overrides \\ %{}) do
+    if overrides do
+      Map.merge(@assigns, overrides)
+    else
+      @assigns
+    end
+  end
+
   describe "component" do
     test "renders" do
       assert render_component(NotificationPeriod, @assigns) =~ ~s(id="notification_period_form")
@@ -34,7 +42,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriodTest do
       {:ok, view, _html} =
         live_isolated_component(
           NotificationPeriod,
-          @assigns
+          assigns()
         )
 
       view
@@ -64,7 +72,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriodTest do
 
     test "works if editing" do
       {:ok, view, _html} =
-        live_isolated_component(NotificationPeriod, @assigns)
+        live_isolated_component(NotificationPeriod, assigns())
 
       live_assign(view, %{
         form_type: :editing,
@@ -80,7 +88,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriodTest do
 
     test "displays error if start invalid" do
       {:ok, view, _html} =
-        live_isolated_component(NotificationPeriod, @assigns)
+        live_isolated_component(NotificationPeriod, assigns())
 
       view
       |> element("form")
@@ -103,7 +111,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriodTest do
 
     test "scheduled start time must be after current time" do
       {:ok, view, _html} =
-        live_isolated_component(NotificationPeriod, @assigns)
+        live_isolated_component(NotificationPeriod, assigns())
 
       view
       |> element("form")
@@ -132,7 +140,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriodTest do
       }
 
       {:ok, view, _html} =
-        live_isolated_component(NotificationPeriod, %{@assigns | alert_data: new_alert_data})
+        live_isolated_component(NotificationPeriod, assigns(%{alert_data: new_alert_data}))
 
       view
       |> element("form")
@@ -151,7 +159,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriodTest do
         current_time: fn -> ~N[2024-04-30 15:54:00Z] end
       ) do
         {:ok, _view, _html} =
-          live_isolated_component(NotificationPeriod, @assigns)
+          live_isolated_component(NotificationPeriod, assigns())
 
         assert_receive {:__live_isolated_component_handle_info_received__, _pid,
                         {:section_completed,
@@ -163,7 +171,7 @@ defmodule AlertsUIWeb.FormComponents.NotificationPeriodTest do
 
     test "it sends section_completed if no error in changeset" do
       {:ok, view, _html} =
-        live_isolated_component(NotificationPeriod, @assigns)
+        live_isolated_component(NotificationPeriod, assigns())
 
       view
       |> element("form")

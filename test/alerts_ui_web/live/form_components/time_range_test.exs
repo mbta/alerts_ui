@@ -62,16 +62,20 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
   @stop %Stop{id: "place-sstat", name: "South Station"}
 
+  defp assigns(overrides \\ %{}) do
+    Map.merge(@assigns, overrides)
+  end
+
   describe "component" do
     test "renders" do
-      assert render_component(TimeRange, @assigns) =~ ~s(id="time_range_form")
+      assert render_component(TimeRange, assigns()) =~ ~s(id="time_range_form")
     end
 
     test "enddate picker hidden unless pick option selected" do
       {:ok, view, _html} =
         live_isolated_component(
           TimeRange,
-          @assigns
+          assigns()
         )
 
       assert view
@@ -96,18 +100,15 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       {:ok, view, _html} =
         live_isolated_component(
           TimeRange,
-          Map.merge(
-            @assigns,
-            %{
-              form_type: :editing,
-              alert_data: %{
-                active_period_start_specifier: "custom",
-                active_period_start: ~N[2024-04-29 10:54:00],
-                active_period_end_specifier: "until_further_notice",
-                active_period_end: ~N[2024-04-30 11:59:00]
-              }
+          assigns(%{
+            form_type: :editing,
+            alert_data: %{
+              active_period_start_specifier: "custom",
+              active_period_start: ~N[2024-04-29 10:54:00],
+              active_period_end_specifier: "until_further_notice",
+              active_period_end: ~N[2024-04-30 11:59:00]
             }
-          )
+          })
         )
 
       assert view
@@ -121,18 +122,15 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       {:ok, _view, _html} =
         live_isolated_component(
           TimeRange,
-          Map.merge(
-            @assigns,
-            %{
-              form_type: :editing,
-              alert_data: %{
-                active_period_start_specifier: "custom",
-                active_period_start: ~N[2024-04-29 10:54:00],
-                active_period_end_specifier: "when_work_order_is_closed",
-                active_period_end: nil
-              }
+          assigns(%{
+            form_type: :editing,
+            alert_data: %{
+              active_period_start_specifier: "custom",
+              active_period_start: ~N[2024-04-29 10:54:00],
+              active_period_end_specifier: "when_work_order_is_closed",
+              active_period_end: nil
             }
-          )
+          })
         )
 
       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
@@ -143,18 +141,15 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       {:ok, _view, _html} =
         live_isolated_component(
           TimeRange,
-          Map.merge(
-            @assigns,
-            %{
-              form_type: :editing,
-              alert_data: %{
-                active_period_start_specifier: "custom",
-                active_period_start: ~N[2024-04-29 10:54:00],
-                active_period_end_specifier: "until_further_notice",
-                active_period_end: nil
-              }
+          assigns(%{
+            form_type: :editing,
+            alert_data: %{
+              active_period_start_specifier: "custom",
+              active_period_start: ~N[2024-04-29 10:54:00],
+              active_period_end_specifier: "until_further_notice",
+              active_period_end: nil
             }
-          )
+          })
         )
 
       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
@@ -165,20 +160,17 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       {:ok, view, _html} =
         live_isolated_component(
           TimeRange,
-          Map.merge(
-            @assigns,
-            %{
-              form_type: :editing,
-              alert_data: %{
-                active_period_start_specifier: "custom",
-                active_period_start: ~N[2040-04-29 10:54:00],
-                active_period_start_date: ~D[2040-04-29],
-                active_period_end_specifier: "custom",
-                active_period_end: ~N[2040-04-30 15:59:00],
-                active_period_end_date: ~D[2040-04-30]
-              }
+          assigns(%{
+            form_type: :editing,
+            alert_data: %{
+              active_period_start_specifier: "custom",
+              active_period_start: ~N[2040-04-29 10:54:00],
+              active_period_start_date: ~D[2040-04-29],
+              active_period_end_specifier: "custom",
+              active_period_end: ~N[2040-04-30 15:59:00],
+              active_period_end_date: ~D[2040-04-30]
             }
-          )
+          })
         )
 
       view
@@ -197,18 +189,15 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       {:ok, view, _html} =
         live_isolated_component(
           TimeRange,
-          Map.merge(
-            @assigns,
-            %{
-              form_type: :editing,
-              alert_data: %{
-                active_period_start_specifier: "custom",
-                active_period_start: ~N[2024-04-29 10:54:00],
-                active_period_end_specifier: "until_further_notice",
-                active_period_end: ~N[2024-04-30 11:59:00]
-              }
+          assigns(%{
+            form_type: :editing,
+            alert_data: %{
+              active_period_start_specifier: "custom",
+              active_period_start: ~N[2024-04-29 10:54:00],
+              active_period_end_specifier: "until_further_notice",
+              active_period_end: ~N[2024-04-30 11:59:00]
             }
-          )
+          })
         )
 
       view
@@ -227,7 +216,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
     test "editing with error field sends error" do
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns)
+        live_isolated_component(TimeRange, assigns())
 
       live_assign(view, %{
         form_type: :editing,
@@ -258,18 +247,15 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       {:ok, view, _html} =
         live_isolated_component(
           TimeRange,
-          Map.merge(
-            @assigns,
-            %{
-              form_type: :editing,
-              alert_data: %{
-                active_period_start: start_time,
-                active_period_start_specifier: "custom",
-                active_period_end_specifier: "later_today",
-                active_period_end: NaiveDateTime.add(start_time, 1, :hour)
-              }
+          assigns(%{
+            form_type: :editing,
+            alert_data: %{
+              active_period_start: start_time,
+              active_period_start_specifier: "custom",
+              active_period_end_specifier: "later_today",
+              active_period_end: NaiveDateTime.add(start_time, 1, :hour)
             }
-          )
+          })
         )
 
       assert view
@@ -307,18 +293,15 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       {:ok, view, _html} =
         live_isolated_component(
           TimeRange,
-          Map.merge(
-            @assigns,
-            %{
-              form_type: :duplicating,
-              alert_data: %{
-                active_period_start_specifier: "custom",
-                active_period_start: ~N[2024-04-29 10:54:00],
-                active_period_end_specifier: "until_further_notice",
-                active_period_end: ~N[2024-04-30 11:59:00]
-              }
+          assigns(%{
+            form_type: :duplicating,
+            alert_data: %{
+              active_period_start_specifier: "custom",
+              active_period_start: ~N[2024-04-29 10:54:00],
+              active_period_end_specifier: "until_further_notice",
+              active_period_end: ~N[2024-04-30 11:59:00]
             }
-          )
+          })
         )
 
       assert view
@@ -332,18 +315,15 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       {:ok, view, _html} =
         live_isolated_component(
           TimeRange,
-          Map.merge(
-            @assigns,
-            %{
-              form_type: :duplicating,
-              alert_data: %{
-                active_period_start_specifier: "custom",
-                active_period_start: ~N[2024-04-29 10:54:00],
-                active_period_end_specifier: "until_further_notice",
-                active_period_end: ~N[2024-04-30 11:59:00]
-              }
+          assigns(%{
+            form_type: :duplicating,
+            alert_data: %{
+              active_period_start_specifier: "custom",
+              active_period_start: ~N[2024-04-29 10:54:00],
+              active_period_end_specifier: "until_further_notice",
+              active_period_end: ~N[2024-04-30 11:59:00]
             }
-          )
+          })
         )
 
       view
@@ -362,7 +342,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
     test "duplicating with error field sends error" do
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns)
+        live_isolated_component(TimeRange, assigns())
 
       live_assign(view, %{
         form_type: :duplicating,
@@ -401,18 +381,15 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       {:ok, view, _html} =
         live_isolated_component(
           TimeRange,
-          Map.merge(
-            @assigns,
-            %{
-              form_type: :duplicating,
-              alert_data: %{
-                active_period_start: start_time,
-                active_period_start_specifier: "custom",
-                active_period_end_specifier: "later_today",
-                active_period_end: NaiveDateTime.add(start_time, 1, :hour)
-              }
+          assigns(%{
+            form_type: :duplicating,
+            alert_data: %{
+              active_period_start: start_time,
+              active_period_start_specifier: "custom",
+              active_period_end_specifier: "later_today",
+              active_period_end: NaiveDateTime.add(start_time, 1, :hour)
             }
-          )
+          })
         )
 
       assert view
@@ -448,7 +425,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
     test "switching between start specifiers retains old date" do
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns)
+        live_isolated_component(TimeRange, assigns())
 
       view
       |> element("form")
@@ -479,7 +456,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
     test "switching between end specifiers retains old date" do
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns)
+        live_isolated_component(TimeRange, assigns())
 
       view
       |> element("form")
@@ -510,7 +487,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
     test "displays error if start invalid" do
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns)
+        live_isolated_component(TimeRange, assigns())
 
       view
       |> element("form")
@@ -533,7 +510,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
     test "displays error if end invalid" do
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns)
+        live_isolated_component(TimeRange, assigns())
 
       view
       |> element("form")
@@ -557,7 +534,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
     test "displays error if end before start" do
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns)
+        live_isolated_component(TimeRange, assigns())
 
       view
       |> element("form")
@@ -590,7 +567,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       }
 
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns |> Map.put(:selected_schedules, [schedule]))
+        live_isolated_component(TimeRange, assigns(%{selected_schedules: [schedule]}))
 
       view
       |> element("form")
@@ -623,7 +600,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       }
 
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns |> Map.put(:selected_schedules, [schedule]))
+        live_isolated_component(TimeRange, assigns(%{selected_schedules: [schedule]}))
 
       view
       |> element("form")
@@ -654,7 +631,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
     test "displays error if start after trip end when 'start of service' is selected" do
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns |> Map.put(:selected_schedules, [@schedule]))
+        live_isolated_component(TimeRange, assigns(%{selected_schedules: [@schedule]}))
 
       view
       |> element("form")
@@ -682,7 +659,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
     test "displays error if one-time start occurs during DST gap" do
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns)
+        live_isolated_component(TimeRange, assigns())
 
       view
       |> element("form")
@@ -706,7 +683,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
     test "displays error if one-time end occurs during DST gap" do
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns)
+        live_isolated_component(TimeRange, assigns())
 
       view
       |> element("form")
@@ -732,9 +709,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       {:ok, view, _html} =
         live_isolated_component(
           TimeRange,
-          @assigns
-          |> Map.put(:current_time, ~N[2024-05-01 08:15:00])
-          |> Map.put(:selected_schedules, [@schedule])
+          assigns(%{current_time: ~N[2024-05-01 08:15:00], selected_schedules: [@schedule]})
         )
 
       view
@@ -774,7 +749,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       {:ok, view, _html} =
         live_isolated_component(
           TimeRange,
-          @assigns |> Map.put(:current_time, ~N[2024-05-01 08:15:00])
+          assigns(%{current_time: ~N[2024-05-01 08:15:00]})
         )
 
       view
@@ -811,9 +786,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       }
 
       assigns =
-        @assigns
-        |> Map.put(:current_time, ~N[2024-05-01 08:15:00])
-        |> Map.put(:form_type, :editing)
+        assigns(%{current_time: ~N[2024-05-01 08:15:00], form_type: :editing})
 
       {:ok, view, _html} =
         live_isolated_component(
@@ -855,7 +828,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       }
 
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns |> Map.put(:selected_schedules, [schedule]))
+        live_isolated_component(TimeRange, assigns(%{selected_schedules: [schedule]}))
 
       view
       |> element("form")
@@ -880,7 +853,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
     test "recurring section is hidden unless recurring is selected" do
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns)
+        live_isolated_component(TimeRange, assigns())
 
       refute view |> render() =~ ~s(Sunday)
 
@@ -899,7 +872,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
     test "if recurring, start date must match weekday selection" do
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns)
+        live_isolated_component(TimeRange, assigns())
 
       view
       |> element("form")
@@ -936,7 +909,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
     test "if recurring, active_period_end should be the last active period end" do
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns)
+        live_isolated_component(TimeRange, assigns())
 
       view
       |> element("form")
@@ -974,7 +947,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
     test "if recurring and no end time, active_period_end should reflect that" do
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns)
+        live_isolated_component(TimeRange, assigns())
 
       view
       |> element("form")
@@ -1011,7 +984,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
     test "does not show reccurrence error if no weekdays selected" do
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns)
+        live_isolated_component(TimeRange, assigns())
 
       refute view |> render() =~ ~s(Sunday)
 
@@ -1031,7 +1004,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
 
     test "it sends section_completed if no error in changeset" do
       {:ok, view, _html} =
-        live_isolated_component(TimeRange, @assigns)
+        live_isolated_component(TimeRange, assigns())
 
       view
       |> element("form")

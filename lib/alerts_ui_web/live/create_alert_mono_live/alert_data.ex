@@ -2,8 +2,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   @moduledoc """
   Alert data v2
   """
-  require Logger
-
   alias AlertsUI.Models.Alert
   alias AlertsUI.Repo
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
