@@ -28,10 +28,17 @@ defmodule AlertsUI.Jobs.AlertValidationUpcomingWorker do
              pool_max_idle_time: 30_000,
              retry: fn _req, response_or_exception ->
                case response_or_exception do
-                 {:error, %Req.TransportError{reason: :closed}} -> true
-                 {:error, %Req.TransportError{reason: :einval}} -> true
-                 {:error, %Req.TransportError{reason: :econnrefused}} -> true
-                 _ -> false
+                 %Req.TransportError{reason: :closed} ->
+                   true
+
+                 %Req.TransportError{reason: :einval} ->
+                   true
+
+                 %Req.TransportError{reason: :econnrefused} ->
+                   true
+
+                 _ ->
+                   false
                end
              end
            ),
