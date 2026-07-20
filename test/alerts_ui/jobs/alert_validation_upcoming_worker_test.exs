@@ -14,7 +14,7 @@ defmodule AlertsUI.Jobs.AlertValidationUpcomingWorkerTest do
 
     test "runs validator if no time is stored" do
       with_mock(Req,
-        get: fn _ ->
+        get: fn _, _ ->
           {:ok,
            %Req.Response{
              body: %{
@@ -41,7 +41,7 @@ defmodule AlertsUI.Jobs.AlertValidationUpcomingWorkerTest do
       with_mocks([
         {Req, [],
          [
-           get: fn _ ->
+           get: fn _, _ ->
              {:ok,
               %Req.Response{
                 body: %{
@@ -72,7 +72,7 @@ defmodule AlertsUI.Jobs.AlertValidationUpcomingWorkerTest do
 
     test "doesn't run validator if stored time is after incoming time" do
       with_mock(Req,
-        get: fn _ ->
+        get: fn _, _ ->
           {:ok,
            %Req.Response{
              body: %{
