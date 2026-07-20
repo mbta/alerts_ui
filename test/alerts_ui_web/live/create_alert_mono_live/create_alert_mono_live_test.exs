@@ -222,6 +222,57 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     end
 
     @tag :logged_in_user
+    test "Works with both modals", %{conn: conn} do
+      with_mocks([
+        {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end},
+        {StopsRepo, [], by_route: fn _, _, _opts -> [@stop] end},
+        {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Suspension")
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "route_ids" => [@route.id],
+            "trip_ids" => ["CR-683322-595"],
+            "active_period_start_specifier" => :custom
+          }
+        })
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "active_period_start" => Date.utc_today() |> NaiveDateTime.new!(~T[23:00:00])
+          }
+        })
+
+        open_review_modal(view)
+
+        assert view |> element("#check_predictions_modal-container") |> render() =~
+                 ~s(Warning: Predictions will be suppressed)
+
+        view
+        |> element("#check_predictions_modal-container button", "Yes, continue")
+        |> render_click()
+
+        assert view |> element("#trip_end_warning_modal-container") |> render() =~
+                 "Warning: Alert starts after end of trip(s)"
+
+        view
+        |> element("#trip_end_warning_modal-container button", "Yes, continue")
+        |> render_click()
+
+        assert view
+               |> element("#review-modal-container", "Commuter Rail • Suspension")
+               |> has_element?
+      end
+    end
+
+    @tag :logged_in_user
     test "shows correct affected service for access combination", %{conn: conn} do
       with_mocks([
         {RoutePatternsRepo, [], [included_stops_by_route_id: fn _route_id, _direction -> [] end]},

@@ -351,6 +351,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     if show_trip_end_warning? do
       {:noreply,
        assign(socket, %{
+         check_predictions: false,
          check_trip_end: true
        })}
     else
