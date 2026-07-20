@@ -240,8 +240,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         {_, _, children_nodes} = Floki.get_by_id(document, "view_alerts_live_routes")
 
         assert [
-                 {"option", [{"value", "default"}, {"selected", "selected"}],
-                  ["\n      All\n    "]},
+                 {"option", [{"value", "default"}, {"selected", ""}], ["\n      All\n    "]},
                  {"option", [{"id", "route-filter-Green"}, {"value", "Green"}], ["Green Line"]},
                  {"option", [{"id", "route-filter-Green-C"}, {"value", "Green-C"}],
                   ["Green Line-C"]},
@@ -425,15 +424,12 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
           "/alerts?filter[routes][]=abcd&filter[timeline]=past&filter[multi_column_search]=foobarbaz"
         )
 
-      reset_text_filters =
-        element(
-          view,
-          "[phx-feedback-for=\"view_alerts_live[multi_column_search]\"] button:has(span.hero-x-circle-solid)"
-        )
+      {:ok, _document} =
+        render_click(view, "reset_text_filter", %{
+          "name" => "view_alerts_live[multi_column_search]"
+        })
+        |> Floki.parse_document()
 
-      assert reset_text_filters
-
-      reset_text_filters |> render_click()
       assert_patch view, ~p"/alerts?filter[routes][]=abcd&filter[timeline]=past"
     end
 
@@ -485,9 +481,9 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       refute has_element?(view, "option", "Access Issue")
 
       {:ok, document} =
-        view
-        |> element("[phx-value-name='view_alerts_live[service_type_search_term]']")
-        |> render_click()
+        render_click(view, "reset_search_filter", %{
+          "name" => "view_alerts_live[service_type_search_term]"
+        })
         |> Floki.parse_document()
 
       # Confirm the trip search input cleared
@@ -505,9 +501,9 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
       # Now clear Route
       {:ok, document} =
-        view
-        |> element("[phx-value-name='view_alerts_live[routes_search_term]']")
-        |> render_click()
+        render_click(view, "reset_search_filter", %{
+          "name" => "view_alerts_live[routes_search_term]"
+        })
         |> Floki.parse_document()
 
       assert document_has_element?(
@@ -522,9 +518,9 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
       # Finally, clear Effects, and everything should be reset
       {:ok, document} =
-        view
-        |> element("[phx-value-name='view_alerts_live[effects_search_term]']")
-        |> render_click()
+        render_click(view, "reset_search_filter", %{
+          "name" => "view_alerts_live[effects_search_term]"
+        })
         |> Floki.parse_document()
 
       assert document_has_element?(

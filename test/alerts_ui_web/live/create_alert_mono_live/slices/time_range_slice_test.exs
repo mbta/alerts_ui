@@ -1008,8 +1008,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       refute view |> element("#time_range_view") |> render() =~
                "Alert start day must match a selected day of the week."
 
-      assert view |> render() =~ ~s(value="tuesday" checked="checked")
-      assert view |> render() =~ ~s(value="wednesday" checked="checked")
+      assert view |> render() =~ ~s(value="tuesday" checked="")
+      assert view |> render() =~ ~s(value="wednesday" checked="")
     end
   end
 

@@ -99,7 +99,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
 
         refute document_has_element?(
                  document,
-                 "select#access_affected_service_facility_ids > option[value=\"Facility-3\"][selected=\"selected\"]"
+                 "select#access_affected_service_facility_ids > option[value=\"Facility-3\"][selected]"
                )
       end
     end
@@ -128,7 +128,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
 
         refute document_has_element?(
                  document,
-                 "select#access_affected_service_facility_ids > option[value=\"Facility-3\"][selected=\"selected\"]"
+                 "select#access_affected_service_facility_ids > option[value=\"Facility-3\"][selected]"
                )
 
         {:ok, document} =
@@ -291,7 +291,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
         # selected option should still be listed even with the filter
         assert document_has_element?(
                  document,
-                 "select#access_affected_service_stop_id > option[value=\"place-sstat\"][selected=\"selected\"]"
+                 "select#access_affected_service_stop_id > option[value=\"place-sstat\"][selected]"
                )
 
         {:ok, document} =
@@ -308,7 +308,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
         # The previously selected value should still be selected after clearing
         assert document_has_element?(
                  document,
-                 "select#access_affected_service_stop_id > option[value=\"place-sstat\"][selected=\"selected\"]"
+                 "select#access_affected_service_stop_id > option[value=\"place-sstat\"][selected]"
                )
 
         # Also assert that this is the ONLY option selected,
@@ -316,7 +316,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
         selected_options =
           Floki.find(
             document,
-            "select#access_affected_service_stop_id > option[selected=\"selected\"]"
+            "select#access_affected_service_stop_id > option[selected]"
           )
 
         assert length(selected_options) == 1
@@ -398,7 +398,7 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
         # Verify text changed
         assert render(view) =~ ~s(Filter: All stops)
         # Verify modal is cleared
-        assert document_has_element?(document, "option[value=\"default\"][selected=\"selected\"]")
+        assert document_has_element?(document, "option[value=\"default\"][selected]")
       end
     end
 

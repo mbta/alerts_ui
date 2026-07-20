@@ -567,7 +567,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         # Verify modal is cleared
         assert view
                |> element("select#affected_service_trip_ids")
-               |> render() =~ ~s(<option value="default" selected="selected">)
+               |> render() =~ ~s(<option value="default" selected="">)
       end
     end
 
@@ -624,7 +624,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
             })
           )
 
-        assert view |> render_async() =~ ~s(id="dates-filter-modal_button" disabled="disabled")
+        assert view |> render_async() =~ ~s(id="dates-filter-modal_button" disabled="")
 
         view
         |> element("form")
@@ -635,7 +635,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
           }
         })
 
-        refute view |> render_async() =~ ~s(id="dates-filter-modal_button" disabled="disabled")
+        refute view |> render_async() =~ ~s(id="dates-filter-modal_button" disabled="")
       end
     end
 
@@ -685,7 +685,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
           )
 
         assert view
-               |> render() =~ ~s(id="affected_service_stop_names_and_ids" disabled="disabled")
+               |> render() =~ ~s(id="affected_service_stop_names_and_ids" disabled="")
 
         view
         |> element("form")
@@ -696,7 +696,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         })
 
         refute view
-               |> render() =~ ~s(id="affected_service_stop_names_and_ids" disabled="disabled")
+               |> render() =~ ~s(id="affected_service_stop_names_and_ids" disabled="")
       end
     end
 
@@ -723,7 +723,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
           )
 
         assert render_async(view) =~
-                 ~s(id="affected_service_stop_names_and_ids" disabled="disabled")
+                 ~s(id="affected_service_stop_names_and_ids" disabled="")
 
         refute render_async(view) =~ "All Stops"
 
@@ -736,7 +736,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         })
 
         refute render_async(view) =~
-                 ~s(id="affected_service_stop_names_and_ids" disabled="disabled")
+                 ~s(id="affected_service_stop_names_and_ids" disabled="")
 
         assert view |> render_async() =~ "All Stops"
 
@@ -749,7 +749,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         })
 
         refute render_async(view) =~
-                 ~s(id="affected_service_stop_names_and_ids" disabled="disabled")
+                 ~s(id="affected_service_stop_names_and_ids" disabled="")
       end
     end
 
@@ -784,7 +784,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         })
 
         assert view
-               |> element("select##affected_service_stop_names_and_ids")
+               |> element("select#affected_service_stop_names_and_ids")
                |> render =~
                  ~r/value="South Station (outbound)|place-sstat">South Station \(outbound\).*value="Courthouse (outbound)|place-crtst">Courthouse \(outbound\).*value="Courthouse (inbound)|place-crtst">Courthouse \(inbound\).*value="South Station (inbound)|place-sstat">South Station \(inbound\)/
       end
@@ -820,10 +820,15 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
           }
         })
 
-        assert view
-               |> element("select##affected_service_stop_names_and_ids")
-               |> render =~
-                 ~r/value="South Station \(outbound\)|place-sstat">South Station \(outbound\).*selected="selected" value="Courthouse \(outbound\)|place-crtst">Courthouse \(outbound\)/
+        render_async(view)
+
+        html =
+          view
+          |> element("select#affected_service_stop_names_and_ids")
+          |> render()
+
+        assert html =~
+                 ~r/value="South Station \(outbound\)|place-sstat">South Station \(outbound\).*selected="" value="Courthouse \(outbound\)|place-crtst">Courthouse \(outbound\)/
       end
     end
 
@@ -849,7 +854,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         })
 
         assert view
-               |> render() =~ ~s(disabled="disabled")
+               |> render() =~ ~s(disabled="")
       end
     end
 
@@ -1001,22 +1006,22 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
 
         assert document_has_element?(
                  document,
-                 "option[value=\"0\"][selected=\"selected\"]"
+                 "option[value=\"0\"][selected=\"\"]"
                )
 
         assert document_has_element?(
                  document,
-                 "option[value=\"South Station|place-sstat\"][selected=\"selected\"]"
+                 "option[value=\"South Station|place-sstat\"][selected=\"\"]"
                )
 
         assert document_has_element?(
                  document,
-                 "option[value=\"CR-683322-595\"][selected=\"selected\"]"
+                 "option[value=\"CR-683322-595\"][selected=\"\"]"
                )
 
         assert document_has_element?(
                  document,
-                 "[value=\"CR-Worcester\"][selected=\"selected\"]"
+                 "[value=\"CR-Worcester\"][selected=\"\"]"
                )
       end
     end
@@ -1288,9 +1293,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
         {:ok, view, _html} = live(conn, "/alerts/legacy/edit?alert_id=123")
 
         html = render(view)
-        assert html =~ ~s(selected="selected" value="CR-Worcester")
-        assert html =~ ~s(selected="selected" value="South Station|place-sstat")
-        assert html =~ ~s(selected="selected" value="CR-683322-595")
+        assert html =~ ~s(selected="" value="CR-Worcester")
+        assert html =~ ~s(selected="" value="South Station|place-sstat")
+        assert html =~ ~s(selected="" value="CR-683322-595")
 
         view
         |> element("#service_form")

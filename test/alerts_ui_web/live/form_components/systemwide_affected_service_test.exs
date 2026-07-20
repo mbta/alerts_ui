@@ -68,7 +68,7 @@ defmodule AlertsUIWeb.FormComponents.SystemwideAffectedServiceTest do
       {:ok, view, _html} = live_isolated_component(SystemwideAffectedService, assigns)
 
       rendered_view = render(view)
-      assert rendered_view =~ ~s( value="1" checked="checked" )
+      assert rendered_view =~ ~s( value="1" checked="" )
     end
 
     @tag :logged_in_user

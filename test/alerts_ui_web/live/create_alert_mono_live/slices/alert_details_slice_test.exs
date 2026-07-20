@@ -557,7 +557,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
         assert view
                |> element("#alert_data_header_sync_toggle")
-               |> render() =~ ~s(checked=\"checked\")
+               |> render() =~ ~s(checked=\"\")
 
         view
         |> element("form")
@@ -570,7 +570,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
         refute view
                |> element("#alert_data_header_sync_toggle")
-               |> render_async(1000) =~ ~s(checked=\"checked\")
+               |> render_async(1000) =~ ~s(checked=\"\")
 
         assert view
                |> element("#alert_data_header_text")
@@ -591,7 +591,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
         assert view
                |> element("#alert_data_header_sync_toggle")
-               |> render() =~ ~s(checked=\"checked\")
+               |> render() =~ ~s(checked=\"\")
       end
     end
 
@@ -1004,7 +1004,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
         assert view
                |> element("#alert_data_description_text")
-               |> render_async() =~ ~s(the elevator broke i&amp;#39;m sorry)
+               |> render_async() =~ ~s(the elevator broke i&#39;m sorry)
       end
     end
 
