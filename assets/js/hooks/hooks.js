@@ -2,12 +2,12 @@ let Hooks = {};
 
 Hooks.ActivityTracker = {
   throttled: false,
-  // 30s throttle
-  delay: 30 * 1000,
+  // 5s throttle
+  delay: 5 * 1000,
   // 30s window for autologout on inactivity
   autologoutWindow: 30 * 1000,
 
-  pushActivity() {
+  pushThrottledActivity() {
     if (!this.throttled) {
       this.pushEventTo("#" + this.el.id, "activity");
       this.throttled = true;
@@ -18,6 +18,10 @@ Hooks.ActivityTracker = {
     }
   },
 
+  pushActivity() {
+    this.pushEventTo("#" + this.el.id, "activity");
+  },
+
   pushInactivity() {
     this.pushEventTo("#" + this.el.id, "inactivity");
     setTimeout(() => { this.pushInactivity() }, this.autologoutWindow);
@@ -26,22 +30,36 @@ Hooks.ActivityTracker = {
   mounted() {
     this.pushInactivity = this.pushInactivity.bind(this);
     this.pushActivity = this.pushActivity.bind(this);
+    this.pushThrottledActivity = this.pushThrottledActivity.bind(this);
 
     this.pushInactivity();
     this.pushActivity();
-    window.addEventListener("mousemove", this.pushActivity);
-    window.addEventListener("scroll", this.pushActivity);
+    this.pushThrottledActivity();
+
+    // types of activity that fire a lot and so are throttled
+    window.addEventListener("mousemove", this.pushThrottledActivity);
+    window.addEventListener("scroll", this.pushThrottledActivity);
+    window.addEventListener("touchmove", this.pushThrottledActivity);
+    window.addEventListener("resize", this.pushThrottledActivity);
+
+    // types of activity that happen once
+    window.addEventListener("click", this.pushActivity);
     window.addEventListener("keydown", this.pushActivity);
-    window.addEventListener("resize", this.pushActivity);
+    window.addEventListener("touchstart", this.pushActivity);
   },
 
   destroyed() {
+    this.pushThrottledActivity = this.pushThrottledActivity.bind(this);
     this.pushActivity = this.pushActivity.bind(this);
 
-    window.removeEventListener("mousemove", this.pushActivity);
-    window.removeEventListener("scroll", this.pushActivity);
+    window.removeEventListener("mousemove", this.pushThrottledActivity);
+    window.removeEventListener("scroll", this.pushThrottledActivity);
+    window.removeEventListener("touchmove", this.pushThrottledActivity);
+    window.removeEventListener("resize", this.pushThrottledActivity);
+
+    window.removeEventListener("click", this.pushActivity);
     window.removeEventListener("keydown", this.pushActivity);
-    window.removeEventListener("resize", this.pushActivity);
+    window.removeEventListener("touchstart", this.pushActivity);
   }
 }
 
