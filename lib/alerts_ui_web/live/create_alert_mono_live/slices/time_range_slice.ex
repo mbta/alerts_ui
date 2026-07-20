@@ -14,6 +14,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeSliceGetters, as: TimeGetters
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
+  alias AlertsUIWeb.TripEndWarningModal
 
   alias Phoenix.HTML.Form
 
@@ -151,7 +152,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       form = socket.assigns.form
       form_data = Map.merge(form.source.data, form.source.changes)
 
+      trip_arrival_time =
+        TimeRangeSlice.get_trip_arrival_time_for_validate(
+          Map.get(form_data, :trip_ids, []),
+          socket.assigns.selections
+        )
+
       assign(socket, %{
+        trip_arrival_time: trip_arrival_time,
         previous_start_specifier: form_data.active_period_start_specifier,
         previous_end_specifier: form_data.active_period_end_specifier,
         previous_start_time_specifier: form_data.active_period_start_time_specifier,
@@ -433,7 +441,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   end
 
   def get_trip_arrival_time_for_validate(trip_ids, %{
-        loading: false,
+        loading: _loading,
         available_schedules: available_schedules
       }) do
     trip_arrival_time(trip_ids, available_schedules)
@@ -506,6 +514,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
   attr :form, Form
   attr :current_time, NaiveDateTime
+  attr :trip_arrival_time, NaiveDateTime
   attr :previous_start_specifier, :atom
   attr :previous_end_specifier, :atom
   attr :previous_start_time_specifier, :atom
@@ -527,6 +536,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       <.one_time_alert
         :if={@form[:alert_timing].value in [:"one-time", "one-time"]}
         class="flex-wrap md:mt-4"
+        trip_arrival_time={@trip_arrival_time}
         current_time={@current_time}
         start_values={start_values()}
         end_values={end_values(@form)}
@@ -548,20 +558,34 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   attr :current_time, NaiveDateTime
   attr :start_values, :list, default: []
   attr :end_values, :list, default: []
+  attr :trip_arrival_time, NaiveDateTime
 
   defp one_time_alert(assigns) do
+    show_trip_end_warning? =
+      TripEndWarningModal.show_warning?(
+        assigns.trip_arrival_time,
+        assigns.form.data.active_period_start,
+        assigns.form.data.modal_date
+      ) && Enum.empty?(assigns.form.errors)
+
+    assigns = assign(assigns, :show_trip_end_warning, show_trip_end_warning?)
+
     ~H"""
     <div class={[responsive_class(), @class]}>
       <div class={responsive_class()}>
         <div class={responsive_class()}>
           <.select
             label="Effect period"
+            warning={
+              @show_trip_end_warning && @form.data.active_period_start_specifier in [:now, "now"]
+            }
             field={@form[:active_period_start_specifier]}
             options={values_to_options(@start_values)}
             class="md:min-w-64 md:max-w-64"
           />
           <.datetime
             field={@form[:active_period_start]}
+            warning={@show_trip_end_warning}
             min={DateTimeHelpers.naive_datetime_to_iso8601(@current_time)}
             max="9999-12-31T23:59"
             value={DateTimeHelpers.naive_datetime_to_iso8601(@form[:active_period_start].value)}

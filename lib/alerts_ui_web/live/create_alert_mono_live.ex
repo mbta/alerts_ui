@@ -60,8 +60,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     ServiceEffectCombinations
   }
 
-  alias AlertsUIWeb.PredictionSuppressionWarningModal
-  alias AlertsUIWeb.TripEndWarningModal
+  alias AlertsUIWeb.{PredictionSuppressionWarningModal, TripEndWarningModal}
 
   alias Phoenix.LiveView
 
