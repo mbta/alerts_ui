@@ -21,7 +21,7 @@ defmodule AlertsUI.Jobs.AlertValidationUpcomingWorker do
 
     stored_time = LastGTFSValidation.get_most_recent_validation()
 
-    with {:ok, response} <- Req.get(base_url <> "/status"),
+    with {:ok, response} <- Req.get(base_url <> "/status", retry: :safe_transient),
          body when not is_nil(body) <- Map.get(response, :body),
          status when not is_nil(status) <-
            get_in(body, ["data", "attributes", "route", "last_updated"]),
