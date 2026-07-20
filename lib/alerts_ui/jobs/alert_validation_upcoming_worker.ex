@@ -21,7 +21,20 @@ defmodule AlertsUI.Jobs.AlertValidationUpcomingWorker do
 
     stored_time = LastGTFSValidation.get_most_recent_validation()
 
-    with {:ok, response} <- Req.get(base_url <> "/status", retry: :safe_transient),
+    with {:ok, response} <-
+           Req.get(base_url <> "/status",
+             # Since upgrading Req/Finch, we've been getting seeing more connection errors that
+             # are not being retried as expected. This tries to control that behavior better.
+             pool_max_idle_time: 30_000,
+             retry: fn _req, response_or_exception ->
+               case response_or_exception do
+                 {:error, %Req.TransportError{reason: :closed}} -> true
+                 {:error, %Req.TransportError{reason: :einval}} -> true
+                 {:error, %Req.TransportError{reason: :econnrefused}} -> true
+                 _ -> false
+               end
+             end
+           ),
          body when not is_nil(body) <- Map.get(response, :body),
          status when not is_nil(status) <-
            get_in(body, ["data", "attributes", "route", "last_updated"]),
@@ -34,13 +47,8 @@ defmodule AlertsUI.Jobs.AlertValidationUpcomingWorker do
       |> AlertValidator.format_invalid_alerts("upcoming")
       |> Logger.info()
     else
-      {:error, error} when is_atom(error) ->
-        Logger.error("error in processing upcoming GTFS validation: #{error}")
-
-      {:error, exception} ->
-        Logger.error(
-          "error in processing upcoming GTFS validation: " <> Exception.message(exception)
-        )
+      {:error, error} ->
+        Logger.error("error in processing upcoming GTFS validation: #{inspect(error)}")
 
       false ->
         Logger.info("Did not run upcoming GTFS validation")
