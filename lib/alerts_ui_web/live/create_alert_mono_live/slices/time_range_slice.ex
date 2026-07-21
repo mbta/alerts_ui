@@ -566,7 +566,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
         assigns.trip_arrival_time,
         assigns.form.data.active_period_start,
         assigns.form.data.modal_date
-      ) && Enum.empty?(assigns.form.errors)
+      ) and :active_period_start not in Keyword.keys(assigns.form.errors)
 
     assigns = assign(assigns, :show_trip_end_warning, show_trip_end_warning?)
 
