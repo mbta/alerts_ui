@@ -16,7 +16,7 @@ defmodule AlertsUIWeb.ApplicationHeader do
   attr :environment, :string
   attr :show_alerts_table, :boolean, default: false
   attr :show_components_page, :boolean, default: false
-  attr :show_validate_page, :boolean, default: false
+  attr :show_bulk_download_page, :boolean, default: false
   attr :current_user, :map, default: nil
 
   def application_header(assigns) do
@@ -65,11 +65,11 @@ defmodule AlertsUIWeb.ApplicationHeader do
             Components
           </a>
           <a
-            :if={@show_validate_page}
-            href="/validate"
+            :if={@show_bulk_download_page}
+            href="/download_history"
             class="text-primary hover:underline active:text-primary-hover"
           >
-            Validate Feeds
+            Download CR Alerts
           </a>
           <div :if={@current_user} class="whitespace-nowrap hidden lg:block">
             <.icon name="hero-user-solid" />

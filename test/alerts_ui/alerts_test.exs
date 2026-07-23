@@ -1034,6 +1034,44 @@ defmodule AlertsUI.AlertsTest do
     end
   end
 
+  describe "list_most_recent_month_commuter_rail/1" do
+    test "lists all commuter rail alerts created in most recent calendar month" do
+      now = ~U[2026-07-23 00:01:00Z]
+
+      insert(:alert, %{
+        alert_id: "123",
+        created_at: ~U[2026-05-30 00:01:00Z],
+        primary_service_type: "2"
+      })
+
+      insert(:alert, %{
+        alert_id: "234",
+        created_at: ~U[2026-06-10 00:01:00Z],
+        primary_service_type: "2"
+      })
+
+      insert(:alert, %{
+        alert_id: "345",
+        created_at: ~U[2026-06-10 00:01:00Z],
+        primary_service_type: "3"
+      })
+
+      insert(:alert, %{
+        alert_id: "456",
+        created_at: ~U[2026-06-30 00:01:00Z],
+        primary_service_type: "2"
+      })
+
+      insert(:alert, %{
+        alert_id: "567",
+        created_at: ~U[2026-07-02 00:01:00Z],
+        primary_service_type: "2"
+      })
+
+      ["234", "456"] = Alerts.list_most_recent_month_commuter_rail(now)
+    end
+  end
+
   describe "list_all_recently_closed/0" do
     test "lists all alerts that were closed more recently than 5 minutes ago" do
       current_time = DateTime.utc_now()

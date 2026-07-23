@@ -153,7 +153,7 @@ defmodule AlertsUIWeb.Tickets.SpecialCharsExportCleanlyInHistoryTest do
       conn =
         conn
         |> Plug.Conn.put_req_header("authorization", "Bearer FAKE_TOKEN")
-        |> get("/download_history?alert_id=special_chars_http_test")
+        |> get("/download_history/download?alert_id=special_chars_http_test")
 
       assert conn.status == 200
       assert get_resp_header(conn, "content-type") == ["text/csv"]
