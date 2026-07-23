@@ -35,7 +35,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
   }
 
   @schedule %EnhancedSchedule{
-    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    route_id: "CR-Worcester",
     trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: nil,
@@ -45,7 +45,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
   }
 
   @schedule_2 %EnhancedSchedule{
-    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    route_id: "CR-Worcester",
     trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: DateTime.utc_now(),

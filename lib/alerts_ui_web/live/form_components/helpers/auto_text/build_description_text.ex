@@ -57,20 +57,21 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionText do
   end
 
   def affected_trips(%{
-        routes: _routes,
+        routes: routes,
         schedules: schedules,
         effect_name: effect,
         route_type: route_type
       }) do
     Enum.reduce(schedules, %{}, fn schedule, acc ->
-      route_name = SelectFormatter.name_for_option(schedule.route)
+      route = Enum.find(routes, fn route -> route.id == schedule.route_id end)
+      route_name = SelectFormatter.name_for_option(route)
 
       trip_name =
         schedule
         |> Map.put(:use_trip_id_in_name?, false)
         |> SelectFormatter.name_for_option(route_type)
 
-      direction_name = trip_direction_name(schedule.trip, schedule.route)
+      direction_name = trip_direction_name(schedule.trip, route)
 
       if Map.has_key?(acc, {route_name, direction_name}) do
         Map.put(

@@ -40,14 +40,14 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
   @routes [@route_one, @route_two]
   @stop %Stop{id: "place-aqucl", name: "Aquarium"}
   @schedule %EnhancedSchedule{
-    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    route_id: "CR-Worcester",
     trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: nil,
     departure_time: Date.utc_today() |> DateTime.new!(~T[22:00:00], "America/New_York")
   }
   @schedule_2 %EnhancedSchedule{
-    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    route_id: "CR-Worcester",
     trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: Date.utc_today() |> DateTime.new!(~T[23:00:00], "America/New_York"),

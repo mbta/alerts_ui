@@ -309,7 +309,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   def route_names(%{routes: routes, schedules: schedules} = autotext) do
     # if there are schedules selected, only include the routes which are associated
     # with the selected schedules
-    route_ids_from_schedules = Enum.map(schedules, & &1.route.id)
+    route_ids_from_schedules = Enum.map(schedules, & &1.route_id)
     filtered_routes = Enum.filter(routes, &(&1.id in route_ids_from_schedules))
 
     autotext |> Map.merge(%{routes: filtered_routes, schedules: []}) |> route_names()

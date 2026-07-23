@@ -50,7 +50,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
   @stop_2_bus %Stop{id: "place-lngmd", name: "Longwood Medical Area (outbound)"}
 
   @schedule_1 %EnhancedSchedule{
-    route: @route_1,
+    route_id: @route_1.id,
     trip: %Trip{id: "CR-683300-527", name: "527", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     departure_time: ~U[2024-02-21 14:01:00.00Z],
@@ -58,7 +58,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
   }
 
   @schedule_2 %EnhancedSchedule{
-    route: @route_2,
+    route_id: @route_2.id,
     trip: %Trip{id: "CR-687395-841", name: "841", direction_id: 1},
     stop: %Stop{id: "place-forhl", name: "Forest Hills"},
     arrival_time: nil,
@@ -67,7 +67,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
   }
 
   @schedule_3 %EnhancedSchedule{
-    route: @route_1,
+    route_id: @route_1.id,
     trip: %Trip{id: "CR-683300-527", name: "528", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     departure_time: ~U[2024-02-21 14:01:00.00Z],

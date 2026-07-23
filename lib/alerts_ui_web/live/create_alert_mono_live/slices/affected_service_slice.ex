@@ -142,7 +142,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
         |> Enum.reduce(%{}, fn s, acc ->
           Map.put(acc, s.trip.id, %{
             direction_id: s.trip.direction_id,
-            route_id: s.route.id,
+            route_id: s.route_id,
             trip_name: SelectFormatter.name_for_option(s, route_type),
             added_route_ids: s.added_route_ids
           })
@@ -274,7 +274,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     prev = prev(Map.get(socket.assigns, :selections))
     form = socket.assigns.form
 
-    trip_id_options = trip_id_options(prev.available_schedules, form)
+    trip_id_options = trip_id_options(prev.available_schedules, prev.available_routes, form)
 
     socket
     |> assign(:selections, %{prev | trip_id_options: trip_id_options})
@@ -325,7 +325,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
       stop_id_options = stop_id_options(available_stops, form)
 
-      trip_id_options = trip_id_options(available_schedules, form)
+      trip_id_options = trip_id_options(available_schedules, available_routes, form)
 
       %Selections{
         available_routes: available_routes,
@@ -367,11 +367,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     )
   end
 
-  defp trip_id_options(available_schedules, form) do
+  defp trip_id_options(available_schedules, available_routes, form) do
     SelectFormatter.formatted_select_options(%SelectFormatter{
       schedules_by_route_name:
         group_schedules_by_route_type(
           available_schedules,
+          available_routes,
           form[:route_ids].value || []
         ),
       search_term: form[:trip_search_term].value,
@@ -431,12 +432,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   defp all_route_types(4), do: [4]
   defp all_route_types(_), do: []
 
-  defp group_schedules_by_route_type(available_schedules, route_ids) do
+  defp group_schedules_by_route_type(available_schedules, available_routes, route_ids) do
     Enum.filter(available_schedules, fn schedule ->
       # If a line was selected and deselected, value here may be set to nil
-      schedule.route.id in (route_ids || [])
+      schedule.route_id in (route_ids || [])
     end)
-    |> Enum.group_by(&SelectFormatter.name_for_option(&1.route))
+    |> Enum.group_by(fn schedule ->
+      route = Enum.find(available_routes, &(&1.id == schedule.route_id))
+      SelectFormatter.name_for_option(route)
+    end)
   end
 
   defp ensure_default_direction(changeset) do

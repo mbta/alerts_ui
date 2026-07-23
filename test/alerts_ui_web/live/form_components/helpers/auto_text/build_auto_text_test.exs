@@ -25,7 +25,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
   @route_6 %Route{id: "746", name: "SLW"}
 
   @schedule_1 %EnhancedSchedule{
-    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    route_id: "CR-Worcester",
     trip: %Trip{id: "CR-683300-527", name: "527", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     departure_time: ~U[2024-02-21 14:01:00.00Z],
@@ -34,7 +34,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
   }
 
   @schedule_2 %EnhancedSchedule{
-    route: %Route{id: "CR-Providence", type: 2, name: "Providence/Stoughton Line"},
+    route_id: "CR-Providence",
     trip: %Trip{id: "CR-687395-841", name: "841", direction_id: 0},
     stop: %Stop{id: "place-forhl", name: "Forest Hills"},
     arrival_time: nil,
@@ -43,7 +43,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
   }
 
   @schedule_3 %EnhancedSchedule{
-    route: %Route{id: "CR-Providence", type: 2, name: "Providence/Stoughton Line"},
+    route_id: "CR-Providence",
     trip: %Trip{id: "CR-687393-839", name: "839", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     departure_time: ~U[2024-02-21 16:03:00.00Z],

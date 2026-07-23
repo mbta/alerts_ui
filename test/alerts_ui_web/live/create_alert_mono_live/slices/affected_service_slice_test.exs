@@ -24,7 +24,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
 
   # Past departure time — kept for Slice.transform/4 unit tests only
   @schedule %EnhancedSchedule{
-    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    route_id: "CR-Worcester",
     trip: %Trip{id: "trip-595", name: "595", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: nil,
@@ -34,7 +34,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
 
   # Far-future times survive filter_out_old_trips; departure_time must be non-nil for sort
   @schedule_future %EnhancedSchedule{
-    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    route_id: "CR-Worcester",
     trip: %Trip{id: "trip-595", name: "595", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: ~U[2099-01-01 12:00:00Z],
@@ -43,7 +43,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
   }
 
   @schedule_3 %EnhancedSchedule{
-    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    route_id: "CR-Worcester",
     trip: %Trip{id: "trip-596", name: "596", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: ~U[2099-01-01 13:00:00Z],
@@ -76,7 +76,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     departure_time: @two_hours_from_now,
     arrival_time: DateTime.add(@two_hours_from_now, 30, :minute),
     trip: %Trip{id: "Boat-F1-2030-Rowes-F1-A-PM-Weekday-Summer-26", name: "", direction_id: 0},
-    route: %Route{id: "Boat-F1", type: 4, name: "Hingham Ferry"},
+    route_id: "Boat-F1",
     added_route_ids: ["Boat-F2H"]
   }
 
@@ -95,7 +95,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
       name: "",
       direction_id: 0
     },
-    route: %Route{id: "Boat-F2H", type: 4, name: "Hingham/Hull Ferry"},
+    route_id: "Boat-F2H",
     added_route_ids: []
   }
 
@@ -2346,7 +2346,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         |> element("form")
         |> render_change(%{
           "_target" => ["alert_data", "route_ids"],
-          "alert_data" => %{"route_ids" => [@boat_f1_schedule_1.route.id]}
+          "alert_data" => %{"route_ids" => [@boat_f1_schedule_1.route_id]}
         })
 
         render_async(view)
@@ -2413,7 +2413,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         |> element("form")
         |> render_change(%{
           "_target" => ["alert_data", "route_ids"],
-          "alert_data" => %{"route_ids" => [@boat_f1_schedule_1.route.id]}
+          "alert_data" => %{"route_ids" => [@boat_f1_schedule_1.route_id]}
         })
 
         render_async(view)
@@ -2471,7 +2471,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         departure_time: @two_hours_from_now,
         arrival_time: DateTime.add(@two_hours_from_now, 30, :minute),
         trip: %Trip{id: "SWKDYWCPeriod-831443-1775", name: "", direction_id: 0},
-        route: %Route{id: "CR-Franklin", type: 4, name: "Franklin/Foxboro Line"},
+        route_id: "CR-Franklin",
         added_route_ids: ["CR-Fairmount"]
       }
 
@@ -2527,7 +2527,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         |> element("form")
         |> render_change(%{
           "_target" => ["alert_data", "route_ids"],
-          "alert_data" => %{"route_ids" => [cr_franklin_schedule.route.id]}
+          "alert_data" => %{"route_ids" => [cr_franklin_schedule.route_id]}
         })
 
         render_async(view)
@@ -2614,7 +2614,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         |> element("form")
         |> render_change(%{
           "_target" => ["alert_data", "route_ids"],
-          "alert_data" => %{"route_ids" => [@boat_f2h_schedule_1.route.id]}
+          "alert_data" => %{"route_ids" => [@boat_f2h_schedule_1.route_id]}
         })
 
         render_async(view)

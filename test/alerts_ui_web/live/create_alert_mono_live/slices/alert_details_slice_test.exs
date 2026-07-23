@@ -32,7 +32,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
             |> NaiveDateTime.new!(~T[00:00:00])
 
   @schedule %EnhancedSchedule{
-    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    route_id: "CR-Worcester",
     trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 1},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: nil,
@@ -41,7 +41,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
   }
 
   @schedule_2 %EnhancedSchedule{
-    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    route_id: "CR-Worcester",
     trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 1},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time:
