@@ -7,8 +7,16 @@ defmodule AlertsUIWeb.DownloadHistoryController do
   alias NimbleCSV.Spreadsheet, as: CSV
 
   def index(conn, _params) do
-    %{month: previous_month_name} = previous_month_with_year()
-    render(conn, :download_history, previous_month_name: previous_month_name)
+    now = DateTime.shift_zone!(DateTime.utc_now(), "America/New_York")
+
+    previous_month = rem(now.month + 10, 12) + 1
+
+    render(conn, :download_history,
+      years: year_options(now),
+      months: month_options(),
+      current_year: now.year,
+      previous_month: previous_month
+    )
   end
 
   def export(conn, %{"alert_id" => alert_id}) do
@@ -25,27 +33,29 @@ defmodule AlertsUIWeb.DownloadHistoryController do
     )
   end
 
-  def export(conn, _params) do
-    file =
-      Alerts.list_most_recent_month_commuter_rail()
-      |> Enum.map(&AlertHistory.alert_history/1)
-      |> List.flatten()
-      |> AlertHistory.build_history_csv()
-      |> CSV.dump_to_iodata()
+  def export_bulk(conn, %{"month" => month, "year" => year}) do
+    with {month, _} <- Integer.parse(month),
+         {year, _} <- Integer.parse(year) do
+      file =
+        Alerts.list_a_month_of_commuter_rail(month, year)
+        |> Enum.map(&AlertHistory.alert_history/1)
+        |> List.flatten()
+        |> AlertHistory.build_history_csv()
+        |> CSV.dump_to_iodata()
 
-    %{month: previous_month, year: previous_year} = previous_month_with_year()
-
-    send_download(conn, {:binary, file},
-      filename: "Commuter_Rail_Alert_History_#{previous_month}_#{previous_year}.csv"
-    )
+      send_download(conn, {:binary, file},
+        filename: "Commuter_Rail_Alert_History_#{month}-#{year}.csv"
+      )
+    else
+      :error -> send_resp(conn, 400, "Bad request")
+    end
   end
 
-  defp previous_month_with_year(now \\ DateTime.utc_now()) do
-    now = DateTime.shift_zone!(now, "America/New_York")
-    previous_month = rem(now.month + 10, 12) + 1
-    year_modifier = if previous_month == 12, do: -1, else: 0
-    previous_year = now.year + year_modifier
+  defp month_options do
+    1..12 |> Enum.to_list() |> Enum.map(fn month -> {Timex.month_name(month), month} end)
+  end
 
-    %{month: Timex.month_name(previous_month), year: previous_year}
+  defp year_options(now) do
+    2013..now.year |> Enum.to_list() |> Enum.reverse() |> Enum.map(fn year -> {year, year} end)
   end
 end

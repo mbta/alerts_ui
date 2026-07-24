@@ -1034,10 +1034,8 @@ defmodule AlertsUI.AlertsTest do
     end
   end
 
-  describe "list_most_recent_month_commuter_rail/1" do
+  describe "list_a_month_of_commuter_rail/1" do
     test "lists all commuter rail alerts created in most recent calendar month" do
-      now = ~U[2026-01-23 00:01:00Z]
-
       insert(:alert, %{
         alert_id: "123",
         created_at: ~U[2025-11-30 00:01:00Z],
@@ -1068,7 +1066,7 @@ defmodule AlertsUI.AlertsTest do
         primary_service_type: "2"
       })
 
-      ["234", "456"] = Alerts.list_most_recent_month_commuter_rail(now)
+      ["234", "456"] = Alerts.list_a_month_of_commuter_rail(12, 2025)
     end
   end
 

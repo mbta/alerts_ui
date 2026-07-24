@@ -40,13 +40,13 @@ defmodule AlertsUIWeb.DownloadHistoryControllerTest do
     end
   end
 
-  describe "GET /download_history/download without alert id parameter" do
+  describe "POST /download_history/download with month and year parameters" do
     @tag :logged_in_user
     test "when authorized, returns 200 with file", %{conn: conn} do
       conn =
         conn
         |> Conn.put_req_header("authorization", "Bearer FAKE_TOKEN")
-        |> get("/download_history/download")
+        |> post("/download_history/download?month=6&year=2026")
 
       assert conn.status == 200
       assert is_binary(conn.resp_body)

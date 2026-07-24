@@ -242,16 +242,14 @@ defmodule AlertsUI.Alerts do
     )
   end
 
-  @spec list_most_recent_month_commuter_rail(DateTime.t()) :: [Alert.t()]
-  def list_most_recent_month_commuter_rail(now \\ DateTime.utc_now()) do
-    now = DateTime.shift_zone!(now, "America/New_York")
-    previous_month = rem(now.month + 10, 12) + 1
-
+  @spec list_a_month_of_commuter_rail(integer(), integer()) :: [Alert.t()]
+  def list_a_month_of_commuter_rail(month, year) when is_integer(month) and is_integer(year) do
     Repo.all(
       from(
         a in Alert,
         where: a.primary_service_type == "2",
-        where: fragment("date_part(?, ?)", "month", a.created_at) == ^previous_month,
+        where: fragment("date_part(?, ?)", "year", a.created_at) == ^year,
+        where: fragment("date_part(?, ?)", "month", a.created_at) == ^month,
         select: a.alert_id,
         order_by: a.created_at
       )
