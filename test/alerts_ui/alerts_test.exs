@@ -1036,35 +1036,35 @@ defmodule AlertsUI.AlertsTest do
 
   describe "list_most_recent_month_commuter_rail/1" do
     test "lists all commuter rail alerts created in most recent calendar month" do
-      now = ~U[2026-07-23 00:01:00Z]
+      now = ~U[2026-01-23 00:01:00Z]
 
       insert(:alert, %{
         alert_id: "123",
-        created_at: ~U[2026-05-30 00:01:00Z],
+        created_at: ~U[2025-11-30 00:01:00Z],
         primary_service_type: "2"
       })
 
       insert(:alert, %{
         alert_id: "234",
-        created_at: ~U[2026-06-10 00:01:00Z],
+        created_at: ~U[2025-12-10 00:01:00Z],
         primary_service_type: "2"
       })
 
       insert(:alert, %{
         alert_id: "345",
-        created_at: ~U[2026-06-10 00:01:00Z],
+        created_at: ~U[2025-12-10 00:01:00Z],
         primary_service_type: "3"
       })
 
       insert(:alert, %{
         alert_id: "456",
-        created_at: ~U[2026-06-30 00:01:00Z],
+        created_at: ~U[2025-12-30 00:01:00Z],
         primary_service_type: "2"
       })
 
       insert(:alert, %{
         alert_id: "567",
-        created_at: ~U[2026-07-02 00:01:00Z],
+        created_at: ~U[2026-01-02 00:01:00Z],
         primary_service_type: "2"
       })
 

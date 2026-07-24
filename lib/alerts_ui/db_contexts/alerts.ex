@@ -245,7 +245,7 @@ defmodule AlertsUI.Alerts do
   @spec list_most_recent_month_commuter_rail(DateTime.t()) :: [Alert.t()]
   def list_most_recent_month_commuter_rail(now \\ DateTime.utc_now()) do
     now = DateTime.shift_zone!(now, "America/New_York")
-    previous_month = now.month - 1
+    previous_month = rem(now.month + 10, 12) + 1
 
     Repo.all(
       from(

@@ -42,7 +42,7 @@ defmodule AlertsUIWeb.DownloadHistoryController do
 
   defp previous_month_with_year(now \\ DateTime.utc_now()) do
     now = DateTime.shift_zone!(now, "America/New_York")
-    previous_month = now.month - 1
+    previous_month = rem(now.month + 10, 12) + 1
     year_modifier = if previous_month == 12, do: -1, else: 0
     previous_year = now.year + year_modifier
 
